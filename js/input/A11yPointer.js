@@ -12,7 +12,6 @@ define( require => {
   'use strict';
 
   const AccessibleInstance = require( 'SCENERY/accessibility/AccessibleInstance' );
-  const platform = require( 'PHET_CORE/platform' );
   const Pointer = require( 'SCENERY/input/Pointer' ); // inherits from Pointer
   const scenery = require( 'SCENERY/scenery' );
   const Trail = require( 'SCENERY/util/Trail' );
@@ -25,7 +24,7 @@ define( require => {
      * @param {Display} display
      */
     constructor( display ) {
-      super( null, false );
+      super( null, false, 'a11y' );
 
       // @private
       this.display = display;
@@ -37,15 +36,13 @@ define( require => {
       // fuzzBoard will appear broken as both user and KeyboardFuzzer interact with display.
       this.blockTrustedEvents = false;
 
+      // @private {Node|null} - target of a user event, if focus changes in response to keydown listeners, listeners
+      // on keyup are prevented because the key press was not intended for the newly focused node.
+      // TODO: Can we do this for more than keydown/keyup? See https://github.com/phetsims/scenery/issues/942
+      this.keydownTargetNode = null; 
+
       sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'Created ' + this.toString() );
     }
-
-    /**
-     * @public
-     * @override
-     * @returns {string}
-     */
-    get type() { return 'a11y'; }
 
     /**
      * Set up listeners, attaching blur and focus listeners to the pointer once this A11yPointer has been attached
@@ -53,6 +50,7 @@ define( require => {
      * @private
      */
     initializeListeners() {
+
       this.addInputListener( {
         focus: () => {
           assert && assert( this.trail, 'trail should have been calculated for the focused node' );
@@ -64,36 +62,30 @@ define( require => {
           }
         },
         blur: ( event ) => {
-          const activeElement = document.activeElement;
-          const elementInDisplay = this.display.accessibleDOMElement.contains( activeElement );
-
-          // In IE11 there are cases where the browser doesn't trigger a focusin event on document.activeElement
-          // so as a workaround we set the scenery.Display.focus directly to the related target of the focusout event,
-          // which is the element that is about to receive focus. This allows operations in AccessibilityTree to
-          // work correctly even though we still sometimes miss `focus` events.
-          //
-          // TODO: Failing to receive the focusin event is scary, so hopefully this workaround can be removed if a fix
-          // is found in https://github.com/phetsims/scenery/issues/925. Also see
-          // https://github.com/phetsims/friction/issues/168 for the original issue.
-          if ( platform.ie11 && ( event.domEvent.relatedTarget === activeElement ) && ( elementInDisplay ) ) {
-            const newTrail = Trail.fromUniqueId( this.display.rootNode, document.activeElement.getAttribute( 'data-trail-id' ) );
-            scenery.Display.focus = new Focus( this.display, AccessibleInstance.guessVisualTrail( newTrail, this.display.rootNode ) );
-          }
-          else {
-            scenery.Display.focus = null;
-          }
+          scenery.Display.focus = null;
+          this.keydownTargetNode = null;
         },
         keydown: ( event ) => {
           if ( this.blockTrustedEvents && event.domEvent.isTrusted ) {
             return;
           }
           scenery.Display.keyStateTracker.keydownUpdate( event );
+
+          // set the target to potentially block keyup events
+          this.keydownTargetNode = event.target;
         },
         keyup: ( event ) => {
           if ( this.blockTrustedEvents && event.domEvent.isTrusted ) {
             return;
           }
           scenery.Display.keyStateTracker.keyupUpdate( event );
+
+          // The keyup event was received on a node that didn't receive a keydown event, abort to prevent any other
+          // listeners from being called for this event. Done after updating KeyStateTracker so that the global state
+          // of the keyboard is still accurate
+          if ( this.keydownTargetNode !== event.target ) {
+            event.abort();
+          }
         }
       } );
     }
@@ -127,13 +119,6 @@ define( require => {
       }
     }
   }
-
-  /**
-   * @override
-   * @type {string}
-   */
-  A11yPointer.type = 'a11y';
-
 
   return scenery.register( 'A11yPointer', A11yPointer );
 } );

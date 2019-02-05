@@ -191,11 +191,11 @@ define( function( require ) {
       phetioHighFrequency: true,
       phetioDocumentation: 'Emits whenever a drag occurs with an EventIO argument.',
       phetioReadOnly: options.phetioReadOnly,
-      phetioEventType: 'user',
+      phetioEventType: PhetioObject.EventType.USER,
 
       argumentTypes: [ { valueType: Event } ],
       phetioType: DraggedEmitterIO,
-      listener: function( event ) {
+      before: function( event ) {
 
         // This is done first, before the drag listener is called (from the prototype drag call)
         if ( !self._globalPoint.equals( self.pointer.point ) ) {

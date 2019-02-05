@@ -58,7 +58,7 @@ define( function( require ) {
       // phetio
       tandem: Tandem.required,
       phetioState: false,
-      phetioEventType: 'user'
+      phetioEventType: PhetioObject.EventType.USER
 
     }, options );
     this.options = options; // @private
@@ -103,9 +103,9 @@ define( function( require ) {
       phetioType: EmitterIO(
         [ { name: 'point', type: Vector2IO, documentation: 'the position of the drag start in view coordinates' },
           { name: 'event', type: VoidIO, documentation: 'the scenery pointer Event' } ] ),
-      listener: function( point, event ) {
+      before: function( point, event ) {
 
-        if ( this.dragging ) { return; }
+        if ( self.dragging ) { return; }
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler startDrag' );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
@@ -147,7 +147,7 @@ define( function( require ) {
       phetioType: EmitterIO(
         [ { name: 'point', type: Vector2IO, documentation: 'the position of the drag in view coordinates' },
           { name: 'event', type: VoidIO, documentation: 'the scenery pointer Event' } ] ),
-      listener: function( point, event ) {
+      before: function( point, event ) {
 
         if ( !self.dragging || self.disposed ) { return; }
 
@@ -211,7 +211,7 @@ define( function( require ) {
       phetioType: EmitterIO(
         [ { name: 'point', type: Vector2IO, documentation: 'the position of the drag end in view coordinates' },
           { name: 'event', type: VoidIO, documentation: 'the scenery pointer Event' } ] ),
-      listener: function( point, event ) {
+      before: function( point, event ) {
 
         if ( !self.dragging ) { return; }
 

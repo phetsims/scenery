@@ -28,7 +28,7 @@ define( function( require ) {
   var PhetioObject = require( 'TANDEM/PhetioObject' );
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
-  var timer = require( 'PHET_CORE/timer' );
+  var timer = require( 'AXON/timer' );
   var VoidIO = require( 'TANDEM/types/VoidIO' );
 
   // global
@@ -224,7 +224,7 @@ define( function( require ) {
                            'used to convey info about the Event.',
       phetioReadOnly: options.phetioReadOnly,
       phetioFeatured: options.phetioFeatured,
-      phetioEventType: 'user',
+      phetioEventType: PhetioObject.EventType.USER,
 
       // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
       argumentTypes: [
@@ -236,7 +236,7 @@ define( function( require ) {
 
       // The main implementation of "press" handling is implemented as a callback to the emitter, so things are nested
       // nicely for phet-io.
-      listener: this.onPress.bind( this )
+      before: this.onPress.bind( this )
     } );
 
     // @private {Emitter} - Emitted on release event
@@ -245,7 +245,7 @@ define( function( require ) {
       phetioDocumentation: 'Emits whenever a release occurs.',
       phetioReadOnly: options.phetioReadOnly,
       phetioFeatured: options.phetioFeatured,
-      phetioEventType: 'user',
+      phetioEventType: PhetioObject.EventType.USER,
 
       // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
       argumentTypes: [
@@ -256,7 +256,7 @@ define( function( require ) {
 
       // The main implementation of "release" handling is implemented as a callback to the emitter, so things are nested
       // nicely for phet-io.
-      listener: this.onRelease.bind( this )
+      before: this.onRelease.bind( this )
     } );
 
     // update isOverProperty (not a DerivedProperty because we need to hook to passed-in properties)

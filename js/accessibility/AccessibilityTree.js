@@ -36,13 +36,13 @@ define( function( require ) {
       assert && assert( child instanceof scenery.Node );
       assert && assert( !child._rendererSummary.isNotAccessible() );
 
-      AccessibilityTree.beforeOp();
+      var blockedDisplays = AccessibilityTree.beforeOp( child );
 
       if ( !child._accessibleParent ) {
         AccessibilityTree.addTree( parent, child );
       }
 
-      AccessibilityTree.afterOp();
+      AccessibilityTree.afterOp( blockedDisplays );
 
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.pop();
     },
@@ -62,13 +62,13 @@ define( function( require ) {
       assert && assert( child instanceof scenery.Node );
       assert && assert( !child._rendererSummary.isNotAccessible() );
 
-      AccessibilityTree.beforeOp();
+      var blockedDisplays = AccessibilityTree.beforeOp( child );
 
       if ( !child._accessibleParent ) {
         AccessibilityTree.removeTree( parent, child );
       }
 
-      AccessibilityTree.afterOp();
+      AccessibilityTree.afterOp( blockedDisplays );
 
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.pop();
     },
@@ -86,11 +86,11 @@ define( function( require ) {
       assert && assert( node instanceof scenery.Node );
       assert && assert( !node._rendererSummary.isNotAccessible() );
 
-      AccessibilityTree.beforeOp();
+      var blockedDisplays = AccessibilityTree.beforeOp( node );
 
       AccessibilityTree.reorder( node );
 
-      AccessibilityTree.afterOp();
+      AccessibilityTree.afterOp( blockedDisplays );
 
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.pop();
     },
@@ -109,7 +109,7 @@ define( function( require ) {
 
       assert && assert( node instanceof scenery.Node );
 
-      AccessibilityTree.beforeOp();
+      var blockedDisplays = AccessibilityTree.beforeOp( node );
 
       var removedItems = []; // {Array.<Node|null>} - May contain the placeholder null
       var addedItems = []; // {Array.<Node|null>} - May contain the placeholder null
@@ -181,7 +181,7 @@ define( function( require ) {
 
       AccessibilityTree.reorder( node, accessibleTrails );
 
-      AccessibilityTree.afterOp();
+      AccessibilityTree.afterOp( blockedDisplays );
 
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.pop();
     },
@@ -198,7 +198,7 @@ define( function( require ) {
 
       assert && assert( node instanceof scenery.Node );
 
-      AccessibilityTree.beforeOp();
+      var blockedDisplays = AccessibilityTree.beforeOp( node );
 
       var i;
       var parents = node._accessibleParent ? [ node._accessibleParent ] : node._parents;
@@ -228,7 +228,7 @@ define( function( require ) {
         }
       }
 
-      AccessibilityTree.afterOp();
+      AccessibilityTree.afterOp( blockedDisplays );
 
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.pop();
     },
@@ -392,20 +392,41 @@ define( function( require ) {
     },
 
     /**
-     * Prepares for an a11y-tree-changing operation (saving some state).
+     * Prepares for an a11y-tree-changing operation (saving some state). During DOM operations we don't want Display
+     * input to dispatch events as focus changes.
      * @private
+     * 
+     * @param {Node} node - root of Node subtree whose AccessibleInstance tree is being rearranged.
      */
-    beforeOp: function() {
+    beforeOp: function( node ) {
       // paranoia about initialization order (should be safe)
       focusedNode = scenery.Display && scenery.Display.focusedNode;
+
+      // list of displays to stop blocking focus callbacks in afterOp
+      var displays = [];
+
+      var accessibleTrails = this.findAccessibleTrails( node );
+      for ( var i = 0; i < accessibleTrails.length; i++ ) {
+        var display = accessibleTrails[ i ].accessibleInstance.display;
+        display.blockFocusCallbacks = true;
+        displays.push( display );
+      }
+
+      return displays;
     },
 
     /**
-     * Finalizes an a11y-tree-changing operation (restoring some state)
+     * Finalizes an a11y-tree-changing operation (restoring some state).
      * @private
+     * 
+     * @param {Array.<Display>} blockedDisplays
      */
-    afterOp: function() {
+    afterOp: function( blockedDisplays ) {
       focusedNode && focusedNode.focus();
+
+      for ( var i = 0; i < blockedDisplays.length; i++ ) {
+        blockedDisplays[ i ].blockFocusCallbacks = false;
+      }
     },
 
     /**

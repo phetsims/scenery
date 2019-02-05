@@ -20,7 +20,7 @@ define( function( require ) {
    * @constructor
    */
   function Mouse() {
-    Pointer.call( this, null, false );
+    Pointer.call( this, null, false, 'mouse' );
 
     // @deprecated, see https://github.com/phetsims/scenery/issues/803
     this.leftDown = false;
@@ -37,13 +37,6 @@ define( function( require ) {
   scenery.register( 'Mouse', Mouse );
 
   inherit( Pointer, Mouse, {
-
-    /**
-     * @public
-     * @override
-     * @type {string}
-     */
-    type: 'mouse',
 
     down: function( point, event ) {
       var pointChanged = this.hasPointChanged( point );

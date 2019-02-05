@@ -15,7 +15,7 @@ define( require => {
   const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
   const Random = require( 'DOT/Random' );
   const scenery = require( 'SCENERY/scenery' );
-  const timer = require( 'PHET_CORE/timer' );
+  const timer = require( 'AXON/timer' );
 
   // uppercase matters
   const keyboardTestingSchema = {
