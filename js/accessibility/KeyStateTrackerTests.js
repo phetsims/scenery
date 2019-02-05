@@ -14,7 +14,7 @@ define( require => {
   // const KeyboardFuzzer = require( 'SCENERY/accessibility/KeyboardFuzzer' ); // TODO: can we use this in testing? https://github.com/phetsims/scenery/issues/850
   const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
   const KeyStateTracker = require( 'SCENERY/accessibility/KeyStateTracker' );
-  const timer = require( 'PHET_CORE/timer' );
+  const timer = require( 'AXON/timer' );
 
   // mock scenery Event, type has a domEvent field for the dom event we
   const tabKeyEvent = { domEvent: { keyCode: KeyboardUtil.KEY_TAB } };
