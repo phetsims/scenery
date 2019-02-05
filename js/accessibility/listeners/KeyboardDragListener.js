@@ -21,7 +21,7 @@ define( function( require ) {
   var KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
   var platform = require( 'PHET_CORE/platform' );
   var sceneryPhet = require( 'SCENERY_PHET/sceneryPhet' );
-  var timer = require( 'PHET_CORE/timer' );
+  var timer = require( 'AXON/timer' );
   var Vector2 = require( 'DOT/Vector2' );
 
   /**
