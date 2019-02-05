@@ -36,6 +36,11 @@ define( require => {
       // fuzzBoard will appear broken as both user and KeyboardFuzzer interact with display.
       this.blockTrustedEvents = false;
 
+      // @private {Node|null} - target of a user event, if focus changes in response to keydown listeners, listeners
+      // on keyup are prevented because the key press was not intended for the newly focused node.
+      // TODO: Can we do this for more than keydown/keyup? See https://github.com/phetsims/scenery/issues/942
+      this.keydownTargetNode = null; 
+
       sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'Created ' + this.toString() );
     }
 
@@ -45,6 +50,7 @@ define( require => {
      * @private
      */
     initializeListeners() {
+
       this.addInputListener( {
         focus: () => {
           assert && assert( this.trail, 'trail should have been calculated for the focused node' );
@@ -57,18 +63,29 @@ define( require => {
         },
         blur: ( event ) => {
           scenery.Display.focus = null;
+          this.keydownTargetNode = null;
         },
         keydown: ( event ) => {
           if ( this.blockTrustedEvents && event.domEvent.isTrusted ) {
             return;
           }
           scenery.Display.keyStateTracker.keydownUpdate( event );
+
+          // set the target to potentially block keyup events
+          this.keydownTargetNode = event.target;
         },
         keyup: ( event ) => {
           if ( this.blockTrustedEvents && event.domEvent.isTrusted ) {
             return;
           }
           scenery.Display.keyStateTracker.keyupUpdate( event );
+
+          // The keyup event was received on a node that didn't receive a keydown event, abort to prevent any other
+          // listeners from being called for this event. Done after updating KeyStateTracker so that the global state
+          // of the keyboard is still accurate
+          if ( this.keydownTargetNode !== event.target ) {
+            event.abort();
+          }
         }
       } );
     }
