@@ -54,7 +54,7 @@ define( require => {
             this.display.pointerFocus = null;
           }
         },
-        blur: ( event ) => {
+        blur: () => {
           const activeElement = document.activeElement;
           const elementInDisplay = this.display.accessibleDOMElement.contains( activeElement );
 
@@ -66,7 +66,7 @@ define( require => {
           // TODO: Failing to receive the focusin event is scary, so hopefully this workaround can be removed if a fix
           // is found in https://github.com/phetsims/scenery/issues/925. Also see
           // https://github.com/phetsims/friction/issues/168 for the original issue.
-          if ( platform.ie11 && ( event.domEvent.relatedTarget === activeElement ) && ( elementInDisplay ) ) {
+          if ( ( platform.ie11 || platform.safari ) && elementInDisplay ) {
             const newTrail = Trail.fromUniqueId( this.display.rootNode, document.activeElement.getAttribute( 'data-trail-id' ) );
             scenery.Display.focus = new Focus( this.display, AccessibleInstance.guessVisualTrail( newTrail, this.display.rootNode ) );
           }
@@ -102,7 +102,7 @@ define( require => {
      * it is recomputed on focus. But there are times where a11y events can be called out of order with focus/blur
      * and the trail will either be null or stale. This might happen more often when scripting fake browser events
      * with a timeout (like in fuzzBoard).
-     * 
+     *
      * @public (scenery-internal)
      * @param {string} trailString
      */
