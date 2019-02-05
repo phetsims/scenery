@@ -495,13 +495,6 @@ define( function( require ) {
       // gives this element styling from SceneryStyle
       domElement.className = 'a11yElement';
 
-      // // Safari requires that certain input elements have dimension, otherwise it will not be keyboard accessible
-      // var upperCaseTagName = tagName.toUpperCase();
-      // if ( _.includes( ELEMENTS_REQUIRE_WIDTH, upperCaseTagName ) ) {
-      //   domElement.style.width = '1px';
-      //   domElement.style.height = '1px';
-      // }
-
       return domElement;
     },
 
