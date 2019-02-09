@@ -179,9 +179,7 @@
           if ( scene.children.length < 8 ) {
             var newNode = new scenery.Node( {
               children: [ new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
-                fill: `rgb( ${ Math.floor( Math.random()*255 ) },
-                  ${ Math.floor( Math.random()*255 ) },
-                  ${ Math.floor( Math.random()*255 ) } )`,
+                fill: `rgb( ${ Math.floor( Math.random()*255 ) }, ${ Math.floor( Math.random()*255 ) }, ${ Math.floor( Math.random()*255 ) } )`,
                 stroke: '#000',
                 x: 50,
                 y: 50,
@@ -235,8 +233,7 @@
 
           // updates the p-dom description
           child.tagName = 'p';
-          child.accessibleName = `a hexagon of color ${ child.children[0].fillValue }
-            in the ${ quadrantY } ${ quadrantX } quadrant`;
+          child.accessibleName = `a hexagon of color ${ child.children[0].fillValue } in the ${ quadrantY } ${ quadrantX } quadrant`;
 
           // updates hexagon's speed and ensures it stays on the screen.
           if ( child.x > display.width - 100 ) {
