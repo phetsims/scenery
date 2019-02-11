@@ -70,7 +70,7 @@ define( function( require ) {
     initializeAccessibleInstance: function( parent, display, trail ) {
       Events.call( this ); // TODO: is Events worth mixing in by default? Will we need to listen to events?
 
-      assert && assert( !this.id || this.disposed, 'If we previously existed, we need to have been disposed' );
+      assert && assert( !this.id || this.isDisposed, 'If we previously existed, we need to have been disposed' );
 
       // unique ID
       this.id = this.id || globalId++;
@@ -486,7 +486,7 @@ define( function( require ) {
       this.trail = null;
       this.node = null;
       this.peer = null;
-      this.disposed = true;
+      this.isDisposed = true;
 
       this.freeToPool();
 
