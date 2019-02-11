@@ -35,6 +35,7 @@ define( function( require ) {
    * @param {AccessibleInstance} accessibleInstance
    * @param {Object} [options]
    * @constructor
+   * @mixes Poolable
    */
   function AccessiblePeer( accessibleInstance, options ) {
     this.initializeAccessiblePeer( accessibleInstance, options );
