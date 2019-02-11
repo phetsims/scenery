@@ -113,6 +113,10 @@ define( function( require ) {
       // @private {function} - The listeners added to the respective relativeNodes
       this.relativeListeners = [];
 
+      // @private {boolean} - Whether we are currently in a "disposed" (in the pool) state, or are available to be
+      // re-initialized
+      this.isDisposed = false;
+
       if ( this.isRootInstance ) {
         var accessibilityContainer = document.createElement( 'div' );
 
