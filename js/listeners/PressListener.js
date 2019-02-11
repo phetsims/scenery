@@ -97,7 +97,7 @@ define( function( require ) {
       // event may not be available.
       canStartPress: truePredicate,
 
-      // {number} (a11y) - How long something should 'look' pressed after an accessible click input event
+      // {number} (a11y) - How long something should 'look' pressed after an accessible click input event, in ms
       a11yLooksPressedInterval: 100,
 
       // {Tandem} - For instrumenting
@@ -420,7 +420,18 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' interrupt' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      if ( this.isPressed ) {
+      // handle a11y interrupt
+      if ( this.a11yClickingProperty.value ) {
+        this.interrupted = true;
+        
+        if ( this._a11yClickingTimeoutListener ) {
+          timer.clearTimeout( this._a11yClickingTimeoutListener );
+          this._a11yClickingTimeoutListener();
+        }
+      }
+      else if ( this.isPressed ) {
+
+        // handle pointer interrupt
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' interrupting' );
         this.interrupted = true;
 
@@ -675,6 +686,7 @@ define( function( require ) {
      */
     click: function( event ) {
       if ( this.canClick() ) {
+        this.interrupted = false; // clears the flag (don't set to false before here)
 
         this.a11yClickingProperty.value = true;
 
