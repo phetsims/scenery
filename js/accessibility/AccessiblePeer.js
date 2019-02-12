@@ -98,6 +98,9 @@ define( function( require ) {
       // (because it hasn't been set yet).
       this.visible = null;
 
+      // @private {boolean|null} - whether or not the primary sibling of this AccessiblePeer can receive focus.
+      this.focusable = null;
+
       // @private {HTMLElement|null} - Optional label/description elements
       this._labelSibling = null;
       this._descriptionSibling = null;
@@ -764,6 +767,20 @@ define( function( require ) {
     },
 
     /**
+     * Make the peer focusable. Only the primary sibling is ever considered focusable.
+     * @public
+     * @param {boolean} focusable
+     */
+    setFocusable: function( focusable ) {
+      assert && assert( typeof focusable === 'boolean' );
+
+      if ( this.focusable !== focusable ) {
+        this.focusable = focusable;
+        AccessibilityUtil.overrideFocusWithTabIndex( this.primarySibling, focusable );
+      }
+    },
+
+    /**
      * Responsible for setting the content for the label sibling
      * @public (scenery-internal)
      * @param {string} content - the content for the label sibling.
@@ -960,6 +977,7 @@ define( function( require ) {
       this._labelSibling = null;
       this._descriptionSibling = null;
       this._containerParent = null;
+      this.focusable = null;
 
       // for now
       this.freeToPool();

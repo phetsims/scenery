@@ -2397,8 +2397,7 @@ define( function( require ) {
             this._focusableOverride = focusable;
 
             for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-              var peer = this._accessibleInstances[ i ].peer;
-              AccessibilityUtil.overrideFocusWithTabIndex( peer.primarySibling, focusable );
+              this._accessibleInstances[ i ].peer.setFocusable( focusable );
             }
           }
         },
