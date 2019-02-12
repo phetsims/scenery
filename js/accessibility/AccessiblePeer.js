@@ -50,6 +50,7 @@ define( function( require ) {
    * @param {AccessibleInstance} accessibleInstance
    * @param {Object} [options]
    * @constructor
+   * @mixes Poolable
    */
   function AccessiblePeer( accessibleInstance, options ) {
     this.initializeAccessiblePeer( accessibleInstance, options );
@@ -75,7 +76,7 @@ define( function( require ) {
         primarySibling: null
       }, options );
 
-      assert && assert( !this.id || this.disposed, 'If we previously existed, we need to have been disposed' );
+      assert && assert( !this.id || this.isDisposed, 'If we previously existed, we need to have been disposed' );
 
       // @public {number} - unique ID
       this.id = this.id || globalId++;
@@ -142,7 +143,7 @@ define( function( require ) {
 
       // @private {boolean} - Whether we are currently in a "disposed" (in the pool) state, or are available to be
       // interacted with.
-      this.disposed = false;
+      this.isDisposed = false;
 
       // edge case for root accessibility
       if ( this.accessibleInstance.isRootInstance ) {
@@ -939,7 +940,7 @@ define( function( require ) {
      * @public (scenery-internal)
      */
     dispose: function() {
-      this.disposed = true;
+      this.isDisposed = true;
 
       // remove focus if the disposed peer is the active element
       this.blur();

@@ -234,7 +234,7 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'validatePointersEmitter' ),
         phetioHighFrequency: true,
-        before: validatePointers
+        first: validatePointers
       } );
 
       // @private {Emitter} - Emits to the PhET-iO data stream.
@@ -250,7 +250,7 @@ define( require => {
         ] ),
         phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when a mouse button is released',
-        before: ( point, event ) => {
+        first: ( point, event ) => {
           if ( !this.mouse ) { this.initMouse(); }
           const pointChanged = this.mouse.up( point, event );
           this.upEvent( this.mouse, event, pointChanged );
@@ -270,7 +270,7 @@ define( require => {
         ] ),
         phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when a mouse button is pressed',
-        before: ( point, event ) => {
+        first: ( point, event ) => {
           if ( !this.mouse ) { this.initMouse(); }
           const pointChanged = this.mouse.down( point, event );
           this.downEvent( this.mouse, event, pointChanged );
@@ -291,7 +291,7 @@ define( require => {
         phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when the mouse is moved',
         phetioHighFrequency: true,
-        before: ( point, event ) => {
+        first: ( point, event ) => {
           if ( !this.mouse ) { this.initMouse(); }
           this.mouse.move( point, event );
           this.moveEvent( this.mouse, event );
@@ -311,7 +311,7 @@ define( require => {
         ] ),
         phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when the mouse is moved over a Node',
-        before: ( point, event ) => {
+        first: ( point, event ) => {
           if ( !this.mouse ) { this.initMouse(); }
           this.mouse.over( point, event );
           // TODO: how to handle mouse-over (and log it)... are we changing the pointer.point without a branch change?
@@ -331,7 +331,7 @@ define( require => {
         ] ),
         phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when the mouse moves out of the display',
-        before: ( point, event ) => {
+        first: ( point, event ) => {
           if ( !this.mouse ) { this.initMouse(); }
           this.mouse.out( point, event );
           // TODO: how to handle mouse-out (and log it)... are we changing the pointer.point without a branch change?
@@ -351,7 +351,7 @@ define( require => {
         phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when the mouse wheel scrolls',
         phetioHighFrequency: true,
-        before: event => {
+        first: event => {
           if ( !this.mouse ) { this.initMouse(); }
           this.mouse.wheel( event );
 
@@ -378,7 +378,7 @@ define( require => {
         ] ),
         phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when a touch begins',
-        before: ( id, point, event ) => {
+        first: ( id, point, event ) => {
           const touch = new Touch( id, point, event );
           this.addPointer( touch );
           this.downEvent( touch, event, false );
@@ -399,7 +399,7 @@ define( require => {
         ] ),
         phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when a touch ends',
-        before: ( id, point, event ) => {
+        first: ( id, point, event ) => {
           const touch = this.findPointerById( id );
           if ( touch ) {
             const pointChanged = touch.end( point, event );
@@ -424,7 +424,7 @@ define( require => {
         phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when a touch moves',
         phetioHighFrequency: true,
-        before: ( id, point, event ) => {
+        first: ( id, point, event ) => {
           const touch = this.findPointerById( id );
           if ( touch ) {
             touch.move( point, event );
@@ -447,7 +447,7 @@ define( require => {
         ] ),
         phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when a touch is canceled',
-        before: ( id, point, event ) => {
+        first: ( id, point, event ) => {
           const touch = this.findPointerById( id );
           if ( touch ) {
             const pointChanged = touch.cancel( point, event );
@@ -471,7 +471,7 @@ define( require => {
         ] ),
         phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when a pen touches the screen',
-        before: ( id, point, event ) => {
+        first: ( id, point, event ) => {
           const pen = new Pen( id, point, event );
           this.addPointer( pen );
           this.downEvent( pen, event, false );
@@ -492,7 +492,7 @@ define( require => {
         ] ),
         phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when a pen is lifted',
-        before: ( id, point, event ) => {
+        first: ( id, point, event ) => {
           const pen = this.findPointerById( id );
           if ( pen ) {
             const pointChanged = pen.end( point, event );
@@ -517,7 +517,7 @@ define( require => {
         phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when a pen is moved',
         phetioHighFrequency: true,
-        before: ( id, point, event ) => {
+        first: ( id, point, event ) => {
           const pen = this.findPointerById( id );
           if ( pen ) {
             pen.move( point, event );
@@ -540,7 +540,7 @@ define( require => {
         ] ),
         phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when a pen is canceled',
-        before: ( id, point, event ) => {
+        first: ( id, point, event ) => {
           const pen = this.findPointerById( id );
           if ( pen ) {
             const pointChanged = pen.cancel( point, event );
@@ -589,7 +589,7 @@ define( require => {
           ] ),
           phetioEventType: PhetioObject.EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the focusin DOM event.',
-          before: ( event ) => {
+          first: ( event ) => {
 
             // ignore any focusout callbacks if they are initiated due to implementation details in PDOM manipulation
             if ( this.display.blockFocusCallbacks ) {
@@ -624,7 +624,7 @@ define( require => {
           ] ),
           phetioEventType: PhetioObject.EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the focusout DOM event.',
-          before: ( event ) => {
+          first: ( event ) => {
 
             // ignore any focusout callbacks if they are initiated due to implementation details in PDOM manipulation
             if ( this.display.blockFocusCallbacks ) {
@@ -681,7 +681,7 @@ define( require => {
           ] ),
           phetioEventType: PhetioObject.EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the click DOM event.',
-          before: ( event ) => {
+          first: ( event ) => {
             sceneryLog && sceneryLog.Input && sceneryLog.Input( 'click(' + Input.debugText( null, event ) + ');' );
             sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -705,7 +705,7 @@ define( require => {
           ] ),
           phetioEventType: PhetioObject.EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the input DOM event.',
-          before: ( event ) => {
+          first: ( event ) => {
             sceneryLog && sceneryLog.Input && sceneryLog.Input( 'input(' + Input.debugText( null, event ) + ');' );
             sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -729,7 +729,7 @@ define( require => {
           ] ),
           phetioEventType: PhetioObject.EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the change DOM event.',
-          before: ( event ) => {
+          first: ( event ) => {
             sceneryLog && sceneryLog.Input && sceneryLog.Input( 'change(' + Input.debugText( null, event ) + ');' );
             sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -753,7 +753,7 @@ define( require => {
           ] ),
           phetioEventType: PhetioObject.EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the keydown DOM event.',
-          before: ( event ) => {
+          first: ( event ) => {
             sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keydown(' + Input.debugText( null, event ) + ');' );
             sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -777,7 +777,7 @@ define( require => {
           ] ),
           phetioEventType: PhetioObject.EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the keyup DOM event.',
-          before: ( event ) => {
+          first: ( event ) => {
             sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyup(' + Input.debugText( null, event ) + ');' );
             sceneryLog && sceneryLog.Input && sceneryLog.push();
 

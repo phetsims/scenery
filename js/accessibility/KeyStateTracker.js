@@ -14,6 +14,7 @@ define( require => {
   // modules
   const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
   const scenery = require( 'SCENERY/scenery' );
+  const timer = require( 'AXON/timer' );
 
   // constants
   // we accept that these keys can be released before a keydown event due to events browser receives when focus enters
@@ -27,6 +28,14 @@ define( require => {
       // keys are the keycode. JavaScript doesn't handle multiple key presses, so we track which keys are currently
       // down and update based on state of this collection of objects.
       this.keyState = {};
+
+      const stepListener = this.step.bind( this );
+      timer.addListener( stepListener );
+
+      // @private
+      this._disposeKeystateTracker = () => {
+        timer.removeListener( stepListener );
+      };
     }
 
     /**

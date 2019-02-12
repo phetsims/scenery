@@ -40,9 +40,9 @@ define( require => {
         // step timer
         timer.emit1( timeStep );
       }, 10 );
-
     },
     after() {
+      testTracker.dispose();
       clearInterval( intervalID );
     },
 
@@ -110,11 +110,6 @@ define( require => {
 
     const done = assert.async();
 
-    const intervalListener = ( time ) => {
-      testTracker.step( time );
-    }; 
-    timer.addListener( intervalListener );
-
     // we will test holding down a key for these lenghts of time in ms
     const firstPressTime = 500;
     const secondPressTime = 71;
@@ -126,20 +121,15 @@ define( require => {
 
     timer.setTimeout( () => {
       currentTimeDown = testTracker.timeDownForKey( spaceKeyEvent.domEvent.keyCode );
-      console.log( currentTimeDown );
-
 
       assert.ok( currentTimeDown >= firstPressTime && currentTimeDown <= totalPressTime, 'key pressed for ' + firstPressTime + ' ms' );
 
       timer.setTimeout( () => {
         currentTimeDown = testTracker.timeDownForKey( spaceKeyEvent.domEvent.keyCode );
-        console.log( currentTimeDown );
 
         assert.ok( currentTimeDown >= totalPressTime, 'key pressed for ' + secondPressTime + ' more ms.' );
 
         testTracker.keyupUpdate( spaceKeyEvent );
-
-        timer.clearInterval( intervalListener );
         done();
       }, secondPressTime );
     }, firstPressTime );

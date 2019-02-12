@@ -65,6 +65,7 @@ define( function( require ) {
   var Property = require( 'AXON/Property' );
   var PropertyIO = require( 'AXON/PropertyIO' );
   var Tandem = require( 'TANDEM/Tandem' );
+  var timer = require( 'AXON/timer' );
 
   // TODO: Order these, and see which ones we can require?
   var Features = require( 'SCENERY/util/Features' );
@@ -329,9 +330,8 @@ define( function( require ) {
 
     /**
      * Updates the display's DOM element with the current visual state of the attached root node and its descendants
-     * @param {number} [dt] - in seconds, optional to drive components that require animation
      */
-    updateDisplay: function( dt ) {
+    updateDisplay: function() {
 
       //OHTWO TODO: turn off after most debugging work is done
       if ( window.sceneryDebugPause ) {
@@ -365,8 +365,7 @@ define( function( require ) {
 
       if ( this._accessible ) {
 
-        // step the KeyStateTracker, updating the state of the keyboard and how long certain keys have been held down
-        Display.keyStateTracker.step( dt );
+        // update positioning of focusable peer siblings so they are discoverable on mobile assistive devices
         this._rootAccessibleInstance.peer.updateSubtreePositioning();
       }
 
@@ -977,11 +976,14 @@ define( function( require ) {
         self._requestAnimationFrameID = window.requestAnimationFrame( step, self._domElement );
 
         // calculate how much time has elapsed since we rendered the last frame
-        var timeNow = new Date().getTime();
+        var timeNow = Date.now();
         if ( lastTime !== 0 ) {
           timeElapsedInSeconds = ( timeNow - lastTime ) / 1000.0;
         }
         lastTime = timeNow;
+
+        // step the timer that drives any time dependent updates of the Display
+        timer.emit1( timeElapsedInSeconds );
 
         stepCallback && stepCallback( timeElapsedInSeconds );
         self.updateDisplay();

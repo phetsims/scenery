@@ -71,7 +71,7 @@ define( function( require ) {
     initializeAccessibleInstance: function( parent, display, trail ) {
       Events.call( this ); // TODO: is Events worth mixing in by default? Will we need to listen to events?
 
-      assert && assert( !this.id || this.disposed, 'If we previously existed, we need to have been disposed' );
+      assert && assert( !this.id || this.isDisposed, 'If we previously existed, we need to have been disposed' );
 
       // unique ID
       this.id = this.id || globalId++;
@@ -114,9 +114,13 @@ define( function( require ) {
       // @private {function} - The listeners added to the respective relativeNodes
       this.relativeListeners = [];
 
-      // @public (scenery-internal) {TransformTracker} - Used to quickly compute the global matrix of this instance's node and observe
-      // when it changes. Used by AccessiblePeer to update positioning of sibling elements.
+      // @public (scenery-internal) {TransformTracker} - Used to quickly compute the global matrix of this instance's
+      // node and observe when it changes. Used by AccessiblePeer to update positioning of sibling elements.
       this.transformTracker = new TransformTracker( AccessibleInstance.guessVisualTrail( this.trail, this.display.rootNode ) );
+
+      // @private {boolean} - Whether we are currently in a "disposed" (in the pool) state, or are available to be
+      // re-initialized
+      this.isDisposed = false;
 
       if ( this.isRootInstance ) {
         var accessibilityContainer = document.createElement( 'div' );
@@ -491,7 +495,7 @@ define( function( require ) {
       this.trail = null;
       this.node = null;
       this.peer = null;
-      this.disposed = true;
+      this.isDisposed = true;
 
       this.freeToPool();
 
@@ -580,7 +584,7 @@ define( function( require ) {
       var firstGoodIndex = lastBadIndex + 1;
       var firstGoodNode = trail.nodes[ firstGoodIndex ];
       var baseTrails = firstGoodNode.getTrailsTo( rootNode );
-      assert && assert( baseTrails.length > 0 );
+      assert && assert( baseTrails.length > 0, 'no base trails found to root' );
 
       // fail gracefully-ish?
       if ( baseTrails.length === 0 ) {
@@ -593,7 +597,7 @@ define( function( require ) {
         baseTrail.addDescendant( trail.nodes[ i ] );
       }
 
-      assert && assert( baseTrail.isValid() );
+      assert && assert( baseTrail.isValid(), 'trail not valid: ' + trail.uniqueId );
 
       return baseTrail;
     },
