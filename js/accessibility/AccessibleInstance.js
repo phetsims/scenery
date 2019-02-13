@@ -584,9 +584,10 @@ define( function( require ) {
       var firstGoodIndex = lastBadIndex + 1;
       var firstGoodNode = trail.nodes[ firstGoodIndex ];
       var baseTrails = firstGoodNode.getTrailsTo( rootNode );
-      assert && assert( baseTrails.length > 0, 'no base trails found to root' );
 
+      // firstGoodNode might not be attached to a Display either! Maybe client just hasn't gotten to it yet, so we
       // fail gracefully-ish?
+      // assert && assert( baseTrails.length > 0, '"good node" in trail with gap not attached to root')
       if ( baseTrails.length === 0 ) {
         return trail;
       }

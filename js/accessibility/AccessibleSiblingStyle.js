@@ -20,9 +20,9 @@ define( require => {
   const ROOT_CLASS_NAME = 'a11y-root';
 
   // All elements that use AccessibilityUtil.createElement should have this style. The only exception is the root of
-  // the PDOM, which should use Additional notes about attributes
-  // that should not be used:
-  //  padding: 0px; - might assist with correct viewport bounds, but prevents <input> from having defined width
+  // the PDOM, which should use 'a11y-root' class attributes instead.
+  // Additional notes about attributes that should not be used:
+  //  - padding: 0px; - might assist with correct viewport bounds, but prevents <input> from having defined width
   SceneryStyle.addRule( '.' + SIBLING_CLASS_NAME +
     '{' +
       // fixed to the 'relative' styled root element, to be transformed with left/top

@@ -276,6 +276,8 @@ define( function( require ) {
         this.setAttributeToElement( 'type', options.inputType );
       }
 
+      this.setFocusable( this.node.focusable );
+
       // recompute and assign the association attributes that link two elements (like aria-labelledby)
       this.onAriaLabelledbyAssociationChange();
       this.onAriaDescribedbyAssociationChange();
@@ -777,6 +779,9 @@ define( function( require ) {
       if ( this.focusable !== focusable ) {
         this.focusable = focusable;
         AccessibilityUtil.overrideFocusWithTabIndex( this.primarySibling, focusable );
+
+        // reposition the sibling in the DOM, since non-focusable nodes are not positioned
+        this.invalidateCSSPositioning();
       }
     },
 
@@ -848,7 +853,7 @@ define( function( require ) {
      * @private
      */
     invalidateCSSPositioning: function() {
-      if ( !this.positionDirty ) {
+      if ( !this.positionDirty && this.focusable ) {
         this.positionDirty = true;
 
         // mark all ancestors of this peer so that we can quickly find this dirty peer when we traverse
