@@ -21,8 +21,6 @@ define( require => {
 
   // All elements that use AccessibilityUtil.createElement should have this style. The only exception is the root of
   // the PDOM, which should use 'a11y-root' class attributes instead.
-  // Additional notes about attributes that should not be used:
-  //  - padding: 0px; - might assist with correct viewport bounds, but prevents <input> from having defined width
   SceneryStyle.addRule( '.' + SIBLING_CLASS_NAME +
     '{' +
       // fixed to the 'relative' styled root element, to be transformed with left/top
@@ -40,6 +38,8 @@ define( require => {
 
       // helps get accurate bounds with getBoundingClientRect() for transformations
       'border-width: 0px;' +
+      'border: 0px;' +
+      'padding: 1px 1px;' + // cannot be zero, otherwise certain elements will have undefined width and height
       'margin: 0px;' +
       'white-space: nowrap;' +
 
