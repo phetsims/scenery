@@ -57,5 +57,8 @@ define( function( require ) {
     assert.ok( siblingBoundsCorrect( buttonElement ), 'button element child of root correctly positioned' );
     assert.ok( siblingBoundsCorrect( divElement ), 'div element child of root correctly positioned' );
     assert.ok( siblingBoundsCorrect( inputElement ), 'input element child of root correctly positioned' );
+
+    // remove the display element so it doesn't interfere with qunit api
+    document.body.removeChild( display.domElement );
   } );
 } );
