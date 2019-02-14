@@ -76,7 +76,14 @@ define( function( require ) {
 
     // udpdate so the display to position elements
     display.updateDisplay();
-    assert.ok( siblingBoundsCorrect( inputElement ), 'input element descendant incorrectly positioned' );
+    assert.ok( siblingBoundsCorrect( buttonElement ), 'button element descendant correctly positioned' );
+    assert.ok( siblingBoundsCorrect( inputElement ), 'input element descendant correctly positioned' );
+
+    // when inner content of an element changes, its client bounds change - make sure that the element still matches
+    // the Node
+    buttonElement.innerHTML = 'Some Test';
+    display.updateDisplay();
+    assert.ok( siblingBoundsCorrect( buttonElement ), 'button element descendant correclty positioned after inner content changed' );
 
     // remove the display element so it doesn't interfere with qunit api
     document.body.removeChild( display.domElement );
