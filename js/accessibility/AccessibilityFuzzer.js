@@ -46,7 +46,7 @@ define( function( require ) {
     this.display = new Display( this.nodes[ 0 ] );
 
     // @private {Random}
-    this.random = new Random( { seed } );
+    this.random = new Random( { seed: seed } );
 
     // @private {Array.<Action>}
     this.actionsTaken = [];
