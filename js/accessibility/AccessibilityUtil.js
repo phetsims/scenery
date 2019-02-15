@@ -15,6 +15,7 @@ define( function( require ) {
   'use strict';
 
   // modules
+  var AccessibleSiblingStyle = require( 'SCENERY/accessibility/AccessibleSiblingStyle' );
   var Random = require( 'DOT/Random' );
   var scenery = require( 'SCENERY/scenery' );
 
@@ -65,9 +66,6 @@ define( function( require ) {
   // valid DOM events that the display adds listeners to. For a list of scenery events that support a11y features
   // see Input.A11Y_EVENT_TYPES
   var DOM_EVENTS = [ 'focusin', 'focusout', 'input', 'change', 'click', 'keydown', 'keyup' ];
-
-  // these elements require a minimum width to be visible in Safari, see https://github.com/phetsims/john-travoltage/issues/204
-  var ELEMENTS_REQUIRE_WIDTH = [ INPUT_TAG, A_TAG ];
 
   var ARIA_LABELLEDBY = 'aria-labelledby';
   var ARIA_DESCRIBEDBY = 'aria-describedby';
@@ -448,16 +446,12 @@ define( function( require ) {
       var domElement = options.namespace
                        ? document.createElementNS( options.namespace, tagName )
                        : document.createElement( tagName );
-      var upperCaseTagName = tagName.toUpperCase();
 
       // set tab index if we are overriding default browser behavior
       AccessibilityUtil.overrideFocusWithTabIndex( domElement, focusable );
 
-      // Safari requires that certain input elements have dimension, otherwise it will not be keyboard accessible
-      if ( _.includes( ELEMENTS_REQUIRE_WIDTH, upperCaseTagName ) ) {
-        domElement.style.width = '1px';
-        domElement.style.height = '1px';
-      }
+      // gives this element styling from SceneryStyle
+      domElement.className = AccessibleSiblingStyle.SIBLING_CLASS_NAME;
 
       return domElement;
     },

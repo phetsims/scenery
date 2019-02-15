@@ -93,7 +93,7 @@ define( function( require ) {
   var platform = require( 'PHET_CORE/platform' );
   var PointerAreaOverlay = require( 'SCENERY/overlays/PointerAreaOverlay' );
   var PointerOverlay = require( 'SCENERY/overlays/PointerOverlay' );
-  var SceneryStyle = require( 'SCENERY/util/SceneryStyle' );
+  // var SceneryStyle = require( 'SCENERY/util/SceneryStyle' );
   var Util = require( 'SCENERY/util/Util' );
 
   /**
@@ -280,7 +280,7 @@ define( function( require ) {
 
       // make the PDOM invisible in the browser - it has some width and is shifted off screen so that AT can read the
       // formatting tags, see https://github.com/phetsims/scenery/issues/730
-      SceneryStyle.addRule( '.accessibility, .accessibility * { position: relative; left: -1000px; top: 0; width: 250px; height: 0; clip: rect(0,0,0,0); pointerEvents: none }' );
+      // SceneryStyle.addRule( '.accessibility, .accessibility * { position: relative; left: -1000px; top: 0; width: 250px; height: 0; clip: rect(0,0,0,0); pointerEvents: none }' );
 
       this._focusRootNode = new Node();
       this._focusOverlay = new FocusOverlay( this, this._focusRootNode );
@@ -361,6 +361,12 @@ define( function( require ) {
       if ( this._input ) {
         // TODO: Should this be handled elsewhere?
         this._input.validatePointers();
+      }
+
+      if ( this._accessible ) {
+
+        // update positioning of focusable peer siblings so they are discoverable on mobile assistive devices
+        this._rootAccessibleInstance.peer.updateSubtreePositioning();
       }
 
       // validate bounds for everywhere that could trigger bounds listeners. we want to flush out any changes, so that we can call validateBounds()

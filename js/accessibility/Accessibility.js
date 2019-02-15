@@ -2397,8 +2397,10 @@ define( function( require ) {
             this._focusableOverride = focusable;
 
             for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-              var peer = this._accessibleInstances[ i ].peer;
-              AccessibilityUtil.overrideFocusWithTabIndex( peer.primarySibling, focusable );
+
+              // after the override is set, update the focusability of the peer based on this node's value for focusable
+              // which may be true or false (but not null)
+              this._accessibleInstances[ i ].peer.setFocusable( this.focusable );
             }
           }
         },

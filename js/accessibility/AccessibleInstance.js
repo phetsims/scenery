@@ -38,6 +38,7 @@ define( function( require ) {
   var platform = require( 'PHET_CORE/platform' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var scenery = require( 'SCENERY/scenery' );
+  var TransformTracker = require( 'SCENERY/util/TransformTracker' );
 
   var globalId = 1;
 
@@ -113,15 +114,16 @@ define( function( require ) {
       // @private {function} - The listeners added to the respective relativeNodes
       this.relativeListeners = [];
 
+      // @public (scenery-internal) {TransformTracker} - Used to quickly compute the global matrix of this instance's
+      // node and observe when it changes. Used by AccessiblePeer to update positioning of sibling elements.
+      this.transformTracker = new TransformTracker( AccessibleInstance.guessVisualTrail( this.trail, this.display.rootNode ) );
+
       // @private {boolean} - Whether we are currently in a "disposed" (in the pool) state, or are available to be
       // re-initialized
       this.isDisposed = false;
 
       if ( this.isRootInstance ) {
         var accessibilityContainer = document.createElement( 'div' );
-
-        // give the container a class name so it is hidden in the Display, see accessibility styling in Display.js
-        accessibilityContainer.className = 'accessibility';
         this.peer = AccessiblePeer.createFromPool( this, {
           primarySibling: accessibilityContainer
         } );
@@ -480,6 +482,9 @@ define( function( require ) {
       // disposal.
       this.peer.dispose();
 
+      // dispose after the peer so the peer can remove any listeners from it
+      this.transformTracker.dispose();
+
       // If we are the root accessible instance, we won't actually have a reference to a node.
       if ( this.node ) {
         this.node.removeAccessibleInstance( this );
@@ -579,9 +584,10 @@ define( function( require ) {
       var firstGoodIndex = lastBadIndex + 1;
       var firstGoodNode = trail.nodes[ firstGoodIndex ];
       var baseTrails = firstGoodNode.getTrailsTo( rootNode );
-      assert && assert( baseTrails.length > 0 );
 
+      // firstGoodNode might not be attached to a Display either! Maybe client just hasn't gotten to it yet, so we
       // fail gracefully-ish?
+      // assert && assert( baseTrails.length > 0, '"good node" in trail with gap not attached to root')
       if ( baseTrails.length === 0 ) {
         return trail;
       }
@@ -592,7 +598,7 @@ define( function( require ) {
         baseTrail.addDescendant( trail.nodes[ i ] );
       }
 
-      assert && assert( baseTrail.isValid() );
+      assert && assert( baseTrail.isValid(), 'trail not valid: ' + trail.uniqueId );
 
       return baseTrail;
     },
