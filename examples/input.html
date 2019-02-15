@@ -347,7 +347,7 @@
   rotationNode.addInputListener( new scenery.DragListener( {
     applyOffset: false, // Tracking the initial rotation needs to be done, have our model point ignore local location.
     drag: function( event ) {
-      rotationProperty.value = this.modelPoint.angle() - this.localPoint.angle();
+      rotationProperty.value = this.modelPoint.angle - this.localPoint.angle;
     }
   } ) );
 

@@ -76,7 +76,7 @@
     var parentPoint = line.globalToParentPoint( globalPoint );
 
     // assumes we have no other transform on the line. apply any translations to a parent of our line
-    line.rotation = parentPoint.angle();
+    line.rotation = parentPoint.angle;
   }
 
   // just listen to move events for a mouse (not touches or pen)
