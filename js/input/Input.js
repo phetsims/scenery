@@ -1994,31 +1994,31 @@ define( require => {
         return event.pointerType; // hope for the best
       }
     }
-
-    // @public {Array.<string>} - Basic event listener types that are not pointer-type specific
-    static get BASIC_EVENT_TYPES() {
-      return [ 'down', 'up', 'cancel', 'move', 'wheel', 'enter', 'exit', 'over', 'out' ];
-    }
-
-    // @public {Array.<string>} - Valid prefixes for the accessibility event types above
-    static get A11Y_EVENT_TYPES() {
-      return [ 'focus', 'blur', 'click', 'input', 'change', 'keydown', 'keyup' ];
-    }
-
-    // @public {Array.<string>} - Valid prefixes for the basic event types above
-    static get EVENT_PREFIXES() {
-      return [ '', 'mouse', 'touch', 'pen' ];
-    }
-
-    // @public {Array.<string>} - Includes basic and specific types, e.g. both 'up' and 'mouseup'
-    static get ALL_EVENT_TYPES() {
-      return Input.EVENT_PREFIXES.map( prefix => {
-        return Input.BASIC_EVENT_TYPES.map( eventName => {
-          return prefix + eventName;
-        } );
-      } ).concat( [ Input.A11Y_EVENT_TYPES ] );
-    }
   }
+
+  // @public {Array.<string>} - Basic event listener types that are not pointer-type specific
+  Input.BASIC_EVENT_TYPES = () => {
+    return [ 'down', 'up', 'cancel', 'move', 'wheel', 'enter', 'exit', 'over', 'out' ];
+  };
+
+  // @public {Array.<string>} - Valid prefixes for the accessibility event types above
+  Input.A11Y_EVENT_TYPES = () => {
+    return [ 'focus', 'blur', 'click', 'input', 'change', 'keydown', 'keyup' ];
+  };
+
+  // @public {Array.<string>} - Valid prefixes for the basic event types above
+  Input.EVENT_PREFIXES = () => {
+    return [ '', 'mouse', 'touch', 'pen' ];
+  };
+
+  // @public {Array.<string>} - Includes basic and specific types, e.g. both 'up' and 'mouseup'
+  Input.ALL_EVENT_TYPES = () => {
+    return Input.EVENT_PREFIXES.map( prefix => {
+      return Input.BASIC_EVENT_TYPES.map( eventName => {
+        return prefix + eventName;
+      } );
+    } ).concat( [ Input.A11Y_EVENT_TYPES ] );
+  };
 
   return scenery.register( 'Input', Input );
 } );
