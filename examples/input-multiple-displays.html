@@ -66,7 +66,7 @@
   function createButton( label, callback, options ) {
     var label = new scenery.Text( label, {
       fontSize: 12,
-      center: new dot.Vector2()
+      center: new dot.Vector2( 0, 0 )
     } );
     var buttonListener = new scenery.FireListener( {
       fire: callback

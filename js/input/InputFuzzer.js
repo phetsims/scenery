@@ -36,7 +36,7 @@ define( function( require ) {
     this.isMouseDown = false;
 
     // @private {Vector2} - Starts at 0,0, because why not
-    this.mousePosition = new Vector2();
+    this.mousePosition = new Vector2( 0, 0 );
 
     // @private {Random}
     this.random = new Random( { seed: seed } );

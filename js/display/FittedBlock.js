@@ -47,7 +47,7 @@ define( function( require ) {
       this.commonFitInstance = null; // filled in if COMMON_ANCESTOR
       this.fitBounds = Bounds2.NOTHING.copy(); // tracks the "tight" bounds for fitting, not the actually-displayed bounds
       this.oldFitBounds = Bounds2.NOTHING.copy(); // copy for storage
-      this.fitOffset = new Vector2();
+      this.fitOffset = new Vector2( 0, 0 );
 
       // {number} - Number of child drawables that are marked as unfittable.
       this.unfittableDrawableCount = 0;
