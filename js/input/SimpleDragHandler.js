@@ -91,9 +91,6 @@ define( function( require ) {
     // another startDrag.
     this.lastInterruptedTouchPointer = null;
 
-    // @private {boolean}
-    this.disposed = false;
-
     // @private
     this.dragStartedEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'dragStartedEmitter' ),
@@ -149,7 +146,7 @@ define( function( require ) {
           { name: 'event', type: VoidIO, documentation: 'the scenery pointer Event' } ] ),
       first: function( point, event ) {
 
-        if ( !self.dragging || self.disposed ) { return; }
+        if ( !self.dragging || self.isDisposed ) { return; }
 
         var globalDelta = self.pointer.point.minus( self.lastDragPoint );
 
@@ -259,7 +256,7 @@ define( function( require ) {
     this.dragListener = {
       // mouse/touch up
       up: function( event ) {
-        if ( !self.dragging || self.disposed ) { return; }
+        if ( !self.dragging || self.isDisposed ) { return; }
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler (pointer) up for ' + self.trail.toString() );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
@@ -277,7 +274,7 @@ define( function( require ) {
 
       // touch cancel
       cancel: function( event ) {
-        if ( !self.dragging || self.disposed ) { return; }
+        if ( !self.dragging || self.isDisposed ) { return; }
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler (pointer) cancel for ' + self.trail.toString() );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
@@ -362,7 +359,7 @@ define( function( require ) {
       }
 
       // If we're disposed, we can't start new drags.
-      if ( this.disposed ) {
+      if ( this.isDisposed ) {
         return;
       }
 
@@ -408,8 +405,6 @@ define( function( require ) {
     dispose: function() {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler dispose' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-
-      this.disposed = true;
 
       if ( this.dragging ) {
         this.pointer.dragging = false;

@@ -447,7 +447,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.dirty && sceneryLog.dirty( 'markDirtyDrawable on WebGLBlock#' + this.id + ' with ' + drawable.toString() );
 
       assert && assert( drawable );
-      assert && assert( !drawable.disposed );
+      assert && assert( !drawable.isDisposed );
 
       // TODO: instance check to see if it is a canvas cache (usually we don't need to call update on our drawables)
       this.dirtyDrawables.push( drawable );

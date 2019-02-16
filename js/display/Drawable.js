@@ -73,7 +73,7 @@ define( function( require ) {
     initializeDrawable: function( renderer ) {
       Events.call( this );
 
-      assert && assert( !this.id || this.disposed, 'If we previously existed, we need to have been disposed' );
+      assert && assert( !this.id || this.isDisposed, 'If we previously existed, we need to have been disposed' );
 
       // unique ID for drawables
       this.id = this.id || globalId++;
@@ -85,7 +85,7 @@ define( function( require ) {
       this.renderer = renderer;
 
       this.dirty = true;
-      this.disposed = false;
+      this.isDisposed = false;
 
       this.linksDirty = false;
 
@@ -133,7 +133,7 @@ define( function( require ) {
     update: function() {
       var needsFurtherUpdates = false;
 
-      if ( this.dirty && !this.disposed ) {
+      if ( this.dirty && !this.isDisposed ) {
         this.dirty = false;
         needsFurtherUpdates = true;
       }
@@ -332,13 +332,13 @@ define( function( require ) {
 
     // generally do not call this directly, use markForDisposal (so Display will dispose us), or disposeImmediately.
     dispose: function() {
-      assert && assert( !this.disposed, 'We should not re-dispose drawables' );
+      assert && assert( !this.isDisposed, 'We should not re-dispose drawables' );
 
       sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( '[' + this.constructor.name + '*] dispose ' + this.toString() );
       sceneryLog && sceneryLog.Drawable && sceneryLog.push();
 
       this.cleanDrawable();
-      this.disposed = true;
+      this.isDisposed = true;
 
       // for now
       this.freeToPool();
@@ -348,7 +348,7 @@ define( function( require ) {
 
     audit: function( allowPendingBlock, allowPendingList, allowDirty ) {
       if ( assertSlow ) {
-        assertSlow && assertSlow( !this.disposed,
+        assertSlow && assertSlow( !this.isDisposed,
           'If we are being audited, we assume we are in the drawable display tree, and we should not be marked as disposed' );
         assertSlow && assertSlow( this.renderer, 'Should not have a 0 (no) renderer' );
 
