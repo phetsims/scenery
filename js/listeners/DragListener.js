@@ -57,7 +57,7 @@ define( function( require ) {
   var Vector2 = require( 'DOT/Vector2' );
 
   // Scratch vectors used to prevent allocations
-  var scratchVector2A = new Vector2();
+  var scratchVector2A = new Vector2( 0, 0 );
   var DraggedEmitterIO = EmitterIO( [ { name: 'event', type: EventIO } ] );
 
   /**
@@ -161,16 +161,16 @@ define( function( require ) {
     this.isUserControlledProperty = this.isPressedProperty;
 
     // @private {Vector2} - The point of the drag in the target's global coordinate frame. Updated with mutation.
-    this._globalPoint = new Vector2();
+    this._globalPoint = new Vector2( 0, 0 );
 
     // @private {Vector2} - The point of the drag in the target's local coordinate frame. Updated with mutation.
-    this._localPoint = new Vector2();
+    this._localPoint = new Vector2( 0, 0 );
 
     // @private {Vector2} - Current drag point in the parent coordinate frame. Updated with mutation.
-    this._parentPoint = new Vector2();
+    this._parentPoint = new Vector2( 0, 0 );
 
     // @private {Vector2} - Current drag point in the model coordinate frame
-    this._modelPoint = new Vector2();
+    this._modelPoint = new Vector2( 0, 0 );
 
     // @private {TransformTracker|null} - Handles watching ancestor transforms for callbacks.
     this._transformTracker = null;

@@ -4976,14 +4976,6 @@ define( function( require ) {
     },
 
     /**
-     * Whether this Node has been disposed.
-     * @public
-     *
-     * @returns {boolean}
-     */
-    get disposed() { return this.isDisposed; },
-
-    /**
      * Override for extra information in the fing output (from Display.getDebugHTML()).
      * @protected (scenery-internal)
      *

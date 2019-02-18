@@ -51,10 +51,10 @@ define( function( require ) {
     }
 
     // corner vertices in the relative transform root coordinate space
-    this.upperLeft = new Vector2();
-    this.lowerLeft = new Vector2();
-    this.upperRight = new Vector2();
-    this.lowerRight = new Vector2();
+    this.upperLeft = new Vector2( 0, 0 );
+    this.lowerLeft = new Vector2( 0, 0 );
+    this.upperRight = new Vector2( 0, 0 );
+    this.lowerRight = new Vector2( 0, 0 );
 
     this.xyDirty = true; // is our vertex position information out of date?
     this.uvDirty = true; // is our UV information out of date?

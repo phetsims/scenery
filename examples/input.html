@@ -73,7 +73,7 @@
   function createButton( labelString, callback, options ) {
     var label = new scenery.Text( labelString, {
       fontSize: 12,
-      center: new dot.Vector2()
+      center: new dot.Vector2( 0, 0 )
     } );
     var buttonListener = new scenery.FireListener( {
       fire: callback
@@ -211,7 +211,7 @@
     var isActive = isHovering || isPressed;
     buttonBackground.fill = isActive ? activeColor : inactiveColor;
     buttonText.text = ( isHovering ? 'hovering' : 'no-hover' ) + ' ' + ( isPressed ? 'pressed' : 'released' );
-    buttonText.center = new dot.Vector2();
+    buttonText.center = new dot.Vector2( 0, 0 );
   } );
 
   /*---------------------------------------------------------------------------*

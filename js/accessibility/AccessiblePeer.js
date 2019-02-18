@@ -137,7 +137,11 @@ define( function( require ) {
       // NOTE: ResizeObserver is a superior alternative to MutationObserver for this purpose because
       // it will only monitor changes we care about and prevent infinite callback loops if size is changed in
       // the callback function (we get around this now by not observing attribute changes). But it is not yet widely
-      // supported, see https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver
+      // supported, see https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver.
+      //
+      // TODO: Should we be watching "model" changes from Accessibility.js instead of using MutationObserver?
+      // See https://github.com/phetsims/scenery/issues/852. This would be less fragile, and also less
+      // memory intensive because we don't need an instance of MutationObserver on every AccessibleInstance.
       this.mutationObserver = this.mutationObserver || new MutationObserver( this.invalidateCSSPositioning.bind( this ) );
 
       // @private {function} - must be removed on disposal
@@ -891,6 +895,12 @@ define( function( require ) {
      *
      * Additional notes were taken in https://github.com/phetsims/scenery/issues/852, see that issue for more
      * information.
+     *
+     * Review: This function could be simplified by setting the element width/height a small arbitrary shape
+     * at the center of the node's global bounds. There is a drawback in that the VO default highlight won't
+     * surround the Node anymore. But it could be a performance enhancement and simplify this function.
+     * Or maybe a big rectangle larger than the Display div still centered on the node so we never
+     * see the VO highlight?
      *
      * @private
      */

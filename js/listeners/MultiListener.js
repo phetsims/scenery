@@ -333,7 +333,7 @@ define( function( require ) {
     // @private
     computeTranslationMatrix: function() {
       // translation only. linear least-squares simplifies to sum of differences
-      var sum = new Vector2();
+      var sum = new Vector2( 0, 0 );
       for ( var i = 0; i < this._presses.length; i++ ) {
         sum.add( this._presses[ i ].targetPoint );
         sum.subtract( this._presses[ i ].localPoint );
@@ -347,8 +347,8 @@ define( function( require ) {
       var localPoints = this._presses.map( function( press ) { return press.localPoint; } );
       var targetPoints = this._presses.map( function( press ) { return press.targetPoint; } );
 
-      var localCentroid = new Vector2();
-      var targetCentroid = new Vector2();
+      var localCentroid = new Vector2( 0, 0 );
+      var targetCentroid = new Vector2( 0, 0 );
 
       localPoints.forEach( function( localPoint ) { localCentroid.add( localPoint ); } );
       targetPoints.forEach( function( targetPoint ) { targetCentroid.add( targetPoint ); } );
@@ -375,8 +375,8 @@ define( function( require ) {
       var i;
       var localMatrix = new Matrix( 2, this._presses.length );
       var targetMatrix = new Matrix( 2, this._presses.length );
-      var localCentroid = new Vector2();
-      var targetCentroid = new Vector2();
+      var localCentroid = new Vector2( 0, 0 );
+      var targetCentroid = new Vector2( 0, 0 );
       for ( i = 0; i < this._presses.length; i++ ) {
         var localPoint = this._presses[ i ].localPoint;
         var targetPoint = this._presses[ i ].targetPoint;

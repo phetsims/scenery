@@ -71,7 +71,7 @@
     var rect = new scenery.Rectangle( x, y, 50, 50 );
 
     // store a 3-dimensional offset on each rectangle
-    rect.wheelOffset = new dot.Vector3();
+    rect.wheelOffset = new dot.Vector3( 0, 0, 0 );
 
     function updateFill() {
       // pay attention only to the vertical scroll offset

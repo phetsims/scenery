@@ -87,7 +87,7 @@ define( function( require ) {
       Util.prepareForTransform( this.canvas, this.forceAcceleration ); // Apply CSS needed for future CSS transforms to work properly.
       Util.unsetTransform( this.canvas ); // clear out any transforms that could have been previously applied
 
-      this.canvasDrawOffset = new Vector2();
+      this.canvasDrawOffset = new Vector2( 0, 0 );
 
       this.currentDrawable = null;
 

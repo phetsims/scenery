@@ -77,7 +77,7 @@ define( function( require ) {
     this.touchExclusiveDirty = true;
 
     // @private {Vector2} - Used to minimize garbage created in the hit-testing process
-    this.scratchVector = new Vector2();
+    this.scratchVector = new Vector2( 0, 0 );
   }
 
   scenery.register( 'Picker', Picker );
