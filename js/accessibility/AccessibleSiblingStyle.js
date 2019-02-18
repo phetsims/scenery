@@ -5,6 +5,9 @@
  * but also exports the class names for root and siblings for where elements are created or retrieved
  * by document.getElementsByClassName().
  *
+ * REVIEW: Rename this to AccessiblePDOMStyle (or something more universal)
+ *   - For all usages of "sibling" in this file.
+ * 
  * @author Jesse Greenberg
  */
 
@@ -16,6 +19,7 @@ define( require => {
   const scenery = require( 'SCENERY/scenery' );
 
   // constants
+  // REVIEW: Consider renaming this to a11y-pdom-element (or something more universal)
   const SIBLING_CLASS_NAME = 'a11y-sibling';
   const ROOT_CLASS_NAME = 'a11y-root';
 

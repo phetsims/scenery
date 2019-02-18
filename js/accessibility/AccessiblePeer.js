@@ -896,6 +896,12 @@ define( function( require ) {
      * Additional notes were taken in https://github.com/phetsims/scenery/issues/852, see that issue for more
      * information.
      *
+     * Review: This function could be simplified by setting the element width/height a small arbitrary shape
+     * at the center of the node's global bounds. There is a drawback in that the VO default highlight won't
+     * surround the Node anymore. But it could be a performance enhancement and simplify this function.
+     * Or maybe a big rectangle larger than the Display div still centered on the node so we never
+     * see the VO highlight?
+     *
      * @private
      */
     positionElements: function() {
