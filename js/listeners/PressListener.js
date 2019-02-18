@@ -22,13 +22,13 @@ define( function( require ) {
   var Event = require( 'SCENERY/input/Event' );
   var EventIO = require( 'SCENERY/input/EventIO' );
   var inherit = require( 'PHET_CORE/inherit' );
+  var KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
   var Mouse = require( 'SCENERY/input/Mouse' );
   var Node = require( 'SCENERY/nodes/Node' );
   var ObservableArray = require( 'AXON/ObservableArray' );
   var PhetioObject = require( 'TANDEM/PhetioObject' );
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
-  var timer = require( 'AXON/timer' );
   var VoidIO = require( 'TANDEM/types/VoidIO' );
 
   // global
@@ -424,10 +424,6 @@ define( function( require ) {
       if ( this.a11yClickingProperty.value ) {
         this.interrupted = true;
         this.a11yClickingProperty.value = false;
-        
-        if ( this._a11yClickingTimeoutListener ) {
-          timer.clearTimeout( this._a11yClickingTimeoutListener );
-        }
       }
       else if ( this.isPressed ) {
 
@@ -684,18 +680,59 @@ define( function( require ) {
      * This will fire listeners immediately, but adds a delay for the a11yClickingProperty so that you can make a
      * button look pressed from a single DOM click event. For example usage, see sun/ButtonModel.looksPressedProperty.
      */
-    click: function( event ) {
-      if ( this.canClick() ) {
-        this.interrupted = false; // clears the flag (don't set to false before here)
+    // click: function( event ) {
+    //   if ( this.canClick() ) {
+    //     this.interrupted = false; // clears the flag (don't set to false before here)
 
-        this.a11yClickingProperty.value = true;
+    //     this.a11yClickingProperty.value = true;
 
-        // ensure that button is 'over' so listener can be called while button is down
-        this.isFocusedProperty.value = true;
-        this.isPressedProperty.value = true;
+    //     // ensure that button is 'over' so listener can be called while button is down
+    //     this.isFocusedProperty.value = true;
+    //     this.isPressedProperty.value = true;
 
-        // fire the optional callback
-        this._pressListener( event, this );
+    //     // fire the optional callback
+    //     this._pressListener( event, this );
+
+    //     // no longer down, don't reset 'over' so button can be styled as long as it has focus
+    //     this.isPressedProperty.value = false;
+
+    //     // fire the callback from options
+    //     this._releaseListener( event, this );
+
+    //     // if we are already clicking, remove the previous timeout - this assumes that clearTimeout is a noop if the
+    //     // listener is no longer attached
+    //     timer.clearTimeout( this._a11yClickingTimeoutListener );
+
+    //     // now add the timeout back to start over, saving so that it can be removed later
+    //     var self = this;
+    //     this._a11yClickingTimeoutListener = timer.setTimeout( function() {
+    //       self.a11yClickingProperty.value = false;
+    //     }, this._a11yLooksPressedInterval );
+    //   }
+    // },
+
+    keydown: function( event ) {
+      var keyCode = event.domEvent.keyCode;
+      if ( keyCode === KeyboardUtil.KEY_ENTER || keyCode === KeyboardUtil.KEY_SPACE ) {
+        if ( this.canClick() ) {
+          this.downKey = keyCode;
+          this.interrupted = false; // clears the flag (don't set to false before here)
+
+          this.a11yClickingProperty.value = true;
+
+          // ensure that button is 'over' so listener can be called while button is down
+          this.isFocusedProperty.value = true;
+          this.isPressedProperty.value = true;
+
+          // fire the optional callback
+          this._pressListener( event, this );
+        }        
+      }
+    },
+
+    keyup: function( event ) {
+      var keyCode = event.domEvent.keyCode;
+      if ( keyCode === this.downKey && this.a11yClickingProperty.value ) {
 
         // no longer down, don't reset 'over' so button can be styled as long as it has focus
         this.isPressedProperty.value = false;
@@ -703,15 +740,7 @@ define( function( require ) {
         // fire the callback from options
         this._releaseListener( event, this );
 
-        // if we are already clicking, remove the previous timeout - this assumes that clearTimeout is a noop if the
-        // listener is no longer attached
-        timer.clearTimeout( this._a11yClickingTimeoutListener );
-
-        // now add the timeout back to start over, saving so that it can be removed later
-        var self = this;
-        this._a11yClickingTimeoutListener = timer.setTimeout( function() {
-          self.a11yClickingProperty.value = false;
-        }, this._a11yLooksPressedInterval );
+        this.a11yClickingProperty.value = false;
       }
     },
 
@@ -731,8 +760,15 @@ define( function( require ) {
      * @a11y
      */
     blur: function() {
+      
       // On blur, the button should no longer look 'over'.
       this.isFocusedProperty.value = false;
+
+      // no longer pressed, but don't set until unfocused so we don't call any listeners
+      // (this is in the case where we tab away from a button while clicked down)
+      if ( this.isPressedProperty.value ) {
+        this.isPressedProperty.value = false;
+      }
     },
 
     /**

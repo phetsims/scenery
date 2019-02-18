@@ -75,6 +75,10 @@ define( function( require ) {
     isWASDKey: function( keyCode ) {
       return ( keyCode === KeyboardUtil.KEY_W || keyCode === KeyboardUtil.KEY_A ||
                keyCode === KeyboardUtil.KEY_S || keyCode === KeyboardUtil.KEY_D );
+    },
+
+    isActivationKey: function( keyCode ) {
+      return keyCode === KeyboardUtil.KEY_ENTER || keyCode === KeyboardUtil.KEY_SPACE;
     }
   };
 

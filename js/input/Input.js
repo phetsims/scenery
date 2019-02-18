@@ -122,6 +122,7 @@ define( require => {
   'use strict';
 
   const A11yPointer = require( 'SCENERY/input/A11yPointer' );
+  const A11yEventCatcher = require( 'SCENERY/input/A11yEventCatcher' );
   const AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   const BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
   const BrowserEvents = require( 'SCENERY/input/BrowserEvents' );
@@ -553,6 +554,8 @@ define( require => {
       // wire up accessibility listeners on the display's root accessible DOM element.
       if ( this.display._accessible ) {
 
+        var eventCatcher = new A11yEventCatcher();
+
         // In IE11, the focusin event can be sent twice since we often have to restore focus to event.relatedTarget
         // after calling focusout callbacks. So this flag is set to prevent focusin callbacks from firing twice
         // when that happens. See https://github.com/phetsims/scenery/issues/925
@@ -686,8 +689,12 @@ define( require => {
             sceneryLog && sceneryLog.Input && sceneryLog.push();
 
             if ( !this.a11yPointer ) { this.initA11yPointer(); }
-            const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
-            this.dispatchEvent( trail, 'click', this.a11yPointer, event, true );
+            eventCatcher.handleClick( event );
+
+            // Don't  dispatch the event anymore, we only care about keydown/keyup now, and 
+            // in case we receive a single `click` event from AT, fake keydown/keyup events are created.
+            // const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
+            // this.dispatchEvent( trail, 'click', this.a11yPointer, event, true );
 
             sceneryLog && sceneryLog.Input && sceneryLog.pop();
           }
@@ -759,6 +766,8 @@ define( require => {
 
             if ( !this.a11yPointer ) { this.initA11yPointer(); }
             const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
+
+            eventCatcher.handleKeyDown( event );
             this.dispatchEvent( trail, 'keydown', this.a11yPointer, event, true );
 
             sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -783,6 +792,8 @@ define( require => {
 
             if ( !this.a11yPointer ) { this.initA11yPointer(); }
             const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
+
+            eventCatcher.handleKeyUp( event );
             this.dispatchEvent( trail, 'keyup', this.a11yPointer, event, true );
 
             sceneryLog && sceneryLog.Input && sceneryLog.pop();
