@@ -703,15 +703,22 @@ define( function( require ) {
         // fire the callback from options
         this._releaseListener( event, this );
 
-        // if we are already clicking, remove the previous timeout - this assumes that clearTimeout is a noop if the
-        // listener is no longer attached
-        timer.clearTimeout( this._a11yClickingTimeoutListener );
+        // press or release listeners may have interrupted this click, if that is the case immediately indicate that
+        // clicking interaction is over
+        if ( this.interrupted ) {
+          this.a11yClickingProperty.value = false;
+        }
+        else {
+          // if we are already clicking, remove the previous timeout - this assumes that clearTimeout is a noop if the
+          // listener is no longer attached
+          timer.clearTimeout( this._a11yClickingTimeoutListener );
 
-        // now add the timeout back to start over, saving so that it can be removed later
-        var self = this;
-        this._a11yClickingTimeoutListener = timer.setTimeout( function() {
-          self.a11yClickingProperty.value = false;
-        }, this._a11yLooksPressedInterval );
+          // now add the timeout back to start over, saving so that it can be removed later
+          var self = this;
+          this._a11yClickingTimeoutListener = timer.setTimeout( function() {
+            self.a11yClickingProperty.value = false;
+          }, this._a11yLooksPressedInterval );
+        }
       }
     },
 
