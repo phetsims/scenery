@@ -423,10 +423,10 @@ define( function( require ) {
       // handle a11y interrupt
       if ( this.a11yClickingProperty.value ) {
         this.interrupted = true;
-        this.a11yClickingProperty.value = false;
         
-        if ( this._a11yClickingTimeoutListener ) {
+        if ( timer.hasListener( this._a11yClickingTimeoutListener ) ) {
           timer.clearTimeout( this._a11yClickingTimeoutListener );
+          this.a11yClickingProperty.value = false;
         }
       }
       else if ( this.isPressed ) {
