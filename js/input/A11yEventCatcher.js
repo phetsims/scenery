@@ -7,6 +7,10 @@
  *
  * TODO: Should this just be in A11yPointer? Probably not, we want this check before events
  * reach the A11yEventCatcherPointer.
+ *
+ * NOTE: I considered creating the fake DOM event with Input.serializeDOMEvent() but would create circular dependency,
+ * and would have to look up target HTMLElement from data-trail-id, and would have to add more info to serialization.
+ * Easier to create our own mock event object.
  * 
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
@@ -14,7 +18,9 @@
 define( require => {
   'use strict';
 
+  // const Input = require( 'SCENERY/input/Input' );
   const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
+  const KeyboardEvent = require( 'SCENERY/input/KeyboardEvent' );
   const scenery = require( 'SCENERY/scenery' );
   const timer = require( 'AXON/timer' );
 
@@ -25,6 +31,8 @@ define( require => {
      */
     constructor( input ) {
 
+      this.input = input;
+
       // {HTMLElement} the target a native DOM keydown event
       this.keyDownTarget = null;
 
@@ -33,7 +41,7 @@ define( require => {
 
       // whether or not we are in the process of sending fake events through scenery in response to a click event
       // that did not receive 'keydown' or 'keyup' events.
-      this.fakeEvent = false;
+      this.emittingFakeEvents = false;
     }
 
     /**
@@ -49,12 +57,16 @@ define( require => {
         return;
       }
       else {
-        this.fakeEvent = true;
-        this.triggerDOMEvent( event.target, 'keydown', KeyboardUtil.KEY_ENTER );
+        this.emittingFakeEvents = true;
+        const fakeDownEvent = new KeyboardEvent( event.target, 'keydown', KeyboardUtil.KEY_ENTER );
+        this.input.keydownEmitter.emit( fakeDownEvent );
 
+        // much simpler if we can avoid this timeout altogether
         timer.setTimeout( () => {
-          this.triggerDOMEvent( event.target, 'keyup', KeyboardUtil.KEY_ENTER );
-          this.fakeEvent = false;
+          const fakeUpEvent = new KeyboardEvent( event.target, 'keyup', KeyboardUtil.KEY_ENTER );
+          this.input.keyupEmitter.emit( fakeUpEvent );
+
+          this.emittingFakeEvents = false;
         }, 100 );
       }
     }
@@ -66,7 +78,7 @@ define( require => {
      * @param {DOMEvent} event
      */
     handleKeyDown( event ) {
-      if ( KeyboardUtil.isActivationKey( event.keyCode ) && !this.fakeEvent ) {
+      if ( KeyboardUtil.isActivationKey( event.keyCode ) && !this.emittingFakeEvents ) {
         this.keyDownTarget = event.target;
       }
     }
@@ -78,7 +90,7 @@ define( require => {
      * @param {DOMEvent} event
      */
     handleKeyUp( event ) {
-      if ( KeyboardUtil.isActivationKey( event.keyCode ) && !this.fakeEvent ) {
+      if ( KeyboardUtil.isActivationKey( event.keyCode ) && !this.emittingFakeEvents ) {
         this.keyDownTarget = null;
         this.keyUpTarget = event.target;
       }

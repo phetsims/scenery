@@ -134,6 +134,7 @@ define( require => {
   const Features = require( 'SCENERY/util/Features' );
   const FullScreen = require( 'SCENERY/util/FullScreen' );
   const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
+  const KeyboardEvent = require( 'SCENERY/input/KeyboardEvent' );
   const Mouse = require( 'SCENERY/input/Mouse' );
   const NumberIO = require( 'TANDEM/types/NumberIO' );
   const Pen = require( 'SCENERY/input/Pen' );
@@ -754,7 +755,7 @@ define( require => {
           tandem: options.tandem.createTandem( 'keydownEmitter' ),
 
           // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-          argumentTypes: [ { valueType: window.Event } ],
+          argumentTypes: [ { isValidValue: function( value ) { return value instanceof window.Event || value instanceof KeyboardEvent; } } ],
           phetioType: EmitterIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
@@ -780,7 +781,7 @@ define( require => {
           tandem: options.tandem.createTandem( 'keyupEmitter' ),
 
           // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-          argumentTypes: [ { valueType: window.Event } ],
+          argumentTypes: [ { isValidValue: function( value ) { return value instanceof window.Event || value instanceof KeyboardEvent; } } ],
           phetioType: EmitterIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
