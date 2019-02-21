@@ -554,7 +554,7 @@ define( require => {
       // wire up accessibility listeners on the display's root accessible DOM element.
       if ( this.display._accessible ) {
 
-        var eventCatcher = new A11yEventCatcher();
+        var eventCatcher = new A11yEventCatcher( this );
 
         // In IE11, the focusin event can be sent twice since we often have to restore focus to event.relatedTarget
         // after calling focusout callbacks. So this flag is set to prevent focusin callbacks from firing twice

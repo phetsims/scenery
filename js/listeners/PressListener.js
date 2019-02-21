@@ -766,6 +766,7 @@ define( function( require ) {
       // no longer pressed, but don't set until unfocused so we don't call any listeners
       // (this is in the case where we tab away from a button while clicked down)
       if ( this.isPressedProperty.value ) {
+        this.a11yClickingProperty.value = false;
         this.isPressedProperty.value = false;
       }
     },

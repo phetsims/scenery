@@ -21,11 +21,18 @@ define( require => {
   class A11yEventCatcher {
 
     /**
-     * @param {Display} display
+     * @param {Input} input
      */
-    constructor( display ) {
+    constructor( input ) {
+
+      // {HTMLElement} the target a native DOM keydown event
       this.keyDownTarget = null;
+
+      // {HTMLElement} the target of a native DOM keyup event
       this.keyUpTarget = null;
+
+      // whether or not we are in the process of sending fake events through scenery in response to a click event
+      // that did not receive 'keydown' or 'keyup' events.
       this.fakeEvent = false;
     }
 
