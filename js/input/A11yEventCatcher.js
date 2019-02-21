@@ -42,6 +42,8 @@ define( require => {
       // whether or not we are in the process of sending fake events through scenery in response to a click event
       // that did not receive 'keydown' or 'keyup' events.
       this.emittingFakeEvents = false;
+
+      this.timerListener = null;
     }
 
     /**
@@ -57,12 +59,18 @@ define( require => {
         return;
       }
       else {
+        if ( this.emittingFakeEvents ) {
+          if ( timer.hasListener( this.timerListener ) ) {
+            timer.clearTimeout( this.timerListener );
+          }
+        }
+
         this.emittingFakeEvents = true;
         const fakeDownEvent = new KeyboardEvent( event.target, 'keydown', KeyboardUtil.KEY_ENTER );
         this.input.keydownEmitter.emit( fakeDownEvent );
 
         // much simpler if we can avoid this timeout altogether
-        timer.setTimeout( () => {
+        this.timerListener = timer.setTimeout( () => {
           const fakeUpEvent = new KeyboardEvent( event.target, 'keyup', KeyboardUtil.KEY_ENTER );
           this.input.keyupEmitter.emit( fakeUpEvent );
 
