@@ -56,10 +56,10 @@ define( function( require ) {
 
     // make sure that the focal point is in both circles. SVG doesn't support rendering outside of them
     if ( this.startRadius >= this.endRadius ) {
-      assert && assert( this.focalPoint.minus( this.start ).magnitude() <= this.startRadius );
+      assert && assert( this.focalPoint.minus( this.start ).magnitude <= this.startRadius );
     }
     else {
-      assert && assert( this.focalPoint.minus( this.end ).magnitude() <= this.endRadius );
+      assert && assert( this.focalPoint.minus( this.end ).magnitude <= this.endRadius );
     }
 
     Gradient.call( this );

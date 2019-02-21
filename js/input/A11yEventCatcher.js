@@ -26,7 +26,6 @@ define( require => {
     constructor( display ) {
       this.keyDownTarget = null;
       this.keyUpTarget = null;
-
       this.fakeEvent = false;
     }
 

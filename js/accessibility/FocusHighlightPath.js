@@ -273,7 +273,7 @@ define( function( require ) {
      * @returns {number}
      */
     getWidthMagnitudeFromTransform: function( node ) {
-      return node.transform.transformDelta2( Vector2.X_UNIT ).magnitude();
+      return node.transform.transformDelta2( Vector2.X_UNIT ).magnitude;
     },
 
     /**
