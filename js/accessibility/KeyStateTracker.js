@@ -16,11 +16,6 @@ define( require => {
   const scenery = require( 'SCENERY/scenery' );
   const timer = require( 'AXON/timer' );
 
-  // constants
-  // we accept that these keys can be released before a keydown event due to events browser receives when focus enters
-  // document
-  const UP_WHITELIST = [ KeyboardUtil.KEY_SHIFT, KeyboardUtil.KEY_TAB, KeyboardUtil.KEY_PRINT_SCREEN ];
-
   class KeyStateTracker {
     constructor() {
 
@@ -54,27 +49,7 @@ define( require => {
 
       // The dom event might have a modifier key that we weren't able to catch, if that is the case update the keystate.
       // This is likely to happen when pressing browser key commands like "ctrl + tab" to switch tabs.
-      if ( domEvent.shiftKey && !this.shiftKeyDown ) {
-        this.keyState[ KeyboardUtil.KEY_SHIFT ] = {
-          keyDown: true,
-          keyCode: domEvent.keyCode,
-          timeDown: 0 // in ms
-        };
-      }
-      if ( domEvent.altKey && !this.altKeyDown ) {
-        this.keyState[ KeyboardUtil.KEY_ALT ] = {
-          keyDown: true,
-          keyCode: domEvent.keyCode,
-          timeDown: 0 // in ms
-        };
-      }
-      if ( domEvent.ctrlKey && !this.ctrlKeyDown ) {
-        this.keyState[ KeyboardUtil.KEY_CTRL ] = {
-          keyDown: true,
-          keyCode: domEvent.keyCode,
-          timeDown: 0 // in ms
-        };
-      }
+      this.correctModifierKeys( domEvent );
 
       if ( assert && domEvent.keyCode !== KeyboardUtil.KEY_SHIFT ) {
         assert(  !!domEvent.shiftKey === !!this.shiftKeyDown, 'shift key inconsistency between event and keystate.' );
@@ -98,6 +73,50 @@ define( require => {
     }
 
     /**
+     * Modifier keys might be part of the domEvent but the browser may or may not have received a keydown/keyup event
+     * with specifically for the modifier key. This will add or remove modifier keys in that case.
+     * @private
+     * 
+     * @param  {DOMEvent} domEvent
+     */
+    correctModifierKeys( domEvent ) {
+
+      // add modifier keys if they aren't down
+      if ( domEvent.shiftKey && !this.shiftKeyDown ) {
+        this.keyState[ KeyboardUtil.KEY_SHIFT ] = {
+          keyDown: true,
+          keyCode: domEvent.keyCode,
+          timeDown: 0 // in ms
+        };
+      }
+      if ( domEvent.altKey && !this.altKeyDown ) {
+        this.keyState[ KeyboardUtil.KEY_ALT ] = {
+          keyDown: true,
+          keyCode: domEvent.keyCode,
+          timeDown: 0 // in ms
+        };
+      }
+      if ( domEvent.ctrlKey && !this.ctrlKeyDown ) {
+        this.keyState[ KeyboardUtil.KEY_CTRL ] = {
+          keyDown: true,
+          keyCode: domEvent.keyCode,
+          timeDown: 0 // in ms
+        };
+      }
+
+      // delete modifier keys if we think they are down
+      if ( !domEvent.shiftKey && this.shiftKeyDown ) {
+        delete this.keyState[ KeyboardUtil.KEY_SHIFT ];
+      }
+      if ( !domEvent.altKey && this.altKeyDown ) {
+        delete this.keyState[ KeyboardUtil.KEY_ALT ];
+      }
+      if ( !domEvent.ctrlKey && this.ctrlKeyDown ) {
+        delete this.keyState[ KeyboardUtil.KEY_CTRL ];
+      }
+    }
+
+    /**
      * Behavior for keyboard 'up' DOM event. Public so it can be attached with addInputListener()
      *
      * Note that this event is assigned in the constructor, and not to the prototype. As of writing this,
@@ -111,28 +130,15 @@ define( require => {
       const domEvent = event.domEvent;
       const keyCode = domEvent.keyCode;
 
+      // correct keystate in case browser didn't receive keydown/keyup events for a modifier key
+      this.correctModifierKeys( domEvent );
 
-      // first tab (or shift tab) into the document will not register a keydown event
-      // many browsers don't have keydown events for print screen, see https://github.com/phetsims/scenery/issues/918
-      if ( assert && !_.includes( UP_WHITELIST, keyCode ) ) {
-        assert( this.isKeyDown( keyCode ), 'key should be down before it is removed from keystate' );
+      // Remove this key data from the state - There are many cases where we might receive a keyup before keydown like
+      // on first tab into scenery Display or when using specific operating system keys with the browser or PrtScn so
+      // an assertion for this is too strict. See https://github.com/phetsims/scenery/issues/918
+      if ( this.isKeyDown( keyCode ) ) {
+        delete this.keyState[ keyCode ];
       }
-
-      // We might have missed release of a modifier key, if that is the case update the keystate.
-      // This is likely to happen when pressing browser key commands like "ctrl + tab" to switch tabs, in this case
-      // the browser never receives keyup events from modifier keys.
-      if ( !domEvent.shiftKey && this.shiftKeyDown ) {
-        delete this.keyState[ KeyboardUtil.KEY_SHIFT ];
-      }
-      if ( !domEvent.altKey && this.altKeyDown ) {
-        delete this.keyState[ KeyboardUtil.KEY_ALT ];
-      }
-      if ( !domEvent.ctrlKey && this.ctrlKeyDown ) {
-        delete this.keyState[ KeyboardUtil.KEY_CTRL ];
-      }
-
-      // remove this key data from the state
-      delete this.keyState[ keyCode ];
     }
 
     /**
