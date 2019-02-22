@@ -4006,8 +4006,9 @@ define( function( require ) {
      */
     // @public (API compatibility for now): Render this node to the Canvas (clearing it first)
     renderToCanvas: function( canvas, context, callback, backgroundColor ) {
+
       // should basically reset everything (and clear the Canvas)
-      canvas.width = canvas.width;
+      canvas.width = canvas.width; // eslint-disable-line no-self-assign
 
       if ( backgroundColor ) {
         context.fillStyle = backgroundColor;

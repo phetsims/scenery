@@ -133,7 +133,7 @@ define( function( require ) {
   // see https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#Improving_scrolling_performance_with_passive_listeners
   Features.passive = false;
   window.addEventListener( 'test', null, Object.defineProperty( {}, 'passive', {
-    get: function() {
+    get: function() { // eslint-disable-line getter-return
       Features.passive = true;
     }
   } ) );
