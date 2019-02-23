@@ -37,10 +37,8 @@ define( require => {
      * Note this is a DOM event, not a scenery.Event
      * @override
      * @public
-     * @param {*} instance
-     * @returns {boolean}
      */
-    isInstance: function( instance ) { return instance instanceof window.Event; },
+    validator: { valueType: window.Event },
 
     /**
      * Encodes a DOMEvent instance to a state.

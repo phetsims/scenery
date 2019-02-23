@@ -19,11 +19,11 @@ define( function( require ) {
   var DerivedProperty = require( 'AXON/DerivedProperty' );
   var Emitter = require( 'AXON/Emitter' );
   var EmitterIO = require( 'AXON/EmitterIO' );
-  var Event = require( 'SCENERY/input/Event' );
   var EventIO = require( 'SCENERY/input/EventIO' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Mouse = require( 'SCENERY/input/Mouse' );
   var Node = require( 'SCENERY/nodes/Node' );
+  var NullableIO = require( 'TANDEM/types/NullableIO' );
   var ObservableArray = require( 'AXON/ObservableArray' );
   var PhetioObject = require( 'TANDEM/PhetioObject' );
   var scenery = require( 'SCENERY/scenery' );
@@ -37,11 +37,26 @@ define( function( require ) {
   // constants - factored out to reduce memory usage, see https://github.com/phetsims/unit-rates/issues/207
   var PressedEmitterIO = EmitterIO( [
     { name: 'event', type: EventIO },
-    { name: 'targetNode', type: VoidIO },
-    { name: 'callback', type: VoidIO }
+    {
+      name: 'targetNode',
+      type: VoidIO,
+      validator: { isValidValue: function( v ) { return v === null || v instanceof Node; } }
+    },
+    {
+      name: 'callback',
+      type: VoidIO,
+      validator: { isValidValue: function( v ) { return v === null || typeof v === 'function'; } }
+    }
   ] );
 
-  var ReleasedEmitterIO = EmitterIO( [ { name: 'callback', type: VoidIO } ] );
+  var ReleasedEmitterIO = EmitterIO( [ {
+    name: 'event',
+    type: NullableIO( EventIO )
+  }, {
+    name: 'callback',
+    type: VoidIO,
+    validator: { isValidValue: function( v ) { return v === null || typeof v === 'function'; } }
+  } ] );
 
   // Factor out to reduce memory footprint, see https://github.com/phetsims/tandem/issues/71
   const truePredicate = _.constant( true );
@@ -225,13 +240,6 @@ define( function( require ) {
       phetioReadOnly: options.phetioReadOnly,
       phetioFeatured: options.phetioFeatured,
       phetioEventType: PhetioObject.EventType.USER,
-
-      // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-      validators: [
-        { valueType: Event },
-        { isValidValue: function( v ) { return v === null || v instanceof Node; } },
-        { isValidValue: function( v ) { return v === null || typeof v === 'function'; } }
-      ],
       phetioType: PressedEmitterIO,
 
       // The main implementation of "press" handling is implemented as a callback to the emitter, so things are nested
@@ -247,11 +255,6 @@ define( function( require ) {
       phetioFeatured: options.phetioFeatured,
       phetioEventType: PhetioObject.EventType.USER,
 
-      // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-      validators: [
-        { isValidValue: v => v instanceof Event || v === null },
-        { isValidValue: function( v ) { return v === null || typeof v === 'function'; } }
-      ],
       phetioType: ReleasedEmitterIO,
 
       // The main implementation of "release" handling is implemented as a callback to the emitter, so things are nested
@@ -423,7 +426,7 @@ define( function( require ) {
       // handle a11y interrupt
       if ( this.a11yClickingProperty.value ) {
         this.interrupted = true;
-        
+
         if ( timer.hasListener( this._a11yClickingTimeoutListener ) ) {
           timer.clearTimeout( this._a11yClickingTimeoutListener );
           this.a11yClickingProperty.value = false;
