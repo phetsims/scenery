@@ -96,7 +96,7 @@ define( function( require ) {
       tandem: options.tandem.createTandem( 'dragStartedEmitter' ),
 
       // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-      argumentTypes: [ { valueType: Vector2 }, { isValidValue: function( value ) { return value === null || value instanceof Event; } } ],
+      validators: [ { valueType: Vector2 }, { isValidValue: function( value ) { return value === null || value instanceof Event; } } ],
       phetioType: EmitterIO(
         [ { name: 'point', type: Vector2IO, documentation: 'the position of the drag start in view coordinates' },
           { name: 'event', type: VoidIO, documentation: 'the scenery pointer Event' } ] ),
@@ -137,7 +137,7 @@ define( function( require ) {
       tandem: options.tandem.createTandem( 'draggedEmitter' ),
 
       // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-      argumentTypes: [
+      validators: [
         { valueType: Vector2 },
         { isValidValue: function( value ) { return value === null || value instanceof Event; } }
       ],
@@ -193,7 +193,7 @@ define( function( require ) {
       tandem: options.tandem.createTandem( 'dragEndedEmitter' ),
 
       // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-      argumentTypes: [
+      validators: [
         { valueType: Vector2 },
         {
           isValidValue: function( value ) {

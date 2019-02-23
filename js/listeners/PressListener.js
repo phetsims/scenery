@@ -227,7 +227,7 @@ define( function( require ) {
       phetioEventType: PhetioObject.EventType.USER,
 
       // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-      argumentTypes: [
+      validators: [
         { valueType: Event },
         { isValidValue: function( v ) { return v === null || v instanceof Node; } },
         { isValidValue: function( v ) { return v === null || typeof v === 'function'; } }
@@ -248,7 +248,7 @@ define( function( require ) {
       phetioEventType: PhetioObject.EventType.USER,
 
       // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-      argumentTypes: [
+      validators: [
         { isValidValue: v => v instanceof Event || v === null },
         { isValidValue: function( v ) { return v === null || typeof v === 'function'; } }
       ],

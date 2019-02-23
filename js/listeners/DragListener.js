@@ -193,7 +193,7 @@ define( function( require ) {
       phetioReadOnly: options.phetioReadOnly,
       phetioEventType: PhetioObject.EventType.USER,
 
-      argumentTypes: [ { valueType: Event } ],
+      validators: [ { valueType: Event } ],
       phetioType: DraggedEmitterIO,
       first: function( event ) {
 
