@@ -1392,8 +1392,6 @@ define( function( require ) {
             }
 
             this.trigger( 'focusHighlightChanged' );
-            //TODO https://github.com/phetsims/scenery/issues/930 address REVIEW comments
-            // REVIEW: Should it call onAccessibleContentChange()
           }
         },
         set focusHighlight( focusHighlight ) { this.setFocusHighlight( focusHighlight ); },
