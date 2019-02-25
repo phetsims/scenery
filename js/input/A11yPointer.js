@@ -55,7 +55,8 @@ define( require => {
           }
         },
         blur: ( event ) => {
-          const targetInDisplay = this.display.accessibleDOMElement.contains( event.domEvent.relatedTarget );
+          const relatedTarget = event.domEvent.relatedTarget;
+          const targetInDisplay = this.display.accessibleDOMElement.contains( relatedTarget );
 
           // In IE11 and safari there are cases where the browser doesn't trigger a focusin event on document.activeElement
           // so as a workaround we set the scenery.Display.focus directly to the related target of the focusout event,
@@ -66,7 +67,7 @@ define( require => {
           // TODO: is found in https://github.com/phetsims/scenery/issues/925. Also see
           // TODO: https://github.com/phetsims/friction/issues/168 for the original issue.
           if ( ( platform.ie11 || platform.safari ) && targetInDisplay ) {
-            const newTrail = Trail.fromUniqueId( this.display.rootNode, document.activeElement.getAttribute( 'data-trail-id' ) );
+            const newTrail = Trail.fromUniqueId( this.display.rootNode, relatedTarget.getAttribute( 'data-trail-id' ) );
             scenery.Display.focus = new Focus( this.display, AccessibleInstance.guessVisualTrail( newTrail, this.display.rootNode ) );
           }
           else {
