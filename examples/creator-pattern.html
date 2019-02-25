@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1"/>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <title>Creator Pattern - Example</title>
+
+  <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
+  <script src="../../aqua/js/pageload-connector.js"></script>
+
+  <!-- jQuery and LoDash are dependencies -->
+  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
+
+  <!-- Scenery code -->
+  <script src="../build/scenery.min.js"></script>
+
+  <style type="text/css">
+    /* Let content go to the edges */
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: #fff;
+      overflow: hidden;
+    }
+
+    /* Have the #main div cover the entire viewport */
+    #main {
+      position: absolute;
+      left: 0;
+      top: 0;
+      background-color: #fff;
+      z-index: 0;
+    }
+
+  </style>
+</head>
+<body>
+
+<div id="main"></div>
+
+<script>
+
+  window.assertions.enableAssert();
+
+  // modules
+  const Node = scenery.Node;
+  const Display = scenery.Display;
+  const Rectangle = scenery.Rectangle;
+  const Circle = scenery.Circle;
+  const DragListener = scenery.DragListener;
+  const ObservableArray = axon.ObservableArray;
+
+  // Set up the display
+  const view = new Node();
+  const display = new Display( view, { container: document.getElementById( 'main' ) } );
+  display.initializeEvents();
+  display.resizeOnWindowResize();
+  display.updateOnRequestAnimationFrame();
+
+  const icon = new Rectangle( 0, 0, 100, 100, { fill: 'blue' } );
+  view.addChild( icon );
+
+  const modelElements = new ObservableArray();
+
+  class ModelElement {}
+
+  icon.addInputListener( new DragListener( {
+    start: event => modelElements.push( new ModelElement() )
+  } ) );
+
+  class ModelElementNode extends Circle {
+    constructor( modelElement ) {
+      super( 50, { fill: 'red' } );
+      this.addInputListener( new DragListener( {
+        translateNode: true
+      } ) );
+    }
+  }
+
+  // VIEW
+  modelElements.addItemAddedListener( modelElement => view.addChild( new ModelElementNode( modelElement ) ) );
+
+</script>
+
+</body>
+</html>
