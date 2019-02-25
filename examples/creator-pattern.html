@@ -63,8 +63,8 @@
   display.resizeOnWindowResize();
   display.updateOnRequestAnimationFrame();
 
-  const icon = new Rectangle( 100, 100, 300, 300, { fill: 'gray', stroke: 'black' } );
-  view.addChild( icon );
+  const toolbox = new Rectangle( 100, 100, 300, 300, { fill: 'gray', stroke: 'black' } );
+  view.addChild( toolbox );
 
   // MODEL
   const modelElements = new ObservableArray();
@@ -72,7 +72,7 @@
   class ModelElement {}
 
   // When the icon is dragged, create a new model element, look up the view and forward the drag events.¬
-  icon.addInputListener( DragListener.createForwardingListener( event => {
+  toolbox.addInputListener( DragListener.createForwardingListener( event => {
     const modelElement = new ModelElement();
     modelElements.push( modelElement );
     const modelElementNode = view.children.find( child => child.modelElement === modelElement );
@@ -89,7 +89,14 @@
 
       // @public (read-only) - so we can forward the drag events from the toolbox.
       this.dragListener = new DragListener( {
-        translateNode: true
+        translateNode: true,
+
+        // Dispose if dropped back in the toolbox.
+        end: event => {
+          if ( toolbox.bounds.containsPoint( this.center ) ) {
+            modelElements.remove( modelElement )
+          }
+        }
       } );
       this.addInputListener( this.dragListener );
     }
@@ -97,6 +104,7 @@
 
   // VIEW
   modelElements.addItemAddedListener( modelElement => view.addChild( new ModelElementNode( modelElement ) ) );
+  modelElements.addItemRemovedListener( modelElement => view.removeChild( view.children.find( child => child.modelElement === modelElement ) ) );
 </script>
 
 </body>
