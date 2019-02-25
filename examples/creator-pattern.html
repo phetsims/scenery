@@ -67,14 +67,18 @@
   view.addChild( toolbox );
 
   // MODEL
-  const modelElements = new ObservableArray();
-
   class ModelElement {}
+
+  const model = {
+    modelElements: new ObservableArray() // Contains ModelElement instances
+  };
+
+  // VIEW
 
   // When the icon is dragged, create a new model element, look up the view and forward the drag events.¬
   toolbox.addInputListener( DragListener.createForwardingListener( event => {
     const modelElement = new ModelElement();
-    modelElements.push( modelElement );
+    model.modelElements.push( modelElement );
     const modelElementNode = view.children.find( child => child.modelElement === modelElement );
     modelElementNode.center = event.pointer.point;
     modelElementNode.dragListener.press( event, modelElementNode );
@@ -94,7 +98,7 @@
         // Dispose if dropped back in the toolbox.
         end: event => {
           if ( toolbox.bounds.containsPoint( this.center ) ) {
-            modelElements.remove( modelElement )
+            model.modelElements.remove( modelElement )
           }
         }
       } );
@@ -103,8 +107,8 @@
   }
 
   // VIEW
-  modelElements.addItemAddedListener( modelElement => view.addChild( new ModelElementNode( modelElement ) ) );
-  modelElements.addItemRemovedListener( modelElement => view.removeChild( view.children.find( child => child.modelElement === modelElement ) ) );
+  model.modelElements.addItemAddedListener( modelElement => view.addChild( new ModelElementNode( modelElement ) ) );
+  model.modelElements.addItemRemovedListener( modelElement => view.removeChild( view.children.find( child => child.modelElement === modelElement ) ) );
 </script>
 
 </body>
