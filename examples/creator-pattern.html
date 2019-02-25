@@ -63,29 +63,40 @@
   display.resizeOnWindowResize();
   display.updateOnRequestAnimationFrame();
 
-  const icon = new Rectangle( 0, 0, 100, 100, { fill: 'blue' } );
+  const icon = new Rectangle( 100, 100, 300, 300, { fill: 'gray', stroke: 'black' } );
   view.addChild( icon );
 
+  // MODEL
   const modelElements = new ObservableArray();
 
   class ModelElement {}
 
-  icon.addInputListener( new DragListener( {
-    start: event => modelElements.push( new ModelElement() )
+  // When the icon is dragged, create a new model element, look up the view and forward the drag events.¬
+  icon.addInputListener( DragListener.createForwardingListener( event => {
+    const modelElement = new ModelElement();
+    modelElements.push( modelElement );
+    const modelElementNode = view.children.find( child => child.modelElement === modelElement );
+    modelElementNode.center = event.pointer.point;
+    modelElementNode.dragListener.press( event, modelElementNode );
   } ) );
 
   class ModelElementNode extends Circle {
     constructor( modelElement ) {
       super( 50, { fill: 'red' } );
-      this.addInputListener( new DragListener( {
+
+      // @public (read-only) - so we can look up the view from a model
+      this.modelElement = modelElement;
+
+      // @public (read-only) - so we can forward the drag events from the toolbox.
+      this.dragListener = new DragListener( {
         translateNode: true
-      } ) );
+      } );
+      this.addInputListener( this.dragListener );
     }
   }
 
   // VIEW
   modelElements.addItemAddedListener( modelElement => view.addChild( new ModelElementNode( modelElement ) ) );
-
 </script>
 
 </body>
