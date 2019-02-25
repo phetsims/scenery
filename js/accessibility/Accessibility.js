@@ -689,20 +689,6 @@ define( function( require ) {
         setAccessibleHeadingBehavior: function( accessibleHeadingBehavior ) {
           assert && A11yBehaviorFunctionDef.validateA11yBehaviorFunctionDef( accessibleHeadingBehavior );
 
-          //TODO https://github.com/phetsims/scenery/issues/930 address REVIEW comments
-          // REVIEW: Note that this doesn't seem to trigger updating the heading levels of siblings correctly:
-          // REVIEW: For example, do the following:
-          // REVIEW:   var a = new scenery.Node();
-          // REVIEW:   var b = new scenery.Node();
-          // REVIEW:   scene.addChild( a );
-          // REVIEW:   a.addChild( b );
-          // REVIEW:   b.accessibleHeading = 'B';
-          // REVIEW:   b.tagName = 'p';
-          // REVIEW:   a.accessibleHeading = 'A';
-          // REVIEW:   a.tagName = 'p';
-          // REVIEW: You will end up with two nested H1s. Presumably this should cascade properly and update the child
-          // REVIEW: to a H2 in this case.
-
           if ( this._accessibleHeadingBehavior !== accessibleHeadingBehavior ) {
 
             this._accessibleHeadingBehavior = accessibleHeadingBehavior;
@@ -748,9 +734,6 @@ define( function( require ) {
          * @returns {number}
          */
         computeHeadingLevel: function() {
-          //TODO https://github.com/phetsims/scenery/issues/930 address REVIEW comments
-          // REVIEW: I'd recommend looking at how node handles this with things. Usually it has an invalidate pattern
-          // REVIEW: but in this case, it may be easier to just update the entire subtree whenever an ancestor changes.
 
           // TODO: assert??? assert( this.headingLevel || this._accessibleParent); see https://github.com/phetsims/scenery/issues/855
           // Either ^ which may break during construction, or V (below)
@@ -1129,20 +1112,6 @@ define( function( require ) {
         setLabelContent: function( label ) {
           assert && assert( label === null || typeof label === 'string', 'label must be null or string' );
 
-          //TODO https://github.com/phetsims/scenery/issues/930 address REVIEW comments
-          // REVIEW: It's also concerning that setting this ends up changing another field (especially when it's set to
-          // REVIEW: the same value!). Can't we handle some of this in the with an accessible*Behavior pattern?
-          // REVIEW: It seems setting and unsetting the labelContent (from null to something to null) makes permanent
-          // REVIEW: changes to the labelTagName, which is weird.
-          // REVIEW: Can we just have a behavior that does this instead?
-          // ZEPUMPH: perhaps worked on as part of https://github.com/phetsims/scenery/issues/867
-
-          // REVIEW: Also this is really weird:
-          // REVIEW:   var n = new scenery.Node();
-          // REVIEW:   n.labelTagName; // null
-          // REVIEW:   n.labelContent = n.labelContent;
-          // REVIEW:   n.labelTagName; // "P" !!!
-
           if ( this._labelContent !== label ) {
             this._labelContent = label;
 
@@ -1216,10 +1185,6 @@ define( function( require ) {
 
           if ( this._descriptionContent !== descriptionContent ) {
             this._descriptionContent = descriptionContent;
-
-            //TODO https://github.com/phetsims/scenery/issues/930 address REVIEW comments
-            // REVIEW: See notes in setLabelContent. Setting the descriptionTagName feels wrong,
-            // REVIEW: where a behavior would be better.
 
             // if there is no description element, assume that a paragraph element should be used
             if ( !this._descriptionTagName ) {

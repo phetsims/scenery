@@ -173,38 +173,6 @@ define( function( require ) {
 
       var options = this.node.getBaseOptions();
 
-      // REVIEW: Since this includes rewriting of options, does the long-term order matter? I could imagine writing code.
-      // REVIEW:
-      // REVIEW: Ahh yup, found one where it creates buggy behavior with defaults. heading/accessibleName both mess with
-      // REVIEW: labelTagName/labelContent.
-      // REVIEW: In the scenery playground:
-      // REVIEW:   var n = new scenery.Node();
-      // REVIEW:   n.accessibleName = 'aname';
-      // REVIEW:   n.tagName = 'input';
-      // REVIEW:   scene.addChild( n );
-      // REVIEW:   n.accessibleHeading = 'header';
-      // REVIEW: The accessible name (executed here first) then gets overwritten with the header. I'm also not quite sure
-      // REVIEW: why, but the tag is 'hnull', e.g.:
-      // REVIEW:   <div class="accessibility">
-      // REVIEW:     <hnull tabindex="-1" id="label-2-11">header</hnull>
-      // REVIEW:     <input tabindex="0" id="2-11" style="width: 1px; height: 1px;">
-      // REVIEW:   </div>
-      // REVIEW: Ideally the order is "what is best", and hopefully the defaults (with normal usage) would not run into
-      // REVIEW: this. But think about what may happen in the future (all settings), and about all the potential ways
-      // REVIEW: we would want to overwrite behaviors.
-      //ZEPUMPH: These were developed as two fully separate apis, not ever to be used together in their default form.
-      //ZEPUMPH: I'm not sure how best to document that though. From a use case perspective, you either have a heading,
-      //ZEPUMPH: Or an accessibleName.
-
-      //ZEPUMPH: This is something JG and I have discussed quite a bit. On one hand these options are all so complicated
-      //ZEPUMPH: and hard to fully understand everything (lower level api), on the other, when we try to create higher level
-      //ZEPUMPH: abstractions, there will be conflicts with each other.
-      // REVIEW:
-      // REVIEW: As a generalization, how would we handle "arbitrary" behaviors that don't depend on one parameter?
-      // REVIEW: What if there was a "pipeline" of behaviors that the client could insert general things into?
-      // REVIEW: It's probably overkill and just brainstorming but if you have this._behaviors = [ b1, b2, b3 ],
-      // REVIEW: then options = b3( node, b2( node, b1( node, options ) ) )?
-      //ZEPUMPH: Intereseting! Let's talk about this on Friday
       if ( this.node.accessibleName !== null ) {
         options = this.node.accessibleNameBehavior( this.node, options, this.node.accessibleName );
       }
@@ -219,10 +187,6 @@ define( function( require ) {
 
 
       // create the base DOM element representing this accessible instance
-      //REVIEW: Do we want to check options.focusable instead? Should no accessibleNameBehavior/helpTextBehavior be
-      //REVIEW: able to modify whether something is focusable?
-      //ZEPUMPH: I think we need to have a larger discussion about what behavior functions' role should be, I totally
-      //ZEPUMPH: understand your thought here.
       // TODO: why not just options.focusable?
       this._primarySibling = AccessibilityUtil.createElement( options.tagName, this.node.focusable, {
         namespace: options.accessibleNamespace
@@ -275,8 +239,6 @@ define( function( require ) {
 
       // if element is an input element, set input type
       if ( options.tagName.toUpperCase() === INPUT_TAG && options.inputType ) {
-        // REVIEW: This looks like something that should be a behavior?
-        //ZEPUMPH: TODO: Let's talk about this more as part of https://github.com/phetsims/scenery/issues/867
         this.setAttributeToElement( 'type', options.inputType );
       }
 
@@ -288,14 +250,6 @@ define( function( require ) {
       this.onActiveDescendantAssociationChange();
 
       // update all attributes for the peer, should cover aria-label, role, and others
-      // REVIEW: Maybe it's unlikely, but I can TOTALLY see our behaviors above wanting to adjust arbitrary attributes.
-      // REVIEW: Since this ONLY inspects things directly on the node (not the overridden a11y options above), this is
-      // REVIEW: not possible. Is that something to consider?
-      // REVIEW: Upon further review, this totally seems like the case (since it's already being kinda done for aria-label).
-      // REVIEW: Can the accessible attributes be included with the "options" object, and can behaviors adjust them as
-      // REVIEW: they see fit?
-      //ZEPUMPH: TODO: Let's talk about this more as part of https://github.com/phetsims/scenery/issues/867
-
       this.onAttributeChange( options );
 
       // update input value attribute for the peer
@@ -309,8 +263,6 @@ define( function( require ) {
     /**
      * Handle the internal ordering of the elements in the peer, this involves setting the proper value of
      * this.topLevelElements
-     * REVIEW: Maybe change the parameter name a bit? I can see someone saying "but options should be optional" and
-     * REVIEW: the object isn't optional here. Or actually make it optional.
      * @param {Object} options - the computed mixin options to be applied to the peer.
      * @private
      */
@@ -445,12 +397,6 @@ define( function( require ) {
         var value = dataObject.value;
 
         // allow overriding of aria-label for accessibleName setter
-        // TODO: this is a specific workaround, it would be nice to sort out a general case for this, https://github.com/phetsims/scenery/issues/832#issuecomment-423770701
-        // REVIEW: See note in update() above, handling the general case of this seems nice. We're likely to run into
-        // REVIEW: other cases in the future.
-        // REVIEW: ALSO we run into weird cases right now of "did you update the aria-label attribute or something that
-        // REVIEW: ran update() last?" -- the attribute could potentially change unpredictably.
-
         if ( attribute === 'aria-label' && a11yOptions && typeof a11yOptions.ariaLabel === 'string' && dataObject.options.elementName === PRIMARY_SIBLING ) {
           value = a11yOptions.ariaLabel;
         }
@@ -805,8 +751,6 @@ define( function( require ) {
       AccessibilityUtil.setTextContent( this._labelSibling, content );
 
       // if the label element happens to be a 'label', associate with 'for' attribute
-      // REVIEW: Should we check _labelTagName directly? Or use a behavior-like strategy for this?
-      // ZEPUMPH: perhaps implemented with https://github.com/phetsims/scenery/issues/867
       if ( this._labelSibling.tagName.toUpperCase() === LABEL_TAG ) {
         this.setAttributeToElement( 'for', this._primarySibling.id, {
           elementName: AccessiblePeer.LABEL_SIBLING
@@ -863,7 +807,7 @@ define( function( require ) {
         // mark all ancestors of this peer so that we can quickly find this dirty peer when we traverse
         // the AccessibleInstance tree
         var parent = this.accessibleInstance.parent;
-        while( parent ) {
+        while ( parent ) {
           parent.peer.childPositionDirty = true;
           parent = parent.parent;
         }
@@ -949,7 +893,7 @@ define( function( require ) {
     /**
      * Update positioning of elements in the PDOM. Does a depth first search for all descendants of parentIntsance with
      * a peer that either has dirty positioning or as a descendant with dirty positioning.
-     * 
+     *
      * @public (scenery-internal)
      */
     updateSubtreePositioning: function() {
@@ -1014,11 +958,11 @@ define( function( require ) {
   //--------------------------------------------------------------------------
   // Helper functions
   //--------------------------------------------------------------------------
-  
+
   /**
    * Get a matrix that can be used as the CSS transform for elements in the DOM. This matrix will an HTML element
    * dimensions in pixels to the global coordinate frame.
-   * 
+   *
    * @param  {HTMLElement} element - the element to receive the CSS transform
    * @param  {number} clientWidth - width of the element to transform in pixels
    * @param  {number} clientHeight - height of the element to transform in pixels
@@ -1044,7 +988,7 @@ define( function( require ) {
    * Gets an object with the width and height of an HTML element in pixels, prior to any scaling. clientWidth and
    * clientHeight are zero for elements with inline layout and elements without CSS. For those elements we fall back
    * to the boundingClientRect, which at that point will describe the dimensions of the element prior to scaling.
-   * 
+   *
    * @param  {HTMLElement} siblingElement
    * @returns {Object} - Returns an object with two entries, { width: {number}, height: {number} }
    */
@@ -1065,7 +1009,7 @@ define( function( require ) {
    * Set the bounds of the sibling element in the view port in pixels, using top, left, width, and height css.
    * The element must be styled with 'position: fixed', and an ancestor must have position: 'relative', so that
    * the dimensions of the sibling are relative to the parent.
-   * 
+   *
    * @param {HTMLElement} siblingElement - the element to position
    * @param {Bounds2} bounds - desired bounds, in pixels
    */
