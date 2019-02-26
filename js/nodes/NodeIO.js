@@ -20,9 +20,6 @@ define( function( require ) {
   var Range = require( 'DOT/Range' );
   var scenery = require( 'SCENERY/scenery' );
 
-  // ifphetio
-  var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
-
   /**
    * IO type for phet/scenery's Node
    * @param {Node} node
@@ -30,7 +27,6 @@ define( function( require ) {
    * @constructor
    */
   function NodeIO( node, phetioID ) {
-    assert && assertInstanceOf( node, scenery.Node );
     ObjectIO.call( this, node, phetioID );
 
     // TODO: This is in-progress work to convert object properties to Axon Properties, see https://github.com/phetsims/phet-io/issues/1326
@@ -119,6 +115,8 @@ define( function( require ) {
     fromStateObject: function( o ) {
       return o; // Pass through values defined by subclasses
     },
+
+    validator: { valueType: scenery.Node },
 
     documentation: 'The base type for graphical and potentially interactive objects.  NodeIO has nested PropertyIO values ' +
                    'for visibility, pickability and opacity.' +

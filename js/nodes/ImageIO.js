@@ -16,16 +16,12 @@ define( function( require ) {
   var StringIO = require( 'TANDEM/types/StringIO' );
   var VoidIO = require( 'TANDEM/types/VoidIO' );
 
-  // ifphetio
-  var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
-
   /**
    * @param {Image} image
    * @param {string} phetioID
    * @constructor
    */
   function ImageIO( image, phetioID ) {
-    assert && assertInstanceOf( image, Image );
     NodeIO.call( this, image, phetioID );
   }
 
@@ -44,7 +40,8 @@ define( function( require ) {
     }
   }, {
     documentation: 'The tandem IO type for the scenery Text node',
-    events: [ 'changed' ]
+    events: [ 'changed' ],
+    validator: { valueType: Image }
   } );
 
   scenery.register( 'ImageIO', ImageIO );

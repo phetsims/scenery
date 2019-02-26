@@ -14,22 +14,19 @@ define( function( require ) {
   var phetioInherit = require( 'TANDEM/phetioInherit' );
   var scenery = require( 'SCENERY/scenery' );
 
-  // ifphetio
-  var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
-
   /**
    * @param {ButtonListener} buttonListener
    * @param {string} phetioID
    * @constructor
    */
   function ButtonListenerIO( buttonListener, phetioID ) {
-    assert && assertInstanceOf( buttonListener, scenery.ButtonListener );
     ObjectIO.call( this, buttonListener, phetioID );
   }
 
   phetioInherit( ObjectIO, 'ButtonListenerIO', ButtonListenerIO, {}, {
     documentation: 'Button listener',
-    events: [ 'up', 'over', 'down', 'out', 'fire' ]
+    events: [ 'up', 'over', 'down', 'out', 'fire' ],
+    validator: { valueType: scenery.ButtonListener }
   } );
 
   scenery.register( 'ButtonListenerIO', ButtonListenerIO );

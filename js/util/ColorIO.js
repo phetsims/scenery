@@ -14,9 +14,7 @@ define( function( require ) {
   var ObjectIO = require( 'TANDEM/types/ObjectIO' );
   var phetioInherit = require( 'TANDEM/phetioInherit' );
   var scenery = require( 'SCENERY/scenery' );
-
-  // ifphetio
-  var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
+  var validate = require( 'AXON/validate' );
 
   /**
    * IO type for phet/scenery's Color class.
@@ -25,12 +23,12 @@ define( function( require ) {
    * @constructor
    */
   function ColorIO( color, phetioID ) {
-    assert && assertInstanceOf( color, Color );
     ObjectIO.call( this, color, phetioID );
   }
 
   phetioInherit( ObjectIO, 'ColorIO', ColorIO, {}, {
     documentation: 'A color, with rgba',
+    validator: { valueType: Color },
 
     /**
      * Encodes a Color into a state object.
@@ -39,7 +37,7 @@ define( function( require ) {
      * @override
      */
     toStateObject: function( color ) {
-      assert && assertInstanceOf( color, Color );
+      validate( color, this.validator );
       return color.toStateObject();
     },
 

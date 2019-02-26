@@ -20,16 +20,12 @@ define( function( require ) {
   var StringIO = require( 'TANDEM/types/StringIO' );
   var VoidIO = require( 'TANDEM/types/VoidIO' );
 
-  // ifphetio
-  var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
-
   /**
    * @param {Text} text
    * @param {string} phetioID
    * @constructor
    */
   function TextIO( text, phetioID ) {
-    assert && assertInstanceOf( text, scenery.Text );
     NodeIO.call( this, text, phetioID );
 
     // this uses a sub Property adapter as described in https://github.com/phetsims/phet-io/issues/1326
@@ -101,7 +97,8 @@ define( function( require ) {
     }
   }, {
     documentation: 'Text that is displayed in the simulation. TextIO has a nested PropertyIO.&lt;String&gt; for ' +
-                   'the current string value.'
+                   'the current string value.',
+    validator: { valueType: scenery.Text }
   } );
 
   scenery.register( 'TextIO', TextIO );

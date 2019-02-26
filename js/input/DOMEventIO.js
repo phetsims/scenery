@@ -14,9 +14,7 @@ define( require => {
   const ObjectIO = require( 'TANDEM/types/ObjectIO' );
   const phetioInherit = require( 'TANDEM/phetioInherit' );
   const scenery = require( 'SCENERY/scenery' );
-
-  // ifphetio
-  const assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
+  const validate = require( 'AXON/validate' );
 
   /**
    * IO type for phet/sun's DOMEvent class.
@@ -25,7 +23,6 @@ define( require => {
    * @constructor
    */
   function DOMEventIO( domEvent, phetioID ) {
-    assert && assertInstanceOf( domEvent, Event ); // Event is the browser DOM event type, not the scenery one.
     ObjectIO.call( this, domEvent, phetioID );
   }
 
@@ -47,6 +44,7 @@ define( require => {
      * @override
      */
     toStateObject( domEvent ) {
+      validate( domEvent, this.validator );
       return scenery.Input.serializeDomEvent( domEvent );
     },
 

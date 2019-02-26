@@ -12,9 +12,7 @@ define( function( require ) {
   var ObjectIO = require( 'TANDEM/types/ObjectIO' );
   var phetioInherit = require( 'TANDEM/phetioInherit' );
   var scenery = require( 'SCENERY/scenery' );
-
-  // ifphetio
-  var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
+  var validate = require( 'AXON/validate' );
 
   /**
    * @constructor
@@ -23,11 +21,12 @@ define( function( require ) {
    * @param {string} phetioID - Full name of this font instance
    */
   function FontIO( font, phetioID ) {
-    assert && assertInstanceOf( font, scenery.Font );
     ObjectIO.call( this, font, phetioID );
   }
 
   phetioInherit( ObjectIO, 'FontIO', FontIO, {}, {
+
+    validator: { valueType: scenery.Font },
 
     // Info from Font.js
     documentation: 'Font handling for text drawing. Options:' +
@@ -50,7 +49,7 @@ define( function( require ) {
      * @override
      */
     toStateObject: function( font ) {
-      assert && assertInstanceOf( font, scenery.Font );
+      validate( font, this.validator );
       return {
         style: font.getStyle(),
         variant: font.getVariant(),

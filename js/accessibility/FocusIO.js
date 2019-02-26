@@ -14,9 +14,7 @@ define( function( require ) {
   var ObjectIO = require( 'TANDEM/types/ObjectIO' );
   var phetioInherit = require( 'TANDEM/phetioInherit' );
   var scenery = require( 'SCENERY/scenery' );
-
-  // ifphetio
-  var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
+  var validate = require( 'AXON/validate' );
 
   /**
    * @param {Focus} focus - the focus region which has {display,trail}
@@ -24,11 +22,11 @@ define( function( require ) {
    * @constructor
    */
   function FocusIO( focus, phetioID ) {
-    assert && assertInstanceOf( focus, Focus );
     ObjectIO.call( this, focus, phetioID );
   }
 
   phetioInherit( ObjectIO, 'FocusIO', FocusIO, {}, {
+    validator: { valueType: Focus }, // TODO: Should this support null?
 
     /**
      * Convert the focus region to a plain JS object for serialization.
@@ -38,12 +36,12 @@ define( function( require ) {
      */
     toStateObject: function( focus ) {
 
-      // If nothing is focused, the focus is nulls
+      // If nothing is focused, the focus is null
       if ( focus === null ) {
         return null;
       }
       else {
-        assert && assertInstanceOf( focus, Focus );
+        validate( focus, this.validator );
         var phetioIDIndices = [];
         focus.trail.nodes.forEach( function( node, i ) {
 

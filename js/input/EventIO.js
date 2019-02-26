@@ -14,9 +14,7 @@ define( function( require ) {
   const scenery = require( 'SCENERY/scenery' );
   const Vector2IO = require( 'DOT/Vector2IO' );
   const Event = require( 'SCENERY/input/Event' );
-
-  // ifphetio
-  const assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
+  const validate = require( 'AXON/validate' );
 
   /**
    * IO type for phet/scenery's Event class.
@@ -25,7 +23,6 @@ define( function( require ) {
    * @constructor
    */
   function EventIO( event, phetioID ) {
-    assert && assertInstanceOf( event, Event );
     ObjectIO.call( this, event, phetioID );
   }
 
@@ -45,7 +42,7 @@ define( function( require ) {
      * @override
      */
     toStateObject( event ) {
-      assert && assertInstanceOf( event, Event );
+      validate( event, this.validator );
 
       var eventObject = {
         type: event.type,

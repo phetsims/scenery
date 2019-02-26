@@ -16,9 +16,6 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var StringIO = require( 'TANDEM/types/StringIO' );
 
-  // ifphetio
-  var assertInstanceOf = require( 'ifphetio!PHET_IO/assertInstanceOf' );
-
   /**
    * IO type for scenery's Text node.
    * @param {RichText} richText
@@ -26,7 +23,6 @@ define( function( require ) {
    * @constructor
    */
   function RichTextIO( richText, phetioID ) {
-    assert && assertInstanceOf( richText, scenery.RichText );
     NodeIO.call( this, richText, phetioID );
 
     // this uses a sub Property adapter as described in https://github.com/phetsims/phet-io/issues/1326
@@ -58,7 +54,8 @@ define( function( require ) {
     }
 
   }, {
-    documentation: 'The tandem IO type for the scenery RichText node'
+    documentation: 'The tandem IO type for the scenery RichText node',
+    validator: { valueType: scenery.RichText }
   } );
 
   scenery.register( 'RichTextIO', RichTextIO );
