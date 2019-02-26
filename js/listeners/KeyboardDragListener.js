@@ -20,7 +20,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
   var platform = require( 'PHET_CORE/platform' );
-  var sceneryPhet = require( 'SCENERY_PHET/sceneryPhet' );
+  var scenery = require( 'SCENERY/scenery' );
   var timer = require( 'AXON/timer' );
   var Vector2 = require( 'DOT/Vector2' );
 
@@ -140,7 +140,7 @@ define( function( require ) {
     };
   }
 
-  sceneryPhet.register( 'KeyboardDragListener', KeyboardDragListener );
+  scenery.register( 'KeyboardDragListener', KeyboardDragListener );
 
   return inherit( Object, KeyboardDragListener, {
 
