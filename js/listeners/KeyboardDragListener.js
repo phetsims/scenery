@@ -6,8 +6,10 @@
  * the Accessibility trait.
  *
  * JavaScript does not natively handle multiple 'keydown' events at once, so we have a custom implementation that
- * tracks which keys are down and for how long in a step() function. This type is in scenery-phet because
- * phet-core/timer drives the updates with step().
+ * tracks which keys are down and for how long in a step() function. To support keydown timing, AXON/timer is used. In
+ * scenery this is supported via Display.updateOnRequestAnimationFrame(), which will step the time on each frame.
+ * If using KeyboardDragListener in a more customized Display, like done in phetsims (see JOIST/Sim), the time must be
+ * manually stepped (by emitting the timer).
  *
  * @author Jesse Greenberg
  * @author Michael Barlow
