@@ -23,10 +23,10 @@ define( function( require ) {
     var self = this;
 
     // @public, listen only, emits an event when the synth begins speaking the utterance
-    this.speakingStartedEmitter = new Emitter();
+    this.speakingStartedEmitter = new Emitter( { validationEnabled: false } );
 
     // @public, listen only, emits an event when the synth has finished speaking the utterance
-    this.speakingEndedEmitter = new Emitter();
+    this.speakingEndedEmitter = new Emitter( { validationEnabled: false } );
 
     // @private, flag for when screen reader is speaking - synth.speaking is unsupported for safari
     this.speaking = false;
@@ -51,11 +51,11 @@ define( function( require ) {
         var utterThis = new SpeechSynthesisUtterance( outputUtterance.text );
 
         utterThis.addEventListener( 'start', function( event ) {
-          self.speakingStartedEmitter.emit1( outputUtterance );
+          self.speakingStartedEmitter.emit( outputUtterance );
         } );
 
         utterThis.addEventListener( 'end', function( event ) {
-          self.speakingEndedEmitter.emit1( outputUtterance );
+          self.speakingEndedEmitter.emit( outputUtterance );
         } );
 
         // get the default voice
@@ -140,7 +140,7 @@ define( function( require ) {
     }
     else {
       cursor.outputUtteranceProperty.link( function() {
-        self.speakingStartedEmitter.emit1( { text: 'Sorry! Web Speech API not supported on this platform.' } );
+        self.speakingStartedEmitter.emit( { text: 'Sorry! Web Speech API not supported on this platform.' } );
       } );
     }
 

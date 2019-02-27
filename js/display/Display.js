@@ -983,7 +983,7 @@ define( function( require ) {
         lastTime = timeNow;
 
         // step the timer that drives any time dependent updates of the Display
-        timer.emit1( timeElapsedInSeconds );
+        timer.emit( timeElapsedInSeconds );
 
         stepCallback && stepCallback( timeElapsedInSeconds );
         self.updateDisplay();
@@ -1710,7 +1710,7 @@ define( function( require ) {
         previousFocus = this.focusedNode;
 
         // Emit that the old focused node is no longer focused
-        previousFocus.focusChangedEmitter.emit1( false );
+        previousFocus.focusChangedEmitter.emit( false );
       }
 
       this.focusProperty.value = value;
@@ -1718,7 +1718,7 @@ define( function( require ) {
       if ( value ) {
 
         // Emit that the new node is focused
-        value.trail.lastNode().focusChangedEmitter.emit1( true );
+        value.trail.lastNode().focusChangedEmitter.emit( true );
       }
       else {
 

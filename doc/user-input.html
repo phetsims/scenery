@@ -78,7 +78,7 @@
     </p>
     <p>
       Accessibility related input listeners require a timer to work with assistive devices and to keep track of the
-      state of the keyboard. In order for accessibility input to work correctly, call <code>axon.timer.emit1( timeElapsedInSeconds )</code>
+      state of the keyboard. In order for accessibility input to work correctly, call <code>axon.timer.emit( timeElapsedInSeconds )</code>
       prior to each call to <a href="./#display-updateDisplay">display.updateDisplay()</a>. <code>display.updateOnRequestAnimationFrame()</code> will do this for you. Take a look at <a href="accessibility.html">Accessibility in Scenery</a> for more information about accessibility.
     </p>
 

@@ -38,7 +38,7 @@ define( require => {
         previousTime = currentTime;
 
         // step timer
-        timer.emit1( timeStep );
+        timer.emit( timeStep );
       }, 10 );
     },
     after() {

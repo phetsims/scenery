@@ -410,7 +410,7 @@ define( function( require ) {
 
           // @public - emits when focus changes. This will trigger with the 'focus' event and the 'blur' event.
           // Listener receives 1 parameter, {boolean} - isFocused. see Display.focus
-          this.focusChangedEmitter = new Emitter();
+          this.focusChangedEmitter = new Emitter( { validationEnabled: false } );
 
           // @private {Array.<Node|null>|null} - (a11y) If provided, it will override the focus order between children
           // (and optionally aribitrary subtrees). If not provided, the focus order will default to the rendering order
