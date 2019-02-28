@@ -75,6 +75,10 @@ define( function( require ) {
   // tabIndex=0 internally for all HTML elements, including those that should not receive focus
   var DATA_FOCUSABLE = 'data-focusable';
 
+  // data attribute which contains the unique ID of a Trail that allows us to find the AccessiblePeer associated
+  // with a particular DOM element. This is used in several places in scenery accessibility, mostly AccessiblePeer.
+  var DATA_TRAIL_ID = 'data-trail-id';
+
   // {Array.<String>} attributes that put an ID of another attribute as the value, see https://github.com/phetsims/scenery/issues/819
   var ASSOCIATION_ATTRIBUTES = [ ARIA_LABELLEDBY, ARIA_DESCRIBEDBY, ARIA_ACTIVE_DESCENDANT ];
 
@@ -519,7 +523,9 @@ define( function( require ) {
     // valid input types that support the "checked" property/attribute for input elements
     INPUT_TYPES_THAT_SUPPORT_CHECKED: [ 'RADIO', 'CHECKBOX' ],
 
-    DOM_EVENTS: DOM_EVENTS
+    DOM_EVENTS: DOM_EVENTS,
+
+    DATA_TRAIL_ID: DATA_TRAIL_ID
   };
 
   scenery.register( 'AccessibilityUtil', AccessibilityUtil );

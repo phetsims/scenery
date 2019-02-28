@@ -153,8 +153,8 @@ define( require => {
     pointerType: true, charCode: true, which: true, clientX: true, clientY: true, changedTouches: true,
     target: true
   };
+  
   const TARGET_SUBSTITUTE_KEY = 'targetSubstitute';
-  const TRAIL_ID_ATTRIBUTE_NAME = 'data-trail-id';
 
   /**
    * An input controller for a specific Display.
@@ -541,11 +541,11 @@ define( require => {
           // could be serialized event for phet-io playbacks, see Input.serializeDOMEvent()
           if ( event[ TARGET_SUBSTITUTE_KEY ] ) {
             assert && assert( event[ TARGET_SUBSTITUTE_KEY ] instanceof Object );
-            return event[ TARGET_SUBSTITUTE_KEY ][ TRAIL_ID_ATTRIBUTE_NAME ];
+            return event[ TARGET_SUBSTITUTE_KEY ][ AccessibilityUtil.DATA_TRAIL_ID ];
           }
           else {
             assert && assert( event.target instanceof window.Element );
-            return event.target.getAttribute( TRAIL_ID_ATTRIBUTE_NAME );
+            return event.target.getAttribute( AccessibilityUtil.DATA_TRAIL_ID );
           }
         };
 
@@ -1884,7 +1884,7 @@ define( require => {
           // we don't need much from the target, just the trail ID
           if ( property === 'target' && domEventProperty !== null ) {
             entries[ property ] = {};
-            entries[ property ][ TRAIL_ID_ATTRIBUTE_NAME ] = domEventProperty.getAttribute( TRAIL_ID_ATTRIBUTE_NAME );
+            entries[ property ][ AccessibilityUtil.DATA_TRAIL_ID ] = domEventProperty.getAttribute( AccessibilityUtil.DATA_TRAIL_ID );
           }
           else {
             entries[ property ] = ( ( typeof domEventProperty === 'object' ) && ( domEventProperty !== null ) ? {} : JSON.parse( JSON.stringify( domEventProperty ) ) ); // TODO: is parse/stringify necessary?
