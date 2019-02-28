@@ -195,7 +195,7 @@ define( function( require ) {
 
       // assign an id that lets us map the DOM element to a Scenery Trail
       // NOTE: dataset isn't supported by all namespaces (like MathML) so we need to use setAttribute
-      this.setAttributeToElement( 'data-trail-id', uniqueId );
+      this.setAttributeToElement( AccessibilityUtil.DATA_TRAIL_ID, uniqueId );
 
       // create the container parent for the dom siblings
       if ( options.containerTagName ) {
@@ -207,6 +207,10 @@ define( function( require ) {
       if ( options.labelTagName ) {
         this._labelSibling = AccessibilityUtil.createElement( options.labelTagName, false );
         this._labelSibling.id = 'label-' + uniqueId;
+
+        this.setAttributeToElement( AccessibilityUtil.DATA_TRAIL_ID, uniqueId, {
+          elementName: AccessiblePeer.LABEL_SIBLING 
+        } );
       }
 
       // create the description DOM element representing this instance
