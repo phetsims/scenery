@@ -154,6 +154,7 @@ define( require => {
     target: true
   };
   const TARGET_SUBSTITUTE_KEY = 'targetSubstitute';
+  const TRAIL_ID_ATTRIBUTE_NAME = 'data-trail-id';
 
   /**
    * An input controller for a specific Display.
@@ -241,8 +242,6 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'mouseUpEmitter' ),
 
-        // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-        argumentTypes: [ { valueType: Vector2 }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
@@ -261,8 +260,6 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'mouseDownEmitter' ),
 
-        // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-        argumentTypes: [ { valueType: Vector2 }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
@@ -281,8 +278,6 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'mouseMovedEmitter' ),
 
-        // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-        argumentTypes: [ { valueType: Vector2 }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
@@ -302,8 +297,6 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'mouseOverEmitter' ),
 
-        // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-        argumentTypes: [ { valueType: Vector2 }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
@@ -322,8 +315,6 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'mouseOutEmitter' ),
 
-        // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-        argumentTypes: [ { valueType: Vector2 }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
@@ -342,8 +333,6 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'wheelScrolledEmitter' ),
 
-        // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-        argumentTypes: [ { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'event', type: DOMEventIO }
         ] ),
@@ -368,8 +357,6 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'touchStartedEmitter' ),
 
-        // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-        argumentTypes: [ { valueType: 'number' }, { valueType: Vector2 }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'id', type: NumberIO },
           { name: 'point', type: Vector2IO },
@@ -389,8 +376,6 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'touchEndedEmitter' ),
 
-        // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-        argumentTypes: [ { valueType: 'number' }, { valueType: Vector2 }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'id', type: NumberIO },
           { name: 'point', type: Vector2IO },
@@ -413,8 +398,6 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'touchMovedEmitter' ),
 
-        // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-        argumentTypes: [ { valueType: 'number' }, { valueType: Vector2 }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'id', type: NumberIO },
           { name: 'point', type: Vector2IO },
@@ -437,8 +420,6 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'touchCanceledEmitter' ),
 
-        // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-        argumentTypes: [ { valueType: 'number' }, { valueType: Vector2 }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'id', type: NumberIO },
           { name: 'point', type: Vector2IO },
@@ -461,8 +442,6 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'penStartedEmitter' ),
 
-        // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-        argumentTypes: [ { valueType: 'number' }, { valueType: Vector2 }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'id', type: NumberIO },
           { name: 'point', type: Vector2IO },
@@ -482,8 +461,6 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'penEndedEmitter' ),
 
-        // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-        argumentTypes: [ { valueType: 'number' }, { valueType: Vector2 }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'id', type: NumberIO },
           { name: 'point', type: Vector2IO },
@@ -506,8 +483,6 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'penMovedEmitter' ),
 
-        // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-        argumentTypes: [ { valueType: 'number' }, { valueType: Vector2 }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'id', type: NumberIO },
           { name: 'point', type: Vector2IO },
@@ -530,8 +505,6 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'penCanceledEmitter' ),
 
-        // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-        argumentTypes: [ { valueType: 'number' }, { valueType: Vector2 }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'id', type: NumberIO },
           { name: 'point', type: Vector2IO },
@@ -568,11 +541,11 @@ define( require => {
           // could be serialized event for phet-io playbacks, see Input.serializeDOMEvent()
           if ( event[ TARGET_SUBSTITUTE_KEY ] ) {
             assert && assert( event[ TARGET_SUBSTITUTE_KEY ] instanceof Object );
-            return event[ TARGET_SUBSTITUTE_KEY ][ AccessibilityUtil.DATA_TRAIL_ID ];
+            return event[ TARGET_SUBSTITUTE_KEY ][ TRAIL_ID_ATTRIBUTE_NAME ];
           }
           else {
             assert && assert( event.target instanceof window.Element );
-            return event.target.getAttribute( AccessibilityUtil.DATA_TRAIL_ID );
+            return event.target.getAttribute( TRAIL_ID_ATTRIBUTE_NAME );
           }
         };
 
@@ -581,8 +554,6 @@ define( require => {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'focusinEmitter' ),
 
-          // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-          argumentTypes: [ { valueType: window.Event } ],
           phetioType: EmitterIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
@@ -616,8 +587,6 @@ define( require => {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'focusoutEmitter' ),
 
-          // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-          argumentTypes: [ { valueType: window.Event } ],
           phetioType: EmitterIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
@@ -673,8 +642,6 @@ define( require => {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'clickEmitter' ),
 
-          // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-          argumentTypes: [ { valueType: window.Event } ],
           phetioType: EmitterIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
@@ -697,8 +664,6 @@ define( require => {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'inputEmitter' ),
 
-          // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-          argumentTypes: [ { valueType: window.Event } ],
           phetioType: EmitterIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
@@ -721,8 +686,6 @@ define( require => {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'changeEmitter' ),
 
-          // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-          argumentTypes: [ { valueType: window.Event } ],
           phetioType: EmitterIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
@@ -745,8 +708,6 @@ define( require => {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'keydownEmitter' ),
 
-          // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-          argumentTypes: [ { valueType: window.Event } ],
           phetioType: EmitterIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
@@ -769,8 +730,6 @@ define( require => {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'keyupEmitter' ),
 
-          // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-          argumentTypes: [ { valueType: window.Event } ],
           phetioType: EmitterIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
@@ -1925,7 +1884,7 @@ define( require => {
           // we don't need much from the target, just the trail ID
           if ( property === 'target' && domEventProperty !== null ) {
             entries[ property ] = {};
-            entries[ property ][ AccessibilityUtil.DATA_TRAIL_ID ] = domEventProperty.getAttribute( AccessibilityUtil.DATA_TRAIL_ID );
+            entries[ property ][ TRAIL_ID_ATTRIBUTE_NAME ] = domEventProperty.getAttribute( TRAIL_ID_ATTRIBUTE_NAME );
           }
           else {
             entries[ property ] = ( ( typeof domEventProperty === 'object' ) && ( domEventProperty !== null ) ? {} : JSON.parse( JSON.stringify( domEventProperty ) ) ); // TODO: is parse/stringify necessary?
