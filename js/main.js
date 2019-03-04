@@ -99,6 +99,7 @@ define( [
   'SCENERY/listeners/DragListener',
   'SCENERY/listeners/FireListener',
   'SCENERY/listeners/HandleDownListener',
+  'SCENERY/listeners/KeyboardDragListener',
   'SCENERY/listeners/MultiListener',
   'SCENERY/listeners/PanZoomListener',
   'SCENERY/listeners/PressListener',
