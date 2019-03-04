@@ -54,7 +54,7 @@
   const Rectangle = scenery.Rectangle;
   const Circle = scenery.Circle;
   const DragListener = scenery.DragListener;
-  const ObservableArray = axon.ObservableArray;
+  const Emitter = axon.Emitter;
 
   // Set up the display
   const view = new Node();
@@ -67,21 +67,26 @@
   view.addChild( toolbox );
 
   // MODEL
-  class ModelElement {}
+  class ModelElement {
+    constructor() {
+      this.disposeEmitter = new Emitter();
+    }
 
-  const model = {
-    modelElements: new ObservableArray() // Contains ModelElement instances
-  };
+    dispose() {
+      this.disposeEmitter.emit();
+    }
+  }
 
   // VIEW
 
   // When the icon is dragged, create a new model element, look up the view and forward the drag events.¬
   toolbox.addInputListener( DragListener.createForwardingListener( event => {
     const modelElement = new ModelElement();
-    model.modelElements.push( modelElement );
-    const modelElementNode = view.children.find( child => child.modelElement === modelElement );
+    const modelElementNode = new ModelElementNode( modelElement );
     modelElementNode.center = event.pointer.point;
     modelElementNode.dragListener.press( event, modelElementNode );
+    modelElement.disposeEmitter.addListener( () => modelElementNode.dispose() );
+    view.addChild( modelElementNode );
   } ) );
 
   class ModelElementNode extends Circle {
@@ -98,17 +103,13 @@
         // Dispose if dropped back in the toolbox.
         end: event => {
           if ( toolbox.bounds.containsPoint( this.center ) ) {
-            model.modelElements.remove( modelElement )
+            modelElement.dispose()
           }
         }
       } );
       this.addInputListener( this.dragListener );
     }
   }
-
-  // VIEW
-  model.modelElements.addItemAddedListener( modelElement => view.addChild( new ModelElementNode( modelElement ) ) );
-  model.modelElements.addItemRemovedListener( modelElement => view.removeChild( view.children.find( child => child.modelElement === modelElement ) ) );
 </script>
 
 </body>
