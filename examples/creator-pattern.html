@@ -81,6 +81,10 @@
 
   // When the icon is dragged, create a new model element, look up the view and forward the drag events.¬
   toolbox.addInputListener( DragListener.createForwardingListener( event => {
+
+    // Create the model element.
+    // See https://github.com/phetsims/phet-info/issues/93#issuecomment-469844263 for discussion about
+    // dealing with model view transform and coordinate frames.
     const modelElement = new ModelElement();
     const modelElementNode = new ModelElementNode( modelElement );
     modelElementNode.center = event.pointer.point;
