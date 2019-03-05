@@ -1047,7 +1047,8 @@ define( function( require ) {
       img: baseImage,
       url: baseURL,
       width: baseCanvas.width,
-      height: baseCanvas.height
+      height: baseCanvas.height,
+      canvas: baseCanvas
     } );
 
     var largeCanvas = baseCanvas;
