@@ -155,7 +155,7 @@ define( function( require ) {
 
         // ignore move events that have 0-length. Chrome seems to be auto-firing these on Windows,
         // see https://code.google.com/p/chromium/issues/detail?id=327114
-        if ( globalDelta.magnitudeSquared() === 0 ) {
+        if ( globalDelta.magnitudeSquared === 0 ) {
           return;
         }
 
