@@ -215,6 +215,7 @@ define( function( require ) {
     'accessibleNamespace', // Sets the namespace for the primary element, see setAccessibleNamespace()
     'ariaLabel', // Sets the value of the 'aria-label' attribute on the primary sibling of this Node, see setAriaLabel()
     'ariaRole', // Sets the ARIA role for the primary sibling of this Node, see setAriaRole()
+    'ariaValueText', // sets the aria-valuetext attribute of the primary sibling, see setAriaValueText()
 
     'labelTagName', // Sets the tag name for the DOM element sibling labelling this node, see setLabelTagName()
     'labelContent', // Sets the label content for the node, see setLabelContent()
@@ -335,7 +336,7 @@ define( function( require ) {
           // element and set to this value. This will determine how the Accessible Name is provided for the DOM element.
           this._ariaLabel = null;
 
-          // @private {string|null} - the ARIA role for this node's DOM element, added as an HTML attribute.  For a complete
+          // @private {string|null} - the ARIA role for this Node's primary sibling, added as an HTML attribute.  For a complete
           // list of ARIA roles, see https://www.w3.org/TR/wai-aria/roles.  Beware that many roles are not supported
           // by browsers or assistive technologies, so use vanilla HTML for accessibility semantics where possible.
           this._ariaRole = null;
@@ -345,6 +346,10 @@ define( function( require ) {
           // supported by browsers or assistive technologies, so use vanilla HTML for accessibility semantics where
           // possible.
           this._containerAriaRole = null;
+
+          // @private {string|null} - if provided, "aria-valuetext" will be added as an inline attribute on the Node's
+          // primary sibling and set to this value. Setting back to null will clear this attribute in the view.
+          this._ariaValueText = null;
 
           // @private {Array.<Object>} - Keep track of what this Node is aria-labelledby via "associationObjects"
           // see addAriaLabelledbyAssociation for why we support more than one association.
@@ -379,8 +384,8 @@ define( function( require ) {
           // {Array.<Node>}
           this._nodesThatAreActiveDescendantToThisNode = [];
 
-          // @private {boolean|null} - whether or not this node's DOM element has been explicitly set to receive focus from
-          // tab navigation. Sets the tabIndex attribute on the node's DOM element. Setting to false will not remove the
+          // @private {boolean|null} - whether or not this Node's primary sibling has been explicitly set to receive focus from
+          // tab navigation. Sets the tabIndex attribute on the Node's primary sibling. Setting to false will not remove the
           // node's DOM from the document, but will ensure that it cannot receive focus by pressing 'tab'.  Several
           // HTMLElements (such as HTML form elements) can be focusable by default, without setting this property. The
           // native HTML function from these form elements can be overridden with this property.
@@ -402,7 +407,7 @@ define( function( require ) {
           this._groupFocusHighlight = false;
 
           // @private {boolean} - Whether or not the accessible content will be visible from the browser and assistive
-          // technologies.  When accessibleVisible is false, the node's DOM element will not be focusable, and it cannot
+          // technologies.  When accessibleVisible is false, the Node's primary sibling will not be focusable, and it cannot
           // be found by the assistive technology virtual cursor. For more information on how assistive technologies
           // read with the virtual cursor see
           // http://www.ssbbartgroup.com/blog/how-windows-screen-readers-work-on-the-web/
@@ -967,7 +972,7 @@ define( function( require ) {
         set inputType( inputType ) { this.setInputType( inputType ); },
 
         /**
-         * Get the input type. Input type is only relevant if this node's DOM element has tag name "INPUT".
+         * Get the input type. Input type is only relevant if this Node's primary sibling has tag name "INPUT".
          * @public
          *
          * @returns {string|null}
@@ -1100,7 +1105,7 @@ define( function( require ) {
         /**
          * Set the content of the label sibling for the this node.  The label sibling will default to the value of
          * DEFAULT_LABEL_TAG_NAME if no `labelTagName` is provided. If the label sibling is a `LABEL` html element,
-         * then the `for` attribute will automatically be added, pointing to the node's primary sibling DOM Element.
+         * then the `for` attribute will automatically be added, pointing to the Node's primary sibling.
          * @public
          *
          * This method supports adding content in two ways, with HTMLElement.textContent and HTMLElement.innerHTML.
@@ -1162,7 +1167,7 @@ define( function( require ) {
         set innerContent( content ) { this.setInnerContent( content ); },
 
         /**
-         * Get the inner content, the string that is the innerHTML or innerText for the node's primary sibling element.
+         * Get the inner content, the string that is the innerHTML or innerText for the Node's primary sibling.
          *
          * @returns {string|null}
          * @public
@@ -1173,7 +1178,7 @@ define( function( require ) {
         get innerContent() { return this.getInnerContent(); },
 
         /**
-         * Set the description content for this node's DOM element. The description sibling tag name must support
+         * Set the description content for this Node's primary sibling. The description sibling tag name must support
          * innerHTML and textContent. If a description element does not exist yet, a default
          * DEFAULT_LABEL_TAG_NAME will be assigned to the descriptionTagName.
          * @public
@@ -1211,7 +1216,7 @@ define( function( require ) {
         get descriptionContent() { return this.getDescriptionContent(); },
 
         /**
-         * Set the ARIA role for this node's DOM element. According to the W3C, the ARIA role is read-only for a DOM
+         * Set the ARIA role for this Node's primary sibling. According to the W3C, the ARIA role is read-only for a DOM
          * element.  So this will create a new DOM element for this Node with the desired role, and replace the old
          * element in the DOM.
          * @public
@@ -1293,6 +1298,41 @@ define( function( require ) {
         get containerAriaRole() { return this.getContainerAriaRole(); },
 
         /**
+         * Set the aria-valuetext of this Node independently from the changing value, if necessary. Setting to null will
+         * clear this attribute.
+         *
+         * @public
+         * @param {string|number} ariaValueText
+         */
+        setAriaValueText: function( ariaValueText ) {
+          assert && assert( ariaValueText === null || typeof ariaValueText === 'string' );
+
+          if ( this._ariaValueText !== ariaValueText ) {
+            this._ariaValueText = ariaValueText;
+
+            if ( this._ariaValueText === null ) {
+              this.removeAccessibleAttribute( 'aria-valuetext' );
+            }
+            else {
+              this.setAccessibleAttribute( 'aria-valuetext', ariaValueText );
+            }
+          }
+        },
+        set ariaValueText( ariaValueText ) { this.setAriaValueText( ariaValueText ); },
+
+        /**
+         * Get the value of the aria-valuetext attribute for this Node's primary sibling. If null, then the attribute
+         * has not been set on the primary sibling.
+         * @public
+         *
+         * @returns {string|null}
+         */
+        getAriaValueText: function() {
+          return this._ariaValueText;
+        },
+        get ariaValueText() { return this.getAriaValueText(); },
+
+        /**
          * Sets the namespace for the primary element (relevant for MathML/SVG/etc.)
          * @public
          *
@@ -1331,7 +1371,7 @@ define( function( require ) {
         get accessibleNamespace() { return this.getAccessibleNamespace(); },
 
         /**
-         * Sets the 'aria-label' attribute for labelling the node's DOM element. By using the
+         * Sets the 'aria-label' attribute for labelling the Node's primary sibling. By using the
          * 'aria-label' attribute, the label will be read on focus, but can not be found with the
          * virtual cursor. This is one way to set a DOM Element's Accessible Name.
          * @public
@@ -1355,7 +1395,7 @@ define( function( require ) {
         set ariaLabel( ariaLabel ) { this.setAriaLabel( ariaLabel ); },
 
         /**
-         * Get the value of the aria-label attribute for this node's DOM element.
+         * Get the value of the aria-label attribute for this Node's primary sibling.
          * @public
          *
          * @returns {string|null}
@@ -2190,7 +2230,7 @@ define( function( require ) {
         get accessibleChecked() { return this.getAccessibleChecked(); },
 
         /**
-         * Get an array containing all accessible attributes that have been added to this node's DOM element.
+         * Get an array containing all accessible attributes that have been added to this Node's primary sibling.
          * @public
          *
          * @returns {Array.<Object>} - Returns objects with: {
@@ -2205,7 +2245,7 @@ define( function( require ) {
         get accessibleAttributes() { return this.getAccessibleAttributes(); },
 
         /**
-         * Set a particular attribute or property for this node's DOM element, generally to provide extra semantic information for
+         * Set a particular attribute or property for this Node's primary sibling, generally to provide extra semantic information for
          * a screen reader.
          *
          * @param {string} attribute - string naming the attribute
@@ -2225,7 +2265,7 @@ define( function( require ) {
             // for setting certain attributes (e.g. MathML).
             namespace: null,
 
-            // set the "attribute" as a javascript property on the DOMElement
+            // set the "attribute" as a javascript property on the DOMElement instead
             asProperty: false,
 
             elementName: AccessiblePeer.PRIMARY_SIBLING // see AccessiblePeer.getElementName() for valid values, default to the primary sibling
@@ -2301,7 +2341,7 @@ define( function( require ) {
          */
         removeAccessibleAttributes: function() {
 
-          // all attributes currently on this node's DOM element
+          // all attributes currently on this Node's primary sibling
           var attributes = this.getAccessibleAttributes();
 
           for ( var i = 0; i < attributes.length; i++ ) {
