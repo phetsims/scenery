@@ -16,6 +16,7 @@ define( function( require ) {
   var Property = require( 'AXON/Property' );
   var Transform3 = require( 'DOT/Transform3' );
   var Vector2 = require( 'DOT/Vector2' );
+  var Vector2Property = require( 'DOT/Vector2Property' );
 
   QUnit.module( 'DragListener' );
 
@@ -72,7 +73,7 @@ define( function( require ) {
 
   QUnit.test( 'locationProperty with hooks', function( assert ) {
     ListenerTestUtils.simpleRectangleTest( function( display, rect, node ) {
-      var locationProperty = new Property( Vector2.ZERO );
+      var locationProperty = new Vector2Property( Vector2.ZERO );
       locationProperty.linkAttribute( rect, 'translation' );
 
       var listener = new DragListener( {
@@ -91,7 +92,7 @@ define( function( require ) {
 
   QUnit.test( 'locationProperty with hooks and transform', function( assert ) {
     ListenerTestUtils.simpleRectangleTest( function( display, rect, node ) {
-      var locationProperty = new Property( Vector2.ZERO );
+      var locationProperty = new Vector2Property( Vector2.ZERO );
       var transform = new Transform3( Matrix3.translation( 5, 3 ).timesMatrix( Matrix3.scale( 2 ) ).timesMatrix( Matrix3.rotation2( Math.PI / 4 ) ) );
 
       // Starts at 5,3
@@ -116,7 +117,7 @@ define( function( require ) {
 
   QUnit.test( 'locationProperty with dragBounds', function( assert ) {
     ListenerTestUtils.simpleRectangleTest( function( display, rect, node ) {
-      var locationProperty = new Property( Vector2.ZERO );
+      var locationProperty = new Vector2Property( Vector2.ZERO );
 
       locationProperty.link( function( location ) {
         rect.translation = location;
