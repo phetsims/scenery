@@ -63,13 +63,11 @@ define( require => {
      * @param {*} value - the new value this Property will take, which is different than the previous value.
      * @protected - can be overridden.
      */
-    setValueAndNotifyListeners( value ) {
+    setPropertyValue( value ) {
 
       // Set the node value first, as if it was the first link listener.
       this.node[ this.attribute ] = value;
-
-      // Notify the other listeners
-      super.setValueAndNotifyListeners( value );
+      super.setPropertyValue( value );
     }
   }
 
