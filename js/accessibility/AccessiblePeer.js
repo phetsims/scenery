@@ -15,6 +15,7 @@ define( function( require ) {
   var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var arrayRemove = require( 'PHET_CORE/arrayRemove' );
   var Bounds2 = require( 'DOT/Bounds2' );
+  var cleanArray = require( 'PHET_CORE/cleanArray' );
   var FullScreen = require( 'SCENERY/util/FullScreen' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Matrix3 = require( 'DOT/Matrix3' );
@@ -123,6 +124,24 @@ define( function( require ) {
       // the siblings need to be repositioned in the next Display.updateDisplay()
       this.positionDirty = false;
 
+      // @private {string|null} - the inner content for the primary sibling
+      this._primarySiblingContent = null;
+
+      // @private {boolean} - flag indicating that the inner content of the primary sibling needs to be redrawn
+      this._primarySiblingContentDirty = false;
+
+      // @private {string|null} - the inner content for the label sibling
+      this._labelSiblingContent = null;
+
+      // @private {boolean} - flag indicating that the inner content of the label sibling needs to be redrawn
+      this._labelSiblingContentDirty = false;
+
+      // @private {string|null} - the inner content for the description sibling
+      this._descriptionSiblingContent = null;
+
+      // @private {boolean} - flag indicating that the inner content of the description sibling needs to be redrawn
+      this._descriptionSiblingContentDirty = false;
+
       // @private {boolean} - indicates that this peer's accessibleInstance has a descendant that is dirty. Used to
       // quickly find peers with positionDirty when we traverse the tree of AccessibleInstances
       this.childPositionDirty = false;
@@ -164,6 +183,9 @@ define( function( require ) {
         // the focus. It also will contain any children.
         this._primarySibling = options.primarySibling;
         this._primarySibling.className = AccessibleSiblingStyle.ROOT_CLASS_NAME;
+
+        // @private {Array.<AccessiblePeer>} - list of (direct) children peers under this peer's AccessibleInstance
+        this.dirtyDescendants = cleanArray( this.dirtyDescendants );
       }
 
       return this;
@@ -277,6 +299,47 @@ define( function( require ) {
       this.node.updateOtherNodesAriaLabelledby();
       this.node.updateOtherNodesAriaDescribedby();
       this.node.updateOtherNodesActiveDescendant();
+    },
+
+    /**
+     * Update dirty content on this AccessiblePeer.
+     * TODO: Eventually, this function should handle everything in update, and replace update entirely? Not doing that
+     * yet because we are exploring this dirty pattern.
+     * @returns {}
+     */
+    updateDirty: function() {
+      if ( this.dirty && !this.isDisposed ) {
+        this.dirty = false;
+
+        if ( this._primarySiblingContentDirty ) {
+          AccessibilityUtil.setTextContent( this._primarySibling, this._primarySiblingContent );
+          this._primarySiblingContentDirty = false;
+        }
+
+        if ( this._labelSiblingContentDirty ) {
+          AccessibilityUtil.setTextContent( this._labelSibling, this._labelSiblingContent );
+
+          // if the label element happens to be a 'label', associate with 'for' attribute
+          if ( this._labelSibling.tagName.toUpperCase() === LABEL_TAG ) {
+            this.setAttributeToElement( 'for', this._primarySibling.id, {
+              elementName: AccessiblePeer.LABEL_SIBLING
+            } );
+          }
+          this._labelSiblingContentDirty = false;
+        }
+
+        if ( this._descriptionSiblingContentDirty ) {
+          AccessibilityUtil.setTextContent( this._descriptionSibling, this._descriptionSiblingContent );
+          this._descriptionSiblingContentDirty = false;
+        }
+      }
+    },
+
+    // TODO: We should have a type just for the root with this `dirtyDescendants` list and this function
+    updateDirtyDescendantContent: function() {
+      while ( this.dirtyDescendants && this.dirtyDescendants.length ) {
+        this.dirtyDescendants.pop().updateDirty();
+      }
     },
 
     /**
@@ -767,14 +830,21 @@ define( function( require ) {
         return;
       }
 
-      AccessibilityUtil.setTextContent( this._labelSibling, content );
-
-      // if the label element happens to be a 'label', associate with 'for' attribute
-      if ( this._labelSibling.tagName.toUpperCase() === LABEL_TAG ) {
-        this.setAttributeToElement( 'for', this._primarySibling.id, {
-          elementName: AccessiblePeer.LABEL_SIBLING
-        } );
+      this.dirty = true;
+      this._labelSiblingContent = content;
+      if ( !this._labelSiblingContentDirty ) {
+        this._labelSiblingContentDirty = true;
+        this.display._rootAccessibleInstance.peer.dirtyDescendants.push( this );
       }
+
+      // AccessibilityUtil.setTextContent( this._labelSibling, content );
+
+      // // if the label element happens to be a 'label', associate with 'for' attribute
+      // if ( this._labelSibling.tagName.toUpperCase() === LABEL_TAG ) {
+      //   this.setAttributeToElement( 'for', this._primarySibling.id, {
+      //     elementName: AccessiblePeer.LABEL_SIBLING
+      //   } );
+      // }
     },
 
     /**
@@ -789,7 +859,14 @@ define( function( require ) {
       if ( !this._descriptionSibling ) {
         return;
       }
-      AccessibilityUtil.setTextContent( this._descriptionSibling, content );
+
+      this.dirty = true;
+      this._descriptionSiblingContent = content;
+
+      if ( !this._descriptionSiblingContentDirty ) {
+        this._descriptionSiblingContentDirty = true;
+        this.display._rootAccessibleInstance.peer.dirtyDescendants.push( this );
+      }
     },
 
     /**
@@ -807,7 +884,16 @@ define( function( require ) {
       if ( !this._primarySibling ) {
         return;
       }
-      AccessibilityUtil.setTextContent( this._primarySibling, content );
+
+      // mark dirty for the next update
+      this.dirty = true;
+      this._primarySiblingContent = content;
+
+      // don't add to list if already dirty
+      if ( !this._primarySiblingContentDirty ) {
+        this._primarySiblingContentDirty = true;
+        this.display._rootAccessibleInstance.peer.dirtyDescendants.push( this );
+      }
     },
 
     /**

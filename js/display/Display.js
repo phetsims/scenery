@@ -365,6 +365,9 @@ define( function( require ) {
 
       if ( this._accessible ) {
 
+        // redraw any dirty accessibility content
+        this._rootAccessibleInstance.peer.updateDirtyDescendantContent();
+
         // update positioning of focusable peer siblings so they are discoverable on mobile assistive devices
         this._rootAccessibleInstance.peer.updateSubtreePositioning();
       }
