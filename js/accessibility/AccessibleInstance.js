@@ -37,6 +37,7 @@ define( function( require ) {
   var inherit = require( 'PHET_CORE/inherit' );
   var platform = require( 'PHET_CORE/platform' );
   var Poolable = require( 'PHET_CORE/Poolable' );
+  var RootAccessiblePeer = require( 'SCENERY/accessibility/RootAccessiblePeer' );
   var scenery = require( 'SCENERY/scenery' );
   var TransformTracker = require( 'SCENERY/util/TransformTracker' );
 
@@ -123,10 +124,7 @@ define( function( require ) {
       this.isDisposed = false;
 
       if ( this.isRootInstance ) {
-        var accessibilityContainer = document.createElement( 'div' );
-        this.peer = AccessiblePeer.createFromPool( this, {
-          primarySibling: accessibilityContainer
-        } );
+        this.peer = new RootAccessiblePeer( this, document.createElement( 'div' ) );
       }
       else {
         this.peer = AccessiblePeer.createFromPool( this );

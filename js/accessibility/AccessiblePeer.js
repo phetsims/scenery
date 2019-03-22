@@ -11,11 +11,9 @@
 define( function( require ) {
   'use strict';
 
-  var AccessibleSiblingStyle = require( 'SCENERY/accessibility/AccessibleSiblingStyle' );
   var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var arrayRemove = require( 'PHET_CORE/arrayRemove' );
   var Bounds2 = require( 'DOT/Bounds2' );
-  var cleanArray = require( 'PHET_CORE/cleanArray' );
   var FullScreen = require( 'SCENERY/util/FullScreen' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Matrix3 = require( 'DOT/Matrix3' );
@@ -74,13 +72,9 @@ define( function( require ) {
      * @private
      *
      * @param {AccessibleInstance} accessibleInstance
-     * @param {Object} [options]
      * @returns {AccessiblePeer} - Returns 'this' reference, for chaining
      */
-    initializeAccessiblePeer: function( accessibleInstance, options ) {
-      options = _.extend( {
-        primarySibling: null
-      }, options );
+    initializeAccessiblePeer: function( accessibleInstance ) {
 
       assert && assert( !this.id || this.isDisposed, 'If we previously existed, we need to have been disposed' );
 
@@ -175,18 +169,6 @@ define( function( require ) {
       // @private {boolean} - Whether we are currently in a "disposed" (in the pool) state, or are available to be
       // interacted with.
       this.isDisposed = false;
-
-      // edge case for root accessibility
-      if ( this.accessibleInstance.isRootInstance ) {
-
-        // @private {HTMLElement} - The main element associated with this peer. If focusable, this is the element that gets
-        // the focus. It also will contain any children.
-        this._primarySibling = options.primarySibling;
-        this._primarySibling.className = AccessibleSiblingStyle.ROOT_CLASS_NAME;
-
-        // @private {Array.<AccessiblePeer>} - list of (direct) children peers under this peer's AccessibleInstance
-        this.dirtyDescendants = cleanArray( this.dirtyDescendants );
-      }
 
       return this;
     },
@@ -311,11 +293,13 @@ define( function( require ) {
       if ( this.dirty && !this.isDisposed ) {
         this.dirty = false;
 
+        // primary sibling inner content
         if ( this._primarySiblingContentDirty ) {
           AccessibilityUtil.setTextContent( this._primarySibling, this._primarySiblingContent );
           this._primarySiblingContentDirty = false;
         }
 
+        // label sibling inner content
         if ( this._labelSiblingContentDirty ) {
           AccessibilityUtil.setTextContent( this._labelSibling, this._labelSiblingContent );
 
@@ -328,17 +312,11 @@ define( function( require ) {
           this._labelSiblingContentDirty = false;
         }
 
+        // description sibling inner content
         if ( this._descriptionSiblingContentDirty ) {
           AccessibilityUtil.setTextContent( this._descriptionSibling, this._descriptionSiblingContent );
           this._descriptionSiblingContentDirty = false;
         }
-      }
-    },
-
-    // TODO: We should have a type just for the root with this `dirtyDescendants` list and this function
-    updateDirtyDescendantContent: function() {
-      while ( this.dirtyDescendants && this.dirtyDescendants.length ) {
-        this.dirtyDescendants.pop().updateDirty();
       }
     },
 
