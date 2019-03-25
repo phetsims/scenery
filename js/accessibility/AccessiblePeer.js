@@ -14,6 +14,7 @@ define( function( require ) {
   var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var arrayRemove = require( 'PHET_CORE/arrayRemove' );
   var Bounds2 = require( 'DOT/Bounds2' );
+  var cleanArray = require( 'PHET_CORE/cleanArray' );
   var FullScreen = require( 'SCENERY/util/FullScreen' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Matrix3 = require( 'DOT/Matrix3' );
@@ -136,6 +137,9 @@ define( function( require ) {
       // @private {boolean} - flag indicating that the inner content of the description sibling needs to be redrawn
       this._descriptionSiblingContentDirty = false;
 
+      // @private {Array.<AttributeData>} - list of data that indicates what data should be added or removed
+      this._dirtyAttributes = cleanArray( this._dirtyAttributes );
+
       // @private {boolean} - indicates that this peer's accessibleInstance has a descendant that is dirty. Used to
       // quickly find peers with positionDirty when we traverse the tree of AccessibleInstances
       this.childPositionDirty = false;
@@ -193,7 +197,6 @@ define( function( require ) {
       if ( this.node.helpText !== null ) {
         options = this.node.helpTextBehavior( this.node, options, this.node.helpText );
       }
-
 
       // create the base DOM element representing this accessible instance
       // TODO: why not just options.focusable?
@@ -316,6 +319,11 @@ define( function( require ) {
         if ( this._descriptionSiblingContentDirty ) {
           AccessibilityUtil.setTextContent( this._descriptionSibling, this._descriptionSiblingContent );
           this._descriptionSiblingContentDirty = false;
+        }
+
+        // set or remove new attributes from elements
+        while( this._dirtyAttributes.length ) {
+          this._dirtyAttributes.pop().udpateElement();
         }
       }
     },
@@ -483,7 +491,7 @@ define( function( require ) {
         var valueString = this.node.inputValue + '';
         this.setAttributeToElement( 'value', valueString, { asProperty: true } );
       }
-    },
+    },    
 
     /**
      * Get an element on this node, looked up by the elementName flag passed in.
@@ -535,15 +543,16 @@ define( function( require ) {
 
       var element = options.element || this.getElementByName( options.elementName );
 
-      if ( options.namespace ) {
-        element.setAttributeNS( options.namespace, attribute, attributeValue );
-      }
-      else if ( options.asProperty ) {
-        element[ attribute ] = attributeValue;
-      }
-      else {
-        element.setAttribute( attribute, attributeValue );
-      }
+      this.addDirtyAttribute( new AttributeData( attribute, attributeValue, true, element, options ) );
+      // if ( options.namespace ) {
+      //   element.setAttributeNS( options.namespace, attribute, attributeValue );
+      // }
+      // else if ( options.asProperty ) {
+      //   element[ attribute ] = attributeValue;
+      // }
+      // else {
+      //   element.setAttribute( attribute, attributeValue );
+      // }
     },
 
     /**
@@ -568,12 +577,13 @@ define( function( require ) {
 
       var element = options.element || this.getElementByName( options.elementName );
 
-      if ( options.namespace ) {
-        element.removeAttributeNS( options.namespace, attribute );
-      }
-      else {
-        element.removeAttribute( attribute );
-      }
+      this.addDirtyAttribute( new AttributeData( attribute, null, false, element, options ) );
+      // if ( options.namespace ) {
+      //   element.removeAttributeNS( options.namespace, attribute );
+      // }
+      // else {
+      //   element.removeAttribute( attribute );
+      // }
     },
 
     /**
@@ -643,6 +653,37 @@ define( function( require ) {
     },
 
     /**
+     * Add a set of AttributeData which will be set on an element next Display update. Any duplicate attributes
+     * on the same element will replace old ones so the most recent attribute values are set.
+     *
+     * @param {} attributeData
+     */
+    addDirtyAttribute: function( attributeData ) {
+      var dataReplaced = false;
+      for ( var i = 0; i < this._dirtyAttributes.length; i++ ) {
+        var newElement = attributeData.element;
+        var oldElement = this._dirtyAttributes[ i ].element;
+
+        var newAttribute = attributeData.attribute;
+        var oldAttribute = this._dirtyAttributes[ i ].attribute;
+
+        if ( newElement === oldElement ) {
+          if ( newAttribute === oldAttribute ) {
+            this._dirtyAttributes[ i ] = attributeData;
+            dataReplaced = true;
+          }
+        }
+      }
+
+      if ( !dataReplaced ) {
+        this._dirtyAttributes.push( attributeData );
+      }
+
+      this.dirty = true;
+      this.display._rootAccessibleInstance.peer.dirtyDescendants.push( this );
+    },
+
+    /**
      * The contentElement will either be a label or description element. The contentElement will be sorted relative to
      * the primarySibling. Its placement will also depend on whether or not this node wants to append this element,
      * see setAppendLabel() and setAppendDescription(). By default, the "content" element will be placed before the
@@ -692,16 +733,17 @@ define( function( require ) {
     isVisible: function() {
       if ( assert ) {
 
-        var visibleElements = 0;
-        this.topLevelElements.forEach( function( element ) {
+        // TODO: Attributes are set asynchrounously, so we can't use this anymore
+        // var visibleElements = 0;
+        // this.topLevelElements.forEach( function( element ) {
 
-          // support property or attribute
-          if ( !element.hidden && !element.hasAttribute( 'hidden' ) ) {
-            visibleElements += 1;
-          }
-        } );
-        assert( this.visible ? visibleElements === this.topLevelElements.length : visibleElements === 0,
-          'some of the peer\'s elements are visible and some are not' );
+        //   // support property or attribute
+        //   if ( !element.hidden && !element.hasAttribute( 'hidden' ) ) {
+        //     visibleElements += 1;
+        //   }
+        // } );
+        // assert( this.visible ? visibleElements === this.topLevelElements.length : visibleElements === 0,
+        //   'some of the peer\'s elements are visible and some are not' );
 
       }
       return this.visible === null ? true : this.visible; // default to true if visibility hasn't been set yet.
@@ -1036,6 +1078,71 @@ define( function( require ) {
   // Set up pooling
   Poolable.mixInto( AccessiblePeer, {
     initalize: AccessiblePeer.prototype.initializeAccessiblePeer
+  } );
+
+  //--------------------------------------------------------------------------
+  // inner types
+  //--------------------------------------------------------------------------
+  /**
+   * Collection of data that.
+   *
+   * @param {boolean} addition - addition or removal of the attribute
+   * @param {HTMLElement} element - element that will receive the attribute
+   * @param {string} namespace - namespace for the attribute
+   * @param {boolean} asProperty - as a property instead of name value pair attribute
+   */
+  function AttributeData( attribute, value, addition, element, options ) {
+
+    options = _.extend( {
+
+      // {string|null} - If non-null, will set the attribute with the specified namespace. This can be required
+      // for setting certain attributes (e.g. MathML).
+      namespace: null,
+
+      // set as a javascript property instead of an attribute on the DOM Element.
+      asProperty: false
+    }, options );
+
+    // @private {string}
+    this.attribute = attribute;
+    this.attributeValue = value;
+    this.namespace = options.namespace;
+
+    // @private {boolean}
+    this.addition = addition;
+    this.asProperty = options.asProperty;
+
+    // @private {HTMLElement}
+    this.element = element;
+  }
+
+  inherit( Object, AttributeData, {
+
+    /**
+     * Set or remove the attribute from the element.
+     */
+    udpateElement: function() {
+
+      if ( this.addition ) {
+        if ( this.namespace ) {
+          this.element.setAttributeNS( this.namespace, this.attribute, this.attributeValue );
+        }
+        else if ( this.asProperty ) {
+          this.element[ this.attribute ] = this.attributeValue;
+        }
+        else {
+          this.element.setAttribute( this.attribute, this.attributeValue );
+        }
+      }
+      else {
+        if ( this.namespace ) {
+          this.element.removeAttributeNS( this.namespace, this.attribute );
+        }
+        else {
+          this.element.removeAttribute( this.attribute );
+        }
+      }
+    }
   } );
 
   //--------------------------------------------------------------------------
