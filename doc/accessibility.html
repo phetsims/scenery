@@ -185,6 +185,7 @@
     <div class="sublink"><a href="#accessible-name">aria-labelledby</a></div>
     <div class="sublink"><a href="#ordering">accessibleOrder</a></div>
     <div class="sublink"><a href="#interactive-alerts">UtteranceQueue</a></div>
+    <div class="sublink"><a href="#performance-considerations">Performance Considerations</a></div>
 
     <div class="navlink"><a href="#phet-info">PhET Specific Info</a></div>
     <div class="sublink"><a href="#enable-a11y">Enabling A11y</a></div>
@@ -625,6 +626,20 @@
       parallel DOM.
     </p>
 
+    <h4 id="performance-considerations">Performance Considerations</h4>
+
+    <p>
+      Manipulating the DOM can be performance intensice. If the DOM is modified every animation frame, performance of
+      the application can be reduced on slower devices like tablets and phones. Performance can be improved by limiting
+      the frequency of setting accessible content and attributes where possible. There is some work in progress to
+      batch the updates to the DOM so that the frequency of updates is reduced per animation frame. Please see the
+      following issues for their status and potential work to be done:
+    </p>
+    <ul>
+      <li><a href="https://github.com/phetsims/scenery/issues/955">textContent vs innerHTML</a></li>
+      <li><a href="https://github.com/phetsims/scenery/issues/663">Batching PDOM changes</a></li>
+      <li><a href="https://github.com/phetsims/scenery/issues/956">setAttribute performance</a></li>
+    </ul>
     <h2 id="phet-info">PhET Specific Information</h2>
     <p>The following information is specific to PhET's work with accessibility and this api.</p>
 
