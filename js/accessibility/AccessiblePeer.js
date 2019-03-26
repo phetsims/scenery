@@ -477,10 +477,15 @@ define( function( require ) {
      * registered correctly by an assistive device. If null, the attribute is removed so that we don't clutter the DOM
      * with value="null" attributes.
      *
+     * @param {boolean} [synchronous] - optional, defaults to true but can be made asynchronous for improved performance
      * @public (scenery-internal)
      */
-    onInputValueChange: function() {
+    onInputValueChange: function( synchronous ) {
       assert && assert( this.node.inputValue !== undefined, 'use null to remove input value attribute' );
+
+      // this might be set very frequently, avoid using _.extend
+      assert && assert( synchronous === undefined || typeof synchronous === 'boolean' );
+      synchronous = synchronous === undefined ? true : synchronous;
 
       if ( this.node.inputValue === null ) {
         this.removeAttributeFromElement( 'value' );
@@ -489,7 +494,7 @@ define( function( require ) {
 
         // type conversion for DOM spec
         var valueString = this.node.inputValue + '';
-        this.setAttributeToElement( 'value', valueString, { asProperty: true } );
+        this.setAttributeToElement( 'value', valueString, { asProperty: true, synchronous: synchronous } );
       }
     },    
 
@@ -538,21 +543,23 @@ define( function( require ) {
 
         // {HTMLElement|null} - element that will directly receive the input rather than looking up by name, if
         // provided, elementName option will have no effect
-        element: null
+        element: null,
+
+        // {boolean} - If true, attribute will be se immediately on the element. This is important for certain
+        // attributes that must be read by an AT immedately. Can be set to false for attributes that change
+        // frequently and don't need to be read for improved performance. 
+        synchronous: true
       }, options );
 
       var element = options.element || this.getElementByName( options.elementName );
+      var attributeData = new AttributeData( attribute, attributeValue, true, element, options );
 
-      this.addDirtyAttribute( new AttributeData( attribute, attributeValue, true, element, options ) );
-      // if ( options.namespace ) {
-      //   element.setAttributeNS( options.namespace, attribute, attributeValue );
-      // }
-      // else if ( options.asProperty ) {
-      //   element[ attribute ] = attributeValue;
-      // }
-      // else {
-      //   element.setAttribute( attribute, attributeValue );
-      // }
+      if ( options.synchronous ) {
+        attributeData.udpateElement();
+      }
+      else {
+        this.addDirtyAttribute( new AttributeData( attribute, attributeValue, true, element, options ) );
+      }
     },
 
     /**
@@ -572,18 +579,19 @@ define( function( require ) {
 
         // {HTMLElement|null} - element that will directly receive the input rather than looking up by name, if
         // provided, elementName option will have no effect
-        element: null
+        element: null,
+
+        synchronous: true
       }, options );
 
       var element = options.element || this.getElementByName( options.elementName );
-
-      this.addDirtyAttribute( new AttributeData( attribute, null, false, element, options ) );
-      // if ( options.namespace ) {
-      //   element.removeAttributeNS( options.namespace, attribute );
-      // }
-      // else {
-      //   element.removeAttribute( attribute );
-      // }
+      var attributeData = new AttributeData( attribute, null, false, element, options );
+      if ( options.synchronous ) {
+        attributeData.udpateElement();
+      }
+      else {
+        this.addDirtyAttribute( attributeData );
+      }
     },
 
     /**

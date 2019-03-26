@@ -2157,13 +2157,22 @@ define( function( require ) {
         /**
          * Set the value of an input element.  Element must be a form element to support the value attribute. The input
          * value is converted to string since input values are generally string for HTML.
+         *
+         * The value is set to the accessible DOM element synchronously by default. If the value changes frequently
+         * you an optionally set it asynchronously for improved performance. Setting the input value frequently is
+         * slow on some platforms.
          * @public
          *
          * @param {string|number} value
+         * @param {boolean} [synchronous] - optional, whether or not to set input value synchronously, defaults to true
          */
-        setInputValue: function( value ) {
+        setInputValue: function( value, synchronous ) {
           assert && assert( value === null || typeof value === 'string' || typeof value === 'number' );
           assert && this._tagName && assert( _.includes( FORM_ELEMENTS, this._tagName.toUpperCase() ), 'dom element must be a form element to support value' );
+
+          // this might be set very frequently, avoid using _.extend - defaults to true
+          assert && assert( synchronous === undefined || typeof synchronous === 'boolean' );
+          synchronous = synchronous === undefined ? true : synchronous;
 
           // type cast
           value = '' + value;
@@ -2173,7 +2182,7 @@ define( function( require ) {
 
             for ( var i = 0; i < this.accessibleInstances.length; i++ ) {
               var peer = this.accessibleInstances[ i ].peer;
-              peer.onInputValueChange();
+              peer.onInputValueChange( synchronous );
             }
           }
         },

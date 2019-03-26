@@ -14,6 +14,11 @@ define( ( require ) => {
   const cleanArray = require( 'PHET_CORE/cleanArray' );
   const scenery = require( 'SCENERY/scenery' );
 
+  // constants
+  // number of frames before updating dirty AccessiblePeers - small value will update PDOM more frequently but will
+  // result in more frequent DOM operations and (potentially) slower graphical animations
+  const FRAMES_PER_UPDATE = 20;
+
   class RootAccessiblePeer extends AccessiblePeer {
 
     /**
@@ -36,34 +41,40 @@ define( ( require ) => {
 
       // @private {Array.<AccessiblePeer>} - list of all AccessiblePeers that need to be updated next updateDisplay
       this.dirtyDescendants = cleanArray( this.dirtyDescendants );
+
+      // @private {boolean} - whether or not the dirty AccessiblePeers will be updated every updateDisply or less
+      // frequently than that (for improved performance)
+      this.leanAccessibilityChanges = this.display._leanAccessibilityChanges;
     }
 
     /**
-     * Update any AccessiblePeers that are in the list of dirtyDescendants. Updating AccessiblePeers involves
-     * DOM operations so we sometimes hide the root element of the PDOM first to prevent the browser from
-     * doing expensive layout calculations for every single update. This way the browser should do work for
-     * layout/reflow at most twice per animation frame.
+     * Update any AccessiblePeers that are in the list of dirtyDescendants.
+     * @public
      *
-     * TODO: Optimize to hide only dirty portions of the PDOM? https://github.com/phetsims/scenery/issues/663
+     * @param {number} frameID - identifier set in Display.updateDisplay, increments each update
      */
-    updateDirtyDescendantContent() {
+    updateDirtyDescendantContent( frameID ) {
 
-      // if multiple elements are marked as dirty we hide the PDOM to prevent layout calculations (thrashing) as
-      // the document is modified - the hide will also cause a layout recalculation, so we only do this
-      // if the browser will have more than a number of updates
-      var preventThrashing = this.dirtyDescendants.length > 1;
-      if ( preventThrashing ) {
-        // console.log( 'prevent thrash, hiding PDOM')
-        this.display.accessibleDOMElement.style.visibility = 'hidden';
+      if ( this.leanAccessibilityChanges ) {
+
+        // update the PDOM ~3 times per second assuming 60 fps
+        if ( frameID % FRAMES_PER_UPDATE === 0 ) {
+          this.cleanDirtyList();
+        }
       }
+      else {
+        this.cleanDirtyList();
+      }
+    }
 
+    /**
+     * Update all AccessiblePeers in the dirty list (synchronously). 
+     *
+     * @private
+     */
+    cleanDirtyList() {
       while ( this.dirtyDescendants.length ) {
         this.dirtyDescendants.pop().updateDirty();
-      }
-
-      if ( preventThrashing ) {
-        // console.log( 'prevent thrash, showing PDOM');
-        this.display.accessibleDOMElement.style.visibility = 'visible';
       }
     }
   }

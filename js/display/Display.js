@@ -177,7 +177,13 @@ define( function( require ) {
 
       // {boolean} - Whether, if no WebGL antialiasing is detected, the backing scale can be increased so as to
       //             provide some antialiasing benefit. See https://github.com/phetsims/scenery/issues/859.
-      allowBackingScaleAntialiasing: true
+      allowBackingScaleAntialiasing: true,
+
+      // {boolean} - Whether or not accessibility related DOM manipulation will occur every updateDisplay or 
+      // less frequently for performance. Only use if updating display every animation frame.
+      // DOM manipulation is time intensive for the browser, but it is generally not necessary to update the
+      // PDOM every frame. If true, the PDOM will be updated less frequently.
+      leanAccessibilityChanges: false
     }, options );
 
     // TODO: don't store the options, it's an anti-pattern.
@@ -185,6 +191,9 @@ define( function( require ) {
 
     // @public (scenery-internal) {boolean} - Whether accessibility is enabled for this particular display.
     this._accessible = options.accessibility;
+
+    // @public (read-only, scenery-internal) - Whether the PDOM will be udpated every animation frame
+    this._leanAccessibilityChanges = options.leanAccessibilityChanges;
 
     this._allowWebGL = options.allowWebGL;
 
@@ -366,7 +375,7 @@ define( function( require ) {
       if ( this._accessible ) {
 
         // redraw any dirty accessibility content
-        this._rootAccessibleInstance.peer.updateDirtyDescendantContent();
+        this._rootAccessibleInstance.peer.updateDirtyDescendantContent( this._frameId );
 
         // update positioning of focusable peer siblings so they are discoverable on mobile assistive devices
         this._rootAccessibleInstance.peer.updateSubtreePositioning();
