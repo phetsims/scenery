@@ -53,11 +53,9 @@ define( require => {
       'border-color:transparent;' +
 
       // So that elements can never be seen visually, can comment this out to "see" transformed elements in the
-      // PDOM. Text and Backgrounds of elements are made transparent where possible. Text is made very small so that
-      // it doesn't extend into the display. Very low opacity on the root takes care of the rest.
+      // PDOM. Text is made very small so that it doesn't extend into the display. Very low opacity on the
+      // root takes care of the rest.
       'font-size: 1px;' + // must be at least 1px to be readable with AT
-      'color: transparent;' +
-      'background-color: transparent;' +
 
       // Just for debugging!
       // color: white // helpful for seeing text over a black background
