@@ -2248,6 +2248,10 @@ define( function( require ) {
          * Set a particular attribute or property for this Node's primary sibling, generally to provide extra semantic information for
          * a screen reader.
          *
+         * Some attributes can be set as a JavaScript property on PDOM elements, and we have seen this to generally
+         * be faster than using setAttribute. The asProperty option should be used wherever possible for improved
+         * performance and behavior with AT. See https://github.com/phetsims/scenery/issues/663
+         *
          * @param {string} attribute - string naming the attribute
          * @param {string|boolean|number} value - the value for the attribute, if boolean, then it will be set as a javascript property on the HTMLElement rather than an attribute
          * @param {Object} [options]
