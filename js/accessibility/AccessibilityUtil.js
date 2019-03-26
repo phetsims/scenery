@@ -234,11 +234,10 @@ define( function( require ) {
 
     /**
      * If the textContent has any tags that are not formatting tags, return false. Only checking for
-     * tags that are not in the whitelist FORMATTING_TAGS, if there are no tags this will still return
-     * true.
+     * tags that are not in the whitelist FORMATTING_TAGS. If there are no tags at all, return false.
      * @public
      *
-     * @param  {string} textContent
+     * @param {string} textContent
      * @returns {boolean}
      */
     usesExclusivelyFormattingTags: function( textContent ) {
@@ -269,6 +268,11 @@ define( function( require ) {
         else {
           i++;
         }
+      }
+
+      // no tags so no formatting, return early
+      if ( openIndices.length === 0 || closeIndices.length === 0 ) {
+        return false;
       }
 
       // check the name in between the open and close brackets - if anything other than formatting tags, return false
@@ -308,7 +312,7 @@ define( function( require ) {
       assert && assert( typeof textContent === 'string' );
       if ( tagNameSupportsContent( domElement.tagName ) ) {
 
-        // returns true if there are no brackets at all
+        // only returns true for whitelist of formatting tags
         if ( AccessibilityUtil.usesExclusivelyFormattingTags( textContent ) ) {
           domElement.innerHTML = textContent;
         }
