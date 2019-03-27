@@ -1991,6 +1991,7 @@ define( function( require ) {
          * i.e. `[null]`.
          *
          * Some general constraints for the orders are:
+         * - Nodes must be attached to a Display (in a scene graph) to be shown in an accessible order.
          * - You can't specify a node in more than one accessibleOrder, and you can't specify duplicates of a value
          *   in an accessibleOrder.
          * - You can't specify an ancestor of a node in that node's accessibleOrder
