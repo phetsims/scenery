@@ -53,11 +53,12 @@ define( require => {
       'border-color:transparent;' +
 
       // So that elements can never be seen visually, can comment this out to "see" transformed elements in the
-      // PDOM. Text and Backgrounds of elements are made transparent where possible. Text is made very small so that
-      // it doesn't extend into the display. Very low opacity on the root takes care of the rest.
+      // PDOM. Text is made very small so that it doesn't extend into the display. Very low opacity on the root takes care of the rest.
       'font-size: 1px;' + // must be at least 1px to be readable with AT
-      'color: transparent;' +
-      'background-color: transparent;' +
+
+      // adding this clip area seems to prevent Safari from doing expensive DOM layout calculations every change, 
+      // see https://github.com/phetsims/scenery/issues/663
+      'clip: rect(1px, 1px, 1px, 1px);' +
 
       // Just for debugging!
       // color: white // helpful for seeing text over a black background
