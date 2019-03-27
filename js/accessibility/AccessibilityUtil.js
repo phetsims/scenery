@@ -240,7 +240,7 @@ define( function( require ) {
      * @param {string} textContent
      * @returns {boolean}
      */
-    usesExclusivelyFormattingTags: function( textContent ) {
+    containsFormattingTags: function( textContent ) {
 
       // no-op for null case
       if ( textContent === null ) {
@@ -313,7 +313,7 @@ define( function( require ) {
       if ( tagNameSupportsContent( domElement.tagName ) ) {
 
         // only returns true if content contains listed formatting tags
-        if ( AccessibilityUtil.usesExclusivelyFormattingTags( textContent ) ) {
+        if ( AccessibilityUtil.containsFormattingTags( textContent ) ) {
           domElement.innerHTML = textContent;
         }
         else {

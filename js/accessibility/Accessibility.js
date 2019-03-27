@@ -1109,7 +1109,7 @@ define( function( require ) {
          * @public
          *
          * This method supports adding content in two ways, with HTMLElement.textContent and HTMLElement.innerHTML.
-         * The DOM setter is chosen based on if the label passes the `usesExclusivelyFormattingTags`.
+         * The DOM setter is chosen based on if the label passes the `containsFormattingTags`.
          *
          * Passing a null label value will not clear the whole label sibling, just the inner content of the DOM Element.
          * @param {string|null} label
