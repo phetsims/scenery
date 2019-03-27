@@ -234,11 +234,10 @@ define( function( require ) {
 
     /**
      * If the textContent has any tags that are not formatting tags, return false. Only checking for
-     * tags that are not in the whitelist FORMATTING_TAGS, if there are no tags this will still return
-     * true.
+     * tags that are not in the whitelist FORMATTING_TAGS. If there are no tags at all, return false.
      * @public
      *
-     * @param  {string} textContent
+     * @param {string} textContent
      * @returns {boolean}
      */
     usesExclusivelyFormattingTags: function( textContent ) {
@@ -271,6 +270,11 @@ define( function( require ) {
         }
       }
 
+      // malformed tags or no tags at all, return false immediately
+      if ( openIndices.length !== closeIndices.length || openIndices.length === 0 ) {
+        return false;
+      }
+
       // check the name in between the open and close brackets - if anything other than formatting tags, return false
       var onlyFormatting = true;
       var upperCaseContent = textContent.toUpperCase();
@@ -296,7 +300,7 @@ define( function( require ) {
 
     /**
      * If the text content uses formatting tags, set the content as innerHTML. Otherwise, set as textContent.
-     * In general, textContent is more secure and more performant because it doesn't trigger DOM styling and
+     * In general, textContent is more secure and much faster because it doesn't trigger DOM styling and
      * element insertions.
      * @public
      *
@@ -308,7 +312,7 @@ define( function( require ) {
       assert && assert( typeof textContent === 'string' );
       if ( tagNameSupportsContent( domElement.tagName ) ) {
 
-        // returns true if there are no brackets at all
+        // only returns true if content contains listed formatting tags
         if ( AccessibilityUtil.usesExclusivelyFormattingTags( textContent ) ) {
           domElement.innerHTML = textContent;
         }
