@@ -56,7 +56,8 @@ define( require => {
       // PDOM. Text is made very small so that it doesn't extend into the display. Very low opacity on the root takes care of the rest.
       'font-size: 1px;' + // must be at least 1px to be readable with AT
 
-      // adding this clip area seems to prevent Safari from doing expensive DOM layout calculations every change, 
+      // adding this clip area seems to prevent Safari from doing expensive DOM layout calculations every change.
+      // Surprisingly, there is no performance benefit if this is put on the root element.
       // see https://github.com/phetsims/scenery/issues/663
       'clip: rect(1px, 1px, 1px, 1px);' +
 
