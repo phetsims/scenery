@@ -448,12 +448,24 @@ define( function( require ) {
      */
     createElement: function( tagName, focusable, options ) {
       options = _.extend( {
-        namespace: null // {string|null} - If non-null, the element will be created with the specific namespace
+        // {string|null} - If non-null, the element will be created with the specific namespace
+        namespace: null,
+
+        // {string|null} - A string id from Trail.getUnqiqueId pointing to the node that is being
+        // represented by this element in the PDOM. Will by used to dispatch events received by this
+        // DOM element to the scenery Node being represented.
+        trailId: null
       }, options );
 
       var domElement = options.namespace
                        ? document.createElementNS( options.namespace, tagName )
                        : document.createElement( tagName );
+
+      if ( options.trailId ) {
+
+        // NOTE: dataset isn't supported by all namespaces (like MathML) so we need to use setAttribute
+        domElement.setAttribute( AccessibilityUtil.DATA_TRAIL_ID, options.trailId );
+      }
 
       // set tab index if we are overriding default browser behavior
       AccessibilityUtil.overrideFocusWithTabIndex( domElement, focusable );

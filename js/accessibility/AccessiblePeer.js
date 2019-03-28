@@ -194,13 +194,10 @@ define( function( require ) {
       // create the base DOM element representing this accessible instance
       // TODO: why not just options.focusable?
       this._primarySibling = AccessibilityUtil.createElement( options.tagName, this.node.focusable, {
-        namespace: options.accessibleNamespace
+        namespace: options.accessibleNamespace,
+        trailId: uniqueId
       } );
       this._primarySibling.id = uniqueId;
-
-      // assign an id that lets us map the DOM element to a Scenery Trail
-      // NOTE: dataset isn't supported by all namespaces (like MathML) so we need to use setAttribute
-      this.setAttributeToElement( AccessibilityUtil.DATA_TRAIL_ID, uniqueId );
 
       // Block any fake pointer events that will be sourced on the primary sibling when a screen reader is in use.
       // Screen readers inconsistently send these events and we want all pointer events to go through
@@ -214,23 +211,25 @@ define( function( require ) {
 
       // create the container parent for the dom siblings
       if ( options.containerTagName ) {
-        this._containerParent = AccessibilityUtil.createElement( options.containerTagName, false );
+        this._containerParent = AccessibilityUtil.createElement( options.containerTagName, false, {
+          trailId: uniqueId
+        } );
         this._containerParent.id = 'container-' + uniqueId;
       }
 
       // create the label DOM element representing this instance
       if ( options.labelTagName ) {
-        this._labelSibling = AccessibilityUtil.createElement( options.labelTagName, false );
-        this._labelSibling.id = 'label-' + uniqueId;
-
-        this.setAttributeToElement( AccessibilityUtil.DATA_TRAIL_ID, uniqueId, {
-          elementName: AccessiblePeer.LABEL_SIBLING 
+        this._labelSibling = AccessibilityUtil.createElement( options.labelTagName, false, {
+          trailId: uniqueId
         } );
+        this._labelSibling.id = 'label-' + uniqueId;
       }
 
       // create the description DOM element representing this instance
       if ( options.descriptionTagName ) {
-        this._descriptionSibling = AccessibilityUtil.createElement( options.descriptionTagName, false );
+        this._descriptionSibling = AccessibilityUtil.createElement( options.descriptionTagName, false, {
+          trailId: uniqueId
+        } );
         this._descriptionSibling.id = 'description-' + uniqueId;
       }
 
