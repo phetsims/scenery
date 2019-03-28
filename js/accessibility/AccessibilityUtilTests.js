@@ -119,4 +119,36 @@ define( function( require ) {
     assert.ok( customParagraph.getAttribute( 'tabindex' ) === '0', 'custom paragraph added to focus' );
     assert.ok( customDiv.getAttribute( 'tabindex' ) === '0', 'custom button removed from focus' );
   } );
+
+  QUnit.test( 'setTextContent', function( assert ) {
+    var toyElement = AccessibilityUtil.createElement( 'div' );
+
+    // basic string
+    var stringContent = 'I am feeling pretty flat today.';
+
+    // formatted content
+    var htmlContent = 'I am <i>feeling</i> rather <strong>BOLD</strong> today';
+
+    // malformed formatting tags
+    var malformedHTMLContent = 'I am feeling a <b>bit off> today.';
+
+    // tags not allowed as innerHTML
+    var invalidHTMLContent = 'I am feeling a bit <a href="daring">devious</a> today.';
+
+    AccessibilityUtil.setTextContent( toyElement, stringContent );
+    assert.ok( toyElement.textContent === stringContent, 'textContent set for basic string' );
+    assert.ok( toyElement.firstElementChild === null, 'no innerHTML for basic string' );
+
+    AccessibilityUtil.setTextContent( toyElement, htmlContent );
+    assert.ok( toyElement.innerHTML === htmlContent, 'innerHTML set for formated content' );
+    assert.ok( toyElement.firstElementChild !== null, 'element child exists for innerHTML' );
+
+    AccessibilityUtil.setTextContent( toyElement, malformedHTMLContent );
+    assert.ok( toyElement.textContent === malformedHTMLContent, 'malformed HTML set as content' );
+    assert.ok( toyElement.firstElementChild === null, 'fallback to textContent for malformed tags' );
+
+    AccessibilityUtil.setTextContent( toyElement, invalidHTMLContent );
+    assert.ok( toyElement.textContent === invalidHTMLContent, 'invalid HTML set as content' );
+    assert.ok( toyElement.firstElementChild === null, 'fallback to textContent for disallowed tags' );
+  } );
 } );
