@@ -631,14 +631,13 @@
     <p>
       Manipulating the DOM can be performance intensice. If the DOM is modified every animation frame, performance of
       the application can be reduced on slower devices like tablets and phones. Performance can be improved by limiting
-      the frequency of setting accessible content and attributes where possible. There is some work in progress to
+      the frequency of setting accessible content and attributes where possible. So in general, it is good practice
+      to set accessibility attributes as infrequently as possible. There is some work in progress for Scenery to
       batch the updates to the DOM so that the frequency of updates is reduced per animation frame. Please see the
-      following issues for their status and potential work to be done:
+      following issue for their status and potential work to be done:
     </p>
     <ul>
-      <li><a href="https://github.com/phetsims/scenery/issues/955">textContent vs innerHTML</a></li>
       <li><a href="https://github.com/phetsims/scenery/issues/663">Batching PDOM changes</a></li>
-      <li><a href="https://github.com/phetsims/scenery/issues/956">setAttribute performance</a></li>
     </ul>
     <h2 id="phet-info">PhET Specific Information</h2>
     <p>The following information is specific to PhET's work with accessibility and this api.</p>
