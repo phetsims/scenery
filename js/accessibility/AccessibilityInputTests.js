@@ -21,6 +21,25 @@ define( require => {
 
   QUnit.module( 'AccessibilityInput' );
 
+  /**
+   * Set up a test for accessible input by attaching a root node to a display and initializing events.
+   * @param {Display} display
+   */
+  const beforeTest = ( display ) => {
+    display.initializeEvents();
+    document.body.appendChild( display.domElement );
+  };
+
+  /**
+   * Clean up a test by detaching events and removing the element from the DOM so that it doesn't interfere
+   * with QUnit UI.
+   * @param {Display} display
+   */
+  const afterTest = ( display ) => {
+    display.detachEvents();
+    document.body.removeChild( display.domElement );
+  };
+
   const dispatchEvent = ( domElement, event ) => {
     domElement.dispatchEvent( new window.Event( event, {
       'bubbles': true // that is vital to all that scenery events hold near and dear to their hearts.
@@ -55,8 +74,7 @@ define( require => {
 
     const rootNode = new Node( { tagName: 'div' } );
     const display = new Display( rootNode ); // eslint-disable-line
-    display.initializeEvents();
-    document.body.appendChild( display.domElement );
+    beforeTest( display );
 
     const a = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
 
@@ -94,13 +112,14 @@ define( require => {
 
     assert.ok( bGotFocus, 'b should have been focused' );
     assert.ok( aLostFocus, 'a should have lost focused' );
+
+    afterTest( display );
   } );
 
   QUnit.test( 'tab focusin/focusout', assert => {
     const rootNode = new Node( { tagName: 'div' } );
     const display = new Display( rootNode ); // eslint-disable-line
-    display.initializeEvents();
-    document.body.appendChild( display.domElement );
+    beforeTest( display );
 
     const buttonA = new Rectangle( 0, 0, 5, 5, { tagName: 'button' } );
     const buttonB = new Rectangle( 0, 0, 5, 5, { tagName: 'button' } );
@@ -145,15 +164,14 @@ define( require => {
     // the blur listener on buttonA should have made the default element unfocusable
     assert.ok( !buttonB.focused, 'buttonB cannot receive focus due to blur listener on buttonA' );
 
+    afterTest( display );
   } );
 
   QUnit.test( 'click', assert => {
 
-
     const rootNode = new Node( { tagName: 'div' } );
     const display = new Display( rootNode ); // eslint-disable-line
-    display.initializeEvents();
-    document.body.appendChild( display.domElement );
+    beforeTest( display );
 
     const a = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
 
@@ -314,8 +332,9 @@ define( require => {
     f.accessibleInstances[ 0 ].peer.primarySibling.click();
     assert.ok( cClickCount === 1 && dClickCount === 1 && eClickCount === 0 && fClickCount === 1,
       'click d should not effect e.' );
-  } );
 
+    afterTest( display );
+  } );
 
   QUnit.test( 'click extra', assert => {
 
@@ -325,10 +344,7 @@ define( require => {
     } );
     const root = new Node( { tagName: 'div' } );
     const display = new Display( root ); // eslint-disable-line
-
-    // need to initializeEvents to add input listeners
-    display.initializeEvents();
-    document.body.appendChild( display.domElement );
+    beforeTest( display );
 
     root.addChild( a1 );
     assert.ok( a1.inputListeners.length === 0, 'no input accessible listeners on instantiation' );
@@ -368,14 +384,15 @@ define( require => {
 
     // TODO: Since converting to use Node.inputListeners, we can't assume this anymore
     // assert.ok( a1.hasInputListener( listener ) === false, 'disposal removed accessible input listeners' );
+    
+    afterTest( display );
   } );
 
   QUnit.test( 'input', assert => {
 
     const rootNode = new Node( { tagName: 'div' } );
     const display = new Display( rootNode ); // eslint-disable-line
-    display.initializeEvents();
-    document.body.appendChild( display.domElement );
+    beforeTest( display );
 
     const a = new Rectangle( 0, 0, 20, 20, { tagName: 'input', inputType: 'text' } );
 
@@ -403,16 +420,15 @@ define( require => {
 
     assert.ok( gotInput && gotFocus, 'a should have been an input' );
 
+    afterTest( display );    
   } );
 
 
   QUnit.test( 'change', assert => {
 
-
     const rootNode = new Node( { tagName: 'div' } );
     const display = new Display( rootNode ); // eslint-disable-line
-    display.initializeEvents();
-    document.body.appendChild( display.domElement );
+    beforeTest( display );
 
     const a = new Rectangle( 0, 0, 20, 20, { tagName: 'input', inputType: 'range' } );
 
@@ -439,15 +455,15 @@ define( require => {
     dispatchEvent( a.accessibleInstances[ 0 ].peer.primarySibling, 'change' );
 
     assert.ok( gotChange && gotFocus, 'a should have been an input' );
+
+    afterTest( display );
   } );
 
   QUnit.test( 'keydown/keyup', assert => {
 
-
     const rootNode = new Node( { tagName: 'div' } );
     const display = new Display( rootNode ); // eslint-disable-line
-    display.initializeEvents();
-    document.body.appendChild( display.domElement );
+    beforeTest( display );
 
     const a = new Rectangle( 0, 0, 20, 20, { tagName: 'input', inputType: 'text' } );
 
@@ -481,14 +497,15 @@ define( require => {
 
     dispatchEvent( a.accessibleInstances[ 0 ].peer.primarySibling, 'keyup' );
     assert.ok( gotKeydown && gotKeyup && gotFocus, 'a should have had keyup' );
+
+    afterTest( display );
   } );
 
   QUnit.test( 'Global KeyStateTracker tests', assert => {
 
     const rootNode = new Node( { tagName: 'div' } );
     const display = new Display( rootNode ); // eslint-disable-line
-    display.initializeEvents();
-    document.body.appendChild( display.domElement );
+    beforeTest( display );
 
     const a = new Node( { tagName:'button' } );
     const b = new Node( { tagName:'button' } );
@@ -504,6 +521,7 @@ define( require => {
     triggerDOMEvent( 'keydown', dPrimarySibling, KeyboardUtil.KEY_RIGHT_ARROW );
 
     assert.ok( Display.keyStateTracker.isKeyDown( KeyboardUtil.KEY_RIGHT_ARROW ), 'global keyStateTracker should be updated with right arrow key down' );
-  } );
 
+    afterTest( display );
+  } );
 } );
