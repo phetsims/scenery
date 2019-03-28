@@ -451,9 +451,14 @@ define( function( require ) {
         // {string|null} - If non-null, the element will be created with the specific namespace
         namespace: null,
 
+        // {string|null} - A string id that uniquely represents this element in the DOM, must be completely
+        // unique in the DOM.
+        id: null,
+
         // {string|null} - A string id from Trail.getUnqiqueId pointing to the node that is being
         // represented by this element in the PDOM. Will by used to dispatch events received by this
-        // DOM element to the scenery Node being represented.
+        // DOM element to the scenery Node being represented. Should be unique to the AccessibleInstance
+        // but each sibling for an AccessiblePeer should have the same trailId.
         trailId: null
       }, options );
 
@@ -465,6 +470,9 @@ define( function( require ) {
 
         // NOTE: dataset isn't supported by all namespaces (like MathML) so we need to use setAttribute
         domElement.setAttribute( AccessibilityUtil.DATA_TRAIL_ID, options.trailId );
+      }
+      if ( options.id ) {
+        domElement.id = options.id;
       }
 
       // set tab index if we are overriding default browser behavior

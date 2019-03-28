@@ -195,9 +195,9 @@ define( function( require ) {
       // TODO: why not just options.focusable?
       this._primarySibling = AccessibilityUtil.createElement( options.tagName, this.node.focusable, {
         namespace: options.accessibleNamespace,
+        id: uniqueId,
         trailId: uniqueId
       } );
-      this._primarySibling.id = uniqueId;
 
       // Block any fake pointer events that will be sourced on the primary sibling when a screen reader is in use.
       // Screen readers inconsistently send these events and we want all pointer events to go through
@@ -212,25 +212,25 @@ define( function( require ) {
       // create the container parent for the dom siblings
       if ( options.containerTagName ) {
         this._containerParent = AccessibilityUtil.createElement( options.containerTagName, false, {
-          trailId: uniqueId
+          trailId: uniqueId,
+          id: 'container-' + uniqueId
         } );
-        this._containerParent.id = 'container-' + uniqueId;
       }
 
       // create the label DOM element representing this instance
       if ( options.labelTagName ) {
         this._labelSibling = AccessibilityUtil.createElement( options.labelTagName, false, {
-          trailId: uniqueId
+          trailId: uniqueId,
+          id: 'label-' + uniqueId
         } );
-        this._labelSibling.id = 'label-' + uniqueId;
       }
 
       // create the description DOM element representing this instance
       if ( options.descriptionTagName ) {
         this._descriptionSibling = AccessibilityUtil.createElement( options.descriptionTagName, false, {
-          trailId: uniqueId
+          trailId: uniqueId,
+          id: 'description-' + uniqueId 
         } );
-        this._descriptionSibling.id = 'description-' + uniqueId;
       }
 
       this.orderElements( options );
