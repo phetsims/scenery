@@ -32,11 +32,6 @@ define( function( require ) {
   var LABEL_TAG = AccessibilityUtil.TAGS.LABEL;
   var INPUT_TAG = AccessibilityUtil.TAGS.INPUT;
 
-  // On certain screen readers, the assistive device may send "fake" pointer events to the browser when only using
-  // a keyboard. We want to handle these as keyboard or alternative events exclusively and not through scenery's
-  // pointer system. See https://github.com/phetsims/scenery/issues/852#issuecomment-467994327
-  var BLOCKED_EVENTS = [ 'touchstart', 'touchend', 'mousedown', 'mouseup' ];
-
   // DOM observers that apply new CSS transformations are triggered when children, or inner content change. Updating
   // style/positioning of the element will change attributes so we can't observe those changes since it would trigger
   // the MutationObserver infinitely.
@@ -198,16 +193,6 @@ define( function( require ) {
         id: uniqueId,
         trailId: uniqueId
       } );
-
-      // Block any fake pointer events that will be sourced on the primary sibling when a screen reader is in use.
-      // Screen readers inconsistently send these events and we want all pointer events to go through
-      // scenery's pointer input system and the display div, never the PDOM
-      for ( var i = 0; i < BLOCKED_EVENTS.length; i++ ) {
-        this._primarySibling.addEventListener( BLOCKED_EVENTS[ i ], function( event ) {
-          event.preventDefault();
-          event.stopPropagation();
-        } );
-      }
 
       // create the container parent for the dom siblings
       if ( options.containerTagName ) {

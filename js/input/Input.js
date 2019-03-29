@@ -156,6 +156,11 @@ define( require => {
   
   const TARGET_SUBSTITUTE_KEY = 'targetSubstitute';
 
+  // Some assistive devices may send "fake" pointer like events to the browser when only using
+  // a keyboard. We want to handle these as keyboard or alternative events exclusively and not through scenery's
+  // pointer system. See https://github.com/phetsims/scenery/issues/852#issuecomment-467994327
+  var BLOCKED_ACCESSIBLE_EVENTS = [ 'touchstart', 'touchend', 'mousedown', 'mouseup' ];
+
   /**
    * An input controller for a specific Display.
    * @constructor
@@ -767,6 +772,16 @@ define( require => {
             sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
           }, accessibleEventOptions );
         } );
+
+        // Block any fake pointer events that may be sourced on the a PDOM element when a screen reader is in use.
+        // Screen readers inconsistently send these fake "pointer" like events to DOM elements and we want
+        // all pointer events to go through scenery's pointer input system and the display div, never the PDOM
+        for ( var i = 0; i < BLOCKED_ACCESSIBLE_EVENTS.length; i++ ) {
+          this.display.accessibleDOMElement.addEventListener( BLOCKED_ACCESSIBLE_EVENTS[ i ], function( event ) {
+            event.preventDefault();
+            event.stopPropagation();
+          } );
+        }
 
         // Add a listener to the document body that will capture any keydown for a11y before focus is in this display.
         document.body.addEventListener( 'keydown', this.handleDocumentKeydown.bind( this ) );
