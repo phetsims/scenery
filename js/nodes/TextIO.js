@@ -64,7 +64,7 @@ define( function( require ) {
       },
       documentation: 'Sets font options for this TextIO instance, e.g. {size: 16, weight: bold}. If increasing the font ' +
                      'size does not make the text size larger, you may need to increase the maxWidth of the TextIO also.',
-      invocableForReadOnlyInstances: false
+      invocableForReadOnlyElements: false
     },
 
     getFontOptions: {
@@ -84,7 +84,7 @@ define( function( require ) {
       },
       documentation: 'Sets the maximum width of text box. ' +
                      'If the text width exceeds maxWidth, it is scaled down to fit.',
-      invocableForReadOnlyInstances: false
+      invocableForReadOnlyElements: false
     },
 
     getMaxWidth: {
