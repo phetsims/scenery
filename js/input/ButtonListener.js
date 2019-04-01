@@ -66,18 +66,12 @@ define( function( require ) {
 
       // parameter to DownUpListener, NOT an input listener itself
       down: function( event, trail ) {
-        if ( event.pointer.isKey ) {
-          self.enter( event );
-        }
         self.setButtonState( event, 'down' );
       },
 
       // parameter to DownUpListener, NOT an input listener itself
       up: function( event, trail ) {
         self.setButtonState( event, self._overCount > 0 ? 'over' : 'up' );
-        if ( event.pointer.isKey ) {
-          self.exit( event );
-        }
       }
     } );
   }
@@ -137,6 +131,45 @@ define( function( require ) {
       if ( this._overCount === 0 ) {
         this.setButtonState( event, this.isDown ? 'out' : 'up' );
       }
+    },
+
+    /**
+     * Called from "focus" events (part of the Scenery listener API). On focus the A11yPointer is over the node
+     * with the attached listener, so add to the over count.
+     * @private
+     *
+     * @param {Event} event
+     */
+    focus: function( event ) {
+      this.enter( event );
+    },
+
+    /**
+     * Called from "blur" events (part of the Scenery listener API). On blur, the A11yPointer leaves the node
+     * with this listener so reduce the over count.
+     * @private
+     *
+     * @param {Event} event
+     */
+    blur: function( event ) {
+      this.exit( event );
+    },
+
+    /**
+     * Called with "click" events (part of the Scenery listener API). Typically will be called from a keyboard
+     * or assistive device.
+     *
+     * There are no `keyup` or `keydown` events when an assistive device is active. So we respond generally
+     * to the single `click` event, which indicates a logical activation of this button.
+     * TODO: This may change after https://github.com/phetsims/scenery/issues/939 is done, at which point
+     * `click` should likely be replaced by `keydown` and `keyup` listeners.
+     * @private
+     *
+     * @param {Event} event
+     */
+    click: function( event ) {
+      this.setButtonState( event, 'down' );
+      this.setButtonState( event, 'up' );
     }
   } );
 
