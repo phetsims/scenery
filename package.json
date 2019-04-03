@@ -28,7 +28,9 @@
   "eslintConfig": {
     "extends": "../chipper/eslint/sim_eslintrc.js",
     "globals": {
-      "himalaya": false
+      "himalaya": false,
+      "sceneryLog": false,
+      "he": false
     }
   }
 }
