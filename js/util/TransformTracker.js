@@ -81,10 +81,10 @@ define( function( require ) {
         var nodeTransformListener = this._nodeTransformListeners[ j - 1 ];
 
         if ( this._isStatic ) {
-          this.trail.nodes[ j ].offStatic( 'transform', nodeTransformListener );
+          this.trail.nodes[ j ].offStatic( 'transform', nodeTransformListener, false );
         }
         else {
-          this.trail.nodes[ j ].off( 'transform', nodeTransformListener );
+          this.trail.nodes[ j ].off( 'transform', nodeTransformListener, false );
         }
       }
     },
