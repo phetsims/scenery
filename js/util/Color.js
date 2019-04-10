@@ -441,10 +441,7 @@ define( function( require ) {
     },
 
     /**
-     * Brightens a color in RGB space. Useful when creating gradients from a
-     * single base color.
-     *
-     * @param color
+     * Brightens a color in RGB space. Useful when creating gradients from a single base color.
      * @param factor 0 (no change) to 1 (white)
      * @returns lighter (closer to white) version of the original color.
      */
