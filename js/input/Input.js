@@ -122,12 +122,12 @@ define( require => {
   'use strict';
 
   const A11yPointer = require( 'SCENERY/input/A11yPointer' );
+  const Action = require( 'AXON/Action' );
   const AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   const BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
   const BrowserEvents = require( 'SCENERY/input/BrowserEvents' );
   const cleanArray = require( 'PHET_CORE/cleanArray' );
   const DOMEventIO = require( 'SCENERY/input/DOMEventIO' );
-  const Emitter = require( 'AXON/Emitter' );
   const EmitterIO = require( 'AXON/EmitterIO' );
   const Event = require( 'SCENERY/input/Event' );
   const Features = require( 'SCENERY/util/Features' );
@@ -153,7 +153,7 @@ define( require => {
     pointerType: true, charCode: true, which: true, clientX: true, clientY: true, changedTouches: true,
     target: true
   };
-  
+
   const TARGET_SUBSTITUTE_KEY = 'targetSubstitute';
 
   // Some assistive devices may send "fake" pointer like events to the browser when only using
@@ -235,15 +235,18 @@ define( require => {
       };
 
       // This is a high frequency event that is necessary for reproducible playbacks
-      this.validatePointersEmitter = new Emitter( {
+      this.validatePointersEmitter = new Action( validatePointers, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'validatePointersEmitter' ),
-        phetioHighFrequency: true,
-        first: validatePointers
+        phetioHighFrequency: true
       } );
 
       // @private {Emitter} - Emits to the PhET-iO data stream.
-      this.mouseUpEmitter = new Emitter( {
+      this.mouseUpEmitter = new Action( ( point, event ) => {
+        if ( !this.mouse ) { this.initMouse(); }
+        const pointChanged = this.mouse.up( point, event );
+        this.upEvent( this.mouse, event, pointChanged );
+      }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'mouseUpEmitter' ),
 
@@ -252,16 +255,15 @@ define( require => {
           { name: 'event', type: DOMEventIO }
         ] ),
         phetioEventType: PhetioObject.EventType.USER,
-        phetioDocumentation: 'Emits when a mouse button is released',
-        first: ( point, event ) => {
-          if ( !this.mouse ) { this.initMouse(); }
-          const pointChanged = this.mouse.up( point, event );
-          this.upEvent( this.mouse, event, pointChanged );
-        }
+        phetioDocumentation: 'Emits when a mouse button is released'
       } );
 
       // @private {Emitter} - Emits to the PhET-iO data stream.
-      this.mouseDownEmitter = new Emitter( {
+      this.mouseDownEmitter = new Action( ( point, event ) => {
+        if ( !this.mouse ) { this.initMouse(); }
+        const pointChanged = this.mouse.down( point, event );
+        this.downEvent( this.mouse, event, pointChanged );
+      }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'mouseDownEmitter' ),
 
@@ -270,16 +272,15 @@ define( require => {
           { name: 'event', type: DOMEventIO }
         ] ),
         phetioEventType: PhetioObject.EventType.USER,
-        phetioDocumentation: 'Emits when a mouse button is pressed',
-        first: ( point, event ) => {
-          if ( !this.mouse ) { this.initMouse(); }
-          const pointChanged = this.mouse.down( point, event );
-          this.downEvent( this.mouse, event, pointChanged );
-        }
+        phetioDocumentation: 'Emits when a mouse button is pressed'
       } );
 
       // @private {Emitter} - Emits to the PhET-iO data stream.
-      this.mouseMovedEmitter = new Emitter( {
+      this.mouseMovedEmitter = new Action( ( point, event ) => {
+        if ( !this.mouse ) { this.initMouse(); }
+        this.mouse.move( point, event );
+        this.moveEvent( this.mouse, event );
+      }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'mouseMovedEmitter' ),
 
@@ -289,16 +290,15 @@ define( require => {
         ] ),
         phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when the mouse is moved',
-        phetioHighFrequency: true,
-        first: ( point, event ) => {
-          if ( !this.mouse ) { this.initMouse(); }
-          this.mouse.move( point, event );
-          this.moveEvent( this.mouse, event );
-        }
+        phetioHighFrequency: true
       } );
 
       // @private {Emitter} - Emits to the PhET-iO data stream.
-      this.mouseOverEmitter = new Emitter( {
+      this.mouseOverEmitter = new Action( ( point, event ) => {
+        if ( !this.mouse ) { this.initMouse(); }
+        this.mouse.over( point, event );
+        // TODO: how to handle mouse-over (and log it)... are we changing the pointer.point without a branch change?
+      }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'mouseOverEmitter' ),
 
@@ -307,16 +307,15 @@ define( require => {
           { name: 'event', type: DOMEventIO }
         ] ),
         phetioEventType: PhetioObject.EventType.USER,
-        phetioDocumentation: 'Emits when the mouse is moved over a Node',
-        first: ( point, event ) => {
-          if ( !this.mouse ) { this.initMouse(); }
-          this.mouse.over( point, event );
-          // TODO: how to handle mouse-over (and log it)... are we changing the pointer.point without a branch change?
-        }
+        phetioDocumentation: 'Emits when the mouse is moved over a Node'
       } );
 
       // @private {Emitter} - Emits to the PhET-iO data stream.
-      this.mouseOutEmitter = new Emitter( {
+      this.mouseOutEmitter = new Action( ( point, event ) => {
+        if ( !this.mouse ) { this.initMouse(); }
+        this.mouse.out( point, event );
+        // TODO: how to handle mouse-out (and log it)... are we changing the pointer.point without a branch change?
+      }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'mouseOutEmitter' ),
 
@@ -325,16 +324,21 @@ define( require => {
           { name: 'event', type: DOMEventIO }
         ] ),
         phetioEventType: PhetioObject.EventType.USER,
-        phetioDocumentation: 'Emits when the mouse moves out of the display',
-        first: ( point, event ) => {
-          if ( !this.mouse ) { this.initMouse(); }
-          this.mouse.out( point, event );
-          // TODO: how to handle mouse-out (and log it)... are we changing the pointer.point without a branch change?
-        }
+        phetioDocumentation: 'Emits when the mouse moves out of the display'
       } );
 
       // @private {Emitter} - Emits to the PhET-iO data stream.
-      this.wheelScrolledEmitter = new Emitter( {
+      this.wheelScrolledEmitter = new Action( event => {
+        if ( !this.mouse ) { this.initMouse(); }
+        this.mouse.wheel( event );
+
+        // don't send mouse-wheel events if we don't yet have a mouse location!
+        // TODO: Can we set the mouse location based on the wheel event?
+        if ( this.mouse.point ) {
+          const trail = this.rootNode.trailUnderPointer( this.mouse ) || new Trail( this.rootNode );
+          this.dispatchEvent( trail, 'wheel', this.mouse, event, true );
+        }
+      }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'wheelScrolledEmitter' ),
 
@@ -343,22 +347,15 @@ define( require => {
         ] ),
         phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when the mouse wheel scrolls',
-        phetioHighFrequency: true,
-        first: event => {
-          if ( !this.mouse ) { this.initMouse(); }
-          this.mouse.wheel( event );
-
-          // don't send mouse-wheel events if we don't yet have a mouse location!
-          // TODO: Can we set the mouse location based on the wheel event?
-          if ( this.mouse.point ) {
-            const trail = this.rootNode.trailUnderPointer( this.mouse ) || new Trail( this.rootNode );
-            this.dispatchEvent( trail, 'wheel', this.mouse, event, true );
-          }
-        }
+        phetioHighFrequency: true
       } );
 
       // @private {Emitter} - Emits to the PhET-iO data stream.
-      this.touchStartedEmitter = new Emitter( {
+      this.touchStartedEmitter = new Action( ( id, point, event ) => {
+        const touch = new Touch( id, point, event );
+        this.addPointer( touch );
+        this.downEvent( touch, event, false );
+      }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'touchStartedEmitter' ),
 
@@ -368,16 +365,18 @@ define( require => {
           { name: 'event', type: DOMEventIO }
         ] ),
         phetioEventType: PhetioObject.EventType.USER,
-        phetioDocumentation: 'Emits when a touch begins',
-        first: ( id, point, event ) => {
-          const touch = new Touch( id, point, event );
-          this.addPointer( touch );
-          this.downEvent( touch, event, false );
-        }
+        phetioDocumentation: 'Emits when a touch begins'
       } );
 
       // @private {Emitter} - Emits to the PhET-iO data stream.
-      this.touchEndedEmitter = new Emitter( {
+      this.touchEndedEmitter = new Action( ( id, point, event ) => {
+        const touch = this.findPointerById( id );
+        if ( touch ) {
+          const pointChanged = touch.end( point, event );
+          this.upEvent( touch, event, pointChanged );
+          this.removePointer( touch );
+        }
+      }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'touchEndedEmitter' ),
 
@@ -387,19 +386,17 @@ define( require => {
           { name: 'event', type: DOMEventIO }
         ] ),
         phetioEventType: PhetioObject.EventType.USER,
-        phetioDocumentation: 'Emits when a touch ends',
-        first: ( id, point, event ) => {
-          const touch = this.findPointerById( id );
-          if ( touch ) {
-            const pointChanged = touch.end( point, event );
-            this.upEvent( touch, event, pointChanged );
-            this.removePointer( touch );
-          }
-        }
+        phetioDocumentation: 'Emits when a touch ends'
       } );
 
       // @private {Emitter} - Emits to the PhET-iO data stream.
-      this.touchMovedEmitter = new Emitter( {
+      this.touchMovedEmitter = new Action( ( id, point, event ) => {
+        const touch = this.findPointerById( id );
+        if ( touch ) {
+          touch.move( point, event );
+          this.moveEvent( touch, event );
+        }
+      }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'touchMovedEmitter' ),
 
@@ -410,18 +407,18 @@ define( require => {
         ] ),
         phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when a touch moves',
-        phetioHighFrequency: true,
-        first: ( id, point, event ) => {
-          const touch = this.findPointerById( id );
-          if ( touch ) {
-            touch.move( point, event );
-            this.moveEvent( touch, event );
-          }
-        }
+        phetioHighFrequency: true
       } );
 
       // @private {Emitter} - Emits to the PhET-iO data stream.
-      this.touchCanceledEmitter = new Emitter( {
+      this.touchCanceledEmitter = new Action( ( id, point, event ) => {
+        const touch = this.findPointerById( id );
+        if ( touch ) {
+          const pointChanged = touch.cancel( point, event );
+          this.cancelEvent( touch, event, pointChanged );
+          this.removePointer( touch );
+        }
+      }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'touchCanceledEmitter' ),
 
@@ -431,19 +428,15 @@ define( require => {
           { name: 'event', type: DOMEventIO }
         ] ),
         phetioEventType: PhetioObject.EventType.USER,
-        phetioDocumentation: 'Emits when a touch is canceled',
-        first: ( id, point, event ) => {
-          const touch = this.findPointerById( id );
-          if ( touch ) {
-            const pointChanged = touch.cancel( point, event );
-            this.cancelEvent( touch, event, pointChanged );
-            this.removePointer( touch );
-          }
-        }
+        phetioDocumentation: 'Emits when a touch is canceled'
       } );
 
       // @private {Emitter} - Emits to the PhET-iO data stream.
-      this.penStartedEmitter = new Emitter( {
+      this.penStartedEmitter = new Action( ( id, point, event ) => {
+        const pen = new Pen( id, point, event );
+        this.addPointer( pen );
+        this.downEvent( pen, event, false );
+      }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'penStartedEmitter' ),
 
@@ -453,16 +446,18 @@ define( require => {
           { name: 'event', type: DOMEventIO }
         ] ),
         phetioEventType: PhetioObject.EventType.USER,
-        phetioDocumentation: 'Emits when a pen touches the screen',
-        first: ( id, point, event ) => {
-          const pen = new Pen( id, point, event );
-          this.addPointer( pen );
-          this.downEvent( pen, event, false );
-        }
+        phetioDocumentation: 'Emits when a pen touches the screen'
       } );
 
       // @private {Emitter} - Emits to the PhET-iO data stream.
-      this.penEndedEmitter = new Emitter( {
+      this.penEndedEmitter = new Action( ( id, point, event ) => {
+        const pen = this.findPointerById( id );
+        if ( pen ) {
+          const pointChanged = pen.end( point, event );
+          this.upEvent( pen, event, pointChanged );
+          this.removePointer( pen );
+        }
+      }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'penEndedEmitter' ),
 
@@ -472,19 +467,17 @@ define( require => {
           { name: 'event', type: DOMEventIO }
         ] ),
         phetioEventType: PhetioObject.EventType.USER,
-        phetioDocumentation: 'Emits when a pen is lifted',
-        first: ( id, point, event ) => {
-          const pen = this.findPointerById( id );
-          if ( pen ) {
-            const pointChanged = pen.end( point, event );
-            this.upEvent( pen, event, pointChanged );
-            this.removePointer( pen );
-          }
-        }
+        phetioDocumentation: 'Emits when a pen is lifted'
       } );
 
       // @private {Emitter} - Emits to the PhET-iO data stream.
-      this.penMovedEmitter = new Emitter( {
+      this.penMovedEmitter = new Action( ( id, point, event ) => {
+        const pen = this.findPointerById( id );
+        if ( pen ) {
+          pen.move( point, event );
+          this.moveEvent( pen, event );
+        }
+      }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'penMovedEmitter' ),
 
@@ -495,18 +488,18 @@ define( require => {
         ] ),
         phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when a pen is moved',
-        phetioHighFrequency: true,
-        first: ( id, point, event ) => {
-          const pen = this.findPointerById( id );
-          if ( pen ) {
-            pen.move( point, event );
-            this.moveEvent( pen, event );
-          }
-        }
+        phetioHighFrequency: true
       } );
 
       // @private {Emitter} - Emits to the PhET-iO data stream.
-      this.penCanceledEmitter = new Emitter( {
+      this.penCanceledEmitter = new Action( ( id, point, event ) => {
+        const pen = this.findPointerById( id );
+        if ( pen ) {
+          const pointChanged = pen.cancel( point, event );
+          this.cancelEvent( pen, event, pointChanged );
+          this.removePointer( pen );
+        }
+      }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'penCanceledEmitter' ),
 
@@ -516,15 +509,7 @@ define( require => {
           { name: 'event', type: DOMEventIO }
         ] ),
         phetioEventType: PhetioObject.EventType.USER,
-        phetioDocumentation: 'Emits when a pen is canceled',
-        first: ( id, point, event ) => {
-          const pen = this.findPointerById( id );
-          if ( pen ) {
-            const pointChanged = pen.cancel( point, event );
-            this.cancelEvent( pen, event, pointChanged );
-            this.removePointer( pen );
-          }
-        }
+        phetioDocumentation: 'Emits when a pen is canceled'
       } );
 
       // wire up accessibility listeners on the display's root accessible DOM element.
@@ -555,7 +540,27 @@ define( require => {
         };
 
         // @private
-        this.focusinEmitter = new Emitter( {
+        this.focusinEmitter = new Action( ( event ) => {
+
+          // ignore any focusout callbacks if they are initiated due to implementation details in PDOM manipulation
+          if ( this.display.blockFocusCallbacks ) {
+            return;
+          }
+
+          if ( ieBlockCallbacks ) {
+            ieBlockCallbacks = false;
+            return;
+          }
+
+          sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusIn(' + Input.debugText( null, event ) + ');' );
+          sceneryLog && sceneryLog.Input && sceneryLog.push();
+
+          if ( !this.a11yPointer ) { this.initA11yPointer(); }
+          const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
+          this.dispatchEvent( trail, 'focus', this.a11yPointer, event, false );
+
+          sceneryLog && sceneryLog.Input && sceneryLog.pop();
+        }, {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'focusinEmitter' ),
 
@@ -563,32 +568,53 @@ define( require => {
             { name: 'event', type: DOMEventIO }
           ] ),
           phetioEventType: PhetioObject.EventType.USER,
-          phetioDocumentation: 'Emits when the PDOM root gets the focusin DOM event.',
-          first: ( event ) => {
-
-            // ignore any focusout callbacks if they are initiated due to implementation details in PDOM manipulation
-            if ( this.display.blockFocusCallbacks ) {
-              return;
-            }
-
-            if ( ieBlockCallbacks ) {
-              ieBlockCallbacks = false;
-              return;
-            }
-
-            sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusIn(' + Input.debugText( null, event ) + ');' );
-            sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-            if ( !this.a11yPointer ) { this.initA11yPointer(); }
-            const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
-            this.dispatchEvent( trail, 'focus', this.a11yPointer, event, false );
-
-            sceneryLog && sceneryLog.Input && sceneryLog.pop();
-          }
+          phetioDocumentation: 'Emits when the PDOM root gets the focusin DOM event.'
         } );
 
         // @private
-        this.focusoutEmitter = new Emitter( {
+        this.focusoutEmitter = new Action( ( event ) => {
+
+          // ignore any focusout callbacks if they are initiated due to implementation details in PDOM manipulation
+          if ( this.display.blockFocusCallbacks ) {
+            return;
+          }
+
+          sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusOut(' + Input.debugText( null, event ) + ');' );
+          sceneryLog && sceneryLog.Input && sceneryLog.push();
+
+          if ( !this.a11yPointer ) { this.initA11yPointer(); }
+
+          // recompute the trail on focusout if necessary - since a blur/focusout may have been initiated from a
+          // focus/focusin listener, it is possible that focusout was called more than once before focusin is called on the
+          // next active element, see https://github.com/phetsims/scenery/issues/898
+          this.a11yPointer.invalidateTrail( getTrailId( event ) );
+          this.dispatchEvent( this.a11yPointer.trail, 'blur', this.a11yPointer, event, false );
+
+          // clear the trail to make sure that our assertions aren't testing a stale trail, do this before
+          // focusing event.relatedTarget below so that trail isn't cleared after focus
+          this.a11yPointer.trail = null;
+
+          // If there exists an event.relatedTarget, user is moving to the next item with "tab" like navigation and
+          // event.relatedTarget is the element focus is moving to. If the relatedTarget element is removed from the
+          // document then added back in during focusout callbacks (which is done in AccessibilityTree operations),
+          // some browsers (IE11 and Safari) will fail to focus the element. So we manually focus the relatedTarget
+          // so that focus isn't lost. Skipped if focusout callbacks sent focus to an element other than the
+          // relatedTarget, or if callbacks made relatedTarget unfocusable.
+          //
+          // Focus is set with DOM API to avoid the performance hit of looking up the Node from trail id.
+          if ( event.relatedTarget ) {
+            var focusMovedInCallbacks = this.display.accessibleDOMElement.contains( document.activeElement );
+            var targetFocusable = AccessibilityUtil.isElementFocusable( event.relatedTarget );
+            if ( targetFocusable && !focusMovedInCallbacks ) {
+              if ( platform.ie ) {
+                ieBlockCallbacks = true;
+              }
+              event.relatedTarget.focus();
+            }
+          }
+
+          sceneryLog && sceneryLog.Input && sceneryLog.pop();
+        }, {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'focusoutEmitter' ),
 
@@ -596,54 +622,20 @@ define( require => {
             { name: 'event', type: DOMEventIO }
           ] ),
           phetioEventType: PhetioObject.EventType.USER,
-          phetioDocumentation: 'Emits when the PDOM root gets the focusout DOM event.',
-          first: ( event ) => {
-
-            // ignore any focusout callbacks if they are initiated due to implementation details in PDOM manipulation
-            if ( this.display.blockFocusCallbacks ) {
-              return;
-            }
-
-            sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusOut(' + Input.debugText( null, event ) + ');' );
-            sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-            if ( !this.a11yPointer ) { this.initA11yPointer(); }
-
-            // recompute the trail on focusout if necessary - since a blur/focusout may have been initiated from a
-            // focus/focusin listener, it is possible that focusout was called more than once before focusin is called on the
-            // next active element, see https://github.com/phetsims/scenery/issues/898
-            this.a11yPointer.invalidateTrail( getTrailId( event ) );
-            this.dispatchEvent( this.a11yPointer.trail, 'blur', this.a11yPointer, event, false );
-
-            // clear the trail to make sure that our assertions aren't testing a stale trail, do this before
-            // focusing event.relatedTarget below so that trail isn't cleared after focus
-            this.a11yPointer.trail = null;
-
-            // If there exists an event.relatedTarget, user is moving to the next item with "tab" like navigation and
-            // event.relatedTarget is the element focus is moving to. If the relatedTarget element is removed from the
-            // document then added back in during focusout callbacks (which is done in AccessibilityTree operations),
-            // some browsers (IE11 and Safari) will fail to focus the element. So we manually focus the relatedTarget
-            // so that focus isn't lost. Skipped if focusout callbacks sent focus to an element other than the
-            // relatedTarget, or if callbacks made relatedTarget unfocusable.
-            // 
-            // Focus is set with DOM API to avoid the performance hit of looking up the Node from trail id.
-            if ( event.relatedTarget ) {
-              var focusMovedInCallbacks = this.display.accessibleDOMElement.contains( document.activeElement );
-              var targetFocusable = AccessibilityUtil.isElementFocusable( event.relatedTarget );
-              if ( targetFocusable && !focusMovedInCallbacks ) {
-                if ( platform.ie ) {
-                  ieBlockCallbacks = true;
-                }
-                event.relatedTarget.focus();
-              }
-            }
-
-            sceneryLog && sceneryLog.Input && sceneryLog.pop();
-          }
+          phetioDocumentation: 'Emits when the PDOM root gets the focusout DOM event.'
         } );
 
         // @private
-        this.clickEmitter = new Emitter( {
+        this.clickEmitter = new Action( ( event ) => {
+          sceneryLog && sceneryLog.Input && sceneryLog.Input( 'click(' + Input.debugText( null, event ) + ');' );
+          sceneryLog && sceneryLog.Input && sceneryLog.push();
+
+          if ( !this.a11yPointer ) { this.initA11yPointer(); }
+          const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
+          this.dispatchEvent( trail, 'click', this.a11yPointer, event, true );
+
+          sceneryLog && sceneryLog.Input && sceneryLog.pop();
+        }, {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'clickEmitter' ),
 
@@ -651,21 +643,20 @@ define( require => {
             { name: 'event', type: DOMEventIO }
           ] ),
           phetioEventType: PhetioObject.EventType.USER,
-          phetioDocumentation: 'Emits when the PDOM root gets the click DOM event.',
-          first: ( event ) => {
-            sceneryLog && sceneryLog.Input && sceneryLog.Input( 'click(' + Input.debugText( null, event ) + ');' );
-            sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-            if ( !this.a11yPointer ) { this.initA11yPointer(); }
-            const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
-            this.dispatchEvent( trail, 'click', this.a11yPointer, event, true );
-
-            sceneryLog && sceneryLog.Input && sceneryLog.pop();
-          }
+          phetioDocumentation: 'Emits when the PDOM root gets the click DOM event.'
         } );
 
         // @private
-        this.inputEmitter = new Emitter( {
+        this.inputEmitter = new Action( ( event ) => {
+          sceneryLog && sceneryLog.Input && sceneryLog.Input( 'input(' + Input.debugText( null, event ) + ');' );
+          sceneryLog && sceneryLog.Input && sceneryLog.push();
+
+          if ( !this.a11yPointer ) { this.initA11yPointer(); }
+          const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
+          this.dispatchEvent( trail, 'input', this.a11yPointer, event, true );
+
+          sceneryLog && sceneryLog.Input && sceneryLog.pop();
+        }, {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'inputEmitter' ),
 
@@ -673,21 +664,20 @@ define( require => {
             { name: 'event', type: DOMEventIO }
           ] ),
           phetioEventType: PhetioObject.EventType.USER,
-          phetioDocumentation: 'Emits when the PDOM root gets the input DOM event.',
-          first: ( event ) => {
-            sceneryLog && sceneryLog.Input && sceneryLog.Input( 'input(' + Input.debugText( null, event ) + ');' );
-            sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-            if ( !this.a11yPointer ) { this.initA11yPointer(); }
-            const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
-            this.dispatchEvent( trail, 'input', this.a11yPointer, event, true );
-
-            sceneryLog && sceneryLog.Input && sceneryLog.pop();
-          }
+          phetioDocumentation: 'Emits when the PDOM root gets the input DOM event.'
         } );
 
         // @private
-        this.changeEmitter = new Emitter( {
+        this.changeEmitter = new Action( ( event ) => {
+          sceneryLog && sceneryLog.Input && sceneryLog.Input( 'change(' + Input.debugText( null, event ) + ');' );
+          sceneryLog && sceneryLog.Input && sceneryLog.push();
+
+          if ( !this.a11yPointer ) { this.initA11yPointer(); }
+          const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
+          this.dispatchEvent( trail, 'change', this.a11yPointer, event, true );
+
+          sceneryLog && sceneryLog.Input && sceneryLog.pop();
+        }, {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'changeEmitter' ),
 
@@ -695,21 +685,20 @@ define( require => {
             { name: 'event', type: DOMEventIO }
           ] ),
           phetioEventType: PhetioObject.EventType.USER,
-          phetioDocumentation: 'Emits when the PDOM root gets the change DOM event.',
-          first: ( event ) => {
-            sceneryLog && sceneryLog.Input && sceneryLog.Input( 'change(' + Input.debugText( null, event ) + ');' );
-            sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-            if ( !this.a11yPointer ) { this.initA11yPointer(); }
-            const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
-            this.dispatchEvent( trail, 'change', this.a11yPointer, event, true );
-
-            sceneryLog && sceneryLog.Input && sceneryLog.pop();
-          }
+          phetioDocumentation: 'Emits when the PDOM root gets the change DOM event.'
         } );
 
         // @private
-        this.keydownEmitter = new Emitter( {
+        this.keydownEmitter = new Action( ( event ) => {
+          sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keydown(' + Input.debugText( null, event ) + ');' );
+          sceneryLog && sceneryLog.Input && sceneryLog.push();
+
+          if ( !this.a11yPointer ) { this.initA11yPointer(); }
+          const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
+          this.dispatchEvent( trail, 'keydown', this.a11yPointer, event, true );
+
+          sceneryLog && sceneryLog.Input && sceneryLog.pop();
+        }, {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'keydownEmitter' ),
 
@@ -717,21 +706,20 @@ define( require => {
             { name: 'event', type: DOMEventIO }
           ] ),
           phetioEventType: PhetioObject.EventType.USER,
-          phetioDocumentation: 'Emits when the PDOM root gets the keydown DOM event.',
-          first: ( event ) => {
-            sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keydown(' + Input.debugText( null, event ) + ');' );
-            sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-            if ( !this.a11yPointer ) { this.initA11yPointer(); }
-            const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
-            this.dispatchEvent( trail, 'keydown', this.a11yPointer, event, true );
-
-            sceneryLog && sceneryLog.Input && sceneryLog.pop();
-          }
+          phetioDocumentation: 'Emits when the PDOM root gets the keydown DOM event.'
         } );
 
         // @private
-        this.keyupEmitter = new Emitter( {
+        this.keyupEmitter = new Action( ( event ) => {
+          sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyup(' + Input.debugText( null, event ) + ');' );
+          sceneryLog && sceneryLog.Input && sceneryLog.push();
+
+          if ( !this.a11yPointer ) { this.initA11yPointer(); }
+          const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
+          this.dispatchEvent( trail, 'keyup', this.a11yPointer, event, true );
+
+          sceneryLog && sceneryLog.Input && sceneryLog.pop();
+        }, {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'keyupEmitter' ),
 
@@ -739,17 +727,7 @@ define( require => {
             { name: 'event', type: DOMEventIO }
           ] ),
           phetioEventType: PhetioObject.EventType.USER,
-          phetioDocumentation: 'Emits when the PDOM root gets the keyup DOM event.',
-          first: ( event ) => {
-            sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyup(' + Input.debugText( null, event ) + ');' );
-            sceneryLog && sceneryLog.Input && sceneryLog.push();
-
-            if ( !this.a11yPointer ) { this.initA11yPointer(); }
-            const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
-            this.dispatchEvent( trail, 'keyup', this.a11yPointer, event, true );
-
-            sceneryLog && sceneryLog.Input && sceneryLog.pop();
-          }
+          phetioDocumentation: 'Emits when the PDOM root gets the keyup DOM event.'
         } );
 
         // same event options for all DOM listeners

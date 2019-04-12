@@ -15,9 +15,10 @@
 define( function( require ) {
   'use strict';
 
+  // modules
+  var Action = require( 'AXON/Action' );
   var BooleanProperty = require( 'AXON/BooleanProperty' );
   var DerivedProperty = require( 'AXON/DerivedProperty' );
-  var Emitter = require( 'AXON/Emitter' );
   var EmitterIO = require( 'AXON/EmitterIO' );
   var EventIO = require( 'SCENERY/input/EventIO' );
   var inherit = require( 'PHET_CORE/inherit' );
@@ -233,33 +234,29 @@ define( function( require ) {
     };
 
     // @private {Emitter} - Emitted on press event
-    this._pressedEmitter = new Emitter( {
+    // The main implementation of "press" handling is implemented as a callback to the emitter, so things are nested
+    // nicely for phet-io.
+    this._pressedEmitter = new Action( this.onPress.bind( this ), {
       tandem: options.tandem.createTandem( 'pressedEmitter' ),
       phetioDocumentation: 'Emits whenever a press occurs. The first argument when emitting can be ' +
                            'used to convey info about the Event.',
       phetioReadOnly: options.phetioReadOnly,
       phetioFeatured: options.phetioFeatured,
       phetioEventType: PhetioObject.EventType.USER,
-      phetioType: PressedEmitterIO,
-
-      // The main implementation of "press" handling is implemented as a callback to the emitter, so things are nested
-      // nicely for phet-io.
-      first: this.onPress.bind( this )
+      phetioType: PressedEmitterIO
     } );
 
     // @private {Emitter} - Emitted on release event
-    this._releasedEmitter = new Emitter( {
+    // The main implementation of "release" handling is implemented as a callback to the emitter, so things are nested
+    // nicely for phet-io.
+    this._releasedEmitter = new Action( this.onRelease.bind( this ), {
       tandem: options.tandem.createTandem( 'releasedEmitter' ),
       phetioDocumentation: 'Emits whenever a release occurs.',
       phetioReadOnly: options.phetioReadOnly,
       phetioFeatured: options.phetioFeatured,
       phetioEventType: PhetioObject.EventType.USER,
 
-      phetioType: ReleasedEmitterIO,
-
-      // The main implementation of "release" handling is implemented as a callback to the emitter, so things are nested
-      // nicely for phet-io.
-      first: this.onRelease.bind( this )
+      phetioType: ReleasedEmitterIO
     } );
 
     // update isOverProperty (not a DerivedProperty because we need to hook to passed-in properties)

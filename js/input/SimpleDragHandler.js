@@ -10,8 +10,8 @@ define( function( require ) {
   'use strict';
 
   // modules
+  var Action = require( 'AXON/Action' );
   var BooleanProperty = require( 'AXON/BooleanProperty' );
-  var Emitter = require( 'AXON/Emitter' );
   var EmitterIO = require( 'AXON/EmitterIO' );
   var Event = require( 'SCENERY/input/Event' );
   var inherit = require( 'PHET_CORE/inherit' );
@@ -92,7 +92,35 @@ define( function( require ) {
     this.lastInterruptedTouchPointer = null;
 
     // @private
-    this.dragStartedEmitter = new Emitter( {
+    this.dragStartedEmitter = new Action( function( point, event ) {
+
+      if ( self.dragging ) { return; }
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler startDrag' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+      // set a flag on the pointer so it won't pick up other nodes
+      event.pointer.dragging = true;
+      event.pointer.cursor = self.options.dragCursor;
+      event.pointer.addInputListener( self.dragListener, self.options.attach );
+
+      // set all of our persistent information
+      self.isDraggingProperty.set( true );
+      self.pointer = event.pointer;
+      self.trail = event.trail.subtrailTo( event.currentTarget, true );
+      self.transform = self.trail.getTransform();
+      self.node = event.currentTarget;
+      self.lastDragPoint = event.pointer.point;
+      self.startTransformMatrix = event.currentTarget.getMatrix().copy();
+      // event.domEvent may not exist for touch-to-snag
+      self.mouseButton = event.pointer instanceof Mouse ? event.domEvent.button : undefined;
+
+      if ( self.options.start ) {
+        self.options.start.call( null, event, self.trail );
+      }
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
+    }, {
       tandem: options.tandem.createTandem( 'dragStartedEmitter' ),
 
       phetioType: EmitterIO(
@@ -102,40 +130,52 @@ define( function( require ) {
             type: VoidIO,
             documentation: 'the scenery pointer Event',
             validator: { isValidValue: function( value ) { return value === null || value instanceof Event; } }
-          } ] ),
-      first: function( point, event ) {
-
-        if ( self.dragging ) { return; }
-
-        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler startDrag' );
-        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-
-        // set a flag on the pointer so it won't pick up other nodes
-        event.pointer.dragging = true;
-        event.pointer.cursor = self.options.dragCursor;
-        event.pointer.addInputListener( self.dragListener, self.options.attach );
-
-        // set all of our persistent information
-        self.isDraggingProperty.set( true );
-        self.pointer = event.pointer;
-        self.trail = event.trail.subtrailTo( event.currentTarget, true );
-        self.transform = self.trail.getTransform();
-        self.node = event.currentTarget;
-        self.lastDragPoint = event.pointer.point;
-        self.startTransformMatrix = event.currentTarget.getMatrix().copy();
-        // event.domEvent may not exist for touch-to-snag
-        self.mouseButton = event.pointer instanceof Mouse ? event.domEvent.button : undefined;
-
-        if ( self.options.start ) {
-          self.options.start.call( null, event, self.trail );
-        }
-
-        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
-      }
+          } ] )
     } );
 
     // @private
-    this.draggedEmitter = new Emitter( {
+    this.draggedEmitter = new Action( function( point, event ) {
+
+      if ( !self.dragging || self.isDisposed ) { return; }
+
+      var globalDelta = self.pointer.point.minus( self.lastDragPoint );
+
+      // ignore move events that have 0-length. Chrome seems to be auto-firing these on Windows,
+      // see https://code.google.com/p/chromium/issues/detail?id=327114
+      if ( globalDelta.magnitudeSquared === 0 ) {
+        return;
+      }
+
+      var delta = self.transform.inverseDelta2( globalDelta );
+
+      assert && assert( event.pointer === self.pointer, 'Wrong pointer in move' );
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler (pointer) move for ' + self.trail.toString() );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+      // move by the delta between the previous point, using the precomputed transform
+      // prepend the translation on the node, so we can ignore whatever other transform state the node has
+      if ( self.options.translate ) {
+        var translation = self.node.getMatrix().getTranslation();
+        self.options.translate.call( null, {
+          delta: delta,
+          oldPosition: translation,
+          position: translation.plus( delta )
+        } );
+      }
+      self.lastDragPoint = self.pointer.point;
+
+      if ( self.options.drag ) {
+
+        // TODO: add the position in to the listener
+        var saveCurrentTarget = event.currentTarget;
+        event.currentTarget = self.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
+        self.options.drag.call( null, event, self.trail ); // new position (old position?) delta
+        event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
+      }
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
+    }, {
       phetioHighFrequency: true,
       tandem: options.tandem.createTandem( 'draggedEmitter' ),
 
@@ -146,53 +186,34 @@ define( function( require ) {
             type: VoidIO,
             documentation: 'the scenery pointer Event',
             validator: { isValidValue: function( value ) { return value === null || value instanceof Event;} }
-          } ] ),
-      first: function( point, event ) {
-
-        if ( !self.dragging || self.isDisposed ) { return; }
-
-        var globalDelta = self.pointer.point.minus( self.lastDragPoint );
-
-        // ignore move events that have 0-length. Chrome seems to be auto-firing these on Windows,
-        // see https://code.google.com/p/chromium/issues/detail?id=327114
-        if ( globalDelta.magnitudeSquared === 0 ) {
-          return;
-        }
-
-        var delta = self.transform.inverseDelta2( globalDelta );
-
-        assert && assert( event.pointer === self.pointer, 'Wrong pointer in move' );
-
-        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler (pointer) move for ' + self.trail.toString() );
-        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-
-        // move by the delta between the previous point, using the precomputed transform
-        // prepend the translation on the node, so we can ignore whatever other transform state the node has
-        if ( self.options.translate ) {
-          var translation = self.node.getMatrix().getTranslation();
-          self.options.translate.call( null, {
-            delta: delta,
-            oldPosition: translation,
-            position: translation.plus( delta )
-          } );
-        }
-        self.lastDragPoint = self.pointer.point;
-
-        if ( self.options.drag ) {
-
-          // TODO: add the position in to the listener
-          var saveCurrentTarget = event.currentTarget;
-          event.currentTarget = self.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
-          self.options.drag.call( null, event, self.trail ); // new position (old position?) delta
-          event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
-        }
-
-        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
-      }
+          } ] )
     } );
 
     // @private
-    this.dragEndedEmitter = new Emitter( {
+    this.dragEndedEmitter = new Action( function( point, event ) {
+
+      if ( !self.dragging ) { return; }
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler endDrag' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+      self.pointer.dragging = false;
+      self.pointer.cursor = null;
+      self.pointer.removeInputListener( self.dragListener );
+
+      self.isDraggingProperty.set( false );
+
+      if ( self.options.end ) {
+
+        // drag end may be triggered programmatically and hence event and trail may be undefined
+        self.options.end.call( null, event, self.trail );
+      }
+
+      // release our reference
+      self.pointer = null;
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
+    }, {
       tandem: options.tandem.createTandem( 'dragEndedEmitter' ),
 
       phetioType: EmitterIO(
@@ -211,31 +232,7 @@ define( function( require ) {
               }
             }
           }
-        ] ),
-      first: function( point, event ) {
-
-        if ( !self.dragging ) { return; }
-
-        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler endDrag' );
-        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-
-        self.pointer.dragging = false;
-        self.pointer.cursor = null;
-        self.pointer.removeInputListener( self.dragListener );
-
-        self.isDraggingProperty.set( false );
-
-        if ( self.options.end ) {
-
-          // drag end may be triggered programmatically and hence event and trail may be undefined
-          self.options.end.call( null, event, self.trail );
-        }
-
-        // release our reference
-        self.pointer = null;
-
-        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
-      }
+        ] )
     } );
 
     // if an ancestor is transformed, pin our node

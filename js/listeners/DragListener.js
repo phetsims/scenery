@@ -40,8 +40,8 @@ define( function( require ) {
   'use strict';
 
   // modules
+  var Action = require( 'AXON/Action' );
   var Bounds2 = require( 'DOT/Bounds2' );
-  var Emitter = require( 'AXON/Emitter' );
   var EmitterIO = require( 'AXON/EmitterIO' );
   var EventIO = require( 'SCENERY/input/EventIO' );
   var inherit = require( 'PHET_CORE/inherit' );
@@ -184,23 +184,22 @@ define( function( require ) {
     this._lastInterruptedTouchPointer = null;
 
     // @private {Emitter} - emitted on drag. Used for triggering phet-io events to the data stream, see https://github.com/phetsims/scenery/issues/842
-    this._draggedEmitter = new Emitter( {
+    this._draggedEmitter = new Action( function( event ) {
+
+      // This is done first, before the drag listener is called (from the prototype drag call)
+      if ( !self._globalPoint.equals( self.pointer.point ) ) {
+        self.reposition( self.pointer.point );
+      }
+
+      PressListener.prototype.drag.call( self, event );
+    }, {
       phetioFeatured: options.phetioFeatured,
       tandem: options.tandem.createTandem( 'draggedEmitter' ),
       phetioHighFrequency: true,
       phetioDocumentation: 'Emits whenever a drag occurs with an EventIO argument.',
       phetioReadOnly: options.phetioReadOnly,
       phetioEventType: PhetioObject.EventType.USER,
-      phetioType: DraggedEmitterIO,
-      first: function( event ) {
-
-        // This is done first, before the drag listener is called (from the prototype drag call)
-        if ( !self._globalPoint.equals( self.pointer.point ) ) {
-          self.reposition( self.pointer.point );
-        }
-
-        PressListener.prototype.drag.call( self, event );
-      }
+      phetioType: DraggedEmitterIO
     } );
   }
 
