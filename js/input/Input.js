@@ -220,11 +220,13 @@ define( require => {
       // like https://github.com/phetsims/balloons-and-static-electricity/issues/406.
       this.currentlyFiringEvents = false;
 
+      ////////////////////////////////////////////////////
       // Declare the Emitters that send scenery input events to the PhET-iO data stream.  Note they use the default value
       // of phetioReadOnly false, in case a client wants to synthesize events.
 
-      // @private {Emitter} Emits pointer validation to the input stream for playback
-      const validatePointers = () => {
+      // @private {Emitter} - Emits pointer validation to the input stream for playback
+      // This is a high frequency event that is necessary for reproducible playbacks
+      this.validatePointersEmitter = new Action( () => {
         let i = this.pointers.length;
         while ( i-- ) {
           const pointer = this.pointers[ i ];
@@ -232,10 +234,7 @@ define( require => {
             this.branchChangeEvents( pointer, pointer.lastDOMEvent, false );
           }
         }
-      };
-
-      // This is a high frequency event that is necessary for reproducible playbacks
-      this.validatePointersEmitter = new Action( validatePointers, {
+      }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'validatePointersEmitter' ),
         phetioHighFrequency: true
