@@ -41,8 +41,8 @@ define( function( require ) {
 
   // modules
   var Action = require( 'AXON/Action' );
+  var ActionIO = require( 'AXON/ActionIO' );
   var Bounds2 = require( 'DOT/Bounds2' );
-  var EmitterIO = require( 'AXON/EmitterIO' );
   var EventIO = require( 'SCENERY/input/EventIO' );
   var inherit = require( 'PHET_CORE/inherit' );
   var PhetioObject = require( 'TANDEM/PhetioObject' );
@@ -57,7 +57,7 @@ define( function( require ) {
 
   // Scratch vectors used to prevent allocations
   var scratchVector2A = new Vector2( 0, 0 );
-  var DraggedEmitterIO = EmitterIO( [ { name: 'event', type: EventIO } ] );
+  var DraggedActionIO = ActionIO( [ { name: 'event', type: EventIO } ] );
 
   /**
    * @constructor
@@ -199,7 +199,7 @@ define( function( require ) {
       phetioDocumentation: 'Emits whenever a drag occurs with an EventIO argument.',
       phetioReadOnly: options.phetioReadOnly,
       phetioEventType: PhetioObject.EventType.USER,
-      phetioType: DraggedEmitterIO
+      phetioType: DraggedActionIO
     } );
   }
 

@@ -11,8 +11,8 @@ define( function( require ) {
 
   // modules
   var Action = require( 'AXON/Action' );
+  var ActionIO = require( 'AXON/ActionIO' );
   var BooleanProperty = require( 'AXON/BooleanProperty' );
-  var EmitterIO = require( 'AXON/EmitterIO' );
   var Event = require( 'SCENERY/input/Event' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Mouse = require( 'SCENERY/input/Mouse' );
@@ -123,7 +123,7 @@ define( function( require ) {
     }, {
       tandem: options.tandem.createTandem( 'dragStartedEmitter' ),
 
-      phetioType: EmitterIO(
+      phetioType: ActionIO(
         [ { name: 'point', type: Vector2IO, documentation: 'the position of the drag start in view coordinates' },
           {
             name: 'event',
@@ -179,7 +179,7 @@ define( function( require ) {
       phetioHighFrequency: true,
       tandem: options.tandem.createTandem( 'draggedEmitter' ),
 
-      phetioType: EmitterIO(
+      phetioType: ActionIO(
         [ { name: 'point', type: Vector2IO, documentation: 'the position of the drag in view coordinates' },
           {
             name: 'event',
@@ -216,7 +216,7 @@ define( function( require ) {
     }, {
       tandem: options.tandem.createTandem( 'dragEndedEmitter' ),
 
-      phetioType: EmitterIO(
+      phetioType: ActionIO(
         [ { name: 'point', type: Vector2IO, documentation: 'the position of the drag end in view coordinates' },
           {
             name: 'event',

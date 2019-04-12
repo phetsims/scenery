@@ -123,12 +123,12 @@ define( require => {
 
   const A11yPointer = require( 'SCENERY/input/A11yPointer' );
   const Action = require( 'AXON/Action' );
+  const ActionIO = require( 'AXON/ActionIO' );
   const AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   const BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
   const BrowserEvents = require( 'SCENERY/input/BrowserEvents' );
   const cleanArray = require( 'PHET_CORE/cleanArray' );
   const DOMEventIO = require( 'SCENERY/input/DOMEventIO' );
-  const EmitterIO = require( 'AXON/EmitterIO' );
   const Event = require( 'SCENERY/input/Event' );
   const Features = require( 'SCENERY/util/Features' );
   const FullScreen = require( 'SCENERY/util/FullScreen' );
@@ -249,7 +249,7 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'mouseUpEmitter' ),
 
-        phetioType: EmitterIO( [
+        phetioType: ActionIO( [
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
@@ -266,7 +266,7 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'mouseDownEmitter' ),
 
-        phetioType: EmitterIO( [
+        phetioType: ActionIO( [
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
@@ -283,7 +283,7 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'mouseMovedEmitter' ),
 
-        phetioType: EmitterIO( [
+        phetioType: ActionIO( [
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
@@ -301,7 +301,7 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'mouseOverEmitter' ),
 
-        phetioType: EmitterIO( [
+        phetioType: ActionIO( [
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
@@ -318,7 +318,7 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'mouseOutEmitter' ),
 
-        phetioType: EmitterIO( [
+        phetioType: ActionIO( [
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
@@ -341,7 +341,7 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'wheelScrolledEmitter' ),
 
-        phetioType: EmitterIO( [
+        phetioType: ActionIO( [
           { name: 'event', type: DOMEventIO }
         ] ),
         phetioEventType: PhetioObject.EventType.USER,
@@ -358,7 +358,7 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'touchStartedEmitter' ),
 
-        phetioType: EmitterIO( [
+        phetioType: ActionIO( [
           { name: 'id', type: NumberIO },
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
@@ -379,7 +379,7 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'touchEndedEmitter' ),
 
-        phetioType: EmitterIO( [
+        phetioType: ActionIO( [
           { name: 'id', type: NumberIO },
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
@@ -399,7 +399,7 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'touchMovedEmitter' ),
 
-        phetioType: EmitterIO( [
+        phetioType: ActionIO( [
           { name: 'id', type: NumberIO },
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
@@ -421,7 +421,7 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'touchCanceledEmitter' ),
 
-        phetioType: EmitterIO( [
+        phetioType: ActionIO( [
           { name: 'id', type: NumberIO },
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
@@ -439,7 +439,7 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'penStartedEmitter' ),
 
-        phetioType: EmitterIO( [
+        phetioType: ActionIO( [
           { name: 'id', type: NumberIO },
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
@@ -460,7 +460,7 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'penEndedEmitter' ),
 
-        phetioType: EmitterIO( [
+        phetioType: ActionIO( [
           { name: 'id', type: NumberIO },
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
@@ -480,7 +480,7 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'penMovedEmitter' ),
 
-        phetioType: EmitterIO( [
+        phetioType: ActionIO( [
           { name: 'id', type: NumberIO },
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
@@ -502,7 +502,7 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'penCanceledEmitter' ),
 
-        phetioType: EmitterIO( [
+        phetioType: ActionIO( [
           { name: 'id', type: NumberIO },
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
@@ -563,7 +563,7 @@ define( require => {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'focusinEmitter' ),
 
-          phetioType: EmitterIO( [
+          phetioType: ActionIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
           phetioEventType: PhetioObject.EventType.USER,
@@ -617,7 +617,7 @@ define( require => {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'focusoutEmitter' ),
 
-          phetioType: EmitterIO( [
+          phetioType: ActionIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
           phetioEventType: PhetioObject.EventType.USER,
@@ -638,7 +638,7 @@ define( require => {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'clickEmitter' ),
 
-          phetioType: EmitterIO( [
+          phetioType: ActionIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
           phetioEventType: PhetioObject.EventType.USER,
@@ -659,7 +659,7 @@ define( require => {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'inputEmitter' ),
 
-          phetioType: EmitterIO( [
+          phetioType: ActionIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
           phetioEventType: PhetioObject.EventType.USER,
@@ -680,7 +680,7 @@ define( require => {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'changeEmitter' ),
 
-          phetioType: EmitterIO( [
+          phetioType: ActionIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
           phetioEventType: PhetioObject.EventType.USER,
@@ -701,7 +701,7 @@ define( require => {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'keydownEmitter' ),
 
-          phetioType: EmitterIO( [
+          phetioType: ActionIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
           phetioEventType: PhetioObject.EventType.USER,
@@ -722,7 +722,7 @@ define( require => {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'keyupEmitter' ),
 
-          phetioType: EmitterIO( [
+          phetioType: ActionIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
           phetioEventType: PhetioObject.EventType.USER,

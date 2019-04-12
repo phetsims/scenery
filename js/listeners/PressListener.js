@@ -17,9 +17,9 @@ define( function( require ) {
 
   // modules
   var Action = require( 'AXON/Action' );
+  var ActionIO = require( 'AXON/ActionIO' );
   var BooleanProperty = require( 'AXON/BooleanProperty' );
   var DerivedProperty = require( 'AXON/DerivedProperty' );
-  var EmitterIO = require( 'AXON/EmitterIO' );
   var EventIO = require( 'SCENERY/input/EventIO' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Mouse = require( 'SCENERY/input/Mouse' );
@@ -36,7 +36,7 @@ define( function( require ) {
   var globalID = 0;
 
   // constants - factored out to reduce memory usage, see https://github.com/phetsims/unit-rates/issues/207
-  var PressedEmitterIO = EmitterIO( [
+  var PressedEmitterIO = ActionIO( [
     { name: 'event', type: EventIO },
     {
       name: 'targetNode',
@@ -50,7 +50,7 @@ define( function( require ) {
     }
   ] );
 
-  var ReleasedEmitterIO = EmitterIO( [ {
+  var ReleasedEmitterIO = ActionIO( [ {
     name: 'event',
     type: NullableIO( EventIO )
   }, {
