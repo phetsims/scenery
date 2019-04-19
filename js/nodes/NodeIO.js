@@ -34,23 +34,21 @@ define( function( require ) {
 
       // pick the following values from the parent Node
       phetioReadOnly: node.phetioReadOnly,
-      phetioState: node.phetioState,
       phetioType: PropertyIO( BooleanIO ),
 
       tandem: node.tandem.createTandem( 'visibleProperty' ),
       phetioDocumentation: 'Controls whether the Node will be visible (and interactive), see the NodeIO documentation for more details.'
-    }, node.phetioComponentOptions.visibleProperty ) );
+    }, node.phetioComponentOptions, node.phetioComponentOptions.visibleProperty ) );
 
     var pickableProperty = new NodeProperty( node, 'pickability', 'pickable', _.extend( {
 
       // pick the following values from the parent Node
       phetioReadOnly: node.phetioReadOnly,
-      phetioState: node.phetioState,
 
       tandem: node.tandem.createTandem( 'pickableProperty' ),
       phetioType: PropertyIO( NullableIO( BooleanIO ) ),
       phetioDocumentation: 'Sets whether the node will be pickable (and hence interactive), see the NodeIO documentation for more details'
-    }, node.phetioComponentOptions.pickableProperty ) );
+    }, node.phetioComponentOptions, node.phetioComponentOptions.pickableProperty ) );
 
     // Adapter for the opacity.  Cannot use NodeProperty at the moment because it doesn't handle numeric types
     // properly--we may address this by moving to a mixin pattern.
@@ -58,12 +56,11 @@ define( function( require ) {
 
       // pick the following values from the parent Node
       phetioReadOnly: node.phetioReadOnly,
-      phetioState: node.phetioState,
 
       tandem: node.tandem.createTandem( 'opacityProperty' ),
       range: new Range( 0, 1 ),
       phetioDocumentation: 'Opacity of the parent NodeIO, between 0 (invisible) and 1 (fully visible)'
-    }, node.phetioComponentOptions.opacityProperty ) );
+    }, node.phetioComponentOptions, node.phetioComponentOptions.opacityProperty ) );
     opacityProperty.link( function( opacity ) { node.opacity = opacity; } );
     node.on( 'opacity', function() { opacityProperty.value = node.opacity; } );
 
@@ -84,37 +81,6 @@ define( function( require ) {
       this.disposeNodeIO();
     }
   }, {
-
-    /**
-     * Since NodeIO has no intrinsic state, we must signify to the PhET-iO serialization engine that this Node should
-     * opt out of appearing in the state. We can't achieve this by removing this method, since NodeIO's parent type has
-     * a `toStateObject` that causes a cyclical JSON reference.
-     *
-     * We also don't need matching `fromStateObject` and `setValue` methods because this type won't be added to the state
-     * object, and thus setState will never be called on instances of NodeIO.
-     *
-     * Subtypes can still override this method, and implement their own `fromStateObject` and `setValue` if there is desired
-     * serializable data for that type to hold in the state.
-     *
-     * We can't declare the Node phetioState: false, like the general pattern that we want to use ( see, because that property
-     * bubbles to children, and we want things like visibleProperty to be in the state by default, just not the NodeIO
-     * type itself.
-     *
-     * @returns {undefined} - We don't use null because other types want that value in the state, see `NullableIO` for example.
-     * @override
-     */
-    toStateObject: function() {
-      return undefined;
-    },
-
-    /**
-     * @param {Node} o
-     * @returns {Object}
-     * @override - to prevent attempted JSON serialization of circular Node
-     */
-    fromStateObject: function( o ) {
-      return o; // Pass through values defined by subclasses
-    },
 
     validator: { valueType: scenery.Node },
 

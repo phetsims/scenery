@@ -4971,7 +4971,7 @@ define( function( require ) {
         }
       } );
 
-      this.initializePhetioObject( { phetioType: NodeIO }, options );
+      this.initializePhetioObject( { phetioType: NodeIO, phetioState: false }, options );
 
       return this; // allow chaining
     },

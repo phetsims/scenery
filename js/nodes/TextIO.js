@@ -33,12 +33,12 @@ define( function( require ) {
 
       // pick the following values from the parent Node
       phetioReadOnly: text.phetioReadOnly,
-      phetioState: text.phetioState,
+      phetioState: true,
       phetioType: PropertyIO( StringIO ),
 
       tandem: text.tandem.createTandem( 'textProperty' ),
       phetioDocumentation: 'Property for the displayed text'
-    }, text.phetioComponentOptions.textProperty ) );
+    }, text.phetioComponentOptions, text.phetioComponentOptions.textProperty ) );
 
     // @private
     this.disposeTextIO = function() {
