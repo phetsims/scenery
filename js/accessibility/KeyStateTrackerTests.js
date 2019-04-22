@@ -100,8 +100,8 @@ define( require => {
 
     // KeyStateTracker should correctly update when modifier keys like "shift" are attached to the event - if shift
     // is down on keyUpUpdate, shift should be considered down
-    assert.ok( testTracker.isKeyDown( shiftKeyEvent.domEvent.keyCode ), 'shift key should not be down in tracker just because of tab up with shift key code' );
-    assert.ok( testTracker.shiftKeyDown, 'shift key should not be down in tracker getter' );
+    assert.ok( testTracker.isKeyDown( shiftKeyEvent.domEvent.keyCode ), 'shift key should update from modifier' );
+    assert.ok( testTracker.shiftKeyDown, 'shift key should update from modifier getter' );
   } );
 
 
