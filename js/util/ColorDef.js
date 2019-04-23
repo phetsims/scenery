@@ -26,7 +26,11 @@ define( function( require ) {
       return color === null ||
              typeof color === 'string' ||
              color instanceof Color ||
-             ( color instanceof Property && ( typeof color.value === 'string' || color.value instanceof Color ) );
+             ( color instanceof Property && (
+               color.value === null ||
+               typeof color.value === 'string' ||
+               color.value instanceof Color
+             ) );
     }
   };
 
