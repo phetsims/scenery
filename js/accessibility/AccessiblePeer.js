@@ -185,36 +185,30 @@ define( function( require ) {
         options = this.node.helpTextBehavior( this.node, options, this.node.helpText );
       }
 
-
       // create the base DOM element representing this accessible instance
       // TODO: why not just options.focusable?
-      this._primarySibling = AccessibilityUtil.createElement( options.tagName, this.node.focusable, {
-        namespace: options.accessibleNamespace,
-        id: uniqueId,
-        trailId: uniqueId
+      this._primarySibling = createElement( options.tagName, this.node.focusable, uniqueId, {
+        namespace: options.accessibleNamespace
       } );
 
       // create the container parent for the dom siblings
       if ( options.containerTagName ) {
-        this._containerParent = AccessibilityUtil.createElement( options.containerTagName, false, {
-          trailId: uniqueId,
-          id: 'container-' + uniqueId
+        this._containerParent = createElement( options.containerTagName, false, uniqueId, {
+          siblingName: 'container'
         } );
       }
 
       // create the label DOM element representing this instance
       if ( options.labelTagName ) {
-        this._labelSibling = AccessibilityUtil.createElement( options.labelTagName, false, {
-          trailId: uniqueId,
-          id: 'label-' + uniqueId
+        this._labelSibling = createElement( options.labelTagName, false, uniqueId, {
+          siblingName: 'label'
         } );
       }
 
       // create the description DOM element representing this instance
       if ( options.descriptionTagName ) {
-        this._descriptionSibling = AccessibilityUtil.createElement( options.descriptionTagName, false, {
-          trailId: uniqueId,
-          id: 'description-' + uniqueId 
+        this._descriptionSibling = createElement( options.descriptionTagName, false, uniqueId, {
+          siblingName: 'description'
         } );
       }
 
@@ -961,6 +955,33 @@ define( function( require ) {
   //--------------------------------------------------------------------------
   // Helper functions
   //--------------------------------------------------------------------------
+  
+  /**
+   * Create a sibling element for the AccessiblePeer.
+   *
+   * @param {string} tagName
+   * @param {boolean} focusable
+   * @param {string} trailId - unique id that points to the instance of the node
+   * @param {object} options - passed along to AccessibilityUtil.createElement
+   * @returns {HTMLElement}
+   */
+  function createElement( tagName, focusable, trailId, options ) {
+    options = _.extend( {
+
+      // {string|null} - addition to the trailId, separated by a hyphen to identify the different siblings within
+      // the document
+      siblingName: null
+    }, options );
+
+    // add sibling name to unique ID generated from the trail to make the non-primary siblings unique in the DOM
+    assert && assert( options.id === undefined, 'createElement will set optional id' );
+    options.id = options.siblingName ? `${options.siblingName}-${trailId}` : trailId;
+
+    assert && assert( options.trailId === undefined, 'createElement will set optional trailId' );
+    options.trailId = trailId;
+
+    return AccessibilityUtil.createElement( tagName, false, options );
+  }
 
   /**
    * Get a matrix that can be used as the CSS transform for elements in the DOM. This matrix will an HTML element
