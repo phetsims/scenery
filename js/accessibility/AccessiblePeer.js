@@ -980,7 +980,7 @@ define( function( require ) {
     assert && assert( options.trailId === undefined, 'createElement will set optional trailId' );
     options.trailId = trailId;
 
-    return AccessibilityUtil.createElement( tagName, false, options );
+    return AccessibilityUtil.createElement( tagName, focusable, options );
   }
 
   /**
