@@ -184,7 +184,7 @@ define( function( require ) {
     this._lastInterruptedTouchPointer = null;
 
     // @private {Emitter} - emitted on drag. Used for triggering phet-io events to the data stream, see https://github.com/phetsims/scenery/issues/842
-    this._draggedEmitter = new Action( function( event ) {
+    this._draggedAction = new Action( function( event ) {
 
       // This is done first, before the drag listener is called (from the prototype drag call)
       if ( !self._globalPoint.equals( self.pointer.point ) ) {
@@ -194,7 +194,7 @@ define( function( require ) {
       PressListener.prototype.drag.call( self, event );
     }, {
       phetioFeatured: options.phetioFeatured,
-      tandem: options.tandem.createTandem( 'draggedEmitter' ),
+      tandem: options.tandem.createTandem( 'draggedAction' ),
       phetioHighFrequency: true,
       phetioDocumentation: 'Emits whenever a drag occurs with an EventIO argument.',
       phetioReadOnly: options.phetioReadOnly,
@@ -305,7 +305,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener drag' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      this._draggedEmitter.emit( event );
+      this._draggedAction.execute( event );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
@@ -670,7 +670,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener dispose' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      this._draggedEmitter.dispose();
+      this._draggedAction.dispose();
 
       this.detachTransformTracker();
 

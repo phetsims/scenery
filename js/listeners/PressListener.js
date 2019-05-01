@@ -36,7 +36,7 @@ define( function( require ) {
   var globalID = 0;
 
   // constants - factored out to reduce memory usage, see https://github.com/phetsims/unit-rates/issues/207
-  var PressedEmitterIO = ActionIO( [
+  var PressedActionIO = ActionIO( [
     { name: 'event', type: EventIO },
     {
       name: 'targetNode',
@@ -50,7 +50,7 @@ define( function( require ) {
     }
   ] );
 
-  var ReleasedEmitterIO = ActionIO( [ {
+  var ReleasedActionIO = ActionIO( [ {
     name: 'event',
     type: NullableIO( EventIO )
   }, {
@@ -233,30 +233,30 @@ define( function( require ) {
       interrupt: this.pointerInterrupt.bind( this )
     };
 
-    // @private {Emitter} - Emitted on press event
-    // The main implementation of "press" handling is implemented as a callback to the emitter, so things are nested
+    // @private {Action} - Executed on press event
+    // The main implementation of "press" handling is implemented as a callback to the Action, so things are nested
     // nicely for phet-io.
-    this._pressedEmitter = new Action( this.onPress.bind( this ), {
-      tandem: options.tandem.createTandem( 'pressedEmitter' ),
-      phetioDocumentation: 'Emits whenever a press occurs. The first argument when emitting can be ' +
+    this._pressedAction = new Action( this.onPress.bind( this ), {
+      tandem: options.tandem.createTandem( 'pressedAction' ),
+      phetioDocumentation: 'Executes whenever a press occurs. The first argument when executing can be ' +
                            'used to convey info about the Event.',
       phetioReadOnly: options.phetioReadOnly,
       phetioFeatured: options.phetioFeatured,
       phetioEventType: PhetioObject.EventType.USER,
-      phetioType: PressedEmitterIO
+      phetioType: PressedActionIO
     } );
 
-    // @private {Emitter} - Emitted on release event
-    // The main implementation of "release" handling is implemented as a callback to the emitter, so things are nested
+    // @private {Action} - Executed on release event
+    // The main implementation of "release" handling is implemented as a callback to the Action, so things are nested
     // nicely for phet-io.
-    this._releasedEmitter = new Action( this.onRelease.bind( this ), {
-      tandem: options.tandem.createTandem( 'releasedEmitter' ),
-      phetioDocumentation: 'Emits whenever a release occurs.',
+    this._releasedAction = new Action( this.onRelease.bind( this ), {
+      tandem: options.tandem.createTandem( 'releasedAction' ),
+      phetioDocumentation: 'Executes whenever a release occurs.',
       phetioReadOnly: options.phetioReadOnly,
       phetioFeatured: options.phetioFeatured,
       phetioEventType: PhetioObject.EventType.USER,
 
-      phetioType: ReleasedEmitterIO
+      phetioType: ReleasedActionIO
     } );
 
     // update isOverProperty (not a DerivedProperty because we need to hook to passed-in properties)
@@ -363,7 +363,7 @@ define( function( require ) {
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' successful press' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-      this._pressedEmitter.emit( event, targetNode || null, callback || null ); // cannot pass undefined into emit call
+      this._pressedAction.execute( event, targetNode || null, callback || null ); // cannot pass undefined into execute call
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
 
@@ -386,7 +386,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' release' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      this._releasedEmitter.emit( event || null, callback || null ); // cannot pass undefined to emit call
+      this._releasedAction.execute( event || null, callback || null ); // cannot pass undefined to execute call
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
@@ -767,8 +767,8 @@ define( function( require ) {
       this.a11yClickingProperty.dispose();
       this.looksPressedProperty.dispose();
 
-      this._pressedEmitter.dispose();
-      this._releasedEmitter.dispose();
+      this._pressedAction.dispose();
+      this._releasedAction.dispose();
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     }
