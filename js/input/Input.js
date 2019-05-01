@@ -213,7 +213,7 @@ define( require => {
       // @public {Array.<Pointer>} - All active pointers.
       this.pointers = [];
 
-      // TODO: replace this with an emitter
+      // TODO: replace this with an Emitter
       this.pointerAddedListeners = [];
 
       // @public {boolean} - Whether we are currently firing events. We need to track this to handle re-entrant cases
@@ -221,12 +221,12 @@ define( require => {
       this.currentlyFiringEvents = false;
 
       ////////////////////////////////////////////////////
-      // Declare the Emitters that send scenery input events to the PhET-iO data stream.  Note they use the default value
+      // Declare the Actions that send scenery input events to the PhET-iO data stream.  Note they use the default value
       // of phetioReadOnly false, in case a client wants to synthesize events.
 
-      // @private {Emitter} - Emits pointer validation to the input stream for playback
+      // @private {Action} - Emits pointer validation to the input stream for playback
       // This is a high frequency event that is necessary for reproducible playbacks
-      this.validatePointersEmitter = new Action( () => {
+      this.validatePointersAction = new Action( () => {
         let i = this.pointers.length;
         while ( i-- ) {
           const pointer = this.pointers[ i ];
@@ -236,18 +236,18 @@ define( require => {
         }
       }, {
         phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'validatePointersEmitter' ),
+        tandem: options.tandem.createTandem( 'validatePointersAction' ),
         phetioHighFrequency: true
       } );
 
-      // @private {Emitter} - Emits to the PhET-iO data stream.
-      this.mouseUpEmitter = new Action( ( point, event ) => {
+      // @private {Action} - Emits to the PhET-iO data stream.
+      this.mouseUpAction = new Action( ( point, event ) => {
         if ( !this.mouse ) { this.initMouse(); }
         const pointChanged = this.mouse.up( point, event );
         this.upEvent( this.mouse, event, pointChanged );
       }, {
         phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'mouseUpEmitter' ),
+        tandem: options.tandem.createTandem( 'mouseUpAction' ),
 
         phetioType: ActionIO( [
           { name: 'point', type: Vector2IO },
@@ -257,14 +257,14 @@ define( require => {
         phetioDocumentation: 'Emits when a mouse button is released'
       } );
 
-      // @private {Emitter} - Emits to the PhET-iO data stream.
-      this.mouseDownEmitter = new Action( ( point, event ) => {
+      // @private {Action} - Emits to the PhET-iO data stream.
+      this.mouseDownAction = new Action( ( point, event ) => {
         if ( !this.mouse ) { this.initMouse(); }
         const pointChanged = this.mouse.down( point, event );
         this.downEvent( this.mouse, event, pointChanged );
       }, {
         phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'mouseDownEmitter' ),
+        tandem: options.tandem.createTandem( 'mouseDownAction' ),
 
         phetioType: ActionIO( [
           { name: 'point', type: Vector2IO },
@@ -274,14 +274,14 @@ define( require => {
         phetioDocumentation: 'Emits when a mouse button is pressed'
       } );
 
-      // @private {Emitter} - Emits to the PhET-iO data stream.
-      this.mouseMovedEmitter = new Action( ( point, event ) => {
+      // @private {Action} - Emits to the PhET-iO data stream.
+      this.mouseMovedAction = new Action( ( point, event ) => {
         if ( !this.mouse ) { this.initMouse(); }
         this.mouse.move( point, event );
         this.moveEvent( this.mouse, event );
       }, {
         phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'mouseMovedEmitter' ),
+        tandem: options.tandem.createTandem( 'mouseMovedAction' ),
 
         phetioType: ActionIO( [
           { name: 'point', type: Vector2IO },
@@ -292,14 +292,14 @@ define( require => {
         phetioHighFrequency: true
       } );
 
-      // @private {Emitter} - Emits to the PhET-iO data stream.
-      this.mouseOverEmitter = new Action( ( point, event ) => {
+      // @private {Action} - Emits to the PhET-iO data stream.
+      this.mouseOverAction = new Action( ( point, event ) => {
         if ( !this.mouse ) { this.initMouse(); }
         this.mouse.over( point, event );
         // TODO: how to handle mouse-over (and log it)... are we changing the pointer.point without a branch change?
       }, {
         phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'mouseOverEmitter' ),
+        tandem: options.tandem.createTandem( 'mouseOverAction' ),
 
         phetioType: ActionIO( [
           { name: 'point', type: Vector2IO },
@@ -309,14 +309,14 @@ define( require => {
         phetioDocumentation: 'Emits when the mouse is moved over a Node'
       } );
 
-      // @private {Emitter} - Emits to the PhET-iO data stream.
-      this.mouseOutEmitter = new Action( ( point, event ) => {
+      // @private {Action} - Emits to the PhET-iO data stream.
+      this.mouseOutAction = new Action( ( point, event ) => {
         if ( !this.mouse ) { this.initMouse(); }
         this.mouse.out( point, event );
         // TODO: how to handle mouse-out (and log it)... are we changing the pointer.point without a branch change?
       }, {
         phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'mouseOutEmitter' ),
+        tandem: options.tandem.createTandem( 'mouseOutAction' ),
 
         phetioType: ActionIO( [
           { name: 'point', type: Vector2IO },
@@ -326,8 +326,8 @@ define( require => {
         phetioDocumentation: 'Emits when the mouse moves out of the display'
       } );
 
-      // @private {Emitter} - Emits to the PhET-iO data stream.
-      this.wheelScrolledEmitter = new Action( event => {
+      // @private {Action} - Emits to the PhET-iO data stream.
+      this.wheelScrolledAction = new Action( event => {
         if ( !this.mouse ) { this.initMouse(); }
         this.mouse.wheel( event );
 
@@ -339,7 +339,7 @@ define( require => {
         }
       }, {
         phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'wheelScrolledEmitter' ),
+        tandem: options.tandem.createTandem( 'wheelScrolledAction' ),
 
         phetioType: ActionIO( [
           { name: 'event', type: DOMEventIO }
@@ -349,14 +349,14 @@ define( require => {
         phetioHighFrequency: true
       } );
 
-      // @private {Emitter} - Emits to the PhET-iO data stream.
-      this.touchStartedEmitter = new Action( ( id, point, event ) => {
+      // @private {Action} - Emits to the PhET-iO data stream.
+      this.touchStartedAction = new Action( ( id, point, event ) => {
         const touch = new Touch( id, point, event );
         this.addPointer( touch );
         this.downEvent( touch, event, false );
       }, {
         phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'touchStartedEmitter' ),
+        tandem: options.tandem.createTandem( 'touchStartedAction' ),
 
         phetioType: ActionIO( [
           { name: 'id', type: NumberIO },
@@ -367,8 +367,8 @@ define( require => {
         phetioDocumentation: 'Emits when a touch begins'
       } );
 
-      // @private {Emitter} - Emits to the PhET-iO data stream.
-      this.touchEndedEmitter = new Action( ( id, point, event ) => {
+      // @private {Action} - Emits to the PhET-iO data stream.
+      this.touchEndedAction = new Action( ( id, point, event ) => {
         const touch = this.findPointerById( id );
         if ( touch ) {
           const pointChanged = touch.end( point, event );
@@ -377,7 +377,7 @@ define( require => {
         }
       }, {
         phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'touchEndedEmitter' ),
+        tandem: options.tandem.createTandem( 'touchEndedAction' ),
 
         phetioType: ActionIO( [
           { name: 'id', type: NumberIO },
@@ -388,8 +388,8 @@ define( require => {
         phetioDocumentation: 'Emits when a touch ends'
       } );
 
-      // @private {Emitter} - Emits to the PhET-iO data stream.
-      this.touchMovedEmitter = new Action( ( id, point, event ) => {
+      // @private {Action} - Emits to the PhET-iO data stream.
+      this.touchMovedAction = new Action( ( id, point, event ) => {
         const touch = this.findPointerById( id );
         if ( touch ) {
           touch.move( point, event );
@@ -397,7 +397,7 @@ define( require => {
         }
       }, {
         phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'touchMovedEmitter' ),
+        tandem: options.tandem.createTandem( 'touchMovedAction' ),
 
         phetioType: ActionIO( [
           { name: 'id', type: NumberIO },
@@ -409,8 +409,8 @@ define( require => {
         phetioHighFrequency: true
       } );
 
-      // @private {Emitter} - Emits to the PhET-iO data stream.
-      this.touchCanceledEmitter = new Action( ( id, point, event ) => {
+      // @private {Action} - Emits to the PhET-iO data stream.
+      this.touchCanceledAction = new Action( ( id, point, event ) => {
         const touch = this.findPointerById( id );
         if ( touch ) {
           const pointChanged = touch.cancel( point, event );
@@ -419,7 +419,7 @@ define( require => {
         }
       }, {
         phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'touchCanceledEmitter' ),
+        tandem: options.tandem.createTandem( 'touchCanceledAction' ),
 
         phetioType: ActionIO( [
           { name: 'id', type: NumberIO },
@@ -430,14 +430,14 @@ define( require => {
         phetioDocumentation: 'Emits when a touch is canceled'
       } );
 
-      // @private {Emitter} - Emits to the PhET-iO data stream.
-      this.penStartedEmitter = new Action( ( id, point, event ) => {
+      // @private {Action} - Emits to the PhET-iO data stream.
+      this.penStartedAction = new Action( ( id, point, event ) => {
         const pen = new Pen( id, point, event );
         this.addPointer( pen );
         this.downEvent( pen, event, false );
       }, {
         phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'penStartedEmitter' ),
+        tandem: options.tandem.createTandem( 'penStartedAction' ),
 
         phetioType: ActionIO( [
           { name: 'id', type: NumberIO },
@@ -448,8 +448,8 @@ define( require => {
         phetioDocumentation: 'Emits when a pen touches the screen'
       } );
 
-      // @private {Emitter} - Emits to the PhET-iO data stream.
-      this.penEndedEmitter = new Action( ( id, point, event ) => {
+      // @private {Action} - Emits to the PhET-iO data stream.
+      this.penEndedAction = new Action( ( id, point, event ) => {
         const pen = this.findPointerById( id );
         if ( pen ) {
           const pointChanged = pen.end( point, event );
@@ -458,7 +458,7 @@ define( require => {
         }
       }, {
         phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'penEndedEmitter' ),
+        tandem: options.tandem.createTandem( 'penEndedAction' ),
 
         phetioType: ActionIO( [
           { name: 'id', type: NumberIO },
@@ -469,8 +469,8 @@ define( require => {
         phetioDocumentation: 'Emits when a pen is lifted'
       } );
 
-      // @private {Emitter} - Emits to the PhET-iO data stream.
-      this.penMovedEmitter = new Action( ( id, point, event ) => {
+      // @private {Action} - Emits to the PhET-iO data stream.
+      this.penMovedAction = new Action( ( id, point, event ) => {
         const pen = this.findPointerById( id );
         if ( pen ) {
           pen.move( point, event );
@@ -478,7 +478,7 @@ define( require => {
         }
       }, {
         phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'penMovedEmitter' ),
+        tandem: options.tandem.createTandem( 'penMovedAction' ),
 
         phetioType: ActionIO( [
           { name: 'id', type: NumberIO },
@@ -490,8 +490,8 @@ define( require => {
         phetioHighFrequency: true
       } );
 
-      // @private {Emitter} - Emits to the PhET-iO data stream.
-      this.penCanceledEmitter = new Action( ( id, point, event ) => {
+      // @private {Action} - Emits to the PhET-iO data stream.
+      this.penCanceledAction = new Action( ( id, point, event ) => {
         const pen = this.findPointerById( id );
         if ( pen ) {
           const pointChanged = pen.cancel( point, event );
@@ -500,7 +500,7 @@ define( require => {
         }
       }, {
         phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'penCanceledEmitter' ),
+        tandem: options.tandem.createTandem( 'penCanceledAction' ),
 
         phetioType: ActionIO( [
           { name: 'id', type: NumberIO },
@@ -539,7 +539,7 @@ define( require => {
         };
 
         // @private
-        this.focusinEmitter = new Action( ( event ) => {
+        this.focusinAction = new Action( ( event ) => {
 
           // ignore any focusout callbacks if they are initiated due to implementation details in PDOM manipulation
           if ( this.display.blockFocusCallbacks ) {
@@ -561,7 +561,7 @@ define( require => {
           sceneryLog && sceneryLog.Input && sceneryLog.pop();
         }, {
           phetioPlayback: true,
-          tandem: options.tandem.createTandem( 'focusinEmitter' ),
+          tandem: options.tandem.createTandem( 'focusinAction' ),
 
           phetioType: ActionIO( [
             { name: 'event', type: DOMEventIO }
@@ -571,7 +571,7 @@ define( require => {
         } );
 
         // @private
-        this.focusoutEmitter = new Action( ( event ) => {
+        this.focusoutAction = new Action( ( event ) => {
 
           // ignore any focusout callbacks if they are initiated due to implementation details in PDOM manipulation
           if ( this.display.blockFocusCallbacks ) {
@@ -615,7 +615,7 @@ define( require => {
           sceneryLog && sceneryLog.Input && sceneryLog.pop();
         }, {
           phetioPlayback: true,
-          tandem: options.tandem.createTandem( 'focusoutEmitter' ),
+          tandem: options.tandem.createTandem( 'focusoutAction' ),
 
           phetioType: ActionIO( [
             { name: 'event', type: DOMEventIO }
@@ -625,7 +625,7 @@ define( require => {
         } );
 
         // @private
-        this.clickEmitter = new Action( ( event ) => {
+        this.clickAction = new Action( ( event ) => {
           sceneryLog && sceneryLog.Input && sceneryLog.Input( 'click(' + Input.debugText( null, event ) + ');' );
           sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -636,7 +636,7 @@ define( require => {
           sceneryLog && sceneryLog.Input && sceneryLog.pop();
         }, {
           phetioPlayback: true,
-          tandem: options.tandem.createTandem( 'clickEmitter' ),
+          tandem: options.tandem.createTandem( 'clickAction' ),
 
           phetioType: ActionIO( [
             { name: 'event', type: DOMEventIO }
@@ -646,7 +646,7 @@ define( require => {
         } );
 
         // @private
-        this.inputEmitter = new Action( ( event ) => {
+        this.inputAction = new Action( ( event ) => {
           sceneryLog && sceneryLog.Input && sceneryLog.Input( 'input(' + Input.debugText( null, event ) + ');' );
           sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -657,7 +657,7 @@ define( require => {
           sceneryLog && sceneryLog.Input && sceneryLog.pop();
         }, {
           phetioPlayback: true,
-          tandem: options.tandem.createTandem( 'inputEmitter' ),
+          tandem: options.tandem.createTandem( 'inputAction' ),
 
           phetioType: ActionIO( [
             { name: 'event', type: DOMEventIO }
@@ -667,7 +667,7 @@ define( require => {
         } );
 
         // @private
-        this.changeEmitter = new Action( ( event ) => {
+        this.changeAction = new Action( ( event ) => {
           sceneryLog && sceneryLog.Input && sceneryLog.Input( 'change(' + Input.debugText( null, event ) + ');' );
           sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -678,7 +678,7 @@ define( require => {
           sceneryLog && sceneryLog.Input && sceneryLog.pop();
         }, {
           phetioPlayback: true,
-          tandem: options.tandem.createTandem( 'changeEmitter' ),
+          tandem: options.tandem.createTandem( 'changeAction' ),
 
           phetioType: ActionIO( [
             { name: 'event', type: DOMEventIO }
@@ -688,7 +688,7 @@ define( require => {
         } );
 
         // @private
-        this.keydownEmitter = new Action( ( event ) => {
+        this.keydownAction = new Action( ( event ) => {
           sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keydown(' + Input.debugText( null, event ) + ');' );
           sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -699,7 +699,7 @@ define( require => {
           sceneryLog && sceneryLog.Input && sceneryLog.pop();
         }, {
           phetioPlayback: true,
-          tandem: options.tandem.createTandem( 'keydownEmitter' ),
+          tandem: options.tandem.createTandem( 'keydownAction' ),
 
           phetioType: ActionIO( [
             { name: 'event', type: DOMEventIO }
@@ -709,7 +709,7 @@ define( require => {
         } );
 
         // @private
-        this.keyupEmitter = new Action( ( event ) => {
+        this.keyupAction = new Action( ( event ) => {
           sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyup(' + Input.debugText( null, event ) + ');' );
           sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -720,7 +720,7 @@ define( require => {
           sceneryLog && sceneryLog.Input && sceneryLog.pop();
         }, {
           phetioPlayback: true,
-          tandem: options.tandem.createTandem( 'keyupEmitter' ),
+          tandem: options.tandem.createTandem( 'keyupAction' ),
 
           phetioType: ActionIO( [
             { name: 'event', type: DOMEventIO }
@@ -735,8 +735,8 @@ define( require => {
         // Add a listener to the root accessible DOM element for each event we want to monitor.
         AccessibilityUtil.DOM_EVENTS.map( eventName => {
 
-          const emitterName = eventName + 'Emitter';
-          assert && assert( this[ emitterName ], `emitter not defined on Input: ${emitterName}` );
+          const actionName = eventName + 'Action';
+          assert && assert( this[ actionName ], `action not defined on Input: ${actionName}` );
 
           // These exist for the lifetime of the display, and need not be disposed.
           this.display.accessibleDOMElement.addEventListener( eventName, event => {
@@ -744,7 +744,7 @@ define( require => {
             sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
 
             // Create the a11yPointer lazily
-            this[ emitterName ].emit( event );
+            this[ actionName ].execute( event );
 
             sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
           }, accessibleEventOptions );
@@ -865,7 +865,7 @@ define( require => {
     validatePointers() {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'validatePointers' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.validatePointersEmitter.emit();
+      this.validatePointersAction.execute();
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
@@ -1036,7 +1036,7 @@ define( require => {
     mouseDown( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseDown(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.mouseDownEmitter.emit( point, event );
+      this.mouseDownAction.execute( point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
@@ -1053,7 +1053,7 @@ define( require => {
     mouseUp( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseUp(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.mouseUpEmitter.emit( point, event );
+      this.mouseUpAction.execute( point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
@@ -1070,7 +1070,7 @@ define( require => {
     mouseMove( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseMove(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.mouseMovedEmitter.emit( point, event );
+      this.mouseMovedAction.execute( point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
@@ -1084,7 +1084,7 @@ define( require => {
     mouseOver( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseOver(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.mouseOverEmitter.emit( point, event );
+      this.mouseOverAction.execute( point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
@@ -1098,7 +1098,7 @@ define( require => {
     mouseOut( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseOut(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.mouseOutEmitter.emit( point, event );
+      this.mouseOutAction.execute( point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
@@ -1111,7 +1111,7 @@ define( require => {
     wheel( event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'wheel(' + Input.debugText( null, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.wheelScrolledEmitter.emit( event );
+      this.wheelScrolledAction.execute( event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
@@ -1129,7 +1129,7 @@ define( require => {
     touchStart( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchStart(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.touchStartedEmitter.emit( id, point, event );
+      this.touchStartedAction.execute( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
@@ -1147,7 +1147,7 @@ define( require => {
     touchEnd( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchEnd(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.touchEndedEmitter.emit( id, point, event );
+      this.touchEndedAction.execute( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
@@ -1165,7 +1165,7 @@ define( require => {
     touchMove( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchMove(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.touchMovedEmitter.emit( id, point, event );
+      this.touchMovedAction.execute( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
@@ -1183,7 +1183,7 @@ define( require => {
     touchCancel( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchCancel(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.touchCanceledEmitter.emit( id, point, event );
+      this.touchCanceledAction.execute( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
@@ -1201,7 +1201,7 @@ define( require => {
     penStart( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penStart(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.penStartedEmitter.emit( id, point, event );
+      this.penStartedAction.execute( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
@@ -1219,7 +1219,7 @@ define( require => {
     penEnd( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penEnd(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.penEndedEmitter.emit( id, point, event );
+      this.penEndedAction.execute( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
@@ -1237,7 +1237,7 @@ define( require => {
     penMove( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penMove(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.penMovedEmitter.emit( id, point, event );
+      this.penMovedAction.execute( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
@@ -1255,7 +1255,7 @@ define( require => {
     penCancel( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penCancel(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.penCanceledEmitter.emit( id, point, event );
+      this.penCanceledAction.execute( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
