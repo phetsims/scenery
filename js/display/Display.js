@@ -274,6 +274,20 @@ define( function( require ) {
     this.scenery = scenery;
 
     if ( this.options.accessibility ) {
+
+      // If the display supports accessibility, we want to overwrite the focusProperty, instead instrumenting it with
+      // PhET-iO, see https://github.com/phetsims/scenery/issues/936
+      // NOTE: Do not move this below FocusOverlay's creation below.
+      Display.focusProperty = new Property( null, {
+
+        // Make this a static tandem so that it can be added to PhET-iO Studio correctly (batched and then flushed when the
+        // listener is added).
+        tandem: Tandem.generalTandem.createTandem( 'focusProperty' ),
+        phetioType: PropertyIO( NullableIO( FocusIO ) ),
+        phetioState: false,
+        phetioReadOnly: true
+      } );
+
       if ( this.options.isApplication ) {
         this._domElement.setAttribute( 'aria-role', 'application' );
       }
@@ -1781,23 +1795,12 @@ define( function( require ) {
     'scenery-grabbing-pointer': [ 'grabbing', '-moz-grabbing', '-webkit-grabbing', 'pointer' ]
   };
 
-  // @public (a11y, read-only, scenery-internal setable) {Property.<Focus|null>} - Display has an axon Property to indicate which
-  // component is focused (or null if no scenery node has focus).  By passing the tandem and phetioValueType,
-  // PhET-iO is able to interoperate (save, restore, control, observe what is currently focused. See Display.focus
-  // for setting the Display's focus. Don't set the value of this Property directly.
-  Display.focusProperty = new Property( null,
-
-    // Only instrument if accessibility is enabled
-    ( window.phet && phet.chipper && phet.chipper.accessibility ) ? {
-
-      // Make this a static tandem so that it can be added to PhET-iO Studio correctly (batched and then flushed when the
-      // listener is added).
-      tandem: Tandem.generalTandem.createTandem( 'focusProperty' ),
-      phetioType: PropertyIO( NullableIO( FocusIO ) ),
-      phetioState: false,
-      phetioReadOnly: true
-    } : {}
-  );
+  // @public (a11y, read-only, scenery-internal setable) {Property.<Focus|null>} - Display has an axon Property to
+  // indicate which component is focused (or null if no scenery node has focus).
+  // NOTE: DO NOT LINK TO THIS!!! It is potentially overridden in Display's constructor
+  // to support PhET-iO Instrumentation.  see https://github.com/phetsims/scenery/issues/936
+  // FocusOverlay links to this as an exception, but only after it is overwritten, see Display's constructor.
+  Display.focusProperty = new Property( null );
 
   // @public {Emitter} - Fires when we detect an input event that would be considered a "user gesture" by Chrome, so
   // that we can trigger browser actions that are only allowed as a result.
