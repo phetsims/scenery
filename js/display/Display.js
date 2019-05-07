@@ -1781,23 +1781,18 @@ define( function( require ) {
     'scenery-grabbing-pointer': [ 'grabbing', '-moz-grabbing', '-webkit-grabbing', 'pointer' ]
   };
 
-  // @public (a11y, read-only, scenery-internal setable) {Property.<Focus|null>} - Display has an axon Property to indicate which
-  // component is focused (or null if no scenery node has focus).  By passing the tandem and phetioValueType,
+  // @public (a11y, read-only, scenery-internal setable) {Property.<Focus|null>} - Display has an axon Property to
+  // indicate which component is focused (or null if no scenery Node has focus). By passing the tandem and phetioValueType,
   // PhET-iO is able to interoperate (save, restore, control, observe what is currently focused. See Display.focus
   // for setting the Display's focus. Don't set the value of this Property directly.
-  Display.focusProperty = new Property( null,
-
-    // Only instrument if accessibility is enabled
-    ( window.phet && phet.chipper && phet.chipper.accessibility ) ? {
-
-      // Make this a static tandem so that it can be added to PhET-iO Studio correctly (batched and then flushed when the
-      // listener is added).
-      tandem: Tandem.generalTandem.createTandem( 'focusProperty' ),
-      phetioType: PropertyIO( NullableIO( FocusIO ) ),
-      phetioState: false,
-      phetioReadOnly: true
-    } : {}
-  );
+  Display.focusProperty = new Property( null, {
+    tandem: Tandem.generalTandem.createTandem( 'focusProperty' ),
+    phetioDocumentation: 'Stores the current focus for the simulation, null if there is not focus. This is not updated ' +
+                         'based on mouse or touch input, only keyboard and other alternative inputs.',
+    phetioType: PropertyIO( NullableIO( FocusIO ) ),
+    phetioState: false,
+    phetioReadOnly: true
+  } );
 
   // @public {Emitter} - Fires when we detect an input event that would be considered a "user gesture" by Chrome, so
   // that we can trigger browser actions that are only allowed as a result.
