@@ -1438,6 +1438,15 @@ define( function( require ) {
     // change tagName to something that is not focusable, focusable should be false
     c.tagName = 'p';
     assert.ok( !c.focusable, 'button changed to paragraph, should no longer be focusable' );
+
+    // When focusable is set to null on an element that is not focusable by default, it should lose focus
+    var d = new Node( { tagName: 'div', focusable: true } );
+    rootNode.addChild( d );
+    d.focus();
+    assert.ok( d.focused, 'focusable div should be focused after calling focus()' );
+
+    d.focusable = null;
+    assert.ok( !d.focused, 'default div should lose focus after node restored to null focusable' );
   } );
 
   QUnit.test( 'append siblings/appendLabel/appendDescription setters', function( assert ) {

@@ -723,9 +723,17 @@ define( function( require ) {
     setFocusable: function( focusable ) {
       assert && assert( typeof focusable === 'boolean' );
 
+      const peerHadFocus = this.isFocused();
       if ( this.focusable !== focusable ) {
         this.focusable = focusable;
         AccessibilityUtil.overrideFocusWithTabIndex( this.primarySibling, focusable );
+
+        // in Chrome, if tabindex is removed and the element is not focusable by default the element is blurred.
+        // This behavior is reasonable and we want to enforce it in other browsers for consistency. See
+        // https://github.com/phetsims/scenery/issues/967
+        if ( peerHadFocus && !focusable ) {
+          this.blur();
+        }
 
         // reposition the sibling in the DOM, since non-focusable nodes are not positioned
         this.invalidateCSSPositioning();
