@@ -864,9 +864,7 @@ define( function( require ) {
 
         scratchGlobalBounds.set( this.node.localBounds );
         if ( scratchGlobalBounds.isFinite() ) {
-
           scratchGlobalBounds.transform( this.accessibleInstance.transformTracker.getMatrix() );
-          var scaleVector = this.node.getScaleVector(); // could be optimized to create less Vector2 instances
 
           var clientDimensions = getClientDimensions( this._primarySibling );
           var clientWidth = clientDimensions.width;
@@ -874,7 +872,7 @@ define( function( require ) {
 
           if ( clientWidth > 0 && clientHeight > 0 ) {
             scratchSiblingBounds.setMinMax( 0, 0, clientWidth, clientHeight );
-            scratchSiblingBounds.transform( getCSSMatrix( this._primarySibling, clientWidth, clientHeight, scratchGlobalBounds, scaleVector ) );
+            scratchSiblingBounds.transform( getCSSMatrix( this._primarySibling, clientWidth, clientHeight, scratchGlobalBounds ) );
             setClientBounds( this._primarySibling, scratchSiblingBounds );
           }
 
@@ -885,7 +883,7 @@ define( function( require ) {
 
             if ( clientHeight > 0 && clientWidth > 0 ) {
               scratchSiblingBounds.setMinMax( 0, 0, clientWidth, clientHeight );
-              scratchSiblingBounds.transform( getCSSMatrix( this.labelSibling, clientWidth, clientHeight, scratchGlobalBounds, scaleVector ) );
+              scratchSiblingBounds.transform( getCSSMatrix( this.labelSibling, clientWidth, clientHeight, scratchGlobalBounds ) );
               setClientBounds( this._labelSibling, scratchSiblingBounds );
             }
           }
@@ -999,10 +997,9 @@ define( function( require ) {
    * @param  {number} clientWidth - width of the element to transform in pixels
    * @param  {number} clientHeight - height of the element to transform in pixels
    * @param  {Bounds2} nodeGlobalBounds - Bounds of the AccessiblePeer's node in the global coordinate frame.
-   * @param  {Vector2} scaleVector - the scale magnitude Vector for the Node.
    * @returns {Matrix3}
    */
-  function getCSSMatrix( element, clientWidth, clientHeight, nodeGlobalBounds, scaleVector ) {
+  function getCSSMatrix( element, clientWidth, clientHeight, nodeGlobalBounds ) {
 
     // the translation matrix for the node's bounds in its local coordinate frame
     globalNodeTranslationMatrix.setToTranslation( nodeGlobalBounds.minX, nodeGlobalBounds.minY );
@@ -1010,7 +1007,6 @@ define( function( require ) {
     // scale matrix for "client" HTML element, scale to make the HTML element's DOM bounds match the
     // local bounds of the node
     globalToClientScaleMatrix.setToScale( nodeGlobalBounds.width / clientWidth, nodeGlobalBounds.height / clientHeight );
-    nodeScaleMagnitudeMatrix.setToScale( scaleVector.x, scaleVector.y );
 
     // combine these in a single transformation matrix
     return globalNodeTranslationMatrix.multiplyMatrix( globalToClientScaleMatrix ).multiplyMatrix( nodeScaleMagnitudeMatrix );
