@@ -29,6 +29,11 @@ define( function( require ) {
   var transformProperty = Features.transform;
   var transformOriginProperty = Features.transformOrigin || 'transformOrigin'; // fallback, so we don't try to set an empty string property later
 
+  // Scenery applications that do not use WebGL may trigger a ~ 0.5 second pause shortly after launch on some platforms.
+  // Webgl is enabled by default but may be shut off for applications that know they will not want to use it
+  // see https://github.com/phetsims/scenery/issues/621
+  var webglEnabled = true;
+
   var Util = {
     /*---------------------------------------------------------------------------*
      * Transformation Utilities (TODO: separate file)
@@ -496,6 +501,16 @@ define( function( require ) {
     },
 
     /**
+     * Set whether webgl should be enabled, see docs for webglEnabled
+     * @public
+     *
+     * @param {boolean} _webglEnabled
+     */
+    setWebGLEnabled( _webglEnabled ) {
+      webglEnabled = _webglEnabled;
+    },
+
+    /**
      * Check to see whether webgl is supported, using the same strategy as mrdoob and pixi.js
      * @public
      *
@@ -503,6 +518,11 @@ define( function( require ) {
      * @returns {boolean}
      */
     checkWebGLSupport: function( extensions ) {
+
+      // The webgl check can be shut off, please see docs at webglEnabled declaration site
+      if ( webglEnabled === false ) {
+        return false;
+      }
       var canvas = document.createElement( 'canvas' );
 
       var args = { failIfMajorPerformanceCaveat: true };
