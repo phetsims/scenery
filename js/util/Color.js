@@ -13,10 +13,10 @@
 define( function( require ) {
   'use strict';
 
-  var Emitter = require( 'AXON/Emitter' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Property = require( 'AXON/Property' );
   var scenery = require( 'SCENERY/scenery' );
+  var TinyEmitter = require( 'AXON/TinyEmitter' );
   var Util = require( 'DOT/Util' );
 
   // constants
@@ -39,7 +39,7 @@ define( function( require ) {
   function Color( r, g, b, a ) {
 
     // @public {Emitter}
-    this.changeEmitter = new Emitter();
+    this.changeEmitter = new TinyEmitter();
 
     this.set( r, g, b, a );
   }
