@@ -1708,24 +1708,13 @@ define( function( require ) {
       var previousFocus;
       if ( this.focusProperty.value ) {
         previousFocus = this.focusedNode;
-
-        // Emit that the old focused node is no longer focused
-        previousFocus.focusChangedEmitter.emit( false );
       }
 
       this.focusProperty.value = value;
 
-      if ( value ) {
-
-        // Emit that the new node is focused
-        value.trail.lastNode().focusChangedEmitter.emit( true );
-      }
-      else {
-
-        // if set to null, make sure that the active element is no longer focused
-        if ( previousFocus ) {
-          previousFocus.blur();
-        }
+      // if set to null, make sure that the active element is no longer focused
+      if ( previousFocus && !value ) {
+        previousFocus.blur();
       }
     },
 

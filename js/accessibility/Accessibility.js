@@ -413,12 +413,8 @@ define( function( require ) {
           // http://www.ssbbartgroup.com/blog/how-windows-screen-readers-work-on-the-web/
           this._accessibleVisible = true;
 
-          // @public - emits when focus changes. This will trigger with the 'focus' event and the 'blur' event.
-          // Listener receives 1 parameter, {boolean} - isFocused. see Display.focus
-          this.focusChangedEmitter = new Emitter( { validationEnabled: false } );
-
           // @private {Array.<Node|null>|null} - (a11y) If provided, it will override the focus order between children
-          // (and optionally aribitrary subtrees). If not provided, the focus order will default to the rendering order
+          // (and optionally arbitrary subtrees). If not provided, the focus order will default to the rendering order
           // (first children first, last children last) determined by the children array.
           // See setAccessibleOrder() for more documentation.
           this._accessibleOrder = null;
