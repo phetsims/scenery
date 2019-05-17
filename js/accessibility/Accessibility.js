@@ -129,7 +129,6 @@ define( function( require ) {
   var AccessibleDisplaysInfo = require( 'SCENERY/accessibility/AccessibleDisplaysInfo' );
   var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
   var arrayDifference = require( 'PHET_CORE/arrayDifference' );
-  var Emitter = require( 'AXON/Emitter' );
   var extend = require( 'PHET_CORE/extend' );
   var scenery = require( 'SCENERY/scenery' );
   var Shape = require( 'KITE/Shape' );
