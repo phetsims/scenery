@@ -57,7 +57,7 @@ define( function( require ) {
 
   // Scratch vectors used to prevent allocations
   var scratchVector2A = new Vector2( 0, 0 );
-  var DraggedActionIO = ActionIO( [ { name: 'event', type: EventIO } ] );
+  var DragActionIO = ActionIO( [ { name: 'event', type: EventIO } ] );
 
   /**
    * @constructor
@@ -184,7 +184,7 @@ define( function( require ) {
     this._lastInterruptedTouchPointer = null;
 
     // @private {Emitter} - emitted on drag. Used for triggering phet-io events to the data stream, see https://github.com/phetsims/scenery/issues/842
-    this._draggedAction = new Action( function( event ) {
+    this._dragAction = new Action( function( event ) {
 
       // This is done first, before the drag listener is called (from the prototype drag call)
       if ( !self._globalPoint.equals( self.pointer.point ) ) {
@@ -194,12 +194,12 @@ define( function( require ) {
       PressListener.prototype.drag.call( self, event );
     }, {
       phetioFeatured: options.phetioFeatured,
-      tandem: options.tandem.createTandem( 'draggedAction' ),
+      tandem: options.tandem.createTandem( 'dragAction' ),
       phetioHighFrequency: true,
       phetioDocumentation: 'Emits whenever a drag occurs with an EventIO argument.',
       phetioReadOnly: options.phetioReadOnly,
       phetioEventType: PhetioObject.EventType.USER,
-      phetioType: DraggedActionIO
+      phetioType: DragActionIO
     } );
   }
 
@@ -305,7 +305,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener drag' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      this._draggedAction.execute( event );
+      this._dragAction.execute( event );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
@@ -670,7 +670,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener dispose' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      this._draggedAction.dispose();
+      this._dragAction.dispose();
 
       this.detachTransformTracker();
 

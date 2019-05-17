@@ -36,7 +36,7 @@ define( function( require ) {
   var globalID = 0;
 
   // constants - factored out to reduce memory usage, see https://github.com/phetsims/unit-rates/issues/207
-  var PressedActionIO = ActionIO( [
+  var PressActionIO = ActionIO( [
     { name: 'event', type: EventIO },
     {
       name: 'targetNode',
@@ -50,7 +50,7 @@ define( function( require ) {
     }
   ] );
 
-  var ReleasedActionIO = ActionIO( [ {
+  var ReleaseActionIO = ActionIO( [ {
     name: 'event',
     type: NullableIO( EventIO )
   }, {
@@ -236,27 +236,27 @@ define( function( require ) {
     // @private {Action} - Executed on press event
     // The main implementation of "press" handling is implemented as a callback to the Action, so things are nested
     // nicely for phet-io.
-    this._pressedAction = new Action( this.onPress.bind( this ), {
-      tandem: options.tandem.createTandem( 'pressedAction' ),
+    this._pressAction = new Action( this.onPress.bind( this ), {
+      tandem: options.tandem.createTandem( 'pressAction' ),
       phetioDocumentation: 'Executes whenever a press occurs. The first argument when executing can be ' +
                            'used to convey info about the Event.',
       phetioReadOnly: options.phetioReadOnly,
       phetioFeatured: options.phetioFeatured,
       phetioEventType: PhetioObject.EventType.USER,
-      phetioType: PressedActionIO
+      phetioType: PressActionIO
     } );
 
     // @private {Action} - Executed on release event
     // The main implementation of "release" handling is implemented as a callback to the Action, so things are nested
     // nicely for phet-io.
-    this._releasedAction = new Action( this.onRelease.bind( this ), {
-      tandem: options.tandem.createTandem( 'releasedAction' ),
+    this._releaseAction = new Action( this.onRelease.bind( this ), {
+      tandem: options.tandem.createTandem( 'releaseAction' ),
       phetioDocumentation: 'Executes whenever a release occurs.',
       phetioReadOnly: options.phetioReadOnly,
       phetioFeatured: options.phetioFeatured,
       phetioEventType: PhetioObject.EventType.USER,
 
-      phetioType: ReleasedActionIO
+      phetioType: ReleaseActionIO
     } );
 
     // update isOverProperty (not a DerivedProperty because we need to hook to passed-in properties)
@@ -363,7 +363,7 @@ define( function( require ) {
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' successful press' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-      this._pressedAction.execute( event, targetNode || null, callback || null ); // cannot pass undefined into execute call
+      this._pressAction.execute( event, targetNode || null, callback || null ); // cannot pass undefined into execute call
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
 
@@ -386,7 +386,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' release' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      this._releasedAction.execute( event || null, callback || null ); // cannot pass undefined to execute call
+      this._releaseAction.execute( event || null, callback || null ); // cannot pass undefined to execute call
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
@@ -767,8 +767,8 @@ define( function( require ) {
       this.a11yClickingProperty.dispose();
       this.looksPressedProperty.dispose();
 
-      this._pressedAction.dispose();
-      this._releasedAction.dispose();
+      this._pressAction.dispose();
+      this._releaseAction.dispose();
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     }

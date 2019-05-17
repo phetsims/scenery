@@ -327,7 +327,7 @@ define( require => {
       } );
 
       // @private {Action} - Emits to the PhET-iO data stream.
-      this.wheelScrolledAction = new Action( event => {
+      this.wheelScrollAction = new Action( event => {
         if ( !this.mouse ) { this.initMouse(); }
         this.mouse.wheel( event );
 
@@ -339,7 +339,7 @@ define( require => {
         }
       }, {
         phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'wheelScrolledAction' ),
+        tandem: options.tandem.createTandem( 'wheelScrollAction' ),
 
         phetioType: ActionIO( [
           { name: 'event', type: DOMEventIO }
@@ -350,13 +350,13 @@ define( require => {
       } );
 
       // @private {Action} - Emits to the PhET-iO data stream.
-      this.touchStartedAction = new Action( ( id, point, event ) => {
+      this.touchStartAction = new Action( ( id, point, event ) => {
         const touch = new Touch( id, point, event );
         this.addPointer( touch );
         this.downEvent( touch, event, false );
       }, {
         phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'touchStartedAction' ),
+        tandem: options.tandem.createTandem( 'touchStartAction' ),
 
         phetioType: ActionIO( [
           { name: 'id', type: NumberIO },
@@ -368,7 +368,7 @@ define( require => {
       } );
 
       // @private {Action} - Emits to the PhET-iO data stream.
-      this.touchEndedAction = new Action( ( id, point, event ) => {
+      this.touchEndAction = new Action( ( id, point, event ) => {
         const touch = this.findPointerById( id );
         if ( touch ) {
           const pointChanged = touch.end( point, event );
@@ -377,7 +377,7 @@ define( require => {
         }
       }, {
         phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'touchEndedAction' ),
+        tandem: options.tandem.createTandem( 'touchEndAction' ),
 
         phetioType: ActionIO( [
           { name: 'id', type: NumberIO },
@@ -389,7 +389,7 @@ define( require => {
       } );
 
       // @private {Action} - Emits to the PhET-iO data stream.
-      this.touchMovedAction = new Action( ( id, point, event ) => {
+      this.touchMoveAction = new Action( ( id, point, event ) => {
         const touch = this.findPointerById( id );
         if ( touch ) {
           touch.move( point, event );
@@ -397,7 +397,7 @@ define( require => {
         }
       }, {
         phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'touchMovedAction' ),
+        tandem: options.tandem.createTandem( 'touchMoveAction' ),
 
         phetioType: ActionIO( [
           { name: 'id', type: NumberIO },
@@ -410,7 +410,7 @@ define( require => {
       } );
 
       // @private {Action} - Emits to the PhET-iO data stream.
-      this.touchCanceledAction = new Action( ( id, point, event ) => {
+      this.touchCancelAction = new Action( ( id, point, event ) => {
         const touch = this.findPointerById( id );
         if ( touch ) {
           const pointChanged = touch.cancel( point, event );
@@ -419,7 +419,7 @@ define( require => {
         }
       }, {
         phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'touchCanceledAction' ),
+        tandem: options.tandem.createTandem( 'touchCancelAction' ),
 
         phetioType: ActionIO( [
           { name: 'id', type: NumberIO },
@@ -431,13 +431,13 @@ define( require => {
       } );
 
       // @private {Action} - Emits to the PhET-iO data stream.
-      this.penStartedAction = new Action( ( id, point, event ) => {
+      this.penStartAction = new Action( ( id, point, event ) => {
         const pen = new Pen( id, point, event );
         this.addPointer( pen );
         this.downEvent( pen, event, false );
       }, {
         phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'penStartedAction' ),
+        tandem: options.tandem.createTandem( 'penStartAction' ),
 
         phetioType: ActionIO( [
           { name: 'id', type: NumberIO },
@@ -449,7 +449,7 @@ define( require => {
       } );
 
       // @private {Action} - Emits to the PhET-iO data stream.
-      this.penEndedAction = new Action( ( id, point, event ) => {
+      this.penEndAction = new Action( ( id, point, event ) => {
         const pen = this.findPointerById( id );
         if ( pen ) {
           const pointChanged = pen.end( point, event );
@@ -458,7 +458,7 @@ define( require => {
         }
       }, {
         phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'penEndedAction' ),
+        tandem: options.tandem.createTandem( 'penEndAction' ),
 
         phetioType: ActionIO( [
           { name: 'id', type: NumberIO },
@@ -470,7 +470,7 @@ define( require => {
       } );
 
       // @private {Action} - Emits to the PhET-iO data stream.
-      this.penMovedAction = new Action( ( id, point, event ) => {
+      this.penMoveAction = new Action( ( id, point, event ) => {
         const pen = this.findPointerById( id );
         if ( pen ) {
           pen.move( point, event );
@@ -478,7 +478,7 @@ define( require => {
         }
       }, {
         phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'penMovedAction' ),
+        tandem: options.tandem.createTandem( 'penMoveAction' ),
 
         phetioType: ActionIO( [
           { name: 'id', type: NumberIO },
@@ -491,7 +491,7 @@ define( require => {
       } );
 
       // @private {Action} - Emits to the PhET-iO data stream.
-      this.penCanceledAction = new Action( ( id, point, event ) => {
+      this.penCancelAction = new Action( ( id, point, event ) => {
         const pen = this.findPointerById( id );
         if ( pen ) {
           const pointChanged = pen.cancel( point, event );
@@ -500,7 +500,7 @@ define( require => {
         }
       }, {
         phetioPlayback: true,
-        tandem: options.tandem.createTandem( 'penCanceledAction' ),
+        tandem: options.tandem.createTandem( 'penCancelAction' ),
 
         phetioType: ActionIO( [
           { name: 'id', type: NumberIO },
@@ -1111,7 +1111,7 @@ define( require => {
     wheel( event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'wheel(' + Input.debugText( null, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.wheelScrolledAction.execute( event );
+      this.wheelScrollAction.execute( event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
@@ -1129,7 +1129,7 @@ define( require => {
     touchStart( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchStart(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.touchStartedAction.execute( id, point, event );
+      this.touchStartAction.execute( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
@@ -1147,7 +1147,7 @@ define( require => {
     touchEnd( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchEnd(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.touchEndedAction.execute( id, point, event );
+      this.touchEndAction.execute( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
@@ -1165,7 +1165,7 @@ define( require => {
     touchMove( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchMove(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.touchMovedAction.execute( id, point, event );
+      this.touchMoveAction.execute( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
@@ -1183,7 +1183,7 @@ define( require => {
     touchCancel( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchCancel(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.touchCanceledAction.execute( id, point, event );
+      this.touchCancelAction.execute( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
@@ -1201,7 +1201,7 @@ define( require => {
     penStart( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penStart(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.penStartedAction.execute( id, point, event );
+      this.penStartAction.execute( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
@@ -1219,7 +1219,7 @@ define( require => {
     penEnd( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penEnd(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.penEndedAction.execute( id, point, event );
+      this.penEndAction.execute( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
@@ -1237,7 +1237,7 @@ define( require => {
     penMove( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penMove(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.penMovedAction.execute( id, point, event );
+      this.penMoveAction.execute( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
@@ -1255,7 +1255,7 @@ define( require => {
     penCancel( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penCancel(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.penCanceledAction.execute( id, point, event );
+      this.penCancelAction.execute( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 

@@ -92,7 +92,7 @@ define( function( require ) {
     this.lastInterruptedTouchPointer = null;
 
     // @private
-    this.dragStartedAction = new Action( function( point, event ) {
+    this.dragStartAction = new Action( function( point, event ) {
 
       if ( self.dragging ) { return; }
 
@@ -121,7 +121,7 @@ define( function( require ) {
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     }, {
-      tandem: options.tandem.createTandem( 'dragStartedAction' ),
+      tandem: options.tandem.createTandem( 'dragStartAction' ),
 
       phetioType: ActionIO(
         [ { name: 'point', type: Vector2IO, documentation: 'the position of the drag start in view coordinates' },
@@ -134,7 +134,7 @@ define( function( require ) {
     } );
 
     // @private
-    this.draggedAction = new Action( function( point, event ) {
+    this.dragAction = new Action( function( point, event ) {
 
       if ( !self.dragging || self.isDisposed ) { return; }
 
@@ -177,7 +177,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     }, {
       phetioHighFrequency: true,
-      tandem: options.tandem.createTandem( 'draggedAction' ),
+      tandem: options.tandem.createTandem( 'dragAction' ),
 
       phetioType: ActionIO(
         [ { name: 'point', type: Vector2IO, documentation: 'the position of the drag in view coordinates' },
@@ -190,7 +190,7 @@ define( function( require ) {
     } );
 
     // @private
-    this.dragEndedAction = new Action( function( point, event ) {
+    this.dragEndAction = new Action( function( point, event ) {
 
       if ( !self.dragging ) { return; }
 
@@ -214,7 +214,7 @@ define( function( require ) {
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     }, {
-      tandem: options.tandem.createTandem( 'dragEndedAction' ),
+      tandem: options.tandem.createTandem( 'dragEndAction' ),
 
       phetioType: ActionIO(
         [ { name: 'point', type: Vector2IO, documentation: 'the position of the drag end in view coordinates' },
@@ -297,7 +297,7 @@ define( function( require ) {
 
       // mouse/touch move
       move: function( event ) {
-        self.draggedAction.execute( event.pointer.point, event );
+        self.dragAction.execute( event.pointer.point, event );
       }
     };
     PhetioObject.call( this, options );
@@ -316,14 +316,14 @@ define( function( require ) {
       assert && assert( 'illegal call to set dragging on SimpleDragHandler' );
     },
     startDrag: function( event ) {
-      this.dragStartedAction.execute( event.pointer.point, event );
+      this.dragStartAction.execute( event.pointer.point, event );
     },
 
     endDrag: function( event ) {
 
       // Signify drag ended.  In the case of programmatically ended drags, signify drag ended at 0,0.
       // see https://github.com/phetsims/ph-scale-basics/issues/43
-      this.dragEndedAction.execute( event ? event.pointer.point : Vector2.ZERO, event );
+      this.dragEndAction.execute( event ? event.pointer.point : Vector2.ZERO, event );
     },
 
     // Called when input is interrupted on this listener, see https://github.com/phetsims/scenery/issues/218
@@ -415,9 +415,9 @@ define( function( require ) {
       this.isDraggingProperty.dispose();
 
       // It seemed without disposing these led to a memory leak in Energy Skate Park: Basics
-      this.dragEndedAction.dispose();
-      this.draggedAction.dispose();
-      this.dragStartedAction.dispose();
+      this.dragEndAction.dispose();
+      this.dragAction.dispose();
+      this.dragStartAction.dispose();
 
       PhetioObject.prototype.dispose.call( this );
 
