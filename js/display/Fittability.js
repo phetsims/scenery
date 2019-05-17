@@ -11,9 +11,9 @@
 define( function( require ) {
   'use strict';
 
-  var Emitter = require( 'AXON/Emitter' );
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
+  var TinyEmitter = require( 'AXON/TinyEmitter' );
 
   /**
    * @constructor
@@ -60,9 +60,9 @@ define( function( require ) {
       // updating our bounds.
       this.subtreeUnfittableCount = this.selfFittable ? 0 : 1;
 
-      // @public {Emitter} - Called with no arguments when the subtree fittability changes (whether
+      // @public {TinyEmitter} - Called with no arguments when the subtree fittability changes (whether
       // subtreeUnfittableCount is greater than zero or not).
-      this.subtreeFittabilityChange = this.subtreeFittabilityChange || new Emitter();
+      this.subtreeFittabilityChangeEmitter = this.subtreeFittabilityChangeEmitter || new TinyEmitter();
 
       return this; // allow chaining
     },
@@ -183,7 +183,7 @@ define( function( require ) {
         this.parent && this.parent.incrementSubtreeUnfittableCount();
 
         // Notify anything listening that the condition ( this.subtreeUnfittableCount > 0 ) changed.
-        this.subtreeFittabilityChange.emit();
+        this.subtreeFittabilityChangeEmitter.emit();
       }
     },
 
@@ -200,7 +200,7 @@ define( function( require ) {
         this.parent && this.parent.decrementSubtreeUnfittableCount();
 
         // Notify anything listening that the condition ( this.subtreeUnfittableCount > 0 ) changed.
-        this.subtreeFittabilityChange.emit();
+        this.subtreeFittabilityChangeEmitter.emit();
       }
     },
 

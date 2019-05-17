@@ -191,13 +191,13 @@ define( function( require ) {
 
       if ( instance ) {
         this.commonFitInstance = instance;
-        this.commonFitInstance.fittability.subtreeFittabilityChange.addListener( this.dirtyFitListener );
+        this.commonFitInstance.fittability.subtreeFittabilityChangeEmitter.addListener( this.dirtyFitListener );
       }
     },
 
     removeCommonFitInstance: function() {
       if ( this.commonFitInstance ) {
-        this.commonFitInstance.fittability.subtreeFittabilityChange.removeListener( this.dirtyFitListener );
+        this.commonFitInstance.fittability.subtreeFittabilityChangeEmitter.removeListener( this.dirtyFitListener );
         this.commonFitInstance = null;
       }
     },
