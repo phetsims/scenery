@@ -19,6 +19,7 @@ define( function( require ) {
   var Node = require( 'SCENERY/nodes/Node' );
   var Renderer = require( 'SCENERY/display/Renderer' );
   var scenery = require( 'SCENERY/scenery' );
+  var Shape = require( 'KITE/Shape' );
   var Util = require( 'SCENERY/util/Util' );
   var WebGLNodeDrawable = require( 'SCENERY/display/drawables/WebGLNodeDrawable' );
 
@@ -147,6 +148,17 @@ define( function( require ) {
      */
     containsPointSelf: function( point ) {
       return false;
+    },
+
+    /**
+     * Returns a Shape that represents the area covered by containsPointSelf.
+     * @public
+     * @override
+     *
+     * @returns {Shape}
+     */
+    getSelfShape: function() {
+      return new Shape();
     },
 
     /**

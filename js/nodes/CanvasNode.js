@@ -13,9 +13,9 @@
 define( function( require ) {
   'use strict';
 
+  var Shape = require( 'KITE/Shape' );
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-
   var CanvasNodeDrawable = require( 'SCENERY/display/drawables/CanvasNodeDrawable' );
   var Node = require( 'SCENERY/nodes/Node' );
   var Renderer = require( 'SCENERY/display/Renderer' );
@@ -138,6 +138,17 @@ define( function( require ) {
      */
     containsPointSelf: function( point ) {
       return false;
+    },
+
+    /**
+     * Returns a Shape that represents the area covered by containsPointSelf.
+     * @public
+     * @override
+     *
+     * @returns {Shape}
+     */
+    getSelfShape: function() {
+      return new Shape();
     },
 
     /**

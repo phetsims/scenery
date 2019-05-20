@@ -77,6 +77,7 @@ define( function( require ) {
   var ChangeInterval = require( 'SCENERY/display/ChangeInterval' );
   require( 'SCENERY/display/DOMSelfDrawable' );
   var Drawable = require( 'SCENERY/display/Drawable' );
+  var HitAreaOverlay = require( 'SCENERY/overlays/HitAreaOverlay' );
   var Instance = require( 'SCENERY/display/Instance' );
   require( 'SCENERY/display/InlineCanvasCacheDrawable' );
   var Renderer = require( 'SCENERY/display/Renderer' );
@@ -258,6 +259,7 @@ define( function( require ) {
     this._overlays = [];
     this._pointerOverlay = null;
     this._pointerAreaOverlay = null;
+    this._hitAreaOverlay = null;
     this._canvasAreaBoundsOverlay = null;
     this._fittedBlockBoundsOverlay = null;
 
@@ -912,6 +914,25 @@ define( function( require ) {
         else {
           this._pointerAreaOverlay = new PointerAreaOverlay( this, this._rootNode );
           this.addOverlay( this._pointerAreaOverlay );
+        }
+      }
+    },
+
+    //TODO: reduce code duplication for handling overlays
+    setHitAreaDisplayVisible: function( visibility ) {
+      assert && assert( typeof visibility === 'boolean' );
+
+      var hasOverlay = !!this._hitAreaOverlay;
+
+      if ( visibility !== hasOverlay ) {
+        if ( !visibility ) {
+          this.removeOverlay( this._hitAreaOverlay );
+          this._hitAreaOverlay.dispose();
+          this._hitAreaOverlay = null;
+        }
+        else {
+          this._hitAreaOverlay = new HitAreaOverlay( this, this._rootNode );
+          this.addOverlay( this._hitAreaOverlay );
         }
       }
     },

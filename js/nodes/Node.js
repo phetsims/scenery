@@ -1418,6 +1418,22 @@ define( function( require ) {
     },
 
     /**
+     * Returns a Shape that represents the area covered by containsPointSelf.
+     * @public
+     *
+     * @returns {Shape}
+     */
+    getSelfShape: function() {
+      const selfBounds = this.selfBounds;
+      if ( selfBounds.isEmpty() ) {
+        return new Shape();
+      }
+      else {
+        return Shape.bounds( this.selfBounds );
+      }
+    },
+
+    /**
      * Returns our selfBounds (the bounds for this Node's content in the local coordinates, excluding anything from our
      * children and descendants).
      * @public

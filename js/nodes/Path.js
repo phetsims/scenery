@@ -527,6 +527,20 @@ define( function( require ) {
     },
 
     /**
+     * Returns a Shape that represents the area covered by containsPointSelf.
+     * @public
+     * @override
+     *
+     * @returns {Shape}
+     */
+    getSelfShape: function() {
+      return Shape.union( [
+        ...( ( this.hasShape() && this._fillPickable ) ? [ this.getShape() ] : [] ),
+        ...( ( this.hasShape() && this._strokePickable ) ? [ this.getStrokedShape() ] : [] )
+      ] );
+    },
+
+    /**
      * Returns whether this Path's selfBounds is intersected by the specified bounds.
      * @public
      *
