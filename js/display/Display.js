@@ -1718,14 +1718,6 @@ define( function( require ) {
      * @param  {Focus|null} value
      */
     set focus( value ) {
-
-      // If in phet-io brand, a11y is enabled, and the focus is not null
-      if ( window.phet && phet.phetio && phet.chipper.accessibility && value ) {
-        var node = value.trail.lastNode();
-        assert && assert( node.isPhetioInstrumented(),
-          'When running phet-io mode, all focusable instances must be instrumented.' );
-      }
-
       var previousFocus;
       if ( this.focusProperty.value ) {
         previousFocus = this.focusedNode;

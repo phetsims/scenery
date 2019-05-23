@@ -525,7 +525,7 @@ define( require => {
          * @returns {string} the trail id added to the element in AccessiblePeer
          */
         var getTrailId = function( event ) {
-          assert && assert( event.target );
+          assert && assert( event.target || event[ TARGET_SUBSTITUTE_KEY ], 'need a way to get the target' );
 
           // could be serialized event for phet-io playbacks, see Input.serializeDOMEvent()
           if ( event[ TARGET_SUBSTITUTE_KEY ] ) {

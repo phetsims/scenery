@@ -30,7 +30,7 @@ define( function( require ) {
 
     /**
      * Convert the focus region to a plain JS object for serialization.
-     * @param {Object} focus - the focus region which has {display,trail}
+     * @param {Object|null} focus - the focus region which has {display,trail}
      * @returns {Object} - the serialized object
      * @override
      */
@@ -45,21 +45,17 @@ define( function( require ) {
         var phetioIDIndices = [];
         focus.trail.nodes.forEach( function( node, i ) {
 
-          // Don't include the last node, since it is the focused node
-          if ( i < focus.trail.nodes.length - 1 ) {
-
-            // If the node was PhET-iO instrumented, include its phetioID instead of its index (because phetioID is more stable)
-            if ( node.tandem ) {
-              phetioIDIndices.push( node.tandem.phetioID );
-            }
-            else {
-              phetioIDIndices.push( focus.trail.indices[ i ] );
-            }
+          // If the node was PhET-iO instrumented, include its phetioID instead of its index (because phetioID is more stable)
+          if ( node.isPhetioInstrumented() ) {
+            phetioIDIndices.push( node.tandem.phetioID );
+          }
+          else {
+            phetioIDIndices.push( focus.trail.indices[ i ] );
           }
         } );
 
         return {
-          focusedPhetioID: focus.trail.lastNode().tandem.phetioID
+          phetioIDIndices: phetioIDIndices
         };
       }
     },
