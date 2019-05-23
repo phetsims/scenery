@@ -668,6 +668,7 @@ define( require => {
 
         // @private
         this.changeAction = new Action( ( event ) => {
+          scenery.Display.userGestureEmitter.emit();
           sceneryLog && sceneryLog.Input && sceneryLog.Input( 'change(' + Input.debugText( null, event ) + ');' );
           sceneryLog && sceneryLog.Input && sceneryLog.push();
 
