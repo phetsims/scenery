@@ -29,6 +29,6 @@ require.config( {
     REPOSITORY: '..'
   },
 
-  // optional cache buster to make browser refresh load all included scripts, can be disabled with ?cacheBuster=false
+  // optional cache bust to make browser refresh load all included scripts, can be disabled with ?cacheBust=false
   urlArgs: Date.now()
 } );
