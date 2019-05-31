@@ -181,57 +181,56 @@ define( function( require ) {
   // HTMLElement attributes whose value is an ID of another element
   var ASSOCIATION_ATTRIBUTES = AccessibilityUtil.ASSOCIATION_ATTRIBUTES;
 
-  // The options for the Accessibility API. In general, most default to null; to clear, set back to null.
+  // The options for the Accessibility API. In general, most default to null; to clear, set back to null. Each one of
+  // these has an associated setter, see setter functions for more information about each.
   var ACCESSIBILITY_OPTION_KEYS = [
 
     // Order matters. Having focus before tagName covers the case where you change the tagName and focusability of a
     // currently focused node. We want the focusability to update correctly.
-    'focusable', // Sets whether or not the node can receive keyboard focus, see setFocusable()
-    'tagName', // Sets the tag name for the primary sibling DOM element in the parallel DOM, should be first
+    'focusable', // {boolean|null} - Sets whether or not the node can receive keyboard focus
+    'tagName', // {string|null} - Sets the tag name for the primary sibling DOM element in the parallel DOM, should be first
 
     /*
      * Higher Level API Functions
      */
-
-    'accessibleName',
+    'accessibleName', // {string|null} - Sets the name of this node, read when this node receives focus and inserted appropriately based on accessibleNameBehavio
     // TODO: add accessibleNameBehavior
-    'helpText',
-    'helpTextBehavior',
-    'accessibleHeading',
-    'accessibleHeadingBehavior',
+    'helpText', // {string|null} - Sets the descriptive content for this node, read by the virtual cursor, inserted into DOM appropriately based on helpTextBehavior
+    'helpTextBehavior', // {function} - Sets the way in which help text will be set for the Node, see DEFAULT_HELP_TEXT_BEHAVIOR for example
+    'accessibleHeading', // {string|null} - Sets content for the heading whose level will be automatically generated if specified
+    'accessibleHeadingBehavior', // {function} - Set to modify default behavior for inserting accessibleHeading string
 
     /*
      * Lower Level API Functions
      */
+    'containerTagName', // {string|null} - Sets the tag name for an [optional] element that contains this Node's siblings
+    'containerAriaRole', // {string|null} - Sets the ARIA role for the container parent DOM element
 
-    'containerTagName', // Sets the tag name for an [optional] element that contains this Node's siblings, see setContainerTagName()
-    'containerAriaRole', // Sets the ARIA role for the container parent DOM element, see setContainerAriaRole()
+    'innerContent', // {string|null} - Sets the inner text or HTML for a node's primary sibling element
+    'inputType', // {string|null} - Sets the input type for the primary sibling DOM element, only relevant if tagName is 'input'
+    'inputValue', // {string|null} - Sets the input value for the primary sibling DOM element, only relevant if tagName is 'input'
+    'accessibleChecked', // {string|null} - Sets the 'checked' state for inputs of type 'radio' and 'checkbox'
+    'accessibleNamespace', // {string|null} - Sets the namespace for the primary element
+    'ariaLabel', // {string|null} - Sets the value of the 'aria-label' attribute on the primary sibling of this Node
+    'ariaRole', // {string|null} - Sets the ARIA role for the primary sibling of this Node
+    'ariaValueText', // {string|null} - sets the aria-valuetext attribute of the primary sibling
 
-    'innerContent', // Sets the inner text or HTML for a node's primary sibling element, see setInnerContent()
-    'inputType', // Sets the input type for the primary sibling DOM element, only relevant if tagName is 'input'
-    'inputValue', // Sets the input value for the primary sibling DOM element, only relevant if tagName is 'input'
-    'accessibleChecked', // Sets the 'checked' state for inputs of type 'radio' and 'checkbox', see setAccessibleChecked()
-    'accessibleNamespace', // Sets the namespace for the primary element, see setAccessibleNamespace()
-    'ariaLabel', // Sets the value of the 'aria-label' attribute on the primary sibling of this Node, see setAriaLabel()
-    'ariaRole', // Sets the ARIA role for the primary sibling of this Node, see setAriaRole()
-    'ariaValueText', // sets the aria-valuetext attribute of the primary sibling, see setAriaValueText()
+    'labelTagName', // {string|null} - Sets the tag name for the DOM element sibling labeling this node
+    'labelContent', // {string|null} - Sets the label content for the node
+    'appendLabel', // {string|null} - Sets the label sibling to come after the primary sibling in the PDOM
 
-    'labelTagName', // Sets the tag name for the DOM element sibling labelling this node, see setLabelTagName()
-    'labelContent', // Sets the label content for the node, see setLabelContent()
-    'appendLabel', // Sets the label sibling to come after the primary sibling in the PDOM, see setAppendLabel()
+    'descriptionTagName', // {string|null} - Sets the tag name for the DOM element sibling describing this node
+    'descriptionContent', // {string|null} - Sets the description content for the node
+    'appendDescription', // {string|null} - Sets the description sibling to come after the primary sibling in the PDOM
 
-    'descriptionTagName', // Sets the tag name for the DOM element sibling describing this node, see setDescriptionTagName()
-    'descriptionContent', // Sets the description content for the node, see setDescriptionContent()
-    'appendDescription', // Sets the description sibling to come after the primary sibling in the PDOM, see setAppendDescription()
-
-    'focusHighlight', // Sets the focus highlight for the node, see setFocusHighlight()
-    'focusHighlightLayerable', // Flag to determine if the focus highlight node can be layered in the scene graph, see setFocusHighlightLayerable()
-    'groupFocusHighlight', // Sets the outer focus highlight for this node when a descendant has focus, see setGroupFocusHighlight()
-    'accessibleVisible', // Sets whether or not the node's DOM element is visible in the parallel DOM, see setAccessibleVisible()
-    'accessibleOrder', // Modifies the order of accessible  navigation, see setAccessibleOrder()
-    'ariaLabelledbyAssociations', // sets the list of aria-labelledby associations between from this node to others (including itself), see setAriaLabelledbyAssociations
-    'ariaDescribedbyAssociations', // sets the list of aria-describedby associations between from this node to others (including itself), see setAriaDescribedbyAssociations
-    'activeDescendantAssociations' // sets the list of aria-activedescendant associations between from this node to others (including itself), see setActiveDescendantAssociations
+    'focusHighlight', // {Node|Shape|null} - Sets the focus highlight for the node
+    'focusHighlightLayerable', // {boolean} Flag to determine if the focus highlight node can be layered in the scene graph
+    'groupFocusHighlight', // {boolean|Node} - Sets the outer focus highlight for this node when a descendant has focus
+    'accessibleVisible', // {boolean} - Sets whether or not the node's DOM element is visible in the parallel DOM
+    'accessibleOrder', // {Array.<Node|null>|null} - Modifies the order of accessible  navigation
+    'ariaLabelledbyAssociations', // {Array.<Object>} - sets the list of aria-labelledby associations between from this node to others (including itself)
+    'ariaDescribedbyAssociations', // {Array.<Object>} - sets the list of aria-describedby associations between from this node to others (including itself)
+    'activeDescendantAssociations' // {Array.<Object>} - sets the list of aria-activedescendant associations between from this node to others (including itself)
   ];
 
   var Accessibility = {
