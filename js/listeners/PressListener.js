@@ -379,7 +379,7 @@ define( function( require ) {
      * This can be called from the outside to release the press without the pointer having actually fired any 'up'
      * events. If the cancel/interrupt behavior is more preferable, call interrupt() on this listener instead.
      *
-     * @param {function} [event] - scenery Event if there was one. We can't gaurantee an event, in part to support interrupting.
+     * @param {function} [event] - scenery Event if there was one. We can't guarantee an event, in part to support interrupting.
      * @param {function} [callback] - called at the end of the release
      */
     release: function( event, callback ) {
