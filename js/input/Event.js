@@ -21,13 +21,13 @@ define( require => {
   const scenery = require( 'SCENERY/scenery' );
   const Trail = require( 'SCENERY/util/Trail' );
 
-  /**
-   * @param {Trail} trail - The trail to the node picked/hit by this input event.
-   * @param {string} type - Type of the event, e.g. 'string'
-   * @param {Pointer} pointer - The pointer that triggered this event
-   * @param {DOMEvent|null} domEvent - The original DOM Event that caused this Event to fire.
-   */
   class Event {
+    /**
+     * @param {Trail} trail - The trail to the node picked/hit by this input event.
+     * @param {string} type - Type of the event, e.g. 'string'
+     * @param {Pointer} pointer - The pointer that triggered this event
+     * @param {DOMEvent|null} domEvent - The original DOM Event that caused this Event to fire.
+     */
     constructor( trail, type, pointer, domEvent ) {
       assert && assert( trail instanceof Trail, 'Event\'s trail parameter should be a {Trail}' );
       assert && assert( typeof type === 'string', 'Event\'s type should be a {string}' );
