@@ -109,7 +109,7 @@ define( function( require ) {
      * needed). If the cancel/interrupt behavior is more preferable (will not fire the button), then call interrupt()
      * on this listener instead.
      *
-     * @param {function} [event] - scenery Event if there was one
+     * @param {Event} [event] - scenery Event if there was one
      * @param {function} [callback] - called at the end of the release
      */
     release: function( event, callback ) {

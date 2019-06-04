@@ -379,7 +379,7 @@ define( function( require ) {
      * This can be called from the outside to release the press without the pointer having actually fired any 'up'
      * events. If the cancel/interrupt behavior is more preferable, call interrupt() on this listener instead.
      *
-     * @param {function} [event] - scenery Event if there was one. We can't guarantee an event, in part to support interrupting.
+     * @param {Event} [event] - scenery Event if there was one. We can't guarantee an event, in part to support interrupting.
      * @param {function} [callback] - called at the end of the release
      */
     release: function( event, callback ) {
@@ -508,7 +508,7 @@ define( function( require ) {
      * Internal code executed as the first step of a release.
      * @private
      *
-     * @param {function} [event] - scenery Event if there was one
+     * @param {Event|null} event - scenery Event if there was one
      * @param {function} [callback] - called at the end of the release
      */
     onRelease: function( event, callback ) {
@@ -683,6 +683,8 @@ define( function( require ) {
      *
      * This will fire listeners immediately, but adds a delay for the a11yClickingProperty so that you can make a
      * button look pressed from a single DOM click event. For example usage, see sun/ButtonModel.looksPressedProperty.
+     *
+     * @param {Event|null} event
      */
     click: function( event ) {
       if ( this.canClick() ) {

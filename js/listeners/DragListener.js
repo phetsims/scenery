@@ -267,7 +267,7 @@ define( function( require ) {
      * This can be called from the outside to stop the drag without the pointer having actually fired any 'up'
      * events. If the cancel/interrupt behavior is more preferable, call interrupt() on this listener instead.
      *
-     * @param {function} [event] - scenery Event if there was one
+     * @param {Event} [event] - scenery Event if there was one
      * @param {function} [callback] - called at the end of the release
      */
     release: function( event, callback ) {
