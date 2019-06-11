@@ -30,14 +30,14 @@ define( function( require ) {
 
   // constants
   var TEXT_OPTION_KEYS = [
-    'boundsMethod', // Sets how bounds are determined for text, see setBoundsMethod() for more documentation
-    'text', // Sets the text to be displayed, see setText() for more documentation
-    'font', // Sets the font used for the text, see setFont() for more documentation
-    'fontWeight', // Sets the weight of the current font, see setFont() for more documentation
-    'fontFamily', // Sets the family of the current font, see setFont() for more documentation
-    'fontStretch', // Sets the stretch of the current font, see setFont() for more documentation
-    'fontStyle', // Sets the style of the current font, see setFont() for more documentation
-    'fontSize' // Sets the size of the current font, see setFont() for more documentation
+    'boundsMethod', // {string} - Sets how bounds are determined for text, see setBoundsMethod() for more documentation
+    'text', // {string|number} - Sets the text to be displayed, see setText() for more documentation
+    'font', // {Font|string} - Sets the font used for the text, see setFont() for more documentation
+    'fontWeight', // {string|number} - Sets the weight of the current font, see setFont() for more documentation
+    'fontFamily', // {string} - Sets the family of the current font, see setFont() for more documentation
+    'fontStretch', // {string} - Sets the stretch of the current font, see setFont() for more documentation
+    'fontStyle', // {string} - Sets the style of the current font, see setFont() for more documentation
+    'fontSize' // {string|number} - Sets the size of the current font, see setFont() for more documentation
   ];
 
   // SVG bounds seems to be malfunctioning for Safari 5. Since we don't have a reproducible test machine for
