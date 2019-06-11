@@ -11,7 +11,7 @@
  *       potentially break on whitespace.
  *
  * It supports the following markup and features in the string content (in addition to other options as listed in
- * RICH_TEXT_OPTIONKEYS):
+ * RICH_TEXT_OPTION_KEYS):
  * - <a href="{{placeholder}}"> for links (pass in { links: { placeholder: ACTUAL_HREF } })
  * - <b> and <strong> for bold text
  * - <i> and <em> for italic text
@@ -76,29 +76,30 @@ define( function( require ) {
   var VStrut = require( 'SCENERY/nodes/VStrut' );
 
   // Options that can be used in the constructor, with mutate(), or directly as setters/getters
+  // each of these options has an associated setter, see setter methods for more documentation
   var RICH_TEXT_OPTION_KEYS = [
-    'boundsMethod', // Sets how bounds are determined for text, see Text.setBoundsMethod() for more documentation
-    'font',
-    'fill',
-    'stroke',
-    'subScale',
-    'subXSpacing',
-    'subYOffset',
-    'supScale',
-    'supXSpacing',
-    'supYOffset',
-    'capHeightScale',
-    'underlineLineWidth',
-    'underlineHeightScale',
-    'strikethroughLineWidth',
-    'strikethroughHeightScale',
-    'linkFill',
-    'linkEventsHandled',
-    'links',
-    'align',
-    'leading',
-    'lineWrap',
-    'text'
+    'boundsMethod', // {string} - Sets how bounds are determined for text
+    'font', // {Font|string} - Sets the font for the text
+    'fill', // {PaintDef} - Sets the fill of the text
+    'stroke', // {PaintDef} - Sets the stroke around the text
+    'subScale', // {number} - Sets the scale of any subscript elements
+    'subXSpacing', // {number} - Sets horizontal spacing before any subscript elements
+    'subYOffset', // {number} - Sets vertical offset for any subscript elements
+    'supScale', // {number} - Sets the scale for any superscript elements
+    'supXSpacing', // {number} - Sets the horizontal offset before any superscript elements
+    'supYOffset', // {number} - Sets the vertical offset for any superscript elements
+    'capHeightScale', // {number} - Sets the expected cap height cap height (baseline to top of capital letters) as a scale
+    'underlineLineWidth', // {number} - Sets the line width for underlines
+    'underlineHeightScale', // {number} - Sets the underline height as a scale relative to text bounds height
+    'strikethroughLineWidth', // {number} - Sets line width for strikethrough
+    'strikethroughHeightScale', // {number} - Sets height of strikethrough as a scale relative to text bounds height
+    'linkFill', // {paint} - Sets the fill for links within the text
+    'linkEventsHandled', // {boolean} - Sets whether link clicks will call event.handle()
+    'links', // {Object|boolean} - Sets the map of href placeholder => actual href/callback used for links
+    'align', // {string} - Sets text alignment if there are multiple lines
+    'leading', // {number} - Sets the spacing between lines if there are multiple lines
+    'lineWrap', // {number} - Sets width of text before creating a new line
+    'text' // {string|number} - Sets the text to be displayed by this Node
   ];
 
   var DEFAULT_FONT = new Font( {
