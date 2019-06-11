@@ -22,7 +22,7 @@ define( function( require ) {
   var Shape = require( 'KITE/Shape' );
 
   var CIRCLE_OPTION_KEYS = [
-    'radius' // see setRadius() for more documentation
+    'radius' // {number} - see setRadius() for more documentation
   ];
 
   /**
