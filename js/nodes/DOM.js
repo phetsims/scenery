@@ -18,8 +18,8 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
 
   var DOM_OPTION_KEYS = [
-    'element', // Sets the element, see setElement() for more documentation
-    'preventTransform' // Sets whether Scenery is allowed to transform the element. see setPreventTransform() for docs
+    'element', // {HTMLElement} - Sets the element, see setElement() for more documentation
+    'preventTransform' // {boolean} - Sets whether Scenery is allowed to transform the element. see setPreventTransform() for docs
   ];
 
   /**
@@ -177,7 +177,7 @@ define( function( require ) {
      * Changes the DOM element of this DOM node to another element.
      * @public
      *
-     * @param {Element} element
+     * @param {HTMLElement} element
      * @returns {DOM} - For chaining
      */
     setElement: function( element ) {
@@ -203,7 +203,7 @@ define( function( require ) {
      * Returns the DOM element being displayed by this DOM node.
      * @public
      *
-     * @returns {Element}
+     * @returns {HTMLElement}
      */
     getElement: function() {
       return this._element;
