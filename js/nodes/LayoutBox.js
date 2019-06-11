@@ -24,10 +24,10 @@ define( function( require ) {
 
   // LayoutBox-specific options that can be passed in the constructor or mutate() call.
   var LAYOUT_BOX_OPTION_KEYS = [
-    'orientation', // 'horizontal' or 'vertical', see setOrientation for documentation
-    'spacing', // Spacing between each Node, see setSpacing for documentation
-    'align', // How to line up items, see setAlign for documentation
-    'resize' // Whether we should update the layout when children change, see setResize for documentation
+    'orientation', // {string} - 'horizontal' or 'vertical', see setOrientation for documentation
+    'spacing', // {number} - Spacing between each Node, see setSpacing for documentation
+    'align', // {string} - How to line up items, see setAlign for documentation
+    'resize' // {boolean} - Whether we should update the layout when children change, see setResize for documentation
   ];
 
   // The position (left/top) property name on the primary axis
