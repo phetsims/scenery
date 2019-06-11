@@ -234,48 +234,48 @@ define( function( require ) {
 
   // Node options, in the order they are executed in the constructor/mutate()
   var NODE_OPTION_KEYS = [
-    'children', // List of children to add (in order), see setChildren for more documentation
-    'cursor', // CSS cursor to display when over this node, see setCursor() for more documentation
-    'visible', // Whether the node is visible, see setVisible() for more documentation
-    'pickable', // Whether the node is pickable, see setPickable() for more documentation
-    'inputEnabled', // Whether input events can reach into this subtree, see setInputEnabled() for more documentation
-    'inputListeners', // The input listeners attached to the Node, see setInputListeners() for more documentation
-    'opacity', // Opacity of this node's subtree, see setOpacity() for more documentation
-    'matrix', // Transformation matrix of the node, see setMatrix() for more documentation
-    'translation', // x/y translation of the node, see setTranslation() for more documentation
-    'x', // x translation of the node, see setX() for more documentation
-    'y', // y translation of the node, see setY() for more documentation
-    'rotation', // rotation (in radians) of the node, see setRotation() for more documentation
-    'scale', // scale of the node, see scale() for more documentation
-    'localBounds', // bounds of subtree in local coordinate frame, see setLocalBounds() for more documentation
-    'maxWidth', // Constrains width of this node, see setMaxWidth() for more documentation
-    'maxHeight', // Constrains height of this node, see setMaxHeight() for more documentation
-    'leftTop', // The upper-left corner of this node's bounds, see setLeftTop() for more documentation
-    'centerTop', // The top-center of this node's bounds, see setCenterTop() for more documentation
-    'rightTop', // The upper-right corner of this node's bounds, see setRightTop() for more documentation
-    'leftCenter', // The left-center of this node's bounds, see setLeftCenter() for more documentation
-    'center', // The center of this node's bounds, see setCenter() for more documentation
-    'rightCenter', // The center-right of this node's bounds, see setRightCenter() for more documentation
-    'leftBottom', // The bottom-left of this node's bounds, see setLeftBottom() for more documentation
-    'centerBottom', // The middle center of this node's bounds, see setCenterBottom() for more documentation
-    'rightBottom', // The bottom right of this node's bounds, see setRightBottom() for more documentation
-    'left', // The left side of this node's bounds, see setLeft() for more documentation
-    'right', // The right side of this node's bounds, see setRight() for more documentation
-    'top', // The top side of this node's bounds, see setTop() for more documentation
-    'bottom', // The bottom side of this node's bounds, see setBottom() for more documentation
-    'centerX', // The x-center of this node's bounds, see setCenterX() for more documentation
-    'centerY', // The y-center of this node's bounds, see setCenterY() for more documentation
-    'renderer', // The preferred renderer for this subtree, see setRenderer() for more documentation
-    'layerSplit', // Forces this subtree into a layer of its own, see setLayerSplit() for more documentation
-    'usesOpacity', // Hint that opacity will be changed, see setUsesOpacity() for more documentation
-    'cssTransform', // Hint that can trigger using CSS transforms, see setCssTransform() for more documentation
-    'excludeInvisible', // If this is invisible, exclude from DOM, see setExcludeInvisible() for more documentation
-    'webglScale', // Hint to adjust WebGL scaling quality for this subtree, see setWebglScale() for more documentation
-    'preventFit', // Prevents layers from fitting this subtree, see setPreventFit() for more documentation
-    'mouseArea', // Changes the area the mouse can interact with, see setMouseArea() for more documentation
-    'touchArea', // Changes the area touches can interact with, see setTouchArea() for more documentation
-    'clipArea', // Makes things outside of a shape invisible, see setClipArea() for more documentation
-    'transformBounds' // Flag that makes bounds tighter, see setTransformBounds() for more documentation
+    'children', // {Array.<Node>}- List of children to add (in order), see setChildren for more documentation
+    'cursor', // {string|null} - CSS cursor to display when over this node, see setCursor() for more documentation
+    'visible', // {boolean} - Whether the node is visible, see setVisible() for more documentation
+    'pickable', // {boolean|null} - Whether the node is pickable, see setPickable() for more documentation
+    'inputEnabled', // {boolean} Whether input events can reach into this subtree, see setInputEnabled() for more documentation
+    'inputListeners', // {Array.<Object>} - The input listeners attached to the Node, see setInputListeners() for more documentation
+    'opacity', // {number} - Opacity of this node's subtree, see setOpacity() for more documentation
+    'matrix', // {Matrix3} - Transformation matrix of the node, see setMatrix() for more documentation
+    'translation', // {Vector2} - x/y translation of the node, see setTranslation() for more documentation
+    'x', // {number} - x translation of the node, see setX() for more documentation
+    'y', // {number} - y translation of the node, see setY() for more documentation
+    'rotation', // {number} - rotation (in radians) of the node, see setRotation() for more documentation
+    'scale', // {number} - scale of the node, see scale() for more documentation
+    'localBounds', // {Bounds2|null} - bounds of subtree in local coordinate frame, see setLocalBounds() for more documentation
+    'maxWidth', // {number|null} - Constrains width of this node, see setMaxWidth() for more documentation
+    'maxHeight', // {number|null} - Constrains height of this node, see setMaxHeight() for more documentation
+    'leftTop', // {Vector2} - The upper-left corner of this node's bounds, see setLeftTop() for more documentation
+    'centerTop', // {Vector2} - The top-center of this node's bounds, see setCenterTop() for more documentation
+    'rightTop', // {Vector2} - The upper-right corner of this node's bounds, see setRightTop() for more documentation
+    'leftCenter', // {Vector2} - The left-center of this node's bounds, see setLeftCenter() for more documentation
+    'center', // {Vector2} - The center of this node's bounds, see setCenter() for more documentation
+    'rightCenter', // {Vector2} - The center-right of this node's bounds, see setRightCenter() for more documentation
+    'leftBottom', // {Vector2} - The bottom-left of this node's bounds, see setLeftBottom() for more documentation
+    'centerBottom', // {Vector2} - The middle center of this node's bounds, see setCenterBottom() for more documentation
+    'rightBottom', // {Vector2} - The bottom right of this node's bounds, see setRightBottom() for more documentation
+    'left', // {number} - The left side of this node's bounds, see setLeft() for more documentation
+    'right', // {number} - The right side of this node's bounds, see setRight() for more documentation
+    'top', // {number} - The top side of this node's bounds, see setTop() for more documentation
+    'bottom', // {number} - The bottom side of this node's bounds, see setBottom() for more documentation
+    'centerX', // {number} - The x-center of this node's bounds, see setCenterX() for more documentation
+    'centerY', // {number} - The y-center of this node's bounds, see setCenterY() for more documentation
+    'renderer', // {string|null} - The preferred renderer for this subtree, see setRenderer() for more documentation
+    'layerSplit', // {boolean} - Forces this subtree into a layer of its own, see setLayerSplit() for more documentation
+    'usesOpacity', // {boolean} - Hint that opacity will be changed, see setUsesOpacity() for more documentation
+    'cssTransform', // {boolean} - Hint that can trigger using CSS transforms, see setCssTransform() for more documentation
+    'excludeInvisible', // {boolean} If this is invisible, exclude from DOM, see setExcludeInvisible() for more documentation
+    'webglScale', // {number|null} - Hint to adjust WebGL scaling quality for this subtree, see setWebglScale() for more documentation
+    'preventFit', // {boolean} - Prevents layers from fitting this subtree, see setPreventFit() for more documentation
+    'mouseArea', // {Bounds2|Shape|null} - Changes the area the mouse can interact with, see setMouseArea() for more documentation
+    'touchArea', // {Bounds2|Shape|null} - Changes the area touches can interact with, see setTouchArea() for more documentation
+    'clipArea', // {Bounds2|Shape|null} - Makes things outside of a shape invisible, see setClipArea() for more documentation
+    'transformBounds' // {boolean} - Flag that makes bounds tighter, see setTransformBounds() for more documentation
   ];
 
   var DEFAULT_OPTIONS = {
