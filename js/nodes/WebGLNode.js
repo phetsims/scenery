@@ -24,7 +24,7 @@ define( function( require ) {
   var WebGLNodeDrawable = require( 'SCENERY/display/drawables/WebGLNodeDrawable' );
 
   var WEBGL_NODE_OPTION_KEYS = [
-    'canvasBounds' // Sets the available Canvas bounds that content will show up in. See setCanvasBounds()
+    'canvasBounds' // {Bounds2} - Sets the available Canvas bounds that content will show up in. See setCanvasBounds()
   ];
 
   /**
