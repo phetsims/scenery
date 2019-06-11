@@ -21,8 +21,8 @@ define( function( require ) {
   var Shape = require( 'KITE/Shape' );
 
   var PATH_OPTION_KEYS = [
-    'boundsMethod', // Sets how bounds are determined, see setBoundsMethod() for more documentation.
-    'shape' // Sets the shape of the Path, see  setShape() for more documentation.
+    'boundsMethod', // {string} - Sets how bounds are determined, see setBoundsMethod() for more documentation.
+    'shape' // {Shape|string|null} - Sets the shape of the Path, see  setShape() for more documentation.
   ];
 
   var DEFAULT_OPTIONS = {
