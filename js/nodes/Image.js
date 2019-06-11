@@ -29,14 +29,14 @@ define( function( require ) {
 
   // Image-specific options that can be passed in the constructor or mutate() call.
   var IMAGE_OPTION_KEYS = [
-    'image', // Changes the image displayed, see setImage() for documentation
-    'imageOpacity', // Controls opacity of this image (and not children), see setImageOpacity() for documentation
-    'initialWidth', // Width of an image not-yet loaded (for layout), see setInitialWidth() for documentation
-    'initialHeight', // Height of an image not-yet loaded (for layout), see setInitialHeight() for documentation
-    'mipmap', // Whether mipmapped output is supported, see setMipmap() for documentation
-    'mipmapBias', // Whether mipmapping tends towards sharp/aliased or blurry, see setMipmapBias() for documentation
-    'mipmapInitialLevel', // How many mipmap levels to generate if needed, see setMipmapInitialLevel() for documentation
-    'mipmapMaxLevel' // The maximum mipmap level to compute if needed, see setMipmapMaxLevel() for documentation
+    'image', // {string|HTMLImageElement|HTMLCanvasElement|Array} - Changes the image displayed, see setImage() for documentation
+    'imageOpacity', // {number} - Controls opacity of this image (and not children), see setImageOpacity() for documentation
+    'initialWidth', // {number} - Width of an image not-yet loaded (for layout), see setInitialWidth() for documentation
+    'initialHeight', // {number} - Height of an image not-yet loaded (for layout), see setInitialHeight() for documentation
+    'mipmap', // {boolean} - Whether mipmapped output is supported, see setMipmap() for documentation
+    'mipmapBias', // {number} - Whether mipmapping tends towards sharp/aliased or blurry, see setMipmapBias() for documentation
+    'mipmapInitialLevel', // {number} - How many mipmap levels to generate if needed, see setMipmapInitialLevel() for documentation
+    'mipmapMaxLevel' // {number} The maximum mipmap level to compute if needed, see setMipmapMaxLevel() for documentation
   ];
 
   var DEFAULT_OPTIONS = {
