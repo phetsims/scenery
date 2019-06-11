@@ -24,15 +24,15 @@ define( function( require ) {
   var Shape = require( 'KITE/Shape' );
 
   var RECTANGLE_OPTION_KEYS = [
-    'rectBounds', // Sets x/y/width/height based on bounds. See setRectBounds() for more documentation.
-    'rectSize', // Sets width/height based on dimension. See setRectSize() for more documentation.
-    'rectX', // Sets x. See setRectX() for more documentation.
-    'rectY', // Sets y. See setRectY() for more documentation.
-    'rectWidth', // Sets width. See setRectWidth() for more documentation.
+    'rectBounds', // {Bounds2} - Sets x/y/width/height based on bounds. See setRectBounds() for more documentation.
+    'rectSize', // {Dimension2} - Sets width/height based on dimension. See setRectSize() for more documentation.
+    'rectX', // {number} - Sets x. See setRectX() for more documentation.
+    'rectY', // {number} - Sets y. See setRectY() for more documentation.
+    'rectWidth', // {number} - Sets width. See setRectWidth() for more documentation.
     'rectHeight', // Sets height. See setRectHeight() for more documentation.
-    'cornerRadius', // Sets corner radii. See setCornerRadius() for more documentation.
-    'cornerXRadius', // Sets horizontal corner radius. See setCornerXRadius() for more documentation.
-    'cornerYRadius' // Sets vertical corner radius. See setCornerYRadius() for more documentation.
+    'cornerRadius', // {number} - Sets corner radii. See setCornerRadius() for more documentation.
+    'cornerXRadius', // {number} - Sets horizontal corner radius. See setCornerXRadius() for more documentation.
+    'cornerYRadius' // {number} - Sets vertical corner radius. See setCornerYRadius() for more documentation.
   ];
 
   /**
