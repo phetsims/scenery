@@ -25,17 +25,17 @@ define( function( require ) {
   var isIE9 = platform.ie9;
 
   var PAINTABLE_OPTION_KEYS = [
-    'fill', // Sets the fill of this node, see setFill() for documentation.
-    'fillPickable', // Sets whether the filled area of the node will be treated as 'inside'. See setFillPickable()
-    'stroke', // Sets the stroke of this node, see setStroke() for documentation.
-    'strokePickable', // Sets whether the stroked area of the node will be treated as 'inside'. See setStrokePickable()
-    'lineWidth', // Sets the width of the stroked area, see setLineWidth for documentation.
-    'lineCap', // Sets the shape of the stroked area at the start/end of the path, see setLineCap() for documentation.
-    'lineJoin', // Sets the shape of the stroked area at joints, see setLineJoin() for documentation.
-    'miterLimit', // Sets when lineJoin will switch from miter to bevel, see setMiterLimit() for documentation.
-    'lineDash', // Sets a line-dash pattern for the stroke, see setLineDash() for documentation
-    'lineDashOffset', // Sets the offset of the line-dash from the start of the stroke, see setLineDashOffset()
-    'cachedPaints' // Sets which paints should be cached, even if not displayed. See setCachedPaints()
+    'fill', // {PaintDef} - Sets the fill of this node, see setFill() for documentation.
+    'fillPickable', // {boolean} - Sets whether the filled area of the node will be treated as 'inside'. See setFillPickable()
+    'stroke', // {PaintDef} - Sets the stroke of this node, see setStroke() for documentation.
+    'strokePickable', // {boolean} - Sets whether the stroked area of the node will be treated as 'inside'. See setStrokePickable()
+    'lineWidth', // {number} Sets the width of the stroked area, see setLineWidth for documentation.
+    'lineCap', // {string} - Sets the shape of the stroked area at the start/end of the path, see setLineCap() for documentation.
+    'lineJoin', // {string} - Sets the shape of the stroked area at joints, see setLineJoin() for documentation.
+    'miterLimit', // {number} - Sets when lineJoin will switch from miter to bevel, see setMiterLimit() for documentation.
+    'lineDash', // {Array.<number>} - Sets a line-dash pattern for the stroke, see setLineDash() for documentation
+    'lineDashOffset', // {number} Sets the offset of the line-dash from the start of the stroke, see setLineDashOffset()
+    'cachedPaints' // {Array.<PaintDef>} - Sets which paints should be cached, even if not displayed. See setCachedPaints()
   ];
 
   var DEFAULT_OPTIONS = {
@@ -588,7 +588,7 @@ define( function( require ) {
          *
          * Also note that duplicate paints are acceptable, and don't need to be filtered out before-hand.
          *
-         * @param {Array.<string|Color|Property.<string|Color>|LinearGradient|RadialGradient|Pattern|null>} paints
+         * @param {Array.<PaintDef>} paints
          * @returns {Paintable} - Returns 'this' reference, for chaining
          */
         setCachedPaints: function( paints ) {
@@ -607,7 +607,7 @@ define( function( require ) {
          * Returns the cached paints.
          * @public
          *
-         * @returns {Array.<string|Color|LinearGradient|RadialGradient|Pattern|null>}
+         * @returns {Array.<PaintDef>}
          */
         getCachedPaints: function() {
           return this._cachedPaints;
