@@ -32,8 +32,8 @@ define( function( require ) {
     // TODO: This is in-progress work to convert object properties to Axon Properties, see https://github.com/phetsims/phet-io/issues/1326
     var visibleProperty = new NodeProperty( node, 'visibility', 'visible', _.extend( {
 
-      // pick the following values from the parent Node
-      phetioReadOnly: node.phetioReadOnly,
+      // pick the baseline value from the parent Node's baseline
+      phetioReadOnly: node.phetioReadOnlyBaseline,
       phetioType: PropertyIO( BooleanIO ),
 
       tandem: node.tandem.createTandem( 'visibleProperty' ),
@@ -42,8 +42,8 @@ define( function( require ) {
 
     var pickableProperty = new NodeProperty( node, 'pickability', 'pickable', _.extend( {
 
-      // pick the following values from the parent Node
-      phetioReadOnly: node.phetioReadOnly,
+      // pick the baseline value from the parent Node's baseline
+      phetioReadOnly: node.phetioReadOnlyBaseline,
 
       tandem: node.tandem.createTandem( 'pickableProperty' ),
       phetioType: PropertyIO( NullableIO( BooleanIO ) ),
@@ -54,8 +54,8 @@ define( function( require ) {
     // properly--we may address this by moving to a mixin pattern.
     var opacityProperty = new NumberProperty( node.opacity, _.extend( {
 
-      // pick the following values from the parent Node
-      phetioReadOnly: node.phetioReadOnly,
+      // pick the baseline value from the parent Node's baseline
+      phetioReadOnly: node.phetioReadOnlyBaseline,
 
       tandem: node.tandem.createTandem( 'opacityProperty' ),
       range: new Range( 0, 1 ),
