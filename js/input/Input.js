@@ -1874,8 +1874,15 @@ define( require => {
             entries[ property ] = touchArray;
           }
 
-          // we don't need much from the target, just the trail ID
-          if ( property === 'target' && domEventProperty !== null ) {
+          // If the target came from the accessibility PDOM, then we want to store the Node trail id of where it came from.
+          if ( property === 'target' && domEventProperty !== null &&
+
+               // Some event targets like HTMLDocument may not have this method, see https://github.com/phetsims/scenery/issues/979
+               typeof domEventProperty.getAttribute === 'function' &&
+
+               // If false, then this target isn't a PDOM element, so we can skip this serialization
+               domEventProperty.hasAttribute( AccessibilityUtil.DATA_TRAIL_ID ) ) {
+
             entries[ property ] = {};
             entries[ property ][ AccessibilityUtil.DATA_TRAIL_ID ] = domEventProperty.getAttribute( AccessibilityUtil.DATA_TRAIL_ID );
           }
