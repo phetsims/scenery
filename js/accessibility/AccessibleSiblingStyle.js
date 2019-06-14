@@ -27,8 +27,10 @@ define( require => {
   // the PDOM, which should use 'a11y-root' class attributes instead.
   SceneryStyle.addRule( '.' + SIBLING_CLASS_NAME +
     '{' +
-      // fixed to the 'relative' styled root element, to be transformed with left/top
-      'position: fixed;' +
+      // positioned relative to the root PDOM element - Do not use `fixed` for this attribute as it could introduce
+      // an issue where Safari becomes unresponsive if left sitting for a few minutes (or interfere with workarounds)
+      // see https://github.com/phetsims/joist/issues/140
+      'position: absolute;' +
 
       // ABSOLUTELY CRITICAL - so PDOM elements do not interfere with rest of scenery input
       'pointer-events: none;' +
@@ -69,8 +71,8 @@ define( require => {
 
   SceneryStyle.addRule( '.' + ROOT_CLASS_NAME +
     '{' +
-      // root has 'relative' style so that descendants can be positioned 'fixed' relative to this root
-      'position: relative;' +
+      // so that sibling elements are positioned relative to this root element
+      'position: absolute;' +
 
       // a catch all for things that are not hidden by the styling on descendants of the root (for example
       // there is no other way to hide or style check boxes with CSS)
