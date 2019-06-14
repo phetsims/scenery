@@ -1,5 +1,5 @@
 // Copyright 2016, University of Colorado Boulder
-(function() {
+( function() {
   'use strict';
   if ( !window.hasOwnProperty( '_' ) ) {
     throw new Error( 'Underscore/Lodash not found: _' );
@@ -16,4 +16,4 @@
     window.scenery = require( 'main' );
     window.scenery.Util.polyfillRequestAnimationFrame();
   } );
-})();
+} )();
