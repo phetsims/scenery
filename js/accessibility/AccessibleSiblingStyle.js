@@ -27,10 +27,10 @@ define( require => {
   // the PDOM, which should use 'a11y-root' class attributes instead.
   SceneryStyle.addRule( '.' + SIBLING_CLASS_NAME +
     '{' +
-      // positioned relative to the root PDOM element - Do not use `fixed` for this attribute as it could introduce
-      // an issue where Safari becomes unresponsive if left sitting for a few minutes (or interfere with workarounds)
-      // see https://github.com/phetsims/joist/issues/140
-      'position: absolute;' +
+
+      // 'fixed' positions elements relative to the ViewPort (global coordinate frame), a requirement for the approach
+      // in AccessiblePeer.positionElements
+      'position: fixed;' +
 
       // ABSOLUTELY CRITICAL - so PDOM elements do not interfere with rest of scenery input
       'pointer-events: none;' +
@@ -62,17 +62,22 @@ define( require => {
       // Surprisingly, there is no performance benefit if this is put on the root element.
       // see https://github.com/phetsims/scenery/issues/663
       'clip: rect(1px, 1px, 1px, 1px);' +
-
-      // Just for debugging!
-      // color: white // helpful for seeing text over a black background
-      // 'z-index: 5000;' + // on top of other display Blocks
     '}'
   );
 
   SceneryStyle.addRule( '.' + ROOT_CLASS_NAME +
     '{' +
-      // so that sibling elements are positioned relative to this root element
+      // so that this root can also be positioned
       'position: absolute;' +
+
+      // 'fixed' positioned elements interfere with workarounds that are meant to prevent Safari from going to sleep
+      // when the browser is left inactive for a few minutes. This z-index keeps the PDOM from interfering, while still
+      // allowing us to use `fixed`. If the PDOM elements are ever styled with position: 'absolute' (would require
+      // changing the current approach of AccessiblePeer.positionElements), this could be removed.
+      'z-index: -1;' +
+
+      // JUST FOR DEBUGGING! So you can see the PDOM on top of other graphical content
+      // 'z-index: 5000;' +
 
       // a catch all for things that are not hidden by the styling on descendants of the root (for example
       // there is no other way to hide or style check boxes with CSS)
