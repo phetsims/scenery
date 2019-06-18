@@ -22,6 +22,9 @@ define( function( require ) {
   function Mouse() {
     Pointer.call( this, null, false, 'mouse' );
 
+    // @public {number|null} - Since we need to track the mouse's pointer id occasionally
+    this.id = null;
+
     // @deprecated, see https://github.com/phetsims/scenery/issues/803
     this.leftDown = false;
     this.middleDown = false;

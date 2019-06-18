@@ -1278,10 +1278,12 @@ define( require => {
         target.setPointerCapture( event.pointerId );
       }
 
+      type = this.handleUnknownPointerType( type, id );
       switch( type ) {
         case 'mouse':
           // The actual event afterwards
           this.mouseDown( point, event );
+          this.mouse.id = id;
           break;
         case 'touch':
           this.touchStart( id, point, event );
@@ -1306,9 +1308,11 @@ define( require => {
      * @param {DOMEvent} event
      */
     pointerUp( id, type, point, event ) {
+      type = this.handleUnknownPointerType( type, id );
       switch( type ) {
         case 'mouse':
           this.mouseUp( point, event );
+          this.mouse.id = null;
           break;
         case 'touch':
           this.touchEnd( id, point, event );
@@ -1333,6 +1337,7 @@ define( require => {
      * @param {DOMEvent} event
      */
     pointerCancel( id, type, point, event ) {
+      type = this.handleUnknownPointerType( type, id );
       switch( type ) {
         case 'mouse':
           if ( console && console.log ) {
@@ -1362,6 +1367,7 @@ define( require => {
      * @param {DOMEvent} event
      */
     pointerMove( id, type, point, event ) {
+      type = this.handleUnknownPointerType( type, id );
       switch( type ) {
         case 'mouse':
           this.mouseMove( point, event );
@@ -1433,6 +1439,24 @@ define( require => {
     pointerLeave( id, type, point, event ) {
       // TODO: accumulate mouse/touch info in the object if needed?
       // TODO: do we want to branch change on these types of events?
+    }
+
+    /**
+     * When we get an unknown pointer event type (allowed in the spec, see
+     * https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/pointerType), we'll try to guess the pointer type
+     * so that we can properly start/end the interaction. NOTE: this can happen for an 'up' where we received a
+     * proper type for a 'down', so thus we need the detection.
+     * @private
+     *
+     * @param {string} type
+     * @param {number} id
+     * @returns {string}
+     */
+    handleUnknownPointerType( type, id ) {
+      if ( type !== '' ) {
+        return type;
+      }
+      return ( this.mouse && this.mouse.id === id ) ? 'mouse' : 'touch';
     }
 
     /**
