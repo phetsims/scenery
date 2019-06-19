@@ -13,6 +13,7 @@ define( function( require ) {
   var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Events = require( 'AXON/Events' );
+  var FullScreen = require( 'JOIST/FullScreen' );
   var inherit = require( 'PHET_CORE/inherit' );
   var KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
   var Poolable = require( 'PHET_CORE/Poolable' );
