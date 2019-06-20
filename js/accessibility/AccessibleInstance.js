@@ -31,6 +31,7 @@ define( function( require ) {
   'use strict';
 
   var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
+  var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   var cleanArray = require( 'PHET_CORE/cleanArray' );
   var Events = require( 'AXON/Events' );
   var FullScreen = require( 'SCENERY/util/FullScreen' );
