@@ -426,7 +426,12 @@ define( function( require ) {
 
         if ( timer.hasListener( this._a11yClickingTimeoutListener ) ) {
           timer.clearTimeout( this._a11yClickingTimeoutListener );
-          this.a11yClickingProperty.value = false;
+
+          // interrupt may be called after the PressListener has been disposed (for instance, internally by scenery
+          // if the Node receives a blur event after the PressListener is disposed)
+          if ( !this.a11yClickingProperty.isDisposed ) {
+            this.a11yClickingProperty.value = false;
+          }
         }
       }
       else if ( this.isPressed ) {
@@ -718,7 +723,12 @@ define( function( require ) {
           // now add the timeout back to start over, saving so that it can be removed later
           var self = this;
           this._a11yClickingTimeoutListener = timer.setTimeout( function() {
-            self.a11yClickingProperty.value = false;
+
+            // the listener may have been disposed before the end of a11yLooksPressedInterval, like if it fires and
+            // disposes itself immediately
+            if ( !self.a11yClickingProperty.isDisposed ) {
+              self.a11yClickingProperty.value = false;
+            }
           }, this._a11yLooksPressedInterval );
         }
       }
