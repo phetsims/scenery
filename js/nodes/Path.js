@@ -260,7 +260,7 @@ define( function( require ) {
 
       // Do not attach shape listeners if we are disposed
       if ( !this.isDisposed ) {
-        this._shape.onStatic( 'invalidated', this._invalidShapeListener );
+        this._shape.invalidatedEmitter.addListener( this._invalidShapeListener );
         this._invalidShapeListenerAttached = true;
       }
     },
@@ -272,7 +272,7 @@ define( function( require ) {
     detachShapeListener: function() {
       assert && assert( this._invalidShapeListenerAttached, 'We cannot detach an unattached listener' );
 
-      this._shape.offStatic( 'invalidated', this._invalidShapeListener );
+      this._shape.invalidatedEmitter.removeListener( this._invalidShapeListener );
       this._invalidShapeListenerAttached = false;
     },
 
