@@ -484,6 +484,7 @@ define( function( require ) {
 
       // dispose after the peer so the peer can remove any listeners from it
       this.transformTracker.dispose();
+      this.transformTracker = null;
 
       // If we are the root accessible instance, we won't actually have a reference to a node.
       if ( this.node ) {
