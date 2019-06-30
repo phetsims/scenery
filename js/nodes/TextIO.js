@@ -60,7 +60,7 @@ define( function( require ) {
       returnType: VoidIO,
       parameterTypes: [ FontIO ],
       implementation: function( font ) {
-        this.instance.setFont( font );
+        this.phetioObject.setFont( font );
       },
       documentation: 'Sets font options for this TextIO instance, e.g. {size: 16, weight: bold}. If increasing the font ' +
                      'size does not make the text size larger, you may need to increase the maxWidth of the TextIO also.',
@@ -71,7 +71,7 @@ define( function( require ) {
       returnType: FontIO,
       parameterTypes: [],
       implementation: function() {
-        return this.instance.getFont();
+        return this.phetioObject.getFont();
       },
       documentation: 'Gets font options for this TextIO instance as an object'
     },
@@ -80,7 +80,7 @@ define( function( require ) {
       returnType: VoidIO,
       parameterTypes: [ NumberIO ],
       implementation: function( maxWidth ) {
-        this.instance.setMaxWidth( maxWidth );
+        this.phetioObject.setMaxWidth( maxWidth );
       },
       documentation: 'Sets the maximum width of text box. ' +
                      'If the text width exceeds maxWidth, it is scaled down to fit.',
@@ -91,7 +91,7 @@ define( function( require ) {
       returnType: NumberIO,
       parameterTypes: [],
       implementation: function() {
-        return this.instance.maxWidth;
+        return this.phetioObject.maxWidth;
       },
       documentation: 'Gets the maximum width of text box'
     }

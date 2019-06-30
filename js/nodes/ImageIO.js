@@ -33,7 +33,7 @@ define( function( require ) {
       implementation: function( base64Text ) {
         var im = new window.Image();
         im.src = base64Text;
-        this.instance.image = im;
+        this.phetioObject.image = im;
       },
       documentation: 'Set the image from a base64 string',
       invocableForReadOnlyElements: false
