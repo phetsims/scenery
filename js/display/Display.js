@@ -815,6 +815,23 @@ define( function( require ) {
       return this.setSceneCursor( this.options.defaultCursor );
     },
 
+    /**
+     * Sets the cursor to be displayed when over the Display.
+     * @private
+     *
+     * @param {string} cursor
+     */
+    setElementCursor( cursor ) {
+      this._domElement.style.cursor = cursor;
+
+      // In some cases, Chrome doesn't seem to respect the cursor set on the Display's domElement. If we are using the
+      // full window, we can apply the workaround of controlling the body's style.
+      // See https://github.com/phetsims/scenery/issues/983
+      if ( this._assumeFullWindow ) {
+        document.body.style.cursor = cursor;
+      }
+    },
+
     setSceneCursor: function( cursor ) {
       if ( cursor !== this._lastCursor ) {
         this._lastCursor = cursor;
@@ -822,11 +839,11 @@ define( function( require ) {
         if ( customCursors ) {
           // go backwards, so the most desired cursor sticks
           for ( var i = customCursors.length - 1; i >= 0; i-- ) {
-            this._domElement.style.cursor = customCursors[ i ];
+            this.setElementCursor( customCursors[ i ] );
           }
         }
         else {
-          this._domElement.style.cursor = cursor;
+          this.setElementCursor( cursor );
         }
       }
     },
