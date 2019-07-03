@@ -22,6 +22,7 @@ define( require => {
   const Trail = require( 'SCENERY/util/Trail' );
 
   class Event {
+
     /**
      * @param {Trail} trail - The trail to the node picked/hit by this input event.
      * @param {string} type - Type of the event, e.g. 'string'
