@@ -706,9 +706,10 @@ define( require => {
 
         // @private
         this.changeAction = new Action( ( event ) => {
-          scenery.Display.userGestureEmitter.emit();
           sceneryLog && sceneryLog.Input && sceneryLog.Input( 'change(' + Input.debugText( null, event ) + ');' );
           sceneryLog && sceneryLog.Input && sceneryLog.push();
+
+          scenery.Display.userGestureEmitter.emit();
 
           if ( !this.a11yPointer ) { this.initA11yPointer(); }
           const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
