@@ -557,25 +557,6 @@ define( require => {
         // when that happens. See https://github.com/phetsims/scenery/issues/925
         var ieBlockCallbacks = false;
 
-        /**
-         * {DOMEvent} event
-         * @param event
-         * @returns {string} the trail id added to the element in AccessiblePeer
-         */
-        var getTrailId = function( event ) {
-          assert && assert( event.target || event[ TARGET_SUBSTITUTE_KEY ], 'need a way to get the target' );
-
-          // could be serialized event for phet-io playbacks, see Input.serializeDOMEvent()
-          if ( event[ TARGET_SUBSTITUTE_KEY ] ) {
-            assert && assert( event[ TARGET_SUBSTITUTE_KEY ] instanceof Object );
-            return event[ TARGET_SUBSTITUTE_KEY ][ AccessibilityUtil.DATA_TRAIL_ID ];
-          }
-          else {
-            assert && assert( event.target instanceof window.Element );
-            return event.target.getAttribute( AccessibilityUtil.DATA_TRAIL_ID );
-          }
-        };
-
         // @private
         this.focusinAction = new Action( ( event ) => {
 
@@ -589,12 +570,10 @@ define( require => {
             return;
           }
 
-          sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusIn(' + Input.debugText( null, event ) + ');' );
+          sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focus(' + Input.debugText( null, event ) + ');' );
           sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-          if ( !this.a11yPointer ) { this.initA11yPointer(); }
-          const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
-          this.dispatchEvent( trail, 'focus', this.a11yPointer, event, false );
+          this.dispatchA11yEvent( 'focus', event, false );
 
           sceneryLog && sceneryLog.Input && sceneryLog.pop();
         }, {
@@ -619,13 +598,13 @@ define( require => {
           sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusOut(' + Input.debugText( null, event ) + ');' );
           sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-          if ( !this.a11yPointer ) { this.initA11yPointer(); }
-
           // recompute the trail on focusout if necessary - since a blur/focusout may have been initiated from a
           // focus/focusin listener, it is possible that focusout was called more than once before focusin is called on the
           // next active element, see https://github.com/phetsims/scenery/issues/898
-          this.a11yPointer.invalidateTrail( getTrailId( event ) );
-          this.dispatchEvent( this.a11yPointer.trail, 'blur', this.a11yPointer, event, false );
+          if ( !this.a11yPointer ) { this.initA11yPointer(); }
+          this.a11yPointer.invalidateTrail( this.getTrailId( event ) );
+
+          this.dispatchA11yEvent( 'blur', event, false );
 
           // clear the trail to make sure that our assertions aren't testing a stale trail, do this before
           // focusing event.relatedTarget below so that trail isn't cleared after focus
@@ -667,9 +646,7 @@ define( require => {
           sceneryLog && sceneryLog.Input && sceneryLog.Input( 'click(' + Input.debugText( null, event ) + ');' );
           sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-          if ( !this.a11yPointer ) { this.initA11yPointer(); }
-          const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
-          this.dispatchEvent( trail, 'click', this.a11yPointer, event, true );
+          this.dispatchA11yEvent( 'click', event, true );
 
           sceneryLog && sceneryLog.Input && sceneryLog.pop();
         }, {
@@ -688,9 +665,7 @@ define( require => {
           sceneryLog && sceneryLog.Input && sceneryLog.Input( 'input(' + Input.debugText( null, event ) + ');' );
           sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-          if ( !this.a11yPointer ) { this.initA11yPointer(); }
-          const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
-          this.dispatchEvent( trail, 'input', this.a11yPointer, event, true );
+          this.dispatchA11yEvent( 'input', event, true );
 
           sceneryLog && sceneryLog.Input && sceneryLog.pop();
         }, {
@@ -709,11 +684,7 @@ define( require => {
           sceneryLog && sceneryLog.Input && sceneryLog.Input( 'change(' + Input.debugText( null, event ) + ');' );
           sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-          scenery.Display.userGestureEmitter.emit();
-
-          if ( !this.a11yPointer ) { this.initA11yPointer(); }
-          const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
-          this.dispatchEvent( trail, 'change', this.a11yPointer, event, true );
+          this.dispatchA11yEvent( 'change', event, true );
 
           sceneryLog && sceneryLog.Input && sceneryLog.pop();
         }, {
@@ -732,9 +703,7 @@ define( require => {
           sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keydown(' + Input.debugText( null, event ) + ');' );
           sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-          if ( !this.a11yPointer ) { this.initA11yPointer(); }
-          const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
-          this.dispatchEvent( trail, 'keydown', this.a11yPointer, event, true );
+          this.dispatchA11yEvent( 'keydown', event );
 
           sceneryLog && sceneryLog.Input && sceneryLog.pop();
         }, {
@@ -750,12 +719,10 @@ define( require => {
 
         // @private
         this.keyupAction = new Action( ( event ) => {
-          sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyup(' + Input.debugText( null, event ) + ');' );
+          sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keydown(' + Input.debugText( null, event ) + ');' );
           sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-          if ( !this.a11yPointer ) { this.initA11yPointer(); }
-          const trail = this.a11yPointer.updateTrail( getTrailId( event ) );
-          this.dispatchEvent( trail, 'keyup', this.a11yPointer, event, true );
+          this.dispatchA11yEvent( 'keyup', event, true );
 
           sceneryLog && sceneryLog.Input && sceneryLog.pop();
         }, {
@@ -1061,6 +1028,45 @@ define( require => {
       this.a11yPointer = new A11yPointer( this.display );
 
       this.addPointer( this.a11yPointer );
+    }
+
+    /**
+     * Steps to dispatch an a11y related event. Before dispatch, the A11yPointer is initialized if it
+     * hasn't been created yet and a userGestureEmitter emits to indicate that a user has begun an interaction.
+     * @private
+     * 
+     * @param {string} eventType
+     * @param {DOMEvent} domEvent
+     * @param {boolean} bubbles
+     */
+    dispatchA11yEvent( eventType, domEvent, bubbles ) {
+      scenery.Display.userGestureEmitter.emit();
+
+      if ( !this.a11yPointer ) { this.initA11yPointer(); }
+      const trail = this.a11yPointer.updateTrail( this.getTrailId( domEvent ) );
+      this.dispatchEvent( trail, eventType, this.a11yPointer, domEvent, bubbles );
+    }
+
+    /**
+     * Get the trail ID of the node represented by a DOM element in the accessible PDOM.
+     * @private
+     * 
+     * @param  {[type]} domEvent [description]
+     * @returns {string}
+     */
+    getTrailId( domEvent ) {
+      assert && assert( this.display._accessible, 'Display must be accessible to get trail IDs from AccessiblePeers' );
+      assert && assert( domEvent.target || domEvent[ TARGET_SUBSTITUTE_KEY ], 'need a way to get the target' );
+
+      // could be serialized event for phet-io playbacks, see Input.serializeDOMEvent()
+      if ( domEvent[ TARGET_SUBSTITUTE_KEY ] ) {
+        assert && assert( domEvent[ TARGET_SUBSTITUTE_KEY ] instanceof Object );
+        return domEvent[ TARGET_SUBSTITUTE_KEY ][ AccessibilityUtil.DATA_TRAIL_ID ];
+      }
+      else {
+        assert && assert( domEvent.target instanceof window.Element );
+        return domEvent.target.getAttribute( AccessibilityUtil.DATA_TRAIL_ID );
+      }
     }
 
     /**
@@ -1649,9 +1655,9 @@ define( require => {
      * @returns {Trail} - The current trail of the pointer
      */
     branchChangeEvents( pointer, event, sendMove ) {
-      sceneryLog && sceneryLog.Input && sceneryLog.Input(
-        'branchChangeEvents: ' + pointer.toString() + ' sendMove:' + sendMove );
-      sceneryLog && sceneryLog.Input && sceneryLog.push();
+      // sceneryLog && sceneryLog.Input && sceneryLog.Input(
+        // 'branchChangeEvents: ' + pointer.toString() + ' sendMove:' + sendMove );
+      // sceneryLog && sceneryLog.Input && sceneryLog.push();
 
       assert && assert( pointer instanceof Pointer );
       assert && assert( typeof sendMove === 'boolean' );
@@ -1680,7 +1686,7 @@ define( require => {
 
       pointer.trail = trail;
 
-      sceneryLog && sceneryLog.Input && sceneryLog.pop();
+      // sceneryLog && sceneryLog.Input && sceneryLog.pop();
       return trail;
     }
 
@@ -1858,7 +1864,6 @@ define( require => {
      * @param  {DOMEvent} event
      */
     handleDocumentKeydown( event ) {
-      scenery.Display.userGestureEmitter.emit();
 
       // If navigating in full screen mode, prevent a bug where focus gets lost if fullscreen mode was initiated
       // from an iframe by keeping focus in the display. getNext/getPreviousFocusable will return active element
