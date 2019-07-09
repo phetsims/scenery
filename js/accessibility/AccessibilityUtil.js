@@ -18,6 +18,7 @@ define( function( require ) {
   var AccessibleSiblingStyle = require( 'SCENERY/accessibility/AccessibleSiblingStyle' );
   var Random = require( 'DOT/Random' );
   var scenery = require( 'SCENERY/scenery' );
+  var validate = require( 'AXON/validate' );
 
   // constants
   var NEXT = 'NEXT';
@@ -310,6 +311,10 @@ define( function( require ) {
     setTextContent: function( domElement, textContent ) {
       assert && assert( domElement instanceof Element ); // parent to HTMLElement, to support other namespaces
       assert && assert( typeof textContent === 'string' );
+
+      // Disallow any unfilled template variables to be set in the PDOM.
+      validate.stringWithoutTemplateVars( textContent );
+
       if ( tagNameSupportsContent( domElement.tagName ) ) {
 
         // only returns true if content contains listed formatting tags
