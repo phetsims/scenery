@@ -1212,7 +1212,10 @@ define( function( require ) {
         /**
          * Set the ARIA role for this Node's primary sibling. According to the W3C, the ARIA role is read-only for a DOM
          * element.  So this will create a new DOM element for this Node with the desired role, and replace the old
-         * element in the DOM.
+         * element in the DOM. Note that the aria role can completely change the events that fire from an element,
+         * especially when using a screen reader. For example, a role of `application` will largely bypass the default
+         * behavior and logic of the screen reader, triggering keydown/keyup events even for buttons that would usually
+         * only receive a "click" event.
          * @public
          *
          * @param {string|null} ariaRole - role for the element, see

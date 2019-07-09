@@ -70,6 +70,40 @@
  * pointer. For mice, it will fire 'mousemove', for touch events it will fire 'touchmove', and for pen events it will
  * fire 'penmove'. Similarly, for any type of event, it will first fire pointerType+eventType, and then eventType.
  *
+ * **** Accessibility Specific Event Types
+ *
+ * Some event types can only be triggered from the PDOM. If a SCENERY/Node has accessible content (see
+ * Accessibility.js for more info), then listeners can be added for events fired from the PDOM. The accessibility events
+ * triggered from a Node are dependent on the `tagName` (ergo the HTMLElement primary sibling) specified by the Node.
+ *
+ * Some terminology for understanding:
+ * - PDOM:  parallel DOM, see Accessibility.js
+ * - Primary Sibling:  The Node's HTMLElement in the PDOM that is interacted with for accessible interactions and to
+ *                     display accessible content. The primary sibling has the tag name specified by the `tagName`
+ *                     option, see `Accessibility.setTagName`. Primary sibling is further defined in AccessiblePeer.js
+ * - Assistive Technology:  aka AT, devices meant to improve the capabilities of an individual with a disability.
+ *
+ * The following are the supported accessible events:
+ *
+ * - focus: Triggered when navigation focus is set to this Node's primary sibling. This can be triggered with some
+ *          AT too, like screen readers' virtual cursor, but that is not dependable as it can be toggled with a screen
+ *          reader option. Furthermore, this event is not triggered on mobile devices.
+ * - blur: Triggered when navigation focus leaves this Node's primary sibling. This can be triggered with some
+ *          AT too, like screen readers' virtual cursor, but that is not dependable as it can be toggled with a screen
+ *          reader option. Furthermore, this event is not triggered on mobile devices.
+ * - click:  Triggered when this Node's primary sibling is clicked. Note, though this event seems similar to some base
+ *           event types (the event implements `MouseEvent`), it only applies when triggered from the PDOM.
+ *           See https://www.w3.org/TR/DOM-Level-3-Events/#click
+ * - input:  Triggered when the value of an <input>, <select>, or <textarea> element has been changed.
+ *           See https://www.w3.org/TR/DOM-Level-3-Events/#input
+ * - change:  Triggered for <input>, <select>, and <textarea> elements when an alteration to the element's value is
+ *            committed by the user. Unlike the input event, the change event is not necessarily fired for each
+ *            alteration to an element's value. See
+ *            https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/change_event and
+ *            https://html.spec.whatwg.org/multipage/indices.html#event-change
+ * - keydown: Triggered for all keys pressed, https://www.w3.org/TR/DOM-Level-3-Events/#keydown
+ * - keyup : Triggered for all keys when released, https://www.w3.org/TR/DOM-Level-3-Events/#keyup
+ *
  * *** Event Dispatch
  *
  * Events have two methods that will cause early termination: event.abort() will cause no more listeners to be notified
@@ -1983,7 +2017,8 @@ define( require => {
     return [ 'down', 'up', 'cancel', 'move', 'wheel', 'enter', 'exit', 'over', 'out' ];
   };
 
-  // @public {Array.<string>} - Valid prefixes for the accessibility event types above
+  // @public {Array.<string>} - Valid accessibility event types, these largely follow the HTML spec for the same names.
+  //                            See the doc at the top of this file for more information.
   Input.A11Y_EVENT_TYPES = () => {
     return [ 'focus', 'blur', 'click', 'input', 'change', 'keydown', 'keyup' ];
   };
