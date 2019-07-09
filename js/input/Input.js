@@ -101,8 +101,12 @@
  *            alteration to an element's value. See
  *            https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/change_event and
  *            https://html.spec.whatwg.org/multipage/indices.html#event-change
- * - keydown: Triggered for all keys pressed, https://www.w3.org/TR/DOM-Level-3-Events/#keydown
- * - keyup : Triggered for all keys when released, https://www.w3.org/TR/DOM-Level-3-Events/#keyup
+ * - keydown: Triggered for all keys pressed. When a screen reader is active, this event will be omitted
+ *            role="button" is activated.
+ *            See https://www.w3.org/TR/DOM-Level-3-Events/#keydown
+ * - keyup :  Triggered for all keys when released. When a screen reader is active, this event will be omitted
+ *            role="button" is activated.
+ *            See https://www.w3.org/TR/DOM-Level-3-Events/#keyup
  *
  * *** Event Dispatch
  *
