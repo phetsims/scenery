@@ -570,7 +570,7 @@ define( require => {
             return;
           }
 
-          sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focus(' + Input.debugText( null, event ) + ');' );
+          sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusin(' + Input.debugText( null, event ) + ');' );
           sceneryLog && sceneryLog.Input && sceneryLog.push();
 
           this.dispatchA11yEvent( 'focus', event, false );
@@ -719,7 +719,7 @@ define( require => {
 
         // @private
         this.keyupAction = new Action( ( event ) => {
-          sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keydown(' + Input.debugText( null, event ) + ');' );
+          sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyup(' + Input.debugText( null, event ) + ');' );
           sceneryLog && sceneryLog.Input && sceneryLog.push();
 
           this.dispatchA11yEvent( 'keyup', event, true );
@@ -1051,7 +1051,7 @@ define( require => {
      * Get the trail ID of the node represented by a DOM element in the accessible PDOM.
      * @private
      * 
-     * @param  {[type]} domEvent [description]
+     * @param  {DOMEvent} domEvent
      * @returns {string}
      */
     getTrailId( domEvent ) {
