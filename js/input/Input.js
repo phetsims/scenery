@@ -1655,9 +1655,9 @@ define( require => {
      * @returns {Trail} - The current trail of the pointer
      */
     branchChangeEvents( pointer, event, sendMove ) {
-      // sceneryLog && sceneryLog.Input && sceneryLog.Input(
-        // 'branchChangeEvents: ' + pointer.toString() + ' sendMove:' + sendMove );
-      // sceneryLog && sceneryLog.Input && sceneryLog.push();
+      sceneryLog && sceneryLog.Input && sceneryLog.Input(
+        'branchChangeEvents: ' + pointer.toString() + ' sendMove:' + sendMove );
+      sceneryLog && sceneryLog.Input && sceneryLog.push();
 
       assert && assert( pointer instanceof Pointer );
       assert && assert( typeof sendMove === 'boolean' );
@@ -1686,7 +1686,7 @@ define( require => {
 
       pointer.trail = trail;
 
-      // sceneryLog && sceneryLog.Input && sceneryLog.pop();
+      sceneryLog && sceneryLog.Input && sceneryLog.pop();
       return trail;
     }
 
