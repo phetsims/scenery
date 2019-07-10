@@ -703,7 +703,7 @@ define( require => {
           sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keydown(' + Input.debugText( null, event ) + ');' );
           sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-          this.dispatchA11yEvent( 'keydown', event );
+          this.dispatchA11yEvent( 'keydown', event, true );
 
           sceneryLog && sceneryLog.Input && sceneryLog.pop();
         }, {
