@@ -33,7 +33,7 @@ define( function( require ) {
     var visibleProperty = new NodeProperty( node, 'visibility', 'visible', _.extend( {
 
       // pick the baseline value from the parent Node's baseline
-      phetioReadOnly: node.phetioReadOnlyBaseline,
+      phetioReadOnly: node.phetioReadOnly,
       phetioType: PropertyIO( BooleanIO ),
 
       tandem: node.tandem.createTandem( 'visibleProperty' ),
@@ -43,7 +43,7 @@ define( function( require ) {
     var pickableProperty = new NodeProperty( node, 'pickability', 'pickable', _.extend( {
 
       // pick the baseline value from the parent Node's baseline
-      phetioReadOnly: node.phetioReadOnlyBaseline,
+      phetioReadOnly: node.phetioReadOnly,
 
       tandem: node.tandem.createTandem( 'pickableProperty' ),
       phetioType: PropertyIO( NullableIO( BooleanIO ) ),
@@ -55,7 +55,7 @@ define( function( require ) {
     var opacityProperty = new NumberProperty( node.opacity, _.extend( {
 
       // pick the baseline value from the parent Node's baseline
-      phetioReadOnly: node.phetioReadOnlyBaseline,
+      phetioReadOnly: node.phetioReadOnly,
 
       tandem: node.tandem.createTandem( 'opacityProperty' ),
       range: new Range( 0, 1 ),
