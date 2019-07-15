@@ -99,7 +99,6 @@
       display.initializeEvents();
       $container[0].appendChild( display.domElement );
       draw( scene, display );
-      display.background;
       display.updateDisplay();
     }
   </script>
@@ -145,7 +144,7 @@
 
       square.addInputListener({
 
-        //click event listeners
+        // click event listeners
         down: () => {
           switchShape( circle );
         },
@@ -153,7 +152,7 @@
           switchShape( hexagon );
         },
 
-        //accessible click event listeners
+        // accessible click event listeners
         keydown: ( e ) => {
           if ( e.domEvent.code === 'Enter' ) {
             switchShape( circle );
@@ -165,7 +164,7 @@
           }
         },
 
-        //pointer events equivalent to the dom events "mouseenter" and "mouseleave"
+        // pointer events equivalent to the dom events "mouseenter" and "mouseleave"
         enter: () => {
           scene.children[1].fill = 'gold';
         },
@@ -173,7 +172,7 @@
           scene.children[1].fill = 'yellow';
         },
 
-        //accessible event listeners triggered when the virtual cursor is focused on or leaves the scene
+        // accessible event listeners triggered when the virtual cursor is focused on or leaves the scene
         focus: () => {
           scene.children[1].fill = 'gold';
         },
@@ -190,23 +189,22 @@
         var formattedPDOM = PDOMHTMLBlock.replace( new RegExp( '<[/]?\\w*[ >]', 'g' ), '\n$&' ); // add breaks in the string
         var $PDOMcode = ( $( '<code class="language-html no-whitespace-normalization"></code>' ).text( formattedPDOM ) );
 
-        //add formatted code to the pre element
+        // add formatted code to the pre element
         $( '#PDOM-pre' ).html( $PDOMcode );
 
-        //apply syntax highlighting
+        // apply syntax highlighting
         Prism.highlightAll();
       };
 
-      //update the displayed p-dom code snippet when there's a change to the scene.
-      const config = {
+      // update the displayed p-dom code snippet when there's a change to the scene.
+      const observer = new MutationObserver( updatePDOMDisplay );
+      observer.observe( document.querySelector( '#accessibility-scene' ), {
         attributes: true,
         childList: true,
         subtree: true
-      };
-      const observer = new MutationObserver( updatePDOMDisplay );
-      observer.observe( document.querySelector( '#accessibility-scene' ), config );
+      } );
 
-      //update the animation upon changes
+      // update the animation upon changes
       display.updateOnRequestAnimationFrame();
     } );
   </script>
