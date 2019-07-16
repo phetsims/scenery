@@ -585,6 +585,7 @@ define( function( require ) {
       assert && assert( !_.includes( this._children, node ), 'Parent already contains child' );
       assert && assert( node !== this, 'Cannot add self as a child' );
       assert && assert( node._parents !== null, 'Tried to insert a disposed child node?' );
+      assert && assert( !node.isDisposed, 'Tried to insert a disposed Node' );
 
       // needs to be early to prevent re-entrant children modifications
       this._picker.onInsertChild( node );
