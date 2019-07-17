@@ -112,6 +112,7 @@ define( function( require ) {
 
       // {Function|null} - Called as end( listener: {DragListener} ) when the drag is ended. This is preferred over
       // passing release(), as the drag start hasn't been fully processed at that point.
+      // NOTE: This will also be called if the drag is ended due to being interrupted or canceled.
       end: null,
 
       // {Tandem} - For instrumenting
@@ -635,6 +636,9 @@ define( function( require ) {
      * Interrupts the listener, releasing it (canceling behavior).
      * @public
      * @override
+     *
+     * This effectively releases/ends the press, and sets the `interrupted` flag to true while firing these events
+     * so that code can determine whether a release/end happened naturally, or was canceled in some way.
      *
      * This can be called manually, but can also be called through node.interruptSubtreeInput().
      */

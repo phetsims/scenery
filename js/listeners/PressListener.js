@@ -92,6 +92,7 @@ define( function( require ) {
       // {function} - Called as release( event: {Event|null}, listener: {PressListener} ) when this listener's node is released
       // Note that an Event arg cannot be guaranteed from this listener. This is, in part, to support interrupt.
       // (pointer up/cancel or interrupt when pressed/after a11y click).
+      // NOTE: This will also be called if the press is "released" due to being interrupted or canceled.
       release: _.noop,
 
       // {function} - Called as drag( event: {Event}, listener: {PressListener} ) when this listener's node is
@@ -413,6 +414,9 @@ define( function( require ) {
     /**
      * Interrupts the listener, releasing it (canceling behavior).
      * @public
+     *
+     * This effectively releases/ends the press, and sets the `interrupted` flag to true while firing these events
+     * so that code can determine whether a release/end happened naturally, or was canceled in some way.
      *
      * This can be called manually, but can also be called through node.interruptSubtreeInput().
      */
