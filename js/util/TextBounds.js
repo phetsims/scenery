@@ -30,6 +30,8 @@ define( function( require ) {
   // Maps CSS {string} => {Bounds2}, so that we can cache the vertical font sizes outside of the Font objects themselves.
   var hybridFontVerticalCache = {};
 
+  var deliveredWarning = false;
+
   var TextBounds = {
     /**
      * Returns a new Bounds2 that is the approximate bounds of a Text node displayed with the specified font and renderedText.
@@ -57,7 +59,34 @@ define( function( require ) {
       }
       TextBounds.setSVGTextAttributes( svgTextSizeElement, font, renderedText );
       var rect = svgTextSizeElement.getBBox();
+
+      if ( rect.width === 0 && rect.height === 0 && renderedText.length > 0 ) {
+        if ( !deliveredWarning ) {
+          deliveredWarning = true;
+
+          console.log( 'WARNING: Guessing text bounds, is the simulation hidden? See https://github.com/phetsims/chipper/issues/768' );
+        }
+        return TextBounds.guessSVGBounds( font, renderedText );
+      }
+
       return new Bounds2( rect.x, rect.y, rect.x + rect.width, rect.y + rect.height );
+    },
+
+    /**
+     * Returns a guess for what the SVG bounds of a font would be, based on PhetFont as an example.
+     * @public
+     *
+     * @param {Font} font
+     * @param {string} renderedText
+     * @returns {Bounds2}
+     */
+    guessSVGBounds: function( font, renderedText ) {
+      const px = font.getNumericSize();
+      const isBold = font.weight === 'bold';
+
+      // Our best guess, based on PhetFont in macOS Chrome. Things may differ, but hopefully this approximation
+      // is useful.
+      return new Bounds2( 0, -0.9 * px, ( isBold ? 0.435 : 0.4 ) * px * renderedText.length, 0.22 * px );
     },
 
     /**
@@ -73,7 +102,8 @@ define( function( require ) {
      * @returns {Bounds2}
      */
     accurateCanvasBounds: function( text ) {
-      var svgBounds = TextBounds.approximateSVGBounds( text._font, text.renderedText ); // this seems to be slower than expected, mostly due to Font getters
+      // this seems to be slower than expected, mostly due to Font getters
+      var svgBounds = TextBounds.approximateSVGBounds( text._font, text.renderedText );
 
       //If svgBounds are zero, then return the zero bounds
       if ( !text.renderedText.length || svgBounds.width === 0 ) {

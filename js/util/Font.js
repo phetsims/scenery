@@ -58,10 +58,10 @@ define( function( require ) {
 
     options = _.extend( {
       // {string} - 'normal', 'italic' or 'oblique'
-      style: 'normal', 
+      style: 'normal',
 
       // {string} - 'normal' or 'small-caps'
-      variant: 'normal', 
+      variant: 'normal',
 
       // {number|string} - 'normal', 'bold', 'bolder', 'lighter', '100', '200', '300', '400', '500', '600', '700',
       // '800', '900', or a number that when cast to a string will be one of the strings above.
@@ -207,6 +207,32 @@ define( function( require ) {
       return this._size;
     },
     get size() { return this.getSize(); },
+
+    /**
+     * Returns an approximate value of this font's size in px.
+     * @public
+     *
+     * @returns {string}
+     */
+    getNumericSize: function() {
+      const pxMatch = this._size.match( /^(\d+)px$/ );
+      if ( pxMatch ) {
+        return parseInt( pxMatch[ 1 ], 10 );
+      }
+
+      const ptMatch = this._size.match( /^(\d+)pt$/ );
+      if ( ptMatch ) {
+        return 0.75 * parseInt( ptMatch[ 1 ], 10 );
+      }
+
+      const emMatch = this._size.match( /^(\d+)em$/ );
+      if ( emMatch ) {
+        return parseInt( emMatch[ 1 ], 10 ) / 16;
+      }
+
+      return 12; // a guess?
+    },
+    get numericSize() { return this.getNumericSize(); },
 
     /**
      * Returns this font's line-height. See the constructor for more details on valid values.
