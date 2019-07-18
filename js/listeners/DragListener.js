@@ -44,6 +44,7 @@ define( function( require ) {
   var ActionIO = require( 'AXON/ActionIO' );
   var Bounds2 = require( 'DOT/Bounds2' );
   var EventIO = require( 'SCENERY/input/EventIO' );
+  var EventType = require( 'TANDEM/EventType' );
   var inherit = require( 'PHET_CORE/inherit' );
   var PhetioObject = require( 'TANDEM/PhetioObject' );
   var PressListener = require( 'SCENERY/listeners/PressListener' );
@@ -199,7 +200,7 @@ define( function( require ) {
       phetioHighFrequency: true,
       phetioDocumentation: 'Emits whenever a drag occurs with an EventIO argument.',
       phetioReadOnly: options.phetioReadOnly,
-      phetioEventType: PhetioObject.EventType.USER,
+      phetioEventType: EventType.USER,
       phetioType: DragActionIO
     } );
   }

@@ -22,8 +22,8 @@ define( function( require ) {
   // modules
   var ButtonListenerIO = require( 'SCENERY/input/ButtonListenerIO' );
   var DownUpListener = require( 'SCENERY/input/DownUpListener' );
+  var EventType = require( 'TANDEM/EventType' );
   var inherit = require( 'PHET_CORE/inherit' );
-  var PhetioObject = require( 'TANDEM/PhetioObject' );
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
 
@@ -47,7 +47,7 @@ define( function( require ) {
       tandem: Tandem.optional,
       phetioType: ButtonListenerIO,
       phetioState: false,
-      phetioEventType: PhetioObject.EventType.USER
+      phetioEventType: EventType.USER
     }, options );
 
     this.buttonState = 'up'; // public: 'up', 'over', 'down' or 'out'

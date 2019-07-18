@@ -160,21 +160,21 @@ define( require => {
   'use strict';
 
   const A11yPointer = require( 'SCENERY/input/A11yPointer' );
+  const AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   const Action = require( 'AXON/Action' );
   const ActionIO = require( 'AXON/ActionIO' );
-  const AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   const BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
   const BrowserEvents = require( 'SCENERY/input/BrowserEvents' );
   const cleanArray = require( 'PHET_CORE/cleanArray' );
   const DOMEventIO = require( 'SCENERY/input/DOMEventIO' );
   const Event = require( 'SCENERY/input/Event' );
+  const EventType = require( 'TANDEM/EventType' );
   const Features = require( 'SCENERY/util/Features' );
   const FullScreen = require( 'SCENERY/util/FullScreen' );
   const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
   const Mouse = require( 'SCENERY/input/Mouse' );
   const NumberIO = require( 'TANDEM/types/NumberIO' );
   const Pen = require( 'SCENERY/input/Pen' );
-  const PhetioObject = require( 'TANDEM/PhetioObject' );
   const platform = require( 'PHET_CORE/platform' );
   const Pointer = require( 'SCENERY/input/Pointer' );
   const scenery = require( 'SCENERY/scenery' );
@@ -291,7 +291,7 @@ define( require => {
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: PhetioObject.EventType.USER,
+        phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a mouse button is released'
       } );
 
@@ -308,7 +308,7 @@ define( require => {
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: PhetioObject.EventType.USER,
+        phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a mouse button is pressed'
       } );
 
@@ -325,7 +325,7 @@ define( require => {
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: PhetioObject.EventType.USER,
+        phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when the mouse is moved',
         phetioHighFrequency: true
       } );
@@ -343,7 +343,7 @@ define( require => {
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: PhetioObject.EventType.USER,
+        phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when the mouse is moved over a Node'
       } );
 
@@ -360,7 +360,7 @@ define( require => {
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: PhetioObject.EventType.USER,
+        phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when the mouse moves out of the display'
       } );
 
@@ -382,7 +382,7 @@ define( require => {
         phetioType: ActionIO( [
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: PhetioObject.EventType.USER,
+        phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when the mouse wheel scrolls',
         phetioHighFrequency: true
       } );
@@ -401,7 +401,7 @@ define( require => {
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: PhetioObject.EventType.USER,
+        phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a touch begins'
       } );
 
@@ -422,7 +422,7 @@ define( require => {
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: PhetioObject.EventType.USER,
+        phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a touch ends'
       } );
 
@@ -442,7 +442,7 @@ define( require => {
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: PhetioObject.EventType.USER,
+        phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a touch moves',
         phetioHighFrequency: true
       } );
@@ -464,7 +464,7 @@ define( require => {
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: PhetioObject.EventType.USER,
+        phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a touch is canceled'
       } );
 
@@ -482,7 +482,7 @@ define( require => {
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: PhetioObject.EventType.USER,
+        phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a pen touches the screen'
       } );
 
@@ -503,7 +503,7 @@ define( require => {
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: PhetioObject.EventType.USER,
+        phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a pen is lifted'
       } );
 
@@ -523,7 +523,7 @@ define( require => {
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: PhetioObject.EventType.USER,
+        phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a pen is moved',
         phetioHighFrequency: true
       } );
@@ -545,7 +545,7 @@ define( require => {
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: PhetioObject.EventType.USER,
+        phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a pen is canceled'
       } );
 
@@ -583,7 +583,7 @@ define( require => {
           phetioType: ActionIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
-          phetioEventType: PhetioObject.EventType.USER,
+          phetioEventType: EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the focusin DOM event.'
         } );
 
@@ -637,7 +637,7 @@ define( require => {
           phetioType: ActionIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
-          phetioEventType: PhetioObject.EventType.USER,
+          phetioEventType: EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the focusout DOM event.'
         } );
 
@@ -656,7 +656,7 @@ define( require => {
           phetioType: ActionIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
-          phetioEventType: PhetioObject.EventType.USER,
+          phetioEventType: EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the click DOM event.'
         } );
 
@@ -675,7 +675,7 @@ define( require => {
           phetioType: ActionIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
-          phetioEventType: PhetioObject.EventType.USER,
+          phetioEventType: EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the input DOM event.'
         } );
 
@@ -694,7 +694,7 @@ define( require => {
           phetioType: ActionIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
-          phetioEventType: PhetioObject.EventType.USER,
+          phetioEventType: EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the change DOM event.'
         } );
 
@@ -713,7 +713,7 @@ define( require => {
           phetioType: ActionIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
-          phetioEventType: PhetioObject.EventType.USER,
+          phetioEventType: EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the keydown DOM event.'
         } );
 
@@ -732,7 +732,7 @@ define( require => {
           phetioType: ActionIO( [
             { name: 'event', type: DOMEventIO }
           ] ),
-          phetioEventType: PhetioObject.EventType.USER,
+          phetioEventType: EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the keyup DOM event.'
         } );
 

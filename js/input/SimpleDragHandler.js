@@ -14,6 +14,7 @@ define( function( require ) {
   var ActionIO = require( 'AXON/ActionIO' );
   var BooleanProperty = require( 'AXON/BooleanProperty' );
   var Event = require( 'SCENERY/input/Event' );
+  var EventType = require( 'TANDEM/EventType' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Mouse = require( 'SCENERY/input/Mouse' );
   var PhetioObject = require( 'TANDEM/PhetioObject' );
@@ -58,7 +59,7 @@ define( function( require ) {
       // phetio
       tandem: Tandem.required,
       phetioState: false,
-      phetioEventType: PhetioObject.EventType.USER
+      phetioEventType: EventType.USER
 
     }, options );
     this.options = options; // @private

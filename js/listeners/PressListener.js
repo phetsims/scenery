@@ -21,6 +21,7 @@ define( function( require ) {
   var BooleanProperty = require( 'AXON/BooleanProperty' );
   var DerivedProperty = require( 'AXON/DerivedProperty' );
   var EventIO = require( 'SCENERY/input/EventIO' );
+  var EventType = require( 'TANDEM/EventType' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Mouse = require( 'SCENERY/input/Mouse' );
   var Node = require( 'SCENERY/nodes/Node' );
@@ -243,7 +244,7 @@ define( function( require ) {
                            'used to convey info about the Event.',
       phetioReadOnly: options.phetioReadOnly,
       phetioFeatured: options.phetioFeatured,
-      phetioEventType: PhetioObject.EventType.USER,
+      phetioEventType: EventType.USER,
       phetioType: PressActionIO
     } );
 
@@ -255,7 +256,7 @@ define( function( require ) {
       phetioDocumentation: 'Executes whenever a release occurs.',
       phetioReadOnly: options.phetioReadOnly,
       phetioFeatured: options.phetioFeatured,
-      phetioEventType: PhetioObject.EventType.USER,
+      phetioEventType: EventType.USER,
 
       phetioType: ReleaseActionIO
     } );
