@@ -1,4 +1,4 @@
-// Copyright 2017, University of Colorado Boulder
+// Copyright 2017-2019, University of Colorado Boulder
 
 /**
  * Unit tests for scenery. Please run once in phet brand and once in brand=phet-io to cover all functionality.

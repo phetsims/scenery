@@ -1,4 +1,4 @@
-// Copyright 2016, University of Colorado Boulder
+// Copyright 2016-2018, University of Colorado Boulder
 
 /**
  * SVG drawable for Image nodes.

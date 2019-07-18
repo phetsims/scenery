@@ -1,4 +1,4 @@
-// Copyright 2016, University of Colorado Boulder
+// Copyright 2016-2019, University of Colorado Boulder
 ( function() {
   'use strict';
   if ( !window.hasOwnProperty( '_' ) ) {

@@ -1,4 +1,4 @@
-// Copyright 2017, University of Colorado Boulder
+// Copyright 2017-2019, University of Colorado Boulder
 
 /**
  * A FocusHighlightPath subtype that is based around a Node. The focusHighlight is constructed based on the bounds of

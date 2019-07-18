@@ -1,4 +1,4 @@
-// Copyright 2017, University of Colorado Boulder
+// Copyright 2017-2019, University of Colorado Boulder
 
 /**
  * A trait that is meant to be composed with Node, adding accessibility by defining content for the Parallel DOM.

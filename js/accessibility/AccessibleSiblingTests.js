@@ -1,4 +1,4 @@
-// Copyright 2017, University of Colorado Boulder
+// Copyright 2019, University of Colorado Boulder
 
 /**
  * Tests for styling accessibility siblings. Siblings should be positioned on top of other elements in the PDOM.

@@ -1,4 +1,4 @@
-// Copyright 2014-2016, University of Colorado Boulder
+// Copyright 2014-2018, University of Colorado Boulder
 
 /**
  * RelativeTransform is a component of an Instance. It is responsible for tracking changes to "relative" transforms, and

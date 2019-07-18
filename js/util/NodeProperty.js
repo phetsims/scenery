@@ -1,4 +1,4 @@
-// Copyright 2018, University of Colorado Boulder
+// Copyright 2018-2019, University of Colorado Boulder
 
 /**
  * An axon Property for a Node.  When the specified trigger event (like 'pickability') occurs, the Property value

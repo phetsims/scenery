@@ -1,4 +1,4 @@
-// Copyright 2017, University of Colorado Boulder
+// Copyright 2017-2018, University of Colorado Boulder
 
 /**
  * Handles creation of an SVG stop element, and handles keeping it updated based on property/color changes.

@@ -1,4 +1,4 @@
-// Copyright 2015-2016, University of Colorado Boulder
+// Copyright 2015-2017, University of Colorado Boulder
 
 /**
  * A trait for subtypes of Node, used to prevent children being added/removed to that subtype of Node.

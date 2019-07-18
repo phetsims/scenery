@@ -1,4 +1,4 @@
-// Copyright 2016-2016, University of Colorado Boulder
+// Copyright 2016-2017, University of Colorado Boulder
 
 /**
  * A group of alignment boxes that follow the constraints:

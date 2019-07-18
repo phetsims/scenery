@@ -1,4 +1,4 @@
-// Copyright 2017, University of Colorado Boulder
+// Copyright 2017-2019, University of Colorado Boulder
 
 /**
  * Displays rich text by interpreting the input text as HTML, supporting a limited set of tags that prevent any
