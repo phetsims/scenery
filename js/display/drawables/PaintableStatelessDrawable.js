@@ -1,4 +1,4 @@
-// Copyright 2016-2018, University of Colorado Boulder
+// Copyright 2016-2019, University of Colorado Boulder
 
 /**
  * A trait for drawables for Paintable nodes that does not store the fill/stroke state, as it just needs to track
