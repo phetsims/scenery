@@ -14,7 +14,6 @@ define( function( require ) {
   var Emitter = require( 'AXON/Emitter' );
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
-  var Utterance = require( 'SCENERY_PHET/accessibility/Utterance' );
 
   /**
    * @constructor
@@ -28,7 +27,7 @@ define( function( require ) {
     ;
 
     // @public, listen only, emits an event when the synth has finished speaking the utterance
-    this.speakingEndedEmitter = new Emitter( { validators: [ { valueType: Utterance } ] } );
+    this.speakingEndedEmitter = new Emitter( { validators: [ { valueType: Object } ] } );
 
     // @private, flag for when screen reader is speaking - synth.speaking is unsupported for safari
     this.speaking = false;
