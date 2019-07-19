@@ -14,6 +14,7 @@ define( function( require ) {
   var Emitter = require( 'AXON/Emitter' );
   var inherit = require( 'PHET_CORE/inherit' );
   var scenery = require( 'SCENERY/scenery' );
+  var Utterance = require( 'SCENERY_PHET/accessibility/Utterance' );
 
   /**
    * @constructor
@@ -23,10 +24,11 @@ define( function( require ) {
     var self = this;
 
     // @public, listen only, emits an event when the synth begins speaking the utterance
-    this.speakingStartedEmitter = new Emitter( { validationEnabled: false } );
+    this.speakingStartedEmitter = new Emitter( { validators: [ { valueType: Object } ] } )
+    ;
 
     // @public, listen only, emits an event when the synth has finished speaking the utterance
-    this.speakingEndedEmitter = new Emitter( { validationEnabled: false } );
+    this.speakingEndedEmitter = new Emitter( { validators: [ { valueType: Utterance } ] } );
 
     // @private, flag for when screen reader is speaking - synth.speaking is unsupported for safari
     this.speaking = false;
@@ -73,9 +75,9 @@ define( function( require ) {
 
         // TODO: Implement behavior for the various live roles
         // see https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Live_Regions
-        if( outputUtterance.liveRole === 'assertive' ||
-            outputUtterance.liveRole === 'off' ||
-            !outputUtterance.liveRole ) {
+        if ( outputUtterance.liveRole === 'assertive' ||
+             outputUtterance.liveRole === 'off' ||
+             !outputUtterance.liveRole ) {
 
           // empty the queue of polite utterances
           self.politeUtterances = [];
@@ -84,7 +86,7 @@ define( function( require ) {
           // if assertive or off, cancel the current active utterance and begin speaking immediately
           // TODO: This is how most screen readers work, but we will probably want different behavior
           // for sims so multiple assertive updates do not compete.
-          
+
           // On Windows, the synth must be paused before cancelation and resumed after speaking, 
           // or every other utterance will be skipped.
           // NOTE: This only seems to happen on Windows for the default voice?
@@ -134,7 +136,7 @@ define( function( require ) {
           else {
             // simply add to the queue
             self.synth.speak( utterThis );
-          } 
+          }
         }
       } );
     }
