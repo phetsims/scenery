@@ -42,12 +42,12 @@ define( function( require ) {
     {
       name: 'targetNode',
       type: VoidIO,
-      validator: { isValidValue: function( v ) { return v === null || v instanceof Node; } }
+      validator: { valueType: [ Node, null ] }
     },
     {
       name: 'callback',
       type: VoidIO,
-      validator: { isValidValue: function( v ) { return v === null || typeof v === 'function'; } }
+      validator: { valueType: [ 'function', null ] }
     }
   ] );
 
@@ -57,7 +57,7 @@ define( function( require ) {
   }, {
     name: 'callback',
     type: VoidIO,
-    validator: { isValidValue: function( v ) { return v === null || typeof v === 'function'; } }
+    validator: { valueType: [ 'function', null ] }
   } ] );
 
   // Factor out to reduce memory footprint, see https://github.com/phetsims/tandem/issues/71

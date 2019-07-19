@@ -130,7 +130,7 @@ define( function( require ) {
             name: 'event',
             type: VoidIO,
             documentation: 'the scenery pointer Event',
-            validator: { isValidValue: function( value ) { return value === null || value instanceof Event; } }
+            validator: { valueType: [ Event, null ] }
           } ] )
     } );
 
@@ -186,7 +186,7 @@ define( function( require ) {
             name: 'event',
             type: VoidIO,
             documentation: 'the scenery pointer Event',
-            validator: { isValidValue: function( value ) { return value === null || value instanceof Event;} }
+            validator: { valueType: [ Event, null ] }
           } ] )
     } );
 
