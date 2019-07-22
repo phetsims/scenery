@@ -54,7 +54,7 @@ define( function( require ) {
 
       // when set to true, the handler will get "attached" to a pointer during use, preventing the pointer from starting
       // a drag via something like PressListener
-      attach: false,
+      attach: true,
 
       // phetio
       tandem: Tandem.required,
