@@ -8,6 +8,10 @@
  * a cursor that is to be used together with the web speech API, see
  * https://github.com/phetsims/scenery/issues/538
  *
+ * NOTE: We are no longer actively developing this since we know that users would much rather use their own
+ * dedicated software. But we are keeping it around for when we want to explore any other self voicing features
+ * using the web speech API.
+ *
  * @author Jesse Greenberg
  */
 define( function( require ) {
