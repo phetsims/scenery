@@ -331,12 +331,28 @@ an UI and Display made for visual testing and debugging.
 
       window.displayTest = function() {
         setTimeout( function() {
-          window.shape = new kite.Shape( 'M 397.00000000000000000000 317.84609028105006700571 L 397.00000000000000000000 328.72090884305322333603 L 407.00000000000000000000 328.72090884305322333603 L 407.00000000000000000000 308.15927466097383558008 L 417.00000000000000000000 308.15927466097383558008 L 417.00000000000000000000 308.23195711190078327490' );
-          window.path = new scenery.Path( shape, { stroke: 'red' } );
-          scene.addChild( path );
-          path.left = 50;
-          path.top = 50;
-          path.lineWidth = 5;
+          window.circle = new scenery.Circle( 30, { fill: 'red' } );
+          circle.toCanvas( ( image, x, y ) => {
+            window.spriteImage = new scenery.SpriteImage( image, new dot.Vector2( x, y ) );
+          } );
+          window.sprite = new scenery.Sprite( spriteImage );
+
+          window.spriteInstances = [
+            new scenery.SpriteInstance(),
+            new scenery.SpriteInstance()
+          ];
+          spriteInstances[ 0 ].sprite = sprite;
+          spriteInstances[ 1 ].sprite = sprite;
+          spriteInstances[ 1 ].matrix.setToTranslation( 100, 0 );
+          spriteInstances[ 1 ].isTranslation = false;
+
+          window.sprites = new scenery.Sprites( {
+            renderer: 'webgl',
+            sprites: [ sprite ],
+            spriteInstances: spriteInstances,
+            canvasBounds: new dot.Bounds2( -200, -200, 1000, 1000 )
+          } );
+          scene.addChild( sprites );
 
           display.updateDisplay();
         }, 400 );
