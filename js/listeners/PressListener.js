@@ -30,7 +30,6 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
   var timer = require( 'AXON/timer' );
-  var VoidIO = require( 'TANDEM/types/VoidIO' );
 
   // global
   var globalID = 0;
@@ -224,12 +223,10 @@ define( function( require ) {
         name: 'event',
         phetioType: EventIO
       }, {
-        name: 'targetNode',
-        phetioType: VoidIO,
+        phetioPrivate: true,
         valueType: [ Node, null ]
       }, {
-        name: 'callback',
-        phetioType: VoidIO,
+        phetioPrivate: true,
         valueType: [ 'function', null ]
       }
       ]
@@ -243,8 +240,7 @@ define( function( require ) {
         name: 'event',
         phetioType: NullableIO( EventIO )
       }, {
-        name: 'callback',
-        phetioType: VoidIO,
+        phetioPrivate: true,
         valueType: [ 'function', null ]
       } ],
 

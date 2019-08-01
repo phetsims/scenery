@@ -22,7 +22,6 @@ define( function( require ) {
   var Touch = require( 'SCENERY/input/Touch' );
   var Vector2 = require( 'DOT/Vector2' );
   var Vector2IO = require( 'DOT/Vector2IO' );
-  var VoidIO = require( 'TANDEM/types/VoidIO' );
 
   /**
    * @param {Object} [options]
@@ -127,9 +126,7 @@ define( function( require ) {
         phetioType: Vector2IO,
         phetioDocumentation: 'the position of the drag start in view coordinates'
       }, {
-        name: 'event',
-        phetioType: VoidIO,
-        phetioDocumentation: 'the scenery pointer Event',
+        phetioPrivate: true,
         valueType: [ Event, null ]
       } ]
     } );
@@ -184,9 +181,7 @@ define( function( require ) {
         phetioType: Vector2IO,
         phetioDocumentation: 'the position of the drag in view coordinates'
       }, {
-        name: 'event',
-        phetioType: VoidIO,
-        phetioDocumentation: 'the scenery pointer Event',
+        phetioPrivate: true,
         valueType: [ Event, null ]
       } ]
     } );
@@ -222,9 +217,7 @@ define( function( require ) {
         phetioType: Vector2IO,
         phetioDocumentation: 'the position of the drag end in view coordinates'
       }, {
-        name: 'event',
-        phetioType: VoidIO,
-        phetioDocumentation: 'the scenery pointer Event',
+        phetioPrivate: true,
         isValidValue: value => {
           return value === null || value instanceof Event ||
 
