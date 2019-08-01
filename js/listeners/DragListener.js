@@ -41,7 +41,6 @@ define( function( require ) {
 
   // modules
   var Action = require( 'AXON/Action' );
-  var ActionIO = require( 'AXON/ActionIO' );
   var Bounds2 = require( 'DOT/Bounds2' );
   var EventIO = require( 'SCENERY/input/EventIO' );
   var EventType = require( 'TANDEM/EventType' );
@@ -58,7 +57,6 @@ define( function( require ) {
 
   // Scratch vectors used to prevent allocations
   var scratchVector2A = new Vector2( 0, 0 );
-  var DragActionIO = ActionIO( [ { name: 'event', type: EventIO } ] );
 
   /**
    * @constructor
@@ -195,13 +193,13 @@ define( function( require ) {
 
       PressListener.prototype.drag.call( self, event );
     }, {
+      parameters: [ { name: 'event', phetioType: EventIO } ],
       phetioFeatured: options.phetioFeatured,
       tandem: options.tandem.createTandem( 'dragAction' ),
       phetioHighFrequency: true,
       phetioDocumentation: 'Emits whenever a drag occurs with an EventIO argument.',
       phetioReadOnly: options.phetioReadOnly,
-      phetioEventType: EventType.USER,
-      phetioType: DragActionIO
+      phetioEventType: EventType.USER
     } );
   }
 
