@@ -1,7 +1,7 @@
 // Copyright 2016-2019, University of Colorado Boulder
 
 /**
- * A Node that will align child (content) node within a specific bounding box.
+ * A Node that will align child (content) Node within a specific bounding box.
  *
  * If a custom alignBounds is provided, content will be aligned within that bounding box. Otherwise, it will be aligned
  * within a bounding box with the left-top corner of (0,0) of the necessary size to include both the content and
