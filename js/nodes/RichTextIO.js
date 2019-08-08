@@ -26,7 +26,7 @@ define( function( require ) {
     NodeIO.call( this, richText, phetioID );
 
     // this uses a sub Property adapter as described in https://github.com/phetsims/phet-io/issues/1326
-    var textProperty = new NodeProperty( richText, 'text', 'text', {
+    var textProperty = new NodeProperty( richText, 'text', 'text', _.extend( {
 
       // pick the following values from the parent Node
       phetioReadOnly: richText.phetioReadOnly,
@@ -35,7 +35,7 @@ define( function( require ) {
 
       tandem: richText.tandem.createTandem( 'textProperty' ),
       phetioDocumentation: 'Property for the displayed text'
-    } );
+    }, richText.phetioComponentOptions, richText.phetioComponentOptions.textProperty ) );
 
     // @private
     this.disposeRichTextIO = function() {
