@@ -43,6 +43,9 @@ define( require => {
     // @private {Float32Array}
     this.vertexArray = new Float32Array( 128 * FLOAT_QUANTITY );
 
+    // @private {Float32Array}
+    this.transformMatrixArray = new Float32Array( 9 );
+
     // @private {Vector2} corner vertices in the relative transform root coordinate space
     this.upperLeft = new Vector2( 0, 0 );
     this.lowerLeft = new Vector2( 0, 0 );
@@ -119,11 +122,12 @@ define( require => {
         'varying vec2 vTextureCoord;',
         'varying float vAlpha;',
         'uniform mat3 uProjectionMatrix;',
+        'uniform mat3 uTransformMatrix;',
 
         'void main() {',
         '  vTextureCoord = aTextureCoord;',
         '  vAlpha = aAlpha;',
-        '  vec3 ndc = uProjectionMatrix * vec3( aVertex, 1.0 );', // homogeneous map to to normalized device coordinates
+        '  vec3 ndc = uProjectionMatrix * ( uTransformMatrix * vec3( aVertex, 1.0 ) );', // homogeneous map to to normalized device coordinates
         '  gl_Position = vec4( ndc.xy, 0.0, 1.0 );',
         '}'
       ].join( '\n' ), [
@@ -140,7 +144,7 @@ define( require => {
         '}'
       ].join( '\n' ), {
         attributes: [ 'aVertex', 'aTextureCoord', 'aAlpha' ],
-        uniforms: [ 'uTexture', 'uProjectionMatrix' ]
+        uniforms: [ 'uTexture', 'uProjectionMatrix', 'uTransformMatrix' ]
       } );
 
       // @private {WebGLBuffer}
@@ -202,8 +206,6 @@ define( require => {
       let vertexArrayIndex = 0;
       let changedLength = false;
 
-      const transformMatrix = this.instance.relativeTransform.matrix; // with compute need, should always be accurate
-
       for ( let i = 0; i < length; i++ ) {
         const spriteInstance = this.node._spriteInstances[ i ];
         const spriteImage = spriteInstance.sprite.imageProperty.value;
@@ -223,13 +225,13 @@ define( require => {
           changedLength = true;
         }
 
-        // Compute our vertices (TODO: move thie transformMatrix into WebGL)
-        transformMatrix.multiplyVector2( matrix.multiplyVector2( this.upperLeft.setXY( -offset.x, -offset.y ) ) );
-        transformMatrix.multiplyVector2( matrix.multiplyVector2( this.lowerLeft.setXY( -offset.x, height - offset.y ) ) );
-        transformMatrix.multiplyVector2( matrix.multiplyVector2( this.upperRight.setXY( width - offset.x, -offset.y ) ) );
-        transformMatrix.multiplyVector2( matrix.multiplyVector2( this.lowerRight.setXY( width - offset.x, height - offset.y ) ) );
+        // Compute our vertices
+        matrix.multiplyVector2( this.upperLeft.setXY( -offset.x, -offset.y ) );
+        matrix.multiplyVector2( this.lowerLeft.setXY( -offset.x, height - offset.y ) );
+        matrix.multiplyVector2( this.upperRight.setXY( width - offset.x, -offset.y ) );
+        matrix.multiplyVector2( this.lowerRight.setXY( width - offset.x, height - offset.y ) );
 
-        // copy our vertex data into the main array
+        // copy our vertex data into the main array (consensus was that this is the fastest way to fill in data)
         this.vertexArray[ vertexArrayIndex + 0 ] = this.upperLeft.x;
         this.vertexArray[ vertexArrayIndex + 1 ] = this.upperLeft.y;
         this.vertexArray[ vertexArrayIndex + 2 ] = uvBounds.minX;
@@ -268,6 +270,10 @@ define( require => {
 
       // (uniform) projection transform into normalized device coordinates
       gl.uniformMatrix3fv( this.shaderProgram.uniformLocations.uProjectionMatrix, false, this.webGLBlock.projectionMatrixArray );
+
+      // (uniform) transformation matrix that is common to all sprites
+      this.instance.relativeTransform.matrix.copyToArray( this.transformMatrixArray );
+      gl.uniformMatrix3fv( this.shaderProgram.uniformLocations.uTransformMatrix, false, this.transformMatrixArray );
 
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
       // if we increased in length, we need to do a full bufferData to resize it on the GPU side
