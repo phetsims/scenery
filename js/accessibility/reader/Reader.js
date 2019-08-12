@@ -27,11 +27,11 @@ define( function( require ) {
     var self = this;
 
     // @public, listen only, emits an event when the synth begins speaking the utterance
-    this.speakingStartedEmitter = new Emitter( { validators: [ { valueType: Object } ] } )
+    this.speakingStartedEmitter = new Emitter( { parameters: [ { valueType: Object } ] } )
     ;
 
     // @public, listen only, emits an event when the synth has finished speaking the utterance
-    this.speakingEndedEmitter = new Emitter( { validators: [ { valueType: Object } ] } );
+    this.speakingEndedEmitter = new Emitter( { parameters: [ { valueType: Object } ] } );
 
     // @private, flag for when screen reader is speaking - synth.speaking is unsupported for safari
     this.speaking = false;

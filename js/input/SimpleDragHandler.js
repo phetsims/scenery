@@ -11,7 +11,6 @@ define( function( require ) {
 
   // modules
   var Action = require( 'AXON/Action' );
-  var ActionIO = require( 'AXON/ActionIO' );
   var BooleanProperty = require( 'AXON/BooleanProperty' );
   var Event = require( 'SCENERY/input/Event' );
   var EventType = require( 'TANDEM/EventType' );
@@ -23,7 +22,6 @@ define( function( require ) {
   var Touch = require( 'SCENERY/input/Touch' );
   var Vector2 = require( 'DOT/Vector2' );
   var Vector2IO = require( 'DOT/Vector2IO' );
-  var VoidIO = require( 'TANDEM/types/VoidIO' );
 
   /**
    * @param {Object} [options]
@@ -123,15 +121,14 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     }, {
       tandem: options.tandem.createTandem( 'dragStartAction' ),
-
-      phetioType: ActionIO(
-        [ { name: 'point', type: Vector2IO, documentation: 'the position of the drag start in view coordinates' },
-          {
-            name: 'event',
-            type: VoidIO,
-            documentation: 'the scenery pointer Event',
-            validator: { valueType: [ Event, null ] }
-          } ] )
+      parameters: [ {
+        name: 'point',
+        phetioType: Vector2IO,
+        phetioDocumentation: 'the position of the drag start in view coordinates'
+      }, {
+        phetioPrivate: true,
+        valueType: [ Event, null ]
+      } ]
     } );
 
     // @private
@@ -179,15 +176,14 @@ define( function( require ) {
     }, {
       phetioHighFrequency: true,
       tandem: options.tandem.createTandem( 'dragAction' ),
-
-      phetioType: ActionIO(
-        [ { name: 'point', type: Vector2IO, documentation: 'the position of the drag in view coordinates' },
-          {
-            name: 'event',
-            type: VoidIO,
-            documentation: 'the scenery pointer Event',
-            validator: { valueType: [ Event, null ] }
-          } ] )
+      parameters: [ {
+        name: 'point',
+        phetioType: Vector2IO,
+        phetioDocumentation: 'the position of the drag in view coordinates'
+      }, {
+        phetioPrivate: true,
+        valueType: [ Event, null ]
+      } ]
     } );
 
     // @private
@@ -216,24 +212,21 @@ define( function( require ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     }, {
       tandem: options.tandem.createTandem( 'dragEndAction' ),
+      parameters: [ {
+        name: 'point',
+        phetioType: Vector2IO,
+        phetioDocumentation: 'the position of the drag end in view coordinates'
+      }, {
+        phetioPrivate: true,
+        isValidValue: value => {
+          return value === null || value instanceof Event ||
 
-      phetioType: ActionIO(
-        [ { name: 'point', type: Vector2IO, documentation: 'the position of the drag end in view coordinates' },
-          {
-            name: 'event',
-            type: VoidIO,
-            documentation: 'the scenery pointer Event',
-            validator: {
-              isValidValue: function( value ) {
-                return value === null || value instanceof Event ||
-
-                       // When interrupted, an object literal is used to signify the interruption,
-                       // see SimpleDragHandler.interrupt
-                       ( value.pointer && value.currentTarget );
-              }
-            }
-          }
-        ] )
+                 // When interrupted, an object literal is used to signify the interruption,
+                 // see SimpleDragHandler.interrupt
+                 ( value.pointer && value.currentTarget );
+        }
+      }
+      ]
     } );
 
     // if an ancestor is transformed, pin our node

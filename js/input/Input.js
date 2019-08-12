@@ -162,7 +162,6 @@ define( require => {
   const A11yPointer = require( 'SCENERY/input/A11yPointer' );
   const AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   const Action = require( 'AXON/Action' );
-  const ActionIO = require( 'AXON/ActionIO' );
   const BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
   const BrowserEvents = require( 'SCENERY/input/BrowserEvents' );
   const cleanArray = require( 'PHET_CORE/cleanArray' );
@@ -286,11 +285,10 @@ define( require => {
       }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'mouseUpAction' ),
-
-        phetioType: ActionIO( [
-          { name: 'point', type: Vector2IO },
-          { name: 'event', type: DOMEventIO }
-        ] ),
+        parameters: [
+          { name: 'point', phetioType: Vector2IO },
+          { name: 'event', phetioType: DOMEventIO }
+        ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a mouse button is released'
       } );
@@ -303,11 +301,10 @@ define( require => {
       }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'mouseDownAction' ),
-
-        phetioType: ActionIO( [
-          { name: 'point', type: Vector2IO },
-          { name: 'event', type: DOMEventIO }
-        ] ),
+        parameters: [
+          { name: 'point', phetioType: Vector2IO },
+          { name: 'event', phetioType: DOMEventIO }
+        ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a mouse button is pressed'
       } );
@@ -320,11 +317,10 @@ define( require => {
       }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'mouseMovedAction' ),
-
-        phetioType: ActionIO( [
-          { name: 'point', type: Vector2IO },
-          { name: 'event', type: DOMEventIO }
-        ] ),
+        parameters: [
+          { name: 'point', phetioType: Vector2IO },
+          { name: 'event', phetioType: DOMEventIO }
+        ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when the mouse is moved',
         phetioHighFrequency: true
@@ -338,11 +334,10 @@ define( require => {
       }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'mouseOverAction' ),
-
-        phetioType: ActionIO( [
-          { name: 'point', type: Vector2IO },
-          { name: 'event', type: DOMEventIO }
-        ] ),
+        parameters: [
+          { name: 'point', phetioType: Vector2IO },
+          { name: 'event', phetioType: DOMEventIO }
+        ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when the mouse is moved over a Node'
       } );
@@ -355,11 +350,10 @@ define( require => {
       }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'mouseOutAction' ),
-
-        phetioType: ActionIO( [
-          { name: 'point', type: Vector2IO },
-          { name: 'event', type: DOMEventIO }
-        ] ),
+        parameters: [
+          { name: 'point', phetioType: Vector2IO },
+          { name: 'event', phetioType: DOMEventIO }
+        ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when the mouse moves out of the display'
       } );
@@ -378,10 +372,9 @@ define( require => {
       }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'wheelScrollAction' ),
-
-        phetioType: ActionIO( [
-          { name: 'event', type: DOMEventIO }
-        ] ),
+        parameters: [
+          { name: 'event', phetioType: DOMEventIO }
+        ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when the mouse wheel scrolls',
         phetioHighFrequency: true
@@ -395,12 +388,11 @@ define( require => {
       }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'touchStartAction' ),
-
-        phetioType: ActionIO( [
-          { name: 'id', type: NumberIO },
-          { name: 'point', type: Vector2IO },
-          { name: 'event', type: DOMEventIO }
-        ] ),
+        parameters: [
+          { name: 'id', phetioType: NumberIO },
+          { name: 'point', phetioType: Vector2IO },
+          { name: 'event', phetioType: DOMEventIO }
+        ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a touch begins'
       } );
@@ -416,12 +408,11 @@ define( require => {
       }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'touchEndAction' ),
-
-        phetioType: ActionIO( [
-          { name: 'id', type: NumberIO },
-          { name: 'point', type: Vector2IO },
-          { name: 'event', type: DOMEventIO }
-        ] ),
+        parameters: [
+          { name: 'id', phetioType: NumberIO },
+          { name: 'point', phetioType: Vector2IO },
+          { name: 'event', phetioType: DOMEventIO }
+        ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a touch ends'
       } );
@@ -436,12 +427,11 @@ define( require => {
       }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'touchMoveAction' ),
-
-        phetioType: ActionIO( [
-          { name: 'id', type: NumberIO },
-          { name: 'point', type: Vector2IO },
-          { name: 'event', type: DOMEventIO }
-        ] ),
+        parameters: [
+          { name: 'id', phetioType: NumberIO },
+          { name: 'point', phetioType: Vector2IO },
+          { name: 'event', phetioType: DOMEventIO }
+        ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a touch moves',
         phetioHighFrequency: true
@@ -458,12 +448,11 @@ define( require => {
       }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'touchCancelAction' ),
-
-        phetioType: ActionIO( [
-          { name: 'id', type: NumberIO },
-          { name: 'point', type: Vector2IO },
-          { name: 'event', type: DOMEventIO }
-        ] ),
+        parameters: [
+          { name: 'id', phetioType: NumberIO },
+          { name: 'point', phetioType: Vector2IO },
+          { name: 'event', phetioType: DOMEventIO }
+        ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a touch is canceled'
       } );
@@ -476,12 +465,11 @@ define( require => {
       }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'penStartAction' ),
-
-        phetioType: ActionIO( [
-          { name: 'id', type: NumberIO },
-          { name: 'point', type: Vector2IO },
-          { name: 'event', type: DOMEventIO }
-        ] ),
+        parameters: [
+          { name: 'id', phetioType: NumberIO },
+          { name: 'point', phetioType: Vector2IO },
+          { name: 'event', phetioType: DOMEventIO }
+        ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a pen touches the screen'
       } );
@@ -497,12 +485,11 @@ define( require => {
       }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'penEndAction' ),
-
-        phetioType: ActionIO( [
-          { name: 'id', type: NumberIO },
-          { name: 'point', type: Vector2IO },
-          { name: 'event', type: DOMEventIO }
-        ] ),
+        parameters: [
+          { name: 'id', phetioType: NumberIO },
+          { name: 'point', phetioType: Vector2IO },
+          { name: 'event', phetioType: DOMEventIO }
+        ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a pen is lifted'
       } );
@@ -517,12 +504,11 @@ define( require => {
       }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'penMoveAction' ),
-
-        phetioType: ActionIO( [
-          { name: 'id', type: NumberIO },
-          { name: 'point', type: Vector2IO },
-          { name: 'event', type: DOMEventIO }
-        ] ),
+        parameters: [
+          { name: 'id', phetioType: NumberIO },
+          { name: 'point', phetioType: Vector2IO },
+          { name: 'event', phetioType: DOMEventIO }
+        ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a pen is moved',
         phetioHighFrequency: true
@@ -539,12 +525,11 @@ define( require => {
       }, {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'penCancelAction' ),
-
-        phetioType: ActionIO( [
-          { name: 'id', type: NumberIO },
-          { name: 'point', type: Vector2IO },
-          { name: 'event', type: DOMEventIO }
-        ] ),
+        parameters: [
+          { name: 'id', phetioType: NumberIO },
+          { name: 'point', phetioType: Vector2IO },
+          { name: 'event', phetioType: DOMEventIO }
+        ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a pen is canceled'
       } );
@@ -579,10 +564,9 @@ define( require => {
         }, {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'focusinAction' ),
-
-          phetioType: ActionIO( [
-            { name: 'event', type: DOMEventIO }
-          ] ),
+          parameters: [
+            { name: 'event', phetioType: DOMEventIO }
+          ],
           phetioEventType: EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the focusin DOM event.'
         } );
@@ -633,10 +617,9 @@ define( require => {
         }, {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'focusoutAction' ),
-
-          phetioType: ActionIO( [
-            { name: 'event', type: DOMEventIO }
-          ] ),
+          parameters: [
+            { name: 'event', phetioType: DOMEventIO }
+          ],
           phetioEventType: EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the focusout DOM event.'
         } );
@@ -652,10 +635,9 @@ define( require => {
         }, {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'clickAction' ),
-
-          phetioType: ActionIO( [
-            { name: 'event', type: DOMEventIO }
-          ] ),
+          parameters: [
+            { name: 'event', phetioType: DOMEventIO }
+          ],
           phetioEventType: EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the click DOM event.'
         } );
@@ -671,10 +653,9 @@ define( require => {
         }, {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'inputAction' ),
-
-          phetioType: ActionIO( [
-            { name: 'event', type: DOMEventIO }
-          ] ),
+          parameters: [
+            { name: 'event', phetioType: DOMEventIO }
+          ],
           phetioEventType: EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the input DOM event.'
         } );
@@ -690,10 +671,9 @@ define( require => {
         }, {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'changeAction' ),
-
-          phetioType: ActionIO( [
-            { name: 'event', type: DOMEventIO }
-          ] ),
+          parameters: [
+            { name: 'event', phetioType: DOMEventIO }
+          ],
           phetioEventType: EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the change DOM event.'
         } );
@@ -709,10 +689,9 @@ define( require => {
         }, {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'keydownAction' ),
-
-          phetioType: ActionIO( [
-            { name: 'event', type: DOMEventIO }
-          ] ),
+          parameters: [
+            { name: 'event', phetioType: DOMEventIO }
+          ],
           phetioEventType: EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the keydown DOM event.'
         } );
@@ -728,10 +707,9 @@ define( require => {
         }, {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'keyupAction' ),
-
-          phetioType: ActionIO( [
-            { name: 'event', type: DOMEventIO }
-          ] ),
+          parameters: [
+            { name: 'event', phetioType: DOMEventIO }
+          ],
           phetioEventType: EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the keyup DOM event.'
         } );
@@ -1034,7 +1012,7 @@ define( require => {
      * Steps to dispatch an a11y related event. Before dispatch, the A11yPointer is initialized if it
      * hasn't been created yet and a userGestureEmitter emits to indicate that a user has begun an interaction.
      * @private
-     * 
+     *
      * @param {string} eventType
      * @param {DOMEvent} domEvent
      * @param {boolean} bubbles
@@ -1050,7 +1028,7 @@ define( require => {
     /**
      * Get the trail ID of the node represented by a DOM element in the accessible PDOM.
      * @private
-     * 
+     *
      * @param  {DOMEvent} domEvent
      * @returns {string}
      */

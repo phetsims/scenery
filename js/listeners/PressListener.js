@@ -17,7 +17,6 @@ define( function( require ) {
 
   // modules
   var Action = require( 'AXON/Action' );
-  var ActionIO = require( 'AXON/ActionIO' );
   var BooleanProperty = require( 'AXON/BooleanProperty' );
   var DerivedProperty = require( 'AXON/DerivedProperty' );
   var EventIO = require( 'SCENERY/input/EventIO' );
@@ -31,34 +30,9 @@ define( function( require ) {
   var scenery = require( 'SCENERY/scenery' );
   var Tandem = require( 'TANDEM/Tandem' );
   var timer = require( 'AXON/timer' );
-  var VoidIO = require( 'TANDEM/types/VoidIO' );
 
   // global
   var globalID = 0;
-
-  // constants - factored out to reduce memory usage, see https://github.com/phetsims/unit-rates/issues/207
-  var PressActionIO = ActionIO( [
-    { name: 'event', type: EventIO },
-    {
-      name: 'targetNode',
-      type: VoidIO,
-      validator: { valueType: [ Node, null ] }
-    },
-    {
-      name: 'callback',
-      type: VoidIO,
-      validator: { valueType: [ 'function', null ] }
-    }
-  ] );
-
-  var ReleaseActionIO = ActionIO( [ {
-    name: 'event',
-    type: NullableIO( EventIO )
-  }, {
-    name: 'callback',
-    type: VoidIO,
-    validator: { valueType: [ 'function', null ] }
-  } ] );
 
   // Factor out to reduce memory footprint, see https://github.com/phetsims/tandem/issues/71
   const truePredicate = _.constant( true );
@@ -245,20 +219,37 @@ define( function( require ) {
       phetioReadOnly: options.phetioReadOnly,
       phetioFeatured: options.phetioFeatured,
       phetioEventType: EventType.USER,
-      phetioType: PressActionIO
+      parameters: [ {
+        name: 'event',
+        phetioType: EventIO
+      }, {
+        phetioPrivate: true,
+        valueType: [ Node, null ]
+      }, {
+        phetioPrivate: true,
+        valueType: [ 'function', null ]
+      }
+      ]
     } );
 
     // @private {Action} - Executed on release event
     // The main implementation of "release" handling is implemented as a callback to the Action, so things are nested
     // nicely for phet-io.
     this._releaseAction = new Action( this.onRelease.bind( this ), {
+      parameters: [ {
+        name: 'event',
+        phetioType: NullableIO( EventIO )
+      }, {
+        phetioPrivate: true,
+        valueType: [ 'function', null ]
+      } ],
+
+      // phet-io
       tandem: options.tandem.createTandem( 'releaseAction' ),
       phetioDocumentation: 'Executes whenever a release occurs.',
       phetioReadOnly: options.phetioReadOnly,
       phetioFeatured: options.phetioFeatured,
-      phetioEventType: EventType.USER,
-
-      phetioType: ReleaseActionIO
+      phetioEventType: EventType.USER
     } );
 
     // update isOverProperty (not a DerivedProperty because we need to hook to passed-in properties)
