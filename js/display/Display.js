@@ -1164,8 +1164,11 @@ define( function( require ) {
     },
 
     /**
-     * Returns an HTML fragment {string} that includes a large amount of debugging information, including a view of the
+     * Returns an HTML fragment that includes a large amount of debugging information, including a view of the
      * instance tree and drawable tree.
+     * @public
+     *
+     * @returns {string}
      */
     getDebugHTML: function() {
       function str( ob ) {
@@ -1483,13 +1486,67 @@ define( function( require ) {
       return result;
     },
 
-    popupDebug: function() {
-      var htmlContent = '<!DOCTYPE html>' +
-                        '<html lang="en">' +
-                        '<head><title>Scenery Debug Snapshot</title></head>' +
-                        '<body style="font-size: 12px;">' + this.getDebugHTML() + '</body>' +
-                        '</html>';
-      window.open( 'data:text/html;charset=utf-8,' + encodeURIComponent( htmlContent ) );
+    /**
+     * Returns the getDebugHTML() information, but wrapped into a full HTML page included in a data URI.
+     * @public
+     *
+     * @returns {string}
+     */
+    getDebugURI() {
+      return 'data:text/html;charset=utf-8,' + encodeURIComponent(
+        '<!DOCTYPE html>' +
+        '<html lang="en">' +
+        '<head><title>Scenery Debug Snapshot</title></head>' +
+        '<body style="font-size: 12px;">' + this.getDebugHTML() + '</body>' +
+        '</html>'
+      );
+    },
+
+    /**
+     * Attempts to open a popup with the getDebugHTML() information.
+     * @public
+     */
+    popupDebug() {
+      window.open( this.getDebugURI() );
+    },
+
+    /**
+     * Attempts to open an iframe popup with the getDebugHTML() information in the same window. This is similar to
+     * popupDebug(), but should work in browsers that block popups, or prevent that type of data URI being opened.
+     * @public
+     */
+    iframeDebug() {
+      const iframe = document.createElement( 'iframe' );
+      iframe.width = window.innerWidth;
+      iframe.height = window.innerHeight;
+      iframe.style.position = 'absolute';
+      iframe.style.left = '0';
+      iframe.style.top = '0';
+      iframe.style.zIndex = '10000';
+      document.body.appendChild( iframe );
+
+      iframe.contentWindow.document.open();
+      iframe.contentWindow.document.write( this.getDebugHTML() );
+      iframe.contentWindow.document.close();
+
+      iframe.contentWindow.document.body.style.background = 'white';
+
+      const closeButton = document.createElement( 'button' );
+      closeButton.style.position = 'absolute';
+      closeButton.style.top = '0';
+      closeButton.style.right = '0';
+      closeButton.style.zIndex = '10001';
+      document.body.appendChild( closeButton );
+
+      closeButton.textContent = 'close';
+
+      // A normal 'click' event listener doesn't seem to be working. This is less-than-ideal.
+      [ 'pointerdown', 'click', 'touchdown' ].forEach( eventType => {
+        closeButton.addEventListener( eventType, () => {
+          document.body.removeChild( iframe );
+          document.body.removeChild( closeButton );
+        }, true );
+      } );
     },
 
     getAccessibleDebugHTML: function() {
