@@ -22,6 +22,12 @@ define( require => {
   const COMPONENTS = 5; // { X Y U V A }
   const FLOAT_QUANTITY = COMPONENTS * 6; // 6 vertices
 
+  // scratch values - corner vertices in the relative transform root coordinate space
+  const upperLeft = new Vector2( 0, 0 );
+  const lowerLeft = new Vector2( 0, 0 );
+  const upperRight = new Vector2( 0, 0 );
+  const lowerRight = new Vector2( 0, 0 );
+
   /**
    * A generated WebGLSelfDrawable whose purpose will be drawing our Sprites. One of these drawables will be created
    * for each displayed instance of a Sprites.
@@ -45,12 +51,6 @@ define( require => {
 
     // @private {Float32Array}
     this.transformMatrixArray = new Float32Array( 9 );
-
-    // @private {Vector2} corner vertices in the relative transform root coordinate space
-    this.upperLeft = new Vector2( 0, 0 );
-    this.lowerLeft = new Vector2( 0, 0 );
-    this.upperRight = new Vector2( 0, 0 );
-    this.lowerRight = new Vector2( 0, 0 );
 
     this.initializeWebGLSelfDrawable( renderer, instance );
 
@@ -206,6 +206,12 @@ define( require => {
       let vertexArrayIndex = 0;
       let changedLength = false;
 
+      // if our vertex data won't fit, keep doubling the size until it fits
+      while ( FLOAT_QUANTITY * length > this.vertexArray.length ) {
+        this.vertexArray = new Float32Array( this.vertexArray.length * 2 );
+        changedLength = true;
+      }
+
       for ( let i = 0; i < length; i++ ) {
         const spriteInstance = this.node._spriteInstances[ i ];
         const spriteImage = spriteInstance.sprite.imageProperty.value;
@@ -217,48 +223,40 @@ define( require => {
         const width = spriteImage.image.width;
         const height = spriteImage.image.height;
 
-        // if our vertex data won't fit, keep doubling the size until it fits
-        while ( FLOAT_QUANTITY + vertexArrayIndex > this.vertexArray.length ) {
-          const newVertexArray = new Float32Array( this.vertexArray.length * 2 );
-          newVertexArray.set( this.vertexArray );
-          this.vertexArray = newVertexArray;
-          changedLength = true;
-        }
-
         // Compute our vertices
-        matrix.multiplyVector2( this.upperLeft.setXY( -offset.x, -offset.y ) );
-        matrix.multiplyVector2( this.lowerLeft.setXY( -offset.x, height - offset.y ) );
-        matrix.multiplyVector2( this.upperRight.setXY( width - offset.x, -offset.y ) );
-        matrix.multiplyVector2( this.lowerRight.setXY( width - offset.x, height - offset.y ) );
+        matrix.multiplyVector2( upperLeft.setXY( -offset.x, -offset.y ) );
+        matrix.multiplyVector2( lowerLeft.setXY( -offset.x, height - offset.y ) );
+        matrix.multiplyVector2( upperRight.setXY( width - offset.x, -offset.y ) );
+        matrix.multiplyVector2( lowerRight.setXY( width - offset.x, height - offset.y ) );
 
         // copy our vertex data into the main array (consensus was that this is the fastest way to fill in data)
-        this.vertexArray[ vertexArrayIndex + 0 ] = this.upperLeft.x;
-        this.vertexArray[ vertexArrayIndex + 1 ] = this.upperLeft.y;
+        this.vertexArray[ vertexArrayIndex + 0 ] = upperLeft.x;
+        this.vertexArray[ vertexArrayIndex + 1 ] = upperLeft.y;
         this.vertexArray[ vertexArrayIndex + 2 ] = uvBounds.minX;
         this.vertexArray[ vertexArrayIndex + 3 ] = uvBounds.minY;
         this.vertexArray[ vertexArrayIndex + 4 ] = alpha;
-        this.vertexArray[ vertexArrayIndex + 5 ] = this.lowerLeft.x;
-        this.vertexArray[ vertexArrayIndex + 6 ] = this.lowerLeft.y;
+        this.vertexArray[ vertexArrayIndex + 5 ] = lowerLeft.x;
+        this.vertexArray[ vertexArrayIndex + 6 ] = lowerLeft.y;
         this.vertexArray[ vertexArrayIndex + 7 ] = uvBounds.minX;
         this.vertexArray[ vertexArrayIndex + 8 ] = uvBounds.maxY;
         this.vertexArray[ vertexArrayIndex + 9 ] = alpha;
-        this.vertexArray[ vertexArrayIndex + 10 ] = this.upperRight.x;
-        this.vertexArray[ vertexArrayIndex + 11 ] = this.upperRight.y;
+        this.vertexArray[ vertexArrayIndex + 10 ] = upperRight.x;
+        this.vertexArray[ vertexArrayIndex + 11 ] = upperRight.y;
         this.vertexArray[ vertexArrayIndex + 12 ] = uvBounds.maxX;
         this.vertexArray[ vertexArrayIndex + 13 ] = uvBounds.minY;
         this.vertexArray[ vertexArrayIndex + 14 ] = alpha;
-        this.vertexArray[ vertexArrayIndex + 15 ] = this.upperRight.x;
-        this.vertexArray[ vertexArrayIndex + 16 ] = this.upperRight.y;
+        this.vertexArray[ vertexArrayIndex + 15 ] = upperRight.x;
+        this.vertexArray[ vertexArrayIndex + 16 ] = upperRight.y;
         this.vertexArray[ vertexArrayIndex + 17 ] = uvBounds.maxX;
         this.vertexArray[ vertexArrayIndex + 18 ] = uvBounds.minY;
         this.vertexArray[ vertexArrayIndex + 19 ] = alpha;
-        this.vertexArray[ vertexArrayIndex + 20 ] = this.lowerLeft.x;
-        this.vertexArray[ vertexArrayIndex + 21 ] = this.lowerLeft.y;
+        this.vertexArray[ vertexArrayIndex + 20 ] = lowerLeft.x;
+        this.vertexArray[ vertexArrayIndex + 21 ] = lowerLeft.y;
         this.vertexArray[ vertexArrayIndex + 22 ] = uvBounds.minX;
         this.vertexArray[ vertexArrayIndex + 23 ] = uvBounds.maxY;
         this.vertexArray[ vertexArrayIndex + 24 ] = alpha;
-        this.vertexArray[ vertexArrayIndex + 25 ] = this.lowerRight.x;
-        this.vertexArray[ vertexArrayIndex + 26 ] = this.lowerRight.y;
+        this.vertexArray[ vertexArrayIndex + 25 ] = lowerRight.x;
+        this.vertexArray[ vertexArrayIndex + 26 ] = lowerRight.y;
         this.vertexArray[ vertexArrayIndex + 27 ] = uvBounds.maxX;
         this.vertexArray[ vertexArrayIndex + 28 ] = uvBounds.maxY;
         this.vertexArray[ vertexArrayIndex + 29 ] = alpha;

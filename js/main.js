@@ -79,6 +79,7 @@ define( [
   'SCENERY/display/drawables/RectangleSVGDrawable',
   'SCENERY/display/drawables/RectangleWebGLDrawable',
   'SCENERY/display/drawables/SpritesCanvasDrawable',
+  'SCENERY/display/drawables/SpritesWebGLDrawable',
   'SCENERY/display/drawables/TextCanvasDrawable',
   'SCENERY/display/drawables/TextDOMDrawable',
   'SCENERY/display/drawables/TextStatefulDrawable',
