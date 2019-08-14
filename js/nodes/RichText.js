@@ -68,6 +68,7 @@ define( function( require ) {
   var Line = require( 'SCENERY/nodes/Line' );
   var Matrix3 = require( 'DOT/Matrix3' );
   var Node = require( 'SCENERY/nodes/Node' );
+  var openPopup = require( 'PHET_CORE/openPopup' );
   var Poolable = require( 'PHET_CORE/Poolable' );
   var RichTextIO = require( 'SCENERY/nodes/RichTextIO' );
   var scenery = require( 'SCENERY/scenery' );
@@ -1750,8 +1751,7 @@ define( function( require ) {
         this.buttonListener = new ButtonListener( {
           fire: function( event ) {
             self._linkEventsHandled && event.handle();
-            var newWindow = window.open( href, '_blank' ); // open in a new window/tab
-            newWindow.focus();
+            openPopup( href ); // open in a new window/tab
           }
         } );
         this.addInputListener( this.buttonListener );
@@ -1772,7 +1772,7 @@ define( function( require ) {
         this.removeChild( child );
         child.clean();
       }
-      
+
       this.removeInputListener( this.buttonListener );
       this.buttonListener = null;
       if ( this.accessibleInputListener ) {
