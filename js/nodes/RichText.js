@@ -1751,7 +1751,7 @@ define( function( require ) {
           fire: function( event ) {
             self._linkEventsHandled && event.handle();
             var newWindow = window.open( href, '_blank' ); // open in a new window/tab
-            newWindow.focus();
+            newWindow && newWindow.focus();
           }
         } );
         this.addInputListener( this.buttonListener );
@@ -1772,7 +1772,7 @@ define( function( require ) {
         this.removeChild( child );
         child.clean();
       }
-      
+
       this.removeInputListener( this.buttonListener );
       this.buttonListener = null;
       if ( this.accessibleInputListener ) {
