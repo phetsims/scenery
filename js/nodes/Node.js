@@ -4227,6 +4227,7 @@ define( function( require ) {
      * @param {number} [y] - The Y offset for where the upper-left of the content drawn into the Canvas
      * @param {number} [width] - The width of the Canvas output
      * @param {number} [height] - The height of the Canvas output
+     * @returns {Image}
      */
     toDataURLImageSynchronous: function( x, y, width, height ) {
       assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
