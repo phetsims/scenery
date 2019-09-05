@@ -36,6 +36,9 @@ define( function( require ) {
     // Super-type initialization
     this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGTextElements ); // usesPaint: true
 
+    // @private {boolean}
+    this.hasLength = false;
+
     if ( !this.svgElement ) {
       // @protected {SVGTextElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
       var text = this.svgElement = document.createElementNS( scenery.svgns, 'text' );
@@ -44,9 +47,6 @@ define( function( require ) {
       // TODO: flag adjustment for SVG qualities
       text.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
       text.setAttribute( 'text-rendering', 'geometricPrecision' );
-      if ( useSVGTextLengthAdjustments ) {
-        text.setAttribute( 'lengthAdjust', 'spacingAndGlyphs' );
-      }
       text.setAttributeNS( 'http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve' );
       text.setAttribute( 'direction', 'ltr' );
     }
@@ -79,8 +79,21 @@ define( function( require ) {
       }
 
       // text length correction, tested with scenery/tests/text-quality-test.html to determine how to match Canvas/SVG rendering (and overall length)
-      if ( this.dirtyBounds && useSVGTextLengthAdjustments && isFinite( this.node.selfBounds.width ) ) {
-        text.setAttribute( 'textLength', this.node.selfBounds.width );
+      if ( this.dirtyBounds && useSVGTextLengthAdjustments ) {
+        var useLengthAdjustment = this.node._boundsMethod !== 'accurate' && isFinite( this.node.selfBounds.width );
+
+        if ( useLengthAdjustment ) {
+          if ( !this.hasLength ) {
+            this.hasLength = true;
+            text.setAttribute( 'lengthAdjust', 'spacingAndGlyphs' );
+          }
+          text.setAttribute( 'textLength', this.node.selfBounds.width );
+        }
+        else if ( this.hasLength ) {
+          this.hasLength = false;
+          text.removeAttribute( 'lengthAdjust' );
+          text.removeAttribute( 'textLength' );
+        }
       }
 
       // Apply any fill/stroke changes to our element.
