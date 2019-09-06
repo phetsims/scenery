@@ -11,21 +11,14 @@ define( function( require ) {
   // modules
   var Image = require( 'SCENERY/nodes/Image' );
   var NodeIO = require( 'SCENERY/nodes/NodeIO' );
-  var phetioInherit = require( 'TANDEM/phetioInherit' );
+  const ObjectIO = require( 'TANDEM/types/ObjectIO' );
   var scenery = require( 'SCENERY/scenery' );
   var StringIO = require( 'TANDEM/types/StringIO' );
   var VoidIO = require( 'TANDEM/types/VoidIO' );
 
-  /**
-   * @param {Image} image
-   * @param {string} phetioID
-   * @constructor
-   */
-  function ImageIO( image, phetioID ) {
-    NodeIO.call( this, image, phetioID );
-  }
+  class ImageIO extends NodeIO {}
 
-  phetioInherit( NodeIO, 'ImageIO', ImageIO, {
+  ImageIO.methods = {
 
     setImage: {
       returnType: VoidIO,
@@ -38,13 +31,13 @@ define( function( require ) {
       documentation: 'Set the image from a base64 string',
       invocableForReadOnlyElements: false
     }
-  }, {
-    documentation: 'The tandem IO type for the scenery Text node',
-    events: [ 'changed' ],
-    validator: { valueType: Image }
-  } );
+  };
 
-  scenery.register( 'ImageIO', ImageIO );
+  ImageIO.documentation = 'The tandem IO type for the scenery Text node';
+  ImageIO.events = [ 'changed' ];
+  ImageIO.validator = { valueType: Image };
+  ImageIO.typeName = 'ImageIO';
+  ObjectIO.validateSubtype( ImageIO );
 
-  return ImageIO;
+  return scenery.register( 'ImageIO', ImageIO );
 } );

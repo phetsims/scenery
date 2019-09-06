@@ -12,21 +12,10 @@ define( function( require ) {
   // modules
   var Focus = require( 'SCENERY/accessibility/Focus' );
   var ObjectIO = require( 'TANDEM/types/ObjectIO' );
-  var phetioInherit = require( 'TANDEM/phetioInherit' );
   var scenery = require( 'SCENERY/scenery' );
   var validate = require( 'AXON/validate' );
 
-  /**
-   * @param {Focus} focus - the focus region which has {display,trail}
-   * @param {string} phetioID - the unique tandem assigned to the focus
-   * @constructor
-   */
-  function FocusIO( focus, phetioID ) {
-    ObjectIO.call( this, focus, phetioID );
-  }
-
-  phetioInherit( ObjectIO, 'FocusIO', FocusIO, {}, {
-    validator: { valueType: Focus }, // TODO: Should this support null?
+  class FocusIO extends ObjectIO {
 
     /**
      * Convert the focus region to a plain JS object for serialization.
@@ -34,7 +23,7 @@ define( function( require ) {
      * @returns {Object} - the serialized object
      * @override
      */
-    toStateObject: function( focus ) {
+    static toStateObject( focus ) {
 
       // If nothing is focused, the focus is null
       if ( focus === null ) {
@@ -58,12 +47,13 @@ define( function( require ) {
           phetioIDIndices: phetioIDIndices
         };
       }
-    },
+    }
+  }
 
-    documentation: 'A IO type for the instance in the simulation which currently has keyboard focus.'
-  } );
+  FocusIO.validator = { valueType: Focus }; // TODO: Should this support null?
+  FocusIO.documentation = 'A IO type for the instance in the simulation which currently has keyboard focus.';
+  FocusIO.typeName = 'FocusIO';
+  ObjectIO.validateSubtype( FocusIO );
 
-  scenery.register( 'FocusIO', FocusIO );
-
-  return FocusIO;
+  return scenery.register( 'FocusIO', FocusIO );
 } );

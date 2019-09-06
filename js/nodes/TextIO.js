@@ -10,52 +10,54 @@ define( function( require ) {
   'use strict';
 
   // modules
+  const ObjectIO = require( 'TANDEM/types/ObjectIO' );
   var FontIO = require( 'SCENERY/util/FontIO' );
   var NodeIO = require( 'SCENERY/nodes/NodeIO' );
   var NodeProperty = require( 'SCENERY/util/NodeProperty' );
   var NumberIO = require( 'TANDEM/types/NumberIO' );
-  var phetioInherit = require( 'TANDEM/phetioInherit' );
   var PropertyIO = require( 'AXON/PropertyIO' );
   var scenery = require( 'SCENERY/scenery' );
   var StringIO = require( 'TANDEM/types/StringIO' );
   var VoidIO = require( 'TANDEM/types/VoidIO' );
 
-  /**
-   * @param {Text} text
-   * @param {string} phetioID
-   * @constructor
-   */
-  function TextIO( text, phetioID ) {
-    NodeIO.call( this, text, phetioID );
+  class TextIO extends NodeIO {
 
-    // this uses a sub Property adapter as described in https://github.com/phetsims/phet-io/issues/1326
-    var textProperty = new NodeProperty( text, 'text', 'text', _.extend( {
+    /**
+     * @param {Text} text
+     * @param {string} phetioID
+     * @constructor
+     */
+    constructor( text, phetioID ) {
+      super( text, phetioID );
 
-      // pick the following values from the parent Node
-      phetioReadOnly: text.phetioReadOnly,
-      phetioState: true,
-      phetioType: PropertyIO( StringIO ),
+      // this uses a sub Property adapter as described in https://github.com/phetsims/phet-io/issues/1326
+      var textProperty = new NodeProperty( text, 'text', 'text', _.extend( {
 
-      tandem: text.tandem.createTandem( 'textProperty' ),
-      phetioDocumentation: 'Property for the displayed text'
-    }, text.phetioComponentOptions, text.phetioComponentOptions.textProperty ) );
+        // pick the following values from the parent Node
+        phetioReadOnly: text.phetioReadOnly,
+        phetioState: true,
+        phetioType: PropertyIO( StringIO ),
 
-    // @private
-    this.disposeTextIO = function() {
-      textProperty.dispose();
-    };
-  }
+        tandem: text.tandem.createTandem( 'textProperty' ),
+        phetioDocumentation: 'Property for the displayed text'
+      }, text.phetioComponentOptions, text.phetioComponentOptions.textProperty ) );
 
-  phetioInherit( NodeIO, 'TextIO', TextIO, {
+      // @private
+      this.disposeTextIO = function() {
+        textProperty.dispose();
+      };
+    }
 
     /**
      * @public - called by PhetioObject when the wrapper is done
      */
-    dispose: function() {
+    dispose() {
       this.disposeTextIO();
       NodeIO.prototype.dispose.call( this );
-    },
+    }
+  }
 
+  TextIO.methods = {
     setFontOptions: {
       returnType: VoidIO,
       parameterTypes: [ FontIO ],
@@ -95,13 +97,12 @@ define( function( require ) {
       },
       documentation: 'Gets the maximum width of text box'
     }
-  }, {
-    documentation: 'Text that is displayed in the simulation. TextIO has a nested PropertyIO.&lt;String&gt; for ' +
-                   'the current string value.',
-    validator: { valueType: scenery.Text }
-  } );
+  };
+  TextIO.documentation = 'Text that is displayed in the simulation. TextIO has a nested PropertyIO.&lt;String&gt; for ' +
+                         'the current string value.';
+  TextIO.validator = { valueType: scenery.Text };
+  TextIO.typeName = 'TextIO';
+  ObjectIO.validateSubtype( TextIO );
 
-  scenery.register( 'TextIO', TextIO );
-
-  return TextIO;
+  return scenery.register( 'TextIO', TextIO );
 } );

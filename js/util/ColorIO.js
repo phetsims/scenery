@@ -12,23 +12,10 @@ define( function( require ) {
   // modules
   var Color = require( 'SCENERY/util/Color' );
   var ObjectIO = require( 'TANDEM/types/ObjectIO' );
-  var phetioInherit = require( 'TANDEM/phetioInherit' );
   var scenery = require( 'SCENERY/scenery' );
   var validate = require( 'AXON/validate' );
 
-  /**
-   * IO type for phet/scenery's Color class.
-   * @param {Color} color
-   * @param phetioID
-   * @constructor
-   */
-  function ColorIO( color, phetioID ) {
-    ObjectIO.call( this, color, phetioID );
-  }
-
-  phetioInherit( ObjectIO, 'ColorIO', ColorIO, {}, {
-    documentation: 'A color, with rgba',
-    validator: { valueType: Color },
+  class ColorIO extends ObjectIO {
 
     /**
      * Encodes a Color into a state object.
@@ -36,10 +23,10 @@ define( function( require ) {
      * @returns {Object}
      * @override
      */
-    toStateObject: function( color ) {
+    static toStateObject( color ) {
       validate( color, this.validator );
       return color.toStateObject();
-    },
+    }
 
     /**
      * Decodes a state into a Color.
@@ -48,13 +35,16 @@ define( function( require ) {
      * @returns {Color}
      * @override
      */
-    fromStateObject: function( stateObject ) {
+    static fromStateObject( stateObject ) {
       return new Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a );
     }
-  } );
+  }
 
-  scenery.register( 'ColorIO', ColorIO );
+  ColorIO.documentation = 'A color, with rgba';
+  ColorIO.validator = { valueType: Color };
+  ColorIO.typeName = 'ColorIO';
+  ObjectIO.validateSubtype( ColorIO );
 
-  return ColorIO;
+  return scenery.register( 'ColorIO', ColorIO );
 } );
 

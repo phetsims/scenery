@@ -12,30 +12,10 @@ define( require => {
 
   // modules
   const ObjectIO = require( 'TANDEM/types/ObjectIO' );
-  const phetioInherit = require( 'TANDEM/phetioInherit' );
   const scenery = require( 'SCENERY/scenery' );
   const validate = require( 'AXON/validate' );
 
-  /**
-   * IO type for phet/sun's DOMEvent class.
-   * @param {DOMEvent} domEvent
-   * @param {string} phetioID
-   * @constructor
-   */
-  function DOMEventIO( domEvent, phetioID ) {
-    ObjectIO.call( this, domEvent, phetioID );
-  }
-
-  // we must use phetioInherit, even in es6
-  phetioInherit( ObjectIO, 'DOMEventIO', DOMEventIO, {}, {
-    documentation: 'A DOM Event',
-
-    /**
-     * Note this is a DOM event, not a scenery.Event
-     * @override
-     * @public
-     */
-    validator: { valueType: window.Event },
+  class DOMEventIO extends ObjectIO {
 
     /**
      * Encodes a DOMEvent instance to a state.
@@ -43,19 +23,24 @@ define( require => {
      * @returns {Object} - a state object
      * @override
      */
-    toStateObject( domEvent ) {
+    static toStateObject( domEvent ) {
       validate( domEvent, this.validator );
       return scenery.Input.serializeDomEvent( domEvent );
-    },
+    }
 
     /**
      * @param {Object} stateObject
      * @returns {window.Event}
      */
-    fromStateObject( stateObject ) {
+    static fromStateObject( stateObject ) {
       return scenery.Input.deserializeDomEvent( stateObject );
     }
-  } );
+  }
+
+  DOMEventIO.documentation = 'A DOM Event';
+  DOMEventIO.validator = { valueType: window.Event };
+  DOMEventIO.typeName = 'DOMEventIO';
+  ObjectIO.validateSubtype( DOMEventIO );
 
   return scenery.register( 'DOMEventIO', DOMEventIO );
 } );

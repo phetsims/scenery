@@ -10,38 +10,19 @@ define( function( require ) {
 
   // modules
   const ObjectIO = require( 'TANDEM/types/ObjectIO' );
-  const phetioInherit = require( 'TANDEM/phetioInherit' );
   const scenery = require( 'SCENERY/scenery' );
   const Vector2IO = require( 'DOT/Vector2IO' );
   const Event = require( 'SCENERY/input/Event' );
   const validate = require( 'AXON/validate' );
 
-  /**
-   * IO type for phet/scenery's Event class.
-   * @param {Event} event
-   * @param phetioID
-   * @constructor
-   */
-  function EventIO( event, phetioID ) {
-    ObjectIO.call( this, event, phetioID );
-  }
-
-  phetioInherit( ObjectIO, 'EventIO', EventIO, {}, {
-    get documentation() { return 'An event, with a point'; },
+  class EventIO extends ObjectIO {
 
     /**
-     * @override
-     * @public
-     */
-    validator: { valueType: Event },
-
-    /**
-     * Encodes a Color into a state object.
      * @param {Event} event
      * @returns {Object}
      * @override
      */
-    toStateObject( event ) {
+    static toStateObject( event ) {
       validate( event, this.validator );
 
       var eventObject = {
@@ -55,7 +36,12 @@ define( function( require ) {
       // Note: If changing the contents of this object, please document it in the public documentation string.
       return eventObject;
     }
-  } );
+  }
+
+  EventIO.documentation = 'An event, with a point';
+  EventIO.validator = { valueType: Event };
+  EventIO.typeName = 'EventIO';
+  ObjectIO.validateSubtype( EventIO );
 
   return scenery.register( 'EventIO', EventIO );
 } );

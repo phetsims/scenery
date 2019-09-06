@@ -11,25 +11,15 @@ define( function( require ) {
 
   // modules
   var ObjectIO = require( 'TANDEM/types/ObjectIO' );
-  var phetioInherit = require( 'TANDEM/phetioInherit' );
   var scenery = require( 'SCENERY/scenery' );
 
-  /**
-   * @param {ButtonListener} buttonListener
-   * @param {string} phetioID
-   * @constructor
-   */
-  function ButtonListenerIO( buttonListener, phetioID ) {
-    ObjectIO.call( this, buttonListener, phetioID );
-  }
+  class ButtonListenerIO extends ObjectIO {}
 
-  phetioInherit( ObjectIO, 'ButtonListenerIO', ButtonListenerIO, {}, {
-    documentation: 'Button listener',
-    events: [ 'up', 'over', 'down', 'out', 'fire' ],
-    validator: { valueType: scenery.ButtonListener }
-  } );
+  ButtonListenerIO.documentation = 'Button listener';
+  ButtonListenerIO.events = [ 'up', 'over', 'down', 'out', 'fire' ];
+  ButtonListenerIO.validator = { valueType: scenery.ButtonListener };
+  ButtonListenerIO.typeName = 'ButtonListenerIO';
+  ObjectIO.validateSubtype( ButtonListenerIO );
 
-  scenery.register( 'ButtonListenerIO', ButtonListenerIO );
-
-  return ButtonListenerIO;
+  return scenery.register( 'ButtonListenerIO', ButtonListenerIO );
 } );
