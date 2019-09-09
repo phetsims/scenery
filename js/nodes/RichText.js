@@ -83,6 +83,7 @@ define( function( require ) {
     'font', // {Font|string} - Sets the font for the text
     'fill', // {PaintDef} - Sets the fill of the text
     'stroke', // {PaintDef} - Sets the stroke around the text
+    'lineWidth', // {number} - Sets the lineWidth around the text
     'subScale', // {number} - Sets the scale of any subscript elements
     'subXSpacing', // {number} - Sets horizontal spacing before any subscript elements
     'subYOffset', // {number} - Sets vertical offset for any subscript elements
@@ -165,6 +166,9 @@ define( function( require ) {
     // @private {PaintDef}
     this._fill = '#000000';
     this._stroke = null;
+
+    // @private {number}
+    this._lineWidth = 1;
 
     // @private {number}
     this._subScale = 0.75;
@@ -422,7 +426,7 @@ define( function( require ) {
     appendEmptyLeaf: function() {
       assert && assert( this.lineContainer.getChildrenCount() === 0 );
 
-      this.appendLine( RichTextLeaf.createFromPool( '', true, this._font, this._boundsMethod, this._fill, this._stroke ) );
+      this.appendLine( RichTextLeaf.createFromPool( '', true, this._font, this._boundsMethod, this._fill, this._stroke, this._lineWidth ) );
     },
 
     /**
@@ -467,7 +471,7 @@ define( function( require ) {
         sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'appending leaf: ' + element.content );
         sceneryLog && sceneryLog.RichText && sceneryLog.push();
 
-        node = RichTextLeaf.createFromPool( element.content, isLTR, font, this._boundsMethod, fill, this._stroke );
+        node = RichTextLeaf.createFromPool( element.content, isLTR, font, this._boundsMethod, fill, this._stroke, this._lineWidth );
 
         // If this content gets added, it will need to be pushed over by this amount
         var containerSpacing = isLTR ? containerNode.rightSpacing : containerNode.leftSpacing;
@@ -489,7 +493,7 @@ define( function( require ) {
 
             // Keep shortening by removing words until it fits (or if we NEED to fit it) or it doesn't fit.
             while ( words.length ) {
-              node = RichTextLeaf.createFromPool( words.join( ' ' ), isLTR, font, this._boundsMethod, fill, this._stroke );
+              node = RichTextLeaf.createFromPool( words.join( ' ' ), isLTR, font, this._boundsMethod, fill, this._stroke, this._lineWidth );
 
               // If we haven't added anything to the line and we are down to the first word, we need to just add it.
               if ( !node.fitsIn( widthAvailable - containerSpacing, this._hasAddedLeafToLine, isLTR ) &&
@@ -844,6 +848,33 @@ define( function( require ) {
       return this._stroke;
     },
     get stroke() { return this.getStroke(); },
+
+    /**
+     * Sets the lineWidth of our text.
+     * @public
+     *
+     * @param {number} lineWidth
+     * @returns {RichText} - For chaining.
+     */
+    setLineWidth: function( lineWidth ) {
+      if ( this._lineWidth !== lineWidth ) {
+        this._lineWidth = lineWidth;
+        this.rebuildRichText();
+      }
+      return this;
+    },
+    set lineWidth( value ) { this.setLineWidth( value ); },
+
+    /**
+     * Returns the current lineWidth.
+     * @public
+     *
+     * @returns {number}
+     */
+    getLineWidth: function() {
+      return this._lineWidth;
+    },
+    get lineWidth() { return this.getLineWidth(); },
 
     /**
      * Sets the scale (relative to 1) of any text under subscript (<sub>) elements.
@@ -1610,11 +1641,12 @@ define( function( require ) {
    * @param {string} boundsMethod
    * @param {PaintDef} fill
    * @param {PaintDef} stroke
+   * @param {number} lineWidth
    */
-  function RichTextLeaf( content, isLTR, font, boundsMethod, fill, stroke ) {
+  function RichTextLeaf( content, isLTR, font, boundsMethod, fill, stroke, lineWidth ) {
     Text.call( this, '' );
 
-    this.initialize( content, isLTR, font, boundsMethod, fill, stroke );
+    this.initialize( content, isLTR, font, boundsMethod, fill, stroke, lineWidth );
   }
 
   inherit( Text, RichTextLeaf, {
@@ -1628,9 +1660,10 @@ define( function( require ) {
      * @param {string} boundsMethod
      * @param {PaintDef} fill
      * @param {PaintDef} stroke
+     * @param {number} lineWidth
      * @returns {RichTextLeaf} - Self reference
      */
-    initialize: function( content, isLTR, font, boundsMethod, fill, stroke ) {
+    initialize: function( content, isLTR, font, boundsMethod, fill, stroke, lineWidth ) {
 
       // Grab all spaces at the (logical) start
       var whitespaceBefore = '';
@@ -1651,6 +1684,7 @@ define( function( require ) {
       this.font = font;
       this.fill = fill;
       this.stroke = stroke;
+      this.lineWidth = lineWidth;
 
       var spacingBefore = whitespaceBefore.length ? scratchText.setText( whitespaceBefore ).setFont( font ).width : 0;
       var spacingAfter = whitespaceAfter.length ? scratchText.setText( whitespaceAfter ).setFont( font ).width : 0;
