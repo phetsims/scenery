@@ -1569,7 +1569,7 @@ define( function( require ) {
       result += '<br><div style="' + headerStyle + '">Parallel DOM</div><br>';
 
       var parallelDOM = this._rootAccessibleInstance.peer.primarySibling.outerHTML;
-      parallelDOM = parallelDOM.replace( /\>\</g, '>\n<' );
+      parallelDOM = parallelDOM.replace( /></g, '>\n<' );
       var lines = parallelDOM.split( '\n' );
 
       var indentation = '';
