@@ -19,39 +19,31 @@ define( function( require ) {
 
     /**
      * Convert the focus region to a plain JS object for serialization.
-     * @param {Object|null} focus - the focus region which has {display,trail}
+     * @param {Object} focus - the focus region which has {display,trail}
      * @returns {Object} - the serialized object
      * @override
      */
     static toStateObject( focus ) {
+      validate( focus, this.validator );
+      var phetioIDs = [];
+      focus.trail.nodes.forEach( function( node, i ) {
 
-      // If nothing is focused, the focus is null
-      if ( focus === null ) {
-        return null;
-      }
-      else {
-        validate( focus, this.validator );
-        var phetioIDIndices = [];
-        focus.trail.nodes.forEach( function( node, i ) {
+        // If the node was PhET-iO instrumented, include its phetioID instead of its index (because phetioID is more stable)
+        if ( node.isPhetioInstrumented() ) {
+          phetioIDs.push( node.tandem.phetioID );
+        }
+      } );
 
-          // If the node was PhET-iO instrumented, include its phetioID instead of its index (because phetioID is more stable)
-          if ( node.isPhetioInstrumented() ) {
-            phetioIDIndices.push( node.tandem.phetioID );
-          }
-          else {
-            phetioIDIndices.push( focus.trail.indices[ i ] );
-          }
-        } );
-
-        return {
-          phetioIDIndices: phetioIDIndices
-        };
-      }
+      return {
+        focusedObject: phetioIDs
+      };
     }
   }
 
-  FocusIO.validator = { valueType: Focus }; // TODO: Should this support null?
-  FocusIO.documentation = 'A IO type for the instance in the simulation which currently has keyboard focus.';
+  FocusIO.validator = { valueType: Focus };
+  FocusIO.documentation = 'A IO type for the instance in the simulation which currently has keyboard focus. FocusIO is ' +
+                          'serialized into a `focusedObject` that is a list of PhET-iO elements, from parent-most to ' +
+                          'child-most cooresponding to the PhET-iO element that was instrumented.';
   FocusIO.typeName = 'FocusIO';
   ObjectIO.validateSubtype( FocusIO );
 
