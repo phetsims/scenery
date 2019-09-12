@@ -35,15 +35,15 @@ define( function( require ) {
       } );
 
       return {
-        focusedObject: phetioIDs
+        focusedPhetioElement: phetioIDs
       };
     }
   }
 
   FocusIO.validator = { valueType: Focus };
   FocusIO.documentation = 'A IO type for the instance in the simulation which currently has keyboard focus. FocusIO is ' +
-                          'serialized into a `focusedObject` that is a list of PhET-iO elements, from parent-most to ' +
-                          'child-most cooresponding to the PhET-iO element that was instrumented.';
+                          'serialized into and Object with key `focusedPhetioElement` that is a list of PhET-iO elements, ' +
+                          'from parent-most to child-most cooresponding to the PhET-iO element that was instrumented.';
   FocusIO.typeName = 'FocusIO';
   ObjectIO.validateSubtype( FocusIO );
 
