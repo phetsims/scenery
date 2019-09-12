@@ -100,7 +100,7 @@ define( function( require ) {
     'links', // {Object|boolean} - Sets the map of href placeholder => actual href/callback used for links
     'align', // {string} - Sets text alignment if there are multiple lines
     'leading', // {number} - Sets the spacing between lines if there are multiple lines
-    'lineWrap', // {number} - Sets width of text before creating a new line
+    'lineWrap', // {number|null} - Sets width of text before creating a new line
     'text' // {string|number} - Sets the text to be displayed by this Node
   ];
 
