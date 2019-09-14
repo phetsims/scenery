@@ -70,7 +70,7 @@
  * pointer. For mice, it will fire 'mousemove', for touch events it will fire 'touchmove', and for pen events it will
  * fire 'penmove'. Similarly, for any type of event, it will first fire pointerType+eventType, and then eventType.
  *
- * **** Accessibility Specific Event Types
+ * **** PDOM Specific Event Types
  *
  * Some event types can only be triggered from the PDOM. If a SCENERY/Node has accessible content (see
  * Accessibility.js for more info), then listeners can be added for events fired from the PDOM. The accessibility events

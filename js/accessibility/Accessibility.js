@@ -2123,7 +2123,7 @@ define( function( require ) {
         /**
          * Hide completely from a screen reader and the browser by setting the hidden attribute on the node's
          * representative DOM element. If the sibling DOM Elements have a container parent, the container
-         * should be hidden so that all peers are hidden as well.  Hiding the element will remove it from the focus
+         * should be hidden so that all PDOM elements are hidden as well.  Hiding the element will remove it from the focus
          * order.
          *
          * @public
