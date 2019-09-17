@@ -695,7 +695,7 @@ define( function( require ) {
     createForwardingListener: function( down, options ) {
 
       options = _.extend( {
-        allowTouchSnag: false
+        allowTouchSnag: true // see https://github.com/phetsims/scenery/issues/999
       }, options );
 
       return {
