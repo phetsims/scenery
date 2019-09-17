@@ -536,7 +536,7 @@ define( function( require ) {
          * Called when assertions are enabled and once the Node has been completely constructed. This is the time to
          * make sure that options are saet up the way they are expected to be. For example. you don't want accessibleName
          * and labelContent declared
-         * @private
+         * @public (only called by Screen.js)
          */
         accessibleAudit: function() {
 
