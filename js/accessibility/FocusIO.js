@@ -25,7 +25,7 @@ define( require => {
      */
     static toStateObject( focus ) {
       validate( focus, this.validator );
-      var phetioIDs = [];
+      const phetioIDs = [];
       focus.trail.nodes.forEach( function( node, i ) {
 
         // If the node was PhET-iO instrumented, include its phetioID instead of its index (because phetioID is more stable)

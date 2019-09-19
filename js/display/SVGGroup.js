@@ -179,7 +179,7 @@ define( require => {
 
       sceneryLog && sceneryLog.SVGGroup && sceneryLog.push();
 
-      var svgGroup = this.svgGroup;
+      const svgGroup = this.svgGroup;
 
       this.dirty = false;
 
@@ -190,7 +190,7 @@ define( require => {
 
         if ( this.willApplyTransforms ) {
 
-          var isIdentity = this.node.transform.isIdentity();
+          const isIdentity = this.node.transform.isIdentity();
 
           if ( !isIdentity ) {
             this.hasTransform = true;
@@ -244,7 +244,7 @@ define( require => {
         //OHTWO TODO: remove clip workaround (use this.willApplyFilters)
         if ( this.node.clipArea ) {
           if ( !this.clipDefinition ) {
-            var clipId = 'clip' + this.node.getId();
+            const clipId = 'clip' + this.node.getId();
 
             this.clipDefinition = document.createElementNS( scenery.svgns, 'clipPath' );
             this.clipDefinition.setAttribute( 'id', clipId );
@@ -276,11 +276,11 @@ define( require => {
         sceneryLog && sceneryLog.SVGGroup && sceneryLog.push();
 
         // our instance should have the proper order of children. we check that way.
-        var idx = this.children.length - 1;
-        var instanceChildren = this.instance.children;
+        let idx = this.children.length - 1;
+        const instanceChildren = this.instance.children;
         // iterate backwards, since DOM's insertBefore makes forward iteration more complicated (no insertAfter)
-        for ( var i = instanceChildren.length - 1; i >= 0; i-- ) {
-          var group = instanceChildren[ i ].lookupSVGGroup( this.block );
+        for ( let i = instanceChildren.length - 1; i >= 0; i-- ) {
+          const group = instanceChildren[ i ].lookupSVGGroup( this.block );
           if ( group ) {
             // ensure that the spot in our array (and in the DOM) at [idx] is correct
             if ( this.children[ idx ] !== group ) {
@@ -292,7 +292,7 @@ define( require => {
               svgGroup.insertBefore( group.svgGroup, idx + 1 >= this.children.length ? null : this.children[ idx + 1 ].svgGroup );
 
               // then in our children array
-              var oldIndex = _.indexOf( this.children, group );
+              const oldIndex = _.indexOf( this.children, group );
               assert && assert( oldIndex < idx, 'The item we are moving backwards to location [idx] should not have an index greater than that' );
               this.children.splice( oldIndex, 1 );
               this.children.splice( idx, 0, group );
@@ -371,7 +371,7 @@ define( require => {
   SVGGroup.addDrawable = function( block, drawable ) {
     assert && assert( drawable.instance, 'Instance is required for a drawable to be grouped correctly in SVG' );
 
-    var group = SVGGroup.ensureGroupsToInstance( block, drawable.instance );
+    const group = SVGGroup.ensureGroupsToInstance( block, drawable.instance );
     group.addSelfDrawable( drawable );
   };
 
@@ -386,12 +386,12 @@ define( require => {
   SVGGroup.ensureGroupsToInstance = function( block, instance ) {
     // TODO: assertions here
 
-    var group = instance.lookupSVGGroup( block );
+    let group = instance.lookupSVGGroup( block );
 
     if ( !group ) {
       assert && assert( instance !== block.rootGroup.instance, 'Making sure we do not walk past our rootGroup' );
 
-      var parentGroup = SVGGroup.ensureGroupsToInstance( block, instance.parent );
+      const parentGroup = SVGGroup.ensureGroupsToInstance( block, instance.parent );
 
       group = SVGGroup.createFromPool( block, instance, parentGroup );
       parentGroup.addChildGroup( group );
@@ -402,10 +402,10 @@ define( require => {
 
   // @private
   SVGGroup.releaseGroupsToInstance = function( block, instance ) {
-    var group = instance.lookupSVGGroup( block );
+    const group = instance.lookupSVGGroup( block );
 
     if ( group.isReleasable() ) {
-      var parentGroup = group.parent;
+      const parentGroup = group.parent;
       parentGroup.removeChildGroup( group );
 
       SVGGroup.releaseGroupsToInstance( block, parentGroup.instance );

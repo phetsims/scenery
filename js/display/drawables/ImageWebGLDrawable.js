@@ -19,20 +19,20 @@ define( require => {
 
   // For alignment, we keep things to 8 components, aligned on 4-byte boundaries.
   // See https://developer.apple.com/library/ios/documentation/3DDrawing/Conceptual/OpenGLES_ProgrammingGuide/TechniquesforWorkingwithVertexData/TechniquesforWorkingwithVertexData.html#//apple_ref/doc/uid/TP40008793-CH107-SW15
-  var WEBGL_COMPONENTS = 5; // format [X Y U V A] for 6 vertices
+  const WEBGL_COMPONENTS = 5; // format [X Y U V A] for 6 vertices
 
-  var VERTEX_0_OFFSET = WEBGL_COMPONENTS * 0;
-  var VERTEX_1_OFFSET = WEBGL_COMPONENTS * 1;
-  var VERTEX_2_OFFSET = WEBGL_COMPONENTS * 2;
-  var VERTEX_3_OFFSET = WEBGL_COMPONENTS * 3;
-  var VERTEX_4_OFFSET = WEBGL_COMPONENTS * 4;
-  var VERTEX_5_OFFSET = WEBGL_COMPONENTS * 5;
+  const VERTEX_0_OFFSET = WEBGL_COMPONENTS * 0;
+  const VERTEX_1_OFFSET = WEBGL_COMPONENTS * 1;
+  const VERTEX_2_OFFSET = WEBGL_COMPONENTS * 2;
+  const VERTEX_3_OFFSET = WEBGL_COMPONENTS * 3;
+  const VERTEX_4_OFFSET = WEBGL_COMPONENTS * 4;
+  const VERTEX_5_OFFSET = WEBGL_COMPONENTS * 5;
 
-  var VERTEX_X_OFFSET = 0;
-  var VERTEX_Y_OFFSET = 1;
-  var VERTEX_U_OFFSET = 2;
-  var VERTEX_V_OFFSET = 3;
-  var VERTEX_A_OFFSET = 4;
+  const VERTEX_X_OFFSET = 0;
+  const VERTEX_Y_OFFSET = 1;
+  const VERTEX_U_OFFSET = 2;
+  const VERTEX_V_OFFSET = 3;
+  const VERTEX_A_OFFSET = 4;
 
   /**
    * A generated WebGLSelfDrawable whose purpose will be drawing our Image. One of these drawables will be created
@@ -94,8 +94,8 @@ define( require => {
       }
 
       // if the width/height isn't loaded yet, we can still use the desired value
-      var width = this.node.getImageWidth();
-      var height = this.node.getImageHeight();
+      const width = this.node.getImageWidth();
+      const height = this.node.getImageHeight();
 
       // if we have a width/height, we'll load a sprite
       this.sprite = ( width > 0 && height > 0 ) ? this.webglBlock.addSpriteSheetImage( this.node._image, width, height ) : null;
@@ -169,7 +169,7 @@ define( require => {
       if ( this.uvDirty ) {
         this.uvDirty = false;
 
-        var uvBounds = this.sprite.uvBounds;
+        const uvBounds = this.sprite.uvBounds;
 
         // TODO: consider reversal of minY and maxY usage here for vertical inverse
 
@@ -193,10 +193,10 @@ define( require => {
       if ( this.xyDirty ) {
         this.xyDirty = false;
 
-        var width = this.node.getImageWidth();
-        var height = this.node.getImageHeight();
+        const width = this.node.getImageWidth();
+        const height = this.node.getImageHeight();
 
-        var transformMatrix = this.instance.relativeTransform.matrix; // with compute need, should always be accurate
+        const transformMatrix = this.instance.relativeTransform.matrix; // with compute need, should always be accurate
         transformMatrix.multiplyVector2( this.upperLeft.setXY( 0, 0 ) );
         transformMatrix.multiplyVector2( this.lowerLeft.setXY( 0, height ) );
         transformMatrix.multiplyVector2( this.upperRight.setXY( width, 0 ) );

@@ -17,11 +17,11 @@ define( require => {
   const scenery = require( 'SCENERY/scenery' );
   const Stitcher = require( 'SCENERY/display/Stitcher' );
 
-  var prototype = {
+  const prototype = {
     stitch: function( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
       this.initialize( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval );
 
-      for ( var d = backbone.previousFirstDrawable; d !== null; d = d.oldNextDrawable ) {
+      for ( let d = backbone.previousFirstDrawable; d !== null; d = d.oldNextDrawable ) {
         this.notePendingRemoval( d );
         if ( d === backbone.previousLastDrawable ) { break; }
       }
@@ -30,12 +30,12 @@ define( require => {
 
       this.removeAllBlocks();
 
-      var currentBlock = null;
-      var currentRenderer = 0;
-      var firstDrawableForBlock = null;
+      let currentBlock = null;
+      let currentRenderer = 0;
+      let firstDrawableForBlock = null;
 
       // linked-list iteration inclusively from firstDrawable to lastDrawable
-      for ( var drawable = firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
+      for ( let drawable = firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
 
         // if we need to switch to a new block, create it
         if ( !currentBlock || drawable.renderer !== currentRenderer ) {
@@ -70,7 +70,7 @@ define( require => {
     }
   };
 
-  var RebuildStitcher = inherit( Stitcher, function RebuildStitcher() {
+  const RebuildStitcher = inherit( Stitcher, function RebuildStitcher() {
     // nothing done
   }, prototype );
   scenery.register( 'RebuildStitcher', RebuildStitcher );

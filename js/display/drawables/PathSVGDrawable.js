@@ -16,7 +16,7 @@ define( require => {
   const SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
 
   // TODO: change this based on memory and performance characteristics of the platform
-  var keepSVGPathElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
+  const keepSVGPathElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
 
   /**
    * A generated SVGSelfDrawable whose purpose will be drawing our Path. One of these drawables will be created
@@ -47,9 +47,9 @@ define( require => {
       assert && assert( !this.node.requiresSVGBoundsWorkaround(),
         'No workaround for https://github.com/phetsims/scenery/issues/196 is provided at this time, please add an epsilon' );
 
-      var path = this.svgElement;
+      const path = this.svgElement;
       if ( this.dirtyShape ) {
-        var svgPath = this.node.hasShape() ? this.node._shape.getSVGPath() : '';
+        let svgPath = this.node.hasShape() ? this.node._shape.getSVGPath() : '';
 
         // temporary workaround for https://bugs.webkit.org/show_bug.cgi?id=78980
         // and http://code.google.com/p/chromium/issues/detail?id=231626 where even removing

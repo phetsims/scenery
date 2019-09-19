@@ -23,7 +23,7 @@ define( require => {
   const scenery = require( 'SCENERY/scenery' );
   const Shape = require( 'KITE/Shape' );
 
-  var RECTANGLE_OPTION_KEYS = [
+  const RECTANGLE_OPTION_KEYS = [
     'rectBounds', // {Bounds2} - Sets x/y/width/height based on bounds. See setRectBounds() for more documentation.
     'rectSize', // {Dimension2} - Sets width/height based on dimension. See setRectSize() for more documentation.
     'rectX', // {number} - Sets x. See setRectX() for more documentation.
@@ -214,7 +214,7 @@ define( require => {
      * @returns {number} - Renderer bitmask, see Renderer for details
      */
     getStrokeRendererBitmask: function() {
-      var bitmask = Path.prototype.getStrokeRendererBitmask.call( this );
+      let bitmask = Path.prototype.getStrokeRendererBitmask.call( this );
       // DOM stroke handling doesn't YET support gradients, patterns, or dashes (with the current implementation, it shouldn't be too hard)
       if ( this.hasStroke() && !this.getStroke().isGradient && !this.getStroke().isPattern && !this.hasLineDash() ) {
         // we can't support the bevel line-join with our current DOM rectangle display
@@ -238,9 +238,9 @@ define( require => {
      * @returns {number} - Renderer bitmask, see Renderer for details
      */
     getPathRendererBitmask: function() {
-      var bitmask = Renderer.bitmaskCanvas | Renderer.bitmaskSVG;
+      let bitmask = Renderer.bitmaskCanvas | Renderer.bitmaskSVG;
 
-      var maximumArcSize = this.getMaximumArcSize();
+      const maximumArcSize = this.getMaximumArcSize();
 
       // If the top/bottom or left/right strokes touch and overlap in the middle (small rectangle, big stroke), our DOM method won't work.
       // Additionally, if we're handling rounded rectangles or a stroke with lineJoin 'round', we'll need borderRadius
@@ -272,8 +272,8 @@ define( require => {
      * @returns {Rectangle} - For chaining
      */
     setRect: function( x, y, width, height, cornerXRadius, cornerYRadius ) {
-      var hasXRadius = cornerXRadius !== undefined;
-      var hasYRadius = cornerYRadius !== undefined;
+      const hasXRadius = cornerXRadius !== undefined;
+      const hasYRadius = cornerYRadius !== undefined;
 
       assert && assert( typeof x === 'number' && isFinite( x ) &&
                         typeof y === 'number' && isFinite( y ) &&
@@ -300,8 +300,8 @@ define( require => {
       this._cornerXRadius = hasXRadius ? cornerXRadius : this._cornerXRadius;
       this._cornerYRadius = hasYRadius ? cornerYRadius : this._cornerYRadius;
 
-      var stateLen = this._drawables.length;
-      for ( var i = 0; i < stateLen; i++ ) {
+      const stateLen = this._drawables.length;
+      for ( let i = 0; i < stateLen; i++ ) {
         this._drawables[ i ].markDirtyRectangle();
       }
       this.invalidateRectangle();
@@ -321,8 +321,8 @@ define( require => {
       if ( this._rectX !== x ) {
         this._rectX = x;
 
-        var stateLen = this._drawables.length;
-        for ( var i = 0; i < stateLen; i++ ) {
+        const stateLen = this._drawables.length;
+        for ( let i = 0; i < stateLen; i++ ) {
           this._drawables[ i ].markDirtyX();
         }
 
@@ -355,8 +355,8 @@ define( require => {
       if ( this._rectY !== y ) {
         this._rectY = y;
 
-        var stateLen = this._drawables.length;
-        for ( var i = 0; i < stateLen; i++ ) {
+        const stateLen = this._drawables.length;
+        for ( let i = 0; i < stateLen; i++ ) {
           this._drawables[ i ].markDirtyY();
         }
 
@@ -389,8 +389,8 @@ define( require => {
       if ( this._rectWidth !== width ) {
         this._rectWidth = width;
 
-        var stateLen = this._drawables.length;
-        for ( var i = 0; i < stateLen; i++ ) {
+        const stateLen = this._drawables.length;
+        for ( let i = 0; i < stateLen; i++ ) {
           this._drawables[ i ].markDirtyWidth();
         }
 
@@ -423,8 +423,8 @@ define( require => {
       if ( this._rectHeight !== height ) {
         this._rectHeight = height;
 
-        var stateLen = this._drawables.length;
-        for ( var i = 0; i < stateLen; i++ ) {
+        const stateLen = this._drawables.length;
+        for ( let i = 0; i < stateLen; i++ ) {
           this._drawables[ i ].markDirtyHeight();
         }
 
@@ -463,8 +463,8 @@ define( require => {
       if ( this._cornerXRadius !== radius ) {
         this._cornerXRadius = radius;
 
-        var stateLen = this._drawables.length;
-        for ( var i = 0; i < stateLen; i++ ) {
+        const stateLen = this._drawables.length;
+        for ( let i = 0; i < stateLen; i++ ) {
           this._drawables[ i ].markDirtyCornerXRadius();
         }
 
@@ -503,8 +503,8 @@ define( require => {
       if ( this._cornerYRadius !== radius ) {
         this._cornerYRadius = radius;
 
-        var stateLen = this._drawables.length;
-        for ( var i = 0; i < stateLen; i++ ) {
+        const stateLen = this._drawables.length;
+        for ( let i = 0; i < stateLen; i++ ) {
           this._drawables[ i ].markDirtyCornerYRadius();
         }
 
@@ -591,7 +591,7 @@ define( require => {
       assert && assert( typeof width === 'number' );
 
       if ( this._rectWidth !== width ) {
-        var right = this._rectX + this._rectWidth;
+        const right = this._rectX + this._rectWidth;
         this.setRectWidth( width );
         this.setRectX( right - width );
       }
@@ -612,7 +612,7 @@ define( require => {
       assert && assert( typeof height === 'number' );
 
       if ( this._rectHeight !== height ) {
-        var bottom = this._rectY + this._rectHeight;
+        const bottom = this._rectY + this._rectHeight;
         this.setRectHeight( height );
         this.setRectY( bottom - height );
       }
@@ -641,7 +641,7 @@ define( require => {
      * @returns {Bounds2}
      */
     computeShapeBounds: function() {
-      var bounds = new Bounds2( this._rectX, this._rectY, this._rectX + this._rectWidth, this._rectY + this._rectHeight );
+      let bounds = new Bounds2( this._rectX, this._rectY, this._rectX + this._rectWidth, this._rectY + this._rectHeight );
       if ( this._stroke ) {
         // since we are axis-aligned, any stroke will expand our bounds by a guaranteed set amount
         bounds = bounds.dilated( this.getLineWidth() / 2 );
@@ -659,7 +659,7 @@ define( require => {
     createRectangleShape: function() {
       if ( this.isRounded() ) {
         // copy border-radius CSS behavior in Chrome, where the arcs won't intersect, in cases where the arc segments at full size would intersect each other
-        var maximumArcSize = Math.min( this._rectWidth / 2, this._rectHeight / 2 );
+        const maximumArcSize = Math.min( this._rectWidth / 2, this._rectHeight / 2 );
         return Shape.roundRectangle( this._rectX, this._rectY, this._rectWidth, this._rectHeight,
           Math.min( maximumArcSize, this._cornerXRadius ), Math.min( maximumArcSize, this._cornerYRadius ) ).makeImmutable();
       }
@@ -707,23 +707,23 @@ define( require => {
      * @returns {boolean}
      */
     containsPointSelf: function( point ) {
-      var x = this._rectX;
-      var y = this._rectY;
-      var width = this._rectWidth;
-      var height = this._rectHeight;
-      var arcWidth = this._cornerXRadius;
-      var arcHeight = this._cornerYRadius;
-      var halfLine = this.getLineWidth() / 2;
+      const x = this._rectX;
+      const y = this._rectY;
+      const width = this._rectWidth;
+      const height = this._rectHeight;
+      const arcWidth = this._cornerXRadius;
+      const arcHeight = this._cornerYRadius;
+      const halfLine = this.getLineWidth() / 2;
 
-      var result = true;
+      let result = true;
       if ( this._strokePickable ) {
         // test the outer boundary if we are stroke-pickable (if also fill-pickable, this is the only test we need)
-        var rounded = this.isRounded();
+        const rounded = this.isRounded();
         if ( !rounded && this.getLineJoin() === 'bevel' ) {
           // fall-back for bevel
           return Path.prototype.containsPointSelf.call( this, point );
         }
-        var miter = this.getLineJoin() === 'miter' && !rounded;
+        const miter = this.getLineJoin() === 'miter' && !rounded;
         result = result && Rectangle.intersects( x - halfLine, y - halfLine,
             width + 2 * halfLine, height + 2 * halfLine,
             miter ? 0 : ( arcWidth + halfLine ), miter ? 0 : ( arcHeight + halfLine ),
@@ -920,7 +920,7 @@ define( require => {
    * @returns {boolean}
    */
   Rectangle.intersects = function( x, y, width, height, arcWidth, arcHeight, point ) {
-    var result = point.x >= x &&
+    const result = point.x >= x &&
                  point.x <= x + width &&
                  point.y >= y &&
                  point.y <= y + height;
@@ -930,16 +930,16 @@ define( require => {
     }
 
     // copy border-radius CSS behavior in Chrome, where the arcs won't intersect, in cases where the arc segments at full size would intersect each other
-    var maximumArcSize = Math.min( width / 2, height / 2 );
+    const maximumArcSize = Math.min( width / 2, height / 2 );
     arcWidth = Math.min( maximumArcSize, arcWidth );
     arcHeight = Math.min( maximumArcSize, arcHeight );
 
     // we are rounded and inside the logical rectangle (if it didn't have rounded corners)
 
     // closest corner arc's center (we assume the rounded rectangle's arcs are 90 degrees fully, and don't intersect)
-    var closestCornerX;
-    var closestCornerY;
-    var guaranteedInside = false;
+    let closestCornerX;
+    let closestCornerY;
+    let guaranteedInside = false;
 
     // if we are to the inside of the closest corner arc's center, we are guaranteed to be in the rounded rectangle (guaranteedInside)
     if ( point.x < x + width / 2 ) {
@@ -965,8 +965,8 @@ define( require => {
     // we are now in the rectangular region between the logical corner and the center of the closest corner's arc.
 
     // offset from the closest corner's arc center
-    var offsetX = point.x - closestCornerX;
-    var offsetY = point.y - closestCornerY;
+    let offsetX = point.x - closestCornerX;
+    let offsetY = point.y - closestCornerY;
 
     // normalize the coordinates so now we are dealing with a unit circle
     // (technically arc, but we are guaranteed to be in the area covered by the arc, so we just consider the circle)

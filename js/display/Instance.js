@@ -37,10 +37,10 @@ define( require => {
   const scenery = require( 'SCENERY/scenery' );
   const Util = require( 'SCENERY/util/Util' );
 
-  var globalIdCounter = 1;
+  let globalIdCounter = 1;
 
   // preferences top to bottom in general
-  var defaultPreferredRenderers = Renderer.createOrderBitmask(
+  const defaultPreferredRenderers = Renderer.createOrderBitmask(
     Renderer.bitmaskSVG, Renderer.bitmaskCanvas, Renderer.bitmaskDOM, Renderer.bitmaskWebGL );
 
   /**
@@ -289,17 +289,17 @@ define( require => {
       sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'old: ' + this.getStateString() );
 
       // old state information, so we can compare what was changed
-      var wasBackbone = this.isBackbone;
-      var wasTransformed = this.isTransformed;
-      var wasVisibilityApplied = this.isVisibilityApplied;
-      var wasInstanceCanvasCache = this.isInstanceCanvasCache;
-      var wasSharedCanvasCacheSelf = this.isSharedCanvasCacheSelf;
-      var wasSharedCanvasCachePlaceholder = this.isSharedCanvasCachePlaceholder;
-      var wasUnderCanvasCache = this.isUnderCanvasCache;
-      var oldSelfRenderer = this.selfRenderer;
-      var oldGroupRenderer = this.groupRenderer;
-      var oldSharedCacheRenderer = this.sharedCacheRenderer;
-      var oldPreferredRenderers = this.preferredRenderers;
+      const wasBackbone = this.isBackbone;
+      const wasTransformed = this.isTransformed;
+      const wasVisibilityApplied = this.isVisibilityApplied;
+      const wasInstanceCanvasCache = this.isInstanceCanvasCache;
+      const wasSharedCanvasCacheSelf = this.isSharedCanvasCacheSelf;
+      const wasSharedCanvasCachePlaceholder = this.isSharedCanvasCachePlaceholder;
+      const wasUnderCanvasCache = this.isUnderCanvasCache;
+      const oldSelfRenderer = this.selfRenderer;
+      const oldGroupRenderer = this.groupRenderer;
+      const oldSharedCacheRenderer = this.sharedCacheRenderer;
+      const oldPreferredRenderers = this.preferredRenderers;
 
       // default values to set (makes the logic much simpler)
       this.isBackbone = false;
@@ -312,7 +312,7 @@ define( require => {
       this.groupRenderer = 0;
       this.sharedCacheRenderer = 0;
 
-      var hints = this.node._hints;
+      const hints = this.node._hints;
 
       this.isUnderCanvasCache = this.isSharedCanvasCacheRoot ||
                                 ( this.parent ? ( this.parent.isUnderCanvasCache || this.parent.isInstanceCanvasCache || this.parent.isSharedCanvasCacheSelf ) : false );
@@ -324,17 +324,17 @@ define( require => {
         this.preferredRenderers = Renderer.pushOrderBitmask( this.preferredRenderers, hints.renderer );
       }
 
-      var hasClip = this.node.hasClipArea();
-      var hasTransparency = this.node.opacity !== 1 || hints.usesOpacity;
-      var requiresSplit = hints.requireElement || hints.cssTransform || hints.layerSplit;
-      var backboneRequired = this.isDisplayRoot || ( !this.isUnderCanvasCache && requiresSplit );
+      const hasClip = this.node.hasClipArea();
+      const hasTransparency = this.node.opacity !== 1 || hints.usesOpacity;
+      const requiresSplit = hints.requireElement || hints.cssTransform || hints.layerSplit;
+      const backboneRequired = this.isDisplayRoot || ( !this.isUnderCanvasCache && requiresSplit );
 
       // Support either "all Canvas" or "all SVG" opacity/clip
-      var applyTransparencyWithBlock = !backboneRequired &&
+      const applyTransparencyWithBlock = !backboneRequired &&
                                        ( hasTransparency || hasClip ) &&
                                        ( this.node._rendererSummary.isSubtreeRenderedExclusivelySVG( this.preferredRenderers ) ||
                                          this.node._rendererSummary.isSubtreeRenderedExclusivelyCanvas( this.preferredRenderers ) );
-      var useBackbone = applyTransparencyWithBlock ? false : ( backboneRequired || hasTransparency || hasClip );
+      const useBackbone = applyTransparencyWithBlock ? false : ( backboneRequired || hasTransparency || hasClip );
 
       // check if we need a backbone or cache
       // if we are under a canvas cache, we will NEVER have a backbone
@@ -383,9 +383,9 @@ define( require => {
           this.selfRenderer = Renderer.bitmaskCanvas;
         }
         else {
-          var supportedNodeBitmask = this.node._rendererBitmask;
+          let supportedNodeBitmask = this.node._rendererBitmask;
           if ( !this.isWebGLSupported ) {
-            var invalidBitmasks = Renderer.bitmaskWebGL;
+            const invalidBitmasks = Renderer.bitmaskWebGL;
             supportedNodeBitmask = supportedNodeBitmask ^ ( supportedNodeBitmask & invalidBitmasks );
           }
 
@@ -447,7 +447,7 @@ define( require => {
      * @returns A short string that contains a summary of the rendering state, for debugging/logging purposes.
      */
     getStateString: function() {
-      var result = 'S[ ' +
+      const result = 'S[ ' +
                    ( this.isDisplayRoot ? 'displayRoot ' : '' ) +
                    ( this.isBackbone ? 'backbone ' : '' ) +
                    ( this.isInstanceCanvasCache ? 'instanceCache ' : '' ) +
@@ -496,7 +496,7 @@ define( require => {
       // may access isTransformed up to root to determine relative trails
       assert && assert( !this.parent || !this.parent.stateless, 'We should not have a stateless parent instance' );
 
-      var wasStateless = this.stateless;
+      const wasStateless = this.stateless;
       if ( wasStateless ||
            ( this.parent && this.parent.cascadingStateChange ) || // if our parent had cascading state changes, we need to recompute
            ( this.renderStateDirtyFrame === this.display._frameId ) ) { // if our render state is dirty
@@ -543,12 +543,12 @@ define( require => {
         // mark fully-removed instances for disposal, and initialize child instances if we were stateless
         this.prepareChildInstances( wasStateless );
 
-        var oldFirstDrawable = this.firstDrawable;
-        var oldLastDrawable = this.lastDrawable;
-        var oldFirstInnerDrawable = this.firstInnerDrawable;
-        var oldLastInnerDrawable = this.lastInnerDrawable;
+        const oldFirstDrawable = this.firstDrawable;
+        const oldLastDrawable = this.lastDrawable;
+        const oldFirstInnerDrawable = this.firstInnerDrawable;
+        const oldLastInnerDrawable = this.lastInnerDrawable;
 
-        var selfChanged = this.updateSelfDrawable();
+        const selfChanged = this.updateSelfDrawable();
 
         // Synchronizes our children and self, with the drawables and change intervals of both combined
         this.localSyncTree( selfChanged );
@@ -583,35 +583,35 @@ define( require => {
      * and first/last drawable information.
      */
     localSyncTree: function( selfChanged ) {
-      var frameId = this.display._frameId;
+      const frameId = this.display._frameId;
 
       // local variables, since we can't overwrite our instance properties yet
-      var firstDrawable = this.selfDrawable; // possibly null
-      var currentDrawable = firstDrawable; // possibly null
+      let firstDrawable = this.selfDrawable; // possibly null
+      let currentDrawable = firstDrawable; // possibly null
 
       assert && assert( this.firstChangeInterval === null && this.lastChangeInterval === null,
         'sanity checks that cleanSyncTreeResults were called' );
 
-      var firstChangeInterval = null;
+      let firstChangeInterval = null;
       if ( selfChanged ) {
         sceneryLog && sceneryLog.ChangeInterval && sceneryLog.ChangeInterval( 'self' );
         sceneryLog && sceneryLog.ChangeInterval && sceneryLog.push();
         firstChangeInterval = ChangeInterval.newForDisplay( null, null, this.display );
         sceneryLog && sceneryLog.ChangeInterval && sceneryLog.pop();
       }
-      var currentChangeInterval = firstChangeInterval;
-      var lastUnchangedDrawable = selfChanged ? null : this.selfDrawable; // possibly null
+      let currentChangeInterval = firstChangeInterval;
+      let lastUnchangedDrawable = selfChanged ? null : this.selfDrawable; // possibly null
 
-      for ( var i = 0; i < this.children.length; i++ ) {
-        var childInstance = this.children[ i ];
+      for ( let i = 0; i < this.children.length; i++ ) {
+        let childInstance = this.children[ i ];
 
-        var isCompatible = childInstance.syncTree();
+        const isCompatible = childInstance.syncTree();
         if ( !isCompatible ) {
           childInstance = this.updateIncompatibleChildInstance( childInstance, i );
           childInstance.syncTree();
         }
 
-        var includeChildDrawables = childInstance.shouldIncludeInParentDrawables();
+        const includeChildDrawables = childInstance.shouldIncludeInParentDrawables();
 
         //OHTWO TODO: only strip out invisible Canvas drawables, while leaving SVG (since we can more efficiently hide
         // SVG trees, memory-wise)
@@ -640,8 +640,8 @@ define( require => {
                                                                               ' in ' + this.toString() );
         sceneryLog && sceneryLog.ChangeInterval && sceneryLog.push();
 
-        var wasIncluded = childInstance.stitchChangeIncluded;
-        var isIncluded = includeChildDrawables;
+        const wasIncluded = childInstance.stitchChangeIncluded;
+        const isIncluded = includeChildDrawables;
         childInstance.stitchChangeIncluded = isIncluded;
 
         sceneryLog && sceneryLog.ChangeInterval && sceneryLog.ChangeInterval( 'included: ' + wasIncluded + ' => ' + isIncluded );
@@ -661,10 +661,10 @@ define( require => {
             'If we do not have stitchChangeFrame activated, our inclusion should not have changed' );
         }
 
-        var firstChildChangeInterval = childInstance.firstChangeInterval;
-        var isBeforeOpen = currentChangeInterval && currentChangeInterval.drawableAfter === null;
-        var isAfterOpen = firstChildChangeInterval && firstChildChangeInterval.drawableBefore === null;
-        var needsBridge = childInstance.stitchChangeBefore === frameId && !isBeforeOpen && !isAfterOpen;
+        const firstChildChangeInterval = childInstance.firstChangeInterval;
+        let isBeforeOpen = currentChangeInterval && currentChangeInterval.drawableAfter === null;
+        const isAfterOpen = firstChildChangeInterval && firstChildChangeInterval.drawableBefore === null;
+        const needsBridge = childInstance.stitchChangeBefore === frameId && !isBeforeOpen && !isAfterOpen;
 
         // We need to insert an additional change interval (bridge) when we notice a link in the drawable linked list
         // where there were nodes that needed stitch changes that aren't still children, or were moved. We create a
@@ -673,7 +673,7 @@ define( require => {
           sceneryLog && sceneryLog.ChangeInterval && sceneryLog.ChangeInterval( 'bridge' );
           sceneryLog && sceneryLog.ChangeInterval && sceneryLog.push();
 
-          var bridge = ChangeInterval.newForDisplay( lastUnchangedDrawable, null, this.display );
+          const bridge = ChangeInterval.newForDisplay( lastUnchangedDrawable, null, this.display );
           if ( currentChangeInterval ) {
             currentChangeInterval.nextChangeInterval = bridge;
           }
@@ -737,7 +737,7 @@ define( require => {
         // if the last instance, check for post-bridge
         if ( i === this.children.length - 1 ) {
           if ( childInstance.stitchChangeAfter === frameId && !( currentChangeInterval && currentChangeInterval.drawableAfter === null ) ) {
-            var endingBridge = ChangeInterval.newForDisplay( lastUnchangedDrawable, null, this.display );
+            const endingBridge = ChangeInterval.newForDisplay( lastUnchangedDrawable, null, this.display );
             if ( currentChangeInterval ) {
               currentChangeInterval.nextChangeInterval = endingBridge;
             }
@@ -776,8 +776,8 @@ define( require => {
 
       // ensure that our firstDrawable and lastDrawable are correct
       if ( assertSlow ) {
-        var firstDrawableCheck = null;
-        for ( var j = 0; j < this.children.length; j++ ) {
+        let firstDrawableCheck = null;
+        for ( let j = 0; j < this.children.length; j++ ) {
           if ( this.children[ j ].shouldIncludeInParentDrawables() && this.children[ j ].firstDrawable ) {
             firstDrawableCheck = this.children[ j ].firstDrawable;
             break;
@@ -787,8 +787,8 @@ define( require => {
           firstDrawableCheck = this.selfDrawable;
         }
 
-        var lastDrawableCheck = this.selfDrawable;
-        for ( var k = this.children.length - 1; k >= 0; k-- ) {
+        let lastDrawableCheck = this.selfDrawable;
+        for ( let k = this.children.length - 1; k >= 0; k-- ) {
           if ( this.children[ k ].shouldIncludeInParentDrawables() && this.children[ k ].lastDrawable ) {
             lastDrawableCheck = this.children[ k ].lastDrawable;
             break;
@@ -807,7 +807,7 @@ define( require => {
      */
     updateSelfDrawable: function() {
       if ( this.node.isPainted() ) {
-        var selfRenderer = this.selfRenderer; // our new self renderer bitmask
+        const selfRenderer = this.selfRenderer; // our new self renderer bitmask
 
         // bitwise trick, since only one of Canvas/SVG/DOM/WebGL/etc. flags will be chosen, and bitmaskRendererArea is
         // the mask for those flags. In English, "Is the current selfDrawable compatible with our selfRenderer (if any),
@@ -838,7 +838,7 @@ define( require => {
     // returns the up-to-date instance
     updateIncompatibleChildInstance: function( childInstance, index ) {
       if ( sceneryLog && scenery.isLoggingPerformance() ) {
-        var affectedInstanceCount = childInstance.getDescendantCount() + 1; // +1 for itself
+        const affectedInstanceCount = childInstance.getDescendantCount() + 1; // +1 for itself
 
         if ( affectedInstanceCount > 100 ) {
           sceneryLog.PerfCritical && sceneryLog.PerfCritical( 'incompatible instance rebuild at ' + this.trail.toPathString() + ': ' + affectedInstanceCount );
@@ -855,20 +855,20 @@ define( require => {
       this.display.markInstanceRootForDisposal( childInstance );
 
       // swap in a new instance
-      var replacementInstance = Instance.createFromPool( this.display, this.trail.copy().addDescendant( childInstance.node, index ), false, false );
+      const replacementInstance = Instance.createFromPool( this.display, this.trail.copy().addDescendant( childInstance.node, index ), false, false );
       this.replaceInstanceWithIndex( childInstance, replacementInstance, index );
       return replacementInstance;
     },
 
     groupSyncTree: function( wasStateless ) {
-      var groupRenderer = this.groupRenderer;
+      const groupRenderer = this.groupRenderer;
       assert && assert( ( this.isBackbone ? 1 : 0 ) +
                         ( this.isInstanceCanvasCache ? 1 : 0 ) +
                         ( this.isSharedCanvasCacheSelf ? 1 : 0 ) === ( groupRenderer ? 1 : 0 ),
         'We should have precisely one of these flags set for us to have a groupRenderer' );
 
       // if we switched to/away from a group, our group type changed, or our group renderer changed
-      var groupChanged = ( !!groupRenderer !== !!this.groupDrawable ) ||
+      const groupChanged = ( !!groupRenderer !== !!this.groupDrawable ) ||
                          ( !wasStateless && this.groupChanged ) ||
                          ( this.groupDrawable && this.groupDrawable.renderer !== groupRenderer );
 
@@ -939,7 +939,7 @@ define( require => {
 
       this.ensureSharedCacheInitialized();
 
-      var sharedCacheRenderer = this.sharedCacheRenderer;
+      const sharedCacheRenderer = this.sharedCacheRenderer;
 
       if ( !this.sharedCacheDrawable || this.sharedCacheDrawable.renderer !== sharedCacheRenderer ) {
         //OHTWO TODO: mark everything as changed (big change interval)
@@ -964,7 +964,7 @@ define( require => {
     prepareChildInstances: function( wasStateless ) {
       // mark all removed instances to be disposed (along with their subtrees)
       while ( this.instanceRemovalCheckList.length ) {
-        var instanceToMark = this.instanceRemovalCheckList.pop();
+        const instanceToMark = this.instanceRemovalCheckList.pop();
         if ( instanceToMark.addRemoveCounter === -1 ) {
           instanceToMark.addRemoveCounter = 0; // reset it, so we don't mark it for disposal more than once
           this.display.markInstanceRootForDisposal( instanceToMark );
@@ -973,9 +973,9 @@ define( require => {
 
       if ( wasStateless ) {
         // we need to create all of the child instances
-        for ( var k = 0; k < this.node.children.length; k++ ) {
+        for ( let k = 0; k < this.node.children.length; k++ ) {
           // create a child instance
-          var child = this.node.children[ k ];
+          const child = this.node.children[ k ];
           this.appendInstance( Instance.createFromPool( this.display, this.trail.copy().addDescendant( child, k ), false, false ) );
         }
       }
@@ -984,7 +984,7 @@ define( require => {
     ensureSharedCacheInitialized: function() {
       // we only need to initialize this shared cache reference once
       if ( !this.sharedCacheInstance ) {
-        var instanceKey = this.node.getId();
+        const instanceKey = this.node.getId();
         // TODO: have this abstracted away in the Display?
         this.sharedCacheInstance = this.display._sharedCanvasInstances[ instanceKey ];
 
@@ -1017,8 +1017,8 @@ define( require => {
 
     // @private, finds the closest drawable (not including the child instance at childIndex) using lastDrawable, or null
     findPreviousDrawable: function( childIndex ) {
-      for ( var i = childIndex - 1; i >= 0; i-- ) {
-        var option = this.children[ i ].lastDrawable;
+      for ( let i = childIndex - 1; i >= 0; i-- ) {
+        const option = this.children[ i ].lastDrawable;
         if ( option !== null ) {
           return option;
         }
@@ -1029,9 +1029,9 @@ define( require => {
 
     // @private, finds the closest drawable (not including the child instance at childIndex) using nextDrawable, or null
     findNextDrawable: function( childIndex ) {
-      var len = this.children.length;
-      for ( var i = childIndex + 1; i < len; i++ ) {
-        var option = this.children[ i ].firstDrawable;
+      const len = this.children.length;
+      for ( let i = childIndex + 1; i < len; i++ ) {
+        const option = this.children[ i ].firstDrawable;
         if ( option !== null ) {
           return option;
         }
@@ -1102,7 +1102,7 @@ define( require => {
         'removing ' + instance.toString() + ' from ' + this.toString() );
       sceneryLog && sceneryLog.InstanceTree && sceneryLog.push();
 
-      var frameId = this.display._frameId;
+      const frameId = this.display._frameId;
 
       // mark it as changed during this frame, so that we can properly set the change interval
       instance.stitchChangeFrame = frameId;
@@ -1164,14 +1164,14 @@ define( require => {
       // then added them back in. There may be more efficient ways to do this, but the stitching and change interval
       // process is a bit complicated right now.
 
-      var frameId = this.display._frameId;
+      const frameId = this.display._frameId;
 
       // Remove the old ordering of instances
       this.children.splice( minChangeIndex, maxChangeIndex - minChangeIndex + 1 );
 
       // Add the instances back in the correct order
-      for ( var i = minChangeIndex; i <= maxChangeIndex; i++ ) {
-        var child = this.findChildInstanceOnNode( this.node._children[ i ] );
+      for ( let i = minChangeIndex; i <= maxChangeIndex; i++ ) {
+        const child = this.findChildInstanceOnNode( this.node._children[ i ] );
         this.children.splice( i, 0, child );
         child.stitchChangeFrame = frameId;
 
@@ -1193,8 +1193,8 @@ define( require => {
 
     // if we have a child instance that corresponds to this node, return it (otherwise null)
     findChildInstanceOnNode: function( node ) {
-      var instances = node.getInstances();
-      for ( var i = 0; i < instances.length; i++ ) {
+      const instances = node.getInstances();
+      for ( let i = 0; i < instances.length; i++ ) {
         if ( instances[ i ].oldParent === this ) {
           return instances[ i ];
         }
@@ -1210,7 +1210,7 @@ define( require => {
 
       assert && assert( !this.stateless, 'If we are stateless, we should not receive these notifications' );
 
-      var instance = this.findChildInstanceOnNode( childNode );
+      let instance = this.findChildInstanceOnNode( childNode );
 
       if ( instance ) {
         sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'instance already exists' );
@@ -1242,7 +1242,7 @@ define( require => {
       assert && assert( !this.stateless, 'If we are stateless, we should not receive these notifications' );
       assert && assert( this.children[ index ].node === childNode, 'Ensure that our instance matches up' );
 
-      var instance = this.findChildInstanceOnNode( childNode );
+      const instance = this.findChildInstanceOnNode( childNode );
       assert && assert( instance !== null, 'We should always have a reference to a removed instance' );
 
       instance.addRemoveCounter -= 1;
@@ -1329,17 +1329,17 @@ define( require => {
       }
 
       // calculate our visibilities
-      var nodeVisible = this.node.isVisible();
-      var wasVisible = this.visible;
-      var wasRelativeVisible = this.relativeVisible;
-      var wasSelfVisible = this.selfVisible;
+      const nodeVisible = this.node.isVisible();
+      const wasVisible = this.visible;
+      const wasRelativeVisible = this.relativeVisible;
+      const wasSelfVisible = this.selfVisible;
       this.visible = parentGloballyVisible && nodeVisible;
       this.relativeVisible = parentRelativelyVisible && nodeVisible;
       this.selfVisible = this.isVisibilityApplied ? true : this.relativeVisible;
 
-      var len = this.children.length;
-      for ( var i = 0; i < len; i++ ) {
-        var child = this.children[ i ];
+      const len = this.children.length;
+      for ( let i = 0; i < len; i++ ) {
+        const child = this.children[ i ];
 
         if ( updateFullSubtree || child.visibilityDirty || child.childVisibilityDirty ) {
           // if we are a visibility root (isVisibilityApplied===true), disregard ancestor visibility
@@ -1363,8 +1363,8 @@ define( require => {
     },
 
     getDescendantCount: function() {
-      var count = this.children.length;
-      for ( var i = 0; i < this.children.length; i++ ) {
+      let count = this.children.length;
+      for ( let i = 0; i < this.children.length; i++ ) {
         count += this.children[ i ].getDescendantCount();
       }
       return count;
@@ -1381,7 +1381,7 @@ define( require => {
 
     // remove a reference for an SVG group (fastest way to track them)
     removeSVGGroup: function( group ) {
-      var index = _.indexOf( this.svgGroups, group );
+      const index = _.indexOf( this.svgGroups, group );
       assert && assert( index >= 0, 'Tried to remove an SVGGroup from an Instance when it did not exist' );
 
       this.svgGroups.splice( index, 1 ); // TODO: remove function
@@ -1389,9 +1389,9 @@ define( require => {
 
     // returns null when a lookup fails (which is legitimate)
     lookupSVGGroup: function( block ) {
-      var len = this.svgGroups.length;
-      for ( var i = 0; i < len; i++ ) {
-        var group = this.svgGroups[ i ];
+      const len = this.svgGroups.length;
+      for ( let i = 0; i < len; i++ ) {
+        const group = this.svgGroups[ i ];
         if ( group.block === block ) {
           return group;
         }
@@ -1480,12 +1480,12 @@ define( require => {
     },
 
     getBranchIndexTo: function( instance ) {
-      var cachedValue = this.branchIndexMap[ instance.id ];
+      const cachedValue = this.branchIndexMap[ instance.id ];
       if ( cachedValue !== undefined ) {
         return cachedValue;
       }
 
-      var branchIndex = this.trail.getBranchIndexTo( instance.trail );
+      const branchIndex = this.trail.getBranchIndexTo( instance.trail );
       this.branchIndexMap[ instance.id ] = branchIndex;
       instance.branchIndexMap[ this.id ] = branchIndex;
       this.branchIndexReferences.push( instance );
@@ -1505,7 +1505,7 @@ define( require => {
 
       // Remove the bidirectional branch index reference data from this instance and any referenced instances.
       while ( this.branchIndexReferences.length ) {
-        var referenceInstance = this.branchIndexReferences.pop();
+        const referenceInstance = this.branchIndexReferences.pop();
         delete this.branchIndexMap[ referenceInstance.id ];
         delete referenceInstance.branchIndexMap[ this.id ];
         arrayRemove( referenceInstance.branchIndexReferences, this );
@@ -1517,14 +1517,14 @@ define( require => {
       this.selfDrawable && this.selfDrawable.disposeImmediately( this.display );
 
       // Dispose the rest of our subtree
-      var numChildren = this.children.length;
-      for ( var i = 0; i < numChildren; i++ ) {
+      const numChildren = this.children.length;
+      for ( let i = 0; i < numChildren; i++ ) {
         this.children[ i ].dispose();
       }
       // Check for child instances that were removed (we are still responsible for disposing them, since we didn't get
       // synctree to happen for them).
       while ( this.instanceRemovalCheckList.length ) {
-        var child = this.instanceRemovalCheckList.pop();
+        const child = this.instanceRemovalCheckList.pop();
 
         // they could have already been disposed, so we need a guard here
         if ( child.active ) {
@@ -1586,8 +1586,8 @@ define( require => {
           'Our addRemoveCounter should always be 0 at the end of syncTree' );
 
         // validate the subtree
-        for ( var i = 0; i < this.children.length; i++ ) {
-          var childInstance = this.children[ i ];
+        for ( let i = 0; i < this.children.length; i++ ) {
+          const childInstance = this.children[ i ];
 
           childInstance.audit( frameId, allowValidationNotNeededChecks );
         }
@@ -1601,14 +1601,14 @@ define( require => {
     // @public (scenery-internal) - Applies checks to make sure our visibility tracking is working as expected.
     auditVisibility: function( parentVisible ) {
       if ( assertSlow ) {
-        var visible = parentVisible && this.node.isVisible();
-        var trailVisible = this.trail.isVisible();
+        const visible = parentVisible && this.node.isVisible();
+        const trailVisible = this.trail.isVisible();
         assertSlow( visible === trailVisible, 'Trail visibility failure' );
         assertSlow( visible === this.visible, 'Visible flag failure' );
 
         // validate the subtree
-        for ( var i = 0; i < this.children.length; i++ ) {
-          var childInstance = this.children[ i ];
+        for ( let i = 0; i < this.children.length; i++ ) {
+          const childInstance = this.children[ i ];
 
           childInstance.auditVisibility( visible );
         }
@@ -1617,7 +1617,7 @@ define( require => {
 
     auditChangeIntervals: function( oldFirstDrawable, oldLastDrawable, newFirstDrawable, newLastDrawable ) {
       if ( oldFirstDrawable ) {
-        var oldOne = oldFirstDrawable;
+        let oldOne = oldFirstDrawable;
 
         // should hit, or will have NPE
         while ( oldOne !== oldLastDrawable ) {
@@ -1626,7 +1626,7 @@ define( require => {
       }
 
       if ( newFirstDrawable ) {
-        var newOne = newFirstDrawable;
+        let newOne = newFirstDrawable;
 
         // should hit, or will have NPE
         while ( newOne !== newLastDrawable ) {
@@ -1648,8 +1648,8 @@ define( require => {
       }
 
       if ( assertSlow ) {
-        var firstChangeInterval = this.firstChangeInterval;
-        var lastChangeInterval = this.lastChangeInterval;
+        const firstChangeInterval = this.firstChangeInterval;
+        const lastChangeInterval = this.lastChangeInterval;
 
         if ( !firstChangeInterval || firstChangeInterval.drawableBefore !== null ) {
           assertSlow( oldFirstDrawable === newFirstDrawable,
@@ -1680,9 +1680,9 @@ define( require => {
           }
 
           // between change intervals (should always be guaranteed to be fixed)
-          var interval = firstChangeInterval;
+          let interval = firstChangeInterval;
           while ( interval && interval.nextChangeInterval ) {
-            var nextInterval = interval.nextChangeInterval;
+            const nextInterval = interval.nextChangeInterval;
 
             assertSlow( interval.drawableAfter !== null );
             assertSlow( nextInterval.drawableBefore !== null );

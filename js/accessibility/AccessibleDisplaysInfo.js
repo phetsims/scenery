@@ -88,8 +88,8 @@ define( require => {
 
       // If we are invisible, our accessibleDisplays would not have changed ([] => [])
       if ( this.node.visible && this.node.accessibleVisible ) {
-        var wasAccessible = !( Renderer.bitmaskNotAccessible & oldBitmask );
-        var isAccessible = !( Renderer.bitmaskNotAccessible & newBitmask );
+        const wasAccessible = !( Renderer.bitmaskNotAccessible & oldBitmask );
+        const isAccessible = !( Renderer.bitmaskNotAccessible & newBitmask );
 
         // If we changed to be accessible, we need to recursively add accessible displays.
         if ( isAccessible && !wasAccessible ) {
@@ -206,8 +206,8 @@ define( require => {
       assert && assert( this.accessibleDisplays.length === 0, 'Should be empty before adding everything' );
       assert && assert( this.canHaveAccessibleDisplays(), 'Should happen when we can store accessibleDisplays' );
 
-      var i;
-      var displays = [];
+      let i;
+      const displays = [];
 
       // Concatenation of our parents' accessibleDisplays
       for ( i = 0; i < this.node._parents.length; i++ ) {
@@ -216,7 +216,7 @@ define( require => {
 
       // AND any acessible displays rooted at this node
       for ( i = 0; i < this.node._rootedDisplays.length; i++ ) {
-        var display = this.node._rootedDisplays[ i ];
+        const display = this.node._rootedDisplays[ i ];
         if ( display._accessible ) {
           displays.push( display );
         }
@@ -262,8 +262,8 @@ define( require => {
         Array.prototype.push.apply( this.accessibleDisplays, displays );
 
         // Propagate the change to our children
-        for ( var i = 0; i < this.node._children.length; i++ ) {
-          var child = this.node._children[ i ];
+        for ( let i = 0; i < this.node._children.length; i++ ) {
+          const child = this.node._children[ i ];
           if ( child._accessibleDisplaysInfo.canHaveAccessibleDisplays() ) {
             this.node._children[ i ]._accessibleDisplaysInfo.addAccessibleDisplays( displays );
           }
@@ -290,17 +290,17 @@ define( require => {
 
       // Simplifies things if we can stop no-ops here.
       if ( displays.length !== 0 ) {
-        var i;
+        let i;
 
         for ( i = displays.length - 1; i >= 0; i-- ) {
-          var index = this.accessibleDisplays.lastIndexOf( displays[ i ] );
+          const index = this.accessibleDisplays.lastIndexOf( displays[ i ] );
           assert && assert( index >= 0 );
           this.accessibleDisplays.splice( i, 1 );
         }
 
         // Propagate the change to our children
         for ( i = 0; i < this.node._children.length; i++ ) {
-          var child = this.node._children[ i ];
+          const child = this.node._children[ i ];
           // NOTE: Since this gets called many times from the RendererSummary (which happens before the actual child
           // modification happens), we DO NOT want to traverse to the child node getting removed. Ideally a better
           // solution than this flag should be found.

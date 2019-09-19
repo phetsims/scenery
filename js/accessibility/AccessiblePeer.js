@@ -25,26 +25,26 @@ define( require => {
   // const Display = require( 'SCENERY/display/Display' );
 
   // constants
-  var PRIMARY_SIBLING = 'PRIMARY_SIBLING';
-  var LABEL_SIBLING = 'LABEL_SIBLING';
-  var DESCRIPTION_SIBLING = 'DESCRIPTION_SIBLING';
-  var CONTAINER_PARENT = 'CONTAINER_PARENT';
-  var LABEL_TAG = AccessibilityUtil.TAGS.LABEL;
-  var INPUT_TAG = AccessibilityUtil.TAGS.INPUT;
+  const PRIMARY_SIBLING = 'PRIMARY_SIBLING';
+  const LABEL_SIBLING = 'LABEL_SIBLING';
+  const DESCRIPTION_SIBLING = 'DESCRIPTION_SIBLING';
+  const CONTAINER_PARENT = 'CONTAINER_PARENT';
+  const LABEL_TAG = AccessibilityUtil.TAGS.LABEL;
+  const INPUT_TAG = AccessibilityUtil.TAGS.INPUT;
 
   // DOM observers that apply new CSS transformations are triggered when children, or inner content change. Updating
   // style/positioning of the element will change attributes so we can't observe those changes since it would trigger
   // the MutationObserver infinitely.
-  var OBSERVER_CONFIG = { attributes: false, childList: true, characterData: true };
+  const OBSERVER_CONFIG = { attributes: false, childList: true, characterData: true };
 
-  var globalId = 1;
+  let globalId = 1;
 
   // mutables instances to avoid creating many in operations that occur frequently
-  var scratchGlobalBounds = new Bounds2( 0, 0, 0, 0 );
-  var scratchSiblingBounds = new Bounds2( 0, 0, 0, 0 );
-  var globalNodeTranslationMatrix = new Matrix3();
-  var globalToClientScaleMatrix = new Matrix3();
-  var nodeScaleMagnitudeMatrix = new Matrix3();
+  const scratchGlobalBounds = new Bounds2( 0, 0, 0, 0 );
+  const scratchSiblingBounds = new Bounds2( 0, 0, 0, 0 );
+  const globalNodeTranslationMatrix = new Matrix3();
+  const globalToClientScaleMatrix = new Matrix3();
+  const nodeScaleMagnitudeMatrix = new Matrix3();
 
   /**
    * @param {AccessibleInstance} accessibleInstance
@@ -169,9 +169,9 @@ define( require => {
      * @public (scenery-internal)
      */
     update: function() {
-      var uniqueId = this.accessibleInstance.trail.getUniqueId();
+      const uniqueId = this.accessibleInstance.trail.getUniqueId();
 
-      var options = this.node.getBaseOptions();
+      let options = this.node.getBaseOptions();
 
       if ( this.node.accessibleName !== null ) {
         options = this.node.accessibleNameBehavior( this.node, options, this.node.accessibleName );
@@ -330,8 +330,8 @@ define( require => {
     onAriaLabelledbyAssociationChange: function() {
       this.removeAttributeFromAllElements( 'aria-labelledby' );
 
-      for ( var i = 0; i < this.node.ariaLabelledbyAssociations.length; i++ ) {
-        var associationObject = this.node.ariaLabelledbyAssociations[ i ];
+      for ( let i = 0; i < this.node.ariaLabelledbyAssociations.length; i++ ) {
+        const associationObject = this.node.ariaLabelledbyAssociations[ i ];
 
         // Assert out if the model list is different than the data held in the associationObject
         assert && assert( associationObject.otherNode.nodesThatAreAriaLabelledbyThisNode.indexOf( this.node ) >= 0,
@@ -349,8 +349,8 @@ define( require => {
     onAriaDescribedbyAssociationChange: function() {
       this.removeAttributeFromAllElements( 'aria-describedby' );
 
-      for ( var i = 0; i < this.node.ariaDescribedbyAssociations.length; i++ ) {
-        var associationObject = this.node.ariaDescribedbyAssociations[ i ];
+      for ( let i = 0; i < this.node.ariaDescribedbyAssociations.length; i++ ) {
+        const associationObject = this.node.ariaDescribedbyAssociations[ i ];
 
         // Assert out if the model list is different than the data held in the associationObject
         assert && assert( associationObject.otherNode.nodesThatAreAriaDescribedbyThisNode.indexOf( this.node ) >= 0,
@@ -368,8 +368,8 @@ define( require => {
     onActiveDescendantAssociationChange: function() {
       this.removeAttributeFromAllElements( 'aria-activedescendant' );
 
-      for ( var i = 0; i < this.node.activeDescendantAssociations.length; i++ ) {
-        var associationObject = this.node.activeDescendantAssociations[ i ];
+      for ( let i = 0; i < this.node.activeDescendantAssociations.length; i++ ) {
+        const associationObject = this.node.activeDescendantAssociations[ i ];
 
         // Assert out if the model list is different than the data held in the associationObject
         assert && assert( associationObject.otherNode.nodesThatAreActiveDescendantToThisNode.indexOf( this.node ) >= 0,
@@ -388,10 +388,10 @@ define( require => {
      */
     onAttributeChange: function( a11yOptions ) {
 
-      for ( var i = 0; i < this.node.accessibleAttributes.length; i++ ) {
-        var dataObject = this.node.accessibleAttributes[ i ];
-        var attribute = dataObject.attribute;
-        var value = dataObject.value;
+      for ( let i = 0; i < this.node.accessibleAttributes.length; i++ ) {
+        const dataObject = this.node.accessibleAttributes[ i ];
+        const attribute = dataObject.attribute;
+        let value = dataObject.value;
 
         // allow overriding of aria-label for accessibleName setter
         if ( attribute === 'aria-label' && a11yOptions && typeof a11yOptions.ariaLabel === 'string' && dataObject.options.elementName === PRIMARY_SIBLING ) {
@@ -417,7 +417,7 @@ define( require => {
       else {
 
         // type conversion for DOM spec
-        var valueString = this.node.inputValue + '';
+        const valueString = this.node.inputValue + '';
         this.setAttributeToElement( 'value', valueString, { asProperty: true } );
       }
     },
@@ -470,7 +470,7 @@ define( require => {
         element: null
       }, options );
 
-      var element = options.element || this.getElementByName( options.elementName );
+      const element = options.element || this.getElementByName( options.elementName );
 
       if ( options.namespace ) {
         element.setAttributeNS( options.namespace, attribute, attributeValue );
@@ -503,7 +503,7 @@ define( require => {
         element: null
       }, options );
 
-      var element = options.element || this.getElementByName( options.elementName );
+      const element = options.element || this.getElementByName( options.elementName );
 
       if ( options.namespace ) {
         element.removeAttributeNS( options.namespace, attribute );
@@ -537,7 +537,7 @@ define( require => {
         'unsupported attribute for setting with association object: ' + attribute );
       assert && AccessibilityUtil.validateAssociationObject( associationObject );
 
-      var otherNodeAccessibleInstances = associationObject.otherNode.getAccessibleInstances();
+      const otherNodeAccessibleInstances = associationObject.otherNode.getAccessibleInstances();
 
       // If the other node hasn't been added to the scene graph yet, it won't have any accessible instances, so no op.
       // This will be recalculated when that node is added to the scene graph
@@ -546,7 +546,7 @@ define( require => {
         // We are just using the first AccessibleInstance for simplicity, but it is OK because the accessible
         // content for all AccessibleInstances will be the same, so the Accessible Names (in the browser's
         // accessibility tree) of elements that are referenced by the attribute value id will all have the same content
-        var firstAccessibleInstance = otherNodeAccessibleInstances[ 0 ];
+        const firstAccessibleInstance = otherNodeAccessibleInstances[ 0 ];
 
         // Handle a case where you are associating to yourself, and the peer has not been constructed yet.
         if ( firstAccessibleInstance === this.accessibleInstance ) {
@@ -556,9 +556,9 @@ define( require => {
         assert && assert( firstAccessibleInstance.peer, 'peer should exist' );
 
         // we can use the same element's id to update all of this Node's peers
-        var otherPeerElement = firstAccessibleInstance.peer.getElementByName( associationObject.otherElementName );
+        const otherPeerElement = firstAccessibleInstance.peer.getElementByName( associationObject.otherElementName );
 
-        var element = this.getElementByName( associationObject.thisElementName );
+        const element = this.getElementByName( associationObject.thisElementName );
 
         // to support any option order, no-op if the peer element has not been created yet.
         if ( element && otherPeerElement ) {
@@ -566,10 +566,10 @@ define( require => {
           // only update associations if the requested peer element has been created
           // NOTE: in the future, we would like to verify that the association exists but can't do that yet because
           // we have to support cases where we set label association prior to setting the sibling/parent tagName
-          var previousAttributeValue = element.getAttribute( attribute ) || '';
+          const previousAttributeValue = element.getAttribute( attribute ) || '';
           assert && assert( typeof previousAttributeValue === 'string' );
 
-          var newAttributeValue = [ previousAttributeValue.trim(), otherPeerElement.id ].join( ' ' ).trim();
+          const newAttributeValue = [ previousAttributeValue.trim(), otherPeerElement.id ].join( ' ' ).trim();
 
           // add the id from the new association to the value of the HTMLElement's attribute.
           this.setAttributeToElement( attribute, newAttributeValue, {
@@ -612,10 +612,10 @@ define( require => {
 
         // keep this.topLevelElements in sync
         arrayRemove( this.topLevelElements, contentElement );
-        var indexOfPrimarySibling = this.topLevelElements.indexOf( this._primarySibling );
+        const indexOfPrimarySibling = this.topLevelElements.indexOf( this._primarySibling );
 
         // if appending, just insert at at end of the top level elements
-        var insertIndex = appendElement ? this.topLevelElements.length : indexOfPrimarySibling;
+        const insertIndex = appendElement ? this.topLevelElements.length : indexOfPrimarySibling;
         this.topLevelElements.splice( insertIndex, 0, contentElement );
       }
     },
@@ -629,7 +629,7 @@ define( require => {
     isVisible: function() {
       if ( assert ) {
 
-        var visibleElements = 0;
+        let visibleElements = 0;
         this.topLevelElements.forEach( function( element ) {
 
           // support property or attribute
@@ -655,8 +655,8 @@ define( require => {
       if ( this.visible !== visible ) {
 
         this.visible = visible;
-        for ( var i = 0; i < this.topLevelElements.length; i++ ) {
-          var element = this.topLevelElements[ i ];
+        for ( let i = 0; i < this.topLevelElements.length; i++ ) {
+          const element = this.topLevelElements[ i ];
           if ( visible ) {
             this.removeAttributeFromElement( 'hidden', { element: element } );
           }
@@ -701,7 +701,7 @@ define( require => {
         // Workaround for a bug in IE11 in Fullscreen mode where document.activeElement.blur() errors out with
         // "Invalid Function". A delay seems to be a common workaround for IE11, see
         // https://stackoverflow.com/questions/2600186/focus-doesnt-work-in-ie
-        var self = this;
+        const self = this;
         if ( platform.ie11 && FullScreen.isFullScreen() ) {
           window.setTimeout( function() {
 
@@ -811,7 +811,7 @@ define( require => {
 
         // mark all ancestors of this peer so that we can quickly find this dirty peer when we traverse
         // the AccessibleInstance tree
-        var parent = this.accessibleInstance.parent;
+        let parent = this.accessibleInstance.parent;
         while ( parent ) {
           parent.peer.childPositionDirty = true;
           parent = parent.parent;
@@ -866,9 +866,9 @@ define( require => {
         if ( scratchGlobalBounds.isFinite() ) {
           scratchGlobalBounds.transform( this.accessibleInstance.transformTracker.getMatrix() );
 
-          var clientDimensions = getClientDimensions( this._primarySibling );
-          var clientWidth = clientDimensions.width;
-          var clientHeight = clientDimensions.height;
+          let clientDimensions = getClientDimensions( this._primarySibling );
+          let clientWidth = clientDimensions.width;
+          let clientHeight = clientDimensions.height;
 
           if ( clientWidth > 0 && clientHeight > 0 ) {
             scratchSiblingBounds.setMinMax( 0, 0, clientWidth, clientHeight );
@@ -906,8 +906,8 @@ define( require => {
         this.positionElements();
       }
 
-      for ( var i = 0; i < this.accessibleInstance.children.length; i++ ) {
-        var childPeer = this.accessibleInstance.children[ i ].peer;
+      for ( let i = 0; i < this.accessibleInstance.children.length; i++ ) {
+        const childPeer = this.accessibleInstance.children[ i ].peer;
         if ( childPeer.positionDirty || childPeer.childPositionDirty ) {
           this.accessibleInstance.children[ i ].peer.updateSubtreePositioning();
         }
@@ -1021,11 +1021,11 @@ define( require => {
    * @returns {Object} - Returns an object with two entries, { width: {number}, height: {number} }
    */
   function getClientDimensions( siblingElement ) {
-    var clientWidth = siblingElement.clientWidth;
-    var clientHeight = siblingElement.clientHeight;
+    let clientWidth = siblingElement.clientWidth;
+    let clientHeight = siblingElement.clientHeight;
 
     if ( clientWidth === 0 && clientHeight === 0 ) {
-      var clientRect = siblingElement.getBoundingClientRect();
+      const clientRect = siblingElement.getBoundingClientRect();
       clientWidth = clientRect.width;
       clientHeight = clientRect.height;
     }

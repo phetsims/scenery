@@ -24,7 +24,7 @@ define( require => {
    */
   function Reader( cursor ) {
 
-    var self = this;
+    const self = this;
 
     // @public, listen only, emits an event when the synth begins speaking the utterance
     this.speakingStartedEmitter = new Emitter( { parameters: [ { valueType: Object } ] } )
@@ -41,9 +41,9 @@ define( require => {
 
     // windows Chrome needs a temporary workaround to avoid skipping every other utterance
     // TODO: Use platform.js and revisit once platforms fix their bugs
-    var userAgent = navigator.userAgent;
-    var osWindows = userAgent.match( /Windows/ );
-    var platSafari = !!( userAgent.match( /Version\/[5-9]\./ ) && userAgent.match( /Safari\// ) && userAgent.match( /AppleWebKit/ ) );
+    const userAgent = navigator.userAgent;
+    const osWindows = userAgent.match( /Windows/ );
+    const platSafari = !!( userAgent.match( /Version\/[5-9]\./ ) && userAgent.match( /Safari\// ) && userAgent.match( /AppleWebKit/ ) );
 
     if ( window.speechSynthesis && SpeechSynthesisUtterance && window.speechSynthesis.speak ) {
 
@@ -53,7 +53,7 @@ define( require => {
       cursor.outputUtteranceProperty.link( function( outputUtterance ) {
 
         // create a new utterance
-        var utterThis = new SpeechSynthesisUtterance( outputUtterance.text );
+        const utterThis = new SpeechSynthesisUtterance( outputUtterance.text );
 
         utterThis.addEventListener( 'start', function( event ) {
           self.speakingStartedEmitter.emit( outputUtterance );
@@ -64,7 +64,7 @@ define( require => {
         } );
 
         // get the default voice
-        var defaultVoice;
+        let defaultVoice;
         self.synth.getVoices().forEach( function( voice ) {
           if ( voice.default ) {
             defaultVoice = voice;
@@ -111,9 +111,9 @@ define( require => {
           if ( platSafari ) {
             self.politeUtterances.push( utterThis );
 
-            var readPolite = function() {
+            const readPolite = function() {
               self.speaking = true;
-              var nextUtterance = self.politeUtterances.shift();
+              const nextUtterance = self.politeUtterances.shift();
               if ( nextUtterance ) {
                 self.synth.speak( nextUtterance );
               }
@@ -130,7 +130,7 @@ define( require => {
             else {
               self.synth.speak( utterThis );
               // remove from queue
-              var index = self.politeUtterances.indexOf( utterThis );
+              const index = self.politeUtterances.indexOf( utterThis );
               if ( index > 0 ) {
                 self.politeUtterances.splice( index, 1 );
               }

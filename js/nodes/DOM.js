@@ -17,7 +17,7 @@ define( require => {
   const Renderer = require( 'SCENERY/display/Renderer' );
   const scenery = require( 'SCENERY/scenery' );
 
-  var DOM_OPTION_KEYS = [
+  const DOM_OPTION_KEYS = [
     'element', // {HTMLElement} - Sets the element, see setElement() for more documentation
     'preventTransform' // {boolean} - Sets whether Scenery is allowed to transform the element. see setPreventTransform() for docs
   ];
@@ -97,7 +97,7 @@ define( require => {
      * @returns {Bounds2}
      */
     calculateDOMBounds: function() {
-      var $element = $( this._element );
+      const $element = $( this._element );
       return new Bounds2( 0, 0, $element.width(), $element.height() );
     },
 
@@ -116,7 +116,7 @@ define( require => {
       this.invalidateDOMLock = true;
 
       // we will place ourselves in a temporary container to get our real desired bounds
-      var temporaryContainer = document.createElement( 'div' );
+      const temporaryContainer = document.createElement( 'div' );
       $( temporaryContainer ).css( {
         display: 'hidden',
         padding: '0 !important',
@@ -134,7 +134,7 @@ define( require => {
       document.body.appendChild( temporaryContainer );
 
       // bounds computation and resize our container to fit precisely
-      var selfBounds = this.calculateDOMBounds();
+      const selfBounds = this.calculateDOMBounds();
       this.invalidateSelf( selfBounds );
       this._$container.width( selfBounds.getWidth() );
       this._$container.height( selfBounds.getHeight() );

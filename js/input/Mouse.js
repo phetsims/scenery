@@ -42,7 +42,7 @@ define( require => {
   inherit( Pointer, Mouse, {
 
     down: function( point, event ) {
-      var pointChanged = this.hasPointChanged( point );
+      const pointChanged = this.hasPointChanged( point );
       point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'mouse down at ' + point.toString() );
       // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
@@ -64,7 +64,7 @@ define( require => {
     },
 
     up: function( point, event ) {
-      var pointChanged = this.hasPointChanged( point );
+      const pointChanged = this.hasPointChanged( point );
       point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'mouse up at ' + point.toString() );
       // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
@@ -86,7 +86,7 @@ define( require => {
     },
 
     move: function( point, event ) {
-      var pointChanged = this.hasPointChanged( point );
+      const pointChanged = this.hasPointChanged( point );
       point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'mouse move at ' + point.toString() );
       // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
@@ -94,7 +94,7 @@ define( require => {
     },
 
     over: function( point, event ) {
-      var pointChanged = this.hasPointChanged( point );
+      const pointChanged = this.hasPointChanged( point );
       point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'mouse over at ' + point.toString() );
       // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
@@ -102,7 +102,7 @@ define( require => {
     },
 
     out: function( point, event ) {
-      var pointChanged = this.hasPointChanged( point );
+      const pointChanged = this.hasPointChanged( point );
       point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'mouse out at ' + point.toString() );
       // if ( this.point ) { this.point.freeToPool(); }
       // TODO: how to handle the mouse out-of-bounds

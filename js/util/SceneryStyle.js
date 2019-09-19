@@ -12,11 +12,11 @@ define( require => {
 
   const scenery = require( 'SCENERY/scenery' );
 
-  var styleElement = document.createElement( 'style' );
+  const styleElement = document.createElement( 'style' );
   styleElement.type = 'text/css';
   document.head.appendChild( styleElement );
 
-  var stylesheet = document.styleSheets[ document.styleSheets.length - 1 ];
+  const stylesheet = document.styleSheets[ document.styleSheets.length - 1 ];
   assert && assert( stylesheet.disabled === false );
 
   return scenery.register( 'SceneryStyle', {

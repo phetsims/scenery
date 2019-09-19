@@ -29,7 +29,7 @@ define( require => {
   const TextSVGDrawable = require( 'SCENERY/display/drawables/TextSVGDrawable' );
 
   // constants
-  var TEXT_OPTION_KEYS = [
+  const TEXT_OPTION_KEYS = [
     'boundsMethod', // {string} - Sets how bounds are determined for text, see setBoundsMethod() for more documentation
     'text', // {string|number} - Sets the text to be displayed, see setText() for more documentation
     'font', // {Font|string} - Sets the font used for the text, see setFont() for more documentation
@@ -44,7 +44,7 @@ define( require => {
   // fast iteration, we'll guess the user agent and use DOM bounds instead of SVG.
   // Hopefully the two contraints rule out any future Safari versions (fairly safe, but not impossible!)
   // @private {boolean}
-  var useDOMAsFastBounds = window.navigator.userAgent.indexOf( 'like Gecko) Version/5' ) !== -1 &&
+  const useDOMAsFastBounds = window.navigator.userAgent.indexOf( 'like Gecko) Version/5' ) !== -1 &&
                            window.navigator.userAgent.indexOf( 'Safari/' ) !== -1;
 
   /**
@@ -129,12 +129,12 @@ define( require => {
       text = '' + text;
 
       if ( text !== this._text ) {
-        var oldText = this._text;
+        const oldText = this._text;
         this._text = text;
         this._cachedRenderedText = null;
 
-        var stateLen = this._drawables.length;
-        for ( var i = 0; i < stateLen; i++ ) {
+        const stateLen = this._drawables.length;
+        for ( let i = 0; i < stateLen; i++ ) {
           this._drawables[ i ].markDirtyText();
         }
 
@@ -208,8 +208,8 @@ define( require => {
         this._boundsMethod = method;
         this.invalidateSupportedRenderers();
 
-        var stateLen = this._drawables.length;
-        for ( var i = 0; i < stateLen; i++ ) {
+        const stateLen = this._drawables.length;
+        for ( let i = 0; i < stateLen; i++ ) {
           this._drawables[ i ].markDirtyBounds();
         }
 
@@ -241,7 +241,7 @@ define( require => {
      * @returns {number} - A bitmask that includes supported renderers, see Renderer for details.
      */
     getTextRendererBitmask: function() {
-      var bitmask = 0;
+      let bitmask = 0;
 
       // canvas support (fast bounds may leak out of dirty rectangles)
       if ( this._boundsMethod !== 'fast' && !this._isHTML ) {
@@ -276,8 +276,8 @@ define( require => {
       this.invalidateSelf();
 
       // TODO: consider replacing this with a general dirty flag notification, and have DOM update bounds every frame?
-      var stateLen = this._drawables.length;
-      for ( var i = 0; i < stateLen; i++ ) {
+      const stateLen = this._drawables.length;
+      for ( let i = 0; i < stateLen; i++ ) {
         this._drawables[ i ].markDirtyBounds();
       }
 
@@ -294,7 +294,7 @@ define( require => {
      */
     updateSelfBounds: function() {
       // TODO: don't create another Bounds2 object just for this!
-      var selfBounds;
+      let selfBounds;
 
       // investigate http://mudcu.be/journal/2011/01/html5-typographic-metrics/
       if ( this._isHTML || ( useDOMAsFastBounds && this._boundsMethod !== 'accurate' ) ) {
@@ -316,7 +316,7 @@ define( require => {
         selfBounds.dilate( this.getLineWidth() / 2 );
       }
 
-      var changed = !selfBounds.equals( this._selfBounds );
+      const changed = !selfBounds.equals( this._selfBounds );
       if ( changed ) {
         this._selfBounds.set( selfBounds );
       }
@@ -406,7 +406,7 @@ define( require => {
      */
     getDOMTextNode: function() {
       if ( this._isHTML ) {
-        var span = document.createElement( 'span' );
+        const span = document.createElement( 'span' );
         span.innerHTML = this._text;
         return span;
       }
@@ -427,9 +427,9 @@ define( require => {
      * @returns {Bounds2}
      */
     getSafeSelfBounds: function() {
-      var expansionFactor = 1; // we use a new bounding box with a new size of size * ( 1 + 2 * expansionFactor )
+      const expansionFactor = 1; // we use a new bounding box with a new size of size * ( 1 + 2 * expansionFactor )
 
-      var selfBounds = this.getSelfBounds();
+      const selfBounds = this.getSelfBounds();
 
       // NOTE: we'll keep this as an estimate for the bounds including stroke miters
       return selfBounds.dilatedXY( expansionFactor * selfBounds.width, expansionFactor * selfBounds.height );
@@ -452,13 +452,13 @@ define( require => {
 
       // We need to detect whether things have updated in a different way depending on whether we are passed a string
       // or a Font object.
-      var changed = font !== ( ( typeof font === 'string' ) ? this._font.toCSS() : this._font );
+      const changed = font !== ( ( typeof font === 'string' ) ? this._font.toCSS() : this._font );
       if ( changed ) {
         // Wrap so that our _font is of type {Font}
         this._font = ( typeof font === 'string' ) ? Font.fromCSS( font ) : font;
 
-        var stateLen = this._drawables.length;
-        for ( var i = 0; i < stateLen; i++ ) {
+        const stateLen = this._drawables.length;
+        for ( let i = 0; i < stateLen; i++ ) {
           this._drawables[ i ].markDirtyFont();
         }
 
@@ -674,9 +674,9 @@ define( require => {
 
   // Unicode embedding marks that we can combine to work around the Edge issue.
   // See https://github.com/phetsims/scenery/issues/520
-  var LTR = '\u202a';
-  var RTL = '\u202b';
-  var POP = '\u202c';
+  const LTR = '\u202a';
+  const RTL = '\u202b';
+  const POP = '\u202c';
 
   /**
    * Replaces embedding mark characters with visible strings. Useful for debugging for strings with embedding marks.
@@ -717,18 +717,18 @@ define( require => {
     // become a node with their interiors becoming children.
 
     // Root node (no direction, so we preserve root LTR/RTLs)
-    var root = {
+    const root = {
       dir: null,
       children: [],
       parent: null
     };
-    var current = root;
-    for ( var i = 0; i < string.length; i++ ) {
-      var chr = string.charAt( i );
+    let current = root;
+    for ( let i = 0; i < string.length; i++ ) {
+      const chr = string.charAt( i );
 
       // Push a direction
       if ( chr === LTR || chr === RTL ) {
-        var node = {
+        const node = {
           dir: chr,
           children: [],
           parent: current
@@ -750,8 +750,8 @@ define( require => {
 
     // Remove redundant nesting (e.g. [LTR][LTR]...[POP][POP])
     function collapseNesting( node ) {
-      for ( var i = node.children.length - 1; i >= 0; i-- ) {
-        var child = node.children[ i ];
+      for ( let i = node.children.length - 1; i >= 0; i-- ) {
+        const child = node.children[ i ];
         if ( node.dir === child.dir ) {
           Array.prototype.splice.apply( node.children, [ i, 1 ].concat( child.children ) );
         }
@@ -768,9 +768,9 @@ define( require => {
 
     // Collapse adjacent matching dirs, e.g. [LTR]...[POP][LTR]...[POP]
     function collapseAdjacent( node ) {
-      for ( var i = node.children.length - 1; i >= 1; i-- ) {
-        var previousChild = node.children[ i - 1 ];
-        var child = node.children[ i ];
+      for ( let i = node.children.length - 1; i >= 1; i-- ) {
+        const previousChild = node.children[ i - 1 ];
+        const child = node.children[ i ];
         if ( child.dir && previousChild.dir === child.dir ) {
           previousChild.children = previousChild.children.concat( child.children );
           node.children.splice( i, 1 );
@@ -787,7 +787,7 @@ define( require => {
         return;
       }
 
-      for ( var i = 0; i < node.children.length; i++ ) {
+      for ( let i = 0; i < node.children.length; i++ ) {
         simplify( node.children[ i ] );
       }
 
@@ -803,7 +803,7 @@ define( require => {
       if ( typeof node === 'string' ) {
         return node;
       }
-      var childString = node.children.map( stringify ).join( '' );
+      const childString = node.children.map( stringify ).join( '' );
       if ( node.dir ) {
         return node.dir + childString + '\u202c';
       }

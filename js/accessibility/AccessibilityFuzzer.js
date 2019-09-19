@@ -60,15 +60,15 @@ define( require => {
      * @public
      */
     step: function() {
-      var action = this.random.sample( this.enumerateActions() );
+      const action = this.random.sample( this.enumerateActions() );
       this.logToConsole && console.log( action.text );
       this.actionsTaken.push( action );
       action.execute();
       this.display._rootAccessibleInstance.auditRoot();
       AccessibilityTree.auditAccessibleDisplays( this.display.rootNode );
       if ( this.logToConsole ) {
-        for ( var i = 0; i < this.nodes.length; i++ ) {
-          var node = this.nodes[ i ];
+        for ( let i = 0; i < this.nodes.length; i++ ) {
+          const node = this.nodes[ i ];
           console.log( i + '#' + node.id + ' ' + node.tagName + ' ch:' + AccessibilityTree.debugOrder( node.children ) + ' or:' + AccessibilityTree.debugOrder( node.accessibleOrder ) + ' vis:' + node.visible + ' avis:' + node.accessibleVisible );
         }
       }
@@ -81,8 +81,8 @@ define( require => {
      * @returns {Array.<Object>} - like { text: {string}, execute: {function} }
      */
     enumerateActions: function() {
-      var self = this;
-      var actions = [];
+      const self = this;
+      const actions = [];
 
       this.nodes.forEach( function( a ) {
         actions.push( {
@@ -171,7 +171,7 @@ define( require => {
         return [ [] ];
       }
       else {
-        var lists = this.powerSet( list.slice( 1 ) );
+        const lists = this.powerSet( list.slice( 1 ) );
         return lists.concat( lists.map( function( subList ) {
           return [ list[ 0 ] ].concat( subList );
         } ) );
@@ -186,7 +186,7 @@ define( require => {
      * @param {Array.<Node|null>|null} order
      */
     isAccessibleOrderChangeLegal: function( node, order ) {
-      var self = this;
+      const self = this;
 
       // remap for equivalence, so it's an array of nodes
       if ( order === null ) { order = []; }
@@ -198,13 +198,13 @@ define( require => {
       }
 
       // Can't include nodes that are included in other accessible orders
-      for ( var i = 0; i < order.length; i++ ) {
+      for ( let i = 0; i < order.length; i++ ) {
         if ( order[ i ]._accessibleParent && order[ i ]._accessibleParent !== node ) {
           return false;
         }
       }
 
-      var hasConnection = function( a, b ) {
+      const hasConnection = function( a, b ) {
         if ( a === node ) {
           return a.hasChild( b ) || _.includes( order, b );
         }
@@ -213,7 +213,7 @@ define( require => {
         }
       };
 
-      var effectiveChildren = node.children.concat( order );
+      const effectiveChildren = node.children.concat( order );
       return _.every( effectiveChildren, function( child ) {
         return self.isAcyclic( node, child, hasConnection );
       } );
@@ -233,7 +233,7 @@ define( require => {
         return false;
       }
 
-      var nodes = child.children.concat( child.accessibleOrder ).filter( function( n ) {
+      const nodes = child.children.concat( child.accessibleOrder ).filter( function( n ) {
         return n !== null;
       } ); // super defensive
 

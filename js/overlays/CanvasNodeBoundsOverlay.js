@@ -25,16 +25,16 @@ define( require => {
   inherit( ShapeBasedOverlay, CanvasNodeBoundsOverlay, {
     // @override
     addShapes: function() {
-      var self = this;
+      const self = this;
 
       new scenery.Trail( this.rootNode ).eachTrailUnder( function( trail ) {
-        var node = trail.lastNode();
+        const node = trail.lastNode();
         if ( !node.isVisible() ) {
           // skip this subtree if the node is invisible
           return true;
         }
         if ( ( node instanceof scenery.CanvasNode ) && trail.isVisible() ) {
-          var transform = trail.getTransform();
+          const transform = trail.getTransform();
 
           self.addShape( transform.transformShape( Shape.bounds( node.selfBounds ) ), 'rgba(0,255,0,0.8)', true );
         }

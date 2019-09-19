@@ -18,10 +18,10 @@ define( require => {
   require( 'SCENERY/util/Util' );
 
   // TODO: change this based on memory and performance characteristics of the platform
-  var keepDOMTextElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
+  const keepDOMTextElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
 
   // scratch matrix used in DOM rendering
-  var scratchMatrix = Matrix3.dirtyFromPool();
+  const scratchMatrix = Matrix3.dirtyFromPool();
 
   /**
    * A generated DOMSelfDrawable whose purpose will be drawing our Text node. One of these drawables will be created
@@ -65,9 +65,9 @@ define( require => {
      * This implements part of the DOMSelfDrawable required API for subtypes.
      */
     updateDOM: function() {
-      var node = this.node;
+      const node = this.node;
 
-      var div = this.domElement;
+      const div = this.domElement;
 
       if ( this.paintDirty ) {
         if ( this.dirtyFont ) {
@@ -90,9 +90,9 @@ define( require => {
 
       if ( this.transformDirty || this.dirtyText || this.dirtyFont || this.dirtyBounds ) {
         // shift the text vertically, postmultiplied with the entire transform.
-        var yOffset = node.getSelfBounds().minY;
+        const yOffset = node.getSelfBounds().minY;
         scratchMatrix.set( this.getTransformMatrix() );
-        var translation = Matrix3.translation( 0, yOffset );
+        const translation = Matrix3.translation( 0, yOffset );
         scratchMatrix.multiplyMatrix( translation );
         translation.freeToPool();
         scenery.Util.applyPreparedTransform( scratchMatrix, div, this.forceAcceleration );

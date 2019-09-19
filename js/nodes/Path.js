@@ -20,12 +20,12 @@ define( require => {
   const scenery = require( 'SCENERY/scenery' );
   const Shape = require( 'KITE/Shape' );
 
-  var PATH_OPTION_KEYS = [
+  const PATH_OPTION_KEYS = [
     'boundsMethod', // {string} - Sets how bounds are determined, see setBoundsMethod() for more documentation.
     'shape' // {Shape|string|null} - Sets the shape of the Path, see  setShape() for more documentation.
   ];
 
-  var DEFAULT_OPTIONS = {
+  const DEFAULT_OPTIONS = {
     shape: null,
     boundsMethod: 'accurate'
   };
@@ -227,8 +227,8 @@ define( require => {
     invalidateShape: function() {
       this.invalidatePath();
 
-      var stateLen = this._drawables.length;
-      for ( var i = 0; i < stateLen; i++ ) {
+      const stateLen = this._drawables.length;
+      for ( let i = 0; i < stateLen; i++ ) {
         this._drawables[ i ].markDirtyShape(); // subtypes of Path may not have this, but it's called during construction
       }
 
@@ -284,8 +284,8 @@ define( require => {
      * @returns {boolean} - Whether the self bounds changed.
      */
     updateSelfBounds: function() {
-      var selfBounds = this.hasShape() ? this.computeShapeBounds() : Bounds2.NOTHING;
-      var changed = !selfBounds.equals( this._selfBounds );
+      const selfBounds = this.hasShape() ? this.computeShapeBounds() : Bounds2.NOTHING;
+      const changed = !selfBounds.equals( this._selfBounds );
       if ( changed ) {
         this._selfBounds.set( selfBounds );
       }
@@ -365,7 +365,7 @@ define( require => {
           // 'safePadding' will include whatever bounds necessary to include miters. Square line-cap requires a
           // slightly extended bounds in either case.
           else {
-            var factor;
+            let factor;
             // If miterLength (inside corner to outside corner) exceeds miterLimit * strokeWidth, it will get turned to
             // a bevel, so our factor will be based just on the miterLimit.
             if ( this._boundsMethod === 'safePadding' && this.getLineJoin() === 'miter' ) {
@@ -509,7 +509,7 @@ define( require => {
      * @returns {boolean}
      */
     containsPointSelf: function( point ) {
-      var result = false;
+      let result = false;
       if ( !this.hasShape() ) {
         return result;
       }
@@ -564,7 +564,7 @@ define( require => {
         return false;
       }
 
-      var bounds = this.computeShapeBounds();
+      const bounds = this.computeShapeBounds();
       return bounds.x * bounds.y === 0; // at least one of them was zero, so the bounding box has no area
     },
 

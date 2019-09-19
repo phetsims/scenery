@@ -17,7 +17,7 @@ define( require => {
   const scenery = require( 'SCENERY/scenery' );
 
   // now it's a namespace
-  var Renderer = {};
+  const Renderer = {};
   scenery.register( 'Renderer', Renderer );
 
   //OHTWO TODO: rename to take advantage of lack of deprecated names? (remove bitmask prefix)
@@ -67,7 +67,7 @@ define( require => {
     return ( bitmask & Renderer.bitmaskWebGL ) !== 0;
   };
 
-  var rendererMap = {
+  const rendererMap = {
     canvas: Renderer.bitmaskCanvas,
     svg: Renderer.bitmaskSVG,
     dom: Renderer.bitmaskDOM,
@@ -120,10 +120,10 @@ define( require => {
   Renderer.pushOrderBitmask = function( bitmask, renderer ) {
     assert && assert( typeof bitmask === 'number' );
     assert && assert( typeof renderer === 'number' );
-    var rendererToInsert = renderer;
-    var totalBits = Renderer.bitsPerRenderer * Renderer.numActiveRenderers;
-    for ( var i = 0; i <= totalBits; i += Renderer.bitsPerRenderer ) {
-      var currentRenderer = ( bitmask >> i ) & Renderer.bitmaskCurrentRendererArea;
+    let rendererToInsert = renderer;
+    const totalBits = Renderer.bitsPerRenderer * Renderer.numActiveRenderers;
+    for ( let i = 0; i <= totalBits; i += Renderer.bitsPerRenderer ) {
+      const currentRenderer = ( bitmask >> i ) & Renderer.bitmaskCurrentRendererArea;
       if ( currentRenderer === rendererToInsert ) {
         return bitmask;
       }
@@ -152,7 +152,7 @@ define( require => {
   };
 
   Renderer.createSelfDrawable = function( instance, node, selfRenderer, fittable ) {
-    var drawable;
+    let drawable;
 
     if ( Renderer.isCanvas( selfRenderer ) ) {
       drawable = node.createCanvasDrawable( selfRenderer, instance );
@@ -173,7 +173,7 @@ define( require => {
     // Check to make sure that all of the drawables have the required mark-dirty methods available.
     if ( assert ) {
       _.each( node.drawableMarkFlags, function( flag ) {
-        var methodName = 'markDirty' + flag[ 0 ].toUpperCase() + flag.slice( 1 );
+        const methodName = 'markDirty' + flag[ 0 ].toUpperCase() + flag.slice( 1 );
         assert( typeof drawable[ methodName ] === 'function', 'Did not find ' + methodName );
       } );
     }

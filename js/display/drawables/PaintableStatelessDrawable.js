@@ -16,11 +16,11 @@ define( require => {
   const scenery = require( 'SCENERY/scenery' );
   const SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
-  var PaintableStatelessDrawable = {
+  const PaintableStatelessDrawable = {
     mixInto: function( drawableType ) {
       assert && assert( _.includes( inheritance( drawableType ), SelfDrawable ) );
 
-      var proto = drawableType.prototype;
+      const proto = drawableType.prototype;
 
       proto.initializePaintableStateless = function( renderer, instance ) {
         this.fillCallback = this.fillCallback || this.markDirtyFill.bind( this );

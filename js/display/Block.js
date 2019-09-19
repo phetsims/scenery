@@ -79,7 +79,7 @@ define( require => {
       this.markDirtyDrawable( drawable );
 
       if ( assertSlow ) {
-        var idx = _.indexOf( this.drawableList, drawable );
+        const idx = _.indexOf( this.drawableList, drawable );
         assertSlow && assertSlow( idx === -1, 'Drawable should not be added when it has not been removed' );
         this.drawableList.push( drawable );
 
@@ -92,7 +92,7 @@ define( require => {
       this.markDirty();
 
       if ( assertSlow ) {
-        var idx = _.indexOf( this.drawableList, drawable );
+        const idx = _.indexOf( this.drawableList, drawable );
         assertSlow && assertSlow( idx !== -1, 'Drawable should be already added when it is removed' );
         this.drawableList.splice( idx, 1 );
 
@@ -126,12 +126,12 @@ define( require => {
       if ( assertSlow ) {
         Drawable.prototype.audit.call( this, allowPendingBlock, allowPendingList, allowDirty );
 
-        var count = 0;
+        let count = 0;
 
         if ( !allowPendingList ) {
 
           // audit children, and get a count
-          for ( var drawable = this.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
+          for ( let drawable = this.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
             drawable.audit( allowPendingBlock, allowPendingList, allowDirty );
             count++;
             if ( drawable === this.lastDrawable ) { break; }
@@ -144,7 +144,7 @@ define( require => {
             assertSlow && assertSlow( this.lastDrawable === this.pendingLastDrawable, 'No pending last drawable' );
 
             // scan through to make sure our drawable lists are identical
-            for ( var d = this.firstDrawable; d !== null; d = d.nextDrawable ) {
+            for ( let d = this.firstDrawable; d !== null; d = d.nextDrawable ) {
               assertSlow && assertSlow( d.renderer === this.renderer, 'Renderers should match' );
               assertSlow && assertSlow( d.parentDrawable === this, 'This block should be this drawable\'s parent' );
               assertSlow && assertSlow( _.indexOf( this.drawableList, d ) >= 0 );

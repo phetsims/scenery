@@ -21,7 +21,7 @@ define( require => {
    * @param {number} seed
    */
   function InputFuzzer( display, seed ) {
-    var self = this;
+    const self = this;
 
     // @private {Display}
     this.display = display;
@@ -49,20 +49,20 @@ define( require => {
       self.mouseMove();
     };
     this.touchStartAction = function() {
-      var touch = self.createTouch( self.getRandomPosition() );
+      const touch = self.createTouch( self.getRandomPosition() );
       self.touchStart( touch );
     };
     this.touchMoveAction = function() {
-      var touch = self.random.sample( self.touches );
+      const touch = self.random.sample( self.touches );
       self.touchMove( touch );
     };
     this.touchEndAction = function() {
-      var touch = self.random.sample( self.touches );
+      const touch = self.random.sample( self.touches );
       self.touchEnd( touch );
       self.removeTouch( touch );
     };
     this.touchCancelAction = function() {
-      var touch = self.random.sample( self.touches );
+      const touch = self.random.sample( self.touches );
       self.touchCancel( touch );
       self.removeTouch( touch );
     };
@@ -87,10 +87,10 @@ define( require => {
       // models a geometric distribution of events
       // See https://github.com/phetsims/joist/issues/343 for notes on the distribution.
       while ( this.random.nextDouble() < 1 - 1 / ( averageEventCount + 1 ) ) {
-        var activePointerCount = this.touches.length + ( this.isMouseDown ? 1 : 0 ); // 1 extra for the mouse if down
-        var canAddPointer = activePointerCount < maximumPointerCount;
+        const activePointerCount = this.touches.length + ( this.isMouseDown ? 1 : 0 ); // 1 extra for the mouse if down
+        const canAddPointer = activePointerCount < maximumPointerCount;
 
-        var potentialActions = [];
+        const potentialActions = [];
 
         if ( allowMouse ) {
           // We could always mouse up/move (if we are down), but can't 'down/move' without being able to add a pointer
@@ -110,7 +110,7 @@ define( require => {
           }
         }
 
-        var action = this.random.sample( potentialActions );
+        const action = this.random.sample( potentialActions );
         action();
       }
     },
@@ -124,10 +124,10 @@ define( require => {
      * @returns {Event} - If possible a TouchEvent, but may be a CustomEvent
      */
     createTouchEvent: function( type, touches ) {
-      var domElement = this.display.domElement;
+      const domElement = this.display.domElement;
 
       // A specification that looks like a Touch object (and may be used to create one)
-      var touchItems = touches.map( function( touch ) {
+      const touchItems = touches.map( function( touch ) {
         return {
           identifier: touch.id,
           target: domElement,
@@ -141,7 +141,7 @@ define( require => {
            window.TouchEvent !== undefined &&
            window.Touch.length === 1 &&
            window.TouchEvent.length === 1 ) {
-        var rawTouches = touchItems.map( function( touchItem ) {
+        const rawTouches = touchItems.map( function( touchItem ) {
           return new window.Touch( touchItem );
         } );
 
@@ -156,7 +156,7 @@ define( require => {
       }
       // Otherwise, use a CustomEvent and "fake" it.
       else {
-        var event = document.createEvent( 'CustomEvent' );
+        const event = document.createEvent( 'CustomEvent' );
         event.initCustomEvent( type, true, true, {
           touches: touchItems,
           targetTouches: [],
@@ -187,7 +187,7 @@ define( require => {
      * @returns {Object}
      */
     createTouch: function( position ) {
-      var touch = {
+      const touch = {
         id: this.nextTouchID++,
         position: position
       };
@@ -212,7 +212,7 @@ define( require => {
      * @param {Object} touch
      */
     touchStart: function( touch ) {
-      var event = this.createTouchEvent( 'touchstart', [ touch ] );
+      const event = this.createTouchEvent( 'touchstart', [ touch ] );
 
       this.display._input.validatePointers();
       this.display._input.touchStart( touch.id, touch.position, event );
@@ -227,7 +227,7 @@ define( require => {
     touchMove: function( touch ) {
       touch.position = this.getRandomPosition();
 
-      var event = this.createTouchEvent( 'touchmove', [ touch ] );
+      const event = this.createTouchEvent( 'touchmove', [ touch ] );
 
       this.display._input.validatePointers();
       this.display._input.touchMove( touch.id, touch.position, event );
@@ -240,7 +240,7 @@ define( require => {
      * @param {Object} touch
      */
     touchEnd: function( touch ) {
-      var event = this.createTouchEvent( 'touchend', [ touch ] );
+      const event = this.createTouchEvent( 'touchend', [ touch ] );
 
       this.display._input.validatePointers();
       this.display._input.touchEnd( touch.id, touch.position, event );
@@ -253,7 +253,7 @@ define( require => {
      * @param {Object} touch
      */
     touchCancel: function( touch ) {
-      var event = this.createTouchEvent( 'touchcancel', [ touch ] );
+      const event = this.createTouchEvent( 'touchcancel', [ touch ] );
 
       this.display._input.validatePointers();
       this.display._input.touchCancel( touch.id, touch.position, event );
@@ -264,7 +264,7 @@ define( require => {
      * @private
      */
     mouseToggle: function() {
-      var domEvent = document.createEvent( 'MouseEvent' );
+      const domEvent = document.createEvent( 'MouseEvent' );
 
       // technically deprecated, but DOM4 event constructors not out yet. people on #whatwg said to use it
       domEvent.initMouseEvent( this.isMouseDown ? 'mouseup' : 'mousedown', true, true, window, 1, // click count
@@ -293,7 +293,7 @@ define( require => {
       this.mousePosition = this.getRandomPosition();
 
       // our move event
-      var domEvent = document.createEvent( 'MouseEvent' ); // not 'MouseEvents' according to DOM Level 3 spec
+      const domEvent = document.createEvent( 'MouseEvent' ); // not 'MouseEvents' according to DOM Level 3 spec
 
       // technically deprecated, but DOM4 event constructors not out yet. people on #whatwg said to use it
       domEvent.initMouseEvent( 'mousemove', true, true, window, 0, // click count

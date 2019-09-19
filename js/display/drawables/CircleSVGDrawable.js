@@ -16,7 +16,7 @@ define( require => {
   const SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
 
   // TODO: change this based on memory and performance characteristics of the platform
-  var keepSVGCircleElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
+  const keepSVGCircleElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
 
   /**
    * A generated SVGSelfDrawable whose purpose will be drawing our Circle. One of these drawables will be created
@@ -49,7 +49,7 @@ define( require => {
      * Implements the interface for SVGSelfDrawable (and is called from the SVGSelfDrawable's update).
      */
     updateSVGSelf: function() {
-      var circle = this.svgElement;
+      const circle = this.svgElement;
 
       if ( this.dirtyRadius ) {
         circle.setAttribute( 'r', this.node._radius );

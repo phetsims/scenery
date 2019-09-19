@@ -22,7 +22,7 @@ define( require => {
 
   QUnit.test( 'translateNode', function( assert ) {
     ListenerTestUtils.simpleRectangleTest( function( display, rect, node ) {
-      var listener = new DragListener( {
+      const listener = new DragListener( {
         translateNode: true
       } );
       rect.addInputListener( listener );
@@ -38,7 +38,7 @@ define( require => {
 
   QUnit.test( 'translateNode with applyOffset:false', function( assert ) {
     ListenerTestUtils.simpleRectangleTest( function( display, rect, node ) {
-      var listener = new DragListener( {
+      const listener = new DragListener( {
         translateNode: true,
         applyOffset: false
       } );
@@ -55,7 +55,7 @@ define( require => {
 
   QUnit.test( 'translateNode with trackAncestors', function( assert ) {
     ListenerTestUtils.simpleRectangleTest( function( display, rect, node ) {
-      var listener = new DragListener( {
+      const listener = new DragListener( {
         translateNode: true,
         trackAncestors: true
       } );
@@ -73,10 +73,10 @@ define( require => {
 
   QUnit.test( 'locationProperty with hooks', function( assert ) {
     ListenerTestUtils.simpleRectangleTest( function( display, rect, node ) {
-      var locationProperty = new Vector2Property( Vector2.ZERO );
+      const locationProperty = new Vector2Property( Vector2.ZERO );
       locationProperty.linkAttribute( rect, 'translation' );
 
-      var listener = new DragListener( {
+      const listener = new DragListener( {
         locationProperty: locationProperty
       } );
       rect.addInputListener( listener );
@@ -92,15 +92,15 @@ define( require => {
 
   QUnit.test( 'locationProperty with hooks and transform', function( assert ) {
     ListenerTestUtils.simpleRectangleTest( function( display, rect, node ) {
-      var locationProperty = new Vector2Property( Vector2.ZERO );
-      var transform = new Transform3( Matrix3.translation( 5, 3 ).timesMatrix( Matrix3.scale( 2 ) ).timesMatrix( Matrix3.rotation2( Math.PI / 4 ) ) );
+      const locationProperty = new Vector2Property( Vector2.ZERO );
+      const transform = new Transform3( Matrix3.translation( 5, 3 ).timesMatrix( Matrix3.scale( 2 ) ).timesMatrix( Matrix3.rotation2( Math.PI / 4 ) ) );
 
       // Starts at 5,3
       locationProperty.link( function( location ) {
         rect.translation = transform.transformPosition2( location );
       } );
 
-      var listener = new DragListener( {
+      const listener = new DragListener( {
         locationProperty: locationProperty,
         transform: transform
       } );
@@ -117,13 +117,13 @@ define( require => {
 
   QUnit.test( 'locationProperty with dragBounds', function( assert ) {
     ListenerTestUtils.simpleRectangleTest( function( display, rect, node ) {
-      var locationProperty = new Vector2Property( Vector2.ZERO );
+      const locationProperty = new Vector2Property( Vector2.ZERO );
 
       locationProperty.link( function( location ) {
         rect.translation = location;
       } );
 
-      var listener = new DragListener( {
+      const listener = new DragListener( {
         locationProperty: locationProperty,
         dragBoundsProperty: new Property( new Bounds2( 0, 0, 5, 5 ) )
       } );

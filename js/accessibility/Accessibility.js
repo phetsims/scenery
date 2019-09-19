@@ -133,15 +133,15 @@ define( require => {
   const scenery = require( 'SCENERY/scenery' );
   const Shape = require( 'KITE/Shape' );
 
-  var INPUT_TAG = AccessibilityUtil.TAGS.INPUT;
-  var P_TAG = AccessibilityUtil.TAGS.P;
+  const INPUT_TAG = AccessibilityUtil.TAGS.INPUT;
+  const P_TAG = AccessibilityUtil.TAGS.P;
 
   // default tag names for siblings
-  var DEFAULT_DESCRIPTION_TAG_NAME = P_TAG;
-  var DEFAULT_LABEL_TAG_NAME = P_TAG;
+  const DEFAULT_DESCRIPTION_TAG_NAME = P_TAG;
+  const DEFAULT_LABEL_TAG_NAME = P_TAG;
 
   // see setAccessibleNameBehavior for more details
-  var DEFAULT_ACCESSIBLE_NAME_BEHAVIOR = function( node, options, accessibleName ) {
+  const DEFAULT_ACCESSIBLE_NAME_BEHAVIOR = function( node, options, accessibleName ) {
     if ( node.tagName === 'input' ) {
       options.labelTagName = 'label';
       options.labelContent = accessibleName;
@@ -156,7 +156,7 @@ define( require => {
   };
 
   // see setHelpTextBehavior for more details
-  var DEFAULT_HELP_TEXT_BEHAVIOR = function( node, options, helpText ) {
+  const DEFAULT_HELP_TEXT_BEHAVIOR = function( node, options, helpText ) {
 
     options.descriptionTagName = AccessibilityUtil.DEFAULT_DESCRIPTION_TAG_NAME;
     options.descriptionContent = helpText;
@@ -165,7 +165,7 @@ define( require => {
   };
 
   // see setAccessibleHeadingBehavior for more details
-  var DEFAULT_ACCESSIBLE_HEADING_BEHAVIOR = function( node, options, heading ) {
+  const DEFAULT_ACCESSIBLE_HEADING_BEHAVIOR = function( node, options, heading ) {
 
     options.labelTagName = 'h' + node.headingLevel; // TODO: make sure heading level change fires a full peer rebuild, see https://github.com/phetsims/scenery/issues/867
     options.labelContent = heading;
@@ -173,17 +173,17 @@ define( require => {
   };
 
   // these elements are typically associated with forms, and support certain attributes
-  var FORM_ELEMENTS = AccessibilityUtil.FORM_ELEMENTS;
+  const FORM_ELEMENTS = AccessibilityUtil.FORM_ELEMENTS;
 
   // list of input "type" attribute values that support the "checked" attribute
-  var INPUT_TYPES_THAT_SUPPORT_CHECKED = AccessibilityUtil.INPUT_TYPES_THAT_SUPPORT_CHECKED;
+  const INPUT_TYPES_THAT_SUPPORT_CHECKED = AccessibilityUtil.INPUT_TYPES_THAT_SUPPORT_CHECKED;
 
   // HTMLElement attributes whose value is an ID of another element
-  var ASSOCIATION_ATTRIBUTES = AccessibilityUtil.ASSOCIATION_ATTRIBUTES;
+  const ASSOCIATION_ATTRIBUTES = AccessibilityUtil.ASSOCIATION_ATTRIBUTES;
 
   // The options for the Accessibility API. In general, most default to null; to clear, set back to null. Each one of
   // these has an associated setter, see setter functions for more information about each.
-  var ACCESSIBILITY_OPTION_KEYS = [
+  const ACCESSIBILITY_OPTION_KEYS = [
 
     // Order matters. Having focus before tagName covers the case where you change the tagName and focusability of a
     // currently focused node. We want the focusability to update correctly.
@@ -233,7 +233,7 @@ define( require => {
     'activeDescendantAssociations' // {Array.<Object>} - sets the list of aria-activedescendant associations between from this node to others (including itself)
   ];
 
-  var Accessibility = {
+  const Accessibility = {
 
     /**
      * Given the constructor for Node, add accessibility functions into the prototype.
@@ -242,7 +242,7 @@ define( require => {
      */
     compose: function( type ) {
       // Can't avoid circular dependency, so no assertion here. Ensure that 'type' is the constructor for Node.
-      var proto = type.prototype;
+      const proto = type.prototype;
 
       /**
        * These properties and methods are put directly on the prototype of Node.
@@ -481,8 +481,8 @@ define( require => {
          * @returns {boolean}
          */
         isFocused: function() {
-          for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-            var peer = this._accessibleInstances[ i ].peer;
+          for ( let i = 0; i < this._accessibleInstances.length; i++ ) {
+            const peer = this._accessibleInstances[ i ].peer;
             if ( peer.isFocused() ) {
               return true;
             }
@@ -511,7 +511,7 @@ define( require => {
             assert && assert( this._accessibleVisible, 'trying to set focus on a node with invisible accessible content' );
             assert && assert( this._accessibleInstances.length === 1, 'focus() unsupported for Nodes using DAG, accessible content is not unique' );
 
-            var peer = this._accessibleInstances[ 0 ].peer;
+            const peer = this._accessibleInstances[ 0 ].peer;
             assert && assert( peer, 'must have a peer to focus' );
             peer.focus();
           }
@@ -525,7 +525,7 @@ define( require => {
         blur: function() {
           if ( this._accessibleInstances.length > 0 ) {
             assert && assert( this._accessibleInstances.length === 1, 'blur() unsupported for Nodes using DAG, accessible content is not unique' );
-            var peer = this._accessibleInstances[ 0 ].peer;
+            const peer = this._accessibleInstances[ 0 ].peer;
             assert && assert( peer, 'must have a peer to blur' );
             peer.blur();
             this.interruptInput(); // interrupt any listeners that attached to this Node
@@ -746,7 +746,7 @@ define( require => {
           }
 
           if ( this._accessibleHeading ) {
-            var level = this._accessibleParent.computeHeadingLevel() + 1;
+            const level = this._accessibleParent.computeHeadingLevel() + 1;
             this._headingLevel = level;
             return level;
           }
@@ -950,8 +950,8 @@ define( require => {
           if ( inputType !== this._inputType ) {
 
             this._inputType = inputType;
-            for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-              var peer = this._accessibleInstances[ i ].peer;
+            for ( let i = 0; i < this._accessibleInstances.length; i++ ) {
+              const peer = this._accessibleInstances[ i ].peer;
 
               // remove the attribute if cleared by setting to 'null'
               if ( inputType === null ) {
@@ -1119,8 +1119,8 @@ define( require => {
               this.setLabelTagName( DEFAULT_LABEL_TAG_NAME );
             }
 
-            for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-              var peer = this._accessibleInstances[ i ].peer;
+            for ( let i = 0; i < this._accessibleInstances.length; i++ ) {
+              const peer = this._accessibleInstances[ i ].peer;
               peer.setLabelSiblingContent( this._labelContent );
             }
           }
@@ -1152,8 +1152,8 @@ define( require => {
           if ( this._innerContent !== content ) {
             this._innerContent = content;
 
-            for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-              var peer = this._accessibleInstances[ i ].peer;
+            for ( let i = 0; i < this._accessibleInstances.length; i++ ) {
+              const peer = this._accessibleInstances[ i ].peer;
               peer.setPrimarySiblingContent( this._innerContent );
             }
           }
@@ -1190,8 +1190,8 @@ define( require => {
               this.setDescriptionTagName( DEFAULT_DESCRIPTION_TAG_NAME );
             }
 
-            for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
-              var peer = this._accessibleInstances[ i ].peer;
+            for ( let i = 0; i < this._accessibleInstances.length; i++ ) {
+              const peer = this._accessibleInstances[ i ].peer;
               peer.setDescriptionSiblingContent( this._descriptionContent );
             }
           }
@@ -1513,8 +1513,8 @@ define( require => {
          * @param {Array.<Object>} ariaLabelledbyAssociations - list of associationObjects, see this._ariaLabelledbyAssociations.
          */
         setAriaLabelledbyAssociations: function( ariaLabelledbyAssociations ) {
-          var associationObject;
-          var i;
+          let associationObject;
+          let i;
 
           // validation if assert is enabled
           if ( assert ) {
@@ -1528,9 +1528,9 @@ define( require => {
           // if the list isn't the same, TODO: make order in the list not matter, perhaps with sorting? https://stackoverflow.com/questions/29951293/using-lodash-to-compare-arrays-items-existence-without-order
           if ( !_.isEqual( ariaLabelledbyAssociations, this._ariaLabelledbyAssociations ) ) {
 
-            var beforeOnly = []; // Will hold all nodes that will be removed.
-            var afterOnly = []; // Will hold all nodes that will be "new" children (added)
-            var inBoth = []; // Child nodes that "stay". Will be ordered for the "after" case.
+            const beforeOnly = []; // Will hold all nodes that will be removed.
+            const afterOnly = []; // Will hold all nodes that will be "new" children (added)
+            const inBoth = []; // Child nodes that "stay". Will be ordered for the "after" case.
 
             // get a difference of the desired new list, and the old
             arrayDifference( ariaLabelledbyAssociations, this._ariaLabelledbyAssociations, afterOnly, beforeOnly, inBoth );
@@ -1546,7 +1546,7 @@ define( require => {
 
             // add each association from the new list that hasn't been added yet
             for ( i = 0; i < afterOnly.length; i++ ) {
-              var ariaLabelledbyAssociation = ariaLabelledbyAssociations[ i ];
+              const ariaLabelledbyAssociation = ariaLabelledbyAssociations[ i ];
               this.addAriaLabelledbyAssociation( ariaLabelledbyAssociation );
             }
 
@@ -1600,7 +1600,7 @@ define( require => {
           assert && assert( _.includes( this._ariaLabelledbyAssociations, associationObject ) );
 
           // remove the
-          var removedObject = this._ariaLabelledbyAssociations.splice( _.indexOf( this._ariaLabelledbyAssociations, associationObject ), 1 );
+          const removedObject = this._ariaLabelledbyAssociations.splice( _.indexOf( this._ariaLabelledbyAssociations, associationObject ), 1 );
 
           // remove the reference from the other node back to this node because we don't need it anymore
           removedObject[ 0 ].otherNode.removeNodeThatIsAriaLabelledByThisNode( this );
@@ -1615,7 +1615,7 @@ define( require => {
          */
         removeNodeThatIsAriaLabelledByThisNode: function( node ) {
           assert && assert( node instanceof scenery.Node );
-          var indexOfNode = _.indexOf( this._nodesThatAreAriaLabelledbyThisNode, node );
+          const indexOfNode = _.indexOf( this._nodesThatAreAriaLabelledbyThisNode, node );
           assert && assert( indexOfNode >= 0 );
           this._nodesThatAreAriaLabelledbyThisNode.splice( indexOfNode, 1 );
         },
@@ -1625,8 +1625,8 @@ define( require => {
          * @public
          */
         updateAriaLabelledbyAssociationsInPeers: function() {
-          for ( var i = 0; i < this.accessibleInstances.length; i++ ) {
-            var peer = this.accessibleInstances[ i ].peer;
+          for ( let i = 0; i < this.accessibleInstances.length; i++ ) {
+            const peer = this.accessibleInstances[ i ].peer;
             peer.onAriaLabelledbyAssociationChange();
           }
         },
@@ -1639,8 +1639,8 @@ define( require => {
 
           // if any other nodes are aria-labelledby this Node, update those associations too. Since this node's
           // accessible content needs to be recreated, they need to update their aria-labelledby associations accordingly.
-          for ( var i = 0; i < this._nodesThatAreAriaLabelledbyThisNode.length; i++ ) {
-            var otherNode = this._nodesThatAreAriaLabelledbyThisNode[ i ];
+          for ( let i = 0; i < this._nodesThatAreAriaLabelledbyThisNode.length; i++ ) {
+            const otherNode = this._nodesThatAreAriaLabelledbyThisNode[ i ];
             otherNode.updateAriaLabelledbyAssociationsInPeers();
           }
         },
@@ -1662,10 +1662,10 @@ define( require => {
          * @param {Array.<Object>} ariaDescribedbyAssociations - list of associationObjects, see this._ariaDescribedbyAssociations.
          */
         setAriaDescribedbyAssociations: function( ariaDescribedbyAssociations ) {
-          var associationObject;
+          let associationObject;
           if ( assert ) {
             assert( Array.isArray( ariaDescribedbyAssociations ) );
-            for ( var j = 0; j < ariaDescribedbyAssociations.length; j++ ) {
+            for ( let j = 0; j < ariaDescribedbyAssociations.length; j++ ) {
               associationObject = ariaDescribedbyAssociations[ j ];
               assert && AccessibilityUtil.validateAssociationObject( associationObject );
             }
@@ -1674,10 +1674,10 @@ define( require => {
           // if the list isn't the same, TODO: make order in the list not matter
           if ( !_.isEqual( ariaDescribedbyAssociations, this._ariaDescribedbyAssociations ) ) {
 
-            var beforeOnly = []; // Will hold all nodes that will be removed.
-            var afterOnly = []; // Will hold all nodes that will be "new" children (added)
-            var inBoth = []; // Child nodes that "stay". Will be ordered for the "after" case.
-            var i;
+            const beforeOnly = []; // Will hold all nodes that will be removed.
+            const afterOnly = []; // Will hold all nodes that will be "new" children (added)
+            const inBoth = []; // Child nodes that "stay". Will be ordered for the "after" case.
+            let i;
 
             // get a difference of the desired new list, and the old
             arrayDifference( ariaDescribedbyAssociations, this._ariaDescribedbyAssociations, afterOnly, beforeOnly, inBoth );
@@ -1693,7 +1693,7 @@ define( require => {
 
             // add each association from the new list that hasn't been added yet
             for ( i = 0; i < afterOnly.length; i++ ) {
-              var ariaDescribedbyAssociation = ariaDescribedbyAssociations[ i ];
+              const ariaDescribedbyAssociation = ariaDescribedbyAssociations[ i ];
               this.addAriaDescribedbyAssociation( ariaDescribedbyAssociation );
             }
 
@@ -1746,7 +1746,7 @@ define( require => {
           assert && assert( _.includes( this._ariaDescribedbyAssociations, associationObject ) );
 
           // remove the
-          var removedObject = this._ariaDescribedbyAssociations.splice( _.indexOf( this._ariaDescribedbyAssociations, associationObject ), 1 );
+          const removedObject = this._ariaDescribedbyAssociations.splice( _.indexOf( this._ariaDescribedbyAssociations, associationObject ), 1 );
 
           // remove the reference from the other node back to this node because we don't need it anymore
           removedObject[ 0 ].otherNode.removeNodeThatIsAriaDescribedByThisNode( this );
@@ -1761,7 +1761,7 @@ define( require => {
          */
         removeNodeThatIsAriaDescribedByThisNode: function( node ) {
           assert && assert( node instanceof scenery.Node );
-          var indexOfNode = _.indexOf( this._nodesThatAreAriaDescribedbyThisNode, node );
+          const indexOfNode = _.indexOf( this._nodesThatAreAriaDescribedbyThisNode, node );
           assert && assert( indexOfNode >= 0 );
           this._nodesThatAreAriaDescribedbyThisNode.splice( indexOfNode, 1 );
 
@@ -1772,8 +1772,8 @@ define( require => {
          * @public
          */
         updateAriaDescribedbyAssociationsInPeers: function() {
-          for ( var i = 0; i < this.accessibleInstances.length; i++ ) {
-            var peer = this.accessibleInstances[ i ].peer;
+          for ( let i = 0; i < this.accessibleInstances.length; i++ ) {
+            const peer = this.accessibleInstances[ i ].peer;
             peer.onAriaDescribedbyAssociationChange();
           }
         },
@@ -1787,8 +1787,8 @@ define( require => {
           // if any other nodes are aria-describedby this Node, update those associations too. Since this node's
           // accessible content needs to be recreated, they need to update their aria-describedby associations accordingly.
           // TODO: only use unique elements of the array (_.unique)
-          for ( var i = 0; i < this._nodesThatAreAriaDescribedbyThisNode.length; i++ ) {
-            var otherNode = this._nodesThatAreAriaDescribedbyThisNode[ i ];
+          for ( let i = 0; i < this._nodesThatAreAriaDescribedbyThisNode.length; i++ ) {
+            const otherNode = this._nodesThatAreAriaDescribedbyThisNode[ i ];
             otherNode.updateAriaDescribedbyAssociationsInPeers();
           }
         },
@@ -1810,10 +1810,10 @@ define( require => {
          * @param {Array.<Object>} activeDescendantAssociations - list of associationObjects, see this._activeDescendantAssociations.
          */
         setActiveDescendantAssociations: function( activeDescendantAssociations ) {
-          var associationObject;
+          let associationObject;
           if ( assert ) {
             assert( Array.isArray( activeDescendantAssociations ) );
-            for ( var j = 0; j < activeDescendantAssociations.length; j++ ) {
+            for ( let j = 0; j < activeDescendantAssociations.length; j++ ) {
               associationObject = activeDescendantAssociations[ j ];
               assert && AccessibilityUtil.validateAssociationObject( associationObject );
             }
@@ -1822,10 +1822,10 @@ define( require => {
           // if the list isn't the same, TODO: make order in the list not matter
           if ( !_.isEqual( activeDescendantAssociations, this._activeDescendantAssociations ) ) {
 
-            var beforeOnly = []; // Will hold all nodes that will be removed.
-            var afterOnly = []; // Will hold all nodes that will be "new" children (added)
-            var inBoth = []; // Child nodes that "stay". Will be ordered for the "after" case.
-            var i;
+            const beforeOnly = []; // Will hold all nodes that will be removed.
+            const afterOnly = []; // Will hold all nodes that will be "new" children (added)
+            const inBoth = []; // Child nodes that "stay". Will be ordered for the "after" case.
+            let i;
 
             // get a difference of the desired new list, and the old
             arrayDifference( activeDescendantAssociations, this._activeDescendantAssociations, afterOnly, beforeOnly, inBoth );
@@ -1841,7 +1841,7 @@ define( require => {
 
             // add each association from the new list that hasn't been added yet
             for ( i = 0; i < afterOnly.length; i++ ) {
-              var activeDescendantAssociation = activeDescendantAssociations[ i ];
+              const activeDescendantAssociation = activeDescendantAssociations[ i ];
               this.addActiveDescendantAssociation( activeDescendantAssociation );
             }
 
@@ -1891,7 +1891,7 @@ define( require => {
           assert && assert( _.includes( this._activeDescendantAssociations, associationObject ) );
 
           // remove the
-          var removedObject = this._activeDescendantAssociations.splice( _.indexOf( this._activeDescendantAssociations, associationObject ), 1 );
+          const removedObject = this._activeDescendantAssociations.splice( _.indexOf( this._activeDescendantAssociations, associationObject ), 1 );
 
           // remove the reference from the other node back to this node because we don't need it anymore
           removedObject[ 0 ].otherNode.removeNodeThatIsActiveDescendantThisNode( this );
@@ -1906,7 +1906,7 @@ define( require => {
          */
         removeNodeThatIsActiveDescendantThisNode: function( node ) {
           assert && assert( node instanceof scenery.Node );
-          var indexOfNode = _.indexOf( this._nodesThatAreActiveDescendantToThisNode, node );
+          const indexOfNode = _.indexOf( this._nodesThatAreActiveDescendantToThisNode, node );
           assert && assert( indexOfNode >= 0 );
           this._nodesThatAreActiveDescendantToThisNode.splice( indexOfNode, 1 );
 
@@ -1917,8 +1917,8 @@ define( require => {
          * @public
          */
         updateActiveDescendantAssociationsInPeers: function() {
-          for ( var i = 0; i < this.accessibleInstances.length; i++ ) {
-            var peer = this.accessibleInstances[ i ].peer;
+          for ( let i = 0; i < this.accessibleInstances.length; i++ ) {
+            const peer = this.accessibleInstances[ i ].peer;
             peer.onActiveDescendantAssociationChange();
           }
         },
@@ -1932,8 +1932,8 @@ define( require => {
           // if any other nodes are aria-activeDescendant this Node, update those associations too. Since this node's
           // accessible content needs to be recreated, they need to update their aria-activeDescendant associations accordingly.
           // TODO: only use unique elements of the array (_.unique)
-          for ( var i = 0; i < this._nodesThatAreActiveDescendantToThisNode.length; i++ ) {
-            var otherNode = this._nodesThatAreActiveDescendantToThisNode[ i ];
+          for ( let i = 0; i < this._nodesThatAreActiveDescendantToThisNode.length; i++ ) {
+            const otherNode = this._nodesThatAreActiveDescendantToThisNode[ i ];
             otherNode.updateActiveDescendantAssociationsInPeers();
           }
         },
@@ -2017,7 +2017,7 @@ define( require => {
 
           // Only update if it has changed
           if ( this._accessibleOrder !== accessibleOrder ) {
-            var oldAccessibleOrder = this._accessibleOrder;
+            const oldAccessibleOrder = this._accessibleOrder;
 
             // Store our own reference to this, so client modifications to the input array won't silently break things.
             // See https://github.com/phetsims/scenery/issues/786
@@ -2087,9 +2087,9 @@ define( require => {
          */
         getEffectiveChildren: function() {
           // Find all children without accessible parents.
-          var nonOrderedChildren = [];
-          for ( var i = 0; i < this._children.length; i++ ) {
-            var child = this._children[ i ];
+          const nonOrderedChildren = [];
+          for ( let i = 0; i < this._children.length; i++ ) {
+            const child = this._children[ i ];
 
             if ( !child._accessibleParent ) {
               nonOrderedChildren.push( child );
@@ -2098,9 +2098,9 @@ define( require => {
 
           // Override the order, and replace the placeholder if it exists.
           if ( this.hasAccessibleOrder() ) {
-            var effectiveChildren = this.accessibleOrder.slice();
+            const effectiveChildren = this.accessibleOrder.slice();
 
-            var placeholderIndex = effectiveChildren.indexOf( null );
+            const placeholderIndex = effectiveChildren.indexOf( null );
 
             // If we have a placeholder, replace its content with the children
             if ( placeholderIndex >= 0 ) {
@@ -2169,8 +2169,8 @@ define( require => {
           if ( value !== this._inputValue ) {
             this._inputValue = value;
 
-            for ( var i = 0; i < this.accessibleInstances.length; i++ ) {
-              var peer = this.accessibleInstances[ i ].peer;
+            for ( let i = 0; i < this.accessibleInstances.length; i++ ) {
+              const peer = this.accessibleInstances[ i ].peer;
               peer.onInputValueChange();
             }
           }
@@ -2273,8 +2273,8 @@ define( require => {
 
           // if the accessible attribute already exists in the list, remove it - no need
           // to remove from the peers, existing attributes will simply be replaced in the DOM
-          for ( var i = 0; i < this._accessibleAttributes.length; i++ ) {
-            var currentAttribute = this._accessibleAttributes[ i ];
+          for ( let i = 0; i < this._accessibleAttributes.length; i++ ) {
+            const currentAttribute = this._accessibleAttributes[ i ];
             if ( currentAttribute.attribute === attribute &&
                  currentAttribute.options.namespace === options.namespace &&
                  currentAttribute.options.asProperty === options.asProperty &&
@@ -2289,8 +2289,8 @@ define( require => {
             options: options
           } );
 
-          for ( var j = 0; j < this._accessibleInstances.length; j++ ) {
-            var peer = this._accessibleInstances[ j ].peer;
+          for ( let j = 0; j < this._accessibleInstances.length; j++ ) {
+            const peer = this._accessibleInstances[ j ].peer;
             peer.setAttributeToElement( attribute, value, options );
           }
         },
@@ -2316,8 +2316,8 @@ define( require => {
             elementName: AccessiblePeer.PRIMARY_SIBLING // see AccessiblePeer.getElementName() for valid values, default to the primary sibling
           }, options );
 
-          var attributeRemoved = false;
-          for ( var i = 0; i < this._accessibleAttributes.length; i++ ) {
+          let attributeRemoved = false;
+          for ( let i = 0; i < this._accessibleAttributes.length; i++ ) {
             if ( this._accessibleAttributes[ i ].attribute === attribute &&
                  this._accessibleAttributes[ i ].options.namespace === options.namespace &&
                  this._accessibleAttributes[ i ].options.elementName === options.elementName ) {
@@ -2327,8 +2327,8 @@ define( require => {
           }
           assert && assert( attributeRemoved, 'Node does not have accessible attribute ' + attribute );
 
-          for ( var j = 0; j < this._accessibleInstances.length; j++ ) {
-            var peer = this._accessibleInstances[ j ].peer;
+          for ( let j = 0; j < this._accessibleInstances.length; j++ ) {
+            const peer = this._accessibleInstances[ j ].peer;
             peer.removeAttributeFromElement( attribute, options );
           }
         },
@@ -2340,10 +2340,10 @@ define( require => {
         removeAccessibleAttributes: function() {
 
           // all attributes currently on this Node's primary sibling
-          var attributes = this.getAccessibleAttributes();
+          const attributes = this.getAccessibleAttributes();
 
-          for ( var i = 0; i < attributes.length; i++ ) {
-            var attribute = attributes[ i ].attribute;
+          for ( let i = 0; i < attributes.length; i++ ) {
+            const attribute = attributes[ i ].attribute;
             this.removeAccessibleAttribute( attribute );
           }
         },
@@ -2370,8 +2370,8 @@ define( require => {
             elementName: AccessiblePeer.PRIMARY_SIBLING // see AccessiblePeer.getElementName() for valid values, default to the primary sibling
           }, options );
 
-          var attributeFound = false;
-          for ( var i = 0; i < this._accessibleAttributes.length; i++ ) {
+          let attributeFound = false;
+          for ( let i = 0; i < this._accessibleAttributes.length; i++ ) {
             if ( this._accessibleAttributes[ i ].attribute === attribute &&
                  this._accessibleAttributes[ i ].options.namespace === options.namespace &&
                  this._accessibleAttributes[ i ].options.elementName === options.elementName ) {
@@ -2397,7 +2397,7 @@ define( require => {
           if ( this._focusableOverride !== focusable ) {
             this._focusableOverride = focusable;
 
-            for ( var i = 0; i < this._accessibleInstances.length; i++ ) {
+            for ( let i = 0; i < this._accessibleInstances.length; i++ ) {
 
               // after the override is set, update the focusability of the peer based on this node's value for focusable
               // which may be true or false (but not null)
@@ -2442,10 +2442,10 @@ define( require => {
          */
         getBaseOptions: function() {
 
-          var currentOptions = {};
+          const currentOptions = {};
 
-          for ( var i = 0; i < ACCESSIBILITY_OPTION_KEYS.length; i++ ) {
-            var optionName = ACCESSIBILITY_OPTION_KEYS[ i ];
+          for ( let i = 0; i < ACCESSIBILITY_OPTION_KEYS.length; i++ ) {
+            const optionName = ACCESSIBILITY_OPTION_KEYS[ i ];
             currentOptions[ optionName ] = this[ optionName ];
           }
 
@@ -2461,22 +2461,22 @@ define( require => {
          * @returns {Array.<Item>}
          */
         getNestedAccessibleOrder: function() {
-          var currentTrail = new scenery.Trail( this );
-          var pruneStack = []; // {Array.<Node>} - A list of nodes to prune
+          const currentTrail = new scenery.Trail( this );
+          let pruneStack = []; // {Array.<Node>} - A list of nodes to prune
 
           // {Array.<Item>} - The main result we will be returning. It is the top-level array where child items will be
           // inserted.
-          var result = [];
+          const result = [];
 
           // {Array.<Array.<Item>>} A stack of children arrays, where we should be inserting items into the top array.
           // We will start out with the result, and as nested levels are added, the children arrays of those items will be
           // pushed and poppped, so that the top array on this stack is where we should insert our next child item.
-          var nestedChildStack = [ result ];
+          const nestedChildStack = [ result ];
 
           function addTrailsForNode( node, overridePruning ) {
             // If subtrees were specified with accessibleOrder, they should be skipped from the ordering of ancestor subtrees,
             // otherwise we could end up having multiple references to the same trail (which should be disallowed).
-            var pruneCount = 0;
+            let pruneCount = 0;
             // count the number of times our node appears in the pruneStack
             _.each( pruneStack, function( pruneNode ) {
               if ( node === pruneNode ) {
@@ -2493,7 +2493,7 @@ define( require => {
 
             // Pushing item and its children array, if accessible
             if ( node.accessibleContent ) {
-              var item = {
+              const item = {
                 trail: currentTrail.copy(),
                 children: []
               };
@@ -2501,7 +2501,7 @@ define( require => {
               nestedChildStack.push( item.children );
             }
 
-            var arrayAccessibleOrder = node._accessibleOrder === null ? [] : node._accessibleOrder;
+            const arrayAccessibleOrder = node._accessibleOrder === null ? [] : node._accessibleOrder;
 
             // push specific focused nodes to the stack
             pruneStack = pruneStack.concat( arrayAccessibleOrder );
@@ -2522,9 +2522,9 @@ define( require => {
             } );
 
             // Visit everything. If there is an accessibleOrder, those trails were already visited, and will be excluded.
-            var numChildren = node._children.length;
-            for ( var i = 0; i < numChildren; i++ ) {
-              var child = node._children[ i ];
+            const numChildren = node._children.length;
+            for ( let i = 0; i < numChildren; i++ ) {
+              const child = node._children[ i ];
 
               currentTrail.addDescendant( child, i );
               addTrailsForNode( child, false );
@@ -2675,7 +2675,7 @@ define( require => {
          */
         removeAccessibleInstance: function( accessibleInstance ) {
           assert && assert( accessibleInstance instanceof scenery.AccessibleInstance );
-          var index = _.indexOf( this._accessibleInstances, accessibleInstance );
+          const index = _.indexOf( this._accessibleInstances, accessibleInstance );
           assert && assert( index !== -1, 'Cannot remove an AccessibleInstance from a Node if it was not there' );
           this._accessibleInstances.splice( index, 1 );
         }

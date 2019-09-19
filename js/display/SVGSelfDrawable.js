@@ -83,14 +83,14 @@ define( require => {
 
       // sync the differences between the previously-recorded list of cached paints and the new list
       if ( this.usesPaint && this.dirtyCachedPaints ) {
-        var newCachedPaints = this.node._cachedPaints.slice(); // defensive copy for now
-        var i;
-        var j;
+        const newCachedPaints = this.node._cachedPaints.slice(); // defensive copy for now
+        let i;
+        let j;
 
         // scan for new cached paints (not in the old list)
         for ( i = 0; i < newCachedPaints.length; i++ ) {
-          var newPaint = newCachedPaints[ i ];
-          var isNew = true;
+          const newPaint = newCachedPaints[ i ];
+          let isNew = true;
           for ( j = 0; j < this.lastCachedPaints.length; j++ ) {
             if ( newPaint === this.lastCachedPaints[ j ] ) {
               isNew = false;
@@ -103,8 +103,8 @@ define( require => {
         }
         // scan for removed cached paints (not in the new list)
         for ( i = 0; i < this.lastCachedPaints.length; i++ ) {
-          var oldPaint = this.lastCachedPaints[ i ];
-          var isRemoved = true;
+          const oldPaint = this.lastCachedPaints[ i ];
+          let isRemoved = true;
           for ( j = 0; j < newCachedPaints.length; j++ ) {
             if ( oldPaint === newCachedPaints[ j ] ) {
               isRemoved = false;
@@ -135,7 +135,7 @@ define( require => {
       if ( this.dirtyStroke ) {
         this.paintState.updateStroke( this.svgBlock, this.node.getStrokeValue() );
       }
-      var strokeDetailDirty = this.dirtyLineWidth || this.dirtyLineOptions;
+      const strokeDetailDirty = this.dirtyLineWidth || this.dirtyLineOptions;
       if ( strokeDetailDirty ) {
         this.paintState.updateStrokeDetailStyle( this.node );
       }
@@ -148,9 +148,9 @@ define( require => {
 
     updateSVGBlock: function( svgBlock ) {
       // remove cached paint references from the old svgBlock
-      var oldSvgBlock = this.svgBlock;
+      const oldSvgBlock = this.svgBlock;
       if ( this.usesPaint && oldSvgBlock ) {
-        for ( var i = 0; i < this.lastCachedPaints.length; i++ ) {
+        for ( let i = 0; i < this.lastCachedPaints.length; i++ ) {
           oldSvgBlock.decrementPaint( this.lastCachedPaints[ i ] );
         }
       }
@@ -159,7 +159,7 @@ define( require => {
 
       // add cached paint references from the new svgBlock
       if ( this.usesPaint ) {
-        for ( var j = 0; j < this.lastCachedPaints.length; j++ ) {
+        for ( let j = 0; j < this.lastCachedPaints.length; j++ ) {
           svgBlock.incrementPaint( this.lastCachedPaints[ j ] );
         }
       }

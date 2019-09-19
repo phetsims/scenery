@@ -99,7 +99,7 @@ define( require => {
 
       sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( '-------------- ' + this.node.constructor.name + '#' + this.node.id );
 
-      var isBaseInclusive = this.selfInclusive;
+      const isBaseInclusive = this.selfInclusive;
 
       // Validate the bounds that we will be using for hit acceleration. This should validate all bounds that could be
       // hit by recursiveHitTest.
@@ -139,7 +139,7 @@ define( require => {
       }
 
       // Validation should have already been done in hitTest(), we just need to grab the accelerated bounds.
-      var pruningBounds;
+      let pruningBounds;
       if ( useMouse ) {
         pruningBounds = isInclusive ? this.mouseInclusiveBounds : this.mouseExclusiveBounds;
         assert && assert( isInclusive ? !this.mouseInclusiveDirty : !this.mouseExclusiveDirty );
@@ -160,7 +160,7 @@ define( require => {
       }
 
       // Transform the point in the local coordinate frame, so we can test it with the clipArea/children
-      var localPoint = this.node._transform.getInverse().multiplyVector2( this.scratchVector.set( point ) );
+      const localPoint = this.node._transform.getInverse().multiplyVector2( this.scratchVector.set( point ) );
 
       // If our point is outside of the local-coordinate clipping area, there should be no hit.
       if ( this.node.hasClipArea() && !this.node._clipArea.containsPoint( localPoint ) ) {
@@ -172,11 +172,11 @@ define( require => {
 
       // Check children before our "self", since the children are rendered on top.
       // Manual iteration here so we can return directly, and so we can iterate backwards (last node is in front).
-      for ( var i = this.node._children.length - 1; i >= 0; i-- ) {
-        var child = this.node._children[ i ];
+      for ( let i = this.node._children.length - 1; i >= 0; i-- ) {
+        const child = this.node._children[ i ];
 
         sceneryLog && sceneryLog.hitTest && sceneryLog.push();
-        var childHit = child._picker.recursiveHitTest( localPoint, useMouse, useTouch, isInclusive );
+        const childHit = child._picker.recursiveHitTest( localPoint, useMouse, useTouch, isInclusive );
         sceneryLog && sceneryLog.hitTest && sceneryLog.pop();
 
         // If there was a hit, immediately add our node to the start of the Trail (will recursively build the Trail).
@@ -222,7 +222,7 @@ define( require => {
       assert && assert( typeof andExclusive === 'boolean' );
 
       // Track whether a 'dirty' flag was changed from false=>true (or if ignoreSelfDirty is passed).
-      var wasNotDirty = !!ignoreSelfDirty || !this.mouseInclusiveDirty || !this.touchInclusiveDirty;
+      let wasNotDirty = !!ignoreSelfDirty || !this.mouseInclusiveDirty || !this.touchInclusiveDirty;
 
       this.mouseInclusiveDirty = true;
       this.touchInclusiveDirty = true;
@@ -236,8 +236,8 @@ define( require => {
       // parents. If we are selfPruned, we are guaranteed to not be visited in a search by our parents, so changes
       // that make this picker dirty should NOT affect our parents' pickers values.
       if ( !this.selfPruned && wasNotDirty ) {
-        var parents = this.node._parents;
-        for ( var i = 0; i < parents.length; i++ ) {
+        const parents = this.node._parents;
+        for ( let i = 0; i < parents.length; i++ ) {
           parents[ i ]._picker.invalidate( andExclusive || this.selfInclusive, false );
         }
       }
@@ -259,9 +259,9 @@ define( require => {
 
       this.mouseInclusiveBounds.set( this.node.selfBounds );
 
-      var children = this.node._children;
-      for ( var i = 0; i < children.length; i++ ) {
-        var childPicker = children[ i ]._picker;
+      const children = this.node._children;
+      for ( let i = 0; i < children.length; i++ ) {
+        const childPicker = children[ i ]._picker;
 
         // Since we are "inclusive", we don't care about subtreePrunable (we won't prune for that). Only check
         // if pruning is force (selfPruned).
@@ -297,9 +297,9 @@ define( require => {
 
       this.mouseExclusiveBounds.set( this.node.selfBounds );
 
-      var children = this.node._children;
-      for ( var i = 0; i < children.length; i++ ) {
-        var childPicker = children[ i ]._picker;
+      const children = this.node._children;
+      for ( let i = 0; i < children.length; i++ ) {
+        const childPicker = children[ i ]._picker;
 
         // Since we are not "inclusive", we will prune the search if subtreePrunable is true.
         if ( !childPicker.subtreePrunable ) {
@@ -339,9 +339,9 @@ define( require => {
 
       this.touchInclusiveBounds.set( this.node.selfBounds );
 
-      var children = this.node._children;
-      for ( var i = 0; i < children.length; i++ ) {
-        var childPicker = children[ i ]._picker;
+      const children = this.node._children;
+      for ( let i = 0; i < children.length; i++ ) {
+        const childPicker = children[ i ]._picker;
 
         // Since we are "inclusive", we don't care about subtreePrunable (we won't prune for that). Only check
         // if pruning is force (selfPruned).
@@ -377,9 +377,9 @@ define( require => {
 
       this.touchExclusiveBounds.set( this.node.selfBounds );
 
-      var children = this.node._children;
-      for ( var i = 0; i < children.length; i++ ) {
-        var childPicker = children[ i ]._picker;
+      const children = this.node._children;
+      for ( let i = 0; i < children.length; i++ ) {
+        const childPicker = children[ i ]._picker;
 
         // Since we are not "inclusive", we will prune the search if subtreePrunable is true.
         if ( !childPicker.subtreePrunable ) {
@@ -421,7 +421,7 @@ define( require => {
       }
 
       if ( this.node.hasClipArea() ) {
-        var clipBounds = this.node._clipArea.bounds;
+        const clipBounds = this.node._clipArea.bounds;
         // exclude areas outside of the clipping area's bounds (for efficiency)
         // Uses Bounds2.constrainBounds, but inlined to prevent https://github.com/phetsims/projectile-motion/issues/155
         mutableBounds.minX = Math.max( mutableBounds.minX, clipBounds.minX );
@@ -446,7 +446,7 @@ define( require => {
     onInsertChild: function( childNode ) {
       // If the child is selfPruned, we don't have to update any metadata.
       if ( !childNode._picker.selfPruned ) {
-        var hasPickable = childNode._picker.subtreePickableCount > 0;
+        const hasPickable = childNode._picker.subtreePickableCount > 0;
 
         // If it has a non-zero subtreePickableCount, we'll need to increment our own count by 1.
         if ( hasPickable ) {
@@ -471,7 +471,7 @@ define( require => {
     onRemoveChild: function( childNode ) {
       // If the child is selfPruned, we don't have to update any metadata.
       if ( !childNode._picker.selfPruned ) {
-        var hasPickable = childNode._picker.subtreePickableCount > 0;
+        const hasPickable = childNode._picker.subtreePickableCount > 0;
 
         // If it has a non-zero subtreePickableCount, we'll need to decrement our own count by 1.
         if ( hasPickable ) {
@@ -528,7 +528,7 @@ define( require => {
       this.checkSubtreePrunable();
 
       // Compute our pickable count change (pickable:true counts for 1)
-      var change = ( oldPickable === true ? -1 : 0 ) + ( pickable === true ? 1 : 0 );
+      const change = ( oldPickable === true ? -1 : 0 ) + ( pickable === true ? 1 : 0 );
 
       if ( change ) {
         this.changePickableCount( change );
@@ -602,14 +602,14 @@ define( require => {
      * invalidate ourself.
      */
     checkSelfPruned: function() {
-      var selfPruned = this.node._pickable === false || !this.node.isVisible();
+      const selfPruned = this.node._pickable === false || !this.node.isVisible();
       if ( this.selfPruned !== selfPruned ) {
         this.selfPruned = selfPruned;
 
         // Notify parents
-        var parents = this.node._parents;
-        for ( var i = 0; i < parents.length; i++ ) {
-          var picker = parents[ i ]._picker;
+        const parents = this.node._parents;
+        for ( let i = 0; i < parents.length; i++ ) {
+          const picker = parents[ i ]._picker;
 
           // If we have an input listener/pickable:true in our subtree, we'll need to invalidate exclusive bounds also,
           // and we'll want to update the pickable count of our parent.
@@ -631,7 +631,7 @@ define( require => {
      * @private
      */
     checkSelfInclusive: function() {
-      var selfInclusive = this.node._pickable === true || this.node._inputListeners.length > 0;
+      const selfInclusive = this.node._pickable === true || this.node._inputListeners.length > 0;
       if ( this.selfInclusive !== selfInclusive ) {
         this.selfInclusive = selfInclusive;
 
@@ -645,7 +645,7 @@ define( require => {
      * @private
      */
     checkSubtreePrunable: function() {
-      var subtreePrunable = this.node._pickable === false ||
+      const subtreePrunable = this.node._pickable === false ||
                             !this.node.isVisible() ||
                             ( this.node._pickable !== true && this.subtreePickableCount === 0 );
 
@@ -669,9 +669,9 @@ define( require => {
       }
 
       // Switching between 0 and 1 matters, since we then need to update the counts of our parents.
-      var wasZero = this.subtreePickableCount === 0;
+      const wasZero = this.subtreePickableCount === 0;
       this.subtreePickableCount += n;
-      var isZero = this.subtreePickableCount === 0;
+      const isZero = this.subtreePickableCount === 0;
 
       // Our subtreePrunable value depends on our pickable count, make sure it gets updated.
       this.checkSubtreePrunable();
@@ -680,8 +680,8 @@ define( require => {
 
       if ( !this.selfPruned && wasZero !== isZero ) {
         // Update our parents if our count changed (AND if it matters, i.e. we aren't selfPruned).
-        var len = this.node._parents.length;
-        for ( var i = 0; i < len; i++ ) {
+        const len = this.node._parents.length;
+        for ( let i = 0; i < len; i++ ) {
           this.node._parents[ i ]._picker.changePickableCount( wasZero ? 1 : -1 );
         }
       }
@@ -694,18 +694,18 @@ define( require => {
      */
     audit: function() {
       if ( assertSlow ) {
-        var self = this;
+        const self = this;
 
         _.each( this.node._children, function( node ) {
           node._picker.audit();
         } );
 
-        var expectedSelfPruned = this.node.pickable === false || !this.node.isVisible();
-        var expectedSelfInclusive = this.node.pickable === true || this.node._inputListeners.length > 0;
-        var expectedSubtreePrunable = this.node.pickable === false ||
+        const expectedSelfPruned = this.node.pickable === false || !this.node.isVisible();
+        const expectedSelfInclusive = this.node.pickable === true || this.node._inputListeners.length > 0;
+        const expectedSubtreePrunable = this.node.pickable === false ||
                                       !this.node.isVisible() ||
                                       ( this.node.pickable !== true && this.subtreePickableCount === 0 );
-        var expectedSubtreePickableCount = this.node._inputListeners.length +
+        const expectedSubtreePickableCount = this.node._inputListeners.length +
                                            ( this.node._pickable === true ? 1 : 0 ) +
                                            _.filter( this.node._children, function( child ) {
                                              return !child._picker.selfPruned && child._picker.subtreePickableCount > 0;
@@ -717,8 +717,8 @@ define( require => {
         assertSlow( this.subtreePickableCount === expectedSubtreePickableCount, 'subtreePickableCount mismatch' );
 
         _.each( this.node._parents, function( parent ) {
-          var parentPicker = parent._picker;
-          var childPicker = self;
+          const parentPicker = parent._picker;
+          const childPicker = self;
 
           if ( !parentPicker.mouseInclusiveDirty ) {
             assertSlow( childPicker.selfPruned || !childPicker.mouseInclusiveDirty );

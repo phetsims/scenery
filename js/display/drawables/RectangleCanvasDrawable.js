@@ -61,18 +61,18 @@ define( require => {
      * @param {Matrix3} matrix - The transformation matrix applied for this node's coordinate system.
      */
     paintCanvas: function( wrapper, node, matrix ) {
-      var context = wrapper.context;
+      const context = wrapper.context;
 
       // use the standard version if it's a rounded rectangle, since there is no Canvas-optimized version for that
       if ( node.isRounded() ) {
         context.beginPath();
-        var maximumArcSize = node.getMaximumArcSize();
-        var arcw = Math.min( node._cornerXRadius, maximumArcSize );
-        var arch = Math.min( node._cornerYRadius, maximumArcSize );
-        var lowX = node._rectX + arcw;
-        var highX = node._rectX + node._rectWidth - arcw;
-        var lowY = node._rectY + arch;
-        var highY = node._rectY + node._rectHeight - arch;
+        const maximumArcSize = node.getMaximumArcSize();
+        const arcw = Math.min( node._cornerXRadius, maximumArcSize );
+        const arch = Math.min( node._cornerYRadius, maximumArcSize );
+        const lowX = node._rectX + arcw;
+        const highX = node._rectX + node._rectWidth - arcw;
+        const lowY = node._rectY + arch;
+        const highY = node._rectY + node._rectHeight - arch;
         if ( arcw === arch ) {
           // we can use circular arcs, which have well defined stroked offsets
           context.arc( highX, lowY, arcw, -Math.PI / 2, 0, false );

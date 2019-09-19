@@ -83,7 +83,7 @@ define( require => {
 
     // Make our interval as tight as possible (we may have over-estimated it before)
     constrict: function() {
-      var changed = false;
+      let changed = false;
 
       if ( this.isEmpty() ) { return true; }
 
@@ -129,11 +129,11 @@ define( require => {
     // {number} The quantity of "old" internal drawables. Requires the old first/last drawables for the backbone, since
     // we need that information for null-before/after boundaries.
     getOldInternalDrawableCount: function( oldStitchFirstDrawable, oldStitchLastDrawable ) {
-      var firstInclude = this.drawableBefore ? this.drawableBefore.oldNextDrawable : oldStitchFirstDrawable;
-      var lastExclude = this.drawableAfter; // null is OK here
+      const firstInclude = this.drawableBefore ? this.drawableBefore.oldNextDrawable : oldStitchFirstDrawable;
+      const lastExclude = this.drawableAfter; // null is OK here
 
-      var count = 0;
-      for ( var drawable = firstInclude; drawable !== lastExclude; drawable = drawable.oldNextDrawable ) {
+      let count = 0;
+      for ( let drawable = firstInclude; drawable !== lastExclude; drawable = drawable.oldNextDrawable ) {
         count++;
       }
 
@@ -143,11 +143,11 @@ define( require => {
     // {number} The quantity of "new" internal drawables. Requires the old first/last drawables for the backbone, since
     // we need that information for null-before/after boundaries.
     getNewInternalDrawableCount: function( newStitchFirstDrawable, newStitchLastDrawable ) {
-      var firstInclude = this.drawableBefore ? this.drawableBefore.nextDrawable : newStitchFirstDrawable;
-      var lastExclude = this.drawableAfter; // null is OK here
+      const firstInclude = this.drawableBefore ? this.drawableBefore.nextDrawable : newStitchFirstDrawable;
+      const lastExclude = this.drawableAfter; // null is OK here
 
-      var count = 0;
-      for ( var drawable = firstInclude; drawable !== lastExclude; drawable = drawable.nextDrawable ) {
+      let count = 0;
+      for ( let drawable = firstInclude; drawable !== lastExclude; drawable = drawable.nextDrawable ) {
         count++;
       }
 
@@ -161,7 +161,7 @@ define( require => {
 
   // creates a ChangeInterval that will be disposed after syncTree is complete (see Display phases)
   ChangeInterval.newForDisplay = function( drawableBefore, drawableAfter, display ) {
-    var changeInterval = ChangeInterval.createFromPool( drawableBefore, drawableAfter );
+    const changeInterval = ChangeInterval.createFromPool( drawableBefore, drawableAfter );
     display.markChangeIntervalToDispose( changeInterval );
     return changeInterval;
   };

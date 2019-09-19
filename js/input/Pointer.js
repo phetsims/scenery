@@ -170,7 +170,7 @@ define( require => {
 
       assert && assert( listener, 'A listener must be provided' );
 
-      var index = _.indexOf( this._listeners, listener );
+      const index = _.indexOf( this._listeners, listener );
       assert && assert( index !== -1, 'Could not find the input listener to remove' );
 
       // If this listener is our attached listener, also detach it
@@ -236,9 +236,9 @@ define( require => {
      * @public
      */
     interruptAll: function() {
-      var listeners = this._listeners.slice();
-      for ( var i = 0; i < listeners.length; i++ ) {
-        var listener = listeners[ i ];
+      const listeners = this._listeners.slice();
+      for ( let i = 0; i < listeners.length; i++ ) {
+        const listener = listeners[ i ];
         listener.interrupt && listener.interrupt();
       }
     },

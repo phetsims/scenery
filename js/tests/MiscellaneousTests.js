@@ -10,10 +10,10 @@ define( require => {
 
   QUnit.module( 'Miscellaneous' );
 
-  var includeBleedingEdgeCanvasTests = false;
+  const includeBleedingEdgeCanvasTests = false;
 
   QUnit.test( 'ES5 Object.defineProperty get/set', function( assert ) {
-    var ob = { _key: 5 };
+    const ob = { _key: 5 };
     Object.defineProperty( ob, 'key', {
       enumerable: true,
       configurable: true,
@@ -35,10 +35,10 @@ define( require => {
     QUnit.module( 'Bleeding Edge Canvas Support' );
 
     QUnit.test( 'Canvas 2D v5 Features', function( assert ) {
-      var canvas = document.createElement( 'canvas' );
-      var context = canvas.getContext( '2d' );
+      const canvas = document.createElement( 'canvas' );
+      const context = canvas.getContext( '2d' );
 
-      var neededMethods = [
+      const neededMethods = [
         'addHitRegion',
         'ellipse',
         'resetClip',
@@ -54,9 +54,9 @@ define( require => {
     } );
 
     QUnit.test( 'Text width measurement in canvas', function( assert ) {
-      var canvas = document.createElement( 'canvas' );
-      var context = canvas.getContext( '2d' );
-      var metrics = context.measureText( 'Hello World' );
+      const canvas = document.createElement( 'canvas' );
+      const context = canvas.getContext( '2d' );
+      const metrics = context.measureText( 'Hello World' );
       _.each( [ 'actualBoundingBoxLeft', 'actualBoundingBoxRight', 'actualBoundingBoxAscent', 'actualBoundingBoxDescent' ], function( method ) {
         assert.ok( metrics[ method ] !== undefined, 'metrics.' + method );
       } );

@@ -3,7 +3,7 @@
 $( window ).ready( function() {
   'use strict';
   
-  var element;
+  let element;
 
   function newElement() {
     element = document.createElement( 'div' );

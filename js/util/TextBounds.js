@@ -16,21 +16,21 @@ define( require => {
   const Util = require( 'SCENERY/util/Util' );
 
   // @private {string} - ID for a container for our SVG test element (determined to find the size of text elements with SVG)
-  var TEXT_SIZE_CONTAINER_ID = 'sceneryTextSizeContainer';
+  const TEXT_SIZE_CONTAINER_ID = 'sceneryTextSizeContainer';
 
   // @private {string} - ID for our SVG test element (determined to find the size of text elements with SVG)
-  var TEXT_SIZE_ELEMENT_ID = 'sceneryTextSizeElement';
+  const TEXT_SIZE_ELEMENT_ID = 'sceneryTextSizeElement';
 
   // @private {SVGElement} - Container for our SVG test element (determined to find the size of text elements with SVG)
-  var svgTextSizeContainer;
+  let svgTextSizeContainer;
 
   // @private {SVGElement} - Test SVG element (determined to find the size of text elements with SVG)
-  var svgTextSizeElement;
+  let svgTextSizeElement;
 
   // Maps CSS {string} => {Bounds2}, so that we can cache the vertical font sizes outside of the Font objects themselves.
-  var hybridFontVerticalCache = {};
+  const hybridFontVerticalCache = {};
 
-  var deliveredWarning = false;
+  let deliveredWarning = false;
 
   var TextBounds = {
     /**
@@ -58,7 +58,7 @@ define( require => {
         }
       }
       TextBounds.setSVGTextAttributes( svgTextSizeElement, font, renderedText );
-      var rect = svgTextSizeElement.getBBox();
+      const rect = svgTextSizeElement.getBBox();
 
       if ( rect.width === 0 && rect.height === 0 && renderedText.length > 0 ) {
         if ( !deliveredWarning ) {
@@ -103,7 +103,7 @@ define( require => {
      */
     accurateCanvasBounds: function( text ) {
       // this seems to be slower than expected, mostly due to Font getters
-      var svgBounds = TextBounds.approximateSVGBounds( text._font, text.renderedText );
+      const svgBounds = TextBounds.approximateSVGBounds( text._font, text.renderedText );
 
       //If svgBounds are zero, then return the zero bounds
       if ( !text.renderedText.length || svgBounds.width === 0 ) {
@@ -111,12 +111,12 @@ define( require => {
       }
 
       // NOTE: should return new instance, so that it can be mutated later
-      var accurateBounds = Util.canvasAccurateBounds( function( context ) {
+      const accurateBounds = Util.canvasAccurateBounds( function( context ) {
         context.font = text._font.toCSS();
         context.direction = 'ltr';
         context.fillText( text.renderedText, 0, 0 );
         if ( text.hasPaintableStroke() ) {
-          var fakeWrapper = new CanvasContextWrapper( null, context );
+          const fakeWrapper = new CanvasContextWrapper( null, context );
           text.beforeCanvasStroke( fakeWrapper );
           context.strokeText( text.renderedText, 0, 0 );
           text.afterCanvasStroke( fakeWrapper );
@@ -142,10 +142,10 @@ define( require => {
     getVerticalBounds: function( font ) {
       assert && assert( font instanceof Font, 'Font required' );
 
-      var css = font.toCSS();
+      const css = font.toCSS();
 
       // Cache these, as it's more expensive
-      var verticalBounds = hybridFontVerticalCache[ css ];
+      let verticalBounds = hybridFontVerticalCache[ css ];
       if ( !verticalBounds ) {
         verticalBounds = hybridFontVerticalCache[ css ] = TextBounds.approximateSVGBounds( font, 'm' );
       }
@@ -165,7 +165,7 @@ define( require => {
       assert && assert( font instanceof Font, 'Font required' );
       assert && assert( typeof renderedText === 'string', 'renderedText required' );
 
-      var context = scenery.scratchContext;
+      const context = scenery.scratchContext;
       context.font = font.toCSS();
       context.direction = 'ltr';
       return context.measureText( renderedText ).width;
@@ -187,9 +187,9 @@ define( require => {
       assert && assert( font instanceof Font, 'Font required' );
       assert && assert( typeof renderedText === 'string', 'renderedText required' );
 
-      var verticalBounds = TextBounds.getVerticalBounds( font );
+      const verticalBounds = TextBounds.getVerticalBounds( font );
 
-      var canvasWidth = TextBounds.approximateCanvasWidth( font, renderedText );
+      const canvasWidth = TextBounds.approximateCanvasWidth( font, renderedText );
 
       // it seems that SVG bounds generally have x=0, so we hard code that here
       return new Bounds2( 0, verticalBounds.minY, canvasWidth, verticalBounds.maxY );
@@ -208,11 +208,11 @@ define( require => {
     approximateDOMBounds: function( font, element ) {
       assert && assert( font instanceof Font, 'Font required' );
 
-      var maxHeight = 1024; // technically this will fail if the font is taller than this!
+      const maxHeight = 1024; // technically this will fail if the font is taller than this!
 
       // <div style="position: absolute; left: 0; top: 0; padding: 0 !important; margin: 0 !important;"><span id="baselineSpan" style="font-family: Verdana; font-size: 25px;">QuipTaQiy</span><div style="vertical-align: baseline; display: inline-block; width: 0; height: 500px; margin: 0 important!; padding: 0 important!;"></div></div>
 
-      var div = document.createElement( 'div' );
+      const div = document.createElement( 'div' );
       $( div ).css( {
         position: 'absolute',
         left: 0,
@@ -222,12 +222,12 @@ define( require => {
         display: 'hidden'
       } );
 
-      var span = document.createElement( 'span' );
+      const span = document.createElement( 'span' );
       $( span ).css( 'font', font.toCSS() );
       span.appendChild( element );
       span.setAttribute( 'direction', 'ltr' );
 
-      var fakeImage = document.createElement( 'div' );
+      const fakeImage = document.createElement( 'div' );
       $( fakeImage ).css( {
         'vertical-align': 'baseline',
         display: 'inline-block',
@@ -241,10 +241,10 @@ define( require => {
       div.appendChild( fakeImage );
 
       document.body.appendChild( div );
-      var rect = span.getBoundingClientRect();
-      var divRect = div.getBoundingClientRect();
+      const rect = span.getBoundingClientRect();
+      const divRect = div.getBoundingClientRect();
       // add 1 pixel to rect.right to prevent HTML text wrapping
-      var result = new Bounds2( rect.left, rect.top - maxHeight, rect.right + 1, rect.bottom - maxHeight ).shifted( -divRect.left, -divRect.top );
+      const result = new Bounds2( rect.left, rect.top - maxHeight, rect.right + 1, rect.bottom - maxHeight ).shifted( -divRect.left, -divRect.top );
       document.body.removeChild( div );
 
       return result;
@@ -266,7 +266,7 @@ define( require => {
       assert && assert( font instanceof Font, 'Font required' );
 
       // TODO: reuse this div?
-      var div = document.createElement( 'div' );
+      const div = document.createElement( 'div' );
       div.style.display = 'inline-block';
       div.style.font = font.toCSS();
       div.style.color = 'transparent';
@@ -279,11 +279,11 @@ define( require => {
       div.appendChild( element );
 
       document.body.appendChild( div );
-      var bounds = new Bounds2( div.offsetLeft, div.offsetTop, div.offsetLeft + div.offsetWidth + 1, div.offsetTop + div.offsetHeight + 1 );
+      const bounds = new Bounds2( div.offsetLeft, div.offsetTop, div.offsetLeft + div.offsetWidth + 1, div.offsetTop + div.offsetHeight + 1 );
       document.body.removeChild( div );
 
       // Compensate for the baseline alignment
-      var verticalBounds = TextBounds.getVerticalBounds( font );
+      const verticalBounds = TextBounds.getVerticalBounds( font );
       return bounds.shiftedY( verticalBounds.minY );
     },
 

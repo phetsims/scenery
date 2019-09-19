@@ -103,7 +103,7 @@ define( require => {
       assert && assert( this.svgBlock === svgBlock );
 
       // NOTE: If fill.isPaint === true, this should be different if we switched to a different SVG block.
-      var fillStyle = paintToSVGStyle( fill, svgBlock );
+      const fillStyle = paintToSVGStyle( fill, svgBlock );
 
       // If our fill paint reference changed
       if ( fill !== this.fillPaint ) {
@@ -135,7 +135,7 @@ define( require => {
       assert && assert( this.svgBlock === svgBlock );
 
       // NOTE: If stroke.isPaint === true, this should be different if we switched to a different SVG block.
-      var strokeStyle = paintToSVGStyle( stroke, svgBlock );
+      const strokeStyle = paintToSVGStyle( stroke, svgBlock );
 
       // If our stroke paint reference changed
       if ( stroke !== this.strokePaint ) {
@@ -161,24 +161,24 @@ define( require => {
     },
 
     updateStrokeDetailStyle: function( node ) {
-      var strokeDetailStyle = '';
+      let strokeDetailStyle = '';
 
-      var lineWidth = node.getLineWidth();
+      const lineWidth = node.getLineWidth();
       if ( lineWidth !== 1 ) {
         strokeDetailStyle += 'stroke-width: ' + lineWidth + ';';
       }
 
-      var lineCap = node.getLineCap();
+      const lineCap = node.getLineCap();
       if ( lineCap !== 'butt' ) {
         strokeDetailStyle += 'stroke-linecap: ' + lineCap + ';';
       }
 
-      var lineJoin = node.getLineJoin();
+      const lineJoin = node.getLineJoin();
       if ( lineJoin !== 'miter' ) {
         strokeDetailStyle += 'stroke-linejoin: ' + lineJoin + ';';
       }
 
-      var miterLimit = node.getMiterLimit();
+      const miterLimit = node.getMiterLimit();
       strokeDetailStyle += 'stroke-miterlimit: ' + miterLimit + ';';
 
       if ( node.hasLineDash() ) {
@@ -192,7 +192,7 @@ define( require => {
     // called when the defs SVG block is switched (our SVG element was moved to another SVG top-level context)
     updateSVGBlock: function( svgBlock ) {
       // remove paints from the old svgBlock
-      var oldSvgBlock = this.svgBlock;
+      const oldSvgBlock = this.svgBlock;
       if ( oldSvgBlock ) {
         if ( this.fillPaint ) {
           oldSvgBlock.decrementPaint( this.fillPaint );

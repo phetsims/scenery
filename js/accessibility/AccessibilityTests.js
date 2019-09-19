@@ -18,27 +18,27 @@ define( require => {
   const Rectangle = require( 'SCENERY/nodes/Rectangle' );
 
   // constants
-  var TEST_INNER_CONTENT = 'Test Inner Content Here please^&*. Thanks you so very mucho.';
-  var TEST_LABEL = 'Test label';
-  var TEST_LABEL_2 = 'Test label 2';
-  var TEST_DESCRIPTION = 'Test description';
-  var TEST_LABEL_HTML = '<strong>I ROCK as a LABEL</strong>';
-  var TEST_LABEL_HTML_2 = '<strong>I ROCK as a LABEL 2</strong>';
-  var TEST_DESCRIPTION_HTML = '<strong>I ROCK as a DESCRIPTION</strong>';
-  var TEST_DESCRIPTION_HTML_2 = '<strong>I ROCK as a DESCRIPTION 2</strong>';
+  const TEST_INNER_CONTENT = 'Test Inner Content Here please^&*. Thanks you so very mucho.';
+  const TEST_LABEL = 'Test label';
+  const TEST_LABEL_2 = 'Test label 2';
+  const TEST_DESCRIPTION = 'Test description';
+  const TEST_LABEL_HTML = '<strong>I ROCK as a LABEL</strong>';
+  const TEST_LABEL_HTML_2 = '<strong>I ROCK as a LABEL 2</strong>';
+  const TEST_DESCRIPTION_HTML = '<strong>I ROCK as a DESCRIPTION</strong>';
+  const TEST_DESCRIPTION_HTML_2 = '<strong>I ROCK as a DESCRIPTION 2</strong>';
 
   // These should manually match the defaults in the Accessibility.js trait
-  var DEFAULT_LABEL_TAG_NAME = AccessibilityUtil.DEFAULT_LABEL_TAG_NAME;
-  var DEFAULT_DESCRIPTION_TAG_NAME = AccessibilityUtil.DEFAULT_DESCRIPTION_TAG_NAME;
+  const DEFAULT_LABEL_TAG_NAME = AccessibilityUtil.DEFAULT_LABEL_TAG_NAME;
+  const DEFAULT_DESCRIPTION_TAG_NAME = AccessibilityUtil.DEFAULT_DESCRIPTION_TAG_NAME;
 
   // given the parent container element for a node, this value is the index of the label sibling in the
   // parent's array of children HTMLElements.
-  var DEFAULT_LABEL_SIBLING_INDEX = 0;
-  var DEFAULT_DESCRIPTION_SIBLING_INDEX = 1;
-  var APPENDED_DESCRIPTION_SIBLING_INDEX = 2;
+  const DEFAULT_LABEL_SIBLING_INDEX = 0;
+  const DEFAULT_DESCRIPTION_SIBLING_INDEX = 1;
+  const APPENDED_DESCRIPTION_SIBLING_INDEX = 2;
 
   // a focus highlight for testing, since dummy nodes tend to have no bounds
-  var TEST_HIGHLIGHT = new Circle( 5 );
+  const TEST_HIGHLIGHT = new Circle( 5 );
 
   QUnit.module( 'Accessibility' );
 
@@ -76,7 +76,7 @@ define( require => {
    */
   function getPrimarySiblingElementByNode( node ) {
 
-    var uniquePeer = getAccessiblePeerByNode( node );
+    const uniquePeer = getAccessiblePeerByNode( node );
     return document.getElementById( uniquePeer.primarySibling.id );
   }
 
@@ -84,16 +84,16 @@ define( require => {
   QUnit.test( 'tagName/innerContent options', function( assert ) {
 
     // test the behavior of swapVisibility function
-    var rootNode = new Node( { tagName: 'div' } );
+    const rootNode = new Node( { tagName: 'div' } );
     var display = new Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
 
     // create some nodes for testing
-    var a = new Node( { tagName: 'button', innerContent: TEST_LABEL } );
+    const a = new Node( { tagName: 'button', innerContent: TEST_LABEL } );
 
     rootNode.addChild( a );
 
-    var aElement = getPrimarySiblingElementByNode( a );
+    const aElement = getPrimarySiblingElementByNode( a );
     assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
     assert.ok( aElement.parentElement.childNodes.length === 1, 'parent contains one primary siblings' );
     assert.ok( aElement.tagName === 'BUTTON', 'default label tagName' );
@@ -116,7 +116,7 @@ define( require => {
     assert.ok( getPrimarySiblingElementByNode( a ).innerHTML === TEST_LABEL_HTML_2, 'innerContent not cleared when tagName set to null.' );
 
     // verify that setting inner content on an input is not allowed
-    var b = new Node( { tagName: 'input' } );
+    const b = new Node( { tagName: 'input' } );
     rootNode.addChild( b );
     window.assert && assert.throws( function() {
       b.innerContent = 'this should fail';
@@ -139,12 +139,12 @@ define( require => {
 
 
     // test the behavior of swapVisibility function
-    var rootNode = new Node( { tagName: 'div' } );
+    const rootNode = new Node( { tagName: 'div' } );
     var display = new Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
 
     // create some nodes for testing
-    var a = new Node( { tagName: 'button' } );
+    const a = new Node( { tagName: 'button' } );
 
     rootNode.addChild( a );
     assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
@@ -167,17 +167,17 @@ define( require => {
   QUnit.test( 'labelTagName/labelContent option', function( assert ) {
 
     // test the behavior of swapVisibility function
-    var rootNode = new Node( { tagName: 'div' } );
+    const rootNode = new Node( { tagName: 'div' } );
     var display = new Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
 
     // create some nodes for testing
-    var a = new Node( { tagName: 'button', labelContent: TEST_LABEL } );
+    const a = new Node( { tagName: 'button', labelContent: TEST_LABEL } );
 
     rootNode.addChild( a );
 
-    var aElement = getPrimarySiblingElementByNode( a );
-    var labelSibling = aElement.parentElement.childNodes[ 0 ];
+    const aElement = getPrimarySiblingElementByNode( a );
+    const labelSibling = aElement.parentElement.childNodes[ 0 ];
     assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
     assert.ok( aElement.parentElement.childNodes.length === 2, 'parent contains two siblings' );
     assert.ok( labelSibling.tagName === DEFAULT_LABEL_TAG_NAME, 'default label tagName' );
@@ -191,8 +191,8 @@ define( require => {
 
     a.tagName = 'div';
 
-    var newAElement = getPrimarySiblingElementByNode( a );
-    var newLabelSibling = newAElement.parentElement.childNodes[ 0 ];
+    const newAElement = getPrimarySiblingElementByNode( a );
+    const newLabelSibling = newAElement.parentElement.childNodes[ 0 ];
 
     assert.ok( newLabelSibling.innerHTML === TEST_LABEL_HTML_2, 'tagName independent of: html label should use innerHTML, overwrite from html' );
 
@@ -207,39 +207,39 @@ define( require => {
     a.labelTagName = 'p';
     assert.ok( a.labelTagName === 'p', 'expect labelTagName setter to work.' );
 
-    var b = new Node( { tagName: 'p', labelContent: 'I am groot' } );
+    const b = new Node( { tagName: 'p', labelContent: 'I am groot' } );
     rootNode.addChild( b );
-    var bLabelElement = document.getElementById( b.accessibleInstances[ 0 ].peer.labelSibling.id );
+    let bLabelElement = document.getElementById( b.accessibleInstances[ 0 ].peer.labelSibling.id );
     assert.ok( !bLabelElement.getAttribute( 'for' ), 'for attribute should not be on non label label sibling.' );
     b.labelTagName = 'label';
     bLabelElement = document.getElementById( b.accessibleInstances[ 0 ].peer.labelSibling.id );
     assert.ok( bLabelElement.getAttribute( 'for' ) !== null, 'for attribute should be on "label" tag for label sibling.' );
 
-    var c = new Node( { tagName: 'p' } );
+    const c = new Node( { tagName: 'p' } );
     rootNode.addChild( c );
     c.labelTagName = 'label';
     c.labelContent = TEST_LABEL;
-    var cLabelElement = document.getElementById( c.accessibleInstances[ 0 ].peer.labelSibling.id );
+    const cLabelElement = document.getElementById( c.accessibleInstances[ 0 ].peer.labelSibling.id );
     assert.ok( cLabelElement.getAttribute( 'for' ) !== null, 'order should not matter' );
   } );
 
   QUnit.test( 'container element not needed for multiple siblings', function( assert ) {
 
     // test the behavior of swapVisibility function
-    var rootNode = new Node( { tagName: 'div' } );
+    const rootNode = new Node( { tagName: 'div' } );
     var display = new Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
 
     // test containerTag is not needed
-    var b = new Node( {
+    const b = new Node( {
       tagName: 'div',
       labelContent: 'hello'
     } );
-    var c = new Node( {
+    const c = new Node( {
       tagName: 'section',
       labelContent: 'hi'
     } );
-    var d = new Node( {
+    const d = new Node( {
       tagName: 'p',
       innerContent: 'PPPP',
       containerTagName: 'div'
@@ -247,11 +247,11 @@ define( require => {
     rootNode.addChild( b );
     b.addChild( c );
     b.addChild( d );
-    var bElement = getPrimarySiblingElementByNode( b );
-    var cPeer = c.accessibleInstances[ 0 ].peer;
-    var dPeer = d.accessibleInstances[ 0 ].peer;
+    let bElement = getPrimarySiblingElementByNode( b );
+    let cPeer = c.accessibleInstances[ 0 ].peer;
+    let dPeer = d.accessibleInstances[ 0 ].peer;
     assert.ok( bElement.children.length === 3, 'c.p, c.section, d.div should all be on the same level' );
-    var confirmOriginalOrder = function() {
+    const confirmOriginalOrder = function() {
       assert.ok( bElement.children[ 0 ].tagName === 'P', 'p first' );
       assert.ok( bElement.children[ 1 ].tagName === 'SECTION', 'section 2nd' );
       assert.ok( bElement.children[ 2 ].tagName === 'DIV', 'div 3rd' );
@@ -262,7 +262,7 @@ define( require => {
     confirmOriginalOrder();
 
     // add a few more
-    var e = new Node( {
+    const e = new Node( {
       tagName: 'span',
       descriptionContent: '<br>sweet and cool things</br>'
     } );
@@ -270,11 +270,11 @@ define( require => {
     bElement = getPrimarySiblingElementByNode( b ); // refresh the DOM Elements
     cPeer = c.accessibleInstances[ 0 ].peer; // refresh the DOM Elements
     dPeer = d.accessibleInstances[ 0 ].peer; // refresh the DOM Elements
-    var ePeer = e.accessibleInstances[ 0 ].peer;
+    let ePeer = e.accessibleInstances[ 0 ].peer;
     assert.ok( bElement.children.length === 5, 'e children should be added to the same PDOM level.' );
     confirmOriginalOrder();
 
-    var confirmOriginalWithE = function() {
+    const confirmOriginalWithE = function() {
       assert.ok( bElement.children[ 3 ].tagName === 'P', 'P 4rd' );
       assert.ok( bElement.children[ 4 ].tagName === 'SPAN', 'SPAN 3rd' );
       assert.ok( bElement.children[ 3 ] === ePeer.descriptionSibling, 'e description 4th' );
@@ -321,17 +321,17 @@ define( require => {
   QUnit.test( 'descriptionTagName/descriptionContent option', function( assert ) {
 
     // test the behavior of swapVisibility function
-    var rootNode = new Node( { tagName: 'div' } );
+    const rootNode = new Node( { tagName: 'div' } );
     var display = new Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
 
     // create some nodes for testing
-    var a = new Node( { tagName: 'button', descriptionContent: TEST_DESCRIPTION } );
+    const a = new Node( { tagName: 'button', descriptionContent: TEST_DESCRIPTION } );
 
     rootNode.addChild( a );
 
-    var aElement = getPrimarySiblingElementByNode( a );
-    var descriptionSibling = aElement.parentElement.childNodes[ 0 ];
+    const aElement = getPrimarySiblingElementByNode( a );
+    const descriptionSibling = aElement.parentElement.childNodes[ 0 ];
     assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
     assert.ok( aElement.parentElement.childNodes.length === 2, 'parent contains two siblings' );
     assert.ok( descriptionSibling.tagName === DEFAULT_DESCRIPTION_TAG_NAME, 'default label tagName' );
@@ -359,12 +359,12 @@ define( require => {
 
   QUnit.test( 'Accessibility options', function( assert ) {
 
-    var rootNode = new Node();
+    const rootNode = new Node();
     var display = new Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
 
     // test setting of accessible content through options
-    var buttonNode = new Node( {
+    const buttonNode = new Node( {
       focusHighlight: new Circle( 5 ),
       containerTagName: 'div', // contained in parent element 'div'
       tagName: 'input', // dom element with tag name 'input'
@@ -377,7 +377,7 @@ define( require => {
     } );
     rootNode.addChild( buttonNode );
 
-    var divNode = new Node( {
+    const divNode = new Node( {
       tagName: 'div',
       ariaLabel: TEST_LABEL, // use ARIA label attribute
       accessibleVisible: false, // hidden from screen readers (and browser)
@@ -417,14 +417,14 @@ define( require => {
     //    <p>Test Description</p>
     //  </div>
     // </div>
-    var buttonElement = getPrimarySiblingElementByNode( buttonNode );
+    let buttonElement = getPrimarySiblingElementByNode( buttonNode );
 
-    var buttonParent = buttonElement.parentNode;
-    var buttonPeers = buttonParent.childNodes;
-    var buttonLabel = buttonPeers[ 0 ];
-    var buttonDescription = buttonPeers[ 1 ];
-    var divElement = getPrimarySiblingElementByNode( divNode );
-    var pDescription = divElement.parentElement.childNodes[ 0 ]; // description before primary div
+    const buttonParent = buttonElement.parentNode;
+    const buttonPeers = buttonParent.childNodes;
+    const buttonLabel = buttonPeers[ 0 ];
+    const buttonDescription = buttonPeers[ 1 ];
+    const divElement = getPrimarySiblingElementByNode( divNode );
+    const pDescription = divElement.parentElement.childNodes[ 0 ]; // description before primary div
 
     assert.ok( buttonParent.tagName === 'DIV', 'parent container' );
     assert.ok( buttonLabel.tagName === 'LABEL', 'Label first' );
@@ -453,7 +453,7 @@ define( require => {
   function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
 
     // use a different setter depending on if testing labelledby or describedby
-    var addAssociationFunction = attribute === 'aria-labelledby' ? 'addAriaLabelledbyAssociation' :
+    const addAssociationFunction = attribute === 'aria-labelledby' ? 'addAriaLabelledbyAssociation' :
                                  attribute === 'aria-describedby' ? 'addAriaDescribedbyAssociation' :
                                  attribute === 'aria-activedescendant' ? 'addActiveDescendantAssociation' :
                                  null;
@@ -463,13 +463,13 @@ define( require => {
     }
 
 
-    var rootNode = new Node();
+    const rootNode = new Node();
     var display = new Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
 
     // two new nodes that will be related with the aria-labelledby and aria-describedby associations
-    var a = new Node( { tagName: 'button', labelTagName: 'p', descriptionTagName: 'p' } );
-    var b = new Node( { tagName: 'p', innerContent: TEST_LABEL_2 } );
+    const a = new Node( { tagName: 'button', labelTagName: 'p', descriptionTagName: 'p' } );
+    const b = new Node( { tagName: 'p', innerContent: TEST_LABEL_2 } );
     rootNode.children = [ a, b ];
 
 
@@ -484,11 +484,11 @@ define( require => {
       otherElementName: AccessiblePeer.PRIMARY_SIBLING
     } );
 
-    var aElement = getPrimarySiblingElementByNode( a );
-    var bElement = getPrimarySiblingElementByNode( b );
+    let aElement = getPrimarySiblingElementByNode( a );
+    let bElement = getPrimarySiblingElementByNode( b );
     assert.ok( aElement.getAttribute( attribute ).indexOf( bElement.id ) >= 0, attribute + ' for one node.' );
 
-    var c = new Node( { tagName: 'div', innerContent: TEST_LABEL } );
+    const c = new Node( { tagName: 'div', innerContent: TEST_LABEL } );
     rootNode.addChild( c );
 
     a[ addAssociationFunction ]( {
@@ -499,15 +499,15 @@ define( require => {
 
     aElement = getPrimarySiblingElementByNode( a );
     bElement = getPrimarySiblingElementByNode( b );
-    var cElement = getPrimarySiblingElementByNode( c );
-    var expectedValue = [ bElement.id, cElement.id ].join( ' ' );
+    let cElement = getPrimarySiblingElementByNode( c );
+    const expectedValue = [ bElement.id, cElement.id ].join( ' ' );
     assert.ok( aElement.getAttribute( attribute ) === expectedValue, attribute + ' two nodes' );
 
     // Make c invalidate
     rootNode.removeChild( c );
     rootNode.addChild( new Node( { children: [ c ] } ) );
 
-    var oldValue = expectedValue;
+    const oldValue = expectedValue;
 
     aElement = getPrimarySiblingElementByNode( a );
     cElement = getPrimarySiblingElementByNode( c );
@@ -516,7 +516,7 @@ define( require => {
     assert.ok( aElement.getAttribute( attribute ) === [ bElement.id, cElement.id ].join( ' ' ),
       'should have invalidated on tree change' );
 
-    var d = new Node( { tagName: 'div', descriptionTagName: 'p', innerContent: TEST_LABEL, containerTagName: 'div' } );
+    const d = new Node( { tagName: 'div', descriptionTagName: 'p', innerContent: TEST_LABEL, containerTagName: 'div' } );
     rootNode.addChild( d );
 
     b[ addAssociationFunction ]( {
@@ -526,8 +526,8 @@ define( require => {
     } );
     b.containerTagName = 'div';
 
-    var bParentContainer = getPrimarySiblingElementByNode( b ).parentElement;
-    var dDescriptionElement = getPrimarySiblingElementByNode( d ).parentElement.childNodes[ 0 ];
+    const bParentContainer = getPrimarySiblingElementByNode( b ).parentElement;
+    const dDescriptionElement = getPrimarySiblingElementByNode( d ).parentElement.childNodes[ 0 ];
     assert.ok( bParentContainer.getAttribute( attribute ) !== oldValue, 'should have invalidated on tree change' );
     assert.ok( bParentContainer.getAttribute( attribute ) === dDescriptionElement.id,
       'b parent container element is ' + attribute + ' d description sibling' );
@@ -542,10 +542,10 @@ define( require => {
     //         \
     //          h
     // we want to make sure
-    var e = new Node( { tagName: 'div', innerContent: TEST_LABEL } );
-    var f = new Node( { tagName: 'div', innerContent: TEST_LABEL } );
-    var g = new Node( { tagName: 'div', innerContent: TEST_LABEL } );
-    var h = new Node( { tagName: 'div', innerContent: TEST_LABEL } );
+    const e = new Node( { tagName: 'div', innerContent: TEST_LABEL } );
+    const f = new Node( { tagName: 'div', innerContent: TEST_LABEL } );
+    const g = new Node( { tagName: 'div', innerContent: TEST_LABEL } );
+    const h = new Node( { tagName: 'div', innerContent: TEST_LABEL } );
     e.addChild( f );
     f.addChild( g );
     g.addChild( h );
@@ -569,10 +569,10 @@ define( require => {
       otherElementName: AccessiblePeer.PRIMARY_SIBLING
     } );
 
-    var eElement = getPrimarySiblingElementByNode( e );
-    var fElement = getPrimarySiblingElementByNode( f );
-    var gElement = getPrimarySiblingElementByNode( g );
-    var hElement = getPrimarySiblingElementByNode( h );
+    let eElement = getPrimarySiblingElementByNode( e );
+    let fElement = getPrimarySiblingElementByNode( f );
+    let gElement = getPrimarySiblingElementByNode( g );
+    let hElement = getPrimarySiblingElementByNode( h );
     assert.ok( eElement.getAttribute( attribute ) === fElement.id, 'eElement should be ' + attribute + ' fElement' );
     assert.ok( fElement.getAttribute( attribute ) === gElement.id, 'fElement should be ' + attribute + ' gElement' );
     assert.ok( gElement.getAttribute( attribute ) === hElement.id, 'gElement should be ' + attribute + ' hElement' );
@@ -601,8 +601,8 @@ define( require => {
     assert.ok( gElement.getAttribute( attribute ) === hElement.id, 'gElement should still be ' + attribute + ' hElement' );
 
     // test aria labelled by your self, but a different peer Element, multiple attribute ids included in the test.
-    var containerTagName = 'div';
-    var j = new Node( {
+    const containerTagName = 'div';
+    const j = new Node( {
       tagName: 'button',
       labelTagName: 'label',
       descriptionTagName: 'p',
@@ -628,13 +628,13 @@ define( require => {
       otherElementName: AccessiblePeer.LABEL_SIBLING
     } );
 
-    var checkOnYourOwnAssociations = function( node ) {
+    const checkOnYourOwnAssociations = function( node ) {
 
-      var instance = node._accessibleInstances[ 0 ];
-      var nodePrimaryElement = instance.peer.primarySibling;
-      var nodeParent = nodePrimaryElement.parentElement;
-      var nodeLabelElement = nodeParent.childNodes[ DEFAULT_LABEL_SIBLING_INDEX ];
-      var nodeDescriptionElement = nodeParent.childNodes[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
+      const instance = node._accessibleInstances[ 0 ];
+      const nodePrimaryElement = instance.peer.primarySibling;
+      const nodeParent = nodePrimaryElement.parentElement;
+      const nodeLabelElement = nodeParent.childNodes[ DEFAULT_LABEL_SIBLING_INDEX ];
+      const nodeDescriptionElement = nodeParent.childNodes[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
 
       assert.ok( nodePrimaryElement.getAttribute( attribute ).indexOf( nodeLabelElement.id ) >= 0, attribute + ' your own label element.' );
       assert.ok( nodeParent.getAttribute( attribute ).indexOf( nodeDescriptionElement.id ) >= 0, 'parent ' + attribute + ' your own description.' );
@@ -644,16 +644,16 @@ define( require => {
     };
 
     // add k into the mix
-    var k = new Node( { tagName: 'div' } );
+    const k = new Node( { tagName: 'div' } );
     k[ addAssociationFunction ]( {
       otherNode: j,
       thisElementName: AccessiblePeer.PRIMARY_SIBLING,
       otherElementName: AccessiblePeer.LABEL_SIBLING
     } );
     rootNode.addChild( k );
-    var testK = function() {
-      var kValue = k._accessibleInstances[ 0 ].peer.primarySibling.getAttribute( attribute );
-      var jID = j._accessibleInstances[ 0 ].peer.labelSibling.getAttribute( 'id' );
+    const testK = function() {
+      const kValue = k._accessibleInstances[ 0 ].peer.primarySibling.getAttribute( attribute );
+      const jID = j._accessibleInstances[ 0 ].peer.labelSibling.getAttribute( 'id' );
       assert.ok( jID === kValue, 'k pointing to j' );
     };
 
@@ -673,7 +673,7 @@ define( require => {
     testK();
 
     // check dispose
-    var jParent = new Node( { children: [ j ] } );
+    const jParent = new Node( { children: [ j ] } );
     rootNode.children = [];
     rootNode.addChild( jParent );
     checkOnYourOwnAssociations( j );
@@ -687,7 +687,7 @@ define( require => {
     testK();
 
     // check removeChild with dag
-    var jParent2 = new Node( { children: [ j ] } );
+    const jParent2 = new Node( { children: [ j ] } );
     rootNode.insertChild( 0, jParent2 );
     checkOnYourOwnAssociations( j );
     testK();
@@ -699,31 +699,31 @@ define( require => {
   function testAssociationAttributeBySetters( assert, attribute ) { // eslint-disable-line
 
 
-    var rootNode = new Node();
+    const rootNode = new Node();
     var display = new Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
 
 
     // use a different setter depending on if testing labelledby or describedby
-    var associationsArrayName = attribute === 'aria-labelledby' ? 'ariaLabelledbyAssociations' :
+    const associationsArrayName = attribute === 'aria-labelledby' ? 'ariaLabelledbyAssociations' :
                                 attribute === 'aria-describedby' ? 'ariaDescribedbyAssociations' :
                                 attribute === 'aria-activedescendant' ? 'activeDescendantAssociations' :
                                 null;
 
     // use a different setter depending on if testing labelledby or describedby
-    var associationRemovalFunction = attribute === 'aria-labelledby' ? 'removeAriaLabelledbyAssociation' :
+    const associationRemovalFunction = attribute === 'aria-labelledby' ? 'removeAriaLabelledbyAssociation' :
                                      attribute === 'aria-describedby' ? 'removeAriaDescribedbyAssociation' :
                                      attribute === 'aria-activedescendant' ? 'removeActiveDescendantAssociation' :
                                      null;
 
 
-    var options = {
+    const options = {
       tagName: 'p',
       labelContent: 'hi',
       descriptionContent: 'hello',
       containerTagName: 'div'
     };
-    var n = new Node( options );
+    const n = new Node( options );
     rootNode.addChild( n );
     options[ associationsArrayName ] = [
       {
@@ -732,16 +732,16 @@ define( require => {
         otherElementName: AccessiblePeer.LABEL_SIBLING
       }
     ];
-    var o = new Node( options );
+    const o = new Node( options );
     rootNode.addChild( o );
 
-    var nElement = getPrimarySiblingElementByNode( n );
-    var oElement = getPrimarySiblingElementByNode( o );
+    const nElement = getPrimarySiblingElementByNode( n );
+    const oElement = getPrimarySiblingElementByNode( o );
     assert.ok( oElement.getAttribute( attribute ).indexOf( nElement.id ) >= 0, attribute + ' for two nodes with setter.' );
 
 
     // make a list of associations to test as a setter
-    var randomAssociationObject = {
+    const randomAssociationObject = {
       otherNode: new Node(),
       thisElementName: AccessiblePeer.CONTAINER_PARENT,
       otherElementName: AccessiblePeer.LABEL_SIBLING
@@ -761,7 +761,7 @@ define( require => {
     ];
 
     // test getters and setters
-    var m = new Node( options );
+    const m = new Node( options );
     rootNode.addChild( m );
     assert.ok( _.isEqual( m[ associationsArrayName ], options[ associationsArrayName ] ), 'test association object getter' );
     m[ associationRemovalFunction ]( randomAssociationObject );
@@ -799,8 +799,8 @@ define( require => {
   QUnit.test( 'Accessibility invalidation', function( assert ) {
 
     // test invalidation of accessibility (changing content which requires )
-    var a1 = new Node();
-    var rootNode = new Node();
+    const a1 = new Node();
+    const rootNode = new Node();
 
     a1.tagName = 'button';
 
@@ -811,7 +811,7 @@ define( require => {
     rootNode.addChild( a1 );
 
     // verify that elements are in the DOM
-    var a1Element = getPrimarySiblingElementByNode( a1 );
+    const a1Element = getPrimarySiblingElementByNode( a1 );
     assert.ok( a1Element, 'button in DOM' );
     assert.ok( a1Element.tagName === 'BUTTON', 'button tag name set' );
 
@@ -820,9 +820,9 @@ define( require => {
     a1.descriptionTagName = 'p';
     a1.containerTagName = 'div';
 
-    var buttonElement = a1.accessibleInstances[ 0 ].peer.primarySibling;
-    var parentElement = buttonElement.parentElement;
-    var buttonPeers = parentElement.childNodes;
+    let buttonElement = a1.accessibleInstances[ 0 ].peer.primarySibling;
+    let parentElement = buttonElement.parentElement;
+    const buttonPeers = parentElement.childNodes;
 
     // now html should look like
     // <div id='parent'>
@@ -855,20 +855,20 @@ define( require => {
     assert.ok( parentElement.childNodes[ 1 ].id.indexOf( 'description' ) >= 0, 'description after div when appending both elements' );
     assert.ok( parentElement.childNodes.length === 2, 'no label peer when using just aria-label attribute' );
 
-    var elementInDom = document.getElementById( a1.accessibleInstances[ 0 ].peer.primarySibling.id );
+    const elementInDom = document.getElementById( a1.accessibleInstances[ 0 ].peer.primarySibling.id );
     assert.ok( elementInDom.getAttribute( 'aria-label' ) === TEST_LABEL, 'aria-label set' );
   } );
 
   QUnit.test( 'Accessibility setters/getters', function( assert ) {
 
-    var a1 = new Node( {
+    const a1 = new Node( {
       tagName: 'div'
     } );
     var display = new Display( a1 ); // eslint-disable-line
     document.body.appendChild( display.domElement );
 
     // set/get attributes
-    var a1Element = getPrimarySiblingElementByNode( a1 );
+    let a1Element = getPrimarySiblingElementByNode( a1 );
     a1.setAccessibleAttribute( 'role', 'switch' );
     assert.ok( a1.getAccessibleAttributes()[ 0 ].attribute === 'role', 'attribute set' );
     assert.ok( a1Element.getAttribute( 'role' ) === 'switch', 'HTML attribute set' );
@@ -878,7 +878,7 @@ define( require => {
     assert.ok( !a1.hasAccessibleAttribute( 'role' ), 'should not have accessible attribute' );
     assert.ok( !a1Element.getAttribute( 'role' ), 'attribute removed' );
 
-    var b = new Node( { focusable: true } );
+    const b = new Node( { focusable: true } );
     a1.addChild( b );
     b.tagName = 'div';
     assert.ok( getPrimarySiblingElementByNode( b ).tabIndex >= 0, 'set tagName after focusable' );
@@ -892,28 +892,28 @@ define( require => {
   } );
 
   QUnit.test( 'Next/Previous focusable', function( assert ) {
-    var util = AccessibilityUtil;
+    const util = AccessibilityUtil;
 
-    var rootNode = new Node( { tagName: 'div', focusable: true } );
+    const rootNode = new Node( { tagName: 'div', focusable: true } );
     var display = new Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
 
     // invisible is deprecated don't use in future, this is a workaround for Nodes without bounds
-    var a = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
-    var b = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
-    var c = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
-    var d = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
-    var e = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+    const a = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+    const b = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+    const c = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+    const d = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+    const e = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
     rootNode.children = [ a, b, c, d ];
 
     assert.ok( a.focusable, 'should be focusable' );
 
     // get dom elements from the body
-    var rootElement = getPrimarySiblingElementByNode( rootNode );
-    var aElement = getPrimarySiblingElementByNode( a );
-    var bElement = getPrimarySiblingElementByNode( b );
-    var cElement = getPrimarySiblingElementByNode( c );
-    var dElement = getPrimarySiblingElementByNode( d );
+    const rootElement = getPrimarySiblingElementByNode( rootNode );
+    const aElement = getPrimarySiblingElementByNode( a );
+    const bElement = getPrimarySiblingElementByNode( b );
+    const cElement = getPrimarySiblingElementByNode( c );
+    const dElement = getPrimarySiblingElementByNode( d );
 
     a.focus();
     assert.ok( document.activeElement.id === aElement.id, 'a in focus (next)' );
@@ -958,21 +958,21 @@ define( require => {
   } );
 
   QUnit.test( 'Remove accessibility subtree', function( assert ) {
-    var rootNode = new Node( { tagName: 'div', focusable: true } );
+    const rootNode = new Node( { tagName: 'div', focusable: true } );
     var display = new Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
 
-    var a = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
-    var b = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
-    var c = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
-    var d = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
-    var e = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
-    var f = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+    const a = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+    const b = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+    const c = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+    const d = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+    const e = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
+    const f = new Node( { tagName: 'div', focusable: true, focusHighlight: 'invisible' } );
     rootNode.children = [ a, b, c, d, e ];
     d.addChild( f );
 
-    var rootDOMElement = getPrimarySiblingElementByNode( rootNode );
-    var dDOMElement = getPrimarySiblingElementByNode( d );
+    let rootDOMElement = getPrimarySiblingElementByNode( rootNode );
+    let dDOMElement = getPrimarySiblingElementByNode( d );
 
     // verify the dom
     assert.ok( rootDOMElement.children.length === 5, 'children added' );
@@ -988,15 +988,15 @@ define( require => {
   QUnit.test( 'accessible-dag', function( assert ) {
 
     // test accessibility for multiple instances of a node
-    var rootNode = new Node( { tagName: 'div', focusable: true } );
+    const rootNode = new Node( { tagName: 'div', focusable: true } );
     var display = new Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
 
-    var a = new Node( { tagName: 'div' } );
-    var b = new Node( { tagName: 'div' } );
-    var c = new Node( { tagName: 'div' } );
-    var d = new Node( { tagName: 'div' } );
-    var e = new Node( { tagName: 'div' } );
+    const a = new Node( { tagName: 'div' } );
+    const b = new Node( { tagName: 'div' } );
+    const c = new Node( { tagName: 'div' } );
+    const d = new Node( { tagName: 'div' } );
+    const e = new Node( { tagName: 'div' } );
 
     rootNode.addChild( a );
     a.children = [ b, c, d ];
@@ -1015,7 +1015,7 @@ define( require => {
     //       <div id="e-instance2">
     //     <div id="d">
     //       <div id="e-instance2">
-    var instances = e.accessibleInstances;
+    const instances = e.accessibleInstances;
     assert.ok( e.accessibleInstances.length === 3, 'node e should have 3 accessible instances' );
     assert.ok( ( instances[ 0 ].peer.primarySibling.id !== instances[ 1 ].peer.primarySibling.id ) &&
                ( instances[ 1 ].peer.primarySibling.id !== instances[ 2 ].peer.primarySibling.id ) &&
@@ -1028,29 +1028,29 @@ define( require => {
   QUnit.test( 'replaceChild', function( assert ) {
 
     // test the behavior of replaceChild function
-    var rootNode = new Node( { tagName: 'div' } );
+    const rootNode = new Node( { tagName: 'div' } );
     var display = new Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
 
     // a custom focus highlight (since dummy node's have no bounds)
-    var focusHighlight = new Rectangle( 0, 0, 10, 10 );
+    const focusHighlight = new Rectangle( 0, 0, 10, 10 );
 
     // create some nodes for testing
-    var a = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
-    var b = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
-    var c = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
-    var d = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
-    var e = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
-    var f = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
+    const a = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
+    const b = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
+    const c = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
+    const d = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
+    const e = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
+    const f = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
 
     // a child that will be added through replaceChild()
-    var testNode = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
+    const testNode = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
 
     // make sure replaceChild puts the child in the right spot
     a.children = [ b, c, d, e, f ];
-    var initIndex = a.indexOfChild( e );
+    const initIndex = a.indexOfChild( e );
     a.replaceChild( e, testNode );
-    var afterIndex = a.indexOfChild( testNode );
+    const afterIndex = a.indexOfChild( testNode );
 
     assert.ok( a.hasChild( testNode ), 'a should have child testNode after it replaced node e' );
     assert.ok( !a.hasChild( e ), 'a should no longer have child node e after it was replaced by testNode' );
@@ -1108,8 +1108,8 @@ define( require => {
 
   QUnit.test( 'accessibleVisible', function( assert ) {
 
-    var rootNode = new Node();
-    var display = new Display( rootNode );
+    const rootNode = new Node();
+    const display = new Display( rootNode );
     document.body.appendChild( display.domElement );
 
     // test with a scene graph
@@ -1120,13 +1120,13 @@ define( require => {
     //       d  e  f
     //           \ /
     //            g
-    var a = new Node();
-    var b = new Node();
-    var c = new Node();
-    var d = new Node();
-    var e = new Node();
-    var f = new Node();
-    var g = new Node();
+    const a = new Node();
+    const b = new Node();
+    const c = new Node();
+    const d = new Node();
+    const e = new Node();
+    const f = new Node();
+    const g = new Node();
 
     rootNode.addChild( a );
     a.children = [ b, c ];
@@ -1148,14 +1148,14 @@ define( require => {
     //   <button id="g2">
 
     // get the accessible primary siblings - looking into accessibleInstances for testing, there is no getter for primarySibling
-    var divA = a.accessibleInstances[ 0 ].peer.primarySibling;
-    var buttonB = b.accessibleInstances[ 0 ].peer.primarySibling;
-    var divE = e.accessibleInstances[ 0 ].peer.primarySibling;
-    var buttonG1 = g.accessibleInstances[ 0 ].peer.primarySibling;
-    var buttonG2 = g.accessibleInstances[ 1 ].peer.primarySibling;
+    const divA = a.accessibleInstances[ 0 ].peer.primarySibling;
+    const buttonB = b.accessibleInstances[ 0 ].peer.primarySibling;
+    const divE = e.accessibleInstances[ 0 ].peer.primarySibling;
+    const buttonG1 = g.accessibleInstances[ 0 ].peer.primarySibling;
+    const buttonG2 = g.accessibleInstances[ 1 ].peer.primarySibling;
 
-    var divAChildren = divA.childNodes;
-    var divEChildren = divE.childNodes;
+    const divAChildren = divA.childNodes;
+    const divEChildren = divE.childNodes;
 
     assert.ok( _.includes( divAChildren, buttonB ), 'button B should be an immediate child of div A' );
     assert.ok( _.includes( divAChildren, divE ), 'div E should be an immediate child of div A' );
@@ -1194,16 +1194,16 @@ define( require => {
 
   QUnit.test( 'inputValue', function( assert ) {
 
-    var rootNode = new Node();
-    var display = new Display( rootNode );
+    const rootNode = new Node();
+    const display = new Display( rootNode );
     document.body.appendChild( display.domElement );
 
-    var a = new Node( { tagName: 'input', inputType: 'radio', inputValue: 'i am value' } );
+    const a = new Node( { tagName: 'input', inputType: 'radio', inputValue: 'i am value' } );
     rootNode.addChild( a );
-    var aElement = getPrimarySiblingElementByNode( a );
+    let aElement = getPrimarySiblingElementByNode( a );
     assert.ok( aElement.getAttribute( 'value' ) === 'i am value', 'should have correct value' );
 
-    var differentValue = 'i am different value';
+    const differentValue = 'i am different value';
     a.inputValue = differentValue;
     aElement = getPrimarySiblingElementByNode( a );
     assert.ok( aElement.getAttribute( 'value' ) === differentValue, 'should have different value' );
@@ -1215,18 +1215,18 @@ define( require => {
 
   QUnit.test( 'ariaValueText', function( assert ) {
 
-    var rootNode = new Node();
-    var display = new Display( rootNode );
+    const rootNode = new Node();
+    const display = new Display( rootNode );
     document.body.appendChild( display.domElement );
 
     const ariaValueText = 'this is my value text';
-    var a = new Node( { tagName: 'input', ariaValueText: ariaValueText } );
+    const a = new Node( { tagName: 'input', ariaValueText: ariaValueText } );
     rootNode.addChild( a );
-    var aElement = getPrimarySiblingElementByNode( a );
+    let aElement = getPrimarySiblingElementByNode( a );
     assert.ok( aElement.getAttribute( 'aria-valuetext' ) === ariaValueText, 'should have correct value text.' );
     assert.ok( a.ariaValueText === ariaValueText, 'should have correct value text, getter' );
 
-    var differentValue = 'i am different value text';
+    const differentValue = 'i am different value text';
     a.ariaValueText = differentValue;
     aElement = getPrimarySiblingElementByNode( a );
     assert.ok( aElement.getAttribute( 'aria-valuetext' ) === differentValue, 'should have different value text' );
@@ -1246,15 +1246,15 @@ define( require => {
 
   QUnit.test( 'setAccessibleAttribute', function( assert ) {
 
-    var rootNode = new Node();
-    var display = new Display( rootNode );
+    const rootNode = new Node();
+    const display = new Display( rootNode );
     document.body.appendChild( display.domElement );
 
-    var a = new Node( { tagName: 'div', labelContent: 'hello' } );
+    const a = new Node( { tagName: 'div', labelContent: 'hello' } );
     rootNode.addChild( a );
 
     a.setAccessibleAttribute( 'test', 'test1' );
-    var aElement = getPrimarySiblingElementByNode( a );
+    let aElement = getPrimarySiblingElementByNode( a );
     assert.ok( aElement.getAttribute( 'test' ) === 'test1', 'setAccessibleAttribute for primary sibling' );
 
     a.removeAccessibleAttribute( 'test' );
@@ -1266,9 +1266,9 @@ define( require => {
       elementName: AccessiblePeer.LABEL_SIBLING
     } );
 
-    var testBothAttributes = function() {
+    const testBothAttributes = function() {
       aElement = getPrimarySiblingElementByNode( a );
-      var aLabelElement = aElement.parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
+      const aLabelElement = aElement.parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
       assert.ok( aElement.getAttribute( 'test' ) === 'testValue', 'setAccessibleAttribute for primary sibling 2' );
       assert.ok( aLabelElement.getAttribute( 'test' ) === 'testValueLabel', 'setAccessibleAttribute for label sibling' );
     };
@@ -1284,20 +1284,20 @@ define( require => {
       elementName: AccessiblePeer.LABEL_SIBLING
     } );
     aElement = getPrimarySiblingElementByNode( a );
-    var aLabelElement = aElement.parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
+    const aLabelElement = aElement.parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
     assert.ok( aElement.getAttribute( 'test' ) === 'testValue', 'removeAccessibleAttribute for label should not effect primary sibling ' );
     assert.ok( aLabelElement.getAttribute( 'test' ) === null, 'removeAccessibleAttribute for label sibling' );
   } );
 
   QUnit.test( 'accessibleChecked', function( assert ) {
 
-    var rootNode = new Node();
-    var display = new Display( rootNode );
+    const rootNode = new Node();
+    const display = new Display( rootNode );
     document.body.appendChild( display.domElement );
 
-    var a = new Node( { tagName: 'input', inputType: 'radio', accessibleChecked: true } );
+    const a = new Node( { tagName: 'input', inputType: 'radio', accessibleChecked: true } );
     rootNode.addChild( a );
-    var aElement = getPrimarySiblingElementByNode( a );
+    let aElement = getPrimarySiblingElementByNode( a );
     assert.ok( aElement.checked, 'should be checked' );
 
     a.accessibleChecked = false;
@@ -1314,17 +1314,17 @@ define( require => {
 
 
     // test the behavior of swapVisibility function
-    var rootNode = new Node( { tagName: 'div' } );
+    const rootNode = new Node( { tagName: 'div' } );
     var display = new Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
 
     // a custom focus highlight (since dummy node's have no bounds)
-    var focusHighlight = new Rectangle( 0, 0, 10, 10 );
+    const focusHighlight = new Rectangle( 0, 0, 10, 10 );
 
     // create some nodes for testing
-    var a = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
-    var b = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
-    var c = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
+    const a = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
+    const b = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
+    const c = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
 
     rootNode.addChild( a );
     a.children = [ b, c ];
@@ -1377,19 +1377,19 @@ define( require => {
 
 
     // test the behavior of swapVisibility function
-    var rootNode = new Node( { tagName: 'div' } );
+    const rootNode = new Node( { tagName: 'div' } );
     var display = new Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
 
     // create some nodes for testing
-    var a = new Node( { tagName: 'button', ariaLabel: TEST_LABEL_2 } );
+    const a = new Node( { tagName: 'button', ariaLabel: TEST_LABEL_2 } );
 
     assert.ok( a.ariaLabel === TEST_LABEL_2, 'aria-label getter/setter' );
     assert.ok( a.labelContent === null, 'no other label set with aria-label' );
     assert.ok( a.innerContent === null, 'no inner content set with aria-label' );
 
     rootNode.addChild( a );
-    var buttonA = a.accessibleInstances[ 0 ].peer.primarySibling;
+    let buttonA = a.accessibleInstances[ 0 ].peer.primarySibling;
     assert.ok( buttonA.getAttribute( 'aria-label' ) === TEST_LABEL_2, 'setter on dom element' );
     assert.ok( buttonA.innerHTML === '', 'no inner html with aria-label setter' );
 
@@ -1404,11 +1404,11 @@ define( require => {
   QUnit.test( 'focusable option', function( assert ) {
 
     // test the behavior of focusable function
-    var rootNode = new Node( { tagName: 'div' } );
+    const rootNode = new Node( { tagName: 'div' } );
     var display = new Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
 
-    var a = new Node( { tagName: 'div', focusable: true } );
+    const a = new Node( { tagName: 'div', focusable: true } );
     rootNode.addChild( a );
 
     assert.ok( a.focusable === true, 'focusable option setter' );
@@ -1423,7 +1423,7 @@ define( require => {
     a.focusable = false;
     assert.ok( getPrimarySiblingElementByNode( a ).tabIndex === -1, 'set focusable false' );
 
-    var b = new Node( { tagName: 'p' } );
+    const b = new Node( { tagName: 'p' } );
     rootNode.addChild( b );
 
     b.focusable = true;
@@ -1432,7 +1432,7 @@ define( require => {
     assert.ok( getPrimarySiblingElementByNode( b ).tabIndex === 0, 'set focusable as setter' );
 
     // HTML elements that are natively focusable are focusable by default
-    var c = new Node( { tagName: 'button' } );
+    const c = new Node( { tagName: 'button' } );
     assert.ok( c.focusable, 'button is focusable by default' );
 
     // change tagName to something that is not focusable, focusable should be false
@@ -1440,7 +1440,7 @@ define( require => {
     assert.ok( !c.focusable, 'button changed to paragraph, should no longer be focusable' );
 
     // When focusable is set to null on an element that is not focusable by default, it should lose focus
-    var d = new Node( { tagName: 'div', focusable: true } );
+    const d = new Node( { tagName: 'div', focusable: true } );
     rootNode.addChild( d );
     d.focus();
     assert.ok( d.focused, 'focusable div should be focused after calling focus()' );
@@ -1453,11 +1453,11 @@ define( require => {
 
 
     // test the behavior of focusable function
-    var rootNode = new Node( { tagName: 'div' } );
-    var display = new Display( rootNode );
+    const rootNode = new Node( { tagName: 'div' } );
+    const display = new Display( rootNode );
     document.body.appendChild( display.domElement );
 
-    var a = new Node( {
+    const a = new Node( {
       tagName: 'li',
       innerContent: TEST_INNER_CONTENT,
       labelTagName: 'h3',
@@ -1468,8 +1468,8 @@ define( require => {
     } );
     rootNode.addChild( a );
 
-    var aElement = getPrimarySiblingElementByNode( a );
-    var containerElement = aElement.parentElement;
+    const aElement = getPrimarySiblingElementByNode( a );
+    let containerElement = aElement.parentElement;
     assert.ok( containerElement.tagName.toUpperCase() === 'SECTION', 'container parent is set to right tag' );
 
 
@@ -1496,7 +1496,7 @@ define( require => {
 
     // test order when using appendLabel/appendDescription without a parent container - order should be primary sibling,
     // label sibling, description sibling
-    var b = new Node( {
+    const b = new Node( {
       tagName: 'input',
       inputType: 'checkbox',
       labelTagName: 'label',
@@ -1507,10 +1507,10 @@ define( require => {
     } );
     rootNode.addChild( b );
 
-    var bPeer = getAccessiblePeerByNode( b );
-    var bElement = getPrimarySiblingElementByNode( b );
-    var bElementParent = bElement.parentElement;
-    var indexOfPrimaryElement = Array.prototype.indexOf.call( bElementParent.childNodes, bElement );
+    let bPeer = getAccessiblePeerByNode( b );
+    let bElement = getPrimarySiblingElementByNode( b );
+    let bElementParent = bElement.parentElement;
+    let indexOfPrimaryElement = Array.prototype.indexOf.call( bElementParent.childNodes, bElement );
 
     assert.ok( bElementParent.childNodes[ indexOfPrimaryElement ] === bElement, 'b primary sibling first with no container, both appended' );
     assert.ok( bElementParent.childNodes[ indexOfPrimaryElement + 1 ] === bPeer.labelSibling, 'b label sibling second with no container, both appended' );
@@ -1534,11 +1534,11 @@ define( require => {
   QUnit.test( 'containerAriaRole option', function( assert ) {
 
     // test the behavior of focusable function
-    var rootNode = new Node( { tagName: 'div' } );
-    var display = new Display( rootNode );
+    const rootNode = new Node( { tagName: 'div' } );
+    const display = new Display( rootNode );
     document.body.appendChild( display.domElement );
 
-    var a = new Node( {
+    const a = new Node( {
       tagName: 'div',
       containerTagName: 'div',
       containerAriaRole: 'application'
@@ -1546,7 +1546,7 @@ define( require => {
 
     rootNode.addChild( a );
     assert.ok( a.containerAriaRole === 'application', 'role attribute should be on node property' );
-    var aElement = getPrimarySiblingElementByNode( a );
+    let aElement = getPrimarySiblingElementByNode( a );
     assert.ok( aElement.parentElement.getAttribute( 'role' ) === 'application', 'role attribute should be on parent element' );
 
     a.containerAriaRole = null;
@@ -1558,18 +1558,18 @@ define( require => {
   QUnit.test( 'ariaRole option', function( assert ) {
 
     // test the behavior of focusable function
-    var rootNode = new Node( { tagName: 'div' } );
-    var display = new Display( rootNode );
+    const rootNode = new Node( { tagName: 'div' } );
+    const display = new Display( rootNode );
     document.body.appendChild( display.domElement );
 
-    var a = new Node( {
+    const a = new Node( {
       tagName: 'div',
       ariaRole: 'application'
     } );
 
     rootNode.addChild( a );
     assert.ok( a.ariaRole === 'application', 'role attribute should be on node property' );
-    var aElement = getPrimarySiblingElementByNode( a );
+    let aElement = getPrimarySiblingElementByNode( a );
     assert.ok( aElement.getAttribute( 'role' ) === 'application', 'role attribute should be on element' );
 
     a.ariaRole = null;
@@ -1585,30 +1585,30 @@ define( require => {
     assert.ok( true );
 
     // test the behavior of focusable function
-    var rootNode = new Node( { tagName: 'div' } );
+    const rootNode = new Node( { tagName: 'div' } );
     var display = new Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
 
-    var a = new Node( { tagName: 'div', accessibleName: TEST_LABEL } );
+    const a = new Node( { tagName: 'div', accessibleName: TEST_LABEL } );
     rootNode.addChild( a );
 
     assert.ok( a.accessibleName === TEST_LABEL, 'accessibleName getter' );
 
-    var aElement = getPrimarySiblingElementByNode( a );
+    const aElement = getPrimarySiblingElementByNode( a );
     assert.ok( aElement.textContent === TEST_LABEL, 'accessibleName setter on div' );
 
-    var b = new Node( { tagName: 'input', accessibleName: TEST_LABEL } );
+    const b = new Node( { tagName: 'input', accessibleName: TEST_LABEL } );
     a.addChild( b );
-    var bElement = getPrimarySiblingElementByNode( b );
-    var bParent = getPrimarySiblingElementByNode( b ).parentElement;
-    var bLabelSibling = bParent.children[ DEFAULT_LABEL_SIBLING_INDEX ];
+    const bElement = getPrimarySiblingElementByNode( b );
+    const bParent = getPrimarySiblingElementByNode( b ).parentElement;
+    const bLabelSibling = bParent.children[ DEFAULT_LABEL_SIBLING_INDEX ];
     assert.ok( bLabelSibling.textContent === TEST_LABEL, 'accessibleName sets label sibling' );
     assert.ok( bLabelSibling.getAttribute( 'for' ).indexOf( bElement.id ) >= 0, 'accessibleName sets label\'s "for" attribute' );
 
 
-    var c = new Node( { containerTagName: 'div', tagName: 'div', ariaLabel: 'overrideThis' } );
+    const c = new Node( { containerTagName: 'div', tagName: 'div', ariaLabel: 'overrideThis' } );
     rootNode.addChild( c );
-    var accessibleNameBehavior = function( node, options, accessibleName ) {
+    const accessibleNameBehavior = function( node, options, accessibleName ) {
 
       options.ariaLabel = accessibleName;
       return options;
@@ -1617,7 +1617,7 @@ define( require => {
 
     assert.ok( c.accessibleNameBehavior === accessibleNameBehavior, 'getter works' );
 
-    var cLabelElement = getPrimarySiblingElementByNode( c ).parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
+    let cLabelElement = getPrimarySiblingElementByNode( c ).parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
     assert.ok( cLabelElement.getAttribute( 'aria-label' ) === 'overrideThis', 'accessibleNameBehavior should not work until there is accessible name' );
     c.accessibleName = 'accessible name description';
     cLabelElement = getPrimarySiblingElementByNode( c ).parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
@@ -1640,16 +1640,16 @@ define( require => {
     assert.ok( true );
 
     // test the behavior of focusable function
-    var rootNode = new Node( { tagName: 'div' } );
+    const rootNode = new Node( { tagName: 'div' } );
     var display = new Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
 
-    var a = new Node( { tagName: 'div', accessibleHeading: TEST_LABEL, containerTagName: 'div' } );
+    const a = new Node( { tagName: 'div', accessibleHeading: TEST_LABEL, containerTagName: 'div' } );
     rootNode.addChild( a );
 
     assert.ok( a.accessibleHeading === TEST_LABEL, 'accessibleName getter' );
 
-    var aLabelSibling = getPrimarySiblingElementByNode( a ).parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
+    const aLabelSibling = getPrimarySiblingElementByNode( a ).parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
     assert.ok( aLabelSibling.textContent === TEST_LABEL, 'accessibleHeading setter on div' );
     assert.ok( aLabelSibling.tagName === 'H1', 'accessibleHeading setter should be h1' );
   } );
@@ -1660,12 +1660,12 @@ define( require => {
     assert.ok( true );
 
     // test the behavior of focusable function
-    var rootNode = new Node( { tagName: 'div' } );
+    const rootNode = new Node( { tagName: 'div' } );
     var display = new Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
 
     // label tag needed for default sibling indices to work
-    var a = new Node( {
+    const a = new Node( {
       containerTagName: 'div',
       tagName: 'div',
       labelTagName: 'div',
@@ -1677,10 +1677,10 @@ define( require => {
     assert.ok( a.helpText === TEST_DESCRIPTION, 'helpText getter' );
 
     // default for help text is to append description after the primary sibling
-    var aDescriptionElement = getPrimarySiblingElementByNode( a ).parentElement.children[ APPENDED_DESCRIPTION_SIBLING_INDEX ];
+    const aDescriptionElement = getPrimarySiblingElementByNode( a ).parentElement.children[ APPENDED_DESCRIPTION_SIBLING_INDEX ];
     assert.ok( aDescriptionElement.textContent === TEST_DESCRIPTION, 'helpText setter on div' );
 
-    var b = new Node( {
+    const b = new Node( {
       containerTagName: 'div',
       tagName: 'button',
       descriptionContent: 'overrideThis',
@@ -1695,7 +1695,7 @@ define( require => {
       return options;
     };
 
-    var bDescriptionElement = getPrimarySiblingElementByNode( b ).parentElement.children[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
+    let bDescriptionElement = getPrimarySiblingElementByNode( b ).parentElement.children[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
     assert.ok( bDescriptionElement.textContent === 'overrideThis', 'helpTextBehavior should not work until there is help text' );
     b.helpText = 'help text description';
     bDescriptionElement = getPrimarySiblingElementByNode( b ).parentElement.children[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
@@ -1715,12 +1715,12 @@ define( require => {
   QUnit.test( 'move to front/move to back', function( assert ) {
 
     // make sure state is restored after moving children to front and back
-    var rootNode = new Node( { tagName: 'div' } );
-    var display = new Display( rootNode );
+    const rootNode = new Node( { tagName: 'div' } );
+    const display = new Display( rootNode );
     document.body.appendChild( display.domElement );
 
-    var a = new Node( { tagName: 'button', focusHighlight: TEST_HIGHLIGHT } );
-    var b = new Node( { tagName: 'button', focusHighlight: TEST_HIGHLIGHT } );
+    const a = new Node( { tagName: 'button', focusHighlight: TEST_HIGHLIGHT } );
+    const b = new Node( { tagName: 'button', focusHighlight: TEST_HIGHLIGHT } );
     rootNode.children = [ a, b ];
     b.focus();
 
@@ -1740,24 +1740,24 @@ define( require => {
 
   // these fuzzers take time, so it is nice when they are last
   QUnit.test( 'AccessibilityFuzzer with 3 nodes', function( assert ) {
-    var fuzzer = new AccessibilityFuzzer( 3, false );
-    for ( var i = 0; i < 5000; i++ ) {
+    const fuzzer = new AccessibilityFuzzer( 3, false );
+    for ( let i = 0; i < 5000; i++ ) {
       fuzzer.step();
     }
     assert.expect( 0 );
   } );
 
   QUnit.test( 'AccessibilityFuzzer with 4 nodes', function( assert ) {
-    var fuzzer = new AccessibilityFuzzer( 4, false );
-    for ( var i = 0; i < 1000; i++ ) {
+    const fuzzer = new AccessibilityFuzzer( 4, false );
+    for ( let i = 0; i < 1000; i++ ) {
       fuzzer.step();
     }
     assert.expect( 0 );
   } );
 
   QUnit.test( 'AccessibilityFuzzer with 5 nodes', function( assert ) {
-    var fuzzer = new AccessibilityFuzzer( 5, false );
-    for ( var i = 0; i < 300; i++ ) {
+    const fuzzer = new AccessibilityFuzzer( 5, false );
+    for ( let i = 0; i < 300; i++ ) {
       fuzzer.step();
     }
     assert.expect( 0 );

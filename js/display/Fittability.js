@@ -83,7 +83,7 @@ define( require => {
      * @public
      */
     checkSelfFittability: function() {
-      var newSelfFittable = this.isSelfFitSupported();
+      const newSelfFittable = this.isSelfFitSupported();
       if ( this.selfFittable !== newSelfFittable ) {
         this.updateSelfFittable();
       }
@@ -114,8 +114,8 @@ define( require => {
 
       this.ancestorsFittable = true;
 
-      var children = this.instance.children;
-      for ( var i = 0; i < children.length; i++ ) {
+      const children = this.instance.children;
+      for ( let i = 0; i < children.length; i++ ) {
         children[ i ].fittability.markSubtreeFittable();
       }
 
@@ -136,8 +136,8 @@ define( require => {
 
       this.ancestorsFittable = false;
 
-      var children = this.instance.children;
-      for ( var i = 0; i < children.length; i++ ) {
+      const children = this.instance.children;
+      for ( let i = 0; i < children.length; i++ ) {
         children[ i ].fittability.markSubtreeUnfittable();
       }
 
@@ -150,7 +150,7 @@ define( require => {
      * @private
      */
     updateSelfFittable: function() {
-      var newSelfFittable = this.isSelfFitSupported();
+      const newSelfFittable = this.isSelfFitSupported();
       assert && assert( this.selfFittable !== newSelfFittable );
 
       this.selfFittable = newSelfFittable;
@@ -250,7 +250,7 @@ define( require => {
 
         // Our subtree unfittable count should be the sum of children that have a non-zero count, plus 1 if our self
         // is not fittable
-        var subtreeUnfittableCount = 0;
+        let subtreeUnfittableCount = 0;
         if ( !this.selfFittable ) {
           subtreeUnfittableCount++;
         }

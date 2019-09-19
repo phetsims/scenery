@@ -35,14 +35,14 @@ define( require => {
   inherit( Pointer, Pen, {
 
     move: function( point, event ) {
-      var pointChanged = this.hasPointChanged( point );
+      const pointChanged = this.hasPointChanged( point );
       // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
       return pointChanged;
     },
 
     end: function( point, event ) {
-      var pointChanged = this.hasPointChanged( point );
+      const pointChanged = this.hasPointChanged( point );
       // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
       this.isDown = false;
@@ -50,7 +50,7 @@ define( require => {
     },
 
     cancel: function( point, event ) {
-      var pointChanged = this.hasPointChanged( point );
+      const pointChanged = this.hasPointChanged( point );
       // if ( this.point ) { this.point.freeToPool(); }
       this.point = point;
       this.isDown = false;

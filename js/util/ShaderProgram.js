@@ -33,7 +33,7 @@ define( require => {
   return inherit( Object, ShaderProgram, {
     // initializes (or reinitializes) the WebGL state and uniform/attribute references.
     initialize: function( gl ) {
-      var self = this;
+      const self = this;
       this.gl = gl; // TODO: create them with separate contexts
 
       this.used = false;
@@ -83,7 +83,7 @@ define( require => {
     use: function() {
       if ( this.used ) { return; }
 
-      var self = this;
+      const self = this;
 
       this.used = true;
 
@@ -115,7 +115,7 @@ define( require => {
     unuse: function() {
       if ( !this.used ) { return; }
 
-      var self = this;
+      const self = this;
 
       this.used = false;
 

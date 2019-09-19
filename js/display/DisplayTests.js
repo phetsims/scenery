@@ -47,20 +47,20 @@ define( require => {
     // The stubDisplay It's a hack that implements the subset of the Display API needed where called. It will definitely
     // be removed. The reason it stores the frame ID is because much of Scenery 0.2 uses ID comparison to determine
     // dirty state. That allows us to not have to set dirty states back to "clean" afterwards.  See #296
-    var stubDisplay = { _frameId: 5 };
+    const stubDisplay = { _frameId: 5 };
 
-    var canvas = document.createElement( 'canvas' );
+    const canvas = document.createElement( 'canvas' );
     canvas.width = 64;
     canvas.height = 48;
-    var context = canvas.getContext( '2d' );
-    var wrapper = new CanvasContextWrapper( canvas, context );
+    const context = canvas.getContext( '2d' );
+    const wrapper = new CanvasContextWrapper( canvas, context );
 
 
-    var r1 = new Rectangle( 5, 10, 100, 50, 0, 0, { fill: 'red', stroke: 'blue', lineWidth: 5 } );
-    var r1i = new Instance( stubDisplay, r1.getUniqueTrail() );
-    var r1dd = r1.createDOMDrawable( Renderer.bitmaskDOM, r1i );
-    var r1ds = r1.createSVGDrawable( Renderer.bitmaskSVG, r1i );
-    var r1dc = r1.createCanvasDrawable( Renderer.bitmaskCanvas, r1i );
+    const r1 = new Rectangle( 5, 10, 100, 50, 0, 0, { fill: 'red', stroke: 'blue', lineWidth: 5 } );
+    const r1i = new Instance( stubDisplay, r1.getUniqueTrail() );
+    const r1dd = r1.createDOMDrawable( Renderer.bitmaskDOM, r1i );
+    const r1ds = r1.createSVGDrawable( Renderer.bitmaskSVG, r1i );
+    const r1dc = r1.createCanvasDrawable( Renderer.bitmaskCanvas, r1i );
 
     assert.ok( r1._drawables.length === 3, 'After init, should have drawable refs' );
 
@@ -93,20 +93,20 @@ define( require => {
   } );
 
   QUnit.test( 'Drawables (Circle)', function( assert ) {
-    var stubDisplay = { _frameId: 5 };
+    const stubDisplay = { _frameId: 5 };
 
-    var canvas = document.createElement( 'canvas' );
+    const canvas = document.createElement( 'canvas' );
     canvas.width = 64;
     canvas.height = 48;
-    var context = canvas.getContext( '2d' );
-    var wrapper = new CanvasContextWrapper( canvas, context );
+    const context = canvas.getContext( '2d' );
+    const wrapper = new CanvasContextWrapper( canvas, context );
 
 
-    var r1 = new Circle( 50, { fill: 'red', stroke: 'blue', lineWidth: 5 } );
-    var r1i = new Instance( stubDisplay, r1.getUniqueTrail() );
-    var r1dd = r1.createDOMDrawable( Renderer.bitmaskDOM, r1i );
-    var r1ds = r1.createSVGDrawable( Renderer.bitmaskSVG, r1i );
-    var r1dc = r1.createCanvasDrawable( Renderer.bitmaskCanvas, r1i );
+    const r1 = new Circle( 50, { fill: 'red', stroke: 'blue', lineWidth: 5 } );
+    const r1i = new Instance( stubDisplay, r1.getUniqueTrail() );
+    const r1dd = r1.createDOMDrawable( Renderer.bitmaskDOM, r1i );
+    const r1ds = r1.createSVGDrawable( Renderer.bitmaskSVG, r1i );
+    const r1dc = r1.createCanvasDrawable( Renderer.bitmaskCanvas, r1i );
 
     assert.ok( r1._drawables.length === 3, 'After init, should have drawable refs' );
 
@@ -139,18 +139,18 @@ define( require => {
   } );
 
   QUnit.test( 'Drawables (Line)', function( assert ) {
-    var stubDisplay = { _frameId: 5 };
+    const stubDisplay = { _frameId: 5 };
 
-    var canvas = document.createElement( 'canvas' );
+    const canvas = document.createElement( 'canvas' );
     canvas.width = 64;
     canvas.height = 48;
-    var context = canvas.getContext( '2d' );
-    var wrapper = new CanvasContextWrapper( canvas, context );
+    const context = canvas.getContext( '2d' );
+    const wrapper = new CanvasContextWrapper( canvas, context );
 
-    var r1 = new Line( 0, 1, 2, 3, { fill: 'red', stroke: 'blue', lineWidth: 5 } );
-    var r1i = new Instance( stubDisplay, r1.getUniqueTrail() );
-    var r1ds = r1.createSVGDrawable( Renderer.bitmaskSVG, r1i );
-    var r1dc = r1.createCanvasDrawable( Renderer.bitmaskCanvas, r1i );
+    const r1 = new Line( 0, 1, 2, 3, { fill: 'red', stroke: 'blue', lineWidth: 5 } );
+    const r1i = new Instance( stubDisplay, r1.getUniqueTrail() );
+    const r1ds = r1.createSVGDrawable( Renderer.bitmaskSVG, r1i );
+    const r1dc = r1.createCanvasDrawable( Renderer.bitmaskCanvas, r1i );
 
     assert.ok( r1._drawables.length === 2, 'After init, should have drawable refs' );
 
@@ -179,19 +179,19 @@ define( require => {
   } );
 
   QUnit.test( 'Drawables (Path)', function( assert ) {
-    var stubDisplay = { _frameId: 5 };
+    const stubDisplay = { _frameId: 5 };
 
-    var canvas = document.createElement( 'canvas' );
+    const canvas = document.createElement( 'canvas' );
     canvas.width = 64;
     canvas.height = 48;
-    var context = canvas.getContext( '2d' );
-    var wrapper = new CanvasContextWrapper( canvas, context );
+    const context = canvas.getContext( '2d' );
+    const wrapper = new CanvasContextWrapper( canvas, context );
 
 
-    var r1 = new Path( Shape.regularPolygon( 5, 10 ), { fill: 'red', stroke: 'blue', lineWidth: 5 } );
-    var r1i = new Instance( stubDisplay, r1.getUniqueTrail() );
-    var r1ds = r1.createSVGDrawable( Renderer.bitmaskSVG, r1i );
-    var r1dc = r1.createCanvasDrawable( Renderer.bitmaskCanvas, r1i );
+    const r1 = new Path( Shape.regularPolygon( 5, 10 ), { fill: 'red', stroke: 'blue', lineWidth: 5 } );
+    const r1i = new Instance( stubDisplay, r1.getUniqueTrail() );
+    const r1ds = r1.createSVGDrawable( Renderer.bitmaskSVG, r1i );
+    const r1dc = r1.createCanvasDrawable( Renderer.bitmaskCanvas, r1i );
 
     assert.ok( r1._drawables.length === 2, 'After init, should have drawable refs' );
 
@@ -224,20 +224,20 @@ define( require => {
   } );
 
   QUnit.test( 'Drawables (Text)', function( assert ) {
-    var stubDisplay = { _frameId: 5 };
+    const stubDisplay = { _frameId: 5 };
 
-    var canvas = document.createElement( 'canvas' );
+    const canvas = document.createElement( 'canvas' );
     canvas.width = 64;
     canvas.height = 48;
-    var context = canvas.getContext( '2d' );
-    var wrapper = new CanvasContextWrapper( canvas, context );
+    const context = canvas.getContext( '2d' );
+    const wrapper = new CanvasContextWrapper( canvas, context );
 
 
-    var r1 = new Text( 'Wow!', { fill: 'red', stroke: 'blue', lineWidth: 5 } );
-    var r1i = new Instance( stubDisplay, r1.getUniqueTrail() );
-    var r1dd = r1.createDOMDrawable( Renderer.bitmaskDOM, r1i );
-    var r1ds = r1.createSVGDrawable( Renderer.bitmaskSVG, r1i );
-    var r1dc = r1.createCanvasDrawable( Renderer.bitmaskCanvas, r1i );
+    const r1 = new Text( 'Wow!', { fill: 'red', stroke: 'blue', lineWidth: 5 } );
+    const r1i = new Instance( stubDisplay, r1.getUniqueTrail() );
+    const r1dd = r1.createDOMDrawable( Renderer.bitmaskDOM, r1i );
+    const r1ds = r1.createSVGDrawable( Renderer.bitmaskSVG, r1i );
+    const r1dc = r1.createCanvasDrawable( Renderer.bitmaskCanvas, r1i );
 
     assert.ok( r1._drawables.length === 3, 'After init, should have drawable refs' );
 
@@ -276,20 +276,20 @@ define( require => {
   } );
 
   QUnit.test( 'Drawables (Image)', function( assert ) {
-    var stubDisplay = { _frameId: 5 };
+    const stubDisplay = { _frameId: 5 };
 
-    var canvas = document.createElement( 'canvas' );
+    const canvas = document.createElement( 'canvas' );
     canvas.width = 64;
     canvas.height = 48;
-    var context = canvas.getContext( '2d' );
-    var wrapper = new CanvasContextWrapper( canvas, context );
+    const context = canvas.getContext( '2d' );
+    const wrapper = new CanvasContextWrapper( canvas, context );
 
     // 1x1 black PNG
-    var r1 = new Image( 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2NkYGD4DwABCQEBtxmN7wAAAABJRU5ErkJggg==' );
-    var r1i = new Instance( stubDisplay, r1.getUniqueTrail() );
-    var r1dd = r1.createDOMDrawable( Renderer.bitmaskDOM, r1i );
-    var r1ds = r1.createSVGDrawable( Renderer.bitmaskSVG, r1i );
-    var r1dc = r1.createCanvasDrawable( Renderer.bitmaskCanvas, r1i );
+    const r1 = new Image( 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2NkYGD4DwABCQEBtxmN7wAAAABJRU5ErkJggg==' );
+    const r1i = new Instance( stubDisplay, r1.getUniqueTrail() );
+    const r1dd = r1.createDOMDrawable( Renderer.bitmaskDOM, r1i );
+    const r1ds = r1.createSVGDrawable( Renderer.bitmaskSVG, r1i );
+    const r1dc = r1.createCanvasDrawable( Renderer.bitmaskCanvas, r1i );
 
     assert.ok( r1._drawables.length === 3, 'After init, should have drawable refs' );
 
@@ -316,11 +316,11 @@ define( require => {
   } );
 
   QUnit.test( 'Drawables (DOM)', function( assert ) {
-    var stubDisplay = { _frameId: 5 };
+    const stubDisplay = { _frameId: 5 };
 
-    var r1 = new DOM( document.createElement( 'canvas' ) );
-    var r1i = new Instance( stubDisplay, r1.getUniqueTrail() );
-    var r1dd = r1.createDOMDrawable( Renderer.bitmaskDOM, r1i );
+    const r1 = new DOM( document.createElement( 'canvas' ) );
+    const r1i = new Instance( stubDisplay, r1.getUniqueTrail() );
+    const r1dd = r1.createDOMDrawable( Renderer.bitmaskDOM, r1i );
 
     assert.ok( r1._drawables.length === 1, 'After init, should have drawable refs' );
 
@@ -336,7 +336,7 @@ define( require => {
   QUnit.test( 'Renderer order bitmask', function( assert ) {
 
     // init test
-    var mask = Renderer.createOrderBitmask( Renderer.bitmaskCanvas, Renderer.bitmaskSVG, Renderer.bitmaskDOM, Renderer.bitmaskWebGL );
+    let mask = Renderer.createOrderBitmask( Renderer.bitmaskCanvas, Renderer.bitmaskSVG, Renderer.bitmaskDOM, Renderer.bitmaskWebGL );
     assert.equal( Renderer.bitmaskOrder( mask, 0 ), Renderer.bitmaskCanvas );
     assert.equal( Renderer.bitmaskOrder( mask, 1 ), Renderer.bitmaskSVG );
     assert.equal( Renderer.bitmaskOrder( mask, 2 ), Renderer.bitmaskDOM );
@@ -418,8 +418,8 @@ define( require => {
   /* eslint-disable no-undef */
 
   QUnit.test( 'Empty Display usage', function( assert ) {
-    var n = new Node();
-    var d = new Display( n );
+    const n = new Node();
+    const d = new Display( n );
     d.updateDisplay();
     d.updateDisplay();
 
@@ -427,8 +427,8 @@ define( require => {
   } );
 
   QUnit.test( 'Simple Display usage', function( assert ) {
-    var r = new Rectangle( 0, 0, 50, 50, { fill: 'red' } );
-    var d = new Display( r );
+    const r = new Rectangle( 0, 0, 50, 50, { fill: 'red' } );
+    const d = new Display( r );
     d.updateDisplay();
     r.rectWidth = 100;
     d.updateDisplay();
@@ -437,8 +437,8 @@ define( require => {
   } );
 
   QUnit.test( 'Stitch patterns #1', function( assert ) {
-    var n = new Node();
-    var d = new Display( n );
+    const n = new Node();
+    const d = new Display( n );
     d.updateDisplay();
 
     n.addChild( new Rectangle( 0, 0, 50, 50, { fill: 'red' } ) );
@@ -469,15 +469,15 @@ define( require => {
   } );
 
   QUnit.test( 'Invisible append', function( assert ) {
-    var scene = new Node();
-    var display = new Display( scene );
+    const scene = new Node();
+    const display = new Display( scene );
     display.updateDisplay();
 
-    var a = new Rectangle( 0, 0, 100, 50, { fill: 'red' } );
+    const a = new Rectangle( 0, 0, 100, 50, { fill: 'red' } );
     scene.addChild( a );
     display.updateDisplay();
 
-    var b = new Rectangle( 0, 0, 100, 50, { fill: 'red', visible: false } );
+    const b = new Rectangle( 0, 0, 100, 50, { fill: 'red', visible: false } );
     scene.addChild( b );
     display.updateDisplay();
 
@@ -485,17 +485,17 @@ define( require => {
   } );
 
   QUnit.test( 'Stitching problem A (GitHub Issue #339)', function( assert ) {
-    var scene = new Node();
-    var display = new Display( scene );
+    const scene = new Node();
+    const display = new Display( scene );
 
-    var a = new Rectangle( 0, 0, 100, 50, { fill: 'red' } );
-    var b = new Rectangle( 0, 0, 50, 50, { fill: 'blue' } );
-    var c = new DOM( document.createElement( 'div' ) );
-    var d = new Rectangle( 100, 0, 100, 50, { fill: 'red' } );
-    var e = new Rectangle( 100, 0, 50, 50, { fill: 'blue' } );
+    const a = new Rectangle( 0, 0, 100, 50, { fill: 'red' } );
+    const b = new Rectangle( 0, 0, 50, 50, { fill: 'blue' } );
+    const c = new DOM( document.createElement( 'div' ) );
+    const d = new Rectangle( 100, 0, 100, 50, { fill: 'red' } );
+    const e = new Rectangle( 100, 0, 50, 50, { fill: 'blue' } );
 
-    var f = new Rectangle( 0, 50, 100, 50, { fill: 'green' } );
-    var g = new DOM( document.createElement( 'div' ) );
+    const f = new Rectangle( 0, 50, 100, 50, { fill: 'green' } );
+    const g = new DOM( document.createElement( 'div' ) );
 
     scene.addChild( a );
     scene.addChild( f );
@@ -513,14 +513,14 @@ define( require => {
   } );
 
   QUnit.test( 'SVG group disposal issue (GitHub Issue #354) A', function( assert ) {
-    var scene = new Node();
-    var display = new Display( scene );
+    const scene = new Node();
+    const display = new Display( scene );
 
-    var node = new Node( {
+    const node = new Node( {
       renderer: 'svg',
       cssTransform: true
     } );
-    var rect = new Rectangle( 0, 0, 100, 50, { fill: 'red' } );
+    const rect = new Rectangle( 0, 0, 100, 50, { fill: 'red' } );
 
     scene.addChild( node );
     node.addChild( rect );
@@ -533,11 +533,11 @@ define( require => {
   } );
 
   QUnit.test( 'SVG group disposal issue (GitHub Issue #354) B', function( assert ) {
-    var scene = new Node();
-    var display = new Display( scene );
+    const scene = new Node();
+    const display = new Display( scene );
 
-    var node = new Node();
-    var rect = new Rectangle( 0, 0, 100, 50, {
+    const node = new Node();
+    const rect = new Rectangle( 0, 0, 100, 50, {
       fill: 'red',
       renderer: 'svg',
       cssTransform: true
@@ -554,8 +554,8 @@ define( require => {
   } );
 
   QUnit.test( 'Empty path display test', function( assert ) {
-    var scene = new Node();
-    var display = new Display( scene );
+    const scene = new Node();
+    const display = new Display( scene );
 
     scene.addChild( new Path( null ) );
     display.updateDisplay();
@@ -564,13 +564,13 @@ define( require => {
   } );
 
   QUnit.test( 'Double remove related to #392', function( assert ) {
-    var scene = new Node();
-    var display = new Display( scene );
+    const scene = new Node();
+    const display = new Display( scene );
 
     display.updateDisplay();
 
-    var n1 = new Node();
-    var n2 = new Node();
+    const n1 = new Node();
+    const n2 = new Node();
     scene.addChild( n1 );
     n1.addChild( n2 );
     scene.addChild( n2 ); // so the tree has a reference to the Node that we can trigger the failure on

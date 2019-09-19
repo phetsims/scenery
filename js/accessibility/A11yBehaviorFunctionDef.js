@@ -21,7 +21,7 @@ define( require => {
    * @param {string} value - the value that you are setting the behavior of, like the accessibleName
    * @returns {Object} - the options that have been mutated by the behavior function.
    */
-  var A11yBehaviorFunctionDef = {
+  const A11yBehaviorFunctionDef = {
 
     /**
      * Will assert out if the behavior function doesn't match the expected features of A11yBehaviorFunction

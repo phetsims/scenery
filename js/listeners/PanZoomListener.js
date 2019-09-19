@@ -53,7 +53,7 @@ define( require => {
       MultiListener.prototype.reposition.call( this );
 
       // Assume same scale in each dimension
-      var currentScale = this._targetNode.getScaleVector().x;
+      const currentScale = this._targetNode.getScaleVector().x;
       if ( currentScale < 1 ) {
         this._targetNode.scale( 1 / currentScale );
       }

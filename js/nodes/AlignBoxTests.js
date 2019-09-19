@@ -17,10 +17,10 @@ define( require => {
   QUnit.module( 'AlignBox' );
 
   QUnit.test( 'Single Box Group', function( assert ) {
-    var circle = new Circle( 20 );
+    const circle = new Circle( 20 );
 
-    var group = new AlignGroup();
-    var box = group.createBox( circle, {
+    const group = new AlignGroup();
+    const box = group.createBox( circle, {
       xMargin: 10,
       yMargin: 20
     } );
@@ -57,19 +57,19 @@ define( require => {
   } );
 
   QUnit.test( 'Multiple Boxes in a Group', function( assert ) {
-    var circle = new Circle( 10 );
-    var rectangle = new Rectangle( 0, 0, 60, 60 );
+    const circle = new Circle( 10 );
+    const rectangle = new Rectangle( 0, 0, 60, 60 );
 
-    var group = new AlignGroup();
+    const group = new AlignGroup();
 
-    var circleBox = group.createBox( circle, {
+    const circleBox = group.createBox( circle, {
       xMargin: 10,
       yMargin: 20,
       xAlign: 'left',
       yAlign: 'bottom'
     } );
 
-    var rectangleBox = group.createBox( rectangle );
+    let rectangleBox = group.createBox( rectangle );
 
     assert.ok( circleBox.xMargin === 10, 'circle: xMargin' );
     assert.ok( circleBox.yMargin === 20, 'circle: yMargin' );

@@ -138,7 +138,7 @@ define( require => {
         return true;
       }
 
-      for ( var i = 0; i < this.stops.length; i++ ) {
+      for ( let i = 0; i < this.stops.length; i++ ) {
         if ( Gradient.colorToString( this.stops[ i ].color ) !== this.lastColorStopValues[ i ] ) {
           return true;
         }
@@ -165,10 +165,10 @@ define( require => {
         cleanArray( this.lastColorStopValues );
         this.canvasGradient = this.createCanvasGradient();
 
-        for ( var i = 0; i < this.stops.length; i++ ) {
-          var stop = this.stops[ i ];
+        for ( let i = 0; i < this.stops.length; i++ ) {
+          const stop = this.stops[ i ];
 
-          var colorString = Gradient.colorToString( stop.color );
+          const colorString = Gradient.colorToString( stop.color );
           this.canvasGradient.addColorStop( stop.ratio, colorString );
 
           // Save it so we can compare next time whether our generated gradient would have changed

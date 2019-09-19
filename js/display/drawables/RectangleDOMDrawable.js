@@ -18,10 +18,10 @@ define( require => {
   const scenery = require( 'SCENERY/scenery' );
 
   // TODO: change this based on memory and performance characteristics of the platform
-  var keepDOMRectangleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
+  const keepDOMRectangleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
 
   // scratch matrix used in DOM rendering
-  var scratchMatrix = Matrix3.dirtyFromPool();
+  const scratchMatrix = Matrix3.dirtyFromPool();
 
   /**
    * A generated DOMSelfDrawable whose purpose will be drawing our Rectangle. One of these drawables will be created
@@ -41,14 +41,14 @@ define( require => {
     // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
     // allocation and performance costs)
     if ( !this.fillElement || !this.strokeElement ) {
-      var fillElement = this.fillElement = document.createElement( 'div' );
+      const fillElement = this.fillElement = document.createElement( 'div' );
       fillElement.style.display = 'block';
       fillElement.style.position = 'absolute';
       fillElement.style.left = '0';
       fillElement.style.top = '0';
       fillElement.style.pointerEvents = 'none';
 
-      var strokeElement = this.strokeElement = document.createElement( 'div' );
+      const strokeElement = this.strokeElement = document.createElement( 'div' );
       strokeElement.style.display = 'block';
       strokeElement.style.position = 'absolute';
       strokeElement.style.left = '0';
@@ -74,13 +74,13 @@ define( require => {
      * This implements part of the DOMSelfDrawable required API for subtypes.
      */
     updateDOM: function() {
-      var node = this.node;
-      var fillElement = this.fillElement;
-      var strokeElement = this.strokeElement;
+      const node = this.node;
+      const fillElement = this.fillElement;
+      const strokeElement = this.strokeElement;
 
       if ( this.paintDirty ) {
-        var borderRadius = Math.min( node._cornerXRadius, node._cornerYRadius );
-        var borderRadiusDirty = this.dirtyCornerXRadius || this.dirtyCornerYRadius;
+        const borderRadius = Math.min( node._cornerXRadius, node._cornerYRadius );
+        const borderRadiusDirty = this.dirtyCornerXRadius || this.dirtyCornerYRadius;
 
         if ( this.dirtyWidth ) {
           fillElement.style.width = node._rectWidth + 'px';
@@ -108,7 +108,7 @@ define( require => {
         if ( node.hasStroke() ) {
           // since we only execute these if we have a stroke, we need to redo everything if there was no stroke previously.
           // the other option would be to update stroked information when there is no stroke (major performance loss for fill-only rectangles)
-          var hadNoStrokeBefore = !this.hadStroke;
+          const hadNoStrokeBefore = !this.hadStroke;
 
           if ( hadNoStrokeBefore || this.dirtyWidth || this.dirtyLineWidth ) {
             strokeElement.style.width = ( node._rectWidth - node.getLineWidth() ) + 'px';
@@ -135,7 +135,7 @@ define( require => {
       // shift the element vertically, postmultiplied with the entire transform.
       if ( this.transformDirty || this.dirtyX || this.dirtyY ) {
         scratchMatrix.set( this.getTransformMatrix() );
-        var translation = Matrix3.translation( node._rectX, node._rectY );
+        const translation = Matrix3.translation( node._rectX, node._rectY );
         scratchMatrix.multiplyMatrix( translation );
         translation.freeToPool();
         scenery.Util.applyPreparedTransform( scratchMatrix, this.fillElement, this.forceAcceleration );

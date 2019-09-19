@@ -17,7 +17,7 @@ define( require => {
   const SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
 
   // TODO: change this based on memory and performance characteristics of the platform
-  var keepSVGImageElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
+  const keepSVGImageElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
 
   /**
    * A generated SVGSelfDrawable whose purpose will be drawing our Image. One of these drawables will be created
@@ -32,7 +32,7 @@ define( require => {
     this.initializeSVGSelfDrawable( renderer, instance, false, keepSVGImageElements ); // usesPaint: false
 
     sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' initialized for ' + instance.toString() );
-    var self = this;
+    const self = this;
 
     // @protected {SVGImageElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
     this.svgElement = this.svgElement || document.createElementNS( scenery.svgns, 'image' );
@@ -72,7 +72,7 @@ scenery.register( 'ImageSVGDrawable', ImageSVGDrawable );
      * Implements the interface for SVGSelfDrawable (and is called from the SVGSelfDrawable's update).
      */
     updateSVGSelf: function() {
-      var image = this.svgElement;
+      const image = this.svgElement;
 
       if ( this.dirtyImage ) {
         sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Updating dirty image' );
@@ -107,7 +107,7 @@ scenery.register( 'ImageSVGDrawable', ImageSVGDrawable );
 
     updateURL: function( image, forced ) {
       // determine our mipmap level, if any is used
-      var level = -1; // signals a default of "we are not using mipmapping"
+      let level = -1; // signals a default of "we are not using mipmapping"
       if ( this.node._mipmap ) {
         level = this.node.getMipmapLevel( this.instance.relativeTransform.matrix );
         sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Mipmap level: ' + level );
@@ -127,8 +127,8 @@ scenery.register( 'ImageSVGDrawable', ImageSVGDrawable );
 
       if ( this.node._mipmap && this.node.hasMipmaps() ) {
         sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Setting image URL to mipmap level ' + level );
-        var url = this.node.getMipmapURL( level );
-        var canvas = this.node.getMipmapCanvas( level );
+        const url = this.node.getMipmapURL( level );
+        const canvas = this.node.getMipmapCanvas( level );
         image.setAttribute( 'width', canvas.width + 'px' );
         image.setAttribute( 'height', canvas.height + 'px' );
         // Since SVG doesn't support parsing scientific notation (e.g. 7e5), we need to output fixed decimal-point strings.

@@ -30,7 +30,7 @@ define( require => {
   const NumberProperty = require( 'AXON/NumberProperty' );
   const scenery = require( 'SCENERY/scenery' );
 
-  var globalId = 1;
+  let globalId = 1;
 
   /**
    * Creates an alignment group that can be composed of multiple boxes.
@@ -213,7 +213,7 @@ define( require => {
      * @public
      */
     dispose: function() {
-      for ( var i = this._alignBoxes.length - 1; i >= 0; i-- ) {
+      for ( let i = this._alignBoxes.length - 1; i >= 0; i-- ) {
         this._alignBoxes[ i ].dispose();
       }
     },
@@ -237,12 +237,12 @@ define( require => {
       sceneryLog && sceneryLog.AlignGroup && sceneryLog.push();
 
       // Compute the maximum dimension of our alignBoxs' content
-      var maxWidth = 0;
-      var maxHeight = 0;
+      let maxWidth = 0;
+      let maxHeight = 0;
       for ( var i = 0; i < this._alignBoxes.length; i++ ) {
-        var alignBox = this._alignBoxes[ i ];
+        const alignBox = this._alignBoxes[ i ];
 
-        var bounds = alignBox.getContentBounds();
+        const bounds = alignBox.getContentBounds();
 
         // Ignore bad bounds
         if ( bounds.isEmpty() || !bounds.isFinite() ) {
@@ -282,7 +282,7 @@ define( require => {
      * @param {number} maxHeight
      */
     setBoxBounds: function( alignBox, maxWidth, maxHeight ) {
-      var alignBounds;
+      let alignBounds;
 
       // If we match both dimensions, we don't have to inspect the box's preferred size
       if ( this._matchVertical && this._matchHorizontal ) {
@@ -290,7 +290,7 @@ define( require => {
       }
       else {
         // Grab the preferred size
-        var contentBounds = alignBox.getContentBounds();
+        const contentBounds = alignBox.getContentBounds();
 
         // Match one orientation
         if ( this._matchVertical ) {

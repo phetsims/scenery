@@ -89,7 +89,7 @@ define( require => {
      * @returns {boolean} success - Returns whether the press was actually started
      */
     press: function( event, targetNode, callback ) {
-      var self = this;
+      const self = this;
 
       return PressListener.prototype.press.call( this, event, targetNode, function() {
         // This function is only called on success
@@ -113,7 +113,7 @@ define( require => {
      * @param {function} [callback] - called at the end of the release
      */
     release: function( event, callback ) {
-      var self = this;
+      const self = this;
 
       PressListener.prototype.release.call( this, event, function() {
         // Notify after the rest of release is called in order to prevent it from triggering interrupt().

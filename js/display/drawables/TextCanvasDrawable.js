@@ -45,7 +45,7 @@ define( require => {
      * @param {Matrix3} matrix - The transformation matrix applied for this node's coordinate system.
      */
     paintCanvas: function( wrapper, node, matrix ) {
-      var context = wrapper.context;
+      const context = wrapper.context;
 
       // extra parameters we need to set, but should avoid setting if we aren't drawing anything
       if ( node.hasFill() || node.hasPaintableStroke() ) {

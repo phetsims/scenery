@@ -24,24 +24,24 @@ define( require => {
 
   // constants
   // default inner and outer strokes for the focus highlight
-  var OUTER_FOCUS_COLOR = new Color( 'rgba(212,19,106,0.5)' );
-  var INNER_FOCUS_COLOR = new Color( 'rgba(250,40,135,0.9)' );
+  const OUTER_FOCUS_COLOR = new Color( 'rgba(212,19,106,0.5)' );
+  const INNER_FOCUS_COLOR = new Color( 'rgba(250,40,135,0.9)' );
 
   // default inner and outer strokes for the group focus highlight, typically over Displays with lighter backgrounds
-  var INNER_LIGHT_GROUP_FOCUS_COLOR = new Color( 'rgba(233,113,166,1.0)' );
-  var OUTER_LIGHT_GROUP_FOCUS_COLOR = new Color( 'rgba(233,113,166,1.0)' );
+  const INNER_LIGHT_GROUP_FOCUS_COLOR = new Color( 'rgba(233,113,166,1.0)' );
+  const OUTER_LIGHT_GROUP_FOCUS_COLOR = new Color( 'rgba(233,113,166,1.0)' );
 
   // default inner and outer strokes for the group  focus highlight, typically over Displays with darker backgrounds
-  var INNER_DARK_GROUP_FOCUS_COLOR = new Color( 'rgba(159,15,80,1.0)' );
-  var OUTER_DARK_GROUP_FOCUS_COLOR = new Color( 'rgba(159,15,80,1.0)' );
+  const INNER_DARK_GROUP_FOCUS_COLOR = new Color( 'rgba(159,15,80,1.0)' );
+  const OUTER_DARK_GROUP_FOCUS_COLOR = new Color( 'rgba(159,15,80,1.0)' );
 
   // Determined by inspection, base widths of focus highlight, transform of shape/bounds will change highlight line width
-  var INNER_LINE_WIDTH_BASE = 2.5;
-  var OUTER_LINE_WIDTH_BASE = 4;
+  const INNER_LINE_WIDTH_BASE = 2.5;
+  const OUTER_LINE_WIDTH_BASE = 4;
 
   // determined by inspection, group focus highlights are thinner than default focus highlights
-  var GROUP_OUTER_LINE_WIDTH = 2;
-  var GROUP_INNER_LINE_WIDTH = 2;
+  const GROUP_OUTER_LINE_WIDTH = 2;
+  const GROUP_INNER_LINE_WIDTH = 2;
 
   /**
    * @constructor
@@ -82,7 +82,7 @@ define( require => {
     this.options = options; // @private TODO: only assign individual options to 'this'.
 
     // options for this Path, the outer focus highlight
-    var outerHighlightOptions = _.extend( {
+    const outerHighlightOptions = _.extend( {
       stroke: options.outerStroke
     }, options ); // TODO: Should this overwrite the "stroke" given in the options rather than extend?
     this.mutate( outerHighlightOptions );
@@ -284,15 +284,15 @@ define( require => {
      * @returns {number}
      */
     getDilationCoefficient: function( node ) {
-      var widthOfFocusHighlight = FocusHighlightPath.getOuterLineWidthFromNode( node );
+      const widthOfFocusHighlight = FocusHighlightPath.getOuterLineWidthFromNode( node );
 
       // Dilating half of the focus highlight width will make the inner edge of the focus highlight at the bounds
       // of the node being highlighted.
-      var scalarToEdgeOfBounds = .5;
+      const scalarToEdgeOfBounds = .5;
 
       // Dilate the focus highlight slightly more to give whitespace in between the node being highlighted's bounds and
       // the inner edge of the highlight.
-      var whiteSpaceScalar = .25;
+      const whiteSpaceScalar = .25;
 
       return widthOfFocusHighlight * ( scalarToEdgeOfBounds + whiteSpaceScalar );
     },
@@ -307,15 +307,15 @@ define( require => {
      * @returns {number}
      */
     getGroupDilationCoefficient: function( node ) {
-      var widthOfFocusHighlight = FocusHighlightPath.getOuterLineWidthFromNode( node );
+      const widthOfFocusHighlight = FocusHighlightPath.getOuterLineWidthFromNode( node );
 
       // Dilating half of the focus highlight width will make the inner edge of the focus highlight at the bounds
       // of the node being highlighted.
-      var scalarToEdgeOfBounds = .5;
+      const scalarToEdgeOfBounds = .5;
 
       // Dilate the group focus highlight slightly more to give whitespace in between the node being highlighted's 
       // bounds and the inner edge of the highlight.
-      var whiteSpaceScalar = 1.4;
+      const whiteSpaceScalar = 1.4;
 
       return widthOfFocusHighlight * ( scalarToEdgeOfBounds + whiteSpaceScalar );
     }

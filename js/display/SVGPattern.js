@@ -35,7 +35,7 @@ define( require => {
       sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGPattern] initialize: ' + pattern.id );
       sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
-      var hasPreviousDefinition = this.definition !== undefined;
+      const hasPreviousDefinition = this.definition !== undefined;
 
       // @public {SVGPatternElement} - persistent
       this.definition = this.definition || document.createElementNS( scenery.svgns, 'pattern' );

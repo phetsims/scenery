@@ -27,7 +27,7 @@ define( require => {
    * @param {Object} [options]
    */
   function TransformTracker( trail, options ) {
-    var self = this;
+    const self = this;
 
     options = _.extend( {
       isStatic: false // {boolean} - Whether the bounds listeners should be added with on() or onStatic().
@@ -50,9 +50,9 @@ define( require => {
 
     // Hook up listeners to each Node in the trail, so we are notified of changes. Will be removed on disposal.
     this._nodeTransformListeners = [];
-    for ( var j = 1; j < this.trail.length; j++ ) {
+    for ( let j = 1; j < this.trail.length; j++ ) {
       // Wrapping with closure to prevent changes
-      var nodeTransformListener = (function( index ) {
+      const nodeTransformListener = (function( index ) {
         return function() {
           self.onTransformChange( index );
         };
@@ -77,8 +77,8 @@ define( require => {
      * @public
      */
     dispose: function() {
-      for ( var j = 1; j < this.trail.length; j++ ) {
-        var nodeTransformListener = this._nodeTransformListeners[ j - 1 ];
+      for ( let j = 1; j < this.trail.length; j++ ) {
+        const nodeTransformListener = this._nodeTransformListeners[ j - 1 ];
 
         if ( this._isStatic ) {
           this.trail.nodes[ j ].offStatic( 'transform', nodeTransformListener, false );
@@ -110,7 +110,7 @@ define( require => {
     removeListener: function( listener ) {
       assert && assert( typeof listener === 'function' );
 
-      var index = _.indexOf( this._listeners, listener );
+      const index = _.indexOf( this._listeners, listener );
       assert && assert( index >= 0, 'TransformTracker listener not found' );
 
       this._listeners.splice( index, 1 );
@@ -121,14 +121,14 @@ define( require => {
      * @private
      */
     notifyListeners: function() {
-      var listeners = this._listeners;
+      let listeners = this._listeners;
 
       if ( !this._isStatic ) {
         listeners = listeners.slice();
       }
 
-      var length = listeners.length;
-      for ( var i = 0; i < length; i++ ) {
+      const length = listeners.length;
+      for ( let i = 0; i < length; i++ ) {
         listeners[ i ]();
       }
     },
@@ -158,7 +158,7 @@ define( require => {
         this._matrices = [];
 
         // Start at 1, so that we don't include the root node's transform
-        for ( var i = 1; i < this.trail.length; i++ ) {
+        for ( let i = 1; i < this.trail.length; i++ ) {
           this._matrices.push( new Matrix3() );
         }
       }
@@ -169,9 +169,9 @@ define( require => {
       }
 
       // Starting at the dirty index, recompute matrices.
-      var numMatrices = this._matrices.length;
-      for ( var index = this._dirtyIndex; index < numMatrices; index++ ) {
-        var nodeMatrix = this.trail.nodes[ index + 1 ].matrix;
+      const numMatrices = this._matrices.length;
+      for ( let index = this._dirtyIndex; index < numMatrices; index++ ) {
+        const nodeMatrix = this.trail.nodes[ index + 1 ].matrix;
 
         if ( index === 0 ) {
           this._matrices[ index ].set( nodeMatrix );

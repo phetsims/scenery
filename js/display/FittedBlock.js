@@ -17,7 +17,7 @@ define( require => {
   const scenery = require( 'SCENERY/scenery' );
   const Vector2 = require( 'DOT/Vector2' );
 
-  var scratchBounds2 = Bounds2.NOTHING.copy();
+  const scratchBounds2 = Bounds2.NOTHING.copy();
 
   function FittedBlock( display, renderer, transformRootInstance ) {
     this.initialize( display, renderer, transformRootInstance );
@@ -144,7 +144,7 @@ define( require => {
         this.fitBounds.set( this.commonFitInstance.node.getLocalBounds() );
 
         // walk it up, transforming so it is relative to our transform root
-        var instance = this.commonFitInstance;
+        let instance = this.commonFitInstance;
         while ( instance !== this.transformRootInstance ) {
           // shouldn't infinite loop, we'll null-pointer beforehand unless something is seriously wrong
           this.fitBounds.transform( instance.node.getMatrix() );
@@ -307,11 +307,11 @@ define( require => {
       assert && assert( this.firstDrawable.instance && this.lastDrawable.instance,
         'For common-ancestor fits, we need the first and last drawables to have direct instance references' );
 
-      var firstInstance = this.firstDrawable.instance;
-      var lastInstance = this.lastDrawable.instance;
+      let firstInstance = this.firstDrawable.instance;
+      let lastInstance = this.lastDrawable.instance;
 
       // walk down the longest one until they are a common length
-      var minLength = Math.min( firstInstance.trail.length, lastInstance.trail.length );
+      const minLength = Math.min( firstInstance.trail.length, lastInstance.trail.length );
       while ( firstInstance.trail.length > minLength ) {
         firstInstance = firstInstance.parent;
       }
@@ -325,7 +325,7 @@ define( require => {
         lastInstance = lastInstance.parent;
       }
 
-      var commonFitInstance = firstInstance;
+      const commonFitInstance = firstInstance;
 
       assert && assert( commonFitInstance.trail.length >= this.transformRootInstance.trail.length );
 

@@ -53,8 +53,8 @@ define( require => {
       }
       if ( paint instanceof scenery.Gradient ) {
         // Average the stops
-        var color = Color.TRANSPARENT;
-        var quantity = 0;
+        let color = Color.TRANSPARENT;
+        const quantity = 0;
         paint.stops.forEach( function( stop ) {
           color = color.blend( PaintDef.toColor( stop.color ), 1 / ( quantity + 1 ) );
         } );

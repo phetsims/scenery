@@ -16,7 +16,7 @@ define( require => {
   const SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
 
   // TODO: change this based on memory and performance characteristics of the platform
-  var keepSVGRectangleElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
+  const keepSVGRectangleElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
 
   /**
    * A generated SVGSelfDrawable whose purpose will be drawing our Rectangle. One of these drawables will be created
@@ -47,7 +47,7 @@ define( require => {
      * Implements the interface for SVGSelfDrawable (and is called from the SVGSelfDrawable's update).
      */
     updateSVGSelf: function() {
-      var rect = this.svgElement;
+      const rect = this.svgElement;
 
       if ( this.dirtyX ) {
         rect.setAttribute( 'x', this.node._rectX );
@@ -62,13 +62,13 @@ define( require => {
         rect.setAttribute( 'height', this.node._rectHeight );
       }
       if ( this.dirtyCornerXRadius || this.dirtyCornerYRadius || this.dirtyWidth || this.dirtyHeight ) {
-        var arcw = 0;
-        var arch = 0;
+        let arcw = 0;
+        let arch = 0;
 
         // workaround for various browsers if rx=20, ry=0 (behavior is inconsistent, either identical to rx=20,ry=20, rx=0,ry=0. We'll treat it as rx=0,ry=0)
         // see https://github.com/phetsims/scenery/issues/183
         if ( this.node.isRounded() ) {
-          var maximumArcSize = this.node.getMaximumArcSize();
+          const maximumArcSize = this.node.getMaximumArcSize();
           arcw = Math.min( this.node._cornerXRadius, maximumArcSize );
           arch = Math.min( this.node._cornerYRadius, maximumArcSize );
         }

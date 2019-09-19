@@ -13,20 +13,20 @@ define( require => {
   const detectPrefix = require( 'PHET_CORE/detectPrefix' );
   const scenery = require( 'SCENERY/scenery' );
 
-  var Features = {};
+  const Features = {};
   scenery.register( 'Features', Features );
 
   function supportsDataURLFormatOutput( format ) {
     try {
-      var canvas = document.createElement( 'canvas' );
+      const canvas = document.createElement( 'canvas' );
       canvas.width = 1;
       canvas.height = 1;
-      var context = canvas.getContext( '2d' );
+      const context = canvas.getContext( '2d' );
       context.fillStyle = 'black';
       context.fillRect( 0, 0, 1, 1 );
-      var url = canvas.toDataURL( [ format ] );
+      const url = canvas.toDataURL( [ format ] );
 
-      var target = 'data:' + format;
+      const target = 'data:' + format;
       // var pngFallback = 'data:image/png';
 
       return url.slice( 0, target.length ) === target;
@@ -37,15 +37,15 @@ define( require => {
   }
 
   function supportsDataURLFormatOrigin( name, black1x1Url ) {
-    var canvas = document.createElement( 'canvas' );
+    const canvas = document.createElement( 'canvas' );
     canvas.width = 1;
     canvas.height = 1;
-    var context = canvas.getContext( '2d' );
+    const context = canvas.getContext( '2d' );
 
-    var img = document.createElement( 'img' );
+    const img = document.createElement( 'img' );
     img.crossOrigin = 'Anonymous'; // maybe setting the CORS attribute will help?
 
-    var loadCall = function() {
+    const loadCall = function() {
       try {
         context.drawImage( img, 0, 0 );
         canvas.toDataURL();
@@ -92,16 +92,16 @@ define( require => {
   supportsDataURLFormatOrigin( 'canvasGIFInput', 'data:image/gif;base64,R0lGODlhAQABAJEAAAAAAP///////wAAACH5BAEAAAIALAAAAAABAAEAAAICRAEAOw==' );
 
   // canvas prefixed names
-  var canvas = document.createElement( 'canvas' );
-  var ctx = canvas.getContext( '2d' );
+  const canvas = document.createElement( 'canvas' );
+  const ctx = canvas.getContext( '2d' );
   Features.toDataURLHD = detectPrefix( canvas, 'toDataURLHD' );
   Features.createImageDataHD = detectPrefix( ctx, 'createImageDataHD' );
   Features.getImageDataHD = detectPrefix( ctx, 'getImageDataHD' );
   Features.putImageDataHD = detectPrefix( ctx, 'putImageDataHD' );
   Features.currentTransform = detectPrefix( ctx, 'currentTransform' );
 
-  var span = document.createElement( 'span' );
-  var div = document.createElement( 'div' );
+  const span = document.createElement( 'span' );
+  const div = document.createElement( 'div' );
   Features.textStroke = detectPrefix( span.style, 'textStroke' );
   Features.textStrokeColor = detectPrefix( span.style, 'textStrokeColor' );
   Features.textStrokeWidth = detectPrefix( span.style, 'textStrokeWidth' );

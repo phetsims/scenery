@@ -21,7 +21,7 @@ define( require => {
   const Shape = require( 'KITE/Shape' );
   const Vector2 = require( 'DOT/Vector2' );
 
-  var LINE_OPTION_KEYS = [
+  const LINE_OPTION_KEYS = [
     'p1', // {Vector2} - Start position
     'p2', // {Vector2} - End position
     'x1', // {number} - Start x position
@@ -166,9 +166,9 @@ define( require => {
       this._x2 = x2;
       this._y2 = y2;
 
-      var stateLen = this._drawables.length;
-      for ( var i = 0; i < stateLen; i++ ) {
-        var state = this._drawables[ i ];
+      const stateLen = this._drawables.length;
+      for ( let i = 0; i < stateLen; i++ ) {
+        const state = this._drawables[ i ];
         state.markDirtyLine();
       }
 
@@ -207,9 +207,9 @@ define( require => {
         this._x1 = x1.x;
         this._y1 = x1.y;
       }
-      var stateLen = this._drawables.length;
-      for ( var i = 0; i < stateLen; i++ ) {
-        var state = this._drawables[ i ];
+      const stateLen = this._drawables.length;
+      for ( let i = 0; i < stateLen; i++ ) {
+        const state = this._drawables[ i ];
         state.markDirtyP1();
       }
       this.invalidateLine();
@@ -249,9 +249,9 @@ define( require => {
         this._x2 = x2.x;
         this._y2 = x2.y;
       }
-      var stateLen = this._drawables.length;
-      for ( var i = 0; i < stateLen; i++ ) {
-        var state = this._drawables[ i ];
+      const stateLen = this._drawables.length;
+      for ( let i = 0; i < stateLen; i++ ) {
+        const state = this._drawables[ i ];
         state.markDirtyP2();
       }
       this.invalidateLine();
@@ -272,8 +272,8 @@ define( require => {
       if ( this._x1 !== x1 ) {
         this._x1 = x1;
 
-        var stateLen = this._drawables.length;
-        for ( var i = 0; i < stateLen; i++ ) {
+        const stateLen = this._drawables.length;
+        for ( let i = 0; i < stateLen; i++ ) {
           this._drawables[ i ].markDirtyX1();
         }
 
@@ -305,8 +305,8 @@ define( require => {
       if ( this._y1 !== y1 ) {
         this._y1 = y1;
 
-        var stateLen = this._drawables.length;
-        for ( var i = 0; i < stateLen; i++ ) {
+        const stateLen = this._drawables.length;
+        for ( let i = 0; i < stateLen; i++ ) {
           this._drawables[ i ].markDirtyY1();
         }
 
@@ -338,8 +338,8 @@ define( require => {
       if ( this._x2 !== x2 ) {
         this._x2 = x2;
 
-        var stateLen = this._drawables.length;
-        for ( var i = 0; i < stateLen; i++ ) {
+        const stateLen = this._drawables.length;
+        for ( let i = 0; i < stateLen; i++ ) {
           this._drawables[ i ].markDirtyX2();
         }
 
@@ -371,8 +371,8 @@ define( require => {
       if ( this._y2 !== y2 ) {
         this._y2 = y2;
 
-        var stateLen = this._drawables.length;
-        for ( var i = 0; i < stateLen; i++ ) {
+        const stateLen = this._drawables.length;
+        for ( let i = 0; i < stateLen; i++ ) {
           this._drawables[ i ].markDirtyY2();
         }
 
@@ -476,8 +476,8 @@ define( require => {
     computeShapeBounds: function() {
       // optimized form for a single line segment (no joins, just two caps)
       if ( this._stroke ) {
-        var lineCap = this.getLineCap();
-        var halfLineWidth = this.getLineWidth() / 2;
+        const lineCap = this.getLineCap();
+        const halfLineWidth = this.getLineWidth() / 2;
         if ( lineCap === 'round' ) {
           // we can simply dilate by half the line width
           return new Bounds2(
@@ -486,17 +486,17 @@ define( require => {
         }
         else {
           // (dx,dy) is a vector p2-p1
-          var dx = this._x2 - this._x1;
-          var dy = this._y2 - this._y1;
-          var magnitude = Math.sqrt( dx * dx + dy * dy );
+          const dx = this._x2 - this._x1;
+          const dy = this._y2 - this._y1;
+          const magnitude = Math.sqrt( dx * dx + dy * dy );
           if ( magnitude === 0 ) {
             // if our line is a point, just dilate by halfLineWidth
             return new Bounds2( this._x1 - halfLineWidth, this._y1 - halfLineWidth, this._x2 + halfLineWidth, this._y2 + halfLineWidth );
           }
           // (sx,sy) is a vector with a magnitude of halfLineWidth pointed in the direction of (dx,dy)
-          var sx = halfLineWidth * dx / magnitude;
-          var sy = halfLineWidth * dy / magnitude;
-          var bounds = Bounds2.NOTHING.copy();
+          const sx = halfLineWidth * dx / magnitude;
+          const sy = halfLineWidth * dy / magnitude;
+          const bounds = Bounds2.NOTHING.copy();
 
           if ( lineCap === 'butt' ) {
             // four points just using the perpendicular stroked offsets (sy,-sx) and (-sy,sx)
@@ -519,7 +519,7 @@ define( require => {
       }
       else {
         // It might have a fill? Just include the fill bounds for now.
-        var fillBounds = Bounds2.NOTHING.copy();
+        const fillBounds = Bounds2.NOTHING.copy();
         fillBounds.addCoordinates( this._x1, this._y1 );
         fillBounds.addCoordinates( this._x2, this._y2 );
         return fillBounds;

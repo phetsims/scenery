@@ -19,7 +19,7 @@ define( require => {
   const Vector2 = require( 'DOT/Vector2' );
   const WebGLSelfDrawable = require( 'SCENERY/display/WebGLSelfDrawable' );
 
-  var scratchColor = new Color( 'transparent' );
+  const scratchColor = new Color( 'transparent' );
 
   /**
    * A generated WebGLSelfDrawable whose purpose will be drawing our Rectangle. One of these drawables will be created
@@ -90,15 +90,15 @@ define( require => {
         this.includeVertices = this.node.hasFill();
 
         if ( this.includeVertices ) {
-          var fill = ( this.node.fill instanceof Property ) ? this.node.fill.value : this.node.fill;
-          var color =  scratchColor.set( fill );
-          var red = color.red / 255;
-          var green = color.green / 255;
-          var blue = color.blue / 255;
-          var alpha = color.alpha;
+          const fill = ( this.node.fill instanceof Property ) ? this.node.fill.value : this.node.fill;
+          const color =  scratchColor.set( fill );
+          const red = color.red / 255;
+          const green = color.green / 255;
+          const blue = color.blue / 255;
+          const alpha = color.alpha;
 
-          for ( var i = 0; i < 6; i++ ) {
-            var offset = i * 6;
+          for ( let i = 0; i < 6; i++ ) {
+            const offset = i * 6;
             this.vertexArray[ 2 + offset ] = red;
             this.vertexArray[ 3 + offset ] = green;
             this.vertexArray[ 4 + offset ] = blue;
@@ -110,12 +110,12 @@ define( require => {
       if ( this.transformDirty || this.dirtyX || this.dirtyY || this.dirtyWidth || this.dirtyHeight ) {
         this.transformDirty = false;
 
-        var x = this.node._rectX;
-        var y = this.node._rectY;
-        var width = this.node._rectWidth;
-        var height = this.node._rectHeight;
+        const x = this.node._rectX;
+        const y = this.node._rectY;
+        const width = this.node._rectWidth;
+        const height = this.node._rectHeight;
 
-        var transformMatrix = this.instance.relativeTransform.matrix; // with compute need, should always be accurate
+        const transformMatrix = this.instance.relativeTransform.matrix; // with compute need, should always be accurate
         transformMatrix.multiplyVector2( this.upperLeft.setXY( x, y ) );
         transformMatrix.multiplyVector2( this.lowerLeft.setXY( x, y + height ) );
         transformMatrix.multiplyVector2( this.upperRight.setXY( x + width, y ) );

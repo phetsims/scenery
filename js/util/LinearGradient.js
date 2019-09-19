@@ -32,7 +32,7 @@ define( require => {
     assert && assert( isFinite( x0 ) && isFinite( y0 ) && isFinite( x1 ) && isFinite( y1 ) );
 
     // TODO: are we using this alternative format?
-    var usesVectors = y1 === undefined;
+    const usesVectors = y1 === undefined;
     if ( usesVectors ) {
       assert && assert( ( x0 instanceof Vector2 ) && ( y0 instanceof Vector2 ), 'If less than 4 parameters are given, the first two parameters must be Vector2' );
     }
@@ -73,7 +73,7 @@ define( require => {
     },
 
     toString: function() {
-      var result = 'new scenery.LinearGradient( ' + this.start.x + ', ' + this.start.y + ', ' + this.end.x + ', ' + this.end.y + ' )';
+      let result = 'new scenery.LinearGradient( ' + this.start.x + ', ' + this.start.y + ', ' + this.end.x + ', ' + this.end.y + ' )';
 
       _.each( this.stops, function( stop ) {
         result += '.addColorStop( ' + stop.ratio + ', \'' + ( stop.color.toCSS ? stop.color.toCSS() : stop.color.toString() ) + '\' )';

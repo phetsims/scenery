@@ -104,9 +104,9 @@ define( require => {
      * @returns {Array.<{ ratio: {number}, stop: {Color|string|Property.<Color|string|null>|null} }>}
      */
     getSVGStops: function() {
-      var startIsLarger = this.startIsLarger;
-      var maxRadius = this.maxRadius;
-      var minRadius = this.minRadius;
+      const startIsLarger = this.startIsLarger;
+      const maxRadius = this.maxRadius;
+      const minRadius = this.minRadius;
 
       //TODO: replace with dot.Util.linear
       // maps x linearly from [a0,b0] => [a1,b1]
@@ -116,7 +116,7 @@ define( require => {
 
       function mapStop( stop ) {
         // flip the stops if the start has a larger radius
-        var ratio = startIsLarger ? 1 - stop.ratio : stop.ratio;
+        let ratio = startIsLarger ? 1 - stop.ratio : stop.ratio;
 
         // scale the stops properly if the smaller radius isn't 0
         if ( minRadius > 0 ) {
@@ -130,7 +130,7 @@ define( require => {
         };
       }
 
-      var stops = this.stops.map( mapStop );
+      const stops = this.stops.map( mapStop );
 
       // switch the direction we apply stops in, so that the ratios always are increasing.
       if ( startIsLarger ) {
@@ -141,7 +141,7 @@ define( require => {
     },
 
     toString: function() {
-      var result = 'new scenery.RadialGradient( ' + this.start.x + ', ' + this.start.y + ', ' + this.startRadius + ', ' + this.end.x + ', ' + this.end.y + ', ' + this.endRadius + ' )';
+      let result = 'new scenery.RadialGradient( ' + this.start.x + ', ' + this.start.y + ', ' + this.startRadius + ', ' + this.end.x + ', ' + this.end.y + ', ' + this.endRadius + ' )';
 
       _.each( this.stops, function( stop ) {
         result += '.addColorStop( ' + stop.ratio + ', \'' + stop.color.toString() + '\' )';

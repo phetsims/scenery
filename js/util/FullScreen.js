@@ -17,13 +17,13 @@ define( require => {
   const scenery = require( 'SCENERY/scenery' );
 
   // get prefixed (and properly capitalized) property names
-  var exitFullscreenPropertyName = detectPrefix( document, 'exitFullscreen' ) ||
+  const exitFullscreenPropertyName = detectPrefix( document, 'exitFullscreen' ) ||
                                    detectPrefix( document, 'cancelFullScreen' ); // Firefox
-  var fullscreenElementPropertyName = detectPrefix( document, 'fullscreenElement' ) ||
+  const fullscreenElementPropertyName = detectPrefix( document, 'fullscreenElement' ) ||
                                       detectPrefix( document, 'fullScreenElement' ); // Firefox capitalization
-  var fullscreenEnabledPropertyName = detectPrefix( document, 'fullscreenEnabled' ) ||
+  const fullscreenEnabledPropertyName = detectPrefix( document, 'fullscreenEnabled' ) ||
                                       detectPrefix( document, 'fullScreenEnabled' ); // Firefox capitalization
-  var fullscreenChangeEvent = detectPrefixEvent( document, 'fullscreenchange' );
+  let fullscreenChangeEvent = detectPrefixEvent( document, 'fullscreenchange' );
 
   // required capitalization workaround for now
   if ( fullscreenChangeEvent === 'msfullscreenchange' ) {
@@ -47,14 +47,14 @@ define( require => {
      * @param {Display} display
      */
     enterFullScreen: function( display ) {
-      var requestFullscreenPropertyName = detectPrefix( document.body, 'requestFullscreen' ) ||
+      const requestFullscreenPropertyName = detectPrefix( document.body, 'requestFullscreen' ) ||
                                           detectPrefix( document.body, 'requestFullScreen' ); // Firefox capitalization
                                           
       if ( !platform.ie9 && !platform.ie10 ) {
         display.domElement[ requestFullscreenPropertyName ] && display.domElement[ requestFullscreenPropertyName ]();
       }
       else if ( typeof window.ActiveXObject !== 'undefined' ) { // Older IE.
-        var wscript = new window.ActiveXObject( 'WScript.Shell' );
+        const wscript = new window.ActiveXObject( 'WScript.Shell' );
         if ( wscript !== null ) {
           wscript.SendKeys( '{F11}' );
         }

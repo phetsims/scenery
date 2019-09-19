@@ -31,7 +31,7 @@ define( require => {
   // require( 'SCENERY/util/TrailPointer' );
 
   // constants
-  var ID_SEPARATOR = '-';
+  const ID_SEPARATOR = '-';
 
   function Trail( nodes ) {
     /*
@@ -46,7 +46,7 @@ define( require => {
 
     if ( nodes instanceof Trail ) {
       // copy constructor (takes advantage of already built index information)
-      var otherTrail = nodes;
+      const otherTrail = nodes;
 
       this.nodes = otherTrail.nodes.slice( 0 );
       this.length = otherTrail.length;
@@ -68,18 +68,18 @@ define( require => {
     // nodes[i].children[ indices[i] ] === nodes[i+1]
     this.indices = [];
 
-    var self = this;
+    const self = this;
     if ( nodes ) {
       if ( nodes instanceof scenery.Node ) {
-        var node = nodes;
+        const node = nodes;
 
         // add just a single node in
         self.addDescendant( node );
       }
       else {
         // process it as an array
-        var len = nodes.length;
-        for ( var i = 0; i < len; i++ ) {
+        const len = nodes.length;
+        for ( let i = 0; i < len; i++ ) {
           self.addDescendant( nodes[ i ] );
         }
       }
@@ -113,8 +113,8 @@ define( require => {
     isValid: function() {
       this.reindex();
 
-      var indexLength = this.indices.length;
-      for ( var i = 0; i < indexLength; i++ ) {
+      const indexLength = this.indices.length;
+      for ( let i = 0; i < indexLength; i++ ) {
         if ( this.indices[ i ] < 0 ) {
           return false;
         }
@@ -125,7 +125,7 @@ define( require => {
 
     // this trail is visible only if all nodes on it are marked as visible
     isVisible: function() {
-      var i = this.nodes.length;
+      let i = this.nodes.length;
       while ( i-- ) {
         if ( !this.nodes[ i ].isVisible() ) {
           return false;
@@ -136,7 +136,7 @@ define( require => {
 
     // this trail is visible only if all nodes on it are marked as visible
     isAccessibleVisible: function() {
-      var i = this.nodes.length;
+      let i = this.nodes.length;
       while ( i-- ) {
         if ( !this.nodes[ i ].isVisible() || !this.nodes[ i ].getAccessibleVisible() ) {
           return false;
@@ -146,8 +146,8 @@ define( require => {
     },
 
     getOpacity: function() {
-      var opacity = 1;
-      var i = this.nodes.length;
+      let opacity = 1;
+      let i = this.nodes.length;
       while ( i-- ) {
         opacity *= this.nodes[ i ].getOpacity();
       }
@@ -198,12 +198,12 @@ define( require => {
     getMatrix: function() {
       // TODO: performance: can we cache this ever? would need the rootNode to not really change in between
       // this matrix will be modified in place, so always start fresh
-      var matrix = Matrix3.identity();
+      const matrix = Matrix3.identity();
 
       // from the root up
-      var nodes = this.nodes;
-      var length = nodes.length;
-      for ( var i = 0; i < length; i++ ) {
+      const nodes = this.nodes;
+      const length = nodes.length;
+      for ( let i = 0; i < length; i++ ) {
         matrix.multiplyMatrix( nodes[ i ].getMatrix() );
       }
       return matrix;
@@ -213,12 +213,12 @@ define( require => {
     getAncestorMatrix: function() {
       // TODO: performance: can we cache this ever? would need the rootNode to not really change in between
       // this matrix will be modified in place, so always start fresh
-      var matrix = Matrix3.identity();
+      const matrix = Matrix3.identity();
 
       // from the root up
-      var nodes = this.nodes;
-      var length = nodes.length;
-      for ( var i = 1; i < length; i++ ) {
+      const nodes = this.nodes;
+      const length = nodes.length;
+      for ( let i = 1; i < length; i++ ) {
         matrix.multiplyMatrix( nodes[ i ].getMatrix() );
       }
       return matrix;
@@ -227,12 +227,12 @@ define( require => {
     // from parent to global
     getParentMatrix: function() {
       // this matrix will be modified in place, so always start fresh
-      var matrix = Matrix3.identity();
+      const matrix = Matrix3.identity();
 
       // from the root up
-      var nodes = this.nodes;
-      var length = nodes.length;
-      for ( var i = 0; i < length - 1; i++ ) {
+      const nodes = this.nodes;
+      const length = nodes.length;
+      for ( let i = 0; i < length - 1; i++ ) {
         matrix.multiplyMatrix( nodes[ i ].getMatrix() );
       }
       return matrix;
@@ -254,7 +254,7 @@ define( require => {
 
 
       if ( this.nodes.length ) {
-        var oldRoot = this.nodes[ 0 ];
+        const oldRoot = this.nodes[ 0 ];
         this.indices.unshift( index === undefined ? _.indexOf( node._children, oldRoot ) : index );
       }
       this.nodes.unshift( node );
@@ -285,7 +285,7 @@ define( require => {
 
 
       if ( this.nodes.length ) {
-        var parent = this.lastNode();
+        const parent = this.lastNode();
         this.indices.push( index === undefined ? _.indexOf( parent._children, node ) : index );
       }
       this.nodes.push( node );
@@ -311,18 +311,18 @@ define( require => {
     },
 
     addDescendantTrail: function( trail ) {
-      var length = trail.length;
+      const length = trail.length;
       if ( length ) {
         this.addDescendant( trail.nodes[ 0 ] );
       }
-      for ( var i = 1; i < length; i++ ) {
+      for ( let i = 1; i < length; i++ ) {
         this.addDescendant( trail.nodes[ i ], this.indices[ i - 1 ] );
       }
     },
 
     removeDescendantTrail: function( trail ) {
-      var length = trail.length;
-      for ( var i = length - 1; i >= 0; i-- ) {
+      const length = trail.length;
+      for ( let i = length - 1; i >= 0; i-- ) {
         assert && assert( this.lastNode() === trail.nodes[ i ] );
 
         this.removeDescendant();
@@ -331,11 +331,11 @@ define( require => {
 
     // refreshes the internal index references (important if any children arrays were modified!)
     reindex: function() {
-      var length = this.length;
-      for ( var i = 1; i < length; i++ ) {
+      const length = this.length;
+      for ( let i = 1; i < length; i++ ) {
         // only replace indices where they have changed (this was a performance hotspot)
-        var currentIndex = this.indices[ i - 1 ];
-        var baseNode = this.nodes[ i - 1 ];
+        const currentIndex = this.indices[ i - 1 ];
+        const baseNode = this.nodes[ i - 1 ];
 
         if ( baseNode._children[ currentIndex ] !== this.nodes[ i ] ) {
           this.indices[ i - 1 ] = _.indexOf( baseNode._children, this.nodes[ i ] );
@@ -366,8 +366,8 @@ define( require => {
     },
 
     areIndicesValid: function() {
-      for ( var i = 1; i < this.length; i++ ) {
-        var currentIndex = this.indices[ i - 1 ];
+      for ( let i = 1; i < this.length; i++ ) {
+        const currentIndex = this.indices[ i - 1 ];
         if ( this.nodes[ i - 1 ]._children[ currentIndex ] !== this.nodes[ i ] ) {
           return false;
         }
@@ -380,7 +380,7 @@ define( require => {
         return false;
       }
 
-      for ( var i = 0; i < this.nodes.length; i++ ) {
+      for ( let i = 0; i < this.nodes.length; i++ ) {
         if ( this.nodes[ i ] !== other.nodes[ i ] ) {
           return false;
         }
@@ -391,7 +391,7 @@ define( require => {
 
     // returns a new Trail from the root up to the parameter node.
     upToNode: function( node ) {
-      var nodeIndex = _.indexOf( this.nodes, node );
+      const nodeIndex = _.indexOf( this.nodes, node );
       assert && assert( nodeIndex >= 0, 'Trail does not contain the node' );
       return this.slice( 0, _.indexOf( this.nodes, node ) + 1 );
     },
@@ -409,7 +409,7 @@ define( require => {
         return false;
       }
 
-      for ( var i = 0; i < other.nodes.length; i++ ) {
+      for ( let i = 0; i < other.nodes.length; i++ ) {
         if ( this.nodes[ i ] !== other.nodes[ i ] ) {
           return false;
         }
@@ -439,10 +439,10 @@ define( require => {
       this.reindex();
       otherTrail.reindex();
 
-      var branchIndex = this.getBranchIndexTo( otherTrail );
-      var idx;
+      const branchIndex = this.getBranchIndexTo( otherTrail );
+      let idx;
 
-      var matrix = Matrix3.IDENTITY;
+      let matrix = Matrix3.IDENTITY;
 
       // walk our transform down, prepending
       for ( idx = this.length - 1; idx >= branchIndex; idx-- ) {
@@ -469,9 +469,9 @@ define( require => {
     getBranchIndexTo: function( otherTrail ) {
       assert && assert( this.nodes[ 0 ] === otherTrail.nodes[ 0 ], 'To get a branch index, the trails must have the same root' );
 
-      var branchIndex;
+      let branchIndex;
 
-      var min = Math.min( this.length, otherTrail.length );
+      const min = Math.min( this.length, otherTrail.length );
       for ( branchIndex = 0; branchIndex < min; branchIndex++ ) {
         if ( this.nodes[ branchIndex ] !== otherTrail.nodes[ branchIndex ] ) {
           break;
@@ -490,8 +490,8 @@ define( require => {
     getLastInputEnabledIndex: function() {
       // Determine how far up the Trail input is determined. The first node with !inputEnabled and after will not have
       // events fired (see https://github.com/phetsims/sun/issues/257)
-      var trailStartIndex = -1;
-      for ( var j = 0; j < this.length; j++ ) {
+      let trailStartIndex = -1;
+      for ( let j = 0; j < this.length; j++ ) {
         if ( !this.nodes[ j ]._inputEnabled ) {
           break;
         }
@@ -510,7 +510,7 @@ define( require => {
      * @returns {number}
      */
     getCursorCheckIndex: function() {
-      var lastInputEnabledIndex = this.getLastInputEnabledIndex();
+      const lastInputEnabledIndex = this.getLastInputEnabledIndex();
       if ( lastInputEnabledIndex + 1 < this.length ) {
         return lastInputEnabledIndex + 1;
       }
@@ -538,12 +538,12 @@ define( require => {
         return null;
       }
 
-      var top = this.nodeFromTop( 0 );
-      var parent = this.nodeFromTop( 1 );
+      const top = this.nodeFromTop( 0 );
+      const parent = this.nodeFromTop( 1 );
 
-      var parentIndex = _.indexOf( parent._children, top );
+      const parentIndex = _.indexOf( parent._children, top );
       assert && assert( parentIndex !== -1 );
-      var arr = this.nodes.slice( 0, this.nodes.length - 1 );
+      const arr = this.nodes.slice( 0, this.nodes.length - 1 );
       if ( parentIndex === 0 ) {
         // we were the first child, so give it the trail to the parent
         return new Trail( arr );
@@ -554,7 +554,7 @@ define( require => {
 
         // and find its last terminal
         while ( arr[ arr.length - 1 ]._children.length !== 0 ) {
-          var last = arr[ arr.length - 1 ];
+          const last = arr[ arr.length - 1 ];
           arr.push( last._children[ last._children.length - 1 ] );
         }
 
@@ -564,7 +564,7 @@ define( require => {
 
     // like previous(), but keeps moving back until the trail goes to a node with isPainted() === true
     previousPainted: function() {
-      var result = this.previous();
+      let result = this.previous();
       while ( result && !result.isPainted() ) {
         result = result.previous();
       }
@@ -573,9 +573,9 @@ define( require => {
 
     // in the order of self-rendering
     next: function() {
-      var arr = this.nodes.slice( 0 );
+      const arr = this.nodes.slice( 0 );
 
-      var top = this.nodeFromTop( 0 );
+      const top = this.nodeFromTop( 0 );
       if ( top._children.length > 0 ) {
         // if we have children, return the first child
         arr.push( top._children[ 0 ] );
@@ -583,15 +583,15 @@ define( require => {
       }
       else {
         // walk down and attempt to find the next parent
-        var depth = this.nodes.length - 1;
+        let depth = this.nodes.length - 1;
 
         while ( depth > 0 ) {
-          var node = this.nodes[ depth ];
-          var parent = this.nodes[ depth - 1 ];
+          const node = this.nodes[ depth ];
+          const parent = this.nodes[ depth - 1 ];
 
           arr.pop(); // take off the node so we can add the next sibling if it exists
 
-          var index = _.indexOf( parent._children, node );
+          const index = _.indexOf( parent._children, node );
           if ( index !== parent._children.length - 1 ) {
             // there is another (later) sibling. use that!
             arr.push( parent._children[ index + 1 ] );
@@ -609,7 +609,7 @@ define( require => {
 
     // like next(), but keeps moving back until the trail goes to a node with isPainted() === true
     nextPainted: function() {
-      var result = this.next();
+      let result = this.next();
       while ( result && !result.isPainted() ) {
         result = result.next();
       }
@@ -638,8 +638,8 @@ define( require => {
       assertSlow && assertSlow( this.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed on ' + this.toString() );
       assertSlow && assertSlow( other.areIndicesValid(), 'Trail.compare other.areIndicesValid() failed on ' + other.toString() );
 
-      var minNodeIndex = Math.min( this.indices.length, other.indices.length );
-      for ( var i = 0; i < minNodeIndex; i++ ) {
+      const minNodeIndex = Math.min( this.indices.length, other.indices.length );
+      for ( let i = 0; i < minNodeIndex; i++ ) {
         if ( this.indices[ i ] !== other.indices[ i ] ) {
           if ( this.indices[ i ] < other.indices[ i ] ) {
             return -1;
@@ -706,12 +706,12 @@ define( require => {
 
     updateUniqueId: function() {
       // string concatenation is faster, see http://jsperf.com/string-concat-vs-joins
-      var result = '';
-      var len = this.nodes.length;
+      let result = '';
+      const len = this.nodes.length;
       if ( len > 0 ) {
         result += this.nodes[ 0 ]._id;
       }
-      for ( var i = 1; i < len; i++ ) {
+      for ( let i = 1; i < len; i++ ) {
         result += ID_SEPARATOR + this.nodes[ i ]._id;
       }
       this.uniqueId = result;
@@ -722,7 +722,7 @@ define( require => {
     getUniqueId: function() {
       // sanity checks
       if ( assert ) {
-        var oldUniqueId = this.uniqueId;
+        const oldUniqueId = this.uniqueId;
         this.updateUniqueId();
         assert( oldUniqueId === this.uniqueId );
       }
@@ -739,7 +739,7 @@ define( require => {
 
     // not optimized by any means, meant for debugging.
     toPathString: function() {
-      var specialNodes = _.filter( this.nodes, function( n ) { return n.constructor.name !== 'Node'; } );
+      const specialNodes = _.filter( this.nodes, function( n ) { return n.constructor.name !== 'Node'; } );
       return _.map( specialNodes, function( n ) { return n.constructor.name; } ).join( '/' );
     },
 
@@ -765,8 +765,8 @@ define( require => {
 
   // global way of iterating across trails. when callback returns true, subtree will be skipped
   Trail.eachTrailBetween = function( a, b, callback, excludeEndTrails, rootNode ) {
-    var aPointer = a ? new scenery.TrailPointer( a.copy(), true ) : new scenery.TrailPointer( new scenery.Trail( rootNode ), true );
-    var bPointer = b ? new scenery.TrailPointer( b.copy(), true ) : new scenery.TrailPointer( new scenery.Trail( rootNode ), false );
+    const aPointer = a ? new scenery.TrailPointer( a.copy(), true ) : new scenery.TrailPointer( new scenery.Trail( rootNode ), true );
+    const bPointer = b ? new scenery.TrailPointer( b.copy(), true ) : new scenery.TrailPointer( new scenery.Trail( rootNode ), false );
 
     // if we are excluding endpoints, just bump the pointers towards each other by one step
     if ( excludeEndTrails ) {
@@ -789,8 +789,8 @@ define( require => {
   // The index at which the two trails diverge. If a.length === b.length === branchIndex, the trails are identical
   Trail.branchIndex = function( a, b ) {
     assert && assert( a.nodes[ 0 ] === b.nodes[ 0 ], 'Branch changes require roots to be the same' );
-    var branchIndex;
-    var shortestLength = Math.min( a.length, b.length );
+    let branchIndex;
+    const shortestLength = Math.min( a.length, b.length );
     for ( branchIndex = 0; branchIndex < shortestLength; branchIndex++ ) {
       if ( a.nodes[ branchIndex ] !== b.nodes[ branchIndex ] ) {
         break;
@@ -805,15 +805,15 @@ define( require => {
   };
 
   Trail.appendAncestorTrailsWithPredicate = function( trailResults, trail, predicate ) {
-    var root = trail.rootNode();
+    const root = trail.rootNode();
 
     if ( predicate( root ) ) {
       trailResults.push( trail.copy() );
     }
 
-    var parentCount = root._parents.length;
-    for ( var i = 0; i < parentCount; i++ ) {
-      var parent = root._parents[ i ];
+    const parentCount = root._parents.length;
+    for ( let i = 0; i < parentCount; i++ ) {
+      const parent = root._parents[ i ];
 
       trail.addAncestor( parent );
       Trail.appendAncestorTrailsWithPredicate( trailResults, trail, predicate );
@@ -822,15 +822,15 @@ define( require => {
   };
 
   Trail.appendDescendantTrailsWithPredicate = function( trailResults, trail, predicate ) {
-    var lastNode = trail.lastNode();
+    const lastNode = trail.lastNode();
 
     if ( predicate( lastNode ) ) {
       trailResults.push( trail.copy() );
     }
 
-    var childCount = lastNode._children.length;
-    for ( var i = 0; i < childCount; i++ ) {
-      var child = lastNode._children[ i ];
+    const childCount = lastNode._children.length;
+    for ( let i = 0; i < childCount; i++ ) {
+      const child = lastNode._children[ i ];
 
       trail.addDescendant( child, i );
       Trail.appendDescendantTrailsWithPredicate( trailResults, trail, predicate );
@@ -933,28 +933,28 @@ define( require => {
    * @returns {Trail}
    */
   Trail.fromUniqueId = function( rootNode, uniqueId ) {
-    var trailIds = uniqueId.split( ID_SEPARATOR );
-    var trailIdNumbers = trailIds.map( function( id ) { return parseInt( id, 10 ); } );
+    const trailIds = uniqueId.split( ID_SEPARATOR );
+    const trailIdNumbers = trailIds.map( function( id ) { return parseInt( id, 10 ); } );
 
-    var currentNode = rootNode;
+    let currentNode = rootNode;
 
-    var rootId = trailIdNumbers.shift();
-    var nodes = [ currentNode ];
+    const rootId = trailIdNumbers.shift();
+    const nodes = [ currentNode ];
 
     assert && assert( rootId === rootNode.id );
 
     while( trailIdNumbers.length > 0 ) {
-      var trailId = trailIdNumbers.shift();
+      const trailId = trailIdNumbers.shift();
 
       // if accessible order is set, the trail might not match the hierarchy of children - search through nodes
       // in accessibleOrder first because accessibleOrder is an override for scene graph structure
-      var accessibleOrder = currentNode.accessibleOrder || [];
-      var children = accessibleOrder.concat( currentNode.children );
-      for ( var j = 0; j < children.length; j++ ) {
+      const accessibleOrder = currentNode.accessibleOrder || [];
+      const children = accessibleOrder.concat( currentNode.children );
+      for ( let j = 0; j < children.length; j++ ) {
 
         // accessibleOrder supports null entries to fill in with default order
         if ( children[ j ] !== null && children[ j ].id === trailId ) {
-          var childAlongTrail = children[ j ];
+          const childAlongTrail = children[ j ];
           nodes.push( childAlongTrail );
           currentNode = childAlongTrail;
 

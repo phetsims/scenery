@@ -87,8 +87,8 @@ define( require => {
 
   // Whether there are blocks that consist of drawables that are ALL internal to the {ChangeInterval} interval.
   function intervalHasOldInternalBlocks( interval, firstStitchBlock, lastStitchBlock ) {
-    var beforeBlock = interval.drawableBefore ? interval.drawableBefore.parentDrawable : null;
-    var afterBlock = interval.drawableAfter ? interval.drawableAfter.parentDrawable : null;
+    const beforeBlock = interval.drawableBefore ? interval.drawableBefore.parentDrawable : null;
+    const afterBlock = interval.drawableAfter ? interval.drawableAfter.parentDrawable : null;
 
     if ( beforeBlock && afterBlock && beforeBlock === afterBlock ) {
       return false;
@@ -111,18 +111,18 @@ define( require => {
    * (b) Has the same renderer as the interval's drawableAfter
    */
   function getLastCompatibleExternalDrawable( interval ) {
-    var firstDrawable = interval.drawableAfter;
+    const firstDrawable = interval.drawableAfter;
 
     if ( firstDrawable ) {
-      var renderer = firstDrawable.renderer;
+      const renderer = firstDrawable.renderer;
 
       // we stop our search before we reach this (null is acceptable), ensuring we don't go into the next change interval
-      var cutoffDrawable = interval.nextChangeInterval ? interval.nextChangeInterval.drawableBefore.nextDrawable : null;
+      const cutoffDrawable = interval.nextChangeInterval ? interval.nextChangeInterval.drawableBefore.nextDrawable : null;
 
-      var drawable = firstDrawable;
+      let drawable = firstDrawable;
 
       while ( true ) { //eslint-disable-line no-constant-condition
-        var nextDrawable = drawable.nextDrawable;
+        const nextDrawable = drawable.nextDrawable;
 
         // first comparison also does null check when necessary
         if ( nextDrawable !== cutoffDrawable && nextDrawable.renderer === renderer ) {
@@ -140,7 +140,7 @@ define( require => {
     }
   }
 
-  var prototype = {
+  const prototype = {
     // Main stitch entry point, called directly from the backbone or cache. We are modifying our backbone's blocks and
     // their attached drawables.
     // @param {Drawable | null} firstStitchDrawable: What our backbone's first drawable will be after this stitch
@@ -172,7 +172,7 @@ define( require => {
       // we need some extra tracking for our inner sub-block edge case loop.
       this.blockWasAdded = false; // we need to know if a previously-existing block was added, and remove it otherwise.
 
-      var interval;
+      let interval;
 
       // record current first/last drawables for the entire backbone
       this.recordBackboneBoundaries();
@@ -185,8 +185,8 @@ define( require => {
       // old block. Note that later we will add the ones that stay on this backbone, so that they only either change
       // blocks, or stay on the same block.
       if ( backbone.blocks.length ) {
-        var veryFirstBlock = backbone.blocks[ 0 ];
-        var veryLastBlock = backbone.blocks[ backbone.blocks.length - 1 ];
+        const veryFirstBlock = backbone.blocks[ 0 ];
+        const veryLastBlock = backbone.blocks[ backbone.blocks.length - 1 ];
 
         for ( interval = firstChangeInterval; interval !== null; interval = interval.nextChangeInterval ) {
           assert && assert( !interval.isEmpty(), 'We now guarantee that the intervals are non-empty' );
@@ -195,15 +195,15 @@ define( require => {
           // back in this backbone, that they are removed from their old block. Note that later we will add the ones
           // that stay on this backbone, so that they only either change blocks, or stay on the same block.
           if ( intervalHasOldInternalDrawables( interval, oldFirstStitchDrawable, oldLastStitchDrawable ) ) {
-            var firstRemoval = interval.drawableBefore ?
+            const firstRemoval = interval.drawableBefore ?
                                interval.drawableBefore.oldNextDrawable :
                                oldFirstStitchDrawable;
-            var lastRemoval = interval.drawableAfter ?
+            const lastRemoval = interval.drawableAfter ?
                               interval.drawableAfter.oldPreviousDrawable :
                               oldLastStitchDrawable;
 
             // drawable iteration on the 'old' linked list
-            for ( var removedDrawable = firstRemoval; ; removedDrawable = removedDrawable.oldNextDrawable ) {
+            for ( let removedDrawable = firstRemoval; ; removedDrawable = removedDrawable.oldNextDrawable ) {
               this.notePendingRemoval( removedDrawable );
               if ( removedDrawable === lastRemoval ) { break; }
             }
@@ -211,10 +211,10 @@ define( require => {
 
           // Blocks totally contained within the change interval are marked as reusable (doesn't include end blocks).
           if ( intervalHasOldInternalBlocks( interval, veryFirstBlock, veryLastBlock ) ) {
-            var firstBlock = interval.drawableBefore === null ? backbone.blocks[ 0 ] : interval.drawableBefore.parentDrawable.nextBlock;
-            var lastBlock = interval.drawableAfter === null ? backbone.blocks[ backbone.blocks.length - 1 ] : interval.drawableAfter.parentDrawable.previousBlock;
+            const firstBlock = interval.drawableBefore === null ? backbone.blocks[ 0 ] : interval.drawableBefore.parentDrawable.nextBlock;
+            const lastBlock = interval.drawableAfter === null ? backbone.blocks[ backbone.blocks.length - 1 ] : interval.drawableAfter.parentDrawable.previousBlock;
 
-            for ( var markedBlock = firstBlock; ; markedBlock = markedBlock.nextBlock ) {
+            for ( let markedBlock = firstBlock; ; markedBlock = markedBlock.nextBlock ) {
               this.unuseBlock( markedBlock );
               if ( markedBlock === lastBlock ) { break; }
             }
@@ -293,7 +293,7 @@ define( require => {
 
           // if we removed everything (no new internal drawables), our drawableBefore is open 'after', if our
           // drawableAfter is open 'before' since they are siblings (only one flag needed).
-          var isOpen = !hasGapBetweenDrawables( interval.drawableBefore, interval.drawableAfter );
+          const isOpen = !hasGapBetweenDrawables( interval.drawableBefore, interval.drawableAfter );
 
           // handle glue/unglue or any other 'external' changes
           this.processEdgeCases( interval, isOpen, isOpen );
@@ -314,17 +314,17 @@ define( require => {
       }
       // otherwise normal operation
       else {
-        var drawable = interval.drawableBefore ? interval.drawableBefore.nextDrawable : firstStitchDrawable;
+        let drawable = interval.drawableBefore ? interval.drawableBefore.nextDrawable : firstStitchDrawable;
 
         // if we have any current drawables at all
-        var subBlockFirstDrawable = null;
-        var matchedBlock = null;
-        var isFirst = true;
+        let subBlockFirstDrawable = null;
+        let matchedBlock = null;
+        let isFirst = true;
 
         // separate our new-drawable linked-list into sub-blocks that we will process individually
         while ( true ) { //eslint-disable-line no-constant-condition
-          var nextDrawable = drawable.nextDrawable;
-          var isLast = nextDrawable === interval.drawableAfter;
+          const nextDrawable = drawable.nextDrawable;
+          const isLast = nextDrawable === interval.drawableAfter;
 
           assert && assert( nextDrawable !== null || isLast, 'If our nextDrawable is null, isLast must be true' );
 
@@ -375,8 +375,8 @@ define( require => {
         ( matchedBlock ? 'with matched: ' + matchedBlock.toString() : 'with no match' ) );
       sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
 
-      var openBefore = isOpenBefore( firstDrawable );
-      var openAfter = isOpenAfter( lastDrawable );
+      const openBefore = isOpenBefore( firstDrawable );
+      const openAfter = isOpenAfter( lastDrawable );
 
       assert && assert( !openBefore || isFirst, 'openBefore implies isFirst' );
       assert && assert( !openAfter || isLast, 'openAfter implies isLast' );
@@ -400,7 +400,7 @@ define( require => {
       matchedBlock = this.ensureUsedBlock( matchedBlock, firstDrawable );
 
       // add internal drawables
-      for ( var drawable = firstDrawable; ; drawable = drawable.nextDrawable ) {
+      for ( let drawable = firstDrawable; ; drawable = drawable.nextDrawable ) {
         this.notePendingAddition( drawable, matchedBlock );
         if ( drawable === lastDrawable ) { break; }
       }
@@ -427,9 +427,9 @@ define( require => {
     processEdgeCases: function( interval, openBefore, openAfter ) {
       // this test passes for glue and unglue cases
       if ( interval.drawableBefore !== null && interval.drawableAfter !== null ) {
-        var beforeBlock = interval.drawableBefore.pendingParentDrawable;
-        var afterBlock = interval.drawableAfter.pendingParentDrawable;
-        var nextAfterBlock = ( interval.nextChangeInterval && interval.nextChangeInterval.drawableAfter ) ?
+        const beforeBlock = interval.drawableBefore.pendingParentDrawable;
+        const afterBlock = interval.drawableAfter.pendingParentDrawable;
+        const nextAfterBlock = ( interval.nextChangeInterval && interval.nextChangeInterval.drawableAfter ) ?
                              interval.nextChangeInterval.drawableAfter.pendingParentDrawable :
                              null;
 
@@ -448,7 +448,7 @@ define( require => {
         sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
 
         // deciding what new block should be used for the external group of drawables after our change interval
-        var newAfterBlock;
+        let newAfterBlock;
         // if we have no gaps/boundaries, we should not have two different blocks
         if ( openBefore && openAfter ) {
           sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'glue using ' + beforeBlock.toString() );
@@ -507,7 +507,7 @@ define( require => {
     // our {Block} newBlock. The next processInterval will both handle the drawables inside that next interval, and
     // will be responsible for the 'external' drawables after that.
     changeExternals: function( interval, newBlock ) {
-      var lastExternalDrawable = getLastCompatibleExternalDrawable( interval );
+      const lastExternalDrawable = getLastCompatibleExternalDrawable( interval );
       this.notePendingMoves( newBlock, interval.drawableAfter, lastExternalDrawable );
 
       // If we didn't make it all the way to the next change interval's drawableBefore (there was another block
@@ -521,7 +521,7 @@ define( require => {
     // needing to be moved to our {Block} newBlock. This should only be called on external drawables, and should only
     // occur as needed with glue/unglue cases in the stitch.
     notePendingMoves: function( newBlock, firstDrawable, lastDrawable ) {
-      for ( var drawable = firstDrawable; ; drawable = drawable.nextDrawable ) {
+      for ( let drawable = firstDrawable; ; drawable = drawable.nextDrawable ) {
         assert && assert( !drawable.pendingAddition && !drawable.pendingRemoval,
           'Moved drawables should be thought of as unchanged, and thus have nothing pending yet' );
 
@@ -553,14 +553,14 @@ define( require => {
     // compatible block.
     // NOTE: this doesn't handle hooking up the block linked list
     getBlockForRenderer: function( renderer, drawable ) {
-      var block;
+      let block;
 
       // If it's not a DOM block, scan our reusable blocks for one with the same renderer.
       // If it's DOM, it should be processed correctly in reusableBlocks, and will never reach this point.
       if ( !Renderer.isDOM( renderer ) ) {
         // backwards scan, hopefully it's faster?
-        for ( var i = this.reusableBlocks.length - 1; i >= 0; i-- ) {
-          var tmpBlock = this.reusableBlocks[ i ];
+        for ( let i = this.reusableBlocks.length - 1; i >= 0; i-- ) {
+          const tmpBlock = this.reusableBlocks[ i ];
           assert && assert( !tmpBlock.used );
           if ( tmpBlock.renderer === renderer ) {
             this.useBlockAtIndex( tmpBlock, i );
@@ -616,7 +616,7 @@ define( require => {
       sceneryLog && sceneryLog.GreedyStitcher && this.reusableBlocks.length && sceneryLog.GreedyStitcher( 'removeUnusedBlocks' );
       sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.push();
       while ( this.reusableBlocks.length ) {
-        var block = this.reusableBlocks.pop();
+        const block = this.reusableBlocks.pop();
         this.markBlockForDisposal( block );
         this.blockOrderChanged = true;
       }
@@ -626,7 +626,7 @@ define( require => {
     // links blocks before a drawable (whether it is the first drawable or not)
     linkBeforeDrawable: function( drawable ) {
       sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'link before ' + drawable.toString() );
-      var beforeDrawable = drawable.previousDrawable;
+      const beforeDrawable = drawable.previousDrawable;
       this.linkBlocks( beforeDrawable ? beforeDrawable.pendingParentDrawable : null,
         drawable.pendingParentDrawable,
         beforeDrawable,
@@ -636,7 +636,7 @@ define( require => {
     // links blocks after a drawable (whether it is the last drawable or not)
     linkAfterDrawable: function( drawable ) {
       sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'link after ' + drawable.toString() );
-      var afterDrawable = drawable.nextDrawable;
+      const afterDrawable = drawable.nextDrawable;
       this.linkBlocks( drawable.pendingParentDrawable,
         afterDrawable ? afterDrawable.pendingParentDrawable : null,
         drawable,
@@ -707,7 +707,7 @@ define( require => {
       if ( firstBlock ) {
 
         // rewrite it starting with the first block
-        for ( var block = firstBlock; ; block = block.nextBlock ) {
+        for ( let block = firstBlock; ; block = block.nextBlock ) {
           sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.GreedyStitcher( block.toString() );
 
           backbone.blocks.push( block );
@@ -720,7 +720,7 @@ define( require => {
     }
   };
 
-  var GreedyStitcher = inherit( Stitcher, function GreedyStitcher() {
+  const GreedyStitcher = inherit( Stitcher, function GreedyStitcher() {
     // nothing done
   }, prototype );
   scenery.register( 'GreedyStitcher', GreedyStitcher );

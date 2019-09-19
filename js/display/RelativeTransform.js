@@ -218,7 +218,7 @@ define( require => {
     },
     // @private (called on the ancestor of the instance with the need)
     incrementTransformListenerChildren: function() {
-      var before = this.hasAncestorListenerNeed();
+      const before = this.hasAncestorListenerNeed();
 
       this.relativeChildrenListenersCount++;
       if ( before !== this.hasAncestorListenerNeed() ) {
@@ -229,7 +229,7 @@ define( require => {
     },
     // @private (called on the ancestor of the instance with the need)
     decrementTransformListenerChildren: function() {
-      var before = this.hasAncestorListenerNeed();
+      const before = this.hasAncestorListenerNeed();
 
       this.relativeChildrenListenersCount--;
       if ( before !== this.hasAncestorListenerNeed() ) {
@@ -241,7 +241,7 @@ define( require => {
 
     // @public (called on the instance itself)
     addListener: function( listener ) {
-      var before = this.hasAncestorListenerNeed();
+      const before = this.hasAncestorListenerNeed();
 
       this.relativeTransformListeners.push( listener );
       if ( before !== this.hasAncestorListenerNeed() ) {
@@ -258,7 +258,7 @@ define( require => {
 
     // @public (called on the instance itself)
     removeListener: function( listener ) {
-      var before = this.hasAncestorListenerNeed();
+      const before = this.hasAncestorListenerNeed();
 
       // TODO: replace with a 'remove' function call
       this.relativeTransformListeners.splice( _.indexOf( this.relativeTransformListeners, listener ), 1 );
@@ -295,7 +295,7 @@ define( require => {
     },
     // @private (called on the ancestor of the instance with the need)
     incrementTransformPrecomputeChildren: function() {
-      var before = this.hasAncestorComputeNeed();
+      const before = this.hasAncestorComputeNeed();
 
       this.relativeChildrenPrecomputeCount++;
       if ( before !== this.hasAncestorComputeNeed() ) {
@@ -306,7 +306,7 @@ define( require => {
     },
     // @private (called on the ancestor of the instance with the need)
     decrementTransformPrecomputeChildren: function() {
-      var before = this.hasAncestorComputeNeed();
+      const before = this.hasAncestorComputeNeed();
 
       this.relativeChildrenPrecomputeCount--;
       if ( before !== this.hasAncestorComputeNeed() ) {
@@ -318,7 +318,7 @@ define( require => {
 
     // @public (called on the instance itself)
     addPrecompute: function() {
-      var before = this.hasAncestorComputeNeed();
+      const before = this.hasAncestorComputeNeed();
 
       this.relativePrecomputeCount++;
       if ( before !== this.hasAncestorComputeNeed() ) {
@@ -335,7 +335,7 @@ define( require => {
 
     // @public (called on the instance itself)
     removePrecompute: function() {
-      var before = this.hasAncestorComputeNeed();
+      const before = this.hasAncestorComputeNeed();
 
       this.relativePrecomputeCount--;
       if ( before !== this.hasAncestorComputeNeed() ) {
@@ -358,13 +358,13 @@ define( require => {
       this.transformDirty = true;
       this.relativeSelfDirty = true;
 
-      var frameId = this.display._frameId;
+      const frameId = this.display._frameId;
 
       // mark all ancestors with relativeChildDirtyFrame, bailing out when possible
-      var instance = this.instance.parent;
+      let instance = this.instance.parent;
       while ( instance && instance.relativeTransform.relativeChildDirtyFrame !== frameId ) {
-        var parentInstance = instance.parent;
-        var isTransformed = instance.isTransformed;
+        const parentInstance = instance.parent;
+        const isTransformed = instance.isTransformed;
 
         // NOTE: our while loop guarantees that it wasn't frameId
         instance.relativeTransform.relativeChildDirtyFrame = frameId;
@@ -386,7 +386,7 @@ define( require => {
 
     // @private, updates our matrix based on any parents, and the node's current transform
     computeRelativeTransform: function() {
-      var nodeMatrix = this.node.getMatrix();
+      const nodeMatrix = this.node.getMatrix();
 
       if ( this.instance.parent && !this.instance.parent.isTransformed ) {
         // mutable form of parentMatrix * nodeMatrix
@@ -434,8 +434,8 @@ define( require => {
         // mark all children now as dirty, since we had to update (marked so that other children from the one we are
         // validating will know that they need updates)
         // if we were called from a child's validate(), they will now need to compute their transform
-        var len = this.instance.children.length;
-        for ( var i = 0; i < len; i++ ) {
+        const len = this.instance.children.length;
+        for ( let i = 0; i < len; i++ ) {
           this.instance.children[ i ].relativeTransform.relativeSelfDirty = true;
         }
       }
@@ -449,8 +449,8 @@ define( require => {
         ( passTransform ? ' passTransform' : '' ) );
       sceneryLog && sceneryLog.RelativeTransform && sceneryLog.push();
 
-      var len;
-      var i;
+      let len;
+      let i;
 
       if ( passTransform ) {
         // if we are passing isTransform, just apply this to the children
@@ -460,12 +460,12 @@ define( require => {
         }
       }
       else {
-        var wasDirty = ancestorWasDirty || this.relativeSelfDirty;
-        var wasSubtreeDirty = wasDirty || this.relativeChildDirtyFrame === frameId;
-        var hasComputeNeed = this.hasDescendantComputeNeed();
-        var hasListenerNeed = this.hasDescendantListenerNeed();
-        var hasSelfComputeNeed = this.hasSelfComputeNeed();
-        var hasSelfListenerNeed = this.hasSelfListenerNeed();
+        const wasDirty = ancestorWasDirty || this.relativeSelfDirty;
+        const wasSubtreeDirty = wasDirty || this.relativeChildDirtyFrame === frameId;
+        const hasComputeNeed = this.hasDescendantComputeNeed();
+        const hasListenerNeed = this.hasDescendantListenerNeed();
+        const hasSelfComputeNeed = this.hasSelfComputeNeed();
+        const hasSelfListenerNeed = this.hasSelfListenerNeed();
 
         // if our relative transform will be dirty but our parents' transform will be clean, we need to mark ourselves
         // as dirty (so that later access can identify we are dirty).
@@ -497,7 +497,7 @@ define( require => {
         // only update children if we aren't transformed (completely other context)
         if ( !this.instance.isTransformed || passTransform ) {
 
-          var isDirty = wasDirty && !( hasComputeNeed || hasSelfComputeNeed );
+          const isDirty = wasDirty && !( hasComputeNeed || hasSelfComputeNeed );
 
           // continue the traversal
           len = this.instance.children.length;
@@ -512,8 +512,8 @@ define( require => {
 
     // @private
     notifyRelativeTransformListeners: function() {
-      var len = this.relativeTransformListeners.length;
-      for ( var i = 0; i < len; i++ ) {
+      const len = this.relativeTransformListeners.length;
+      for ( let i = 0; i < len; i++ ) {
         this.relativeTransformListeners[ i ]();
       }
     },
@@ -522,8 +522,8 @@ define( require => {
       // get the relative matrix, computed to be up-to-date, and ignores any flags/counts so we can check whether our
       // state is consistent
       function currentRelativeMatrix( instance ) {
-        var resultMatrix = Matrix3.dirtyFromPool();
-        var nodeMatrix = instance.node.getMatrix();
+        const resultMatrix = Matrix3.dirtyFromPool();
+        const nodeMatrix = instance.node.getMatrix();
 
         if ( !instance.parent ) {
           // if our instance has no parent, ignore its transform
@@ -553,10 +553,10 @@ define( require => {
 
       if ( assertSlow ) {
         // count verification for invariants
-        var notifyRelativeCount = 0;
-        var precomputeRelativeCount = 0;
-        for ( var i = 0; i < this.instance.children.length; i++ ) {
-          var childInstance = this.instance.children[ i ];
+        let notifyRelativeCount = 0;
+        let precomputeRelativeCount = 0;
+        for ( let i = 0; i < this.instance.children.length; i++ ) {
+          const childInstance = this.instance.children[ i ];
 
           if ( childInstance.relativeTransform.hasAncestorListenerNeed() ) {
             notifyRelativeCount++;
@@ -578,7 +578,7 @@ define( require => {
         // Since we check to see if something is not dirty, we need to handle this when we are actually reporting
         // what is dirty. See https://github.com/phetsims/scenery/issues/512
         if ( !allowValidationNotNeededChecks && !hasRelativeSelfDirty( this ) ) {
-          var matrix = currentRelativeMatrix( this );
+          const matrix = currentRelativeMatrix( this );
           assertSlow( matrix.equals( this.matrix ), 'If there is no relativeSelfDirty flag set here or in our' +
                                                     ' ancestors, our matrix should be up-to-date' );
         }

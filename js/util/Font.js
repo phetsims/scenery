@@ -33,17 +33,17 @@ define( require => {
   const Tandem = require( 'TANDEM/Tandem' );
 
   // @private {Array.<string>} - Valid values for the 'style' property of Font
-  var VALID_STYLES = [ 'normal', 'italic', 'oblique' ];
+  const VALID_STYLES = [ 'normal', 'italic', 'oblique' ];
 
   // @private {Array.<string>} - Valid values for the 'variant' property of Font
-  var VALID_VARIANTS = [ 'normal', 'small-caps' ];
+  const VALID_VARIANTS = [ 'normal', 'small-caps' ];
 
   // @private {Array.<string>} - Valid values for the 'weight' property of Font
-  var VALID_WEIGHTS = [ 'normal', 'bold', 'bolder', 'lighter',
+  const VALID_WEIGHTS = [ 'normal', 'bold', 'bolder', 'lighter',
     '100', '200', '300', '400', '500', '600', '700', '800', '900' ];
 
   // @private {Array.<string>} - Valid values for the 'stretch' property of Font
-  var VALID_STRETCHES = [ 'normal', 'ultra-condensed', 'extra-condensed', 'condensed', 'semi-condensed',
+  const VALID_STRETCHES = [ 'normal', 'ultra-condensed', 'extra-condensed', 'condensed', 'semi-condensed',
     'semi-expanded', 'expanded', 'extra-expanded', 'ultra-expanded' ];
 
   /**
@@ -285,7 +285,7 @@ define( require => {
      * @returns {string}
      */
     computeShorthand: function() {
-      var ret = '';
+      let ret = '';
       if ( this._style !== 'normal' ) { ret += this._style + ' '; }
       if ( this._variant !== 'normal' ) { ret += this._variant + ' '; }
       if ( this._weight !== 'normal' ) { ret += this._weight + ' '; }
@@ -343,14 +343,14 @@ define( require => {
     fromCSS: function( cssString ) {
       // parse a somewhat proper CSS3 form (not guaranteed to handle it precisely the same as browsers yet)
 
-      var options = {};
+      const options = {};
 
       // split based on whitespace allowed by CSS spec (more restrictive than regular regexp whitespace)
-      var tokens = _.filter( cssString.split( /[\x09\x0A\x0C\x0D\x20]/ ), function( token ) { return token.length > 0; } ); // eslint-disable-line no-control-regex
+      const tokens = _.filter( cssString.split( /[\x09\x0A\x0C\x0D\x20]/ ), function( token ) { return token.length > 0; } ); // eslint-disable-line no-control-regex
 
       // pull tokens out until we reach something that doesn't match. that must be the font size (according to spec)
-      for ( var i = 0; i < tokens.length; i++ ) {
-        var token = tokens[ i ];
+      for ( let i = 0; i < tokens.length; i++ ) {
+        const token = tokens[ i ];
         if ( token === 'normal' ) {
           // nothing has to be done, everything already normal as default
         }
@@ -372,7 +372,7 @@ define( require => {
         }
         else {
           // not a style/variant/weight/stretch, must be a font size, possibly with an included line-height
-          var subtokens = token.split( /\// ); // extract font size from any line-height
+          const subtokens = token.split( /\// ); // extract font size from any line-height
           options.size = subtokens[ 0 ];
           if ( subtokens[ 1 ] ) {
             options.lineHeight = subtokens[ 1 ];

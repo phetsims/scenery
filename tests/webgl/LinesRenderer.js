@@ -46,7 +46,7 @@ define( require => {
       this.bindVertexBuffer();
     },
     draw: function() {
-      var gl = this.gl;
+      const gl = this.gl;
 
       gl.enableVertexAttribArray( this.positionAttribLocation );
       gl.useProgram( this.lineShaderProgram );
@@ -60,7 +60,7 @@ define( require => {
     },
 
     bindVertexBuffer: function() {
-      var gl = this.gl;
+      const gl = this.gl;
       gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
 
       gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [

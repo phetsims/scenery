@@ -35,8 +35,8 @@ define( require => {
   const KEY_DOWN = 'keydown';
   const KEY_UP = 'keyup';
 
-  var min = 9;
-  var max = 223;
+  const min = 9;
+  const max = 223;
 
   /**
    *
@@ -71,7 +71,7 @@ define( require => {
 
         // before we change focus to the next item, immediately release all keys that were down on the active element
         this.clearListeners();
-        var nextFocusable = AccessibilityUtil.getRandomFocusable( this.random );
+        const nextFocusable = AccessibilityUtil.getRandomFocusable( this.random );
         nextFocusable.focus();
         this.currentElement = nextFocusable;
 
@@ -133,7 +133,7 @@ define( require => {
      */
     triggerRandomKeyDownUpEvents( element ) {
 
-      var randomKeyCode = Math.floor( this.random.nextDouble() * ( max - min ) + min );
+      const randomKeyCode = Math.floor( this.random.nextDouble() * ( max - min ) + min );
 
       sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( 'trigger random keydown/up: ' + randomKeyCode );
       sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.push();
@@ -168,7 +168,7 @@ define( require => {
 
 
         // get active element, focus might have changed in the last press
-        var elementWithFocus = document.activeElement;
+        const elementWithFocus = document.activeElement;
 
         if ( keyboardTestingSchema[ elementWithFocus.tagName ] ) {
 
@@ -199,7 +199,7 @@ define( require => {
      * @private
      */
     triggerDOMEvent( event, element, keyCode ) {
-      var eventObj = document.createEventObject ?
+      const eventObj = document.createEventObject ?
                      document.createEventObject() : document.createEvent( 'Events' );
 
       if ( eventObj.initEvent ) {

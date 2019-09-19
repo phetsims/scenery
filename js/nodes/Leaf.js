@@ -13,7 +13,7 @@ define( require => {
   const Node = require( 'SCENERY/nodes/Node' );
   const scenery = require( 'SCENERY/scenery' );
 
-  var Leaf = {
+  const Leaf = {
     /**
      * Removes the capability to insert children when this is mixed into a type.
      * @public
@@ -24,7 +24,7 @@ define( require => {
     mixInto: function( type ) {
       assert && assert( _.includes( inheritance( type ), Node ) );
 
-      var proto = type.prototype;
+      const proto = type.prototype;
 
       /**
        * @override

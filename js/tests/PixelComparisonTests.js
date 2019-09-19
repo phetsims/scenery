@@ -27,22 +27,22 @@ define( require => {
 
   QUnit.module( 'PixelComparison' );
 
-  var DEFAULT_THRESHOLD = 1.5;
+  const DEFAULT_THRESHOLD = 1.5;
 
   function snapshotFromImage( image ) { // eslint-disable-line no-unused-vars
 
-    var canvas = document.createElement( 'canvas' );
+    const canvas = document.createElement( 'canvas' );
     canvas.width = image.width;
     canvas.height = image.height;
-    var context = canvas.getContext( '2d' );
+    const context = canvas.getContext( '2d' );
     context.drawImage( image, 0, 0, image.width, image.height );
     return context.getImageData( 0, 0, image.width, image.height );
   }
 
-  var testedRenderers = [ 'canvas', 'svg', 'dom', 'webgl' ];
+  const testedRenderers = [ 'canvas', 'svg', 'dom', 'webgl' ];
 
   // known clipping issues to fix
-  var nonDomWebGLTestedRenderers = testedRenderers.filter( function( renderer ) { return renderer !== 'dom' && renderer !== 'webgl'; } );
+  const nonDomWebGLTestedRenderers = testedRenderers.filter( function( renderer ) { return renderer !== 'dom' && renderer !== 'webgl'; } );
 
   /* eslint-disable no-undef */
   // We can only guarantee comparisons for Firefox and Chrome
@@ -63,18 +63,18 @@ define( require => {
    */
   function pixelTest( name, setup, dataURL, threshold, isAsync ) {
     QUnit.test( name, function( assert ) {
-      var done = assert.async();
+      const done = assert.async();
       // set up the scene/display
-      var scene = new Node();
-      var display = new Display( scene, {
+      const scene = new Node();
+      const display = new Display( scene, {
         preserveDrawingBuffer: true
       } );
 
       function loadImages() {
         // called when both images have been loaded
         function compareSnapshots() {
-          var referenceSnapshot = snapshotFromImage( referenceImage );
-          var freshSnapshot = snapshotFromImage( freshImage );
+          const referenceSnapshot = snapshotFromImage( referenceImage );
+          const freshSnapshot = snapshotFromImage( freshImage );
 
           display.domElement.style.position = 'relative'; // don't have it be absolutely positioned
           display.domElement.style.border = '1px solid black'; // border
@@ -87,7 +87,7 @@ define( require => {
         }
 
         // load images to compare
-        var loadedCount = 0;
+        let loadedCount = 0;
         var referenceImage = document.createElement( 'img' );
         var freshImage = document.createElement( 'img' );
         referenceImage.onload = freshImage.onload = function() {
@@ -128,7 +128,7 @@ define( require => {
   function multipleRendererTest( name, setup, dataURL, threshold, renderers, isAsync ) {
     for ( var i = 0; i < renderers.length; i++ ) {
       ( function() {
-        var renderer = renderers[ i ];
+        const renderer = renderers[ i ];
 
         pixelTest( name + ' (' + renderer + ')', function( scene, display, asyncCallback ) {
           scene.renderer = renderer;
@@ -138,7 +138,7 @@ define( require => {
     }
   }
 
-  var simpleRectangleDataURL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAcElEQVRYR+3YwQoAIQhFUfv/j572NQRiQTOc1ipyn0+kFpe/dnl/ocGqQgieJPhUiyfzX9VcSazBgTCCyZGbwhFEcCRgzVgzVVcgiGDE8uS3ZpiESZgkNwMO1hyvORpBBD938lcl25Lv+62KEcHfE+wTtBwp2K8YwAAAAABJRU5ErkJggg==';
+  const simpleRectangleDataURL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAcElEQVRYR+3YwQoAIQhFUfv/j572NQRiQTOc1ipyn0+kFpe/dnl/ocGqQgieJPhUiyfzX9VcSazBgTCCyZGbwhFEcCRgzVgzVVcgiGDE8uS3ZpiESZgkNwMO1hyvORpBBD938lcl25Lv+62KEcHfE+wTtBwp2K8YwAAAAABJRU5ErkJggg==';
   multipleRendererTest( 'Simple Rectangle',
     function( scene, display ) {
       display.width = 40;
@@ -169,7 +169,7 @@ define( require => {
     function( scene, display ) {
       display.width = 40;
       display.height = 40;
-      var rect = new Rectangle( 0, 0, 28, 28, {
+      const rect = new Rectangle( 0, 0, 28, 28, {
         fill: '#000000',
         x: 10,
         y: -10
@@ -187,7 +187,7 @@ define( require => {
     function( scene, display ) {
       display.width = 40;
       display.height = 40;
-      var rect = new Rectangle( 6, 6, 28, 28, {
+      const rect = new Rectangle( 6, 6, 28, 28, {
         fill: 'green'
       } );
       scene.addChild( rect );
@@ -201,7 +201,7 @@ define( require => {
   // try rendering the image itself
   multipleRendererTest( 'Image with PNG data URL',
     function( scene, display, asyncCallback ) {
-      var img = document.createElement( 'img' );
+      const img = document.createElement( 'img' );
       img.onload = function() {
         display.width = 40;
         display.height = 40;
@@ -222,7 +222,7 @@ define( require => {
     function( scene, display ) {
       display.width = 40;
       display.height = 40;
-      var colorProperty = new Property( 'red' );
+      const colorProperty = new Property( 'red' );
       scene.addChild( new Rectangle( 6, 6, 28, 28, {
         fill: colorProperty
       } ) );
@@ -239,7 +239,7 @@ define( require => {
     function( scene, display ) {
       display.width = 32;
       display.height = 32;
-      var shape = Shape.rectangle( 0, 0, 30, 30 );
+      const shape = Shape.rectangle( 0, 0, 30, 30 );
       scene.addChild( new Path( shape, {
         fill: '#000',
         stroke: '#f00',
@@ -268,7 +268,7 @@ define( require => {
     function( scene, display ) {
       display.width = 32;
       display.height = 32;
-      var rect = new Rectangle( 0, 0, 16, 16, { fill: '#f00', visible: false } );
+      const rect = new Rectangle( 0, 0, 16, 16, { fill: '#f00', visible: false } );
       scene.addChild( rect );
       scene.addChild( new Rectangle( 0, 0, 32, 32, { fill: 'green', visible: false } ) );
       display.updateDisplay();
@@ -282,7 +282,7 @@ define( require => {
     function( scene, display ) {
       display.width = 32;
       display.height = 32;
-      var rect = new Rectangle( 0, 0, 16, 16, { fill: '#f00' } );
+      const rect = new Rectangle( 0, 0, 16, 16, { fill: '#f00' } );
       scene.addChild( rect );
       display.updateDisplay();
       rect.visible = false;
@@ -298,7 +298,7 @@ define( require => {
     function( scene, display ) {
       display.width = 32;
       display.height = 32;
-      var rect = new Rectangle( 0, 0, 16, 16, { fill: '#f00', visible: false } );
+      const rect = new Rectangle( 0, 0, 16, 16, { fill: '#f00', visible: false } );
       scene.addChild( rect );
       display.updateDisplay();
     }, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAALUlEQVRYR+3QQREAAAABQfqXFsNnFTizzXk99+MAAQIECBAgQIAAAQIECBAgMBo/ACHo7lH9AAAAAElFTkSuQmCC',
@@ -309,12 +309,12 @@ define( require => {
   * Circles
   *----------------------------------------------------------------------------*/
 
-  var redCenteredCircle = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABLElEQVRYR+2W0XHCMAyGP01QOgllAjpC2aCM0AlKNmADugF0gzJBYRM6gTldzDUcsWXHufNL9JKHONIX6bd/C5VDKtdnApg6kN0BB2/AHHgFXryIT8APcBL4zhF2MoBri+06RUN1FGYtoE8zkgAcbIBPM9v9go1AY31jAgwsfqv7IbCNQUQBfNt/rb8w3i9i47AAdI4quJJQYS5CCYIAXu37ksqdb1cCh75cMYAhwgvxNtIK+SFiALqvlyN14CjtuZEFcAGeRgK4CDzXBPgTmOUCVB9BdRGq6dTbhjov1xpK6UF0ln/XTN8FHkAdsN5R7CFKtFBmRrd+DXREs7jmN+24A6Hj+ErQxBl4H/VC0lWONymFCV3Jek0n2w1HOoLNNMkjMDMNXDABTB24AvQKQiGCr2i0AAAAAElFTkSuQmCC';
+  const redCenteredCircle = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABLElEQVRYR+2W0XHCMAyGP01QOgllAjpC2aCM0AlKNmADugF0gzJBYRM6gTldzDUcsWXHufNL9JKHONIX6bd/C5VDKtdnApg6kN0BB2/AHHgFXryIT8APcBL4zhF2MoBri+06RUN1FGYtoE8zkgAcbIBPM9v9go1AY31jAgwsfqv7IbCNQUQBfNt/rb8w3i9i47AAdI4quJJQYS5CCYIAXu37ksqdb1cCh75cMYAhwgvxNtIK+SFiALqvlyN14CjtuZEFcAGeRgK4CDzXBPgTmOUCVB9BdRGq6dTbhjov1xpK6UF0ln/XTN8FHkAdsN5R7CFKtFBmRrd+DXREs7jmN+24A6Hj+ErQxBl4H/VC0lWONymFCV3Jek0n2w1HOoLNNMkjMDMNXDABTB24AvQKQiGCr2i0AAAAAElFTkSuQmCC';
   multipleRendererTest( 'Simple Circle',
     function( scene, display ) {
       display.width = 32;
       display.height = 32;
-      var circle = new Circle( 10, { fill: 'red', centerX: 16, centerY: 16 } );
+      const circle = new Circle( 10, { fill: 'red', centerX: 16, centerY: 16 } );
       scene.addChild( circle );
       display.updateDisplay();
     }, redCenteredCircle,
@@ -325,7 +325,7 @@ define( require => {
     function( scene, display ) {
       display.width = 32;
       display.height = 32;
-      var circle = new Circle( 10, { fill: 'black' } );
+      const circle = new Circle( 10, { fill: 'black' } );
       scene.addChild( circle );
       display.updateDisplay();
       circle.x = 16;
@@ -340,7 +340,7 @@ define( require => {
     function( scene, display ) {
       display.width = 32;
       display.height = 32;
-      var circle = new Circle( 5, { fill: 'red', scale: 2, centerX: 16, centerY: 16 } );
+      const circle = new Circle( 5, { fill: 'red', scale: 2, centerX: 16, centerY: 16 } );
       scene.addChild( circle );
       display.updateDisplay();
     }, redCenteredCircle,
@@ -351,7 +351,7 @@ define( require => {
     function( scene, display ) {
       display.width = 32;
       display.height = 32;
-      var circle = new Circle( 5, { fill: 'red', centerX: 16, centerY: 16 } );
+      const circle = new Circle( 5, { fill: 'red', centerX: 16, centerY: 16 } );
       scene.addChild( circle );
       display.updateDisplay();
       circle.radius = 10;
@@ -400,7 +400,7 @@ define( require => {
     function( scene, display ) {
       display.width = 32;
       display.height = 32;
-      var rect = new Rectangle( 0, 0, 32, 16, {
+      const rect = new Rectangle( 0, 0, 32, 16, {
         opacity: 0.7,
         fill: 'rgba(0,0,0,0.7)',
         stroke: 'rgba(0,0,255,0.7)',
@@ -438,16 +438,16 @@ define( require => {
     function( scene, display ) {
       display.width = 64;
       display.height = 40;
-      var clipShape1 = Shape.regularPolygon( 6, 27 ).transformed( Matrix3.translation( 32, 32 ) );
-      var clipShape2 = Shape.regularPolygon( 9, 32 ).transformed( Matrix3.translation( 32, 0 ) );
-      var shape = Shape.circle( 32, 32, 25 );
-      var circle = new Path( shape, {
+      const clipShape1 = Shape.regularPolygon( 6, 27 ).transformed( Matrix3.translation( 32, 32 ) );
+      const clipShape2 = Shape.regularPolygon( 9, 32 ).transformed( Matrix3.translation( 32, 0 ) );
+      const shape = Shape.circle( 32, 32, 25 );
+      const circle = new Path( shape, {
         fill: '#000',
         stroke: '#f00',
         lineWidth: 3
       } );
       circle.clipArea = clipShape1;
-      var wrapper = new Node();
+      const wrapper = new Node();
       wrapper.addChild( circle );
       wrapper.clipArea = clipShape2;
       scene.addChild( wrapper );
@@ -461,7 +461,7 @@ define( require => {
     function( scene, display ) {
       display.width = 200;
       display.height = 50;
-      var x = 32;
+      let x = 32;
       scene.addChild( new Path( Shape.ellipse( x, 25, 20, 10 ), {
         fill: '#ff0000',
         stroke: '#000000',
@@ -501,7 +501,7 @@ define( require => {
     function( scene, display ) {
       display.width = 200;
       display.height = 50;
-      var x = 32;
+      let x = 32;
       scene.addChild( new Path( Shape.circle( x, 25, 20 ), {
         fill: '#ff0000',
         stroke: '#000000',
@@ -541,7 +541,7 @@ define( require => {
     function( scene, display ) {
       display.width = 250;
       display.height = 120;
-      var square = new Path( Shape.rectangle( 0, 0, 50, 50 ), {
+      const square = new Path( Shape.rectangle( 0, 0, 50, 50 ), {
         x: 0.5,
         y: 0.5,
         fill: 'rgba(0,0,0,0.5)',
@@ -549,25 +549,25 @@ define( require => {
         lineWidth: 3
       } );
 
-      var arrow = new Path( Shape.regularPolygon( 3, 10 ), {
+      const arrow = new Path( Shape.regularPolygon( 3, 10 ), {
         fill: 'rgba(0,255,0,1)',
         stroke: '#000000'
       } );
 
-      var combined = new Node();
+      const combined = new Node();
       combined.addChild( square );
-      var leftArrow = new Node( { x: 15, y: 25 } );
+      const leftArrow = new Node( { x: 15, y: 25 } );
       leftArrow.addChild( arrow );
       combined.addChild( leftArrow );
-      var rightArrow = new Node( { x: 35, y: 25 } );
+      const rightArrow = new Node( { x: 35, y: 25 } );
       rightArrow.addChild( arrow );
       combined.addChild( rightArrow );
 
-      var a = new Node( { x: 20, y: 20 } );
+      const a = new Node( { x: 20, y: 20 } );
       a.addChild( combined );
-      var b = new Node( { x: 120, y: 30, rotation: Math.PI / 4 } );
+      const b = new Node( { x: 120, y: 30, rotation: Math.PI / 4 } );
       b.addChild( combined );
-      var c = new Node( { x: 220, y: 40, rotation: Math.PI / 2 } );
+      const c = new Node( { x: 220, y: 40, rotation: Math.PI / 2 } );
       c.addChild( combined );
       scene.addChild( a );
       scene.addChild( b );
@@ -581,7 +581,7 @@ define( require => {
     function( scene, display ) {
       display.width = 64;
       display.height = 44;
-      var container = new Node( {
+      const container = new Node( {
         x: 20,
         rotation: Math.PI / 12,
         scale: 0.5
@@ -610,15 +610,15 @@ define( require => {
   );
 
   // 16x16 with black circle in the middle
-  var patternUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAo0lEQVQ4T7WT4Q2CMBCFPyZAN2EDcAOcQJ1MmABHkA0YBTcwL6FELhYvFpr0B+n13X2vj4zElSXeJyZwBS5AMTUYgAZobUMrcAA6oIpM9gTOwBjOrYAKyh9Yqjl9E9DYd6cntwlp4YGne9DvA+Yngrhy5wSqPar2X4EXIMO3RUg2URN5jJwNtAj6FtdjJQu6XK8FKTyCcLRtlBXnxdrtZ3LGAd6BXBwR28m13gAAAABJRU5ErkJggg==';
+  const patternUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAo0lEQVQ4T7WT4Q2CMBCFPyZAN2EDcAOcQJ1MmABHkA0YBTcwL6FELhYvFpr0B+n13X2vj4zElSXeJyZwBS5AMTUYgAZobUMrcAA6oIpM9gTOwBjOrYAKyh9Yqjl9E9DYd6cntwlp4YGne9DvA+Yngrhy5wSqPar2X4EXIMO3RUg2URN5jJwNtAj6FtdjJQu6XK8FKTyCcLRtlBXnxdrtZ3LGAd6BXBwR28m13gAAAABJRU5ErkJggg==';
 
   multipleRendererTest( 'Patterns',
     function( scene, display, asyncCallback ) {
       display.width = 64;
       display.height = 64;
-      var img = document.createElement( 'img' );
+      const img = document.createElement( 'img' );
       img.onload = function() {
-        var pattern = new Pattern( img );
+        const pattern = new Pattern( img );
         scene.addChild( new Path( Shape.regularPolygon( 6, 22 ), {
           x: 32,
           y: 32,
@@ -639,9 +639,9 @@ define( require => {
     function( scene, display, asyncCallback ) {
       display.width = 64;
       display.height = 64;
-      var img = document.createElement( 'img' );
+      const img = document.createElement( 'img' );
       img.onload = function() {
-        var pattern = new Pattern( img ).setTransformMatrix( Matrix3.rowMajor( 0.4, 0.2, 1.3, -0.2, 0.2, 7.2, 0, 0, 1 ) );
+        const pattern = new Pattern( img ).setTransformMatrix( Matrix3.rowMajor( 0.4, 0.2, 1.3, -0.2, 0.2, 7.2, 0, 0, 1 ) );
         scene.addChild( new Path( Shape.regularPolygon( 6, 22 ), {
           x: 32,
           y: 32,
@@ -692,19 +692,19 @@ define( require => {
     function( scene, display, asyncCallback ) {
       display.width = 192;
       display.height = 64;
-      var fillGradient = new RadialGradient( 22, 0, 0, 22, 0, 44 );
+      const fillGradient = new RadialGradient( 22, 0, 0, 22, 0, 44 );
       fillGradient.addColorStop( 0.1, '#ff0000' );
       fillGradient.addColorStop( 0.5, '#00ff00' );
       fillGradient.addColorStop( 0.6, 'rgba(0,255,0,0.3)' );
       fillGradient.addColorStop( 0.9, '#000000' );
 
-      var mainGradient = new RadialGradient( 32, 20, 10, 32, 32, 32 );
+      const mainGradient = new RadialGradient( 32, 20, 10, 32, 32, 32 );
       mainGradient.addColorStop( 0, '#8ED6FF' );
       mainGradient.addColorStop( 0.5, '#004CB3' );
       mainGradient.addColorStop( 0.6, '#bbbbbb' );
       mainGradient.addColorStop( 1, '#ffffff' );
 
-      var transformedGradient = new RadialGradient( 0, 0, 0, 0, 0, 64 );
+      const transformedGradient = new RadialGradient( 0, 0, 0, 0, 0, 64 );
       transformedGradient.addColorStop( 0.3, '#8ED6FF' );
       transformedGradient.addColorStop( 1, '#004CB3' );
       transformedGradient.setTransformMatrix( Matrix3.translation( 32, 32 ).timesMatrix( Matrix3.rotation2( Math.PI / 4 ).timesMatrix( Matrix3.scaling( 1, 0.25 ) ) ) );
@@ -733,13 +733,13 @@ define( require => {
     function( scene, display, asyncCallback ) {
       display.width = 128;
       display.height = 64;
-      var fillGradient = new LinearGradient( -22, 0, 22, 0 );
+      const fillGradient = new LinearGradient( -22, 0, 22, 0 );
       fillGradient.addColorStop( 0.1, '#ff0000' );
       fillGradient.addColorStop( 0.5, '#00ff00' );
       fillGradient.addColorStop( 0.6, 'rgba(0,255,0,0.3)' );
       fillGradient.addColorStop( 0.9, '#000000' );
 
-      var strokeGradient = new LinearGradient( 0, -15, 0, 15 );
+      const strokeGradient = new LinearGradient( 0, -15, 0, 15 );
       strokeGradient.addColorStop( 0, '#ff0000' );
       strokeGradient.addColorStop( 0.5, '#00ff00' );
       strokeGradient.addColorStop( 1, '#0000ff' );
@@ -802,7 +802,7 @@ define( require => {
       display.width = 64;
       display.height = 64;
       scene.addChild( new Rectangle( 0, 12, 64, 20, { fill: '#000' } ) );
-      var circle = Shape.circle( 0, 0, 30 );
+      const circle = Shape.circle( 0, 0, 30 );
       scene.addChild( new Node( {
         opacity: 0.5,
         children: [
@@ -817,11 +817,11 @@ define( require => {
 
   multipleRendererTest( 'Image shifted',
     function( scene, display, asyncCallback ) {
-      var img = document.createElement( 'img' );
+      const img = document.createElement( 'img' );
       img.onload = function() {
         display.width = 40;
         display.height = 40;
-        var image = new Image( img );
+        const image = new Image( img );
         scene.addChild( image );
         display.updateDisplay();
         image.x = 10;
@@ -840,15 +840,15 @@ define( require => {
 
   multipleRendererTest( 'Image changed after display',
     function( scene, display, asyncCallback ) {
-      var img1 = document.createElement( 'img' );
+      const img1 = document.createElement( 'img' );
       img1.onload = function() {
         display.width = 32;
         display.height = 32;
-        var image = new Image( img1 );
+        const image = new Image( img1 );
         scene.addChild( image );
         display.updateDisplay();
 
-        var img2 = document.createElement( 'img' );
+        const img2 = document.createElement( 'img' );
         img2.onload = function() {
           image.image = img2;
           display.updateDisplay();
@@ -873,8 +873,8 @@ define( require => {
       display.width = 64;
       display.height = 64;
 
-      var img = document.createElement( 'img' );
-      var image = new Image( img );
+      const img = document.createElement( 'img' );
+      const image = new Image( img );
       scene.addChild( image );
       display.updateDisplay();
 

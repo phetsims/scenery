@@ -39,7 +39,7 @@ define( require => {
    * fire: null        // Called on a state change to/from 'down' (depending on fireOnDown), as fire( event ). Called after the triggering up/over/down event.
    */
   function ButtonListener( options ) {
-    var self = this;
+    const self = this;
 
     options = _.extend( {
 
@@ -84,7 +84,7 @@ define( require => {
       if ( state !== this.buttonState ) {
         sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent(
           'ButtonListener state change to ' + state + ' from ' + this.buttonState + ' for ' + ( this.downTrail ? this.downTrail.toString() : this.downTrail ) );
-        var oldState = this.buttonState;
+        const oldState = this.buttonState;
 
         this.buttonState = state;
 

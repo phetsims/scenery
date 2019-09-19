@@ -133,7 +133,7 @@ define( require => {
     this.delayComplete = false;
 
     // step the drag listener, must be removed in dispose
-    var stepListener = this.step.bind( this );
+    const stepListener = this.step.bind( this );
     timer.addListener( stepListener );
 
     // @private - called in dispose
@@ -311,7 +311,7 @@ define( require => {
      * @param {Event} event
      */
     keydown: function( event ) {
-      var domEvent = event.domEvent;
+      const domEvent = event.domEvent;
 
       // required to work with Safari and VoiceOver, otherwise arrow keys will move virtual cursor, see https://github.com/phetsims/balloons-and-static-electricity/issues/205#issuecomment-263428003
       // prevent default for WASD too, see https://github.com/phetsims/friction/issues/167
@@ -352,7 +352,7 @@ define( require => {
       }
 
       // move object on first down before a delay
-      var positionDelta = this.shiftKeyDown() ? this._shiftDownDelta : this._downDelta;
+      const positionDelta = this.shiftKeyDown() ? this._shiftDownDelta : this._downDelta;
       this.updatePosition( positionDelta );
     },
 
@@ -367,9 +367,9 @@ define( require => {
      * @param {Event} event
      */
     keyup: function( event ) {
-      var domEvent = event.domEvent;
+      const domEvent = event.domEvent;
 
-      var moveKeysDown = this.movementKeysDown;
+      const moveKeysDown = this.movementKeysDown;
 
       // if the shift key is down when we navigate to the object, add it to the keystate because it won't be added until
       // the next keydown event
@@ -385,13 +385,13 @@ define( require => {
         }
       }
 
-      for ( var i = 0; i < this.keyState.length; i++ ) {
+      for ( let i = 0; i < this.keyState.length; i++ ) {
         if ( domEvent.keyCode === this.keyState[ i ].keyCode ) {
           this.keyState.splice( i, 1 );
         }
       }
 
-      var moveKeysStillDown = this.movementKeysDown;
+      const moveKeysStillDown = this.movementKeysDown;
       if ( this._end ) {
 
         // if movement keys are no longer down after keyup, call the optional end drag function
@@ -426,7 +426,7 @@ define( require => {
       // no-op unless a key is down
       if ( this.keyState.length > 0 ) {
         // for each key that is still down, increment the tracked time that has been down
-        for ( var i = 0; i < this.keyState.length; i++ ) {
+        for ( let i = 0; i < this.keyState.length; i++ ) {
           if ( this.keyState[ i ].keyDown ) {
             this.keyState[ i ].timeDown += dt;
           }
@@ -442,8 +442,8 @@ define( require => {
         }
 
         // calculate change in position from time step
-        var positionVelocity = this.shiftKeyDown() ? this._shiftDragVelocity : this._dragVelocity;
-        var positionDelta = dt * positionVelocity;
+        const positionVelocity = this.shiftKeyDown() ? this._shiftDragVelocity : this._dragVelocity;
+        const positionDelta = dt * positionVelocity;
 
         if ( this.moveOnHoldDelayCounter >= this._moveOnHoldDelay && !this.delayComplete ) {
           this.updatePosition( positionDelta );
@@ -466,12 +466,12 @@ define( require => {
     updatePosition: function( delta ) {
 
       // check to see if any hotkey combinations are down
-      for ( var j = 0; j < this.hotkeyGroups.length; j++ ) {
-        var hotkeysDownList = [];
-        var keys = this.hotkeyGroups[ j ].keys;
+      for ( let j = 0; j < this.hotkeyGroups.length; j++ ) {
+        const hotkeysDownList = [];
+        const keys = this.hotkeyGroups[ j ].keys;
 
-        for ( var k = 0; k < keys.length; k++ ) {
-          for ( var l = 0; l < this.keyState.length; l++ ) {
+        for ( let k = 0; k < keys.length; k++ ) {
+          for ( let l = 0; l < this.keyState.length; l++ ) {
             if ( this.keyState[ l ].keyCode === keys[ k ] ) {
               hotkeysDownList.push( this.keyState[ l ] );
             }
@@ -480,8 +480,8 @@ define( require => {
 
         // the hotkeysDownList array order should match the order of the key group, so now we just need to make
         // sure that the key down times are in the right order
-        var keysInOrder = false;
-        for ( var m = 0; m < hotkeysDownList.length - 1; m++ ) {
+        let keysInOrder = false;
+        for ( let m = 0; m < hotkeysDownList.length - 1; m++ ) {
           if ( hotkeysDownList[ m + 1 ] && hotkeysDownList[ m ].timeDown > hotkeysDownList[ m + 1 ].timeDown ) {
             keysInOrder = true;
           }
@@ -517,8 +517,8 @@ define( require => {
       if ( !this.draggingDisabled ) {
 
         // handle the change in position
-        var deltaX = 0;
-        var deltaY = 0;
+        let deltaX = 0;
+        let deltaY = 0;
 
         if ( this.leftMovementKeysDown() ) {
           deltaX = -delta;
@@ -534,7 +534,7 @@ define( require => {
         }
 
         // only initiate move if there was some attempted keyboard drag
-        var vectorDelta = new Vector2( deltaX, deltaY );
+        let vectorDelta = new Vector2( deltaX, deltaY );
         if ( !vectorDelta.equals( Vector2.ZERO ) ) {
 
           // to model coordinates
@@ -544,7 +544,7 @@ define( require => {
 
           // synchronize with model location
           if ( this._locationProperty ) {
-            var newPosition = this._locationProperty.get().plus( vectorDelta );
+            let newPosition = this._locationProperty.get().plus( vectorDelta );
 
             // constrain to bounds in model coordinates
             if ( this._dragBounds ) {
@@ -575,10 +575,10 @@ define( require => {
      * @public
      */
     keyInListDown: function( keys ) {
-      var keyIsDown = false;
-      for ( var i = 0; i < this.keyState.length; i++ ) {
+      let keyIsDown = false;
+      for ( let i = 0; i < this.keyState.length; i++ ) {
         if ( this.keyState[ i ].keyDown ) {
-          for ( var j = 0; j < keys.length; j++ ) {
+          for ( let j = 0; j < keys.length; j++ ) {
             if ( keys[ j ] === this.keyState[ i ].keyCode ) {
               keyIsDown = true;
               break;
@@ -602,9 +602,9 @@ define( require => {
      * @public
      */
     allKeysInListDown: function( keys ) {
-      var allKeysDown = true;
-      for ( var i = 0; i < keys.length; i++ ) {
-        for ( var j = 0; j < this.keyState.length; j++ ) {
+      let allKeysDown = true;
+      for ( let i = 0; i < keys.length; i++ ) {
+        for ( let j = 0; j < this.keyState.length; j++ ) {
           if ( this.keyState[ j ].keyDown ) {
             if ( keys[ j ] !== this.keyState ) {
 
@@ -712,7 +712,7 @@ define( require => {
      * @public
      */
     addHotkeyGroups: function( hotKeyGroups ) {
-      for ( var i = 0; i < hotKeyGroups.length; i++ ) {
+      for ( let i = 0; i < hotKeyGroups.length; i++ ) {
         this.addHotkeyGroup( hotKeyGroups[ i ] );
       }
     },

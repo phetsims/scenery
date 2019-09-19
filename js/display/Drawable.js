@@ -61,7 +61,7 @@ define( require => {
   const Renderer = require( 'SCENERY/display/Renderer' );
   const scenery = require( 'SCENERY/scenery' );
 
-  var globalId = 1;
+  let globalId = 1;
 
   function Drawable( renderer ) {
     this.initializeDrawable( renderer );
@@ -131,7 +131,7 @@ define( require => {
      *                      be done).
      */
     update: function() {
-      var needsFurtherUpdates = false;
+      let needsFurtherUpdates = false;
 
       if ( this.dirty && !this.isDisposed ) {
         this.dirty = false;
@@ -242,7 +242,7 @@ define( require => {
                                                                 ' new:' + ( this.pendingParentDrawable ? this.pendingParentDrawable.toString() : '-' ) );
       sceneryLog && sceneryLog.Drawable && sceneryLog.push();
 
-      var changed = false;
+      let changed = false;
 
       if ( this.pendingRemoval || this.pendingAddition ) {
         // we are only unchanged if we have an addition AND removal, and the endpoints are identical
@@ -434,10 +434,10 @@ define( require => {
 
   // converts a linked list of drawables to an array (useful for debugging/assertion purposes, should not be used in production code)
   Drawable.listToArray = function( firstDrawable, lastDrawable ) {
-    var arr = [];
+    const arr = [];
 
     // assumes we'll hit lastDrawable, otherwise we'll NPE
-    for ( var drawable = firstDrawable; ; drawable = drawable.nextDrawable ) {
+    for ( let drawable = firstDrawable; ; drawable = drawable.nextDrawable ) {
       arr.push( drawable );
 
       if ( drawable === lastDrawable ) {
@@ -450,10 +450,10 @@ define( require => {
 
   // converts an old linked list of drawables to an array (useful for debugging/assertion purposes, should not be used in production code)
   Drawable.oldListToArray = function( firstDrawable, lastDrawable ) {
-    var arr = [];
+    const arr = [];
 
     // assumes we'll hit lastDrawable, otherwise we'll NPE
-    for ( var drawable = firstDrawable; ; drawable = drawable.oldNextDrawable ) {
+    for ( let drawable = firstDrawable; ; drawable = drawable.oldNextDrawable ) {
       arr.push( drawable );
 
       if ( drawable === lastDrawable ) {
