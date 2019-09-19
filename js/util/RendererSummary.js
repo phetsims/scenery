@@ -16,7 +16,7 @@ define( require => {
   const Renderer = require( 'SCENERY/display/Renderer' );
   const scenery = require( 'SCENERY/scenery' );
 
-  var summaryBits = [
+  const summaryBits = [
     // renderer bits ("Is renderer X supported by the entire sub-tree?")
     Renderer.bitmaskCanvas,
     Renderer.bitmaskSVG,
@@ -38,11 +38,11 @@ define( require => {
     Renderer.bitmaskLacksDOM,
     Renderer.bitmaskLacksWebGL
   ];
-  var numSummaryBits = summaryBits.length;
+  const numSummaryBits = summaryBits.length;
 
   // A bitmask with all of the bits set that we record
-  var bitmaskAll = 0;
-  for ( var l = 0; l < numSummaryBits; l++ ) {
+  let bitmaskAll = 0;
+  for ( let l = 0; l < numSummaryBits; l++ ) {
     bitmaskAll |= summaryBits[ l ];
   }
 
@@ -64,7 +64,7 @@ define( require => {
     // @private {Object} Maps stringified bitmask bit (e.g. "1" for Canvas, since Renderer.bitmaskCanvas is 0x01) to
     // a count of how many children (or self) have that property (e.g. can't renderer all of their contents with Canvas)
     this._counts = {};
-    for ( var i = 0; i < numSummaryBits; i++ ) {
+    for ( let i = 0; i < numSummaryBits; i++ ) {
       this._counts[ summaryBits[ i ] ] = 0; // set everything to 0 at first
     }
 
@@ -77,7 +77,7 @@ define( require => {
     this.summaryChange( this.bitmask, this.selfBitmask );
 
     // required listeners to update our summary based on painted/non-painted information
-    var listener = this.selfChange.bind( this );
+    const listener = this.selfChange.bind( this );
     this.node.onStatic( 'opacity', listener );
     this.node.onStatic( 'hint', listener ); // should fire on things like node.renderer being changed
     this.node.onStatic( 'clip', listener );
@@ -99,12 +99,12 @@ define( require => {
     summaryChange: function( oldBitmask, newBitmask ) {
       assert && this.audit();
 
-      var changeBitmask = oldBitmask ^ newBitmask; // bit set only if it changed
+      const changeBitmask = oldBitmask ^ newBitmask; // bit set only if it changed
 
-      var ancestorOldMask = 0;
-      var ancestorNewMask = 0;
-      for ( var i = 0; i < numSummaryBits; i++ ) {
-        var bit = summaryBits[ i ];
+      let ancestorOldMask = 0;
+      let ancestorNewMask = 0;
+      for ( let i = 0; i < numSummaryBits; i++ ) {
+        const bit = summaryBits[ i ];
 
         // If the bit for the renderer has changed
         if ( bit & changeBitmask ) {
@@ -128,11 +128,11 @@ define( require => {
 
       if ( ancestorOldMask || ancestorNewMask ) {
 
-        var oldSubtreeBitmask = this.bitmask;
+        const oldSubtreeBitmask = this.bitmask;
         assert && assert( oldSubtreeBitmask !== undefined );
 
-        for ( var j = 0; j < numSummaryBits; j++ ) {
-          var ancestorBit = summaryBits[ j ];
+        for ( let j = 0; j < numSummaryBits; j++ ) {
+          const ancestorBit = summaryBits[ j ];
           // Check for added bits
           if ( ancestorNewMask & ancestorBit ) {
             this.bitmask |= ancestorBit;
@@ -149,8 +149,8 @@ define( require => {
         this.node.trigger0( 'rendererSummary' ); // please don't change children when listening to this!
         this.node.onSummaryChange( oldSubtreeBitmask, this.bitmask );
 
-        var len = this.node._parents.length;
-        for ( var k = 0; k < len; k++ ) {
+        const len = this.node._parents.length;
+        for ( let k = 0; k < len; k++ ) {
           this.node._parents[ k ]._rendererSummary.summaryChange( ancestorOldMask, ancestorNewMask );
         }
 
@@ -162,8 +162,8 @@ define( require => {
 
     // @public
     selfChange: function() {
-      var oldBitmask = this.selfBitmask;
-      var newBitmask = RendererSummary.summaryBitmaskForNodeSelf( this.node );
+      const oldBitmask = this.selfBitmask;
+      const newBitmask = RendererSummary.summaryBitmaskForNodeSelf( this.node );
       if ( oldBitmask !== newBitmask ) {
         this.summaryChange( oldBitmask, newBitmask );
         this.selfBitmask = newBitmask;
@@ -172,8 +172,8 @@ define( require => {
 
     // @private
     computeBitmask: function() {
-      var bitmask = 0;
-      for ( var i = 0; i < numSummaryBits; i++ ) {
+      let bitmask = 0;
+      for ( let i = 0; i < numSummaryBits; i++ ) {
         if ( this._counts[ summaryBits[ i ] ] === 0 ) {
           bitmask |= summaryBits[ i ];
         }
@@ -236,9 +236,9 @@ define( require => {
       }
 
       // Check for any renderer preferences that would CAUSE us to choose not to display with a single SVG block
-      for ( var i = 0; i < Renderer.numActiveRenderers; i++ ) {
+      for ( let i = 0; i < Renderer.numActiveRenderers; i++ ) {
         // Grab the next-most preferred renderer
-        var renderer = Renderer.bitmaskOrder( preferredRenderers, i );
+        const renderer = Renderer.bitmaskOrder( preferredRenderers, i );
 
         // If it's SVG, congrats! Everything will render in SVG (since SVG is supported, as noted above)
         if ( Renderer.bitmaskSVG & renderer ) {
@@ -267,9 +267,9 @@ define( require => {
       }
 
       // Check for any renderer preferences that would CAUSE us to choose not to display with a single Canvas block
-      for ( var i = 0; i < Renderer.numActiveRenderers; i++ ) {
+      for ( let i = 0; i < Renderer.numActiveRenderers; i++ ) {
         // Grab the next-most preferred renderer
-        var renderer = Renderer.bitmaskOrder( preferredRenderers, i );
+        const renderer = Renderer.bitmaskOrder( preferredRenderers, i );
 
         // If it's Canvas, congrats! Everything will render in Canvas (since Canvas is supported, as noted above)
         if ( Renderer.bitmaskCanvas & renderer ) {
@@ -289,10 +289,10 @@ define( require => {
     // for debugging purposes
     audit: function() {
       if ( assert ) {
-        for ( var i = 0; i < numSummaryBits; i++ ) {
-          var bit = summaryBits[ i ];
-          var countIsZero = this._counts[ bit ] === 0;
-          var bitmaskContainsBit = !!( this.bitmask & bit );
+        for ( let i = 0; i < numSummaryBits; i++ ) {
+          const bit = summaryBits[ i ];
+          const countIsZero = this._counts[ bit ] === 0;
+          const bitmaskContainsBit = !!( this.bitmask & bit );
           assert( countIsZero === bitmaskContainsBit, 'Bits should be set if count is zero' );
         }
       }
@@ -300,10 +300,10 @@ define( require => {
 
     // for debugging purposes
     toString: function() {
-      var result = RendererSummary.bitmaskToString( this.bitmask );
-      for ( var i = 0; i < numSummaryBits; i++ ) {
-        var bit = summaryBits[ i ];
-        var countForBit = this._counts[ bit ];
+      let result = RendererSummary.bitmaskToString( this.bitmask );
+      for ( let i = 0; i < numSummaryBits; i++ ) {
+        const bit = summaryBits[ i ];
+        const countForBit = this._counts[ bit ];
         if ( countForBit !== 0 ) {
           result += ' ' + RendererSummary.bitToString( bit ) + ':' + countForBit;
         }
@@ -321,7 +321,7 @@ define( require => {
      * @param {Node} node
      */
     summaryBitmaskForNodeSelf: function( node ) {
-      var bitmask = node._rendererBitmask;
+      let bitmask = node._rendererBitmask;
 
       if ( node.isPainted() ) {
         bitmask |= ( ( node._rendererBitmask & Renderer.bitmaskCurrentRendererArea ) ^ Renderer.bitmaskCurrentRendererArea ) << Renderer.bitmaskLacksShift;
@@ -331,8 +331,8 @@ define( require => {
       }
 
       // NOTE: If changing, see Instance.updateRenderingState
-      var requiresSplit = node._hints.requireElement || node._hints.cssTransform || node._hints.layerSplit;
-      var rendererHint = node._hints.renderer;
+      const requiresSplit = node._hints.requireElement || node._hints.cssTransform || node._hints.layerSplit;
+      const rendererHint = node._hints.renderer;
 
       // Whether this subtree will be able to support a single SVG element
       // NOTE: If changing, see Instance.updateRenderingState
@@ -383,9 +383,9 @@ define( require => {
 
     // for debugging purposes
     bitmaskToString: function( bitmask ) {
-      var result = '';
-      for ( var i = 0; i < numSummaryBits; i++ ) {
-        var bit = summaryBits[ i ];
+      let result = '';
+      for ( let i = 0; i < numSummaryBits; i++ ) {
+        const bit = summaryBits[ i ];
         if ( bitmask & bit ) {
           result += RendererSummary.bitToString( bit ) + ' ';
         }

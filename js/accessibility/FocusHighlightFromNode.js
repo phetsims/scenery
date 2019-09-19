@@ -78,10 +78,10 @@ define( require => {
 
       // Figure out how much dilation to apply to the focus highlight around the node, calculated unless specified
       // with options
-      var defaultDilationCoefficient = ( this.useGroupDilation ? FocusHighlightPath.getGroupDilationCoefficient( node ) :
+      const defaultDilationCoefficient = ( this.useGroupDilation ? FocusHighlightPath.getGroupDilationCoefficient( node ) :
                                          FocusHighlightPath.getDilationCoefficient( node ) );
-      var dilationCoefficient = this.dilationCoefficient || defaultDilationCoefficient;
-      var dilatedBounds = this.nodeBounds.dilated( dilationCoefficient );
+      const dilationCoefficient = this.dilationCoefficient || defaultDilationCoefficient;
+      const dilatedBounds = this.nodeBounds.dilated( dilationCoefficient );
 
       // Update the line width of the focus highlight based on the transform of the node
       this.updateLineWidthFromNode( node );

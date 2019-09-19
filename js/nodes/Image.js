@@ -25,10 +25,10 @@ define( require => {
   const Util = require( 'DOT/Util' );
 
   // Need to poly-fill on some browsers
-  var log2 = Math.log2 || function( x ) { return Math.log( x ) / Math.LN2; };
+  const log2 = Math.log2 || function( x ) { return Math.log( x ) / Math.LN2; };
 
   // Image-specific options that can be passed in the constructor or mutate() call.
-  var IMAGE_OPTION_KEYS = [
+  const IMAGE_OPTION_KEYS = [
     'image', // {string|HTMLImageElement|HTMLCanvasElement|Array} - Changes the image displayed, see setImage() for documentation
     'imageOpacity', // {number} - Controls opacity of this image (and not children), see setImageOpacity() for documentation
     'initialWidth', // {number} - Width of an image not-yet loaded (for layout), see setInitialWidth() for documentation
@@ -39,7 +39,7 @@ define( require => {
     'mipmapMaxLevel' // {number} The maximum mipmap level to compute if needed, see setMipmapMaxLevel() for documentation
   ];
 
-  var DEFAULT_OPTIONS = {
+  const DEFAULT_OPTIONS = {
     imageOpacity: 1,
     initialWidth: 0,
     initialHeight: 0,
@@ -204,7 +204,7 @@ define( require => {
                         Array.isArray( image ), 'image is not of the correct type' );
 
       // Generally, if a different value for image is provided, it has changed
-      var hasImageChanged = this._image !== image;
+      let hasImageChanged = this._image !== image;
 
       // Except in some cases, where the provided image is a string
       if ( hasImageChanged && typeof image === 'string' ) {
@@ -237,7 +237,7 @@ define( require => {
         // Convert string => HTMLImageElement
         if ( typeof image === 'string' ) {
           // create an image with the assumed URL
-          var src = image;
+          const src = image;
           image = document.createElement( 'img' );
           image.src = src;
         }
@@ -299,8 +299,8 @@ define( require => {
         this.invalidateSelf( Bounds2.NOTHING );
       }
 
-      var stateLen = this._drawables.length;
-      for ( var i = 0; i < stateLen; i++ ) {
+      const stateLen = this._drawables.length;
+      for ( let i = 0; i < stateLen; i++ ) {
         this._drawables[ i ].markDirtyImage();
       }
 
@@ -315,13 +315,13 @@ define( require => {
     invalidateSupportedRenderers: function() {
 
       // Canvas is always permitted
-      var r = Renderer.bitmaskCanvas;
+      let r = Renderer.bitmaskCanvas;
 
       // If it fits within the sprite sheet, then WebGL is also permitted
       // If the image hasn't loaded, the getImageWidth/Height will be 0 and this rule would pass.  However, this
       // function will be called again after the image loads, and would correctly invalidate WebGL, if too large to fit
       // in a SpriteSheet
-      var fitsWithinSpriteSheet = this.getImageWidth() <= SpriteSheet.MAX_DIMENSION.width &&
+      const fitsWithinSpriteSheet = this.getImageWidth() <= SpriteSheet.MAX_DIMENSION.width &&
                                   this.getImageHeight() <= SpriteSheet.MAX_DIMENSION.height;
       if ( fitsWithinSpriteSheet ) {
         r |= Renderer.bitmaskWebGL;
@@ -381,8 +381,8 @@ define( require => {
       if ( this._imageOpacity !== imageOpacity ) {
         this._imageOpacity = imageOpacity;
 
-        var stateLen = this._drawables.length;
-        for ( var i = 0; i < stateLen; i++ ) {
+        const stateLen = this._drawables.length;
+        for ( let i = 0; i < stateLen; i++ ) {
           this._drawables[ i ].markDirtyImageOpacity();
         }
       }
@@ -657,19 +657,19 @@ define( require => {
      * @private
      */
     constructNextMipmap: function() {
-      var level = this._mipmapCanvases.length;
-      var biggerCanvas = this._mipmapCanvases[ level - 1 ];
+      const level = this._mipmapCanvases.length;
+      const biggerCanvas = this._mipmapCanvases[ level - 1 ];
 
       // ignore any 1x1 canvases (or smaller?!?)
       if ( biggerCanvas.width * biggerCanvas.height > 2 ) {
-        var canvas = document.createElement( 'canvas' );
+        const canvas = document.createElement( 'canvas' );
         canvas.width = Math.ceil( biggerCanvas.width / 2 );
         canvas.height = Math.ceil( biggerCanvas.height / 2 );
 
         // sanity check
         if ( canvas.width > 0 && canvas.height > 0 ) {
           // Draw half-scale into the smaller Canvas
-          var context = canvas.getContext( '2d' );
+          const context = canvas.getContext( '2d' );
           context.scale( 0.5, 0.5 );
           context.drawImage( biggerCanvas, 0, 0 );
 
@@ -691,8 +691,8 @@ define( require => {
       if ( this._image && this._mipmap ) {
         // If we have mipmap data as an input
         if ( this._mipmapData ) {
-          for ( var k = 0; k < this._mipmapData.length; k++ ) {
-            var url = this._mipmapData[ k ].url;
+          for ( let k = 0; k < this._mipmapData.length; k++ ) {
+            const url = this._mipmapData[ k ].url;
             this._mipmapURLs.push( url );
             this._mipmapData[ k ].updateCanvas && this._mipmapData[ k ].updateCanvas();
             this._mipmapCanvases.push( this._mipmapData[ k ].canvas );
@@ -700,26 +700,26 @@ define( require => {
         }
         // Otherwise, we have an image (not mipmap) as our input, so we'll need to construct mipmap levels.
         else {
-          var baseCanvas = document.createElement( 'canvas' );
+          const baseCanvas = document.createElement( 'canvas' );
           baseCanvas.width = this.getImageWidth();
           baseCanvas.height = this.getImageHeight();
 
           // if we are not loaded yet, just ignore
           if ( baseCanvas.width && baseCanvas.height ) {
-            var baseContext = baseCanvas.getContext( '2d' );
+            const baseContext = baseCanvas.getContext( '2d' );
             baseContext.drawImage( this._image, 0, 0 );
 
             this._mipmapCanvases.push( baseCanvas );
             this._mipmapURLs.push( baseCanvas.toDataURL() );
 
-            var level = 0;
+            let level = 0;
             while ( ++level < this._mipmapInitialLevel ) {
               this.constructNextMipmap();
             }
           }
 
-          var stateLen = this._drawables.length;
-          for ( var i = 0; i < stateLen; i++ ) {
+          const stateLen = this._drawables.length;
+          for ( let i = 0; i < stateLen; i++ ) {
             this._drawables[ i ].markDirtyMipmap();
           }
         }
@@ -738,7 +738,7 @@ define( require => {
       assert && assert( this._mipmap, 'Assumes mipmaps can be used' );
 
       // a sense of "average" scale, which should be exact if there is no asymmetric scale/shear applied
-      var scale = ( Math.sqrt( matrix.m00() * matrix.m00() + matrix.m10() * matrix.m10() ) +
+      let scale = ( Math.sqrt( matrix.m00() * matrix.m00() + matrix.m10() * matrix.m10() ) +
                     Math.sqrt( matrix.m01() * matrix.m01() + matrix.m11() * matrix.m11() ) ) / 2;
       scale *= ( window.devicePixelRatio || 1 ); // for retina-like devices
 
@@ -749,7 +749,7 @@ define( require => {
         return 0;
       }
 
-      var level = log2( 1 / scale ); // our approximate level of detail
+      let level = log2( 1 / scale ); // our approximate level of detail
       level = Util.roundSymmetric( level + this._mipmapBias - 0.7 ); // convert to an integer level (-0.7 is a good default)
 
       if ( level < 0 ) {
@@ -761,7 +761,7 @@ define( require => {
 
       // If necessary, do lazy construction of the mipmap level
       if ( this.mipmap && !this._mipmapCanvases[ level ] ) {
-        var currentLevel = this._mipmapCanvases.length - 1;
+        let currentLevel = this._mipmapCanvases.length - 1;
         while ( ++currentLevel <= level ) {
           this.constructNextMipmap();
         }
@@ -830,7 +830,7 @@ define( require => {
      * @returns {number}
      */
     getImageWidth: function() {
-      var detectedWidth = this._mipmapData ? this._mipmapData[ 0 ].width : ( this._image.naturalWidth || this._image.width );
+      const detectedWidth = this._mipmapData ? this._mipmapData[ 0 ].width : ( this._image.naturalWidth || this._image.width );
       if ( detectedWidth === 0 ) {
         return this._initialWidth; // either 0 (default), or the overridden value
       }
@@ -851,7 +851,7 @@ define( require => {
      * @returns {number}
      */
     getImageHeight: function() {
-      var detectedHeight = this._mipmapData ? this._mipmapData[ 0 ].height : ( this._image.naturalHeight || this._image.height );
+      const detectedHeight = this._mipmapData ? this._mipmapData[ 0 ].height : ( this._image.naturalHeight || this._image.height );
       if ( detectedHeight === 0 ) {
         return this._initialHeight; // either 0 (default), or the overridden value
       }
@@ -1018,7 +1018,7 @@ define( require => {
     assert && assert( typeof height === 'number' && isFinite( height ) && height >= 0 && ( height % 1 ) === 0,
       'height should be a non-negative finite integer' );
 
-    var element = document.createElementNS( scenery.svgns, 'image' );
+    const element = document.createElementNS( scenery.svgns, 'image' );
     element.setAttribute( 'x', 0 );
     element.setAttribute( 'y', 0 );
     element.setAttribute( 'width', width + 'px' );
@@ -1036,10 +1036,10 @@ define( require => {
    * @returns {Array}
    */
   Image.createFastMipmapFromCanvas = function( baseCanvas ) {
-    var mipmaps = [];
+    const mipmaps = [];
 
-    var baseURL = baseCanvas.toDataURL();
-    var baseImage = new window.Image();
+    const baseURL = baseCanvas.toDataURL();
+    const baseImage = new window.Image();
     baseImage.src = baseURL;
 
     // base level
@@ -1051,16 +1051,16 @@ define( require => {
       canvas: baseCanvas
     } );
 
-    var largeCanvas = baseCanvas;
+    let largeCanvas = baseCanvas;
     while ( largeCanvas.width >= 2 && largeCanvas.height >= 2 ) {
       // smaller level
-      var mipmap = {};
+      const mipmap = {};
 
       // draw half-size
-      var canvas = document.createElement( 'canvas' );
+      const canvas = document.createElement( 'canvas' );
       canvas.width = mipmap.width = Math.ceil( largeCanvas.width / 2 );
       canvas.height = mipmap.height = Math.ceil( largeCanvas.height / 2 );
-      var context = canvas.getContext( '2d' );
+      const context = canvas.getContext( '2d' );
       context.setTransform( 0.5, 0, 0, 0.5, 0, 0 );
       context.drawImage( largeCanvas, 0, 0 );
 

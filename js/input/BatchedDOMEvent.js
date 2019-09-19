@@ -47,8 +47,8 @@ define( require => {
       sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Running batched event' );
       sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
 
-      var domEvent = this.domEvent;
-      var callback = this.callback;
+      const domEvent = this.domEvent;
+      const callback = this.callback;
 
       // process whether anything under the pointers changed before running additional input events
       input.validatePointers();
@@ -61,9 +61,9 @@ define( require => {
         callback.call( input, domEvent.pointerId, scenery.Input.msPointerType( domEvent ), input.pointFromEvent( domEvent ), domEvent );
       }
       else if ( this.type === BatchedDOMEvent.TOUCH_TYPE ) {
-        for ( var i = 0; i < domEvent.changedTouches.length; i++ ) {
+        for ( let i = 0; i < domEvent.changedTouches.length; i++ ) {
           // according to spec (http://www.w3.org/TR/touch-events/), this is not an Array, but a TouchList
-          var touch = domEvent.changedTouches.item( i );
+          const touch = domEvent.changedTouches.item( i );
 
           callback.call( input, touch.identifier, input.pointFromEvent( touch ), domEvent );
         }

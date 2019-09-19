@@ -37,7 +37,7 @@ define( require => {
    * }
    */
   function DownUpListener( options ) {
-    var self = this;
+    const self = this;
 
     options = _.extend( {
       mouseButton: 0 // allow a different mouse button
@@ -114,13 +114,13 @@ define( require => {
       this.isDown = false;
       this.pointer.removeInputListener( this.downListener );
 
-      var currentTargetSave = event.currentTarget;
+      const currentTargetSave = event.currentTarget;
       event.currentTarget = this.downCurrentTarget; // up is handled by a pointer listener, so currentTarget would be null.
       if ( this.options.upInside || this.options.upOutside ) {
-        var trailUnderPointer = event.trail;
+        const trailUnderPointer = event.trail;
 
         // TODO: consider changing this so that it just does a hit check and ignores anything in front?
-        var isInside = trailUnderPointer.isExtensionOf( this.downTrail, true ) && !this.interrupted;
+        const isInside = trailUnderPointer.isExtensionOf( this.downTrail, true ) && !this.interrupted;
 
         if ( isInside && this.options.upInside ) {
           this.options.upInside( event, this.downTrail );

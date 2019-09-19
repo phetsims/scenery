@@ -93,10 +93,10 @@ define( require => {
       sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] secondary update' );
       sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
-      var count = this.secondaryPropertyCountsMap[ property.id ];
+      const count = this.secondaryPropertyCountsMap[ property.id ];
       assert && assert( count > 0, 'We should always be removing at least one reference' );
 
-      for ( var i = 0; i < count; i++ ) {
+      for ( let i = 0; i < count; i++ ) {
         this.attachSecondary( newPaint );
       }
       this.notifyChangeCallback();
@@ -135,7 +135,7 @@ define( require => {
       else if ( paint instanceof Gradient ) {
         sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] add Gradient listeners' );
         sceneryLog && sceneryLog.Paints && sceneryLog.push();
-        for ( var i = 0; i < paint.stops.length; i++ ) {
+        for ( let i = 0; i < paint.stops.length; i++ ) {
           this.attachPrimary( paint.stops[ i ].color );
         }
         sceneryLog && sceneryLog.Paints && sceneryLog.pop();
@@ -167,7 +167,7 @@ define( require => {
       else if ( paint instanceof Gradient ) {
         sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] remove Gradient listeners' );
         sceneryLog && sceneryLog.Paints && sceneryLog.push();
-        for ( var i = 0; i < paint.stops.length; i++ ) {
+        for ( let i = 0; i < paint.stops.length; i++ ) {
           this.detachPrimary( paint.stops[ i ].color );
         }
         sceneryLog && sceneryLog.Paints && sceneryLog.pop();
@@ -222,8 +222,8 @@ define( require => {
       sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] secondaryLazyLinkProperty ' + property._id );
       sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
-      var id = property.id;
-      var count = this.secondaryPropertyCountsMap[ id ];
+      const id = property.id;
+      const count = this.secondaryPropertyCountsMap[ id ];
       if ( count ) {
         this.secondaryPropertyCountsMap[ id ]++;
       }
@@ -246,8 +246,8 @@ define( require => {
       sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] secondaryUnlinkProperty ' + property._id );
       sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
-      var id = property.id;
-      var count = --this.secondaryPropertyCountsMap[ id ];
+      const id = property.id;
+      const count = --this.secondaryPropertyCountsMap[ id ];
       assert && assert( count >= 0, 'We should have had a reference before' );
 
       if ( count === 0 ) {

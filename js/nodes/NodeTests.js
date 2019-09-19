@@ -23,8 +23,8 @@ define( require => {
   }
 
   QUnit.test( 'Mouse and Touch areas', function( assert ) {
-    var node = new Node();
-    var rect = new Rectangle( 0, 0, 100, 50 );
+    const node = new Node();
+    const rect = new Rectangle( 0, 0, 100, 50 );
     rect.pickable = true;
 
     node.addChild( rect );
@@ -52,11 +52,11 @@ define( require => {
   } );
 
 
-  var epsilon = 0.000000001;
+  const epsilon = 0.000000001;
 
   QUnit.test( 'Points (parent and child)', function( assert ) {
-    var a = new Node();
-    var b = new Node();
+    const a = new Node();
+    const b = new Node();
     a.addChild( b );
     a.x = 10;
     b.y = 10;
@@ -82,13 +82,13 @@ define( require => {
   } );
 
   QUnit.test( 'Bounds (parent and child)', function( assert ) {
-    var a = new Node();
-    var b = new Node();
+    const a = new Node();
+    const b = new Node();
     a.addChild( b );
     a.x = 10;
     b.y = 10;
 
-    var bounds = new Bounds2( 4, 4, 20, 30 );
+    const bounds = new Bounds2( 4, 4, 20, 30 );
 
     assert.ok( new Bounds2( 4, 14, 20, 40 ).equalsEpsilon( b.localToParentBounds( bounds ), epsilon ), 'localToParentBounds on child' );
     assert.ok( new Bounds2( 14, 4, 30, 30 ).equalsEpsilon( a.localToParentBounds( bounds ), epsilon ), 'localToParentBounds on root' );
@@ -110,9 +110,9 @@ define( require => {
   } );
 
   QUnit.test( 'Points (order of transforms)', function( assert ) {
-    var a = new Node();
-    var b = new Node();
-    var c = new Node();
+    const a = new Node();
+    const b = new Node();
+    const c = new Node();
     a.addChild( b );
     b.addChild( c );
     a.x = 10;
@@ -126,16 +126,16 @@ define( require => {
   } );
 
   QUnit.test( 'Bounds (order of transforms)', function( assert ) {
-    var a = new Node();
-    var b = new Node();
-    var c = new Node();
+    const a = new Node();
+    const b = new Node();
+    const c = new Node();
     a.addChild( b );
     b.addChild( c );
     a.x = 10;
     b.scale( 2 );
     c.y = 10;
 
-    var bounds = new Bounds2( 4, 4, 20, 30 );
+    const bounds = new Bounds2( 4, 4, 20, 30 );
 
     assert.ok( new Bounds2( 18, 28, 50, 80 ).equalsEpsilon( c.localToGlobalBounds( bounds ), epsilon ), 'localToGlobalBounds' );
     assert.ok( new Bounds2( -3, -8, 5, 5 ).equalsEpsilon( c.globalToLocalBounds( bounds ), epsilon ), 'globalToLocalBounds' );
@@ -144,17 +144,17 @@ define( require => {
   } );
 
   QUnit.test( 'Trail and Node transform equivalence', function( assert ) {
-    var a = new Node();
-    var b = new Node();
-    var c = new Node();
+    const a = new Node();
+    const b = new Node();
+    const c = new Node();
     a.addChild( b );
     b.addChild( c );
     a.x = 10;
     b.scale( 2 );
     c.y = 10;
 
-    var trailMatrix = c.getUniqueTrail().getMatrix();
-    var nodeMatrix = c.getUniqueTransform().getMatrix();
+    const trailMatrix = c.getUniqueTrail().getMatrix();
+    const nodeMatrix = c.getUniqueTransform().getMatrix();
     assert.ok( trailMatrix.equalsEpsilon( nodeMatrix, epsilon ), 'Trail and Node transform equivalence' );
   } );
 } );

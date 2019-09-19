@@ -40,7 +40,7 @@ define( require => {
   const scenery = require( 'SCENERY/scenery' );
   const TransformTracker = require( 'SCENERY/util/TransformTracker' );
 
-  var globalId = 1;
+  let globalId = 1;
 
   /**
    * Constructor for AccessibleInstance, uses an initialize method for pooling.
@@ -123,7 +123,7 @@ define( require => {
       this.isDisposed = false;
 
       if ( this.isRootInstance ) {
-        var accessibilityContainer = document.createElement( 'div' );
+        const accessibilityContainer = document.createElement( 'div' );
         this.peer = AccessiblePeer.createFromPool( this, {
           primarySibling: accessibilityContainer
         } );
@@ -138,19 +138,19 @@ define( require => {
 
         // Scan over all of the nodes in our trail (that are NOT in our parent's trail) to check for accessibleDisplays
         // so we can initialize our invisibleCount and add listeners.
-        var parentTrail = this.parent.trail;
-        for ( var i = parentTrail.length; i < trail.length; i++ ) {
-          var relativeNode = trail.nodes[ i ];
+        const parentTrail = this.parent.trail;
+        for ( let i = parentTrail.length; i < trail.length; i++ ) {
+          const relativeNode = trail.nodes[ i ];
           this.relativeNodes.push( relativeNode );
 
-          var accessibleDisplays = relativeNode._accessibleDisplaysInfo.accessibleDisplays;
-          var isVisible = _.includes( accessibleDisplays, display );
+          const accessibleDisplays = relativeNode._accessibleDisplaysInfo.accessibleDisplays;
+          const isVisible = _.includes( accessibleDisplays, display );
           this.relativeVisibilities.push( isVisible );
           if ( !isVisible ) {
             this.invisibleCount++;
           }
 
-          var listener = this.checkAccessibleDisplayVisibility.bind( this, i - parentTrail.length );
+          const listener = this.checkAccessibleDisplayVisibility.bind( this, i - parentTrail.length );
           relativeNode.onStatic( 'accessibleDisplays', listener );
           this.relativeListeners.push( listener );
         }
@@ -175,11 +175,11 @@ define( require => {
         'addConsecutiveInstances on ' + this.toString() + ' with: ' + accessibleInstances.map( function( inst ) { return inst.toString(); } ).join( ',' ) );
       sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.push();
 
-      var hadChildren = this.children.length > 0;
+      const hadChildren = this.children.length > 0;
 
       Array.prototype.push.apply( this.children, accessibleInstances );
 
-      for ( var i = 0; i < accessibleInstances.length; i++ ) {
+      for ( let i = 0; i < accessibleInstances.length; i++ ) {
         // Append the container parent to the end (so that, when provided in order, we don't have to resort below
         // when initializing).
         AccessibilityUtil.insertElements( this.peer.primarySibling, accessibleInstances[ i ].peer.topLevelElements );
@@ -203,14 +203,14 @@ define( require => {
         'removeInstancesForTrail on ' + this.toString() + ' with trail ' + trail.toString() );
       sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.push();
 
-      for ( var i = 0; i < this.children.length; i++ ) {
-        var childInstance = this.children[ i ];
-        var childTrail = childInstance.trail;
+      for ( let i = 0; i < this.children.length; i++ ) {
+        const childInstance = this.children[ i ];
+        const childTrail = childInstance.trail;
 
         // Not worth it to inspect before our trail ends, since it should be (!) guaranteed to be equal
-        var differs = childTrail.length < trail.length;
+        let differs = childTrail.length < trail.length;
         if ( !differs ) {
-          for ( var j = this.trail.length; j < trail.length; j++ ) {
+          for ( let j = this.trail.length; j < trail.length; j++ ) {
             if ( trail.nodes[ j ] !== childTrail.nodes[ j ] ) {
               differs = true;
               break;
@@ -251,8 +251,8 @@ define( require => {
      * @returns {AccessibleInstance|null}
      */
     findChildWithTrail: function( trail ) {
-      for ( var i = 0; i < this.children.length; i++ ) {
-        var child = this.children[ i ];
+      for ( let i = 0; i < this.children.length; i++ ) {
+        const child = this.children[ i ];
         if ( child.trail.equals( trail ) ) {
           return child;
         }
@@ -272,8 +272,8 @@ define( require => {
         'removeSubtree on ' + this.toString() + ' with trail ' + trail.toString() );
       sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.push();
 
-      for ( var i = this.children.length - 1; i >= 0; i-- ) {
-        var childInstance = this.children[ i ];
+      for ( let i = this.children.length - 1; i >= 0; i-- ) {
+        const childInstance = this.children[ i ];
         if ( childInstance.trail.isExtensionOf( trail, true ) ) {
           sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
             'Remove parent: ' + this.toString() + ', child: ' + childInstance.toString() );
@@ -294,18 +294,18 @@ define( require => {
      * @param {number} index - Index into the relativeNodes array (which node had the notification)
      */
     checkAccessibleDisplayVisibility: function( index ) {
-      var isNodeVisible = _.includes( this.relativeNodes[ index ]._accessibleDisplaysInfo.accessibleDisplays, this.display );
-      var wasNodeVisible = this.relativeVisibilities[ index ];
+      const isNodeVisible = _.includes( this.relativeNodes[ index ]._accessibleDisplaysInfo.accessibleDisplays, this.display );
+      const wasNodeVisible = this.relativeVisibilities[ index ];
 
       if ( isNodeVisible !== wasNodeVisible ) {
         this.relativeVisibilities[ index ] = isNodeVisible;
 
-        var wasVisible = this.invisibleCount === 0;
+        const wasVisible = this.invisibleCount === 0;
 
         this.invisibleCount += ( isNodeVisible ? -1 : 1 );
         assert && assert( this.invisibleCount >= 0 && this.invisibleCount <= this.relativeNodes.length );
 
-        var isVisible = this.invisibleCount === 0;
+        const isVisible = this.invisibleCount === 0;
 
         if ( isVisible !== wasVisible ) {
           this.updateVisibility();
@@ -369,23 +369,23 @@ define( require => {
      * @returns {Array.<AccessibleInstance>}
      */
     getChildOrdering: function( trail ) {
-      var node = trail.lastNode();
-      var effectiveChildren = node.getEffectiveChildren();
-      var i;
-      var instances = [];
+      const node = trail.lastNode();
+      const effectiveChildren = node.getEffectiveChildren();
+      let i;
+      const instances = [];
 
       // base case, node has accessible content, but don't match the "root" node of this accessible instance
       if ( node.accessibleContent && node !== this.node ) {
-        var potentialInstances = node.accessibleInstances;
+        const potentialInstances = node.accessibleInstances;
 
         instanceLoop:
           for ( i = 0; i < potentialInstances.length; i++ ) {
-            var potentialInstance = potentialInstances[ i ];
+            const potentialInstance = potentialInstances[ i ];
             if ( potentialInstance.parent !== this ) {
               continue instanceLoop;
             }
 
-            for ( var j = 0; j < trail.length; j++ ) {
+            for ( let j = 0; j < trail.length; j++ ) {
               if ( trail.nodes[ j ] !== potentialInstance.trail.nodes[ j + potentialInstance.trail.length - trail.length ] ) {
                 continue instanceLoop;
               }
@@ -418,7 +418,7 @@ define( require => {
     sortChildren: function() {
       // It's simpler/faster to just grab our order directly with one recursion, rather than specifying a sorting
       // function (since a lot gets re-evaluated in that case).
-      var targetChildren = this.getChildOrdering( new scenery.Trail( this.isRootInstance ? this.display.rootNode : this.node ) );
+      const targetChildren = this.getChildOrdering( new scenery.Trail( this.isRootInstance ? this.display.rootNode : this.node ) );
 
       assert && assert( targetChildren.length === this.children.length, 'sorting should not change number of children' );
 
@@ -426,19 +426,19 @@ define( require => {
       this.children = targetChildren;
 
       // the DOMElement to add the child DOMElements to.
-      var primarySibling = this.peer.primarySibling;
+      const primarySibling = this.peer.primarySibling;
 
       // "i" will keep track of the "collapsed" index when all DOMElements for all AccessibleInstance children are
       // added to a single parent DOMElement (this AccessibleInstance's AccessiblePeer's primarySibling)
-      var i = primarySibling.childNodes.length - 1;
+      let i = primarySibling.childNodes.length - 1;
 
       // Iterate through all AccessibleInstance children
-      for ( var peerIndex = this.children.length - 1; peerIndex >= 0; peerIndex-- ) {
-        var peer = this.children[ peerIndex ].peer;
+      for ( let peerIndex = this.children.length - 1; peerIndex >= 0; peerIndex-- ) {
+        const peer = this.children[ peerIndex ].peer;
 
         // Iterate through all top level elements of an AccessibleInstance's peer
-        for ( var elementIndex = peer.topLevelElements.length - 1; elementIndex >= 0; elementIndex-- ) {
-          var element = peer.topLevelElements[ elementIndex ];
+        for ( let elementIndex = peer.topLevelElements.length - 1; elementIndex >= 0; elementIndex-- ) {
+          const element = peer.topLevelElements[ elementIndex ];
 
           // Reorder DOM elements in a way that doesn't do any work if they are already in a sorted order.
           // No need to reinsert if `element` is already in the right order
@@ -469,7 +469,7 @@ define( require => {
         // primary sibling (or its child container)
         AccessibilityUtil.removeElements( this.parent.peer.primarySibling, this.peer.topLevelElements );
 
-        for ( var i = 0; i < this.relativeNodes.length; i++ ) {
+        for ( let i = 0; i < this.relativeNodes.length; i++ ) {
           this.relativeNodes[ i ].offStatic( 'accessibleDisplays', this.relativeListeners[ i ] );
         }
       }
@@ -523,7 +523,7 @@ define( require => {
     auditRoot: function() {
       if ( !assert ) { return; }
 
-      var rootNode = this.display.rootNode;
+      const rootNode = this.display.rootNode;
 
       assert( this.trail.length === 0,
         'Should only call auditRoot() on the root AccessibleInstance for a display' );
@@ -538,12 +538,12 @@ define( require => {
           audit( fakeInstance.children[ i ], accessibleInstance.children[ i ] );
         }
 
-        var isVisible = accessibleInstance.isGloballyVisible();
+        const isVisible = accessibleInstance.isGloballyVisible();
 
-        var shouldBeVisible = true;
+        let shouldBeVisible = true;
         for ( i = 0; i < accessibleInstance.trail.length; i++ ) {
-          var node = accessibleInstance.trail.nodes[ i ];
-          var trails = node.getTrailsTo( rootNode ).filter( function( trail ) {
+          const node = accessibleInstance.trail.nodes[ i ];
+          const trails = node.getTrailsTo( rootNode ).filter( function( trail ) {
             return trail.isAccessibleVisible();
           } );
           if ( trails.length === 0 ) {
@@ -575,16 +575,16 @@ define( require => {
       // !nodes[ n ].hasChild( nodes[ n + 1 ] ).
       // NOTE: This index points to the parent where this is the case, because the indices in the trail are such that:
       // trail.nodes[ n ].children[ trail.indices[ n ] ] = trail.nodes[ n + 1 ]
-      var lastBadIndex = trail.indices.lastIndexOf( -1 );
+      const lastBadIndex = trail.indices.lastIndexOf( -1 );
 
       // If we have no bad indices, just return our trail immediately.
       if ( lastBadIndex < 0 ) {
         return trail;
       }
 
-      var firstGoodIndex = lastBadIndex + 1;
-      var firstGoodNode = trail.nodes[ firstGoodIndex ];
-      var baseTrails = firstGoodNode.getTrailsTo( rootNode );
+      const firstGoodIndex = lastBadIndex + 1;
+      const firstGoodNode = trail.nodes[ firstGoodIndex ];
+      const baseTrails = firstGoodNode.getTrailsTo( rootNode );
 
       // firstGoodNode might not be attached to a Display either! Maybe client just hasn't gotten to it yet, so we
       // fail gracefully-ish?
@@ -594,8 +594,8 @@ define( require => {
       }
 
       // Add the rest of the trail back in
-      var baseTrail = baseTrails[ 0 ];
-      for ( var i = firstGoodIndex + 1; i < trail.length; i++ ) {
+      const baseTrail = baseTrails[ 0 ];
+      for ( let i = firstGoodIndex + 1; i < trail.length; i++ ) {
         baseTrail.addDescendant( trail.nodes[ i ] );
       }
 
@@ -614,7 +614,7 @@ define( require => {
      */
     createFakeAccessibleTree: function( rootNode ) {
       function createFakeTree( node ) {
-        var fakeInstances = _.flatten( node.getEffectiveChildren().map( createFakeTree ) );
+        let fakeInstances = _.flatten( node.getEffectiveChildren().map( createFakeTree ) );
         if ( node.accessibleContent ) {
           fakeInstances = [ {
             node: node,

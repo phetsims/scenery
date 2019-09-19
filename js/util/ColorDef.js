@@ -14,7 +14,7 @@ define( require => {
   const Property = require( 'AXON/Property' );
   const scenery = require( 'SCENERY/scenery' );
 
-  var ColorDef = {
+  const ColorDef = {
     /**
      * Returns whether the parameter is considered to be a ColorDef.
      * @public

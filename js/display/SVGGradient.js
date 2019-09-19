@@ -44,7 +44,7 @@ define( require => {
       // @private {Gradient} - transient
       this.gradient = gradient;
 
-      var hasPreviousDefinition = this.definition !== undefined;
+      const hasPreviousDefinition = this.definition !== undefined;
 
       // @public {SVGGradientElement} - persistent
       this.definition = this.definition || this.createDefinition();
@@ -62,12 +62,12 @@ define( require => {
       }
 
       // We need to make a function call, as stops need to be rescaled/reversed in some radial gradient cases.
-      var gradientStops = gradient.getSVGStops();
+      const gradientStops = gradient.getSVGStops();
 
       // @private {Array.<SVGGradientStop>} - transient
       this.stops = cleanArray( this.stops );
-      for ( var i = 0; i < gradientStops.length; i++ ) {
-        var stop = new SVGGradientStop( this, gradientStops[ i ].ratio, gradientStops[ i ].color );
+      for ( let i = 0; i < gradientStops.length; i++ ) {
+        const stop = new SVGGradientStop( this, gradientStops[ i ].ratio, gradientStops[ i ].color );
         this.stops.push( stop );
         this.definition.appendChild( stop.svgElement );
       }
@@ -119,7 +119,7 @@ define( require => {
       sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradient] update: ' + this.gradient.id );
       sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
-      for ( var i = 0; i < this.stops.length; i++ ) {
+      for ( let i = 0; i < this.stops.length; i++ ) {
         this.stops[ i ].update();
       }
 
@@ -135,8 +135,8 @@ define( require => {
       sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
       // Dispose and clean up stops
-      for ( var i = 0; i < this.stops.length; i++ ) {
-        var stop = this.stops[ i ]; // SVGGradientStop
+      for ( let i = 0; i < this.stops.length; i++ ) {
+        const stop = this.stops[ i ]; // SVGGradientStop
         this.definition.removeChild( stop.svgElement );
         stop.dispose();
       }

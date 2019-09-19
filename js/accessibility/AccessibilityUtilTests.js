@@ -16,10 +16,10 @@ define( require => {
   // tests
   QUnit.test( 'insertElements', function( assert ) {
 
-    var div1 = document.createElement( 'div1' );
-    var div2 = document.createElement( 'div2' );
-    var div3 = document.createElement( 'div3' );
-    var div4 = document.createElement( 'div4' );
+    const div1 = document.createElement( 'div1' );
+    const div2 = document.createElement( 'div2' );
+    const div3 = document.createElement( 'div3' );
+    const div4 = document.createElement( 'div4' );
 
     AccessibilityUtil.insertElements( div1, [ div2, div3, div4 ] );
 
@@ -29,9 +29,9 @@ define( require => {
     assert.ok( div1.childNodes[2] === div4, 'inserted div4 order of elements');
 
 
-    var div5 = document.createElement( 'div5' );
-    var div6 = document.createElement( 'div6' );
-    var div7 = document.createElement( 'div7' );
+    const div5 = document.createElement( 'div5' );
+    const div6 = document.createElement( 'div6' );
+    const div7 = document.createElement( 'div7' );
 
     AccessibilityUtil.insertElements( div1, [div5,div6,div7], div3);
     assert.ok( div1.childNodes[0] === div2, 'inserted div2 order of elements');
@@ -43,11 +43,11 @@ define( require => {
   } );
 
   QUnit.test( 'getNextPreviousFocusable', function( assert ) {
-    var parent = AccessibilityUtil.createElement( 'div', false );
+    const parent = AccessibilityUtil.createElement( 'div', false );
 
-    var button = AccessibilityUtil.createElement( 'button', true ); // focusable
-    var div = AccessibilityUtil.createElement( 'div', true ); // focusable
-    var p = AccessibilityUtil.createElement( 'p', false ); // not focusable
+    const button = AccessibilityUtil.createElement( 'button', true ); // focusable
+    const div = AccessibilityUtil.createElement( 'div', true ); // focusable
+    const p = AccessibilityUtil.createElement( 'p', false ); // not focusable
 
     // elements must be in DOM to be focusable
     document.body.appendChild( parent );
@@ -55,16 +55,16 @@ define( require => {
     parent.appendChild( div );
     parent.appendChild( p );
 
-    var firstFocusable = AccessibilityUtil.getNextFocusable( parent );
+    const firstFocusable = AccessibilityUtil.getNextFocusable( parent );
     assert.ok( firstFocusable === button, 'first focusable found' );
     firstFocusable.focus();
 
-    var secondFocusable = AccessibilityUtil.getNextFocusable( parent );
+    const secondFocusable = AccessibilityUtil.getNextFocusable( parent );
     assert.ok( secondFocusable === div, 'second focusable found' );
     secondFocusable.focus();
 
     // should still return the div because the p isn't focusable
-    var thirdFocusable = AccessibilityUtil.getNextFocusable( parent );
+    const thirdFocusable = AccessibilityUtil.getNextFocusable( parent );
     assert.ok( thirdFocusable === div, 'no more focusables after div' );
 
     // remove the DOM nodes so they don't clutter the tests
@@ -74,10 +74,10 @@ define( require => {
   QUnit.test( 'overrideFocusWithTabIndex', function ( assert ) {
 
     // test function directly
-    var testButton = document.createElement( 'button' );
-    var testListItem = document.createElement( 'li' );
-    var testLink = document.createElement( 'a' );
-    var testSection = document.createElement( 'section' );
+    const testButton = document.createElement( 'button' );
+    const testListItem = document.createElement( 'li' );
+    const testLink = document.createElement( 'a' );
+    const testSection = document.createElement( 'section' );
 
     // defaults, should not an tabindex to any elements
     AccessibilityUtil.overrideFocusWithTabIndex( testButton, true );
@@ -101,9 +101,9 @@ define( require => {
 
     // test function in usages with createElement
     // tab index should only be set on elements where we are overriding what is being done natively in the browser
-    var defaultButton = AccessibilityUtil.createElement( 'button', true ); // focusable
-    var defaultParagraph = AccessibilityUtil.createElement( 'p', false ); // not focusable
-    var defaultDiv = AccessibilityUtil.createElement( 'div', false ); // not focusable
+    const defaultButton = AccessibilityUtil.createElement( 'button', true ); // focusable
+    const defaultParagraph = AccessibilityUtil.createElement( 'p', false ); // not focusable
+    const defaultDiv = AccessibilityUtil.createElement( 'div', false ); // not focusable
 
     // use getAttribute because tabIndex DOM property is always provided by default
     assert.ok( defaultButton.getAttribute( 'tabindex' ) === null, 'default button has no tab index' );
@@ -111,9 +111,9 @@ define( require => {
     assert.ok( defaultDiv.getAttribute( 'tabindex' ) === null, 'default div has no tab index' );
 
     // custom focusability should all have tab indices, even those that are being removed from the document
-    var customButton = AccessibilityUtil.createElement( 'button', false ); // not focusable
-    var customParagraph = AccessibilityUtil.createElement( 'p', true ); // focusable
-    var customDiv = AccessibilityUtil.createElement( 'div', true ); // focusable
+    const customButton = AccessibilityUtil.createElement( 'button', false ); // not focusable
+    const customParagraph = AccessibilityUtil.createElement( 'p', true ); // focusable
+    const customDiv = AccessibilityUtil.createElement( 'div', true ); // focusable
 
     assert.ok( customButton.getAttribute( 'tabindex' ) === '-1', 'custom button removed from focus' );
     assert.ok( customParagraph.getAttribute( 'tabindex' ) === '0', 'custom paragraph added to focus' );
@@ -121,19 +121,19 @@ define( require => {
   } );
 
   QUnit.test( 'setTextContent', function( assert ) {
-    var toyElement = AccessibilityUtil.createElement( 'div' );
+    const toyElement = AccessibilityUtil.createElement( 'div' );
 
     // basic string
-    var stringContent = 'I am feeling pretty flat today.';
+    const stringContent = 'I am feeling pretty flat today.';
 
     // formatted content
-    var htmlContent = 'I am <i>feeling</i> rather <strong>BOLD</strong> today';
+    const htmlContent = 'I am <i>feeling</i> rather <strong>BOLD</strong> today';
 
     // malformed formatting tags
-    var malformedHTMLContent = 'I am feeling a <b>bit off> today.';
+    const malformedHTMLContent = 'I am feeling a <b>bit off> today.';
 
     // tags not allowed as innerHTML
-    var invalidHTMLContent = 'I am feeling a bit <a href="daring">devious</a> today.';
+    const invalidHTMLContent = 'I am feeling a bit <a href="daring">devious</a> today.';
 
     AccessibilityUtil.setTextContent( toyElement, stringContent );
     assert.ok( toyElement.textContent === stringContent, 'textContent set for basic string' );

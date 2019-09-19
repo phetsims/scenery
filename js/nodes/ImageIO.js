@@ -24,7 +24,7 @@ define( require => {
       returnType: VoidIO,
       parameterTypes: [ StringIO ],
       implementation: function( base64Text ) {
-        var im = new window.Image();
+        const im = new window.Image();
         im.src = base64Text;
         this.phetioObject.image = im;
       },

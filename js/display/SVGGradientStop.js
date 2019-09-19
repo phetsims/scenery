@@ -15,7 +15,7 @@ define( require => {
   const Property = require( 'AXON/Property' );
   const scenery = require( 'SCENERY/scenery' );
 
-  var scratchColor = new Color( 'transparent' );
+  const scratchColor = new Color( 'transparent' );
 
   /**
    * @constructor
@@ -128,7 +128,7 @@ define( require => {
       sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
       // {Color|string|Property.<Color|string|null>|null}
-      var color = this.color;
+      let color = this.color;
 
       // to {Color|string|null}
       if ( color instanceof Property ) {
@@ -152,11 +152,11 @@ define( require => {
       // Since this needs to be done quickly, and we don't particularly care about slight rounding differences (it's
       // being used for display purposes only, and is never shown to the user), we use the built-in JS toFixed instead of
       // Dot's version of toFixed. See https://github.com/phetsims/kite/issues/50
-      var stopOpacityRule = 'stop-opacity: ' + scratchColor.a.toFixed( 20 ) + ';';
+      const stopOpacityRule = 'stop-opacity: ' + scratchColor.a.toFixed( 20 ) + ';';
 
       // For GC, mutate the color so it is just RGB and output that CSS also
       scratchColor.alpha = 1;
-      var stopColorRule = 'stop-color: ' + scratchColor.toCSS() + ';';
+      const stopColorRule = 'stop-color: ' + scratchColor.toCSS() + ';';
 
       this.svgElement.setAttribute( 'style', stopColorRule + ' ' + stopOpacityRule );
 
@@ -171,7 +171,7 @@ define( require => {
       sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] dispose: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );
       sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
-      var color = this.color;
+      const color = this.color;
 
       if ( color instanceof Property ) {
         sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] removing Property listener: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );

@@ -107,8 +107,8 @@ define( require => {
      * This sets a "dirty" flag, so that it will be repainted the next time it would be displayed.
      */
     invalidatePaint: function() {
-      var stateLen = this._drawables.length;
-      for ( var i = 0; i < stateLen; i++ ) {
+      const stateLen = this._drawables.length;
+      for ( let i = 0; i < stateLen; i++ ) {
         this._drawables[ i ].markDirty();
       }
     },

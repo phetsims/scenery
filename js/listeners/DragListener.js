@@ -56,7 +56,7 @@ define( require => {
   const Vector2 = require( 'DOT/Vector2' );
 
   // Scratch vectors used to prevent allocations
-  var scratchVector2A = new Vector2( 0, 0 );
+  const scratchVector2A = new Vector2( 0, 0 );
 
   /**
    * @constructor
@@ -65,7 +65,7 @@ define( require => {
    * @param {Object} [options] - See the constructor body (below) and in PressListener for documented options.
    */
   function DragListener( options ) {
-    var self = this;
+    const self = this;
 
     options = _.extend( {
       // {boolean} - If true, unattached touches that move across our node will trigger a press(). This helps sometimes
@@ -221,11 +221,11 @@ define( require => {
      * @returns {boolean} success - Returns whether the press was actually started
      */
     press: function( event, targetNode, callback ) {
-      var self = this;
+      const self = this;
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener press' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      var success = PressListener.prototype.press.call( this, event, targetNode, function() {
+      const success = PressListener.prototype.press.call( this, event, targetNode, function() {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener successful press' );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -271,7 +271,7 @@ define( require => {
      * @param {function} [callback] - called at the end of the release
      */
     release: function( event, callback ) {
-      var self = this;
+      const self = this;
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener release' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();

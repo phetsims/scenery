@@ -17,12 +17,12 @@ define( require => {
   const TextStatefulDrawable = require( 'SCENERY/display/drawables/TextStatefulDrawable' );
 
   // TODO: change this based on memory and performance characteristics of the platform
-  var keepSVGTextElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
+  const keepSVGTextElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
 
   // Some browsers (IE/Edge) can't handle our UTF-8 embedding marks AND SVG textLength/spacingAndGlyphs. We disable
   // using these features, because they aren't necessary on these browsers.
   // See https://github.com/phetsims/scenery/issues/455 for more information.
-  var useSVGTextLengthAdjustments = !platform.ie && !platform.edge;
+  const useSVGTextLengthAdjustments = !platform.ie && !platform.edge;
 
   /**
    * A generated SVGSelfDrawable whose purpose will be drawing our Text. One of these drawables will be created
@@ -41,7 +41,7 @@ define( require => {
 
     if ( !this.svgElement ) {
       // @protected {SVGTextElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
-      var text = this.svgElement = document.createElementNS( scenery.svgns, 'text' );
+      const text = this.svgElement = document.createElementNS( scenery.svgns, 'text' );
       text.appendChild( document.createTextNode( '' ) );
 
       // TODO: flag adjustment for SVG qualities
@@ -62,7 +62,7 @@ define( require => {
      * Implements the interface for SVGSelfDrawable (and is called from the SVGSelfDrawable's update).
      */
     updateSVGSelf: function() {
-      var text = this.svgElement;
+      const text = this.svgElement;
 
       // set all of the font attributes, since we can't use the combined one
       if ( this.dirtyFont ) {
@@ -80,7 +80,7 @@ define( require => {
 
       // text length correction, tested with scenery/tests/text-quality-test.html to determine how to match Canvas/SVG rendering (and overall length)
       if ( this.dirtyBounds && useSVGTextLengthAdjustments ) {
-        var useLengthAdjustment = this.node._boundsMethod !== 'accurate' && isFinite( this.node.selfBounds.width );
+        const useLengthAdjustment = this.node._boundsMethod !== 'accurate' && isFinite( this.node.selfBounds.width );
 
         if ( useLengthAdjustment ) {
           if ( !this.hasLength ) {

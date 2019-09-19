@@ -32,7 +32,7 @@ define( require => {
   const timer = require( 'AXON/timer' );
 
   // global
-  var globalID = 0;
+  let globalID = 0;
 
   // Factor out to reduce memory footprint, see https://github.com/phetsims/tandem/issues/71
   const truePredicate = _.constant( true );
@@ -43,7 +43,7 @@ define( require => {
    * @param {Object} [options] - See the constructor body (below) for documented options.
    */
   function PressListener( options ) {
-    var self = this;
+    const self = this;
 
     options = _.extend( {
       // {number} - Restricts to the specific mouse button (but allows any touch). Only one mouse button is allowed at
@@ -455,9 +455,9 @@ define( require => {
      * @private
      */
     invalidateHovering: function() {
-      var pointers = this.overPointers.getArray();
-      for ( var i = 0; i < pointers.length; i++ ) {
-        var pointer = pointers[ i ];
+      const pointers = this.overPointers.getArray();
+      for ( let i = 0; i < pointers.length; i++ ) {
+        const pointer = pointers[ i ];
         if ( !pointer.isDown || pointer === this.pointer ) {
           this.isHoveringProperty.value = true;
           return;
@@ -717,7 +717,7 @@ define( require => {
           timer.clearTimeout( this._a11yClickingTimeoutListener );
 
           // now add the timeout back to start over, saving so that it can be removed later
-          var self = this;
+          const self = this;
           this._a11yClickingTimeoutListener = timer.setTimeout( function() {
 
             // the listener may have been disposed before the end of a11yLooksPressedInterval, like if it fires and

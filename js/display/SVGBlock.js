@@ -91,7 +91,7 @@ define( require => {
       Util.unsetTransform( this.svg ); // clear out any transforms that could have been previously applied
       this.baseTransformGroup.setAttribute( 'transform', '' ); // no base transform
 
-      var instanceClosestToRoot = transformRootInstance.trail.nodes.length > filterRootInstance.trail.nodes.length ?
+      const instanceClosestToRoot = transformRootInstance.trail.nodes.length > filterRootInstance.trail.nodes.length ?
                                   filterRootInstance : transformRootInstance;
 
       this.rootGroup = SVGGroup.createFromPool( this, instanceClosestToRoot, null );
@@ -119,7 +119,7 @@ define( require => {
         this.paintMap[ paint.id ].count++;
       }
       else {
-        var svgPaint = paint.createSVGPaint( this );
+        const svgPaint = paint.createSVGPaint( this );
         svgPaint.definition.setAttribute( 'id', paint.id + '-' + this.id );
 
         // TODO: reduce allocations? (pool these)
@@ -146,7 +146,7 @@ define( require => {
 
       // since the block may have been disposed (yikes!), we have a defensive set-up here
       if ( this.paintMap.hasOwnProperty( paint.id ) ) {
-        var entry = this.paintMap[ paint.id ];
+        const entry = this.paintMap[ paint.id ];
         assert && assert( entry.count >= 1 );
 
         if ( entry.count === 1 ) {
@@ -182,7 +182,7 @@ define( require => {
       this.baseTransformGroup.removeAttribute( 'transform' );
       Util.unsetTransform( this.svg );
 
-      var size = this.display.getSize();
+      const size = this.display.getSize();
       this.svg.setAttribute( 'width', size.width );
       this.svg.setAttribute( 'height', size.height );
     },
@@ -190,8 +190,8 @@ define( require => {
     setSizeFitBounds: function() {
       sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( 'setSizeFitBounds #' + this.id + ' with ' + this.fitBounds.toString() );
 
-      var x = this.fitBounds.minX;
-      var y = this.fitBounds.minY;
+      const x = this.fitBounds.minX;
+      const y = this.fitBounds.minY;
 
       assert && assert( isFinite( x ) && isFinite( y ), 'Invalid SVG transform for SVGBlock' );
       assert && assert( this.fitBounds.isValid(), 'Invalid fitBounds' );
@@ -221,7 +221,7 @@ define( require => {
       //OHTWO TODO: call here!
       // TODO: What does the above TODO mean?
       while ( this.dirtyGroups.length ) {
-        var group = this.dirtyGroups.pop();
+        const group = this.dirtyGroups.pop();
 
         // if this group has been disposed or moved to another block, don't mess with it
         if ( group.block === this ) {
@@ -232,7 +232,7 @@ define( require => {
         this.dirtyGradients.pop().update();
       }
       while ( this.dirtyDrawables.length ) {
-        var drawable = this.dirtyDrawables.pop();
+        const drawable = this.dirtyDrawables.pop();
 
         // if this drawable has been disposed or moved to another block, don't mess with it
         // TODO: If it was moved to another block, why might it still appear in our list?  Shouldn't that be an assertion check?

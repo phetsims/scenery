@@ -14,11 +14,11 @@ define( require => {
   const scenery = require( 'SCENERY/scenery' );
   const SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
-  var LineStatelessDrawable = {
+  const LineStatelessDrawable = {
     mixInto: function( drawableType ) {
       assert && assert( _.includes( inheritance( drawableType ), SelfDrawable ) );
 
-      var proto = drawableType.prototype;
+      const proto = drawableType.prototype;
 
       // initializes, and resets (so we can support pooled states)
       proto.initializeLineStateless = function() {

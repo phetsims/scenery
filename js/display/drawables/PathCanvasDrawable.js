@@ -45,7 +45,7 @@ define( require => {
      * @param {Matrix3} matrix - The transformation matrix applied for this node's coordinate system.
      */
     paintCanvas: function( wrapper, node, matrix ) {
-      var context = wrapper.context;
+      const context = wrapper.context;
 
       if ( node.hasShape() ) {
         // TODO: fill/stroke delay optimizations?

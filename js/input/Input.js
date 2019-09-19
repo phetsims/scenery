@@ -196,7 +196,7 @@ define( require => {
   // Some assistive devices may send "fake" pointer like events to the browser when only using
   // a keyboard. We want to handle these as keyboard or alternative events exclusively and not through scenery's
   // pointer system. See https://github.com/phetsims/scenery/issues/852#issuecomment-467994327
-  var BLOCKED_ACCESSIBLE_EVENTS = [ 'touchstart', 'touchend', 'mousedown', 'mouseup' ];
+  const BLOCKED_ACCESSIBLE_EVENTS = [ 'touchstart', 'touchend', 'mousedown', 'mouseup' ];
 
   /**
    * An input controller for a specific Display.
@@ -540,7 +540,7 @@ define( require => {
         // In IE11, the focusin event can be sent twice since we often have to restore focus to event.relatedTarget
         // after calling focusout callbacks. So this flag is set to prevent focusin callbacks from firing twice
         // when that happens. See https://github.com/phetsims/scenery/issues/925
-        var ieBlockCallbacks = false;
+        let ieBlockCallbacks = false;
 
         // @private
         this.focusinAction = new Action( event => {
@@ -603,8 +603,8 @@ define( require => {
           //
           // Focus is set with DOM API to avoid the performance hit of looking up the Node from trail id.
           if ( event.relatedTarget ) {
-            var focusMovedInCallbacks = this.display.accessibleDOMElement.contains( document.activeElement );
-            var targetFocusable = AccessibilityUtil.isElementFocusable( event.relatedTarget );
+            const focusMovedInCallbacks = this.display.accessibleDOMElement.contains( document.activeElement );
+            const targetFocusable = AccessibilityUtil.isElementFocusable( event.relatedTarget );
             if ( targetFocusable && !focusMovedInCallbacks ) {
               if ( platform.ie ) {
                 ieBlockCallbacks = true;
@@ -738,7 +738,7 @@ define( require => {
         // Block any fake pointer events that may be sourced on the a PDOM element when a screen reader is in use.
         // Screen readers inconsistently send these fake "pointer" like events to DOM elements and we want
         // all pointer events to go through scenery's pointer input system and the display div, never the PDOM
-        for ( var i = 0; i < BLOCKED_ACCESSIBLE_EVENTS.length; i++ ) {
+        for ( let i = 0; i < BLOCKED_ACCESSIBLE_EVENTS.length; i++ ) {
           this.display.accessibleDOMElement.addEventListener( BLOCKED_ACCESSIBLE_EVENTS[ i ], function( event ) {
             event.preventDefault();
             event.stopPropagation();
@@ -1847,8 +1847,8 @@ define( require => {
       // from an iframe by keeping focus in the display. getNext/getPreviousFocusable will return active element
       // if there are no more elements in that direction. See https://github.com/phetsims/scenery/issues/883
       if ( FullScreen.isFullScreen() && event.keyCode === KeyboardUtil.KEY_TAB ) {
-        var rootElement = this.display.accessibleDOMElement;
-        var nextElement = event.shiftKey ? AccessibilityUtil.getPreviousFocusable( rootElement ) :
+        const rootElement = this.display.accessibleDOMElement;
+        const nextElement = event.shiftKey ? AccessibilityUtil.getPreviousFocusable( rootElement ) :
                           AccessibilityUtil.getNextFocusable( rootElement );
         if ( nextElement === event.target ) {
           event.preventDefault();
@@ -1858,16 +1858,16 @@ define( require => {
       // if an accessible node was being interacted with a mouse, or had focus when sim is made inactive, this node
       // should receive focus upon resuming keyboard navigation
       if ( this.display.pointerFocus || this.display.activeNode ) {
-        var active = this.display.pointerFocus || this.display.activeNode;
-        var focusable = active.focusable;
+        const active = this.display.pointerFocus || this.display.activeNode;
+        const focusable = active.focusable;
 
         // if there is a single accessible instance, we can restore focus
         if ( active.getAccessibleInstances().length === 1 ) {
 
           // if all ancestors of this node are visible, so is the active node
-          var nodeAndAncestorsVisible = true;
-          var activeTrail = active.accessibleInstances[ 0 ].trail;
-          for ( var i = activeTrail.nodes.length - 1; i >= 0; i-- ) {
+          let nodeAndAncestorsVisible = true;
+          const activeTrail = active.accessibleInstances[ 0 ].trail;
+          for ( let i = activeTrail.nodes.length - 1; i >= 0; i-- ) {
             if ( !activeTrail.nodes[ i ].visible ) {
               nodeAndAncestorsVisible = false;
               break;

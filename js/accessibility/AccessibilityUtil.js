@@ -21,67 +21,67 @@ define( require => {
   const validate = require( 'AXON/validate' );
 
   // constants
-  var NEXT = 'NEXT';
-  var PREVIOUS = 'PREVIOUS';
+  const NEXT = 'NEXT';
+  const PREVIOUS = 'PREVIOUS';
 
   // HTML tag names
-  var INPUT_TAG = 'INPUT';
-  var LABEL_TAG = 'LABEL';
-  var BUTTON_TAG = 'BUTTON';
-  var TEXTAREA_TAG = 'TEXTAREA';
-  var SELECT_TAG = 'SELECT';
-  var OPTGROUP_TAG = 'OPTGROUP';
-  var DATALIST_TAG = 'DATALIST';
-  var OUTPUT_TAG = 'OUTPUT';
-  var DIV_TAG = 'DIV';
-  var A_TAG = 'A';
-  var AREA_TAG = 'AREA';
-  var P_TAG = 'P';
-  var IFRAME_TAG = 'IFRAME';
+  const INPUT_TAG = 'INPUT';
+  const LABEL_TAG = 'LABEL';
+  const BUTTON_TAG = 'BUTTON';
+  const TEXTAREA_TAG = 'TEXTAREA';
+  const SELECT_TAG = 'SELECT';
+  const OPTGROUP_TAG = 'OPTGROUP';
+  const DATALIST_TAG = 'DATALIST';
+  const OUTPUT_TAG = 'OUTPUT';
+  const DIV_TAG = 'DIV';
+  const A_TAG = 'A';
+  const AREA_TAG = 'AREA';
+  const P_TAG = 'P';
+  const IFRAME_TAG = 'IFRAME';
 
   // tag names with special behavior
-  var BOLD_TAG = 'B';
-  var STRONG_TAG = 'STRONG';
-  var I_TAG = 'I';
-  var EM_TAG = 'EM';
-  var MARK_TAG = 'MARK';
-  var SMALL_TAG = 'SMALL';
-  var DEL_TAG = 'DEL';
-  var INS_TAG = 'INS';
-  var SUB_TAG = 'SUB';
-  var SUP_TAG = 'SUP';
-  var BR_TAG = 'BR';
+  const BOLD_TAG = 'B';
+  const STRONG_TAG = 'STRONG';
+  const I_TAG = 'I';
+  const EM_TAG = 'EM';
+  const MARK_TAG = 'MARK';
+  const SMALL_TAG = 'SMALL';
+  const DEL_TAG = 'DEL';
+  const INS_TAG = 'INS';
+  const SUB_TAG = 'SUB';
+  const SUP_TAG = 'SUP';
+  const BR_TAG = 'BR';
 
   // These browser tags are a definition of default focusable elements, converted from Javascript types,
   // see https://stackoverflow.com/questions/1599660/which-html-elements-can-receive-focus
-  var DEFAULT_FOCUSABLE_TAGS = [ A_TAG, AREA_TAG, INPUT_TAG, SELECT_TAG, TEXTAREA_TAG, BUTTON_TAG, IFRAME_TAG ];
+  const DEFAULT_FOCUSABLE_TAGS = [ A_TAG, AREA_TAG, INPUT_TAG, SELECT_TAG, TEXTAREA_TAG, BUTTON_TAG, IFRAME_TAG ];
 
   // collection of tags that are used for formatting text
-  var FORMATTING_TAGS = [ BOLD_TAG, STRONG_TAG, I_TAG, EM_TAG, MARK_TAG, SMALL_TAG, DEL_TAG, INS_TAG, SUB_TAG,
+  const FORMATTING_TAGS = [ BOLD_TAG, STRONG_TAG, I_TAG, EM_TAG, MARK_TAG, SMALL_TAG, DEL_TAG, INS_TAG, SUB_TAG,
     SUP_TAG, BR_TAG ];
 
   // these elements do not have a closing tag, so they won't support features like innerHTML. This is how PhET treats
   // these elements, not necessary what is legal html.
-  var ELEMENTS_WITHOUT_CLOSING_TAG = [ INPUT_TAG ];
+  const ELEMENTS_WITHOUT_CLOSING_TAG = [ INPUT_TAG ];
 
   // valid DOM events that the display adds listeners to. For a list of scenery events that support a11y features
   // see Input.A11Y_EVENT_TYPES
-  var DOM_EVENTS = [ 'focusin', 'focusout', 'input', 'change', 'click', 'keydown', 'keyup' ];
+  const DOM_EVENTS = [ 'focusin', 'focusout', 'input', 'change', 'click', 'keydown', 'keyup' ];
 
-  var ARIA_LABELLEDBY = 'aria-labelledby';
-  var ARIA_DESCRIBEDBY = 'aria-describedby';
-  var ARIA_ACTIVE_DESCENDANT = 'aria-activedescendant';
+  const ARIA_LABELLEDBY = 'aria-labelledby';
+  const ARIA_DESCRIBEDBY = 'aria-describedby';
+  const ARIA_ACTIVE_DESCENDANT = 'aria-activedescendant';
 
   // data attribute to flag whether an element is focusable - cannot check tabindex because IE11 and Edge assign
   // tabIndex=0 internally for all HTML elements, including those that should not receive focus
-  var DATA_FOCUSABLE = 'data-focusable';
+  const DATA_FOCUSABLE = 'data-focusable';
 
   // data attribute which contains the unique ID of a Trail that allows us to find the AccessiblePeer associated
   // with a particular DOM element. This is used in several places in scenery accessibility, mostly AccessiblePeer.
-  var DATA_TRAIL_ID = 'data-trail-id';
+  const DATA_TRAIL_ID = 'data-trail-id';
 
   // {Array.<String>} attributes that put an ID of another attribute as the value, see https://github.com/phetsims/scenery/issues/819
-  var ASSOCIATION_ATTRIBUTES = [ ARIA_LABELLEDBY, ARIA_DESCRIBEDBY, ARIA_ACTIVE_DESCENDANT ];
+  const ASSOCIATION_ATTRIBUTES = [ ARIA_LABELLEDBY, ARIA_DESCRIBEDBY, ARIA_ACTIVE_DESCENDANT ];
 
   /**
    * Get all 'element' nodes off the parent element, placing them in an array for easy traversal.  Note that this
@@ -93,10 +93,10 @@ define( require => {
   function getLinearDOMElements( domElement ) {
 
     // gets ALL descendant children for the element
-    var children = domElement.getElementsByTagName( '*' );
+    const children = domElement.getElementsByTagName( '*' );
 
-    var linearDOM = [];
-    for ( var i = 0; i < children.length; i++ ) {
+    const linearDOM = [];
+    for ( let i = 0; i < children.length; i++ ) {
 
       // searching for the HTML element nodes (NOT Scenery nodes)
       if ( children[ i ].nodeType === Node.ELEMENT_NODE ) {
@@ -138,17 +138,17 @@ define( require => {
   function getNextPreviousFocusable( direction, parentElement ) {
 
     // linearize the document [or the desired parent] for traversal
-    var parent = parentElement || document.body;
-    var linearDOM = getLinearDOMElements( parent );
+    const parent = parentElement || document.body;
+    const linearDOM = getLinearDOMElements( parent );
 
-    var activeElement = document.activeElement;
-    var activeIndex = linearDOM.indexOf( activeElement );
-    var delta = direction === NEXT ? +1 : -1;
+    const activeElement = document.activeElement;
+    const activeIndex = linearDOM.indexOf( activeElement );
+    const delta = direction === NEXT ? +1 : -1;
 
     // find the next focusable element in the DOM
-    var nextIndex = activeIndex + delta;
+    let nextIndex = activeIndex + delta;
     while ( nextIndex < linearDOM.length && nextIndex >= 0 ) {
-      var nextElement = linearDOM[ nextIndex ];
+      const nextElement = linearDOM[ nextIndex ];
       nextIndex += delta;
 
       if ( AccessibilityUtil.isElementFocusable( nextElement ) ) {
@@ -224,9 +224,9 @@ define( require => {
 
       random = random || new Random();
 
-      var linearDOM = getLinearDOMElements( document.body );
-      var focusableElements = [];
-      for ( var i = 0; i < linearDOM.length; i++ ) {
+      const linearDOM = getLinearDOMElements( document.body );
+      const focusableElements = [];
+      for ( let i = 0; i < linearDOM.length; i++ ) {
         AccessibilityUtil.isElementFocusable( linearDOM[ i ] ) && focusableElements.push( linearDOM[ i ] );
       }
 
@@ -249,14 +249,14 @@ define( require => {
       }
       assert && assert( typeof textContent === 'string', 'unsupported type for textContent.' );
 
-      var i = 0;
-      var openIndices = [];
-      var closeIndices = [];
+      let i = 0;
+      const openIndices = [];
+      const closeIndices = [];
 
       // find open/close tag pairs in the text content
       while ( i < textContent.length ) {
-        var openIndex = textContent.indexOf( '<', i );
-        var closeIndex = textContent.indexOf( '>', i );
+        const openIndex = textContent.indexOf( '<', i );
+        const closeIndex = textContent.indexOf( '>', i );
 
         if ( openIndex > -1 ) {
           openIndices.push( openIndex );
@@ -277,16 +277,16 @@ define( require => {
       }
 
       // check the name in between the open and close brackets - if anything other than formatting tags, return false
-      var onlyFormatting = true;
-      var upperCaseContent = textContent.toUpperCase();
-      for ( var j = 0; j < openIndices.length; j++ ) {
+      let onlyFormatting = true;
+      const upperCaseContent = textContent.toUpperCase();
+      for ( let j = 0; j < openIndices.length; j++ ) {
 
         // get the name and remove the closing slash
-        var subString = upperCaseContent.substring( openIndices[ j ] + 1, closeIndices[ j ] );
+        let subString = upperCaseContent.substring( openIndices[ j ] + 1, closeIndices[ j ] );
         subString = subString.replace( '/', '' );
 
         // if the left of the substring contains space, it is not a valid tag so allow
-        var trimmed = trimLeft( subString );
+        const trimmed = trimLeft( subString );
         if ( subString.length - trimmed.length > 0 ) {
           continue;
         }
@@ -388,8 +388,8 @@ define( require => {
      */
     removeElements: function( element, childrenToRemove ) {
 
-      for ( var i = 0; i < childrenToRemove.length; i++ ) {
-        var childToRemove = childrenToRemove[ i ];
+      for ( let i = 0; i < childrenToRemove.length; i++ ) {
+        const childToRemove = childrenToRemove[ i ];
 
         assert && assert( element.contains( childToRemove ), 'element does not contain child to be removed: ', childToRemove );
 
@@ -408,8 +408,8 @@ define( require => {
      */
     insertElements: function( element, childrenToAdd, beforeThisElement ) {
 
-      for ( var i = 0; i < childrenToAdd.length; i++ ) {
-        var childToAdd = childrenToAdd[ i ];
+      for ( let i = 0; i < childrenToAdd.length; i++ ) {
+        const childToAdd = childrenToAdd[ i ];
         element.insertBefore( childToAdd, beforeThisElement || null );
       }
     },
@@ -423,15 +423,15 @@ define( require => {
     validateAssociationObject: function( associationObject ) {
       assert && assert( typeof associationObject === 'object' );
 
-      var expectedKeys = [ 'thisElementName', 'otherNode', 'otherElementName' ];
+      const expectedKeys = [ 'thisElementName', 'otherNode', 'otherElementName' ];
 
-      var objectKeys = Object.keys( associationObject );
+      const objectKeys = Object.keys( associationObject );
 
       assert && assert( objectKeys.length === 3, 'wrong number of keys in associationObject, expected:', expectedKeys, ' got:', objectKeys );
 
 
-      for ( var i = 0; i < objectKeys.length; i++ ) {
-        var objectKey = objectKeys[ i ];
+      for ( let i = 0; i < objectKeys.length; i++ ) {
+        const objectKey = objectKeys[ i ];
         assert && assert( expectedKeys.indexOf( objectKey ) >= 0, 'unexpected key: ' + objectKey );
       }
 
@@ -467,7 +467,7 @@ define( require => {
         trailId: null
       }, options );
 
-      var domElement = options.namespace
+      const domElement = options.namespace
                        ? document.createElementNS( options.namespace, tagName )
                        : document.createElement( tagName );
 
@@ -502,7 +502,7 @@ define( require => {
      * @param {boolean} focusable
      */
     overrideFocusWithTabIndex: function( element, focusable ) {
-      var defaultFocusable = AccessibilityUtil.tagIsDefaultFocusable( element.tagName );
+      const defaultFocusable = AccessibilityUtil.tagIsDefaultFocusable( element.tagName );
 
       // only add a tabindex when we are overriding the default focusable bahvior of the browser for the tag name
       if ( defaultFocusable !== focusable ) {

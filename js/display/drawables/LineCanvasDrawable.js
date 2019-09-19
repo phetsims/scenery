@@ -47,7 +47,7 @@ define( require => {
      * @param {Matrix3} matrix - The transformation matrix applied for this node's coordinate system.
      */
     paintCanvas: function( wrapper, node, matrix ) {
-      var context = wrapper.context;
+      const context = wrapper.context;
 
       context.beginPath();
       context.moveTo( node._x1, node._y1 );

@@ -23,7 +23,7 @@ define( require => {
   const Util = require( 'SCENERY/util/Util' );
   const WebGLNodeDrawable = require( 'SCENERY/display/drawables/WebGLNodeDrawable' );
 
-  var WEBGL_NODE_OPTION_KEYS = [
+  const WEBGL_NODE_OPTION_KEYS = [
     'canvasBounds' // {Bounds2} - Sets the available Canvas bounds that content will show up in. See setCanvasBounds()
   ];
 
@@ -130,8 +130,8 @@ define( require => {
      * This sets a "dirty" flag, so that it will be repainted the next time it would be displayed.
      */
     invalidatePaint: function() {
-      var stateLen = this._drawables.length;
-      for ( var i = 0; i < stateLen; i++ ) {
+      const stateLen = this._drawables.length;
+      for ( let i = 0; i < stateLen; i++ ) {
         this._drawables[ i ].markDirty();
       }
     },
@@ -184,28 +184,28 @@ define( require => {
      * @param {Matrix3} matrix - The current transformation matrix associated with the wrapper
      */
     renderToCanvasSelf: function( wrapper, matrix ) {
-      var width = wrapper.canvas.width;
-      var height = wrapper.canvas.height;
+      const width = wrapper.canvas.width;
+      const height = wrapper.canvas.height;
 
       // TODO: Can we reuse the same Canvas? That might save some context creations?
-      var scratchCanvas = document.createElement( 'canvas' );
+      const scratchCanvas = document.createElement( 'canvas' );
       scratchCanvas.width = width;
       scratchCanvas.height = height;
-      var contextOptions = {
+      const contextOptions = {
         antialias: true,
         preserveDrawingBuffer: true // so we can get the data and render it to the Canvas
       };
-      var gl = scratchCanvas.getContext( 'webgl', contextOptions ) || scratchCanvas.getContext( 'experimental-webgl', contextOptions );
+      const gl = scratchCanvas.getContext( 'webgl', contextOptions ) || scratchCanvas.getContext( 'experimental-webgl', contextOptions );
       Util.applyWebGLContextDefaults( gl ); // blending, etc.
 
-      var projectionMatrix = new Matrix3().rowMajor(
+      const projectionMatrix = new Matrix3().rowMajor(
         2 / width, 0, -1,
         0, -2 / height, 1,
         0, 0, 1 );
       gl.viewport( 0, 0, width, height );
 
-      var PainterType = this.painterType;
-      var painter = new PainterType( gl, this );
+      const PainterType = this.painterType;
+      const painter = new PainterType( gl, this );
 
       painter.paint( matrix, projectionMatrix );
       painter.dispose();

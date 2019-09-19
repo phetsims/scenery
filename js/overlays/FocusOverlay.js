@@ -19,11 +19,11 @@ define( require => {
 
   // colors for the focus highlights, can be changed for different application backgrounds or color profiles, see
   // the setters and getters below for these values.
-  var outerHighlightColor = FocusHighlightPath.OUTER_FOCUS_COLOR;
-  var innerHighlightColor = FocusHighlightPath.INNER_FOCUS_COLOR;
+  let outerHighlightColor = FocusHighlightPath.OUTER_FOCUS_COLOR;
+  let innerHighlightColor = FocusHighlightPath.INNER_FOCUS_COLOR;
 
-  var innerGroupHighlightColor = FocusHighlightPath.INNER_LIGHT_GROUP_FOCUS_COLOR;
-  var outerGroupHighlightColor = FocusHighlightPath.OUTER_LIGHT_GROUP_FOCUS_COLOR;
+  let innerGroupHighlightColor = FocusHighlightPath.INNER_LIGHT_GROUP_FOCUS_COLOR;
+  let outerGroupHighlightColor = FocusHighlightPath.OUTER_LIGHT_GROUP_FOCUS_COLOR;
 
   /**
    * @constructor
@@ -138,11 +138,11 @@ define( require => {
     activateHighlight: function( trail ) {
       this.trail = trail;
       this.node = trail.lastNode();
-      var focusHighlight = this.node.focusHighlight;
+      const focusHighlight = this.node.focusHighlight;
 
       // we may or may not track this trail depending on whether the focus highlight surrounds the trail's leaf node or
       // a different node
-      var trailToTrack = trail;
+      let trailToTrack = trail;
 
       // Invisible mode - no focus highlight; this is only for testing mode, when Nodes rarely have bounds.
       if ( focusHighlight === 'invisible' ) {
@@ -253,14 +253,14 @@ define( require => {
      */
     activateGroupHighlights: function() {
 
-      var trail = this.trail;
-      for ( var i = 0; i < trail.length; i++ ) {
-        var node = trail.nodes[ i ];
-        var highlight = node.groupFocusHighlight;
+      const trail = this.trail;
+      for ( let i = 0; i < trail.length; i++ ) {
+        const node = trail.nodes[ i ];
+        const highlight = node.groupFocusHighlight;
         if ( highlight ) {
 
           // update transform tracker
-          var trailToParent = trail.upToNode( node );
+          const trailToParent = trail.upToNode( node );
           this.groupTransformTracker = new TransformTracker( trailToParent );
           this.groupTransformTracker.addListener( this.transformListener );
 
@@ -369,7 +369,7 @@ define( require => {
 
     // Called when the main Scenery focus pair (Display,Trail) changes.
     onFocusChange: function( focus ) {
-      var newTrail = ( focus && focus.display === this.display ) ? focus.trail : null;
+      const newTrail = ( focus && focus.display === this.display ) ? focus.trail : null;
 
       if ( this.hasHighlight() ) {
         this.deactivateHighlight();

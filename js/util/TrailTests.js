@@ -39,7 +39,7 @@ define( require => {
   }
 
   function createTestNodeTree() { // eslint-disable-line no-unused-vars
-    var node = new Node();
+    const node = new Node();
     node.addChild( new Node() );
     node.addChild( new Node() );
     node.addChild( new Node() );
@@ -60,7 +60,7 @@ define( require => {
   }
 
   QUnit.test( 'Dirty bounds propagation test', function( assert ) {
-    var node = createTestNodeTree();
+    const node = createTestNodeTree();
 
     node.validateBounds();
 
@@ -72,12 +72,12 @@ define( require => {
   } );
 
   QUnit.test( 'Canvas 2D Context and Features', function( assert ) {
-    var canvas = document.createElement( 'canvas' );
-    var context = canvas.getContext( '2d' );
+    const canvas = document.createElement( 'canvas' );
+    const context = canvas.getContext( '2d' );
 
     assert.ok( context, 'context' );
 
-    var neededMethods = [
+    const neededMethods = [
       'arc',
       'arcTo',
       'beginPath',
@@ -106,10 +106,10 @@ define( require => {
   } );
 
   QUnit.test( 'Trail next/previous', function( assert ) {
-    var node = createTestNodeTree();
+    const node = createTestNodeTree();
 
     // walk it forward
-    var trail = new Trail( [ node ] );
+    let trail = new Trail( [ node ] );
     assert.equal( 1, trail.length );
     trail = trail.next();
     assert.equal( 2, trail.length );
@@ -169,11 +169,11 @@ define( require => {
   } );
 
   QUnit.test( 'Trail comparison', function( assert ) {
-    var node = createTestNodeTree();
+    const node = createTestNodeTree();
 
     // get a list of all trails in render order
-    var trails = [];
-    var currentTrail = new Trail( node ); // start at the first node
+    const trails = [];
+    let currentTrail = new Trail( node ); // start at the first node
 
     while ( currentTrail ) {
       trails.push( currentTrail );
@@ -182,9 +182,9 @@ define( require => {
 
     assert.equal( 13, trails.length, 'Trail for each node' );
 
-    for ( var i = 0; i < trails.length; i++ ) {
-      for ( var j = i; j < trails.length; j++ ) {
-        var comparison = trails[ i ].compare( trails[ j ] );
+    for ( let i = 0; i < trails.length; i++ ) {
+      for ( let j = i; j < trails.length; j++ ) {
+        const comparison = trails[ i ].compare( trails[ j ] );
 
         // make sure that every trail compares as expected (0 and they are equal, -1 and i < j)
         assert.equal( i === j ? 0 : ( i < j ? -1 : 1 ), comparison, i + ',' + j );
@@ -193,11 +193,11 @@ define( require => {
   } );
 
   QUnit.test( 'Trail eachTrailBetween', function( assert ) {
-    var node = createTestNodeTree();
+    const node = createTestNodeTree();
 
     // get a list of all trails in render order
-    var trails = [];
-    var currentTrail = new Trail( node ); // start at the first node
+    const trails = [];
+    let currentTrail = new Trail( node ); // start at the first node
 
     while ( currentTrail ) {
       trails.push( currentTrail );
@@ -206,13 +206,13 @@ define( require => {
 
     assert.equal( 13, trails.length, 'Trails: ' + _.map( trails, function( trail ) { return trail.toString(); } ).join( '\n' ) );
 
-    for ( var i = 0; i < trails.length; i++ ) {
-      for ( var j = i; j < trails.length; j++ ) {
+    for ( let i = 0; i < trails.length; i++ ) {
+      for ( let j = i; j < trails.length; j++ ) {
         var inclusiveList = [];
         Trail.eachTrailBetween( trails[ i ], trails[ j ], function( trail ) {
           inclusiveList.push( trail.copy() );
         }, false, node );
-        var trailString = i + ',' + j + ' ' + trails[ i ].toString() + ' to ' + trails[ j ].toString();
+        const trailString = i + ',' + j + ' ' + trails[ i ].toString() + ' to ' + trails[ j ].toString();
         assert.ok( inclusiveList[ 0 ].equals( trails[ i ] ), 'inclusive start on ' + trailString + ' is ' + inclusiveList[ 0 ].toString() );
         assert.ok( inclusiveList[ inclusiveList.length - 1 ].equals( trails[ j ] ), 'inclusive end on ' + trailString + 'is ' + inclusiveList[ inclusiveList.length - 1 ].toString() );
         assert.equal( inclusiveList.length, j - i + 1, 'inclusive length on ' + trailString + ' is ' + inclusiveList.length + ', ' + _.map( inclusiveList, function( trail ) { return trail.toString(); } ).join( '\n' ) );
@@ -229,7 +229,7 @@ define( require => {
   } );
 
   QUnit.test( 'depthFirstUntil depthFirstUntil with subtree skipping', function( assert ) {
-    var node = createTestNodeTree();
+    const node = createTestNodeTree();
     node.children[ 0 ].children[ 2 ].visible = false;
     node.children[ 0 ].children[ 3 ].visible = false;
     new TrailPointer( new Trail( node ), true ).depthFirstUntil( new TrailPointer( new Trail( node ), false ), function( pointer ) {
@@ -242,7 +242,7 @@ define( require => {
   } );
 
   QUnit.test( 'Trail eachTrailUnder with subtree skipping', function( assert ) {
-    var node = createTestNodeTree();
+    const node = createTestNodeTree();
     node.children[ 0 ].children[ 2 ].visible = false;
     node.children[ 0 ].children[ 3 ].visible = false;
     new Trail( node ).eachTrailUnder( function( trail ) {
@@ -255,7 +255,7 @@ define( require => {
   } );
 
   QUnit.test( 'TrailPointer render comparison', function( assert ) {
-    var node = createTestNodeTree();
+    const node = createTestNodeTree();
 
     assert.equal( 0, new TrailPointer( node.getUniqueTrail(), true ).compareRender( new TrailPointer( node.getUniqueTrail(), true ) ), 'Same before pointer' );
     assert.equal( 0, new TrailPointer( node.getUniqueTrail(), false ).compareRender( new TrailPointer( node.getUniqueTrail(), false ) ), 'Same after pointer' );
@@ -264,7 +264,7 @@ define( require => {
     assert.equal( 0, new TrailPointer( node.children[ 0 ].children[ 1 ].children[ 0 ].getUniqueTrail(), false ).compareRender( new TrailPointer( node.children[ 0 ].children[ 2 ].getUniqueTrail(), true ) ), 'Equivalence of before/after' );
 
     // all pointers in the render order
-    var pointers = [
+    const pointers = [
       new TrailPointer( node.getUniqueTrail(), true ),
       new TrailPointer( node.getUniqueTrail(), false ),
       new TrailPointer( node.children[ 0 ].getUniqueTrail(), true ),
@@ -294,9 +294,9 @@ define( require => {
     ];
 
     // compare the pointers. different ones can be equal if they represent the same place, so we only check if they compare differently
-    for ( var i = 0; i < pointers.length; i++ ) {
-      for ( var j = i; j < pointers.length; j++ ) {
-        var comparison = pointers[ i ].compareRender( pointers[ j ] );
+    for ( let i = 0; i < pointers.length; i++ ) {
+      for ( let j = i; j < pointers.length; j++ ) {
+        const comparison = pointers[ i ].compareRender( pointers[ j ] );
 
         if ( comparison === -1 ) {
           assert.ok( i < j, i + ',' + j );
@@ -309,10 +309,10 @@ define( require => {
   } );
 
   QUnit.test( 'TrailPointer nested comparison and fowards/backwards', function( assert ) {
-    var node = createTestNodeTree();
+    const node = createTestNodeTree();
 
     // all pointers in the nested order
-    var pointers = [
+    const pointers = [
       new TrailPointer( node.getUniqueTrail(), true ),
       new TrailPointer( node.children[ 0 ].getUniqueTrail(), true ),
       new TrailPointer( node.children[ 0 ].children[ 0 ].getUniqueTrail(), true ),
@@ -353,14 +353,14 @@ define( require => {
 
     // verify forwards and backwards, as well as copy constructors
     for ( i = 1; i < pointers.length; i++ ) {
-      var a = pointers[ i - 1 ];
-      var b = pointers[ i ];
+      const a = pointers[ i - 1 ];
+      const b = pointers[ i ];
 
-      var forwardsCopy = a.copy();
+      const forwardsCopy = a.copy();
       forwardsCopy.nestedForwards();
       assert.equal( forwardsCopy.compareNested( b ), 0, 'forwardsPointerCheck ' + ( i - 1 ) + ' to ' + i );
 
-      var backwardsCopy = b.copy();
+      const backwardsCopy = b.copy();
       backwardsCopy.nestedBackwards();
       assert.equal( backwardsCopy.compareNested( a ), 0, 'backwardsPointerCheck ' + i + ' to ' + ( i - 1 ) );
     }
@@ -479,16 +479,16 @@ define( require => {
   // } );
 
   QUnit.test( 'Text width measurement in canvas', function( assert ) {
-    var canvas = document.createElement( 'canvas' );
-    var context = canvas.getContext( '2d' );
-    var metrics = context.measureText( 'Hello World' );
+    const canvas = document.createElement( 'canvas' );
+    const context = canvas.getContext( '2d' );
+    const metrics = context.measureText( 'Hello World' );
     assert.ok( metrics.width, 'metrics.width' );
   } );
 
   QUnit.test( 'Sceneless node handling', function( assert ) {
-    var a = new Path( null );
-    var b = new Path( null );
-    var c = new Path( null );
+    const a = new Path( null );
+    const b = new Path( null );
+    const c = new Path( null );
 
     a.setShape( Shape.rectangle( 0, 0, 20, 20 ) );
     c.setShape( Shape.rectangle( 10, 10, 30, 30 ) );
@@ -507,7 +507,7 @@ define( require => {
   } );
 
   QUnit.test( 'Correct bounds on rectangle', function( assert ) {
-    var rectBounds = Util.canvasAccurateBounds( function( context ) { context.fillRect( 100, 100, 200, 200 ); } );
+    const rectBounds = Util.canvasAccurateBounds( function( context ) { context.fillRect( 100, 100, 200, 200 ); } );
     assert.ok( Math.abs( rectBounds.minX - 100 ) < 0.01, rectBounds.minX );
     assert.ok( Math.abs( rectBounds.minY - 100 ) < 0.01, rectBounds.minY );
     assert.ok( Math.abs( rectBounds.maxX - 300 ) < 0.01, rectBounds.maxX );
@@ -515,7 +515,7 @@ define( require => {
   } );
 
   QUnit.test( 'Consistent and precise bounds range on Text', function( assert ) {
-    var textBounds = Util.canvasAccurateBounds( function( context ) { context.fillText( 'test string', 0, 0 ); } );
+    const textBounds = Util.canvasAccurateBounds( function( context ) { context.fillText( 'test string', 0, 0 ); } );
     assert.ok( textBounds.isConsistent, textBounds.toString() );
 
     // precision of 0.001 (or lower given different parameters) is possible on non-Chome browsers (Firefox, IE9, Opera)
@@ -523,8 +523,8 @@ define( require => {
   } );
 
   QUnit.test( 'Consistent and precise bounds range on Text', function( assert ) {
-    var text = new Text( '0\u0489' );
-    var textBounds = TextBounds.accurateCanvasBounds( text );
+    const text = new Text( '0\u0489' );
+    const textBounds = TextBounds.accurateCanvasBounds( text );
     assert.ok( textBounds.isConsistent, textBounds.toString() );
 
     // precision of 0.001 (or lower given different parameters) is possible on non-Chome browsers (Firefox, IE9, Opera)
@@ -532,19 +532,19 @@ define( require => {
   } );
 
   QUnit.test( 'ES5 Setter / Getter tests', function( assert ) {
-    var node = new Path( null );
-    var fill = '#abcdef';
+    const node = new Path( null );
+    const fill = '#abcdef';
     node.fill = fill;
     assert.equal( node.fill, fill );
     assert.equal( node.getFill(), fill );
 
-    var otherNode = new Path( Shape.rectangle( 0, 0, 10, 10 ), { fill: fill } );
+    const otherNode = new Path( Shape.rectangle( 0, 0, 10, 10 ), { fill: fill } );
 
     assert.equal( otherNode.fill, fill );
   } );
 
   QUnit.test( 'Piccolo-like behavior', function( assert ) {
-    var node = new Node();
+    const node = new Node();
 
     node.scale( 2 );
     node.translate( 1, 3 );
@@ -577,7 +577,7 @@ define( require => {
   } );
 
   QUnit.test( 'Setting left/right of node', function( assert ) {
-    var node = new Path( Shape.rectangle( -20, -20, 50, 50 ), {
+    const node = new Path( Shape.rectangle( -20, -20, 50, 50 ), {
       scale: 2
     } );
 
@@ -599,26 +599,26 @@ define( require => {
   } );
 
   QUnit.test( 'Path with empty shape', function( assert ) {
-    var scene = new Node();
-    var node = new Path( new Shape() );
+    const scene = new Node();
+    const node = new Path( new Shape() );
     scene.addChild( node );
     assert.ok( true, 'so we have at least 1 test in this set' );
   } );
 
   QUnit.test( 'Path with null shape', function( assert ) {
-    var scene = new Node();
-    var node = new Path( null );
+    const scene = new Node();
+    const node = new Path( null );
     scene.addChild( node );
     assert.ok( true, 'so we have at least 1 test in this set' );
   } );
 
   QUnit.test( 'Display resize event', function( assert ) {
-    var scene = new Node();
-    var display = new Display( scene );
+    const scene = new Node();
+    const display = new Display( scene );
 
-    var width;
-    var height;
-    var count = 0;
+    let width;
+    let height;
+    let count = 0;
 
     display.on( 'displaySize', function( size ) {
       width = size.width;
@@ -634,16 +634,16 @@ define( require => {
   } );
 
   QUnit.test( 'Bounds events', function( assert ) {
-    var node = new Node();
+    const node = new Node();
     node.y = 10;
 
-    var rect = new Rectangle( 0, 0, 100, 50, { fill: '#f00' } );
+    const rect = new Rectangle( 0, 0, 100, 50, { fill: '#f00' } );
     rect.x = 10; // a transform, so we can verify everything is handled correctly
     node.addChild( rect );
 
     node.validateBounds();
 
-    var epsilon = 0.0000001;
+    const epsilon = 0.0000001;
 
     node.on( 'childBounds', function() {
       assert.ok( node.childBounds.equalsEpsilon( new Bounds2( 10, 0, 110, 30 ), epsilon ), 'Parent child bounds check: ' + node.childBounds.toString() );
@@ -674,19 +674,19 @@ define( require => {
   } );
 
   QUnit.test( 'Using a color instance', function( assert ) {
-    var scene = new Node();
+    const scene = new Node();
 
-    var rect = new Rectangle( 0, 0, 100, 50 );
+    const rect = new Rectangle( 0, 0, 100, 50 );
     assert.ok( rect.fill === null, 'Always starts with a null fill' );
     scene.addChild( rect );
-    var color = new Color( 255, 0, 0 );
+    const color = new Color( 255, 0, 0 );
     rect.fill = color;
     color.setRGBA( 0, 255, 0, 1 );
   } );
 
   QUnit.test( 'Bounds and Visible Bounds', function( assert ) {
-    var node = new Node();
-    var rect = new Rectangle( 0, 0, 100, 50 );
+    const node = new Node();
+    const rect = new Rectangle( 0, 0, 100, 50 );
     node.addChild( rect );
 
     assert.ok( node.visibleBounds.equals( new Bounds2( 0, 0, 100, 50 ) ), 'Visible Bounds Visible' );
@@ -699,8 +699,8 @@ define( require => {
   } );
 
   QUnit.test( 'localBounds override', function( assert ) {
-    var node = new Node( { y: 5 } );
-    var rect = new Rectangle( 0, 0, 100, 50 );
+    const node = new Node( { y: 5 } );
+    const rect = new Rectangle( 0, 0, 100, 50 );
     node.addChild( rect );
 
     rect.localBounds = new Bounds2( 0, 0, 50, 50 );
@@ -724,9 +724,9 @@ define( require => {
     a = a.slice();
     b = b.slice();
 
-    for ( var i = 0; i < a.length; i++ ) {
+    for ( let i = 0; i < a.length; i++ ) {
       // for each A, remove the first matching one in B
-      for ( var j = 0; j < b.length; j++ ) {
+      for ( let j = 0; j < b.length; j++ ) {
         if ( a[ i ].equals( b[ j ] ) ) {
           b.splice( j, 1 );
           break;
@@ -739,11 +739,11 @@ define( require => {
   }
 
   QUnit.test( 'getTrails/getUniqueTrail', function( assert ) {
-    var a = new Node();
-    var b = new Node();
-    var c = new Node();
-    var d = new Node();
-    var e = new Node();
+    const a = new Node();
+    const b = new Node();
+    const c = new Node();
+    const d = new Node();
+    const e = new Node();
 
     // DAG-like structure
     a.addChild( b );
@@ -760,7 +760,7 @@ define( require => {
     assert.ok( e.getUniqueTrail().equals( new Trail( [ a, c, e ] ) ), 'e.getUniqueTrail()' );
 
     // getTrails()
-    var trails;
+    let trails;
     trails = a.getTrails();
     assert.ok( trails.length === 1 && trails[ 0 ].equals( new Trail( [ a ] ) ), 'a.getTrails()' );
     trails = b.getTrails();
@@ -810,11 +810,11 @@ define( require => {
   } );
 
   QUnit.test( 'getLeafTrails', function( assert ) {
-    var a = new Node();
-    var b = new Node();
-    var c = new Node();
-    var d = new Node();
-    var e = new Node();
+    const a = new Node();
+    const b = new Node();
+    const c = new Node();
+    const d = new Node();
+    const e = new Node();
 
     // DAG-like structure
     a.addChild( b );
@@ -830,7 +830,7 @@ define( require => {
     assert.ok( e.getUniqueLeafTrail().equals( new Trail( [ e ] ) ), 'c.getUniqueLeafTrail()' );
 
     // getLeafTrails()
-    var trails;
+    let trails;
     trails = a.getLeafTrails();
     assert.ok( trails.length === 3 && compareTrailArrays( trails, [
       new Trail( [ a, b, d ] ),
@@ -876,9 +876,9 @@ define( require => {
   } );
 
   QUnit.test( 'Line stroked bounds', function( assert ) {
-    var line = new Line( 0, 0, 50, 0, { stroke: 'red', lineWidth: 5 } );
+    const line = new Line( 0, 0, 50, 0, { stroke: 'red', lineWidth: 5 } );
 
-    var positions = [
+    const positions = [
       { x1: 50, y1: 0, x2: 0, y2: 0 },
       { x1: 0, y1: 50, x2: 0, y2: 0 },
       { x1: 0, y1: 0, x2: 50, y2: 0 },
@@ -901,7 +901,7 @@ define( require => {
       { x1: -10, y1: 0, x2: 0, y2: 50 }
     ];
 
-    var caps = [
+    const caps = [
       'round',
       'butt',
       'square'
@@ -920,8 +920,8 @@ define( require => {
   } );
 
   QUnit.test( 'maxWidth/maxHeight for Node', function( assert ) {
-    var rect = new Rectangle( 0, 0, 100, 50, { fill: 'red' } );
-    var node = new Node( { children: [ rect ] } );
+    const rect = new Rectangle( 0, 0, 100, 50, { fill: 'red' } );
+    const node = new Node( { children: [ rect ] } );
 
     assert.ok( node.bounds.equals( new Bounds2( 0, 0, 100, 50 ) ), 'Initial bounds' );
 
@@ -976,13 +976,13 @@ define( require => {
   } );
 
   QUnit.test( 'Spacers', function( assert ) {
-    var spacer = new Spacer( 100, 50, { x: 50 } );
+    const spacer = new Spacer( 100, 50, { x: 50 } );
     assert.ok( spacer.bounds.equals( new Bounds2( 50, 0, 150, 50 ) ), 'Spacer bounds with translation' );
 
-    var hstrut = new HStrut( 100, { y: 50 } );
+    const hstrut = new HStrut( 100, { y: 50 } );
     assert.ok( hstrut.bounds.equals( new Bounds2( 0, 50, 100, 50 ) ), 'HStrut bounds with translation' );
 
-    var vstrut = new VStrut( 100, { x: 50 } );
+    const vstrut = new VStrut( 100, { x: 50 } );
     assert.ok( vstrut.bounds.equals( new Bounds2( 50, 0, 50, 100 ) ), 'VStrut bounds with translation' );
 
     assert.throws( function() {
@@ -999,11 +999,11 @@ define( require => {
   } );
 
   QUnit.test( 'Renderer Summary', function( assert ) {
-    var canvasNode = new CanvasNode( { canvasBounds: new Bounds2( 0, 0, 10, 10 ) } );
-    var webglNode = new WebGLNode( function() {}, { canvasBounds: new Bounds2( 0, 0, 10, 10 ) } );
-    var rect = new Rectangle( 0, 0, 100, 50 );
-    var node = new Node( { children: [ canvasNode, webglNode, rect ] } );
-    var emptyNode = new Node();
+    const canvasNode = new CanvasNode( { canvasBounds: new Bounds2( 0, 0, 10, 10 ) } );
+    const webglNode = new WebGLNode( function() {}, { canvasBounds: new Bounds2( 0, 0, 10, 10 ) } );
+    const rect = new Rectangle( 0, 0, 100, 50 );
+    const node = new Node( { children: [ canvasNode, webglNode, rect ] } );
+    const emptyNode = new Node();
 
     assert.ok( canvasNode._rendererSummary.isSubtreeFullyCompatible( Renderer.bitmaskCanvas ), 'CanvasNode fully compatible: Canvas' );
     assert.ok( !canvasNode._rendererSummary.isSubtreeFullyCompatible( Renderer.bitmaskSVG ), 'CanvasNode not fully compatible: SVG' );

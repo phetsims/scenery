@@ -20,10 +20,10 @@ define( require => {
   const scenery = require( 'SCENERY/scenery' );
 
   // constants
-  var DEFAULT_SPACING = 0;
+  const DEFAULT_SPACING = 0;
 
   // LayoutBox-specific options that can be passed in the constructor or mutate() call.
-  var LAYOUT_BOX_OPTION_KEYS = [
+  const LAYOUT_BOX_OPTION_KEYS = [
     'orientation', // {string} - 'horizontal' or 'vertical', see setOrientation for documentation
     'spacing', // {number} - Spacing between each Node, see setSpacing for documentation
     'align', // {string} - How to line up items, see setAlign for documentation
@@ -31,19 +31,19 @@ define( require => {
   ];
 
   // The position (left/top) property name on the primary axis
-  var LAYOUT_POSITION = {
+  const LAYOUT_POSITION = {
     vertical: 'top',
     horizontal: 'left'
   };
 
   // The size (width/height) property name on the primary axis
-  var LAYOUT_DIMENSION = {
+  const LAYOUT_DIMENSION = {
     vertical: 'height',
     horizontal: 'width'
   };
 
   // The alignment property name on the secondary axis
-  var LAYOUT_ALIGNMENT = {
+  const LAYOUT_ALIGNMENT = {
     vertical: {
       left: 'left',
       center: 'centerX',
@@ -127,11 +127,11 @@ define( require => {
      */
     getAlignmentBounds: function() {
       // Construct a Bounds2 at the origin, but with the maximum width/height of the children.
-      var maxWidth = Number.NEGATIVE_INFINITY;
-      var maxHeight = Number.NEGATIVE_INFINITY;
+      let maxWidth = Number.NEGATIVE_INFINITY;
+      let maxHeight = Number.NEGATIVE_INFINITY;
 
-      for ( var i = 0; i < this._children.length; i++ ) {
-        var child = this._children[ i ];
+      for ( let i = 0; i < this._children.length; i++ ) {
+        const child = this._children[ i ];
         maxWidth = Math.max( maxWidth, child.width );
         maxHeight = Math.max( maxHeight, child.height );
       }
@@ -143,24 +143,24 @@ define( require => {
      * @private
      */
     layout: function() {
-      var children = this._children;
+      const children = this._children;
 
       // The position (left/top) property name on the primary axis
-      var layoutPosition = LAYOUT_POSITION[ this._orientation ];
+      const layoutPosition = LAYOUT_POSITION[ this._orientation ];
 
       // The size (width/height) property name on the primary axis
-      var layoutDimension = LAYOUT_DIMENSION[ this._orientation ];
+      const layoutDimension = LAYOUT_DIMENSION[ this._orientation ];
 
       // The alignment (left/right/bottom/top/centerX/centerY) property name on the secondary axis
-      var layoutAlignment = LAYOUT_ALIGNMENT[ this._orientation ][ this._align ];
+      const layoutAlignment = LAYOUT_ALIGNMENT[ this._orientation ][ this._align ];
 
       // The bounds that children will be aligned in (on the secondary axis)
-      var alignmentBounds = this.getAlignmentBounds();
+      const alignmentBounds = this.getAlignmentBounds();
 
       // Starting at 0, position the children
-      var position = 0;
-      for ( var i = 0; i < children.length; i++ ) {
-        var child = children[ i ];
+      let position = 0;
+      for ( let i = 0; i < children.length; i++ ) {
+        const child = children[ i ];
         if ( !child.bounds.isValid() ) {
           continue; // Skip children without bounds
         }
@@ -247,7 +247,7 @@ define( require => {
         return Node.prototype.setChildren.call( this, children );
       }
 
-      var oldChildren = this.getChildren(); // defensive copy
+      const oldChildren = this.getChildren(); // defensive copy
 
       // Lock layout while the children are removed and added
       this._updateLayoutLocked = true;
@@ -402,8 +402,8 @@ define( require => {
         this._resize = resize;
 
         // Add or remove listeners, based on how resize switched
-        for ( var i = 0; i < this._children.length; i++ ) {
-          var child = this._children[ i ];
+        for ( let i = 0; i < this._children.length; i++ ) {
+          const child = this._children[ i ];
 
           // If we are now resizable, we need to add listeners to every child
           if ( resize ) {

@@ -22,7 +22,7 @@ define( require => {
   const Util = require( 'SCENERY/util/Util' );
 
   // constants
-  var useGreedyStitcher = true;
+  const useGreedyStitcher = true;
 
   /**
    * @constructor
@@ -102,8 +102,8 @@ define( require => {
           'Our backboneInstance should be deeper if we are applying filters' );
 
         // walk through to see which instances we'll need to watch for filter changes
-        for ( var instance = this.backboneInstance; instance !== this.filterRootAncestorInstance; instance = instance.parent ) {
-          var node = instance.node;
+        for ( let instance = this.backboneInstance; instance !== this.filterRootAncestorInstance; instance = instance.parent ) {
+          const node = instance.node;
 
           this.watchedFilterNodes.push( node );
           node.onStatic( 'opacity', this.opacityDirtyListener );
@@ -136,7 +136,7 @@ define( require => {
 
 
       while ( this.watchedFilterNodes.length ) {
-        var node = this.watchedFilterNodes.pop();
+        const node = this.watchedFilterNodes.pop();
 
         node.offStatic( 'opacity', this.opacityDirtyListener );
         node.offStatic( 'clip', this.clipDirtyListener );
@@ -146,7 +146,7 @@ define( require => {
 
       // if we need to remove drawables from the blocks, do so
       if ( !this.removedDrawables ) {
-        for ( var d = this.previousFirstDrawable; d !== null; d = d.nextDrawable ) {
+        for ( let d = this.previousFirstDrawable; d !== null; d = d.nextDrawable ) {
           d.parentDrawable.removeDrawable( d );
           if ( d === this.previousLastDrawable ) { break; }
         }
@@ -177,7 +177,7 @@ define( require => {
     // dispose all of the blocks while clearing our references to them
     markBlocksForDisposal: function() {
       while ( this.blocks.length ) {
-        var block = this.blocks.pop();
+        const block = this.blocks.pop();
         sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( this.toString() + ' removing block: ' + block.toString() );
         //TODO: PERFORMANCE: does this cause reflows / style calculation
         if ( block.domElement.parentNode === this.domElement ) {
@@ -199,7 +199,7 @@ define( require => {
 
     // should be called during syncTree
     markForDisposal: function( display ) {
-      for ( var d = this.previousFirstDrawable; d !== null; d = d.oldNextDrawable ) {
+      for ( let d = this.previousFirstDrawable; d !== null; d = d.oldNextDrawable ) {
         d.notePendingRemoval( this.display );
         if ( d === this.previousLastDrawable ) { break; }
       }
@@ -261,7 +261,7 @@ define( require => {
       if ( this.opacityDirty ) {
         this.opacityDirty = false;
 
-        var filterOpacity = this.willApplyFilters ? this.getFilterOpacity() : 1;
+        const filterOpacity = this.willApplyFilters ? this.getFilterOpacity() : 1;
         this.domElement.style.opacity = ( filterOpacity !== 1 ) ? filterOpacity : '';
       }
 
@@ -284,10 +284,10 @@ define( require => {
     },
 
     getFilterOpacity: function() {
-      var opacity = 1;
+      let opacity = 1;
 
-      var len = this.watchedFilterNodes.length;
-      for ( var i = 0; i < len; i++ ) {
+      const len = this.watchedFilterNodes.length;
+      for ( let i = 0; i < len; i++ ) {
         opacity *= this.watchedFilterNodes[ i ].getOpacity();
       }
 
@@ -295,8 +295,8 @@ define( require => {
     },
 
     getFilterVisibility: function() {
-      var len = this.watchedFilterNodes.length;
-      for ( var i = 0; i < len; i++ ) {
+      const len = this.watchedFilterNodes.length;
+      for ( let i = 0; i < len; i++ ) {
         if ( !this.watchedFilterNodes[ i ].isVisible() ) {
           return false;
         }
@@ -306,7 +306,7 @@ define( require => {
     },
 
     getFilterClip: function() {
-      var clip = '';
+      const clip = '';
 
       //OHTWO TODO: proper clipping support
       // var len = this.watchedFilterNodes.length;
@@ -322,11 +322,11 @@ define( require => {
     // ensures that z-indices are strictly increasing, while trying to minimize the number of times we must change it
     reindexBlocks: function() {
       // full-pass change for zindex.
-      var zIndex = 0; // don't start below 1 (we ensure > in loop)
-      for ( var k = 0; k < this.blocks.length; k++ ) {
-        var block = this.blocks[ k ];
+      let zIndex = 0; // don't start below 1 (we ensure > in loop)
+      for ( let k = 0; k < this.blocks.length; k++ ) {
+        const block = this.blocks[ k ];
         if ( block.zIndex <= zIndex ) {
-          var newIndex = ( k + 1 < this.blocks.length && this.blocks[ k + 1 ].zIndex - 1 > zIndex ) ?
+          const newIndex = ( k + 1 < this.blocks.length && this.blocks[ k + 1 ].zIndex - 1 > zIndex ) ?
                          Math.ceil( ( zIndex + this.blocks[ k + 1 ].zIndex ) / 2 ) :
                          zIndex + 20;
 
@@ -367,9 +367,9 @@ define( require => {
 
       // Make the intervals as small as possible by skipping areas without changes, and collapse the interval
       // linked list
-      var lastNonemptyInterval = null;
-      var interval = firstChangeInterval;
-      var intervalsChanged = false;
+      let lastNonemptyInterval = null;
+      let interval = firstChangeInterval;
+      let intervalsChanged = false;
       while ( interval ) {
         intervalsChanged = interval.constrict() || intervalsChanged;
 
@@ -410,7 +410,7 @@ define( require => {
       if ( sceneryLog && scenery.isLoggingPerformance() ) {
         this.display.perfStitchCount++;
 
-        var dInterval = firstChangeInterval;
+        let dInterval = firstChangeInterval;
 
         while ( dInterval ) {
           this.display.perfIntervalCount++;
@@ -432,7 +432,7 @@ define( require => {
         assertSlow && assertSlow( this.backboneInstance.isBackbone, 'We should reference an instance that requires a backbone' );
         assertSlow && assertSlow( this.transformRootInstance.isTransformed, 'Transform root should be transformed' );
 
-        for ( var i = 0; i < this.blocks.length; i++ ) {
+        for ( let i = 0; i < this.blocks.length; i++ ) {
           this.blocks[ i ].audit( allowPendingBlock, allowPendingList, allowDirty );
         }
       }
@@ -440,7 +440,7 @@ define( require => {
   } );
 
   BackboneDrawable.createDivBackbone = function() {
-    var div = document.createElement( 'div' );
+    const div = document.createElement( 'div' );
     div.style.position = 'absolute';
     div.style.left = '0';
     div.style.top = '0';

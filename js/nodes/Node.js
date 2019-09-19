@@ -219,21 +219,21 @@ define( require => {
   // require( 'SCENERY/util/TrailPointer' );
   const NodeIO = require( 'SCENERY/nodes/NodeIO' );
   // constants
-  var clamp = Util.clamp;
+  const clamp = Util.clamp;
 
-  var globalIdCounter = 1;
+  let globalIdCounter = 1;
 
-  var eventsRequiringBoundsValidation = {
+  const eventsRequiringBoundsValidation = {
     'childBounds': true,
     'localBounds': true,
     'bounds': true
   };
 
-  var scratchBounds2 = Bounds2.NOTHING.copy(); // mutable {Bounds2} used temporarily in methods
-  var scratchMatrix3 = new Matrix3();
+  const scratchBounds2 = Bounds2.NOTHING.copy(); // mutable {Bounds2} used temporarily in methods
+  const scratchMatrix3 = new Matrix3();
 
   // Node options, in the order they are executed in the constructor/mutate()
-  var NODE_OPTION_KEYS = [
+  const NODE_OPTION_KEYS = [
     'children', // {Array.<Node>}- List of children to add (in order), see setChildren for more documentation
     'cursor', // {string|null} - CSS cursor to display when over this node, see setCursor() for more documentation
     'visible', // {boolean} - Whether the node is visible, see setVisible() for more documentation
@@ -278,7 +278,7 @@ define( require => {
     'transformBounds' // {boolean} - Flag that makes bounds tighter, see setTransformBounds() for more documentation
   ];
 
-  var DEFAULT_OPTIONS = {
+  const DEFAULT_OPTIONS = {
     visible: true,
     opacity: 1,
     pickable: null,
@@ -643,7 +643,7 @@ define( require => {
       assert && assert( node && node instanceof Node, 'Need to call node.removeChild() with a Node.' );
       assert && assert( this.hasChild( node ), 'Attempted to removeChild with a node that was not a child.' );
 
-      var indexOfChild = _.indexOf( this._children, node );
+      const indexOfChild = _.indexOf( this._children, node );
 
       this.removeChildWithIndex( node, indexOfChild, isComposite );
 
@@ -663,7 +663,7 @@ define( require => {
       assert && assert( index >= 0 );
       assert && assert( index < this._children.length );
 
-      var node = this._children[ index ];
+      const node = this._children[ index ];
 
       this.removeChildWithIndex( node, index, isComposite );
 
@@ -686,7 +686,7 @@ define( require => {
       assert && assert( this._children[ indexOfChild ] === node, 'Incorrect index for removeChildWithIndex' );
       assert && assert( node._parents !== null, 'Tried to remove a disposed child node?' );
 
-      var indexOfParent = _.indexOf( node._parents, this );
+      const indexOfParent = _.indexOf( node._parents, this );
 
       node._isGettingRemovedFromParent = true;
 
@@ -730,7 +730,7 @@ define( require => {
       assert && assert( typeof index === 'number' && index % 1 === 0 && index >= 0 && index < this._children.length,
         'Invalid index: ' + index );
 
-      var currentIndex = this.indexOfChild( node );
+      const currentIndex = this.indexOfChild( node );
       if ( this._children[ index ] !== node ) {
 
         // Apply the actual children change
@@ -775,10 +775,10 @@ define( require => {
       // 2. Reorder children that exist both before/after the change.
       // 3. Insert in new children
 
-      var beforeOnly = []; // Will hold all nodes that will be removed.
-      var afterOnly = []; // Will hold all nodes that will be "new" children (added)
-      var inBoth = []; // Child nodes that "stay". Will be ordered for the "after" case.
-      var i;
+      const beforeOnly = []; // Will hold all nodes that will be removed.
+      const afterOnly = []; // Will hold all nodes that will be "new" children (added)
+      const inBoth = []; // Child nodes that "stay". Will be ordered for the "after" case.
+      let i;
 
       // Compute what things were added, removed, or stay.
       arrayDifference( children, this._children, afterOnly, beforeOnly, inBoth );
@@ -792,10 +792,10 @@ define( require => {
         'Removing children should not have triggered other children changes' );
 
       // Handle the main reordering (of nodes that "stay")
-      var minChangeIndex = -1; // What is the smallest index where this._children[ index ] !== inBoth[ index ]
-      var maxChangeIndex = -1; // What is the largest index where this._children[ index ] !== inBoth[ index ]
+      let minChangeIndex = -1; // What is the smallest index where this._children[ index ] !== inBoth[ index ]
+      let maxChangeIndex = -1; // What is the largest index where this._children[ index ] !== inBoth[ index ]
       for ( i = 0; i < inBoth.length; i++ ) {
-        var desired = inBoth[ i ];
+        const desired = inBoth[ i ];
         if ( this._children[ i ] !== desired ) {
           this._children[ i ] = desired;
           if ( minChangeIndex === -1 ) {
@@ -806,7 +806,7 @@ define( require => {
       }
       // If our minChangeIndex is still -1, then none of those nodes that "stay" were reordered. It's important to check
       // for this case, so that `node.children = node.children` is effectively a no-op performance-wise.
-      var hasReorderingChange = minChangeIndex !== -1;
+      const hasReorderingChange = minChangeIndex !== -1;
 
       // Immediate consequences/updates from reordering
       if ( hasReorderingChange ) {
@@ -823,8 +823,8 @@ define( require => {
       // then be quadratic in time, which would be unacceptable here). At this point, a forward scan should be
       // sufficient to insert in-place, and should move the least amount of nodes in the array.
       if ( afterOnly.length ) {
-        var afterIndex = 0;
-        var after = afterOnly[ afterIndex ];
+        let afterIndex = 0;
+        let after = afterOnly[ afterIndex ];
         for ( i = 0; i < children.length; i++ ) {
           if ( children[ i ] === after ) {
             this.insertChild( i, after, true );
@@ -840,7 +840,7 @@ define( require => {
 
       // Sanity checks to make sure our resulting children array is correct.
       if ( assert ) {
-        for ( var j = 0; j < this._children.length; j++ ) {
+        for ( let j = 0; j < this._children.length; j++ ) {
           assert( children[ j ] === this._children[ j ],
             'Incorrect child after setChildren, possibly a reentrancy issue' );
         }
@@ -942,7 +942,7 @@ define( require => {
      * @returns {Node} - Returns 'this' reference, for chaining
      */
     moveToFront: function() {
-      var self = this;
+      const self = this;
       _.each( this._parents.slice(), function( parent ) {
         parent.moveChildToFront( self );
       } );
@@ -968,7 +968,7 @@ define( require => {
      * @returns {Node} - Returns 'this' reference, for chaining
      */
     moveToBack: function() {
-      var self = this;
+      const self = this;
       _.each( this._parents.slice(), function( parent ) {
         parent.moveChildToBack( self );
       } );
@@ -1001,8 +1001,8 @@ define( require => {
       assert && assert( this.hasChild( oldChild ), 'Attempted to replace a node that was not a child.' );
 
       // information that needs to be restored
-      var index = this.indexOfChild( oldChild );
-      var oldChildFocused = oldChild.focused;
+      const index = this.indexOfChild( oldChild );
+      const oldChildFocused = oldChild.focused;
 
       this.removeChild( oldChild, true );
       this.insertChild( index, newChild, true );
@@ -1023,7 +1023,7 @@ define( require => {
      * @returns {Node} - Returns 'this' reference, for chaining
      */
     detach: function() {
-      var self = this;
+      const self = this;
       _.each( this._parents.slice( 0 ), function( parent ) {
         parent.removeChild( self );
       } );
@@ -1039,19 +1039,19 @@ define( require => {
      */
     changeBoundsEventCount: function( n ) {
       if ( n !== 0 ) {
-        var zeroBefore = this._boundsEventCount === 0;
+        const zeroBefore = this._boundsEventCount === 0;
 
         this._boundsEventCount += n;
         assert && assert( this._boundsEventCount >= 0, 'subtree bounds event count should be guaranteed to be >= 0' );
 
-        var zeroAfter = this._boundsEventCount === 0;
+        const zeroAfter = this._boundsEventCount === 0;
 
         if ( zeroBefore !== zeroAfter ) {
           // parents will only have their count
-          var parentDelta = zeroBefore ? 1 : -1;
+          const parentDelta = zeroBefore ? 1 : -1;
 
-          var len = this._parents.length;
-          for ( var i = 0; i < len; i++ ) {
+          const len = this._parents.length;
+          for ( let i = 0; i < len; i++ ) {
             this._parents[ i ].changeBoundsEventCount( parentDelta );
           }
         }
@@ -1071,7 +1071,7 @@ define( require => {
         // Rely on an overloadable method to accomplish computing our self bounds. This should update
         // this._selfBounds itself, returning whether it was actually changed. If it didn't change, we don't want to
         // send a 'selfBounds' event.
-        var didSelfBoundsChange = this.updateSelfBounds();
+        const didSelfBoundsChange = this.updateSelfBounds();
         this._selfBoundsDirty = false;
 
         if ( didSelfBoundsChange ) {
@@ -1092,11 +1092,11 @@ define( require => {
      * @returns {boolean} - Was something potentially updated?
      */
     validateBounds: function() {
-      var self = this;
-      var i;
-      var notificationThreshold = 1e-13;
+      const self = this;
+      let i;
+      const notificationThreshold = 1e-13;
 
-      var wasDirtyBefore = this.validateSelfBounds();
+      let wasDirtyBefore = this.validateSelfBounds();
 
       // validate bounds of children if necessary
       if ( this._childBoundsDirty ) {
@@ -1109,7 +1109,7 @@ define( require => {
         }
 
         // and recompute our _childBounds
-        var oldChildBounds = scratchBounds2.set( this._childBounds ); // store old value in a temporary Bounds2
+        const oldChildBounds = scratchBounds2.set( this._childBounds ); // store old value in a temporary Bounds2
         this._childBounds.set( Bounds2.NOTHING ); // initialize to a value that can be unioned with includeBounds()
 
         i = this._children.length;
@@ -1133,7 +1133,7 @@ define( require => {
 
         this._localBoundsDirty = false; // we only need this to set local bounds as dirty
 
-        var oldLocalBounds = scratchBounds2.set( this._localBounds ); // store old value in a temporary Bounds2
+        const oldLocalBounds = scratchBounds2.set( this._localBounds ); // store old value in a temporary Bounds2
 
         // local bounds are a union between our self bounds and child bounds
         this._localBounds.set( this._selfBounds ).includeBounds( this._childBounds );
@@ -1166,13 +1166,13 @@ define( require => {
         // run this before firing the event
         this._boundsDirty = false;
 
-        var oldBounds = scratchBounds2.set( this._bounds ); // store old value in a temporary Bounds2
+        const oldBounds = scratchBounds2.set( this._bounds ); // store old value in a temporary Bounds2
 
         // no need to do the more expensive bounds transformation if we are still axis-aligned
         if ( this._transformBounds && !this._transform.getMatrix().isAxisAligned() ) {
           // mutates the matrix and bounds during recursion
 
-          var matrix = scratchMatrix3.set( this.getMatrix() ); // calls below mutate this matrix
+          const matrix = scratchMatrix3.set( this.getMatrix() ); // calls below mutate this matrix
           this._bounds.set( Bounds2.NOTHING );
           // Include each painted self individually, transformed with the exact transform matrix.
           // This is expensive, as we have to do 2 matrix transforms for every descendant.
@@ -1221,18 +1221,18 @@ define( require => {
       if ( assertSlow ) {
         // new scope for safety
         ( function() {
-          var epsilon = 0.000001;
+          const epsilon = 0.000001;
 
-          var childBounds = Bounds2.NOTHING.copy();
+          const childBounds = Bounds2.NOTHING.copy();
           _.each( self._children, function( child ) { childBounds.includeBounds( child._bounds ); } );
 
-          var localBounds = self._selfBounds.union( childBounds );
+          let localBounds = self._selfBounds.union( childBounds );
 
           if ( self.hasClipArea() ) {
             localBounds = localBounds.intersection( self._clipArea.bounds );
           }
 
-          var fullBounds = self.localToParentBounds( localBounds );
+          const fullBounds = self.localToParentBounds( localBounds );
 
           assertSlow && assertSlow( self._childBounds.equalsEpsilon( childBounds, epsilon ),
             'Child bounds mismatch after validateBounds: ' +
@@ -1262,9 +1262,9 @@ define( require => {
         bounds.includeBounds( this.getTransformedSelfBounds( matrix ) );
       }
 
-      var numChildren = this._children.length;
-      for ( var i = 0; i < numChildren; i++ ) {
-        var child = this._children[ i ];
+      const numChildren = this._children.length;
+      for ( let i = 0; i < numChildren; i++ ) {
+        const child = this._children[ i ];
 
         matrix.multiplyMatrix( child._transform.getMatrix() );
         child._includeTransformedSubtreeBounds( matrix, bounds );
@@ -1307,9 +1307,9 @@ define( require => {
       }
       else if ( this._boundsEventCount > 0 && this._childBoundsDirty ) {
         // descendants have watched bounds, traverse!
-        var changed = false;
-        var numChildren = this._children.length;
-        for ( var i = 0; i < numChildren; i++ ) {
+        let changed = false;
+        const numChildren = this._children.length;
+        for ( let i = 0; i < numChildren; i++ ) {
           changed = this._children[ i ].watchedBoundsScan() || changed;
         }
         return changed;
@@ -1330,7 +1330,7 @@ define( require => {
       this._localBoundsDirty = true;
 
       // and set flags for all ancestors
-      var i = this._parents.length;
+      let i = this._parents.length;
       while ( i-- ) {
         this._parents[ i ].invalidateChildBounds();
       }
@@ -1345,7 +1345,7 @@ define( require => {
       if ( !this._childBoundsDirty ) {
         this._childBoundsDirty = true;
         this._localBoundsDirty = true;
-        var i = this._parents.length;
+        let i = this._parents.length;
         while ( i-- ) {
           this._parents[ i ].invalidateChildBounds();
         }
@@ -1413,7 +1413,7 @@ define( require => {
      */
     hasChild: function( potentialChild ) {
       assert && assert( potentialChild && ( potentialChild instanceof Node ), 'hasChild needs to be called with a Node' );
-      var isOurChild = _.includes( this._children, potentialChild );
+      const isOurChild = _.includes( this._children, potentialChild );
       assert && assert( isOurChild === _.includes( potentialChild._parents, this ), 'child-parent reference should match parent-child reference' );
       return isOurChild;
     },
@@ -1521,7 +1521,7 @@ define( require => {
       }
       else {
         // just an instance check for now. consider equals() in the future depending on cost
-        var changed = !localBounds.equals( this._localBounds ) || !this._localBoundsOverridden;
+        const changed = !localBounds.equals( this._localBounds ) || !this._localBoundsOverridden;
 
         if ( changed ) {
           this._localBounds.set( localBounds );
@@ -1593,7 +1593,7 @@ define( require => {
         }
 
         if ( this._children.length ) {
-          for ( var i = 0; i < this._children.length; i++ ) {
+          for ( let i = 0; i < this._children.length; i++ ) {
             bounds.includeBounds( this._children[ i ].getSafeTransformedVisibleBounds( localMatrix ) );
           }
         }
@@ -1663,11 +1663,11 @@ define( require => {
      */
     getVisibleLocalBounds: function() {
       // defensive copy, since we use mutable modifications below
-      var bounds = this.selfBounds.copy();
+      const bounds = this.selfBounds.copy();
 
-      var i = this._children.length;
+      let i = this._children.length;
       while ( i-- ) {
-        var child = this._children[ i ];
+        const child = this._children[ i ];
         if ( child.isVisible() ) {
           bounds.includeBounds( child.getVisibleBounds() );
         }
@@ -1835,8 +1835,8 @@ define( require => {
      */
     walkDepthFirst: function( callback ) {
       callback( this );
-      var length = this._children.length;
-      for ( var i = 0; i < length; i++ ) {
+      const length = this._children.length;
+      for ( let i = 0; i < length; i++ ) {
         this._children[ i ].walkDepthFirst( callback );
       }
     },
@@ -1849,10 +1849,10 @@ define( require => {
      * @returns {Array.<Node>}
      */
     getChildrenWithinBounds: function( bounds ) {
-      var result = [];
-      var length = this._children.length;
-      for ( var i = 0; i < length; i++ ) {
-        var child = this._children[ i ];
+      const result = [];
+      const length = this._children.length;
+      for ( let i = 0; i < length; i++ ) {
+        const child = this._children[ i ];
         if ( !child._bounds.intersection( bounds ).isEmpty() ) {
           result.push( child );
         }
@@ -1891,7 +1891,7 @@ define( require => {
      * @returns {Node} - Returns 'this' reference, for chaining
      */
     removeInputListener: function( listener ) {
-      var index = _.indexOf( this._inputListeners, listener );
+      const index = _.indexOf( this._inputListeners, listener );
 
       // ensure the listener is in our list (ignore assertion for disposal, see https://github.com/phetsims/sun/issues/394)
       assert && assert( this.isDisposed || index >= 0, 'Could not find input listener to remove' );
@@ -1914,7 +1914,7 @@ define( require => {
      * @returns {boolean}
      */
     hasInputListener: function( listener ) {
-      for ( var i = 0; i < this._inputListeners.length; i++ ) {
+      for ( let i = 0; i < this._inputListeners.length; i++ ) {
         if ( this._inputListeners[ i ] === listener ) {
           return true;
         }
@@ -1929,10 +1929,10 @@ define( require => {
      * @returns {Node} - For chaining
      */
     interruptInput: function() {
-      var listenersCopy = this.inputListeners;
+      const listenersCopy = this.inputListeners;
 
-      for ( var i = 0; i < listenersCopy.length; i++ ) {
-        var listener = listenersCopy[ i ];
+      for ( let i = 0; i < listenersCopy.length; i++ ) {
+        const listener = listenersCopy[ i ];
 
         listener.interrupt && listener.interrupt(); // TODO: get rid of the event?
       }
@@ -1949,8 +1949,8 @@ define( require => {
     interruptSubtreeInput: function() {
       this.interruptInput();
 
-      var children = this._children.slice();
-      for ( var i = 0; i < children.length; i++ ) {
+      const children = this._children.slice();
+      for ( let i = 0; i < children.length; i++ ) {
         children[ i ].interruptSubtreeInput();
       }
 
@@ -1994,7 +1994,7 @@ define( require => {
       }
       else {
         // translate( vector, prependInstead )
-        var vector = x;
+        const vector = x;
         assert && assert( vector instanceof Vector2 && vector.isFinite(), 'translation should be a finite Vector2 if not finite numbers' );
         if ( !vector.x && !vector.y ) { return; } // bail out if both are zero
         this.translate( vector.x, vector.y, y ); // forward to full version
@@ -2043,7 +2043,7 @@ define( require => {
       }
       else {
         // scale( vector, [prependInstead] )
-        var vector = x;
+        const vector = x;
         assert && assert( vector instanceof Vector2 && vector.isFinite(), 'scale should be a finite Vector2 if not a finite number' );
         this.scale( vector.x, vector.y, y ); // forward to full version
       }
@@ -2088,7 +2088,7 @@ define( require => {
       assert && assert( point instanceof Vector2 && point.isFinite(), 'point should be a finite Vector2' );
       assert && assert( typeof angle === 'number' && isFinite( angle ), 'angle should be a finite number' );
 
-      var matrix = Matrix3.translation( -point.x, -point.y );
+      let matrix = Matrix3.translation( -point.x, -point.y );
       matrix = Matrix3.rotation2( angle ).timesMatrix( matrix );
       matrix = Matrix3.translation( point.x, point.y ).timesMatrix( matrix );
       this.prependMatrix( matrix );
@@ -2167,7 +2167,7 @@ define( require => {
      * @returns {Node} - Returns 'this' reference, for chaining
      */
     setScaleMagnitude: function( a, b ) {
-      var currentScale = this.getScaleVector();
+      const currentScale = this.getScaleVector();
 
       if ( typeof a === 'number' ) {
         if ( b === undefined ) {
@@ -2245,12 +2245,12 @@ define( require => {
      * @returns {Node} - Returns 'this' reference, for chaining
      */
     setTranslation: function( a, b ) {
-      var m = this._transform.getMatrix();
-      var tx = m.m02();
-      var ty = m.m12();
+      const m = this._transform.getMatrix();
+      const tx = m.m02();
+      const ty = m.m12();
 
-      var dx;
-      var dy;
+      let dx;
+      let dy;
 
       if ( typeof a === 'number' ) {
         assert && assert( typeof a === 'number' && isFinite( a ), 'Parameters to setTranslation should be finite numbers' );
@@ -2277,7 +2277,7 @@ define( require => {
      * @returns {Vector2}
      */
     getTranslation: function() {
-      var matrix = this._transform.getMatrix();
+      const matrix = this._transform.getMatrix();
       return new Vector2( matrix.m02(), matrix.m12() );
     },
     get translation() { return this.getTranslation(); },
@@ -2406,24 +2406,24 @@ define( require => {
      * @param {Bounds2} localBounds
      */
     updateMaxDimension: function( localBounds ) {
-      var currentScale = this._appliedScaleFactor;
-      var idealScale = 1;
+      const currentScale = this._appliedScaleFactor;
+      let idealScale = 1;
 
       if ( this._maxWidth !== null ) {
-        var width = localBounds.width;
+        const width = localBounds.width;
         if ( width > this._maxWidth ) {
           idealScale = Math.min( idealScale, this._maxWidth / width );
         }
       }
 
       if ( this._maxHeight !== null ) {
-        var height = localBounds.height;
+        const height = localBounds.height;
         if ( height > this._maxHeight ) {
           idealScale = Math.min( idealScale, this._maxHeight / height );
         }
       }
 
-      var scaleAdjustment = idealScale / currentScale;
+      const scaleAdjustment = idealScale / currentScale;
       if ( scaleAdjustment !== 1 ) {
         this.scale( scaleAdjustment );
 
@@ -3064,11 +3064,11 @@ define( require => {
     swapVisibility: function( otherNode ) {
       assert && assert( this.visible !== otherNode.visible );
 
-      var visibleNode = this.visible ? this : otherNode;
-      var invisibleNode = this.visible ? otherNode : this;
+      const visibleNode = this.visible ? this : otherNode;
+      const invisibleNode = this.visible ? otherNode : this;
 
       // if the visible node has focus we will restore focus on the invisible node once it is visible
-      var visibleNodeFocused = visibleNode.focused;
+      const visibleNodeFocused = visibleNode.focused;
 
       visibleNode.visible = false;
       invisibleNode.visible = true;
@@ -3091,7 +3091,7 @@ define( require => {
     setOpacity: function( opacity ) {
       assert && assert( typeof opacity === 'number' && isFinite( opacity ), 'opacity should be a finite number' );
 
-      var clampedOpacity = clamp( opacity, 0, 1 );
+      const clampedOpacity = clamp( opacity, 0, 1 );
       if ( clampedOpacity !== this._opacity ) {
         this._opacity = clampedOpacity;
 
@@ -3148,7 +3148,7 @@ define( require => {
       assert && assert( pickable === null || typeof pickable === 'boolean' );
 
       if ( this._pickable !== pickable ) {
-        var oldPickable = this._pickable;
+        const oldPickable = this._pickable;
 
         // no paint or invalidation changes for now, since this is only handled for the mouse
         this._pickable = pickable;
@@ -3226,7 +3226,7 @@ define( require => {
       }
 
       // Add in all new input listeners
-      for ( var i = 0; i < inputListeners.length; i++ ) {
+      for ( let i = 0; i < inputListeners.length; i++ ) {
         this.addInputListener( inputListeners[ i ] );
       }
 
@@ -3427,7 +3427,7 @@ define( require => {
       assert && assert( renderer === null || renderer === 'canvas' || renderer === 'svg' || renderer === 'dom' || renderer === 'webgl',
         'Renderer input should be null, or one of: "canvas", "svg", "dom" or "webgl".' );
 
-      var newRenderer = 0;
+      let newRenderer = 0;
       if ( renderer === 'canvas' ) {
         newRenderer = Renderer.bitmaskCanvas;
       }
@@ -3658,8 +3658,8 @@ define( require => {
       // Without a predicate, we'll be able to bail out the instant we hit a node with 2+ parents, and it makes the
       // logic easier.
       if ( !predicate ) {
-        var trail = new scenery.Trail();
-        var node = this; // eslint-disable-line consistent-this
+        const trail = new scenery.Trail();
+        let node = this; // eslint-disable-line consistent-this
 
         while ( node ) {
           assert && assert( node._parents.length <= 1,
@@ -3673,7 +3673,7 @@ define( require => {
       }
       // With a predicate, we need to explore multiple parents (since the predicate may filter out all but one)
       else {
-        var trails = this.getTrails( predicate );
+        const trails = this.getTrails( predicate );
 
         assert && assert( trails.length === 1,
           'getUniqueTrail found ' + trails.length + ' matching trails for the predicate' );
@@ -3708,8 +3708,8 @@ define( require => {
     getTrails: function( predicate ) {
       predicate = predicate || Node.defaultTrailPredicate;
 
-      var trails = [];
-      var trail = new scenery.Trail( this );
+      const trails = [];
+      const trail = new scenery.Trail( this );
       scenery.Trail.appendAncestorTrailsWithPredicate( trails, trail, predicate );
 
       return trails;
@@ -3740,8 +3740,8 @@ define( require => {
     getLeafTrails: function( predicate ) {
       predicate = predicate || Node.defaultLeafTrailPredicate;
 
-      var trails = [];
-      var trail = new scenery.Trail( this );
+      const trails = [];
+      const trail = new scenery.Trail( this );
       scenery.Trail.appendDescendantTrailsWithPredicate( trails, trail, predicate );
 
       return trails;
@@ -3770,7 +3770,7 @@ define( require => {
      * @returns {Trail}
      */
     getUniqueLeafTrail: function( predicate ) {
-      var trails = this.getLeafTrails( predicate );
+      const trails = this.getLeafTrails( predicate );
 
       assert && assert( trails.length === 1,
         'getUniqueLeafTrail found ' + trails.length + ' matching trails for the predicate' );
@@ -3800,10 +3800,10 @@ define( require => {
      * @returns {Array.<Node>}
      */
     getConnectedNodes: function() {
-      var result = [];
-      var fresh = this._children.concat( this._parents ).concat( this );
+      const result = [];
+      let fresh = this._children.concat( this._parents ).concat( this );
       while ( fresh.length ) {
-        var node = fresh.pop();
+        const node = fresh.pop();
         if ( !_.includes( result, node ) ) {
           result.push( node );
           fresh = fresh.concat( node._children, node._parents );
@@ -3820,10 +3820,10 @@ define( require => {
      * @returns {Array.<Node>}
      */
     getSubtreeNodes: function() {
-      var result = [];
-      var fresh = this._children.concat( this );
+      const result = [];
+      let fresh = this._children.concat( this );
       while ( fresh.length ) {
-        var node = fresh.pop();
+        const node = fresh.pop();
         if ( !_.includes( result, node ) ) {
           result.push( node );
           fresh = fresh.concat( node._children );
@@ -3840,10 +3840,10 @@ define( require => {
      */
     getTopologicallySortedNodes: function() {
       // see http://en.wikipedia.org/wiki/Topological_sorting
-      var edges = {};
-      var s = [];
-      var l = [];
-      var n;
+      const edges = {};
+      const s = [];
+      const l = [];
+      let n;
       _.each( this.getConnectedNodes(), function( node ) {
         edges[ node.id ] = {};
         _.each( node._children, function( m ) {
@@ -3891,10 +3891,10 @@ define( require => {
 
       // see http://en.wikipedia.org/wiki/Topological_sorting
       // TODO: remove duplication with above handling?
-      var edges = {};
-      var s = [];
-      var l = [];
-      var n;
+      const edges = {};
+      const s = [];
+      const l = [];
+      let n;
       _.each( this.getConnectedNodes().concat( child.getConnectedNodes() ), function( node ) {
         edges[ node.id ] = {};
         _.each( node._children, function( m ) {
@@ -3971,21 +3971,21 @@ define( require => {
       wrapper.resetStyles();
 
       this.renderToCanvasSelf( wrapper, matrix );
-      for ( var i = 0; i < this._children.length; i++ ) {
-        var child = this._children[ i ];
+      for ( let i = 0; i < this._children.length; i++ ) {
+        const child = this._children[ i ];
 
         if ( child.isVisible() ) {
-          var requiresScratchCanvas = child._opacity !== 1 || child._clipArea;
+          const requiresScratchCanvas = child._opacity !== 1 || child._clipArea;
 
           wrapper.context.save();
           matrix.multiplyMatrix( child._transform.getMatrix() );
           matrix.canvasSetTransform( wrapper.context );
           if ( requiresScratchCanvas ) {
-            var canvas = document.createElement( 'canvas' );
+            const canvas = document.createElement( 'canvas' );
             canvas.width = wrapper.canvas.width;
             canvas.height = wrapper.canvas.height;
-            var context = canvas.getContext( '2d' );
-            var childWrapper = new scenery.CanvasContextWrapper( canvas, context );
+            const context = canvas.getContext( '2d' );
+            const childWrapper = new scenery.CanvasContextWrapper( canvas, context );
 
             matrix.canvasSetTransform( context );
 
@@ -4032,7 +4032,7 @@ define( require => {
         context.fillRect( 0, 0, canvas.width, canvas.height );
       }
 
-      var wrapper = new scenery.CanvasContextWrapper( canvas, context );
+      const wrapper = new scenery.CanvasContextWrapper( canvas, context );
 
       this.renderToCanvasSubtree( wrapper, Matrix3.identity() );
 
@@ -4059,10 +4059,10 @@ define( require => {
       assert && assert( height === undefined || ( typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
         'If provided, height should be a non-negative integer' );
 
-      var padding = 2; // padding used if x and y are not set
+      const padding = 2; // padding used if x and y are not set
 
       // for now, we add an unpleasant hack around Text and safe bounds in general. We don't want to add another Bounds2 object per Node for now.
-      var bounds = this.getBounds().union( this.localToParentBounds( this.getSafeSelfBounds() ) );
+      const bounds = this.getBounds().union( this.localToParentBounds( this.getSafeSelfBounds() ) );
       assert && assert( !bounds.isEmpty() ||
                         ( x !== undefined && y !== undefined && width !== undefined && height !== undefined ),
         'Should not call toCanvas on a Node with empty bounds, unless all dimensions are provided' );
@@ -4072,10 +4072,10 @@ define( require => {
       width = width !== undefined ? width : Math.ceil( bounds.getWidth() + 2 * padding );
       height = height !== undefined ? height : Math.ceil( bounds.getHeight() + 2 * padding );
 
-      var canvas = document.createElement( 'canvas' );
+      const canvas = document.createElement( 'canvas' );
       canvas.width = width;
       canvas.height = height;
-      var context = canvas.getContext( '2d' );
+      const context = canvas.getContext( '2d' );
 
       // shift our rendering over by the desired amount
       context.translate( x, y );
@@ -4083,7 +4083,7 @@ define( require => {
       // for API compatibility, we apply our own transform here
       this._transform.getMatrix().canvasAppendTransform( context );
 
-      var wrapper = new scenery.CanvasContextWrapper( canvas, context );
+      const wrapper = new scenery.CanvasContextWrapper( canvas, context );
 
       this.renderToCanvasSubtree( wrapper, Matrix3.translation( x, y ).timesMatrix( this._transform.getMatrix() ) );
 
@@ -4139,7 +4139,7 @@ define( require => {
 
       this.toDataURL( function( url, x, y ) {
         // this x and y shadow the outside parameters, and will be different if the outside parameters are undefined
-        var img = document.createElement( 'img' );
+        const img = document.createElement( 'img' );
         img.onload = function() {
           callback( img, x, y );
           try {
@@ -4202,7 +4202,7 @@ define( require => {
       assert && assert( height === undefined || ( typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
         'If provided, height should be a non-negative integer' );
 
-      var result = null;
+      let result = null;
       this.toCanvas( function( canvas, x, y ) {
         result = new scenery.Node( {
           children: [
@@ -4237,7 +4237,7 @@ define( require => {
       assert && assert( height === undefined || ( typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
         'If provided, height should be a non-negative integer' );
 
-      var result;
+      let result;
       this.toDataURL( function( dataURL, x, y, width, height ) {
         result = new scenery.Image( dataURL, { x: -x, y: -y, initialWidth: width, initialHeight: height } );
       }, x, y, width, height );
@@ -4310,8 +4310,8 @@ define( require => {
         useCanvas: false
       }, options );
 
-      var resolution = options.resolution;
-      var sourceBounds = options.sourceBounds;
+      const resolution = options.resolution;
+      const sourceBounds = options.sourceBounds;
 
       if ( assert ) {
         assert( typeof resolution === 'number' && resolution > 0, 'resolution should be a positive number' );
@@ -4324,12 +4324,12 @@ define( require => {
       }
 
       // We'll need to wrap it in a container node temporarily (while rasterizing) for the scale
-      var wrapperNode = new Node( {
+      const wrapperNode = new Node( {
         scale: resolution,
         children: [ this ]
       } );
 
-      var transformedBounds = sourceBounds || this.getSafeTransformedVisibleBounds().dilated( 2 ).roundedOut();
+      let transformedBounds = sourceBounds || this.getSafeTransformedVisibleBounds().dilated( 2 ).roundedOut();
 
       // Unfortunately if we provide a resolution AND bounds, we can't use the source bounds directly.
       if ( resolution !== 1 ) {
@@ -4348,11 +4348,11 @@ define( require => {
         }
       }
 
-      var image;
+      let image;
 
       // NOTE: This callback is executed SYNCHRONOUSLY
       function callback( canvas, x, y, width, height ) {
-        var imageSource = options.useCanvas ? canvas : canvas.toDataURL();
+        const imageSource = options.useCanvas ? canvas : canvas.toDataURL();
 
         image = new scenery.Image( imageSource, _.extend( options, {
           x: -x,
@@ -4373,14 +4373,14 @@ define( require => {
 
       // For our useTargetBounds option, we do NOT want to include any "safe" bounds, and instead want to stay true to
       // the original bounds. We do filter out invisible subtrees to set the bounds.
-      var finalParentBounds = this.getVisibleBounds();
+      let finalParentBounds = this.getVisibleBounds();
       if ( sourceBounds ) {
         // If we provide sourceBounds, don't have resulting bounds that go outside.
         finalParentBounds = sourceBounds.intersection( finalParentBounds );
       }
 
       if ( options.wrap ) {
-        var wrappedNode = new Node( { children: [ image ] } );
+        const wrappedNode = new Node( { children: [ image ] } );
         if ( options.useTargetBounds ) {
           wrappedNode.localBounds = finalParentBounds;
         }
@@ -4490,7 +4490,7 @@ define( require => {
      */
     removeInstance: function( instance ) {
       assert && assert( instance instanceof scenery.Instance );
-      var index = _.indexOf( this._instances, instance );
+      const index = _.indexOf( this._instances, instance );
       assert && assert( index !== -1, 'Cannot remove a Instance from a Node if it was not there' );
       this._instances.splice( index, 1 );
 
@@ -4505,8 +4505,8 @@ define( require => {
      * @returns {boolean}
      */
     wasDisplayed: function( display ) {
-      for ( var i = 0; i < this._instances.length; i++ ) {
-        var instance = this._instances[ i ];
+      for ( let i = 0; i < this._instances.length; i++ ) {
+        const instance = this._instances[ i ];
 
         if ( instance.display === display && instance.visible ) {
           return true;
@@ -4552,7 +4552,7 @@ define( require => {
      */
     removeRootedDisplay: function( display ) {
       assert && assert( display instanceof scenery.Display );
-      var index = _.indexOf( this._rootedDisplays, display );
+      const index = _.indexOf( this._rootedDisplays, display );
       assert && assert( index !== -1, 'Cannot remove a Display from a Node if it was not there' );
       this._rootedDisplays.splice( index, 1 );
 
@@ -4649,10 +4649,10 @@ define( require => {
      * @returns {Matrix3}
      */
     getLocalToGlobalMatrix: function() {
-      var node = this; // eslint-disable-line consistent-this
+      let node = this; // eslint-disable-line consistent-this
 
       // we need to apply the transformations in the reverse order, so we temporarily store them
-      var matrices = [];
+      const matrices = [];
 
       // concatenation like this has been faster than getting a unique trail, getting its transform, and applying it
       while ( node ) {
@@ -4661,10 +4661,10 @@ define( require => {
         node = node._parents[ 0 ];
       }
 
-      var matrix = Matrix3.identity(); // will be modified in place
+      const matrix = Matrix3.identity(); // will be modified in place
 
       // iterate from the back forwards (from the root node to here)
-      for ( var i = matrices.length - 1; i >= 0; i-- ) {
+      for ( let i = matrices.length - 1; i >= 0; i-- ) {
         matrix.multiplyMatrix( matrices[ i ] );
       }
 
@@ -4711,8 +4711,8 @@ define( require => {
      * @returns {Vector2}
      */
     localToGlobalPoint: function( point ) {
-      var node = this; // eslint-disable-line consistent-this
-      var resultPoint = point.copy();
+      let node = this; // eslint-disable-line consistent-this
+      const resultPoint = point.copy();
       while ( node ) {
         // in-place multiplication
         node._transform.getMatrix().multiplyVector2( resultPoint );
@@ -4733,11 +4733,11 @@ define( require => {
      * @returns {Vector2}
      */
     globalToLocalPoint: function( point ) {
-      var node = this; // eslint-disable-line consistent-this
+      let node = this; // eslint-disable-line consistent-this
       // TODO: performance: test whether it is faster to get a total transform and then invert (won't compute individual inverses)
 
       // we need to apply the transformations in the reverse order, so we temporarily store them
-      var transforms = [];
+      const transforms = [];
       while ( node ) {
         transforms.push( node._transform );
         assert && assert( node._parents[ 1 ] === undefined, 'globalToLocalPoint unable to work for DAG' );
@@ -4745,8 +4745,8 @@ define( require => {
       }
 
       // iterate from the back forwards (from the root node to here)
-      var resultPoint = point.copy();
-      for ( var i = transforms.length - 1; i >= 0; i-- ) {
+      const resultPoint = point.copy();
+      for ( let i = transforms.length - 1; i >= 0; i-- ) {
         // in-place multiplication
         transforms[ i ].getInverse().multiplyVector2( resultPoint );
       }
@@ -4923,7 +4923,7 @@ define( require => {
      * @returns {Node} - Returns 'this' reference, for chaining
      */
     detachDrawable: function( drawable ) {
-      var index = _.indexOf( this._drawables, drawable );
+      const index = _.indexOf( this._drawables, drawable );
 
       assert && assert( index >= 0, 'Invalid operation: trying to detach a non-referenced drawable' );
 
@@ -4969,7 +4969,7 @@ define( require => {
       assert && assert( _.filter( [ 'translation', 'y', 'top', 'bottom', 'centerY', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom' ], function( key ) { return options[ key ] !== undefined; } ).length <= 1,
         'More than one mutation on this Node set the y component, check ' + Object.keys( options ).join( ',' ) );
 
-      var self = this;
+      const self = this;
 
       _.each( this._mutatorKeys, function( key ) {
 
@@ -4977,7 +4977,7 @@ define( require => {
         assert && assert( !options.hasOwnProperty( key ) || options[ key ] !== undefined, 'Undefined not allowed for Node key: ' + key );
 
         if ( options[ key ] !== undefined ) {
-          var descriptor = Object.getOwnPropertyDescriptor( Node.prototype, key );
+          const descriptor = Object.getOwnPropertyDescriptor( Node.prototype, key );
 
           // if the key refers to a function that is not ES5 writable, it will execute that function with the single argument
           if ( descriptor && typeof descriptor.value === 'function' ) {
@@ -5034,9 +5034,9 @@ define( require => {
      */
     auditInstanceSubtreeForDisplay: function( display ) {
       if ( assertSlow ) {
-        var numInstances = this._instances.length;
-        for ( var i = 0; i < numInstances; i++ ) {
-          var instance = this._instances[ i ];
+        const numInstances = this._instances.length;
+        for ( let i = 0; i < numInstances; i++ ) {
+          const instance = this._instances[ i ];
           if ( instance.display === display ) {
             assertSlow( instance.trail.isValid(),
               'Invalid trail on Instance: ' + instance.toString() + ' with trail ' + instance.trail.toString() );
@@ -5164,11 +5164,11 @@ define( require => {
     disposeSubtree: function() {
       if ( !this.isDisposed ) {
         // makes a copy before disposing
-        var children = this.children;
+        const children = this.children;
 
         this.dispose();
 
-        for ( var i = 0; i < children.length; i++ ) {
+        for ( let i = 0; i < children.length; i++ ) {
           children[ i ].disposeSubtree();
         }
       }

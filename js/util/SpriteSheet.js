@@ -26,16 +26,16 @@ define( require => {
   // constants
   // The max SpriteSheet size was selected to minimize memory overhead while still accommodating many large images
   // See https://github.com/phetsims/scenery/issues/539
-  var MAX_DIMENSION = new Dimension2( 1024, 1024 );
+  const MAX_DIMENSION = new Dimension2( 1024, 1024 );
 
   // Amount of space along the edge of each image that is filled with the closest adjacent pixel value. This helps
   // get rid of alpha fading, see https://github.com/phetsims/scenery/issues/637.
-  var GUTTER_SIZE = 1;
+  const GUTTER_SIZE = 1;
 
   // Amount of blank space along the bottom and right of each image that is left transparent, to avoid graphical
   // artifacts due to texture filtering blending the adjacent image in.
   // See https://github.com/phetsims/scenery/issues/637.
-  var PADDING = 1;
+  const PADDING = 1;
 
   /**
    * @constructor
@@ -105,7 +105,7 @@ define( require => {
      * @private
      */
     createTexture: function() {
-      var gl = this.gl;
+      const gl = this.gl;
 
       this.texture = gl.createTexture();
       gl.bindTexture( gl.TEXTURE_2D, this.texture );
@@ -140,7 +140,7 @@ define( require => {
       if ( this.dirty ) {
         this.dirty = false;
 
-        var gl = this.gl;
+        const gl = this.gl;
 
         gl.bindTexture( gl.TEXTURE_2D, this.texture );
         gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.canvas );
@@ -162,11 +162,11 @@ define( require => {
      * @returns {Sprite|null}
      */
     addImage: function( image, width, height ) {
-      var i;
+      let i;
 
       // check used cache
       for ( i = 0; i < this.usedSprites.length; i++ ) {
-        var usedSprite = this.usedSprites[ i ];
+        const usedSprite = this.usedSprites[ i ];
         if ( usedSprite.image === image ) {
           usedSprite.count++;
           return usedSprite;
@@ -175,7 +175,7 @@ define( require => {
 
       // check unused cache
       for ( i = 0; i < this.unusedSprites.length; i++ ) {
-        var unusedSprite = this.unusedSprites[ i ];
+        const unusedSprite = this.unusedSprites[ i ];
         if ( unusedSprite.image === image ) {
           unusedSprite.count++;
           assert && assert( unusedSprite.count === 1, 'Count should be exactly 1 after coming back from being unused' );
@@ -187,15 +187,15 @@ define( require => {
 
       // Not in any caches, let's try to find space. If we can't find space at first, we start removing unused sprites
       // one-by-one.
-      var bin;
+      let bin;
       // Enters 'while' loop only if allocate() returns null and we have unused sprites (i.e. conditions where we will
       // want to deallocate the least recently used (LRU) unused sprite and then check for allocation again).
       while ( !( bin = this.binPacker.allocate( width + 2 * GUTTER_SIZE + PADDING, height + 2 * GUTTER_SIZE + PADDING ) ) && this.unusedSprites.length ) {
-        var ejectedSprite = this.unusedSprites.shift(); // LRU policy by taking first item
+        const ejectedSprite = this.unusedSprites.shift(); // LRU policy by taking first item
 
         // clear its space in the Canvas
         this.dirty = true;
-        var ejectedBounds = ejectedSprite.bin.bounds;
+        const ejectedBounds = ejectedSprite.bin.bounds;
         this.context.clearRect( ejectedBounds.x, ejectedBounds.y, ejectedBounds.width, ejectedBounds.height );
 
         // deallocate its area in the bin packer
@@ -205,12 +205,12 @@ define( require => {
       if ( bin ) {
         // WebGL will want UV coordinates in the [0,1] range
         // We need to chop off the gutters (on all sides), and the padding (on the bottom and right)
-        var uvBounds = new Bounds2(
+        const uvBounds = new Bounds2(
           ( bin.bounds.minX + GUTTER_SIZE ) / this.width,
           ( bin.bounds.minY + GUTTER_SIZE ) / this.height,
           ( bin.bounds.maxX - GUTTER_SIZE - PADDING ) / this.width,
           ( bin.bounds.maxY - GUTTER_SIZE - PADDING ) / this.height );
-        var sprite = new SpriteSheet.Sprite( this, bin, uvBounds, image, 1 );
+        const sprite = new SpriteSheet.Sprite( this, bin, uvBounds, image, 1 );
 
         this.copyImageWithGutter( image, width, height, bin.bounds.x, bin.bounds.y );
 
@@ -233,8 +233,8 @@ define( require => {
      */
     removeImage: function( image ) {
       // find the used sprite (and its index)
-      var usedSprite;
-      var i;
+      let usedSprite;
+      let i;
       for ( i = 0; i < this.usedSprites.length; i++ ) {
         if ( this.usedSprites[ i ].image === image ) {
           usedSprite = this.usedSprites[ i ];
@@ -262,7 +262,7 @@ define( require => {
      * @returns {boolean}
      */
     containsImage: function( image ) {
-      var i;
+      let i;
 
       // check used cache
       for ( i = 0; i < this.usedSprites.length; i++ ) {

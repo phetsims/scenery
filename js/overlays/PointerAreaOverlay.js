@@ -25,16 +25,16 @@ define( require => {
   inherit( ShapeBasedOverlay, PointerAreaOverlay, {
     // @override
     addShapes: function() {
-      var self = this;
+      const self = this;
 
       new scenery.Trail( this.rootNode ).eachTrailUnder( function( trail ) {
-        var node = trail.lastNode();
+        const node = trail.lastNode();
         if ( !node.isVisible() ) {
           // skip this subtree if the node is invisible
           return true;
         }
         if ( ( node.mouseArea || node.touchArea ) && trail.isVisible() ) {
-          var transform = trail.getTransform();
+          const transform = trail.getTransform();
 
           if ( node.mouseArea ) {
             self.addShape( transform.transformShape( node.mouseArea.isBounds ? Shape.bounds( node.mouseArea ) : node.mouseArea ), 'rgba(0,0,255,0.8)', true );

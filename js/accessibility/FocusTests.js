@@ -19,9 +19,9 @@ define( require => {
   function nestedEquality( assert, a, b ) {
     assert.equal( a.length, b.length );
 
-    for ( var i = 0; i < a.length; i++ ) {
-      var aItem = a[ i ];
-      var bItem = b[ i ];
+    for ( let i = 0; i < a.length; i++ ) {
+      const aItem = a[ i ];
+      const bItem = b[ i ];
 
       assert.ok( aItem.trail.equals( bItem.trail ) );
 
@@ -31,18 +31,18 @@ define( require => {
 
   QUnit.test( 'Simple Test', function( assert ) {
 
-    var a1 = new Node( { tagName: 'div' } );
-    var a2 = new Node( { tagName: 'div' } );
+    const a1 = new Node( { tagName: 'div' } );
+    const a2 = new Node( { tagName: 'div' } );
 
-    var b1 = new Node( { tagName: 'div' } );
-    var b2 = new Node( { tagName: 'div' } );
+    const b1 = new Node( { tagName: 'div' } );
+    const b2 = new Node( { tagName: 'div' } );
 
-    var a = new Node( { children: [ a1, a2 ] } );
-    var b = new Node( { children: [ b1, b2 ] } );
+    const a = new Node( { children: [ a1, a2 ] } );
+    const b = new Node( { children: [ b1, b2 ] } );
 
-    var root = new Node( { children: [ a, b ] } );
+    const root = new Node( { children: [ a, b ] } );
 
-    var nestedOrder = root.getNestedAccessibleOrder();
+    const nestedOrder = root.getNestedAccessibleOrder();
 
     nestedEquality( assert, nestedOrder, [
       { trail: new Trail( [ root, a, a1 ] ), children: [] },
@@ -54,18 +54,18 @@ define( require => {
 
   QUnit.test( 'accessibleOrder Simple Test', function( assert ) {
 
-    var a1 = new Node( { tagName: 'div' } );
-    var a2 = new Node( { tagName: 'div' } );
+    const a1 = new Node( { tagName: 'div' } );
+    const a2 = new Node( { tagName: 'div' } );
 
-    var b1 = new Node( { tagName: 'div' } );
-    var b2 = new Node( { tagName: 'div' } );
+    const b1 = new Node( { tagName: 'div' } );
+    const b2 = new Node( { tagName: 'div' } );
 
-    var a = new Node( { children: [ a1, a2 ] } );
-    var b = new Node( { children: [ b1, b2 ] } );
+    const a = new Node( { children: [ a1, a2 ] } );
+    const b = new Node( { children: [ b1, b2 ] } );
 
-    var root = new Node( { children: [ a, b ], accessibleOrder: [ b, a ] } );
+    const root = new Node( { children: [ a, b ], accessibleOrder: [ b, a ] } );
 
-    var nestedOrder = root.getNestedAccessibleOrder();
+    const nestedOrder = root.getNestedAccessibleOrder();
 
     nestedEquality( assert, nestedOrder, [
       { trail: new Trail( [ root, b, b1 ] ), children: [] },
@@ -77,18 +77,18 @@ define( require => {
 
   QUnit.test( 'accessibleOrder Descendant Test', function( assert ) {
 
-    var a1 = new Node( { tagName: 'div' } );
-    var a2 = new Node( { tagName: 'div' } );
+    const a1 = new Node( { tagName: 'div' } );
+    const a2 = new Node( { tagName: 'div' } );
 
-    var b1 = new Node( { tagName: 'div' } );
-    var b2 = new Node( { tagName: 'div' } );
+    const b1 = new Node( { tagName: 'div' } );
+    const b2 = new Node( { tagName: 'div' } );
 
-    var a = new Node( { children: [ a1, a2 ] } );
-    var b = new Node( { children: [ b1, b2 ] } );
+    const a = new Node( { children: [ a1, a2 ] } );
+    const b = new Node( { children: [ b1, b2 ] } );
 
-    var root = new Node( { children: [ a, b ], accessibleOrder: [ a1, b1, a2, b2 ] } );
+    const root = new Node( { children: [ a, b ], accessibleOrder: [ a1, b1, a2, b2 ] } );
 
-    var nestedOrder = root.getNestedAccessibleOrder();
+    const nestedOrder = root.getNestedAccessibleOrder();
 
     nestedEquality( assert, nestedOrder, [
       { trail: new Trail( [ root, a, a1 ] ), children: [] },
@@ -100,23 +100,23 @@ define( require => {
 
   QUnit.test( 'accessibleOrder Descendant Pruning Test', function( assert ) {
 
-    var a1 = new Node( { tagName: 'div' } );
-    var a2 = new Node( { tagName: 'div' } );
+    const a1 = new Node( { tagName: 'div' } );
+    const a2 = new Node( { tagName: 'div' } );
 
-    var b1 = new Node( { tagName: 'div' } );
-    var b2 = new Node( { tagName: 'div' } );
+    const b1 = new Node( { tagName: 'div' } );
+    const b2 = new Node( { tagName: 'div' } );
 
-    var c1 = new Node( { tagName: 'div' } );
-    var c2 = new Node( { tagName: 'div' } );
+    const c1 = new Node( { tagName: 'div' } );
+    const c2 = new Node( { tagName: 'div' } );
 
-    var c = new Node( { children: [ c1, c2 ] } );
+    const c = new Node( { children: [ c1, c2 ] } );
 
-    var a = new Node( { children: [ a1, a2, c ] } );
-    var b = new Node( { children: [ b1, b2 ] } );
+    const a = new Node( { children: [ a1, a2, c ] } );
+    const b = new Node( { children: [ b1, b2 ] } );
 
-    var root = new Node( { children: [ a, b ], accessibleOrder: [ c1, a, a2, b2 ] } );
+    const root = new Node( { children: [ a, b ], accessibleOrder: [ c1, a, a2, b2 ] } );
 
-    var nestedOrder = root.getNestedAccessibleOrder();
+    const nestedOrder = root.getNestedAccessibleOrder();
 
     nestedEquality( assert, nestedOrder, [
       { trail: new Trail( [ root, a, c, c1 ] ), children: [] },
@@ -130,18 +130,18 @@ define( require => {
 
   QUnit.test( 'accessibleOrder Descendant Override', function( assert ) {
 
-    var a1 = new Node( { tagName: 'div' } );
-    var a2 = new Node( { tagName: 'div' } );
+    const a1 = new Node( { tagName: 'div' } );
+    const a2 = new Node( { tagName: 'div' } );
 
-    var b1 = new Node( { tagName: 'div' } );
-    var b2 = new Node( { tagName: 'div' } );
+    const b1 = new Node( { tagName: 'div' } );
+    const b2 = new Node( { tagName: 'div' } );
 
-    var a = new Node( { children: [ a1, a2 ] } );
-    var b = new Node( { children: [ b1, b2 ], accessibleOrder: [ b1, b2 ] } );
+    const a = new Node( { children: [ a1, a2 ] } );
+    const b = new Node( { children: [ b1, b2 ], accessibleOrder: [ b1, b2 ] } );
 
-    var root = new Node( { children: [ a, b ], accessibleOrder: [ b, b1, a ] } );
+    const root = new Node( { children: [ a, b ], accessibleOrder: [ b, b1, a ] } );
 
-    var nestedOrder = root.getNestedAccessibleOrder();
+    const nestedOrder = root.getNestedAccessibleOrder();
 
     nestedEquality( assert, nestedOrder, [
       { trail: new Trail( [ root, b, b2 ] ), children: [] },
@@ -153,18 +153,18 @@ define( require => {
 
   QUnit.test( 'accessibleOrder Hierarchy', function( assert ) {
 
-    var a1 = new Node( { tagName: 'div' } );
-    var a2 = new Node( { tagName: 'div' } );
+    const a1 = new Node( { tagName: 'div' } );
+    const a2 = new Node( { tagName: 'div' } );
 
-    var b1 = new Node( { tagName: 'div' } );
-    var b2 = new Node( { tagName: 'div' } );
+    const b1 = new Node( { tagName: 'div' } );
+    const b2 = new Node( { tagName: 'div' } );
 
-    var a = new Node( { children: [ a1, a2 ], accessibleOrder: [ a2 ] } );
-    var b = new Node( { children: [ b1, b2 ], accessibleOrder: [ b2, b1 ] } );
+    const a = new Node( { children: [ a1, a2 ], accessibleOrder: [ a2 ] } );
+    const b = new Node( { children: [ b1, b2 ], accessibleOrder: [ b2, b1 ] } );
 
-    var root = new Node( { children: [ a, b ], accessibleOrder: [ b, a ] } );
+    const root = new Node( { children: [ a, b ], accessibleOrder: [ b, a ] } );
 
-    var nestedOrder = root.getNestedAccessibleOrder();
+    const nestedOrder = root.getNestedAccessibleOrder();
 
     nestedEquality( assert, nestedOrder, [
       { trail: new Trail( [ root, b, b2 ] ), children: [] },
@@ -176,15 +176,15 @@ define( require => {
 
   QUnit.test( 'accessibleOrder DAG test', function( assert ) {
 
-    var a1 = new Node( { tagName: 'div' } );
-    var a2 = new Node( { tagName: 'div' } );
+    const a1 = new Node( { tagName: 'div' } );
+    const a2 = new Node( { tagName: 'div' } );
 
-    var a = new Node( { children: [ a1, a2 ], accessibleOrder: [ a2, a1 ] } );
-    var b = new Node( { children: [ a1, a2 ], accessibleOrder: [ a1, a2 ] } );
+    const a = new Node( { children: [ a1, a2 ], accessibleOrder: [ a2, a1 ] } );
+    const b = new Node( { children: [ a1, a2 ], accessibleOrder: [ a1, a2 ] } );
 
-    var root = new Node( { children: [ a, b ] } );
+    const root = new Node( { children: [ a, b ] } );
 
-    var nestedOrder = root.getNestedAccessibleOrder();
+    const nestedOrder = root.getNestedAccessibleOrder();
 
     nestedEquality( assert, nestedOrder, [
       { trail: new Trail( [ root, a, a2 ] ), children: [] },
@@ -196,19 +196,19 @@ define( require => {
 
   QUnit.test( 'accessibleOrder DAG test', function( assert ) {
 
-    var x = new Node();
-    var a = new Node();
-    var b = new Node();
-    var c = new Node();
-    var d = new Node( { tagName: 'div' } );
-    var e = new Node();
-    var f = new Node( { tagName: 'div' } );
-    var g = new Node( { tagName: 'div' } );
-    var h = new Node( { tagName: 'div' } );
-    var i = new Node( { tagName: 'div' } );
-    var j = new Node( { tagName: 'div' } );
-    var k = new Node( { tagName: 'div' } );
-    var l = new Node();
+    const x = new Node();
+    const a = new Node();
+    const b = new Node();
+    const c = new Node();
+    const d = new Node( { tagName: 'div' } );
+    const e = new Node();
+    const f = new Node( { tagName: 'div' } );
+    const g = new Node( { tagName: 'div' } );
+    const h = new Node( { tagName: 'div' } );
+    const i = new Node( { tagName: 'div' } );
+    const j = new Node( { tagName: 'div' } );
+    const k = new Node( { tagName: 'div' } );
+    const l = new Node();
 
     x.children = [ a ];
     a.children = [ k, b, c ];
@@ -221,7 +221,7 @@ define( require => {
     a.accessibleOrder = [ c, b ];
     e.accessibleOrder = [ g, f, j ];
 
-    var nestedOrder = x.getNestedAccessibleOrder();
+    const nestedOrder = x.getNestedAccessibleOrder();
 
     nestedEquality( assert, nestedOrder, [
       // x order's F
@@ -254,24 +254,24 @@ define( require => {
 
   QUnit.test( 'setting accessibleOrder', function( assert ) {
 
-    var rootNode = new Node();
+    const rootNode = new Node();
     var display = new Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
 
-    var a = new Node( { tagName: 'div' } );
-    var b = new Node( { tagName: 'div' } );
-    var c = new Node( { tagName: 'div' } );
-    var d = new Node( { tagName: 'div' } );
+    const a = new Node( { tagName: 'div' } );
+    const b = new Node( { tagName: 'div' } );
+    const c = new Node( { tagName: 'div' } );
+    const d = new Node( { tagName: 'div' } );
     rootNode.children = [ a, b, c, d ];
 
     // reverse accessible order
     rootNode.accessibleOrder = [ d, c, b, a ];
 
-    var divRoot = display._rootAccessibleInstance.peer.primarySibling;
-    var divA = a.accessibleInstances[ 0 ].peer.primarySibling;
-    var divB = b.accessibleInstances[ 0 ].peer.primarySibling;
-    var divC = c.accessibleInstances[ 0 ].peer.primarySibling;
-    var divD = d.accessibleInstances[ 0 ].peer.primarySibling;
+    const divRoot = display._rootAccessibleInstance.peer.primarySibling;
+    const divA = a.accessibleInstances[ 0 ].peer.primarySibling;
+    const divB = b.accessibleInstances[ 0 ].peer.primarySibling;
+    const divC = c.accessibleInstances[ 0 ].peer.primarySibling;
+    const divD = d.accessibleInstances[ 0 ].peer.primarySibling;
 
     assert.ok( divRoot.children[ 0 ] === divD, 'divD should be first child' );
     assert.ok( divRoot.children[ 1 ] === divC, 'divC should be second child' );
@@ -280,14 +280,14 @@ define( require => {
   } );
 
   QUnit.test( 'setting accessibleOrder before setting accessible content', function( assert ) {
-    var rootNode = new Node();
+    const rootNode = new Node();
     var display = new Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
 
-    var a = new Node();
-    var b = new Node();
-    var c = new Node();
-    var d = new Node();
+    const a = new Node();
+    const b = new Node();
+    const c = new Node();
+    const d = new Node();
     rootNode.children = [ a, b, c, d ];
 
     // reverse accessible order
@@ -298,11 +298,11 @@ define( require => {
     c.tagName = 'div';
     d.tagName = 'div';
 
-    var divRoot = display._rootAccessibleInstance.peer.primarySibling;
-    var divA = a.accessibleInstances[ 0 ].peer.primarySibling;
-    var divB = b.accessibleInstances[ 0 ].peer.primarySibling;
-    var divC = c.accessibleInstances[ 0 ].peer.primarySibling;
-    var divD = d.accessibleInstances[ 0 ].peer.primarySibling;
+    const divRoot = display._rootAccessibleInstance.peer.primarySibling;
+    const divA = a.accessibleInstances[ 0 ].peer.primarySibling;
+    const divB = b.accessibleInstances[ 0 ].peer.primarySibling;
+    const divC = c.accessibleInstances[ 0 ].peer.primarySibling;
+    const divD = d.accessibleInstances[ 0 ].peer.primarySibling;
 
     assert.ok( divRoot.children[ 0 ] === divD, 'divD should be first child' );
     assert.ok( divRoot.children[ 1 ] === divC, 'divC should be second child' );
@@ -311,7 +311,7 @@ define( require => {
   } );
 
   QUnit.test( 'setting accessible order on nodes with no accessible content', function( assert ) {
-    var rootNode = new Node();
+    const rootNode = new Node();
     var display = new Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
 
@@ -321,12 +321,12 @@ define( require => {
     //     c   e
     //        d  f
 
-    var a = new Node( { tagName: 'div' } );
-    var b = new Node( { tagName: 'div' } );
-    var c = new Node( { tagName: 'div' } );
-    var d = new Node( { tagName: 'div' } );
-    var e = new Node( { tagName: 'div' } );
-    var f = new Node( { tagName: 'div' } );
+    const a = new Node( { tagName: 'div' } );
+    const b = new Node( { tagName: 'div' } );
+    const c = new Node( { tagName: 'div' } );
+    const d = new Node( { tagName: 'div' } );
+    const e = new Node( { tagName: 'div' } );
+    const f = new Node( { tagName: 'div' } );
     rootNode.addChild( a );
     a.addChild( b );
     b.addChild( c );
@@ -335,25 +335,25 @@ define( require => {
     c.addChild( f );
     b.accessibleOrder = [ e, c ];
 
-    var divB = b.accessibleInstances[ 0 ].peer.primarySibling;
-    var divC = c.accessibleInstances[ 0 ].peer.primarySibling;
-    var divE = e.accessibleInstances[ 0 ].peer.primarySibling;
+    const divB = b.accessibleInstances[ 0 ].peer.primarySibling;
+    const divC = c.accessibleInstances[ 0 ].peer.primarySibling;
+    const divE = e.accessibleInstances[ 0 ].peer.primarySibling;
 
     assert.ok( divB.children[ 0 ] === divE, 'div E should be first child of div B' );
     assert.ok( divB.children[ 1 ] === divC, 'div C should be second child of div B' );
   } );
 
   QUnit.test( 'setting accessible order on nodes with no accessible content', function( assert ) {
-    var rootNode = new Node();
+    const rootNode = new Node();
     var display = new Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
 
-    var a = new Node( { tagName: 'div' } );
-    var b = new Node();
-    var c = new Node( { tagName: 'div' } );
-    var d = new Node( { tagName: 'div' } );
-    var e = new Node( { tagName: 'div' } );
-    var f = new Node( { tagName: 'div' } );
+    const a = new Node( { tagName: 'div' } );
+    const b = new Node();
+    const c = new Node( { tagName: 'div' } );
+    const d = new Node( { tagName: 'div' } );
+    const e = new Node( { tagName: 'div' } );
+    const f = new Node( { tagName: 'div' } );
     rootNode.addChild( a );
     a.addChild( b );
     b.addChild( c );
@@ -362,9 +362,9 @@ define( require => {
     c.addChild( f );
     a.accessibleOrder = [ e, c ];
 
-    var divA = a.accessibleInstances[ 0 ].peer.primarySibling;
-    var divC = c.accessibleInstances[ 0 ].peer.primarySibling;
-    var divE = e.accessibleInstances[ 0 ].peer.primarySibling;
+    const divA = a.accessibleInstances[ 0 ].peer.primarySibling;
+    const divC = c.accessibleInstances[ 0 ].peer.primarySibling;
+    const divE = e.accessibleInstances[ 0 ].peer.primarySibling;
 
     assert.ok( divA.children[ 0 ] === divE, 'div E should be first child of div B' );
     assert.ok( divA.children[ 1 ] === divC, 'div C should be second child of div B' );

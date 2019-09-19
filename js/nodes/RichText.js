@@ -78,7 +78,7 @@ define( require => {
 
   // Options that can be used in the constructor, with mutate(), or directly as setters/getters
   // each of these options has an associated setter, see setter methods for more documentation
-  var RICH_TEXT_OPTION_KEYS = [
+  const RICH_TEXT_OPTION_KEYS = [
     'boundsMethod', // {string} - Sets how bounds are determined for text
     'font', // {Font|string} - Sets the font for the text
     'fill', // {PaintDef} - Sets the fill of the text
@@ -104,17 +104,17 @@ define( require => {
     'text' // {string|number} - Sets the text to be displayed by this Node
   ];
 
-  var DEFAULT_FONT = new Font( {
+  const DEFAULT_FONT = new Font( {
     size: 20
   } );
 
   // Tags that should be included in accessible innerContent, see https://github.com/phetsims/joist/issues/430
-  var ACCESSIBLE_TAGS = [
+  const ACCESSIBLE_TAGS = [
     'b', 'strong', 'i', 'em', 'sub', 'sup', 'u', 's'
   ];
 
   // What type of line-break situations we can be in during our recursive process
-  var LineBreakState = {
+  const LineBreakState = {
     // There was a line break, but it was at the end of the element (or was a <br>). The relevant element can be fully
     // removed from the tree.
     COMPLETE: 'COMPLETE',
@@ -127,10 +127,10 @@ define( require => {
   };
 
   // We need to do some font-size tests, so we have a Text for that.
-  var scratchText = new scenery.Text( '' );
+  const scratchText = new scenery.Text( '' );
 
   // himalaya converts dash separated CSS to camel case - use CSS compatible style with dashes, see above for examples
-  var FONT_STYLE_MAP = {
+  const FONT_STYLE_MAP = {
     'fontFamily': 'family',
     'fontSize': 'size',
     'fontStretch': 'stretch',
@@ -140,8 +140,8 @@ define( require => {
     'lineHeight': 'lineHeight'
   };
 
-  var FONT_STYLE_KEYS = Object.keys( FONT_STYLE_MAP );
-  var STYLE_KEYS = [ 'color' ].concat( FONT_STYLE_KEYS );
+  const FONT_STYLE_KEYS = Object.keys( FONT_STYLE_MAP );
+  const STYLE_KEYS = [ 'color' ].concat( FONT_STYLE_KEYS );
 
   /**
    * @public
@@ -256,7 +256,7 @@ define( require => {
      * @private
      */
     rebuildRichText: function() {
-      var self = this;
+      const self = this;
 
       this.freeChildrenToPool();
 
@@ -270,31 +270,31 @@ define( require => {
       sceneryLog && sceneryLog.RichText && sceneryLog.push();
 
       // Turn bidirectional marks into explicit elements, so that the nesting is applied correctly.
-      var mappedText = this._text.replace( /\u202a/g, '<span dir="ltr">' )
+      const mappedText = this._text.replace( /\u202a/g, '<span dir="ltr">' )
         .replace( /\u202b/g, '<span dir="rtl">' )
         .replace( /\u202c/g, '</span>' );
 
       // Start appending all top-level elements
-      var rootElements = himalaya.parse( mappedText );
+      const rootElements = himalaya.parse( mappedText );
 
       // Clear out link items, as we'll need to reconstruct them later
       this._linkItems.length = 0;
 
-      var widthAvailable = this._lineWrap === null ? Number.POSITIVE_INFINITY : this._lineWrap;
-      var isRootLTR = true;
+      const widthAvailable = this._lineWrap === null ? Number.POSITIVE_INFINITY : this._lineWrap;
+      const isRootLTR = true;
 
-      var currentLine = RichTextElement.createFromPool( isRootLTR );
+      let currentLine = RichTextElement.createFromPool( isRootLTR );
       this._hasAddedLeafToLine = false; // notify that if nothing has been added, the first leaf always gets added.
 
       // Himalaya can give us multiple top-level items, so we need to iterate over those
       while ( rootElements.length ) {
-        var element = rootElements[ 0 ];
+        const element = rootElements[ 0 ];
 
         // How long our current line is already
-        var currentLineWidth = currentLine.bounds.isValid() ? currentLine.width : 0;
+        const currentLineWidth = currentLine.bounds.isValid() ? currentLine.width : 0;
 
         // Add the element in
-        var lineBreakState = this.appendElement( currentLine, element, this._font, this._fill, isRootLTR, widthAvailable - currentLineWidth );
+        const lineBreakState = this.appendElement( currentLine, element, this._font, this._fill, isRootLTR, widthAvailable - currentLineWidth );
         sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'lineBreakState: ' + lineBreakState );
 
         // If there was a line break (we'll need to swap to a new line node)
@@ -341,28 +341,28 @@ define( require => {
       while ( this._linkItems.length ) {
         // Close over the href and other references
         ( function() {
-          var linkElement = self._linkItems[ 0 ].element;
-          var href = self._linkItems[ 0 ].href;
-          var i;
+          const linkElement = self._linkItems[ 0 ].element;
+          const href = self._linkItems[ 0 ].href;
+          let i;
 
           // Find all nodes that are for the same link
-          var nodes = [];
+          const nodes = [];
           for ( i = self._linkItems.length - 1; i >= 0; i-- ) {
-            var item = self._linkItems[ i ];
+            const item = self._linkItems[ i ];
             if ( item.element === linkElement ) {
               nodes.push( item.node );
               self._linkItems.splice( i, 1 );
             }
           }
 
-          var linkRootNode = RichTextLink.createFromPool( linkElement.innerContent, href );
+          const linkRootNode = RichTextLink.createFromPool( linkElement.innerContent, href );
           self.lineContainer.addChild( linkRootNode );
 
           // Detach the node from its location, adjust its transform, and reattach under the link. This should keep each
           // fragment in the same place, but changes its parent.
           for ( i = 0; i < nodes.length; i++ ) {
-            var node = nodes[ i ];
-            var matrix = node.getUniqueTrailTo( self.lineContainer ).getMatrix();
+            const node = nodes[ i ];
+            const matrix = node.getUniqueTrailTo( self.lineContainer ).getMatrix();
             node.detach();
             node.matrix = matrix;
             linkRootNode.addChild( node );
@@ -383,7 +383,7 @@ define( require => {
     freeChildrenToPool: function() {
       // Clear any existing lines or link fragments (higher performance, and return them to pools also)
       while ( this.lineContainer._children.length ) {
-        var child = this.lineContainer._children[ this.lineContainer._children.length - 1 ];
+        const child = this.lineContainer._children[ this.lineContainer._children.length - 1 ];
         this.lineContainer.removeChild( child );
         child.clean();
       }
@@ -435,10 +435,10 @@ define( require => {
      */
     alignLines: function() {
       // All nodes will either share a 'left', 'centerX' or 'right'.
-      var coordinateName = this._align === 'center' ? 'centerX' : this._align;
+      const coordinateName = this._align === 'center' ? 'centerX' : this._align;
 
-      var ideal = this.lineContainer[ coordinateName ];
-      for ( var i = 0; i < this.lineContainer.getChildrenCount(); i++ ) {
+      const ideal = this.lineContainer[ coordinateName ];
+      for ( let i = 0; i < this.lineContainer.getChildrenCount(); i++ ) {
         this.lineContainer.getChildAt( i )[ coordinateName ] = ideal;
       }
     },
@@ -461,10 +461,10 @@ define( require => {
      * @returns {LineBreakState} - Whether a line break was reached
      */
     appendElement: function( containerNode, element, font, fill, isLTR, widthAvailable ) {
-      var lineBreakState = LineBreakState.NONE;
+      let lineBreakState = LineBreakState.NONE;
 
       // {Node|Text} - The main Node for the element that we are adding
-      var node;
+      let node;
 
       // If we're a leaf
       if ( element.type === 'Text' ) {
@@ -474,12 +474,12 @@ define( require => {
         node = RichTextLeaf.createFromPool( element.content, isLTR, font, this._boundsMethod, fill, this._stroke, this._lineWidth );
 
         // If this content gets added, it will need to be pushed over by this amount
-        var containerSpacing = isLTR ? containerNode.rightSpacing : containerNode.leftSpacing;
+        const containerSpacing = isLTR ? containerNode.rightSpacing : containerNode.leftSpacing;
 
         // Handle wrapping if required. Container spacing cuts into our available width
         if ( !node.fitsIn( widthAvailable - containerSpacing, this._hasAddedLeafToLine, isLTR ) ) {
           // Didn't fit, lets break into words to see what we can fit
-          var words = element.content.split( ' ' );
+          const words = element.content.split( ' ' );
 
           sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'Overflow leafAdded:' + this._hasAddedLeafToLine + ', words: ' + words.length );
 
@@ -487,8 +487,8 @@ define( require => {
           if ( this._hasAddedLeafToLine || words.length > 1 ) {
             sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'Skipping words' );
 
-            var skippedWords = [];
-            var success = false;
+            const skippedWords = [];
+            let success = false;
             skippedWords.unshift( words.pop() ); // We didn't fit with the last one!
 
             // Keep shortening by removing words until it fits (or if we NEED to fit it) or it doesn't fit.
@@ -546,7 +546,7 @@ define( require => {
         sceneryLog && sceneryLog.RichText && sceneryLog.push();
 
         if ( element.attributes.style ) {
-          var css = element.attributes.style;
+          const css = element.attributes.style;
           assert && Object.keys( css ).forEach( function( key ) {
             assert( _.includes( STYLE_KEYS, key ), 'See supported style CSS keys' );
           } );
@@ -557,9 +557,9 @@ define( require => {
           }
 
           // Font
-          var fontOptions = {};
-          for ( var i = 0; i < FONT_STYLE_KEYS.length; i++ ) {
-            var styleKey = FONT_STYLE_KEYS[ i ];
+          const fontOptions = {};
+          for ( let i = 0; i < FONT_STYLE_KEYS.length; i++ ) {
+            const styleKey = FONT_STYLE_KEYS[ i ];
             if ( css[ styleKey ] ) {
               fontOptions[ FONT_STYLE_MAP[ styleKey ] ] = css[ styleKey ];
             }
@@ -569,7 +569,7 @@ define( require => {
 
         // Achor (link)
         if ( element.tagName === 'a' ) {
-          var href = element.attributes.href;
+          let href = element.attributes.href;
 
           // Try extracting the href from the links object
           if ( this._links !== true ) {
@@ -625,13 +625,13 @@ define( require => {
         }
 
         // If we've added extra spacing, we'll need to subtract it off of our available width
-        var scale = node.getScaleVector().x;
+        const scale = node.getScaleVector().x;
 
         // Process children
         while ( lineBreakState === LineBreakState.NONE && element.children.length ) {
-          var widthBefore = node.bounds.isValid() ? node.width : 0;
+          const widthBefore = node.bounds.isValid() ? node.width : 0;
 
-          var childElement = element.children[ 0 ];
+          const childElement = element.children[ 0 ];
           lineBreakState = this.appendElement( node, childElement, font, fill, isLTR, widthAvailable / scale );
 
           // for COMPLETE or NONE, we'll want to remove the childElement from the tree (we fully processed it)
@@ -639,7 +639,7 @@ define( require => {
             element.children.splice( 0, 1 );
           }
 
-          var widthAfter = node.bounds.isValid() ? node.width : 0;
+          const widthAfter = node.bounds.isValid() ? node.width : 0;
 
           // Remove the amount of width taken up by the child
           widthAvailable += widthBefore - widthAfter;
@@ -663,7 +663,7 @@ define( require => {
         }
         // Underline
         else if ( element.tagName === 'u' ) {
-          var underlineY = -node.top * this._underlineHeightScale;
+          const underlineY = -node.top * this._underlineHeightScale;
           if ( isFinite( node.top ) ) {
             node.addChild( new Line( node.localBounds.left, underlineY, node.localBounds.right, underlineY, {
               stroke: fill,
@@ -673,7 +673,7 @@ define( require => {
         }
         // Strikethrough
         else if ( element.tagName === 's' ) {
-          var strikethroughY = node.top * this._strikethroughHeightScale;
+          const strikethroughY = node.top * this._strikethroughHeightScale;
           if ( isFinite( node.top ) ) {
             node.addChild( new Line( node.localBounds.left, strikethroughY, node.localBounds.right, strikethroughY, {
               stroke: fill,
@@ -684,7 +684,7 @@ define( require => {
         sceneryLog && sceneryLog.RichText && sceneryLog.pop();
       }
 
-      var wasAdded = containerNode.addElement( node );
+      const wasAdded = containerNode.addElement( node );
       if ( !wasAdded ) {
         // Remove it from the linkItems if we didn't actually add it.
         this._linkItems = this._linkItems.filter( function( item ) {
@@ -715,7 +715,7 @@ define( require => {
       text = '' + text;
 
       if ( text !== this._text ) {
-        var oldText = this._text;
+        const oldText = this._text;
 
         this._text = text;
         this.rebuildRichText();
@@ -1468,7 +1468,7 @@ define( require => {
         }
 
         // Process children
-        var content = element.children.map( function( child ) {
+        const content = element.children.map( function( child ) {
           return RichText.himalayaElementToAccessibleString( child, isLTR );
         } ).join( '' );
 
@@ -1495,7 +1495,7 @@ define( require => {
      * @returns {string}
      */
     contentToString: function( content, isLTR ) {
-      var unescapedContent = he.decode( content );
+      const unescapedContent = he.decode( content );
       return isLTR ? ( '\u202a' + unescapedContent + '\u202c' ) : ( '\u202b' + unescapedContent + '\u202c' );
     }
   } );
@@ -1540,7 +1540,7 @@ define( require => {
     clean: function() {
       // Remove all children (and recursively clean)
       while ( this._children.length ) {
-        var child = this._children[ this._children.length - 1 ];
+        const child = this._children[ this._children.length - 1 ];
         this.removeChild( child );
         child.clean();
       }
@@ -1559,13 +1559,13 @@ define( require => {
      */
     addElement: function( element ) {
 
-      var hadChild = this.children.length > 0;
-      var hasElement = element.width > 0;
+      const hadChild = this.children.length > 0;
+      const hasElement = element.width > 0;
 
       // May be at a different scale, which we need to handle
-      var elementScale = element.getScaleVector().x;
-      var leftElementSpacing = element.leftSpacing * elementScale;
-      var rightElementSpacing = element.rightSpacing * elementScale;
+      const elementScale = element.getScaleVector().x;
+      const leftElementSpacing = element.leftSpacing * elementScale;
+      const rightElementSpacing = element.rightSpacing * elementScale;
 
       // If there is nothing, than no spacing should be handled
       if ( !hadChild && !hasElement ) {
@@ -1666,14 +1666,14 @@ define( require => {
     initialize: function( content, isLTR, font, boundsMethod, fill, stroke, lineWidth ) {
 
       // Grab all spaces at the (logical) start
-      var whitespaceBefore = '';
+      let whitespaceBefore = '';
       while ( content[ 0 ] === ' ' ) {
         whitespaceBefore += ' ';
         content = content.slice( 1 );
       }
 
       // Grab all spaces at the (logical) end
-      var whitespaceAfter = '';
+      let whitespaceAfter = '';
       while ( content[ content.length - 1 ] === ' ' ) {
         whitespaceAfter = ' ';
         content = content.slice( 0, content.length - 1 );
@@ -1686,8 +1686,8 @@ define( require => {
       this.stroke = stroke;
       this.lineWidth = lineWidth;
 
-      var spacingBefore = whitespaceBefore.length ? scratchText.setText( whitespaceBefore ).setFont( font ).width : 0;
-      var spacingAfter = whitespaceAfter.length ? scratchText.setText( whitespaceAfter ).setFont( font ).width : 0;
+      const spacingBefore = whitespaceBefore.length ? scratchText.setText( whitespaceBefore ).setFont( font ).width : 0;
+      const spacingAfter = whitespaceAfter.length ? scratchText.setText( whitespaceAfter ).setFont( font ).width : 0;
 
       // Turn logical spacing into directional
       // @protected {number}
@@ -1802,7 +1802,7 @@ define( require => {
     clean: function() {
       // Remove all children (and recursively clean)
       while ( this._children.length ) {
-        var child = this._children[ this._children.length - 1 ];
+        const child = this._children[ this._children.length - 1 ];
         this.removeChild( child );
         child.clean();
       }

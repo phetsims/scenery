@@ -16,7 +16,7 @@ define( require => {
   const scenery = require( 'SCENERY/scenery' );
 
   // Sometimes we need to add a listener that does absolutely nothing
-  var noop = function noop() {};
+  const noop = function noop() {};
 
   var BrowserEvents = {
     /**
@@ -88,7 +88,7 @@ define( require => {
      * @returns {Object|boolean}
      */
     getEventOptions: function( passiveEvents, isMain ) {
-      var passDirectPassiveFlag = Features.passive && passiveEvents !== null;
+      const passDirectPassiveFlag = Features.passive && passiveEvents !== null;
       if ( !passDirectPassiveFlag ) {
         return false;
       }
@@ -201,7 +201,7 @@ define( require => {
      * @returns {Array.<string>}
      */
     getNonWheelUsedTypes: function() {
-      var eventTypes;
+      let eventTypes;
 
       if ( this.canUsePointerEvents ) {
         // accepts pointer events corresponding to the spec at http://www.w3.org/TR/pointerevents/
@@ -262,11 +262,11 @@ define( require => {
       assert && assert( typeof addOrRemove === 'boolean' );
       assert && assert( typeof passiveEvents === 'boolean' || passiveEvents === null );
 
-      var forWindow = element === window;
+      const forWindow = element === window;
       assert && assert( !forWindow || ( this.listenersAttachedToWindow > 0 ) === !addOrRemove,
         'Do not add listeners to the window when already attached, or remove listeners when none are attached' );
 
-      var delta = addOrRemove ? 1 : -1;
+      const delta = addOrRemove ? 1 : -1;
       if ( forWindow ) {
         this.listenersAttachedToWindow += delta;
       }
@@ -276,13 +276,13 @@ define( require => {
       assert && assert( this.listenersAttachedToWindow === 0 || this.listenersAttachedToElement === 0,
         'Listeners should not be added both with addDisplayToWindow and addDisplayToElement. Use only one.' );
 
-      var method = addOrRemove ? 'addEventListener' : 'removeEventListener';
+      const method = addOrRemove ? 'addEventListener' : 'removeEventListener';
 
       // {Array.<string>}
-      var eventTypes = this.getNonWheelUsedTypes();
+      const eventTypes = this.getNonWheelUsedTypes();
 
-      for ( var i = 0; i < eventTypes.length; i++ ) {
-        var type = eventTypes[ i ];
+      for ( let i = 0; i < eventTypes.length; i++ ) {
+        const type = eventTypes[ i ];
 
         // If we add input listeners to the window itself, iOS Safari 7 won't send touch events to displays in an
         // iframe unless we also add dummy listeners to the document.
@@ -292,7 +292,7 @@ define( require => {
           document[ method ]( type, noop, BrowserEvents.getEventOptions( passiveEvents, false ) );
         }
 
-        var callback = this[ 'on' + type ];
+        const callback = this[ 'on' + type ];
         assert && assert( !!callback );
 
         // Workaround for older browsers needed,
@@ -317,9 +317,9 @@ define( require => {
       // NOTE: For now, we don't check whether the event is actually within the display's boundingClientRect. Most
       // displays will want to receive events outside of their bounds (especially for checking drags and mouse-ups
       // outside of their bounds).
-      for ( var i = 0; i < this.attachedDisplays.length; i++ ) {
-        var display = this.attachedDisplays[ i ];
-        var input = display._input;
+      for ( let i = 0; i < this.attachedDisplays.length; i++ ) {
+        const display = this.attachedDisplays[ i ];
+        const input = display._input;
         input.batchEvent( domEvent, batchType, input[ inputCallbackName ], triggerImmediate );
       }
     },

@@ -16,8 +16,8 @@ define( require => {
 
   QUnit.test( 'Basics', function( assert ) {
     ListenerTestUtils.simpleRectangleTest( function( display, rect, node ) {
-      var fireCount = 0;
-      var listener = new FireListener( {
+      let fireCount = 0;
+      const listener = new FireListener( {
         fire: function() {
           fireCount++;
         }

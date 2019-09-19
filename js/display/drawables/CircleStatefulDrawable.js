@@ -19,7 +19,7 @@ define( require => {
   const scenery = require( 'SCENERY/scenery' );
   const SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
-  var CircleStatefulDrawable = {
+  const CircleStatefulDrawable = {
     /**
      * Given the type (constructor) of a drawable, we'll mix in a combination of:
      * - initialization/disposal with the *State suffix
@@ -37,7 +37,7 @@ define( require => {
     mixInto: function( drawableType ) {
       assert && assert( _.includes( inheritance( drawableType ), SelfDrawable ) );
 
-      var proto = drawableType.prototype;
+      const proto = drawableType.prototype;
 
       /**
        * Initializes the stateful trait state, starting its "lifetime" until it is disposed with disposeState().

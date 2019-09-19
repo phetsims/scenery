@@ -295,7 +295,7 @@ define( require => {
       sceneryLog && sceneryLog.Stitch && sceneryLog.push();
 
       while ( this.backbone.blocks.length ) {
-        var block = this.backbone.blocks[ 0 ];
+        const block = this.backbone.blocks[ 0 ];
 
         this.removeBlock( block );
         this.markBlockForDisposal( block );
@@ -344,7 +344,7 @@ define( require => {
     // Flushes markBeforeBlock/markAfterBlock changes to notifyInterval on blocks themselves.
     updateBlockIntervals: function() {
       while ( this.touchedBlocks.length ) {
-        var block = this.touchedBlocks.pop();
+        const block = this.touchedBlocks.pop();
 
         if ( block.used ) {
           sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'update interval: ' + block.toString() + ' ' +
@@ -373,8 +373,8 @@ define( require => {
     // Creates a fresh block with the desired renderer and {Drawable} arbitrary drawable included, and adds it to
     // our DOM.
     createBlock: function( renderer, drawable ) {
-      var backbone = this.backbone;
-      var block;
+      const backbone = this.backbone;
+      let block;
 
       if ( Renderer.isCanvas( renderer ) ) {
         block = CanvasBlock.createFromPool( backbone.display, renderer, backbone.transformRootInstance, backbone.backboneInstance );
@@ -437,7 +437,7 @@ define( require => {
       sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'removing block: ' + block.toString() );
 
       // remove the block from our internal list
-      var blockIndex = _.indexOf( this.backbone.blocks, block );
+      const blockIndex = _.indexOf( this.backbone.blocks, block );
       assert && assert( blockIndex >= 0, 'Cannot remove block, not attached: ' + block.toString() );
       this.backbone.blocks.splice( blockIndex, 1 );
 
@@ -468,10 +468,10 @@ define( require => {
     // An audit for testing assertions
     auditStitch: function() {
       if ( assertSlow ) {
-        var self = this;
+        const self = this;
 
-        var blocks = self.backbone.blocks;
-        var previousBlocks = self.previousBlocks;
+        const blocks = self.backbone.blocks;
+        const previousBlocks = self.previousBlocks;
 
         assertSlow( self.initialized, 'We seem to have finished a stitch without proper initialization' );
         assertSlow( self.boundariesRecorded, 'Our stitch API requires recordBackboneBoundaries() to be called before' +
@@ -502,7 +502,7 @@ define( require => {
 
         // all drawables for disposed blocks have been marked as pending removal (or moved)
         _.each( self.disposedBlocks, function( blockData ) {
-          var block = blockData.block;
+          const block = blockData.block;
           _.each( Drawable.oldListToArray( block.firstDrawable, block.lastDrawable ), function( drawable ) {
             assertSlow( _.some( self.pendingRemovals, function( removalData ) {
                 return removalData.drawable === drawable;
@@ -515,7 +515,7 @@ define( require => {
 
         // all drawables for created blocks have been marked as pending addition or moved for our block
         _.each( self.createdBlocks, function( blockData ) {
-          var block = blockData.block;
+          const block = blockData.block;
           _.each( Drawable.listToArray( block.pendingFirstDrawable, block.pendingLastDrawable ), function( drawable ) {
             assertSlow( _.some( self.pendingAdditions, function( additionData ) {
                 return additionData.drawable === drawable && additionData.block === block;
@@ -528,13 +528,13 @@ define( require => {
 
         // all disposed blocks should have been removed
         _.each( self.disposedBlocks, function( blockData ) {
-          var blockIdx = _.indexOf( blocks, blockData.block );
+          const blockIdx = _.indexOf( blocks, blockData.block );
           assertSlow( blockIdx < 0, 'Disposed block ' + blockData.block.toString() + ' still present at index ' + blockIdx );
         } );
 
         // all created blocks should have been added
         _.each( self.createdBlocks, function( blockData ) {
-          var blockIdx = _.indexOf( blocks, blockData.block );
+          const blockIdx = _.indexOf( blocks, blockData.block );
           assertSlow( blockIdx >= 0, 'Created block ' + blockData.block.toString() + ' is not in the blocks array' );
         } );
 
@@ -565,7 +565,7 @@ define( require => {
           assertSlow( blocks[ blocks.length - 1 ].pendingLastDrawable === self.backbone.previousLastDrawable,
             'Our last drawable should match the last drawable of our last block' );
 
-          for ( var i = 0; i < blocks.length - 1; i++ ) {
+          for ( let i = 0; i < blocks.length - 1; i++ ) {
             // [i] and [i+1] are a pair of consecutive blocks
             assertSlow( blocks[ i ].pendingLastDrawable.nextDrawable === blocks[ i + 1 ].pendingFirstDrawable &&
                         blocks[ i ].pendingLastDrawable === blocks[ i + 1 ].pendingFirstDrawable.previousDrawable,
@@ -583,7 +583,7 @@ define( require => {
 
   Stitcher.debugIntervals = function( firstChangeInterval ) {
     if ( sceneryLog && sceneryLog.Stitch ) {
-      for ( var debugInterval = firstChangeInterval; debugInterval !== null; debugInterval = debugInterval.nextChangeInterval ) {
+      for ( let debugInterval = firstChangeInterval; debugInterval !== null; debugInterval = debugInterval.nextChangeInterval ) {
         sceneryLog.Stitch( '  interval: ' +
                            ( debugInterval.isEmpty() ? '(empty) ' : '' ) +
                            ( debugInterval.drawableBefore ? debugInterval.drawableBefore.toString() : '-' ) + ' to ' +
@@ -600,16 +600,16 @@ define( require => {
         return;
       }
 
-      var isChanged = firstChangeInterval.drawableBefore === null;
-      var currentInterval = firstChangeInterval;
+      let isChanged = firstChangeInterval.drawableBefore === null;
+      let currentInterval = firstChangeInterval;
 
-      for ( var drawable = firstDrawable; ; drawable = ( useCurrent ? drawable.nextDrawable : drawable.oldNextDrawable ) ) {
+      for ( let drawable = firstDrawable; ; drawable = ( useCurrent ? drawable.nextDrawable : drawable.oldNextDrawable ) ) {
         if ( isChanged && drawable === currentInterval.drawableAfter ) {
           isChanged = false;
           currentInterval = currentInterval.nextChangeInterval;
         }
 
-        var drawableString = drawable.renderer + ' ' + ( ( !useCurrent && drawable.parentDrawable ) ? drawable.parentDrawable.toString() : '' ) + ' ' + drawable.toDetailedString();
+        const drawableString = drawable.renderer + ' ' + ( ( !useCurrent && drawable.parentDrawable ) ? drawable.parentDrawable.toString() : '' ) + ' ' + drawable.toDetailedString();
         sceneryLog.StitchDrawables( drawableString, isChanged ? ( useCurrent ? 'color: #0a0;' : 'color: #a00;' ) : 'color: #666' );
 
         if ( !isChanged && currentInterval && currentInterval.drawableBefore === drawable ) {

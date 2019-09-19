@@ -14,7 +14,7 @@ define( require => {
   const Poolable = require( 'PHET_CORE/Poolable' );
   const scenery = require( 'SCENERY/scenery' );
 
-  var emptyArray = []; // constant, used for line-dash
+  const emptyArray = []; // constant, used for line-dash
 
   /**
    * A generated CanvasSelfDrawable whose purpose will be drawing our CanvasNode. One of these drawables will be created
@@ -52,7 +52,7 @@ define( require => {
                                                     'Please set canvasBounds (or use setCanvasBounds()) on ' + node.constructor.name );
 
       if ( !node.selfBounds.isEmpty() ) {
-        var context = wrapper.context;
+        const context = wrapper.context;
         context.save();
 
         // set back to Canvas default styles

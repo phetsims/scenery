@@ -33,7 +33,7 @@ define( require => {
     // NOTE: Only if the parent instance is the root instance do we want to include our partial trail's root.
     // For other instances, this node in the trail will already be included
     // TODO: add Trail.concat()
-    for ( var j = ( this.isRoot ? 0 : 1 ); j < this.trail.length; j++ ) {
+    for ( let j = ( this.isRoot ? 0 : 1 ); j < this.trail.length; j++ ) {
       this.fullTrail.addDescendant( this.trail.nodes[ j ] );
     }
   }

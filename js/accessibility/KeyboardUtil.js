@@ -13,13 +13,13 @@ define( require => {
   // modules
   const scenery = require( 'SCENERY/scenery' );
 
-  var KEY_RIGHT_ARROW = 39;
-  var KEY_LEFT_ARROW = 37;
-  var KEY_UP_ARROW = 38;
-  var KEY_DOWN_ARROW = 40;
-  var KEY_SHIFT = 16;
-  var KEY_CTRL = 17;
-  var KEY_ALT = 18;
+  const KEY_RIGHT_ARROW = 39;
+  const KEY_LEFT_ARROW = 37;
+  const KEY_UP_ARROW = 38;
+  const KEY_DOWN_ARROW = 40;
+  const KEY_SHIFT = 16;
+  const KEY_CTRL = 17;
+  const KEY_ALT = 18;
 
   // constants
   var KeyboardUtil = {

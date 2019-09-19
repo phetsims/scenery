@@ -27,7 +27,7 @@ define( require => {
   const Node = require( 'SCENERY/nodes/Node' );
   const scenery = require( 'SCENERY/scenery' );
 
-  var ALIGNMENT_CONTAINER_OPTION_KEYS = [
+  const ALIGNMENT_CONTAINER_OPTION_KEYS = [
     'alignBounds', // {Bounds2|null} - See setAlignBounds() for more documentation
     'xAlign', // {string} - 'left', 'center', or 'right', see setXAlign() for more documentation
     'yAlign', // {string} - 'top', 'center', or 'bottom', see setYAlign() for more documentation
@@ -545,7 +545,7 @@ define( require => {
       sceneryLog && sceneryLog.AlignBox && sceneryLog.AlignBox( 'AlignBox#' + this.id + ' getContentBounds' );
       sceneryLog && sceneryLog.AlignBox && sceneryLog.push();
 
-      var bounds = this._content.bounds;
+      const bounds = this._content.bounds;
 
       sceneryLog && sceneryLog.AlignBox && sceneryLog.pop();
 
@@ -567,8 +567,8 @@ define( require => {
      * @param {number} offset - Offset to be applied to the localBounds location.
      */
     updateProperty: function( propName, offset ) {
-      var currentValue = this._content[ propName ];
-      var newValue = this.localBounds[ propName ] + offset;
+      const currentValue = this._content[ propName ];
+      const newValue = this.localBounds[ propName ] + offset;
 
       // Prevent infinite loops or stack overflows by ignoring tiny changes
       if ( Math.abs( currentValue - newValue ) > 1e-5 ) {
@@ -593,8 +593,8 @@ define( require => {
       }
       // Otherwise, we'll grab a Bounds2 anchored at the upper-left with our required dimensions.
       else {
-        var widthWithMargin = this._leftMargin + this._content.width + this._rightMargin;
-        var heightWithMargin = this._topMargin + this._content.height + this._bottomMargin;
+        const widthWithMargin = this._leftMargin + this._content.width + this._rightMargin;
+        const heightWithMargin = this._topMargin + this._content.height + this._bottomMargin;
         this.localBounds = new Bounds2( 0, 0, widthWithMargin, heightWithMargin );
       }
 

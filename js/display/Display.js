@@ -356,7 +356,7 @@ define( require => {
       sceneryLog && sceneryLog.Display && sceneryLog.Display( 'updateDisplay frame ' + this._frameId );
       sceneryLog && sceneryLog.Display && sceneryLog.push();
 
-      var firstRun = !!this._baseInstance;
+      const firstRun = !!this._baseInstance;
 
       // check to see whether contents under pointers changed (and if so, send the enter/exit events) to
       // maintain consistent state
@@ -405,7 +405,7 @@ define( require => {
       sceneryLog && sceneryLog.Display && sceneryLog.Display( 'drawable block change phase' );
       sceneryLog && sceneryLog.Display && sceneryLog.push();
       while ( this._drawablesToChangeBlock.length ) {
-        var changed = this._drawablesToChangeBlock.pop().updateBlock();
+        const changed = this._drawablesToChangeBlock.pop().updateBlock();
         if ( sceneryLog && scenery.isLoggingPerformance() && changed ) {
           this.perfDrawableBlockChangeCount++;
         }
@@ -470,10 +470,10 @@ define( require => {
       this.updateSize();
 
       if ( this._overlays.length ) {
-        var zIndex = this._rootBackbone.lastZIndex;
-        for ( var i = 0; i < this._overlays.length; i++ ) {
+        let zIndex = this._rootBackbone.lastZIndex;
+        for ( let i = 0; i < this._overlays.length; i++ ) {
           // layer the overlays properly
-          var overlay = this._overlays[ i ];
+          const overlay = this._overlays[ i ];
           overlay.domElement.style.zIndex = zIndex++;
 
           overlay.update();
@@ -483,7 +483,7 @@ define( require => {
       this._frameId++;
 
       if ( sceneryLog && scenery.isLoggingPerformance() ) {
-        var syncTreeMessage = 'syncTree count: ' + this.perfSyncTreeCount;
+        const syncTreeMessage = 'syncTree count: ' + this.perfSyncTreeCount;
         if ( this.perfSyncTreeCount > 500 ) {
           sceneryLog.PerfCritical && sceneryLog.PerfCritical( syncTreeMessage );
         }
@@ -497,7 +497,7 @@ define( require => {
           sceneryLog.PerfVerbose && sceneryLog.PerfVerbose( syncTreeMessage );
         }
 
-        var drawableBlockCountMessage = 'drawable block changes: ' + this.perfDrawableBlockChangeCount + ' for' +
+        const drawableBlockCountMessage = 'drawable block changes: ' + this.perfDrawableBlockChangeCount + ' for' +
                                         ' -' + this.perfDrawableOldIntervalCount +
                                         ' +' + this.perfDrawableNewIntervalCount;
         if ( this.perfDrawableBlockChangeCount > 200 ) {
@@ -520,7 +520,7 @@ define( require => {
     },
 
     updateSize: function() {
-      var sizeDirty = false;
+      let sizeDirty = false;
       //OHTWO TODO: if we aren't clipping or setting background colors, can we get away with having a 0x0 container div and using absolutely-positioned children?
       if ( this._size.width !== this._currentSize.width ) {
         sizeDirty = true;
@@ -670,7 +670,7 @@ define( require => {
     sortAccessibleInstances: function() {
 
       // keep reference so we can restore focus if browser blurs element while sorting
-      var focusedNode = Display.focusedNode;
+      const focusedNode = Display.focusedNode;
 
       while ( this._unsortedAccessibleInstances.length ) {
         this._unsortedAccessibleInstances.pop().sortChildren();
@@ -695,7 +695,7 @@ define( require => {
      */
     getUsedRenderersBitmask: function() {
       function renderersUnderBackbone( backbone ) {
-        var bitmask = 0;
+        let bitmask = 0;
         _.each( backbone.blocks, function( block ) {
           if ( block instanceof scenery.DOMBlock && block.domDrawable instanceof scenery.BackboneDrawable ) {
             bitmask = bitmask | renderersUnderBackbone( block.domDrawable );
@@ -770,7 +770,7 @@ define( require => {
                         typeof this._backgroundColor === 'string' ||
                         this._backgroundColor instanceof scenery.Color );
 
-      var newBackgroundCSS = this._backgroundColor === null ?
+      const newBackgroundCSS = this._backgroundColor === null ?
                              '' :
                              ( this._backgroundColor.toCSS ?
                                this._backgroundColor.toCSS() :
@@ -794,12 +794,12 @@ define( require => {
         }
 
         //OHTWO TODO: For a display, just return an instance and we can avoid the garbage collection/mutation at the cost of the linked-list traversal instead of an array
-        var mouseTrail = this._rootNode.trailUnderPointer( this._input.mouse );
+        const mouseTrail = this._rootNode.trailUnderPointer( this._input.mouse );
 
         if ( mouseTrail ) {
-          for ( var i = mouseTrail.getCursorCheckIndex(); i >= 0; i-- ) {
-            var node = mouseTrail.nodes[ i ];
-            var cursor = node.getCursor();
+          for ( let i = mouseTrail.getCursorCheckIndex(); i >= 0; i-- ) {
+            const node = mouseTrail.nodes[ i ];
+            const cursor = node.getCursor();
 
             if ( cursor ) {
               sceneryLog && sceneryLog.Cursor && sceneryLog.Cursor( cursor + ' on ' + node.constructor.name + '#' + node.id );
@@ -835,10 +835,10 @@ define( require => {
     setSceneCursor: function( cursor ) {
       if ( cursor !== this._lastCursor ) {
         this._lastCursor = cursor;
-        var customCursors = Display.customCursors[ cursor ];
+        const customCursors = Display.customCursors[ cursor ];
         if ( customCursors ) {
           // go backwards, so the most desired cursor sticks
-          for ( var i = customCursors.length - 1; i >= 0; i-- ) {
+          for ( let i = customCursors.length - 1; i >= 0; i-- ) {
             this.setElementCursor( customCursors[ i ] );
           }
         }
@@ -885,11 +885,11 @@ define( require => {
 
     // renders what it can into a Canvas (so far, Canvas and SVG layers work fine)
     canvasSnapshot: function( callback ) {
-      var canvas = document.createElement( 'canvas' );
+      const canvas = document.createElement( 'canvas' );
       canvas.width = this._size.width;
       canvas.height = this._size.height;
 
-      var context = canvas.getContext( '2d' );
+      const context = canvas.getContext( '2d' );
 
       //OHTWO TODO: allow actual background color directly, not having to check the style here!!!
       this._rootNode.renderToCanvas( canvas, context, function() {
@@ -901,7 +901,7 @@ define( require => {
     setPointerDisplayVisible: function( visibility ) {
       assert && assert( typeof visibility === 'boolean' );
 
-      var hasOverlay = !!this._pointerOverlay;
+      const hasOverlay = !!this._pointerOverlay;
 
       if ( visibility !== hasOverlay ) {
         if ( !visibility ) {
@@ -920,7 +920,7 @@ define( require => {
     setPointerAreaDisplayVisible: function( visibility ) {
       assert && assert( typeof visibility === 'boolean' );
 
-      var hasOverlay = !!this._pointerAreaOverlay;
+      const hasOverlay = !!this._pointerAreaOverlay;
 
       if ( visibility !== hasOverlay ) {
         if ( !visibility ) {
@@ -939,7 +939,7 @@ define( require => {
     setHitAreaDisplayVisible: function( visibility ) {
       assert && assert( typeof visibility === 'boolean' );
 
-      var hasOverlay = !!this._hitAreaOverlay;
+      const hasOverlay = !!this._hitAreaOverlay;
 
       if ( visibility !== hasOverlay ) {
         if ( !visibility ) {
@@ -958,7 +958,7 @@ define( require => {
     setCanvasNodeBoundsVisible: function( visibility ) {
       assert && assert( typeof visibility === 'boolean' );
 
-      var hasOverlay = !!this._canvasAreaBoundsOverlay;
+      const hasOverlay = !!this._canvasAreaBoundsOverlay;
 
       if ( visibility !== hasOverlay ) {
         if ( !visibility ) {
@@ -977,7 +977,7 @@ define( require => {
     setFittedBlockBoundsVisible: function( visibility ) {
       assert && assert( typeof visibility === 'boolean' );
 
-      var hasOverlay = !!this._fittedBlockBoundsOverlay;
+      const hasOverlay = !!this._fittedBlockBoundsOverlay;
 
       if ( visibility !== hasOverlay ) {
         if ( !visibility ) {
@@ -993,9 +993,9 @@ define( require => {
     },
 
     resizeOnWindowResize: function() {
-      var self = this;
+      const self = this;
 
-      var resizer = function() {
+      const resizer = function() {
         self.setWidthHeight( window.innerWidth, window.innerHeight );
       };
       window.addEventListener( 'resize', resizer );
@@ -1006,15 +1006,15 @@ define( require => {
     // stepCallback( timeElapsedInSeconds )
     updateOnRequestAnimationFrame: function( stepCallback ) {
       // keep track of how much time elapsed over the last frame
-      var lastTime = 0;
-      var timeElapsedInSeconds = 0;
+      let lastTime = 0;
+      let timeElapsedInSeconds = 0;
 
-      var self = this;
+      const self = this;
       ( function step() {
         self._requestAnimationFrameID = window.requestAnimationFrame( step, self._domElement );
 
         // calculate how much time has elapsed since we rendered the last frame
-        var timeNow = Date.now();
+        const timeNow = Date.now();
         if ( lastTime !== 0 ) {
           timeElapsedInSeconds = ( timeNow - lastTime ) / 1000.0;
         }
@@ -1043,7 +1043,7 @@ define( require => {
       assert && assert( !this._input, 'Events cannot be attached twice to a display (for now)' );
 
       // TODO: refactor here
-      var input = new Input( this, !this._listenToOnlyElement, this._batchDOMEvents, this._assumeFullWindow, this._passiveEvents, options );
+      const input = new Input( this, !this._listenToOnlyElement, this._batchDOMEvents, this._assumeFullWindow, this._passiveEvents, options );
       this._input = input;
 
       input.connectListeners();
@@ -1104,7 +1104,7 @@ define( require => {
      * @returns {boolean}
      */
     hasInputListener: function( listener ) {
-      for ( var i = 0; i < this._inputListeners.length; i++ ) {
+      for ( let i = 0; i < this._inputListeners.length; i++ ) {
         if ( this._inputListeners[ i ] === listener ) {
           return true;
         }
@@ -1146,7 +1146,7 @@ define( require => {
             }
 
             //TODO: pattern for this iteration
-            for ( var drawable = block.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
+            for ( let drawable = block.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
               loseBackbone( drawable );
               if ( drawable === block.lastDrawable ) { break; }
             }
@@ -1175,18 +1175,18 @@ define( require => {
         return ob ? ob.toString() : ob + '';
       }
 
-      var headerStyle = 'font-weight: bold; font-size: 120%; margin-top: 5px;';
+      const headerStyle = 'font-weight: bold; font-size: 120%; margin-top: 5px;';
 
-      var depth = 0;
+      let depth = 0;
 
-      var result = '';
+      let result = '';
 
       result += '<div style="' + headerStyle + '">Display Summary</div>';
       result += this._size.toString() + ' frame:' + this._frameId + ' input:' + !!this._input + ' cursor:' + this._lastCursor + '<br/>';
 
       function nodeCount( node ) {
-        var count = 1; // for us
-        for ( var i = 0; i < node.children.length; i++ ) {
+        let count = 1; // for us
+        for ( let i = 0; i < node.children.length; i++ ) {
           count += nodeCount( node.children[ i ] );
         }
         return count;
@@ -1195,8 +1195,8 @@ define( require => {
       result += 'Nodes: ' + nodeCount( this._rootNode ) + '<br/>';
 
       function instanceCount( instance ) {
-        var count = 1; // for us
-        for ( var i = 0; i < instance.children.length; i++ ) {
+        let count = 1; // for us
+        for ( let i = 0; i < instance.children.length; i++ ) {
           count += instanceCount( instance.children[ i ] );
         }
         return count;
@@ -1205,7 +1205,7 @@ define( require => {
       result += this._baseInstance ? ( 'Instances: ' + instanceCount( this._baseInstance ) + '<br/>' ) : '';
 
       function drawableCount( drawable ) {
-        var count = 1; // for us
+        let count = 1; // for us
         if ( drawable.blocks ) {
           // we're a backbone
           _.each( drawable.blocks, function( childDrawable ) {
@@ -1214,7 +1214,7 @@ define( require => {
         }
         else if ( drawable.firstDrawable && drawable.lastDrawable ) {
           // we're a block
-          for ( var childDrawable = drawable.firstDrawable; childDrawable !== drawable.lastDrawable; childDrawable = childDrawable.nextDrawable ) {
+          for ( let childDrawable = drawable.firstDrawable; childDrawable !== drawable.lastDrawable; childDrawable = childDrawable.nextDrawable ) {
             count += drawableCount( childDrawable );
           }
           count += drawableCount( drawable.lastDrawable );
@@ -1224,10 +1224,10 @@ define( require => {
 
       result += this._rootBackbone ? ( 'Drawables: ' + drawableCount( this._rootBackbone ) + '<br/>' ) : '';
 
-      var drawableCountMap = {}; // {string} drawable constructor name => {number} count of seen
+      const drawableCountMap = {}; // {string} drawable constructor name => {number} count of seen
       // increment the count in our map
       function countRetainedDrawable( drawable ) {
-        var name = drawable.constructor.name;
+        const name = drawable.constructor.name;
         if ( drawableCountMap[ name ] ) {
           drawableCountMap[ name ]++;
         }
@@ -1237,7 +1237,7 @@ define( require => {
       }
 
       function retainedDrawableCount( instance ) {
-        var count = 0;
+        let count = 0;
         if ( instance.selfDrawable ) {
           countRetainedDrawable( instance.selfDrawable );
           count++;
@@ -1250,14 +1250,14 @@ define( require => {
           countRetainedDrawable( instance.sharedCacheDrawable );
           count++;
         }
-        for ( var i = 0; i < instance.children.length; i++ ) {
+        for ( let i = 0; i < instance.children.length; i++ ) {
           count += retainedDrawableCount( instance.children[ i ] );
         }
         return count;
       }
 
       result += this._baseInstance ? ( 'Retained Drawables: ' + retainedDrawableCount( this._baseInstance ) + '<br/>' ) : '';
-      for ( var drawableName in drawableCountMap ) {
+      for ( const drawableName in drawableCountMap ) {
         result += '&nbsp;&nbsp;&nbsp;&nbsp;' + drawableName + ': ' + drawableCountMap[ drawableName ] + '<br/>';
       }
 
@@ -1267,9 +1267,9 @@ define( require => {
           return;
         }
 
-        var hasBackbone = block.domDrawable && block.domDrawable.blocks;
+        const hasBackbone = block.domDrawable && block.domDrawable.blocks;
 
-        var div = '<div style="margin-left: ' + ( depth * 20 ) + 'px">';
+        let div = '<div style="margin-left: ' + ( depth * 20 ) + 'px">';
 
         div += block.toString();
         if ( !hasBackbone ) {
@@ -1280,7 +1280,7 @@ define( require => {
 
         depth += 1;
         if ( hasBackbone ) {
-          for ( var k = 0; k < block.domDrawable.blocks.length; k++ ) {
+          for ( let k = 0; k < block.domDrawable.blocks.length; k++ ) {
             div += blockSummary( block.domDrawable.blocks[ k ] );
           }
         }
@@ -1291,19 +1291,19 @@ define( require => {
 
       if ( this._rootBackbone ) {
         result += '<div style="' + headerStyle + '">Block Summary</div>';
-        for ( var i = 0; i < this._rootBackbone.blocks.length; i++ ) {
+        for ( let i = 0; i < this._rootBackbone.blocks.length; i++ ) {
           result += blockSummary( this._rootBackbone.blocks[ i ] );
         }
       }
 
       function instanceSummary( instance ) {
-        var iSummary = '';
+        let iSummary = '';
 
         function addQualifier( text ) {
           iSummary += ' <span style="color: #008">' + text + '</span>';
         }
 
-        var node = instance.node;
+        const node = instance.node;
 
         iSummary += instance.id;
         iSummary += ' ' + ( node.constructor.name ? node.constructor.name : '?' );
@@ -1363,7 +1363,7 @@ define( require => {
           addQualifier( '<span style="color: #800">boundsListen:' + node._boundsEventCount + ':' + node._boundsEventSelfCount + '</span>' );
         }
 
-        var transformType = '';
+        let transformType = '';
         switch( node.transform.getMatrix().type ) {
           case Matrix3.Types.IDENTITY:
             transformType = '';
@@ -1395,7 +1395,7 @@ define( require => {
       }
 
       function drawableSummary( drawable ) {
-        var drawableString = drawable.toString();
+        let drawableString = drawable.toString();
         if ( drawable.visible ) {
           drawableString = '<strong>' + drawableString + '</strong>';
         }
@@ -1409,7 +1409,7 @@ define( require => {
       }
 
       function printInstanceSubtree( instance ) {
-        var div = '<div style="margin-left: ' + ( depth * 20 ) + 'px">';
+        let div = '<div style="margin-left: ' + ( depth * 20 ) + 'px">';
 
         function addDrawable( name, drawable ) {
           div += ' <span style="color: #888">' + name + ':' + drawableSummary( drawable ) + '</span>';
@@ -1442,7 +1442,7 @@ define( require => {
       } );
 
       function printDrawableSubtree( drawable ) {
-        var div = '<div style="margin-left: ' + ( depth * 20 ) + 'px">';
+        let div = '<div style="margin-left: ' + ( depth * 20 ) + 'px">';
 
         div += drawableSummary( drawable );
         if ( drawable.instance ) {
@@ -1468,7 +1468,7 @@ define( require => {
         else if ( drawable.firstDrawable && drawable.lastDrawable ) {
           // we're a block
           depth += 1;
-          for ( var childDrawable = drawable.firstDrawable; childDrawable !== drawable.lastDrawable; childDrawable = childDrawable.nextDrawable ) {
+          for ( let childDrawable = drawable.firstDrawable; childDrawable !== drawable.lastDrawable; childDrawable = childDrawable.nextDrawable ) {
             printDrawableSubtree( childDrawable );
           }
           printDrawableSubtree( drawable.lastDrawable ); // wasn't hit in our simplified (and safer) loop
@@ -1550,10 +1550,10 @@ define( require => {
     },
 
     getAccessibleDebugHTML: function() {
-      var result = '';
+      let result = '';
 
-      var headerStyle = 'font-weight: bold; font-size: 120%; margin-top: 5px;';
-      var indent = '&nbsp;&nbsp;&nbsp;&nbsp;';
+      const headerStyle = 'font-weight: bold; font-size: 120%; margin-top: 5px;';
+      const indent = '&nbsp;&nbsp;&nbsp;&nbsp;';
 
       result += '<div style="' + headerStyle + '">Accessible Instances</div><br>';
 
@@ -1568,14 +1568,14 @@ define( require => {
 
       result += '<br><div style="' + headerStyle + '">Parallel DOM</div><br>';
 
-      var parallelDOM = this._rootAccessibleInstance.peer.primarySibling.outerHTML;
+      let parallelDOM = this._rootAccessibleInstance.peer.primarySibling.outerHTML;
       parallelDOM = parallelDOM.replace( /></g, '>\n<' );
-      var lines = parallelDOM.split( '\n' );
+      const lines = parallelDOM.split( '\n' );
 
-      var indentation = '';
-      for ( var i = 0; i < lines.length; i++ ) {
-        var line = lines[ i ];
-        var isEndTag = line.slice( 0, 2 ) === '</';
+      let indentation = '';
+      for ( let i = 0; i < lines.length; i++ ) {
+        const line = lines[ i ];
+        const isEndTag = line.slice( 0, 2 ) === '</';
 
         if ( isEndTag ) {
           indentation = indentation.slice( indent.length );
@@ -1600,9 +1600,9 @@ define( require => {
       // Scan our drawable tree for Canvases. We'll rasterize them here (to data URLs) so we can replace them later in
       // the HTML tree (with images) before putting that in the foreignObject. That way, we can actually display
       // things rendered in Canvas in our rasterization.
-      var canvasUrlMap = {};
+      const canvasUrlMap = {};
 
-      var unknownIds = 0;
+      let unknownIds = 0;
 
       function addCanvas( canvas ) {
         if ( !canvas.id ) {
@@ -1620,7 +1620,7 @@ define( require => {
         }
         else if ( drawable.firstDrawable && drawable.lastDrawable ) {
           // we're a block
-          for ( var childDrawable = drawable.firstDrawable; childDrawable !== drawable.lastDrawable; childDrawable = childDrawable.nextDrawable ) {
+          for ( let childDrawable = drawable.firstDrawable; childDrawable !== drawable.lastDrawable; childDrawable = childDrawable.nextDrawable ) {
             scanForCanvases( childDrawable );
           }
           scanForCanvases( drawable.lastDrawable ); // wasn't hit in our simplified (and safer) loop
@@ -1644,20 +1644,20 @@ define( require => {
 
       // Create a new document, so that we can (1) serialize it to XHTML, and (2) manipulate it independently.
       // Inspired by http://cburgmer.github.io/rasterizeHTML.js/
-      var doc = document.implementation.createHTMLDocument( '' );
+      const doc = document.implementation.createHTMLDocument( '' );
       doc.documentElement.innerHTML = this.domElement.outerHTML;
       doc.documentElement.setAttribute( 'xmlns', doc.documentElement.namespaceURI );
 
       // Replace each <canvas> with an <img> that has src=canvas.toDataURL() and the same style
-      var displayCanvases = doc.documentElement.getElementsByTagName( 'canvas' );
+      let displayCanvases = doc.documentElement.getElementsByTagName( 'canvas' );
       displayCanvases = Array.prototype.slice.call( displayCanvases ); // don't use a live HTMLCollection copy!
-      for ( var i = 0; i < displayCanvases.length; i++ ) {
-        var displayCanvas = displayCanvases[ i ];
+      for ( let i = 0; i < displayCanvases.length; i++ ) {
+        const displayCanvas = displayCanvases[ i ];
 
-        var cssText = displayCanvas.style.cssText;
+        const cssText = displayCanvas.style.cssText;
 
-        var displayImg = doc.createElement( 'img' );
-        var src = canvasUrlMap[ displayCanvas.id ];
+        const displayImg = doc.createElement( 'img' );
+        const src = canvasUrlMap[ displayCanvas.id ];
         assert && assert( src, 'Must have missed a toDataURL() on a Canvas' );
 
         displayImg.src = src;
@@ -1666,9 +1666,9 @@ define( require => {
         displayCanvas.parentNode.replaceChild( displayImg, displayCanvas );
       }
 
-      var displayWidth = this.width;
-      var displayHeight = this.height;
-      var completeFunction = function() {
+      const displayWidth = this.width;
+      const displayHeight = this.height;
+      const completeFunction = function() {
         Display.elementToSVGDataURL( doc.documentElement, displayWidth, displayHeight, callback );
       };
 
@@ -1676,10 +1676,10 @@ define( require => {
       // <image ... xlink:href="http://localhost:8080/scenery-phet/images/battery-D-cell.png?bust=1476308407988"/>
       // gets replaced with a data URL.
       // See https://github.com/phetsims/scenery/issues/573
-      var replacedImages = 0; // Count how many images get replaced. We'll decrement with each finished image.
-      var hasReplacedImages = false; // Whether any images are replaced
-      var displaySVGImages = Array.prototype.slice.call( doc.documentElement.getElementsByTagName( 'image' ) );
-      for ( var j = 0; j < displaySVGImages.length; j++ ) {
+      let replacedImages = 0; // Count how many images get replaced. We'll decrement with each finished image.
+      let hasReplacedImages = false; // Whether any images are replaced
+      const displaySVGImages = Array.prototype.slice.call( doc.documentElement.getElementsByTagName( 'image' ) );
+      for ( let j = 0; j < displaySVGImages.length; j++ ) {
         var displaySVGImage = displaySVGImages[ j ];
         var currentHref = displaySVGImage.getAttribute( 'xlink:href' );
         if ( currentHref.slice( 0, 5 ) !== 'data:' ) {
@@ -1688,15 +1688,15 @@ define( require => {
 
           ( function() {
             // Closure variables need to be stored for each individual SVG image.
-            var refImage = new window.Image();
-            var svgImage = displaySVGImage;
+            const refImage = new window.Image();
+            const svgImage = displaySVGImage;
 
             refImage.onload = function() {
               // Get a Canvas
-              var refCanvas = document.createElement( 'canvas' );
+              const refCanvas = document.createElement( 'canvas' );
               refCanvas.width = refImage.width;
               refCanvas.height = refImage.height;
-              var refContext = refCanvas.getContext( '2d' );
+              const refContext = refCanvas.getContext( '2d' );
 
               // Draw the (now loaded) image into the Canvas
               refContext.drawImage( refImage, 0, 0 );
@@ -1749,16 +1749,16 @@ define( require => {
      * @param {function} callback - Called as callback( url: {string} ), where the URL will be the encoded SVG file.
      */
     elementToSVGDataURL: function( domElement, width, height, callback ) {
-      var canvas = document.createElement( 'canvas' );
-      var context = canvas.getContext( '2d' );
+      const canvas = document.createElement( 'canvas' );
+      const context = canvas.getContext( '2d' );
       canvas.width = width;
       canvas.height = height;
 
       // Serialize it to XHTML that can be used in foreignObject (HTML can't be)
-      var xhtml = new window.XMLSerializer().serializeToString( domElement );
+      const xhtml = new window.XMLSerializer().serializeToString( domElement );
 
       // Create an SVG container with a foreignObject.
-      var data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '">' +
+      const data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '">' +
                  '<foreignObject width="100%" height="100%">' +
                  '<div xmlns="http://www.w3.org/1999/xhtml">' +
                  xhtml +
@@ -1767,7 +1767,7 @@ define( require => {
                  '</svg>';
 
       // Load an <img> with the SVG data URL, and when loaded draw it into our Canvas
-      var img = new window.Image();
+      const img = new window.Image();
       img.onload = function() {
         context.drawImage( img, 0, 0 );
         callback( canvas.toDataURL() ); // Endpoint here
@@ -1778,8 +1778,8 @@ define( require => {
 
       // We can't btoa() arbitrary unicode, so we need another solution,
       // see https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding#The_.22Unicode_Problem.22
-      var uint8array = new window.TextEncoderLite( 'utf-8' ).encode( data );
-      var base64 = window.fromByteArray( uint8array );
+      const uint8array = new window.TextEncoderLite( 'utf-8' ).encode( data );
+      const base64 = window.fromByteArray( uint8array );
 
       // turn it to base64 and wrap it in the data URL format
       img.src = 'data:image/svg+xml;base64,' + base64;
@@ -1792,7 +1792,7 @@ define( require => {
      * @param  {Focus|null} value
      */
     set focus( value ) {
-      var previousFocus;
+      let previousFocus;
       if ( this.focusProperty.value ) {
         previousFocus = this.focusedNode;
       }
@@ -1823,8 +1823,8 @@ define( require => {
      * @returns {Node|null}
      */
     getFocusedNode: function() {
-      var focusedNode = null;
-      var focus = this.focusProperty.get();
+      let focusedNode = null;
+      const focus = this.focusProperty.get();
       if ( focus ) {
         focusedNode = focus.trail.lastNode();
       }
@@ -1891,7 +1891,7 @@ define( require => {
     assert && assert( !node.isDisposed, 'Disposed nodes should not be included in a scene graph to display.' );
 
     if ( assert ) {
-      for ( var i = 0; i < node.children.length; i++ ) {
+      for ( let i = 0; i < node.children.length; i++ ) {
         Display.assertSubtreeDisposed( node.children[ i ] );
       }
     }

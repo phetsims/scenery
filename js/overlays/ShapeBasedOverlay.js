@@ -18,7 +18,7 @@ define( require => {
     this.display = display;
     this.rootNode = rootNode;
 
-    var svg = this.svg = document.createElementNS( scenery.svgns, 'svg' );
+    const svg = this.svg = document.createElementNS( scenery.svgns, 'svg' );
     svg.style.position = 'absolute';
     svg.setAttribute( 'class', name );
     svg.style.top = 0;
@@ -43,8 +43,8 @@ define( require => {
 
   inherit( Object, ShapeBasedOverlay, {
     addShape: function( shape, color, isOffset ) {
-      var path = document.createElementNS( scenery.svgns, 'path' );
-      var svgPath = shape.getSVGPath();
+      const path = document.createElementNS( scenery.svgns, 'path' );
+      let svgPath = shape.getSVGPath();
 
       // temporary workaround for https://bugs.webkit.org/show_bug.cgi?id=78980
       // and http://code.google.com/p/chromium/issues/detail?id=231626 where even removing

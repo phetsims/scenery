@@ -47,7 +47,7 @@ define( require => {
      * @returns {*} - Whatever node.painterType is will be the type.
      */
     createPainter: function() {
-      var PainterType = this.node.painterType;
+      const PainterType = this.node.painterType;
       return new PainterType( this.webGLBlock.gl, this.node );
     },
 
@@ -77,9 +77,9 @@ define( require => {
 
     draw: function() {
       // we have a precompute need
-      var matrix = this.instance.relativeTransform.matrix;
+      const matrix = this.instance.relativeTransform.matrix;
 
-      var painted = this.painter.paint( matrix, this.webGLBlock.projectionMatrix );
+      const painted = this.painter.paint( matrix, this.webGLBlock.projectionMatrix );
 
       assert && assert( painted === scenery.WebGLNode.PAINTED_SOMETHING || painted === scenery.WebGLNode.PAINTED_NOTHING );
       assert && assert( scenery.WebGLNode.PAINTED_NOTHING === 0 && scenery.WebGLNode.PAINTED_SOMETHING === 1,

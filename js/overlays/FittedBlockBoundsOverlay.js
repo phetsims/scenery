@@ -26,7 +26,7 @@ define( require => {
   inherit( ShapeBasedOverlay, FittedBlockBoundsOverlay, {
     // @override
     addShapes: function() {
-      var self = this;
+      const self = this;
 
       function processBackbone( backbone, matrix ) {
         if ( backbone.willApplyTransform ) {
@@ -42,7 +42,7 @@ define( require => {
           self.addShape( Shape.bounds( block.fitBounds ).transformed( matrix ), 'rgba(255,0,0,0.8)', true );
         }
         if ( block.firstDrawable && block.lastDrawable ) {
-          for ( var childDrawable = block.firstDrawable; childDrawable !== block.lastDrawable; childDrawable = childDrawable.nextDrawable ) {
+          for ( let childDrawable = block.firstDrawable; childDrawable !== block.lastDrawable; childDrawable = childDrawable.nextDrawable ) {
             processDrawable( childDrawable, matrix );
           }
           processDrawable( block.lastDrawable, matrix );

@@ -17,7 +17,7 @@ define( require => {
   require( 'SCENERY/util/Util' );
 
   // TODO: change this based on memory and performance characteristics of the platform
-  var keepDOMImageElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
+  const keepDOMImageElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
 
   /**
    * A generated DOMSelfDrawable whose purpose will be drawing our Image. One of these drawables will be created
@@ -63,8 +63,8 @@ scenery.register( 'ImageDOMDrawable', ImageDOMDrawable );
      * This implements part of the DOMSelfDrawable required API for subtypes.
      */
     updateDOM: function() {
-      var node = this.node;
-      var img = this.domElement;
+      const node = this.node;
+      const img = this.domElement;
 
       if ( this.paintDirty && this.dirtyImage ) {
         // TODO: allow other ways of showing a DOM image?

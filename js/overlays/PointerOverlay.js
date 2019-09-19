@@ -19,7 +19,7 @@ define( require => {
   require( 'SCENERY/util/Trail' );
 
   function PointerOverlay( display, rootNode ) {
-    var self = this;
+    const self = this;
     this.display = display;
     this.rootNode = rootNode;
 
@@ -30,10 +30,10 @@ define( require => {
     this.pointerSVGContainer.style.left = 0;
     this.pointerSVGContainer.style[ 'pointer-events' ] = 'none';
 
-    var innerRadius = 10;
-    var strokeWidth = 1;
-    var diameter = ( innerRadius + strokeWidth / 2 ) * 2;
-    var radius = diameter / 2;
+    const innerRadius = 10;
+    const strokeWidth = 1;
+    const diameter = ( innerRadius + strokeWidth / 2 ) * 2;
+    const radius = diameter / 2;
 
     //Resize the parent div when the rootNode is resized
     display.onStatic( 'displaySize', function( dimension ) {
@@ -42,7 +42,7 @@ define( require => {
       self.pointerSVGContainer.style.clip = 'rect(0px,' + dimension.width + 'px,' + dimension.height + 'px,0px)';
     } );
 
-    var scratchMatrix = Matrix3.IDENTITY.copy();
+    const scratchMatrix = Matrix3.IDENTITY.copy();
 
     //Display a pointer that was added.  Use a separate SVG layer for each pointer so it can be hardware accelerated, otherwise it is too slow just setting svg internal attributes
     this.pointerAdded = function( pointer ) {
@@ -50,7 +50,7 @@ define( require => {
       // TODO: I believe this can be removed? Double-check
       if ( pointer.isKey ) { return; }
 
-      var svg = document.createElementNS( scenery.svgns, 'svg' );
+      const svg = document.createElementNS( scenery.svgns, 'svg' );
       svg.style.position = 'absolute';
       svg.style.top = 0;
       svg.style.left = 0;
@@ -62,7 +62,7 @@ define( require => {
       svg.setAttribute( 'width', diameter );
       svg.setAttribute( 'height', diameter );
 
-      var circle = document.createElementNS( scenery.svgns, 'circle' );
+      const circle = document.createElementNS( scenery.svgns, 'circle' );
 
       //use css transform for performance?
       circle.setAttribute( 'cx', innerRadius + strokeWidth / 2 );
@@ -73,7 +73,7 @@ define( require => {
       circle.setAttribute( 'opacity', 0.4 );
 
       //Add a move listener to the pointer to update position when it has moved
-      var pointerRemoved = function() {
+      const pointerRemoved = function() {
 
         //For touches that get a touch up event, remove them.  But when the mouse button is released, don't stop showing the mouse location
         if ( pointer instanceof Touch ) {

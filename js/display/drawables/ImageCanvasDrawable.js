@@ -43,7 +43,7 @@ define( require => {
      * @param {Matrix3} matrix - The transformation matrix applied for this node's coordinate system.
      */
     paintCanvas: function( wrapper, node, matrix ) {
-      var hasImageOpacity = node._imageOpacity !== 1;
+      const hasImageOpacity = node._imageOpacity !== 1;
 
       // Ensure that the image has been loaded by checking whether it has a width or height of 0.
       // See https://github.com/phetsims/scenery/issues/536
@@ -55,9 +55,9 @@ define( require => {
         }
 
         if ( node._mipmap && node.hasMipmaps() ) {
-          var level = node.getMipmapLevel( matrix );
-          var canvas = node.getMipmapCanvas( level );
-          var multiplier = Math.pow( 2, level );
+          const level = node.getMipmapLevel( matrix );
+          const canvas = node.getMipmapCanvas( level );
+          const multiplier = Math.pow( 2, level );
           wrapper.context.drawImage( canvas, 0, 0, canvas.width * multiplier, canvas.height * multiplier );
         }
         else {

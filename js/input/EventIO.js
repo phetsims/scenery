@@ -25,7 +25,7 @@ define( require => {
     static toStateObject( event ) {
       validate( event, this.validator );
 
-      var eventObject = {
+      const eventObject = {
         type: event.type,
         domEventType: event.domEvent.type
       };

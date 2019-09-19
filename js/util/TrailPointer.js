@@ -42,7 +42,7 @@ define( require => {
 
     // return the equivalent pointer that swaps before and after (may return null if it doesn't exist)
     getRenderSwappedPointer: function() {
-      var newTrail = this.isBefore ? this.trail.previous() : this.trail.next();
+      const newTrail = this.isBefore ? this.trail.previous() : this.trail.next();
 
       if ( newTrail === null ) {
         return null;
@@ -67,8 +67,8 @@ define( require => {
     compareRender: function( other ) {
       assert && assert( other !== null );
 
-      var a = this.getRenderBeforePointer();
-      var b = other.getRenderBeforePointer();
+      const a = this.getRenderBeforePointer();
+      const b = other.getRenderBeforePointer();
 
       if ( a !== null && b !== null ) {
         // normal (non-degenerate) case
@@ -93,7 +93,7 @@ define( require => {
     compareNested: function( other ) {
       assert && assert( other );
 
-      var comparison = this.trail.compare( other.trail );
+      const comparison = this.trail.compare( other.trail );
 
       if ( comparison === 0 ) {
         // if trails are equal, just compare before/after
@@ -153,7 +153,7 @@ define( require => {
           return null;
         }
         else {
-          var index = this.trail.indices[ this.trail.indices.length - 1 ];
+          const index = this.trail.indices[ this.trail.indices.length - 1 ];
           this.trail.removeDescendant();
 
           if ( this.trail.lastNode()._children.length > index + 1 ) {
@@ -179,7 +179,7 @@ define( require => {
           return null;
         }
         else {
-          var index = this.trail.indices[ this.trail.indices.length - 1 ];
+          const index = this.trail.indices[ this.trail.indices.length - 1 ];
           this.trail.removeDescendant();
 
           if ( index - 1 >= 0 ) {
@@ -195,7 +195,7 @@ define( require => {
       else {
         if ( this.trail.lastNode()._children.length > 0 ) {
           // stay isAfter, but walk to the last child
-          var children = this.trail.lastNode()._children;
+          const children = this.trail.lastNode()._children;
           this.trail.addDescendant( children[ children.length - 1 ], children.length - 1 );
         }
         else {
@@ -246,14 +246,14 @@ define( require => {
       this.trail.reindex();
       other.trail.reindex();
 
-      var pointer = this.copy();
+      const pointer = this.copy();
       pointer.trail.setMutable(); // this trail will be modified in the iteration, so references to it may be modified
 
-      var first = true;
+      let first = true;
 
       while ( !pointer.equalsNested( other ) ) {
         assert && assert( pointer.compareNested( other ) !== 1, 'skipped in depthFirstUntil' );
-        var skipSubtree = false;
+        let skipSubtree = false;
 
         if ( first ) {
           // start point
@@ -294,7 +294,7 @@ define( require => {
 
   // same as new TrailPointer( trailA, isBeforeA ).compareNested( new TrailPointer( trailB, isBeforeB ) )
   TrailPointer.compareNested = function( trailA, isBeforeA, trailB, isBeforeB ) {
-    var comparison = trailA.compare( trailB );
+    const comparison = trailA.compare( trailB );
 
     if ( comparison === 0 ) {
       // if trails are equal, just compare before/after

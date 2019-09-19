@@ -18,7 +18,7 @@ define( require => {
   // const Trail = require( 'SCENERY/util/Trail' );
 
   // globals (for restoring focus)
-  var focusedNode = null;
+  let focusedNode = null;
 
   var AccessibilityTree = {
     /**
@@ -36,7 +36,7 @@ define( require => {
       assert && assert( child instanceof scenery.Node );
       assert && assert( !child._rendererSummary.isNotAccessible() );
 
-      var blockedDisplays = AccessibilityTree.beforeOp( child );
+      const blockedDisplays = AccessibilityTree.beforeOp( child );
 
       if ( !child._accessibleParent ) {
         AccessibilityTree.addTree( parent, child );
@@ -62,7 +62,7 @@ define( require => {
       assert && assert( child instanceof scenery.Node );
       assert && assert( !child._rendererSummary.isNotAccessible() );
 
-      var blockedDisplays = AccessibilityTree.beforeOp( child );
+      const blockedDisplays = AccessibilityTree.beforeOp( child );
 
       if ( !child._accessibleParent ) {
         AccessibilityTree.removeTree( parent, child );
@@ -86,7 +86,7 @@ define( require => {
       assert && assert( node instanceof scenery.Node );
       assert && assert( !node._rendererSummary.isNotAccessible() );
 
-      var blockedDisplays = AccessibilityTree.beforeOp( node );
+      const blockedDisplays = AccessibilityTree.beforeOp( node );
 
       AccessibilityTree.reorder( node );
 
@@ -109,18 +109,18 @@ define( require => {
 
       assert && assert( node instanceof scenery.Node );
 
-      var blockedDisplays = AccessibilityTree.beforeOp( node );
+      const blockedDisplays = AccessibilityTree.beforeOp( node );
 
-      var removedItems = []; // {Array.<Node|null>} - May contain the placeholder null
-      var addedItems = []; // {Array.<Node|null>} - May contain the placeholder null
+      const removedItems = []; // {Array.<Node|null>} - May contain the placeholder null
+      const addedItems = []; // {Array.<Node|null>} - May contain the placeholder null
 
       arrayDifference( oldOrder || [], newOrder || [], removedItems, addedItems );
 
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'removed: ' + AccessibilityTree.debugOrder( removedItems ) );
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'added: ' + AccessibilityTree.debugOrder( addedItems ) );
 
-      var i;
-      var j;
+      let i;
+      let j;
 
       // Check some initial conditions
       if ( assert ) {
@@ -139,11 +139,11 @@ define( require => {
       // in an accessibleOrder, changing its parent's order to include it (or vice versa) triggers a rebuild when it
       // would not strictly be necessary.
 
-      var accessibleTrails = AccessibilityTree.findAccessibleTrails( node );
+      const accessibleTrails = AccessibilityTree.findAccessibleTrails( node );
 
       // Remove subtrees from us (that were removed)
       for ( i = 0; i < removedItems.length; i++ ) {
-        var removedItemToRemove = removedItems[ i ];
+        const removedItemToRemove = removedItems[ i ];
         if ( removedItemToRemove ) {
           AccessibilityTree.removeTree( node, removedItemToRemove, accessibleTrails );
           removedItemToRemove._accessibleParent = null;
@@ -152,9 +152,9 @@ define( require => {
 
       // Remove subtrees from their parents (that will be added here instead)
       for ( i = 0; i < addedItems.length; i++ ) {
-        var addedItemToRemove = addedItems[ i ];
+        const addedItemToRemove = addedItems[ i ];
         if ( addedItemToRemove ) {
-          var removedParents = addedItemToRemove._parents;
+          const removedParents = addedItemToRemove._parents;
           for ( j = 0; j < removedParents.length; j++ ) {
             AccessibilityTree.removeTree( removedParents[ j ], addedItemToRemove );
           }
@@ -164,9 +164,9 @@ define( require => {
 
       // Add subtrees to their parents (that were removed from our order)
       for ( i = 0; i < removedItems.length; i++ ) {
-        var removedItemToAdd = removedItems[ i ];
+        const removedItemToAdd = removedItems[ i ];
         if ( removedItemToAdd ) {
-          var addedParents = removedItemToAdd._parents;
+          const addedParents = removedItemToAdd._parents;
           for ( j = 0; j < addedParents.length; j++ ) {
             AccessibilityTree.addTree( addedParents[ j ], removedItemToAdd );
           }
@@ -175,7 +175,7 @@ define( require => {
 
       // Add subtrees to us (that were added in this order change)
       for ( i = 0; i < addedItems.length; i++ ) {
-        var addedItemToAdd = addedItems[ i ];
+        const addedItemToAdd = addedItems[ i ];
         addedItemToAdd && AccessibilityTree.addTree( node, addedItemToAdd, accessibleTrails );
       }
 
@@ -198,18 +198,18 @@ define( require => {
 
       assert && assert( node instanceof scenery.Node );
 
-      var blockedDisplays = AccessibilityTree.beforeOp( node );
+      const blockedDisplays = AccessibilityTree.beforeOp( node );
 
-      var i;
-      var parents = node._accessibleParent ? [ node._accessibleParent ] : node._parents;
-      var accessibleTrailsList = []; // accessibleTrailsList[ i ] := AccessibilityTree.findAccessibleTrails( parents[ i ] )
+      let i;
+      const parents = node._accessibleParent ? [ node._accessibleParent ] : node._parents;
+      const accessibleTrailsList = []; // accessibleTrailsList[ i ] := AccessibilityTree.findAccessibleTrails( parents[ i ] )
 
       // For now, just regenerate the full tree. Could optimize in the future, if we can swap the content for an
       // AccessibleInstance.
       for ( i = 0; i < parents.length; i++ ) {
-        var parent = parents[ i ];
+        const parent = parents[ i ];
 
-        var accessibleTrails = AccessibilityTree.findAccessibleTrails( parent );
+        const accessibleTrails = AccessibilityTree.findAccessibleTrails( parent );
         accessibleTrailsList.push( accessibleTrails );
 
         AccessibilityTree.removeTree( parent, node, accessibleTrails );
@@ -222,7 +222,7 @@ define( require => {
 
       // An edge case is where we change the rootNode of the display (and don't have an effective parent)
       for ( i = 0; i < node._rootedDisplays.length; i++ ) {
-        var display = node._rootedDisplays[ i ];
+        const display = node._rootedDisplays[ i ];
         if ( display._accessible ) {
           AccessibilityTree.rebuildInstanceTree( display._rootAccessibleInstance );
         }
@@ -240,7 +240,7 @@ define( require => {
      * @param {AccessibleInstance} rootInstance
      */
     rebuildInstanceTree: function( rootInstance ) {
-      var rootNode = rootInstance.display.rootNode;
+      const rootNode = rootInstance.display.rootNode;
       assert && assert( rootNode );
 
       rootInstance.removeAllChildren();
@@ -264,16 +264,16 @@ define( require => {
 
       accessibleTrails = accessibleTrails || AccessibilityTree.findAccessibleTrails( parent );
 
-      for ( var i = 0; i < accessibleTrails.length; i++ ) {
+      for ( let i = 0; i < accessibleTrails.length; i++ ) {
         sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'trail: ' + accessibleTrails[ i ].trail.toString() + ' full:' + accessibleTrails[ i ].fullTrail.toString() + ' for ' + accessibleTrails[ i ].accessibleInstance.toString() + ' root:' + accessibleTrails[ i ].isRoot );
         sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.push();
 
-        var partialTrail = accessibleTrails[ i ];
-        var parentInstance = partialTrail.accessibleInstance;
+        const partialTrail = accessibleTrails[ i ];
+        const parentInstance = partialTrail.accessibleInstance;
 
         // The full trail doesn't have the child in it, so we temporarily add that for tree creation
         partialTrail.fullTrail.addDescendant( child );
-        var childInstances = AccessibilityTree.createTree( partialTrail.fullTrail, parentInstance.display, parentInstance );
+        const childInstances = AccessibilityTree.createTree( partialTrail.fullTrail, parentInstance.display, parentInstance );
         partialTrail.fullTrail.removeDescendant( child );
 
         parentInstance.addConsecutiveInstances( childInstances );
@@ -298,8 +298,8 @@ define( require => {
 
       accessibleTrails = accessibleTrails || AccessibilityTree.findAccessibleTrails( parent );
 
-      for ( var i = 0; i < accessibleTrails.length; i++ ) {
-        var partialTrail = accessibleTrails[ i ];
+      for ( let i = 0; i < accessibleTrails.length; i++ ) {
+        const partialTrail = accessibleTrails[ i ];
 
         // The full trail doesn't have the child in it, so we temporarily add that for tree removal
         partialTrail.fullTrail.addDescendant( child );
@@ -323,8 +323,8 @@ define( require => {
 
       accessibleTrails = accessibleTrails || AccessibilityTree.findAccessibleTrails( node );
 
-      for ( var i = 0; i < accessibleTrails.length; i++ ) {
-        var partialTrail = accessibleTrails[ i ];
+      for ( let i = 0; i < accessibleTrails.length; i++ ) {
+        const partialTrail = accessibleTrails[ i ];
 
         // TODO: does it optimize things to pass the partial trail in (so we scan less)?
         partialTrail.accessibleInstance.sortChildren();
@@ -350,14 +350,14 @@ define( require => {
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'createTree ' + trail.toString() + ' parent:' + ( parentInstance ? parentInstance.toString() : 'null' ) );
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.push();
 
-      var node = trail.lastNode();
-      var effectiveChildren = node.getEffectiveChildren();
+      const node = trail.lastNode();
+      const effectiveChildren = node.getEffectiveChildren();
 
       sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'effectiveChildren: ' + AccessibilityTree.debugOrder( effectiveChildren ) );
 
       // If we are accessible ourself, we need to create the instance (so we can provide it to child instances).
-      var instance;
-      var existed = false;
+      let instance;
+      let existed = false;
       if ( node.accessibleContent ) {
         instance = parentInstance.findChildWithTrail( trail );
         if ( instance ) {
@@ -370,8 +370,8 @@ define( require => {
       }
 
       // Create all of the direct-child instances.
-      var childInstances = [];
-      for ( var i = 0; i < effectiveChildren.length; i++ ) {
+      const childInstances = [];
+      for ( let i = 0; i < effectiveChildren.length; i++ ) {
         trail.addDescendant( effectiveChildren[ i ], i );
         Array.prototype.push.apply( childInstances, AccessibilityTree.createTree( trail, display, parentInstance ) );
         trail.removeDescendant();
@@ -403,11 +403,11 @@ define( require => {
       focusedNode = scenery.Display && scenery.Display.focusedNode;
 
       // list of displays to stop blocking focus callbacks in afterOp
-      var displays = [];
+      const displays = [];
 
-      var accessibleTrails = this.findAccessibleTrails( node );
-      for ( var i = 0; i < accessibleTrails.length; i++ ) {
-        var display = accessibleTrails[ i ].accessibleInstance.display;
+      const accessibleTrails = this.findAccessibleTrails( node );
+      for ( let i = 0; i < accessibleTrails.length; i++ ) {
+        const display = accessibleTrails[ i ].accessibleInstance.display;
         display.blockFocusCallbacks = true;
         displays.push( display );
       }
@@ -424,7 +424,7 @@ define( require => {
     afterOp: function( blockedDisplays ) {
       focusedNode && focusedNode.focus();
 
-      for ( var i = 0; i < blockedDisplays.length; i++ ) {
+      for ( let i = 0; i < blockedDisplays.length; i++ ) {
         blockedDisplays[ i ].blockFocusCallbacks = false;
       }
     },
@@ -441,7 +441,7 @@ define( require => {
      * @returns {Array.<PartialAccessibleTrail>}
      */
     findAccessibleTrails: function( node ) {
-      var trails = [];
+      const trails = [];
       AccessibilityTree.recursiveAccessibleTrailSearch( trails, new scenery.Trail( node ) );
       return trails;
     },
@@ -454,14 +454,14 @@ define( require => {
      * @param {Trail} trail - Where to start from
      */
     recursiveAccessibleTrailSearch: function( trailResults, trail ) {
-      var root = trail.rootNode();
-      var i;
+      const root = trail.rootNode();
+      let i;
 
       // If we find accessible content, our search ends here. IF it is connected to any accessible displays somehow, it
       // will have accessible instances. We only care about these accessible instances, as they already have any DAG
       // deduplication applied.
       if ( root.accessibleContent ) {
-        var instances = root.accessibleInstances;
+        const instances = root.accessibleInstances;
 
         for ( i = 0; i < instances.length; i++ ) {
           trailResults.push( new PartialAccessibleTrail( instances[ i ], trail.copy(), false ) );
@@ -470,9 +470,9 @@ define( require => {
       }
       // Otherwise check for accessible displays for which our node is the rootNode.
       else {
-        var rootedDisplays = root.rootedDisplays;
+        const rootedDisplays = root.rootedDisplays;
         for ( i = 0; i < rootedDisplays.length; i++ ) {
-          var display = rootedDisplays[ i ];
+          const display = rootedDisplays[ i ];
 
           if ( display._accessible ) {
             trailResults.push( new PartialAccessibleTrail( display._rootAccessibleInstance, trail.copy(), true ) );
@@ -480,10 +480,10 @@ define( require => {
         }
       }
 
-      var parents = root._accessibleParent ? [ root._accessibleParent ] : root._parents;
-      var parentCount = parents.length;
+      const parents = root._accessibleParent ? [ root._accessibleParent ] : root._parents;
+      const parentCount = parents.length;
       for ( i = 0; i < parentCount; i++ ) {
-        var parent = parents[ i ];
+        const parent = parents[ i ];
 
         trail.addAncestor( parent );
         AccessibilityTree.recursiveAccessibleTrailSearch( trailResults, trail );
@@ -499,8 +499,8 @@ define( require => {
       if ( assertSlow ) {
         if ( node._accessibleDisplaysInfo.canHaveAccessibleDisplays() ) {
 
-          var i;
-          var displays = [];
+          let i;
+          const displays = [];
 
           // Concatenation of our parents' accessibleDisplays
           for ( i = 0; i < node._parents.length; i++ ) {
@@ -509,18 +509,18 @@ define( require => {
 
           // And concatenation of any rooted displays (that are a11y)
           for ( i = 0; i < node._rootedDisplays.length; i++ ) {
-            var display = node._rootedDisplays[ i ];
+            const display = node._rootedDisplays[ i ];
             if ( display._accessible ) {
               displays.push( display );
             }
           }
 
-          var actualArray = node._accessibleDisplaysInfo.accessibleDisplays.slice();
-          var expectedArray = displays.slice(); // slice helps in debugging
+          const actualArray = node._accessibleDisplaysInfo.accessibleDisplays.slice();
+          const expectedArray = displays.slice(); // slice helps in debugging
           assertSlow( actualArray.length === expectedArray.length );
 
           for ( i = 0; i < expectedArray.length; i++ ) {
-            for ( var j = 0; j < actualArray.length; j++ ) {
+            for ( let j = 0; j < actualArray.length; j++ ) {
               if ( expectedArray[ i ] === actualArray[ j ] ) {
                 expectedArray.splice( i, 1 );
                 actualArray.splice( j, 1 );
@@ -550,19 +550,19 @@ define( require => {
      */
     auditNodeForAccessibleCycles: function( node ) {
       if ( assert ) {
-        var trail = new scenery.Trail( node );
+        const trail = new scenery.Trail( node );
 
         ( function recursiveSearch() {
-          var root = trail.rootNode();
+          const root = trail.rootNode();
 
           assert( trail.length <= 1 || root !== node,
             'Accessible graph cycle detected. The combined scene-graph DAG with accessibleOrder defining additional ' +
             'parent-child relationships should still be a DAG. Cycle detected with the trail: ' + trail.toString() +
             ' path: ' + trail.toPathString() );
 
-          var parentCount = root._parents.length;
-          for ( var i = 0; i < parentCount; i++ ) {
-            var parent = root._parents[ i ];
+          const parentCount = root._parents.length;
+          for ( let i = 0; i < parentCount; i++ ) {
+            const parent = root._parents[ i ];
 
             trail.addAncestor( parent );
             recursiveSearch();

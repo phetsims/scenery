@@ -19,7 +19,7 @@ define( require => {
   require( 'SCENERY/util/Util' );
 
   // TODO: change this based on memory and performance characteristics of the platform
-  var keepDOMCircleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
+  const keepDOMCircleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
 
   /**
    * A generated DOMSelfDrawable whose purpose will be drawing our Circle. One of these drawables will be created
@@ -48,10 +48,10 @@ define( require => {
     // allocation and performance costs)
     if ( !this.fillElement || !this.strokeElement ) {
       // @protected {HTMLDivElement} - Will contain the fill by manipulating borderRadius
-      var fillElement = this.fillElement = document.createElement( 'div' );
+      const fillElement = this.fillElement = document.createElement( 'div' );
 
       // @protected {HTMLDivElement} - Will contain the stroke by manipulating borderRadius
-      var strokeElement = this.strokeElement = document.createElement( 'div' );
+      const strokeElement = this.strokeElement = document.createElement( 'div' );
 
       fillElement.style.display = 'block';
       fillElement.style.position = 'absolute';
@@ -85,9 +85,9 @@ define( require => {
      * This implements part of the DOMSelfDrawable required API for subtypes.
      */
     updateDOM: function() {
-      var node = this.node;
-      var fillElement = this.fillElement;
-      var strokeElement = this.strokeElement;
+      const node = this.node;
+      const fillElement = this.fillElement;
+      const strokeElement = this.strokeElement;
 
       // If paintDirty is false, there are no updates that are needed.
       if ( this.paintDirty ) {
@@ -113,7 +113,7 @@ define( require => {
         if ( node.hasStroke() ) {
           // since we only execute these if we have a stroke, we need to redo everything if there was no stroke previously.
           // the other option would be to update stroked information when there is no stroke (major performance loss for fill-only Circles)
-          var hadNoStrokeBefore = !this.hadStroke;
+          const hadNoStrokeBefore = !this.hadStroke;
 
           if ( hadNoStrokeBefore || this.dirtyLineWidth || this.dirtyRadius ) {
             strokeElement.style.width = ( 2 * node._radius - node.getLineWidth() ) + 'px';
@@ -134,7 +134,7 @@ define( require => {
       // shift the element vertically, postmultiplied with the entire transform.
       if ( this.transformDirty || this.dirtyRadius ) {
         this.matrix.set( this.getTransformMatrix() );
-        var translation = Matrix3.translation( -node._radius, -node._radius );
+        const translation = Matrix3.translation( -node._radius, -node._radius );
         this.matrix.multiplyMatrix( translation );
         translation.freeToPool();
         scenery.Util.applyPreparedTransform( this.matrix, this.fillElement, this.forceAcceleration );

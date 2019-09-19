@@ -16,7 +16,7 @@ define( require => {
   const SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
 
   // TODO: change this based on memory and performance characteristics of the platform
-  var keepSVGLineElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
+  const keepSVGLineElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
 
   /*---------------------------------------------------------------------------*
    * SVG Rendering
@@ -48,7 +48,7 @@ define( require => {
      * Implements the interface for SVGSelfDrawable (and is called from the SVGSelfDrawable's update).
      */
     updateSVGSelf: function() {
-      var line = this.svgElement;
+      const line = this.svgElement;
 
       if ( this.dirtyX1 ) {
         line.setAttribute( 'x1', this.node._x1 );

@@ -24,7 +24,7 @@ define( require => {
      * @param {number} y
      */
     mouseDown: function( display, x, y ) {
-      var domEvent = document.createEvent( 'MouseEvent' );
+      const domEvent = document.createEvent( 'MouseEvent' );
 
       // technically deprecated, but DOM4 event constructors not out yet. people on #whatwg said to use it
       domEvent.initMouseEvent( 'mousedown', true, true, window, 1, // click count
@@ -46,7 +46,7 @@ define( require => {
      * @param {number} y
      */
     mouseUp: function( display, x, y ) {
-      var domEvent = document.createEvent( 'MouseEvent' );
+      const domEvent = document.createEvent( 'MouseEvent' );
 
       // technically deprecated, but DOM4 event constructors not out yet. people on #whatwg said to use it
       domEvent.initMouseEvent( 'mouseup', true, true, window, 1, // click count
@@ -68,7 +68,7 @@ define( require => {
      * @param {number} y
      */
     mouseMove: function( display, x, y ) {
-      var domEvent = document.createEvent( 'MouseEvent' );
+      const domEvent = document.createEvent( 'MouseEvent' );
 
       // technically deprecated, but DOM4 event constructors not out yet. people on #whatwg said to use it
       domEvent.initMouseEvent( 'mousemove', true, true, window, 0, // click count
@@ -89,12 +89,12 @@ define( require => {
      * @param {Function} callback - Called with callback( {Display}, {Node}, {Node} ) - First node is the draggable rect
      */
     simpleRectangleTest: function( callback ) {
-      var node = new Node();
-      var display = new Display( node, { width: 640, height: 480 } );
+      const node = new Node();
+      const display = new Display( node, { width: 640, height: 480 } );
       display.initializeEvents();
       display.updateDisplay();
 
-      var rect = new Rectangle( 0, 0, 20, 20, { fill: 'red' } );
+      const rect = new Rectangle( 0, 0, 20, 20, { fill: 'red' } );
       node.addChild( rect );
 
       callback( display, rect, node );

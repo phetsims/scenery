@@ -12,7 +12,7 @@ define( require => {
   const inherit = require( 'PHET_CORE/inherit' );
   const scenery = require( 'SCENERY/scenery' );
 
-  var globalId = 1;
+  let globalId = 1;
 
   /**
    * @constructor

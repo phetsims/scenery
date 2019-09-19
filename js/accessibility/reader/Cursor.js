@@ -23,19 +23,19 @@ define( require => {
   const scenery = require( 'SCENERY/scenery' );
 
   // constants
-  var SPACE = ' '; // space to insert between words of text content
-  var END_OF_DOCUMENT = 'End of Document'; // flag thrown when there is no more content
-  var COMMA = ','; // some bits of text content should be separated with a comma for clear synth output
-  var LINE_WORD_LENGTH = 15; // number of words read in a single line
-  var NEXT = 'NEXT'; // constant that marks the direction of traversal
-  var PREVIOUS = 'PREVIOUS'; // constant that marks the direction of tragersal through the DOM
+  const SPACE = ' '; // space to insert between words of text content
+  const END_OF_DOCUMENT = 'End of Document'; // flag thrown when there is no more content
+  const COMMA = ','; // some bits of text content should be separated with a comma for clear synth output
+  const LINE_WORD_LENGTH = 15; // number of words read in a single line
+  const NEXT = 'NEXT'; // constant that marks the direction of traversal
+  const PREVIOUS = 'PREVIOUS'; // constant that marks the direction of tragersal through the DOM
 
   /**
    * Constructor.
    */
   function Cursor( domElement ) {
 
-    var self = this;
+    const self = this;
 
     // the output utterance for the cursor, to be read by the synth and handled in various ways
     // initial output is the document title
@@ -86,15 +86,15 @@ define( require => {
       self.keyState[ event.keyCode ] = true;
 
       // store the output text here
-      var outputText;
+      let outputText;
 
       // check to see if shift key pressed
       // TODO: we can optionally use the keyState object for this
-      var shiftKeyDown = event.shiftKey;
+      const shiftKeyDown = event.shiftKey;
 
       // direction to navigate through the DOM - usually, holding shift indicates the user wants to travers
       // backwards through the DOM
-      var direction = shiftKeyDown ? PREVIOUS : NEXT;
+      const direction = shiftKeyDown ? PREVIOUS : NEXT;
 
       // the dom can change at any time, make sure that we are reading a copy that is up to date
       self.linearDOM = self.getLinearDOMElements( domElement );
@@ -119,7 +119,7 @@ define( require => {
       }
       else if ( self.keyState[ 72 ] ) {
         // read the previous or next headings depending on whether the shift key is pressed
-        var headingLevels = [ 'H1', 'H2', 'H3', 'H4', 'H5', 'H6' ];
+        const headingLevels = [ 'H1', 'H2', 'H3', 'H4', 'H5', 'H6' ];
         outputText = self.readNextPreviousHeading( headingLevels, direction );
       }
       else if ( self.keyState[ 9 ] ) {
@@ -225,11 +225,11 @@ define( require => {
         self.activeElement = event.target;
 
         // so read out all content from aria markup since focus moved via application behavior
-        var withApplicationContent = true;
-        var outputText = self.getAccessibleText( this.activeElement, withApplicationContent );
+        const withApplicationContent = true;
+        const outputText = self.getAccessibleText( this.activeElement, withApplicationContent );
 
         if( outputText ) {
-          var liveRole = self.activeElement.getAttribute( 'aria-live' );
+          const liveRole = self.activeElement.getAttribute( 'aria-live' );
           self.outputUtteranceProperty.set( new Utterance( outputText, liveRole ) );
         }
       }
@@ -252,10 +252,10 @@ define( require => {
      */
     getLinearDOMElements: function( domElement ) {
       // gets ALL descendent children for the element
-      var children = domElement.getElementsByTagName( '*' );
+      const children = domElement.getElementsByTagName( '*' );
 
-      var linearDOM = [];
-      for( var i = 0; i < children.length; i++ ) {
+      const linearDOM = [];
+      for( let i = 0; i < children.length; i++ ) {
         if( children[i].nodeType === Node.ELEMENT_NODE ) {
           linearDOM[i] = ( children[ i ] );
         }
@@ -270,11 +270,11 @@ define( require => {
      * @returns {string}
      */
     getLiveRole: function( domElement ) {
-      var liveRole = null;
+      let liveRole = null;
 
       // collection of all roles that can produce 'live region' behavior
       // see https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Live_Regions
-      var roles = [ 'log', 'status', 'alert', 'progressbar', 'marquee', 'timer', 'assertive', 'polite' ];
+      const roles = [ 'log', 'status', 'alert', 'progressbar', 'marquee', 'timer', 'assertive', 'polite' ];
 
       roles.forEach( function( role ) {
         if ( domElement.getAttribute( 'aria-live' ) === role || domElement.getAttribute( 'role' ) === role ) {
@@ -297,10 +297,10 @@ define( require => {
         this.activeElement = this.linearDOM[ 0 ];
       }
 
-      var searchDelta = direction === 'NEXT' ? 1 : -1;
-      var activeIndex = this.linearDOM.indexOf( this.activeElement );
+      const searchDelta = direction === 'NEXT' ? 1 : -1;
+      const activeIndex = this.linearDOM.indexOf( this.activeElement );
 
-      var nextIndex = activeIndex + searchDelta;
+      const nextIndex = activeIndex + searchDelta;
       return this.linearDOM[ nextIndex ];
     },
 
@@ -310,10 +310,10 @@ define( require => {
      * @returns {HTMLElement}
      */
     getLabel: function( id ) {
-      var labels = document.getElementsByTagName( 'label' );
+      const labels = document.getElementsByTagName( 'label' );
 
       // loop through NodeList
-      var labelWithId;
+      let labelWithId;
       Array.prototype.forEach.call( labels, function( label ) {
         if ( label.getAttribute( 'for' ) ) {
           labelWithId = label;
@@ -335,7 +335,7 @@ define( require => {
     getAccessibleText: function( element, withApplicationContent ) {
 
       // placeholder for the text content that we will build up from the markup
-      var textContent = '';
+      let textContent = '';
 
       // if the element is undefined, we have reached the end of the document
       if ( !element ) {
@@ -360,7 +360,7 @@ define( require => {
       }
 
       // search up through the ancestors to see if this element should be hidden
-      var childElement = element;
+      let childElement = element;
       while ( childElement.parentElement ) {
         if ( childElement.getAttribute( 'aria-hidden' ) || childElement.hidden ) {
           return null;
@@ -382,19 +382,19 @@ define( require => {
         textContent += 'Heading Level 3, ' + element.textContent;
       }
       if ( element.tagName === 'UL' ) {
-        var listLength = element.children.length;
+        const listLength = element.children.length;
         textContent += 'List with ' + listLength + ' items';
       }
       if ( element.tagName === 'LI' ) {
         textContent += 'List Item: ' + element.textContent;
       }
       if ( element.tagName === 'BUTTON' ) {
-        var buttonLabel = ' Button';
+        const buttonLabel = ' Button';
         // check to see if this is a 'toggle' button with the 'aria-pressed' attribute
         if ( element.getAttribute( 'aria-pressed' ) ) {
-          var toggleLabel = ' toggle';
-          var pressedLabel = ' pressed';
-          var notLabel = ' not';
+          let toggleLabel = ' toggle';
+          const pressedLabel = ' pressed';
+          const notLabel = ' not';
 
           // insert a comma for readibility of the synth
           toggleLabel += buttonLabel + COMMA;
@@ -416,15 +416,15 @@ define( require => {
         }
         if ( element.type === 'checkbox' ) {
           // the checkbox should have a label - find the correct one
-          var checkboxLabel = this.getLabel( element.id );
-          var labelContent = checkboxLabel.textContent;
+          const checkboxLabel = this.getLabel( element.id );
+          const labelContent = checkboxLabel.textContent;
 
           // describe as a switch if it has the role
           if ( element.getAttribute( 'role' ) === 'switch' ) {
             // required for a checkbox
-            var ariaChecked = element.getAttribute( 'aria-checked' );
+            const ariaChecked = element.getAttribute( 'aria-checked' );
             if ( ariaChecked ) {
-              var switchedString = ( ariaChecked === 'true' ) ? 'On' : 'Off';
+              const switchedString = ( ariaChecked === 'true' ) ? 'On' : 'Off';
               textContent += labelContent + COMMA + SPACE + 'switch' + COMMA + SPACE + switchedString;
             }
             else {
@@ -432,7 +432,7 @@ define( require => {
             }
           }
           else {
-            var checkedString = element.checked ? ' Checked' : ' Not Checked';
+            const checkedString = element.checked ? ' Checked' : ' Not Checked';
             textContent += element.textContent + ' Checkbox' + checkedString;
           }
         }
@@ -451,18 +451,18 @@ define( require => {
         }
 
         // look for an aria-label
-        var ariaLabel = element.getAttribute( 'aria-label' );
+        const ariaLabel = element.getAttribute( 'aria-label' );
         if ( ariaLabel ) {
           textContent += SPACE + ariaLabel + COMMA;
         }
 
         // look for an aria-labelledBy attribute to see if there is another element in the DOM that
         // describes this one
-        var ariaLabelledById = element.getAttribute( 'aria-labelledBy' );
+        const ariaLabelledById = element.getAttribute( 'aria-labelledBy' );
         if ( ariaLabelledById ) {
 
-          var ariaLabelledBy = document.getElementById( ariaLabelledById );
-          var ariaLabelledByText = ariaLabelledBy.textContent;
+          const ariaLabelledBy = document.getElementById( ariaLabelledById );
+          const ariaLabelledByText = ariaLabelledBy.textContent;
 
           textContent += SPACE + ariaLabelledByText + COMMA;
         }
@@ -470,7 +470,7 @@ define( require => {
         // search up through the ancestors to find if the element has 'application' or 'document' content
         // TODO: Factor out into a searchUp type of function.
         childElement = element;
-        var role;
+        let role;
         while ( childElement.parentElement ) {
           role = childElement.getAttribute( 'role' );
           if ( role === 'document' || role === 'application' ) {
@@ -502,13 +502,13 @@ define( require => {
         }
 
         // look for an element in the DOM that describes this one
-        var ariaDescribedBy = element.getAttribute( 'aria-describedby' );
+        const ariaDescribedBy = element.getAttribute( 'aria-describedby' );
         if ( ariaDescribedBy ) {
           // the aria spec supports multiple description ID's for a single element
-          var descriptionIDs = ariaDescribedBy.split( SPACE );
+          const descriptionIDs = ariaDescribedBy.split( SPACE );
 
-          var descriptionElement;
-          var descriptionText;
+          let descriptionElement;
+          let descriptionText;
           descriptionIDs.forEach( function( descriptionID ) {
             descriptionElement = document.getElementById( descriptionID );
             descriptionText = descriptionElement.textContent;
@@ -535,7 +535,7 @@ define( require => {
      * @returns {HTMLElement}
      */
     getNextPreviousElementWithAccessibleContent: function( direction ) {
-      var accessibleContent;
+      let accessibleContent;
       while ( !accessibleContent ) {
         // set the selected element to the next element in the DOM
         this.activeElement = this.getNextPreviousElement( direction );
@@ -555,8 +555,8 @@ define( require => {
      */
     getNextPreviousElementWithRole: function( roles, direction ) {
 
-      var element = null;
-      var searchDelta = ( direction === NEXT ) ? 1 : -1;
+      let element = null;
+      const searchDelta = ( direction === NEXT ) ? 1 : -1;
 
       // if there is not an active element, use the first element in the DOM.
       if ( !this.activeElement ) {
@@ -564,13 +564,13 @@ define( require => {
       }
 
       // start search from the next or previous element and set up the traversal conditions
-      var searchIndex = this.linearDOM.indexOf( this.activeElement ) + searchDelta;
+      let searchIndex = this.linearDOM.indexOf( this.activeElement ) + searchDelta;
       while ( this.linearDOM[ searchIndex ] ) {
-        for ( var j = 0; j < roles.length; j++ ) {
-          var elementTag = this.linearDOM[ searchIndex ].tagName;
-          var elementType = this.linearDOM[ searchIndex ].type;
-          var elementRole = this.linearDOM[ searchIndex ].getAttribute( 'role' );
-          var searchRole = roles[ j ];
+        for ( let j = 0; j < roles.length; j++ ) {
+          const elementTag = this.linearDOM[ searchIndex ].tagName;
+          const elementType = this.linearDOM[ searchIndex ].type;
+          const elementRole = this.linearDOM[ searchIndex ].getAttribute( 'role' );
+          const searchRole = roles[ j ];
           if ( elementTag === searchRole || elementRole === searchRole || elementType === searchRole ) {
             element = this.linearDOM[ searchIndex ];
             break;
@@ -587,7 +587,7 @@ define( require => {
     },
 
     readNextPreviousLine: function( direction ) {
-      var line = '';
+      let line = '';
 
       // reset the content letter and word positions because we are reading a new line
       this.letterPosition = 0;
@@ -599,7 +599,7 @@ define( require => {
       }
 
       // get the accessible content for the active element, without any 'application' content, and split into words
-      var accessibleText = this.getAccessibleText( this.activeElement, false ).split( SPACE );
+      let accessibleText = this.getAccessibleText( this.activeElement, false ).split( SPACE );
 
       // if traversing backwards, position in line needs be at the start of previous line
       if ( direction === PREVIOUS ) {
@@ -612,7 +612,7 @@ define( require => {
         this.positionInLine = 0;
 
         // save the active element in case it needs to be restored
-        var previousElement = this.activeElement;
+        const previousElement = this.activeElement;
 
         // update the active element and set the accessible content from this element
         this.activeElement = this.getNextPreviousElementWithAccessibleContent( direction );
@@ -626,8 +626,8 @@ define( require => {
       }
 
       // read the next line of the accessible content
-      var lineLimit = this.positionInLine + LINE_WORD_LENGTH;
-      for( var i = this.positionInLine; i < lineLimit; i++ ) {
+      const lineLimit = this.positionInLine + LINE_WORD_LENGTH;
+      for( let i = this.positionInLine; i < lineLimit; i++ ) {
         if ( accessibleText[ i ] ) {
           line += accessibleText[ i ];
           this.positionInLine += 1;
@@ -655,7 +655,7 @@ define( require => {
      */
     readActiveLine: function() {
 
-      var line = '';
+      let line = '';
 
       // if there is no active line, find the next one
       if ( !this.activeLine ) {
@@ -663,10 +663,10 @@ define( require => {
       }
 
       // split up the active line into an array of words
-      var activeWords = this.activeLine.split( SPACE );
+      const activeWords = this.activeLine.split( SPACE );
 
       // read this line of content
-      for( var i = 0; i < LINE_WORD_LENGTH; i++ ) {
+      for( let i = 0; i < LINE_WORD_LENGTH; i++ ) {
         if ( activeWords[ i ] ) {
           line += activeWords[ i ];
 
@@ -691,11 +691,11 @@ define( require => {
       }
 
       // split the active line into an array of words
-      var activeWords = this.activeLine.split( SPACE );
+      const activeWords = this.activeLine.split( SPACE );
 
       // direction dependent variables
-      var searchDelta;
-      var contentEnd;
+      let searchDelta;
+      let contentEnd;
       if ( direction === NEXT ) {
         contentEnd = activeWords.length;
         searchDelta = 1;
@@ -711,7 +711,7 @@ define( require => {
       }
 
       // get the word to read update word position
-      var outputText = activeWords[ this.wordPosition ];
+      const outputText = activeWords[ this.wordPosition ];
       this.wordPosition += searchDelta;
 
       return outputText;
@@ -729,11 +729,11 @@ define( require => {
 
       // get the next element in the DOM with one of the above heading levels which has accessible content
       // to read
-      var accessibleText;
-      var nextElement;
+      let accessibleText;
+      let nextElement;
 
       // track the previous element - if there are no more headings, store it here
-      var previousElement;
+      let previousElement;
 
       while ( !accessibleText ) {
         previousElement = this.activeElement;
@@ -746,12 +746,12 @@ define( require => {
         // restore the active element
         this.activeElement = previousElement;
         // let the user know that there are no more headings at the desired level
-        var directionDescriptionString = ( direction === NEXT ) ? 'more' : 'previous';
+        const directionDescriptionString = ( direction === NEXT ) ? 'more' : 'previous';
         if ( headingLevels.length === 1 ) {
-          var noNextHeadingString = 'No ' + directionDescriptionString + ' headings at ';
+          const noNextHeadingString = 'No ' + directionDescriptionString + ' headings at ';
 
-          var headingLevel = headingLevels[ 0 ];
-          var levelString = headingLevel === 'H1' ? 'Level 1' :
+          const headingLevel = headingLevels[ 0 ];
+          const levelString = headingLevel === 'H1' ? 'Level 1' :
                             headingLevel === 'H2' ? 'Level 2' :
                             headingLevel === 'H3' ? 'Level 3' :
                             headingLevel === 'H4' ? 'Level 4' :
@@ -775,11 +775,11 @@ define( require => {
      */
     readNextPreviousButton: function( direction ) {
       // the following roles should handle 'role=button', 'type=button', 'tagName=BUTTON'
-      var roles = [ 'button', 'BUTTON', 'submit', 'reset' ];
+      const roles = [ 'button', 'BUTTON', 'submit', 'reset' ];
 
-      var nextElement;
-      var accessibleText;
-      var previousElement;
+      let nextElement;
+      let accessibleText;
+      let previousElement;
 
       while( !accessibleText ) {
         previousElement = this.activeElement;
@@ -792,7 +792,7 @@ define( require => {
 
       if ( !nextElement ) {
         this.activeElement = previousElement;
-        var directionDescriptionString = direction === NEXT ? 'more' : 'previous';
+        const directionDescriptionString = direction === NEXT ? 'more' : 'previous';
         return 'No ' + directionDescriptionString + ' buttons';
       }
 
@@ -802,15 +802,15 @@ define( require => {
 
     readNextPreviousFormElement: function( direction ) {
       // TODO: support more form elements!
-      var tagNames = [ 'INPUT', 'BUTTON' ];
-      var ariaRoles = [ 'button' ];
-      var roles = tagNames.concat( ariaRoles );
+      const tagNames = [ 'INPUT', 'BUTTON' ];
+      const ariaRoles = [ 'button' ];
+      const roles = tagNames.concat( ariaRoles );
 
-      var nextElement;
-      var accessibleText;
+      let nextElement;
+      let accessibleText;
 
       // track the previous element - if there are no more form elements it will need to be restored
-      var previousElement;
+      let previousElement;
 
       while ( !accessibleText ) {
         previousElement = this.activeElement;
@@ -823,7 +823,7 @@ define( require => {
 
       if ( accessibleText === END_OF_DOCUMENT ) {
         this.activeElement = previousElement;
-        var directionDescriptionString = direction === NEXT ? 'next' : 'previous';
+        const directionDescriptionString = direction === NEXT ? 'next' : 'previous';
         return 'No ' + directionDescriptionString + ' form field';
       }
 
@@ -836,16 +836,16 @@ define( require => {
         this.activeElement = this.getNextPreviousElementWithAccessibleContent( direction );
       }
 
-      var accessibleText;
+      let accessibleText;
 
       // if we are inside of a list, get the next peer, or find the next list
-      var parentElement = this.activeElement.parentElement;
+      const parentElement = this.activeElement.parentElement;
       if ( parentElement.tagName === 'UL' || parentElement.tagName === 'OL' ) {
 
-        var searchDelta = direction === NEXT ? 1 : -1;
+        const searchDelta = direction === NEXT ? 1 : -1;
 
         // Array.prototype must be used on the NodeList
-        var searchIndex = Array.prototype.indexOf.call( parentElement.children, this.activeElement ) + searchDelta;
+        let searchIndex = Array.prototype.indexOf.call( parentElement.children, this.activeElement ) + searchDelta;
 
         while ( parentElement.children[ searchIndex ] ) {
           accessibleText = this.getAccessibleText( parentElement.children[ searchIndex ] );
@@ -867,7 +867,7 @@ define( require => {
       }
 
       if ( !accessibleText ) {
-        var directionDescriptionString = ( direction === NEXT ) ? 'more' : 'previous';
+        const directionDescriptionString = ( direction === NEXT ) ? 'more' : 'previous';
         return 'No ' + directionDescriptionString + ' list items';
       }
 
@@ -880,8 +880,8 @@ define( require => {
       }
 
       // if we are inside of a list already, step out of it to begin searching there
-      var parentElement = this.activeElement.parentElement;
-      var activeElement;
+      const parentElement = this.activeElement.parentElement;
+      let activeElement;
       if ( parentElement.tagName === 'UL' || parentElement.tagName === 'OL' ) {
         // save the previous active element - if there are no more lists, this should not change
         activeElement = this.activeElement;
@@ -889,7 +889,7 @@ define( require => {
         this.activeElement = parentElement;
       }
 
-      var listElement = this.getNextPreviousElementWithRole( [ 'UL', 'OL' ], direction );
+      const listElement = this.getNextPreviousElementWithRole( [ 'UL', 'OL' ], direction );
 
       if ( !listElement ) {
 
@@ -899,16 +899,16 @@ define( require => {
         }
 
         // let the user know that there are no more lists and move to the next element
-        var directionDescriptionString = direction === NEXT ? 'more' : 'previous';
+        const directionDescriptionString = direction === NEXT ? 'more' : 'previous';
         return 'No ' + directionDescriptionString + ' lists';
       }
 
       // get the content from the list element
-      var listText = this.getAccessibleText( listElement );
+      const listText = this.getAccessibleText( listElement );
 
       // include the content from the first item in the list
-      var itemText = '';
-      var firstItem = listElement.children[ 0 ];
+      let itemText = '';
+      const firstItem = listElement.children[ 0 ];
       if ( firstItem ) {
         itemText = this.getAccessibleText( firstItem );
         this.activeElement = firstItem;
@@ -924,9 +924,9 @@ define( require => {
       }
 
       // directional dependent variables
-      var contentEnd;
-      var searchDelta;
-      var normalizeDirection;
+      let contentEnd;
+      let searchDelta;
+      let normalizeDirection;
       if ( direction === NEXT ) {
         contentEnd = this.activeLine.length;
         searchDelta = 1;
@@ -948,7 +948,7 @@ define( require => {
       }
 
       // get the letter to read and increment the letter position
-      var outputText = this.activeLine[ this.letterPosition + normalizeDirection ];
+      const outputText = this.activeLine[ this.letterPosition + normalizeDirection ];
       this.letterPosition += searchDelta;
 
       return outputText;
@@ -961,7 +961,7 @@ define( require => {
      */
     updateLiveElementList: function() {
 
-      var self = this;
+      const self = this;
 
       // remove all previous observers
       // TODO: only update the observer list if necessary
@@ -976,14 +976,14 @@ define( require => {
 
       // search through the DOM, looking for elements with a 'live region' attribute
       for ( i = 0; i < this.linearDOM.length; i++ ) {
-        var domElement = this.linearDOM[ i ];
-        var liveRole = self.getLiveRole( domElement );
+        const domElement = this.linearDOM[ i ];
+        const liveRole = self.getLiveRole( domElement );
 
         if( liveRole ) {
           var mutationObserverCallback = function( mutations ) {
             mutations.forEach( function( mutation ) {
-              var liveRole;
-              var mutatedElement = mutation.target;
+              let liveRole;
+              let mutatedElement = mutation.target;
 
               // look for the type of live role that is associated with this mutation
               // if the target has no live attribute, search through the element's ancestors to find the attribute
@@ -994,19 +994,19 @@ define( require => {
 
               // we only care about nodes added
               if ( mutation.addedNodes[ 0 ] ) {
-                var updatedText = mutation.addedNodes[ 0 ].data;
+                const updatedText = mutation.addedNodes[ 0 ].data;
                 self.outputUtteranceProperty.set( new Utterance( updatedText, liveRole ) );
               }
             } );
           };
 
           // create a mutation observer for this live element
-          var observer = new MutationObserver( function( mutations ) {
+          const observer = new MutationObserver( function( mutations ) {
             mutationObserverCallback( mutations );
           } );
 
           // listen for changes to the subtree in case children of the aria-live parent change their textContent
-          var observerConfig = { childList: true, subtree: true };
+          const observerConfig = { childList: true, subtree: true };
 
           observer.observe( domElement, observerConfig );
           self.observers.push( observer );
@@ -1024,9 +1024,9 @@ define( require => {
      */
     readEntireDocument: function() {
 
-      var liveRole = 'polite';
-      var outputText = this.getAccessibleText( this.activeElement );
-      var activeElement = this.activeElement;
+      const liveRole = 'polite';
+      let outputText = this.getAccessibleText( this.activeElement );
+      let activeElement = this.activeElement;
 
       while ( outputText !== END_OF_DOCUMENT ) {
         activeElement = this.activeElement;
@@ -1050,9 +1050,9 @@ define( require => {
     isFocusable: function( domElement ) {
       // list of attributes and tag names which should be in the navigation order
       // TODO: more roles!
-      var focusableRoles = [ 'tabindex', 'BUTTON', 'INPUT' ];
+      const focusableRoles = [ 'tabindex', 'BUTTON', 'INPUT' ];
 
-      var focusable = false;
+      let focusable = false;
       focusableRoles.forEach( function( role ) {
 
         if ( domElement.getAttribute( role ) ) {

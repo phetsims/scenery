@@ -16,10 +16,10 @@ define( require => {
 
   QUnit.test( 'Basics', function( assert ) {
     ListenerTestUtils.simpleRectangleTest( function( display, rect, node ) {
-      var pressCount = 0;
-      var releaseCount = 0;
-      var dragCount = 0;
-      var listener = new PressListener( {
+      let pressCount = 0;
+      let releaseCount = 0;
+      let dragCount = 0;
+      const listener = new PressListener( {
         press: function( event, listener ) {
           pressCount++;
         },
@@ -92,7 +92,7 @@ define( require => {
 
   QUnit.test( 'Interruption', function( assert ) {
     ListenerTestUtils.simpleRectangleTest( function( display, rect, node ) {
-      var listener = new PressListener();
+      const listener = new PressListener();
       rect.addInputListener( listener );
 
       ListenerTestUtils.mouseDown( display, 10, 10 );

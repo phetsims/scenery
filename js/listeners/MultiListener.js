@@ -29,7 +29,7 @@ define( require => {
    * @param {Object} [options] - See the constructor body (below) for documented options.
    */
   function MultiListener( targetNode, options ) {
-    var self = this;
+    const self = this;
 
     options = _.extend( {
       mouseButton: 0, // TODO: see PressListener
@@ -81,7 +81,7 @@ define( require => {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener pointer cancel' );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-        var press = self.findPress( event.pointer );
+        const press = self.findPress( event.pointer );
         press.interrupted = true;
 
         self.removePress( press );
@@ -135,7 +135,7 @@ define( require => {
   inherit( Object, MultiListener, {
 
     findPress: function( pointer ) {
-      for ( var i = 0; i < this._presses.length; i++ ) {
+      for ( let i = 0; i < this._presses.length; i++ ) {
         if ( this._presses[ i ].pointer === pointer ) {
           return this._presses[ i ];
         }
@@ -146,7 +146,7 @@ define( require => {
 
     findBackgroundPress: function( pointer ) {
       // TODO: reduce duplication with findPress?
-      for ( var i = 0; i < this._backgroundPresses.length; i++ ) {
+      for ( let i = 0; i < this._backgroundPresses.length; i++ ) {
         if ( this._backgroundPresses[ i ].pointer === pointer ) {
           return this._backgroundPresses[ i ];
         }
@@ -170,7 +170,7 @@ define( require => {
       assert && assert( _.includes( event.trail.nodes, this._targetNode ),
         'MultiListener down trail does not include targetNode?' );
 
-      var press = new Press( event.pointer, event.trail.subtrailTo( this._targetNode, false ) );
+      const press = new Press( event.pointer, event.trail.subtrailTo( this._targetNode, false ) );
 
       if ( !event.pointer.isAttached() ) {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener unattached, using press' );
@@ -260,9 +260,9 @@ define( require => {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener convertBackgroundPresses' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      var presses = this._backgroundPresses.slice();
-      for ( var i = 0; i < presses.length; i++ ) {
-        var press = presses[ i ];
+      const presses = this._backgroundPresses.slice();
+      for ( let i = 0; i < presses.length; i++ ) {
+        const press = presses[ i ];
         this.removeBackgroundPress( press );
         press.pointer.interruptAttached();
         this.addPress( press );
@@ -284,7 +284,7 @@ define( require => {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener recomputeLocals' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      for ( var i = 0; i < this._presses.length; i++ ) {
+      for ( let i = 0; i < this._presses.length; i++ ) {
         this._presses[ i ].recomputeLocalPoint();
       }
 
@@ -324,17 +324,17 @@ define( require => {
     // @private
     computeSinglePressMatrix: function() {
       // TODO: scratch things
-      var singleTargetPoint = this._presses[ 0 ].targetPoint;
-      var singleMappedPoint = this._targetNode.localToParentPoint( this._presses[ 0 ].localPoint );
-      var delta = singleTargetPoint.minus( singleMappedPoint );
+      const singleTargetPoint = this._presses[ 0 ].targetPoint;
+      const singleMappedPoint = this._targetNode.localToParentPoint( this._presses[ 0 ].localPoint );
+      const delta = singleTargetPoint.minus( singleMappedPoint );
       return Matrix3.translationFromVector( delta ).timesMatrix( this._targetNode.getMatrix() );
     },
 
     // @private
     computeTranslationMatrix: function() {
       // translation only. linear least-squares simplifies to sum of differences
-      var sum = new Vector2( 0, 0 );
-      for ( var i = 0; i < this._presses.length; i++ ) {
+      const sum = new Vector2( 0, 0 );
+      for ( let i = 0; i < this._presses.length; i++ ) {
         sum.add( this._presses[ i ].targetPoint );
         sum.subtract( this._presses[ i ].localPoint );
       }
@@ -344,11 +344,11 @@ define( require => {
     // @private
     computeTranslationScaleMatrix: function() {
       // TODO: minimize closures
-      var localPoints = this._presses.map( function( press ) { return press.localPoint; } );
-      var targetPoints = this._presses.map( function( press ) { return press.targetPoint; } );
+      const localPoints = this._presses.map( function( press ) { return press.localPoint; } );
+      const targetPoints = this._presses.map( function( press ) { return press.targetPoint; } );
 
-      var localCentroid = new Vector2( 0, 0 );
-      var targetCentroid = new Vector2( 0, 0 );
+      const localCentroid = new Vector2( 0, 0 );
+      const targetCentroid = new Vector2( 0, 0 );
 
       localPoints.forEach( function( localPoint ) { localCentroid.add( localPoint ); } );
       targetPoints.forEach( function( targetPoint ) { targetCentroid.add( targetPoint ); } );
@@ -356,30 +356,30 @@ define( require => {
       localCentroid.divideScalar( this._presses.length );
       targetCentroid.divideScalar( this._presses.length );
 
-      var localSquaredDistance = 0;
-      var targetSquaredDistance = 0;
+      let localSquaredDistance = 0;
+      let targetSquaredDistance = 0;
 
       localPoints.forEach( function( localPoint ) { localSquaredDistance += localPoint.distanceSquared( localCentroid ); } );
       targetPoints.forEach( function( targetPoint ) { targetSquaredDistance += targetPoint.distanceSquared( targetCentroid ); } );
 
-      var scale = Math.sqrt( targetSquaredDistance / localSquaredDistance );
+      const scale = Math.sqrt( targetSquaredDistance / localSquaredDistance );
 
-      var translateToTarget = Matrix3.translation( targetCentroid.x, targetCentroid.y );
-      var translateFromLocal = Matrix3.translation( -localCentroid.x, -localCentroid.y );
+      const translateToTarget = Matrix3.translation( targetCentroid.x, targetCentroid.y );
+      const translateFromLocal = Matrix3.translation( -localCentroid.x, -localCentroid.y );
 
       return translateToTarget.timesMatrix( Matrix3.scaling( scale ) ).timesMatrix( translateFromLocal );
     },
 
     // @private
     computeTranslationRotationMatrix: function() {
-      var i;
-      var localMatrix = new Matrix( 2, this._presses.length );
-      var targetMatrix = new Matrix( 2, this._presses.length );
-      var localCentroid = new Vector2( 0, 0 );
-      var targetCentroid = new Vector2( 0, 0 );
+      let i;
+      const localMatrix = new Matrix( 2, this._presses.length );
+      const targetMatrix = new Matrix( 2, this._presses.length );
+      const localCentroid = new Vector2( 0, 0 );
+      const targetCentroid = new Vector2( 0, 0 );
       for ( i = 0; i < this._presses.length; i++ ) {
-        var localPoint = this._presses[ i ].localPoint;
-        var targetPoint = this._presses[ i ].targetPoint;
+        const localPoint = this._presses[ i ].localPoint;
+        const targetPoint = this._presses[ i ].targetPoint;
         localCentroid.add( localPoint );
         targetCentroid.add( targetPoint );
         localMatrix.set( 0, i, localPoint.x );
@@ -397,16 +397,16 @@ define( require => {
         targetMatrix.set( 0, i, targetMatrix.get( 0, i ) - targetCentroid.x );
         targetMatrix.set( 1, i, targetMatrix.get( 1, i ) - targetCentroid.y );
       }
-      var covarianceMatrix = localMatrix.times( targetMatrix.transpose() );
-      var svd = new SingularValueDecomposition( covarianceMatrix );
-      var rotation = svd.getV().times( svd.getU().transpose() );
+      const covarianceMatrix = localMatrix.times( targetMatrix.transpose() );
+      const svd = new SingularValueDecomposition( covarianceMatrix );
+      let rotation = svd.getV().times( svd.getU().transpose() );
       if ( rotation.det() < 0 ) {
         rotation = svd.getV().times( Matrix.diagonalMatrix( [ 1, -1 ] ) ).times( svd.getU().transpose() );
       }
-      var rotation3 = new Matrix3().rowMajor( rotation.get( 0, 0 ), rotation.get( 0, 1 ), 0,
+      const rotation3 = new Matrix3().rowMajor( rotation.get( 0, 0 ), rotation.get( 0, 1 ), 0,
                                               rotation.get( 1, 0 ), rotation.get( 1, 1 ), 0,
                                               0, 0, 1 );
-      var translation = targetCentroid.minus( rotation3.timesVector2( localCentroid ) );
+      const translation = targetCentroid.minus( rotation3.timesVector2( localCentroid ) );
       rotation3.set02( translation.x );
       rotation3.set12( translation.y );
       return rotation3;
@@ -414,12 +414,12 @@ define( require => {
 
     // @private
     computeTranslationRotationScaleMatrix: function() {
-      var i;
-      var localMatrix = new Matrix( this._presses.length * 2, 4 );
+      let i;
+      const localMatrix = new Matrix( this._presses.length * 2, 4 );
       for ( i = 0; i < this._presses.length; i++ ) {
         // [ x  y 1 0 ]
         // [ y -x 0 1 ]
-        var localPoint = this._presses[ i ].localPoint;
+        const localPoint = this._presses[ i ].localPoint;
         localMatrix.set( 2 * i + 0, 0, localPoint.x );
         localMatrix.set( 2 * i + 0, 1, localPoint.y );
         localMatrix.set( 2 * i + 0, 2, 1 );
@@ -427,17 +427,17 @@ define( require => {
         localMatrix.set( 2 * i + 1, 1, -localPoint.x );
         localMatrix.set( 2 * i + 1, 3, 1 );
       }
-      var targetMatrix = new Matrix( this._presses.length * 2, 1 );
+      const targetMatrix = new Matrix( this._presses.length * 2, 1 );
       for ( i = 0; i < this._presses.length; i++ ) {
-        var targetPoint = this._presses[ i ].targetPoint;
+        const targetPoint = this._presses[ i ].targetPoint;
         targetMatrix.set( 2 * i + 0, 0, targetPoint.x );
         targetMatrix.set( 2 * i + 1, 0, targetPoint.y );
       }
-      var coefficientMatrix = SingularValueDecomposition.pseudoinverse( localMatrix ).times( targetMatrix );
-      var m11 = coefficientMatrix.get( 0, 0 );
-      var m12 = coefficientMatrix.get( 1, 0 );
-      var m13 = coefficientMatrix.get( 2, 0 );
-      var m23 = coefficientMatrix.get( 3, 0 );
+      const coefficientMatrix = SingularValueDecomposition.pseudoinverse( localMatrix ).times( targetMatrix );
+      const m11 = coefficientMatrix.get( 0, 0 );
+      const m12 = coefficientMatrix.get( 1, 0 );
+      const m13 = coefficientMatrix.get( 2, 0 );
+      const m23 = coefficientMatrix.get( 3, 0 );
       return new Matrix3().rowMajor( m11, m12, m13,
                                      -m12, m11, m23,
                                      0, 0, 1 );

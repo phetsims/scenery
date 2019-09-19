@@ -21,7 +21,7 @@ define( require => {
   const scenery = require( 'SCENERY/scenery' );
   const Shape = require( 'KITE/Shape' );
 
-  var CIRCLE_OPTION_KEYS = [
+  const CIRCLE_OPTION_KEYS = [
     'radius' // {number} - see setRadius() for more documentation
   ];
 
@@ -99,7 +99,7 @@ define( require => {
      * @returns {number} - Renderer bitmask, see Renderer for details
      */
     getStrokeRendererBitmask: function() {
-      var bitmask = Path.prototype.getStrokeRendererBitmask.call( this );
+      let bitmask = Path.prototype.getStrokeRendererBitmask.call( this );
       if ( this.hasStroke() && !this.getStroke().isGradient && !this.getStroke().isPattern && this.getLineWidth() <= this.getRadius() ) {
         bitmask |= Renderer.bitmaskDOM;
       }
@@ -153,10 +153,10 @@ define( require => {
      */
     intersectsBoundsSelf: function( bounds ) {
       // TODO: handle intersection with somewhat-infinite bounds!
-      var x = Math.abs( bounds.centerX );
-      var y = Math.abs( bounds.centerY );
-      var halfWidth = bounds.maxX - x;
-      var halfHeight = bounds.maxY - y;
+      let x = Math.abs( bounds.centerX );
+      let y = Math.abs( bounds.centerY );
+      const halfWidth = bounds.maxX - x;
+      const halfHeight = bounds.maxY - y;
 
       // too far to have a possible intersection
       if ( x > halfWidth + this._radius || y > halfHeight + this._radius ) {
@@ -243,8 +243,8 @@ define( require => {
         this._radius = radius;
         this.invalidateCircle();
 
-        var stateLen = this._drawables.length;
-        for ( var i = 0; i < stateLen; i++ ) {
+        const stateLen = this._drawables.length;
+        for ( let i = 0; i < stateLen; i++ ) {
           this._drawables[ i ].markDirtyRadius();
         }
       }
@@ -271,7 +271,7 @@ define( require => {
      * @returns {Bounds2}
      */
     computeShapeBounds: function() {
-      var bounds = new Bounds2( -this._radius, -this._radius, this._radius, this._radius );
+      let bounds = new Bounds2( -this._radius, -this._radius, this._radius, this._radius );
       if ( this._stroke ) {
         // since we are axis-aligned, any stroke will expand our bounds by a guaranteed set amount
         bounds = bounds.dilated( this.getLineWidth() / 2 );
@@ -290,12 +290,12 @@ define( require => {
      * @returns {boolean}
      */
     containsPointSelf: function( point ) {
-      var magSq = point.x * point.x + point.y * point.y;
-      var result = true;
-      var iRadius;
+      const magSq = point.x * point.x + point.y * point.y;
+      let result = true;
+      let iRadius;
       if ( this._strokePickable ) {
         iRadius = this.getLineWidth() / 2;
-        var outerRadius = this._radius + iRadius;
+        const outerRadius = this._radius + iRadius;
         result = result && magSq <= outerRadius * outerRadius;
       }
 
@@ -310,7 +310,7 @@ define( require => {
         }
       }
       else if ( this._strokePickable ) {
-        var innerRadius = this._radius - iRadius;
+        const innerRadius = this._radius - iRadius;
         return result && magSq >= innerRadius * innerRadius;
       }
       else {

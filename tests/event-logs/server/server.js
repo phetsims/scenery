@@ -16,7 +16,7 @@ http.createServer( function( req, res ) {
 
   // see http://nodejs.org/api/http.html#http_request_method for docs
 
-  var headers = {
+  const headers = {
     'Content-Type': 'text/plain',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
@@ -31,13 +31,13 @@ http.createServer( function( req, res ) {
     return;
   }
 
-  var logname = decodeURIComponent( req.url.slice( 1 ) );
+  const logname = decodeURIComponent( req.url.slice( 1 ) );
   if ( logname.indexOf( '..' ) !== -1 ) { throw new Error( 'bad logname: ' + logname ); } // brief check, there are probably other bad ways
-  var logfile = '../data/' + logname + '.js';
+  const logfile = '../data/' + logname + '.js';
 
   // interpret a POST as a file write
   if ( req.method === 'POST' ) {
-    var postdata = '';
+    let postdata = '';
     req.on( 'data', function( chunk ) {
       postdata += chunk;
     } );

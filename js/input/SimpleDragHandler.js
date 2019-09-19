@@ -28,7 +28,7 @@ define( require => {
    * @constructor
    */
   function SimpleDragHandler( options ) {
-    var self = this;
+    const self = this;
 
     options = _.extend( {
 
@@ -136,7 +136,7 @@ define( require => {
 
       if ( !self.dragging || self.isDisposed ) { return; }
 
-      var globalDelta = self.pointer.point.minus( self.lastDragPoint );
+      const globalDelta = self.pointer.point.minus( self.lastDragPoint );
 
       // ignore move events that have 0-length. Chrome seems to be auto-firing these on Windows,
       // see https://code.google.com/p/chromium/issues/detail?id=327114
@@ -144,7 +144,7 @@ define( require => {
         return;
       }
 
-      var delta = self.transform.inverseDelta2( globalDelta );
+      const delta = self.transform.inverseDelta2( globalDelta );
 
       assert && assert( event.pointer === self.pointer, 'Wrong pointer in move' );
 
@@ -154,7 +154,7 @@ define( require => {
       // move by the delta between the previous point, using the precomputed transform
       // prepend the translation on the node, so we can ignore whatever other transform state the node has
       if ( self.options.translate ) {
-        var translation = self.node.getMatrix().getTranslation();
+        const translation = self.node.getMatrix().getTranslation();
         self.options.translate.call( null, {
           delta: delta,
           oldPosition: translation,
@@ -166,7 +166,7 @@ define( require => {
       if ( self.options.drag ) {
 
         // TODO: add the position in to the listener
-        var saveCurrentTarget = event.currentTarget;
+        const saveCurrentTarget = event.currentTarget;
         event.currentTarget = self.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
         self.options.drag.call( null, event, self.trail ); // new position (old position?) delta
         event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
@@ -236,8 +236,8 @@ define( require => {
           return;
         }
 
-        var newMatrix = args.trail.getMatrix();
-        var oldMatrix = self.transform.getMatrix();
+        const newMatrix = args.trail.getMatrix();
+        const oldMatrix = self.transform.getMatrix();
 
         // if A was the trail's old transform, B is the trail's new transform, we need to apply (B^-1 A) to our node
         self.node.prependMatrix( newMatrix.inverted().timesMatrix( oldMatrix ) );
@@ -258,7 +258,7 @@ define( require => {
 
         assert && assert( event.pointer === self.pointer, 'Wrong pointer in up' );
         if ( !( event.pointer instanceof Mouse ) || event.domEvent.button === self.mouseButton ) {
-          var saveCurrentTarget = event.currentTarget;
+          const saveCurrentTarget = event.currentTarget;
           event.currentTarget = self.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
           self.endDrag( event );
           event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
@@ -276,7 +276,7 @@ define( require => {
 
         assert && assert( event.pointer === self.pointer, 'Wrong pointer in cancel' );
 
-        var saveCurrentTarget = event.currentTarget;
+        const saveCurrentTarget = event.currentTarget;
         event.currentTarget = self.node; // #66: currentTarget on a pointer is null, so set it to the node we're dragging
         self.endDrag( event );
         event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget

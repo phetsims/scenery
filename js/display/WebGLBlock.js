@@ -126,8 +126,8 @@ define( require => {
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'rebuildCanvas #' + this.id );
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.push();
 
-      var canvas = document.createElement( 'canvas' );
-      var gl = this.getContextFromCanvas( canvas );
+      const canvas = document.createElement( 'canvas' );
+      const gl = this.getContextFromCanvas( canvas );
 
       // Don't assert-failure out if this is not our first attempt (we're testing to see if we can recreate)
       assert && assert( gl || this.canvas, 'We should have a WebGL context by now' );
@@ -201,7 +201,7 @@ define( require => {
       this.texturedTrianglesProcessor.initializeContext( this.gl );
 
       // Notify spritesheets of the new context
-      for ( var i = 0; i < this.spriteSheets.length; i++ ) {
+      for ( let i = 0; i < this.spriteSheets.length; i++ ) {
         this.spriteSheets[ i ].initializeContext( this.gl );
       }
 
@@ -217,7 +217,7 @@ define( require => {
      */
     delayedRebuildCanvas: function() {
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'Delaying rebuilding of Canvas #' + this.id );
-      var self = this;
+      const self = this;
 
       // TODO: Can we move this to before the update() step? Could happen same-frame in that case.
       window.setTimeout( function() {
@@ -263,7 +263,7 @@ define( require => {
         sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'Context restored #' + this.id );
         sceneryLog && sceneryLog.WebGLBlock && sceneryLog.push();
 
-        var gl = this.getContextFromCanvas( this.canvas );
+        const gl = this.getContextFromCanvas( this.canvas );
         assert && assert( gl, 'We were told the context was restored, so this should work' );
 
         this.setupContext( gl );
@@ -282,7 +282,7 @@ define( require => {
      * @returns {WebGLRenderingContext|*} - If falsy, it did not succeed.
      */
     getContextFromCanvas: function( canvas ) {
-      var contextOptions = {
+      const contextOptions = {
         antialias: true,
         preserveDrawingBuffer: this.preserveDrawingBuffer
         // NOTE: we use premultiplied alpha since it should have better performance AND it appears to be the only one
@@ -296,7 +296,7 @@ define( require => {
     },
 
     setSizeFullDisplay: function() {
-      var size = this.display.getSize();
+      const size = this.display.getSize();
       this.canvas.width = Math.ceil( size.width * this.backingScale );
       this.canvas.height = Math.ceil( size.height * this.backingScale );
       this.canvas.style.width = size.width + 'px';
@@ -324,7 +324,7 @@ define( require => {
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'update #' + this.id );
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.push();
 
-      var gl = this.gl;
+      const gl = this.gl;
 
       if ( this.isContextLost && this.display._aggressiveContextRecreation ) {
         this.delayedRebuildCanvas();
@@ -336,8 +336,8 @@ define( require => {
       }
 
       // ensure sprite sheet textures are up-to-date
-      var numSpriteSheets = this.spriteSheets.length;
-      for ( var i = 0; i < numSpriteSheets; i++ ) {
+      const numSpriteSheets = this.spriteSheets.length;
+      for ( let i = 0; i < numSpriteSheets; i++ ) {
         this.spriteSheets[ i ].updateTexture();
       }
 
@@ -374,17 +374,17 @@ define( require => {
       // will be activated, will process a certain number of adjacent drawables with that processor's webglRenderer,
       // and then will be deactivated. This allows us to switch back-and-forth between different shader programs,
       // and allows us to trigger draw calls for each grouping of drawables in an efficient way.
-      var currentProcessor = null;
+      let currentProcessor = null;
       // How many draw calls have been executed. If no draw calls are executed while updating, it means nothing should
       // be drawn, and we'll have to manually clear the Canvas if we are not preserving the drawing buffer.
-      var cumulativeDrawCount = 0;
+      let cumulativeDrawCount = 0;
       // Iterate through all of our drawables (linked list)
       //OHTWO TODO: PERFORMANCE: create an array for faster drawable iteration (this is probably a hellish memory access pattern)
-      for ( var drawable = this.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
+      for ( let drawable = this.firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
         // ignore invisible drawables
         if ( drawable.visible ) {
           // select our desired processor
-          var desiredProcessor = null;
+          let desiredProcessor = null;
           if ( drawable.webglRenderer === Renderer.webglTexturedTriangles ) {
             desiredProcessor = this.texturedTrianglesProcessor;
           }
@@ -468,7 +468,7 @@ define( require => {
 
       // Ensure a removed drawable is not present in the dirtyDrawables array afterwards. Don't want to update it.
       // See https://github.com/phetsims/scenery/issues/635
-      var index = 0;
+      let index = 0;
       while ( ( index = this.dirtyDrawables.indexOf( drawable, index ) ) >= 0 ) {
         this.dirtyDrawables.splice( index, 1 );
       }
@@ -491,18 +491,18 @@ define( require => {
      * @returns {Sprite} - Throws an error if we can't accommodate the image
      */
     addSpriteSheetImage: function( image, width, height ) {
-      var sprite = null;
-      var numSpriteSheets = this.spriteSheets.length;
+      let sprite = null;
+      const numSpriteSheets = this.spriteSheets.length;
       // TODO: check for SpriteSheet containment first?
-      for ( var i = 0; i < numSpriteSheets; i++ ) {
-        var spriteSheet = this.spriteSheets[ i ];
+      for ( let i = 0; i < numSpriteSheets; i++ ) {
+        const spriteSheet = this.spriteSheets[ i ];
         sprite = spriteSheet.addImage( image, width, height );
         if ( sprite ) {
           break;
         }
       }
       if ( !sprite ) {
-        var newSpriteSheet = new SpriteSheet( true ); // use mipmaps for now?
+        const newSpriteSheet = new SpriteSheet( true ); // use mipmaps for now?
         sprite = newSpriteSheet.addImage( image, width, height );
         newSpriteSheet.initializeContext( this.gl );
         this.spriteSheets.push( newSpriteSheet );
@@ -595,7 +595,7 @@ define( require => {
     // @private
     draw: function() {
       if ( this.drawable ) {
-        var count = this.drawable.draw();
+        const count = this.drawable.draw();
         assert && assert( typeof count === 'number' );
         this.drawCount += count;
         this.drawable = null;
@@ -681,11 +681,11 @@ define( require => {
 
     processDrawable: function( drawable ) {
       if ( drawable.includeVertices ) {
-        var vertexData = drawable.vertexArray;
+        const vertexData = drawable.vertexArray;
 
         // if our vertex data won't fit, keep doubling the size until it fits
         while ( vertexData.length + this.vertexArrayIndex > this.vertexArray.length ) {
-          var newVertexArray = new Float32Array( this.vertexArray.length * 2 );
+          const newVertexArray = new Float32Array( this.vertexArray.length * 2 );
           newVertexArray.set( this.vertexArray );
           this.vertexArray = newVertexArray;
         }
@@ -710,7 +710,7 @@ define( require => {
 
     // @private
     draw: function() {
-      var gl = this.gl;
+      const gl = this.gl;
 
       // (uniform) projection transform into normalized device coordinates
       gl.uniformMatrix3fv( this.shaderProgram.uniformLocations.uProjectionMatrix, false, this.projectionMatrixArray );
@@ -724,8 +724,8 @@ define( require => {
       else {
         gl.bufferSubData( gl.ARRAY_BUFFER, 0, this.vertexArray.subarray( 0, this.vertexArrayIndex ) );
       }
-      var sizeOfFloat = Float32Array.BYTES_PER_ELEMENT;
-      var stride = 6 * sizeOfFloat;
+      const sizeOfFloat = Float32Array.BYTES_PER_ELEMENT;
+      const stride = 6 * sizeOfFloat;
       gl.vertexAttribPointer( this.shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, stride, 0 * sizeOfFloat );
       gl.vertexAttribPointer( this.shaderProgram.attributeLocations.aColor, 4, gl.FLOAT, false, stride, 2 * sizeOfFloat );
 
@@ -829,11 +829,11 @@ define( require => {
       }
       this.currentSpriteSheet = drawable.sprite.spriteSheet;
 
-      var vertexData = drawable.vertexArray;
+      const vertexData = drawable.vertexArray;
 
       // if our vertex data won't fit, keep doubling the size until it fits
       while ( vertexData.length + this.vertexArrayIndex > this.vertexArray.length ) {
-        var newVertexArray = new Float32Array( this.vertexArray.length * 2 );
+        const newVertexArray = new Float32Array( this.vertexArray.length * 2 );
         newVertexArray.set( this.vertexArray );
         this.vertexArray = newVertexArray;
       }
@@ -856,7 +856,7 @@ define( require => {
     // @private
     draw: function() {
       assert && assert( this.currentSpriteSheet );
-      var gl = this.gl;
+      const gl = this.gl;
 
       // (uniform) projection transform into normalized device coordinates
       gl.uniformMatrix3fv( this.shaderProgram.uniformLocations.uProjectionMatrix, false, this.projectionMatrixArray );
@@ -871,9 +871,9 @@ define( require => {
         gl.bufferSubData( gl.ARRAY_BUFFER, 0, this.vertexArray.subarray( 0, this.vertexArrayIndex ) );
       }
 
-      var numComponents = 5;
-      var sizeOfFloat = Float32Array.BYTES_PER_ELEMENT;
-      var stride = numComponents * sizeOfFloat;
+      const numComponents = 5;
+      const sizeOfFloat = Float32Array.BYTES_PER_ELEMENT;
+      const stride = numComponents * sizeOfFloat;
       gl.vertexAttribPointer( this.shaderProgram.attributeLocations.aVertex, 2, gl.FLOAT, false, stride, 0 * sizeOfFloat );
       gl.vertexAttribPointer( this.shaderProgram.attributeLocations.aTextureCoord, 2, gl.FLOAT, false, stride, 2 * sizeOfFloat );
       gl.vertexAttribPointer( this.shaderProgram.attributeLocations.aAlpha, 1, gl.FLOAT, false, stride, 4 * sizeOfFloat );

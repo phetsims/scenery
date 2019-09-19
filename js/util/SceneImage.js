@@ -30,7 +30,7 @@ define( require => {
   inherit( Object, SceneImage, {
     // NOTE: calling this before the previous update() completes may cause the previous onComplete to not be executed
     update: function( onComplete ) {
-      var self = this;
+      const self = this;
 
       this.scene.updateScene();
 
@@ -38,7 +38,7 @@ define( require => {
       this.canvas.height = this.scene.getSceneHeight();
 
       this.scene.renderToCanvas( this.canvas, this.context, function() {
-        var url = self.toDataURL();
+        const url = self.toDataURL();
 
         self.img.onload = function() {
           onComplete();

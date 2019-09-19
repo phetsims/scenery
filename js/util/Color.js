@@ -20,8 +20,8 @@ define( require => {
   const Util = require( 'DOT/Util' );
 
   // constants
-  var clamp = Util.clamp;
-  var linear = Util.linear;
+  const clamp = Util.clamp;
+  const linear = Util.linear;
 
   /**
    * Creates a Color with an initial value. Multiple different types of parameters are supported:
@@ -47,13 +47,13 @@ define( require => {
   scenery.register( 'Color', Color );
 
   // regex utilities
-  var rgbNumber = '(-?\\d{1,3}%?)'; // syntax allows negative integers and percentages
-  var aNumber = '(\\d+|\\d*\\.\\d+)'; // decimal point number. technically we allow for '255', even though this will be clamped to 1.
-  var rawNumber = '(\\d{1,3})'; // a 1-3 digit number
+  const rgbNumber = '(-?\\d{1,3}%?)'; // syntax allows negative integers and percentages
+  const aNumber = '(\\d+|\\d*\\.\\d+)'; // decimal point number. technically we allow for '255', even though this will be clamped to 1.
+  const rawNumber = '(\\d{1,3})'; // a 1-3 digit number
 
   // handles negative and percentage values
   function parseRGBNumber( str ) {
-    var multiplier = 1;
+    let multiplier = 1;
 
     // if it's a percentage, strip it off and handle it that way
     if ( str.charAt( str.length - 1 ) === '%' ) {
@@ -200,10 +200,10 @@ define( require => {
         assert && assert( typeof r === 'number' );
         assert && assert( g === undefined || typeof g === 'number' );
 
-        var red = ( r >> 16 ) & 0xFF;
-        var green = ( r >> 8 ) & 0xFF;
-        var blue = ( r >> 0 ) & 0xFF;
-        var alpha = ( g === undefined ) ? 1 : g;
+        const red = ( r >> 16 ) & 0xFF;
+        const green = ( r >> 8 ) & 0xFF;
+        const blue = ( r >> 0 ) & 0xFF;
+        const alpha = ( g === undefined ) ? 1 : g;
         this.setRGBA( red, green, blue, alpha );
       }
       // support for set( r, g, b ) and set( r, g, b, a )
@@ -265,18 +265,18 @@ define( require => {
     blend: function( otherColor, ratio ) {
       assert && assert( otherColor instanceof Color );
 
-      var gamma = 2.4;
-      var linearRedA = Math.pow( this.r, gamma );
-      var linearRedB = Math.pow( otherColor.r, gamma );
-      var linearGreenA = Math.pow( this.g, gamma );
-      var linearGreenB = Math.pow( otherColor.g, gamma );
-      var linearBlueA = Math.pow( this.b, gamma );
-      var linearBlueB = Math.pow( otherColor.b, gamma );
+      const gamma = 2.4;
+      const linearRedA = Math.pow( this.r, gamma );
+      const linearRedB = Math.pow( otherColor.r, gamma );
+      const linearGreenA = Math.pow( this.g, gamma );
+      const linearGreenB = Math.pow( otherColor.g, gamma );
+      const linearBlueA = Math.pow( this.b, gamma );
+      const linearBlueB = Math.pow( otherColor.b, gamma );
 
-      var r = Math.pow( linearRedA + ( linearRedB - linearRedA ) * ratio, 1 / gamma );
-      var g = Math.pow( linearGreenA + ( linearGreenB - linearGreenA ) * ratio, 1 / gamma );
-      var b = Math.pow( linearBlueA + ( linearBlueB - linearBlueA ) * ratio, 1 / gamma );
-      var a = this.a + ( otherColor.a - this.a ) * ratio;
+      const r = Math.pow( linearRedA + ( linearRedB - linearRedA ) * ratio, 1 / gamma );
+      const g = Math.pow( linearGreenA + ( linearGreenB - linearGreenA ) * ratio, 1 / gamma );
+      const b = Math.pow( linearBlueA + ( linearBlueB - linearBlueA ) * ratio, 1 / gamma );
+      const a = this.a + ( otherColor.a - this.a ) * ratio;
 
       return new Color( r, g, b, a );
     },
@@ -290,12 +290,12 @@ define( require => {
         // Since this needs to be done quickly, and we don't particularly care about slight rounding differences (it's
         // being used for display purposes only, and is never shown to the user), we use the built-in JS toFixed instead of
         // Dot's version of toFixed. See https://github.com/phetsims/kite/issues/50
-        var alpha = this.a.toFixed( 20 );
+        let alpha = this.a.toFixed( 20 );
         while ( alpha.length >= 2 && alpha[ alpha.length - 1 ] === '0' && alpha[ alpha.length - 2 ] !== '.' ) {
           alpha = alpha.slice( 0, alpha.length - 1 );
         }
 
-        var alphaString = this.a === 0 || this.a === 1 ? this.a : alpha;
+        const alphaString = this.a === 0 || this.a === 1 ? this.a : alpha;
         return 'rgba(' + this.r + ',' + this.g + ',' + this.b + ',' + alphaString + ')';
       }
     },
@@ -308,20 +308,20 @@ define( require => {
     },
 
     setCSS: function( cssString ) {
-      var str = cssString.replace( / /g, '' ).toLowerCase();
-      var success = false;
+      let str = cssString.replace( / /g, '' ).toLowerCase();
+      let success = false;
 
       // replace colors based on keywords
-      var keywordMatch = Color.colorKeywords[ str ];
+      const keywordMatch = Color.colorKeywords[ str ];
       if ( keywordMatch ) {
         str = '#' + keywordMatch;
       }
 
       // run through the available text formats
-      for ( var i = 0; i < Color.formatParsers.length; i++ ) {
-        var parser = Color.formatParsers[ i ];
+      for ( let i = 0; i < Color.formatParsers.length; i++ ) {
+        const parser = Color.formatParsers[ i ];
 
-        var matches = parser.regexp.exec( str );
+        const matches = parser.regexp.exec( str );
         if ( matches ) {
           parser.apply( this, matches );
           success = true;
@@ -361,7 +361,7 @@ define( require => {
                         this.alpha >= 0 && this.alpha <= 1,
         'Ensure color components are in the proper ranges: ' + this.toString() );
 
-      var oldCSS = this._css;
+      const oldCSS = this._css;
       this._css = this.computeCSS();
 
       // notify listeners if it changed
@@ -396,8 +396,8 @@ define( require => {
       lightness = clamp( lightness / 100, 0, 1 );   // percentage
 
       // see http://www.w3.org/TR/css3-color/
-      var m1;
-      var m2;
+      let m1;
+      let m2;
       if ( lightness < 0.5 ) {
         m2 = lightness * ( saturation + 1 );
       }
@@ -434,9 +434,9 @@ define( require => {
     // matches Java's Color.brighter()
     brighterColor: function( factor ) {
       factor = this.checkFactor( factor );
-      var red = Math.min( 255, Math.floor( this.r / factor ) );
-      var green = Math.min( 255, Math.floor( this.g / factor ) );
-      var blue = Math.min( 255, Math.floor( this.b / factor ) );
+      const red = Math.min( 255, Math.floor( this.r / factor ) );
+      const green = Math.min( 255, Math.floor( this.g / factor ) );
+      const blue = Math.min( 255, Math.floor( this.b / factor ) );
       return new Color( red, green, blue, this.a );
     },
 
@@ -447,18 +447,18 @@ define( require => {
      */
     colorUtilsBrighter: function( factor ) {
       factor = this.checkFactor( factor );
-      var red = Math.min( 255, this.getRed() + Math.floor( factor * ( 255 - this.getRed() ) ) );
-      var green = Math.min( 255, this.getGreen() + Math.floor( factor * ( 255 - this.getGreen() ) ) );
-      var blue = Math.min( 255, this.getBlue() + Math.floor( factor * ( 255 - this.getBlue() ) ) );
+      const red = Math.min( 255, this.getRed() + Math.floor( factor * ( 255 - this.getRed() ) ) );
+      const green = Math.min( 255, this.getGreen() + Math.floor( factor * ( 255 - this.getGreen() ) ) );
+      const blue = Math.min( 255, this.getBlue() + Math.floor( factor * ( 255 - this.getBlue() ) ) );
       return new Color( red, green, blue, this.getAlpha() );
     },
 
     // matches Java's Color.darker()
     darkerColor: function( factor ) {
       factor = this.checkFactor( factor );
-      var red = Math.max( 0, Math.floor( factor * this.r ) );
-      var green = Math.max( 0, Math.floor( factor * this.g ) );
-      var blue = Math.max( 0, Math.floor( factor * this.b ) );
+      const red = Math.max( 0, Math.floor( factor * this.r ) );
+      const green = Math.max( 0, Math.floor( factor * this.g ) );
+      const blue = Math.max( 0, Math.floor( factor * this.b ) );
       return new Color( red, green, blue, this.a );
     },
 
@@ -472,9 +472,9 @@ define( require => {
      */
     colorUtilsDarker: function( factor ) {
       factor = this.checkFactor( factor );
-      var red = Math.max( 0, this.getRed() - Math.floor( factor * this.getRed() ) );
-      var green = Math.max( 0, this.getGreen() - Math.floor( factor * this.getGreen() ) );
-      var blue = Math.max( 0, this.getBlue() - Math.floor( factor * this.getBlue() ) );
+      const red = Math.max( 0, this.getRed() - Math.floor( factor * this.getRed() ) );
+      const green = Math.max( 0, this.getGreen() - Math.floor( factor * this.getGreen() ) );
+      const blue = Math.max( 0, this.getBlue() - Math.floor( factor * this.getBlue() ) );
       return new Color( red, green, blue, this.getAlpha() );
     },
 
@@ -714,10 +714,10 @@ define( require => {
     if ( distance < 0 || distance > 1 ) {
       throw new Error( 'distance must be between 0 and 1: ' + distance );
     }
-    var r = Math.floor( linear( 0, 1, color1.r, color2.r, distance ) );
-    var g = Math.floor( linear( 0, 1, color1.g, color2.g, distance ) );
-    var b = Math.floor( linear( 0, 1, color1.b, color2.b, distance ) );
-    var a = linear( 0, 1, color1.a, color2.a, distance );
+    const r = Math.floor( linear( 0, 1, color1.r, color2.r, distance ) );
+    const g = Math.floor( linear( 0, 1, color1.g, color2.g, distance ) );
+    const b = Math.floor( linear( 0, 1, color1.b, color2.b, distance ) );
+    const a = linear( 0, 1, color1.a, color2.a, distance );
     return new Color( r, g, b, a );
   };
 
@@ -729,7 +729,7 @@ define( require => {
     return new Color( 0, 0, 0, 1 ).setHSLA( hue, saturation, lightness, alpha );
   };
 
-  var scratchColor = new Color( 'blue' );
+  const scratchColor = new Color( 'blue' );
   Color.checkPaintString = function( cssString ) {
     if ( assert ) {
       try {

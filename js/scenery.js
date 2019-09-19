@@ -24,12 +24,12 @@ define( require => {
   window.sceneryLog = null;
   window.sceneryAccessibilityLog = null;
 
-  var scratchCanvas = document.createElement( 'canvas' );
-  var scratchContext = scratchCanvas.getContext( '2d' );
+  const scratchCanvas = document.createElement( 'canvas' );
+  const scratchContext = scratchCanvas.getContext( '2d' );
 
-  var logPadding = '';
+  let logPadding = '';
 
-  var scenery = new Namespace( 'scenery' );
+  const scenery = new Namespace( 'scenery' );
 
   // @public - A Canvas and 2D Canvas context used for convenience functions (think of it as having arbitrary state).
   scenery.register( 'scratchCanvas', scratchCanvas );
@@ -58,7 +58,7 @@ define( require => {
   }
 
   // @private - List of Scenery's loggers, with their display name and (if using console) the display style.
-  var logProperties = {
+  const logProperties = {
     dirty: { name: 'dirty', style: 'color: #888;' },
     bounds: { name: 'bounds', style: 'color: #888;' },
     hitTest: { name: 'hitTest', style: 'color: #888;' },
@@ -169,10 +169,10 @@ define( require => {
           'Unknown logger: ' + name + ', please use periods (.) to separate different log names' );
 
         window.sceneryLog[ name ] = window.sceneryLog[ name ] || function( ob, styleOverride ) {
-          var data = logProperties[ name ];
+          const data = logProperties[ name ];
 
-          var prefix = data.name ? '[' + data.name + '] ' : '';
-          var padStyle = 'color: #ddd;';
+          const prefix = data.name ? '[' + data.name + '] ' : '';
+          const padStyle = 'color: #ddd;';
           scenery.logFunction( '%c' + logPadding + '%c' + prefix + ob, padStyle, styleOverride ? styleOverride : data.style );
         };
       }
@@ -204,7 +204,7 @@ define( require => {
         return logPadding.length / 2;
       };
 
-      for ( var i = 0; i < logNames.length; i++ ) {
+      for ( let i = 0; i < logNames.length; i++ ) {
         this.enableIndividualLog( logNames[ i ] );
       }
     },
@@ -290,7 +290,7 @@ define( require => {
         };
       }
       else if ( scenery.Paint && value instanceof scenery.Paint ) {
-        var paintSerialization = {};
+        const paintSerialization = {};
 
         if ( value.transformMatrix ) {
           paintSerialization.transformMatrix = scenery.serialize( value.transformMatrix );
@@ -325,10 +325,10 @@ define( require => {
         return paintSerialization;
       }
       else if ( value instanceof scenery.Node ) {
-        var node = value;
+        const node = value;
 
-        var options = {};
-        var setup = {
+        const options = {};
+        const setup = {
           // maxWidth
           // maxHeight
           // clipArea
@@ -383,7 +383,7 @@ define( require => {
         } );
         setup.hasInputListeners = node.inputListeners.length > 0;
 
-        var serialization = {
+        const serialization = {
           id: node.id,
           type: 'Node',
           types: inheritance( node.constructor ).map( function( type ) { return type.name; } ).filter( function( name ) {
@@ -491,17 +491,17 @@ define( require => {
           setup.canvasBounds = scenery.serialize( node.canvasBounds );
 
           // Identify the approximate scale of the node
-          var scale = Math.min( 5, node._drawables.length ? ( 1 / _.mean( node._drawables.map( function( drawable ) {
-            var scaleVector = drawable.instance.trail.getMatrix().getScaleVector();
+          let scale = Math.min( 5, node._drawables.length ? ( 1 / _.mean( node._drawables.map( function( drawable ) {
+            const scaleVector = drawable.instance.trail.getMatrix().getScaleVector();
             return ( scaleVector.x + scaleVector.y ) / 2;
           } ) ) ) : 1 );
           scale = 1;
-          var canvas = document.createElement( 'canvas' );
+          const canvas = document.createElement( 'canvas' );
           canvas.width = Math.ceil( node.canvasBounds.width * scale );
           canvas.height = Math.ceil( node.canvasBounds.height * scale );
-          var context = canvas.getContext( '2d' );
-          var wrapper = new scenery.CanvasContextWrapper( canvas, context );
-          var matrix = dot.Matrix3.scale( 1 / scale );
+          const context = canvas.getContext( '2d' );
+          const wrapper = new scenery.CanvasContextWrapper( canvas, context );
+          const matrix = dot.Matrix3.scale( 1 / scale );
           wrapper.context.setTransform( scale, 0, 0, scale, -node.canvasBounds.left, -node.canvasBounds.top );
           node.renderToCanvasSelf( wrapper, matrix );
           setup.url = canvas.toDataURL();
@@ -570,7 +570,7 @@ define( require => {
 
     // @public
     deserialize: function( value ) {
-      var nodeTypes = [
+      const nodeTypes = [
         'Node', 'Path', 'Circle', 'Line', 'Rectangle', 'Text', 'HTMLText', 'Image', 'CanvasNode', 'WebGLNode', 'DOM'
       ];
 
@@ -598,17 +598,17 @@ define( require => {
         return new axon.Property( scenery.deserialize( value.value ) );
       }
       else if ( value.type === 'Pattern' || value.type === 'LinearGradient' || value.type === 'RadialGradient' ) {
-        var paint;
+        let paint;
 
         if ( value.type === 'Pattern' ) {
-          var img = new window.Image();
+          const img = new window.Image();
           img.src = value.url;
           paint = new scenery.Pattern( img );
         }
         // Gradients
         else {
-          var start = scenery.deserialize( value.start );
-          var end = scenery.deserialize( value.end );
+          const start = scenery.deserialize( value.start );
+          const end = scenery.deserialize( value.end );
           if ( value.type === 'LinearGradient' ) {
             paint = new scenery.LinearGradient( start.x, start.y, end.x, end.y );
           }
@@ -628,9 +628,9 @@ define( require => {
         return paint;
       }
       else if ( _.includes( nodeTypes, value.type ) ) {
-        var node;
+        let node;
 
-        var setup = value.setup;
+        const setup = value.setup;
 
         if ( value.type === 'Node' ) {
           node = new scenery.Node();
@@ -661,8 +661,8 @@ define( require => {
             }
           }
           else if ( setup.imageType === 'mipmapData' ) {
-            var mipmapData = setup.mipmapData.map( function( level ) {
-              var result = {
+            const mipmapData = setup.mipmapData.map( function( level ) {
+              const result = {
                 width: level.width,
                 height: level.height,
                 url: level.url
@@ -672,7 +672,7 @@ define( require => {
               result.canvas = document.createElement( 'canvas' );
               result.canvas.width = level.width;
               result.canvas.height = level.height;
-              var context = result.canvas.getContext( '2d' );
+              const context = result.canvas.getContext( '2d' );
               // delayed loading like in mipmap plugin
               result.updateCanvas = function() {
                 if ( result.img.complete && ( typeof result.img.naturalWidth === 'undefined' || result.img.naturalWidth > 0 ) ) {
@@ -699,9 +699,9 @@ define( require => {
           } );
         }
         else if ( value.type === 'DOM' ) {
-          var div = document.createElement( 'div' );
+          const div = document.createElement( 'div' );
           div.innerHTML = value.element;
-          var element = div.childNodes[ 0 ];
+          const element = div.childNodes[ 0 ];
           div.removeChild( element );
           node = new scenery.DOM( element );
         }
@@ -740,8 +740,8 @@ define( require => {
         return node;
       }
       else if ( value.type === 'Subtree' ) {
-        var nodeMap = {};
-        var nodes = value.nodes.map( scenery.deserialize );
+        const nodeMap = {};
+        const nodes = value.nodes.map( scenery.deserialize );
 
         // Index them
         nodes.forEach( function( node ) {
