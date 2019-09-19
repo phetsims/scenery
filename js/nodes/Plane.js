@@ -10,13 +10,13 @@
  * @author Sam Reid
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const scenery = require( 'SCENERY/scenery' );
 
-  var Rectangle = require( 'SCENERY/nodes/Rectangle' );
+  const Rectangle = require( 'SCENERY/nodes/Rectangle' );
 
   /**
    * @public

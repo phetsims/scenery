@@ -6,12 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
+  const inherit = require( 'PHET_CORE/inherit' );
 
-  var scenery = require( 'SCENERY/scenery' );
+  const scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
 
   function ShapeBasedOverlay( display, rootNode, name ) {

@@ -6,15 +6,15 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var platform = require( 'PHET_CORE/platform' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
-  var scenery = require( 'SCENERY/scenery' );
-  var SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
-  var TextStatefulDrawable = require( 'SCENERY/display/drawables/TextStatefulDrawable' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const platform = require( 'PHET_CORE/platform' );
+  const Poolable = require( 'PHET_CORE/Poolable' );
+  const scenery = require( 'SCENERY/scenery' );
+  const SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
+  const TextStatefulDrawable = require( 'SCENERY/display/drawables/TextStatefulDrawable' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepSVGTextElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory

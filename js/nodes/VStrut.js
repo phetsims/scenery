@@ -7,13 +7,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const scenery = require( 'SCENERY/scenery' );
 
-  var Spacer = require( 'SCENERY/nodes/Spacer' );
+  const Spacer = require( 'SCENERY/nodes/Spacer' );
 
   /**
    * Creates a strut with x=0 and y in the range [0,height].

@@ -5,11 +5,11 @@
  *
  * @author Sam Reid (PhET Interactive Simulations)
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
+  const AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
 
   QUnit.module( 'AccessibilityUtilTests' );
 

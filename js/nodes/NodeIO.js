@@ -6,18 +6,18 @@
  * @author Sam Reid (PhET Interactive Simulations)
  * @author Andrew Adare (PhET Interactive Simulations)
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var BooleanIO = require( 'TANDEM/types/BooleanIO' );
-  var NodeProperty = require( 'SCENERY/util/NodeProperty' );
-  var NullableIO = require( 'TANDEM/types/NullableIO' );
-  var NumberProperty = require( 'AXON/NumberProperty' );
-  var ObjectIO = require( 'TANDEM/types/ObjectIO' );
-  var PropertyIO = require( 'AXON/PropertyIO' );
-  var Range = require( 'DOT/Range' );
-  var scenery = require( 'SCENERY/scenery' );
+  const BooleanIO = require( 'TANDEM/types/BooleanIO' );
+  const NodeProperty = require( 'SCENERY/util/NodeProperty' );
+  const NullableIO = require( 'TANDEM/types/NullableIO' );
+  const NumberProperty = require( 'AXON/NumberProperty' );
+  const ObjectIO = require( 'TANDEM/types/ObjectIO' );
+  const PropertyIO = require( 'AXON/PropertyIO' );
+  const Range = require( 'DOT/Range' );
+  const scenery = require( 'SCENERY/scenery' );
 
   class NodeIO extends ObjectIO {
     constructor( node, phetioID ) {

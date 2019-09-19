@@ -10,15 +10,15 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var Shape = require( 'KITE/Shape' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
-  var CanvasNodeDrawable = require( 'SCENERY/display/drawables/CanvasNodeDrawable' );
-  var Node = require( 'SCENERY/nodes/Node' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
+  const Shape = require( 'KITE/Shape' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const scenery = require( 'SCENERY/scenery' );
+  const CanvasNodeDrawable = require( 'SCENERY/display/drawables/CanvasNodeDrawable' );
+  const Node = require( 'SCENERY/nodes/Node' );
+  const Renderer = require( 'SCENERY/display/Renderer' );
 
   /**
    * @public

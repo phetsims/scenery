@@ -10,15 +10,15 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var axon = require( 'AXON/axon' );
-  var dot = require( 'DOT/dot' );
-  var extend = require( 'PHET_CORE/extend' );
-  var inheritance = require( 'PHET_CORE/inheritance' );
-  var kite = require( 'KITE/kite' );
-  var Namespace = require( 'PHET_CORE/Namespace' );
+  const axon = require( 'AXON/axon' );
+  const dot = require( 'DOT/dot' );
+  const extend = require( 'PHET_CORE/extend' );
+  const inheritance = require( 'PHET_CORE/inheritance' );
+  const kite = require( 'KITE/kite' );
+  const Namespace = require( 'PHET_CORE/Namespace' );
 
   // @public (scenery-internal)
   window.sceneryLog = null;

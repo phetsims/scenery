@@ -6,18 +6,18 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var AccessibilityTree = require( 'SCENERY/accessibility/AccessibilityTree' );
-  var arrayDifference = require( 'PHET_CORE/arrayDifference' );
-  var Display = require( 'SCENERY/display/Display' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Node = require( 'SCENERY/nodes/Node' );
-  var Permutation = require( 'DOT/Permutation' );
-  var Random = require( 'DOT/Random' );
-  var scenery = require( 'SCENERY/scenery' );
+  const AccessibilityTree = require( 'SCENERY/accessibility/AccessibilityTree' );
+  const arrayDifference = require( 'PHET_CORE/arrayDifference' );
+  const Display = require( 'SCENERY/display/Display' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Node = require( 'SCENERY/nodes/Node' );
+  const Permutation = require( 'DOT/Permutation' );
+  const Random = require( 'DOT/Random' );
+  const scenery = require( 'SCENERY/scenery' );
 
   /**
    * @constructor

@@ -53,13 +53,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var Events = require( 'AXON/Events' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
-  var scenery = require( 'SCENERY/scenery' );
+  const Events = require( 'AXON/Events' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Renderer = require( 'SCENERY/display/Renderer' );
+  const scenery = require( 'SCENERY/scenery' );
 
   var globalId = 1;
 

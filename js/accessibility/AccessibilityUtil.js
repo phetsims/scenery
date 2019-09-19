@@ -11,14 +11,14 @@
  * @author Jesse Greenberg
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var AccessibleSiblingStyle = require( 'SCENERY/accessibility/AccessibleSiblingStyle' );
-  var Random = require( 'DOT/Random' );
-  var scenery = require( 'SCENERY/scenery' );
-  var validate = require( 'AXON/validate' );
+  const AccessibleSiblingStyle = require( 'SCENERY/accessibility/AccessibleSiblingStyle' );
+  const Random = require( 'DOT/Random' );
+  const scenery = require( 'SCENERY/scenery' );
+  const validate = require( 'AXON/validate' );
 
   // constants
   var NEXT = 'NEXT';

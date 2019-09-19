@@ -6,14 +6,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var Color = require( 'SCENERY/util/Color' );
-  var Gradient = require( 'SCENERY/util/Gradient' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Property = require( 'AXON/Property' );
-  var scenery = require( 'SCENERY/scenery' );
+  const Color = require( 'SCENERY/util/Color' );
+  const Gradient = require( 'SCENERY/util/Gradient' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Property = require( 'AXON/Property' );
+  const scenery = require( 'SCENERY/scenery' );
 
   /**
    * An observer for a paint (fill or stroke), that will be able to trigger notifications when it changes.

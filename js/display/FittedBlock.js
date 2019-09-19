@@ -8,14 +8,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var Block = require( 'SCENERY/display/Block' );
-  var Bounds2 = require( 'DOT/Bounds2' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Vector2 = require( 'DOT/Vector2' );
+  const Block = require( 'SCENERY/display/Block' );
+  const Bounds2 = require( 'DOT/Bounds2' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const scenery = require( 'SCENERY/scenery' );
+  const Vector2 = require( 'DOT/Vector2' );
 
   var scratchBounds2 = Bounds2.NOTHING.copy();
 

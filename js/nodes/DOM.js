@@ -6,16 +6,16 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var Bounds2 = require( 'DOT/Bounds2' );
-  var DOMDrawable = require( 'SCENERY/display/drawables/DOMDrawable' );
-  var extendDefined = require( 'PHET_CORE/extendDefined' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Node = require( 'SCENERY/nodes/Node' ); // DOM inherits from Node
-  var Renderer = require( 'SCENERY/display/Renderer' );
-  var scenery = require( 'SCENERY/scenery' );
+  const Bounds2 = require( 'DOT/Bounds2' );
+  const DOMDrawable = require( 'SCENERY/display/drawables/DOMDrawable' );
+  const extendDefined = require( 'PHET_CORE/extendDefined' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Node = require( 'SCENERY/nodes/Node' ); // DOM inherits from Node
+  const Renderer = require( 'SCENERY/display/Renderer' );
+  const scenery = require( 'SCENERY/scenery' );
 
   var DOM_OPTION_KEYS = [
     'element', // {HTMLElement} - Sets the element, see setElement() for more documentation

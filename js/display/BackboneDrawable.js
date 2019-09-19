@@ -7,19 +7,19 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var Drawable = require( 'SCENERY/display/Drawable' );
-  var GreedyStitcher = require( 'SCENERY/display/GreedyStitcher' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
-  var RebuildStitcher = require( 'SCENERY/display/RebuildStitcher' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Stitcher = require( 'SCENERY/display/Stitcher' );
-  var Util = require( 'SCENERY/util/Util' );
+  const cleanArray = require( 'PHET_CORE/cleanArray' );
+  const Drawable = require( 'SCENERY/display/Drawable' );
+  const GreedyStitcher = require( 'SCENERY/display/GreedyStitcher' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Poolable = require( 'PHET_CORE/Poolable' );
+  const RebuildStitcher = require( 'SCENERY/display/RebuildStitcher' );
+  const scenery = require( 'SCENERY/scenery' );
+  const Stitcher = require( 'SCENERY/display/Stitcher' );
+  const Util = require( 'SCENERY/util/Util' );
 
   // constants
   var useGreedyStitcher = true;

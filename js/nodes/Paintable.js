@@ -6,20 +6,20 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var arrayRemove = require( 'PHET_CORE/arrayRemove' );
-  var Color = require( 'SCENERY/util/Color' );
-  var extend = require( 'PHET_CORE/extend' );
-  var inheritance = require( 'PHET_CORE/inheritance' );
-  var LineStyles = require( 'KITE/util/LineStyles' );
-  var Node = require( 'SCENERY/nodes/Node' );
-  var PaintDef = require( 'SCENERY/util/PaintDef' );
-  var platform = require( 'PHET_CORE/platform' );
-  var Property = require( 'AXON/Property' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
-  var scenery = require( 'SCENERY/scenery' );
+  const arrayRemove = require( 'PHET_CORE/arrayRemove' );
+  const Color = require( 'SCENERY/util/Color' );
+  const extend = require( 'PHET_CORE/extend' );
+  const inheritance = require( 'PHET_CORE/inheritance' );
+  const LineStyles = require( 'KITE/util/LineStyles' );
+  const Node = require( 'SCENERY/nodes/Node' );
+  const PaintDef = require( 'SCENERY/util/PaintDef' );
+  const platform = require( 'PHET_CORE/platform' );
+  const Property = require( 'AXON/Property' );
+  const Renderer = require( 'SCENERY/display/Renderer' );
+  const scenery = require( 'SCENERY/scenery' );
 
   var isSafari5 = platform.safari5;
   var isIE9 = platform.ie9;

@@ -10,14 +10,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Mouse = require( 'SCENERY/input/Mouse' );
-  var PhetioObject = require( 'TANDEM/PhetioObject' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Trail = require( 'SCENERY/util/Trail' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Mouse = require( 'SCENERY/input/Mouse' );
+  const PhetioObject = require( 'TANDEM/PhetioObject' );
+  const scenery = require( 'SCENERY/scenery' );
+  const Trail = require( 'SCENERY/util/Trail' );
   require( 'SCENERY/util/Trail' );
 
   /*

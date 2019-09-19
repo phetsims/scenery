@@ -84,13 +84,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Matrix3 = require( 'DOT/Matrix3' );
-  var scenery = require( 'SCENERY/scenery' );
+  const cleanArray = require( 'PHET_CORE/cleanArray' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Matrix3 = require( 'DOT/Matrix3' );
+  const scenery = require( 'SCENERY/scenery' );
 
   function RelativeTransform( instance ) {
     this.instance = instance;

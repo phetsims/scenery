@@ -6,13 +6,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var inheritance = require( 'PHET_CORE/inheritance' );
-  var PaintableStatelessDrawable = require( 'SCENERY/display/drawables/PaintableStatelessDrawable' );
-  var scenery = require( 'SCENERY/scenery' );
-  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
+  const inheritance = require( 'PHET_CORE/inheritance' );
+  const PaintableStatelessDrawable = require( 'SCENERY/display/drawables/PaintableStatelessDrawable' );
+  const scenery = require( 'SCENERY/scenery' );
+  const SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
   var LineStatelessDrawable = {
     mixInto: function( drawableType ) {

@@ -36,24 +36,24 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var Action = require( 'AXON/Action' );
-  var Bounds2 = require( 'DOT/Bounds2' );
-  var EventIO = require( 'SCENERY/input/EventIO' );
-  var EventType = require( 'TANDEM/EventType' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var PhetioObject = require( 'TANDEM/PhetioObject' );
-  var PressListener = require( 'SCENERY/listeners/PressListener' );
-  var Property = require( 'AXON/Property' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Tandem = require( 'TANDEM/Tandem' );
-  var Touch = require( 'SCENERY/input/Touch' );
-  var Transform3 = require( 'DOT/Transform3' );
-  var TransformTracker = require( 'SCENERY/util/TransformTracker' );
-  var Vector2 = require( 'DOT/Vector2' );
+  const Action = require( 'AXON/Action' );
+  const Bounds2 = require( 'DOT/Bounds2' );
+  const EventIO = require( 'SCENERY/input/EventIO' );
+  const EventType = require( 'TANDEM/EventType' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const PhetioObject = require( 'TANDEM/PhetioObject' );
+  const PressListener = require( 'SCENERY/listeners/PressListener' );
+  const Property = require( 'AXON/Property' );
+  const scenery = require( 'SCENERY/scenery' );
+  const Tandem = require( 'TANDEM/Tandem' );
+  const Touch = require( 'SCENERY/input/Touch' );
+  const Transform3 = require( 'DOT/Transform3' );
+  const TransformTracker = require( 'SCENERY/util/TransformTracker' );
+  const Vector2 = require( 'DOT/Vector2' );
 
   // Scratch vectors used to prevent allocations
   var scratchVector2A = new Vector2( 0, 0 );

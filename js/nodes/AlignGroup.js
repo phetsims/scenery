@@ -19,16 +19,16 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var AlignBox = require( 'SCENERY/nodes/AlignBox' );
-  var arrayRemove = require( 'PHET_CORE/arrayRemove' );
-  var Bounds2 = require( 'DOT/Bounds2' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Node = require( 'SCENERY/nodes/Node' );
-  var NumberProperty = require( 'AXON/NumberProperty' );
-  var scenery = require( 'SCENERY/scenery' );
+  const AlignBox = require( 'SCENERY/nodes/AlignBox' );
+  const arrayRemove = require( 'PHET_CORE/arrayRemove' );
+  const Bounds2 = require( 'DOT/Bounds2' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Node = require( 'SCENERY/nodes/Node' );
+  const NumberProperty = require( 'AXON/NumberProperty' );
+  const scenery = require( 'SCENERY/scenery' );
 
   var globalId = 1;
 

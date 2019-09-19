@@ -9,14 +9,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var Color = require( 'SCENERY/util/Color' );
-  var inheritance = require( 'PHET_CORE/inheritance' );
-  var PaintObserver = require( 'SCENERY/display/PaintObserver' );
-  var scenery = require( 'SCENERY/scenery' );
-  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
+  const Color = require( 'SCENERY/util/Color' );
+  const inheritance = require( 'PHET_CORE/inheritance' );
+  const PaintObserver = require( 'SCENERY/display/PaintObserver' );
+  const scenery = require( 'SCENERY/scenery' );
+  const SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
   var PaintableStatefulDrawable = {
     /**

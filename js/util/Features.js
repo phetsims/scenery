@@ -7,11 +7,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var detectPrefix = require( 'PHET_CORE/detectPrefix' );
-  var scenery = require( 'SCENERY/scenery' );
+  const detectPrefix = require( 'PHET_CORE/detectPrefix' );
+  const scenery = require( 'SCENERY/scenery' );
 
   var Features = {};
   scenery.register( 'Features', Features );

@@ -6,14 +6,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var PaintableStatelessDrawable = require( 'SCENERY/display/drawables/PaintableStatelessDrawable' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
-  var scenery = require( 'SCENERY/scenery' );
+  const CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const PaintableStatelessDrawable = require( 'SCENERY/display/drawables/PaintableStatelessDrawable' );
+  const Poolable = require( 'PHET_CORE/Poolable' );
+  const scenery = require( 'SCENERY/scenery' );
 
   /**
    * A generated CanvasSelfDrawable whose purpose will be drawing our Rectangle. One of these drawables will be created

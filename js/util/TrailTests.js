@@ -5,30 +5,30 @@
  *
  * @author Sam Reid (PhET Interactive Simulations)
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var Bounds2 = require( 'DOT/Bounds2' );
-  var CanvasNode = require( 'SCENERY/nodes/CanvasNode' );
-  var Color = require( 'SCENERY/util/Color' );
-  var Display = require( 'SCENERY/display/Display' );
-  var HStrut = require( 'SCENERY/nodes/HStrut' );
-  var Line = require( 'SCENERY/nodes/Line' );
-  var Node = require( 'SCENERY/nodes/Node' );
-  var Path = require( 'SCENERY/nodes/Path' );
-  var Rectangle = require( 'SCENERY/nodes/Rectangle' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
-  var Shape = require( 'KITE/Shape' );
-  var Spacer = require( 'SCENERY/nodes/Spacer' );
-  var Text = require( 'SCENERY/nodes/Text' );
-  var TextBounds = require( 'SCENERY/util/TextBounds' );
-  var Trail = require( 'SCENERY/util/Trail' );
-  var TrailPointer = require( 'SCENERY/util/TrailPointer' );
-  var Util = require( 'SCENERY/util/Util' );
-  var Vector2 = require( 'DOT/Vector2' );
-  var VStrut = require( 'SCENERY/nodes/VStrut' );
-  var WebGLNode = require( 'SCENERY/nodes/WebGLNode' );
+  const Bounds2 = require( 'DOT/Bounds2' );
+  const CanvasNode = require( 'SCENERY/nodes/CanvasNode' );
+  const Color = require( 'SCENERY/util/Color' );
+  const Display = require( 'SCENERY/display/Display' );
+  const HStrut = require( 'SCENERY/nodes/HStrut' );
+  const Line = require( 'SCENERY/nodes/Line' );
+  const Node = require( 'SCENERY/nodes/Node' );
+  const Path = require( 'SCENERY/nodes/Path' );
+  const Rectangle = require( 'SCENERY/nodes/Rectangle' );
+  const Renderer = require( 'SCENERY/display/Renderer' );
+  const Shape = require( 'KITE/Shape' );
+  const Spacer = require( 'SCENERY/nodes/Spacer' );
+  const Text = require( 'SCENERY/nodes/Text' );
+  const TextBounds = require( 'SCENERY/util/TextBounds' );
+  const Trail = require( 'SCENERY/util/Trail' );
+  const TrailPointer = require( 'SCENERY/util/TrailPointer' );
+  const Util = require( 'SCENERY/util/Util' );
+  const Vector2 = require( 'DOT/Vector2' );
+  const VStrut = require( 'SCENERY/nodes/VStrut' );
+  const WebGLNode = require( 'SCENERY/nodes/WebGLNode' );
 
   QUnit.module( 'Trail' );
 

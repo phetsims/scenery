@@ -21,21 +21,21 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var arrayRemove = require( 'PHET_CORE/arrayRemove' );
-  var ChangeInterval = require( 'SCENERY/display/ChangeInterval' );
-  var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var Drawable = require( 'SCENERY/display/Drawable' );
-  var Events = require( 'AXON/Events' );
-  var Fittability = require( 'SCENERY/display/Fittability' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
-  var RelativeTransform = require( 'SCENERY/display/RelativeTransform' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Util = require( 'SCENERY/util/Util' );
+  const arrayRemove = require( 'PHET_CORE/arrayRemove' );
+  const ChangeInterval = require( 'SCENERY/display/ChangeInterval' );
+  const cleanArray = require( 'PHET_CORE/cleanArray' );
+  const Drawable = require( 'SCENERY/display/Drawable' );
+  const Events = require( 'AXON/Events' );
+  const Fittability = require( 'SCENERY/display/Fittability' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Poolable = require( 'PHET_CORE/Poolable' );
+  const RelativeTransform = require( 'SCENERY/display/RelativeTransform' );
+  const Renderer = require( 'SCENERY/display/Renderer' );
+  const scenery = require( 'SCENERY/scenery' );
+  const Util = require( 'SCENERY/util/Util' );
 
   var globalIdCounter = 1;
 

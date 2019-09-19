@@ -6,14 +6,14 @@
  * @author Sam Reid (PhET Interactive Simulations)
  * @author Andrew Adare (PhET Interactive Simulations)
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var Color = require( 'SCENERY/util/Color' );
-  var ObjectIO = require( 'TANDEM/types/ObjectIO' );
-  var scenery = require( 'SCENERY/scenery' );
-  var validate = require( 'AXON/validate' );
+  const Color = require( 'SCENERY/util/Color' );
+  const ObjectIO = require( 'TANDEM/types/ObjectIO' );
+  const scenery = require( 'SCENERY/scenery' );
+  const validate = require( 'AXON/validate' );
 
   class ColorIO extends ObjectIO {
 

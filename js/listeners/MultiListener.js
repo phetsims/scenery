@@ -10,17 +10,17 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var arrayRemove = require( 'PHET_CORE/arrayRemove' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Matrix = require( 'DOT/Matrix' );
-  var Matrix3 = require( 'DOT/Matrix3' );
-  var Mouse = require( 'SCENERY/input/Mouse' );
-  var scenery = require( 'SCENERY/scenery' );
-  var SingularValueDecomposition = require( 'DOT/SingularValueDecomposition' );
-  var Vector2 = require( 'DOT/Vector2' );
+  const arrayRemove = require( 'PHET_CORE/arrayRemove' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Matrix = require( 'DOT/Matrix' );
+  const Matrix3 = require( 'DOT/Matrix3' );
+  const Mouse = require( 'SCENERY/input/Mouse' );
+  const scenery = require( 'SCENERY/scenery' );
+  const SingularValueDecomposition = require( 'DOT/SingularValueDecomposition' );
+  const Vector2 = require( 'DOT/Vector2' );
 
   /**
    * @constructor

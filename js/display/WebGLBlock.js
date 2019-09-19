@@ -7,21 +7,21 @@
  * @author Sam Reid (PhET Interactive Simulations)
  * @author Sharfudeen Ashraf (For Ghent University)
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var Emitter = require( 'AXON/Emitter' );
-  var FittedBlock = require( 'SCENERY/display/FittedBlock' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Matrix3 = require( 'DOT/Matrix3' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
-  var scenery = require( 'SCENERY/scenery' );
-  var ShaderProgram = require( 'SCENERY/util/ShaderProgram' );
-  var SpriteSheet = require( 'SCENERY/util/SpriteSheet' );
-  var Util = require( 'SCENERY/util/Util' );
+  const cleanArray = require( 'PHET_CORE/cleanArray' );
+  const Emitter = require( 'AXON/Emitter' );
+  const FittedBlock = require( 'SCENERY/display/FittedBlock' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Matrix3 = require( 'DOT/Matrix3' );
+  const Poolable = require( 'PHET_CORE/Poolable' );
+  const Renderer = require( 'SCENERY/display/Renderer' );
+  const scenery = require( 'SCENERY/scenery' );
+  const ShaderProgram = require( 'SCENERY/util/ShaderProgram' );
+  const SpriteSheet = require( 'SCENERY/util/SpriteSheet' );
+  const Util = require( 'SCENERY/util/Util' );
 
   /**
    * @constructor

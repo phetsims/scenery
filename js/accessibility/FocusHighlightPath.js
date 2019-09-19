@@ -10,17 +10,17 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var Color = require( 'SCENERY/util/Color' );
-  var Emitter = require( 'AXON/Emitter' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var LineStyles = require( 'KITE/util/LineStyles' );
-  var Path = require( 'SCENERY/nodes/Path' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Vector2 = require( 'DOT/Vector2' );
+  const Color = require( 'SCENERY/util/Color' );
+  const Emitter = require( 'AXON/Emitter' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const LineStyles = require( 'KITE/util/LineStyles' );
+  const Path = require( 'SCENERY/nodes/Path' );
+  const scenery = require( 'SCENERY/scenery' );
+  const Vector2 = require( 'DOT/Vector2' );
 
   // constants
   // default inner and outer strokes for the focus highlight

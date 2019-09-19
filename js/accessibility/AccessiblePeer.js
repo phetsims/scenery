@@ -8,21 +8,21 @@
  * @author Jesse Greenberg
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var AccessibleSiblingStyle = require( 'SCENERY/accessibility/AccessibleSiblingStyle' );
-  var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
-  var arrayRemove = require( 'PHET_CORE/arrayRemove' );
-  var Bounds2 = require( 'DOT/Bounds2' );
-  var FullScreen = require( 'SCENERY/util/FullScreen' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Matrix3 = require( 'DOT/Matrix3' );
-  var platform = require( 'PHET_CORE/platform' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
-  var scenery = require( 'SCENERY/scenery' );
+  const AccessibleSiblingStyle = require( 'SCENERY/accessibility/AccessibleSiblingStyle' );
+  const AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
+  const arrayRemove = require( 'PHET_CORE/arrayRemove' );
+  const Bounds2 = require( 'DOT/Bounds2' );
+  const FullScreen = require( 'SCENERY/util/FullScreen' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Matrix3 = require( 'DOT/Matrix3' );
+  const platform = require( 'PHET_CORE/platform' );
+  const Poolable = require( 'PHET_CORE/Poolable' );
+  const scenery = require( 'SCENERY/scenery' );
   // so RequireJS doesn't complain about circular dependency
-  // var Display = require( 'SCENERY/display/Display' );
+  // const Display = require( 'SCENERY/display/Display' );
 
   // constants
   var PRIMARY_SIBLING = 'PRIMARY_SIBLING';

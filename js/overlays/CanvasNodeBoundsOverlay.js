@@ -6,14 +6,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Shape = require( 'KITE/Shape' );
-  var ShapeBasedOverlay = require( 'SCENERY/overlays/ShapeBasedOverlay' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Shape = require( 'KITE/Shape' );
+  const ShapeBasedOverlay = require( 'SCENERY/overlays/ShapeBasedOverlay' );
 
-  var scenery = require( 'SCENERY/scenery' );
+  const scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Trail' );
 
   function CanvasNodeBoundsOverlay( display, rootNode ) {

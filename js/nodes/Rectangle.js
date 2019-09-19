@@ -6,22 +6,22 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var Bounds2 = require( 'DOT/Bounds2' );
-  var Dimension2 = require( 'DOT/Dimension2' );
-  var extendDefined = require( 'PHET_CORE/extendDefined' );
-  var Features = require( 'SCENERY/util/Features' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Path = require( 'SCENERY/nodes/Path' );
-  var RectangleCanvasDrawable = require( 'SCENERY/display/drawables/RectangleCanvasDrawable' );
-  var RectangleDOMDrawable = require( 'SCENERY/display/drawables/RectangleDOMDrawable' );
-  var RectangleSVGDrawable = require( 'SCENERY/display/drawables/RectangleSVGDrawable' );
-  var RectangleWebGLDrawable = require( 'SCENERY/display/drawables/RectangleWebGLDrawable' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Shape = require( 'KITE/Shape' );
+  const Bounds2 = require( 'DOT/Bounds2' );
+  const Dimension2 = require( 'DOT/Dimension2' );
+  const extendDefined = require( 'PHET_CORE/extendDefined' );
+  const Features = require( 'SCENERY/util/Features' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Path = require( 'SCENERY/nodes/Path' );
+  const RectangleCanvasDrawable = require( 'SCENERY/display/drawables/RectangleCanvasDrawable' );
+  const RectangleDOMDrawable = require( 'SCENERY/display/drawables/RectangleDOMDrawable' );
+  const RectangleSVGDrawable = require( 'SCENERY/display/drawables/RectangleSVGDrawable' );
+  const RectangleWebGLDrawable = require( 'SCENERY/display/drawables/RectangleWebGLDrawable' );
+  const Renderer = require( 'SCENERY/display/Renderer' );
+  const scenery = require( 'SCENERY/scenery' );
+  const Shape = require( 'KITE/Shape' );
 
   var RECTANGLE_OPTION_KEYS = [
     'rectBounds', // {Bounds2} - Sets x/y/width/height based on bounds. See setRectBounds() for more documentation.

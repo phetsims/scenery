@@ -6,19 +6,19 @@
  * @author Sam Reid (PhET Interactive Simulations)
  * @author Denzell Barnett (PhET Interactive Simulations)
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
   const ObjectIO = require( 'TANDEM/types/ObjectIO' );
-  var FontIO = require( 'SCENERY/util/FontIO' );
-  var NodeIO = require( 'SCENERY/nodes/NodeIO' );
-  var NodeProperty = require( 'SCENERY/util/NodeProperty' );
-  var NumberIO = require( 'TANDEM/types/NumberIO' );
-  var PropertyIO = require( 'AXON/PropertyIO' );
-  var scenery = require( 'SCENERY/scenery' );
-  var StringIO = require( 'TANDEM/types/StringIO' );
-  var VoidIO = require( 'TANDEM/types/VoidIO' );
+  const FontIO = require( 'SCENERY/util/FontIO' );
+  const NodeIO = require( 'SCENERY/nodes/NodeIO' );
+  const NodeProperty = require( 'SCENERY/util/NodeProperty' );
+  const NumberIO = require( 'TANDEM/types/NumberIO' );
+  const PropertyIO = require( 'AXON/PropertyIO' );
+  const scenery = require( 'SCENERY/scenery' );
+  const StringIO = require( 'TANDEM/types/StringIO' );
+  const VoidIO = require( 'TANDEM/types/VoidIO' );
 
   class TextIO extends NodeIO {
 

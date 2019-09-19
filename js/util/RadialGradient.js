@@ -8,15 +8,15 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var Gradient = require( 'SCENERY/util/Gradient' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var platform = require( 'PHET_CORE/platform' );
-  var scenery = require( 'SCENERY/scenery' );
-  var SVGRadialGradient = require( 'SCENERY/display/SVGRadialGradient' );
-  var Vector2 = require( 'DOT/Vector2' );
+  const Gradient = require( 'SCENERY/util/Gradient' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const platform = require( 'PHET_CORE/platform' );
+  const scenery = require( 'SCENERY/scenery' );
+  const SVGRadialGradient = require( 'SCENERY/display/SVGRadialGradient' );
+  const Vector2 = require( 'DOT/Vector2' );
 
   /**
    * @constructor

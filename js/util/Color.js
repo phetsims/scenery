@@ -10,14 +10,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Property = require( 'AXON/Property' );
-  var scenery = require( 'SCENERY/scenery' );
-  var TinyEmitter = require( 'AXON/TinyEmitter' );
-  var Util = require( 'DOT/Util' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Property = require( 'AXON/Property' );
+  const scenery = require( 'SCENERY/scenery' );
+  const TinyEmitter = require( 'AXON/TinyEmitter' );
+  const Util = require( 'DOT/Util' );
 
   // constants
   var clamp = Util.clamp;
