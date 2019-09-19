@@ -8,25 +8,25 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var escapeHTML = require( 'PHET_CORE/escapeHTML' );
-  var extendDefined = require( 'PHET_CORE/extendDefined' );
-  var Font = require( 'SCENERY/util/Font' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Node = require( 'SCENERY/nodes/Node' );
-  var Paintable = require( 'SCENERY/nodes/Paintable' );
-  var platform = require( 'PHET_CORE/platform' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Tandem = require( 'TANDEM/Tandem' );
-  var TextBounds = require( 'SCENERY/util/TextBounds' );
-  var TextCanvasDrawable = require( 'SCENERY/display/drawables/TextCanvasDrawable' );
-  var TextDOMDrawable = require( 'SCENERY/display/drawables/TextDOMDrawable' );
-  var TextIO = require( 'SCENERY/nodes/TextIO' );
-  var TextSVGDrawable = require( 'SCENERY/display/drawables/TextSVGDrawable' );
+  const escapeHTML = require( 'PHET_CORE/escapeHTML' );
+  const extendDefined = require( 'PHET_CORE/extendDefined' );
+  const Font = require( 'SCENERY/util/Font' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Node = require( 'SCENERY/nodes/Node' );
+  const Paintable = require( 'SCENERY/nodes/Paintable' );
+  const platform = require( 'PHET_CORE/platform' );
+  const Renderer = require( 'SCENERY/display/Renderer' );
+  const scenery = require( 'SCENERY/scenery' );
+  const Tandem = require( 'TANDEM/Tandem' );
+  const TextBounds = require( 'SCENERY/util/TextBounds' );
+  const TextCanvasDrawable = require( 'SCENERY/display/drawables/TextCanvasDrawable' );
+  const TextDOMDrawable = require( 'SCENERY/display/drawables/TextDOMDrawable' );
+  const TextIO = require( 'SCENERY/nodes/TextIO' );
+  const TextSVGDrawable = require( 'SCENERY/display/drawables/TextSVGDrawable' );
 
   // constants
   var TEXT_OPTION_KEYS = [

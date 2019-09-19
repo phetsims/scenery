@@ -12,24 +12,24 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var Action = require( 'AXON/Action' );
-  var BooleanProperty = require( 'AXON/BooleanProperty' );
-  var DerivedProperty = require( 'AXON/DerivedProperty' );
-  var EventIO = require( 'SCENERY/input/EventIO' );
-  var EventType = require( 'TANDEM/EventType' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Mouse = require( 'SCENERY/input/Mouse' );
-  var Node = require( 'SCENERY/nodes/Node' );
-  var NullableIO = require( 'TANDEM/types/NullableIO' );
-  var ObservableArray = require( 'AXON/ObservableArray' );
-  var PhetioObject = require( 'TANDEM/PhetioObject' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Tandem = require( 'TANDEM/Tandem' );
-  var timer = require( 'AXON/timer' );
+  const Action = require( 'AXON/Action' );
+  const BooleanProperty = require( 'AXON/BooleanProperty' );
+  const DerivedProperty = require( 'AXON/DerivedProperty' );
+  const EventIO = require( 'SCENERY/input/EventIO' );
+  const EventType = require( 'TANDEM/EventType' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Mouse = require( 'SCENERY/input/Mouse' );
+  const Node = require( 'SCENERY/nodes/Node' );
+  const NullableIO = require( 'TANDEM/types/NullableIO' );
+  const ObservableArray = require( 'AXON/ObservableArray' );
+  const PhetioObject = require( 'TANDEM/PhetioObject' );
+  const scenery = require( 'SCENERY/scenery' );
+  const Tandem = require( 'TANDEM/Tandem' );
+  const timer = require( 'AXON/timer' );
 
   // global
   var globalID = 0;

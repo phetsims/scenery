@@ -35,14 +35,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Stitcher = require( 'SCENERY/display/Stitcher' );
+  const cleanArray = require( 'PHET_CORE/cleanArray' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Renderer = require( 'SCENERY/display/Renderer' );
+  const scenery = require( 'SCENERY/scenery' );
+  const Stitcher = require( 'SCENERY/display/Stitcher' );
 
   // Returns whether the consecutive {Drawable}s 'a' and 'b' should be put into separate blocks
   function hasGapBetweenDrawables( a, b ) {

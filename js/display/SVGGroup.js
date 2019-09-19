@@ -7,14 +7,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var platform = require( 'PHET_CORE/platform' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
-  var scenery = require( 'SCENERY/scenery' );
+  const cleanArray = require( 'PHET_CORE/cleanArray' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const platform = require( 'PHET_CORE/platform' );
+  const Poolable = require( 'PHET_CORE/Poolable' );
+  const scenery = require( 'SCENERY/scenery' );
 
   /**
    * @constructor

@@ -8,13 +8,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var Drawable = require( 'SCENERY/display/Drawable' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
+  const cleanArray = require( 'PHET_CORE/cleanArray' );
+  const Drawable = require( 'SCENERY/display/Drawable' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const scenery = require( 'SCENERY/scenery' );
 
   function Block( display, renderer ) {
     throw new Error( 'Should never be called' );

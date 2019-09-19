@@ -15,13 +15,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var PaintSVGState = require( 'SCENERY/display/PaintSVGState' );
-  var scenery = require( 'SCENERY/scenery' );
-  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const PaintSVGState = require( 'SCENERY/display/PaintSVGState' );
+  const scenery = require( 'SCENERY/scenery' );
+  const SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
   function SVGSelfDrawable( renderer, instance ) {
     this.initializeSVGSelfDrawable( renderer, instance );

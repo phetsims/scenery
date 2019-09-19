@@ -6,12 +6,12 @@
  * @author Sam Reid (PhET Interactive Simulations)
  * @author Andrew Adare (PhET Interactive Simulations)
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var ObjectIO = require( 'TANDEM/types/ObjectIO' );
-  var scenery = require( 'SCENERY/scenery' );
+  const ObjectIO = require( 'TANDEM/types/ObjectIO' );
+  const scenery = require( 'SCENERY/scenery' );
 
   class ButtonListenerIO extends ObjectIO {}
 

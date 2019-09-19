@@ -7,22 +7,22 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var Bounds2 = require( 'DOT/Bounds2' );
-  var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var extendDefined = require( 'PHET_CORE/extendDefined' );
-  var ImageCanvasDrawable = require( 'SCENERY/display/drawables/ImageCanvasDrawable' );
-  var ImageDOMDrawable = require( 'SCENERY/display/drawables/ImageDOMDrawable' );
-  var ImageSVGDrawable = require( 'SCENERY/display/drawables/ImageSVGDrawable' );
-  var ImageWebGLDrawable = require( 'SCENERY/display/drawables/ImageWebGLDrawable' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Node = require( 'SCENERY/nodes/Node' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
-  var scenery = require( 'SCENERY/scenery' );
-  var SpriteSheet = require( 'SCENERY/util/SpriteSheet' );
-  var Util = require( 'DOT/Util' );
+  const Bounds2 = require( 'DOT/Bounds2' );
+  const cleanArray = require( 'PHET_CORE/cleanArray' );
+  const extendDefined = require( 'PHET_CORE/extendDefined' );
+  const ImageCanvasDrawable = require( 'SCENERY/display/drawables/ImageCanvasDrawable' );
+  const ImageDOMDrawable = require( 'SCENERY/display/drawables/ImageDOMDrawable' );
+  const ImageSVGDrawable = require( 'SCENERY/display/drawables/ImageSVGDrawable' );
+  const ImageWebGLDrawable = require( 'SCENERY/display/drawables/ImageWebGLDrawable' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Node = require( 'SCENERY/nodes/Node' );
+  const Renderer = require( 'SCENERY/display/Renderer' );
+  const scenery = require( 'SCENERY/scenery' );
+  const SpriteSheet = require( 'SCENERY/util/SpriteSheet' );
+  const Util = require( 'DOT/Util' );
 
   // Need to poly-fill on some browsers
   var log2 = Math.log2 || function( x ) { return Math.log( x ) / Math.LN2; };

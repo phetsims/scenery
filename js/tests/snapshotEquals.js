@@ -5,11 +5,11 @@
  *
  * @author Jonathan Olson (PhET Interactive Simulations)
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var scenery = require( 'SCENERY/scenery' );
+  const scenery = require( 'SCENERY/scenery' );
 
   function snapshotToCanvas( snapshot ) {
 

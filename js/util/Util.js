@@ -6,16 +6,16 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var scenery = require( 'SCENERY/scenery' );
+  const scenery = require( 'SCENERY/scenery' );
 
-  var Bounds2 = require( 'DOT/Bounds2' );
-  var Features = require( 'SCENERY/util/Features' );
-  var Matrix3 = require( 'DOT/Matrix3' );
-  var Transform3 = require( 'DOT/Transform3' );
-  var Vector2 = require( 'DOT/Vector2' );
+  const Bounds2 = require( 'DOT/Bounds2' );
+  const Features = require( 'SCENERY/util/Features' );
+  const Matrix3 = require( 'DOT/Matrix3' );
+  const Transform3 = require( 'DOT/Transform3' );
+  const Vector2 = require( 'DOT/Vector2' );
 
   // convenience function
   function p( x, y ) {

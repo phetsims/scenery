@@ -6,22 +6,22 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  * @deprecated - please use DragListener for new code
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var Action = require( 'AXON/Action' );
-  var BooleanProperty = require( 'AXON/BooleanProperty' );
-  var Event = require( 'SCENERY/input/Event' );
-  var EventType = require( 'TANDEM/EventType' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Mouse = require( 'SCENERY/input/Mouse' );
-  var PhetioObject = require( 'TANDEM/PhetioObject' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Tandem = require( 'TANDEM/Tandem' );
-  var Touch = require( 'SCENERY/input/Touch' );
-  var Vector2 = require( 'DOT/Vector2' );
-  var Vector2IO = require( 'DOT/Vector2IO' );
+  const Action = require( 'AXON/Action' );
+  const BooleanProperty = require( 'AXON/BooleanProperty' );
+  const Event = require( 'SCENERY/input/Event' );
+  const EventType = require( 'TANDEM/EventType' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Mouse = require( 'SCENERY/input/Mouse' );
+  const PhetioObject = require( 'TANDEM/PhetioObject' );
+  const scenery = require( 'SCENERY/scenery' );
+  const Tandem = require( 'TANDEM/Tandem' );
+  const Touch = require( 'SCENERY/input/Touch' );
+  const Vector2 = require( 'DOT/Vector2' );
+  const Vector2IO = require( 'DOT/Vector2IO' );
 
   /**
    * @param {Object} [options]

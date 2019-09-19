@@ -6,14 +6,14 @@
  * 
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var FocusHighlightFromNode = require( 'SCENERY/accessibility/FocusHighlightFromNode' );
-  var FocusHighlightPath = require( 'SCENERY/accessibility/FocusHighlightPath' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
+  const FocusHighlightFromNode = require( 'SCENERY/accessibility/FocusHighlightFromNode' );
+  const FocusHighlightPath = require( 'SCENERY/accessibility/FocusHighlightPath' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const scenery = require( 'SCENERY/scenery' );
 
   /**
    *

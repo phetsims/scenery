@@ -56,25 +56,25 @@
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var ButtonListener = require( 'SCENERY/input/ButtonListener' );
-  var Color = require( 'SCENERY/util/Color' );
-  var extendDefined = require( 'PHET_CORE/extendDefined' );
-  var Font = require( 'SCENERY/util/Font' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Line = require( 'SCENERY/nodes/Line' );
-  var Matrix3 = require( 'DOT/Matrix3' );
-  var Node = require( 'SCENERY/nodes/Node' );
-  var openPopup = require( 'PHET_CORE/openPopup' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
-  var RichTextIO = require( 'SCENERY/nodes/RichTextIO' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Tandem = require( 'TANDEM/Tandem' );
-  var Text = require( 'SCENERY/nodes/Text' );
-  var VStrut = require( 'SCENERY/nodes/VStrut' );
+  const ButtonListener = require( 'SCENERY/input/ButtonListener' );
+  const Color = require( 'SCENERY/util/Color' );
+  const extendDefined = require( 'PHET_CORE/extendDefined' );
+  const Font = require( 'SCENERY/util/Font' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Line = require( 'SCENERY/nodes/Line' );
+  const Matrix3 = require( 'DOT/Matrix3' );
+  const Node = require( 'SCENERY/nodes/Node' );
+  const openPopup = require( 'PHET_CORE/openPopup' );
+  const Poolable = require( 'PHET_CORE/Poolable' );
+  const RichTextIO = require( 'SCENERY/nodes/RichTextIO' );
+  const scenery = require( 'SCENERY/scenery' );
+  const Tandem = require( 'TANDEM/Tandem' );
+  const Text = require( 'SCENERY/nodes/Text' );
+  const VStrut = require( 'SCENERY/nodes/VStrut' );
 
   // Options that can be used in the constructor, with mutate(), or directly as setters/getters
   // each of these options has an associated setter, see setter methods for more documentation

@@ -6,12 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Text = require( 'SCENERY/nodes/Text' ); // inherits from Text
+  const inherit = require( 'PHET_CORE/inherit' );
+  const scenery = require( 'SCENERY/scenery' );
+  const Text = require( 'SCENERY/nodes/Text' ); // inherits from Text
 
   /**
    * @public

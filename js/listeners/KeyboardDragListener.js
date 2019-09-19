@@ -15,16 +15,16 @@
  * @author Michael Barlow
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var inherit = require( 'PHET_CORE/inherit' );
-  var KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
-  var platform = require( 'PHET_CORE/platform' );
-  var scenery = require( 'SCENERY/scenery' );
-  var timer = require( 'AXON/timer' );
-  var Vector2 = require( 'DOT/Vector2' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
+  const platform = require( 'PHET_CORE/platform' );
+  const scenery = require( 'SCENERY/scenery' );
+  const timer = require( 'AXON/timer' );
+  const Vector2 = require( 'DOT/Vector2' );
 
   /**
    * @constructor

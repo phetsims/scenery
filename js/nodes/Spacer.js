@@ -6,14 +6,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var Bounds2 = require( 'DOT/Bounds2' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Leaf = require( 'SCENERY/nodes/Leaf' );
-  var Node = require( 'SCENERY/nodes/Node' );
-  var scenery = require( 'SCENERY/scenery' );
+  const Bounds2 = require( 'DOT/Bounds2' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Leaf = require( 'SCENERY/nodes/Leaf' );
+  const Node = require( 'SCENERY/nodes/Node' );
+  const scenery = require( 'SCENERY/scenery' );
 
   /**
    * Creates a spacer taking up a rectangular area from x: [0,width] and y: [0,height]. Use x/y in options to control

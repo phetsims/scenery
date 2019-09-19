@@ -5,13 +5,13 @@
  *
  * @author Sam Reid (PhET Interactive Simulations)
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var Display = require( 'SCENERY/display/Display' );
-  var Node = require( 'SCENERY/nodes/Node' );
-  var Trail = require( 'SCENERY/util/Trail' );
+  const Display = require( 'SCENERY/display/Display' );
+  const Node = require( 'SCENERY/nodes/Node' );
+  const Trail = require( 'SCENERY/util/Trail' );
 
   QUnit.module( 'Focus' );
 

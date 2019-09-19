@@ -10,18 +10,18 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  * @author Sam Reid
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Matrix3 = require( 'DOT/Matrix3' );
-  var Node = require( 'SCENERY/nodes/Node' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Shape = require( 'KITE/Shape' );
-  var Util = require( 'SCENERY/util/Util' );
-  var WebGLNodeDrawable = require( 'SCENERY/display/drawables/WebGLNodeDrawable' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Matrix3 = require( 'DOT/Matrix3' );
+  const Node = require( 'SCENERY/nodes/Node' );
+  const Renderer = require( 'SCENERY/display/Renderer' );
+  const scenery = require( 'SCENERY/scenery' );
+  const Shape = require( 'KITE/Shape' );
+  const Util = require( 'SCENERY/util/Util' );
+  const WebGLNodeDrawable = require( 'SCENERY/display/drawables/WebGLNodeDrawable' );
 
   var WEBGL_NODE_OPTION_KEYS = [
     'canvasBounds' // {Bounds2} - Sets the available Canvas bounds that content will show up in. See setCanvasBounds()

@@ -6,14 +6,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var arrayRemove = require( 'PHET_CORE/arrayRemove' );
-  var BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
-  var Features = require( 'SCENERY/util/Features' );
-  var platform = require( 'PHET_CORE/platform' );
-  var scenery = require( 'SCENERY/scenery' );
+  const arrayRemove = require( 'PHET_CORE/arrayRemove' );
+  const BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
+  const Features = require( 'SCENERY/util/Features' );
+  const platform = require( 'PHET_CORE/platform' );
+  const scenery = require( 'SCENERY/scenery' );
 
   // Sometimes we need to add a listener that does absolutely nothing
   var noop = function noop() {};

@@ -13,11 +13,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const scenery = require( 'SCENERY/scenery' );
 
   /*
    * isBefore: whether this points to before the node (and its children) have been rendered, or after

@@ -6,13 +6,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
-  var scenery = require( 'SCENERY/scenery' );
+  const DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Poolable = require( 'PHET_CORE/Poolable' );
+  const scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Util' );
 
   /**

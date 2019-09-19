@@ -5,40 +5,40 @@
  *
  * @author Sam Reid (PhET Interactive Simulations)
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var CanvasContextWrapper = require( 'SCENERY/util/CanvasContextWrapper' );
-  var Circle = require( 'SCENERY/nodes/Circle' );
-  var CircleCanvasDrawable = require( 'SCENERY/display/drawables/CircleCanvasDrawable' );
-  var CircleDOMDrawable = require( 'SCENERY/display/drawables/CircleDOMDrawable' );
-  var CircleSVGDrawable = require( 'SCENERY/display/drawables/CircleSVGDrawable' );
-  var Display = require( 'SCENERY/display/Display' );
-  var DOM = require( 'SCENERY/nodes/DOM' );
-  var DOMDrawable = require( 'SCENERY/display/drawables/DOMDrawable' );
-  var Image = require( 'SCENERY/nodes/Image' );
-  var ImageCanvasDrawable = require( 'SCENERY/display/drawables/ImageCanvasDrawable' );
-  var ImageDOMDrawable = require( 'SCENERY/display/drawables/ImageDOMDrawable' );
-  var ImageSVGDrawable = require( 'SCENERY/display/drawables/ImageSVGDrawable' );
-  var Instance = require( 'SCENERY/display/Instance' );
-  var Line = require( 'SCENERY/nodes/Line' );
-  var LineCanvasDrawable = require( 'SCENERY/display/drawables/LineCanvasDrawable' );
-  var LineSVGDrawable = require( 'SCENERY/display/drawables/LineSVGDrawable' );
-  var Node = require( 'SCENERY/nodes/Node' );
-  var Path = require( 'SCENERY/nodes/Path' );
-  var PathCanvasDrawable = require( 'SCENERY/display/drawables/PathCanvasDrawable' );
-  var PathSVGDrawable = require( 'SCENERY/display/drawables/PathSVGDrawable' );
-  var Rectangle = require( 'SCENERY/nodes/Rectangle' );
-  var RectangleCanvasDrawable = require( 'SCENERY/display/drawables/RectangleCanvasDrawable' );
-  var RectangleDOMDrawable = require( 'SCENERY/display/drawables/RectangleDOMDrawable' );
-  var RectangleSVGDrawable = require( 'SCENERY/display/drawables/RectangleSVGDrawable' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
-  var Shape = require( 'KITE/Shape' );
-  var Text = require( 'SCENERY/nodes/Text' );
-  var TextCanvasDrawable = require( 'SCENERY/display/drawables/TextCanvasDrawable' );
-  var TextDOMDrawable = require( 'SCENERY/display/drawables/TextDOMDrawable' );
-  var TextSVGDrawable = require( 'SCENERY/display/drawables/TextSVGDrawable' );
+  const CanvasContextWrapper = require( 'SCENERY/util/CanvasContextWrapper' );
+  const Circle = require( 'SCENERY/nodes/Circle' );
+  const CircleCanvasDrawable = require( 'SCENERY/display/drawables/CircleCanvasDrawable' );
+  const CircleDOMDrawable = require( 'SCENERY/display/drawables/CircleDOMDrawable' );
+  const CircleSVGDrawable = require( 'SCENERY/display/drawables/CircleSVGDrawable' );
+  const Display = require( 'SCENERY/display/Display' );
+  const DOM = require( 'SCENERY/nodes/DOM' );
+  const DOMDrawable = require( 'SCENERY/display/drawables/DOMDrawable' );
+  const Image = require( 'SCENERY/nodes/Image' );
+  const ImageCanvasDrawable = require( 'SCENERY/display/drawables/ImageCanvasDrawable' );
+  const ImageDOMDrawable = require( 'SCENERY/display/drawables/ImageDOMDrawable' );
+  const ImageSVGDrawable = require( 'SCENERY/display/drawables/ImageSVGDrawable' );
+  const Instance = require( 'SCENERY/display/Instance' );
+  const Line = require( 'SCENERY/nodes/Line' );
+  const LineCanvasDrawable = require( 'SCENERY/display/drawables/LineCanvasDrawable' );
+  const LineSVGDrawable = require( 'SCENERY/display/drawables/LineSVGDrawable' );
+  const Node = require( 'SCENERY/nodes/Node' );
+  const Path = require( 'SCENERY/nodes/Path' );
+  const PathCanvasDrawable = require( 'SCENERY/display/drawables/PathCanvasDrawable' );
+  const PathSVGDrawable = require( 'SCENERY/display/drawables/PathSVGDrawable' );
+  const Rectangle = require( 'SCENERY/nodes/Rectangle' );
+  const RectangleCanvasDrawable = require( 'SCENERY/display/drawables/RectangleCanvasDrawable' );
+  const RectangleDOMDrawable = require( 'SCENERY/display/drawables/RectangleDOMDrawable' );
+  const RectangleSVGDrawable = require( 'SCENERY/display/drawables/RectangleSVGDrawable' );
+  const Renderer = require( 'SCENERY/display/Renderer' );
+  const Shape = require( 'KITE/Shape' );
+  const Text = require( 'SCENERY/nodes/Text' );
+  const TextCanvasDrawable = require( 'SCENERY/display/drawables/TextCanvasDrawable' );
+  const TextDOMDrawable = require( 'SCENERY/display/drawables/TextDOMDrawable' );
+  const TextSVGDrawable = require( 'SCENERY/display/drawables/TextSVGDrawable' );
 
   QUnit.module( 'Display' );
 

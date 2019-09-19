@@ -5,12 +5,12 @@
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var FireListener = require( 'SCENERY/listeners/FireListener' );
-  var ListenerTestUtils = require( 'SCENERY/listeners/ListenerTestUtils' );
+  const FireListener = require( 'SCENERY/listeners/FireListener' );
+  const ListenerTestUtils = require( 'SCENERY/listeners/ListenerTestUtils' );
 
   QUnit.module( 'FireListener' );
 

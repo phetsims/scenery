@@ -6,16 +6,16 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
-  var Features = require( 'SCENERY/util/Features' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Matrix3 = require( 'DOT/Matrix3' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
-  var RectangleStatefulDrawable = require( 'SCENERY/display/drawables/RectangleStatefulDrawable' );
-  var scenery = require( 'SCENERY/scenery' );
+  const DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
+  const Features = require( 'SCENERY/util/Features' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Matrix3 = require( 'DOT/Matrix3' );
+  const Poolable = require( 'PHET_CORE/Poolable' );
+  const RectangleStatefulDrawable = require( 'SCENERY/display/drawables/RectangleStatefulDrawable' );
+  const scenery = require( 'SCENERY/scenery' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   var keepDOMRectangleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory

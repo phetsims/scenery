@@ -6,20 +6,20 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var Bounds2 = require( 'DOT/Bounds2' );
-  var extendDefined = require( 'PHET_CORE/extendDefined' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var KiteLine = require( 'KITE/segments/Line' ); // eslint-disable-line require-statement-match
-  var LineCanvasDrawable = require( 'SCENERY/display/drawables/LineCanvasDrawable' );
-  var LineSVGDrawable = require( 'SCENERY/display/drawables/LineSVGDrawable' );
-  var Path = require( 'SCENERY/nodes/Path' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Shape = require( 'KITE/Shape' );
-  var Vector2 = require( 'DOT/Vector2' );
+  const Bounds2 = require( 'DOT/Bounds2' );
+  const extendDefined = require( 'PHET_CORE/extendDefined' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const KiteLine = require( 'KITE/segments/Line' ); // eslint-disable-line require-statement-match
+  const LineCanvasDrawable = require( 'SCENERY/display/drawables/LineCanvasDrawable' );
+  const LineSVGDrawable = require( 'SCENERY/display/drawables/LineSVGDrawable' );
+  const Path = require( 'SCENERY/nodes/Path' );
+  const Renderer = require( 'SCENERY/display/Renderer' );
+  const scenery = require( 'SCENERY/scenery' );
+  const Shape = require( 'KITE/Shape' );
+  const Vector2 = require( 'DOT/Vector2' );
 
   var LINE_OPTION_KEYS = [
     'p1', // {Vector2} - Start position

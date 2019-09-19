@@ -119,19 +119,19 @@
  * @author Sam Reid (PhET Interactive Simulations)
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var A11yBehaviorFunctionDef = require( 'SCENERY/accessibility/A11yBehaviorFunctionDef' );
-  var AccessibilityTree = require( 'SCENERY/accessibility/AccessibilityTree' );
-  var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
-  var AccessibleDisplaysInfo = require( 'SCENERY/accessibility/AccessibleDisplaysInfo' );
-  var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
-  var arrayDifference = require( 'PHET_CORE/arrayDifference' );
-  var extend = require( 'PHET_CORE/extend' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Shape = require( 'KITE/Shape' );
+  const A11yBehaviorFunctionDef = require( 'SCENERY/accessibility/A11yBehaviorFunctionDef' );
+  const AccessibilityTree = require( 'SCENERY/accessibility/AccessibilityTree' );
+  const AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
+  const AccessibleDisplaysInfo = require( 'SCENERY/accessibility/AccessibleDisplaysInfo' );
+  const AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
+  const arrayDifference = require( 'PHET_CORE/arrayDifference' );
+  const extend = require( 'PHET_CORE/extend' );
+  const scenery = require( 'SCENERY/scenery' );
+  const Shape = require( 'KITE/Shape' );
 
   var INPUT_TAG = AccessibilityUtil.TAGS.INPUT;
   var P_TAG = AccessibilityUtil.TAGS.P;

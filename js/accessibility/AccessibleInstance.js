@@ -27,18 +27,18 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
-  var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
-  var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var Events = require( 'AXON/Events' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var platform = require( 'PHET_CORE/platform' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
-  var scenery = require( 'SCENERY/scenery' );
-  var TransformTracker = require( 'SCENERY/util/TransformTracker' );
+  const AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
+  const AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
+  const cleanArray = require( 'PHET_CORE/cleanArray' );
+  const Events = require( 'AXON/Events' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const platform = require( 'PHET_CORE/platform' );
+  const Poolable = require( 'PHET_CORE/Poolable' );
+  const scenery = require( 'SCENERY/scenery' );
+  const TransformTracker = require( 'SCENERY/util/TransformTracker' );
 
   var globalId = 1;
 

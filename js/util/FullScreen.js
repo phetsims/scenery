@@ -6,15 +6,15 @@
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var detectPrefix = require( 'PHET_CORE/detectPrefix' );
-  var detectPrefixEvent = require( 'PHET_CORE/detectPrefixEvent' );
-  var platform = require( 'PHET_CORE/platform' );
-  var Property = require( 'AXON/Property' );
-  var scenery = require( 'SCENERY/scenery' );
+  const detectPrefix = require( 'PHET_CORE/detectPrefix' );
+  const detectPrefixEvent = require( 'PHET_CORE/detectPrefixEvent' );
+  const platform = require( 'PHET_CORE/platform' );
+  const Property = require( 'AXON/Property' );
+  const scenery = require( 'SCENERY/scenery' );
 
   // get prefixed (and properly capitalized) property names
   var exitFullscreenPropertyName = detectPrefix( document, 'exitFullscreen' ) ||

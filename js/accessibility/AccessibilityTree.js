@@ -6,16 +6,16 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var AccessibleInstance = require( 'SCENERY/accessibility/AccessibleInstance' );
-  var arrayDifference = require( 'PHET_CORE/arrayDifference' );
-  var PartialAccessibleTrail = require( 'SCENERY/accessibility/PartialAccessibleTrail' );
-  var scenery = require( 'SCENERY/scenery' );
+  const AccessibleInstance = require( 'SCENERY/accessibility/AccessibleInstance' );
+  const arrayDifference = require( 'PHET_CORE/arrayDifference' );
+  const PartialAccessibleTrail = require( 'SCENERY/accessibility/PartialAccessibleTrail' );
+  const scenery = require( 'SCENERY/scenery' );
   // commented out so Require.js doesn't balk at the circular dependency
-  // var Trail = require( 'SCENERY/util/Trail' );
+  // const Trail = require( 'SCENERY/util/Trail' );
 
   // globals (for restoring focus)
   var focusedNode = null;

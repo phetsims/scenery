@@ -5,16 +5,16 @@
  *
  * @author Sam Reid (PhET Interactive Simulations)
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var Image = require( 'SCENERY/nodes/Image' );
-  var NodeIO = require( 'SCENERY/nodes/NodeIO' );
+  const Image = require( 'SCENERY/nodes/Image' );
+  const NodeIO = require( 'SCENERY/nodes/NodeIO' );
   const ObjectIO = require( 'TANDEM/types/ObjectIO' );
-  var scenery = require( 'SCENERY/scenery' );
-  var StringIO = require( 'TANDEM/types/StringIO' );
-  var VoidIO = require( 'TANDEM/types/VoidIO' );
+  const scenery = require( 'SCENERY/scenery' );
+  const StringIO = require( 'TANDEM/types/StringIO' );
+  const VoidIO = require( 'TANDEM/types/VoidIO' );
 
   class ImageIO extends NodeIO {}
 

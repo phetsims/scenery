@@ -9,12 +9,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var inheritance = require( 'PHET_CORE/inheritance' );
-  var scenery = require( 'SCENERY/scenery' );
-  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
+  const inheritance = require( 'PHET_CORE/inheritance' );
+  const scenery = require( 'SCENERY/scenery' );
+  const SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
   var ImageStatefulDrawable = {
     /**

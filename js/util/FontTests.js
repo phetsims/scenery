@@ -5,11 +5,11 @@
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var Font = require( 'SCENERY/util/Font' );
+  const Font = require( 'SCENERY/util/Font' );
 
   QUnit.module( 'Font' );
 

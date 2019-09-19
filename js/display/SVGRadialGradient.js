@@ -8,13 +8,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
-  var scenery = require( 'SCENERY/scenery' );
-  var SVGGradient = require( 'SCENERY/display/SVGGradient' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Poolable = require( 'PHET_CORE/Poolable' );
+  const scenery = require( 'SCENERY/scenery' );
+  const SVGGradient = require( 'SCENERY/display/SVGGradient' );
 
   /**
    * @constructor

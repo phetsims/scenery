@@ -6,16 +6,16 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var FittedBlock = require( 'SCENERY/display/FittedBlock' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
-  var scenery = require( 'SCENERY/scenery' );
-  var SVGGroup = require( 'SCENERY/display/SVGGroup' );
-  var Util = require( 'SCENERY/util/Util' );
+  const cleanArray = require( 'PHET_CORE/cleanArray' );
+  const FittedBlock = require( 'SCENERY/display/FittedBlock' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Poolable = require( 'PHET_CORE/Poolable' );
+  const scenery = require( 'SCENERY/scenery' );
+  const SVGGroup = require( 'SCENERY/display/SVGGroup' );
+  const Util = require( 'SCENERY/util/Util' );
 
   /**
    * @constructor

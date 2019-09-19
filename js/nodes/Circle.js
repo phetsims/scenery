@@ -6,20 +6,20 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var Bounds2 = require( 'DOT/Bounds2' );
-  var CircleCanvasDrawable = require( 'SCENERY/display/drawables/CircleCanvasDrawable' );
-  var CircleDOMDrawable = require( 'SCENERY/display/drawables/CircleDOMDrawable' );
-  var CircleSVGDrawable = require( 'SCENERY/display/drawables/CircleSVGDrawable' );
-  var extendDefined = require( 'PHET_CORE/extendDefined' );
-  var Features = require( 'SCENERY/util/Features' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Path = require( 'SCENERY/nodes/Path' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Shape = require( 'KITE/Shape' );
+  const Bounds2 = require( 'DOT/Bounds2' );
+  const CircleCanvasDrawable = require( 'SCENERY/display/drawables/CircleCanvasDrawable' );
+  const CircleDOMDrawable = require( 'SCENERY/display/drawables/CircleDOMDrawable' );
+  const CircleSVGDrawable = require( 'SCENERY/display/drawables/CircleSVGDrawable' );
+  const extendDefined = require( 'PHET_CORE/extendDefined' );
+  const Features = require( 'SCENERY/util/Features' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Path = require( 'SCENERY/nodes/Path' );
+  const Renderer = require( 'SCENERY/display/Renderer' );
+  const scenery = require( 'SCENERY/scenery' );
+  const Shape = require( 'KITE/Shape' );
 
   var CIRCLE_OPTION_KEYS = [
     'radius' // {number} - see setRadius() for more documentation

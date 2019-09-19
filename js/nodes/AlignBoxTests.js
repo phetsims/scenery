@@ -5,14 +5,14 @@
  *
  * @author Sam Reid (PhET Interactive Simulations)
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var AlignGroup = require( 'SCENERY/nodes/AlignGroup' );
-  var Bounds2 = require( 'DOT/Bounds2' );
-  var Circle = require( 'SCENERY/nodes/Circle' );
-  var Rectangle = require( 'SCENERY/nodes/Rectangle' );
+  const AlignGroup = require( 'SCENERY/nodes/AlignGroup' );
+  const Bounds2 = require( 'DOT/Bounds2' );
+  const Circle = require( 'SCENERY/nodes/Circle' );
+  const Rectangle = require( 'SCENERY/nodes/Rectangle' );
 
   QUnit.module( 'AlignBox' );
 

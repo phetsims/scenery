@@ -16,16 +16,16 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var ButtonListenerIO = require( 'SCENERY/input/ButtonListenerIO' );
-  var DownUpListener = require( 'SCENERY/input/DownUpListener' );
-  var EventType = require( 'TANDEM/EventType' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Tandem = require( 'TANDEM/Tandem' );
+  const ButtonListenerIO = require( 'SCENERY/input/ButtonListenerIO' );
+  const DownUpListener = require( 'SCENERY/input/DownUpListener' );
+  const EventType = require( 'TANDEM/EventType' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const scenery = require( 'SCENERY/scenery' );
+  const Tandem = require( 'TANDEM/Tandem' );
 
   /**
    * Options for the ButtonListener:

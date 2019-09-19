@@ -6,16 +6,16 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var CircleStatefulDrawable = require( 'SCENERY/display/drawables/CircleStatefulDrawable' );
-  var DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
-  var Features = require( 'SCENERY/util/Features' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Matrix3 = require( 'DOT/Matrix3' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
-  var scenery = require( 'SCENERY/scenery' );
+  const CircleStatefulDrawable = require( 'SCENERY/display/drawables/CircleStatefulDrawable' );
+  const DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
+  const Features = require( 'SCENERY/util/Features' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Matrix3 = require( 'DOT/Matrix3' );
+  const Poolable = require( 'PHET_CORE/Poolable' );
+  const scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/util/Util' );
 
   // TODO: change this based on memory and performance characteristics of the platform

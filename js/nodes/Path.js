@@ -6,19 +6,19 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var Bounds2 = require( 'DOT/Bounds2' );
-  var extendDefined = require( 'PHET_CORE/extendDefined' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Node = require( 'SCENERY/nodes/Node' );
-  var Paintable = require( 'SCENERY/nodes/Paintable' );
-  var PathCanvasDrawable = require( 'SCENERY/display/drawables/PathCanvasDrawable' );
-  var PathSVGDrawable = require( 'SCENERY/display/drawables/PathSVGDrawable' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Shape = require( 'KITE/Shape' );
+  const Bounds2 = require( 'DOT/Bounds2' );
+  const extendDefined = require( 'PHET_CORE/extendDefined' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Node = require( 'SCENERY/nodes/Node' );
+  const Paintable = require( 'SCENERY/nodes/Paintable' );
+  const PathCanvasDrawable = require( 'SCENERY/display/drawables/PathCanvasDrawable' );
+  const PathSVGDrawable = require( 'SCENERY/display/drawables/PathSVGDrawable' );
+  const Renderer = require( 'SCENERY/display/Renderer' );
+  const scenery = require( 'SCENERY/scenery' );
+  const Shape = require( 'KITE/Shape' );
 
   var PATH_OPTION_KEYS = [
     'boundsMethod', // {string} - Sets how bounds are determined, see setBoundsMethod() for more documentation.

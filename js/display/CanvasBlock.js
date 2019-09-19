@@ -6,19 +6,19 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var CanvasContextWrapper = require( 'SCENERY/util/CanvasContextWrapper' );
-  var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var FittedBlock = require( 'SCENERY/display/FittedBlock' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Matrix3 = require( 'DOT/Matrix3' );
-  var Poolable = require( 'PHET_CORE/Poolable' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Util = require( 'SCENERY/util/Util' );
-  var Vector2 = require( 'DOT/Vector2' );
+  const CanvasContextWrapper = require( 'SCENERY/util/CanvasContextWrapper' );
+  const cleanArray = require( 'PHET_CORE/cleanArray' );
+  const FittedBlock = require( 'SCENERY/display/FittedBlock' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Matrix3 = require( 'DOT/Matrix3' );
+  const Poolable = require( 'PHET_CORE/Poolable' );
+  const Renderer = require( 'SCENERY/display/Renderer' );
+  const scenery = require( 'SCENERY/scenery' );
+  const Util = require( 'SCENERY/util/Util' );
+  const Vector2 = require( 'DOT/Vector2' );
 
   var scratchMatrix = new Matrix3();
   var scratchMatrix2 = new Matrix3();

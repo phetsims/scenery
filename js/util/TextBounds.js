@@ -6,14 +6,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var Bounds2 = require( 'DOT/Bounds2' );
-  var CanvasContextWrapper = require( 'SCENERY/util/CanvasContextWrapper' );
-  var Font = require( 'SCENERY/util/Font' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Util = require( 'SCENERY/util/Util' );
+  const Bounds2 = require( 'DOT/Bounds2' );
+  const CanvasContextWrapper = require( 'SCENERY/util/CanvasContextWrapper' );
+  const Font = require( 'SCENERY/util/Font' );
+  const scenery = require( 'SCENERY/scenery' );
+  const Util = require( 'SCENERY/util/Util' );
 
   // @private {string} - ID for a container for our SVG test element (determined to find the size of text elements with SVG)
   var TEXT_SIZE_CONTAINER_ID = 'sceneryTextSizeContainer';

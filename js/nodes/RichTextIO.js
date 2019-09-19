@@ -5,16 +5,16 @@
  *
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
   const ObjectIO = require( 'TANDEM/types/ObjectIO' );
-  var NodeIO = require( 'SCENERY/nodes/NodeIO' );
-  var NodeProperty = require( 'SCENERY/util/NodeProperty' );
-  var PropertyIO = require( 'AXON/PropertyIO' );
-  var scenery = require( 'SCENERY/scenery' );
-  var StringIO = require( 'TANDEM/types/StringIO' );
+  const NodeIO = require( 'SCENERY/nodes/NodeIO' );
+  const NodeProperty = require( 'SCENERY/util/NodeProperty' );
+  const PropertyIO = require( 'AXON/PropertyIO' );
+  const scenery = require( 'SCENERY/scenery' );
+  const StringIO = require( 'TANDEM/types/StringIO' );
 
   class RichTextIO extends NodeIO {
     /**

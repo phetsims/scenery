@@ -9,13 +9,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Paint = require( 'SCENERY/util/Paint' );
-  var scenery = require( 'SCENERY/scenery' );
-  var SVGPattern = require( 'SCENERY/display/SVGPattern' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Paint = require( 'SCENERY/util/Paint' );
+  const scenery = require( 'SCENERY/scenery' );
+  const SVGPattern = require( 'SCENERY/display/SVGPattern' );
 
   /**
    * @constructor

@@ -7,11 +7,11 @@
  *
  * @author Jesse Greenberg
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var scenery = require( 'SCENERY/scenery' );
+  const scenery = require( 'SCENERY/scenery' );
 
   var KEY_RIGHT_ARROW = 39;
   var KEY_LEFT_ARROW = 37;

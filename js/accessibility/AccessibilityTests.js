@@ -5,17 +5,17 @@
  *
  * @author Sam Reid (PhET Interactive Simulations)
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var AccessibilityFuzzer = require( 'SCENERY/accessibility/AccessibilityFuzzer' );
-  var AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
-  var AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
-  var Circle = require( 'SCENERY/nodes/Circle' );
-  var Display = require( 'SCENERY/display/Display' );
-  var Node = require( 'SCENERY/nodes/Node' );
-  var Rectangle = require( 'SCENERY/nodes/Rectangle' );
+  const AccessibilityFuzzer = require( 'SCENERY/accessibility/AccessibilityFuzzer' );
+  const AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
+  const AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
+  const Circle = require( 'SCENERY/nodes/Circle' );
+  const Display = require( 'SCENERY/display/Display' );
+  const Node = require( 'SCENERY/nodes/Node' );
+  const Rectangle = require( 'SCENERY/nodes/Rectangle' );
 
   // constants
   var TEST_INNER_CONTENT = 'Test Inner Content Here please^&*. Thanks you so very mucho.';

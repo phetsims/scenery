@@ -6,13 +6,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
-  var SVGGradientStop = require( 'SCENERY/display/SVGGradientStop' );
+  const cleanArray = require( 'PHET_CORE/cleanArray' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const scenery = require( 'SCENERY/scenery' );
+  const SVGGradientStop = require( 'SCENERY/display/SVGGradientStop' );
 
   /**
    * @constructor

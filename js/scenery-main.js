@@ -7,7 +7,7 @@
   if ( !window.hasOwnProperty( '$' ) ) {
     throw new Error( 'jQuery not found: $' );
   }
-  define( function( require ) {
+  define( require => {
 
     window.axon = require( 'AXON/main' );
     window.dot = require( 'DOT/main' );

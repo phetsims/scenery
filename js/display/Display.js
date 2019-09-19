@@ -50,52 +50,52 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var AccessibilityTree = require( 'SCENERY/accessibility/AccessibilityTree' );
-  var Dimension2 = require( 'DOT/Dimension2' );
-  var Emitter = require( 'AXON/Emitter' );
-  var escapeHTML = require( 'PHET_CORE/escapeHTML' );
-  var Events = require( 'AXON/Events' );
-  var extend = require( 'PHET_CORE/extend' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var KeyStateTracker = require( 'SCENERY/accessibility/KeyStateTracker' );
-  var Matrix3 = require( 'DOT/Matrix3' );
-  var Property = require( 'AXON/Property' );
-  var PropertyIO = require( 'AXON/PropertyIO' );
-  var Tandem = require( 'TANDEM/Tandem' );
-  var timer = require( 'AXON/timer' );
+  const AccessibilityTree = require( 'SCENERY/accessibility/AccessibilityTree' );
+  const Dimension2 = require( 'DOT/Dimension2' );
+  const Emitter = require( 'AXON/Emitter' );
+  const escapeHTML = require( 'PHET_CORE/escapeHTML' );
+  const Events = require( 'AXON/Events' );
+  const extend = require( 'PHET_CORE/extend' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const KeyStateTracker = require( 'SCENERY/accessibility/KeyStateTracker' );
+  const Matrix3 = require( 'DOT/Matrix3' );
+  const Property = require( 'AXON/Property' );
+  const PropertyIO = require( 'AXON/PropertyIO' );
+  const Tandem = require( 'TANDEM/Tandem' );
+  const timer = require( 'AXON/timer' );
 
   // TODO: Order these, and see which ones we can require?
-  var Features = require( 'SCENERY/util/Features' );
-  var Node = require( 'SCENERY/nodes/Node' );
-  var scenery = require( 'SCENERY/scenery' );
+  const Features = require( 'SCENERY/util/Features' );
+  const Node = require( 'SCENERY/nodes/Node' );
+  const scenery = require( 'SCENERY/scenery' );
   require( 'SCENERY/display/BackboneDrawable' );
   require( 'SCENERY/display/CanvasBlock' );
   require( 'SCENERY/display/CanvasSelfDrawable' );
-  var ChangeInterval = require( 'SCENERY/display/ChangeInterval' );
+  const ChangeInterval = require( 'SCENERY/display/ChangeInterval' );
   require( 'SCENERY/display/DOMSelfDrawable' );
-  var Drawable = require( 'SCENERY/display/Drawable' );
-  var HitAreaOverlay = require( 'SCENERY/overlays/HitAreaOverlay' );
-  var Instance = require( 'SCENERY/display/Instance' );
+  const Drawable = require( 'SCENERY/display/Drawable' );
+  const HitAreaOverlay = require( 'SCENERY/overlays/HitAreaOverlay' );
+  const Instance = require( 'SCENERY/display/Instance' );
   require( 'SCENERY/display/InlineCanvasCacheDrawable' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
+  const Renderer = require( 'SCENERY/display/Renderer' );
   require( 'SCENERY/display/SharedCanvasCacheDrawable' );
   require( 'SCENERY/display/SVGSelfDrawable' );
-  var Input = require( 'SCENERY/input/Input' );
+  const Input = require( 'SCENERY/input/Input' );
   require( 'SCENERY/util/Trail' );
-  var AccessibleInstance = require( 'SCENERY/accessibility/AccessibleInstance' );
-  var CanvasNodeBoundsOverlay = require( 'SCENERY/overlays/CanvasNodeBoundsOverlay' );
-  var FittedBlockBoundsOverlay = require( 'SCENERY/overlays/FittedBlockBoundsOverlay' );
-  var FocusIO = require( 'SCENERY/accessibility/FocusIO' );
-  var FocusOverlay = require( 'SCENERY/overlays/FocusOverlay' );
-  var NullableIO = require( 'TANDEM/types/NullableIO' );
-  var platform = require( 'PHET_CORE/platform' );
-  var PointerAreaOverlay = require( 'SCENERY/overlays/PointerAreaOverlay' );
-  var PointerOverlay = require( 'SCENERY/overlays/PointerOverlay' );
-  // var SceneryStyle = require( 'SCENERY/util/SceneryStyle' );
-  var Util = require( 'SCENERY/util/Util' );
+  const AccessibleInstance = require( 'SCENERY/accessibility/AccessibleInstance' );
+  const CanvasNodeBoundsOverlay = require( 'SCENERY/overlays/CanvasNodeBoundsOverlay' );
+  const FittedBlockBoundsOverlay = require( 'SCENERY/overlays/FittedBlockBoundsOverlay' );
+  const FocusIO = require( 'SCENERY/accessibility/FocusIO' );
+  const FocusOverlay = require( 'SCENERY/overlays/FocusOverlay' );
+  const NullableIO = require( 'TANDEM/types/NullableIO' );
+  const platform = require( 'PHET_CORE/platform' );
+  const PointerAreaOverlay = require( 'SCENERY/overlays/PointerAreaOverlay' );
+  const PointerOverlay = require( 'SCENERY/overlays/PointerOverlay' );
+  // const SceneryStyle = require( 'SCENERY/util/SceneryStyle' );
+  const Util = require( 'SCENERY/util/Util' );
 
   /**
    * Constructs a Display that will show the rootNode and its subtree in a visual state. Default options provided below

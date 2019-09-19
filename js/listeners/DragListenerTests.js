@@ -5,18 +5,18 @@
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var Bounds2 = require( 'DOT/Bounds2' );
-  var DragListener = require( 'SCENERY/listeners/DragListener' );
-  var ListenerTestUtils = require( 'SCENERY/listeners/ListenerTestUtils' );
-  var Matrix3 = require( 'DOT/Matrix3' );
-  var Property = require( 'AXON/Property' );
-  var Transform3 = require( 'DOT/Transform3' );
-  var Vector2 = require( 'DOT/Vector2' );
-  var Vector2Property = require( 'DOT/Vector2Property' );
+  const Bounds2 = require( 'DOT/Bounds2' );
+  const DragListener = require( 'SCENERY/listeners/DragListener' );
+  const ListenerTestUtils = require( 'SCENERY/listeners/ListenerTestUtils' );
+  const Matrix3 = require( 'DOT/Matrix3' );
+  const Property = require( 'AXON/Property' );
+  const Transform3 = require( 'DOT/Transform3' );
+  const Vector2 = require( 'DOT/Vector2' );
+  const Vector2Property = require( 'DOT/Vector2Property' );
 
   QUnit.module( 'DragListener' );
 

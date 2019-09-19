@@ -5,25 +5,25 @@
  *
  * @author Sam Reid (PhET Interactive Simulations)
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var Circle = require( 'SCENERY/nodes/Circle' );
-  var Display = require( 'SCENERY/display/Display' );
-  var Image = require( 'SCENERY/nodes/Image' );
-  var LinearGradient = require( 'SCENERY/util/LinearGradient' );
-  var Matrix3 = require( 'DOT/Matrix3' );
-  var Node = require( 'SCENERY/nodes/Node' );
-  var Path = require( 'SCENERY/nodes/Path' );
-  var Pattern = require( 'SCENERY/util/Pattern' );
-  var platform = require( 'PHET_CORE/platform' );
-  var Property = require( 'AXON/Property' );
-  var RadialGradient = require( 'SCENERY/util/RadialGradient' );
-  var Rectangle = require( 'SCENERY/nodes/Rectangle' );
-  var Shape = require( 'KITE/Shape' );
-  var snapshotEquals = require( 'SCENERY/tests/snapshotEquals' );
-  var Vector2 = require( 'DOT/Vector2' );
+  const Circle = require( 'SCENERY/nodes/Circle' );
+  const Display = require( 'SCENERY/display/Display' );
+  const Image = require( 'SCENERY/nodes/Image' );
+  const LinearGradient = require( 'SCENERY/util/LinearGradient' );
+  const Matrix3 = require( 'DOT/Matrix3' );
+  const Node = require( 'SCENERY/nodes/Node' );
+  const Path = require( 'SCENERY/nodes/Path' );
+  const Pattern = require( 'SCENERY/util/Pattern' );
+  const platform = require( 'PHET_CORE/platform' );
+  const Property = require( 'AXON/Property' );
+  const RadialGradient = require( 'SCENERY/util/RadialGradient' );
+  const Rectangle = require( 'SCENERY/nodes/Rectangle' );
+  const Shape = require( 'KITE/Shape' );
+  const snapshotEquals = require( 'SCENERY/tests/snapshotEquals' );
+  const Vector2 = require( 'DOT/Vector2' );
 
   QUnit.module( 'PixelComparison' );
 

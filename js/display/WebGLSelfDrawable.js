@@ -7,12 +7,12 @@
  * @author Sam Reid
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var scenery = require( 'SCENERY/scenery' );
-  var SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const scenery = require( 'SCENERY/scenery' );
+  const SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
 
   function WebGLSelfDrawable( renderer, instance ) {
     this.initializeWebGLSelfDrawable( renderer, instance );

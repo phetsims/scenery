@@ -6,13 +6,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var Color = require( 'SCENERY/util/Color' );
-  var Paint = require( 'SCENERY/util/Paint' );
-  var Property = require( 'AXON/Property' );
-  var scenery = require( 'SCENERY/scenery' );
+  const Color = require( 'SCENERY/util/Color' );
+  const Paint = require( 'SCENERY/util/Paint' );
+  const Property = require( 'AXON/Property' );
+  const scenery = require( 'SCENERY/scenery' );
 
   var PaintDef = {
     /**

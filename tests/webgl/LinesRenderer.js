@@ -5,16 +5,16 @@
  *
  * @author Sam Reid (PhET Interactive Simulations)
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
   // modules
-  var inherit = require( 'PHET_CORE/inherit' );
-  var WebGLUtil = require( 'SCENERY/display/webgl/WebGLUtil' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const WebGLUtil = require( 'SCENERY/display/webgl/WebGLUtil' );
 
   // shaders
-  var lineVertexShader = require( 'text!SCENERY/../tests/webgl/lines.vert' );
-  var lineFragmentShader = require( 'text!SCENERY/../tests/webgl/lines.frag' );
+  const lineVertexShader = require( 'text!SCENERY/../tests/webgl/lines.vert' );
+  const lineFragmentShader = require( 'text!SCENERY/../tests/webgl/lines.frag' );
 
   /**
    *

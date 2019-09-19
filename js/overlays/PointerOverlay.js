@@ -8,14 +8,14 @@
  *
  * @author Sam Reid (PhET Interactive Simulations)
  */
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Matrix3 = require( 'DOT/Matrix3' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Touch = require( 'SCENERY/input/Touch' );
-  var Util = require( 'SCENERY/util/Util' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Matrix3 = require( 'DOT/Matrix3' );
+  const scenery = require( 'SCENERY/scenery' );
+  const Touch = require( 'SCENERY/input/Touch' );
+  const Util = require( 'SCENERY/util/Util' );
   require( 'SCENERY/util/Trail' );
 
   function PointerOverlay( display, rootNode ) {

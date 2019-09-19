@@ -9,13 +9,13 @@
  * @author Jesse Greenberg
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Matrix3 = require( 'DOT/Matrix3' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Matrix3 = require( 'DOT/Matrix3' );
 
-  var scenery = require( 'SCENERY/scenery' );
+  const scenery = require( 'SCENERY/scenery' );
 
   /**
    * Creates a transform-tracking object, where it can send out updates on transform changes, and also efficiently

@@ -97,18 +97,18 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var CanvasBlock = require( 'SCENERY/display/CanvasBlock' );
-  var cleanArray = require( 'PHET_CORE/cleanArray' );
-  var DOMBlock = require( 'SCENERY/display/DOMBlock' );
-  var Drawable = require( 'SCENERY/display/Drawable' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
-  var scenery = require( 'SCENERY/scenery' );
-  var SVGBlock = require( 'SCENERY/display/SVGBlock' );
-  var WebGLBlock = require( 'SCENERY/display/WebGLBlock' );
+  const CanvasBlock = require( 'SCENERY/display/CanvasBlock' );
+  const cleanArray = require( 'PHET_CORE/cleanArray' );
+  const DOMBlock = require( 'SCENERY/display/DOMBlock' );
+  const Drawable = require( 'SCENERY/display/Drawable' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Renderer = require( 'SCENERY/display/Renderer' );
+  const scenery = require( 'SCENERY/scenery' );
+  const SVGBlock = require( 'SCENERY/display/SVGBlock' );
+  const WebGLBlock = require( 'SCENERY/display/WebGLBlock' );
 
   function Stitcher( display, renderer ) {
     throw new Error( 'We are too abstract for that!' );

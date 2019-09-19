@@ -6,12 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var inheritance = require( 'PHET_CORE/inheritance' );
-  var Node = require( 'SCENERY/nodes/Node' );
-  var scenery = require( 'SCENERY/scenery' );
+  const inheritance = require( 'PHET_CORE/inheritance' );
+  const Node = require( 'SCENERY/nodes/Node' );
+  const scenery = require( 'SCENERY/scenery' );
 
   var Leaf = {
     /**

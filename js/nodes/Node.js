@@ -191,33 +191,33 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var Accessibility = require( 'SCENERY/accessibility/Accessibility' );
-  var arrayDifference = require( 'PHET_CORE/arrayDifference' );
-  var Bounds2 = require( 'DOT/Bounds2' );
-  var Events = require( 'AXON/Events' );
-  var extend = require( 'PHET_CORE/extend' );
-  var inherit = require( 'PHET_CORE/inherit' );
-  var Matrix3 = require( 'DOT/Matrix3' );
-  var Mouse = require( 'SCENERY/input/Mouse' );
-  var Pen = require( 'SCENERY/input/Pen' );
-  var PhetioObject = require( 'TANDEM/PhetioObject' );
-  var Picker = require( 'SCENERY/util/Picker' );
-  var Renderer = require( 'SCENERY/display/Renderer' );
-  var RendererSummary = require( 'SCENERY/util/RendererSummary' );
-  var scenery = require( 'SCENERY/scenery' );
-  var Shape = require( 'KITE/Shape' );
-  var Touch = require( 'SCENERY/input/Touch' );
-  var Transform3 = require( 'DOT/Transform3' );
-  var Util = require( 'DOT/Util' );
-  var Vector2 = require( 'DOT/Vector2' );
+  const Accessibility = require( 'SCENERY/accessibility/Accessibility' );
+  const arrayDifference = require( 'PHET_CORE/arrayDifference' );
+  const Bounds2 = require( 'DOT/Bounds2' );
+  const Events = require( 'AXON/Events' );
+  const extend = require( 'PHET_CORE/extend' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const Matrix3 = require( 'DOT/Matrix3' );
+  const Mouse = require( 'SCENERY/input/Mouse' );
+  const Pen = require( 'SCENERY/input/Pen' );
+  const PhetioObject = require( 'TANDEM/PhetioObject' );
+  const Picker = require( 'SCENERY/util/Picker' );
+  const Renderer = require( 'SCENERY/display/Renderer' );
+  const RendererSummary = require( 'SCENERY/util/RendererSummary' );
+  const scenery = require( 'SCENERY/scenery' );
+  const Shape = require( 'KITE/Shape' );
+  const Touch = require( 'SCENERY/input/Touch' );
+  const Transform3 = require( 'DOT/Transform3' );
+  const Util = require( 'DOT/Util' );
+  const Vector2 = require( 'DOT/Vector2' );
   require( 'SCENERY/util/CanvasContextWrapper' );
   // commented out so Require.js doesn't balk at the circular dependency
   // require( 'SCENERY/util/Trail' );
   // require( 'SCENERY/util/TrailPointer' );
-  var NodeIO = require( 'SCENERY/nodes/NodeIO' );
+  const NodeIO = require( 'SCENERY/nodes/NodeIO' );
   // constants
   var clamp = Util.clamp;
 

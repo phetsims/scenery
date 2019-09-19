@@ -10,12 +10,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( function( require ) {
+define( require => {
   'use strict';
 
-  var inherit = require( 'PHET_CORE/inherit' );
-  var MultiListener = require( 'SCENERY/listeners/MultiListener' );
-  var scenery = require( 'SCENERY/scenery' );
+  const inherit = require( 'PHET_CORE/inherit' );
+  const MultiListener = require( 'SCENERY/listeners/MultiListener' );
+  const scenery = require( 'SCENERY/scenery' );
 
   /**
    * @constructor
