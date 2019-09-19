@@ -543,7 +543,7 @@ define( require => {
         var ieBlockCallbacks = false;
 
         // @private
-        this.focusinAction = new Action( ( event ) => {
+        this.focusinAction = new Action( event => {
 
           // ignore any focusout callbacks if they are initiated due to implementation details in PDOM manipulation
           if ( this.display.blockFocusCallbacks ) {
@@ -572,7 +572,7 @@ define( require => {
         } );
 
         // @private
-        this.focusoutAction = new Action( ( event ) => {
+        this.focusoutAction = new Action( event => {
 
           // ignore any focusout callbacks if they are initiated due to implementation details in PDOM manipulation
           if ( this.display.blockFocusCallbacks ) {
@@ -625,7 +625,7 @@ define( require => {
         } );
 
         // @private
-        this.clickAction = new Action( ( event ) => {
+        this.clickAction = new Action( event => {
           sceneryLog && sceneryLog.Input && sceneryLog.Input( 'click(' + Input.debugText( null, event ) + ');' );
           sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -643,7 +643,7 @@ define( require => {
         } );
 
         // @private
-        this.inputAction = new Action( ( event ) => {
+        this.inputAction = new Action( event => {
           sceneryLog && sceneryLog.Input && sceneryLog.Input( 'input(' + Input.debugText( null, event ) + ');' );
           sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -661,7 +661,7 @@ define( require => {
         } );
 
         // @private
-        this.changeAction = new Action( ( event ) => {
+        this.changeAction = new Action( event => {
           sceneryLog && sceneryLog.Input && sceneryLog.Input( 'change(' + Input.debugText( null, event ) + ');' );
           sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -679,7 +679,7 @@ define( require => {
         } );
 
         // @private
-        this.keydownAction = new Action( ( event ) => {
+        this.keydownAction = new Action( event => {
           sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keydown(' + Input.debugText( null, event ) + ');' );
           sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -697,7 +697,7 @@ define( require => {
         } );
 
         // @private
-        this.keyupAction = new Action( ( event ) => {
+        this.keyupAction = new Action( event => {
           sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyup(' + Input.debugText( null, event ) + ');' );
           sceneryLog && sceneryLog.Input && sceneryLog.push();
 
