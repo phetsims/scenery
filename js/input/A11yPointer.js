@@ -61,11 +61,11 @@ define( require => {
             this.display.pointerFocus = null;
           }
         },
-        blur: ( event ) => {
+        blur: event => {
           scenery.Display.focus = null;
           this.keydownTargetNode = null;
         },
-        keydown: ( event ) => {
+        keydown: event => {
           if ( this.blockTrustedEvents && event.domEvent.isTrusted ) {
             return;
           }
@@ -74,7 +74,7 @@ define( require => {
           // set the target to potentially block keyup events
           this.keydownTargetNode = event.target;
         },
-        keyup: ( event ) => {
+        keyup: event => {
           if ( this.blockTrustedEvents && event.domEvent.isTrusted ) {
             return;
           }

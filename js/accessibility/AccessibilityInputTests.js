@@ -25,7 +25,7 @@ define( require => {
    * Set up a test for accessible input by attaching a root node to a display and initializing events.
    * @param {Display} display
    */
-  const beforeTest = ( display ) => {
+  const beforeTest = display => {
     display.initializeEvents();
     document.body.appendChild( display.domElement );
   };
@@ -35,7 +35,7 @@ define( require => {
    * with QUnit UI.
    * @param {Display} display
    */
-  const afterTest = ( display ) => {
+  const afterTest = display => {
     display.detachEvents();
     document.body.removeChild( display.domElement );
   };
