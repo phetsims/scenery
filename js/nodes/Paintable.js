@@ -21,10 +21,10 @@ define( require => {
   const Renderer = require( 'SCENERY/display/Renderer' );
   const scenery = require( 'SCENERY/scenery' );
 
-  var isSafari5 = platform.safari5;
-  var isIE9 = platform.ie9;
+  const isSafari5 = platform.safari5;
+  const isIE9 = platform.ie9;
 
-  var PAINTABLE_OPTION_KEYS = [
+  const PAINTABLE_OPTION_KEYS = [
     'fill', // {PaintDef} - Sets the fill of this node, see setFill() for documentation.
     'fillPickable', // {boolean} - Sets whether the filled area of the node will be treated as 'inside'. See setFillPickable()
     'stroke', // {PaintDef} - Sets the stroke of this node, see setStroke() for documentation.
@@ -38,7 +38,7 @@ define( require => {
     'cachedPaints' // {Array.<PaintDef>} - Sets which paints should be cached, even if not displayed. See setCachedPaints()
   ];
 
-  var DEFAULT_OPTIONS = {
+  const DEFAULT_OPTIONS = {
     fill: null,
     fillPickable: true,
     stroke: null,
@@ -52,7 +52,7 @@ define( require => {
     miterLimit: LineStyles.DEFAULT_OPTIONS.miterLimit
   };
 
-  var Paintable = {
+  const Paintable = {
     /**
      * Applies the trait to a subtype of Node.
      * @public
@@ -63,7 +63,7 @@ define( require => {
     mixInto: function( type ) {
       assert && assert( _.includes( inheritance( type ), Node ), 'Only Node subtypes should mix Paintable' );
 
-      var proto = type.prototype;
+      const proto = type.prototype;
 
       /**
        * These properties and methods are put directly on the prototype of things that have Paintable mixed in.
@@ -163,7 +163,7 @@ define( require => {
          * @returns {null|string|Color|LinearGradient|RadialGradient|Pattern}
          */
         getFillValue: function() {
-          var fill = this.getFill();
+          let fill = this.getFill();
 
           // Property lookup
           if ( fill instanceof Property ) {
@@ -249,7 +249,7 @@ define( require => {
          * @returns {null|string|Color|LinearGradient|RadialGradient|Pattern}
          */
         getStrokeValue: function() {
-          var stroke = this.getStroke();
+          let stroke = this.getStroke();
 
           // Property lookup
           if ( stroke instanceof Property ) {
@@ -337,8 +337,8 @@ define( require => {
             this._lineDrawingStyles.lineWidth = lineWidth;
             this.invalidateStroke();
 
-            var stateLen = this._drawables.length;
-            for ( var i = 0; i < stateLen; i++ ) {
+            const stateLen = this._drawables.length;
+            for ( let i = 0; i < stateLen; i++ ) {
               this._drawables[ i ].markDirtyLineWidth();
             }
           }
@@ -375,8 +375,8 @@ define( require => {
             this._lineDrawingStyles.lineCap = lineCap;
             this.invalidateStroke();
 
-            var stateLen = this._drawables.length;
-            for ( var i = 0; i < stateLen; i++ ) {
+            const stateLen = this._drawables.length;
+            for ( let i = 0; i < stateLen; i++ ) {
               this._drawables[ i ].markDirtyLineOptions();
             }
           }
@@ -414,8 +414,8 @@ define( require => {
             this._lineDrawingStyles.lineJoin = lineJoin;
             this.invalidateStroke();
 
-            var stateLen = this._drawables.length;
-            for ( var i = 0; i < stateLen; i++ ) {
+            const stateLen = this._drawables.length;
+            for ( let i = 0; i < stateLen; i++ ) {
               this._drawables[ i ].markDirtyLineOptions();
             }
           }
@@ -449,8 +449,8 @@ define( require => {
             this._lineDrawingStyles.miterLimit = miterLimit;
             this.invalidateStroke();
 
-            var stateLen = this._drawables.length;
-            for ( var i = 0; i < stateLen; i++ ) {
+            const stateLen = this._drawables.length;
+            for ( let i = 0; i < stateLen; i++ ) {
               this._drawables[ i ].markDirtyLineOptions();
             }
           }
@@ -485,8 +485,8 @@ define( require => {
             this._lineDrawingStyles.lineDash = lineDash || [];
             this.invalidateStroke();
 
-            var stateLen = this._drawables.length;
-            for ( var i = 0; i < stateLen; i++ ) {
+            const stateLen = this._drawables.length;
+            for ( let i = 0; i < stateLen; i++ ) {
               this._drawables[ i ].markDirtyLineOptions();
             }
           }
@@ -530,8 +530,8 @@ define( require => {
             this._lineDrawingStyles.lineDashOffset = lineDashOffset;
             this.invalidateStroke();
 
-            var stateLen = this._drawables.length;
-            for ( var i = 0; i < stateLen; i++ ) {
+            const stateLen = this._drawables.length;
+            for ( let i = 0; i < stateLen; i++ ) {
               this._drawables[ i ].markDirtyLineOptions();
             }
           }
@@ -594,8 +594,8 @@ define( require => {
         setCachedPaints: function( paints ) {
           this._cachedPaints = paints.filter( function( paint ) { return paint && paint.isPaint; } );
 
-          var stateLen = this._drawables.length;
-          for ( var i = 0; i < stateLen; i++ ) {
+          const stateLen = this._drawables.length;
+          for ( let i = 0; i < stateLen; i++ ) {
             this._drawables[ i ].markDirtyCachedPaints();
           }
 
@@ -630,8 +630,8 @@ define( require => {
           if ( paint && paint.isPaint ) {
             this._cachedPaints.push( paint );
 
-            var stateLen = this._drawables.length;
-            for ( var i = 0; i < stateLen; i++ ) {
+            const stateLen = this._drawables.length;
+            for ( let i = 0; i < stateLen; i++ ) {
               this._drawables[ i ].markDirtyCachedPaints();
             }
           }
@@ -654,8 +654,8 @@ define( require => {
 
             arrayRemove( this._cachedPaints, paint );
 
-            var stateLen = this._drawables.length;
-            for ( var i = 0; i < stateLen; i++ ) {
+            const stateLen = this._drawables.length;
+            for ( let i = 0; i < stateLen; i++ ) {
               this._drawables[ i ].markDirtyCachedPaints();
             }
           }
@@ -668,7 +668,7 @@ define( require => {
          * @param {CanvasContextWrapper} wrapper
          */
         beforeCanvasFill: function( wrapper ) {
-          var fillValue = this.getFillValue();
+          const fillValue = this.getFillValue();
 
           wrapper.setFillStyle( fillValue );
           if ( fillValue.transformMatrix ) {
@@ -684,7 +684,7 @@ define( require => {
          * @param {CanvasContextWrapper} wrapper
          */
         afterCanvasFill: function( wrapper ) {
-          var fillValue = this.getFillValue();
+          const fillValue = this.getFillValue();
 
           if ( fillValue.transformMatrix ) {
             wrapper.context.restore();
@@ -698,7 +698,7 @@ define( require => {
          * @param {CanvasContextWrapper} wrapper
          */
         beforeCanvasStroke: function( wrapper ) {
-          var strokeValue = this.getStrokeValue();
+          const strokeValue = this.getStrokeValue();
 
           // TODO: is there a better way of not calling so many things on each stroke?
           wrapper.setStrokeStyle( this._stroke );
@@ -721,7 +721,7 @@ define( require => {
          * @param {CanvasContextWrapper} wrapper
          */
         afterCanvasStroke: function( wrapper ) {
-          var strokeValue = this.getStrokeValue();
+          const strokeValue = this.getStrokeValue();
 
           if ( strokeValue.transformMatrix ) {
             wrapper.context.restore();
@@ -735,7 +735,7 @@ define( require => {
          * @returns {string}
          */
         getCSSFill: function() {
-          var fillValue = this.getFillValue();
+          const fillValue = this.getFillValue();
           // if it's a Color object, get the corresponding CSS
           // 'transparent' will make us invisible if the fill is null
           return fillValue ? ( fillValue.toCSS ? fillValue.toCSS() : fillValue ) : 'transparent';
@@ -748,7 +748,7 @@ define( require => {
          * @returns {string}
          */
         getSimpleCSSStroke: function() {
-          var strokeValue = this.getStrokeValue();
+          const strokeValue = this.getStrokeValue();
           // if it's a Color object, get the corresponding CSS
           // 'transparent' will make us invisible if the fill is null
           return strokeValue ? ( strokeValue.toCSS ? strokeValue.toCSS() : strokeValue ) : 'transparent';
@@ -789,7 +789,7 @@ define( require => {
          * @returns {string}
          */
         appendStrokablePropString: function( spaces, result ) {
-          var self = this;
+          const self = this;
 
           function addProp( key, value, nowrap ) {
             if ( result ) {
@@ -804,7 +804,7 @@ define( require => {
           }
 
           if ( this._stroke ) {
-            var defaultStyles = new LineStyles();
+            const defaultStyles = new LineStyles();
             if ( typeof this.getStrokeValue() === 'string' ) {
               addProp( 'stroke', this.getStrokeValue() );
             }
@@ -837,7 +837,7 @@ define( require => {
          * @returns {number} - Renderer bitmask, see Renderer for details
          */
         getFillRendererBitmask: function() {
-          var bitmask = 0;
+          let bitmask = 0;
 
           // Safari 5 has buggy issues with SVG gradients
           if ( !( isSafari5 && this._fill && this._fill.isGradient ) ) {
@@ -878,7 +878,7 @@ define( require => {
          * @returns {number} - Renderer bitmask, see Renderer for details
          */
         getStrokeRendererBitmask: function() {
-          var bitmask = 0;
+          let bitmask = 0;
 
           // IE9 has bad dashed strokes, let's force a different renderer in case
           if ( !( isIE9 && this.hasStroke() && this.hasLineDash() ) ) {
@@ -906,15 +906,15 @@ define( require => {
       function invalidateFill() {
         this.invalidateSupportedRenderers();
 
-        var stateLen = this._drawables.length;
-        for ( var i = 0; i < stateLen; i++ ) {
+        const stateLen = this._drawables.length;
+        for ( let i = 0; i < stateLen; i++ ) {
           this._drawables[ i ].markDirtyFill();
         }
       }
 
       // Patch in a sub-type call if it already exists on the prototype
       if ( proto.invalidateFill ) {
-        var subtypeInvalidateFill = proto.invalidateFill;
+        const subtypeInvalidateFill = proto.invalidateFill;
         proto.invalidateFill = function() {
           subtypeInvalidateFill.call( this );
           invalidateFill.call( this );
@@ -932,15 +932,15 @@ define( require => {
       function invalidateStroke() {
         this.invalidateSupportedRenderers();
 
-        var stateLen = this._drawables.length;
-        for ( var i = 0; i < stateLen; i++ ) {
+        const stateLen = this._drawables.length;
+        for ( let i = 0; i < stateLen; i++ ) {
           this._drawables[ i ].markDirtyStroke();
         }
       }
 
       // Patch in a sub-type call if it already exists on the prototype
       if ( proto.invalidateStroke ) {
-        var subtypeInvalidateStroke = proto.invalidateStroke;
+        const subtypeInvalidateStroke = proto.invalidateStroke;
         proto.invalidateStroke = function() {
           subtypeInvalidateStroke.call( this );
           invalidateStroke.call( this );
