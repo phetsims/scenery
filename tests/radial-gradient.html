@@ -1,0 +1,66 @@
+
+
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+
+  <title>Radial gradient test</title>
+</head>
+<body style="background-color:#eea;">
+
+<script type="text/javascript">
+  const canvas = document.createElement( 'canvas' );
+  canvas.width = 256;
+  canvas.height = 256;
+  const context = canvas.getContext( '2d' );
+
+  const x = 128;
+  const y = 128;
+  const radius = 40;
+
+  // draw the circle
+  context.beginPath();
+  context.arc( x, y, radius, 0, 2 * Math.PI, false );
+
+  // create the radial gradient from the center of the arc
+  const x0 = x + radius * 0.1;
+  const y0 = y + radius * 0.7;
+  const r0 = 0.2;
+  const x1 = x + -radius * 0.2;
+  const y1 = y + -radius * 0.3;
+  const r1 = radius * 2;
+
+  const gradient = context.createRadialGradient( x0, y0, r0, x1, y1, r1 );
+  gradient.addColorStop( 0, 'rgb(200,200,200)' );
+  gradient.addColorStop( 0.33, 'red' );
+  gradient.addColorStop( 1, 'black' );
+  context.fillStyle = gradient;
+
+  // fill and close so that the context can be used to draw more particles
+  context.fill();
+  context.closePath();
+
+  document.body.appendChild( canvas );
+</script>
+
+<svg id="svg" focusable="false" aria-hidden="true" width="256" height="256">
+  <defs>
+    <radialGradient gradientUnits="userSpaceOnUse" cx="-8" cy="-12" r="80" fx="4.030075187969925" fy="28.100250626566417" id="paint">
+      <stop offset="0.0025" style="stop-color: rgb(200,200,200);"></stop>
+      <stop offset="0.33167500000000005" style="stop-color: rgb(255,0,0);"></stop>
+      <stop offset="1" style="stop-color: rgb(0,0,0);"></stop>
+    </radialGradient>
+  </defs>
+  <g transform="translate(128.00000000000000000000,128.00000000000000000000)">
+    <circle r="40" style="fill: url(#paint); stroke: none;stroke-miterlimit: 10;"></circle>
+  </g>
+</svg>
+
+</body>
+</html>
