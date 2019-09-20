@@ -13,6 +13,7 @@ define( require => {
 
   const Gradient = require( 'SCENERY/util/Gradient' );
   const inherit = require( 'PHET_CORE/inherit' );
+  const platform = require( 'PHET_CORE/platform' );
   const scenery = require( 'SCENERY/scenery' );
   const SVGRadialGradient = require( 'SCENERY/display/SVGRadialGradient' );
   const Vector2 = require( 'DOT/Vector2' );
@@ -36,6 +37,17 @@ define( require => {
     // @public {Vector2}
     this.start = new Vector2( x0, y0 );
     this.end = new Vector2( x1, y1 );
+
+    // If we are using Safari, we need to work around incorrect gradient handling for now,
+    // see https://github.com/phetsims/sun/issues/526
+    if ( platform.safari ) {
+      var x = ( x0 + x1 ) / 2;
+      var y = ( y0 + y1 ) / 2;
+      this.start.x = x;
+      this.start.y = y;
+      this.end.x = x;
+      this.end.y = y;
+    }
 
     // @public {number}
     this.startRadius = r0;
