@@ -396,7 +396,6 @@ define( require => {
       lightness = clamp( lightness / 100, 0, 1 );   // percentage
 
       // see http://www.w3.org/TR/css3-color/
-      let m1;
       let m2;
       if ( lightness < 0.5 ) {
         m2 = lightness * ( saturation + 1 );
@@ -404,7 +403,7 @@ define( require => {
       else {
         m2 = lightness + saturation - lightness * saturation;
       }
-      m1 = lightness * 2 - m2;
+      const m1 = lightness * 2 - m2;
 
       this.r = Util.roundSymmetric( Color.hueToRGB( m1, m2, hue + 1 / 3 ) * 255 );
       this.g = Util.roundSymmetric( Color.hueToRGB( m1, m2, hue ) * 255 );
