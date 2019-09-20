@@ -1,4 +1,4 @@
-// Copyright 2014-2015, University of Colorado Boulder
+// Copyright 2014-2019, University of Colorado Boulder
 
 /**
  * Abstraction over the shader program

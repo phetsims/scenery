@@ -1,4 +1,4 @@
-// Copyright 2017, University of Colorado Boulder
+// Copyright 2017-2019, University of Colorado Boulder
 
 /**
  * A scenery-internal type for tracking what currently has focus in Display.  This is the value for
