@@ -57,7 +57,7 @@ define( require => {
     }, options );
 
     const eventObj = document.createEventObject ?
-                   document.createEventObject() : document.createEvent( 'Events' );
+                     document.createEventObject() : document.createEvent( 'Events' );
 
     if ( eventObj.initEvent ) {
       eventObj.initEvent( event, true, true );
@@ -384,7 +384,7 @@ define( require => {
 
     // TODO: Since converting to use Node.inputListeners, we can't assume this anymore
     // assert.ok( a1.hasInputListener( listener ) === false, 'disposal removed accessible input listeners' );
-    
+
     afterTest( display );
   } );
 
@@ -420,7 +420,7 @@ define( require => {
 
     assert.ok( gotInput && gotFocus, 'a should have been an input' );
 
-    afterTest( display );    
+    afterTest( display );
   } );
 
 
@@ -507,10 +507,10 @@ define( require => {
     const display = new Display( rootNode ); // eslint-disable-line
     beforeTest( display );
 
-    const a = new Node( { tagName:'button' } );
-    const b = new Node( { tagName:'button' } );
-    const c = new Node( { tagName:'button' } );
-    const d = new Node( { tagName:'button' } );
+    const a = new Node( { tagName: 'button' } );
+    const b = new Node( { tagName: 'button' } );
+    const c = new Node( { tagName: 'button' } );
+    const d = new Node( { tagName: 'button' } );
 
     a.addChild( b );
     b.addChild( c );
