@@ -56,7 +56,7 @@ define( require => {
     /**
      * Applies the trait to a subtype of Node.
      * @public
-     * @trait
+     * @trait {Node}
      *
      * @param {constructor} type - A constructor that inherits from Node
      */
