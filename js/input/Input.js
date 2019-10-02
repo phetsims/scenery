@@ -598,7 +598,7 @@ define( require => {
           //
           // Focus is set with DOM API to avoid the performance hit of looking up the Node from trail id.
           if ( event.relatedTarget ) {
-            const focusMovedInCallbacks = this.display.accessibleDOMElement.contains( document.activeElement );
+            const focusMovedInCallbacks = this.isTargetUnderPDOM( document.activeElement );
             const targetFocusable = AccessibilityUtil.isElementFocusable( event.relatedTarget );
             if ( targetFocusable && !focusMovedInCallbacks ) {
               if ( platform.ie ) {
@@ -1487,19 +1487,19 @@ define( require => {
      * @param {boolean} pointChanged
      */
     upEvent( pointer, event, pointChanged ) {
+
+      // if the event target is within the PDOM the AT is sending a fake pointer event to the document - do not
+      // dispatch this since the PDOM should only handle Input.A11Y_EVENT_TYPES, and all other pointer input should
+      // go through the Display div. Otherwise, activation will be duplicated when we handle pointer and PDOM events
+      if ( this.isTargetUnderPDOM( event.target ) ) {
+        return;
+      }
+
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'upEvent ' + pointer.toString() + ' changed:' + pointChanged );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
       assert && assert( pointer instanceof Pointer );
       assert && assert( typeof pointChanged === 'boolean' );
-
-      // if the event target is within the PDOM the AT is sending a fake pointer event to the document - do not
-      // dispatch this since the PDOM should only handle Input.A11Y_EVENT_TYPES, and all other pointer input should
-      // go through the Display div. Otherwise, activation could be duplicated while we handle both. See
-      // https://github.com/phetsims/scenery/issues/1001
-      if ( this.display._accessible && this.display.accessibleDOMElement.contains( event.target ) ) {
-        return;
-      }
 
       // We'll use this trail for the entire dispatch of this event.
       const eventTrail = this.branchChangeEvents( pointer, event, pointChanged );
@@ -1523,6 +1523,14 @@ define( require => {
      * @param {boolean} pointChanged
      */
     downEvent( pointer, event, pointChanged ) {
+
+      // if the event target is within the PDOM the AT is sending a fake pointer event to the document - do not
+      // dispatch this since the PDOM should only handle Input.A11Y_EVENT_TYPES, and all other pointer input should
+      // go through the Display div. Otherwise, activation will be duplicated when we handle pointer and PDOM events
+      if ( this.isTargetUnderPDOM( event.target ) ) {
+        return;
+      }
+
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'downEvent ' + pointer.toString() + ' changed:' + pointChanged );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -1554,14 +1562,6 @@ define( require => {
           // Remove keyboard focus, but store element that is receiving interaction in case we resume .
           this.display.pointerFocus = focusableNode;
           scenery.Display.focus = null;
-
-          // if the event target is within the PDOM the AT is sending a fake pointer event to the document - do not
-          // dispatch this since the PDOM should only handle Input.A11Y_EVENT_TYPES, and all other pointer input should
-          // go through the Display div. Otherwise, activation could be duplicated while we handle both. See
-          // https://github.com/phetsims/scenery/issues/1001
-          if ( this.display._accessible && this.display.accessibleDOMElement.contains( event.target ) ) {
-            return;
-          }
         }
       }
 
@@ -1829,6 +1829,17 @@ define( require => {
           return;
         }
       }
+    }
+
+    /**
+     * Returns true if the Display is accessible and the element is a descendant of the Display PDOM.
+     * @private
+     *
+     * @param {HTMLElement} element
+     * @returns {boolean}
+     */
+    isTargetUnderPDOM( element ) {
+      return this.display._accessible && this.display.accessibleDOMElement.contains( element );
     }
 
     /**
