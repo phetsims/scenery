@@ -7,7 +7,7 @@
  *
  * REVIEW: Rename this to AccessiblePDOMStyle (or something more universal)
  *   - For all usages of "sibling" in this file.
- * 
+ *
  * @author Jesse Greenberg
  */
 

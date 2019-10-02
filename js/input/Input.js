@@ -193,11 +193,6 @@ define( require => {
 
   const TARGET_SUBSTITUTE_KEY = 'targetSubstitute';
 
-  // Some assistive devices may send "fake" pointer like events to the browser when only using
-  // a keyboard. We want to handle these as keyboard or alternative events exclusively and not through scenery's
-  // pointer system. See https://github.com/phetsims/scenery/issues/852#issuecomment-467994327
-  const BLOCKED_ACCESSIBLE_EVENTS = [ 'touchstart', 'touchend', 'mousedown', 'mouseup' ];
-
   /**
    * An input controller for a specific Display.
    * @constructor
@@ -734,16 +729,6 @@ define( require => {
             sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
           }, accessibleEventOptions );
         } );
-
-        // Block any fake pointer events that may be sourced on the a PDOM element when a screen reader is in use.
-        // Screen readers inconsistently send these fake "pointer" like events to DOM elements and we want
-        // all pointer events to go through scenery's pointer input system and the display div, never the PDOM
-        for ( let i = 0; i < BLOCKED_ACCESSIBLE_EVENTS.length; i++ ) {
-          this.display.accessibleDOMElement.addEventListener( BLOCKED_ACCESSIBLE_EVENTS[ i ], function( event ) {
-            event.preventDefault();
-            event.stopPropagation();
-          } );
-        }
 
         // Add a listener to the document body that will capture any keydown for a11y before focus is in this display.
         document.body.addEventListener( 'keydown', this.handleDocumentKeydown.bind( this ) );
@@ -1508,6 +1493,14 @@ define( require => {
       assert && assert( pointer instanceof Pointer );
       assert && assert( typeof pointChanged === 'boolean' );
 
+      // if the event target is within the PDOM the AT is sending a fake pointer event to the document - do not
+      // dispatch this since the PDOM should only handle Input.A11Y_EVENT_TYPES, and all other pointer input should
+      // go through the Display div. Otherwise, activation could be duplicated while we handle both. See
+      // https://github.com/phetsims/scenery/issues/1001
+      if ( this.display.accessibleDOMElement.contains( event.target ) ) {
+        return;
+      }
+
       // We'll use this trail for the entire dispatch of this event.
       const eventTrail = this.branchChangeEvents( pointer, event, pointChanged );
 
@@ -1545,12 +1538,10 @@ define( require => {
 
       // If any node in the trail has accessible content
       if ( trailAccessible ) {
-
-        // an AT might have sent a down event at the location of the PDOM element (outside of the display), if this
-        // happened we will not remove focus
         const inDisplay = this.display.bounds.containsPoint( pointer.point );
         if ( inDisplay ) {
 
+          // An AT might have sent a down event outside of the display, if this happened we will not remove focus.
           // Starting with the leaf most node, search for the closest accessible ancestor from the node under the
           // pointer.
           for ( let i = eventTrail.nodes.length - 1; i >= 0; i-- ) {
@@ -1564,6 +1555,13 @@ define( require => {
           this.display.pointerFocus = focusableNode;
           scenery.Display.focus = null;
 
+          // if the event target is within the PDOM the AT is sending a fake pointer event to the document - do not
+          // dispatch this since the PDOM should only handle Input.A11Y_EVENT_TYPES, and all other pointer input should
+          // go through the Display div. Otherwise, activation could be duplicated while we handle both. See
+          // https://github.com/phetsims/scenery/issues/1001
+          if ( this.display.accessibleDOMElement.contains( event.target ) ) {
+            return;
+          }
         }
       }
 
