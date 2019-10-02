@@ -1497,7 +1497,7 @@ define( require => {
       // dispatch this since the PDOM should only handle Input.A11Y_EVENT_TYPES, and all other pointer input should
       // go through the Display div. Otherwise, activation could be duplicated while we handle both. See
       // https://github.com/phetsims/scenery/issues/1001
-      if ( this.display.accessibleDOMElement.contains( event.target ) ) {
+      if ( this.display._accessible && this.display.accessibleDOMElement.contains( event.target ) ) {
         return;
       }
 
@@ -1559,7 +1559,7 @@ define( require => {
           // dispatch this since the PDOM should only handle Input.A11Y_EVENT_TYPES, and all other pointer input should
           // go through the Display div. Otherwise, activation could be duplicated while we handle both. See
           // https://github.com/phetsims/scenery/issues/1001
-          if ( this.display.accessibleDOMElement.contains( event.target ) ) {
+          if ( this.display._accessible && this.display.accessibleDOMElement.contains( event.target ) ) {
             return;
           }
         }
