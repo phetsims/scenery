@@ -57,14 +57,15 @@ define( require => {
       // phetio
       tandem: Tandem.required,
       phetioState: false,
-      phetioEventType: EventType.USER
+      phetioEventType: EventType.USER,
+      phetioReadOnly: true
 
     }, options );
     this.options = options; // @private
 
     // @public (read-only) {BooleanProperty} - indicates whether dragging is in progress
     this.isDraggingProperty = new BooleanProperty( false, {
-      phetioReadOnly: true,
+      phetioReadOnly: options.phetioReadOnly,
       phetioState: false,
       tandem: options.tandem.createTandem( 'isDraggingProperty' ),
       phetioDocumentation: 'Indicates whether the object is dragging'
@@ -121,6 +122,7 @@ define( require => {
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     }, {
       tandem: options.tandem.createTandem( 'dragStartAction' ),
+      phetioReadOnly: options.phetioReadOnly,
       parameters: [ {
         name: 'point',
         phetioType: Vector2IO,
@@ -175,6 +177,7 @@ define( require => {
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     }, {
       phetioHighFrequency: true,
+      phetioReadOnly: options.phetioReadOnly,
       tandem: options.tandem.createTandem( 'dragAction' ),
       parameters: [ {
         name: 'point',
@@ -212,6 +215,7 @@ define( require => {
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     }, {
       tandem: options.tandem.createTandem( 'dragEndAction' ),
+      phetioReadOnly: options.phetioReadOnly,
       parameters: [ {
         name: 'point',
         phetioType: Vector2IO,

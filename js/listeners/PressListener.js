@@ -96,7 +96,7 @@ define( require => {
       tandem: Tandem.required,
 
       // to support properly passing this to children, see https://github.com/phetsims/tandem/issues/60
-      phetioReadOnly: PhetioObject.DEFAULT_OPTIONS.phetioReadOnly,
+      phetioReadOnly: false,
       phetioFeatured: PhetioObject.DEFAULT_OPTIONS.phetioFeatured
     }, options );
 
