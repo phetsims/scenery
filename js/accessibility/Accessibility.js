@@ -475,7 +475,7 @@ define( require => {
         },
 
         /**
-         * Get whether this node's primary DOM element currently has focus.
+         * Get whether this Node's primary DOM element currently has focus.
          * @public
          *
          * @returns {boolean}
