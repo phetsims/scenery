@@ -274,7 +274,7 @@ define( require => {
     'preventFit', // {boolean} - Prevents layers from fitting this subtree, see setPreventFit() for more documentation
     'mouseArea', // {Bounds2|Shape|null} - Changes the area the mouse can interact with, see setMouseArea() for more documentation
     'touchArea', // {Bounds2|Shape|null} - Changes the area touches can interact with, see setTouchArea() for more documentation
-    'clipArea', // {Bounds2|Shape|null} - Makes things outside of a shape invisible, see setClipArea() for more documentation
+    'clipArea', // {Shape|null} - Makes things outside of a shape invisible, see setClipArea() for more documentation
     'transformBounds' // {boolean} - Flag that makes bounds tighter, see setTransformBounds() for more documentation
   ];
 
