@@ -6,7 +6,7 @@
  *
  * TODO: test hand handle down, go off screen, up. How to handle that properly?
  * TODO: tests
- *
+ * @deprecated - use PressListener instead
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
