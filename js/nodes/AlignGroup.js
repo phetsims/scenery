@@ -26,6 +26,7 @@ define( require => {
   const arrayRemove = require( 'PHET_CORE/arrayRemove' );
   const Bounds2 = require( 'DOT/Bounds2' );
   const inherit = require( 'PHET_CORE/inherit' );
+  const merge = require( 'PHET_CORE/merge' );
   const Node = require( 'SCENERY/nodes/Node' );
   const NumberProperty = require( 'AXON/NumberProperty' );
   const scenery = require( 'SCENERY/scenery' );
@@ -48,7 +49,7 @@ define( require => {
     assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
       'Extra prototype on options object is a code smell' );
 
-    options = _.extend( {
+    options = merge( {
       matchHorizontal: true, // {boolean} - Whether the boxes should have all matching widths (otherwise it fits to size)
       matchVertical: true  // {boolean} - Whether the boxes should have all matching heights (otherwise it fits to size)
     }, options );
@@ -137,7 +138,7 @@ define( require => {
       assert && assert( content instanceof Node );
 
       // Setting the group should call our addAlignBox()
-      return new AlignBox( content, _.extend( {
+      return new AlignBox( content, merge( {
         group: this
       }, options ) );
     },

@@ -28,6 +28,7 @@ define( require => {
 
   const FontIO = require( 'SCENERY/util/FontIO' );
   const inherit = require( 'PHET_CORE/inherit' );
+  const merge = require( 'PHET_CORE/merge' );
   const PhetioObject = require( 'TANDEM/PhetioObject' );
   const scenery = require( 'SCENERY/scenery' );
   const Tandem = require( 'TANDEM/Tandem' );
@@ -56,7 +57,7 @@ define( require => {
     assert && assert( options === undefined || ( typeof options === 'object' && Object.getPrototypeOf( options ) === Object.prototype ),
       'options, if provided, should be a raw object' );
 
-    options = _.extend( {
+    options = merge( {
       // {string} - 'normal', 'italic' or 'oblique'
       style: 'normal',
 
@@ -265,7 +266,7 @@ define( require => {
      * @returns {Font}
      */
     copy: function( options ) {
-      return new Font( _.extend( {
+      return new Font( merge( {
         style: this._style,
         variant: this._variant,
         weight: this._weight,

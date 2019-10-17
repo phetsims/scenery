@@ -9,9 +9,10 @@ define( require => {
   'use strict';
 
   // modules
-  const ObjectIO = require( 'TANDEM/types/ObjectIO' );
+  const merge = require( 'PHET_CORE/merge' );
   const NodeIO = require( 'SCENERY/nodes/NodeIO' );
   const NodeProperty = require( 'SCENERY/util/NodeProperty' );
+  const ObjectIO = require( 'TANDEM/types/ObjectIO' );
   const PropertyIO = require( 'AXON/PropertyIO' );
   const scenery = require( 'SCENERY/scenery' );
   const StringIO = require( 'TANDEM/types/StringIO' );
@@ -25,7 +26,7 @@ define( require => {
       super( richText, phetioID );
 
       // this uses a sub Property adapter as described in https://github.com/phetsims/phet-io/issues/1326
-      const textProperty = new NodeProperty( richText, 'text', 'text', _.extend( {
+      const textProperty = new NodeProperty( richText, 'text', 'text', merge( {
 
         // pick the following values from the parent Node
         phetioReadOnly: richText.phetioReadOnly,

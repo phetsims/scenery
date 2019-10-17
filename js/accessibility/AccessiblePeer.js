@@ -11,13 +11,14 @@
 define( require => {
   'use strict';
 
-  const AccessibleSiblingStyle = require( 'SCENERY/accessibility/AccessibleSiblingStyle' );
   const AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
+  const AccessibleSiblingStyle = require( 'SCENERY/accessibility/AccessibleSiblingStyle' );
   const arrayRemove = require( 'PHET_CORE/arrayRemove' );
   const Bounds2 = require( 'DOT/Bounds2' );
   const FullScreen = require( 'SCENERY/util/FullScreen' );
   const inherit = require( 'PHET_CORE/inherit' );
   const Matrix3 = require( 'DOT/Matrix3' );
+  const merge = require( 'PHET_CORE/merge' );
   const platform = require( 'PHET_CORE/platform' );
   const Poolable = require( 'PHET_CORE/Poolable' );
   const scenery = require( 'SCENERY/scenery' );
@@ -72,7 +73,7 @@ define( require => {
      * @returns {AccessiblePeer} - Returns 'this' reference, for chaining
      */
     initializeAccessiblePeer: function( accessibleInstance, options ) {
-      options = _.extend( {
+      options = merge( {
         primarySibling: null
       }, options );
 
@@ -455,7 +456,7 @@ define( require => {
      */
     setAttributeToElement: function( attribute, attributeValue, options ) {
 
-      options = _.extend( {
+      options = merge( {
         // {string|null} - If non-null, will set the attribute with the specified namespace. This can be required
         // for setting certain attributes (e.g. MathML).
         namespace: null,
@@ -491,7 +492,7 @@ define( require => {
      */
     removeAttributeFromElement: function( attribute, options ) {
 
-      options = _.extend( {
+      options = merge( {
         // {string|null} - If non-null, will set the attribute with the specified namespace. This can be required
         // for setting certain attributes (e.g. MathML).
         namespace: null,
@@ -972,7 +973,7 @@ define( require => {
    * @returns {HTMLElement}
    */
   function createElement( tagName, focusable, trailId, options ) {
-    options = _.extend( {
+    options = merge( {
 
       // {string|null} - addition to the trailId, separated by a hyphen to identify the different siblings within
       // the document

@@ -14,6 +14,7 @@ define( require => {
   const Emitter = require( 'AXON/Emitter' );
   const EventType = require( 'TANDEM/EventType' );
   const inherit = require( 'PHET_CORE/inherit' );
+  const merge = require( 'PHET_CORE/merge' );
   const PressListener = require( 'SCENERY/listeners/PressListener' );
   const scenery = require( 'SCENERY/scenery' );
   const Tandem = require( 'TANDEM/Tandem' );
@@ -25,7 +26,7 @@ define( require => {
    * @param {Object} [options] - See the constructor body (below) and in PressListener for documented options.
    */
   function FireListener( options ) {
-    options = _.extend( {
+    options = merge( {
 
       // {Function} - Called as fire() when the button is fired.
       fire: _.noop,

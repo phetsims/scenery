@@ -13,6 +13,7 @@ define( require => {
   const FocusHighlightFromNode = require( 'SCENERY/accessibility/FocusHighlightFromNode' );
   const FocusHighlightPath = require( 'SCENERY/accessibility/FocusHighlightPath' );
   const inherit = require( 'PHET_CORE/inherit' );
+  const merge = require( 'PHET_CORE/merge' );
   const scenery = require( 'SCENERY/scenery' );
 
   /**
@@ -23,7 +24,7 @@ define( require => {
    */
   function GroupFocusHighlightFromNode( node, options ) {
 
-    options = _.extend( {
+    options = merge( {
       outerStroke: FocusHighlightPath.OUTER_LIGHT_GROUP_FOCUS_COLOR,
       innerStroke: FocusHighlightPath.INNER_LIGHT_GROUP_FOCUS_COLOR,
 

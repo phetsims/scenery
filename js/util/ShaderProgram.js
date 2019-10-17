@@ -10,11 +10,12 @@ define( require => {
   'use strict';
 
   const inherit = require( 'PHET_CORE/inherit' );
+  const merge = require( 'PHET_CORE/merge' );
   const scenery = require( 'SCENERY/scenery' );
   const Util = require( 'SCENERY/util/Util' );
 
   function ShaderProgram( gl, vertexSource, fragmentSource, options ) {
-    options = _.extend( {
+    options = merge( {
       attributes: [], // {Array.<string>} (vertex) attribute names in the shader source
       uniforms: [] // {Array.<string>} uniform names in the shader source
     }, options );

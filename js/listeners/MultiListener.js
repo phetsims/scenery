@@ -17,6 +17,7 @@ define( require => {
   const inherit = require( 'PHET_CORE/inherit' );
   const Matrix = require( 'DOT/Matrix' );
   const Matrix3 = require( 'DOT/Matrix3' );
+  const merge = require( 'PHET_CORE/merge' );
   const Mouse = require( 'SCENERY/input/Mouse' );
   const scenery = require( 'SCENERY/scenery' );
   const SingularValueDecomposition = require( 'DOT/SingularValueDecomposition' );
@@ -31,7 +32,7 @@ define( require => {
   function MultiListener( targetNode, options ) {
     const self = this;
 
-    options = _.extend( {
+    options = merge( {
       mouseButton: 0, // TODO: see PressListener
       pressCursor: 'pointer', // TODO: see PressListener
       targetNode: null, // TODO: required? pass in at front

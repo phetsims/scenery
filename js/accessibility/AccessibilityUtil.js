@@ -16,6 +16,7 @@ define( require => {
 
   // modules
   const AccessibleSiblingStyle = require( 'SCENERY/accessibility/AccessibleSiblingStyle' );
+  const merge = require( 'PHET_CORE/merge' );
   const Random = require( 'DOT/Random' );
   const scenery = require( 'SCENERY/scenery' );
   const validate = require( 'AXON/validate' );
@@ -452,7 +453,7 @@ define( require => {
      * @returns {HTMLElement}
      */
     createElement: function( tagName, focusable, options ) {
-      options = _.extend( {
+      options = merge( {
         // {string|null} - If non-null, the element will be created with the specific namespace
         namespace: null,
 

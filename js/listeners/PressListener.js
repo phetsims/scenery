@@ -22,6 +22,7 @@ define( require => {
   const EventIO = require( 'SCENERY/input/EventIO' );
   const EventType = require( 'TANDEM/EventType' );
   const inherit = require( 'PHET_CORE/inherit' );
+  const merge = require( 'PHET_CORE/merge' );
   const Mouse = require( 'SCENERY/input/Mouse' );
   const Node = require( 'SCENERY/nodes/Node' );
   const NullableIO = require( 'TANDEM/types/NullableIO' );
@@ -45,7 +46,7 @@ define( require => {
   function PressListener( options ) {
     const self = this;
 
-    options = _.extend( {
+    options = merge( {
       // {number} - Restricts to the specific mouse button (but allows any touch). Only one mouse button is allowed at
       // a time. The button numbers are defined in https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/button,
       // where typically:

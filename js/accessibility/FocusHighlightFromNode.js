@@ -14,6 +14,7 @@ define( require => {
   // modules
   const FocusHighlightPath = require( 'SCENERY/accessibility/FocusHighlightPath' );
   const inherit = require( 'PHET_CORE/inherit' );
+  const merge = require( 'PHET_CORE/merge' );
   const scenery = require( 'SCENERY/scenery' );
   const Shape = require( 'KITE/Shape' );
 
@@ -26,7 +27,7 @@ define( require => {
    */
   function FocusHighlightFromNode( node, options ) {
 
-    options = _.extend( {
+    options = merge( {
 
       // {boolean} - if true, highlight will surround local bounds
       useLocalBounds: true,

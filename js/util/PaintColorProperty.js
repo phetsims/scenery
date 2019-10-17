@@ -38,6 +38,7 @@
 define( require => {
   'use strict';
 
+  const merge = require( 'PHET_CORE/merge' );
   const PaintDef = require( 'SCENERY/util/PaintDef' );
   const PaintObserver = require( 'SCENERY/display/PaintObserver' );
   const Property = require( 'AXON/Property' );
@@ -54,7 +55,7 @@ define( require => {
     constructor( paint, options ) {
       const initialColor = PaintDef.toColor( paint );
 
-      options = _.extend( {
+      options = merge( {
         // {number} - 0 applies no change. Positive numbers brighten the color up to 1 (white). Negative numbers darken
         // the color up to -1 (black). See setLuminanceFactor() for more information.
         luminanceFactor: 0,

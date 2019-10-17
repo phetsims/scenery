@@ -201,6 +201,7 @@ define( require => {
   const extend = require( 'PHET_CORE/extend' );
   const inherit = require( 'PHET_CORE/inherit' );
   const Matrix3 = require( 'DOT/Matrix3' );
+  const merge = require( 'PHET_CORE/merge' );
   const Mouse = require( 'SCENERY/input/Mouse' );
   const Pen = require( 'SCENERY/input/Pen' );
   const PhetioObject = require( 'TANDEM/PhetioObject' );
@@ -4281,7 +4282,7 @@ define( require => {
      * @returns {Node}
      */
     rasterized: function( options ) {
-      options = _.extend( {
+      options = merge( {
         // {number} - Controls the resolution of the image relative to the local view units. For example, if our node is
         // ~100 view units across (in the local coordinate frame) but you want the image to actually have a ~200-pixel
         // resolution, provide resolution:2.
@@ -4354,7 +4355,7 @@ define( require => {
       function callback( canvas, x, y, width, height ) {
         const imageSource = options.useCanvas ? canvas : canvas.toDataURL();
 
-        image = new scenery.Image( imageSource, _.extend( options, {
+        image = new scenery.Image( imageSource, merge( options, {
           x: -x,
           y: -y,
           initialWidth: width,

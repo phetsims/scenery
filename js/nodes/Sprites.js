@@ -10,6 +10,7 @@
 define( require => {
   'use strict';
 
+  const merge = require( 'PHET_CORE/merge' );
   const Node = require( 'SCENERY/nodes/Node' );
   const Renderer = require( 'SCENERY/display/Renderer' );
   const scenery = require( 'SCENERY/scenery' );
@@ -23,7 +24,7 @@ define( require => {
      */
     constructor( options ) {
 
-      options = _.extend( {
+      options = merge( {
         // {Array.<Sprite>} - Provide a fixed set of Sprite objects that will be used for this node. Currently it
         // cannot be modified after construction for simplicity of the implementation.
         sprites: [],

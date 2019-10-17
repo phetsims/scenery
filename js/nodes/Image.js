@@ -18,6 +18,7 @@ define( require => {
   const ImageSVGDrawable = require( 'SCENERY/display/drawables/ImageSVGDrawable' );
   const ImageWebGLDrawable = require( 'SCENERY/display/drawables/ImageWebGLDrawable' );
   const inherit = require( 'PHET_CORE/inherit' );
+  const merge = require( 'PHET_CORE/merge' );
   const Node = require( 'SCENERY/nodes/Node' );
   const Renderer = require( 'SCENERY/display/Renderer' );
   const scenery = require( 'SCENERY/scenery' );
@@ -1078,7 +1079,7 @@ define( require => {
   };
 
   // @public {Object} - Initial values for most Node mutator options
-  Image.DEFAULT_OPTIONS = _.extend( {}, Node.DEFAULT_OPTIONS, DEFAULT_OPTIONS );
+  Image.DEFAULT_OPTIONS = merge( {}, Node.DEFAULT_OPTIONS, DEFAULT_OPTIONS );
 
   return Image;
 } );

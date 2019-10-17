@@ -12,6 +12,7 @@ define( require => {
   const Bounds2 = require( 'DOT/Bounds2' );
   const extendDefined = require( 'PHET_CORE/extendDefined' );
   const inherit = require( 'PHET_CORE/inherit' );
+  const merge = require( 'PHET_CORE/merge' );
   const Node = require( 'SCENERY/nodes/Node' );
   const Paintable = require( 'SCENERY/nodes/Paintable' );
   const PathCanvasDrawable = require( 'SCENERY/display/drawables/PathCanvasDrawable' );
@@ -594,7 +595,7 @@ define( require => {
   } );
 
   // @public {Object} - Initial values for most Node mutator options
-  Path.DEFAULT_OPTIONS = _.extend( {}, Node.DEFAULT_OPTIONS, DEFAULT_OPTIONS );
+  Path.DEFAULT_OPTIONS = merge( {}, Node.DEFAULT_OPTIONS, DEFAULT_OPTIONS );
 
   // mix in support for fills and strokes
   Paintable.mixInto( Path );

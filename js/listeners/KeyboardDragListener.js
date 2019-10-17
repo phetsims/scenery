@@ -21,6 +21,7 @@ define( require => {
   // modules
   const inherit = require( 'PHET_CORE/inherit' );
   const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
+  const merge = require( 'PHET_CORE/merge' );
   const platform = require( 'PHET_CORE/platform' );
   const scenery = require( 'SCENERY/scenery' );
   const timer = require( 'AXON/timer' );
@@ -32,7 +33,7 @@ define( require => {
    */
   function KeyboardDragListener( options ) {
 
-    options = _.extend( {
+    options = merge( {
 
       // {number|null} - While direction key is down, this will be the 1D velocity for movement. The position will
       // change this much in view coordinates every second.

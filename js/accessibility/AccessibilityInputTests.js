@@ -10,8 +10,9 @@ define( require => {
   'use strict';
 
   // modules
-  const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
   const Display = require( 'SCENERY/display/Display' );
+  const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
+  const merge = require( 'PHET_CORE/merge' );
   const Node = require( 'SCENERY/nodes/Node' );
   const Rectangle = require( 'SCENERY/nodes/Rectangle' );
 
@@ -50,7 +51,7 @@ define( require => {
   // TODO: Can this replace the dispatchEvent function above?
   const triggerDOMEvent = ( event, element, keyCode, options ) => {
 
-    options = _.extend( {
+    options = merge( {
 
       // secondary target for the event, behavior depends on event type
       relatedTarget: null

@@ -14,6 +14,7 @@ define( require => {
   'use strict';
 
   const inherit = require( 'PHET_CORE/inherit' );
+  const merge = require( 'PHET_CORE/merge' );
   const Mouse = require( 'SCENERY/input/Mouse' );
   const PhetioObject = require( 'TANDEM/PhetioObject' );
   const scenery = require( 'SCENERY/scenery' );
@@ -39,7 +40,7 @@ define( require => {
   function DownUpListener( options ) {
     const self = this;
 
-    options = _.extend( {
+    options = merge( {
       mouseButton: 0 // allow a different mouse button
     }, options );
 

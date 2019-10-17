@@ -24,6 +24,7 @@ define( require => {
   const DownUpListener = require( 'SCENERY/input/DownUpListener' );
   const EventType = require( 'TANDEM/EventType' );
   const inherit = require( 'PHET_CORE/inherit' );
+  const merge = require( 'PHET_CORE/merge' );
   const scenery = require( 'SCENERY/scenery' );
   const Tandem = require( 'TANDEM/Tandem' );
 
@@ -41,7 +42,7 @@ define( require => {
   function ButtonListener( options ) {
     const self = this;
 
-    options = _.extend( {
+    options = merge( {
 
       // When running in PhET-iO brand, the tandem must be supplied
       tandem: Tandem.optional,

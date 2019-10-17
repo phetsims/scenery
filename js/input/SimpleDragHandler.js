@@ -15,6 +15,7 @@ define( require => {
   const Event = require( 'SCENERY/input/Event' );
   const EventType = require( 'TANDEM/EventType' );
   const inherit = require( 'PHET_CORE/inherit' );
+  const merge = require( 'PHET_CORE/merge' );
   const Mouse = require( 'SCENERY/input/Mouse' );
   const PhetioObject = require( 'TANDEM/PhetioObject' );
   const scenery = require( 'SCENERY/scenery' );
@@ -30,7 +31,7 @@ define( require => {
   function SimpleDragHandler( options ) {
     const self = this;
 
-    options = _.extend( {
+    options = merge( {
 
       start: null, // {null|function(Event,Trail)} called when a drag is started
       drag: null, // {null|function(Event,Trail)} called when pointer moves
@@ -432,7 +433,7 @@ define( require => {
      */
     createForwardingListener: function( down, options ) {
 
-      options = _.extend( {
+      options = merge( {
         allowTouchSnag: false
       }, options );
 

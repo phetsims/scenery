@@ -171,6 +171,7 @@ define( require => {
   const Features = require( 'SCENERY/util/Features' );
   const FullScreen = require( 'SCENERY/util/FullScreen' );
   const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
+  const merge = require( 'PHET_CORE/merge' );
   const Mouse = require( 'SCENERY/input/Mouse' );
   const NumberIO = require( 'TANDEM/types/NumberIO' );
   const Pen = require( 'SCENERY/input/Pen' );
@@ -214,7 +215,7 @@ define( require => {
       assert && assert( typeof batchDOMEvents === 'boolean' );
       assert && assert( typeof assumeFullWindow === 'boolean' );
 
-      options = _.extend( {
+      options = merge( {
         tandem: Tandem.optional
       }, options );
 

@@ -45,6 +45,7 @@ define( require => {
   const EventIO = require( 'SCENERY/input/EventIO' );
   const EventType = require( 'TANDEM/EventType' );
   const inherit = require( 'PHET_CORE/inherit' );
+  const merge = require( 'PHET_CORE/merge' );
   const PhetioObject = require( 'TANDEM/PhetioObject' );
   const PressListener = require( 'SCENERY/listeners/PressListener' );
   const Property = require( 'AXON/Property' );
@@ -67,7 +68,7 @@ define( require => {
   function DragListener( options ) {
     const self = this;
 
-    options = _.extend( {
+    options = merge( {
       // {boolean} - If true, unattached touches that move across our node will trigger a press(). This helps sometimes
       // for small draggable objects.
       allowTouchSnag: true,
@@ -694,7 +695,7 @@ define( require => {
      */
     createForwardingListener: function( down, options ) {
 
-      options = _.extend( {
+      options = merge( {
         allowTouchSnag: true // see https://github.com/phetsims/scenery/issues/999
       }, options );
 

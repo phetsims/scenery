@@ -130,6 +130,7 @@ define( require => {
   const AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
   const arrayDifference = require( 'PHET_CORE/arrayDifference' );
   const extend = require( 'PHET_CORE/extend' );
+  const merge = require( 'PHET_CORE/merge' );
   const scenery = require( 'SCENERY/scenery' );
   const Shape = require( 'KITE/Shape' );
 
@@ -2257,7 +2258,7 @@ define( require => {
           assert && options && assert( Object.getPrototypeOf( options ) === Object.prototype,
             'Extra prototype on accessibleAttribute options object is a code smell' );
 
-          options = _.extend( {
+          options = merge( {
 
             // {string|null} - If non-null, will set the attribute with the specified namespace. This can be required
             // for setting certain attributes (e.g. MathML).
@@ -2307,7 +2308,7 @@ define( require => {
           assert && options && assert( Object.getPrototypeOf( options ) === Object.prototype,
             'Extra prototype on accessibleAttribute options object is a code smell' );
 
-          options = _.extend( {
+          options = merge( {
 
             // {string|null} - If non-null, will remove the attribute with the specified namespace. This can be required
             // for removing certain attributes (e.g. MathML).
@@ -2361,7 +2362,7 @@ define( require => {
           assert && options && assert( Object.getPrototypeOf( options ) === Object.prototype,
             'Extra prototype on accessibleAttribute options object is a code smell' );
 
-          options = _.extend( {
+          options = merge( {
 
             // {string|null} - If non-null, will remove the attribute with the specified namespace. This can be required
             // for removing certain attributes (e.g. MathML).

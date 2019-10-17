@@ -14,6 +14,7 @@ define( require => {
   'use strict';
 
   const inherit = require( 'PHET_CORE/inherit' );
+  const merge = require( 'PHET_CORE/merge' );
   const MultiListener = require( 'SCENERY/listeners/MultiListener' );
   const scenery = require( 'SCENERY/scenery' );
 
@@ -33,7 +34,7 @@ define( require => {
    * @param {Object} [options] - See the constructor body (below) for documented options.
    */
   function PanZoomListener( targetNode, panBounds, options ) {
-    options = _.extend( {
+    options = merge( {
       allowScale: true,
       allowRotation: false,
       pressCursor: null

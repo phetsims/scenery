@@ -62,6 +62,7 @@ define( require => {
   const inherit = require( 'PHET_CORE/inherit' );
   const KeyStateTracker = require( 'SCENERY/accessibility/KeyStateTracker' );
   const Matrix3 = require( 'DOT/Matrix3' );
+  const merge = require( 'PHET_CORE/merge' );
   const Property = require( 'AXON/Property' );
   const PropertyIO = require( 'AXON/PropertyIO' );
   const Tandem = require( 'TANDEM/Tandem' );
@@ -85,6 +86,7 @@ define( require => {
   require( 'SCENERY/display/SVGSelfDrawable' );
   const Input = require( 'SCENERY/input/Input' );
   require( 'SCENERY/util/Trail' );
+  // const SceneryStyle = require( 'SCENERY/util/SceneryStyle' );
   const AccessibleInstance = require( 'SCENERY/accessibility/AccessibleInstance' );
   const CanvasNodeBoundsOverlay = require( 'SCENERY/overlays/CanvasNodeBoundsOverlay' );
   const FittedBlockBoundsOverlay = require( 'SCENERY/overlays/FittedBlockBoundsOverlay' );
@@ -94,7 +96,6 @@ define( require => {
   const platform = require( 'PHET_CORE/platform' );
   const PointerAreaOverlay = require( 'SCENERY/overlays/PointerAreaOverlay' );
   const PointerOverlay = require( 'SCENERY/overlays/PointerOverlay' );
-  // const SceneryStyle = require( 'SCENERY/util/SceneryStyle' );
   const Util = require( 'SCENERY/util/Util' );
 
   /**
@@ -123,7 +124,7 @@ define( require => {
     // supertype call to axon.Events (should just initialize a few properties here, notably _eventListeners and _staticEventListeners)
     Events.call( this );
 
-    options = _.extend( {
+    options = merge( {
       // initial display width
       width: ( options && options.container && options.container.clientWidth ) || 640,
 

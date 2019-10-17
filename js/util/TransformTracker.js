@@ -14,6 +14,7 @@ define( require => {
 
   const inherit = require( 'PHET_CORE/inherit' );
   const Matrix3 = require( 'DOT/Matrix3' );
+  const merge = require( 'PHET_CORE/merge' );
 
   const scenery = require( 'SCENERY/scenery' );
 
@@ -29,7 +30,7 @@ define( require => {
   function TransformTracker( trail, options ) {
     const self = this;
 
-    options = _.extend( {
+    options = merge( {
       isStatic: false // {boolean} - Whether the bounds listeners should be added with on() or onStatic().
     }, options );
     this._isStatic = options.isStatic;

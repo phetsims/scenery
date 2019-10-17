@@ -24,6 +24,7 @@ define( require => {
 
   const Bounds2 = require( 'DOT/Bounds2' );
   const inherit = require( 'PHET_CORE/inherit' );
+  const merge = require( 'PHET_CORE/merge' );
   const Node = require( 'SCENERY/nodes/Node' );
   const scenery = require( 'SCENERY/scenery' );
 
@@ -83,7 +84,7 @@ define( require => {
     // Will be removed by dispose()
     this._content.on( 'bounds', this._contentBoundsListener );
 
-    Node.call( this, _.extend( {}, options, {
+    Node.call( this, merge( {}, options, {
       children: [ this._content ]
     } ) );
   }

@@ -18,6 +18,7 @@ define( require => {
   const Emitter = require( 'AXON/Emitter' );
   const inherit = require( 'PHET_CORE/inherit' );
   const LineStyles = require( 'KITE/util/LineStyles' );
+  const merge = require( 'PHET_CORE/merge' );
   const Path = require( 'SCENERY/nodes/Path' );
   const scenery = require( 'SCENERY/scenery' );
   const Vector2 = require( 'DOT/Vector2' );
@@ -51,7 +52,7 @@ define( require => {
    */
   function FocusHighlightPath( shape, options ) {
 
-    options = _.extend( {
+    options = merge( {
 
       // stroke options,  one for each highlight
       outerStroke: OUTER_FOCUS_COLOR,
@@ -82,7 +83,7 @@ define( require => {
     this.options = options; // @private TODO: only assign individual options to 'this'.
 
     // options for this Path, the outer focus highlight
-    const outerHighlightOptions = _.extend( {
+    const outerHighlightOptions = merge( {
       stroke: options.outerStroke
     }, options ); // TODO: Should this overwrite the "stroke" given in the options rather than extend?
     this.mutate( outerHighlightOptions );
