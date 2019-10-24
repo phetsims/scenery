@@ -13,7 +13,6 @@
     "generatedUnitTests": true,
     "requirejsNamespace": "SCENERY",
     "buildStandalone": true,
-    "isJSOnly": true,
     "requiresLodash": true,
     "requiresJQuery": true,
     "assignGlobals": {
