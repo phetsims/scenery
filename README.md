@@ -35,7 +35,7 @@ For testing purposes, the following are currently being worked on:
 * [Renderer Comparison](http://phetsims.github.io/scenery/tests/renderer-comparison.html)
 * [Canvas Browser Differences](http://jonathan-olson.com/canvas-diff/canvas-diff.html)
 
-The [PhET Development Overview](http://bit.ly/phet-html5-development-overview) is the most complete guide to PhET Simulation Development. This guide includes how
+The [PhET Development Overview](https://github.com/phetsims/phet-info/blob/master/doc/phet-development-overview.md) is the most complete guide to PhET Simulation Development. This guide includes how
 to obtain simulation code and its dependencies, notes about architecture & design, how to test and build the sims, as well as other important information.
 
 ### License
