@@ -1,5 +1,4 @@
 // Copyright 2017-2019, University of Colorado Boulder
-/* eslint-disable bad-sim-text */
 
 /**
  * Utility functions for scenery that are specifically useful for Accessibility.
@@ -17,7 +16,6 @@ define( require => {
   // modules
   const AccessibleSiblingStyle = require( 'SCENERY/accessibility/AccessibleSiblingStyle' );
   const merge = require( 'PHET_CORE/merge' );
-  const Random = require( 'DOT/Random' );
   const scenery = require( 'SCENERY/scenery' );
   const validate = require( 'AXON/validate' );
 
@@ -218,12 +216,11 @@ define( require => {
      * Return a random focusable element in the document. Particularly useful for fuzz testing.
      * @public
      *
-     * @parma {Random} [random]
+     * @parma {Random} random
      * @returns {HTMLElement}
      */
     getRandomFocusable: function( random ) {
-
-      random = random || new Random();
+      assert && assert( random, 'Random expected' );
 
       const linearDOM = getLinearDOMElements( document.body );
       const focusableElements = [];
@@ -469,8 +466,8 @@ define( require => {
       }, options );
 
       const domElement = options.namespace
-                       ? document.createElementNS( options.namespace, tagName )
-                       : document.createElement( tagName );
+                         ? document.createElementNS( options.namespace, tagName )
+                         : document.createElement( tagName );
 
       if ( options.trailId ) {
 
