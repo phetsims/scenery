@@ -98,7 +98,7 @@ define( require => {
     this._shiftDownDelta = options.shiftDownDelta;
     this._moveOnHoldDelay = options.moveOnHoldDelay;
     this._moveOnHoldInterval = options.moveOnHoldInterval;
-    this._hotkeyHoldInterval = options.hotkeyHoldInterval; // TODO: rename to hotkeyHoldInterval!!!!!!!
+    this._hotkeyHoldInterval = options.hotkeyHoldInterval;
 
     // @private {Array.<{isDown:boolean, timeDown:[boolean]>} - tracks the state of the keyboard. JavaScript doesn't
     // handle multiple key presses, so we track which keys are currently down and update based on state of this
@@ -119,11 +119,12 @@ define( require => {
     this.hotkeyDisablingDragging = false;
 
     // @private {number} - delay before calling a keygroup listener (if keygroup is being held down), incremented in
-    // step, in seconds. TODO: add doc like "initialized to hotkey because. . ."
+    // step. This is initialized to the "threshold" so that the first hotkey will fire immediately. Only
+    // subsequent actions while holding the hotkey should result in a delay of this much. in ms
     this.hotkeyHoldIntervalCounter = this._hotkeyHoldInterval;
 
     // @private {number} - counters to allow for press-and-hold functionality that enables user to incrementally move
-    // the draggable object or hold the movement key for continuous or stepped movement - values in seconds
+    // the draggable object or hold the movement key for continuous or stepped movement - values in ms
     this.moveOnHoldDelayCounter = 0;
     this.moveOnHoldIntervalCounter = 0;
 
