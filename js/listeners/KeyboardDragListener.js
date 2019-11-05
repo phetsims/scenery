@@ -107,12 +107,11 @@ define( require => {
     // TODO: be accurate when focus changes from one element to another, see https://github.com/phetsims/friction/issues/53
     this.keyState = [];
 
-    // TODO: explain what a "hotkey" is (a collection of keys pressed together)
-    // @private {Array.<{keys:<Array.number>, callback:function}>} - groups of keys that have some behavior when
-    // pressed in order. See this.addHotkeyGroup() for more information
+    // @private {Array.<{keys:<Array.number>, callback:function}>} - A list of hotkeys, each of which haing some
+    // behavior when each individual key of the hotkey is  pressed in order. See this.addHotkey() for more information.
     this.hotkeys = [];
 
-    // @private {{keys: <Array.number>, callback: <Function>}|null} - the hotkey group that is currently down
+    // @private {{keys: <Array.number>, callback: <Function>}|null} - the hotkey that is currently down
     this.currentHotkey = null;
 
     // @private {boolean} - when a hotkey group is pressed down, dragging will be disabled until
@@ -700,27 +699,29 @@ define( require => {
     },
 
     /**
-     * Add a set of hotkeys that behave such that the desired callback will be called when
+     * Add a hotkey that behaves such that the desired callback will be called when
      * all keys listed in the array are pressed down in order.
      *
-     * @param {Object} hotKeyGroup - { keys: [].<number>, callback: {function}, interval: {number} }
+     * @param {{keys: Array.<number>, callback:function}} hotkey
      * @public
      */
-    addHotkeyGroup: function( hotKeyGroup ) {
-      this.hotkeys.push( hotKeyGroup );
+    addHotkey: function( hotkey ) {
+      this.hotkeys.push( hotkey );
     },
 
     /**
-     * Add mutliple sets of hotkey groups that behave such hat the desired callback will be called
-     * when all keys listed in the array are pressed down in order.  Behaves much like addHotkeyGroup,
+     * Add mutliple sets of hotkey groups that behave such that the desired callback will be called
+     * when all keys listed in the array are pressed down in order.  Behaves much like addHotkey,
      * but allows you to add multiple groups at one time.
      *
-     * @param {[].<string>} hotKeyGroups
+     * For the purposes of this class, a "hotkey" is an ordered list of keys.
+     *
+     * @param {Array.<{keys: Array.<number>, callback:function}>} hotkeys
      * @public
      */
-    addHotkeyGroups: function( hotKeyGroups ) {
-      for ( let i = 0; i < hotKeyGroups.length; i++ ) {
-        this.addHotkeyGroup( hotKeyGroups[ i ] );
+    addHotkeys: function( hotkeys ) {
+      for ( let i = 0; i < hotkeys.length; i++ ) {
+        this.addHotkey( hotkeys[ i ] );
       }
     },
 
