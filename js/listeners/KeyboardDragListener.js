@@ -100,7 +100,7 @@ define( require => {
     this._moveOnHoldInterval = options.moveOnHoldInterval;
     this._hotkeyHoldInterval = options.hotkeyHoldInterval; // TODO: rename to hotkeyHoldInterval!!!!!!!
 
-    // @private { [].{ isDown: {boolean}, timeDown: [boolean] } - tracks the state of the keyboard. JavaScript doesn't
+    // @private {Array.<{isDown:boolean, timeDown:[boolean]>} - tracks the state of the keyboard. JavaScript doesn't
     // handle multiple key presses, so we track which keys are currently down and update based on state of this
     // collection of objects
     // TODO: Consider a global state object for this that persists across listeners so the state of the keyboard will
@@ -108,10 +108,9 @@ define( require => {
     this.keyState = [];
 
     // TODO: explain what a "hotkey" is (a collection of keys pressed together)
-    // @private { [].{ keys: <Array.number>, callback: <Function> } } - groups of keys that have some behavior when
+    // @private {Array.<{keys:<Array.number>, callback:function}>} - groups of keys that have some behavior when
     // pressed in order. See this.addHotkeyGroup() for more information
-    this.hotkeyGroups = [];
-    // TODO: rename to hotkeys
+    this.hotkeys = [];
 
     // @private {{keys: <Array.number>, callback: <Function>}|null} - the hotkey group that is currently down
     this.keyGroupDown = null;
@@ -462,9 +461,9 @@ define( require => {
     updateHotkeys: function() {
 
       // check to see if any hotkey combinations are down
-      for ( let j = 0; j < this.hotkeyGroups.length; j++ ) {
+      for ( let j = 0; j < this.hotkeys.length; j++ ) {
         const hotkeysDownList = [];
-        const keys = this.hotkeyGroups[ j ].keys;
+        const keys = this.hotkeys[ j ].keys;
 
         for ( let k = 0; k < keys.length; k++ ) {
           for ( let l = 0; l < this.keyState.length; l++ ) {
@@ -486,7 +485,7 @@ define( require => {
         // if keys are in order, call the callback associated with the group, and disable dragging until
         // all hotkeys associated with that group are up again
         if ( keysInOrder ) {
-          this.keyGroupDown = this.hotkeyGroups[ j ];
+          this.keyGroupDown = this.hotkeys[ j ];
           if ( this.groupDownTimer >= this._hotkeyHoldInterval ) {
 
             // Set the counter to begin counting the next interval between hotkey activations.
@@ -494,7 +493,7 @@ define( require => {
 
             // call the callback last, after internal state has been updated. This solves a bug caused if this callback
             // then makes this listener interrupt.
-            this.hotkeyGroups[ j ].callback();
+            this.hotkeys[ j ].callback();
           }
         }
       }
@@ -711,7 +710,7 @@ define( require => {
      * @public
      */
     addHotkeyGroup: function( hotKeyGroup ) {
-      this.hotkeyGroups.push( hotKeyGroup );
+      this.hotkeys.push( hotKeyGroup );
     },
 
     /**
