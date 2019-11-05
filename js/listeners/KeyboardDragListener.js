@@ -113,18 +113,15 @@ define( require => {
     this.hotkeys = [];
 
     // @private {{keys: <Array.number>, callback: <Function>}|null} - the hotkey group that is currently down
-    this.keyGroupDown = null;
-    // TODO: rename to currentHotkey
+    this.currentHotkey = null;
 
     // @private {boolean} - when a hotkey group is pressed down, dragging will be disabled until
     // any keys are up again
-    this.draggingDisabled = false;
-    // TODO: rename to hotkeyDisablingDragging
+    this.hotkeyDisablingDragging = false;
 
     // @private {number} - delay before calling a keygroup listener (if keygroup is being held down), incremented in
     // step, in seconds. TODO: add doc like "initialized to hotkey because. . ."
-    this.groupDownTimer = this._hotkeyHoldInterval;
-    // TODO: rename to hotkeyHoldIntervalCounter
+    this.hotkeyHoldIntervalCounter = this._hotkeyHoldInterval;
 
     // @private {number} - counters to allow for press-and-hold functionality that enables user to incrementally move
     // the draggable object or hold the movement key for continuous or stepped movement - values in seconds
@@ -403,7 +400,7 @@ define( require => {
       }
 
       // if any current hotkey keys are no longer down, clear out the current hotkey and reset.
-      if ( this.keyGroupDown && !this.allKeysInListDown( this.keyGroupDown.keys ) ) {
+      if ( this.currentHotkey && !this.allKeysInListDown( this.currentHotkey.keys ) ) {
         this.resetHotkeyState();
       }
 
@@ -435,8 +432,8 @@ define( require => {
         this.moveOnHoldIntervalCounter += dt * 1000;
 
         // update timer for keygroup if one is being held down
-        if ( this.keyGroupDown ) {
-          this.groupDownTimer += dt * 1000;
+        if ( this.currentHotkey ) {
+          this.hotkeyHoldIntervalCounter += dt * 1000;
         }
 
         // calculate change in position from time step
@@ -485,11 +482,11 @@ define( require => {
         // if keys are in order, call the callback associated with the group, and disable dragging until
         // all hotkeys associated with that group are up again
         if ( keysInOrder ) {
-          this.keyGroupDown = this.hotkeys[ j ];
-          if ( this.groupDownTimer >= this._hotkeyHoldInterval ) {
+          this.currentHotkey = this.hotkeys[ j ];
+          if ( this.hotkeyHoldIntervalCounter >= this._hotkeyHoldInterval ) {
 
             // Set the counter to begin counting the next interval between hotkey activations.
-            this.groupDownTimer = 0;
+            this.hotkeyHoldIntervalCounter = 0;
 
             // call the callback last, after internal state has been updated. This solves a bug caused if this callback
             // then makes this listener interrupt.
@@ -500,15 +497,15 @@ define( require => {
 
       // if a key group is down, check to see if any of those keys are still down - if so, we will disable dragging
       // until all of them are up
-      if ( this.keyGroupDown ) {
-        if ( this.keyInListDown( this.keyGroupDown.keys ) ) {
-          this.draggingDisabled = true;
+      if ( this.currentHotkey ) {
+        if ( this.keyInListDown( this.currentHotkey.keys ) ) {
+          this.hotkeyDisablingDragging = true;
         }
         else {
-          this.draggingDisabled = false;
+          this.hotkeyDisablingDragging = false;
 
           // keys are no longer down, clear the group
-          this.keyGroupDown = null;
+          this.currentHotkey = null;
         }
       }
     },
@@ -525,7 +522,7 @@ define( require => {
       // hotkeys may disable dragging, so do this first
       this.updateHotkeys();
 
-      if ( !this.draggingDisabled ) {
+      if ( !this.hotkeyDisablingDragging ) {
 
         // handle the change in position
         let deltaX = 0;
@@ -743,9 +740,9 @@ define( require => {
      * @private
      */
     resetHotkeyState: function() {
-      this.keyGroupDown = null;
-      this.groupDownTimer = this._hotkeyHoldInterval; // reset to threshold so the hotkey fires immediately next time.
-      this.draggingDisabled = false;
+      this.currentHotkey = null;
+      this.hotkeyHoldIntervalCounter = this._hotkeyHoldInterval; // reset to threshold so the hotkey fires immediately next time.
+      this.hotkeyDisablingDragging = false;
     },
 
     /**
