@@ -82,7 +82,7 @@ define( require => {
       shiftDownDelta: 0,
 
       // {number} - time interval at which holding down a hotkey group will trigger an associated listener, in ms
-      hotkeyInterval: 800
+      hotkeyHoldInterval: 800
     }, options );
 
     // @private, mutable attributes declared from options, see options for info, as well as getters and setters
@@ -98,7 +98,7 @@ define( require => {
     this._shiftDownDelta = options.shiftDownDelta;
     this._moveOnHoldDelay = options.moveOnHoldDelay;
     this._moveOnHoldInterval = options.moveOnHoldInterval;
-    this._hotkeyInterval = options.hotkeyInterval; // TODO: rename to hotkeyHoldInterval!!!!!!!
+    this._hotkeyHoldInterval = options.hotkeyHoldInterval; // TODO: rename to hotkeyHoldInterval!!!!!!!
 
     // @private { [].{ isDown: {boolean}, timeDown: [boolean] } - tracks the state of the keyboard. JavaScript doesn't
     // handle multiple key presses, so we track which keys are currently down and update based on state of this
@@ -124,7 +124,7 @@ define( require => {
 
     // @private {number} - delay before calling a keygroup listener (if keygroup is being held down), incremented in
     // step, in seconds. TODO: add doc like "initialized to hotkey because. . ."
-    this.groupDownTimer = this._hotkeyInterval;
+    this.groupDownTimer = this._hotkeyHoldInterval;
     // TODO: rename to hotkeyHoldIntervalCounter
 
     // @private {number} - counters to allow for press-and-hold functionality that enables user to incrementally move
@@ -295,16 +295,16 @@ define( require => {
     set moveOnHoldInterval( moveOnHoldInterval ) { this._moveOnHoldInterval = moveOnHoldInterval; },
 
     /**
-     * Getter for the hotkeyInterval property, see options.hotkeyInterval for more info.
+     * Getter for the hotkeyHoldInterval property, see options.hotkeyHoldInterval for more info.
      * @returns {number}
      */
-    get hotkeyInterval() { return this._hotkeyInterval; },
+    get hotkeyHoldInterval() { return this._hotkeyHoldInterval; },
 
     /**
-     * Setter for the hotkeyInterval property, see options.hotkeyInterval for more info.
-     * @param {number} hotkeyInterval
+     * Setter for the hotkeyHoldInterval property, see options.hotkeyHoldInterval for more info.
+     * @param {number} hotkeyHoldInterval
      */
-    set hotkeyInterval( hotkeyInterval ) { this._hotkeyInterval = hotkeyInterval; },
+    set hotkeyHoldInterval( hotkeyHoldInterval ) { this._hotkeyHoldInterval = hotkeyHoldInterval; },
 
     /**
      * Implements keyboard dragging when listener is attached to the Node, public so listener is attached
@@ -487,7 +487,7 @@ define( require => {
         // all hotkeys associated with that group are up again
         if ( keysInOrder ) {
           this.keyGroupDown = this.hotkeyGroups[ j ];
-          if ( this.groupDownTimer >= this._hotkeyInterval ) {
+          if ( this.groupDownTimer >= this._hotkeyHoldInterval ) {
 
             // Set the counter to begin counting the next interval between hotkey activations.
             this.groupDownTimer = 0;
@@ -745,7 +745,7 @@ define( require => {
      */
     resetHotkeyState: function() {
       this.keyGroupDown = null;
-      this.groupDownTimer = this._hotkeyInterval; // reset to threshold so the hotkey fires immediately next time.
+      this.groupDownTimer = this._hotkeyHoldInterval; // reset to threshold so the hotkey fires immediately next time.
       this.draggingDisabled = false;
     },
 
