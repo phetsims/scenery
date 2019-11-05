@@ -11,8 +11,12 @@
  * If using KeyboardDragListener in a more customized Display, like done in phetsims (see JOIST/Sim), the time must be
  * manually stepped (by emitting the timer).
  *
- * @author Jesse Greenberg
+ * For the purposes of this file, a "hotkey" is a collection of keys that, when pressed together in the right
+ * order, fire a callback.
+ *
+ * @author Jesse Greenberg (PhET Interactive Simulations)
  * @author Michael Barlow
+ * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
 define( require => {
@@ -94,39 +98,37 @@ define( require => {
     this._shiftDownDelta = options.shiftDownDelta;
     this._moveOnHoldDelay = options.moveOnHoldDelay;
     this._moveOnHoldInterval = options.moveOnHoldInterval;
-    this._hotkeyInterval = options.hotkeyInterval;
+    this._hotkeyInterval = options.hotkeyInterval; // TODO: rename to hotkeyHoldInterval!!!!!!!
 
     // @private { [].{ isDown: {boolean}, timeDown: [boolean] } - tracks the state of the keyboard. JavaScript doesn't
     // handle multiple key presses, so we track which keys are currently down and update based on state of this
     // collection of objects
     // TODO: Consider a global state object for this that persists across listeners so the state of the keyboard will
-    // be accurate when focus changes from one element to another, see https://github.com/phetsims/friction/issues/53
+    // TODO: be accurate when focus changes from one element to another, see https://github.com/phetsims/friction/issues/53
     this.keyState = [];
 
+    // TODO: explain what a "hotkey" is (a collection of keys pressed together)
     // @private { [].{ keys: <Array.number>, callback: <Function> } } - groups of keys that have some behavior when
     // pressed in order. See this.addHotkeyGroup() for more information
     this.hotkeyGroups = [];
-
-    // @private { keyCode: <number>, timeDown: <number> } - a key in a hot key group that is currently down. When all
-    // keys in a group have been pressed in order, we will call the associated listener
-    this.hotKeyDown = {};
+    // TODO: rename to hotkeys
 
     // @private {{keys: <Array.number>, callback: <Function>}|null} - the hotkey group that is currently down
     this.keyGroupDown = null;
+    // TODO: rename to currentHotkey
 
     // @private {boolean} - when a hotkey group is pressed down, dragging will be disabled until
-    // all keys are up again
+    // any keys are up again
     this.draggingDisabled = false;
+    // TODO: rename to hotkeyDisablingDragging
 
     // @private {number} - delay before calling a keygroup listener (if keygroup is being held down), incremented in
-    // step
+    // step, in seconds. TODO: add doc like "initialized to hotkey because. . ."
     this.groupDownTimer = this._hotkeyInterval;
-
-    // @private {boolean} - used to determine if the step functions updates position normally or in the 'hold to move' pattern
-    this.canMove = true;
+    // TODO: rename to hotkeyHoldIntervalCounter
 
     // @private {number} - counters to allow for press-and-hold functionality that enables user to incrementally move
-    // the draggable object or hold the movement key for continuous or stepped movement - values in ms
+    // the draggable object or hold the movement key for continuous or stepped movement - values in seconds
     this.moveOnHoldDelayCounter = 0;
     this.moveOnHoldIntervalCounter = 0;
 
@@ -401,13 +403,9 @@ define( require => {
         }
       }
 
-      // if keygroup keys are no longer down, clear the keygroup and reset timer
-      if ( this.keyGroupDown ) {
-        if ( !this.allKeysInListDown( this.keyGroupDown.keys ) ) {
-          this.keyGroupDown = null;
-          this.groupDownTimer = this._hotkeyInterval;
-          this.draggingDisabled = false;
-        }
+      // if any current hotkey keys are no longer down, clear out the current hotkey and reset.
+      if ( this.keyGroupDown && !this.allKeysInListDown( this.keyGroupDown.keys ) ) {
+        this.resetHotkeyState();
       }
 
       this.resetPressAndHold();
@@ -458,13 +456,10 @@ define( require => {
     },
 
     /**
-     * Handle the actual change in position of associated object based on currently pressed keys. Called in step function
-     * and keydown listener.
-     *
-     * @param {number} delta - potential change in position in x and y for the position Property
+     * Update the state of hotkeys, and fire hotkey callbacks if one is active.
      * @private
      */
-    updatePosition: function( delta ) {
+    updateHotkeys: function() {
 
       // check to see if any hotkey combinations are down
       for ( let j = 0; j < this.hotkeyGroups.length; j++ ) {
@@ -493,10 +488,13 @@ define( require => {
         if ( keysInOrder ) {
           this.keyGroupDown = this.hotkeyGroups[ j ];
           if ( this.groupDownTimer >= this._hotkeyInterval ) {
-            this.hotkeyGroups[ j ].callback();
 
-            // reset timer for delay between group keygroup commands
+            // Set the counter to begin counting the next interval between hotkey activations.
             this.groupDownTimer = 0;
+
+            // call the callback last, after internal state has been updated. This solves a bug caused if this callback
+            // then makes this listener interrupt.
+            this.hotkeyGroups[ j ].callback();
           }
         }
       }
@@ -514,6 +512,19 @@ define( require => {
           this.keyGroupDown = null;
         }
       }
+    },
+
+    /**
+     * Handle the actual change in position of associated object based on currently pressed keys. Called in step function
+     * and keydown listener.
+     *
+     * @param {number} delta - potential change in position in x and y for the position Property
+     * @private
+     */
+    updatePosition: function( delta ) {
+
+      // hotkeys may disable dragging, so do this first
+      this.updateHotkeys();
 
       if ( !this.draggingDisabled ) {
 
@@ -565,7 +576,6 @@ define( require => {
         }
       }
       this.moveOnHoldIntervalCounter = 0;
-      this.canMove = false;
     },
 
     /**
@@ -730,12 +740,23 @@ define( require => {
     },
 
     /**
+     * Resets the timers and control variables for the hotkey functionality.
+     * @private
+     */
+    resetHotkeyState: function() {
+      this.keyGroupDown = null;
+      this.groupDownTimer = this._hotkeyInterval; // reset to threshold so the hotkey fires immediately next time.
+      this.draggingDisabled = false;
+    },
+
+    /**
      * Reset the keystate Object tracking which keys are currently pressed down.
      *
      * @public
      */
     interrupt: function() {
       this.keyState = [];
+      this.resetHotkeyState();
       this.resetPressAndHold();
     },
 
