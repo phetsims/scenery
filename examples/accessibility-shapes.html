@@ -61,6 +61,7 @@
       width: $container.width(),
       height: $container.height()
     } );
+    window.display = display;
     $container[ 0 ].appendChild( display.domElement );
     draw( scene, display );
     display.updateDisplay();
