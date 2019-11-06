@@ -97,6 +97,7 @@ define( require => {
   const PointerAreaOverlay = require( 'SCENERY/overlays/PointerAreaOverlay' );
   const PointerOverlay = require( 'SCENERY/overlays/PointerOverlay' );
   const Util = require( 'SCENERY/util/Util' );
+  const UtteranceQueue = require( 'UTTERANCE_QUEUE/UtteranceQueue' );
 
   /**
    * Constructs a Display that will show the rootNode and its subtree in a visual state. Default options provided below
@@ -276,6 +277,9 @@ define( require => {
     // global reference if we have a Display (useful)
     this.scenery = scenery;
 
+    // @public - data structure for managing aria-live alerts the this Display instance
+    this.utteranceQueue = new UtteranceQueue( !this.options.accessibility );
+
     if ( this.options.accessibility ) {
       if ( this.options.isApplication ) {
         this._domElement.setAttribute( 'aria-role', 'application' );
@@ -319,6 +323,9 @@ define( require => {
 
       // add the accessible DOM as a child of this DOM element
       this._domElement.appendChild( this._rootAccessibleInstance.peer.primarySibling );
+
+      // add aria-live elements to the display
+      this._domElement.appendChild( this.utteranceQueue.getAriaLiveContainer() );
     }
   }
 
@@ -499,8 +506,8 @@ define( require => {
         }
 
         const drawableBlockCountMessage = 'drawable block changes: ' + this.perfDrawableBlockChangeCount + ' for' +
-                                        ' -' + this.perfDrawableOldIntervalCount +
-                                        ' +' + this.perfDrawableNewIntervalCount;
+                                          ' -' + this.perfDrawableOldIntervalCount +
+                                          ' +' + this.perfDrawableNewIntervalCount;
         if ( this.perfDrawableBlockChangeCount > 200 ) {
           sceneryLog.PerfCritical && sceneryLog.PerfCritical( drawableBlockCountMessage );
         }
@@ -772,10 +779,10 @@ define( require => {
                         this._backgroundColor instanceof scenery.Color );
 
       const newBackgroundCSS = this._backgroundColor === null ?
-                             '' :
-                             ( this._backgroundColor.toCSS ?
-                               this._backgroundColor.toCSS() :
-                               this._backgroundColor );
+                               '' :
+                               ( this._backgroundColor.toCSS ?
+                                 this._backgroundColor.toCSS() :
+                                 this._backgroundColor );
       if ( newBackgroundCSS !== this._currentBackgroundCSS ) {
         this._currentBackgroundCSS = newBackgroundCSS;
 
@@ -1495,11 +1502,11 @@ define( require => {
      */
     getDebugURI() {
       return 'data:text/html;charset=utf-8,' + encodeURIComponent(
-        '<!DOCTYPE html>' +
-        '<html lang="en">' +
-        '<head><title>Scenery Debug Snapshot</title></head>' +
-        '<body style="font-size: 12px;">' + this.getDebugHTML() + '</body>' +
-        '</html>'
+             '<!DOCTYPE html>' +
+             '<html lang="en">' +
+             '<head><title>Scenery Debug Snapshot</title></head>' +
+             '<body style="font-size: 12px;">' + this.getDebugHTML() + '</body>' +
+             '</html>'
       );
     },
 
@@ -1760,12 +1767,12 @@ define( require => {
 
       // Create an SVG container with a foreignObject.
       const data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '">' +
-                 '<foreignObject width="100%" height="100%">' +
-                 '<div xmlns="http://www.w3.org/1999/xhtml">' +
-                 xhtml +
-                 '</div>' +
-                 '</foreignObject>' +
-                 '</svg>';
+                   '<foreignObject width="100%" height="100%">' +
+                   '<div xmlns="http://www.w3.org/1999/xhtml">' +
+                   xhtml +
+                   '</div>' +
+                   '</foreignObject>' +
+                   '</svg>';
 
       // Load an <img> with the SVG data URL, and when loaded draw it into our Canvas
       const img = new window.Image();

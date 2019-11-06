@@ -39,9 +39,10 @@ require.config( {
     SCENERY_PHET: '../../scenery-phet/js',
     SUN: '../../sun/js',
     TAMBO: '../../tambo/js',
-    TANDEM: '../../tandem/js'
+    TANDEM: '../../tandem/js',
+    UTTERANCE_QUEUE: '../../utterance-queue/js'
   },
 
-  // optional cache bust to make browser refresh load all included scripts, can be disabled with ?cacheBust=false
+  // Cache busting is applied by default, but can be disabled via ?cacheBust=false, see initialize-globals.js
   urlArgs: phet.chipper.getCacheBustArgs()
 } );

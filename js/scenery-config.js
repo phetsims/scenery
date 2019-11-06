@@ -7,7 +7,7 @@
  */
 
 require.config( {
-  // depends on all of Scenery, Kite, Dot, Axon and phet-core
+  // depends on all of scenery, kite, dot, axon, phet-core and utterance-queue
   deps: [ 'scenery-main' ],
 
   paths: {
@@ -24,6 +24,7 @@ require.config( {
     DOT: '../../dot/js',
     PHET_CORE: '../../phet-core/js',
     AXON: '../../axon/js',
+    UTTERANCE_QUEUE: '../../utterance-queue/js',
 
     TANDEM: '../../tandem/js',
     REPOSITORY: '..'

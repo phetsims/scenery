@@ -13,6 +13,7 @@
     window.dot = require( 'DOT/main' );
     window.kite = require( 'KITE/main' );
     window.phetCore = require( 'PHET_CORE/main' );
+    window.utteranceQueue = require( 'UTTERANCE_QUEUE/main' );
     window.scenery = require( 'main' );
     window.scenery.Util.polyfillRequestAnimationFrame();
   } );

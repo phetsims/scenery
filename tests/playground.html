@@ -91,12 +91,14 @@ an UI and Display made for visual testing and debugging.
   var fuzzStep = false;
 
   require( [ 'config' ], function() {
-    require( [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main', 'AXON/main' ], function( scenery, kite, dot, phetCore, axon ) {
+    require( [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main', 'AXON/main', 'UTTERANCE_QUEUE/main' ],
+      function( scenery, kite, dot, phetCore, axon, utteranceQueue ) {
       window.scenery = scenery;
       window.kite = kite;
       window.dot = dot;
       window.phetCore = phetCore;
       window.axon = axon;
+      window.utteranceQueue = utteranceQueue;
 
       console.log( 'loaded' );
 
@@ -105,7 +107,8 @@ an UI and Display made for visual testing and debugging.
       var display = window.display = new scenery.Display( scene, {
         width: 640,
         height: 320,
-        preserveDrawingBuffer: true
+        preserveDrawingBuffer: true,
+        accessibility: true
         // any overrides here?
       } );
       console.log( 'window.display created' );
@@ -210,7 +213,7 @@ an UI and Display made for visual testing and debugging.
         var im2 = new scenery.Image( canvas2 );
         im2.x = 176;
         var im3 = new scenery.Image( canvas2.toDataURL() );
-        im3.x = 176+168;
+        im3.x = 176 + 168;
 
         const bars = new scenery.Node( {
           children: [
