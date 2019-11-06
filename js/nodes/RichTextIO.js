@@ -30,7 +30,6 @@ define( require => {
 
         // pick the following values from the parent Node
         phetioReadOnly: richText.phetioReadOnly,
-        phetioState: richText.phetioState,
         phetioType: PropertyIO( StringIO ),
 
         tandem: richText.tandem.createTandem( 'textProperty' ),
