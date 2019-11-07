@@ -18,12 +18,13 @@ define( require => {
     this.display = display;
     this.rootNode = rootNode;
 
-    const svg = this.svg = document.createElementNS( scenery.svgns, 'svg' );
+    const svg = document.createElementNS( scenery.svgns, 'svg' );
     svg.style.position = 'absolute';
     svg.setAttribute( 'class', name );
     svg.style.top = 0;
     svg.style.left = 0;
     svg.style[ 'pointer-events' ] = 'none';
+    this.svg = svg;
 
     function resize( width, height ) {
       svg.setAttribute( 'width', width );

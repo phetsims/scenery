@@ -41,14 +41,16 @@ define( require => {
     // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
     // allocation and performance costs)
     if ( !this.fillElement || !this.strokeElement ) {
-      const fillElement = this.fillElement = document.createElement( 'div' );
+      const fillElement = document.createElement( 'div' );
+      this.fillElement = fillElement;
       fillElement.style.display = 'block';
       fillElement.style.position = 'absolute';
       fillElement.style.left = '0';
       fillElement.style.top = '0';
       fillElement.style.pointerEvents = 'none';
 
-      const strokeElement = this.strokeElement = document.createElement( 'div' );
+      const strokeElement = document.createElement( 'div' );
+      this.strokeElement = strokeElement;
       strokeElement.style.display = 'block';
       strokeElement.style.position = 'absolute';
       strokeElement.style.left = '0';

@@ -48,10 +48,12 @@ define( require => {
     // allocation and performance costs)
     if ( !this.fillElement || !this.strokeElement ) {
       // @protected {HTMLDivElement} - Will contain the fill by manipulating borderRadius
-      const fillElement = this.fillElement = document.createElement( 'div' );
+      const fillElement = document.createElement( 'div' );
+      this.fillElement = fillElement;
 
       // @protected {HTMLDivElement} - Will contain the stroke by manipulating borderRadius
-      const strokeElement = this.strokeElement = document.createElement( 'div' );
+      const strokeElement = document.createElement( 'div' );
+      this.strokeElement = strokeElement;
 
       fillElement.style.display = 'block';
       fillElement.style.position = 'absolute';

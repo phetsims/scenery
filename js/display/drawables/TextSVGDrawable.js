@@ -41,7 +41,8 @@ define( require => {
 
     if ( !this.svgElement ) {
       // @protected {SVGTextElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
-      const text = this.svgElement = document.createElementNS( scenery.svgns, 'text' );
+      const text = document.createElementNS( scenery.svgns, 'text' );
+      this.svgElement = text;
       text.appendChild( document.createTextNode( '' ) );
 
       // TODO: flag adjustment for SVG qualities
