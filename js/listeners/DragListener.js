@@ -633,6 +633,30 @@ define( require => {
     get dragBounds() { return this.getDragBounds(); },
 
     /**
+     * Sets the drag transform of the listener.
+     * @public
+     *
+     * @param {Bounds2} transform
+     */
+    setTransform: function( transform ) {
+      assert && assert( transform instanceof Transform3 );
+
+      this._transform = transform;
+    },
+    set transform( transform ) { this.setTransform( transform ); },
+
+    /**
+     * Returns the transform of the listener.
+     * @public
+     *
+     * @returns {Transform3}
+     */
+    getTransform: function() {
+      return this._transform;
+    },
+    get transform() { return this.getTransform(); },
+
+    /**
      * Interrupts the listener, releasing it (canceling behavior).
      * @public
      * @override
