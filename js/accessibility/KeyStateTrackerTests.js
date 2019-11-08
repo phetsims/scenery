@@ -32,7 +32,7 @@ define( require => {
 
       // step the timer, because utteranceQueue runs on timer
       let previousTime = Date.now();
-      intervalID = setInterval( () => {
+      intervalID = setInterval( () => { // eslint-disable-line bad-sim-text
         const currentTime = Date.now();
         const timeStep = ( currentTime - previousTime ) / 1000; // convert to seconds
         previousTime = currentTime;
@@ -118,12 +118,12 @@ define( require => {
     let currentTimeDown = testTracker.timeDownForKey( spaceKeyEvent.domEvent.keyCode );
     assert.ok( currentTimeDown === 0, 'should be zero, has not been down any time' );
 
-    timer.setTimeout( () => {
+    timer.setTimeout( () => { // eslint-disable-line bad-sim-text
       currentTimeDown = testTracker.timeDownForKey( spaceKeyEvent.domEvent.keyCode );
 
       assert.ok( currentTimeDown >= firstPressTime && currentTimeDown <= totalPressTime, 'key pressed for ' + firstPressTime + ' ms' );
 
-      timer.setTimeout( () => {
+      timer.setTimeout( () => { // eslint-disable-line bad-sim-text
         currentTimeDown = testTracker.timeDownForKey( spaceKeyEvent.domEvent.keyCode );
 
         assert.ok( currentTimeDown >= totalPressTime, 'key pressed for ' + secondPressTime + ' more ms.' );

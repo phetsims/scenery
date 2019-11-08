@@ -125,7 +125,7 @@ define( require => {
             // a small delay will allow the utterance to be read in full, even if
             // added after cancel().
             if ( self.speaking ) {
-              setTimeout( function() { readPolite(); }, 2000 );
+              setTimeout( function() { readPolite(); }, 2000 ); // eslint-disable-line bad-sim-text
             }
             else {
               self.synth.speak( utterThis );

@@ -704,7 +704,7 @@ define( require => {
         // https://stackoverflow.com/questions/2600186/focus-doesnt-work-in-ie
         const self = this;
         if ( platform.ie11 && FullScreen.isFullScreen() ) {
-          window.setTimeout( function() {
+          window.setTimeout( function() { // eslint-disable-line bad-sim-text
 
             // make sure that the primary sibling hasn't been removed from the document since the timeout was added
             self._primarySibling && self._primarySibling.blur();

@@ -881,7 +881,7 @@ define( require => {
       // add handler after creating the image
       img.onload = function() {
         // a bit of extra time afterwards
-        setTimeout( function() {
+        setTimeout( function() { // eslint-disable-line bad-sim-text
           display.updateDisplay();
 
           asyncCallback();
