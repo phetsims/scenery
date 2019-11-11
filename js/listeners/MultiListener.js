@@ -38,12 +38,20 @@ define( require => {
         targetNode: null, // TODO: required? pass in at front
         allowScale: true,
         allowRotation: true,
-        allowMultitouchInterruption: false
+        allowMultitouchInterruption: false,
+
+        // {number} - limits for scaling
+        minScale: 1,
+        maxScale: 4
       }, options );
 
       // TODO: type checks for options
 
       this._targetNode = targetNode;
+
+      // @protected (read-only)
+      this._minScale = options.minScale;
+      this._maxScale = options.maxScale;
 
       this._mouseButton = options.mouseButton;
       this._pressCursor = options.pressCursor;
@@ -359,12 +367,25 @@ define( require => {
       localPoints.forEach( localPoint => { localSquaredDistance += localPoint.distanceSquared( localCentroid ); } );
       targetPoints.forEach( targetPoint => { targetSquaredDistance += targetPoint.distanceSquared( targetCentroid ); } );
 
-      const scale = Math.sqrt( targetSquaredDistance / localSquaredDistance );
+      let scale = Math.sqrt( targetSquaredDistance / localSquaredDistance );
+      scale = this.limitScale( scale );
 
       const translateToTarget = Matrix3.translation( targetCentroid.x, targetCentroid.y );
       const translateFromLocal = Matrix3.translation( -localCentroid.x, -localCentroid.y );
 
       return translateToTarget.timesMatrix( Matrix3.scaling( scale ) ).timesMatrix( translateFromLocal );
+    }
+
+    /**
+     * Limit the provided scale by constraints of this MultiListener.
+     *
+     * @param {number} scale
+     * @returns {number}
+     */
+    limitScale( scale ) {
+      let correctedScale = Math.max( scale, this._minScale );
+      correctedScale = Math.min( correctedScale, this._maxScale );
+      return correctedScale;
     }
 
     // @private
