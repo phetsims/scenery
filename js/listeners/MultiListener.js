@@ -127,9 +127,9 @@ define( require => {
         },
 
         move: function( event ) {
-          if ( self._allowMoveInterruption ) {
+          if ( this._allowMoveInterruption ) {
 
-            const backgroundPress = self.findBackgroundPress( event.pointer );
+            const backgroundPress = this.findBackgroundPress( event.pointer );
 
             // TODO: scratch Vector
             const difference = backgroundPress.initialPoint.minus( event.pointer.point );
@@ -139,8 +139,8 @@ define( require => {
               // only interrupt if pointer has moved far enough so we don't interrupt taps that might move little
               sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener attached, interrupting for press' );
               event.pointer.interruptAttached();
-              self.convertBackgroundPresses();
-              self.movePress( self.findPress( event.pointer ) );
+              this.convertBackgroundPresses();
+              this.movePress( this.findPress( event.pointer ) );
             }
           }
         },
