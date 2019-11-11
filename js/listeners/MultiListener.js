@@ -22,6 +22,10 @@ define( require => {
   const SingularValueDecomposition = require( 'DOT/SingularValueDecomposition' );
   const Vector2 = require( 'DOT/Vector2' );
 
+  // constants
+  // pointer must move this much to initiate a move interruption for panning, in the global coordinate frame
+  const MOVE_INTERRUPT_MAGNITUDE = 25;
+
   class MultiListener {
 
     /**
@@ -39,6 +43,9 @@ define( require => {
         allowScale: true,
         allowRotation: true,
         allowMultitouchInterruption: false,
+
+        // {private}
+        allowMoveInterruption: true,
 
         // {number} - limits for scaling
         minScale: 1,
@@ -119,6 +126,25 @@ define( require => {
           sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
         },
 
+        move: function( event ) {
+          if ( self._allowMoveInterruption ) {
+
+            const backgroundPress = self.findBackgroundPress( event.pointer );
+
+            // TODO: scratch Vector
+            const difference = backgroundPress.initialPoint.minus( event.pointer.point );
+
+            if ( difference.magnitude > MOVE_INTERRUPT_MAGNITUDE ) {
+
+              // only interrupt if pointer has moved far enough so we don't interrupt taps that might move little
+              sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener attached, interrupting for press' );
+              event.pointer.interruptAttached();
+              self.convertBackgroundPresses();
+              self.movePress( self.findPress( event.pointer ) );
+            }
+          }
+        },
+
         cancel: event => {
           sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener background cancel' );
           sceneryLog && sceneryLog.InputListener && sceneryLog.push();
@@ -193,6 +219,10 @@ define( require => {
           sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener attached, adding background press' );
           this.addBackgroundPress( press );
         }
+      }
+      else if ( this._allowMoveInterruption )  {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener attached, adding background press for move' );
+        this.addBackgroundPress( press );
       }
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
