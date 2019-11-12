@@ -42,9 +42,13 @@ define( require => {
         targetNode: null, // TODO: required? pass in at front
         allowScale: true,
         allowRotation: true,
+
+        // {boolean} - if true, multitouch will interrupt any active pointer listeners and and initiate translation
+        // and scale from multitouch gestures
         allowMultitouchInterruption: false,
 
-        // {private}
+        // {private} - if true, a certain amount of movement in the global coordinate frame with interrupt any pointer
+        // listeners and initiate translation from the pointer
         allowMoveInterruption: true,
 
         // {number} - limits for scaling
