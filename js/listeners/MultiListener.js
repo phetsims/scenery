@@ -491,6 +491,24 @@ define( require => {
                                      0, 0, 1 );
     }
 
+    /**
+     * Get the current scale on the target node, assumes that there is isometric scaling in both x and y.
+     *
+     * @public
+     * @returns {number}
+     */
+    getCurrentScale() {
+      return this._targetNode.getScaleVector().x;
+    }
+
+    /**
+     * Reset transform on the target node.
+     *
+     * @public
+     */
+    resetTransform() {
+      this._targetNode.resetTransform();
+    }
   }
 
   scenery.register( 'MultiListener', MultiListener );
