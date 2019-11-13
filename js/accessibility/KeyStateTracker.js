@@ -76,7 +76,7 @@ define( require => {
      * Modifier keys might be part of the domEvent but the browser may or may not have received a keydown/keyup event
      * with specifically for the modifier key. This will add or remove modifier keys in that case.
      * @private
-     * 
+     *
      * @param  {DOMEvent} domEvent
      */
     correctModifierKeys( domEvent ) {

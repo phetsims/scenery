@@ -56,7 +56,7 @@ define( require => {
 
       // @private {Bounds2} - the panBounds transformed so that they are in the targetNode's parent frame
       // TODO: this probably isn't working generally, I don't see how this could be correct
-      this._transformedPanBounds = this.panBounds.transformed( this.targetNode.matrix.inverted() );
+      this._transformedPanBounds = this._panBounds.transformed( this._targetNode.matrix.inverted() );
     }
 
     /**
@@ -85,7 +85,7 @@ define( require => {
       }
 
       // TODO: check on this, I don't see how this could be correct
-      this.transformedPanBounds = this.panBounds.transformed( this._targetNode.matrix.inverted() );
+      this._transformedPanBounds = this._panBounds.transformed( this._targetNode.matrix.inverted() );
     }
 
     /**
