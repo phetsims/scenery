@@ -26,9 +26,18 @@ define( require => {
   'use strict';
 
   const BooleanProperty = require( 'AXON/BooleanProperty' );
+  const Enumeration = require( 'PHET_CORE/Enumeration' );
   const inherit = require( 'PHET_CORE/inherit' );
   const scenery = require( 'SCENERY/scenery' );
   const Vector2 = require( 'DOT/Vector2' );
+
+  // constants
+  // entries when signifying Intent of the pointer, see setIntent
+  const Intent = new Enumeration( [
+    'DRAG', // listener attached to the pointer will be used for dragging
+    'MULTI_DRAG', // listener attached to pointer and more than one item can be dragged at at a time with multitouch
+    'KEYBOARD_DRAG' // listener attached to pointer is for dragging with a keyboard
+  ] );
 
   /**
    * @constructor
@@ -82,6 +91,11 @@ define( require => {
     // @public (scenery-internal) {DOMEvent|null} - Recorded and exposed so that it can be provided to events when there
     // is no "immediate" DOM event (e.g. when a node moves UNDER a pointer and triggers a touch-snag).
     this.lastDOMEvent = null;
+
+    // @private {null|Intent} - A Pointer can be assigned an intent when a listener is attached to initiate or prevent
+    // certain behavior for the life of the listener. Other listeners can observe the Intent on the Pointer and
+    // react accordingly
+    this._intent = null;
   }
 
   scenery.register( 'Pointer', Pointer );
@@ -286,6 +300,22 @@ define( require => {
     },
 
     /**
+     * Sets the Intent on the Pointer. By setting Intent, other listeners in the dispatch phase can react accordingly.
+     * Note that the Intent can be changed by listeners up the dispatch phase or on the next press. See Intent enum
+     * for valid entries.
+     * @param {Intent|null} intent
+     */
+    setIntent: function( intent ) {
+      assert && assert( intent === null || Intent.includes( intent ), 'trying to set unsupported intent for Pointer' );
+      this._intent = intent;
+    },
+
+    getIntent: function() {
+      return this._intent;
+    },
+    get intent() { return this.getIntent(); },
+
+    /**
      * Releases references so it can be garbage collected.
      * @public
      */
@@ -295,6 +325,13 @@ define( require => {
       assert && assert( this._attachedListener === null, 'Attached listeners should be cleared before pointer disposal' );
       assert && assert( this._listeners.length === 0, 'Should not have listeners when a pointer is disposed' );
     }
+  }, {
+
+    /**
+     * @static
+     * @public
+     */
+    Intent: Intent
   } );
 
   return Pointer;
