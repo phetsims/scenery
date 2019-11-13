@@ -15,6 +15,7 @@ define( require => {
   const Display = require( 'SCENERY/display/Display' );
   const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
   const KeyboardZoomUtil = require( 'SCENERY/accessibility/KeyboardZoomUtil' );
+  const Matrix3 = require( 'DOT/Matrix3' );
   const merge = require( 'PHET_CORE/merge' );
   const PanZoomListener = require( 'SCENERY/listeners/PanZoomListener' );
   const platform = require( 'PHET_CORE/platform' );
@@ -402,6 +403,65 @@ define( require => {
         globalDelta.setMagnitude( Math.min( reducedMagnitude / dt, MAX_SCROLL_VELOCITY ) );
         this.setDestinationLocation( this.sourceLocation.plus( globalDelta ) );
       }
+    }
+
+    /**
+     * Translate and scale to a target point. The result of this function should make it appear that we are scaling
+     * in or out of a particular point on the target node. This actually modifies the matrix of the target node. To
+     * accomplish zooming into a particular point, we compute a matrix that would transform the target node from
+     * the target point, then apply scale, then translate the target back to the target point.
+     * @public
+     *
+     * @param {Vector2} globalPoint - point to zoom in on, in the global coordinate frame
+     * @param {number} scaleDelta
+     */
+    translateScaleToTarget( globalPoint, scaleDelta ) {
+      const pointInLocalFrame = this._targetNode.globalToLocalPoint( globalPoint );
+      const pointInParentFrame = this._targetNode.globalToParentPoint( globalPoint );
+
+      var fromLocalPoint = Matrix3.translation( -pointInLocalFrame.x, -pointInLocalFrame.y );
+      var toTargetPoint = Matrix3.translation( pointInParentFrame.x, pointInParentFrame.y );
+
+      const nextScale = this.limitScale( this.getCurrentScale() + scaleDelta );
+
+      // we first translate from target point, then apply scale, then translate back to target point ()
+      // so that it appears as though we are zooming into that point
+      const scaleMatrix = toTargetPoint.timesMatrix( Matrix3.scaling( nextScale ) ).timesMatrix( fromLocalPoint );
+      this._targetNode.matrix = scaleMatrix;
+
+      // make sure that we are still within PanZoomListener constraints
+      this.correctReposition();
+    }
+
+    /**
+     * Translate the target node in a direction specified by deltaVector.
+     * @public
+     *
+     * @param {Vector2} deltaVector
+     */
+    translateDelta( deltaVector ) {
+      const targetPoint = this._targetNode.globalToParentPoint( this._panBounds.center );
+      const sourcePoint = targetPoint.plus( deltaVector );
+      this.translateToTarget( sourcePoint, targetPoint );
+    }
+
+    /**
+     * Translate the targetNode from a local point to a target point. Both points should be in the global coordinate
+     * frame.
+     * @public
+     *
+     * @param {Vector} initialPoint - in global coordinate frame, source position
+     * @param {Vector2} targetPoint - in global coordinate frame, target position
+     */
+    translateToTarget( initialPoint, targetPoint ) {
+
+      // TODO: scratch things?
+      const singleInitialPoint = this._targetNode.globalToParentPoint( initialPoint );
+      const singleTargetPoint = this._targetNode.globalToParentPoint( targetPoint );
+      var delta = singleTargetPoint.minus( singleInitialPoint );
+      this._targetNode.matrix = Matrix3.translationFromVector( delta ).timesMatrix( this._targetNode.getMatrix() );
+
+      this.correctReposition();
     }
 
     /**
