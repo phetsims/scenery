@@ -184,7 +184,7 @@ define( require => {
     // another startDrag.
     this._lastInterruptedTouchPointer = null;
 
-    // @private {Emitter} - emitted on drag. Used for triggering phet-io events to the data stream, see https://github.com/phetsims/scenery/issues/842
+    // @private {Action} - emitted on drag. Used for triggering phet-io events to the data stream, see https://github.com/phetsims/scenery/issues/842
     this._dragAction = new Action( function( event ) {
 
       // This is done first, before the drag listener is called (from the prototype drag call)
