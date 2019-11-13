@@ -100,9 +100,9 @@ define( require => {
     this._moveOnHoldInterval = options.moveOnHoldInterval;
     this._hotkeyHoldInterval = options.hotkeyHoldInterval;
 
-    // @private {Array.<{isDown:boolean, timeDown:[boolean]>} - tracks the state of the keyboard. JavaScript doesn't
+    // @private {Array.<{isDown:boolean, timeDown:number>} - tracks the state of the keyboard. JavaScript doesn't
     // handle multiple key presses, so we track which keys are currently down and update based on state of this
-    // collection of objects
+    // collection of objects. "timeDown" is in milliseconds
     // TODO: Consider a global state object for this that persists across listeners so the state of the keyboard will
     // TODO: be accurate when focus changes from one element to another, see https://github.com/phetsims/friction/issues/53
     this.keyState = [];
@@ -417,28 +417,30 @@ define( require => {
      * @param {number} dt - in seconds
      */
     step: function( dt ) {
+      const ms = dt * 1000;
 
       // no-op unless a key is down
       if ( this.keyState.length > 0 ) {
         // for each key that is still down, increment the tracked time that has been down
         for ( let i = 0; i < this.keyState.length; i++ ) {
           if ( this.keyState[ i ].keyDown ) {
-            this.keyState[ i ].timeDown += dt;
+            this.keyState[ i ].timeDown += ms;
           }
         }
 
         // dt is in seconds and we convert to ms
-        this.moveOnHoldDelayCounter += dt * 1000;
-        this.moveOnHoldIntervalCounter += dt * 1000;
+        this.moveOnHoldDelayCounter += ms;
+        this.moveOnHoldIntervalCounter += ms;
 
         // update timer for keygroup if one is being held down
         if ( this.currentHotkey ) {
-          this.hotkeyHoldIntervalCounter += dt * 1000;
+          this.hotkeyHoldIntervalCounter += ms;
         }
 
         // calculate change in position from time step
-        const positionVelocity = this.shiftKeyDown() ? this._shiftDragVelocity : this._dragVelocity;
-        const positionDelta = dt * positionVelocity;
+        const positionVelocitySeconds = this.shiftKeyDown() ? this._shiftDragVelocity : this._dragVelocity;
+        const positionVelocityMilliseconds = positionVelocitySeconds / 1000;
+        const positionDelta = ms * positionVelocityMilliseconds;
 
         if ( this.moveOnHoldDelayCounter >= this._moveOnHoldDelay && !this.delayComplete ) {
           this.updatePosition( positionDelta );
