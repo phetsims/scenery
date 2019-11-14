@@ -12,6 +12,7 @@
 
 define( require => {
   'use strict';
+  require( 'PHET_CORE/phet-polyfill' );
 
   const axon = require( 'AXON/axon' );
   const dot = require( 'DOT/dot' );
