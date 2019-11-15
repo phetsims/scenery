@@ -12,11 +12,13 @@
 define( require => {
   'use strict';
 
+  // modules
   const arrayRemove = require( 'PHET_CORE/arrayRemove' );
   const Matrix = require( 'DOT/Matrix' );
   const Matrix3 = require( 'DOT/Matrix3' );
   const merge = require( 'PHET_CORE/merge' );
   const Mouse = require( 'SCENERY/input/Mouse' );
+  const Pointer = require( 'SCENERY/input/Pointer' );
   const scenery = require( 'SCENERY/scenery' );
   const SingularValueDecomposition = require( 'DOT/SingularValueDecomposition' );
   const Vector2 = require( 'DOT/Vector2' );
@@ -132,7 +134,7 @@ define( require => {
         },
 
         move: event => {
-          if ( this._allowMoveInterruption ) {
+          if ( this._allowMoveInterruption && this.canMove( event.pointer ) ) {
 
             const backgroundPress = this.findBackgroundPress( event.pointer );
 
@@ -189,6 +191,18 @@ define( require => {
       }
       assert && assert( false, 'Did not find press' );
       return null;
+    }
+
+    /**
+     * Movement is disallowed for pointers with Intent that indicate that dragging is expected.
+     * @private
+     *
+     * @param {Pointer} pointer
+     * @returns {boolean}
+     */
+    canMove( pointer ) {
+      const intent = pointer.getIntent();
+      return ( intent !== Pointer.Intent.DRAG && intent !== Pointer.Intent.MULTI_DRAG );
     }
 
     // TODO: see PressListener

@@ -18,6 +18,7 @@ define( require => {
   const merge = require( 'PHET_CORE/merge' );
   const Mouse = require( 'SCENERY/input/Mouse' );
   const PhetioObject = require( 'TANDEM/PhetioObject' );
+  const Pointer = require( 'SCENERY/input/Pointer' );
   const scenery = require( 'SCENERY/scenery' );
   const Tandem = require( 'TANDEM/Tandem' );
   const Touch = require( 'SCENERY/input/Touch' );
@@ -104,6 +105,10 @@ define( require => {
       event.pointer.dragging = true;
       event.pointer.cursor = self.options.dragCursor;
       event.pointer.addInputListener( self.dragListener, self.options.attach );
+
+      // mark the Intent of this pointer listener to indicate that we want to drag and therefore potentially
+      // change the behavior of other listeners in the dispatch phase
+      event.pointer.setIntent( Pointer.Intent.DRAG );
 
       // set all of our persistent information
       self.isDraggingProperty.set( true );
