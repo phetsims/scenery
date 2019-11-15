@@ -63,11 +63,13 @@ define( require => {
       this._minScale = options.minScale;
       this._maxScale = options.maxScale;
 
+      // @private - see options
       this._mouseButton = options.mouseButton;
       this._pressCursor = options.pressCursor;
       this._allowScale = options.allowScale;
       this._allowRotation = options.allowRotation;
       this._allowMultitouchInterruption = options.allowMultitouchInterruption;
+      this._allowMoveInterruption = options.allowMoveInterruption;
 
       // @private {Array.<Press>}
       this._presses = [];
@@ -129,7 +131,7 @@ define( require => {
           sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
         },
 
-        move: function( event ) {
+        move: event => {
           if ( this._allowMoveInterruption ) {
 
             const backgroundPress = this.findBackgroundPress( event.pointer );
@@ -521,6 +523,9 @@ define( require => {
       this.pointer = pointer;
       this.trail = trail;
       this.interrupted = false;
+
+      // @public (read-only) {Vector2} - down point for the new press, in the global coordinate frame
+      this.initialPoint = pointer.point;
 
       this.localPoint = null;
       this.recomputeLocalPoint();
