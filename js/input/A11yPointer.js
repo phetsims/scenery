@@ -69,7 +69,7 @@ define( require => {
           if ( this.blockTrustedEvents && event.domEvent.isTrusted ) {
             return;
           }
-          scenery.Display.keyStateTracker.keydownUpdate( event );
+          scenery.Display.keyStateTracker.keydownUpdate( event.domEvent );
 
           // set the target to potentially block keyup events
           this.keydownTargetNode = event.target;
@@ -78,7 +78,7 @@ define( require => {
           if ( this.blockTrustedEvents && event.domEvent.isTrusted ) {
             return;
           }
-          scenery.Display.keyStateTracker.keyupUpdate( event );
+          scenery.Display.keyStateTracker.keyupUpdate( event.domEvent );
 
           // The keyup event was received on a node that didn't receive a keydown event, abort to prevent any other
           // listeners from being called for this event. Done after updating KeyStateTracker so that the global state

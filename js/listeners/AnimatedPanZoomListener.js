@@ -5,6 +5,8 @@
  * wheel, and keyboard input. These gestures will animate the target node to its destination translation and scale so it
  * uses a step function that must be called every animation frame.
  *
+ * TODO: Implement dispose
+ *
  * @author Jesse Greenberg
  */
 define( require => {
@@ -15,6 +17,7 @@ define( require => {
   const Display = require( 'SCENERY/display/Display' );
   const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
   const KeyboardZoomUtil = require( 'SCENERY/accessibility/KeyboardZoomUtil' );
+  const KeyStateTracker = require( 'SCENERY/accessibility/KeyStateTracker' );
   const Matrix3 = require( 'DOT/Matrix3' );
   const merge = require( 'PHET_CORE/merge' );
   const PanZoomListener = require( 'SCENERY/listeners/PanZoomListener' );
@@ -44,7 +47,9 @@ define( require => {
       super( targetNode, options );
 
       // @private {KeyStateTracker}
-      this.keyStateTracker = keyStateTracker;
+      // this.keyStateTracker = keyStateTracker;
+      this.keyStateTracker = new KeyStateTracker();
+      this.keyStateTracker.attachToBody();
 
       // @private (null|Vector2) - This point is the center of the transformedPanBounds (see PanZoomListener) in
       // the parent coordinate frame of the targetNode. This is the current center of the transformedPanBounds, and
@@ -70,7 +75,7 @@ define( require => {
 
       // @private {Array.<number>} - scale changes in discrete amounts for certain types of input, and in these
       // cases this array defines the discrete scales possible
-      this.discreteScales = calculateDiscreteScales( this._minScale, this.maxScale );
+      this.discreteScales = calculateDiscreteScales( this._minScale, this._maxScale );
 
       // @private {MiddlePress|null} - If defined, indicates that a middle mouse button is down to pan in the direction
       // of cursor movement.
@@ -107,8 +112,7 @@ define( require => {
 
       // Handle key input from events outside of the PDOM - in this case it is impossible for the a11y pointer
       // to be attached so we have free reign over the keyboard
-      document.body.addEventListener( 'keydown', this.documentKeydown.bind( this ) );
-      // this.keyStateTracker.keydownEmitter.addListener( this.documentKeydown.bind( this ) );
+      this.keyStateTracker.keydownEmitter.addListener( this.documentKeydown.bind( this ) );
 
       // TODO: move this out of this listener? PanZoomListener shouldn't care about Display focus
       Display.focusProperty.link( focus => {
@@ -299,9 +303,9 @@ define( require => {
       // handle translation
       if ( KeyboardUtil.isArrowKey( domEvent.keyCode ) ) {
         const keyboardDragIntent = event.pointer.getIntent() === Pointer.Intent.KEYBOARD_DRAG;
-        const elementUsesKeys = AccessibilityUtil.elementUsesArrowKeys( domEvent.target );
+        // const elementUsesKeys = AccessibilityUtil.elementUsesArrowKeys( domEvent.target );
 
-        if ( !keyboardDragIntent && !elementUsesKeys ) {
+        if ( !keyboardDragIntent ) {
           sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener handle arrow key down' );
           sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -593,10 +597,10 @@ define( require => {
 
       const locationInTargetFrame = this._targetNode.globalToLocalPoint( globalLocation );
 
-      const distanceToLeftEdge = Math.abs( this.targetBounds.left - locationInTargetFrame.x );
-      const distanceToRightEdge = Math.abs( this.targetBounds.right - locationInTargetFrame.x );
-      const distanceToTopEdge = Math.abs( this.targetBounds.top - locationInTargetFrame.y );
-      const distanceToBottomEdge = Math.abs( this.targetBounds.bottom - locationInTargetFrame.y );
+      const distanceToLeftEdge = Math.abs( this._targetBounds.left - locationInTargetFrame.x );
+      const distanceToRightEdge = Math.abs( this._targetBounds.right - locationInTargetFrame.x );
+      const distanceToTopEdge = Math.abs( this._targetBounds.top - locationInTargetFrame.y );
+      const distanceToBottomEdge = Math.abs( this._targetBounds.bottom - locationInTargetFrame.y );
 
       if ( distanceToRightEdge < this._transformedPanBounds.width / 2  ) {
         const correction = this._transformedPanBounds.width / 2 - distanceToRightEdge;
