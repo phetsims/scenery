@@ -345,12 +345,9 @@ define( require => {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener keyboard reset' );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-        // only prevent default and reset if zooming in non-natively, so that for native magnification we can revert
-        // still reset from this key command
-        if ( this.isTransformApplied() ) {
-          event.preventDefault();
-          this.resetTransform();
-        }
+        // this is a native command, but we are taking over
+        event.preventDefault();
+        this.resetTransform();
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       }
