@@ -448,7 +448,25 @@ define( require => {
      * @private
      */
     invalidateOver: function() {
-      this.isOverProperty.value = this.isFocusedProperty.value || this.overPointers.length > 0;
+      let pointerAttachedToOther = false;
+
+      if ( this._listeningToPointer ) {
+
+        // this pointer listener is attached to the pointer
+        pointerAttachedToOther = false;
+      }
+      else {
+
+        // a listener other than this one is attached to the pointer so it should not be considered over
+        for ( let i = 0; i < this.overPointers.length; i++ ) {
+          if ( this.overPointers.get( i ).isAttached() ) {
+            pointerAttachedToOther = true;
+            break;
+          }
+        }
+      }
+
+      this.isOverProperty.value = this.isFocusedProperty.value || ( this.overPointers.length > 0 && !pointerAttachedToOther );
     },
 
     /**
@@ -563,6 +581,21 @@ define( require => {
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
       this.overPointers.push( event.pointer );
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
+    },
+
+    /**
+     * Called with `move` events (part of the listener API). It is necessary to check for `over` state changes on move
+     * in case a pointer listener gets interrupted and resumes movement over a target.
+     *
+     * @param {Event} event
+     */
+    move: function( event ) {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'PressListener#' + this._id + ' move' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+      this.invalidateOver();
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
