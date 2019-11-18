@@ -870,6 +870,10 @@ define( require => {
       // forward all pointer events
       this._domElement.style.msTouchAction = 'none';
 
+      // prevent any default zooming behavior from a trackpad on IE11 and Edge, all should be handled by scenery - must
+      // be on the body, doesn't prevent behavior if on the display div
+      document.body.style.msContentZooming = 'none';
+
       // don't allow browser to switch between font smoothing methods for text (see https://github.com/phetsims/scenery/issues/431)
       Features.setStyle( this._domElement, Features.fontSmoothing, 'antialiased' );
 
