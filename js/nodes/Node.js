@@ -4996,7 +4996,7 @@ define( require => {
     },
 
     /**
-     * Override for extra information in the fing output (from Display.getDebugHTML()).
+     * Override for extra information in the debugging output (from Display.getDebugHTML()).
      * @protected (scenery-internal)
      *
      * @returns {string}
