@@ -15,14 +15,6 @@
 <body>
 <div id="qunit"></div>
 <div id="qunit-fixture"></div><div id="display"></div>
-<!-- a11y - aria-live attribute is used to send alerts and status updates to screen readers, otherwise invisible -->
-<div id='aria-live-elements'
-     style="position: absolute; left: 0px; top: 0px; width: 0px; height: 0px; clip: rect(0px 0px 0px 0px); pointer-events: none;">
-  <p id="polite-1" aria-live="polite"></p>
-  <p id="polite-2" aria-live="polite"></p>
-  <p id="polite-3" aria-live="polite"></p>
-  <p id="polite-4" aria-live="polite"></p>
-</div>
 
 <script type="text/javascript">
 
@@ -36,6 +28,7 @@
 
   // Preloads, with more included for phet-io brand
   let preloads = [
+    '../phet-core/js/phet-polyfill.js',
     '../sherpa/lib/jquery-2.1.0.js',
     '../sherpa/lib/lodash-4.17.4.js',
     '../sherpa/lib/FileSaver-b8054a2.js',
