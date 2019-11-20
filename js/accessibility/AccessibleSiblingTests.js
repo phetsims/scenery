@@ -21,6 +21,11 @@ define( require => {
 
   QUnit.module( 'AccessibleSiblingTests' );
 
+  const getSiblingBounds = node => {
+    const siblingRect = node.accessibleInstances[ 0 ].peer.primarySibling.getBoundingClientRect();
+    return new Bounds2( siblingRect.x, siblingRect.y, siblingRect.x + siblingRect.width, siblingRect.y + siblingRect.height );
+  };
+
   /**
    * Returns true if the node's first accessible peer has a primary sibling with bounds thar are correctly positioned
    * in the viewport. Some padding is required for the HTML elements to have defined bounds, so we allow a few pixels
@@ -29,12 +34,15 @@ define( require => {
    * @returns {boolean}
    */
   const siblingBoundsCorrect = node => {
-    const nodeBounds = node.globalBounds;
 
-    const siblingRect = node.accessibleInstances[ 0 ].peer.primarySibling.getBoundingClientRect();
-    const siblingBounds = new Bounds2( siblingRect.x, siblingRect.y, siblingRect.x + siblingRect.width, siblingRect.y + siblingRect.height );
+    // if a pdomTransformSourceNode is specified, the sibling should overlap this node's bounds instead of its own
+    // bounds
+    const transformSourceNode = node.pdomTransformSourceNode;
+    const sourceNodeBounds = transformSourceNode ? transformSourceNode.globalBounds : node.globalBounds;
 
-    return nodeBounds.equalsEpsilon( siblingBounds, PIXEL_PADDING );
+    const siblingBounds = getSiblingBounds( node );
+
+    return sourceNodeBounds.equalsEpsilon( siblingBounds, PIXEL_PADDING );
   };
 
   // tests
@@ -84,6 +92,52 @@ define( require => {
     buttonElement.innerHTML = 'Some Test';
     display.updateDisplay();
     assert.ok( siblingBoundsCorrect( buttonElement ), 'button element descendant correclty positioned after inner content changed' );
+
+    // remove the display element so it doesn't interfere with qunit api
+    document.body.removeChild( display.domElement );
+  } );
+
+  QUnit.test( 'PDOM transform source Node', assert => {
+    const rootNode = new Node( { tagName: 'div' } );
+    const display = new Display( rootNode ); // eslint-disable-line
+    document.body.appendChild( display.domElement );
+
+    const buttonNode = new Rectangle( 5, 5, 5, 5, { tagName: 'button' } );
+    const transformSourceNode = new Rectangle( 0, 0, 25, 25 );
+
+    rootNode.addChild( buttonNode );
+    rootNode.addChild( transformSourceNode );
+
+    // update the display to position elements
+    display.updateDisplay();
+    assert.ok( siblingBoundsCorrect( buttonNode ), 'button element child of root correctly positioned' );
+
+    const siblingBoundsBefore = getSiblingBounds( buttonNode );
+
+    // test setting transform source Node
+    buttonNode.pdomTransformSourceNode = transformSourceNode;
+
+    // update the display to position elements
+    display.updateDisplay();
+
+    assert.ok( siblingBoundsCorrect( buttonNode ), 'button element transformed with transform source Node' );
+    assert.ok( !siblingBoundsBefore.equals( getSiblingBounds( buttonNode ) ), 'sibling bounds should have changed after setting transform source' );
+
+    // reposition the buttonNode - pdom sibling should NOT reposition
+    const siblingBoundsBeforeNodeReposition = getSiblingBounds( buttonNode );
+    buttonNode.setX( 100 );
+    buttonNode.setY( 100 );
+    display.updateDisplay();
+    assert.ok( siblingBoundsCorrect( buttonNode ), 'sibling bounds correct after node repositioned' );
+    assert.ok( siblingBoundsBeforeNodeReposition.equals( getSiblingBounds( buttonNode ) ), 'transform source didnt change, primary sibling should not reposition' );
+
+    // reposition the transform source - pdom sibling SHOULD reposition
+    const siblingBoundsBeforeSourceReposition = getSiblingBounds( buttonNode );
+    transformSourceNode.setX( 50 );
+    transformSourceNode.setX( 50 );
+    display.updateDisplay();
+    assert.ok( siblingBoundsCorrect( buttonNode), 'sibling bounds correct after source node repositioned' );
+    assert.ok( !siblingBoundsBeforeSourceReposition.equals( getSiblingBounds( buttonNode ) ), 'transform source didnt change, primary sibling should not reposition' );
 
     // remove the display element so it doesn't interfere with qunit api
     document.body.removeChild( display.domElement );

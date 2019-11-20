@@ -229,9 +229,12 @@ define( require => {
     'groupFocusHighlight', // {boolean|Node} - Sets the outer focus highlight for this node when a descendant has focus
     'accessibleVisible', // {boolean} - Sets whether or not the node's DOM element is visible in the parallel DOM
     'accessibleOrder', // {Array.<Node|null>|null} - Modifies the order of accessible  navigation
+
     'ariaLabelledbyAssociations', // {Array.<Object>} - sets the list of aria-labelledby associations between from this node to others (including itself)
     'ariaDescribedbyAssociations', // {Array.<Object>} - sets the list of aria-describedby associations between from this node to others (including itself)
-    'activeDescendantAssociations' // {Array.<Object>} - sets the list of aria-activedescendant associations between from this node to others (including itself)
+    'activeDescendantAssociations', // {Array.<Object>} - sets the list of aria-activedescendant associations between from this node to others (including itself)
+
+    'pdomTransformSourceNode' // {Node|null} - sets the node that controls primary sibling element positioning in the display, see setPDOMTransformSourceNode()
   ];
 
   const Accessibility = {
@@ -422,6 +425,11 @@ define( require => {
           // accessibleOrder, then this will have the value of that other (accessible parent) node. Otherwise it's null.
           this._accessibleParent = null;
 
+          // @public (scenery-internal) {Node|null} - If this is specified, the primary sibling will be positioned
+          // to align with this source node and observe the transforms along this node's trail. At this time the
+          // pdomTransformSourceNode cannot use DAG.
+          this._pdomTransformSourceNode = null;
+
           // @public (scenery-internal) {AccessibleDisplaysInfo} - Contains information about what accessible displays
           // this node is "visible" for, see AccessibleDisplaysInfo.js for more information.
           this._accessibleDisplaysInfo = new AccessibleDisplaysInfo( this );
@@ -468,6 +476,9 @@ define( require => {
           // To prevent memory leaks, we want to clear our order (since otherwise nodes in our order will reference
           // this node).
           this.accessibleOrder = null;
+
+          // clear references to the pdomTransformSourceNode
+          this.setPDOMTransformSourceNode( null );
 
           // Clear out aria association attributes, which hold references to other nodes.
           this.setAriaLabelledbyAssociations( [] );
@@ -2429,6 +2440,42 @@ define( require => {
           }
         },
         get focusable() { return this.isFocusable(); },
+
+
+        /**
+         * Sets the source Node that controls positioning of the primary sibling. Transforms along the trail to this
+         * node are observed so that the primary sibling is positioned correctly in the global coordinate frame.
+         *
+         * The transformSourceNode cannot use DAG for now because we need a unique trail to observe transforms.
+         *
+         * By default, transforms along trails to all of this Node's AccessibleInstances are observed. But this
+         * function can be used if you have a visual Node represented in the PDOM by a different Node in the scene
+         * graph but still need the other Node's PDOM content positioned over the visual node. For example, this could
+         * be required to catch all fake pointer events that may come from certain types of screen readers.
+         * @public
+         *
+         * @param {Node|null} node
+         */
+        setPDOMTransformSourceNode: function( node ) {
+          this._pdomTransformSourceNode = node;
+
+          for ( let i = 0; i < this._accessibleInstances.length; i++ ) {
+            this._accessibleInstances[ i ].peer.setPDOMTransformSourceNode( this._pdomTransformSourceNode );
+          }
+        },
+        set pdomTransformSourceNode( node ) { this.setPDOMTransformSourceNode( node ); },
+
+        /**
+         * Get the source Node that controls positioning of the primary sibling in the global coordinate frame. See
+         * setPDOMTransformSourceNode for more in depth information.
+         * @public
+         * @returns {Node|null}
+         */
+        getPDOMTransformSourceNode: function() {
+          return this._pdomTransformSourceNode;
+        },
+        get pdomTransformSourceNode() { return this.getPDOMTransformSourceNode(); },
+
 
         /***********************************************************************************************************/
         // SCENERY-INTERNAL AND PRIVATE METHODS

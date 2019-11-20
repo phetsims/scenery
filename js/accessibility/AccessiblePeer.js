@@ -126,7 +126,7 @@ define( require => {
       // @private {MutationObserver} - An observer that will call back any time a property of the primary
       // sibling changes. Used to reposition the sibling elements if the bounding box resizes. No need to loop over
       // all of the mutations, any single mutation will require updating CSS positioning.
-      // 
+      //
       // NOTE: Ideally, a single MutationObserver could be used to observe changes to all elements in the PDOM. But
       // MutationObserver makes it impossible to detach observers from a single element. MutationObserver.detach()
       // will remove listeners on all observed elements, so individual observers must be used on each element.
@@ -134,7 +134,7 @@ define( require => {
       // OBSERVER_CONFIG. This could reduce the number of MutationObservers, but there is no easy way to get the
       // peer from the mutation target element. If MutationObserver takes a lot of memory, this could be an
       // optimization that may come with a performance cost.
-      // 
+      //
       // NOTE: ResizeObserver is a superior alternative to MutationObserver for this purpose because
       // it will only monitor changes we care about and prevent infinite callback loops if size is changed in
       // the callback function (we get around this now by not observing attribute changes). But it is not yet widely
@@ -798,6 +798,26 @@ define( require => {
     },
 
     /**
+     * Sets the pdomTransformSourceNode so that the primary sibling will be transformed with changes to along the
+     * unique trail to the source node. If null, repositioning happens with transform changes along this
+     * accessibleInstance's trail.
+     *
+     * @param {Node|null} node
+     */
+    setPDOMTransformSourceNode: function( node ) {
+
+      // remove previous listeners before creating a new TransformTracker
+      this.accessibleInstance.transformTracker.removeListener( this.transformListener );
+      this.accessibleInstance.updateTransformTracker( node );
+
+      // add listeners back after update
+      this.accessibleInstance.transformTracker.addListener( this.transformListener );
+
+      // new trail with transforms so positioning is probably dirty
+      this.invalidateCSSPositioning();
+    },
+
+    /**
      * Mark that the siblings of this AccessiblePeer need to be updated in the next Display update. Possibly from a
      * change of accessible content or node transformation. Does nothing if already marked dirty.
      *
@@ -862,8 +882,9 @@ define( require => {
       // by gesture navigation with the virtual cursor. Bounds for non-focusable elements in the ViewPort don't
       // need to be accurate because the AT doesn't need to send events to them.
       if ( this.node.focusable ) {
+        const transformSourceNode = this.node.pdomTransformSourceNode ? this.node.pdomTransformSourceNode : this.node;
 
-        scratchGlobalBounds.set( this.node.localBounds );
+        scratchGlobalBounds.set( transformSourceNode.localBounds );
         if ( scratchGlobalBounds.isFinite() ) {
           scratchGlobalBounds.transform( this.accessibleInstance.transformTracker.getMatrix() );
 
@@ -962,7 +983,7 @@ define( require => {
   //--------------------------------------------------------------------------
   // Helper functions
   //--------------------------------------------------------------------------
-  
+
   /**
    * Create a sibling element for the AccessiblePeer.
    *

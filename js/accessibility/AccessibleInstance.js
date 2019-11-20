@@ -114,9 +114,11 @@ define( require => {
       // @private {function} - The listeners added to the respective relativeNodes
       this.relativeListeners = [];
 
-      // @public (scenery-internal) {TransformTracker} - Used to quickly compute the global matrix of this instance's
-      // node and observe when it changes. Used by AccessiblePeer to update positioning of sibling elements.
-      this.transformTracker = new TransformTracker( AccessibleInstance.guessVisualTrail( this.trail, this.display.rootNode ) );
+      // @public (scenery-internal) {TransformTracker|null} - Used to quickly compute the global matrix of this
+      // instance's transform source Node and observe when the transform changes. Used by AccessiblePeer to update
+      // positioning of sibling elements. By default, watches this AccessibleInstance's visual trail.
+      this.transformTracker = null;
+      this.updateTransformTracker( this.node ? this.node.pdomTransformSourceNode : null );
 
       // @private {boolean} - Whether we are currently in a "disposed" (in the pool) state, or are available to be
       // re-initialized
@@ -450,6 +452,29 @@ define( require => {
           i--;
         }
       }
+    },
+
+    /**
+     * Create a new TransformTracker that will observe transforms along the trail of this AccessibleInstance OR
+     * the specified pdomTransformSourceNode. See Accessibility.setPDOMTransformSourceNode(). The source Node
+     * must not use DAG so that its trail is unique.
+     * @public
+     *
+     * @param {Node|null} node - if null, we use this AccessibleInstance's visual trail
+     * @returns {TransformTracker}
+     */
+    updateTransformTracker( pdomTransformSourceNode ) {
+      this.transformTracker && this.transformTracker.dispose();
+
+      let trackedTrail = null;
+      if ( pdomTransformSourceNode ) {
+        trackedTrail = pdomTransformSourceNode.getUniqueTrail();
+      }
+      else {
+        trackedTrail = AccessibleInstance.guessVisualTrail( this.trail, this.display.rootNode );
+      }
+
+      this.transformTracker = new TransformTracker( trackedTrail );
     },
 
     /**
