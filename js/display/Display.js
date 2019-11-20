@@ -324,8 +324,14 @@ define( require => {
       // add the accessible DOM as a child of this DOM element
       this._domElement.appendChild( this._rootAccessibleInstance.peer.primarySibling );
 
+      const ariaLiveContainer = this.utteranceQueue.getAriaLiveContainer();
+
       // add aria-live elements to the display
-      this._domElement.appendChild( this.utteranceQueue.getAriaLiveContainer() );
+      this._domElement.appendChild( ariaLiveContainer );
+
+      // set `user-select: none` on the aria-live container to prevent iOS text selection issue, see
+      // https://github.com/phetsims/scenery/issues/1006
+      ariaLiveContainer.style[ Features.userSelect ] = 'none';
     }
   }
 
