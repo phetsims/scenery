@@ -23,7 +23,10 @@
       "phetCore": "PHET_CORE/main",
       "utteranceQueue": "UTTERANCE_QUEUE/main"
     },
-    "finalizeJS": "scenery.Util.polyfillRequestAnimationFrame();"
+    "finalizeJS": "scenery.Util.polyfillRequestAnimationFrame();",
+    "preload": [
+      "../sherpa/lib/himalaya-0.2.7.js"
+    ]
   },
   "eslintConfig": {
     "extends": "../chipper/eslint/sim_eslintrc.js",
