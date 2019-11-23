@@ -12,9 +12,11 @@ define( require => {
   'use strict';
 
   const Emitter = require( 'AXON/Emitter' );
+  const EventIO = require( 'SCENERY/input/EventIO' );
   const EventType = require( 'TANDEM/EventType' );
   const inherit = require( 'PHET_CORE/inherit' );
   const merge = require( 'PHET_CORE/merge' );
+  const NullableIO = require( 'TANDEM/types/NullableIO' );
   const PressListener = require( 'SCENERY/listeners/PressListener' );
   const scenery = require( 'SCENERY/scenery' );
   const Tandem = require( 'TANDEM/Tandem' );
@@ -50,7 +52,11 @@ define( require => {
     // @private {Emitter}
     this.firedEmitter = new Emitter( {
       tandem: options.tandem.createTandem( 'firedEmitter' ),
-      phetioEventType: EventType.USER
+      phetioEventType: EventType.USER,
+      parameters: [ {
+        name: 'event',
+        phetioType: NullableIO( EventIO )
+      } ]
     } );
     this.firedEmitter.addListener( options.fire );
   }
@@ -70,7 +76,7 @@ define( require => {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'FireListener fire' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      this.firedEmitter.emit();
+      this.firedEmitter.emit( event );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
@@ -119,7 +125,7 @@ define( require => {
       PressListener.prototype.release.call( this, event, function() {
         // Notify after the rest of release is called in order to prevent it from triggering interrupt().
         if ( !self._fireOnDown && self.isHoveringProperty.value && !self.interrupted ) {
-          self.fire();
+          self.fire( event );
         }
         callback && callback();
       } );
