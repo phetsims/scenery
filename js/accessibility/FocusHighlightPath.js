@@ -62,6 +62,10 @@ define( require => {
       outerLineWidth: null,
       innerLineWidth: null,
 
+      // {Node|null} - If specified, this FocusHighlightPath will reposition with transform changes along the unique
+      // trail to this source Node. Otherwise you will have to position this highlight node yourself.
+      transformSourceNode: null,
+
       // TODO: this could use nested options
       // remaining paintable options applied to both highlights
       lineDash: [],
@@ -81,6 +85,9 @@ define( require => {
     Path.call( this, shape );
 
     this.options = options; // @private TODO: only assign individual options to 'this'.
+
+    // @public {Node|null} - see options for documentation
+    this.transformSourceNode = options.transformSourceNode;
 
     // options for this Path, the outer focus highlight
     const outerHighlightOptions = merge( {
@@ -223,8 +230,19 @@ define( require => {
     getOuterHighlightColor: function() {
       return this._outerHighlightColor;
     },
-    get outerHighlightColor() { return this.getOuterHighlightColor(); }
+    get outerHighlightColor() { return this.getOuterHighlightColor(); },
 
+    /**
+     * Return the trail to the transform source node being used for this focus highlight. So that we can observe
+     * transforms applied to the source node so that the focus highlight can update accordingly.
+     *
+     * @public (scenery-internal)
+     * @returns {Trail}
+     */
+    getUniqueHighlightTrail: function() {
+      assert && assert( this.transformSourceNode.instances.length <= 1, 'transformSourceNode cannot use DAG, must have single trail.' );
+      return this.transformSourceNode.getUniqueTrail();
+    }
   }, {
 
     // @public
@@ -314,7 +332,7 @@ define( require => {
       // of the node being highlighted.
       const scalarToEdgeOfBounds = .5;
 
-      // Dilate the group focus highlight slightly more to give whitespace in between the node being highlighted's 
+      // Dilate the group focus highlight slightly more to give whitespace in between the node being highlighted's
       // bounds and the inner edge of the highlight.
       const whiteSpaceScalar = 1.4;
 

@@ -160,7 +160,7 @@ define( require => {
         this.mode = 'node';
 
         // if using a focus highlight from another node, we will track that node's transform instead of the focused node
-        if ( focusHighlight instanceof FocusHighlightFromNode ) {
+        if ( focusHighlight.transformSourceNode ) {
           trailToTrack = focusHighlight.getUniqueHighlightTrail();
         }
 
