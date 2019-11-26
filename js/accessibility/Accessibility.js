@@ -1738,8 +1738,8 @@ define( require => {
          */
         addAriaDescribedbyAssociation: function( associationObject ) {
           assert && AccessibilityUtil.validateAssociationObject( associationObject );
+          assert && assert( !_.includes( this._ariaDescribedbyAssociations, associationObject ), 'describedby association already registed' );
 
-          // TODO: assert if this associationObject is already in the association objects list! https://github.com/phetsims/scenery/issues/832
           this._ariaDescribedbyAssociations.push( associationObject ); // Keep track of this association.
 
           // Flag that this node is is being described by the other node, so that if the other node changes it can tell
@@ -1748,6 +1748,15 @@ define( require => {
 
           // update the accessiblePeers with this aria-describedby association
           this.updateAriaDescribedbyAssociationsInPeers();
+        },
+
+        /**
+         * Is this object already in the describedby association list
+         * @param {Object} associationObject
+         * @returns {boolean}
+         */
+        hasAriaDescribedbyAssociation: function( associationObject ) {
+          return _.includes( this._ariaDescribedbyAssociations, associationObject );
         },
 
         /**
