@@ -894,7 +894,7 @@ define( require => {
 
           if ( clientWidth > 0 && clientHeight > 0 ) {
             scratchSiblingBounds.setMinMax( 0, 0, clientWidth, clientHeight );
-            scratchSiblingBounds.transform( getCSSMatrix( this._primarySibling, clientWidth, clientHeight, scratchGlobalBounds ) );
+            scratchSiblingBounds.transform( getCSSMatrix( clientWidth, clientHeight, scratchGlobalBounds ) );
             setClientBounds( this._primarySibling, scratchSiblingBounds );
           }
 
@@ -905,7 +905,7 @@ define( require => {
 
             if ( clientHeight > 0 && clientWidth > 0 ) {
               scratchSiblingBounds.setMinMax( 0, 0, clientWidth, clientHeight );
-              scratchSiblingBounds.transform( getCSSMatrix( this.labelSibling, clientWidth, clientHeight, scratchGlobalBounds ) );
+              scratchSiblingBounds.transform( getCSSMatrix( clientWidth, clientHeight, scratchGlobalBounds ) );
               setClientBounds( this._labelSibling, scratchSiblingBounds );
             }
           }
@@ -1015,13 +1015,12 @@ define( require => {
    * Get a matrix that can be used as the CSS transform for elements in the DOM. This matrix will an HTML element
    * dimensions in pixels to the global coordinate frame.
    *
-   * @param  {HTMLElement} element - the element to receive the CSS transform
    * @param  {number} clientWidth - width of the element to transform in pixels
    * @param  {number} clientHeight - height of the element to transform in pixels
    * @param  {Bounds2} nodeGlobalBounds - Bounds of the AccessiblePeer's node in the global coordinate frame.
    * @returns {Matrix3}
    */
-  function getCSSMatrix( element, clientWidth, clientHeight, nodeGlobalBounds ) {
+  function getCSSMatrix( clientWidth, clientHeight, nodeGlobalBounds ) {
 
     // the translation matrix for the node's bounds in its local coordinate frame
     globalNodeTranslationMatrix.setToTranslation( nodeGlobalBounds.minX, nodeGlobalBounds.minY );
