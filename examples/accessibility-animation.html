@@ -2,9 +2,10 @@
 <html lang='en'>
 
 <head>
-  <meta charset='utf-8' />
-  <meta http-equiv='X-UA-Compatible' content='IE=edge' />
-  <meta name='viewport' content='width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' />
+  <meta charset='utf-8'/>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge'/>
+  <meta name='viewport'
+        content='width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'/>
   <meta name='apple-mobile-web-app-capable' content='yes'>
 
   <title>Accessibility: Animation</title>
@@ -18,248 +19,228 @@
 
   <!--For the styling-->
   <link rel='stylesheet' href='../assets/scenery.css'>
-  <link rel='stylesheet' href='../../sherpa/lib/prism-1.15.0/prism-1.15.0.css'>
+  <link rel='stylesheet' href='../../sherpa/lib/prism-1.17.1/prism-1.17.1.css'>
 
-  <!--Syntax highlighting-->
+  <!--Syntax highlighting & styling-->
   <script src='../../sherpa/lib/bootstrap-2.2.2.js'></script>
-  <script src='../../sherpa/lib/prism-1.15.0/prism-1.15.0.min.js'></script>
+  <script src='../../sherpa/lib/prism-1.17.1/prism-1.17.1.min.js'></script>
 
   <!--Scenery-->
   <script src='../build/scenery.min.js'></script>
 
   <style>
     .container {
-      max-width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
 
     .scene-and-PDOM {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      min-width: 1350px;
+      width: 80%;
       margin: 0;
-      padding: 0 1%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
 
     .container .title {
-      grid-column: span 2;
       text-align: center;
-      margin-top: 40px;
+      margin-top: 20px;
     }
 
     /* formatting for the displayed PDOM code */
     .PDOM-container {
-      width: 100%;
+      width: 75em;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin-top: 10px;
     }
 
-    pre {
-      width: 800px;
-      padding: 20px 10%;
-      font-size: 0.9em;
+    #PDOM-pre {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    .input-container {
+      width: 75em;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
 
     #accessibility-scene {
-      width: 95%;
-      margin: 0 2%;
+      width: 100%;
       height: 300px;
       position: relative;
       left: 0;
       top: 0;
+      border: 1px solid black;
     }
   </style>
 </head>
 
 <body>
-  <div class="container">
-    <div class="title">
-      <h2>Scenery Accessibility Examples: Animation</h2>
-      <p>Click to add additional hexagons, press space to clear</p>
+<div class="container">
+  <div class="title">
+    <h2>Scenery Accessibility Examples: Animation</h2>
+    <p>Click to add additional hexagons, press space to clear</p>
+  </div>
+  <div class="scene-and-PDOM">
+    <div class="input-container">
+      <div id="accessibility-scene" class="exampleScene"></div>
     </div>
-    <div class="scene-and-PDOM">
-      <div class="input-container">
-        <div id="accessibility-scene" class="exampleScene"></div>
-      </div>
 
-      <div class="PDOM-container">
-        <pre id="PDOM-pre"></pre>
-      </div>
+    <div class="PDOM-container">
+      <pre id="PDOM-pre"></pre>
     </div>
   </div>
+</div>
 
-  <script type="text/javascript">
-    function docExample( id, draw ) {
+<script type="text/javascript">
+  function docExample( id, draw ) {
+    // specify the dom element to which the display will be appended
+    var $container = $( '#' + id );
+    // create the scene and display
+    var scene = new scenery.Node();
+    var display = new scenery.Display( scene, {
+      width: $container.width(),
+      height: $container.height()
+    } );
+    // add all event listeners and start the animation loop
+    display.initializeEvents();
+    // append the scene to the container and draw it for the first time
+    $container[ 0 ].appendChild( display.domElement );
+    draw( scene, display );
+    display.updateDisplay();
+  }
+</script>
+<script>
+  // update displayed p-dom text
+  function updatePDOMDisplay( display ) {
+    'use strict';
+    //format PDOM code and add to container
+    var PDOMHTMLBlock = display.accessibleDOMElement.outerHTML;
+    var formattedPDOM = PDOMHTMLBlock
+      .replace( new RegExp( '<[/]?\\w*[ >]', 'g' ), '\n$&' ) // add breaks in the string
+      .replace( new RegExp( '<p', 'g' ), '\t<p' ) //formatting for opening paragraph tag
+      .replace( new RegExp( 'a hexagon', 'g' ), '\n\t\ta hexagon' ) //formatting for opening paragraph tag
+      .replace( new RegExp( '</p>', 'g' ), '\t</p>' ); //formatting for opening paragraph tag
 
-      // specify the dom element to which the display will be appended
-      var $container = $( '#' + id );
+    //syntax highlighting
+    const pw = Prism.plugins.NormalizeWhitespace;
+    pw.setDefaults( {
+      'remove-trailing': false,
+      'remove-indent': false,
+      'left-trim': false,
+      'right-trim': false,
+      'break-lines': 120
+    } );
+    pw.normalize( formattedPDOM );
+    var $PDOMcode = ( $( '<code class="language-html"></code>' ).text( formattedPDOM ) );
+    $( '#PDOM-pre' ).html( $PDOMcode );
+    Prism.highlightAll();
+  }
 
-      // create the scene and display
-      var scene = new scenery.Node();
-      var display = new scenery.Display( scene, {
-        width: $container.width(),
-        height: $container.height()
-      } );
+  function randomRGBValue() {
+    return Math.floor( Math.random() * 255 )
+  }
 
-      // add all event listeners and start the animation loop
-      display.initializeEvents();
+  docExample( 'accessibility-scene', ( scene, display ) => {
+    'use strict';
 
-      // append the scene to the container and draw it for the first time
-      $container[0].appendChild( display.domElement );
-      draw( scene, display );
-      display.updateDisplay();
-    }
-  </script>
-  <script>
+    class Hexagon extends scenery.Node {
 
-    // update displayed p-dom text
-    function updatePDOMDisplay( display ) {
-      'use strict';
-
-      //format PDOM code and add to container
-      var PDOMHTMLBlock = display.accessibleDOMElement.outerHTML;
-      var formattedPDOM = PDOMHTMLBlock.replace( new RegExp( '<[/]?\\w*[ >]', 'g' ), '\n$&' ); // add breaks in the string
-      var $PDOMcode = ( $( '<code class="language-html no-whitespace-normalization"></code>' ).text( formattedPDOM ) );
-      $( '#PDOM-pre' ).html( $PDOMcode );
-
-      //syntax highlighting
-      Prism.highlightAll();
-    }
-
-    // removes and disposes of children of a scenery node
-    function clearScene( node ) {
-      'use strict';
-      node.children.forEach( child => {
-        node.removeChild( child );
-        child.dispose();
-      } );
-    }
-
-    docExample( 'accessibility-scene', ( scene, display ) => {
-      'use strict';
-
-      const initialScene = () => {
-        return ( new scenery.Node( {
-          children: [ new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
-            fill: 'yellow',
-            stroke: '#000',
-            x: 50,
-            y: 50,
-            bounds: {
-              minX: 0,
-              minY: 0,
-              maxX: window.innerWidth / 2,
-              maxY: window.innerHeight
-            }
-          } ) ],
+      constructor( fill = 'yellow' ) {
+        const options = {
           x: 0,
           y: 0,
           tagName: 'p',
-          accessibleName: 'a yellow hexagon in the top left quadrant'
+          accessibleName: 'a yellow hexagon in the top left quadrant',
+          xVelocity: 10 * ( Math.random() - 0.5 ),
+          yVelocity: 10 * ( Math.random() - 0.5 )
+        };
+        super( options );
+        this.fill = fill;
+        this.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
+          fill: this.fill,
+          stroke: '#000',
+          x: 50,
+          y: 50,
+          bounds: {
+            minX: 0,
+            minY: 0,
+            maxX: display.width.value / 2,
+            maxY: display.height.value
+          }
         } ) );
-      };
+      }
+    }
 
-      scene.addChild( initialScene() );
+    scene.children = [ new Hexagon() ];
 
-      // set the initial velocity of the hexagon
-      scene.children[ 0 ].xVelocity = 10 * ( Math.random() - 0.5 );
-      scene.children[ 0 ].yVelocity = 10 * ( Math.random() - 0.5 );
-
-      // removes all hexagon clones when space bar is pressed
-      window.addEventListener( 'keydown', ( e ) => {
-        if ( e.code === 'Space' ) {
-          clearScene( scene );
-          scene.addChild( initialScene() );
-        }
-      } );
-
-      // reverses the direction of the hexagon when the display is clicked
-      display.addInputListener( {
-        down: () => {
-          scene.children[ 0 ].fill = 'orange';
-        },
-        up: () => {
-          if ( scene.children.length < 8 ) {
-            var newNode = new scenery.Node( {
-              children: [ new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
-                fill: `rgb( ${Math.floor( Math.random() * 255 )}, ${Math.floor( Math.random() * 255 )}, ${Math.floor( Math.random() * 255 )} )`,
-                stroke: '#000',
-                x: 50,
-                y: 50,
-                bounds: {
-                  minX: 0,
-                  minY: 0,
-                  maxX: window.innerWidth / 2,
-                  maxY: window.innerHeight
-                }
-              } ) ]
-            } );
-            newNode.xVelocity = 20 * ( Math.random() - 0.5 );
-            newNode.yVelocity = 20 * ( Math.random() - 0.5 );
-            scene.addChild( newNode );
-            scene.children[ 0 ].fill = 'yellow';
-          }
-        },
-
-        // Add a listener that fires when the button in the PDOM is clicked
-        a11yclick: () => {
-          scene.children[ 0 ].fill = 'red';
-          setTimeout( () => {
-            //reverse the direction of the hexagon
-            scene.children[ 0 ].xVelocity = scene.children[ 0 ].xVelocity * -1;
-            scene.children[ 0 ].yVelocity = scene.children[ 0 ] * -1;
-            scene.children[ 0 ].fill = 'yellow';
-          }, 100 );
-        }
-      } );
-
-
-      /*---------------------------------------------------------------------------*
-       * main loop
-       *----------------------------------------------------------------------------*/
-
-      display.updateOnRequestAnimationFrame( function( timeElapsed ) {
-
-        var children = scene.children;
-        var quadrantX;
-        var quadrantY;
-
-        // for each hexagon, update its velocity and accessible description
-        let i;
-        for ( i = 0; i < scene.children.length; i++ ) {
-          var child = children[ i ];
-          child.translate( timeElapsed * child.xVelocity, timeElapsed * child.yVelocity, true );
-
-          // updates p-dom description words based on position of the hexagon
-          child.x > display.width / 2 ? quadrantX = 'right' : quadrantX = 'left';
-          child.y > display.height / 2 ? quadrantY = 'bottom' : quadrantY = 'top';
-
-          // updates the p-dom description
-          child.tagName = 'p';
-          child.accessibleName = `a hexagon of color ${child.children[ 0 ].fillValue} in the ${quadrantY} ${quadrantX} quadrant`;
-
-          // updates hexagon's speed and ensures it stays on the screen.
-          if ( child.x > display.width - 100 ) {
-            child.xVelocity = -50 * Math.random();
-          }
-          else if ( child.x < 50 ) {
-            child.xVelocity = 50 * Math.random();
-          }
-          else {
-            child.xVelocity += 50 * ( Math.random() - 0.5 );
-          }
-          if ( child.y > display.height - 100 ) {
-            child.yVelocity = -50 * Math.random();
-          }
-          else if ( child.y < 50 ) {
-            child.yVelocity = 50 * Math.random();
-          }
-          else {
-            child.yVelocity += 50 * ( Math.random() - 0.5 );
-          }
-        }
-        updatePDOMDisplay( display );
-      } );
+    // resets the scene when the spacebar is pressed
+    window.addEventListener( 'keydown', ( e ) => {
+      if ( e.code === 'Space' ) {
+        scene.children = [ new Hexagon() ];
+      }
     } );
 
-  </script>
+    // adds another hexagon when the display is clicked
+    scene.addInputListener( {
+      up: () => {
+        if ( scene.children.length < 8 ) {
+          scene.addChild( new Hexagon( `rgb( ${randomRGBValue()}, ${randomRGBValue()}, ${randomRGBValue()})` ) );
+        }
+      }
+    } );
+
+    /*---------------------------------------------------------------------------*
+     * main loop
+     *----------------------------------------------------------------------------*/
+    display.updateOnRequestAnimationFrame( function( timeElapsed ) {
+      updatePDOMDisplay( display );
+
+      // for each hexagon, update its velocity and accessible description
+      for ( var i = 0; i < scene.children.length; i++ ) {
+        var hexagon = scene.children[ i ];
+        hexagon.translate( timeElapsed * hexagon.xVelocity, timeElapsed * hexagon.yVelocity, true );
+
+        // updates p-dom description words based on position of the hexagon
+        var quadrantX = hexagon.x > display.width / 2 ? 'right' : 'left';
+        var quadrantY = hexagon.y > display.height / 2 ? 'bottom' : 'top';
+
+        // updates the p-dom description
+        hexagon.accessibleName = `a hexagon of color ${hexagon.fill} in the ${quadrantY} ${quadrantX} quadrant`;
+
+        // updates hexagon's speed and ensures it stays on the screen.
+        if ( hexagon.x > display.width - 100 ) {
+          hexagon.xVelocity = -50 * Math.random();
+        }
+        else if ( hexagon.x < 50 ) {
+          hexagon.xVelocity = 50 * Math.random();
+        }
+        else {
+          hexagon.xVelocity += 50 * ( Math.random() - 0.5 );
+        }
+        if ( hexagon.y > display.height - 100 ) {
+          hexagon.yVelocity = -50 * Math.random();
+        }
+        else if ( hexagon.y < 50 ) {
+          hexagon.yVelocity = 50 * Math.random();
+        }
+        else {
+          hexagon.yVelocity += 50 * ( Math.random() - 0.5 );
+        }
+      }
+    } );
+  } );
+</script>
 
 </body>
 
