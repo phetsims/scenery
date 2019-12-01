@@ -129,8 +129,8 @@
     var formattedPDOM = PDOMHTMLBlock
       .replace( new RegExp( '<[/]?\\w*[ >]', 'g' ), '\n$&' ) // add breaks in the string
       .replace( new RegExp( '<p', 'g' ), '\t<p' ) //formatting for opening paragraph tag
-      .replace( new RegExp( 'a hexagon', 'g' ), '\n\t\ta hexagon' ) //formatting for opening paragraph tag
-      .replace( new RegExp( '</p>', 'g' ), '\t</p>' ); //formatting for opening paragraph tag
+      .replace( new RegExp( 'a hexagon', 'g' ), '\n\t\ta hexagon' ) //formatting for paragraph inner html
+      .replace( new RegExp( '</p>', 'g' ), '\t</p>' ); //formatting for closing paragraph tag
 
     //syntax highlighting
     const pw = Prism.plugins.NormalizeWhitespace;
@@ -166,6 +166,7 @@
           yVelocity: 10 * ( Math.random() - 0.5 )
         };
         super( options );
+
         this.fill = fill;
         this.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
           fill: this.fill,
