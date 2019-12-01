@@ -122,8 +122,19 @@
 
 <script type="text/javascript">
   scenery.Util.polyfillRequestAnimationFrame();
+
+  // This example is designed to demonstrate the way the PDOM updates as properties of the sim change, as well as the
+  // usage of Press Listener. PressListener is a PhET type that is designed to gracefully handle a variety of input events,
+  // including accessible clicks. PhET's standard event listener would require the separate handling of "up" and "down" events,
+  // which are mouse click events, and "keydown" and "keyup" events for the enter key, which are keyboard accessibility
+  // click events. PressListener handles all four of these events such that mouse click and a11y click events have the
+  // same callback functions, and do not need to be separately handled because both are handled in a single "press" event.
   docExample( 'accessibility-scene', ( scene, display ) => {
     'use strict';
+
+    // list of colorful buttons to be generated.
+    const initialColors = [ 'tomato', 'dodgerblue', 'magenta' ];
+    let colorsToGenerate = [ ...initialColors ];
 
     // creates the initial hexagon
     const hexagon = new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
@@ -138,9 +149,6 @@
     // creates the scenery node to which both hexagon and buttons will be added.
     const container = new scenery.Node();
     const buttonsContainer = new scenery.Node();
-    scene.addChild( container );
-    container.addChild( buttonsContainer );
-    container.addChild( hexagon );
 
     // creates the button to add another color
     const addButton = new scenery.Path( kite.Shape.roundRect( 20, 20, 70, 30, 7, 7 ), {
@@ -205,16 +213,12 @@
     // resetButtonListener.a11yClickingProperty = true;
     resetButton.addInputListener( resetButtonListener );
 
-    // control panel holds the
+    // control panel holds the "Add Button" button and the "Reset" button
     const controlPanel = new scenery.Path( kite.Shape.roundRect( 10, 10, 90, 100, 7, 7 ), {
       stroke: 'orange',
       lineWidth: 3,
       fill: 'white'
     } );
-
-    controlPanel.addChild( resetButton );
-    controlPanel.addChild( addButton );
-    scene.addChild( controlPanel );
 
     // creates a single button
     function generateButton( color, x, y ) {
@@ -240,18 +244,14 @@
       } ) );
 
       // Input listener makes the hexagon change colors when buttons are clicked
-      rectangle.addInputListener( {
-        // Listener for pointer clicks
-        up: () => {
-          hexagon.fill = color; // change hexagon color
-          hexagon.accessibleName = `a ${color} hexagon`; // update the PDOM text
-        },
-        // Accessible listener that fires when the button in the PDOM is clicked
-        a11yclick: () => {
+      const rectangleListener = new scenery.PressListener( {
+        press: () => {
           hexagon.fill = color; // change hexagon color
           hexagon.accessibleName = `a ${color} hexagon`; // update the PDOM text
         }
       } );
+
+      rectangle.addInputListener( rectangleListener );
       buttonsContainer.addChild( rectangle );
     }
 
@@ -259,10 +259,10 @@
     function createButtons( colorList ) {
       let xPosition = 10;
       const yPosition = 150;
-      colorList.forEach( color => {
-        generateButton( color, xPosition, yPosition );
+      for ( let i = 0; i < colorList.length; i++ ) {
+        generateButton( colorList[ i ], xPosition, yPosition );
         xPosition += display.width / ( colorList.length );
-      } );
+      }
     }
 
     function clearScene() {
@@ -273,9 +273,19 @@
     }
 
     // create buttons of various colors using the generateButton function above.
-    const initialColors = ['tomato', 'dodgerblue', 'magenta'];
-    let colorsToGenerate = [ ... initialColors ];
     createButtons( colorsToGenerate );
+
+    // add buttons to the control panel
+    controlPanel.addChild( resetButton );
+    controlPanel.addChild( addButton );
+
+    // add all components to the container
+    container.addChild( hexagon );
+    container.addChild( buttonsContainer );
+    container.addChild( controlPanel );
+
+    // add the container to the scene
+    scene.addChild( container );
 
     // update displayed p-dom text
     function updatePDOMDisplay() {
