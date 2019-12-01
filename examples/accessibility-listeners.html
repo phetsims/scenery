@@ -194,15 +194,13 @@
     const updatePDOMDisplay = function updatePDOMDisplay() {
 
       //format the p-dom code
+      var buttonRegex = new RegExp('(<button.*?>)((.|\\n)*?)(<\/button>)','gm');
+      var pRegex = new RegExp('(<p.*?>)((.|\\n)*?)(<\/p>)','gm');
       var PDOMHTMLBlock = display.accessibleDOMElement.outerHTML;
       var formattedPDOM = PDOMHTMLBlock
         .replace( new RegExp( '<[/]?\\w*[ >]', 'g' ), '\n$&' ) // add breaks in the string
-        .replace( new RegExp( '<p', 'g' ), '\t\t<p' ) //formatting for opening paragraph tag
-        .replace( new RegExp( 'a yellow', 'g' ), '\n\t\t\t a yellow' ) //formatting for paragraph inner html
-        .replace( new RegExp( '</p>', 'g' ), '\t\t</p>' ) //formatting for closing paragraph tag
-        .replace( new RegExp( '<button', 'g' ), '\t<button' ) //formatting for opening paragraph tag
-        .replace( new RegExp( 'a black', 'g' ), '\n\t\ta black' ) //formatting for button inner html
-        .replace( new RegExp( '</button>', 'g' ), '\t</button>' ); //formatting for closing paragraph tag
+        .replace( new RegExp( pRegex, 'g' ), '\t\t$1\n\t\t\t$2\t\t<\/p>' ) //formatting for opening paragraph tag
+        .replace( buttonRegex , '\t$1\n\t\t$2\t<\/button>' ); //formatting for buttons
       var $PDOMcode = ( $( '<code class="language-html no-whitespace-normalization"></code>' ).text( formattedPDOM ) );
 
       // add formatted code to the pre element

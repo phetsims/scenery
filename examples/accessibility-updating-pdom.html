@@ -2,9 +2,10 @@
 <html lang="en">
 
 <head>
-  <meta charset="utf-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport"
+        content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <meta name="apple-mobile-web-app-capable" content="yes">
 
   <title>Accessibility: Updating the PDOM</title>
@@ -19,8 +20,6 @@
   <!--For the styling-->
   <link rel="stylesheet" href="../assets/scenery.css">
   <link rel="stylesheet" href="../../sherpa/lib/prism-1.17.1/prism-1.17.1.css">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-
 
   <script src="../../sherpa/lib/bootstrap-2.2.2.js"></script>
   <script src="../../sherpa/lib/prism-1.17.1/prism-1.17.1.min.js"></script>
@@ -28,262 +27,288 @@
   <script src="../build/scenery.min.js"></script>
 
   <style>
-    .container{
-      max-width: 100%;
+    .container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
+
     .scene-and-PDOM {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        min-width: 1350px;
-        margin:0;
-        padding: 0 1%;
-      }
+      width: 80%;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
 
-      .container .title{
-          grid-column: span 2;
-          text-align: center;
-          margin-top: 40px;
-      }
+    .container .title {
+      text-align: center;
+      margin-top: 20px;
+    }
 
-      /* formatting for the displayed PDOM code */
-      .PDOM-container{
-        width: 100%;
-      }
+    /* formatting for the displayed PDOM code */
+    .PDOM-container {
+      width: 75em;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin-top: 10px;
+    }
 
-      pre{
-        width: 800px;
-        padding: 20px 10%;
-      }
+    #PDOM-pre {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
 
-      #accessibility-scene{
-        width: 95%;
-        margin: 0 2%;
-        height: 300px;
-        position: relative;
-        left: 0;
-        top: 0;
-      }
+    .input-container {
+      width: 75em;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
 
+    #accessibility-scene {
+      width: 100%;
+      height: 300px;
+      position: relative;
+      left: 0;
+      top: 0;
+      border: 1px solid black;
+    }
   </style>
 </head>
 
 <body>
-  <div class="container">
-    <div class="title">
-      <h2>Scenery Accessibility Examples: Updating the parallel DOM</h2>
-      <p> Click on the bottom buttons to change the hexagon's color. Use the control panel to add more buttons or reset the scene.</p>
+<div class="container">
+  <div class="title">
+    <h2>Scenery Accessibility Examples: Updating the parallel DOM</h2>
+    <p> Click on the bottom buttons to change the hexagon's color. Use the control panel to add more buttons or reset
+      the scene.</p>
+  </div>
+  <div class="scene-and-PDOM">
+    <div class="input-container">
+      <div id="accessibility-scene" class="exampleScene"></div>
     </div>
-    <div class="scene-and-PDOM">
-      <div class="input-container">
-        <div id="accessibility-scene" class="exampleScene"></div>
-      </div>
 
-      <div class="PDOM-container">
-        <pre id="PDOM-pre"></pre>
-      </div>
+    <div class="PDOM-container">
+      <pre id="PDOM-pre"></pre>
     </div>
   </div>
+</div>
 
-  <script type="text/javascript">
-    //docExample creates the display and initalizes the display events.
-    let scene
+<script type="text/javascript">
+  //docExample creates the display and initalizes the display events.
+  let scene;
 
-    function docExample(id, draw) {
-      let $container = $('#' + id);
-      scene = new scenery.Node();
-      let display = new scenery.Display(scene, {
-        width: $container.width(),
-        height: $container.height(),
-        backgroundColor: '#eee'
-      });
-      display.initializeEvents()
-      $container[0].appendChild(display.domElement);
-      draw(scene, display);
-      display.updateDisplay();
-    }
-  </script>
+  function docExample( id, draw ) {
+    let $container = $( '#' + id );
+    scene = new scenery.Node();
+    let display = new scenery.Display( scene, {
+      width: $container.width(),
+      height: $container.height(),
+      backgroundColor: '#eee'
+    } );
+    display.initializeEvents()
+    $container[ 0 ].appendChild( display.domElement );
+    draw( scene, display );
+    display.updateDisplay();
+  }
+</script>
 
-  <script type="text/javascript">
-    scenery.Util.polyfillRequestAnimationFrame();
-    docExample( 'accessibility-scene', ( scene, display ) => {
-      'use strict';
+<script type="text/javascript">
+  scenery.Util.polyfillRequestAnimationFrame();
+  docExample( 'accessibility-scene', ( scene, display ) => {
+    'use strict';
 
-      // creates the initial hexagon
-      const hexagon = new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
-        fill: 'yellow',
-        stroke: '#000',
-        x: display.width / 2,
-        y: 75,
-        tagName: 'p', // tag name for PDOM element
-        accessibleName: 'a yellow hexagon' // accessibility description
-      } );
+    // creates the initial hexagon
+    const hexagon = new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
+      fill: 'yellow',
+      stroke: '#000',
+      x: display.width / 2,
+      y: 75,
+      tagName: 'p', // tag name for PDOM element
+      accessibleName: 'a yellow hexagon' // accessibility description
+    } );
 
-      // creates the scenery node to which both hexagon and buttons will be added.
-      const node = new scenery.Node();
-      scene.addChild( node );
-      node.addChild( hexagon );
+    // creates the scenery node to which both hexagon and buttons will be added.
+    const container = new scenery.Node();
+    const buttonsContainer = new scenery.Node();
+    scene.addChild( container );
+    container.addChild( buttonsContainer );
+    container.addChild( hexagon );
 
-      // creates the button to add another color
-      const addButton = new scenery.Path( kite.Shape.roundRect( 20, 20, 70, 30, 7, 7 ), {
-        stroke: 'grey',
-        fill: 'yellow',
+    // creates the button to add another color
+    const addButton = new scenery.Path( kite.Shape.roundRect( 20, 20, 70, 30, 7, 7 ), {
+      stroke: 'grey',
+      fill: 'yellow',
+      cursor: 'pointer',
+      tagName: 'button', // tag name for PDOM element
+      accessibleName: 'add a color button' // accessibility description
+    } );
+    addButton.addChild( new scenery.Text( 'Add color', {
+      font: '1em sans-serif',
+      center: addButton.center
+    } ) );
+
+    // listener to make the add button respond to user clicks/touches/a11y clicks
+    const addButtonListener = new scenery.PressListener( {
+      press: () => {
+
+        // remove old scene
+        clearScene();
+
+        // redraw the scene with the new color randomly generating and added to the scene
+        var newColor = `rgb(${Math.floor( Math.random() * 255 )},${Math.floor( Math.random() * 255 )},${Math.floor( Math.random() * 255 )})`;
+        newColor && colorsToGenerate.push( newColor );
+        createButtons( colorsToGenerate );
+      }
+    } );
+    // addButtonListener.a11yClickingProperty = true;
+    addButton.addInputListener( addButtonListener );
+
+    addButtonListener.looksPressedProperty.link( looksPressed => {
+      addButton.fill = looksPressed ? 'red' : 'yellow';
+    } );
+
+    // reset button resets the scene to only the first three color buttons
+    const resetButton = new scenery.Path( kite.Shape.roundRect( 20, 70, 70, 30, 7, 7 ), {
+      stroke: 'grey',
+      fill: 'yellow',
+      cursor: 'pointer',
+      tagName: 'button',
+      accessibleName: 'reset button'
+    } );
+
+    const resetButtonListener = new scenery.PressListener( {
+      press: () => {
+
+        // remove old scene and redraw the scene
+        clearScene();
+        colorsToGenerate = [ 'tomato', 'dodgerblue', 'magenta' ];
+        hexagon.fill = 'yellow';
+
+        // regenerate the buttons, appropriately spaced
+        createButtons( initialColors );
+      }
+    } );
+
+    resetButton.addChild( new scenery.Text( 'Reset', {
+      font: '1em sans-serif',
+      center: resetButton.center
+    } ) );
+
+    // resetButtonListener.a11yClickingProperty = true;
+    resetButton.addInputListener( resetButtonListener );
+
+    // control panel holds the
+    const controlPanel = new scenery.Path( kite.Shape.roundRect( 10, 10, 90, 100, 7, 7 ), {
+      stroke: 'orange',
+      lineWidth: 3,
+      fill: 'white'
+    } );
+
+    controlPanel.addChild( resetButton );
+    controlPanel.addChild( addButton );
+    scene.addChild( controlPanel );
+
+    // creates a single button
+    function generateButton( color, x, y ) {
+
+      // creates the button as a scenery element
+      const rectangle = new scenery.Path( kite.Shape.roundedRectangleWithRadii( x, y, display.width / ( colorsToGenerate.length ) - 10, 40, {
+        topLeft: 10,
+        topRight: 10,
+        bottomLeft: 10,
+        bottomRight: 10
+      } ), {
+        stroke: 'black',
+        fill: color,
         cursor: 'pointer',
         tagName: 'button', // tag name for PDOM element
-        accessibleName: 'add a color button' // accessibility description
+        accessibleName: `${color}-colored button` // accessibility description
       } );
-      addButton.addChild( new scenery.Text( 'Add color', {
-        font: '1em sans-serif',
-        center: addButton.center
+
+      // Adds text to the button with the name of the color
+      rectangle.addChild( new scenery.Text( color, {
+        font: '0.8em sans-serif',
+        center: rectangle.center
       } ) );
 
-      // listener to make the add button respond to user clicks/touches/a11y clicks
-      const addPressListener = new scenery.PressListener( {
-        press: () => {
-
-          // remove old scene
-          clearScene();
-
-          // redraw the scene with the new color randomly generating and added to the scene
-          node.addChild( hexagon );
-          var newColor = `rgb(${Math.floor( Math.random() * 255 )},${Math.floor( Math.random() * 255 )},${Math.floor( Math.random() * 255 )})`;
-          newColor && colorsToGenerate.push( newColor );
-          createButtons( colorsToGenerate );
+      // Input listener makes the hexagon change colors when buttons are clicked
+      rectangle.addInputListener( {
+        // Listener for pointer clicks
+        up: () => {
+          hexagon.fill = color; // change hexagon color
+          hexagon.accessibleName = `a ${color} hexagon`; // update the PDOM text
+        },
+        // Accessible listener that fires when the button in the PDOM is clicked
+        a11yclick: () => {
+          hexagon.fill = color; // change hexagon color
+          hexagon.accessibleName = `a ${color} hexagon`; // update the PDOM text
         }
       } );
-      // addPressListener.a11yClickingProperty = true;
-      addButton.addInputListener( addPressListener );
+      buttonsContainer.addChild( rectangle );
+    }
 
-      addPressListener.looksPressedProperty.link( looksPressed => {
-        addButton.fill = looksPressed ? 'red' : 'yellow';
+    // generates multiple buttons, appropriately spaced from an array of colors
+    function createButtons( colorList ) {
+      let xPosition = 10;
+      const yPosition = 150;
+      colorList.forEach( color => {
+        generateButton( color, xPosition, yPosition );
+        xPosition += display.width / ( colorList.length );
       } );
+    }
 
-      // reset button resets the scene to only the first three color buttons
-      const resetButton = new scenery.Path( kite.Shape.roundRect( 20, 70, 70, 30, 7, 7 ), {
-        stroke: 'grey',
-        fill: 'yellow',
-        cursor: 'pointer',
-        tagName: 'button',
-        accessibleName: 'reset button'
+    function clearScene() {
+      buttonsContainer.children = [];
+      buttonsContainer.children.forEach( child => {
+        child.dispose();
       } );
+    }
 
-      const resetPressListener = new scenery.PressListener( {
-        press: () => {
+    // create buttons of various colors using the generateButton function above.
+    const initialColors = ['tomato', 'dodgerblue', 'magenta'];
+    let colorsToGenerate = [ ... initialColors ];
+    createButtons( colorsToGenerate );
 
-          // remove old scene and redraw the scene
-          clearScene();
-          node.addChild( hexagon );
-          colorsToGenerate.splice( 3, colorsToGenerate.length - 3 );
+    // update displayed p-dom text
+    function updatePDOMDisplay() {
 
-          // regenerate the buttons, appropriately spaced
-          createButtons( colorsToGenerate );
-        }
-      } );
-      resetButton.addChild( new scenery.Text( 'Reset', {
-        font: '1em sans-serif',
-        center: resetButton.center
-      } ) );
+      //format the p-dom code
+      var buttonRegex = new RegExp( '(<button.*?>)((.|\\n)*?)(<\/button>)', 'gm' );
+      var pRegex = new RegExp( '(<p.*?>)((.|\\n)*?)(<\/p>)', 'gm' );
+      var PDOMHTMLBlock = display.accessibleDOMElement.outerHTML;
+      var formattedPDOM = PDOMHTMLBlock
+        .replace( new RegExp( '<[/]?\\w*[ >]', 'g' ), '\n$&' ) // add breaks in the string
+        .replace( new RegExp( pRegex, 'g' ), '\t$1\n\t\t$2\t<\/p>' ) //formatting for opening paragraph tag
+        .replace( buttonRegex, '\t$1\n\t\t$2\t<\/button>' ); //formatting for buttons
+      var $PDOMcode = ( $( '<code class="language-html no-whitespace-normalization"></code>' ).text( formattedPDOM ) );
 
-      // resetPressListener.a11yClickingProperty = true;
-      resetButton.addInputListener( resetPressListener );
+      //add formatted code to the pre element
+      $( '#PDOM-pre' ).html( $PDOMcode );
 
-      // control panel holds the
-      const controlPanel = new scenery.Path( kite.Shape.roundRect( 10, 10, 90, 100, 7, 7 ), {
-        stroke: 'orange',
-        lineWidth: 3,
-        fill: 'white'
-      } );
+      //apply syntax highlighting
+      Prism.highlightAll();
+    }
 
-      controlPanel.addChild( resetButton );
-      controlPanel.addChild( addButton );
-      scene.addChild( controlPanel );
-
-      // creates a single button
-      function generateButton( color, x, y ) {
-
-        // creates the button as a scenery element
-        const rectangle = new scenery.Path( kite.Shape.roundedRectangleWithRadii( x, y, display.width / ( colorsToGenerate.length ) - 10, 40, {
-          topLeft: 10,
-          topRight: 10,
-          bottomLeft: 10,
-          bottomRight: 10
-        } ), {
-          stroke: 'black',
-          fill: color,
-          cursor: 'pointer',
-          tagName: 'button', // tag name for PDOM element
-          accessibleName: `${color}-colored button` // accessibility description
-        } );
-
-        // Adds text to the button with the name of the color
-        rectangle.addChild( new scenery.Text( color, {
-          font: '0.8em sans-serif',
-          center: rectangle.center
-        } ) );
-
-        // Input listener makes the hexagon change colors when buttons are clicked
-        rectangle.addInputListener( {
-          // Listener for pointer clicks
-          up: () => {
-            hexagon.fill = color; // change hexagon color
-            hexagon.accessibleName = `a ${color} hexagon`; // update the PDOM text
-          },
-          // Accessible listener that fires when the button in the PDOM is clicked
-          a11yclick: () => {
-            hexagon.fill = color; // change hexagon color
-            hexagon.accessibleName = `a ${color} hexagon`; // update the PDOM text
-          }
-        } );
-        node.addChild( rectangle );
-      }
-
-      // generates multiple buttons, appropriately spaced from an array of colors
-      function createButtons( colorList ) {
-        let xPosition = 10;
-        const yPosition = 150;
-        colorList.forEach( color => {
-          generateButton( color, xPosition, yPosition );
-          xPosition += display.width / ( colorList.length );
-        } );
-      }
-
-      // create buttons of various colors using the generateButton function above.
-      const colorsToGenerate = [ 'tomato', 'dodgerblue', 'magenta' ];
-      createButtons( colorsToGenerate );
-
-      // update displayed p-dom text
-      const updatePDOMDisplay = function updatePDOMDisplay() {
-
-        //format the p-dom code
-        var PDOMHTMLBlock = display.accessibleDOMElement.outerHTML;
-        var formattedPDOM = PDOMHTMLBlock.replace( new RegExp( '<[/]?\\w*[ >]', 'g' ), '\n$&' ); // add breaks in the string
-        var $PDOMcode = ( $( '<code class="language-html no-whitespace-normalization"></code>' ).text( formattedPDOM ) );
-
-        //add formatted code to the pre element
-        $( '#PDOM-pre' ).html( $PDOMcode );
-
-        //apply syntax highlighting
-        Prism.highlightAll();
-      };
-
-      function clearScene() {
-        node.children.forEach( child => {
-          node.removeChild( child );
-          child.dispose();
-        } );
-      }
-
-      // update the displayed p-dom code snippet when there's a change to the scene.
-      const observer = new MutationObserver( updatePDOMDisplay );
-      observer.observe( document.querySelector( '#accessibility-scene' ), {
-        attributes: true,
-        childList: true,
-        subtree: true
-      } );
-
-      // update the animation upon changes
-      display.updateOnRequestAnimationFrame();
+    // update the displayed p-dom code snippet when there's a change to the scene.
+    const observer = new MutationObserver( updatePDOMDisplay );
+    observer.observe( document.querySelector( '#accessibility-scene' ), {
+      attributes: true,
+      childList: true,
+      subtree: true
     } );
-  </script>
+
+    // update the animation upon changes
+    display.updateOnRequestAnimationFrame();
+  } );
+</script>
 </body>
 
 </html>
