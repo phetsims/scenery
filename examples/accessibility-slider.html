@@ -31,42 +31,58 @@
 
   <style>
     .container {
-      max-width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
 
     .scene-and-PDOM {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      min-width: 1350px;
+      width: 80%;
       margin: 0;
-      padding: 0 1%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
 
     .container .title {
-      grid-column: span 2;
       text-align: center;
-      margin-top: 40px;
+      margin-top: 20px;
     }
 
     /* formatting for the displayed PDOM code */
     .PDOM-container {
-      width: 100%;
+      width: 75em;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin-top: 10px;
     }
 
-    pre {
-      width: 800px;
-      padding: 20px 10%;
+    #PDOM-pre {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    .input-container {
+      width: 75em;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
 
     #accessibility-scene {
-      width: 95%;
-      margin: 0 2%;
+      width: 100%;
       height: 300px;
       position: relative;
       left: 0;
       top: 0;
+      border: 1px solid black;
     }
-
   </style>
 </head>
 
@@ -112,10 +128,10 @@
     'use strict';
 
     // number of tick marks on track
-    const ticks = 10;
+    const numberOfTicks = 10;
 
     // calculates distance slider travels with each button press
-    const increment = ( display.width ) / ( ticks + 2 );
+    const increment = ( display.width ) / ( ( numberOfTicks + 2 ) );
 
     // add a red hexagon to the screen at the beginning (since slider will start on the red side)
     const hexagon = new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
@@ -124,33 +140,46 @@
       x: display.width / 2,
       y: 75,
       tagName: 'p', // tag name for PDOM element
-      accessibleName: 'a hexagon of color (255, 0, 0)' // accessibility description
+      accessibleName: 'a hexagon of color ' // accessibility description
     } );
-    scene.addChild( hexagon );
 
-    // TODO: Implement rainbow gradient (maybe with an image?)
-    // let track = new scenery.LinearGradient(0, 100, 10, 200)
-    // track.addColorStop( 0, '#02ace4' ).addColorStop( 1, '#cfecfc' )
+    let trackFill = new scenery.LinearGradient( increment / 2, 215, display.width - increment, 10 );
+    trackFill
+      .addColorStop( 0, 'pink' )
+      .addColorStop( 0.1, 'red' )
+      .addColorStop( 0.2, 'orange' )
+      .addColorStop( 0.3, 'yellow' )
+      .addColorStop( 0.4, 'gold' )
+      .addColorStop( 0.5, 'green' )
+      .addColorStop( 0.6, 'turquoise' )
+      .addColorStop( 0.7, 'blue' )
+      .addColorStop( 0.8, 'magenta' )
+      .addColorStop( 0.9, 'purple' )
+      .addColorStop( 1, 'indigo' );
+    const sliderStops = trackFill.getSVGStops();
 
     // slider thumb
     const thumb = new scenery.Path( kite.Shape.rectangle( increment, 200, 15, 40 ), {
       fill: 'white',
       stroke: 'black',
       tagName: 'button',
-      accessibleName: 'Slider thumb at position 0'
+      accessibleName: `Slider thumb at position 0`
     } );
+    thumb.index = 0;
 
     // slider track
     const track = new scenery.Path( kite.Shape.rectangle( increment / 2, 215, display.width - increment, 10 ), {
-      fill: 'grey'
+      fill: trackFill
     } );
 
+    // add all children to the scene
+    scene.addChild( hexagon );
     scene.addChild( track );
     scene.addChild( thumb );
 
-    // labels for the track
+    // add labels for the track to the scene
     let i;
-    for ( i = 0; i < ticks + 1; i++ ) {
+    for ( i = 0; i < numberOfTicks + 1; i++ ) {
 
       //labels
       scene.addChild( new scenery.Text( `${i}`, {
@@ -164,57 +193,63 @@
       } ) );
     }
 
+    /**
+     * Moves the slider thumb based on the new sliderIndex, and updates the associated properties
+     * @param {number} sliderIndex
+     * @private
+     */
+    const moveSliderThumb = ( sliderIndex ) => {
+
+      // moves the thumb right or left if it will stay on the track
+      thumb.index = sliderIndex;
+      thumb.x = increment * sliderIndex;
+
+      // makes the hexagon's color move in rainbow order, moving right to left
+      hexagon.fill = `${sliderStops[ sliderIndex ].color}`;
+
+      //updates attributes that will create the PDOM elements
+      hexagon.tagName = 'p';
+      hexagon.accessibleName = `A hexagon of color ${hexagon.fill}`;
+      thumb.tagName = 'button';
+      thumb.accessibleName = `Slider thumb at position ${sliderIndex}`;
+    };
+
     // listener that moves slider when left or right arrow keys are pressed
     display.addInputListener( {
       keydown: ( e ) => {
 
         // determine whether slider should move left, right, or not at all.
-        let direction;
+        let sliderIndex = thumb.index;
         if ( e.domEvent.code === 'ArrowRight' ) {
-          direction = 1;
+          sliderIndex += 1;
         }
         else if ( e.domEvent.code === 'ArrowLeft' ) {
-          direction = -1;
-        }
-        else {
-          direction = 0;
+          sliderIndex -= 1;
         }
 
         // checks to see if thumb moves off the track (and doesn't allow)
-        if ( ( thumb.x + thumb.width / 2 + 2 * increment >= display.width && direction > 0 ) || ( thumb.x + thumb.width / 2 - increment <= 0 && direction < 0 ) ) {
+        const leftBoundary = sliderStops[ 0 ].ratio * numberOfTicks;
+        const rightBoundary = sliderStops[ 10 ].ratio * numberOfTicks;
+        if ( sliderIndex < leftBoundary || sliderIndex > rightBoundary ) {
           console.log( 'reached boundary' );
         }
         else {
-
-          // moves the thumb right or left if it will stay on the track
-          thumb.x += increment * direction;
-          const x = thumb.x;
-          const trackWidth = track.width;
-
-          // sets frequency to ensures that one rainbow cycle happens over the course of one slider length
-          const frequency = ( 2 * Math.PI ) / ( display.width );
-
-          // makes the hexagon's color move in rainbow order, moving right to left
-          const r = Math.floor( 127.5 * Math.cos( frequency * x ) + 127.5 );
-          const g = Math.floor( -127.5 * Math.cos( frequency * x + trackWidth / 4 ) + 127.5 );
-          const b = Math.floor( -127.5 * Math.cos( frequency * x ) + 127.5 );
-          hexagon.fill = `rgb(${r}, ${g}, ${b})`;
-
-          //updates attributes that will create the PDOM elements
-          hexagon.tagName = 'p';
-          hexagon.accessibleName = `A hexagon of color ${hexagon.fill}`;
-          thumb.tagName = 'button';
-          thumb.accessibleName = `Slider thumb at position ${thumb.x / increment}`;
+          moveSliderThumb( sliderIndex )
         }
       }
     } );
 
     // update displayed p-dom text
-    const updatePDOMDisplay = function updatePDOMDisplay() {
+    const updatePDOMDisplay = () => {
 
       // format the p-dom code
+      var buttonRegex = new RegExp( '(<button.*?>)((.|\\n)*?)(<\/button>)', 'gm' );
+      var pRegex = new RegExp( '(<p.*?>)((.|\\n)*?)(<\/p>)', 'gm' );
       var PDOMHTMLBlock = display.accessibleDOMElement.outerHTML;
-      var formattedPDOM = PDOMHTMLBlock.replace( new RegExp( '<[/]?\\w*[ >]', 'g' ), '\n$&' ); // add breaks in the string
+      var formattedPDOM = PDOMHTMLBlock
+        .replace( new RegExp( '<[/]?\\w*[ >]', 'g' ), '\n$&' ) // add breaks in the string
+        .replace( new RegExp( pRegex, 'g' ), '\t$1\n\t\t$2\t<\/p>' ) //formatting for opening paragraph tag
+        .replace( buttonRegex, '\t$1\n\t\t$2\t<\/button>' ); //formatting for buttons
       var $PDOMcode = ( $( '<code class="language-html no-whitespace-normalization"></code>' ).text( formattedPDOM ) );
 
       // add formatted code to the pre element
