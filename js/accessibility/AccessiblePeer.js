@@ -888,26 +888,37 @@ define( require => {
         if ( scratchGlobalBounds.isFinite() ) {
           scratchGlobalBounds.transform( this.accessibleInstance.transformTracker.getMatrix() );
 
-          let clientDimensions = getClientDimensions( this._primarySibling );
-          let clientWidth = clientDimensions.width;
-          let clientHeight = clientDimensions.height;
+          // no need to position if the node is fully outside of the Display bounds (out of view)
+          const displayBounds = this.display.bounds;
+          if ( displayBounds.intersectsBounds( scratchGlobalBounds ) ) {
 
-          if ( clientWidth > 0 && clientHeight > 0 ) {
-            scratchSiblingBounds.setMinMax( 0, 0, clientWidth, clientHeight );
-            scratchSiblingBounds.transform( getCSSMatrix( clientWidth, clientHeight, scratchGlobalBounds ) );
-            setClientBounds( this._primarySibling, scratchSiblingBounds );
-          }
+            // Constrain the global bounds to Display bounds so that center of the sibling element
+            // is always in the Display. We may miss input if the center of the Node is outside
+            // the Display, where VoiceOver would otherwise send pointer events.
+            scratchGlobalBounds.constrainBounds( displayBounds );
 
-          if ( this.labelSibling ) {
-            clientDimensions = getClientDimensions( this._labelSibling );
-            clientWidth = clientDimensions.width;
-            clientHeight = clientDimensions.height;
+            let clientDimensions = getClientDimensions( this._primarySibling );
+            let clientWidth = clientDimensions.width;
+            let clientHeight = clientDimensions.height;
 
-            if ( clientHeight > 0 && clientWidth > 0 ) {
+            if ( clientWidth > 0 && clientHeight > 0 ) {
               scratchSiblingBounds.setMinMax( 0, 0, clientWidth, clientHeight );
               scratchSiblingBounds.transform( getCSSMatrix( clientWidth, clientHeight, scratchGlobalBounds ) );
-              setClientBounds( this._labelSibling, scratchSiblingBounds );
+              setClientBounds( this._primarySibling, scratchSiblingBounds );
             }
+
+            if ( this.labelSibling ) {
+              clientDimensions = getClientDimensions( this._labelSibling );
+              clientWidth = clientDimensions.width;
+              clientHeight = clientDimensions.height;
+
+              if ( clientHeight > 0 && clientWidth > 0 ) {
+                scratchSiblingBounds.setMinMax( 0, 0, clientWidth, clientHeight );
+                scratchSiblingBounds.transform( getCSSMatrix( clientWidth, clientHeight, scratchGlobalBounds ) );
+                setClientBounds( this._labelSibling, scratchSiblingBounds );
+              }
+            }
+
           }
         }
       }
