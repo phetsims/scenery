@@ -882,7 +882,7 @@ define( require => {
       // by gesture navigation with the virtual cursor. Bounds for non-focusable elements in the ViewPort don't
       // need to be accurate because the AT doesn't need to send events to them.
       if ( this.node.focusable ) {
-        const transformSourceNode = this.node.pdomTransformSourceNode ? this.node.pdomTransformSourceNode : this.node;
+        const transformSourceNode = this.node.pdomTransformSourceNode || this.node;
 
         scratchGlobalBounds.set( transformSourceNode.localBounds );
         if ( scratchGlobalBounds.isFinite() ) {
