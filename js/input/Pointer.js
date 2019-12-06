@@ -33,7 +33,7 @@ define( require => {
 
   // constants
   // entries when signifying Intent of the pointer, see setIntent
-  const Intent = new Enumeration( [
+  const Intent = Enumeration.byKeys( [
     'DRAG', // listener attached to the pointer will be used for dragging
     'MULTI_DRAG', // listener attached to pointer and more than one item can be dragged at at a time with multitouch
     'KEYBOARD_DRAG' // listener attached to pointer is for dragging with a keyboard
