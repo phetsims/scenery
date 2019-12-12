@@ -38,7 +38,7 @@ define( require => {
       fireOnDown: false,
 
       // {Tandem}
-      tandem: Tandem.required
+      tandem: Tandem.REQUIRED
     }, options );
 
     assert && assert( typeof options.fire === 'function', 'The fire callback should be a function' );

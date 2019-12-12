@@ -94,7 +94,7 @@ define( require => {
       a11yLooksPressedInterval: 100,
 
       // {Tandem} - For instrumenting
-      tandem: Tandem.required,
+      tandem: Tandem.REQUIRED,
 
       // to support properly passing this to children, see https://github.com/phetsims/tandem/issues/60
       phetioReadOnly: false,

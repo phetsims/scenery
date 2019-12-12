@@ -216,7 +216,7 @@ define( require => {
       assert && assert( typeof assumeFullWindow === 'boolean' );
 
       options = merge( {
-        tandem: Tandem.optional
+        tandem: Tandem.OPTIONAL
       }, options );
 
       // @public {Display}

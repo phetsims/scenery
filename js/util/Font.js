@@ -85,7 +85,7 @@ define( require => {
       family: 'sans-serif',
 
       phetioType: FontIO,
-      tandem: Tandem.optional
+      tandem: Tandem.OPTIONAL
     }, options );
 
     assert && assert( typeof options.weight === 'string' || typeof options.weight === 'number', 'Font weight should be specified as a string or number' );

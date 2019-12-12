@@ -116,7 +116,7 @@ define( require => {
       end: null,
 
       // {Tandem} - For instrumenting
-      tandem: Tandem.required,
+      tandem: Tandem.REQUIRED,
 
       // to support properly passing this to children, see https://github.com/phetsims/tandem/issues/60
       phetioReadOnly: PhetioObject.DEFAULT_OPTIONS.phetioReadOnly,

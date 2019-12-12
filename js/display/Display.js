@@ -1880,7 +1880,7 @@ define( require => {
   // phetioValueType, PhET-iO is able to interoperate (save, restore, control, observe what is currently focused).
   // See Display.focus for setting the Display's focus. Don't set the value of this Property directly.
   Display.focusProperty = new Property( null, {
-    tandem: Tandem.generalTandem.createTandem( 'focusProperty' ),
+    tandem: Tandem.GENERAL.createTandem( 'focusProperty' ),
     phetioDocumentation: 'Stores the current focus for the simulation, null if there is not focus. This is not updated ' +
                          'based on mouse or touch input, only keyboard and other alternative inputs.',
     phetioType: PropertyIO( NullableIO( FocusIO ) ),

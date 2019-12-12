@@ -221,7 +221,7 @@ define( require => {
     options = extendDefined( {
       fill: '#000000',
       text: text,
-      tandem: Tandem.optional,
+      tandem: Tandem.OPTIONAL,
       phetioType: RichTextIO
     }, options );
 

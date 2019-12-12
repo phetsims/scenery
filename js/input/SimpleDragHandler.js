@@ -57,7 +57,7 @@ define( require => {
       attach: true,
 
       // phetio
-      tandem: Tandem.required,
+      tandem: Tandem.REQUIRED,
       phetioState: false,
       phetioEventType: EventType.USER,
       phetioReadOnly: true

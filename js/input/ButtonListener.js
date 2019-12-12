@@ -45,7 +45,7 @@ define( require => {
     options = merge( {
 
       // When running in PhET-iO brand, the tandem must be supplied
-      tandem: Tandem.optional,
+      tandem: Tandem.OPTIONAL,
       phetioType: ButtonListenerIO,
       phetioState: false,
       phetioEventType: EventType.USER
