@@ -75,7 +75,17 @@ define( require => {
 
       // {boolean} - If true, the initial offset of the pointer's location is taken into account, so that drags will
       // try to keep the pointer at the same local point of our dragged node.
+      // NOTE: The default behavior is to use the given Node (either the targetNode or the node with the listener on it)
+      // and use its transform to compute the "local point" (assuming that the node's local origin is what is
+      // transformed around). This is ideal for most situations, but it's also possible to use a parent-coordinate
+      // based approach for offsets (see useParentOffset)
       applyOffset: true,
+
+      // {boolean} - If set to true, then any offsets applied will be handled in the parent coordinate space using the
+      // locationProperty as the "ground truth", instead of looking at the node's actual location and transform. This
+      // is useful if the location/transform cannot be applied directly to a single Node (e.g. positioning multiple
+      // independent nodes, or centering things instead of transforming based on the origin of the Node).
+      useParentOffset: false,
 
       // {boolean} - If true, ancestor transforms will be watched. If they change, it will trigger a repositioning,
       // which will usually adjust the location/transform to maintain position.
@@ -136,6 +146,7 @@ define( require => {
     assert && assert( options.start === null || typeof options.start === 'function', 'start, if provided, should be a function' );
     assert && assert( options.end === null || typeof options.end === 'function', 'end, if provided, should be a function' );
     assert && assert( options.tandem instanceof Tandem, 'The provided tandem should be a Tandem' );
+    assert && assert( !options.useParentOffset || options.locationProperty, 'If useParentOffset is set, a locationProperty is required' );
 
     assert && assert(
       !( options.mapLocation && options.dragBoundsProperty ),
@@ -147,6 +158,7 @@ define( require => {
     // @private (stored options)
     this._allowTouchSnag = options.allowTouchSnag;
     this._applyOffset = options.applyOffset;
+    this._useParentOffset = options.useParentOffset;
     this._trackAncestors = options.trackAncestors;
     this._translateNode = options.translateNode;
     this._transform = options.transform;
@@ -171,6 +183,10 @@ define( require => {
 
     // @private {Vector2} - Current drag point in the model coordinate frame
     this._modelPoint = new Vector2( 0, 0 );
+
+    // @private {Vector2} - If useParentOffset is true, this will be set to the parent-coordinate offset at the start
+    // of a drag, and the "offset" will be handled by applying this offset compared to where the pointer is.
+    this._parentOffset = new Vector2( 0, 0 );
 
     // @private {TransformTracker|null} - Handles watching ancestor transforms for callbacks.
     this._transformTracker = null;
@@ -232,8 +248,15 @@ define( require => {
 
         self.attachTransformTracker();
 
+        // Compute the parent point corresponding to the pointer's location
+        const parentPoint = self.globalToParentPoint( self._localPoint.set( self.pointer.point ) );
+
+        if ( self._useParentOffset ) {
+          self.modelToParentPoint( self._parentOffset.set( self._locationProperty.value ) ).subtract( parentPoint );
+        }
+
         // Set the local point
-        self.parentToLocalPoint( self.globalToParentPoint( self._localPoint.set( self.pointer.point ) ) );
+        self.parentToLocalPoint( parentPoint );
 
         self.reposition( self.pointer.point );
 
@@ -510,10 +533,14 @@ define( require => {
 
       // Don't apply any offset if applyOffset is false
       if ( this._applyOffset ) {
-        // Add the difference between our local origin (in the parent coordinate frame) and the local point (in the same
-        // parent coordinate frame).
-        parentPoint.subtract( this.localToParentPoint( scratchVector2A.set( this._localPoint ) ) );
-        parentPoint.add( this.localToParentPoint( scratchVector2A.setXY( 0, 0 ) ) );
+        if ( this._useParentOffset ) {
+          parentPoint.add( this._parentOffset );
+        } else {
+          // Add the difference between our local origin (in the parent coordinate frame) and the local point (in the same
+          // parent coordinate frame).
+          parentPoint.subtract( this.localToParentPoint( scratchVector2A.set( this._localPoint ) ) );
+          parentPoint.add( this.localToParentPoint( scratchVector2A.setXY( 0, 0 ) ) );
+        }
       }
     },
 
