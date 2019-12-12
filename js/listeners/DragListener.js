@@ -66,8 +66,6 @@ define( require => {
    * @param {Object} [options] - See the constructor body (below) and in PressListener for documented options.
    */
   function DragListener( options ) {
-    const self = this;
-
     options = merge( {
       // {boolean} - If true, unattached touches that move across our node will trigger a press(). This helps sometimes
       // for small draggable objects.
@@ -201,14 +199,14 @@ define( require => {
     this._lastInterruptedTouchPointer = null;
 
     // @private {Action} - emitted on drag. Used for triggering phet-io events to the data stream, see https://github.com/phetsims/scenery/issues/842
-    this._dragAction = new Action( function( event ) {
+    this._dragAction = new Action( event => {
 
       // This is done first, before the drag listener is called (from the prototype drag call)
-      if ( !self._globalPoint.equals( self.pointer.point ) ) {
-        self.reposition( self.pointer.point );
+      if ( !this._globalPoint.equals( this.pointer.point ) ) {
+        this.reposition( this.pointer.point );
       }
 
-      PressListener.prototype.drag.call( self, event );
+      PressListener.prototype.drag.call( this, event );
     }, {
       parameters: [ { name: 'event', phetioType: EventIO } ],
       phetioFeatured: options.phetioFeatured,
@@ -237,31 +235,30 @@ define( require => {
      * @param {function} [callback] - to be run at the end of the function, but only on success
      * @returns {boolean} success - Returns whether the press was actually started
      */
-    press: function( event, targetNode, callback ) {
-      const self = this;
+    press( event, targetNode, callback ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener press' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      const success = PressListener.prototype.press.call( this, event, targetNode, function() {
+      const success = PressListener.prototype.press.call( this, event, targetNode, () => {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener successful press' );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-        self.attachTransformTracker();
+        this.attachTransformTracker();
 
         // Compute the parent point corresponding to the pointer's location
-        const parentPoint = self.globalToParentPoint( self._localPoint.set( self.pointer.point ) );
+        const parentPoint = this.globalToParentPoint( this._localPoint.set( this.pointer.point ) );
 
-        if ( self._useParentOffset ) {
-          self.modelToParentPoint( self._parentOffset.set( self._locationProperty.value ) ).subtract( parentPoint );
+        if ( this._useParentOffset ) {
+          this.modelToParentPoint( this._parentOffset.set( this._locationProperty.value ) ).subtract( parentPoint );
         }
 
         // Set the local point
-        self.parentToLocalPoint( parentPoint );
+        this.parentToLocalPoint( parentPoint );
 
-        self.reposition( self.pointer.point );
+        this.reposition( this.pointer.point );
 
         // Notify after positioning and other changes
-        self._start && self._start( event, self );
+        this._start && this._start( event, this );
 
         callback && callback();
 
@@ -279,7 +276,7 @@ define( require => {
      * @public
      * @returns {boolean}
      */
-    canClick: function() {
+    canClick() {
       return false;
     },
 
@@ -294,17 +291,15 @@ define( require => {
      * @param {Event} [event] - scenery Event if there was one
      * @param {function} [callback] - called at the end of the release
      */
-    release: function( event, callback ) {
-      const self = this;
-
+    release( event, callback ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener release' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      PressListener.prototype.release.call( this, event, function() {
-        self.detachTransformTracker();
+      PressListener.prototype.release.call( this, event, () => {
+        this.detachTransformTracker();
 
         // Notify after the rest of release is called in order to prevent it from triggering interrupt().
-        self._end && self._end( self );
+        this._end && this._end( this );
 
         callback && callback();
       } );
@@ -319,7 +314,7 @@ define( require => {
      *
      * @param {Event} event
      */
-    drag: function( event ) {
+    drag( event ) {
       // Ignore global moves that have zero length (Chrome might autofire, see
       // https://code.google.com/p/chromium/issues/detail?id=327114)
       if ( this._globalPoint.equals( this.pointer.point ) ) {
@@ -342,7 +337,7 @@ define( require => {
      *
      * @param {Event} event
      */
-    tryTouchSnag: function( event ) {
+    tryTouchSnag( event ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener tryTouchSnag' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -359,7 +354,7 @@ define( require => {
      *
      * @returns {Vector2}
      */
-    getGlobalPoint: function() {
+    getGlobalPoint() {
       return this._globalPoint.copy();
     },
     get globalPoint() { return this.getGlobalPoint(); },
@@ -370,7 +365,7 @@ define( require => {
      *
      * @returns {Vector2}
      */
-    getLocalPoint: function() {
+    getLocalPoint() {
       return this._localPoint.copy();
     },
     get localPoint() { return this.getLocalPoint(); },
@@ -381,7 +376,7 @@ define( require => {
      *
      * @returns {Vector2}
      */
-    getParentPoint: function() {
+    getParentPoint() {
       return this._parentPoint.copy();
     },
     get parentPoint() { return this.getParentPoint(); },
@@ -392,7 +387,7 @@ define( require => {
      *
      * @returns {Vector2}
      */
-    getModelPoint: function() {
+    getModelPoint() {
       return this._modelPoint.copy();
     },
     get modelPoint() { return this.getModelPoint(); },
@@ -408,7 +403,7 @@ define( require => {
      * @param {Vector2} globalPoint
      * @returns {Vector2}
      */
-    globalToParentPoint: function( globalPoint ) {
+    globalToParentPoint( globalPoint ) {
       if ( assert ) {
         var referenceResult = this.pressedTrail.globalToParentPoint( globalPoint );
       }
@@ -428,7 +423,7 @@ define( require => {
      * @param {Vector2} parentPoint
      * @returns {Vector2}
      */
-    parentToLocalPoint: function( parentPoint ) {
+    parentToLocalPoint( parentPoint ) {
       if ( assert ) {
         var referenceResult = this.pressedTrail.lastNode().parentToLocalPoint( parentPoint );
       }
@@ -448,7 +443,7 @@ define( require => {
      * @param {Vector2} localPoint
      * @returns {Vector2}
      */
-    localToParentPoint: function( localPoint ) {
+    localToParentPoint( localPoint ) {
       if ( assert ) {
         var referenceResult = this.pressedTrail.lastNode().localToParentPoint( localPoint );
       }
@@ -469,7 +464,7 @@ define( require => {
      * @param {Vector2} parentPoint
      * @returns {Vector2}
      */
-    parentToModelPoint: function( parentPoint ) {
+    parentToModelPoint( parentPoint ) {
       if ( this._transform ) {
         this._transform.getInverse().multiplyVector2( parentPoint );
       }
@@ -488,7 +483,7 @@ define( require => {
      * @param {Vector2} modelPoint
      * @returns {Vector2}
      */
-    modelToParentPoint: function( modelPoint ) {
+    modelToParentPoint( modelPoint ) {
       if ( this._transform ) {
         this._transform.getMatrix().multiplyVector2( modelPoint );
       }
@@ -508,7 +503,7 @@ define( require => {
      * @param {Vector2} modelPoint
      * @returns {Vector2} - A point in the model coordinate frame
      */
-    mapModelPoint: function( modelPoint ) {
+    mapModelPoint( modelPoint ) {
       if ( this._mapLocation ) {
         return this._mapLocation( modelPoint );
       }
@@ -526,7 +521,7 @@ define( require => {
      *
      * @param {Vector2} parentPoint
      */
-    applyParentOffset: function( parentPoint ) {
+    applyParentOffset( parentPoint ) {
       if ( this._offsetLocation ) {
         parentPoint.add( this._offsetLocation( parentPoint, this ) );
       }
@@ -553,7 +548,7 @@ define( require => {
      *
      * @param {Vector2} globalPoint
      */
-    reposition: function( globalPoint ) {
+    reposition( globalPoint ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener reposition' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -587,7 +582,7 @@ define( require => {
      *
      * @param {Event} event
      */
-    touchenter: function( event ) {
+    touchenter( event ) {
       this.tryTouchSnag( event );
     },
 
@@ -599,7 +594,7 @@ define( require => {
      *
      * @param {Event} event
      */
-    touchmove: function( event ) {
+    touchmove( event ) {
       this.tryTouchSnag( event );
     },
 
@@ -607,7 +602,7 @@ define( require => {
      * Called when an ancestor's transform has changed (when trackAncestors is true).
      * @private
      */
-    ancestorTransformed: function() {
+    ancestorTransformed() {
       // Reposition based on the current point.
       this.reposition( this.pointer.point );
     },
@@ -616,7 +611,7 @@ define( require => {
      * Attaches our transform tracker (begins listening to the ancestor transforms)
      * @private
      */
-    attachTransformTracker: function() {
+    attachTransformTracker() {
       if ( this._trackAncestors ) {
         this._transformTracker = new TransformTracker( this.pressedTrail.copy().removeDescendant() );
         this._transformTracker.addListener( this._transformTrackerListener );
@@ -627,7 +622,7 @@ define( require => {
      * Detaches our transform tracker (stops listening to the ancestor transforms)
      * @private
      */
-    detachTransformTracker: function() {
+    detachTransformTracker() {
       if ( this._transformTracker ) {
         this._transformTracker.removeListener( this._transformTrackerListener );
         this._transformTracker.dispose();
@@ -641,7 +636,7 @@ define( require => {
      *
      * @param {Bounds2} bounds
      */
-    setDragBounds: function( bounds ) {
+    setDragBounds( bounds ) {
       assert && assert( bounds instanceof Bounds2 );
 
       this._dragBoundsProperty.value = bounds;
@@ -654,7 +649,7 @@ define( require => {
      *
      * @returns {Bounds2}
      */
-    getDragBounds: function() {
+    getDragBounds() {
       return this._dragBoundsProperty.value;
     },
     get dragBounds() { return this.getDragBounds(); },
@@ -665,7 +660,7 @@ define( require => {
      *
      * @param {Bounds2} transform
      */
-    setTransform: function( transform ) {
+    setTransform( transform ) {
       assert && assert( transform instanceof Transform3 );
 
       this._transform = transform;
@@ -678,7 +673,7 @@ define( require => {
      *
      * @returns {Transform3}
      */
-    getTransform: function() {
+    getTransform() {
       return this._transform;
     },
     get transform() { return this.getTransform(); },
@@ -693,7 +688,7 @@ define( require => {
      *
      * This can be called manually, but can also be called through node.interruptSubtreeInput().
      */
-    interrupt: function() {
+    interrupt() {
       if ( this.pointer && this.pointer instanceof Touch ) {
         this._lastInterruptedTouchPointer = this.pointer;
       }
@@ -709,7 +704,7 @@ define( require => {
      * @param {Event} event
      * @returns {boolean}
      */
-    canPress: function( event ) {
+    canPress( event ) {
       if ( event.pointer === this._lastInterruptedTouchPointer ) {
         return false;
       }
@@ -721,7 +716,7 @@ define( require => {
      * Disposes the listener, releasing references. It should not be used after this.
      * @public
      */
-    dispose: function() {
+    dispose() {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener dispose' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -744,22 +739,22 @@ define( require => {
      * @param {Object} [options]
      * @returns {Object} a scenery input listener
      */
-    createForwardingListener: function( down, options ) {
+    createForwardingListener( down, options ) {
 
       options = merge( {
         allowTouchSnag: true // see https://github.com/phetsims/scenery/issues/999
       }, options );
 
       return {
-        down: function( event ) {
+        down( event ) {
           if ( event.canStartPress() ) {
             down( event );
           }
         },
-        touchenter: function( event ) {
+        touchenter( event ) {
           options.allowTouchSnag && this.down( event );
         },
-        touchmove: function( event ) {
+        touchmove( event ) {
           options.allowTouchSnag && this.down( event );
         }
       };
