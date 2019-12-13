@@ -80,9 +80,12 @@ define( require => {
       applyOffset: true,
 
       // {boolean} - If set to true, then any offsets applied will be handled in the parent coordinate space using the
-      // locationProperty as the "ground truth", instead of looking at the node's actual location and transform. This
+      // locationProperty as the "ground truth", instead of looking at the Node's actual location and transform. This
       // is useful if the location/transform cannot be applied directly to a single Node (e.g. positioning multiple
       // independent nodes, or centering things instead of transforming based on the origin of the Node).
+      //
+      // NOTE: Use this option most likely if converting from MoveableDragHandler, because it transformed based in
+      // the parent's coordinate frame. See https://github.com/phetsims/scenery/issues/1014
       useParentOffset: false,
 
       // {boolean} - If true, ancestor transforms will be watched. If they change, it will trigger a repositioning,
