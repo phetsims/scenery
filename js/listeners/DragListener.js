@@ -582,7 +582,6 @@ define( require => {
 
       // Complete the delta computation
       this._modelDelta.add( this._modelPoint );
-      console.log( this._modelDelta.toString() );
 
       // Apply any mapping changes back to the parent point
       this.modelToParentPoint( this._parentPoint.set( this._modelPoint ) );
