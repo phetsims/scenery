@@ -185,6 +185,9 @@ define( require => {
     // @private {Vector2} - Current drag point in the model coordinate frame
     this._modelPoint = new Vector2( 0, 0 );
 
+    // @private {Vector2} - Stores the model delta computed during every repositioning
+    this._modelDelta = new Vector2( 0, 0 );
+
     // @private {Vector2} - If useParentOffset is true, this will be set to the parent-coordinate offset at the start
     // of a drag, and the "offset" will be handled by applying this offset compared to where the pointer is.
     this._parentOffset = new Vector2( 0, 0 );
@@ -396,6 +399,17 @@ define( require => {
     get modelPoint() { return this.getModelPoint(); },
 
     /**
+     * Returns a defensive copy of the model-coordinate-frame delta.
+     * @public
+     *
+     * @returns {Vector2}
+     */
+    getModelDelta() {
+      return this._modelDelta.copy();
+    },
+    get modelDelta() { return this.getModelDelta(); },
+
+    /**
      * Maps a point from the global coordinate frame to our drag target's parent coordinate frame.
      * @protected
      *
@@ -560,8 +574,15 @@ define( require => {
       // Update parentPoint mutably.
       this.applyParentOffset( this.globalToParentPoint( this._parentPoint.set( globalPoint ) ) );
 
+      // To compute the delta (new - old), we first mutate it to (-old)
+      this._modelDelta.set( this._modelPoint ).negate();
+
       // Compute the modelPoint from the parentPoint
       this._modelPoint = this.mapModelPoint( this.parentToModelPoint( scratchVector2A.set( this._parentPoint ) ) );
+
+      // Complete the delta computation
+      this._modelDelta.add( this._modelPoint );
+      console.log( this._modelDelta.toString() );
 
       // Apply any mapping changes back to the parent point
       this.modelToParentPoint( this._parentPoint.set( this._modelPoint ) );
