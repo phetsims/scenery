@@ -45,20 +45,6 @@ define( require => {
    */
   function PressListener( options ) {
     options = merge( {
-      // {number} - Restricts to the specific mouse button (but allows any touch). Only one mouse button is allowed at
-      // a time. The button numbers are defined in https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/button,
-      // where typically:
-      //   0: Left mouse button
-      //   1: Middle mouse button (or wheel press)
-      //   2: Right mouse button
-      //   3+: other specific numbered buttons that are more rare
-      mouseButton: 0,
-
-      // {string|null} - Sets the pointer cursor to this value when this listener is "pressed". This means that even
-      // when the mouse moves out of the node after pressing down, it will still have this cursor (overriding the
-      // cursor of whatever nodes the pointer may be over).
-      pressCursor: 'pointer',
-
       // {function} - Called as press( event: {Event}, listener: {PressListener} ) when this listener's node is pressed
       // (typically from a down event, but can be triggered by other handlers).
       press: _.noop,
@@ -82,6 +68,20 @@ define( require => {
       // will mark itself as attached to the pointer. If this listener should not be interrupted by others and isn't
       // a "primary" handler of the pointer's behavior, this should be set to false.
       attach: true,
+
+      // {number} - Restricts to the specific mouse button (but allows any touch). Only one mouse button is allowed at
+      // a time. The button numbers are defined in https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/button,
+      // where typically:
+      //   0: Left mouse button
+      //   1: Middle mouse button (or wheel press)
+      //   2: Right mouse button
+      //   3+: other specific numbered buttons that are more rare
+      mouseButton: 0,
+
+      // {string|null} - Sets the pointer cursor to this value when this listener is "pressed". This means that even
+      // when the mouse moves out of the node after pressing down, it will still have this cursor (overriding the
+      // cursor of whatever nodes the pointer may be over).
+      pressCursor: 'pointer',
 
       // {function} - Checks this when trying to start a press. If this function returns false, a press will not be
       // started. Called as canStartPress( event: {Event|null}, listener: {PressListener} ), since sometimes the

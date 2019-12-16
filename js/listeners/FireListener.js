@@ -72,7 +72,7 @@ define( require => {
      * @param {Event|null} event
      * NOTE: This is safe to call on the listener externally.
      */
-    fire: function( event ) {
+    fire( event ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'FireListener fire' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -95,13 +95,11 @@ define( require => {
      * @param {function} [callback] - to be run at the end of the function, but only on success
      * @returns {boolean} success - Returns whether the press was actually started
      */
-    press: function( event, targetNode, callback ) {
-      const self = this;
-
-      return PressListener.prototype.press.call( this, event, targetNode, function() {
+    press( event, targetNode, callback ) {
+      return PressListener.prototype.press.call( this, event, targetNode, () => {
         // This function is only called on success
-        if ( self._fireOnDown ) {
-          self.fire( event );
+        if ( this._fireOnDown ) {
+          this.fire( event );
         }
         callback && callback();
       } );
@@ -119,13 +117,11 @@ define( require => {
      * @param {Event} [event] - scenery Event if there was one
      * @param {function} [callback] - called at the end of the release
      */
-    release: function( event, callback ) {
-      const self = this;
-
-      PressListener.prototype.release.call( this, event, function() {
+    release( event, callback ) {
+      PressListener.prototype.release.call( this, event, () => {
         // Notify after the rest of release is called in order to prevent it from triggering interrupt().
-        if ( !self._fireOnDown && self.isHoveringProperty.value && !self.interrupted ) {
-          self.fire( event );
+        if ( !this._fireOnDown && this.isHoveringProperty.value && !this.interrupted ) {
+          this.fire( event );
         }
         callback && callback();
       } );
@@ -135,8 +131,9 @@ define( require => {
      * @override
      * @public
      */
-    dispose: function() {
+    dispose() {
       this.firedEmitter.dispose();
+
       PressListener.prototype.dispose.call( this );
     }
   } );

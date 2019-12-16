@@ -67,6 +67,27 @@ define( require => {
    */
   function DragListener( options ) {
     options = merge( {
+
+      // {Property.<Vector2>|null} - If provided, it will be synchronized with the drag location in the model coordinate
+      // frame (applying any provided transforms as needed).
+      locationProperty: null,
+
+      // {Function|null} - Called as start( event: {Event}, listener: {DragListener} ) when the drag is started.
+      // This is preferred over passing press(), as the drag start hasn't been fully processed at that point.
+      start: null,
+
+      // {Function|null} - Called as end( listener: {DragListener} ) when the drag is ended. This is preferred over
+      // passing release(), as the drag start hasn't been fully processed at that point.
+      // NOTE: This will also be called if the drag is ended due to being interrupted or canceled.
+      end: null,
+
+      // {Transform3|null} - If provided, this will be the conversion between the parent (view) and model coordinate
+      // frames. Usually most useful when paired with the locationProperty.
+      transform: null,
+
+      // {Property.<Bounds2|null>} - If provided, the model location will be constrained to be inside these bounds.
+      dragBoundsProperty: null,
+
       // {boolean} - If true, unattached touches that move across our node will trigger a press(). This helps sometimes
       // for small draggable objects.
       allowTouchSnag: true,
@@ -95,17 +116,6 @@ define( require => {
       // {boolean} - If true, the effective currentTarget will be translated when the drag position changes.
       translateNode: false,
 
-      // {Transform3|null} - If provided, this will be the conversion between the parent (view) and model coordinate
-      // frames. Usually most useful when paired with the locationProperty.
-      transform: null,
-
-      // {Property.<Vector2>|null} - If provided, it will be synchronized with the drag location in the model coordinate
-      // frame (applying any provided transforms as needed).
-      locationProperty: null,
-
-      // {Property.<Bounds2|null>} - If provided, the model location will be constrained to be inside these bounds.
-      dragBoundsProperty: null,
-
       // {Function|null} - function( modelPoint: {Vector2} ) : {Vector2}. If provided, it will allow custom mapping
       // from the desired location (i.e. where the pointer is) to the actual possible location (i.e. where the dragged
       // object ends up). For example, using dragBoundsProperty is equivalent to passing:
@@ -116,15 +126,6 @@ define( require => {
       // result will be added to the parentPoint before computation continues, to allow the ability to "offset" where
       // the pointer location seems to be. Useful for touch, where things shouldn't be under the pointer directly.
       offsetLocation: null,
-
-      // {Function|null} - Called as start( event: {Event}, listener: {DragListener} ) when the drag is started.
-      // This is preferred over passing press(), as the drag start hasn't been fully processed at that point.
-      start: null,
-
-      // {Function|null} - Called as end( listener: {DragListener} ) when the drag is ended. This is preferred over
-      // passing release(), as the drag start hasn't been fully processed at that point.
-      // NOTE: This will also be called if the drag is ended due to being interrupted or canceled.
-      end: null,
 
       // {Tandem} - For instrumenting
       tandem: Tandem.REQUIRED,
