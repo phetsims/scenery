@@ -53,11 +53,14 @@ define( require => {
       phetioEventType: EventType.USER
     }, options );
 
-    this.buttonState = 'up'; // public: 'up', 'over', 'down' or 'out'
+    // @public {string} - 'up', 'over', 'down' or 'out'
+    this.buttonState = 'up';
 
-    this._overCount = 0; // how many pointers are over us (track a count, so we can handle multiple pointers gracefully)
+    // @private {number} - how many pointers are over us (track a count, so we can handle multiple pointers gracefully)
+    this._overCount = 0;
 
-    this._buttonOptions = options; // store the options object so we can call the callbacks
+    // @private {Object} - store the options object so we can call the callbacks
+    this._buttonOptions = options;
 
     // TODO: pass through options
     DownUpListener.call( this, {

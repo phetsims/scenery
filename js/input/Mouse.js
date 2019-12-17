@@ -10,9 +10,8 @@ define( require => {
   'use strict';
 
   const inherit = require( 'PHET_CORE/inherit' );
+  const Pointer = require( 'SCENERY/input/Pointer' );
   const scenery = require( 'SCENERY/scenery' );
-
-  const Pointer = require( 'SCENERY/input/Pointer' ); // inherits from Pointer
   const Vector3 = require( 'DOT/Vector3' );
 
   /**
@@ -25,14 +24,18 @@ define( require => {
     // @public {number|null} - Since we need to track the mouse's pointer id occasionally
     this.id = null;
 
-    // @deprecated, see https://github.com/phetsims/scenery/issues/803
+    // @public {boolean} @deprecated, see https://github.com/phetsims/scenery/issues/803
     this.leftDown = false;
     this.middleDown = false;
     this.rightDown = false;
 
-    // mouse wheel delta and mode for the last event, see https://developer.mozilla.org/en-US/docs/Web/Events/wheel
+    // @public {Vector3} - Mouse wheel delta for the last event, see
+    // https://developer.mozilla.org/en-US/docs/Web/Events/wheel
     this.wheelDelta = new Vector3( 0, 0, 0 );
-    this.wheelDeltaMode = 0; // 0: pixels, 1: lines, 2: pages
+
+    // @public {number} - Mouse wheel mode for the last event (0: pixels, 1: lines, 2: pages), see
+    // https://developer.mozilla.org/en-US/docs/Web/Events/wheel
+    this.wheelDeltaMode = 0;
 
     sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'Created ' + this.toString() );
   }
@@ -41,10 +44,18 @@ define( require => {
 
   inherit( Pointer, Mouse, {
 
+    /**
+     * Sets information in this Mouse for a given mouse down.
+     * @public (scenery-internal)
+     *
+     * @param {Vector2} point
+     * @param {DOMEvent} event
+     * @returns {boolean} - Whether the point changed
+     */
     down: function( point, event ) {
       const pointChanged = this.hasPointChanged( point );
       point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'mouse down at ' + point.toString() );
-      // if ( this.point ) { this.point.freeToPool(); }
+
       this.point = point;
       this.isDown = true;
       switch( event.button ) {
@@ -63,10 +74,18 @@ define( require => {
       return pointChanged;
     },
 
+    /**
+     * Sets information in this Mouse for a given mouse up.
+     * @public (scenery-internal)
+     *
+     * @param {Vector2} point
+     * @param {DOMEvent} event
+     * @returns {boolean} - Whether the point changed
+     */
     up: function( point, event ) {
       const pointChanged = this.hasPointChanged( point );
       point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'mouse up at ' + point.toString() );
-      // if ( this.point ) { this.point.freeToPool(); }
+
       this.point = point;
       this.isDown = false;
       switch( event.button ) {
@@ -85,38 +104,76 @@ define( require => {
       return pointChanged;
     },
 
+    /**
+     * Sets information in this Mouse for a given mouse move.
+     * @public (scenery-internal)
+     *
+     * @param {Vector2} point
+     * @param {DOMEvent} event
+     * @returns {boolean} - Whether the point changed
+     */
     move: function( point, event ) {
       const pointChanged = this.hasPointChanged( point );
       point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'mouse move at ' + point.toString() );
-      // if ( this.point ) { this.point.freeToPool(); }
+
       this.point = point;
       return pointChanged;
     },
 
+    /**
+     * Sets information in this Mouse for a given mouse over.
+     * @public (scenery-internal)
+     *
+     * @param {Vector2} point
+     * @param {DOMEvent} event
+     * @returns {boolean} - Whether the point changed
+     */
     over: function( point, event ) {
       const pointChanged = this.hasPointChanged( point );
       point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'mouse over at ' + point.toString() );
-      // if ( this.point ) { this.point.freeToPool(); }
+
       this.point = point;
       return pointChanged;
     },
 
+    /**
+     * Sets information in this Mouse for a given mouse out.
+     * @public (scenery-internal)
+     *
+     * @param {Vector2} point
+     * @param {DOMEvent} event
+     * @returns {boolean} - Whether the point changed
+     */
     out: function( point, event ) {
       const pointChanged = this.hasPointChanged( point );
       point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'mouse out at ' + point.toString() );
-      // if ( this.point ) { this.point.freeToPool(); }
+
       // TODO: how to handle the mouse out-of-bounds
       this.point = null;
       return pointChanged;
     },
 
+
+    /**
+     * Sets information in this Mouse for a given mouse wheel.
+     * @public (scenery-internal)
+     *
+     * @param {DOMEvent} event
+     */
     wheel: function( event ) {
       this.wheelDelta.setXYZ( event.deltaX, event.deltaY, event.deltaZ );
       this.wheelDeltaMode = event.deltaMode;
     },
 
+    /**
+     * Returns an improved string representation of this object.
+     * @public
+     * @override
+     *
+     * @returns {string}
+     */
     toString: function() {
-      return 'Mouse';
+      return 'Mouse'; // there is only one
     }
   } );
 

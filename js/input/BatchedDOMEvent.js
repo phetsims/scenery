@@ -19,16 +19,22 @@ define( require => {
    * @constructor
    * @mixes Poolable
    *
-   * @param domEvent
-   * @param type
-   * @param callback
+   * @param {DOMEvent} domEvent
+   * @param {string} type
+   * @param {function} callback
    */
   function BatchedDOMEvent( domEvent, type, callback ) {
     assert && assert( domEvent, 'for some reason, there is no DOM event?' );
 
     // called multiple times due to pooling, this should be re-entrant
+
+    // @public {DOMEvent}
     this.domEvent = domEvent;
+
+    // @public {string} type
     this.type = type;
+
+    // @public {function} callback
     this.callback = callback;
   }
 

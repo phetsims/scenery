@@ -1,11 +1,8 @@
 // Copyright 2013-2019, University of Colorado Boulder
 
-
 /**
  * Basic down/up pointer handling for a Node, so that it's easy to handle buttons
  *
- * TODO: test hand handle down, go off screen, up. How to handle that properly?
- * TODO: tests
  * @deprecated - use PressListener instead
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -19,13 +16,14 @@ define( require => {
   const PhetioObject = require( 'TANDEM/PhetioObject' );
   const scenery = require( 'SCENERY/scenery' );
   const Trail = require( 'SCENERY/util/Trail' );
-  require( 'SCENERY/util/Trail' );
 
-  /*
-   * The 'trail' parameter passed to down/upInside/upOutside will end with the node to which this DownUpListener has been added.
+  /**
+   * The 'trail' parameter passed to down/upInside/upOutside will end with the node to which this DownUpListener has
+   * been added.
    *
    * Allowed options: {
-   *    mouseButton: 0  // The mouse button to use: left: 0, middle: 1, right: 2, see https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
+   *    mouseButton: 0  // The mouse button to use: left: 0, middle: 1, right: 2, see
+   *                    // https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
    *    down: null      // down( event, trail ) is called when the pointer is pressed down on this node
    *                    // (and another pointer is not already down on it).
    *    up: null        // up( event, trail ) is called after 'down', regardless of the pointer's current location.
@@ -36,6 +34,8 @@ define( require => {
    *                    // this node (it or a descendant is the not top pickable node under the pointer, even if the
    *                    // same instance is still directly under the pointer)
    * }
+   *
+   * @param {Object} [options]
    */
   function DownUpListener( options ) {
     const self = this;
@@ -45,14 +45,27 @@ define( require => {
     }, options );
 
     PhetioObject.call( this, options );
-    this.options = options; // @private
-    this.isDown = false;   // public, whether this listener is down
-    this.downCurrentTarget = null; // 'up' is handled via a pointer lister, which will have null currentTarget, so save the 'down' currentTarget
+
+    // @private {Object}
+    this.options = options;
+
+    // @public {boolean} - whether this listener is down
+    this.isDown = false;
+
+    // @public {Node|null} - 'up' is handled via a pointer lister, which will have null currentTarget, so save the
+    // 'down' currentTarget
+    this.downCurrentTarget = null;
+
+    // @public {Trail|null}
     this.downTrail = null;
+
+    // @public {Pointer|null}
     this.pointer = null;
+
+    // @public {boolean}
     this.interrupted = false;
 
-    // this listener gets added to the pointer on a 'down'
+    // @private {function} - this listener gets added to the pointer on a 'down'
     this.downListener = {
       // mouse/touch up
       up: function( event ) {
