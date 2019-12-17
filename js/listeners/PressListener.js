@@ -54,17 +54,17 @@ define( require => {
    */
   function PressListener( options ) {
     options = merge( {
-      // {function} - Called as press( event: {Event}, listener: {PressListener} ) when this listener's node is pressed
+      // {function} - Called as press( event: {Event}, listener: {PressListener} ) when this listener is pressed
       // (typically from a down event, but can be triggered by other handlers).
       press: _.noop,
 
-      // {function} - Called as release( event: {Event|null}, listener: {PressListener} ) when this listener's node is released
+      // {function} - Called as release( event: {Event|null}, listener: {PressListener} ) when this listener is released
       // Note that an Event arg cannot be guaranteed from this listener. This is, in part, to support interrupt.
       // (pointer up/cancel or interrupt when pressed/after a11y click).
       // NOTE: This will also be called if the press is "released" due to being interrupted or canceled.
       release: _.noop,
 
-      // {function} - Called as drag( event: {Event}, listener: {PressListener} ) when this listener's node is
+      // {function} - Called as drag( event: {Event}, listener: {PressListener} ) when this listener is
       // dragged (move events on the pointer while pressed).
       drag: _.noop,
 
@@ -154,7 +154,7 @@ define( require => {
     // 'enter' events and removing with 'exit' events.
     this.overPointers = new ObservableArray();
 
-    // @public {Property.<Boolean>} [read-only] - Tracks whether this listener's node is "pressed" or not
+    // @public {Property.<Boolean>} [read-only] - Tracks whether this listener is "pressed" or not
     this.isPressedProperty = new BooleanProperty( false, { reentrant: true } );
 
     // @public {Property.<boolean>} ]read-only] - It will be set to true when at least one pointer is over the listener.
