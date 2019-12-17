@@ -60,6 +60,11 @@
  *     }
  *   } )
  *
+ * It's completely fine to use one DragListener with multiple objects, however this isn't done as much since specifying
+ * locationProperty only works with ONE model position Property (so if things are backed by the same Property it would
+ * be fine). Doing things based on modelPoint/modelDelta/etc. should be completely fine using one listener with
+ * multiple nodes. The typical pattern IS creating one DragListener per draggable view Node.
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -96,7 +101,9 @@ define( require => {
     options = merge( {
 
       // {Property.<Vector2>|null} - If provided, it will be synchronized with the drag location in the model coordinate
-      // frame (applying any provided transforms as needed).
+      // frame (applying any provided transforms as needed). Typically, DURING a drag this Property should not be
+      // modified externally (as the next drag event will probably undo the change), but it's completely fine to modify
+      // this Property at any other time.
       locationProperty: null,
 
       // {Function|null} - Called as start( event: {Event}, listener: {DragListener} ) when the drag is started.

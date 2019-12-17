@@ -810,9 +810,14 @@ define( require => {
       }
       !this.isHoveringProperty.isDisposed && this.isHoveringProperty.unlink( this._isHighlightedListener );
 
+      this.overPointers.dispose();
+      this.isPressedProperty.dispose();
+      this.isOverProperty.dispose();
+      this.isHoveringProperty.dispose();
+      this.isHighlightedProperty.dispose();
+      this.isFocusedProperty.dispose();
       this.a11yClickingProperty.dispose();
       this.looksPressedProperty.dispose();
-
       this._pressAction.dispose();
       this._releaseAction.dispose();
 
