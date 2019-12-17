@@ -449,6 +449,19 @@ define( require => {
     },
 
     /**
+     * This should be called when the listened "Node" is effectively removed from the scene graph AND
+     * expected to be placed back in such that it could potentially get multiple "enter" events, see
+     * https://github.com/phetsims/scenery/issues/1021
+     * @public
+     *
+     * This will clear the list of pointers considered "over" the Node, so that when it is placed back in, the state
+     * will be correct, and another "enter" event will not be missing an "exit".
+     */
+    clearOverPointers() {
+      this.overPointers.clear(); // We have listeners that will trigger the proper refreshes
+    },
+
+    /**
      * Recomputes the value for isOverProperty. Separate to reduce anonymous function closures.
      * @private
      */
