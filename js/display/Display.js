@@ -1141,6 +1141,24 @@ define( require => {
     },
     get inputListeners() { return this.getInputListeners(); },
 
+    /**
+     * Interrupts all input listeners that are attached to this Display.
+     * @public
+     *
+     * @returns {Display} - For chaining
+     */
+    interruptInput: function() {
+      const listenersCopy = this.inputListeners;
+
+      for ( let i = 0; i < listenersCopy.length; i++ ) {
+        const listener = listenersCopy[ i ];
+
+        listener.interrupt && listener.interrupt();
+      }
+
+      return this;
+    },
+
     ensureNotPainting: function() {
       assert && assert( !this._isPainting,
         'This should not be run in the call tree of updateDisplay(). If you see this, it is likely that either the ' +

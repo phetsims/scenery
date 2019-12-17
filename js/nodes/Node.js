@@ -1935,7 +1935,7 @@ define( require => {
       for ( let i = 0; i < listenersCopy.length; i++ ) {
         const listener = listenersCopy[ i ];
 
-        listener.interrupt && listener.interrupt(); // TODO: get rid of the event?
+        listener.interrupt && listener.interrupt();
       }
 
       return this;
