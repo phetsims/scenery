@@ -154,34 +154,34 @@ define( require => {
     // 'enter' events and removing with 'exit' events.
     this.overPointers = new ObservableArray();
 
-    // @public {Property.<Boolean>} [read-only] - Tracks whether this listener is "pressed" or not
+    // @public {Property.<Boolean>} (read-only) - Tracks whether this listener is "pressed" or not.
     this.isPressedProperty = new BooleanProperty( false, { reentrant: true } );
 
-    // @public {Property.<boolean>} ]read-only] - It will be set to true when at least one pointer is over the listener.
+    // @public {Property.<boolean>} (read-only) - It will be set to true when at least one pointer is over the listener.
     this.isOverProperty = new BooleanProperty( false );
 
-    // @public {Property.<boolean>} [read-only] - It will be set to true when either:
+    // @public {Property.<boolean>} (read-only) - It will be set to true when either:
     //   1. The listener is pressed and the pointer that is pressing is over the listener.
     //   2. There is at least one unpressed pointer that is over the listener.
     this.isHoveringProperty = new BooleanProperty( false );
 
-    // @public {Property.<Boolean>} [read-only] - It will be set to true when either:
+    // @public {Property.<Boolean>} (read-only) - It will be set to true when either:
     //   1. The listener is pressed.
     //   2. There is at least one unpressed pointer that is over the listener.
     // This is essentially true when ( isPressed || isHovering ).
     this.isHighlightedProperty = new BooleanProperty( false );
 
-    // @public {Property.<boolean>} [read-only] - Whether the listener has focus (should appear to be over)
+    // @public {Property.<boolean>} (read-only) - Whether the listener has focus (should appear to be over)
     this.isFocusedProperty = new BooleanProperty( false );
 
-    // @public {Pointer|null} [read-only] - The current pointer, or null when not pressed.
+    // @public {Pointer|null} (read-only) - The current pointer, or null when not pressed.
     this.pointer = null;
 
-    // @public {Trail|null} [read-only] - The Trail for the press, with no descendant nodes past the currentTarget
+    // @public {Trail|null} (read-only) - The Trail for the press, with no descendant nodes past the currentTarget
     // or targetNode (if provided). Will be null when not pressed.
     this.pressedTrail = null;
 
-    // @public {boolean} [read-only] - Whether the last press was interrupted. Will be valid until the next press.
+    // @public {boolean} (read-only) - Whether the last press was interrupted. Will be valid until the next press.
     this.interrupted = false;
 
     // @private {boolean} - Whether our pointer listener is referenced by the pointer (need to have a flag due to
@@ -196,10 +196,10 @@ define( require => {
     // properties)
     this._isHighlightedListener = this.invalidateHighlighted.bind( this );
 
-    // @public {BooleanProperty} [read-only] - Whether or not a press is being processed from an a11y click input event.
+    // @public {BooleanProperty} (read-only) - Whether or not a press is being processed from an a11y click input event.
     this.a11yClickingProperty = new BooleanProperty( false );
 
-    // @public {BooleanProperty} [read-only] - This Property was added for a11y. It tracks whether or not the button
+    // @public {BooleanProperty} (read-only) - This Property was added for a11y. It tracks whether or not the button
     // should "look" down. This will be true if downProperty is true or if an a11y click is in progress. For an a11y
     // click, the listeners are fired right away but the button will look down for as long as a11yLooksPressedInterval.
     // See PressListener.click() for more details.
