@@ -73,19 +73,31 @@ define( require => {
       phetioDocumentation: 'Indicates whether the object is dragging'
     } );
 
-    this.pointer = null;              // the pointer doing the current dragging
-    this.trail = null;                // stores the path to the node that is being dragged
-    this.transform = null;            // transform of the trail to our node (but not including our node, so we can prepend the deltas)
-    this.node = null;                 // the node that we are handling the drag for
-    this.lastDragPoint = null;        // the location of the drag at the previous event (so we can calculate a delta)
-    this.startTransformMatrix = null; // the node's transform at the start of the drag, so we can reset on a touch cancel
-    this.mouseButton = undefined;     // tracks which mouse button was pressed, so we can handle that specifically
+    // @public {Pointer|null} - the pointer doing the current dragging
+    this.pointer = null;
+
+    // @public {Trail|null} - stores the path to the node that is being dragged
+    this.trail = null;
+
+    // @public {Transform3|null} - transform of the trail to our node (but not including our node, so we can prepend
+    // the deltas)
+    this.transform = null;
+
+    // @public {Node|null} - the node that we are handling the drag for
+    this.node = null;
+
+    // @protected {Vector2|null} - the location of the drag at the previous event (so we can calculate a delta)
+    this.lastDragPoint = null;
+
+    // @protected {Matrix3|null} - the node's transform at the start of the drag, so we can reset on a touch cancel
+    this.startTransformMatrix = null;
+
+    // @public {number|undefined} - tracks which mouse button was pressed, so we can handle that specifically
+    this.mouseButton = undefined;
 
     // @public {boolean} - This will be set to true for endDrag calls that are the result of the listener being
     // interrupted. It will be set back to false after the endDrag is finished.
     this.interrupted = false;
-
-    // TODO: consider mouse buttons as separate pointers?
 
     // @private {Pointer|null} - There are cases like https://github.com/phetsims/equality-explorer/issues/97 where if
     // a touchenter starts a drag that is IMMEDIATELY interrupted, the touchdown would start another drag. We record
@@ -93,7 +105,7 @@ define( require => {
     // another startDrag.
     this.lastInterruptedTouchPointer = null;
 
-    // @private
+    // @private {Action}
     this.dragStartAction = new Action( function( point, event ) {
 
       if ( self.dragging ) { return; }
@@ -139,7 +151,7 @@ define( require => {
       } ]
     } );
 
-    // @private
+    // @private {Action}
     this.dragAction = new Action( function( point, event ) {
 
       if ( !self.dragging || self.isDisposed ) { return; }
@@ -195,7 +207,7 @@ define( require => {
       } ]
     } );
 
-    // @private
+    // @private {Action}
     this.dragEndAction = new Action( function( point, event ) {
 
       if ( !self.dragging ) { return; }
@@ -239,7 +251,7 @@ define( require => {
       ]
     } );
 
-    // if an ancestor is transformed, pin our node
+    // @protected {function} - if an ancestor is transformed, pin our node
     this.transformListener = {
       transform: function( args ) {
         if ( !self.trail.isExtensionOf( args.trail, true ) ) {
@@ -257,7 +269,7 @@ define( require => {
       }
     };
 
-    // this listener gets added to the pointer when it starts dragging our node
+    // @protected {function} - this listener gets added to the pointer when it starts dragging our node
     this.dragListener = {
       // mouse/touch up
       up: function( event ) {
