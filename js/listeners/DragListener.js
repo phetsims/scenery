@@ -33,6 +33,33 @@
  *
  * For example usage, see scenery/examples/input.html
  *
+ * For most PhET model-view usage, it's recommended to include a model position Property as the `locationProperty`
+ * option, along with the `transform` option specifying the MVT. By default, this will then assume that the Node with
+ * the listener is positioned in the "view" coordinate frame, and will properly handle offsets and transformations.
+ * It is assumed that when the model `locationProperty` changes, that the location of the Node would also change.
+ * If it's another Node being transformed, please use the `targetNode` option to specify which Node is being
+ * transformed. If something more complicated than a Node being transformed is going on (like positioning multiple
+ * items, positioning based on the center, changing something in CanvasNode), it's recommended to pass the
+ * `useParentOffset` option (so that the DragListener will NOT try to compute offsets based on the Node's position), or
+ * to use `applyOffset:false` (effectively having drags reposition the Node so that the origin is at the pointer).
+ *
+ * The typical PhET usage would look like:
+ *
+ *   new DragListener( {
+ *     locationProperty: someObject.positionProperty,
+ *     transform: modelViewTransform
+ *   } )
+ *
+ * Additionally, for PhET usage it's also fine NOT to hook into a `locationProperty`. Typically using start/end/drag,
+ * and values can be read out (like `modelPoint`, `localPoint`, `parentPoint`, `modelDelta`) from the listener to do
+ * operations. For instance, if deltas and model positions are the only thing desired:
+ *
+ *   new DragListener( {
+ *     drag: ( event, listener ) => {
+ *       doSomethingWith( listener.modelDelta, listener.modelPoint );
+ *     }
+ *   } )
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 

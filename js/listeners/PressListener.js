@@ -7,7 +7,16 @@
  * This is the base type for both DragListener and FireListener, which contains the shared logic that would be needed
  * by both.
  *
- * For example usage, see scenery/examples/input.html
+ * PressListener is fine to use directly, particularly when drag-coordinate information is needed (e.g. DragListener),
+ * or if the interaction is more complicated than a simple button fire (e.g. FireListener).
+ *
+ * For example usage, see scenery/examples/input.html. Additionally, a typical "simple" PressListener direct usage
+ * would be something like:
+ *
+ *   someNode.addInputListener( new PressListener( {
+ *     press: () => { ... },
+ *     release: () => { ... }
+ *   } ) );
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -62,6 +71,8 @@ define( require => {
       // {Node|null} - If provided, the pressedTrail (calculated from the down event) will be replaced with the
       // (sub)trail that ends with the targetNode as the leaf-most Node. This affects the parent coordinate frame
       // computations.
+      // This is ideally used when the Node which has this input listener is different from the Node being transformed,
+      // as otherwise offsets and drag behavior would be incorrect by default.
       targetNode: null,
 
       // {boolean} - If true, this listener will not "press" while the associated pointer is attached, and when pressed,

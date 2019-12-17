@@ -1,6 +1,5 @@
 // Copyright 2013-2019, University of Colorado Boulder
 
-
 /**
  * Basic button handling.
  *
@@ -12,6 +11,9 @@
  *
  * TODO: offscreen handling
  * TODO: fix enter/exit edge cases for moving nodes or add/remove child, and when touches are created
+ *
+ * @deprecated - please use FireListener for new code (set up for the `fire` callback to be easy, and has Properties
+ * that can be checked for the other states or complicated cases)
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

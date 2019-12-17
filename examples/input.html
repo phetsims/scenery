@@ -241,7 +241,7 @@
   transformContainer.addChild( constrainedNode );
   constrainedNode.addInputListener( new scenery.DragListener( {
     translateNode: true,
-    dragBounds: constrainBounds.eroded( constrainedNode.radius )
+    dragBoundsProperty: new axon.Property( constrainBounds.eroded( constrainedNode.radius ) )
   } ) );
 
   /*---------------------------------------------------------------------------*

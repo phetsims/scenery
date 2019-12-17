@@ -1,11 +1,7 @@
 // Copyright 2017-2019, University of Colorado Boulder
 
 /**
- * TODO: doc
- *
- * TODO: unit tests
- *
- * TODO: add example usage
+ * NOTE: Not a fully finished product, please BEWARE before using this in code.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -13,7 +9,7 @@ define( require => {
   'use strict';
 
   // modules
-  var Bounds2 = require( 'DOT/Bounds2' );
+  const Bounds2 = require( 'DOT/Bounds2' );
   const merge = require( 'PHET_CORE/merge' );
   const MultiListener = require( 'SCENERY/listeners/MultiListener' );
   const scenery = require( 'SCENERY/scenery' );
