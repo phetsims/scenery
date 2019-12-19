@@ -27,7 +27,7 @@ define( require => {
      * @param {Trail} trail - The trail to the node picked/hit by this input event.
      * @param {string} type - Type of the event, e.g. 'string'
      * @param {Pointer} pointer - The pointer that triggered this event
-     * @param {DOMEvent|null} domEvent - The original DOM Event that caused this SceneryEvent to fire.
+     * @param {Event|null} domEvent - The original DOM Event that caused this SceneryEvent to fire.
      */
     constructor( trail, type, pointer, domEvent ) {
       assert && assert( trail instanceof Trail, 'SceneryEvent\'s trail parameter should be a {Trail}' );
@@ -50,7 +50,7 @@ define( require => {
       // @public {Pointer} - The pointer that triggered this event
       this.pointer = pointer;
 
-      // @public {DOMEvent|null} - Raw DOM InputEvent (TouchEvent, PointerEvent, MouseEvent,...)
+      // @public {Event|null} - Raw DOM InputEvent (TouchEvent, PointerEvent, MouseEvent,...)
       this.domEvent = domEvent;
 
       // @public {Node|null} - whatever node you attached the listener to, or null when firing events on a Pointer

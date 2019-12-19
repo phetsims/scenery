@@ -55,7 +55,7 @@ define( require => {
     KEY_S: 83,
     KEY_W: 87,
 
-    // beware that "="" and "+" keys share the same keycode, distinguish with shfitKey DOMEvent property
+    // beware that "="" and "+" keys share the same keycode, distinguish with shfitKey Event property
     // also, these keycodes are different in Firefox, see http://www.javascripter.net/faq/keycodes.htm
     KEY_EQUALS: platform.firefox ? 61 : 187,
     KEY_PLUS: platform.firefox ? 61 : 187,

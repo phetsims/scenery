@@ -49,7 +49,7 @@ define( require => {
      * @public (scenery-internal)
      *
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      * @returns {boolean} - Whether the point changed
      */
     down: function( point, event ) {
@@ -79,7 +79,7 @@ define( require => {
      * @public (scenery-internal)
      *
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      * @returns {boolean} - Whether the point changed
      */
     up: function( point, event ) {
@@ -109,7 +109,7 @@ define( require => {
      * @public (scenery-internal)
      *
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      * @returns {boolean} - Whether the point changed
      */
     move: function( point, event ) {
@@ -125,7 +125,7 @@ define( require => {
      * @public (scenery-internal)
      *
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      * @returns {boolean} - Whether the point changed
      */
     over: function( point, event ) {
@@ -141,7 +141,7 @@ define( require => {
      * @public (scenery-internal)
      *
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      * @returns {boolean} - Whether the point changed
      */
     out: function( point, event ) {
@@ -158,7 +158,7 @@ define( require => {
      * Sets information in this Mouse for a given mouse wheel.
      * @public (scenery-internal)
      *
-     * @param {DOMEvent} event
+     * @param {Event} event
      */
     wheel: function( event ) {
       this.wheelDelta.setXYZ( event.deltaX, event.deltaY, event.deltaZ );

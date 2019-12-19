@@ -39,7 +39,7 @@ define( require => {
      * Returns true of the keyboard input indicates that a zoom command was initiated. Different keys are checked
      * on mac devices (which go through the Cmd key) and windows devices (which use the ctrl modifier).
      *
-     * @param {DOMEvent} event
+     * @param {Event} event
      * @param {boolean} zoomIn - do you want to check for zoom in or zoom out?
      * @returns {boolean}
      */
@@ -53,7 +53,7 @@ define( require => {
      * Returns true if the keyboard command indicates a "zoom reset". This is ctrl + 0 on Win and cmd + 0 on mac.
      *
      * TODO: I suspect that these zoom specific functions should be moved out of KeyboardUtil.js
-     * @param {DOMEvent} event
+     * @param {Event} event
      * @returns {boolean}
      */
     isZoomResetCommand: event => {

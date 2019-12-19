@@ -165,7 +165,7 @@ define( require => {
   const BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
   const BrowserEvents = require( 'SCENERY/input/BrowserEvents' );
   const cleanArray = require( 'PHET_CORE/cleanArray' );
-  const DOMEventIO = require( 'SCENERY/input/DOMEventIO' );
+  const EventIO = require( 'SCENERY/input/EventIO' );
   const EventType = require( 'TANDEM/EventType' );
   const Features = require( 'SCENERY/util/Features' );
   const FullScreen = require( 'SCENERY/util/FullScreen' );
@@ -283,7 +283,7 @@ define( require => {
         tandem: options.tandem.createTandem( 'mouseUpAction' ),
         parameters: [
           { name: 'point', phetioType: Vector2IO },
-          { name: 'event', phetioType: DOMEventIO }
+          { name: 'event', phetioType: EventIO }
         ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a mouse button is released'
@@ -299,7 +299,7 @@ define( require => {
         tandem: options.tandem.createTandem( 'mouseDownAction' ),
         parameters: [
           { name: 'point', phetioType: Vector2IO },
-          { name: 'event', phetioType: DOMEventIO }
+          { name: 'event', phetioType: EventIO }
         ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a mouse button is pressed'
@@ -315,7 +315,7 @@ define( require => {
         tandem: options.tandem.createTandem( 'mouseMovedAction' ),
         parameters: [
           { name: 'point', phetioType: Vector2IO },
-          { name: 'event', phetioType: DOMEventIO }
+          { name: 'event', phetioType: EventIO }
         ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when the mouse is moved',
@@ -332,7 +332,7 @@ define( require => {
         tandem: options.tandem.createTandem( 'mouseOverAction' ),
         parameters: [
           { name: 'point', phetioType: Vector2IO },
-          { name: 'event', phetioType: DOMEventIO }
+          { name: 'event', phetioType: EventIO }
         ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when the mouse is moved over a Node'
@@ -348,7 +348,7 @@ define( require => {
         tandem: options.tandem.createTandem( 'mouseOutAction' ),
         parameters: [
           { name: 'point', phetioType: Vector2IO },
-          { name: 'event', phetioType: DOMEventIO }
+          { name: 'event', phetioType: EventIO }
         ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when the mouse moves out of the display'
@@ -369,7 +369,7 @@ define( require => {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'wheelScrollAction' ),
         parameters: [
-          { name: 'event', phetioType: DOMEventIO }
+          { name: 'event', phetioType: EventIO }
         ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when the mouse wheel scrolls',
@@ -387,7 +387,7 @@ define( require => {
         parameters: [
           { name: 'id', phetioType: NumberIO },
           { name: 'point', phetioType: Vector2IO },
-          { name: 'event', phetioType: DOMEventIO }
+          { name: 'event', phetioType: EventIO }
         ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a touch begins'
@@ -407,7 +407,7 @@ define( require => {
         parameters: [
           { name: 'id', phetioType: NumberIO },
           { name: 'point', phetioType: Vector2IO },
-          { name: 'event', phetioType: DOMEventIO }
+          { name: 'event', phetioType: EventIO }
         ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a touch ends'
@@ -426,7 +426,7 @@ define( require => {
         parameters: [
           { name: 'id', phetioType: NumberIO },
           { name: 'point', phetioType: Vector2IO },
-          { name: 'event', phetioType: DOMEventIO }
+          { name: 'event', phetioType: EventIO }
         ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a touch moves',
@@ -447,7 +447,7 @@ define( require => {
         parameters: [
           { name: 'id', phetioType: NumberIO },
           { name: 'point', phetioType: Vector2IO },
-          { name: 'event', phetioType: DOMEventIO }
+          { name: 'event', phetioType: EventIO }
         ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a touch is canceled'
@@ -464,7 +464,7 @@ define( require => {
         parameters: [
           { name: 'id', phetioType: NumberIO },
           { name: 'point', phetioType: Vector2IO },
-          { name: 'event', phetioType: DOMEventIO }
+          { name: 'event', phetioType: EventIO }
         ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a pen touches the screen'
@@ -484,7 +484,7 @@ define( require => {
         parameters: [
           { name: 'id', phetioType: NumberIO },
           { name: 'point', phetioType: Vector2IO },
-          { name: 'event', phetioType: DOMEventIO }
+          { name: 'event', phetioType: EventIO }
         ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a pen is lifted'
@@ -503,7 +503,7 @@ define( require => {
         parameters: [
           { name: 'id', phetioType: NumberIO },
           { name: 'point', phetioType: Vector2IO },
-          { name: 'event', phetioType: DOMEventIO }
+          { name: 'event', phetioType: EventIO }
         ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a pen is moved',
@@ -524,7 +524,7 @@ define( require => {
         parameters: [
           { name: 'id', phetioType: NumberIO },
           { name: 'point', phetioType: Vector2IO },
-          { name: 'event', phetioType: DOMEventIO }
+          { name: 'event', phetioType: EventIO }
         ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a pen is canceled'
@@ -561,7 +561,7 @@ define( require => {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'focusinAction' ),
           parameters: [
-            { name: 'event', phetioType: DOMEventIO }
+            { name: 'event', phetioType: EventIO }
           ],
           phetioEventType: EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the focusin DOM event.'
@@ -614,7 +614,7 @@ define( require => {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'focusoutAction' ),
           parameters: [
-            { name: 'event', phetioType: DOMEventIO }
+            { name: 'event', phetioType: EventIO }
           ],
           phetioEventType: EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the focusout DOM event.'
@@ -632,7 +632,7 @@ define( require => {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'clickAction' ),
           parameters: [
-            { name: 'event', phetioType: DOMEventIO }
+            { name: 'event', phetioType: EventIO }
           ],
           phetioEventType: EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the click DOM event.'
@@ -650,7 +650,7 @@ define( require => {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'inputAction' ),
           parameters: [
-            { name: 'event', phetioType: DOMEventIO }
+            { name: 'event', phetioType: EventIO }
           ],
           phetioEventType: EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the input DOM event.'
@@ -668,7 +668,7 @@ define( require => {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'changeAction' ),
           parameters: [
-            { name: 'event', phetioType: DOMEventIO }
+            { name: 'event', phetioType: EventIO }
           ],
           phetioEventType: EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the change DOM event.'
@@ -686,7 +686,7 @@ define( require => {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'keydownAction' ),
           parameters: [
-            { name: 'event', phetioType: DOMEventIO }
+            { name: 'event', phetioType: EventIO }
           ],
           phetioEventType: EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the keydown DOM event.'
@@ -704,7 +704,7 @@ define( require => {
           phetioPlayback: true,
           tandem: options.tandem.createTandem( 'keyupAction' ),
           parameters: [
-            { name: 'event', phetioType: DOMEventIO }
+            { name: 'event', phetioType: EventIO }
           ],
           phetioEventType: EventType.USER,
           phetioDocumentation: 'Emits when the PDOM root gets the keyup DOM event.'
@@ -751,7 +751,7 @@ define( require => {
      * Called to batch a raw DOM event (which may be immediately fired, depending on the settings).
      * @public (scenery-internal)
      *
-     * @param {DOMEvent} domEvent
+     * @param {Event} domEvent
      * @param {number} batchType - See BatchedDOMEvent's "enumeration" - TODO: use an actual enumeration
      * @param {function} callback - Parameter types defined by the batchType. See BatchedDOMEvent for details
      * @param {boolean} triggerImmediate - Certain events can force immediate action, since browsers like Chrome
@@ -882,7 +882,7 @@ define( require => {
      * Extract a {Vector2} global coordinate point from an arbitrary DOM event.
      * @public (scenery-internal)
      *
-     * @param {DOMEvent} domEvent
+     * @param {Event} domEvent
      * @returns {Vector2}
      */
     pointFromEvent( domEvent ) {
@@ -1000,7 +1000,7 @@ define( require => {
      * @private
      *
      * @param {string} eventType
-     * @param {DOMEvent} domEvent
+     * @param {Event} domEvent
      * @param {boolean} bubbles
      */
     dispatchA11yEvent( eventType, domEvent, bubbles ) {
@@ -1015,7 +1015,7 @@ define( require => {
      * Get the trail ID of the node represented by a DOM element in the accessible PDOM.
      * @private
      *
-     * @param  {DOMEvent} domEvent
+     * @param  {Event} domEvent
      * @returns {string}
      */
     getTrailId( domEvent ) {
@@ -1041,7 +1041,7 @@ define( require => {
      * playback. The event may be "faked" for certain purposes.
      *
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      */
     mouseDown( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseDown(' + Input.debugText( point, event ) + ');' );
@@ -1058,7 +1058,7 @@ define( require => {
      * playback. The event may be "faked" for certain purposes.
      *
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      */
     mouseUp( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseUp(' + Input.debugText( point, event ) + ');' );
@@ -1075,7 +1075,7 @@ define( require => {
      * playback. The event may be "faked" for certain purposes.
      *
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      */
     mouseMove( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseMove(' + Input.debugText( point, event ) + ');' );
@@ -1089,7 +1089,7 @@ define( require => {
      * @public (scenery-internal)
      *
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      */
     mouseOver( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseOver(' + Input.debugText( point, event ) + ');' );
@@ -1103,7 +1103,7 @@ define( require => {
      * @public (scenery-internal)
      *
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      */
     mouseOut( point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseOut(' + Input.debugText( point, event ) + ');' );
@@ -1116,7 +1116,7 @@ define( require => {
      * Triggers a logical mouse-wheel/scroll event.
      * @public (scenery-internal)
      *
-     * @param {DOMEvent} event
+     * @param {Event} event
      */
     wheel( event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'wheel(' + Input.debugText( null, event ) + ');' );
@@ -1134,7 +1134,7 @@ define( require => {
      *
      * @param {number} id
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      */
     touchStart( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchStart(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
@@ -1152,7 +1152,7 @@ define( require => {
      *
      * @param {number} id
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      */
     touchEnd( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchEnd(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
@@ -1170,7 +1170,7 @@ define( require => {
      *
      * @param {number} id
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      */
     touchMove( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchMove(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
@@ -1188,7 +1188,7 @@ define( require => {
      *
      * @param {number} id
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      */
     touchCancel( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchCancel(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
@@ -1206,7 +1206,7 @@ define( require => {
      *
      * @param {number} id
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      */
     penStart( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penStart(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
@@ -1224,7 +1224,7 @@ define( require => {
      *
      * @param {number} id
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      */
     penEnd( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penEnd(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
@@ -1242,7 +1242,7 @@ define( require => {
      *
      * @param {number} id
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      */
     penMove( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penMove(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
@@ -1260,7 +1260,7 @@ define( require => {
      *
      * @param {number} id
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      */
     penCancel( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penCancel(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
@@ -1276,7 +1276,7 @@ define( require => {
      * @param {number} id
      * @param {string} type
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      */
     pointerDown( id, type, point, event ) {
       // In IE for pointer down events, we want to make sure than the next interactions off the page are sent to
@@ -1314,7 +1314,7 @@ define( require => {
      * @param {number} id
      * @param {string} type
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      */
     pointerUp( id, type, point, event ) {
       type = this.handleUnknownPointerType( type, id );
@@ -1343,7 +1343,7 @@ define( require => {
      * @param {number} id
      * @param {string} type
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      */
     pointerCancel( id, type, point, event ) {
       type = this.handleUnknownPointerType( type, id );
@@ -1373,7 +1373,7 @@ define( require => {
      * @param {number} id
      * @param {string} type
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      */
     pointerMove( id, type, point, event ) {
       type = this.handleUnknownPointerType( type, id );
@@ -1401,7 +1401,7 @@ define( require => {
      * @param {number} id
      * @param {string} type
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      */
     pointerOver( id, type, point, event ) {
       // TODO: accumulate mouse/touch info in the object if needed?
@@ -1415,7 +1415,7 @@ define( require => {
      * @param {number} id
      * @param {string} type
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      */
     pointerOut( id, type, point, event ) {
       // TODO: accumulate mouse/touch info in the object if needed?
@@ -1429,7 +1429,7 @@ define( require => {
      * @param {number} id
      * @param {string} type
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      */
     pointerEnter( id, type, point, event ) {
       // TODO: accumulate mouse/touch info in the object if needed?
@@ -1443,7 +1443,7 @@ define( require => {
      * @param {number} id
      * @param {string} type
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      */
     pointerLeave( id, type, point, event ) {
       // TODO: accumulate mouse/touch info in the object if needed?
@@ -1484,7 +1484,7 @@ define( require => {
      * @private
      *
      * @param {Pointer} pointer
-     * @param {DOMEvent} event
+     * @param {Event} event
      * @param {boolean} pointChanged
      */
     upEvent( pointer, event, pointChanged ) {
@@ -1520,7 +1520,7 @@ define( require => {
      * @private
      *
      * @param {Pointer} pointer
-     * @param {DOMEvent} event
+     * @param {Event} event
      * @param {boolean} pointChanged
      */
     downEvent( pointer, event, pointChanged ) {
@@ -1577,7 +1577,7 @@ define( require => {
      * @private
      *
      * @param {Pointer} pointer
-     * @param {DOMEvent} event
+     * @param {Event} event
      */
     moveEvent( pointer, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'moveEvent ' + pointer.toString() );
@@ -1596,7 +1596,7 @@ define( require => {
      * @private
      *
      * @param {Pointer} pointer
-     * @param {DOMEvent} event
+     * @param {Event} event
      * @param {boolean} pointChanged
      */
     cancelEvent( pointer, event, pointChanged ) {
@@ -1627,7 +1627,7 @@ define( require => {
      * out/over events, and if flagged a move event.
      *
      * @param {Pointer} pointer
-     * @param {DOMEvent|null} event
+     * @param {Event|null} event
      * @param {boolean} sendMove - Whether to send move events
      * @returns {Trail} - The current trail of the pointer
      */
@@ -1678,7 +1678,7 @@ define( require => {
      * - over y (bubbles)
      *
      * @param {Pointer} pointer
-     * @param {DOMEvent|null} event
+     * @param {Event|null} event
      * @param {Trail} trail - The "new" trail
      * @param {number} branchIndex - The first index where the old and new trails have a different node. We will notify
      *                               for this node and all "descendant" nodes in the relevant trail.
@@ -1709,7 +1709,7 @@ define( require => {
      * - exit e
      *
      * @param {Pointer} pointer
-     * @param {DOMEvent|null} event
+     * @param {Event|null} event
      * @param {Trail} trail - The "old" trail
      * @param {number} branchIndex - The first index where the old and new trails have a different node. We will notify
      *                               for this node and all "descendant" nodes in the relevant trail.
@@ -1735,7 +1735,7 @@ define( require => {
      * @param {Trail} trail
      * @param {string} type
      * @param {Pointer} pointer
-     * @param {DOMEvent|null} event
+     * @param {Event|null} event
      * @param {boolean} bubbles - If bubbles is false, the event is only dispatched to the leaf node of the trail.
      */
     dispatchEvent( trail, type, pointer, event, bubbles ) {
@@ -1853,7 +1853,7 @@ define( require => {
      * Display that user interaction has begun. Otherwise, most a11y listeners should instead go through dispatchEvent.
      * @private
      *
-     * @param  {DOMEvent} event
+     * @param {Event} event
      */
     handleDocumentKeydown( event ) {
 
@@ -1904,7 +1904,7 @@ define( require => {
      * Saves the main information we care about from a DOM `Event` into a JSON-like structure.
      * @public
      *
-     * @param {DOMEvent} domEvent
+     * @param {Event} domEvent
      * @returns {Object} - see domEventPropertiesToSerialize for list keys that are serialized
      */
     static serializeDomEvent( domEvent ) {
@@ -1981,7 +1981,7 @@ define( require => {
      * @private
      *
      * @param {Vector2|null} point - Not logged if null
-     * @param {DOMEvent} domEvent
+     * @param {Event} domEvent
      */
     static debugText( point, domEvent ) {
       let result = domEvent.timeStamp + ' ' + domEvent.type;
@@ -1995,7 +1995,7 @@ define( require => {
      * Maps the current MS pointer types onto the pointer spec.
      * @public (scenery-internal)
      *
-     * @param {DOMEvent} event
+     * @param {Event} event
      * @returns {string}
      */
     static msPointerType( event ) {

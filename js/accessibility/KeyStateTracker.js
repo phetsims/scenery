@@ -55,7 +55,7 @@ define( require => {
      * `Node.addInputListener` only supports type properties as event listeners, and not the event keys as
      * prototype methods. Please see https://github.com/phetsims/scenery/issues/851 for more information.
      * @public
-     * @param {DOMEvent} domEvent
+     * @param {Event} domEvent
      */
     keydownUpdate( domEvent ) {
 
@@ -92,7 +92,7 @@ define( require => {
      * with specifically for the modifier key. This will add or remove modifier keys in that case.
      * @private
      *
-     * @param  {DOMEvent} domEvent
+     * @param  {Event} domEvent
      */
     correctModifierKeys( domEvent ) {
 
@@ -139,7 +139,7 @@ define( require => {
      * prototype methods. Please see https://github.com/phetsims/scenery/issues/851 for more information.
      *
      * @public
-     * @param {DOMEvent} domEvent
+     * @param {Event} domEvent
      */
     keyupUpdate( domEvent ) {
       const keyCode = domEvent.keyCode;

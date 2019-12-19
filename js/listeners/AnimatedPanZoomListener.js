@@ -257,12 +257,12 @@ define( require => {
 
     /**
      * Keydown listener for events outside of the PDOM. Attached as a listener to the body and driven by
-     * DOMEvents rather than SceneryEvents. When we handle Events from within the PDOM we need the Pointer to
+     * Events rather than SceneryEvents. When we handle Events from within the PDOM we need the Pointer to
      * determine if attached. But from outside of the PDOM we know that there is no focus in the document and therfore
      * the A11yPointer is not attached.
      * @private
      *
-     * @param {DOMEvent} domEvent
+     * @param {Event} domEvent
      */
     documentKeydown( domEvent ) {
 
@@ -284,7 +284,7 @@ define( require => {
 
     /**
      * For the Scenery listener API, handle a keydown event. This SceneryEvent will have been dispatched from
-     * Input.dispatchEvent and so the DOMEvent target must be within the PDOM. In this case, we may
+     * Input.dispatchEvent and so the Event target must be within the PDOM. In this case, we may
      * need to prevent translation if the A11yPointer is attached or the Pointer indicates that it
      * is intended to for arrow key control.
      * @public (scenery-internal)
@@ -321,7 +321,7 @@ define( require => {
      * Handle zoom commands from a keyboard.
      * @private
      *
-     * @param {DOMEvent} domEvent
+     * @param {Event} domEvent
      */
     handleZoomCommands( domEvent ) {
 
@@ -358,7 +358,7 @@ define( require => {
      * required for for repositioning as user operates the track pad.
      * @private
      *
-     * @param {DOMEvent} domEvent
+     * @param {Event} domEvent
      */
     handleGestureStartEvent( domEvent ) {
 
@@ -373,7 +373,7 @@ define( require => {
      * sets destination scale as user pinches on the trackpad.
      * @private
      *
-     * @param {DOMEvent} domEvent
+     * @param {Event} domEvent
      */
     handleGestureChangeEvent( domEvent ) {
 
@@ -916,7 +916,7 @@ define( require => {
       // @public (read-only) - the target of the wheel input in the global coordinate frame
       this.targetPoint = event.pointer.point;
 
-      // the DOMEvent specifies deltas that look appropriate and works well in different cases like
+      // the DOM Event specifies deltas that look appropriate and works well in different cases like
       // mouse wheel and trackpad input, both which trigger wheel events but at different rates with different
       // delta values
       let translationX = domEvent.deltaX;

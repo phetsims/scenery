@@ -19,7 +19,7 @@ define( require => {
    *
    * @param {number} id
    * @param {Vector2} point
-   * @param {DOMEvent} event
+   * @param {Event} event
    * @constructor
    */
   function Pen( id, point, event ) {
@@ -40,7 +40,7 @@ define( require => {
      * @public (scenery-internal)
      *
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      * @returns {boolean} - Whether the point changed
      */
     move: function( point, event ) {
@@ -55,7 +55,7 @@ define( require => {
      * @public (scenery-internal)
      *
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      * @returns {boolean} - Whether the point changed
      */
     end: function( point, event ) {
@@ -71,7 +71,7 @@ define( require => {
      * @public (scenery-internal)
      *
      * @param {Vector2} point
-     * @param {DOMEvent} event
+     * @param {Event} event
      * @returns {boolean} - Whether the point changed
      */
     cancel: function( point, event ) {

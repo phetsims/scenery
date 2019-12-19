@@ -1,7 +1,7 @@
 // Copyright 2018-2019, University of Colorado Boulder
 
 /**
- * IO type for a DOMEvent
+ * IO type for a window.Event
  *
  * @author Michael Kauzmann (PhET Interactive Simulations)
  * @author Chris Klusendorf (PhET Interactive Simulations)
@@ -15,10 +15,10 @@ define( require => {
   const scenery = require( 'SCENERY/scenery' );
   const validate = require( 'AXON/validate' );
 
-  class DOMEventIO extends ObjectIO {
+  class EventIO extends ObjectIO {
 
     /**
-     * Encodes a DOMEvent instance to a state.
+     * Encodes an Event instance to a state.
      * @param {Event} domEvent
      * @returns {Object} - a state object
      * @override
@@ -37,11 +37,11 @@ define( require => {
     }
   }
 
-  DOMEventIO.documentation = 'A DOM Event';
-  DOMEventIO.validator = { valueType: window.Event };
-  DOMEventIO.typeName = 'DOMEventIO';
-  ObjectIO.validateSubtype( DOMEventIO );
+  EventIO.documentation = 'A DOM Event';
+  EventIO.validator = { valueType: window.Event };
+  EventIO.typeName = 'EventIO';
+  ObjectIO.validateSubtype( EventIO );
 
-  return scenery.register( 'DOMEventIO', DOMEventIO );
+  return scenery.register( 'EventIO', EventIO );
 } );
 

@@ -19,7 +19,7 @@ define( require => {
    * @constructor
    * @mixes Poolable
    *
-   * @param {DOMEvent} domEvent
+   * @param {Event} domEvent
    * @param {string} type
    * @param {function} callback
    */
@@ -28,7 +28,7 @@ define( require => {
 
     // called multiple times due to pooling, this should be re-entrant
 
-    // @public {DOMEvent}
+    // @public {Event}
     this.domEvent = domEvent;
 
     // @public {string} type
