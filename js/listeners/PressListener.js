@@ -102,6 +102,12 @@ define( require => {
       // {number} (a11y) - How long something should 'look' pressed after an accessible click input event, in ms
       a11yLooksPressedInterval: 100,
 
+      // {boolean} - If true, multiple drag events in a row (between steps) will be collapsed into one drag event
+      // (usually for performance) by just calling the callbacks for the last drag event. Other events (press/release
+      // handling) will force through the last pending drag event. Calling step() every frame will then be generally
+      // necessary to have accurate-looking drags. NOTE that this may put in events out-of-order.
+      collapseDragEvents: false,
+
       // {Tandem} - For instrumenting
       tandem: Tandem.REQUIRED,
 
@@ -149,6 +155,7 @@ define( require => {
 
     // @private {boolean}
     this._attach = options.attach;
+    this._collapseDragEvents = options.collapseDragEvents;
 
     // @public {ObservableArray.<Pointer>} - Contains all pointers that are over our button. Tracked by adding with
     // 'enter' events and removing with 'exit' events.
@@ -183,6 +190,10 @@ define( require => {
 
     // @public {boolean} (read-only) - Whether the last press was interrupted. Will be valid until the next press.
     this.interrupted = false;
+
+    // @private {Event|null} - For the collapseDragEvents feature, this will hold the last pending drag event to
+    // trigger a call to drag() with, if one has been skipped.
+    this._pendingCollapsedDragEvent = null;
 
     // @private {boolean} - Whether our pointer listener is referenced by the pointer (need to have a flag due to
     //                      handling disposal properly).
@@ -360,6 +371,9 @@ define( require => {
         return false;
       }
 
+      // Flush out a pending drag, so it happens before we press
+      this.flushCollapsedDrag();
+
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} successful press` );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
       this._pressAction.execute( event, targetNode || null, callback || null ); // cannot pass undefined into execute call
@@ -384,6 +398,9 @@ define( require => {
     release( event, callback ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} release` );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+      // Flush out a pending drag, so it happens before we release
+      this.flushCollapsedDrag();
 
       this._releaseAction.execute( event || null, callback || null ); // cannot pass undefined to execute call
 
@@ -459,6 +476,26 @@ define( require => {
      */
     clearOverPointers() {
       this.overPointers.clear(); // We have listeners that will trigger the proper refreshes
+    },
+
+    /**
+     * If collapseDragEvents is set to true, this step() should be called every frame so that the collapsed drag
+     * can be fired.
+     * @public
+     */
+    step() {
+      this.flushCollapsedDrag();
+    },
+
+    /**
+     * If there is a pending collapsed drag waiting, we'll fire that drag (usually before other events or during a step)
+     * @private
+     */
+    flushCollapsedDrag() {
+      if ( this._pendingCollapsedDragEvent ) {
+        this.drag( this._pendingCollapsedDragEvent );
+      }
+      this._pendingCollapsedDragEvent = null;
     },
 
     /**
@@ -704,7 +741,12 @@ define( require => {
       if ( this.isPressed ) {
         assert && assert( event.pointer === this.pointer );
 
-        this.drag( event );
+        if ( this._collapseDragEvents ) {
+          this._pendingCollapsedDragEvent = event;
+        }
+        else {
+          this.drag( event );
+        }
       }
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
