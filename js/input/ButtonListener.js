@@ -144,7 +144,7 @@ define( require => {
      * with the attached listener, so add to the over count.
      * @private
      *
-     * @param {Event} event
+     * @param {SceneryEvent} event
      */
     focus: function( event ) {
       this.enter( event );
@@ -155,7 +155,7 @@ define( require => {
      * with this listener so reduce the over count.
      * @private
      *
-     * @param {Event} event
+     * @param {SceneryEvent} event
      */
     blur: function( event ) {
       this.exit( event );
@@ -171,7 +171,7 @@ define( require => {
      * `click` should likely be replaced by `keydown` and `keyup` listeners.
      * @private
      *
-     * @param {Event} event
+     * @param {SceneryEvent} event
      */
     click: function( event ) {
       this.setButtonState( event, 'down' );

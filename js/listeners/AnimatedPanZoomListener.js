@@ -147,7 +147,7 @@ define( require => {
      * Attach a MiddlePress for drag panning, if detected.
      * @override
      *
-     * @param {Event} event
+     * @param {SceneryEvent} event
      */
     down( event ) {
       PanZoomListener.prototype.down.call( this, event );
@@ -179,7 +179,7 @@ define( require => {
      * Listener for the attached pointer on move. Only move if a middle press is not currently down.
      * @override
      *
-     * @param {Event} event
+     * @param {SceneryEvent} event
      */
     movePress( event ) {
       if ( !this.middlePress ) {
@@ -192,7 +192,7 @@ define( require => {
      * Node under this listener. If the node and pointer are out of the dragBounds, we reposition to keep the Node
      * visible within dragBounds.
      *
-     * @param {Event} event
+     * @param {SceneryEvent} event
      */
     move( event ) {
       if ( this._downTarget && this._downInDragBounds ) {
@@ -228,7 +228,7 @@ define( require => {
     /**
      * Scenery listener API. Clear cursor and middlePress.
      *
-     * @param {Event} event
+     * @param {SceneryEvent} event
      */
     up( event ) {
       this._targetInBoundsOnDown = false;
@@ -239,7 +239,7 @@ define( require => {
     /**
      * Input listener for the 'wheel' event, part of the Scenery Input API.
      *
-     * @param {Event} event
+     * @param {SceneryEvent} event
      */
     wheel( event ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener wheel' );
@@ -257,7 +257,7 @@ define( require => {
 
     /**
      * Keydown listener for events outside of the PDOM. Attached as a listener to the body and driven by
-     * DOMEvents rather than scenery Events. When we handle Events from within the PDOM we need the Pointer to
+     * DOMEvents rather than SceneryEvents. When we handle Events from within the PDOM we need the Pointer to
      * determine if attached. But from outside of the PDOM we know that there is no focus in the document and therfore
      * the A11yPointer is not attached.
      * @private
@@ -283,13 +283,13 @@ define( require => {
     }
 
     /**
-     * For the Scenery listener API, handle a keydown event. This Event will have been dispatched from
+     * For the Scenery listener API, handle a keydown event. This SceneryEvent will have been dispatched from
      * Input.dispatchEvent and so the DOMEvent target must be within the PDOM. In this case, we may
      * need to prevent translation if the A11yPointer is attached or the Pointer indicates that it
      * is intended to for arrow key control.
      * @public (scenery-internal)
      *
-     * @param {Event} event
+     * @param {SceneryEvent} event
      */
     keydown( event ) {
       const domEvent = event.domEvent;
@@ -501,7 +501,7 @@ define( require => {
      * @private
      *
      * @param   {Wheel} wheel
-     * @param   {Event} event
+     * @param   {SceneryEvent} event
      */
     repositionFromWheel( wheel, event ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener reposition from wheel' );
@@ -900,7 +900,7 @@ define( require => {
   class Wheel {
 
     /**
-     * @param {Event} event
+     * @param {SceneryEvent} event
      */
     constructor( event ) {
       const domEvent = event.domEvent;

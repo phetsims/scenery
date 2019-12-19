@@ -58,13 +58,13 @@ define( require => {
       // {Bounds2|null} - if provided, the model location will be constrained to be inside these bounds
       dragBounds: null,
 
-      // {Function|null} - Called as start( event: {Event} ) when keyboard drag is started
+      // {Function|null} - Called as start( event: {SceneryEvent} ) when keyboard drag is started
       start: null,
 
       // {Function|null} - Called as drag( viewDelta: {Vector2} ) during drag
       drag: null,
 
-      // {Function|null} - Called as end( event: {Event} ) when keyboard drag ends
+      // {Function|null} - Called as end( event: {SceneryEvent} ) when keyboard drag ends
       end: null, // called at the end of the dragging interaction
 
       // {number} - arrow keys must be pressed this long to begin movement set on moveOnHoldInterval, in ms
@@ -307,7 +307,7 @@ define( require => {
      * with addInputListener()
      *
      * @public
-     * @param {Event} event
+     * @param {SceneryEvent} event
      */
     keydown: function( event ) {
       const domEvent = event.domEvent;
@@ -363,7 +363,7 @@ define( require => {
      * prototype methods. Please see https://github.com/phetsims/scenery/issues/851 for more information.
      *
      * @public
-     * @param {Event} event
+     * @param {SceneryEvent} event
      */
     keyup: function( event ) {
       const domEvent = event.domEvent;

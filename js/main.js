@@ -90,7 +90,7 @@ define( [
   'SCENERY/input/BrowserEvents',
   'SCENERY/input/ButtonListener',
   'SCENERY/input/DownUpListener',
-  'SCENERY/input/Event',
+  'SCENERY/input/SceneryEvent',
   'SCENERY/input/Input',
   'SCENERY/input/Mouse',
   'SCENERY/input/Pen',

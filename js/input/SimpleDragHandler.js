@@ -12,7 +12,6 @@ define( require => {
   // modules
   const Action = require( 'AXON/Action' );
   const BooleanProperty = require( 'AXON/BooleanProperty' );
-  const Event = require( 'SCENERY/input/Event' );
   const EventType = require( 'TANDEM/EventType' );
   const inherit = require( 'PHET_CORE/inherit' );
   const merge = require( 'PHET_CORE/merge' );
@@ -20,6 +19,7 @@ define( require => {
   const PhetioObject = require( 'TANDEM/PhetioObject' );
   const Pointer = require( 'SCENERY/input/Pointer' );
   const scenery = require( 'SCENERY/scenery' );
+  const SceneryEvent = require( 'SCENERY/input/SceneryEvent' );
   const Tandem = require( 'TANDEM/Tandem' );
   const Touch = require( 'SCENERY/input/Touch' );
   const Vector2 = require( 'DOT/Vector2' );
@@ -34,9 +34,9 @@ define( require => {
 
     options = merge( {
 
-      start: null, // {null|function(Event,Trail)} called when a drag is started
-      drag: null, // {null|function(Event,Trail)} called when pointer moves
-      end: null,  // {null|function(Event,Trail)} called when a drag is ended
+      start: null, // {null|function(SceneryEvent,Trail)} called when a drag is started
+      drag: null, // {null|function(SceneryEvent,Trail)} called when pointer moves
+      end: null,  // {null|function(SceneryEvent,Trail)} called when a drag is ended
 
       // {null|function} Called when the pointer moves.
       // Signature is translate( delta: Vector2, oldPosition: Vector2, position: Vector2 )
@@ -147,7 +147,7 @@ define( require => {
         phetioDocumentation: 'the position of the drag start in view coordinates'
       }, {
         phetioPrivate: true,
-        valueType: [ Event, null ]
+        valueType: [ SceneryEvent, null ]
       } ]
     } );
 
@@ -203,7 +203,7 @@ define( require => {
         phetioDocumentation: 'the position of the drag in view coordinates'
       }, {
         phetioPrivate: true,
-        valueType: [ Event, null ]
+        valueType: [ SceneryEvent, null ]
       } ]
     } );
 
@@ -241,7 +241,7 @@ define( require => {
       }, {
         phetioPrivate: true,
         isValidValue: value => {
-          return value === null || value instanceof Event ||
+          return value === null || value instanceof SceneryEvent ||
 
                  // When interrupted, an object literal is used to signify the interruption,
                  // see SimpleDragHandler.interrupt
@@ -444,7 +444,7 @@ define( require => {
     /**
      * Creates an input listener that forwards events to the specified input listener
      * See https://github.com/phetsims/scenery/issues/639
-     * @param {function(Event)} down - down function to be added to the input listener
+     * @param {function(SceneryEvent)} down - down function to be added to the input listener
      * @param {Object} [options]
      * @returns {Object} a scenery input listener
      */

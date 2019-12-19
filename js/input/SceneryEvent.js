@@ -1,7 +1,7 @@
 // Copyright 2013-2019, University of Colorado Boulder
 
 /**
- * A Scenery Event is an abstraction over incoming user DOM events.
+ * A Scenery event is an abstraction over incoming user DOM events.
  *
  * It provides more information (particularly Scenery-related information), and handles a single pointer at a time
  * (DOM TouchEvents can include information for multiple touches at the same time, so the TouchEvent can be passed to
@@ -21,24 +21,24 @@ define( require => {
   const scenery = require( 'SCENERY/scenery' );
   const Trail = require( 'SCENERY/util/Trail' );
 
-  class Event {
+  class SceneryEvent {
 
     /**
      * @param {Trail} trail - The trail to the node picked/hit by this input event.
      * @param {string} type - Type of the event, e.g. 'string'
      * @param {Pointer} pointer - The pointer that triggered this event
-     * @param {DOMEvent|null} domEvent - The original DOM Event that caused this Event to fire.
+     * @param {DOMEvent|null} domEvent - The original DOM Event that caused this SceneryEvent to fire.
      */
     constructor( trail, type, pointer, domEvent ) {
-      assert && assert( trail instanceof Trail, 'Event\'s trail parameter should be a {Trail}' );
-      assert && assert( typeof type === 'string', 'Event\'s type should be a {string}' );
-      assert && assert( pointer instanceof Pointer, 'Event\'s pointer parameter should be a {Pointer}' );
+      assert && assert( trail instanceof Trail, 'SceneryEvent\'s trail parameter should be a {Trail}' );
+      assert && assert( typeof type === 'string', 'SceneryEvent\'s type should be a {string}' );
+      assert && assert( pointer instanceof Pointer, 'SceneryEvent\'s pointer parameter should be a {Pointer}' );
       // TODO: add domEvent type assertion -- will browsers support this?
 
-      // @public (read-only) {boolean} - Whether this Event has been 'handled'. If so, it will not bubble further.
+      // @public (read-only) {boolean} - Whether this SceneryEvent has been 'handled'. If so, it will not bubble further.
       this.handled = false;
 
-      // @public (read-only) {boolean} - Whether this Event has been 'aborted'. If so, no further listeners with it will fire.
+      // @public (read-only) {boolean} - Whether this SceneryEvent has been 'aborted'. If so, no further listeners with it will fire.
       this.aborted = false;
 
       // @public {Trail} - Path to the leaf-most node "hit" by the event, ordered list, from root to leaf
@@ -71,7 +71,7 @@ define( require => {
     }
 
     /**
-     * like DOM Event.stopPropagation(), but named differently to indicate it doesn't fire that behavior on the underlying DOM event
+     * like DOM SceneryEvent.stopPropagation(), but named differently to indicate it doesn't fire that behavior on the underlying DOM event
      * @public
      */
     handle() {
@@ -80,7 +80,7 @@ define( require => {
     }
 
     /**
-     * like DOM Event.stopImmediatePropagation(), but named differently to indicate it doesn't fire that behavior on the underlying DOM event
+     * like DOM SceneryEvent.stopImmediatePropagation(), but named differently to indicate it doesn't fire that behavior on the underlying DOM event
      * @public
      */
     abort() {
@@ -89,7 +89,7 @@ define( require => {
     }
 
     /**
-     * Specifies whether or not the Event came from alternative input. See Input.A11Y_EVENT_TYPES for a list of events
+     * Specifies whether or not the SceneryEvent came from alternative input. See Input.A11Y_EVENT_TYPES for a list of events
      * a11y related events supported by scenery.
      * @public
      * @returns {boolean}
@@ -124,5 +124,5 @@ define( require => {
     }
   }
 
-  return scenery.register( 'Event', Event );
+  return scenery.register( 'SceneryEvent', SceneryEvent );
 } );

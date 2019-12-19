@@ -28,7 +28,6 @@ define( require => {
   const Action = require( 'AXON/Action' );
   const BooleanProperty = require( 'AXON/BooleanProperty' );
   const DerivedProperty = require( 'AXON/DerivedProperty' );
-  const EventIO = require( 'SCENERY/input/EventIO' );
   const EventType = require( 'TANDEM/EventType' );
   const inherit = require( 'PHET_CORE/inherit' );
   const merge = require( 'PHET_CORE/merge' );
@@ -38,6 +37,7 @@ define( require => {
   const ObservableArray = require( 'AXON/ObservableArray' );
   const PhetioObject = require( 'TANDEM/PhetioObject' );
   const scenery = require( 'SCENERY/scenery' );
+  const SceneryEventIO = require( 'SCENERY/input/SceneryEventIO' );
   const Tandem = require( 'TANDEM/Tandem' );
   const timer = require( 'AXON/timer' );
 
@@ -54,17 +54,17 @@ define( require => {
    */
   function PressListener( options ) {
     options = merge( {
-      // {function} - Called as press( event: {Event}, listener: {PressListener} ) when this listener is pressed
+      // {function} - Called as press( event: {SceneryEvent}, listener: {PressListener} ) when this listener is pressed
       // (typically from a down event, but can be triggered by other handlers).
       press: _.noop,
 
-      // {function} - Called as release( event: {Event|null}, listener: {PressListener} ) when this listener is released
-      // Note that an Event arg cannot be guaranteed from this listener. This is, in part, to support interrupt.
-      // (pointer up/cancel or interrupt when pressed/after a11y click).
+      // {function} - Called as release( event: {SceneryEvent|null}, listener: {PressListener} ) when this listener is
+      // released. Note that an SceneryEvent arg cannot be guaranteed from this listener. This is, in part, to support
+      // interrupt. (pointer up/cancel or interrupt when pressed/after a11y click).
       // NOTE: This will also be called if the press is "released" due to being interrupted or canceled.
       release: _.noop,
 
-      // {function} - Called as drag( event: {Event}, listener: {PressListener} ) when this listener is
+      // {function} - Called as drag( event: {SceneryEvent}, listener: {PressListener} ) when this listener is
       // dragged (move events on the pointer while pressed).
       drag: _.noop,
 
@@ -95,7 +95,7 @@ define( require => {
       pressCursor: 'pointer',
 
       // {function} - Checks this when trying to start a press. If this function returns false, a press will not be
-      // started. Called as canStartPress( event: {Event|null}, listener: {PressListener} ), since sometimes the
+      // started. Called as canStartPress( event: {SceneryEvent|null}, listener: {PressListener} ), since sometimes the
       // event may not be available.
       canStartPress: truePredicate,
 
@@ -191,7 +191,7 @@ define( require => {
     // @public {boolean} (read-only) - Whether the last press was interrupted. Will be valid until the next press.
     this.interrupted = false;
 
-    // @private {Event|null} - For the collapseDragEvents feature, this will hold the last pending drag event to
+    // @private {SceneryEvent|null} - For the collapseDragEvents feature, this will hold the last pending drag event to
     // trigger a call to drag() with, if one has been skipped.
     this._pendingCollapsedDragEvent = null;
 
@@ -236,13 +236,13 @@ define( require => {
     this._pressAction = new Action( this.onPress.bind( this ), {
       tandem: options.tandem.createTandem( 'pressAction' ),
       phetioDocumentation: 'Executes whenever a press occurs. The first argument when executing can be ' +
-                           'used to convey info about the Event.',
+                           'used to convey info about the SceneryEvent.',
       phetioReadOnly: options.phetioReadOnly,
       phetioFeatured: options.phetioFeatured,
       phetioEventType: EventType.USER,
       parameters: [ {
         name: 'event',
-        phetioType: EventIO
+        phetioType: SceneryEventIO
       }, {
         phetioPrivate: true,
         valueType: [ Node, null ]
@@ -259,7 +259,7 @@ define( require => {
     this._releaseAction = new Action( this.onRelease.bind( this ), {
       parameters: [ {
         name: 'event',
-        phetioType: NullableIO( EventIO )
+        phetioType: NullableIO( SceneryEventIO )
       }, {
         phetioPrivate: true,
         valueType: [ 'function', null ]
@@ -320,7 +320,7 @@ define( require => {
      * Returns whether a press can be started with a particular event.
      * @public
      *
-     * @param {Event} event
+     * @param {SceneryEvent} event
      * @returns {boolean}
      */
     canPress( event ) {
@@ -355,7 +355,7 @@ define( require => {
      * pointer), and is useful if a 'drag' needs to change between listeners. Use canPress( event ) to determine if
      * a press can be started (if needed beforehand).
      *
-     * @param {Event} event
+     * @param {SceneryEvent} event
      * @param {Node} [targetNode] - If provided, will take the place of the targetNode for this call. Useful for
      *                              forwarded presses.
      * @param {function} [callback] - to be run at the end of the function, but only on success
@@ -392,7 +392,7 @@ define( require => {
      * This can be called from the outside to release the press without the pointer having actually fired any 'up'
      * events. If the cancel/interrupt behavior is more preferable, call interrupt() on this listener instead.
      *
-     * @param {Event} [event] - scenery Event if there was one. We can't guarantee an event, in part to support interrupting.
+     * @param {SceneryEvent} [event] - scenery event if there was one. We can't guarantee an event, in part to support interrupting.
      * @param {function} [callback] - called at the end of the release
      */
     release( event, callback ) {
@@ -413,7 +413,7 @@ define( require => {
      *
      * This can be overridden (with super-calls) when custom drag behavior is needed for a type.
      *
-     * @param {Event} event
+     * @param {SceneryEvent} event
      */
     drag( event ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} drag` );
@@ -552,7 +552,7 @@ define( require => {
      * Internal code executed as the first step of a press.
      * @private
      *
-     * @param {Event} event
+     * @param {SceneryEvent} event
      * @param {Node} [targetNode] - If provided, will take the place of the targetNode for this call. Useful for
      *                              forwarded presses.
      * @param {function} [callback] - to be run at the end of the function, but only on success
@@ -583,7 +583,7 @@ define( require => {
      * Internal code executed as the first step of a release.
      * @private
      *
-     * @param {Event|null} event - scenery Event if there was one
+     * @param {SceneryEvent|null} event - scenery event if there was one
      * @param {function} [callback] - called at the end of the release
      */
     onRelease( event, callback ) {
@@ -612,7 +612,7 @@ define( require => {
      *
      * NOTE: Do not call directly. See the press method instead.
      *
-     * @param {Event} event
+     * @param {SceneryEvent} event
      */
     down( event ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} down` );
@@ -629,7 +629,7 @@ define( require => {
      *
      * NOTE: Do not call directly.
      *
-     * @param {Event} event
+     * @param {SceneryEvent} event
      */
     enter( event ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} enter` );
@@ -644,7 +644,7 @@ define( require => {
      * Called with `move` events (part of the listener API). It is necessary to check for `over` state changes on move
      * in case a pointer listener gets interrupted and resumes movement over a target.
      *
-     * @param {Event} event
+     * @param {SceneryEvent} event
      */
     move( event ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} move` );
@@ -661,7 +661,7 @@ define( require => {
      *
      * NOTE: Do not call directly.
      *
-     * @param {Event} event
+     * @param {SceneryEvent} event
      */
     exit( event ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} exit` );
@@ -681,7 +681,7 @@ define( require => {
      *
      * NOTE: Do not call directly.
      *
-     * @param {Event} event
+     * @param {SceneryEvent} event
      */
     pointerUp( event ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} pointer up` );
@@ -705,7 +705,7 @@ define( require => {
      *
      * NOTE: Do not call directly.
      *
-     * @param {Event} event
+     * @param {SceneryEvent} event
      */
     pointerCancel( event ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} pointer cancel` );
@@ -729,7 +729,7 @@ define( require => {
      *
      * NOTE: Do not call directly.
      *
-     * @param {Event} event
+     * @param {SceneryEvent} event
      */
     pointerMove( event ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} pointer move` );
@@ -779,7 +779,7 @@ define( require => {
      * This will fire listeners immediately, but adds a delay for the a11yClickingProperty so that you can make a
      * button look pressed from a single DOM click event. For example usage, see sun/ButtonModel.looksPressedProperty.
      *
-     * @param {Event|null} event
+     * @param {SceneryEvent|null} event
      */
     click( event ) {
       if ( this.canClick() ) {

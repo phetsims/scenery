@@ -166,7 +166,6 @@ define( require => {
   const BrowserEvents = require( 'SCENERY/input/BrowserEvents' );
   const cleanArray = require( 'PHET_CORE/cleanArray' );
   const DOMEventIO = require( 'SCENERY/input/DOMEventIO' );
-  const Event = require( 'SCENERY/input/Event' );
   const EventType = require( 'TANDEM/EventType' );
   const Features = require( 'SCENERY/util/Features' );
   const FullScreen = require( 'SCENERY/util/FullScreen' );
@@ -178,6 +177,7 @@ define( require => {
   const platform = require( 'PHET_CORE/platform' );
   const Pointer = require( 'SCENERY/input/Pointer' );
   const scenery = require( 'SCENERY/scenery' );
+  const SceneryEvent = require( 'SCENERY/input/SceneryEvent' );
   const Tandem = require( 'TANDEM/Tandem' );
   const Touch = require( 'SCENERY/input/Touch' );
   const Trail = require( 'SCENERY/util/Trail' );
@@ -1746,7 +1746,7 @@ define( require => {
       assert && assert( trail, 'Falsy trail for dispatchEvent' );
 
       // NOTE: event is not immutable, as its currentTarget changes
-      const inputEvent = new Event( trail, type, pointer, event );
+      const inputEvent = new SceneryEvent( trail, type, pointer, event );
 
       // first run through the pointer's listeners to see if one of them will handle the event
       this.dispatchToListeners( pointer, pointer.getListeners(), type, inputEvent );
@@ -1768,9 +1768,11 @@ define( require => {
      * @param {Pointer} pointer
      * @param {Array.<Object>} listeners - Should be a defensive array copy already.
      * @param {string} type
-     * @param {Event} inputEvent
+     * @param {SceneryEvent} inputEvent
      */
     dispatchToListeners( pointer, listeners, type, inputEvent ) {
+      assert && assert( inputEvent instanceof SceneryEvent );
+
       if ( inputEvent.handled ) {
         return;
       }
@@ -1807,10 +1809,12 @@ define( require => {
      * @param {Trail} trail
      * @param {string} type
      * @param {Pointer} pointer
-     * @param {Event} inputEvent
+     * @param {SceneryEvent} inputEvent
      * @param {boolean} bubbles - If bubbles is false, the event is only dispatched to the leaf node of the trail.
      */
     dispatchToTargets( trail, type, pointer, inputEvent, bubbles ) {
+      assert && assert( inputEvent instanceof SceneryEvent );
+
       if ( inputEvent.aborted || inputEvent.handled ) {
         return;
       }
@@ -1953,7 +1957,7 @@ define( require => {
     /**
      * From a serialized dom event, return a recreated window.Event
      * @param {Object} eventObject
-     * @returns {Window.Event}
+     * @returns {Event}
      */
     static deserializeDomEvent( eventObject ) {
       const domEvent = new window.Event( 'inputEvent' );

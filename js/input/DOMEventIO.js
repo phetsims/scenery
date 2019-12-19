@@ -30,7 +30,7 @@ define( require => {
 
     /**
      * @param {Object} stateObject
-     * @returns {window.Event}
+     * @returns {Event}
      */
     static fromStateObject( stateObject ) {
       return scenery.Input.deserializeDomEvent( stateObject );

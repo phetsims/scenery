@@ -74,7 +74,6 @@ define( require => {
   // modules
   const Action = require( 'AXON/Action' );
   const Bounds2 = require( 'DOT/Bounds2' );
-  const EventIO = require( 'SCENERY/input/EventIO' );
   const EventType = require( 'TANDEM/EventType' );
   const inherit = require( 'PHET_CORE/inherit' );
   const merge = require( 'PHET_CORE/merge' );
@@ -82,6 +81,7 @@ define( require => {
   const PressListener = require( 'SCENERY/listeners/PressListener' );
   const Property = require( 'AXON/Property' );
   const scenery = require( 'SCENERY/scenery' );
+  const SceneryEventIO = require( 'SCENERY/input/SceneryEventIO' );
   const Tandem = require( 'TANDEM/Tandem' );
   const Touch = require( 'SCENERY/input/Touch' );
   const Transform3 = require( 'DOT/Transform3' );
@@ -106,7 +106,7 @@ define( require => {
       // this Property at any other time.
       locationProperty: null,
 
-      // {Function|null} - Called as start( event: {Event}, listener: {DragListener} ) when the drag is started.
+      // {Function|null} - Called as start( event: {SceneryEvent}, listener: {DragListener} ) when the drag is started.
       // This is preferred over passing press(), as the drag start hasn't been fully processed at that point.
       start: null,
 
@@ -249,11 +249,11 @@ define( require => {
 
       PressListener.prototype.drag.call( this, event );
     }, {
-      parameters: [ { name: 'event', phetioType: EventIO } ],
+      parameters: [ { name: 'event', phetioType: SceneryEventIO } ],
       phetioFeatured: options.phetioFeatured,
       tandem: options.tandem.createTandem( 'dragAction' ),
       phetioHighFrequency: true,
-      phetioDocumentation: 'Emits whenever a drag occurs with an EventIO argument.',
+      phetioDocumentation: 'Emits whenever a drag occurs with an SceneryEventIO argument.',
       phetioReadOnly: options.phetioReadOnly,
       phetioEventType: EventType.USER
     } );
@@ -270,7 +270,7 @@ define( require => {
      * NOTE: This is safe to call externally in order to attempt to start a press. dragListener.canPress( event ) can
      * be used to determine whether this will actually start a drag.
      *
-     * @param {Event} event
+     * @param {SceneryEvent} event
      * @param {Node} [targetNode] - If provided, will take the place of the targetNode for this call. Useful for
      *                              forwarded presses.
      * @param {function} [callback] - to be run at the end of the function, but only on success
@@ -329,7 +329,7 @@ define( require => {
      * This can be called from the outside to stop the drag without the pointer having actually fired any 'up'
      * events. If the cancel/interrupt behavior is more preferable, call interrupt() on this listener instead.
      *
-     * @param {Event} [event] - scenery Event if there was one
+     * @param {SceneryEvent} [event] - scenery event if there was one
      * @param {function} [callback] - called at the end of the release
      */
     release( event, callback ) {
@@ -353,7 +353,7 @@ define( require => {
      * @protected
      * @override
      *
-     * @param {Event} event
+     * @param {SceneryEvent} event
      */
     drag( event ) {
       // Ignore global moves that have zero length (Chrome might autofire, see
@@ -371,12 +371,12 @@ define( require => {
     },
 
     /**
-     * Attempts to start a touch snag, given a Scenery Event.
+     * Attempts to start a touch snag, given a SceneryEvent.
      * @public
      *
      * Should be safe to be called externally with an event.
      *
-     * @param {Event} event
+     * @param {SceneryEvent} event
      */
     tryTouchSnag( event ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener tryTouchSnag' );
@@ -638,7 +638,7 @@ define( require => {
      *
      * NOTE: Do not call directly. See the press method instead.
      *
-     * @param {Event} event
+     * @param {SceneryEvent} event
      */
     touchenter( event ) {
       this.tryTouchSnag( event );
@@ -650,7 +650,7 @@ define( require => {
      *
      * NOTE: Do not call directly. See the press method instead.
      *
-     * @param {Event} event
+     * @param {SceneryEvent} event
      */
     touchmove( event ) {
       this.tryTouchSnag( event );
@@ -759,7 +759,7 @@ define( require => {
      * @public
      * @override
      *
-     * @param {Event} event
+     * @param {SceneryEvent} event
      * @returns {boolean}
      */
     canPress( event ) {
@@ -793,7 +793,7 @@ define( require => {
      *
      * See https://github.com/phetsims/scenery/issues/639
      *
-     * @param {function} down - function( {Event} ) - down function to be added to the input listener
+     * @param {function} down - function( {SceneryEvent} ) - down function to be added to the input listener
      * @param {Object} [options]
      * @returns {Object} a scenery input listener
      */

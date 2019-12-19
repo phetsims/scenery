@@ -13,13 +13,13 @@ define( require => {
   'use strict';
 
   const Emitter = require( 'AXON/Emitter' );
-  const EventIO = require( 'SCENERY/input/EventIO' );
   const EventType = require( 'TANDEM/EventType' );
   const inherit = require( 'PHET_CORE/inherit' );
   const merge = require( 'PHET_CORE/merge' );
   const NullableIO = require( 'TANDEM/types/NullableIO' );
   const PressListener = require( 'SCENERY/listeners/PressListener' );
   const scenery = require( 'SCENERY/scenery' );
+  const SceneryEventIO = require( 'SCENERY/input/SceneryEventIO' );
   const Tandem = require( 'TANDEM/Tandem' );
 
   /**
@@ -56,7 +56,7 @@ define( require => {
       phetioEventType: EventType.USER,
       parameters: [ {
         name: 'event',
-        phetioType: NullableIO( EventIO )
+        phetioType: NullableIO( SceneryEventIO )
       } ]
     } );
     this.firedEmitter.addListener( options.fire );
@@ -70,7 +70,7 @@ define( require => {
      * Fires any associated button fire callback.
      * @public
      *
-     * @param {Event|null} event
+     * @param {SceneryEvent|null} event
      * NOTE: This is safe to call on the listener externally.
      */
     fire( event ) {
@@ -90,7 +90,7 @@ define( require => {
      * NOTE: This is safe to call externally in order to attempt to start a press. fireListener.canPress( event ) can
      * be used to determine whether this will actually start a press.
      *
-     * @param {Event} event
+     * @param {SceneryEvent} event
      * @param {Node} [targetNode] - If provided, will take the place of the targetNode for this call. Useful for
      *                              forwarded presses.
      * @param {function} [callback] - to be run at the end of the function, but only on success
@@ -115,7 +115,7 @@ define( require => {
      * needed). If the cancel/interrupt behavior is more preferable (will not fire the button), then call interrupt()
      * on this listener instead.
      *
-     * @param {Event} [event] - scenery Event if there was one
+     * @param {SceneryEvent} [event] - scenery event if there was one
      * @param {function} [callback] - called at the end of the release
      */
     release( event, callback ) {

@@ -1,7 +1,7 @@
 // Copyright 2018-2019, University of Colorado Boulder
 
 /**
- * IO type for scenery Event
+ * IO type for SceneryEvent
  *
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
@@ -11,14 +11,14 @@ define( require => {
   // modules
   const ObjectIO = require( 'TANDEM/types/ObjectIO' );
   const scenery = require( 'SCENERY/scenery' );
+  const SceneryEvent = require( 'SCENERY/input/SceneryEvent' );
   const Vector2IO = require( 'DOT/Vector2IO' );
-  const Event = require( 'SCENERY/input/Event' );
   const validate = require( 'AXON/validate' );
 
-  class EventIO extends ObjectIO {
+  class SceneryEventIO extends ObjectIO {
 
     /**
-     * @param {Event} event
+     * @param {SceneryEvent} event
      * @returns {Object}
      * @override
      */
@@ -38,11 +38,11 @@ define( require => {
     }
   }
 
-  EventIO.documentation = 'An event, with a point';
-  EventIO.validator = { valueType: Event };
-  EventIO.typeName = 'EventIO';
-  ObjectIO.validateSubtype( EventIO );
+  SceneryEventIO.documentation = 'An event, with a point';
+  SceneryEventIO.validator = { valueType: SceneryEvent };
+  SceneryEventIO.typeName = 'SceneryEventIO';
+  ObjectIO.validateSubtype( SceneryEventIO );
 
-  return scenery.register( 'EventIO', EventIO );
+  return scenery.register( 'SceneryEventIO', SceneryEventIO );
 } );
 
