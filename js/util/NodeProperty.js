@@ -13,6 +13,7 @@ define( require => {
   'use strict';
 
   // modules
+  const merge = require( 'PHET_CORE/merge' );
   const Property = require( 'AXON/Property' );
   const scenery = require( 'SCENERY/scenery' );
 
@@ -21,11 +22,19 @@ define( require => {
     /**
      * @param {Node} node
      * @param {string} trigger - the Node trigger that will cause this NodeProperty to update, such as 'bounds', or 'opacity'
+     *                         - NOTE: 'bounds' support doesn't work right now because the Node bounds instance mutates
+     *                         - and hence notifications are not sent.
      * @param {string} attribute - for example 'left' or 'centerBottom' or 'visible' or 'pickable'
      * @param {Object} [options]
      */
     constructor( node, trigger, attribute, options ) {
       assert && assert( typeof attribute === 'string', 'wrong type for getLocation' );
+
+      options = merge( {
+
+        // If changing the property shouldn't propagate back to the Node
+        readOnly: false
+      }, options );
 
       // Read-only Property that describes a part relative to the bounds of the node.
       super( node[ attribute ], options );
@@ -38,6 +47,9 @@ define( require => {
 
       // @private {string}
       this.attribute = attribute;
+
+      // @private
+      this.nodePropertyReadOnly = options.readOnly;
 
       // @private {function} - When the node event is triggered, get the new value and set it to this Property
       this.changeListener = () => this.set( node[ attribute ] );
@@ -64,9 +76,11 @@ define( require => {
      * @protected - can be overridden.
      */
     setPropertyValue( value ) {
+      if ( !this.nodePropertyReadOnly ) {
 
-      // Set the node value first, as if it was the first link listener.
-      this.node[ this.attribute ] = value;
+        // Set the node value first, as if it was the first link listener.
+        this.node[ this.attribute ] = value;
+      }
       super.setPropertyValue( value );
     }
   }
