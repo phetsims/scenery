@@ -22,8 +22,8 @@ define( require => {
     /**
      * @param {Node} node
      * @param {string} trigger - the Node trigger that will cause this NodeProperty to update, such as 'bounds', or 'opacity'
-     *                         - NOTE: 'bounds' support doesn't work right now because the Node bounds instance mutates
-     *                         - and hence notifications are not sent.
+     *                         - TODO: 'bounds' support doesn't work right now because the Node bounds instance mutates
+     *                         - and hence notifications are not sent, see https://github.com/phetsims/scenery/issues/1028
      * @param {string} attribute - for example 'left' or 'centerBottom' or 'visible' or 'pickable'
      * @param {Object} [options]
      */
