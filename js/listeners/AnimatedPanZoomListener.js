@@ -16,7 +16,7 @@ define( require => {
   const AccessibilityUtils = require( 'SCENERY/accessibility/AccessibilityUtils' );
   const Display = require( 'SCENERY/display/Display' );
   const KeyboardUtils = require( 'SCENERY/accessibility/KeyboardUtils' );
-  const KeyboardZoomUtil = require( 'SCENERY/accessibility/KeyboardZoomUtil' );
+  const KeyboardZoomUtils = require( 'SCENERY/accessibility/KeyboardZoomUtils' );
   const KeyStateTracker = require( 'SCENERY/accessibility/KeyStateTracker' );
   const Matrix3 = require( 'DOT/Matrix3' );
   const merge = require( 'PHET_CORE/merge' );
@@ -327,8 +327,8 @@ define( require => {
 
       // handle zoom - Safari doesn't receive the keyup event when the meta key is pressed so we cannot use
       // the keyStateTracker to determine if zoom keys are down
-      const zoomInCommandDown = KeyboardZoomUtil.isZoomCommand( domEvent, true );
-      const zoomOutCommandDown = KeyboardZoomUtil.isZoomCommand( domEvent, false );
+      const zoomInCommandDown = KeyboardZoomUtils.isZoomCommand( domEvent, true );
+      const zoomOutCommandDown = KeyboardZoomUtils.isZoomCommand( domEvent, false );
 
       if ( zoomInCommandDown || zoomOutCommandDown ) {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiPanZoomListener keyboard zoom in' );
@@ -341,7 +341,7 @@ define( require => {
         const keyPress = new KeyPress( this.keyStateTracker, nextScale );
         this.repositionFromKeys( keyPress );
       }
-      else if ( KeyboardZoomUtil.isZoomResetCommand( domEvent ) ) {
+      else if ( KeyboardZoomUtils.isZoomResetCommand( domEvent ) ) {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener keyboard reset' );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 

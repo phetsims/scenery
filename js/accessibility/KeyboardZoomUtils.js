@@ -12,7 +12,7 @@ define( require => {
   const KeyboardUtils = require( 'SCENERY/accessibility/KeyboardUtils' );
   const scenery = require( 'SCENERY/scenery' );
 
-  const KeyboardZoomUtil = {
+  const KeyboardZoomUtils = {
 
     /**
      * Returns true if the platform is most likely a Mac device. Pan/Zoom will use different modifier keys in this case.
@@ -32,7 +32,7 @@ define( require => {
      * @returns {string}
      */
     getPlatformZoomMetaKey: () => {
-      return KeyboardZoomUtil.isPlatformMac() ? 'metaKey' : 'ctrlKey';
+      return KeyboardZoomUtils.isPlatformMac() ? 'metaKey' : 'ctrlKey';
     },
 
     /**
@@ -45,7 +45,7 @@ define( require => {
      */
     isZoomCommand: ( event, zoomIn ) => {
       const zoomKey = zoomIn ? KeyboardUtils.KEY_EQUALS : KeyboardUtils.KEY_MINUS;
-      const metaKey = KeyboardZoomUtil.getPlatformZoomMetaKey();
+      const metaKey = KeyboardZoomUtils.getPlatformZoomMetaKey();
       return event[ metaKey ] && event.keyCode === zoomKey;
     },
 
@@ -57,10 +57,10 @@ define( require => {
      * @returns {boolean}
      */
     isZoomResetCommand: event => {
-      const metaKey = KeyboardZoomUtil.getPlatformZoomMetaKey();
+      const metaKey = KeyboardZoomUtils.getPlatformZoomMetaKey();
       return event[ metaKey ] && event.keyCode === KeyboardUtils.KEY_0;
     }
   };
 
-  return scenery.register( 'KeyboardZoomUtil', KeyboardZoomUtil );
+  return scenery.register( 'KeyboardZoomUtils', KeyboardZoomUtils );
 } );
