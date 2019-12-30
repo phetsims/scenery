@@ -11,7 +11,7 @@ define( require => {
 
   // modules
   const Display = require( 'SCENERY/display/Display' );
-  const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
+  const KeyboardUtils = require( 'SCENERY/accessibility/KeyboardUtils' );
   const merge = require( 'PHET_CORE/merge' );
   const Node = require( 'SCENERY/nodes/Node' );
   const Rectangle = require( 'SCENERY/nodes/Rectangle' );
@@ -142,7 +142,7 @@ define( require => {
     buttonA.addInputListener( overrideFocusListener );
 
     // mimic a "tab" interaction, attempting to move focus to the next element
-    triggerDOMEvent( 'focusout', aPrimarySibling, KeyboardUtil.KEY_TAB, {
+    triggerDOMEvent( 'focusout', aPrimarySibling, KeyboardUtils.KEY_TAB, {
       relatedTarget: bPrimarySibling
     } );
 
@@ -158,7 +158,7 @@ define( require => {
       }
     };
     buttonA.addInputListener( makeUnfocusableListener );
-    triggerDOMEvent( 'focusout', aPrimarySibling, KeyboardUtil.KEY_TAB, {
+    triggerDOMEvent( 'focusout', aPrimarySibling, KeyboardUtils.KEY_TAB, {
       relatedTarget: bPrimarySibling
     } );
 
@@ -519,9 +519,9 @@ define( require => {
     rootNode.addChild( a );
 
     const dPrimarySibling = d.accessibleInstances[ 0 ].peer.primarySibling;
-    triggerDOMEvent( 'keydown', dPrimarySibling, KeyboardUtil.KEY_RIGHT_ARROW );
+    triggerDOMEvent( 'keydown', dPrimarySibling, KeyboardUtils.KEY_RIGHT_ARROW );
 
-    assert.ok( Display.keyStateTracker.isKeyDown( KeyboardUtil.KEY_RIGHT_ARROW ), 'global keyStateTracker should be updated with right arrow key down' );
+    assert.ok( Display.keyStateTracker.isKeyDown( KeyboardUtils.KEY_RIGHT_ARROW ), 'global keyStateTracker should be updated with right arrow key down' );
 
     afterTest( display );
   } );

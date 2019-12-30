@@ -12,18 +12,18 @@ define( require => {
   // modules
   const AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   const Display = require( 'SCENERY/display/Display' );
-  const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
+  const KeyboardUtils = require( 'SCENERY/accessibility/KeyboardUtils' );
   const Random = require( 'DOT/Random' );
   const scenery = require( 'SCENERY/scenery' );
   const timer = require( 'AXON/timer' );
 
   // uppercase matters
   const keyboardTestingSchema = {
-    INPUT: [ ...KeyboardUtil.ARROW_KEYS, KeyboardUtil.KEY_PAGE_UP, KeyboardUtil.KEY_PAGE_DOWN,
-      KeyboardUtil.KEY_HOME, KeyboardUtil.KEY_END, KeyboardUtil.KEY_ENTER, KeyboardUtil.KEY_SPACE ],
-    DIV: [ ...KeyboardUtil.ARROW_KEYS ],
-    P: [ KeyboardUtil.KEY_ESCAPE ],
-    BUTTON: [ KeyboardUtil.KEY_ENTER, KeyboardUtil.KEY_SPACE ]
+    INPUT: [ ...KeyboardUtils.ARROW_KEYS, KeyboardUtils.KEY_PAGE_UP, KeyboardUtils.KEY_PAGE_DOWN,
+      KeyboardUtils.KEY_HOME, KeyboardUtils.KEY_END, KeyboardUtils.KEY_ENTER, KeyboardUtils.KEY_SPACE ],
+    DIV: [ ...KeyboardUtils.ARROW_KEYS ],
+    P: [ KeyboardUtils.KEY_ESCAPE ],
+    BUTTON: [ KeyboardUtils.KEY_ENTER, KeyboardUtils.KEY_SPACE ]
   };
 
   const MAX_MS_KEY_HOLD_DOWN = 200;

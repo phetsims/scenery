@@ -9,7 +9,7 @@ define( require => {
   'use strict';
 
   // modules
-  const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
+  const KeyboardUtils = require( 'SCENERY/accessibility/KeyboardUtils' );
   const scenery = require( 'SCENERY/scenery' );
 
   const KeyboardZoomUtil = {
@@ -44,7 +44,7 @@ define( require => {
      * @returns {boolean}
      */
     isZoomCommand: ( event, zoomIn ) => {
-      const zoomKey = zoomIn ? KeyboardUtil.KEY_EQUALS : KeyboardUtil.KEY_MINUS;
+      const zoomKey = zoomIn ? KeyboardUtils.KEY_EQUALS : KeyboardUtils.KEY_MINUS;
       const metaKey = KeyboardZoomUtil.getPlatformZoomMetaKey();
       return event[ metaKey ] && event.keyCode === zoomKey;
     },
@@ -52,13 +52,13 @@ define( require => {
     /**
      * Returns true if the keyboard command indicates a "zoom reset". This is ctrl + 0 on Win and cmd + 0 on mac.
      *
-     * TODO: I suspect that these zoom specific functions should be moved out of KeyboardUtil.js
+     * TODO: I suspect that these zoom specific functions should be moved out of KeyboardUtils.js
      * @param {Event} event
      * @returns {boolean}
      */
     isZoomResetCommand: event => {
       const metaKey = KeyboardZoomUtil.getPlatformZoomMetaKey();
-      return event[ metaKey ] && event.keyCode === KeyboardUtil.KEY_0;
+      return event[ metaKey ] && event.keyCode === KeyboardUtils.KEY_0;
     }
   };
 

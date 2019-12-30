@@ -9,7 +9,6 @@ define( require => {
   'use strict';
 
   // modules
-  // const AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   const Bounds2 = require( 'DOT/Bounds2' );
   const Display = require( 'SCENERY/display/Display' );
   const Node = require( 'SCENERY/nodes/Node' );

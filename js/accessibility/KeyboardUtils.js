@@ -23,7 +23,7 @@ define( require => {
   const KEY_ALT = 18;
 
   // constants
-  var KeyboardUtil = {
+  var KeyboardUtils = {
 
     // TODO: See if these can be replaced by DOM/Browser API support
     KEY_SPACE: 32,
@@ -65,28 +65,28 @@ define( require => {
 
     // returns whether or not the keyCode corresponds to pressing an arrow key
     isArrowKey: function( keyCode ) {
-      return ( keyCode === KeyboardUtil.KEY_RIGHT_ARROW || keyCode === KeyboardUtil.KEY_LEFT_ARROW ||
-               keyCode === KeyboardUtil.KEY_UP_ARROW || keyCode === KeyboardUtil.KEY_DOWN_ARROW );
+      return ( keyCode === KeyboardUtils.KEY_RIGHT_ARROW || keyCode === KeyboardUtils.KEY_LEFT_ARROW ||
+               keyCode === KeyboardUtils.KEY_UP_ARROW || keyCode === KeyboardUtils.KEY_DOWN_ARROW );
     },
 
     // returns true if keycode is one of keys used for range inputs (key codes 33 - 40, inclusive)
     isRangeKey: function( keyCode ) {
-      return ( keyCode >= KeyboardUtil.KEY_PAGE_UP && keyCode <= KeyboardUtil.KEY_DOWN_ARROW );
+      return ( keyCode >= KeyboardUtils.KEY_PAGE_UP && keyCode <= KeyboardUtils.KEY_DOWN_ARROW );
     },
 
     // returns whether or not the keyCode corresponds to pressing a number key
     isNumberKey: function( keyCode ) {
-      return ( keyCode > KeyboardUtil.KEY_0 && keyCode < KeyboardUtil.KEY_9 );
+      return ( keyCode > KeyboardUtils.KEY_0 && keyCode < KeyboardUtils.KEY_9 );
     },
 
     // returns whether or not the keyCode corresponds to one of the WASD movement keys
     isWASDKey: function( keyCode ) {
-      return ( keyCode === KeyboardUtil.KEY_W || keyCode === KeyboardUtil.KEY_A ||
-               keyCode === KeyboardUtil.KEY_S || keyCode === KeyboardUtil.KEY_D );
+      return ( keyCode === KeyboardUtils.KEY_W || keyCode === KeyboardUtils.KEY_A ||
+               keyCode === KeyboardUtils.KEY_S || keyCode === KeyboardUtils.KEY_D );
     }
   };
 
-  scenery.register( 'KeyboardUtil', KeyboardUtil );
+  scenery.register( 'KeyboardUtils', KeyboardUtils );
 
-  return KeyboardUtil;
+  return KeyboardUtils;
 } );

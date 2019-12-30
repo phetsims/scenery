@@ -12,24 +12,24 @@ define( require => {
 
   // modules
   // const KeyboardFuzzer = require( 'SCENERY/accessibility/KeyboardFuzzer' ); // TODO: can we use this in testing? https://github.com/phetsims/scenery/issues/850
-  const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
+  const KeyboardUtils = require( 'SCENERY/accessibility/KeyboardUtils' );
   const KeyStateTracker = require( 'SCENERY/accessibility/KeyStateTracker' );
   const timer = require( 'AXON/timer' );
 
   // Reusable KeyboardEvents to update the KeyStateTracker with
-  // const tabKeyEvent = { keyCode: KeyboardUtil.KEY_TAB };
-  // const spaceKeyEvent = { keyCode: KeyboardUtil.KEY_SPACE };
-  // const shiftTabKeyEvent = { keyCode: KeyboardUtil.KEY_TAB, shiftKey: true };
-  // const shiftKeyEvent = { keyCode: KeyboardUtil.KEY_SHIFT };
+  // const tabKeyEvent = { keyCode: KeyboardUtils.KEY_TAB };
+  // const spaceKeyEvent = { keyCode: KeyboardUtils.KEY_SPACE };
+  // const shiftTabKeyEvent = { keyCode: KeyboardUtils.KEY_TAB, shiftKey: true };
+  // const shiftKeyEvent = { keyCode: KeyboardUtils.KEY_SHIFT };
 
-  const tabKeyDownEvent = new KeyboardEvent( 'keydown', { keyCode: KeyboardUtil.KEY_TAB } );
-  const tabKeyUpEvent = new KeyboardEvent( 'keyup', { keyCode: KeyboardUtil.KEY_TAB } );
-  const spaceKeyDownEvent = new KeyboardEvent( 'keydown', { keyCode: KeyboardUtil.KEY_SPACE } );
-  const spaceKeyUpEvent = new KeyboardEvent( 'keyup', { keyCode: KeyboardUtil.KEY_SPACE } );
-  const shiftTabKeyDownEvent = new KeyboardEvent( 'keydown', { keyCode: KeyboardUtil.KEY_TAB, shiftKey: true } );
-  const shiftTabKeyUpEvent = new KeyboardEvent( 'keyup', { keyCode: KeyboardUtil.KEY_TAB, shiftKey: true } );
-  const shiftKeyDownEvent = new KeyboardEvent( 'keydown', { keyCode: KeyboardUtil.KEY_SHIFT } );
-  const shiftKeyUpEvent = new KeyboardEvent( 'keyup', { keyCode: KeyboardUtil.KEY_SHIFT } );
+  const tabKeyDownEvent = new KeyboardEvent( 'keydown', { keyCode: KeyboardUtils.KEY_TAB } );
+  const tabKeyUpEvent = new KeyboardEvent( 'keyup', { keyCode: KeyboardUtils.KEY_TAB } );
+  const spaceKeyDownEvent = new KeyboardEvent( 'keydown', { keyCode: KeyboardUtils.KEY_SPACE } );
+  const spaceKeyUpEvent = new KeyboardEvent( 'keyup', { keyCode: KeyboardUtils.KEY_SPACE } );
+  const shiftTabKeyDownEvent = new KeyboardEvent( 'keydown', { keyCode: KeyboardUtils.KEY_TAB, shiftKey: true } );
+  const shiftTabKeyUpEvent = new KeyboardEvent( 'keyup', { keyCode: KeyboardUtils.KEY_TAB, shiftKey: true } );
+  const shiftKeyDownEvent = new KeyboardEvent( 'keydown', { keyCode: KeyboardUtils.KEY_SHIFT } );
+  const shiftKeyUpEvent = new KeyboardEvent( 'keyup', { keyCode: KeyboardUtils.KEY_SHIFT } );
 
   const testTracker = new KeyStateTracker();
 

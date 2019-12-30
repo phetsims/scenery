@@ -24,7 +24,7 @@ define( require => {
 
   // modules
   const inherit = require( 'PHET_CORE/inherit' );
-  const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
+  const KeyboardUtils = require( 'SCENERY/accessibility/KeyboardUtils' );
   const merge = require( 'PHET_CORE/merge' );
   const platform = require( 'PHET_CORE/platform' );
   const scenery = require( 'SCENERY/scenery' );
@@ -314,7 +314,7 @@ define( require => {
 
       // required to work with Safari and VoiceOver, otherwise arrow keys will move virtual cursor, see https://github.com/phetsims/balloons-and-static-electricity/issues/205#issuecomment-263428003
       // prevent default for WASD too, see https://github.com/phetsims/friction/issues/167
-      if ( KeyboardUtil.isArrowKey( domEvent.keyCode ) || KeyboardUtil.isWASDKey( domEvent.keyCode ) ) {
+      if ( KeyboardUtils.isArrowKey( domEvent.keyCode ) || KeyboardUtils.isWASDKey( domEvent.keyCode ) ) {
         domEvent.preventDefault();
       }
 
@@ -327,10 +327,10 @@ define( require => {
       // down, we immediately clear the keystate and return
       // see https://github.com/phetsims/balloons-and-static-electricity/issues/384
       if ( platform.safari ) {
-        if ( KeyboardUtil.isArrowKey( domEvent.keyCode ) ) {
+        if ( KeyboardUtils.isArrowKey( domEvent.keyCode ) ) {
           if ( this.keyInListDown( [
-            KeyboardUtil.KEY_RIGHT_ARROW, KeyboardUtil.KEY_LEFT_ARROW,
-            KeyboardUtil.KEY_UP_ARROW, KeyboardUtil.KEY_DOWN_ARROW ] ) ) {
+            KeyboardUtils.KEY_RIGHT_ARROW, KeyboardUtils.KEY_LEFT_ARROW,
+            KeyboardUtils.KEY_UP_ARROW, KeyboardUtils.KEY_DOWN_ARROW ] ) ) {
             this.interrupt();
             return;
           }
@@ -372,13 +372,13 @@ define( require => {
 
       // if the shift key is down when we navigate to the object, add it to the keystate because it won't be added until
       // the next keydown event
-      if ( domEvent.keyCode === KeyboardUtil.KEY_TAB ) {
+      if ( domEvent.keyCode === KeyboardUtils.KEY_TAB ) {
         if ( domEvent.shiftKey ) {
 
           // add 'shift' to the keystate until it is released again
           this.keyState.push( {
             keyDown: true,
-            keyCode: KeyboardUtil.KEY_SHIFT,
+            keyCode: KeyboardUtils.KEY_SHIFT,
             timeDown: 0 // in ms
           } );
         }
@@ -636,7 +636,7 @@ define( require => {
      * @returns {boolean}
      */
     leftMovementKeysDown: function() {
-      return this.keyInListDown( [ KeyboardUtil.KEY_A, KeyboardUtil.KEY_LEFT_ARROW ] );
+      return this.keyInListDown( [ KeyboardUtils.KEY_A, KeyboardUtils.KEY_LEFT_ARROW ] );
     },
 
     /**
@@ -646,7 +646,7 @@ define( require => {
      * @returns {boolean}
      */
     rightMovementKeysDown: function() {
-      return this.keyInListDown( [ KeyboardUtil.KEY_RIGHT_ARROW, KeyboardUtil.KEY_D ] );
+      return this.keyInListDown( [ KeyboardUtils.KEY_RIGHT_ARROW, KeyboardUtils.KEY_D ] );
     },
 
     /**
@@ -656,7 +656,7 @@ define( require => {
      * @returns {boolean}
      */
     upMovementKeysDown: function() {
-      return this.keyInListDown( [ KeyboardUtil.KEY_UP_ARROW, KeyboardUtil.KEY_W ] );
+      return this.keyInListDown( [ KeyboardUtils.KEY_UP_ARROW, KeyboardUtils.KEY_W ] );
     },
 
     /**
@@ -666,7 +666,7 @@ define( require => {
      * @returns {boolean}
      */
     downMovementKeysDown: function() {
-      return this.keyInListDown( [ KeyboardUtil.KEY_DOWN_ARROW, KeyboardUtil.KEY_S ] );
+      return this.keyInListDown( [ KeyboardUtils.KEY_DOWN_ARROW, KeyboardUtils.KEY_S ] );
     },
 
     /**
@@ -688,7 +688,7 @@ define( require => {
      * @public
      */
     enterKeyDown: function() {
-      return this.keyInListDown( [ KeyboardUtil.KEY_ENTER ] );
+      return this.keyInListDown( [ KeyboardUtils.KEY_ENTER ] );
     },
 
     /**
@@ -698,7 +698,7 @@ define( require => {
      * @public
      */
     shiftKeyDown: function() {
-      return this.keyInListDown( [ KeyboardUtil.KEY_SHIFT ] );
+      return this.keyInListDown( [ KeyboardUtils.KEY_SHIFT ] );
     },
 
     /**
@@ -775,7 +775,7 @@ define( require => {
      * @returns {boolean}
      */
     isLeftMovementKey: function( keyCode ) {
-      return keyCode === KeyboardUtil.KEY_A || keyCode === KeyboardUtil.KEY_LEFT_ARROW;
+      return keyCode === KeyboardUtils.KEY_A || keyCode === KeyboardUtils.KEY_LEFT_ARROW;
     },
 
     /**
@@ -785,7 +785,7 @@ define( require => {
      * @returns {boolean}
      */
     isRightMovementKey: function( keyCode ) {
-      return keyCode === KeyboardUtil.KEY_D || keyCode === KeyboardUtil.KEY_RIGHT_ARROW;
+      return keyCode === KeyboardUtils.KEY_D || keyCode === KeyboardUtils.KEY_RIGHT_ARROW;
     },
 
     /**
@@ -795,7 +795,7 @@ define( require => {
      * @returns {boolean}
      */
     isUpMovementKey: function( keyCode ) {
-      return keyCode === KeyboardUtil.KEY_W || keyCode === KeyboardUtil.KEY_UP_ARROW;
+      return keyCode === KeyboardUtils.KEY_W || keyCode === KeyboardUtils.KEY_UP_ARROW;
     },
 
     /**
@@ -805,7 +805,7 @@ define( require => {
      * @returns {boolean}
      */
     isDownMovementKey: function( keyCode ) {
-      return keyCode === KeyboardUtil.KEY_S || keyCode === KeyboardUtil.KEY_DOWN_ARROW;
+      return keyCode === KeyboardUtils.KEY_S || keyCode === KeyboardUtils.KEY_DOWN_ARROW;
     }
   } );
 } );

@@ -169,7 +169,7 @@ define( require => {
   const EventType = require( 'TANDEM/EventType' );
   const Features = require( 'SCENERY/util/Features' );
   const FullScreen = require( 'SCENERY/util/FullScreen' );
-  const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
+  const KeyboardUtils = require( 'SCENERY/accessibility/KeyboardUtils' );
   const merge = require( 'PHET_CORE/merge' );
   const Mouse = require( 'SCENERY/input/Mouse' );
   const NumberIO = require( 'TANDEM/types/NumberIO' );
@@ -1860,7 +1860,7 @@ define( require => {
       // If navigating in full screen mode, prevent a bug where focus gets lost if fullscreen mode was initiated
       // from an iframe by keeping focus in the display. getNext/getPreviousFocusable will return active element
       // if there are no more elements in that direction. See https://github.com/phetsims/scenery/issues/883
-      if ( FullScreen.isFullScreen() && event.keyCode === KeyboardUtil.KEY_TAB ) {
+      if ( FullScreen.isFullScreen() && event.keyCode === KeyboardUtils.KEY_TAB ) {
         const rootElement = this.display.accessibleDOMElement;
         const nextElement = event.shiftKey ? AccessibilityUtil.getPreviousFocusable( rootElement ) :
                           AccessibilityUtil.getNextFocusable( rootElement );
@@ -1889,7 +1889,7 @@ define( require => {
           }
 
           if ( focusable && nodeAndAncestorsVisible ) {
-            if ( event.keyCode === KeyboardUtil.KEY_TAB ) {
+            if ( event.keyCode === KeyboardUtils.KEY_TAB ) {
               event.preventDefault();
               active.focus();
               this.display.pointerFocus = null;

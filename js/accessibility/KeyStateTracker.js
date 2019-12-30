@@ -13,7 +13,7 @@ define( require => {
 
   // modules
   const Emitter = require( 'AXON/Emitter' );
-  const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
+  const KeyboardUtils = require( 'SCENERY/accessibility/KeyboardUtils' );
   const scenery = require( 'SCENERY/scenery' );
   const timer = require( 'AXON/timer' );
 
@@ -63,13 +63,13 @@ define( require => {
       // This is likely to happen when pressing browser key commands like "ctrl + tab" to switch tabs.
       this.correctModifierKeys( domEvent );
 
-      if ( assert && domEvent.keyCode !== KeyboardUtil.KEY_SHIFT ) {
+      if ( assert && domEvent.keyCode !== KeyboardUtils.KEY_SHIFT ) {
         assert(  !!domEvent.shiftKey === !!this.shiftKeyDown, 'shift key inconsistency between event and keystate.' );
       }
-      if ( assert && domEvent.keyCode !== KeyboardUtil.KEY_ALT ) {
+      if ( assert && domEvent.keyCode !== KeyboardUtils.KEY_ALT ) {
         assert(  !!domEvent.altKey === !!this.altKeyDown, 'alt key inconsistency between event and keystate.' );
       }
-      if ( assert && domEvent.keyCode !== KeyboardUtil.KEY_CTRL ) {
+      if ( assert && domEvent.keyCode !== KeyboardUtils.KEY_CTRL ) {
         assert(  !!domEvent.ctrlKey === !!this.ctrlKeyDown, 'ctrl key inconsistency between event and keystate.' );
       }
 
@@ -98,21 +98,21 @@ define( require => {
 
       // add modifier keys if they aren't down
       if ( domEvent.shiftKey && !this.shiftKeyDown ) {
-        this.keyState[ KeyboardUtil.KEY_SHIFT ] = {
+        this.keyState[ KeyboardUtils.KEY_SHIFT ] = {
           keyDown: true,
           keyCode: domEvent.keyCode,
           timeDown: 0 // in ms
         };
       }
       if ( domEvent.altKey && !this.altKeyDown ) {
-        this.keyState[ KeyboardUtil.KEY_ALT ] = {
+        this.keyState[ KeyboardUtils.KEY_ALT ] = {
           keyDown: true,
           keyCode: domEvent.keyCode,
           timeDown: 0 // in ms
         };
       }
       if ( domEvent.ctrlKey && !this.ctrlKeyDown ) {
-        this.keyState[ KeyboardUtil.KEY_CTRL ] = {
+        this.keyState[ KeyboardUtils.KEY_CTRL ] = {
           keyDown: true,
           keyCode: domEvent.keyCode,
           timeDown: 0 // in ms
@@ -121,13 +121,13 @@ define( require => {
 
       // delete modifier keys if we think they are down
       if ( !domEvent.shiftKey && this.shiftKeyDown ) {
-        delete this.keyState[ KeyboardUtil.KEY_SHIFT ];
+        delete this.keyState[ KeyboardUtils.KEY_SHIFT ];
       }
       if ( !domEvent.altKey && this.altKeyDown ) {
-        delete this.keyState[ KeyboardUtil.KEY_ALT ];
+        delete this.keyState[ KeyboardUtils.KEY_ALT ];
       }
       if ( !domEvent.ctrlKey && this.ctrlKeyDown ) {
-        delete this.keyState[ KeyboardUtil.KEY_CTRL ];
+        delete this.keyState[ KeyboardUtils.KEY_CTRL ];
       }
     }
 
@@ -234,7 +234,7 @@ define( require => {
      * @public
      */
     get enterKeyDown() {
-      return this.isKeyDown( KeyboardUtil.KEY_ENTER );
+      return this.isKeyDown( KeyboardUtils.KEY_ENTER );
     }
 
     /**
@@ -242,7 +242,7 @@ define( require => {
      * @public
      */
     get shiftKeyDown() {
-      return this.isKeyDown( KeyboardUtil.KEY_SHIFT );
+      return this.isKeyDown( KeyboardUtils.KEY_SHIFT );
     }
 
     /**
@@ -250,7 +250,7 @@ define( require => {
      * @public
      */
     get altKeyDown() {
-      return this.isKeyDown( KeyboardUtil.KEY_ALT );
+      return this.isKeyDown( KeyboardUtils.KEY_ALT );
     }
 
     /**
@@ -258,7 +258,7 @@ define( require => {
      * @public
      */
     get ctrlKeyDown() {
-      return this.isKeyDown( KeyboardUtil.KEY_CTRL );
+      return this.isKeyDown( KeyboardUtils.KEY_CTRL );
     }
 
     /**

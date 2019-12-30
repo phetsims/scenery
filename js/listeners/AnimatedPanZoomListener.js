@@ -15,7 +15,7 @@ define( require => {
   // modules
   const AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
   const Display = require( 'SCENERY/display/Display' );
-  const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
+  const KeyboardUtils = require( 'SCENERY/accessibility/KeyboardUtils' );
   const KeyboardZoomUtil = require( 'SCENERY/accessibility/KeyboardZoomUtil' );
   const KeyStateTracker = require( 'SCENERY/accessibility/KeyStateTracker' );
   const Matrix3 = require( 'DOT/Matrix3' );
@@ -274,7 +274,7 @@ define( require => {
         this.handleZoomCommands( domEvent );
 
         // handle translation without worry of the pointer being attached because there is no pointer at this level
-        if ( KeyboardUtil.isArrowKey( domEvent.keyCode ) ) {
+        if ( KeyboardUtils.isArrowKey( domEvent.keyCode ) ) {
           const keyPress = new KeyPress( this.keyStateTracker, this.getCurrentScale() );
           this.repositionFromKeys( keyPress );
         }
@@ -301,7 +301,7 @@ define( require => {
       this.handleZoomCommands( domEvent );
 
       // handle translation
-      if ( KeyboardUtil.isArrowKey( domEvent.keyCode ) ) {
+      if ( KeyboardUtils.isArrowKey( domEvent.keyCode ) ) {
         const keyboardDragIntent = event.pointer.getIntent() === Pointer.Intent.KEYBOARD_DRAG;
         // const elementUsesKeys = AccessibilityUtil.elementUsesArrowKeys( domEvent.target );
 
@@ -829,12 +829,12 @@ define( require => {
 
       // determine resulting translation
       let xDirection = 0;
-      xDirection += keyStateTracker.isKeyDown( KeyboardUtil.KEY_RIGHT_ARROW );
-      xDirection -= keyStateTracker.isKeyDown( KeyboardUtil.KEY_LEFT_ARROW );
+      xDirection += keyStateTracker.isKeyDown( KeyboardUtils.KEY_RIGHT_ARROW );
+      xDirection -= keyStateTracker.isKeyDown( KeyboardUtils.KEY_LEFT_ARROW );
 
       let yDirection = 0;
-      yDirection += keyStateTracker.isKeyDown( KeyboardUtil.KEY_DOWN_ARROW );
-      yDirection -= keyStateTracker.isKeyDown( KeyboardUtil.KEY_UP_ARROW );
+      yDirection += keyStateTracker.isKeyDown( KeyboardUtils.KEY_DOWN_ARROW );
+      yDirection -= keyStateTracker.isKeyDown( KeyboardUtils.KEY_UP_ARROW );
 
       // don't set magnitude if zero vector (as vector will become ill-defined)
       scratchTranslationVector.setXY( xDirection, yDirection );
