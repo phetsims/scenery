@@ -25,7 +25,7 @@ define( require => {
   const TextBounds = require( 'SCENERY/util/TextBounds' );
   const Trail = require( 'SCENERY/util/Trail' );
   const TrailPointer = require( 'SCENERY/util/TrailPointer' );
-  const Util = require( 'SCENERY/util/Util' );
+  const Utils = require( 'SCENERY/util/Utils' );
   const Vector2 = require( 'DOT/Vector2' );
   const VStrut = require( 'SCENERY/nodes/VStrut' );
   const WebGLNode = require( 'SCENERY/nodes/WebGLNode' );
@@ -507,7 +507,7 @@ define( require => {
   } );
 
   QUnit.test( 'Correct bounds on rectangle', function( assert ) {
-    const rectBounds = Util.canvasAccurateBounds( function( context ) { context.fillRect( 100, 100, 200, 200 ); } );
+    const rectBounds = Utils.canvasAccurateBounds( function( context ) { context.fillRect( 100, 100, 200, 200 ); } );
     assert.ok( Math.abs( rectBounds.minX - 100 ) < 0.01, rectBounds.minX );
     assert.ok( Math.abs( rectBounds.minY - 100 ) < 0.01, rectBounds.minY );
     assert.ok( Math.abs( rectBounds.maxX - 300 ) < 0.01, rectBounds.maxX );
@@ -515,7 +515,7 @@ define( require => {
   } );
 
   QUnit.test( 'Consistent and precise bounds range on Text', function( assert ) {
-    const textBounds = Util.canvasAccurateBounds( function( context ) { context.fillText( 'test string', 0, 0 ); } );
+    const textBounds = Utils.canvasAccurateBounds( function( context ) { context.fillText( 'test string', 0, 0 ); } );
     assert.ok( textBounds.isConsistent, textBounds.toString() );
 
     // precision of 0.001 (or lower given different parameters) is possible on non-Chome browsers (Firefox, IE9, Opera)

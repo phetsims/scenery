@@ -212,7 +212,7 @@ define( require => {
   const Shape = require( 'KITE/Shape' );
   const Touch = require( 'SCENERY/input/Touch' );
   const Transform3 = require( 'DOT/Transform3' );
-  const Util = require( 'DOT/Util' );
+  const Utils = require( 'DOT/Utils' );
   const Vector2 = require( 'DOT/Vector2' );
   require( 'SCENERY/util/CanvasContextWrapper' );
   // commented out so Require.js doesn't balk at the circular dependency
@@ -220,7 +220,7 @@ define( require => {
   // require( 'SCENERY/util/TrailPointer' );
   const NodeIO = require( 'SCENERY/nodes/NodeIO' );
   // constants
-  const clamp = Util.clamp;
+  const clamp = Utils.clamp;
 
   let globalIdCounter = 1;
 
@@ -4319,8 +4319,8 @@ define( require => {
         assert( sourceBounds === null || sourceBounds instanceof Bounds2, 'sourceBounds should be null or a Bounds2' );
         if ( sourceBounds ) {
           assert( sourceBounds.isValid(), 'sourceBounds should be valid (finite non-negative)' );
-          assert( Util.isInteger( sourceBounds.width ), 'sourceBounds.width should be an integer' );
-          assert( Util.isInteger( sourceBounds.height ), 'sourceBounds.height should be an integer' );
+          assert( Utils.isInteger( sourceBounds.width ), 'sourceBounds.width should be an integer' );
+          assert( Utils.isInteger( sourceBounds.height ), 'sourceBounds.height should be an integer' );
         }
       }
 

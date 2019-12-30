@@ -163,7 +163,7 @@ define( [
   'SCENERY/util/Trail',
   'SCENERY/util/TrailPointer',
   'SCENERY/util/TransformTracker',
-  'SCENERY/util/Util'
+  'SCENERY/util/Utils'
 ], function( scenery ) {
   'use strict';
 

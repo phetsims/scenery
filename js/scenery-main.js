@@ -15,6 +15,6 @@
     window.phetCore = require( 'PHET_CORE/main' );
     window.utteranceQueue = require( 'UTTERANCE_QUEUE/main' );
     window.scenery = require( 'main' );
-    window.scenery.Util.polyfillRequestAnimationFrame();
+    window.scenery.Utils.polyfillRequestAnimationFrame();
   } );
 } )();

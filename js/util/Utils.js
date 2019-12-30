@@ -34,7 +34,7 @@ define( require => {
   // see https://github.com/phetsims/scenery/issues/621
   let webglEnabled = true;
 
-  var Util = {
+  var Utils = {
     /*---------------------------------------------------------------------------*
      * Transformation Utilities (TODO: separate file)
      *---------------------------------------------------------------------------*/
@@ -50,10 +50,10 @@ define( require => {
     prepareForTransform: function( element, forceAcceleration ) {
       element.style[ transformOriginProperty ] = 'top left';
       if ( forceAcceleration ) {
-        scenery.Util.setTransformAcceleration( element );
+        scenery.Utils.setTransformAcceleration( element );
       }
       else {
-        scenery.Util.unsetTransformAcceleration( element );
+        scenery.Utils.unsetTransformAcceleration( element );
       }
     },
 
@@ -169,7 +169,7 @@ define( require => {
      */
     backingScale: function( context ) {
       if ( 'devicePixelRatio' in window ) {
-        const backingStoreRatio = Util.backingStorePixelRatio( context );
+        const backingStoreRatio = Utils.backingStorePixelRatio( context );
 
         return window.devicePixelRatio / backingStoreRatio;
       }
@@ -273,7 +273,7 @@ define( require => {
         context.restore();
 
         const data = context.getImageData( 0, 0, resolution, resolution );
-        const minMaxBounds = Util.scanBounds( data, resolution, transform );
+        const minMaxBounds = Utils.scanBounds( data, resolution, transform );
 
         function snapshotToCanvas( snapshot ) {
           const canvas = document.createElement( 'canvas' );
@@ -581,7 +581,7 @@ define( require => {
      */
     get isWebGLSupported() {
       if ( this._extensionlessWebGLSupport === undefined ) {
-        this._extensionlessWebGLSupport = scenery.Util.checkWebGLSupport();
+        this._extensionlessWebGLSupport = scenery.Utils.checkWebGLSupport();
       }
       return this._extensionlessWebGLSupport;
     },
@@ -605,7 +605,7 @@ define( require => {
       }
     }
   };
-  scenery.register( 'Util', Util );
+  scenery.register( 'Utils', Utils );
 
-  return Util;
+  return Utils;
 } );

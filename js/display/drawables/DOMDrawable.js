@@ -13,7 +13,7 @@ define( require => {
   const inherit = require( 'PHET_CORE/inherit' );
   const Poolable = require( 'PHET_CORE/Poolable' );
   const scenery = require( 'SCENERY/scenery' );
-  require( 'SCENERY/util/Util' );
+  require( 'SCENERY/util/Utils' );
 
   /**
    * A generated DOMSelfDrawable whose purpose will be drawing our DOM node. One of these drawables will be created
@@ -34,7 +34,7 @@ define( require => {
     this.domElement = this.node._container;
 
     // Apply CSS needed for future CSS transforms to work properly.
-    scenery.Util.prepareForTransform( this.domElement, this.forceAcceleration );
+    scenery.Utils.prepareForTransform( this.domElement, this.forceAcceleration );
   }
 
   scenery.register( 'DOMDrawable', DOMDrawable );
@@ -48,7 +48,7 @@ define( require => {
      */
     updateDOM: function() {
       if ( this.transformDirty && !this.node._preventTransform ) {
-        scenery.Util.applyPreparedTransform( this.getTransformMatrix(), this.domElement, this.forceAcceleration );
+        scenery.Utils.applyPreparedTransform( this.getTransformMatrix(), this.domElement, this.forceAcceleration );
       }
 
       // clear all of the dirty flags

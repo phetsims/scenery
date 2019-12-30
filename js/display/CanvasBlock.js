@@ -17,7 +17,7 @@ define( require => {
   const Poolable = require( 'PHET_CORE/Poolable' );
   const Renderer = require( 'SCENERY/display/Renderer' );
   const scenery = require( 'SCENERY/scenery' );
-  const Util = require( 'SCENERY/util/Util' );
+  const Utils = require( 'SCENERY/util/Utils' );
   const Vector2 = require( 'DOT/Vector2' );
 
   const scratchMatrix = new Matrix3();
@@ -84,8 +84,8 @@ define( require => {
       this.filterListenerCountMap = this.filterListenerCountMap || {};
 
       // reset any fit transforms that were applied
-      Util.prepareForTransform( this.canvas, this.forceAcceleration ); // Apply CSS needed for future CSS transforms to work properly.
-      Util.unsetTransform( this.canvas ); // clear out any transforms that could have been previously applied
+      Utils.prepareForTransform( this.canvas, this.forceAcceleration ); // Apply CSS needed for future CSS transforms to work properly.
+      Utils.unsetTransform( this.canvas ); // clear out any transforms that could have been previously applied
 
       this.canvasDrawOffset = new Vector2( 0, 0 );
 
@@ -98,7 +98,7 @@ define( require => {
       this.clipCount = 0;
 
       // store our backing scale so we don't have to look it up while fitting
-      this.backingScale = ( renderer & Renderer.bitmaskCanvasLowResolution ) ? 1 : scenery.Util.backingScale( this.context );
+      this.backingScale = ( renderer & Renderer.bitmaskCanvasLowResolution ) ? 1 : scenery.Utils.backingScale( this.context );
 
       this.clipDirtyListener = this.markDirty.bind( this );
       this.opacityDirtyListener = this.markDirty.bind( this );
@@ -118,7 +118,7 @@ define( require => {
       this.canvas.style.height = size.height + 'px';
       this.wrapper.resetStyles();
       this.canvasDrawOffset.setXY( 0, 0 );
-      Util.unsetTransform( this.canvas );
+      Utils.unsetTransform( this.canvas );
     },
 
     setSizeFitBounds: function() {
@@ -126,7 +126,7 @@ define( require => {
       const y = this.fitBounds.minY;
       this.canvasDrawOffset.setXY( -x, -y ); // subtract off so we have a tight fit
       //OHTWO TODO PERFORMANCE: see if we can get a speedup by putting the backing scale in our transform instead of with CSS?
-      Util.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.canvas, this.forceAcceleration ); // reapply the translation as a CSS transform
+      Utils.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.canvas, this.forceAcceleration ); // reapply the translation as a CSS transform
       this.canvas.width = this.fitBounds.width * this.backingScale;
       this.canvas.height = this.fitBounds.height * this.backingScale;
       this.canvas.style.width = this.fitBounds.width + 'px';

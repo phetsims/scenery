@@ -35,7 +35,7 @@ define( require => {
   const RelativeTransform = require( 'SCENERY/display/RelativeTransform' );
   const Renderer = require( 'SCENERY/display/Renderer' );
   const scenery = require( 'SCENERY/scenery' );
-  const Util = require( 'SCENERY/util/Util' );
+  const Utils = require( 'SCENERY/util/Utils' );
 
   let globalIdCounter = 1;
 
@@ -81,7 +81,7 @@ define( require => {
 
       this.id = this.id || globalIdCounter++;
 
-      this.isWebGLSupported = display._allowWebGL && Util.isWebGLSupported;
+      this.isWebGLSupported = display._allowWebGL && Utils.isWebGLSupported;
 
       // {RelativeTransform}, provides high-performance access to 'relative' transforms (from our nearest
       // transform root), and allows for listening to when our relative transform changes (called during

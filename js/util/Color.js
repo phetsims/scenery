@@ -17,11 +17,11 @@ define( require => {
   const Property = require( 'AXON/Property' );
   const scenery = require( 'SCENERY/scenery' );
   const TinyEmitter = require( 'AXON/TinyEmitter' );
-  const Util = require( 'DOT/Util' );
+  const Utils = require( 'DOT/Utils' );
 
   // constants
-  const clamp = Util.clamp;
-  const linear = Util.linear;
+  const clamp = Utils.clamp;
+  const linear = Utils.linear;
 
   /**
    * Creates a Color with an initial value. Multiple different types of parameters are supported:
@@ -61,7 +61,7 @@ define( require => {
       str = str.slice( 0, str.length - 1 );
     }
 
-    return Util.roundSymmetric( parseInt( str, 10 ) * multiplier );
+    return Utils.roundSymmetric( parseInt( str, 10 ) * multiplier );
   }
 
   Color.formatParsers = [
@@ -244,9 +244,9 @@ define( require => {
 
     // RGB integral between 0-255, alpha (float) between 0-1
     setRGBA: function( red, green, blue, alpha ) {
-      this.r = Util.roundSymmetric( clamp( red, 0, 255 ) );
-      this.g = Util.roundSymmetric( clamp( green, 0, 255 ) );
-      this.b = Util.roundSymmetric( clamp( blue, 0, 255 ) );
+      this.r = Utils.roundSymmetric( clamp( red, 0, 255 ) );
+      this.g = Utils.roundSymmetric( clamp( green, 0, 255 ) );
+      this.b = Utils.roundSymmetric( clamp( blue, 0, 255 ) );
       this.a = clamp( alpha, 0, 1 );
 
       this.updateColor(); // update the cached value
@@ -405,9 +405,9 @@ define( require => {
       }
       const m1 = lightness * 2 - m2;
 
-      this.r = Util.roundSymmetric( Color.hueToRGB( m1, m2, hue + 1 / 3 ) * 255 );
-      this.g = Util.roundSymmetric( Color.hueToRGB( m1, m2, hue ) * 255 );
-      this.b = Util.roundSymmetric( Color.hueToRGB( m1, m2, hue - 1 / 3 ) * 255 );
+      this.r = Utils.roundSymmetric( Color.hueToRGB( m1, m2, hue + 1 / 3 ) * 255 );
+      this.g = Utils.roundSymmetric( Color.hueToRGB( m1, m2, hue ) * 255 );
+      this.b = Utils.roundSymmetric( Color.hueToRGB( m1, m2, hue - 1 / 3 ) * 255 );
       this.a = clamp( alpha, 0, 1 );
 
       this.updateColor(); // update the cached value

@@ -15,7 +15,7 @@ define( require => {
   const Poolable = require( 'PHET_CORE/Poolable' );
   const scenery = require( 'SCENERY/scenery' );
   const SVGGroup = require( 'SCENERY/display/SVGGroup' );
-  const Util = require( 'SCENERY/util/Util' );
+  const Utils = require( 'SCENERY/util/Utils' );
 
   /**
    * @constructor
@@ -86,9 +86,9 @@ define( require => {
       }
 
       // reset what layer fitting can do (this.forceAcceleration set in fitted block initialization)
-      Util.prepareForTransform( this.svg, this.forceAcceleration ); // Apply CSS needed for future CSS transforms to work properly.
+      Utils.prepareForTransform( this.svg, this.forceAcceleration ); // Apply CSS needed for future CSS transforms to work properly.
 
-      Util.unsetTransform( this.svg ); // clear out any transforms that could have been previously applied
+      Utils.unsetTransform( this.svg ); // clear out any transforms that could have been previously applied
       this.baseTransformGroup.setAttribute( 'transform', '' ); // no base transform
 
       const instanceClosestToRoot = transformRootInstance.trail.nodes.length > filterRootInstance.trail.nodes.length ?
@@ -180,7 +180,7 @@ define( require => {
       sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( 'setSizeFullDisplay #' + this.id );
 
       this.baseTransformGroup.removeAttribute( 'transform' );
-      Util.unsetTransform( this.svg );
+      Utils.unsetTransform( this.svg );
 
       const size = this.display.getSize();
       this.svg.setAttribute( 'width', size.width );
@@ -197,7 +197,7 @@ define( require => {
       assert && assert( this.fitBounds.isValid(), 'Invalid fitBounds' );
 
       this.baseTransformGroup.setAttribute( 'transform', 'translate(' + (-x) + ',' + (-y) + ')' ); // subtract off so we have a tight fit
-      Util.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.svg, this.forceAcceleration ); // reapply the translation as a CSS transform
+      Utils.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.svg, this.forceAcceleration ); // reapply the translation as a CSS transform
       this.svg.setAttribute( 'width', this.fitBounds.width );
       this.svg.setAttribute( 'height', this.fitBounds.height );
     },

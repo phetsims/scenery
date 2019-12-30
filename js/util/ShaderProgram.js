@@ -12,7 +12,7 @@ define( require => {
   const inherit = require( 'PHET_CORE/inherit' );
   const merge = require( 'PHET_CORE/merge' );
   const scenery = require( 'SCENERY/scenery' );
-  const Util = require( 'SCENERY/util/Util' );
+  const Utils = require( 'SCENERY/util/Utils' );
 
   function ShaderProgram( gl, vertexSource, fragmentSource, options ) {
     options = merge( {
@@ -41,8 +41,8 @@ define( require => {
 
       this.program = this.gl.createProgram();
 
-      this.vertexShader = Util.createShader( this.gl, this.vertexSource, this.gl.VERTEX_SHADER );
-      this.fragmentShader = Util.createShader( this.gl, this.fragmentSource, this.gl.FRAGMENT_SHADER );
+      this.vertexShader = Utils.createShader( this.gl, this.vertexSource, this.gl.VERTEX_SHADER );
+      this.fragmentShader = Utils.createShader( this.gl, this.fragmentSource, this.gl.FRAGMENT_SHADER );
 
       this.gl.attachShader( this.program, this.vertexShader );
       this.gl.attachShader( this.program, this.fragmentShader );

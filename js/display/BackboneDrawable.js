@@ -19,7 +19,7 @@ define( require => {
   const RebuildStitcher = require( 'SCENERY/display/RebuildStitcher' );
   const scenery = require( 'SCENERY/scenery' );
   const Stitcher = require( 'SCENERY/display/Stitcher' );
-  const Util = require( 'SCENERY/util/Util' );
+  const Utils = require( 'SCENERY/util/Utils' );
 
   // constants
   const useGreedyStitcher = true;
@@ -89,7 +89,7 @@ define( require => {
       this.dirtyDrawables = cleanArray( this.dirtyDrawables );
 
       // Apply CSS needed for future CSS transforms to work properly.
-      Util.prepareForTransform( this.domElement, this.forceAcceleration );
+      Utils.prepareForTransform( this.domElement, this.forceAcceleration );
 
       // if we need to, watch nodes below us (and including us) and apply their filters (opacity/visibility/clip) to the backbone.
       this.watchedFilterNodes = cleanArray( this.watchedFilterNodes );
@@ -223,7 +223,7 @@ define( require => {
       assert && assert( this.willApplyTransform, 'Sanity check for willApplyTransform' );
 
       // relative matrix on backbone instance should be up to date, since we added the compute flags
-      scenery.Util.applyPreparedTransform( this.backboneInstance.relativeTransform.matrix, this.domElement, this.forceAcceleration );
+      scenery.Utils.applyPreparedTransform( this.backboneInstance.relativeTransform.matrix, this.domElement, this.forceAcceleration );
     },
 
     markOpacityDirty: function() {

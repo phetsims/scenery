@@ -20,7 +20,7 @@ define( require => {
   const Renderer = require( 'SCENERY/display/Renderer' );
   const scenery = require( 'SCENERY/scenery' );
   const Shape = require( 'KITE/Shape' );
-  const Util = require( 'SCENERY/util/Util' );
+  const Utils = require( 'SCENERY/util/Utils' );
   const WebGLNodeDrawable = require( 'SCENERY/display/drawables/WebGLNodeDrawable' );
 
   const WEBGL_NODE_OPTION_KEYS = [
@@ -196,7 +196,7 @@ define( require => {
         preserveDrawingBuffer: true // so we can get the data and render it to the Canvas
       };
       const gl = scratchCanvas.getContext( 'webgl', contextOptions ) || scratchCanvas.getContext( 'experimental-webgl', contextOptions );
-      Util.applyWebGLContextDefaults( gl ); // blending, etc.
+      Utils.applyWebGLContextDefaults( gl ); // blending, etc.
 
       const projectionMatrix = new Matrix3().rowMajor(
         2 / width, 0, -1,

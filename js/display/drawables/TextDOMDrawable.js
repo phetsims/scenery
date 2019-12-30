@@ -15,7 +15,7 @@ define( require => {
   const Poolable = require( 'PHET_CORE/Poolable' );
   const scenery = require( 'SCENERY/scenery' );
   const TextStatefulDrawable = require( 'SCENERY/display/drawables/TextStatefulDrawable' );
-  require( 'SCENERY/util/Util' );
+  require( 'SCENERY/util/Utils' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   const keepDOMTextElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
@@ -52,7 +52,7 @@ define( require => {
     }
 
     // Apply CSS needed for future CSS transforms to work properly.
-    scenery.Util.prepareForTransform( this.domElement, this.forceAcceleration );
+    scenery.Utils.prepareForTransform( this.domElement, this.forceAcceleration );
   }
 
   scenery.register( 'TextDOMDrawable', TextDOMDrawable );
@@ -95,7 +95,7 @@ define( require => {
         const translation = Matrix3.translation( 0, yOffset );
         scratchMatrix.multiplyMatrix( translation );
         translation.freeToPool();
-        scenery.Util.applyPreparedTransform( scratchMatrix, div, this.forceAcceleration );
+        scenery.Utils.applyPreparedTransform( scratchMatrix, div, this.forceAcceleration );
       }
 
       // clear all of the dirty flags

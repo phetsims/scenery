@@ -16,7 +16,7 @@ define( require => {
   const Matrix3 = require( 'DOT/Matrix3' );
   const Poolable = require( 'PHET_CORE/Poolable' );
   const scenery = require( 'SCENERY/scenery' );
-  require( 'SCENERY/util/Util' );
+  require( 'SCENERY/util/Utils' );
 
   // TODO: change this based on memory and performance characteristics of the platform
   const keepDOMCircleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
@@ -74,7 +74,7 @@ define( require => {
     this.domElement = this.fillElement;
 
     // Apply CSS needed for future CSS transforms to work properly.
-    scenery.Util.prepareForTransform( this.domElement, this.forceAcceleration );
+    scenery.Utils.prepareForTransform( this.domElement, this.forceAcceleration );
   }
 
   scenery.register( 'CircleDOMDrawable', CircleDOMDrawable );
@@ -139,7 +139,7 @@ define( require => {
         const translation = Matrix3.translation( -node._radius, -node._radius );
         this.matrix.multiplyMatrix( translation );
         translation.freeToPool();
-        scenery.Util.applyPreparedTransform( this.matrix, this.fillElement, this.forceAcceleration );
+        scenery.Utils.applyPreparedTransform( this.matrix, this.fillElement, this.forceAcceleration );
       }
 
       // clear all of the dirty flags

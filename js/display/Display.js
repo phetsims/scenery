@@ -96,7 +96,7 @@ define( require => {
   const platform = require( 'PHET_CORE/platform' );
   const PointerAreaOverlay = require( 'SCENERY/overlays/PointerAreaOverlay' );
   const PointerOverlay = require( 'SCENERY/overlays/PointerOverlay' );
-  const Util = require( 'SCENERY/util/Util' );
+  const Utils = require( 'SCENERY/util/Utils' );
   const UtteranceQueue = require( 'UTTERANCE_QUEUE/UtteranceQueue' );
 
   /**
@@ -1178,7 +1178,7 @@ define( require => {
         if ( backbone.blocks ) {
           backbone.blocks.forEach( function( block ) {
             if ( block.gl ) {
-              Util.loseContext( block.gl );
+              Utils.loseContext( block.gl );
             }
 
             //TODO: pattern for this iteration

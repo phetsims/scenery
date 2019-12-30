@@ -15,7 +15,7 @@ define( require => {
   const Matrix3 = require( 'DOT/Matrix3' );
   const scenery = require( 'SCENERY/scenery' );
   const Touch = require( 'SCENERY/input/Touch' );
-  const Util = require( 'SCENERY/util/Util' );
+  const Utils = require( 'SCENERY/util/Utils' );
   require( 'SCENERY/util/Trail' );
 
   function PointerOverlay( display, rootNode ) {
@@ -56,7 +56,7 @@ define( require => {
       svg.style.left = 0;
       svg.style[ 'pointer-events' ] = 'none';
 
-      Util.prepareForTransform( svg, false );
+      Utils.prepareForTransform( svg, false );
 
       //Fit the size to the display
       svg.setAttribute( 'width', diameter );
@@ -86,7 +86,7 @@ define( require => {
           //TODO: Why is point sometimes null?
           if ( pointer.point ) {
 
-            Util.applyPreparedTransform( scratchMatrix.setToTranslation( pointer.point.x - radius, pointer.point.y - radius ), svg, false );
+            Utils.applyPreparedTransform( scratchMatrix.setToTranslation( pointer.point.x - radius, pointer.point.y - radius ), svg, false );
           }
         },
 

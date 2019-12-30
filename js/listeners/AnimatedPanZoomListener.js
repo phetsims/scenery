@@ -24,7 +24,7 @@ define( require => {
   const platform = require( 'PHET_CORE/platform' );
   const Pointer = require( 'SCENERY/input/Pointer' );
   const scenery = require( 'SCENERY/scenery' );
-  const Util = require( 'DOT/Util' );
+  const Utils = require( 'DOT/Utils' );
   const Vector2 = require( 'DOT/Vector2' );
 
   // constants
@@ -624,7 +624,7 @@ define( require => {
       assert && assert( this.sourceLocation !== null, 'initializeLocations must be called at least once before animating' );
 
       const locationDirty = !this.destinationLocation.equalsEpsilon( this.sourceLocation, 0.1 );
-      const scaleDirty = !Util.equalsEpsilon( this.sourceScale, this.destinationScale, 0.001 );
+      const scaleDirty = !Utils.equalsEpsilon( this.sourceScale, this.destinationScale, 0.001 );
 
       // Only a MiddlePress can support animation while down
       if ( this._presses.length === 0 || this.middlePress !== null ) {
@@ -771,7 +771,7 @@ define( require => {
       }
 
       let nextIndex = zoomIn ? nearestIndex + 1 : nearestIndex - 1;
-      nextIndex = Util.clamp( nextIndex, 0, this.discreteScales.length - 1 );
+      nextIndex = Utils.clamp( nextIndex, 0, this.discreteScales.length - 1 );
       return this.discreteScales[ nextIndex ];
     }
 

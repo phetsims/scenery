@@ -13,7 +13,7 @@ define( require => {
   const CanvasContextWrapper = require( 'SCENERY/util/CanvasContextWrapper' );
   const Font = require( 'SCENERY/util/Font' );
   const scenery = require( 'SCENERY/scenery' );
-  const Util = require( 'SCENERY/util/Util' );
+  const Utils = require( 'SCENERY/util/Utils' );
 
   // @private {string} - ID for a container for our SVG test element (determined to find the size of text elements with SVG)
   const TEXT_SIZE_CONTAINER_ID = 'sceneryTextSizeContainer';
@@ -111,7 +111,7 @@ define( require => {
       }
 
       // NOTE: should return new instance, so that it can be mutated later
-      const accurateBounds = Util.canvasAccurateBounds( function( context ) {
+      const accurateBounds = Utils.canvasAccurateBounds( function( context ) {
         context.font = text._font.toCSS();
         context.direction = 'ltr';
         context.fillText( text.renderedText, 0, 0 );

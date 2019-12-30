@@ -63,7 +63,7 @@ define( require => {
     this.domElement = this.fillElement;
 
     // Apply CSS needed for future CSS transforms to work properly.
-    scenery.Util.prepareForTransform( this.domElement, this.forceAcceleration );
+    scenery.Utils.prepareForTransform( this.domElement, this.forceAcceleration );
   }
 
   scenery.register( 'RectangleDOMDrawable', RectangleDOMDrawable );
@@ -140,7 +140,7 @@ define( require => {
         const translation = Matrix3.translation( node._rectX, node._rectY );
         scratchMatrix.multiplyMatrix( translation );
         translation.freeToPool();
-        scenery.Util.applyPreparedTransform( scratchMatrix, this.fillElement, this.forceAcceleration );
+        scenery.Utils.applyPreparedTransform( scratchMatrix, this.fillElement, this.forceAcceleration );
       }
 
       // clear all of the dirty flags

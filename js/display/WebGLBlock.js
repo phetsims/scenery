@@ -21,7 +21,7 @@ define( require => {
   const scenery = require( 'SCENERY/scenery' );
   const ShaderProgram = require( 'SCENERY/util/ShaderProgram' );
   const SpriteSheet = require( 'SCENERY/util/SpriteSheet' );
-  const Util = require( 'SCENERY/util/Util' );
+  const Utils = require( 'SCENERY/util/Utils' );
 
   /**
    * @constructor
@@ -107,8 +107,8 @@ define( require => {
       this.gl.clear( this.gl.COLOR_BUFFER_BIT );
 
       // reset any fit transforms that were applied
-      Util.prepareForTransform( this.canvas, false ); // Apply CSS needed for future CSS transforms to work properly.
-      Util.unsetTransform( this.canvas ); // clear out any transforms that could have been previously applied
+      Utils.prepareForTransform( this.canvas, false ); // Apply CSS needed for future CSS transforms to work properly.
+      Utils.unsetTransform( this.canvas ); // clear out any transforms that could have been previously applied
 
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.pop();
 
@@ -177,7 +177,7 @@ define( require => {
 
       // @private {number} - How much larger our Canvas will be compared to the CSS pixel dimensions, so that our
       // Canvas maps one of its pixels to a physical pixel (for Retina devices, etc.).
-      this.backingScale = Util.backingScale( this.gl );
+      this.backingScale = Utils.backingScale( this.gl );
 
       // Double the backing scale size if we detect no built-in antialiasing.
       // See https://github.com/phetsims/circuit-construction-kit-dc/issues/139 and
@@ -189,7 +189,7 @@ define( require => {
       // @private {number}
       this.originalBackingScale = this.backingScale;
 
-      Util.applyWebGLContextDefaults( this.gl ); // blending defaults, etc.
+      Utils.applyWebGLContextDefaults( this.gl ); // blending defaults, etc.
 
       // When the context changes, we need to force certain refreshes
       this.markDirty();
