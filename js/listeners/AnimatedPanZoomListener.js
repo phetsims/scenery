@@ -13,7 +13,7 @@ define( require => {
   'use strict';
 
   // modules
-  const AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
+  const AccessibilityUtils = require( 'SCENERY/accessibility/AccessibilityUtils' );
   const Display = require( 'SCENERY/display/Display' );
   const KeyboardUtils = require( 'SCENERY/accessibility/KeyboardUtils' );
   const KeyboardZoomUtil = require( 'SCENERY/accessibility/KeyboardZoomUtil' );
@@ -303,7 +303,7 @@ define( require => {
       // handle translation
       if ( KeyboardUtils.isArrowKey( domEvent.keyCode ) ) {
         const keyboardDragIntent = event.pointer.getIntent() === Pointer.Intent.KEYBOARD_DRAG;
-        // const elementUsesKeys = AccessibilityUtil.elementUsesArrowKeys( domEvent.target );
+        // const elementUsesKeys = AccessibilityUtils.elementUsesArrowKeys( domEvent.target );
 
         if ( !keyboardDragIntent ) {
           sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener handle arrow key down' );
@@ -875,7 +875,7 @@ define( require => {
         scratchScaleTargetVector.set( focusedNode.parentToGlobalPoint( focusedNode.center ) );
       }
       else {
-        const firstFocusable = AccessibilityUtil.getNextFocusable();
+        const firstFocusable = AccessibilityUtils.getNextFocusable();
         if ( firstFocusable !== document.body ) {
 
           // if not the body, focused node should be contained by the body - error loudly if the browser reports

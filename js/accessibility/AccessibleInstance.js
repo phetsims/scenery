@@ -30,7 +30,7 @@
 define( require => {
   'use strict';
 
-  const AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
+  const AccessibilityUtils = require( 'SCENERY/accessibility/AccessibilityUtils' );
   const AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
   const cleanArray = require( 'PHET_CORE/cleanArray' );
   const Events = require( 'AXON/Events' );
@@ -184,7 +184,7 @@ define( require => {
       for ( let i = 0; i < accessibleInstances.length; i++ ) {
         // Append the container parent to the end (so that, when provided in order, we don't have to resort below
         // when initializing).
-        AccessibilityUtil.insertElements( this.peer.primarySibling, accessibleInstances[ i ].peer.topLevelElements );
+        AccessibilityUtils.insertElements( this.peer.primarySibling, accessibleInstances[ i ].peer.topLevelElements );
       }
 
       if ( hadChildren ) {
@@ -492,7 +492,7 @@ define( require => {
 
         // remove this peer's primary sibling DOM Element (or its container parent) from the parent peer's
         // primary sibling (or its child container)
-        AccessibilityUtil.removeElements( this.parent.peer.primarySibling, this.peer.topLevelElements );
+        AccessibilityUtils.removeElements( this.parent.peer.primarySibling, this.peer.topLevelElements );
 
         for ( let i = 0; i < this.relativeNodes.length; i++ ) {
           this.relativeNodes[ i ].offStatic( 'accessibleDisplays', this.relativeListeners[ i ] );

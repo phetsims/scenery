@@ -15,11 +15,11 @@ define( [
 
   'SCENERY/accessibility/AccessibilityFuzzer',
   'SCENERY/accessibility/AccessibilityTree',
-  'SCENERY/accessibility/AccessibilityUtil',
+  'SCENERY/accessibility/AccessibilityUtils',
   'SCENERY/accessibility/AccessibleInstance',
   'SCENERY/accessibility/AccessiblePeer',
   'SCENERY/accessibility/Accessibility',
-  'SCENERY/accessibility/AccessibilityUtil',
+  'SCENERY/accessibility/AccessibilityUtils',
   'SCENERY/accessibility/reader/Cursor',
   'SCENERY/accessibility/reader/Reader',
 

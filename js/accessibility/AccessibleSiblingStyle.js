@@ -23,7 +23,7 @@ define( require => {
   const SIBLING_CLASS_NAME = 'a11y-sibling';
   const ROOT_CLASS_NAME = 'a11y-root';
 
-  // All elements that use AccessibilityUtil.createElement should have this style. The only exception is the root of
+  // All elements that use AccessibilityUtils.createElement should have this style. The only exception is the root of
   // the PDOM, which should use 'a11y-root' class attributes instead.
   SceneryStyle.addRule( '.' + SIBLING_CLASS_NAME +
     '{' +

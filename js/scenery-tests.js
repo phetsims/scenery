@@ -12,7 +12,7 @@ define( require => {
   require( 'SCENERY/accessibility/AccessibilityTests' );
   require( 'SCENERY/accessibility/AccessibleSiblingTests' );
   require( 'SCENERY/accessibility/AccessibilityInputTests' );
-  require( 'SCENERY/accessibility/AccessibilityUtilTests' );
+  require( 'SCENERY/accessibility/AccessibilityUtilsTests' );
   require( 'SCENERY/accessibility/FocusTests' );
   require( 'SCENERY/nodes/AlignBoxTests' );
   require( 'SCENERY/util/ColorTests' );

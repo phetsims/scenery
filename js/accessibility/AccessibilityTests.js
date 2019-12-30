@@ -10,7 +10,7 @@ define( require => {
 
   // modules
   const AccessibilityFuzzer = require( 'SCENERY/accessibility/AccessibilityFuzzer' );
-  const AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
+  const AccessibilityUtils = require( 'SCENERY/accessibility/AccessibilityUtils' );
   const AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
   const Circle = require( 'SCENERY/nodes/Circle' );
   const Display = require( 'SCENERY/display/Display' );
@@ -28,8 +28,8 @@ define( require => {
   const TEST_DESCRIPTION_HTML_2 = '<strong>I ROCK as a DESCRIPTION 2</strong>';
 
   // These should manually match the defaults in the Accessibility.js trait
-  const DEFAULT_LABEL_TAG_NAME = AccessibilityUtil.DEFAULT_LABEL_TAG_NAME;
-  const DEFAULT_DESCRIPTION_TAG_NAME = AccessibilityUtil.DEFAULT_DESCRIPTION_TAG_NAME;
+  const DEFAULT_LABEL_TAG_NAME = AccessibilityUtils.DEFAULT_LABEL_TAG_NAME;
+  const DEFAULT_DESCRIPTION_TAG_NAME = AccessibilityUtils.DEFAULT_DESCRIPTION_TAG_NAME;
 
   // given the parent container element for a node, this value is the index of the label sibling in the
   // parent's array of children HTMLElements.
@@ -892,7 +892,7 @@ define( require => {
   } );
 
   QUnit.test( 'Next/Previous focusable', function( assert ) {
-    const util = AccessibilityUtil;
+    const util = AccessibilityUtils;
 
     const rootNode = new Node( { tagName: 'div', focusable: true } );
     var display = new Display( rootNode ); // eslint-disable-line

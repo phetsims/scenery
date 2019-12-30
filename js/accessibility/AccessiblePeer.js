@@ -11,7 +11,7 @@
 define( require => {
   'use strict';
 
-  const AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
+  const AccessibilityUtils = require( 'SCENERY/accessibility/AccessibilityUtils' );
   const AccessibleSiblingStyle = require( 'SCENERY/accessibility/AccessibleSiblingStyle' );
   const arrayRemove = require( 'PHET_CORE/arrayRemove' );
   const Bounds2 = require( 'DOT/Bounds2' );
@@ -30,8 +30,8 @@ define( require => {
   const LABEL_SIBLING = 'LABEL_SIBLING';
   const DESCRIPTION_SIBLING = 'DESCRIPTION_SIBLING';
   const CONTAINER_PARENT = 'CONTAINER_PARENT';
-  const LABEL_TAG = AccessibilityUtil.TAGS.LABEL;
-  const INPUT_TAG = AccessibilityUtil.TAGS.INPUT;
+  const LABEL_TAG = AccessibilityUtils.TAGS.LABEL;
+  const INPUT_TAG = AccessibilityUtils.TAGS.INPUT;
 
   // DOM observers that apply new CSS transformations are triggered when children, or inner content change. Updating
   // style/positioning of the element will change attributes so we can't observe those changes since it would trigger
@@ -427,7 +427,7 @@ define( require => {
      * Get an element on this node, looked up by the elementName flag passed in.
      * @public (scenery-internal)
      *
-     * @param {string} elementName - see AccessibilityUtil for valid associations
+     * @param {string} elementName - see AccessibilityUtils for valid associations
      * @returns {HTMLElement}
      */
     getElementByName: function( elementName ) {
@@ -534,9 +534,9 @@ define( require => {
      * @param {Object} associationObject - see addAriaLabelledbyAssociation() for schema
      */
     setAssociationAttribute: function( attribute, associationObject ) {
-      assert && assert( AccessibilityUtil.ASSOCIATION_ATTRIBUTES.indexOf( attribute ) >= 0,
+      assert && assert( AccessibilityUtils.ASSOCIATION_ATTRIBUTES.indexOf( attribute ) >= 0,
         'unsupported attribute for setting with association object: ' + attribute );
-      assert && AccessibilityUtil.validateAssociationObject( associationObject );
+      assert && AccessibilityUtils.validateAssociationObject( associationObject );
 
       const otherNodeAccessibleInstances = associationObject.otherNode.getAccessibleInstances();
 
@@ -727,7 +727,7 @@ define( require => {
       const peerHadFocus = this.isFocused();
       if ( this.focusable !== focusable ) {
         this.focusable = focusable;
-        AccessibilityUtil.overrideFocusWithTabIndex( this.primarySibling, focusable );
+        AccessibilityUtils.overrideFocusWithTabIndex( this.primarySibling, focusable );
 
         // in Chrome, if tabindex is removed and the element is not focusable by default the element is blurred.
         // This behavior is reasonable and we want to enforce it in other browsers for consistency. See
@@ -754,7 +754,7 @@ define( require => {
         return;
       }
 
-      AccessibilityUtil.setTextContent( this._labelSibling, content );
+      AccessibilityUtils.setTextContent( this._labelSibling, content );
 
       // if the label element happens to be a 'label', associate with 'for' attribute
       if ( this._labelSibling.tagName.toUpperCase() === LABEL_TAG ) {
@@ -776,7 +776,7 @@ define( require => {
       if ( !this._descriptionSibling ) {
         return;
       }
-      AccessibilityUtil.setTextContent( this._descriptionSibling, content );
+      AccessibilityUtils.setTextContent( this._descriptionSibling, content );
     },
 
     /**
@@ -787,14 +787,14 @@ define( require => {
     setPrimarySiblingContent: function( content ) {
       assert && assert( typeof content === 'string', 'incorrect inner content type' );
       assert && assert( this.accessibleInstance.children.length === 0, 'descendants exist with accessible content, innerContent cannot be used' );
-      assert && assert( AccessibilityUtil.tagNameSupportsContent( this._primarySibling.tagName ),
+      assert && assert( AccessibilityUtils.tagNameSupportsContent( this._primarySibling.tagName ),
         'tagName: ' + this._tagName + ' does not support inner content' );
 
       // no-op to support any option order
       if ( !this._primarySibling ) {
         return;
       }
-      AccessibilityUtil.setTextContent( this._primarySibling, content );
+      AccessibilityUtils.setTextContent( this._primarySibling, content );
     },
 
     /**
@@ -861,7 +861,7 @@ define( require => {
      * attributes instead.
      *
      * This function assumes that elements have other style attributes so they can be positioned correctly and don't
-     * interfere with scenery input, see SceneryStyle in AccessibilityUtil.
+     * interfere with scenery input, see SceneryStyle in AccessibilityUtils.
      *
      * Additional notes were taken in https://github.com/phetsims/scenery/issues/852, see that issue for more
      * information.
@@ -1001,7 +1001,7 @@ define( require => {
    * @param {string} tagName
    * @param {boolean} focusable
    * @param {string} trailId - unique id that points to the instance of the node
-   * @param {object} options - passed along to AccessibilityUtil.createElement
+   * @param {object} options - passed along to AccessibilityUtils.createElement
    * @returns {HTMLElement}
    */
   function createElement( tagName, focusable, trailId, options ) {
@@ -1019,7 +1019,7 @@ define( require => {
     assert && assert( options.trailId === undefined, 'createElement will set optional trailId' );
     options.trailId = trailId;
 
-    return AccessibilityUtil.createElement( tagName, focusable, options );
+    return AccessibilityUtils.createElement( tagName, focusable, options );
   }
 
   /**

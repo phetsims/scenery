@@ -160,7 +160,7 @@ define( require => {
   'use strict';
 
   const A11yPointer = require( 'SCENERY/input/A11yPointer' );
-  const AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
+  const AccessibilityUtils = require( 'SCENERY/accessibility/AccessibilityUtils' );
   const Action = require( 'AXON/Action' );
   const BatchedDOMEvent = require( 'SCENERY/input/BatchedDOMEvent' );
   const BrowserEvents = require( 'SCENERY/input/BrowserEvents' );
@@ -600,7 +600,7 @@ define( require => {
           // Focus is set with DOM API to avoid the performance hit of looking up the Node from trail id.
           if ( event.relatedTarget ) {
             const focusMovedInCallbacks = this.isTargetUnderPDOM( document.activeElement );
-            const targetFocusable = AccessibilityUtil.isElementFocusable( event.relatedTarget );
+            const targetFocusable = AccessibilityUtils.isElementFocusable( event.relatedTarget );
             if ( targetFocusable && !focusMovedInCallbacks ) {
               if ( platform.ie ) {
                 ieBlockCallbacks = true;
@@ -714,7 +714,7 @@ define( require => {
         const accessibleEventOptions = Features.passive ? { useCapture: false, passive: false } : false;
 
         // Add a listener to the root accessible DOM element for each event we want to monitor.
-        AccessibilityUtil.DOM_EVENTS.map( eventName => {
+        AccessibilityUtils.DOM_EVENTS.map( eventName => {
 
           const actionName = eventName + 'Action';
           assert && assert( this[ actionName ], `action not defined on Input: ${actionName}` );
@@ -1025,11 +1025,11 @@ define( require => {
       // could be serialized event for phet-io playbacks, see Input.serializeDOMEvent()
       if ( domEvent[ TARGET_SUBSTITUTE_KEY ] ) {
         assert && assert( domEvent[ TARGET_SUBSTITUTE_KEY ] instanceof Object );
-        return domEvent[ TARGET_SUBSTITUTE_KEY ][ AccessibilityUtil.DATA_TRAIL_ID ];
+        return domEvent[ TARGET_SUBSTITUTE_KEY ][ AccessibilityUtils.DATA_TRAIL_ID ];
       }
       else {
         assert && assert( domEvent.target instanceof window.Element );
-        return domEvent.target.getAttribute( AccessibilityUtil.DATA_TRAIL_ID );
+        return domEvent.target.getAttribute( AccessibilityUtils.DATA_TRAIL_ID );
       }
     }
 
@@ -1862,8 +1862,8 @@ define( require => {
       // if there are no more elements in that direction. See https://github.com/phetsims/scenery/issues/883
       if ( FullScreen.isFullScreen() && event.keyCode === KeyboardUtils.KEY_TAB ) {
         const rootElement = this.display.accessibleDOMElement;
-        const nextElement = event.shiftKey ? AccessibilityUtil.getPreviousFocusable( rootElement ) :
-                          AccessibilityUtil.getNextFocusable( rootElement );
+        const nextElement = event.shiftKey ? AccessibilityUtils.getPreviousFocusable( rootElement ) :
+                          AccessibilityUtils.getNextFocusable( rootElement );
         if ( nextElement === event.target ) {
           event.preventDefault();
         }
@@ -1941,10 +1941,10 @@ define( require => {
                typeof domEventProperty.getAttribute === 'function' &&
 
                // If false, then this target isn't a PDOM element, so we can skip this serialization
-               domEventProperty.hasAttribute( AccessibilityUtil.DATA_TRAIL_ID ) ) {
+               domEventProperty.hasAttribute( AccessibilityUtils.DATA_TRAIL_ID ) ) {
 
             entries[ property ] = {};
-            entries[ property ][ AccessibilityUtil.DATA_TRAIL_ID ] = domEventProperty.getAttribute( AccessibilityUtil.DATA_TRAIL_ID );
+            entries[ property ][ AccessibilityUtils.DATA_TRAIL_ID ] = domEventProperty.getAttribute( AccessibilityUtils.DATA_TRAIL_ID );
           }
           else {
             entries[ property ] = ( ( typeof domEventProperty === 'object' ) && ( domEventProperty !== null ) ? {} : JSON.parse( JSON.stringify( domEventProperty ) ) ); // TODO: is parse/stringify necessary?

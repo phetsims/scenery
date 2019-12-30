@@ -150,7 +150,7 @@ define( require => {
       const nextElement = linearDOM[ nextIndex ];
       nextIndex += delta;
 
-      if ( AccessibilityUtil.isElementFocusable( nextElement ) ) {
+      if ( AccessibilityUtils.isElementFocusable( nextElement ) ) {
         return nextElement;
       }
     }
@@ -184,7 +184,7 @@ define( require => {
     return !_.includes( ELEMENTS_WITHOUT_CLOSING_TAG, tagName.toUpperCase() );
   }
 
-  var AccessibilityUtil = {
+  var AccessibilityUtils = {
 
     /**
      * Get the next focusable element. This should very rarely be used.  The next focusable element can almost
@@ -225,7 +225,7 @@ define( require => {
       const linearDOM = getLinearDOMElements( document.body );
       const focusableElements = [];
       for ( let i = 0; i < linearDOM.length; i++ ) {
-        AccessibilityUtil.isElementFocusable( linearDOM[ i ] ) && focusableElements.push( linearDOM[ i ] );
+        AccessibilityUtils.isElementFocusable( linearDOM[ i ] ) && focusableElements.push( linearDOM[ i ] );
       }
 
       return focusableElements[ random.nextInt( focusableElements.length ) ];
@@ -316,7 +316,7 @@ define( require => {
       if ( tagNameSupportsContent( domElement.tagName ) ) {
 
         // only returns true if content contains listed formatting tags
-        if ( AccessibilityUtil.containsFormattingTags( textContent ) ) {
+        if ( AccessibilityUtils.containsFormattingTags( textContent ) ) {
           domElement.innerHTML = textContent;
         }
         else {
@@ -472,14 +472,14 @@ define( require => {
       if ( options.trailId ) {
 
         // NOTE: dataset isn't supported by all namespaces (like MathML) so we need to use setAttribute
-        domElement.setAttribute( AccessibilityUtil.DATA_TRAIL_ID, options.trailId );
+        domElement.setAttribute( AccessibilityUtils.DATA_TRAIL_ID, options.trailId );
       }
       if ( options.id ) {
         domElement.id = options.id;
       }
 
       // set tab index if we are overriding default browser behavior
-      AccessibilityUtil.overrideFocusWithTabIndex( domElement, focusable );
+      AccessibilityUtils.overrideFocusWithTabIndex( domElement, focusable );
 
       // gives this element styling from SceneryStyle
       domElement.className = AccessibleSiblingStyle.SIBLING_CLASS_NAME;
@@ -500,7 +500,7 @@ define( require => {
      * @param {boolean} focusable
      */
     overrideFocusWithTabIndex: function( element, focusable ) {
-      const defaultFocusable = AccessibilityUtil.tagIsDefaultFocusable( element.tagName );
+      const defaultFocusable = AccessibilityUtils.tagIsDefaultFocusable( element.tagName );
 
       // only add a tabindex when we are overriding the default focusable bahvior of the browser for the tag name
       if ( defaultFocusable !== focusable ) {
@@ -555,7 +555,7 @@ define( require => {
     DATA_TRAIL_ID: DATA_TRAIL_ID
   };
 
-  scenery.register( 'AccessibilityUtil', AccessibilityUtil );
+  scenery.register( 'AccessibilityUtils', AccessibilityUtils );
 
-  return AccessibilityUtil;
+  return AccessibilityUtils;
 } );

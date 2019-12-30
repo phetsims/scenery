@@ -9,9 +9,9 @@ define( require => {
   'use strict';
 
   // modules
-  const AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
+  const AccessibilityUtils = require( 'SCENERY/accessibility/AccessibilityUtils' );
 
-  QUnit.module( 'AccessibilityUtilTests' );
+  QUnit.module( 'AccessibilityUtilsTests' );
 
   // tests
   QUnit.test( 'insertElements', function( assert ) {
@@ -21,7 +21,7 @@ define( require => {
     const div3 = document.createElement( 'div3' );
     const div4 = document.createElement( 'div4' );
 
-    AccessibilityUtil.insertElements( div1, [ div2, div3, div4 ] );
+    AccessibilityUtils.insertElements( div1, [ div2, div3, div4 ] );
 
     assert.ok( div1.childNodes.length === 3, 'inserted number of elements');
     assert.ok( div1.childNodes[0] === div2, 'inserted div2 order of elements');
@@ -33,7 +33,7 @@ define( require => {
     const div6 = document.createElement( 'div6' );
     const div7 = document.createElement( 'div7' );
 
-    AccessibilityUtil.insertElements( div1, [div5,div6,div7], div3);
+    AccessibilityUtils.insertElements( div1, [div5,div6,div7], div3);
     assert.ok( div1.childNodes[0] === div2, 'inserted div2 order of elements');
     assert.ok( div1.childNodes[1] === div5, 'inserted div5 order of elements');
     assert.ok( div1.childNodes[2] === div6, 'inserted div6 order of elements');
@@ -43,11 +43,11 @@ define( require => {
   } );
 
   QUnit.test( 'getNextPreviousFocusable', function( assert ) {
-    const parent = AccessibilityUtil.createElement( 'div', false );
+    const parent = AccessibilityUtils.createElement( 'div', false );
 
-    const button = AccessibilityUtil.createElement( 'button', true ); // focusable
-    const div = AccessibilityUtil.createElement( 'div', true ); // focusable
-    const p = AccessibilityUtil.createElement( 'p', false ); // not focusable
+    const button = AccessibilityUtils.createElement( 'button', true ); // focusable
+    const div = AccessibilityUtils.createElement( 'div', true ); // focusable
+    const p = AccessibilityUtils.createElement( 'p', false ); // not focusable
 
     // elements must be in DOM to be focusable
     document.body.appendChild( parent );
@@ -55,16 +55,16 @@ define( require => {
     parent.appendChild( div );
     parent.appendChild( p );
 
-    const firstFocusable = AccessibilityUtil.getNextFocusable( parent );
+    const firstFocusable = AccessibilityUtils.getNextFocusable( parent );
     assert.ok( firstFocusable === button, 'first focusable found' );
     firstFocusable.focus();
 
-    const secondFocusable = AccessibilityUtil.getNextFocusable( parent );
+    const secondFocusable = AccessibilityUtils.getNextFocusable( parent );
     assert.ok( secondFocusable === div, 'second focusable found' );
     secondFocusable.focus();
 
     // should still return the div because the p isn't focusable
-    const thirdFocusable = AccessibilityUtil.getNextFocusable( parent );
+    const thirdFocusable = AccessibilityUtils.getNextFocusable( parent );
     assert.ok( thirdFocusable === div, 'no more focusables after div' );
 
     // remove the DOM nodes so they don't clutter the tests
@@ -80,20 +80,20 @@ define( require => {
     const testSection = document.createElement( 'section' );
 
     // defaults, should not an tabindex to any elements
-    AccessibilityUtil.overrideFocusWithTabIndex( testButton, true );
-    AccessibilityUtil.overrideFocusWithTabIndex( testLink, true );
-    AccessibilityUtil.overrideFocusWithTabIndex( testListItem, false );
-    AccessibilityUtil.overrideFocusWithTabIndex( testSection, false );
+    AccessibilityUtils.overrideFocusWithTabIndex( testButton, true );
+    AccessibilityUtils.overrideFocusWithTabIndex( testLink, true );
+    AccessibilityUtils.overrideFocusWithTabIndex( testListItem, false );
+    AccessibilityUtils.overrideFocusWithTabIndex( testSection, false );
     assert.ok( testButton.getAttribute( 'tabindex' ) === null, 'testButton focusable by default, shouldn\'t have override' );
     assert.ok( testLink.getAttribute( 'tabindex' ) === null, 'testLink focusable by default, shouldn\'t have override' );
     assert.ok( testListItem.getAttribute( 'tabindex' ) === null, 'testListItem not focusable by default, shouldn\'t have override' );
     assert.ok( testSection.getAttribute( 'tabindex' ) === null, 'testSection not focusable by default, shouldn\'t have override' );
 
     // override all, should all should have a tabindex
-    AccessibilityUtil.overrideFocusWithTabIndex( testButton, false );
-    AccessibilityUtil.overrideFocusWithTabIndex( testLink, false );
-    AccessibilityUtil.overrideFocusWithTabIndex( testListItem, true );
-    AccessibilityUtil.overrideFocusWithTabIndex( testSection, true );
+    AccessibilityUtils.overrideFocusWithTabIndex( testButton, false );
+    AccessibilityUtils.overrideFocusWithTabIndex( testLink, false );
+    AccessibilityUtils.overrideFocusWithTabIndex( testListItem, true );
+    AccessibilityUtils.overrideFocusWithTabIndex( testSection, true );
     assert.ok( testButton.getAttribute( 'tabindex' ) === '-1', 'testButton focusable by default, should have override' );
     assert.ok( testLink.getAttribute( 'tabindex' ) === '-1', 'testLink focusable by default, should have override' );
     assert.ok( testListItem.getAttribute( 'tabindex' ) === '0', 'testListItem not focusable by default, should have override' );
@@ -101,9 +101,9 @@ define( require => {
 
     // test function in usages with createElement
     // tab index should only be set on elements where we are overriding what is being done natively in the browser
-    const defaultButton = AccessibilityUtil.createElement( 'button', true ); // focusable
-    const defaultParagraph = AccessibilityUtil.createElement( 'p', false ); // not focusable
-    const defaultDiv = AccessibilityUtil.createElement( 'div', false ); // not focusable
+    const defaultButton = AccessibilityUtils.createElement( 'button', true ); // focusable
+    const defaultParagraph = AccessibilityUtils.createElement( 'p', false ); // not focusable
+    const defaultDiv = AccessibilityUtils.createElement( 'div', false ); // not focusable
 
     // use getAttribute because tabIndex DOM property is always provided by default
     assert.ok( defaultButton.getAttribute( 'tabindex' ) === null, 'default button has no tab index' );
@@ -111,9 +111,9 @@ define( require => {
     assert.ok( defaultDiv.getAttribute( 'tabindex' ) === null, 'default div has no tab index' );
 
     // custom focusability should all have tab indices, even those that are being removed from the document
-    const customButton = AccessibilityUtil.createElement( 'button', false ); // not focusable
-    const customParagraph = AccessibilityUtil.createElement( 'p', true ); // focusable
-    const customDiv = AccessibilityUtil.createElement( 'div', true ); // focusable
+    const customButton = AccessibilityUtils.createElement( 'button', false ); // not focusable
+    const customParagraph = AccessibilityUtils.createElement( 'p', true ); // focusable
+    const customDiv = AccessibilityUtils.createElement( 'div', true ); // focusable
 
     assert.ok( customButton.getAttribute( 'tabindex' ) === '-1', 'custom button removed from focus' );
     assert.ok( customParagraph.getAttribute( 'tabindex' ) === '0', 'custom paragraph added to focus' );
@@ -121,7 +121,7 @@ define( require => {
   } );
 
   QUnit.test( 'setTextContent', function( assert ) {
-    const toyElement = AccessibilityUtil.createElement( 'div' );
+    const toyElement = AccessibilityUtils.createElement( 'div' );
 
     // basic string
     const stringContent = 'I am feeling pretty flat today.';
@@ -135,19 +135,19 @@ define( require => {
     // tags not allowed as innerHTML
     const invalidHTMLContent = 'I am feeling a bit <a href="daring">devious</a> today.';
 
-    AccessibilityUtil.setTextContent( toyElement, stringContent );
+    AccessibilityUtils.setTextContent( toyElement, stringContent );
     assert.ok( toyElement.textContent === stringContent, 'textContent set for basic string' );
     assert.ok( toyElement.firstElementChild === null, 'no innerHTML for basic string' );
 
-    AccessibilityUtil.setTextContent( toyElement, htmlContent );
+    AccessibilityUtils.setTextContent( toyElement, htmlContent );
     assert.ok( toyElement.innerHTML === htmlContent, 'innerHTML set for formated content' );
     assert.ok( toyElement.firstElementChild !== null, 'element child exists for innerHTML' );
 
-    AccessibilityUtil.setTextContent( toyElement, malformedHTMLContent );
+    AccessibilityUtils.setTextContent( toyElement, malformedHTMLContent );
     assert.ok( toyElement.textContent === malformedHTMLContent, 'malformed HTML set as content' );
     assert.ok( toyElement.firstElementChild === null, 'fallback to textContent for malformed tags' );
 
-    AccessibilityUtil.setTextContent( toyElement, invalidHTMLContent );
+    AccessibilityUtils.setTextContent( toyElement, invalidHTMLContent );
     assert.ok( toyElement.textContent === invalidHTMLContent, 'invalid HTML set as content' );
     assert.ok( toyElement.firstElementChild === null, 'fallback to textContent for disallowed tags' );
   } );

@@ -10,7 +10,7 @@ define( require => {
   'use strict';
 
   // modules
-  const AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
+  const AccessibilityUtils = require( 'SCENERY/accessibility/AccessibilityUtils' );
   const Display = require( 'SCENERY/display/Display' );
   const KeyboardUtils = require( 'SCENERY/accessibility/KeyboardUtils' );
   const Random = require( 'DOT/Random' );
@@ -71,7 +71,7 @@ define( require => {
 
         // before we change focus to the next item, immediately release all keys that were down on the active element
         this.clearListeners();
-        const nextFocusable = AccessibilityUtil.getRandomFocusable( this.random );
+        const nextFocusable = AccessibilityUtils.getRandomFocusable( this.random );
         nextFocusable.focus();
         this.currentElement = nextFocusable;
 

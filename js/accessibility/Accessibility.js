@@ -125,7 +125,7 @@ define( require => {
   // modules
   const A11yBehaviorFunctionDef = require( 'SCENERY/accessibility/A11yBehaviorFunctionDef' );
   const AccessibilityTree = require( 'SCENERY/accessibility/AccessibilityTree' );
-  const AccessibilityUtil = require( 'SCENERY/accessibility/AccessibilityUtil' );
+  const AccessibilityUtils = require( 'SCENERY/accessibility/AccessibilityUtils' );
   const AccessibleDisplaysInfo = require( 'SCENERY/accessibility/AccessibleDisplaysInfo' );
   const AccessiblePeer = require( 'SCENERY/accessibility/AccessiblePeer' );
   const arrayDifference = require( 'PHET_CORE/arrayDifference' );
@@ -134,8 +134,8 @@ define( require => {
   const scenery = require( 'SCENERY/scenery' );
   const Shape = require( 'KITE/Shape' );
 
-  const INPUT_TAG = AccessibilityUtil.TAGS.INPUT;
-  const P_TAG = AccessibilityUtil.TAGS.P;
+  const INPUT_TAG = AccessibilityUtils.TAGS.INPUT;
+  const P_TAG = AccessibilityUtils.TAGS.P;
 
   // default tag names for siblings
   const DEFAULT_DESCRIPTION_TAG_NAME = P_TAG;
@@ -147,7 +147,7 @@ define( require => {
       options.labelTagName = 'label';
       options.labelContent = accessibleName;
     }
-    else if ( AccessibilityUtil.tagNameSupportsContent( node.tagName ) ) {
+    else if ( AccessibilityUtils.tagNameSupportsContent( node.tagName ) ) {
       options.innerContent = accessibleName;
     }
     else {
@@ -159,7 +159,7 @@ define( require => {
   // see setHelpTextBehavior for more details
   const DEFAULT_HELP_TEXT_BEHAVIOR = function( node, options, helpText ) {
 
-    options.descriptionTagName = AccessibilityUtil.DEFAULT_DESCRIPTION_TAG_NAME;
+    options.descriptionTagName = AccessibilityUtils.DEFAULT_DESCRIPTION_TAG_NAME;
     options.descriptionContent = helpText;
     options.appendDescription = true;
     return options;
@@ -174,13 +174,13 @@ define( require => {
   };
 
   // these elements are typically associated with forms, and support certain attributes
-  const FORM_ELEMENTS = AccessibilityUtil.FORM_ELEMENTS;
+  const FORM_ELEMENTS = AccessibilityUtils.FORM_ELEMENTS;
 
   // list of input "type" attribute values that support the "checked" attribute
-  const INPUT_TYPES_THAT_SUPPORT_CHECKED = AccessibilityUtil.INPUT_TYPES_THAT_SUPPORT_CHECKED;
+  const INPUT_TYPES_THAT_SUPPORT_CHECKED = AccessibilityUtils.INPUT_TYPES_THAT_SUPPORT_CHECKED;
 
   // HTMLElement attributes whose value is an ID of another element
-  const ASSOCIATION_ATTRIBUTES = AccessibilityUtil.ASSOCIATION_ATTRIBUTES;
+  const ASSOCIATION_ATTRIBUTES = AccessibilityUtils.ASSOCIATION_ATTRIBUTES;
 
   // The options for the Accessibility API. In general, most default to null; to clear, set back to null. Each one of
   // these has an associated setter, see setter functions for more information about each.
@@ -1533,7 +1533,7 @@ define( require => {
             assert( Array.isArray( ariaLabelledbyAssociations ) );
             for ( i = 0; i < ariaLabelledbyAssociations.length; i++ ) {
               associationObject = ariaLabelledbyAssociations[ i ];
-              AccessibilityUtil.validateAssociationObject( associationObject );
+              AccessibilityUtils.validateAssociationObject( associationObject );
             }
           }
 
@@ -1591,7 +1591,7 @@ define( require => {
          *                               see AccessiblePeer for valid element names.
          */
         addAriaLabelledbyAssociation: function( associationObject ) {
-          assert && AccessibilityUtil.validateAssociationObject( associationObject );
+          assert && AccessibilityUtils.validateAssociationObject( associationObject );
 
           // TODO: assert if this associationObject is already in the association objects list! https://github.com/phetsims/scenery/issues/832
 
@@ -1679,7 +1679,7 @@ define( require => {
             assert( Array.isArray( ariaDescribedbyAssociations ) );
             for ( let j = 0; j < ariaDescribedbyAssociations.length; j++ ) {
               associationObject = ariaDescribedbyAssociations[ j ];
-              assert && AccessibilityUtil.validateAssociationObject( associationObject );
+              assert && AccessibilityUtils.validateAssociationObject( associationObject );
             }
           }
 
@@ -1737,7 +1737,7 @@ define( require => {
          *                               see AccessiblePeer for valid element names.
          */
         addAriaDescribedbyAssociation: function( associationObject ) {
-          assert && AccessibilityUtil.validateAssociationObject( associationObject );
+          assert && AccessibilityUtils.validateAssociationObject( associationObject );
           assert && assert( !_.includes( this._ariaDescribedbyAssociations, associationObject ), 'describedby association already registed' );
 
           this._ariaDescribedbyAssociations.push( associationObject ); // Keep track of this association.
@@ -1836,7 +1836,7 @@ define( require => {
             assert( Array.isArray( activeDescendantAssociations ) );
             for ( let j = 0; j < activeDescendantAssociations.length; j++ ) {
               associationObject = activeDescendantAssociations[ j ];
-              assert && AccessibilityUtil.validateAssociationObject( associationObject );
+              assert && AccessibilityUtils.validateAssociationObject( associationObject );
             }
           }
 
@@ -1891,7 +1891,7 @@ define( require => {
          *                               see AccessiblePeer for valid element names.
          */
         addActiveDescendantAssociation: function( associationObject ) {
-          assert && AccessibilityUtil.validateAssociationObject( associationObject );
+          assert && AccessibilityUtils.validateAssociationObject( associationObject );
 
           // TODO: assert if this associationObject is already in the association objects list! https://github.com/phetsims/scenery/issues/832
           this._activeDescendantAssociations.push( associationObject ); // Keep track of this association.
@@ -2445,7 +2445,7 @@ define( require => {
             return false;
           }
           else {
-            return AccessibilityUtil.tagIsDefaultFocusable( this._tagName );
+            return AccessibilityUtils.tagIsDefaultFocusable( this._tagName );
           }
         },
         get focusable() { return this.isFocusable(); },
