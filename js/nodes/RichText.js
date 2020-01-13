@@ -1576,11 +1576,13 @@ define( require => {
         sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'First child, ltr:' + this.isLTR + ', spacing: ' + ( this.isLTR ? rightElementSpacing : leftElementSpacing ) );
         if ( this.isLTR ) {
           element.left = 0;
+          this.leftSpacing = leftElementSpacing;
           this.rightSpacing = rightElementSpacing;
         }
         else {
           element.right = 0;
           this.leftSpacing = leftElementSpacing;
+          this.rightSpacing = rightElementSpacing;
         }
         this.addChild( element );
         return true;
