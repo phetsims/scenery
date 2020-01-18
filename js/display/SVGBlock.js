@@ -251,8 +251,8 @@ define( require => {
       sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( 'dispose #' + this.id );
 
       // make it take up zero area, so that we don't use up excess memory
-      this.svg.setAttribute( 'width', 0 );
-      this.svg.setAttribute( 'height', 0 );
+      this.svg.setAttribute( 'width', '0' );
+      this.svg.setAttribute( 'height', '0' );
 
       // clear references
       this.filterRootInstance = null;

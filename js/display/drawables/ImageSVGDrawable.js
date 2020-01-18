@@ -36,8 +36,8 @@ define( require => {
 
     // @protected {SVGImageElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
     this.svgElement = this.svgElement || document.createElementNS( scenery.svgns, 'image' );
-    this.svgElement.setAttribute( 'x', 0 );
-    this.svgElement.setAttribute( 'y', 0 );
+    this.svgElement.setAttribute( 'x', '0' );
+    this.svgElement.setAttribute( 'y', '0' );
 
     // Whether we have an opacity attribute specified on the DOM element.
     this.hasOpacity = false;
@@ -47,7 +47,7 @@ define( require => {
 
     // if mipmaps are enabled, this listener will be added to when our relative transform changes
     this._mipmapTransformListener = this._mipmapTransformListener || function() {
-        sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( self.id + ' Transform dirties mipmap' );
+      sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( self.id + ' Transform dirties mipmap' );
         self.markDirtyMipmap();
       };
 

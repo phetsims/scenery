@@ -70,7 +70,7 @@ define( require => {
       circle.setAttribute( 'r', innerRadius );
       circle.setAttribute( 'style', 'fill:black;' );
       circle.setAttribute( 'style', 'stroke:white;' );
-      circle.setAttribute( 'opacity', 0.4 );
+      circle.setAttribute( 'opacity', '0.4' );
 
       //Add a move listener to the pointer to update position when it has moved
       const pointerRemoved = function() {

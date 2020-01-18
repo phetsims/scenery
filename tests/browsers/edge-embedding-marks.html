@@ -27,10 +27,10 @@
   // SVG
   var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
   svg.style.display = 'block';
-  svg.setAttribute( 'height', 25 );
+  svg.setAttribute( 'height', '25' );
   var svgText = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
-  svgText.setAttribute( 'y', 20 );
-  svgText.setAttribute( 'font-size', 20 );
+  svgText.setAttribute( 'y', '20' );
+  svgText.setAttribute( 'font-size', '20' );
   svgText.appendChild( document.createTextNode( 'SVG: ' + string ) );
   svg.appendChild( svgText );
   document.body.appendChild( svg );
