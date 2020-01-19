@@ -14,7 +14,8 @@ define( require => {
   const Rectangle = require( 'SCENERY/nodes/Rectangle' );
   const Vector2 = require( 'DOT/Vector2' );
 
-  return {
+  const ListenerTestUtils = {
+
     /**
      * Sends a synthesized mouseDown event at the given coordinates.
      * @public
@@ -103,4 +104,6 @@ define( require => {
       display.dispose();
     }
   };
+
+  return ListenerTestUtils;
 } );
