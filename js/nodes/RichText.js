@@ -1,4 +1,4 @@
-// Copyright 2017-2019, University of Colorado Boulder
+// Copyright 2017-2020, University of Colorado Boulder
 
 /**
  * Displays rich text by interpreting the input text as HTML, supporting a limited set of tags that prevent any
@@ -1576,11 +1576,13 @@ define( require => {
         sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'First child, ltr:' + this.isLTR + ', spacing: ' + ( this.isLTR ? rightElementSpacing : leftElementSpacing ) );
         if ( this.isLTR ) {
           element.left = 0;
+          this.leftSpacing = leftElementSpacing;
           this.rightSpacing = rightElementSpacing;
         }
         else {
           element.right = 0;
           this.leftSpacing = leftElementSpacing;
+          this.rightSpacing = rightElementSpacing;
         }
         this.addChild( element );
         return true;

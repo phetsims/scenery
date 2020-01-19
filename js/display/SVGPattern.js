@@ -55,15 +55,15 @@ define( require => {
         this.definition.removeAttribute( 'patternTransform' );
       }
 
-      this.definition.setAttribute( 'x', 0 );
-      this.definition.setAttribute( 'y', 0 );
+      this.definition.setAttribute( 'x', '0' );
+      this.definition.setAttribute( 'y', '0' );
       this.definition.setAttribute( 'width', pattern.image.width );
       this.definition.setAttribute( 'height', pattern.image.height );
 
       // @private {SVGImageElement} - persistent
       this.imageElement = this.imageElement || document.createElementNS( scenery.svgns, 'image' );
-      this.imageElement.setAttribute( 'x', 0 );
-      this.imageElement.setAttribute( 'y', 0 );
+      this.imageElement.setAttribute( 'x', '0' );
+      this.imageElement.setAttribute( 'y', '0' );
       this.imageElement.setAttribute( 'width', pattern.image.width + 'px' );
       this.imageElement.setAttribute( 'height', pattern.image.height + 'px' );
       this.imageElement.setAttributeNS( scenery.xlinkns, 'xlink:href', pattern.image.src );

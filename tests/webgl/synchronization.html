@@ -8,12 +8,15 @@
   <title>Scenery SVG performance/resolution test</title>
 
   <style type="text/css">
-    canvas, body,html {
-      padding: 0; margin: 0;
+    canvas, body, html {
+      padding: 0;
+      margin: 0;
     }
+
     canvas {
       display: block;
     }
+
     svg {
       display: block;
     }
@@ -40,7 +43,7 @@
       gl.shaderSource( shader, source );
       gl.compileShader( shader );
 
-      if( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) ) {
+      if ( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) ) {
         console.log( gl.getShaderInfoLog( shader ) );
         console.log( source );
         throw new Error( 'GLSL compile error: ' + gl.getShaderInfoLog( shader ) );
@@ -80,14 +83,15 @@
       '    vec2 c = location * 10.0;\n' +
       '    vec2 z = c;\n' +
       '    float x, y;\n' +
-      [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17].map( function() { return
-      '      x = (z.x * z.x - z.y * z.y) + c.x;\n' +
-      '      y = (z.y * z.x + z.x * z.y) + c.y;\n' +
-      '      if((x * x + y * y) <= 4.0) {\n' +
-      '        z.x = x;\n' +
-      '        z.y = y;\n' +
-      '        i += 1.0;\n' +
-      '      }\n'
+      [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 ].map( function() {
+        return
+        '      x = (z.x * z.x - z.y * z.y) + c.x;\n' +
+        '      y = (z.y * z.x + z.x * z.y) + c.y;\n' +
+        '      if((x * x + y * y) <= 4.0) {\n' +
+        '        z.x = x;\n' +
+        '        z.y = y;\n' +
+        '        i += 1.0;\n' +
+        '      }\n'
       } ).join( '\n' ) +
       '    result.r += i;\n' +
 
@@ -131,7 +135,7 @@
 
     gl.linkProgram( program );
 
-    if( !gl.getProgramParameter( program, gl.LINK_STATUS ) ) {
+    if ( !gl.getProgramParameter( program, gl.LINK_STATUS ) ) {
       console.log( gl.getProgramInfoLog( program ) );
       throw new Error( 'GLSL link error: ' + gl.getProgramInfoLog( program ) );
     }
@@ -164,7 +168,7 @@
 
     var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
     svg.setAttribute( 'width', n );
-    svg.setAttribute( 'height', 64 );
+    svg.setAttribute( 'height', '64' );
     svg.style.backgroundColor = 'black';
     document.body.appendChild( svg );
 
@@ -183,16 +187,16 @@
 
       gl.drawArrays( gl.TRIANGLE_STRIP, 0, 4 );
 
-      context.clearRect( 0, 0, n, n/8 );
+      context.clearRect( 0, 0, n, n / 8 );
       context.fillStyle = 'black';
-      context.fillRect( 0, 0, n, n/8 );
+      context.fillRect( 0, 0, n, n / 8 );
       context.fillStyle = 'blue';
-      context.fillRect( n * ( ( time / 1000 ) % 1 ), 0, n, n/8 );
+      context.fillRect( n * ( ( time / 1000 ) % 1 ), 0, n, n / 8 );
 
       svgRect.setAttribute( 'x', n * ( ( time / 1000 ) % 1 ) );
-      svgRect.setAttribute( 'y', 0 );
+      svgRect.setAttribute( 'y', '0' );
       svgRect.setAttribute( 'width', n );
-      svgRect.setAttribute( 'height', n/8 );
+      svgRect.setAttribute( 'height', n / 8 );
     }
 
     ( function step() {

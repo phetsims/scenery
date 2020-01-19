@@ -1020,8 +1020,8 @@ define( require => {
       'height should be a non-negative finite integer' );
 
     const element = document.createElementNS( scenery.svgns, 'image' );
-    element.setAttribute( 'x', 0 );
-    element.setAttribute( 'y', 0 );
+    element.setAttribute( 'x', '0' );
+    element.setAttribute( 'y', '0' );
     element.setAttribute( 'width', width + 'px' );
     element.setAttribute( 'height', height + 'px' );
     element.setAttributeNS( scenery.xlinkns, 'xlink:href', url );
