@@ -62,7 +62,7 @@ define( require => {
      * @param {string} dataURL - The reference data URL to compare against
      * @param {number} threshold - Numerical threshold to determine how much error is acceptable
      */
-    function pixelTest( name, setup, dataURL, threshold, isAsync ) {
+    const pixelTest = function( name, setup, dataURL, threshold, isAsync ) {
       QUnit.test( name, function( assert ) {
         const done = assert.async();
         // set up the scene/display
@@ -123,10 +123,10 @@ define( require => {
           loadImages();
         }
       } );
-    }
+    };
 
     // Like pixelTest, but for multiple listeners ({string[]}). Don't override the renderer on the scene.
-    function multipleRendererTest( name, setup, dataURL, threshold, renderers, isAsync ) {
+    const multipleRendererTest = function( name, setup, dataURL, threshold, renderers, isAsync ) {
       for ( var i = 0; i < renderers.length; i++ ) {
         ( function() {
           const renderer = renderers[ i ];
@@ -137,7 +137,7 @@ define( require => {
           }, dataURL, threshold, isAsync );
         } )();
       }
-    }
+    };
 
     const simpleRectangleDataURL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAcElEQVRYR+3YwQoAIQhFUfv/j572NQRiQTOc1ipyn0+kFpe/dnl/ocGqQgieJPhUiyfzX9VcSazBgTCCyZGbwhFEcCRgzVgzVVcgiGDE8uS3ZpiESZgkNwMO1hyvORpBBD938lcl25Lv+62KEcHfE+wTtBwp2K8YwAAAAABJRU5ErkJggg==';
     multipleRendererTest( 'Simple Rectangle',
