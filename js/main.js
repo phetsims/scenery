@@ -10,162 +10,162 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( [
-  'SCENERY/scenery',
-
-  'SCENERY/accessibility/AccessibilityFuzzer',
-  'SCENERY/accessibility/AccessibilityTree',
-  'SCENERY/accessibility/AccessibilityUtils',
-  'SCENERY/accessibility/AccessibleInstance',
-  'SCENERY/accessibility/AccessiblePeer',
-  'SCENERY/accessibility/Accessibility',
-  'SCENERY/accessibility/AccessibilityUtils',
-  'SCENERY/accessibility/reader/Cursor',
-  'SCENERY/accessibility/reader/Reader',
-
-  'SCENERY/debug/DebugContext',
-
-  'SCENERY/display/BackboneDrawable',
-  'SCENERY/display/Block',
-  'SCENERY/display/CanvasBlock',
-  'SCENERY/display/CanvasSelfDrawable',
-  'SCENERY/display/ChangeInterval',
-  'SCENERY/display/Display',
-  'SCENERY/display/DOMBlock',
-  'SCENERY/display/DOMSelfDrawable',
-  'SCENERY/display/Drawable',
-  'SCENERY/display/Fittability',
-  'SCENERY/display/FittedBlock',
-  'SCENERY/display/GreedyStitcher',
-  'SCENERY/display/InlineCanvasCacheDrawable',
-  'SCENERY/display/Instance',
-  'SCENERY/display/PaintObserver',
-  'SCENERY/display/PaintSVGState',
-  'SCENERY/display/RebuildStitcher',
-  'SCENERY/display/RelativeTransform',
-  'SCENERY/display/Renderer',
-  'SCENERY/display/SelfDrawable',
-  'SCENERY/display/SharedCanvasCacheDrawable',
-  'SCENERY/display/Stitcher',
-  'SCENERY/display/SVGBlock',
-  'SCENERY/display/SVGGroup',
-  'SCENERY/display/SVGSelfDrawable',
-  'SCENERY/display/WebGLBlock',
-  'SCENERY/display/WebGLSelfDrawable',
-
-  'SCENERY/display/drawables/CanvasNodeDrawable',
-  'SCENERY/display/drawables/CircleCanvasDrawable',
-  'SCENERY/display/drawables/CircleDOMDrawable',
-  'SCENERY/display/drawables/CircleStatefulDrawable',
-  'SCENERY/display/drawables/CircleSVGDrawable',
-  'SCENERY/display/drawables/DOMDrawable',
-  'SCENERY/display/drawables/ImageCanvasDrawable',
-  'SCENERY/display/drawables/ImageDOMDrawable',
-  'SCENERY/display/drawables/ImageStatefulDrawable',
-  'SCENERY/display/drawables/ImageSVGDrawable',
-  'SCENERY/display/drawables/ImageWebGLDrawable',
-  'SCENERY/display/drawables/LineCanvasDrawable',
-  'SCENERY/display/drawables/LineStatefulDrawable',
-  'SCENERY/display/drawables/LineStatelessDrawable',
-  'SCENERY/display/drawables/LineSVGDrawable',
-  'SCENERY/display/drawables/PaintableStatefulDrawable',
-  'SCENERY/display/drawables/PaintableStatelessDrawable',
-  'SCENERY/display/drawables/PathCanvasDrawable',
-  'SCENERY/display/drawables/PathStatefulDrawable',
-  'SCENERY/display/drawables/PathSVGDrawable',
-  'SCENERY/display/drawables/RectangleCanvasDrawable',
-  'SCENERY/display/drawables/RectangleDOMDrawable',
-  'SCENERY/display/drawables/RectangleStatefulDrawable',
-  'SCENERY/display/drawables/RectangleSVGDrawable',
-  'SCENERY/display/drawables/RectangleWebGLDrawable',
-  'SCENERY/display/drawables/SpritesCanvasDrawable',
-  'SCENERY/display/drawables/SpritesWebGLDrawable',
-  'SCENERY/display/drawables/TextCanvasDrawable',
-  'SCENERY/display/drawables/TextDOMDrawable',
-  'SCENERY/display/drawables/TextStatefulDrawable',
-  'SCENERY/display/drawables/TextSVGDrawable',
-  'SCENERY/display/drawables/WebGLNodeDrawable',
-
-  'SCENERY/input/BatchedDOMEvent',
-  'SCENERY/input/BrowserEvents',
-  'SCENERY/input/ButtonListener',
-  'SCENERY/input/DownUpListener',
-  'SCENERY/input/SceneryEvent',
-  'SCENERY/input/Input',
-  'SCENERY/input/Mouse',
-  'SCENERY/input/Pen',
-  'SCENERY/input/Pointer',
-  'SCENERY/input/SimpleDragHandler',
-  'SCENERY/input/Touch',
-
-  'SCENERY/listeners/DragListener',
-  'SCENERY/listeners/FireListener',
-  'SCENERY/listeners/HandleDownListener',
-  'SCENERY/listeners/KeyboardDragListener',
-  'SCENERY/listeners/MultiListener',
-  'SCENERY/listeners/PanZoomListener',
-  'SCENERY/listeners/PressListener',
-
-  'SCENERY/nodes/AlignBox',
-  'SCENERY/nodes/AlignGroup',
-  'SCENERY/nodes/CanvasNode',
-  'SCENERY/nodes/Circle',
-  'SCENERY/nodes/DOM',
-  'SCENERY/nodes/HBox',
-  'SCENERY/nodes/HTMLText',
-  'SCENERY/nodes/HStrut',
-  'SCENERY/nodes/Image',
-  'SCENERY/nodes/Leaf',
-  'SCENERY/nodes/Line',
-  'SCENERY/nodes/Node',
-  'SCENERY/nodes/Paintable',
-  'SCENERY/nodes/Path',
-  'SCENERY/nodes/Plane',
-  'SCENERY/nodes/Rectangle',
-  'SCENERY/nodes/RichText',
-  'SCENERY/nodes/Spacer',
-  'SCENERY/nodes/Sprites',
-  'SCENERY/nodes/Text',
-  'SCENERY/nodes/VBox',
-  'SCENERY/nodes/VStrut',
-  'SCENERY/nodes/WebGLNode',
-
-  'SCENERY/overlays/CanvasNodeBoundsOverlay',
-  'SCENERY/overlays/FittedBlockBoundsOverlay',
-  'SCENERY/overlays/FocusOverlay',
-  'SCENERY/overlays/PointerAreaOverlay',
-  'SCENERY/overlays/PointerOverlay',
-
-  'SCENERY/util/CanvasContextWrapper',
-  'SCENERY/util/Color',
-  'SCENERY/util/ColorDef',
-  'SCENERY/util/DisplayedProperty',
-  'SCENERY/util/Features',
-  'SCENERY/util/Font',
-  'SCENERY/util/FullScreen',
-  'SCENERY/util/Gradient',
-  'SCENERY/util/LinearGradient',
-  'SCENERY/util/Paint',
-  'SCENERY/util/PaintColorProperty',
-  'SCENERY/util/PaintDef',
-  'SCENERY/util/Pattern',
-  'SCENERY/util/Picker',
-  'SCENERY/util/RadialGradient',
-  'SCENERY/util/RendererSummary',
-  'SCENERY/util/SceneImage',
-  'SCENERY/util/SceneryStyle',
-  'SCENERY/util/ShaderProgram',
-  'SCENERY/util/Sprite',
-  'SCENERY/util/SpriteImage',
-  'SCENERY/util/SpriteInstance',
-  'SCENERY/util/SpriteSheet',
-  'SCENERY/util/TextBounds',
-  'SCENERY/util/Trail',
-  'SCENERY/util/TrailPointer',
-  'SCENERY/util/TransformTracker',
-  'SCENERY/util/Utils'
-], function( scenery ) {
+define( require => {
   'use strict';
+
+  const scenery = require( 'SCENERY/scenery' );
+
+  require( 'SCENERY/accessibility/AccessibilityFuzzer' );
+  require( 'SCENERY/accessibility/AccessibilityTree' );
+  require( 'SCENERY/accessibility/AccessibilityUtils' );
+  require( 'SCENERY/accessibility/AccessibleInstance' );
+  require( 'SCENERY/accessibility/AccessiblePeer' );
+  require( 'SCENERY/accessibility/Accessibility' );
+  require( 'SCENERY/accessibility/AccessibilityUtils' );
+  require( 'SCENERY/accessibility/reader/Cursor' );
+  require( 'SCENERY/accessibility/reader/Reader' );
+
+  require( 'SCENERY/debug/DebugContext' );
+
+  require( 'SCENERY/display/BackboneDrawable' );
+  require( 'SCENERY/display/Block' );
+  require( 'SCENERY/display/CanvasBlock' );
+  require( 'SCENERY/display/CanvasSelfDrawable' );
+  require( 'SCENERY/display/ChangeInterval' );
+  require( 'SCENERY/display/Display' );
+  require( 'SCENERY/display/DOMBlock' );
+  require( 'SCENERY/display/DOMSelfDrawable' );
+  require( 'SCENERY/display/Drawable' );
+  require( 'SCENERY/display/Fittability' );
+  require( 'SCENERY/display/FittedBlock' );
+  require( 'SCENERY/display/GreedyStitcher' );
+  require( 'SCENERY/display/InlineCanvasCacheDrawable' );
+  require( 'SCENERY/display/Instance' );
+  require( 'SCENERY/display/PaintObserver' );
+  require( 'SCENERY/display/PaintSVGState' );
+  require( 'SCENERY/display/RebuildStitcher' );
+  require( 'SCENERY/display/RelativeTransform' );
+  require( 'SCENERY/display/Renderer' );
+  require( 'SCENERY/display/SelfDrawable' );
+  require( 'SCENERY/display/SharedCanvasCacheDrawable' );
+  require( 'SCENERY/display/Stitcher' );
+  require( 'SCENERY/display/SVGBlock' );
+  require( 'SCENERY/display/SVGGroup' );
+  require( 'SCENERY/display/SVGSelfDrawable' );
+  require( 'SCENERY/display/WebGLBlock' );
+  require( 'SCENERY/display/WebGLSelfDrawable' );
+
+  require( 'SCENERY/display/drawables/CanvasNodeDrawable' );
+  require( 'SCENERY/display/drawables/CircleCanvasDrawable' );
+  require( 'SCENERY/display/drawables/CircleDOMDrawable' );
+  require( 'SCENERY/display/drawables/CircleStatefulDrawable' );
+  require( 'SCENERY/display/drawables/CircleSVGDrawable' );
+  require( 'SCENERY/display/drawables/DOMDrawable' );
+  require( 'SCENERY/display/drawables/ImageCanvasDrawable' );
+  require( 'SCENERY/display/drawables/ImageDOMDrawable' );
+  require( 'SCENERY/display/drawables/ImageStatefulDrawable' );
+  require( 'SCENERY/display/drawables/ImageSVGDrawable' );
+  require( 'SCENERY/display/drawables/ImageWebGLDrawable' );
+  require( 'SCENERY/display/drawables/LineCanvasDrawable' );
+  require( 'SCENERY/display/drawables/LineStatefulDrawable' );
+  require( 'SCENERY/display/drawables/LineStatelessDrawable' );
+  require( 'SCENERY/display/drawables/LineSVGDrawable' );
+  require( 'SCENERY/display/drawables/PaintableStatefulDrawable' );
+  require( 'SCENERY/display/drawables/PaintableStatelessDrawable' );
+  require( 'SCENERY/display/drawables/PathCanvasDrawable' );
+  require( 'SCENERY/display/drawables/PathStatefulDrawable' );
+  require( 'SCENERY/display/drawables/PathSVGDrawable' );
+  require( 'SCENERY/display/drawables/RectangleCanvasDrawable' );
+  require( 'SCENERY/display/drawables/RectangleDOMDrawable' );
+  require( 'SCENERY/display/drawables/RectangleStatefulDrawable' );
+  require( 'SCENERY/display/drawables/RectangleSVGDrawable' );
+  require( 'SCENERY/display/drawables/RectangleWebGLDrawable' );
+  require( 'SCENERY/display/drawables/SpritesCanvasDrawable' );
+  require( 'SCENERY/display/drawables/SpritesWebGLDrawable' );
+  require( 'SCENERY/display/drawables/TextCanvasDrawable' );
+  require( 'SCENERY/display/drawables/TextDOMDrawable' );
+  require( 'SCENERY/display/drawables/TextStatefulDrawable' );
+  require( 'SCENERY/display/drawables/TextSVGDrawable' );
+  require( 'SCENERY/display/drawables/WebGLNodeDrawable' );
+
+  require( 'SCENERY/input/BatchedDOMEvent' );
+  require( 'SCENERY/input/BrowserEvents' );
+  require( 'SCENERY/input/ButtonListener' );
+  require( 'SCENERY/input/DownUpListener' );
+  require( 'SCENERY/input/SceneryEvent' );
+  require( 'SCENERY/input/Input' );
+  require( 'SCENERY/input/Mouse' );
+  require( 'SCENERY/input/Pen' );
+  require( 'SCENERY/input/Pointer' );
+  require( 'SCENERY/input/SimpleDragHandler' );
+  require( 'SCENERY/input/Touch' );
+
+  require( 'SCENERY/listeners/DragListener' );
+  require( 'SCENERY/listeners/FireListener' );
+  require( 'SCENERY/listeners/HandleDownListener' );
+  require( 'SCENERY/listeners/KeyboardDragListener' );
+  require( 'SCENERY/listeners/MultiListener' );
+  require( 'SCENERY/listeners/PanZoomListener' );
+  require( 'SCENERY/listeners/PressListener' );
+
+  require( 'SCENERY/nodes/AlignBox' );
+  require( 'SCENERY/nodes/AlignGroup' );
+  require( 'SCENERY/nodes/CanvasNode' );
+  require( 'SCENERY/nodes/Circle' );
+  require( 'SCENERY/nodes/DOM' );
+  require( 'SCENERY/nodes/HBox' );
+  require( 'SCENERY/nodes/HTMLText' );
+  require( 'SCENERY/nodes/HStrut' );
+  require( 'SCENERY/nodes/Image' );
+  require( 'SCENERY/nodes/Leaf' );
+  require( 'SCENERY/nodes/Line' );
+  require( 'SCENERY/nodes/Node' );
+  require( 'SCENERY/nodes/Paintable' );
+  require( 'SCENERY/nodes/Path' );
+  require( 'SCENERY/nodes/Plane' );
+  require( 'SCENERY/nodes/Rectangle' );
+  require( 'SCENERY/nodes/RichText' );
+  require( 'SCENERY/nodes/Spacer' );
+  require( 'SCENERY/nodes/Sprites' );
+  require( 'SCENERY/nodes/Text' );
+  require( 'SCENERY/nodes/VBox' );
+  require( 'SCENERY/nodes/VStrut' );
+  require( 'SCENERY/nodes/WebGLNode' );
+
+  require( 'SCENERY/overlays/CanvasNodeBoundsOverlay' );
+  require( 'SCENERY/overlays/FittedBlockBoundsOverlay' );
+  require( 'SCENERY/overlays/FocusOverlay' );
+  require( 'SCENERY/overlays/PointerAreaOverlay' );
+  require( 'SCENERY/overlays/PointerOverlay' );
+
+  require( 'SCENERY/util/CanvasContextWrapper' );
+  require( 'SCENERY/util/Color' );
+  require( 'SCENERY/util/ColorDef' );
+  require( 'SCENERY/util/DisplayedProperty' );
+  require( 'SCENERY/util/Features' );
+  require( 'SCENERY/util/Font' );
+  require( 'SCENERY/util/FullScreen' );
+  require( 'SCENERY/util/Gradient' );
+  require( 'SCENERY/util/LinearGradient' );
+  require( 'SCENERY/util/Paint' );
+  require( 'SCENERY/util/PaintColorProperty' );
+  require( 'SCENERY/util/PaintDef' );
+  require( 'SCENERY/util/Pattern' );
+  require( 'SCENERY/util/Picker' );
+  require( 'SCENERY/util/RadialGradient' );
+  require( 'SCENERY/util/RendererSummary' );
+  require( 'SCENERY/util/SceneImage' );
+  require( 'SCENERY/util/SceneryStyle' );
+  require( 'SCENERY/util/ShaderProgram' );
+  require( 'SCENERY/util/Sprite' );
+  require( 'SCENERY/util/SpriteImage' );
+  require( 'SCENERY/util/SpriteInstance' );
+  require( 'SCENERY/util/SpriteSheet' );
+  require( 'SCENERY/util/TextBounds' );
+  require( 'SCENERY/util/Trail' );
+  require( 'SCENERY/util/TrailPointer' );
+  require( 'SCENERY/util/TransformTracker' );
+  require( 'SCENERY/util/Utils' );
 
   // note: we don't need any of the other parts, we just need to specify them as dependencies so they fill in the scenery namespace
   return scenery;
