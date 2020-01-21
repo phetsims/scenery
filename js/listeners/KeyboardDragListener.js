@@ -47,15 +47,15 @@ define( require => {
       // coordinates every second.
       shiftDragVelocity: 300,
 
-      // {Property.<Vector2>|null} - if provided, it will be synchronized with the drag location in the model
+      // {Property.<Vector2>|null} - if provided, it will be synchronized with the drag position in the model
       // frame, applying provided transforms as needed. Most useful when used with transform option
-      locationProperty: null,
+      positionProperty: null,
 
       // {Transform3|null} - if provided, this will be the conversion between the view and model coordinate frames,
-      // Usually most useful when paired with the locationProperty
+      // Usually most useful when paired with the positionProperty
       transform: null,
 
-      // {Bounds2|null} - if provided, the model location will be constrained to be inside these bounds
+      // {Bounds2|null} - if provided, the model position will be constrained to be inside these bounds
       dragBounds: null,
 
       // {Function|null} - Called as start( event: {SceneryEvent} ) when keyboard drag is started
@@ -91,7 +91,7 @@ define( require => {
     this._end = options.end;
     this._dragBounds = options.dragBounds;
     this._transform = options.transform;
-    this._locationProperty = options.locationProperty;
+    this._positionProperty = options.positionProperty;
     this._dragVelocity = options.dragVelocity;
     this._shiftDragVelocity = options.shiftDragVelocity;
     this._downDelta = options.downDelta;
@@ -207,16 +207,16 @@ define( require => {
     set transform( transform ) { this._transform = transform; },
 
     /**
-     * Getter for the locationProperty property, see options.locationProperty for more info.
+     * Getter for the positionProperty property, see options.positionProperty for more info.
      * @returns {Property.<Vector2>|null}
      */
-    get locationProperty() { return this._locationProperty; },
+    get positionProperty() { return this._positionProperty; },
 
     /**
-     * Setter for the locationProperty property, see options.locationProperty for more info.
-     * @param {Property.<Vector2>|null} locationProperty
+     * Setter for the positionProperty property, see options.positionProperty for more info.
+     * @param {Property.<Vector2>|null} positionProperty
      */
-    set locationProperty( locationProperty ) { this._locationProperty = locationProperty; },
+    set positionProperty( positionProperty ) { this._positionProperty = positionProperty; },
 
     /**
      * Getter for the dragVelocity property, see options.dragVelocity for more info.
@@ -552,9 +552,9 @@ define( require => {
             vectorDelta = this._transform.viewToModelDelta( vectorDelta );
           }
 
-          // synchronize with model location
-          if ( this._locationProperty ) {
-            let newPosition = this._locationProperty.get().plus( vectorDelta );
+          // synchronize with model position
+          if ( this._positionProperty ) {
+            let newPosition = this._positionProperty.get().plus( vectorDelta );
 
             // constrain to bounds in model coordinates
             if ( this._dragBounds ) {
@@ -562,8 +562,8 @@ define( require => {
             }
 
             // update the position if it is different
-            if ( !newPosition.equals( this._locationProperty.get() ) ) {
-              this._locationProperty.set( newPosition );
+            if ( !newPosition.equals( this._positionProperty.get() ) ) {
+              this._positionProperty.set( newPosition );
             }
           }
 
