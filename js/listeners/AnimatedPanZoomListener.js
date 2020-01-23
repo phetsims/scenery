@@ -51,14 +51,14 @@ define( require => {
       this.keyStateTracker = new KeyStateTracker();
       this.keyStateTracker.attachToBody();
 
-      // @private (null|Vector2) - This point is the center of the transformedPanBounds (see PanZoomListener) in
+      // @private {null|Vector2} - This point is the center of the transformedPanBounds (see PanZoomListener) in
       // the parent coordinate frame of the targetNode. This is the current center of the transformedPanBounds, and
-      // during animation we will move this point closer to the destinationLocation.
-      this.sourceLocation = null;
+      // during animation we will move this point closer to the destinationPosition.
+      this.sourcePosition = null;
 
-      // @private (null|Vector2) - The destination for translation, we will reposition the targetNode until the
-      // sourceLocation matches this point. This is in the parent coordinate frame of the targetNode.
-      this.destinationLocation = null;
+      // @private {null|Vector2} - The destination for translation, we will reposition the targetNode until the
+      // sourcePosition matches this point. This is in the parent coordinate frame of the targetNode.
+      this.destinationPosition = null;
 
       // @private {number} - The current scale of the targetNode. During animation we will scale the targetNode until
       // this matches the destinationScale.
@@ -71,7 +71,7 @@ define( require => {
       // @private {null|Vector2} - The point at which a scale gesture was initiated. This is usually the mouse point in
       // the global coordinate frame when a wheel or trackpad zoom gesture is initiated. The targetNode will appear to
       // be zoomed into this point. This is in the global coordinate frame.
-      this.scaleGestureTargetLocation = null;
+      this.scaleGestureTargetPosition = null;
 
       // @private {Array.<number>} - scale changes in discrete amounts for certain types of input, and in these
       // cases this array defines the discrete scales possible
@@ -126,7 +126,7 @@ define( require => {
     }
 
     /**
-     * Step the listener, supporting any animation as the target node is transformed to target location and scale.
+     * Step the listener, supporting any animation as the target node is transformed to target position and scale.
      * @public
      *
      * @param {number} dt
@@ -222,7 +222,7 @@ define( require => {
     repositionDuringDrag( pointerPoint ) {
       const closestContainedPoint = this._dragBounds.getClosestPoint( pointerPoint.x, pointerPoint.y );
       const translationDelta = pointerPoint.minus( closestContainedPoint );
-      this.setDestinationLocation( this.sourceLocation.plus( translationDelta ) );
+      this.setDestinationPosition( this.sourcePosition.plus( translationDelta ) );
     }
 
     /**
@@ -365,7 +365,7 @@ define( require => {
       // prevent Safari from doing anything native with this gesture
       domEvent.preventDefault();
       this.trackpadGestureStartScale = domEvent.scale;
-      this.scaleGestureTargetLocation = new Vector2( event.pageX, event.pageY );
+      this.scaleGestureTargetPosition = new Vector2( event.pageX, event.pageY );
     }
 
     /**
@@ -385,7 +385,7 @@ define( require => {
     }
 
     /**
-     * Handle the down MiddlePress during animation. If we have a middle press we need to update location target.
+     * Handle the down MiddlePress during animation. If we have a middle press we need to update position target.
      * @private
      *
      * @param {number} dt
@@ -402,7 +402,7 @@ define( require => {
 
         // set the delta vector in global coordinates, limited by a maximum view coords/second velocity
         globalDelta.setMagnitude( Math.min( reducedMagnitude / dt, MAX_SCROLL_VELOCITY ) );
-        this.setDestinationLocation( this.sourceLocation.plus( globalDelta ) );
+        this.setDestinationPosition( this.sourcePosition.plus( globalDelta ) );
       }
     }
 
@@ -481,12 +481,12 @@ define( require => {
 
         // key press changed scale
         this.setDestinationScale( newScale );
-        this.scaleGestureTargetLocation = keyPress.computeScaleTargetFromKeyPress();
+        this.scaleGestureTargetPosition = keyPress.computeScaleTargetFromKeyPress();
       }
       else if ( !keyPress.translationVector.equals( Vector2.ZERO ) ) {
 
         // key press initiated some translation
-        this.setDestinationLocation( this.sourceLocation.plus( keyPress.translationVector ) );
+        this.setDestinationPosition( this.sourcePosition.plus( keyPress.translationVector ) );
       }
 
       this.correctReposition();
@@ -512,13 +512,13 @@ define( require => {
 
       if ( wheel.isCtrlKeyDown ) {
         const nextScale = this.limitScale( this.getCurrentScale() + wheel.scaleDelta );
-        this.scaleGestureTargetLocation = wheel.targetPoint;
+        this.scaleGestureTargetPosition = wheel.targetPoint;
         this.setDestinationScale( nextScale );
       }
       else {
 
         // wheel does not indicate zoom, must be translation
-        this.setDestinationLocation( this.sourceLocation.plus( wheel.translationVector ) );
+        this.setDestinationPosition( this.sourcePosition.plus( wheel.translationVector ) );
       }
 
       this.correctReposition();
@@ -527,14 +527,14 @@ define( require => {
     }
 
     /**
-     * Upon any kind of reposition, update the source location and scale for the next update in animateToTargets.
+     * Upon any kind of reposition, update the source position and scale for the next update in animateToTargets.
      *
      * Note: This assumes that any kind of repositioning of the target node will eventually call correctReposition.
      */
     correctReposition() {
       super.correctReposition();
 
-      this.sourceLocation = this._transformedPanBounds.center;
+      this.sourcePosition = this._transformedPanBounds.center;
       this.sourceScale = this.getCurrentScale();
     }
 
@@ -590,48 +590,48 @@ define( require => {
      * @param {Node} node
      */
     panToNode( node ) {
-      const globalLocation = node.globalBounds.center;
+      const globalPosition = node.globalBounds.center;
 
-      const locationInTargetFrame = this._targetNode.globalToLocalPoint( globalLocation );
+      const positionInTargetFrame = this._targetNode.globalToLocalPoint( globalPosition );
 
-      const distanceToLeftEdge = Math.abs( this._targetBounds.left - locationInTargetFrame.x );
-      const distanceToRightEdge = Math.abs( this._targetBounds.right - locationInTargetFrame.x );
-      const distanceToTopEdge = Math.abs( this._targetBounds.top - locationInTargetFrame.y );
-      const distanceToBottomEdge = Math.abs( this._targetBounds.bottom - locationInTargetFrame.y );
+      const distanceToLeftEdge = Math.abs( this._targetBounds.left - positionInTargetFrame.x );
+      const distanceToRightEdge = Math.abs( this._targetBounds.right - positionInTargetFrame.x );
+      const distanceToTopEdge = Math.abs( this._targetBounds.top - positionInTargetFrame.y );
+      const distanceToBottomEdge = Math.abs( this._targetBounds.bottom - positionInTargetFrame.y );
 
       if ( distanceToRightEdge < this._transformedPanBounds.width / 2  ) {
         const correction = this._transformedPanBounds.width / 2 - distanceToRightEdge;
-        locationInTargetFrame.x = locationInTargetFrame.x - correction;
+        positionInTargetFrame.x = positionInTargetFrame.x - correction;
       }
       if ( distanceToLeftEdge < this._transformedPanBounds.width / 2 ) {
         const correction = this._transformedPanBounds.width / 2 - distanceToLeftEdge;
-        locationInTargetFrame.x = locationInTargetFrame.x + correction;
+        positionInTargetFrame.x = positionInTargetFrame.x + correction;
       }
       if ( distanceToTopEdge < this._transformedPanBounds.height / 2 ) {
         const correction = this._transformedPanBounds.height / 2 - distanceToTopEdge;
-        locationInTargetFrame.y = locationInTargetFrame.y + correction;
+        positionInTargetFrame.y = positionInTargetFrame.y + correction;
       }
       if ( distanceToBottomEdge < this._transformedPanBounds.height / 2 ) {
         const correction = this._transformedPanBounds.height / 2 - distanceToBottomEdge;
-        locationInTargetFrame.y = locationInTargetFrame.y - correction;
+        positionInTargetFrame.y = positionInTargetFrame.y - correction;
       }
 
-      this.setDestinationLocation( locationInTargetFrame );
+      this.setDestinationPosition( positionInTargetFrame );
     }
 
     animateToTargets( dt ) {
-      assert && assert( this.destinationLocation !== null, 'initializeLocations must be called at least once before animating' );
-      assert && assert( this.sourceLocation !== null, 'initializeLocations must be called at least once before animating' );
+      assert && assert( this.destinationPosition !== null, 'initializePositions must be called at least once before animating' );
+      assert && assert( this.sourcePosition !== null, 'initializePositions must be called at least once before animating' );
 
-      const locationDirty = !this.destinationLocation.equalsEpsilon( this.sourceLocation, 0.1 );
+      const positionDirty = !this.destinationPosition.equalsEpsilon( this.sourcePosition, 0.1 );
       const scaleDirty = !Utils.equalsEpsilon( this.sourceScale, this.destinationScale, 0.001 );
 
       // Only a MiddlePress can support animation while down
       if ( this._presses.length === 0 || this.middlePress !== null ) {
-        if ( locationDirty ) {
+        if ( positionDirty ) {
 
-          // animate to the location, effectively panning over time without any scaling
-          const translationDifference = this.destinationLocation.minus( this.sourceLocation );
+          // animate to the position, effectively panning over time without any scaling
+          const translationDifference = this.destinationPosition.minus( this.sourcePosition );
 
           let translationDirection = translationDifference;
           if ( translationDifference.magnitude !== 0 ) {
@@ -654,7 +654,7 @@ define( require => {
           this.translateDelta( translationDelta );
         }
         if ( scaleDirty ) {
-          assert && assert( this.scaleGestureTargetLocation, 'there must be a scale target point' );
+          assert && assert( this.scaleGestureTargetPosition, 'there must be a scale target point' );
 
           const scaleDifference = this.destinationScale - this.sourceScale;
           let scaleDelta = scaleDifference * dt * 6;
@@ -663,10 +663,10 @@ define( require => {
           if ( Math.abs( scaleDelta ) > Math.abs( scaleDifference ) ) {
             scaleDelta = scaleDifference;
           }
-          this.translateScaleToTarget( this.scaleGestureTargetLocation, scaleDelta );
+          this.translateScaleToTarget( this.scaleGestureTargetPosition, scaleDelta );
 
           // after applying the scale, the source position has changed, update destination to match
-          this.setDestinationLocation( this.sourceLocation );
+          this.setDestinationPosition( this.sourcePosition );
         }
       }
     }
@@ -678,18 +678,18 @@ define( require => {
      */
     stopInProgressAnimation() {
       this.setDestinationScale( this.sourceScale );
-      this.setDestinationLocation( this.sourceLocation );
+      this.setDestinationPosition( this.sourcePosition );
     }
 
     /**
-     * Sets the source and destination locations. Necessary because target or pan bounds may not be defined
+     * Sets the source and destination positions. Necessary because target or pan bounds may not be defined
      * upon construction. This can set those up when they are defined.
      *
      * @private
      */
-    initializeLocations() {
-      this.sourceLocation = this._transformedPanBounds.center;
-      this.setDestinationLocation( this.sourceLocation );
+    initializePositions() {
+      this.sourcePosition = this._transformedPanBounds.center;
+      this.setDestinationPosition( this.sourcePosition );
     }
 
     /**
@@ -699,7 +699,7 @@ define( require => {
      */
     setPanBounds( bounds ) {
       super.setPanBounds( bounds );
-      this.initializeLocations();
+      this.initializePositions();
 
       // drag bounds eroded a bit so that repositioning during drag occurs as the pointer gets close to the edge.
       this._dragBounds = bounds.erodedXY( bounds.width * 0.1, bounds.height * 0.1 );
@@ -707,25 +707,25 @@ define( require => {
     }
 
     /**
-     * Upon setting target bounds, re-set source and destination locations.
+     * Upon setting target bounds, re-set source and destination positions.
      * @override
      *
      * @param {Bounds2} targetBounds
      */
     setTargetBounds( targetBounds ) {
       super.setTargetBounds( targetBounds );
-      this.initializeLocations();
+      this.initializePositions();
     }
 
     /**
-     * Set the destination location. In animation, we will try move the targetNode until sourceLocation matches
+     * Set the destination position. In animation, we will try move the targetNode until sourcePosition matches
      * this point. Destination is in the local coordinate frame of the target node.
      * @private
      *
      * @param {Vector2} destination
      */
-    setDestinationLocation( destination ) {
-      this.destinationLocation = destination;
+    setDestinationPosition( destination ) {
+      this.destinationPosition = destination;
     }
 
     /**
@@ -851,7 +851,7 @@ define( require => {
     }
 
     /**
-     * Compute the target location for scaling from a key press. The target node will appear to get larger and zoom
+     * Compute the target position for scaling from a key press. The target node will appear to get larger and zoom
      * into this point. If focus is within the Display, we zoom into the focused node. If not and focusable content
      * exists in the display, we zoom into the first focusable component. Otherwise, we zoom into the top left corner
      * of the screen.
@@ -935,7 +935,7 @@ define( require => {
   }
 
   /**
-   * A press from a middle mouse button. Will initiate panning and destination location will be updated for as long
+   * A press from a middle mouse button. Will initiate panning and destination position will be updated for as long
    * as the Pointer point is dragged away from the initial point.
    */
   class MiddlePress {
