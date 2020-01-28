@@ -17,6 +17,7 @@ define( require => {
   const AccessibleSiblingStyle = require( 'SCENERY/accessibility/AccessibleSiblingStyle' );
   const merge = require( 'PHET_CORE/merge' );
   const scenery = require( 'SCENERY/scenery' );
+  const stripEmbeddingMarks = require( 'PHET_CORE/stripEmbeddingMarks' );
   const validate = require( 'AXON/validate' );
 
   // constants
@@ -310,17 +311,20 @@ define( require => {
       assert && assert( domElement instanceof Element ); // parent to HTMLElement, to support other namespaces
       assert && assert( typeof textContent === 'string' );
 
+      // TODO: this line must be removed to support i18n Interactive Descriptions, see https://github.com/phetsims/chipper/issues/798
+      const textWithoutEmbeddingMarks = stripEmbeddingMarks( textContent );
+
       // Disallow any unfilled template variables to be set in the PDOM.
-      validate.stringWithoutTemplateVars( textContent );
+      validate.stringWithoutTemplateVars( textWithoutEmbeddingMarks );
 
       if ( tagNameSupportsContent( domElement.tagName ) ) {
 
         // only returns true if content contains listed formatting tags
-        if ( AccessibilityUtils.containsFormattingTags( textContent ) ) {
-          domElement.innerHTML = textContent;
+        if ( AccessibilityUtils.containsFormattingTags( textWithoutEmbeddingMarks ) ) {
+          domElement.innerHTML = textWithoutEmbeddingMarks;
         }
         else {
-          domElement.textContent = textContent;
+          domElement.textContent = textWithoutEmbeddingMarks;
         }
       }
     },
