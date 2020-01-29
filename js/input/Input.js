@@ -1863,39 +1863,26 @@ define( require => {
       if ( FullScreen.isFullScreen() && event.keyCode === KeyboardUtils.KEY_TAB ) {
         const rootElement = this.display.accessibleDOMElement;
         const nextElement = event.shiftKey ? AccessibilityUtils.getPreviousFocusable( rootElement ) :
-                          AccessibilityUtils.getNextFocusable( rootElement );
+                            AccessibilityUtils.getNextFocusable( rootElement );
         if ( nextElement === event.target ) {
           event.preventDefault();
         }
       }
 
-      // if an accessible node was being interacted with a mouse, or had focus when sim is made inactive, this node
+      // if an accessible Node was being interacted with a mouse, or had focus when sim is made inactive, this Node
       // should receive focus upon resuming keyboard navigation
       if ( this.display.pointerFocus || this.display.activeNode ) {
         const active = this.display.pointerFocus || this.display.activeNode;
-        const focusable = active.focusable;
 
         // if there is a single accessible instance, we can restore focus
-        if ( active.getAccessibleInstances().length === 1 ) {
-
-          // if all ancestors of this node are visible, so is the active node
-          let nodeAndAncestorsVisible = true;
-          const activeTrail = active.accessibleInstances[ 0 ].trail;
-          for ( let i = activeTrail.nodes.length - 1; i >= 0; i-- ) {
-            if ( !activeTrail.nodes[ i ].visible ) {
-              nodeAndAncestorsVisible = false;
-              break;
-            }
-          }
-
-          if ( focusable && nodeAndAncestorsVisible ) {
-            if ( event.keyCode === KeyboardUtils.KEY_TAB ) {
-              event.preventDefault();
-              active.focus();
-              this.display.pointerFocus = null;
-              this.display.activeNode = null;
-            }
-          }
+        if ( active.getAccessibleInstances().length === 1 &&
+             active.focusable && // if the active element is focusable
+             active.accessibleInstances[ 0 ].trail.isVisible() && // if the active element is visible
+             event.keyCode === KeyboardUtils.KEY_TAB ) {
+          event.preventDefault();
+          active.focus();
+          this.display.pointerFocus = null;
+          this.display.activeNode = null;
         }
       }
     }
