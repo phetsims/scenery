@@ -121,7 +121,15 @@
 </script>
 
 <script type="text/javascript">
-  scenery.Utils.polyfillRequestAnimationFrame();
+  /**
+   * Note that this example solely uses Scenery, but PhET Interactive Simulation has created `AccessibleSlider.js` in a
+   * component library called "sun" (https://github.com/phetsims/sun/blob/master/js/accessibility/AccessibleSlider.js) as
+   * a mixin that solves much of the accessible-description related elements of this examples. AccessibleSlider is also
+   * used by sun/Slider.js, which is the visual, slider written with Scenery that PhET uses.
+   *
+   */
+
+  scenery.Util.polyfillRequestAnimationFrame();
   docExample( 'accessibility-scene', ( scene, display ) => {
     'use strict';
 
@@ -240,14 +248,16 @@
     // update displayed p-dom text
     const updatePDOMDisplay = () => {
 
-      // format the p-dom code
-      var buttonRegex = new RegExp( '(<button.*?>)((.|\\n)*?)(<\/button>)', 'gm' );
-      var pRegex = new RegExp( '(<p.*?>)((.|\\n)*?)(<\/p>)', 'gm' );
-      var PDOMHTMLBlock = display.accessibleDOMElement.outerHTML;
-      var formattedPDOM = PDOMHTMLBlock
-        .replace( new RegExp( '<[/]?\\w*[ >]', 'g' ), '\n$&' ) // add breaks in the string
-        .replace( new RegExp( pRegex, 'g' ), '\t$1\n\t\t$2\t<\/p>' ) //formatting for opening paragraph tag
-        .replace( buttonRegex, '\t$1\n\t\t$2\t<\/button>' ); //formatting for buttons
+      var formattedPDOM = display.accessibleDOMElement.outerHTML
+        // add breaks in the string
+        .replace( new RegExp( '<[/]?\\w*[ >]', 'g' ), '\n$&' )
+
+        // formatting for opening paragraph tag
+        .replace( new RegExp( '(<p.*?>)((.|\\n)*?)(<\/p>)', 'gm' ), '\t$1\n\t\t$2\t<\/p>' )
+
+        //formatting for buttons
+        .replace( new RegExp( '(<button.*?>)((.|\\n)*?)(<\/button>)', 'gm' ), '\t$1\n\t\t$2\t<\/button>' );
+
       var $PDOMcode = ( $( '<code class="language-html no-whitespace-normalization"></code>' ).text( formattedPDOM ) );
 
       // add formatted code to the pre element
