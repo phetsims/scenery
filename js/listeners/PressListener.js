@@ -113,6 +113,8 @@ define( require => {
       // (usually for performance) by just calling the callbacks for the last drag event. Other events (press/release
       // handling) will force through the last pending drag event. Calling step() every frame will then be generally
       // necessary to have accurate-looking drags. NOTE that this may put in events out-of-order.
+      // This is appropriate when the drag operation is expensive performance-wise AND ideally should only be run at
+      // most once per frame (any more, and it would be a waste).
       collapseDragEvents: false,
 
       // {Tandem} - For instrumenting
