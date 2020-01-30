@@ -89,10 +89,17 @@ define( require => {
       //   3+: other specific numbered buttons that are more rare
       mouseButton: 0,
 
-      // {string|null} - Sets the pointer cursor to this value when this listener is "pressed". This means that even
-      // when the mouse moves out of the node after pressing down, it will still have this cursor (overriding the
-      // cursor of whatever nodes the pointer may be over).
+      // {string|null} - If the targetNode/currentTarget don't have a custom cursor, this will set the pointer cursor to
+      // this value when this listener is "pressed". This means that even when the mouse moves out of the node after
+      // pressing down, it will still have this cursor (overriding the cursor of whatever nodes the pointer may be
+      // over). Additionally, if preferTargetCursor:false is set, then this value will ALWAYS be used as the pointer
+      // cursor, regardless of the value of the targetNode/currentTarget's cursor value.
       pressCursor: 'pointer',
+
+      // {boolean} - By default, the targetNode or currentTarget's cursor will be used (if it is non-null), falling back
+      // to the pressCursor option. If this option is set to false, then the pressCursor option will override any set
+      // cursor on the targetNode/currentTarget. See https://github.com/phetsims/scenery/issues/1013 for more info.
+      preferTargetCursor: true,
 
       // {function} - Checks this when trying to start a press. If this function returns false, a press will not be
       // started. Called as canStartPress( event: {SceneryEvent|null}, listener: {PressListener} ), since sometimes the
@@ -156,6 +163,7 @@ define( require => {
     // @private {boolean}
     this._attach = options.attach;
     this._collapseDragEvents = options.collapseDragEvents;
+    this._preferTargetCursor = options.preferTargetCursor;
 
     // @public {ObservableArray.<Pointer>} - Contains all pointers that are over our button. Tracked by adding with
     // 'enter' events and removing with 'exit' events.
@@ -569,7 +577,9 @@ define( require => {
       this.pointer.addInputListener( this._pointerListener, this._attach );
       this._listeningToPointer = true;
 
-      this.pointer.cursor = this._pressCursor;
+      // Use the targetNode/currentTarget cursor if it's non-null and preferTargetCursor is set, see
+      // https://github.com/phetsims/scenery/issues/1013
+      this.pointer.cursor = ( this._preferTargetCursor && this.pressedTrail.lastNode().cursor ) || this._pressCursor;
 
       this.isPressedProperty.value = true;
 
