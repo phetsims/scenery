@@ -12,6 +12,7 @@
 define( require => {
   'use strict';
 
+  const CallbackTimer = require( 'AXON/CallbackTimer' );
   const Emitter = require( 'AXON/Emitter' );
   const EventType = require( 'TANDEM/EventType' );
   const inherit = require( 'PHET_CORE/inherit' );
@@ -38,6 +39,12 @@ define( require => {
       // button is released while the pointer is over the button.
       fireOnDown: false,
 
+      // fire-on-hold feature (similar to PushButtonModel, see https://github.com/phetsims/scenery/issues/1004 as
+      // this exists here so we don't need to use FireOnHoldInputListener ever).
+      fireOnHold: false, // {boolean} - is the fire-on-hold feature enabled?
+      fireOnHoldDelay: 400, // {number} - start to fire continuously after pressing for this long (milliseconds)
+      fireOnHoldInterval: 100, // {number} - fire continuously at this interval (milliseconds)
+
       // {Tandem}
       tandem: Tandem.REQUIRED
     }, options );
@@ -60,6 +67,17 @@ define( require => {
       } ]
     } );
     this.firedEmitter.addListener( options.fire );
+
+    // Create a timer to handle the optional fire-on-hold feature.
+    // When that feature is enabled, calling this.fire is delegated to the timer.
+    if ( options.fireOnHold ) {
+      // @private {CallbackTimer}
+      this._timer = new CallbackTimer( {
+        callback: this.fire.bind( this, null ), // Pass null for fire-on-hold events
+        delay: options.fireOnHoldDelay,
+        interval: options.fireOnHoldInterval
+      } );
+    }
   }
 
   scenery.register( 'FireListener', FireListener );
@@ -102,6 +120,9 @@ define( require => {
         if ( this._fireOnDown ) {
           this.fire( event );
         }
+        if ( this._timer ) {
+          this._timer.start();
+        }
         callback && callback();
       } );
     },
@@ -121,11 +142,31 @@ define( require => {
     release( event, callback ) {
       PressListener.prototype.release.call( this, event, () => {
         // Notify after the rest of release is called in order to prevent it from triggering interrupt().
-        if ( !this._fireOnDown && this.isHoveringProperty.value && !this.interrupted ) {
+        const shouldFire = !this._fireOnDown && this.isHoveringProperty.value && !this.interrupted;
+        if ( this._timer ) {
+          this._timer.stop( shouldFire );
+        }
+        else if ( shouldFire ) {
           this.fire( event );
         }
         callback && callback();
       } );
+    },
+
+    /**
+     * Interrupts the listener, releasing it (canceling behavior).
+     * @public
+     * @override
+     *
+     * This effectively releases/ends the press, and sets the `interrupted` flag to true while firing these events
+     * so that code can determine whether a release/end happened naturally, or was canceled in some way.
+     *
+     * This can be called manually, but can also be called through node.interruptSubtreeInput().
+     */
+    interrupt() {
+      PressListener.prototype.interrupt.call( this );
+
+      this._timer && this._timer.stop( false ); // Stop the timer, don't fire if we haven't already
     },
 
     /**
@@ -134,6 +175,7 @@ define( require => {
      */
     dispose() {
       this.firedEmitter.dispose();
+      this._timer && this._timer.dispose();
 
       PressListener.prototype.dispose.call( this );
     }
