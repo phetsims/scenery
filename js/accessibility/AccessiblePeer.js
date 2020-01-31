@@ -677,7 +677,8 @@ define( require => {
      * @returns {boolean}
      */
     isFocused: function() {
-      return document.activeElement === this._primarySibling;
+      const visualFocusTrail = phet.scenery.AccessibleInstance.guessVisualTrail( this.trail,  this.display.rootNode );
+      return phet.scenery.Display.focusProperty.value && phet.scenery.Display.focusProperty.value.trail.equals( visualFocusTrail );
     },
 
     /**

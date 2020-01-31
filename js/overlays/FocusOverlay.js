@@ -387,7 +387,7 @@ define( require => {
      * necessary when the node has focus.
      */
     onFocusHighlightChange: function() {
-      assert && this.display.interactive && assert( this.node.focused, 'update should only be necessary if node already has focus' );
+      assert && assert( this.node.focused, 'update should only be necessary if node already has focus' );
       this.onFocusChange( scenery.Display.focus );
     },
 
