@@ -40,6 +40,9 @@ define( require => {
   // a focus highlight for testing, since dummy nodes tend to have no bounds
   const TEST_HIGHLIGHT = new Circle( 5 );
 
+  // a custom focus highlight (since dummy node's have no bounds)
+  const focusHighlight = new Rectangle( 0, 0, 10, 10 );
+
   QUnit.module( 'Accessibility' );
 
   /**
@@ -1032,8 +1035,7 @@ define( require => {
     var display = new Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
 
-    // a custom focus highlight (since dummy node's have no bounds)
-    const focusHighlight = new Rectangle( 0, 0, 10, 10 );
+    display.initializeEvents();
 
     // create some nodes for testing
     const a = new Node( { tagName: 'button', focusHighlight: focusHighlight } );
@@ -1104,6 +1106,8 @@ define( require => {
     assert.ok( !b.hasChild( d ), 'd should not be a child of b after it was replaced with replaceChild' );
     assert.ok( !d.focused, 'do does not have focus after being replaced by testNode' );
     assert.ok( !testNode.focused, 'testNode does not have focus after replacing node d (testNode is not focusable)' );
+
+    display.detachEvents();
   } );
 
   QUnit.test( 'accessibleVisible', function( assert ) {
@@ -1318,6 +1322,8 @@ define( require => {
     var display = new Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
 
+    display.initializeEvents();
+
     // a custom focus highlight (since dummy node's have no bounds)
     const focusHighlight = new Rectangle( 0, 0, 10, 10 );
 
@@ -1371,6 +1377,8 @@ define( require => {
     assert.ok( c.visible === true, 'c should be visible after visibility is swapped' );
     assert.ok( b.focused === false, 'b should no longer have focus after visibility is swapped' );
     assert.ok( c.focused === false, 'c should not have focus after visibility is swapped because it is not focusable' );
+
+    display.detachEvents();
   } );
 
   QUnit.test( 'Aria Label Setter', function( assert ) {
@@ -1408,6 +1416,8 @@ define( require => {
     var display = new Display( rootNode ); // eslint-disable-line
     document.body.appendChild( display.domElement );
 
+    display.initializeEvents();
+
     const a = new Node( { tagName: 'div', focusable: true } );
     rootNode.addChild( a );
 
@@ -1440,13 +1450,15 @@ define( require => {
     assert.ok( !c.focusable, 'button changed to paragraph, should no longer be focusable' );
 
     // When focusable is set to null on an element that is not focusable by default, it should lose focus
-    const d = new Node( { tagName: 'div', focusable: true } );
+    const d = new Node( { tagName: 'div', focusable: true, focusHighlight: focusHighlight } );
     rootNode.addChild( d );
     d.focus();
     assert.ok( d.focused, 'focusable div should be focused after calling focus()' );
 
     d.focusable = null;
     assert.ok( !d.focused, 'default div should lose focus after node restored to null focusable' );
+
+    display.detachEvents();
   } );
 
   QUnit.test( 'append siblings/appendLabel/appendDescription setters', function( assert ) {
@@ -1516,7 +1528,7 @@ define( require => {
     assert.ok( bElementParent.childNodes[ indexOfPrimaryElement + 1 ] === bPeer.labelSibling, 'b label sibling second with no container, both appended' );
     assert.ok( bElementParent.childNodes[ indexOfPrimaryElement + 2 ] === bPeer.descriptionSibling, 'b description sibling third with no container, both appended' );
 
-    // test order when only description appended and no parent container - order should be label, primary, then 
+    // test order when only description appended and no parent container - order should be label, primary, then
     // description
     b.appendLabel = false;
 
@@ -1719,6 +1731,8 @@ define( require => {
     const display = new Display( rootNode );
     document.body.appendChild( display.domElement );
 
+    display.initializeEvents();
+
     const a = new Node( { tagName: 'button', focusHighlight: TEST_HIGHLIGHT } );
     const b = new Node( { tagName: 'button', focusHighlight: TEST_HIGHLIGHT } );
     rootNode.children = [ a, b ];
@@ -1736,6 +1750,8 @@ define( require => {
     if ( document.body.contains( document.activeElement ) && document.body !== document.activeElement ) {
       assert.ok( b.focused, 'b should have focus after a moved to back' );
     }
+
+    display.detachEvents();
   } );
 
   // these fuzzers take time, so it is nice when they are last
