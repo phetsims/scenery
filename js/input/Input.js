@@ -189,7 +189,8 @@ define( require => {
     button: true, keyCode: true,
     deltaX: true, deltaY: true, deltaZ: true, deltaMode: true, pointerId: true,
     pointerType: true, charCode: true, which: true, clientX: true, clientY: true, changedTouches: true,
-    target: true
+    target: true,
+    ctrlKey: true, shiftKey: true, altKey: true, metaKey: true
   };
 
   const TARGET_SUBSTITUTE_KEY = 'targetSubstitute';
