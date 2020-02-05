@@ -261,7 +261,7 @@ define( require => {
     /**
      * Handle the internal ordering of the elements in the peer, this involves setting the proper value of
      * this.topLevelElements
-     * @param {Object} options - the computed mixin options to be applied to the peer.
+     * @param {Object} [options] - the computed mixin options to be applied to the peer.
      * @private
      */
     orderElements: function( options ) {
@@ -1002,7 +1002,7 @@ define( require => {
    * @param {string} tagName
    * @param {boolean} focusable
    * @param {string} trailId - unique id that points to the instance of the node
-   * @param {object} options - passed along to AccessibilityUtils.createElement
+   * @param {Object} [options] - passed along to AccessibilityUtils.createElement
    * @returns {HTMLElement}
    */
   function createElement( tagName, focusable, trailId, options ) {

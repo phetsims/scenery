@@ -103,7 +103,7 @@ define( require => {
    * Constructs a Display that will show the rootNode and its subtree in a visual state. Default options provided below
    *
    * @param {Node} rootNode - Displays this node and all of its descendants
-   * @param {Object} options - Valid parameters in the parameter object:
+   * @param {Object} [options] - Valid parameters in the parameter object:
    * {
    *   allowSceneOverflow: false,           // Usually anything displayed outside of this $main (DOM/CSS3 transformed SVG) is hidden with CSS overflow
    *   allowCSSHacks: true,                 // Applies styling that prevents mobile browser graphical issues

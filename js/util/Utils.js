@@ -235,7 +235,7 @@ define( require => {
      * @public
      *
      * @param {function} renderToContext - Called with the Canvas 2D context as a parameter, should draw to it.
-     * @param {Object} options
+     * @param {Object} [options]
      */
     canvasAccurateBounds: function( renderToContext, options ) {
       // how close to the actual bounds do we need to be?

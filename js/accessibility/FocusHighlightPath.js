@@ -48,7 +48,7 @@ define( require => {
    * @constructor
    *
    * @param {Shape} shape - the shape for the focus highlight
-   * @param {Object} options
+   * @param {Object} [options]
    */
   function FocusHighlightPath( shape, options ) {
 
