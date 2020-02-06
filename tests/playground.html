@@ -88,11 +88,8 @@ an UI and Display made for visual testing and debugging.
 </div>
 
 <script>
-  var fuzzStep = false;
-
   require( [ 'config' ], function() {
-    require( [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main', 'AXON/main', 'UTTERANCE_QUEUE/main' ],
-      function( scenery, kite, dot, phetCore, axon, utteranceQueue ) {
+    require( [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main', 'AXON/main', 'UTTERANCE_QUEUE/main' ], function( scenery, kite, dot, phetCore, axon, utteranceQueue ) {
       window.scenery = scenery;
       window.kite = kite;
       window.dot = dot;

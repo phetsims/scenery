@@ -109,918 +109,912 @@
 <h1>Scenery Renderer Comparison</h1>
 
 <script>
-
-  //
   require( [ 'config' ], function() {
-    require( [
-          'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main'
-        ],
-        function( scenery, kite, dot, phetCore ) {
-          const ShaderProgram = require( 'SCENERY/util/ShaderProgram' );
-          var scratchFloatArray = new Float32Array( 9 );
+    require( [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main' ], function( scenery, kite, dot, phetCore ) {
+      const ShaderProgram = require( 'SCENERY/util/ShaderProgram' );
+      var scratchFloatArray = new Float32Array( 9 );
 
-          var testCases = [
-            {
-              name: 'simple-blue-rectangle',
-              width: 200,
-              height: 200,
-              draw: function( scene, updateDisplayCallback ) {
-                scene.addChild( new scenery.Rectangle( 50, 50, 100, 100, {
-                  fill: 'blue'
-                } ) );
-              },
-              renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
-            },
-            {
-              name: 'simple-images',
-              width: 200,
-              height: 200,
-              draw: function( scene, updateDisplayCallback ) {
-                var thumbnail = document.getElementById( 'light-bulb-image' );
-                scene.addChild( new scenery.Image( thumbnail ) );
-                updateDisplayCallback();
-              },
-              renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
-            },
-            {
-              name: 'solid-line',
-              width: 200,
-              height: 200,
-              draw: function( scene, display ) {
-                scene.addChild( new scenery.Line( 10, 10, 190, 190, { stroke: 'black', lineWidth: 4 } ) );
-              },
-              renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
-            },
-            {
-              name: 'circle',
-              width: 200,
-              height: 200,
-              draw: function( scene, display ) {
-                scene.addChild( new scenery.Circle( 50, { fill: 'green', centerX: 100, centerY: 100 } ) );
-              },
-              renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
-            },
-            {
-              name: 'hello-text',
-              width: 200,
-              height: 200,
-              draw: function( scene, display ) {
-                scene.addChild( new scenery.Text( 'hello text!', { left: 10, top: 10 } ) );
-              },
-              renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
-            },
-            {
-              name: 'hello-text-animation',
-              width: 200,
-              height: 200,
-              draw: function( scene, updateDisplay ) {
-                var text = new scenery.Text( 'hello text!', { left: 10, top: 10 } );
-                scene.addChild( text );
+      var testCases = [
+        {
+          name: 'simple-blue-rectangle',
+          width: 200,
+          height: 200,
+          draw: function( scene, updateDisplayCallback ) {
+            scene.addChild( new scenery.Rectangle( 50, 50, 100, 100, {
+              fill: 'blue'
+            } ) );
+          },
+          renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
+        },
+        {
+          name: 'simple-images',
+          width: 200,
+          height: 200,
+          draw: function( scene, updateDisplayCallback ) {
+            var thumbnail = document.getElementById( 'light-bulb-image' );
+            scene.addChild( new scenery.Image( thumbnail ) );
+            updateDisplayCallback();
+          },
+          renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
+        },
+        {
+          name: 'solid-line',
+          width: 200,
+          height: 200,
+          draw: function( scene, display ) {
+            scene.addChild( new scenery.Line( 10, 10, 190, 190, { stroke: 'black', lineWidth: 4 } ) );
+          },
+          renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
+        },
+        {
+          name: 'circle',
+          width: 200,
+          height: 200,
+          draw: function( scene, display ) {
+            scene.addChild( new scenery.Circle( 50, { fill: 'green', centerX: 100, centerY: 100 } ) );
+          },
+          renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
+        },
+        {
+          name: 'hello-text',
+          width: 200,
+          height: 200,
+          draw: function( scene, display ) {
+            scene.addChild( new scenery.Text( 'hello text!', { left: 10, top: 10 } ) );
+          },
+          renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
+        },
+        {
+          name: 'hello-text-animation',
+          width: 200,
+          height: 200,
+          draw: function( scene, updateDisplay ) {
+            var text = new scenery.Text( 'hello text!', { left: 10, top: 10 } );
+            scene.addChild( text );
 
-                var callback = function() {
-                  window.requestAnimationFrame( callback );
-                  text.text = Math.floor( Date.now() / 1000 );
+            var callback = function() {
+              window.requestAnimationFrame( callback );
+              text.text = Math.floor( Date.now() / 1000 );
 
-                  updateDisplay();
-                };
-                window.requestAnimationFrame( callback );
-              },
-              renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
-            },
-            {
-              name: 'solid-line-animating-position',
-              width: 200,
-              height: 200,
-              draw: function( scene, updateDisplay ) {
-                var line = new scenery.Line( 10, 10, 190, 190, { stroke: 'black', lineWidth: 4 } );
-                scene.addChild( line );
+              updateDisplay();
+            };
+            window.requestAnimationFrame( callback );
+          },
+          renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
+        },
+        {
+          name: 'solid-line-animating-position',
+          width: 200,
+          height: 200,
+          draw: function( scene, updateDisplay ) {
+            var line = new scenery.Line( 10, 10, 190, 190, { stroke: 'black', lineWidth: 4 } );
+            scene.addChild( line );
 
-                var callback = function() {
-                  window.requestAnimationFrame( callback );
-                  line.y2 = Math.sin( Date.now() / 1000 ) * 100 + 100;
-                  line.x1 = Math.sin( Date.now() / 500 ) * 50 + 50;
-                  line.y1 = Math.cos( Date.now() / 400 ) * 50 + 50;
-                  updateDisplay();
-                };
-                window.requestAnimationFrame( callback );
-              },
-              renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
-            },
-            {
-              name: 'solid-line-animating-lineWidth',
-              width: 200,
-              height: 200,
-              draw: function( scene, updateDisplay ) {
-                var line = new scenery.Line( 10, 10, 190, 190, { stroke: 'black', lineWidth: 4 } );
-                scene.addChild( line );
+            var callback = function() {
+              window.requestAnimationFrame( callback );
+              line.y2 = Math.sin( Date.now() / 1000 ) * 100 + 100;
+              line.x1 = Math.sin( Date.now() / 500 ) * 50 + 50;
+              line.y1 = Math.cos( Date.now() / 400 ) * 50 + 50;
+              updateDisplay();
+            };
+            window.requestAnimationFrame( callback );
+          },
+          renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
+        },
+        {
+          name: 'solid-line-animating-lineWidth',
+          width: 200,
+          height: 200,
+          draw: function( scene, updateDisplay ) {
+            var line = new scenery.Line( 10, 10, 190, 190, { stroke: 'black', lineWidth: 4 } );
+            scene.addChild( line );
 
-                var callback = function() {
-                  window.requestAnimationFrame( callback );
-                  line.lineWidth = Math.sin( Date.now() / 1000 ) * 20 + 20;
-                  updateDisplay();
-                };
-                window.requestAnimationFrame( callback );
-              },
-              renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
-            },
-            {
-              name: 'moving-image',
-              width: 200,
-              height: 200,
-              draw: function( scene, updateDisplay ) {
-                var thumbnail = document.getElementById( 'light-bulb-image' );
-                var sceneryImage = new scenery.Image( thumbnail );
-                scene.addChild( sceneryImage );
+            var callback = function() {
+              window.requestAnimationFrame( callback );
+              line.lineWidth = Math.sin( Date.now() / 1000 ) * 20 + 20;
+              updateDisplay();
+            };
+            window.requestAnimationFrame( callback );
+          },
+          renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
+        },
+        {
+          name: 'moving-image',
+          width: 200,
+          height: 200,
+          draw: function( scene, updateDisplay ) {
+            var thumbnail = document.getElementById( 'light-bulb-image' );
+            var sceneryImage = new scenery.Image( thumbnail );
+            scene.addChild( sceneryImage );
 
-                var callback = function() {
-                  window.requestAnimationFrame( callback );
-                  var value = Math.sin( Date.now() / 1000 ) * 20 + 20;
-                  sceneryImage.x = value;
-                  updateDisplay();
-                };
-                window.requestAnimationFrame( callback );
-              },
-              renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
-            },
-            {
-              name: '1000-moving-images',
-              width: 200,
-              height: 200,
-              draw: function( scene, updateDisplay ) {
-                var thumbnail = document.getElementById( 'light-bulb-image' );
-                var initialPositions = [];
-                for ( var i = 0; i < 1000; i++ ) {
-                  var position = { x: Math.random() * 100, y: Math.random() * 100 };
-                  initialPositions.push( position );
-                  scene.addChild( new scenery.Image( thumbnail, { x: position.x, y: position.y } ) );
-                }
-
-                var callback = function() {
-                  window.requestAnimationFrame( callback );
-                  var children = scene.children;
-                  for ( var i = 0; i < children.length; i++ ) {
-                    var child = children[ i ];
-                    child.x = initialPositions[ i ].x + Math.sin( Date.now() / 1000 ) * 20 + 20;
-                  }
-                  updateDisplay();
-                };
-                window.requestAnimationFrame( callback );
-              },
-              renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
-            },
-            {
-              name: 'CanvasNode',
-              width: 200,
-              height: 200,
-              draw: function( scene, updateDisplayCallback ) {
-
-                //TODO: Make it so we can pass in the paintCanvas call to the CanvasNode constructor.
-                var canvasNode = new scenery.CanvasNode( { canvasBounds: new dot.Bounds2( 0, 0, 100, 100 ) } );
-                canvasNode.paintCanvas = function( context ) {
-
-                  context.fillStyle = 'red';
-                  context.fillRect( 0, 0, 100, 20 );
-                };
-                scene.addChild( canvasNode );
-              },
-              renderers: [ 'canvas' ]
-            },
-            {
-              name: 'WebGLNode',
-              width: 200,
-              height: 200,
-              draw: function( scene, updateDisplayCallback ) {
-
-                function LinesNode( options ) {
-                  scenery.WebGLNode.call( this, LinesPainter, options );
-                }
-
-                var LinesNode = phetCore.inherit( scenery.WebGLNode, LinesNode, {} );
-
-                function LinesPainter( gl, node ) {
-                  this.gl = gl;
-                  this.node = node;
-
-                  // Simple example for custom shader
-                  var lineVertexShaderSource = [
-                    // Position
-                    'attribute vec3 aPosition;',
-                    'uniform mat3 uModelViewMatrix;',
-                    'uniform mat3 uProjectionMatrix;',
-
-                    'void main( void ) {',
-                    // homogeneous model-view transformation
-                    '  vec3 view = uModelViewMatrix * vec3( aPosition.xy, 1 );',
-                    // homogeneous map to to normalized device coordinates
-                    '  vec3 ndc = uProjectionMatrix * vec3( view.xy, 1 );',
-                    // combine with the z coordinate specified
-                    '  gl_Position = vec4( ndc.xy, aPosition.z, 1.0 );',
-                    '}'
-                  ].join( '\n' );
-
-                  // Simple demo for custom shader
-                  var lineFragmentShaderSource = [
-                    'precision mediump float;',
-
-                    // Returns the color from the vertex shader
-                    'void main( void ) {',
-                    '  gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );',
-                    '}'
-                  ].join( '\n' );
-
-                  this.shaderProgram = new ShaderProgram( gl, lineVertexShaderSource, lineFragmentShaderSource, {
-                    attributes: [ 'aPosition' ],
-                    uniforms: [ 'uModelViewMatrix', 'uProjectionMatrix' ]
-                  } );
-
-                  this.vertexBuffer = gl.createBuffer();
-
-                  gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-                  gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [
-                    0, 0, 0.1,
-                    50, 30, 0.1
-                  ] ), gl.STATIC_DRAW );
-                }
-
-                phetCore.inherit( Object, LinesPainter, {
-                  paint: function( modelViewMatrix, projectionMatrix ) {
-                    var gl = this.gl;
-                    var shaderProgram = this.shaderProgram;
-
-                    shaderProgram.use();
-
-                    gl.uniformMatrix3fv( shaderProgram.uniformLocations.uModelViewMatrix, false, modelViewMatrix.copyToArray( scratchFloatArray ) );
-                    gl.uniformMatrix3fv( shaderProgram.uniformLocations.uProjectionMatrix, false, projectionMatrix.copyToArray( scratchFloatArray ) );
-
-                    gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-                    gl.vertexAttribPointer( shaderProgram.attributeLocations.aPosition, 3, gl.FLOAT, false, 0, 0 );
-
-                    gl.drawArrays( gl.LINES, 0, 2 );
-
-                    shaderProgram.unuse();
-
-                    return scenery.WebGLNode.PAINTED_SOMETHING;
-                  },
-
-                  dispose: function() {
-                    this.shaderProgram.dispose();
-                    this.gl.deleteBuffer( this.vertexBuffer );
-
-                    this.shaderProgram = null;
-                  }
-                } );
-
-                var linesNode = new LinesNode( {
-                  canvasBounds: new dot.Bounds2( 0, 0, 100, 100 ),
-                  y: 50,
-                  scale: 2
-                } );
-                scene.addChild( linesNode );
-              },
-              renderers: [ 'webgl' ]
-            },
-            {
-              name: 'Rectangle',
-              width: 128,
-              height: 64,
-              draw: function( scene, updateDisplayCallback ) {
-                scene.addChild( new scenery.Rectangle( 10.5, 10.5, 44, 44, {
-                  fill: '#f00',
-                  stroke: '#000',
-                  lineWidth: 3
-                } ) );
-                scene.addChild( new scenery.Rectangle( 10.5, 10.5, 44, 44, 15, 15, {
-                  x: 64,
-                  fill: '#f00',
-                  stroke: '#000',
-                  lineWidth: 3
-                } ) );
-              },
-              renderers: [ 'canvas', 'svg', 'webgl' ]
-            },
-            {
-              name: 'Circle',
-              width: 64,
-              height: 64,
-              draw: function( scene, updateDisplayCallback ) {
-                scene.addChild( new scenery.Circle( 22, {
-                  x: 32, y: 32,
-                  fill: '#f00',
-                  stroke: '#000',
-                  lineWidth: 3
-                } ) );
-                scene.addChild( new scenery.Circle( {
-                  x: 43, y: 32,
-                  radius: 11,
-                  fill: '#0f0',
-                  stroke: '#000',
-                  lineWidth: 3
-                } ) );
-              },
-              renderers: [ 'canvas', 'svg', 'webgl' ]
-            },
-            {
-              name: 'Hexagon',
-              width: 64,
-              height: 64,
-              draw: function( scene, updateDisplayCallback ) {
-                scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
-                  x: 32,
-                  y: 32,
-                  fill: '#ff0000',
-                  stroke: '#000000',
-                  lineWidth: 3
-                } ) );
-              },
-              renderers: [ 'canvas', 'svg', 'webgl' ]
-            },
-            {
-              name: 'Quadratic B\u00E9zier',
-              width: 64,
-              height: 64,
-              draw: function( scene, updateDisplayCallback ) {
-                scene.addChild( new scenery.Path( new kite.Shape().moveTo( -20, -20 ).quadraticCurveTo( 20, -20, 20, 20 ).close(), {
-                  x: 32,
-                  y: 32,
-                  fill: '#ff0000',
-                  stroke: '#000000',
-                  lineWidth: 3
-                } ) );
-              },
-              renderers: [ 'canvas', 'svg', 'webgl' ]
-            },
-            {
-              name: 'Cubic B\u00E9zier',
-              width: 64,
-              height: 64,
-              draw: function( scene, updateDisplayCallback ) {
-                scene.addChild( new scenery.Path( new kite.Shape().moveTo( -20, -20 ).cubicCurveTo( -20, 0, 0, 0, 20, 20 ).lineTo( 20, -20 ).close(), {
-                  x: 32,
-                  y: 32,
-                  fill: '#ff0000',
-                  stroke: '#000000',
-                  lineWidth: 3
-                } ) );
-              },
-              renderers: [ 'canvas', 'svg', 'webgl' ]
-            },
-            {
-              name: 'Linear Gradients',
-              width: 128,
-              height: 64,
-              draw: function( scene, updateDisplayCallback ) {
-                var fillGradient = new scenery.LinearGradient( -22, 0, 22, 0 );
-                fillGradient.addColorStop( 0.1, '#ff0000' );
-                fillGradient.addColorStop( 0.5, '#00ff00' );
-                fillGradient.addColorStop( 0.6, 'rgba(0,255,0,0.3)' );
-                fillGradient.addColorStop( 0.9, '#000000' );
-
-                var strokeGradient = new scenery.LinearGradient( 0, -15, 0, 15 );
-                strokeGradient.addColorStop( 0, '#ff0000' );
-                strokeGradient.addColorStop( 0.5, '#00ff00' );
-                strokeGradient.addColorStop( 1, '#0000ff' );
-
-                scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
-                  x: 32,
-                  y: 32,
-                  rotation: Math.PI / 4,
-                  scale: 0.5,
-                  fill: fillGradient,
-                  stroke: '#000000',
-                  lineWidth: 3
-                } ) );
-                scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
-                  x: 32 + 64,
-                  y: 32,
-                  fill: fillGradient,
-                  stroke: strokeGradient,
-                  lineWidth: 3
-                } ) );
-              },
-              renderers: [ 'canvas', 'svg', 'webgl' ]
-            },
-            {
-              name: 'Radial Gradients',
-              width: 128 + 64,
-              height: 64,
-              draw: function( scene, updateDisplayCallback ) {
-                var fillGradient = new scenery.RadialGradient( 22, 0, 0, 22, 0, 44 );
-                fillGradient.addColorStop( 0.1, '#ff0000' );
-                fillGradient.addColorStop( 0.5, '#00ff00' );
-                fillGradient.addColorStop( 0.6, 'rgba(0,255,0,0.3)' );
-                fillGradient.addColorStop( 0.9, '#000000' );
-
-                var mainGradient = new scenery.RadialGradient( 32, 20, 10, 32, 32, 32 );
-                mainGradient.addColorStop( 0, '#8ED6FF' );
-                mainGradient.addColorStop( 0.5, '#004CB3' );
-                mainGradient.addColorStop( 0.6, '#bbbbbb' );
-                mainGradient.addColorStop( 1, '#ffffff' );
-
-                var transformedGradient = new scenery.RadialGradient( 0, 0, 0, 0, 0, 64 );
-                transformedGradient.addColorStop( 0.3, '#8ED6FF' );
-                transformedGradient.addColorStop( 1, '#004CB3' );
-                transformedGradient.setTransformMatrix( dot.Matrix3.translation( 32, 32 ).timesMatrix( dot.Matrix3.rotation2( Math.PI / 4 ).timesMatrix( dot.Matrix3.scaling( 1, 0.25 ) ) ) );
-
-                scene.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 64, 64 ), {
-                  fill: mainGradient
-                } ) );
-                scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
-                  x: 32 + 64,
-                  y: 32,
-                  rotation: Math.PI / 4,
-                  fill: fillGradient,
-                  stroke: '#000000',
-                  lineWidth: 3
-                } ) );
-                scene.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 64, 64 ), {
-                  x: 128,
-                  fill: transformedGradient
-                } ) );
-              },
-              renderers: [ 'canvas', 'svg', 'webgl' ]
-            },
-            {
-              name: 'RGBA',
-              width: 64,
-              height: 64,
-              draw: function( scene, updateDisplayCallback ) {
-                scene.addChild( new scenery.Path( kite.Shape.rectangle( 32, 0, 32, 64 ), {
-                  fill: '#000000'
-                } ) );
-                scene.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 44, 44 ), {
-                  x: 10.5,
-                  y: 10.5,
-                  fill: 'rgba(255,0,0,0.5)',
-                  stroke: '#000000',
-                  lineWidth: 3
-                } ) );
-              },
-              renderers: [ 'canvas', 'svg', 'webgl' ]
-            },
-            {
-              name: 'Dashes',
-              width: 64,
-              height: 64,
-              draw: function( scene, updateDisplayCallback ) {
-                scene.addChild( new scenery.Path( kite.Shape.rectangle( 10, 10, 44, 44 ), {
-                  stroke: '#000',
-                  lineWidth: 3,
-                  lineDash: [ 7, 2, 3, 2 ],
-                  x: 0.5,
-                  y: 0.5
-                } ) );
-                scene.addChild( new scenery.Rectangle( 5, 5, 54, 54, {
-                  stroke: '#000',
-                  lineWidth: 3,
-                  lineDash: [ 7, 2, 3, 2 ],
-                  x: 0.5,
-                  y: 0.5
-                } ) );
-                scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 15 ), {
-                  stroke: '#000',
-                  lineDash: [ 5, 5 ],
-                  lineDashOffset: 5,
-                  x: 32.5,
-                  y: 32.5
-                } ) );
-              },
-              renderers: [ 'canvas', 'svg', 'webgl' ]
-            },
-            {
-              name: 'Images',
-              width: 220,
-              height: 120,
-              draw: function( scene, updateDisplayCallback ) {
-                scene.addChild( new scenery.Image( document.getElementById( 'light-bulb-image' ) ) );
-
-                // ugly hack placement for correct z-index
-                scene.addChild( new scenery.Image( document.getElementById( 'fire-extinguisher-image' ), {
-                  scale: 0.5,
-                  rotation: Math.PI / 6,
-                  x: 130,
-                  y: 20
-                } ) );
-                updateDisplayCallback();
-              },
-              renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
-            },
-            {
-              name: 'Patterns',
-              width: 64,
-              height: 64,
-              draw: function( scene, updateDisplayCallback ) {
-                var img = document.createElement( 'img' );
-                img.addEventListener( 'load', function() {
-                  var pattern = new scenery.Pattern( img );
-                  scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
-                    x: 32,
-                    y: 32,
-                    rotation: Math.PI / 4,
-                    fill: pattern,
-                    stroke: '#000000',
-                    lineWidth: 3
-                  } ) );
-                  updateDisplayCallback();
-                } );
-                img.src = 'http://phet.colorado.edu/files/archive/images/circleArrow_Icon.gif';
-              },
-              renderers: [ 'canvas', 'svg', 'webgl' ]
-            },
-            {
-              name: 'Overlapping and Nested Rotations',
-              width: 128,
-              height: 128,
-              draw: function( scene, updateDisplayCallback ) {
-                var container = new scenery.Node( {
-                  x: 40,
-                  rotation: Math.PI / 12
-                } );
-                scene.addChild( container );
-
-                container.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 44, 44 ), {
-                  x: 10.5,
-                  y: 10.5,
-                  rotation: Math.PI / 4,
-                  fill: '#ff0000',
-                  stroke: '#000000',
-                  lineWidth: 3
-                } ) );
-
-                container.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 44, 44 ), {
-                  x: 30.5,
-                  y: 10.5,
-                  fill: '#ff0000',
-                  stroke: '#000000',
-                  // lineJoin: 'round',
-                  lineWidth: 10
-                } ) );
-              },
-              renderers: [ 'canvas', 'svg' ]
-            },
-            {
-              name: 'DAG support',
-              width: 256,
-              height: 128,
-              draw: function( scene, updateDisplayCallback ) {
-                var square = new scenery.Path( kite.Shape.rectangle( 0, 0, 50, 50 ), {
-                  x: 0.5,
-                  y: 0.5,
-                  fill: 'rgba(0,0,0,0.5)',
-                  stroke: '#000000',
-                  lineWidth: 3
-                } );
-
-                var arrow = new scenery.Path( kite.Shape.regularPolygon( 3, 10 ), {
-                  fill: 'rgba(0,255,0,1)',
-                  stroke: '#000000'
-                } );
-
-                var combined = new scenery.Node();
-                combined.addChild( square );
-                var leftArrow = new scenery.Node( { x: 15, y: 25 } );
-                leftArrow.addChild( arrow );
-                combined.addChild( leftArrow );
-                var rightArrow = new scenery.Node( { x: 35, y: 25 } );
-                rightArrow.addChild( arrow );
-                combined.addChild( rightArrow );
-
-                var a = new scenery.Node( { x: 20, y: 20 } );
-                a.addChild( combined );
-                var b = new scenery.Node( { x: 120, y: 30, rotation: Math.PI / 4 } );
-                b.addChild( combined );
-                var c = new scenery.Node( { x: 220, y: 40, rotation: Math.PI / 2 } );
-                c.addChild( combined );
-                scene.addChild( a );
-                scene.addChild( b );
-                scene.addChild( c );
-              },
-              renderers: [ 'canvas', 'svg' ]
-            },
-            {
-              name: 'Text',
-              width: 256,
-              height: 128,
-              draw: function( scene, updateDisplayCallback ) {
-                scene.addChild( new scenery.Text( 'Is this a test?', {
-                  fontSize: 60,
-                  top: 1.5,
-                  left: 1.5,
-                  fill: '#606'
-                } ) );
-                scene.addChild( new scenery.Text( 'Aa', {
-                  fontSize: 100,
-                  centerX: 64,
-                  centerY: 64,
-                  fill: null,
-                  stroke: '#000'
-                } ) );
-                scene.addChild( new scenery.Text( 'Bb', {
-                  fontSize: 100,
-                  centerX: 64 + 128,
-                  centerY: 64,
-                  fill: new scenery.LinearGradient( 0, 0, 0, -40 )
-                      .addColorStop( 0, '#f00' )
-                      .addColorStop( 1, '#0f0' ),
-                  stroke: '#777',
-                  lineWidth: 3,
-                  lineJoin: 'round'
-                } ) );
-              },
-              renderers: [ 'canvas', 'svg' ]
-            },
-            {
-              name: 'HTML Text',
-              width: 512,
-              height: 128,
-              draw: function( scene, updateDisplayCallback ) {
-                scene.addChild( new scenery.HTMLText( '<strong>H<sub>2</sub>O</strong> <em>might</em> contain water, also<br>known as <u>dihydrogen monoxide</u>!', {
-                  fontSize: 35,
-                  top: 2,
-                  left: 2,
-                  fill: '#606'
-                } ) );
-              },
-              renderers: [ 'dom' ]
-            },
-            {
-              name: 'Circles and Arcs',
-              width: 200,
-              height: 64,
-              draw: function( scene, updateDisplayCallback ) {
-                var x = 32;
-                scene.addChild( new scenery.Path( kite.Shape.circle( x, 25, 20 ), {
-                  fill: '#ff0000',
-                  stroke: '#000000',
-                  lineWidth: 3
-                } ) );
-
-                x += 64;
-                scene.addChild( new scenery.Path( kite.Shape.arc( x, 25, 20, Math.PI / 4, Math.PI * 3 / 2, false ), {
-                  fill: 'rgba(255,0,0,0.5)',
-                  stroke: '#aa0000',
-                  lineWidth: 3
-                } ) );
-
-                scene.addChild( new scenery.Path( kite.Shape.arc( x, 25, 20, Math.PI / 4, Math.PI * 3 / 2, true ), {
-                  fill: 'rgba(0,0,255,0.5)',
-                  stroke: '#0000aa',
-                  lineWidth: 3
-                } ) );
-
-                x += 64;
-                scene.addChild( new scenery.Path( new kite.Shape().moveTo( 0, 0 )
-                    .arc( 0, 0, 20, 0, Math.PI / 3, false )
-                    .arc( 0, 0, 20, Math.PI / 3 + Math.PI, Math.PI, true )
-                    .close(), {
-                  x: x,
-                  y: 25.5,
-                  fill: '#ff0000',
-                  stroke: '#000000',
-                  lineWidth: 3
-                } ) );
-              },
-              renderers: [ 'canvas', 'svg' ]
-            },
-            {
-              name: 'Ellipses and Elliptical Arcs',
-              width: 200,
-              height: 64,
-              draw: function( scene, updateDisplayCallback ) {
-                var x = 32;
-                scene.addChild( new scenery.Path( kite.Shape.ellipse( x, 25, 20, 10 ), {
-                  fill: '#ff0000',
-                  stroke: '#000000',
-                  lineWidth: 3
-                } ) );
-
-                x += 64;
-                scene.addChild( new scenery.Path( new kite.Shape().ellipticalArc( x, 25, 20, 10, Math.PI / 6, Math.PI / 4, Math.PI * 3 / 2, false ), {
-                  fill: 'rgba(255,0,0,0.5)',
-                  stroke: '#aa0000',
-                  lineWidth: 3
-                } ) );
-
-                scene.addChild( new scenery.Path( new kite.Shape().ellipticalArc( x, 25, 20, 10, Math.PI / 6, Math.PI / 4, Math.PI * 3 / 2, true ), {
-                  fill: 'rgba(0,0,255,0.5)',
-                  stroke: '#0000aa',
-                  lineWidth: 3
-                } ) );
-
-                x += 64;
-                scene.addChild( new scenery.Path( new kite.Shape().moveTo( 0, 0 )
-                    .ellipticalArc( 0, 0, 20, 10, 0, 0, Math.PI / 3, false )
-                    .ellipticalArc( 0, 0, 20, 10, 0, Math.PI / 3 + Math.PI, Math.PI, true )
-                    .close(), {
-                  x: x,
-                  y: 25.5,
-                  fill: '#ff0000',
-                  stroke: '#000000',
-                  lineWidth: 3
-                } ) );
-              },
-              renderers: [ 'canvas', 'svg' ]
-            },
-            {
-              name: 'DOM Elements',
-              width: 200,
-              height: 200,
-              draw: function( scene, updateDisplayCallback ) {
-                var textDiv = document.createElement( 'div' );
-                textDiv.innerHTML = 'See our <a href="http://phet.colorado.edu">website</a>!';
-                scene.addChild( new scenery.DOM( textDiv, {
-                  x: 20,
-                  y: 20
-                } ) );
-
-                var form = document.createElement( 'form' );
-                form.innerHTML = '<label>Type in me:</label><input type="text">';
-
-                scene.addChild( new scenery.DOM( form, {
-                  x: 50,
-                  y: 50,
-                  rotation: Math.PI / 4
-                } ) );
-              },
-              renderers: [ 'dom' ]
-            },
-            {
-              name: 'Invisible nodes',
-              width: 64,
-              height: 64,
-              draw: function( scene, updateDisplayCallback ) {
-                var shape = kite.Shape.rectangle( 0, 0, 30, 30 );
-                var rect = new scenery.Path( shape, {
-                  fill: '#000',
-                  stroke: '#f00',
-                  lineWidth: 4
-                } );
-                scene.addChild( new scenery.Node( {
-                  children: [ rect ],
-                  x: -10, y: -10
-                } ) );
-                scene.addChild( new scenery.Node( {
-                  children: [ rect ],
-                  x: 10, y: 10,
-                  visible: false
-                } ) );
-                var third = new scenery.Node( {
-                  children: [ rect ],
-                  x: 20, y: 20
-                } );
-                scene.addChild( third );
-                third.visible = false; // delayed, should cause issues with old SVG handling
-              },
-              renderers: [ 'canvas', 'svg' ]
-            },
-            {
-              name: 'Simple Clipping',
-              width: 64,
-              height: 64,
-              draw: function( scene, updateDisplayCallback ) {
-                scene.addChild( new scenery.Rectangle( 4, 4, 56, 56, {
-                  fill: 'black',
-                  clipArea: kite.Shape.circle( 32, 32, 25 ),
-                  x: 20,
-                  y: -20
-                } ) );
-              },
-              renderers: [ 'canvas', 'svg' ]
-            },
-            {
-              name: 'Nested Clipping',
-              width: 64,
-              height: 64,
-              draw: function( scene, updateDisplayCallback ) {
-                var clipShape1 = kite.Shape.regularPolygon( 6, 27 ).transformed( dot.Matrix3.translation( 32, 32 ) );
-                var clipShape2 = kite.Shape.regularPolygon( 9, 32 ).transformed( dot.Matrix3.translation( 32, 0 ) );
-                var shape = kite.Shape.circle( 32, 32, 25 );
-                var circle = new scenery.Path( shape, {
-                  fill: '#000',
-                  stroke: '#f00',
-                  lineWidth: 3
-                } );
-                circle.clipArea = clipShape1;
-                scene.addChild( circle );
-                scene.clipArea = clipShape2;
-              },
-              renderers: [ 'canvas', 'svg' ]
-            },
-            {
-              name: 'Opacity',
-              width: 64,
-              height: 64,
-              draw: function( scene, updateDisplayCallback ) {
-                scene.addChild( new scenery.Rectangle( 0, 12, 64, 20, { fill: '#000' } ) );
-                var circle = kite.Shape.circle( 0, 0, 30 );
-                scene.addChild( new scenery.Node( {
-                  opacity: 0.5,
-                  children: [
-                    new scenery.Path( circle, { x: 12, y: 22, fill: '#f00' } ),
-                    new scenery.Path( circle, { x: 52, y: 22, fill: '#00f' } )
-                  ]
-                } ) );
-              },
-              renderers: [ 'canvas', 'svg' ]
+            var callback = function() {
+              window.requestAnimationFrame( callback );
+              var value = Math.sin( Date.now() / 1000 ) * 20 + 20;
+              sceneryImage.x = value;
+              updateDisplay();
+            };
+            window.requestAnimationFrame( callback );
+          },
+          renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
+        },
+        {
+          name: '1000-moving-images',
+          width: 200,
+          height: 200,
+          draw: function( scene, updateDisplay ) {
+            var thumbnail = document.getElementById( 'light-bulb-image' );
+            var initialPositions = [];
+            for ( var i = 0; i < 1000; i++ ) {
+              var position = { x: Math.random() * 100, y: Math.random() * 100 };
+              initialPositions.push( position );
+              scene.addChild( new scenery.Image( thumbnail, { x: position.x, y: position.y } ) );
             }
-          ];
 
-          var selectTestCases = function( array, queryParameterKey ) {
-            if ( QueryStringMachine.containsKey( queryParameterKey ) ) {
-              var testIndices = QueryStringMachine.get( queryParameterKey, {
-                type: 'array',
-                elementSchema: {
-                  type: 'number'
-                },
-                defaultValue: []
-              } );
-              var result = [];
-              for ( var i = 0; i < testIndices.length; i++ ) {
-                var testIndex = testIndices[ i ];
-                result.push( array[ testIndex ] );
+            var callback = function() {
+              window.requestAnimationFrame( callback );
+              var children = scene.children;
+              for ( var i = 0; i < children.length; i++ ) {
+                var child = children[ i ];
+                child.x = initialPositions[ i ].x + Math.sin( Date.now() / 1000 ) * 20 + 20;
               }
-              return result;
-            }
-            return array;
-          };
+              updateDisplay();
+            };
+            window.requestAnimationFrame( callback );
+          },
+          renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
+        },
+        {
+          name: 'CanvasNode',
+          width: 200,
+          height: 200,
+          draw: function( scene, updateDisplayCallback ) {
 
-          // Select the renderers to be compared (for tests that declare support for them).
-          var renderers = QueryStringMachine.get( 'renderers', {
+            //TODO: Make it so we can pass in the paintCanvas call to the CanvasNode constructor.
+            var canvasNode = new scenery.CanvasNode( { canvasBounds: new dot.Bounds2( 0, 0, 100, 100 ) } );
+            canvasNode.paintCanvas = function( context ) {
+
+              context.fillStyle = 'red';
+              context.fillRect( 0, 0, 100, 20 );
+            };
+            scene.addChild( canvasNode );
+          },
+          renderers: [ 'canvas' ]
+        },
+        {
+          name: 'WebGLNode',
+          width: 200,
+          height: 200,
+          draw: function( scene, updateDisplayCallback ) {
+
+            function LinesNode( options ) {
+              scenery.WebGLNode.call( this, LinesPainter, options );
+            }
+
+            var LinesNode = phetCore.inherit( scenery.WebGLNode, LinesNode, {} );
+
+            function LinesPainter( gl, node ) {
+              this.gl = gl;
+              this.node = node;
+
+              // Simple example for custom shader
+              var lineVertexShaderSource = [
+                // Position
+                'attribute vec3 aPosition;',
+                'uniform mat3 uModelViewMatrix;',
+                'uniform mat3 uProjectionMatrix;',
+
+                'void main( void ) {',
+                // homogeneous model-view transformation
+                '  vec3 view = uModelViewMatrix * vec3( aPosition.xy, 1 );',
+                // homogeneous map to to normalized device coordinates
+                '  vec3 ndc = uProjectionMatrix * vec3( view.xy, 1 );',
+                // combine with the z coordinate specified
+                '  gl_Position = vec4( ndc.xy, aPosition.z, 1.0 );',
+                '}'
+              ].join( '\n' );
+
+              // Simple demo for custom shader
+              var lineFragmentShaderSource = [
+                'precision mediump float;',
+
+                // Returns the color from the vertex shader
+                'void main( void ) {',
+                '  gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );',
+                '}'
+              ].join( '\n' );
+
+              this.shaderProgram = new ShaderProgram( gl, lineVertexShaderSource, lineFragmentShaderSource, {
+                attributes: [ 'aPosition' ],
+                uniforms: [ 'uModelViewMatrix', 'uProjectionMatrix' ]
+              } );
+
+              this.vertexBuffer = gl.createBuffer();
+
+              gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+              gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [
+                0, 0, 0.1,
+                50, 30, 0.1
+              ] ), gl.STATIC_DRAW );
+            }
+
+            phetCore.inherit( Object, LinesPainter, {
+              paint: function( modelViewMatrix, projectionMatrix ) {
+                var gl = this.gl;
+                var shaderProgram = this.shaderProgram;
+
+                shaderProgram.use();
+
+                gl.uniformMatrix3fv( shaderProgram.uniformLocations.uModelViewMatrix, false, modelViewMatrix.copyToArray( scratchFloatArray ) );
+                gl.uniformMatrix3fv( shaderProgram.uniformLocations.uProjectionMatrix, false, projectionMatrix.copyToArray( scratchFloatArray ) );
+
+                gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+                gl.vertexAttribPointer( shaderProgram.attributeLocations.aPosition, 3, gl.FLOAT, false, 0, 0 );
+
+                gl.drawArrays( gl.LINES, 0, 2 );
+
+                shaderProgram.unuse();
+
+                return scenery.WebGLNode.PAINTED_SOMETHING;
+              },
+
+              dispose: function() {
+                this.shaderProgram.dispose();
+                this.gl.deleteBuffer( this.vertexBuffer );
+
+                this.shaderProgram = null;
+              }
+            } );
+
+            var linesNode = new LinesNode( {
+              canvasBounds: new dot.Bounds2( 0, 0, 100, 100 ),
+              y: 50,
+              scale: 2
+            } );
+            scene.addChild( linesNode );
+          },
+          renderers: [ 'webgl' ]
+        },
+        {
+          name: 'Rectangle',
+          width: 128,
+          height: 64,
+          draw: function( scene, updateDisplayCallback ) {
+            scene.addChild( new scenery.Rectangle( 10.5, 10.5, 44, 44, {
+              fill: '#f00',
+              stroke: '#000',
+              lineWidth: 3
+            } ) );
+            scene.addChild( new scenery.Rectangle( 10.5, 10.5, 44, 44, 15, 15, {
+              x: 64,
+              fill: '#f00',
+              stroke: '#000',
+              lineWidth: 3
+            } ) );
+          },
+          renderers: [ 'canvas', 'svg', 'webgl' ]
+        },
+        {
+          name: 'Circle',
+          width: 64,
+          height: 64,
+          draw: function( scene, updateDisplayCallback ) {
+            scene.addChild( new scenery.Circle( 22, {
+              x: 32, y: 32,
+              fill: '#f00',
+              stroke: '#000',
+              lineWidth: 3
+            } ) );
+            scene.addChild( new scenery.Circle( {
+              x: 43, y: 32,
+              radius: 11,
+              fill: '#0f0',
+              stroke: '#000',
+              lineWidth: 3
+            } ) );
+          },
+          renderers: [ 'canvas', 'svg', 'webgl' ]
+        },
+        {
+          name: 'Hexagon',
+          width: 64,
+          height: 64,
+          draw: function( scene, updateDisplayCallback ) {
+            scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
+              x: 32,
+              y: 32,
+              fill: '#ff0000',
+              stroke: '#000000',
+              lineWidth: 3
+            } ) );
+          },
+          renderers: [ 'canvas', 'svg', 'webgl' ]
+        },
+        {
+          name: 'Quadratic B\u00E9zier',
+          width: 64,
+          height: 64,
+          draw: function( scene, updateDisplayCallback ) {
+            scene.addChild( new scenery.Path( new kite.Shape().moveTo( -20, -20 ).quadraticCurveTo( 20, -20, 20, 20 ).close(), {
+              x: 32,
+              y: 32,
+              fill: '#ff0000',
+              stroke: '#000000',
+              lineWidth: 3
+            } ) );
+          },
+          renderers: [ 'canvas', 'svg', 'webgl' ]
+        },
+        {
+          name: 'Cubic B\u00E9zier',
+          width: 64,
+          height: 64,
+          draw: function( scene, updateDisplayCallback ) {
+            scene.addChild( new scenery.Path( new kite.Shape().moveTo( -20, -20 ).cubicCurveTo( -20, 0, 0, 0, 20, 20 ).lineTo( 20, -20 ).close(), {
+              x: 32,
+              y: 32,
+              fill: '#ff0000',
+              stroke: '#000000',
+              lineWidth: 3
+            } ) );
+          },
+          renderers: [ 'canvas', 'svg', 'webgl' ]
+        },
+        {
+          name: 'Linear Gradients',
+          width: 128,
+          height: 64,
+          draw: function( scene, updateDisplayCallback ) {
+            var fillGradient = new scenery.LinearGradient( -22, 0, 22, 0 );
+            fillGradient.addColorStop( 0.1, '#ff0000' );
+            fillGradient.addColorStop( 0.5, '#00ff00' );
+            fillGradient.addColorStop( 0.6, 'rgba(0,255,0,0.3)' );
+            fillGradient.addColorStop( 0.9, '#000000' );
+
+            var strokeGradient = new scenery.LinearGradient( 0, -15, 0, 15 );
+            strokeGradient.addColorStop( 0, '#ff0000' );
+            strokeGradient.addColorStop( 0.5, '#00ff00' );
+            strokeGradient.addColorStop( 1, '#0000ff' );
+
+            scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
+              x: 32,
+              y: 32,
+              rotation: Math.PI / 4,
+              scale: 0.5,
+              fill: fillGradient,
+              stroke: '#000000',
+              lineWidth: 3
+            } ) );
+            scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
+              x: 32 + 64,
+              y: 32,
+              fill: fillGradient,
+              stroke: strokeGradient,
+              lineWidth: 3
+            } ) );
+          },
+          renderers: [ 'canvas', 'svg', 'webgl' ]
+        },
+        {
+          name: 'Radial Gradients',
+          width: 128 + 64,
+          height: 64,
+          draw: function( scene, updateDisplayCallback ) {
+            var fillGradient = new scenery.RadialGradient( 22, 0, 0, 22, 0, 44 );
+            fillGradient.addColorStop( 0.1, '#ff0000' );
+            fillGradient.addColorStop( 0.5, '#00ff00' );
+            fillGradient.addColorStop( 0.6, 'rgba(0,255,0,0.3)' );
+            fillGradient.addColorStop( 0.9, '#000000' );
+
+            var mainGradient = new scenery.RadialGradient( 32, 20, 10, 32, 32, 32 );
+            mainGradient.addColorStop( 0, '#8ED6FF' );
+            mainGradient.addColorStop( 0.5, '#004CB3' );
+            mainGradient.addColorStop( 0.6, '#bbbbbb' );
+            mainGradient.addColorStop( 1, '#ffffff' );
+
+            var transformedGradient = new scenery.RadialGradient( 0, 0, 0, 0, 0, 64 );
+            transformedGradient.addColorStop( 0.3, '#8ED6FF' );
+            transformedGradient.addColorStop( 1, '#004CB3' );
+            transformedGradient.setTransformMatrix( dot.Matrix3.translation( 32, 32 ).timesMatrix( dot.Matrix3.rotation2( Math.PI / 4 ).timesMatrix( dot.Matrix3.scaling( 1, 0.25 ) ) ) );
+
+            scene.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 64, 64 ), {
+              fill: mainGradient
+            } ) );
+            scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
+              x: 32 + 64,
+              y: 32,
+              rotation: Math.PI / 4,
+              fill: fillGradient,
+              stroke: '#000000',
+              lineWidth: 3
+            } ) );
+            scene.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 64, 64 ), {
+              x: 128,
+              fill: transformedGradient
+            } ) );
+          },
+          renderers: [ 'canvas', 'svg', 'webgl' ]
+        },
+        {
+          name: 'RGBA',
+          width: 64,
+          height: 64,
+          draw: function( scene, updateDisplayCallback ) {
+            scene.addChild( new scenery.Path( kite.Shape.rectangle( 32, 0, 32, 64 ), {
+              fill: '#000000'
+            } ) );
+            scene.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 44, 44 ), {
+              x: 10.5,
+              y: 10.5,
+              fill: 'rgba(255,0,0,0.5)',
+              stroke: '#000000',
+              lineWidth: 3
+            } ) );
+          },
+          renderers: [ 'canvas', 'svg', 'webgl' ]
+        },
+        {
+          name: 'Dashes',
+          width: 64,
+          height: 64,
+          draw: function( scene, updateDisplayCallback ) {
+            scene.addChild( new scenery.Path( kite.Shape.rectangle( 10, 10, 44, 44 ), {
+              stroke: '#000',
+              lineWidth: 3,
+              lineDash: [ 7, 2, 3, 2 ],
+              x: 0.5,
+              y: 0.5
+            } ) );
+            scene.addChild( new scenery.Rectangle( 5, 5, 54, 54, {
+              stroke: '#000',
+              lineWidth: 3,
+              lineDash: [ 7, 2, 3, 2 ],
+              x: 0.5,
+              y: 0.5
+            } ) );
+            scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 15 ), {
+              stroke: '#000',
+              lineDash: [ 5, 5 ],
+              lineDashOffset: 5,
+              x: 32.5,
+              y: 32.5
+            } ) );
+          },
+          renderers: [ 'canvas', 'svg', 'webgl' ]
+        },
+        {
+          name: 'Images',
+          width: 220,
+          height: 120,
+          draw: function( scene, updateDisplayCallback ) {
+            scene.addChild( new scenery.Image( document.getElementById( 'light-bulb-image' ) ) );
+
+            // ugly hack placement for correct z-index
+            scene.addChild( new scenery.Image( document.getElementById( 'fire-extinguisher-image' ), {
+              scale: 0.5,
+              rotation: Math.PI / 6,
+              x: 130,
+              y: 20
+            } ) );
+            updateDisplayCallback();
+          },
+          renderers: [ 'canvas', 'svg', 'dom', 'webgl' ]
+        },
+        {
+          name: 'Patterns',
+          width: 64,
+          height: 64,
+          draw: function( scene, updateDisplayCallback ) {
+            var img = document.createElement( 'img' );
+            img.addEventListener( 'load', function() {
+              var pattern = new scenery.Pattern( img );
+              scene.addChild( new scenery.Path( kite.Shape.regularPolygon( 6, 22 ), {
+                x: 32,
+                y: 32,
+                rotation: Math.PI / 4,
+                fill: pattern,
+                stroke: '#000000',
+                lineWidth: 3
+              } ) );
+              updateDisplayCallback();
+            } );
+            img.src = 'http://phet.colorado.edu/files/archive/images/circleArrow_Icon.gif';
+          },
+          renderers: [ 'canvas', 'svg', 'webgl' ]
+        },
+        {
+          name: 'Overlapping and Nested Rotations',
+          width: 128,
+          height: 128,
+          draw: function( scene, updateDisplayCallback ) {
+            var container = new scenery.Node( {
+              x: 40,
+              rotation: Math.PI / 12
+            } );
+            scene.addChild( container );
+
+            container.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 44, 44 ), {
+              x: 10.5,
+              y: 10.5,
+              rotation: Math.PI / 4,
+              fill: '#ff0000',
+              stroke: '#000000',
+              lineWidth: 3
+            } ) );
+
+            container.addChild( new scenery.Path( kite.Shape.rectangle( 0, 0, 44, 44 ), {
+              x: 30.5,
+              y: 10.5,
+              fill: '#ff0000',
+              stroke: '#000000',
+              // lineJoin: 'round',
+              lineWidth: 10
+            } ) );
+          },
+          renderers: [ 'canvas', 'svg' ]
+        },
+        {
+          name: 'DAG support',
+          width: 256,
+          height: 128,
+          draw: function( scene, updateDisplayCallback ) {
+            var square = new scenery.Path( kite.Shape.rectangle( 0, 0, 50, 50 ), {
+              x: 0.5,
+              y: 0.5,
+              fill: 'rgba(0,0,0,0.5)',
+              stroke: '#000000',
+              lineWidth: 3
+            } );
+
+            var arrow = new scenery.Path( kite.Shape.regularPolygon( 3, 10 ), {
+              fill: 'rgba(0,255,0,1)',
+              stroke: '#000000'
+            } );
+
+            var combined = new scenery.Node();
+            combined.addChild( square );
+            var leftArrow = new scenery.Node( { x: 15, y: 25 } );
+            leftArrow.addChild( arrow );
+            combined.addChild( leftArrow );
+            var rightArrow = new scenery.Node( { x: 35, y: 25 } );
+            rightArrow.addChild( arrow );
+            combined.addChild( rightArrow );
+
+            var a = new scenery.Node( { x: 20, y: 20 } );
+            a.addChild( combined );
+            var b = new scenery.Node( { x: 120, y: 30, rotation: Math.PI / 4 } );
+            b.addChild( combined );
+            var c = new scenery.Node( { x: 220, y: 40, rotation: Math.PI / 2 } );
+            c.addChild( combined );
+            scene.addChild( a );
+            scene.addChild( b );
+            scene.addChild( c );
+          },
+          renderers: [ 'canvas', 'svg' ]
+        },
+        {
+          name: 'Text',
+          width: 256,
+          height: 128,
+          draw: function( scene, updateDisplayCallback ) {
+            scene.addChild( new scenery.Text( 'Is this a test?', {
+              fontSize: 60,
+              top: 1.5,
+              left: 1.5,
+              fill: '#606'
+            } ) );
+            scene.addChild( new scenery.Text( 'Aa', {
+              fontSize: 100,
+              centerX: 64,
+              centerY: 64,
+              fill: null,
+              stroke: '#000'
+            } ) );
+            scene.addChild( new scenery.Text( 'Bb', {
+              fontSize: 100,
+              centerX: 64 + 128,
+              centerY: 64,
+              fill: new scenery.LinearGradient( 0, 0, 0, -40 )
+                  .addColorStop( 0, '#f00' )
+                  .addColorStop( 1, '#0f0' ),
+              stroke: '#777',
+              lineWidth: 3,
+              lineJoin: 'round'
+            } ) );
+          },
+          renderers: [ 'canvas', 'svg' ]
+        },
+        {
+          name: 'HTML Text',
+          width: 512,
+          height: 128,
+          draw: function( scene, updateDisplayCallback ) {
+            scene.addChild( new scenery.HTMLText( '<strong>H<sub>2</sub>O</strong> <em>might</em> contain water, also<br>known as <u>dihydrogen monoxide</u>!', {
+              fontSize: 35,
+              top: 2,
+              left: 2,
+              fill: '#606'
+            } ) );
+          },
+          renderers: [ 'dom' ]
+        },
+        {
+          name: 'Circles and Arcs',
+          width: 200,
+          height: 64,
+          draw: function( scene, updateDisplayCallback ) {
+            var x = 32;
+            scene.addChild( new scenery.Path( kite.Shape.circle( x, 25, 20 ), {
+              fill: '#ff0000',
+              stroke: '#000000',
+              lineWidth: 3
+            } ) );
+
+            x += 64;
+            scene.addChild( new scenery.Path( kite.Shape.arc( x, 25, 20, Math.PI / 4, Math.PI * 3 / 2, false ), {
+              fill: 'rgba(255,0,0,0.5)',
+              stroke: '#aa0000',
+              lineWidth: 3
+            } ) );
+
+            scene.addChild( new scenery.Path( kite.Shape.arc( x, 25, 20, Math.PI / 4, Math.PI * 3 / 2, true ), {
+              fill: 'rgba(0,0,255,0.5)',
+              stroke: '#0000aa',
+              lineWidth: 3
+            } ) );
+
+            x += 64;
+            scene.addChild( new scenery.Path( new kite.Shape().moveTo( 0, 0 )
+                .arc( 0, 0, 20, 0, Math.PI / 3, false )
+                .arc( 0, 0, 20, Math.PI / 3 + Math.PI, Math.PI, true )
+                .close(), {
+              x: x,
+              y: 25.5,
+              fill: '#ff0000',
+              stroke: '#000000',
+              lineWidth: 3
+            } ) );
+          },
+          renderers: [ 'canvas', 'svg' ]
+        },
+        {
+          name: 'Ellipses and Elliptical Arcs',
+          width: 200,
+          height: 64,
+          draw: function( scene, updateDisplayCallback ) {
+            var x = 32;
+            scene.addChild( new scenery.Path( kite.Shape.ellipse( x, 25, 20, 10 ), {
+              fill: '#ff0000',
+              stroke: '#000000',
+              lineWidth: 3
+            } ) );
+
+            x += 64;
+            scene.addChild( new scenery.Path( new kite.Shape().ellipticalArc( x, 25, 20, 10, Math.PI / 6, Math.PI / 4, Math.PI * 3 / 2, false ), {
+              fill: 'rgba(255,0,0,0.5)',
+              stroke: '#aa0000',
+              lineWidth: 3
+            } ) );
+
+            scene.addChild( new scenery.Path( new kite.Shape().ellipticalArc( x, 25, 20, 10, Math.PI / 6, Math.PI / 4, Math.PI * 3 / 2, true ), {
+              fill: 'rgba(0,0,255,0.5)',
+              stroke: '#0000aa',
+              lineWidth: 3
+            } ) );
+
+            x += 64;
+            scene.addChild( new scenery.Path( new kite.Shape().moveTo( 0, 0 )
+                .ellipticalArc( 0, 0, 20, 10, 0, 0, Math.PI / 3, false )
+                .ellipticalArc( 0, 0, 20, 10, 0, Math.PI / 3 + Math.PI, Math.PI, true )
+                .close(), {
+              x: x,
+              y: 25.5,
+              fill: '#ff0000',
+              stroke: '#000000',
+              lineWidth: 3
+            } ) );
+          },
+          renderers: [ 'canvas', 'svg' ]
+        },
+        {
+          name: 'DOM Elements',
+          width: 200,
+          height: 200,
+          draw: function( scene, updateDisplayCallback ) {
+            var textDiv = document.createElement( 'div' );
+            textDiv.innerHTML = 'See our <a href="http://phet.colorado.edu">website</a>!';
+            scene.addChild( new scenery.DOM( textDiv, {
+              x: 20,
+              y: 20
+            } ) );
+
+            var form = document.createElement( 'form' );
+            form.innerHTML = '<label>Type in me:</label><input type="text">';
+
+            scene.addChild( new scenery.DOM( form, {
+              x: 50,
+              y: 50,
+              rotation: Math.PI / 4
+            } ) );
+          },
+          renderers: [ 'dom' ]
+        },
+        {
+          name: 'Invisible nodes',
+          width: 64,
+          height: 64,
+          draw: function( scene, updateDisplayCallback ) {
+            var shape = kite.Shape.rectangle( 0, 0, 30, 30 );
+            var rect = new scenery.Path( shape, {
+              fill: '#000',
+              stroke: '#f00',
+              lineWidth: 4
+            } );
+            scene.addChild( new scenery.Node( {
+              children: [ rect ],
+              x: -10, y: -10
+            } ) );
+            scene.addChild( new scenery.Node( {
+              children: [ rect ],
+              x: 10, y: 10,
+              visible: false
+            } ) );
+            var third = new scenery.Node( {
+              children: [ rect ],
+              x: 20, y: 20
+            } );
+            scene.addChild( third );
+            third.visible = false; // delayed, should cause issues with old SVG handling
+          },
+          renderers: [ 'canvas', 'svg' ]
+        },
+        {
+          name: 'Simple Clipping',
+          width: 64,
+          height: 64,
+          draw: function( scene, updateDisplayCallback ) {
+            scene.addChild( new scenery.Rectangle( 4, 4, 56, 56, {
+              fill: 'black',
+              clipArea: kite.Shape.circle( 32, 32, 25 ),
+              x: 20,
+              y: -20
+            } ) );
+          },
+          renderers: [ 'canvas', 'svg' ]
+        },
+        {
+          name: 'Nested Clipping',
+          width: 64,
+          height: 64,
+          draw: function( scene, updateDisplayCallback ) {
+            var clipShape1 = kite.Shape.regularPolygon( 6, 27 ).transformed( dot.Matrix3.translation( 32, 32 ) );
+            var clipShape2 = kite.Shape.regularPolygon( 9, 32 ).transformed( dot.Matrix3.translation( 32, 0 ) );
+            var shape = kite.Shape.circle( 32, 32, 25 );
+            var circle = new scenery.Path( shape, {
+              fill: '#000',
+              stroke: '#f00',
+              lineWidth: 3
+            } );
+            circle.clipArea = clipShape1;
+            scene.addChild( circle );
+            scene.clipArea = clipShape2;
+          },
+          renderers: [ 'canvas', 'svg' ]
+        },
+        {
+          name: 'Opacity',
+          width: 64,
+          height: 64,
+          draw: function( scene, updateDisplayCallback ) {
+            scene.addChild( new scenery.Rectangle( 0, 12, 64, 20, { fill: '#000' } ) );
+            var circle = kite.Shape.circle( 0, 0, 30 );
+            scene.addChild( new scenery.Node( {
+              opacity: 0.5,
+              children: [
+                new scenery.Path( circle, { x: 12, y: 22, fill: '#f00' } ),
+                new scenery.Path( circle, { x: 52, y: 22, fill: '#00f' } )
+              ]
+            } ) );
+          },
+          renderers: [ 'canvas', 'svg' ]
+        }
+      ];
+
+      var selectTestCases = function( array, queryParameterKey ) {
+        if ( QueryStringMachine.containsKey( queryParameterKey ) ) {
+          var testIndices = QueryStringMachine.get( queryParameterKey, {
             type: 'array',
             elementSchema: {
-              type: 'string',
-
-              validValues: [
-                'canvas',
-                'svg',
-                'dom',
-                'webgl'
-              ]
+              type: 'number'
             },
-            defaultValue: [ 'canvas', 'svg', 'dom', 'webgl' ]
+            defaultValue: []
+          } );
+          var result = [];
+          for ( var i = 0; i < testIndices.length; i++ ) {
+            var testIndex = testIndices[ i ];
+            result.push( array[ testIndex ] );
+          }
+          return result;
+        }
+        return array;
+      };
+
+      // Select the renderers to be compared (for tests that declare support for them).
+      var renderers = QueryStringMachine.get( 'renderers', {
+        type: 'array',
+        elementSchema: {
+          type: 'string',
+
+          validValues: [
+            'canvas',
+            'svg',
+            'dom',
+            'webgl'
+          ]
+        },
+        defaultValue: [ 'canvas', 'svg', 'dom', 'webgl' ]
+      } );
+
+      // Allow selection of the tests by a query parameter ?test=...
+      // For instance, when test=0 is specified, only show the 0th test.
+      // When test=0,1,2 is specified, show tests 0,1,2
+      testCases = selectTestCases( testCases, 'tests' );
+
+      _.each( testCases, function( testCase, index ) {
+        var $testTitle = $( document.createElement( 'h2' ) );
+        $testTitle.text( '' + index + ': ' + testCase.name );
+        $testTitle.addClass( 'testname' );
+        $( document.body ).append( $testTitle );
+
+        _.each( renderers, function( renderer ) {
+          // don't render unsupported renderers for specific test cases
+          if ( !_.includes( testCase.renderers, renderer ) ) {
+            return;
+          }
+
+          var width = testCase.width || 320;
+          var height = testCase.height || 240;
+
+          var scene = new scenery.Node( {
+            renderer: renderer
+          } );
+          var display = new scenery.Display( scene, {
+            width: width,
+            height: height
           } );
 
-          // Allow selection of the tests by a query parameter ?test=...
-          // For instance, when test=0 is specified, only show the 0th test.
-          // When test=0,1,2 is specified, show tests 0,1,2
-          testCases = selectTestCases( testCases, 'tests' );
+          var layerType = renderer.defaultLayerType;
+          var $container = $( document.createElement( 'div' ) );
+          $container.addClass( 'scene' );
+          $container.addClass( renderer );
+          $container.width( width );
+          $container.height( height );
+          $container[ 0 ].appendChild( display.domElement );
+          $( document.body ).append( $container );
 
-          _.each( testCases, function( testCase, index ) {
-            var $testTitle = $( document.createElement( 'h2' ) );
-            $testTitle.text( '' + index + ': ' + testCase.name );
-            $testTitle.addClass( 'testname' );
-            $( document.body ).append( $testTitle );
+          function updateDisplay() {
+            display.updateDisplay();
 
-            _.each( renderers, function( renderer ) {
-              // don't render unsupported renderers for specific test cases
-              if ( !_.includes( testCase.renderers, renderer ) ) {
-                return;
-              }
+            if ( display.getUsedRenderersBitmask() !== scenery.Renderer.fromName( renderer ) ) {
+              $container.addClass( 'wrong-renderer' );
+            }
+            else {
+              $container.removeClass( 'wrong-renderer' );
+            }
+          }
 
-              var width = testCase.width || 320;
-              var height = testCase.height || 240;
-
-              var scene = new scenery.Node( {
-                renderer: renderer
-              } );
-              var display = new scenery.Display( scene, {
-                width: width,
-                height: height
-              } );
-
-              var layerType = renderer.defaultLayerType;
-              var $container = $( document.createElement( 'div' ) );
-              $container.addClass( 'scene' );
-              $container.addClass( renderer );
-              $container.width( width );
-              $container.height( height );
-              $container[ 0 ].appendChild( display.domElement );
-              $( document.body ).append( $container );
-
-              function updateDisplay() {
-                display.updateDisplay();
-
-                if ( display.getUsedRenderersBitmask() !== scenery.Renderer.fromName( renderer ) ) {
-                  $container.addClass( 'wrong-renderer' );
-                }
-                else {
-                  $container.removeClass( 'wrong-renderer' );
-                }
-              }
-
-              // try {
-              testCase.draw( scene, updateDisplay );
-              // } catch( e ) {
-              //   if ( console.log ) {
-              //     console.log( 'error encountered in test ' + testCase.name + ' with ' + layerType.name );
-              //   }
-              //   throw e;
-              // }
-              updateDisplay();
-            } );
-          } );
+          // try {
+          testCase.draw( scene, updateDisplay );
+          // } catch( e ) {
+          //   if ( console.log ) {
+          //     console.log( 'error encountered in test ' + testCase.name + ' with ' + layerType.name );
+          //   }
+          //   throw e;
+          // }
+          updateDisplay();
         } );
+      } );
+    } );
   } )
-
 </script>
 
 </body>
