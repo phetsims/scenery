@@ -186,6 +186,7 @@ define( require => {
 
   // Object literal makes it easy to check for the existence of an attribute (compared to [].indexOf()>=0)
   const domEventPropertiesToSerialize = {
+    type: true,
     button: true, keyCode: true,
     deltaX: true, deltaY: true, deltaZ: true, deltaMode: true, pointerId: true,
     pointerType: true, charCode: true, which: true, clientX: true, clientY: true, changedTouches: true,
@@ -1963,7 +1964,9 @@ define( require => {
     static deserializeDomEvent( eventObject ) {
       const domEvent = new window.Event( 'inputEvent' );
       for ( const key in eventObject ) {
-        if ( eventObject.hasOwnProperty( key ) ) {
+
+        // `type` is readonly, so don't try to set it.
+        if ( eventObject.hasOwnProperty( key ) && key !== 'type' ) {
 
           // Special case for target since we can't set that read-only property. Instead use a substitute key.
           if ( key === 'target' ) {
