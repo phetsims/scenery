@@ -636,6 +636,25 @@ define( require => {
     },
 
     /**
+     * Called with 'up' events (part of the listener API).
+     * @public (scenery-internal)
+     *
+     * NOTE: Do not call directly.
+     *
+     * @param {SceneryEvent} event
+     */
+    up( event ) {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} up` );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+      // Recalculate over/hovering Properties.
+      this.invalidateOver();
+      this.invalidateHovering();
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
+    },
+
+    /**
      * Called with 'enter' events (part of the listener API).
      * @public (scenery-internal)
      *
