@@ -1957,7 +1957,9 @@ define( require => {
      * @returns {Event}
      */
     static deserializeDomEvent( eventObject ) {
-      const domEvent = new window.Event( 'inputEvent' );
+
+      // IE doesn't support `new Event()`, but document.createEvent is largely deprecated, so only use it when we must.
+      const domEvent = platform.ie ? document.createEvent( 'Event' ) : new window.Event( 'Event' );
       for ( const key in eventObject ) {
         if ( eventObject.hasOwnProperty( key ) ) {
 
