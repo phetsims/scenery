@@ -1786,6 +1786,11 @@ define( require => {
       else {
         this.buttonListener = new ButtonListener( {
           fire: function( event ) {
+            if ( event.isA11y() ) {
+
+              // prevent default from a11y activation so we don't also open a new tab from native DOM input on a link
+              event.domEvent.preventDefault();
+            }
             self._linkEventsHandled && event.handle();
             openPopup( href ); // open in a new window/tab
           }
