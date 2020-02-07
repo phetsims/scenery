@@ -15,6 +15,7 @@ define( require => {
   const Matrix3 = require( 'DOT/Matrix3' );
   const Property = require( 'AXON/Property' );
   const Transform3 = require( 'DOT/Transform3' );
+  const Utils = require( 'DOT/Utils' );
   const Vector2 = require( 'DOT/Vector2' );
   const Vector2Property = require( 'DOT/Vector2Property' );
 
@@ -110,8 +111,8 @@ define( require => {
       ListenerTestUtils.mouseDown( display, 10, 10 );
       ListenerTestUtils.mouseMove( display, 20, 15 );
       ListenerTestUtils.mouseUp( display, 20, 15 );
-      assert.equal( rect.x, 15, '[x] Started at 5, moved by 10' );
-      assert.equal( rect.y, 8, '[y] Started at 3, moved by 5' );
+      assert.equal( Utils.roundSymmetric( rect.x ), 15, '[x] Started at 5, moved by 10' );
+      assert.equal( Utils.roundSymmetric( rect.y ), 8, '[y] Started at 3, moved by 5' );
     } );
   } );
 
