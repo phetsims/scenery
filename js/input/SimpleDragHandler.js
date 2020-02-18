@@ -39,7 +39,7 @@ define( require => {
       end: null,  // {null|function(SceneryEvent,Trail)} called when a drag is ended
 
       // {null|function} Called when the pointer moves.
-      // Signature is translate( delta: Vector2, oldPosition: Vector2, position: Vector2 )
+      // Signature is translate( { delta: Vector2, oldPosition: Vector2, position: Vector2 } )
       translate: null, //
 
       allowTouchSnag: false,
