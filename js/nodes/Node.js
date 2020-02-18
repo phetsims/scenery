@@ -248,6 +248,7 @@ define( require => {
     'y', // {number} - y translation of the node, see setY() for more documentation
     'rotation', // {number} - rotation (in radians) of the node, see setRotation() for more documentation
     'scale', // {number} - scale of the node, see scale() for more documentation
+    'excludeInvisibleChildrenFromBounds', // {boolean} - Controls bounds depending on child visibility, see setExcludeInvisibleChildrenFromBounds() for more documentation
     'localBounds', // {Bounds2|null} - bounds of subtree in local coordinate frame, see setLocalBounds() for more documentation
     'maxWidth', // {number|null} - Constrains width of this node, see setMaxWidth() for more documentation
     'maxHeight', // {number|null} - Constrains height of this node, see setMaxHeight() for more documentation
@@ -270,7 +271,7 @@ define( require => {
     'layerSplit', // {boolean} - Forces this subtree into a layer of its own, see setLayerSplit() for more documentation
     'usesOpacity', // {boolean} - Hint that opacity will be changed, see setUsesOpacity() for more documentation
     'cssTransform', // {boolean} - Hint that can trigger using CSS transforms, see setCssTransform() for more documentation
-    'excludeInvisible', // {boolean} If this is invisible, exclude from DOM, see setExcludeInvisible() for more documentation
+    'excludeInvisible', // {boolean} - If this is invisible, exclude from DOM, see setExcludeInvisible() for more documentation
     'webglScale', // {number|null} - Hint to adjust WebGL scaling quality for this subtree, see setWebglScale() for more documentation
     'preventFit', // {boolean} - Prevents layers from fitting this subtree, see setPreventFit() for more documentation
     'mouseArea', // {Bounds2|Shape|null} - Changes the area the mouse can interact with, see setMouseArea() for more documentation
@@ -439,6 +440,9 @@ define( require => {
     // overridden value. If true, then localBounds itself will not be updated, but will instead always be the
     // overridden value.
     this._localBoundsOverridden = false;
+
+    // @private {boolean} - [mutable] Whether invisible children will be excluded from this node's bounds
+    this._excludeInvisibleChildrenFromBounds = false;
 
     this._boundsDirty = true; // @private {boolean} - Whether bounds needs to be recomputed to be valid.
     this._localBoundsDirty = true; // @private {boolean} - Whether localBounds needs to be recomputed to be valid.
@@ -1115,7 +1119,10 @@ define( require => {
 
         i = this._children.length;
         while ( i-- ) {
-          this._childBounds.includeBounds( this._children[ i ]._bounds );
+          const child = this._children[ i ];
+          if ( !this._excludeInvisibleChildrenFromBounds || child.isVisible() ) {
+            this._childBounds.includeBounds( child._bounds );
+          }
         }
 
         // run this before firing the event
@@ -1826,6 +1833,19 @@ define( require => {
      */
     hasChildren: function() {
       return this._children.length > 0;
+    },
+
+    /**
+     * Returns whether a child should be included for layout (if this node is a layout container).
+     * @public
+     *
+     * @param {Node} child
+     * @returns {boolean}
+     */
+    isChildIncludedInLayout: function( child ) {
+      assert && assert( child instanceof Node );
+
+      return child.bounds.isValid() && ( !this._excludeInvisibleChildrenFromBounds || child.visible );
     },
 
     /**
@@ -3038,6 +3058,13 @@ define( require => {
         this._accessibleDisplaysInfo.onVisibilityChange( visible );
 
         this.trigger0( 'visibility' );
+
+        for ( let i = 0; i < this._parents.length; i++ ) {
+          const parent = this._parents[ i ];
+          if ( parent._excludeInvisibleChildrenFromBounds ) {
+            parent.invalidateBounds();
+          }
+        }
       }
       return this;
     },
@@ -3591,6 +3618,38 @@ define( require => {
       return this._hints.excludeInvisible;
     },
     get excludeInvisible() { return this.isExcludeInvisible(); },
+
+    /**
+     * If this is set to true, child nodes that are invisible will NOT contribute to the bounds of this node.
+     * @public
+     *
+     * The default is for child nodes bounds' to be included in this node's bounds, but that would in general be a
+     * problem for layout containers or other situations, see https://github.com/phetsims/joist/issues/608.
+     *
+     * @param {boolean} excludeInvisibleChildrenFromBounds
+     */
+    setExcludeInvisibleChildrenFromBounds: function( excludeInvisibleChildrenFromBounds ) {
+      assert && assert( typeof excludeInvisibleChildrenFromBounds === 'boolean' );
+
+      if ( excludeInvisibleChildrenFromBounds !== this._excludeInvisibleChildrenFromBounds ) {
+        this._excludeInvisibleChildrenFromBounds = excludeInvisibleChildrenFromBounds;
+
+        this.invalidateBounds();
+      }
+    },
+    set excludeInvisibleChildrenFromBounds( value ) { this.setExcludeInvisibleChildrenFromBounds( value ); },
+
+    /**
+     * Returns whether the excludeInvisibleChildrenFromBounds flag is set, see
+     * setExcludeInvisibleChildrenFromBounds() for documentation.
+     * @public
+     *
+     * @returns {boolean}
+     */
+    isExcludeInvisibleChildrenFromBounds: function() {
+      return this._excludeInvisibleChildrenFromBounds;
+    },
+    get excludeInvisibleChildrenFromBounds() { return this.isExcludeInvisibleChildrenFromBounds(); },
 
     setPreventFit: function( preventFit ) {
       assert && assert( typeof preventFit === 'boolean' );

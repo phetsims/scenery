@@ -16,6 +16,7 @@ define( require => {
   // modules
   const Bounds2 = require( 'DOT/Bounds2' );
   const inherit = require( 'PHET_CORE/inherit' );
+  const merge = require( 'PHET_CORE/merge' );
   const Node = require( 'SCENERY/nodes/Node' );
   const scenery = require( 'SCENERY/scenery' );
 
@@ -67,6 +68,10 @@ define( require => {
    *                             provided along-side options for Node.
    */
   function LayoutBox( options ) {
+    options = merge( {
+      // Set to true, because we want invisible direct children to not be included in the layout or bounds
+      excludeInvisibleChildrenFromBounds: true
+    }, options );
 
     // @private {string} - Either 'vertical' or 'horizontal'. The default chosen by popular vote (with more references).
     //                     see setOrientation() for more documentation.
@@ -132,8 +137,11 @@ define( require => {
 
       for ( let i = 0; i < this._children.length; i++ ) {
         const child = this._children[ i ];
-        maxWidth = Math.max( maxWidth, child.width );
-        maxHeight = Math.max( maxHeight, child.height );
+
+        if ( this.isChildIncludedInLayout( child ) ) {
+          maxWidth = Math.max( maxWidth, child.width );
+          maxHeight = Math.max( maxHeight, child.height );
+        }
       }
       return new Bounds2( 0, 0, maxWidth, maxHeight );
     },
@@ -161,12 +169,12 @@ define( require => {
       let position = 0;
       for ( let i = 0; i < children.length; i++ ) {
         const child = children[ i ];
-        if ( !child.bounds.isValid() ) {
-          continue; // Skip children without bounds
+
+        if ( this.isChildIncludedInLayout( child ) ) {
+          child[ layoutPosition ] = position;
+          child[ layoutAlignment ] = this._align === 'origin' ? 0 : alignmentBounds[ layoutAlignment ];
+          position += child[ layoutDimension ] + this._spacing; // Move forward by the node's size, including spacing
         }
-        child[ layoutPosition ] = position;
-        child[ layoutAlignment ] = this._align === 'origin' ? 0 : alignmentBounds[ layoutAlignment ];
-        position += child[ layoutDimension ] + this._spacing; // Move forward by the node's size, including spacing
       }
     },
 
@@ -204,6 +212,7 @@ define( require => {
     onLayoutBoxChildInserted: function( node ) {
       if ( this._resize ) {
         node.onStatic( 'bounds', this._updateLayoutListener );
+        node.onStatic( 'visibility', this._updateLayoutListener );
       }
     },
 
@@ -216,6 +225,7 @@ define( require => {
     onLayoutBoxChildRemoved: function( node ) {
       if ( this._resize ) {
         node.offStatic( 'bounds', this._updateLayoutListener );
+        node.offStatic( 'visibility', this._updateLayoutListener );
       }
     },
 
@@ -408,10 +418,12 @@ define( require => {
           // If we are now resizable, we need to add listeners to every child
           if ( resize ) {
             child.onStatic( 'bounds', this._updateLayoutListener );
+            child.onStatic( 'visibility', this._updateLayoutListener );
           }
           // Otherwise we are now not resizeable, and need to remove the listeners
           else {
             child.offStatic( 'bounds', this._updateLayoutListener );
+            child.offStatic( 'visibility', this._updateLayoutListener );
           }
         }
 
