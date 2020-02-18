@@ -42,6 +42,7 @@ define( require => {
       // Signature is translate( { delta: Vector2, oldPosition: Vector2, position: Vector2 } )
       translate: null, //
 
+      // {boolean|function:boolean}
       allowTouchSnag: false,
 
       // allow changing the mouse button that activates the drag listener.
