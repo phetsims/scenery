@@ -963,6 +963,54 @@ define( require => {
     },
 
     /**
+     * Move this node one index forward in each of its parents.  If the node is already at the front, this is a no-op.
+     * @returns {Node}
+     * @public
+     */
+    moveForward: function() {
+      this._parents.forEach( parent => parent.moveChildForward( this ) ); // TODO: Do we need slice like moveToFront has?
+      return this; // chaining
+    },
+
+    /**
+     * Moves the specified child forward by one index.  If the child is already at the front, this is a no-op.
+     * @param {Node} child
+     * @returns {Node}
+     * @public
+     */
+    moveChildForward: function( child ) {
+      const index = this.indexOfChild( child );
+      if ( index < this.getChildrenCount() - 1 ) {
+        this.moveChildToIndex( child, index + 1 );
+      }
+      return this; // chaining
+    },
+
+    /**
+     * Move this node one index backward in each of its parents.  If the node is already at the back, this is a no-op.
+     * @returns {Node}
+     * @public
+     */
+    moveBackward: function() {
+      this._parents.forEach( parent => parent.moveChildBackward( this ) ); // TODO: Do we need slice like moveToFront has?
+      return this; // chaining
+    },
+
+    /**
+     * Moves the specified child forward by one index.  If the child is already at the back, this is a no-op.
+     * @param {Node} child
+     * @returns {Node}
+     * @public
+     */
+    moveChildBackward: function( child ) {
+      const index = this.indexOfChild( child );
+      if ( index > 0 ) {
+        this.moveChildToIndex( child, index - 1 );
+      }
+      return this; // chaining
+    },
+
+    /**
      * Moves this node to the back (front) of all of its parents children array.
      * @public
      *

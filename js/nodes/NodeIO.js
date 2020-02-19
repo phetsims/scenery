@@ -19,6 +19,7 @@ define( require => {
   const PropertyIO = require( 'AXON/PropertyIO' );
   const Range = require( 'DOT/Range' );
   const scenery = require( 'SCENERY/scenery' );
+  const VoidIO = require( 'TANDEM/types/VoidIO' );
 
   class NodeIO extends ObjectIO {
     constructor( node, phetioID ) {
@@ -74,6 +75,26 @@ define( require => {
       this.disposeNodeIO();
     }
   }
+
+  NodeIO.methods = {
+    moveForward: {
+      returnType: VoidIO,
+      parameterTypes: [],
+      implementation: function() {
+        return this.phetioObject.moveForward();
+      },
+      documentation: 'Move this node one index forward in each of its parents.  If the node is already at the front, this is a no-op.'
+    },
+
+    moveBackward: {
+      returnType: VoidIO,
+      parameterTypes: [],
+      implementation: function() {
+        return this.phetioObject.moveBackward();
+      },
+      documentation: 'Move this node one index backward in each of its parents.  If the node is already at the back, this is a no-op.'
+    }
+  };
 
   NodeIO.validator = { valueType: scenery.Node };
 
