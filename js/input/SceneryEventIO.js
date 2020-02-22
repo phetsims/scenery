@@ -26,7 +26,7 @@ define( require => {
       validate( event, this.validator );
 
       const eventObject = {
-        type: event.type,
+        type: event.type
       };
 
       if ( event.domEvent ) {
