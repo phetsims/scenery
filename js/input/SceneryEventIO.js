@@ -27,8 +27,11 @@ define( require => {
 
       const eventObject = {
         type: event.type,
-        domEventType: event.domEvent.type
       };
+
+      if ( event.domEvent ) {
+        eventObject.domEventType = event.domEvent.type;
+      }
       if ( event.pointer && event.pointer.point ) {
         eventObject.point = Vector2IO.toStateObject( event.pointer.point );
       }

@@ -1150,7 +1150,13 @@ define( require => {
     touchStart( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchStart(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.touchStartAction.execute( id, point, event );
+
+
+      // ignore this touch event if it came from the PDOM
+      if ( !this.isTargetUnderPDOM( event.target ) ) {
+        this.touchStartAction.execute( id, point, event );
+      }
+
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
@@ -1168,7 +1174,12 @@ define( require => {
     touchEnd( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchEnd(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.touchEndAction.execute( id, point, event );
+
+      // ignore this touch event if it came from the PDOM
+      if ( !this.isTargetUnderPDOM( event.target ) ) {
+        this.touchEndAction.execute( id, point, event );
+      }
+
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
