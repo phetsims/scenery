@@ -216,7 +216,6 @@ import '../util/Trail.js';
 import '../util/TrailPointer.js';
 import NodeIO from './NodeIO.js';
 
-// commented out so Require.js doesn't balk at the circular dependency
 // constants
 const clamp = Utils.clamp;
 
