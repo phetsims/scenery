@@ -11,9 +11,6 @@ import scenery from '../scenery.js';
 import AccessibleInstance from './AccessibleInstance.js';
 import PartialAccessibleTrail from './PartialAccessibleTrail.js';
 
-// commented out so Require.js doesn't balk at the circular dependency
-// const Trail = require( '/scenery/js/util/Trail' );
-
 // globals (for restoring focus)
 let focusedNode = null;
 
