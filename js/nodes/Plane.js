@@ -10,26 +10,22 @@
  * @author Sam Reid
  */
 
-define( require => {
-  'use strict';
+import inherit from '../../../phet-core/js/inherit.js';
+import scenery from '../scenery.js';
+import Rectangle from './Rectangle.js';
 
-  const inherit = require( 'PHET_CORE/inherit' );
-  const scenery = require( 'SCENERY/scenery' );
+/**
+ * @public
+ * @constructor
+ * @extends Rectangle
+ *
+ * @param {Object} [options] Passed to Rectangle. See Rectangle for more documentation
+ */
+function Plane( options ) {
+  Rectangle.call( this, -2000, -2000, 6000, 6000, options );
+}
 
-  const Rectangle = require( 'SCENERY/nodes/Rectangle' );
+scenery.register( 'Plane', Plane );
 
-  /**
-   * @public
-   * @constructor
-   * @extends Rectangle
-   *
-   * @param {Object} [options] Passed to Rectangle. See Rectangle for more documentation
-   */
-  function Plane( options ) {
-    Rectangle.call( this, -2000, -2000, 6000, 6000, options );
-  }
-
-  scenery.register( 'Plane', Plane );
-
-  return inherit( Rectangle, Plane );
-} );
+inherit( Rectangle, Plane );
+export default Plane;

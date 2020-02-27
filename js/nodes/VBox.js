@@ -5,35 +5,32 @@
  *
  * @author Sam Reid
  */
-define( require => {
-  'use strict';
 
-  // modules
-  const inherit = require( 'PHET_CORE/inherit' );
-  const LayoutBox = require( 'SCENERY/nodes/LayoutBox' );
-  const scenery = require( 'SCENERY/scenery' );
+import inherit from '../../../phet-core/js/inherit.js';
+import scenery from '../scenery.js';
+import LayoutBox from './LayoutBox.js';
 
-  /**
-   * @public
-   * @constructor
-   * @extends LayoutBox
-   *
-   * @param {Object} [options] see LayoutBox
-   */
-  function VBox( options ) {
+/**
+ * @public
+ * @constructor
+ * @extends LayoutBox
+ *
+ * @param {Object} [options] see LayoutBox
+ */
+function VBox( options ) {
 
-    options = options || {};
+  options = options || {};
 
-    assert && assert( Object.getPrototypeOf( options ) === Object.prototype,
-      'Extra prototype on Node options object is a code smell' );
+  assert && assert( Object.getPrototypeOf( options ) === Object.prototype,
+    'Extra prototype on Node options object is a code smell' );
 
-    assert && assert( !options.orientation, 'VBox sets orientation' );
-    options.orientation = 'vertical';
+  assert && assert( !options.orientation, 'VBox sets orientation' );
+  options.orientation = 'vertical';
 
-    LayoutBox.call( this, options );
-  }
+  LayoutBox.call( this, options );
+}
 
-  scenery.register( 'VBox', VBox );
+scenery.register( 'VBox', VBox );
 
-  return inherit( LayoutBox, VBox );
-} );
+inherit( LayoutBox, VBox );
+export default VBox;

@@ -24,7 +24,6 @@
   </script>
 
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
-  <script data-main="../js/config.js" src="../../sherpa/lib/require-2.3.6.js"></script>
 
   <style type="text/css">
     .testname {
@@ -108,19 +107,22 @@
 
 <h1>Scenery Renderer Comparison</h1>
 
-<script>
-  require( [ 'config' ], function() {
-    require( [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main' ], function( scenery, kite, dot, phetCore ) {
-      const ShaderProgram = require( 'SCENERY/util/ShaderProgram' );
-      var scratchFloatArray = new Float32Array( 9 );
+<script type="module">
+  import scenery from '../js/main.js';
+  import phetCore from '../../phet-core/js/main.js';
+  import dot from '../../dot/js/main.js';
+  import kite from '../../kite/js/main.js';
 
-      var testCases = [
-        {
-          name: 'simple-blue-rectangle',
-          width: 200,
-          height: 200,
-          draw: function( scene, updateDisplayCallback ) {
-            scene.addChild( new scenery.Rectangle( 50, 50, 100, 100, {
+  const ShaderProgram = require( 'SCENERY/util/ShaderProgram' );
+  var scratchFloatArray = new Float32Array( 9 );
+
+  var testCases = [
+    {
+      name: 'simple-blue-rectangle',
+      width: 200,
+      height: 200,
+      draw: function( scene, updateDisplayCallback ) {
+        scene.addChild( new scenery.Rectangle( 50, 50, 100, 100, {
               fill: 'blue'
             } ) );
           },
@@ -1018,4 +1020,3 @@
 </script>
 
 </body>
-</html>

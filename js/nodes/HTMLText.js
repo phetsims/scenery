@@ -6,34 +6,30 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( require => {
-  'use strict';
+import inherit from '../../../phet-core/js/inherit.js';
+import scenery from '../scenery.js';
+import Text from './Text.js'; // inherits from Text
 
-  const inherit = require( 'PHET_CORE/inherit' );
-  const scenery = require( 'SCENERY/scenery' );
-  const Text = require( 'SCENERY/nodes/Text' ); // inherits from Text
+/**
+ * @public
+ * @constructor
+ * @extends Text
+ *
+ * NOTE: Currently does not properly handle multi-line (<br>) text height, since it expects DOM text that will be an
+ * inline element
+ *
+ * @param {string} text - The HTML-styled text to display
+ * @param {Object} [options] - Passed to Text/Node
+ */
+function HTMLText( text, options ) {
+  // internal flag for Text
+  this._isHTML = true;
 
-  /**
-   * @public
-   * @constructor
-   * @extends Text
-   *
-   * NOTE: Currently does not properly handle multi-line (<br>) text height, since it expects DOM text that will be an
-   * inline element
-   *
-   * @param {string} text - The HTML-styled text to display
-   * @param {Object} [options] - Passed to Text/Node
-   */
-  function HTMLText( text, options ) {
-    // internal flag for Text
-    this._isHTML = true;
+  Text.call( this, text, options );
+}
 
-    Text.call( this, text, options );
-  }
+scenery.register( 'HTMLText', HTMLText );
 
-  scenery.register( 'HTMLText', HTMLText );
+inherit( Text, HTMLText );
 
-  inherit( Text, HTMLText );
-
-  return HTMLText;
-} );
+export default HTMLText;

@@ -9,61 +9,57 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( require => {
-  'use strict';
+import inherit from '../../../phet-core/js/inherit.js';
+import SVGPattern from '../display/SVGPattern.js';
+import scenery from '../scenery.js';
+import Paint from './Paint.js';
 
-  const inherit = require( 'PHET_CORE/inherit' );
-  const Paint = require( 'SCENERY/util/Paint' );
-  const scenery = require( 'SCENERY/scenery' );
-  const SVGPattern = require( 'SCENERY/display/SVGPattern' );
+/**
+ * @constructor
+ * @extends Paint
+ *
+ * @param {HTMLImageElement} image - The image to use as a repeated pattern.
+ */
+function Pattern( image ) {
+  Paint.call( this );
+
+  this.image = image;
+
+  // use the global scratch canvas instead of creating a new Canvas
+  this.canvasPattern = scenery.scratchContext.createPattern( image, 'repeat' );
+}
+
+scenery.register( 'Pattern', Pattern );
+
+inherit( Paint, Pattern, {
+  // @public {boolean}
+  isPattern: true,
 
   /**
-   * @constructor
-   * @extends Paint
+   * Returns an object that can be passed to a Canvas context's fillStyle or strokeStyle.
+   * @public
+   * @override
    *
-   * @param {HTMLImageElement} image - The image to use as a repeated pattern.
+   * @returns {*}
    */
-  function Pattern( image ) {
-    Paint.call( this );
+  getCanvasStyle: function() {
+    return this.canvasPattern;
+  },
 
-    this.image = image;
+  /**
+   * Creates an SVG paint object for creating/updating the SVG equivalent definition.
+   * @public
+   *
+   * @param {SVGBlock} svgBlock
+   * @returns {SVGGradient|SVGPattern}
+   */
+  createSVGPaint: function( svgBlock ) {
+    return SVGPattern.createFromPool( this );
+  },
 
-    // use the global scratch canvas instead of creating a new Canvas
-    this.canvasPattern = scenery.scratchContext.createPattern( image, 'repeat' );
+  toString: function() {
+    return 'new scenery.Pattern( $( \'<img src="' + this.image.src + '"/>\' )[0] )';
   }
-
-  scenery.register( 'Pattern', Pattern );
-
-  inherit( Paint, Pattern, {
-    // @public {boolean}
-    isPattern: true,
-
-    /**
-     * Returns an object that can be passed to a Canvas context's fillStyle or strokeStyle.
-     * @public
-     * @override
-     *
-     * @returns {*}
-     */
-    getCanvasStyle: function() {
-      return this.canvasPattern;
-    },
-
-    /**
-     * Creates an SVG paint object for creating/updating the SVG equivalent definition.
-     * @public
-     *
-     * @param {SVGBlock} svgBlock
-     * @returns {SVGGradient|SVGPattern}
-     */
-    createSVGPaint: function( svgBlock ) {
-      return SVGPattern.createFromPool( this );
-    },
-
-    toString: function() {
-      return 'new scenery.Pattern( $( \'<img src="' + this.image.src + '"/>\' )[0] )';
-    }
-  } );
-
-  return Pattern;
 } );
+
+export default Pattern;

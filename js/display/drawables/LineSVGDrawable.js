@@ -6,70 +6,66 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( require => {
-  'use strict';
+import inherit from '../../../../phet-core/js/inherit.js';
+import Poolable from '../../../../phet-core/js/Poolable.js';
+import scenery from '../../scenery.js';
+import SVGSelfDrawable from '../SVGSelfDrawable.js';
+import LineStatefulDrawable from './LineStatefulDrawable.js';
 
-  const inherit = require( 'PHET_CORE/inherit' );
-  const LineStatefulDrawable = require( 'SCENERY/display/drawables/LineStatefulDrawable' );
-  const Poolable = require( 'PHET_CORE/Poolable' );
-  const scenery = require( 'SCENERY/scenery' );
-  const SVGSelfDrawable = require( 'SCENERY/display/SVGSelfDrawable' );
+// TODO: change this based on memory and performance characteristics of the platform
+const keepSVGLineElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
 
-  // TODO: change this based on memory and performance characteristics of the platform
-  const keepSVGLineElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
+/*---------------------------------------------------------------------------*
+ * SVG Rendering
+ *----------------------------------------------------------------------------*/
 
-  /*---------------------------------------------------------------------------*
-   * SVG Rendering
-   *----------------------------------------------------------------------------*/
+/**
+ * A generated SVGSelfDrawable whose purpose will be drawing our Line. One of these drawables will be created
+ * for each displayed instance of a Line.
+ * @constructor
+ *
+ * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+ * @param {Instance} instance
+ */
+function LineSVGDrawable( renderer, instance ) {
+  // Super-type initialization
+  this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGLineElements ); // usesPaint: true
 
+  // @protected {SVGLineElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
+  this.svgElement = this.svgElement || document.createElementNS( scenery.svgns, 'line' );
+}
+
+scenery.register( 'LineSVGDrawable', LineSVGDrawable );
+
+inherit( SVGSelfDrawable, LineSVGDrawable, {
   /**
-   * A generated SVGSelfDrawable whose purpose will be drawing our Line. One of these drawables will be created
-   * for each displayed instance of a Line.
-   * @constructor
+   * Updates the SVG elements so that they will appear like the current node's representation.
+   * @protected
    *
-   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-   * @param {Instance} instance
+   * Implements the interface for SVGSelfDrawable (and is called from the SVGSelfDrawable's update).
    */
-  function LineSVGDrawable( renderer, instance ) {
-    // Super-type initialization
-    this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGLineElements ); // usesPaint: true
+  updateSVGSelf: function() {
+    const line = this.svgElement;
 
-    // @protected {SVGLineElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
-    this.svgElement = this.svgElement || document.createElementNS( scenery.svgns, 'line' );
-  }
-
-  scenery.register( 'LineSVGDrawable', LineSVGDrawable );
-
-  inherit( SVGSelfDrawable, LineSVGDrawable, {
-    /**
-     * Updates the SVG elements so that they will appear like the current node's representation.
-     * @protected
-     *
-     * Implements the interface for SVGSelfDrawable (and is called from the SVGSelfDrawable's update).
-     */
-    updateSVGSelf: function() {
-      const line = this.svgElement;
-
-      if ( this.dirtyX1 ) {
-        line.setAttribute( 'x1', this.node._x1 );
-      }
-      if ( this.dirtyY1 ) {
-        line.setAttribute( 'y1', this.node._y1 );
-      }
-      if ( this.dirtyX2 ) {
-        line.setAttribute( 'x2', this.node._x2 );
-      }
-      if ( this.dirtyY2 ) {
-        line.setAttribute( 'y2', this.node._y2 );
-      }
-
-      // Apply any fill/stroke changes to our element.
-      this.updateFillStrokeStyle( line );
+    if ( this.dirtyX1 ) {
+      line.setAttribute( 'x1', this.node._x1 );
     }
-  } );
-  LineStatefulDrawable.mixInto( LineSVGDrawable );
+    if ( this.dirtyY1 ) {
+      line.setAttribute( 'y1', this.node._y1 );
+    }
+    if ( this.dirtyX2 ) {
+      line.setAttribute( 'x2', this.node._x2 );
+    }
+    if ( this.dirtyY2 ) {
+      line.setAttribute( 'y2', this.node._y2 );
+    }
 
-  Poolable.mixInto( LineSVGDrawable );
-
-  return LineSVGDrawable;
+    // Apply any fill/stroke changes to our element.
+    this.updateFillStrokeStyle( line );
+  }
 } );
+LineStatefulDrawable.mixInto( LineSVGDrawable );
+
+Poolable.mixInto( LineSVGDrawable );
+
+export default LineSVGDrawable;

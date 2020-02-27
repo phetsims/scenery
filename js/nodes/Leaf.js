@@ -6,42 +6,38 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( require => {
-  'use strict';
+import inheritance from '../../../phet-core/js/inheritance.js';
+import scenery from '../scenery.js';
+import Node from './Node.js';
 
-  const inheritance = require( 'PHET_CORE/inheritance' );
-  const Node = require( 'SCENERY/nodes/Node' );
-  const scenery = require( 'SCENERY/scenery' );
+const Leaf = {
+  /**
+   * Removes the capability to insert children when this is mixed into a type.
+   * @public
+   * @trait {Node}
+   *
+   * @param {function} type - The type (constructor) whose prototype we'll modify so that it can't have children.
+   */
+  mixInto: function( type ) {
+    assert && assert( _.includes( inheritance( type ), Node ) );
 
-  const Leaf = {
+    const proto = type.prototype;
+
     /**
-     * Removes the capability to insert children when this is mixed into a type.
-     * @public
-     * @trait {Node}
-     *
-     * @param {function} type - The type (constructor) whose prototype we'll modify so that it can't have children.
+     * @override
      */
-    mixInto: function( type ) {
-      assert && assert( _.includes( inheritance( type ), Node ) );
+    proto.insertChild = function( index, node ) {
+      throw new Error( 'Attempt to insert child into Leaf' );
+    };
 
-      const proto = type.prototype;
+    /**
+     * @override
+     */
+    proto.removeChildWithIndex = function( node, indexOfChild ) {
+      throw new Error( 'Attempt to remove child from Leaf' );
+    };
+  }
+};
+scenery.register( 'Leaf', Leaf );
 
-      /**
-       * @override
-       */
-      proto.insertChild = function( index, node ) {
-        throw new Error( 'Attempt to insert child into Leaf' );
-      };
-
-      /**
-       * @override
-       */
-      proto.removeChildWithIndex = function( node, indexOfChild ) {
-        throw new Error( 'Attempt to remove child from Leaf' );
-      };
-    }
-  };
-  scenery.register( 'Leaf', Leaf );
-
-  return scenery.Leaf;
-} );
+export default scenery.Leaf;

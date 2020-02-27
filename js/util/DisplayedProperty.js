@@ -13,93 +13,90 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( require => {
-  'use strict';
+import BooleanProperty from '../../../axon/js/BooleanProperty.js';
+import scenery from '../scenery.js';
 
-  const BooleanProperty = require( 'AXON/BooleanProperty' );
-  const scenery = require( 'SCENERY/scenery' );
+class DisplayedProperty extends BooleanProperty {
+  /**
+   * @public
+   * @extends {BooleanProperty}
+   *
+   * @param {Node} node
+   * @param {Display} display
+   * @param {Object} [options] - Passed through to the BooleanProperty
+   */
+  constructor( node, display, options ) {
+    super( false, options );
 
-  class DisplayedProperty extends BooleanProperty {
-    /**
-     * @public
-     * @extends {BooleanProperty}
-     *
-     * @param {Node} node
-     * @param {Display} display
-     * @param {Object} [options] - Passed through to the BooleanProperty
-     */
-    constructor( node, display, options ) {
-      super( false, options );
+    // @private {Node}
+    this.node = node;
 
-      // @private {Node}
-      this.node = node;
+    // @private {Display}
+    this.display = display;
 
-      // @private {Display}
-      this.display = display;
+    // @private {function}
+    this.updateListener = this.updateValue.bind( this );
+    this.addedInstancelistener = this.addedInstance.bind( this );
+    this.removedInstancelistener = this.removedInstance.bind( this );
 
-      // @private {function}
-      this.updateListener = this.updateValue.bind( this );
-      this.addedInstancelistener = this.addedInstance.bind( this );
-      this.removedInstancelistener = this.removedInstance.bind( this );
+    node.onStatic( 'addedInstance', this.addedInstancelistener );
+    node.onStatic( 'removedInstance', this.removedInstancelistener );
 
-      node.onStatic( 'addedInstance', this.addedInstancelistener );
-      node.onStatic( 'removedInstance', this.removedInstancelistener );
-
-      // Add any instances the node may already have/
-      const instances = node.instances;
-      for ( let i = 0; i < instances.length; i++ ) {
-        this.addedInstance( instances[ i ] );
-      }
-    }
-
-    /**
-     * Checks whether the node was displayed and updates the value of this Property.
-     * @private
-     */
-    updateValue() {
-      this.value = this.node.wasDisplayed( this.display );
-    }
-
-    /**
-     * Adds a listener to one of the node's instances.
-     * @private
-     *
-     * @param {Instance} instance
-     */
-    addedInstance( instance ) {
-      instance.onStatic( 'visibility', this.updateListener );
-      this.updateValue();
-    }
-
-    /**
-     * Removes a listener from one of the node's instances.
-     * @private
-     *
-     * @param {Instance} instance
-     */
-    removedInstance( instance ) {
-      instance.offStatic( 'visibility', this.updateListener );
-      this.updateValue();
-    }
-
-    /**
-     * Releases references to avoid memory leaks.
-     * @public
-     * @override
-     */
-    dispose() {
-      // Remove any instances the node may still have
-      const instances = this.node.instances;
-      for ( let i = 0; i < instances.length; i++ ) {
-        this.removedInstance( instances[ i ] );
-      }
-
-      this.node.offStatic( 'addedInstance', this.addedInstancelistener );
-      this.node.offStatic( 'removedInstance', this.removedInstancelistener );
-
-      super.dispose();
+    // Add any instances the node may already have/
+    const instances = node.instances;
+    for ( let i = 0; i < instances.length; i++ ) {
+      this.addedInstance( instances[ i ] );
     }
   }
 
-  return scenery.register( 'DisplayedProperty', DisplayedProperty );
-} );
+  /**
+   * Checks whether the node was displayed and updates the value of this Property.
+   * @private
+   */
+  updateValue() {
+    this.value = this.node.wasDisplayed( this.display );
+  }
+
+  /**
+   * Adds a listener to one of the node's instances.
+   * @private
+   *
+   * @param {Instance} instance
+   */
+  addedInstance( instance ) {
+    instance.onStatic( 'visibility', this.updateListener );
+    this.updateValue();
+  }
+
+  /**
+   * Removes a listener from one of the node's instances.
+   * @private
+   *
+   * @param {Instance} instance
+   */
+  removedInstance( instance ) {
+    instance.offStatic( 'visibility', this.updateListener );
+    this.updateValue();
+  }
+
+  /**
+   * Releases references to avoid memory leaks.
+   * @public
+   * @override
+   */
+  dispose() {
+    // Remove any instances the node may still have
+    const instances = this.node.instances;
+    for ( let i = 0; i < instances.length; i++ ) {
+      this.removedInstance( instances[ i ] );
+    }
+
+    this.node.offStatic( 'addedInstance', this.addedInstancelistener );
+    this.node.offStatic( 'removedInstance', this.removedInstancelistener );
+
+    super.dispose();
+  }
+}
+
+scenery.register( 'DisplayedProperty', DisplayedProperty );
+export default DisplayedProperty;

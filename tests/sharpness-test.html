@@ -14,7 +14,6 @@
   <script src="../../sherpa/lib/himalaya-0.2.7.js"></script>
   <script src="../../sherpa/lib/he-1.1.1.js"></script>
 
-  <script data-main="../js/config.js" src="../../sherpa/lib/require-2.3.6.js"></script>
 </head>
 <body>
 
@@ -24,44 +23,47 @@
 <label for="mipmap">Mipmap</label>
 <input type="checkbox" autocomplete="off" id="mipmapCheckbox" name="mipmap" checked></input>
 
-<script>
-  require( [ 'config' ], function() {
-    require( [ 'main', 'KITE/main', 'DOT/main', 'AXON/main', 'PHET_CORE/main' ], function( scenery, kite, dot, axon, phetCore ) {
-      window.scenery = scenery;
-      window.kite = kite;
-      window.dot = dot;
-      window.axon = axon;
-      window.phetCore = phetCore;
+<script type="module">
+  import scenery from '../js/main.js';
+  import phetCore from '../../phet-core/js/main.js';
+  import axon from '../../axon/js/main.js';
+  import dot from '../../dot/js/main.js';
+  import kite from '../../kite/js/main.js';
 
-      var scene = new scenery.Node();
-      var display = new scenery.Display( scene, {
-        width: 1024,
-        height: 1024,
-        backgroundColor: '#eee',accessibility:true
-      } );
+  window.scenery = scenery;
+  window.kite = kite;
+  window.dot = dot;
+  window.axon = axon;
+  window.phetCore = phetCore;
 
-      document.body.appendChild( display.domElement );
-      display.domElement.style.position = 'relative';
+  var scene = new scenery.Node();
+  var display = new scenery.Display( scene, {
+    width: 1024,
+    height: 1024,
+    backgroundColor: '#eee', accessibility: true
+  } );
 
-      var image = new scenery.Image( '../assets/sharpness-test-pattern.png', {
-        mipmap: true,
-        initialLevel: 7,
-        maxLevel: 7
-      } );
-      scene.addChild( image );
+  document.body.appendChild( display.domElement );
+  display.domElement.style.position = 'relative';
 
-      display.updateDisplay();
+  var image = new scenery.Image( '../assets/sharpness-test-pattern.png', {
+    mipmap: true,
+    initialLevel: 7,
+    maxLevel: 7
+  } );
+  scene.addChild( image );
 
-      function updateMipmap() {
-        image.mipmap = document.getElementById( 'mipmapCheckbox' ).checked;
-      }
-      document.getElementById( 'mipmapCheckbox' ).addEventListener( 'click', updateMipmap );
+  display.updateDisplay();
 
-      display.updateOnRequestAnimationFrame( function() {
-        image.setScaleMagnitude( Math.pow( 2, parseFloat( document.getElementById( 'scaleSlider' ).value ) / 10 ) );
-        display.updateDisplay();
-      } );
-    } );
+  function updateMipmap() {
+    image.mipmap = document.getElementById( 'mipmapCheckbox' ).checked;
+  }
+
+  document.getElementById( 'mipmapCheckbox' ).addEventListener( 'click', updateMipmap );
+
+  display.updateOnRequestAnimationFrame( function() {
+    image.setScaleMagnitude( Math.pow( 2, parseFloat( document.getElementById( 'scaleSlider' ).value ) / 10 ) );
+    display.updateDisplay();
   } );
 </script>
 </body>

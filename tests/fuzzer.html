@@ -30,7 +30,6 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
     window.assertions.enableAssertSlow();
   </script>
 
-  <script data-main="../js/config.js" src="../../sherpa/lib/require-2.3.6.js"></script>
 
   <style>
 
@@ -39,7 +38,7 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
 </head>
 <body>
 
-<script>
+<script type="module">
   var INITIAL_WIDTH = 640;
   var INITIAL_HEIGHT = 480;
   var INITIAL_BACKGROUND_COLOR = '#eee';
@@ -52,459 +51,465 @@ Will copy it to the console so it can be copy-pasted to reproduce elsewhere.
 
   var fuzzing = true;
 
-  require( [ 'config' ], function() {
-    require( [ 'main', 'KITE/main', 'DOT/main', 'PHET_CORE/main' ], function( scenery, kite, dot, phetCore ) {
-      window.scenery = scenery;
-      window.kite = kite;
-      window.dot = dot;
-      window.phetCore = phetCore;
+  import scenery from '../js/main.js';
+  import phetCore from '../../phet-core/js/main.js';
+  import dot from '../../dot/js/main.js';
+  import kite from '../../kite/js/main.js';
 
-      console.log( 'loaded' );
+  window.scenery = scenery;
+  window.kite = kite;
+  window.dot = dot;
+  window.phetCore = phetCore;
 
-      function randomString() {
-        var result = '';
+  console.log( 'loaded' );
 
-        while ( Math.random() > 0.1 ) {
-          result += String.fromCharCode( 97 + Math.floor( Math.random() * 26 ) );
-        }
+  function randomString() {
+    var result = '';
 
-        return result;
+    while ( Math.random() > 0.1 ) {
+      result += String.fromCharCode( 97 + Math.floor( Math.random() * 26 ) );
+    }
+
+    return result;
+  }
+
+  var fuzzLog = window._fuzzLog = [];
+
+  var nodes = window.nodes = {};
+  var paths = window.paths = {};
+  var texts = window.texts = {};
+  var shapes = window.shapes = {};
+  var paintables = window.paintables = {};
+  var paints = window.paints = {};
+
+  fuzzLog.push( 'var scene = new scenery.Node();' );
+  nodes.scene = new scenery.Node();
+
+  fuzzLog.push( 'var display = new scenery.Display( scene, { ' +
+                'width: ' + INITIAL_WIDTH + ', ' +
+                'height: ' + INITIAL_HEIGHT + ', ' +
+                'backgroundColor: \'' + INITIAL_BACKGROUND_COLOR + '\'' +
+                ' } );' );
+  var display = window.display = new scenery.Display( nodes.scene, {
+    width: INITIAL_WIDTH,
+    height: INITIAL_HEIGHT,
+    backgroundColor: INITIAL_BACKGROUND_COLOR
+  } );
+
+  fuzzLog.push( 'display.updateDisplay();' );
+  display.updateDisplay();
+
+  fuzzLog.push( 'document.body.appendChild( display.domElement );' );
+  document.body.appendChild( display.domElement );
+
+  var i;
+  for ( i = 0; i < Math.ceil( 2 * NODE_COUNT_MULTIPLIER ); i++ ) {
+    fuzzLog.push( 'var node' + i + ' = new scenery.Node();' );
+    nodes[ 'node' + i ] = new scenery.Node();
+  }
+  for ( i = 0; i < Math.ceil( 6 * NODE_COUNT_MULTIPLIER ); i++ ) {
+    fuzzLog.push( 'var path' + i + ' = new scenery.Path( null );' );
+    paths[ 'path' + i ] = paintables[ 'path' + i ] = nodes[ 'path' + i ] = new scenery.Path( null );
+  }
+  for ( i = 0; i < Math.ceil( 4 * NODE_COUNT_MULTIPLIER ); i++ ) {
+    fuzzLog.push( 'var text' + i + ' = new scenery.Text( \'' + i + '!\' );' );
+    texts[ 'text' + i ] = paintables[ 'text' + i ] = nodes[ 'text' + i ] = new scenery.Text( i + '!' );
+  }
+
+  fuzzLog.push( 'var shape0 = null;' );
+  shapes.shape0 = null;
+  fuzzLog.push( 'var shape1 = kite.Shape.regularPolygon( 6, 50 );' );
+  shapes.shape1 = kite.Shape.regularPolygon( 6, 50 );
+  fuzzLog.push( 'var shape2 = kite.Shape.circle( 40 );' );
+  shapes.shape2 = kite.Shape.circle( 40 );
+  fuzzLog.push( 'var shape3 = kite.Shape.lineSegment( 0, 0, 50, 100 );' );
+  shapes.shape3 = kite.Shape.lineSegment( 0, 0, 50, 100 );
+
+  fuzzLog.push( 'var paint0 = null;' );
+  paints.paint0 = null;
+  fuzzLog.push( 'var paint1 = \'red\';' );
+  paints.paint1 = 'red';
+  fuzzLog.push( 'var paint2 = \'#aa00ee\';' );
+  paints.paint2 = '#aa00ee';
+  fuzzLog.push( 'var paint3 = new scenery.Color( 0, 0, 255, 0.8 );' );
+  paints.paint3 = new scenery.Color( 0, 0, 255, 0.8 );
+  fuzzLog.push( 'var paint4 = new scenery.LinearGradient( -50, 0, 50, 0 ).addColorStop( 0, \'white\' ).addColorStop( 1, \'black\' );' );
+  paints.paint4 = new scenery.LinearGradient( -50, 0, 50, 0 ).addColorStop( 0, 'white' ).addColorStop( 1, 'black' );
+  fuzzLog.push( 'var paint5 = new scenery.RadialGradient( 0, 0, 0, 0, 0, 50 ).addColorStop( 0, \'red\' ).addColorStop( 1, \'black\' );' );
+  paints.paint5 = new scenery.RadialGradient( 0, 0, 0, 0, 0, 50 ).addColorStop( 0, 'red' ).addColorStop( 1, 'black' );
+
+  function randomName( names ) {
+    return names[ _.random( 0, names.length - 1 ) ];
+  }
+
+  function nameOf( item, optionalCollection ) {
+    var collection = optionalCollection || nodes;
+
+    var names = Object.keys( collection );
+    for ( var i = 0; i < names.length; i++ ) {
+      if ( collection[ names[ i ] ] === item ) {
+        return names[ i ];
+      }
+    }
+    throw new Error( 'bad item' );
+  }
+
+  function randomFromType( type ) {
+    return type[ randomName( Object.keys( type ) ) ];
+  }
+
+  function randomNode() {
+    return randomFromType( nodes );
+  }
+
+  function randomText() {
+    return randomFromType( texts );
+  }
+
+  function randomPath() {
+    return randomFromType( paths );
+  }
+
+  function randomPaintable() {
+    return randomFromType( paintables );
+  }
+
+  function randomPaint() {
+    return randomFromType( paints );
+  }
+
+  function randomShape() {
+    return randomFromType( shapes );
+  }
+
+  function childChange() {
+    var r = Math.random();
+
+    var a = randomNode();
+
+    if ( r < 0.5 ) {
+      var b = randomNode();
+
+      // have the scene not be the leaf as often
+      if ( b === nodes.scene && Math.random() < 0.8 ) {
+        return;
       }
 
-      var fuzzLog = window._fuzzLog = [];
+      // attempt to add a node to another one
+      if ( a.canAddChild( b ) ) {
+        // insert it into a random place
+        var index = _.random( 0, a.children.length );
+        fuzzLog.push( nameOf( a ) + '.insertChild( ' + index + ', ' + nameOf( b ) + ' );' );
+        a.insertChild( index, b );
+      }
+    }
+    else {
+      if ( a.children.length ) {
+        var child = a.children[ _.random( 0, a.children.length - 1 ) ];
+        fuzzLog.push( nameOf( a ) + '.removeChild( ' + nameOf( child ) + ' );' );
+        a.removeChild( child );
+      }
+    }
+  }
 
-      var nodes = window.nodes = {};
-      var paths = window.paths = {};
-      var texts = window.texts = {};
-      var shapes = window.shapes = {};
-      var paintables = window.paintables = {};
-      var paints = window.paints = {};
+  function rendererChange() {
+    var a = randomNode();
 
-      fuzzLog.push( 'var scene = new scenery.Node();' );
-      nodes.scene = new scenery.Node();
+    var r = Math.random();
 
-      fuzzLog.push( 'var display = new scenery.Display( scene, { ' +
-        'width: ' + INITIAL_WIDTH + ', ' +
-        'height: ' + INITIAL_HEIGHT + ', '+
-        'backgroundColor: \'' + INITIAL_BACKGROUND_COLOR + '\'' +
-        ' } );' );
-      var display = window.display = new scenery.Display( nodes.scene, {
-        width: INITIAL_WIDTH,
-        height: INITIAL_HEIGHT,
-        backgroundColor: INITIAL_BACKGROUND_COLOR
-      } );
+    var renderer;
+
+    if ( r < 0.75 ) {
+      renderer = null;
+    }
+    else if ( r < 0.80 ) {
+      renderer = 'svg';
+    }
+    else if ( r < 0.85 ) {
+      renderer = 'canvas';
+    }
+    else if ( r < 0.90 ) {
+      renderer = 'dom';
+    }
+    else {
+      renderer = null; // TODO: WebGL fuzzing
+    }
+
+    if ( a.renderer !== renderer ) {
+      fuzzLog.push( nameOf( a ) + '.renderer = ' + JSON.stringify( renderer ) + ';' );
+      a.renderer = renderer;
+    }
+  }
+
+  function sizeChange() {
+    var width = Math.floor( MIN_WIDTH + ( MAX_WIDTH - MIN_WIDTH ) * Math.random() );
+    var height = Math.floor( MIN_HEIGHT + ( MAX_HEIGHT - MIN_HEIGHT ) * Math.random() );
+
+    display.setWidthHeight( width, height );
+  }
+
+  function shapeChange() {
+    var path = randomPath();
+    var shape = randomShape();
+
+    if ( path.shape !== shape ) {
+      fuzzLog.push( nameOf( path ) + '.shape = ' + nameOf( shape, shapes ) + ';' );
+      path.shape = shape;
+    }
+  }
+
+  function paintChange() {
+    var paintable = randomPaintable();
+    var g = Math.floor( Math.random() * 256 );
+    var r = Math.floor( g + ( 255 - g ) * Math.random() );
+    var b = Math.floor( g + ( 255 - g ) * Math.random() );
+    var paint = Math.random() < 0.5 ? randomPaint() : 'rgba(' + r + ',' + g + ',' + b + ',' + Math.random() + ')';
+
+    var type = Math.random() < 0.7 ? 'fill' : 'stroke';
+
+    if ( paintable[ type ] !== paint ) {
+      fuzzLog.push( nameOf( paintable ) + '.' + type + ' = ' + ( typeof paint === 'string' ? JSON.stringify( paint ) : nameOf( paint, paints ) ) + ';' );
+      paintable[ type ] = paint;
+    }
+  }
+
+  function textChange() {
+    var text = randomText();
+    var string = randomString();
+
+    fuzzLog.push( nameOf( text ) + '.text = ' + JSON.stringify( string ) + ';' );
+    text.text = string;
+  }
+
+  function opacityChange() {
+    var node = randomNode();
+    var r = Math.random();
+
+    var opacity = r > 0.1 ? 1 : r * 10; // 90% chance =1, 10% chance uniform from 0 to 1.
+    if ( node.opacity !== opacity ) {
+      fuzzLog.push( nameOf( node ) + '.opacity = ' + opacity + ';' );
+      node.opacity = opacity;
+    }
+  }
+
+  function directTransformChange() {
+    var node = randomNode();
+
+    var matrix;
+    var matrixString;
+    var a = Math.random();
+    var b = Math.random();
+
+    if ( a < 0.4 ) {
+      var x = Math.random() * 200 - 100;
+      var y = Math.random() * 200 - 100;
+      matrix = dot.Matrix3.translation( x, y );
+      matrixString = 'dot.Matrix3.translation( ' + x + ', ' + y + ' )';
+    }
+    else if ( a < 0.8 ) {
+      // slightly scales up, but random => 0 undoes random => 1
+      var phi = 1.61803398875;
+      var scale = Math.random() + phi - 1;
+      matrix = dot.Matrix3.scaling( scale );
+      matrixString = 'dot.Matrix3.scaling( ' + scale + ' )';
+    }
+    else {
+      var rotation = Math.random() * Math.PI * 2;
+      matrix = dot.Matrix3.rotation2( rotation );
+      matrixString = 'dot.Matrix3.rotation2( ' + rotation + ' )';
+    }
+
+    if ( b < 0.333 ) {
+      fuzzLog.push( nameOf( node ) + '.transform.setMatrix( ' + matrixString + ' );' );
+      node.transform.setMatrix( matrix );
+    }
+    else if ( b < 0.666 ) {
+      fuzzLog.push( nameOf( node ) + '.transform.prepend( ' + matrixString + ' );' );
+      node.transform.prepend( matrix );
+    }
+    else {
+      fuzzLog.push( nameOf( node ) + '.transform.append( ' + matrixString + ' );' );
+      node.transform.append( matrix );
+    }
+  }
+
+  ( function step() {
+    requestAnimationFrame( step );
+
+    if ( fuzzing ) {
+      while ( Math.random() < 0.9 ) {
+        var r = Math.random();
+
+        if ( r < 0.01 ) {
+          sizeChange();
+        }
+        else if ( r < 0.5 ) {
+          childChange();
+        }
+        else if ( r < 0.7 ) {
+          directTransformChange();
+        }
+        else if ( r < 0.75 ) {
+          shapeChange();
+        }
+        else if ( r < 0.85 ) {
+          paintChange();
+        }
+        else if ( r < 0.90 ) {
+          textChange();
+        }
+        else if ( r < 0.95 ) {
+          opacityChange();
+        }
+        else {
+          rendererChange();
+        }
+      }
 
       fuzzLog.push( 'display.updateDisplay();' );
       display.updateDisplay();
+    }
+  } )();
 
-      fuzzLog.push( 'document.body.appendChild( display.domElement );' );
-      document.body.appendChild( display.domElement );
+  window.startFuzz = function() {
+    fuzzing = true;
+  };
+  window.endFuzz = function() {
+    fuzzing = false;
+  };
 
-      var i;
-      for ( i = 0; i < Math.ceil( 2 * NODE_COUNT_MULTIPLIER ); i++ ) {
-        fuzzLog.push( 'var node' + i + ' = new scenery.Node();' );
-        nodes[ 'node' + i ] = new scenery.Node();
-      }
-      for ( i = 0; i < Math.ceil( 6 * NODE_COUNT_MULTIPLIER ); i++ ) {
-        fuzzLog.push( 'var path' + i + ' = new scenery.Path( null );' );
-        paths[ 'path' + i ] = paintables[ 'path' + i ] = nodes[ 'path' + i ] = new scenery.Path( null );
-      }
-      for ( i = 0; i < Math.ceil( 4 * NODE_COUNT_MULTIPLIER ); i++ ) {
-        fuzzLog.push( 'var text' + i + ' = new scenery.Text( \'' + i + '!\' );' );
-        texts[ 'text' + i ] = paintables[ 'text' + i ] = nodes[ 'text' + i ] = new scenery.Text( i + '!' );
-      }
-
-      fuzzLog.push( 'var shape0 = null;' );
-      shapes.shape0 = null;
-      fuzzLog.push( 'var shape1 = kite.Shape.regularPolygon( 6, 50 );' );
-      shapes.shape1 = kite.Shape.regularPolygon( 6, 50 );
-      fuzzLog.push( 'var shape2 = kite.Shape.circle( 40 );' );
-      shapes.shape2 = kite.Shape.circle( 40 );
-      fuzzLog.push( 'var shape3 = kite.Shape.lineSegment( 0, 0, 50, 100 );' );
-      shapes.shape3 = kite.Shape.lineSegment( 0, 0, 50, 100 );
-
-      fuzzLog.push( 'var paint0 = null;' );
-      paints.paint0 = null;
-      fuzzLog.push( 'var paint1 = \'red\';' );
-      paints.paint1 = 'red';
-      fuzzLog.push( 'var paint2 = \'#aa00ee\';' );
-      paints.paint2 = '#aa00ee';
-      fuzzLog.push( 'var paint3 = new scenery.Color( 0, 0, 255, 0.8 );' );
-      paints.paint3 = new scenery.Color( 0, 0, 255, 0.8 );
-      fuzzLog.push( 'var paint4 = new scenery.LinearGradient( -50, 0, 50, 0 ).addColorStop( 0, \'white\' ).addColorStop( 1, \'black\' );' );
-      paints.paint4 = new scenery.LinearGradient( -50, 0, 50, 0 ).addColorStop( 0, 'white' ).addColorStop( 1, 'black' );
-      fuzzLog.push( 'var paint5 = new scenery.RadialGradient( 0, 0, 0, 0, 0, 50 ).addColorStop( 0, \'red\' ).addColorStop( 1, \'black\' );' );
-      paints.paint5 = new scenery.RadialGradient( 0, 0, 0, 0, 0, 50 ).addColorStop( 0, 'red' ).addColorStop( 1, 'black' );
-
-      function randomName( names ) {
-        return names[ _.random( 0, names.length - 1 ) ];
-      }
-
-      function nameOf( item, optionalCollection ) {
-        var collection = optionalCollection || nodes;
-
-        var names = Object.keys( collection );
-        for ( var i = 0; i < names.length; i++ ) {
-          if ( collection[names[i]] === item ) {
-            return names[i];
-          }
-        }
-        throw new Error( 'bad item' );
-      }
-
-      function randomFromType( type ) {
-        return type[randomName( Object.keys( type ) )];
-      }
-      function randomNode() {
-        return randomFromType( nodes );
-      }
-      function randomText() {
-        return randomFromType( texts );
-      }
-      function randomPath() {
-        return randomFromType( paths );
-      }
-      function randomPaintable() {
-        return randomFromType( paintables );
-      }
-      function randomPaint() {
-        return randomFromType( paints );
-      }
-      function randomShape() {
-        return randomFromType( shapes );
-      }
-
-      function childChange() {
-        var r = Math.random();
-
-        var a = randomNode();
-
-        if ( r < 0.5 ) {
-          var b = randomNode();
-
-          // have the scene not be the leaf as often
-          if ( b === nodes.scene && Math.random() < 0.8 ) {
-            return;
-          }
-
-          // attempt to add a node to another one
-          if ( a.canAddChild( b ) ) {
-            // insert it into a random place
-            var index = _.random( 0, a.children.length );
-            fuzzLog.push( nameOf( a ) + '.insertChild( ' + index + ', ' + nameOf( b ) + ' );' );
-            a.insertChild( index, b );
-          }
-        }
-        else {
-          if ( a.children.length ) {
-            var child = a.children[_.random( 0, a.children.length - 1 )];
-            fuzzLog.push( nameOf( a ) + '.removeChild( ' + nameOf( child ) + ' );' );
-            a.removeChild( child );
-          }
-        }
-      }
-
-      function rendererChange() {
-        var a = randomNode();
-
-        var r = Math.random();
-
-        var renderer;
-
-        if ( r < 0.75 ) {
-          renderer = null;
-        }
-        else if ( r < 0.80 ) {
-          renderer = 'svg';
-        }
-        else if ( r < 0.85 ) {
-          renderer = 'canvas';
-        }
-        else if ( r < 0.90 ) {
-          renderer = 'dom';
-        }
-        else {
-          renderer = null; // TODO: WebGL fuzzing
-        }
-
-        if ( a.renderer !== renderer ) {
-          fuzzLog.push( nameOf( a ) + '.renderer = ' + JSON.stringify( renderer ) + ';' );
-          a.renderer = renderer;
-        }
-      }
-
-      function sizeChange() {
-        var width = Math.floor( MIN_WIDTH + ( MAX_WIDTH - MIN_WIDTH ) * Math.random() );
-        var height = Math.floor( MIN_HEIGHT + ( MAX_HEIGHT - MIN_HEIGHT ) * Math.random() );
-
-        display.setWidthHeight( width, height );
-      }
-
-      function shapeChange() {
-        var path = randomPath();
-        var shape = randomShape();
-
-        if ( path.shape !== shape ) {
-          fuzzLog.push( nameOf( path ) + '.shape = ' + nameOf( shape, shapes ) + ';' );
-          path.shape = shape;
-        }
-      }
-
-      function paintChange() {
-        var paintable = randomPaintable();
-        var g = Math.floor( Math.random() * 256 );
-        var r = Math.floor( g + ( 255 - g ) * Math.random() );
-        var b = Math.floor( g + ( 255 - g ) * Math.random() );
-        var paint = Math.random() < 0.5 ? randomPaint() : 'rgba(' + r + ',' + g + ',' + b + ',' + Math.random() + ')';
-
-        var type = Math.random() < 0.7 ? 'fill' : 'stroke';
-
-        if ( paintable[type] !== paint ) {
-          fuzzLog.push( nameOf( paintable ) + '.' + type + ' = ' + ( typeof paint === 'string' ? JSON.stringify( paint ) : nameOf( paint, paints ) ) + ';' );
-          paintable[type] = paint;
-        }
-      }
-
-      function textChange() {
-        var text = randomText();
-        var string = randomString();
-
-        fuzzLog.push( nameOf( text ) + '.text = ' + JSON.stringify( string ) + ';' );
-        text.text = string;
-      }
-
-      function opacityChange() {
-        var node = randomNode();
-        var r = Math.random();
-
-        var opacity = r > 0.1 ? 1 : r * 10; // 90% chance =1, 10% chance uniform from 0 to 1.
-        if ( node.opacity !== opacity ) {
-          fuzzLog.push( nameOf( node ) + '.opacity = ' + opacity + ';' );
-          node.opacity = opacity;
-        }
-      }
-
-      function directTransformChange() {
-        var node = randomNode();
-
-        var matrix;
-        var matrixString;
-        var a = Math.random();
-        var b = Math.random();
-
-        if ( a < 0.4 ) {
-          var x = Math.random() * 200 - 100;
-          var y = Math.random() * 200 - 100;
-          matrix = dot.Matrix3.translation( x, y );
-          matrixString = 'dot.Matrix3.translation( ' + x + ', ' + y + ' )';
-        }
-        else if ( a < 0.8 ) {
-          // slightly scales up, but random => 0 undoes random => 1
-          var phi = 1.61803398875;
-          var scale = Math.random() + phi - 1;
-          matrix = dot.Matrix3.scaling( scale );
-          matrixString = 'dot.Matrix3.scaling( ' + scale + ' )';
-        }
-        else {
-          var rotation = Math.random() * Math.PI * 2;
-          matrix = dot.Matrix3.rotation2( rotation );
-          matrixString = 'dot.Matrix3.rotation2( ' + rotation + ' )';
-        }
-
-        if ( b < 0.333 ) {
-          fuzzLog.push( nameOf( node ) + '.transform.setMatrix( ' + matrixString + ' );' );
-          node.transform.setMatrix( matrix );
-        }
-        else if ( b < 0.666 ){
-          fuzzLog.push( nameOf( node ) + '.transform.prepend( ' + matrixString + ' );' );
-          node.transform.prepend( matrix );
-        }
-        else {
-          fuzzLog.push( nameOf( node ) + '.transform.append( ' + matrixString + ' );' );
-          node.transform.append( matrix );
-        }
-      }
-
-      (function step() {
-        requestAnimationFrame( step );
-
-        if ( fuzzing ) {
-          while ( Math.random() < 0.9 ) {
-            var r = Math.random();
-
-            if ( r < 0.01 ) {
-              sizeChange();
-            }
-            else if ( r < 0.5 ) {
-              childChange();
-            }
-            else if ( r < 0.7 ) {
-              directTransformChange();
-            }
-            else if ( r < 0.75 ) {
-              shapeChange();
-            }
-            else if ( r < 0.85 ) {
-              paintChange();
-            }
-            else if ( r < 0.90 ) {
-              textChange();
-            }
-            else if ( r < 0.95 ) {
-              opacityChange();
-            }
-            else {
-              rendererChange();
-            }
-          }
-
-          fuzzLog.push( 'display.updateDisplay();' );
-          display.updateDisplay();
-        }
-      })();
-
-      window.startFuzz = function() {
-        fuzzing = true;
-      };
-      window.endFuzz = function() {
-        fuzzing = false;
-      };
-
-      phetCore.extend( window, {
-        get fuzzLog() {
-          return this._fuzzLog.join( '\n' );
-        }
-      } );
-
-
-
-      /*---------------------------------------------------------------------------*
-       * Miscellaneous
-       *----------------------------------------------------------------------------*/
-
-      // window.fuzzLayers = function() {
-      //   // disable the regular step
-      //   basicSceneStep = false;
-      //   fuzzStep = true;
-
-      //   // disable the layer logging, or we'll spam ourselves to death
-      //   scenery.disableLayerLogging();
-      //   scenery.disableEventLogging();
-
-      //   var lines = [];
-      //   window.lines = lines;
-
-      //   var nodes = [];
-      //   var scene = new scenery.Scene( $( '<div>' ), { width: 640, height: 320 } );
-      //   nodes.push( scene );
-
-      //   _.times( 5, function() { nodes.push( new scenery.Node() ); } );
-      //   _.times( 10, function() { nodes.push( new scenery.Path() ); } );
-      //   // _.times( 5, function() { nodes.push( new scenery.DOM( document.createElement( 'div' ) ) ); } );
-
-      //   function name( node ) {
-      //     return node === scene ? 'scene' : node.constructor.name.toLowerCase() + node.id;
-      //   }
-
-      //   _.each( nodes, function( node ) {
-      //     if ( node !== scene ) {
-      //       lines.push( 'var ' + name( node ) + ' = ' + node.toString() + ';' );
-      //     }
-      //   } );
-
-      //   (function fuzz(){
-      //     // abort if desired
-      //     if ( !fuzzStep ) {
-      //       return;
-      //     }
-
-      //     var nodeMutators = [
-      //       {
-      //         weight: 1.0,
-      //         f: function( node ) { node.renderer = 'canvas'; },
-      //         mess: 'canvas renderer',
-      //         line: function( node ) { return name( node ) + '.renderer = \'canvas\';' }
-      //       },
-      //       {
-      //         weight: 1.0,
-      //         f: function( node ) { node.renderer = 'svg'; },
-      //         mess: 'svg renderer',
-      //         line: function( node ) { return name( node ) + '.renderer = \'svg\';' }
-      //       },
-      //       {
-      //         weight: 2.0,
-      //         f: function( node ) { node.renderer = null; },
-      //         mess: 'null renderer',
-      //         line: function( node ) { return name( node ) + '.renderer = null;' }
-      //       },
-      //       {
-      //         weight: 0.3,
-      //         f: function( node ) { node.layerSplit = true; },
-      //         mess: 'layerSplit true',
-      //         line: function( node ) { return name( node ) + '.layerSplit = true;' }
-      //       },
-      //       {
-      //         weight: 1.0,
-      //         f: function( node ) { node.layerSplit = false; },
-      //         mess: 'layerSplit false',
-      //         line: function( node ) { return name( node ) + '.layerSplit = false;' }
-      //       }
-      //     ];
-
-      //     var totalWeight = _.reduce( _.pluck( nodeMutators, 'weight' ), function( memo, num ) { return memo + num; }, 0 );
-
-      //     _.times( 20, function() {
-      //       window.beforeFuzzDebug = scene.getDebugHTML();
-      //       window.beforeFuzzSerialization = scene.toStringWithChildren( true );
-
-      //       var r = Math.random();
-
-      //       // pick two different nodes at random
-      //       var a = nodes[_.random( 0, nodes.length - 1 )];
-      //       var b = nodes[_.random( 0, nodes.length - 1 )];
-
-      //       if ( r < 0.333 ) {
-      //         // attempt to add a node to another one
-      //         if ( a.canAddChild( b ) ) {
-      //           // insert it into a random place
-      //           var index = _.random( 0, a.children.length );
-      //           window.fuzzMessage = 'inserting child ' + b.id + ' into ' + a.id + ' at index ' + index;
-      //           lines.push( name( a ) + '.insertChild( ' + index + ', ' + name( b ) + ' );' );
-      //           a.insertChild( index, b );
-      //         }
-      //       } else if( r < 0.666 ) {
-      //         if ( a.children.length ) {
-      //           var child = a.children[_.random( 0, a.children.length - 1 )];
-      //           window.fuzzMessage = 'removing child ' + child.id + ' to ' + a.id;
-      //           lines.push( name( a ) + '.removeChild( ' + name( child ) + ' );' );
-      //           a.removeChild( child );
-      //         }
-      //       } else {
-      //         // pick a random modification from the weighted list
-      //         var rr = Math.random() * totalWeight;
-      //         for ( var i = 0; i < nodeMutators.length; i++ ) {
-      //           var mutator = nodeMutators[i];
-      //           rr -= mutator.weight;
-      //           if ( rr <= 0 ) {
-      //             window.fuzzMessage = 'mutating node ' + a.id + ' with ' + mutator.mess;
-      //             lines.push( mutator.line( a ) );
-      //             mutator.f( a );
-      //             break;
-      //           }
-      //         }
-      //       }
-
-      //       scene.layerAudit();
-
-      //     } );
-      //     $( '#debug' ).html( scene.getDebugHTML() );
-
-      //     // an error above will prevent this from running
-      //     window.requestAnimationFrame( fuzz );
-      //   })();
-      // };
-    } );
+  phetCore.extend( window, {
+    get fuzzLog() {
+      return this._fuzzLog.join( '\n' );
+    }
   } );
+
+
+  /*---------------------------------------------------------------------------*
+   * Miscellaneous
+   *----------------------------------------------------------------------------*/
+
+  // window.fuzzLayers = function() {
+  //   // disable the regular step
+  //   basicSceneStep = false;
+  //   fuzzStep = true;
+
+  //   // disable the layer logging, or we'll spam ourselves to death
+  //   scenery.disableLayerLogging();
+  //   scenery.disableEventLogging();
+
+  //   var lines = [];
+  //   window.lines = lines;
+
+  //   var nodes = [];
+  //   var scene = new scenery.Scene( $( '<div>' ), { width: 640, height: 320 } );
+  //   nodes.push( scene );
+
+  //   _.times( 5, function() { nodes.push( new scenery.Node() ); } );
+  //   _.times( 10, function() { nodes.push( new scenery.Path() ); } );
+  //   // _.times( 5, function() { nodes.push( new scenery.DOM( document.createElement( 'div' ) ) ); } );
+
+  //   function name( node ) {
+  //     return node === scene ? 'scene' : node.constructor.name.toLowerCase() + node.id;
+  //   }
+
+  //   _.each( nodes, function( node ) {
+  //     if ( node !== scene ) {
+  //       lines.push( 'var ' + name( node ) + ' = ' + node.toString() + ';' );
+  //     }
+  //   } );
+
+  //   (function fuzz(){
+  //     // abort if desired
+  //     if ( !fuzzStep ) {
+  //       return;
+  //     }
+
+  //     var nodeMutators = [
+  //       {
+  //         weight: 1.0,
+  //         f: function( node ) { node.renderer = 'canvas'; },
+  //         mess: 'canvas renderer',
+  //         line: function( node ) { return name( node ) + '.renderer = \'canvas\';' }
+  //       },
+  //       {
+  //         weight: 1.0,
+  //         f: function( node ) { node.renderer = 'svg'; },
+  //         mess: 'svg renderer',
+  //         line: function( node ) { return name( node ) + '.renderer = \'svg\';' }
+  //       },
+  //       {
+  //         weight: 2.0,
+  //         f: function( node ) { node.renderer = null; },
+  //         mess: 'null renderer',
+  //         line: function( node ) { return name( node ) + '.renderer = null;' }
+  //       },
+  //       {
+  //         weight: 0.3,
+  //         f: function( node ) { node.layerSplit = true; },
+  //         mess: 'layerSplit true',
+  //         line: function( node ) { return name( node ) + '.layerSplit = true;' }
+  //       },
+  //       {
+  //         weight: 1.0,
+  //         f: function( node ) { node.layerSplit = false; },
+  //         mess: 'layerSplit false',
+  //         line: function( node ) { return name( node ) + '.layerSplit = false;' }
+  //       }
+  //     ];
+
+  //     var totalWeight = _.reduce( _.pluck( nodeMutators, 'weight' ), function( memo, num ) { return memo + num; }, 0 );
+
+  //     _.times( 20, function() {
+  //       window.beforeFuzzDebug = scene.getDebugHTML();
+  //       window.beforeFuzzSerialization = scene.toStringWithChildren( true );
+
+  //       var r = Math.random();
+
+  //       // pick two different nodes at random
+  //       var a = nodes[_.random( 0, nodes.length - 1 )];
+  //       var b = nodes[_.random( 0, nodes.length - 1 )];
+
+  //       if ( r < 0.333 ) {
+  //         // attempt to add a node to another one
+  //         if ( a.canAddChild( b ) ) {
+  //           // insert it into a random place
+  //           var index = _.random( 0, a.children.length );
+  //           window.fuzzMessage = 'inserting child ' + b.id + ' into ' + a.id + ' at index ' + index;
+  //           lines.push( name( a ) + '.insertChild( ' + index + ', ' + name( b ) + ' );' );
+  //           a.insertChild( index, b );
+  //         }
+  //       } else if( r < 0.666 ) {
+  //         if ( a.children.length ) {
+  //           var child = a.children[_.random( 0, a.children.length - 1 )];
+  //           window.fuzzMessage = 'removing child ' + child.id + ' to ' + a.id;
+  //           lines.push( name( a ) + '.removeChild( ' + name( child ) + ' );' );
+  //           a.removeChild( child );
+  //         }
+  //       } else {
+  //         // pick a random modification from the weighted list
+  //         var rr = Math.random() * totalWeight;
+  //         for ( var i = 0; i < nodeMutators.length; i++ ) {
+  //           var mutator = nodeMutators[i];
+  //           rr -= mutator.weight;
+  //           if ( rr <= 0 ) {
+  //             window.fuzzMessage = 'mutating node ' + a.id + ' with ' + mutator.mess;
+  //             lines.push( mutator.line( a ) );
+  //             mutator.f( a );
+  //             break;
+  //           }
+  //         }
+  //       }
+
+  //       scene.layerAudit();
+
+  //     } );
+  //     $( '#debug' ).html( scene.getDebugHTML() );
+
+  //     // an error above will prevent this from running
+  //     window.requestAnimationFrame( fuzz );
+  //   })();
+  // };
 </script>
 </body>
 </html>

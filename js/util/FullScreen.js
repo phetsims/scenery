@@ -2,92 +2,88 @@
 
 /**
  * Utilities for full-screen support
- * Used to live at 'JOIST/FullScreen'. Moved to 'SCENERY/util/FullScreen' on 4/10/2018
+ * Used to live at '/joist/js/FullScreen'. Moved to '/scenery/js/util/FullScreen' on 4/10/2018
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
-define( require => {
-  'use strict';
 
-  // modules
-  const detectPrefix = require( 'PHET_CORE/detectPrefix' );
-  const detectPrefixEvent = require( 'PHET_CORE/detectPrefixEvent' );
-  const platform = require( 'PHET_CORE/platform' );
-  const Property = require( 'AXON/Property' );
-  const scenery = require( 'SCENERY/scenery' );
+import Property from '../../../axon/js/Property.js';
+import detectPrefix from '../../../phet-core/js/detectPrefix.js';
+import detectPrefixEvent from '../../../phet-core/js/detectPrefixEvent.js';
+import platform from '../../../phet-core/js/platform.js';
+import scenery from '../scenery.js';
 
-  // get prefixed (and properly capitalized) property names
-  const exitFullscreenPropertyName = detectPrefix( document, 'exitFullscreen' ) ||
+// get prefixed (and properly capitalized) property names
+const exitFullscreenPropertyName = detectPrefix( document, 'exitFullscreen' ) ||
                                    detectPrefix( document, 'cancelFullScreen' ); // Firefox
-  const fullscreenElementPropertyName = detectPrefix( document, 'fullscreenElement' ) ||
+const fullscreenElementPropertyName = detectPrefix( document, 'fullscreenElement' ) ||
                                       detectPrefix( document, 'fullScreenElement' ); // Firefox capitalization
-  const fullscreenEnabledPropertyName = detectPrefix( document, 'fullscreenEnabled' ) ||
+const fullscreenEnabledPropertyName = detectPrefix( document, 'fullscreenEnabled' ) ||
                                       detectPrefix( document, 'fullScreenEnabled' ); // Firefox capitalization
-  let fullscreenChangeEvent = detectPrefixEvent( document, 'fullscreenchange' );
+let fullscreenChangeEvent = detectPrefixEvent( document, 'fullscreenchange' );
 
-  // required capitalization workaround for now
-  if ( fullscreenChangeEvent === 'msfullscreenchange' ) {
-    fullscreenChangeEvent = 'MSFullscreenChange';
-  }
+// required capitalization workaround for now
+if ( fullscreenChangeEvent === 'msfullscreenchange' ) {
+  fullscreenChangeEvent = 'MSFullscreenChange';
+}
 
-  var FullScreen = {
+var FullScreen = {
 
-    // @public
-    isFullScreen: function() {
-      return !!document[ fullscreenElementPropertyName ];
-    },
+  // @public
+  isFullScreen: function() {
+    return !!document[ fullscreenElementPropertyName ];
+  },
 
-    // @public
-    isFullScreenEnabled: function() {
-      return document[ fullscreenEnabledPropertyName ] && !platform.safari7;
-    },
+  // @public
+  isFullScreenEnabled: function() {
+    return document[ fullscreenEnabledPropertyName ] && !platform.safari7;
+  },
 
-    /**
-     * @public
-     * @param {Display} display
-     */
-    enterFullScreen: function( display ) {
-      const requestFullscreenPropertyName = detectPrefix( document.body, 'requestFullscreen' ) ||
+  /**
+   * @public
+   * @param {Display} display
+   */
+  enterFullScreen: function( display ) {
+    const requestFullscreenPropertyName = detectPrefix( document.body, 'requestFullscreen' ) ||
                                           detectPrefix( document.body, 'requestFullScreen' ); // Firefox capitalization
-                                          
-      if ( !platform.ie9 && !platform.ie10 ) {
-        display.domElement[ requestFullscreenPropertyName ] && display.domElement[ requestFullscreenPropertyName ]();
+
+    if ( !platform.ie9 && !platform.ie10 ) {
+      display.domElement[ requestFullscreenPropertyName ] && display.domElement[ requestFullscreenPropertyName ]();
+    }
+    else if ( typeof window.ActiveXObject !== 'undefined' ) { // Older IE.
+      const wscript = new window.ActiveXObject( 'WScript.Shell' );
+      if ( wscript !== null ) {
+        wscript.SendKeys( '{F11}' );
       }
-      else if ( typeof window.ActiveXObject !== 'undefined' ) { // Older IE.
-        const wscript = new window.ActiveXObject( 'WScript.Shell' );
-        if ( wscript !== null ) {
-          wscript.SendKeys( '{F11}' );
-        }
-      }
-    },
+    }
+  },
 
-    // @public
-    exitFullScreen: function() {
-      document[ exitFullscreenPropertyName ] && document[ exitFullscreenPropertyName ]();
-    },
+  // @public
+  exitFullScreen: function() {
+    document[ exitFullscreenPropertyName ] && document[ exitFullscreenPropertyName ]();
+  },
 
-    /**
-     * @public
-     * @param {Display} display
-     */
-    toggleFullScreen: function( display ) {
-      if ( FullScreen.isFullScreen() ) {
-        FullScreen.exitFullScreen();
-      }
-      else {
-        FullScreen.enterFullScreen( display );
-      }
-    },
+  /**
+   * @public
+   * @param {Display} display
+   */
+  toggleFullScreen: function( display ) {
+    if ( FullScreen.isFullScreen() ) {
+      FullScreen.exitFullScreen();
+    }
+    else {
+      FullScreen.enterFullScreen( display );
+    }
+  },
 
-    isFullScreenProperty: new Property( false )
-  };
+  isFullScreenProperty: new Property( false )
+};
 
-  // update isFullScreenProperty on potential changes
-  document.addEventListener( fullscreenChangeEvent, function( evt ) {
-    FullScreen.isFullScreenProperty.set( FullScreen.isFullScreen() );
-  } );
-
-  scenery.register( 'FullScreen', FullScreen );
-
-  return FullScreen;
+// update isFullScreenProperty on potential changes
+document.addEventListener( fullscreenChangeEvent, function( evt ) {
+  FullScreen.isFullScreenProperty.set( FullScreen.isFullScreen() );
 } );
+
+scenery.register( 'FullScreen', FullScreen );
+
+export default FullScreen;

@@ -6,68 +6,64 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( require => {
-  'use strict';
+import inherit from '../../../../phet-core/js/inherit.js';
+import Poolable from '../../../../phet-core/js/Poolable.js';
+import scenery from '../../scenery.js';
+import '../../util/Utils.js';
+import DOMSelfDrawable from '../DOMSelfDrawable.js';
 
-  const DOMSelfDrawable = require( 'SCENERY/display/DOMSelfDrawable' );
-  const inherit = require( 'PHET_CORE/inherit' );
-  const Poolable = require( 'PHET_CORE/Poolable' );
-  const scenery = require( 'SCENERY/scenery' );
-  require( 'SCENERY/util/Utils' );
+/**
+ * A generated DOMSelfDrawable whose purpose will be drawing our DOM node. One of these drawables will be created
+ * for each displayed instance of a DOM node.
+ * @public (scenery-internal)
+ * @constructor
+ * @extends DOMSelfDrawable
+ * @mixes SelfDrawable.Poolable
+ *
+ * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+ * @param {Instance} instance
+ */
+function DOMDrawable( renderer, instance ) {
+  // Super-type initialization
+  this.initializeDOMSelfDrawable( renderer, instance );
+
+  // @public {HTMLElement} - Our primary DOM element. This is exposed as part of the DOMSelfDrawable API.
+  this.domElement = this.node._container;
+
+  // Apply CSS needed for future CSS transforms to work properly.
+  scenery.Utils.prepareForTransform( this.domElement, this.forceAcceleration );
+}
+
+scenery.register( 'DOMDrawable', DOMDrawable );
+
+inherit( DOMSelfDrawable, DOMDrawable, {
+  /**
+   * Updates our DOM element so that its appearance matches our node's representation.
+   * @protected
+   *
+   * This implements part of the DOMSelfDrawable required API for subtypes.
+   */
+  updateDOM: function() {
+    if ( this.transformDirty && !this.node._preventTransform ) {
+      scenery.Utils.applyPreparedTransform( this.getTransformMatrix(), this.domElement, this.forceAcceleration );
+    }
+
+    // clear all of the dirty flags
+    this.transformDirty = false;
+  },
 
   /**
-   * A generated DOMSelfDrawable whose purpose will be drawing our DOM node. One of these drawables will be created
-   * for each displayed instance of a DOM node.
-   * @public (scenery-internal)
-   * @constructor
-   * @extends DOMSelfDrawable
-   * @mixes SelfDrawable.Poolable
-   *
-   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-   * @param {Instance} instance
+   * Disposes the drawable.
+   * @public
+   * @override
    */
-  function DOMDrawable( renderer, instance ) {
-    // Super-type initialization
-    this.initializeDOMSelfDrawable( renderer, instance );
+  dispose: function() {
+    DOMSelfDrawable.prototype.dispose.call( this );
 
-    // @public {HTMLElement} - Our primary DOM element. This is exposed as part of the DOMSelfDrawable API.
-    this.domElement = this.node._container;
-
-    // Apply CSS needed for future CSS transforms to work properly.
-    scenery.Utils.prepareForTransform( this.domElement, this.forceAcceleration );
+    this.domElement = null;
   }
-
-  scenery.register( 'DOMDrawable', DOMDrawable );
-
-  inherit( DOMSelfDrawable, DOMDrawable, {
-    /**
-     * Updates our DOM element so that its appearance matches our node's representation.
-     * @protected
-     *
-     * This implements part of the DOMSelfDrawable required API for subtypes.
-     */
-    updateDOM: function() {
-      if ( this.transformDirty && !this.node._preventTransform ) {
-        scenery.Utils.applyPreparedTransform( this.getTransformMatrix(), this.domElement, this.forceAcceleration );
-      }
-
-      // clear all of the dirty flags
-      this.transformDirty = false;
-    },
-
-    /**
-     * Disposes the drawable.
-     * @public
-     * @override
-     */
-    dispose: function() {
-      DOMSelfDrawable.prototype.dispose.call( this );
-
-      this.domElement = null;
-    }
-  } );
-
-  Poolable.mixInto( DOMDrawable );
-
-  return DOMDrawable;
 } );
+
+Poolable.mixInto( DOMDrawable );
+
+export default DOMDrawable;

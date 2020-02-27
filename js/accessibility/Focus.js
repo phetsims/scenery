@@ -7,26 +7,23 @@
  *
  * @author Jesse Greenberg
  */
-define( require => {
-  'use strict';
 
-  // modules
-  const inherit = require( 'PHET_CORE/inherit' );
-  const scenery = require( 'SCENERY/scenery' );
+import inherit from '../../../phet-core/js/inherit.js';
+import scenery from '../scenery.js';
 
-  /**
-   * Constructor.
-   * @param {Display} display - Display containing the focused node
-   * @param {Trail} trail - Trail to the focused node
-   */
-  function Focus( display, trail ) {
+/**
+ * Constructor.
+ * @param {Display} display - Display containing the focused node
+ * @param {Trail} trail - Trail to the focused node
+ */
+function Focus( display, trail ) {
 
-    // @public (read-only)
-    this.display = display;
-    this.trail = trail;
-  }
+  // @public (read-only)
+  this.display = display;
+  this.trail = trail;
+}
 
-  scenery.register( 'Focus', Focus );
+scenery.register( 'Focus', Focus );
 
-  return inherit( Object, Focus );
-} );
+inherit( Object, Focus );
+export default Focus;

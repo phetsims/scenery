@@ -7,25 +7,21 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( require => {
-  'use strict';
+import scenery from '../scenery.js';
 
-  const scenery = require( 'SCENERY/scenery' );
+const styleElement = document.createElement( 'style' );
+styleElement.type = 'text/css';
+document.head.appendChild( styleElement );
 
-  const styleElement = document.createElement( 'style' );
-  styleElement.type = 'text/css';
-  document.head.appendChild( styleElement );
+const stylesheet = document.styleSheets[ document.styleSheets.length - 1 ];
+assert && assert( stylesheet.disabled === false );
 
-  const stylesheet = document.styleSheets[ document.styleSheets.length - 1 ];
-  assert && assert( stylesheet.disabled === false );
+export default scenery.register( 'SceneryStyle', {
+  stylesheet: stylesheet,
+  styleElement: styleElement,
 
-  return scenery.register( 'SceneryStyle', {
-    stylesheet: stylesheet,
-    styleElement: styleElement,
-
-    addRule: function( ruleString ) {
-      // using a this reference so it doesn't need to be a closure
-      this.stylesheet.insertRule( ruleString, 0 );
-    }
-  } );
+  addRule: function( ruleString ) {
+    // using a this reference so it doesn't need to be a closure
+    this.stylesheet.insertRule( ruleString, 0 );
+  }
 } );

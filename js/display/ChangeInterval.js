@@ -18,153 +18,149 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( require => {
-  'use strict';
+import inherit from '../../../phet-core/js/inherit.js';
+import Poolable from '../../../phet-core/js/Poolable.js';
+import scenery from '../scenery.js';
+import Drawable from './Drawable.js';
 
-  const Drawable = require( 'SCENERY/display/Drawable' );
-  const inherit = require( 'PHET_CORE/inherit' );
-  const Poolable = require( 'PHET_CORE/Poolable' );
-  const scenery = require( 'SCENERY/scenery' );
+/**
+ * @constructor
+ * @mixes Poolable
+ *
+ * @param drawableBefore
+ * @param drawableAfter
+ */
+function ChangeInterval( drawableBefore, drawableAfter ) {
+  this.initialize( drawableBefore, drawableAfter );
+}
 
-  /**
-   * @constructor
-   * @mixes Poolable
-   *
-   * @param drawableBefore
-   * @param drawableAfter
-   */
-  function ChangeInterval( drawableBefore, drawableAfter ) {
-    this.initialize( drawableBefore, drawableAfter );
-  }
+scenery.register( 'ChangeInterval', ChangeInterval );
 
-  scenery.register( 'ChangeInterval', ChangeInterval );
+inherit( Object, ChangeInterval, {
+  initialize: function( drawableBefore, drawableAfter ) {
+    assert && assert( drawableBefore === null || ( drawableBefore instanceof Drawable ),
+      'drawableBefore can either be null to indicate that there is no un-changed drawable before our changes, ' +
+      'or it can reference an un-changed drawable' );
+    assert && assert( drawableAfter === null || ( drawableAfter instanceof Drawable ),
+      'drawableAfter can either be null to indicate that there is no un-changed drawable after our changes, ' +
+      'or it can reference an un-changed drawable' );
 
-  inherit( Object, ChangeInterval, {
-    initialize: function( drawableBefore, drawableAfter ) {
-      assert && assert( drawableBefore === null || ( drawableBefore instanceof Drawable ),
-        'drawableBefore can either be null to indicate that there is no un-changed drawable before our changes, ' +
-        'or it can reference an un-changed drawable' );
-      assert && assert( drawableAfter === null || ( drawableAfter instanceof Drawable ),
-        'drawableAfter can either be null to indicate that there is no un-changed drawable after our changes, ' +
-        'or it can reference an un-changed drawable' );
+    /*---------------------------------------------------------------------------*
+     * All @public properties
+     *----------------------------------------------------------------------------*/
 
-      /*---------------------------------------------------------------------------*
-       * All @public properties
-       *----------------------------------------------------------------------------*/
+    // {ChangeInterval|null}, singly-linked list
+    this.nextChangeInterval = null;
 
-      // {ChangeInterval|null}, singly-linked list
-      this.nextChangeInterval = null;
+    // {Drawable|null}, the drawable before our ChangeInterval that is not modified. null indicates that we don't yet
+    // have a "before" boundary, and should be connected to the closest drawable that is unchanged.
+    this.drawableBefore = drawableBefore;
 
-      // {Drawable|null}, the drawable before our ChangeInterval that is not modified. null indicates that we don't yet
-      // have a "before" boundary, and should be connected to the closest drawable that is unchanged.
-      this.drawableBefore = drawableBefore;
+    // {Drawable|null}, the drawable after our ChangeInterval that is not modified. null indicates that we don't yet
+    // have a "after" boundary, and should be connected to the closest drawable that is unchanged.
+    this.drawableAfter = drawableAfter;
 
-      // {Drawable|null}, the drawable after our ChangeInterval that is not modified. null indicates that we don't yet
-      // have a "after" boundary, and should be connected to the closest drawable that is unchanged.
-      this.drawableAfter = drawableAfter;
+    // {boolean} If a null-to-X interval gets collapsed all the way, we want to have a flag that indicates that.
+    // Otherwise, it would be interpreted as a null-to-null change interval ("change everything"), instead of the
+    // correct "change nothing".
+    this.collapsedEmpty = false;
 
-      // {boolean} If a null-to-X interval gets collapsed all the way, we want to have a flag that indicates that.
-      // Otherwise, it would be interpreted as a null-to-null change interval ("change everything"), instead of the
-      // correct "change nothing".
-      this.collapsedEmpty = false;
+    // chaining for PoolableMixin
+    return this;
+  },
 
-      // chaining for PoolableMixin
-      return this;
-    },
+  dispose: function() {
+    // release our references
+    this.nextChangeInterval = null;
+    this.drawableBefore = null;
+    this.drawableAfter = null;
 
-    dispose: function() {
-      // release our references
-      this.nextChangeInterval = null;
-      this.drawableBefore = null;
-      this.drawableAfter = null;
+    this.freeToPool();
+  },
 
-      this.freeToPool();
-    },
+  // Make our interval as tight as possible (we may have over-estimated it before)
+  constrict: function() {
+    let changed = false;
 
-    // Make our interval as tight as possible (we may have over-estimated it before)
-    constrict: function() {
-      let changed = false;
+    if ( this.isEmpty() ) { return true; }
 
+    // Notes: We don't constrict null boundaries, and we should never constrict a non-null boundary to a null
+    // boundary (this the this.drawableX.Xdrawable truthy check), since going from a null-to-X interval to
+    // null-to-null has a completely different meaning. This should be checked by a client of this API.
+
+    while ( this.drawableBefore && this.drawableBefore.nextDrawable === this.drawableBefore.oldNextDrawable ) {
+      this.drawableBefore = this.drawableBefore.nextDrawable;
+      changed = true;
+
+      // check for a totally-collapsed state
+      if ( !this.drawableBefore ) {
+        assert && assert( !this.drawableAfter );
+        this.collapsedEmpty = true;
+      }
+
+      // if we are empty, bail out before continuing
       if ( this.isEmpty() ) { return true; }
-
-      // Notes: We don't constrict null boundaries, and we should never constrict a non-null boundary to a null
-      // boundary (this the this.drawableX.Xdrawable truthy check), since going from a null-to-X interval to
-      // null-to-null has a completely different meaning. This should be checked by a client of this API.
-
-      while ( this.drawableBefore && this.drawableBefore.nextDrawable === this.drawableBefore.oldNextDrawable ) {
-        this.drawableBefore = this.drawableBefore.nextDrawable;
-        changed = true;
-
-        // check for a totally-collapsed state
-        if ( !this.drawableBefore ) {
-          assert && assert( !this.drawableAfter );
-          this.collapsedEmpty = true;
-        }
-
-        // if we are empty, bail out before continuing
-        if ( this.isEmpty() ) { return true; }
-      }
-
-      while ( this.drawableAfter && this.drawableAfter.previousDrawable === this.drawableAfter.oldPreviousDrawable ) {
-        this.drawableAfter = this.drawableAfter.previousDrawable;
-        changed = true;
-
-        // check for a totally-collapsed state
-        if ( !this.drawableAfter ) {
-          assert && assert( !this.drawableBefore );
-          this.collapsedEmpty = true;
-        }
-
-        // if we are empty, bail out before continuing
-        if ( this.isEmpty() ) { return true; }
-      }
-
-      return changed;
-    },
-
-    isEmpty: function() {
-      return this.collapsedEmpty || ( this.drawableBefore !== null && this.drawableBefore === this.drawableAfter );
-    },
-
-    // {number} The quantity of "old" internal drawables. Requires the old first/last drawables for the backbone, since
-    // we need that information for null-before/after boundaries.
-    getOldInternalDrawableCount: function( oldStitchFirstDrawable, oldStitchLastDrawable ) {
-      const firstInclude = this.drawableBefore ? this.drawableBefore.oldNextDrawable : oldStitchFirstDrawable;
-      const lastExclude = this.drawableAfter; // null is OK here
-
-      let count = 0;
-      for ( let drawable = firstInclude; drawable !== lastExclude; drawable = drawable.oldNextDrawable ) {
-        count++;
-      }
-
-      return count;
-    },
-
-    // {number} The quantity of "new" internal drawables. Requires the old first/last drawables for the backbone, since
-    // we need that information for null-before/after boundaries.
-    getNewInternalDrawableCount: function( newStitchFirstDrawable, newStitchLastDrawable ) {
-      const firstInclude = this.drawableBefore ? this.drawableBefore.nextDrawable : newStitchFirstDrawable;
-      const lastExclude = this.drawableAfter; // null is OK here
-
-      let count = 0;
-      for ( let drawable = firstInclude; drawable !== lastExclude; drawable = drawable.nextDrawable ) {
-        count++;
-      }
-
-      return count;
     }
-  } );
 
-  Poolable.mixInto( ChangeInterval, {
-    initialize: ChangeInterval.prototype.initialize
-  } );
+    while ( this.drawableAfter && this.drawableAfter.previousDrawable === this.drawableAfter.oldPreviousDrawable ) {
+      this.drawableAfter = this.drawableAfter.previousDrawable;
+      changed = true;
 
-  // creates a ChangeInterval that will be disposed after syncTree is complete (see Display phases)
-  ChangeInterval.newForDisplay = function( drawableBefore, drawableAfter, display ) {
-    const changeInterval = ChangeInterval.createFromPool( drawableBefore, drawableAfter );
-    display.markChangeIntervalToDispose( changeInterval );
-    return changeInterval;
-  };
+      // check for a totally-collapsed state
+      if ( !this.drawableAfter ) {
+        assert && assert( !this.drawableBefore );
+        this.collapsedEmpty = true;
+      }
 
-  return ChangeInterval;
+      // if we are empty, bail out before continuing
+      if ( this.isEmpty() ) { return true; }
+    }
+
+    return changed;
+  },
+
+  isEmpty: function() {
+    return this.collapsedEmpty || ( this.drawableBefore !== null && this.drawableBefore === this.drawableAfter );
+  },
+
+  // {number} The quantity of "old" internal drawables. Requires the old first/last drawables for the backbone, since
+  // we need that information for null-before/after boundaries.
+  getOldInternalDrawableCount: function( oldStitchFirstDrawable, oldStitchLastDrawable ) {
+    const firstInclude = this.drawableBefore ? this.drawableBefore.oldNextDrawable : oldStitchFirstDrawable;
+    const lastExclude = this.drawableAfter; // null is OK here
+
+    let count = 0;
+    for ( let drawable = firstInclude; drawable !== lastExclude; drawable = drawable.oldNextDrawable ) {
+      count++;
+    }
+
+    return count;
+  },
+
+  // {number} The quantity of "new" internal drawables. Requires the old first/last drawables for the backbone, since
+  // we need that information for null-before/after boundaries.
+  getNewInternalDrawableCount: function( newStitchFirstDrawable, newStitchLastDrawable ) {
+    const firstInclude = this.drawableBefore ? this.drawableBefore.nextDrawable : newStitchFirstDrawable;
+    const lastExclude = this.drawableAfter; // null is OK here
+
+    let count = 0;
+    for ( let drawable = firstInclude; drawable !== lastExclude; drawable = drawable.nextDrawable ) {
+      count++;
+    }
+
+    return count;
+  }
 } );
+
+Poolable.mixInto( ChangeInterval, {
+  initialize: ChangeInterval.prototype.initialize
+} );
+
+// creates a ChangeInterval that will be disposed after syncTree is complete (see Display phases)
+ChangeInterval.newForDisplay = function( drawableBefore, drawableAfter, display ) {
+  const changeInterval = ChangeInterval.createFromPool( drawableBefore, drawableAfter );
+  display.markChangeIntervalToDispose( changeInterval );
+  return changeInterval;
+};
+
+export default ChangeInterval;

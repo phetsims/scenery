@@ -9,73 +9,69 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( require => {
-  'use strict';
+import inherit from '../../../phet-core/js/inherit.js';
+import scenery from '../scenery.js';
+import Renderer from './Renderer.js';
+import Stitcher from './Stitcher.js';
 
-  const inherit = require( 'PHET_CORE/inherit' );
-  const Renderer = require( 'SCENERY/display/Renderer' );
-  const scenery = require( 'SCENERY/scenery' );
-  const Stitcher = require( 'SCENERY/display/Stitcher' );
+const prototype = {
+  stitch: function( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
+    this.initialize( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval );
 
-  const prototype = {
-    stitch: function( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
-      this.initialize( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval );
+    for ( let d = backbone.previousFirstDrawable; d !== null; d = d.oldNextDrawable ) {
+      this.notePendingRemoval( d );
+      if ( d === backbone.previousLastDrawable ) { break; }
+    }
 
-      for ( let d = backbone.previousFirstDrawable; d !== null; d = d.oldNextDrawable ) {
-        this.notePendingRemoval( d );
-        if ( d === backbone.previousLastDrawable ) { break; }
-      }
+    this.recordBackboneBoundaries();
 
-      this.recordBackboneBoundaries();
+    this.removeAllBlocks();
 
-      this.removeAllBlocks();
+    let currentBlock = null;
+    let currentRenderer = 0;
+    let firstDrawableForBlock = null;
 
-      let currentBlock = null;
-      let currentRenderer = 0;
-      let firstDrawableForBlock = null;
+    // linked-list iteration inclusively from firstDrawable to lastDrawable
+    for ( let drawable = firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
 
-      // linked-list iteration inclusively from firstDrawable to lastDrawable
-      for ( let drawable = firstDrawable; drawable !== null; drawable = drawable.nextDrawable ) {
-
-        // if we need to switch to a new block, create it
-        if ( !currentBlock || drawable.renderer !== currentRenderer ) {
-          if ( currentBlock ) {
-            this.notifyInterval( currentBlock, firstDrawableForBlock, drawable.previousDrawable );
-          }
-
-          currentRenderer = drawable.renderer;
-
-          currentBlock = this.createBlock( currentRenderer, drawable );
-          if ( Renderer.isDOM( currentRenderer ) ) {
-            currentRenderer = 0;
-          }
-
-          this.appendBlock( currentBlock );
-
-          firstDrawableForBlock = drawable;
+      // if we need to switch to a new block, create it
+      if ( !currentBlock || drawable.renderer !== currentRenderer ) {
+        if ( currentBlock ) {
+          this.notifyInterval( currentBlock, firstDrawableForBlock, drawable.previousDrawable );
         }
 
-        this.notePendingAddition( drawable, currentBlock );
+        currentRenderer = drawable.renderer;
 
-        // don't cause an infinite loop!
-        if ( drawable === lastDrawable ) { break; }
+        currentBlock = this.createBlock( currentRenderer, drawable );
+        if ( Renderer.isDOM( currentRenderer ) ) {
+          currentRenderer = 0;
+        }
+
+        this.appendBlock( currentBlock );
+
+        firstDrawableForBlock = drawable;
       }
-      if ( currentBlock ) {
-        this.notifyInterval( currentBlock, firstDrawableForBlock, lastDrawable );
-      }
 
-      this.reindex();
+      this.notePendingAddition( drawable, currentBlock );
 
-      this.clean();
+      // don't cause an infinite loop!
+      if ( drawable === lastDrawable ) { break; }
     }
-  };
+    if ( currentBlock ) {
+      this.notifyInterval( currentBlock, firstDrawableForBlock, lastDrawable );
+    }
 
-  const RebuildStitcher = inherit( Stitcher, function RebuildStitcher() {
-    // nothing done
-  }, prototype );
-  scenery.register( 'RebuildStitcher', RebuildStitcher );
+    this.reindex();
 
-  RebuildStitcher.stitchPrototype = prototype;
+    this.clean();
+  }
+};
 
-  return RebuildStitcher;
-} );
+const RebuildStitcher = inherit( Stitcher, function RebuildStitcher() {
+  // nothing done
+}, prototype );
+scenery.register( 'RebuildStitcher', RebuildStitcher );
+
+RebuildStitcher.stitchPrototype = prototype;
+
+export default RebuildStitcher;

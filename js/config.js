@@ -1,3 +1,4 @@
+
 // Copyright 2013-2019, University of Colorado Boulder
 
 /**
@@ -8,8 +9,8 @@
 
 require.config( {
 
-  // depends on all of Scenery, Kite, Dot, Axon and phet-core
-  deps: [ 'main', 'KITE/main', 'DOT/main', 'AXON/main', 'PHET_CORE/main', 'UTTERANCE_QUEUE/main' ],
+// depends on all of Scenery, Kite, Dot, Axon and phet-core
+  deps: [ 'main', '/kite/js/main', '/dot/js/main', '/axon/js/main', '/phet-core/js/main', '/utterance-queue/js/main' ],
 
   paths: {
 
@@ -32,6 +33,6 @@ require.config( {
     REPOSITORY: '..'
   },
 
-  // optional cache bust to make browser refresh load all included scripts, can be disabled with ?cacheBust=false
+// optional cache bust to make browser refresh load all included scripts, can be disabled with ?cacheBust=false
   urlArgs: 'bust=' + ( new Date() ).getTime()
 } );

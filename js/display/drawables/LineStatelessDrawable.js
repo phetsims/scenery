@@ -6,75 +6,71 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( require => {
-  'use strict';
+import inheritance from '../../../../phet-core/js/inheritance.js';
+import scenery from '../../scenery.js';
+import SelfDrawable from '../SelfDrawable.js';
+import PaintableStatelessDrawable from './PaintableStatelessDrawable.js';
 
-  const inheritance = require( 'PHET_CORE/inheritance' );
-  const PaintableStatelessDrawable = require( 'SCENERY/display/drawables/PaintableStatelessDrawable' );
-  const scenery = require( 'SCENERY/scenery' );
-  const SelfDrawable = require( 'SCENERY/display/SelfDrawable' );
+const LineStatelessDrawable = {
+  mixInto: function( drawableType ) {
+    assert && assert( _.includes( inheritance( drawableType ), SelfDrawable ) );
 
-  const LineStatelessDrawable = {
-    mixInto: function( drawableType ) {
-      assert && assert( _.includes( inheritance( drawableType ), SelfDrawable ) );
+    const proto = drawableType.prototype;
 
-      const proto = drawableType.prototype;
+    // initializes, and resets (so we can support pooled states)
+    proto.initializeLineStateless = function() {
+      // @protected {boolean} - Flag marked as true if ANY of the drawable dirty flags are set (basically everything except for transforms, as we
+      //                        need to accelerate the transform case.
+      this.paintDirty = true;
+      return this; // allow for chaining
+    };
 
-      // initializes, and resets (so we can support pooled states)
-      proto.initializeLineStateless = function() {
-        // @protected {boolean} - Flag marked as true if ANY of the drawable dirty flags are set (basically everything except for transforms, as we
-        //                        need to accelerate the transform case.
-        this.paintDirty = true;
-        return this; // allow for chaining
-      };
+    /**
+     * A "catch-all" dirty method that directly marks the paintDirty flag and triggers propagation of dirty
+     * information. This can be used by other mark* methods, or directly itself if the paintDirty flag is checked.
+     * @public (scenery-internal)
+     *
+     * It should be fired (indirectly or directly) for anything besides transforms that needs to make a drawable
+     * dirty.
+     */
+    proto.markPaintDirty = function() {
+      this.paintDirty = true;
+      this.markDirty();
+    };
 
-      /**
-       * A "catch-all" dirty method that directly marks the paintDirty flag and triggers propagation of dirty
-       * information. This can be used by other mark* methods, or directly itself if the paintDirty flag is checked.
-       * @public (scenery-internal)
-       *
-       * It should be fired (indirectly or directly) for anything besides transforms that needs to make a drawable
-       * dirty.
-       */
-      proto.markPaintDirty = function() {
-        this.paintDirty = true;
-        this.markDirty();
-      };
+    proto.markDirtyLine = function() {
+      this.markPaintDirty();
+    };
 
-      proto.markDirtyLine = function() {
-        this.markPaintDirty();
-      };
+    proto.markDirtyP1 = function() {
+      this.markPaintDirty();
+    };
 
-      proto.markDirtyP1 = function() {
-        this.markPaintDirty();
-      };
+    proto.markDirtyP2 = function() {
+      this.markPaintDirty();
+    };
 
-      proto.markDirtyP2 = function() {
-        this.markPaintDirty();
-      };
+    proto.markDirtyX1 = function() {
+      this.markPaintDirty();
+    };
 
-      proto.markDirtyX1 = function() {
-        this.markPaintDirty();
-      };
+    proto.markDirtyY1 = function() {
+      this.markPaintDirty();
+    };
 
-      proto.markDirtyY1 = function() {
-        this.markPaintDirty();
-      };
+    proto.markDirtyX2 = function() {
+      this.markPaintDirty();
+    };
 
-      proto.markDirtyX2 = function() {
-        this.markPaintDirty();
-      };
+    proto.markDirtyY2 = function() {
+      this.markPaintDirty();
+    };
 
-      proto.markDirtyY2 = function() {
-        this.markPaintDirty();
-      };
+    // TODO: egad! mixing in the wrong drawable???
+    PaintableStatelessDrawable.mixInto( drawableType );
+  }
+};
 
-      // TODO: egad! mixing in the wrong drawable???
-      PaintableStatelessDrawable.mixInto( drawableType );
-    }
-  };
+scenery.register( 'LineStatelessDrawable', LineStatelessDrawable );
 
-  scenery.register( 'LineStatelessDrawable', LineStatelessDrawable );
-
-  return LineStatelessDrawable;
-} );
+export default LineStatelessDrawable;

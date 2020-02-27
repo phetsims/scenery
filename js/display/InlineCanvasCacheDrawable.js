@@ -7,33 +7,29 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( require => {
-  'use strict';
+import inherit from '../../../phet-core/js/inherit.js';
+import scenery from '../scenery.js';
+import Drawable from './Drawable.js';
 
-  const Drawable = require( 'SCENERY/display/Drawable' );
-  const inherit = require( 'PHET_CORE/inherit' );
-  const scenery = require( 'SCENERY/scenery' );
-
-  function InlineCanvasCacheDrawable( renderer, instance ) {
-    Drawable.call( this, renderer );
+function InlineCanvasCacheDrawable( renderer, instance ) {
+  Drawable.call( this, renderer );
 
 
-    //OHTWO TODO: pooling!
+  //OHTWO TODO: pooling!
 
-    // TODO: NOTE: may have to separate into separate drawables for separate group renderers
+  // TODO: NOTE: may have to separate into separate drawables for separate group renderers
 
-    this.instance = instance; // will need this so we can get bounds for layer fitting
+  this.instance = instance; // will need this so we can get bounds for layer fitting
+}
+
+scenery.register( 'InlineCanvasCacheDrawable', InlineCanvasCacheDrawable );
+
+inherit( Drawable, InlineCanvasCacheDrawable, {
+  // TODO: support Canvas/SVG/DOM
+
+  stitch: function( firstDrawable, lastDrawable, firstChangeInterval, lastChangeInterval ) {
+    //OHTWO TODO: called when we have a change in our drawables
   }
-
-  scenery.register( 'InlineCanvasCacheDrawable', InlineCanvasCacheDrawable );
-
-  inherit( Drawable, InlineCanvasCacheDrawable, {
-    // TODO: support Canvas/SVG/DOM
-
-    stitch: function( firstDrawable, lastDrawable, firstChangeInterval, lastChangeInterval ) {
-      //OHTWO TODO: called when we have a change in our drawables
-    }
-  } );
-
-  return InlineCanvasCacheDrawable;
 } );
+
+export default InlineCanvasCacheDrawable;

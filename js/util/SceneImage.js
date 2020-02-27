@@ -7,47 +7,43 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( require => {
-  'use strict';
+import inherit from '../../../phet-core/js/inherit.js';
+import scenery from '../scenery.js';
 
-  const inherit = require( 'PHET_CORE/inherit' );
-  const scenery = require( 'SCENERY/scenery' );
+// NOTE: ideally the scene shouldn't use SVG, since rendering that to a canvas takes a callback (and usually requires canvg)
+function SceneImage( scene ) {
+  this.scene = scene;
 
-  // NOTE: ideally the scene shouldn't use SVG, since rendering that to a canvas takes a callback (and usually requires canvg)
-  function SceneImage( scene ) {
-    this.scene = scene;
+  // we write the scene to a canvas, get its data URL, and pass that to the image.
+  this.canvas = document.createElement( 'canvas' );
+  this.context = this.canvas.getContext( '2d' );
 
-    // we write the scene to a canvas, get its data URL, and pass that to the image.
-    this.canvas = document.createElement( 'canvas' );
-    this.context = this.canvas.getContext( '2d' );
+  this.img = document.createElement( 'img' );
+  this.update();
+}
 
-    this.img = document.createElement( 'img' );
-    this.update();
+scenery.register( 'SceneImage', SceneImage );
+
+inherit( Object, SceneImage, {
+  // NOTE: calling this before the previous update() completes may cause the previous onComplete to not be executed
+  update: function( onComplete ) {
+    const self = this;
+
+    this.scene.updateScene();
+
+    this.canvas.width = this.scene.getSceneWidth();
+    this.canvas.height = this.scene.getSceneHeight();
+
+    this.scene.renderToCanvas( this.canvas, this.context, function() {
+      const url = self.toDataURL();
+
+      self.img.onload = function() {
+        onComplete();
+        delete self.img.onload;
+      };
+      self.img.src = url;
+    } );
   }
-
-  scenery.register( 'SceneImage', SceneImage );
-
-  inherit( Object, SceneImage, {
-    // NOTE: calling this before the previous update() completes may cause the previous onComplete to not be executed
-    update: function( onComplete ) {
-      const self = this;
-
-      this.scene.updateScene();
-
-      this.canvas.width = this.scene.getSceneWidth();
-      this.canvas.height = this.scene.getSceneHeight();
-
-      this.scene.renderToCanvas( this.canvas, this.context, function() {
-        const url = self.toDataURL();
-
-        self.img.onload = function() {
-          onComplete();
-          delete self.img.onload;
-        };
-        self.img.src = url;
-      } );
-    }
-  } );
-
-  return SceneImage;
 } );
+
+export default SceneImage;

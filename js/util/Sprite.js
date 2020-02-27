@@ -6,24 +6,21 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( require => {
-  'use strict';
+import Property from '../../../axon/js/Property.js';
+import scenery from '../scenery.js';
+import SpriteImage from './SpriteImage.js';
 
-  const Property = require( 'AXON/Property' );
-  const scenery = require( 'SCENERY/scenery' );
-  const SpriteImage = require( 'SCENERY/util/SpriteImage' );
+class Sprite {
+  /**
+   * @param {SpriteImage} spriteImage - The initial SpriteImage
+   */
+  constructor( spriteImage ) {
+    assert && assert( spriteImage instanceof SpriteImage );
 
-  class Sprite {
-    /**
-     * @param {SpriteImage} spriteImage - The initial SpriteImage
-     */
-    constructor( spriteImage ) {
-      assert && assert( spriteImage instanceof SpriteImage );
-
-      // @public {Property.<SpriteImage>}
-      this.imageProperty = new Property( spriteImage );
-    }
+    // @public {Property.<SpriteImage>}
+    this.imageProperty = new Property( spriteImage );
   }
+}
 
-  return scenery.register( 'Sprite', Sprite );
-} );
+scenery.register( 'Sprite', Sprite );
+export default Sprite;

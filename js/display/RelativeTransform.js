@@ -84,507 +84,503 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( require => {
-  'use strict';
+import Matrix3 from '../../../dot/js/Matrix3.js';
+import cleanArray from '../../../phet-core/js/cleanArray.js';
+import inherit from '../../../phet-core/js/inherit.js';
+import scenery from '../scenery.js';
 
-  const cleanArray = require( 'PHET_CORE/cleanArray' );
-  const inherit = require( 'PHET_CORE/inherit' );
-  const Matrix3 = require( 'DOT/Matrix3' );
-  const scenery = require( 'SCENERY/scenery' );
+function RelativeTransform( instance ) {
+  this.instance = instance;
+}
 
-  function RelativeTransform( instance ) {
-    this.instance = instance;
-  }
+scenery.register( 'RelativeTransform', RelativeTransform );
 
-  scenery.register( 'RelativeTransform', RelativeTransform );
+inherit( Object, RelativeTransform, {
+  /**
+   * Responsible for initialization and cleaning of this. If the parameters are both null, we'll want to clean our
+   * external references (like Instance does).
+   *
+   * @param {Display|null} display
+   * @param {Trail|null} trail
+   * @returns {RelativeTransform} - Returns this, to allow chaining.
+   */
+  initialize: function( display, trail ) {
+    this.display = display;
+    this.trail = trail;
+    this.node = trail && trail.lastNode();
 
-  inherit( Object, RelativeTransform, {
-    /**
-     * Responsible for initialization and cleaning of this. If the parameters are both null, we'll want to clean our
-     * external references (like Instance does).
-     *
-     * @param {Display|null} display
-     * @param {Trail|null} trail
-     * @returns {RelativeTransform} - Returns this, to allow chaining.
-     */
-    initialize: function( display, trail ) {
-      this.display = display;
-      this.trail = trail;
-      this.node = trail && trail.lastNode();
+    // properties relevant to the node's direct transform
+    this.transformDirty = true; // whether the node's transform has changed (until the pre-repaint phase)
+    this.nodeTransformListener = this.nodeTransformListener || this.onNodeTransformDirty.bind( this );
 
-      // properties relevant to the node's direct transform
-      this.transformDirty = true; // whether the node's transform has changed (until the pre-repaint phase)
-      this.nodeTransformListener = this.nodeTransformListener || this.onNodeTransformDirty.bind( this );
+    // the actual cached transform to the root
+    this.matrix = this.matrix || Matrix3.identity();
 
-      // the actual cached transform to the root
-      this.matrix = this.matrix || Matrix3.identity();
+    // whether our matrix is dirty
+    this.relativeSelfDirty = true;
 
-      // whether our matrix is dirty
-      this.relativeSelfDirty = true;
+    // how many children have (or have descendants with) relativeTransformListeners
+    this.relativeChildrenListenersCount = 0;
 
-      // how many children have (or have descendants with) relativeTransformListeners
-      this.relativeChildrenListenersCount = 0;
+    // if >0, indicates this should be precomputed in the pre-repaint phase
+    this.relativePrecomputeCount = 0;
 
-      // if >0, indicates this should be precomputed in the pre-repaint phase
-      this.relativePrecomputeCount = 0;
+    // how many children have (or have descendants with) >0 relativePrecomputeCount
+    this.relativeChildrenPrecomputeCount = 0;
 
-      // how many children have (or have descendants with) >0 relativePrecomputeCount
-      this.relativeChildrenPrecomputeCount = 0;
+    // used to mark what frame the transform was updated in (to accelerate non-precomputed relative transform access)
+    this.relativeFrameId = -1;
 
-      // used to mark what frame the transform was updated in (to accelerate non-precomputed relative transform access)
-      this.relativeFrameId = -1;
+    // Whether children have dirty transforms (if it is the current frame) NOTE: used only for pre-repaint traversal,
+    // and can be ignored if it has a value less than the current frame ID. This allows us to traverse and hit all
+    // listeners for this particular traversal, without leaving an invalid subtree (a boolean flag here is
+    // insufficient, since our traversal handling would validate our invariant of
+    // this.relativeChildDirtyFrame => parent.relativeChildDirtyFrame). In this case, they are both effectively
+    // "false" unless they are the current frame ID, in which case that invariant holds.
+    this.relativeChildDirtyFrame = display ? display._frameId : 0;
 
-      // Whether children have dirty transforms (if it is the current frame) NOTE: used only for pre-repaint traversal,
-      // and can be ignored if it has a value less than the current frame ID. This allows us to traverse and hit all
-      // listeners for this particular traversal, without leaving an invalid subtree (a boolean flag here is
-      // insufficient, since our traversal handling would validate our invariant of
-      // this.relativeChildDirtyFrame => parent.relativeChildDirtyFrame). In this case, they are both effectively
-      // "false" unless they are the current frame ID, in which case that invariant holds.
-      this.relativeChildDirtyFrame = display ? display._frameId : 0;
+    // will be notified in pre-repaint phase that our relative transform has changed (but not computed by default)
+    //OHTWO TODO: should we rely on listeners removing themselves?
+    this.relativeTransformListeners = cleanArray( this.relativeTransformListeners );
 
-      // will be notified in pre-repaint phase that our relative transform has changed (but not computed by default)
-      //OHTWO TODO: should we rely on listeners removing themselves?
-      this.relativeTransformListeners = cleanArray( this.relativeTransformListeners );
+    return this; // allow chaining
+  },
 
-      return this; // allow chaining
-    },
+  get parent() {
+    return this.instance.parent ? this.instance.parent.relativeTransform : null;
+  },
 
-    get parent() {
-      return this.instance.parent ? this.instance.parent.relativeTransform : null;
-    },
-
-    addInstance: function( instance ) {
-      if ( instance.stateless ) {
-        assert && assert( !instance.relativeTransform.hasAncestorListenerNeed(),
-          'We only track changes properly if stateless instances do not have needs' );
-        assert && assert( !instance.relativeTransform.hasAncestorComputeNeed(),
-          'We only track changes properly if stateless instances do not have needs' );
-      }
-      else {
-        if ( instance.relativeTransform.hasAncestorListenerNeed() ) {
-          this.incrementTransformListenerChildren();
-        }
-        if ( instance.relativeTransform.hasAncestorComputeNeed() ) {
-          this.incrementTransformPrecomputeChildren();
-        }
-      }
-
-      // mark the instance's transform as dirty, so that it will be reachable in the pre-repaint traversal pass
-      instance.relativeTransform.forceMarkTransformDirty();
-    },
-
-    removeInstance: function( instance ) {
+  addInstance: function( instance ) {
+    if ( instance.stateless ) {
+      assert && assert( !instance.relativeTransform.hasAncestorListenerNeed(),
+        'We only track changes properly if stateless instances do not have needs' );
+      assert && assert( !instance.relativeTransform.hasAncestorComputeNeed(),
+        'We only track changes properly if stateless instances do not have needs' );
+    }
+    else {
       if ( instance.relativeTransform.hasAncestorListenerNeed() ) {
-        this.decrementTransformListenerChildren();
+        this.incrementTransformListenerChildren();
       }
       if ( instance.relativeTransform.hasAncestorComputeNeed() ) {
-        this.decrementTransformPrecomputeChildren();
+        this.incrementTransformPrecomputeChildren();
       }
-    },
+    }
 
-    attachNodeListeners: function() {
-      this.node.onStatic( 'transform', this.nodeTransformListener );
-    },
+    // mark the instance's transform as dirty, so that it will be reachable in the pre-repaint traversal pass
+    instance.relativeTransform.forceMarkTransformDirty();
+  },
 
-    detachNodeListeners: function() {
-      this.node.offStatic( 'transform', this.nodeTransformListener );
-    },
+  removeInstance: function( instance ) {
+    if ( instance.relativeTransform.hasAncestorListenerNeed() ) {
+      this.decrementTransformListenerChildren();
+    }
+    if ( instance.relativeTransform.hasAncestorComputeNeed() ) {
+      this.decrementTransformPrecomputeChildren();
+    }
+  },
 
-    /*---------------------------------------------------------------------------*
-     * Relative transform listener count recursive handling
-     *----------------------------------------------------------------------------*/
+  attachNodeListeners: function() {
+    this.node.onStatic( 'transform', this.nodeTransformListener );
+  },
 
-    // @private: Only for descendants need, ignores 'self' need on isTransformed
-    hasDescendantListenerNeed: function() {
-      if ( this.instance.isTransformed ) {
-        return this.relativeChildrenListenersCount > 0;
-      }
-      else {
-        return this.relativeChildrenListenersCount > 0 || this.relativeTransformListeners.length > 0;
-      }
-    },
-    // @private: Only for ancestors need, ignores child need on isTransformed
-    hasAncestorListenerNeed: function() {
-      if ( this.instance.isTransformed ) {
-        return this.relativeTransformListeners.length > 0;
-      }
-      else {
-        return this.relativeChildrenListenersCount > 0 || this.relativeTransformListeners.length > 0;
-      }
-    },
-    // @private
-    hasSelfListenerNeed: function() {
+  detachNodeListeners: function() {
+    this.node.offStatic( 'transform', this.nodeTransformListener );
+  },
+
+  /*---------------------------------------------------------------------------*
+   * Relative transform listener count recursive handling
+   *----------------------------------------------------------------------------*/
+
+  // @private: Only for descendants need, ignores 'self' need on isTransformed
+  hasDescendantListenerNeed: function() {
+    if ( this.instance.isTransformed ) {
+      return this.relativeChildrenListenersCount > 0;
+    }
+    else {
+      return this.relativeChildrenListenersCount > 0 || this.relativeTransformListeners.length > 0;
+    }
+  },
+  // @private: Only for ancestors need, ignores child need on isTransformed
+  hasAncestorListenerNeed: function() {
+    if ( this.instance.isTransformed ) {
       return this.relativeTransformListeners.length > 0;
-    },
-    // @private (called on the ancestor of the instance with the need)
-    incrementTransformListenerChildren: function() {
-      const before = this.hasAncestorListenerNeed();
+    }
+    else {
+      return this.relativeChildrenListenersCount > 0 || this.relativeTransformListeners.length > 0;
+    }
+  },
+  // @private
+  hasSelfListenerNeed: function() {
+    return this.relativeTransformListeners.length > 0;
+  },
+  // @private (called on the ancestor of the instance with the need)
+  incrementTransformListenerChildren: function() {
+    const before = this.hasAncestorListenerNeed();
 
-      this.relativeChildrenListenersCount++;
-      if ( before !== this.hasAncestorListenerNeed() ) {
-        assert && assert( !this.instance.isTransformed, 'Should not be a change in need if we have the isTransformed flag' );
+    this.relativeChildrenListenersCount++;
+    if ( before !== this.hasAncestorListenerNeed() ) {
+      assert && assert( !this.instance.isTransformed, 'Should not be a change in need if we have the isTransformed flag' );
 
-        this.parent && this.parent.incrementTransformListenerChildren();
-      }
-    },
-    // @private (called on the ancestor of the instance with the need)
-    decrementTransformListenerChildren: function() {
-      const before = this.hasAncestorListenerNeed();
+      this.parent && this.parent.incrementTransformListenerChildren();
+    }
+  },
+  // @private (called on the ancestor of the instance with the need)
+  decrementTransformListenerChildren: function() {
+    const before = this.hasAncestorListenerNeed();
 
-      this.relativeChildrenListenersCount--;
-      if ( before !== this.hasAncestorListenerNeed() ) {
-        assert && assert( !this.instance.isTransformed, 'Should not be a change in need if we have the isTransformed flag' );
+    this.relativeChildrenListenersCount--;
+    if ( before !== this.hasAncestorListenerNeed() ) {
+      assert && assert( !this.instance.isTransformed, 'Should not be a change in need if we have the isTransformed flag' );
 
-        this.parent && this.parent.decrementTransformListenerChildren();
-      }
-    },
+      this.parent && this.parent.decrementTransformListenerChildren();
+    }
+  },
 
-    // @public (called on the instance itself)
-    addListener: function( listener ) {
-      const before = this.hasAncestorListenerNeed();
+  // @public (called on the instance itself)
+  addListener: function( listener ) {
+    const before = this.hasAncestorListenerNeed();
 
-      this.relativeTransformListeners.push( listener );
-      if ( before !== this.hasAncestorListenerNeed() ) {
-        this.parent && this.parent.incrementTransformListenerChildren();
+    this.relativeTransformListeners.push( listener );
+    if ( before !== this.hasAncestorListenerNeed() ) {
+      this.parent && this.parent.incrementTransformListenerChildren();
 
-        // if we just went from "not needing to be traversed" to "needing to be traversed", mark ourselves as dirty so
-        // that we for-sure get future updates
-        if ( !this.hasAncestorComputeNeed() ) {
-          // TODO: can we do better than this?
-          this.forceMarkTransformDirty();
-        }
-      }
-    },
-
-    // @public (called on the instance itself)
-    removeListener: function( listener ) {
-      const before = this.hasAncestorListenerNeed();
-
-      // TODO: replace with a 'remove' function call
-      this.relativeTransformListeners.splice( _.indexOf( this.relativeTransformListeners, listener ), 1 );
-      if ( before !== this.hasAncestorListenerNeed() ) {
-        this.parent && this.parent.decrementTransformListenerChildren();
-      }
-    },
-
-    /*---------------------------------------------------------------------------*
-     * Relative transform precompute flag recursive handling
-     *----------------------------------------------------------------------------*/
-
-    // @private: Only for descendants need, ignores 'self' need on isTransformed
-    hasDescendantComputeNeed: function() {
-      if ( this.instance.isTransformed ) {
-        return this.relativeChildrenPrecomputeCount > 0;
-      }
-      else {
-        return this.relativeChildrenPrecomputeCount > 0 || this.relativePrecomputeCount > 0;
-      }
-    },
-    // @private: Only for ancestors need, ignores child need on isTransformed
-    hasAncestorComputeNeed: function() {
-      if ( this.instance.isTransformed ) {
-        return this.relativePrecomputeCount > 0;
-      }
-      else {
-        return this.relativeChildrenPrecomputeCount > 0 || this.relativePrecomputeCount > 0;
-      }
-    },
-    // @private
-    hasSelfComputeNeed: function() {
-      return this.relativePrecomputeCount > 0;
-    },
-    // @private (called on the ancestor of the instance with the need)
-    incrementTransformPrecomputeChildren: function() {
-      const before = this.hasAncestorComputeNeed();
-
-      this.relativeChildrenPrecomputeCount++;
-      if ( before !== this.hasAncestorComputeNeed() ) {
-        assert && assert( !this.instance.isTransformed, 'Should not be a change in need if we have the isTransformed flag' );
-
-        this.parent && this.parent.incrementTransformPrecomputeChildren();
-      }
-    },
-    // @private (called on the ancestor of the instance with the need)
-    decrementTransformPrecomputeChildren: function() {
-      const before = this.hasAncestorComputeNeed();
-
-      this.relativeChildrenPrecomputeCount--;
-      if ( before !== this.hasAncestorComputeNeed() ) {
-        assert && assert( !this.instance.isTransformed, 'Should not be a change in need if we have the isTransformed flag' );
-
-        this.parent && this.parent.decrementTransformPrecomputeChildren();
-      }
-    },
-
-    // @public (called on the instance itself)
-    addPrecompute: function() {
-      const before = this.hasAncestorComputeNeed();
-
-      this.relativePrecomputeCount++;
-      if ( before !== this.hasAncestorComputeNeed() ) {
-        this.parent && this.parent.incrementTransformPrecomputeChildren();
-
-        // if we just went from "not needing to be traversed" to "needing to be traversed", mark ourselves as dirty so
-        // that we for-sure get future updates
-        if ( !this.hasAncestorListenerNeed() ) {
-          // TODO: can we do better than this?
-          this.forceMarkTransformDirty();
-        }
-      }
-    },
-
-    // @public (called on the instance itself)
-    removePrecompute: function() {
-      const before = this.hasAncestorComputeNeed();
-
-      this.relativePrecomputeCount--;
-      if ( before !== this.hasAncestorComputeNeed() ) {
-        this.parent && this.parent.decrementTransformPrecomputeChildren();
-      }
-    },
-
-    /*---------------------------------------------------------------------------*
-     * Relative transform handling
-     *----------------------------------------------------------------------------*/
-
-    // called immediately when the corresponding node has a transform change (can happen multiple times between renders)
-    onNodeTransformDirty: function() {
-      if ( !this.transformDirty ) {
+      // if we just went from "not needing to be traversed" to "needing to be traversed", mark ourselves as dirty so
+      // that we for-sure get future updates
+      if ( !this.hasAncestorComputeNeed() ) {
+        // TODO: can we do better than this?
         this.forceMarkTransformDirty();
       }
-    },
+    }
+  },
 
-    forceMarkTransformDirty: function() {
-      this.transformDirty = true;
-      this.relativeSelfDirty = true;
+  // @public (called on the instance itself)
+  removeListener: function( listener ) {
+    const before = this.hasAncestorListenerNeed();
 
-      const frameId = this.display._frameId;
+    // TODO: replace with a 'remove' function call
+    this.relativeTransformListeners.splice( _.indexOf( this.relativeTransformListeners, listener ), 1 );
+    if ( before !== this.hasAncestorListenerNeed() ) {
+      this.parent && this.parent.decrementTransformListenerChildren();
+    }
+  },
 
-      // mark all ancestors with relativeChildDirtyFrame, bailing out when possible
-      let instance = this.instance.parent;
-      while ( instance && instance.relativeTransform.relativeChildDirtyFrame !== frameId ) {
-        const parentInstance = instance.parent;
-        const isTransformed = instance.isTransformed;
+  /*---------------------------------------------------------------------------*
+   * Relative transform precompute flag recursive handling
+   *----------------------------------------------------------------------------*/
 
-        // NOTE: our while loop guarantees that it wasn't frameId
-        instance.relativeTransform.relativeChildDirtyFrame = frameId;
+  // @private: Only for descendants need, ignores 'self' need on isTransformed
+  hasDescendantComputeNeed: function() {
+    if ( this.instance.isTransformed ) {
+      return this.relativeChildrenPrecomputeCount > 0;
+    }
+    else {
+      return this.relativeChildrenPrecomputeCount > 0 || this.relativePrecomputeCount > 0;
+    }
+  },
+  // @private: Only for ancestors need, ignores child need on isTransformed
+  hasAncestorComputeNeed: function() {
+    if ( this.instance.isTransformed ) {
+      return this.relativePrecomputeCount > 0;
+    }
+    else {
+      return this.relativeChildrenPrecomputeCount > 0 || this.relativePrecomputeCount > 0;
+    }
+  },
+  // @private
+  hasSelfComputeNeed: function() {
+    return this.relativePrecomputeCount > 0;
+  },
+  // @private (called on the ancestor of the instance with the need)
+  incrementTransformPrecomputeChildren: function() {
+    const before = this.hasAncestorComputeNeed();
 
-        // always mark an instance without a parent (root instance!)
-        if ( parentInstance === null ) {
-          // passTransform depends on whether it is marked as a transform root
-          this.display.markTransformRootDirty( instance, isTransformed );
-          break;
-        }
-        else if ( isTransformed ) {
-          this.display.markTransformRootDirty( instance, true ); // passTransform true
-          break;
-        }
+    this.relativeChildrenPrecomputeCount++;
+    if ( before !== this.hasAncestorComputeNeed() ) {
+      assert && assert( !this.instance.isTransformed, 'Should not be a change in need if we have the isTransformed flag' );
 
-        instance = parentInstance;
+      this.parent && this.parent.incrementTransformPrecomputeChildren();
+    }
+  },
+  // @private (called on the ancestor of the instance with the need)
+  decrementTransformPrecomputeChildren: function() {
+    const before = this.hasAncestorComputeNeed();
+
+    this.relativeChildrenPrecomputeCount--;
+    if ( before !== this.hasAncestorComputeNeed() ) {
+      assert && assert( !this.instance.isTransformed, 'Should not be a change in need if we have the isTransformed flag' );
+
+      this.parent && this.parent.decrementTransformPrecomputeChildren();
+    }
+  },
+
+  // @public (called on the instance itself)
+  addPrecompute: function() {
+    const before = this.hasAncestorComputeNeed();
+
+    this.relativePrecomputeCount++;
+    if ( before !== this.hasAncestorComputeNeed() ) {
+      this.parent && this.parent.incrementTransformPrecomputeChildren();
+
+      // if we just went from "not needing to be traversed" to "needing to be traversed", mark ourselves as dirty so
+      // that we for-sure get future updates
+      if ( !this.hasAncestorListenerNeed() ) {
+        // TODO: can we do better than this?
+        this.forceMarkTransformDirty();
       }
-    },
+    }
+  },
 
-    // @private, updates our matrix based on any parents, and the node's current transform
-    computeRelativeTransform: function() {
-      const nodeMatrix = this.node.getMatrix();
+  // @public (called on the instance itself)
+  removePrecompute: function() {
+    const before = this.hasAncestorComputeNeed();
 
-      if ( this.instance.parent && !this.instance.parent.isTransformed ) {
-        // mutable form of parentMatrix * nodeMatrix
-        this.matrix.set( this.parent.matrix );
-        this.matrix.multiplyMatrix( nodeMatrix );
+    this.relativePrecomputeCount--;
+    if ( before !== this.hasAncestorComputeNeed() ) {
+      this.parent && this.parent.decrementTransformPrecomputeChildren();
+    }
+  },
+
+  /*---------------------------------------------------------------------------*
+   * Relative transform handling
+   *----------------------------------------------------------------------------*/
+
+  // called immediately when the corresponding node has a transform change (can happen multiple times between renders)
+  onNodeTransformDirty: function() {
+    if ( !this.transformDirty ) {
+      this.forceMarkTransformDirty();
+    }
+  },
+
+  forceMarkTransformDirty: function() {
+    this.transformDirty = true;
+    this.relativeSelfDirty = true;
+
+    const frameId = this.display._frameId;
+
+    // mark all ancestors with relativeChildDirtyFrame, bailing out when possible
+    let instance = this.instance.parent;
+    while ( instance && instance.relativeTransform.relativeChildDirtyFrame !== frameId ) {
+      const parentInstance = instance.parent;
+      const isTransformed = instance.isTransformed;
+
+      // NOTE: our while loop guarantees that it wasn't frameId
+      instance.relativeTransform.relativeChildDirtyFrame = frameId;
+
+      // always mark an instance without a parent (root instance!)
+      if ( parentInstance === null ) {
+        // passTransform depends on whether it is marked as a transform root
+        this.display.markTransformRootDirty( instance, isTransformed );
+        break;
       }
-      else {
-        // we are the first in the trail transform, so we just directly copy the matrix over
-        this.matrix.set( nodeMatrix );
+      else if ( isTransformed ) {
+        this.display.markTransformRootDirty( instance, true ); // passTransform true
+        break;
       }
 
-      // mark the frame where this transform was updated, to accelerate non-precomputed access
-      this.relativeFrameId = this.display._frameId;
-      this.relativeSelfDirty = false;
-    },
+      instance = parentInstance;
+    }
+  },
 
-    // @public
-    isValidationNotNeeded: function() {
-      return this.hasAncestorComputeNeed() || this.relativeFrameId === this.display._frameId;
-    },
+  // @private, updates our matrix based on any parents, and the node's current transform
+  computeRelativeTransform: function() {
+    const nodeMatrix = this.node.getMatrix();
 
-    // Called from any place in the rendering process where we are not guaranteed to have a fresh relative transform.
-    // needs to scan up the tree, so it is more expensive than precomputed transforms.
-    // @returns Whether we had to update this transform
-    validate: function() {
-      // if we are clean, bail out. If we have a compute "need", we will always be clean here since this is after the
-      // traversal step. If we did not have a compute "need", we check whether we were already updated this frame by
-      // computeRelativeTransform.
-      if ( this.isValidationNotNeeded() ) {
+    if ( this.instance.parent && !this.instance.parent.isTransformed ) {
+      // mutable form of parentMatrix * nodeMatrix
+      this.matrix.set( this.parent.matrix );
+      this.matrix.multiplyMatrix( nodeMatrix );
+    }
+    else {
+      // we are the first in the trail transform, so we just directly copy the matrix over
+      this.matrix.set( nodeMatrix );
+    }
+
+    // mark the frame where this transform was updated, to accelerate non-precomputed access
+    this.relativeFrameId = this.display._frameId;
+    this.relativeSelfDirty = false;
+  },
+
+  // @public
+  isValidationNotNeeded: function() {
+    return this.hasAncestorComputeNeed() || this.relativeFrameId === this.display._frameId;
+  },
+
+  // Called from any place in the rendering process where we are not guaranteed to have a fresh relative transform.
+  // needs to scan up the tree, so it is more expensive than precomputed transforms.
+  // @returns Whether we had to update this transform
+  validate: function() {
+    // if we are clean, bail out. If we have a compute "need", we will always be clean here since this is after the
+    // traversal step. If we did not have a compute "need", we check whether we were already updated this frame by
+    // computeRelativeTransform.
+    if ( this.isValidationNotNeeded() ) {
+      return;
+    }
+
+    // if we are not the first transform from the root, validate our parent. isTransform check prevents us from
+    // passing a transform root.
+    if ( this.instance.parent && !this.instance.parent.isTransformed ) {
+      this.parent.validate();
+    }
+
+    // validation of the parent may have changed our relativeSelfDirty flag to true, so we check now (could also have
+    // been true before)
+    if ( this.relativeSelfDirty ) {
+      // compute the transform, and mark us as not relative-dirty
+      this.computeRelativeTransform();
+
+      // mark all children now as dirty, since we had to update (marked so that other children from the one we are
+      // validating will know that they need updates)
+      // if we were called from a child's validate(), they will now need to compute their transform
+      const len = this.instance.children.length;
+      for ( let i = 0; i < len; i++ ) {
+        this.instance.children[ i ].relativeTransform.relativeSelfDirty = true;
+      }
+    }
+  },
+
+  // called during the pre-repaint phase to (a) fire off all relative transform listeners that should be fired, and
+  // (b) precompute transforms were desired
+  updateTransformListenersAndCompute: function( ancestorWasDirty, ancestorIsDirty, frameId, passTransform ) {
+    sceneryLog && sceneryLog.RelativeTransform && sceneryLog.RelativeTransform(
+      'update/compute: ' + this.toString() + ' ' + ancestorWasDirty + ' => ' + ancestorIsDirty +
+      ( passTransform ? ' passTransform' : '' ) );
+    sceneryLog && sceneryLog.RelativeTransform && sceneryLog.push();
+
+    let len;
+    let i;
+
+    if ( passTransform ) {
+      // if we are passing isTransform, just apply this to the children
+      len = this.instance.children.length;
+      for ( i = 0; i < len; i++ ) {
+        this.instance.children[ i ].relativeTransform.updateTransformListenersAndCompute( false, false, frameId, false );
+      }
+    }
+    else {
+      const wasDirty = ancestorWasDirty || this.relativeSelfDirty;
+      const wasSubtreeDirty = wasDirty || this.relativeChildDirtyFrame === frameId;
+      const hasComputeNeed = this.hasDescendantComputeNeed();
+      const hasListenerNeed = this.hasDescendantListenerNeed();
+      const hasSelfComputeNeed = this.hasSelfComputeNeed();
+      const hasSelfListenerNeed = this.hasSelfListenerNeed();
+
+      // if our relative transform will be dirty but our parents' transform will be clean, we need to mark ourselves
+      // as dirty (so that later access can identify we are dirty).
+      if ( !hasComputeNeed && wasDirty && !ancestorIsDirty ) {
+        this.relativeSelfDirty = true;
+      }
+
+      // check if traversal isn't needed (no instances marked as having listeners or needing computation)
+      // either the subtree is clean (no traversal needed for compute/listeners), or we have no compute/listener needs
+      if ( !wasSubtreeDirty || ( !hasComputeNeed && !hasListenerNeed && !hasSelfComputeNeed && !hasSelfListenerNeed ) ) {
+        sceneryLog && sceneryLog.RelativeTransform && sceneryLog.pop();
         return;
       }
 
-      // if we are not the first transform from the root, validate our parent. isTransform check prevents us from
-      // passing a transform root.
-      if ( this.instance.parent && !this.instance.parent.isTransformed ) {
-        this.parent.validate();
-      }
-
-      // validation of the parent may have changed our relativeSelfDirty flag to true, so we check now (could also have
-      // been true before)
-      if ( this.relativeSelfDirty ) {
-        // compute the transform, and mark us as not relative-dirty
+      // if desired, compute the transform
+      if ( wasDirty && ( hasComputeNeed || hasSelfComputeNeed ) ) {
+        // compute this transform in the pre-repaint phase, so it is cheap when always used/
+        // we update when the child-precompute count >0, since those children will need
         this.computeRelativeTransform();
-
-        // mark all children now as dirty, since we had to update (marked so that other children from the one we are
-        // validating will know that they need updates)
-        // if we were called from a child's validate(), they will now need to compute their transform
-        const len = this.instance.children.length;
-        for ( let i = 0; i < len; i++ ) {
-          this.instance.children[ i ].relativeTransform.relativeSelfDirty = true;
-        }
       }
-    },
 
-    // called during the pre-repaint phase to (a) fire off all relative transform listeners that should be fired, and
-    // (b) precompute transforms were desired
-    updateTransformListenersAndCompute: function( ancestorWasDirty, ancestorIsDirty, frameId, passTransform ) {
-      sceneryLog && sceneryLog.RelativeTransform && sceneryLog.RelativeTransform(
-        'update/compute: ' + this.toString() + ' ' + ancestorWasDirty + ' => ' + ancestorIsDirty +
-        ( passTransform ? ' passTransform' : '' ) );
-      sceneryLog && sceneryLog.RelativeTransform && sceneryLog.push();
+      if ( this.transformDirty ) {
+        this.transformDirty = false;
+      }
 
-      let len;
-      let i;
+      // no hasListenerNeed guard needed?
+      this.notifyRelativeTransformListeners();
 
-      if ( passTransform ) {
-        // if we are passing isTransform, just apply this to the children
+      // only update children if we aren't transformed (completely other context)
+      if ( !this.instance.isTransformed || passTransform ) {
+
+        const isDirty = wasDirty && !( hasComputeNeed || hasSelfComputeNeed );
+
+        // continue the traversal
         len = this.instance.children.length;
         for ( i = 0; i < len; i++ ) {
-          this.instance.children[ i ].relativeTransform.updateTransformListenersAndCompute( false, false, frameId, false );
-        }
-      }
-      else {
-        const wasDirty = ancestorWasDirty || this.relativeSelfDirty;
-        const wasSubtreeDirty = wasDirty || this.relativeChildDirtyFrame === frameId;
-        const hasComputeNeed = this.hasDescendantComputeNeed();
-        const hasListenerNeed = this.hasDescendantListenerNeed();
-        const hasSelfComputeNeed = this.hasSelfComputeNeed();
-        const hasSelfListenerNeed = this.hasSelfListenerNeed();
-
-        // if our relative transform will be dirty but our parents' transform will be clean, we need to mark ourselves
-        // as dirty (so that later access can identify we are dirty).
-        if ( !hasComputeNeed && wasDirty && !ancestorIsDirty ) {
-          this.relativeSelfDirty = true;
-        }
-
-        // check if traversal isn't needed (no instances marked as having listeners or needing computation)
-        // either the subtree is clean (no traversal needed for compute/listeners), or we have no compute/listener needs
-        if ( !wasSubtreeDirty || ( !hasComputeNeed && !hasListenerNeed && !hasSelfComputeNeed && !hasSelfListenerNeed ) ) {
-          sceneryLog && sceneryLog.RelativeTransform && sceneryLog.pop();
-          return;
-        }
-
-        // if desired, compute the transform
-        if ( wasDirty && ( hasComputeNeed || hasSelfComputeNeed ) ) {
-          // compute this transform in the pre-repaint phase, so it is cheap when always used/
-          // we update when the child-precompute count >0, since those children will need
-          this.computeRelativeTransform();
-        }
-
-        if ( this.transformDirty ) {
-          this.transformDirty = false;
-        }
-
-        // no hasListenerNeed guard needed?
-        this.notifyRelativeTransformListeners();
-
-        // only update children if we aren't transformed (completely other context)
-        if ( !this.instance.isTransformed || passTransform ) {
-
-          const isDirty = wasDirty && !( hasComputeNeed || hasSelfComputeNeed );
-
-          // continue the traversal
-          len = this.instance.children.length;
-          for ( i = 0; i < len; i++ ) {
-            this.instance.children[ i ].relativeTransform.updateTransformListenersAndCompute( wasDirty, isDirty, frameId, false );
-          }
-        }
-      }
-
-      sceneryLog && sceneryLog.RelativeTransform && sceneryLog.pop();
-    },
-
-    // @private
-    notifyRelativeTransformListeners: function() {
-      const len = this.relativeTransformListeners.length;
-      for ( let i = 0; i < len; i++ ) {
-        this.relativeTransformListeners[ i ]();
-      }
-    },
-
-    audit: function( frameId, allowValidationNotNeededChecks ) {
-      // get the relative matrix, computed to be up-to-date, and ignores any flags/counts so we can check whether our
-      // state is consistent
-      function currentRelativeMatrix( instance ) {
-        const resultMatrix = Matrix3.dirtyFromPool();
-        const nodeMatrix = instance.node.getMatrix();
-
-        if ( !instance.parent ) {
-          // if our instance has no parent, ignore its transform
-          resultMatrix.set( Matrix3.IDENTITY );
-        }
-        else if ( !instance.parent.isTransformed ) {
-          // mutable form of parentMatrix * nodeMatrix
-          resultMatrix.set( currentRelativeMatrix( instance.parent ) );
-          resultMatrix.multiplyMatrix( nodeMatrix );
-        }
-        else {
-          // we are the first in the trail transform, so we just directly copy the matrix over
-          resultMatrix.set( nodeMatrix );
-        }
-
-        return resultMatrix;
-      }
-
-      function hasRelativeSelfDirty( instance ) {
-        // if validation isn't needed, act like nothing is dirty (matching our validate behavior)
-        if ( allowValidationNotNeededChecks && instance.isValidationNotNeeded() ) {
-          return false;
-        }
-
-        return instance.relativeSelfDirty || ( instance.parent && hasRelativeSelfDirty( instance.parent ) );
-      }
-
-      if ( assertSlow ) {
-        // count verification for invariants
-        let notifyRelativeCount = 0;
-        let precomputeRelativeCount = 0;
-        for ( let i = 0; i < this.instance.children.length; i++ ) {
-          const childInstance = this.instance.children[ i ];
-
-          if ( childInstance.relativeTransform.hasAncestorListenerNeed() ) {
-            notifyRelativeCount++;
-          }
-          if ( childInstance.relativeTransform.hasAncestorComputeNeed() ) {
-            precomputeRelativeCount++;
-          }
-        }
-        assertSlow( notifyRelativeCount === this.relativeChildrenListenersCount,
-          'Relative listener count invariant' );
-        assertSlow( precomputeRelativeCount === this.relativeChildrenPrecomputeCount,
-          'Relative precompute count invariant' );
-
-        assertSlow( !this.parent || this.instance.isTransformed || ( this.relativeChildDirtyFrame !== frameId ) ||
-                    ( this.parent.relativeChildDirtyFrame === frameId ),
-          'If we have a parent, we need to hold the invariant ' +
-          'this.relativeChildDirtyFrame => parent.relativeChildDirtyFrame' );
-
-        // Since we check to see if something is not dirty, we need to handle this when we are actually reporting
-        // what is dirty. See https://github.com/phetsims/scenery/issues/512
-        if ( !allowValidationNotNeededChecks && !hasRelativeSelfDirty( this ) ) {
-          const matrix = currentRelativeMatrix( this );
-          assertSlow( matrix.equals( this.matrix ), 'If there is no relativeSelfDirty flag set here or in our' +
-                                                    ' ancestors, our matrix should be up-to-date' );
+          this.instance.children[ i ].relativeTransform.updateTransformListenersAndCompute( wasDirty, isDirty, frameId, false );
         }
       }
     }
-  } );
 
-  return RelativeTransform;
+    sceneryLog && sceneryLog.RelativeTransform && sceneryLog.pop();
+  },
+
+  // @private
+  notifyRelativeTransformListeners: function() {
+    const len = this.relativeTransformListeners.length;
+    for ( let i = 0; i < len; i++ ) {
+      this.relativeTransformListeners[ i ]();
+    }
+  },
+
+  audit: function( frameId, allowValidationNotNeededChecks ) {
+    // get the relative matrix, computed to be up-to-date, and ignores any flags/counts so we can check whether our
+    // state is consistent
+    function currentRelativeMatrix( instance ) {
+      const resultMatrix = Matrix3.dirtyFromPool();
+      const nodeMatrix = instance.node.getMatrix();
+
+      if ( !instance.parent ) {
+        // if our instance has no parent, ignore its transform
+        resultMatrix.set( Matrix3.IDENTITY );
+      }
+      else if ( !instance.parent.isTransformed ) {
+        // mutable form of parentMatrix * nodeMatrix
+        resultMatrix.set( currentRelativeMatrix( instance.parent ) );
+        resultMatrix.multiplyMatrix( nodeMatrix );
+      }
+      else {
+        // we are the first in the trail transform, so we just directly copy the matrix over
+        resultMatrix.set( nodeMatrix );
+      }
+
+      return resultMatrix;
+    }
+
+    function hasRelativeSelfDirty( instance ) {
+      // if validation isn't needed, act like nothing is dirty (matching our validate behavior)
+      if ( allowValidationNotNeededChecks && instance.isValidationNotNeeded() ) {
+        return false;
+      }
+
+      return instance.relativeSelfDirty || ( instance.parent && hasRelativeSelfDirty( instance.parent ) );
+    }
+
+    if ( assertSlow ) {
+      // count verification for invariants
+      let notifyRelativeCount = 0;
+      let precomputeRelativeCount = 0;
+      for ( let i = 0; i < this.instance.children.length; i++ ) {
+        const childInstance = this.instance.children[ i ];
+
+        if ( childInstance.relativeTransform.hasAncestorListenerNeed() ) {
+          notifyRelativeCount++;
+        }
+        if ( childInstance.relativeTransform.hasAncestorComputeNeed() ) {
+          precomputeRelativeCount++;
+        }
+      }
+      assertSlow( notifyRelativeCount === this.relativeChildrenListenersCount,
+        'Relative listener count invariant' );
+      assertSlow( precomputeRelativeCount === this.relativeChildrenPrecomputeCount,
+        'Relative precompute count invariant' );
+
+      assertSlow( !this.parent || this.instance.isTransformed || ( this.relativeChildDirtyFrame !== frameId ) ||
+                  ( this.parent.relativeChildDirtyFrame === frameId ),
+        'If we have a parent, we need to hold the invariant ' +
+        'this.relativeChildDirtyFrame => parent.relativeChildDirtyFrame' );
+
+      // Since we check to see if something is not dirty, we need to handle this when we are actually reporting
+      // what is dirty. See https://github.com/phetsims/scenery/issues/512
+      if ( !allowValidationNotNeededChecks && !hasRelativeSelfDirty( this ) ) {
+        const matrix = currentRelativeMatrix( this );
+        assertSlow( matrix.equals( this.matrix ), 'If there is no relativeSelfDirty flag set here or in our' +
+                                                  ' ancestors, our matrix should be up-to-date' );
+      }
+    }
+  }
 } );
+
+export default RelativeTransform;

@@ -6,35 +6,31 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( require => {
-  'use strict';
+import inherit from '../../../phet-core/js/inherit.js';
+import scenery from '../scenery.js';
 
-  const inherit = require( 'PHET_CORE/inherit' );
-  const scenery = require( 'SCENERY/scenery' );
+/**
+ * Creates a listener that absorbs 'down' events, preventing them from bubbling further.
+ * @constructor
+ *
+ * NOTE: This does not call abort(), so listeners that are added to the same Node as this listener will still fire
+ *       normally.
+ */
+function HandleDownlistener() {
+}
 
+scenery.register( 'HandleDownlistener', HandleDownlistener );
+
+inherit( Object, HandleDownlistener, {
   /**
-   * Creates a listener that absorbs 'down' events, preventing them from bubbling further.
-   * @constructor
+   * Scenery input callback to absorb down events.
+   * @public
    *
-   * NOTE: This does not call abort(), so listeners that are added to the same Node as this listener will still fire
-   *       normally.
+   * @param {SceneryEvent} event
    */
-  function HandleDownlistener() {
+  down: function( event ) {
+    event.handle();
   }
-
-  scenery.register( 'HandleDownlistener', HandleDownlistener );
-
-  inherit( Object, HandleDownlistener, {
-    /**
-     * Scenery input callback to absorb down events.
-     * @public
-     *
-     * @param {SceneryEvent} event
-     */
-    down: function( event ) {
-      event.handle();
-    }
-  } );
-
-  return HandleDownlistener;
 } );
+
+export default HandleDownlistener;

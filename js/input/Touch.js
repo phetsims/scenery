@@ -8,93 +8,88 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( require => {
-  'use strict';
+import inherit from '../../../phet-core/js/inherit.js';
+import scenery from '../scenery.js';
+import Pointer from './Pointer.js'; // extends Pointer
 
-  const inherit = require( 'PHET_CORE/inherit' );
-  const scenery = require( 'SCENERY/scenery' );
+/**
+ * @extends Pointer
+ *
+ * @param {number} id
+ * @param {Vector2} point
+ * @param {Event} event
+ * @constructor
+ */
+function Touch( id, point, event ) {
+  Pointer.call( this, point, true, 'touch' ); // true: touches always start in the down state
 
-  const Pointer = require( 'SCENERY/input/Pointer' ); // extends Pointer
+  // @public {number} - For tracking which touch is which
+  this.id = id;
+
+  sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'Created ' + this.toString() );
+}
+
+scenery.register( 'Touch', Touch );
+
+inherit( Pointer, Touch, {
 
   /**
-   * @extends Pointer
+   * Sets information in this Touch for a given touch move.
+   * @public (scenery-internal)
    *
-   * @param {number} id
    * @param {Vector2} point
    * @param {Event} event
-   * @constructor
+   * @returns {boolean} - Whether the point changed
    */
-  function Touch( id, point, event ) {
-    Pointer.call( this, point, true, 'touch' ); // true: touches always start in the down state
+  move: function( point, event ) {
+    const pointChanged = this.hasPointChanged( point );
 
-    // @public {number} - For tracking which touch is which
-    this.id = id;
+    this.point = point;
+    return pointChanged;
+  },
 
-    sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'Created ' + this.toString() );
+  /**
+   * Sets information in this Touch for a given touch end.
+   * @public (scenery-internal)
+   *
+   * @param {Vector2} point
+   * @param {Event} event
+   * @returns {boolean} - Whether the point changed
+   */
+  end: function( point, event ) {
+    const pointChanged = this.hasPointChanged( point );
+
+    this.point = point;
+    this.isDown = false;
+    return pointChanged;
+  },
+
+  /**
+   * Sets information in this Touch for a given touch cancel.
+   * @public (scenery-internal)
+   *
+   * @param {Vector2} point
+   * @param {Event} event
+   * @returns {boolean} - Whether the point changed
+   */
+  cancel: function( point, event ) {
+    const pointChanged = this.hasPointChanged( point );
+
+    this.point = point;
+    this.isDown = false;
+    return pointChanged;
+  },
+
+  /**
+   * Returns an improved string representation of this object.
+   * @public
+   * @override
+   *
+   * @returns {string}
+   */
+  toString: function() {
+    return 'Touch#' + this.id;
   }
-
-  scenery.register( 'Touch', Touch );
-
-  inherit( Pointer, Touch, {
-
-    /**
-     * Sets information in this Touch for a given touch move.
-     * @public (scenery-internal)
-     *
-     * @param {Vector2} point
-     * @param {Event} event
-     * @returns {boolean} - Whether the point changed
-     */
-    move: function( point, event ) {
-      const pointChanged = this.hasPointChanged( point );
-
-      this.point = point;
-      return pointChanged;
-    },
-
-    /**
-     * Sets information in this Touch for a given touch end.
-     * @public (scenery-internal)
-     *
-     * @param {Vector2} point
-     * @param {Event} event
-     * @returns {boolean} - Whether the point changed
-     */
-    end: function( point, event ) {
-      const pointChanged = this.hasPointChanged( point );
-
-      this.point = point;
-      this.isDown = false;
-      return pointChanged;
-    },
-
-    /**
-     * Sets information in this Touch for a given touch cancel.
-     * @public (scenery-internal)
-     *
-     * @param {Vector2} point
-     * @param {Event} event
-     * @returns {boolean} - Whether the point changed
-     */
-    cancel: function( point, event ) {
-      const pointChanged = this.hasPointChanged( point );
-
-      this.point = point;
-      this.isDown = false;
-      return pointChanged;
-    },
-
-    /**
-     * Returns an improved string representation of this object.
-     * @public
-     * @override
-     *
-     * @returns {string}
-     */
-    toString: function() {
-      return 'Touch#' + this.id;
-    }
-  } );
-
-  return Touch;
 } );
+
+export default Touch;

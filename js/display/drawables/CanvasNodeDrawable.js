@@ -6,74 +6,70 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-define( require => {
-  'use strict';
+import inherit from '../../../../phet-core/js/inherit.js';
+import Poolable from '../../../../phet-core/js/Poolable.js';
+import scenery from '../../scenery.js';
+import CanvasSelfDrawable from '../CanvasSelfDrawable.js';
 
-  const CanvasSelfDrawable = require( 'SCENERY/display/CanvasSelfDrawable' );
-  const inherit = require( 'PHET_CORE/inherit' );
-  const Poolable = require( 'PHET_CORE/Poolable' );
-  const scenery = require( 'SCENERY/scenery' );
+const emptyArray = []; // constant, used for line-dash
 
-  const emptyArray = []; // constant, used for line-dash
+/**
+ * A generated CanvasSelfDrawable whose purpose will be drawing our CanvasNode. One of these drawables will be created
+ * for each displayed instance of a CanvasNode.
+ * @public (scenery-internal)
+ * @constructor
+ * @extends CanvasSelfDrawable
+ * @mixes SelfDrawable.Poolable
+ *
+ * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+ * @param {Instance} instance
+ */
+function CanvasNodeDrawable( renderer, instance ) {
+  this.initializeCanvasSelfDrawable( renderer, instance );
+}
 
+scenery.register( 'CanvasNodeDrawable', CanvasNodeDrawable );
+
+inherit( CanvasSelfDrawable, CanvasNodeDrawable, {
   /**
-   * A generated CanvasSelfDrawable whose purpose will be drawing our CanvasNode. One of these drawables will be created
-   * for each displayed instance of a CanvasNode.
-   * @public (scenery-internal)
-   * @constructor
-   * @extends CanvasSelfDrawable
-   * @mixes SelfDrawable.Poolable
+   * Paints this drawable to a Canvas (the wrapper contains both a Canvas reference and its drawing context).
+   * @public
    *
-   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
-   * @param {Instance} instance
+   * Assumes that the Canvas's context is already in the proper local coordinate frame for the node, and that any
+   * other required effects (opacity, clipping, etc.) have already been prepared.
+   *
+   * This is part of the CanvasSelfDrawable API required to be implemented for subtypes.
+   *
+   * @param {CanvasContextWrapper} wrapper - Contains the Canvas and its drawing context
+   * @param {Node} node - Our node that is being drawn
+   * @param {Matrix3} matrix - The transformation matrix applied for this node's coordinate system.
    */
-  function CanvasNodeDrawable( renderer, instance ) {
-    this.initializeCanvasSelfDrawable( renderer, instance );
-  }
+  paintCanvas: function( wrapper, node, matrix ) {
+    assert && assert( !node.selfBounds.isEmpty(), 'CanvasNode should not be used with an empty canvasBounds. ' +
+                                                  'Please set canvasBounds (or use setCanvasBounds()) on ' + node.constructor.name );
 
-  scenery.register( 'CanvasNodeDrawable', CanvasNodeDrawable );
+    if ( !node.selfBounds.isEmpty() ) {
+      const context = wrapper.context;
+      context.save();
 
-  inherit( CanvasSelfDrawable, CanvasNodeDrawable, {
-    /**
-     * Paints this drawable to a Canvas (the wrapper contains both a Canvas reference and its drawing context).
-     * @public
-     *
-     * Assumes that the Canvas's context is already in the proper local coordinate frame for the node, and that any
-     * other required effects (opacity, clipping, etc.) have already been prepared.
-     *
-     * This is part of the CanvasSelfDrawable API required to be implemented for subtypes.
-     *
-     * @param {CanvasContextWrapper} wrapper - Contains the Canvas and its drawing context
-     * @param {Node} node - Our node that is being drawn
-     * @param {Matrix3} matrix - The transformation matrix applied for this node's coordinate system.
-     */
-    paintCanvas: function( wrapper, node, matrix ) {
-      assert && assert( !node.selfBounds.isEmpty(), 'CanvasNode should not be used with an empty canvasBounds. ' +
-                                                    'Please set canvasBounds (or use setCanvasBounds()) on ' + node.constructor.name );
+      // set back to Canvas default styles
+      // TODO: are these necessary, or can we drop them for performance?
+      context.fillStyle = 'black';
+      context.strokeStyle = 'black';
+      context.lineWidth = 1;
+      context.lineCap = 'butt';
+      context.lineJoin = 'miter';
+      context.lineDash = emptyArray;
+      context.lineDashOffset = 0;
+      context.miterLimit = 10;
 
-      if ( !node.selfBounds.isEmpty() ) {
-        const context = wrapper.context;
-        context.save();
+      node.paintCanvas( context );
 
-        // set back to Canvas default styles
-        // TODO: are these necessary, or can we drop them for performance?
-        context.fillStyle = 'black';
-        context.strokeStyle = 'black';
-        context.lineWidth = 1;
-        context.lineCap = 'butt';
-        context.lineJoin = 'miter';
-        context.lineDash = emptyArray;
-        context.lineDashOffset = 0;
-        context.miterLimit = 10;
-
-        node.paintCanvas( context );
-
-        context.restore();
-      }
+      context.restore();
     }
-  } );
-
-  Poolable.mixInto( CanvasNodeDrawable );
-
-  return CanvasNodeDrawable;
+  }
 } );
+
+Poolable.mixInto( CanvasNodeDrawable );
+
+export default CanvasNodeDrawable;

@@ -6,45 +6,41 @@
  * @author Sam Reid (PhET Interactive Simulations)
  * @author Andrew Adare (PhET Interactive Simulations)
  */
-define( require => {
-  'use strict';
 
-  // modules
-  const Color = require( 'SCENERY/util/Color' );
-  const ObjectIO = require( 'TANDEM/types/ObjectIO' );
-  const scenery = require( 'SCENERY/scenery' );
-  const validate = require( 'AXON/validate' );
+import validate from '../../../axon/js/validate.js';
+import ObjectIO from '../../../tandem/js/types/ObjectIO.js';
+import scenery from '../scenery.js';
+import Color from './Color.js';
 
-  class ColorIO extends ObjectIO {
+class ColorIO extends ObjectIO {
 
-    /**
-     * Encodes a Color into a state object.
-     * @param {Color} color
-     * @returns {Object}
-     * @override
-     */
-    static toStateObject( color ) {
-      validate( color, this.validator );
-      return color.toStateObject();
-    }
-
-    /**
-     * Decodes a state into a Color.
-     * Use stateObject as the Font constructor's options argument
-     * @param {Object} stateObject
-     * @returns {Color}
-     * @override
-     */
-    static fromStateObject( stateObject ) {
-      return new Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a );
-    }
+  /**
+   * Encodes a Color into a state object.
+   * @param {Color} color
+   * @returns {Object}
+   * @override
+   */
+  static toStateObject( color ) {
+    validate( color, this.validator );
+    return color.toStateObject();
   }
 
-  ColorIO.documentation = 'A color, with rgba';
-  ColorIO.validator = { valueType: Color };
-  ColorIO.typeName = 'ColorIO';
-  ObjectIO.validateSubtype( ColorIO );
+  /**
+   * Decodes a state into a Color.
+   * Use stateObject as the Font constructor's options argument
+   * @param {Object} stateObject
+   * @returns {Color}
+   * @override
+   */
+  static fromStateObject( stateObject ) {
+    return new Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a );
+  }
+}
 
-  return scenery.register( 'ColorIO', ColorIO );
-} );
+ColorIO.documentation = 'A color, with rgba';
+ColorIO.validator = { valueType: Color };
+ColorIO.typeName = 'ColorIO';
+ObjectIO.validateSubtype( ColorIO );
 
+scenery.register( 'ColorIO', ColorIO );
+export default ColorIO;

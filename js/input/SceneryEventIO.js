@@ -5,47 +5,43 @@
  *
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
-define( require => {
-  'use strict';
 
-  // modules
-  const ObjectIO = require( 'TANDEM/types/ObjectIO' );
-  const scenery = require( 'SCENERY/scenery' );
-  const SceneryEvent = require( 'SCENERY/input/SceneryEvent' );
-  const Vector2IO = require( 'DOT/Vector2IO' );
-  const validate = require( 'AXON/validate' );
+import validate from '../../../axon/js/validate.js';
+import Vector2IO from '../../../dot/js/Vector2IO.js';
+import ObjectIO from '../../../tandem/js/types/ObjectIO.js';
+import scenery from '../scenery.js';
+import SceneryEvent from './SceneryEvent.js';
 
-  class SceneryEventIO extends ObjectIO {
+class SceneryEventIO extends ObjectIO {
 
-    /**
-     * @param {SceneryEvent} event
-     * @returns {Object}
-     * @override
-     */
-    static toStateObject( event ) {
-      validate( event, this.validator );
+  /**
+   * @param {SceneryEvent} event
+   * @returns {Object}
+   * @override
+   */
+  static toStateObject( event ) {
+    validate( event, this.validator );
 
-      const eventObject = {
-        type: event.type
-      };
+    const eventObject = {
+      type: event.type
+    };
 
-      if ( event.domEvent ) {
-        eventObject.domEventType = event.domEvent.type;
-      }
-      if ( event.pointer && event.pointer.point ) {
-        eventObject.point = Vector2IO.toStateObject( event.pointer.point );
-      }
-
-      // Note: If changing the contents of this object, please document it in the public documentation string.
-      return eventObject;
+    if ( event.domEvent ) {
+      eventObject.domEventType = event.domEvent.type;
     }
+    if ( event.pointer && event.pointer.point ) {
+      eventObject.point = Vector2IO.toStateObject( event.pointer.point );
+    }
+
+    // Note: If changing the contents of this object, please document it in the public documentation string.
+    return eventObject;
   }
+}
 
-  SceneryEventIO.documentation = 'An event, with a point';
-  SceneryEventIO.validator = { valueType: SceneryEvent };
-  SceneryEventIO.typeName = 'SceneryEventIO';
-  ObjectIO.validateSubtype( SceneryEventIO );
+SceneryEventIO.documentation = 'An event, with a point';
+SceneryEventIO.validator = { valueType: SceneryEvent };
+SceneryEventIO.typeName = 'SceneryEventIO';
+ObjectIO.validateSubtype( SceneryEventIO );
 
-  return scenery.register( 'SceneryEventIO', SceneryEventIO );
-} );
-
+scenery.register( 'SceneryEventIO', SceneryEventIO );
+export default SceneryEventIO;

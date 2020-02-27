@@ -6,20 +6,17 @@
  * @author Sam Reid (PhET Interactive Simulations)
  * @author Andrew Adare (PhET Interactive Simulations)
  */
-define( require => {
-  'use strict';
 
-  // modules
-  const ObjectIO = require( 'TANDEM/types/ObjectIO' );
-  const scenery = require( 'SCENERY/scenery' );
+import ObjectIO from '../../../tandem/js/types/ObjectIO.js';
+import scenery from '../scenery.js';
 
-  class ButtonListenerIO extends ObjectIO {}
+class ButtonListenerIO extends ObjectIO {}
 
-  ButtonListenerIO.documentation = 'Button listener';
-  ButtonListenerIO.events = [ 'up', 'over', 'down', 'out', 'fire' ];
-  ButtonListenerIO.validator = { valueType: scenery.ButtonListener };
-  ButtonListenerIO.typeName = 'ButtonListenerIO';
-  ObjectIO.validateSubtype( ButtonListenerIO );
+ButtonListenerIO.documentation = 'Button listener';
+ButtonListenerIO.events = [ 'up', 'over', 'down', 'out', 'fire' ];
+ButtonListenerIO.validator = { valueType: scenery.ButtonListener };
+ButtonListenerIO.typeName = 'ButtonListenerIO';
+ObjectIO.validateSubtype( ButtonListenerIO );
 
-  return scenery.register( 'ButtonListenerIO', ButtonListenerIO );
-} );
+scenery.register( 'ButtonListenerIO', ButtonListenerIO );
+export default ButtonListenerIO;
