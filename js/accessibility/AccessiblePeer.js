@@ -20,9 +20,6 @@ import FullScreen from '../util/FullScreen.js';
 import AccessibilityUtils from './AccessibilityUtils.js';
 import AccessibleSiblingStyle from './AccessibleSiblingStyle.js';
 
-// so RequireJS doesn't complain about circular dependency
-// const Display = require( '/scenery/js/display/Display' );
-
 // constants
 const PRIMARY_SIBLING = 'PRIMARY_SIBLING';
 const LABEL_SIBLING = 'LABEL_SIBLING';
