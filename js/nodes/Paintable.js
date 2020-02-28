@@ -1,4 +1,4 @@
-// Copyright 2013-2019, University of Colorado Boulder
+// Copyright 2013-2020, University of Colorado Boulder
 
 /**
  * Trait for nodes that support a standard fill and/or stroke (e.g. Text, Path and Path subtypes).
