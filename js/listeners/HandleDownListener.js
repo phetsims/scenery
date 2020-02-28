@@ -1,4 +1,4 @@
-// Copyright 2017-2019, University of Colorado Boulder
+// Copyright 2017-2020, University of Colorado Boulder
 
 /**
  * A type of listener that absorbs all 'down' events, not letting it bubble further to ancestor node listeners.

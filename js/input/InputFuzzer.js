@@ -1,4 +1,4 @@
-// Copyright 2018-2019, University of Colorado Boulder
+// Copyright 2018-2020, University of Colorado Boulder
 
 /**
  * For generating random mouse/touch input to a Display, to hopefully discover bugs in an automated fashion.

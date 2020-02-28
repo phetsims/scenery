@@ -1,4 +1,4 @@
-// Copyright 2018-2019, University of Colorado Boulder
+// Copyright 2018-2020, University of Colorado Boulder
 
 /**
  * The main logic for maintaining the accessible instance tree (see https://github.com/phetsims/scenery-phet/issues/365)

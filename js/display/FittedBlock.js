@@ -1,4 +1,4 @@
-// Copyright 2014-2019, University of Colorado Boulder
+// Copyright 2014-2020, University of Colorado Boulder
 
 /**
  * A Block that needs to be fitted to either the screen bounds or other local bounds. This potentially reduces memory

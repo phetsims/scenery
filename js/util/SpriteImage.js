@@ -1,4 +1,4 @@
-// Copyright 2019, University of Colorado Boulder
+// Copyright 2019-2020, University of Colorado Boulder
 
 /**
  * Represents an image with a specific center "offset". Considered immutable (with an immutable image, the Canvas if

@@ -1,4 +1,4 @@
-// Copyright 2013-2019, University of Colorado Boulder
+// Copyright 2013-2020, University of Colorado Boulder
 
 /**
  * A Path draws a Shape with a specific type of fill and stroke. Mixes in Paintable.
