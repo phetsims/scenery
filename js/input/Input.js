@@ -833,10 +833,7 @@ class Input {
    * @public (scenery-internal)
    */
   validatePointers() {
-    sceneryLog && sceneryLog.Input && sceneryLog.Input( 'validatePointers' );
-    sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.validatePointersAction.execute();
-    sceneryLog && sceneryLog.Input && sceneryLog.pop();
   }
 
   /**
