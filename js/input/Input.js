@@ -1022,9 +1022,6 @@ define( require => {
 
         _.hasIn( window, 'phet.phetIo.dataStream' ) && phet.phetIo.dataStream.popNonPlaybackable();
       }
-      else {
-        console.log( 'label excluded from input' );
-      }
     }
 
     /**
