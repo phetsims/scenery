@@ -1008,7 +1008,7 @@ define( require => {
     dispatchA11yEvent( eventType, domEvent, bubbles ) {
       scenery.Display.userGestureEmitter.emit();
 
-      if ( !domEvent.target.hasAttribute( AccessibilityUtils.DATA_EXCLUDE_FROM_INPUT ) ) {
+      if ( !( domEvent.target && domEvent.target.hasAttribute( AccessibilityUtils.DATA_EXCLUDE_FROM_INPUT ) ) ) {
         if ( !this.a11yPointer ) { this.initA11yPointer(); }
         const trail = this.a11yPointer.updateTrail( this.getTrailId( domEvent ) );
 
@@ -1887,7 +1887,7 @@ define( require => {
       if ( FullScreen.isFullScreen() && event.keyCode === KeyboardUtils.KEY_TAB ) {
         const rootElement = this.display.accessibleDOMElement;
         const nextElement = event.shiftKey ? AccessibilityUtils.getPreviousFocusable( rootElement ) :
-                          AccessibilityUtils.getNextFocusable( rootElement );
+                            AccessibilityUtils.getNextFocusable( rootElement );
         if ( nextElement === event.target ) {
           event.preventDefault();
         }
