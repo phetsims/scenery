@@ -7,7 +7,7 @@
   <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1"/>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="phet-sim-level" content="development">
-    <link rel="stylesheet" href="../sherpa/lib/qunit-2.4.1.css">
+  <link rel="stylesheet" href="../sherpa/lib/qunit-2.4.1.css">
   <title>scenery</title>
 </head>
 
@@ -20,38 +20,65 @@
 
   window.phet = window.phet || {};
   window.phet.chipper = window.phet.chipper || {};
-  window.phet.chipper.packageObject = {
-    "name": "scenery",
-    "version": "0.0.0",
-    "license": "MIT",
-    "repository": { "type": "git", "url": "https://github.com/phetsims/scenery.git" },
-    "devDependencies": { "grunt": "~1.0.0" },
-    "phet": {
-      "generatedUnitTests": true,
-      "requirejsNamespace": "SCENERY",
-      "buildStandalone": true,
-      "requiresLodash": true,
-      "requiresJQuery": true,
-      "assignGlobals": {
-        "scenery": "main",
-        "kite": "KITE/main",
-        "dot": "DOT/main",
-        "axon": "AXON/main",
-        "phetCore": "PHET_CORE/main",
-        "utteranceQueue": "UTTERANCE_QUEUE/main"
+  window.phet.chipper.packageObject =
+    {
+      "name": "scenery",
+      "version": "0.0.0",
+      "license": "MIT",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/phetsims/scenery.git"
       },
-      "finalizeJS": "scenery.Utils.polyfillRequestAnimationFrame();",
-      "preload": [ "../sherpa/lib/himalaya-0.2.7.js" ]
-    },
-    "eslintConfig": {
-      "extends": "../chipper/eslint/sim_eslintrc.js",
-      "globals": { "himalaya": false, "sceneryLog": false, "he": false }
-    }
-  };
-  window.phet.chipper.stringRepos = [ { "repo": "joist", "requirejsNamespace": "JOIST" }, {
-    "repo": "scenery-phet",
-    "requirejsNamespace": "SCENERY_PHET"
-  }, { "repo": "sun", "requirejsNamespace": "SUN" }, { "repo": "tambo", "requirejsNamespace": "TAMBO" } ];
+      "devDependencies": {
+        "grunt": "~1.0.0"
+      },
+      "phet": {
+        "generatedUnitTests": true,
+        "requirejsNamespace": "SCENERY",
+        "buildStandalone": true,
+        "requiresLodash": true,
+        "requiresJQuery": true,
+        "assignGlobals": {
+          "scenery": "main",
+          "kite": "KITE/main",
+          "dot": "DOT/main",
+          "axon": "AXON/main",
+          "phetCore": "PHET_CORE/main",
+          "utteranceQueue": "UTTERANCE_QUEUE/main"
+        },
+        "finalizeJS": "scenery.Utils.polyfillRequestAnimationFrame();",
+        "preload": [
+          "../sherpa/lib/himalaya-0.2.7.js"
+        ]
+      },
+      "eslintConfig": {
+        "extends": "../chipper/eslint/sim_eslintrc.js",
+        "globals": {
+          "himalaya": false,
+          "sceneryLog": false,
+          "he": false
+        }
+      }
+    };
+  window.phet.chipper.stringRepos =
+    [
+      {
+        "repo": "joist",
+        "requirejsNamespace": "JOIST"
+      },
+      {
+        "repo": "scenery-phet",
+        "requirejsNamespace": "SCENERY_PHET"
+      },
+      {
+        "repo": "sun",
+        "requirejsNamespace": "SUN"
+      },
+      {
+        "repo": "tambo",
+        "requirejsNamespace": "TAMBO"
+      }
+    ];
 
   // Identify the brand (assume generated brand if not provided with query parameters)
   const brandMatch = location.search.match( /brand=([^&]+)/ );
