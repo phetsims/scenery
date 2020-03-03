@@ -1002,7 +1002,9 @@ class Input {
   dispatchA11yEvent( eventType, domEvent, bubbles ) {
     scenery.Display.userGestureEmitter.emit();
 
+    // This workaround hopefully won't be here forever, see Accessibility.setExcludeLabelSiblingFromInput() and https://github.com/phetsims/a11y-research/issues/156
     if ( !domEvent.target.hasAttribute( AccessibilityUtils.DATA_EXCLUDE_FROM_INPUT ) ) {
+
       if ( !this.a11yPointer ) { this.initA11yPointer(); }
       const trail = this.a11yPointer.updateTrail( this.getTrailId( domEvent ) );
 
@@ -1015,9 +1017,6 @@ class Input {
       this.dispatchEvent( trail, eventType, this.a11yPointer, domEvent, bubbles );
 
       _.hasIn( window, 'phet.phetIo.dataStream' ) && phet.phetIo.dataStream.popNonPlaybackable();
-    }
-    else {
-      console.log( 'label excluded from input' );
     }
   }
 
