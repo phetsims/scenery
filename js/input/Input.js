@@ -1003,7 +1003,7 @@ class Input {
     scenery.Display.userGestureEmitter.emit();
 
     // This workaround hopefully won't be here forever, see Accessibility.setExcludeLabelSiblingFromInput() and https://github.com/phetsims/a11y-research/issues/156
-    if ( !domEvent.target.hasAttribute( AccessibilityUtils.DATA_EXCLUDE_FROM_INPUT ) ) {
+    if ( !( domEvent.target && domEvent.target.hasAttribute( AccessibilityUtils.DATA_EXCLUDE_FROM_INPUT ) ) ) {
 
       if ( !this.a11yPointer ) { this.initA11yPointer(); }
       const trail = this.a11yPointer.updateTrail( this.getTrailId( domEvent ) );
