@@ -997,6 +997,7 @@ Poolable.mixInto( AccessiblePeer, {
  *
  * @param {string} tagName
  * @param {boolean} focusable
+ * @param {string} trailId - unique id that points to the instance of the node
  * @param {Object} [options] - passed along to AccessibilityUtils.createElement
  * @returns {HTMLElement}
  */
