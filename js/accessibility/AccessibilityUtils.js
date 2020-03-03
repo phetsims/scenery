@@ -552,7 +552,11 @@ define( require => {
 
     DOM_EVENTS: DOM_EVENTS,
 
-    DATA_TRAIL_ID: DATA_TRAIL_ID
+    DATA_TRAIL_ID: DATA_TRAIL_ID,
+
+    // attribute used for elements which Scenery should not dispatch SceneryEvents when DOM event input is received on
+    // them, see Accessibility.setExcludeLabelSiblingFromInput for more information
+    DATA_EXCLUDE_FROM_INPUT: 'data-exclude-from-input'
   };
 
   scenery.register( 'AccessibilityUtils', AccessibilityUtils );

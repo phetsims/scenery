@@ -89,11 +89,13 @@
  * });
  *
  * A few notes:
- * 1. Notice the names of the content setters for siblings parallel the `innerContent` option for setting the primary
+ * 1. Only the primary sibling (specified by tagName) is focusable. Using a focusable element through another element
+ *    (like labelTagName) will result in buggy behavior.
+ * 2. Notice the names of the content setters for siblings parallel the `innerContent` option for setting the primary
  *    sibling.
- * 2. To make this example actually work, you would need the `inputType` option to set the "type" attribute on the `input`.
- * 3. When you specify the  <label> tag for the label sibling, the "for" attribute is automatically added to the sibling.
- * 4. Finally, the example above doesn't utilize the default tags that we have in place for the parent and siblings.
+ * 3. To make this example actually work, you would need the `inputType` option to set the "type" attribute on the `input`.
+ * 4. When you specify the  <label> tag for the label sibling, the "for" attribute is automatically added to the sibling.
+ * 5. Finally, the example above doesn't utilize the default tags that we have in place for the parent and siblings.
  *      default labelTagName: 'p'
  *      default descriptionTagName: 'p'
  *      default containerTagName: 'div'
@@ -437,6 +439,10 @@ define( require => {
           // @protected {Array.<AccessibleInstance>} - Empty unless the node contains some accessible instance.
           this._accessibleInstances = [];
 
+          // @public (read-only, scenery-internal) {boolean} - If true, any DOM events received on the label sibling
+          // will not dispatch SceneryEvents through the scene graph, see setExcludeLabelSiblingFromInput()
+          this.excludeLabelSiblingFromInput = false;
+
           // HIGHER LEVEL API INITIALIZATION
 
           // {string|null} - sets the "Accessible Name" of the Node, as defined by the Browser's Accessibility Tree
@@ -564,6 +570,21 @@ define( require => {
           for ( let i = 0; i < this.children.length; i++ ) {
             this.children[ i ].accessibleAudit();
           }
+        },
+
+        /**
+         * This function should be used sparingly as a workaround. If used, any DOM input events received from the label
+         * sibling will not be dispatched as SceneryEvents in Input.js. The label sibling may receive input by screen
+         * readers if the virtual cursor is over it. That is usually fine, but there is a bug with NVDA and Firefox where
+         * both the label sibling AND primary sibling receive events in this case, and both bubble up to the root of the
+         * PDOM, and so we would otherwise dispatch two SceneryEvents instead of one.
+         * @public
+         *
+         * See https://github.com/phetsims/a11y-research/issues/156 for more information.
+         */
+        setExcludeLabelSiblingFromInput: function() {
+          this.excludeLabelSiblingFromInput = true;
+          this.onAccessibleContentChange();
         },
 
         /***********************************************************************************************************/

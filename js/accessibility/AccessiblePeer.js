@@ -202,7 +202,8 @@ define( require => {
       // create the label DOM element representing this instance
       if ( options.labelTagName ) {
         this._labelSibling = createElement( options.labelTagName, false, uniqueId, {
-          siblingName: 'label'
+          siblingName: 'label',
+          excludeFromInput: this.node.excludeLabelSiblingFromInput
         } );
       }
 
@@ -1001,7 +1002,7 @@ define( require => {
    * @param {string} tagName
    * @param {boolean} focusable
    * @param {string} trailId - unique id that points to the instance of the node
-   * @param {object} options - passed along to AccessibilityUtils.createElement
+   * @param {Object} [options] - passed along to AccessibilityUtils.createElement
    * @returns {HTMLElement}
    */
   function createElement( tagName, focusable, trailId, options ) {
@@ -1009,17 +1010,26 @@ define( require => {
 
       // {string|null} - addition to the trailId, separated by a hyphen to identify the different siblings within
       // the document
-      siblingName: null
+      siblingName: null,
+
+      // {boolean} - if true, DOM input events received on the element will not be dispatched as SceneryEvents in Input.js
+      // see Accessibility.setExcludeLabelSiblingFromInput for more information
+      excludeFromInput: false
     }, options );
 
     // add sibling name to unique ID generated from the trail to make the non-primary siblings unique in the DOM
     assert && assert( options.id === undefined, 'createElement will set optional id' );
     options.id = options.siblingName ? `${options.siblingName}-${trailId}` : trailId;
 
-    assert && assert( options.trailId === undefined, 'createElement will set optional trailId' );
     options.trailId = trailId;
 
-    return AccessibilityUtils.createElement( tagName, focusable, options );
+    const newElement = AccessibilityUtils.createElement( tagName, focusable, options );
+
+    if ( options.excludeFromInput ) {
+      newElement.setAttribute( AccessibilityUtils.DATA_EXCLUDE_FROM_INPUT, true );
+    }
+
+    return newElement;
   }
 
   /**
