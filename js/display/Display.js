@@ -1896,10 +1896,12 @@ Display.customCursors = {
 // See Display.focus for setting the Display's focus. Don't set the value of this Property directly.
 Display.focusProperty = new Property( null, {
   tandem: Tandem.GENERAL_MODEL.createTandem( 'focusProperty' ),
-  phetioDocumentation: 'Stores the current focus for the simulation, null if there is not focus. This is not updated ' +
-                       'based on mouse or touch input, only keyboard and other alternative inputs.',
+  phetioDocumentation: 'Stores the current focus in the simulation, null if there is nothing focused. This is not updated ' +
+                       'based on mouse or touch input, only keyboard and other alternative inputs. Note that this only ' +
+                       'applies to simulations that support alternative input.',
   phetioType: PropertyIO( NullableIO( FocusIO ) ),
   phetioState: false,
+  phetioFeatured: true,
   phetioReadOnly: true
 } );
 
