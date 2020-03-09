@@ -15,8 +15,6 @@ import scenery from '../scenery.js';
 import Trail from '../util/Trail.js';
 import Mouse from './Mouse.js';
 
-assert && deprecationWarning( 'DownUpListener is deprecated, please use PressListener instead' );
-
 /**
  * The 'trail' parameter passed to down/upInside/upOutside will end with the node to which this DownUpListener has
  * been added.
@@ -38,6 +36,8 @@ assert && deprecationWarning( 'DownUpListener is deprecated, please use PressLis
  * @param {Object} [options]
  */
 function DownUpListener( options ) {
+  assert && deprecationWarning( 'DownUpListener is deprecated, please use PressListener instead' );
+
   const self = this;
 
   options = merge( {

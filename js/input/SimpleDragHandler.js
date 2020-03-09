@@ -23,13 +23,13 @@ import Pointer from './Pointer.js';
 import SceneryEvent from './SceneryEvent.js';
 import Touch from './Touch.js';
 
-assert && deprecationWarning( 'SimpleDragHandler is deprecated, please use DragListener instead' );
-
 /**
  * @param {Object} [options]
  * @constructor
  */
 function SimpleDragHandler( options ) {
+  assert && deprecationWarning( 'SimpleDragHandler is deprecated, please use DragListener instead' );
+
   const self = this;
 
   options = merge( {
@@ -44,7 +44,7 @@ function SimpleDragHandler( options ) {
 
     // {boolean|function:boolean}
     allowTouchSnag: false,
-
+git
     // allow changing the mouse button that activates the drag listener.
     // -1 should activate on any mouse button, 0 on left, 1 for middle, 2 for right, etc.
     mouseButton: 0,

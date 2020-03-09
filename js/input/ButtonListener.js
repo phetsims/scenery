@@ -27,8 +27,6 @@ import scenery from '../scenery.js';
 import ButtonListenerIO from './ButtonListenerIO.js';
 import DownUpListener from './DownUpListener.js';
 
-assert && deprecationWarning( 'ButtonListener is deprecated, please use FireListener instead' );
-
 /**
  * Options for the ButtonListener:
  *
@@ -41,6 +39,8 @@ assert && deprecationWarning( 'ButtonListener is deprecated, please use FireList
  * fire: null        // Called on a state change to/from 'down' (depending on fireOnDown), as fire( event ). Called after the triggering up/over/down event.
  */
 function ButtonListener( options ) {
+  assert && deprecationWarning( 'ButtonListener is deprecated, please use FireListener instead' );
+
   const self = this;
 
   options = merge( {
