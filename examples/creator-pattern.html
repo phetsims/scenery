@@ -45,75 +45,80 @@
 <div id="main"></div>
 
 <script>
+  const main = () => {
 
-  window.assertions.enableAssert();
 
-  // modules
-  const Node = scenery.Node;
-  const Display = scenery.Display;
-  const Rectangle = scenery.Rectangle;
-  const Circle = scenery.Circle;
-  const DragListener = scenery.DragListener;
-  const Emitter = axon.Emitter;
+    window.assertions.enableAssert();
 
-  // Set up the display
-  const view = new Node();
-  const display = new Display( view, { container: document.getElementById( 'main' ) } );
-  display.initializeEvents();
-  display.resizeOnWindowResize();
-  display.updateOnRequestAnimationFrame();
+    // modules
+    const Node = scenery.Node;
+    const Display = scenery.Display;
+    const Rectangle = scenery.Rectangle;
+    const Circle = scenery.Circle;
+    const DragListener = scenery.DragListener;
+    const Emitter = axon.Emitter;
 
-  const toolbox = new Rectangle( 100, 100, 300, 300, { fill: 'gray', stroke: 'black' } );
-  view.addChild( toolbox );
+    // Set up the display
+    const view = new Node();
+    const display = new Display( view, { container: document.getElementById( 'main' ) } );
+    display.initializeEvents();
+    display.resizeOnWindowResize();
+    display.updateOnRequestAnimationFrame();
 
-  // MODEL
-  class ModelElement {
-    constructor() {
-      this.disposeEmitter = new Emitter();
+    const toolbox = new Rectangle( 100, 100, 300, 300, { fill: 'gray', stroke: 'black' } );
+    view.addChild( toolbox );
+
+    // MODEL
+    class ModelElement {
+      constructor() {
+        this.disposeEmitter = new Emitter();
+      }
+
+      dispose() {
+        this.disposeEmitter.emit();
+      }
     }
 
-    dispose() {
-      this.disposeEmitter.emit();
-    }
-  }
+    // VIEW
 
-  // VIEW
+    // When the icon is dragged, create a new model element, look up the view and forward the drag events.¬
+    toolbox.addInputListener( DragListener.createForwardingListener( event => {
 
-  // When the icon is dragged, create a new model element, look up the view and forward the drag events.¬
-  toolbox.addInputListener( DragListener.createForwardingListener( event => {
+      // Create the model element.
+      // See https://github.com/phetsims/phet-info/issues/93#issuecomment-469844263 for discussion about
+      // dealing with model view transform and coordinate frames.
+      const modelElement = new ModelElement();
+      const modelElementNode = new ModelElementNode( modelElement );
+      modelElementNode.center = event.pointer.point;
+      modelElementNode.dragListener.press( event, modelElementNode );
+      modelElement.disposeEmitter.addListener( () => modelElementNode.dispose() );
+      view.addChild( modelElementNode );
+    } ) );
 
-    // Create the model element.
-    // See https://github.com/phetsims/phet-info/issues/93#issuecomment-469844263 for discussion about
-    // dealing with model view transform and coordinate frames.
-    const modelElement = new ModelElement();
-    const modelElementNode = new ModelElementNode( modelElement );
-    modelElementNode.center = event.pointer.point;
-    modelElementNode.dragListener.press( event, modelElementNode );
-    modelElement.disposeEmitter.addListener( () => modelElementNode.dispose() );
-    view.addChild( modelElementNode );
-  } ) );
+    class ModelElementNode extends Circle {
+      constructor( modelElement ) {
+        super( 50, { fill: 'red' } );
 
-  class ModelElementNode extends Circle {
-    constructor( modelElement ) {
-      super( 50, { fill: 'red' } );
+        // @public (read-only) - so we can look up the view from a model
+        this.modelElement = modelElement;
 
-      // @public (read-only) - so we can look up the view from a model
-      this.modelElement = modelElement;
+        // @public (read-only) - so we can forward the drag events from the toolbox.
+        this.dragListener = new DragListener( {
+          translateNode: true,
 
-      // @public (read-only) - so we can forward the drag events from the toolbox.
-      this.dragListener = new DragListener( {
-        translateNode: true,
-
-        // Dispose if dropped back in the toolbox.
-        end: event => {
-          if ( toolbox.bounds.containsPoint( this.center ) ) {
-            modelElement.dispose()
+          // Dispose if dropped back in the toolbox.
+          end: event => {
+            if ( toolbox.bounds.containsPoint( this.center ) ) {
+              modelElement.dispose()
+            }
           }
-        }
-      } );
-      this.addInputListener( this.dragListener );
+        } );
+        this.addInputListener( this.dragListener );
+      }
     }
-  }
+  };
+
+  main();
 </script>
 
 </body>
