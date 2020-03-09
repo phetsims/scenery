@@ -11,6 +11,7 @@ import Action from '../../../axon/js/Action.js';
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector2IO from '../../../dot/js/Vector2IO.js';
+import deprecationWarning from '../../../phet-core/js/deprecationWarning.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import EventType from '../../../tandem/js/EventType.js';
@@ -21,6 +22,8 @@ import Mouse from './Mouse.js';
 import Pointer from './Pointer.js';
 import SceneryEvent from './SceneryEvent.js';
 import Touch from './Touch.js';
+
+assert && deprecationWarning( 'SimpleDragHandler is deprecated, please use DragListener instead' );
 
 /**
  * @param {Object} [options]

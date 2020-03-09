@@ -199,6 +199,7 @@ import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Shape from '../../../kite/js/Shape.js';
 import arrayDifference from '../../../phet-core/js/arrayDifference.js';
+import deprecationWarning from '../../../phet-core/js/deprecationWarning.js';
 import extend from '../../../phet-core/js/extend.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
@@ -4070,6 +4071,8 @@ inherit( PhetioObject, Node, extend( {
   // @public (API compatibility for now): Render this node to the Canvas (clearing it first)
   renderToCanvas: function( canvas, context, callback, backgroundColor ) {
 
+    assert && deprecationWarning( 'Node.renderToCanvas() is deprecated, please use Node.rasterized() instead' );
+
     // should basically reset everything (and clear the Canvas)
     canvas.width = canvas.width; // eslint-disable-line no-self-assign
 
@@ -4175,6 +4178,9 @@ inherit( PhetioObject, Node, extend( {
    * @param {number} [height] - The height of the Canvas output
    */
   toImage: function( callback, x, y, width, height ) {
+
+    assert && deprecationWarning( 'Node.toImage() is deprecated, please use Node.rasterized() instead' );
+
     assert && assert( typeof callback === 'function' );
     assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
     assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
@@ -4212,6 +4218,9 @@ inherit( PhetioObject, Node, extend( {
    * @param {number} [height] - The height of the Canvas output
    */
   toImageNodeAsynchronous: function( callback, x, y, width, height ) {
+
+    assert && deprecationWarning( 'Node.toImageNodeAsyncrhonous() is deprecated, please use Node.rasterized() instead' );
+
     assert && assert( typeof callback === 'function' );
     assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
     assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
@@ -4241,6 +4250,9 @@ inherit( PhetioObject, Node, extend( {
    * @param {number} [height] - The height of the Canvas output
    */
   toCanvasNodeSynchronous: function( x, y, width, height ) {
+
+    assert && deprecationWarning( 'Node.toCanvasNodeSynchronous() is deprecated, please use Node.rasterized() instead' );
+
     assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
     assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
     assert && assert( width === undefined || ( typeof width === 'number' && width >= 0 && ( width % 1 === 0 ) ),
@@ -4276,6 +4288,9 @@ inherit( PhetioObject, Node, extend( {
    * @returns {Image}
    */
   toDataURLImageSynchronous: function( x, y, width, height ) {
+
+    assert && deprecationWarning( 'Node.toDataURLImageSychronous() is deprecated, please use Node.rasterized() instead' );
+
     assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
     assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
     assert && assert( width === undefined || ( typeof width === 'number' && width >= 0 && ( width % 1 === 0 ) ),
@@ -4305,6 +4320,9 @@ inherit( PhetioObject, Node, extend( {
    * @param {number} [height] - The height of the Canvas output
    */
   toDataURLNodeSynchronous: function( x, y, width, height ) {
+
+    assert && deprecationWarning( 'Node.toDataURLNodeSynchronous() is deprecated, please use Node.rasterized() instead' );
+
     assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
     assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
     assert && assert( width === undefined || ( typeof width === 'number' && width >= 0 && ( width % 1 === 0 ) ),

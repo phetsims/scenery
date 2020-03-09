@@ -7,12 +7,15 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import deprecationWarning from '../../../phet-core/js/deprecationWarning.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import scenery from '../scenery.js';
 import Trail from '../util/Trail.js';
 import Mouse from './Mouse.js';
+
+assert && deprecationWarning( 'DownUpListener is deprecated, please use PressListener instead' );
 
 /**
  * The 'trail' parameter passed to down/upInside/upOutside will end with the node to which this DownUpListener has

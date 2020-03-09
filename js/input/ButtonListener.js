@@ -18,6 +18,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import deprecationWarning from '../../../phet-core/js/deprecationWarning.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import EventType from '../../../tandem/js/EventType.js';
@@ -25,6 +26,8 @@ import Tandem from '../../../tandem/js/Tandem.js';
 import scenery from '../scenery.js';
 import ButtonListenerIO from './ButtonListenerIO.js';
 import DownUpListener from './DownUpListener.js';
+
+assert && deprecationWarning( 'ButtonListener is deprecated, please use FireListener instead' );
 
 /**
  * Options for the ButtonListener:
