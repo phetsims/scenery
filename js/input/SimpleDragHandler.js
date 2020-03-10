@@ -44,7 +44,7 @@ function SimpleDragHandler( options ) {
 
     // {boolean|function:boolean}
     allowTouchSnag: false,
-git
+
     // allow changing the mouse button that activates the drag listener.
     // -1 should activate on any mouse button, 0 on left, 1 for middle, 2 for right, etc.
     mouseButton: 0,
