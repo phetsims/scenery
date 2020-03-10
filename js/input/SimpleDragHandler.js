@@ -332,6 +332,7 @@ export default inherit( PhetioObject, SimpleDragHandler, {
   set dragging( d ) {
     assert && assert( 'illegal call to set dragging on SimpleDragHandler' );
   },
+
   startDrag: function( event ) {
     this.dragStartAction.execute( event.pointer.point, event );
   },
