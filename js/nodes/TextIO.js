@@ -33,7 +33,6 @@ class TextIO extends NodeIO {
 
       // pick the following values from the parent Node
       phetioReadOnly: text.phetioReadOnly,
-      phetioState: true,
       phetioType: PropertyIO( StringIO ),
 
       tandem: text.tandem.createTandem( 'textProperty' ),
