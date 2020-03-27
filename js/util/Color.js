@@ -717,6 +717,43 @@ Color.interpolateRGBA = function( color1, color2, distance ) {
   return new Color( r, g, b, a );
 };
 
+/**
+ * Returns a blended color as a mix between the given colors.
+ * @public
+ *
+ * @param {Array.<Color>} colors
+ * @returns {Color}
+ */
+Color.supersampleBlend = function( colors ) {
+  // hard-coded gamma (assuming the exponential part of the sRGB curve as a simplification)
+  const GAMMA = 2.2;
+
+  // maps to [0,1] linear colorspace
+  const reds = colors.map( color => Math.pow( color.r / 255, GAMMA ) );
+  const greens = colors.map( color => Math.pow( color.g / 255, GAMMA ) );
+  const blues = colors.map( color => Math.pow( color.b / 255, GAMMA ) );
+  const alphas = colors.map( color => Math.pow( color.a, GAMMA ) );
+
+  const alphaSum = _.sum( alphas );
+
+  if ( alphaSum === 0 ) {
+    return new Color( 0, 0, 0, 0 );
+  }
+
+  // blending of pixels, weighted by alphas
+  const red = _.sum( _.range( 0, colors.length ).map( i => reds[ i ] * alphas[ i ] ) ) / alphaSum;
+  const green = _.sum( _.range( 0, colors.length ).map( i => greens[ i ] * alphas[ i ] ) ) / alphaSum;
+  const blue = _.sum( _.range( 0, colors.length ).map( i => blues[ i ] * alphas[ i ] ) ) / alphaSum;
+  const alpha = alphaSum / colors.length; // average of alphas
+
+  return new Color(
+    Math.floor( Math.pow( red, 1 / GAMMA ) * 255 ),
+    Math.floor( Math.pow( green, 1 / GAMMA ) * 255 ),
+    Math.floor( Math.pow( blue, 1 / GAMMA ) * 255 ),
+    Math.pow( alpha, 1 / GAMMA )
+  );
+};
+
 Color.fromStateObject = function( stateObject ) {
   return new Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a );
 };
