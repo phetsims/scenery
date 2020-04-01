@@ -117,7 +117,6 @@
     ] );
   }
 
-  // TODO: es6 modules won't need a "main" param in this function
   // Loads a synchronously-executed asynchronously-downloaded script tag, with optional data-main parameter.
   // See http://www.html5rocks.com/en/tutorials/speed/script-loading/ for more about script loading. It helps to
   // load all of the scripts with this method, so they are treated the same (and placed in the correct execution
@@ -131,13 +130,13 @@
   };
 
   // Kick off string loading immediately
-  loadURL( '../chipper/js/load-runtime-strings.js' );
+  loadURL( '../chipper/js/load-unbuilt-strings.js' );
 
   // Queue all of the preloads to be loaded.
   preloads.forEach( preload => loadURL( preload ) );
 
   // Module loading in compilation-free (development) mode will be kicked off once strings are loaded.
-  // This is done in load-runtime-strings.js
+  // This is done in load-unbuilt-strings.js
   window.phet.chipper.loadModules = () => loadURL( 'js/scenery-tests.js', 'module' );
 </script>
 </body>
