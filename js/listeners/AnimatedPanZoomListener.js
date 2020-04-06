@@ -15,7 +15,7 @@ import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
-import AccessibilityUtils from '../accessibility/AccessibilityUtils.js';
+import AccessibilityUtils from '../accessibility/pdom/AccessibilityUtils.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import KeyboardZoomUtils from '../accessibility/KeyboardZoomUtils.js';
 import KeyStateTracker from '../accessibility/KeyStateTracker.js';

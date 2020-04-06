@@ -6,11 +6,11 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import Bounds2 from '../../../dot/js/Bounds2.js';
-import Vector2 from '../../../dot/js/Vector2.js';
-import Display from '../display/Display.js';
-import Node from '../nodes/Node.js';
-import Rectangle from '../nodes/Rectangle.js';
+import Bounds2 from '../../../../dot/js/Bounds2.js';
+import Vector2 from '../../../../dot/js/Vector2.js';
+import Display from '../../display/Display.js';
+import Node from '../../nodes/Node.js';
+import Rectangle from '../../nodes/Rectangle.js';
 
 // constants
 const PIXEL_PADDING = 3;

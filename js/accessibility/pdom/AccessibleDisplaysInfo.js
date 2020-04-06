@@ -7,9 +7,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../phet-core/js/inherit.js';
-import Renderer from '../display/Renderer.js';
-import scenery from '../scenery.js';
+import inherit from '../../../../phet-core/js/inherit.js';
+import Renderer from '../../display/Renderer.js';
+import scenery from '../../scenery.js';
 
 /**
  * Tracks accessible display information for our given node.

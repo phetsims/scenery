@@ -204,7 +204,7 @@ import extend from '../../../phet-core/js/extend.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
-import Accessibility from '../accessibility/Accessibility.js';
+import Accessibility from '../accessibility/pdom/Accessibility.js';
 import Renderer from '../display/Renderer.js';
 import Mouse from '../input/Mouse.js';
 import Pen from '../input/Pen.js';

@@ -6,10 +6,10 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
-import Display from '../display/Display.js';
-import Circle from '../nodes/Circle.js';
-import Node from '../nodes/Node.js';
-import Rectangle from '../nodes/Rectangle.js';
+import Display from '../../display/Display.js';
+import Circle from '../../nodes/Circle.js';
+import Node from '../../nodes/Node.js';
+import Rectangle from '../../nodes/Rectangle.js';
 import AccessibilityFuzzer from './AccessibilityFuzzer.js';
 import AccessibilityUtils from './AccessibilityUtils.js';
 import AccessiblePeer from './AccessiblePeer.js';

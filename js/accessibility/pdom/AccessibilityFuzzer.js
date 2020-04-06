@@ -6,13 +6,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Permutation from '../../../dot/js/Permutation.js';
-import Random from '../../../dot/js/Random.js';
-import arrayDifference from '../../../phet-core/js/arrayDifference.js';
-import inherit from '../../../phet-core/js/inherit.js';
-import Display from '../display/Display.js';
-import Node from '../nodes/Node.js';
-import scenery from '../scenery.js';
+import Permutation from '../../../../dot/js/Permutation.js';
+import Random from '../../../../dot/js/Random.js';
+import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
+import inherit from '../../../../phet-core/js/inherit.js';
+import Display from '../../display/Display.js';
+import Node from '../../nodes/Node.js';
+import scenery from '../../scenery.js';
 import AccessibilityTree from './AccessibilityTree.js';
 
 /**

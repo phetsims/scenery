@@ -11,8 +11,8 @@
  * @author Jesse Greenberg
  */
 
-import scenery from '../scenery.js';
-import SceneryStyle from '../util/SceneryStyle.js';
+import scenery from '../../scenery.js';
+import SceneryStyle from '../../util/SceneryStyle.js';
 
 // constants
 // REVIEW: Consider renaming this to a11y-pdom-element (or something more universal)

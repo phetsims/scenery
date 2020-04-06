@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import arrayDifference from '../../../phet-core/js/arrayDifference.js';
-import scenery from '../scenery.js';
+import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
+import scenery from '../../scenery.js';
 import AccessibleInstance from './AccessibleInstance.js';
 import PartialAccessibleTrail from './PartialAccessibleTrail.js';
 

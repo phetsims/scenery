@@ -7,11 +7,11 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import merge from '../../../phet-core/js/merge.js';
-import Display from '../display/Display.js';
-import Node from '../nodes/Node.js';
-import Rectangle from '../nodes/Rectangle.js';
-import KeyboardUtils from './KeyboardUtils.js';
+import merge from '../../../../phet-core/js/merge.js';
+import Display from '../../display/Display.js';
+import Node from '../../nodes/Node.js';
+import Rectangle from '../../nodes/Rectangle.js';
+import KeyboardUtils from '../KeyboardUtils.js';
 
 // constants
 const TEST_LABEL = 'Test Label';

@@ -8,15 +8,15 @@
  * @author Jesse Greenberg
  */
 
-import Bounds2 from '../../../dot/js/Bounds2.js';
-import Matrix3 from '../../../dot/js/Matrix3.js';
-import arrayRemove from '../../../phet-core/js/arrayRemove.js';
-import inherit from '../../../phet-core/js/inherit.js';
-import merge from '../../../phet-core/js/merge.js';
-import platform from '../../../phet-core/js/platform.js';
-import Poolable from '../../../phet-core/js/Poolable.js';
-import scenery from '../scenery.js';
-import FullScreen from '../util/FullScreen.js';
+import Bounds2 from '../../../../dot/js/Bounds2.js';
+import Matrix3 from '../../../../dot/js/Matrix3.js';
+import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
+import inherit from '../../../../phet-core/js/inherit.js';
+import merge from '../../../../phet-core/js/merge.js';
+import platform from '../../../../phet-core/js/platform.js';
+import Poolable from '../../../../phet-core/js/Poolable.js';
+import scenery from '../../scenery.js';
+import FullScreen from '../../util/FullScreen.js';
 import AccessibilityUtils from './AccessibilityUtils.js';
 import AccessibleSiblingStyle from './AccessibleSiblingStyle.js';
 

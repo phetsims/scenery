@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../phet-core/js/inherit.js';
-import scenery from '../scenery.js';
+import inherit from '../../../../phet-core/js/inherit.js';
+import scenery from '../../scenery.js';
 
 /**
  * @constructor

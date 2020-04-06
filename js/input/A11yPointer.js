@@ -8,7 +8,7 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import AccessibleInstance from '../accessibility/AccessibleInstance.js';
+import AccessibleInstance from '../accessibility/pdom/AccessibleInstance.js';
 import Focus from '../accessibility/Focus.js';
 import scenery from '../scenery.js';
 import Trail from '../util/Trail.js';

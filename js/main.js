@@ -10,12 +10,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import './accessibility/Accessibility.js';
-import './accessibility/AccessibilityFuzzer.js';
-import './accessibility/AccessibilityTree.js';
-import './accessibility/AccessibilityUtils.js';
-import './accessibility/AccessibleInstance.js';
-import './accessibility/AccessiblePeer.js';
+import './accessibility/pdom/Accessibility.js';
+import './accessibility/pdom/AccessibilityFuzzer.js';
+import './accessibility/pdom/AccessibilityTree.js';
+import './accessibility/pdom/AccessibilityUtils.js';
+import './accessibility/pdom/AccessibleInstance.js';
+import './accessibility/pdom/AccessiblePeer.js';
 import './accessibility/reader/Cursor.js';
 import './accessibility/reader/Reader.js';
 import './debug/DebugContext.js';

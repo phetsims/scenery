@@ -10,10 +10,10 @@
  * @author Jesse Greenberg
  */
 
-import validate from '../../../axon/js/validate.js';
-import merge from '../../../phet-core/js/merge.js';
-import stripEmbeddingMarks from '../../../phet-core/js/stripEmbeddingMarks.js';
-import scenery from '../scenery.js';
+import validate from '../../../../axon/js/validate.js';
+import merge from '../../../../phet-core/js/merge.js';
+import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
+import scenery from '../../scenery.js';
 import AccessibleSiblingStyle from './AccessibleSiblingStyle.js';
 
 // constants

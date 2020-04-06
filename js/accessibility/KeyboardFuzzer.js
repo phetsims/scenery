@@ -11,7 +11,7 @@ import timer from '../../../axon/js/timer.js';
 import Random from '../../../dot/js/Random.js';
 import Display from '../display/Display.js';
 import scenery from '../scenery.js';
-import AccessibilityUtils from './AccessibilityUtils.js';
+import AccessibilityUtils from './pdom/AccessibilityUtils.js';
 import KeyboardUtils from './KeyboardUtils.js';
 
 // uppercase matters

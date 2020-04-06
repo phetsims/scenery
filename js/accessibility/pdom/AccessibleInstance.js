@@ -27,13 +27,13 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Events from '../../../axon/js/Events.js';
-import cleanArray from '../../../phet-core/js/cleanArray.js';
-import inherit from '../../../phet-core/js/inherit.js';
-import platform from '../../../phet-core/js/platform.js';
-import Poolable from '../../../phet-core/js/Poolable.js';
-import scenery from '../scenery.js';
-import TransformTracker from '../util/TransformTracker.js';
+import Events from '../../../../axon/js/Events.js';
+import cleanArray from '../../../../phet-core/js/cleanArray.js';
+import inherit from '../../../../phet-core/js/inherit.js';
+import platform from '../../../../phet-core/js/platform.js';
+import Poolable from '../../../../phet-core/js/Poolable.js';
+import scenery from '../../scenery.js';
+import TransformTracker from '../../util/TransformTracker.js';
 import AccessibilityUtils from './AccessibilityUtils.js';
 import AccessiblePeer from './AccessiblePeer.js';
 

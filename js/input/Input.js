@@ -165,7 +165,7 @@ import platform from '../../../phet-core/js/platform.js';
 import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
-import AccessibilityUtils from '../accessibility/AccessibilityUtils.js';
+import AccessibilityUtils from '../accessibility/pdom/AccessibilityUtils.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import scenery from '../scenery.js';
 import Features from '../util/Features.js';

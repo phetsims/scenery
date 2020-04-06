@@ -122,12 +122,12 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
-import Shape from '../../../kite/js/Shape.js';
-import arrayDifference from '../../../phet-core/js/arrayDifference.js';
-import extend from '../../../phet-core/js/extend.js';
-import merge from '../../../phet-core/js/merge.js';
-import scenery from '../scenery.js';
-import A11yBehaviorFunctionDef from './A11yBehaviorFunctionDef.js';
+import Shape from '../../../../kite/js/Shape.js';
+import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
+import extend from '../../../../phet-core/js/extend.js';
+import merge from '../../../../phet-core/js/merge.js';
+import scenery from '../../scenery.js';
+import A11yBehaviorFunctionDef from '../A11yBehaviorFunctionDef.js';
 import AccessibilityTree from './AccessibilityTree.js';
 import AccessibilityUtils from './AccessibilityUtils.js';
 import AccessibleDisplaysInfo from './AccessibleDisplaysInfo.js';
