@@ -1758,7 +1758,7 @@ inherit( Node, RichTextLink, {
    * @returns {RichTextLink} - Self reference
    */
   initialize: function( innerContent, href ) {
-    // a11y - open the link in the new tab when activated with a keyboard.
+    // pdom - open the link in the new tab when activated with a keyboard.
     // also see https://github.com/phetsims/joist/issues/430
     this.innerContent = innerContent;
 

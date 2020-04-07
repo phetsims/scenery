@@ -1561,7 +1561,7 @@ class Input {
     // We'll use this trail for the entire dispatch of this event.
     const eventTrail = this.branchChangeEvents( pointer, event, pointChanged );
 
-    // a11y
+    // pdom
     let focusableNode = null;
     const trailAccessible = !eventTrail.rootNode()._rendererSummary.isNotAccessible();
 

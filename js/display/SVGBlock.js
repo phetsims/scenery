@@ -65,7 +65,7 @@ inherit( FittedBlock, SVGBlock, {
       this.svg.style.left = '0';
       this.svg.style.top = '0';
 
-      // a11y - make sure the element is not focusable (it is focusable by default in IE11 full screen mode)
+      // pdom - make sure the element is not focusable (it is focusable by default in IE11 full screen mode)
       this.svg.setAttribute( 'focusable', false );
 
       //OHTWO TODO: why would we clip the individual layers also? Seems like a potentially useless performance loss
