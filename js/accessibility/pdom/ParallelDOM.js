@@ -2737,7 +2737,7 @@ const ParallelDOM = {
        * @param {AccessibleInstance} accessibleInstance
        */
       addAccessibleInstance: function( accessibleInstance ) {
-        assert && assert( accessibleInstance instanceof scenery.AccessibleInstance );
+        assert && assert( accessibleInstance instanceof scenery.PDOMInstance );
         this._accessibleInstances.push( accessibleInstance );
       },
 
@@ -2748,7 +2748,7 @@ const ParallelDOM = {
        * @param {AccessibleInstance} accessibleInstance
        */
       removeAccessibleInstance: function( accessibleInstance ) {
-        assert && assert( accessibleInstance instanceof scenery.AccessibleInstance );
+        assert && assert( accessibleInstance instanceof scenery.PDOMInstance );
         const index = _.indexOf( this._accessibleInstances, accessibleInstance );
         assert && assert( index !== -1, 'Cannot remove an PDOMInstance from a Node if it was not there' );
         this._accessibleInstances.splice( index, 1 );
