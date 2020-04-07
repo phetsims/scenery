@@ -1,7 +1,7 @@
 // Copyright 2017-2020, University of Colorado Boulder
 
 /**
- * Accessibility tests
+ * ParallelPDOM tests
  *
  * @author Sam Reid (PhET Interactive Simulations)
  */
@@ -24,7 +24,7 @@ const TEST_LABEL_HTML_2 = '<strong>I ROCK as a LABEL 2</strong>';
 const TEST_DESCRIPTION_HTML = '<strong>I ROCK as a DESCRIPTION</strong>';
 const TEST_DESCRIPTION_HTML_2 = '<strong>I ROCK as a DESCRIPTION 2</strong>';
 
-// These should manually match the defaults in the Accessibility.js trait
+// These should manually match the defaults in the ParallelPDOM.js trait
 const DEFAULT_LABEL_TAG_NAME = AccessibilityUtils.DEFAULT_LABEL_TAG_NAME;
 const DEFAULT_DESCRIPTION_TAG_NAME = AccessibilityUtils.DEFAULT_DESCRIPTION_TAG_NAME;
 
@@ -40,7 +40,7 @@ const TEST_HIGHLIGHT = new Circle( 5 );
 // a custom focus highlight (since dummy node's have no bounds)
 const focusHighlight = new Rectangle( 0, 0, 10, 10 );
 
-QUnit.module( 'Accessibility' );
+QUnit.module( 'ParallelPDOMTests' );
 
 /**
  * Get a unique AccessiblePeer from a node with accessible content. Will error if the node has multiple instances
@@ -357,7 +357,7 @@ QUnit.test( 'descriptionTagName/descriptionContent option', function( assert ) {
   assert.ok( a.descriptionTagName === 'p', 'expect descriptionTagName setter to work.' );
 } );
 
-QUnit.test( 'Accessibility options', function( assert ) {
+QUnit.test( 'ParallelPDOM options', function( assert ) {
 
   const rootNode = new Node();
   var display = new Display( rootNode ); // eslint-disable-line
@@ -796,7 +796,7 @@ QUnit.test( 'aria-activedescendant', function( assert ) {
 
 } );
 
-QUnit.test( 'Accessibility invalidation', function( assert ) {
+QUnit.test( 'ParallelPDOM invalidation', function( assert ) {
 
   // test invalidation of accessibility (changing content which requires )
   const a1 = new Node();
@@ -859,7 +859,7 @@ QUnit.test( 'Accessibility invalidation', function( assert ) {
   assert.ok( elementInDom.getAttribute( 'aria-label' ) === TEST_LABEL, 'aria-label set' );
 } );
 
-QUnit.test( 'Accessibility setters/getters', function( assert ) {
+QUnit.test( 'ParallelPDOM setters/getters', function( assert ) {
 
   const a1 = new Node( {
     tagName: 'div'

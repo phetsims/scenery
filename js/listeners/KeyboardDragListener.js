@@ -3,7 +3,7 @@
 /**
  * A general type for keyboard dragging. Objects can be dragged in two dimensions with the arrow keys and with the WASD
  * keys. This can be added to a node through addInputListener for accessibility, which is mixed into Nodes with
- * the Accessibility trait.
+ * the ParallelPDOM trait.
  *
  * JavaScript does not natively handle multiple 'keydown' events at once, so we have a custom implementation that
  * tracks which keys are down and for how long in a step() function. To support keydown timing, AXON/timer is used. In

@@ -108,7 +108,7 @@
  *     descriptionContent: 'This is a description for the input',
  *    });
  *
- * The Accessibility trait is smart enough to know when there needs to be a container parent to wrap multiple siblings,
+ * The ParallelPDOM trait is smart enough to know when there needs to be a container parent to wrap multiple siblings,
  * it is not necessary to use that option unless the desired tag name is  something other than 'div'.
  *
  * --------------------------------------------------------------------------------------------------------------------
@@ -181,7 +181,7 @@ const INPUT_TYPES_THAT_SUPPORT_CHECKED = AccessibilityUtils.INPUT_TYPES_THAT_SUP
 // HTMLElement attributes whose value is an ID of another element
 const ASSOCIATION_ATTRIBUTES = AccessibilityUtils.ASSOCIATION_ATTRIBUTES;
 
-// The options for the Accessibility API. In general, most default to null; to clear, set back to null. Each one of
+// The options for the ParallelPDOM API. In general, most default to null; to clear, set back to null. Each one of
 // these has an associated setter, see setter functions for more information about each.
 const ACCESSIBILITY_OPTION_KEYS = [
 
@@ -236,7 +236,7 @@ const ACCESSIBILITY_OPTION_KEYS = [
   'pdomTransformSourceNode' // {Node|null} - sets the node that controls primary sibling element positioning in the display, see setPDOMTransformSourceNode()
 ];
 
-const Accessibility = {
+const ParallelPDOM = {
 
   /**
    * Given the constructor for Node, add accessibility functions into the prototype.
@@ -442,7 +442,7 @@ const Accessibility = {
 
         // HIGHER LEVEL API INITIALIZATION
 
-        // {string|null} - sets the "Accessible Name" of the Node, as defined by the Browser's Accessibility Tree
+        // {string|null} - sets the "Accessible Name" of the Node, as defined by the Browser's ParallelPDOM Tree
         this._accessibleName = null;
 
         // {A11yBehaviorFunctionDef} - function that returns the options needed to set the appropriate accessible name for the Node
@@ -471,7 +471,7 @@ const Accessibility = {
       /***********************************************************************************************************/
 
       /**
-       * Dispose accessibility by removing all listeners on this node for accessible input. Accessibility is disposed
+       * Dispose accessibility by removing all listeners on this node for accessible input. ParallelPDOM is disposed
        * by calling Node.dispose(), so this function is scenery-internal.
        * @public (scenery-internal)
        */
@@ -509,7 +509,7 @@ const Accessibility = {
       /**
        * Focus this node's primary dom element. The element must not be hidden, and it must be focusable. If the node
        * has more than one instance, this will fail because the DOM element is not uniquely defined. If accessibility
-       * is not enabled, this will be a no op. When Accessibility is more widely used, the no op can be replaced
+       * is not enabled, this will be a no op. When ParallelPDOM is more widely used, the no op can be replaced
        * with an assertion that checks for accessible content.
        *
        * @public
@@ -625,7 +625,7 @@ const Accessibility = {
        * to validate this function.
        *
        * NOTE: By Accessible Name (capitalized), we mean the proper title of the HTML element that will be set in
-       * the browser Accessibility Tree and then interpreted by AT. This is necessily different from scenery internal
+       * the browser ParallelPDOM Tree and then interpreted by AT. This is necessily different from scenery internal
        * names of HTML elements like "label sibling" (even though, in certain circumstances, an Accessible Name could
        * be set by using the "label sibling" with tag name "label" and a "for" attribute).
        *
@@ -2622,7 +2622,7 @@ const Accessibility = {
       },
 
       /**
-       * Sets the accessible content for a Node. See constructor for more information. Not part of the Accessibility
+       * Sets the accessible content for a Node. See constructor for more information. Not part of the ParallelPDOM
        * API
        * @public (scenery-internal)
        */
@@ -2657,8 +2657,8 @@ const Accessibility = {
        * @param {Node} node
        */
       onAccessibleAddChild: function( node ) {
-        sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'onAccessibleAddChild n#' + node.id + ' (parent:n#' + this.id + ')' );
-        sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
+        sceneryLog && sceneryLog.ParallelDOM && sceneryLog.ParallelDOM( 'onAccessibleAddChild n#' + node.id + ' (parent:n#' + this.id + ')' );
+        sceneryLog && sceneryLog.ParallelDOM && sceneryLog.push();
 
         // Find descendants with accessibleOrders and check them against all of their ancestors/self
         assert && ( function recur( descendant ) {
@@ -2676,7 +2676,7 @@ const Accessibility = {
 
         PDOMTree.addChild( this, node );
 
-        sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
+        sceneryLog && sceneryLog.ParallelDOM && sceneryLog.pop();
       },
 
       /**
@@ -2687,8 +2687,8 @@ const Accessibility = {
        * @param {Node} node
        */
       onAccessibleRemoveChild: function( node ) {
-        sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'onAccessibleRemoveChild n#' + node.id + ' (parent:n#' + this.id + ')' );
-        sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
+        sceneryLog && sceneryLog.ParallelDOM && sceneryLog.ParallelDOM( 'onAccessibleRemoveChild n#' + node.id + ' (parent:n#' + this.id + ')' );
+        sceneryLog && sceneryLog.ParallelDOM && sceneryLog.push();
 
         this._accessibleDisplaysInfo.onRemoveChild( node );
 
@@ -2700,7 +2700,7 @@ const Accessibility = {
         node.updateOtherNodesAriaDescribedby();
         node.updateOtherNodesActiveDescendant();
 
-        sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
+        sceneryLog && sceneryLog.ParallelDOM && sceneryLog.pop();
       },
 
       /**
@@ -2708,12 +2708,12 @@ const Accessibility = {
        * @private
        */
       onAccessibleReorderedChildren: function() {
-        sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'onAccessibleReorderedChildren (parent:n#' + this.id + ')' );
-        sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
+        sceneryLog && sceneryLog.ParallelDOM && sceneryLog.ParallelDOM( 'onAccessibleReorderedChildren (parent:n#' + this.id + ')' );
+        sceneryLog && sceneryLog.ParallelDOM && sceneryLog.push();
 
         PDOMTree.childrenOrderChange( this );
 
-        sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
+        sceneryLog && sceneryLog.ParallelDOM && sceneryLog.pop();
       },
 
       /*---------------------------------------------------------------------------*/
@@ -2757,6 +2757,6 @@ const Accessibility = {
   }
 };
 
-scenery.register( 'Accessibility', Accessibility );
+scenery.register( 'ParallelPDOM', ParallelPDOM );
 
-export default Accessibility;
+export default ParallelPDOM;

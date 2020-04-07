@@ -47,7 +47,7 @@ function FocusOverlay( display, focusRootNode ) {
   this.groupMode = null;
 
   // @private {Node|null} - the group highlight node around an ancestor of this.node when focus changes,
-  // see Accessibility.setGroupFocusHighlight for more information on the group focus highlight, modified when
+  // see ParallelPDOM.setGroupFocusHighlight for more information on the group focus highlight, modified when
   // focus changes
   this.groupHighlightNode = null;
 

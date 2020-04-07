@@ -1,7 +1,7 @@
 // Copyright 2018-2020, University of Colorado Boulder
 
 /**
- * Tests related to Accessibility input and events.
+ * Tests related to ParallelPDOM input and events.
  *
  * @author Michael Kauzmann (PhET Interactive Simulations)
  * @author Jesse Greenberg (PhET Interactive Simulations)

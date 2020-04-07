@@ -68,7 +68,7 @@ export default inherit( FocusHighlightPath, FocusHighlightFromNode, {
    * Update the focusHighlight shape on the path given the node passed in. Depending on options supplied to this
    * FocusHighlightFromNode, the shape will surround the node's bounds or its local bounds, dilated by an amount
    * that is dependent on whether or not this highlight is for group content or for the node itself. See
-   * Accessibility.setGroupFocusHighlight() for more information on group highlights.
+   * ParallelDOM.setGroupFocusHighlight() for more information on group highlights.
    *
    * @param {Node} node
    */

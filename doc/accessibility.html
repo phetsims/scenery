@@ -258,8 +258,8 @@
     <h2 id="a11y-api">Scenery's Accessibility API</h2>
 
     <p>
-      Most of Scenery's accessibility features are defined and implemented in <code>Accessibility.js</code>.
-      <code>Accessibility.js</code> is a trait that is mixed in to <code>Node.js</code>. It adds getters and setters
+      Most of Scenery's accessibility features are defined and implemented in <code>ParallelDOM.js</code>.
+      <code>ParallelDOM.js</code> is a trait that is mixed in to <code>Node.js</code>. It adds getters and setters
       for accessibility properties, so all we have to do is pass in a11y specific options like normal into the
       Parent.call() or mutate() function calls.
     </p>
@@ -267,7 +267,7 @@
     <p>
       The following explains how to use the accessibility functionality of Scenery. For more information and up-to-date
       api
-      documentation, see <a href="https://github.com/phetsims/scenery/blob/master/js/accessibility/Accessibility.js#L4">
+      documentation, see <a href="https://github.com/phetsims/scenery/blob/master/js/accessibility/pdom/ParalllelDOM.js#L4">
       the source code</a>. On the side bar, options are categorized by
       where they are introduced and explained. In this file there is little "traditional" documentation, rather
       example based explanation. The source code is the best place for specifics and implementation.
@@ -550,7 +550,7 @@
 
 
     <h3 id="manipulating-pdom">Manipulating the Parallel DOM</h3>
-    <p>Most properties of the <code>Accessibility.js</code> trait are mutable so that the Parallel DOM can update
+    <p>Most properties of the <code>ParallelDOM.js</code> trait are mutable so that the Parallel DOM can update
       with the graphical scene. Here are a few examples:</p>
     <ul>
       <li><code>tagName</code>: set&#47;get the tag name of the primary DOM sibling of a node</li>
@@ -567,8 +567,8 @@
       set the
       <code>Node.tagName = null</code>, this will clear all accessible content of the node.</p>
     <p>
-      Please see <a href="https://github.com/phetsims/scenery/blob/master/js/accessibility/Accessibility.js">the
-      Accessibility trait</a> for a complete and up-to-date list of getters/setters.
+      Please see <a href="https://github.com/phetsims/scenery/blob/master/js/accessibility/pdom/ParallelDOM.js">the
+      ParallelDOM trait</a> for a complete and up-to-date list of getters/setters.
     </p>
 
     <h4 id="accessible-name">A note about Accessible Name</h4>
@@ -766,7 +766,7 @@
     </ul>
     <h4>Source Code</h4>
     <p>For up-to-date documentation and the latest API for accessibility in Scenery, please visit <a
-        href="https://github.com/phetsims/scenery/blob/master/js/accessibility/Accessibility.js">the source code</a>.
+        href="https://github.com/phetsims/scenery/blob/master/js/accessibility/pdom/ParalllelDOM.js">the source code</a>.
 
     <p>Good luck and happy coding!</p>
   </div>

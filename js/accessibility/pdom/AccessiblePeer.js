@@ -135,7 +135,7 @@ inherit( Object, AccessiblePeer, {
     // the callback function (we get around this now by not observing attribute changes). But it is not yet widely
     // supported, see https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver.
     //
-    // TODO: Should we be watching "model" changes from Accessibility.js instead of using MutationObserver?
+    // TODO: Should we be watching "model" changes from ParallelPDOM.js instead of using MutationObserver?
     // See https://github.com/phetsims/scenery/issues/852. This would be less fragile, and also less
     // memory intensive because we don't need an instance of MutationObserver on every AccessibleInstance.
     this.mutationObserver = this.mutationObserver || new MutationObserver( this.invalidateCSSPositioning.bind( this ) );
@@ -1009,7 +1009,7 @@ function createElement( tagName, focusable, trailId, options ) {
     siblingName: null,
 
     // {boolean} - if true, DOM input events received on the element will not be dispatched as SceneryEvents in Input.js
-    // see Accessibility.setExcludeLabelSiblingFromInput for more information
+    // see ParallelPDOM.setExcludeLabelSiblingFromInput for more information
     excludeFromInput: false
   }, options );
 

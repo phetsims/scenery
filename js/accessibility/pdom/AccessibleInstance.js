@@ -453,7 +453,7 @@ inherit( Events, AccessibleInstance, {
 
   /**
    * Create a new TransformTracker that will observe transforms along the trail of this AccessibleInstance OR
-   * the specified pdomTransformSourceNode. See Accessibility.setPDOMTransformSourceNode(). The source Node
+   * the specified pdomTransformSourceNode. See ParallelPDOM.setPDOMTransformSourceNode(). The source Node
    * must not use DAG so that its trail is unique.
    * @public
    *

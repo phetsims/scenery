@@ -89,7 +89,7 @@ const logProperties = {
   RichText: { name: 'RichText', style: '' },
 
   // Accessibility-related
-  Accessibility: { name: 'Accessibility', style: '' },
+  ParallelDOM: { name: 'ParallelDOM', style: '' },
   AccessibleInstance: { name: 'AccessibleInstance', style: '' },
   AccessibilityTree: { name: 'AccessibilityTree', style: '' },
   AccessibleDisplaysInfo: { name: 'AccessibleDisplaysInfo', style: '' },
@@ -154,7 +154,7 @@ extend( scenery, {
       return;
     }
     if ( name === 'a11y' ) {
-      this.enableIndividualLog( 'Accessibility' );
+      this.enableIndividualLog( 'ParallelDOM' );
       this.enableIndividualLog( 'AccessibleInstance' );
       this.enableIndividualLog( 'AccessibilityTree' );
       this.enableIndividualLog( 'AccessibleDisplaysInfo' );

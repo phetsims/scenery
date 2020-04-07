@@ -1,7 +1,7 @@
 // Copyright 2018-2020, University of Colorado Boulder
 
 /**
- * Accessibility tests
+ * ParallelPDOM tests
  *
  * @author Sam Reid (PhET Interactive Simulations)
  */
