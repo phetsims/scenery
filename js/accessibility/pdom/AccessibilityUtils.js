@@ -1,7 +1,7 @@
 // Copyright 2017-2020, University of Colorado Boulder
 
 /**
- * Utility functions for scenery that are specifically useful for ParallelPDOM.
+ * Utility functions for scenery that are specifically useful for ParallelDOM.
  * These generally pertain to DOM traversal and manipulation.
  *
  * For the most part this file's methods are public in a scenery-internal context. Some exceptions apply. Please
@@ -555,7 +555,7 @@ var AccessibilityUtils = {
   DATA_TRAIL_ID: DATA_TRAIL_ID,
 
   // attribute used for elements which Scenery should not dispatch ScenerEvents when DOM event input is received on
-  // them, see ParallelPDOM.setExcludeLabelSiblingFromInput for more information
+  // them, see ParallelDOM.setExcludeLabelSiblingFromInput for more information
   DATA_EXCLUDE_FROM_INPUT: 'data-exclude-from-input'
 };
 

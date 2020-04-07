@@ -204,7 +204,7 @@ import extend from '../../../phet-core/js/extend.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
-import ParallelPDOM from '../accessibility/pdom/ParallelPDOM.js';
+import ParallelDOM from '../accessibility/pdom/ParallelDOM.js';
 import Renderer from '../display/Renderer.js';
 import Mouse from '../input/Mouse.js';
 import Pen from '../input/Pen.js';
@@ -303,7 +303,7 @@ const DEFAULT_OPTIONS = {
  * @public
  * @constructor
  * @mixes Events
- * @mixes ParallelPDOM
+ * @mixes ParallelDOM
  *
  * NOTE: Directly created Nodes (not of any subtype, but created with "new Node( ... )") are generally used as
  *       containers, which can hold other Nodes, subtypes of Node that can display things.
@@ -2441,7 +2441,7 @@ inherit( PhetioObject, Node, extend( {
    * @param {number} newBitmask
    */
   onSummaryChange: function( oldBitmask, newBitmask ) {
-    // Defined in ParallelPDOM.js
+    // Defined in ParallelDOM.js
     this._accessibleDisplaysInfo.onSummaryChange( oldBitmask, newBitmask );
   },
 
@@ -3080,7 +3080,7 @@ inherit( PhetioObject, Node, extend( {
       this._picker.onVisibilityChange();
       if ( assertSlow ) { this._picker.audit(); }
 
-      // Defined in ParallelPDOM.js
+      // Defined in ParallelDOM.js
       this._accessibleDisplaysInfo.onVisibilityChange( visible );
 
       this.trigger0( 'visibility' );
@@ -4604,7 +4604,7 @@ inherit( PhetioObject, Node, extend( {
     assert && assert( display instanceof scenery.Display );
     this._rootedDisplays.push( display );
 
-    // Defined in ParallelPDOM.js
+    // Defined in ParallelDOM.js
     this._accessibleDisplaysInfo.onAddedRootedDisplay( display );
   },
 
@@ -4620,7 +4620,7 @@ inherit( PhetioObject, Node, extend( {
     assert && assert( index !== -1, 'Cannot remove a Display from a Node if it was not there' );
     this._rootedDisplays.splice( index, 1 );
 
-    // Defined in ParallelPDOM.js
+    // Defined in ParallelDOM.js
     this._accessibleDisplaysInfo.onRemovedRootedDisplay( display );
   },
 
@@ -5258,6 +5258,6 @@ inherit( PhetioObject, Node, extend( {
 } );
 
 // Node is composed with this feature of Interactive Descriptions
-ParallelPDOM.compose( Node );
+ParallelDOM.compose( Node );
 
 export default Node;

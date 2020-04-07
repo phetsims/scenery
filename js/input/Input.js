@@ -73,14 +73,14 @@
  * **** PDOM Specific Event Types
  *
  * Some event types can only be triggered from the PDOM. If a SCENERY/Node has accessible content (see
- * ParallelPDOM.js for more info), then listeners can be added for events fired from the PDOM. The accessibility events
+ * ParallelDOM.js for more info), then listeners can be added for events fired from the PDOM. The accessibility events
  * triggered from a Node are dependent on the `tagName` (ergo the HTMLElement primary sibling) specified by the Node.
  *
  * Some terminology for understanding:
- * - PDOM:  parallel DOM, see ParallelPDOM.js
+ * - PDOM:  parallel DOM, see ParallelDOM.js
  * - Primary Sibling:  The Node's HTMLElement in the PDOM that is interacted with for accessible interactions and to
  *                     display accessible content. The primary sibling has the tag name specified by the `tagName`
- *                     option, see `ParallelPDOM.setTagName`. Primary sibling is further defined in AccessiblePeer.js
+ *                     option, see `ParallelDOM.setTagName`. Primary sibling is further defined in AccessiblePeer.js
  * - Assistive Technology:  aka AT, devices meant to improve the capabilities of an individual with a disability.
  *
  * The following are the supported accessible events:
@@ -1002,7 +1002,7 @@ class Input {
   dispatchA11yEvent( eventType, domEvent, bubbles ) {
     scenery.Display.userGestureEmitter.emit();
 
-    // This workaround hopefully won't be here forever, see ParallelPDOM.setExcludeLabelSiblingFromInput() and https://github.com/phetsims/a11y-research/issues/156
+    // This workaround hopefully won't be here forever, see ParallelDOM.setExcludeLabelSiblingFromInput() and https://github.com/phetsims/a11y-research/issues/156
     if ( !( domEvent.target && domEvent.target.hasAttribute( AccessibilityUtils.DATA_EXCLUDE_FROM_INPUT ) ) ) {
 
       if ( !this.a11yPointer ) { this.initA11yPointer(); }

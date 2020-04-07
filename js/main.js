@@ -10,7 +10,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import './accessibility/pdom/ParallelPDOM.js';
+import './accessibility/pdom/ParallelDOM.js';
 import './accessibility/pdom/PDOMFuzzer.js';
 import './accessibility/pdom/PDOMTree.js';
 import './accessibility/pdom/AccessibilityUtils.js';
