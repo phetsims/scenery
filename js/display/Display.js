@@ -66,7 +66,7 @@ import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import UtteranceQueue from '../../../utterance-queue/js/UtteranceQueue.js';
 import PDOMTree from '../accessibility/pdom/PDOMTree.js';
-import AccessibleInstance from '../accessibility/pdom/AccessibleInstance.js';
+import PDOMInstance from '../accessibility/pdom/PDOMInstance.js';
 import FocusIO from '../accessibility/FocusIO.js';
 import KeyStateTracker from '../accessibility/KeyStateTracker.js';
 import Input from '../input/Input.js';
@@ -312,8 +312,8 @@ function Display( rootNode, options ) {
     // restore focus after sorting accessible instances
     this._focusedNodeOnRemoveTrail;
 
-    // @public (scenery-internal) {AccessibleInstance}
-    this._rootAccessibleInstance = AccessibleInstance.createFromPool( null, this, new scenery.Trail() );
+    // @public (scenery-internal) {PDOMInstance}
+    this._rootAccessibleInstance = PDOMInstance.createFromPool( null, this, new scenery.Trail() );
     sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
       'Display root instance: ' + this._rootAccessibleInstance.toString() );
     PDOMTree.rebuildInstanceTree( this._rootAccessibleInstance );

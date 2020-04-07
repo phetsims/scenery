@@ -1,7 +1,7 @@
 // Copyright 2019-2020, University of Colorado Boulder
 
 /**
- * Static CSS style for elements of the PDOM (siblings of AccessiblePeer). Adds the styling directly to SceneryStyle,
+ * Static CSS style for elements of the PDOM (siblings of PDOMPeer). Adds the styling directly to SceneryStyle,
  * but also exports the class names for root and siblings for where elements are created or retrieved
  * by document.getElementsByClassName().
  *
@@ -19,13 +19,13 @@ import SceneryStyle from '../../util/SceneryStyle.js';
 const SIBLING_CLASS_NAME = 'a11y-sibling';
 const ROOT_CLASS_NAME = 'a11y-root';
 
-// All elements that use AccessibilityUtils.createElement should have this style. The only exception is the root of
+// All elements that use PDOMUtils.createElement should have this style. The only exception is the root of
 // the PDOM, which should use 'a11y-root' class attributes instead.
 SceneryStyle.addRule( '.' + SIBLING_CLASS_NAME +
                       '{' +
 
                       // 'fixed' positions elements relative to the ViewPort (global coordinate frame), a requirement for the approach
-                      // in AccessiblePeer.positionElements
+                      // in PDOMPeer.positionElements
                       'position: fixed;' +
 
                       // ABSOLUTELY CRITICAL - so PDOM elements do not interfere with rest of scenery input

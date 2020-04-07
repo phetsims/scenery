@@ -11,7 +11,7 @@ import timer from '../../../axon/js/timer.js';
 import Random from '../../../dot/js/Random.js';
 import Display from '../display/Display.js';
 import scenery from '../scenery.js';
-import AccessibilityUtils from './pdom/AccessibilityUtils.js';
+import PDOMUtils from './pdom/PDOMUtils.js';
 import KeyboardUtils from './KeyboardUtils.js';
 
 // uppercase matters
@@ -68,7 +68,7 @@ class KeyboardFuzzer {
 
       // before we change focus to the next item, immediately release all keys that were down on the active element
       this.clearListeners();
-      const nextFocusable = AccessibilityUtils.getRandomFocusable( this.random );
+      const nextFocusable = PDOMUtils.getRandomFocusable( this.random );
       nextFocusable.focus();
       this.currentElement = nextFocusable;
 

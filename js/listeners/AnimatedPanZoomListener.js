@@ -15,7 +15,7 @@ import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
-import AccessibilityUtils from '../accessibility/pdom/AccessibilityUtils.js';
+import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import KeyboardZoomUtils from '../accessibility/KeyboardZoomUtils.js';
 import KeyStateTracker from '../accessibility/KeyStateTracker.js';
@@ -300,7 +300,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // handle translation
     if ( KeyboardUtils.isArrowKey( domEvent.keyCode ) ) {
       const keyboardDragIntent = event.pointer.getIntent() === Pointer.Intent.KEYBOARD_DRAG;
-      // const elementUsesKeys = AccessibilityUtils.elementUsesArrowKeys( domEvent.target );
+      // const elementUsesKeys = PDOMUtils.elementUsesArrowKeys( domEvent.target );
 
       if ( !keyboardDragIntent ) {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener handle arrow key down' );
@@ -872,7 +872,7 @@ class KeyPress {
       scratchScaleTargetVector.set( focusedNode.parentToGlobalPoint( focusedNode.center ) );
     }
     else {
-      const firstFocusable = AccessibilityUtils.getNextFocusable();
+      const firstFocusable = PDOMUtils.getNextFocusable();
       if ( firstFocusable !== document.body ) {
 
         // if not the body, focused node should be contained by the body - error loudly if the browser reports

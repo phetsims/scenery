@@ -11,8 +11,8 @@ import Circle from '../../nodes/Circle.js';
 import Node from '../../nodes/Node.js';
 import Rectangle from '../../nodes/Rectangle.js';
 import AccessibilityFuzzer from './PDOMFuzzer.js';
-import AccessibilityUtils from './AccessibilityUtils.js';
-import AccessiblePeer from './AccessiblePeer.js';
+import PDOMUtils from './PDOMUtils.js';
+import PDOMPeer from './PDOMPeer.js';
 
 // constants
 const TEST_INNER_CONTENT = 'Test Inner Content Here please^&*. Thanks you so very mucho.';
@@ -25,8 +25,8 @@ const TEST_DESCRIPTION_HTML = '<strong>I ROCK as a DESCRIPTION</strong>';
 const TEST_DESCRIPTION_HTML_2 = '<strong>I ROCK as a DESCRIPTION 2</strong>';
 
 // These should manually match the defaults in the ParallelDOM.js trait
-const DEFAULT_LABEL_TAG_NAME = AccessibilityUtils.DEFAULT_LABEL_TAG_NAME;
-const DEFAULT_DESCRIPTION_TAG_NAME = AccessibilityUtils.DEFAULT_DESCRIPTION_TAG_NAME;
+const DEFAULT_LABEL_TAG_NAME = PDOMUtils.DEFAULT_LABEL_TAG_NAME;
+const DEFAULT_DESCRIPTION_TAG_NAME = PDOMUtils.DEFAULT_DESCRIPTION_TAG_NAME;
 
 // given the parent container element for a node, this value is the index of the label sibling in the
 // parent's array of children HTMLElements.
@@ -43,11 +43,11 @@ const focusHighlight = new Rectangle( 0, 0, 10, 10 );
 QUnit.module( 'ParallelDOMTests' );
 
 /**
- * Get a unique AccessiblePeer from a node with accessible content. Will error if the node has multiple instances
+ * Get a unique PDOMPeer from a node with accessible content. Will error if the node has multiple instances
  * or if the node hasn't been attached to a display (and therefore has no accessible content).
  *
  * @param  {Node} node
- * @returns {AccessiblePeer}
+ * @returns {PDOMPeer}
  */
 function getAccessiblePeerByNode( node ) {
   if ( node.accessibleInstances.length === 0 ) {
@@ -69,7 +69,7 @@ function getAccessiblePeerByNode( node ) {
  * there should only be one accessible instance and one dom element for the node.
  *
  * NOTE: Be careful about getting references to dom Elements, the reference will be stale each time
- * the view (AccessiblePeer) is redrawn, which is quite often when setting options.
+ * the view (PDOMPeer) is redrawn, which is quite often when setting options.
  *
  * @param  {Node} node
  * @returns {HTMLElement}
@@ -480,8 +480,8 @@ function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
 
   a[ addAssociationFunction ]( {
     otherNode: b,
-    thisElementName: AccessiblePeer.PRIMARY_SIBLING,
-    otherElementName: AccessiblePeer.PRIMARY_SIBLING
+    thisElementName: PDOMPeer.PRIMARY_SIBLING,
+    otherElementName: PDOMPeer.PRIMARY_SIBLING
   } );
 
   let aElement = getPrimarySiblingElementByNode( a );
@@ -493,8 +493,8 @@ function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
 
   a[ addAssociationFunction ]( {
     otherNode: c,
-    thisElementName: AccessiblePeer.PRIMARY_SIBLING,
-    otherElementName: AccessiblePeer.PRIMARY_SIBLING
+    thisElementName: PDOMPeer.PRIMARY_SIBLING,
+    otherElementName: PDOMPeer.PRIMARY_SIBLING
   } );
 
   aElement = getPrimarySiblingElementByNode( a );
@@ -521,8 +521,8 @@ function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
 
   b[ addAssociationFunction ]( {
     otherNode: d,
-    thisElementName: AccessiblePeer.CONTAINER_PARENT,
-    otherElementName: AccessiblePeer.DESCRIPTION_SIBLING
+    thisElementName: PDOMPeer.CONTAINER_PARENT,
+    otherElementName: PDOMPeer.DESCRIPTION_SIBLING
   } );
   b.containerTagName = 'div';
 
@@ -553,20 +553,20 @@ function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
 
   e[ addAssociationFunction ]( {
     otherNode: f,
-    thisElementName: AccessiblePeer.PRIMARY_SIBLING,
-    otherElementName: AccessiblePeer.PRIMARY_SIBLING
+    thisElementName: PDOMPeer.PRIMARY_SIBLING,
+    otherElementName: PDOMPeer.PRIMARY_SIBLING
   } );
 
   f[ addAssociationFunction ]( {
     otherNode: g,
-    thisElementName: AccessiblePeer.PRIMARY_SIBLING,
-    otherElementName: AccessiblePeer.PRIMARY_SIBLING
+    thisElementName: PDOMPeer.PRIMARY_SIBLING,
+    otherElementName: PDOMPeer.PRIMARY_SIBLING
   } );
 
   g[ addAssociationFunction ]( {
     otherNode: h,
-    thisElementName: AccessiblePeer.PRIMARY_SIBLING,
-    otherElementName: AccessiblePeer.PRIMARY_SIBLING
+    thisElementName: PDOMPeer.PRIMARY_SIBLING,
+    otherElementName: PDOMPeer.PRIMARY_SIBLING
   } );
 
   let eElement = getPrimarySiblingElementByNode( e );
@@ -612,20 +612,20 @@ function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
 
   j[ addAssociationFunction ]( {
     otherNode: j,
-    thisElementName: AccessiblePeer.PRIMARY_SIBLING,
-    otherElementName: AccessiblePeer.LABEL_SIBLING
+    thisElementName: PDOMPeer.PRIMARY_SIBLING,
+    otherElementName: PDOMPeer.LABEL_SIBLING
   } );
 
   j[ addAssociationFunction ]( {
     otherNode: j,
-    thisElementName: AccessiblePeer.CONTAINER_PARENT,
-    otherElementName: AccessiblePeer.DESCRIPTION_SIBLING
+    thisElementName: PDOMPeer.CONTAINER_PARENT,
+    otherElementName: PDOMPeer.DESCRIPTION_SIBLING
   } );
 
   j[ addAssociationFunction ]( {
     otherNode: j,
-    thisElementName: AccessiblePeer.CONTAINER_PARENT,
-    otherElementName: AccessiblePeer.LABEL_SIBLING
+    thisElementName: PDOMPeer.CONTAINER_PARENT,
+    otherElementName: PDOMPeer.LABEL_SIBLING
   } );
 
   const checkOnYourOwnAssociations = function( node ) {
@@ -647,8 +647,8 @@ function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
   const k = new Node( { tagName: 'div' } );
   k[ addAssociationFunction ]( {
     otherNode: j,
-    thisElementName: AccessiblePeer.PRIMARY_SIBLING,
-    otherElementName: AccessiblePeer.LABEL_SIBLING
+    thisElementName: PDOMPeer.PRIMARY_SIBLING,
+    otherElementName: PDOMPeer.LABEL_SIBLING
   } );
   rootNode.addChild( k );
   const testK = function() {
@@ -728,8 +728,8 @@ function testAssociationAttributeBySetters( assert, attribute ) { // eslint-disa
   options[ associationsArrayName ] = [
     {
       otherNode: n,
-      thisElementName: AccessiblePeer.PRIMARY_SIBLING,
-      otherElementName: AccessiblePeer.LABEL_SIBLING
+      thisElementName: PDOMPeer.PRIMARY_SIBLING,
+      otherElementName: PDOMPeer.LABEL_SIBLING
     }
   ];
   const o = new Node( options );
@@ -743,20 +743,20 @@ function testAssociationAttributeBySetters( assert, attribute ) { // eslint-disa
   // make a list of associations to test as a setter
   const randomAssociationObject = {
     otherNode: new Node(),
-    thisElementName: AccessiblePeer.CONTAINER_PARENT,
-    otherElementName: AccessiblePeer.LABEL_SIBLING
+    thisElementName: PDOMPeer.CONTAINER_PARENT,
+    otherElementName: PDOMPeer.LABEL_SIBLING
   };
   options[ associationsArrayName ] = [
     {
       otherNode: new Node(),
-      thisElementName: AccessiblePeer.CONTAINER_PARENT,
-      otherElementName: AccessiblePeer.DESCRIPTION_SIBLING
+      thisElementName: PDOMPeer.CONTAINER_PARENT,
+      otherElementName: PDOMPeer.DESCRIPTION_SIBLING
     },
     randomAssociationObject,
     {
       otherNode: new Node(),
-      thisElementName: AccessiblePeer.PRIMARY_SIBLING,
-      otherElementName: AccessiblePeer.LABEL_SIBLING
+      thisElementName: PDOMPeer.PRIMARY_SIBLING,
+      otherElementName: PDOMPeer.LABEL_SIBLING
     }
   ];
 
@@ -892,7 +892,7 @@ QUnit.test( 'ParallelDOM setters/getters', function( assert ) {
 } );
 
 QUnit.test( 'Next/Previous focusable', function( assert ) {
-  const util = AccessibilityUtils;
+  const util = PDOMUtils;
 
   const rootNode = new Node( { tagName: 'div', focusable: true } );
   var display = new Display( rootNode ); // eslint-disable-line
@@ -1264,7 +1264,7 @@ QUnit.test( 'setAccessibleAttribute', function( assert ) {
 
   a.setAccessibleAttribute( 'test', 'testValue' );
   a.setAccessibleAttribute( 'test', 'testValueLabel', {
-    elementName: AccessiblePeer.LABEL_SIBLING
+    elementName: PDOMPeer.LABEL_SIBLING
   } );
 
   const testBothAttributes = function() {
@@ -1282,7 +1282,7 @@ QUnit.test( 'setAccessibleAttribute', function( assert ) {
 
 
   a.removeAccessibleAttribute( 'test', {
-    elementName: AccessiblePeer.LABEL_SIBLING
+    elementName: PDOMPeer.LABEL_SIBLING
   } );
   aElement = getPrimarySiblingElementByNode( a );
   const aLabelElement = aElement.parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];

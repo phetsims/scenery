@@ -34,36 +34,36 @@ import platform from '../../../../phet-core/js/platform.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import scenery from '../../scenery.js';
 import TransformTracker from '../../util/TransformTracker.js';
-import AccessibilityUtils from './AccessibilityUtils.js';
-import AccessiblePeer from './AccessiblePeer.js';
+import PDOMUtils from './PDOMUtils.js';
+import PDOMPeer from './PDOMPeer.js';
 
 let globalId = 1;
 
 /**
- * Constructor for AccessibleInstance, uses an initialize method for pooling.
+ * Constructor for PDOMInstance, uses an initialize method for pooling.
  * @constructor
  * @mixes Poolable
  *
- * @param {AccessibleInstance|null} parent - parent of this instance, null if root of AccessibleInstance tree
+ * @param {PDOMInstance|null} parent - parent of this instance, null if root of PDOMInstance tree
  * @param {Display} display
- * @param {Trail} trail - trail to the node for this AccessibleInstance
+ * @param {Trail} trail - trail to the node for this PDOMInstance
  */
-function AccessibleInstance( parent, display, trail ) {
+function PDOMInstance( parent, display, trail ) {
   this.initializeAccessibleInstance( parent, display, trail );
 }
 
-scenery.register( 'AccessibleInstance', AccessibleInstance );
+scenery.register( 'PDOMInstance', PDOMInstance );
 
-inherit( Events, AccessibleInstance, {
+inherit( Events, PDOMInstance, {
 
   /**
-   * Initializes an AccessibleInstance, implements construction for pooling.
+   * Initializes an PDOMInstance, implements construction for pooling.
    * @private
    *
-   * @param {AccessibleInstance|null} parent - null if this AccessibleInstance is root of AccessibleInstance tree
+   * @param {PDOMInstance|null} parent - null if this PDOMInstance is root of PDOMInstance tree
    * @param {Display} display
-   * @param {Trail} trail - trail to node for this AccessibleInstance
-   * @returns {AccessibleInstance} - Returns 'this' reference, for chaining
+   * @param {Trail} trail - trail to node for this PDOMInstance
+   * @returns {PDOMInstance} - Returns 'this' reference, for chaining
    */
   initializeAccessibleInstance: function( parent, display, trail ) {
     Events.call( this ); // TODO: is Events worth mixing in by default? Will we need to listen to events?
@@ -87,7 +87,7 @@ inherit( Events, AccessibleInstance, {
     // @public {Node|null}
     this.node = this.isRootInstance ? null : trail.lastNode();
 
-    // @public {Array.<AccessibleInstance>}
+    // @public {Array.<PDOMInstance>}
     this.children = cleanArray( this.children );
 
     // If we are the root accessible instance, we won't actually have a reference to a node.
@@ -95,7 +95,7 @@ inherit( Events, AccessibleInstance, {
       this.node.addAccessibleInstance( this );
     }
 
-    // @public {AccessiblePeer}
+    // @public {PDOMPeer}
     this.peer = null; // Filled in below
 
     // @private {number} - The number of nodes in our trail that are NOT in our parent's trail and do NOT have our
@@ -112,8 +112,8 @@ inherit( Events, AccessibleInstance, {
     this.relativeListeners = [];
 
     // @public (scenery-internal) {TransformTracker|null} - Used to quickly compute the global matrix of this
-    // instance's transform source Node and observe when the transform changes. Used by AccessiblePeer to update
-    // positioning of sibling elements. By default, watches this AccessibleInstance's visual trail.
+    // instance's transform source Node and observe when the transform changes. Used by PDOMPeer to update
+    // positioning of sibling elements. By default, watches this PDOMInstance's visual trail.
     this.transformTracker = null;
     this.updateTransformTracker( this.node ? this.node.pdomTransformSourceNode : null );
 
@@ -123,12 +123,12 @@ inherit( Events, AccessibleInstance, {
 
     if ( this.isRootInstance ) {
       const accessibilityContainer = document.createElement( 'div' );
-      this.peer = AccessiblePeer.createFromPool( this, {
+      this.peer = PDOMPeer.createFromPool( this, {
         primarySibling: accessibilityContainer
       } );
     }
     else {
-      this.peer = AccessiblePeer.createFromPool( this );
+      this.peer = PDOMPeer.createFromPool( this );
 
       // The peer is not fully constructed until this update function is called, see https://github.com/phetsims/scenery/issues/832
       this.peer.update();
@@ -167,7 +167,7 @@ inherit( Events, AccessibleInstance, {
    * Adds a series of (sorted) accessible instances as children.
    * @public
    *
-   * @param {Array.<AccessibleInstance>} accessibleInstances
+   * @param {Array.<PDOMInstance>} accessibleInstances
    */
   addConsecutiveInstances: function( accessibleInstances ) {
     sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
@@ -181,7 +181,7 @@ inherit( Events, AccessibleInstance, {
     for ( let i = 0; i < accessibleInstances.length; i++ ) {
       // Append the container parent to the end (so that, when provided in order, we don't have to resort below
       // when initializing).
-      AccessibilityUtils.insertElements( this.peer.primarySibling, accessibleInstances[ i ].peer.topLevelElements );
+      PDOMUtils.insertElements( this.peer.primarySibling, accessibleInstances[ i ].peer.topLevelElements );
     }
 
     if ( hadChildren ) {
@@ -243,11 +243,11 @@ inherit( Events, AccessibleInstance, {
   },
 
   /**
-   * Returns an AccessibleInstance child (if one exists with the given Trail), or null otherwise.
+   * Returns an PDOMInstance child (if one exists with the given Trail), or null otherwise.
    * @public
    *
    * @param {Trail} trail
-   * @returns {AccessibleInstance|null}
+   * @returns {PDOMInstance|null}
    */
   findChildWithTrail: function( trail ) {
     for ( let i = 0; i < this.children.length; i++ ) {
@@ -260,9 +260,9 @@ inherit( Events, AccessibleInstance, {
   },
 
   /**
-   * Remove a subtree of AccessibleInstances from this AccessibleInstance
+   * Remove a subtree of AccessibleInstances from this PDOMInstance
    *
-   * @param {Trail} trail - children of this AccessibleInstance will be removed if the child trails are extensions
+   * @param {Trail} trail - children of this PDOMInstance will be removed if the child trails are extensions
    *                        of the trail.
    * @public (scenery-internal)
    */
@@ -364,8 +364,8 @@ inherit( Events, AccessibleInstance, {
    * @private
    *
    * @param {Trail} trail - A partial trail, where the root of the trail is either this.node or the display's root
-   *                        node (if we are the root AccessibleInstance)
-   * @returns {Array.<AccessibleInstance>}
+   *                        node (if we are the root PDOMInstance)
+   * @returns {Array.<PDOMInstance>}
    */
   getChildOrdering: function( trail ) {
     const node = trail.lastNode();
@@ -421,21 +421,21 @@ inherit( Events, AccessibleInstance, {
 
     assert && assert( targetChildren.length === this.children.length, 'sorting should not change number of children' );
 
-    // {Array.<AccessibleInstance>}
+    // {Array.<PDOMInstance>}
     this.children = targetChildren;
 
     // the DOMElement to add the child DOMElements to.
     const primarySibling = this.peer.primarySibling;
 
-    // "i" will keep track of the "collapsed" index when all DOMElements for all AccessibleInstance children are
-    // added to a single parent DOMElement (this AccessibleInstance's AccessiblePeer's primarySibling)
+    // "i" will keep track of the "collapsed" index when all DOMElements for all PDOMInstance children are
+    // added to a single parent DOMElement (this PDOMInstance's PDOMPeer's primarySibling)
     let i = primarySibling.childNodes.length - 1;
 
-    // Iterate through all AccessibleInstance children
+    // Iterate through all PDOMInstance children
     for ( let peerIndex = this.children.length - 1; peerIndex >= 0; peerIndex-- ) {
       const peer = this.children[ peerIndex ].peer;
 
-      // Iterate through all top level elements of an AccessibleInstance's peer
+      // Iterate through all top level elements of an PDOMInstance's peer
       for ( let elementIndex = peer.topLevelElements.length - 1; elementIndex >= 0; elementIndex-- ) {
         const element = peer.topLevelElements[ elementIndex ];
 
@@ -452,12 +452,12 @@ inherit( Events, AccessibleInstance, {
   },
 
   /**
-   * Create a new TransformTracker that will observe transforms along the trail of this AccessibleInstance OR
+   * Create a new TransformTracker that will observe transforms along the trail of this PDOMInstance OR
    * the specified pdomTransformSourceNode. See ParallelDOM.setPDOMTransformSourceNode(). The source Node
    * must not use DAG so that its trail is unique.
    * @public
    *
-   * @param {Node|null} node - if null, we use this AccessibleInstance's visual trail
+   * @param {Node|null} node - if null, we use this PDOMInstance's visual trail
    * @returns {TransformTracker}
    */
   updateTransformTracker( pdomTransformSourceNode ) {
@@ -468,7 +468,7 @@ inherit( Events, AccessibleInstance, {
       trackedTrail = pdomTransformSourceNode.getUniqueTrail();
     }
     else {
-      trackedTrail = AccessibleInstance.guessVisualTrail( this.trail, this.display.rootNode );
+      trackedTrail = PDOMInstance.guessVisualTrail( this.trail, this.display.rootNode );
     }
 
     this.transformTracker = new TransformTracker( trackedTrail );
@@ -489,7 +489,7 @@ inherit( Events, AccessibleInstance, {
 
       // remove this peer's primary sibling DOM Element (or its container parent) from the parent peer's
       // primary sibling (or its child container)
-      AccessibilityUtils.removeElements( this.parent.peer.primarySibling, this.peer.topLevelElements );
+      PDOMUtils.removeElements( this.parent.peer.primarySibling, this.peer.topLevelElements );
 
       for ( let i = 0; i < this.relativeNodes.length; i++ ) {
         this.relativeNodes[ i ].offStatic( 'accessibleDisplays', this.relativeListeners[ i ] );
@@ -548,13 +548,13 @@ inherit( Events, AccessibleInstance, {
     const rootNode = this.display.rootNode;
 
     assert( this.trail.length === 0,
-      'Should only call auditRoot() on the root AccessibleInstance for a display' );
+      'Should only call auditRoot() on the root PDOMInstance for a display' );
 
     function audit( fakeInstance, accessibleInstance ) {
       assert( fakeInstance.children.length === accessibleInstance.children.length,
         'Different number of children in accessible instance' );
 
-      assert( fakeInstance.node === accessibleInstance.node, 'Node mismatch for AccessibleInstance' );
+      assert( fakeInstance.node === accessibleInstance.node, 'Node mismatch for PDOMInstance' );
 
       for ( var i = 0; i < accessibleInstance.children.length; i++ ) {
         audit( fakeInstance.children[ i ], accessibleInstance.children[ i ] );
@@ -577,16 +577,16 @@ inherit( Events, AccessibleInstance, {
       assert( isVisible === shouldBeVisible, 'Instance visibility mismatch' );
     }
 
-    audit( AccessibleInstance.createFakeAccessibleTree( rootNode ), this );
+    audit( PDOMInstance.createFakeAccessibleTree( rootNode ), this );
   }
 }, {
 
   /**
-   * Since a "Trail" on AccessibleInstance can have discontinuous jumps (due to accessibleOrder), this finds the best
-   * actual visual Trail to use, from the trail of an AccessibleInstance to the root of a Display.
+   * Since a "Trail" on PDOMInstance can have discontinuous jumps (due to accessibleOrder), this finds the best
+   * actual visual Trail to use, from the trail of an PDOMInstance to the root of a Display.
    * @public
    *
-   * @param {Trail} trail - trail of the AccessibleInstance, which can containe "gaps"
+   * @param {Trail} trail - trail of the PDOMInstance, which can containe "gaps"
    * @param {Node} rootNode - root of a Display
    * @returns {Trail}
    */
@@ -627,7 +627,7 @@ inherit( Events, AccessibleInstance, {
   },
 
   /**
-   * Creates a fake AccessibleInstance-like tree structure (with the equivalent nodes and children structure).
+   * Creates a fake PDOMInstance-like tree structure (with the equivalent nodes and children structure).
    * For debugging.
    * @private
    *
@@ -653,8 +653,8 @@ inherit( Events, AccessibleInstance, {
   }
 } );
 
-Poolable.mixInto( AccessibleInstance, {
-  initialize: AccessibleInstance.prototype.initializeAccessibleInstance
+Poolable.mixInto( PDOMInstance, {
+  initialize: PDOMInstance.prototype.initializeAccessibleInstance
 } );
 
-export default AccessibleInstance;
+export default PDOMInstance;

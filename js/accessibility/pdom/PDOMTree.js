@@ -8,7 +8,7 @@
 
 import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
 import scenery from '../../scenery.js';
-import AccessibleInstance from './AccessibleInstance.js';
+import PDOMInstance from './PDOMInstance.js';
 import PartialPDOMTrail from './PartialPDOMTrail.js';
 
 // globals (for restoring focus)
@@ -199,7 +199,7 @@ var PDOMTree = {
     const accessibleTrailsList = []; // accessibleTrailsList[ i ] := AccessibilityTree.findAccessibleTrails( parents[ i ] )
 
     // For now, just regenerate the full tree. Could optimize in the future, if we can swap the content for an
-    // AccessibleInstance.
+    // PDOMInstance.
     for ( i = 0; i < parents.length; i++ ) {
       const parent = parents[ i ];
 
@@ -231,7 +231,7 @@ var PDOMTree = {
    * Sets up a root instance with a given root node.
    * @public
    *
-   * @param {AccessibleInstance} rootInstance
+   * @param {PDOMInstance} rootInstance
    */
   rebuildInstanceTree: function( rootInstance ) {
     const rootNode = rootInstance.display.rootNode;
@@ -337,8 +337,8 @@ var PDOMTree = {
    *
    * @param {Trail} trail
    * @param {Display} display
-   * @param {AccessibleInstance} parentInstance - Since we don't create the root here, can't be null
-   * @returns {Array.<AccessibleInstance>}
+   * @param {PDOMInstance} parentInstance - Since we don't create the root here, can't be null
+   * @returns {Array.<PDOMInstance>}
    */
   createTree: function( trail, display, parentInstance ) {
     sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'createTree ' + trail.toString() + ' parent:' + ( parentInstance ? parentInstance.toString() : 'null' ) );
@@ -358,7 +358,7 @@ var PDOMTree = {
         existed = true;
       }
       else {
-        instance = AccessibleInstance.createFromPool( parentInstance, display, trail.copy() );
+        instance = PDOMInstance.createFromPool( parentInstance, display, trail.copy() );
       }
       parentInstance = instance;
     }
@@ -390,7 +390,7 @@ var PDOMTree = {
    * input to dispatch events as focus changes.
    * @private
    *
-   * @param {Node} node - root of Node subtree whose AccessibleInstance tree is being rearranged.
+   * @param {Node} node - root of Node subtree whose PDOMInstance tree is being rearranged.
    */
   beforeOp: function( node ) {
     // paranoia about initialization order (should be safe)

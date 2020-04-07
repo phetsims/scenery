@@ -80,7 +80,7 @@
  * - PDOM:  parallel DOM, see ParallelDOM.js
  * - Primary Sibling:  The Node's HTMLElement in the PDOM that is interacted with for accessible interactions and to
  *                     display accessible content. The primary sibling has the tag name specified by the `tagName`
- *                     option, see `ParallelDOM.setTagName`. Primary sibling is further defined in AccessiblePeer.js
+ *                     option, see `ParallelDOM.setTagName`. Primary sibling is further defined in PDOMPeer.js
  * - Assistive Technology:  aka AT, devices meant to improve the capabilities of an individual with a disability.
  *
  * The following are the supported accessible events:
@@ -165,7 +165,7 @@ import platform from '../../../phet-core/js/platform.js';
 import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
-import AccessibilityUtils from '../accessibility/pdom/AccessibilityUtils.js';
+import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import scenery from '../scenery.js';
 import Features from '../util/Features.js';
@@ -599,7 +599,7 @@ class Input {
         // Focus is set with DOM API to avoid the performance hit of looking up the Node from trail id.
         if ( event.relatedTarget ) {
           const focusMovedInCallbacks = this.isTargetUnderPDOM( document.activeElement );
-          const targetFocusable = AccessibilityUtils.isElementFocusable( event.relatedTarget );
+          const targetFocusable = PDOMUtils.isElementFocusable( event.relatedTarget );
           if ( targetFocusable && !focusMovedInCallbacks ) {
             if ( platform.ie ) {
               ieBlockCallbacks = true;
@@ -713,7 +713,7 @@ class Input {
       const accessibleEventOptions = Features.passive ? { useCapture: false, passive: false } : false;
 
       // Add a listener to the root accessible DOM element for each event we want to monitor.
-      AccessibilityUtils.DOM_EVENTS.map( eventName => {
+      PDOMUtils.DOM_EVENTS.map( eventName => {
 
         const actionName = eventName + 'Action';
         assert && assert( this[ actionName ], `action not defined on Input: ${actionName}` );
@@ -1003,7 +1003,7 @@ class Input {
     scenery.Display.userGestureEmitter.emit();
 
     // This workaround hopefully won't be here forever, see ParallelDOM.setExcludeLabelSiblingFromInput() and https://github.com/phetsims/a11y-research/issues/156
-    if ( !( domEvent.target && domEvent.target.hasAttribute( AccessibilityUtils.DATA_EXCLUDE_FROM_INPUT ) ) ) {
+    if ( !( domEvent.target && domEvent.target.hasAttribute( PDOMUtils.DATA_EXCLUDE_FROM_INPUT ) ) ) {
 
       if ( !this.a11yPointer ) { this.initA11yPointer(); }
       const trail = this.a11yPointer.updateTrail( this.getTrailId( domEvent ) );
@@ -1034,11 +1034,11 @@ class Input {
     // could be serialized event for phet-io playbacks, see Input.serializeDOMEvent()
     if ( domEvent[ TARGET_SUBSTITUTE_KEY ] ) {
       assert && assert( domEvent[ TARGET_SUBSTITUTE_KEY ] instanceof Object );
-      return domEvent[ TARGET_SUBSTITUTE_KEY ][ AccessibilityUtils.DATA_TRAIL_ID ];
+      return domEvent[ TARGET_SUBSTITUTE_KEY ][ PDOMUtils.DATA_TRAIL_ID ];
     }
     else {
       assert && assert( domEvent.target instanceof window.Element );
-      return domEvent.target.getAttribute( AccessibilityUtils.DATA_TRAIL_ID );
+      return domEvent.target.getAttribute( PDOMUtils.DATA_TRAIL_ID );
     }
   }
 
@@ -1882,8 +1882,8 @@ class Input {
     // if there are no more elements in that direction. See https://github.com/phetsims/scenery/issues/883
     if ( FullScreen.isFullScreen() && event.keyCode === KeyboardUtils.KEY_TAB ) {
       const rootElement = this.display.accessibleDOMElement;
-      const nextElement = event.shiftKey ? AccessibilityUtils.getPreviousFocusable( rootElement ) :
-                          AccessibilityUtils.getNextFocusable( rootElement );
+      const nextElement = event.shiftKey ? PDOMUtils.getPreviousFocusable( rootElement ) :
+                          PDOMUtils.getNextFocusable( rootElement );
       if ( nextElement === event.target ) {
         event.preventDefault();
       }
@@ -1948,10 +1948,10 @@ class Input {
              typeof domEventProperty.getAttribute === 'function' &&
 
              // If false, then this target isn't a PDOM element, so we can skip this serialization
-             domEventProperty.hasAttribute( AccessibilityUtils.DATA_TRAIL_ID ) ) {
+             domEventProperty.hasAttribute( PDOMUtils.DATA_TRAIL_ID ) ) {
 
           entries[ property ] = {};
-          entries[ property ][ AccessibilityUtils.DATA_TRAIL_ID ] = domEventProperty.getAttribute( AccessibilityUtils.DATA_TRAIL_ID );
+          entries[ property ][ PDOMUtils.DATA_TRAIL_ID ] = domEventProperty.getAttribute( PDOMUtils.DATA_TRAIL_ID );
         }
         else {
           entries[ property ] = ( ( typeof domEventProperty === 'object' ) && ( domEventProperty !== null ) ? {} : JSON.parse( JSON.stringify( domEventProperty ) ) ); // TODO: is parse/stringify necessary?

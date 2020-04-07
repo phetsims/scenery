@@ -305,7 +305,7 @@
       but the a11y api supports a richer architecture to represent a <code>Node</code> to AT: each
       <code>Node</code> can have multiple DOM Elements. A <code>Node</code>'s HTML Elements, or the
       <code>Node</code>'s peer, can be thought of
-      as collectively equating to the <code>Node</code>. (Note: a "peer" is of type <code>AccessiblePeer</code>).
+      as collectively equating to the <code>Node</code>. (Note: a "peer" is of type <code>PDOMPeer</code>).
       Although a <code>Node</code> has a primary HTML element (the <code>HTMLElement</code> that is created with the
       <code>tagName</code> option), this is only a single element of the peer. Other HTML Elements can
       provide supplemental information to be conveyed
@@ -325,7 +325,7 @@
     </p>
 
     <p>
-      <strong>Summary:</strong> Each <code>Node</code> has an <code>AccessiblePeer</code> (aka “peer”) that
+      <strong>Summary:</strong> Each <code>Node</code> has an <code>PDOMPeer</code> (aka “peer”) that
       manages the <code>HTMLElement</code>s (aka “elements”) that are related to that <code>Node</code>
       in the PDOM. A <code>Node</code> has one or more associated elements, one
       of which is the “primary element”, whose tag is specified by option <code>tagName</code>. There are two other
@@ -378,7 +378,7 @@
     <ul>
       <li>All supplemental HTML Elements (container, description and label) have default tags in the a11y api.
         Specifying a "*Content" option without the "*TagName" option will produce an element of the default. See
-        <code>AccessibilityUtils</code> for the default tag names.
+        <code>PDOMUtils</code> for the default tag names.
       </li>
       <li id="append-siblings">By default the description and label tags come before the primary sibling, you can change
         this with
@@ -396,7 +396,7 @@
       consider. If a parent <code>Node</code> and child <code>Node</code> both have accessible content, then, in the
       PDOM, the accessible HTML
       of the child node will be added as a child of the parent's primary sibling. In scenery code, this is
-      managed by <code>AccessiblePeer</code>, a type that stores and controls all HTML Elements for a given
+      managed by <code>PDOMPeer</code>, a type that stores and controls all HTML Elements for a given
       <code>Node</code>.
     </p>
 

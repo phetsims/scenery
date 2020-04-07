@@ -1,7 +1,7 @@
 // Copyright 2018-2020, University of Colorado Boulder
 
 /**
- * Represents a path up to an AccessibleInstance.
+ * Represents a path up to an PDOMInstance.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

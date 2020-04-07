@@ -8,7 +8,7 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import AccessibleInstance from '../accessibility/pdom/AccessibleInstance.js';
+import PDOMInstance from '../accessibility/pdom/PDOMInstance.js';
 import Focus from '../accessibility/Focus.js';
 import scenery from '../scenery.js';
 import Trail from '../util/Trail.js';
@@ -55,7 +55,7 @@ class A11yPointer extends Pointer {
 
         // NOTE: The "root" peer can't be focused (so it doesn't matter if it doesn't have a node).
         if ( this.trail.lastNode().focusable ) {
-          scenery.Display.focus = new Focus( this.display, AccessibleInstance.guessVisualTrail( this.trail, this.display.rootNode ) );
+          scenery.Display.focus = new Focus( this.display, PDOMInstance.guessVisualTrail( this.trail, this.display.rootNode ) );
           this.display.pointerFocus = null;
         }
       },

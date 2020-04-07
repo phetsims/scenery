@@ -72,8 +72,8 @@ const ARIA_ACTIVE_DESCENDANT = 'aria-activedescendant';
 // tabIndex=0 internally for all HTML elements, including those that should not receive focus
 const DATA_FOCUSABLE = 'data-focusable';
 
-// data attribute which contains the unique ID of a Trail that allows us to find the AccessiblePeer associated
-// with a particular DOM element. This is used in several places in scenery accessibility, mostly AccessiblePeer.
+// data attribute which contains the unique ID of a Trail that allows us to find the PDOMPeer associated
+// with a particular DOM element. This is used in several places in scenery accessibility, mostly PDOMPeer.
 const DATA_TRAIL_ID = 'data-trail-id';
 
 // {Array.<String>} attributes that put an ID of another attribute as the value, see https://github.com/phetsims/scenery/issues/819
@@ -147,7 +147,7 @@ function getNextPreviousFocusable( direction, parentElement ) {
     const nextElement = linearDOM[ nextIndex ];
     nextIndex += delta;
 
-    if ( AccessibilityUtils.isElementFocusable( nextElement ) ) {
+    if ( PDOMUtils.isElementFocusable( nextElement ) ) {
       return nextElement;
     }
   }
@@ -181,7 +181,7 @@ function tagNameSupportsContent( tagName ) {
   return !_.includes( ELEMENTS_WITHOUT_CLOSING_TAG, tagName.toUpperCase() );
 }
 
-var AccessibilityUtils = {
+var PDOMUtils = {
 
   /**
    * Get the next focusable element. This should very rarely be used.  The next focusable element can almost
@@ -222,7 +222,7 @@ var AccessibilityUtils = {
     const linearDOM = getLinearDOMElements( document.body );
     const focusableElements = [];
     for ( let i = 0; i < linearDOM.length; i++ ) {
-      AccessibilityUtils.isElementFocusable( linearDOM[ i ] ) && focusableElements.push( linearDOM[ i ] );
+      PDOMUtils.isElementFocusable( linearDOM[ i ] ) && focusableElements.push( linearDOM[ i ] );
     }
 
     return focusableElements[ random.nextInt( focusableElements.length ) ];
@@ -316,7 +316,7 @@ var AccessibilityUtils = {
     if ( tagNameSupportsContent( domElement.tagName ) ) {
 
       // only returns true if content contains listed formatting tags
-      if ( AccessibilityUtils.containsFormattingTags( textWithoutEmbeddingMarks ) ) {
+      if ( PDOMUtils.containsFormattingTags( textWithoutEmbeddingMarks ) ) {
         domElement.innerHTML = textWithoutEmbeddingMarks;
       }
       else {
@@ -460,8 +460,8 @@ var AccessibilityUtils = {
 
       // {string|null} - A string id from Trail.getUnqiqueId pointing to the node that is being
       // represented by this element in the PDOM. Will by used to dispatch events received by this
-      // DOM element to the scenery Node being represented. Should be unique to the AccessibleInstance
-      // but each sibling for an AccessiblePeer should have the same trailId.
+      // DOM element to the scenery Node being represented. Should be unique to the PDOMInstance
+      // but each sibling for an PDOMPeer should have the same trailId.
       trailId: null
     }, options );
 
@@ -472,14 +472,14 @@ var AccessibilityUtils = {
     if ( options.trailId ) {
 
       // NOTE: dataset isn't supported by all namespaces (like MathML) so we need to use setAttribute
-      domElement.setAttribute( AccessibilityUtils.DATA_TRAIL_ID, options.trailId );
+      domElement.setAttribute( PDOMUtils.DATA_TRAIL_ID, options.trailId );
     }
     if ( options.id ) {
       domElement.id = options.id;
     }
 
     // set tab index if we are overriding default browser behavior
-    AccessibilityUtils.overrideFocusWithTabIndex( domElement, focusable );
+    PDOMUtils.overrideFocusWithTabIndex( domElement, focusable );
 
     // gives this element styling from SceneryStyle
     domElement.className = PDOMSiblingStyle.SIBLING_CLASS_NAME;
@@ -500,7 +500,7 @@ var AccessibilityUtils = {
    * @param {boolean} focusable
    */
   overrideFocusWithTabIndex: function( element, focusable ) {
-    const defaultFocusable = AccessibilityUtils.tagIsDefaultFocusable( element.tagName );
+    const defaultFocusable = PDOMUtils.tagIsDefaultFocusable( element.tagName );
 
     // only add a tabindex when we are overriding the default focusable bahvior of the browser for the tag name
     if ( defaultFocusable !== focusable ) {
@@ -559,6 +559,6 @@ var AccessibilityUtils = {
   DATA_EXCLUDE_FROM_INPUT: 'data-exclude-from-input'
 };
 
-scenery.register( 'AccessibilityUtils', AccessibilityUtils );
+scenery.register( 'PDOMUtils', PDOMUtils );
 
-export default AccessibilityUtils;
+export default PDOMUtils;

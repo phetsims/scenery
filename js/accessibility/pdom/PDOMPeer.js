@@ -1,7 +1,7 @@
 // Copyright 2015-2020, University of Colorado Boulder
 
 /**
- * An accessible peer controls the appearance of an accessible Node's instance in the parallel DOM. An AccessiblePeer can
+ * An accessible peer controls the appearance of an accessible Node's instance in the parallel DOM. An PDOMPeer can
  * have up to four HTMLElements displayed in the PDOM, see ftructor for details.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
@@ -17,7 +17,7 @@ import platform from '../../../../phet-core/js/platform.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import scenery from '../../scenery.js';
 import FullScreen from '../../util/FullScreen.js';
-import AccessibilityUtils from './AccessibilityUtils.js';
+import PDOMUtils from './PDOMUtils.js';
 import PDOMSiblingStyle from './PDOMSiblingStyle.js';
 
 // constants
@@ -25,8 +25,8 @@ const PRIMARY_SIBLING = 'PRIMARY_SIBLING';
 const LABEL_SIBLING = 'LABEL_SIBLING';
 const DESCRIPTION_SIBLING = 'DESCRIPTION_SIBLING';
 const CONTAINER_PARENT = 'CONTAINER_PARENT';
-const LABEL_TAG = AccessibilityUtils.TAGS.LABEL;
-const INPUT_TAG = AccessibilityUtils.TAGS.INPUT;
+const LABEL_TAG = PDOMUtils.TAGS.LABEL;
+const INPUT_TAG = PDOMUtils.TAGS.INPUT;
 
 // DOM observers that apply new CSS transformations are triggered when children, or inner content change. Updating
 // style/positioning of the element will change attributes so we can't observe those changes since it would trigger
@@ -48,24 +48,24 @@ const nodeScaleMagnitudeMatrix = new Matrix3();
  * @constructor
  * @mixes Poolable
  */
-function AccessiblePeer( accessibleInstance, options ) {
+function PDOMPeer( accessibleInstance, options ) {
   this.initializeAccessiblePeer( accessibleInstance, options );
 }
 
-scenery.register( 'AccessiblePeer', AccessiblePeer );
+scenery.register( 'PDOMPeer', PDOMPeer );
 
-inherit( Object, AccessiblePeer, {
+inherit( Object, PDOMPeer, {
 
   /**
    * Initializes the object (either from a freshly-created state, or from a "disposed" state brought back from a
    * pool).
    *
-   * NOTE: the AccessiblePeer is not fully constructed until calling AccessiblePeer.update() after creating from pool.
+   * NOTE: the PDOMPeer is not fully constructed until calling PDOMPeer.update() after creating from pool.
    * @private
    *
    * @param {AccessibleInstance} accessibleInstance
    * @param {Object} [options]
-   * @returns {AccessiblePeer} - Returns 'this' reference, for chaining
+   * @returns {PDOMPeer} - Returns 'this' reference, for chaining
    */
   initializeAccessiblePeer: function( accessibleInstance, options ) {
     options = merge( {
@@ -77,7 +77,7 @@ inherit( Object, AccessiblePeer, {
     // @public {number} - unique ID
     this.id = this.id || globalId++;
 
-    // @public {AccessibleInstance}
+    // @public {PDOMInstance}
     this.accessibleInstance = accessibleInstance;
 
     // @public {Node|null} only null for the root accessibleInstance
@@ -89,12 +89,12 @@ inherit( Object, AccessiblePeer, {
     // @public {Trail} - NOTE: May have "gaps" due to accessibleOrder usage.
     this.trail = accessibleInstance.trail;
 
-    // @private {boolean|null} - whether or not this AccessiblePeer is visible in the PDOM
+    // @private {boolean|null} - whether or not this PDOMPeer is visible in the PDOM
     // Only initialized to null, should not be set to it. isVisible() will return true if this.visible is null
     // (because it hasn't been set yet).
     this.visible = null;
 
-    // @private {boolean|null} - whether or not the primary sibling of this AccessiblePeer can receive focus.
+    // @private {boolean|null} - whether or not the primary sibling of this PDOMPeer can receive focus.
     this.focusable = null;
 
     // @private {HTMLElement|null} - Optional label/description elements
@@ -137,7 +137,7 @@ inherit( Object, AccessiblePeer, {
     //
     // TODO: Should we be watching "model" changes from ParallelDOM.js instead of using MutationObserver?
     // See https://github.com/phetsims/scenery/issues/852. This would be less fragile, and also less
-    // memory intensive because we don't need an instance of MutationObserver on every AccessibleInstance.
+    // memory intensive because we don't need an instance of MutationObserver on every PDOMInstance.
     this.mutationObserver = this.mutationObserver || new MutationObserver( this.invalidateCSSPositioning.bind( this ) );
 
     // @private {function} - must be removed on disposal
@@ -212,7 +212,7 @@ inherit( Object, AccessiblePeer, {
     this.orderElements( options );
 
     // assign listeners (to be removed or disconnected during disposal)
-    this.mutationObserver.disconnect(); // in case update() is called more than once on an instance of AccessiblePeer
+    this.mutationObserver.disconnect(); // in case update() is called more than once on an instance of PDOMPeer
     this.mutationObserver.observe( this._primarySibling, OBSERVER_CONFIG );
 
     // set the accessible label now that the element has been recreated again, but not if the tagName
@@ -423,20 +423,20 @@ inherit( Object, AccessiblePeer, {
    * Get an element on this node, looked up by the elementName flag passed in.
    * @public (scenery-internal)
    *
-   * @param {string} elementName - see AccessibilityUtils for valid associations
+   * @param {string} elementName - see PDOMUtils for valid associations
    * @returns {HTMLElement}
    */
   getElementByName: function( elementName ) {
-    if ( elementName === AccessiblePeer.PRIMARY_SIBLING ) {
+    if ( elementName === PDOMPeer.PRIMARY_SIBLING ) {
       return this._primarySibling;
     }
-    else if ( elementName === AccessiblePeer.LABEL_SIBLING ) {
+    else if ( elementName === PDOMPeer.LABEL_SIBLING ) {
       return this._labelSibling;
     }
-    else if ( elementName === AccessiblePeer.DESCRIPTION_SIBLING ) {
+    else if ( elementName === PDOMPeer.DESCRIPTION_SIBLING ) {
       return this._descriptionSibling;
     }
-    else if ( elementName === AccessiblePeer.CONTAINER_PARENT ) {
+    else if ( elementName === PDOMPeer.CONTAINER_PARENT ) {
       return this._containerParent;
     }
 
@@ -530,9 +530,9 @@ inherit( Object, AccessiblePeer, {
    * @param {Object} associationObject - see addAriaLabelledbyAssociation() for schema
    */
   setAssociationAttribute: function( attribute, associationObject ) {
-    assert && assert( AccessibilityUtils.ASSOCIATION_ATTRIBUTES.indexOf( attribute ) >= 0,
+    assert && assert( PDOMUtils.ASSOCIATION_ATTRIBUTES.indexOf( attribute ) >= 0,
       'unsupported attribute for setting with association object: ' + attribute );
-    assert && AccessibilityUtils.validateAssociationObject( associationObject );
+    assert && PDOMUtils.validateAssociationObject( associationObject );
 
     const otherNodeAccessibleInstances = associationObject.otherNode.getAccessibleInstances();
 
@@ -540,7 +540,7 @@ inherit( Object, AccessiblePeer, {
     // This will be recalculated when that node is added to the scene graph
     if ( otherNodeAccessibleInstances.length > 0 ) {
 
-      // We are just using the first AccessibleInstance for simplicity, but it is OK because the accessible
+      // We are just using the first PDOMInstance for simplicity, but it is OK because the accessible
       // content for all AccessibleInstances will be the same, so the Accessible Names (in the browser's
       // accessibility tree) of elements that are referenced by the attribute value id will all have the same content
       const firstAccessibleInstance = otherNodeAccessibleInstances[ 0 ];
@@ -724,7 +724,7 @@ inherit( Object, AccessiblePeer, {
     const peerHadFocus = this.isFocused();
     if ( this.focusable !== focusable ) {
       this.focusable = focusable;
-      AccessibilityUtils.overrideFocusWithTabIndex( this.primarySibling, focusable );
+      PDOMUtils.overrideFocusWithTabIndex( this.primarySibling, focusable );
 
       // in Chrome, if tabindex is removed and the element is not focusable by default the element is blurred.
       // This behavior is reasonable and we want to enforce it in other browsers for consistency. See
@@ -751,12 +751,12 @@ inherit( Object, AccessiblePeer, {
       return;
     }
 
-    AccessibilityUtils.setTextContent( this._labelSibling, content );
+    PDOMUtils.setTextContent( this._labelSibling, content );
 
     // if the label element happens to be a 'label', associate with 'for' attribute
     if ( this._labelSibling.tagName.toUpperCase() === LABEL_TAG ) {
       this.setAttributeToElement( 'for', this._primarySibling.id, {
-        elementName: AccessiblePeer.LABEL_SIBLING
+        elementName: PDOMPeer.LABEL_SIBLING
       } );
     }
   },
@@ -773,7 +773,7 @@ inherit( Object, AccessiblePeer, {
     if ( !this._descriptionSibling ) {
       return;
     }
-    AccessibilityUtils.setTextContent( this._descriptionSibling, content );
+    PDOMUtils.setTextContent( this._descriptionSibling, content );
   },
 
   /**
@@ -784,14 +784,14 @@ inherit( Object, AccessiblePeer, {
   setPrimarySiblingContent: function( content ) {
     assert && assert( typeof content === 'string', 'incorrect inner content type' );
     assert && assert( this.accessibleInstance.children.length === 0, 'descendants exist with accessible content, innerContent cannot be used' );
-    assert && assert( AccessibilityUtils.tagNameSupportsContent( this._primarySibling.tagName ),
+    assert && assert( PDOMUtils.tagNameSupportsContent( this._primarySibling.tagName ),
       'tagName: ' + this._tagName + ' does not support inner content' );
 
     // no-op to support any option order
     if ( !this._primarySibling ) {
       return;
     }
-    AccessibilityUtils.setTextContent( this._primarySibling, content );
+    PDOMUtils.setTextContent( this._primarySibling, content );
   },
 
   /**
@@ -815,7 +815,7 @@ inherit( Object, AccessiblePeer, {
   },
 
   /**
-   * Mark that the siblings of this AccessiblePeer need to be updated in the next Display update. Possibly from a
+   * Mark that the siblings of this PDOMPeer need to be updated in the next Display update. Possibly from a
    * change of accessible content or node transformation. Does nothing if already marked dirty.
    *
    * TODO: We shouldn't be marking all elements as dirty, just those that are focusable. Setting focusable
@@ -828,7 +828,7 @@ inherit( Object, AccessiblePeer, {
       this.positionDirty = true;
 
       // mark all ancestors of this peer so that we can quickly find this dirty peer when we traverse
-      // the AccessibleInstance tree
+      // the PDOMInstance tree
       let parent = this.accessibleInstance.parent;
       while ( parent ) {
         parent.peer.childPositionDirty = true;
@@ -858,7 +858,7 @@ inherit( Object, AccessiblePeer, {
    * attributes instead.
    *
    * This function assumes that elements have other style attributes so they can be positioned correctly and don't
-   * interfere with scenery input, see SceneryStyle in AccessibilityUtils.
+   * interfere with scenery input, see SceneryStyle in PDOMUtils.
    *
    * Additional notes were taken in https://github.com/phetsims/scenery/issues/852, see that issue for more
    * information.
@@ -984,8 +984,8 @@ inherit( Object, AccessiblePeer, {
 } );
 
 // Set up pooling
-Poolable.mixInto( AccessiblePeer, {
-  initalize: AccessiblePeer.prototype.initializeAccessiblePeer
+Poolable.mixInto( PDOMPeer, {
+  initalize: PDOMPeer.prototype.initializeAccessiblePeer
 } );
 
 //--------------------------------------------------------------------------
@@ -993,12 +993,12 @@ Poolable.mixInto( AccessiblePeer, {
 //--------------------------------------------------------------------------
 
 /**
- * Create a sibling element for the AccessiblePeer.
+ * Create a sibling element for the PDOMPeer.
  *
  * @param {string} tagName
  * @param {boolean} focusable
  * @param {string} trailId - unique id that points to the instance of the node
- * @param {Object} [options] - passed along to AccessibilityUtils.createElement
+ * @param {Object} [options] - passed along to PDOMUtils.createElement
  * @returns {HTMLElement}
  */
 function createElement( tagName, focusable, trailId, options ) {
@@ -1019,10 +1019,10 @@ function createElement( tagName, focusable, trailId, options ) {
 
   options.trailId = trailId;
 
-  const newElement = AccessibilityUtils.createElement( tagName, focusable, options );
+  const newElement = PDOMUtils.createElement( tagName, focusable, options );
 
   if ( options.excludeFromInput ) {
-    newElement.setAttribute( AccessibilityUtils.DATA_EXCLUDE_FROM_INPUT, true );
+    newElement.setAttribute( PDOMUtils.DATA_EXCLUDE_FROM_INPUT, true );
   }
 
   return newElement;
@@ -1034,7 +1034,7 @@ function createElement( tagName, focusable, trailId, options ) {
  *
  * @param  {number} clientWidth - width of the element to transform in pixels
  * @param  {number} clientHeight - height of the element to transform in pixels
- * @param  {Bounds2} nodeGlobalBounds - Bounds of the AccessiblePeer's node in the global coordinate frame.
+ * @param  {Bounds2} nodeGlobalBounds - Bounds of the PDOMPeer's node in the global coordinate frame.
  * @returns {Matrix3}
  */
 function getCSSMatrix( clientWidth, clientHeight, nodeGlobalBounds ) {
@@ -1086,4 +1086,4 @@ function setClientBounds( siblingElement, bounds ) {
   siblingElement.style.height = bounds.height + 'px';
 }
 
-export default AccessiblePeer;
+export default PDOMPeer;
