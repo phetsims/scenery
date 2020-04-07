@@ -90,9 +90,9 @@ const logProperties = {
 
   // Accessibility-related
   ParallelDOM: { name: 'ParallelDOM', style: '' },
-  AccessibleInstance: { name: 'AccessibleInstance', style: '' },
-  AccessibilityTree: { name: 'AccessibilityTree', style: '' },
-  AccessibleDisplaysInfo: { name: 'AccessibleDisplaysInfo', style: '' },
+  PDOMInstance: { name: 'PDOMInstance', style: '' },
+  PDOMTree: { name: 'PDOMTree', style: '' },
+  PDOMDisplaysInfo: { name: 'PDOMDisplaysInfo', style: '' },
   KeyboardFuzzer: { name: 'KeyboardFuzzer', style: '' },
 
   // Input-related
@@ -155,9 +155,9 @@ extend( scenery, {
     }
     if ( name === 'a11y' ) {
       this.enableIndividualLog( 'ParallelDOM' );
-      this.enableIndividualLog( 'AccessibleInstance' );
-      this.enableIndividualLog( 'AccessibilityTree' );
-      this.enableIndividualLog( 'AccessibleDisplaysInfo' );
+      this.enableIndividualLog( 'PDOMInstance' );
+      this.enableIndividualLog( 'PDOMTree' );
+      this.enableIndividualLog( 'PDOMDisplaysInfo' );
       return;
     }
 

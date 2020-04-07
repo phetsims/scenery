@@ -45,14 +45,14 @@ export default inherit( Object, PDOMDisplaysInfo, {
    * @param {Node} node
    */
   onAddChild: function( node ) {
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.AccessibleDisplaysInfo( 'onAddChild n#' + node.id + ' (parent:n#' + this.node.id + ')' );
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.push();
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onAddChild n#' + node.id + ' (parent:n#' + this.node.id + ')' );
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     if ( node._accessibleDisplaysInfo.canHaveAccessibleDisplays() ) {
       node._accessibleDisplaysInfo.addAccessibleDisplays( this.accessibleDisplays );
     }
 
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.pop();
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
   },
 
   /**
@@ -62,14 +62,14 @@ export default inherit( Object, PDOMDisplaysInfo, {
    * @param {Node} node
    */
   onRemoveChild: function( node ) {
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.AccessibleDisplaysInfo( 'onRemoveChild n#' + node.id + ' (parent:n#' + this.node.id + ')' );
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.push();
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onRemoveChild n#' + node.id + ' (parent:n#' + this.node.id + ')' );
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     if ( node._accessibleDisplaysInfo.canHaveAccessibleDisplays() ) {
       node._accessibleDisplaysInfo.removeAccessibleDisplays( this.accessibleDisplays );
     }
 
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.pop();
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
   },
 
   /**
@@ -80,8 +80,8 @@ export default inherit( Object, PDOMDisplaysInfo, {
    * @param {number} newBitmask
    */
   onSummaryChange: function( oldBitmask, newBitmask ) {
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.AccessibleDisplaysInfo( 'onSummaryChange n#' + this.node.id + ' wasA11y:' + !( Renderer.bitmaskNotAccessible & oldBitmask ) + ', isA11y:' + !( Renderer.bitmaskNotAccessible & newBitmask ) );
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.push();
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onSummaryChange n#' + this.node.id + ' wasA11y:' + !( Renderer.bitmaskNotAccessible & oldBitmask ) + ', isA11y:' + !( Renderer.bitmaskNotAccessible & newBitmask ) );
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     // If we are invisible, our accessibleDisplays would not have changed ([] => [])
     if ( this.node.visible && this.node.accessibleVisible ) {
@@ -99,7 +99,7 @@ export default inherit( Object, PDOMDisplaysInfo, {
       }
     }
 
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.pop();
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
   },
 
   /**
@@ -109,8 +109,8 @@ export default inherit( Object, PDOMDisplaysInfo, {
    * @param {boolean} visible
    */
   onVisibilityChange: function( visible ) {
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.AccessibleDisplaysInfo( 'onVisibilityChange n#' + this.node.id + ' visible:' + visible );
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.push();
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onVisibilityChange n#' + this.node.id + ' visible:' + visible );
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     // If we are not accessible (or accessibleVisible), our accessibleDisplays would not have changed ([] => [])
     if ( this.node.accessibleVisible && !this.node._rendererSummary.isNotAccessible() ) {
@@ -122,7 +122,7 @@ export default inherit( Object, PDOMDisplaysInfo, {
       }
     }
 
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.pop();
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
   },
 
   /**
@@ -132,8 +132,8 @@ export default inherit( Object, PDOMDisplaysInfo, {
    * @param {boolean} visible
    */
   onAccessibleVisibilityChange: function( visible ) {
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.AccessibleDisplaysInfo( 'onAccessibleVisibilityChange n#' + this.node.id + ' accessibleVisible:' + visible );
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.push();
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onAccessibleVisibilityChange n#' + this.node.id + ' accessibleVisible:' + visible );
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     // If we are not accessible, our accessibleDisplays would not have changed ([] => [])
     if ( this.node.visible && !this.node._rendererSummary.isNotAccessible() ) {
@@ -145,7 +145,7 @@ export default inherit( Object, PDOMDisplaysInfo, {
       }
     }
 
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.pop();
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
   },
 
   /**
@@ -155,14 +155,14 @@ export default inherit( Object, PDOMDisplaysInfo, {
    * @param {Display} display
    */
   onAddedRootedDisplay: function( display ) {
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.AccessibleDisplaysInfo( 'onAddedRootedDisplay n#' + this.node.id );
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.push();
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onAddedRootedDisplay n#' + this.node.id );
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     if ( display._accessible && this.canHaveAccessibleDisplays() ) {
       this.addAccessibleDisplays( [ display ] );
     }
 
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.pop();
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
   },
 
   /**
@@ -172,14 +172,14 @@ export default inherit( Object, PDOMDisplaysInfo, {
    * @param {Display} display
    */
   onRemovedRootedDisplay: function( display ) {
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.AccessibleDisplaysInfo( 'onRemovedRootedDisplay n#' + this.node.id );
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.push();
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onRemovedRootedDisplay n#' + this.node.id );
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     if ( display._accessible && this.canHaveAccessibleDisplays() ) {
       this.removeAccessibleDisplays( [ display ] );
     }
 
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.pop();
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
   },
 
   /**
@@ -197,8 +197,8 @@ export default inherit( Object, PDOMDisplaysInfo, {
    * @private
    */
   addAllAccessibleDisplays: function() {
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.AccessibleDisplaysInfo( 'addAllAccessibleDisplays n#' + this.node.id );
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.push();
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'addAllAccessibleDisplays n#' + this.node.id );
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     assert && assert( this.accessibleDisplays.length === 0, 'Should be empty before adding everything' );
     assert && assert( this.canHaveAccessibleDisplays(), 'Should happen when we can store accessibleDisplays' );
@@ -221,7 +221,7 @@ export default inherit( Object, PDOMDisplaysInfo, {
 
     this.addAccessibleDisplays( displays );
 
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.pop();
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
   },
 
   /**
@@ -229,8 +229,8 @@ export default inherit( Object, PDOMDisplaysInfo, {
    * @private
    */
   removeAllAccessibleDisplays: function() {
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.AccessibleDisplaysInfo( 'removeAllAccessibleDisplays n#' + this.node.id );
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.push();
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'removeAllAccessibleDisplays n#' + this.node.id );
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     assert && assert( !this.canHaveAccessibleDisplays(), 'Should happen when we cannot store accessibleDisplays' );
 
@@ -239,7 +239,7 @@ export default inherit( Object, PDOMDisplaysInfo, {
 
     assert && assert( this.accessibleDisplays.length === 0, 'Should be empty after removing everything' );
 
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.pop();
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
   },
 
   /**
@@ -249,8 +249,8 @@ export default inherit( Object, PDOMDisplaysInfo, {
    * @param {Array.<Display>} displays
    */
   addAccessibleDisplays: function( displays ) {
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.AccessibleDisplaysInfo( 'addAccessibleDisplays n#' + this.node.id + ' numDisplays:' + displays.length );
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.push();
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'addAccessibleDisplays n#' + this.node.id + ' numDisplays:' + displays.length );
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     assert && assert( Array.isArray( displays ) );
 
@@ -269,7 +269,7 @@ export default inherit( Object, PDOMDisplaysInfo, {
       this.node.trigger0( 'accessibleDisplays' );
     }
 
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.pop();
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
   },
 
   /**
@@ -279,8 +279,8 @@ export default inherit( Object, PDOMDisplaysInfo, {
    * @param {Array.<Display>} displays
    */
   removeAccessibleDisplays: function( displays ) {
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.AccessibleDisplaysInfo( 'removeAccessibleDisplays n#' + this.node.id + ' numDisplays:' + displays.length );
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.push();
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'removeAccessibleDisplays n#' + this.node.id + ' numDisplays:' + displays.length );
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     assert && assert( Array.isArray( displays ) );
     assert && assert( this.accessibleDisplays.length >= displays.length );
@@ -309,6 +309,6 @@ export default inherit( Object, PDOMDisplaysInfo, {
       this.node.trigger0( 'accessibleDisplays' );
     }
 
-    sceneryLog && sceneryLog.AccessibleDisplaysInfo && sceneryLog.pop();
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
   }
 } );

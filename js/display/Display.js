@@ -314,7 +314,7 @@ function Display( rootNode, options ) {
 
     // @public (scenery-internal) {PDOMInstance}
     this._rootAccessibleInstance = PDOMInstance.createFromPool( null, this, new scenery.Trail() );
-    sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
+    sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
       'Display root instance: ' + this._rootAccessibleInstance.toString() );
     PDOMTree.rebuildInstanceTree( this._rootAccessibleInstance );
 

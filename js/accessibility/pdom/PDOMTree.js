@@ -23,8 +23,8 @@ var PDOMTree = {
    * @param {Node} child
    */
   addChild: function( parent, child ) {
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'addChild parent:n#' + parent._id + ', child:n#' + child._id );
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.push();
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'addChild parent:n#' + parent._id + ', child:n#' + child._id );
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
     assert && assert( parent instanceof scenery.Node );
     assert && assert( child instanceof scenery.Node );
@@ -38,7 +38,7 @@ var PDOMTree = {
 
     PDOMTree.afterOp( blockedDisplays );
 
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.pop();
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
   },
 
   /**
@@ -49,8 +49,8 @@ var PDOMTree = {
    * @param {Node} child
    */
   removeChild: function( parent, child ) {
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'removeChild parent:n#' + parent._id + ', child:n#' + child._id );
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.push();
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'removeChild parent:n#' + parent._id + ', child:n#' + child._id );
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
     assert && assert( parent instanceof scenery.Node );
     assert && assert( child instanceof scenery.Node );
@@ -64,7 +64,7 @@ var PDOMTree = {
 
     PDOMTree.afterOp( blockedDisplays );
 
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.pop();
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
   },
 
   /**
@@ -74,8 +74,8 @@ var PDOMTree = {
    * @param {Node} node
    */
   childrenOrderChange: function( node ) {
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'childrenOrderChange node:n#' + node._id );
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.push();
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'childrenOrderChange node:n#' + node._id );
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
     assert && assert( node instanceof scenery.Node );
     assert && assert( !node._rendererSummary.isNotAccessible() );
@@ -86,7 +86,7 @@ var PDOMTree = {
 
     PDOMTree.afterOp( blockedDisplays );
 
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.pop();
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
   },
 
   /**
@@ -98,8 +98,8 @@ var PDOMTree = {
    * @param {Array.<Node|null>|null} newOrder
    */
   accessibleOrderChange: function( node, oldOrder, newOrder ) {
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'accessibleOrderChange n#' + node._id + ': ' + PDOMTree.debugOrder( oldOrder ) + ',' + PDOMTree.debugOrder( newOrder ) );
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.push();
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'accessibleOrderChange n#' + node._id + ': ' + PDOMTree.debugOrder( oldOrder ) + ',' + PDOMTree.debugOrder( newOrder ) );
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
     assert && assert( node instanceof scenery.Node );
 
@@ -110,8 +110,8 @@ var PDOMTree = {
 
     arrayDifference( oldOrder || [], newOrder || [], removedItems, addedItems );
 
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'removed: ' + PDOMTree.debugOrder( removedItems ) );
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'added: ' + PDOMTree.debugOrder( addedItems ) );
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'removed: ' + PDOMTree.debugOrder( removedItems ) );
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'added: ' + PDOMTree.debugOrder( addedItems ) );
 
     let i;
     let j;
@@ -177,7 +177,7 @@ var PDOMTree = {
 
     PDOMTree.afterOp( blockedDisplays );
 
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.pop();
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
   },
 
   /**
@@ -187,8 +187,8 @@ var PDOMTree = {
    * @param {Node} node
    */
   accessibleContentChange: function( node ) {
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'accessibleContentChange n#' + node._id );
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.push();
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'accessibleContentChange n#' + node._id );
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
     assert && assert( node instanceof scenery.Node );
 
@@ -224,7 +224,7 @@ var PDOMTree = {
 
     PDOMTree.afterOp( blockedDisplays );
 
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.pop();
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
   },
 
   /**
@@ -251,16 +251,16 @@ var PDOMTree = {
    * @param {Array.<PartialPDOMTrail>} [accessibleTrails] - Will be computed if needed
    */
   addTree: function( parent, child, accessibleTrails ) {
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'addTree parent:n#' + parent._id + ', child:n#' + child._id );
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.push();
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'addTree parent:n#' + parent._id + ', child:n#' + child._id );
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
     assert && PDOMTree.auditNodeForAccessibleCycles( parent );
 
     accessibleTrails = accessibleTrails || PDOMTree.findAccessibleTrails( parent );
 
     for ( let i = 0; i < accessibleTrails.length; i++ ) {
-      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'trail: ' + accessibleTrails[ i ].trail.toString() + ' full:' + accessibleTrails[ i ].fullTrail.toString() + ' for ' + accessibleTrails[ i ].accessibleInstance.toString() + ' root:' + accessibleTrails[ i ].isRoot );
-      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.push();
+      sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'trail: ' + accessibleTrails[ i ].trail.toString() + ' full:' + accessibleTrails[ i ].fullTrail.toString() + ' for ' + accessibleTrails[ i ].accessibleInstance.toString() + ' root:' + accessibleTrails[ i ].isRoot );
+      sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
       const partialTrail = accessibleTrails[ i ];
       const parentInstance = partialTrail.accessibleInstance;
@@ -272,10 +272,10 @@ var PDOMTree = {
 
       parentInstance.addConsecutiveInstances( childInstances );
 
-      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.pop();
+      sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
     }
 
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.pop();
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
   },
 
   /**
@@ -287,8 +287,8 @@ var PDOMTree = {
    * @param {Array.<PartialPDOMTrail>} [accessibleTrails] - Will be computed if needed
    */
   removeTree: function( parent, child, accessibleTrails ) {
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'removeTree parent:n#' + parent._id + ', child:n#' + child._id );
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.push();
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'removeTree parent:n#' + parent._id + ', child:n#' + child._id );
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
     accessibleTrails = accessibleTrails || PDOMTree.findAccessibleTrails( parent );
 
@@ -301,7 +301,7 @@ var PDOMTree = {
       partialTrail.fullTrail.removeDescendant( child );
     }
 
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.pop();
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
   },
 
   /**
@@ -312,8 +312,8 @@ var PDOMTree = {
    * @param {Array.<PartialPDOMTrail>} [accessibleTrails] - Will be computed if needed
    */
   reorder: function( node, accessibleTrails ) {
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'reorder n#' + node._id );
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.push();
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'reorder n#' + node._id );
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
     accessibleTrails = accessibleTrails || PDOMTree.findAccessibleTrails( node );
 
@@ -324,7 +324,7 @@ var PDOMTree = {
       partialTrail.accessibleInstance.sortChildren();
     }
 
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.pop();
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
   },
 
   /**
@@ -341,13 +341,13 @@ var PDOMTree = {
    * @returns {Array.<PDOMInstance>}
    */
   createTree: function( trail, display, parentInstance ) {
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'createTree ' + trail.toString() + ' parent:' + ( parentInstance ? parentInstance.toString() : 'null' ) );
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.push();
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'createTree ' + trail.toString() + ' parent:' + ( parentInstance ? parentInstance.toString() : 'null' ) );
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
     const node = trail.lastNode();
     const effectiveChildren = node.getEffectiveChildren();
 
-    sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.AccessibilityTree( 'effectiveChildren: ' + PDOMTree.debugOrder( effectiveChildren ) );
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'effectiveChildren: ' + PDOMTree.debugOrder( effectiveChildren ) );
 
     // If we are accessible ourself, we need to create the instance (so we can provide it to child instances).
     let instance;
@@ -375,12 +375,12 @@ var PDOMTree = {
     if ( instance ) {
       instance.addConsecutiveInstances( childInstances );
 
-      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.pop();
+      sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
       return existed ? [] : [ instance ];
     }
     // Otherwise pass things forward so they can be added as children by the parentInstance
     else {
-      sceneryLog && sceneryLog.AccessibilityTree && sceneryLog.pop();
+      sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
       return childInstances;
     }
   },

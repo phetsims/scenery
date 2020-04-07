@@ -157,7 +157,7 @@ inherit( Events, PDOMInstance, {
       this.updateVisibility();
     }
 
-    sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
+    sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
       'Initialized ' + this.toString() );
 
     return this;
@@ -170,9 +170,9 @@ inherit( Events, PDOMInstance, {
    * @param {Array.<PDOMInstance>} accessibleInstances
    */
   addConsecutiveInstances: function( accessibleInstances ) {
-    sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
+    sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
       'addConsecutiveInstances on ' + this.toString() + ' with: ' + accessibleInstances.map( function( inst ) { return inst.toString(); } ).join( ',' ) );
-    sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.push();
+    sceneryLog && sceneryLog.PDOMInstance && sceneryLog.push();
 
     const hadChildren = this.children.length > 0;
 
@@ -188,7 +188,7 @@ inherit( Events, PDOMInstance, {
       this.sortChildren();
     }
 
-    sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.pop();
+    sceneryLog && sceneryLog.PDOMInstance && sceneryLog.pop();
   },
 
   /**
@@ -198,9 +198,9 @@ inherit( Events, PDOMInstance, {
    * @param {Trail} trail
    */
   removeInstancesForTrail: function( trail ) {
-    sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
+    sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
       'removeInstancesForTrail on ' + this.toString() + ' with trail ' + trail.toString() );
-    sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.push();
+    sceneryLog && sceneryLog.PDOMInstance && sceneryLog.push();
 
     for ( let i = 0; i < this.children.length; i++ ) {
       const childInstance = this.children[ i ];
@@ -224,7 +224,7 @@ inherit( Events, PDOMInstance, {
       }
     }
 
-    sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.pop();
+    sceneryLog && sceneryLog.PDOMInstance && sceneryLog.pop();
   },
 
   /**
@@ -232,14 +232,14 @@ inherit( Events, PDOMInstance, {
    * @public
    */
   removeAllChildren: function() {
-    sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance( 'removeAllChildren on ' + this.toString() );
-    sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.push();
+    sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance( 'removeAllChildren on ' + this.toString() );
+    sceneryLog && sceneryLog.PDOMInstance && sceneryLog.push();
 
     while ( this.children.length ) {
       this.children.pop().dispose();
     }
 
-    sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.pop();
+    sceneryLog && sceneryLog.PDOMInstance && sceneryLog.pop();
   },
 
   /**
@@ -267,14 +267,14 @@ inherit( Events, PDOMInstance, {
    * @public (scenery-internal)
    */
   removeSubtree: function( trail ) {
-    sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
+    sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
       'removeSubtree on ' + this.toString() + ' with trail ' + trail.toString() );
-    sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.push();
+    sceneryLog && sceneryLog.PDOMInstance && sceneryLog.push();
 
     for ( let i = this.children.length - 1; i >= 0; i-- ) {
       const childInstance = this.children[ i ];
       if ( childInstance.trail.isExtensionOf( trail, true ) ) {
-        sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
+        sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
           'Remove parent: ' + this.toString() + ', child: ' + childInstance.toString() );
         this.children.splice( i, 1 ); // remove it from the children array
 
@@ -283,7 +283,7 @@ inherit( Events, PDOMInstance, {
       }
     }
 
-    sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.pop();
+    sceneryLog && sceneryLog.PDOMInstance && sceneryLog.pop();
   },
 
   /**
@@ -480,9 +480,9 @@ inherit( Events, PDOMInstance, {
    * @public (scenery-internal)
    */
   dispose: function() {
-    sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
+    sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
       'Disposing ' + this.toString() );
-    sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.push();
+    sceneryLog && sceneryLog.PDOMInstance && sceneryLog.push();
 
     // Disconnect DOM and remove listeners
     if ( !this.isRootInstance ) {
@@ -522,7 +522,7 @@ inherit( Events, PDOMInstance, {
 
     this.freeToPool();
 
-    sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.pop();
+    sceneryLog && sceneryLog.PDOMInstance && sceneryLog.pop();
   },
 
   /**
