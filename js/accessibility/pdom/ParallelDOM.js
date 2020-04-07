@@ -114,7 +114,7 @@
  * --------------------------------------------------------------------------------------------------------------------
  *
  * For additional accessibility options, please see the options listed in ACCESSIBILITY_OPTION_KEYS. To understand the
- * PDOM more, see AccessiblePeer, which manages the DOM Elements for a node. For more documentation on Scenery, Nodes,
+ * PDOM more, see PDOMPeer, which manages the DOM Elements for a node. For more documentation on Scenery, Nodes,
  * and the scene graph, please see http://phetsims.github.io/scenery/
  *
  * @author Jesse Greenberg (PhET Interactive Simulations)
@@ -129,12 +129,12 @@ import merge from '../../../../phet-core/js/merge.js';
 import scenery from '../../scenery.js';
 import A11yBehaviorFunctionDef from '../A11yBehaviorFunctionDef.js';
 import PDOMTree from './PDOMTree.js';
-import AccessibilityUtils from './AccessibilityUtils.js';
+import PDOMUtils from './PDOMUtils.js';
 import AccessibleDisplaysInfo from './PDOMDisplaysInfo.js';
-import AccessiblePeer from './AccessiblePeer.js';
+import PDOMPeer from './PDOMPeer.js';
 
-const INPUT_TAG = AccessibilityUtils.TAGS.INPUT;
-const P_TAG = AccessibilityUtils.TAGS.P;
+const INPUT_TAG = PDOMUtils.TAGS.INPUT;
+const P_TAG = PDOMUtils.TAGS.P;
 
 // default tag names for siblings
 const DEFAULT_DESCRIPTION_TAG_NAME = P_TAG;
@@ -146,7 +146,7 @@ const DEFAULT_ACCESSIBLE_NAME_BEHAVIOR = function( node, options, accessibleName
     options.labelTagName = 'label';
     options.labelContent = accessibleName;
   }
-  else if ( AccessibilityUtils.tagNameSupportsContent( node.tagName ) ) {
+  else if ( PDOMUtils.tagNameSupportsContent( node.tagName ) ) {
     options.innerContent = accessibleName;
   }
   else {
@@ -158,7 +158,7 @@ const DEFAULT_ACCESSIBLE_NAME_BEHAVIOR = function( node, options, accessibleName
 // see setHelpTextBehavior for more details
 const DEFAULT_HELP_TEXT_BEHAVIOR = function( node, options, helpText ) {
 
-  options.descriptionTagName = AccessibilityUtils.DEFAULT_DESCRIPTION_TAG_NAME;
+  options.descriptionTagName = PDOMUtils.DEFAULT_DESCRIPTION_TAG_NAME;
   options.descriptionContent = helpText;
   options.appendDescription = true;
   return options;
@@ -173,13 +173,13 @@ const DEFAULT_ACCESSIBLE_HEADING_BEHAVIOR = function( node, options, heading ) {
 };
 
 // these elements are typically associated with forms, and support certain attributes
-const FORM_ELEMENTS = AccessibilityUtils.FORM_ELEMENTS;
+const FORM_ELEMENTS = PDOMUtils.FORM_ELEMENTS;
 
 // list of input "type" attribute values that support the "checked" attribute
-const INPUT_TYPES_THAT_SUPPORT_CHECKED = AccessibilityUtils.INPUT_TYPES_THAT_SUPPORT_CHECKED;
+const INPUT_TYPES_THAT_SUPPORT_CHECKED = PDOMUtils.INPUT_TYPES_THAT_SUPPORT_CHECKED;
 
 // HTMLElement attributes whose value is an ID of another element
-const ASSOCIATION_ATTRIBUTES = AccessibilityUtils.ASSOCIATION_ATTRIBUTES;
+const ASSOCIATION_ATTRIBUTES = PDOMUtils.ASSOCIATION_ATTRIBUTES;
 
 // The options for the ParallelDOM API. In general, most default to null; to clear, set back to null. Each one of
 // these has an associated setter, see setter functions for more information about each.
@@ -433,7 +433,7 @@ const ParallelDOM = {
         // this node is "visible" for, see AccessibleDisplaysInfo.js for more information.
         this._accessibleDisplaysInfo = new AccessibleDisplaysInfo( this );
 
-        // @protected {Array.<AccessibleInstance>} - Empty unless the node contains some accessible instance.
+        // @protected {Array.<PDOMInstance>} - Empty unless the node contains some accessible instance.
         this._accessibleInstances = [];
 
         // @public (read-only, scenery-internal) {boolean} - If true, any DOM events received on the label sibling
@@ -841,7 +841,7 @@ const ParallelDOM = {
 
       /**
        * Set the tag name for the primary sibling in the PDOM. DOM element tag names are read-only, so this
-       * function will create a new DOM element each time it is called for the Node's AccessiblePeer and
+       * function will create a new DOM element each time it is called for the Node's PDOMPeer and
        * reset the accessible content.
        * @public
        *
@@ -872,7 +872,7 @@ const ParallelDOM = {
 
       /**
        * Set the tag name for the accessible label sibling for this Node. DOM element tag names are read-only,
-       * so this will require creating a new AccessiblePeer for this Node (reconstructing all DOM Elements). If
+       * so this will require creating a new PDOMPeer for this Node (reconstructing all DOM Elements). If
        * labelContent is specified without calling this method, then the DEFAULT_LABEL_TAG_NAME will be used as the
        * tag name for the label sibling.
        * @public
@@ -1285,14 +1285,14 @@ const ParallelDOM = {
           // clear out the attribute
           if ( this._containerAriaRole === null ) {
             this.removeAccessibleAttribute( 'role', {
-              elementName: AccessiblePeer.CONTAINER_PARENT
+              elementName: PDOMPeer.CONTAINER_PARENT
             } );
           }
 
           // add the attribute
           else {
             this.setAccessibleAttribute( 'role', ariaRole, {
-              elementName: AccessiblePeer.CONTAINER_PARENT
+              elementName: PDOMPeer.CONTAINER_PARENT
             } );
           }
         }
@@ -1536,7 +1536,7 @@ const ParallelDOM = {
           assert( Array.isArray( ariaLabelledbyAssociations ) );
           for ( i = 0; i < ariaLabelledbyAssociations.length; i++ ) {
             associationObject = ariaLabelledbyAssociations[ i ];
-            AccessibilityUtils.validateAssociationObject( associationObject );
+            PDOMUtils.validateAssociationObject( associationObject );
           }
         }
 
@@ -1591,10 +1591,10 @@ const ParallelDOM = {
        *
        * @param {Object} associationObject - with key value pairs like
        *                               { otherNode: {Node}, otherElementName: {string}, thisElementName: {string } }
-       *                               see AccessiblePeer for valid element names.
+       *                               see PDOMPeer for valid element names.
        */
       addAriaLabelledbyAssociation: function( associationObject ) {
-        assert && AccessibilityUtils.validateAssociationObject( associationObject );
+        assert && PDOMUtils.validateAssociationObject( associationObject );
 
         // TODO: assert if this associationObject is already in the association objects list! https://github.com/phetsims/scenery/issues/832
 
@@ -1636,7 +1636,7 @@ const ParallelDOM = {
       },
 
       /**
-       * Trigger the view update for each AccessiblePeer
+       * Trigger the view update for each PDOMPeer
        * @public
        */
       updateAriaLabelledbyAssociationsInPeers: function() {
@@ -1682,7 +1682,7 @@ const ParallelDOM = {
           assert( Array.isArray( ariaDescribedbyAssociations ) );
           for ( let j = 0; j < ariaDescribedbyAssociations.length; j++ ) {
             associationObject = ariaDescribedbyAssociations[ j ];
-            assert && AccessibilityUtils.validateAssociationObject( associationObject );
+            assert && PDOMUtils.validateAssociationObject( associationObject );
           }
         }
 
@@ -1737,10 +1737,10 @@ const ParallelDOM = {
        *
        * @param {Object} associationObject - with key value pairs like
        *                               { otherNode: {Node}, otherElementName: {string}, thisElementName: {string } }
-       *                               see AccessiblePeer for valid element names.
+       *                               see PDOMPeer for valid element names.
        */
       addAriaDescribedbyAssociation: function( associationObject ) {
-        assert && AccessibilityUtils.validateAssociationObject( associationObject );
+        assert && PDOMUtils.validateAssociationObject( associationObject );
         assert && assert( !_.includes( this._ariaDescribedbyAssociations, associationObject ), 'describedby association already registed' );
 
         this._ariaDescribedbyAssociations.push( associationObject ); // Keep track of this association.
@@ -1792,7 +1792,7 @@ const ParallelDOM = {
       },
 
       /**
-       * Trigger the view update for each AccessiblePeer
+       * Trigger the view update for each PDOMPeer
        * @public
        */
       updateAriaDescribedbyAssociationsInPeers: function() {
@@ -1839,7 +1839,7 @@ const ParallelDOM = {
           assert( Array.isArray( activeDescendantAssociations ) );
           for ( let j = 0; j < activeDescendantAssociations.length; j++ ) {
             associationObject = activeDescendantAssociations[ j ];
-            assert && AccessibilityUtils.validateAssociationObject( associationObject );
+            assert && PDOMUtils.validateAssociationObject( associationObject );
           }
         }
 
@@ -1891,10 +1891,10 @@ const ParallelDOM = {
        *
        * @param {Object} associationObject - with key value pairs like
        *                               { otherNode: {Node}, otherElementName: {string}, thisElementName: {string } }
-       *                               see AccessiblePeer for valid element names.
+       *                               see PDOMPeer for valid element names.
        */
       addActiveDescendantAssociation: function( associationObject ) {
-        assert && AccessibilityUtils.validateAssociationObject( associationObject );
+        assert && PDOMUtils.validateAssociationObject( associationObject );
 
         // TODO: assert if this associationObject is already in the association objects list! https://github.com/phetsims/scenery/issues/832
         this._activeDescendantAssociations.push( associationObject ); // Keep track of this association.
@@ -1937,7 +1937,7 @@ const ParallelDOM = {
       },
 
       /**
-       * Trigger the view update for each AccessiblePeer
+       * Trigger the view update for each PDOMPeer
        * @public
        */
       updateActiveDescendantAssociationsInPeers: function() {
@@ -2290,7 +2290,7 @@ const ParallelDOM = {
           // set the "attribute" as a javascript property on the DOMElement instead
           asProperty: false,
 
-          elementName: AccessiblePeer.PRIMARY_SIBLING // see AccessiblePeer.getElementName() for valid values, default to the primary sibling
+          elementName: PDOMPeer.PRIMARY_SIBLING // see PDOMPeer.getElementName() for valid values, default to the primary sibling
         }, options );
 
         assert && assert( ASSOCIATION_ATTRIBUTES.indexOf( attribute ) < 0, 'setAccessibleAttribute does not support association attributes' );
@@ -2337,7 +2337,7 @@ const ParallelDOM = {
           // for removing certain attributes (e.g. MathML).
           namespace: null,
 
-          elementName: AccessiblePeer.PRIMARY_SIBLING // see AccessiblePeer.getElementName() for valid values, default to the primary sibling
+          elementName: PDOMPeer.PRIMARY_SIBLING // see PDOMPeer.getElementName() for valid values, default to the primary sibling
         }, options );
 
         let attributeRemoved = false;
@@ -2391,7 +2391,7 @@ const ParallelDOM = {
           // for removing certain attributes (e.g. MathML).
           namespace: null,
 
-          elementName: AccessiblePeer.PRIMARY_SIBLING // see AccessiblePeer.getElementName() for valid values, default to the primary sibling
+          elementName: PDOMPeer.PRIMARY_SIBLING // see PDOMPeer.getElementName() for valid values, default to the primary sibling
         }, options );
 
         let attributeFound = false;
@@ -2448,7 +2448,7 @@ const ParallelDOM = {
           return false;
         }
         else {
-          return AccessibilityUtils.tagIsDefaultFocusable( this._tagName );
+          return PDOMUtils.tagIsDefaultFocusable( this._tagName );
         }
       },
       get focusable() { return this.isFocusable(); },
@@ -2651,7 +2651,7 @@ const ParallelDOM = {
 
       /**
        * Called when the node is added as a child to this node AND the node's subtree contains accessible content.
-       * We need to notify all Displays that can see this change, so that they can update the AccessibleInstance tree.
+       * We need to notify all Displays that can see this change, so that they can update the PDOMInstance tree.
        * @protected (called from Node.js)
        *
        * @param {Node} node
@@ -2681,7 +2681,7 @@ const ParallelDOM = {
 
       /**
        * Called when the node is removed as a child from this node AND the node's subtree contains accessible content.
-       * We need to notify all Displays that can see this change, so that they can update the AccessibleInstance tree.
+       * We need to notify all Displays that can see this change, so that they can update the PDOMInstance tree.
        * @private
        *
        * @param {Node} node
@@ -2731,7 +2731,7 @@ const ParallelDOM = {
       get accessibleInstances() { return this.getAccessibleInstances(); },
 
       /**
-       * Adds an AccessibleInstance reference to our array.
+       * Adds an PDOMInstance reference to our array.
        * @public (scenery-internal)
        *
        * @param {AccessibleInstance} accessibleInstance
@@ -2742,7 +2742,7 @@ const ParallelDOM = {
       },
 
       /**
-       * Removes an AccessibleInstance reference from our array.
+       * Removes an PDOMInstance reference from our array.
        * @public (scenery-internal)
        *
        * @param {AccessibleInstance} accessibleInstance
@@ -2750,7 +2750,7 @@ const ParallelDOM = {
       removeAccessibleInstance: function( accessibleInstance ) {
         assert && assert( accessibleInstance instanceof scenery.AccessibleInstance );
         const index = _.indexOf( this._accessibleInstances, accessibleInstance );
-        assert && assert( index !== -1, 'Cannot remove an AccessibleInstance from a Node if it was not there' );
+        assert && assert( index !== -1, 'Cannot remove an PDOMInstance from a Node if it was not there' );
         this._accessibleInstances.splice( index, 1 );
       }
     } );
