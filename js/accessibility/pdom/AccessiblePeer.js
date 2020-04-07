@@ -18,7 +18,7 @@ import Poolable from '../../../../phet-core/js/Poolable.js';
 import scenery from '../../scenery.js';
 import FullScreen from '../../util/FullScreen.js';
 import AccessibilityUtils from './AccessibilityUtils.js';
-import AccessibleSiblingStyle from './AccessibleSiblingStyle.js';
+import PDOMSiblingStyle from './PDOMSiblingStyle.js';
 
 // constants
 const PRIMARY_SIBLING = 'PRIMARY_SIBLING';
@@ -154,7 +154,7 @@ inherit( Object, AccessiblePeer, {
       // @private {HTMLElement} - The main element associated with this peer. If focusable, this is the element that gets
       // the focus. It also will contain any children.
       this._primarySibling = options.primarySibling;
-      this._primarySibling.className = AccessibleSiblingStyle.ROOT_CLASS_NAME;
+      this._primarySibling.className = PDOMSiblingStyle.ROOT_CLASS_NAME;
     }
 
     return this;

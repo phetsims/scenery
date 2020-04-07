@@ -18,7 +18,7 @@ import scenery from '../../scenery.js';
  *
  * @param {Node} node
  */
-function AccessibleDisplaysInfo( node ) {
+function PDOMDisplaysInfo( node ) {
 
   // @public {Node}
   this.node = node;
@@ -35,9 +35,9 @@ function AccessibleDisplaysInfo( node ) {
   this.accessibleDisplays = [];
 }
 
-scenery.register( 'AccessibleDisplaysInfo', AccessibleDisplaysInfo );
+scenery.register( 'PDOMDisplaysInfo', PDOMDisplaysInfo );
 
-export default inherit( Object, AccessibleDisplaysInfo, {
+export default inherit( Object, PDOMDisplaysInfo, {
   /**
    * Called when the node is added as a child to this node AND the node's subtree contains accessible content.
    * @public (scenery-internal)

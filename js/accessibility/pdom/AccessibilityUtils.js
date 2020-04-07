@@ -14,7 +14,7 @@ import validate from '../../../../axon/js/validate.js';
 import merge from '../../../../phet-core/js/merge.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
 import scenery from '../../scenery.js';
-import AccessibleSiblingStyle from './AccessibleSiblingStyle.js';
+import PDOMSiblingStyle from './PDOMSiblingStyle.js';
 
 // constants
 const NEXT = 'NEXT';
@@ -482,7 +482,7 @@ var AccessibilityUtils = {
     AccessibilityUtils.overrideFocusWithTabIndex( domElement, focusable );
 
     // gives this element styling from SceneryStyle
-    domElement.className = AccessibleSiblingStyle.SIBLING_CLASS_NAME;
+    domElement.className = PDOMSiblingStyle.SIBLING_CLASS_NAME;
 
     return domElement;
   },

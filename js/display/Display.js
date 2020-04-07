@@ -65,7 +65,7 @@ import platform from '../../../phet-core/js/platform.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import UtteranceQueue from '../../../utterance-queue/js/UtteranceQueue.js';
-import AccessibilityTree from '../accessibility/pdom/AccessibilityTree.js';
+import PDOMTree from '../accessibility/pdom/PDOMTree.js';
 import AccessibleInstance from '../accessibility/pdom/AccessibleInstance.js';
 import FocusIO from '../accessibility/FocusIO.js';
 import KeyStateTracker from '../accessibility/KeyStateTracker.js';
@@ -316,7 +316,7 @@ function Display( rootNode, options ) {
     this._rootAccessibleInstance = AccessibleInstance.createFromPool( null, this, new scenery.Trail() );
     sceneryLog && sceneryLog.AccessibleInstance && sceneryLog.AccessibleInstance(
       'Display root instance: ' + this._rootAccessibleInstance.toString() );
-    AccessibilityTree.rebuildInstanceTree( this._rootAccessibleInstance );
+    PDOMTree.rebuildInstanceTree( this._rootAccessibleInstance );
 
     // add the accessible DOM as a child of this DOM element
     this._domElement.appendChild( this._rootAccessibleInstance.peer.primarySibling );
@@ -525,7 +525,7 @@ inherit( Object, Display, extend( {
       }
     }
 
-    AccessibilityTree.auditAccessibleDisplays( this.rootNode );
+    PDOMTree.auditAccessibleDisplays( this.rootNode );
 
     sceneryLog && sceneryLog.Display && sceneryLog.pop();
   },

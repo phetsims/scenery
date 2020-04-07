@@ -11,8 +11,8 @@
  */
 
 import './accessibility/pdom/Accessibility.js';
-import './accessibility/pdom/AccessibilityFuzzer.js';
-import './accessibility/pdom/AccessibilityTree.js';
+import './accessibility/pdom/PDOMFuzzer.js';
+import './accessibility/pdom/PDOMTree.js';
 import './accessibility/pdom/AccessibilityUtils.js';
 import './accessibility/pdom/AccessibleInstance.js';
 import './accessibility/pdom/AccessiblePeer.js';

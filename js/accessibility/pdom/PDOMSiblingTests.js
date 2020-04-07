@@ -15,7 +15,7 @@ import Rectangle from '../../nodes/Rectangle.js';
 // constants
 const PIXEL_PADDING = 3;
 
-QUnit.module( 'AccessibleSiblingTests' );
+QUnit.module( 'PDOMSiblingTests' );
 
 const getSiblingBounds = node => {
   const siblingRect = node.accessibleInstances[ 0 ].peer.primarySibling.getBoundingClientRect();

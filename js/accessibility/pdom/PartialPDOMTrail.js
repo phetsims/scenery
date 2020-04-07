@@ -15,7 +15,7 @@ import scenery from '../../scenery.js';
  * @param {Trail} trail
  * @param {boolean} isRoot
  */
-function PartialAccessibleTrail( accessibleInstance, trail, isRoot ) {
+function PartialPDOMTrail( accessibleInstance, trail, isRoot ) {
 
   // @public
   this.accessibleInstance = accessibleInstance;
@@ -34,7 +34,7 @@ function PartialAccessibleTrail( accessibleInstance, trail, isRoot ) {
   }
 }
 
-scenery.register( 'PartialAccessibleTrail', PartialAccessibleTrail );
+scenery.register( 'PartialPDOMTrail', PartialPDOMTrail );
 
-inherit( Object, PartialAccessibleTrail );
-export default PartialAccessibleTrail;
+inherit( Object, PartialPDOMTrail );
+export default PartialPDOMTrail;

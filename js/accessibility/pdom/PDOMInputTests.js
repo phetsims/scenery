@@ -17,7 +17,7 @@ import KeyboardUtils from '../KeyboardUtils.js';
 const TEST_LABEL = 'Test Label';
 const TEST_LABEL_2 = 'Test Label 2';
 
-QUnit.module( 'AccessibilityInput' );
+QUnit.module( 'PDOMInput' );
 
 /**
  * Set up a test for accessible input by attaching a root node to a display and initializing events.

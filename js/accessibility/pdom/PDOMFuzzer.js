@@ -13,7 +13,7 @@ import inherit from '../../../../phet-core/js/inherit.js';
 import Display from '../../display/Display.js';
 import Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
-import AccessibilityTree from './AccessibilityTree.js';
+import PDOMTree from './PDOMTree.js';
 
 /**
  * @constructor
@@ -22,7 +22,7 @@ import AccessibilityTree from './AccessibilityTree.js';
  * @param {boolean} logToConsole
  * @param {number} [seed]
  */
-function AccessibilityFuzzer( nodeCount, logToConsole, seed ) {
+function PDOMFuzzer( nodeCount, logToConsole, seed ) {
   assert && assert( nodeCount >= 2 );
 
   seed = seed || null;
@@ -48,9 +48,9 @@ function AccessibilityFuzzer( nodeCount, logToConsole, seed ) {
   this.actionsTaken = [];
 }
 
-scenery.register( 'AccessibilityFuzzer', AccessibilityFuzzer );
+scenery.register( 'PDOMFuzzer', PDOMFuzzer );
 
-export default inherit( Object, AccessibilityFuzzer, {
+export default inherit( Object, PDOMFuzzer, {
   /**
    * Runs one action randomly (printing out the action and result).
    * @public
@@ -61,11 +61,11 @@ export default inherit( Object, AccessibilityFuzzer, {
     this.actionsTaken.push( action );
     action.execute();
     this.display._rootAccessibleInstance.auditRoot();
-    AccessibilityTree.auditAccessibleDisplays( this.display.rootNode );
+    PDOMTree.auditAccessibleDisplays( this.display.rootNode );
     if ( this.logToConsole ) {
       for ( let i = 0; i < this.nodes.length; i++ ) {
         const node = this.nodes[ i ];
-        console.log( i + '#' + node.id + ' ' + node.tagName + ' ch:' + AccessibilityTree.debugOrder( node.children ) + ' or:' + AccessibilityTree.debugOrder( node.accessibleOrder ) + ' vis:' + node.visible + ' avis:' + node.accessibleVisible );
+        console.log( i + '#' + node.id + ' ' + node.tagName + ' ch:' + PDOMTree.debugOrder( node.children ) + ' or:' + PDOMTree.debugOrder( node.accessibleOrder ) + ' vis:' + node.visible + ' avis:' + node.accessibleVisible );
       }
     }
   },
@@ -109,7 +109,7 @@ export default inherit( Object, AccessibilityFuzzer, {
           // TODO: Make sure it's not the CURRENT order?
           if ( self.isAccessibleOrderChangeLegal( a, order ) ) {
             actions.push( {
-              text: '#' + a.id + '.accessibleOrder = ' + AccessibilityTree.debugOrder( order ),
+              text: '#' + a.id + '.accessibleOrder = ' + PDOMTree.debugOrder( order ),
               execute: function() {
                 a.accessibleOrder = order;
               }

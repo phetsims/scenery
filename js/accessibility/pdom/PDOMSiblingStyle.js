@@ -82,10 +82,10 @@ SceneryStyle.addRule( '.' + ROOT_CLASS_NAME +
                       '}'
 );
 
-const AccessibleSiblingStyle = {
+const PDOMSiblingStyle = {
   SIBLING_CLASS_NAME: SIBLING_CLASS_NAME,
   ROOT_CLASS_NAME: ROOT_CLASS_NAME
 };
 
-scenery.register( 'AccessibleSiblingStyle', AccessibleSiblingStyle );
-export default AccessibleSiblingStyle;
+scenery.register( 'PDOMSiblingStyle', PDOMSiblingStyle );
+export default PDOMSiblingStyle;

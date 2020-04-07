@@ -128,9 +128,9 @@ import extend from '../../../../phet-core/js/extend.js';
 import merge from '../../../../phet-core/js/merge.js';
 import scenery from '../../scenery.js';
 import A11yBehaviorFunctionDef from '../A11yBehaviorFunctionDef.js';
-import AccessibilityTree from './AccessibilityTree.js';
+import PDOMTree from './PDOMTree.js';
 import AccessibilityUtils from './AccessibilityUtils.js';
-import AccessibleDisplaysInfo from './AccessibleDisplaysInfo.js';
+import AccessibleDisplaysInfo from './PDOMDisplaysInfo.js';
 import AccessiblePeer from './AccessiblePeer.js';
 
 const INPUT_TAG = AccessibilityUtils.TAGS.INPUT;
@@ -2047,7 +2047,7 @@ const Accessibility = {
           // See https://github.com/phetsims/scenery/issues/786
           this._accessibleOrder = accessibleOrder === null ? null : accessibleOrder.slice();
 
-          AccessibilityTree.accessibleOrderChange( this, oldAccessibleOrder, accessibleOrder );
+          PDOMTree.accessibleOrderChange( this, oldAccessibleOrder, accessibleOrder );
 
           this.trigger0( 'accessibleOrder' );
         }
@@ -2628,7 +2628,7 @@ const Accessibility = {
        */
       onAccessibleContentChange: function() {
 
-        AccessibilityTree.accessibleContentChange( this );
+        PDOMTree.accessibleContentChange( this );
 
         // recompute the heading level for this node if it is using the accessibleHeading API.
         this._accessibleHeading && this.computeHeadingLevel();
@@ -2670,11 +2670,11 @@ const Accessibility = {
           } ).length === 0, 'accessibleOrder should not include any ancestors or the node itself' );
         } )( node );
 
-        assert && AccessibilityTree.auditNodeForAccessibleCycles( this );
+        assert && PDOMTree.auditNodeForAccessibleCycles( this );
 
         this._accessibleDisplaysInfo.onAddChild( node );
 
-        AccessibilityTree.addChild( this, node );
+        PDOMTree.addChild( this, node );
 
         sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
       },
@@ -2692,7 +2692,7 @@ const Accessibility = {
 
         this._accessibleDisplaysInfo.onRemoveChild( node );
 
-        AccessibilityTree.removeChild( this, node );
+        PDOMTree.removeChild( this, node );
 
         // make sure that the associations for aria-labelledby and aria-describedby are updated for nodes associated
         // to this Node (they are pointing to this Node's IDs). https://github.com/phetsims/scenery/issues/816
@@ -2711,7 +2711,7 @@ const Accessibility = {
         sceneryLog && sceneryLog.Accessibility && sceneryLog.Accessibility( 'onAccessibleReorderedChildren (parent:n#' + this.id + ')' );
         sceneryLog && sceneryLog.Accessibility && sceneryLog.push();
 
-        AccessibilityTree.childrenOrderChange( this );
+        PDOMTree.childrenOrderChange( this );
 
         sceneryLog && sceneryLog.Accessibility && sceneryLog.pop();
       },
