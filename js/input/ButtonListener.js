@@ -139,7 +139,7 @@ inherit( DownUpListener, ButtonListener, {
   },
 
   /**
-   * Called from "focus" events (part of the Scenery listener API). On focus the A11yPointer is over the node
+   * Called from "focus" events (part of the Scenery listener API). On focus the PDOMPointer is over the node
    * with the attached listener, so add to the over count.
    * @private
    *
@@ -150,7 +150,7 @@ inherit( DownUpListener, ButtonListener, {
   },
 
   /**
-   * Called from "blur" events (part of the Scenery listener API). On blur, the A11yPointer leaves the node
+   * Called from "blur" events (part of the Scenery listener API). On blur, the PDOMPointer leaves the node
    * with this listener so reduce the over count.
    * @private
    *

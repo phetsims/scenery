@@ -16,7 +16,7 @@ import Pointer from './Pointer.js'; // inherits from Pointer
 
 // const Display = require( '/scenery/js/display/Display' ); // so requireJS doesn't balk about circular dependency
 
-class A11yPointer extends Pointer {
+class PDOMPointer extends Pointer {
 
   /**
    * @param {Display} display
@@ -43,7 +43,7 @@ class A11yPointer extends Pointer {
   }
 
   /**
-   * Set up listeners, attaching blur and focus listeners to the pointer once this A11yPointer has been attached
+   * Set up listeners, attaching blur and focus listeners to the pointer once this PDOMPointer has been attached
    * to a display.
    * @private
    */
@@ -103,7 +103,7 @@ class A11yPointer extends Pointer {
   }
 
   /**
-   * Recompute the trail to the node under this A11yPointer. Updating the trail here is generally not necessary since
+   * Recompute the trail to the node under this PDOMPointer. Updating the trail here is generally not necessary since
    * it is recomputed on focus. But there are times where a11y events can be called out of order with focus/blur
    * and the trail will either be null or stale. This might happen more often when scripting fake browser events
    * with a timeout (like in fuzzBoard).
@@ -118,5 +118,5 @@ class A11yPointer extends Pointer {
   }
 }
 
-scenery.register( 'A11yPointer', A11yPointer );
-export default A11yPointer;
+scenery.register( 'PDOMPointer', PDOMPointer );
+export default PDOMPointer;

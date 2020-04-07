@@ -171,7 +171,7 @@ import scenery from '../scenery.js';
 import Features from '../util/Features.js';
 import FullScreen from '../util/FullScreen.js';
 import Trail from '../util/Trail.js';
-import A11yPointer from './A11yPointer.js';
+import PDOMPointer from './PDOMPointer.js';
 import BatchedDOMEvent from './BatchedDOMEvent.js';
 import BrowserEvents from './BrowserEvents.js';
 import EventIO from './EventIO.js';
@@ -235,7 +235,7 @@ class Input {
     // @private {Array.<BatchedDOMEvent}>
     this.batchedEvents = [];
 
-    // @public {A11yPointer|null} - Pointer for accessibility, only created lazily on first a11y event.
+    // @public {PDOMPointer|null} - Pointer for accessibility, only created lazily on first a11y event.
     this.a11yPointer = null;
 
     // @public {Mouse|null} - Pointer for mouse, only created lazily on first mouse event, so no mouse is allocated on.
@@ -985,13 +985,13 @@ class Input {
    * @private
    */
   initA11yPointer() {
-    this.a11yPointer = new A11yPointer( this.display );
+    this.a11yPointer = new PDOMPointer( this.display );
 
     this.addPointer( this.a11yPointer );
   }
 
   /**
-   * Steps to dispatch an a11y related event. Before dispatch, the A11yPointer is initialized if it
+   * Steps to dispatch an a11y related event. Before dispatch, the PDOMPointer is initialized if it
    * hasn't been created yet and a userGestureEmitter emits to indicate that a user has begun an interaction.
    * @private
    *

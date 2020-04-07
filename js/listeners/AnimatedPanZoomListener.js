@@ -256,7 +256,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * Keydown listener for events outside of the PDOM. Attached as a listener to the body and driven by
    * Events rather than SceneryEvents. When we handle Events from within the PDOM we need the Pointer to
    * determine if attached. But from outside of the PDOM we know that there is no focus in the document and therfore
-   * the A11yPointer is not attached.
+   * the PDOMPointer is not attached.
    * @private
    *
    * @param {Event} domEvent
@@ -282,7 +282,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
   /**
    * For the Scenery listener API, handle a keydown event. This SceneryEvent will have been dispatched from
    * Input.dispatchEvent and so the Event target must be within the PDOM. In this case, we may
-   * need to prevent translation if the A11yPointer is attached or the Pointer indicates that it
+   * need to prevent translation if the PDOMPointer is attached or the Pointer indicates that it
    * is intended to for arrow key control.
    * @public (scenery-internal)
    *

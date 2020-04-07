@@ -14,7 +14,7 @@
 
 import scenery from '../scenery.js';
 import Trail from '../util/Trail.js';
-import A11yPointer from './A11yPointer.js';
+import PDOMPointer from './PDOMPointer.js';
 import Mouse from './Mouse.js';
 import Pointer from './Pointer.js';
 
@@ -87,12 +87,13 @@ class SceneryEvent {
 
   /**
    * Specifies whether or not the SceneryEvent came from alternative input. See Input.A11Y_EVENT_TYPES for a list of events
-   * a11y related events supported by scenery.
+   * a11y related events supported by scenery. These events are exclusively supported by the Parallel DOM for Interactive
+   * descriptions.
    * @public
    * @returns {boolean}
    */
-  isA11y() {
-    return this.pointer instanceof A11yPointer;
+  isFromPDOM() {
+    return this.pointer instanceof PDOMPointer;
   }
 
   /**
