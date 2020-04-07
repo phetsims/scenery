@@ -129,8 +129,11 @@ export default inherit( Node, LayoutBox, {
 
     for ( let i = 0; i < this._children.length; i++ ) {
       const child = this._children[ i ];
-      maxWidth = Math.max( maxWidth, child.width );
-      maxHeight = Math.max( maxHeight, child.height );
+
+      if ( this.isChildIncludedInLayout( child ) ) {
+        maxWidth = Math.max( maxWidth, child.width );
+        maxHeight = Math.max( maxHeight, child.height );
+      }
     }
     return new Bounds2( 0, 0, maxWidth, maxHeight );
   },
@@ -158,12 +161,12 @@ export default inherit( Node, LayoutBox, {
     let position = 0;
     for ( let i = 0; i < children.length; i++ ) {
       const child = children[ i ];
-      if ( !child.bounds.isValid() ) {
-        continue; // Skip children without bounds
+
+      if ( this.isChildIncludedInLayout( child ) ) {
+        child[ layoutPosition ] = position;
+        child[ layoutAlignment ] = this._align === 'origin' ? 0 : alignmentBounds[ layoutAlignment ];
+        position += child[ layoutDimension ] + this._spacing; // Move forward by the node's size, including spacing
       }
-      child[ layoutPosition ] = position;
-      child[ layoutAlignment ] = this._align === 'origin' ? 0 : alignmentBounds[ layoutAlignment ];
-      position += child[ layoutDimension ] + this._spacing; // Move forward by the node's size, including spacing
     }
   },
 
@@ -201,6 +204,7 @@ export default inherit( Node, LayoutBox, {
   onLayoutBoxChildInserted: function( node ) {
     if ( this._resize ) {
       node.onStatic( 'bounds', this._updateLayoutListener );
+      node.onStatic( 'visibility', this._updateLayoutListener );
     }
   },
 
@@ -213,6 +217,7 @@ export default inherit( Node, LayoutBox, {
   onLayoutBoxChildRemoved: function( node ) {
     if ( this._resize ) {
       node.offStatic( 'bounds', this._updateLayoutListener );
+      node.offStatic( 'visibility', this._updateLayoutListener );
     }
   },
 
@@ -405,10 +410,12 @@ export default inherit( Node, LayoutBox, {
         // If we are now resizable, we need to add listeners to every child
         if ( resize ) {
           child.onStatic( 'bounds', this._updateLayoutListener );
+          child.onStatic( 'visibility', this._updateLayoutListener );
         }
         // Otherwise we are now not resizeable, and need to remove the listeners
         else {
           child.offStatic( 'bounds', this._updateLayoutListener );
+          child.offStatic( 'visibility', this._updateLayoutListener );
         }
       }
 
