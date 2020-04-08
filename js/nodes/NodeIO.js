@@ -22,7 +22,6 @@ class NodeIO extends ObjectIO {
   constructor( node, phetioID ) {
     super( node, phetioID );
 
-    // TODO: This is in-progress work to convert object properties to Axon Properties, see https://github.com/phetsims/phet-io/issues/1326
     const visibleProperty = new NodeProperty( node, 'visibility', 'visible', merge( {
 
       // pick the baseline value from the parent Node's baseline
