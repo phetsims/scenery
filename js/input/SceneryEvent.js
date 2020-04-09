@@ -14,8 +14,8 @@
 
 import scenery from '../scenery.js';
 import Trail from '../util/Trail.js';
-import PDOMPointer from './PDOMPointer.js';
 import Mouse from './Mouse.js';
+import PDOMPointer from './PDOMPointer.js';
 import Pointer from './Pointer.js';
 
 class SceneryEvent {

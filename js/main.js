@@ -12,10 +12,10 @@
 
 import './accessibility/pdom/ParallelDOM.js';
 import './accessibility/pdom/PDOMFuzzer.js';
-import './accessibility/pdom/PDOMTree.js';
-import './accessibility/pdom/PDOMUtils.js';
 import './accessibility/pdom/PDOMInstance.js';
 import './accessibility/pdom/PDOMPeer.js';
+import './accessibility/pdom/PDOMTree.js';
+import './accessibility/pdom/PDOMUtils.js';
 import './accessibility/reader/Cursor.js';
 import './accessibility/reader/Reader.js';
 import './debug/DebugContext.js';

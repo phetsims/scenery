@@ -8,8 +8,8 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import PDOMInstance from '../accessibility/pdom/PDOMInstance.js';
 import Focus from '../accessibility/Focus.js';
+import PDOMInstance from '../accessibility/pdom/PDOMInstance.js';
 import scenery from '../scenery.js';
 import Trail from '../util/Trail.js';
 import Pointer from './Pointer.js'; // inherits from Pointer

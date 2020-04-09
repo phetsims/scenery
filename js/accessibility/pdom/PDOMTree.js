@@ -8,8 +8,8 @@
 
 import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
 import scenery from '../../scenery.js';
-import PDOMInstance from './PDOMInstance.js';
 import PartialPDOMTrail from './PartialPDOMTrail.js';
+import PDOMInstance from './PDOMInstance.js';
 
 // globals (for restoring focus)
 let focusedNode = null;

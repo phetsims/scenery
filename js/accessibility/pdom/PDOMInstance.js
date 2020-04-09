@@ -33,8 +33,8 @@ import platform from '../../../../phet-core/js/platform.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import scenery from '../../scenery.js';
 import TransformTracker from '../../util/TransformTracker.js';
-import PDOMUtils from './PDOMUtils.js';
 import PDOMPeer from './PDOMPeer.js';
+import PDOMUtils from './PDOMUtils.js';
 
 let globalId = 1;
 

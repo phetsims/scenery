@@ -11,8 +11,8 @@ import timer from '../../../axon/js/timer.js';
 import Random from '../../../dot/js/Random.js';
 import Display from '../display/Display.js';
 import scenery from '../scenery.js';
-import PDOMUtils from './pdom/PDOMUtils.js';
 import KeyboardUtils from './KeyboardUtils.js';
+import PDOMUtils from './pdom/PDOMUtils.js';
 
 // uppercase matters
 const keyboardTestingSchema = {

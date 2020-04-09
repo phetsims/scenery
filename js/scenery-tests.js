@@ -6,12 +6,12 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
-import './accessibility/pdom/PDOMInputTests.js';
-import './accessibility/pdom/ParallelDOMTests.js';
-import './accessibility/pdom/PDOMUtilsTests.js';
-import './accessibility/pdom/PDOMSiblingTests.js';
 import './accessibility/FocusTests.js';
 import './accessibility/KeyStateTrackerTests.js';
+import './accessibility/pdom/ParallelDOMTests.js';
+import './accessibility/pdom/PDOMInputTests.js';
+import './accessibility/pdom/PDOMSiblingTests.js';
+import './accessibility/pdom/PDOMUtilsTests.js';
 import './display/DisplayTests.js';
 import './display/FuzzTests.js';
 import './listeners/DragListenerTests.js';

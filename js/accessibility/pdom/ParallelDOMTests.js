@@ -11,8 +11,8 @@ import Circle from '../../nodes/Circle.js';
 import Node from '../../nodes/Node.js';
 import Rectangle from '../../nodes/Rectangle.js';
 import AccessibilityFuzzer from './PDOMFuzzer.js';
-import PDOMUtils from './PDOMUtils.js';
 import PDOMPeer from './PDOMPeer.js';
+import PDOMUtils from './PDOMUtils.js';
 
 // constants
 const TEST_INNER_CONTENT = 'Test Inner Content Here please^&*. Thanks you so very mucho.';

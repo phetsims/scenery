@@ -17,8 +17,8 @@ import platform from '../../../../phet-core/js/platform.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import scenery from '../../scenery.js';
 import FullScreen from '../../util/FullScreen.js';
-import PDOMUtils from './PDOMUtils.js';
 import PDOMSiblingStyle from './PDOMSiblingStyle.js';
+import PDOMUtils from './PDOMUtils.js';
 
 // constants
 const PRIMARY_SIBLING = 'PRIMARY_SIBLING';
