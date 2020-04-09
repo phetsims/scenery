@@ -2049,7 +2049,7 @@ const ParallelDOM = {
 
           PDOMTree.accessibleOrderChange( this, oldAccessibleOrder, accessibleOrder );
 
-          this.accessibleOrderEmitter.emit();
+          this.rendererSummaryRefreshEmitter.emit();
         }
       },
       set accessibleOrder( value ) { this.setAccessibleOrder( value ); },
@@ -2633,7 +2633,7 @@ const ParallelDOM = {
         // recompute the heading level for this node if it is using the accessibleHeading API.
         this._accessibleHeading && this.computeHeadingLevel();
 
-        this.accessibleContentEmitter.emit();
+        this.rendererSummaryRefreshEmitter.emit();
       },
 
       /**
