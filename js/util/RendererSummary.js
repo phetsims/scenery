@@ -77,10 +77,7 @@ function RendererSummary( node ) {
   const listener = this.selfChange.bind( this );
   this.node.opacityProperty.lazyLink( listener );
   this.node.clipAreaProperty.lazyLink( listener );
-  this.node.hintEmitter.addListener( listener ); // should fire on things like node.renderer being changed
-  this.node.selfBoundsValidEmitter.addListener( listener ); // e.g. Text, may change based on boundsMethod
-  this.node.accessibleContentEmitter.addListener( listener );
-  this.node.accessibleOrderEmitter.addListener( listener );
+  this.node.rendererSummaryRefreshEmitter.addListener( listener );
 }
 
 scenery.register( 'RendererSummary', RendererSummary );
@@ -143,7 +140,7 @@ inherit( Object, RendererSummary, {
         }
       }
 
-      this.node.rendererSummaryEmitter.emit();
+      this.node.instanceRefreshEmitter.emit();
       this.node.onSummaryChange( oldSubtreeBitmask, this.bitmask );
 
       const len = this.node._parents.length;

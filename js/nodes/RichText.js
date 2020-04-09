@@ -225,8 +225,6 @@ function RichText( text, options ) {
 
   Node.call( this );
 
-  Node.preventSettersOnProperty( this, 'textProperty' );
-
   // @private {Node} - Normal layout container of lines (separate, so we can clear it easily)
   this.lineContainer = new Node( {} );
   this.addChild( this.lineContainer );
@@ -720,7 +718,7 @@ inherit( Node, RichText, {
       this.textProperty.setPropertyValue( text );
       this.rebuildRichText();
 
-      this.textProperty._notifyListeners( oldText );
+      this.textProperty.notifyListeners( oldText );
     }
     return this;
   },

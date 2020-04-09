@@ -36,16 +36,14 @@ class DisplayedProperty extends BooleanProperty {
 
     // @private {function}
     this.updateListener = this.updateValue.bind( this );
-    this.addedInstancelistener = this.addedInstance.bind( this );
-    this.removedInstancelistener = this.removedInstance.bind( this );
+    this.changedInstanceListener = this.changedInstance.bind( this );
 
-    node.addedInstanceEmitter.addListener( this.addedInstancelistener );
-    node.removedInstanceEmitter.addListener( this.removedInstancelistener );
+    node.changedInstanceEmitter.addListener( this.changedInstanceListener );
 
     // Add any instances the node may already have/
     const instances = node.instances;
     for ( let i = 0; i < instances.length; i++ ) {
-      this.addedInstance( instances[ i ] );
+      this.changedInstance( instances[ i ], true );
     }
   }
 
@@ -58,24 +56,20 @@ class DisplayedProperty extends BooleanProperty {
   }
 
   /**
-   * Adds a listener to one of the node's instances.
+   * Called when an instance is changed or added (based on the boolean flag).
    * @private
    *
    * @param {Instance} instance
+   * @param {boolean} added
    */
-  addedInstance( instance ) {
-    instance.visibleEmitter.addListener( this.updateListener );
-    this.updateValue();
-  }
+  changedInstance( instance, added ) {
+    if ( added ) {
+      instance.visibleEmitter.addListener( this.updateListener );
+    }
+    else {
+      instance.visibleEmitter.removeListener( this.updateListener );
+    }
 
-  /**
-   * Removes a listener from one of the node's instances.
-   * @private
-   *
-   * @param {Instance} instance
-   */
-  removedInstance( instance ) {
-    instance.visibleEmitter.removeListener( this.updateListener );
     this.updateValue();
   }
 
@@ -88,11 +82,10 @@ class DisplayedProperty extends BooleanProperty {
     // Remove any instances the node may still have
     const instances = this.node.instances;
     for ( let i = 0; i < instances.length; i++ ) {
-      this.removedInstance( instances[ i ] );
+      this.changedInstance( instances[ i ], false );
     }
 
-    this.node.addedInstanceEmitter.removeListener( this.addedInstancelistener );
-    this.node.removedInstanceEmitter.removeListener( this.removedInstancelistener );
+    this.node.changedInstanceEmitter.removeListener( this.changedInstanceListener );
 
     super.dispose();
   }

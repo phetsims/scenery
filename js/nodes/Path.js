@@ -317,7 +317,7 @@ inherit( Node, Path, {
       this._boundsMethod = boundsMethod;
       this.invalidatePath();
 
-      this.selfBoundsValidEmitter.emit(); // whether our self bounds are valid may have changed
+      this.rendererSummaryRefreshEmitter.emit(); // whether our self bounds are valid may have changed
     }
     return this;
   },
@@ -431,7 +431,8 @@ inherit( Node, Path, {
    */
   invalidateStroke: function() {
     this.invalidatePath();
-    this.selfBoundsValidEmitter.emit(); // Stroke changing could have changed our self-bounds-validitity (unstroked/etc)
+
+    this.rendererSummaryRefreshEmitter.emit(); // Stroke changing could have changed our self-bounds-validitity (unstroked/etc)
   },
 
   /**

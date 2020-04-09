@@ -86,8 +86,6 @@ function Text( text, options ) {
 
   Node.call( this, options );
 
-  Node.preventSettersOnProperty( this, 'textProperty' );
-
   this.invalidateSupportedRenderers(); // takes care of setting up supported renderers
 }
 
@@ -139,7 +137,7 @@ inherit( Node, Text, {
 
       this.invalidateText();
 
-      this.textProperty._notifyListeners( oldText );
+      this.textProperty.notifyListeners( oldText );
     }
     return this;
   },
@@ -215,7 +213,7 @@ inherit( Node, Text, {
 
       this.invalidateText();
 
-      this.selfBoundsValidEmitter.emit(); // whether our self bounds are valid may have changed
+      this.rendererSummaryRefreshEmitter.emit(); // whether our self bounds are valid may have changed
     }
     return this;
   },

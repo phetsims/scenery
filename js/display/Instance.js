@@ -1441,9 +1441,7 @@ inherit( Object, Instance, {
 
       this.node.opacityProperty.lazyLink( this.markRenderStateDirtyListener );
       this.node.clipAreaProperty.lazyLink( this.markRenderStateDirtyListener );
-      this.node.hintEmitter.addListener( this.markRenderStateDirtyListener );
-      this.node.rendererBitmaskEmitter.addListener( this.markRenderStateDirtyListener );
-      this.node.rendererSummaryEmitter.addListener( this.markRenderStateDirtyListener );
+      this.node.instanceRefreshEmitter.addListener( this.markRenderStateDirtyListener );
     }
   },
 
@@ -1458,9 +1456,7 @@ inherit( Object, Instance, {
 
       this.node.opacityProperty.unlink( this.markRenderStateDirtyListener );
       this.node.clipAreaProperty.unlink( this.markRenderStateDirtyListener );
-      this.node.hintEmitter.removeListener( this.markRenderStateDirtyListener );
-      this.node.rendererBitmaskEmitter.removeListener( this.markRenderStateDirtyListener );
-      this.node.rendererSummaryEmitter.removeListener( this.markRenderStateDirtyListener );
+      this.node.instanceRefreshEmitter.removeListener( this.markRenderStateDirtyListener );
     }
   },
 

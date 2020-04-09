@@ -92,7 +92,7 @@ QUnit.test( 'focusin/focusout (focus/blur)', assert => {
   } );
 
   a.focus();
-  debugger;
+
   assert.ok( aGotFocus, 'a should have been focused' );
   assert.ok( !aLostFocus, 'a should not blur' );
 

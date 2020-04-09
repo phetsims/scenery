@@ -310,12 +310,15 @@ function Node( options ) {
 
   // @public {TinyProperty.<boolean>} - Whether this node (and its children) will be visible when the scene is updated.
   // Visible nodes by default will not be pickable either.
+  // NOTE: This is fired synchronously when the visibility of the Node is toggled
   this.visibleProperty = new TinyProperty( DEFAULT_OPTIONS.visible );
 
   // @public {TinyProperty.<number>} - Opacity, in the range from 0 (fully transparent) to 1 (fully opaque).
+  // NOTE: This is fired synchronously when the opacity of the Node is toggled
   this.opacityProperty = new TinyProperty( DEFAULT_OPTIONS.opacity );
 
   // @public {TinyProperty.<boolean|null>} - See setPickable().
+  // NOTE: This is fired synchronously when the pickability of the Node is toggled
   this.pickableProperty = new TinyProperty( DEFAULT_OPTIONS.pickable );
 
   // @public {TinyProperty.<boolean>} - Whether input event listeners on this node or descendants on a trail will have
@@ -325,6 +328,7 @@ function Node( options ) {
 
   // @private {TinyProperty.<Shape|null>} - This node and all children will be clipped by this shape (in addition to any
   // other clipping shapes). The shape should be in the local coordinate frame.
+  // NOTE: This is fired synchronously when the clipArea of the Node is toggled
   this.clipAreaProperty = new TinyProperty( DEFAULT_OPTIONS.clipArea );
 
   // @private - Areas for hit intersection. If set on a Node, no descendants can handle events.
@@ -375,25 +379,36 @@ function Node( options ) {
   // @private {Array.<Function>} - For user input handling (mouse/touch).
   this._inputListeners = [];
 
-  // @public {TinyProperty.<Bounds2>} - [mutable] Bounds for this node and its children in the "parent" coordinate frame.
+  // @public {TinyProperty.<Bounds2>} - [mutable] Bounds for this node and its children in the "parent" coordinate
+  // frame.
   // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
+  // NOTE: This is fired **asynchronously** (usually as part of a Display.updateDisplay()) when the bounds of the node
+  // is changed.
   this.boundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy(), { useDeepEquality: true } );
 
-  // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds for this node and its children in the "local" coordinate frame.
+  // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds for this node and its children in the "local" coordinate
+  // frame.
   // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
+  // NOTE: This is fired **asynchronously** (usually as part of a Display.updateDisplay()) when the localBounds of
+  // the node is changed.
   this.localBoundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy(), { useDeepEquality: true } );
 
   // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds just for this node, in the "local" coordinate frame.
   // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
+  // NOTE: This event can be fired synchronously, and happens with the self-bounds of a Node is changed. This is NOT
+  // like the other bounds Properties, which usually fire asynchronously
   this.selfBoundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy(), { useDeepEquality: true } );
 
-  // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds just for children of this node (and sub-trees), in the "local"
-  // coordinate frame.
+  // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds just for children of this node (and sub-trees), in the
+  // "local" coordinate frame.
   // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
+  // NOTE: This is fired **asynchronously** (usually as part of a Display.updateDisplay()) when the childBounds of the
+  // node is changed.
   this.childBoundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy(), { useDeepEquality: true } );
 
   // For now, custom-add listener count change notifications into these Properties, since we need to know when their
   // number of listeners changes dynamically.
+  // TODO: We'll want an improved way of doing this, that is still performant.
   const boundsListenersAddedOrRemovedListener = this.onBoundsListenersAddedOrRemoved.bind( this );
   this.boundsProperty.changeCount = boundsListenersAddedOrRemovedListener;
   this.localBoundsProperty.changeCount = boundsListenersAddedOrRemovedListener;
@@ -454,59 +469,41 @@ function Node( options ) {
     preventFit: DEFAULT_OPTIONS.preventFit
   };
 
-  /*
-   * TODO: inline and update docs
-   * - childrenChanged - This is fired only once for any single operation that may change the children of a Node. For
-   *                     example, if a Node's children are [ a, b ] and setChildren( [ a, x, y, z ] ) is called on it,
-   *                     the childrenChanged event will only be fired once after the entire operation of changing the
-   *                     children is completed.
-   * - selfBounds - This event can be fired synchronously, and happens with the self-bounds of a Node is changed.
-   * - childBounds - This is fired asynchronously (usually as part of a Display.updateDisplay()) when the childBounds of
-   *                 the node is changed.
-   * - localBounds - This is fired asynchronously (usually as part of a Display.updateDisplay()) when the localBounds of
-   *                 the node is changed.
-   * - bounds - This is fired asynchronously (usually as part of a Display.updateDisplay()) when the bounds of the node is
-   *            changed.
-   * - transform - Fired synchronously when the transform (transformation matrix) of a Node is changed. Any change to a
-   *               Node's translation/rotation/scale/etc. will trigger this event.
-   * - visibility - Fired synchronously when the visibility of the Node is toggled.
-   * - opacity - Fired synchronously when the opacity of the Node is changed.
-   * - pickability - Fired synchronously when the pickability of the Node is changed
-   * - clip - Fired synchronously when the clipArea of the Node is changed.
-   *
-   * While the following are considered scenery-internal and should not be used externally:
-   *
-   * - childInserted - For a single added child Node.
-   * - childRemoved - For a single removed child Node.
-   * - childrenReordered - Provides a given range that may be affected by the reordering
-   * - localBoundsOverride - When the presence/value of the localBounds override is changed.
-   * - inputEnabled - When the inputEnabled property is changed.
-   * - rendererBitmask - When this node's bitmask changes (generally happens synchronously to other changes)
-   * - hint - Fired synchronously when various hints change
-   * - addedInstance - Fires when an Instance is added to the Node.
-   * - removedInstance - Fires when an Instance is removed from the Node.
-   */
-
-  // @public {TinyEmitter}
+  // @public {TinyEmitter} - This is fired only once for any single operation that may change the children of a Node.
+  // For example, if a Node's children are [ a, b ] and setChildren( [ a, x, y, z ] ) is called on it, the
+  // childrenChanged event will only be fired once after the entire operation of changing the children is completed.
   this.childrenChangedEmitter = new TinyEmitter();
-  this.childInsertedEmitter = new TinyEmitter(); // emits with: node, indexOfChild
-  this.childRemovedEmitter = new TinyEmitter(); // emits with: node, indexOfChild
-  this.childrenReorderedEmitter = new TinyEmitter(); // emits with: minChangedIndex, maxChangedIndex
-  this.hintEmitter = new TinyEmitter(); // emits with: {string} hint type
-  this.rendererBitmaskEmitter = new TinyEmitter();
-  this.rendererSummaryEmitter = new TinyEmitter();
-  this.selfBoundsValidEmitter = new TinyEmitter();
+
+  // @public {TinyEmitter} - For every single added child Node, emits with {Node} node, {number} indexOfChild
+  this.childInsertedEmitter = new TinyEmitter();
+
+  // @public {TinyEmitter} - For every single removed child Node, emits with {Node} node, {number} indexOfChild
+  this.childRemovedEmitter = new TinyEmitter();
+
+  // @public {TinyEmitter} - Provides a given range that may be affected by the reordering. Emits with
+  // {number} minChangedIndex, {number} maxChangedIndex
+  this.childrenReorderedEmitter = new TinyEmitter();
+
+  // @public {TinyEmitter} - Fired synchronously when the transform (transformation matrix) of a Node is changed. Any
+  // change to a Node's translation/rotation/scale/etc. will trigger this event.
   this.transformEmitter = new TinyEmitter();
 
-  // @public {TinyEmitter}
-  this.accessibleContentEmitter = new TinyEmitter();
+  // @public {TinyEmitter} - Should be emitted when we need to check full metadata updates directly on Instances,
+  // to see if we need to change drawable types, etc.
+  this.instanceRefreshEmitter = new TinyEmitter();
+
+  // @public {TinyEmitter} - Emitted to when we need to potentially recompute our renderer summary (bitmask flags, or
+  // things that could affect descendants)
+  this.rendererSummaryRefreshEmitter = new TinyEmitter();
+
+  // @public {TinyEmitter} - Fired when the accessible Displays for this Node have changed (see PDOMInstance)
   this.accessibleDisplaysEmitter = new TinyEmitter();
-  this.accessibleOrderEmitter = new TinyEmitter();
+
+  // @public {TinyEmitter}
   this.focusHighlightChangedEmitter = new TinyEmitter();
 
   // @public {TinyEmitter}
-  this.addedInstanceEmitter = new TinyEmitter();
-  this.removedInstanceEmitter = new TinyEmitter();
+  this.changedInstanceEmitter = new TinyEmitter(); // emits with {Instance}, {boolean} added
 
   // compose accessibility
   this.initializeAccessibility();
@@ -541,35 +538,6 @@ function Node( options ) {
   // to know that a node is getting removed from its parent BUT that process has not completed yet. It would be ideal
   // to not need this.
   this._isGettingRemovedFromParent = false;
-
-  if ( assert ) {
-    [
-      'visibleProperty',
-      'opacityProperty',
-      'pickableProperty',
-      'inputEnabledProperty',
-      'clipAreaProperty',
-      'boundsProperty',
-      'localBoundsProperty',
-      'selfBoundsProperty',
-      'childBoundsProperty',
-      'childrenChangedEmitter',
-      'childInsertedEmitter',
-      'childRemovedEmitter',
-      'childrenReorderedEmitter',
-      'hintEmitter',
-      'rendererBitmaskEmitter',
-      'rendererSummaryEmitter',
-      'selfBoundsValidEmitter',
-      'transformEmitter',
-      'accessibleContentEmitter',
-      'accessibleDisplaysEmitter',
-      'accessibleOrderEmitter',
-      'focusHighlightChanged',
-      'addedInstanceEmitter',
-      'removedInstanceEmitter'
-    ].forEach( name => Node.preventSettersOnProperty( this, name ) );
-  }
 
   PhetioObject.call( this );
 
@@ -1176,7 +1144,7 @@ inherit( PhetioObject, Node, extend( {
       this._selfBoundsDirty = false;
 
       if ( didSelfBoundsChange ) {
-        this.selfBoundsProperty._notifyListeners( oldSelfBounds );
+        this.selfBoundsProperty.notifyListeners( oldSelfBounds );
       }
 
       return true;
@@ -1233,7 +1201,7 @@ inherit( PhetioObject, Node, extend( {
       if ( !ourChildBounds.equals( oldChildBounds ) ) {
         // notifies only on an actual change
         if ( !ourChildBounds.equalsEpsilon( oldChildBounds, notificationThreshold ) ) {
-          this.childBoundsProperty._notifyListeners( oldChildBounds );
+          this.childBoundsProperty.notifyListeners( oldChildBounds );
         }
       }
     }
@@ -1255,7 +1223,7 @@ inherit( PhetioObject, Node, extend( {
 
       if ( !ourLocalBounds.equals( oldLocalBounds ) ) {
         if ( !ourLocalBounds.equalsEpsilon( oldLocalBounds, notificationThreshold ) ) {
-          this.localBoundsProperty._notifyListeners( oldLocalBounds );
+          this.localBoundsProperty.notifyListeners( oldLocalBounds );
         }
 
         // sanity check
@@ -1308,7 +1276,7 @@ inherit( PhetioObject, Node, extend( {
 
         // TODO: consider changing to parameter object (that may be a problem for the GC overhead)
         if ( !ourBounds.equalsEpsilon( oldBounds, notificationThreshold ) ) {
-          this.boundsProperty._notifyListeners( oldBounds );
+          this.boundsProperty.notifyListeners( oldBounds );
         }
       }
     }
@@ -1499,7 +1467,7 @@ inherit( PhetioObject, Node, extend( {
         ourSelfBounds.set( newSelfBounds );
 
         // fire the event immediately
-        this.selfBoundsProperty._notifyListeners( oldSelfBounds );
+        this.selfBoundsProperty.notifyListeners( oldSelfBounds );
       }
     }
 
@@ -3165,7 +3133,7 @@ inherit( PhetioObject, Node, extend( {
       // Defined in ParallelDOM.js
       this._accessibleDisplaysInfo.onVisibilityChange( visible );
 
-      this.visibleProperty._notifyListeners( !visible );
+      this.visibleProperty.notifyListeners( !visible );
 
       for ( let i = 0; i < this._parents.length; i++ ) {
         const parent = this._parents[ i ];
@@ -3288,7 +3256,7 @@ inherit( PhetioObject, Node, extend( {
       if ( assertSlow ) { this._picker.audit(); }
       // TODO: invalidate the cursor somehow? #150
 
-      this.pickableProperty._notifyListeners( oldPickable );
+      this.pickableProperty.notifyListeners( oldPickable );
     }
   },
   set pickable( value ) { this.setPickable( value ); },
@@ -3521,7 +3489,7 @@ inherit( PhetioObject, Node, extend( {
 
       this._rendererSummary.selfChange();
 
-      this.rendererBitmaskEmitter.emit();
+      this.instanceRefreshEmitter.emit();
     }
   },
 
@@ -3536,6 +3504,15 @@ inherit( PhetioObject, Node, extend( {
   /*---------------------------------------------------------------------------*
    * Hints
    *----------------------------------------------------------------------------*/
+
+  /**
+   * When a hint changes in general, we default to refresh everything for safety.
+   * @private
+   */
+  invalidateHint: function() {
+    this.rendererSummaryRefreshEmitter.emit();
+    this.instanceRefreshEmitter.emit();
+  },
 
   /**
    * Sets a preferred renderer for this node and its sub-tree. Scenery will attempt to use this renderer under here
@@ -3572,7 +3549,7 @@ inherit( PhetioObject, Node, extend( {
     if ( this._hints.renderer !== newRenderer ) {
       this._hints.renderer = newRenderer;
 
-      this.hintEmitter.emit( 'renderer' );
+      this.invalidateHint();
     }
   },
   set renderer( value ) { this.setRenderer( value ); },
@@ -3617,7 +3594,7 @@ inherit( PhetioObject, Node, extend( {
     if ( split !== this._hints.layerSplit ) {
       this._hints.layerSplit = split;
 
-      this.hintEmitter.emit( 'layerSplit' );
+      this.invalidateHint();
     }
   },
   set layerSplit( value ) { this.setLayerSplit( value ); },
@@ -3646,7 +3623,7 @@ inherit( PhetioObject, Node, extend( {
     if ( usesOpacity !== this._hints.usesOpacity ) {
       this._hints.usesOpacity = usesOpacity;
 
-      this.hintEmitter.emit( 'usesOpacity' );
+      this.invalidateHint();
     }
   },
   set usesOpacity( value ) { this.setUsesOpacity( value ); },
@@ -3676,7 +3653,7 @@ inherit( PhetioObject, Node, extend( {
     if ( cssTransform !== this._hints.cssTransform ) {
       this._hints.cssTransform = cssTransform;
 
-      this.hintEmitter.emit( 'cssTransform' );
+      this.invalidateHint();
     }
   },
   set cssTransform( value ) { this.setCSSTransform( value ); },
@@ -3705,7 +3682,7 @@ inherit( PhetioObject, Node, extend( {
     if ( excludeInvisible !== this._hints.excludeInvisible ) {
       this._hints.excludeInvisible = excludeInvisible;
 
-      this.hintEmitter.emit( 'excludeInvisible' );
+      this.invalidateHint();
     }
   },
   set excludeInvisible( value ) { this.setExcludeInvisible( value ); },
@@ -3759,7 +3736,7 @@ inherit( PhetioObject, Node, extend( {
     if ( preventFit !== this._hints.preventFit ) {
       this._hints.preventFit = preventFit;
 
-      this.hintEmitter.emit( 'preventFit' );
+      this.invalidateHint();
     }
   },
   set preventFit( value ) { this.setPreventFit( value ); },
@@ -3787,7 +3764,7 @@ inherit( PhetioObject, Node, extend( {
     if ( webglScale !== this._hints.webglScale ) {
       this._hints.webglScale = webglScale;
 
-      this.hintEmitter.emit( 'webglScale' );
+      this.invalidateHint();
     }
   },
   set webglScale( value ) { this.setWebGLScale( value ); },
@@ -4660,7 +4637,7 @@ inherit( PhetioObject, Node, extend( {
     assert && assert( instance instanceof scenery.Instance );
     this._instances.push( instance );
 
-    this.addedInstanceEmitter.emit( instance );
+    this.changedInstanceEmitter.emit( instance, true );
   },
 
   /**
@@ -4675,7 +4652,7 @@ inherit( PhetioObject, Node, extend( {
     assert && assert( index !== -1, 'Cannot remove a Instance from a Node if it was not there' );
     this._instances.splice( index, 1 );
 
-    this.removedInstanceEmitter.emit( instance );
+    this.changedInstanceEmitter.emit( instance, false );
   },
 
   /**
@@ -5295,15 +5272,6 @@ inherit( PhetioObject, Node, extend( {
 
   defaultLeafTrailPredicate: function( node ) {
     return node._children.length === 0;
-  },
-
-  // TODO: doc
-  preventSettersOnProperty: function( node, propertyName ) {
-    // Overwrites with a non-overwritable definition
-    Object.defineProperty( node, propertyName, {
-      writable: false,
-      value: node[ propertyName ]
-    } );
   }
 } );
 
