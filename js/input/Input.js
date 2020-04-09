@@ -305,13 +305,13 @@ class Input {
     } );
 
     // @private {Action} - Emits to the PhET-iO data stream.
-    this.mouseMovedAction = new Action( ( point, event ) => {
+    this.mouseMoveAction = new Action( ( point, event ) => {
       if ( !this.mouse ) { this.initMouse(); }
       this.mouse.move( point, event );
       this.moveEvent( this.mouse, event );
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'mouseMovedAction' ),
+      tandem: options.tandem.createTandem( 'mouseMoveAction' ),
       parameters: [
         { name: 'point', phetioType: Vector2IO },
         { name: 'event', phetioType: EventIO }
@@ -1093,7 +1093,7 @@ class Input {
   mouseMove( point, event ) {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseMove(' + Input.debugText( point, event ) + ');' );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
-    this.mouseMovedAction.execute( point, event );
+    this.mouseMoveAction.execute( point, event );
     sceneryLog && sceneryLog.Input && sceneryLog.pop();
   }
 
