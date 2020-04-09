@@ -153,7 +153,7 @@ inherit( Object, Trail, {
     if ( _.some( this.nodes, function( node ) { return node.pickable === false || node.visible === false; } ) ) { return false; }
 
     // if there is any listener or pickable: true, it will be pickable
-    if ( _.some( this.nodes, function( node ) { return node._inputListeners.length > 0 || node._pickable === true; } ) ) { return true; }
+    if ( _.some( this.nodes, function( node ) { return node._inputListeners.length > 0 || node.pickableProperty.value === true; } ) ) { return true; }
 
     // TODO: Is this even necessary?
     if ( this.lastNode()._picker._subtreePickableCount > 0 ) {
@@ -485,7 +485,7 @@ inherit( Object, Trail, {
     // events fired (see https://github.com/phetsims/sun/issues/257)
     let trailStartIndex = -1;
     for ( let j = 0; j < this.length; j++ ) {
-      if ( !this.nodes[ j ]._inputEnabled ) {
+      if ( !this.nodes[ j ].inputEnabled ) {
         break;
       }
 

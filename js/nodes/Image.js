@@ -7,6 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Utils from '../../../dot/js/Utils.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
@@ -102,6 +103,9 @@ function Image( image, options ) {
 
   // @private {boolean} - Whether our _imageLoadListener has been attached as a listener to the current image.
   this._imageLoadListenerAttached = false;
+
+  // @public {Emitter} - Emits when mipmaps are (re)generated
+  this.mipmapEmitter = new TinyEmitter();
 
   // rely on the setImage call from the super constructor to do the setup
   options = extendDefined( {
@@ -723,7 +727,7 @@ inherit( Node, Image, {
       }
     }
 
-    this.trigger0( 'mipmap' );
+    this.mipmapEmitter.emit();
   },
 
   /**

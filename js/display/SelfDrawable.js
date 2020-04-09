@@ -36,7 +36,7 @@ inherit( scenery.Drawable, SelfDrawable, {
     this.node = instance.trail.lastNode();
     this.node.attachDrawable( this );
 
-    this.instance.onStatic( 'selfVisibility', this.drawableVisibilityListener );
+    this.instance.selfVisibleEmitter.addListener( this.drawableVisibilityListener );
 
     this.updateSelfVisibility();
 
@@ -45,7 +45,7 @@ inherit( scenery.Drawable, SelfDrawable, {
 
   // @public
   dispose: function() {
-    this.instance.offStatic( 'selfVisibility', this.drawableVisibilityListener );
+    this.instance.selfVisibleEmitter.removeListener( this.drawableVisibilityListener );
 
     this.node.detachDrawable( this );
 

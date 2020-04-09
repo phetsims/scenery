@@ -29,7 +29,7 @@ class TextIO extends NodeIO {
     super( text, phetioID );
 
     // this uses a sub Property adapter as described in https://github.com/phetsims/phet-io/issues/1326
-    const textProperty = new NodeProperty( text, 'text', 'text', merge( {
+    const textProperty = new NodeProperty( text, text.textProperty, 'text', merge( {
 
       // pick the following values from the parent Node
       phetioReadOnly: text.phetioReadOnly,

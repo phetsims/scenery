@@ -617,7 +617,7 @@ QUnit.test( 'Display resize event', function( assert ) {
   let height;
   let count = 0;
 
-  display.on( 'displaySize', function( size ) {
+  display.sizeProperty.lazyLink( function( size ) {
     width = size.width;
     height = size.height;
     count++;
@@ -642,27 +642,27 @@ QUnit.test( 'Bounds events', function( assert ) {
 
   const epsilon = 0.0000001;
 
-  node.on( 'childBounds', function() {
+  node.childBoundsProperty.lazyLink( function() {
     assert.ok( node.childBounds.equalsEpsilon( new Bounds2( 10, 0, 110, 30 ), epsilon ), 'Parent child bounds check: ' + node.childBounds.toString() );
   } );
 
-  node.on( 'bounds', function() {
+  node.boundsProperty.lazyLink( function() {
     assert.ok( node.bounds.equalsEpsilon( new Bounds2( 10, 10, 110, 40 ), epsilon ), 'Parent bounds check: ' + node.bounds.toString() );
   } );
 
-  node.on( 'selfBounds', function() {
+  node.selfBoundsProperty.lazyLink( function() {
     assert.ok( false, 'Self bounds should not change for parent node' );
   } );
 
-  rect.on( 'selfBounds', function() {
+  rect.selfBoundsProperty.lazyLink( function() {
     assert.ok( rect.selfBounds.equalsEpsilon( new Bounds2( 0, 0, 100, 30 ), epsilon ), 'Self bounds check: ' + rect.selfBounds.toString() );
   } );
 
-  rect.on( 'bounds', function() {
+  rect.boundsProperty.lazyLink( function() {
     assert.ok( rect.bounds.equalsEpsilon( new Bounds2( 10, 0, 110, 30 ), epsilon ), 'Bounds check: ' + rect.bounds.toString() );
   } );
 
-  rect.on( 'childBounds', function() {
+  rect.childBoundsProperty.lazyLink( function() {
     assert.ok( false, 'Child bounds should not change for leaf node' );
   } );
 

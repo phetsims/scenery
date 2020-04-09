@@ -22,7 +22,7 @@ class NodeIO extends ObjectIO {
   constructor( node, phetioID ) {
     super( node, phetioID );
 
-    const visibleProperty = new NodeProperty( node, 'visibility', 'visible', merge( {
+    const visibleProperty = new NodeProperty( node, node.visibleProperty, 'visible', merge( {
 
       // pick the baseline value from the parent Node's baseline
       phetioReadOnly: node.phetioReadOnly,
@@ -32,7 +32,7 @@ class NodeIO extends ObjectIO {
       phetioDocumentation: 'Controls whether the Node will be visible (and interactive), see the NodeIO documentation for more details.'
     }, node.phetioComponentOptions, node.phetioComponentOptions.visibleProperty ) );
 
-    const pickableProperty = new NodeProperty( node, 'pickability', 'pickable', merge( {
+    const pickableProperty = new NodeProperty( node, node.pickableProperty, 'pickable', merge( {
 
       // pick the baseline value from the parent Node's baseline
       phetioReadOnly: node.phetioReadOnly,
@@ -54,7 +54,7 @@ class NodeIO extends ObjectIO {
       phetioDocumentation: 'Opacity of the parent NodeIO, between 0 (invisible) and 1 (fully visible)'
     }, node.phetioComponentOptions, node.phetioComponentOptions.opacityProperty ) );
     opacityProperty.link( function( opacity ) { node.opacity = opacity; } );
-    node.on( 'opacity', function() { opacityProperty.value = node.opacity; } );
+    node.opacityProperty.lazyLink( () => { opacityProperty.value = node.opacity; } );
 
     // @private
     this.disposeNodeIO = function() {

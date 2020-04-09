@@ -146,7 +146,7 @@ inherit( Object, Picker, {
       assert && assert( isInclusive ? !this.touchInclusiveDirty : !this.touchExclusiveDirty );
     }
     else {
-      pruningBounds = this.node._bounds;
+      pruningBounds = this.node.bounds;
       assert && assert( !this.node._boundsDirty );
     }
 
@@ -160,7 +160,7 @@ inherit( Object, Picker, {
     const localPoint = this.node._transform.getInverse().multiplyVector2( this.scratchVector.set( point ) );
 
     // If our point is outside of the local-coordinate clipping area, there should be no hit.
-    if ( this.node.hasClipArea() && !this.node._clipArea.containsPoint( localPoint ) ) {
+    if ( this.node.hasClipArea() && !this.node.clipArea.containsPoint( localPoint ) ) {
       sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( this.node.constructor.name + '#' + this.node.id + ' out of clip area' );
       return null;
     }
@@ -418,7 +418,7 @@ inherit( Object, Picker, {
     }
 
     if ( this.node.hasClipArea() ) {
-      const clipBounds = this.node._clipArea.bounds;
+      const clipBounds = this.node.clipArea.bounds;
       // exclude areas outside of the clipping area's bounds (for efficiency)
       // Uses Bounds2.constrainBounds, but inlined to prevent https://github.com/phetsims/projectile-motion/issues/155
       mutableBounds.minX = Math.max( mutableBounds.minX, clipBounds.minX );
@@ -599,7 +599,7 @@ inherit( Object, Picker, {
    * invalidate ourself.
    */
   checkSelfPruned: function() {
-    const selfPruned = this.node._pickable === false || !this.node.isVisible();
+    const selfPruned = this.node.pickableProperty.value === false || !this.node.isVisible();
     if ( this.selfPruned !== selfPruned ) {
       this.selfPruned = selfPruned;
 
@@ -628,7 +628,7 @@ inherit( Object, Picker, {
    * @private
    */
   checkSelfInclusive: function() {
-    const selfInclusive = this.node._pickable === true || this.node._inputListeners.length > 0;
+    const selfInclusive = this.node.pickableProperty.value === true || this.node._inputListeners.length > 0;
     if ( this.selfInclusive !== selfInclusive ) {
       this.selfInclusive = selfInclusive;
 
@@ -642,9 +642,9 @@ inherit( Object, Picker, {
    * @private
    */
   checkSubtreePrunable: function() {
-    const subtreePrunable = this.node._pickable === false ||
+    const subtreePrunable = this.node.pickableProperty.value === false ||
                             !this.node.isVisible() ||
-                            ( this.node._pickable !== true && this.subtreePickableCount === 0 );
+                            ( this.node.pickableProperty.value !== true && this.subtreePickableCount === 0 );
 
     if ( this.subtreePrunable !== subtreePrunable ) {
       this.subtreePrunable = subtreePrunable;
@@ -703,7 +703,7 @@ inherit( Object, Picker, {
                                       !this.node.isVisible() ||
                                       ( this.node.pickable !== true && this.subtreePickableCount === 0 );
       const expectedSubtreePickableCount = this.node._inputListeners.length +
-                                           ( this.node._pickable === true ? 1 : 0 ) +
+                                           ( this.node.pickableProperty.value === true ? 1 : 0 ) +
                                            _.filter( this.node._children, function( child ) {
                                              return !child._picker.selfPruned && child._picker.subtreePickableCount > 0;
                                            } ).length;

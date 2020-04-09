@@ -28,10 +28,9 @@ function ShapeBasedOverlay( display, rootNode, name ) {
     svg.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
   }
 
-  display.onStatic( 'displaySize', function( dimension ) {
+  display.sizeProperty.link( function( dimension ) {
     resize( dimension.width, dimension.height );
   } );
-  resize( display.width, display.height );
 
   this.domElement = svg;
 }

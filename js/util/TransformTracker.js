@@ -57,12 +57,7 @@ function TransformTracker( trail, options ) {
 
     this._nodeTransformListeners.push( nodeTransformListener );
 
-    if ( this._isStatic ) {
-      trail.nodes[ j ].onStatic( 'transform', nodeTransformListener );
-    }
-    else {
-      trail.nodes[ j ].on( 'transform', nodeTransformListener );
-    }
+    trail.nodes[ j ].transformEmitter.addListener( nodeTransformListener );
   }
 }
 
@@ -77,11 +72,8 @@ inherit( Object, TransformTracker, {
     for ( let j = 1; j < this.trail.length; j++ ) {
       const nodeTransformListener = this._nodeTransformListeners[ j - 1 ];
 
-      if ( this._isStatic ) {
-        this.trail.nodes[ j ].offStatic( 'transform', nodeTransformListener, false );
-      }
-      else {
-        this.trail.nodes[ j ].off( 'transform', nodeTransformListener, false );
+      if ( this.trail.nodes[ j ].transformEmitter.hasListener( nodeTransformListener ) ) {
+        this.trail.nodes[ j ].transformEmitter.removeListener( nodeTransformListener );
       }
     }
   },

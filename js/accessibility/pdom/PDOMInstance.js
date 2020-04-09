@@ -27,7 +27,6 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Events from '../../../../axon/js/Events.js';
 import cleanArray from '../../../../phet-core/js/cleanArray.js';
 import inherit from '../../../../phet-core/js/inherit.js';
 import platform from '../../../../phet-core/js/platform.js';
@@ -54,7 +53,7 @@ function PDOMInstance( parent, display, trail ) {
 
 scenery.register( 'PDOMInstance', PDOMInstance );
 
-inherit( Events, PDOMInstance, {
+inherit( Object, PDOMInstance, {
 
   /**
    * Initializes an PDOMInstance, implements construction for pooling.
@@ -66,8 +65,6 @@ inherit( Events, PDOMInstance, {
    * @returns {PDOMInstance} - Returns 'this' reference, for chaining
    */
   initializeAccessibleInstance: function( parent, display, trail ) {
-    Events.call( this ); // TODO: is Events worth mixing in by default? Will we need to listen to events?
-
     assert && assert( !this.id || this.isDisposed, 'If we previously existed, we need to have been disposed' );
 
     // unique ID
@@ -150,7 +147,7 @@ inherit( Events, PDOMInstance, {
         }
 
         const listener = this.checkAccessibleDisplayVisibility.bind( this, i - parentTrail.length );
-        relativeNode.onStatic( 'accessibleDisplays', listener );
+        relativeNode.accessibleDisplaysEmitter.addListener( listener );
         this.relativeListeners.push( listener );
       }
 
@@ -492,7 +489,7 @@ inherit( Events, PDOMInstance, {
       PDOMUtils.removeElements( this.parent.peer.primarySibling, this.peer.topLevelElements );
 
       for ( let i = 0; i < this.relativeNodes.length; i++ ) {
-        this.relativeNodes[ i ].offStatic( 'accessibleDisplays', this.relativeListeners[ i ] );
+        this.relativeNodes[ i ].accessibleDisplaysEmitter.removeListener( this.relativeListeners[ i ] );
       }
     }
 

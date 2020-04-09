@@ -182,13 +182,13 @@ inherit( Object, FocusOverlay, {
       this.boundsFocusHighlightPath.setShapeFromNode( this.node );
 
       this.boundsFocusHighlightPath.visible = true;
-      this.node.onStatic( 'localBounds', this.boundsListener );
+      this.node.localBoundsProperty.lazyLink( this.boundsListener );
 
       this.onBoundsChange();
     }
 
     // handle any changes to the focus highlight while the node has focus
-    this.node.onStatic( 'focusHighlightChanged', this.focusHighlightListener );
+    this.node.focusHighlightChangedEmitter.addListener( this.focusHighlightListener );
 
     this.transformTracker = new TransformTracker( trailToTrack, {
       isStatic: true
@@ -225,11 +225,11 @@ inherit( Object, FocusOverlay, {
     }
     else if ( this.mode === 'bounds' ) {
       this.boundsFocusHighlightPath.visible = false;
-      this.node.offStatic( 'localBounds', this.boundsListener );
+      this.node.localBoundsProperty.unlink( this.boundsListener );
     }
 
     // remove listener that updated focus highlight while this node had focus
-    this.node.offStatic( 'focusHighlightChanged', this.focusHighlightListener );
+    this.node.focusHighlightChangedEmitter.removeListener( this.focusHighlightListener );
 
     // remove all 'group' focus highlights
     this.deactivateGroupHighlights();

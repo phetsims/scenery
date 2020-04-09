@@ -8,6 +8,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import TinyProperty from '../../../axon/js/TinyProperty.js';
 import escapeHTML from '../../../phet-core/js/escapeHTML.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
 import inherit from '../../../phet-core/js/inherit.js';
@@ -56,8 +57,8 @@ function Text( text, options ) {
   assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
     'Extra prototype on Node options object is a code smell' );
 
-  // @private {string} - The text to display. We'll initialize this by mutating.
-  this._text = '';
+  // @public {TinyProperty.<string>} - The text to display. We'll initialize this by mutating.
+  this.textProperty = new TinyProperty( '' );
 
   // @private {Font} - The font with which to display the text.
   this._font = Font.DEFAULT;
@@ -84,6 +85,8 @@ function Text( text, options ) {
   this.textTandem = options.tandem; // @private (phet-io) - property name avoids namespace of the Node setter
 
   Node.call( this, options );
+
+  Node.preventSettersOnProperty( this, 'textProperty' );
 
   this.invalidateSupportedRenderers(); // takes care of setting up supported renderers
 }
@@ -124,9 +127,9 @@ inherit( Node, Text, {
     // cast it to a string (for numbers, etc., and do it before the change guard so we don't accidentally trigger on non-changed text)
     text = '' + text;
 
-    if ( text !== this._text ) {
-      const oldText = this._text;
-      this._text = text;
+    if ( text !== this.text ) {
+      const oldText = this.text;
+      this.textProperty.setPropertyValue( text );
       this._cachedRenderedText = null;
 
       const stateLen = this._drawables.length;
@@ -135,7 +138,8 @@ inherit( Node, Text, {
       }
 
       this.invalidateText();
-      this.trigger2( 'text', oldText, text );
+
+      this.textProperty._notifyListeners( oldText );
     }
     return this;
   },
@@ -150,7 +154,7 @@ inherit( Node, Text, {
    * @returns {string}
    */
   getText: function() {
-    return this._text;
+    return this.textProperty.value;
   },
   get text() { return this.getText(); },
 
@@ -164,7 +168,7 @@ inherit( Node, Text, {
   getRenderedText: function() {
     if ( this._cachedRenderedText === null ) {
       // Using the non-breaking space (&nbsp;) encoded as 0x00A0 in UTF-8
-      this._cachedRenderedText = this._text.replace( ' ', '\xA0' );
+      this._cachedRenderedText = this.text.replace( ' ', '\xA0' );
 
       if ( platform.edge ) {
         // Simplify embedding marks to work around an Edge bug, see https://github.com/phetsims/scenery/issues/520
@@ -211,9 +215,7 @@ inherit( Node, Text, {
 
       this.invalidateText();
 
-      this.trigger0( 'boundsMethod' );
-
-      this.trigger0( 'selfBoundsValid' ); // whether our self bounds are valid may have changed
+      this.selfBoundsValidEmitter.emit(); // whether our self bounds are valid may have changed
     }
     return this;
   },
@@ -312,9 +314,9 @@ inherit( Node, Text, {
       selfBounds.dilate( this.getLineWidth() / 2 );
     }
 
-    const changed = !selfBounds.equals( this._selfBounds );
+    const changed = !selfBounds.equals( this.selfBoundsProperty.value );
     if ( changed ) {
-      this._selfBounds.set( selfBounds );
+      this.selfBoundsProperty.value.set( selfBounds );
     }
     return changed;
   },
@@ -403,7 +405,7 @@ inherit( Node, Text, {
   getDOMTextNode: function() {
     if ( this._isHTML ) {
       const span = document.createElement( 'span' );
-      span.innerHTML = this._text;
+      span.innerHTML = this.text;
       return span;
     }
     else {

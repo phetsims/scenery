@@ -55,7 +55,7 @@ function ImageSVGDrawable( renderer, instance ) {
     // update our mipmap usage status
     self.updateMipmapStatus( self.node._mipmap );
   };
-  this.node.onStatic( 'mipmap', this._mipmapListener );
+  this.node.mipmapEmitter.addListener( this._mipmapListener );
   this.updateMipmapStatus( instance.node._mipmap );
 }
 
@@ -173,7 +173,7 @@ inherit( SVGSelfDrawable, ImageSVGDrawable, {
 
     // clean up mipmap listeners and compute needs
     this.updateMipmapStatus( false );
-    this.node.offStatic( 'mipmap', this._mipmapListener );
+    this.node.mipmapEmitter.removeListener( this._mipmapListener );
 
     SVGSelfDrawable.prototype.dispose.call( this );
   }

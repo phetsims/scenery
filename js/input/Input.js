@@ -713,13 +713,17 @@ class Input {
       const accessibleEventOptions = Features.passive ? { useCapture: false, passive: false } : false;
 
       // Add a listener to the root accessible DOM element for each event we want to monitor.
-      PDOMUtils.DOM_EVENTS.map( eventName => {
+      PDOMUtils.DOM_EVENTS.forEach( eventName => {
 
         const actionName = eventName + 'Action';
         assert && assert( this[ actionName ], `action not defined on Input: ${actionName}` );
 
+        console.log( eventName );
+
         // These exist for the lifetime of the display, and need not be disposed.
         this.display.accessibleDOMElement.addEventListener( eventName, event => {
+          console.log( `firing ${eventName}` );
+
           sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `Input.${eventName}FromBrowser` );
           sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
 

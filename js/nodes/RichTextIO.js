@@ -23,7 +23,7 @@ class RichTextIO extends NodeIO {
     super( richText, phetioID );
 
     // this uses a sub Property adapter as described in https://github.com/phetsims/phet-io/issues/1326
-    const textProperty = new NodeProperty( richText, 'text', 'text', merge( {
+    const textProperty = new NodeProperty( richText, richText.textProperty, 'text', merge( {
 
       // pick the following values from the parent Node
       phetioReadOnly: richText.phetioReadOnly,

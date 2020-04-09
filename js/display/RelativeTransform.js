@@ -180,11 +180,11 @@ inherit( Object, RelativeTransform, {
   },
 
   attachNodeListeners: function() {
-    this.node.onStatic( 'transform', this.nodeTransformListener );
+    this.node.transformEmitter.addListener( this.nodeTransformListener );
   },
 
   detachNodeListeners: function() {
-    this.node.offStatic( 'transform', this.nodeTransformListener );
+    this.node.transformEmitter.removeListener( this.nodeTransformListener );
   },
 
   /*---------------------------------------------------------------------------*

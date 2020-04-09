@@ -53,7 +53,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Events from '../../../axon/js/Events.js';
+import TinyProperty from '../../../axon/js/TinyProperty.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 import Renderer from './Renderer.js';
@@ -66,9 +66,8 @@ function Drawable( renderer ) {
 
 scenery.register( 'Drawable', Drawable );
 
-inherit( Events, Drawable, {
+inherit( Object, Drawable, {
   initializeDrawable: function( renderer ) {
-    Events.call( this );
 
     assert && assert( !this.id || this.isDisposed, 'If we previously existed, we need to have been disposed' );
 
@@ -86,10 +85,9 @@ inherit( Events, Drawable, {
 
     this.linksDirty = false;
 
-    this._visible = true; // {boolean}, ES5 getter/setter provided
-
-    // {boolean} - If false, will cause our parent block to not be fitted. (ES5 getter/setter provided)
-    this._fittable = true;
+    // @public {TinyProperty.<boolean>}
+    this.visibleProperty = new TinyProperty( true );
+    this.fittableProperty = new TinyProperty( true ); // If false, will cause our parent block to not be fitted
 
     return this;
   },
@@ -115,7 +113,8 @@ inherit( Events, Drawable, {
     this.oldPreviousDrawable = null;
     this.oldNextDrawable = null;
 
-    this.removeAllEventListeners();
+    this.visibleProperty && this.visibleProperty.removeAllListeners();
+    this.fittableProperty && this.fittableProperty.removeAllListeners();
   },
 
   /**
@@ -139,29 +138,23 @@ inherit( Events, Drawable, {
   },
 
   setVisible: function( visible ) {
-    if ( this._visible !== visible ) {
-      this._visible = visible;
-      this.trigger0( 'visibility' );
-    }
+    this.visibleProperty.value = visible;
   },
   set visible( value ) { this.setVisible( value ); },
 
   isVisible: function() {
-    return this._visible;
+    return this.visibleProperty.value;
   },
   get visible() { return this.isVisible(); },
 
   // Should be called just after initialization (before being added to blocks) if we aren't fittable.
   setFittable: function( fittable ) {
-    if ( this._fittable !== fittable ) {
-      this._fittable = fittable;
-      this.trigger1( 'fittability', this );
-    }
+    this.fittableProperty.value = fittable;
   },
   set fittable( value ) { this.setFittable( value ); },
 
   isFittable: function() {
-    return this._fittable;
+    return this.fittableProperty.value;
   },
   get fittable() { return this.isFittable(); },
 

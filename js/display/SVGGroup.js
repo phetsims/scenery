@@ -55,7 +55,7 @@ inherit( Object, SVGGroup, {
     this.hasTransform = this.hasTransform !== undefined ? this.hasTransform : false; // persists across disposal
     this.transformDirtyListener = this.transformDirtyListener || this.markTransformDirty.bind( this );
     if ( this.willApplyTransforms ) {
-      this.node.onStatic( 'transform', this.transformDirtyListener );
+      this.node.transformEmitter.addListener( this.transformDirtyListener );
     }
 
     // filter handling
@@ -68,17 +68,17 @@ inherit( Object, SVGGroup, {
     this.opacityDirtyListener = this.opacityDirtyListener || this.markOpacityDirty.bind( this );
     this.visibilityDirtyListener = this.visibilityDirtyListener || this.markVisibilityDirty.bind( this );
     this.clipDirtyListener = this.clipDirtyListener || this.markClipDirty.bind( this );
-    this.node.onStatic( 'visibility', this.visibilityDirtyListener );
+    this.node.visibleProperty.lazyLink( this.visibilityDirtyListener );
     if ( this.willApplyFilters ) {
-      this.node.onStatic( 'opacity', this.opacityDirtyListener );
+      this.node.opacityProperty.lazyLink( this.opacityDirtyListener );
     }
     //OHTWO TODO: remove clip workaround
-    this.node.onStatic( 'clip', this.clipDirtyListener );
+    this.node.clipAreaProperty.lazyLink( this.clipDirtyListener );
 
     // for tracking the order of child groups, we use a flag and update (reorder) once per updateDisplay if necessary.
     this.orderDirty = true;
     this.orderDirtyListener = this.orderDirtyListener || this.markOrderDirty.bind( this );
-    this.node.onStatic( 'childrenChanged', this.orderDirtyListener );
+    this.node.childrenChangedEmitter.addListener( this.orderDirtyListener );
 
     if ( !this.svgGroup ) {
       this.svgGroup = document.createElementNS( scenery.svgns, 'g' );
@@ -321,16 +321,16 @@ inherit( Object, SVGGroup, {
     assert && assert( this.children.length === 0, 'Should be empty by now' );
 
     if ( this.willApplyTransforms ) {
-      this.node.offStatic( 'transform', this.transformDirtyListener );
+      this.node.transformEmitter.removeListener( this.transformDirtyListener );
     }
-    this.node.offStatic( 'visibility', this.visibilityDirtyListener );
+    this.node.visibleProperty.unlink( this.visibilityDirtyListener );
     if ( this.willApplyFilters ) {
-      this.node.offStatic( 'opacity', this.opacityDirtyListener );
+      this.node.opacityProperty.unlink( this.opacityDirtyListener );
     }
     //OHTWO TODO: remove clip workaround
-    this.node.offStatic( 'clip', this.clipDirtyListener );
+    this.node.clipAreaProperty.unlink( this.clipDirtyListener );
 
-    this.node.offStatic( 'childrenChanged', this.orderDirtyListener );
+    this.node.childrenChangedEmitter.removeListener( this.orderDirtyListener );
 
     // if our Instance has been disposed, it has already had the reference removed
     if ( this.instance.active ) {

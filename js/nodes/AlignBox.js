@@ -79,7 +79,7 @@ function AlignBox( content, options ) {
   this._layoutLock = false;
 
   // Will be removed by dispose()
-  this._content.on( 'bounds', this._contentBoundsListener );
+  this._content.boundsProperty.lazyLink( this._contentBoundsListener );
 
   Node.call( this, merge( {}, options, {
     children: [ this._content ]
@@ -637,7 +637,7 @@ inherit( Node, AlignBox, {
    */
   dispose: function() {
     // Remove our listener
-    this._content.off( 'bounds', this._contentBoundsListener );
+    this._content.boundsProperty.unlink( this._contentBoundsListener );
 
     // Disconnects from the group
     this.group = null;

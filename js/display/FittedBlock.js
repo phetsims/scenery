@@ -55,7 +55,7 @@ inherit( Block, FittedBlock, {
     this.forceAcceleration = false;
 
     // now we always add a listener to the display size to invalidate our fit
-    this.display.onStatic( 'displaySize', this.dirtyFitListener );
+    this.display.sizeProperty.lazyLink( this.dirtyFitListener );
 
     // TODO: add count of boundsless objects?
     return this;
@@ -202,7 +202,7 @@ inherit( Block, FittedBlock, {
   dispose: function() {
     sceneryLog && sceneryLog.FittedBlock && sceneryLog.FittedBlock( 'dispose #' + this.id );
 
-    this.display.offStatic( 'displaySize', this.dirtyFitListener );
+    this.display.sizeProperty.unlink( this.dirtyFitListener );
 
     this.removeCommonFitInstance();
 
@@ -221,7 +221,7 @@ inherit( Block, FittedBlock, {
   addDrawable: function( drawable ) {
     Block.prototype.addDrawable.call( this, drawable );
 
-    drawable.onStatic( 'fittability', this.fittableListener );
+    drawable.fittableProperty.lazyLink( this.fittableListener );
 
     if ( !drawable.fittable ) {
       this.incrementUnfittable();
@@ -237,7 +237,7 @@ inherit( Block, FittedBlock, {
   removeDrawable: function( drawable ) {
     Block.prototype.removeDrawable.call( this, drawable );
 
-    drawable.offStatic( 'fittability', this.fittableListener );
+    drawable.fittableProperty.unlink( this.fittableListener );
 
     if ( !drawable.fittable ) {
       this.decrementUnfittable();
@@ -248,12 +248,10 @@ inherit( Block, FittedBlock, {
    * Called from the fittability listener attached to child drawables when their fittability changes.
    * @private
    *
-   * @param {Drawable} drawable
+   * @param {boolean} fittable - Whether the particular child drawable is fittable
    */
-  onFittabilityChange: function( drawable ) {
-    assert && assert( drawable.parentDrawable === this );
-
-    if ( drawable.isFittable() ) {
+  onFittabilityChange: function( fittable ) {
+    if ( fittable ) {
       this.decrementUnfittable();
     }
     else {

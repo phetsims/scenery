@@ -132,18 +132,37 @@ an UI and Display made for visual testing and debugging.
   window.accessibleTest = function() {
     setTimeout( function() {
 
-      // with scenery logging for a11y
-      toggleA11yDebug( true );
-      toggleUpdates();
+      display.initializeEvents();
+      document.body.appendChild( display.domElement );
 
-      scene.tagName = 'div';
+      const a = new scenery.Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
 
-      var a = new scenery.Node( { tagName: 'div', accessibleName: 'Test label' } );
+      let aGotFocus = false;
+      let aLostFocus = false;
+      let bGotFocus = false;
+
       scene.addChild( a );
 
-      // TODO: this should be passing,see
-      var b = new scenery.Node( { tagName: 'input', accessibleName: 'Test label' } );
-      a.addChild( b );
+      a.addInputListener( {
+        focus() {
+          aGotFocus = true;
+        },
+        blur() {
+          aLostFocus = true;
+        }
+      } );
+
+      a._accessibleInstances[ 0 ].peer._primarySibling.addEventListener( 'focusin', () => console.log( 'primary focusin') );
+      a._accessibleInstances[ 0 ].peer._primarySibling.addEventListener( 'focus', () => console.log( 'primary focus') );
+      display.accessibleDOMElement.addEventListener( 'focusin', () => console.log( 'element focusin') );
+      display.accessibleDOMElement.addEventListener( 'focus', () => console.log( 'element focus') );
+
+      a.focus();
+
+      window.element = a._accessibleInstances[ 0 ].peer._primarySibling;
+      element.focus();
+
+      debugger;
     } )
   };
 

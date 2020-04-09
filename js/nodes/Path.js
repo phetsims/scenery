@@ -283,9 +283,9 @@ inherit( Node, Path, {
    */
   updateSelfBounds: function() {
     const selfBounds = this.hasShape() ? this.computeShapeBounds() : Bounds2.NOTHING;
-    const changed = !selfBounds.equals( this._selfBounds );
+    const changed = !selfBounds.equals( this.selfBoundsProperty.value );
     if ( changed ) {
-      this._selfBounds.set( selfBounds );
+      this.selfBoundsProperty.value.set( selfBounds );
     }
     return changed;
   },
@@ -317,9 +317,7 @@ inherit( Node, Path, {
       this._boundsMethod = boundsMethod;
       this.invalidatePath();
 
-      this.trigger0( 'boundsMethod' );
-
-      this.trigger0( 'selfBoundsValid' ); // whether our self bounds are valid may have changed
+      this.selfBoundsValidEmitter.emit(); // whether our self bounds are valid may have changed
     }
     return this;
   },
@@ -433,7 +431,7 @@ inherit( Node, Path, {
    */
   invalidateStroke: function() {
     this.invalidatePath();
-    this.trigger0( 'selfBoundsValid' ); // Stroke changing could have changed our self-bounds-validitity (unstroked/etc)
+    this.selfBoundsValidEmitter.emit(); // Stroke changing could have changed our self-bounds-validitity (unstroked/etc)
   },
 
   /**

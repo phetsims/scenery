@@ -301,7 +301,7 @@
         }
       } );
 
-      childrenNode.onStatic( 'bounds', function() {
+      childrenNode.boundsProperty.lazyLink( function() {
         column.rectHeight = childrenNode.height;
       } );
     }

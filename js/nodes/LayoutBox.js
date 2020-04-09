@@ -89,9 +89,9 @@ function LayoutBox( options ) {
   // @private {boolean} - Prevents layout() from running while true. Generally will be unlocked and laid out.
   this._updateLayoutLocked = false;
 
-  this.onStatic( 'childInserted', this.onLayoutBoxChildInserted.bind( this ) );
-  this.onStatic( 'childRemoved', this.onLayoutBoxChildRemoved.bind( this ) );
-  this.onStatic( 'childrenChanged', this.onLayoutBoxChildrenChanged.bind( this ) );
+  this.childInsertedEmitter.addListener( this.onLayoutBoxChildInserted.bind( this ) );
+  this.childRemovedEmitter.addListener( this.onLayoutBoxChildRemoved.bind( this ) );
+  this.childrenChangedEmitter.addListener( this.onLayoutBoxChildrenChanged.bind( this ) );
 
   // @private {boolean} - We'll ignore the resize flag while running the initial mutate.
   this._layoutMutating = true;
@@ -203,8 +203,8 @@ export default inherit( Node, LayoutBox, {
    */
   onLayoutBoxChildInserted: function( node ) {
     if ( this._resize ) {
-      node.onStatic( 'bounds', this._updateLayoutListener );
-      node.onStatic( 'visibility', this._updateLayoutListener );
+      node.boundsProperty.lazyLink( this._updateLayoutListener );
+      node.visibleProperty.lazyLink( this._updateLayoutListener );
     }
   },
 
@@ -216,8 +216,8 @@ export default inherit( Node, LayoutBox, {
    */
   onLayoutBoxChildRemoved: function( node ) {
     if ( this._resize ) {
-      node.offStatic( 'bounds', this._updateLayoutListener );
-      node.offStatic( 'visibility', this._updateLayoutListener );
+      node.boundsProperty.unlink( this._updateLayoutListener );
+      node.visibleProperty.unlink( this._updateLayoutListener );
     }
   },
 
@@ -409,13 +409,13 @@ export default inherit( Node, LayoutBox, {
 
         // If we are now resizable, we need to add listeners to every child
         if ( resize ) {
-          child.onStatic( 'bounds', this._updateLayoutListener );
-          child.onStatic( 'visibility', this._updateLayoutListener );
+          child.boundsProperty.lazyLink( this._updateLayoutListener );
+          child.visibleProperty.lazyLink( this._updateLayoutListener );
         }
         // Otherwise we are now not resizeable, and need to remove the listeners
         else {
-          child.offStatic( 'bounds', this._updateLayoutListener );
-          child.offStatic( 'visibility', this._updateLayoutListener );
+          child.boundsProperty.unlink( this._updateLayoutListener );
+          child.visibleProperty.unlink( this._updateLayoutListener );
         }
       }
 

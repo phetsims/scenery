@@ -148,50 +148,12 @@
  * The trails above are in order from bottom to top (visually), due to the order of children. Thus since A's children
  * are [B,C] in that order, F with the trail [A,B,D,F] is displayed below [A,C,D,F], because C is after B.
  *
- * ## Events
- *
- * There are a number of events that can be triggered on a Node (usually when something changes or happens). Currently
- * Node effectively inherits the Events type, and thus has the on()/off() and onStatic()/offStatic() methods for
- * handling these types of event listeners. It is generally preferred to use the "static" forms, which have improved
- * performance (but come with the restriction that a listener being fired should NOT trigger any listeners getting
- * added or removed as a side-effect).
- *
- * The following events are exposed non-Scenery usage:
- *
- * - childrenChanged - This is fired only once for any single operation that may change the children of a Node. For
- *                     example, if a Node's children are [ a, b ] and setChildren( [ a, x, y, z ] ) is called on it,
- *                     the childrenChanged event will only be fired once after the entire operation of changing the
- *                     children is completed.
- * - selfBounds - This event can be fired synchronously, and happens with the self-bounds of a Node is changed.
- * - childBounds - This is fired asynchronously (usually as part of a Display.updateDisplay()) when the childBounds of
- *                 the node is changed.
- * - localBounds - This is fired asynchronously (usually as part of a Display.updateDisplay()) when the localBounds of
- *                 the node is changed.
- * - bounds - This is fired asynchronously (usually as part of a Display.updateDisplay()) when the bounds of the node is
- *            changed.
- * - transform - Fired synchronously when the transform (transformation matrix) of a Node is changed. Any change to a
- *               Node's translation/rotation/scale/etc. will trigger this event.
- * - visibility - Fired synchronously when the visibility of the Node is toggled.
- * - opacity - Fired synchronously when the opacity of the Node is changed.
- * - pickability - Fired synchronously when the pickability of the Node is changed
- * - clip - Fired synchronously when the clipArea of the Node is changed.
- *
- * While the following are considered scenery-internal and should not be used externally:
- *
- * - childInserted - For a single added child Node.
- * - childRemoved - For a single removed child Node.
- * - childrenReordered - Provides a given range that may be affected by the reordering
- * - localBoundsOverride - When the presence/value of the localBounds override is changed.
- * - inputEnabled - When the inputEnabled property is changed.
- * - rendererBitmask - When this node's bitmask changes (generally happens synchronously to other changes)
- * - hint - Fired synchronously when various hints change
- * - addedInstance - Fires when an Instance is added to the Node.
- * - removedInstance - Fires when an Instance is removed from the Node.
- *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Events from '../../../axon/js/Events.js';
+import TinyEmitter from '../../../axon/js/TinyEmitter.js';
+import TinyProperty from '../../../axon/js/TinyProperty.js';
+import TinyStaticProperty from '../../../axon/js/TinyStaticProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Transform3 from '../../../dot/js/Transform3.js';
@@ -221,12 +183,6 @@ import NodeIO from './NodeIO.js';
 const clamp = Utils.clamp;
 
 let globalIdCounter = 1;
-
-const eventsRequiringBoundsValidation = {
-  'childBounds': true,
-  'localBounds': true,
-  'bounds': true
-};
 
 const scratchBounds2 = Bounds2.NOTHING.copy(); // mutable {Bounds2} used temporarily in methods
 const scratchMatrix3 = new Matrix3();
@@ -303,7 +259,6 @@ const DEFAULT_OPTIONS = {
  * Creates a Node with options.
  * @public
  * @constructor
- * @mixes Events
  * @mixes ParallelDOM
  *
  * NOTE: Directly created Nodes (not of any subtype, but created with "new Node( ... )") are generally used as
@@ -338,9 +293,6 @@ const DEFAULT_OPTIONS = {
  * @param {Object} [options] - Optional options object, as described above.
  */
 function Node( options ) {
-  // supertype call to axon.Events (should just initialize a few properties here, notably _eventListeners and _staticEventListeners)
-  Events.call( this );
-
   // NOTE: All member properties with names starting with '_' are assumed to be @private!
 
   // @private {number} - Assigns a unique ID to this node (allows trails to get a unique list of IDs)
@@ -356,23 +308,24 @@ function Node( options ) {
   // DOM elements that need to closely track state (possibly by Canvas to maintain dirty state).
   this._drawables = [];
 
-  // @private {boolean} - Whether this node (and its children) will be visible when the scene is updated. Visible
-  // nodes by default will not be pickable either.
-  this._visible = DEFAULT_OPTIONS.visible;
+  // @public {TinyProperty.<boolean>} - Whether this node (and its children) will be visible when the scene is updated.
+  // Visible nodes by default will not be pickable either.
+  this.visibleProperty = new TinyProperty( DEFAULT_OPTIONS.visible );
 
-  // @private {number} - Opacity, in the range from 0 (fully transparent) to 1 (fully opaque).
-  this._opacity = DEFAULT_OPTIONS.opacity;
+  // @public {TinyProperty.<number>} - Opacity, in the range from 0 (fully transparent) to 1 (fully opaque).
+  this.opacityProperty = new TinyProperty( DEFAULT_OPTIONS.opacity );
 
-  // @private {boolean|null} - See setPickable().
-  this._pickable = DEFAULT_OPTIONS.pickable;
+  // @public {TinyProperty.<boolean|null>} - See setPickable().
+  this.pickableProperty = new TinyProperty( DEFAULT_OPTIONS.pickable );
 
-  // @private {boolean} - Whether input event listeners on this node or descendants on a trail will have input
-  // listeners. triggered. Note that this does NOT effect picking, and only prevents some listeners from being fired.
-  this._inputEnabled = DEFAULT_OPTIONS.inputEnabled;
+  // @public {TinyProperty.<boolean>} - Whether input event listeners on this node or descendants on a trail will have
+  // input listeners. triggered. Note that this does NOT effect picking, and only prevents some listeners from being
+  // fired.
+  this.inputEnabledProperty = new TinyProperty( DEFAULT_OPTIONS.inputEnabled );
 
-  // @private - This node and all children will be clipped by this shape (in addition to any other clipping shapes).
-  // {Shape|null} The shape should be in the local coordinate frame.
-  this._clipArea = DEFAULT_OPTIONS.clipArea;
+  // @private {TinyProperty.<Shape|null>} - This node and all children will be clipped by this shape (in addition to any
+  // other clipping shapes). The shape should be in the local coordinate frame.
+  this.clipAreaProperty = new TinyProperty( DEFAULT_OPTIONS.clipArea );
 
   // @private - Areas for hit intersection. If set on a Node, no descendants can handle events.
   this._mouseArea = DEFAULT_OPTIONS.mouseArea; // {Shape|Bounds2} for mouse position in the local coordinate frame
@@ -394,7 +347,7 @@ function Node( options ) {
    */
   this._transform = new Transform3(); // @private {Transform3}
   this._transformListener = this.onTransformChange.bind( this ); // @private {Function}
-  this._transform.onStatic( 'change', this._transformListener ); // NOTE: Listener/transform bound to this node.
+  this._transform.changeEmitter.addListener( this._transformListener ); // NOTE: Listener/transform bound to this node.
 
   /*
    * Maximum dimensions for the node's local bounds before a corrective scaling factor is applied to maintain size.
@@ -422,17 +375,29 @@ function Node( options ) {
   // @private {Array.<Function>} - For user input handling (mouse/touch).
   this._inputListeners = [];
 
-  // @private {Bounds2} - [mutable] Bounds for this node and its children in the "parent" coordinate frame.
-  this._bounds = Bounds2.NOTHING.copy();
+  // @public {TinyProperty.<Bounds2>} - [mutable] Bounds for this node and its children in the "parent" coordinate frame.
+  // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
+  this.boundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy(), { useDeepEquality: true } );
 
-  // @private {Bounds2} - [mutable] Bounds for this node and its children in the "local" coordinate frame.
-  this._localBounds = Bounds2.NOTHING.copy();
+  // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds for this node and its children in the "local" coordinate frame.
+  // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
+  this.localBoundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy(), { useDeepEquality: true } );
 
-  // @private {Bounds2} - [mutable] Bounds just for this node, in the "local" coordinate frame.
-  this._selfBounds = Bounds2.NOTHING.copy();
+  // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds just for this node, in the "local" coordinate frame.
+  // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
+  this.selfBoundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy(), { useDeepEquality: true } );
 
-  // @private {Bounds2} - [mutable] Bounds just for children of this node (and sub-trees), in the "local" coordinate frame.
-  this._childBounds = Bounds2.NOTHING.copy();
+  // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds just for children of this node (and sub-trees), in the "local"
+  // coordinate frame.
+  // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
+  this.childBoundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy(), { useDeepEquality: true } );
+
+  // For now, custom-add listener count change notifications into these Properties, since we need to know when their
+  // number of listeners changes dynamically.
+  const boundsListenersAddedOrRemovedListener = this.onBoundsListenersAddedOrRemoved.bind( this );
+  this.boundsProperty.changeCount = boundsListenersAddedOrRemovedListener;
+  this.localBoundsProperty.changeCount = boundsListenersAddedOrRemovedListener;
+  this.childBoundsProperty.changeCount = boundsListenersAddedOrRemovedListener;
 
   // @private {boolean} - Whether our localBounds have been set (with the ES5 setter/setLocalBounds()) to a custom
   // overridden value. If true, then localBounds itself will not be updated, but will instead always be the
@@ -449,10 +414,10 @@ function Node( options ) {
 
   if ( assert ) {
     // for assertions later to ensure that we are using the same Bounds2 copies as before
-    this._originalBounds = this._bounds;
-    this._originalLocalBounds = this._localBounds;
-    this._originalSelfBounds = this._selfBounds;
-    this._originalChildBounds = this._childBounds;
+    this._originalBounds = this.boundsProperty.value;
+    this._originalLocalBounds = this.localBoundsProperty.value;
+    this._originalSelfBounds = this.selfBoundsProperty.value;
+    this._originalChildBounds = this.childBoundsProperty.value;
   }
 
   // @public (scenery-internal) {Object} - Where rendering-specific settings are stored. They are generally modified
@@ -489,6 +454,60 @@ function Node( options ) {
     preventFit: DEFAULT_OPTIONS.preventFit
   };
 
+  /*
+   * TODO: inline and update docs
+   * - childrenChanged - This is fired only once for any single operation that may change the children of a Node. For
+   *                     example, if a Node's children are [ a, b ] and setChildren( [ a, x, y, z ] ) is called on it,
+   *                     the childrenChanged event will only be fired once after the entire operation of changing the
+   *                     children is completed.
+   * - selfBounds - This event can be fired synchronously, and happens with the self-bounds of a Node is changed.
+   * - childBounds - This is fired asynchronously (usually as part of a Display.updateDisplay()) when the childBounds of
+   *                 the node is changed.
+   * - localBounds - This is fired asynchronously (usually as part of a Display.updateDisplay()) when the localBounds of
+   *                 the node is changed.
+   * - bounds - This is fired asynchronously (usually as part of a Display.updateDisplay()) when the bounds of the node is
+   *            changed.
+   * - transform - Fired synchronously when the transform (transformation matrix) of a Node is changed. Any change to a
+   *               Node's translation/rotation/scale/etc. will trigger this event.
+   * - visibility - Fired synchronously when the visibility of the Node is toggled.
+   * - opacity - Fired synchronously when the opacity of the Node is changed.
+   * - pickability - Fired synchronously when the pickability of the Node is changed
+   * - clip - Fired synchronously when the clipArea of the Node is changed.
+   *
+   * While the following are considered scenery-internal and should not be used externally:
+   *
+   * - childInserted - For a single added child Node.
+   * - childRemoved - For a single removed child Node.
+   * - childrenReordered - Provides a given range that may be affected by the reordering
+   * - localBoundsOverride - When the presence/value of the localBounds override is changed.
+   * - inputEnabled - When the inputEnabled property is changed.
+   * - rendererBitmask - When this node's bitmask changes (generally happens synchronously to other changes)
+   * - hint - Fired synchronously when various hints change
+   * - addedInstance - Fires when an Instance is added to the Node.
+   * - removedInstance - Fires when an Instance is removed from the Node.
+   */
+
+  // @public {TinyEmitter}
+  this.childrenChangedEmitter = new TinyEmitter();
+  this.childInsertedEmitter = new TinyEmitter(); // emits with: node, indexOfChild
+  this.childRemovedEmitter = new TinyEmitter(); // emits with: node, indexOfChild
+  this.childrenReorderedEmitter = new TinyEmitter(); // emits with: minChangedIndex, maxChangedIndex
+  this.hintEmitter = new TinyEmitter(); // emits with: {string} hint type
+  this.rendererBitmaskEmitter = new TinyEmitter();
+  this.rendererSummaryEmitter = new TinyEmitter();
+  this.selfBoundsValidEmitter = new TinyEmitter();
+  this.transformEmitter = new TinyEmitter();
+
+  // @public {TinyEmitter}
+  this.accessibleContentEmitter = new TinyEmitter();
+  this.accessibleDisplaysEmitter = new TinyEmitter();
+  this.accessibleOrderEmitter = new TinyEmitter();
+  this.focusHighlightChangedEmitter = new TinyEmitter();
+
+  // @public {TinyEmitter}
+  this.addedInstanceEmitter = new TinyEmitter();
+  this.removedInstanceEmitter = new TinyEmitter();
+
   // compose accessibility
   this.initializeAccessibility();
 
@@ -522,6 +541,35 @@ function Node( options ) {
   // to know that a node is getting removed from its parent BUT that process has not completed yet. It would be ideal
   // to not need this.
   this._isGettingRemovedFromParent = false;
+
+  if ( assert ) {
+    [
+      'visibleProperty',
+      'opacityProperty',
+      'pickableProperty',
+      'inputEnabledProperty',
+      'clipAreaProperty',
+      'boundsProperty',
+      'localBoundsProperty',
+      'selfBoundsProperty',
+      'childBoundsProperty',
+      'childrenChangedEmitter',
+      'childInsertedEmitter',
+      'childRemovedEmitter',
+      'childrenReorderedEmitter',
+      'hintEmitter',
+      'rendererBitmaskEmitter',
+      'rendererSummaryEmitter',
+      'selfBoundsValidEmitter',
+      'transformEmitter',
+      'accessibleContentEmitter',
+      'accessibleDisplaysEmitter',
+      'accessibleOrderEmitter',
+      'focusHighlightChanged',
+      'addedInstanceEmitter',
+      'removedInstanceEmitter'
+    ].forEach( name => Node.preventSettersOnProperty( this, name ) );
+  }
 
   PhetioObject.call( this );
 
@@ -608,9 +656,9 @@ inherit( PhetioObject, Node, extend( {
     // like calling this.invalidateBounds(), but we already marked all ancestors with dirty child bounds
     this._boundsDirty = true;
 
-    this.trigger2( 'childInserted', node, index );
+    this.childInsertedEmitter.emit( node, index );
 
-    !isComposite && this.trigger0( 'childrenChanged' );
+    !isComposite && this.childrenChangedEmitter.emit();
 
     if ( assertSlow ) { this._picker.audit(); }
 
@@ -711,9 +759,9 @@ inherit( PhetioObject, Node, extend( {
     this.invalidateBounds();
     this._childBoundsDirty = true; // force recomputation of child bounds after removing a child
 
-    this.trigger2( 'childRemoved', node, indexOfChild );
+    this.childRemovedEmitter.emit( node, indexOfChild );
 
-    !isComposite && this.trigger0( 'childrenChanged' );
+    !isComposite && this.childrenChangedEmitter.emit();
 
     if ( assertSlow ) { this._picker.audit(); }
   },
@@ -744,8 +792,8 @@ inherit( PhetioObject, Node, extend( {
         this.onAccessibleReorderedChildren();
       }
 
-      this.trigger2( 'childrenReordered', Math.min( currentIndex, index ), Math.max( currentIndex, index ) );
-      this.trigger0( 'childrenChanged' );
+      this.childrenReorderedEmitter.emit( Math.min( currentIndex, index ), Math.max( currentIndex, index ) );
+      this.childrenChangedEmitter.emit();
     }
 
     return this;
@@ -817,7 +865,7 @@ inherit( PhetioObject, Node, extend( {
         this.onAccessibleReorderedChildren();
       }
 
-      this.trigger2( 'childrenReordered', minChangeIndex, maxChangeIndex );
+      this.childrenReorderedEmitter.emit( minChangeIndex, maxChangeIndex );
     }
 
     // Add in "new" children.
@@ -838,7 +886,7 @@ inherit( PhetioObject, Node, extend( {
 
     // If we had any changes, send the generic "changed" event.
     if ( beforeOnly.length !== 0 || afterOnly.length !== 0 || hasReorderingChange ) {
-      this.trigger0( 'childrenChanged' );
+      this.childrenChangedEmitter.emit();
     }
 
     // Sanity checks to make sure our resulting children array is correct.
@@ -1058,7 +1106,7 @@ inherit( PhetioObject, Node, extend( {
     this.removeChild( oldChild, true );
     this.insertChild( index, newChild, true );
 
-    this.trigger0( 'childrenChanged' );
+    this.childrenChangedEmitter.emit();
 
     if ( oldChildFocused && newChild.focusable ) {
       newChild.focus();
@@ -1110,7 +1158,7 @@ inherit( PhetioObject, Node, extend( {
   },
 
   /**
-   * Ensures that the cached _selfBounds of this node is accurate. Returns true if any sort of dirty flag was set
+   * Ensures that the cached selfBounds of this node is accurate. Returns true if any sort of dirty flag was set
    * before this was called.
    * @public
    *
@@ -1119,14 +1167,16 @@ inherit( PhetioObject, Node, extend( {
   validateSelfBounds: function() {
     // validate bounds of ourself if necessary
     if ( this._selfBoundsDirty ) {
+      const oldSelfBounds = scratchBounds2.set( this.selfBoundsProperty.value );
+
       // Rely on an overloadable method to accomplish computing our self bounds. This should update
-      // this._selfBounds itself, returning whether it was actually changed. If it didn't change, we don't want to
+      // this.selfBounds itself, returning whether it was actually changed. If it didn't change, we don't want to
       // send a 'selfBounds' event.
       const didSelfBoundsChange = this.updateSelfBounds();
       this._selfBoundsDirty = false;
 
       if ( didSelfBoundsChange ) {
-        this.trigger0( 'selfBounds' );
+        this.selfBoundsProperty._notifyListeners( oldSelfBounds );
       }
 
       return true;
@@ -1149,6 +1199,12 @@ inherit( PhetioObject, Node, extend( {
 
     let wasDirtyBefore = this.validateSelfBounds();
 
+    // We're going to directly change these instances
+    const ourChildBounds = this.childBoundsProperty.value;
+    const ourLocalBounds = this.localBoundsProperty.value;
+    const ourSelfBounds = this.selfBoundsProperty.value;
+    const ourBounds = this.boundsProperty.value;
+
     // validate bounds of children if necessary
     if ( this._childBoundsDirty ) {
       wasDirtyBefore = true;
@@ -1159,25 +1215,25 @@ inherit( PhetioObject, Node, extend( {
         this._children[ i ].validateBounds();
       }
 
-      // and recompute our _childBounds
-      const oldChildBounds = scratchBounds2.set( this._childBounds ); // store old value in a temporary Bounds2
-      this._childBounds.set( Bounds2.NOTHING ); // initialize to a value that can be unioned with includeBounds()
+      // and recompute our childBounds
+      const oldChildBounds = scratchBounds2.set( ourChildBounds ); // store old value in a temporary Bounds2
+      ourChildBounds.set( Bounds2.NOTHING ); // initialize to a value that can be unioned with includeBounds()
 
       i = this._children.length;
       while ( i-- ) {
         const child = this._children[ i ];
         if ( !this._excludeInvisibleChildrenFromBounds || child.isVisible() ) {
-          this._childBounds.includeBounds( child._bounds );
+          ourChildBounds.includeBounds( child.bounds );
         }
       }
 
       // run this before firing the event
       this._childBoundsDirty = false;
 
-      if ( !this._childBounds.equals( oldChildBounds ) ) {
+      if ( !ourChildBounds.equals( oldChildBounds ) ) {
         // notifies only on an actual change
-        if ( !this._childBounds.equalsEpsilon( oldChildBounds, notificationThreshold ) ) {
-          this.trigger0( 'childBounds' );
+        if ( !ourChildBounds.equalsEpsilon( oldChildBounds, notificationThreshold ) ) {
+          this.childBoundsProperty._notifyListeners( oldChildBounds );
         }
       }
     }
@@ -1187,19 +1243,19 @@ inherit( PhetioObject, Node, extend( {
 
       this._localBoundsDirty = false; // we only need this to set local bounds as dirty
 
-      const oldLocalBounds = scratchBounds2.set( this._localBounds ); // store old value in a temporary Bounds2
+      const oldLocalBounds = scratchBounds2.set( ourLocalBounds ); // store old value in a temporary Bounds2
 
       // local bounds are a union between our self bounds and child bounds
-      this._localBounds.set( this._selfBounds ).includeBounds( this._childBounds );
+      ourLocalBounds.set( ourSelfBounds ).includeBounds( ourChildBounds );
 
       // apply clipping to the bounds if we have a clip area (all done in the local coordinate frame)
       if ( this.hasClipArea() ) {
-        this._localBounds.constrainBounds( this._clipArea.bounds );
+        ourLocalBounds.constrainBounds( this.clipArea.bounds );
       }
 
-      if ( !this._localBounds.equals( oldLocalBounds ) ) {
-        if ( !this._localBounds.equalsEpsilon( oldLocalBounds, notificationThreshold ) ) {
-          this.trigger0( 'localBounds' );
+      if ( !ourLocalBounds.equals( oldLocalBounds ) ) {
+        if ( !ourLocalBounds.equalsEpsilon( oldLocalBounds, notificationThreshold ) ) {
+          this.localBoundsProperty._notifyListeners( oldLocalBounds );
         }
 
         // sanity check
@@ -1208,7 +1264,7 @@ inherit( PhetioObject, Node, extend( {
 
       // adjust our transform to match maximum bounds if necessary on a local bounds change
       if ( this._maxWidth !== null || this._maxHeight !== null ) {
-        this.updateMaxDimension( this._localBounds );
+        this.updateMaxDimension( ourLocalBounds );
       }
     }
 
@@ -1220,30 +1276,30 @@ inherit( PhetioObject, Node, extend( {
       // run this before firing the event
       this._boundsDirty = false;
 
-      const oldBounds = scratchBounds2.set( this._bounds ); // store old value in a temporary Bounds2
+      const oldBounds = scratchBounds2.set( ourBounds ); // store old value in a temporary Bounds2
 
       // no need to do the more expensive bounds transformation if we are still axis-aligned
       if ( this._transformBounds && !this._transform.getMatrix().isAxisAligned() ) {
         // mutates the matrix and bounds during recursion
 
         const matrix = scratchMatrix3.set( this.getMatrix() ); // calls below mutate this matrix
-        this._bounds.set( Bounds2.NOTHING );
+        ourBounds.set( Bounds2.NOTHING );
         // Include each painted self individually, transformed with the exact transform matrix.
         // This is expensive, as we have to do 2 matrix transforms for every descendant.
-        this._includeTransformedSubtreeBounds( matrix, this._bounds ); // self and children
+        this._includeTransformedSubtreeBounds( matrix, ourBounds ); // self and children
 
         if ( this.hasClipArea() ) {
-          this._bounds.constrainBounds( this._clipArea.getBoundsWithTransform( matrix ) );
+          ourBounds.constrainBounds( this.clipArea.getBoundsWithTransform( matrix ) );
         }
       }
       else {
         // converts local to parent bounds. mutable methods used to minimize number of created bounds instances
         // (we create one so we don't change references to the old one)
-        this._bounds.set( this._localBounds );
-        this.transformBoundsFromLocalToParent( this._bounds );
+        ourBounds.set( ourLocalBounds );
+        this.transformBoundsFromLocalToParent( ourBounds );
       }
 
-      if ( !this._bounds.equals( oldBounds ) ) {
+      if ( !ourBounds.equals( oldBounds ) ) {
         // if we have a bounds change, we need to invalidate our parents so they can be recomputed
         i = this._parents.length;
         while ( i-- ) {
@@ -1251,8 +1307,8 @@ inherit( PhetioObject, Node, extend( {
         }
 
         // TODO: consider changing to parameter object (that may be a problem for the GC overhead)
-        if ( !this._bounds.equalsEpsilon( oldBounds, notificationThreshold ) ) {
-          this.trigger0( 'bounds' );
+        if ( !ourBounds.equalsEpsilon( oldBounds, notificationThreshold ) ) {
+          this.boundsProperty._notifyListeners( oldBounds );
         }
       }
     }
@@ -1265,10 +1321,10 @@ inherit( PhetioObject, Node, extend( {
     }
 
     if ( assert ) {
-      assert( this._originalBounds === this._bounds, 'Reference for _bounds changed!' );
-      assert( this._originalLocalBounds === this._localBounds, 'Reference for _localBounds changed!' );
-      assert( this._originalSelfBounds === this._selfBounds, 'Reference for _selfBounds changed!' );
-      assert( this._originalChildBounds === this._childBounds, 'Reference for _childBounds changed!' );
+      assert( this._originalBounds === this.boundsProperty.value, 'Reference for bounds changed!' );
+      assert( this._originalLocalBounds === this.localBoundsProperty.value, 'Reference for localBounds changed!' );
+      assert( this._originalSelfBounds === this.selfBoundsProperty.value, 'Reference for selfBounds changed!' );
+      assert( this._originalChildBounds === this.childBoundsProperty.value, 'Reference for childBounds changed!' );
     }
 
     // double-check that all of our bounds handling has been accurate
@@ -1278,24 +1334,24 @@ inherit( PhetioObject, Node, extend( {
         const epsilon = 0.000001;
 
         const childBounds = Bounds2.NOTHING.copy();
-        _.each( self._children, function( child ) { childBounds.includeBounds( child._bounds ); } );
+        _.each( self._children, function( child ) { childBounds.includeBounds( child.boundsProperty.value ); } );
 
-        let localBounds = self._selfBounds.union( childBounds );
+        let localBounds = self.selfBoundsProperty.value.union( childBounds );
 
         if ( self.hasClipArea() ) {
-          localBounds = localBounds.intersection( self._clipArea.bounds );
+          localBounds = localBounds.intersection( self.clipArea.bounds );
         }
 
         const fullBounds = self.localToParentBounds( localBounds );
 
-        assertSlow && assertSlow( self._childBounds.equalsEpsilon( childBounds, epsilon ),
+        assertSlow && assertSlow( self.childBoundsProperty.value.equalsEpsilon( childBounds, epsilon ),
           'Child bounds mismatch after validateBounds: ' +
-          self._childBounds.toString() + ', expected: ' + childBounds.toString() );
+          self.childBoundsProperty.value.toString() + ', expected: ' + childBounds.toString() );
         assertSlow && assertSlow( self._localBoundsOverridden ||
                                   self._transformBounds ||
-                                  self._bounds.equalsEpsilon( fullBounds, epsilon ) ||
-                                  self._bounds.equalsEpsilon( fullBounds, epsilon ),
-          'Bounds mismatch after validateBounds: ' + self._bounds.toString() +
+                                  self.boundsProperty.value.equalsEpsilon( fullBounds, epsilon ) ||
+                                  self.boundsProperty.value.equalsEpsilon( fullBounds, epsilon ),
+          'Bounds mismatch after validateBounds: ' + self.boundsProperty.value.toString() +
           ', expected: ' + fullBounds.toString() );
       } )();
     }
@@ -1416,6 +1472,8 @@ inherit( PhetioObject, Node, extend( {
     assert && assert( newSelfBounds === undefined || newSelfBounds instanceof Bounds2,
       'invalidateSelf\'s newSelfBounds, if provided, needs to be Bounds2' );
 
+    const ourSelfBounds = this.selfBoundsProperty.value;
+
     // If no self bounds are provided, rely on the bounds validation to trigger computation (using updateSelfBounds()).
     if ( !newSelfBounds ) {
       this._selfBoundsDirty = true;
@@ -1430,16 +1488,18 @@ inherit( PhetioObject, Node, extend( {
       this._selfBoundsDirty = false;
 
       // if these bounds are different than current self bounds
-      if ( !this._selfBounds.equals( newSelfBounds ) ) {
+      if ( !ourSelfBounds.equals( newSelfBounds ) ) {
+        const oldSelfBounds = scratchBounds2.set( ourSelfBounds );
+
         // set repaint flags
         this.invalidateBounds();
         this._picker.onSelfBoundsDirty();
 
         // record the new bounds
-        this._selfBounds.set( newSelfBounds );
+        ourSelfBounds.set( newSelfBounds );
 
         // fire the event immediately
-        this.trigger0( 'selfBounds' );
+        this.selfBoundsProperty._notifyListeners( oldSelfBounds );
       }
     }
 
@@ -1454,7 +1514,7 @@ inherit( PhetioObject, Node, extend( {
    */
   updateSelfBounds: function() {
     // The Node implementation (un-overridden) will never change the self bounds (always NOTHING).
-    assert && assert( this._selfBounds.equals( Bounds2.NOTHING ) );
+    assert && assert( this.selfBoundsProperty.value.equals( Bounds2.NOTHING ) );
     return false;
   },
 
@@ -1499,7 +1559,7 @@ inherit( PhetioObject, Node, extend( {
    */
   getSelfBounds: function() {
     this.validateSelfBounds();
-    return this._selfBounds;
+    return this.selfBoundsProperty.value;
   },
   get selfBounds() { return this.getSelfBounds(); },
 
@@ -1514,7 +1574,7 @@ inherit( PhetioObject, Node, extend( {
    */
   getSafeSelfBounds: function() {
     this.validateSelfBounds();
-    return this._selfBounds;
+    return this.selfBoundsProperty.value;
   },
   get safeSelfBounds() { return this.getSafeSelfBounds(); },
 
@@ -1529,7 +1589,7 @@ inherit( PhetioObject, Node, extend( {
    */
   getChildBounds: function() {
     this.validateBounds();
-    return this._childBounds;
+    return this.childBoundsProperty.value;
   },
   get childBounds() { return this.getChildBounds(); },
 
@@ -1544,7 +1604,7 @@ inherit( PhetioObject, Node, extend( {
    */
   getLocalBounds: function() {
     this.validateBounds();
-    return this._localBounds;
+    return this.localBoundsProperty.value;
   },
   get localBounds() { return this.getLocalBounds(); },
 
@@ -1565,25 +1625,25 @@ inherit( PhetioObject, Node, extend( {
     assert && assert( localBounds === null || !isNaN( localBounds.maxX ), 'maxX for localBounds should not be NaN' );
     assert && assert( localBounds === null || !isNaN( localBounds.maxY ), 'maxY for localBounds should not be NaN' );
 
+    const ourLocalBounds = this.localBoundsProperty.value;
+
     if ( localBounds === null ) {
       // we can just ignore this if we weren't actually overriding local bounds before
       if ( this._localBoundsOverridden ) {
         this._localBoundsOverridden = false;
-        this.trigger1( 'localBoundsOverride', false );
         this.invalidateBounds();
       }
     }
     else {
       // just an instance check for now. consider equals() in the future depending on cost
-      const changed = !localBounds.equals( this._localBounds ) || !this._localBoundsOverridden;
+      const changed = !localBounds.equals( ourLocalBounds ) || !this._localBoundsOverridden;
 
       if ( changed ) {
-        this._localBounds.set( localBounds );
+        ourLocalBounds.set( localBounds );
       }
 
       if ( !this._localBoundsOverridden ) {
         this._localBoundsOverridden = true; // NOTE: has to be done before invalidating bounds, since this disables localBounds computation
-        this.trigger1( 'localBoundsOverride', true );
       }
 
       if ( changed ) {
@@ -1641,7 +1701,7 @@ inherit( PhetioObject, Node, extend( {
 
     const bounds = Bounds2.NOTHING.copy();
 
-    if ( this._visible ) {
+    if ( this.visibleProperty.value ) {
       if ( !this.selfBounds.isEmpty() ) {
         bounds.includeBounds( this.getTransformedSafeSelfBounds( localMatrix ) );
       }
@@ -1705,7 +1765,7 @@ inherit( PhetioObject, Node, extend( {
    */
   getBounds: function() {
     this.validateBounds();
-    return this._bounds;
+    return this.boundsProperty.value;
   },
   get bounds() { return this.getBounds(); },
 
@@ -1920,7 +1980,8 @@ inherit( PhetioObject, Node, extend( {
     const length = this._children.length;
     for ( let i = 0; i < length; i++ ) {
       const child = this._children[ i ];
-      if ( !child._bounds.intersection( bounds ).isEmpty() ) {
+      // TODO: Is this safe, we're directly accessing?
+      if ( !child.boundsProperty.value.intersection( bounds ).isEmpty() ) {
         result.push( child );
       }
     }
@@ -2450,7 +2511,7 @@ inherit( PhetioObject, Node, extend( {
     this._picker.onTransformChange();
     if ( assertSlow ) { this._picker.audit(); }
 
-    this.trigger0( 'transform' );
+    this.transformEmitter.emit();
   },
 
   /**
@@ -2534,7 +2595,7 @@ inherit( PhetioObject, Node, extend( {
 
       this._maxWidth = maxWidth;
 
-      this.updateMaxDimension( this._localBounds );
+      this.updateMaxDimension( this.localBoundsProperty.value );
     }
   },
   set maxWidth( value ) { this.setMaxWidth( value ); },
@@ -2566,7 +2627,7 @@ inherit( PhetioObject, Node, extend( {
 
       this._maxHeight = maxHeight;
 
-      this.updateMaxDimension( this._localBounds );
+      this.updateMaxDimension( this.localBoundsProperty.value );
     }
   },
   set maxHeight( value ) { this.setMaxHeight( value ); },
@@ -3093,8 +3154,9 @@ inherit( PhetioObject, Node, extend( {
   setVisible: function( visible ) {
     assert && assert( typeof visible === 'boolean', 'Node visibility should be a boolean value' );
 
-    if ( visible !== this._visible ) {
-      this._visible = visible;
+    if ( visible !== this.visibleProperty.value ) {
+      this.visibleProperty.setPropertyValue( visible );
+      // this.visibleProperty.value = visible; // TODO: yikes!
 
       // changing visibility can affect pickability pruning, which affects mouse/touch bounds
       this._picker.onVisibilityChange();
@@ -3103,7 +3165,7 @@ inherit( PhetioObject, Node, extend( {
       // Defined in ParallelDOM.js
       this._accessibleDisplaysInfo.onVisibilityChange( visible );
 
-      this.trigger0( 'visibility' );
+      this.visibleProperty._notifyListeners( !visible );
 
       for ( let i = 0; i < this._parents.length; i++ ) {
         const parent = this._parents[ i ];
@@ -3123,7 +3185,7 @@ inherit( PhetioObject, Node, extend( {
    * @returns {boolean}
    */
   isVisible: function() {
-    return this._visible;
+    return this.visibleProperty.value;
   },
   get visible() { return this.isVisible(); },
 
@@ -3165,12 +3227,7 @@ inherit( PhetioObject, Node, extend( {
   setOpacity: function( opacity ) {
     assert && assert( typeof opacity === 'number' && isFinite( opacity ), 'opacity should be a finite number' );
 
-    const clampedOpacity = clamp( opacity, 0, 1 );
-    if ( clampedOpacity !== this._opacity ) {
-      this._opacity = clampedOpacity;
-
-      this.trigger0( 'opacity' );
-    }
+    this.opacityProperty.value = clamp( opacity, 0, 1 );
   },
   set opacity( value ) { this.setOpacity( value ); },
 
@@ -3181,7 +3238,7 @@ inherit( PhetioObject, Node, extend( {
    * @returns {number}
    */
   getOpacity: function() {
-    return this._opacity;
+    return this.opacityProperty.value;
   },
   get opacity() { return this.getOpacity(); },
 
@@ -3221,17 +3278,17 @@ inherit( PhetioObject, Node, extend( {
   setPickable: function( pickable ) {
     assert && assert( pickable === null || typeof pickable === 'boolean' );
 
-    if ( this._pickable !== pickable ) {
-      const oldPickable = this._pickable;
+    if ( this.pickable !== pickable ) {
+      const oldPickable = this.pickable;
 
       // no paint or invalidation changes for now, since this is only handled for the mouse
-      this._pickable = pickable;
+      this.pickableProperty.setPropertyValue( pickable );
 
       this._picker.onPickableChange( oldPickable, pickable );
       if ( assertSlow ) { this._picker.audit(); }
       // TODO: invalidate the cursor somehow? #150
 
-      this.trigger0( 'pickability' );
+      this.pickableProperty._notifyListeners( oldPickable );
     }
   },
   set pickable( value ) { this.setPickable( value ); },
@@ -3243,7 +3300,7 @@ inherit( PhetioObject, Node, extend( {
    * @returns {boolean|null}
    */
   isPickable: function() {
-    return this._pickable;
+    return this.pickableProperty.value;
   },
   get pickable() { return this.isPickable(); },
 
@@ -3262,11 +3319,7 @@ inherit( PhetioObject, Node, extend( {
   setInputEnabled: function( inputEnabled ) {
     assert && assert( typeof inputEnabled === 'boolean' );
 
-    if ( this._inputEnabled !== inputEnabled ) {
-      this._inputEnabled = inputEnabled;
-
-      this.trigger0( 'inputEnabled' );
-    }
+    this.inputEnabledProperty.value = inputEnabled;
   },
   set inputEnabled( value ) { this.setInputEnabled( value ); },
 
@@ -3277,7 +3330,7 @@ inherit( PhetioObject, Node, extend( {
    * @returns {boolean}
    */
   isInputEnabled: function() {
-    return this._inputEnabled;
+    return this.inputEnabledProperty.value;
   },
   get inputEnabled() { return this.isInputEnabled(); },
 
@@ -3422,10 +3475,8 @@ inherit( PhetioObject, Node, extend( {
   setClipArea: function( shape ) {
     assert && assert( shape === null || shape instanceof Shape, 'clipArea needs to be a kite.Shape, or null' );
 
-    if ( this._clipArea !== shape ) {
-      this._clipArea = shape;
-
-      this.trigger0( 'clip' );
+    if ( this.clipArea !== shape ) {
+      this.clipAreaProperty.value = shape;
 
       this.invalidateBounds();
       this._picker.onClipAreaChange();
@@ -3442,7 +3493,7 @@ inherit( PhetioObject, Node, extend( {
    * @returns {Shape|null}
    */
   getClipArea: function() {
-    return this._clipArea;
+    return this.clipAreaProperty.value;
   },
   get clipArea() { return this.getClipArea(); },
 
@@ -3453,7 +3504,7 @@ inherit( PhetioObject, Node, extend( {
    * @returns {boolean}
    */
   hasClipArea: function() {
-    return this._clipArea !== null;
+    return this.clipArea !== null;
   },
 
   /**
@@ -3469,7 +3520,8 @@ inherit( PhetioObject, Node, extend( {
       this._rendererBitmask = bitmask;
 
       this._rendererSummary.selfChange();
-      this.trigger0( 'rendererBitmask' );
+
+      this.rendererBitmaskEmitter.emit();
     }
   },
 
@@ -3520,7 +3572,7 @@ inherit( PhetioObject, Node, extend( {
     if ( this._hints.renderer !== newRenderer ) {
       this._hints.renderer = newRenderer;
 
-      this.trigger1( 'hint', 'renderer' );
+      this.hintEmitter.emit( 'renderer' );
     }
   },
   set renderer( value ) { this.setRenderer( value ); },
@@ -3564,7 +3616,8 @@ inherit( PhetioObject, Node, extend( {
 
     if ( split !== this._hints.layerSplit ) {
       this._hints.layerSplit = split;
-      this.trigger1( 'hint', 'layerSplit' );
+
+      this.hintEmitter.emit( 'layerSplit' );
     }
   },
   set layerSplit( value ) { this.setLayerSplit( value ); },
@@ -3592,7 +3645,8 @@ inherit( PhetioObject, Node, extend( {
 
     if ( usesOpacity !== this._hints.usesOpacity ) {
       this._hints.usesOpacity = usesOpacity;
-      this.trigger1( 'hint', 'usesOpacity' );
+
+      this.hintEmitter.emit( 'usesOpacity' );
     }
   },
   set usesOpacity( value ) { this.setUsesOpacity( value ); },
@@ -3621,7 +3675,8 @@ inherit( PhetioObject, Node, extend( {
 
     if ( cssTransform !== this._hints.cssTransform ) {
       this._hints.cssTransform = cssTransform;
-      this.trigger1( 'hint', 'cssTransform' );
+
+      this.hintEmitter.emit( 'cssTransform' );
     }
   },
   set cssTransform( value ) { this.setCSSTransform( value ); },
@@ -3649,7 +3704,8 @@ inherit( PhetioObject, Node, extend( {
 
     if ( excludeInvisible !== this._hints.excludeInvisible ) {
       this._hints.excludeInvisible = excludeInvisible;
-      this.trigger1( 'hint', 'excludeInvisible' );
+
+      this.hintEmitter.emit( 'excludeInvisible' );
     }
   },
   set excludeInvisible( value ) { this.setExcludeInvisible( value ); },
@@ -3702,7 +3758,8 @@ inherit( PhetioObject, Node, extend( {
 
     if ( preventFit !== this._hints.preventFit ) {
       this._hints.preventFit = preventFit;
-      this.trigger1( 'hint', 'preventFit' );
+
+      this.hintEmitter.emit( 'preventFit' );
     }
   },
   set preventFit( value ) { this.setPreventFit( value ); },
@@ -3729,7 +3786,8 @@ inherit( PhetioObject, Node, extend( {
 
     if ( webglScale !== this._hints.webglScale ) {
       this._hints.webglScale = webglScale;
-      this.trigger1( 'hint', 'webglScale' );
+
+      this.hintEmitter.emit( 'webglScale' );
     }
   },
   set webglScale( value ) { this.setWebGLScale( value ); },
@@ -4081,7 +4139,7 @@ inherit( PhetioObject, Node, extend( {
       const child = this._children[ i ];
 
       if ( child.isVisible() ) {
-        const requiresScratchCanvas = child._opacity !== 1 || child._clipArea;
+        const requiresScratchCanvas = child.opacity !== 1 || child.clipArea;
 
         wrapper.context.save();
         matrix.multiplyMatrix( child._transform.getMatrix() );
@@ -4098,13 +4156,13 @@ inherit( PhetioObject, Node, extend( {
           child.renderToCanvasSubtree( childWrapper, matrix );
 
           wrapper.context.save();
-          if ( child._clipArea ) {
+          if ( child.clipArea ) {
             wrapper.context.beginPath();
-            child._clipArea.writeToContext( wrapper.context );
+            child.clipArea.writeToContext( wrapper.context );
             wrapper.context.clip();
           }
           wrapper.context.setTransform( 1, 0, 0, 1, 0, 0 ); // identity
-          wrapper.context.globalAlpha = child._opacity;
+          wrapper.context.globalAlpha = child.opacity;
           wrapper.context.drawImage( canvas, 0, 0 );
           wrapper.context.restore();
         }
@@ -4602,7 +4660,7 @@ inherit( PhetioObject, Node, extend( {
     assert && assert( instance instanceof scenery.Instance );
     this._instances.push( instance );
 
-    this.trigger1( 'addedInstance', instance );
+    this.addedInstanceEmitter.emit( instance );
   },
 
   /**
@@ -4617,7 +4675,7 @@ inherit( PhetioObject, Node, extend( {
     assert && assert( index !== -1, 'Cannot remove a Instance from a Node if it was not there' );
     this._instances.splice( index, 1 );
 
-    this.trigger1( 'removedInstance', instance );
+    this.removedInstanceEmitter.emit( instance );
   },
 
   /**
@@ -5174,87 +5232,14 @@ inherit( PhetioObject, Node, extend( {
   },
 
   /**
-   * Tracks when an event listener is added, so that we can prune hit testing for performance.
+   * When we add or remove any number of bounds listeners, we want to increment/decrement internal information.
    * @private
    *
-   * @param {string} eventName
-   * @param {Function} listener
+   * @param {number} deltaQuantity - If positive, the number of listeners being added, otherwise the number removed
    */
-  onEventListenerAdded: function( eventName, listener ) {
-    if ( eventName in eventsRequiringBoundsValidation ) {
-      this.changeBoundsEventCount( 1 );
-      this._boundsEventSelfCount++;
-    }
-  },
-
-  /**
-   * Tracks when an event listener is removed, so that we can prune hit testing for performance.
-   * @private
-   *
-   * @param {string} eventName
-   * @param {Function} listener
-   */
-  onEventListenerRemoved: function( eventName, listener ) {
-    if ( eventName in eventsRequiringBoundsValidation ) {
-      this.changeBoundsEventCount( -1 );
-      this._boundsEventSelfCount--;
-    }
-  }
-}, Events.prototype, {
-  /**
-   * Adds a listener for a specific event name. Overridden so we can track specific types of listeners.
-   * @public
-   *
-   * @param {string} eventName
-   * @param {Function} listener
-   */
-  on: function onOverride( eventName, listener ) {
-    Events.prototype.on.call( this, eventName, listener );
-    this.onEventListenerAdded( eventName, listener );
-  },
-
-  /**
-   * Adds a listener for a specific event name, that guarantees it won't trigger changes to the listener list when
-   * the listener is called. Overridden so we can track specific types of listeners.
-   * @public
-   *
-   * @param {string} eventName
-   * @param {Function} listener
-   */
-  onStatic: function onStaticOverride( eventName, listener ) {
-    Events.prototype.onStatic.call( this, eventName, listener );
-    this.onEventListenerAdded( eventName, listener );
-  },
-
-  /**
-   * Removes a listener for a specific event name. Overridden so we can track specific types of listeners.
-   * @public
-   *
-   * @param {string} eventName
-   * @param {Function} listener
-   */
-  off: function offOverride( eventName, listener ) {
-
-    // Throw an error when removing a non-listener (except when the Node has already been disposed)
-    Events.prototype.off.call( this, eventName, listener, !this.isDisposed );
-
-    this.onEventListenerRemoved( eventName, listener );
-  },
-
-  /**
-   * Removes a listener for a specific event name, that guarantees it won't trigger changes to the listener list when
-   * the listener is called. Overridden so we can track specific types of listeners.
-   * @public
-   *
-   * @param {string} eventName
-   * @param {Function} listener
-   */
-  offStatic: function offStaticOverride( eventName, listener ) {
-
-    // Throw an error when removing a non-listener (except when the Node has already been disposed)
-    Events.prototype.offStatic.call( this, eventName, listener, !this.isDisposed );
-
-    this.onEventListenerRemoved( eventName, listener );
+  onBoundsListenersAddedOrRemoved: function( deltaQuantity ) {
+    this.changeBoundsEventCount( deltaQuantity );
+    this._boundsEventSelfCount += deltaQuantity;
   },
 
   /**
@@ -5272,9 +5257,6 @@ inherit( PhetioObject, Node, extend( {
 
     // Tear-down in the reverse order Node was created
     PhetioObject.prototype.dispose.call( this );
-
-    // Remove any listeners that haven't been removed by the preceding dispose logic.
-    Events.prototype.dispose.call( this ); // TODO: don't rely on Events, see https://github.com/phetsims/scenery/issues/490
   },
 
   /**
@@ -5313,6 +5295,15 @@ inherit( PhetioObject, Node, extend( {
 
   defaultLeafTrailPredicate: function( node ) {
     return node._children.length === 0;
+  },
+
+  // TODO: doc
+  preventSettersOnProperty: function( node, propertyName ) {
+    // Overwrites with a non-overwritable definition
+    Object.defineProperty( node, propertyName, {
+      writable: false,
+      value: node[ propertyName ]
+    } );
   }
 } );
 

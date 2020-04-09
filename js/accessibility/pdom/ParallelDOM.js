@@ -1443,7 +1443,7 @@ const ParallelDOM = {
             focusHighlight.visible = this.focused;
           }
 
-          this.trigger( 'focusHighlightChanged' );
+          this.focusHighlightChangedEmitter.emit();
         }
       },
       set focusHighlight( focusHighlight ) { this.setFocusHighlight( focusHighlight ); },
@@ -2049,7 +2049,7 @@ const ParallelDOM = {
 
           PDOMTree.accessibleOrderChange( this, oldAccessibleOrder, accessibleOrder );
 
-          this.trigger0( 'accessibleOrder' );
+          this.accessibleOrderEmitter.emit();
         }
       },
       set accessibleOrder( value ) { this.setAccessibleOrder( value ); },
@@ -2633,8 +2633,7 @@ const ParallelDOM = {
         // recompute the heading level for this node if it is using the accessibleHeading API.
         this._accessibleHeading && this.computeHeadingLevel();
 
-
-        this.trigger0( 'accessibleContent' );
+        this.accessibleContentEmitter.emit();
       },
 
       /**

@@ -266,7 +266,7 @@ export default inherit( Object, PDOMDisplaysInfo, {
         }
       }
 
-      this.node.trigger0( 'accessibleDisplays' );
+      this.node.accessibleDisplaysEmitter.emit();
     }
 
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
@@ -306,7 +306,7 @@ export default inherit( Object, PDOMDisplaysInfo, {
         }
       }
 
-      this.node.trigger0( 'accessibleDisplays' );
+      this.node.accessibleDisplaysEmitter.emit();
     }
 
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();

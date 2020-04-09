@@ -33,8 +33,8 @@ function PointerOverlay( display, rootNode ) {
   const diameter = ( innerRadius + strokeWidth / 2 ) * 2;
   const radius = diameter / 2;
 
-  //Resize the parent div when the rootNode is resized
-  display.onStatic( 'displaySize', function( dimension ) {
+  // Resize the parent div when the rootNode is resized
+  display.sizeProperty.lazyLink( function( dimension ) {
     self.pointerSVGContainer.setAttribute( 'width', dimension.width );
     self.pointerSVGContainer.setAttribute( 'height', dimension.height );
     self.pointerSVGContainer.style.clip = 'rect(0px,' + dimension.width + 'px,' + dimension.height + 'px,0px)';

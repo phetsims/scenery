@@ -51,10 +51,10 @@
  */
 
 import Emitter from '../../../axon/js/Emitter.js';
-import Events from '../../../axon/js/Events.js';
 import Property from '../../../axon/js/Property.js';
 import PropertyIO from '../../../axon/js/PropertyIO.js';
 import timer from '../../../axon/js/timer.js';
+import TinyProperty from '../../../axon/js/TinyProperty.js';
 import Dimension2 from '../../../dot/js/Dimension2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import escapeHTML from '../../../phet-core/js/escapeHTML.js';
@@ -118,9 +118,6 @@ function Display( rootNode, options ) {
   assert && assert( rootNode, 'rootNode is a required parameter' );
 
   //OHTWO TODO: hybrid batching (option to batch until an event like 'up' that might be needed for security issues)
-
-  // supertype call to axon.Events (should just initialize a few properties here, notably _eventListeners and _staticEventListeners)
-  Events.call( this );
 
   options = merge( {
     // initial display width
@@ -188,8 +185,11 @@ function Display( rootNode, options ) {
 
   this._allowWebGL = options.allowWebGL;
 
-  // The (integral, > 0) dimensions of the Display's DOM element (only updates the DOM element on updateDisplay())
-  this._size = new Dimension2( this.options.width, this.options.height );
+  // @public {Property.<Dimension2>} The (integral, > 0) dimensions of the Display's DOM element (only updates the DOM
+  // element on updateDisplay())
+  this.sizeProperty = new TinyProperty( new Dimension2( this.options.width, this.options.height ), {
+    useDeepEquality: true
+  } );
   this._currentSize = new Dimension2( -1, -1 ); // used to check against new size to see what we need to change
 
   this._rootNode = rootNode;
@@ -533,20 +533,20 @@ inherit( Object, Display, extend( {
   updateSize: function() {
     let sizeDirty = false;
     //OHTWO TODO: if we aren't clipping or setting background colors, can we get away with having a 0x0 container div and using absolutely-positioned children?
-    if ( this._size.width !== this._currentSize.width ) {
+    if ( this.size.width !== this._currentSize.width ) {
       sizeDirty = true;
-      this._currentSize.width = this._size.width;
-      this._domElement.style.width = this._size.width + 'px';
+      this._currentSize.width = this.size.width;
+      this._domElement.style.width = this.size.width + 'px';
     }
-    if ( this._size.height !== this._currentSize.height ) {
+    if ( this.size.height !== this._currentSize.height ) {
       sizeDirty = true;
-      this._currentSize.height = this._size.height;
-      this._domElement.style.height = this._size.height + 'px';
+      this._currentSize.height = this.size.height;
+      this._domElement.style.height = this.size.height + 'px';
     }
     if ( sizeDirty && !this.options.allowSceneOverflow ) {
       // to prevent overflow, we add a CSS clip
       //TODO: 0px => 0?
-      this._domElement.style.clip = 'rect(0px,' + this._size.width + 'px,' + this._size.height + 'px,0px)';
+      this._domElement.style.clip = 'rect(0px,' + this.size.width + 'px,' + this.size.height + 'px,0px)';
     }
   },
 
@@ -557,12 +557,12 @@ inherit( Object, Display, extend( {
 
   // The dimensions of the Display's DOM element
   getSize: function() {
-    return this._size;
+    return this.sizeProperty.value;
   },
   get size() { return this.getSize(); },
 
   getBounds: function() {
-    return this._size.toBounds();
+    return this.size.toBounds();
   },
   get bounds() { return this.getBounds(); },
 
@@ -574,11 +574,7 @@ inherit( Object, Display, extend( {
     assert && assert( size.height % 1 === 0, 'Display.height should be an integer' );
     assert && assert( size.height > 0, 'Display.height should be greater than zero' );
 
-    if ( !this._size.equals( size ) ) {
-      this._size = size;
-
-      this.trigger1( 'displaySize', this._size );
-    }
+    this.sizeProperty.value = size;
   },
 
   setWidthHeight: function( width, height ) {
@@ -588,7 +584,7 @@ inherit( Object, Display, extend( {
 
   // The width of the Display's DOM element
   getWidth: function() {
-    return this._size.width;
+    return this.size.width;
   },
   get width() { return this.getWidth(); },
 
@@ -605,7 +601,7 @@ inherit( Object, Display, extend( {
 
   // The height of the Display's DOM element
   getHeight: function() {
-    return this._size.height;
+    return this.size.height;
   },
   get height() { return this.getHeight(); },
 
@@ -901,8 +897,8 @@ inherit( Object, Display, extend( {
   // renders what it can into a Canvas (so far, Canvas and SVG layers work fine)
   canvasSnapshot: function( callback ) {
     const canvas = document.createElement( 'canvas' );
-    canvas.width = this._size.width;
-    canvas.height = this._size.height;
+    canvas.width = this.size.width;
+    canvas.height = this.size.height;
 
     const context = canvas.getContext( '2d' );
 
@@ -1215,7 +1211,7 @@ inherit( Object, Display, extend( {
     let result = '';
 
     result += '<div style="' + headerStyle + '">Display Summary</div>';
-    result += this._size.toString() + ' frame:' + this._frameId + ' input:' + !!this._input + ' cursor:' + this._lastCursor + '<br/>';
+    result += this.size.toString() + ' frame:' + this._frameId + ' input:' + !!this._input + ' cursor:' + this._lastCursor + '<br/>';
 
     function nodeCount( node ) {
       let count = 1; // for us
@@ -1769,8 +1765,25 @@ inherit( Object, Display, extend( {
 
   popupRasterization: function() {
     this.foreignObjectRasterization( window.open );
+  },
+
+  /**
+   * Releases references.
+   * @public
+   *
+   * TODO: this dispose function is not complete.
+   */
+  dispose: function() {
+    if ( this._input ) {
+      this.detachEvents();
+    }
+    this._rootNode.removeRootedDisplay( this );
+
+    if ( this._accessible ) {
+      this._rootAccessibleInstance.dispose();
+    }
   }
-}, Events.prototype ), {
+} ), {
   /**
    * Takes a given DOM element, and asynchronously renders it to a string that is a data URL representing an SVG
    * file.
@@ -1865,25 +1878,6 @@ inherit( Object, Display, extend( {
   },
   get focusedNode() { return this.getFocusedNode(); }
 } );
-
-/**
- * Dispose function for Display.
- *
- * TODO: this dispose function is not complete.
- * TODO: Don't require overriding like this. Events prototype and non-standard inheritance forces us right now, but
- * ideally we'll stop using Events for Display and this should just work.
- * @public
- */
-Display.prototype.dispose = function() {
-  if ( this._input ) {
-    this.detachEvents();
-  }
-  this._rootNode.removeRootedDisplay( this );
-
-  if ( this._accessible ) {
-    this._rootAccessibleInstance.dispose();
-  }
-};
 
 Display.customCursors = {
   'scenery-grab-pointer': [ 'grab', '-moz-grab', '-webkit-grab', 'pointer' ],

@@ -57,6 +57,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import TinyProperty from '../../../axon/js/TinyProperty.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
 import inherit from '../../../phet-core/js/inherit.js';
@@ -124,7 +125,7 @@ const LineBreakState = {
 };
 
 // We need to do some font-size tests, so we have a Text for that.
-const scratchText = new scenery.Text( '' );
+const scratchText = new Text( '' );
 
 // himalaya converts dash separated CSS to camel case - use CSS compatible style with dashes, see above for examples
 const FONT_STYLE_MAP = {
@@ -151,8 +152,8 @@ const STYLE_KEYS = [ 'color' ].concat( FONT_STYLE_KEYS );
  */
 function RichText( text, options ) {
 
-  // @private {string} - Set by mutator
-  this._text = '';
+  // @public {TinyProperty.<string>} - Set by mutator
+  this.textProperty = new TinyProperty( '' );
 
   // @private {Font}
   this._font = DEFAULT_FONT;
@@ -224,6 +225,8 @@ function RichText( text, options ) {
 
   Node.call( this );
 
+  Node.preventSettersOnProperty( this, 'textProperty' );
+
   // @private {Node} - Normal layout container of lines (separate, so we can clear it easily)
   this.lineContainer = new Node( {} );
   this.addChild( this.lineContainer );
@@ -258,7 +261,7 @@ inherit( Node, RichText, {
     this.freeChildrenToPool();
 
     // Bail early, particularly if we are being constructed.
-    if ( this._text === '' ) {
+    if ( this.text === '' ) {
       this.appendEmptyLeaf();
       return;
     }
@@ -267,7 +270,7 @@ inherit( Node, RichText, {
     sceneryLog && sceneryLog.RichText && sceneryLog.push();
 
     // Turn bidirectional marks into explicit elements, so that the nesting is applied correctly.
-    const mappedText = this._text.replace( /\u202a/g, '<span dir="ltr">' )
+    const mappedText = this.text.replace( /\u202a/g, '<span dir="ltr">' )
       .replace( /\u202b/g, '<span dir="rtl">' )
       .replace( /\u202c/g, '</span>' );
 
@@ -711,13 +714,13 @@ inherit( Node, RichText, {
     // cast it to a string (for numbers, etc., and do it before the change guard so we don't accidentally trigger on non-changed text)
     text = '' + text;
 
-    if ( text !== this._text ) {
-      const oldText = this._text;
+    if ( text !== this.text ) {
+      const oldText = this.text;
 
-      this._text = text;
+      this.textProperty.setPropertyValue( text );
       this.rebuildRichText();
 
-      this.trigger2( 'text', oldText, text );
+      this.textProperty._notifyListeners( oldText );
     }
     return this;
   },
@@ -730,7 +733,7 @@ inherit( Node, RichText, {
    * @returns {string}
    */
   getText: function() {
-    return this._text;
+    return this.textProperty.value;
   },
   get text() { return this.getText(); },
 

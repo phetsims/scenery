@@ -420,8 +420,8 @@ inherit( FittedBlock, CanvasBlock, {
       else {
         this.filterListenerCountMap[ node.id ] = 1;
 
-        node.onStatic( 'opacity', this.opacityDirtyListener );
-        node.onStatic( 'clip', this.clipDirtyListener );
+        node.opacityProperty.lazyLink( this.opacityDirtyListener );
+        node.clipAreaProperty.lazyLink( this.clipDirtyListener );
       }
     }
   },
@@ -437,8 +437,8 @@ inherit( FittedBlock, CanvasBlock, {
       if ( this.filterListenerCountMap[ node.id ] === 0 ) {
         delete this.filterListenerCountMap[ node.id ];
 
-        node.offStatic( 'clip', this.clipDirtyListener );
-        node.offStatic( 'opacity', this.opacityDirtyListener );
+        node.clipAreaProperty.unlink( this.clipDirtyListener );
+        node.opacityProperty.unlink( this.opacityDirtyListener );
       }
     }
 

@@ -75,7 +75,7 @@ inherit( Drawable, BackboneDrawable, {
     }
 
     this.backboneVisibilityListener = this.backboneVisibilityListener || this.updateBackboneVisibility.bind( this );
-    this.backboneInstance.onStatic( 'relativeVisibility', this.backboneVisibilityListener );
+    this.backboneInstance.relativeVisibleEmitter.addListener( this.backboneVisibilityListener );
     this.updateBackboneVisibility();
     this.visibilityDirty = true;
 
@@ -102,8 +102,8 @@ inherit( Drawable, BackboneDrawable, {
         const node = instance.node;
 
         this.watchedFilterNodes.push( node );
-        node.onStatic( 'opacity', this.opacityDirtyListener );
-        node.onStatic( 'clip', this.clipDirtyListener );
+        node.opacityProperty.lazyLink( this.opacityDirtyListener );
+        node.clipAreaProperty.lazyLink( this.clipDirtyListener );
       }
     }
 
@@ -134,11 +134,11 @@ inherit( Drawable, BackboneDrawable, {
     while ( this.watchedFilterNodes.length ) {
       const node = this.watchedFilterNodes.pop();
 
-      node.offStatic( 'opacity', this.opacityDirtyListener );
-      node.offStatic( 'clip', this.clipDirtyListener );
+      node.opacityProperty.unlink( this.opacityDirtyListener );
+      node.clipAreaProperty.unlink( this.clipDirtyListener );
     }
 
-    this.backboneInstance.offStatic( 'relativeVisibility', this.backboneVisibilityListener );
+    this.backboneInstance.relativeVisibleEmitter.removeListener( this.backboneVisibilityListener );
 
     // if we need to remove drawables from the blocks, do so
     if ( !this.removedDrawables ) {

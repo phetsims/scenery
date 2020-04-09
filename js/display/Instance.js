@@ -21,7 +21,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Events from '../../../axon/js/Events.js';
+import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import inherit from '../../../phet-core/js/inherit.js';
@@ -52,7 +52,6 @@ const defaultPreferredRenderers = Renderer.createOrderBitmask(
  * @param isSharedCanvasCacheRoot
  */
 function Instance( display, trail, isDisplayRoot, isSharedCanvasCacheRoot ) {
-  Events.call( this );
 
   this.active = false;
 
@@ -61,7 +60,7 @@ function Instance( display, trail, isDisplayRoot, isSharedCanvasCacheRoot ) {
 
 scenery.register( 'Instance', Instance );
 
-inherit( Events, Instance, {
+inherit( Object, Instance, {
   /*
    * @param {Display} display - Instances are bound to a single display
    * @param {Trail} trail - The list of ancestors going back up to our root instance (for the display, or for a cache)
@@ -135,6 +134,11 @@ inherit( Events, Instance, {
     this.childrenReorderedListener = this.childrenReorderedListener || this.onChildrenReordered.bind( this );
     this.visibilityListener = this.visibilityListener || this.onVisibilityChange.bind( this );
     this.markRenderStateDirtyListener = this.markRenderStateDirtyListener || this.markRenderStateDirty.bind( this );
+
+    // @public {TinyEmitter}
+    this.visibleEmitter = new TinyEmitter();
+    this.relativeVisibleEmitter = new TinyEmitter();
+    this.selfVisibleEmitter = new TinyEmitter();
 
     this.cleanInstance( display, trail );
 
@@ -1349,13 +1353,13 @@ inherit( Events, Instance, {
 
     // trigger changes after we do the full visibility update
     if ( this.visible !== wasVisible ) {
-      this.trigger0( 'visibility' );
+      this.visibleEmitter.emit();
     }
     if ( this.relativeVisible !== wasRelativeVisible ) {
-      this.trigger0( 'relativeVisibility' );
+      this.relativeVisibleEmitter.emit();
     }
     if ( this.selfVisible !== wasSelfVisible ) {
-      this.trigger0( 'selfVisibility' );
+      this.selfVisibleEmitter.emit();
     }
   },
 
@@ -1430,16 +1434,16 @@ inherit( Events, Instance, {
     this.relativeTransform.attachNodeListeners();
 
     if ( !this.isSharedCanvasCachePlaceholder ) {
-      this.node.onStatic( 'childInserted', this.childInsertedListener );
-      this.node.onStatic( 'childRemoved', this.childRemovedListener );
-      this.node.onStatic( 'childrenReordered', this.childrenReorderedListener );
-      this.node.onStatic( 'visibility', this.visibilityListener );
+      this.node.childInsertedEmitter.addListener( this.childInsertedListener );
+      this.node.childRemovedEmitter.addListener( this.childRemovedListener );
+      this.node.childrenReorderedEmitter.addListener( this.childrenReorderedListener );
+      this.node.visibleProperty.lazyLink( this.visibilityListener );
 
-      this.node.onStatic( 'opacity', this.markRenderStateDirtyListener );
-      this.node.onStatic( 'hint', this.markRenderStateDirtyListener );
-      this.node.onStatic( 'clip', this.markRenderStateDirtyListener );
-      this.node.onStatic( 'rendererBitmask', this.markRenderStateDirtyListener );
-      this.node.onStatic( 'rendererSummary', this.markRenderStateDirtyListener );
+      this.node.opacityProperty.lazyLink( this.markRenderStateDirtyListener );
+      this.node.clipAreaProperty.lazyLink( this.markRenderStateDirtyListener );
+      this.node.hintEmitter.addListener( this.markRenderStateDirtyListener );
+      this.node.rendererBitmaskEmitter.addListener( this.markRenderStateDirtyListener );
+      this.node.rendererSummaryEmitter.addListener( this.markRenderStateDirtyListener );
     }
   },
 
@@ -1447,16 +1451,16 @@ inherit( Events, Instance, {
     this.relativeTransform.detachNodeListeners();
 
     if ( !this.isSharedCanvasCachePlaceholder ) {
-      this.node.offStatic( 'childInserted', this.childInsertedListener );
-      this.node.offStatic( 'childRemoved', this.childRemovedListener );
-      this.node.offStatic( 'childrenReordered', this.childrenReorderedListener );
-      this.node.offStatic( 'visibility', this.visibilityListener );
+      this.node.childInsertedEmitter.removeListener( this.childInsertedListener );
+      this.node.childRemovedEmitter.removeListener( this.childRemovedListener );
+      this.node.childrenReorderedEmitter.removeListener( this.childrenReorderedListener );
+      this.node.visibleProperty.unlink( this.visibilityListener );
 
-      this.node.offStatic( 'opacity', this.markRenderStateDirtyListener );
-      this.node.offStatic( 'hint', this.markRenderStateDirtyListener );
-      this.node.offStatic( 'clip', this.markRenderStateDirtyListener );
-      this.node.offStatic( 'rendererBitmask', this.markRenderStateDirtyListener );
-      this.node.offStatic( 'rendererSummary', this.markRenderStateDirtyListener );
+      this.node.opacityProperty.unlink( this.markRenderStateDirtyListener );
+      this.node.clipAreaProperty.unlink( this.markRenderStateDirtyListener );
+      this.node.hintEmitter.removeListener( this.markRenderStateDirtyListener );
+      this.node.rendererBitmaskEmitter.removeListener( this.markRenderStateDirtyListener );
+      this.node.rendererSummaryEmitter.removeListener( this.markRenderStateDirtyListener );
     }
   },
 
@@ -1548,7 +1552,9 @@ inherit( Events, Instance, {
     // clean our variables out to release memory
     this.cleanInstance( null, null );
 
-    this.removeAllEventListeners();
+    this.visibleEmitter.removeAllListeners();
+    this.relativeVisibleEmitter.removeAllListeners();
+    this.selfVisibleEmitter.removeAllListeners();
 
     this.freeToPool();
 

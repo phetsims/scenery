@@ -39,8 +39,8 @@ class DisplayedProperty extends BooleanProperty {
     this.addedInstancelistener = this.addedInstance.bind( this );
     this.removedInstancelistener = this.removedInstance.bind( this );
 
-    node.onStatic( 'addedInstance', this.addedInstancelistener );
-    node.onStatic( 'removedInstance', this.removedInstancelistener );
+    node.addedInstanceEmitter.addListener( this.addedInstancelistener );
+    node.removedInstanceEmitter.addListener( this.removedInstancelistener );
 
     // Add any instances the node may already have/
     const instances = node.instances;
@@ -64,7 +64,7 @@ class DisplayedProperty extends BooleanProperty {
    * @param {Instance} instance
    */
   addedInstance( instance ) {
-    instance.onStatic( 'visibility', this.updateListener );
+    instance.visibleEmitter.addListener( this.updateListener );
     this.updateValue();
   }
 
@@ -75,7 +75,7 @@ class DisplayedProperty extends BooleanProperty {
    * @param {Instance} instance
    */
   removedInstance( instance ) {
-    instance.offStatic( 'visibility', this.updateListener );
+    instance.visibleEmitter.removeListener( this.updateListener );
     this.updateValue();
   }
 
@@ -91,8 +91,8 @@ class DisplayedProperty extends BooleanProperty {
       this.removedInstance( instances[ i ] );
     }
 
-    this.node.offStatic( 'addedInstance', this.addedInstancelistener );
-    this.node.offStatic( 'removedInstance', this.removedInstancelistener );
+    this.node.addedInstanceEmitter.removeListener( this.addedInstancelistener );
+    this.node.removedInstanceEmitter.removeListener( this.removedInstancelistener );
 
     super.dispose();
   }

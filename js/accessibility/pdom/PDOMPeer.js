@@ -673,8 +673,8 @@ inherit( Object, PDOMPeer, {
    * @returns {boolean}
    */
   isFocused: function() {
-    const visualFocusTrail = phet.scenery.PDOMInstance.guessVisualTrail( this.trail, this.display.rootNode );
-    return phet.scenery.Display.focusProperty.value && phet.scenery.Display.focusProperty.value.trail.equals( visualFocusTrail );
+    const visualFocusTrail = scenery.PDOMInstance.guessVisualTrail( this.trail, this.display.rootNode );
+    return scenery.Display.focusProperty.value && scenery.Display.focusProperty.value.trail.equals( visualFocusTrail );
   },
 
   /**
