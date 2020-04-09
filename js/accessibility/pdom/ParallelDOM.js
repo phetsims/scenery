@@ -128,10 +128,10 @@ import extend from '../../../../phet-core/js/extend.js';
 import merge from '../../../../phet-core/js/merge.js';
 import scenery from '../../scenery.js';
 import A11yBehaviorFunctionDef from '../A11yBehaviorFunctionDef.js';
-import PDOMTree from './PDOMTree.js';
-import PDOMUtils from './PDOMUtils.js';
 import AccessibleDisplaysInfo from './PDOMDisplaysInfo.js';
 import PDOMPeer from './PDOMPeer.js';
+import PDOMTree from './PDOMTree.js';
+import PDOMUtils from './PDOMUtils.js';
 
 const INPUT_TAG = PDOMUtils.TAGS.INPUT;
 const P_TAG = PDOMUtils.TAGS.P;
