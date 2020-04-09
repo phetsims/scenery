@@ -285,7 +285,7 @@ class Input {
         { name: 'event', phetioType: EventIO }
       ],
       phetioEventType: EventType.USER,
-      phetioDocumentation: 'Emits when a mouse button is released'
+      phetioDocumentation: 'Emits when a mouse button is released.'
     } );
 
     // @private {Action} - Emits to the PhET-iO data stream.
@@ -301,7 +301,7 @@ class Input {
         { name: 'event', phetioType: EventIO }
       ],
       phetioEventType: EventType.USER,
-      phetioDocumentation: 'Emits when a mouse button is pressed'
+      phetioDocumentation: 'Emits when a mouse button is pressed.'
     } );
 
     // @private {Action} - Emits to the PhET-iO data stream.
@@ -317,7 +317,7 @@ class Input {
         { name: 'event', phetioType: EventIO }
       ],
       phetioEventType: EventType.USER,
-      phetioDocumentation: 'Emits when the mouse is moved',
+      phetioDocumentation: 'Emits when the mouse is moved.',
       phetioHighFrequency: true
     } );
 
@@ -334,7 +334,7 @@ class Input {
         { name: 'event', phetioType: EventIO }
       ],
       phetioEventType: EventType.USER,
-      phetioDocumentation: 'Emits when the mouse is moved over a Node'
+      phetioDocumentation: 'Emits when the mouse is moved while on the sim.'
     } );
 
     // @private {Action} - Emits to the PhET-iO data stream.
@@ -350,7 +350,7 @@ class Input {
         { name: 'event', phetioType: EventIO }
       ],
       phetioEventType: EventType.USER,
-      phetioDocumentation: 'Emits when the mouse moves out of the display'
+      phetioDocumentation: 'Emits when the mouse moves out of the display.'
     } );
 
     // @private {Action} - Emits to the PhET-iO data stream.
@@ -371,7 +371,7 @@ class Input {
         { name: 'event', phetioType: EventIO }
       ],
       phetioEventType: EventType.USER,
-      phetioDocumentation: 'Emits when the mouse wheel scrolls',
+      phetioDocumentation: 'Emits when the mouse wheel scrolls.',
       phetioHighFrequency: true
     } );
 
@@ -389,7 +389,7 @@ class Input {
         { name: 'event', phetioType: EventIO }
       ],
       phetioEventType: EventType.USER,
-      phetioDocumentation: 'Emits when a touch begins'
+      phetioDocumentation: 'Emits when a touch begins.'
     } );
 
     // @private {Action} - Emits to the PhET-iO data stream.
@@ -409,7 +409,7 @@ class Input {
         { name: 'event', phetioType: EventIO }
       ],
       phetioEventType: EventType.USER,
-      phetioDocumentation: 'Emits when a touch ends'
+      phetioDocumentation: 'Emits when a touch ends.'
     } );
 
     // @private {Action} - Emits to the PhET-iO data stream.
@@ -428,7 +428,7 @@ class Input {
         { name: 'event', phetioType: EventIO }
       ],
       phetioEventType: EventType.USER,
-      phetioDocumentation: 'Emits when a touch moves',
+      phetioDocumentation: 'Emits when a touch moves.',
       phetioHighFrequency: true
     } );
 
@@ -449,7 +449,7 @@ class Input {
         { name: 'event', phetioType: EventIO }
       ],
       phetioEventType: EventType.USER,
-      phetioDocumentation: 'Emits when a touch is canceled'
+      phetioDocumentation: 'Emits when a touch is canceled.'
     } );
 
     // @private {Action} - Emits to the PhET-iO data stream.
@@ -466,7 +466,7 @@ class Input {
         { name: 'event', phetioType: EventIO }
       ],
       phetioEventType: EventType.USER,
-      phetioDocumentation: 'Emits when a pen touches the screen'
+      phetioDocumentation: 'Emits when a pen touches the screen.'
     } );
 
     // @private {Action} - Emits to the PhET-iO data stream.
@@ -486,7 +486,7 @@ class Input {
         { name: 'event', phetioType: EventIO }
       ],
       phetioEventType: EventType.USER,
-      phetioDocumentation: 'Emits when a pen is lifted'
+      phetioDocumentation: 'Emits when a pen is lifted.'
     } );
 
     // @private {Action} - Emits to the PhET-iO data stream.
@@ -505,7 +505,7 @@ class Input {
         { name: 'event', phetioType: EventIO }
       ],
       phetioEventType: EventType.USER,
-      phetioDocumentation: 'Emits when a pen is moved',
+      phetioDocumentation: 'Emits when a pen is moved.',
       phetioHighFrequency: true
     } );
 
@@ -526,7 +526,7 @@ class Input {
         { name: 'event', phetioType: EventIO }
       ],
       phetioEventType: EventType.USER,
-      phetioDocumentation: 'Emits when a pen is canceled'
+      phetioDocumentation: 'Emits when a pen is canceled.'
     } );
 
     // wire up accessibility listeners on the display's root accessible DOM element.
@@ -738,7 +738,6 @@ class Input {
       document.body.addEventListener( 'keydown', this.handleDocumentKeydown.bind( this ) );
     }
   }
-
 
   /**
    * Interrupts any input actions that are currently taking place (should stop drags, etc.)
