@@ -13,6 +13,7 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import inherit from '../../../phet-core/js/inherit.js';
+import merge from '../../../phet-core/js/merge.js';
 import scenery from '../scenery.js';
 import Node from './Node.js';
 
@@ -64,6 +65,10 @@ const LAYOUT_ALIGNMENT = {
  *                             provided along-side options for Node.
  */
 function LayoutBox( options ) {
+  options = merge( {
+    // Allow dynamic layout by default, see https://github.com/phetsims/joist/issues/608
+    excludeInvisibleChildrenFromBounds: true
+  }, options );
 
   // @private {string} - Either 'vertical' or 'horizontal'. The default chosen by popular vote (with more references).
   //                     see setOrientation() for more documentation.
