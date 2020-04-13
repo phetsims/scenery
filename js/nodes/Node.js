@@ -3141,7 +3141,7 @@ inherit( PhetioObject, Node, extend( {
       for ( let i = 0; i < this._parents.length; i++ ) {
         const parent = this._parents[ i ];
         if ( parent._excludeInvisibleChildrenFromBounds ) {
-          parent.invalidateBounds();
+          parent.invalidateChildBounds();
         }
       }
     }
