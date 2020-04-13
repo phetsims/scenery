@@ -40,4 +40,4 @@ const Leaf = {
 };
 scenery.register( 'Leaf', Leaf );
 
-export default scenery.Leaf;
+export default Leaf;

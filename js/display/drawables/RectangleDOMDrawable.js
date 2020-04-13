@@ -61,7 +61,7 @@ function RectangleDOMDrawable( renderer, instance ) {
   this.domElement = this.fillElement;
 
   // Apply CSS needed for future CSS transforms to work properly.
-  scenery.Utils.prepareForTransform( this.domElement, this.forceAcceleration );
+  Utils.prepareForTransform( this.domElement, this.forceAcceleration );
 }
 
 scenery.register( 'RectangleDOMDrawable', RectangleDOMDrawable );

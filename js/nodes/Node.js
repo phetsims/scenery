@@ -4328,7 +4328,7 @@ inherit( PhetioObject, Node, extend( {
       'If provided, height should be a non-negative integer' );
 
     this.toImage( function( image, x, y ) {
-      callback( new scenery.Node( {
+      callback( new Node( {
         children: [
           new scenery.Image( image, { x: -x, y: -y } )
         ]
@@ -4360,7 +4360,7 @@ inherit( PhetioObject, Node, extend( {
 
     let result = null;
     this.toCanvas( function( canvas, x, y ) {
-      result = new scenery.Node( {
+      result = new Node( {
         children: [
           new scenery.Image( canvas, { x: -x, y: -y } )
         ]
@@ -4428,7 +4428,7 @@ inherit( PhetioObject, Node, extend( {
     assert && assert( height === undefined || ( typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
       'If provided, height should be a non-negative integer' );
 
-    return new scenery.Node( {
+    return new Node( {
       children: [
         this.toDataURLImageSynchronous( x, y, width, height )
       ]

@@ -837,7 +837,7 @@ inherit( Path, Rectangle, {
    */
   setShape: function( shape ) {
     if ( shape !== null ) {
-      throw new Error( 'Cannot set the shape of a scenery.Rectangle to something non-null' );
+      throw new Error( 'Cannot set the shape of a Rectangle to something non-null' );
     }
     else {
       // probably called from the Path constructor
