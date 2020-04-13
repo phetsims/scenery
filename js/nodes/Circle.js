@@ -325,7 +325,7 @@ inherit( Path, Circle, {
    */
   setShape: function( shape ) {
     if ( shape !== null ) {
-      throw new Error( 'Cannot set the shape of a scenery.Circle to something non-null' );
+      throw new Error( 'Cannot set the shape of a Circle to something non-null' );
     }
     else {
       // probably called from the Path constructor

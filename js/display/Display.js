@@ -53,8 +53,8 @@
 import Emitter from '../../../axon/js/Emitter.js';
 import Property from '../../../axon/js/Property.js';
 import PropertyIO from '../../../axon/js/PropertyIO.js';
-import timer from '../../../axon/js/timer.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
+import timer from '../../../axon/js/timer.js';
 import Dimension2 from '../../../dot/js/Dimension2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import escapeHTML from '../../../phet-core/js/escapeHTML.js';
@@ -78,23 +78,17 @@ import HitAreaOverlay from '../overlays/HitAreaOverlay.js';
 import PointerAreaOverlay from '../overlays/PointerAreaOverlay.js';
 import PointerOverlay from '../overlays/PointerOverlay.js';
 import scenery from '../scenery.js';
+import Color from '../util/Color.js';
 import Features from '../util/Features.js';
-import '../util/Trail.js';
+import Trail from '../util/Trail.js';
 import Utils from '../util/Utils.js';
-import './BackboneDrawable.js';
-import './CanvasBlock.js';
-import './CanvasSelfDrawable.js';
+import BackboneDrawable from './BackboneDrawable.js';
 import ChangeInterval from './ChangeInterval.js';
-import './DOMSelfDrawable.js';
+import DOMBlock from './DOMBlock.js';
 import Drawable from './Drawable.js';
-import './InlineCanvasCacheDrawable.js';
 import Instance from './Instance.js';
 import Renderer from './Renderer.js';
-import './SharedCanvasCacheDrawable.js';
-import './SVGSelfDrawable.js';
-
-// TODO: Order these, and see which ones we can require?
-// const SceneryStyle = require( '/scenery/js/util/SceneryStyle' );
+import DOMDrawable from './drawables/DOMDrawable.js';
 
 /**
  * Constructs a Display that will show the rootNode and its subtree in a visual state. Default options provided below
@@ -196,8 +190,8 @@ function Display( rootNode, options ) {
   this._rootNode.addRootedDisplay( this );
   this._rootBackbone = null; // to be filled in later
   this._domElement = ( options && options.container ) ?
-                     scenery.BackboneDrawable.repurposeBackboneContainer( options.container ) :
-                     scenery.BackboneDrawable.createDivBackbone();
+                     BackboneDrawable.repurposeBackboneContainer( options.container ) :
+                     BackboneDrawable.createDivBackbone();
   this._sharedCanvasInstances = {}; // map from Node ID to Instance, for fast lookup
   this._baseInstance = null; // will be filled with the root Instance
 
@@ -313,7 +307,7 @@ function Display( rootNode, options ) {
     this._focusedNodeOnRemoveTrail;
 
     // @public (scenery-internal) {PDOMInstance}
-    this._rootAccessibleInstance = PDOMInstance.createFromPool( null, this, new scenery.Trail() );
+    this._rootAccessibleInstance = PDOMInstance.createFromPool( null, this, new Trail() );
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
       'Display root instance: ' + this._rootAccessibleInstance.toString() );
     PDOMTree.rebuildInstanceTree( this._rootAccessibleInstance );
@@ -390,7 +384,7 @@ inherit( Object, Display, extend( {
 
     if ( assertSlow ) { this._rootNode._picker.audit(); }
 
-    this._baseInstance = this._baseInstance || scenery.Instance.createFromPool( this, new scenery.Trail( this._rootNode ), true, false );
+    this._baseInstance = this._baseInstance || Instance.createFromPool( this, new Trail( this._rootNode ), true, false );
     this._baseInstance.baseSyncTree();
     if ( firstRun ) {
       this.markTransformRootDirty( this._baseInstance, this._baseInstance.isTransformed ); // marks the transform root as dirty (since it is)
@@ -619,7 +613,7 @@ inherit( Object, Display, extend( {
   // {string} (CSS), {Color} instance, or null (no background color).
   // Will be applied to the root DOM element on updateDisplay(), and no sooner.
   setBackgroundColor: function( color ) {
-    assert && assert( color === null || typeof color === 'string' || color instanceof scenery.Color );
+    assert && assert( color === null || typeof color === 'string' || color instanceof Color );
 
     this._backgroundColor = color;
   },
@@ -704,7 +698,7 @@ inherit( Object, Display, extend( {
     function renderersUnderBackbone( backbone ) {
       let bitmask = 0;
       _.each( backbone.blocks, function( block ) {
-        if ( block instanceof scenery.DOMBlock && block.domDrawable instanceof scenery.BackboneDrawable ) {
+        if ( block instanceof DOMBlock && block.domDrawable instanceof BackboneDrawable ) {
           bitmask = bitmask | renderersUnderBackbone( block.domDrawable );
         }
         else {
@@ -775,7 +769,7 @@ inherit( Object, Display, extend( {
   updateBackgroundColor: function() {
     assert && assert( this._backgroundColor === null ||
                       typeof this._backgroundColor === 'string' ||
-                      this._backgroundColor instanceof scenery.Color );
+                      this._backgroundColor instanceof Color );
 
     const newBackgroundCSS = this._backgroundColor === null ?
                              '' :
@@ -1659,7 +1653,7 @@ inherit( Object, Display, extend( {
         }
       }
 
-      if ( scenery.DOMDrawable && drawable instanceof scenery.DOMDrawable ) {
+      if ( DOMDrawable && drawable instanceof DOMDrawable ) {
         if ( drawable.domElement instanceof window.HTMLCanvasElement ) {
           addCanvas( drawable.domElement );
         }

@@ -172,11 +172,10 @@ import Mouse from '../input/Mouse.js';
 import Pen from '../input/Pen.js';
 import Touch from '../input/Touch.js';
 import scenery from '../scenery.js';
-import '../util/CanvasContextWrapper.js';
+import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
 import Picker from '../util/Picker.js';
 import RendererSummary from '../util/RendererSummary.js';
-import '../util/Trail.js';
-import '../util/TrailPointer.js';
+import Trail from '../util/Trail.js';
 import NodeIO from './NodeIO.js';
 
 // constants
@@ -3804,7 +3803,7 @@ inherit( PhetioObject, Node, extend( {
     // Without a predicate, we'll be able to bail out the instant we hit a node with 2+ parents, and it makes the
     // logic easier.
     if ( !predicate ) {
-      const trail = new scenery.Trail();
+      const trail = new Trail();
       let node = this; // eslint-disable-line consistent-this
 
       while ( node ) {
@@ -3855,8 +3854,8 @@ inherit( PhetioObject, Node, extend( {
     predicate = predicate || Node.defaultTrailPredicate;
 
     const trails = [];
-    const trail = new scenery.Trail( this );
-    scenery.Trail.appendAncestorTrailsWithPredicate( trails, trail, predicate );
+    const trail = new Trail( this );
+    Trail.appendAncestorTrailsWithPredicate( trails, trail, predicate );
 
     return trails;
   },
@@ -3887,8 +3886,8 @@ inherit( PhetioObject, Node, extend( {
     predicate = predicate || Node.defaultLeafTrailPredicate;
 
     const trails = [];
-    const trail = new scenery.Trail( this );
-    scenery.Trail.appendDescendantTrailsWithPredicate( trails, trail, predicate );
+    const trail = new Trail( this );
+    Trail.appendDescendantTrailsWithPredicate( trails, trail, predicate );
 
     return trails;
   },
@@ -4131,7 +4130,7 @@ inherit( PhetioObject, Node, extend( {
           canvas.width = wrapper.canvas.width;
           canvas.height = wrapper.canvas.height;
           const context = canvas.getContext( '2d' );
-          const childWrapper = new scenery.CanvasContextWrapper( canvas, context );
+          const childWrapper = new CanvasContextWrapper( canvas, context );
 
           matrix.canvasSetTransform( context );
 
@@ -4180,7 +4179,7 @@ inherit( PhetioObject, Node, extend( {
       context.fillRect( 0, 0, canvas.width, canvas.height );
     }
 
-    const wrapper = new scenery.CanvasContextWrapper( canvas, context );
+    const wrapper = new CanvasContextWrapper( canvas, context );
 
     this.renderToCanvasSubtree( wrapper, Matrix3.identity() );
 
@@ -4231,7 +4230,7 @@ inherit( PhetioObject, Node, extend( {
     // for API compatibility, we apply our own transform here
     this._transform.getMatrix().canvasAppendTransform( context );
 
-    const wrapper = new scenery.CanvasContextWrapper( canvas, context );
+    const wrapper = new CanvasContextWrapper( canvas, context );
 
     this.renderToCanvasSubtree( wrapper, Matrix3.translation( x, y ).timesMatrix( this._transform.getMatrix() ) );
 

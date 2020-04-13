@@ -8,8 +8,9 @@
 
 import Shape from '../../../kite/js/Shape.js';
 import inherit from '../../../phet-core/js/inherit.js';
+import CanvasNode from '../nodes/CanvasNode.js';
 import scenery from '../scenery.js';
-import '../util/Trail.js';
+import Trail from'../util/Trail.js';
 import ShapeBasedOverlay from './ShapeBasedOverlay.js';
 
 function CanvasNodeBoundsOverlay( display, rootNode ) {
@@ -23,13 +24,13 @@ inherit( ShapeBasedOverlay, CanvasNodeBoundsOverlay, {
   addShapes: function() {
     const self = this;
 
-    new scenery.Trail( this.rootNode ).eachTrailUnder( function( trail ) {
+    new Trail( this.rootNode ).eachTrailUnder( function( trail ) {
       const node = trail.lastNode();
       if ( !node.isVisible() ) {
         // skip this subtree if the node is invisible
         return true;
       }
-      if ( ( node instanceof scenery.CanvasNode ) && trail.isVisible() ) {
+      if ( ( node instanceof CanvasNode ) && trail.isVisible() ) {
         const transform = trail.getTransform();
 
         self.addShape( transform.transformShape( Shape.bounds( node.selfBounds ) ), 'rgba(0,255,0,0.8)', true );

@@ -8,6 +8,7 @@
 
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import platform from '../../../phet-core/js/platform.js';
+import Display from '../display/Display.js';
 import scenery from '../scenery.js';
 import Features from '../util/Features.js';
 import BatchedDOMEvent from './BatchedDOMEvent.js';
@@ -26,7 +27,7 @@ var BrowserEvents = {
    * @param {boolean|null} passiveEvents - The value of the `passive` option for adding/removing DOM event listeners
    */
   addDisplay: function( display, attachToWindow, passiveEvents ) {
-    assert && assert( display instanceof scenery.Display );
+    assert && assert( display instanceof Display );
     assert && assert( typeof attachToWindow === 'boolean' );
     assert && assert( !_.includes( this.attachedDisplays, display ),
       'A display cannot be concurrently attached to events more than one time' );
@@ -56,7 +57,7 @@ var BrowserEvents = {
    * @param {boolean|null} passiveEvents - The value of the `passive` option for adding/removing DOM event listeners
    */
   removeDisplay: function( display, attachToWindow, passiveEvents ) {
-    assert && assert( display instanceof scenery.Display );
+    assert && assert( display instanceof Display );
     assert && assert( typeof attachToWindow === 'boolean' );
     assert && assert( _.includes( this.attachedDisplays, display ),
       'This display was not already attached to listen for window events' );
@@ -332,7 +333,7 @@ var BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
     if ( domEvent.pointerType === 'mouse' ) {
-      scenery.Display.userGestureEmitter.emit();
+      Display.userGestureEmitter.emit();
     }
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
@@ -351,7 +352,7 @@ var BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'pointerup' );
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
-    scenery.Display.userGestureEmitter.emit();
+    Display.userGestureEmitter.emit();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
     BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, 'pointerUp', true );
@@ -545,7 +546,7 @@ var BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'touchend' );
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
-    scenery.Display.userGestureEmitter.emit();
+    Display.userGestureEmitter.emit();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
     BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.TOUCH_TYPE, 'touchEnd', true );
@@ -595,7 +596,7 @@ var BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'mousedown' );
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
-    scenery.Display.userGestureEmitter.emit();
+    Display.userGestureEmitter.emit();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
     BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, 'mouseDown', false );
@@ -613,7 +614,7 @@ var BrowserEvents = {
     sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'mouseup' );
     sceneryLog && sceneryLog.OnInput && sceneryLog.push();
 
-    scenery.Display.userGestureEmitter.emit();
+    Display.userGestureEmitter.emit();
 
     // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
     BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.MOUSE_TYPE, 'mouseUp', true );

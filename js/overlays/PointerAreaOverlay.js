@@ -9,7 +9,7 @@
 import Shape from '../../../kite/js/Shape.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
-import '../util/Trail.js';
+import Trail from '../util/Trail.js';
 import ShapeBasedOverlay from './ShapeBasedOverlay.js';
 
 function PointerAreaOverlay( display, rootNode ) {
@@ -23,7 +23,7 @@ inherit( ShapeBasedOverlay, PointerAreaOverlay, {
   addShapes: function() {
     const self = this;
 
-    new scenery.Trail( this.rootNode ).eachTrailUnder( function( trail ) {
+    new Trail( this.rootNode ).eachTrailUnder( function( trail ) {
       const node = trail.lastNode();
       if ( !node.isVisible() ) {
         // skip this subtree if the node is invisible

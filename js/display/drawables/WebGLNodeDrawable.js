@@ -7,8 +7,9 @@
  * @author Sam Reid
  */
 
-import inherit from '../../../../phet-core/js/inherit.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
+import inherit from '../../../../phet-core/js/inherit.js';
+import WebGLNode from '../../nodes/WebGLNode.js';
 import scenery from '../../scenery.js';
 import Renderer from '../Renderer.js';
 import WebGLSelfDrawable from '../WebGLSelfDrawable.js';
@@ -78,8 +79,8 @@ inherit( WebGLSelfDrawable, WebGLNodeDrawable, {
 
     const painted = this.painter.paint( matrix, this.webGLBlock.projectionMatrix );
 
-    assert && assert( painted === scenery.WebGLNode.PAINTED_SOMETHING || painted === scenery.WebGLNode.PAINTED_NOTHING );
-    assert && assert( scenery.WebGLNode.PAINTED_NOTHING === 0 && scenery.WebGLNode.PAINTED_SOMETHING === 1,
+    assert && assert( painted === WebGLNode.PAINTED_SOMETHING || painted === WebGLNode.PAINTED_NOTHING );
+    assert && assert( WebGLNode.PAINTED_NOTHING === 0 && WebGLNode.PAINTED_SOMETHING === 1,
       'Ensure we can pass the value through directly to indicate whether draw calls were made' );
 
     return painted;

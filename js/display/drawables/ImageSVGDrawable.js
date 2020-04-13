@@ -6,10 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import Poolable from '../../../../phet-core/js/Poolable.js';
 import inherit from '../../../../phet-core/js/inherit.js';
 import platform from '../../../../phet-core/js/platform.js';
-import Poolable from '../../../../phet-core/js/Poolable.js';
 import scenery from '../../scenery.js';
+import svgns from '../../util/svgns.js';
+import xlinkns from '../../util/xlinkns.js';
 import SVGSelfDrawable from '../SVGSelfDrawable.js';
 import ImageStatefulDrawable from './ImageStatefulDrawable.js';
 
@@ -32,7 +34,7 @@ function ImageSVGDrawable( renderer, instance ) {
   const self = this;
 
   // @protected {SVGImageElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
-  this.svgElement = this.svgElement || document.createElementNS( scenery.svgns, 'image' );
+  this.svgElement = this.svgElement || document.createElementNS( svgns, 'image' );
   this.svgElement.setAttribute( 'x', '0' );
   this.svgElement.setAttribute( 'y', '0' );
 
@@ -80,7 +82,7 @@ inherit( SVGSelfDrawable, ImageSVGDrawable, {
       else {
         image.setAttribute( 'width', '0' );
         image.setAttribute( 'height', '0' );
-        image.setAttributeNS( scenery.xlinkns, 'xlink:href', '//:0' ); // see http://stackoverflow.com/questions/5775469/whats-the-valid-way-to-include-an-image-with-no-src
+        image.setAttributeNS( xlinkns, 'xlink:href', '//:0' ); // see http://stackoverflow.com/questions/5775469/whats-the-valid-way-to-include-an-image-with-no-src
       }
     }
     else if ( this.dirtyMipmap && this.node._image ) {
@@ -133,13 +135,13 @@ inherit( SVGSelfDrawable, ImageSVGDrawable, {
       // being used for display purposes only, and is never shown to the user), we use the built-in JS toFixed instead of
       // Dot's version of toFixed. See https://github.com/phetsims/kite/issues/50
       image.setAttribute( 'transform', 'scale(' + Math.pow( 2, level ).toFixed( 20 ) + ')' );
-      image.setAttributeNS( scenery.xlinkns, 'xlink:href', url );
+      image.setAttributeNS( xlinkns, 'xlink:href', url );
     }
     else {
       sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Setting image URL' );
       image.setAttribute( 'width', this.node.getImageWidth() + 'px' );
       image.setAttribute( 'height', this.node.getImageHeight() + 'px' );
-      image.setAttributeNS( scenery.xlinkns, 'xlink:href', this.node.getImageURL() );
+      image.setAttributeNS( xlinkns, 'xlink:href', this.node.getImageURL() );
     }
   },
 

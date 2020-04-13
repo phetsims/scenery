@@ -7,10 +7,11 @@
  */
 
 import Property from '../../../axon/js/Property.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
+import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 import Color from '../util/Color.js';
+import svgns from '../util/svgns.js';
 
 const scratchColor = new Color( 'transparent' );
 
@@ -51,7 +52,7 @@ inherit( Object, SVGGradientStop, {
     this.ratio = ratio;
 
     // @public {SVGStopElement} - persistent
-    this.svgElement = this.svgElement || document.createElementNS( scenery.svgns, 'stop' );
+    this.svgElement = this.svgElement || document.createElementNS( svgns, 'stop' );
 
     this.svgElement.setAttribute( 'offset', ratio );
 

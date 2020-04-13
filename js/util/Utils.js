@@ -46,10 +46,10 @@ var Utils = {
   prepareForTransform: function( element, forceAcceleration ) {
     element.style[ transformOriginProperty ] = 'top left';
     if ( forceAcceleration ) {
-      scenery.Utils.setTransformAcceleration( element );
+      Utils.setTransformAcceleration( element );
     }
     else {
-      scenery.Utils.unsetTransformAcceleration( element );
+      Utils.unsetTransformAcceleration( element );
     }
   },
 
@@ -577,7 +577,7 @@ var Utils = {
    */
   get isWebGLSupported() {
     if ( this._extensionlessWebGLSupport === undefined ) {
-      this._extensionlessWebGLSupport = scenery.Utils.checkWebGLSupport();
+      this._extensionlessWebGLSupport = Utils.checkWebGLSupport();
     }
     return this._extensionlessWebGLSupport;
   },

@@ -167,6 +167,7 @@ import Tandem from '../../../tandem/js/Tandem.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
+import Display from '../display/Display.js';
 import scenery from '../scenery.js';
 import Features from '../util/Features.js';
 import FullScreen from '../util/FullScreen.js';
@@ -209,7 +210,7 @@ const TARGET_SUBSTITUTE_KEY = 'targetSubstitute';
  */
 class Input {
   constructor( display, attachToWindow, batchDOMEvents, assumeFullWindow, passiveEvents, options ) {
-    assert && assert( display instanceof scenery.Display );
+    assert && assert( display instanceof Display );
     assert && assert( typeof attachToWindow === 'boolean' );
     assert && assert( typeof batchDOMEvents === 'boolean' );
     assert && assert( typeof assumeFullWindow === 'boolean' );
@@ -1000,7 +1001,7 @@ class Input {
    * @param {boolean} bubbles
    */
   dispatchA11yEvent( eventType, domEvent, bubbles ) {
-    scenery.Display.userGestureEmitter.emit();
+    Display.userGestureEmitter.emit();
 
     // This workaround hopefully won't be here forever, see ParallelDOM.setExcludeLabelSiblingFromInput() and https://github.com/phetsims/a11y-research/issues/156
     if ( !( domEvent.target && domEvent.target.hasAttribute( PDOMUtils.DATA_EXCLUDE_FROM_INPUT ) ) ) {
@@ -1582,7 +1583,7 @@ class Input {
 
         // Remove keyboard focus, but store element that is receiving interaction in case we resume .
         this.display.pointerFocus = focusableNode;
-        scenery.Display.focus = null;
+        Display.focus = null;
       }
     }
 

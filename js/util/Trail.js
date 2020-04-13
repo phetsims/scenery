@@ -19,9 +19,9 @@
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Transform3 from '../../../dot/js/Transform3.js';
 import inherit from '../../../phet-core/js/inherit.js';
-import '../nodes/Node.js';
+import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
-import './TrailPointer.js';
+import TrailPointer from './TrailPointer.js';
 
 // constants
 const ID_SEPARATOR = '-';
@@ -63,7 +63,7 @@ function Trail( nodes ) {
 
   const self = this;
   if ( nodes ) {
-    if ( nodes instanceof scenery.Node ) {
+    if ( nodes instanceof Node ) {
       const node = nodes;
 
       // add just a single node in
@@ -612,7 +612,7 @@ inherit( Object, Trail, {
   // calls callback( trail ) for this trail, and each descendant trail. If callback returns true, subtree will be skipped
   eachTrailUnder: function( callback ) {
     // TODO: performance: should be optimized to be much faster, since we don't have to deal with the before/after
-    new scenery.TrailPointer( this, true ).eachTrailBetween( new scenery.TrailPointer( this, false ), callback );
+    new TrailPointer( this, true ).eachTrailBetween( new TrailPointer( this, false ), callback );
   },
 
   /*
@@ -758,8 +758,8 @@ Trail.eachPaintedTrailBetween = function( a, b, callback, excludeEndTrails, root
 
 // global way of iterating across trails. when callback returns true, subtree will be skipped
 Trail.eachTrailBetween = function( a, b, callback, excludeEndTrails, rootNode ) {
-  const aPointer = a ? new scenery.TrailPointer( a.copy(), true ) : new scenery.TrailPointer( new scenery.Trail( rootNode ), true );
-  const bPointer = b ? new scenery.TrailPointer( b.copy(), true ) : new scenery.TrailPointer( new scenery.Trail( rootNode ), false );
+  const aPointer = a ? new TrailPointer( a.copy(), true ) : new TrailPointer( new Trail( rootNode ), true );
+  const bPointer = b ? new TrailPointer( b.copy(), true ) : new TrailPointer( new Trail( rootNode ), false );
 
   // if we are excluding endpoints, just bump the pointers towards each other by one step
   if ( excludeEndTrails ) {

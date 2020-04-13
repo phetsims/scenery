@@ -867,7 +867,7 @@ class KeyPress {
     // default cause, scale target will be origin of the screen
     scratchScaleTargetVector.setXY( 0, 0 );
 
-    const focusedNode = scenery.Display.focusedNode;
+    const focusedNode = Display.focusedNode;
     if ( focusedNode ) {
       scratchScaleTargetVector.set( focusedNode.parentToGlobalPoint( focusedNode.center ) );
     }

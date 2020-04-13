@@ -9,6 +9,7 @@
 import Property from '../../../axon/js/Property.js';
 import scenery from '../scenery.js';
 import Color from './Color.js';
+import Gradient from './Gradient.js';
 import Paint from './Paint.js';
 
 var PaintDef = {
@@ -48,7 +49,7 @@ var PaintDef = {
     if ( paint instanceof Property ) {
       return PaintDef.toColor( paint.value );
     }
-    if ( paint instanceof scenery.Gradient ) {
+    if ( paint instanceof Gradient ) {
       // Average the stops
       let color = Color.TRANSPARENT;
       const quantity = 0;

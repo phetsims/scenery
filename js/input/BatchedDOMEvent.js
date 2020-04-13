@@ -8,9 +8,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../phet-core/js/inherit.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
+import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
+import Input from './Input.js';
 
 /**
  * @constructor
@@ -61,7 +62,7 @@ inherit( Object, BatchedDOMEvent, {
       callback.call( input, domEvent.pointerId, domEvent.pointerType, input.pointFromEvent( domEvent ), domEvent );
     }
     else if ( this.type === BatchedDOMEvent.MS_POINTER_TYPE ) {
-      callback.call( input, domEvent.pointerId, scenery.Input.msPointerType( domEvent ), input.pointFromEvent( domEvent ), domEvent );
+      callback.call( input, domEvent.pointerId, Input.msPointerType( domEvent ), input.pointFromEvent( domEvent ), domEvent );
     }
     else if ( this.type === BatchedDOMEvent.TOUCH_TYPE ) {
       for ( let i = 0; i < domEvent.changedTouches.length; i++ ) {

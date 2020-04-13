@@ -11,6 +11,7 @@
 
 import inherit from '../../../phet-core/js/inherit.js';
 import Renderer from '../display/Renderer.js';
+import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
 
 const summaryBits = [
@@ -49,7 +50,7 @@ for ( let l = 0; l < numSummaryBits; l++ ) {
  * @param {Node} node
  */
 function RendererSummary( node ) {
-  assert && assert( node instanceof scenery.Node );
+  assert && assert( node instanceof Node );
 
   // NOTE: assumes that we are created in the Node constructor
   assert && assert( node._rendererBitmask === Renderer.bitmaskNodeDefault, 'Node must have a default bitmask when creating a RendererSummary' );

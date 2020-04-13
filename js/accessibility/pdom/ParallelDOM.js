@@ -126,9 +126,12 @@ import Shape from '../../../../kite/js/Shape.js';
 import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
 import extend from '../../../../phet-core/js/extend.js';
 import merge from '../../../../phet-core/js/merge.js';
+import Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
+import Trail from '../../util/Trail.js';
 import A11yBehaviorFunctionDef from '../A11yBehaviorFunctionDef.js';
 import AccessibleDisplaysInfo from './PDOMDisplaysInfo.js';
+import PDOMInstance from './PDOMInstance.js';
 import PDOMPeer from './PDOMPeer.js';
 import PDOMTree from './PDOMTree.js';
 import PDOMUtils from './PDOMUtils.js';
@@ -561,7 +564,7 @@ const ParallelDOM = {
           this._accessibleChecked && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support accessibleChecked.' );
           this._inputValue && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support inputValue' );
           this._accessibleChecked && assert( INPUT_TYPES_THAT_SUPPORT_CHECKED.indexOf( this._inputType.toUpperCase() ) >= 0, 'inputType does not support checked attribute: ' + this._inputType );
-          this._focusHighlightLayerable && assert( this.focusHighlight instanceof scenery.Node, 'focusHighlight must be Node if highlight is layerable' );
+          this._focusHighlightLayerable && assert( this.focusHighlight instanceof Node, 'focusHighlight must be Node if highlight is layerable' );
         }
 
         for ( let i = 0; i < this.children.length; i++ ) {
@@ -1427,7 +1430,7 @@ const ParallelDOM = {
        */
       setFocusHighlight: function( focusHighlight ) {
         assert && assert( focusHighlight === null ||
-                          focusHighlight instanceof scenery.Node ||
+                          focusHighlight instanceof Node ||
                           focusHighlight instanceof Shape ||
                           focusHighlight === 'invisible' );
 
@@ -1439,7 +1442,7 @@ const ParallelDOM = {
           if ( this._focusHighlightLayerable ) {
 
             // if focus highlight is layerable, it must be a node in the scene graph
-            assert && assert( focusHighlight instanceof scenery.Node );
+            assert && assert( focusHighlight instanceof Node );
             focusHighlight.visible = this.focused;
           }
 
@@ -1475,7 +1478,7 @@ const ParallelDOM = {
           // if a focus highlight is defined (it must be a node), update its visibility so it is linked to focus
           // of the associated node
           if ( this._focusHighlight ) {
-            assert && assert( this._focusHighlight instanceof scenery.Node );
+            assert && assert( this._focusHighlight instanceof Node );
             this._focusHighlight.visible = this.focused;
           }
         }
@@ -1505,7 +1508,7 @@ const ParallelDOM = {
        * @param {boolean|Node} groupHighlight
        */
       setGroupFocusHighlight: function( groupHighlight ) {
-        assert && assert( typeof groupHighlight === 'boolean' || groupHighlight instanceof scenery.Node );
+        assert && assert( typeof groupHighlight === 'boolean' || groupHighlight instanceof Node );
         this._groupFocusHighlight = groupHighlight;
       },
       set groupFocusHighlight( groupHighlight ) { this.setGroupFocusHighlight( groupHighlight ); },
@@ -1629,7 +1632,7 @@ const ParallelDOM = {
        * @public (scenery-internal)
        */
       removeNodeThatIsAriaLabelledByThisNode: function( node ) {
-        assert && assert( node instanceof scenery.Node );
+        assert && assert( node instanceof Node );
         const indexOfNode = _.indexOf( this._nodesThatAreAriaLabelledbyThisNode, node );
         assert && assert( indexOfNode >= 0 );
         this._nodesThatAreAriaLabelledbyThisNode.splice( indexOfNode, 1 );
@@ -1784,7 +1787,7 @@ const ParallelDOM = {
        * @public (scenery-internal)
        */
       removeNodeThatIsAriaDescribedByThisNode: function( node ) {
-        assert && assert( node instanceof scenery.Node );
+        assert && assert( node instanceof Node );
         const indexOfNode = _.indexOf( this._nodesThatAreAriaDescribedbyThisNode, node );
         assert && assert( indexOfNode >= 0 );
         this._nodesThatAreAriaDescribedbyThisNode.splice( indexOfNode, 1 );
@@ -1929,7 +1932,7 @@ const ParallelDOM = {
        * @public (scenery-internal)
        */
       removeNodeThatIsActiveDescendantThisNode: function( node ) {
-        assert && assert( node instanceof scenery.Node );
+        assert && assert( node instanceof Node );
         const indexOfNode = _.indexOf( this._nodesThatAreActiveDescendantToThisNode, node );
         assert && assert( indexOfNode >= 0 );
         this._nodesThatAreActiveDescendantToThisNode.splice( indexOfNode, 1 );
@@ -2032,7 +2035,7 @@ const ParallelDOM = {
         assert && assert( Array.isArray( accessibleOrder ) || accessibleOrder === null,
           'Array or null expected, received: ' + accessibleOrder );
         assert && accessibleOrder && accessibleOrder.forEach( function( node, index ) {
-          assert( node === null || node instanceof scenery.Node,
+          assert( node === null || node instanceof Node,
             'Elements of accessibleOrder should be either a Node or null. Element at index ' + index + ' is: ' + node );
         } );
         assert && accessibleOrder && assert( this.getTrails( function( node ) {
@@ -2535,7 +2538,7 @@ const ParallelDOM = {
        * @returns {Array.<Item>}
        */
       getNestedAccessibleOrder: function() {
-        const currentTrail = new scenery.Trail( this );
+        const currentTrail = new Trail( this );
         let pruneStack = []; // {Array.<Node>} - A list of nodes to prune
 
         // {Array.<Item>} - The main result we will be returning. It is the top-level array where child items will be
@@ -2736,7 +2739,7 @@ const ParallelDOM = {
        * @param {AccessibleInstance} accessibleInstance
        */
       addAccessibleInstance: function( accessibleInstance ) {
-        assert && assert( accessibleInstance instanceof scenery.PDOMInstance );
+        assert && assert( accessibleInstance instanceof PDOMInstance );
         this._accessibleInstances.push( accessibleInstance );
       },
 
@@ -2747,7 +2750,7 @@ const ParallelDOM = {
        * @param {AccessibleInstance} accessibleInstance
        */
       removeAccessibleInstance: function( accessibleInstance ) {
-        assert && assert( accessibleInstance instanceof scenery.PDOMInstance );
+        assert && assert( accessibleInstance instanceof PDOMInstance );
         const index = _.indexOf( this._accessibleInstances, accessibleInstance );
         assert && assert( index !== -1, 'Cannot remove an PDOMInstance from a Node if it was not there' );
         this._accessibleInstances.splice( index, 1 );

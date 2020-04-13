@@ -10,11 +10,10 @@
 
 import Focus from '../accessibility/Focus.js';
 import PDOMInstance from '../accessibility/pdom/PDOMInstance.js';
+import Display from '../display/Display.js';
 import scenery from '../scenery.js';
 import Trail from '../util/Trail.js';
 import Pointer from './Pointer.js'; // inherits from Pointer
-
-// const Display = require( '/scenery/js/display/Display' ); // so requireJS doesn't balk about circular dependency
 
 class PDOMPointer extends Pointer {
 
@@ -55,19 +54,19 @@ class PDOMPointer extends Pointer {
 
         // NOTE: The "root" peer can't be focused (so it doesn't matter if it doesn't have a node).
         if ( this.trail.lastNode().focusable ) {
-          scenery.Display.focus = new Focus( this.display, PDOMInstance.guessVisualTrail( this.trail, this.display.rootNode ) );
+          Display.focus = new Focus( this.display, PDOMInstance.guessVisualTrail( this.trail, this.display.rootNode ) );
           this.display.pointerFocus = null;
         }
       },
       blur: event => {
-        scenery.Display.focus = null;
+        Display.focus = null;
         this.keydownTargetNode = null;
       },
       keydown: event => {
         if ( this.blockTrustedEvents && event.domEvent.isTrusted ) {
           return;
         }
-        scenery.Display.keyStateTracker.keydownUpdate( event.domEvent );
+        Display.keyStateTracker.keydownUpdate( event.domEvent );
 
         // set the target to potentially block keyup events
         this.keydownTargetNode = event.target;
@@ -76,7 +75,7 @@ class PDOMPointer extends Pointer {
         if ( this.blockTrustedEvents && event.domEvent.isTrusted ) {
           return;
         }
-        scenery.Display.keyStateTracker.keyupUpdate( event.domEvent );
+        Display.keyStateTracker.keyupUpdate( event.domEvent );
 
         // The keyup event was received on a node that didn't receive a keydown event, abort to prevent any other
         // listeners from being called for this event. Done after updating KeyStateTracker so that the global state

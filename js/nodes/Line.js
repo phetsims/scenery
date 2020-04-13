@@ -559,7 +559,7 @@ inherit( Path, Line, {
    */
   setShape: function( shape ) {
     if ( shape !== null ) {
-      throw new Error( 'Cannot set the shape of a scenery.Line to something non-null' );
+      throw new Error( 'Cannot set the shape of a Line to something non-null' );
     }
     else {
       // probably called from the Path constructor

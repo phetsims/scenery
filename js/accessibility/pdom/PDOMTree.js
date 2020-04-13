@@ -7,9 +7,11 @@
  */
 
 import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
+import Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
-import PartialPDOMTrail from './PartialPDOMTrail.js';
+import Trail from '../../util/Trail.js';
 import PDOMInstance from './PDOMInstance.js';
+import PartialPDOMTrail from './PartialPDOMTrail.js';
 
 // globals (for restoring focus)
 let focusedNode = null;
@@ -26,8 +28,8 @@ var PDOMTree = {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'addChild parent:n#' + parent._id + ', child:n#' + child._id );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
-    assert && assert( parent instanceof scenery.Node );
-    assert && assert( child instanceof scenery.Node );
+    assert && assert( parent instanceof Node );
+    assert && assert( child instanceof Node );
     assert && assert( !child._rendererSummary.isNotAccessible() );
 
     const blockedDisplays = PDOMTree.beforeOp( child );
@@ -52,8 +54,8 @@ var PDOMTree = {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'removeChild parent:n#' + parent._id + ', child:n#' + child._id );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
-    assert && assert( parent instanceof scenery.Node );
-    assert && assert( child instanceof scenery.Node );
+    assert && assert( parent instanceof Node );
+    assert && assert( child instanceof Node );
     assert && assert( !child._rendererSummary.isNotAccessible() );
 
     const blockedDisplays = PDOMTree.beforeOp( child );
@@ -77,7 +79,7 @@ var PDOMTree = {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'childrenOrderChange node:n#' + node._id );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
-    assert && assert( node instanceof scenery.Node );
+    assert && assert( node instanceof Node );
     assert && assert( !node._rendererSummary.isNotAccessible() );
 
     const blockedDisplays = PDOMTree.beforeOp( node );
@@ -101,7 +103,7 @@ var PDOMTree = {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'accessibleOrderChange n#' + node._id + ': ' + PDOMTree.debugOrder( oldOrder ) + ',' + PDOMTree.debugOrder( newOrder ) );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
-    assert && assert( node instanceof scenery.Node );
+    assert && assert( node instanceof Node );
 
     const blockedDisplays = PDOMTree.beforeOp( node );
 
@@ -190,7 +192,7 @@ var PDOMTree = {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'accessibleContentChange n#' + node._id );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
-    assert && assert( node instanceof scenery.Node );
+    assert && assert( node instanceof Node );
 
     const blockedDisplays = PDOMTree.beforeOp( node );
 
@@ -239,7 +241,7 @@ var PDOMTree = {
 
     rootInstance.removeAllChildren();
 
-    rootInstance.addConsecutiveInstances( PDOMTree.createTree( new scenery.Trail( rootNode ), rootInstance.display, rootInstance ) );
+    rootInstance.addConsecutiveInstances( PDOMTree.createTree( new Trail( rootNode ), rootInstance.display, rootInstance ) );
   },
 
   /**
@@ -436,7 +438,7 @@ var PDOMTree = {
    */
   findAccessibleTrails: function( node ) {
     const trails = [];
-    PDOMTree.recursiveAccessibleTrailSearch( trails, new scenery.Trail( node ) );
+    PDOMTree.recursiveAccessibleTrailSearch( trails, new Trail( node ) );
     return trails;
   },
 
@@ -544,7 +546,7 @@ var PDOMTree = {
    */
   auditNodeForAccessibleCycles: function( node ) {
     if ( assert ) {
-      const trail = new scenery.Trail( node );
+      const trail = new Trail( node );
 
       ( function recursiveSearch() {
         const root = trail.rootNode();

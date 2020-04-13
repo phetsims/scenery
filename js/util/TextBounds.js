@@ -11,6 +11,7 @@ import scenery from '../scenery.js';
 import CanvasContextWrapper from './CanvasContextWrapper.js';
 import Font from './Font.js';
 import Utils from './Utils.js';
+import svgns from './svgns.js';
 
 // @private {string} - ID for a container for our SVG test element (determined to find the size of text elements with SVG)
 const TEXT_SIZE_CONTAINER_ID = 'sceneryTextSizeContainer';
@@ -314,7 +315,7 @@ var TextBounds = {
 
     if ( !svgTextSizeContainer ) {
       // set up the container and text for testing text bounds quickly (using approximateSVGBounds)
-      svgTextSizeContainer = document.createElementNS( scenery.svgns, 'svg' );
+      svgTextSizeContainer = document.createElementNS( svgns, 'svg' );
       svgTextSizeContainer.setAttribute( 'width', '2' );
       svgTextSizeContainer.setAttribute( 'height', '2' );
       svgTextSizeContainer.setAttribute( 'id', TEXT_SIZE_CONTAINER_ID );
@@ -325,7 +326,7 @@ var TextBounds = {
 
     // NOTE! copies createSVGElement
     if ( !svgTextSizeElement ) {
-      svgTextSizeElement = document.createElementNS( scenery.svgns, 'text' );
+      svgTextSizeElement = document.createElementNS( svgns, 'text' );
       svgTextSizeElement.appendChild( document.createTextNode( '' ) );
       svgTextSizeElement.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
       svgTextSizeElement.setAttribute( 'text-rendering', 'geometricPrecision' );

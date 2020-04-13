@@ -8,9 +8,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../phet-core/js/inherit.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
+import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
+import svgns from '../util/svgns.js';
 import SVGGradient from './SVGGradient.js';
 
 /**
@@ -70,7 +71,7 @@ inherit( SVGGradient, SVGLinearGradient, {
    * @returns {SVGLinearGradientElement}
    */
   createDefinition: function() {
-    return document.createElementNS( scenery.svgns, 'linearGradient' );
+    return document.createElementNS( svgns, 'linearGradient' );
   }
 } );
 

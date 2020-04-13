@@ -7,10 +7,11 @@
  */
 
 import Matrix3 from '../../../../dot/js/Matrix3.js';
-import inherit from '../../../../phet-core/js/inherit.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
+import inherit from '../../../../phet-core/js/inherit.js';
 import scenery from '../../scenery.js';
 import Features from '../../util/Features.js';
+import Utils from '../../util/Utils.js';
 import DOMSelfDrawable from '../DOMSelfDrawable.js';
 import RectangleStatefulDrawable from './RectangleStatefulDrawable.js';
 
@@ -137,7 +138,7 @@ inherit( DOMSelfDrawable, RectangleDOMDrawable, {
       const translation = Matrix3.translation( node._rectX, node._rectY );
       scratchMatrix.multiplyMatrix( translation );
       translation.freeToPool();
-      scenery.Utils.applyPreparedTransform( scratchMatrix, this.fillElement, this.forceAcceleration );
+      Utils.applyPreparedTransform( scratchMatrix, this.fillElement, this.forceAcceleration );
     }
 
     // clear all of the dirty flags

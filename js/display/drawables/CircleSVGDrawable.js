@@ -6,9 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../../phet-core/js/inherit.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
+import inherit from '../../../../phet-core/js/inherit.js';
 import scenery from '../../scenery.js';
+import svgns from '../../util/svgns.js';
 import SVGSelfDrawable from '../SVGSelfDrawable.js';
 import CircleStatefulDrawable from './CircleStatefulDrawable.js';
 
@@ -33,7 +34,7 @@ function CircleSVGDrawable( renderer, instance ) {
   this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGCircleElements ); // usesPaint: true
 
   // @protected {SVGCircleElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
-  this.svgElement = this.svgElement || document.createElementNS( scenery.svgns, 'circle' );
+  this.svgElement = this.svgElement || document.createElementNS( svgns, 'circle' );
 }
 
 scenery.register( 'CircleSVGDrawable', CircleSVGDrawable );

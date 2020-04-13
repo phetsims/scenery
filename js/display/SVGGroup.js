@@ -7,11 +7,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import Poolable from '../../../phet-core/js/Poolable.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import platform from '../../../phet-core/js/platform.js';
-import Poolable from '../../../phet-core/js/Poolable.js';
 import scenery from '../scenery.js';
+import svgns from '../util/svgns.js';
 
 /**
  * @constructor
@@ -81,7 +82,7 @@ inherit( Object, SVGGroup, {
     this.node.childrenChangedEmitter.addListener( this.orderDirtyListener );
 
     if ( !this.svgGroup ) {
-      this.svgGroup = document.createElementNS( scenery.svgns, 'g' );
+      this.svgGroup = document.createElementNS( svgns, 'g' );
     }
 
     this.instance.addSVGGroup( this );
@@ -243,12 +244,12 @@ inherit( Object, SVGGroup, {
         if ( !this.clipDefinition ) {
           const clipId = 'clip' + this.node.getId();
 
-          this.clipDefinition = document.createElementNS( scenery.svgns, 'clipPath' );
+          this.clipDefinition = document.createElementNS( svgns, 'clipPath' );
           this.clipDefinition.setAttribute( 'id', clipId );
           this.clipDefinition.setAttribute( 'clipPathUnits', 'userSpaceOnUse' );
           this.block.defs.appendChild( this.clipDefinition ); // TODO: method? evaluate with future usage of defs (not done yet)
 
-          this.clipPath = document.createElementNS( scenery.svgns, 'path' );
+          this.clipPath = document.createElementNS( svgns, 'path' );
           this.clipDefinition.appendChild( this.clipPath );
 
           svgGroup.setAttribute( 'clip-path', 'url(#' + clipId + ')' );

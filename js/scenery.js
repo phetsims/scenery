@@ -32,12 +32,6 @@ const scenery = new Namespace( 'scenery' );
 scenery.register( 'scratchCanvas', scratchCanvas );
 scenery.register( 'scratchContext', scratchContext );
 
-// @public - SVG namespace, used for document.createElementNS( scenery.svgns, name );
-scenery.register( 'svgns', 'http://www.w3.org/2000/svg' );
-
-// @public - X-link namespace, used for SVG image URLs (xlink:href)
-scenery.register( 'xlinkns', 'http://www.w3.org/1999/xlink' );
-
 /*---------------------------------------------------------------------------*
  * Logging
  * TODO: Move this out of scenery.js if possible

@@ -10,7 +10,6 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Shape from '../../../kite/js/Shape.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
-import '../util/Trail.js';
 import ShapeBasedOverlay from './ShapeBasedOverlay.js';
 
 function FittedBlockBoundsOverlay( display, rootNode ) {

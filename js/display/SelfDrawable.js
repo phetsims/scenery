@@ -25,7 +25,7 @@ function SelfDrawable( renderer, instance ) {
 
 scenery.register( 'SelfDrawable', SelfDrawable );
 
-inherit( scenery.Drawable, SelfDrawable, {
+inherit( Drawable, SelfDrawable, {
   initializeSelfDrawable: function( renderer, instance ) {
     this.drawableVisibilityListener = this.drawableVisibilityListener || this.updateSelfVisibility.bind( this );
 

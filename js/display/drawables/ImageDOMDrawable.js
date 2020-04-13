@@ -9,7 +9,7 @@
 import inherit from '../../../../phet-core/js/inherit.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import scenery from '../../scenery.js';
-import '../../util/Utils.js';
+import Utils from '../../util/Utils.js';
 import DOMSelfDrawable from '../DOMSelfDrawable.js';
 import ImageStatefulDrawable from './ImageStatefulDrawable.js';
 
@@ -47,7 +47,7 @@ function ImageDOMDrawable( renderer, instance ) {
   this.hasOpacity = false;
 
   // Apply CSS needed for future CSS transforms to work properly.
-  scenery.Utils.prepareForTransform( this.domElement, this.forceAcceleration );
+  Utils.prepareForTransform( this.domElement, this.forceAcceleration );
 }
 
 scenery.register( 'ImageDOMDrawable', ImageDOMDrawable );
@@ -82,7 +82,7 @@ inherit( DOMSelfDrawable, ImageDOMDrawable, {
     }
 
     if ( this.transformDirty ) {
-      scenery.Utils.applyPreparedTransform( this.getTransformMatrix(), this.domElement, this.forceAcceleration );
+      Utils.applyPreparedTransform( this.getTransformMatrix(), this.domElement, this.forceAcceleration );
     }
 
     // clear all of the dirty flags

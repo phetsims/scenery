@@ -10,6 +10,7 @@ import Shape from '../../../kite/js/Shape.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import FocusHighlightFromNode from '../accessibility/FocusHighlightFromNode.js';
 import FocusHighlightPath from '../accessibility/FocusHighlightPath.js';
+import Display from '../display/Display.js';
 import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
 import TransformTracker from '../util/TransformTracker.js';
@@ -68,7 +69,7 @@ function FocusOverlay( display, focusRootNode ) {
   this.focusRootNode.addChild( this.highlightNode );
 
   // @private {Display} - display that manages all focus highlights
-  this.focusDisplay = new scenery.Display( this.focusRootNode, {
+  this.focusDisplay = new Display( this.focusRootNode, {
     width: this.width,
     height: this.height,
     allowWebGL: display._allowWebGL,
@@ -108,7 +109,7 @@ function FocusOverlay( display, focusRootNode ) {
   this.focusListener = this.onFocusChange.bind( this );
   this.focusHighlightListener = this.onFocusHighlightChange.bind( this );
 
-  scenery.Display.focusProperty.link( this.focusListener );
+  Display.focusProperty.link( this.focusListener );
 }
 
 scenery.register( 'FocusOverlay', FocusOverlay );
@@ -119,7 +120,7 @@ inherit( Object, FocusOverlay, {
       this.deactivateHighlight();
     }
 
-    scenery.Display.focusProperty.unlink( this.focusListener );
+    Display.focusProperty.unlink( this.focusListener );
   },
 
   hasHighlight: function() {
@@ -385,7 +386,7 @@ inherit( Object, FocusOverlay, {
    */
   onFocusHighlightChange: function() {
     assert && assert( this.node.focused, 'update should only be necessary if node already has focus' );
-    this.onFocusChange( scenery.Display.focus );
+    this.onFocusChange( Display.focus );
   },
 
   update: function() {

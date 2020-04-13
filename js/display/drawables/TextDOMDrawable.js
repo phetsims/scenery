@@ -10,7 +10,7 @@ import Matrix3 from '../../../../dot/js/Matrix3.js';
 import inherit from '../../../../phet-core/js/inherit.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import scenery from '../../scenery.js';
-import '../../util/Utils.js';
+import Utils from '../../util/Utils.js';
 import DOMSelfDrawable from '../DOMSelfDrawable.js';
 import TextStatefulDrawable from './TextStatefulDrawable.js';
 
@@ -49,7 +49,7 @@ function TextDOMDrawable( renderer, instance ) {
   }
 
   // Apply CSS needed for future CSS transforms to work properly.
-  scenery.Utils.prepareForTransform( this.domElement, this.forceAcceleration );
+  Utils.prepareForTransform( this.domElement, this.forceAcceleration );
 }
 
 scenery.register( 'TextDOMDrawable', TextDOMDrawable );
@@ -92,7 +92,7 @@ inherit( DOMSelfDrawable, TextDOMDrawable, {
       const translation = Matrix3.translation( 0, yOffset );
       scratchMatrix.multiplyMatrix( translation );
       translation.freeToPool();
-      scenery.Utils.applyPreparedTransform( scratchMatrix, div, this.forceAcceleration );
+      Utils.applyPreparedTransform( scratchMatrix, div, this.forceAcceleration );
     }
 
     // clear all of the dirty flags

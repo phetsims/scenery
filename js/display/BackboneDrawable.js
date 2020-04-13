@@ -219,7 +219,7 @@ inherit( Drawable, BackboneDrawable, {
     assert && assert( this.willApplyTransform, 'Sanity check for willApplyTransform' );
 
     // relative matrix on backbone instance should be up to date, since we added the compute flags
-    scenery.Utils.applyPreparedTransform( this.backboneInstance.relativeTransform.matrix, this.domElement, this.forceAcceleration );
+    Utils.applyPreparedTransform( this.backboneInstance.relativeTransform.matrix, this.domElement, this.forceAcceleration );
   },
 
   markOpacityDirty: function() {

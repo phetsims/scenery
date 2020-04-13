@@ -6,9 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../../phet-core/js/inherit.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
+import inherit from '../../../../phet-core/js/inherit.js';
 import scenery from '../../scenery.js';
+import svgns from '../../util/svgns.js';
 import SVGSelfDrawable from '../SVGSelfDrawable.js';
 import PathStatefulDrawable from './PathStatefulDrawable.js';
 
@@ -28,7 +29,7 @@ function PathSVGDrawable( renderer, instance ) {
   this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGPathElements ); // usesPaint: true
 
   // @protected {SVGPathElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
-  this.svgElement = this.svgElement || document.createElementNS( scenery.svgns, 'path' );
+  this.svgElement = this.svgElement || document.createElementNS( svgns, 'path' );
 }
 
 scenery.register( 'PathSVGDrawable', PathSVGDrawable );

@@ -22,17 +22,22 @@
  */
 
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
+import Poolable from '../../../phet-core/js/Poolable.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import inherit from '../../../phet-core/js/inherit.js';
-import Poolable from '../../../phet-core/js/Poolable.js';
 import scenery from '../scenery.js';
+import Trail from '../util/Trail.js';
 import Utils from '../util/Utils.js';
+import BackboneDrawable from './BackboneDrawable.js';
+import CanvasBlock from './CanvasBlock.js';
 import ChangeInterval from './ChangeInterval.js';
 import Drawable from './Drawable.js';
 import Fittability from './Fittability.js';
+import InlineCanvasCacheDrawable from './InlineCanvasCacheDrawable.js';
 import RelativeTransform from './RelativeTransform.js';
 import Renderer from './Renderer.js';
+import SharedCanvasCacheDrawable from './SharedCanvasCacheDrawable.js';
 
 let globalIdCounter = 1;
 
@@ -893,7 +898,7 @@ inherit( Object, Instance, {
 
       if ( this.isBackbone ) {
         if ( groupChanged ) {
-          this.groupDrawable = scenery.BackboneDrawable.createFromPool( this.display, this, this.getTransformRootInstance(), groupRenderer, this.isDisplayRoot );
+          this.groupDrawable = BackboneDrawable.createFromPool( this.display, this, this.getTransformRootInstance(), groupRenderer, this.isDisplayRoot );
 
           if ( this.isTransformed ) {
             this.display.markTransformRootDirty( this, true );
@@ -906,7 +911,7 @@ inherit( Object, Instance, {
       }
       else if ( this.isInstanceCanvasCache ) {
         if ( groupChanged ) {
-          this.groupDrawable = scenery.InlineCanvasCacheDrawable.createFromPool( groupRenderer, this );
+          this.groupDrawable = InlineCanvasCacheDrawable.createFromPool( groupRenderer, this );
         }
         if ( this.firstChangeInterval ) {
           this.groupDrawable.stitch( this.firstDrawable, this.lastDrawable, this.firstChangeInterval, this.lastChangeInterval );
@@ -914,7 +919,7 @@ inherit( Object, Instance, {
       }
       else if ( this.isSharedCanvasCacheSelf ) {
         if ( groupChanged ) {
-          this.groupDrawable = scenery.CanvasBlock.createFromPool( groupRenderer, this );
+          this.groupDrawable = CanvasBlock.createFromPool( groupRenderer, this );
         }
         //OHTWO TODO: restitch here??? implement it
       }
@@ -953,7 +958,7 @@ inherit( Object, Instance, {
 
       //OHTWO TODO: actually create the proper shared cache drawable depending on the specified renderer
       // (update it if necessary)
-      this.sharedCacheDrawable = new scenery.SharedCanvasCacheDrawable( this.trail, sharedCacheRenderer, this, this.sharedCacheInstance );
+      this.sharedCacheDrawable = new SharedCanvasCacheDrawable( this.trail, sharedCacheRenderer, this, this.sharedCacheInstance );
       this.firstDrawable = this.sharedCacheDrawable;
       this.lastDrawable = this.sharedCacheDrawable;
 
@@ -991,7 +996,7 @@ inherit( Object, Instance, {
 
       // TODO: increment reference counting?
       if ( !this.sharedCacheInstance ) {
-        this.sharedCacheInstance = Instance.createFromPool( this.display, new scenery.Trail( this.node ), false, true );
+        this.sharedCacheInstance = Instance.createFromPool( this.display, new Trail( this.node ), false, true );
         this.sharedCacheInstance.syncTree();
         this.display._sharedCanvasInstances[ instanceKey ] = this.sharedCacheInstance;
         // TODO: reference counting?

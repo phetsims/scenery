@@ -95,7 +95,7 @@ inherit( FittedBlock, CanvasBlock, {
     this.clipCount = 0;
 
     // store our backing scale so we don't have to look it up while fitting
-    this.backingScale = ( renderer & Renderer.bitmaskCanvasLowResolution ) ? 1 : scenery.Utils.backingScale( this.context );
+    this.backingScale = ( renderer & Renderer.bitmaskCanvasLowResolution ) ? 1 : Utils.backingScale( this.context );
 
     this.clipDirtyListener = this.markDirty.bind( this );
     this.opacityDirtyListener = this.markDirty.bind( this );

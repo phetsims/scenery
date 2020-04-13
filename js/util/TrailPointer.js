@@ -15,12 +15,13 @@
 
 import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
+import Trail from './Trail.js';
 
 /*
  * isBefore: whether this points to before the node (and its children) have been rendered, or after
  */
 function TrailPointer( trail, isBefore ) {
-  assert && assert( trail instanceof scenery.Trail, 'trail is not a trail' );
+  assert && assert( trail instanceof Trail, 'trail is not a trail' );
   this.trail = trail;
   this.setBefore( isBefore );
 }

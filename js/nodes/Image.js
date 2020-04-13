@@ -14,13 +14,15 @@ import cleanArray from '../../../phet-core/js/cleanArray.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
+import Renderer from '../display/Renderer.js';
 import ImageCanvasDrawable from '../display/drawables/ImageCanvasDrawable.js';
 import ImageDOMDrawable from '../display/drawables/ImageDOMDrawable.js';
 import ImageSVGDrawable from '../display/drawables/ImageSVGDrawable.js';
 import ImageWebGLDrawable from '../display/drawables/ImageWebGLDrawable.js';
-import Renderer from '../display/Renderer.js';
 import scenery from '../scenery.js';
 import SpriteSheet from '../util/SpriteSheet.js';
+import svgns from '../util/svgns.js';
+import xlinkns from '../util/xlinkns.js';
 import Node from './Node.js';
 
 // Need to poly-fill on some browsers
@@ -1020,12 +1022,12 @@ Image.createSVGImage = function( url, width, height ) {
   assert && assert( typeof height === 'number' && isFinite( height ) && height >= 0 && ( height % 1 ) === 0,
     'height should be a non-negative finite integer' );
 
-  const element = document.createElementNS( scenery.svgns, 'image' );
+  const element = document.createElementNS( svgns, 'image' );
   element.setAttribute( 'x', '0' );
   element.setAttribute( 'y', '0' );
   element.setAttribute( 'width', width + 'px' );
   element.setAttribute( 'height', height + 'px' );
-  element.setAttributeNS( scenery.xlinkns, 'xlink:href', url );
+  element.setAttributeNS( xlinkns, 'xlink:href', url );
 
   return element;
 };

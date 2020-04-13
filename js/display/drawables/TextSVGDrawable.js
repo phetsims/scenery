@@ -6,10 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import Poolable from '../../../../phet-core/js/Poolable.js';
 import inherit from '../../../../phet-core/js/inherit.js';
 import platform from '../../../../phet-core/js/platform.js';
-import Poolable from '../../../../phet-core/js/Poolable.js';
 import scenery from '../../scenery.js';
+import svgns from '../../util/svgns.js';
 import SVGSelfDrawable from '../SVGSelfDrawable.js';
 import TextStatefulDrawable from './TextStatefulDrawable.js';
 
@@ -38,7 +39,7 @@ function TextSVGDrawable( renderer, instance ) {
 
   if ( !this.svgElement ) {
     // @protected {SVGTextElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
-    const text = document.createElementNS( scenery.svgns, 'text' );
+    const text = document.createElementNS( svgns, 'text' );
     this.svgElement = text;
     text.appendChild( document.createTextNode( '' ) );
 

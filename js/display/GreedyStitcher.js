@@ -38,6 +38,9 @@
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
+import Block from './Block.js';
+import ChangeInterval from './ChangeInterval.js';
+import Drawable from './Drawable.js';
 import Renderer from './Renderer.js';
 import Stitcher from './Stitcher.js';
 
@@ -269,9 +272,9 @@ const prototype = {
 
   // does the main bulk of the work for each change interval
   processInterval: function( backbone, interval, firstStitchDrawable, lastStitchDrawable ) {
-    assert && assert( interval instanceof scenery.ChangeInterval );
-    assert && assert( firstStitchDrawable instanceof scenery.Drawable, 'We assume we have a non-null remaining section' );
-    assert && assert( lastStitchDrawable instanceof scenery.Drawable, 'We assume we have a non-null remaining section' );
+    assert && assert( interval instanceof ChangeInterval );
+    assert && assert( firstStitchDrawable instanceof Drawable, 'We assume we have a non-null remaining section' );
+    assert && assert( lastStitchDrawable instanceof Drawable, 'We assume we have a non-null remaining section' );
     assert && assert( !interval.isEmpty(), 'We now guarantee that the intervals are non-empty' );
 
     sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'interval: ' +
@@ -656,9 +659,9 @@ const prototype = {
     sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.push();
 
     assert && assert( ( beforeBlock === null && beforeDrawable === null ) ||
-                      ( beforeBlock instanceof scenery.Block && beforeDrawable instanceof scenery.Drawable ) );
+                      ( beforeBlock instanceof Block && beforeDrawable instanceof Drawable ) );
     assert && assert( ( afterBlock === null && afterDrawable === null ) ||
-                      ( afterBlock instanceof scenery.Block && afterDrawable instanceof scenery.Drawable ) );
+                      ( afterBlock instanceof Block && afterDrawable instanceof Drawable ) );
 
     if ( beforeBlock ) {
       if ( beforeBlock.nextBlock !== afterBlock ) {

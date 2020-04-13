@@ -8,7 +8,7 @@
 
 import Shape from '../../../kite/js/Shape.js';
 import scenery from '../scenery.js';
-import '../util/Trail.js';
+import Trail from '../util/Trail.js';
 import ShapeBasedOverlay from './ShapeBasedOverlay.js';
 
 class HitAreaOverlay extends ShapeBasedOverlay {
@@ -26,7 +26,7 @@ class HitAreaOverlay extends ShapeBasedOverlay {
    * @override
    */
   addShapes() {
-    new scenery.Trail( this.rootNode ).eachTrailUnder( trail => {
+    new Trail( this.rootNode ).eachTrailUnder( trail => {
       const node = trail.lastNode();
 
       if ( !node.isVisible() || node.pickable === false ) {

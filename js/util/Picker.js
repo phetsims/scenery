@@ -13,6 +13,7 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
+import Trail from './Trail.js';
 
 /**
  * @constructor
@@ -186,12 +187,12 @@ inherit( Object, Picker, {
     if ( useMouse && this.node._mouseArea ) {
       sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( this.node.constructor.name + '#' + this.node.id + ' mouse area hit' );
       // NOTE: both Bounds2 and Shape have containsPoint! We use both here!
-      return this.node._mouseArea.containsPoint( localPoint ) ? new scenery.Trail( this.node ) : null;
+      return this.node._mouseArea.containsPoint( localPoint ) ? new Trail( this.node ) : null;
     }
     if ( useTouch && this.node._touchArea ) {
       sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( this.node.constructor.name + '#' + this.node.id + ' touch area hit' );
       // NOTE: both Bounds2 and Shape have containsPoint! We use both here!
-      return this.node._touchArea.containsPoint( localPoint ) ? new scenery.Trail( this.node ) : null;
+      return this.node._touchArea.containsPoint( localPoint ) ? new Trail( this.node ) : null;
     }
 
     // Didn't hit our children, so check ourself as a last resort. Check our selfBounds first, so we can potentially
@@ -199,7 +200,7 @@ inherit( Object, Picker, {
     if ( this.node.selfBounds.containsPoint( localPoint ) ) {
       if ( this.node.containsPointSelf( localPoint ) ) {
         sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( this.node.constructor.name + '#' + this.node.id + ' self hit' );
-        return new scenery.Trail( this.node );
+        return new Trail( this.node );
       }
     }
 

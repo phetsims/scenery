@@ -321,6 +321,7 @@ inherit( Object, PDOMInstance, {
     // if we hid a parent element, blur focus if active element was an ancestor
     if ( !this.peer.isVisible() ) {
       if ( this.peer.primarySibling.contains( document.activeElement ) ) { // still true if activeElement is this primary sibling
+        // NOTE: We don't seem to be able to import normally here
         scenery.Display.focus = null;
       }
     }

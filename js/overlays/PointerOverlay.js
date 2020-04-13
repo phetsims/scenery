@@ -13,8 +13,8 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import Touch from '../input/Touch.js';
 import scenery from '../scenery.js';
-import '../util/Trail.js';
 import Utils from '../util/Utils.js';
+import svgns from '../util/svgns.js';
 
 function PointerOverlay( display, rootNode ) {
   const self = this;
@@ -48,7 +48,7 @@ function PointerOverlay( display, rootNode ) {
     // TODO: I believe this can be removed? Double-check
     if ( pointer.isKey ) { return; }
 
-    const svg = document.createElementNS( scenery.svgns, 'svg' );
+    const svg = document.createElementNS( svgns, 'svg' );
     svg.style.position = 'absolute';
     svg.style.top = 0;
     svg.style.left = 0;
@@ -60,7 +60,7 @@ function PointerOverlay( display, rootNode ) {
     svg.setAttribute( 'width', diameter );
     svg.setAttribute( 'height', diameter );
 
-    const circle = document.createElementNS( scenery.svgns, 'circle' );
+    const circle = document.createElementNS( svgns, 'circle' );
 
     //use css transform for performance?
     circle.setAttribute( 'cx', innerRadius + strokeWidth / 2 );

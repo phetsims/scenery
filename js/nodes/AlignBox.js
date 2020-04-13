@@ -23,6 +23,7 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import scenery from '../scenery.js';
+import AlignGroup from './AlignGroup.js';
 import Node from './Node.js';
 
 const ALIGNMENT_CONTAINER_OPTION_KEYS = [
@@ -169,7 +170,7 @@ inherit( Node, AlignBox, {
    * @returns {AlignBox} - For chaining
    */
   setGroup: function( group ) {
-    assert && assert( group === null || group instanceof scenery.AlignGroup, 'group should be an AlignGroup' );
+    assert && assert( group === null || group instanceof AlignGroup, 'group should be an AlignGroup' );
 
     if ( this._group !== group ) {
       // Remove from a previous group

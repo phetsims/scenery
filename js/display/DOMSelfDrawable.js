@@ -14,7 +14,6 @@
 
 import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
-import './Renderer.js';
 import SelfDrawable from './SelfDrawable.js';
 
 function DOMSelfDrawable( renderer, instance ) {

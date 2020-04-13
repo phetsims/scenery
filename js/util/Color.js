@@ -327,7 +327,7 @@ inherit( Object, Color, {
     }
 
     if ( !success ) {
-      throw new Error( 'scenery.Color unable to parse color string: ' + cssString );
+      throw new Error( 'Color unable to parse color string: ' + cssString );
     }
 
     this.updateColor(); // update the cached value

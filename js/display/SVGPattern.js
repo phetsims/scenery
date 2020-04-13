@@ -6,9 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../phet-core/js/inherit.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
+import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
+import svgns from '../util/svgns.js';
+import xlinkns from '../util/xlinkns.js';
 
 /**
  * @constructor
@@ -35,7 +37,7 @@ inherit( Object, SVGPattern, {
     const hasPreviousDefinition = this.definition !== undefined;
 
     // @public {SVGPatternElement} - persistent
-    this.definition = this.definition || document.createElementNS( scenery.svgns, 'pattern' );
+    this.definition = this.definition || document.createElementNS( svgns, 'pattern' );
 
     if ( !hasPreviousDefinition ) {
       // so we don't depend on the bounds of the object being drawn with the pattern
@@ -58,12 +60,12 @@ inherit( Object, SVGPattern, {
     this.definition.setAttribute( 'height', pattern.image.height );
 
     // @private {SVGImageElement} - persistent
-    this.imageElement = this.imageElement || document.createElementNS( scenery.svgns, 'image' );
+    this.imageElement = this.imageElement || document.createElementNS( svgns, 'image' );
     this.imageElement.setAttribute( 'x', '0' );
     this.imageElement.setAttribute( 'y', '0' );
     this.imageElement.setAttribute( 'width', pattern.image.width + 'px' );
     this.imageElement.setAttribute( 'height', pattern.image.height + 'px' );
-    this.imageElement.setAttributeNS( scenery.xlinkns, 'xlink:href', pattern.image.src );
+    this.imageElement.setAttributeNS( xlinkns, 'xlink:href', pattern.image.src );
     if ( !hasPreviousDefinition ) {
       this.definition.appendChild( this.imageElement );
     }

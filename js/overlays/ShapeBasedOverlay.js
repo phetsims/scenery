@@ -8,13 +8,13 @@
 
 import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
-import '../util/Trail.js';
+import svgns from '../util/svgns.js';
 
 function ShapeBasedOverlay( display, rootNode, name ) {
   this.display = display;
   this.rootNode = rootNode;
 
-  const svg = document.createElementNS( scenery.svgns, 'svg' );
+  const svg = document.createElementNS( svgns, 'svg' );
   svg.style.position = 'absolute';
   svg.setAttribute( 'class', name );
   svg.style.top = 0;
@@ -39,7 +39,7 @@ scenery.register( 'ShapeBasedOverlay', ShapeBasedOverlay );
 
 inherit( Object, ShapeBasedOverlay, {
   addShape: function( shape, color, isOffset ) {
-    const path = document.createElementNS( scenery.svgns, 'path' );
+    const path = document.createElementNS( svgns, 'path' );
     let svgPath = shape.getSVGPath();
 
     // temporary workaround for https://bugs.webkit.org/show_bug.cgi?id=78980

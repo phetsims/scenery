@@ -6,11 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import Poolable from '../../../phet-core/js/Poolable.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import inherit from '../../../phet-core/js/inherit.js';
-import Poolable from '../../../phet-core/js/Poolable.js';
 import scenery from '../scenery.js';
 import Utils from '../util/Utils.js';
+import svgns from '../util/svgns.js';
 import FittedBlock from './FittedBlock.js';
 import SVGGroup from './SVGGroup.js';
 
@@ -60,7 +61,7 @@ inherit( FittedBlock, SVGBlock, {
     if ( !this.domElement ) {
 
       // main SVG element
-      this.svg = document.createElementNS( scenery.svgns, 'svg' );
+      this.svg = document.createElementNS( svgns, 'svg' );
       this.svg.style.position = 'absolute';
       this.svg.style.left = '0';
       this.svg.style.top = '0';
@@ -73,10 +74,10 @@ inherit( FittedBlock, SVGBlock, {
       this.svg.style[ 'pointer-events' ] = 'none';
 
       // the <defs> block that we will be stuffing gradients and patterns into
-      this.defs = document.createElementNS( scenery.svgns, 'defs' );
+      this.defs = document.createElementNS( svgns, 'defs' );
       this.svg.appendChild( this.defs );
 
-      this.baseTransformGroup = document.createElementNS( scenery.svgns, 'g' );
+      this.baseTransformGroup = document.createElementNS( svgns, 'g' );
       this.svg.appendChild( this.baseTransformGroup );
 
       this.domElement = this.svg;
