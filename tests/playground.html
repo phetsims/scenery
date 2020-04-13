@@ -354,30 +354,14 @@ an UI and Display made for visual testing and debugging.
 
   window.displayTest = function() {
     setTimeout( function() {
-      window.circle = new scenery.Circle( 30, { fill: 'red' } );
-      circle.toCanvas( ( image, x, y ) => {
-        window.spriteImage = new scenery.SpriteImage( image, new dot.Vector2( x, y ) );
+      window.box = new scenery.VBox( {
+        spacing: 10,
+        children: [
+          new scenery.Node( { visible: false } ),
+          new scenery.Rectangle( 0, 0, 100, 50, { visible: false } )
+        ]
       } );
-      window.sprite = new scenery.Sprite( spriteImage );
-
-      window.spriteInstances = [
-        new scenery.SpriteInstance(),
-        new scenery.SpriteInstance()
-      ];
-      spriteInstances[ 0 ].sprite = sprite;
-      spriteInstances[ 1 ].sprite = sprite;
-      spriteInstances[ 1 ].matrix.setToTranslation( 100, 0 );
-      spriteInstances[ 1 ].isTranslation = false;
-
-      window.sprites = new scenery.Sprites( {
-        renderer: 'webgl',
-        sprites: [ sprite ],
-        spriteInstances: spriteInstances,
-        canvasBounds: new dot.Bounds2( -200, -200, 1000, 1000 )
-      } );
-      scene.addChild( sprites );
-
-      display.updateDisplay();
+      console.log( box.bounds );
     }, 400 );
   };
 

@@ -1161,7 +1161,6 @@ inherit( PhetioObject, Node, extend( {
    * @returns {boolean} - Was something potentially updated?
    */
   validateBounds: function() {
-    const self = this;
     let i;
     const notificationThreshold = 1e-13;
 
@@ -1298,28 +1297,32 @@ inherit( PhetioObject, Node, extend( {
     // double-check that all of our bounds handling has been accurate
     if ( assertSlow ) {
       // new scope for safety
-      ( function() {
+      ( () => {
         const epsilon = 0.000001;
 
         const childBounds = Bounds2.NOTHING.copy();
-        _.each( self._children, function( child ) { childBounds.includeBounds( child.boundsProperty.value ); } );
+        _.each( this._children, child => {
+          if ( !this._excludeInvisibleChildrenFromBounds || child.isVisible() ) {
+            childBounds.includeBounds( child.boundsProperty.value );
+          }
+        } );
 
-        let localBounds = self.selfBoundsProperty.value.union( childBounds );
+        let localBounds = this.selfBoundsProperty.value.union( childBounds );
 
-        if ( self.hasClipArea() ) {
-          localBounds = localBounds.intersection( self.clipArea.bounds );
+        if ( this.hasClipArea() ) {
+          localBounds = localBounds.intersection( this.clipArea.bounds );
         }
 
-        const fullBounds = self.localToParentBounds( localBounds );
+        const fullBounds = this.localToParentBounds( localBounds );
 
-        assertSlow && assertSlow( self.childBoundsProperty.value.equalsEpsilon( childBounds, epsilon ),
+        assertSlow && assertSlow( this.childBoundsProperty.value.equalsEpsilon( childBounds, epsilon ),
           'Child bounds mismatch after validateBounds: ' +
-          self.childBoundsProperty.value.toString() + ', expected: ' + childBounds.toString() );
-        assertSlow && assertSlow( self._localBoundsOverridden ||
-                                  self._transformBounds ||
-                                  self.boundsProperty.value.equalsEpsilon( fullBounds, epsilon ) ||
-                                  self.boundsProperty.value.equalsEpsilon( fullBounds, epsilon ),
-          'Bounds mismatch after validateBounds: ' + self.boundsProperty.value.toString() +
+          this.childBoundsProperty.value.toString() + ', expected: ' + childBounds.toString() );
+        assertSlow && assertSlow( this._localBoundsOverridden ||
+                                  this._transformBounds ||
+                                  this.boundsProperty.value.equalsEpsilon( fullBounds, epsilon ) ||
+                                  this.boundsProperty.value.equalsEpsilon( fullBounds, epsilon ),
+          'Bounds mismatch after validateBounds: ' + this.boundsProperty.value.toString() +
           ', expected: ' + fullBounds.toString() );
       } )();
     }
