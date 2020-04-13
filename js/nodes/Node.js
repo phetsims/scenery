@@ -167,6 +167,7 @@ import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import ParallelDOM from '../accessibility/pdom/ParallelDOM.js';
+import Instance from '../display/Instance.js';
 import Renderer from '../display/Renderer.js';
 import Mouse from '../input/Mouse.js';
 import Pen from '../input/Pen.js';
@@ -4638,7 +4639,7 @@ inherit( PhetioObject, Node, extend( {
    * @param {Instance} instance
    */
   addInstance: function( instance ) {
-    assert && assert( instance instanceof scenery.Instance );
+    assert && assert( instance instanceof Instance );
     this._instances.push( instance );
 
     this.changedInstanceEmitter.emit( instance, true );
@@ -4651,7 +4652,7 @@ inherit( PhetioObject, Node, extend( {
    * @param {Instance} instance
    */
   removeInstance: function( instance ) {
-    assert && assert( instance instanceof scenery.Instance );
+    assert && assert( instance instanceof Instance );
     const index = _.indexOf( this._instances, instance );
     assert && assert( index !== -1, 'Cannot remove a Instance from a Node if it was not there' );
     this._instances.splice( index, 1 );
