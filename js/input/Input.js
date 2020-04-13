@@ -718,11 +718,8 @@ class Input {
         const actionName = eventName + 'Action';
         assert && assert( this[ actionName ], `action not defined on Input: ${actionName}` );
 
-        console.log( eventName );
-
         // These exist for the lifetime of the display, and need not be disposed.
         this.display.accessibleDOMElement.addEventListener( eventName, event => {
-          console.log( `firing ${eventName}` );
 
           sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `Input.${eventName}FromBrowser` );
           sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
