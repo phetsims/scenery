@@ -354,14 +354,9 @@ an UI and Display made for visual testing and debugging.
 
   window.displayTest = function() {
     setTimeout( function() {
-      window.box = new scenery.VBox( {
-        spacing: 10,
-        children: [
-          new scenery.Node( { visible: false } ),
-          new scenery.Rectangle( 0, 0, 100, 50, { visible: false } )
-        ]
-      } );
-      console.log( box.bounds );
+      window.r = new scenery.Rectangle( 0, 0, 100, 50 );
+      r.rectWidth = 200;
+      console.log( r.boundsProperty.value );
     }, 400 );
   };
 

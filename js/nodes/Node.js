@@ -379,40 +379,47 @@ function Node( options ) {
   // @private {Array.<Function>} - For user input handling (mouse/touch).
   this._inputListeners = [];
 
+  // For now, custom-add listener count change notifications into these Properties, since we need to know when their
+  // number of listeners changes dynamically.
+  // TODO: We'll want an improved way of doing this, that is still performant.
+  const boundsListenersAddedOrRemovedListener = this.onBoundsListenersAddedOrRemoved.bind( this );
+
+  const boundsInvalidationListener = this.validateBounds.bind( this );
+  const selfBoundsInvalidationListener = this.validateSelfBounds.bind( this );
+
   // @public {TinyProperty.<Bounds2>} - [mutable] Bounds for this node and its children in the "parent" coordinate
   // frame.
   // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
   // NOTE: This is fired **asynchronously** (usually as part of a Display.updateDisplay()) when the bounds of the node
   // is changed.
-  this.boundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy(), { useDeepEquality: true } );
+  this.boundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy() );
+  this.boundsProperty.onAccessAttempt = boundsInvalidationListener;
+  this.boundsProperty.changeCount = boundsListenersAddedOrRemovedListener;
 
   // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds for this node and its children in the "local" coordinate
   // frame.
   // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
   // NOTE: This is fired **asynchronously** (usually as part of a Display.updateDisplay()) when the localBounds of
   // the node is changed.
-  this.localBoundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy(), { useDeepEquality: true } );
-
-  // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds just for this node, in the "local" coordinate frame.
-  // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
-  // NOTE: This event can be fired synchronously, and happens with the self-bounds of a Node is changed. This is NOT
-  // like the other bounds Properties, which usually fire asynchronously
-  this.selfBoundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy(), { useDeepEquality: true } );
+  this.localBoundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy() );
+  this.localBoundsProperty.onAccessAttempt = boundsInvalidationListener;
+  this.localBoundsProperty.changeCount = boundsListenersAddedOrRemovedListener;
 
   // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds just for children of this node (and sub-trees), in the
   // "local" coordinate frame.
   // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
   // NOTE: This is fired **asynchronously** (usually as part of a Display.updateDisplay()) when the childBounds of the
   // node is changed.
-  this.childBoundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy(), { useDeepEquality: true } );
-
-  // For now, custom-add listener count change notifications into these Properties, since we need to know when their
-  // number of listeners changes dynamically.
-  // TODO: We'll want an improved way of doing this, that is still performant.
-  const boundsListenersAddedOrRemovedListener = this.onBoundsListenersAddedOrRemoved.bind( this );
-  this.boundsProperty.changeCount = boundsListenersAddedOrRemovedListener;
-  this.localBoundsProperty.changeCount = boundsListenersAddedOrRemovedListener;
+  this.childBoundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy() );
+  this.childBoundsProperty.onAccessAttempt = boundsInvalidationListener;
   this.childBoundsProperty.changeCount = boundsListenersAddedOrRemovedListener;
+
+  // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds just for this node, in the "local" coordinate frame.
+  // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
+  // NOTE: This event can be fired synchronously, and happens with the self-bounds of a Node is changed. This is NOT
+  // like the other bounds Properties, which usually fire asynchronously
+  this.selfBoundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy() );
+  this.selfBoundsProperty.onAccessAttempt = selfBoundsInvalidationListener;
 
   // @private {boolean} - Whether our localBounds have been set (with the ES5 setter/setLocalBounds()) to a custom
   // overridden value. If true, then localBounds itself will not be updated, but will instead always be the
@@ -429,10 +436,10 @@ function Node( options ) {
 
   if ( assert ) {
     // for assertions later to ensure that we are using the same Bounds2 copies as before
-    this._originalBounds = this.boundsProperty.value;
-    this._originalLocalBounds = this.localBoundsProperty.value;
-    this._originalSelfBounds = this.selfBoundsProperty.value;
-    this._originalChildBounds = this.childBoundsProperty.value;
+    this._originalBounds = this.boundsProperty._value;
+    this._originalLocalBounds = this.localBoundsProperty._value;
+    this._originalSelfBounds = this.selfBoundsProperty._value;
+    this._originalChildBounds = this.childBoundsProperty._value;
   }
 
   // @public (scenery-internal) {Object} - Where rendering-specific settings are stored. They are generally modified
@@ -1135,7 +1142,7 @@ inherit( PhetioObject, Node, extend( {
   validateSelfBounds: function() {
     // validate bounds of ourself if necessary
     if ( this._selfBoundsDirty ) {
-      const oldSelfBounds = scratchBounds2.set( this.selfBoundsProperty.value );
+      const oldSelfBounds = scratchBounds2.set( this.selfBoundsProperty._value );
 
       // Rely on an overloadable method to accomplish computing our self bounds. This should update
       // this.selfBounds itself, returning whether it was actually changed. If it didn't change, we don't want to
@@ -1167,10 +1174,10 @@ inherit( PhetioObject, Node, extend( {
     let wasDirtyBefore = this.validateSelfBounds();
 
     // We're going to directly change these instances
-    const ourChildBounds = this.childBoundsProperty.value;
-    const ourLocalBounds = this.localBoundsProperty.value;
-    const ourSelfBounds = this.selfBoundsProperty.value;
-    const ourBounds = this.boundsProperty.value;
+    const ourChildBounds = this.childBoundsProperty._value;
+    const ourLocalBounds = this.localBoundsProperty._value;
+    const ourSelfBounds = this.selfBoundsProperty._value;
+    const ourBounds = this.boundsProperty._value;
 
     // validate bounds of children if necessary
     if ( this._childBoundsDirty ) {
@@ -1288,10 +1295,10 @@ inherit( PhetioObject, Node, extend( {
     }
 
     if ( assert ) {
-      assert( this._originalBounds === this.boundsProperty.value, 'Reference for bounds changed!' );
-      assert( this._originalLocalBounds === this.localBoundsProperty.value, 'Reference for localBounds changed!' );
-      assert( this._originalSelfBounds === this.selfBoundsProperty.value, 'Reference for selfBounds changed!' );
-      assert( this._originalChildBounds === this.childBoundsProperty.value, 'Reference for childBounds changed!' );
+      assert( this._originalBounds === this.boundsProperty._value, 'Reference for bounds changed!' );
+      assert( this._originalLocalBounds === this.localBoundsProperty._value, 'Reference for localBounds changed!' );
+      assert( this._originalSelfBounds === this.selfBoundsProperty._value, 'Reference for selfBounds changed!' );
+      assert( this._originalChildBounds === this.childBoundsProperty._value, 'Reference for childBounds changed!' );
     }
 
     // double-check that all of our bounds handling has been accurate
@@ -1303,11 +1310,11 @@ inherit( PhetioObject, Node, extend( {
         const childBounds = Bounds2.NOTHING.copy();
         _.each( this._children, child => {
           if ( !this._excludeInvisibleChildrenFromBounds || child.isVisible() ) {
-            childBounds.includeBounds( child.boundsProperty.value );
+            childBounds.includeBounds( child.boundsProperty._value );
           }
         } );
 
-        let localBounds = this.selfBoundsProperty.value.union( childBounds );
+        let localBounds = this.selfBoundsProperty._value.union( childBounds );
 
         if ( this.hasClipArea() ) {
           localBounds = localBounds.intersection( this.clipArea.bounds );
@@ -1315,14 +1322,14 @@ inherit( PhetioObject, Node, extend( {
 
         const fullBounds = this.localToParentBounds( localBounds );
 
-        assertSlow && assertSlow( this.childBoundsProperty.value.equalsEpsilon( childBounds, epsilon ),
+        assertSlow && assertSlow( this.childBoundsProperty._value.equalsEpsilon( childBounds, epsilon ),
           'Child bounds mismatch after validateBounds: ' +
-          this.childBoundsProperty.value.toString() + ', expected: ' + childBounds.toString() );
+          this.childBoundsProperty._value.toString() + ', expected: ' + childBounds.toString() );
         assertSlow && assertSlow( this._localBoundsOverridden ||
                                   this._transformBounds ||
-                                  this.boundsProperty.value.equalsEpsilon( fullBounds, epsilon ) ||
-                                  this.boundsProperty.value.equalsEpsilon( fullBounds, epsilon ),
-          'Bounds mismatch after validateBounds: ' + this.boundsProperty.value.toString() +
+                                  this.boundsProperty._value.equalsEpsilon( fullBounds, epsilon ) ||
+                                  this.boundsProperty._value.equalsEpsilon( fullBounds, epsilon ),
+          'Bounds mismatch after validateBounds: ' + this.boundsProperty._value.toString() +
           ', expected: ' + fullBounds.toString() );
       } )();
     }
@@ -1443,7 +1450,7 @@ inherit( PhetioObject, Node, extend( {
     assert && assert( newSelfBounds === undefined || newSelfBounds instanceof Bounds2,
       'invalidateSelf\'s newSelfBounds, if provided, needs to be Bounds2' );
 
-    const ourSelfBounds = this.selfBoundsProperty.value;
+    const ourSelfBounds = this.selfBoundsProperty._value;
 
     // If no self bounds are provided, rely on the bounds validation to trigger computation (using updateSelfBounds()).
     if ( !newSelfBounds ) {
@@ -1485,7 +1492,7 @@ inherit( PhetioObject, Node, extend( {
    */
   updateSelfBounds: function() {
     // The Node implementation (un-overridden) will never change the self bounds (always NOTHING).
-    assert && assert( this.selfBoundsProperty.value.equals( Bounds2.NOTHING ) );
+    assert && assert( this.selfBoundsProperty._value.equals( Bounds2.NOTHING ) );
     return false;
   },
 
@@ -1529,7 +1536,6 @@ inherit( PhetioObject, Node, extend( {
    * @returns {Bounds2}
    */
   getSelfBounds: function() {
-    this.validateSelfBounds();
     return this.selfBoundsProperty.value;
   },
   get selfBounds() { return this.getSelfBounds(); },
@@ -1544,7 +1550,6 @@ inherit( PhetioObject, Node, extend( {
    * @returns {Bounds2}
    */
   getSafeSelfBounds: function() {
-    this.validateSelfBounds();
     return this.selfBoundsProperty.value;
   },
   get safeSelfBounds() { return this.getSafeSelfBounds(); },
@@ -1559,7 +1564,6 @@ inherit( PhetioObject, Node, extend( {
    * @returns {Bounds2}
    */
   getChildBounds: function() {
-    this.validateBounds();
     return this.childBoundsProperty.value;
   },
   get childBounds() { return this.getChildBounds(); },
@@ -1574,7 +1578,6 @@ inherit( PhetioObject, Node, extend( {
    * @returns {Bounds2}
    */
   getLocalBounds: function() {
-    this.validateBounds();
     return this.localBoundsProperty.value;
   },
   get localBounds() { return this.getLocalBounds(); },
@@ -1596,7 +1599,7 @@ inherit( PhetioObject, Node, extend( {
     assert && assert( localBounds === null || !isNaN( localBounds.maxX ), 'maxX for localBounds should not be NaN' );
     assert && assert( localBounds === null || !isNaN( localBounds.maxY ), 'maxY for localBounds should not be NaN' );
 
-    const ourLocalBounds = this.localBoundsProperty.value;
+    const ourLocalBounds = this.localBoundsProperty._value;
 
     if ( localBounds === null ) {
       // we can just ignore this if we weren't actually overriding local bounds before
@@ -1735,7 +1738,6 @@ inherit( PhetioObject, Node, extend( {
    * @returns {Bounds2}
    */
   getBounds: function() {
-    this.validateBounds();
     return this.boundsProperty.value;
   },
   get bounds() { return this.getBounds(); },

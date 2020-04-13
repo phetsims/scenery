@@ -283,9 +283,9 @@ inherit( Node, Path, {
    */
   updateSelfBounds: function() {
     const selfBounds = this.hasShape() ? this.computeShapeBounds() : Bounds2.NOTHING;
-    const changed = !selfBounds.equals( this.selfBoundsProperty.value );
+    const changed = !selfBounds.equals( this.selfBoundsProperty._value );
     if ( changed ) {
-      this.selfBoundsProperty.value.set( selfBounds );
+      this.selfBoundsProperty._value.set( selfBounds );
     }
     return changed;
   },

@@ -312,9 +312,9 @@ inherit( Node, Text, {
       selfBounds.dilate( this.getLineWidth() / 2 );
     }
 
-    const changed = !selfBounds.equals( this.selfBoundsProperty.value );
+    const changed = !selfBounds.equals( this.selfBoundsProperty._value );
     if ( changed ) {
-      this.selfBoundsProperty.value.set( selfBounds );
+      this.selfBoundsProperty._value.set( selfBounds );
     }
     return changed;
   },
