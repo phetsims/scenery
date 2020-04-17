@@ -22,16 +22,6 @@ class NodeIO extends ObjectIO {
   constructor( node, phetioID ) {
     super( node, phetioID );
 
-    const visibleProperty = new NodeProperty( node, node.visibleProperty, 'visible', merge( {
-
-      // pick the baseline value from the parent Node's baseline
-      phetioReadOnly: node.phetioReadOnly,
-      phetioType: PropertyIO( BooleanIO ),
-
-      tandem: node.tandem.createTandem( 'visibleProperty' ),
-      phetioDocumentation: 'Controls whether the Node will be visible (and interactive), see the NodeIO documentation for more details.'
-    }, node.phetioComponentOptions, node.phetioComponentOptions.visibleProperty ) );
-
     const pickableProperty = new NodeProperty( node, node.pickableProperty, 'pickable', merge( {
 
       // pick the baseline value from the parent Node's baseline
@@ -58,7 +48,6 @@ class NodeIO extends ObjectIO {
 
     // @private
     this.disposeNodeIO = function() {
-      visibleProperty.dispose();
       pickableProperty.dispose();
       opacityProperty.dispose();
     };

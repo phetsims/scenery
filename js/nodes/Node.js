@@ -151,7 +151,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
+import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import TinyStaticProperty from '../../../axon/js/TinyStaticProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
@@ -191,6 +193,7 @@ const scratchMatrix3 = new Matrix3();
 const NODE_OPTION_KEYS = [
   'children', // {Array.<Node>}- List of children to add (in order), see setChildren for more documentation
   'cursor', // {string|null} - CSS cursor to display when over this node, see setCursor() for more documentation
+  'visibleProperty', // {Property.<boolean>|null} - Sets forwarding of the visibleProperty, see setVisibleProperty() for more documentation
   'visible', // {boolean} - Whether the node is visible, see setVisible() for more documentation
   'pickable', // {boolean|null} - Whether the node is pickable, see setPickable() for more documentation
   'inputEnabled', // {boolean} Whether input events can reach into this subtree, see setInputEnabled() for more documentation
@@ -311,8 +314,8 @@ function Node( options ) {
   // @public {TinyProperty.<boolean>} - Whether this node (and its children) will be visible when the scene is updated.
   // Visible nodes by default will not be pickable either.
   // NOTE: This is fired synchronously when the visibility of the Node is toggled
-  this.visibleProperty = new TinyProperty( DEFAULT_OPTIONS.visible );
-  this.visibleProperty.lazyLink( this.onVisiblePropertyChange.bind( this ) );
+  this._visibleProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.visible );
+  this._visibleProperty.lazyLink( this.onVisiblePropertyChange.bind( this ) );
 
   // @public {TinyProperty.<number>} - Opacity, in the range from 0 (fully transparent) to 1 (fully opaque).
   // NOTE: This is fired synchronously when the opacity of the Node is toggled
@@ -388,7 +391,7 @@ function Node( options ) {
   const boundsInvalidationListener = this.validateBounds.bind( this );
   const selfBoundsInvalidationListener = this.validateSelfBounds.bind( this );
 
-  // @public {TinyProperty.<Bounds2>} - [mutable] Bounds for this node and its children in the "parent" coordinate
+  // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds for this node and its children in the "parent" coordinate
   // frame.
   // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
   // NOTE: This is fired **asynchronously** (usually as part of a Display.updateDisplay()) when the bounds of the node
@@ -3142,6 +3145,49 @@ inherit( PhetioObject, Node, extend( {
   },
 
   /**
+   * Handles linking and checking our visibleProperty when instrumented.
+   * @private
+   *
+   * @param {Property.<boolean>} property
+   */
+  onInstrumentedVisibleProperty( property ) {
+    assert && assert( property.isPhetioInstrumented(),
+      'If a node is instrumented, you cannot give it an uninstrumented visibleProperty' );
+
+    this.addLinkedElement( property, { tandem: this.tandem.createTandem( 'visibleProperty' ) } );
+  },
+
+  /**
+   * Sets what Property our visibleProperty is backed by, so that changes to this provided Property will change this
+   * node's visibility, and vice versa.
+   * @public
+   *
+   * @param {Property.<boolean>|null}
+   */
+  set visibleProperty( property ) {
+    assert && assert(
+      !(
+        this.visibleProperty.forwardingProperty &&
+        this.visibleProperty.forwardingProperty.isPhetioInstrumented() &&
+        ( !property || !property.isPhetioInstrumented() ) ),
+      'Please think about what you are doing to the phet-io client.' );
+
+    this._visibleProperty.setForwardingProperty( property );
+
+    // If we had the "default instrumented" Property, we'll remove that and link our new Property
+    if ( this.instrumentedVisibleProperty ) {
+      assert && assert( property,
+        'If our visibleProperty was instrumented, you cannot unforward it since it would not be included in the API' );
+
+      this.onInstrumentedVisibleProperty( property );
+
+      this.instrumentedVisibleProperty.dispose();
+      this.instrumentedVisibleProperty = null;
+    }
+  },
+  get visibleProperty() { return this._visibleProperty; },
+
+  /**
    * Sets whether this node is visible.
    * @public
    *
@@ -5158,7 +5204,29 @@ inherit( PhetioObject, Node, extend( {
       }
     } );
 
+    // Track this, so we only override our visibleProperty once.
+    const wasInstrumented = this.isPhetioInstrumented();
+
     this.initializePhetioObject( { phetioType: NodeIO, phetioState: false }, options );
+
+    if ( !wasInstrumented && this.isPhetioInstrumented() ) {
+      if ( !this.visibleProperty.forwardingProperty ) {
+        const instrumentedVisibleProperty = new BooleanProperty( this.visible, merge( {
+
+          // pick the baseline value from the parent Node's baseline
+          phetioReadOnly: this.phetioReadOnly,
+
+          tandem: this.tandem.createTandem( 'visibleProperty' ),
+          phetioDocumentation: 'Controls whether the Node will be visible (and interactive), see the NodeIO documentation for more details.'
+        }, this.phetioComponentOptions, this.phetioComponentOptions.visibleProperty, options.visiblePropertyOptions ) );
+
+        this.visibleProperty = this.instrumentedVisibleProperty;
+        this.instrumentedVisibleProperty = instrumentedVisibleProperty;
+      }
+      else {
+        this.onInstrumentedVisibleProperty( this.visibleProperty.forwardingProperty );
+      }
+    }
 
     return this; // allow chaining
   },
@@ -5242,6 +5310,12 @@ inherit( PhetioObject, Node, extend( {
     // When disposing, remove all children and parents. See https://github.com/phetsims/scenery/issues/629
     this.removeAllChildren();
     this.detach();
+
+    // We provided a tandem to instrumentedVisibleProperty, we'll need to dispose it if we created it.
+    if ( this.instrumentedVisibleProperty ) {
+      this.instrumentedVisibleProperty.dispose();
+      this.instrumentedVisibleProperty = null;
+    }
 
     // Tear-down in the reverse order Node was created
     PhetioObject.prototype.dispose.call( this );
