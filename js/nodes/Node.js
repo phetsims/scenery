@@ -312,6 +312,7 @@ function Node( options ) {
   // Visible nodes by default will not be pickable either.
   // NOTE: This is fired synchronously when the visibility of the Node is toggled
   this.visibleProperty = new TinyProperty( DEFAULT_OPTIONS.visible );
+  this.visibleProperty.lazyLink( this.onVisiblePropertyChange.bind( this ) );
 
   // @public {TinyProperty.<number>} - Opacity, in the range from 0 (fully transparent) to 1 (fully opaque).
   // NOTE: This is fired synchronously when the opacity of the Node is toggled
@@ -3118,6 +3119,29 @@ inherit( PhetioObject, Node, extend( {
   get id() { return this.getId(); },
 
   /**
+   * Called when our visibility Property changes values.
+   * @private
+   *
+   * @param {boolean} visible
+   */
+  onVisiblePropertyChange: function( visible ) {
+    // changing visibility can affect pickability pruning, which affects mouse/touch bounds
+    this._picker.onVisibilityChange();
+
+    if ( assertSlow ) { this._picker.audit(); }
+
+    // Defined in ParallelDOM.js
+    this._accessibleDisplaysInfo.onVisibilityChange( visible );
+
+    for ( let i = 0; i < this._parents.length; i++ ) {
+      const parent = this._parents[ i ];
+      if ( parent._excludeInvisibleChildrenFromBounds ) {
+        parent.invalidateChildBounds();
+      }
+    }
+  },
+
+  /**
    * Sets whether this node is visible.
    * @public
    *
@@ -3127,26 +3151,8 @@ inherit( PhetioObject, Node, extend( {
   setVisible: function( visible ) {
     assert && assert( typeof visible === 'boolean', 'Node visibility should be a boolean value' );
 
-    if ( visible !== this.visibleProperty.value ) {
-      this.visibleProperty.setPropertyValue( visible );
-      // this.visibleProperty.value = visible; // TODO: yikes!
+    this.visibleProperty.set( visible );
 
-      // changing visibility can affect pickability pruning, which affects mouse/touch bounds
-      this._picker.onVisibilityChange();
-      if ( assertSlow ) { this._picker.audit(); }
-
-      // Defined in ParallelDOM.js
-      this._accessibleDisplaysInfo.onVisibilityChange( visible );
-
-      this.visibleProperty.notifyListeners( !visible );
-
-      for ( let i = 0; i < this._parents.length; i++ ) {
-        const parent = this._parents[ i ];
-        if ( parent._excludeInvisibleChildrenFromBounds ) {
-          parent.invalidateChildBounds();
-        }
-      }
-    }
     return this;
   },
   set visible( value ) { this.setVisible( value ); },
