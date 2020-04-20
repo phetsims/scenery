@@ -5220,7 +5220,7 @@ inherit( PhetioObject, Node, extend( {
           phetioDocumentation: 'Controls whether the Node will be visible (and interactive), see the NodeIO documentation for more details.'
         }, this.phetioComponentOptions, this.phetioComponentOptions.visibleProperty, options.visiblePropertyOptions ) );
 
-        this.visibleProperty = this.instrumentedVisibleProperty;
+        this.visibleProperty = instrumentedVisibleProperty;
         this.instrumentedVisibleProperty = instrumentedVisibleProperty;
       }
       else {
