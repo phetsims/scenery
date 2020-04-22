@@ -66,7 +66,6 @@ class PDOMPointer extends Pointer {
         if ( this.blockTrustedEvents && event.domEvent.isTrusted ) {
           return;
         }
-        Display.keyStateTracker.keydownUpdate( event.domEvent );
 
         // set the target to potentially block keyup events
         this.keydownTargetNode = event.target;
@@ -75,7 +74,6 @@ class PDOMPointer extends Pointer {
         if ( this.blockTrustedEvents && event.domEvent.isTrusted ) {
           return;
         }
-        Display.keyStateTracker.keyupUpdate( event.domEvent );
 
         // The keyup event was received on a node that didn't receive a keydown event, abort to prevent any other
         // listeners from being called for this event. Done after updating KeyStateTracker so that the global state
