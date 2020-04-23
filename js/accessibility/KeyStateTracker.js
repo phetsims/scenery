@@ -310,9 +310,6 @@ class KeyStateTracker {
    */
   attachToBody() {
     assert && assert( !this.attachedToBody, 'KeyStateTracker is already attached to body.' );
-    if ( !document.body ) {
-      throw new Error( 'Cant access body element until it is declared, run script later or in a timeout.' );
-    }
 
     this.bodyKeydownListener = event => {
       if ( this.blockTrustedEvents && event.isTrusted ) {
@@ -328,11 +325,17 @@ class KeyStateTracker {
       this.keyupUpdate( event );
     };
 
-    // attach with useCapture so that the keyStateTracker is up to date before the events dispatch within Scenery
-    document.body.addEventListener( 'keydown', this.bodyKeydownListener, true );
-    document.body.addEventListener( 'keyup', this.bodyKeyupListener, true );
+    // attach listeners on window load to ensure that the body is defined
+    const loadListener = event => {
 
-    this.attachedToBody = true;
+      // attach with useCapture so that the keyStateTracker is up to date before the events dispatch within Scenery
+      document.body.addEventListener( 'keydown', this.bodyKeydownListener, true );
+      document.body.addEventListener( 'keyup', this.bodyKeyupListener, true );
+      this.attachedToBody = true;
+
+      window.removeEventListener( 'load', loadListener );
+    };
+    window.addEventListener( 'load', loadListener );
   }
 
   /**
