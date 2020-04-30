@@ -16,7 +16,7 @@ document.head.appendChild( styleElement );
 const stylesheet = document.styleSheets[ document.styleSheets.length - 1 ];
 assert && assert( stylesheet.disabled === false );
 
-export default scenery.register( 'SceneryStyle', {
+const SceneryStyle = {
   stylesheet: stylesheet,
   styleElement: styleElement,
 
@@ -24,4 +24,6 @@ export default scenery.register( 'SceneryStyle', {
     // using a this reference so it doesn't need to be a closure
     this.stylesheet.insertRule( ruleString, 0 );
   }
-} );
+};
+scenery.register( 'SceneryStyle', SceneryStyle );
+export default SceneryStyle;
