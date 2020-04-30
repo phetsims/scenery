@@ -37,7 +37,7 @@ function PDOMDisplaysInfo( node ) {
 
 scenery.register( 'PDOMDisplaysInfo', PDOMDisplaysInfo );
 
-export default inherit( Object, PDOMDisplaysInfo, {
+inherit( Object, PDOMDisplaysInfo, {
   /**
    * Called when the node is added as a child to this node AND the node's subtree contains accessible content.
    * @public (scenery-internal)
@@ -312,3 +312,5 @@ export default inherit( Object, PDOMDisplaysInfo, {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
   }
 } );
+
+export default PDOMDisplaysInfo;

@@ -139,7 +139,7 @@ function KeyboardDragListener( options ) {
 
 scenery.register( 'KeyboardDragListener', KeyboardDragListener );
 
-export default inherit( Object, KeyboardDragListener, {
+inherit( Object, KeyboardDragListener, {
 
 
   /**
@@ -804,3 +804,5 @@ export default inherit( Object, KeyboardDragListener, {
     return keyCode === KeyboardUtils.KEY_S || keyCode === KeyboardUtils.KEY_DOWN_ARROW;
   }
 } );
+
+export default KeyboardDragListener;

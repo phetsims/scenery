@@ -108,7 +108,7 @@ function FocusHighlightPath( shape, options ) {
 
 scenery.register( 'FocusHighlightPath', FocusHighlightPath );
 
-export default inherit( Path, FocusHighlightPath, {
+inherit( Path, FocusHighlightPath, {
 
   /**
    * Mutating convenience function to mutate both the inner highlight also
@@ -335,3 +335,5 @@ export default inherit( Path, FocusHighlightPath, {
     return widthOfFocusHighlight * ( scalarToEdgeOfBounds + whiteSpaceScalar );
   }
 } );
+
+export default FocusHighlightPath;

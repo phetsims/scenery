@@ -50,7 +50,7 @@ function PDOMFuzzer( nodeCount, logToConsole, seed ) {
 
 scenery.register( 'PDOMFuzzer', PDOMFuzzer );
 
-export default inherit( Object, PDOMFuzzer, {
+inherit( Object, PDOMFuzzer, {
   /**
    * Runs one action randomly (printing out the action and result).
    * @public
@@ -258,3 +258,5 @@ export default inherit( Object, PDOMFuzzer, {
     return true;
   }
 } );
+
+export default PDOMFuzzer;

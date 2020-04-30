@@ -108,7 +108,7 @@ function LayoutBox( options ) {
 
 scenery.register( 'LayoutBox', LayoutBox );
 
-export default inherit( Node, LayoutBox, {
+inherit( Node, LayoutBox, {
   /**
    * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
    * order they will be evaluated in.
@@ -445,3 +445,5 @@ export default inherit( Node, LayoutBox, {
   },
   get resize() { return this.isResize(); }
 } );
+
+export default LayoutBox;

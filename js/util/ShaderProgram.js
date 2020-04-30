@@ -28,7 +28,7 @@ function ShaderProgram( gl, vertexSource, fragmentSource, options ) {
 
 scenery.register( 'ShaderProgram', ShaderProgram );
 
-export default inherit( Object, ShaderProgram, {
+inherit( Object, ShaderProgram, {
   // initializes (or reinitializes) the WebGL state and uniform/attribute references.
   initialize: function( gl ) {
     const self = this;
@@ -143,3 +143,5 @@ export default inherit( Object, ShaderProgram, {
     this.gl.deleteProgram( this.program );
   }
 } );
+
+export default ShaderProgram;

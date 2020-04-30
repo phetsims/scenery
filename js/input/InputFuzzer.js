@@ -67,7 +67,7 @@ function InputFuzzer( display, seed ) {
 
 scenery.register( 'InputFuzzer', InputFuzzer );
 
-export default inherit( Object, InputFuzzer, {
+inherit( Object, InputFuzzer, {
   /**
    * Sends a certain (expected) number of random events through the input system for the display.
    * @public
@@ -303,3 +303,5 @@ export default inherit( Object, InputFuzzer, {
     this.display._input.mouseMove( this.mousePosition, domEvent );
   }
 } );
+
+export default InputFuzzer;

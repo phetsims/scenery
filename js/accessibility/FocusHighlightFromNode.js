@@ -62,7 +62,7 @@ function FocusHighlightFromNode( node, options ) {
 
 scenery.register( 'FocusHighlightFromNode', FocusHighlightFromNode );
 
-export default inherit( FocusHighlightPath, FocusHighlightFromNode, {
+inherit( FocusHighlightPath, FocusHighlightFromNode, {
 
   /**
    * Update the focusHighlight shape on the path given the node passed in. Depending on options supplied to this
@@ -102,3 +102,5 @@ export default inherit( FocusHighlightPath, FocusHighlightFromNode, {
     this.innerHighlightPath.lineWidth = this.innerLineWidth || FocusHighlightPath.getInnerLineWidthFromNode( node );
   }
 } );
+
+export default FocusHighlightFromNode;

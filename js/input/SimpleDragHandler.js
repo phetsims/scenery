@@ -322,7 +322,7 @@ function SimpleDragHandler( options ) {
 
 scenery.register( 'SimpleDragHandler', SimpleDragHandler );
 
-export default inherit( PhetioObject, SimpleDragHandler, {
+inherit( PhetioObject, SimpleDragHandler, {
 
   // @private
   get dragging() {
@@ -471,3 +471,5 @@ export default inherit( PhetioObject, SimpleDragHandler, {
     };
   }
 } );
+
+export default SimpleDragHandler;
