@@ -164,7 +164,6 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import Shape from '../../../kite/js/Shape.js';
 import arrayDifference from '../../../phet-core/js/arrayDifference.js';
 import deprecationWarning from '../../../phet-core/js/deprecationWarning.js';
-import extend from '../../../phet-core/js/extend.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
@@ -559,7 +558,7 @@ function Node( options ) {
 
 scenery.register( 'Node', Node );
 
-inherit( PhetioObject, Node, extend( {
+inherit( PhetioObject, Node, {
   /**
    * This is an array of property (setter) names for Node.mutate(), which are also used when creating nodes with
    * parameter objects.
@@ -5340,7 +5339,7 @@ inherit( PhetioObject, Node, extend( {
       }
     }
   }
-} ), {
+}, {
   // @public {Object} - A mapping of all of the default options provided to Node
   DEFAULT_OPTIONS: DEFAULT_OPTIONS,
 

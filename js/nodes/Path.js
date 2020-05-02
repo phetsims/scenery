@@ -321,7 +321,7 @@ inherit( Node, Path, {
     }
     return this;
   },
-  set boundsMethod( value ) { return this.setBoundsMethod( value ); },
+  set boundsMethod( value ) { this.setBoundsMethod( value ); },
 
   /**
    * Returns the curent bounds method. See setBoundsMethod for details.
