@@ -2788,10 +2788,10 @@ inherit( PhetioObject, Node, {
    * Shifts this node vertically so that its bottom (in the parent coordinate frame) is equal to the passed-in Y value.
    * @public
    *
-   * NOTE: top is the highest Y value in our bounds.
+   * NOTE: bottom is the highest Y value in our bounds.
    * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
    *
-   * @param {number} top - After this operation, node.bottom should approximately equal this value.
+   * @param {number} bottom - After this operation, node.bottom should approximately equal this value.
    * @returns {Node} - Returns 'this' reference, for chaining
    */
   setBottom: function( bottom ) {
