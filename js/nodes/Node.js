@@ -2631,10 +2631,12 @@ inherit( PhetioObject, Node, {
    */
   setLeft: function( left ) {
     assert && assert( typeof left === 'number' );
-    assert && assert( this.getBounds().isValid(),
-      'Setting left is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
-    this.translate( left - this.getLeft(), 0, true );
+    const currentLeft = this.getLeft();
+    if ( isFinite( currentLeft ) ) {
+      this.translate( left - currentLeft, 0, true );
+    }
+
     return this; // allow chaining
   },
   set left( value ) { this.setLeft( value ); },
@@ -2664,10 +2666,11 @@ inherit( PhetioObject, Node, {
    */
   setRight: function( right ) {
     assert && assert( typeof right === 'number' );
-    assert && assert( this.getBounds().isValid(),
-      'Setting right is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
-    this.translate( right - this.getRight(), 0, true );
+    const currentRight = this.getRight();
+    if ( isFinite( currentRight ) ) {
+      this.translate( right - currentRight, 0, true );
+    }
     return this; // allow chaining
   },
   set right( value ) { this.setRight( value ); },
@@ -2697,10 +2700,12 @@ inherit( PhetioObject, Node, {
    */
   setCenterX: function( x ) {
     assert && assert( typeof x === 'number' );
-    assert && assert( this.getBounds().isValid(),
-      'Setting centerX is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
-    this.translate( x - this.getCenterX(), 0, true );
+    const currentCenterX = this.getCenterX();
+    if ( isFinite( currentCenterX ) ) {
+      this.translate( x - currentCenterX, 0, true );
+    }
+
     return this; // allow chaining
   },
   set centerX( value ) { this.setCenterX( value ); },
@@ -2730,10 +2735,12 @@ inherit( PhetioObject, Node, {
    */
   setCenterY: function( y ) {
     assert && assert( typeof y === 'number' );
-    assert && assert( this.getBounds().isValid(),
-      'Setting centerY is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
-    this.translate( 0, y - this.getCenterY(), true );
+    const currentCenterY = this.getCenterY();
+    if ( isFinite( currentCenterY ) ) {
+      this.translate( 0, y - currentCenterY, true );
+    }
+
     return this; // allow chaining
   },
   set centerY( value ) { this.setCenterY( value ); },
@@ -2763,10 +2770,12 @@ inherit( PhetioObject, Node, {
    */
   setTop: function( top ) {
     assert && assert( typeof top === 'number' );
-    assert && assert( this.getBounds().isValid(),
-      'Setting top is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
-    this.translate( 0, top - this.getTop(), true );
+    const currentTop = this.getTop();
+    if ( isFinite( currentTop ) ) {
+      this.translate( 0, top - currentTop, true );
+    }
+
     return this; // allow chaining
   },
   set top( value ) { this.setTop( value ); },
@@ -2796,10 +2805,12 @@ inherit( PhetioObject, Node, {
    */
   setBottom: function( bottom ) {
     assert && assert( typeof bottom === 'number' );
-    assert && assert( this.getBounds().isValid(),
-      'Setting bottom is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
-    this.translate( 0, bottom - this.getBottom(), true );
+    const currentBottom = this.getBottom();
+    if ( isFinite( currentBottom ) ) {
+      this.translate( 0, bottom - currentBottom, true );
+    }
+
     return this; // allow chaining
   },
   set bottom( value ) { this.setBottom( value ); },
@@ -2840,10 +2851,12 @@ inherit( PhetioObject, Node, {
    */
   setLeftTop: function( leftTop ) {
     assert && assert( leftTop instanceof Vector2 && leftTop.isFinite(), 'leftTop should be a finite Vector2' );
-    assert && assert( this.getBounds().isValid(),
-      'Setting leftTop is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
-    this.translate( leftTop.minus( this.getLeftTop() ), true );
+    const currentLeftTop = this.getLeftTop();
+    if ( currentLeftTop.isFinite() ) {
+      this.translate( leftTop.minus( currentLeftTop ), true );
+    }
+
     return this;
   },
   set leftTop( value ) { this.setLeftTop( value ); },
@@ -2868,10 +2881,12 @@ inherit( PhetioObject, Node, {
    */
   setCenterTop: function( centerTop ) {
     assert && assert( centerTop instanceof Vector2 && centerTop.isFinite(), 'centerTop should be a finite Vector2' );
-    assert && assert( this.getBounds().isValid(),
-      'Setting centerTop is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
-    this.translate( centerTop.minus( this.getCenterTop() ), true );
+    const currentCenterTop = this.getCenterTop();
+    if ( currentCenterTop.isFinite() ) {
+      this.translate( centerTop.minus( currentCenterTop ), true );
+    }
+
     return this;
   },
   set centerTop( value ) { this.setCenterTop( value ); },
@@ -2896,10 +2911,12 @@ inherit( PhetioObject, Node, {
    */
   setRightTop: function( rightTop ) {
     assert && assert( rightTop instanceof Vector2 && rightTop.isFinite(), 'rightTop should be a finite Vector2' );
-    assert && assert( this.getBounds().isValid(),
-      'Setting rightTop is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
-    this.translate( rightTop.minus( this.getRightTop() ), true );
+    const currentRightTop = this.getRightTop();
+    if ( currentRightTop.isFinite() ) {
+      this.translate( rightTop.minus( currentRightTop ), true );
+    }
+
     return this;
   },
   set rightTop( value ) { this.setRightTop( value ); },
@@ -2924,10 +2941,12 @@ inherit( PhetioObject, Node, {
    */
   setLeftCenter: function( leftCenter ) {
     assert && assert( leftCenter instanceof Vector2 && leftCenter.isFinite(), 'leftCenter should be a finite Vector2' );
-    assert && assert( this.getBounds().isValid(),
-      'Setting leftCenter is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
-    this.translate( leftCenter.minus( this.getLeftCenter() ), true );
+    const currentLeftCenter = this.getLeftCenter();
+    if ( currentLeftCenter.isFinite() ) {
+      this.translate( leftCenter.minus( currentLeftCenter ), true );
+    }
+
     return this;
   },
   set leftCenter( value ) { this.setLeftCenter( value ); },
@@ -2952,10 +2971,12 @@ inherit( PhetioObject, Node, {
    */
   setCenter: function( center ) {
     assert && assert( center instanceof Vector2 && center.isFinite(), 'center should be a finite Vector2' );
-    assert && assert( this.getBounds().isValid(),
-      'Setting center is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
-    this.translate( center.minus( this.getCenter() ), true );
+    const currentCenter = this.getCenter();
+    if ( currentCenter.isFinite() ) {
+      this.translate( center.minus( currentCenter ), true );
+    }
+
     return this;
   },
   set center( value ) { this.setCenter( value ); },
@@ -2980,10 +3001,12 @@ inherit( PhetioObject, Node, {
    */
   setRightCenter: function( rightCenter ) {
     assert && assert( rightCenter instanceof Vector2 && rightCenter.isFinite(), 'rightCenter should be a finite Vector2' );
-    assert && assert( this.getBounds().isValid(),
-      'Setting rightCenter is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
-    this.translate( rightCenter.minus( this.getRightCenter() ), true );
+    const currentRightCenter = this.getRightCenter();
+    if ( currentRightCenter.isFinite() ) {
+      this.translate( rightCenter.minus( currentRightCenter ), true );
+    }
+
     return this;
   },
   set rightCenter( value ) { this.setRightCenter( value ); },
@@ -3008,10 +3031,12 @@ inherit( PhetioObject, Node, {
    */
   setLeftBottom: function( leftBottom ) {
     assert && assert( leftBottom instanceof Vector2 && leftBottom.isFinite(), 'leftBottom should be a finite Vector2' );
-    assert && assert( this.getBounds().isValid(),
-      'Setting leftBottom is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
-    this.translate( leftBottom.minus( this.getLeftBottom() ), true );
+    const currentLeftBottom = this.getLeftBottom();
+    if ( currentLeftBottom.isFinite() ) {
+      this.translate( leftBottom.minus( currentLeftBottom ), true );
+    }
+
     return this;
   },
   set leftBottom( value ) { this.setLeftBottom( value ); },
@@ -3036,10 +3061,12 @@ inherit( PhetioObject, Node, {
    */
   setCenterBottom: function( centerBottom ) {
     assert && assert( centerBottom instanceof Vector2 && centerBottom.isFinite(), 'centerBottom should be a finite Vector2' );
-    assert && assert( this.getBounds().isValid(),
-      'Setting centerBottom is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
-    this.translate( centerBottom.minus( this.getCenterBottom() ), true );
+    const currentCenterBottom = this.getCenterBottom();
+    if ( currentCenterBottom.isFinite() ) {
+      this.translate( centerBottom.minus( currentCenterBottom ), true );
+    }
+
     return this;
   },
   set centerBottom( value ) { this.setCenterBottom( value ); },
@@ -3064,10 +3091,12 @@ inherit( PhetioObject, Node, {
    */
   setRightBottom: function( rightBottom ) {
     assert && assert( rightBottom instanceof Vector2 && rightBottom.isFinite(), 'rightBottom should be a finite Vector2' );
-    assert && assert( this.getBounds().isValid(),
-      'Setting rightBottom is invalid when the node has invalid (empty/NaN/infinite) bounds.' );
 
-    this.translate( rightBottom.minus( this.getRightBottom() ), true );
+    const currentRightBottom = this.getRightBottom();
+    if ( currentRightBottom.isFinite() ) {
+      this.translate( rightBottom.minus( currentRightBottom ), true );
+    }
+
     return this;
   },
   set rightBottom( value ) { this.setRightBottom( value ); },
