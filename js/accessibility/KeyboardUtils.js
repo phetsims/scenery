@@ -52,6 +52,7 @@ var KeyboardUtils = {
   KEY_S: 83,
   KEY_W: 87,
   KEY_K: 75,
+  KEY_L: 76,
 
   // beware that "="" and "+" keys share the same keycode, distinguish with shfitKey Event property
   // also, these keycodes are different in Firefox, see http://www.javascripter.net/faq/keycodes.htm
