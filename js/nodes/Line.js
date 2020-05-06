@@ -48,10 +48,10 @@ const LINE_OPTION_KEYS = [
  *   - new Line( { p1: p1, x2: x2, y2: y2, ... } )
  *   - new Line( { x1: x1, y1: y1, x2: x2, y2: y2, ... } )
  *
- * @param {number} x1
- * @param {number} y1
- * @param {number} x2
- * @param {number} y2
+ * @param {number|Object|Vector2} x1
+ * @param {number|Vector2} [y1]
+ * @param {number|Object} [x2]
+ * @param {number} [y2]
  * @param {Object} [options] - Line-specific options are documented in LINE_OPTION_KEYS above, and can be provided
  *                             along-side options for Node
  */
