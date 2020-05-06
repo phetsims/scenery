@@ -321,6 +321,9 @@ inherit( Object, PressListener, {
 
     return this.pressedTrail.lastNode();
   },
+  get currentTarget() {
+    return this.getCurrentTarget();
+  },
 
   /**
    * Returns whether a press can be started with a particular event.
