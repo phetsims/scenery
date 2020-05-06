@@ -140,9 +140,10 @@ class MultiListener {
           // TODO: scratch Vector
           const difference = backgroundPress.initialPoint.minus( event.pointer.point );
 
-          if ( difference.magnitude > MOVE_INTERRUPT_MAGNITUDE ) {
+          if ( difference.magnitude > MOVE_INTERRUPT_MAGNITUDE && this.getCurrentScale() !== 1 ) {
 
-            // only interrupt if pointer has moved far enough so we don't interrupt taps that might move little
+            // only interrupt if pointer has moved far enough so we don't interrupt taps that might move little or
+            // when there is no scale to translate
             sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener attached, interrupting for press' );
             event.pointer.interruptAttached();
             this.convertBackgroundPresses();
