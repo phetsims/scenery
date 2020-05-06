@@ -148,7 +148,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
    */
   down( event ) {
     PanZoomListener.prototype.down.call( this, event );
-    this._downTarget = event.target;
+
+    this._downTrail = event.trail;
     this._downInDragBounds = this._dragBounds.containsPoint( event.pointer.point );
 
     // begin middle press panning if we aren't already in that state
@@ -192,16 +193,19 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * @param {SceneryEvent} event
    */
   move( event ) {
-    if ( this._downTarget && this._downInDragBounds ) {
-      const targetInBounds = this._panBounds.containsBounds( this._downTarget.globalBounds );
+    if ( this._downTrail && this._downInDragBounds ) {
+      this._repositionDuringDragPoint = null;
+
       const hasDragIntent = this.hasDragIntent( event.pointer );
       const currentTargetExists = event.currentTarget !== null;
 
-      if ( currentTargetExists && hasDragIntent && !targetInBounds ) {
-        this._repositionDuringDragPoint = event.pointer.point;
-      }
-      else {
-        this._repositionDuringDragPoint = null;
+      if ( currentTargetExists && hasDragIntent ) {
+
+        const globalTargetBounds = this._downTrail.parentToGlobalBounds( this._downTrail.lastNode().bounds );
+        const targetInBounds = this._panBounds.containsBounds( globalTargetBounds );
+        if ( !targetInBounds ) {
+          this._repositionDuringDragPoint = event.pointer.point;
+        }
       }
     }
     else {
@@ -229,7 +233,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
    */
   up( event ) {
     this._targetInBoundsOnDown = false;
-    this._downTarget = null;
+    this._downTrail = null;
     this._repositionDuringDragPoint = null;
   }
 
