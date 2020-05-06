@@ -32,6 +32,11 @@ const linear = Utils.linear;
  * The 'r', 'g', and 'b' values stand for red, green and blue respectively, and will be clamped to integers in 0-255.
  * The 'a' value stands for alpha, and will be clamped to 0-1 (floating point)
  * 'hex' indicates a 6-decimal-digit format hex number, for example 0xFFAA00 is equivalent to r=255, g=170, b=0.
+ *
+ * @param {number|Color|string} r - See above for the possible overloaded values
+ * @param {number} [g] - If provided, should be the green value (or the alpha value if a hex color is given)
+ * @param {number} [b] - If provided, should be the blue value
+ * @param {number} [a] - If provided, should be the alpha value
  */
 function Color( r, g, b, a ) {
 
@@ -168,18 +173,32 @@ Color.toColor = function( colorSpec ) {
 };
 
 inherit( Object, Color, {
+  /**
+   * Returns a copy of this color.
+   * @public
+   *
+   * @returns {Color}
+   */
   copy: function() {
     return new Color( this.r, this.g, this.b, this.a );
   },
 
   /**
    * Sets the values of this Color. Supported styles:
+   * @public
+   *
    * - set( color ) is a copy constructor
    * - set( string ) will parse the string assuming it's a CSS-compatible color, e.g. set( 'red' )
    * - set( r, g, b ) is equivalent to setRGBA( r, g, b, 1 ), e.g. set( 255, 0, 128 )
    * - set( r, g, b, a ) is equivalent to setRGBA( r, g, b, a ), e.g. set( 255, 0, 128, 0.5 )
    * - set( hex ) will set RGB with alpha=1, e.g. set( 0xFF0000 )
    * - set( hex, alpha ) will set RGBA, e.g. set( 0xFF0000, 1 )
+   *
+   * @param {number|Color|string} r - See above for the possible overloaded values
+   * @param {number} [g] - If provided, should be the green value (or the alpha value if a hex color is given)
+   * @param {number} [b] - If provided, should be the blue value
+   * @param {number} [a] - If provided, should be the alpha value
+   * @returns {Color} - for chaining
    */
   set: function( r, g, b, a ) {
     assert && assert( r !== undefined, 'Can\'t call Color.set( undefined )' );
