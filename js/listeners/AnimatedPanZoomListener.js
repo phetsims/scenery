@@ -304,7 +304,6 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // handle translation
     if ( KeyboardUtils.isArrowKey( domEvent.keyCode ) ) {
       const keyboardDragIntent = event.pointer.getIntent() === Pointer.Intent.KEYBOARD_DRAG;
-      // const elementUsesKeys = PDOMUtils.elementUsesArrowKeys( domEvent.target );
 
       if ( !keyboardDragIntent ) {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener handle arrow key down' );

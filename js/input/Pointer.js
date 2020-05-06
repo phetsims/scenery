@@ -313,6 +313,48 @@ inherit( Object, Pointer, {
   get intent() { return this.getIntent(); },
 
   /**
+   * Set the intent of this Pointer to indicate that it will be used for mouse/touch style dragging, indicating to
+   * other listeners in the dispatch phase that behavior may need to change. Adds a listener to the pointer (with
+   * self removal) that clears the intent when the pointer receives an "up" event. Should generally be called on
+   * the Pointer in response to a down event.
+   * @public
+   */
+  reserveForDrag: function() {
+    this.setIntent( Intent.DRAG );
+
+    const pointerListener = {
+      up: event => {
+        this.setIntent( null );
+        this.removeInputListener( pointerListener );
+      }
+    };
+    this.addInputListener( pointerListener );
+  },
+
+  /**
+   * Set the intent of this Pointer to indicate that it will be used for keyboard style dragging, indicating to
+   * other listeners in the dispatch that behavior may need to change. Adds a listener to the pointer (with self
+   * removal) that clears the intent when the pointer receives a "keyup" or "blur" event. Should generally be called
+   * on the Pointer in response to a keydown event.
+   * @public
+   */
+  reserveForKeyboardDrag: function() {
+    this.setIntent( Intent.KEYBOARD_DRAG );
+
+    const clearIntent = () => {
+      this.setIntent( null );
+      this.removeInputListener( pointerListener );
+    };
+
+    // clear on blur as well since focus may be lost before we receive a keyup event
+    const pointerListener = {
+      keyup: event => clearIntent(),
+      blur: event => clearIntent()
+    };
+    this.addInputListener( pointerListener );
+  },
+
+  /**
    * Releases references so it can be garbage collected.
    * @public
    */
