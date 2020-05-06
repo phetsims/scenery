@@ -325,17 +325,28 @@ class KeyStateTracker {
       this.keyupUpdate( event );
     };
 
-    // attach listeners on window load to ensure that the body is defined
-    const loadListener = event => {
+    const addListenersToBody = () => {
 
       // attach with useCapture so that the keyStateTracker is up to date before the events dispatch within Scenery
       document.body.addEventListener( 'keydown', this.bodyKeydownListener, true );
       document.body.addEventListener( 'keyup', this.bodyKeyupListener, true );
       this.attachedToBody = true;
-
-      window.removeEventListener( 'load', loadListener );
     };
-    window.addEventListener( 'load', loadListener );
+
+    if ( !document.body ) {
+
+      // attach listeners on window load to ensure that the body is defined
+      const loadListener = event => {
+        addListenersToBody();
+        window.removeEventListener( 'load', loadListener );
+      };
+      window.addEventListener( 'load', loadListener );
+    }
+    else {
+
+      // body is defined and we won't get another load event so attach right away
+      addListenersToBody();
+    }
   }
 
   /**
