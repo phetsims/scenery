@@ -121,7 +121,7 @@ function SimpleDragHandler( options ) {
 
     // mark the Intent of this pointer listener to indicate that we want to drag and therefore potentially
     // change the behavior of other listeners in the dispatch phase
-    event.pointer.reserveForDrag();
+    // event.pointer.reserveForDrag();
 
     // set all of our persistent information
     self.isDraggingProperty.set( true );
