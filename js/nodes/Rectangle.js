@@ -57,12 +57,12 @@ const RECTANGLE_OPTION_KEYS = [
  * same non-zero value, circular rounded corners will be used.
  *
  * Available parameters to the various constructor options:
- * @param {number} x - x-position of the upper-left corner (left bound)
- * @param {number} y - y-position of the upper-left corner (top bound)
- * @param {number} width - width of the rectangle to the right of the upper-left corner, required to be >= 0
- * @param {number} height - height of the rectangle below the upper-left corner, required to be >= 0
- * @param {number} cornerXRadius - positive vertical radius (width) of the rounded corner, or 0 to indicate the corner should be sharp
- * @param {number} cornerYRadius - positive horizontal radius (height) of the rounded corner, or 0 to indicate the corner should be sharp
+ * @param {number|Bounds2|Object} x - x-position of the upper-left corner (left bound)
+ * @param {number|Object} [y] - y-position of the upper-left corner (top bound)
+ * @param {number} [width] - width of the rectangle to the right of the upper-left corner, required to be >= 0
+ * @param {number|Object} [height] - height of the rectangle below the upper-left corner, required to be >= 0
+ * @param {number|Object} [cornerXRadius] - positive vertical radius (width) of the rounded corner, or 0 to indicate the corner should be sharp
+ * @param {number} [cornerYRadius] - positive horizontal radius (height) of the rounded corner, or 0 to indicate the corner should be sharp
  * @param {Object} [options] - Rectangle-specific options are documented in RECTANGLE_OPTION_KEYS above, and can be provided
  *                             along-side options for Node
  */
