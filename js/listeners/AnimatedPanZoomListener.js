@@ -432,6 +432,31 @@ class AnimatedPanZoomListener extends PanZoomListener {
   }
 
   /**
+   * Sets the translation and scale to a target point. Like translateScaleToTarget, but instead of taking a scaleDelta
+   * it takes the final scale to be used for the target Nodes matrix.
+   *
+   * @param {Vector2} globalPoint - point to translate to in the global coordinate frame
+   * @param {number} scale - final scale for the transformation matrix
+   */
+  setTranslationScaleToTarget( globalPoint, scale ) {
+    const pointInLocalFrame = this._targetNode.globalToLocalPoint( globalPoint );
+    const pointInParentFrame = this._targetNode.globalToParentPoint( globalPoint );
+
+    var fromLocalPoint = Matrix3.translation( -pointInLocalFrame.x, -pointInLocalFrame.y );
+    var toTargetPoint = Matrix3.translation( pointInParentFrame.x, pointInParentFrame.y );
+
+    const nextScale = this.limitScale( scale );
+
+    // we first translate from target point, then apply scale, then translate back to target point ()
+    // so that it appears as though we are zooming into that point
+    const scaleMatrix = toTargetPoint.timesMatrix( Matrix3.scaling( nextScale ) ).timesMatrix( fromLocalPoint );
+    this._targetNode.matrix = scaleMatrix;
+
+    // make sure that we are still within PanZoomListener constraints
+    this.correctReposition();
+  }
+
+  /**
    * Translate the target node in a direction specified by deltaVector.
    * @public
    *
@@ -620,6 +645,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
     assert && assert( this.destinationPosition !== null, 'initializePositions must be called at least once before animating' );
     assert && assert( this.sourcePosition !== null, 'initializePositions must be called at least once before animating' );
 
+    // only animate to targets if within this precision so that we don't animate forever, since animation speed
+    // is dependent on the difference betwen source and destination positions
     const positionDirty = !this.destinationPosition.equalsEpsilon( this.sourcePosition, 0.1 );
     const scaleDirty = !Utils.equalsEpsilon( this.sourceScale, this.destinationScale, 0.001 );
 
@@ -650,6 +677,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
         this.translateDelta( translationDelta );
       }
+
       if ( scaleDirty ) {
         assert && assert( this.scaleGestureTargetPosition, 'there must be a scale target point' );
 
@@ -663,6 +691,13 @@ class AnimatedPanZoomListener extends PanZoomListener {
         this.translateScaleToTarget( this.scaleGestureTargetPosition, scaleDelta );
 
         // after applying the scale, the source position has changed, update destination to match
+        this.setDestinationPosition( this.sourcePosition );
+      }
+      else if ( this.destinationScale !== this.sourceScale ) {
+
+        // not far enough to animate but close enough that we can set destination equal to source to avoid further
+        // animation steps
+        this.setTranslationScaleToTarget( this.scaleGestureTargetPosition, this.destinationScale );
         this.setDestinationPosition( this.sourcePosition );
       }
     }
