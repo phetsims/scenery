@@ -93,6 +93,11 @@ function Pointer( initialPoint, initialDownState, type ) {
   // certain behavior for the life of the listener. Other listeners can observe the Intent on the Pointer and
   // react accordingly
   this._intent = null;
+
+  // @private {null|Object} - listeners attached to this pointer that clear the this._intent after input in
+  // reserveForDrag functions, referenced so they can be removed on disposal
+  this._listenerForDragReserve = null;
+  this._listenerForKeyboardDragReserve = null;
 }
 
 scenery.register( 'Pointer', Pointer );
@@ -322,13 +327,13 @@ inherit( Object, Pointer, {
   reserveForDrag: function() {
     this.setIntent( Intent.DRAG );
 
-    const pointerListener = {
+    this._listenerForDragReserve = {
       up: event => {
         this.setIntent( null );
-        this.removeInputListener( pointerListener );
+        this.removeInputListener( this._listenerForDragReserve );
       }
     };
-    this.addInputListener( pointerListener );
+    this.addInputListener( this._listenerForDragReserve );
   },
 
   /**
@@ -343,15 +348,15 @@ inherit( Object, Pointer, {
 
     const clearIntent = () => {
       this.setIntent( null );
-      this.removeInputListener( pointerListener );
+      this.removeInputListener( this._listenerForKeyboardDragReserve );
     };
 
     // clear on blur as well since focus may be lost before we receive a keyup event
-    const pointerListener = {
+    this._listenerForKeyboardDragReserve = {
       keyup: event => clearIntent(),
       blur: event => clearIntent()
     };
-    this.addInputListener( pointerListener );
+    this.addInputListener( this._listenerForKeyboardDragReserve );
   },
 
   /**
@@ -360,6 +365,10 @@ inherit( Object, Pointer, {
    */
   dispose: function() {
     sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'Disposing ' + this.toString() );
+
+    // remove listeners that would clear intent on disposal
+    if ( this._listeners.indexOf( this._listenerForDragReserve ) >= 0 ) { this.removeInputListener( this._listenerForDragReserve ); }
+    if ( this._listeners.indexOf( this._listenerForKeyboardDragReserve ) >= 0 ) { this.removeInputListener( this._listenerForKeyboardDragReserve ); }
 
     assert && assert( this._attachedListener === null, 'Attached listeners should be cleared before pointer disposal' );
     assert && assert( this._listeners.length === 0, 'Should not have listeners when a pointer is disposed' );

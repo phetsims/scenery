@@ -315,7 +315,7 @@ inherit( Object, KeyboardDragListener, {
     }
 
     // reserve keyboard events for dragging to prevent default panning behavior with zoom features
-    // event.pointer.reserveForKeyboardDrag();
+    event.pointer.reserveForKeyboardDrag();
 
     // if the key is already down, don't do anything else (we don't want to create a new keystate object
     // for a key that is already being tracked and down, nor call startDrag every keydown event)
