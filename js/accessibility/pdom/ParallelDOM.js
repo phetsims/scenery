@@ -1544,32 +1544,31 @@ const ParallelDOM = {
           }
         }
 
-        // if the list isn't the same, TODO: make order in the list not matter, perhaps with sorting? https://stackoverflow.com/questions/29951293/using-lodash-to-compare-arrays-items-existence-without-order
-        if ( !_.isEqual( ariaLabelledbyAssociations, this._ariaLabelledbyAssociations ) ) {
+        // no work to be done if both are empty, return early
+        if ( ariaLabelledbyAssociations.length === 0 && this._ariaLabelledbyAssociations.length === 0 ) {
+          return;
+        }
 
-          const beforeOnly = []; // Will hold all nodes that will be removed.
-          const afterOnly = []; // Will hold all nodes that will be "new" children (added)
-          const inBoth = []; // Child nodes that "stay". Will be ordered for the "after" case.
+        const beforeOnly = []; // Will hold all nodes that will be removed.
+        const afterOnly = []; // Will hold all nodes that will be "new" children (added)
+        const inBoth = []; // Child nodes that "stay". Will be ordered for the "after" case.
 
-          // get a difference of the desired new list, and the old
-          arrayDifference( ariaLabelledbyAssociations, this._ariaLabelledbyAssociations, afterOnly, beforeOnly, inBoth );
+        // get a difference of the desired new list, and the old
+        arrayDifference( ariaLabelledbyAssociations, this._ariaLabelledbyAssociations, afterOnly, beforeOnly, inBoth );
 
-          // remove each current associationObject that isn't in the new list
-          for ( i = 0; i < beforeOnly.length; i++ ) {
-            associationObject = beforeOnly[ i ];
-            this.removeAriaLabelledbyAssociation( associationObject );
-          }
+        // remove each current associationObject that isn't in the new list
+        for ( i = 0; i < beforeOnly.length; i++ ) {
+          associationObject = beforeOnly[ i ];
+          this.removeAriaLabelledbyAssociation( associationObject );
+        }
 
-          assert && assert( this._ariaLabelledbyAssociations.length === inBoth.length,
-            'Removing associations should not have triggered other association changes' );
+        assert && assert( this._ariaLabelledbyAssociations.length === inBoth.length,
+          'Removing associations should not have triggered other association changes' );
 
-          // add each association from the new list that hasn't been added yet
-          for ( i = 0; i < afterOnly.length; i++ ) {
-            const ariaLabelledbyAssociation = ariaLabelledbyAssociations[ i ];
-            this.addAriaLabelledbyAssociation( ariaLabelledbyAssociation );
-          }
-
-          // TODO maybe reorder them, but right now order doesn't seem to matter
+        // add each association from the new list that hasn't been added yet
+        for ( i = 0; i < afterOnly.length; i++ ) {
+          const ariaLabelledbyAssociation = ariaLabelledbyAssociations[ i ];
+          this.addAriaLabelledbyAssociation( ariaLabelledbyAssociation );
         }
       },
       set ariaLabelledbyAssociations( ariaLabelledbyAssociations ) { return this.setAriaLabelledbyAssociations( ariaLabelledbyAssociations ); },
@@ -1690,33 +1689,32 @@ const ParallelDOM = {
           }
         }
 
-        // if the list isn't the same, TODO: make order in the list not matter
-        if ( !_.isEqual( ariaDescribedbyAssociations, this._ariaDescribedbyAssociations ) ) {
+        // no work to be done if both are empty
+        if ( ariaDescribedbyAssociations.length === 0 && this._ariaDescribedbyAssociations.length === 0 ) {
+          return;
+        }
 
-          const beforeOnly = []; // Will hold all nodes that will be removed.
-          const afterOnly = []; // Will hold all nodes that will be "new" children (added)
-          const inBoth = []; // Child nodes that "stay". Will be ordered for the "after" case.
-          let i;
+        const beforeOnly = []; // Will hold all nodes that will be removed.
+        const afterOnly = []; // Will hold all nodes that will be "new" children (added)
+        const inBoth = []; // Child nodes that "stay". Will be ordered for the "after" case.
+        let i;
 
-          // get a difference of the desired new list, and the old
-          arrayDifference( ariaDescribedbyAssociations, this._ariaDescribedbyAssociations, afterOnly, beforeOnly, inBoth );
+        // get a difference of the desired new list, and the old
+        arrayDifference( ariaDescribedbyAssociations, this._ariaDescribedbyAssociations, afterOnly, beforeOnly, inBoth );
 
-          // remove each current associationObject that isn't in the new list
-          for ( i = 0; i < beforeOnly.length; i++ ) {
-            associationObject = beforeOnly[ i ];
-            this.removeAriaDescribedbyAssociation( associationObject );
-          }
+        // remove each current associationObject that isn't in the new list
+        for ( i = 0; i < beforeOnly.length; i++ ) {
+          associationObject = beforeOnly[ i ];
+          this.removeAriaDescribedbyAssociation( associationObject );
+        }
 
-          assert && assert( this._ariaDescribedbyAssociations.length === inBoth.length,
-            'Removing associations should not have triggered other association changes' );
+        assert && assert( this._ariaDescribedbyAssociations.length === inBoth.length,
+          'Removing associations should not have triggered other association changes' );
 
-          // add each association from the new list that hasn't been added yet
-          for ( i = 0; i < afterOnly.length; i++ ) {
-            const ariaDescribedbyAssociation = ariaDescribedbyAssociations[ i ];
-            this.addAriaDescribedbyAssociation( ariaDescribedbyAssociation );
-          }
-
-          // TODO maybe reorder them, but right now order doesn't seem to matter
+        // add each association from the new list that hasn't been added yet
+        for ( i = 0; i < afterOnly.length; i++ ) {
+          const ariaDescribedbyAssociation = ariaDescribedbyAssociations[ i ];
+          this.addAriaDescribedbyAssociation( ariaDescribedbyAssociation );
         }
       },
       set ariaDescribedbyAssociations( ariaDescribedbyAssociations ) { return this.setAriaDescribedbyAssociations( ariaDescribedbyAssociations ); },
@@ -1838,6 +1836,7 @@ const ParallelDOM = {
        * @param {Array.<Object>} activeDescendantAssociations - list of associationObjects, see this._activeDescendantAssociations.
        */
       setActiveDescendantAssociations: function( activeDescendantAssociations ) {
+
         let associationObject;
         if ( assert ) {
           assert( Array.isArray( activeDescendantAssociations ) );
@@ -1847,33 +1846,32 @@ const ParallelDOM = {
           }
         }
 
-        // if the list isn't the same, TODO: make order in the list not matter
-        if ( !_.isEqual( activeDescendantAssociations, this._activeDescendantAssociations ) ) {
+        // no work to be done if both are empty, safe to return early
+        if ( activeDescendantAssociations.length === 0 && this._activeDescendantAssociations.length === 0 ) {
+          return;
+        }
 
-          const beforeOnly = []; // Will hold all nodes that will be removed.
-          const afterOnly = []; // Will hold all nodes that will be "new" children (added)
-          const inBoth = []; // Child nodes that "stay". Will be ordered for the "after" case.
-          let i;
+        const beforeOnly = []; // Will hold all nodes that will be removed.
+        const afterOnly = []; // Will hold all nodes that will be "new" children (added)
+        const inBoth = []; // Child nodes that "stay". Will be ordered for the "after" case.
+        let i;
 
-          // get a difference of the desired new list, and the old
-          arrayDifference( activeDescendantAssociations, this._activeDescendantAssociations, afterOnly, beforeOnly, inBoth );
+        // get a difference of the desired new list, and the old
+        arrayDifference( activeDescendantAssociations, this._activeDescendantAssociations, afterOnly, beforeOnly, inBoth );
 
-          // remove each current associationObject that isn't in the new list
-          for ( i = 0; i < beforeOnly.length; i++ ) {
-            associationObject = beforeOnly[ i ];
-            this.removeActiveDescendantAssociation( associationObject );
-          }
+        // remove each current associationObject that isn't in the new list
+        for ( i = 0; i < beforeOnly.length; i++ ) {
+          associationObject = beforeOnly[ i ];
+          this.removeActiveDescendantAssociation( associationObject );
+        }
 
-          assert && assert( this._activeDescendantAssociations.length === inBoth.length,
-            'Removing associations should not have triggered other association changes' );
+        assert && assert( this._activeDescendantAssociations.length === inBoth.length,
+          'Removing associations should not have triggered other association changes' );
 
-          // add each association from the new list that hasn't been added yet
-          for ( i = 0; i < afterOnly.length; i++ ) {
-            const activeDescendantAssociation = activeDescendantAssociations[ i ];
-            this.addActiveDescendantAssociation( activeDescendantAssociation );
-          }
-
-          // TODO maybe reorder them, but right now order doesn't seem to matter
+        // add each association from the new list that hasn't been added yet
+        for ( i = 0; i < afterOnly.length; i++ ) {
+          const activeDescendantAssociation = activeDescendantAssociations[ i ];
+          this.addActiveDescendantAssociation( activeDescendantAssociation );
         }
       },
       set activeDescendantAssociations( activeDescendantAssociations ) { return this.setActiveDescendantAssociations( activeDescendantAssociations ); },
