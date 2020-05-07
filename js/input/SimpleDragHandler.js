@@ -19,7 +19,6 @@ import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import scenery from '../scenery.js';
 import Mouse from './Mouse.js';
-import Pointer from './Pointer.js';
 import SceneryEvent from './SceneryEvent.js';
 import Touch from './Touch.js';
 
