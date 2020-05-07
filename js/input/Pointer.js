@@ -327,12 +327,14 @@ inherit( Object, Pointer, {
   reserveForDrag: function() {
     this.setIntent( Intent.DRAG );
 
-    this._listenerForDragReserve = {
+    const listener = {
       up: event => {
         this.setIntent( null );
-        this.removeInputListener( this._listenerForDragReserve );
+        this.removeInputListener( listener );
       }
     };
+
+    this._listenerForDragReserve = listener;
     this.addInputListener( this._listenerForDragReserve );
   },
 
@@ -346,16 +348,18 @@ inherit( Object, Pointer, {
   reserveForKeyboardDrag: function() {
     this.setIntent( Intent.KEYBOARD_DRAG );
 
-    const clearIntent = () => {
-      this.setIntent( null );
-      this.removeInputListener( this._listenerForKeyboardDragReserve );
-    };
-
-    // clear on blur as well since focus may be lost before we receive a keyup event
-    this._listenerForKeyboardDragReserve = {
+    const listener = {
       keyup: event => clearIntent(),
       blur: event => clearIntent()
     };
+
+    const clearIntent = () => {
+      this.setIntent( null );
+      this.removeInputListener( listener );
+    };
+
+    // clear on blur as well since focus may be lost before we receive a keyup event
+    this._listenerForKeyboardDragReserve = listener;
     this.addInputListener( this._listenerForKeyboardDragReserve );
   },
 
