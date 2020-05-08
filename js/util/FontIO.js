@@ -17,6 +17,7 @@ class FontIO extends ObjectIO {
    * @param {Font} font
    * @returns {Object}
    * @override
+   * @public
    */
   static toStateObject( font ) {
     validate( font, this.validator );
@@ -37,6 +38,7 @@ class FontIO extends ObjectIO {
    * @param {Object} stateObject
    * @returns {Font}
    * @override
+   * @public
    */
   static fromStateObject( stateObject ) {
     return new scenery.Font( stateObject );

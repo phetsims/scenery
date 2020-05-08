@@ -18,6 +18,7 @@ class SceneryEventIO extends ObjectIO {
    * @param {SceneryEvent} event
    * @returns {Object}
    * @override
+   * @public
    */
   static toStateObject( event ) {
     validate( event, this.validator );

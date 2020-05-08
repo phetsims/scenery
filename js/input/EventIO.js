@@ -19,6 +19,7 @@ class EventIO extends ObjectIO {
    * @param {Event} domEvent
    * @returns {Object} - a state object
    * @override
+   * @public
    */
   static toStateObject( domEvent ) {
     validate( domEvent, this.validator );
@@ -28,6 +29,8 @@ class EventIO extends ObjectIO {
   /**
    * @param {Object} stateObject
    * @returns {Event}
+   * @override
+   * @public
    */
   static fromStateObject( stateObject ) {
     return scenery.Input.deserializeDomEvent( stateObject );

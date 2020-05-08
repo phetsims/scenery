@@ -19,6 +19,7 @@ class ColorIO extends ObjectIO {
    * @param {Color} color
    * @returns {Object}
    * @override
+   * @public
    */
   static toStateObject( color ) {
     validate( color, this.validator );
@@ -31,6 +32,7 @@ class ColorIO extends ObjectIO {
    * @param {Object} stateObject
    * @returns {Color}
    * @override
+   * @public
    */
   static fromStateObject( stateObject ) {
     return new Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a );
