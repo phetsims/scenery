@@ -451,12 +451,11 @@ inherit( Object, PDOMInstance, {
 
   /**
    * Create a new TransformTracker that will observe transforms along the trail of this PDOMInstance OR
-   * the specified pdomTransformSourceNode. See ParallelDOM.setPDOMTransformSourceNode(). The source Node
+   * the provided pdomTransformSourceNode. See ParallelDOM.setPDOMTransformSourceNode(). The The source Node
    * must not use DAG so that its trail is unique.
    * @public
    *
-   * @param {Node|null} node - if null, we use this PDOMInstance's visual trail
-   * @returns {TransformTracker}
+   * @param {null|Node} pdomTransformSourceNode
    */
   updateTransformTracker( pdomTransformSourceNode ) {
     this.transformTracker && this.transformTracker.dispose();
