@@ -427,10 +427,11 @@ var PDOMUtils = {
 
     assert && assert( objectKeys.length === 3, 'wrong number of keys in associationObject, expected:', expectedKeys, ' got:', objectKeys );
 
-
-    for ( let i = 0; i < objectKeys.length; i++ ) {
-      const objectKey = objectKeys[ i ];
-      assert && assert( expectedKeys.indexOf( objectKey ) >= 0, 'unexpected key: ' + objectKey );
+    if ( assert ) {
+      for ( let i = 0; i < objectKeys.length; i++ ) {
+        const objectKey = objectKeys[ i ];
+        assert && assert( expectedKeys.indexOf( objectKey ) >= 0, 'unexpected key: ' + objectKey );
+      }
     }
 
     assert && assert( associationObject.otherNode instanceof scenery.Node );
