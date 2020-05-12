@@ -140,7 +140,11 @@ class MultiListener {
           // TODO: scratch Vector
           const difference = backgroundPress.initialPoint.minus( event.pointer.point );
 
-          if ( difference.magnitude > MOVE_INTERRUPT_MAGNITUDE && this.getCurrentScale() !== 1 ) {
+          // it is nice to allow down pointers to move around freely without interruption when there isn't any zoom,
+          // but we still allow interruption if the number of background presses indicate the user is trying to
+          // zoom in
+          const zoomedOutPan = this._backgroundPresses.length <= 1 && this.getCurrentScale() === 1;
+          if ( difference.magnitude > MOVE_INTERRUPT_MAGNITUDE && !zoomedOutPan ) {
 
             // only interrupt if pointer has moved far enough so we don't interrupt taps that might move little or
             // when there is no scale to translate
