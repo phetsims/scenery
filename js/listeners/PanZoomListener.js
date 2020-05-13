@@ -117,6 +117,7 @@ class PanZoomListener extends MultiListener {
    * Set the targetBounds which should totally fill the panBounds at all times. Useful if the targetNode has bounds
    * which don't accurately describe the node. For instance, if an overlay plane is on top of the node and extends
    * beyond the dimensions of the visible node.
+   * @public
    *
    * TODO: What coordinate frame is this?
    * @param {Bounds2} targetBounds

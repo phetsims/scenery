@@ -142,6 +142,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
   /**
    * Attach a MiddlePress for drag panning, if detected.
+   * @public
    * @override
    *
    * @param {SceneryEvent} event
@@ -175,6 +176,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
   /**
    * Listener for the attached pointer on move. Only move if a middle press is not currently down.
+   * @protected
    * @override
    *
    * @param {SceneryEvent} event
@@ -189,6 +191,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * Part of the Scenery listener API. Supports repositioning while dragging a more descendant level
    * Node under this listener. If the node and pointer are out of the dragBounds, we reposition to keep the Node
    * visible within dragBounds.
+   * @public (scenery-internal)
    *
    * @param {SceneryEvent} event
    */
@@ -228,6 +231,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
   /**
    * Scenery listener API. Clear cursor and middlePress.
+   * @public (scenery-internal)
    *
    * @param {SceneryEvent} event
    */
@@ -239,6 +243,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
   /**
    * Input listener for the 'wheel' event, part of the Scenery Input API.
+   * @public (scenery-internal)
    *
    * @param {SceneryEvent} event
    */
@@ -437,6 +442,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
   /**
    * Sets the translation and scale to a target point. Like translateScaleToTarget, but instead of taking a scaleDelta
    * it takes the final scale to be used for the target Nodes matrix.
+   * @private
    *
    * @param {Vector2} globalPoint - point to translate to in the global coordinate frame
    * @param {number} scale - final scale for the transformation matrix
@@ -555,6 +561,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * Upon any kind of reposition, update the source position and scale for the next update in animateToTargets.
    *
    * Note: This assumes that any kind of repositioning of the target node will eventually call correctReposition.
+   * @protected
    */
   correctReposition() {
     super.correctReposition();
@@ -565,6 +572,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
   /**
    * When a new press begins, stop any in progress animation.
+   * @override
+   * @protected
    *
    * @param {MultiListener.Press} press
    */
@@ -575,6 +584,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
   /**
    * When presses are removed, reset animation destinations.
+   * @override
+   * @protected
    *
    * @param {MultiListener.Press} press
    * @returns {}
@@ -601,6 +612,13 @@ class AnimatedPanZoomListener extends PanZoomListener {
     super.interrupt();
   }
 
+  /**
+   * Returns true if the Intent of the Pointer indicates that it will be used for dragging of some kind.
+   * @private
+   *
+   * @param {Pointer} pointer
+   * @returns {boolean}
+   */
   hasDragIntent( pointer ) {
     return pointer.getIntent() === Pointer.Intent.KEYBOARD_DRAG ||
            pointer.getIntent() === Pointer.Intent.DRAG ||
@@ -644,6 +662,10 @@ class AnimatedPanZoomListener extends PanZoomListener {
     this.setDestinationPosition( positionInTargetFrame );
   }
 
+  /**
+   * @private
+   * @param {number} dt - in seconds
+   */
   animateToTargets( dt ) {
     assert && assert( this.destinationPosition !== null, 'initializePositions must be called at least once before animating' );
     assert && assert( this.sourcePosition !== null, 'initializePositions must be called at least once before animating' );
@@ -728,6 +750,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
   }
 
   /**
+   * @public
    * @override
    *
    * @param {Bounds2} bounds
@@ -743,6 +766,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
   /**
    * Upon setting target bounds, re-set source and destination positions.
+   * @public
    * @override
    *
    * @param {Bounds2} targetBounds
@@ -777,6 +801,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
   /**
    * Reset all transformations on the target node, and reset destination targets to source values to prevent any
    * in progress animation.
+   * @public
    * @override
    */
   resetTransform() {
@@ -787,6 +812,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
   /**
    * Get the next discrete scale from the current scale. Will be one of the scales along the discreteScales list
    * and limited by the min and max scales assigned to this MultiPanZoomListener.
+   * @private
    *
    * @param {boolean} zoomIn - direction of zoom change, positive if zooming in
    * @returns {number} number
@@ -814,6 +840,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * Returns true if the provided trail has any listeners that use keydown or keyup. If we find such a listener
    * we want to prevent panning with a keyboard. Excludes this listener in the search, and stops searching once we
    * hit it.
+   * @private
    *
    * @param {Trail} trail
    * @returns {boolean}

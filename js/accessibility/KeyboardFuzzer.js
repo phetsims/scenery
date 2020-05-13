@@ -100,7 +100,9 @@ class KeyboardFuzzer {
   }
 
   /**
-   * Trigger a keydown/keyup pair. The keyup is triggered with a timeout
+   * Trigger a keydown/keyup pair. The keyup is triggered with a timeout.
+   * @private
+   *
    * @param {HTMLElement} element
    * @param {number} keyCode
    */

@@ -18,6 +18,7 @@ class FocusIO extends ObjectIO {
    * Convert the focus region to a plain JS object for serialization.
    * @param {Object} focus - the focus region which has {display,trail}
    * @returns {Object} - the serialized object
+   * @public
    * @override
    */
   static toStateObject( focus ) {

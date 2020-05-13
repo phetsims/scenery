@@ -922,11 +922,21 @@ class Input {
     }
   }
 
-  // TODO: Just use an emitter
+  /**
+   * Add a listener to be called when a Pointer is added.
+   * TODO: Just use an emitter
+   * @public
+   * @param {function} listener
+   */
   addPointerAddedListener( listener ) {
     this.pointerAddedListeners.push( listener );
   }
 
+  /**
+   * Remove a listener being called when a Pointer is added.
+   * @public
+   * @param listener
+   */
   removePointerAddedListener( listener ) {
     const index = this.pointerAddedListeners.indexOf( listener );
     if ( index !== -1 ) {
@@ -1964,6 +1974,8 @@ class Input {
 
   /**
    * From a serialized dom event, return a recreated window.Event
+   * @public (scenery-internal)
+   *
    * @param {Object} eventObject
    * @returns {Event}
    */

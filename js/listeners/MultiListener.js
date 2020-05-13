@@ -176,6 +176,12 @@ class MultiListener {
     };
   }
 
+  /**
+   * Finds a Press by searching for the one with the provided Pointer.
+   * @private
+   * @param {Pointer} pointer
+   * @returns {null|Press}
+   */
   findPress( pointer ) {
     for ( let i = 0; i < this._presses.length; i++ ) {
       if ( this._presses[ i ].pointer === pointer ) {
@@ -186,6 +192,14 @@ class MultiListener {
     return null;
   }
 
+  /**
+   * Find a background Press by searching for one with the provided Pointer. A background Press is one created
+   * when we receive an event while a Pointer is already attached.
+   * @private
+   *
+   * @param {Pointer} pointer
+   * @returns {null|Press}
+   */
   findBackgroundPress( pointer ) {
     // TODO: reduce duplication with findPress?
     for ( let i = 0; i < this._backgroundPresses.length; i++ ) {
@@ -209,7 +223,11 @@ class MultiListener {
     return ( intent !== Pointer.Intent.DRAG && intent !== Pointer.Intent.MULTI_DRAG );
   }
 
-  // TODO: see PressListener
+  /**
+   * Part of the scenery event API.
+   * @public (scenery-internal)
+   * @param event
+   */
   down( event ) {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener down' );
 
@@ -251,6 +269,12 @@ class MultiListener {
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
   }
 
+  /**
+   * Add a Press to this listener when a new Pointer goes down.
+   * @protected
+   *
+   * @param {Press} press
+   */
   addPress( press ) {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener addPress' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
@@ -268,6 +292,11 @@ class MultiListener {
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
   }
 
+  /**
+   * Reposition in response to movement of any Presses.
+   * @private
+   * @param press
+   */
   movePress( press ) {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener movePress' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
@@ -277,6 +306,12 @@ class MultiListener {
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
   }
 
+  /**
+   * Remove a Press from this listener.
+   * @protected
+   *
+   * @param {Press} press
+   */
   removePress( press ) {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener removePress' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
@@ -292,6 +327,13 @@ class MultiListener {
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
   }
 
+  /**
+   * Add a background Press, a Press that we receive while a Pointer is already attached. Depending on background
+   * Presses, we may interrupt the attached pointer to begin zoom operations.
+   * @private
+   *
+   * @param {Press} press
+   */
   addBackgroundPress( press ) {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener addBackgroundPress' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
@@ -303,6 +345,12 @@ class MultiListener {
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
   }
 
+  /**
+   * Remove a background Press from this listener.
+   * @private
+   *
+   * @param press
+   */
   removeBackgroundPress( press ) {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener removeBackgroundPress' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
@@ -314,6 +362,11 @@ class MultiListener {
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
   }
 
+  /**
+   * Convert background Presses to Presses. Done when an attached Pointer is interrupted and we are ready to begin
+   * a pan or zoom operation with the available Presses.\
+   * @private
+   */
   convertBackgroundPresses() {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener convertBackgroundPresses' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
@@ -329,6 +382,10 @@ class MultiListener {
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
   }
 
+  /**
+   * Reposition the target node (including all apsects of transformation) of this listener's target Node.
+   * @protected
+   */
   reposition() {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener reposition' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
@@ -338,6 +395,10 @@ class MultiListener {
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
   }
 
+  /**
+   * Recompute the local points of the Presses for this listener, relative to the target Node.
+   * @private
+   */
   recomputeLocals() {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener recomputeLocals' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
@@ -349,6 +410,10 @@ class MultiListener {
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
   }
 
+  /**
+   * Interrupt this listener.
+   * @public
+   */
   interrupt() {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener interrupt' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
@@ -360,7 +425,12 @@ class MultiListener {
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
   }
 
-  // @private?
+  /**
+   * Compute the transformation matrix for the target node based on Presses.
+   * @private
+   *
+   * @returns {Matrix3}
+   */
   computeMatrix() {
     if ( this._presses.length === 0 ) {
       return this._targetNode.getMatrix();
@@ -382,7 +452,13 @@ class MultiListener {
     }
   }
 
-  // @private
+  /**
+   * Compute a transformation matrix from a single press. Single press indicates translation (panning) for the
+   * target Node.
+   * @private
+   *
+   * @returns {Matrix3}
+   */
   computeSinglePressMatrix() {
     // TODO: scratch things
     const singleTargetPoint = this._presses[ 0 ].targetPoint;
@@ -392,6 +468,13 @@ class MultiListener {
   }
 
   // @private
+  /**
+   * Compute a translation matrix from multiple presses. Usually multiple presses will have some scale or rotation
+   * as well, but this is to be used if rotation and scale are not enabled for this listener.
+   * @public
+   *
+   * @returns {Matrix3}
+   */
   computeTranslationMatrix() {
     // translation only. linear least-squares simplifies to sum of differences
     const sum = new Vector2( 0, 0 );
@@ -402,7 +485,12 @@ class MultiListener {
     return Matrix3.translationFromVector( sum.dividedScalar( this._presses.length ) );
   }
 
-  // @private
+  /**
+   * A transformation matrix from multiple Presses that will translate and scale the target Node.
+   * @private
+   *
+   * @returns {Matrix3}
+   */
   computeTranslationScaleMatrix() {
     // TODO: minimize closures
     const localPoints = this._presses.map( press => press.localPoint );
@@ -434,6 +522,7 @@ class MultiListener {
 
   /**
    * Limit the provided scale by constraints of this MultiListener.
+   * @protected
    *
    * @param {number} scale
    * @returns {number}
@@ -444,7 +533,13 @@ class MultiListener {
     return correctedScale;
   }
 
-  // @private
+  /**
+   * Compute a transformation matrix that will translate and scale the target Node from multiple presses. Should
+   * be used when scaling is not enabled for this listener.
+   * @private
+   *
+   * @returns {Matrix3}
+   */
   computeTranslationRotationMatrix() {
     let i;
     const localMatrix = new Matrix( 2, this._presses.length );
@@ -486,7 +581,12 @@ class MultiListener {
     return rotation3;
   }
 
-  // @private
+  /**
+   * Compute a transformation matrix that will translate, scale, and rotate the target Node from multiple Presses.
+   * @private
+   *
+   * @returns {Matrix3}
+   */
   computeTranslationRotationScaleMatrix() {
     let i;
     const localMatrix = new Matrix( this._presses.length * 2, 4 );
@@ -552,10 +652,19 @@ class Press {
     this.recomputeLocalPoint();
   }
 
+  /**
+   * Compute the local point for this Press, which is the local point for the leaf Node of this Press's Trail.
+   * @public
+   */
   recomputeLocalPoint() {
     this.localPoint = this.trail.globalToLocalPoint( this.pointer.point );
   }
 
+  /**
+   * The parent point of this press, relative to the leaf Node of this Press's Trail.
+   * @public
+   * @returns {Vector2}
+   */
   get targetPoint() {
     return this.trail.globalToParentPoint( this.pointer.point );
   }
