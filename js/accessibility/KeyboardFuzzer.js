@@ -205,6 +205,7 @@ class KeyboardFuzzer {
       eventObj.initEvent( event, true, true );
     }
 
+    eventObj.key = '';
     eventObj.keyCode = keyCode;
     // eventObj.shiftKey = true; // TODO: we can add modifier keys in here with options?
     eventObj.which = keyCode;
