@@ -66,6 +66,7 @@ const LAYOUT_ALIGNMENT = {
  */
 function LayoutBox( options ) {
   options = merge( {
+
     // Allow dynamic layout by default, see https://github.com/phetsims/joist/issues/608
     excludeInvisibleChildrenFromBounds: true
   }, options );
