@@ -75,12 +75,37 @@ QUnit.test( 'focusin/focusout (focus/blur)', assert => {
   beforeTest( display );
 
   const a = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
+  const b = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
+  const c = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
+
+  // rootNode
+  //   /  \
+  //  a    b
+  //        \
+  //         c
+  rootNode.addChild( a );
+  rootNode.addChild( b );
+  b.addChild( c );
 
   let aGotFocus = false;
   let aLostFocus = false;
   let bGotFocus = false;
+  let bGotBlur = false;
+  let bGotFocusIn = false;
+  let bGotFocusOut = false;
+  let cGotFocusIn = false;
+  let cGotFocusOut = false;
 
-  rootNode.addChild( a );
+  const resetFocusVariables = () => {
+    aGotFocus = false;
+    aLostFocus = false;
+    bGotFocus = false;
+    bGotBlur = false;
+    bGotFocusIn = false;
+    bGotFocusOut = false;
+    cGotFocusIn = false;
+    cGotFocusOut = false;
+  };
 
   a.addInputListener( {
     focus() {
@@ -91,26 +116,51 @@ QUnit.test( 'focusin/focusout (focus/blur)', assert => {
     }
   } );
 
+  b.addInputListener( {
+    focus() {
+      bGotFocus = true;
+    },
+    blur() {
+      bGotBlur = true;
+    },
+    focusin() {
+      bGotFocusIn = true;
+    },
+    focusout() {
+      bGotFocusOut = true;
+    }
+  } );
+
+  c.addInputListener( {
+    focusin() {
+      cGotFocusIn = true;
+    },
+    focusout() {
+      cGotFocusOut = true;
+    }
+  } );
+
   a.focus();
 
   assert.ok( aGotFocus, 'a should have been focused' );
   assert.ok( !aLostFocus, 'a should not blur' );
-
-  const b = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
-
-  // TODO: what if b was child of a, make sure these events don't bubble!
-  rootNode.addChild( b );
-
-  b.addInputListener( {
-    focus() {
-      bGotFocus = true;
-    }
-  } );
+  resetFocusVariables();
 
   b.focus();
-
   assert.ok( bGotFocus, 'b should have been focused' );
   assert.ok( aLostFocus, 'a should have lost focused' );
+  resetFocusVariables();
+
+  c.focus();
+  assert.ok( !bGotFocus, 'b should not receive focus (doesnt bubble)' );
+  assert.ok( cGotFocusIn, 'c should receive a focusin' );
+  assert.ok( bGotFocusIn, 'b should receive a focusin (from bubbling)' );
+  resetFocusVariables();
+
+  c.blur();
+  assert.ok( !bGotBlur, 'b should not receive a blur event (doesnt bubble)' );
+  assert.ok( cGotFocusOut, 'c should have received a focusout' );
+  assert.ok( bGotFocusOut, 'c should have received a focusout (from bubbling)' );
 
   afterTest( display );
 } );

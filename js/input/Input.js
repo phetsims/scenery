@@ -87,10 +87,12 @@
  *
  * - focus: Triggered when navigation focus is set to this Node's primary sibling. This can be triggered with some
  *          AT too, like screen readers' virtual cursor, but that is not dependable as it can be toggled with a screen
- *          reader option. Furthermore, this event is not triggered on mobile devices.
- * - blur: Triggered when navigation focus leaves this Node's primary sibling. This can be triggered with some
+ *          reader option. Furthermore, this event is not triggered on mobile devices. Does not bubble.
+ * - focusin: Same as 'focus' event, but bubbles.
+ * - blur:  Triggered when navigation focus leaves this Node's primary sibling. This can be triggered with some
  *          AT too, like screen readers' virtual cursor, but that is not dependable as it can be toggled with a screen
  *          reader option. Furthermore, this event is not triggered on mobile devices.
+ * - focusout: Same as 'blur' event, but bubbles.
  * - click:  Triggered when this Node's primary sibling is clicked. Note, though this event seems similar to some base
  *           event types (the event implements `MouseEvent`), it only applies when triggered from the PDOM.
  *           See https://www.w3.org/TR/DOM-Level-3-Events/#click
@@ -555,6 +557,7 @@ class Input {
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
         this.dispatchA11yEvent( 'focus', event, false );
+        this.dispatchA11yEvent( 'focusin', event, true );
 
         sceneryLog && sceneryLog.Input && sceneryLog.pop();
       }, {
@@ -585,6 +588,7 @@ class Input {
         this.a11yPointer.invalidateTrail( this.getTrailId( event ) );
 
         this.dispatchA11yEvent( 'blur', event, false );
+        this.dispatchA11yEvent( 'focusout', event, true );
 
         // clear the trail to make sure that our assertions aren't testing a stale trail, do this before
         // focusing event.relatedTarget below so that trail isn't cleared after focus
@@ -2046,7 +2050,7 @@ Input.BASIC_EVENT_TYPES = () => {
 // @public {Array.<string>} - Valid accessibility event types, these largely follow the HTML spec for the same names.
 //                            See the doc at the top of this file for more information.
 Input.A11Y_EVENT_TYPES = () => {
-  return [ 'focus', 'blur', 'click', 'input', 'change', 'keydown', 'keyup' ];
+  return [ 'focus', 'blur', 'click', 'input', 'change', 'keydown', 'keyup', 'focusin', 'focusout' ];
 };
 
 // @public {Array.<string>} - Valid prefixes for the basic event types above
