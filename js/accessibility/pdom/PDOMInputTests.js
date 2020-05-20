@@ -91,20 +91,20 @@ QUnit.test( 'focusin/focusout (focus/blur)', assert => {
   let aLostFocus = false;
   let bGotFocus = false;
   let bGotBlur = false;
-  // let bGotFocusIn = false;
-  // let bGotFocusOut = false;
-  // let cGotFocusIn = false;
-  // let cGotFocusOut = false;
+  let bGotFocusIn = false;
+  let bGotFocusOut = false;
+  let cGotFocusIn = false;
+  let cGotFocusOut = false;
 
   const resetFocusVariables = () => {
     aGotFocus = false;
     aLostFocus = false;
     bGotFocus = false;
     bGotBlur = false;
-    //bGotFocusIn = false;
-    //bGotFocusOut = false;
-    //cGotFocusIn = false;
-    //cGotFocusOut = false;
+    bGotFocusIn = false;
+    bGotFocusOut = false;
+    cGotFocusIn = false;
+    cGotFocusOut = false;
   };
 
   a.addInputListener( {
@@ -124,19 +124,19 @@ QUnit.test( 'focusin/focusout (focus/blur)', assert => {
       bGotBlur = true;
     },
     focusin() {
-      //bGotFocusIn = true;
+      bGotFocusIn = true;
     },
     focusout() {
-      //bGotFocusOut = true;
+      bGotFocusOut = true;
     }
   } );
 
   c.addInputListener( {
     focusin() {
-      //cGotFocusIn = true;
+      cGotFocusIn = true;
     },
     focusout() {
-      //cGotFocusOut = true;
+      cGotFocusOut = true;
     }
   } );
 
@@ -153,14 +153,14 @@ QUnit.test( 'focusin/focusout (focus/blur)', assert => {
 
   c.focus();
   assert.ok( !bGotFocus, 'b should not receive focus (doesnt bubble)' );
-  //assert.ok( cGotFocusIn, 'c should receive a focusin' );
-  //assert.ok( bGotFocusIn, 'b should receive a focusin (from bubbling)' );
+  assert.ok( cGotFocusIn, 'c should receive a focusin' );
+  assert.ok( bGotFocusIn, 'b should receive a focusin (from bubbling)' );
   resetFocusVariables();
 
   c.blur();
   assert.ok( !bGotBlur, 'b should not receive a blur event (doesnt bubble)' );
-  //assert.ok( cGotFocusOut, 'c should have received a focusout' );
-  //assert.ok( bGotFocusOut, 'c should have received a focusout (from bubbling)' );
+  assert.ok( cGotFocusOut, 'c should have received a focusout' );
+  assert.ok( bGotFocusOut, 'c should have received a focusout (from bubbling)' );
 
   afterTest( display );
 } );

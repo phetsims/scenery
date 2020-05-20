@@ -1041,7 +1041,8 @@ class Input {
   }
 
   /**
-   * Update the PDOMPointer with a new trail from a DOMEvent and return it. We can calculate
+   * Update the PDOMPointer with a new trail from a DOMEvent and return it. For multiple dispatches from a single
+   * DOMEvent, this ensures that all will dispatch to the same Trail.
    * @private
    *
    * @param domEvent
