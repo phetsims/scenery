@@ -557,7 +557,7 @@ class Input {
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
         this.dispatchA11yEvent( 'focus', event, false );
-        this.dispatchA11yEvent( 'focusin', event, true );
+        //this.dispatchA11yEvent( 'focusin', event, true );
 
         sceneryLog && sceneryLog.Input && sceneryLog.pop();
       }, {
@@ -588,7 +588,7 @@ class Input {
         this.a11yPointer.invalidateTrail( this.getTrailId( event ) );
 
         this.dispatchA11yEvent( 'blur', event, false );
-        this.dispatchA11yEvent( 'focusout', event, true );
+        //this.dispatchA11yEvent( 'focusout', event, true );
 
         // clear the trail to make sure that our assertions aren't testing a stale trail, do this before
         // focusing event.relatedTarget below so that trail isn't cleared after focus
