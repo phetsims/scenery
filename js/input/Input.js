@@ -556,8 +556,9 @@ class Input {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusin(' + Input.debugText( null, event ) + ');' );
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-        this.dispatchA11yEvent( 'focus', event, false );
-        //this.dispatchA11yEvent( 'focusin', event, true );
+        const trail = this.updateTrailForPDOMDispatch( event );
+        this.dispatchA11yEvent( trail, 'focus', event, false );
+        this.dispatchA11yEvent( trail, 'focusin', event, true );
 
         sceneryLog && sceneryLog.Input && sceneryLog.pop();
       }, {
@@ -587,8 +588,9 @@ class Input {
         if ( !this.a11yPointer ) { this.initA11yPointer(); }
         this.a11yPointer.invalidateTrail( this.getTrailId( event ) );
 
-        this.dispatchA11yEvent( 'blur', event, false );
-        //this.dispatchA11yEvent( 'focusout', event, true );
+        const trail = this.updateTrailForPDOMDispatch( event );
+        this.dispatchA11yEvent( trail, 'blur', event, false );
+        this.dispatchA11yEvent( trail, 'focusout', event, true );
 
         // clear the trail to make sure that our assertions aren't testing a stale trail, do this before
         // focusing event.relatedTarget below so that trail isn't cleared after focus
@@ -629,7 +631,8 @@ class Input {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'click(' + Input.debugText( null, event ) + ');' );
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-        this.dispatchA11yEvent( 'click', event, true );
+        const trail = this.updateTrailForPDOMDispatch( event );
+        this.dispatchA11yEvent( trail, 'click', event, true );
 
         sceneryLog && sceneryLog.Input && sceneryLog.pop();
       }, {
@@ -647,7 +650,8 @@ class Input {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'input(' + Input.debugText( null, event ) + ');' );
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-        this.dispatchA11yEvent( 'input', event, true );
+        const trail = this.updateTrailForPDOMDispatch( event );
+        this.dispatchA11yEvent( trail, 'input', event, true );
 
         sceneryLog && sceneryLog.Input && sceneryLog.pop();
       }, {
@@ -665,7 +669,8 @@ class Input {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'change(' + Input.debugText( null, event ) + ');' );
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-        this.dispatchA11yEvent( 'change', event, true );
+        const trail = this.updateTrailForPDOMDispatch( event );
+        this.dispatchA11yEvent( trail, 'change', event, true );
 
         sceneryLog && sceneryLog.Input && sceneryLog.pop();
       }, {
@@ -683,7 +688,8 @@ class Input {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keydown(' + Input.debugText( null, event ) + ');' );
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-        this.dispatchA11yEvent( 'keydown', event, true );
+        const trail = this.updateTrailForPDOMDispatch( event );
+        this.dispatchA11yEvent( trail, 'keydown', event, true );
 
         sceneryLog && sceneryLog.Input && sceneryLog.pop();
       }, {
@@ -701,7 +707,8 @@ class Input {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyup(' + Input.debugText( null, event ) + ');' );
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-        this.dispatchA11yEvent( 'keyup', event, true );
+        const trail = this.updateTrailForPDOMDispatch( event );
+        this.dispatchA11yEvent( trail, 'keyup', event, true );
 
         sceneryLog && sceneryLog.Input && sceneryLog.pop();
       }, {
@@ -1010,18 +1017,16 @@ class Input {
    * hasn't been created yet and a userGestureEmitter emits to indicate that a user has begun an interaction.
    * @private
    *
+   * @param {Trail} trail
    * @param {string} eventType
    * @param {Event} domEvent
    * @param {boolean} bubbles
    */
-  dispatchA11yEvent( eventType, domEvent, bubbles ) {
+  dispatchA11yEvent( trail, eventType, domEvent, bubbles ) {
     Display.userGestureEmitter.emit();
 
     // This workaround hopefully won't be here forever, see ParallelDOM.setExcludeLabelSiblingFromInput() and https://github.com/phetsims/a11y-research/issues/156
     if ( !( domEvent.target && domEvent.target.hasAttribute( PDOMUtils.DATA_EXCLUDE_FROM_INPUT ) ) ) {
-
-      if ( !this.a11yPointer ) { this.initA11yPointer(); }
-      const trail = this.a11yPointer.updateTrail( this.getTrailId( domEvent ) );
 
       // To support PhET-iO playback, any potential playback events downstream of this playback event must be marked as
       // non playback events. This is to prevent the PhET-iO playback engine from repeating those events. This is here
@@ -1033,6 +1038,18 @@ class Input {
 
       _.hasIn( window, 'phet.phetio.dataStream' ) && phet.phetio.dataStream.popNonPlaybackable();
     }
+  }
+
+  /**
+   * Update the PDOMPointer with a new trail from a DOMEvent and return it. We can calculate
+   * @private
+   *
+   * @param domEvent
+   * @returns {Trail}
+   */
+  updateTrailForPDOMDispatch( domEvent ) {
+    if ( !this.a11yPointer ) { this.initA11yPointer(); }
+    return this.a11yPointer.updateTrail( this.getTrailId( domEvent ) );
   }
 
   /**
