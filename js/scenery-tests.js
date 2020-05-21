@@ -20,6 +20,7 @@ import './listeners/PressListenerTests.js';
 import './nodes/AlignBoxTests.js';
 import './nodes/NodeTests.js';
 import './nodes/ShapeTests.js';
+import qunitStart from '../../chipper/js/sim-tests/qunitStart.js';
 import scenery from './scenery.js';
 import './tests/MiscellaneousTests.js';
 import './tests/PixelComparisonTests.js';
@@ -44,4 +45,4 @@ const sceneryLogQueryParameter = QueryStringMachine.get( 'sceneryLog', {
 sceneryLogQueryParameter && scenery.enableLogging( sceneryLogQueryParameter );
 
 // Since our tests are loaded asynchronously, we must direct QUnit to begin the tests
-QUnit.start();
+qunitStart();
