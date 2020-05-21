@@ -26,6 +26,7 @@ import './tests/PixelComparisonTests.js';
 import './util/ColorTests.js';
 import './util/FontTests.js';
 import './util/TrailTests.js';
+import qunitStart from '../../chipper/js/sim-tests/qunitStart.js';
 
 // add elements to the QUnit fixture for our Scenery-specific tests
 // TODO: is this necessary?
@@ -44,4 +45,4 @@ const sceneryLogQueryParameter = QueryStringMachine.get( 'sceneryLog', {
 sceneryLogQueryParameter && scenery.enableLogging( sceneryLogQueryParameter );
 
 // Since our tests are loaded asynchronously, we must direct QUnit to begin the tests
-QUnit.start();
+qunitStart();
