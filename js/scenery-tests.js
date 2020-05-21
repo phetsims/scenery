@@ -27,7 +27,6 @@ import './tests/PixelComparisonTests.js';
 import './util/ColorTests.js';
 import './util/FontTests.js';
 import './util/TrailTests.js';
-import qunitStart from '../../chipper/js/sim-tests/qunitStart.js';
 
 // add elements to the QUnit fixture for our Scenery-specific tests
 // TODO: is this necessary?
