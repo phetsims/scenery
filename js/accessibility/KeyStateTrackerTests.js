@@ -10,7 +10,6 @@
 
 
 // modules
-// const KeyboardFuzzer = require( '/scenery/js/accessibility/KeyboardFuzzer' ); // TODO: can we use this in testing? https://github.com/phetsims/scenery/issues/850
 import timer from '../../../axon/js/timer.js';
 import KeyboardUtils from './KeyboardUtils.js';
 import KeyStateTracker from './KeyStateTracker.js';
