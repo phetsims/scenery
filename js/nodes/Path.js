@@ -71,9 +71,9 @@ function Path( shape, options ) {
   // @private {boolean} Whether our shape listener is attached to a shape.
   this._invalidShapeListenerAttached = false;
 
-  this.initializePaintable();
-
   Node.call( this );
+
+  this.initializePaintable();
 
   this.invalidateSupportedRenderers();
 

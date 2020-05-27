@@ -73,8 +73,6 @@ function Text( text, options ) {
   // When this is null, its value needs to be recomputed
   this._cachedRenderedText = null;
 
-  this.initializePaintable();
-
   options = extendDefined( {
     fill: '#000000', // Default to black filled text
     text: text,
@@ -84,7 +82,11 @@ function Text( text, options ) {
 
   this.textTandem = options.tandem; // @private (phet-io) - property name avoids namespace of the Node setter
 
-  Node.call( this, options );
+  Node.call( this );
+
+  this.initializePaintable();
+
+  this.mutate( options );
 
   this.invalidateSupportedRenderers(); // takes care of setting up supported renderers
 }

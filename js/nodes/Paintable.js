@@ -9,6 +9,7 @@
 import Property from '../../../axon/js/Property.js';
 import LineStyles from '../../../kite/js/util/LineStyles.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
+import assertHasProperties from '../../../phet-core/js/assertHasProperties.js';
 import extend from '../../../phet-core/js/extend.js';
 import inheritance from '../../../phet-core/js/inheritance.js';
 import platform from '../../../phet-core/js/platform.js';
@@ -90,6 +91,9 @@ const Paintable = {
        * @protected
        */
       initializePaintable: function() {
+
+        assertHasProperties( this, [ '_drawables' ] );
+
         this._fill = DEFAULT_OPTIONS.fill;
         this._fillPickable = DEFAULT_OPTIONS.fillPickable;
 
