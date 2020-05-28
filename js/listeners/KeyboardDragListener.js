@@ -99,8 +99,7 @@ function KeyboardDragListener( options ) {
   // @private {Array.<{isDown:boolean, timeDown:number>} - tracks the state of the keyboard. JavaScript doesn't
   // handle multiple key presses, so we track which keys are currently down and update based on state of this
   // collection of objects. "timeDown" is in milliseconds
-  // TODO: Consider a global state object for this that persists across listeners so the state of the keyboard will
-  // TODO: be accurate when focus changes from one element to another, see https://github.com/phetsims/friction/issues/53
+  // TODO: Consider a global state object for this, see https://github.com/phetsims/scenery/issues/1054
   this.keyState = [];
 
   // @private {Array.<{keys:<Array.number>, callback:function}>} - A list of hotkeys, each of which haing some
