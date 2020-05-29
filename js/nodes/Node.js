@@ -3202,13 +3202,9 @@ inherit( PhetioObject, Node, {
 
     // If we had the "default instrumented" Property, we'll remove that and link our new Property
     if ( this.instrumentedVisibleProperty ) {
-      assert && assert( property,
-        'If our visibleProperty was instrumented, you cannot unforward it since it would not be included in the API' );
-
-      this.onInstrumentedVisibleProperty( property );
-
       this.instrumentedVisibleProperty.dispose();
       this.instrumentedVisibleProperty = null;
+      this.onInstrumentedVisibleProperty( property );
     }
   },
   get visibleProperty() { return this._visibleProperty; },
