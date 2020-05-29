@@ -19,7 +19,7 @@ class NodeProperty extends Property {
 
   /**
    * @param {Node} node
-   * @param {TinyProperty} property
+   * @param {TinyProperty|Property} property
    * @param {string} attribute - for example 'left' or 'centerBottom' or 'visible' or 'pickable'
    * @param {Object} [options]
    */
@@ -38,7 +38,7 @@ class NodeProperty extends Property {
     // @private {Node}
     this.node = node;
 
-    // @private {TinyProperty}
+    // @private {TinyProperty|Property}
     this.property = property;
 
     // @private {string}
