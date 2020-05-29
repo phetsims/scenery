@@ -3186,6 +3186,10 @@ inherit( PhetioObject, Node, {
   /**
    * Sets what Property our visibleProperty is backed by, so that changes to this provided Property will change this
    * node's visibility, and vice versa.
+   *
+   * Note that all instrumented Nodes create their own instrumented visibleProperty (if one is not passed in as an option).
+   * Once a Node's visibleProperty has been registered with PhET-iO, it cannot be "swapped out" for another.
+   *
    * @public
    *
    * @param {Property.<boolean>|null} property
