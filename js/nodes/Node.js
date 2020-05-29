@@ -5247,7 +5247,9 @@ inherit( PhetioObject, Node, {
     // TODO: this should only happen once, so perhaps assert that somehow? https://github.com/phetsims/scenery/issues/1046
     if ( !wasInstrumented && this.isPhetioInstrumented() ) {
 
-      // TODO: This feels like a proxy for a lack of better check for if we already have overwrittent the visibilityProperty, that said it may be best as is, https://github.com/phetsims/scenery/issues/1046
+      // If a visibleProperty was already specified in the options (in the constructor or mutate), then it will be set
+      // as this.visibleProperty.forwardingProperty.  We only create the default instrumented one if another hasn't
+      // already been specified.
       if ( !this.visibleProperty.forwardingProperty ) {
         const instrumentedVisibleProperty = new BooleanProperty( this.visible, merge( {
 
