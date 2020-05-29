@@ -5230,15 +5230,27 @@ inherit( PhetioObject, Node, {
       }
     } );
 
+    this.initializePhetioObject( { phetioType: NodeIO, phetioState: false }, options );
+
+    return this; // allow chaining
+  },
+
+  /**
+   * @param {Object} baseOptions
+   * @param {Object} config
+   * @override
+   * @protected
+   */
+  initializePhetioObject: function( baseOptions, config ) {
+
     // Track this, so we only override our visibleProperty once.
     const wasInstrumented = this.isPhetioInstrumented();
 
-    this.initializePhetioObject( { phetioType: NodeIO, phetioState: false }, options );
+    PhetioObject.prototype.initializePhetioObject.call( this, baseOptions, config );
 
     // TODO: this should only happen once, so perhaps assert that somehow? https://github.com/phetsims/scenery/issues/1046
     if ( !wasInstrumented && this.isPhetioInstrumented() ) {
 
-      // TODO: factor out into a default instrumented visibilityProperty-specific function, but out of mutate, https://github.com/phetsims/scenery/issues/1046
       // TODO: This feels like a proxy for a lack of better check for if we already have overwrittent the visibilityProperty, that said it may be best as is, https://github.com/phetsims/scenery/issues/1046
       if ( !this.visibleProperty.forwardingProperty ) {
         const instrumentedVisibleProperty = new BooleanProperty( this.visible, merge( {
@@ -5248,7 +5260,7 @@ inherit( PhetioObject, Node, {
 
           tandem: this.tandem.createTandem( 'visibleProperty' ),
           phetioDocumentation: 'Controls whether the Node will be visible (and interactive), see the NodeIO documentation for more details.'
-        }, this.phetioComponentOptions, this.phetioComponentOptions.visibleProperty, options.visiblePropertyOptions ) );
+        }, this.phetioComponentOptions, this.phetioComponentOptions.visibleProperty, config.visiblePropertyOptions ) );
 
         this.visibleProperty = instrumentedVisibleProperty;
 
@@ -5260,8 +5272,6 @@ inherit( PhetioObject, Node, {
         this.onInstrumentedVisibleProperty( this.visibleProperty.forwardingProperty );
       }
     }
-
-    return this; // allow chaining
   },
 
   /**
