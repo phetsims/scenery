@@ -1,23 +1,23 @@
 // Copyright 2012-2020, University of Colorado Boulder
 
 /**
- * A node for the Scenery scene graph. Supports general directed acyclic graphics (DAGs).
+ * A Node for the Scenery scene graph. Supports general directed acyclic graphics (DAGs).
  * Handles multiple layers with assorted types (Canvas 2D, SVG, DOM, WebGL, etc.).
  *
  * ## General description of Nodes
  *
- * In Scenery, the visual output is determined by a group of connected nodes (generally known as a scene graph).
- * Each node has a list of 'child' nodes. When a node is visually displayed, its child nodes (children) will also be
- * displayed, along with their children, etc. There is typically one 'root' node that is passed to the Scenery Display
- * whose descendants (nodes that can be traced from the root by child relationships) will be displayed.
+ * In Scenery, the visual output is determined by a group of connected Nodes (generally known as a scene graph).
+ * Each Node has a list of 'child' Nodes. When a Node is visually displayed, its child Nodes (children) will also be
+ * displayed, along with their children, etc. There is typically one 'root' Node that is passed to the Scenery Display
+ * whose descendants (Nodes that can be traced from the root by child relationships) will be displayed.
  *
- * For instance, say there are nodes named A, B, C, D and E, who have the relationships:
+ * For instance, say there are Nodes named A, B, C, D and E, who have the relationships:
  * - B is a child of A (thus A is a parent of B)
  * - C is a child of A (thus A is a parent of C)
  * - D is a child of C (thus C is a parent of D)
  * - E is a child of C (thus C is a parent of E)
- * where A would be the root node. This can be visually represented as a scene graph, where a line connects a parent
- * node to a child node (where the parent is usually always at the top of the line, and the child is at the bottom):
+ * where A would be the root Node. This can be visually represented as a scene graph, where a line connects a parent
+ * Node to a child Node (where the parent is usually always at the top of the line, and the child is at the bottom):
  * For example:
  *
  *   A
@@ -31,7 +31,7 @@
  * - A is an 'ancestor' of D (due to the reverse)
  * - C's 'subtree' is C, D and E, which consists of C itself and all of its descendants.
  *
- * Note that Scenery allows some more complicated forms, where nodes can have multiple parents, e.g.:
+ * Note that Scenery allows some more complicated forms, where Nodes can have multiple parents, e.g.:
  *
  *   A
  *  / \
@@ -39,12 +39,12 @@
  *  \ /
  *   D
  *
- * In this case, D has two parents (B and C). Scenery disallows any node from being its own ancestor or descendant,
- * so that loops are not possible. When a node has two or more parents, it means that the node's subtree will typically
+ * In this case, D has two parents (B and C). Scenery disallows any Node from being its own ancestor or descendant,
+ * so that loops are not possible. When a Node has two or more parents, it means that the Node's subtree will typically
  * be displayed twice on the screen. In the above case, D would appear both at B's position and C's position. Each
- * place a node would be displayed is known as an 'instance'.
+ * place a Node would be displayed is known as an 'instance'.
  *
- * Each node has a 'transform' associated with it, which determines how its subtree (that node and all of its
+ * Each Node has a 'transform' associated with it, which determines how its subtree (that Node and all of its
  * descendants) will be positioned. Transforms can contain:
  * - Translation, which moves the position the subtree is displayed
  * - Scale, which makes the displayed subtree larger or smaller
@@ -66,7 +66,7 @@
  * - C has a 'rotation' that rotates 180-degrees around the origin
  *
  * If C displays a square that fills the area with 0 <= x <= 10 and 0 <= y <= 10, we can determine the position on
- * the display by applying transforms starting at C and moving towards the root node (in this case, A):
+ * the display by applying transforms starting at C and moving towards the root Node (in this case, A):
  * 1. We apply C's rotation to our square, so the filled area will now be -10 <= x <= 0 and -10 <= y <= 0
  * 2. We apply B's scale to our square, so now we have -20 <= x <= 0 and -20 <= y <= 0
  * 3. We apply A's translation to our square, moving it to 80 <= x <= 100 and -20 <= y <= 0
@@ -74,22 +74,22 @@
  * Nodes also have a large number of properties that will affect how their entire subtree is rendered, such as
  * visibility, opacity, etc.
  *
- * ## Creating nodes
+ * ## Creating Nodes
  *
- * Generally, there are two types of nodes:
- * - Nodes that don't display anything, but serve as a container for other nodes (e.g. Node itself, HBox, VBox)
+ * Generally, there are two types of Nodes:
+ * - Nodes that don't display anything, but serve as a container for other Nodes (e.g. Node itself, HBox, VBox)
  * - Nodes that display content, but ALSO serve as a container (e.g. Circle, Image, Text)
  *
- * When a node is created with the default Node constructor, e.g.:
+ * When a Node is created with the default Node constructor, e.g.:
  *   var node = new Node();
- * then that node will not display anything by itself.
+ * then that Node will not display anything by itself.
  *
  * Generally subtypes of Node are used for displaying things, such as Circle, e.g.:
  *   var circle = new Circle( 20 ); // radius of 20
  *
- * Almost all nodes (with the exception of leaf-only nodes like Spacer) can contain children.
+ * Almost all Nodes (with the exception of leaf-only Nodes like Spacer) can contain children.
  *
- * ## Connecting nodes, and rendering order
+ * ## Connecting Nodes, and rendering order
  *
  * To make a 'childNode' become a 'parentNode', the typical way is to call addChild():
  *   parentNode.addChild( childNode );
@@ -97,8 +97,8 @@
  * To remove this connection, you can call:
  *   parentNode.removeChild( childNode );
  *
- * Adding a child node with addChild() puts it at the end of parentNode's list of child nodes. This is important,
- * because the order of children affects what nodes are drawn on the 'top' or 'bottom' visually. Nodes that are at the
+ * Adding a child Node with addChild() puts it at the end of parentNode's list of child Nodes. This is important,
+ * because the order of children affects what Nodes are drawn on the 'top' or 'bottom' visually. Nodes that are at the
  * end of the list of children are generally drawn on top.
  *
  * This is generally easiest to represent by notating scene graphs with children in order from left to right, thus:
@@ -110,24 +110,24 @@
  *   D   E
  *
  * would indicate that A's children are [B,C], so C's subtree is drawn ON TOP of B. The same is true of C's children
- * [D,E], so E is drawn on top of D. If a node itself has content, it is drawn below that of its children (so C itself
+ * [D,E], so E is drawn on top of D. If a Node itself has content, it is drawn below that of its children (so C itself
  * would be below D and E).
  *
- * This means that for every scene graph, nodes instances can be ordered from bottom to top. For the above example, the
+ * This means that for every scene graph, Nodes instances can be ordered from bottom to top. For the above example, the
  * order is:
- * 1. A (on the very bottom visually, may get covered up by other nodes)
+ * 1. A (on the very bottom visually, may get covered up by other Nodes)
  * 2. B
  * 3. C
  * 4. D
- * 5. E (on the very top visually, may be covering other nodes)
+ * 5. E (on the very top visually, may be covering other Nodes)
  *
  * ## Trails
  *
- * For examples where there are multiple parents for some nodes (also referred to as DAG in some code, as it represents
- * a Directed Acyclic Graph), we need more information about the rendering order (as otherwise nodes could appear
+ * For examples where there are multiple parents for some Nodes (also referred to as DAG in some code, as it represents
+ * a Directed Acyclic Graph), we need more information about the rendering order (as otherwise Nodes could appear
  * multiple places in the visual bottom-to-top order.
  *
- * A Trail is basically a list of nodes, where every node in the list is a child of its previous element, and a parent
+ * A Trail is basically a list of Nodes, where every Node in the list is a child of its previous element, and a parent
  * of its next element. Thus for the scene graph:
  *
  *   A
@@ -142,7 +142,7 @@
  * - [A,B,D,F]
  * - [A,C,D,F]
  * - [A,C,E,F]
- * Note that the trails are essentially listing nodes used in walking from the root (A) to the relevant node (F) using
+ * Note that the trails are essentially listing Nodes used in walking from the root (A) to the relevant Node (F) using
  * connections between parents and children.
  *
  * The trails above are in order from bottom to top (visually), due to the order of children. Thus since A's children
@@ -191,38 +191,38 @@ const scratchMatrix3 = new Matrix3();
 // Node options, in the order they are executed in the constructor/mutate()
 const NODE_OPTION_KEYS = [
   'children', // {Array.<Node>}- List of children to add (in order), see setChildren for more documentation
-  'cursor', // {string|null} - CSS cursor to display when over this node, see setCursor() for more documentation
+  'cursor', // {string|null} - CSS cursor to display when over this Node, see setCursor() for more documentation
   'visibleProperty', // {Property.<boolean>|null} - Sets forwarding of the visibleProperty, see setVisibleProperty() for more documentation
-  'visible', // {boolean} - Whether the node is visible, see setVisible() for more documentation
-  'pickable', // {boolean|null} - Whether the node is pickable, see setPickable() for more documentation
+  'visible', // {boolean} - Whether the Node is visible, see setVisible() for more documentation
+  'pickable', // {boolean|null} - Whether the Node is pickable, see setPickable() for more documentation
   'inputEnabled', // {boolean} Whether input events can reach into this subtree, see setInputEnabled() for more documentation
   'inputListeners', // {Array.<Object>} - The input listeners attached to the Node, see setInputListeners() for more documentation
-  'opacity', // {number} - Opacity of this node's subtree, see setOpacity() for more documentation
-  'matrix', // {Matrix3} - Transformation matrix of the node, see setMatrix() for more documentation
-  'translation', // {Vector2} - x/y translation of the node, see setTranslation() for more documentation
-  'x', // {number} - x translation of the node, see setX() for more documentation
-  'y', // {number} - y translation of the node, see setY() for more documentation
-  'rotation', // {number} - rotation (in radians) of the node, see setRotation() for more documentation
-  'scale', // {number} - scale of the node, see scale() for more documentation
+  'opacity', // {number} - Opacity of this Node's subtree, see setOpacity() for more documentation
+  'matrix', // {Matrix3} - Transformation matrix of the Node, see setMatrix() for more documentation
+  'translation', // {Vector2} - x/y translation of the Node, see setTranslation() for more documentation
+  'x', // {number} - x translation of the Node, see setX() for more documentation
+  'y', // {number} - y translation of the Node, see setY() for more documentation
+  'rotation', // {number} - rotation (in radians) of the Node, see setRotation() for more documentation
+  'scale', // {number} - scale of the Node, see scale() for more documentation
   'excludeInvisibleChildrenFromBounds', // {boolean} - Controls bounds depending on child visibility, see setExcludeInvisibleChildrenFromBounds() for more documentation
   'localBounds', // {Bounds2|null} - bounds of subtree in local coordinate frame, see setLocalBounds() for more documentation
-  'maxWidth', // {number|null} - Constrains width of this node, see setMaxWidth() for more documentation
-  'maxHeight', // {number|null} - Constrains height of this node, see setMaxHeight() for more documentation
-  'leftTop', // {Vector2} - The upper-left corner of this node's bounds, see setLeftTop() for more documentation
-  'centerTop', // {Vector2} - The top-center of this node's bounds, see setCenterTop() for more documentation
-  'rightTop', // {Vector2} - The upper-right corner of this node's bounds, see setRightTop() for more documentation
-  'leftCenter', // {Vector2} - The left-center of this node's bounds, see setLeftCenter() for more documentation
-  'center', // {Vector2} - The center of this node's bounds, see setCenter() for more documentation
-  'rightCenter', // {Vector2} - The center-right of this node's bounds, see setRightCenter() for more documentation
-  'leftBottom', // {Vector2} - The bottom-left of this node's bounds, see setLeftBottom() for more documentation
-  'centerBottom', // {Vector2} - The middle center of this node's bounds, see setCenterBottom() for more documentation
-  'rightBottom', // {Vector2} - The bottom right of this node's bounds, see setRightBottom() for more documentation
-  'left', // {number} - The left side of this node's bounds, see setLeft() for more documentation
-  'right', // {number} - The right side of this node's bounds, see setRight() for more documentation
-  'top', // {number} - The top side of this node's bounds, see setTop() for more documentation
-  'bottom', // {number} - The bottom side of this node's bounds, see setBottom() for more documentation
-  'centerX', // {number} - The x-center of this node's bounds, see setCenterX() for more documentation
-  'centerY', // {number} - The y-center of this node's bounds, see setCenterY() for more documentation
+  'maxWidth', // {number|null} - Constrains width of this Node, see setMaxWidth() for more documentation
+  'maxHeight', // {number|null} - Constrains height of this Node, see setMaxHeight() for more documentation
+  'leftTop', // {Vector2} - The upper-left corner of this Node's bounds, see setLeftTop() for more documentation
+  'centerTop', // {Vector2} - The top-center of this Node's bounds, see setCenterTop() for more documentation
+  'rightTop', // {Vector2} - The upper-right corner of this Node's bounds, see setRightTop() for more documentation
+  'leftCenter', // {Vector2} - The left-center of this Node's bounds, see setLeftCenter() for more documentation
+  'center', // {Vector2} - The center of this Node's bounds, see setCenter() for more documentation
+  'rightCenter', // {Vector2} - The center-right of this Node's bounds, see setRightCenter() for more documentation
+  'leftBottom', // {Vector2} - The bottom-left of this Node's bounds, see setLeftBottom() for more documentation
+  'centerBottom', // {Vector2} - The middle center of this Node's bounds, see setCenterBottom() for more documentation
+  'rightBottom', // {Vector2} - The bottom right of this Node's bounds, see setRightBottom() for more documentation
+  'left', // {number} - The left side of this Node's bounds, see setLeft() for more documentation
+  'right', // {number} - The right side of this Node's bounds, see setRight() for more documentation
+  'top', // {number} - The top side of this Node's bounds, see setTop() for more documentation
+  'bottom', // {number} - The bottom side of this Node's bounds, see setBottom() for more documentation
+  'centerX', // {number} - The x-center of this Node's bounds, see setCenterX() for more documentation
+  'centerY', // {number} - The y-center of this Node's bounds, see setCenterY() for more documentation
   'renderer', // {string|null} - The preferred renderer for this subtree, see setRenderer() for more documentation
   'layerSplit', // {boolean} - Forces this subtree into a layer of its own, see setLayerSplit() for more documentation
   'usesOpacity', // {boolean} - Hint that opacity will be changed, see setUsesOpacity() for more documentation
@@ -297,21 +297,21 @@ const DEFAULT_OPTIONS = {
 function Node( options ) {
   // NOTE: All member properties with names starting with '_' are assumed to be @private!
 
-  // @private {number} - Assigns a unique ID to this node (allows trails to get a unique list of IDs)
+  // @private {number} - Assigns a unique ID to this Node (allows trails to get a unique list of IDs)
   this._id = globalIdCounter++;
 
   // @protected {Array.<Instance>} - All of the Instances tracking this Node
   this._instances = [];
 
-  // @protected {Array.<Display>} - All displays where this node is the root.
+  // @protected {Array.<Display>} - All displays where this Node is the root.
   this._rootedDisplays = [];
 
   // @protected {Array.<Drawable>} - Drawable states that need to be updated on mutations. Generally added by SVG and
   // DOM elements that need to closely track state (possibly by Canvas to maintain dirty state).
   this._drawables = [];
 
-  // @public {TinyProperty.<boolean>} - Whether this node (and its children) will be visible when the scene is updated.
-  // Visible nodes by default will not be pickable either.
+  // @public {TinyProperty.<boolean>} - Whether this Node (and its children) will be visible when the scene is updated.
+  // Visible Nodes by default will not be pickable either.
   // NOTE: This is fired synchronously when the visibility of the Node is toggled
   this._visibleProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.visible );
   this._visibleProperty.lazyLink( this.onVisiblePropertyChange.bind( this ) );
@@ -324,12 +324,12 @@ function Node( options ) {
   // NOTE: This is fired synchronously when the pickability of the Node is toggled
   this.pickableProperty = new TinyProperty( DEFAULT_OPTIONS.pickable );
 
-  // @public {TinyProperty.<boolean>} - Whether input event listeners on this node or descendants on a trail will have
+  // @public {TinyProperty.<boolean>} - Whether input event listeners on this Node or descendants on a trail will have
   // input listeners. triggered. Note that this does NOT effect picking, and only prevents some listeners from being
   // fired.
   this.inputEnabledProperty = new TinyProperty( DEFAULT_OPTIONS.inputEnabled );
 
-  // @private {TinyProperty.<Shape|null>} - This node and all children will be clipped by this shape (in addition to any
+  // @private {TinyProperty.<Shape|null>} - This Node and all children will be clipped by this shape (in addition to any
   // other clipping shapes). The shape should be in the local coordinate frame.
   // NOTE: This is fired synchronously when the clipArea of the Node is toggled
   this.clipAreaProperty = new TinyProperty( DEFAULT_OPTIONS.clipArea );
@@ -338,12 +338,12 @@ function Node( options ) {
   this._mouseArea = DEFAULT_OPTIONS.mouseArea; // {Shape|Bounds2} for mouse position in the local coordinate frame
   this._touchArea = DEFAULT_OPTIONS.touchArea; // {Shape|Bounds2} for touch and pen position in the local coordinate frame
 
-  // @private {string|null} - The CSS cursor to be displayed over this node. null should be the default (inherit) value.
+  // @private {string|null} - The CSS cursor to be displayed over this Node. null should be the default (inherit) value.
   this._cursor = DEFAULT_OPTIONS.cursor;
 
   // @public (scenery-internal) - Not for public use, but used directly internally for performance.
-  this._children = []; // {Array.<Node>} - Ordered array of child nodes.
-  this._parents = []; // {Array.<Node>} - Unordered array of parent nodes.
+  this._children = []; // {Array.<Node>} - Ordered array of child Nodes.
+  this._parents = []; // {Array.<Node>} - Unordered array of parent Nodes.
 
   // @private {boolean} - Whether we will do more accurate (and tight) bounds computations for rotations and shears.
   this._transformBounds = DEFAULT_OPTIONS.transformBounds;
@@ -354,18 +354,18 @@ function Node( options ) {
    */
   this._transform = new Transform3(); // @private {Transform3}
   this._transformListener = this.onTransformChange.bind( this ); // @private {Function}
-  this._transform.changeEmitter.addListener( this._transformListener ); // NOTE: Listener/transform bound to this node.
+  this._transform.changeEmitter.addListener( this._transformListener ); // NOTE: Listener/transform bound to this Node.
 
   /*
-   * Maximum dimensions for the node's local bounds before a corrective scaling factor is applied to maintain size.
-   * The maximum dimensions are always compared to local bounds, and applied "before" the node's transform.
+   * Maximum dimensions for the Node's local bounds before a corrective scaling factor is applied to maintain size.
+   * The maximum dimensions are always compared to local bounds, and applied "before" the Node's transform.
    * Whenever the local bounds or maximum dimensions of this Node change and it has at least one maximum dimension
    * (width or height), an ideal scale is computed (either the smallest scale for our local bounds to fit the
    * dimension constraints, OR 1, whichever is lower). Then the Node's transform will be scaled (prepended) with
    * a scale adjustment of ( idealScale / alreadyAppliedScaleFactor ).
    * In the simple case where the Node isn't otherwise transformed, this will apply and update the Node's scale so that
-   * the node matches the maximum dimensions, while never scaling over 1. Note that manually applying transforms to
-   * the Node is fine, but may make the node's width greater than the maximum width.
+   * the Node matches the maximum dimensions, while never scaling over 1. Note that manually applying transforms to
+   * the Node is fine, but may make the Node's width greater than the maximum width.
    * NOTE: If a dimension constraint is null, no resizing will occur due to it. If both maxWidth and maxHeight are null,
    * no scale adjustment will be applied.
    *
@@ -390,34 +390,34 @@ function Node( options ) {
   const boundsInvalidationListener = this.validateBounds.bind( this );
   const selfBoundsInvalidationListener = this.validateSelfBounds.bind( this );
 
-  // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds for this node and its children in the "parent" coordinate
+  // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds for this Node and its children in the "parent" coordinate
   // frame.
   // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
-  // NOTE: This is fired **asynchronously** (usually as part of a Display.updateDisplay()) when the bounds of the node
+  // NOTE: This is fired **asynchronously** (usually as part of a Display.updateDisplay()) when the bounds of the Node
   // is changed.
   this.boundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy() );
   this.boundsProperty.onAccessAttempt = boundsInvalidationListener;
   this.boundsProperty.changeCount = boundsListenersAddedOrRemovedListener;
 
-  // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds for this node and its children in the "local" coordinate
+  // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds for this Node and its children in the "local" coordinate
   // frame.
   // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
   // NOTE: This is fired **asynchronously** (usually as part of a Display.updateDisplay()) when the localBounds of
-  // the node is changed.
+  // the Node is changed.
   this.localBoundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy() );
   this.localBoundsProperty.onAccessAttempt = boundsInvalidationListener;
   this.localBoundsProperty.changeCount = boundsListenersAddedOrRemovedListener;
 
-  // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds just for children of this node (and sub-trees), in the
+  // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds just for children of this Node (and sub-trees), in the
   // "local" coordinate frame.
   // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
   // NOTE: This is fired **asynchronously** (usually as part of a Display.updateDisplay()) when the childBounds of the
-  // node is changed.
+  // Node is changed.
   this.childBoundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy() );
   this.childBoundsProperty.onAccessAttempt = boundsInvalidationListener;
   this.childBoundsProperty.changeCount = boundsListenersAddedOrRemovedListener;
 
-  // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds just for this node, in the "local" coordinate frame.
+  // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds just for this Node, in the "local" coordinate frame.
   // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
   // NOTE: This event can be fired synchronously, and happens with the self-bounds of a Node is changed. This is NOT
   // like the other bounds Properties, which usually fire asynchronously
@@ -429,7 +429,7 @@ function Node( options ) {
   // overridden value.
   this._localBoundsOverridden = false;
 
-  // @private {boolean} - [mutable] Whether invisible children will be excluded from this node's bounds
+  // @private {boolean} - [mutable] Whether invisible children will be excluded from this Node's bounds
   this._excludeInvisibleChildrenFromBounds = false;
 
   this._boundsDirty = true; // @private {boolean} - Whether bounds needs to be recomputed to be valid.
@@ -448,7 +448,7 @@ function Node( options ) {
   // @public (scenery-internal) {Object} - Where rendering-specific settings are stored. They are generally modified
   // internally, so there is no ES5 setter for hints.
   this._hints = {
-    // {number} - What type of renderer should be forced for this node. Uses the internal bitmask structure declared
+    // {number} - What type of renderer should be forced for this Node. Uses the internal bitmask structure declared
     //            in scenery.js and Renderer.js.
     renderer: DEFAULT_OPTIONS.renderer === null ? 0 : Renderer.fromName( DEFAULT_OPTIONS.renderer ),
 
@@ -456,10 +456,10 @@ function Node( options ) {
     //             make switching back-and-forth between opacity:1 and other opacities much faster.
     usesOpacity: DEFAULT_OPTIONS.usesOpacity,
 
-    // {boolean} - Whether layers should be split before and after this node.
+    // {boolean} - Whether layers should be split before and after this Node.
     layerSplit: DEFAULT_OPTIONS.layerSplit,
 
-    // {boolean} - Whether this node and its subtree should handle transforms by using a CSS transform of a div.
+    // {boolean} - Whether this Node and its subtree should handle transforms by using a CSS transform of a div.
     cssTransform: DEFAULT_OPTIONS.cssTransform,
 
     // {boolean} - When rendered as Canvas, whether we should use full (device) resolution on retina-like devices.
@@ -474,8 +474,8 @@ function Node( options ) {
     webglScale: DEFAULT_OPTIONS.webglScale,
 
     // {boolean} - If true, Scenery will not fit any blocks that contain drawables attached to Nodes underneath this
-    //             node's subtree. This will typically prevent Scenery from triggering bounds computation for this
-    //             sub-tree, and movement of this node or its descendants will never trigger the refitting of a block.
+    //             Node's subtree. This will typically prevent Scenery from triggering bounds computation for this
+    //             sub-tree, and movement of this Node or its descendants will never trigger the refitting of a block.
     preventFit: DEFAULT_OPTIONS.preventFit
   };
 
@@ -484,10 +484,10 @@ function Node( options ) {
   // childrenChanged event will only be fired once after the entire operation of changing the children is completed.
   this.childrenChangedEmitter = new TinyEmitter();
 
-  // @public {TinyEmitter} - For every single added child Node, emits with {Node} node, {number} indexOfChild
+  // @public {TinyEmitter} - For every single added child Node, emits with {Node} Node, {number} indexOfChild
   this.childInsertedEmitter = new TinyEmitter();
 
-  // @public {TinyEmitter} - For every single removed child Node, emits with {Node} node, {number} indexOfChild
+  // @public {TinyEmitter} - For every single removed child Node, emits with {Node} Node, {number} indexOfChild
   this.childRemovedEmitter = new TinyEmitter();
 
   // @public {TinyEmitter} - Provides a given range that may be affected by the reordering. Emits with
@@ -518,12 +518,12 @@ function Node( options ) {
   // compose accessibility
   this.initializeAccessibility();
 
-  // @public (scenery-internal) {number} - A bitmask which specifies which renderers this node (and only this node,
+  // @public (scenery-internal) {number} - A bitmask which specifies which renderers this Node (and only this Node,
   // not its subtree) supports.
   this._rendererBitmask = Renderer.bitmaskNodeDefault;
 
   // @public (scenery-internal) {RendererSummary} - A bitmask-like summary of what renderers and options are supported
-  // by this node and all of its descendants
+  // by this Node and all of its descendants
   this._rendererSummary = new RendererSummary( this );
 
   /*
@@ -545,7 +545,7 @@ function Node( options ) {
   this._picker = new Picker( this );
 
   // @public (scenery-internal) {boolean} - There are certain specific cases (in this case due to a11y) where we need
-  // to know that a node is getting removed from its parent BUT that process has not completed yet. It would be ideal
+  // to know that a Node is getting removed from its parent BUT that process has not completed yet. It would be ideal
   // to not need this.
   this._isGettingRemovedFromParent = false;
 
@@ -560,7 +560,7 @@ scenery.register( 'Node', Node );
 
 inherit( PhetioObject, Node, {
   /**
-   * This is an array of property (setter) names for Node.mutate(), which are also used when creating nodes with
+   * This is an array of property (setter) names for Node.mutate(), which are also used when creating Nodes with
    * parameter objects.
    * @protected
    *
@@ -580,7 +580,7 @@ inherit( PhetioObject, Node, {
   _mutatorKeys: NODE_OPTION_KEYS,
 
   /**
-   * {Array.<String>} - List of all dirty flags that should be available on drawables created from this node (or
+   * {Array.<String>} - List of all dirty flags that should be available on drawables created from this Node (or
    *                    subtype). Given a flag (e.g. radius), it indicates the existence of a function
    *                    drawable.markDirtyRadius() that will indicate to the drawable that the radius has changed.
    * @public (scenery-internal)
@@ -590,7 +590,7 @@ inherit( PhetioObject, Node, {
   drawableMarkFlags: [],
 
   /**
-   * Inserts a child node at a specific index.
+   * Inserts a child Node at a specific index.
    * @public
    *
    * node.insertChild( 0, childNode ) will insert the child into the beginning of the children array (on the bottom
@@ -601,7 +601,7 @@ inherit( PhetioObject, Node, {
    *
    * NOTE: overridden by Leaf for some subtypes
    *
-   * @param {number} index - Index where the inserted child node will be after this operation.
+   * @param {number} index - Index where the inserted child Node will be after this operation.
    * @param {Node} node - The new child to insert.
    * @param {boolean} [isComposite] - (scenery-internal) If true, the childrenChanged event will not be sent out.
    * @returns {Node} - Returns 'this' reference, for chaining
@@ -644,10 +644,10 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Appends a child node to our list of children.
+   * Appends a child Node to our list of children.
    * @public
    *
-   * The new child node will be displayed in front (on top) of all of this node's other children.
+   * The new child Node will be displayed in front (on top) of all of this node's other children.
    *
    * @param {Node} node
    * @param {boolean} [isComposite] - (scenery-internal) If true, the childrenChanged event will not be sent out.
@@ -660,8 +660,8 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Removes a child node from our list of children, see http://phetsims.github.io/scenery/doc/#node-removeChild
-   * Will fail an assertion if the node is not currently one of our children
+   * Removes a child Node from our list of children, see http://phetsims.github.io/scenery/doc/#node-removeChild
+   * Will fail an assertion if the Node is not currently one of our children
    * @public
    *
    * @param {Node} node
@@ -680,7 +680,7 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Removes a child node at a specific index (node.children[ index ]) from our list of children.
+   * Removes a child Node at a specific index (node.children[ index ]) from our list of children.
    * Will fail if the index is out of bounds.
    * @public
    *
@@ -700,12 +700,12 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Internal method for removing a node (always has the Node and index).
+   * Internal method for removing a Node (always has the Node and index).
    * @private
    *
    * NOTE: overridden by Leaf for some subtypes
    *
-   * @param {Node} node - The child node to remove from this node (it's parent)
+   * @param {Node} node - The child node to remove from this Node (it's parent)
    * @param {number} indexOfChild - Should satisfy this.children[ indexOfChild ] === node
    * @param {boolean} [isComposite] - (scenery-internal) If true, the childrenChanged event will not be sent out.
    */
@@ -745,11 +745,11 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * If a child is not at the given index, it is moved to the given index. This reorders the children of this node so
+   * If a child is not at the given index, it is moved to the given index. This reorders the children of this Node so
    * that `this.children[ index ] === node`.
    * @public
    *
-   * @param {Node} node - The child node to move in the order
+   * @param {Node} node - The child Node to move in the order
    * @param {number} index - The desired index (into the children array) of the child.
    * @returns {Node} - Returns 'this' reference, for chaining
    */
@@ -965,7 +965,7 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Moves this node to the front (end) of all of its parents children array.
+   * Moves this Node to the front (end) of all of its parents children array.
    * @public
    *
    * @returns {Node} - Returns 'this' reference, for chaining
@@ -991,7 +991,7 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Move this node one index forward in each of its parents.  If the node is already at the front, this is a no-op.
+   * Move this node one index forward in each of its parents.  If the Node is already at the front, this is a no-op.
    * @returns {Node}
    * @public
    */
@@ -1015,7 +1015,7 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Move this node one index backward in each of its parents.  If the node is already at the back, this is a no-op.
+   * Move this node one index backward in each of its parents.  If the Node is already at the back, this is a no-op.
    * @returns {Node}
    * @public
    */
@@ -1039,7 +1039,7 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Moves this node to the back (front) of all of its parents children array.
+   * Moves this Node to the back (front) of all of its parents children array.
    * @public
    *
    * @returns {Node} - Returns 'this' reference, for chaining
@@ -1094,7 +1094,7 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Removes this node from all of its parents.
+   * Removes this Node from all of its parents.
    * @public
    *
    * @returns {Node} - Returns 'this' reference, for chaining
@@ -1136,7 +1136,7 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Ensures that the cached selfBounds of this node is accurate. Returns true if any sort of dirty flag was set
+   * Ensures that the cached selfBounds of this Node is accurate. Returns true if any sort of dirty flag was set
    * before this was called.
    * @public
    *
@@ -1164,7 +1164,7 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Ensures that cached bounds stored on this node (and all children) are accurate. Returns true if any sort of dirty
+   * Ensures that cached bounds stored on this Node (and all children) are accurate. Returns true if any sort of dirty
    * flag was set before this was called.
    * @public
    *
@@ -1176,7 +1176,7 @@ inherit( PhetioObject, Node, {
 
     let wasDirtyBefore = this.validateSelfBounds();
 
-    // We're going to directly change these instances
+    // We're going to directly mutate these instances
     const ourChildBounds = this.childBoundsProperty._value;
     const ourLocalBounds = this.localBoundsProperty._value;
     const ourSelfBounds = this.selfBoundsProperty._value;
@@ -1412,7 +1412,7 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Marks the bounds of this node as invalid, so they are recomputed before being accessed again.
+   * Marks the bounds of this Node as invalid, so they are recomputed before being accessed again.
    * @public
    */
   invalidateBounds: function() {
@@ -1661,7 +1661,7 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Returns the visual "safe" bounds that are taken up by this node and its subtree. Notably, this is essentially the
+   * Returns the visual "safe" bounds that are taken up by this Node and its subtree. Notably, this is essentially the
    * combined effects of the "visible" bounds (i.e. invisible nodes do not contribute to bounds), and "safe" bounds
    * (e.g. Text, where we need a larger bounds area to guarantee there is nothing outside). It also tries to "fit"
    * transformed bounds more tightly, where it will handle rotated Path bounds in an improved way.
@@ -1781,7 +1781,7 @@ inherit( PhetioObject, Node, {
 
   /**
    * Tests whether the given point is "contained" in this node's subtree (optionally using mouse/touch areas), and if
-   * so returns the Trail (rooted at this node) to the top-most (in stacking order) node that contains the given
+   * so returns the Trail (rooted at this node) to the top-most (in stacking order) Node that contains the given
    * point.
    * @public
    *
@@ -1824,7 +1824,7 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Hit-tests what is under the pointer, and returns a {Trail} to that node (or null if there is no matching node).
+   * Hit-tests what is under the pointer, and returns a {Trail} to that Node (or null if there is no matching node).
    * @public
    *
    * See hitTest() for more details about what will be returned.
@@ -1898,7 +1898,7 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Returns whether this node has any parents at all.
+   * Returns whether this Node has any parents at all.
    * @public
    *
    * @returns {boolean}
@@ -1908,7 +1908,7 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Returns whether this node has any children at all.
+   * Returns whether this Node has any children at all.
    * @public
    *
    * @returns {boolean}
@@ -1918,7 +1918,7 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Returns whether a child should be included for layout (if this node is a layout container).
+   * Returns whether a child should be included for layout (if this Node is a layout container).
    * @public
    *
    * @param {Node} child
@@ -2062,14 +2062,14 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Changes the transform of this node by adding a transform. The default "appends" the transform, so that it will
-   * appear to happen to the node before the rest of the transform would apply, but if "prepended", the rest of the
+   * Changes the transform of this Node by adding a transform. The default "appends" the transform, so that it will
+   * appear to happen to the Node before the rest of the transform would apply, but if "prepended", the rest of the
    * transform would apply first.
    * @public
    *
    * As an example, if a Node is centered at (0,0) and scaled by 2:
-   * translate( 100, 0 ) would cause the center of the node (in the parent coordinate frame) to be at (200,0).
-   * translate( 100, 0, true ) would cause the center of the node (in the parent coordinate frame) to be at (100,0).
+   * translate( 100, 0 ) would cause the center of the Node (in the parent coordinate frame) to be at (200,0).
+   * translate( 100, 0, true ) would cause the center of the Node (in the parent coordinate frame) to be at (100,0).
    *
    * Allowed call signatures:
    * translate( x {number}, y {number} )
@@ -2107,13 +2107,13 @@ inherit( PhetioObject, Node, {
 
   /**
    * Scales the node's transform. The default "appends" the transform, so that it will
-   * appear to happen to the node before the rest of the transform would apply, but if "prepended", the rest of the
+   * appear to happen to the Node before the rest of the transform would apply, but if "prepended", the rest of the
    * transform would apply first.
    * @public
    *
    * As an example, if a Node is translated to (100,0):
-   * scale( 2 ) will leave the node translated at (100,0), but it will be twice as big around its origin at that location.
-   * scale( 2, true ) will shift the node to (200,0).
+   * scale( 2 ) will leave the Node translated at (100,0), but it will be twice as big around its origin at that location.
+   * scale( 2, true ) will shift the Node to (200,0).
    *
    * Allowed call signatures:
    * scale( s {number|Vector2}, [prependInstead] {boolean} )
@@ -2155,13 +2155,13 @@ inherit( PhetioObject, Node, {
 
   /**
    * Rotates the node's transform. The default "appends" the transform, so that it will
-   * appear to happen to the node before the rest of the transform would apply, but if "prepended", the rest of the
+   * appear to happen to the Node before the rest of the transform would apply, but if "prepended", the rest of the
    * transform would apply first.
    * @public
    *
    * As an example, if a Node is translated to (100,0):
-   * rotate( Math.PI ) will rotate the node around (100,0)
-   * rotate( Math.PI, true ) will rotate the node around the origin, moving it to (-100,0)
+   * rotate( Math.PI ) will rotate the Node around (100,0)
+   * rotate( Math.PI, true ) will rotate the Node around the origin, moving it to (-100,0)
    *
    * @param {number} angle - The angle (in radians) to rotate by
    * @param {boolean} [prependInstead] - Whether the transform should be prepended (defaults to false)
@@ -2620,7 +2620,7 @@ inherit( PhetioObject, Node, {
   get maxHeight() { return this.getMaxHeight(); },
 
   /**
-   * Shifts this node horizontally so that its left bound (in the parent coordinate frame) is equal to the passed-in
+   * Shifts this Node horizontally so that its left bound (in the parent coordinate frame) is equal to the passed-in
    * 'left' X value.
    * @public
    *
@@ -2642,7 +2642,7 @@ inherit( PhetioObject, Node, {
   set left( value ) { this.setLeft( value ); },
 
   /**
-   * Returns the X value of the left side of the bounding box of this node (in the parent coordinate frame).
+   * Returns the X value of the left side of the bounding box of this Node (in the parent coordinate frame).
    * @public
    *
    * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
@@ -2655,7 +2655,7 @@ inherit( PhetioObject, Node, {
   get left() { return this.getLeft(); },
 
   /**
-   * Shifts this node horizontally so that its right bound (in the parent coordinate frame) is equal to the passed-in
+   * Shifts this Node horizontally so that its right bound (in the parent coordinate frame) is equal to the passed-in
    * 'right' X value.
    * @public
    *
@@ -2676,7 +2676,7 @@ inherit( PhetioObject, Node, {
   set right( value ) { this.setRight( value ); },
 
   /**
-   * Returns the X value of the right side of the bounding box of this node (in the parent coordinate frame).
+   * Returns the X value of the right side of the bounding box of this Node (in the parent coordinate frame).
    * @public
    *
    * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
@@ -2689,7 +2689,7 @@ inherit( PhetioObject, Node, {
   get right() { return this.getRight(); },
 
   /**
-   * Shifts this node horizontally so that its horizontal center (in the parent coordinate frame) is equal to the
+   * Shifts this Node horizontally so that its horizontal center (in the parent coordinate frame) is equal to the
    * passed-in center X value.
    * @public
    *
@@ -2724,7 +2724,7 @@ inherit( PhetioObject, Node, {
   get centerX() { return this.getCenterX(); },
 
   /**
-   * Shifts this node vertically so that its vertical center (in the parent coordinate frame) is equal to the
+   * Shifts this Node vertically so that its vertical center (in the parent coordinate frame) is equal to the
    * passed-in center Y value.
    * @public
    *
@@ -2759,7 +2759,7 @@ inherit( PhetioObject, Node, {
   get centerY() { return this.getCenterY(); },
 
   /**
-   * Shifts this node vertically so that its top (in the parent coordinate frame) is equal to the passed-in Y value.
+   * Shifts this Node vertically so that its top (in the parent coordinate frame) is equal to the passed-in Y value.
    * @public
    *
    * NOTE: top is the lowest Y value in our bounds.
@@ -2794,7 +2794,7 @@ inherit( PhetioObject, Node, {
   get top() { return this.getTop(); },
 
   /**
-   * Shifts this node vertically so that its bottom (in the parent coordinate frame) is equal to the passed-in Y value.
+   * Shifts this Node vertically so that its bottom (in the parent coordinate frame) is equal to the passed-in Y value.
    * @public
    *
    * NOTE: bottom is the highest Y value in our bounds.
@@ -3180,7 +3180,7 @@ inherit( PhetioObject, Node, {
    */
   onInstrumentedVisibleProperty( property ) {
     assert && assert( property.isPhetioInstrumented(),
-      'If a node is instrumented, you cannot give it an uninstrumented visibleProperty' );
+      'If a Node is instrumented, you cannot give it an uninstrumented visibleProperty' );
 
     this.addLinkedElement( property, { tandem: this.tandem.createTandem( 'visibleProperty' ) } );
   },
@@ -3190,15 +3190,13 @@ inherit( PhetioObject, Node, {
    * node's visibility, and vice versa.
    * @public
    *
-   * @param {Property.<boolean>|null}
+   * @param {Property.<boolean>|null} property
    */
   set visibleProperty( property ) {
-    assert && assert(
-      !(
-        this.visibleProperty.forwardingProperty &&
-        this.visibleProperty.forwardingProperty.isPhetioInstrumented() &&
-        ( !property || !property.isPhetioInstrumented() ) ),
-      'Please think about what you are doing to the phet-io client.' );
+    const currentVisibilityPropertyInstrumented = this.visibleProperty.forwardingProperty &&
+                                                  this.visibleProperty.forwardingProperty.isPhetioInstrumented();
+    assert && assert( !( currentVisibilityPropertyInstrumented && ( !property || !property.isPhetioInstrumented() ) ),
+      'Cannot set swap out a PhET-iO instrumented visibleProperty for an uninstrumented one' );
 
     this._visibleProperty.setForwardingProperty( property );
 
@@ -3216,7 +3214,7 @@ inherit( PhetioObject, Node, {
   get visibleProperty() { return this._visibleProperty; },
 
   /**
-   * Sets whether this node is visible.
+   * Sets whether this Node is visible.
    * @public
    *
    * @param {boolean} visible
@@ -3232,7 +3230,7 @@ inherit( PhetioObject, Node, {
   set visible( value ) { this.setVisible( value ); },
 
   /**
-   * Returns whether this node is visible.
+   * Returns whether this Node is visible.
    * @public
    *
    * @returns {boolean}
@@ -3243,7 +3241,7 @@ inherit( PhetioObject, Node, {
   get visible() { return this.isVisible(); },
 
   /**
-   * Swap the visibility of this node with another node. The node that is made visible will receive keyboard focus
+   * Swap the visibility of this node with another node. The Node that is made visible will receive keyboard focus
    * if it is focusable and the previously visible Node had focus.
    * @public
    *
@@ -3256,7 +3254,7 @@ inherit( PhetioObject, Node, {
     const visibleNode = this.visible ? this : otherNode;
     const invisibleNode = this.visible ? otherNode : this;
 
-    // if the visible node has focus we will restore focus on the invisible node once it is visible
+    // if the visible node has focus we will restore focus on the invisible Node once it is visible
     const visibleNodeFocused = visibleNode.focused;
 
     visibleNode.visible = false;
@@ -3270,7 +3268,7 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Sets the opacity of this node (and its sub-tree), where 0 is fully transparent, and 1 is fully opaque.
+   * Sets the opacity of this Node (and its sub-tree), where 0 is fully transparent, and 1 is fully opaque.
    * @public
    *
    * NOTE: opacity is clamped to be between 0 and 1.
@@ -3296,7 +3294,7 @@ inherit( PhetioObject, Node, {
   get opacity() { return this.getOpacity(); },
 
   /**
-   * Sets whether this node (and its subtree) will allow hit-testing (and thus user interaction), controlling what
+   * Sets whether this Node (and its subtree) will allow hit-testing (and thus user interaction), controlling what
    * Trail is returned from node.trailUnderPoint().
    * @public
    *
@@ -3310,9 +3308,9 @@ inherit( PhetioObject, Node, {
    * above rules. Nodes that are not pickable (pruned) will not have input events targeted to them.
    *
    * The following rules (applied in the given order) determine whether a Node (really, a Trail) will receive input events:
-   * 1. If the node or one of its ancestors has pickable: false OR is invisible, the node *will not* receive events
+   * 1. If the node or one of its ancestors has pickable: false OR is invisible, the Node *will not* receive events
    *    or hit testing.
-   * 2. If the node or one of its ancestors or descendants is pickable: true OR has an input listener attached, it
+   * 2. If the Node or one of its ancestors or descendants is pickable: true OR has an input listener attached, it
    *    *will* receive events or hit testing.
    * 3. Otherwise, it *will not* receive events or hit testing.
    *
@@ -3358,8 +3356,8 @@ inherit( PhetioObject, Node, {
   get pickable() { return this.isPickable(); },
 
   /**
-   * Sets whether input is enabled for this node and its subtree. If false, input event listeners will not be fired
-   * on this node or its descendants in the picked Trail. This does NOT effect picking (what Trail/nodes are under
+   * Sets whether input is enabled for this Node and its subtree. If false, input event listeners will not be fired
+   * on this Node or its descendants in the picked Trail. This does NOT effect picking (what Trail/nodes are under
    * a pointer), but only effects what listeners are fired.
    * @public
    *
@@ -3459,7 +3457,7 @@ inherit( PhetioObject, Node, {
   get cursor() { return this.getCursor(); },
 
   /**
-   * Sets the hit-tested mouse area for this node (see constructor for more advanced documentation). Use null for the
+   * Sets the hit-tested mouse area for this Node (see constructor for more advanced documentation). Use null for the
    * default behavior.
    * @public
    *
@@ -3489,7 +3487,7 @@ inherit( PhetioObject, Node, {
   get mouseArea() { return this.getMouseArea(); },
 
   /**
-   * Sets the hit-tested touch area for this node (see constructor for more advanced documentation). Use null for the
+   * Sets the hit-tested touch area for this Node (see constructor for more advanced documentation). Use null for the
    * default behavior.
    * @public
    *
@@ -3551,7 +3549,7 @@ inherit( PhetioObject, Node, {
   get clipArea() { return this.getClipArea(); },
 
   /**
-   * Returns whether this node has a clip area.
+   * Returns whether this Node has a clip area.
    * @public
    *
    * @returns {boolean}
@@ -3600,7 +3598,7 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Sets a preferred renderer for this node and its sub-tree. Scenery will attempt to use this renderer under here
+   * Sets a preferred renderer for this Node and its sub-tree. Scenery will attempt to use this renderer under here
    * unless it isn't supported, OR another preferred renderer is set as a closer ancestor. Acceptable values are:
    * - null (default, no preference)
    * - 'canvas'
@@ -3667,7 +3665,7 @@ inherit( PhetioObject, Node, {
   get renderer() { return this.getRenderer(); },
 
   /**
-   * Sets whether or not Scenery will try to put this node (and its descendants) into a separate SVG/Canvas/WebGL/etc.
+   * Sets whether or not Scenery will try to put this Node (and its descendants) into a separate SVG/Canvas/WebGL/etc.
    * layer, different from other siblings or other nodes. Can be used for performance purposes.
    * @public
    *
@@ -3870,18 +3868,18 @@ inherit( PhetioObject, Node, {
    *----------------------------------------------------------------------------*/
 
   /**
-   * Returns the one Trail that starts from a node with no parents (or if the predicate is present, a node that
+   * Returns the one Trail that starts from a node with no parents (or if the predicate is present, a Node that
    * satisfies it), and ends at this node. If more than one Trail would satisfy these conditions, an assertion is
    * thrown (please use getTrails() for those cases).
    * @public
    *
-   * @param {function( node ) : boolean} [predicate] - If supplied, we will only return trails rooted at a node that
+   * @param {function( node ) : boolean} [predicate] - If supplied, we will only return trails rooted at a Node that
    *                                                   satisfies predicate( node ) == true
    * @returns {Trail}
    */
   getUniqueTrail: function( predicate ) {
 
-    // Without a predicate, we'll be able to bail out the instant we hit a node with 2+ parents, and it makes the
+    // Without a predicate, we'll be able to bail out the instant we hit a Node with 2+ parents, and it makes the
     // logic easier.
     if ( !predicate ) {
       const trail = new Trail();
@@ -3889,7 +3887,7 @@ inherit( PhetioObject, Node, {
 
       while ( node ) {
         assert && assert( node._parents.length <= 1,
-          'getUniqueTrail found a node with ' + node._parents.length + ' parents.' );
+          'getUniqueTrail found a Node with ' + node._parents.length + ' parents.' );
 
         trail.addAncestor( node );
         node = node._parents[ 0 ]; // should be undefined if there aren't any parents
@@ -3955,7 +3953,7 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Returns an array of all Trails rooted at this node and end with nodes with no children (or if a predicate is
+   * Returns an array of all Trails rooted at this Node and end with nodes with no children (or if a predicate is
    * present, those that satisfy the predicate).
    * @public
    *
@@ -3974,7 +3972,7 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Returns an array of all Trails rooted at this node and end with leafNode.
+   * Returns an array of all Trails rooted at this Node and end with leafNode.
    * @public
    *
    * @param {Node} leafNode
@@ -3987,11 +3985,11 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Returns a Trail rooted at this node and ending at a node that has no children (or if a predicate is provided, a
-   * node that satisfies the predicate). If more than one trail matches this description, an assertion will be fired.
+   * Returns a Trail rooted at this node and ending at a Node that has no children (or if a predicate is provided, a
+   * Node that satisfies the predicate). If more than one trail matches this description, an assertion will be fired.
    * @public
    *
-   * @param {function( node ) : boolean} [predicate] - If supplied, we will return a Trail that ends with a node that
+   * @param {function( node ) : boolean} [predicate] - If supplied, we will return a Trail that ends with a Node that
    *                                                   satisfies predicate( node ) == true
    * @returns {Trail}
    */
@@ -4005,7 +4003,7 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Returns a Trail rooted at this node and ending at leafNode. If more than one trail matches this description,
+   * Returns a Trail rooted at this Node and ending at leafNode. If more than one trail matches this description,
    * an assertion will be fired.
    * @public
    *
@@ -4039,7 +4037,7 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Returns all nodes in the subtree with this node as its root, returned in an arbitrary order. Like
+   * Returns all nodes in the subtree with this Node as its root, returned in an arbitrary order. Like
    * getConnectedNodes, but doesn't include parents.
    * @public
    *
@@ -4158,7 +4156,7 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * To be overridden in paintable node types. Should hook into the drawable's prototype (presumably).
+   * To be overridden in paintable Node types. Should hook into the drawable's prototype (presumably).
    * @protected
    *
    * Draws the current Node's self representation, assuming the wrapper's Canvas context is already in the local
@@ -4185,7 +4183,7 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Renders this node and its descendants into the Canvas wrapper.
+   * Renders this Node and its descendants into the Canvas wrapper.
    * @public
    *
    * @param {CanvasContextWrapper} wrapper
@@ -4239,7 +4237,7 @@ inherit( PhetioObject, Node, {
 
   /**
    * @deprecated
-   * Render this node to the Canvas (clearing it first)
+   * Render this Node to the Canvas (clearing it first)
    * @public
    *
    * @param {HTMLCanvasElement} canvas
@@ -4247,7 +4245,7 @@ inherit( PhetioObject, Node, {
    * @param {Function} callback - Called with no arguments
    * @param {string} [backgroundColor]
    */
-  // @public (API compatibility for now): Render this node to the Canvas (clearing it first)
+  // @public (API compatibility for now): Render this Node to the Canvas (clearing it first)
   renderToCanvas: function( canvas, context, callback, backgroundColor ) {
 
     assert && deprecationWarning( 'Node.renderToCanvas() is deprecated, please use Node.rasterized() instead' );
@@ -4268,7 +4266,7 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Renders this node to an HTMLCanvasElement. If toCanvas( callback ) is used, the canvas will contain the node's
+   * Renders this Node to an HTMLCanvasElement. If toCanvas( callback ) is used, the canvas will contain the node's
    * entire bounds (if no x/y/width/height is provided)
    * @public
    *
@@ -4319,7 +4317,7 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Renders this node to a Canvas, then calls the callback with the data URI from it.
+   * Renders this Node to a Canvas, then calls the callback with the data URI from it.
    * @public
    *
    * @param {Function} callback - callback( dataURI {string}, x, y, width, height ) is called, where x,y are computed if not specified.
@@ -4385,8 +4383,8 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Calls the callback with an Image node that contains this Node's subtree's visual form. This is always
-   * asynchronous, but the resulting image node can be used with any back-end (Canvas/WebGL/SVG/etc.)
+   * Calls the callback with an Image Node that contains this Node's subtree's visual form. This is always
+   * asynchronous, but the resulting image Node can be used with any back-end (Canvas/WebGL/SVG/etc.)
    * @public
    * @deprecated - Use node.rasterized() instead (should avoid the asynchronous-ness)
    *
@@ -4418,8 +4416,8 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Creates a Node containing an Image node that contains this Node's subtree's visual form. This is always
-   * synchronous, but the resulting image node can ONLY used with Canvas/WebGL (NOT SVG).
+   * Creates a Node containing an Image Node that contains this Node's subtree's visual form. This is always
+   * synchronous, but the resulting image Node can ONLY used with Canvas/WebGL (NOT SVG).
    * @public
    * @deprecated - Use node.rasterized() instead, should be mostly equivalent if useCanvas:true is provided.
    *
@@ -4517,7 +4515,7 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Returns a node (backed by a scenery Image) that is a rasterized version of this node.
+   * Returns a Node (backed by a scenery Image) that is a rasterized version of this node.
    * @public
    *
    * @param {Object} [options] - See below options. This is also passed directly to the created Image object.
@@ -4525,7 +4523,7 @@ inherit( PhetioObject, Node, {
    */
   rasterized: function( options ) {
     options = merge( {
-      // {number} - Controls the resolution of the image relative to the local view units. For example, if our node is
+      // {number} - Controls the resolution of the image relative to the local view units. For example, if our Node is
       // ~100 view units across (in the local coordinate frame) but you want the image to actually have a ~200-pixel
       // resolution, provide resolution:2.
       resolution: 1,
@@ -4536,15 +4534,15 @@ inherit( PhetioObject, Node, {
       sourceBounds: null,
 
       // {boolean} - If true, the localBounds of the result will be set in a way such that it will precisely match
-      // the visible bounds of the original node (this). Note that antialiased content (with a much lower resolution)
+      // the visible bounds of the original Node (this). Note that antialiased content (with a much lower resolution)
       // may somewhat spill outside of these bounds if this is set to true. Usually this is fine and should be the
       // recommended option. If sourceBounds are provided, they will restrict the used bounds (so it will just
       // represent the bounds of the sliced part of the image).
       useTargetBounds: true,
 
-      // {boolean} - If true, the created Image node gets wrapped in an extra Node so that it can be transformed
+      // {boolean} - If true, the created Image Node gets wrapped in an extra Node so that it can be transformed
       // independently. If there is no need to transform the resulting node, wrap:false can be passed so that no extra
-      // node is created.
+      // Node is created.
       wrap: true,
 
       // {boolean} - If true, it will directly use the <canvas> element (only works with canvas/webgl renderers)
@@ -4566,7 +4564,7 @@ inherit( PhetioObject, Node, {
       }
     }
 
-    // We'll need to wrap it in a container node temporarily (while rasterizing) for the scale
+    // We'll need to wrap it in a container Node temporarily (while rasterizing) for the scale
     const wrapperNode = new Node( {
       scale: resolution,
       children: [ this ]
@@ -4741,7 +4739,7 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Returns whether this node was visually rendered/displayed by a Display in the last updateDisplay() call.
+   * Returns whether this Node was visually rendered/displayed by a Display in the last updateDisplay() call.
    * @public
    *
    * @param {Display} display
@@ -4886,7 +4884,7 @@ inherit( PhetioObject, Node, {
    * coordinate frame.
    * @public
    *
-   * NOTE: If there are multiple instances of this node (e.g. this or one ancestor has two parents), it will fail
+   * NOTE: If there are multiple instances of this Node (e.g. this or one ancestor has two parents), it will fail
    * with an assertion (since the transform wouldn't be uniquely defined).
    *
    * @returns {Matrix3}
@@ -4906,7 +4904,7 @@ inherit( PhetioObject, Node, {
 
     const matrix = Matrix3.identity(); // will be modified in place
 
-    // iterate from the back forwards (from the root node to here)
+    // iterate from the back forwards (from the root Node to here)
     for ( let i = matrices.length - 1; i >= 0; i-- ) {
       matrix.multiplyMatrix( matrices[ i ] );
     }
@@ -4920,7 +4918,7 @@ inherit( PhetioObject, Node, {
    * Equivalent to getUniqueTrail().getTransform(), but faster.
    * @public
    *
-   * NOTE: If there are multiple instances of this node (e.g. this or one ancestor has two parents), it will fail
+   * NOTE: If there are multiple instances of this Node (e.g. this or one ancestor has two parents), it will fail
    * with an assertion (since the transform wouldn't be uniquely defined).
    *
    * @returns {Transform3}
@@ -4934,7 +4932,7 @@ inherit( PhetioObject, Node, {
    * coordinate frame.
    * @public
    *
-   * NOTE: If there are multiple instances of this node (e.g. this or one ancestor has two parents), it will fail
+   * NOTE: If there are multiple instances of this Node (e.g. this or one ancestor has two parents), it will fail
    * with an assertion (since the transform wouldn't be uniquely defined).
    *
    * @returns {Matrix3}
@@ -4947,7 +4945,7 @@ inherit( PhetioObject, Node, {
    * Transforms a point from our local coordinate frame to the global coordinate frame.
    * @public
    *
-   * NOTE: If there are multiple instances of this node (e.g. this or one ancestor has two parents), it will fail
+   * NOTE: If there are multiple instances of this Node (e.g. this or one ancestor has two parents), it will fail
    * with an assertion (since the transform wouldn't be uniquely defined).
    *
    * @param {Vector2} point
@@ -4969,7 +4967,7 @@ inherit( PhetioObject, Node, {
    * Transforms a point from the global coordinate frame to our local coordinate frame.
    * @public
    *
-   * NOTE: If there are multiple instances of this node (e.g. this or one ancestor has two parents), it will fail
+   * NOTE: If there are multiple instances of this Node (e.g. this or one ancestor has two parents), it will fail
    * with an assertion (since the transform wouldn't be uniquely defined).
    *
    * @param {Vector2} point
@@ -4987,7 +4985,7 @@ inherit( PhetioObject, Node, {
       node = node._parents[ 0 ];
     }
 
-    // iterate from the back forwards (from the root node to here)
+    // iterate from the back forwards (from the root Node to here)
     const resultPoint = point.copy();
     for ( let i = transforms.length - 1; i >= 0; i-- ) {
       // in-place multiplication
@@ -5002,7 +5000,7 @@ inherit( PhetioObject, Node, {
    * (and it can be expanded).
    * @public
    *
-   * NOTE: If there are multiple instances of this node (e.g. this or one ancestor has two parents), it will fail
+   * NOTE: If there are multiple instances of this Node (e.g. this or one ancestor has two parents), it will fail
    * with an assertion (since the transform wouldn't be uniquely defined).
    *
    * @param {Bounds2} bounds
@@ -5020,7 +5018,7 @@ inherit( PhetioObject, Node, {
    * (and it can be expanded).
    * @public
    *
-   * NOTE: If there are multiple instances of this node (e.g. this or one ancestor has two parents), it will fail
+   * NOTE: If there are multiple instances of this Node (e.g. this or one ancestor has two parents), it will fail
    * with an assertion (since the transform wouldn't be uniquely defined).
    *
    * @param {Bounds2} bounds
@@ -5035,7 +5033,7 @@ inherit( PhetioObject, Node, {
    * Transforms a point from our parent coordinate frame to the global coordinate frame.
    * @public
    *
-   * NOTE: If there are multiple instances of this node (e.g. this or one ancestor has two parents), it will fail
+   * NOTE: If there are multiple instances of this Node (e.g. this or one ancestor has two parents), it will fail
    * with an assertion (since the transform wouldn't be uniquely defined).
    *
    * @param {Vector2} point
@@ -5052,7 +5050,7 @@ inherit( PhetioObject, Node, {
    * (and it can be expanded).
    * @public
    *
-   * NOTE: If there are multiple instances of this node (e.g. this or one ancestor has two parents), it will fail
+   * NOTE: If there are multiple instances of this Node (e.g. this or one ancestor has two parents), it will fail
    * with an assertion (since the transform wouldn't be uniquely defined).
    *
    * @param {Bounds2} bounds
@@ -5067,7 +5065,7 @@ inherit( PhetioObject, Node, {
    * Transforms a point from the global coordinate frame to our parent coordinate frame.
    * @public
    *
-   * NOTE: If there are multiple instances of this node (e.g. this or one ancestor has two parents), it will fail
+   * NOTE: If there are multiple instances of this Node (e.g. this or one ancestor has two parents), it will fail
    * with an assertion (since the transform wouldn't be uniquely defined).
    *
    * @param {Vector2} point
@@ -5084,7 +5082,7 @@ inherit( PhetioObject, Node, {
    * (and it can be expanded).
    * @public
    *
-   * NOTE: If there are multiple instances of this node (e.g. this or one ancestor has two parents), it will fail
+   * NOTE: If there are multiple instances of this Node (e.g. this or one ancestor has two parents), it will fail
    * with an assertion (since the transform wouldn't be uniquely defined).
    *
    * @param {Bounds2} bounds
@@ -5099,7 +5097,7 @@ inherit( PhetioObject, Node, {
    * Returns a bounding box for this Node (and its sub-tree) in the global coordinate frame.
    * @public
    *
-   * NOTE: If there are multiple instances of this node (e.g. this or one ancestor has two parents), it will fail
+   * NOTE: If there are multiple instances of this Node (e.g. this or one ancestor has two parents), it will fail
    * with an assertion (since the transform wouldn't be uniquely defined).
    *
    * NOTE: This requires computation of this node's subtree bounds, which may incur some performance loss.
@@ -5113,9 +5111,9 @@ inherit( PhetioObject, Node, {
   get globalBounds() { return this.getGlobalBounds(); },
 
   /**
-   * Returns the bounds of any other node in our local coordinate frame.
+   * Returns the bounds of any other Node in our local coordinate frame.
    *
-   * NOTE: If this node or the passed in node have multiple instances (e.g. this or one ancestor has two parents), it will fail
+   * NOTE: If this node or the passed in Node have multiple instances (e.g. this or one ancestor has two parents), it will fail
    * with an assertion.
    *
    * TODO: Possible to be well-defined and have multiple instances of each.
@@ -5128,9 +5126,9 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Returns the bounds of this node in another node's local coordinate frame.
+   * Returns the bounds of this Node in another node's local coordinate frame.
    *
-   * NOTE: If this node or the passed in node have multiple instances (e.g. this or one ancestor has two parents), it will fail
+   * NOTE: If this node or the passed in Node have multiple instances (e.g. this or one ancestor has two parents), it will fail
    * with an assertion.
    *
    * TODO: Possible to be well-defined and have multiple instances of each.
@@ -5357,7 +5355,7 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Disposes this node and all other descendant nodes.
+   * Disposes this Node and all other descendant nodes.
    * @public
    *
    * NOTE: Use with caution, as you should not re-use any Node touched by this. Not compatible with most DAG
@@ -5380,7 +5378,7 @@ inherit( PhetioObject, Node, {
   DEFAULT_OPTIONS: DEFAULT_OPTIONS,
 
   /**
-   * A default for getTrails() searches, returns whether the node has no parents.
+   * A default for getTrails() searches, returns whether the Node has no parents.
    * @public
    *
    * @param {Node} node
