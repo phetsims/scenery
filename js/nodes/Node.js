@@ -3178,10 +3178,8 @@ inherit( PhetioObject, Node, {
    *
    * @param {Property.<boolean>} property
    */
-  onInstrumentedVisibleProperty( property ) {
-    assert && assert( property.isPhetioInstrumented(),
-      'If a Node is instrumented, you cannot give it an uninstrumented visibleProperty' );
-
+  linkVisibleProperty( property ) {
+    assert && assert( property.isPhetioInstrumented(), 'If a Node is instrumented, you cannot give it an uninstrumented visibleProperty' );
     this.addLinkedElement( property, { tandem: this.tandem.createTandem( 'visibleProperty' ) } );
   },
 
@@ -3201,10 +3199,10 @@ inherit( PhetioObject, Node, {
     this._visibleProperty.setForwardingProperty( property );
 
     // If we had the "default instrumented" Property, we'll remove that and link our new Property
-    if ( this.instrumentedVisibleProperty ) {
-      this.instrumentedVisibleProperty.dispose();
-      this.instrumentedVisibleProperty = null;
-      this.onInstrumentedVisibleProperty( property );
+    if ( this.ownedPhetioVisibleProperty ) {
+      this.ownedPhetioVisibleProperty.dispose();
+      this.ownedPhetioVisibleProperty = null;
+      this.linkVisibleProperty( property );
     }
   },
   get visibleProperty() { return this._visibleProperty; },
@@ -5251,7 +5249,9 @@ inherit( PhetioObject, Node, {
       // as this.visibleProperty.forwardingProperty.  We only create the default instrumented one if another hasn't
       // already been specified.
       if ( !this.visibleProperty.forwardingProperty ) {
-        const instrumentedVisibleProperty = new BooleanProperty( this.visible, merge( {
+
+        // TODO: Should this be set to null in the constructor, https://github.com/phetsims/scenery/issues/490
+        const ownedPhetioVisibleProperty = new BooleanProperty( this.visible, merge( {
 
           // pick the baseline value from the parent Node's baseline
           phetioReadOnly: this.phetioReadOnly,
@@ -5260,14 +5260,14 @@ inherit( PhetioObject, Node, {
           phetioDocumentation: 'Controls whether the Node will be visible (and interactive), see the NodeIO documentation for more details.'
         }, this.phetioComponentOptions, this.phetioComponentOptions.visibleProperty, config.visiblePropertyOptions ) );
 
-        this.visibleProperty = instrumentedVisibleProperty;
+        // calls a setter method with additional logic
+        this.visibleProperty = ownedPhetioVisibleProperty;
 
-        // TODO: this should be set to null in the constructor, https://github.com/phetsims/scenery/issues/1046
-        // TODO: rename to `defaultInstrumentedVisibleProperty`, https://github.com/phetsims/scenery/issues/1046
-        this.instrumentedVisibleProperty = instrumentedVisibleProperty;
+        // Assign after calling this.visibleProperty = ... since it disposes this.ownedPhetioVisibleProperty if it exists
+        this.ownedPhetioVisibleProperty = ownedPhetioVisibleProperty;
       }
       else {
-        this.onInstrumentedVisibleProperty( this.visibleProperty.forwardingProperty );
+        this.linkVisibleProperty( this.visibleProperty.forwardingProperty );
       }
     }
   },
@@ -5352,10 +5352,10 @@ inherit( PhetioObject, Node, {
     this.removeAllChildren();
     this.detach();
 
-    // We provided a tandem to instrumentedVisibleProperty, we'll need to dispose it if we created it.
-    if ( this.instrumentedVisibleProperty ) {
-      this.instrumentedVisibleProperty.dispose();
-      this.instrumentedVisibleProperty = null;
+    // We provided a tandem to ownedPhetioVisibleProperty, we'll need to dispose it if we created it.
+    if ( this.ownedPhetioVisibleProperty ) {
+      this.ownedPhetioVisibleProperty.dispose();
+      this.ownedPhetioVisibleProperty = null;
     }
 
     // Tear-down in the reverse order Node was created
