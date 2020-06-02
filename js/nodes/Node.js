@@ -382,9 +382,8 @@ function Node( options ) {
   // @private {Array.<Function>} - For user input handling (mouse/touch).
   this._inputListeners = [];
 
-  // For now, custom-add listener count change notifications into these Properties, since we need to know when their
-  // number of listeners changes dynamically.
-  // TODO: We'll want an improved way of doing this, that is still performant.
+  // Add listener count change notifications into these Properties, since we need to know when their number of listeners
+  // changes dynamically.
   const boundsListenersAddedOrRemovedListener = this.onBoundsListenersAddedOrRemoved.bind( this );
 
   const boundsInvalidationListener = this.validateBounds.bind( this );
@@ -1942,26 +1941,6 @@ inherit( PhetioObject, Node, {
     for ( let i = 0; i < length; i++ ) {
       this._children[ i ].walkDepthFirst( callback );
     }
-  },
-
-  /**
-   * Returns a list of child nodes that intersect the passed in bounds.
-   * @public
-   *
-   * @param {Bounds2} bounds - In the local coordinate frame
-   * @returns {Array.<Node>}
-   */
-  getChildrenWithinBounds: function( bounds ) {
-    const result = [];
-    const length = this._children.length;
-    for ( let i = 0; i < length; i++ ) {
-      const child = this._children[ i ];
-      // TODO: Is this safe, we're directly accessing?
-      if ( !child.boundsProperty.value.intersection( bounds ).isEmpty() ) {
-        result.push( child );
-      }
-    }
-    return result;
   },
 
   /**
@@ -3587,7 +3566,8 @@ inherit( PhetioObject, Node, {
    *----------------------------------------------------------------------------*/
 
   /**
-   * When a hint changes in general, we default to refresh everything for safety.
+   * When ANY hint changes, we refresh everything currently (for safety, this may be possible to make more specific
+   * in the future, but hint changes are not particularly common performance bottleneck).
    * @private
    */
   invalidateHint: function() {
