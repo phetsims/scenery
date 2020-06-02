@@ -1,11 +1,7 @@
 // Copyright 2018-2020, University of Colorado Boulder
 
 /**
- * TODO: doc update
- * An axon Property for a Node.  When the specified trigger event (like 'pickability') occurs, the Property value
- * changes according to the getter (like 'pickable'), which may have any type.  This relies on guards in both Property
- * and Node to prevent cycles--if we detect an infinite loop for a case, we will need to add an epsilon tolerance
- * in the corresponding Node setter to short circuit the lop.
+ * A Property wrapper for Node TinyProperty/Property instances.
  *
  * @author Sam Reid (PhET Interactive Simulations)
  * @author Jonathan Olson (PhET Interactive Simulations)
