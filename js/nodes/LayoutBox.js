@@ -272,6 +272,26 @@ inherit( Node, LayoutBox, {
   },
 
   /**
+   * If this is set to true, child nodes that are invisible will NOT contribute to the bounds of this node.
+   * @public
+   * @override
+   *
+   * The default is for child nodes bounds' to be included in this node's bounds, but that would in general be a
+   * problem for layout containers or other situations, see https://github.com/phetsims/joist/issues/608.
+   *
+   * @param {boolean} excludeInvisibleChildrenFromBounds
+   */
+  setExcludeInvisibleChildrenFromBounds: function( excludeInvisibleChildrenFromBounds ) {
+    Node.prototype.setExcludeInvisibleChildrenFromBounds.call( this, excludeInvisibleChildrenFromBounds );
+
+    // If we have invisible children, we'll likely need to update our layout,
+    // see https://github.com/phetsims/sun/issues/594
+    if ( _.some( this._children, child => !child.visible ) ) {
+      this.updateLayoutAutomatically();
+    }
+  },
+
+  /**
    * Sets the orientation of the LayoutBox (the axis along which nodes will be placed, separated by spacing).
    * @public
    *
