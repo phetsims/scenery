@@ -4,6 +4,7 @@
  * NOTE: Not a fully finished product, please BEWARE before using this in code.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
@@ -14,9 +15,6 @@ import MultiListener from './MultiListener.js';
 class PanZoomListener extends MultiListener {
 
   /**
-   * @constructor
-   * @extends MultiListener
-   *
    * @param {Node} targetNode - The Node that should be transformed by this PanZoomListener.
    * @param {Object} [options] - See the constructor body (below) for documented options.
    */
@@ -38,8 +36,6 @@ class PanZoomListener extends MultiListener {
       // extends off screen). Defaults to targetNode bounds if null. Bounds in the parent frame of the target Node.
       targetBounds: null
     }, options );
-
-    // TODO: type checks for options
 
     super( targetNode, options );
 
