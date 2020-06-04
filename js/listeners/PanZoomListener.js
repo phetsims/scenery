@@ -17,8 +17,6 @@ class PanZoomListener extends MultiListener {
    * @constructor
    * @extends MultiListener
    *
-   * TODO: If scale !~=1, allow interrupting other pointers when multitouch begins (say pan area is filled with button)
-   *
    * @param {Node} targetNode - The Node that should be transformed by this PanZoomListener.
    * @param {Object} [options] - See the constructor body (below) for documented options.
    */
