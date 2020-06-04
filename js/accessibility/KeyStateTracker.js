@@ -41,6 +41,10 @@ class KeyStateTracker {
     // @private
     this._disposeKeystateTracker = () => {
       timer.removeListener( stepListener );
+
+      if ( this.attachedToBody ) {
+        this.detachFromBody();
+      }
     };
   }
 

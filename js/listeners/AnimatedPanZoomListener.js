@@ -5,8 +5,6 @@
  * wheel, and keyboard input. These gestures will animate the target node to its destination translation and scale so it
  * uses a step function that must be called every animation frame.
  *
- * TODO: Implement dispose
- *
  * @author Jesse Greenberg
  */
 
@@ -44,7 +42,6 @@ class AnimatedPanZoomListener extends PanZoomListener {
     super( targetNode, options );
 
     // @private {KeyStateTracker}
-    // this.keyStateTracker = keyStateTracker;
     this.keyStateTracker = new KeyStateTracker();
     this.keyStateTracker.attachToBody();
 
@@ -92,8 +89,15 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // then user likely trying to pull an object back into view so we prevent panning during drag
     this._downInDragBounds = false;
 
+    // listeners that will be bound to `this` if we are on a (non-touchscreen) safari platform, referenced for
+    // removal on dispose
+    let boundGestureStartListener = null;
+    let boundGestureChangeListener = null;
+
     // respond to macOS trackpad input, but don't respond to this input on an iOS touch screen
     if ( platform.safari && !platform.mobileSafari ) {
+      boundGestureStartListener = this.handleGestureStartEvent.bind( this );
+      boundGestureChangeListener = this.handleGestureChangeEvent.bind( this );
 
       // @private {number} - the scale of the targetNode at the start of the gesture, used to calculate
       // how scale to apply from 'gesturechange' event
@@ -102,24 +106,33 @@ class AnimatedPanZoomListener extends PanZoomListener {
       // WARNING: These events are non-standard, but this is the only way to detect and prevent native trackpad
       // input on macOS Safari. For Apple documentation about these events, see
       // https://developer.apple.com/documentation/webkitjs/gestureevent
-      // NOTE: Perhaps these can be added to the scenery Input API so we don't have to go through window
-      window.addEventListener( 'gesturestart', this.handleGestureStartEvent.bind( this ) );
-      window.addEventListener( 'gesturechange', this.handleGestureChangeEvent.bind( this ) );
+      window.addEventListener( 'gesturestart', boundGestureStartListener );
+      window.addEventListener( 'gesturechange', boundGestureChangeListener );
     }
 
     // Handle key input from events outside of the PDOM - in this case it is impossible for the a11y pointer
     // to be attached so we have free reign over the keyboard
     this.keyStateTracker.keydownEmitter.addListener( this.documentKeydown.bind( this ) );
 
-    // TODO: move this out of this listener? PanZoomListener shouldn't care about Display focus
-    Display.focusProperty.link( focus => {
+    const displayFocusListener = focus => {
       if ( focus ) {
         const node = focus.trail.lastNode();
         if ( !this._panBounds.containsBounds( node.globalBounds ) ) {
           this.panToNode( node );
         }
       }
-    } );
+    };
+    Display.focusProperty.link( displayFocusListener );
+
+    // @private - called by dispose
+    this.disposeAnimatedPanZoomListener = () => {
+      boundGestureStartListener && window.removeEventListener( 'gesturestart', boundGestureStartListener );
+      boundGestureChangeListener && window.removeEventListener( 'gestureChange', boundGestureChangeListener );
+
+      Display.focusProperty.unlink( displayFocusListener );
+
+      this.keyStateTracker.dispose();
+    };
   }
 
   /**
@@ -834,6 +847,13 @@ class AnimatedPanZoomListener extends PanZoomListener {
     let nextIndex = zoomIn ? nearestIndex + 1 : nearestIndex - 1;
     nextIndex = Utils.clamp( nextIndex, 0, this.discreteScales.length - 1 );
     return this.discreteScales[ nextIndex ];
+  }
+
+  /**
+   *
+   */
+  dispose() {
+    this.disposeAnimatedPanZoomListener();
   }
 
   /**
