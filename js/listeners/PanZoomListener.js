@@ -33,7 +33,8 @@ class PanZoomListener extends MultiListener {
 
       // {null|Bounds2} - Bounds for the target node that get transformed with this listener and fill panBounds,
       // useful if the targetNode bounds do not accurately describe the targetNode (like if invisible content
-      // extends off screen). Defaults to targetNode bounds if null. Bounds in the parent frame of the target Node.
+      // extends off screen). Defaults to targetNode bounds if null. Bounds in the global coordinate frame of the
+      // target Node.
       targetBounds: null
     }, options );
 
@@ -41,11 +42,7 @@ class PanZoomListener extends MultiListener {
 
     // @private {Bounds2} - see options
     this._panBounds = options.panBounds;
-    this._targetBounds = options.targetBounds || targetNode.bounds.copy();
-
-    // @private {Bounds2} - the panBounds transformed so that they are in the targetNode's parent frame
-    // TODO: this probably isn't working generally, I don't see how this could be correct
-    this._transformedPanBounds = this._panBounds.transformed( this._targetNode.matrix.inverted() );
+    this._targetBounds = options.targetBounds || targetNode.globalBounds.copy();
   }
 
   /**
@@ -72,9 +69,6 @@ class PanZoomListener extends MultiListener {
     if ( transformedBounds.bottom < this._panBounds.bottom ) {
       this._targetNode.bottom = this._panBounds.bottom + ( this._targetNode.bottom - transformedBounds.bottom );
     }
-
-    // TODO: check on this, I don't see how this could be correct
-    this._transformedPanBounds = this._panBounds.transformed( this._targetNode.matrix.inverted() );
   }
 
   /**

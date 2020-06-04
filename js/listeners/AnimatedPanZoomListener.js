@@ -79,6 +79,10 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // we will try to reposition so that the dragged object remains visible
     this._dragBounds = null;
 
+    // @private {Bounds2} - The panBounds in the local coordinate frame of the targetNode. Generally, these are the
+    // bounds of the targetNode that you can see within the panBounds.
+    this._transformedPanBounds = this._panBounds.transformed( this._targetNode.matrix.inverted() );
+
     // @private {Vector2|null} - A Pointer point during a drag with another listener which declares its intent
     // for dragging. In the global coordinate frame. We will reposition based on how far this point is out of
     // this._dragBounds (when defined)
@@ -577,6 +581,10 @@ class AnimatedPanZoomListener extends PanZoomListener {
   correctReposition() {
     super.correctReposition();
 
+    // the pan bounds in the local coordinate frame of the target Node (generally, bounds of the targetNode
+    // that are visible in the global panBounds)
+    this._transformedPanBounds = this._panBounds.transformed( this._targetNode.matrix.inverted() );
+
     this.sourcePosition = this._transformedPanBounds.center;
     this.sourceScale = this.getCurrentScale();
   }
@@ -646,13 +654,18 @@ class AnimatedPanZoomListener extends PanZoomListener {
   panToNode( node ) {
     const globalPosition = node.globalBounds.center;
 
+    // the center of the Node in the local coordinate frame of the target node
     const positionInTargetFrame = this._targetNode.globalToLocalPoint( globalPosition );
 
+    // distances from destination node in the targetNode local coordinate frame to the edges of the targetBounds
     const distanceToLeftEdge = Math.abs( this._targetBounds.left - positionInTargetFrame.x );
     const distanceToRightEdge = Math.abs( this._targetBounds.right - positionInTargetFrame.x );
     const distanceToTopEdge = Math.abs( this._targetBounds.top - positionInTargetFrame.y );
     const distanceToBottomEdge = Math.abs( this._targetBounds.bottom - positionInTargetFrame.y );
 
+    // if distances to edges are less than half width of transformedPanBounds, it will be impossible to translate
+    // targetNode so that the provided node is in the center of the transformedPanBounds, so determine the correct
+    // desintation position that will get the node close to the center without moving the targetNode out of panBounds
     if ( distanceToRightEdge < this._transformedPanBounds.width / 2 ) {
       const correction = this._transformedPanBounds.width / 2 - distanceToRightEdge;
       positionInTargetFrame.x = positionInTargetFrame.x - correction;
