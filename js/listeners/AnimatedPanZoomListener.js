@@ -35,10 +35,9 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
   /**
    * @param {Node} targetNode - Node to be transformed by this listener
-   * @param {KeyStateTracker} keyStateTracker - represents keyboard state to respond to keyboard input
    * @param {Object} [options]
    */
-  constructor( targetNode, keyStateTracker, options ) {
+  constructor( targetNode, options ) {
     super( targetNode, options );
 
     // @private {KeyStateTracker}
