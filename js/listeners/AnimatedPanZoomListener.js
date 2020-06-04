@@ -500,7 +500,6 @@ class AnimatedPanZoomListener extends PanZoomListener {
    */
   translateToTarget( initialPoint, targetPoint ) {
 
-    // TODO: scratch things?
     const singleInitialPoint = this._targetNode.globalToParentPoint( initialPoint );
     const singleTargetPoint = this._targetNode.globalToParentPoint( targetPoint );
     var delta = singleTargetPoint.minus( singleInitialPoint );
@@ -940,12 +939,8 @@ class KeyPress {
    *
    * This function could be expensive, so we only call it if we know that the key press is a "scale" gesture.
    *
-   * TODO: Consider moving somewhere else, it seems that MultiPanZoomListener shouldn't care about Display's focus.
-   * And this behavior assumes that the use of this will be at the global level. Maybe we need a SimPanZoomListener
-   * that extends MultiPanZoomListener.
-   *
    * @public
-   * @returns {}
+   * @returns {Vector2} - a scratch Vector2 instance with the target postion
    */
   computeScaleTargetFromKeyPress() {
 
@@ -957,6 +952,8 @@ class KeyPress {
       scratchScaleTargetVector.set( focusedNode.parentToGlobalPoint( focusedNode.center ) );
     }
     else {
+
+      // no focusable element in the Display so try to zoom into the first focusable element
       const firstFocusable = PDOMUtils.getNextFocusable();
       if ( firstFocusable !== document.body ) {
 
