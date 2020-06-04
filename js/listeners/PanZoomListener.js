@@ -20,10 +20,9 @@ class PanZoomListener extends MultiListener {
    * TODO: If scale !~=1, allow interrupting other pointers when multitouch begins (say pan area is filled with button)
    *
    * @param {Node} targetNode - The Node that should be transformed by this PanZoomListener.
-   * @param {Bounds2} panBounds - Bounds that should be fully filled with content at all times.
    * @param {Object} [options] - See the constructor body (below) for documented options.
    */
-  constructor( targetNode, panBounds, options ) {
+  constructor( targetNode, options ) {
 
     options = merge( {
       allowScale: true,
@@ -45,7 +44,7 @@ class PanZoomListener extends MultiListener {
 
     // @private {Bounds2} - see options
     this._panBounds = options.panBounds;
-    this._targetBounds = options.targetBounds || targetNode.bounds;
+    this._targetBounds = options.targetBounds || targetNode.bounds.copy();
 
     // @private {Bounds2} - the panBounds transformed so that they are in the targetNode's parent frame
     // TODO: this probably isn't working generally, I don't see how this could be correct
@@ -60,7 +59,7 @@ class PanZoomListener extends MultiListener {
    */
   correctReposition() {
 
-    // the targetBounds transformed to the parent coordinate frame
+    // the targetBounds transformed by the targetNode's transform, to determine if targetBounds are out of panBounds
     const transformedBounds = this._targetBounds.transformed( this._targetNode.getMatrix() );
 
     // Don't let panning go through if the node is fully contained by the panBounds
