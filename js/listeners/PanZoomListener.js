@@ -23,16 +23,19 @@ class PanZoomListener extends MultiListener {
   constructor( targetNode, options ) {
 
     options = merge( {
+
+      // {boolean} - does this listener allow scaling of the target Node with various input?
       allowScale: true,
+
+      // {boolean} - does this listener allow rotation of the target Node with various input?
       allowRotation: false,
-      pressCursor: null,
 
       // {Bounds2} - these bounds should be fully filled with content at all times, in the global coordinate frame
       panBounds: Bounds2.NOTHING,
 
       // {null|Bounds2} - Bounds for the target node that get transformed with this listener and fill panBounds,
       // useful if the targetNode bounds do not accurately describe the targetNode (like if invisible content
-      // extends off screen). Defaults to targetNode bounds if null. TODO: What coordinate frame?
+      // extends off screen). Defaults to targetNode bounds if null. Bounds in the parent frame of the target Node.
       targetBounds: null
     }, options );
 
