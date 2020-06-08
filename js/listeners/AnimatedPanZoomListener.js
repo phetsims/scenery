@@ -861,7 +861,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
   }
 
   /**
-   *
+   * @public
    */
   dispose() {
     this.disposeAnimatedPanZoomListener();
