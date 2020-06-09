@@ -212,6 +212,24 @@ class MultiListener {
   }
 
   /**
+   * Returns whether or not the pointer already in its list of background presses. findBackgroundPress will return
+   * the Pointer for use (or error if not found), this will let you know if it exists to decide how to proceed.
+   * @private
+   *
+   * @param {Pointer} pointer
+   * @returns {boolean}
+   */
+  hasBackgroundPress( pointer ) {
+    for ( let i = 0; i < this._backgroundPresses.length; i++ ) {
+      if ( this._backgroundPresses[ i ].pointer === pointer ) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
    * Movement is disallowed for pointers with Intent that indicate that dragging is expected.
    * @private
    *
@@ -338,9 +356,13 @@ class MultiListener {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener addBackgroundPress' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-    // TODO: handle turning background presses into main presses here
-    this._backgroundPresses.push( press );
-    press.pointer.addInputListener( this._backgroundListener, false );
+    // its possible that the press pointer already has the listener - for instance in Chrome we fail to get
+    // "up" events once the context menu is open (like after a right click), so only add to the Pointer
+    // if it isn't already added
+    if ( !this.hasBackgroundPress( press.pointer ) ) {
+      this._backgroundPresses.push( press );
+      press.pointer.addInputListener( this._backgroundListener, false );
+    }
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
   }
