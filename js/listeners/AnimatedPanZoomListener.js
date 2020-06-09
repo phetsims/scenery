@@ -187,6 +187,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
     if ( this.middlePress ) {
       this.middlePress.pointer.cursor = null;
       this.middlePress = null;
+
+      this.stopInProgressAnimation();
     }
   }
 
