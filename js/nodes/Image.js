@@ -37,7 +37,8 @@ const IMAGE_OPTION_KEYS = [
   'mipmap', // {boolean} - Whether mipmapped output is supported, see setMipmap() for documentation
   'mipmapBias', // {number} - Whether mipmapping tends towards sharp/aliased or blurry, see setMipmapBias() for documentation
   'mipmapInitialLevel', // {number} - How many mipmap levels to generate if needed, see setMipmapInitialLevel() for documentation
-  'mipmapMaxLevel' // {number} The maximum mipmap level to compute if needed, see setMipmapMaxLevel() for documentation
+  'mipmapMaxLevel', // {number} The maximum mipmap level to compute if needed, see setMipmapMaxLevel() for documentation
+  'hitTestPixels' // {boolean} - Whether non-transparent pixels will control contained points, see setHitTestPixels() for documentation
 ];
 
 const DEFAULT_OPTIONS = {
@@ -47,7 +48,24 @@ const DEFAULT_OPTIONS = {
   mipmap: false,
   mipmapBias: 0,
   mipmapInitialLevel: 4,
-  mipmapMaxLevel: 5
+  mipmapMaxLevel: 5,
+  hitTestPixels: false
+};
+
+// Lazy scratch canvas/context (so we don't incur the startup cost of canvas/context creation)
+let scratchCanvas = null;
+let scratchContext = null;
+const getScratchCanvas = () => {
+  if ( !scratchCanvas ) {
+    scratchCanvas = document.createElement( 'canvas' );
+  }
+  return scratchCanvas;
+};
+const getScratchContext = () => {
+  if ( !scratchContext ) {
+    scratchContext = getScratchCanvas().getContext( '2d' );
+  }
+  return scratchContext;
 };
 
 /**
@@ -66,6 +84,9 @@ function Image( image, options ) {
   assert && assert( image, 'image should be available' );
   assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
     'Extra prototype on Node options object is a code smell' );
+
+  // @private {HTMLImageElement|HTMLCanvasElement} - Internal stateful value, see setImage()
+  this._image = null;
 
   // @private {number} - Internal stateful value, see setInitialWidth() for documentation.
   this._initialWidth = DEFAULT_OPTIONS.initialWidth;
@@ -88,6 +109,9 @@ function Image( image, options ) {
   // @private {number} - Internal stateful value, see setMipmapMaxLevel() for documentation
   this._mipmapMaxLevel = DEFAULT_OPTIONS.mipmapMaxLevel;
 
+  // @private {number} - Internal stateful value, see setHitTestPixels() for documentation
+  this._hitTestPixels = DEFAULT_OPTIONS.hitTestPixels;
+
   // @private {Array.<HTMLCanvasElement>} - Array of Canvases for each level, constructed internally so that
   //                                        Canvas-based drawables (Canvas, WebGL) can quickly draw mipmaps.
   this._mipmapCanvases = [];
@@ -105,6 +129,9 @@ function Image( image, options ) {
 
   // @private {boolean} - Whether our _imageLoadListener has been attached as a listener to the current image.
   this._imageLoadListenerAttached = false;
+
+  // @private {ImageData|null} - Used for pixel hit testing.
+  this._hitTestImageData = null;
 
   // @public {Emitter} - Emits when mipmaps are (re)generated
   this.mipmapEmitter = new TinyEmitter();
@@ -310,6 +337,7 @@ inherit( Node, Image, {
 
     this.invalidateMipmaps();
     this.invalidateSupportedRenderers();
+    this.invalidateHitTestData();
   },
 
   /**
@@ -657,6 +685,42 @@ inherit( Node, Image, {
   get mipmapMaxLevel() { return this.getMipmapMaxLevel(); },
 
   /**
+   * Controls whether either any pixel in the image will be marked as contained (when false), or whether transparent
+   * pixels will be counted as "not contained in the image" for hit-testing (when true).
+   * @public
+   *
+   * See https://github.com/phetsims/scenery/issues/1049 for more information.
+   *
+   * @param {boolean} hitTestPixels
+   * @returns {Image} - for Chaining
+   */
+  setHitTestPixels: function( hitTestPixels ) {
+    assert && assert( typeof hitTestPixels === 'boolean', 'hitTestPixels should be a boolean' );
+
+    if ( this._hitTestPixels !== hitTestPixels ) {
+      this._hitTestPixels = hitTestPixels;
+
+      this.invalidateHitTestData();
+    }
+
+    return this;
+  },
+  set hitTestPixels( value ) { this.setHitTestPixels( value ); },
+
+  /**
+   * Returns whether pixels are checked for hit testing.
+   * @public
+   *
+   * See setHitTestPixels() for more documentation.
+   *
+   * @returns {boolean}
+   */
+  getHitTestPixels: function() {
+    return this._hitTestPixels;
+  },
+  get hitTestPixels() { return this.getHitTestPixels(); },
+
+  /**
    * Constructs the next available (uncomputed) mipmap level, as long as the previous level was larger than 1x1.
    * @private
    */
@@ -823,6 +887,60 @@ inherit( Node, Image, {
    */
   hasMipmaps: function() {
     return this._mipmapCanvases.length > 0;
+  },
+
+  /**
+   * Triggers recomputation of hit test data
+   * @private
+   */
+  invalidateHitTestData: function() {
+    this._hitTestImageData = null;
+
+    // Only compute this if we are hit-testing pixels
+    if ( !this._hitTestPixels ) {
+      return;
+    }
+
+    const width = this.getImageWidth();
+    const height = this.getImageHeight();
+
+    // If the image isn't loaded yet, we don't want to try loading anything
+    if ( !( this._image.naturalWidth || this._image.width ) || !( this._image.naturalHeight || this._image.height ) ) {
+      return;
+    }
+
+    const canvas = getScratchCanvas();
+    const context = getScratchContext();
+
+    canvas.width = width;
+    canvas.height = height;
+    context.drawImage( this._image, 0, 0 );
+
+    this._hitTestImageData = context.getImageData( 0, 0, width, height );
+  },
+
+  /**
+   * Override this for computation of whether a point is inside our self content (defaults to selfBounds check).
+   * @protected
+   * @override
+   *
+   * @param {Vector2} point - Considered to be in the local coordinate frame
+   * @returns {boolean}
+   */
+  containsPointSelf: function( point ) {
+    const inBounds = Node.prototype.containsPointSelf.call( this, point );
+
+    if ( !inBounds || !this._hitTestPixels || !this._hitTestImageData ) {
+      return inBounds;
+    }
+
+    // For sanity, map it based on the image dimensions and image data dimensions, and carefully clamp in case things are weird.
+    const x = Utils.clamp( Math.floor( ( point.x / this.imageWidth ) * this._hitTestImageData.width ), 0, this._hitTestImageData.width - 1 );
+    const y = Utils.clamp( Math.floor( ( point.y / this.imageHeight ) * this._hitTestImageData.height ), 0, this._hitTestImageData.height - 1 );
+
+    const index = 4 * ( x + y * this._hitTestImageData.width ) + 3;
+
+    return this._hitTestImageData.data[ index ] !== 0;
   },
 
   /**
