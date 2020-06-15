@@ -24,7 +24,7 @@ import PanZoomListener from './PanZoomListener.js';
 
 // constants
 const MOVE_CURSOR = 'all-scroll';
-const MAX_SCROLL_VELOCITY = 300; // max global view coords per second while scrolling with middle mouse button drag
+const MAX_SCROLL_VELOCITY = 150; // max global view coords per second while scrolling with middle mouse button drag
 
 // scratch variables to reduce garbage
 const scratchTranslationVector = new Vector2( 0, 0 );
@@ -272,7 +272,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // cannot reposition if a dragging with middle mouse button - but wheel zoom should not cancel a middle press
     // (behavior copied from other browsers)
     if ( !this.middlePress ) {
-      const wheel = new Wheel( event );
+      const wheel = new Wheel( event, this._targetScale );
       this.repositionFromWheel( wheel, event );
     }
 
@@ -299,7 +299,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
       // handle translation without worry of the pointer being attached because there is no pointer at this level
       if ( KeyboardUtils.isArrowKey( domEvent.keyCode ) ) {
-        const keyPress = new KeyPress( this.keyStateTracker, this.getCurrentScale() );
+        const keyPress = new KeyPress( this.keyStateTracker, this.getCurrentScale(), this._targetScale );
         this.repositionFromKeys( keyPress );
       }
 
@@ -332,7 +332,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener handle arrow key down' );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-        const keyPress = new KeyPress( this.keyStateTracker, this.getCurrentScale() );
+        const keyPress = new KeyPress( this.keyStateTracker, this.getCurrentScale(), this._targetScale );
         this.repositionFromKeys( keyPress );
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
@@ -361,7 +361,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
       domEvent.preventDefault();
 
       const nextScale = this.getNextDiscreteScale( zoomInCommandDown );
-      const keyPress = new KeyPress( this.keyStateTracker, nextScale );
+      const keyPress = new KeyPress( this.keyStateTracker, nextScale, this._targetScale );
       this.repositionFromKeys( keyPress );
     }
     else if ( KeyboardZoomUtils.isZoomResetCommand( domEvent ) ) {
@@ -423,8 +423,9 @@ class AnimatedPanZoomListener extends PanZoomListener {
     const reducedMagnitude = globalDelta.magnitude / 100;
     if ( dt > 0 && reducedMagnitude > 0 ) {
 
-      // set the delta vector in global coordinates, limited by a maximum view coords/second velocity
-      globalDelta.setMagnitude( Math.min( reducedMagnitude / dt, MAX_SCROLL_VELOCITY ) );
+      // set the delta vector in global coordinates, limited by a maximum view coords/second velocity, corrected
+      // for any representative target scale
+      globalDelta.setMagnitude( Math.min( reducedMagnitude / dt, MAX_SCROLL_VELOCITY * this._targetScale ) );
       this.setDestinationPosition( this.sourcePosition.plus( globalDelta ) );
     }
   }
@@ -911,10 +912,11 @@ class KeyPress {
   /**
    * @param {KeyStateTracker} keyStateTracker
    * @param {KeyStateTracker} scale
-   * @param {KeyStateTracker} options
+   * @param {number} targetScale - scale describing the targetNode, see PanZoomListener._targetScale
+   * @param {Object} [options]
    * @returns {KeyStateTracker}
    */
-  constructor( keyStateTracker, scale, options ) {
+  constructor( keyStateTracker, scale, targetScale, options ) {
 
     options = merge( {
 
@@ -934,7 +936,8 @@ class KeyPress {
     // don't set magnitude if zero vector (as vector will become ill-defined)
     scratchTranslationVector.setXY( xDirection, yDirection );
     if ( !scratchTranslationVector.equals( Vector2.ZERO ) ) {
-      scratchTranslationVector.setMagnitude( options.translationMagnitude );
+      const translationMagnitude = options.translationMagnitude * targetScale;
+      scratchTranslationVector.setMagnitude( translationMagnitude );
     }
 
     // @public (read-only) - The translation delta vector that should be applied to the target node in response
@@ -994,8 +997,9 @@ class Wheel {
 
   /**
    * @param {SceneryEvent} event
+   * @param {number} targetScale - scale describing the targetNode, see PanZoomListener._targetScale
    */
-  constructor( event ) {
+  constructor( event, targetScale ) {
     const domEvent = event.domEvent;
 
     // @public (read-only) - is the ctrl key down during this wheel input? Cannot use KeyStateTracker because the
@@ -1023,7 +1027,7 @@ class Wheel {
     }
 
     // @public (read-only)
-    this.translationVector = scratchTranslationVector.setXY( translationX, translationY );
+    this.translationVector = scratchTranslationVector.setXY( translationX * targetScale, translationY * targetScale );
   }
 }
 

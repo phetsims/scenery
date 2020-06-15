@@ -35,7 +35,14 @@ class PanZoomListener extends MultiListener {
       // useful if the targetNode bounds do not accurately describe the targetNode (like if invisible content
       // extends off screen). Defaults to targetNode bounds if null. Bounds in the global coordinate frame of the
       // target Node.
-      targetBounds: null
+      targetBounds: null,
+
+      // {number} - Scale that accurately describes scale of the targetNode, but is different from the actual
+      // scale of the targetNode's transform. This scale is applied to translation Vectors for the TargetNode during
+      // panning. If targetNode children get scaled uniformly (such as in response to window resizing or native
+      // browser zoom), you likely want that scale to be applied during translation operations so that pan/zoom behaves
+      // the same regardless of window size or native browser zoom.
+      targetScale: 1
     }, options );
 
     super( targetNode, options );
@@ -43,6 +50,9 @@ class PanZoomListener extends MultiListener {
     // @private {Bounds2} - see options
     this._panBounds = options.panBounds;
     this._targetBounds = options.targetBounds || targetNode.globalBounds.copy();
+
+    // @protected {number}
+    this._targetScale = options.targetScale;
   }
 
   /**
@@ -109,8 +119,7 @@ class PanZoomListener extends MultiListener {
    * beyond the dimensions of the visible node.
    * @public
    *
-   * TODO: What coordinate frame is this?
-   * @param {Bounds2} targetBounds
+   * @param {Bounds2} targetBounds - in the global coordinate frame
    */
   setTargetBounds( targetBounds ) {
     this._targetBounds = targetBounds;
@@ -118,8 +127,18 @@ class PanZoomListener extends MultiListener {
   }
 
   /**
-   * Get the targetBounds.
-   * TODO: What coordinate frame?
+   * Set the representative scale of the target Node. If the targetBounds are different from the targetNode.bounds
+   * it may be useful to correct changes to panning and zooming by a scale that is different from the
+   * actual scale applied to the targetNode during panning.
+   * @public
+   * @param {number} scale
+   */
+  setTargetScale( scale ) {
+    this._targetScale = scale;
+  }
+
+  /**
+   * Get the targetBounds, in the global coordinate frame.
    * @public
    *
    * @returns {Bounds2}
