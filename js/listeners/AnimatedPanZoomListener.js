@@ -11,6 +11,7 @@
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
+import Bounds2 from '../../../dot/js/Bounds2.js';
 import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
@@ -30,6 +31,7 @@ const MAX_SCROLL_VELOCITY = 150; // max global view coords per second while scro
 const scratchTranslationVector = new Vector2( 0, 0 );
 const scratchScaleTargetVector = new Vector2( 0, 0 );
 const scratchVelocityVector = new Vector2( 0, 0 );
+const scratchBounds = new Bounds2( 0, 0, 0, 0 );
 
 class AnimatedPanZoomListener extends PanZoomListener {
 
@@ -811,7 +813,16 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * @param {Vector2} destination
    */
   setDestinationPosition( destination ) {
-    this.destinationPosition = destination;
+
+    // limit destination position to the available bounds pan bounds
+    scratchBounds.setMinMax(
+      this.sourcePosition.x - this._panBounds.right - this._transformedPanBounds.right,
+      this.sourcePosition.y - this._transformedPanBounds.left - this._panBounds.left,
+      this.sourcePosition.x + this._transformedPanBounds.top - this._panBounds.top,
+      this.sourcePosition.y + this._panBounds.bottom - this._transformedPanBounds.bottom
+    );
+    const constrainedDestination = scratchBounds.closestPointTo( destination );
+    this.destinationPosition = constrainedDestination;
   }
 
   /**
