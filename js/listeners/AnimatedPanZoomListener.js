@@ -814,13 +814,14 @@ class AnimatedPanZoomListener extends PanZoomListener {
    */
   setDestinationPosition( destination ) {
 
-    // limit destination position to the available bounds pan bounds
+    // limit destination position to be within the available bounds pan bounds
     scratchBounds.setMinMax(
-      this.sourcePosition.x - this._panBounds.right - this._transformedPanBounds.right,
-      this.sourcePosition.y - this._transformedPanBounds.left - this._panBounds.left,
-      this.sourcePosition.x + this._transformedPanBounds.top - this._panBounds.top,
+      this.sourcePosition.x - this._transformedPanBounds.left - this._panBounds.left,
+      this.sourcePosition.y - this._transformedPanBounds.top - this._panBounds.top,
+      this.sourcePosition.x + this._panBounds.right - this._transformedPanBounds.right,
       this.sourcePosition.y + this._panBounds.bottom - this._transformedPanBounds.bottom
     );
+
     const constrainedDestination = scratchBounds.closestPointTo( destination );
     this.destinationPosition = constrainedDestination;
   }
