@@ -1,8 +1,8 @@
 // Copyright 2013-2020, University of Colorado Boulder
 
 /**
- * The main 'scenery' namespace object for the exported (non-Require.js) API. Used internally
- * since it prevents Require.js issues with circular dependencies.
+ * The main 'scenery' namespace object for the exported (built) API. Used internally in some places where there are
+ * potential circular dependencies.
  *
  * The returned scenery object namespace may be incomplete if not all modules are listed as
  * dependencies. Please use the 'main' module for that purpose if all of Scenery is desired.

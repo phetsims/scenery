@@ -13,7 +13,7 @@ import CanvasSelfDrawable from '../CanvasSelfDrawable.js';
 import PaintableStatelessDrawable from './PaintableStatelessDrawable.js';
 
 // TODO: use LineStatelessDrawable instead of the custom stuff going on
-// const LineStatelessDrawable = require( '/scenery/js/display/drawables/LineStatelessDrawable' );
+// import LineStatelessDrawable from './LineStatelessDrawable';
 
 /**
  * A generated CanvasSelfDrawable whose purpose will be drawing our Line. One of these drawables will be created
