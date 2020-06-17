@@ -5,6 +5,8 @@
 
 // This is intended to allow reads/writes to the recorded sim data area (../data), depending on whether it is a GET or POST request
 
+/* eslint-env node */
+
 const http = require( 'http' );
 const fs = require( 'fs' );
 
