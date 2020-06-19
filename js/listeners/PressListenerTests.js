@@ -6,8 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import phetioAPITest from '../../../tandem/js/phetioAPITest.js';
 import ListenerTestUtils from './ListenerTestUtils.js';
 import PressListener from './PressListener.js';
+import PressListenerIO from './PressListenerIO.js';
 
 QUnit.module( 'PressListener' );
 
@@ -98,4 +100,8 @@ QUnit.test( 'Interruption', function( assert ) {
     listener.interrupt();
     assert.equal( listener.isPressedProperty.value, false, 'Is NOT pressed after the interruption' );
   } );
+} );
+
+QUnit.test( 'PhET-iO API Validation', function( assert ) {
+  phetioAPITest( assert, PressListenerIO, 'pressListener', tandem => new PressListener( { tandem: tandem } ) );
 } );
