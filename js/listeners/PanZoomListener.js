@@ -1,7 +1,8 @@
 // Copyright 2017-2020, University of Colorado Boulder
 
 /**
- * NOTE: Not a fully finished product, please BEWARE before using this in code.
+ * A MultiListener that is designed to pan and zoom a target Node, where you can provide limiting and
+ * describing bounds so that the targetNode is limited to a region.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  * @author Jesse Greenberg (PhET Interactive Simulations)
@@ -22,12 +23,6 @@ class PanZoomListener extends MultiListener {
 
     options = merge( {
 
-      // {boolean} - does this listener allow scaling of the target Node with various input?
-      allowScale: true,
-
-      // {boolean} - does this listener allow rotation of the target Node with various input?
-      allowRotation: false,
-
       // {Bounds2} - these bounds should be fully filled with content at all times, in the global coordinate frame
       panBounds: Bounds2.NOTHING,
 
@@ -42,7 +37,10 @@ class PanZoomListener extends MultiListener {
       // panning. If targetNode children get scaled uniformly (such as in response to window resizing or native
       // browser zoom), you likely want that scale to be applied during translation operations so that pan/zoom behaves
       // the same regardless of window size or native browser zoom.
-      targetScale: 1
+      targetScale: 1,
+
+      // {boolean} - by default, the PanZoomListener does now allow rotation
+      allowRotation: false
     }, options );
 
     super( targetNode, options );

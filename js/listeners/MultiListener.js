@@ -37,27 +37,39 @@ class MultiListener {
   constructor( targetNode, options ) {
 
     options = merge( {
-      mouseButton: 0, // TODO: see PressListener
-      pressCursor: 'pointer', // TODO: see PressListener
-      targetNode: null, // TODO: required? pass in at front
+
+      // {number} - Restricts input to the specified mouse button (but allows any touch). Only one mouse button is
+      // allowed at a time. The button numbers are defined in https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/button,
+      // where typically:
+      //   0: Left mouse button
+      //   1: Middle mouse button (or wheel press)
+      //   2: Right mouse button
+      //   3+: other specific numbered buttons that are more rare
+      mouseButton: 0,
+
+      // {string} - Sets the Pointer cursor to this cursor when the listener is "pressed".
+      pressCursor: 'pointer',
+
+      // {boolean} - If true, the listener will scale the targetNode from input
       allowScale: true,
+
+      // {boolean} - If true, the listener will rotate the targetNode from input
       allowRotation: true,
 
       // {boolean} - if true, multitouch will interrupt any active pointer listeners and and initiate translation
       // and scale from multitouch gestures
       allowMultitouchInterruption: false,
 
-      // {private} - if true, a certain amount of movement in the global coordinate frame with interrupt any pointer
+      // {private} - if true, a certain amount of movement in the global coordinate frame will interrupt any pointer
       // listeners and initiate translation from the pointer
       allowMoveInterruption: true,
 
-      // {number} - limits for scaling
+      // {number} - magnitude limits for scaling in both x and y
       minScale: 1,
       maxScale: 4
     }, options );
 
-    // TODO: type checks for options
-
+    // @private {Node} - the Node that will be transformed by this listener
     this._targetNode = targetNode;
 
     // @protected (read-only)
@@ -288,7 +300,7 @@ class MultiListener {
   }
 
   /**
-   * Add a Press to this listener when a new Pointer goes down.
+   * Add a Press to this listener when a new Pointer is down.
    * @protected
    *
    * @param {Press} press
@@ -304,8 +316,6 @@ class MultiListener {
 
     this.recomputeLocals();
     this.reposition();
-
-    // TODO: handle interrupted?
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
   }
@@ -661,6 +671,9 @@ class MultiListener {
 
 scenery.register( 'MultiListener', MultiListener );
 
+/**
+ * A logical "press" for the MultiListener, capturing information when a Pointer goes down on the screen.
+ */
 class Press {
   constructor( pointer, trail ) {
     this.pointer = pointer;
