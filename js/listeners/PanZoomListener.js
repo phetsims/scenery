@@ -80,6 +80,23 @@ class PanZoomListener extends MultiListener {
   }
 
   /**
+   * If the transformed targetBounds are equal to the panBounds, there is no space for us to pan so do not change
+   * the pointer cursor.
+   * @protected
+   * @override
+   *
+   * @param {Press} press
+   */
+  addPress( press ) {
+    super.addPress( press );
+
+    // don't show the pressCursor if our bounds are limited by pan bounds, and we cannot pan anywhere
+    const transformedBounds = this._targetBounds.transformed( this._targetNode.getMatrix() );
+    const boundsLimited = transformedBounds.equalsEpsilon( this._panBounds, 1E-8 );
+    press.pointer.cursor = boundsLimited ? null : this._pressCursor;
+  }
+
+  /**
    * Reposition but keep content within this._panBounds.
    * @public
    * @override
