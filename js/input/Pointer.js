@@ -325,17 +325,23 @@ inherit( Object, Pointer, {
    * @public
    */
   reserveForDrag: function() {
-    this.setIntent( Intent.DRAG );
 
-    const listener = {
-      up: event => {
-        this.setIntent( null );
-        this.removeInputListener( listener );
-      }
-    };
+    // if the Pointer hasn't already been reserved for drag in Input event dispatch
+    if ( this.getIntent() !== Intent.DRAG ) {
+      this.setIntent( Intent.DRAG );
 
-    this._listenerForDragReserve = listener;
-    this.addInputListener( this._listenerForDragReserve );
+      const listener = {
+        up: event => {
+          this.setIntent( null );
+          this.removeInputListener( this._listenerForDragReserve );
+          this._listenerForDragReserve = null;
+        }
+      };
+
+      assert && assert( this._listenerForDragReserve === null, 'still a listener to reserve pointer, memory leak likely' );
+      this._listenerForDragReserve = listener;
+      this.addInputListener( this._listenerForDragReserve );
+    }
   },
 
   /**
