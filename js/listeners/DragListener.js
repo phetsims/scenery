@@ -280,6 +280,10 @@ inherit( PressListener, DragListener, {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener successful press' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
+      // signify that this listener is reserved for dragging so that other listeners can change
+      // their behavior during scenery event dispatch
+      this.pointer.reserveForDrag();
+
       this.attachTransformTracker();
 
       // Compute the parent point corresponding to the pointer's position
