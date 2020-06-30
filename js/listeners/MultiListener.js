@@ -249,8 +249,7 @@ class MultiListener {
    * @returns {boolean}
    */
   canMove( pointer ) {
-    const intent = pointer.getIntent();
-    return ( intent !== Pointer.Intent.DRAG && intent !== Pointer.Intent.MULTI_DRAG );
+    return !pointer.hasIntent( Pointer.Intent.DRAG ) && !pointer.hasIntent( Pointer.Intent.MULTI_DRAG );
   }
 
   /**

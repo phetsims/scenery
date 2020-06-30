@@ -29,7 +29,7 @@ import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 
 // constants
-// entries when signifying Intent of the pointer, see setIntent
+// entries when signifying Intent of the pointer, see addIntent
 const Intent = Enumeration.byKeys( [
   'DRAG', // listener attached to the pointer will be used for dragging
   'MULTI_DRAG', // listener attached to pointer and more than one item can be dragged at at a time with multitouch
@@ -89,10 +89,10 @@ function Pointer( initialPoint, initialDownState, type ) {
   // is no "immediate" DOM event (e.g. when a node moves UNDER a pointer and triggers a touch-snag).
   this.lastDOMEvent = null;
 
-  // @private {null|Intent} - A Pointer can be assigned an intent when a listener is attached to initiate or prevent
-  // certain behavior for the life of the listener. Other listeners can observe the Intent on the Pointer and
+  // @private {Intent[]]} - A Pointer can be assigned an intent when a listener is attached to initiate or prevent
+  // certain behavior for the life of the listener. Other listeners can observe the Intents on the Pointer and
   // react accordingly
-  this._intent = null;
+  this._intents = [];
 
   // @private {null|Object} - listeners attached to this pointer that clear the this._intent after input in
   // reserveForDrag functions, referenced so they can be removed on disposal
@@ -302,20 +302,45 @@ inherit( Object, Pointer, {
   },
 
   /**
-   * Sets the Intent on the Pointer. By setting Intent, other listeners in the dispatch phase can react accordingly.
+   * Adds an Intent Pointer. By setting Intent, other listeners in the dispatch phase can react accordingly.
    * Note that the Intent can be changed by listeners up the dispatch phase or on the next press. See Intent enum
    * for valid entries.
-   * @param {Intent|null} intent
+   * @public
+   *
+   * @param {Intent} intent
    */
-  setIntent: function( intent ) {
-    assert && assert( intent === null || Intent.includes( intent ), 'trying to set unsupported intent for Pointer' );
-    this._intent = intent;
+  addIntent: function( intent ) {
+    assert && assert( Intent.includes( intent ), 'trying to set unsupported intent for Pointer' );
+    if ( !this._intents.includes( intent ) ) {
+      this._intents.push( intent );
+    }
+
+    assert && assert( this._intents.length <= Intent.VALUES.length, 'to many Intents saved, memory leak likely' );
   },
 
-  getIntent: function() {
-    return this._intent;
+  /**
+   * Remove an Intent from the Pointer. See addIntent for more information.
+   * @public
+   *
+   * @param {Intent} intent
+   */
+  removeIntent: function( intent ) {
+    if ( this._intents.includes( intent ) ) {
+      const index = this._intents.indexOf( intent );
+      this._intents.splice( index, 1 );
+    }
   },
-  get intent() { return this.getIntent(); },
+
+  /**
+   * Returns whether or not this Pointer has been assigned the provided Intent.
+   * @public
+   *
+   * @param {Intent} intent
+   * @returns {boolean}
+   */
+  hasIntent: function( intent ) {
+    return this._intents.includes( intent );
+  },
 
   /**
    * Set the intent of this Pointer to indicate that it will be used for mouse/touch style dragging, indicating to
@@ -326,13 +351,14 @@ inherit( Object, Pointer, {
    */
   reserveForDrag: function() {
 
-    // if the Pointer hasn't already been reserved for drag in Input event dispatch
-    if ( this.getIntent() !== Intent.DRAG ) {
-      this.setIntent( Intent.DRAG );
+    // if the Pointer hasn't already been reserved for drag in Input event dispatch, in which
+    // case it already has Intent and listener to remove Intent
+    if ( !this._intents.includes( Intent.DRAG ) ) {
+      this.addIntent( Intent.DRAG );
 
       const listener = {
         up: event => {
-          this.setIntent( null );
+          this.removeIntent( Intent.DRAG );
           this.removeInputListener( this._listenerForDragReserve );
           this._listenerForDragReserve = null;
         }
@@ -352,21 +378,27 @@ inherit( Object, Pointer, {
    * @public
    */
   reserveForKeyboardDrag: function() {
-    this.setIntent( Intent.KEYBOARD_DRAG );
 
-    const listener = {
-      keyup: event => clearIntent(),
-      blur: event => clearIntent()
-    };
+    if ( !this._intents.includes( Intent.KEYBOARD_DRAG ) ) {
+      this.addIntent( Intent.KEYBOARD_DRAG );
 
-    const clearIntent = () => {
-      this.setIntent( null );
-      this.removeInputListener( listener );
-    };
+      const listener = {
+        keyup: event => clearIntent(),
 
-    // clear on blur as well since focus may be lost before we receive a keyup event
-    this._listenerForKeyboardDragReserve = listener;
-    this.addInputListener( this._listenerForKeyboardDragReserve );
+        // clear on blur as well since focus may be lost before we receive a keyup event
+        blur: event => clearIntent()
+      };
+
+      const clearIntent = () => {
+        this.removeIntent( Intent.KEYBOARD_DRAG );
+        this.removeInputListener( this._listenerForKeyboardDragReserve );
+        this._listenerForKeyboardDragReserve = null;
+      };
+
+      assert && assert( this._listenerForDragReserve === null, 'still a listener on Pointer for reserve, memory leak likely' );
+      this._listenerForKeyboardDragReserve = listener;
+      this.addInputListener( this._listenerForKeyboardDragReserve );
+    }
   },
 
   /**

@@ -328,7 +328,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
     // handle translation
     if ( KeyboardUtils.isArrowKey( domEvent.keyCode ) ) {
-      const keyboardDragIntent = event.pointer.getIntent() === Pointer.Intent.KEYBOARD_DRAG;
+      const keyboardDragIntent = event.pointer.hasIntent( Pointer.Intent.KEYBOARD_DRAG );
 
       if ( !keyboardDragIntent ) {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener handle arrow key down' );
@@ -644,9 +644,9 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * @returns {boolean}
    */
   hasDragIntent( pointer ) {
-    return pointer.getIntent() === Pointer.Intent.KEYBOARD_DRAG ||
-           pointer.getIntent() === Pointer.Intent.DRAG ||
-           pointer.getIntent() === Pointer.Intent.MULTI_DRAG;
+    return pointer.hasIntent( Pointer.Intent.KEYBOARD_DRAG ) ||
+           pointer.hasIntent( Pointer.Intent.DRAG ) ||
+           pointer.hasIntent( Pointer.Intent.MULTI_DRAG );
   }
 
   /**
