@@ -566,6 +566,11 @@ const ParallelDOM = {
           this._accessibleChecked && assert( INPUT_TYPES_THAT_SUPPORT_CHECKED.indexOf( this._inputType.toUpperCase() ) >= 0, 'inputType does not support checked attribute: ' + this._inputType );
           this._focusHighlightLayerable && assert( this.focusHighlight instanceof Node, 'focusHighlight must be Node if highlight is layerable' );
           this._tagName.toUpperCase() === INPUT_TAG && assert( typeof this._inputType === 'string', ' inputType expected for input' );
+
+          // note that most things that are not focusable by default need innerContent to be focusable on VoiceOver,
+          // but this will catch most cases since often things that get added to the focus order have the application
+          // role for custom input
+          this.ariaRole === 'application' && assert( this._innerContent, 'must have some innerContent or element will never be focusable in VoiceOver' );
         }
 
         for ( let i = 0; i < this.children.length; i++ ) {

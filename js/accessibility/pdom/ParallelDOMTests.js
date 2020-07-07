@@ -1573,6 +1573,7 @@ QUnit.test( 'ariaRole option', function( assert ) {
 
   const a = new Node( {
     tagName: 'div',
+    innerContent: 'Draggable',
     ariaRole: 'application'
   } );
 
