@@ -2057,13 +2057,15 @@ const ParallelDOM = {
       set accessibleOrder( value ) { this.setAccessibleOrder( value ); },
 
       /**
-       * Returns the accessible (focus) order for this node. To prevent strange DAG problems, this should not be
-       * mutated, like with `Array.push()`, instead it should be set new each time, see setAccessibleOrder().
+       * Returns the accessible (focus) order for this node.
        * @public
        *
        * @returns {Array.<Node|null>|null}
        */
       getAccessibleOrder: function() {
+        if ( this._accessibleOrder ) {
+          return this._accessibleOrder.slice( 0 ); // create a defensive copy
+        }
         return this._accessibleOrder;
       },
       get accessibleOrder() { return this.getAccessibleOrder(); },
