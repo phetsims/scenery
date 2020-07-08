@@ -80,6 +80,14 @@ function getPrimarySiblingElementByNode( node ) {
   return document.getElementById( uniquePeer.primarySibling.id );
 }
 
+/**
+ * Audit the root node for accessible content within a test, to make sure that content is accessible as we expect,
+ * and so that our accessibleAudit function may catch things that have gone wrong.
+ * @param {Node} rootNode - the root Node attached to the Display being tested
+ */
+function accessibleAuditRootNode( rootNode ) {
+  rootNode.accessibleAudit();
+}
 
 QUnit.test( 'tagName/innerContent options', function( assert ) {
 
@@ -116,7 +124,7 @@ QUnit.test( 'tagName/innerContent options', function( assert ) {
   assert.ok( getPrimarySiblingElementByNode( a ).innerHTML === TEST_LABEL_HTML_2, 'innerContent not cleared when tagName set to null.' );
 
   // verify that setting inner content on an input is not allowed
-  const b = new Node( { tagName: 'input' } );
+  const b = new Node( { tagName: 'input',  inputType: 'range' } );
   rootNode.addChild( b );
   window.assert && assert.throws( function() {
     b.innerContent = 'this should fail';
@@ -417,6 +425,7 @@ QUnit.test( 'ParallelDOM options', function( assert ) {
   //    <p>Test Description</p>
   //  </div>
   // </div>
+  accessibleAuditRootNode( rootNode );
   let buttonElement = getPrimarySiblingElementByNode( buttonNode );
 
   const buttonParent = buttonElement.parentNode;
@@ -657,6 +666,8 @@ function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
     assert.ok( jID === kValue, 'k pointing to j' );
   };
 
+  // audit the content we have created
+  accessibleAuditRootNode( rootNode );
 
   // Check basic associations within single node
   checkOnYourOwnAssociations( j );
@@ -889,6 +900,7 @@ QUnit.test( 'ParallelDOM setters/getters', function( assert ) {
   assert.ok( a1Element.hidden, true, 'hidden set as Property' );
   assert.ok( a1Element.getAttribute( 'hidden' ) === '', 'hidden should not be set as attribute' );
 
+  accessibleAuditRootNode( a1 );
 } );
 
 QUnit.test( 'Next/Previous focusable', function( assert ) {
@@ -955,6 +967,8 @@ QUnit.test( 'Next/Previous focusable', function( assert ) {
   a.focus();
   util.getNextFocusable( rootElement ).focus();
   assert.ok( document.activeElement.id === aElement.id, 'a only element focusable' );
+
+  accessibleAuditRootNode( rootNode );
 } );
 
 QUnit.test( 'Remove accessibility subtree', function( assert ) {
@@ -1221,7 +1235,7 @@ QUnit.test( 'ariaValueText', function( assert ) {
   document.body.appendChild( display.domElement );
 
   const ariaValueText = 'this is my value text';
-  const a = new Node( { tagName: 'input', ariaValueText: ariaValueText } );
+  const a = new Node( { tagName: 'input', ariaValueText: ariaValueText, inputType: 'range' } );
   rootNode.addChild( a );
   let aElement = getPrimarySiblingElementByNode( a );
   assert.ok( aElement.getAttribute( 'aria-valuetext' ) === ariaValueText, 'should have correct value text.' );
@@ -1380,7 +1394,6 @@ QUnit.test( 'swapVisibility', function( assert ) {
 
 QUnit.test( 'Aria Label Setter', function( assert ) {
 
-
   // test the behavior of swapVisibility function
   const rootNode = new Node( { tagName: 'div' } );
   var display = new Display( rootNode ); // eslint-disable-line
@@ -1404,6 +1417,8 @@ QUnit.test( 'Aria Label Setter', function( assert ) {
   assert.ok( !buttonA.hasAttribute( 'aria-label' ), 'setter can clear on dom element' );
   assert.ok( buttonA.innerHTML === '', 'no inner html with aria-label setter when clearing' );
   assert.ok( a.ariaLabel === null, 'cleared in Node model.' );
+
+  accessibleAuditRootNode( rootNode );
 } );
 
 QUnit.test( 'focusable option', function( assert ) {
@@ -1459,7 +1474,6 @@ QUnit.test( 'focusable option', function( assert ) {
 } );
 
 QUnit.test( 'append siblings/appendLabel/appendDescription setters', function( assert ) {
-
 
   // test the behavior of focusable function
   const rootNode = new Node( { tagName: 'div' } );
@@ -1538,6 +1552,8 @@ QUnit.test( 'append siblings/appendLabel/appendDescription setters', function( a
   assert.ok( bElementParent.childNodes[ indexOfPrimaryElement - 1 ] === bPeer.labelSibling, 'b label sibling first with no container, description appended' );
   assert.ok( bElementParent.childNodes[ indexOfPrimaryElement ] === bElement, 'b primary sibling second with no container, description appended' );
   assert.ok( bElementParent.childNodes[ indexOfPrimaryElement + 1 ] === bPeer.descriptionSibling, 'b description sibling third with no container, description appended' );
+
+  accessibleAuditRootNode( rootNode );
 } );
 
 QUnit.test( 'containerAriaRole option', function( assert ) {
@@ -1562,6 +1578,8 @@ QUnit.test( 'containerAriaRole option', function( assert ) {
   assert.ok( a.containerAriaRole === null, 'role attribute should be cleared on node' );
   aElement = getPrimarySiblingElementByNode( a );
   assert.ok( aElement.parentElement.getAttribute( 'role' ) === null, 'role attribute should be cleared on parent element' );
+
+  accessibleAuditRootNode( rootNode );
 } );
 
 QUnit.test( 'ariaRole option', function( assert ) {
@@ -1586,6 +1604,8 @@ QUnit.test( 'ariaRole option', function( assert ) {
   assert.ok( a.ariaRole === null, 'role attribute should be cleared on node' );
   aElement = getPrimarySiblingElementByNode( a );
   assert.ok( aElement.getAttribute( 'role' ) === null, 'role attribute should be cleared on element' );
+
+  accessibleAuditRootNode( rootNode );
 } );
 
 
@@ -1607,7 +1627,7 @@ QUnit.test( 'accessibleName option', function( assert ) {
   const aElement = getPrimarySiblingElementByNode( a );
   assert.ok( aElement.textContent === TEST_LABEL, 'accessibleName setter on div' );
 
-  const b = new Node( { tagName: 'input', accessibleName: TEST_LABEL } );
+  const b = new Node( { tagName: 'input', accessibleName: TEST_LABEL, inputType: 'range' } );
   a.addChild( b );
   const bElement = getPrimarySiblingElementByNode( b );
   const bParent = getPrimarySiblingElementByNode( b ).parentElement;
@@ -1642,6 +1662,7 @@ QUnit.test( 'accessibleName option', function( assert ) {
   cLabelElement = getPrimarySiblingElementByNode( c ).parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
   assert.ok( cLabelElement.getAttribute( 'aria-label' ) === 'overrideThis', 'accessibleNameBehavior should not work until there is accessible name' );
 
+  accessibleAuditRootNode( rootNode );
 } );
 
 
@@ -1683,7 +1704,7 @@ QUnit.test( 'helpText option', function( assert ) {
   } );
   rootNode.addChild( a );
 
-  rootNode.addChild( new Node( { tagName: 'input' } ) );
+  rootNode.addChild( new Node( { tagName: 'input', inputType: 'range' } ) );
   assert.ok( a.helpText === TEST_DESCRIPTION, 'helpText getter' );
 
   // default for help text is to append description after the primary sibling
@@ -1720,6 +1741,8 @@ QUnit.test( 'helpText option', function( assert ) {
   b.helpText = null;
   bDescriptionElement = getPrimarySiblingElementByNode( b ).parentElement.children[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
   assert.ok( bDescriptionElement.textContent === 'overrideThis', 'helpTextBehavior should not work until there is help text' );
+
+  accessibleAuditRootNode( rootNode );
 } );
 
 QUnit.test( 'move to front/move to back', function( assert ) {
