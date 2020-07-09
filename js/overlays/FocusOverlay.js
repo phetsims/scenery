@@ -75,7 +75,6 @@ function FocusOverlay( display, focusRootNode ) {
     allowWebGL: display._allowWebGL,
     allowCSSHacks: false,
     accessibility: false,
-    isApplication: false,
     interactive: false
   } );
 
