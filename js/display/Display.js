@@ -127,7 +127,6 @@ function Display( rootNode, options ) {
     preserveDrawingBuffer: false,
     allowWebGL: true,
     accessibility: true,        // enables accessibility features
-    isApplication: false,      // adds the aria-role: 'application' when accessibility is enabled
     interactive: true,         // Whether mouse/touch/keyboard inputs are enabled (if input has been added).
 
     // {boolean} - If true, input event listeners will be attached to the Display's DOM element instead of the window.
@@ -272,9 +271,6 @@ function Display( rootNode, options ) {
   this.utteranceQueue = new UtteranceQueue( !this.options.accessibility );
 
   if ( this.options.accessibility ) {
-    if ( this.options.isApplication ) {
-      this._domElement.setAttribute( 'aria-role', 'application' );
-    }
 
     // make the PDOM invisible in the browser - it has some width and is shifted off screen so that AT can read the
     // formatting tags, see https://github.com/phetsims/scenery/issues/730
