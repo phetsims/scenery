@@ -716,8 +716,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
           translationDirection = translationDifference.normalized();
         }
 
-        // translation velocity is faster the farther away you are from the target
-        const translationSpeed = translationDifference.magnitude * 6;
+        const translationSpeed = this.getTranslationSpeed( translationDifference.magnitude );
         scratchVelocityVector.setXY( translationSpeed, translationSpeed );
 
         // finally determine the final panning translation and apply
@@ -835,6 +834,28 @@ class AnimatedPanZoomListener extends PanZoomListener {
    */
   setDestinationScale( scale ) {
     this.destinationScale = this.limitScale( scale );
+  }
+
+  /**
+   * Calculate the translation speed to animate from our sourcePosition to our targetPosition. Speed goes to zero
+   * as the translationDistance gets smaller for smooth animation as we reach our destination position.
+   * @private
+   *
+   * @param {number} translationDistance
+   */
+  getTranslationSpeed( translationDistance ) {
+
+    // The larger the scale, that faster we want to translate because the distances between source and destination
+    // are smaller when zoomed in. Otherwise, speeds will be slower while zoomed in.
+    const scaleDistance = translationDistance * this.getCurrentScale();
+
+    // A maximum translation factor applied to distance to determine a reasonable speed, determined by
+    // inspection but could be modified
+    const maxScaleFactor = 5;
+
+    // speed falls away exponentially as we get closer to our destination so that the draft doesn't go for too long
+    const translationSpeed = scaleDistance * ( 1 / ( Math.pow( scaleDistance, 2 ) - Math.pow( maxScaleFactor, 2 ) ) + maxScaleFactor );
+    return translationSpeed;
   }
 
   /**
