@@ -86,7 +86,7 @@ class MultiListener {
     this._allowMoveInterruption = options.allowMoveInterruption;
 
     // @private {Array.<Press>} - List of "active" Presses down from Pointer input which are actively changing
-    // the transformation of the target node
+    // the transformation of the target Node
     this._presses = [];
 
     // @private {Array.<Press>} - List of "background" presses which are saved but not yet doing anything
@@ -154,25 +154,23 @@ class MultiListener {
 
         // A pointer with "drag" intent is signifying that it should not be interrupted for other things like
         // this listener, do not interrupt if background Presses have a pointer with drag intent
-        if ( this.canMoveFromPointer( event.pointer ) && !this.anyBackgroundPressesWithDragIntent() ) {
-          if ( this._allowMoveInterruption ) {
+        if ( this.canMoveFromPointer( event.pointer ) && !this.anyBackgroundPressesWithDragIntent() && this._allowMoveInterruption ) {
 
-            const backgroundPress = this.findBackgroundPress( event.pointer );
-            const difference = backgroundPress.initialPoint.minus( event.pointer.point );
+          const backgroundPress = this.findBackgroundPress( event.pointer );
+          const difference = backgroundPress.initialPoint.minus( event.pointer.point );
 
-            // it is nice to allow down pointers to move around freely without interruption when there isn't any zoom,
-            // but we still allow interruption if the number of background presses indicate the user is trying to
-            // zoom in
-            const zoomedOutPan = this._backgroundPresses.length <= 1 && this.getCurrentScale() === 1;
-            if ( difference.magnitude > MOVE_INTERRUPT_MAGNITUDE && !zoomedOutPan ) {
+          // it is nice to allow down pointers to move around freely without interruption when there isn't any zoom,
+          // but we still allow interruption if the number of background presses indicate the user is trying to
+          // zoom in
+          const zoomedOutPan = this._backgroundPresses.length <= 1 && this.getCurrentScale() === 1;
+          if ( difference.magnitude > MOVE_INTERRUPT_MAGNITUDE && !zoomedOutPan ) {
 
-              // only interrupt if pointer has moved far enough so we don't interrupt taps that might move little or
-              // when there is no scale to translate
-              sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener attached, interrupting for press' );
-              event.pointer.interruptAttached();
-              this.convertBackgroundPresses();
-              this.movePress( this.findPress( event.pointer ) );
-            }
+            // only interrupt if pointer has moved far enough so we don't interrupt taps that might move little or
+            // when there is no scale to translate
+            sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener attached, interrupting for press' );
+            event.pointer.interruptAttached();
+            this.convertBackgroundPresses();
+            this.movePress( this.findPress( event.pointer ) );
           }
         }
       },
@@ -431,7 +429,7 @@ class MultiListener {
   }
 
   /**
-   * Reposition the target node (including all apsects of transformation) of this listener's target Node.
+   * Reposition the target Node (including all apsects of transformation) of this listener's target Node.
    * @protected
    */
   reposition() {
@@ -474,7 +472,7 @@ class MultiListener {
   }
 
   /**
-   * Compute the transformation matrix for the target node based on Presses.
+   * Compute the transformation matrix for the target Node based on Presses.
    * @private
    *
    * @returns {Matrix3}
@@ -666,7 +664,7 @@ class MultiListener {
   }
 
   /**
-   * Get the current scale on the target node, assumes that there is isometric scaling in both x and y.
+   * Get the current scale on the target Node, assumes that there is isometric scaling in both x and y.
    *
    * @public
    * @returns {number}
@@ -676,7 +674,7 @@ class MultiListener {
   }
 
   /**
-   * Reset transform on the target node.
+   * Reset transform on the target Node.
    *
    * @public
    */
