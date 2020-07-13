@@ -124,7 +124,7 @@ QUnit.test( 'tagName/innerContent options', function( assert ) {
   assert.ok( getPrimarySiblingElementByNode( a ).innerHTML === TEST_LABEL_HTML_2, 'innerContent not cleared when tagName set to null.' );
 
   // verify that setting inner content on an input is not allowed
-  const b = new Node( { tagName: 'input',  inputType: 'range' } );
+  const b = new Node( { tagName: 'input', inputType: 'range' } );
   rootNode.addChild( b );
   window.assert && assert.throws( function() {
     b.innerContent = 'this should fail';
@@ -1182,6 +1182,7 @@ QUnit.test( 'accessibleVisible', function( assert ) {
   assert.ok( b.visible === true, 'b should be visible after becoming hidden for screen readers' );
   assert.ok( b.accessibleVisible === false, 'b state should reflect it is hidden for screen readers' );
   assert.ok( buttonB.hidden === true, 'buttonB should be hidden for screen readers' );
+  assert.ok( b.accessibleDisplayed === false, 'accessibleVisible=false, b should have no representation in the PDOM' );
   b.accessibleVisible = true;
 
   // make node B invisible - it should not be visible, and it should be hidden for screen readers
@@ -1189,13 +1190,15 @@ QUnit.test( 'accessibleVisible', function( assert ) {
   assert.ok( b.visible === false, 'state of node b is visible' );
   assert.ok( buttonB.hidden === true, 'buttonB is hidden from screen readers after becoming invisible' );
   assert.ok( b.accessibleVisible === true, 'state of node b still reflects accessible visibility when invisible' );
+  assert.ok( b.accessibleDisplayed === false, 'b invisible and should have no representation in the PDOM' );
   b.visible = true;
 
-  // make node f invisible - g's trail that goes through f should be invisible to AT, the child of c should remain accessibleVisible
+  // make node f invisible - g's trail that goes through f should be invisible to AT, tcomhe child of c should remain accessibleVisible
   f.visible = false;
   assert.ok( g.getAccessibleVisible() === true, 'state of accessibleVisible should remain true on node g' );
   assert.ok( !buttonG1.hidden, 'buttonG1 (child of e) should not be hidden after parent node f made invisible (no accessible content on node f)' );
   assert.ok( buttonG2.hidden === true, 'buttonG2 should be hidden after parent node f made invisible (no accessible content on node f)' );
+  assert.ok( g.accessibleDisplayed === true, 'one parent still visible, g still has one PDOMInstance displayed in PDOM' );
   f.visible = true;
 
   // make node c (no accessible content) invisible to screen, e should be hidden and g2 should be hidden
@@ -1203,7 +1206,6 @@ QUnit.test( 'accessibleVisible', function( assert ) {
   assert.ok( c.visible === true, 'c should still be visible after becoming invisible to screen readers' );
   assert.ok( divE.hidden === true, 'div E should be hidden after parent node c (no accessible content) is made invisible to screen readers' );
   assert.ok( buttonG2.hidden === true, 'buttonG2 should be hidden after ancestor node c (no accessible content) is made invisible to screen readers' );
-  // assert.ok( !buttonG1.hidden, 'buttonG1 should not NOT be hidden after ancestor node c is made invisible (parent div E already marked)' );
   assert.ok( !divA.hidden, 'div A should not have been hidden by making descendant c invisible to screen readers' );
 } );
 
