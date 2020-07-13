@@ -2187,6 +2187,23 @@ const ParallelDOM = {
       get accessibleVisible() { return this.getAccessibleVisible(); },
 
       /**
+       * Returns true if any of the PDOMInstances for the Node are globally visible and displayed in the PDOM. A
+       * PDOMInstance is globally visible if Node and all ancestors are accessibleVisible. PDOMInstance visibility is
+       * updated synchronously, so this returns the most up-to-date information without requiring Display.updateDisplay
+       * (unlike Node.wasDisplayed()).
+       * @public
+       */
+      isAccessibleDisplayed: function() {
+        for ( let i = 0; i < this._accessibleInstances.length; i++ ) {
+          if ( this._accessibleInstances[ i ].isGloballyVisible() ) {
+            return true;
+          }
+        }
+        return false;
+      },
+      get accessibleDisplayed() { return this.isAccessibleDisplayed(); },
+
+      /**
        * Set the value of an input element.  Element must be a form element to support the value attribute. The input
        * value is converted to string since input values are generally string for HTML.
        * @public
