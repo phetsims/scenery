@@ -10,6 +10,7 @@
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Utils from '../../../dot/js/Utils.js';
+import Shape from '../../../kite/js/Shape.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
 import inherit from '../../../phet-core/js/inherit.js';
@@ -685,6 +686,23 @@ inherit( Node, Image, {
   get mipmapMaxLevel() { return this.getMipmapMaxLevel(); },
 
   /**
+   * Returns a Shape that represents the area covered by containsPointSelf.
+   * @public
+   *
+   * @returns {Shape}
+   */
+  getSelfShape: function() {
+    if ( this._hitTestPixels ) {
+      // If we're hit-testing pixels, return that shape included.
+      return Image.hitTestDataToShape( this._hitTestImageData, this.imageWidth, this.imageHeight );
+    }
+    else {
+      // Otherwise the super call will just include the rectangle (bounds).
+      return Node.prototype.getSelfShape.call( this );
+    }
+  },
+
+  /**
    * Controls whether either any pixel in the image will be marked as contained (when false), or whether transparent
    * pixels will be counted as "not contained in the image" for hit-testing (when true).
    * @public
@@ -894,29 +912,12 @@ inherit( Node, Image, {
    * @private
    */
   invalidateHitTestData: function() {
-    this._hitTestImageData = null;
-
     // Only compute this if we are hit-testing pixels
     if ( !this._hitTestPixels ) {
       return;
     }
 
-    const width = this.getImageWidth();
-    const height = this.getImageHeight();
-
-    // If the image isn't loaded yet, we don't want to try loading anything
-    if ( !( this._image.naturalWidth || this._image.width ) || !( this._image.naturalHeight || this._image.height ) ) {
-      return;
-    }
-
-    const canvas = getScratchCanvas();
-    const context = getScratchContext();
-
-    canvas.width = width;
-    canvas.height = height;
-    context.drawImage( this._image, 0, 0 );
-
-    this._hitTestImageData = context.getImageData( 0, 0, width, height );
+    this._hitTestImageData = Image.getHitTestData( this._image, this.imageWidth, this.imageHeight );
   },
 
   /**
@@ -934,13 +935,7 @@ inherit( Node, Image, {
       return inBounds;
     }
 
-    // For sanity, map it based on the image dimensions and image data dimensions, and carefully clamp in case things are weird.
-    const x = Utils.clamp( Math.floor( ( point.x / this.imageWidth ) * this._hitTestImageData.width ), 0, this._hitTestImageData.width - 1 );
-    const y = Utils.clamp( Math.floor( ( point.y / this.imageHeight ) * this._hitTestImageData.height ), 0, this._hitTestImageData.height - 1 );
-
-    const index = 4 * ( x + y * this._hitTestImageData.width ) + 3;
-
-    return this._hitTestImageData.data[ index ] !== 0;
+    return Image.testHitTestData( this._hitTestImageData, this.imageWidth, this.imageHeight, point );
   },
 
   /**
@@ -1123,6 +1118,79 @@ inherit( Node, Image, {
     Node.prototype.dispose.call( this );
   }
 } );
+
+/**
+ * Optionally returns an ImageData object useful for hit-testing the pixel data of an image.
+ * @public
+ *
+ * @param {HTMLImageElement|HTMLCanvasElement} image
+ * @param {number} width - logical width of the image
+ * @param {number} height - logical height of the image
+ * @returns {ImageData|null}
+ */
+Image.getHitTestData = ( image, width, height ) => {
+  // If the image isn't loaded yet, we don't want to try loading anything
+  if ( !( image.naturalWidth || image.width ) || !( image.naturalHeight || image.height ) ) {
+    return null;
+  }
+
+  const canvas = getScratchCanvas();
+  const context = getScratchContext();
+
+  canvas.width = width;
+  canvas.height = height;
+  context.drawImage( image, 0, 0 );
+
+  return context.getImageData( 0, 0, width, height );
+};
+
+/**
+ * Tests whether a given pixel in an ImageData is at all non-transparent.
+ * @public
+ *
+ * @param {ImageData} imageData
+ * @param {number} width - logical width of the image
+ * @param {number} height - logical height of the image
+ * @param {Vector2} point
+ * @returns {boolean}
+ */
+Image.testHitTestData = ( imageData, width, height, point ) => {
+  // For sanity, map it based on the image dimensions and image data dimensions, and carefully clamp in case things are weird.
+  const x = Utils.clamp( Math.floor( ( point.x / width ) * imageData.width ), 0, imageData.width - 1 );
+  const y = Utils.clamp( Math.floor( ( point.y / height ) * imageData.height ), 0, imageData.height - 1 );
+
+  const index = 4 * ( x + y * imageData.width ) + 3;
+
+  return imageData.data[ index ] !== 0;
+};
+
+/**
+ * Turns the ImageData into a Shape showing where hit testing would succeed.
+ * @public
+ *
+ * @param {ImageData} imageData
+ * @param {number} width - logical width of the image
+ * @param {number} height - logical height of the image
+ * @returns {Shape}
+ */
+Image.hitTestDataToShape = ( imageData, width, height ) => {
+  const widthScale = width / imageData.width;
+  const heightScale = height / imageData.height;
+
+  const shape = new Shape();
+
+  for ( let x = 0; x < imageData.width; x++ ) {
+    for ( let y = 0; y < imageData.height; y++ ) {
+      const index = 4 * ( x + y * imageData.width ) + 3;
+
+      if ( imageData.data[ index ] !== 0 ) {
+        shape.rect( x * widthScale, y * widthScale, widthScale, heightScale );
+      }
+    }
+  }
+
+  return shape.getSimplifiedAreaShape();
+};
 
 /**
  * Creates an SVG image element with a given URL and dimensions

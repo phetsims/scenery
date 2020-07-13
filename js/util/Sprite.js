@@ -20,6 +20,27 @@ class Sprite {
     // @public {Property.<SpriteImage>}
     this.imageProperty = new Property( spriteImage );
   }
+
+  /**
+   * Returns a Shape that represents the hit-testable area of this Sprite.
+   * @public
+   *
+   * @returns {Shape}
+   */
+  getShape() {
+    return this.imageProperty.value.getShape();
+  }
+
+  /**
+   * Returns whether a given point is considered "inside" the Sprite
+   * @public
+   *
+   * @param {Vector2} point
+   * @returns {boolean}
+   */
+  containsPoint( point ) {
+    return this.imageProperty.value.containsPoint( point );
+  }
 }
 
 scenery.register( 'Sprite', Sprite );

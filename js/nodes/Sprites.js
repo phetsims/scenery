@@ -31,6 +31,10 @@ class Sprites extends Node {
       // invalidatePaint() should be called on the Sprites node.
       spriteInstances: [],
 
+      // {boolean} - Whether individual sprites will be hit-tested to determine what is a contained point (for hit
+      // testing, etc.). If false, the canvasBounds will be used for hit testing.
+      hitTestSprites: false,
+
       // Sets the node's default renderer to WebGL (as we'll generally want that when using this type)
       renderer: 'webgl'
     }, options );
@@ -43,6 +47,9 @@ class Sprites extends Node {
     // @private {Array.<SpriteInstance>}
     this._spriteInstances = options.spriteInstances;
 
+    // @private {boolean}
+    this._hitTestSprites = options.hitTestSprites;
+
     // WebGL and Canvas are supported.
     this.setRendererBitmask( Renderer.bitmaskCanvas | Renderer.bitmaskWebGL );
 
@@ -53,7 +60,7 @@ class Sprites extends Node {
    * Sets the bounds that are used for layout/repainting.
    * @public
    *
-   * These bounds should always cover at least the area where the CanvasNode will draw in. If this is violated, this
+   * These bounds should always cover at least the area where the Sprites will draw in. If this is violated, this
    * node may be partially or completely invisible in Scenery's output.
    *
    * @param {Bounds2} selfBounds
@@ -61,7 +68,6 @@ class Sprites extends Node {
   setCanvasBounds( selfBounds ) {
     this.invalidateSelf( selfBounds );
   }
-
   set canvasBounds( value ) { this.setCanvasBounds( value ); }
 
   /**
@@ -73,7 +79,6 @@ class Sprites extends Node {
   getCanvasBounds() {
     return this.getSelfBounds();
   }
-
   get canvasBounds() { return this.getCanvasBounds(); }
 
   /**
@@ -120,13 +125,37 @@ class Sprites extends Node {
    * @protected
    * @override
    *
-   * If CanvasNode subtypes want to support being picked or hit-tested, it should override this function.
-   *
    * @param {Vector2} point - Considered to be in the local coordinate frame
    * @returns {boolean}
    */
   containsPointSelf( point ) {
-    return false;
+    const inBounds = super.containsPointSelf( point );
+    if ( !inBounds ) {
+      return false;
+    }
+
+    if ( this._hitTestSprites ) {
+      return !!this.getSpriteInstanceFromPoint( point );
+    }
+    else {
+      return true;
+    }
+  }
+
+  /**
+   * Finds which sprite instance is on top under a certain point (or null if none are).
+   * @public
+   *
+   * @param {Vector2} point
+   * @returns {SpriteInstance|null}
+   */
+  getSpriteInstanceFromPoint( point ) {
+    for ( let i = this._spriteInstances.length - 1; i >= 0; i-- ) {
+      if ( this._spriteInstances[ i ].containsPoint( point ) ) {
+        return this._spriteInstances[ i ];
+      }
+    }
+    return null;
   }
 
   /**
@@ -137,7 +166,12 @@ class Sprites extends Node {
    * @returns {Shape}
    */
   getSelfShape() {
-    return new Shape();
+    if ( this._hitTestSprites ) {
+      return Shape.union( this._spriteInstances.map( instance => instance.getShape() ) );
+    }
+    else {
+      return Shape.bounds( this.selfBounds );
+    }
   }
 
   /**

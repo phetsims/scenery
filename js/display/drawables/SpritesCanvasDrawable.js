@@ -6,9 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../../phet-core/js/inherit.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
+import inherit from '../../../../phet-core/js/inherit.js';
 import scenery from '../../scenery.js';
+import SpriteInstance from '../../util/SpriteInstance.js';
 import CanvasSelfDrawable from '../CanvasSelfDrawable.js';
 
 /**
@@ -53,7 +54,7 @@ inherit( CanvasSelfDrawable, SpritesCanvasDrawable, {
       }
 
       // If it's a translation only, we can add the offsets to the drawImage call directly (higher performance)
-      if ( spriteInstance.isTranslation ) {
+      if ( spriteInstance.translationType === SpriteInstance.TRANSLATION ) {
         wrapper.context.drawImage(
           spriteImage.image,
           spriteInstance.matrix.m02() - spriteImage.offset.x,
