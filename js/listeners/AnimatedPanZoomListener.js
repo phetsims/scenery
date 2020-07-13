@@ -418,17 +418,19 @@ class AnimatedPanZoomListener extends PanZoomListener {
   handleMiddlePress( dt ) {
     assert && assert( this.middlePress, 'MiddlePress must be defined to handle' );
 
-    const currentPoint = this.middlePress.pointer.point;
-    const globalDelta = currentPoint.minus( this.middlePress.initialPoint );
+    if ( dt > 0 ) {
+      const currentPoint = this.middlePress.pointer.point;
+      const globalDelta = currentPoint.minus( this.middlePress.initialPoint );
 
-    // magnitude alone is too fast, reduce by a bit
-    const reducedMagnitude = globalDelta.magnitude / 100;
-    if ( dt > 0 && reducedMagnitude > 0 ) {
+      // magnitude alone is too fast, reduce by a bit
+      const reducedMagnitude = globalDelta.magnitude / 100;
+      if ( reducedMagnitude > 0 ) {
 
-      // set the delta vector in global coordinates, limited by a maximum view coords/second velocity, corrected
-      // for any representative target scale
-      globalDelta.setMagnitude( Math.min( reducedMagnitude / dt, MAX_SCROLL_VELOCITY * this._targetScale ) );
-      this.setDestinationPosition( this.sourcePosition.plus( globalDelta ) );
+        // set the delta vector in global coordinates, limited by a maximum view coords/second velocity, corrected
+        // for any representative target scale
+        globalDelta.setMagnitude( Math.min( reducedMagnitude / dt, MAX_SCROLL_VELOCITY * this._targetScale ) );
+        this.setDestinationPosition( this.sourcePosition.plus( globalDelta ) );
+      }
     }
   }
 
