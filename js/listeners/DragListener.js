@@ -135,7 +135,7 @@ function DragListener( options ) {
     // is useful if the position/transform cannot be applied directly to a single Node (e.g. positioning multiple
     // independent nodes, or centering things instead of transforming based on the origin of the Node).
     //
-    // NOTE: Use this option most likely if converting from MoveableDragHandler, because it transformed based in
+    // NOTE: Use this option most likely if converting from MovableDragHandler, because it transformed based in
     // the parent's coordinate frame. See https://github.com/phetsims/scenery/issues/1014
     useParentOffset: false,
 
