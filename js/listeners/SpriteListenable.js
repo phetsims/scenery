@@ -7,7 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inheritance from '../../../../phet-core/js/inheritance.js';
+import inheritance from '../../../phet-core/js/inheritance.js';
 import Sprites from '../nodes/Sprites.js';
 import scenery from '../scenery.js';
 import PressListener from './PressListener.js';
