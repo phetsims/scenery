@@ -1048,9 +1048,9 @@ class Wheel {
 
     // the DOM Event specifies deltas that look appropriate and works well in different cases like
     // mouse wheel and trackpad input, both which trigger wheel events but at different rates with different
-    // delta values
-    let translationX = domEvent.deltaX;
-    let translationY = domEvent.deltaY;
+    // delta values - but they are generally too large, reducing a bit feels more natural and gives more control
+    let translationX = domEvent.deltaX * 0.5;
+    let translationY = domEvent.deltaY * 0.5;
 
     // FireFox defaults to scrolling in units of "lines" rather than pixels, resulting in slow movement - speed up
     // translation in this case
