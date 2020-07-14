@@ -22,13 +22,13 @@ class KeyStateTracker {
     // down and update based on state of this collection of objects.
     this.keyState = {};
 
-    // @private {boolean} - whether or not this KeyStateTracker is attached to the body.
-    this.attachedToBody = false;
+    // @private {boolean} - whether or not this KeyStateTracker is attached to the document
+    this.attachedToDocument = false;
 
-    // @private {null|function} - Listeners potentially attached to the body to update the state of this
-    // KeyStateTracker, see attachToBody()
-    this.bodyKeydownListener = null;
-    this.bodyKeyupListener = null;
+    // @private {null|function} - Listeners potentially attached to the document to update the state of this
+    // KeyStateTracker, see attachToDocument()
+    this.documentKeyupListener = null;
+    this.documentKeydownListener = null;
 
     // @public - Emits events when keyup/keydown updates are received. These will emit after any updates to the
     // keyState so that keystate is up to date in time for listeners.
@@ -42,8 +42,8 @@ class KeyStateTracker {
     this._disposeKeystateTracker = () => {
       timer.removeListener( stepListener );
 
-      if ( this.attachedToBody ) {
-        this.detachFromBody();
+      if ( this.attachedToDocument ) {
+        this.detachFromDocument();
       }
     };
   }
@@ -308,66 +308,66 @@ class KeyStateTracker {
   }
 
   /**
-   * Add this KeyStateTracker to the DOM body so that it updates whenever the body receives key events. This is
-   * useful if you want to observe key presses while DOM focus not in a descendant of the body (like the PDOM).
+   * Add this KeyStateTracker to the DOM document so that it updates whenever the document receives key events. This is
+   * useful if you want to observe key presses while DOM focus not within the PDOM root.
    * @public
    */
-  attachToBody() {
-    assert && assert( !this.attachedToBody, 'KeyStateTracker is already attached to body.' );
+  attachToDocument() {
+    assert && assert( !this.attachedToDocument, 'KeyStateTracker is already attached to document.' );
 
-    this.bodyKeydownListener = event => {
+    this.documentKeydownListener = event => {
       if ( this.blockTrustedEvents && event.isTrusted ) {
         return;
       }
       this.keydownUpdate( event );
     };
 
-    this.bodyKeyupListener = event => {
+    this.documentKeyupListener = event => {
       if ( this.blockTrustedEvents && event.isTrusted ) {
         return;
       }
       this.keyupUpdate( event );
     };
 
-    const addListenersToBody = () => {
+    const addListenersToDocument = () => {
 
       // attach with useCapture so that the keyStateTracker is up to date before the events dispatch within Scenery
-      document.body.addEventListener( 'keydown', this.bodyKeydownListener, true );
-      document.body.addEventListener( 'keyup', this.bodyKeyupListener, true );
-      this.attachedToBody = true;
+      window.addEventListener( 'keyup', this.documentKeyupListener, true );
+      window.addEventListener( 'keydown', this.documentKeydownListener, true );
+      this.attachedToDocument = true;
     };
 
-    if ( !document.body ) {
+    if ( !document ) {
 
-      // attach listeners on window load to ensure that the body is defined
+      // attach listeners on window load to ensure that the document is defined
       const loadListener = event => {
-        addListenersToBody();
+        addListenersToDocument();
         window.removeEventListener( 'load', loadListener );
       };
       window.addEventListener( 'load', loadListener );
     }
     else {
 
-      // body is defined and we won't get another load event so attach right away
-      addListenersToBody();
+      // document is defined and we won't get another load event so attach right away
+      addListenersToDocument();
     }
   }
 
   /**
-   * Detach listeners from the body that would update the state of this KeyStateTracker on key presses.
+   * Detach listeners from the document that would update the state of this KeyStateTracker on key presses.
    *
    * @public
    */
-  detachFromBody() {
-    assert && assert( this.attachedToBody, 'KeyStateTracker is not attached to body.' );
+  detachFromDocument() {
+    assert && assert( this.attachedToDocument, 'KeyStateTracker is not attached to document.' );
 
-    document.body.removeEventListener( 'keydown', this.bodyKeydownListener );
-    document.body.removeEventListener( 'keyuop', this.bodyKeyupListener );
+    window.removeEventListener( 'keyuop', this.documentKeyupListener );
+    window.removeEventListener( 'keydown', this.documentKeydownListener );
 
-    this.bodyKeydownListener = null;
-    this.bodyKeyupListener = null;
+    this.documentKeyupListener = null;
+    this.documentKeydownListener = null;
 
-    this.attachedToBody = false;
+    this.attachedToDocument = false;
   }
 
   /**
