@@ -2,7 +2,8 @@
 
 /**
  * A FocusHighlightPath subtype that is based around a Node. The focusHighlight is constructed based on the bounds of
- * the node. Handles transformations so that when the source node is transformed, the FocusHighlightFromNode will
+ * the node. The focusHighlight will update as the Node's bounds changes. Handles transformations so that when the
+ * source node is transformed, the FocusHighlightFromNode will
  * updated be as well.
  *
  * @author Michael Kauzmann (PhET Interactive Simulations)
@@ -12,6 +13,7 @@
 import Shape from '../../../kite/js/Shape.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
+import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
 import FocusHighlightPath from './FocusHighlightPath.js';
 
@@ -55,6 +57,12 @@ function FocusHighlightFromNode( node, options ) {
   this.outerLineWidth = options.outerLineWidth;
   this.innerLineWidth = options.innerLineWidth;
 
+  // @private {Property.<Bounds2>} - keep track to remove listener
+  this.observedBoundsProperty = null;
+
+  // @private {function} - keep track of the listener so that it can be removed
+  this.boundsListener = null;
+
   if ( node ) {
     this.setShapeFromNode( node );
   }
@@ -73,21 +81,38 @@ inherit( FocusHighlightPath, FocusHighlightFromNode, {
    * @param {Node} node
    */
   setShapeFromNode: function( node ) {
-    this.nodeBounds = this.useLocalBounds ? node.localBounds : node.bounds;
+    assert && assert( node instanceof Node );
 
-    let dilationCoefficient = this.dilationCoefficient;
-
-    // Figure out how much dilation to apply to the focus highlight around the node, calculated unless specified
-    // with options
-    if ( this.dilationCoefficient === null ) {
-      dilationCoefficient = ( this.useGroupDilation ? FocusHighlightPath.getGroupDilationCoefficient( node ) :
-                              FocusHighlightPath.getDilationCoefficient( node ) );
+    // cleanup the previous listener
+    if ( this.observedBoundsProperty ) {
+      assert && assert( this.boundsListener, 'should be a listener if there is a previous focusHighlightNode' );
+      this.observedBoundsProperty.unlink( this.boundsListener );
     }
-    const dilatedBounds = this.nodeBounds.dilated( dilationCoefficient );
 
-    // Update the line width of the focus highlight based on the transform of the node
-    this.updateLineWidthFromNode( node );
-    this.setShape( Shape.bounds( dilatedBounds ) );
+    this.observedBoundsProperty = this.useLocalBounds ? node.localBoundsProperty : node.boundsProperty;
+
+    this.boundsListener = bounds => {
+
+      // Ignore setting the shape if we don't yet have finite bounds.
+      if ( !bounds.isFinite() ) {
+        return;
+      }
+
+      let dilationCoefficient = this.dilationCoefficient;
+
+      // Figure out how much dilation to apply to the focus highlight around the node, calculated unless specified
+      // with options
+      if ( this.dilationCoefficient === null ) {
+        dilationCoefficient = ( this.useGroupDilation ? FocusHighlightPath.getGroupDilationCoefficient( node ) :
+                                FocusHighlightPath.getDilationCoefficient( node ) );
+      }
+      const dilatedBounds = bounds.dilated( dilationCoefficient );
+
+      // Update the line width of the focus highlight based on the transform of the node
+      this.updateLineWidthFromNode( node );
+      this.setShape( Shape.bounds( dilatedBounds ) );
+    };
+    this.observedBoundsProperty.link( this.boundsListener );
   },
 
   /**

@@ -169,6 +169,8 @@ inherit( Object, FocusOverlay, {
         this.nodeFocusHighlight.visible = true;
       }
       else {
+        assert && assert( this.nodeFocusHighlight.shape !== null,
+          'The shape of the Node focusHighlight should be set by now. Does it have bounds?' );
         this.nodeFocusHighlight.visible = true;
 
         // Use the node itself as the highlight
