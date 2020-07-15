@@ -164,6 +164,9 @@ inherit( Object, FocusOverlay, {
       // store the focus highlight so that it can be removed later
       this.nodeFocusHighlight = focusHighlight;
 
+      assert && assert( this.nodeFocusHighlight.shape !== null,
+        'The shape of the Node focusHighlight should be set by now. Does it have bounds?' );
+
       // If focusHighlightLayerable, then the focusHighlight is just a node in the scene graph, so set it visible
       if ( this.node.focusHighlightLayerable ) {
         this.nodeFocusHighlight.visible = true;

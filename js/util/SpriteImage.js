@@ -28,26 +28,30 @@ class SpriteImage {
     assert && assert( offset instanceof Vector2 );
 
     options = merge( {
-      hitTestPixels: false
+      hitTestPixels: false,
+      pickable: true
     }, options );
 
-    // @public {number}
+    // @public (read-only) {number}
     this.id = globalIdCounter++;
 
-    // @public {HTMLImageElement|HTMLCanvasElement}
+    // @public (read-only) {HTMLImageElement|HTMLCanvasElement}
     this.image = image;
 
-    // @public {Vector2}
+    // @public (read-only) {Vector2}
     this.offset = offset;
+
+    // @public (read-only) {boolean}
+    this.hitTestPixels = options.hitTestPixels;
+
+    // @public (read-only) {boolean}
+    this.pickable = options.pickable;
 
     // @private {ImageData|null} - Used for hit testing (lazily constructed)
     this.imageData = null;
 
     // @private {Shape|null} - lazily constructed
     this.shape = null;
-
-    // @private {boolean}
-    this.hitTestPixels = options.hitTestPixels;
   }
 
   /**
@@ -75,6 +79,11 @@ class SpriteImage {
    * @returns {Shape}
    */
   getShape() {
+
+    if ( !this.pickable) {
+      return new Shape();
+    }
+
     if ( !this.shape ) {
       if ( this.hitTestPixels ) {
         this.ensureImageData();
@@ -117,6 +126,11 @@ class SpriteImage {
    * @returns {boolean}
    */
   containsPoint( point ) {
+
+    if ( !this.pickable) {
+      return false;
+    }
+
     const width = this.width;
     const height = this.height;
 
