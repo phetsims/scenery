@@ -93,6 +93,11 @@ inherit( FocusHighlightPath, FocusHighlightFromNode, {
 
     this.boundsListener = bounds => {
 
+      // trigger invalidation of the Property value (will update the Bounds2 referenced by `bounds`) - required for
+      // Properties that use onAccessAttempt.
+      // TODO: Remove this when https://github.com/phetsims/axon/issues/309 is resolved
+      this.observedBoundsProperty.get();
+
       // Ignore setting the shape if we don't yet have finite bounds.
       if ( !bounds.isFinite() ) {
         return;
