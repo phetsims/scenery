@@ -2,6 +2,9 @@
 
 /**
  * IO type for PressListener
+ * TODO: This is an experimental IO Type because PressListener is not instrumented (but instead only its components are)
+ * TODO: do not use without consulting https://github.com/phetsims/phet-io/issues/1657
+
  *
  * @author Sam Reid (PhET Interactive Simulations)
  * @author Michael Kauzmann (PhET Interactive Simulations)
@@ -20,6 +23,7 @@ PressListenerIO.validator = { valueType: scenery.PressListener };
 PressListenerIO.documentation = 'IO Type for PressListener';
 PressListenerIO.typeName = 'PressListenerIO';
 
+// TODO: experimental, do not use without consulting https://github.com/phetsims/phet-io/issues/1657
 PressListenerIO.api = {
   pressAction: { phetioType: ActionIO( [ SceneryEventIO ] ) },
   releaseAction: { phetioType: ActionIO( [ NullableIO( SceneryEventIO ) ] ) }
