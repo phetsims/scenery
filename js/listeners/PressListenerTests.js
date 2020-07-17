@@ -6,8 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import phetioAPITest from '../../../tandem/js/phetioAPITest.js';
 import ListenerTestUtils from './ListenerTestUtils.js';
 import PressListener from './PressListener.js';
+import PressListenerAPI from './PressListenerAPI.js';
 
 QUnit.module( 'PressListener' );
 
@@ -100,7 +102,6 @@ QUnit.test( 'Interruption', function( assert ) {
   } );
 } );
 
-// TODO: support with ObjectAPI.js pattern https://github.com/phetsims/phet-io/issues/1657
-// QUnit.test( 'PhET-iO API Validation', function( assert ) {
-//   phetioAPITest( assert, PressListenerIO, 'pressListener', tandem => new PressListener( { tandem: tandem } ) );
-// } );
+QUnit.test( 'PhET-iO API Validation', function( assert ) {
+  phetioAPITest( assert, new PressListenerAPI(), 'pressListener', tandem => new PressListener( { tandem: tandem } ) );
+} );
