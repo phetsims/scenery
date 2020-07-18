@@ -167,6 +167,7 @@ import deprecationWarning from '../../../phet-core/js/deprecationWarning.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
+import Tandem from '../../../tandem/js/Tandem.js';
 import ParallelDOM from '../accessibility/pdom/ParallelDOM.js';
 import Instance from '../display/Instance.js';
 import Renderer from '../display/Renderer.js';
@@ -3158,7 +3159,7 @@ inherit( PhetioObject, Node, {
    * @param {Property.<boolean>} property
    */
   linkVisibleProperty( property ) {
-    assert && assert( property.isPhetioInstrumented(), 'If a Node is instrumented, you cannot give it an uninstrumented visibleProperty' );
+    assert && Tandem.VALIDATION && assert( property.isPhetioInstrumented(), 'If a Node is instrumented, you cannot give it an uninstrumented visibleProperty' );
     this.addLinkedElement( property, { tandem: this.tandem.createTandem( 'visibleProperty' ) } );
   },
 
