@@ -117,8 +117,9 @@ function PressListener( options ) {
     // {Tandem} - For instrumenting
     tandem: Tandem.REQUIRED,
 
-    // to support properly passing this to children, see https://github.com/phetsims/tandem/issues/60
-    phetioReadOnly: false,
+    // Though PressListener is not instrumented, declare these here to support properly passing this to children, see https://github.com/phetsims/tandem/issues/60.
+    // PressListener by default doesn't allow PhET-iO to trigger press/release Action events
+    phetioReadOnly: true,
     phetioFeatured: PhetioObject.DEFAULT_OPTIONS.phetioFeatured
   }, options );
 

@@ -160,8 +160,9 @@ function DragListener( options ) {
     // {Tandem} - For instrumenting
     tandem: Tandem.REQUIRED,
 
-    // to support properly passing this to children, see https://github.com/phetsims/tandem/issues/60
-    phetioReadOnly: PhetioObject.DEFAULT_OPTIONS.phetioReadOnly,
+    // Though DragListener is not instrumented, declare these here to support properly passing this to children, see https://github.com/phetsims/tandem/issues/60.
+    // DragListener by default doesn't allow PhET-iO to trigger drag Action events
+    phetioReadOnly: true,
     phetioFeatured: PhetioObject.DEFAULT_OPTIONS.phetioFeatured
   }, options );
 
