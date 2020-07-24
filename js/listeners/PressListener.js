@@ -114,7 +114,9 @@ function PressListener( options ) {
     // most once per frame (any more, and it would be a waste).
     collapseDragEvents: false,
 
-    // {Tandem} - For instrumenting
+    // {Tandem} - For PhET-iO instrumentation. If only using the PressListener for hover behavior, there is no need to
+    // instrument because events are only added to the data stream for press/release and not for hover events. Please pass
+    // Tandem.OPT_OUT as the tandem option to not instrument an instance.
     tandem: Tandem.REQUIRED,
 
     // Though PressListener is not instrumented, declare these here to support properly passing this to children, see https://github.com/phetsims/tandem/issues/60.
