@@ -105,6 +105,9 @@ function SimpleDragHandler( options ) {
   // another startDrag.
   this.lastInterruptedTouchPointer = null;
 
+  // @private {boolean}
+  this._attach = options.attach;
+
   // @private {Action}
   this.dragStartAction = new Action( function( point, event ) {
 
@@ -114,7 +117,11 @@ function SimpleDragHandler( options ) {
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
     // set a flag on the pointer so it won't pick up other nodes
-    event.pointer.dragging = true;
+    if ( self._attach ) {
+      // Only set the `dragging` flag on the pointer if we have attach:true
+      // See https://github.com/phetsims/scenery/issues/206
+      event.pointer.dragging = true;
+    }
     event.pointer.cursor = self.options.dragCursor;
     event.pointer.addInputListener( self.dragListener, self.options.attach );
 
@@ -215,7 +222,11 @@ function SimpleDragHandler( options ) {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler endDrag' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-    self.pointer.dragging = false;
+    if ( self._attach ) {
+      // Only set the `dragging` flag on the pointer if we have attach:true
+      // See https://github.com/phetsims/scenery/issues/206
+      self.pointer.dragging = false;
+    }
     self.pointer.cursor = null;
     self.pointer.removeInputListener( self.dragListener );
 
@@ -383,7 +394,8 @@ inherit( PhetioObject, SimpleDragHandler, {
 
     // only start dragging if the pointer isn't dragging anything, we aren't being dragged, and if it's a mouse it's button is down
     if ( !this.dragging &&
-         !event.pointer.dragging &&
+         // Don't check pointer.dragging if we don't attach, see https://github.com/phetsims/scenery/issues/206
+         ( !event.pointer.dragging || !this._attach ) &&
          event.pointer !== this.lastInterruptedTouchPointer &&
          event.canStartPress() ) {
       this.startDrag( event );
@@ -425,7 +437,11 @@ inherit( PhetioObject, SimpleDragHandler, {
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
     if ( this.dragging ) {
-      this.pointer.dragging = false;
+      if ( this._attach ) {
+        // Only set the `dragging` flag on the pointer if we have attach:true
+        // See https://github.com/phetsims/scenery/issues/206
+        this.pointer.dragging = false;
+      }
       this.pointer.cursor = null;
       this.pointer.removeInputListener( this.dragListener );
     }
