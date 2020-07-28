@@ -122,6 +122,8 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
+import validate from '../../../../axon/js/validate.js';
+import ValidatorDef from '../../../../axon/js/ValidatorDef.js';
 import Shape from '../../../../kite/js/Shape.js';
 import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
 import extend from '../../../../phet-core/js/extend.js';
@@ -2307,6 +2309,7 @@ const ParallelDOM = {
         assert && assert( typeof value === 'string' || typeof value === 'boolean' || typeof value === 'number' );
         assert && options && assert( Object.getPrototypeOf( options ) === Object.prototype,
           'Extra prototype on accessibleAttribute options object is a code smell' );
+        assert && typeof value === 'string' && validate( value, ValidatorDef.STRING_WITHOUT_TEMPLATE_VARS_VALIDATOR );
 
         options = merge( {
 
