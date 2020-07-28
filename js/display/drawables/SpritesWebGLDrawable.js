@@ -63,7 +63,7 @@ function SpritesWebGLDrawable( renderer, instance ) {
 scenery.register( 'SpritesWebGLDrawable', SpritesWebGLDrawable );
 
 inherit( WebGLSelfDrawable, SpritesWebGLDrawable, {
-  // What type of WebGL renderer/processor should be used. TODO: doc
+  // We use a custom renderer for the needed flexibility
   webglRenderer: Renderer.webglCustom,
 
   /**
