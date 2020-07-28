@@ -63,7 +63,7 @@ function SpritesWebGLDrawable( renderer, instance ) {
 scenery.register( 'SpritesWebGLDrawable', SpritesWebGLDrawable );
 
 inherit( WebGLSelfDrawable, SpritesWebGLDrawable, {
-  // What type of WebGL renderer/processor should be used. TODO: doc
+  // What type of WebGL renderer/processor should be used. TODO https://github.com/phetsims/natural-selection/issues/116 doc
   webglRenderer: Renderer.webglCustom,
 
   /**
