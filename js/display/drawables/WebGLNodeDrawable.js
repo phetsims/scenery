@@ -35,7 +35,7 @@ function WebGLNodeDrawable( renderer, instance ) {
 scenery.register( 'WebGLNodeDrawable', WebGLNodeDrawable );
 
 inherit( WebGLSelfDrawable, WebGLNodeDrawable, {
-  // What type of WebGL renderer/processor should be used. TODO: doc
+  // We use a custom renderer for the needed flexibility
   webglRenderer: Renderer.webglCustom,
 
   /**
