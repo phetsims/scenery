@@ -1027,11 +1027,16 @@ class Input {
   dispatchA11yEvent( trail, eventType, domEvent, bubbles ) {
     Display.userGestureEmitter.emit();
 
-    // Even unpickable (disabled) components should stay in the focus order.
-    const canFireListeners = trail.isPickable() || PDOM_UNPICKABLE_EVENTS.includes( eventType );
-
     // This workaround hopefully won't be here forever, see ParallelDOM.setExcludeLabelSiblingFromInput() and https://github.com/phetsims/a11y-research/issues/156
-    if ( !( domEvent.target && domEvent.target.hasAttribute( PDOMUtils.DATA_EXCLUDE_FROM_INPUT ) ) && canFireListeners ) {
+    if ( !( domEvent.target && domEvent.target.hasAttribute( PDOMUtils.DATA_EXCLUDE_FROM_INPUT ) ) ) {
+
+      // If the trail is not pickable, don't dispatch PDOM events to those targets - but we still
+      // dispatch with an empty trail to call listeners on the Display and Pointer.
+      const canFireListeners = trail.isPickable() || PDOM_UNPICKABLE_EVENTS.includes( eventType );
+
+      if ( !canFireListeners ) {
+        trail = new Trail( [] );
+      }
 
       // To support PhET-iO playback, any potential playback events downstream of this playback event must be marked as
       // non playback events. This is to prevent the PhET-iO playback engine from repeating those events. This is here
