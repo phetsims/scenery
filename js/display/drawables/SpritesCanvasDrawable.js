@@ -54,7 +54,7 @@ inherit( CanvasSelfDrawable, SpritesCanvasDrawable, {
       }
 
       // If it's a translation only, we can add the offsets to the drawImage call directly (higher performance)
-      if ( spriteInstance.translationType === SpriteInstance.TRANSLATION ) {
+      if ( spriteInstance.transformType === SpriteInstance.TransformType.TRANSLATION ) {
         wrapper.context.drawImage(
           spriteImage.image,
           spriteInstance.matrix.m02() - spriteImage.offset.x,
