@@ -168,8 +168,10 @@ class AnimatedPanZoomListener extends PanZoomListener {
   down( event ) {
     PanZoomListener.prototype.down.call( this, event );
 
-    this._downTrail = event.trail;
-    this._downInDragBounds = this._dragBounds.containsPoint( event.pointer.point );
+    if ( this._dragBounds !== null ) {
+      this._downTrail = event.trail;
+      this._downInDragBounds = this._dragBounds.containsPoint( event.pointer.point );
+    }
 
     // begin middle press panning if we aren't already in that state
     if ( event.pointer.type === 'mouse' && event.pointer.middleDown && !this.middlePress ) {
@@ -216,23 +218,25 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * @param {SceneryEvent} event
    */
   move( event ) {
-    if ( this._downTrail && this._downInDragBounds ) {
-      this._repositionDuringDragPoint = null;
+    if ( this._downTrail ) {
+      if ( this._downInDragBounds ) {
+        this._repositionDuringDragPoint = null;
 
-      const hasDragIntent = this.hasDragIntent( event.pointer );
-      const currentTargetExists = event.currentTarget !== null;
+        const hasDragIntent = this.hasDragIntent( event.pointer );
+        const currentTargetExists = event.currentTarget !== null;
 
-      if ( currentTargetExists && hasDragIntent ) {
+        if ( currentTargetExists && hasDragIntent ) {
 
-        const globalTargetBounds = this._downTrail.parentToGlobalBounds( this._downTrail.lastNode().bounds );
-        const targetInBounds = this._panBounds.containsBounds( globalTargetBounds );
-        if ( !targetInBounds ) {
-          this._repositionDuringDragPoint = event.pointer.point;
+          const globalTargetBounds = this._downTrail.parentToGlobalBounds( this._downTrail.lastNode().bounds );
+          const targetInBounds = this._panBounds.containsBounds( globalTargetBounds );
+          if ( !targetInBounds ) {
+            this._repositionDuringDragPoint = event.pointer.point;
+          }
         }
       }
-    }
-    else {
-      this._downInDragBounds = this._dragBounds.containsPoint( event.pointer.point );
+      else {
+        this._downInDragBounds = this._dragBounds.containsPoint( event.pointer.point );
+      }
     }
   }
 

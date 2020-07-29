@@ -285,11 +285,12 @@ class MultiListener {
       return;
     }
 
+    if ( !_.includes( event.trail.nodes, this._targetNode ) ) {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener abort: target not in event trail' );
+      return;
+    }
+
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-
-    assert && assert( _.includes( event.trail.nodes, this._targetNode ),
-      'MultiListener down trail does not include targetNode?' );
-
     const press = new Press( event.pointer, event.trail.subtrailTo( this._targetNode, false ) );
 
     if ( !this._allowMoveInterruption && !this._allowMultitouchInterruption ) {
