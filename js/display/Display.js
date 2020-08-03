@@ -1772,6 +1772,8 @@ inherit( Object, Display, extend( {
     if ( this._accessible ) {
       this._rootAccessibleInstance.dispose();
     }
+
+    this._focusOverlay && this._focusOverlay.dispose();
   }
 } ), {
   /**
