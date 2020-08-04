@@ -72,7 +72,7 @@ function FocusOverlay( display, focusRootNode ) {
   this.focusDisplay = new Display( this.focusRootNode, {
     width: this.width,
     height: this.height,
-    allowWebGL: display._allowWebGL,
+    allowWebGL: display.isWebGLAllowed(),
     allowCSSHacks: false,
     accessibility: false,
     interactive: false

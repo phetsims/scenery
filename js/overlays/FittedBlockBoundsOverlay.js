@@ -51,7 +51,7 @@ inherit( ShapeBasedOverlay, FittedBlockBoundsOverlay, {
       }
     }
 
-    processBackbone( this.display._rootBackbone, Matrix3.IDENTITY );
+    processBackbone( this.display.rootBackbone, Matrix3.IDENTITY );
   }
 } );
 

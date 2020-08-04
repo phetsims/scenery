@@ -54,7 +54,7 @@ inherit( FittedBlock, WebGLBlock, {
     // so that canvas.toDataURL() will work. It also requires clearing the context manually ever frame. Both incur
     // performance costs, so it should be false by default.
     // TODO: This block can be shared across displays, so we need to handle preserveDrawingBuffer separately?
-    this.preserveDrawingBuffer = display.options.preserveDrawingBuffer;
+    this.preserveDrawingBuffer = display._preserveDrawingBuffer;
 
     // list of {Drawable}s that need to be updated before we update
     this.dirtyDrawables = cleanArray( this.dirtyDrawables );

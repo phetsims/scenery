@@ -80,7 +80,7 @@ inherit( Drawable, BackboneDrawable, {
     this.visibilityDirty = true;
 
     this.renderer = renderer;
-    this.domElement = isDisplayRoot ? display._domElement : BackboneDrawable.createDivBackbone();
+    this.domElement = isDisplayRoot ? display.domElement : BackboneDrawable.createDivBackbone();
     this.isDisplayRoot = isDisplayRoot;
     this.dirtyDrawables = cleanArray( this.dirtyDrawables );
 

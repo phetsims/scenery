@@ -114,20 +114,35 @@ function Display( rootNode, options ) {
   //OHTWO TODO: hybrid batching (option to batch until an event like 'up' that might be needed for security issues)
 
   options = merge( {
-    // initial display width
+    // {number} - Initial display width
     width: ( options && options.container && options.container.clientWidth ) || 640,
 
-    // initial display height
+    // {number} - Initial display height
     height: ( options && options.container && options.container.clientHeight ) || 480,
 
-    allowCSSHacks: true,       // applies CSS styles to the root DOM element that make it amenable to interactive content
-    allowSceneOverflow: false, // usually anything displayed outside of our dom element is hidden with CSS overflow
-    defaultCursor: 'default',  // what cursor is used when no other cursor is specified
-    backgroundColor: null,      // initial background color
+    // {boolean} - Applies CSS styles to the root DOM element that make it amenable to interactive content
+    allowCSSHacks: true,
+
+    // {boolean} - Usually anything displayed outside of our dom element is hidden with CSS overflow
+    allowSceneOverflow: false,
+
+    // {string} - What cursor is used when no other cursor is specified
+    defaultCursor: 'default',
+
+    // {ColorDef} - Intial background color
+    backgroundColor: null,
+
+    // {boolean} - Whether WebGL will preserve the drawing buffer
     preserveDrawingBuffer: false,
+
+    // {boolean} - Whether WebGL is enabled at all for drawables in this Display
     allowWebGL: true,
-    accessibility: true,        // enables accessibility features
-    interactive: true,         // Whether mouse/touch/keyboard inputs are enabled (if input has been added).
+
+    // {boolean} - Enables accessibility features
+    accessibility: true,
+
+    // {boolean} - Whether mouse/touch/keyboard inputs are enabled (if input has been added).
+    interactive: true,
 
     // {boolean} - If true, input event listeners will be attached to the Display's DOM element instead of the window.
     // Normally, attaching listeners to the window is preferred (it will see mouse moves/ups outside of the browser
@@ -135,7 +150,7 @@ function Display( rootNode, options ) {
     // preferred.
     listenToOnlyElement: false,
 
-    // TODO: doc
+    // {boolean} - Forwarded to Input: If true, most event types will be batched until otherwise triggered.
     batchDOMEvents: false,
 
     // {boolean} - If true, the input event location (based on the top-left of the browser tab's viewport, with no
@@ -170,73 +185,105 @@ function Display( rootNode, options ) {
     allowBackingScaleAntialiasing: true
   }, options );
 
-  // TODO: don't store the options, it's an anti-pattern.
-  this.options = options; // @private
-
   // @public (scenery-internal) {boolean} - Whether accessibility is enabled for this particular display.
   this._accessible = options.accessibility;
 
+  // @public (scenery-internal) {boolean}
+  this._preserveDrawingBuffer = options.preserveDrawingBuffer;
+
+  // @private {boolean}
   this._allowWebGL = options.allowWebGL;
+  this._allowCSSHacks = options.allowCSSHacks;
+  this._allowSceneOverflow = options.allowSceneOverflow;
+
+  // @private {string}
+  this._defaultCursor = options.defaultCursor;
 
   // @public {Property.<Dimension2>} The (integral, > 0) dimensions of the Display's DOM element (only updates the DOM
   // element on updateDisplay())
-  this.sizeProperty = new TinyProperty( new Dimension2( this.options.width, this.options.height ), {
+  this.sizeProperty = new TinyProperty( new Dimension2( options.width, options.height ), {
     useDeepEquality: true
   } );
-  this._currentSize = new Dimension2( -1, -1 ); // used to check against new size to see what we need to change
 
+  // @private {Dimension2} - used to check against new size to see what we need to change
+  this._currentSize = new Dimension2( -1, -1 );
+
+  // @private {Node}
   this._rootNode = rootNode;
   this._rootNode.addRootedDisplay( this );
-  this._rootBackbone = null; // to be filled in later
-  this._domElement = ( options && options.container ) ?
+
+  // @private {BackboneDrawable|null} - to be filled in later
+  this._rootBackbone = null;
+
+  // @private {Element}
+  this._domElement = options.container ?
                      BackboneDrawable.repurposeBackboneContainer( options.container ) :
                      BackboneDrawable.createDivBackbone();
-  this._sharedCanvasInstances = {}; // map from Node ID to Instance, for fast lookup
-  this._baseInstance = null; // will be filled with the root Instance
 
-  // We have a monotonically-increasing frame ID, generally for use with a pattern where we can mark objects with this
-  // to note that they are either up-to-date or need refreshing due to this particular frame (without having to clear
-  // that information after use). This is incremented every frame
-  this._frameId = 0; // {number}
+  // @public (scenery-internal) {Object.<nodeID:number,Instance>} - map from Node ID to Instance, for fast lookup
+  this._sharedCanvasInstances = {};
 
+  // @private {Instance|null} - will be filled with the root Instance
+  this._baseInstance = null;
+
+  // @public (scenery-internal) {number} - We have a monotonically-increasing frame ID, generally for use with a pattern
+  // where we can mark objects with this to note that they are either up-to-date or need refreshing due to this
+  // particular frame (without having to clear that information after use). This is incremented every frame
+  this._frameId = 0;
+
+  // @private {Array.<Instance>}
   this._dirtyTransformRoots = [];
   this._dirtyTransformRootsWithoutPass = [];
 
+  // @private {Array.<Instance>}
   this._instanceRootsToDispose = [];
+
+  // @private {Array.<Drawable>}
   this._drawablesToDispose = [];
 
-  // Block changes are handled by changing the "pending" block/backbone on drawables. We want to change them all after
-  // the main stitch process has completed, so we can guarantee that a single drawable is removed from its previous
-  // block before being added to a new one. This is taken care of in an updateDisplay pass after syncTree / stitching.
-  this._drawablesToChangeBlock = []; // {[Drawable]}
+  // @private {Array.<Drawable>} - Block changes are handled by changing the "pending" block/backbone on drawables. We
+  // want to change them all after the main stitch process has completed, so we can guarantee that a single drawable is
+  // removed from its previous block before being added to a new one. This is taken care of in an updateDisplay pass
+  // after syncTree / stitching.
+  this._drawablesToChangeBlock = [];
 
-  // Drawables have two implicit linked-lists, "current" and "old". syncTree modifies the "current" linked-list
-  // information so it is up-to-date, but needs to use the "old" information also. We move updating the
-  // "current" => "old" linked-list information until after syncTree and stitching is complete, and is taken care of
-  // in an updateDisplay pass.
-  this._drawablesToUpdateLinks = []; // {[Drawable]}
+  // @private {Array.<Drawable>} - Drawables have two implicit linked-lists, "current" and "old". syncTree modifies the
+  // "current" linked-list information so it is up-to-date, but needs to use the "old" information also. We move
+  // updating the "current" => "old" linked-list information until after syncTree and stitching is complete, and is
+  // taken care of in an updateDisplay pass.
+  this._drawablesToUpdateLinks = [];
 
-  // We store information on {ChangeInterval}s that records change interval information, that may contain references.
-  // We don't want to leave those references dangling after we don't need them, so they are recorded and cleaned in
-  // one of updateDisplay's phases.
-  this._changeIntervalsToDispose = []; // {[ChangeInterval]}
+  // @private {Array.<ChangeInterval>} - We store information on {ChangeInterval}s that records change interval
+  // information, that may contain references. We don't want to leave those references dangling after we don't need
+  // them, so they are recorded and cleaned in one of updateDisplay's phases.
+  this._changeIntervalsToDispose = [];
 
+  // @private {string|null}
   this._lastCursor = null;
-
   this._currentBackgroundCSS = null;
+
+  // @private {ColorDef}
   this._backgroundColor = null;
 
-  // used for shortcut animation frame functions
+  // @private {number} - Used for shortcut animation frame functions
   this._requestAnimationFrameID = 0;
 
-  // will be filled in with a scenery.Input if event handling is enabled
-  this._input = null; // @public (phet-io)
-  this._inputListeners = []; // {Array.<Object>} - Listeners that will be called for every event.
-  this._interactive = this.options.interactive; // {boolean} - Whether mouse/touch/keyboard inputs are enabled (if input has been added). Simulation will still step.
-  this._listenToOnlyElement = options.listenToOnlyElement; // TODO: doc
-  this._batchDOMEvents = options.batchDOMEvents; // TODO: doc
-  this._assumeFullWindow = options.assumeFullWindow; // TODO: doc
-  this._passiveEvents = options.passiveEvents; // @private {boolean|null}
+  // @public (phet-io,scenery) - Will be filled in with a scenery.Input if event handling is enabled
+  this._input = null;
+
+  // @private {Array.<Object>} - Listeners that will be called for every event.
+  this._inputListeners = [];
+
+  // @private {boolean} - Whether mouse/touch/keyboard inputs are enabled (if input has been added). Simulation will still step.
+  this._interactive = options.interactive;
+
+  // @private {boolean} - Passed through to Input
+  this._listenToOnlyElement = options.listenToOnlyElement;
+  this._batchDOMEvents = options.batchDOMEvents;
+  this._assumeFullWindow = options.assumeFullWindow;
+
+  // @private {boolean|null}
+  this._passiveEvents = options.passiveEvents;
 
   // @public (scenery-internal) {boolean}
   this._aggressiveContextRecreation = options.aggressiveContextRecreation;
@@ -244,15 +291,25 @@ function Display( rootNode, options ) {
   // @public (scenery-internal) {boolean}
   this._allowBackingScaleAntialiasing = options.allowBackingScaleAntialiasing;
 
-  // overlays currently being displayed.
+  // @private {Array.<*>} - Overlays currently being displayed.
   // API expected:
   //   .domElement
   //   .update()
   this._overlays = [];
+
+  // @private {PointerOverlay|null}
   this._pointerOverlay = null;
+
+  // @private {PointerAreaOverlay|null}
   this._pointerAreaOverlay = null;
+
+  // @private {HitAreaOverlay|null}
   this._hitAreaOverlay = null;
+
+  // @private {CanvasNodeBoundsOverlay|null}
   this._canvasAreaBoundsOverlay = null;
+
+  // @private {FittedBlockBoundsOverlay|null}
   this._fittedBlockBoundsOverlay = null;
 
   if ( assert ) {
@@ -262,25 +319,25 @@ function Display( rootNode, options ) {
 
   this.applyCSSHacks();
 
-  this.setBackgroundColor( this.options.backgroundColor );
+  this.setBackgroundColor( options.backgroundColor );
 
-  // global reference if we have a Display (useful)
-  this.scenery = scenery;
+  // @public {UtteranceQueue} - data structure for managing aria-live alerts the this Display instance
+  this.utteranceQueue = new UtteranceQueue( !this._accessible );
 
-  // @public - data structure for managing aria-live alerts the this Display instance
-  this.utteranceQueue = new UtteranceQueue( !this.options.accessibility );
-
-  if ( this.options.accessibility ) {
+  if ( this._accessible ) {
 
     // make the PDOM invisible in the browser - it has some width and is shifted off screen so that AT can read the
     // formatting tags, see https://github.com/phetsims/scenery/issues/730
     // SceneryStyle.addRule( '.accessibility, .accessibility * { position: relative; left: -1000px; top: 0; width: 250px; height: 0; clip: rect(0,0,0,0); pointerEvents: none }' );
 
+    // @private {Node}
     this._focusRootNode = new Node();
+
+    // @private {FocusOverlay}
     this._focusOverlay = new FocusOverlay( this, this._focusRootNode );
     this.addOverlay( this._focusOverlay );
 
-    // TODO: doc
+    // @private {Array.<PDOMInstance>}
     this._unsortedAccessibleInstances = [];
 
     // @public (scenery-internal) {Node|null} - When this display receives a pointer event, this is the focusable
@@ -297,10 +354,6 @@ function Display( rootNode, options ) {
     // reinserted into the PDOM, event callbacks related to focus should be blocked as these are internal operations
     // unrelated to application behavior user input, see https://github.com/phetsims/scenery/issues/925
     this.blockFocusCallbacks = false;
-
-    // @private - the node that currently has focus when we remove an accessible trail, tracked so that we can
-    // restore focus after sorting accessible instances
-    this._focusedNodeOnRemoveTrail;
 
     // @public (scenery-internal) {PDOMInstance}
     this._rootAccessibleInstance = PDOMInstance.createFromPool( null, this, new Trail() );
@@ -335,12 +388,6 @@ inherit( Object, Display, extend( {
    * Updates the display's DOM element with the current visual state of the attached root node and its descendants
    */
   updateDisplay: function() {
-
-    //OHTWO TODO: turn off after most debugging work is done
-    if ( window.sceneryDebugPause ) {
-      return;
-    }
-
     if ( sceneryLog && scenery.isLoggingPerformance() ) {
       this.perfSyncTreeCount = 0;
       this.perfStitchCount = 0;
@@ -376,7 +423,7 @@ inherit( Object, Display, extend( {
     // from code below without triggering side effects (we assume that we are not reentrant).
     this._rootNode.validateWatchedBounds();
 
-    if ( assertSlow ) { this.options.accessibility && this._rootAccessibleInstance.auditRoot(); }
+    if ( assertSlow ) { this._accessible && this._rootAccessibleInstance.auditRoot(); }
 
     if ( assertSlow ) { this._rootNode._picker.audit(); }
 
@@ -533,17 +580,31 @@ inherit( Object, Display, extend( {
       this._currentSize.height = this.size.height;
       this._domElement.style.height = this.size.height + 'px';
     }
-    if ( sizeDirty && !this.options.allowSceneOverflow ) {
+    if ( sizeDirty && !this._allowSceneOverflow ) {
       // to prevent overflow, we add a CSS clip
       //TODO: 0px => 0?
       this._domElement.style.clip = 'rect(0px,' + this.size.width + 'px,' + this.size.height + 'px,0px)';
     }
   },
 
+  /**
+   * @public
+   *
+   * @returns {boolean} - Whether WebGL is allowed to be used in drawables for this Display
+   */
+  isWebGLAllowed() {
+    return this._allowWebGL;
+  },
+
   getRootNode: function() {
     return this._rootNode;
   },
   get rootNode() { return this.getRootNode(); },
+
+  getRootBackbone: function() {
+    return this._rootBackbone;
+  },
+  get rootBackbone() { return this.getRootBackbone(); },
 
   // The dimensions of the Display's DOM element
   getSize: function() {
@@ -633,7 +694,7 @@ inherit( Object, Display, extend( {
     // when not interactive, all keyboard navigation is disabled
     // TODO: disable keyboard nav without hiding content so that it is still readable with a screen reader,
     // see https://github.com/phetsims/phet-io/issues/995
-    if ( this.options.accessibility ) {
+    if ( this._accessible ) {
       if ( !this._interactive ) {
         this.activeNode = Display.focusedNode;
 
@@ -809,7 +870,7 @@ inherit( Object, Display, extend( {
     }
 
     // fallback case
-    return this.setSceneCursor( this.options.defaultCursor );
+    return this.setSceneCursor( this._defaultCursor );
   },
 
   /**
@@ -847,7 +908,7 @@ inherit( Object, Display, extend( {
 
   applyCSSHacks: function() {
     // to use CSS3 transforms for performance, hide anything outside our bounds by default
-    if ( !this.options.allowSceneOverflow ) {
+    if ( !this._allowSceneOverflow ) {
       this._domElement.style.overflow = 'hidden';
     }
 
@@ -866,7 +927,7 @@ inherit( Object, Display, extend( {
     // don't allow browser to switch between font smoothing methods for text (see https://github.com/phetsims/scenery/issues/431)
     Features.setStyle( this._domElement, Features.fontSmoothing, 'antialiased' );
 
-    if ( this.options.allowCSSHacks ) {
+    if ( this._allowCSSHacks ) {
       // some css hacks (inspired from https://github.com/EightMedia/hammer.js/blob/master/hammer.js).
       // modified to only apply the proper prefixed version instead of spamming all of them, and doesn't use jQuery.
       Features.setStyle( this._domElement, Features.userDrag, 'none' );
@@ -1774,6 +1835,12 @@ inherit( Object, Display, extend( {
     }
 
     this._focusOverlay && this._focusOverlay.dispose();
+
+    this.sizeProperty.dispose();
+
+    // Will immediately dispose recursively, all Instances AND their attached drawables, which will include the
+    // rootBackbone.
+    this._baseInstance.dispose();
   }
 } ), {
   /**

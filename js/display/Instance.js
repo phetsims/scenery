@@ -82,7 +82,7 @@ inherit( Object, Instance, {
 
     this.id = this.id || globalIdCounter++;
 
-    this.isWebGLSupported = display._allowWebGL && Utils.isWebGLSupported;
+    this.isWebGLSupported = display.isWebGLAllowed() && Utils.isWebGLSupported;
 
     // {RelativeTransform}, provides high-performance access to 'relative' transforms (from our nearest
     // transform root), and allows for listening to when our relative transform changes (called during
