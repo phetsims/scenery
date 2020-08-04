@@ -1841,6 +1841,8 @@ inherit( Object, Display, extend( {
     // Will immediately dispose recursively, all Instances AND their attached drawables, which will include the
     // rootBackbone.
     this._baseInstance.dispose();
+
+    this.utteranceQueue && this.utteranceQueue.dispose();
   }
 } ), {
   /**
