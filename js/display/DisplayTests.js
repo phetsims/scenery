@@ -44,7 +44,7 @@ QUnit.test( 'Drawables (Rectangle)', function( assert ) {
   // The stubDisplay It's a hack that implements the subset of the Display API needed where called. It will definitely
   // be removed. The reason it stores the frame ID is because much of Scenery 0.2 uses ID comparison to determine
   // dirty state. That allows us to not have to set dirty states back to "clean" afterwards.  See #296
-  const stubDisplay = { _frameId: 5 };
+  const stubDisplay = { _frameId: 5, isWebGLAllowed: () => true };
 
   const canvas = document.createElement( 'canvas' );
   canvas.width = 64;
@@ -90,7 +90,7 @@ QUnit.test( 'Drawables (Rectangle)', function( assert ) {
 } );
 
 QUnit.test( 'Drawables (Circle)', function( assert ) {
-  const stubDisplay = { _frameId: 5 };
+  const stubDisplay = { _frameId: 5, isWebGLAllowed: () => true };
 
   const canvas = document.createElement( 'canvas' );
   canvas.width = 64;
@@ -136,7 +136,7 @@ QUnit.test( 'Drawables (Circle)', function( assert ) {
 } );
 
 QUnit.test( 'Drawables (Line)', function( assert ) {
-  const stubDisplay = { _frameId: 5 };
+  const stubDisplay = { _frameId: 5, isWebGLAllowed: () => true };
 
   const canvas = document.createElement( 'canvas' );
   canvas.width = 64;
@@ -176,7 +176,7 @@ QUnit.test( 'Drawables (Line)', function( assert ) {
 } );
 
 QUnit.test( 'Drawables (Path)', function( assert ) {
-  const stubDisplay = { _frameId: 5 };
+  const stubDisplay = { _frameId: 5, isWebGLAllowed: () => true };
 
   const canvas = document.createElement( 'canvas' );
   canvas.width = 64;
@@ -221,7 +221,7 @@ QUnit.test( 'Drawables (Path)', function( assert ) {
 } );
 
 QUnit.test( 'Drawables (Text)', function( assert ) {
-  const stubDisplay = { _frameId: 5 };
+  const stubDisplay = { _frameId: 5, isWebGLAllowed: () => true };
 
   const canvas = document.createElement( 'canvas' );
   canvas.width = 64;
@@ -273,7 +273,7 @@ QUnit.test( 'Drawables (Text)', function( assert ) {
 } );
 
 QUnit.test( 'Drawables (Image)', function( assert ) {
-  const stubDisplay = { _frameId: 5 };
+  const stubDisplay = { _frameId: 5, isWebGLAllowed: () => true };
 
   const canvas = document.createElement( 'canvas' );
   canvas.width = 64;
@@ -313,7 +313,7 @@ QUnit.test( 'Drawables (Image)', function( assert ) {
 } );
 
 QUnit.test( 'Drawables (DOM)', function( assert ) {
-  const stubDisplay = { _frameId: 5 };
+  const stubDisplay = { _frameId: 5, isWebGLAllowed: () => true };
 
   const r1 = new DOM( document.createElement( 'canvas' ) );
   const r1i = new Instance( stubDisplay, r1.getUniqueTrail() );
