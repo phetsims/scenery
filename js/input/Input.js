@@ -953,7 +953,7 @@ class Input {
   removePointerAddedListener( listener ) {
     const index = this.pointerAddedListeners.indexOf( listener );
     if ( index !== -1 ) {
-      this.pointerAddedListeners.splice( index, index + 1 );
+      this.pointerAddedListeners.splice( index, 1 );
     }
   }
 
