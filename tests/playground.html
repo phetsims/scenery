@@ -14,9 +14,6 @@ an UI and Display made for visual testing and debugging.
   <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
   <script src="../../aqua/js/pageload-connector.js"></script>
 
-  <!--  Query String Machine is used by Tandem-->
-  <script src="../../query-string-machine/js/QueryStringMachine.js"></script>
-
   <!-- jQuery and LoDash are dependencies -->
   <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
   <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
@@ -157,10 +154,10 @@ an UI and Display made for visual testing and debugging.
         }
       } );
 
-      a._accessibleInstances[ 0 ].peer._primarySibling.addEventListener( 'focusin', () => console.log( 'primary focusin') );
-      a._accessibleInstances[ 0 ].peer._primarySibling.addEventListener( 'focus', () => console.log( 'primary focus') );
-      display.accessibleDOMElement.addEventListener( 'focusin', () => console.log( 'element focusin') );
-      display.accessibleDOMElement.addEventListener( 'focus', () => console.log( 'element focus') );
+      a._accessibleInstances[ 0 ].peer._primarySibling.addEventListener( 'focusin', () => console.log( 'primary focusin' ) );
+      a._accessibleInstances[ 0 ].peer._primarySibling.addEventListener( 'focus', () => console.log( 'primary focus' ) );
+      display.accessibleDOMElement.addEventListener( 'focusin', () => console.log( 'element focusin' ) );
+      display.accessibleDOMElement.addEventListener( 'focus', () => console.log( 'element focus' ) );
 
       a.focus();
 
