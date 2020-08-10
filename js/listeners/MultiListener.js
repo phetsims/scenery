@@ -1,15 +1,24 @@
 // Copyright 2017-2020, University of Colorado Boulder
 
 /**
- * NOTE: Not a fully finished product, please BEWARE before using this in code.
+ * MultiListener is responsible for monitoring the mouse, touch, and other presses on the screen and determines the
+ * operations to apply to a target Node from this input. Single touch dragging on the screen will initiate
+ * panning. Multi-touch gestures will initiate scaling, translation, and potentially rotation depending on
+ * the gesture.
  *
- * TODO: doc
+ * Multilistener will keep track of all "background" presses on the screen. When certain conditions are met, the
+ * "background" presses become active and attached listeners may be interrupted so that the Multilistener
+ * gestures take precedence. Multilistener uses the Intent feature of Pointer, so that the default behavior of this
+ * listener can be prevented if necessary. Generally, you would use Pointer.reserveForDrag() to indicate
+ * that your Node is intended for other input that should not be interrupted by this listener.
  *
- * TODO: unit tests
+ * For example usage, see scenery/examples/input.html. A typical "simple" MultiListener usage
+ * would be something like:
  *
- * TODO: add example usage
+ *    display.addInputListener( new PressListener( targetNode ) );
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
+ * @author Jesse Greenberg
  */
 
 import Matrix from '../../../dot/js/Matrix.js';
@@ -61,8 +70,8 @@ class MultiListener {
       allowMultitouchInterruption: false,
 
       // {private} - if true, a certain amount of movement in the global coordinate frame will interrupt any pointer
-      // listeners and initiate translation from the pointer, unless the Pointer of the SceneryEvent has been
-      // reserved for dragging
+      // listeners and initiate translation from the pointer, unless default behavior has been prevented by
+      // setting Intent on the Pointer.
       allowMoveInterruption: true,
 
       // {number} - magnitude limits for scaling in both x and y
@@ -96,7 +105,7 @@ class MultiListener {
     // other Pointer listeners are interrupted in these cases.
     this._backgroundPresses = [];
 
-    // @private
+    // @private - attached to the Pointer when a Press is added
     this._pressListener = {
       move: event => {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener pointer move' );
@@ -111,7 +120,6 @@ class MultiListener {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener pointer up' );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-        // TODO: consider logging press on the pointer itself?
         this.removePress( this.findPress( event.pointer ) );
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
@@ -220,7 +228,6 @@ class MultiListener {
    * @returns {null|Press}
    */
   findBackgroundPress( pointer ) {
-    // TODO: reduce duplication with findPress?
     for ( let i = 0; i < this._backgroundPresses.length; i++ ) {
       if ( this._backgroundPresses[ i ].pointer === pointer ) {
         return this._backgroundPresses[ i ];
@@ -507,7 +514,6 @@ class MultiListener {
    * @returns {Matrix3}
    */
   computeSinglePressMatrix() {
-    // TODO: scratch things
     const singleTargetPoint = this._presses[ 0 ].targetPoint;
     const singleMappedPoint = this._targetNode.localToParentPoint( this._presses[ 0 ].localPoint );
     const delta = singleTargetPoint.minus( singleMappedPoint );
@@ -539,7 +545,6 @@ class MultiListener {
    * @returns {Matrix3}
    */
   computeTranslationScaleMatrix() {
-    // TODO: minimize closures
     const localPoints = this._presses.map( press => press.localPoint );
     const targetPoints = this._presses.map( press => press.targetPoint );
 
