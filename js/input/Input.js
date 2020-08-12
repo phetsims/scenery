@@ -1037,16 +1037,7 @@ class Input {
       if ( !canFireListeners ) {
         trail = new Trail( [] );
       }
-
-      // To support PhET-iO playback, any potential playback events downstream of this playback event must be marked as
-      // non playback events. This is to prevent the PhET-iO playback engine from repeating those events. This is here
-      // because, unlike visual pointer events, alternative input from the PDOM is often called from code instead of
-      // being "top-level" user input at the root of the event hierarchy. See https://github.com/phetsims/gravity-force-lab/issues/242
-      Tandem.PHET_IO_ENABLED && phet.phetio.dataStream.pushNonPlaybackable();
-
       this.dispatchEvent( trail, eventType, this.a11yPointer, domEvent, bubbles );
-
-      Tandem.PHET_IO_ENABLED && phet.phetio.dataStream.popNonPlaybackable();
     }
   }
 
