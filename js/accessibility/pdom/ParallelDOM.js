@@ -198,12 +198,12 @@ const ACCESSIBILITY_OPTION_KEYS = [
   /*
    * Higher Level API Functions
    */
-  'accessibleName', // {string|null} - Sets the name of this node, read when this node receives focus and inserted appropriately based on accessibleNameBehavio
-  // TODO: add accessibleNameBehavior
+  'accessibleName', // {string|null} - Sets the name of this node, read when this node receives focus and inserted appropriately based on accessibleNameBehavior
+  'accessibleNameBehavior', // {A11yBehaviorFunctionDef} - Sets the way in which accessibleName will be set for the Node, see DEFAULT_ACCESSIBLE_NAME_BEHAVIOR for example
   'helpText', // {string|null} - Sets the descriptive content for this node, read by the virtual cursor, inserted into DOM appropriately based on helpTextBehavior
-  'helpTextBehavior', // {function} - Sets the way in which help text will be set for the Node, see DEFAULT_HELP_TEXT_BEHAVIOR for example
+  'helpTextBehavior', // {A11yBehaviorFunctionDef} - Sets the way in which help text will be set for the Node, see DEFAULT_HELP_TEXT_BEHAVIOR for example
   'accessibleHeading', // {string|null} - Sets content for the heading whose level will be automatically generated if specified
-  'accessibleHeadingBehavior', // {function} - Set to modify default behavior for inserting accessibleHeading string
+  'accessibleHeadingBehavior', // {A11yBehaviorFunctionDef} - Set to modify default behavior for inserting accessibleHeading string
 
   /*
    * Lower Level API Functions
