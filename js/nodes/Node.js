@@ -1231,12 +1231,13 @@ inherit( PhetioObject, Node, {
       }
 
       if ( !ourLocalBounds.equals( oldLocalBounds ) ) {
+        // sanity check, see https://github.com/phetsims/scenery/issues/1071, we're running this before the localBounds
+        // listeners are notified, to support limited re-entrance.
+        this._boundsDirty = true;
+
         if ( !ourLocalBounds.equalsEpsilon( oldLocalBounds, notificationThreshold ) ) {
           this.localBoundsProperty.notifyListeners( oldLocalBounds );
         }
-
-        // sanity check
-        this._boundsDirty = true;
       }
 
       // adjust our transform to match maximum bounds if necessary on a local bounds change
