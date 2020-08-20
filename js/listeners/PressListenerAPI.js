@@ -25,11 +25,13 @@ class PressListenerAPI extends UninstrumentedAPI {
     options = merge( {
       pressActionOptions: {
         phetioType: ActionIO( [ SceneryEventIO ] ),
-        phetioEventType: EventType.USER
+        phetioEventType: EventType.USER,
+        phetioReadOnly: true
       },
       releaseActionOptions: {
         phetioType: ActionIO( [ NullableIO( SceneryEventIO ) ] ),
-        phetioEventType: EventType.USER
+        phetioEventType: EventType.USER,
+        phetioReadOnly: true
       }
     }, options );
 

@@ -14,6 +14,7 @@ import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector2Property from '../../../dot/js/Vector2Property.js';
 import phetioAPITest from '../../../tandem/js/phetioAPITest.js';
+import Tandem from '../../../tandem/js/Tandem.js';
 import DragListener from './DragListener.js';
 import DragListenerAPI from './DragListenerAPI.js';
 import ListenerTestUtils from './ListenerTestUtils.js';
@@ -23,6 +24,7 @@ QUnit.module( 'DragListener' );
 QUnit.test( 'translateNode', function( assert ) {
   ListenerTestUtils.simpleRectangleTest( function( display, rect, node ) {
     const listener = new DragListener( {
+      tandem: Tandem.GENERAL.createTandem( 'myListener' ),
       translateNode: true
     } );
     rect.addInputListener( listener );
@@ -33,12 +35,14 @@ QUnit.test( 'translateNode', function( assert ) {
     ListenerTestUtils.mouseUp( display, 20, 15 );
     assert.equal( rect.x, 10, 'Drag with translateNode should have changed the x translation' );
     assert.equal( rect.y, 5, 'Drag with translateNode should have changed the y translation' );
+    listener.dispose();
   } );
 } );
 
 QUnit.test( 'translateNode with applyOffset:false', function( assert ) {
   ListenerTestUtils.simpleRectangleTest( function( display, rect, node ) {
     const listener = new DragListener( {
+      tandem: Tandem.GENERAL.createTandem( 'myListener' ),
       translateNode: true,
       applyOffset: false
     } );
@@ -50,12 +54,14 @@ QUnit.test( 'translateNode with applyOffset:false', function( assert ) {
     ListenerTestUtils.mouseUp( display, 20, 15 );
     assert.equal( rect.x, 20, 'Drag should place the rect with its origin at the last mouse position (x)' );
     assert.equal( rect.y, 15, 'Drag should place the rect with its origin at the last mouse position (y)' );
+    listener.dispose();
   } );
 } );
 
 QUnit.test( 'translateNode with trackAncestors', function( assert ) {
   ListenerTestUtils.simpleRectangleTest( function( display, rect, node ) {
     const listener = new DragListener( {
+      tandem: Tandem.GENERAL.createTandem( 'myListener' ),
       translateNode: true,
       trackAncestors: true
     } );
@@ -68,6 +74,7 @@ QUnit.test( 'translateNode with trackAncestors', function( assert ) {
     ListenerTestUtils.mouseUp( display, 20, 15 );
     assert.equal( rect.x, 5, 'The x shift of 10 on the base node will have wiped out half of the drag change' );
     assert.equal( rect.y, 5, 'No y movement occurred of the base node' );
+    listener.dispose();
   } );
 } );
 
@@ -77,6 +84,7 @@ QUnit.test( 'positionProperty with hooks', function( assert ) {
     positionProperty.linkAttribute( rect, 'translation' );
 
     const listener = new DragListener( {
+      tandem: Tandem.GENERAL.createTandem( 'myListener' ),
       positionProperty: positionProperty
     } );
     rect.addInputListener( listener );
@@ -87,6 +95,7 @@ QUnit.test( 'positionProperty with hooks', function( assert ) {
     ListenerTestUtils.mouseUp( display, 20, 15 );
     assert.equal( positionProperty.value.x, 10, 'Drag with translateNode should have changed the x translation' );
     assert.equal( positionProperty.value.y, 5, 'Drag with translateNode should have changed the y translation' );
+    listener.dispose();
   } );
 } );
 
@@ -101,6 +110,7 @@ QUnit.test( 'positionProperty with hooks and transform', function( assert ) {
     } );
 
     const listener = new DragListener( {
+      tandem: Tandem.GENERAL.createTandem( 'myListener' ),
       positionProperty: positionProperty,
       transform: transform
     } );
@@ -112,6 +122,7 @@ QUnit.test( 'positionProperty with hooks and transform', function( assert ) {
     ListenerTestUtils.mouseUp( display, 20, 15 );
     assert.equal( Utils.roundSymmetric( rect.x ), 15, '[x] Started at 5, moved by 10' );
     assert.equal( Utils.roundSymmetric( rect.y ), 8, '[y] Started at 3, moved by 5' );
+    listener.dispose();
   } );
 } );
 
@@ -124,6 +135,7 @@ QUnit.test( 'positionProperty with dragBounds', function( assert ) {
     } );
 
     const listener = new DragListener( {
+      tandem: Tandem.GENERAL.createTandem( 'myListener' ),
       positionProperty: positionProperty,
       dragBoundsProperty: new Property( new Bounds2( 0, 0, 5, 5 ) )
     } );
@@ -135,6 +147,7 @@ QUnit.test( 'positionProperty with dragBounds', function( assert ) {
     ListenerTestUtils.mouseUp( display, 50, 30 );
     assert.equal( positionProperty.value.x, 5, '[x] Should be limited to 5 by dragBounds' );
     assert.equal( positionProperty.value.y, 5, '[y] Should be limited to 5 by dragBounds  ' );
+    listener.dispose();
   } );
 } );
 

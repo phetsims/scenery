@@ -34,8 +34,8 @@ const beforeTest = display => {
  * @param {Display} display
  */
 const afterTest = display => {
-  display.detachEvents();
   document.body.removeChild( display.domElement );
+  display.dispose();
 };
 
 const dispatchEvent = ( domElement, event ) => {

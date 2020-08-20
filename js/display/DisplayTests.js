@@ -421,6 +421,7 @@ QUnit.test( 'Empty Display usage', function( assert ) {
   d.updateDisplay();
 
   assert.ok( true, 'so we have at least 1 test in this set' );
+  d.dispose();
 } );
 
 QUnit.test( 'Simple Display usage', function( assert ) {
@@ -431,6 +432,7 @@ QUnit.test( 'Simple Display usage', function( assert ) {
   d.updateDisplay();
 
   assert.ok( true, 'so we have at least 1 test in this set' );
+  d.dispose();
 } );
 
 QUnit.test( 'Stitch patterns #1', function( assert ) {
@@ -463,6 +465,7 @@ QUnit.test( 'Stitch patterns #1', function( assert ) {
   d.updateDisplay();
 
   assert.ok( true, 'so we have at least 1 test in this set' );
+  d.dispose();
 } );
 
 QUnit.test( 'Invisible append', function( assert ) {
@@ -479,6 +482,8 @@ QUnit.test( 'Invisible append', function( assert ) {
   display.updateDisplay();
 
   assert.ok( true, 'so we have at least 1 test in this set' );
+  display.dispose();
+
 } );
 
 QUnit.test( 'Stitching problem A (GitHub Issue #339)', function( assert ) {
@@ -507,6 +512,8 @@ QUnit.test( 'Stitching problem A (GitHub Issue #339)', function( assert ) {
   display.updateDisplay();
 
   assert.ok( true, 'so we have at least 1 test in this set' );
+  display.dispose();
+
 } );
 
 QUnit.test( 'SVG group disposal issue (GitHub Issue #354) A', function( assert ) {
@@ -527,6 +534,8 @@ QUnit.test( 'SVG group disposal issue (GitHub Issue #354) A', function( assert )
   display.updateDisplay();
 
   assert.ok( true, 'so we have at least 1 test in this set' );
+  display.dispose();
+
 } );
 
 QUnit.test( 'SVG group disposal issue (GitHub Issue #354) B', function( assert ) {
@@ -548,6 +557,7 @@ QUnit.test( 'SVG group disposal issue (GitHub Issue #354) B', function( assert )
   display.updateDisplay();
 
   assert.ok( true, 'so we have at least 1 test in this set' );
+  display.dispose();
 } );
 
 QUnit.test( 'Empty path display test', function( assert ) {
@@ -558,6 +568,7 @@ QUnit.test( 'Empty path display test', function( assert ) {
   display.updateDisplay();
 
   assert.ok( true, 'so we have at least 1 test in this set' );
+  display.dispose();
 } );
 
 QUnit.test( 'Double remove related to #392', function( assert ) {
@@ -580,4 +591,5 @@ QUnit.test( 'Double remove related to #392', function( assert ) {
   display.updateDisplay();
 
   assert.ok( true, 'so we have at least 1 test in this set' );
+  display.dispose();
 } );

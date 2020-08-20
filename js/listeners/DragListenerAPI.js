@@ -24,7 +24,8 @@ class DragListenerAPI extends PressListenerAPI {
       dragActionOptions: {
         phetioType: ActionIO( [ SceneryEventIO ] ),
         phetioEventType: EventType.USER,
-        phetioHighFrequency: true
+        phetioHighFrequency: true,
+        phetioReadOnly: true
       }
     }, options );
     super( options );

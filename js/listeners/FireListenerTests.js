@@ -6,6 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import Tandem from '../../../tandem/js/Tandem.js';
 import FireListener from './FireListener.js';
 import ListenerTestUtils from './ListenerTestUtils.js';
 
@@ -15,6 +16,7 @@ QUnit.test( 'Basics', function( assert ) {
   ListenerTestUtils.simpleRectangleTest( function( display, rect, node ) {
     let fireCount = 0;
     const listener = new FireListener( {
+      tandem: Tandem.GENERAL.createTandem( 'myListener' ),
       fire: function() {
         fireCount++;
       }
@@ -57,5 +59,7 @@ QUnit.test( 'Basics', function( assert ) {
     ListenerTestUtils.mouseMove( display, 10, 10 );
     ListenerTestUtils.mouseUp( display, 10, 10 );
     assert.equal( fireCount, 2, 'Should fire if the mouse is moved away after press (but moved back before release)' );
+
+    listener.dispose();
   } );
 } );

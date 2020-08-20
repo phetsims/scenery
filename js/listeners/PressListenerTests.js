@@ -7,6 +7,7 @@
  */
 
 import phetioAPITest from '../../../tandem/js/phetioAPITest.js';
+import Tandem from '../../../tandem/js/Tandem.js';
 import ListenerTestUtils from './ListenerTestUtils.js';
 import PressListener from './PressListener.js';
 import PressListenerAPI from './PressListenerAPI.js';
@@ -19,6 +20,8 @@ QUnit.test( 'Basics', function( assert ) {
     let releaseCount = 0;
     let dragCount = 0;
     const listener = new PressListener( {
+      tandem: Tandem.GENERAL.createTandem( 'myListener' ),
+
       press: function( event, listener ) {
         pressCount++;
       },
@@ -86,12 +89,15 @@ QUnit.test( 'Basics', function( assert ) {
     assert.equal( listener.isHoveringProperty.value, false, '[5] Is NOT hovering' );
     assert.equal( listener.isHighlightedProperty.value, false, '[5] Is NOT highlighted' );
     assert.equal( listener.interrupted, false, '[5] Is not interrupted' );
+    listener.dispose();
   } );
 } );
 
 QUnit.test( 'Interruption', function( assert ) {
   ListenerTestUtils.simpleRectangleTest( function( display, rect, node ) {
-    const listener = new PressListener();
+    const listener = new PressListener( {
+      tandem: Tandem.GENERAL.createTandem( 'myListener' )
+    });
     rect.addInputListener( listener );
 
     ListenerTestUtils.mouseDown( display, 10, 10 );
@@ -99,6 +105,7 @@ QUnit.test( 'Interruption', function( assert ) {
     assert.equal( listener.isPressedProperty.value, true, 'Is pressed before the interruption' );
     listener.interrupt();
     assert.equal( listener.isPressedProperty.value, false, 'Is NOT pressed after the interruption' );
+    listener.dispose();
   } );
 } );
 

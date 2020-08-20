@@ -256,6 +256,10 @@ inherit( Object, PDOMFuzzer, {
     }
 
     return true;
+  },
+
+  dispose: function() {
+    this.display.dispose();
   }
 } );
 

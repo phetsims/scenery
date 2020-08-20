@@ -91,6 +91,8 @@ QUnit.test( 'sibling positioning', function( assert ) {
 
   // remove the display element so it doesn't interfere with qunit api
   document.body.removeChild( display.domElement );
+  display.dispose();
+
 } );
 
 QUnit.test( 'PDOM transform source Node', assert => {
@@ -137,4 +139,6 @@ QUnit.test( 'PDOM transform source Node', assert => {
 
   // remove the display element so it doesn't interfere with qunit api
   document.body.removeChild( display.domElement );
+  display.dispose();
+
 } );

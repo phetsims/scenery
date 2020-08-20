@@ -274,6 +274,8 @@ QUnit.test( 'setting accessibleOrder', function( assert ) {
   assert.ok( divRoot.children[ 1 ] === divC, 'divC should be second child' );
   assert.ok( divRoot.children[ 2 ] === divB, 'divB should be third child' );
   assert.ok( divRoot.children[ 3 ] === divA, 'divA should be fourth child' );
+  display.dispose();
+
 } );
 
 QUnit.test( 'setting accessibleOrder before setting accessible content', function( assert ) {
@@ -305,6 +307,8 @@ QUnit.test( 'setting accessibleOrder before setting accessible content', functio
   assert.ok( divRoot.children[ 1 ] === divC, 'divC should be second child' );
   assert.ok( divRoot.children[ 2 ] === divB, 'divB should be third child' );
   assert.ok( divRoot.children[ 3 ] === divA, 'divA should be fourth child' );
+  display.dispose();
+
 } );
 
 QUnit.test( 'setting accessible order on nodes with no accessible content', function( assert ) {
@@ -338,6 +342,8 @@ QUnit.test( 'setting accessible order on nodes with no accessible content', func
 
   assert.ok( divB.children[ 0 ] === divE, 'div E should be first child of div B' );
   assert.ok( divB.children[ 1 ] === divC, 'div C should be second child of div B' );
+  display.dispose();
+
 } );
 
 QUnit.test( 'setting accessible order on nodes with no accessible content', function( assert ) {
@@ -365,4 +371,6 @@ QUnit.test( 'setting accessible order on nodes with no accessible content', func
 
   assert.ok( divA.children[ 0 ] === divE, 'div E should be first child of div B' );
   assert.ok( divA.children[ 1 ] === divC, 'div C should be second child of div B' );
+  display.dispose();
+
 } );

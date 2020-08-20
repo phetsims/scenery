@@ -507,6 +507,7 @@ QUnit.test( 'Instance.addRemoveCounter === -2 failure (#392)', function( assert 
   node0.removeChild( node6 );
 
   assert.ok( true, 'so we have at least 1 test in this set' );
+  display.dispose();
 } );
 
 QUnit.test( 'RelativeTransform matrix mismatch #393', function( assert ) {
@@ -527,6 +528,7 @@ QUnit.test( 'RelativeTransform matrix mismatch #393', function( assert ) {
   display.updateDisplay();
 
   assert.ok( true, 'so we have at least 1 test in this set' );
+  display.dispose();
 } );
 
 QUnit.test( 'computeShapeBounds in requiresSVGBoundsWorkaround', function( assert ) {
@@ -1317,4 +1319,5 @@ QUnit.test( 'computeShapeBounds in requiresSVGBoundsWorkaround', function( asser
   display.updateDisplay();
 
   assert.ok( true, 'so we have at least 1 test in this set' );
+  display.dispose();
 } );
