@@ -176,7 +176,7 @@ class MultiListener {
             // only interrupt if pointer has moved far enough so we don't interrupt taps that might move little or
             // when there is no scale to translate
             sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener attached, interrupting for press' );
-            event.pointer.interruptAttached();
+            this.interruptOtherListeners( event.pointer );
             this.convertBackgroundPresses();
             this.movePress( this.findPress( event.pointer ) );
           }
@@ -265,6 +265,24 @@ class MultiListener {
     return _.some( this._backgroundPresses, press => {
       return !this.canMoveFromPointer( press.pointer );
     } );
+  }
+
+  /**
+   * Interrupt all listeners on the pointer, except for background listeners that
+   * were added by this MultiListener. Useful when it is time for this listener to
+   * "take over" and interrupt any other listeners on the pointer.
+   * @private
+   *
+   * @param {Pointer} pointer
+   */
+  interruptOtherListeners( pointer ) {
+    const listeners = pointer._listeners.slice();
+    for ( let i = 0; i < listeners.length; i++ ) {
+      const listener = listeners[ i ];
+      if ( listener !== this._backgroundListener ) {
+        listener.interrupt && listener.interrupt();
+      }
+    }
   }
 
   /**
