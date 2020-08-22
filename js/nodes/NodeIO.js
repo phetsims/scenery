@@ -14,7 +14,6 @@ import merge from '../../../phet-core/js/merge.js';
 import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import ObjectIO from '../../../tandem/js/types/ObjectIO.js';
-import VoidIO from '../../../tandem/js/types/VoidIO.js';
 import scenery from '../scenery.js';
 import NodeProperty from '../util/NodeProperty.js';
 
@@ -60,26 +59,6 @@ class NodeIO extends ObjectIO {
     this.disposeNodeIO();
   }
 }
-
-NodeIO.methods = {
-  moveForward: {
-    returnType: VoidIO,
-    parameterTypes: [],
-    implementation: function() {
-      return this.phetioObject.moveForward();
-    },
-    documentation: 'Move this node one index forward in each of its parents.  If the node is already at the front, this is a no-op.'
-  },
-
-  moveBackward: {
-    returnType: VoidIO,
-    parameterTypes: [],
-    implementation: function() {
-      return this.phetioObject.moveBackward();
-    },
-    documentation: 'Move this node one index backward in each of its parents.  If the node is already at the back, this is a no-op.'
-  }
-};
 
 NodeIO.validator = { valueType: scenery.Node };
 
