@@ -94,6 +94,11 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // then user likely trying to pull an object back into view so we prevent panning during drag
     this._downInDragBounds = false;
 
+    // @private - reference to the PDOMPointer that is currently down, to determine if its
+    // has been reserved with intent for dragging - if so, we will try to keep the Pointer's
+    // target visible and pan to it while user is dragging with keyboard
+    this._pdomPointerWithIntent = null;
+
     // listeners that will be bound to `this` if we are on a (non-touchscreen) safari platform, referenced for
     // removal on dispose
     let boundGestureStartListener = null;
@@ -151,6 +156,21 @@ class AnimatedPanZoomListener extends PanZoomListener {
       this.handleMiddlePress( dt );
     }
 
+    // if dragging focused item with drag intent, make sure that the Node stays within
+    // the pan bounds so that it is always visible while being moved around
+    if ( this._pdomPointerWithIntent ) {
+      const pointerHasIntent = this.hasDragIntent( this._pdomPointerWithIntent );
+      if ( pointerHasIntent && this.keyStateTracker.movementKeysDown && Display.focusProperty.value !== null ) {
+        const focusedNode = Display.focusedNode;
+        if ( this._panBounds.containsBounds( focusedNode.globalBounds ) ) {
+          this.panToNode( focusedNode );
+        }
+      }
+    }
+
+    // if dragging an item with a mouse or touch pointer, make sure that it
+    // ramains visible in the zoomed in view, panning to it when it approaches
+    // edge of the screen
     if ( this._repositionDuringDragPoint ) {
       this.repositionDuringDrag( this._repositionDuringDragPoint );
     }
@@ -308,7 +328,6 @@ class AnimatedPanZoomListener extends PanZoomListener {
         const keyPress = new KeyPress( this.keyStateTracker, this.getCurrentScale(), this._targetScale );
         this.repositionFromKeys( keyPress );
       }
-
     }
   }
 
@@ -342,6 +361,9 @@ class AnimatedPanZoomListener extends PanZoomListener {
         this.repositionFromKeys( keyPress );
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
+      }
+      else {
+        this._pdomPointerWithIntent = event.pointer;
       }
     }
   }

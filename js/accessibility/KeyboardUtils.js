@@ -18,6 +18,13 @@ const KEY_DOWN_ARROW = 40;
 const KEY_SHIFT = 16;
 const KEY_CTRL = 17;
 const KEY_ALT = 18;
+const KEY_W = 87;
+const KEY_A = 65;
+const KEY_S = 83;
+const KEY_D = 68;
+
+const ARROW_KEYS = [ KEY_RIGHT_ARROW, KEY_LEFT_ARROW, KEY_UP_ARROW, KEY_DOWN_ARROW ];
+const WASD_KEYS = [ KEY_W, KEY_S, KEY_A, KEY_D ];
 
 // constants
 var KeyboardUtils = {
@@ -60,7 +67,9 @@ var KeyboardUtils = {
   KEY_PLUS: platform.firefox ? 61 : 187,
   KEY_MINUS: platform.firefox ? 173 : 189,
 
-  ARROW_KEYS: [ KEY_RIGHT_ARROW, KEY_LEFT_ARROW, KEY_RIGHT_ARROW, KEY_DOWN_ARROW ],
+  ARROW_KEYS: ARROW_KEYS,
+  WASD_KEYS: WASD_KEYS,
+  MOVEMENT_KEYS: ARROW_KEYS.concat( WASD_KEYS ),
 
   // returns whether or not the keyCode corresponds to pressing an arrow key
   isArrowKey: function( keyCode ) {
@@ -82,6 +91,11 @@ var KeyboardUtils = {
   isWASDKey: function( keyCode ) {
     return ( keyCode === KeyboardUtils.KEY_W || keyCode === KeyboardUtils.KEY_A ||
              keyCode === KeyboardUtils.KEY_S || keyCode === KeyboardUtils.KEY_D );
+  },
+
+  // returns true if the keycode indicates a 'movement' key in keyboard dragging
+  isMovementKey: function( keyCode ) {
+    return KeyboardUtils.MOVEMENT_KEYS.includes( keyCode );
   }
 };
 

@@ -166,8 +166,7 @@ class KeyStateTracker {
    * @public
    */
   get movementKeysDown() {
-    return this.rightMovementKeysDown() || this.leftMovementKeysDown() ||
-           this.upMovementKeysDown() || this.downMovementKeysDown();
+    return this.isAnyKeyInListDown( KeyboardUtils.MOVEMENT_KEYS );
   }
 
   /**
