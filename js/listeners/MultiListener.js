@@ -306,17 +306,24 @@ class MultiListener {
 
     if ( event.pointer instanceof Mouse && event.domEvent.button !== this._mouseButton ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener abort: wrong mouse button' );
-
       return;
     }
 
+    let pressTrail;
     if ( !_.includes( event.trail.nodes, this._targetNode ) ) {
-      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener abort: target not in event trail' );
-      return;
+
+      // if the target Node is not in the event trail, we assume that the event went to the
+      // Display or the root Node of the scene graph - this will throw an assertion if
+      // there are more than one trails found
+      pressTrail = this._targetNode.getUniqueTrailTo( event.target );
     }
+    else {
+      pressTrail = event.trail.subtrailTo( this._targetNode, false );
+    }
+    assert && assert( _.includes( pressTrail.nodes, this._targetNode ), 'targetNode must be in the Trail for Press' );
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-    const press = new Press( event.pointer, event.trail.subtrailTo( this._targetNode, false ) );
+    const press = new Press( event.pointer, pressTrail );
 
     if ( !this._allowMoveInterruption && !this._allowMultitouchInterruption ) {
 
