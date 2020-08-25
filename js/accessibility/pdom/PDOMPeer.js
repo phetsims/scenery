@@ -63,7 +63,7 @@ inherit( Object, PDOMPeer, {
    * NOTE: the PDOMPeer is not fully constructed until calling PDOMPeer.update() after creating from pool.
    * @private
    *
-   * @param {AccessibleInstance} accessibleInstance
+   * @param {PDOMInstance} accessibleInstance
    * @param {Object} [options]
    * @returns {PDOMPeer} - Returns 'this' reference, for chaining
    */
@@ -169,16 +169,21 @@ inherit( Object, PDOMPeer, {
 
     let options = this.node.getBaseOptions();
 
+    const otherNodeCallbacks = [];
+
     if ( this.node.accessibleName !== null ) {
-      options = this.node.accessibleNameBehavior( this.node, options, this.node.accessibleName );
+      options = this.node.accessibleNameBehavior( this.node, options, this.node.accessibleName, otherNodeCallbacks );
+      assert && assert( typeof options === 'object', 'should return an object' );
     }
 
     if ( this.node.accessibleHeading !== null ) {
-      options = this.node.accessibleHeadingBehavior( this.node, options, this.node.accessibleHeading );
+      options = this.node.accessibleHeadingBehavior( this.node, options, this.node.accessibleHeading, otherNodeCallbacks );
+      assert && assert( typeof options === 'object', 'should return an object' );
     }
 
     if ( this.node.helpText !== null ) {
-      options = this.node.helpTextBehavior( this.node, options, this.node.helpText );
+      options = this.node.helpTextBehavior( this.node, options, this.node.helpText, otherNodeCallbacks );
+      assert && assert( typeof options === 'object', 'should return an object' );
     }
 
     // create the base DOM element representing this accessible instance
@@ -252,6 +257,11 @@ inherit( Object, PDOMPeer, {
     this.node.updateOtherNodesAriaLabelledby();
     this.node.updateOtherNodesAriaDescribedby();
     this.node.updateOtherNodesActiveDescendant();
+
+    otherNodeCallbacks.forEach( callback => {
+      assert && assert( typeof callback === 'function' );
+      callback();
+    } );
   },
 
   /**
