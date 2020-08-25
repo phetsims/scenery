@@ -145,30 +145,6 @@ const P_TAG = PDOMUtils.TAGS.P;
 const DEFAULT_DESCRIPTION_TAG_NAME = P_TAG;
 const DEFAULT_LABEL_TAG_NAME = P_TAG;
 
-// see setAccessibleNameBehavior for more details
-const DEFAULT_ACCESSIBLE_NAME_BEHAVIOR = function( node, options, accessibleName ) {
-  if ( node.tagName === 'input' ) {
-    options.labelTagName = 'label';
-    options.labelContent = accessibleName;
-  }
-  else if ( PDOMUtils.tagNameSupportsContent( node.tagName ) ) {
-    options.innerContent = accessibleName;
-  }
-  else {
-    options.ariaLabel = accessibleName;
-  }
-  return options;
-};
-
-// see setHelpTextBehavior for more details
-const DEFAULT_HELP_TEXT_BEHAVIOR = function( node, options, helpText ) {
-
-  options.descriptionTagName = PDOMUtils.DEFAULT_DESCRIPTION_TAG_NAME;
-  options.descriptionContent = helpText;
-  options.appendDescription = true;
-  return options;
-};
-
 // see setAccessibleHeadingBehavior for more details
 const DEFAULT_ACCESSIBLE_HEADING_BEHAVIOR = function( node, options, heading ) {
 
@@ -451,13 +427,13 @@ const ParallelDOM = {
         this._accessibleName = null;
 
         // {A11yBehaviorFunctionDef} - function that returns the options needed to set the appropriate accessible name for the Node
-        this._accessibleNameBehavior = DEFAULT_ACCESSIBLE_NAME_BEHAVIOR;
+        this._accessibleNameBehavior = A11yBehaviorFunctionDef.BASIC_ACCESSIBLE_NAME_BEHAVIOR;
 
         // {string|null} - sets the help text of the Node, this most often corresponds to description text.
         this._helpText = null;
 
         // {A11yBehaviorFunctionDef} - sets the help text of the Node, this most often corresponds to description text.
-        this._helpTextBehavior = DEFAULT_HELP_TEXT_BEHAVIOR;
+        this._helpTextBehavior = A11yBehaviorFunctionDef.HELP_TEXT_AFTER_CONTENT;
 
         // {string|null} - sets the help text of the Node, this most often corresponds to label sibling text.
         this._accessibleHeading = null;
