@@ -8,7 +8,6 @@
  */
 
 import Property from '../../../axon/js/Property.js';
-import merge from '../../../phet-core/js/merge.js';
 import scenery from '../scenery.js';
 
 class NodeProperty extends Property {
@@ -22,12 +21,6 @@ class NodeProperty extends Property {
   constructor( node, property, attribute, options ) {
     assert && assert( typeof attribute === 'string', 'wrong type for getLocation' );
 
-    options = merge( {
-
-      // If changing the property shouldn't propagate back to the Node
-      readOnly: false
-    }, options );
-
     // Read-only Property that describes a part relative to the bounds of the node.
     super( node[ attribute ], options );
 
@@ -39,9 +32,6 @@ class NodeProperty extends Property {
 
     // @private {string}
     this.attribute = attribute;
-
-    // @private
-    this.nodePropertyReadOnly = options.readOnly;
 
     // @private {function} - When the node event is triggered, get the new value and set it to this Property
     this.changeListener = () => this.set( node[ attribute ] );
@@ -67,11 +57,10 @@ class NodeProperty extends Property {
    * @protected - can be overridden.
    */
   setPropertyValue( value ) {
-    if ( !this.nodePropertyReadOnly ) {
 
-      // Set the node value first, as if it was the first link listener.
-      this.node[ this.attribute ] = value;
-    }
+    // Set the node value first, as if it was the first link listener.
+    this.node[ this.attribute ] = value;
+
     super.setPropertyValue( value );
   }
 }
