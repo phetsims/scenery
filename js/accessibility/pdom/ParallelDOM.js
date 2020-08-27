@@ -536,7 +536,7 @@ const ParallelDOM = {
        */
       accessibleAudit: function() {
 
-        if ( this.accessibleContent && assert ) {
+        if ( this.hasPDOMContent && assert ) {
 
           this._inputType && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support inputType' );
           this._accessibleChecked && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support accessibleChecked.' );
@@ -2572,7 +2572,7 @@ const ParallelDOM = {
           }
 
           // Pushing item and its children array, if accessible
-          if ( node.accessibleContent ) {
+          if ( node.hasPDOMContent ) {
             const item = {
               trail: currentTrail.copy(),
               children: []
@@ -2617,7 +2617,7 @@ const ParallelDOM = {
           } );
 
           // Popping children array if accessible
-          if ( node.accessibleContent ) {
+          if ( node.hasPDOMContent ) {
             nestedChildStack.pop();
           }
         }
@@ -2643,16 +2643,16 @@ const ParallelDOM = {
       },
 
       /**
-       * Returns whether or not this Node has any accessibleContent defined.
+       * Returns whether or not this Node has any representation for the Parallel DOM.
+       * Note this is still true if the content is accessibleVisible=false or is otherwise hidden.
+       *
        * @public
        *
        * @returns {boolean}
        */
-      hasAccessibleContent: function() {
+      get hasPDOMContent() {
         return !!this._tagName;
       },
-      get accessibleContent() { return this.hasAccessibleContent(); },
-
 
       /**
        * Called when the node is added as a child to this node AND the node's subtree contains accessible content.
