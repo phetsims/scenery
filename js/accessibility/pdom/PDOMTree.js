@@ -354,7 +354,7 @@ var PDOMTree = {
     // If we are accessible ourself, we need to create the instance (so we can provide it to child instances).
     let instance;
     let existed = false;
-    if ( node.accessibleContent ) {
+    if ( node.hasPDOMContent ) {
       instance = parentInstance.findChildWithTrail( trail );
       if ( instance ) {
         existed = true;
@@ -456,7 +456,7 @@ var PDOMTree = {
     // If we find accessible content, our search ends here. IF it is connected to any accessible displays somehow, it
     // will have accessible instances. We only care about these accessible instances, as they already have any DAG
     // deduplication applied.
-    if ( root.accessibleContent ) {
+    if ( root.hasPDOMContent ) {
       const instances = root.accessibleInstances;
 
       for ( i = 0; i < instances.length; i++ ) {

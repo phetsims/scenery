@@ -372,7 +372,7 @@ inherit( Object, PDOMInstance, {
     const instances = [];
 
     // base case, node has accessible content, but don't match the "root" node of this accessible instance
-    if ( node.accessibleContent && node !== this.node ) {
+    if ( node.hasPDOMContent && node !== this.node ) {
       const potentialInstances = node.accessibleInstances;
 
       instanceLoop:
@@ -634,7 +634,7 @@ inherit( Object, PDOMInstance, {
   createFakeAccessibleTree: function( rootNode ) {
     function createFakeTree( node ) {
       let fakeInstances = _.flatten( node.getEffectiveChildren().map( createFakeTree ) );
-      if ( node.accessibleContent ) {
+      if ( node.hasPDOMContent ) {
         fakeInstances = [ {
           node: node,
           children: fakeInstances

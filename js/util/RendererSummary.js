@@ -351,7 +351,7 @@ inherit( Object, RendererSummary, {
     if ( node.areSelfBoundsValid() ) {
       bitmask |= Renderer.bitmaskBoundsValid;
     }
-    if ( !node.accessibleContent && !node.hasAccessibleOrder() ) {
+    if ( !node.hasPDOMContent && !node.hasAccessibleOrder() ) {
       bitmask |= Renderer.bitmaskNotAccessible;
     }
 
