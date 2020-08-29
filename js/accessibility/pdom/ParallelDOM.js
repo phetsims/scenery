@@ -427,13 +427,13 @@ const ParallelDOM = {
         this._accessibleName = null;
 
         // {A11yBehaviorFunctionDef} - function that returns the options needed to set the appropriate accessible name for the Node
-        this._accessibleNameBehavior = A11yBehaviorFunctionDef.BASIC_ACCESSIBLE_NAME_BEHAVIOR;
+        this._accessibleNameBehavior = ParallelDOM.BASIC_ACCESSIBLE_NAME_BEHAVIOR;
 
         // {string|null} - sets the help text of the Node, this most often corresponds to description text.
         this._helpText = null;
 
         // {A11yBehaviorFunctionDef} - sets the help text of the Node, this most often corresponds to description text.
-        this._helpTextBehavior = A11yBehaviorFunctionDef.HELP_TEXT_AFTER_CONTENT;
+        this._helpTextBehavior = ParallelDOM.HELP_TEXT_AFTER_CONTENT;
 
         // {string|null} - sets the help text of the Node, this most often corresponds to label sibling text.
         this._accessibleHeading = null;
@@ -2759,6 +2759,46 @@ const ParallelDOM = {
         this._accessibleInstances.splice( index, 1 );
       }
     } );
+  },
+
+  /**
+   * @public
+   * @type {a11yBehaviorFunction}
+   */
+  BASIC_ACCESSIBLE_NAME_BEHAVIOR: function( node, options, accessibleName ) {
+    if ( node.tagName === 'input' ) {
+      options.labelTagName = 'label';
+      options.labelContent = accessibleName;
+    }
+    else if ( PDOMUtils.tagNameSupportsContent( node.tagName ) ) {
+      options.innerContent = accessibleName;
+    }
+    else {
+      options.ariaLabel = accessibleName;
+    }
+    return options;
+  },
+
+  /**
+   * @public
+   * @type {a11yBehaviorFunction}
+   */
+  HELP_TEXT_BEFORE_CONTENT: function( node, options, helpText ) {
+    options.descriptionTagName = PDOMUtils.DEFAULT_DESCRIPTION_TAG_NAME;
+    options.descriptionContent = helpText;
+    options.appendDescription = false;
+    return options;
+  },
+
+  /**
+   * @public
+   * @type {a11yBehaviorFunction}
+   */
+  HELP_TEXT_AFTER_CONTENT: function( node, options, helpText ) {
+    options.descriptionTagName = PDOMUtils.DEFAULT_DESCRIPTION_TAG_NAME;
+    options.descriptionContent = helpText;
+    options.appendDescription = true;
+    return options;
   }
 };
 
