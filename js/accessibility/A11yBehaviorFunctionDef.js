@@ -11,7 +11,6 @@
  */
 
 import scenery from '../scenery.js';
-import PDOMUtils from './pdom/PDOMUtils.js';
 
 /**
  * @name a11yBehaviorFunction
@@ -34,46 +33,6 @@ const A11yBehaviorFunctionDef = {
   validateA11yBehaviorFunctionDef: function( behaviorFunction ) {
     assert && assert( typeof behaviorFunction === 'function' );
     assert && assert( behaviorFunction.length === 3 || behaviorFunction.length === 4, 'behavior function should take three or four args' );
-  },
-
-  /**
-   * @public
-   * @type {a11yBehaviorFunction}
-   */
-  BASIC_ACCESSIBLE_NAME_BEHAVIOR: function( node, options, accessibleName ) {
-    if ( node.tagName === 'input' ) {
-      options.labelTagName = 'label';
-      options.labelContent = accessibleName;
-    }
-    else if ( PDOMUtils.tagNameSupportsContent( node.tagName ) ) {
-      options.innerContent = accessibleName;
-    }
-    else {
-      options.ariaLabel = accessibleName;
-    }
-    return options;
-  },
-
-  /**
-   * @public
-   * @type {a11yBehaviorFunction}
-   */
-  HELP_TEXT_BEFORE_CONTENT: function( node, options, helpText ) {
-    options.descriptionTagName = PDOMUtils.DEFAULT_DESCRIPTION_TAG_NAME;
-    options.descriptionContent = helpText;
-    options.appendDescription = false;
-    return options;
-  },
-
-  /**
-   * @public
-   * @type {a11yBehaviorFunction}
-   */
-  HELP_TEXT_AFTER_CONTENT: function( node, options, helpText ) {
-    options.descriptionTagName = PDOMUtils.DEFAULT_DESCRIPTION_TAG_NAME;
-    options.descriptionContent = helpText;
-    options.appendDescription = true;
-    return options;
   }
 };
 
