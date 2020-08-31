@@ -22,7 +22,6 @@
  */
 
 import Action from '../../../axon/js/Action.js';
-import ActionIO from '../../../axon/js/ActionIO.js';
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import DerivedProperty from '../../../axon/js/DerivedProperty.js';
 import ObservableArray from '../../../axon/js/ObservableArray.js';
@@ -915,8 +914,8 @@ inherit( Object, PressListener, {
 } );
 
 PressListener.phetioAPI = {
-  pressAction: { phetioType: ActionIO( [ SceneryEventIO ] ) },
-  releaseAction: { phetioType: ActionIO( [ NullableIO( SceneryEventIO ) ] ) }
+  pressAction: { phetioType: Action.createActionIO( [ SceneryEventIO ] ) },
+  releaseAction: { phetioType: Action.createActionIO( [ NullableIO( SceneryEventIO ) ] ) }
 };
 
 export default PressListener;

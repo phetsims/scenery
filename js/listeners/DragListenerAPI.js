@@ -6,8 +6,8 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
+import Action from '../../../axon/js/Action.js';
 import ActionAPI from '../../../axon/js/ActionAPI.js';
-import ActionIO from '../../../axon/js/ActionIO.js';
 import merge from '../../../phet-core/js/merge.js';
 import EventType from '../../../tandem/js/EventType.js';
 import SceneryEventIO from '../input/SceneryEventIO.js';
@@ -22,7 +22,7 @@ class DragListenerAPI extends PressListenerAPI {
   constructor( options ) {
     options = merge( {
       dragActionOptions: {
-        phetioType: ActionIO( [ SceneryEventIO ] ),
+        phetioType: Action.createActionIO( [ SceneryEventIO ] ),
         phetioEventType: EventType.USER,
         phetioHighFrequency: true,
         phetioReadOnly: true

@@ -7,8 +7,8 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
+import Action from '../../../axon/js/Action.js';
 import ActionAPI from '../../../axon/js/ActionAPI.js';
-import ActionIO from '../../../axon/js/ActionIO.js';
 import merge from '../../../phet-core/js/merge.js';
 import EventType from '../../../tandem/js/EventType.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
@@ -24,12 +24,12 @@ class PressListenerAPI extends UninstrumentedAPI {
   constructor( options ) {
     options = merge( {
       pressActionOptions: {
-        phetioType: ActionIO( [ SceneryEventIO ] ),
+        phetioType: Action.createActionIO( [ SceneryEventIO ] ),
         phetioEventType: EventType.USER,
         phetioReadOnly: true
       },
       releaseActionOptions: {
-        phetioType: ActionIO( [ NullableIO( SceneryEventIO ) ] ),
+        phetioType: Action.createActionIO( [ NullableIO( SceneryEventIO ) ] ),
         phetioEventType: EventType.USER,
         phetioReadOnly: true
       }
