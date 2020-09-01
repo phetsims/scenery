@@ -588,8 +588,13 @@ class MultiListener {
     localPoints.forEach( localPoint => { localSquaredDistance += localPoint.distanceSquared( localCentroid ); } );
     targetPoints.forEach( targetPoint => { targetSquaredDistance += targetPoint.distanceSquared( targetCentroid ); } );
 
-    let scale = Math.sqrt( targetSquaredDistance / localSquaredDistance );
-    scale = this.limitScale( scale );
+    // while fuzz testing, it is possible that the Press points are
+    // exactly the same resulting in undefined scale - if that is the case
+    // we will not adjust
+    let scale = this.getCurrentScale();
+    if ( targetSquaredDistance !== 0 ) {
+      scale = this.limitScale( Math.sqrt( targetSquaredDistance / localSquaredDistance ) );
+    }
 
     const translateToTarget = Matrix3.translation( targetCentroid.x, targetCentroid.y );
     const translateFromLocal = Matrix3.translation( -localCentroid.x, -localCentroid.y );
