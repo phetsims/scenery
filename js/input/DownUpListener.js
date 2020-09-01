@@ -80,6 +80,16 @@ function DownUpListener( options ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     },
 
+    // interruption of this Pointer listener
+    interrupt: function() {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener (pointer) interrupt for ' + self.downTrail.toString() );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+      self.interrupt();
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
+    },
+
     // touch cancel
     cancel: function( event ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener (pointer) cancel for ' + self.downTrail.toString() );
