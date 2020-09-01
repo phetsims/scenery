@@ -14,6 +14,7 @@ import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import scenery from '../scenery.js';
 import Trail from '../util/Trail.js';
 import Mouse from './Mouse.js';
+import SceneryEvent from './SceneryEvent.js';
 
 /**
  * The 'trail' parameter passed to down/upInside/upOutside will end with the node to which this DownUpListener has
@@ -170,12 +171,10 @@ inherit( PhetioObject, DownUpListener, {
       this.interrupted = true;
 
       // We create a synthetic event here, as there is no available event here.
-      this.buttonUp( {
-        // Empty trail, so that it for-sure isn't under our downTrail (guaranteeing that isInside will be false).
-        trail: new Trail(),
-        currentTarget: this.downCurrentTarget,
-        pointer: this.pointer
-      } );
+      // Empty trail, so that it for-sure isn't under our downTrail (guaranteeing that isInside will be false).
+      const syntheticEvent = new SceneryEvent( new Trail(), 'synthetic', this.pointer, null );
+      syntheticEvent.currentTarget = this.downCurrentTarget;
+      this.buttonUp( syntheticEvent );
 
       this.interrupted = false;
 
