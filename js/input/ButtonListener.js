@@ -106,6 +106,7 @@ inherit( DownUpListener, ButtonListener, {
 
       if ( this._buttonOptions.fire &&
            this._overCount > 0 &&
+           !this.interrupted &&
            ( this._buttonOptions.fireOnDown ? ( state === 'down' ) : ( oldState === 'down' ) ) ) {
 
         // Record this event to the phet-io data stream, including all downstream events as nested children
