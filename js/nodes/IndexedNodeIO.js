@@ -1,7 +1,7 @@
 // Copyright 2020, University of Colorado Boulder
 
 /**
- * IO type for Nodes that can save their own index (if phetioState: true).  Can be used to customize z-order
+ * IO Type for Nodes that can save their own index (if phetioState: true).  Can be used to customize z-order
  * or layout order.
  *
  * @author Sam Reid (PhET Interactive Simulations)

@@ -1,7 +1,7 @@
 // Copyright 2017-2020, University of Colorado Boulder
 
 /**
- * IO type for RichText
+ * IO Type for RichText
  *
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
@@ -48,7 +48,7 @@ class RichTextIO extends NodeIO {
   }
 }
 
-RichTextIO.documentation = 'The tandem IO type for the scenery RichText node';
+RichTextIO.documentation = 'The tandem IO Type for the scenery RichText node';
 RichTextIO.validator = { valueType: scenery.RichText };
 RichTextIO.typeName = 'RichTextIO';
 ObjectIO.validateSubtype( RichTextIO );

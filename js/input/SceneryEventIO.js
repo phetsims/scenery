@@ -1,7 +1,7 @@
 // Copyright 2018-2020, University of Colorado Boulder
 
 /**
- * IO type for SceneryEvent
+ * IO Type for SceneryEvent
  *
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */

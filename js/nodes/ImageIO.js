@@ -1,7 +1,7 @@
 // Copyright 2017-2020, University of Colorado Boulder
 
 /**
- * IO type for SCENERY/Image (not the Image HTMLElement)
+ * IO Type for SCENERY/Image (not the Image HTMLElement)
  *
  * @author Sam Reid (PhET Interactive Simulations)
  */
@@ -30,7 +30,7 @@ ImageIO.methods = {
   }
 };
 
-ImageIO.documentation = 'The tandem IO type for the scenery Text node';
+ImageIO.documentation = 'The tandem IO Type for the scenery Text node';
 ImageIO.events = [ 'changed' ];
 ImageIO.validator = { valueType: Image };
 ImageIO.typeName = 'ImageIO';

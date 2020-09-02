@@ -1,7 +1,7 @@
 // Copyright 2017-2020, University of Colorado Boulder
 
 /**
- * IO type for SCENERY ButtonListener (not SUN ButtonListener)
+ * IO Type for SCENERY ButtonListener (not SUN ButtonListener)
  *
  * @author Sam Reid (PhET Interactive Simulations)
  * @author Andrew Adare (PhET Interactive Simulations)

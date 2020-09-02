@@ -1,7 +1,7 @@
 // Copyright 2017-2020, University of Colorado Boulder
 
 /**
- * IO type for Focus
+ * IO Type for Focus
  *
  * @author Sam Reid (PhET Interactive Simulations)
  * @author Jesse Greenberg (PhET Interactive Simulations)
@@ -39,7 +39,7 @@ class FocusIO extends ObjectIO {
 }
 
 FocusIO.validator = { valueType: Focus };
-FocusIO.documentation = 'A IO type for the instance in the simulation which currently has keyboard focus. FocusIO is ' +
+FocusIO.documentation = 'A IO Type for the instance in the simulation which currently has keyboard focus. FocusIO is ' +
                         'serialized into and Object with key `focusedPhetioElement` that is a list of PhET-iO elements, ' +
                         'from parent-most to child-most cooresponding to the PhET-iO element that was instrumented.';
 FocusIO.typeName = 'FocusIO';
