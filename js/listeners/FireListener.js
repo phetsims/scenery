@@ -14,6 +14,7 @@ import Emitter from '../../../axon/js/Emitter.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import EventType from '../../../tandem/js/EventType.js';
+import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import SceneryEventIO from '../input/SceneryEventIO.js';
@@ -43,7 +44,10 @@ function FireListener( options ) {
     fireOnHoldInterval: 100, // {number} - fire continuously at this interval (milliseconds)
 
     // {Tandem}
-    tandem: Tandem.REQUIRED
+    tandem: Tandem.REQUIRED,
+
+    // Though FireListener is not instrumented, declare these here to support properly passing this to children
+    phetioReadOnly: PhetioObject.DEFAULT_OPTIONS.phetioReadOnly
   }, options );
 
   assert && assert( typeof options.fire === 'function', 'The fire callback should be a function' );
@@ -58,6 +62,7 @@ function FireListener( options ) {
   this.firedEmitter = new Emitter( {
     tandem: options.tandem.createTandem( 'firedEmitter' ),
     phetioEventType: EventType.USER,
+    phetioReadOnly: options.phetioReadOnly,
     parameters: [ {
       name: 'event',
       phetioType: NullableIO( SceneryEventIO )
