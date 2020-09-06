@@ -42,7 +42,7 @@ class ColorIO extends ObjectIO {
 ColorIO.documentation = 'A color, with rgba';
 ColorIO.validator = { valueType: Color };
 ColorIO.typeName = 'ColorIO';
-ObjectIO.validateSubtype( ColorIO );
+ObjectIO.validateIOType( ColorIO );
 
 scenery.register( 'ColorIO', ColorIO );
 export default ColorIO;

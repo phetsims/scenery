@@ -42,7 +42,7 @@ class SceneryEventIO extends ObjectIO {
 SceneryEventIO.documentation = 'An event, with a point';
 SceneryEventIO.validator = { valueType: SceneryEvent };
 SceneryEventIO.typeName = 'SceneryEventIO';
-ObjectIO.validateSubtype( SceneryEventIO );
+ObjectIO.validateIOType( SceneryEventIO );
 
 scenery.register( 'SceneryEventIO', SceneryEventIO );
 export default SceneryEventIO;

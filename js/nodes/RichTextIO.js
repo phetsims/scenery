@@ -51,7 +51,7 @@ class RichTextIO extends NodeIO {
 RichTextIO.documentation = 'The tandem IO Type for the scenery RichText node';
 RichTextIO.validator = { valueType: scenery.RichText };
 RichTextIO.typeName = 'RichTextIO';
-ObjectIO.validateSubtype( RichTextIO );
+ObjectIO.validateIOType( RichTextIO );
 
 scenery.register( 'RichTextIO', RichTextIO );
 export default RichTextIO;

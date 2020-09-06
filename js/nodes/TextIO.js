@@ -99,7 +99,7 @@ TextIO.documentation = 'Text that is displayed in the simulation. TextIO has a n
                        'the current string value.';
 TextIO.validator = { valueType: scenery.Text };
 TextIO.typeName = 'TextIO';
-ObjectIO.validateSubtype( TextIO );
+ObjectIO.validateIOType( TextIO );
 
 scenery.register( 'TextIO', TextIO );
 export default TextIO;

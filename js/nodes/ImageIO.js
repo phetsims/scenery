@@ -34,7 +34,7 @@ ImageIO.documentation = 'The tandem IO Type for the scenery Text node';
 ImageIO.events = [ 'changed' ];
 ImageIO.validator = { valueType: Image };
 ImageIO.typeName = 'ImageIO';
-ObjectIO.validateSubtype( ImageIO );
+ObjectIO.validateIOType( ImageIO );
 
 scenery.register( 'ImageIO', ImageIO );
 export default ImageIO;

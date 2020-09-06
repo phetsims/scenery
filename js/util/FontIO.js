@@ -60,7 +60,7 @@ FontIO.documentation = 'Font handling for text drawing. Options:' +
                        '</ul>';
 
 FontIO.typeName = 'FontIO';
-ObjectIO.validateSubtype( FontIO );
+ObjectIO.validateIOType( FontIO );
 
 scenery.register( 'FontIO', FontIO );
 export default FontIO;

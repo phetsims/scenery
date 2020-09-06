@@ -54,7 +54,7 @@ IndexedNodeIO.methods = {
 IndexedNodeIO.validator = { valueType: scenery.Node };
 IndexedNodeIO.documentation = 'Node that can be moved forward/back by index, which specifies z-order and/or layout order';
 IndexedNodeIO.typeName = 'IndexedNodeIO';
-ObjectIO.validateSubtype( IndexedNodeIO );
+ObjectIO.validateIOType( IndexedNodeIO );
 
 scenery.register( 'IndexedNodeIO', IndexedNodeIO );
 export default IndexedNodeIO;

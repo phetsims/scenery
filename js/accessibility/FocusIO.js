@@ -43,7 +43,7 @@ FocusIO.documentation = 'A IO Type for the instance in the simulation which curr
                         'serialized into and Object with key `focusedPhetioElement` that is a list of PhET-iO elements, ' +
                         'from parent-most to child-most cooresponding to the PhET-iO element that was instrumented.';
 FocusIO.typeName = 'FocusIO';
-ObjectIO.validateSubtype( FocusIO );
+ObjectIO.validateIOType( FocusIO );
 
 scenery.register( 'FocusIO', FocusIO );
 export default FocusIO;

@@ -74,7 +74,7 @@ NodeIO.documentation = 'The base type for graphical and potentially interactive 
                        '</ul>' +
                        'For more about Scenery node pickability, please see <a href="http://phetsims.github.io/scenery/doc/implementation-notes#pickability">http://phetsims.github.io/scenery/doc/implementation-notes#pickability</a>';
 NodeIO.typeName = 'NodeIO';
-ObjectIO.validateSubtype( NodeIO );
+ObjectIO.validateIOType( NodeIO );
 
 scenery.register( 'NodeIO', NodeIO );
 export default NodeIO;

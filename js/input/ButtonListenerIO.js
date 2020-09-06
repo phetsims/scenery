@@ -16,7 +16,7 @@ ButtonListenerIO.documentation = 'Button listener';
 ButtonListenerIO.events = [ 'up', 'over', 'down', 'out', 'fire' ];
 ButtonListenerIO.validator = { valueType: scenery.ButtonListener };
 ButtonListenerIO.typeName = 'ButtonListenerIO';
-ObjectIO.validateSubtype( ButtonListenerIO );
+ObjectIO.validateIOType( ButtonListenerIO );
 
 scenery.register( 'ButtonListenerIO', ButtonListenerIO );
 export default ButtonListenerIO;

@@ -40,7 +40,7 @@ class EventIO extends ObjectIO {
 EventIO.documentation = 'A DOM Event';
 EventIO.validator = { valueType: window.Event };
 EventIO.typeName = 'EventIO';
-ObjectIO.validateSubtype( EventIO );
+ObjectIO.validateIOType( EventIO );
 
 scenery.register( 'EventIO', EventIO );
 export default EventIO;
