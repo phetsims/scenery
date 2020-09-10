@@ -23,7 +23,7 @@ ImageIO.methods = {
     implementation: function( base64Text ) {
       const im = new window.Image();
       im.src = base64Text;
-      this.phetioObject.image = im;
+      this.image = im;
     },
     documentation: 'Set the image from a base64 string',
     invocableForReadOnlyElements: false

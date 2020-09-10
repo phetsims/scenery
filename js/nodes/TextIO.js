@@ -59,7 +59,7 @@ TextIO.methods = {
     returnType: VoidIO,
     parameterTypes: [ FontIO ],
     implementation: function( font ) {
-      this.phetioObject.setFont( font );
+      this.setFont( font );
     },
     documentation: 'Sets font options for this TextIO instance, e.g. {size: 16, weight: bold}. If increasing the font ' +
                    'size does not make the text size larger, you may need to increase the maxWidth of the TextIO also.',
@@ -70,7 +70,7 @@ TextIO.methods = {
     returnType: FontIO,
     parameterTypes: [],
     implementation: function() {
-      return this.phetioObject.getFont();
+      return this.getFont();
     },
     documentation: 'Gets font options for this TextIO instance as an object'
   },
@@ -79,7 +79,7 @@ TextIO.methods = {
     returnType: VoidIO,
     parameterTypes: [ NumberIO ],
     implementation: function( maxWidth ) {
-      this.phetioObject.setMaxWidth( maxWidth );
+      this.setMaxWidth( maxWidth );
     },
     documentation: 'Sets the maximum width of text box. ' +
                    'If the text width exceeds maxWidth, it is scaled down to fit.',
@@ -90,7 +90,7 @@ TextIO.methods = {
     returnType: NumberIO,
     parameterTypes: [],
     implementation: function() {
-      return this.phetioObject.maxWidth;
+      return this.maxWidth;
     },
     documentation: 'Gets the maximum width of text box'
   }

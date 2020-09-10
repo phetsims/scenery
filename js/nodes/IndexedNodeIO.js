@@ -36,7 +36,7 @@ IndexedNodeIO.methods = {
     returnType: VoidIO,
     parameterTypes: [],
     implementation: function() {
-      return this.phetioObject.moveForward();
+      return this.moveForward();
     },
     documentation: 'Move this node one index forward in each of its parents.  If the node is already at the front, this is a no-op.'
   },
@@ -45,7 +45,7 @@ IndexedNodeIO.methods = {
     returnType: VoidIO,
     parameterTypes: [],
     implementation: function() {
-      return this.phetioObject.moveBackward();
+      return this.moveBackward();
     },
     documentation: 'Move this node one index backward in each of its parents.  If the node is already at the back, this is a no-op.'
   }
