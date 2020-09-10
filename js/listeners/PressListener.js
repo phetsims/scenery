@@ -805,9 +805,9 @@ inherit( Object, PressListener, {
    * @public - In general not needed to be public, but just used in edge cases to get proper click logic for a11y.
    * @a11y
    *
-   * Handle the click event from DOM for a11y. Clicks by setting the over and pressed Properties behind a timeout.
-   * When assistive technology is used, the browser may not receive 'down' or 'up' events on buttons - only a single
-   * 'click' event. For a11y we need to toggle the pressed state from the single 'click' event.
+   * Handle the click event from DOM for a11y. Clicks by calling press and release immediately.
+   * When assistive technology is used, the browser may not receive 'keydown' or 'keyup' events on input elements, but
+   * only a single 'click' event. For a11y we need to toggle the pressed state from the single 'click' event.
    *
    * This will fire listeners immediately, but adds a delay for the a11yClickingProperty so that you can make a
    * button look pressed from a single DOM click event. For example usage, see sun/ButtonModel.looksPressedProperty.
@@ -820,18 +820,11 @@ inherit( Object, PressListener, {
 
       this.a11yClickingProperty.value = true;
 
-      // ensure that button is 'over' so listener can be called while button is down
+      // ensure that button is 'focused' so listener can be called while button is down
       this.isFocusedProperty.value = true;
-      this.isPressedProperty.value = true;
 
-      // fire the optional callback
-      this._pressListener( event, this );
-
-      // no longer down, don't reset 'over' so button can be styled as long as it has focus
-      this.isPressedProperty.value = false;
-
-      // fire the callback from options
-      this._releaseListener( event, this );
+      this.press( event );
+      this.release( event );
 
       // press or release listeners may have interrupted this click, if that is the case immediately indicate that
       // clicking interaction is over
