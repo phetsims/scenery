@@ -10,7 +10,7 @@
  */
 
 import Emitter from '../../../axon/js/Emitter.js';
-import timer from '../../../axon/js/timer.js';
+import stepTimer from '../../../axon/js/stepTimer.js';
 import scenery from '../scenery.js';
 import KeyboardUtils from './KeyboardUtils.js';
 
@@ -36,11 +36,11 @@ class KeyStateTracker {
     this.keyupEmitter = new Emitter( { parameters: [ { valueType: Event } ] } );
 
     const stepListener = this.step.bind( this );
-    timer.addListener( stepListener );
+    stepTimer.addListener( stepListener );
 
     // @private
     this._disposeKeystateTracker = () => {
-      timer.removeListener( stepListener );
+      stepTimer.removeListener( stepListener );
 
       if ( this.attachedToDocument ) {
         this.detachFromDocument();

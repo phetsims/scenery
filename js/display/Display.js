@@ -54,7 +54,7 @@ import Emitter from '../../../axon/js/Emitter.js';
 import Property from '../../../axon/js/Property.js';
 import PropertyIO from '../../../axon/js/PropertyIO.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
-import timer from '../../../axon/js/timer.js';
+import stepTimer from '../../../axon/js/stepTimer.js';
 import Dimension2 from '../../../dot/js/Dimension2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import escapeHTML from '../../../phet-core/js/escapeHTML.js';
@@ -1083,7 +1083,7 @@ inherit( Object, Display, extend( {
       lastTime = timeNow;
 
       // step the timer that drives any time dependent updates of the Display
-      timer.emit( timeElapsedInSeconds );
+      stepTimer.emit( timeElapsedInSeconds );
 
       stepCallback && stepCallback( timeElapsedInSeconds );
       self.updateDisplay();

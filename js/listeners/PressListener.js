@@ -25,7 +25,7 @@ import Action from '../../../axon/js/Action.js';
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import DerivedProperty from '../../../axon/js/DerivedProperty.js';
 import ObservableArray from '../../../axon/js/ObservableArray.js';
-import timer from '../../../axon/js/timer.js';
+import stepTimer from '../../../axon/js/stepTimer.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import EventType from '../../../tandem/js/EventType.js';
@@ -455,8 +455,8 @@ inherit( Object, PressListener, {
     if ( this.a11yClickingProperty.value ) {
       this.interrupted = true;
 
-      if ( timer.hasListener( this._a11yClickingTimeoutListener ) ) {
-        timer.clearTimeout( this._a11yClickingTimeoutListener );
+      if ( stepTimer.hasListener( this._a11yClickingTimeoutListener ) ) {
+        stepTimer.clearTimeout( this._a11yClickingTimeoutListener );
 
         // interrupt may be called after the PressListener has been disposed (for instance, internally by scenery
         // if the Node receives a blur event after the PressListener is disposed)
@@ -834,10 +834,10 @@ inherit( Object, PressListener, {
       else {
         // if we are already clicking, remove the previous timeout - this assumes that clearTimeout is a noop if the
         // listener is no longer attached
-        timer.clearTimeout( this._a11yClickingTimeoutListener );
+        stepTimer.clearTimeout( this._a11yClickingTimeoutListener );
 
         // now add the timeout back to start over, saving so that it can be removed later
-        this._a11yClickingTimeoutListener = timer.setTimeout( () => {
+        this._a11yClickingTimeoutListener = stepTimer.setTimeout( () => {
 
           // the listener may have been disposed before the end of a11yLooksPressedInterval, like if it fires and
           // disposes itself immediately

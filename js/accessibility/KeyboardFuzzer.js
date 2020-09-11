@@ -7,7 +7,7 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
-import timer from '../../../axon/js/timer.js';
+import stepTimer from '../../../axon/js/stepTimer.js';
 import Random from '../../../dot/js/Random.js';
 import Display from '../display/Display.js';
 import scenery from '../scenery.js';
@@ -81,7 +81,7 @@ class KeyboardFuzzer {
    */
   clearListeners() {
     this.keyupListeners.forEach( function( listener ) {
-      timer.clearTimeout( listener );
+      stepTimer.clearTimeout( listener );
       listener();
     } );
   }
@@ -116,7 +116,7 @@ class KeyboardFuzzer {
       // TODO: screen readers normally take our keydown events, but may not here, is the descrpency ok?
       this.triggerDOMEvent( KEY_DOWN, element, keyCode );
 
-      this.keyupListeners.push( timer.setTimeout( () => {
+      this.keyupListeners.push( stepTimer.setTimeout( () => {
         this.triggerDOMEvent( KEY_UP, element, keyCode );
 
       }, this.random.nextInt( MAX_MS_KEY_HOLD_DOWN ) ) );

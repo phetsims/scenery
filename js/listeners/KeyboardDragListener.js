@@ -19,7 +19,7 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
-import timer from '../../../axon/js/timer.js';
+import stepTimer from '../../../axon/js/stepTimer.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
@@ -128,11 +128,11 @@ function KeyboardDragListener( options ) {
 
   // step the drag listener, must be removed in dispose
   const stepListener = this.step.bind( this );
-  timer.addListener( stepListener );
+  stepTimer.addListener( stepListener );
 
   // @private - called in dispose
   this._disposeKeyboardDragListener = function() {
-    timer.removeListener( stepListener );
+    stepTimer.removeListener( stepListener );
   };
 }
 

@@ -10,7 +10,7 @@
 
 
 // modules
-import timer from '../../../axon/js/timer.js';
+import stepTimer from '../../../axon/js/stepTimer.js';
 import KeyboardUtils from './KeyboardUtils.js';
 import KeyStateTracker from './KeyStateTracker.js';
 
@@ -37,7 +37,7 @@ QUnit.module( 'KeyStateTracker', {
 
   before() {
 
-    // step the timer, because utteranceQueue runs on timer
+    // step the stepTimer, because utteranceQueue runs on stepTimer
     let previousTime = Date.now();
     intervalID = setInterval( () => { // eslint-disable-line bad-sim-text
       const currentTime = Date.now();
@@ -45,7 +45,7 @@ QUnit.module( 'KeyStateTracker', {
       previousTime = currentTime;
 
       // step timer
-      timer.emit( timeStep );
+      stepTimer.emit( timeStep );
     }, 10 );
   },
   after() {
@@ -125,12 +125,12 @@ QUnit.test( 'test tracking with time', async assert => {
   let currentTimeDown = testTracker.timeDownForKey( spaceKeyDownEvent.keyCode );
   assert.ok( currentTimeDown === 0, 'should be zero, has not been down any time' );
 
-  timer.setTimeout( () => { // eslint-disable-line bad-sim-text
+  stepTimer.setTimeout( () => { // eslint-disable-line bad-sim-text
     currentTimeDown = testTracker.timeDownForKey( spaceKeyDownEvent.keyCode );
 
     assert.ok( currentTimeDown >= firstPressTime && currentTimeDown <= totalPressTime, 'key pressed for ' + firstPressTime + ' ms' );
 
-    timer.setTimeout( () => { // eslint-disable-line bad-sim-text
+    stepTimer.setTimeout( () => { // eslint-disable-line bad-sim-text
       currentTimeDown = testTracker.timeDownForKey( spaceKeyDownEvent.keyCode );
 
       assert.ok( currentTimeDown >= totalPressTime, 'key pressed for ' + secondPressTime + ' more ms.' );
