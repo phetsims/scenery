@@ -144,8 +144,7 @@ inherit( PressListener, FireListener, {
   release( event, callback ) {
     PressListener.prototype.release.call( this, event, () => {
       // Notify after the rest of release is called in order to prevent it from triggering interrupt().
-      const hoveringOrFocused = this.isHoveringProperty.value || this.isFocusedProperty.value;
-      const shouldFire = !this._fireOnDown && hoveringOrFocused && !this.interrupted;
+      const shouldFire = !this._fireOnDown && this.isHoveringProperty.value && !this.interrupted;
       if ( this._timer ) {
         this._timer.stop( shouldFire );
       }
@@ -174,7 +173,11 @@ inherit( PressListener, FireListener, {
    */
   click( event, callback ) {
     PressListener.prototype.click.call( this, event, () => {
-      this.fire( event );
+
+      // don't click if listener was interrupted before this callback
+      if ( !this.interrupted ) {
+        this.fire( event );
+      }
       callback && callback();
     } );
   },
