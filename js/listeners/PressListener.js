@@ -813,8 +813,9 @@ inherit( Object, PressListener, {
    * button look pressed from a single DOM click event. For example usage, see sun/ButtonModel.looksPressedProperty.
    *
    * @param {SceneryEvent|null} event
+   * @param {function} [callback] optionally called immediately after press, but only on successful click
    */
-  click( event ) {
+  click( event, callback ) {
     if ( this.canClick() ) {
       this.interrupted = false; // clears the flag (don't set to false before here)
 
@@ -822,9 +823,18 @@ inherit( Object, PressListener, {
 
       // ensure that button is 'focused' so listener can be called while button is down
       this.isFocusedProperty.value = true;
+      this.isPressedProperty.value = true;
 
-      this.press( event );
-      this.release( event );
+      // fire the optional callback
+      this._pressListener( event, this );
+
+      callback && callback();
+
+      // no longer down, don't reset 'over' so button can be styled as long as it has focus
+      this.isPressedProperty.value = false;
+
+      // fire the callback from options
+      this._releaseListener( event, this );
 
       // press or release listeners may have interrupted this click, if that is the case immediately indicate that
       // clicking interaction is over

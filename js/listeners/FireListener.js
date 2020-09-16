@@ -157,6 +157,29 @@ inherit( PressListener, FireListener, {
   },
 
   /**
+   * Clicks the listener, pressing it and releasing it immediately. Part of the scenery input API, triggered from PDOM
+   * events for accessibility.
+   *
+   * Click does not involve the FireListener timer because it is a discrete event that
+   * presses and releases the listener immediately. This behavior is a limitation imposed
+   * by screen reader technology. See PressListener.click for more information.
+   *
+   * NOTE: This can be safely called externally in order to click the listener, event is not required.
+   * fireListener.canClick() can be used to determine if this will actually trigger a click.
+   * @public
+   * @override
+   *
+   * @param {SceneryEvent|null} [event]
+   * @param {function} [callback] - called at the end of the click
+   */
+  click( event, callback ) {
+    PressListener.prototype.click.call( this, event, () => {
+      this.fire( event );
+      callback && callback();
+    } );
+  },
+
+  /**
    * Interrupts the listener, releasing it (canceling behavior).
    * @public
    * @override
