@@ -19,7 +19,7 @@ const RichTextIO = new IOType( 'RichTextIO', {
   supertype: NodeIO,
   documentation: 'The tandem IO Type for the scenery RichText node',
 
-  // TODO: Eliminate, see https://github.com/phetsims/tandem/issues/211
+  // TODO: https://github.com/phetsims/tandem/issues/211 Move these added Properties to the core types
   createWrapper( richText, phetioID ) {
     const superWrapper = this.supertype.createWrapper( richText, phetioID );
 
