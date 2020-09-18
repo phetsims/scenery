@@ -23,14 +23,8 @@ const TextIO = new IOType( 'TextIO', {
   supertype: NodeIO,
   documentation: 'Text that is displayed in the simulation. TextIO has a nested PropertyIO.&lt;String&gt; for ' +
                  'the current string value.',
-
-
-  /**
-   * @param {Text} text
-   * @param {string} phetioID
-   * @constructor
-   */
   createWrapper( text, phetioID ) {
+    const superWrapper = this.supertype.createWrapper( text, phetioID );
 
     // this uses a sub Property adapter as described in https://github.com/phetsims/phet-io/issues/1326
     const textProperty = new NodeProperty( text, text.textProperty, 'text', merge( {
@@ -46,7 +40,10 @@ const TextIO = new IOType( 'TextIO', {
     return {
       phetioObject: text,
       phetioID: phetioID,
-      dispose: () => textProperty.dispose()
+      dispose: () => {
+        superWrapper.dispose();
+        textProperty.dispose();
+      }
     };
   },
   methods: {

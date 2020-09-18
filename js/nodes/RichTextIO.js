@@ -19,8 +19,9 @@ const RichTextIO = new IOType( 'RichTextIO', {
   supertype: NodeIO,
   documentation: 'The tandem IO Type for the scenery RichText node',
 
-  // https://github.com/phetsims/tandem/issues/211 and dispose
+  // TODO: Eliminate, see https://github.com/phetsims/tandem/issues/211
   createWrapper( richText, phetioID ) {
+    const superWrapper = this.supertype.createWrapper( richText, phetioID );
 
     // this uses a sub Property adapter as described in https://github.com/phetsims/phet-io/issues/1326
     const textProperty = new NodeProperty( richText, richText.textProperty, 'text', merge( {
@@ -36,7 +37,10 @@ const RichTextIO = new IOType( 'RichTextIO', {
     return {
       phetioObject: richText,
       phetioID: phetioID,
-      dispose: () => textProperty.dispose()
+      dispose: () => {
+        superWrapper.dispose();
+        textProperty.dispose();
+      }
     };
   }
 } );
