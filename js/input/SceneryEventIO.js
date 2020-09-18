@@ -14,7 +14,7 @@ import SceneryEvent from './SceneryEvent.js';
 const SceneryEventIO = new IOType( 'SceneryEventIO', {
   valueType: SceneryEvent,
   documentation: 'An event, with a point',
-  toStateObject( event ) {
+  toStateObject: event => {
 
     const eventObject = {
       type: event.type

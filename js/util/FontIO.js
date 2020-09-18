@@ -21,17 +21,15 @@ const FontIO = new IOType( 'FontIO', {
                  '<li><strong>lineHeight:</strong> normal &mdash; normal | number | length | percentage -- NOTE: Canvas spec forces line-height to normal </li>' +
                  '<li><strong>family:</strong> sans-serif &mdash; comma-separated list of families, including generic families (serif, sans-serif, cursive, fantasy, monospace). ideally escape with double-quotes</li>' +
                  '</ul>',
-  toStateObject( font ) {
-    return {
-      style: font.getStyle(),
-      variant: font.getVariant(),
-      weight: font.getWeight(),
-      stretch: font.getStretch(),
-      size: font.getSize(),
-      lineHeight: font.getLineHeight(),
-      family: font.getFamily()
-    };
-  },
+  toStateObject: font => ( {
+    style: font.getStyle(),
+    variant: font.getVariant(),
+    weight: font.getWeight(),
+    stretch: font.getStretch(),
+    size: font.getSize(),
+    lineHeight: font.getLineHeight(),
+    family: font.getFamily()
+  } ),
 
   fromStateObject( stateObject ) {
     return new scenery.Font( stateObject );

@@ -16,24 +16,19 @@ const IndexedNodeIO = new IOType( 'IndexedNodeIO', {
   valueType: scenery.Node,
   documentation: 'Node that can be moved forward/back by index, which specifies z-order and/or layout order',
   supertype: NodeIO,
-
-  // @public
-  toStateObject( node ) {
+  toStateObject: node => {
     const stateObject = {};
     if ( node.parents[ 0 ] ) {
       stateObject.index = node.parents[ 0 ].indexOfChild( node );
     }
     return stateObject;
   },
-
-// @public
-  applyState( node, fromStateObject ) {
+  applyState: ( node, fromStateObject ) => {
     if ( node.parents[ 0 ] ) {
       node.parents[ 0 ].moveChildToIndex( node, fromStateObject.index );
     }
   },
-
-  methods:{
+  methods: {
     moveForward: {
       returnType: VoidIO,
       parameterTypes: [],
