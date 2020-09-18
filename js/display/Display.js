@@ -238,6 +238,12 @@ function Display( rootNode, options ) {
   // @private {Array.<Instance>}
   this._instanceRootsToDispose = [];
 
+  // @private {Array.<*>} - At the end of Display.update, reduceReferences will be called on all of these. It's meant to
+  // catch various objects that would usually have update() called, but if they are invisible or otherwise not updated
+  // for performance, they may need to release references another way instead.
+  // See https://github.com/phetsims/energy-forms-and-changes/issues/356
+  this._reduceReferencesNeeded = [];
+
   // @private {Array.<Drawable>}
   this._drawablesToDispose = [];
 
@@ -528,6 +534,11 @@ inherit( Object, Display, extend( {
       }
     }
 
+    // After our update and disposals, we want to eliminate any memory leaks from anything that wasn't updated.
+    while ( this._reduceReferencesNeeded.length ) {
+      this._reduceReferencesNeeded.pop().reduceReferences();
+    }
+
     this._frameId++;
 
     if ( sceneryLog && scenery.isLoggingPerformance() ) {
@@ -794,6 +805,18 @@ inherit( Object, Display, extend( {
 
     sceneryLog && sceneryLog.Display && sceneryLog.Display( 'markDrawableChangedBlock: ' + drawable.toString() );
     this._drawablesToChangeBlock.push( drawable );
+  },
+
+  /**
+   * Marks an item for later reduceReferences() calls at the end of Display.update().
+   * @public
+   *
+   * @param {*} item
+   */
+  markForReducedReferences: function( item ) {
+    assert && assert( !!item.reduceReferences );
+
+    this._reduceReferencesNeeded.push( item );
   },
 
   markInstanceRootForDisposal: function( instance ) {

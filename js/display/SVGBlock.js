@@ -58,6 +58,9 @@ inherit( FittedBlock, SVGBlock, {
     // @private
     this.paintMap = {};
 
+    // @private {boolean} - Tracks whether we have no dirty objects that would require cleanup or releases
+    this.areReferencesReduced = true;
+
     if ( !this.domElement ) {
 
       // main SVG element
@@ -166,6 +169,11 @@ inherit( FittedBlock, SVGBlock, {
   markDirtyGroup: function( block ) {
     this.dirtyGroups.push( block );
     this.markDirty();
+
+    if ( this.areReferencesReduced ) {
+      this.display.markForReducedReferences( this );
+    }
+    this.areReferencesReduced = false;
   },
 
   markDirtyDrawable: function( drawable ) {
@@ -239,10 +247,53 @@ inherit( FittedBlock, SVGBlock, {
       }
     }
 
+    this.areReferencesReduced = true; // Once we've iterated through things, we've automatically reduced our references.
+
     // checks will be done in updateFit() to see whether it is needed
     this.updateFit();
 
     return true;
+  },
+
+  /**
+   * Looks to remove dirty objects that may have been disposed.
+   * See https://github.com/phetsims/energy-forms-and-changes/issues/356
+   *
+   * @public
+   */
+  reduceReferences: function() {
+    // no-op if we had an update first
+    if ( this.areReferencesReduced ) {
+      return;
+    }
+
+    // Attempts to do this in a high-performance way, where we're not shifting array contents around (so we'll do this
+    // in one scan).
+
+    let inspectionIndex = 0;
+    let replacementIndex = 0;
+
+    while ( inspectionIndex < this.dirtyGroups.length ) {
+      const group = this.dirtyGroups[ inspectionIndex ];
+
+      // Only keep things that reference our block.
+      if ( group.block === this ) {
+        // If the indices are the same, don't do the operation
+        if ( replacementIndex !== inspectionIndex ) {
+          this.dirtyGroups[ replacementIndex ] = group;
+        }
+        replacementIndex++;
+      }
+
+      inspectionIndex++;
+    }
+
+    // Our array should be
+    while ( this.dirtyGroups.length > replacementIndex ) {
+      this.dirtyGroups.pop();
+    }
+
+    this.areReferencesReduced = true;
   },
 
   dispose: function() {
