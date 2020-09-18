@@ -18,9 +18,9 @@ import svgns from '../util/svgns.js';
  * @constructor
  * @mixes Poolable
  *
- * @param block
- * @param instance
- * @param parent
+ * @param {SVGBlock} block
+ * @param {Block} instance
+ * @param {SVGGroup|null} parent
  */
 function SVGGroup( block, instance, parent ) {
   this.initialize( block, instance, parent );
@@ -32,9 +32,15 @@ inherit( Object, SVGGroup, {
   initialize: function( block, instance, parent ) {
     //OHTWO TODO: add collapsing groups! they can't have self drawables, transforms, filters, etc., and we probably shouldn't de-collapse groups
 
+    // @public {SVGBlock|null} - Set to null when we're disposing, checked by other code.
     this.block = block;
+
+    // @public {Instance|null} - Set to null when we're disposed.
     this.instance = instance;
+
+    // @public {Node|null} - Set to null when we're disposed
     this.node = instance.trail.lastNode();
+
     this.parent = parent;
     this.children = cleanArray( this.children );
     this.hasSelfDrawable = false;

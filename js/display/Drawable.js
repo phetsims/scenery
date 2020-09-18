@@ -71,18 +71,21 @@ inherit( Object, Drawable, {
 
     assert && assert( !this.id || this.isDisposed, 'If we previously existed, we need to have been disposed' );
 
-    // unique ID for drawables
+    // @public {number} - unique ID for drawables
     this.id = this.id || globalId++;
 
     sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( '[' + this.constructor.name + '*] initialize ' + this.toString() );
 
     this.cleanDrawable();
 
+    // @public {number} - Bitmask defined by Renderer.js
     this.renderer = renderer;
 
+    // @public {boolean}
     this.dirty = true;
-    this.isDisposed = false;
 
+    // @private {boolean}
+    this.isDisposed = false;
     this.linksDirty = false;
 
     // @public {TinyProperty.<boolean>}
@@ -105,11 +108,12 @@ inherit( Object, Drawable, {
     assert && assert( !this.previousDrawable && !this.nextDrawable,
       'By cleaning (disposal or fresh creation), we should have disconnected from the linked list' );
 
-    // linked list handling (will be filled in later)
+    // @public {Drawable|null} - Linked list handling (will be filled in later)
     this.previousDrawable = null;
     this.nextDrawable = null;
 
-    // similar but without recent changes, so that we can traverse both orders at the same time for stitching
+    // @public {Drawable|null} - Similar to previousDrawable/nextDrawable, but without recent changes, so that we can
+    // traverse both orders at the same time for stitching.
     this.oldPreviousDrawable = null;
     this.oldNextDrawable = null;
 

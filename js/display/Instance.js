@@ -58,6 +58,7 @@ const defaultPreferredRenderers = Renderer.createOrderBitmask(
  */
 function Instance( display, trail, isDisplayRoot, isSharedCanvasCacheRoot ) {
 
+  // @private {boolean}
   this.active = false;
 
   this.initialize( display, trail, isDisplayRoot, isSharedCanvasCacheRoot );
@@ -80,8 +81,10 @@ inherit( Object, Instance, {
     // prevent the trail passed in from being mutated after this point (we want a consistent trail)
     trail.setImmutable();
 
+    // @public {number}
     this.id = this.id || globalIdCounter++;
 
+    // @public {boolean}
     this.isWebGLSupported = display.isWebGLAllowed() && Utils.isWebGLSupported;
 
     // {RelativeTransform}, provides high-performance access to 'relative' transforms (from our nearest
