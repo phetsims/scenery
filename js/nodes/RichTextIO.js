@@ -8,19 +8,19 @@
 
 import PropertyIO from '../../../axon/js/PropertyIO.js';
 import merge from '../../../phet-core/js/merge.js';
-import ObjectIO from '../../../tandem/js/types/ObjectIO.js';
+import IOType from '../../../tandem/js/types/IOType.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
 import scenery from '../scenery.js';
 import NodeProperty from '../util/NodeProperty.js';
 import NodeIO from './NodeIO.js';
 
-class RichTextIO extends NodeIO {
-  /**
-   * @param {RichText} richText
-   * @param {string} phetioID
-   */
-  constructor( richText, phetioID ) {
-    super( richText, phetioID );
+const RichTextIO = new IOType( 'RichTextIO', {
+  valueType: scenery.RichText,
+  supertype: NodeIO,
+  documentation: 'The tandem IO Type for the scenery RichText node',
+
+  // https://github.com/phetsims/tandem/issues/211 and dispose
+  createWrapper( richText, phetioID ) {
 
     // this uses a sub Property adapter as described in https://github.com/phetsims/phet-io/issues/1326
     const textProperty = new NodeProperty( richText, richText.textProperty, 'text', merge( {
@@ -33,25 +33,13 @@ class RichTextIO extends NodeIO {
       phetioDocumentation: 'Property for the displayed text'
     }, richText.phetioComponentOptions, richText.phetioComponentOptions.textProperty ) );
 
-    // @private
-    this.disposeRichTextIO = function() {
-      textProperty.dispose();
+    return {
+      phetioObject: richText,
+      phetioID: phetioID,
+      dispose: () => textProperty.dispose()
     };
   }
-
-  /**
-   * @public - called by PhetioObject when the wrapper is done
-   */
-  dispose() {
-    this.disposeRichTextIO();
-    NodeIO.prototype.dispose.call( this );
-  }
-}
-
-RichTextIO.documentation = 'The tandem IO Type for the scenery RichText node';
-RichTextIO.validator = { valueType: scenery.RichText };
-RichTextIO.typeName = 'RichTextIO';
-ObjectIO.validateIOType( RichTextIO );
+} );
 
 scenery.register( 'RichTextIO', RichTextIO );
 export default RichTextIO;

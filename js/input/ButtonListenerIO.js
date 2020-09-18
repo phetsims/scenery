@@ -7,16 +7,14 @@
  * @author Andrew Adare (PhET Interactive Simulations)
  */
 
-import ObjectIO from '../../../tandem/js/types/ObjectIO.js';
+import IOType from '../../../tandem/js/types/IOType.js';
 import scenery from '../scenery.js';
 
-class ButtonListenerIO extends ObjectIO {}
-
-ButtonListenerIO.documentation = 'Button listener';
-ButtonListenerIO.events = [ 'up', 'over', 'down', 'out', 'fire' ];
-ButtonListenerIO.validator = { valueType: scenery.ButtonListener };
-ButtonListenerIO.typeName = 'ButtonListenerIO';
-ObjectIO.validateIOType( ButtonListenerIO );
+const ButtonListenerIO = new IOType( 'ButtonListenerIO', {
+  valueType: scenery.ButtonListener,
+  documentation: 'Button listener',
+  events: [ 'up', 'over', 'down', 'out', 'fire' ]
+} );
 
 scenery.register( 'ButtonListenerIO', ButtonListenerIO );
 export default ButtonListenerIO;

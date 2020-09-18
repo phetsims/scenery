@@ -8,39 +8,15 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
-import validate from '../../../axon/js/validate.js';
-import ObjectIO from '../../../tandem/js/types/ObjectIO.js';
+import IOType from '../../../tandem/js/types/IOType.js';
 import scenery from '../scenery.js';
 
-class EventIO extends ObjectIO {
-
-  /**
-   * Encodes an Event instance to a state.
-   * @param {Event} domEvent
-   * @returns {Object} - a state object
-   * @override
-   * @public
-   */
-  static toStateObject( domEvent ) {
-    validate( domEvent, this.validator );
-    return scenery.Input.serializeDomEvent( domEvent );
-  }
-
-  /**
-   * @param {Object} stateObject
-   * @returns {Event}
-   * @override
-   * @public
-   */
-  static fromStateObject( stateObject ) {
-    return scenery.Input.deserializeDomEvent( stateObject );
-  }
-}
-
-EventIO.documentation = 'A DOM Event';
-EventIO.validator = { valueType: window.Event };
-EventIO.typeName = 'EventIO';
-ObjectIO.validateIOType( EventIO );
+const EventIO = new IOType( 'EventIO', {
+  valueType: window.Event,
+  documentation: 'A DOM Event',
+  toStateObject: domEvent => scenery.Input.serializeDomEvent( domEvent ),
+  fromStateObject: stateObject => scenery.Input.deserializeDomEvent( stateObject )
+} );
 
 scenery.register( 'EventIO', EventIO );
 export default EventIO;

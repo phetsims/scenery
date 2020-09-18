@@ -7,22 +7,16 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import validate from '../../../axon/js/validate.js';
-import ObjectIO from '../../../tandem/js/types/ObjectIO.js';
+import IOType from '../../../tandem/js/types/IOType.js';
 import scenery from '../scenery.js';
 import Focus from './Focus.js';
 
-class FocusIO extends ObjectIO {
-
-  /**
-   * Convert the focus region to a plain JS object for serialization.
-   * @param {Object} focus - the focus region which has {display,trail}
-   * @returns {Object} - the serialized object
-   * @public
-   * @override
-   */
-  static toStateObject( focus ) {
-    validate( focus, this.validator );
+const FocusIO = new IOType( 'FocusIO', {
+  valueType: Focus,
+  documentation: 'A IO Type for the instance in the simulation which currently has keyboard focus. FocusIO is ' +
+                 'serialized into and Object with key `focusedPhetioElement` that is a list of PhET-iO elements, ' +
+                 'from parent-most to child-most cooresponding to the PhET-iO element that was instrumented.',
+  toStateObject( focus ) {
     const phetioIDs = [];
     focus.trail.nodes.forEach( function( node, i ) {
 
@@ -36,14 +30,7 @@ class FocusIO extends ObjectIO {
       focusedPhetioElement: phetioIDs
     };
   }
-}
-
-FocusIO.validator = { valueType: Focus };
-FocusIO.documentation = 'A IO Type for the instance in the simulation which currently has keyboard focus. FocusIO is ' +
-                        'serialized into and Object with key `focusedPhetioElement` that is a list of PhET-iO elements, ' +
-                        'from parent-most to child-most cooresponding to the PhET-iO element that was instrumented.';
-FocusIO.typeName = 'FocusIO';
-ObjectIO.validateIOType( FocusIO );
+} );
 
 scenery.register( 'FocusIO', FocusIO );
 export default FocusIO;

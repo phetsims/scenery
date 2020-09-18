@@ -12,14 +12,27 @@ import PropertyIO from '../../../axon/js/PropertyIO.js';
 import Range from '../../../dot/js/Range.js';
 import merge from '../../../phet-core/js/merge.js';
 import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
+import IOType from '../../../tandem/js/types/IOType.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
-import ObjectIO from '../../../tandem/js/types/ObjectIO.js';
 import scenery from '../scenery.js';
 import NodeProperty from '../util/NodeProperty.js';
 
-class NodeIO extends ObjectIO {
-  constructor( node, phetioID ) {
-    super( node, phetioID );
+const NodeIO = new IOType( 'NodeIO', {
+  valueType: scenery.Node,
+  documentation: 'The base type for graphical and potentially interactive objects.  NodeIO has nested PropertyIO values ' +
+                 'for visibility, pickability and opacity.' +
+                 '<br>' +
+                 '<br>' +
+                 'Pickable can take one of three values:<br>' +
+                 '<ul>' +
+                 '<li>null: pass-through behavior. Nodes with input listeners are pickable, but nodes without input listeners won\'t block events for nodes behind it.</li>' +
+                 '<li>false: The node cannot be interacted with, and it blocks events for nodes behind it.</li>' +
+                 '<li>true: The node can be interacted with (if it has an input listener).</li>' +
+                 '</ul>' +
+                 'For more about Scenery node pickability, please see <a href="http://phetsims.github.io/scenery/doc/implementation-notes#pickability">http://phetsims.github.io/scenery/doc/implementation-notes#pickability</a>',
+
+  // TODO: https://github.com/phetsims/tandem/issues/211
+  createWrapper: ( node, phetioID ) => {
 
     const pickableProperty = new NodeProperty( node, node.pickableProperty, 'pickable', merge( {
 
@@ -45,36 +58,16 @@ class NodeIO extends ObjectIO {
     opacityProperty.link( function( opacity ) { node.opacity = opacity; } );
     node.opacityProperty.lazyLink( () => { opacityProperty.value = node.opacity; } );
 
-    // @private
-    this.disposeNodeIO = function() {
-      pickableProperty.dispose();
-      opacityProperty.dispose();
+    return {
+      phetioObject: node,
+      phetioID: phetioID,
+      dispose: () => {
+        pickableProperty.dispose();
+        opacityProperty.dispose();
+      }
     };
   }
-
-  /**
-   * @public - called by PhetioObject when the wrapper is done
-   */
-  dispose() {
-    this.disposeNodeIO();
-  }
-}
-
-NodeIO.validator = { valueType: scenery.Node };
-
-NodeIO.documentation = 'The base type for graphical and potentially interactive objects.  NodeIO has nested PropertyIO values ' +
-                       'for visibility, pickability and opacity.' +
-                       '<br>' +
-                       '<br>' +
-                       'Pickable can take one of three values:<br>' +
-                       '<ul>' +
-                       '<li>null: pass-through behavior. Nodes with input listeners are pickable, but nodes without input listeners won\'t block events for nodes behind it.</li>' +
-                       '<li>false: The node cannot be interacted with, and it blocks events for nodes behind it.</li>' +
-                       '<li>true: The node can be interacted with (if it has an input listener).</li>' +
-                       '</ul>' +
-                       'For more about Scenery node pickability, please see <a href="http://phetsims.github.io/scenery/doc/implementation-notes#pickability">http://phetsims.github.io/scenery/doc/implementation-notes#pickability</a>';
-NodeIO.typeName = 'NodeIO';
-ObjectIO.validateIOType( NodeIO );
+} );
 
 scenery.register( 'NodeIO', NodeIO );
 export default NodeIO;
