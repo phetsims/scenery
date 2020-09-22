@@ -836,26 +836,20 @@ inherit( Object, PressListener, {
       // fire the callback from options
       this._releaseListener( event, this );
 
-      // press or release listeners may have interrupted this click, if that is the case immediately indicate that
-      // clicking interaction is over
-      if ( this.interrupted ) {
-        this.a11yClickingProperty.value = false;
-      }
-      else {
-        // if we are already clicking, remove the previous timeout - this assumes that clearTimeout is a noop if the
-        // listener is no longer attached
-        stepTimer.clearTimeout( this._a11yClickingTimeoutListener );
+      // if we are already clicking, remove the previous timeout - this assumes that clearTimeout is a noop if the
+      // listener is no longer attached
+      stepTimer.clearTimeout( this._a11yClickingTimeoutListener );
 
-        // now add the timeout back to start over, saving so that it can be removed later
-        this._a11yClickingTimeoutListener = stepTimer.setTimeout( () => {
+      // Now add the timeout back to start over, saving so that it can be removed later. Even when this listener was
+      // interrupted from above logic, we still delay setting this to false to support visual "pressing" redraw.
+      this._a11yClickingTimeoutListener = stepTimer.setTimeout( () => {
 
-          // the listener may have been disposed before the end of a11yLooksPressedInterval, like if it fires and
-          // disposes itself immediately
-          if ( !this.a11yClickingProperty.isDisposed ) {
-            this.a11yClickingProperty.value = false;
-          }
-        }, this._a11yLooksPressedInterval );
-      }
+        // the listener may have been disposed before the end of a11yLooksPressedInterval, like if it fires and
+        // disposes itself immediately
+        if ( !this.a11yClickingProperty.isDisposed ) {
+          this.a11yClickingProperty.value = false;
+        }
+      }, this._a11yLooksPressedInterval );
     }
   },
 
