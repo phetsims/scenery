@@ -288,9 +288,33 @@ inherit( FittedBlock, SVGBlock, {
       inspectionIndex++;
     }
 
-    // Our array should be
+    // Our array should be only that length now
     while ( this.dirtyGroups.length > replacementIndex ) {
       this.dirtyGroups.pop();
+    }
+
+    // Do a similar thing with dirtyDrawables (not optimized out because for right now we want to maximize performance).
+    inspectionIndex = 0;
+    replacementIndex = 0;
+
+    while ( inspectionIndex < this.dirtyDrawables.length ) {
+      const drawable = this.dirtyDrawables[ inspectionIndex ];
+
+      // Only keep things that reference our block as the parentDrawable.
+      if ( drawable.parentDrawable === this ) {
+        // If the indices are the same, don't do the operation
+        if ( replacementIndex !== inspectionIndex ) {
+          this.dirtyDrawables[ replacementIndex ] = drawable;
+        }
+        replacementIndex++;
+      }
+
+      inspectionIndex++;
+    }
+
+    // Our array should be only that length now
+    while ( this.dirtyDrawables.length > replacementIndex ) {
+      this.dirtyDrawables.pop();
     }
 
     this.areReferencesReduced = true;
