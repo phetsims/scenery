@@ -37,8 +37,7 @@ function FireListener( options ) {
     // button is released while the pointer is over the button.
     fireOnDown: false,
 
-    // fire-on-hold feature (similar to PushButtonModel, see https://github.com/phetsims/scenery/issues/1004 as
-    // this exists here so we don't need to use FireOnHoldInputListener ever).
+    // fire-on-hold feature, see https://github.com/phetsims/scenery/issues/1004
     fireOnHold: false, // {boolean} - is the fire-on-hold feature enabled?
     fireOnHoldDelay: 400, // {number} - start to fire continuously after pressing for this long (milliseconds)
     fireOnHoldInterval: 100, // {number} - fire continuously at this interval (milliseconds)
