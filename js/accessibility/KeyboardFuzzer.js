@@ -18,22 +18,22 @@ import PDOMUtils from './pdom/PDOMUtils.js';
 const keyboardTestingSchema = {
   INPUT: [ ...KeyboardUtils.ARROW_KEYS, KeyboardUtils.KEY_PAGE_UP, KeyboardUtils.KEY_PAGE_DOWN,
     KeyboardUtils.KEY_HOME, KeyboardUtils.KEY_END, KeyboardUtils.KEY_ENTER, KeyboardUtils.KEY_SPACE ],
-  DIV: [ ...KeyboardUtils.ARROW_KEYS ],
+  DIV: [ ...KeyboardUtils.ARROW_KEYS, ...KeyboardUtils.WASD_KEYS ],
   P: [ KeyboardUtils.KEY_ESCAPE ],
   BUTTON: [ KeyboardUtils.KEY_ENTER, KeyboardUtils.KEY_SPACE ]
 };
 
-const MAX_MS_KEY_HOLD_DOWN = 200;
+const MAX_MS_KEY_HOLD_DOWN = 100;
 const NEXT_ELEMENT_THRESHOLD = .1;
 
-const DO_KNOWN_KEYS_THRESHOLD = .60; // for keydown/up
-const CLICK_EVENT = .10; // TODO because of implementation this is actually 4%. but reads like "10% of the time after 60% of the time"
+const DO_KNOWN_KEYS_THRESHOLD = .60; // for keydown/up, 60 percent of the events
+const CLICK_EVENT_THRESHOLD = DO_KNOWN_KEYS_THRESHOLD + .10; // 10 percent of the events
 
 const KEY_DOWN = 'keydown';
 const KEY_UP = 'keyup';
 
-const min = 9;
-const max = 223;
+const MIN_KEY_CODE = 8; // Backspace key
+const MAX_KEY_CODE = 127; // Delete key
 
 /**
  *
@@ -47,7 +47,7 @@ class KeyboardFuzzer {
     // @private
     this.display = display;
     this.random = new Random( { seed: seed } );
-    this.keysPressedEachFrame = 1;
+    this.numberOfComponentsTested = 10;
     this.keyupListeners = [];
 
     // @private {HTMLElement}
@@ -108,21 +108,21 @@ class KeyboardFuzzer {
    */
   triggerKeyDownUpEvents( element, keyCode ) {
 
-    if ( !Display.keyStateTracker.isKeyDown( keyCode ) ) {
-      sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( 'trigger keydown/up: ' + keyCode );
-      sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.push();
+    sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( 'trigger keydown/up: ' + keyCode );
+    sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.push();
 
 
-      // TODO: screen readers normally take our keydown events, but may not here, is the descrpency ok?
-      this.triggerDOMEvent( KEY_DOWN, element, keyCode );
+    // TODO: screen readers normally take our keydown events, but may not here, is the descrpency ok?
+    this.triggerDOMEvent( KEY_DOWN, element, keyCode );
 
-      this.keyupListeners.push( stepTimer.setTimeout( () => {
-        this.triggerDOMEvent( KEY_UP, element, keyCode );
+    const timeout = this.random.nextInt( MAX_MS_KEY_HOLD_DOWN );
 
-      }, this.random.nextInt( MAX_MS_KEY_HOLD_DOWN ) ) );
+    this.keyupListeners.push( stepTimer.setTimeout( () => {
+      this.triggerDOMEvent( KEY_UP, element, keyCode );
 
-      sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.pop();
-    }
+    }, timeout === MAX_MS_KEY_HOLD_DOWN ? 2000 : timeout ) );
+
+    sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.pop();
   }
 
   /**
@@ -132,7 +132,7 @@ class KeyboardFuzzer {
    */
   triggerRandomKeyDownUpEvents( element ) {
 
-    const randomKeyCode = Math.floor( this.random.nextDouble() * ( max - min ) + min );
+    const randomKeyCode = Math.floor( this.random.nextDouble() * ( MAX_KEY_CODE - MIN_KEY_CODE ) + MIN_KEY_CODE );
 
     sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( 'trigger random keydown/up: ' + randomKeyCode );
     sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.push();
@@ -151,42 +151,49 @@ class KeyboardFuzzer {
    * TODO: @param keyboardPressesPerFocusedItem {number} - basically would be the same as fuzzRate, but handling
    * TODO:     the keydown events for a focused item
    */
-  fuzzBoardEvents() {
+  fuzzBoardEvents( fuzzRate ) {
 
     const a11yPointer = this.display._input.a11yPointer;
     if ( a11yPointer && !a11yPointer.blockTrustedEvents ) {
       a11yPointer.blockTrustedEvents = true;
     }
 
-    this.chooseNextElement();
+    for ( let i = 0; i < this.numberOfComponentsTested; i++ ) {
 
-    for ( let i = 0; i < this.keysPressedEachFrame; i++ ) {
+      // find a focus a random element
+      this.chooseNextElement();
 
-      sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( 'main loop, i=' + i );
-      sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.push();
+      for ( let i = 0; i < fuzzRate / this.numberOfComponentsTested; i++ ) {
 
+        sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( 'main loop, i=' + i );
+        sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.push();
 
-      // get active element, focus might have changed in the last press
-      const elementWithFocus = document.activeElement;
+        // get active element, focus might have changed in the last press
+        const elementWithFocus = document.activeElement;
 
-      if ( keyboardTestingSchema[ elementWithFocus.tagName ] ) {
+        if ( keyboardTestingSchema[ elementWithFocus.tagName.toUpperCase() ] ) {
 
-        if ( this.random.nextDouble() < DO_KNOWN_KEYS_THRESHOLD ) {
-          const keyCodes = keyboardTestingSchema[ elementWithFocus.tagName ];
-          const keyCode = this.random.sample( keyCodes );
-          this.triggerKeyDownUpEvents( elementWithFocus, keyCode );
-        }
-        else if ( this.random.nextDouble() < CLICK_EVENT ) {
-          this.triggerClickEvent( elementWithFocus );
+          const randomNumber = this.random.nextDouble();
+          if ( randomNumber < DO_KNOWN_KEYS_THRESHOLD ) {
+            const keyCodes = keyboardTestingSchema[ elementWithFocus.tagName ];
+            const keyCode = this.random.sample( keyCodes );
+            this.triggerKeyDownUpEvents( elementWithFocus, keyCode );
+          }
+          else if ( randomNumber < CLICK_EVENT_THRESHOLD ) {
+            this.triggerClickEvent( elementWithFocus );
+          }
+          else {
+            this.triggerRandomKeyDownUpEvents( elementWithFocus );
+          }
         }
         else {
           this.triggerRandomKeyDownUpEvents( elementWithFocus );
         }
-      }
-      // TODO: What about other types of events, not just keydown/keyup??!?!
-      // TODO: what about application role elements
+        // TODO: What about other types of events, not just keydown/keyup??!?!
+        // TODO: what about application role elements
 
-      sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.pop();
+        sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.pop();
+      }
     }
   }
 
