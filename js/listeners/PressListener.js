@@ -455,6 +455,10 @@ inherit( Object, PressListener, {
     if ( this.a11yClickingProperty.value ) {
       this.interrupted = true;
 
+      // release on interrupt (without going through onRelease, which handles mouse/touch specific things)
+      this.isPressedProperty.value = false;
+      this._releaseListener( null, this );
+
       if ( stepTimer.hasListener( this._a11yClickingTimeoutListener ) ) {
         stepTimer.clearTimeout( this._a11yClickingTimeoutListener );
 
