@@ -6,9 +6,11 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import stepTimer from '../../../../axon/js/stepTimer.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
-import inherit from '../../../../phet-core/js/inherit.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
+import inherit from '../../../../phet-core/js/inherit.js';
+import platform from '../../../../phet-core/js/platform.js';
 import scenery from '../../scenery.js';
 import ShaderProgram from '../../util/ShaderProgram.js';
 import SpriteSheet from '../../util/SpriteSheet.js';
@@ -58,6 +60,9 @@ function SpritesWebGLDrawable( renderer, instance ) {
     sprite.imageProperty.lazyLink( this.spriteChangeListener );
     this.addSpriteImage( sprite.imageProperty.value );
   } );
+
+  // @private {boolean} - See https://github.com/phetsims/natural-selection/issues/243
+  this.hasDrawn = false;
 }
 
 scenery.register( 'SpritesWebGLDrawable', SpritesWebGLDrawable );
@@ -295,6 +300,14 @@ inherit( WebGLSelfDrawable, SpritesWebGLDrawable, {
     gl.bindTexture( gl.TEXTURE_2D, null );
 
     this.shaderProgram.unuse();
+
+    // See https://github.com/phetsims/natural-selection/issues/243
+    if ( !this.hasDrawn && platform.safari ) {
+      // Redraw once more if we're in Safari, since it's undetermined why an initial draw isn't working.
+      // Everything seems to otherwise be in place.
+      stepTimer.setTimeout( () => this.markDirty(), 0 );
+    }
+    this.hasDrawn = true;
 
     return 1;
   },
