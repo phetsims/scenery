@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import stepTimer from '../../../../axon/js/stepTimer.js';
+import animationFrameTimer from '../../../../axon/js/animationFrameTimer.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import inherit from '../../../../phet-core/js/inherit.js';
@@ -305,7 +305,7 @@ inherit( WebGLSelfDrawable, SpritesWebGLDrawable, {
     if ( !this.hasDrawn && platform.safari ) {
       // Redraw once more if we're in Safari, since it's undetermined why an initial draw isn't working.
       // Everything seems to otherwise be in place.
-      stepTimer.setTimeout( () => this.markDirty(), 0 );
+      animationFrameTimer.setTimeout( () => this.markDirty(), 0 );
     }
     this.hasDrawn = true;
 
