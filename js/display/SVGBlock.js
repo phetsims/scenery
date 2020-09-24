@@ -180,6 +180,11 @@ inherit( FittedBlock, SVGBlock, {
     sceneryLog && sceneryLog.dirty && sceneryLog.dirty( 'markDirtyDrawable on SVGBlock#' + this.id + ' with ' + drawable.toString() );
     this.dirtyDrawables.push( drawable );
     this.markDirty();
+
+    if ( this.areReferencesReduced ) {
+      this.display.markForReducedReferences( this );
+    }
+    this.areReferencesReduced = false;
   },
 
   setSizeFullDisplay: function() {
