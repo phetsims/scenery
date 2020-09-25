@@ -102,7 +102,12 @@ class WebSpeaker {
    * @private
    */
   populateVoices() {
-    this.voices = this.synth.getVoices();
+
+    // for now, only include the english voice
+    this.voices = _.filter( this.synth.getVoices(), voice => {
+      return voice.lang === 'en-US';
+    } );
+
     this.voiceProperty.set( this.voices[ 0 ] );
   }
 
