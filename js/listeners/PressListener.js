@@ -915,8 +915,8 @@ inherit( Object, PressListener, {
 } );
 
 PressListener.phetioAPI = {
-  pressAction: { phetioType: Action.createActionIO( [ SceneryEventIO ] ) },
-  releaseAction: { phetioType: Action.createActionIO( [ NullableIO( SceneryEventIO ) ] ) }
+  pressAction: { phetioType: Action.ActionIO( [ SceneryEventIO ] ) },
+  releaseAction: { phetioType: Action.ActionIO( [ NullableIO( SceneryEventIO ) ] ) }
 };
 
 export default PressListener;

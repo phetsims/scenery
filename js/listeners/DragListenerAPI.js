@@ -22,7 +22,7 @@ class DragListenerAPI extends PressListenerAPI {
   constructor( options ) {
     options = merge( {
       dragActionOptions: {
-        phetioType: Action.createActionIO( [ SceneryEventIO ] ),
+        phetioType: Action.ActionIO( [ SceneryEventIO ] ),
         phetioEventType: EventType.USER,
         phetioHighFrequency: true,
         phetioReadOnly: true
