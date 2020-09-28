@@ -82,6 +82,8 @@ const logProperties = {
   AlignGroup: { name: 'AlignGroup', style: '' },
   RichText: { name: 'RichText', style: '' },
 
+  Sim: { name: 'Sim', style: '' },
+
   // Accessibility-related
   ParallelDOM: { name: 'ParallelDOM', style: '' },
   PDOMInstance: { name: 'PDOMInstance', style: '' },
