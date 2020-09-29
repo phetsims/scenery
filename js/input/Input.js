@@ -160,7 +160,6 @@
 
 import Action from '../../../axon/js/Action.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import Vector2IO from '../../../dot/js/Vector2IO.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
@@ -286,7 +285,7 @@ class Input {
       phetioPlayback: true,
       tandem: options.tandem.createTandem( 'mouseUpAction' ),
       parameters: [
-        { name: 'point', phetioType: Vector2IO },
+        { name: 'point', phetioType: Vector2.Vector2IO },
         { name: 'event', phetioType: EventIO }
       ],
       phetioEventType: EventType.USER,
@@ -302,7 +301,7 @@ class Input {
       phetioPlayback: true,
       tandem: options.tandem.createTandem( 'mouseDownAction' ),
       parameters: [
-        { name: 'point', phetioType: Vector2IO },
+        { name: 'point', phetioType: Vector2.Vector2IO },
         { name: 'event', phetioType: EventIO }
       ],
       phetioEventType: EventType.USER,
@@ -318,7 +317,7 @@ class Input {
       phetioPlayback: true,
       tandem: options.tandem.createTandem( 'mouseMoveAction' ),
       parameters: [
-        { name: 'point', phetioType: Vector2IO },
+        { name: 'point', phetioType: Vector2.Vector2IO },
         { name: 'event', phetioType: EventIO }
       ],
       phetioEventType: EventType.USER,
@@ -335,7 +334,7 @@ class Input {
       phetioPlayback: true,
       tandem: options.tandem.createTandem( 'mouseOverAction' ),
       parameters: [
-        { name: 'point', phetioType: Vector2IO },
+        { name: 'point', phetioType: Vector2.Vector2IO },
         { name: 'event', phetioType: EventIO }
       ],
       phetioEventType: EventType.USER,
@@ -351,7 +350,7 @@ class Input {
       phetioPlayback: true,
       tandem: options.tandem.createTandem( 'mouseOutAction' ),
       parameters: [
-        { name: 'point', phetioType: Vector2IO },
+        { name: 'point', phetioType: Vector2.Vector2IO },
         { name: 'event', phetioType: EventIO }
       ],
       phetioEventType: EventType.USER,
@@ -390,7 +389,7 @@ class Input {
       tandem: options.tandem.createTandem( 'touchStartAction' ),
       parameters: [
         { name: 'id', phetioType: NumberIO },
-        { name: 'point', phetioType: Vector2IO },
+        { name: 'point', phetioType: Vector2.Vector2IO },
         { name: 'event', phetioType: EventIO }
       ],
       phetioEventType: EventType.USER,
@@ -410,7 +409,7 @@ class Input {
       tandem: options.tandem.createTandem( 'touchEndAction' ),
       parameters: [
         { name: 'id', phetioType: NumberIO },
-        { name: 'point', phetioType: Vector2IO },
+        { name: 'point', phetioType: Vector2.Vector2IO },
         { name: 'event', phetioType: EventIO }
       ],
       phetioEventType: EventType.USER,
@@ -429,7 +428,7 @@ class Input {
       tandem: options.tandem.createTandem( 'touchMoveAction' ),
       parameters: [
         { name: 'id', phetioType: NumberIO },
-        { name: 'point', phetioType: Vector2IO },
+        { name: 'point', phetioType: Vector2.Vector2IO },
         { name: 'event', phetioType: EventIO }
       ],
       phetioEventType: EventType.USER,
@@ -450,7 +449,7 @@ class Input {
       tandem: options.tandem.createTandem( 'touchCancelAction' ),
       parameters: [
         { name: 'id', phetioType: NumberIO },
-        { name: 'point', phetioType: Vector2IO },
+        { name: 'point', phetioType: Vector2.Vector2IO },
         { name: 'event', phetioType: EventIO }
       ],
       phetioEventType: EventType.USER,
@@ -467,7 +466,7 @@ class Input {
       tandem: options.tandem.createTandem( 'penStartAction' ),
       parameters: [
         { name: 'id', phetioType: NumberIO },
-        { name: 'point', phetioType: Vector2IO },
+        { name: 'point', phetioType: Vector2.Vector2IO },
         { name: 'event', phetioType: EventIO }
       ],
       phetioEventType: EventType.USER,
@@ -487,7 +486,7 @@ class Input {
       tandem: options.tandem.createTandem( 'penEndAction' ),
       parameters: [
         { name: 'id', phetioType: NumberIO },
-        { name: 'point', phetioType: Vector2IO },
+        { name: 'point', phetioType: Vector2.Vector2IO },
         { name: 'event', phetioType: EventIO }
       ],
       phetioEventType: EventType.USER,
@@ -506,7 +505,7 @@ class Input {
       tandem: options.tandem.createTandem( 'penMoveAction' ),
       parameters: [
         { name: 'id', phetioType: NumberIO },
-        { name: 'point', phetioType: Vector2IO },
+        { name: 'point', phetioType: Vector2.Vector2IO },
         { name: 'event', phetioType: EventIO }
       ],
       phetioEventType: EventType.USER,
@@ -527,7 +526,7 @@ class Input {
       tandem: options.tandem.createTandem( 'penCancelAction' ),
       parameters: [
         { name: 'id', phetioType: NumberIO },
-        { name: 'point', phetioType: Vector2IO },
+        { name: 'point', phetioType: Vector2.Vector2IO },
         { name: 'event', phetioType: EventIO }
       ],
       phetioEventType: EventType.USER,

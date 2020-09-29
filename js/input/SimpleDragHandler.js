@@ -10,7 +10,6 @@
 import Action from '../../../axon/js/Action.js';
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import Vector2IO from '../../../dot/js/Vector2IO.js';
 import deprecationWarning from '../../../phet-core/js/deprecationWarning.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
@@ -150,7 +149,7 @@ function SimpleDragHandler( options ) {
     phetioReadOnly: options.phetioReadOnly,
     parameters: [ {
       name: 'point',
-      phetioType: Vector2IO,
+      phetioType: Vector2.Vector2IO,
       phetioDocumentation: 'the position of the drag start in view coordinates'
     }, {
       phetioPrivate: true,
@@ -206,7 +205,7 @@ function SimpleDragHandler( options ) {
     tandem: options.tandem.createTandem( 'dragAction' ),
     parameters: [ {
       name: 'point',
-      phetioType: Vector2IO,
+      phetioType: Vector2.Vector2IO,
       phetioDocumentation: 'the position of the drag in view coordinates'
     }, {
       phetioPrivate: true,
@@ -247,7 +246,7 @@ function SimpleDragHandler( options ) {
     phetioReadOnly: options.phetioReadOnly,
     parameters: [ {
       name: 'point',
-      phetioType: Vector2IO,
+      phetioType: Vector2.Vector2IO,
       phetioDocumentation: 'the position of the drag end in view coordinates'
     }, {
       phetioPrivate: true,
