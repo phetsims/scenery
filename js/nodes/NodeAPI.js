@@ -7,7 +7,7 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
-import NumberPropertyIO from '../../../axon/js/NumberPropertyIO.js';
+import NumberProperty from '../../../axon/js/NumberProperty.js';
 import PropertyAPI from '../../../axon/js/PropertyAPI.js';
 import PropertyIO from '../../../axon/js/PropertyIO.js';
 import merge from '../../../phet-core/js/merge.js';
@@ -36,7 +36,7 @@ class NodeAPI extends PhetioObjectAPI {
       },
 
       opacityPropertyOptions: {
-        phetioType: NumberPropertyIO
+        phetioType: NumberProperty.NumberPropertyIO
       }
     }, options );
     super( options );
