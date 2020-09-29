@@ -9,7 +9,7 @@
 
 import NumberProperty from '../../../axon/js/NumberProperty.js';
 import PropertyAPI from '../../../axon/js/PropertyAPI.js';
-import PropertyIO from '../../../axon/js/PropertyIO.js';
+import Property from '../../../axon/js/Property.js';
 import merge from '../../../phet-core/js/merge.js';
 import PhetioObjectAPI from '../../../tandem/js/PhetioObjectAPI.js';
 import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
@@ -28,11 +28,11 @@ class NodeAPI extends PhetioObjectAPI {
       phetioType: NodeIO,
       phetioState: false,
       visiblePropertyOptions: {
-        phetioType: PropertyIO( BooleanIO )
+        phetioType: Property.PropertyIO( BooleanIO )
       },
 
       pickablePropertyOptions: {
-        phetioType: PropertyIO( NullableIO( BooleanIO ) )
+        phetioType: Property.PropertyIO( NullableIO( BooleanIO ) )
       },
 
       opacityPropertyOptions: {

@@ -7,7 +7,7 @@
  * @author Denzell Barnett (PhET Interactive Simulations)
  */
 
-import PropertyIO from '../../../axon/js/PropertyIO.js';
+import Property from '../../../axon/js/Property.js';
 import merge from '../../../phet-core/js/merge.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
@@ -31,7 +31,7 @@ const TextIO = new IOType( 'TextIO', {
 
       // pick the following values from the parent Node
       phetioReadOnly: text.phetioReadOnly,
-      phetioType: PropertyIO( StringIO ),
+      phetioType: Property.PropertyIO( StringIO ),
 
       tandem: text.tandem.createTandem( 'textProperty' ),
       phetioDocumentation: 'Property for the displayed text'

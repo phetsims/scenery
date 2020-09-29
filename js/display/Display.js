@@ -52,7 +52,6 @@
 
 import Emitter from '../../../axon/js/Emitter.js';
 import Property from '../../../axon/js/Property.js';
-import PropertyIO from '../../../axon/js/PropertyIO.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
 import Dimension2 from '../../../dot/js/Dimension2.js';
@@ -1977,7 +1976,7 @@ Display.focusProperty = new Property( null, {
   phetioDocumentation: 'Stores the current focus in the simulation, null if there is nothing focused. This is not updated ' +
                        'based on mouse or touch input, only keyboard and other alternative inputs. Note that this only ' +
                        'applies to simulations that support alternative input.',
-  phetioType: PropertyIO( NullableIO( FocusIO ) ),
+  phetioType: Property.PropertyIO( NullableIO( FocusIO ) ),
   phetioState: false,
   phetioFeatured: true,
   phetioReadOnly: true

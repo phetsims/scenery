@@ -8,7 +8,7 @@
  */
 
 import NumberProperty from '../../../axon/js/NumberProperty.js';
-import PropertyIO from '../../../axon/js/PropertyIO.js';
+import Property from '../../../axon/js/Property.js';
 import Range from '../../../dot/js/Range.js';
 import merge from '../../../phet-core/js/merge.js';
 import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
@@ -40,7 +40,7 @@ const NodeIO = new IOType( 'NodeIO', {
       phetioReadOnly: node.phetioReadOnly,
 
       tandem: node.tandem.createTandem( 'pickableProperty' ),
-      phetioType: PropertyIO( NullableIO( BooleanIO ) ),
+      phetioType: Property.PropertyIO( NullableIO( BooleanIO ) ),
       phetioDocumentation: 'Sets whether the node will be pickable (and hence interactive), see the NodeIO documentation for more details'
     }, node.phetioComponentOptions, node.phetioComponentOptions.pickableProperty ) );
 

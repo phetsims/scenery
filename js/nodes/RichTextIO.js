@@ -6,7 +6,7 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
-import PropertyIO from '../../../axon/js/PropertyIO.js';
+import Property from '../../../axon/js/Property.js';
 import merge from '../../../phet-core/js/merge.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
@@ -28,7 +28,7 @@ const RichTextIO = new IOType( 'RichTextIO', {
 
       // pick the following values from the parent Node
       phetioReadOnly: richText.phetioReadOnly,
-      phetioType: PropertyIO( StringIO ),
+      phetioType: Property.PropertyIO( StringIO ),
 
       tandem: richText.tandem.createTandem( 'textProperty' ),
       phetioDocumentation: 'Property for the displayed text'
