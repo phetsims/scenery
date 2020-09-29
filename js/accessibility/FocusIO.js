@@ -15,7 +15,7 @@ const FocusIO = new IOType( 'FocusIO', {
   valueType: Focus,
   documentation: 'A IO Type for the instance in the simulation which currently has keyboard focus. FocusIO is ' +
                  'serialized into and Object with key `focusedPhetioElement` that is a list of PhET-iO elements, ' +
-                 'from parent-most to child-most cooresponding to the PhET-iO element that was instrumented.',
+                 'from parent-most to child-most corresponding to the PhET-iO element that was instrumented.',
   toStateObject: focus => {
     const phetioIDs = [];
     focus.trail.nodes.forEach( function( node, i ) {
