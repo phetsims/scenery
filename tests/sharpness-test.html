@@ -49,9 +49,17 @@
   var image = new scenery.Image( '../assets/sharpness-test-pattern.png', {
     mipmap: true,
     initialLevel: 7,
-    maxLevel: 7
+    maxLevel: 7,
+    mipmapBias: 0.5
   } );
-  scene.addChild( image );
+
+  var imageContainer = new scenery.HBox( {
+    children: [
+      new scenery.Node( { children: [ image ], renderer: 'svg' } ),
+      new scenery.Node( { children: [ image ], renderer: 'canvas' } )
+    ]
+  } );
+  scene.addChild( imageContainer );
 
   display.updateDisplay();
 
@@ -62,7 +70,7 @@
   document.getElementById( 'mipmapCheckbox' ).addEventListener( 'click', updateMipmap );
 
   display.updateOnRequestAnimationFrame( function() {
-    image.setScaleMagnitude( Math.pow( 2, parseFloat( document.getElementById( 'scaleSlider' ).value ) / 10 ) );
+    imageContainer.setScaleMagnitude( Math.pow( 2, parseFloat( document.getElementById( 'scaleSlider' ).value ) / 10 ) );
     display.updateDisplay();
   } );
 </script>
