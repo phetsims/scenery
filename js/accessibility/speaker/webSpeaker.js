@@ -33,6 +33,10 @@ class WebSpeaker {
     this.startSpeakingEmitter = new Emitter();
     this.endSpeakingEmitter = new Emitter();
 
+    // @public - whether or not the synth is speaking - perhaps this should
+    // replace the emitters above?
+    this.speakingProperty = new BooleanProperty( false );
+
     // create the synthesizer
     this.synth = window.speechSynthesis;
 
@@ -127,8 +131,9 @@ class WebSpeaker {
       // since the "end" event doesn't come through all the time after cancel() on
       // safari, we broadcast this right away to indicate that any previous speaking
       // is done
-      if ( withCancel ) {
+      if ( this.speakingProperty.get() && withCancel ) {
         this.endSpeakingEmitter.emit();
+        this.speakingProperty.value = false;
       }
 
       // embidding marks (for i18n) impact the output, strip before speaking
@@ -143,11 +148,13 @@ class WebSpeaker {
 
       const startListener = () => {
         this.startSpeakingEmitter.emit();
+        this.speakingProperty.set( true );
         utterance.removeEventListener( 'start', startListener );
       };
 
       const endListener = () => {
         this.endSpeakingEmitter.emit();
+        this.speakingProperty.set( false );
         utterance.removeEventListener( 'end', endListener );
       };
 
