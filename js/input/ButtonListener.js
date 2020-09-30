@@ -23,8 +23,8 @@ import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
+import IOType from '../../../tandem/js/types/IOType.js';
 import scenery from '../scenery.js';
-import ButtonListenerIO from './ButtonListenerIO.js';
 import DownUpListener from './DownUpListener.js';
 
 /**
@@ -47,7 +47,7 @@ function ButtonListener( options ) {
 
     // When running in PhET-iO brand, the tandem must be supplied
     tandem: Tandem.OPTIONAL,
-    phetioType: ButtonListenerIO,
+    phetioType: ButtonListener.ButtonListenerIO,
     phetioState: false,
     phetioEventType: EventType.USER
   }, options );
@@ -177,6 +177,12 @@ inherit( DownUpListener, ButtonListener, {
     this.setButtonState( event, 'down' );
     this.setButtonState( event, 'up' );
   }
+} );
+
+ButtonListener.ButtonListenerIO = new IOType( 'ButtonListenerIO', {
+  valueType: ButtonListener,
+  documentation: 'Button listener',
+  events: [ 'up', 'over', 'down', 'out', 'fire' ]
 } );
 
 export default ButtonListener;
