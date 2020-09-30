@@ -15,6 +15,9 @@ import cleanArray from '../../../phet-core/js/cleanArray.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
+import IOType from '../../../tandem/js/types/IOType.js';
+import StringIO from '../../../tandem/js/types/StringIO.js';
+import VoidIO from '../../../tandem/js/types/VoidIO.js';
 import Renderer from '../display/Renderer.js';
 import ImageCanvasDrawable from '../display/drawables/ImageCanvasDrawable.js';
 import ImageDOMDrawable from '../display/drawables/ImageDOMDrawable.js';
@@ -25,6 +28,7 @@ import SpriteSheet from '../util/SpriteSheet.js';
 import svgns from '../util/svgns.js';
 import xlinkns from '../util/xlinkns.js';
 import Node from './Node.js';
+import NodeIO from './NodeIO.js';
 
 // Need to poly-fill on some browsers
 const log2 = Math.log2 || function( x ) { return Math.log( x ) / Math.LN2; };
@@ -1269,5 +1273,25 @@ Image.createFastMipmapFromCanvas = function( baseCanvas ) {
 
 // @public {Object} - Initial values for most Node mutator options
 Image.DEFAULT_OPTIONS = merge( {}, Node.DEFAULT_OPTIONS, DEFAULT_OPTIONS );
+
+// NOTE: Not currently in use
+Image.IOType = new IOType( 'ImageIO', {
+  valueType: Image,
+  supertype: NodeIO,
+  events: [ 'changed' ],
+  methods: {
+    setImage: {
+      returnType: VoidIO,
+      parameterTypes: [ StringIO ],
+      implementation: function( base64Text ) {
+        const im = new window.Image();
+        im.src = base64Text;
+        this.image = im;
+      },
+      documentation: 'Set the image from a base64 string',
+      invocableForReadOnlyElements: false
+    }
+  }
+} );
 
 export default Image;
