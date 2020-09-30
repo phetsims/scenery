@@ -5400,7 +5400,7 @@ inherit( PhetioObject, Node, {
 ParallelDOM.compose( Node );
 
 Node.NodeIO = new IOType( 'NodeIO', {
-  valueType: scenery.Node,
+  valueType: Node,
   documentation: 'The base type for graphical and potentially interactive objects.  NodeIO has nested PropertyIO values ' +
                  'for visibility, pickability and opacity.' +
                  '<br>' +
