@@ -37,7 +37,7 @@
 
   var scene = new scenery.Node();
   var display = new scenery.Display( scene, {
-    width: 1024,
+    width: 2048,
     height: 1024,
     backgroundColor: '#eee',
     accessibility: true
@@ -53,18 +53,34 @@
     mipmapBias: 0.5
   } );
 
+  const images = [
+    new scenery.Image( '../assets/sharpness-test-pattern.png', {
+      mipmap: true,
+      initialLevel: 7,
+      maxLevel: 7,
+      mipmapBias: 0,
+      renderer: 'svg'
+    } ),
+    new scenery.Image( '../assets/sharpness-test-pattern.png', {
+      mipmap: true,
+      initialLevel: 7,
+      maxLevel: 7,
+      mipmapBias: 0.5,
+      renderer: 'canvas'
+    } )
+  ];
+
   var imageContainer = new scenery.HBox( {
-    children: [
-      new scenery.Node( { children: [ image ], renderer: 'svg' } ),
-      new scenery.Node( { children: [ image ], renderer: 'canvas' } )
-    ]
+    children: images
   } );
   scene.addChild( imageContainer );
 
   display.updateDisplay();
 
   function updateMipmap() {
-    image.mipmap = document.getElementById( 'mipmapCheckbox' ).checked;
+    images.forEach( image => {
+      image.mipmap = document.getElementById( 'mipmapCheckbox' ).checked;
+    } );
   }
 
   document.getElementById( 'mipmapCheckbox' ).addEventListener( 'click', updateMipmap );
