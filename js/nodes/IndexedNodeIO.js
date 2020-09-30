@@ -10,12 +10,12 @@
 import IOType from '../../../tandem/js/types/IOType.js';
 import VoidIO from '../../../tandem/js/types/VoidIO.js';
 import scenery from '../scenery.js';
-import NodeIO from './NodeIO.js';
+import Node from './Node.js';
 
 const IndexedNodeIO = new IOType( 'IndexedNodeIO', {
-  valueType: scenery.Node,
+  valueType: Node,
   documentation: 'Node that can be moved forward/back by index, which specifies z-order and/or layout order',
-  supertype: NodeIO,
+  supertype: Node.NodeIO,
   toStateObject: node => {
     const stateObject = {};
     if ( node.parents[ 0 ] ) {

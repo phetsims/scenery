@@ -16,11 +16,11 @@ import VoidIO from '../../../tandem/js/types/VoidIO.js';
 import scenery from '../scenery.js';
 import FontIO from '../util/FontIO.js';
 import NodeProperty from '../util/NodeProperty.js';
-import NodeIO from './NodeIO.js';
+import Node from './Node.js';
 
 const TextIO = new IOType( 'TextIO', {
   valueType: scenery.Text,
-  supertype: NodeIO,
+  supertype: Node.NodeIO,
   documentation: 'Text that is displayed in the simulation. TextIO has a nested PropertyIO.&lt;String&gt; for ' +
                  'the current string value.',
   createWrapper( text, phetioID ) {

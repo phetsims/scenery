@@ -152,12 +152,15 @@
  */
 
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
+import NumberProperty from '../../../axon/js/NumberProperty.js';
+import Property from '../../../axon/js/Property.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import TinyStaticProperty from '../../../axon/js/TinyStaticProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
+import Range from '../../../dot/js/Range.js';
 import Transform3 from '../../../dot/js/Transform3.js';
 import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
@@ -168,6 +171,9 @@ import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
+import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
+import IOType from '../../../tandem/js/types/IOType.js';
+import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import ParallelDOM from '../accessibility/pdom/ParallelDOM.js';
 import Instance from '../display/Instance.js';
 import Renderer from '../display/Renderer.js';
@@ -176,10 +182,10 @@ import Pen from '../input/Pen.js';
 import Touch from '../input/Touch.js';
 import scenery from '../scenery.js';
 import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
+import NodeProperty from '../util/NodeProperty.js';
 import Picker from '../util/Picker.js';
 import RendererSummary from '../util/RendererSummary.js';
 import Trail from '../util/Trail.js';
-import NodeIO from './NodeIO.js';
 
 // constants
 const clamp = Utils.clamp;
@@ -5210,7 +5216,7 @@ inherit( PhetioObject, Node, {
       }
     } );
 
-    this.initializePhetioObject( { phetioType: NodeIO, phetioState: false }, options );
+    this.initializePhetioObject( { phetioType: Node.NodeIO, phetioState: false }, options );
 
     return this; // allow chaining
   },
@@ -5392,5 +5398,57 @@ inherit( PhetioObject, Node, {
 
 // Node is composed with this feature of Interactive Descriptions
 ParallelDOM.compose( Node );
+
+Node.NodeIO = new IOType( 'NodeIO', {
+  valueType: scenery.Node,
+  documentation: 'The base type for graphical and potentially interactive objects.  NodeIO has nested PropertyIO values ' +
+                 'for visibility, pickability and opacity.' +
+                 '<br>' +
+                 '<br>' +
+                 'Pickable can take one of three values:<br>' +
+                 '<ul>' +
+                 '<li>null: pass-through behavior. Nodes with input listeners are pickable, but nodes without input listeners won\'t block events for nodes behind it.</li>' +
+                 '<li>false: The node cannot be interacted with, and it blocks events for nodes behind it.</li>' +
+                 '<li>true: The node can be interacted with (if it has an input listener).</li>' +
+                 '</ul>' +
+                 'For more about Scenery node pickability, please see <a href="http://phetsims.github.io/scenery/doc/implementation-notes#pickability">http://phetsims.github.io/scenery/doc/implementation-notes#pickability</a>',
+
+  // TODO: https://github.com/phetsims/scenery/issues/1046 Move these added Properties to the core types
+  createWrapper: ( node, phetioID ) => {
+
+    const pickableProperty = new NodeProperty( node, node.pickableProperty, 'pickable', merge( {
+
+      // pick the baseline value from the parent Node's baseline
+      phetioReadOnly: node.phetioReadOnly,
+
+      tandem: node.tandem.createTandem( 'pickableProperty' ),
+      phetioType: Property.PropertyIO( NullableIO( BooleanIO ) ),
+      phetioDocumentation: 'Sets whether the node will be pickable (and hence interactive), see the NodeIO documentation for more details'
+    }, node.phetioComponentOptions, node.phetioComponentOptions.pickableProperty ) );
+
+    // Adapter for the opacity.  Cannot use NodeProperty at the moment because it doesn't handle numeric types
+    // properly--we may address this by moving to a mixin pattern.
+    const opacityProperty = new NumberProperty( node.opacity, merge( {
+
+      // pick the baseline value from the parent Node's baseline
+      phetioReadOnly: node.phetioReadOnly,
+
+      tandem: node.tandem.createTandem( 'opacityProperty' ),
+      range: new Range( 0, 1 ),
+      phetioDocumentation: 'Opacity of the parent NodeIO, between 0 (invisible) and 1 (fully visible)'
+    }, node.phetioComponentOptions, node.phetioComponentOptions.opacityProperty ) );
+    opacityProperty.link( function( opacity ) { node.opacity = opacity; } );
+    node.opacityProperty.lazyLink( () => { opacityProperty.value = node.opacity; } );
+
+    return {
+      phetioObject: node,
+      phetioID: phetioID,
+      dispose: () => {
+        pickableProperty.dispose();
+        opacityProperty.dispose();
+      }
+    };
+  }
+} );
 
 export default Node;

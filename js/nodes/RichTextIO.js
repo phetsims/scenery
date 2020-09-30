@@ -12,11 +12,11 @@ import IOType from '../../../tandem/js/types/IOType.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
 import scenery from '../scenery.js';
 import NodeProperty from '../util/NodeProperty.js';
-import NodeIO from './NodeIO.js';
+import Node from './Node.js';
 
 const RichTextIO = new IOType( 'RichTextIO', {
   valueType: scenery.RichText,
-  supertype: NodeIO,
+  supertype: Node.NodeIO,
   documentation: 'The tandem IO Type for the scenery RichText node',
 
   // TODO: https://github.com/phetsims/scenery/issues/1046 Move these added Properties to the core types

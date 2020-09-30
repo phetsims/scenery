@@ -15,7 +15,7 @@ import PhetioObjectAPI from '../../../tandem/js/PhetioObjectAPI.js';
 import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import scenery from '../scenery.js';
-import NodeIO from './NodeIO.js';
+import Node from './Node.js';
 
 class NodeAPI extends PhetioObjectAPI {
 
@@ -25,7 +25,7 @@ class NodeAPI extends PhetioObjectAPI {
   constructor( options ) {
 
     options = merge( {
-      phetioType: NodeIO,
+      phetioType: Node.NodeIO,
       phetioState: false,
       visiblePropertyOptions: {
         phetioType: Property.PropertyIO( BooleanIO )

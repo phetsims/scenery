@@ -28,7 +28,6 @@ import SpriteSheet from '../util/SpriteSheet.js';
 import svgns from '../util/svgns.js';
 import xlinkns from '../util/xlinkns.js';
 import Node from './Node.js';
-import NodeIO from './NodeIO.js';
 
 // Need to poly-fill on some browsers
 const log2 = Math.log2 || function( x ) { return Math.log( x ) / Math.LN2; };
@@ -1277,7 +1276,7 @@ Image.DEFAULT_OPTIONS = merge( {}, Node.DEFAULT_OPTIONS, DEFAULT_OPTIONS );
 // NOTE: Not currently in use
 Image.IOType = new IOType( 'ImageIO', {
   valueType: Image,
-  supertype: NodeIO,
+  supertype: Node.NodeIO,
   events: [ 'changed' ],
   methods: {
     setImage: {
