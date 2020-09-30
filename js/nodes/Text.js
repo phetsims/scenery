@@ -8,22 +8,29 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import Property from '../../../axon/js/Property.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import escapeHTML from '../../../phet-core/js/escapeHTML.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
 import inherit from '../../../phet-core/js/inherit.js';
+import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
 import Tandem from '../../../tandem/js/Tandem.js';
+import IOType from '../../../tandem/js/types/IOType.js';
+import NumberIO from '../../../tandem/js/types/NumberIO.js';
+import StringIO from '../../../tandem/js/types/StringIO.js';
+import VoidIO from '../../../tandem/js/types/VoidIO.js';
 import TextCanvasDrawable from '../display/drawables/TextCanvasDrawable.js';
 import TextDOMDrawable from '../display/drawables/TextDOMDrawable.js';
 import TextSVGDrawable from '../display/drawables/TextSVGDrawable.js';
 import Renderer from '../display/Renderer.js';
 import scenery from '../scenery.js';
 import Font from '../util/Font.js';
+import FontIO from '../util/FontIO.js';
+import NodeProperty from '../util/NodeProperty.js';
 import TextBounds from '../util/TextBounds.js';
 import Node from './Node.js';
 import Paintable from './Paintable.js';
-import TextIO from './TextIO.js';
 
 // constants
 const TEXT_OPTION_KEYS = [
@@ -77,7 +84,7 @@ function Text( text, options ) {
     fill: '#000000', // Default to black filled text
     text: text,
     tandem: Tandem.OPTIONAL,
-    phetioType: TextIO
+    phetioType: Text.TextIO
   }, options );
 
   this.textTandem = options.tandem; // @private (phet-io) - property name avoids namespace of the Node setter
@@ -815,5 +822,76 @@ Text.simplifyEmbeddingMarks = function( string ) {
 
 // Initialize computation of hybrid text
 TextBounds.initializeTextBounds();
+
+Text.TextIO = new IOType( 'TextIO', {
+  valueType: Text,
+  supertype: Node.NodeIO,
+  documentation: 'Text that is displayed in the simulation. TextIO has a nested PropertyIO.&lt;String&gt; for ' +
+                 'the current string value.',
+  createWrapper( text, phetioID ) {
+    const superWrapper = this.supertype.createWrapper( text, phetioID );
+
+    // this uses a sub Property adapter as described in https://github.com/phetsims/phet-io/issues/1326
+    const textProperty = new NodeProperty( text, text.textProperty, 'text', merge( {
+
+      // pick the following values from the parent Node
+      phetioReadOnly: text.phetioReadOnly,
+      phetioType: Property.PropertyIO( StringIO ),
+
+      tandem: text.tandem.createTandem( 'textProperty' ),
+      phetioDocumentation: 'Property for the displayed text'
+    }, text.phetioComponentOptions, text.phetioComponentOptions.textProperty ) );
+
+    return {
+      phetioObject: text,
+      phetioID: phetioID,
+      dispose: () => {
+        superWrapper.dispose();
+        textProperty.dispose();
+      }
+    };
+  },
+  methods: {
+    setFontOptions: {
+      returnType: VoidIO,
+      parameterTypes: [ FontIO ],
+      implementation: function( font ) {
+        this.setFont( font );
+      },
+      documentation: 'Sets font options for this TextIO instance, e.g. {size: 16, weight: bold}. If increasing the font ' +
+                     'size does not make the text size larger, you may need to increase the maxWidth of the TextIO also.',
+      invocableForReadOnlyElements: false
+    },
+
+    getFontOptions: {
+      returnType: FontIO,
+      parameterTypes: [],
+      implementation: function() {
+        return this.getFont();
+      },
+      documentation: 'Gets font options for this TextIO instance as an object'
+    },
+
+    setMaxWidth: {
+      returnType: VoidIO,
+      parameterTypes: [ NumberIO ],
+      implementation: function( maxWidth ) {
+        this.setMaxWidth( maxWidth );
+      },
+      documentation: 'Sets the maximum width of text box. ' +
+                     'If the text width exceeds maxWidth, it is scaled down to fit.',
+      invocableForReadOnlyElements: false
+    },
+
+    getMaxWidth: {
+      returnType: NumberIO,
+      parameterTypes: [],
+      implementation: function() {
+        return this.maxWidth;
+      },
+      documentation: 'Gets the maximum width of text box'
+    }
+  }
+} );
 
 export default Text;
