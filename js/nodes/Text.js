@@ -26,7 +26,6 @@ import TextSVGDrawable from '../display/drawables/TextSVGDrawable.js';
 import Renderer from '../display/Renderer.js';
 import scenery from '../scenery.js';
 import Font from '../util/Font.js';
-import FontIO from '../util/FontIO.js';
 import NodeProperty from '../util/NodeProperty.js';
 import TextBounds from '../util/TextBounds.js';
 import Node from './Node.js';
@@ -854,7 +853,7 @@ Text.TextIO = new IOType( 'TextIO', {
   methods: {
     setFontOptions: {
       returnType: VoidIO,
-      parameterTypes: [ FontIO ],
+      parameterTypes: [ Font.FontIO ],
       implementation: function( font ) {
         this.setFont( font );
       },
@@ -864,7 +863,7 @@ Text.TextIO = new IOType( 'TextIO', {
     },
 
     getFontOptions: {
-      returnType: FontIO,
+      returnType: Font.FontIO,
       parameterTypes: [],
       implementation: function() {
         return this.getFont();
