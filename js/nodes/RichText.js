@@ -57,20 +57,24 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import Property from '../../../axon/js/Property.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
 import inherit from '../../../phet-core/js/inherit.js';
+import merge from '../../../phet-core/js/merge.js';
 import openPopup from '../../../phet-core/js/openPopup.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
 import Tandem from '../../../tandem/js/Tandem.js';
+import IOType from '../../../tandem/js/types/IOType.js';
+import StringIO from '../../../tandem/js/types/StringIO.js';
 import ButtonListener from '../input/ButtonListener.js';
 import scenery from '../scenery.js';
 import Color from '../util/Color.js';
 import Font from '../util/Font.js';
+import NodeProperty from '../util/NodeProperty.js';
 import Line from './Line.js';
 import Node from './Node.js';
-import RichTextIO from './RichTextIO.js';
 import Text from './Text.js';
 import VStrut from './VStrut.js';
 
@@ -220,7 +224,7 @@ function RichText( text, options ) {
     fill: '#000000',
     text: text,
     tandem: Tandem.OPTIONAL,
-    phetioType: RichTextIO
+    phetioType: RichText.RichTextIO
   }, options );
 
   Node.call( this );
@@ -1827,6 +1831,37 @@ inherit( Node, RichTextLink, {
 
 Poolable.mixInto( RichTextLink, {
   initialize: RichTextLink.prototype.initialize
+} );
+
+RichText.RichTextIO = new IOType( 'RichTextIO', {
+  valueType: RichText,
+  supertype: Node.NodeIO,
+  documentation: 'The tandem IO Type for the scenery RichText node',
+
+  // TODO: https://github.com/phetsims/scenery/issues/1046 Move these added Properties to the core types
+  createWrapper( richText, phetioID ) {
+    const superWrapper = this.supertype.createWrapper( richText, phetioID );
+
+    // this uses a sub Property adapter as described in https://github.com/phetsims/phet-io/issues/1326
+    const textProperty = new NodeProperty( richText, richText.textProperty, 'text', merge( {
+
+      // pick the following values from the parent Node
+      phetioReadOnly: richText.phetioReadOnly,
+      phetioType: Property.PropertyIO( StringIO ),
+
+      tandem: richText.tandem.createTandem( 'textProperty' ),
+      phetioDocumentation: 'Property for the displayed text'
+    }, richText.phetioComponentOptions, richText.phetioComponentOptions.textProperty ) );
+
+    return {
+      phetioObject: richText,
+      phetioID: phetioID,
+      dispose: () => {
+        superWrapper.dispose();
+        textProperty.dispose();
+      }
+    };
+  }
 } );
 
 export default RichText;
