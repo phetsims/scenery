@@ -78,7 +78,7 @@ import merge from '../../../phet-core/js/merge.js';
 import EventType from '../../../tandem/js/EventType.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import SceneryEventIO from '../input/SceneryEventIO.js';
+import SceneryEvent from '../input/SceneryEvent.js';
 import Touch from '../input/Touch.js';
 import scenery from '../scenery.js';
 import TransformTracker from '../util/TransformTracker.js';
@@ -246,7 +246,7 @@ function DragListener( options ) {
 
     PressListener.prototype.drag.call( this, event );
   }, {
-    parameters: [ { name: 'event', phetioType: SceneryEventIO } ],
+    parameters: [ { name: 'event', phetioType: SceneryEvent.SceneryEventIO } ],
     phetioFeatured: options.phetioFeatured,
     tandem: options.tandem.createTandem( 'dragAction' ),
     phetioHighFrequency: true,

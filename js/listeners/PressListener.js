@@ -33,7 +33,7 @@ import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import Mouse from '../input/Mouse.js';
-import SceneryEventIO from '../input/SceneryEventIO.js';
+import SceneryEvent from '../input/SceneryEvent.js';
 import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
 
@@ -251,7 +251,7 @@ function PressListener( options ) {
     phetioEventType: EventType.USER,
     parameters: [ {
       name: 'event',
-      phetioType: SceneryEventIO
+      phetioType: SceneryEvent.SceneryEventIO
     }, {
       phetioPrivate: true,
       valueType: [ Node, null ]
@@ -268,7 +268,7 @@ function PressListener( options ) {
   this._releaseAction = new Action( this.onRelease.bind( this ), {
     parameters: [ {
       name: 'event',
-      phetioType: NullableIO( SceneryEventIO )
+      phetioType: NullableIO( SceneryEvent.SceneryEventIO )
     }, {
       phetioPrivate: true,
       valueType: [ 'function', null ]
@@ -915,8 +915,8 @@ inherit( Object, PressListener, {
 } );
 
 PressListener.phetioAPI = {
-  pressAction: { phetioType: Action.ActionIO( [ SceneryEventIO ] ) },
-  releaseAction: { phetioType: Action.ActionIO( [ NullableIO( SceneryEventIO ) ] ) }
+  pressAction: { phetioType: Action.ActionIO( [ SceneryEvent.SceneryEventIO ] ) },
+  releaseAction: { phetioType: Action.ActionIO( [ NullableIO( SceneryEvent.SceneryEventIO ) ] ) }
 };
 
 export default PressListener;

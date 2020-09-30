@@ -17,7 +17,7 @@ import EventType from '../../../tandem/js/EventType.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
-import SceneryEventIO from '../input/SceneryEventIO.js';
+import SceneryEvent from '../input/SceneryEvent.js';
 import scenery from '../scenery.js';
 import PressListener from './PressListener.js';
 
@@ -64,7 +64,7 @@ function FireListener( options ) {
     phetioReadOnly: options.phetioReadOnly,
     parameters: [ {
       name: 'event',
-      phetioType: NullableIO( SceneryEventIO )
+      phetioType: NullableIO( SceneryEvent.SceneryEventIO )
     } ]
   } );
   this.firedEmitter.addListener( options.fire );

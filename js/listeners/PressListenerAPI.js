@@ -13,7 +13,7 @@ import merge from '../../../phet-core/js/merge.js';
 import EventType from '../../../tandem/js/EventType.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import UninstrumentedAPI from '../../../tandem/js/UninstrumentedAPI.js';
-import SceneryEventIO from '../input/SceneryEventIO.js';
+import SceneryEvent from '../input/SceneryEvent.js';
 import scenery from '../scenery.js';
 
 class PressListenerAPI extends UninstrumentedAPI {
@@ -24,12 +24,12 @@ class PressListenerAPI extends UninstrumentedAPI {
   constructor( options ) {
     options = merge( {
       pressActionOptions: {
-        phetioType: Action.ActionIO( [ SceneryEventIO ] ),
+        phetioType: Action.ActionIO( [ SceneryEvent.SceneryEventIO ] ),
         phetioEventType: EventType.USER,
         phetioReadOnly: true
       },
       releaseActionOptions: {
-        phetioType: Action.ActionIO( [ NullableIO( SceneryEventIO ) ] ),
+        phetioType: Action.ActionIO( [ NullableIO( SceneryEvent.SceneryEventIO ) ] ),
         phetioEventType: EventType.USER,
         phetioReadOnly: true
       }
