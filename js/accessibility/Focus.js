@@ -9,6 +9,7 @@
  */
 
 import inherit from '../../../phet-core/js/inherit.js';
+import IOType from '../../../tandem/js/types/IOType.js';
 import scenery from '../scenery.js';
 
 /**
@@ -23,7 +24,29 @@ function Focus( display, trail ) {
   this.trail = trail;
 }
 
+inherit( Object, Focus );
+
+Focus.FocusIO = new IOType( 'FocusIO', {
+  valueType: Focus,
+  documentation: 'A IO Type for the instance in the simulation which currently has keyboard focus. FocusIO is ' +
+                 'serialized into and Object with key `focusedPhetioElement` that is a list of PhET-iO elements, ' +
+                 'from parent-most to child-most corresponding to the PhET-iO element that was instrumented.',
+  toStateObject: focus => {
+    const phetioIDs = [];
+    focus.trail.nodes.forEach( function( node, i ) {
+
+      // If the node was PhET-iO instrumented, include its phetioID instead of its index (because phetioID is more stable)
+      if ( node.isPhetioInstrumented() ) {
+        phetioIDs.push( node.tandem.phetioID );
+      }
+    } );
+
+    return {
+      focusedPhetioElement: phetioIDs
+    };
+  }
+} );
+
 scenery.register( 'Focus', Focus );
 
-inherit( Object, Focus );
 export default Focus;

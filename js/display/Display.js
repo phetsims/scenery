@@ -64,7 +64,7 @@ import platform from '../../../phet-core/js/platform.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import UtteranceQueue from '../../../utterance-queue/js/UtteranceQueue.js';
-import FocusIO from '../accessibility/FocusIO.js';
+import Focus from '../accessibility/Focus.js';
 import KeyStateTracker from '../accessibility/KeyStateTracker.js';
 import PDOMInstance from '../accessibility/pdom/PDOMInstance.js';
 import PDOMTree from '../accessibility/pdom/PDOMTree.js';
@@ -1976,7 +1976,7 @@ Display.focusProperty = new Property( null, {
   phetioDocumentation: 'Stores the current focus in the simulation, null if there is nothing focused. This is not updated ' +
                        'based on mouse or touch input, only keyboard and other alternative inputs. Note that this only ' +
                        'applies to simulations that support alternative input.',
-  phetioType: Property.PropertyIO( NullableIO( FocusIO ) ),
+  phetioType: Property.PropertyIO( NullableIO( Focus.FocusIO ) ),
   phetioState: false,
   phetioFeatured: true,
   phetioReadOnly: true
