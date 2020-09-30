@@ -14,6 +14,7 @@ import Property from '../../../axon/js/Property.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import Utils from '../../../dot/js/Utils.js';
 import inherit from '../../../phet-core/js/inherit.js';
+import IOType from '../../../tandem/js/types/IOType.js';
 import scenery from '../scenery.js';
 
 // constants
@@ -852,5 +853,12 @@ Color.isDarkColor = function( color, luminanceThreshold = 186 ) {
 Color.isLightColor = function( color, luminanceThreshold ) {
   return !Color.isDarkColor( color, luminanceThreshold );
 };
+
+Color.ColorIO = new IOType( 'ColorIO', {
+  valueType: Color,
+  documentation: 'A color, with rgba',
+  toStateObject: color => color.toStateObject(),
+  fromStateObject: stateObject => new Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a )
+} );
 
 export default Color;
