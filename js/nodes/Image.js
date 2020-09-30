@@ -822,8 +822,9 @@ inherit( Node, Image, {
    * @public (scenery-internal)
    *
    * @param {Matrix3} matrix - The relative transformation matrix of the node.
+   * @param {number} [additionalBias] - Can be provided to get per-call bias (we want some of this for Canvas output)
    */
-  getMipmapLevel: function( matrix ) {
+  getMipmapLevel: function( matrix, additionalBias = 0 ) {
     assert && assert( this._mipmap, 'Assumes mipmaps can be used' );
 
     // a sense of "average" scale, which should be exact if there is no asymmetric scale/shear applied
@@ -838,8 +839,11 @@ inherit( Node, Image, {
       return 0;
     }
 
-    let level = log2( 1 / scale ); // our approximate level of detail
-    level = Utils.roundSymmetric( level + this._mipmapBias - 0.7 ); // convert to an integer level (-0.7 is a good default)
+    // our approximate level of detail
+    let level = log2( 1 / scale );
+
+    // convert to an integer level (-0.7 is a good default)
+    level = Utils.roundSymmetric( level + this._mipmapBias + additionalBias - 0.7 );
 
     if ( level < 0 ) {
       level = 0;

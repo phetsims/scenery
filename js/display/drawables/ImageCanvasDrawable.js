@@ -52,7 +52,7 @@ inherit( CanvasSelfDrawable, ImageCanvasDrawable, {
       }
 
       if ( node._mipmap && node.hasMipmaps() ) {
-        const level = node.getMipmapLevel( matrix );
+        const level = node.getMipmapLevel( matrix, 0.5 );
         const canvas = node.getMipmapCanvas( level );
         const multiplier = Math.pow( 2, level );
         wrapper.context.drawImage( canvas, 0, 0, canvas.width * multiplier, canvas.height * multiplier );
