@@ -166,7 +166,7 @@ function PressListener( options ) {
   this._collapseDragEvents = options.collapseDragEvents;
   this._preferTargetCursor = options.preferTargetCursor;
 
-  // @public {ObservableArray.<Pointer>} - Contains all pointers that are over our button. Tracked by adding with
+  // @public {ObservableArrayDef.<Pointer>} - Contains all pointers that are over our button. Tracked by adding with
   // 'enter' events and removing with 'exit' events.
   this.overPointers = createObservableArray();
 
@@ -706,7 +706,7 @@ inherit( Object, PressListener, {
 
     // NOTE: We don't require the pointer to be included here, since we may have added the listener after the 'enter'
     // was fired. See https://github.com/phetsims/area-model-common/issues/159 for more details. This may be a
-    // no-op, which ObservableArray allows.
+    // no-op, which ObservableArrayDef allows.
     this.overPointers.remove( event.pointer );
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
