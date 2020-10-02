@@ -24,7 +24,7 @@
 import Action from '../../../axon/js/Action.js';
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import DerivedProperty from '../../../axon/js/DerivedProperty.js';
-import ObservableArray from '../../../axon/js/ObservableArray.js';
+import createObservableArray from '../../../axon/js/createObservableArray.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
@@ -168,7 +168,7 @@ function PressListener( options ) {
 
   // @public {ObservableArray.<Pointer>} - Contains all pointers that are over our button. Tracked by adding with
   // 'enter' events and removing with 'exit' events.
-  this.overPointers = new ObservableArray();
+  this.overPointers = createObservableArray();
 
   // @public {Property.<Boolean>} (read-only) - Tracks whether this listener is "pressed" or not.
   this.isPressedProperty = new BooleanProperty( false, { reentrant: true } );
