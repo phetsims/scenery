@@ -258,7 +258,7 @@
   } );
 
   var objectTransform = new dot.Transform3( dot.Matrix3.scaling( 2 ).timesMatrix( dot.Matrix3.translation( 100, 50 ) ) );
-  var objects = new axon.ObservableArray(); // {ObservableArray.<Property.<Vector2>>}
+  var objects = axon.createObservableArray(); // {ObservableArray.<Property.<Vector2>>}
   var objectNodes = []; // Node with { model: {Property.<Vector2>}, dragListener: {DragListener} }
   function getObjectNode( object ) {
     return objectNodes.filter( function( objectNode ) { return objectNode.model === object; } )[ 0 ];
