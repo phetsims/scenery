@@ -217,7 +217,7 @@ inherit( WebGLSelfDrawable, SpritesWebGLDrawable, {
     for ( let i = 0; i < length; i++ ) {
       const spriteInstance = this.node._spriteInstances[ i ];
       const spriteImage = spriteInstance.sprite.imageProperty.value;
-      const alpha = spriteInstance.alpha;
+      const alpha = spriteInstance.alpha * spriteImage.imageOpacity;
       const uvBounds = this.spriteImageUVMap[ spriteImage.id ];
       const matrix = spriteInstance.matrix;
       const offset = spriteImage.offset;
