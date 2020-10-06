@@ -17,9 +17,9 @@ import scenery from '../scenery.js';
 let globalIdCounter = 1;
 const scratchVector = new Vector2( 0, 0 );
 
-class SpriteImage {
+class SpriteImage extends Imageable( Object ) {
   /**
-   * @param {HTMLImageElement|HTMLCanvasElement} image
+   * @param {string|HTMLImageElement|HTMLCanvasElement|Array} image
    * @param {Vector2} offset - A 2d offset from the upper-left of the image which is considered the "center".
    * @param {Object} [options]
    */
@@ -29,29 +29,31 @@ class SpriteImage {
 
     options = merge( {
       hitTestPixels: false,
-      pickable: true
+      pickable: true,
+      image: image
     }, options );
+
+    super();
 
     // @public (read-only) {number}
     this.id = globalIdCounter++;
-
-    // @public (read-only) {HTMLImageElement|HTMLCanvasElement}
-    this.image = image;
 
     // @public (read-only) {Vector2}
     this.offset = offset;
 
     // @public (read-only) {boolean}
-    this.hitTestPixels = options.hitTestPixels;
-
-    // @public (read-only) {boolean}
     this.pickable = options.pickable;
-
-    // @private {ImageData|null} - Used for hit testing (lazily constructed)
-    this.imageData = null;
 
     // @private {Shape|null} - lazily constructed
     this.shape = null;
+
+    // Initialize Imageable items (including the image itself)
+    this.setImage( image );
+    Object.keys( Imageable.DEFAULT_OPTIONS ).forEach( name => {
+      if ( options[ name ] !== undefined ) {
+        this[ name ] = options[ name ];
+      }
+    } );
   }
 
   /**
@@ -60,7 +62,7 @@ class SpriteImage {
    * @returns {number}
    */
   get width() {
-    return this.image.naturalWidth || this.image.width;
+    return this.imageWidth;
   }
 
   /**
@@ -69,7 +71,7 @@ class SpriteImage {
    * @returns {number}
    */
   get height() {
-    return this.image.naturalHeight || this.image.height;
+    return this.imageHeight;
   }
 
   /**
@@ -79,8 +81,7 @@ class SpriteImage {
    * @returns {Shape}
    */
   getShape() {
-
-    if ( !this.pickable) {
+    if ( !this.pickable ) {
       return new Shape();
     }
 
@@ -127,7 +128,7 @@ class SpriteImage {
    */
   containsPoint( point ) {
 
-    if ( !this.pickable) {
+    if ( !this.pickable ) {
       return false;
     }
 

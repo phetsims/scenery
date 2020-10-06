@@ -691,11 +691,21 @@ const Imageable = type => {
     getMipmapLevel( matrix, additionalBias = 0 ) {
       assert && assert( this._mipmap, 'Assumes mipmaps can be used' );
 
-      // a sense of "average" scale, which should be exact if there is no asymmetric scale/shear applied
-      let scale = ( Math.sqrt( matrix.m00() * matrix.m00() + matrix.m10() * matrix.m10() ) +
-                    Math.sqrt( matrix.m01() * matrix.m01() + matrix.m11() * matrix.m11() ) ) / 2;
-      scale *= ( window.devicePixelRatio || 1 ); // for retina-like devices
+      // Handle high-dpi devices like retina with correct mipmap levels.
+      const scale = Imageable.getApproximateMatrixScale( matrix ) * ( window.devicePixelRatio || 1 );
 
+      return this.getMipmapLevelFromScale( scale, additionalBias );
+    }
+
+    /**
+     * Returns the desired mipmap level (0-indexed) that should be used for the particular scale
+     * @public
+     *
+     * @param {number} scale
+     * @param {number} [additionalBias] = 0
+     * @returns {*}
+     */
+    getMipmapLevelFromScale( scale, additionalBias = 0 ) {
       assert && assert( typeof scale === 'number' && scale > 0, 'scale should be a positive number' );
 
       // If we are shown larger than scale, ALWAYS choose the highest resolution
@@ -1042,6 +1052,21 @@ Imageable.createFastMipmapFromCanvas = baseCanvas => {
 
   return mipmaps;
 };
+
+/**
+ * Returns a sense of "average" scale, which should be exact if there is no asymmetric scale/shear applied
+ * @public
+ *
+ * @param {Matrix3} matrix
+ * @returns {number}
+ */
+Imageable.getApproximateMatrixScale = matrix => {
+  return ( Math.sqrt( matrix.m00() * matrix.m00() + matrix.m10() * matrix.m10() ) +
+           Math.sqrt( matrix.m01() * matrix.m01() + matrix.m11() * matrix.m11() ) ) / 2;
+};
+
+// @public {number} - We include this for additional smoothing that seems to be needed for Canvas image quality
+Imageable.CANVAS_MIPMAP_BIAS_ADJUSTMENT = 0.5;
 
 // @public {Object} - Initial values for most Node mutator options
 Imageable.DEFAULT_OPTIONS = DEFAULT_OPTIONS;

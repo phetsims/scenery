@@ -6,8 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../../phet-core/js/inherit.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
+import inherit from '../../../../phet-core/js/inherit.js';
+import Imageable from '../../nodes/Imageable.js';
 import scenery from '../../scenery.js';
 import CanvasSelfDrawable from '../CanvasSelfDrawable.js';
 
@@ -52,7 +53,7 @@ inherit( CanvasSelfDrawable, ImageCanvasDrawable, {
       }
 
       if ( node._mipmap && node.hasMipmaps() ) {
-        const level = node.getMipmapLevel( matrix, 0.5 );
+        const level = node.getMipmapLevel( matrix, Imageable.CANVAS_MIPMAP_BIAS_ADJUSTMENT );
         const canvas = node.getMipmapCanvas( level );
         const multiplier = Math.pow( 2, level );
         wrapper.context.drawImage( canvas, 0, 0, canvas.width * multiplier, canvas.height * multiplier );
