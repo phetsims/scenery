@@ -11,7 +11,7 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Shape from '../../../kite/js/Shape.js';
 import merge from '../../../phet-core/js/merge.js';
-import Image from '../nodes/Image.js';
+import Imageable from '../nodes/Imageable.js';
 import scenery from '../scenery.js';
 
 let globalIdCounter = 1;
@@ -88,7 +88,7 @@ class SpriteImage {
       if ( this.hitTestPixels ) {
         this.ensureImageData();
         if ( this.imageData ) {
-          this.shape = Image.hitTestDataToShape( this.imageData, this.width, this.height );
+          this.shape = Imageable.hitTestDataToShape( this.imageData, this.width, this.height );
         }
         else {
           // Empty, if we haven't been able to load image data (even if we have a width/height)
@@ -114,7 +114,7 @@ class SpriteImage {
    */
   ensureImageData() {
     if ( !this.imageData && this.width && this.height ) {
-      this.imageData = Image.getHitTestData( this.image, this.width, this.height );
+      this.imageData = Imageable.getHitTestData( this.image, this.width, this.height );
     }
   }
 
@@ -155,7 +155,7 @@ class SpriteImage {
 
       // And test if it's available
       if ( this.imageData ) {
-        return Image.testHitTestData( this.imageData, width, height, position );
+        return Imageable.testHitTestData( this.imageData, width, height, position );
       }
       else {
         return false;
