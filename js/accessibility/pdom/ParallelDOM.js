@@ -598,6 +598,16 @@ const ParallelDOM = {
       },
       get accessibleName() { return this.getAccessibleName(); },
 
+      /**
+       * Remove this Node from the PDOM by clearing its accessible content. This can be useful when creating icons from
+       * accessible content.
+       * @public
+       */
+      removeFromPDOM: function() {
+        assert && assert( this._tagName !== null, 'There is no accessible content to clear from the PDOM' );
+        this.tagName = null;
+      },
+
 
       /**
        * accessibleNameBehavior is a function that will set the appropriate options on this node to get the desired
