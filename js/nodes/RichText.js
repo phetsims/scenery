@@ -1838,7 +1838,7 @@ RichText.RichTextIO = new IOType( 'RichTextIO', {
   supertype: Node.NodeIO,
   documentation: 'The tandem IO Type for the scenery RichText node',
 
-  // TODO: https://github.com/phetsims/scenery/issues/1046 Move these added Properties to the core types
+  // TODO: https://github.com/phetsims/scenery/issues/1082 Move these added Properties to the core types
   createWrapper( richText, phetioID ) {
     const superWrapper = this.supertype.createWrapper( richText, phetioID );
 

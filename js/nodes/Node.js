@@ -5431,7 +5431,7 @@ Node.NodeIO = new IOType( 'NodeIO', {
                  '</ul>' +
                  'For more about Scenery node pickability, please see <a href="http://phetsims.github.io/scenery/doc/implementation-notes#pickability">http://phetsims.github.io/scenery/doc/implementation-notes#pickability</a>',
 
-  // TODO: https://github.com/phetsims/scenery/issues/1046 Move these added Properties to the core types
+  // TODO: https://github.com/phetsims/scenery/issues/1047 Move these added Properties to the core types
   createWrapper: ( node, phetioID ) => {
 
     const pickableProperty = new NodeProperty( node, node.pickableProperty, 'pickable', merge( {
