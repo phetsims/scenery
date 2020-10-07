@@ -1594,32 +1594,6 @@ class Input {
     // We'll use this trail for the entire dispatch of this event.
     const eventTrail = this.branchChangeEvents( pointer, event, pointChanged );
 
-    // pdom
-    let focusableNode = null;
-    const trailAccessible = !eventTrail.rootNode()._rendererSummary.isNotAccessible();
-
-    // If any node in the trail has accessible content
-    if ( trailAccessible ) {
-      const inDisplay = this.display.bounds.containsPoint( pointer.point );
-      if ( inDisplay ) {
-
-        // An AT might have sent a down event outside of the display, if this happened we will not remove focus.
-        // Starting with the leaf most node, search for the closest accessible ancestor from the node under the
-        // pointer.
-        for ( let i = eventTrail.nodes.length - 1; i >= 0; i-- ) {
-          if ( eventTrail.nodes[ i ].focusable ) {
-            focusableNode = eventTrail.nodes[ i ];
-            break;
-          }
-        }
-
-        // Remove keyboard focus, but store element that is receiving interaction in case we resume .
-        this.display.pointerFocus = focusableNode;
-        Display.focus = null;
-      }
-    }
-
-    // dispatch after handling display focus in case immediate focusout interferes
     this.dispatchEvent( eventTrail, 'down', pointer, event, true );
 
     sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -1919,23 +1893,6 @@ class Input {
                           PDOMUtils.getNextFocusable( rootElement );
       if ( nextElement === event.target ) {
         event.preventDefault();
-      }
-    }
-
-    // if an accessible Node was being interacted with a mouse, or had focus when sim is made inactive, this Node
-    // should receive focus upon resuming keyboard navigation
-    if ( this.display.pointerFocus || this.display.activeNode ) {
-      const active = this.display.pointerFocus || this.display.activeNode;
-
-      // if there is a single accessible instance, we can restore focus
-      if ( active.getAccessibleInstances().length === 1 &&
-           active.focusable && // if the active element is focusable
-           active.accessibleInstances[ 0 ].trail.isVisible() && // if the active element is visible
-           event.keyCode === KeyboardUtils.KEY_TAB ) {
-        event.preventDefault();
-        active.focus();
-        this.display.pointerFocus = null;
-        this.display.activeNode = null;
       }
     }
   }

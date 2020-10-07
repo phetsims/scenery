@@ -345,16 +345,6 @@ function Display( rootNode, options ) {
     // @private {Array.<PDOMInstance>}
     this._unsortedAccessibleInstances = [];
 
-    // @public (scenery-internal) {Node|null} - When this display receives a pointer event, this is the focusable
-    // node that is being interacted with. When keyboard navigation resumes after pointer interaction, this node will
-    // receive focus.
-    this.pointerFocus = null;
-
-    // @public (scenery-internal) - {Node|null} - When  this display is made inactive, store the focused node
-    // so that when the sim becomes interactive again this node can receive focus when we resume keyboard
-    // navigation
-    this.activeNode = null;
-
     // @public {boolean} (scenery-internal) - During DOM operations where HTML elements are removed from and
     // reinserted into the PDOM, event callbacks related to focus should be blocked as these are internal operations
     // unrelated to application behavior user input, see https://github.com/phetsims/scenery/issues/925
@@ -705,13 +695,6 @@ inherit( Object, Display, extend( {
     // TODO: disable keyboard nav without hiding content so that it is still readable with a screen reader,
     // see https://github.com/phetsims/phet-io/issues/995
     if ( this._accessible ) {
-      if ( !this._interactive ) {
-        this.activeNode = Display.focusedNode;
-
-        // prevent a FF bug where hiding the element without blurring it causes focus to get stuck in the body
-        this.activeNode && this.activeNode.blur();
-      }
-
       this.accessibleDOMElement.hidden = !this._interactive;
     }
   },
