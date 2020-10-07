@@ -5243,7 +5243,7 @@ inherit( PhetioObject, Node, {
       // already been specified.
       if ( !this.visibleProperty.forwardingProperty ) {
 
-        // TODO: Should this be set to null in the constructor, https://github.com/phetsims/scenery/issues/490
+        // TODO: Should this be set to null in the constructor, https://github.com/phetsims/scenery/issues/1087
         const phetioVisibleProperty = new BooleanProperty( this.visible, merge( {
 
           // pick the baseline value from the parent Node's baseline
