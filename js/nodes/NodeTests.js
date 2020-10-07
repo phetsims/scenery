@@ -6,9 +6,11 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
+import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Shape from '../../../kite/js/Shape.js';
+import Tandem from '../../../tandem/js/Tandem.js';
 import Touch from '../input/Touch.js';
 import Node from './Node.js';
 import Rectangle from './Rectangle.js';
@@ -154,3 +156,223 @@ QUnit.test( 'Trail and Node transform equivalence', function( assert ) {
   const nodeMatrix = c.getUniqueTransform().getMatrix();
   assert.ok( trailMatrix.equalsEpsilon( nodeMatrix, epsilon ), 'Trail and Node transform equivalence' );
 } );
+
+if ( Tandem.PHET_IO_ENABLED ) {
+
+  QUnit.test( 'Node instrumented visible Property', assert => {
+
+    const apiValidation = phet.tandem.phetioAPIValidation;
+    const previousEnabled = apiValidation.enabled;
+    const previousSimStarted = apiValidation.simHasStarted;
+
+    apiValidation.simHasStarted = false;
+
+    const testNodeAndVisibleProperty = ( node, property ) => {
+      const initialVisible = node.visible;
+      assert.ok( property.value === node.visible, 'initial values should be the same' );
+      node.visible = !initialVisible;
+      assert.ok( property.value === !initialVisible, 'property should reflect node change' );
+      property.value = initialVisible;
+      assert.ok( node.visible === initialVisible, 'node should reflect property change' );
+
+      node.visible = initialVisible;
+    };
+
+    const instrumentedVisibleProperty = new BooleanProperty( false, { tandem: Tandem.GENERAL.createTandem( 'myVisibleProperty' ) } );
+    const otherInstrumentedVisibleProperty = new BooleanProperty( false, { tandem: Tandem.GENERAL.createTandem( 'myOtherVisibleProperty' ) } );
+    const uninstrumentedVisibleProperty = new BooleanProperty( false );
+
+    /***************************************
+     /* Testing uninstrumented Nodes
+     */
+
+
+      // uninstrumentedNode => no property (before startup)
+    let uninstrumented = new Node();
+    assert.ok( uninstrumented.visibleProperty.forwardingProperty === undefined );
+    testNodeAndVisibleProperty( uninstrumented, uninstrumented.visibleProperty );
+
+    // uninstrumentedNode => uninstrumented property (before startup)
+    uninstrumented = new Node( { visibleProperty: uninstrumentedVisibleProperty } );
+    assert.ok( uninstrumented.visibleProperty.forwardingProperty === uninstrumentedVisibleProperty );
+    testNodeAndVisibleProperty( uninstrumented, uninstrumentedVisibleProperty );
+
+    //uninstrumentedNode => instrumented property (before startup)
+    uninstrumented = new Node();
+    uninstrumented.mutate( {
+      visibleProperty: instrumentedVisibleProperty
+    } );
+    assert.ok( uninstrumented.visibleProperty.forwardingProperty === instrumentedVisibleProperty );
+    testNodeAndVisibleProperty( uninstrumented, instrumentedVisibleProperty );
+
+    //  uninstrumentedNode => instrumented property => instrument the Node (before startup) OK
+    uninstrumented = new Node();
+    uninstrumented.mutate( {
+      visibleProperty: instrumentedVisibleProperty
+    } );
+    uninstrumented.mutate( { tandem: Tandem.GENERAL.createTandem( 'myNode' ) } );
+    assert.ok( uninstrumented.visibleProperty.forwardingProperty === instrumentedVisibleProperty );
+    testNodeAndVisibleProperty( uninstrumented, instrumentedVisibleProperty );
+    uninstrumented.dispose();
+
+    //////////////////////////////////////////////////
+    apiValidation.simHasStarted = true;
+
+    // uninstrumentedNode => no property (before startup)
+    uninstrumented = new Node();
+    assert.ok( uninstrumented.visibleProperty.forwardingProperty === undefined );
+    testNodeAndVisibleProperty( uninstrumented, uninstrumented.visibleProperty );
+
+    // uninstrumentedNode => uninstrumented property (before startup)
+    uninstrumented = new Node( { visibleProperty: uninstrumentedVisibleProperty } );
+    assert.ok( uninstrumented.visibleProperty.forwardingProperty === uninstrumentedVisibleProperty );
+    testNodeAndVisibleProperty( uninstrumented, uninstrumentedVisibleProperty );
+
+    //uninstrumentedNode => instrumented property (before startup)
+    uninstrumented = new Node();
+    uninstrumented.mutate( {
+      visibleProperty: instrumentedVisibleProperty
+    } );
+    assert.ok( uninstrumented.visibleProperty.forwardingProperty === instrumentedVisibleProperty );
+    testNodeAndVisibleProperty( uninstrumented, instrumentedVisibleProperty );
+
+    //  uninstrumentedNode => instrumented property => instrument the Node (before startup) OK
+    uninstrumented = new Node();
+    uninstrumented.mutate( {
+      visibleProperty: instrumentedVisibleProperty
+    } );
+    uninstrumented.mutate( { tandem: Tandem.GENERAL.createTandem( 'myNode' ) } );
+    assert.ok( uninstrumented.visibleProperty.forwardingProperty === instrumentedVisibleProperty );
+    testNodeAndVisibleProperty( uninstrumented, instrumentedVisibleProperty );
+    uninstrumented.dispose();
+    apiValidation.simHasStarted = false;
+
+
+    /***************************************
+     /* Testing instrumented nodes
+     */
+
+      // instrumentedNodeWithDefaultInstrumentedVisibleProperty => instrumented property (before startup)
+    let instrumented = new Node( {
+        tandem: Tandem.GENERAL.createTandem( 'myNode' )
+      } );
+    assert.ok( instrumented.visibleProperty.forwardingProperty === instrumented.ownedPhetioVisibleProperty );
+    assert.ok( instrumented.linkedElements.length === 0, 'no linked elements for default visible Property' );
+    testNodeAndVisibleProperty( instrumented, instrumented.visibleProperty );
+    instrumented.dispose();
+
+    // instrumentedNodeWithDefaultInstrumentedVisibleProperty => uninstrumented property (before startup)
+    instrumented = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myNode' )
+    } );
+    window.assert && assert.throws( () => {
+      instrumented.mutate( { visibleProperty: uninstrumentedVisibleProperty } );
+    }, 'cannot remove instrumentation from the Node\'s visibleProperty' );
+    instrumented.dispose();
+
+    // instrumentedNodeWithPassedInInstrumentedVisibleProperty => instrumented property (before startup)
+    instrumented = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myNode' )
+    } );
+    instrumented.mutate( { visibleProperty: instrumentedVisibleProperty } );
+    assert.ok( instrumented.visibleProperty.forwardingProperty === instrumentedVisibleProperty );
+    assert.ok( instrumented.linkedElements.length === 1, 'added linked element' );
+    assert.ok( instrumented.linkedElements[ 0 ].element === instrumentedVisibleProperty,
+      'added linked element should be for visibleProperty ' );
+    testNodeAndVisibleProperty( instrumented, instrumentedVisibleProperty );
+    instrumented.dispose();
+
+    instrumented = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myNode' ),
+      visibleProperty: instrumentedVisibleProperty
+    } );
+    assert.ok( instrumented.visibleProperty.forwardingProperty === instrumentedVisibleProperty );
+    assert.ok( instrumented.linkedElements.length === 1, 'added linked element' );
+    assert.ok( instrumented.linkedElements[ 0 ].element === instrumentedVisibleProperty,
+      'added linked element should be for visibleProperty ' );
+    testNodeAndVisibleProperty( instrumented, instrumentedVisibleProperty );
+    instrumented.dispose();
+
+    // instrumentedNodeWithPassedInInstrumentedVisibleProperty => uninstrumented property (before startup)
+    instrumented = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myNode' ),
+      visibleProperty: instrumentedVisibleProperty
+    } );
+    window.assert && assert.throws( () => {
+      instrumented.mutate( { visibleProperty: uninstrumentedVisibleProperty } );
+    }, 'cannot remove instrumentation from the Node\'s visibleProperty' );
+    instrumented.dispose();
+    instrumented = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myNode' )
+    } );
+    instrumented.mutate( { visibleProperty: instrumentedVisibleProperty } );
+    window.assert && assert.throws( () => {
+      instrumented.mutate( { visibleProperty: uninstrumentedVisibleProperty } );
+    }, 'cannot remove instrumentation from the Node\'s visibleProperty' );
+    instrumented.dispose();
+
+    apiValidation.enabled = true;
+    apiValidation.simHasStarted = true;
+    // instrumentedNodeWithDefaultInstrumentedVisibleProperty => instrumented property (after startup)
+    const instrumented1 = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myNode1' )
+    } );
+    assert.ok( instrumented1.visibleProperty.forwardingProperty === instrumented1.ownedPhetioVisibleProperty );
+    assert.ok( instrumented1.linkedElements.length === 0, 'no linked elements for default visible Property' );
+    testNodeAndVisibleProperty( instrumented1, instrumented1.visibleProperty );
+
+    // instrumentedNodeWithDefaultInstrumentedVisibleProperty => uninstrumented property (after startup)
+    const instrumented2 = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myNode2' )
+    } );
+    window.assert && assert.throws( () => {
+      instrumented2.setVisibleProperty( uninstrumentedVisibleProperty );
+    }, 'cannot remove instrumentation from the Node\'s visibleProperty' );
+
+    // instrumentedNodeWithPassedInInstrumentedVisibleProperty => instrumented property (after startup)
+    const instrumented3 = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myNode3' ),
+      visibleProperty: instrumentedVisibleProperty
+    } );
+
+    // TODO: make this work, https://github.com/phetsims/scenery/issues/1046
+    // window.assert && assert.throws( () => {
+    //   instrumented3.mutate( { visibleProperty: otherInstrumentedVisibleProperty } );
+    // }, 'cannot swap out one instrumented for another' );
+
+    // instrumentedNodeWithPassedInInstrumentedVisibleProperty => uninstrumented property (after startup)
+    const instrumented4 = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myNode4' ),
+      visibleProperty: instrumentedVisibleProperty
+    } );
+    window.assert && assert.throws( () => {
+      instrumented4.mutate( { visibleProperty: uninstrumentedVisibleProperty } );
+    }, 'cannot remove instrumentation from the Node\'s visibleProperty' );
+    const instrumented5 = new Node( {} );
+    instrumented5.mutate( { visibleProperty: instrumentedVisibleProperty } );
+    instrumented5.mutate( { tandem: Tandem.GENERAL.createTandem( 'myNode5' ) } );
+    window.assert && assert.throws( () => {
+      instrumented5.mutate( { visibleProperty: uninstrumentedVisibleProperty } );
+    }, 'cannot remove instrumentation from the Node\'s visibleProperty' );
+    apiValidation.enabled = false;
+
+    instrumented1.dispose();
+    instrumented2.dispose();
+    instrumented3.dispose();
+    instrumented4.dispose();
+    instrumented5.dispose();
+
+    instrumented = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myNode' )
+    } );
+    window.assert && assert.throws( () => {
+      instrumented.setVisibleProperty( null );
+    }, 'cannot clear out an instrumented visibleProperty' );
+
+
+    instrumentedVisibleProperty.dispose();
+    otherInstrumentedVisibleProperty.dispose();
+    apiValidation.simHasStarted = previousSimStarted;
+    apiValidation.enabled = previousEnabled;
+  } );
+}
