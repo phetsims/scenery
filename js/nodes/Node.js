@@ -555,6 +555,11 @@ function Node( options ) {
   // to not need this.
   this._isGettingRemovedFromParent = false;
 
+  // {Property.<boolean>|null} - TinyProperty is not instrumented for PhET-iO, so when a Node is instrumented, by default,
+  // an instrumented `Property` is forwarded to by this._visibleProperty. This field stores the default instrumented
+  // visible Property when this Node is PhET-iO instrumented and an outside visible Property isn't provided.
+  this.ownedPhetioVisibleProperty = null;
+
   PhetioObject.call( this );
 
   if ( options ) {
@@ -3190,9 +3195,9 @@ inherit( PhetioObject, Node, {
     this._visibleProperty.setForwardingProperty( property );
 
     // If we had the "default instrumented" Property, we'll remove that and link our new Property
-    if ( this.phetioVisibleProperty ) {
-      this.phetioVisibleProperty.dispose();
-      this.phetioVisibleProperty = null;
+    if ( this.ownedPhetioVisibleProperty ) {
+      this.ownedPhetioVisibleProperty.dispose();
+      this.ownedPhetioVisibleProperty = null;
       this.linkVisibleProperty( property );
     }
   },
@@ -5236,15 +5241,14 @@ inherit( PhetioObject, Node, {
 
     if ( !wasInstrumented && this.isPhetioInstrumented() ) {
 
-      assert && assert( !this.phetioVisibleProperty, 'Already created the phetioVisibleProperty' );
+      assert && assert( !this.ownedPhetioVisibleProperty, 'Already created the ownedPhetioVisibleProperty' );
 
       // If a visibleProperty was already specified in the options (in the constructor or mutate), then it will be set
       // as this.visibleProperty.forwardingProperty.  We only create the default instrumented one if another hasn't
       // already been specified.
       if ( !this.visibleProperty.forwardingProperty ) {
 
-        // TODO: Should this be set to null in the constructor, https://github.com/phetsims/scenery/issues/1087
-        const phetioVisibleProperty = new BooleanProperty( this.visible, merge( {
+        const ownedPhetioVisibleProperty = new BooleanProperty( this.visible, merge( {
 
           // pick the baseline value from the parent Node's baseline
           phetioReadOnly: this.phetioReadOnly,
@@ -5254,12 +5258,10 @@ inherit( PhetioObject, Node, {
         }, this.phetioComponentOptions, this.phetioComponentOptions.visibleProperty, config.visiblePropertyOptions ) );
 
         // calls a setter method with additional logic
-        this.visibleProperty = phetioVisibleProperty;
+        this.visibleProperty = ownedPhetioVisibleProperty;
 
-        // When created in this manner, the phetioVisibleProperty is "owned" by this Node and we are responsible
-        // for its disposal. Assign after calling this.visibleProperty = ... since it disposes this.phetioVisibleProperty
-        // if it exists
-        this.phetioVisibleProperty = phetioVisibleProperty;
+        // Assign after calling this.visibleProperty = ... since it disposes this.ownedPhetioVisibleProperty if it exists
+        this.ownedPhetioVisibleProperty = ownedPhetioVisibleProperty;
       }
       else {
         this.linkVisibleProperty( this.visibleProperty.forwardingProperty );
@@ -5347,10 +5349,10 @@ inherit( PhetioObject, Node, {
     this.removeAllChildren();
     this.detach();
 
-    // We provided a tandem to phetioVisibleProperty, we'll need to dispose it if we created it.
-    if ( this.phetioVisibleProperty ) {
-      this.phetioVisibleProperty.dispose();
-      this.phetioVisibleProperty = null;
+    // We instrumented ownedPhetioVisibleProperty for PhET-iO, so we'll need to dispose it if we created it.
+    if ( this.ownedPhetioVisibleProperty ) {
+      this.ownedPhetioVisibleProperty.dispose();
+      this.ownedPhetioVisibleProperty = null;
     }
 
     // Tear-down in the reverse order Node was created
