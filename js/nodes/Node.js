@@ -3189,10 +3189,6 @@ inherit( PhetioObject, Node, {
    * @param {Property.<boolean>|null} property
    */
   setVisibleProperty( property ) {
-    const currentVisibilityPropertyInstrumented = this.visibleProperty.forwardingProperty &&
-                                                  this.visibleProperty.forwardingProperty.isPhetioInstrumented();
-    assert && assert( !( currentVisibilityPropertyInstrumented && ( !property || !property.isPhetioInstrumented() ) ),
-      'Cannot set swap out a PhET-iO instrumented visibleProperty for an uninstrumented one' );
 
     this._visibleProperty.setForwardingProperty( property );
 
