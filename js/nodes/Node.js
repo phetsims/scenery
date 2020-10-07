@@ -555,9 +555,10 @@ function Node( options ) {
   // to not need this.
   this._isGettingRemovedFromParent = false;
 
-  // {Property.<boolean>|null} - TinyProperty is not instrumented for PhET-iO, so when a Node is instrumented, by default,
-  // an instrumented `Property` is forwarded to by this._visibleProperty. This field stores the default instrumented
-  // visible Property when this Node is PhET-iO instrumented and an outside visible Property isn't provided.
+  // @public (NodeTests) {Property.<boolean>|null} - TinyProperty is not instrumented for PhET-iO, so when a Node is
+  // instrumented, by default, an instrumented `Property` is forwarded to by this._visibleProperty. This field
+  // stores the default instrumented visible Property when this Node is PhET-iO instrumented and an outside visible
+  // Property isn't provided.
   this.ownedPhetioVisibleProperty = null;
 
   PhetioObject.call( this );
@@ -3177,7 +3178,8 @@ inherit( PhetioObject, Node, {
 
   /**
    * Sets what Property our visibleProperty is backed by, so that changes to this provided Property will change this
-   * node's visibility, and vice versa.
+   * Node's visibility, and vice versa. This does not change this._visibleProperty. See TinyForwardingProperty.setForwardingProperty()
+   * for more info.
    *
    * Note that all instrumented Nodes create their own instrumented visibleProperty (if one is not passed in as an option).
    * Once a Node's visibleProperty has been registered with PhET-iO, it cannot be "swapped out" for another.
@@ -3186,7 +3188,7 @@ inherit( PhetioObject, Node, {
    *
    * @param {Property.<boolean>|null} property
    */
-  set visibleProperty( property ) {
+  setVisibleProperty( property ) {
     const currentVisibilityPropertyInstrumented = this.visibleProperty.forwardingProperty &&
                                                   this.visibleProperty.forwardingProperty.isPhetioInstrumented();
     assert && assert( !( currentVisibilityPropertyInstrumented && ( !property || !property.isPhetioInstrumented() ) ),
@@ -3201,7 +3203,25 @@ inherit( PhetioObject, Node, {
       this.linkVisibleProperty( property );
     }
   },
-  get visibleProperty() { return this._visibleProperty; },
+  set visibleProperty( property ) { this.setVisibleProperty( property ); },
+
+  /**
+   * Get this Node's visibleProperty. Note! This is not the reciprocal of setVisibleProperty. Node.prototype._visibleProperty
+   * is a TinyForwardingProperty, and is set up to listen to changes from the visibleProperty provided by
+   * setVisibleProperty(), but the underlying reference does not change. This means the following:
+   *     * const myNode = new Node();
+     * const visibleProperty = new Property( false );
+   * myNode.setVisibleProperty( visibleProperty )
+   * => myNode.getVisibleProperty() !== visibleProperty (!!!!!!)
+   *
+   * Please use this with caution. See setVisibleProperty() for more information.
+   *
+   * @returns {TinyForwardingProperty}
+   */
+  getVisibleProperty: function() {
+    return this._visibleProperty;
+  },
+  get visibleProperty() { return this.getVisibleProperty(); },
 
   /**
    * Sets whether this Node is visible.
