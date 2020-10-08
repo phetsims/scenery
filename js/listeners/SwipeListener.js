@@ -169,10 +169,6 @@ class SwipeListener {
       if ( this.timeSinceLastDown > DOUBLE_TAP_INTERVAL ) {
         this.firstUp = false;
         this.timeSinceLastDown = 0;
-
-        // tap on the screen was not a gesture, and likely indicates user tapped somewhere that
-        // was not focusable, clear focus
-        Display.focus = null;
       }
     }
 
