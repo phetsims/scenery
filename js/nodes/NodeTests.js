@@ -315,7 +315,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     apiValidation.simHasStarted = true;
     // instrumentedNodeWithDefaultInstrumentedVisibleProperty => instrumented property (after startup)
     const instrumented1 = new Node( {
-      tandem: Tandem.GENERAL.createTandem( 'myNode1' )
+      tandem: Tandem.GENERAL.createTandem( 'myUniquelyNamedNodeThatWillNotBeDuplicated1' )
     } );
     assert.ok( instrumented1.visibleProperty.forwardingProperty === instrumented1.ownedPhetioVisibleProperty );
     assert.ok( instrumented1.linkedElements.length === 0, 'no linked elements for default visible Property' );
@@ -323,7 +323,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
     // instrumentedNodeWithDefaultInstrumentedVisibleProperty => uninstrumented property (after startup)
     const instrumented2 = new Node( {
-      tandem: Tandem.GENERAL.createTandem( 'myNode2' )
+      tandem: Tandem.GENERAL.createTandem( 'myUniquelyNamedNodeThatWillNotBeDuplicated2' )
     } );
     window.assert && assert.throws( () => {
       instrumented2.setVisibleProperty( uninstrumentedVisibleProperty );
@@ -331,18 +331,17 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
     // instrumentedNodeWithPassedInInstrumentedVisibleProperty => instrumented property (after startup)
     const instrumented3 = new Node( {
-      tandem: Tandem.GENERAL.createTandem( 'myNode3' ),
+      tandem: Tandem.GENERAL.createTandem( 'myUniquelyNamedNodeThatWillNotBeDuplicated3' ),
       visibleProperty: instrumentedVisibleProperty
     } );
 
-    // TODO: make this work, https://github.com/phetsims/scenery/issues/1046
-    // window.assert && assert.throws( () => {
-    //   instrumented3.mutate( { visibleProperty: otherInstrumentedVisibleProperty } );
-    // }, 'cannot swap out one instrumented for another' );
+    window.assert && assert.throws( () => {
+      instrumented3.mutate( { visibleProperty: otherInstrumentedVisibleProperty } );
+    }, 'cannot swap out one instrumented for another' );
 
     // instrumentedNodeWithPassedInInstrumentedVisibleProperty => uninstrumented property (after startup)
     const instrumented4 = new Node( {
-      tandem: Tandem.GENERAL.createTandem( 'myNode4' ),
+      tandem: Tandem.GENERAL.createTandem( 'myUniquelyNamedNodeThatWillNotBeDuplicated4' ),
       visibleProperty: instrumentedVisibleProperty
     } );
     window.assert && assert.throws( () => {
@@ -350,17 +349,21 @@ if ( Tandem.PHET_IO_ENABLED ) {
     }, 'cannot remove instrumentation from the Node\'s visibleProperty' );
     const instrumented5 = new Node( {} );
     instrumented5.mutate( { visibleProperty: instrumentedVisibleProperty } );
-    instrumented5.mutate( { tandem: Tandem.GENERAL.createTandem( 'myNode5' ) } );
+    instrumented5.mutate( { tandem: Tandem.GENERAL.createTandem( 'myUniquelyNamedNodeThatWillNotBeDuplicated5' ) } );
     window.assert && assert.throws( () => {
       instrumented5.mutate( { visibleProperty: uninstrumentedVisibleProperty } );
     }, 'cannot remove instrumentation from the Node\'s visibleProperty' );
     apiValidation.enabled = false;
 
     instrumented1.dispose();
-    instrumented2.dispose();
-    instrumented3.dispose();
-    instrumented4.dispose();
-    instrumented5.dispose();
+
+    // These can't be disposed because they were broken while creating (on purpose in an assert.throws()). These elements
+    // have special Tandem component names to make sure that they don't interfere with other tests (since they can't be
+    // removed from the registry
+    // instrumented2.dispose();
+    // instrumented3.dispose();
+    // instrumented4.dispose();
+    // instrumented5.dispose();
 
     instrumented = new Node( {
       tandem: Tandem.GENERAL.createTandem( 'myNode' )

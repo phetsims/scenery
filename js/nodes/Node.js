@@ -170,7 +170,6 @@ import deprecationWarning from '../../../phet-core/js/deprecationWarning.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
-import Tandem from '../../../tandem/js/Tandem.js';
 import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
@@ -3169,11 +3168,21 @@ inherit( PhetioObject, Node, {
    * Handles linking and checking our visibleProperty when instrumented.
    * @private
    *
-   * @param {Property.<boolean>} property
+   * @param {Property.<boolean>|undefined|null} oldProperty - same typedef as TinyForwardingProperty.forwardingProperty
+   * @param {Property.<boolean>|undefined|null} newProperty - same typedef as TinyForwardingProperty.forwardingProperty
+   * @param {boolean} newPropertyIsOwnedPhetioVisibleProperty - If the visibleProperty is being set to this.ownedPhetioVisibleProperty
    */
-  linkVisibleProperty( property ) {
-    assert && Tandem.VALIDATION && assert( property.isPhetioInstrumented(), 'If a Node is instrumented, you cannot give it an uninstrumented visibleProperty' );
-    this.addLinkedElement( property, { tandem: this.tandem.createTandem( 'visibleProperty' ) } );
+  updateLinkedElementForVisibleProperty( oldProperty, newProperty, newPropertyIsOwnedPhetioVisibleProperty ) {
+    assert && assert( oldProperty !== newProperty, 'should not be called on same values' );
+    assert && assert( this.isPhetioInstrumented(), 'cannot link elements on an uninstrumented Node' );
+
+    oldProperty && oldProperty.isPhetioInstrumented() && this.removeLinkedElements( oldProperty );
+
+    // this.ownedVisiblePhetioProperty takes the place of the LinkedElement in the phetioID structure, so don't create
+    // the LinkedElement.
+    if ( newProperty && newProperty.isPhetioInstrumented() && !newPropertyIsOwnedPhetioVisibleProperty ) {
+      this.addLinkedElement( newProperty, { tandem: this.tandem.createTandem( 'visibleProperty' ) } );
+    }
   },
 
   /**
@@ -3186,18 +3195,31 @@ inherit( PhetioObject, Node, {
    *
    * @public
    *
-   * @param {Property.<boolean>|null} property
+   * @param {TinyProperty.<boolean>|Property.<boolean>|null} newTarget
+   * @returns {Node} for chaining
    */
-  setVisibleProperty( property ) {
+  setVisibleProperty( newTarget ) {
 
-    this._visibleProperty.setForwardingProperty( property );
+    // We need this information eagerly for later on in the function
+    const previousTarget = this._visibleProperty.forwardingProperty;
+    const newPropertyIsOwnedPhetioVisibleProperty = newTarget === this.ownedPhetioVisibleProperty;
 
-    // If we had the "default instrumented" Property, we'll remove that and link our new Property
-    if ( this.ownedPhetioVisibleProperty ) {
+    // If we had the "default instrumented" Property, we'll remove that and link our new Property. Guard on the fact
+    // that ownedPhetioVisibleProperty is added via this exact method, see Node.initialiePhetioObject() for details
+    // To this before linked a PhET-iO LinkedElement because ownedPhetioVisibleProperty has the same phetioID as the LinkedElement
+    if ( this.ownedPhetioVisibleProperty && newTarget !== this.ownedPhetioVisibleProperty ) {
       this.ownedPhetioVisibleProperty.dispose();
       this.ownedPhetioVisibleProperty = null;
-      this.linkVisibleProperty( property );
     }
+
+    // Only update linked elements if this Node is instrumented for PhET-iO
+    if ( this.isPhetioInstrumented() ) {
+      this.updateLinkedElementForVisibleProperty( previousTarget, newTarget, newPropertyIsOwnedPhetioVisibleProperty );
+    }
+
+    this._visibleProperty.setForwardingProperty( newTarget );
+
+    return this; // for chaining
   },
   set visibleProperty( property ) { this.setVisibleProperty( property ); },
 
@@ -3206,7 +3228,7 @@ inherit( PhetioObject, Node, {
    * is a TinyForwardingProperty, and is set up to listen to changes from the visibleProperty provided by
    * setVisibleProperty(), but the underlying reference does not change. This means the following:
    *     * const myNode = new Node();
-     * const visibleProperty = new Property( false );
+   * const visibleProperty = new Property( false );
    * myNode.setVisibleProperty( visibleProperty )
    * => myNode.getVisibleProperty() !== visibleProperty (!!!!!!)
    *
@@ -5262,25 +5284,22 @@ inherit( PhetioObject, Node, {
       // If a visibleProperty was already specified in the options (in the constructor or mutate), then it will be set
       // as this.visibleProperty.forwardingProperty.  We only create the default instrumented one if another hasn't
       // already been specified.
+
       if ( !this.visibleProperty.forwardingProperty ) {
 
-        const ownedPhetioVisibleProperty = new BooleanProperty( this.visible, merge( {
-
-          // pick the baseline value from the parent Node's baseline
-          phetioReadOnly: this.phetioReadOnly,
-
+        this.ownedPhetioVisibleProperty = new BooleanProperty( this.visible, merge( {
+          phetioReadOnly: this.phetioReadOnly, // pick the baseline value from the parent Node's baseline
           tandem: this.tandem.createTandem( 'visibleProperty' ),
           phetioDocumentation: 'Controls whether the Node will be visible (and interactive), see the NodeIO documentation for more details.'
         }, this.phetioComponentOptions, this.phetioComponentOptions.visibleProperty, config.visiblePropertyOptions ) );
 
-        // calls a setter method with additional logic
-        this.visibleProperty = ownedPhetioVisibleProperty;
-
-        // Assign after calling this.visibleProperty = ... since it disposes this.ownedPhetioVisibleProperty if it exists
-        this.ownedPhetioVisibleProperty = ownedPhetioVisibleProperty;
+        this.setVisibleProperty( this.ownedPhetioVisibleProperty );
       }
       else {
-        this.linkVisibleProperty( this.visibleProperty.forwardingProperty );
+
+        // Since we are just now instrumented, and linked elements can't be added to linked Elements until the PhetioObject
+        // is instrumented, we need to retroactively link to whatever forwardingProperty may have been added before.
+        this.updateLinkedElementForVisibleProperty( null, this.visibleProperty.forwardingProperty );
       }
     }
   },
