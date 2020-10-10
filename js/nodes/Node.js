@@ -3207,7 +3207,7 @@ inherit( PhetioObject, Node, {
     // If we had the "default instrumented" Property, we'll remove that and link our new Property. Guard on the fact
     // that ownedPhetioVisibleProperty is added via this exact method, see Node.initialiePhetioObject() for details
     // To this before linked a PhET-iO LinkedElement because ownedPhetioVisibleProperty has the same phetioID as the LinkedElement
-    if ( this.ownedPhetioVisibleProperty && newTarget !== this.ownedPhetioVisibleProperty ) {
+    if ( this.ownedPhetioVisibleProperty && !newPropertyIsOwnedPhetioVisibleProperty ) {
       this.ownedPhetioVisibleProperty.dispose();
       this.ownedPhetioVisibleProperty = null;
     }
@@ -5299,7 +5299,7 @@ inherit( PhetioObject, Node, {
 
         // Since we are just now instrumented, and linked elements can't be added to linked Elements until the PhetioObject
         // is instrumented, we need to retroactively link to whatever forwardingProperty may have been added before.
-        this.updateLinkedElementForVisibleProperty( null, this.visibleProperty.forwardingProperty );
+        this.updateLinkedElementForVisibleProperty( null, this.visibleProperty.forwardingProperty, false );
       }
     }
   },
