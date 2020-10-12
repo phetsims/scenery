@@ -214,6 +214,8 @@ const ACCESSIBILITY_OPTION_KEYS = [
   'ariaDescribedbyAssociations', // {Array.<Object>} - sets the list of aria-describedby associations between from this node to others (including itself)
   'activeDescendantAssociations', // {Array.<Object>} - sets the list of aria-activedescendant associations between from this node to others (including itself)
 
+  'positionSiblings', // {boolean} - Sets whether or not the node's DOM elements are positioned in the viewport
+
   'pdomTransformSourceNode' // {Node|null} - sets the node that controls primary sibling element positioning in the display, see setPDOMTransformSourceNode()
 ];
 
@@ -416,6 +418,11 @@ const ParallelDOM = {
 
         // @protected {Array.<PDOMInstance>} - Empty unless the node contains some accessible instance.
         this._accessibleInstances = [];
+
+        // @private {boolean} - Determines if DOM siblings are positioned in the viewport. This
+        // is required for focusable elements to be accessible on mobile screen readers. But this
+        // layout is also very performance intensive. Set to false when necessary to improve performance.
+        this._positionSiblings = true;
 
         // @public (read-only, scenery-internal) {boolean} - If true, any DOM events received on the label sibling
         // will not dispatch SceneryEvents through the scene graph, see setExcludeLabelSiblingFromInput()
@@ -2503,6 +2510,34 @@ const ParallelDOM = {
         return this._pdomTransformSourceNode;
       },
       get pdomTransformSourceNode() { return this.getPDOMTransformSourceNode(); },
+
+      /**
+       * Sets whether the PDOM sibling elements are positioned in the correct place in the viewport. Doing so is a
+       * requirement for accessibility on touch based screen readers. However, doing this DOM layout is expensive so
+       * you may wish to disable positioning for certain elements during animation or dragging input.
+       * @public
+       *
+       * @param {boolean} positionSiblings
+       */
+      setPositionSiblings( positionSiblings ) {
+        this._positionSiblings = positionSiblings;
+
+        for ( let i = 0; i < this._accessibleInstances.length; i++ ) {
+          this._accessibleInstances[ i ].peer.setPositionSiblings( positionSiblings );
+        }
+      },
+      set positionSiblings( positionSiblings ) { this.setPositionSiblings( positionSiblings ); },
+
+      /**
+       * Gets whether or not we are positioning the PDOM sibling elements. See setPositionSiblings().
+       * @public
+       *
+       * @returns {boolean}
+       */
+      getPositionSiblings() {
+        return this._positionSiblings;
+      },
+      get positionSiblings() { return this.getPositionSiblings(); },
 
       /**
        * This function should be used sparingly as a workaround. If used, any DOM input events received from the label
