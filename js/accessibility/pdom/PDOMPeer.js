@@ -118,6 +118,11 @@ inherit( Object, PDOMPeer, {
     // quickly find peers with positionDirty when we traverse the tree of AccessibleInstances
     this.childPositionDirty = false;
 
+    // @private {boolean} - Indicates that this peer will position sibling elements so that
+    // they are in the right location in the viewport, which is a requirement for touch based
+    // screen readers. See setPositionSiblings.
+    this.positionSiblings = true;
+
     // @private {MutationObserver} - An observer that will call back any time a property of the primary
     // sibling changes. Used to reposition the sibling elements if the bounding box resizes. No need to loop over
     // all of the mutations, any single mutation will require updating CSS positioning.
@@ -242,6 +247,9 @@ inherit( Object, PDOMPeer, {
     }
 
     this.setFocusable( this.node.focusable );
+
+    // set the positionSiblings field to our updated instance
+    this.setPositionSiblings( this.node.positionSiblings );
 
     // recompute and assign the association attributes that link two elements (like aria-labelledby)
     this.onAriaLabelledbyAssociationChange();
@@ -825,6 +833,35 @@ inherit( Object, PDOMPeer, {
   },
 
   /**
+   * Enable or disable positioning of the sibling elements. Generally this is required
+   * for accessibility to work on touch screen based screen readers like phones. But
+   * repositioning DOM elements is expensive. This can be set to false to optimize when
+   * positioning is not necessary.
+   * @public (scenery-internal)
+   *
+   * @param {boolean} positionSiblings
+   */
+  setPositionSiblings: function( positionSiblings ) {
+
+    this.positionSiblings = positionSiblings;
+
+    if ( this.positionSiblings ) {
+
+      // positioning again, mark as dirty immediately
+      this.invalidateCSSPositioning();
+    }
+    else {
+
+      // not positioning, just move off screen
+      scratchSiblingBounds.set( PDOMPeer.OFFSCREEN_SIBLING_BOUNDS );
+      setClientBounds( this._primarySibling, scratchSiblingBounds );
+      if ( this._labelSibling ) {
+        setClientBounds( this._labelSibling, scratchSiblingBounds );
+      }
+    }
+  },
+
+  /**
    * Mark that the siblings of this PDOMPeer need to be updated in the next Display update. Possibly from a
    * change of accessible content or node transformation. Does nothing if already marked dirty.
    *
@@ -834,7 +871,7 @@ inherit( Object, PDOMPeer, {
    * @private
    */
   invalidateCSSPositioning: function() {
-    if ( !this.positionDirty && this.focusable ) {
+    if ( !this.positionDirty && this.focusable && this.positionSiblings ) {
       this.positionDirty = true;
 
       // mark all ancestors of this peer so that we can quickly find this dirty peer when we traverse
@@ -925,7 +962,6 @@ inherit( Object, PDOMPeer, {
               setClientBounds( this._labelSibling, scratchSiblingBounds );
             }
           }
-
         }
       }
     }
@@ -990,7 +1026,11 @@ inherit( Object, PDOMPeer, {
   PRIMARY_SIBLING: PRIMARY_SIBLING, // associate with all accessible content related to this peer
   LABEL_SIBLING: LABEL_SIBLING, // associate with just the label content of this peer
   DESCRIPTION_SIBLING: DESCRIPTION_SIBLING, // associate with just the description content of this peer
-  CONTAINER_PARENT: CONTAINER_PARENT // associate with everything under the container parent of this peer
+  CONTAINER_PARENT: CONTAINER_PARENT, // associate with everything under the container parent of this peer
+
+  // @public (scenery-internal) - bounds for a sibling that should be moved off-screen when not positioning, in
+  // global coordinates
+  OFFSCREEN_SIBLING_BOUNDS: new Bounds2( 0, 0, 1, 1 )
 } );
 
 // Set up pooling
