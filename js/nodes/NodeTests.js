@@ -161,6 +161,11 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
   QUnit.test( 'Node instrumented visible Property', assert => {
 
+    const wasLaunched = Tandem.launched;
+    if ( !Tandem.launched ) {
+      Tandem.launch();
+    }
+
     const apiValidation = phet.tandem.phetioAPIValidation;
     const previousEnabled = apiValidation.enabled;
     const previousSimStarted = apiValidation.simHasStarted;
@@ -377,5 +382,9 @@ if ( Tandem.PHET_IO_ENABLED ) {
     otherInstrumentedVisibleProperty.dispose();
     apiValidation.simHasStarted = previousSimStarted;
     apiValidation.enabled = previousEnabled;
+
+    if ( !wasLaunched ) {
+      Tandem.unlaunch();
+    }
   } );
 }
