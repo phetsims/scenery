@@ -161,6 +161,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
   QUnit.test( 'Node instrumented visible Property', assert => {
 
+    // TODO: Use the AuxiliaryTandemRegistry?  See https://github.com/phetsims/tandem/issues/187
     const wasLaunched = Tandem.launched;
     if ( !Tandem.launched ) {
       Tandem.launch();
