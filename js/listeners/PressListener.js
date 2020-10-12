@@ -545,9 +545,8 @@ inherit( Object, PressListener, {
    * @private
    */
   invalidateHovering() {
-    const pointers = this.overPointers.getArray();
-    for ( let i = 0; i < pointers.length; i++ ) {
-      const pointer = pointers[ i ];
+    for ( let i = 0; i < this.overPointers.length; i++ ) {
+      const pointer = this.overPointers[ i ];
       if ( !pointer.isDown || pointer === this.pointer ) {
         this.isHoveringProperty.value = true;
         return;
