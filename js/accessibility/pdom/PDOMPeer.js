@@ -833,45 +833,29 @@ inherit( Object, PDOMPeer, {
   },
 
   /**
-   * Enable or disable positioning of the sibling elements. Generally this is required
-   * for accessibility to work on touch screen based screen readers like phones. But
-   * repositioning DOM elements is expensive. This can be set to false to optimize when
-   * positioning is not necessary.
+   * Enable or disable positioning of the sibling elements. Generally this is requiredfor accessibility to work on
+   * touch screen based screen readers like phones. But repositioning DOM elements is expensive. This can be set to
+   * false to optimize when positioning is not necessary.
    * @public (scenery-internal)
    *
    * @param {boolean} positionSiblings
    */
   setPositionSiblings: function( positionSiblings ) {
-
     this.positionSiblings = positionSiblings;
 
-    if ( this.positionSiblings ) {
-
-      // positioning again, mark as dirty immediately
-      this.invalidateCSSPositioning();
-    }
-    else {
-
-      // not positioning, just move off screen
-      scratchSiblingBounds.set( PDOMPeer.OFFSCREEN_SIBLING_BOUNDS );
-      setClientBounds( this._primarySibling, scratchSiblingBounds );
-      if ( this._labelSibling ) {
-        setClientBounds( this._labelSibling, scratchSiblingBounds );
-      }
-    }
+    // signify that it needs to be repositioned next frame, either off screen or to match
+    // graphical rendering
+    this.invalidateCSSPositioning();
   },
 
   /**
    * Mark that the siblings of this PDOMPeer need to be updated in the next Display update. Possibly from a
    * change of accessible content or node transformation. Does nothing if already marked dirty.
    *
-   * TODO: We shouldn't be marking all elements as dirty, just those that are focusable. Setting focusable
-   * should therfore mark dirty.
-   *
    * @private
    */
   invalidateCSSPositioning: function() {
-    if ( !this.positionDirty && this.focusable && this.positionSiblings ) {
+    if ( !this.positionDirty && this.focusable ) {
       this.positionDirty = true;
 
       // mark all ancestors of this peer so that we can quickly find this dirty peer when we traverse
@@ -926,42 +910,53 @@ inherit( Object, PDOMPeer, {
     // by gesture navigation with the virtual cursor. Bounds for non-focusable elements in the ViewPort don't
     // need to be accurate because the AT doesn't need to send events to them.
     if ( this.node.focusable ) {
-      const transformSourceNode = this.node.pdomTransformSourceNode || this.node;
+      if ( this.positionSiblings ) {
+        const transformSourceNode = this.node.pdomTransformSourceNode || this.node;
 
-      scratchGlobalBounds.set( transformSourceNode.localBounds );
-      if ( scratchGlobalBounds.isFinite() ) {
-        scratchGlobalBounds.transform( this.accessibleInstance.transformTracker.getMatrix() );
+        scratchGlobalBounds.set( transformSourceNode.localBounds );
+        if ( scratchGlobalBounds.isFinite() ) {
+          scratchGlobalBounds.transform( this.accessibleInstance.transformTracker.getMatrix() );
 
-        // no need to position if the node is fully outside of the Display bounds (out of view)
-        const displayBounds = this.display.bounds;
-        if ( displayBounds.intersectsBounds( scratchGlobalBounds ) ) {
+          // no need to position if the node is fully outside of the Display bounds (out of view)
+          const displayBounds = this.display.bounds;
+          if ( displayBounds.intersectsBounds( scratchGlobalBounds ) ) {
 
-          // Constrain the global bounds to Display bounds so that center of the sibling element
-          // is always in the Display. We may miss input if the center of the Node is outside
-          // the Display, where VoiceOver would otherwise send pointer events.
-          scratchGlobalBounds.constrainBounds( displayBounds );
+            // Constrain the global bounds to Display bounds so that center of the sibling element
+            // is always in the Display. We may miss input if the center of the Node is outside
+            // the Display, where VoiceOver would otherwise send pointer events.
+            scratchGlobalBounds.constrainBounds( displayBounds );
 
-          let clientDimensions = getClientDimensions( this._primarySibling );
-          let clientWidth = clientDimensions.width;
-          let clientHeight = clientDimensions.height;
+            let clientDimensions = getClientDimensions( this._primarySibling );
+            let clientWidth = clientDimensions.width;
+            let clientHeight = clientDimensions.height;
 
-          if ( clientWidth > 0 && clientHeight > 0 ) {
-            scratchSiblingBounds.setMinMax( 0, 0, clientWidth, clientHeight );
-            scratchSiblingBounds.transform( getCSSMatrix( clientWidth, clientHeight, scratchGlobalBounds ) );
-            setClientBounds( this._primarySibling, scratchSiblingBounds );
-          }
-
-          if ( this.labelSibling ) {
-            clientDimensions = getClientDimensions( this._labelSibling );
-            clientWidth = clientDimensions.width;
-            clientHeight = clientDimensions.height;
-
-            if ( clientHeight > 0 && clientWidth > 0 ) {
+            if ( clientWidth > 0 && clientHeight > 0 ) {
               scratchSiblingBounds.setMinMax( 0, 0, clientWidth, clientHeight );
               scratchSiblingBounds.transform( getCSSMatrix( clientWidth, clientHeight, scratchGlobalBounds ) );
-              setClientBounds( this._labelSibling, scratchSiblingBounds );
+              setClientBounds( this._primarySibling, scratchSiblingBounds );
+            }
+
+            if ( this.labelSibling ) {
+              clientDimensions = getClientDimensions( this._labelSibling );
+              clientWidth = clientDimensions.width;
+              clientHeight = clientDimensions.height;
+
+              if ( clientHeight > 0 && clientWidth > 0 ) {
+                scratchSiblingBounds.setMinMax( 0, 0, clientWidth, clientHeight );
+                scratchSiblingBounds.transform( getCSSMatrix( clientWidth, clientHeight, scratchGlobalBounds ) );
+                setClientBounds( this._labelSibling, scratchSiblingBounds );
+              }
             }
           }
+        }
+      }
+      else {
+
+        // not positioning, just move off screen
+        scratchSiblingBounds.set( PDOMPeer.OFFSCREEN_SIBLING_BOUNDS );
+        setClientBounds( this._primarySibling, scratchSiblingBounds );
+        if ( this._labelSibling ) {
+          setClientBounds( this._labelSibling, scratchSiblingBounds );
         }
       }
     }
