@@ -216,7 +216,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     uninstrumented.mutate( {
       visibleProperty: instrumentedVisibleProperty
     } );
-    uninstrumented.mutate( { tandem: Tandem.GENERAL.createTandem( 'myNode' ) } );
+    uninstrumented.mutate( { tandem: Tandem.GENERAL.createTandem( 'myNodeWithVisible' ) } );
     assert.ok( uninstrumented.visibleProperty.forwardingProperty === instrumentedVisibleProperty );
     testNodeAndVisibleProperty( uninstrumented, instrumentedVisibleProperty );
     uninstrumented.dispose();
@@ -247,7 +247,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     uninstrumented.mutate( {
       visibleProperty: instrumentedVisibleProperty
     } );
-    uninstrumented.mutate( { tandem: Tandem.GENERAL.createTandem( 'myNode' ) } );
+    uninstrumented.mutate( { tandem: Tandem.GENERAL.createTandem( 'myNodeWithVisible' ) } );
     assert.ok( uninstrumented.visibleProperty.forwardingProperty === instrumentedVisibleProperty );
     testNodeAndVisibleProperty( uninstrumented, instrumentedVisibleProperty );
     uninstrumented.dispose();
@@ -260,7 +260,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
       // instrumentedNodeWithDefaultInstrumentedVisibleProperty => instrumented property (before startup)
     let instrumented = new Node( {
-        tandem: Tandem.GENERAL.createTandem( 'myNode' )
+        tandem: Tandem.GENERAL.createTandem( 'myNodeWithVisible' )
       } );
     assert.ok( instrumented.visibleProperty.forwardingProperty === instrumented.ownedPhetioVisibleProperty );
     assert.ok( instrumented.linkedElements.length === 0, 'no linked elements for default visible Property' );
@@ -269,7 +269,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
     // instrumentedNodeWithDefaultInstrumentedVisibleProperty => uninstrumented property (before startup)
     instrumented = new Node( {
-      tandem: Tandem.GENERAL.createTandem( 'myNode' )
+      tandem: Tandem.GENERAL.createTandem( 'myNodeWithVisible' )
     } );
     window.assert && assert.throws( () => {
       instrumented.mutate( { visibleProperty: uninstrumentedVisibleProperty } );
@@ -278,7 +278,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
     // instrumentedNodeWithPassedInInstrumentedVisibleProperty => instrumented property (before startup)
     instrumented = new Node( {
-      tandem: Tandem.GENERAL.createTandem( 'myNode' )
+      tandem: Tandem.GENERAL.createTandem( 'myNodeWithVisible' )
     } );
     instrumented.mutate( { visibleProperty: instrumentedVisibleProperty } );
     assert.ok( instrumented.visibleProperty.forwardingProperty === instrumentedVisibleProperty );
@@ -289,7 +289,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     instrumented.dispose();
 
     instrumented = new Node( {
-      tandem: Tandem.GENERAL.createTandem( 'myNode' ),
+      tandem: Tandem.GENERAL.createTandem( 'myNodeWithVisible' ),
       visibleProperty: instrumentedVisibleProperty
     } );
     assert.ok( instrumented.visibleProperty.forwardingProperty === instrumentedVisibleProperty );
@@ -301,7 +301,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
     // instrumentedNodeWithPassedInInstrumentedVisibleProperty => uninstrumented property (before startup)
     instrumented = new Node( {
-      tandem: Tandem.GENERAL.createTandem( 'myNode' ),
+      tandem: Tandem.GENERAL.createTandem( 'myNodeWithVisible' ),
       visibleProperty: instrumentedVisibleProperty
     } );
     window.assert && assert.throws( () => {
@@ -309,7 +309,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     }, 'cannot remove instrumentation from the Node\'s visibleProperty' );
     instrumented.dispose();
     instrumented = new Node( {
-      tandem: Tandem.GENERAL.createTandem( 'myNode' )
+      tandem: Tandem.GENERAL.createTandem( 'myNodeWithVisible' )
     } );
     instrumented.mutate( { visibleProperty: instrumentedVisibleProperty } );
     window.assert && assert.throws( () => {
@@ -321,7 +321,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     apiValidation.simHasStarted = true;
     // instrumentedNodeWithDefaultInstrumentedVisibleProperty => instrumented property (after startup)
     const instrumented1 = new Node( {
-      tandem: Tandem.GENERAL.createTandem( 'myUniquelyNamedNodeThatWillNotBeDuplicated1' )
+      tandem: Tandem.GENERAL.createTandem( 'myVisibleUniquelyNamedNodeThatWillNotBeDuplicated1' )
     } );
     assert.ok( instrumented1.visibleProperty.forwardingProperty === instrumented1.ownedPhetioVisibleProperty );
     assert.ok( instrumented1.linkedElements.length === 0, 'no linked elements for default visible Property' );
@@ -329,7 +329,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
     // instrumentedNodeWithDefaultInstrumentedVisibleProperty => uninstrumented property (after startup)
     const instrumented2 = new Node( {
-      tandem: Tandem.GENERAL.createTandem( 'myUniquelyNamedNodeThatWillNotBeDuplicated2' )
+      tandem: Tandem.GENERAL.createTandem( 'myVisibleUniquelyNamedNodeThatWillNotBeDuplicated2' )
     } );
     window.assert && assert.throws( () => {
       instrumented2.setVisibleProperty( uninstrumentedVisibleProperty );
@@ -337,7 +337,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
     // instrumentedNodeWithPassedInInstrumentedVisibleProperty => instrumented property (after startup)
     const instrumented3 = new Node( {
-      tandem: Tandem.GENERAL.createTandem( 'myUniquelyNamedNodeThatWillNotBeDuplicated3' ),
+      tandem: Tandem.GENERAL.createTandem( 'myVisibleUniquelyNamedNodeThatWillNotBeDuplicated3' ),
       visibleProperty: instrumentedVisibleProperty
     } );
 
@@ -347,7 +347,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
     // instrumentedNodeWithPassedInInstrumentedVisibleProperty => uninstrumented property (after startup)
     const instrumented4 = new Node( {
-      tandem: Tandem.GENERAL.createTandem( 'myUniquelyNamedNodeThatWillNotBeDuplicated4' ),
+      tandem: Tandem.GENERAL.createTandem( 'myVisibleUniquelyNamedNodeThatWillNotBeDuplicated4' ),
       visibleProperty: instrumentedVisibleProperty
     } );
     window.assert && assert.throws( () => {
@@ -355,7 +355,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     }, 'cannot remove instrumentation from the Node\'s visibleProperty' );
     const instrumented5 = new Node( {} );
     instrumented5.mutate( { visibleProperty: instrumentedVisibleProperty } );
-    instrumented5.mutate( { tandem: Tandem.GENERAL.createTandem( 'myUniquelyNamedNodeThatWillNotBeDuplicated5' ) } );
+    instrumented5.mutate( { tandem: Tandem.GENERAL.createTandem( 'myVisibleUniquelyNamedNodeThatWillNotBeDuplicated5' ) } );
     window.assert && assert.throws( () => {
       instrumented5.mutate( { visibleProperty: uninstrumentedVisibleProperty } );
     }, 'cannot remove instrumentation from the Node\'s visibleProperty' );
@@ -372,7 +372,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     // instrumented5.dispose();
 
     instrumented = new Node( {
-      tandem: Tandem.GENERAL.createTandem( 'myNode' )
+      tandem: Tandem.GENERAL.createTandem( 'myNodeWithVisible' )
     } );
     window.assert && assert.throws( () => {
       instrumented.setVisibleProperty( null );
@@ -381,6 +381,253 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
     instrumentedVisibleProperty.dispose();
     otherInstrumentedVisibleProperty.dispose();
+    apiValidation.simHasStarted = previousSimStarted;
+    apiValidation.enabled = previousEnabled;
+
+    if ( !wasLaunched ) {
+      Tandem.unlaunch();
+    }
+  } );
+
+  QUnit.test( 'Node instrumented pickable Property', assert => {
+
+    // TODO: Use the AuxiliaryTandemRegistry?  See https://github.com/phetsims/tandem/issues/187
+    const wasLaunched = Tandem.launched;
+    if ( !Tandem.launched ) {
+      Tandem.launch();
+    }
+
+    const apiValidation = phet.tandem.phetioAPIValidation;
+    const previousEnabled = apiValidation.enabled;
+    const previousSimStarted = apiValidation.simHasStarted;
+
+    apiValidation.simHasStarted = false;
+
+    const testNodeAndPickableProperty = ( node, property ) => {
+      const initialPickable = node.pickable;
+      assert.ok( property.value === node.pickable, 'initial values should be the same' );
+      node.pickable = !initialPickable;
+      assert.ok( property.value === !initialPickable, 'property should reflect node change' );
+      property.value = initialPickable;
+      assert.ok( node.pickable === initialPickable, 'node should reflect property change' );
+
+      node.pickable = initialPickable;
+    };
+
+    const instrumentedPickableProperty = new BooleanProperty( false, { tandem: Tandem.GENERAL.createTandem( 'myPickableProperty' ) } );
+    const otherInstrumentedPickableProperty = new BooleanProperty( false, { tandem: Tandem.GENERAL.createTandem( 'myOtherPickableProperty' ) } );
+    const uninstrumentedPickableProperty = new BooleanProperty( false );
+
+    /***************************************
+     /* Testing uninstrumented Nodes
+     */
+
+
+      // uninstrumentedNode => no property (before startup)
+    let uninstrumented = new Node();
+    assert.ok( uninstrumented.pickableProperty.forwardingProperty === undefined );
+    testNodeAndPickableProperty( uninstrumented, uninstrumented.pickableProperty );
+
+    // uninstrumentedNode => uninstrumented property (before startup)
+    uninstrumented = new Node( { pickableProperty: uninstrumentedPickableProperty } );
+    assert.ok( uninstrumented.pickableProperty.forwardingProperty === uninstrumentedPickableProperty );
+    testNodeAndPickableProperty( uninstrumented, uninstrumentedPickableProperty );
+
+    //uninstrumentedNode => instrumented property (before startup)
+    uninstrumented = new Node();
+    uninstrumented.mutate( {
+      pickableProperty: instrumentedPickableProperty
+    } );
+    assert.ok( uninstrumented.pickableProperty.forwardingProperty === instrumentedPickableProperty );
+    testNodeAndPickableProperty( uninstrumented, instrumentedPickableProperty );
+
+    //  uninstrumentedNode => instrumented property => instrument the Node (before startup) OK
+    uninstrumented = new Node();
+    uninstrumented.mutate( {
+      pickableProperty: instrumentedPickableProperty
+    } );
+    uninstrumented.mutate( { tandem: Tandem.GENERAL.createTandem( 'myNodeWithPickable' ) } );
+    assert.ok( uninstrumented.pickableProperty.forwardingProperty === instrumentedPickableProperty );
+    testNodeAndPickableProperty( uninstrumented, instrumentedPickableProperty );
+    uninstrumented.dispose();
+
+    //////////////////////////////////////////////////
+    apiValidation.simHasStarted = true;
+
+    // uninstrumentedNode => no property (before startup)
+    uninstrumented = new Node();
+    assert.ok( uninstrumented.pickableProperty.forwardingProperty === undefined );
+    testNodeAndPickableProperty( uninstrumented, uninstrumented.pickableProperty );
+
+    // uninstrumentedNode => uninstrumented property (before startup)
+    uninstrumented = new Node( { pickableProperty: uninstrumentedPickableProperty } );
+    assert.ok( uninstrumented.pickableProperty.forwardingProperty === uninstrumentedPickableProperty );
+    testNodeAndPickableProperty( uninstrumented, uninstrumentedPickableProperty );
+
+    //uninstrumentedNode => instrumented property (before startup)
+    uninstrumented = new Node();
+    uninstrumented.mutate( {
+      pickableProperty: instrumentedPickableProperty
+    } );
+    assert.ok( uninstrumented.pickableProperty.forwardingProperty === instrumentedPickableProperty );
+    testNodeAndPickableProperty( uninstrumented, instrumentedPickableProperty );
+
+    //  uninstrumentedNode => instrumented property => instrument the Node (before startup) OK
+    uninstrumented = new Node();
+    uninstrumented.mutate( {
+      pickableProperty: instrumentedPickableProperty
+    } );
+
+    uninstrumented.mutate( { tandem: Tandem.GENERAL.createTandem( 'myNodeWithPickable' ) } );
+    assert.ok( uninstrumented.pickableProperty.forwardingProperty === instrumentedPickableProperty );
+    testNodeAndPickableProperty( uninstrumented, instrumentedPickableProperty );
+    uninstrumented.dispose();
+    apiValidation.simHasStarted = false;
+
+
+    /***************************************
+     /* Testing instrumented nodes
+     */
+
+      // instrumentedNodeWithDefaultInstrumentedPickableProperty => instrumented property (before startup)
+    let instrumented = new Node( {
+        tandem: Tandem.GENERAL.createTandem( 'myNodeWithPickable' ),
+        pickablePropertyInstrumented: true
+      } );
+    assert.ok( instrumented.pickableProperty.forwardingProperty === instrumented.ownedPhetioPickableProperty );
+    assert.ok( instrumented.linkedElements.length === 0, 'no linked elements for default pickable Property' );
+    testNodeAndPickableProperty( instrumented, instrumented.pickableProperty );
+    instrumented.dispose();
+
+    // instrumentedNodeWithDefaultInstrumentedPickableProperty => uninstrumented property (before startup)
+    instrumented = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myNodeWithPickable' ),
+      pickablePropertyInstrumented: true
+    } );
+    window.assert && assert.throws( () => {
+      instrumented.mutate( { pickableProperty: uninstrumentedPickableProperty } );
+    }, 'cannot remove instrumentation from the Node\'s pickableProperty' );
+    instrumented.dispose();
+
+    // instrumentedNodeWithPassedInInstrumentedPickableProperty => instrumented property (before startup)
+    instrumented = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myNodeWithPickable' ),
+      pickablePropertyInstrumented: true
+    } );
+    instrumented.mutate( { pickableProperty: instrumentedPickableProperty } );
+    assert.ok( instrumented.pickableProperty.forwardingProperty === instrumentedPickableProperty );
+    assert.ok( instrumented.linkedElements.length === 1, 'added linked element' );
+    assert.ok( instrumented.linkedElements[ 0 ].element === instrumentedPickableProperty,
+      'added linked element should be for pickableProperty ' );
+    testNodeAndPickableProperty( instrumented, instrumentedPickableProperty );
+    instrumented.dispose();
+
+    instrumented = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myNodeWithPickable' ),
+      pickableProperty: instrumentedPickableProperty
+    } );
+    assert.ok( instrumented.pickableProperty.forwardingProperty === instrumentedPickableProperty );
+    assert.ok( instrumented.linkedElements.length === 1, 'added linked element' );
+    assert.ok( instrumented.linkedElements[ 0 ].element === instrumentedPickableProperty,
+      'added linked element should be for pickableProperty ' );
+    testNodeAndPickableProperty( instrumented, instrumentedPickableProperty );
+    instrumented.dispose();
+
+    // instrumentedNodeWithPassedInInstrumentedPickableProperty => uninstrumented property (before startup)
+    instrumented = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myNodeWithPickable' ),
+      pickableProperty: instrumentedPickableProperty
+    } );
+    window.assert && assert.throws( () => {
+      instrumented.mutate( { pickableProperty: uninstrumentedPickableProperty } );
+    }, 'cannot remove instrumentation from the Node\'s pickableProperty' );
+    instrumented.dispose();
+    instrumented = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myNodeWithPickable' )
+    } );
+    instrumented.mutate( { pickableProperty: instrumentedPickableProperty } );
+    window.assert && assert.throws( () => {
+      instrumented.mutate( { pickableProperty: uninstrumentedPickableProperty } );
+    }, 'cannot remove instrumentation from the Node\'s pickableProperty' );
+    instrumented.dispose();
+
+    apiValidation.enabled = true;
+    apiValidation.simHasStarted = true;
+    // instrumentedNodeWithDefaultInstrumentedPickableProperty => instrumented property (after startup)
+    const instrumented1 = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myPickableUniquelyNamedNodeThatWillNotBeDuplicated1' ),
+      pickablePropertyInstrumented: true
+    } );
+    assert.ok( instrumented1.pickableProperty.forwardingProperty === instrumented1.ownedPhetioPickableProperty );
+    assert.ok( instrumented1.linkedElements.length === 0, 'no linked elements for default pickable Property' );
+    testNodeAndPickableProperty( instrumented1, instrumented1.pickableProperty );
+
+    // instrumentedNodeWithDefaultInstrumentedPickableProperty => uninstrumented property (after startup)
+    const instrumented2 = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myPickableUniquelyNamedNodeThatWillNotBeDuplicated2' ),
+      pickablePropertyInstrumented: true
+    } );
+    window.assert && assert.throws( () => {
+      instrumented2.setPickableProperty( uninstrumentedPickableProperty );
+    }, 'cannot remove instrumentation from the Node\'s pickableProperty' );
+
+    // instrumentedNodeWithPassedInInstrumentedPickableProperty => instrumented property (after startup)
+    const instrumented3 = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myPickableUniquelyNamedNodeThatWillNotBeDuplicated3' ),
+      pickableProperty: instrumentedPickableProperty
+    } );
+
+    window.assert && assert.throws( () => {
+      instrumented3.mutate( { pickableProperty: otherInstrumentedPickableProperty } );
+    }, 'cannot swap out one instrumented for another' );
+
+    // instrumentedNodeWithPassedInInstrumentedPickableProperty => uninstrumented property (after startup)
+    const instrumented4 = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myPickableUniquelyNamedNodeThatWillNotBeDuplicated4' ),
+      pickableProperty: instrumentedPickableProperty
+    } );
+    window.assert && assert.throws( () => {
+      instrumented4.mutate( { pickableProperty: uninstrumentedPickableProperty } );
+    }, 'cannot remove instrumentation from the Node\'s pickableProperty' );
+    const instrumented5 = new Node( {} );
+    instrumented5.mutate( { pickableProperty: instrumentedPickableProperty } );
+    instrumented5.mutate( { tandem: Tandem.GENERAL.createTandem( 'myPickableUniquelyNamedNodeThatWillNotBeDuplicated5' ) } );
+    window.assert && assert.throws( () => {
+      instrumented5.mutate( { pickableProperty: uninstrumentedPickableProperty } );
+    }, 'cannot remove instrumentation from the Node\'s pickableProperty' );
+    apiValidation.enabled = false;
+
+    instrumented1.dispose();
+
+    // These can't be disposed because they were broken while creating (on purpose in an assert.throws()). These elements
+    // have special Tandem component names to make sure that they don't interfere with other tests (since they can't be
+    // removed from the registry
+    // instrumented2.dispose();
+    // instrumented3.dispose();
+    // instrumented4.dispose();
+    // instrumented5.dispose();
+
+    instrumented = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myNodeWithPickable' ),
+      pickablePropertyInstrumented: true
+    } );
+    window.assert && assert.throws( () => {
+      instrumented.setPickableProperty( null );
+    }, 'cannot clear out an instrumented pickableProperty' );
+    instrumented.dispose();
+
+
+    instrumented = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myNodeWithPickable' )
+    } );
+    window.assert && assert.throws( () => {
+      instrumented.pickablePropertyInstrumented = true;
+    }, 'cannot set pickablePropertyInstrumented after instrumentation' );
+    instrumented.dispose();
+
+
+    instrumentedPickableProperty.dispose();
+    otherInstrumentedPickableProperty.dispose();
     apiValidation.simHasStarted = previousSimStarted;
     apiValidation.enabled = previousEnabled;
 

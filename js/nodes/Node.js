@@ -153,6 +153,7 @@
 
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import NumberProperty from '../../../axon/js/NumberProperty.js';
+import Property from '../../../axon/js/Property.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
@@ -169,7 +170,9 @@ import deprecationWarning from '../../../phet-core/js/deprecationWarning.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
+import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
+import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import ParallelDOM from '../accessibility/pdom/ParallelDOM.js';
 import Instance from '../display/Instance.js';
 import Renderer from '../display/Renderer.js';
@@ -198,6 +201,7 @@ const NODE_OPTION_KEYS = [
   'visibleProperty', // {Property.<boolean>|null} - Sets forwarding of the visibleProperty, see setVisibleProperty() for more documentation
   'visible', // {boolean} - Whether the Node is visible, see setVisible() for more documentation
 
+  'pickablePropertyInstrumented', // {boolean} - When true, create an instrumented pickableProperty when this Node is instrumented, see setPickablePropertyInstrumented() for more documentation
   'pickableProperty', // {Property.<boolean|null>|null} - Sets forwarding of the pickableProperty, see setPickableProperty() for more documentation
   'pickable', // {boolean|null} - Whether the Node is pickable, see setPickable() for more documentation
   'inputEnabled', // {boolean} Whether input events can reach into this subtree, see setInputEnabled() for more documentation
@@ -245,6 +249,7 @@ const DEFAULT_OPTIONS = {
   visible: true,
   opacity: 1,
   pickable: null,
+  pickablePropertyInstrumented: true,
   inputEnabled: true,
   clipArea: null,
   mouseArea: null,
@@ -329,6 +334,9 @@ function Node( options ) {
   // NOTE: This is fired synchronously when the pickability of the Node is toggled
   this._pickableProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.pickable );
   this._pickableProperty.lazyLink( this.onPickablePropertyChange.bind( this ) );
+
+  // @private - when true, automatically set up a PhET-iO instrumented forwarded Property for pickableProperty, see this.initializePhetioObject for usage
+  this._pickablePropertyInstrumented = DEFAULT_OPTIONS.pickablePropertyInstrumented;
 
   // @public {TinyProperty.<boolean>} - Whether input event listeners on this Node or descendants on a trail will have
   // input listeners. triggered. Note that this does NOT effect picking, and only prevents some listeners from being
@@ -559,6 +567,12 @@ function Node( options ) {
   // stores the default instrumented visible Property when this Node is PhET-iO instrumented and an outside visible
   // Property isn't provided.
   this.ownedPhetioVisibleProperty = null;
+
+  // @public (NodeTests) {Property.<boolean>|null} - TinyProperty is not instrumented for PhET-iO, so when a Node is
+  // instrumented, by default, an instrumented `Property` can be forwarded to by this._pickableProperty (see
+  // this._pickablePropertyInstrumented). This field stores the default instrumented pickable Property when
+  // _pickablePropertyInstrumented is true.
+  this.ownedPhetioPickableProperty = null;
 
   PhetioObject.call( this );
 
@@ -3178,7 +3192,7 @@ inherit( PhetioObject, Node, {
 
     oldProperty && oldProperty.isPhetioInstrumented() && this.removeLinkedElements( oldProperty );
 
-    // this.ownedVisiblePhetioProperty takes the place of the LinkedElement in the phetioID structure, so don't create
+    // this.ownedPhetioVisibleProperty takes the place of the LinkedElement in the phetioID structure, so don't create
     // the LinkedElement.
     if ( newProperty && newProperty.isPhetioInstrumented() && !newPropertyIsOwnedPhetioVisibleProperty ) {
       this.addLinkedElement( newProperty, { tandem: this.tandem.createTandem( 'visibleProperty' ) } );
@@ -3205,14 +3219,15 @@ inherit( PhetioObject, Node, {
     const newPropertyIsOwnedPhetioVisibleProperty = newTarget === this.ownedPhetioVisibleProperty;
 
     // If we had the "default instrumented" Property, we'll remove that and link our new Property. Guard on the fact
-    // that ownedPhetioVisibleProperty is added via this exact method, see Node.initialiePhetioObject() for details
-    // To this before linked a PhET-iO LinkedElement because ownedPhetioVisibleProperty has the same phetioID as the LinkedElement
+    // that ownedPhetioVisibleProperty is added via this exact method, see Node.initializePhetioObject() for details.
+    // Do this before adding a PhET-iO LinkedElement because ownedPhetioVisibleProperty has the same phetioID as the LinkedElement
     if ( this.ownedPhetioVisibleProperty && !newPropertyIsOwnedPhetioVisibleProperty ) {
       this.ownedPhetioVisibleProperty.dispose();
       this.ownedPhetioVisibleProperty = null;
     }
 
     // Only update linked elements if this Node is instrumented for PhET-iO
+    // TODO: we don't need this check anymore, https://github.com/phetsims/scenery/issues/1047
     if ( this.isPhetioInstrumented() ) {
       this.updateLinkedElementForVisibleProperty( previousTarget, newTarget, newPropertyIsOwnedPhetioVisibleProperty );
     }
@@ -3338,6 +3353,14 @@ inherit( PhetioObject, Node, {
     // We need this information eagerly for later on in the function
     const previousTarget = this._pickableProperty.forwardingProperty;
 
+    // If we had the "default instrumented" Property, we'll remove that and then link our new Property. Guard on the fact
+    // that ownedPhetioPickableProperty is added via this exact method, see Node.initializePhetioObject() for details
+    // Do this before adding a PhET-iO LinkedElement because ownedPhetioPickableProperty has the same phetioID as the LinkedElement
+    if ( this.ownedPhetioPickableProperty && newTarget !== this.ownedPhetioPickableProperty ) {
+      this.ownedPhetioPickableProperty.dispose();
+      this.ownedPhetioPickableProperty = null;
+    }
+
     // Only update linked elements if this Node is instrumented for PhET-iO
     this.updateLinkedElementForPickableProperty( previousTarget, newTarget );
 
@@ -3348,7 +3371,7 @@ inherit( PhetioObject, Node, {
   set pickableProperty( property ) { this.setPickableProperty( property ); },
 
   /**
-   * Handles linking and checking our visibleProperty when instrumented.
+   * Handles linking and checking our pickableProperty when instrumented.
    * @private
    *
    * @param {Property.<boolean>|undefined|null} oldProperty - same typedef as TinyForwardingProperty.forwardingProperty
@@ -3385,6 +3408,32 @@ inherit( PhetioObject, Node, {
     return this._pickableProperty;
   },
   get pickableProperty() { return this.getPickableProperty(); },
+
+  /**
+   * Use this to automatically create a forwarded, PhET-iO instrumented pickableProperty internal to Node. This is different
+   * from visible because pickable by default doesn't not create this forwarded Property.
+   * @public
+   * @param {boolean} pickablePropertyInstrumented
+   */
+  setPickablePropertyInstrumented: function( pickablePropertyInstrumented ) {
+    assert && assert( typeof pickablePropertyInstrumented === 'boolean' );
+
+    // See Node.initializePhetioObject for more details on this assertion
+    assert && assert( !this.isPhetioInstrumented(), 'this option only works if it is passed in before this Node is instrumented' );
+
+    this._pickablePropertyInstrumented = pickablePropertyInstrumented;
+  },
+  set pickablePropertyInstrumented( pickablePropertyInstrumented ) { this.setPickablePropertyInstrumented( pickablePropertyInstrumented );},
+
+  /**
+   * @public
+   * @returns {boolean}
+   */
+  getPickablePropertyInstrumented: function() {
+    return this._pickablePropertyInstrumented;
+  },
+  get pickablePropertyInstrumented() { return this.getPickablePropertyInstrumented();},
+
 
   /**
    * Sets whether this Node (and its subtree) will allow hit-testing (and thus user interaction), controlling what
@@ -5346,7 +5395,8 @@ inherit( PhetioObject, Node, {
       // This option is a bit buried because it can only be used when the Node is being instrumented, which is when
       // the default, instrumented visibleProperty is conditionally created. We don't want to store these on the Node,
       // and thus they aren't support through `mutate()`.
-      visiblePropertyOptions: null
+      visiblePropertyOptions: null,
+      pickablePropertyOptions: null
     }, config );
 
     // Track this, so we only override our visibleProperty once.
@@ -5365,7 +5415,9 @@ inherit( PhetioObject, Node, {
       if ( !this._visibleProperty.forwardingProperty ) {
 
         this.ownedPhetioVisibleProperty = new BooleanProperty( this.visible, merge( {
-          phetioReadOnly: this.phetioReadOnly, // pick the baseline value from the parent Node's baseline
+
+          // by default, use the value from the Node
+          phetioReadOnly: this.phetioReadOnly,
           tandem: this.tandem.createTandem( 'visibleProperty' ),
           phetioDocumentation: 'Controls whether the Node will be visible (and interactive), see the NodeIO documentation for more details.'
         }, this.phetioComponentOptions, this.phetioComponentOptions.visibleProperty, config.visiblePropertyOptions ) );
@@ -5379,8 +5431,23 @@ inherit( PhetioObject, Node, {
         this.updateLinkedElementForVisibleProperty( null, this._visibleProperty.forwardingProperty, false );
       }
 
-      // If the pickableProperty was already set, now that it is instrumented, add a LinkedElement for it.
-      if ( this.pickableProperty.forwardingProperty && this.pickableProperty.forwardingProperty.isPhetioInstumented() ) {
+      if ( this._pickablePropertyInstrumented ) {
+        assert && assert( !this._pickableProperty.forwardingProperty, 'I create the pickableProperty when pickablePropertyInstrumented:true' );
+
+        this.ownedPhetioPickableProperty = new Property( this.pickable, merge( {
+
+          // by default, use the value from the Node
+          phetioReadOnly: this.phetioReadOnly,
+          tandem: this.tandem.createTandem( 'pickableProperty' ),
+          phetioType: Property.PropertyIO( NullableIO( BooleanIO ) ),
+          phetioDocumentation: 'Sets whether the node will be pickable (and hence interactive), see the NodeIO documentation for more details'
+        }, this.phetioComponentOptions, this.phetioComponentOptions.pickableProperty, config.pickablePropertyOptions ) );
+
+        this.setPickableProperty( this.ownedPhetioPickableProperty );
+      }
+      else if ( this.pickableProperty.forwardingProperty && this.pickableProperty.forwardingProperty.isPhetioInstrumented() ) {
+
+        // If the pickableProperty was already set, now that it is instrumented, add a LinkedElement for it.
         this.updateLinkedElementForPickableProperty( null, this._pickableProperty.forwardingProperty );
       }
     }
@@ -5470,6 +5537,12 @@ inherit( PhetioObject, Node, {
     if ( this.ownedPhetioVisibleProperty ) {
       this.ownedPhetioVisibleProperty.dispose();
       this.ownedPhetioVisibleProperty = null;
+    }
+
+    // We instrumented ownedPhetioPickableProperty for PhET-iO, so we'll need to dispose it if we created it.
+    if ( this.ownedPhetioPickableProperty ) {
+      this.ownedPhetioPickableProperty.dispose();
+      this.ownedPhetioPickableProperty = null;
     }
 
     // Tear-down in the reverse order Node was created
