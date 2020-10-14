@@ -5275,9 +5275,11 @@ inherit( PhetioObject, Node, {
     config = merge( {
 
       // This option is used to create the instrumented, default PhET-iO visibleProperty. These options should not
-      // be provided if a `visibleProperty` was provided to this Node. This option is a bit buried because it can only
-      // be used when the Node is being instrumented, which is when the default, instrumented visibleProperty is
-      // conditionally created. We don't want to store these on the Node, and thus they aren't support through `mutate()`.
+      // be provided if a `visibleProperty` was provided to this Node, though if they are, they will just be ignored.
+      // This grace is to support default options across the component hierarchy melding with usages providing a visibleProperty.
+      // This option is a bit buried because it can only be used when the Node is being instrumented, which is when
+      // the default, instrumented visibleProperty is conditionally created. We don't want to store these on the Node,
+      // and thus they aren't support through `mutate()`.
       visiblePropertyOptions: null
     }, config );
 
