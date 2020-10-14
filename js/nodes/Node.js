@@ -153,7 +153,6 @@
 
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import NumberProperty from '../../../axon/js/NumberProperty.js';
-import Property from '../../../axon/js/Property.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
@@ -170,9 +169,7 @@ import deprecationWarning from '../../../phet-core/js/deprecationWarning.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
-import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
-import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import ParallelDOM from '../accessibility/pdom/ParallelDOM.js';
 import Instance from '../display/Instance.js';
 import Renderer from '../display/Renderer.js';
@@ -181,7 +178,6 @@ import Pen from '../input/Pen.js';
 import Touch from '../input/Touch.js';
 import scenery from '../scenery.js';
 import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
-import NodeProperty from '../util/NodeProperty.js';
 import Picker from '../util/Picker.js';
 import RendererSummary from '../util/RendererSummary.js';
 import Trail from '../util/Trail.js';
@@ -198,8 +194,11 @@ const scratchMatrix3 = new Matrix3();
 const NODE_OPTION_KEYS = [
   'children', // {Array.<Node>}- List of children to add (in order), see setChildren for more documentation
   'cursor', // {string|null} - CSS cursor to display when over this Node, see setCursor() for more documentation
+
   'visibleProperty', // {Property.<boolean>|null} - Sets forwarding of the visibleProperty, see setVisibleProperty() for more documentation
   'visible', // {boolean} - Whether the Node is visible, see setVisible() for more documentation
+
+  'pickableProperty', // {Property.<boolean|null>|null} - Sets forwarding of the pickableProperty, see setPickableProperty() for more documentation
   'pickable', // {boolean|null} - Whether the Node is pickable, see setPickable() for more documentation
   'inputEnabled', // {boolean} Whether input events can reach into this subtree, see setInputEnabled() for more documentation
   'inputListeners', // {Array.<Object>} - The input listeners attached to the Node, see setInputListeners() for more documentation
@@ -316,7 +315,7 @@ function Node( options ) {
   // DOM elements that need to closely track state (possibly by Canvas to maintain dirty state).
   this._drawables = [];
 
-  // @public {TinyProperty.<boolean>} - Whether this Node (and its children) will be visible when the scene is updated.
+  // @public {TinyForwardingProperty.<boolean>} - Whether this Node (and its children) will be visible when the scene is updated.
   // Visible Nodes by default will not be pickable either.
   // NOTE: This is fired synchronously when the visibility of the Node is toggled
   this._visibleProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.visible );
@@ -326,9 +325,10 @@ function Node( options ) {
   // NOTE: This is fired synchronously when the opacity of the Node is toggled
   this.opacityProperty = new TinyProperty( DEFAULT_OPTIONS.opacity );
 
-  // @public {TinyProperty.<boolean|null>} - See setPickable().
+  // @public {TinyForwardingProperty.<boolean|null>} - See setPickable() and setPickableProperty()
   // NOTE: This is fired synchronously when the pickability of the Node is toggled
-  this.pickableProperty = new TinyProperty( DEFAULT_OPTIONS.pickable );
+  this._pickableProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.pickable );
+  this._pickableProperty.lazyLink( this.onPickablePropertyChange.bind( this ) );
 
   // @public {TinyProperty.<boolean>} - Whether input event listeners on this Node or descendants on a trail will have
   // input listeners. triggered. Note that this does NOT effect picking, and only prevents some listeners from being
@@ -3322,6 +3322,71 @@ inherit( PhetioObject, Node, {
   get opacity() { return this.getOpacity(); },
 
   /**
+   * Sets what Property our pickableProperty is backed by, so that changes to this provided Property will change this
+   * Node's pickability, and vice versa. This does not change this._pickableProperty. See TinyForwardingProperty.setForwardingProperty()
+   * for more info.
+   *
+   * Instrumented Nodes do not by default create their own instrumented pickableProperty, even though Node.visibleProperty does.
+   *
+   * @public
+   *
+   * @param {TinyProperty.<boolean>|Property.<boolean>|null} newTarget
+   * @returns {Node} for chaining
+   */
+  setPickableProperty( newTarget ) {
+
+    // We need this information eagerly for later on in the function
+    const previousTarget = this._pickableProperty.forwardingProperty;
+
+    // Only update linked elements if this Node is instrumented for PhET-iO
+    this.updateLinkedElementForPickableProperty( previousTarget, newTarget );
+
+    this._pickableProperty.setForwardingProperty( newTarget );
+
+    return this; // for chaining
+  },
+  set pickableProperty( property ) { this.setPickableProperty( property ); },
+
+  /**
+   * Handles linking and checking our visibleProperty when instrumented.
+   * @private
+   *
+   * @param {Property.<boolean>|undefined|null} oldProperty - same typedef as TinyForwardingProperty.forwardingProperty
+   * @param {Property.<boolean>|undefined|null} newProperty - same typedef as TinyForwardingProperty.forwardingProperty
+   */
+  updateLinkedElementForPickableProperty( oldProperty, newProperty ) {
+    assert && assert( oldProperty !== newProperty, 'should not be called on same values' );
+
+    if ( this.isPhetioInstrumented() ) {
+
+      oldProperty && oldProperty.isPhetioInstrumented() && this.removeLinkedElements( oldProperty );
+
+      const tandem = this.tandem.createTandem( 'pickableProperty' );
+      if ( newProperty && newProperty.isPhetioInstrumented() && tandem !== newProperty.tandem ) {
+        this.addLinkedElement( newProperty, { tandem: tandem } );
+      }
+    }
+  },
+
+  /**
+   * Get this Node's pickableProperty. Note! This is not the reciprocal of setPickableProperty. Node.prototype._pickableProperty
+   * is a TinyForwardingProperty, and is set up to listen to changes from the pickableProperty provided by
+   * setPickableProperty(), but the underlying reference does not change. This means the following:
+   * const myNode = new Node();
+   * const pickableProperty = new Property( false );
+   * myNode.setPickableProperty( pickableProperty )
+   * => myNode.getPickableProperty() !== pickableProperty (!!!!!!)
+   *
+   * Please use this with caution. See setPickableProperty() for more information.
+   *
+   * @returns {TinyForwardingProperty}
+   */
+  getPickableProperty: function() {
+    return this._pickableProperty;
+  },
+  get pickableProperty() { return this.getPickableProperty(); },
+
+  /**
    * Sets whether this Node (and its subtree) will allow hit-testing (and thus user interaction), controlling what
    * Trail is returned from node.trailUnderPoint().
    * @public
@@ -3356,19 +3421,7 @@ inherit( PhetioObject, Node, {
    */
   setPickable: function( pickable ) {
     assert && assert( pickable === null || typeof pickable === 'boolean' );
-
-    if ( this.pickable !== pickable ) {
-      const oldPickable = this.pickable;
-
-      // no paint or invalidation changes for now, since this is only handled for the mouse
-      this.pickableProperty.setPropertyValue( pickable );
-
-      this._picker.onPickableChange( oldPickable, pickable );
-      if ( assertSlow ) { this._picker.audit(); }
-      // TODO: invalidate the cursor somehow? #150
-
-      this.pickableProperty.notifyListeners( oldPickable );
-    }
+    this._pickableProperty.set( pickable );
   },
   set pickable( value ) { this.setPickable( value ); },
 
@@ -3379,9 +3432,22 @@ inherit( PhetioObject, Node, {
    * @returns {boolean|null}
    */
   isPickable: function() {
-    return this.pickableProperty.value;
+    return this._pickableProperty.value;
   },
   get pickable() { return this.isPickable(); },
+
+  /**
+   * Called when our visibility Property changes values.
+   * @private
+   *
+   * @param {boolean} pickable
+   * @param {boolean} oldPickable
+   */
+  onPickablePropertyChange: function( pickable, oldPickable ) {
+    this._picker.onPickableChange( oldPickable, pickable );
+    if ( assertSlow ) { this._picker.audit(); }
+    // TODO: invalidate the cursor somehow? #150
+  },
 
   /**
    * Sets whether input is enabled for this Node and its subtree. If false, input event listeners will not be fired
@@ -5296,7 +5362,7 @@ inherit( PhetioObject, Node, {
       // as this.visibleProperty.forwardingProperty.  We only create the default instrumented one if another hasn't
       // already been specified.
 
-      if ( !this.visibleProperty.forwardingProperty ) {
+      if ( !this._visibleProperty.forwardingProperty ) {
 
         this.ownedPhetioVisibleProperty = new BooleanProperty( this.visible, merge( {
           phetioReadOnly: this.phetioReadOnly, // pick the baseline value from the parent Node's baseline
@@ -5310,7 +5376,12 @@ inherit( PhetioObject, Node, {
 
         // Since we are just now instrumented, and linked elements can't be added to linked Elements until the PhetioObject
         // is instrumented, we need to retroactively link to whatever forwardingProperty may have been added before.
-        this.updateLinkedElementForVisibleProperty( null, this.visibleProperty.forwardingProperty, false );
+        this.updateLinkedElementForVisibleProperty( null, this._visibleProperty.forwardingProperty, false );
+      }
+
+      // If the pickableProperty was already set, now that it is instrumented, add a LinkedElement for it.
+      if ( this.pickableProperty.forwardingProperty && this.pickableProperty.forwardingProperty.isPhetioInstumented() ) {
+        this.updateLinkedElementForPickableProperty( null, this._pickableProperty.forwardingProperty );
       }
     }
   },
@@ -5464,16 +5535,6 @@ Node.NodeIO = new IOType( 'NodeIO', {
   // TODO: https://github.com/phetsims/scenery/issues/1047 Move these added Properties to the core types
   createWrapper: ( node, phetioID ) => {
 
-    const pickableProperty = new NodeProperty( node, node.pickableProperty, 'pickable', merge( {
-
-      // pick the baseline value from the parent Node's baseline
-      phetioReadOnly: node.phetioReadOnly,
-
-      tandem: node.tandem.createTandem( 'pickableProperty' ),
-      phetioType: Property.PropertyIO( NullableIO( BooleanIO ) ),
-      phetioDocumentation: 'Sets whether the node will be pickable (and hence interactive), see the NodeIO documentation for more details'
-    }, node.phetioComponentOptions, node.phetioComponentOptions.pickableProperty ) );
-
     // Adapter for the opacity.  Cannot use NodeProperty at the moment because it doesn't handle numeric types
     // properly--we may address this by moving to a mixin pattern.
     const opacityProperty = new NumberProperty( node.opacity, merge( {
@@ -5492,7 +5553,6 @@ Node.NodeIO = new IOType( 'NodeIO', {
       phetioObject: node,
       phetioID: phetioID,
       dispose: () => {
-        pickableProperty.dispose();
         opacityProperty.dispose();
       }
     };
