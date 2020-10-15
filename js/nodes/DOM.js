@@ -85,7 +85,7 @@ inherit( Node, DOM, {
   /**
    * Computes the bounds of our current DOM element (using jQuery, as replacing this with other things seems a bit
    * bug-prone and has caused issues in the past).
-   * @private
+   * @protected
    *
    * The dom element needs to be attached to the DOM tree in order for this to work.
    *
