@@ -31,6 +31,7 @@ class NodeAPI extends PhetioObjectAPI {
         phetioType: Property.PropertyIO( BooleanIO )
       },
 
+      pickablePropertyInstrumented: false,
       pickablePropertyOptions: {
         phetioType: Property.PropertyIO( NullableIO( BooleanIO ) )
       },
@@ -43,7 +44,9 @@ class NodeAPI extends PhetioObjectAPI {
 
     this.visibleProperty = new PropertyAPI( options.visiblePropertyOptions );
     this.opacityProperty = new PropertyAPI( options.opacityPropertyOptions );
-    this.pickableProperty = new PropertyAPI( options.pickablePropertyOptions );
+    if ( options.pickablePropertyInstrumented ) {
+      this.pickableProperty = new PropertyAPI( options.pickablePropertyOptions );
+    }
   }
 }
 
