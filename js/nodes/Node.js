@@ -252,7 +252,7 @@ const DEFAULT_OPTIONS = {
   visible: true,
   opacity: 1,
   pickable: null,
-  pickablePropertyInstrumented: true,
+  pickablePropertyInstrumented: false,
   inputEnabled: true,
   clipArea: null,
   mouseArea: null,
