@@ -152,7 +152,6 @@
  */
 
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
-import NumberProperty from '../../../axon/js/NumberProperty.js';
 import Property from '../../../axon/js/Property.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
@@ -160,7 +159,6 @@ import TinyProperty from '../../../axon/js/TinyProperty.js';
 import TinyStaticProperty from '../../../axon/js/TinyStaticProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import Range from '../../../dot/js/Range.js';
 import Transform3 from '../../../dot/js/Transform3.js';
 import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
@@ -5582,33 +5580,7 @@ Node.NodeIO = new IOType( 'NodeIO', {
                  '<li>false: The node cannot be interacted with, and it blocks events for nodes behind it.</li>' +
                  '<li>true: The node can be interacted with (if it has an input listener).</li>' +
                  '</ul>' +
-                 'For more about Scenery node pickability, please see <a href="http://phetsims.github.io/scenery/doc/implementation-notes#pickability">http://phetsims.github.io/scenery/doc/implementation-notes#pickability</a>',
-
-  // TODO: https://github.com/phetsims/scenery/issues/1047 Move these added Properties to the core types
-  createWrapper: ( node, phetioID ) => {
-
-    // Adapter for the opacity.  Cannot use NodeProperty at the moment because it doesn't handle numeric types
-    // properly--we may address this by moving to a mixin pattern.
-    const opacityProperty = new NumberProperty( node.opacity, merge( {
-
-      // pick the baseline value from the parent Node's baseline
-      phetioReadOnly: node.phetioReadOnly,
-
-      tandem: node.tandem.createTandem( 'opacityProperty' ),
-      range: new Range( 0, 1 ),
-      phetioDocumentation: 'Opacity of the parent NodeIO, between 0 (invisible) and 1 (fully visible)'
-    }, node.phetioComponentOptions, node.phetioComponentOptions.opacityProperty ) );
-    opacityProperty.link( function( opacity ) { node.opacity = opacity; } );
-    node.opacityProperty.lazyLink( () => { opacityProperty.value = node.opacity; } );
-
-    return {
-      phetioObject: node,
-      phetioID: phetioID,
-      dispose: () => {
-        opacityProperty.dispose();
-      }
-    };
-  }
+                 'For more about Scenery node pickability, please see <a href="http://phetsims.github.io/scenery/doc/implementation-notes#pickability">http://phetsims.github.io/scenery/doc/implementation-notes#pickability</a>'
 } );
 
 export default Node;
