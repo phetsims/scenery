@@ -5397,7 +5397,7 @@ inherit( PhetioObject, Node, {
           phetioReadOnly: this.phetioReadOnly,
           tandem: this.tandem.createTandem( VISIBLE_PROPERTY_TANDEM_NAME ),
           phetioDocumentation: 'Controls whether the Node will be visible (and interactive), see the NodeIO documentation for more details.'
-        }, this.phetioComponentOptions, this.phetioComponentOptions.visibleProperty, config.visiblePropertyOptions ) );
+        }, config.visiblePropertyOptions ) );
 
         this.setVisibleProperty( this.ownedPhetioVisibleProperty );
       }
@@ -5418,7 +5418,7 @@ inherit( PhetioObject, Node, {
           tandem: this.tandem.createTandem( 'pickableProperty' ),
           phetioType: Property.PropertyIO( NullableIO( BooleanIO ) ),
           phetioDocumentation: 'Sets whether the node will be pickable (and hence interactive), see the NodeIO documentation for more details'
-        }, this.phetioComponentOptions, this.phetioComponentOptions.pickableProperty, config.pickablePropertyOptions ) );
+        }, config.pickablePropertyOptions ) );
 
         this.setPickableProperty( this.ownedPhetioPickableProperty );
       }
