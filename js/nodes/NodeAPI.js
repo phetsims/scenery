@@ -7,7 +7,6 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
-import NumberProperty from '../../../axon/js/NumberProperty.js';
 import PropertyAPI from '../../../axon/js/PropertyAPI.js';
 import Property from '../../../axon/js/Property.js';
 import merge from '../../../phet-core/js/merge.js';
@@ -34,18 +33,19 @@ class NodeAPI extends PhetioObjectAPI {
       pickablePropertyInstrumented: false,
       pickablePropertyOptions: {
         phetioType: Property.PropertyIO( NullableIO( BooleanIO ) )
-      },
-
-      opacityPropertyOptions: {
-        phetioType: NumberProperty.NumberPropertyIO
       }
     }, options );
     super( options );
 
     this.visibleProperty = new PropertyAPI( options.visiblePropertyOptions );
-    this.opacityProperty = new PropertyAPI( options.opacityPropertyOptions );
+
     if ( options.pickablePropertyInstrumented ) {
       this.pickableProperty = new PropertyAPI( options.pickablePropertyOptions );
+    }
+
+    // TODO: not supported yet, see https://github.com/phetsims/scenery/issues/1047
+    if ( options.opacityPropertyInstrumented ) {
+      this.opacityProperty = new PropertyAPI( options.opacityPropertyOptions );
     }
   }
 }
