@@ -3347,7 +3347,7 @@ inherit( PhetioObject, Node, {
 
   /**
    * Handles linking and checking child PhET-iO Properties such as visibleProperty and pickableProperty.
-   * @private
+   * @protected
    *
    * @param {string} tandemName - the name for the child tandem
    * @param {Property.<boolean>|undefined|null} oldProperty - same typedef as TinyForwardingProperty.forwardingProperty
