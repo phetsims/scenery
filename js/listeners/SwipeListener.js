@@ -19,6 +19,7 @@
  */
 
 import Display from '../display/Display.js';
+import Pointer from '../input/Pointer.js';
 import scenery from '../scenery.js';
 import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
@@ -45,6 +46,11 @@ class SwipeListener {
     this.firstUp = false;
     this.timeSinceLastDown = 0;
 
+    // @private - list of all pointers that are currently down for this listener - if there are more than one
+    // we will allow responding to zoom guestures, but if there is only one pointer we will prevent pan
+    // gestures because we are taking over for swipe gestures instead
+    this.downPointers = [];
+
     // amount of time in seconds that a finger has been down on the screen - when this
     // time becomes larger than the interval we forward a drag listener to the
     // display target
@@ -58,7 +64,7 @@ class SwipeListener {
     // on a particular node with focus
     this._attachedPointerListener = {
       up: event => {
-        this.focusedNode.swipeEnd && this.focusedNode.swipeEnd.bind( this.focusedNode )( event );
+        this.focusedNode && this.focusedNode.swipeEnd && this.focusedNode.swipeEnd.bind( this.focusedNode )( event );
 
         // remove this listener, call the focusedNode's swipeEnd function
         this.focusedNode = null;
@@ -69,7 +75,7 @@ class SwipeListener {
       move: event => {
 
         // call the focusedNode's swipeDrag function
-        this.focusedNode.swipeMove && this.focusedNode.swipeMove.bind( this.focusedNode )( event );
+        this.focusedNode && this.focusedNode.swipeMove && this.focusedNode.swipeMove.bind( this.focusedNode )( event );
       },
 
       interrupt: event => {
@@ -124,7 +130,6 @@ class SwipeListener {
       },
 
       move: event => {
-
         if ( event.pointer.isAttached() ) {
           this.interrupt();
         }
@@ -143,6 +148,15 @@ class SwipeListener {
    * @param event
    */
   down( event ) {
+    event.pointer.addIntent( Pointer.Intent.DRAG );
+    this.downPointers.push( event.pointer );
+
+    // allow zoom gestures if there is more than one pointer down
+    if ( this.downPointers.length > 1 ) {
+      this.downPointers.forEach( downPointer => downPointer.removeIntent( Pointer.Intent.DRAG ) );
+      event.pointer.removeIntent( Pointer.Intent.DRAG );
+    }
+
     if ( this._pointer === null && event.pointer.type === 'touch' ) {
       this._pointer = event.pointer;
       event.pointer.addInputListener( this._pointerListener );
@@ -150,6 +164,17 @@ class SwipeListener {
       this.downPoint = event.pointer.point;
       this.currentPoint = this.downPoint.copy();
       this.previousPoint = this.currentPoint.copy();
+    }
+  }
+
+  /**
+   * @public
+   * @param event
+   */
+  up( event ) {
+    const index = this.downPointers.indexOf( event.pointer );
+    if ( index > -1 ) {
+      this.downPointers.splice( index, 1 );
     }
   }
 
