@@ -5417,6 +5417,7 @@ inherit( PhetioObject, Node, {
           phetioReadOnly: this.phetioReadOnly,
           tandem: this.tandem.createTandem( 'pickableProperty' ),
           phetioType: Property.PropertyIO( NullableIO( BooleanIO ) ),
+          phetioFeatured: true, // Since this property is opt-in, we typically only opt-in when it should be featured
           phetioDocumentation: 'Sets whether the node will be pickable (and hence interactive), see the NodeIO documentation for more details'
         }, config.pickablePropertyOptions ) );
 
