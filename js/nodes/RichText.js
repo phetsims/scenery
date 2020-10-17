@@ -57,8 +57,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Property from '../../../axon/js/Property.js';
-import TinyProperty from '../../../axon/js/TinyProperty.js';
+import StringProperty from '../../../axon/js/StringProperty.js';
+import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
 import inherit from '../../../phet-core/js/inherit.js';
@@ -67,12 +67,10 @@ import openPopup from '../../../phet-core/js/openPopup.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
-import StringIO from '../../../tandem/js/types/StringIO.js';
 import ButtonListener from '../input/ButtonListener.js';
 import scenery from '../scenery.js';
 import Color from '../util/Color.js';
 import Font from '../util/Font.js';
-import NodeProperty from '../util/NodeProperty.js';
 import Line from './Line.js';
 import Node from './Node.js';
 import Text from './Text.js';
@@ -103,12 +101,15 @@ const RICH_TEXT_OPTION_KEYS = [
   'align', // {string} - Sets text alignment if there are multiple lines
   'leading', // {number} - Sets the spacing between lines if there are multiple lines
   'lineWrap', // {number|null} - Sets width of text before creating a new line
+  'textProperty', // {Property.<string>|null} - Sets forwarding of the textProperty, see setTextProperty() for more documentation
   'text' // {string|number} - Sets the text to be displayed by this Node
 ];
 
 const DEFAULT_FONT = new Font( {
   size: 20
 } );
+
+const TEXT_PROPERTY_TANDEM_NAME = 'textProperty';
 
 // Tags that should be included in accessible innerContent, see https://github.com/phetsims/joist/issues/430
 const ACCESSIBLE_TAGS = [
@@ -156,8 +157,12 @@ const STYLE_KEYS = [ 'color' ].concat( FONT_STYLE_KEYS );
  */
 function RichText( text, options ) {
 
-  // @public {TinyProperty.<string>} - Set by mutator
-  this.textProperty = new TinyProperty( '' );
+  // @public {TinyProperty.<string>} - The text to display. We'll initialize this by mutating.
+  this._textProperty = new TinyForwardingProperty( '' );
+  this._textProperty.lazyLink( this.onTextPropertyChange.bind( this ) );
+
+  // @public (NodeTests) {Property.<string>|null} - See documentation for Node.ownedPhetioVisibleProperty
+  this.ownedPhetioTextProperty = null;
 
   // @private {Font}
   this._font = DEFAULT_FONT;
@@ -252,6 +257,99 @@ inherit( Node, RichText, {
    *       cases that may apply.
    */
   _mutatorKeys: RICH_TEXT_OPTION_KEYS.concat( Node.prototype._mutatorKeys ),
+
+
+  /**
+   * Called when our text Property changes values.
+   * @private
+   */
+  onTextPropertyChange: function() {
+    this.rebuildRichText();
+  },
+
+  /**
+   * See documentation for Node.setVisibleProperty, except this is for the text string.
+   *
+   * @public
+   *
+   * @param {TinyProperty.<string>|Property.<string>|null} newTarget
+   * @returns {Text} for chaining
+   */
+  setTextProperty( newTarget ) {
+
+    // We need this information eagerly for later on in the function
+    const previousTarget = this._textProperty.forwardingProperty;
+    const newPropertyIsOwnedPhetioTextProperty = newTarget === this.ownedPhetioTextProperty;
+
+    // If we had the "default instrumented" Property, we'll remove that and link our new Property. Guard on the fact
+    // that ownedPhetioTextProperty is added via this exact method, see Node.initializePhetioObject() for details.
+    // Do this before adding a PhET-iO LinkedElement because ownedPhetioTextProperty has the same phetioID as the LinkedElement
+    if ( this.ownedPhetioTextProperty && !newPropertyIsOwnedPhetioTextProperty ) {
+      this.ownedPhetioTextProperty.dispose();
+      this.ownedPhetioTextProperty = null;
+    }
+
+    this.updateLinkedElementForProperty( TEXT_PROPERTY_TANDEM_NAME, previousTarget, newTarget );
+
+    this._textProperty.setForwardingProperty( newTarget );
+
+    return this; // for chaining
+  },
+  set textProperty( property ) { this.setTextProperty( property ); },
+
+  /**
+   * Like Node.getVisibleProperty, but for the text string.
+   *
+   * @returns {TinyForwardingProperty}
+   * @public
+   */
+  getTextProperty: function() {
+    return this._textProperty;
+  },
+  get textProperty() { return this.getTextProperty(); },
+
+  /**
+   * See documentation and comments in Node.initializePhetioObject
+   * @param {Object} baseOptions
+   * @param {Object} config
+   * @override
+   * @protected
+   */
+  initializePhetioObject: function( baseOptions, config ) {
+
+    config = merge( {
+      textPropertyOptions: null
+    }, config );
+
+    // Track this, so we only override our textProperty once.
+    const wasInstrumented = this.isPhetioInstrumented();
+
+    Node.prototype.initializePhetioObject.call( this, baseOptions, config );
+
+    if ( !wasInstrumented && this.isPhetioInstrumented() ) {
+
+      assert && assert( !this.ownedPhetioTextProperty, 'Already created the ownedPhetioTextProperty' );
+
+      if ( !this._textProperty.forwardingProperty ) {
+
+        this.ownedPhetioTextProperty = new StringProperty( this.text, merge( {
+
+          // by default, use the value from the Node
+          phetioReadOnly: this.phetioReadOnly,
+          tandem: this.tandem.createTandem( TEXT_PROPERTY_TANDEM_NAME ),
+          phetioDocumentation: 'Property for the displayed text'
+        }, this.phetioComponentOptions, this.phetioComponentOptions.textProperty, config.textPropertyOptions ) );
+
+        this.setTextProperty( this.ownedPhetioTextProperty );
+      }
+      else {
+
+        // Since we are just now instrumented, and linked elements can't be added to linked Elements until the PhetioObject
+        // is instrumented, we need to retroactively link to whatever forwardingProperty may have been added before.
+        this.updateLinkedElementForProperty( TEXT_PROPERTY_TANDEM_NAME, null, this._textProperty.forwardingProperty );
+      }
+    }
+  },
 
   /**
    * When called, will rebuild the node structure for this RichText
@@ -400,6 +498,12 @@ inherit( Node, RichText, {
     this.freeChildrenToPool();
 
     Node.prototype.dispose.call( this );
+
+    // We instrumented ownedPhetioTextProperty for PhET-iO, so we'll need to dispose it if we created it.
+    if ( this.ownedPhetioTextProperty ) {
+      this.ownedPhetioTextProperty.dispose();
+      this.ownedPhetioTextProperty = null;
+    }
   },
 
   /**
@@ -716,14 +820,8 @@ inherit( Node, RichText, {
     // cast it to a string (for numbers, etc., and do it before the change guard so we don't accidentally trigger on non-changed text)
     text = '' + text;
 
-    if ( text !== this.text ) {
-      const oldText = this.text;
+    this._textProperty.set( text );
 
-      this.textProperty.setPropertyValue( text );
-      this.rebuildRichText();
-
-      this.textProperty.notifyListeners( oldText );
-    }
     return this;
   },
   set text( value ) { this.setText( value ); },
@@ -1836,32 +1934,7 @@ Poolable.mixInto( RichTextLink, {
 RichText.RichTextIO = new IOType( 'RichTextIO', {
   valueType: RichText,
   supertype: Node.NodeIO,
-  documentation: 'The tandem IO Type for the scenery RichText node',
-
-  // TODO: https://github.com/phetsims/scenery/issues/1082 Move these added Properties to the core types
-  createWrapper( richText, phetioID ) {
-    const superWrapper = this.supertype.createWrapper( richText, phetioID );
-
-    // this uses a sub Property adapter as described in https://github.com/phetsims/phet-io/issues/1326
-    const textProperty = new NodeProperty( richText, richText.textProperty, 'text', merge( {
-
-      // pick the following values from the parent Node
-      phetioReadOnly: richText.phetioReadOnly,
-      phetioType: Property.PropertyIO( StringIO ),
-
-      tandem: richText.tandem.createTandem( 'textProperty' ),
-      phetioDocumentation: 'Property for the displayed text'
-    }, richText.phetioComponentOptions, richText.phetioComponentOptions.textProperty ) );
-
-    return {
-      phetioObject: richText,
-      phetioID: phetioID,
-      dispose: () => {
-        superWrapper.dispose();
-        textProperty.dispose();
-      }
-    };
-  }
+  documentation: 'The tandem IO Type for the scenery RichText node'
 } );
 
 export default RichText;

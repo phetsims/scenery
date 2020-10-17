@@ -5395,7 +5395,7 @@ inherit( PhetioObject, Node, {
 
           // by default, use the value from the Node
           phetioReadOnly: this.phetioReadOnly,
-          tandem: this.tandem.createTandem( 'visibleProperty' ),
+          tandem: this.tandem.createTandem( VISIBLE_PROPERTY_TANDEM_NAME ),
           phetioDocumentation: 'Controls whether the Node will be visible (and interactive), see the NodeIO documentation for more details.'
         }, this.phetioComponentOptions, this.phetioComponentOptions.visibleProperty, config.visiblePropertyOptions ) );
 

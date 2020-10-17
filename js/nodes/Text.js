@@ -263,7 +263,7 @@ inherit( Node, Text, {
 
           // by default, use the value from the Node
           phetioReadOnly: this.phetioReadOnly,
-          tandem: this.tandem.createTandem( 'textProperty' ),
+          tandem: this.tandem.createTandem( TEXT_PROPERTY_TANDEM_NAME ),
           phetioDocumentation: 'Property for the displayed text'
         }, this.phetioComponentOptions, this.phetioComponentOptions.textProperty, config.textPropertyOptions ) );
 
