@@ -8,8 +8,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Property from '../../../axon/js/Property.js';
-import TinyProperty from '../../../axon/js/TinyProperty.js';
+import StringProperty from '../../../axon/js/StringProperty.js';
+import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import escapeHTML from '../../../phet-core/js/escapeHTML.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
 import inherit from '../../../phet-core/js/inherit.js';
@@ -18,7 +18,6 @@ import platform from '../../../phet-core/js/platform.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
-import StringIO from '../../../tandem/js/types/StringIO.js';
 import VoidIO from '../../../tandem/js/types/VoidIO.js';
 import TextCanvasDrawable from '../display/drawables/TextCanvasDrawable.js';
 import TextDOMDrawable from '../display/drawables/TextDOMDrawable.js';
@@ -26,7 +25,6 @@ import TextSVGDrawable from '../display/drawables/TextSVGDrawable.js';
 import Renderer from '../display/Renderer.js';
 import scenery from '../scenery.js';
 import Font from '../util/Font.js';
-import NodeProperty from '../util/NodeProperty.js';
 import TextBounds from '../util/TextBounds.js';
 import Node from './Node.js';
 import Paintable from './Paintable.js';
@@ -34,6 +32,7 @@ import Paintable from './Paintable.js';
 // constants
 const TEXT_OPTION_KEYS = [
   'boundsMethod', // {string} - Sets how bounds are determined for text, see setBoundsMethod() for more documentation
+  'textProperty', // {Property.<string>|null} - Sets forwarding of the textProperty, see setTextProperty() for more documentation
   'text', // {string|number} - Sets the text to be displayed, see setText() for more documentation
   'font', // {Font|string} - Sets the font used for the text, see setFont() for more documentation
   'fontWeight', // {string|number} - Sets the weight of the current font, see setFont() for more documentation
@@ -42,6 +41,8 @@ const TEXT_OPTION_KEYS = [
   'fontStyle', // {string} - Sets the style of the current font, see setFont() for more documentation
   'fontSize' // {string|number} - Sets the size of the current font, see setFont() for more documentation
 ];
+
+const TEXT_PROPERTY_TANDEM_NAME = 'textProperty';
 
 // SVG bounds seems to be malfunctioning for Safari 5. Since we don't have a reproducible test machine for
 // fast iteration, we'll guess the user agent and use DOM bounds instead of SVG.
@@ -64,7 +65,11 @@ function Text( text, options ) {
     'Extra prototype on Node options object is a code smell' );
 
   // @public {TinyProperty.<string>} - The text to display. We'll initialize this by mutating.
-  this.textProperty = new TinyProperty( '' );
+  this._textProperty = new TinyForwardingProperty( '' );
+  this._textProperty.lazyLink( this.onTextPropertyChange.bind( this ) );
+
+  // @public (NodeTests) {Property.<string>|null} - See documentation for Node.ownedPhetioVisibleProperty
+  this.ownedPhetioTextProperty = null;
 
   // @private {Font} - The font with which to display the text.
   this._font = Font.DEFAULT;
@@ -133,20 +138,8 @@ inherit( Node, Text, {
     // cast it to a string (for numbers, etc., and do it before the change guard so we don't accidentally trigger on non-changed text)
     text = '' + text;
 
-    if ( text !== this.text ) {
-      const oldText = this.text;
-      this.textProperty.setPropertyValue( text );
-      this._cachedRenderedText = null;
+    this._textProperty.set( text );
 
-      const stateLen = this._drawables.length;
-      for ( let i = 0; i < stateLen; i++ ) {
-        this._drawables[ i ].markDirtyText();
-      }
-
-      this.invalidateText();
-
-      this.textProperty.notifyListeners( oldText );
-    }
     return this;
   },
   set text( value ) { this.setText( value ); },
@@ -185,6 +178,105 @@ inherit( Node, Text, {
     return this._cachedRenderedText;
   },
   get renderedText() { return this.getRenderedText(); },
+
+  /**
+   * Called when our text Property changes values.
+   * @private
+   */
+  onTextPropertyChange: function() {
+    this._cachedRenderedText = null;
+
+    const stateLen = this._drawables.length;
+    for ( let i = 0; i < stateLen; i++ ) {
+      this._drawables[ i ].markDirtyText();
+    }
+
+    this.invalidateText();
+  },
+
+  /**
+   * See documentation for Node.setVisibleProperty, except this is for the text string.
+   *
+   * @public
+   *
+   * @param {TinyProperty.<string>|Property.<string>|null} newTarget
+   * @returns {Text} for chaining
+   */
+  setTextProperty( newTarget ) {
+
+    // We need this information eagerly for later on in the function
+    const previousTarget = this._textProperty.forwardingProperty;
+    const newPropertyIsOwnedPhetioTextProperty = newTarget === this.ownedPhetioTextProperty;
+
+    // If we had the "default instrumented" Property, we'll remove that and link our new Property. Guard on the fact
+    // that ownedPhetioTextProperty is added via this exact method, see Node.initializePhetioObject() for details.
+    // Do this before adding a PhET-iO LinkedElement because ownedPhetioTextProperty has the same phetioID as the LinkedElement
+    if ( this.ownedPhetioTextProperty && !newPropertyIsOwnedPhetioTextProperty ) {
+      this.ownedPhetioTextProperty.dispose();
+      this.ownedPhetioTextProperty = null;
+    }
+
+    this.updateLinkedElementForProperty( TEXT_PROPERTY_TANDEM_NAME, previousTarget, newTarget );
+
+    this._textProperty.setForwardingProperty( newTarget );
+
+    return this; // for chaining
+  },
+  set textProperty( property ) { this.setTextProperty( property ); },
+
+  /**
+   * Like Node.getVisibleProperty, but for the text string.
+   *
+   * @returns {TinyForwardingProperty}
+   * @public
+   */
+  getTextProperty: function() {
+    return this._textProperty;
+  },
+  get textProperty() { return this.getTextProperty(); },
+
+  /**
+   * See documentation and comments in Node.initializePhetioObject
+   * @param {Object} baseOptions
+   * @param {Object} config
+   * @override
+   * @protected
+   */
+  initializePhetioObject: function( baseOptions, config ) {
+
+    config = merge( {
+      textPropertyOptions: null
+    }, config );
+
+    // Track this, so we only override our textProperty once.
+    const wasInstrumented = this.isPhetioInstrumented();
+
+    Node.prototype.initializePhetioObject.call( this, baseOptions, config );
+
+    if ( !wasInstrumented && this.isPhetioInstrumented() ) {
+
+      assert && assert( !this.ownedPhetioTextProperty, 'Already created the ownedPhetioTextProperty' );
+
+      if ( !this._textProperty.forwardingProperty ) {
+
+        this.ownedPhetioTextProperty = new StringProperty( this.text, merge( {
+
+          // by default, use the value from the Node
+          phetioReadOnly: this.phetioReadOnly,
+          tandem: this.tandem.createTandem( 'textProperty' ),
+          phetioDocumentation: 'Property for the displayed text'
+        }, this.phetioComponentOptions, this.phetioComponentOptions.textProperty, config.textPropertyOptions ) );
+
+        this.setTextProperty( this.ownedPhetioTextProperty );
+      }
+      else {
+
+        // Since we are just now instrumented, and linked elements can't be added to linked Elements until the PhetioObject
+        // is instrumented, we need to retroactively link to whatever forwardingProperty may have been added before.
+        this.updateLinkedElementForProperty( TEXT_PROPERTY_TANDEM_NAME, null, this._textProperty.forwardingProperty );
+      }
+    }
+  },
 
   /**
    * Sets the method that is used to determine bounds from the text.
@@ -670,6 +762,17 @@ inherit( Node, Text, {
    */
   getDebugHTMLExtras: function() {
     return ' "' + escapeHTML( this.renderedText ) + '"' + ( this._isHTML ? ' (html)' : '' );
+  },
+
+  // @public
+  dispose() {
+    Node.prototype.dispose.call( this );
+
+    // We instrumented ownedPhetioTextProperty for PhET-iO, so we'll need to dispose it if we created it.
+    if ( this.ownedPhetioTextProperty ) {
+      this.ownedPhetioTextProperty.dispose();
+      this.ownedPhetioTextProperty = null;
+    }
   }
 } );
 
@@ -827,29 +930,6 @@ Text.TextIO = new IOType( 'TextIO', {
   supertype: Node.NodeIO,
   documentation: 'Text that is displayed in the simulation. TextIO has a nested PropertyIO.&lt;String&gt; for ' +
                  'the current string value.',
-  createWrapper( text, phetioID ) {
-    const superWrapper = this.supertype.createWrapper( text, phetioID );
-
-    // this uses a sub Property adapter as described in https://github.com/phetsims/phet-io/issues/1326
-    const textProperty = new NodeProperty( text, text.textProperty, 'text', merge( {
-
-      // pick the following values from the parent Node
-      phetioReadOnly: text.phetioReadOnly,
-      phetioType: Property.PropertyIO( StringIO ),
-
-      tandem: text.tandem.createTandem( 'textProperty' ),
-      phetioDocumentation: 'Property for the displayed text'
-    }, text.phetioComponentOptions, text.phetioComponentOptions.textProperty ) );
-
-    return {
-      phetioObject: text,
-      phetioID: phetioID,
-      dispose: () => {
-        superWrapper.dispose();
-        textProperty.dispose();
-      }
-    };
-  },
   methods: {
     setFontOptions: {
       returnType: VoidIO,
