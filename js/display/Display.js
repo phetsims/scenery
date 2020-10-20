@@ -63,6 +63,7 @@ import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
+import AriaHerald from '../../../utterance-queue/js/AriaHerald.js';
 import UtteranceQueue from '../../../utterance-queue/js/UtteranceQueue.js';
 import Focus from '../accessibility/Focus.js';
 import KeyStateTracker from '../accessibility/KeyStateTracker.js';
@@ -327,7 +328,8 @@ function Display( rootNode, options ) {
   this.setBackgroundColor( options.backgroundColor );
 
   // @public {UtteranceQueue} - data structure for managing aria-live alerts the this Display instance
-  this.utteranceQueue = new UtteranceQueue( !this._accessible );
+  const ariaHerald = new AriaHerald();
+  this.utteranceQueue = new UtteranceQueue( ariaHerald, !this._accessible );
 
   if ( this._accessible ) {
 
@@ -359,7 +361,7 @@ function Display( rootNode, options ) {
     // add the accessible DOM as a child of this DOM element
     this._domElement.appendChild( this._rootAccessibleInstance.peer.primarySibling );
 
-    const ariaLiveContainer = this.utteranceQueue.getAriaLiveContainer();
+    const ariaLiveContainer = ariaHerald.ariaLiveContainer;
 
     // add aria-live elements to the display
     this._domElement.appendChild( ariaLiveContainer );
