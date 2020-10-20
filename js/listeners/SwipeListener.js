@@ -82,6 +82,12 @@ class SwipeListener {
         this.focusedNode = null;
         this._pointer.removeInputListener( this._attachedPointerListener );
         this._pointer = null;
+      },
+
+      cancel: event => {
+        this.focusedNode = null;
+        this._pointer.removeInputListener( this._attachedPointerListener );
+        this._pointer = null;
       }
     };
 
@@ -135,6 +141,14 @@ class SwipeListener {
         }
         this.lastPoint = this.currentPoint;
         this.currentPoint = event.pointer.point;
+      },
+
+      interrupt: () => {
+        this.interrupt();
+      },
+
+      cancel: () => {
+        this.interrupt();
       }
     };
 

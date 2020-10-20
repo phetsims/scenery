@@ -12,6 +12,7 @@
 import BooleanProperty from '../../../../axon/js/BooleanProperty.js';
 import platform from '../../../../phet-core/js/platform.js';
 import Emitter from '../../../../axon/js/Emitter.js';
+import SelfVoicingUtterance from '../../../../utterance-queue/js/SelfVoicingUtterance.js';
 import NumberProperty from '../../../../axon/js/NumberProperty.js';
 import Property from '../../../../axon/js/Property.js';
 import Range from '../../../../dot/js/Range.js';
@@ -49,6 +50,10 @@ class WebSpeaker {
 
     // whether or ot the webSpeaker is enabled - if false, there will be no speech
     this.enabledProperty = new BooleanProperty( true );
+
+    // @private {Utterance} - A reference to the last utterance spoken, so we can determine
+    // cancelling behavior when it is time to speak the next utterance. See SelfVoicingUtterance options.
+    this.previousUtterance = null;
 
     // @public {boolean} - a more interal way to disable speaking - the enabledProperty
     // can be set by the user and is publicly observable for other things - but if
@@ -132,6 +137,30 @@ class WebSpeaker {
     } );
 
     this.voiceProperty.set( this.voices[ 0 ] );
+  }
+
+  /**
+   * Implements announce so the webSpeaker can be a source of output for utteranceQueue.
+   * @public
+   *
+   * @param {Utterance} utterance
+   */
+  announce( utterance ) {
+    let withCancel = true;
+    if ( this.previousUtterance && utterance instanceof SelfVoicingUtterance ) {
+      if ( this.previousUtterance === utterance ) {
+        withCancel = utterance.cancelSelf;
+      }
+      else {
+        withCancel = utterance.cancelOther;
+      }
+    }
+
+    // Note that getTextToAlert may have side effects on the Utterance - this function
+    // may change the content if the Utterance changes itself based on how frequently it
+    // is used
+    webSpeaker.speak( utterance.getTextToAlert(), withCancel );
+    this.previousUtterance = utterance;
   }
 
   /**
