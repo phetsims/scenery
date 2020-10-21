@@ -37,6 +37,10 @@ class SwipeListener {
     // @private the position (in global coordinate frame) of the point on initial down
     this.downPoint = null;
 
+    // @private - reference to the down event initially so we can pass it to swipeStart
+    // if the pointer remains down for long enough
+    this.downEvent = null;
+
     // @private {Vector2} - point of the last Pointer on down
     this.lastPoint = null;
     this.currentPoint = null;
@@ -64,7 +68,7 @@ class SwipeListener {
     // on a particular node with focus
     this._attachedPointerListener = {
       up: event => {
-        this.focusedNode && this.focusedNode.swipeEnd && this.focusedNode.swipeEnd.bind( this.focusedNode )( event );
+        this.focusedNode && this.focusedNode.swipeEnd && this.focusedNode.swipeEnd.bind( this.focusedNode )( event, this );
 
         // remove this listener, call the focusedNode's swipeEnd function
         this.focusedNode = null;
@@ -75,7 +79,7 @@ class SwipeListener {
       move: event => {
 
         // call the focusedNode's swipeDrag function
-        this.focusedNode && this.focusedNode.swipeMove && this.focusedNode.swipeMove.bind( this.focusedNode )( event );
+        this.focusedNode && this.focusedNode.swipeMove && this.focusedNode.swipeMove.bind( this.focusedNode )( event, this );
       },
 
       interrupt: event => {
@@ -175,6 +179,10 @@ class SwipeListener {
       this._pointer = event.pointer;
       event.pointer.addInputListener( this._pointerListener );
 
+      // keep a reference to the event on down so we can use it in the swipeStart
+      // callback if the pointer remains down for long enough
+      this.downEvent = event;
+
       this.downPoint = event.pointer.point;
       this.currentPoint = this.downPoint.copy();
       this.previousPoint = this.currentPoint.copy();
@@ -227,7 +235,8 @@ class SwipeListener {
           this.focusedNode = focusedNode;
           this._pointer.addInputListener( this._attachedPointerListener, true );
 
-          this.focusedNode.swipeStart && this.focusedNode.swipeStart();
+          this.focusedNode.swipeStart && this.focusedNode.swipeStart( this.downEvent, this );
+          this.downEvent = null;
         }
       }
     }
@@ -249,12 +258,24 @@ class SwipeListener {
   }
 
   /**
+   * Detach the Pointer listener that is observing movement after a press-and-hold gesture.
+   * This allows you to forward the down event to another listener if you don't want to
+   * re-implement an interaction with swipeMove. This does not remove the listener from the Pointer,
+   * just detaches it so that another listener can be attached.
+   * @public
+   */
+  detachPointerListener() {
+    this._pointer.detach( this._attachedPointerListener );
+  }
+
+  /**
    * Interrupt this listener.
    * @public
    */
   interrupt() {
     this.endSwipe();
     this._pointer = null;
+    this.downEvent = null;
   }
 }
 
