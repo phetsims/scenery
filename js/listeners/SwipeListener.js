@@ -274,7 +274,10 @@ class SwipeListener {
   endSwipe() {
     this.holdingTime = 0;
 
-    this._pointer.removeInputListener( this._pointerListener );
+    // remove if we haven't been interrupted already
+    if ( this._pointer && this._pointer.listeners.includes( this._pointerListener ) ) {
+      this._pointer.removeInputListener( this._pointerListener );
+    }
   }
 
   /**
