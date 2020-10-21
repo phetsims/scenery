@@ -118,6 +118,26 @@ class SwipeListener {
             PDOMUtils.getPreviousFocusable( document.body ).focus();
           }
         }
+        else if ( Math.abs( horizontalDistance ) < 100 && Math.abs( verticalDistance ) > 100 ) {
+          const activeElement = document.activeElement;
+
+          // some sort of vertical swipe, dispatch a change event ot the component
+          // if it is of type input
+          if ( activeElement.tagName === 'INPUT' ) {
+
+            // determine the new input value that would result from this guesture
+            const step = parseInt( activeElement.getAttribute( 'step' ), 10 );
+            const value = parseInt( activeElement.value, 10 );
+            activeElement.value = verticalDistance < 0 ? value + step : value - step;
+
+            // dispatch an Native Event after changing the element value, so that listeners
+            // can respond to the change
+            document.activeElement.dispatchEvent( new Event( 'input', { // eslint-disable-line
+              bubbles: true,
+              cancelable: true
+            } ) );
+          }
+        }
         else {
 
           // potentially a double tap
