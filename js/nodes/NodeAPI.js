@@ -43,7 +43,7 @@ class NodeAPI extends PhetioObjectAPI {
       this.pickableProperty = new PropertyAPI( options.pickablePropertyOptions );
     }
 
-    // TODO: not supported yet, see https://github.com/phetsims/scenery/issues/1047
+    // TODO: not supported yet, see https://github.com/phetsims/scenery/issues/1098
     if ( options.opacityPropertyInstrumented ) {
       this.opacityProperty = new PropertyAPI( options.opacityPropertyOptions );
     }
