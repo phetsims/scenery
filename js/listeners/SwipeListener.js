@@ -160,9 +160,6 @@ class SwipeListener {
       },
 
       move: event => {
-        if ( event.pointer.isAttached() ) {
-          this.interrupt();
-        }
         this.lastPoint = this.currentPoint;
         this.currentPoint = event.pointer.point;
       },
@@ -196,16 +193,25 @@ class SwipeListener {
     }
 
     if ( this._pointer === null && event.pointer.type === 'touch' ) {
-      this._pointer = event.pointer;
-      event.pointer.addInputListener( this._pointerListener );
 
-      // keep a reference to the event on down so we can use it in the swipeStart
-      // callback if the pointer remains down for long enough
-      this.downEvent = event;
+      // this listener will take priority, remove any other listeners
+      event.pointer.interruptAll();
 
-      this.downPoint = event.pointer.point;
-      this.currentPoint = this.downPoint.copy();
-      this.previousPoint = this.currentPoint.copy();
+      // don't add new listeners if we weren't able to successfully detach and interrupt
+      // the previous listener
+      if ( !event.pointer.isAttached() ) {
+        this._pointer = event.pointer;
+
+        event.pointer.addInputListener( this._pointerListener, true );
+
+        // keep a reference to the event on down so we can use it in the swipeStart
+        // callback if the pointer remains down for long enough
+        this.downEvent = event;
+
+        this.downPoint = event.pointer.point;
+        this.currentPoint = this.downPoint.copy();
+        this.previousPoint = this.currentPoint.copy();
+      }
     }
   }
 
@@ -240,23 +246,28 @@ class SwipeListener {
     }
 
     // detecting a press and hold
-    if ( this._pointer && !this._pointer.isAttached() ) {
-      this.holdingTime += dt;
-      if ( this.holdingTime > PRESS_AND_HOLD_INTERVAL ) {
+    if ( this._pointer ) {
+      if ( !this._pointer.listeners.includes( this._attachedPointerListener ) ) {
+        if ( this.holdingTime > PRESS_AND_HOLD_INTERVAL ) {
 
-        // user has pressed down for long enough to forward a drag event to the
-        // focused node
-        const focusedNode = Display.focusedNode;
-        if ( focusedNode && !this._pointer.listeners.includes( this._attachedPointerListener ) ) {
+          // user has pressed down for long enough to forward a drag event to the
+          // focused node
+          const focusedNode = Display.focusedNode;
+          if ( focusedNode ) {
 
-          // remove the unattached listener looking for gestures
-          this.endSwipe();
+            // remove the listener looking for gestures
+            this._pointer.removeInputListener( this._pointerListener );
+            this.holdingTime = 0;
 
-          this.focusedNode = focusedNode;
-          this._pointer.addInputListener( this._attachedPointerListener, true );
+            this.focusedNode = focusedNode;
+            this._pointer.addInputListener( this._attachedPointerListener, true );
 
-          this.focusedNode.swipeStart && this.focusedNode.swipeStart( this.downEvent, this );
-          this.downEvent = null;
+            this.focusedNode.swipeStart && this.focusedNode.swipeStart( this.downEvent, this );
+            this.downEvent = null;
+          }
+        }
+        else {
+          this.holdingTime += dt;
         }
       }
     }
