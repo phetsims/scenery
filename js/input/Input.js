@@ -746,6 +746,33 @@ class Input {
 
       // Add a listener to the document body that will capture any keydown for a11y before focus is in this display.
       document.body.addEventListener( 'keydown', this.handleDocumentKeydown.bind( this ) );
+
+      // Prevent click events from reaching the sim if we receive a Pointer event within
+      // the display bounds. Some screen readers send both 'click' and 'pointer' events
+      // when the user activates a component while others do not. If both are sent, scenery will
+      // dispatch events for both of them, resulting in double activations. To prevent this,
+      // we stop all click events if we receive pointer events within display bounds. Some screen readers
+      // dispatch events outside of display bounds, and we still want to dispatch click in this case
+      let hasClickCaptureListener = false;
+      const clickCaptureListener = event => {
+        event.stopPropagation();
+        window.removeEventListener( 'click', clickCaptureListener, true );
+        hasClickCaptureListener = false;
+      };
+
+      this.display.addInputListener( {
+        up: event => {
+
+          // only capture the click event if a pointer event went down within the display
+          const inDisplay = this.display.bounds.containsPoint( event.pointer.point );
+          if ( inDisplay && !hasClickCaptureListener ) {
+
+            // listener added to the capture phase so click is stopped before bubbling phase
+            window.addEventListener( 'click', clickCaptureListener, true );
+            hasClickCaptureListener = true;
+          }
+        }
+      } );
     }
   }
 
