@@ -216,20 +216,21 @@ function PressListener( options ) {
   // properties)
   this._isHighlightedListener = this.invalidateHighlighted.bind( this );
 
-  // @public {BooleanProperty} (read-only) - Whether or not a press is being processed from an a11y click input event.
-  this.a11yClickingProperty = new BooleanProperty( false );
+  // @public {BooleanProperty} (read-only) - Whether or not a press is being processed from an a11y click input event
+  // from the PDOM.
+  this.pdomClickingProperty = new BooleanProperty( false );
 
   // @public {BooleanProperty} (read-only) - This Property was added for a11y. It tracks whether or not the button
   // should "look" down. This will be true if downProperty is true or if an a11y click is in progress. For an a11y
   // click, the listeners are fired right away but the button will look down for as long as a11yLooksPressedInterval.
   // See PressListener.click() for more details.
-  this.looksPressedProperty = DerivedProperty.or( [ this.a11yClickingProperty, this.isPressedProperty ] );
+  this.looksPressedProperty = DerivedProperty.or( [ this.pdomClickingProperty, this.isPressedProperty ] );
 
   // @private {function|null} - When a11y clicking begins, this will be added to a timeout so that the
-  // a11yClickingProperty is updated after some delay. This is required since an assistive device (like a switch) may
+  // pdomClickingProperty is updated after some delay. This is required since an assistive device (like a switch) may
   // send "click" events directly instead of keydown/keyup pairs. If a click initiates while already in progress,
   // this listener will be removed to start the timeout over. null until timout is added.
-  this._a11yClickingTimeoutListener = null;
+  this._pdomClickingTimeoutListener = null;
 
   // @private {Object} - The listener that gets added to the pointer when we are pressed
   this._pointerListener = {
@@ -452,7 +453,7 @@ inherit( Object, PressListener, {
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
     // handle a11y interrupt
-    if ( this.a11yClickingProperty.value ) {
+    if ( this.pdomClickingProperty.value ) {
       this.interrupted = true;
 
       // it is possible we are interrupting a click with a pointer press, in which case
@@ -468,13 +469,13 @@ inherit( Object, PressListener, {
       }
 
       // clear the clicking timer, specific to a11y input
-      if ( stepTimer.hasListener( this._a11yClickingTimeoutListener ) ) {
-        stepTimer.clearTimeout( this._a11yClickingTimeoutListener );
+      if ( stepTimer.hasListener( this._pdomClickingTimeoutListener ) ) {
+        stepTimer.clearTimeout( this._pdomClickingTimeoutListener );
 
         // interrupt may be called after the PressListener has been disposed (for instance, internally by scenery
         // if the Node receives a blur event after the PressListener is disposed)
-        if ( !this.a11yClickingProperty.isDisposed ) {
-          this.a11yClickingProperty.value = false;
+        if ( !this.pdomClickingProperty.isDisposed ) {
+          this.pdomClickingProperty.value = false;
         }
       }
     }
@@ -815,13 +816,13 @@ inherit( Object, PressListener, {
   /**
    * Click listener, called when this is treated as an accessible input listener.
    * @public - In general not needed to be public, but just used in edge cases to get proper click logic for a11y.
-   * @a11y
+   * @pdom
    *
    * Handle the click event from DOM for a11y. Clicks by calling press and release immediately.
    * When assistive technology is used, the browser may not receive 'keydown' or 'keyup' events on input elements, but
    * only a single 'click' event. For a11y we need to toggle the pressed state from the single 'click' event.
    *
-   * This will fire listeners immediately, but adds a delay for the a11yClickingProperty so that you can make a
+   * This will fire listeners immediately, but adds a delay for the pdomClickingProperty so that you can make a
    * button look pressed from a single DOM click event. For example usage, see sun/ButtonModel.looksPressedProperty.
    *
    * @param {SceneryEvent|null} event
@@ -831,7 +832,7 @@ inherit( Object, PressListener, {
     if ( this.canClick() ) {
       this.interrupted = false; // clears the flag (don't set to false before here)
 
-      this.a11yClickingProperty.value = true;
+      this.pdomClickingProperty.value = true;
 
       // ensure that button is 'focused' so listener can be called while button is down
       this.isFocusedProperty.value = true;
@@ -850,16 +851,16 @@ inherit( Object, PressListener, {
 
       // if we are already clicking, remove the previous timeout - this assumes that clearTimeout is a noop if the
       // listener is no longer attached
-      stepTimer.clearTimeout( this._a11yClickingTimeoutListener );
+      stepTimer.clearTimeout( this._pdomClickingTimeoutListener );
 
       // Now add the timeout back to start over, saving so that it can be removed later. Even when this listener was
       // interrupted from above logic, we still delay setting this to false to support visual "pressing" redraw.
-      this._a11yClickingTimeoutListener = stepTimer.setTimeout( () => {
+      this._pdomClickingTimeoutListener = stepTimer.setTimeout( () => {
 
         // the listener may have been disposed before the end of a11yLooksPressedInterval, like if it fires and
         // disposes itself immediately
-        if ( !this.a11yClickingProperty.isDisposed ) {
-          this.a11yClickingProperty.value = false;
+        if ( !this.pdomClickingProperty.isDisposed ) {
+          this.pdomClickingProperty.value = false;
         }
       }, this._a11yLooksPressedInterval );
     }
@@ -868,7 +869,7 @@ inherit( Object, PressListener, {
   /**
    * Focus listener, called when this is treated as an accessible input listener.
    * @public (scenery-internal)
-   * @a11y
+   * @pdom
    */
   focus() {
     // On focus, button should look 'over'.
@@ -878,7 +879,7 @@ inherit( Object, PressListener, {
   /**
    * Blur listener, called when this is treated as an accessible input listener.
    * @public (scenery-internal)
-   * @a11y
+   * @pdom
    */
   blur() {
     // On blur, the button should no longer look 'over'.
@@ -913,7 +914,7 @@ inherit( Object, PressListener, {
     this.isHoveringProperty.dispose();
     this.isHighlightedProperty.dispose();
     this.isFocusedProperty.dispose();
-    this.a11yClickingProperty.dispose();
+    this.pdomClickingProperty.dispose();
     this.looksPressedProperty.dispose();
     this._pressAction.dispose();
     this._releaseAction.dispose();
