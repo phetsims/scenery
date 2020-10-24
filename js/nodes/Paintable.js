@@ -1,7 +1,7 @@
 // Copyright 2013-2020, University of Colorado Boulder
 
 /**
- * Trait for nodes that support a standard fill and/or stroke (e.g. Text, Path and Path subtypes).
+ * Trait for Nodes that support a standard fill and/or stroke (e.g. Text, Path and Path subtypes).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -23,10 +23,10 @@ const isSafari5 = platform.safari5;
 const isIE9 = platform.ie9;
 
 const PAINTABLE_OPTION_KEYS = [
-  'fill', // {PaintDef} - Sets the fill of this node, see setFill() for documentation.
-  'fillPickable', // {boolean} - Sets whether the filled area of the node will be treated as 'inside'. See setFillPickable()
-  'stroke', // {PaintDef} - Sets the stroke of this node, see setStroke() for documentation.
-  'strokePickable', // {boolean} - Sets whether the stroked area of the node will be treated as 'inside'. See setStrokePickable()
+  'fill', // {PaintDef} - Sets the fill of this Node, see setFill() for documentation.
+  'fillPickable', // {boolean} - Sets whether the filled area of the Node will be treated as 'inside'. See setFillPickable()
+  'stroke', // {PaintDef} - Sets the stroke of this Node, see setStroke() for documentation.
+  'strokePickable', // {boolean} - Sets whether the stroked area of the Node will be treated as 'inside'. See setStrokePickable()
   'lineWidth', // {number} Sets the width of the stroked area, see setLineWidth for documentation.
   'lineCap', // {string} - Sets the shape of the stroked area at the start/end of the path, see setLineCap() for documentation.
   'lineJoin', // {string} - Sets the shape of the stroked area at joints, see setLineJoin() for documentation.
@@ -68,7 +68,7 @@ const Paintable = {
      */
     extend( proto, {
       /**
-       * {Array.<String>} - List of all dirty flags that should be available on drawables created from this node (or
+       * {Array.<String>} - List of all dirty flags that should be available on drawables created from this Node (or
        *                    subtype). Given a flag (e.g. radius), it indicates the existence of a function
        *                    drawable.markDirtyRadius() that will indicate to the drawable that the radius has changed.
        * @public (scenery-internal)
@@ -77,7 +77,7 @@ const Paintable = {
       drawableMarkFlags: proto.drawableMarkFlags.concat( [ 'fill', 'stroke', 'lineWidth', 'lineOptions', 'cachedPaints' ] ),
 
       /**
-       * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
+       * {Array.<string>} - String keys for all of the allowed options that will be set by Node.mutate( options ), in the
        * order they will be evaluated in.
        * @protected
        *
@@ -105,7 +105,7 @@ const Paintable = {
       },
 
       /**
-       * Sets the fill color for the node.
+       * Sets the fill color for the Node.
        * @public
        *
        * The fill determines the appearance of the interior part of a Path or Text.
@@ -176,13 +176,13 @@ const Paintable = {
       get fillValue() { return this.getFillValue(); },
 
       /**
-       * Sets the stroke color for the node.
+       * Sets the stroke color for the Node.
        * @public
        *
        * The stroke determines the appearance of the region along the boundary of the Path or Text. The shape of the
        * stroked area depends on the base shape (that of the Path or Text) and multiple parameters:
        * lineWidth/lineCap/lineJoin/miterLimit/lineDash/lineDashOffset. It will be drawn on top of any fill on the
-       * same node.
+       * same Node.
        *
        * Please use null for indicating "no stroke" (that is the default). Strings and Scenery Color objects can be
        * provided for a single-color flat appearance, and can be wrapped with an Axon Property. Gradients and patterns
@@ -274,7 +274,7 @@ const Paintable = {
         if ( this._fillPickable !== pickable ) {
           this._fillPickable = pickable;
 
-          // TODO: better way of indicating that only the node under pointers could have changed, but no paint change is needed?
+          // TODO: better way of indicating that only the Node under pointers could have changed, but no paint change is needed?
           this.invalidateFill();
         }
         return this;
@@ -305,7 +305,7 @@ const Paintable = {
         if ( this._strokePickable !== pickable ) {
           this._strokePickable = pickable;
 
-          // TODO: better way of indicating that only the node under pointers could have changed, but no paint change is needed?
+          // TODO: better way of indicating that only the Node under pointers could have changed, but no paint change is needed?
           this.invalidateStroke();
         }
         return this;
@@ -583,7 +583,7 @@ const Paintable = {
        * not considered paints (e.g. strings, Colors, etc.).
        * @public
        *
-       * When this node is displayed in SVG, it will force the presence of the cached paint to be stored in the SVG's
+       * When this Node is displayed in SVG, it will force the presence of the cached paint to be stored in the SVG's
        * <defs> element, so that we can switch quickly to use the given paint (instead of having to create it on the
        * SVG-side whenever the switch is made).
        *
@@ -619,7 +619,7 @@ const Paintable = {
        * Adds a cached paint. Does nothing if paint is just a normal fill (string, Color), but for gradients and
        * patterns, it will be made faster to switch to.
        *
-       * When this node is displayed in SVG, it will force the presence of the cached paint to be stored in the SVG's
+       * When this Node is displayed in SVG, it will force the presence of the cached paint to be stored in the SVG's
        * <defs> element, so that we can switch quickly to use the given paint (instead of having to create it on the
        * SVG-side whenever the switch is made).
        *
@@ -643,7 +643,7 @@ const Paintable = {
        * patterns it will remove any existing cached paint. If it was added more than once, it will need to be removed
        * more than once.
        *
-       * When this node is displayed in SVG, it will force the presence of the cached paint to be stored in the SVG's
+       * When this Node is displayed in SVG, it will force the presence of the cached paint to be stored in the SVG's
        * <defs> element, so that we can switch quickly to use the given paint (instead of having to create it on the
        * SVG-side whenever the switch is made).
        *
