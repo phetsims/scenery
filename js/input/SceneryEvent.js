@@ -126,7 +126,7 @@ class SceneryEvent {
 
 SceneryEvent.SceneryEventIO = new IOType( 'SceneryEventIO', {
   valueType: SceneryEvent,
-  documentation: 'An event, with a point',
+  documentation: 'An event, with a "point" field',
   toStateObject: event => {
 
     const eventObject = {
