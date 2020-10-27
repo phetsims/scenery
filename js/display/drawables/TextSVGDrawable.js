@@ -10,6 +10,7 @@ import Poolable from '../../../../phet-core/js/Poolable.js';
 import inherit from '../../../../phet-core/js/inherit.js';
 import platform from '../../../../phet-core/js/platform.js';
 import scenery from '../../scenery.js';
+import Utils from '../../util/Utils.js';
 import svgns from '../../util/svgns.js';
 import SVGSelfDrawable from '../SVGSelfDrawable.js';
 import TextStatefulDrawable from './TextStatefulDrawable.js';
@@ -74,7 +75,7 @@ inherit( SVGSelfDrawable, TextSVGDrawable, {
 
     // update the text-node's value
     if ( this.dirtyText ) {
-      text.lastChild.nodeValue = this.node.renderedText;
+      text.lastChild.nodeValue = Utils.safariEmbeddingMarkWorkaround( this.node.renderedText );
     }
 
     // text length correction, tested with scenery/tests/text-quality-test.html to determine how to match Canvas/SVG rendering (and overall length)

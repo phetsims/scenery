@@ -10,6 +10,7 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Transform3 from '../../../dot/js/Transform3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
+import platform from '../../../phet-core/js/platform.js';
 import scenery from '../scenery.js';
 import Features from './Features.js';
 
@@ -598,6 +599,24 @@ var Utils = {
       setTimeout( function() {
         extension.restoreContext();
       }, 1000 );
+    }
+  },
+
+  /**
+   * Creates a string useful for working around https://github.com/phetsims/collision-lab/issues/177.
+   * @public
+   *
+   * @param {string} str
+   * @returns {string}
+   */
+  safariEmbeddingMarkWorkaround( str ) {
+    if ( platform.safari ) {
+      // Add in zero-width spaces for Safari, so it doesn't have adjacent embedding marks ever (which seems to prevent
+      // things).
+      return str.split( '' ).join( '\u200B' );
+    }
+    else {
+      return str;
     }
   }
 };
