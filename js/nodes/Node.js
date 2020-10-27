@@ -5417,7 +5417,14 @@ inherit( PhetioObject, Node, {
           tandem: this.tandem.createTandem( 'pickableProperty' ),
           phetioType: Property.PropertyIO( NullableIO( BooleanIO ) ),
           phetioFeatured: true, // Since this property is opt-in, we typically only opt-in when it should be featured
-          phetioDocumentation: 'Sets whether the node will be pickable (and hence interactive), see the NodeIO documentation for more details'
+          phetioDocumentation: 'Sets whether the node will be pickable (and hence interactive). Pickable can take one ' +
+                               'of three values:<br>' +
+                               '<ul>' +
+                               '<li>null: pass-through behavior. Nodes with input listeners are pickable, but nodes without input listeners won\'t block events for nodes behind it.</li>' +
+                               '<li>false: The node cannot be interacted with, and it blocks events for nodes behind it.</li>' +
+                               '<li>true: The node can be interacted with (if it has an input listener).</li>' +
+                               '</ul>' +
+                               'For more about Scenery node pickability, please see <a href="http://phetsims.github.io/scenery/doc/implementation-notes#pickability">http://phetsims.github.io/scenery/doc/implementation-notes#pickability</a>'
         }, config.pickablePropertyOptions ) );
 
         this.setPickableProperty( this.ownedPhetioPickableProperty );
@@ -5570,17 +5577,7 @@ ParallelDOM.compose( Node );
 
 Node.NodeIO = new IOType( 'NodeIO', {
   valueType: Node,
-  documentation: 'The base type for graphical and potentially interactive objects.  NodeIO has nested PropertyIO values ' +
-                 'for visibility, pickability and opacity.' +
-                 '<br>' +
-                 '<br>' +
-                 'Pickable can take one of three values:<br>' +
-                 '<ul>' +
-                 '<li>null: pass-through behavior. Nodes with input listeners are pickable, but nodes without input listeners won\'t block events for nodes behind it.</li>' +
-                 '<li>false: The node cannot be interacted with, and it blocks events for nodes behind it.</li>' +
-                 '<li>true: The node can be interacted with (if it has an input listener).</li>' +
-                 '</ul>' +
-                 'For more about Scenery node pickability, please see <a href="http://phetsims.github.io/scenery/doc/implementation-notes#pickability">http://phetsims.github.io/scenery/doc/implementation-notes#pickability</a>'
+  documentation: 'The base type for graphical and potentially interactive objects.'
 } );
 
 export default Node;
