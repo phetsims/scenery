@@ -492,7 +492,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
       // instrumentedNodeWithDefaultInstrumentedPickableProperty => instrumented property (before startup)
     let instrumented = new Node( {
         tandem: Tandem.GENERAL.createTandem( 'myNodeWithPickable' ),
-        pickablePropertyInstrumented: true
+        pickablePropertyPhetioInstrumented: true
       } );
     assert.ok( instrumented.pickableProperty.forwardingProperty === instrumented.ownedPhetioPickableProperty );
     assert.ok( instrumented.linkedElements.length === 0, 'no linked elements for default pickable Property' );
@@ -502,7 +502,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     // instrumentedNodeWithDefaultInstrumentedPickableProperty => uninstrumented property (before startup)
     instrumented = new Node( {
       tandem: Tandem.GENERAL.createTandem( 'myNodeWithPickable' ),
-      pickablePropertyInstrumented: true
+      pickablePropertyPhetioInstrumented: true
     } );
     window.assert && assert.throws( () => {
       instrumented.mutate( { pickableProperty: uninstrumentedPickableProperty } );
@@ -512,7 +512,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     // instrumentedNodeWithPassedInInstrumentedPickableProperty => instrumented property (before startup)
     instrumented = new Node( {
       tandem: Tandem.GENERAL.createTandem( 'myNodeWithPickable' ),
-      pickablePropertyInstrumented: true
+      pickablePropertyPhetioInstrumented: true
     } );
     instrumented.mutate( { pickableProperty: instrumentedPickableProperty } );
     assert.ok( instrumented.pickableProperty.forwardingProperty === instrumentedPickableProperty );
@@ -556,7 +556,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     // instrumentedNodeWithDefaultInstrumentedPickableProperty => instrumented property (after startup)
     const instrumented1 = new Node( {
       tandem: Tandem.GENERAL.createTandem( 'myPickableUniquelyNamedNodeThatWillNotBeDuplicated1' ),
-      pickablePropertyInstrumented: true
+      pickablePropertyPhetioInstrumented: true
     } );
     assert.ok( instrumented1.pickableProperty.forwardingProperty === instrumented1.ownedPhetioPickableProperty );
     assert.ok( instrumented1.linkedElements.length === 0, 'no linked elements for default pickable Property' );
@@ -565,7 +565,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     // instrumentedNodeWithDefaultInstrumentedPickableProperty => uninstrumented property (after startup)
     const instrumented2 = new Node( {
       tandem: Tandem.GENERAL.createTandem( 'myPickableUniquelyNamedNodeThatWillNotBeDuplicated2' ),
-      pickablePropertyInstrumented: true
+      pickablePropertyPhetioInstrumented: true
     } );
     window.assert && assert.throws( () => {
       instrumented2.setPickableProperty( uninstrumentedPickableProperty );
@@ -609,7 +609,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
     instrumented = new Node( {
       tandem: Tandem.GENERAL.createTandem( 'myNodeWithPickable' ),
-      pickablePropertyInstrumented: true
+      pickablePropertyPhetioInstrumented: true
     } );
     window.assert && assert.throws( () => {
       instrumented.setPickableProperty( null );
@@ -621,8 +621,8 @@ if ( Tandem.PHET_IO_ENABLED ) {
       tandem: Tandem.GENERAL.createTandem( 'myNodeWithPickable' )
     } );
     window.assert && assert.throws( () => {
-      instrumented.pickablePropertyInstrumented = true;
-    }, 'cannot set pickablePropertyInstrumented after instrumentation' );
+      instrumented.pickablePropertyPhetioInstrumented = true;
+    }, 'cannot set pickablePropertyPhetioInstrumented after instrumentation' );
     instrumented.dispose();
 
 

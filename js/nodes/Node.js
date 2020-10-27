@@ -202,7 +202,7 @@ const NODE_OPTION_KEYS = [
   'visibleProperty', // {Property.<boolean>|null} - Sets forwarding of the visibleProperty, see setVisibleProperty() for more documentation
   'visible', // {boolean} - Whether the Node is visible, see setVisible() for more documentation
 
-  'pickablePropertyInstrumented', // {boolean} - When true, create an instrumented pickableProperty when this Node is instrumented, see setPickablePropertyInstrumented() for more documentation
+  'pickablePropertyPhetioInstrumented', // {boolean} - When true, create an instrumented pickableProperty when this Node is instrumented, see setPickablePropertyPhetioInstrumented() for more documentation
   'pickableProperty', // {Property.<boolean|null>|null} - Sets forwarding of the pickableProperty, see setPickableProperty() for more documentation
   'pickable', // {boolean|null} - Whether the Node is pickable, see setPickable() for more documentation
   'inputEnabled', // {boolean} Whether input events can reach into this subtree, see setInputEnabled() for more documentation
@@ -250,7 +250,7 @@ const DEFAULT_OPTIONS = {
   visible: true,
   opacity: 1,
   pickable: null,
-  pickablePropertyInstrumented: false,
+  pickablePropertyPhetioInstrumented: false,
   inputEnabled: true,
   clipArea: null,
   mouseArea: null,
@@ -337,7 +337,7 @@ function Node( options ) {
   this._pickableProperty.lazyLink( this.onPickablePropertyChange.bind( this ) );
 
   // @private - when true, automatically set up a PhET-iO instrumented forwarded Property for pickableProperty, see this.initializePhetioObject for usage
-  this._pickablePropertyInstrumented = DEFAULT_OPTIONS.pickablePropertyInstrumented;
+  this._pickablePropertyPhetioInstrumented = DEFAULT_OPTIONS.pickablePropertyPhetioInstrumented;
 
   // @public {TinyProperty.<boolean>} - Whether input event listeners on this Node or descendants on a trail will have
   // input listeners. triggered. Note that this does NOT effect picking, and only prevents some listeners from being
@@ -571,8 +571,8 @@ function Node( options ) {
 
   // @public (NodeTests) {Property.<boolean>|null} - TinyProperty is not instrumented for PhET-iO, so when a Node is
   // instrumented, by default, an instrumented `Property` can be forwarded to by this._pickableProperty (see
-  // this._pickablePropertyInstrumented). This field stores the default instrumented pickable Property when
-  // _pickablePropertyInstrumented is true.
+  // this._pickablePropertyPhetioInstrumented). This field stores the default instrumented pickable Property when
+  // _pickablePropertyPhetioInstrumented is true.
   this.ownedPhetioPickableProperty = null;
 
   PhetioObject.call( this );
@@ -3390,27 +3390,26 @@ inherit( PhetioObject, Node, {
    * Use this to automatically create a forwarded, PhET-iO instrumented pickableProperty internal to Node. This is different
    * from visible because pickable by default doesn't not create this forwarded Property.
    * @public
-   * @param {boolean} pickablePropertyInstrumented
+   * @param {boolean} pickablePropertyPhetioInstrumented
    */
-  setPickablePropertyInstrumented: function( pickablePropertyInstrumented ) {
-    assert && assert( typeof pickablePropertyInstrumented === 'boolean' );
+  setPickablePropertyPhetioInstrumented: function( pickablePropertyPhetioInstrumented ) {
+    assert && assert( typeof pickablePropertyPhetioInstrumented === 'boolean' );
 
     // See Node.initializePhetioObject for more details on this assertion
     assert && assert( !this.isPhetioInstrumented(), 'this option only works if it is passed in before this Node is instrumented' );
 
-    this._pickablePropertyInstrumented = pickablePropertyInstrumented;
+    this._pickablePropertyPhetioInstrumented = pickablePropertyPhetioInstrumented;
   },
-  set pickablePropertyInstrumented( pickablePropertyInstrumented ) { this.setPickablePropertyInstrumented( pickablePropertyInstrumented );},
+  set pickablePropertyPhetioInstrumented( pickablePropertyPhetioInstrumented ) { this.setPickablePropertyPhetioInstrumented( pickablePropertyPhetioInstrumented );},
 
   /**
    * @public
    * @returns {boolean}
    */
-  getPickablePropertyInstrumented: function() {
-    return this._pickablePropertyInstrumented;
+  getPickablePropertyPhetioInstrumented: function() {
+    return this._pickablePropertyPhetioInstrumented;
   },
-  get pickablePropertyInstrumented() { return this.getPickablePropertyInstrumented();},
-
+  get pickablePropertyPhetioInstrumented() { return this.getPickablePropertyPhetioInstrumented();},
 
   /**
    * Sets whether this Node (and its subtree) will allow hit-testing (and thus user interaction), controlling what
@@ -5408,8 +5407,8 @@ inherit( PhetioObject, Node, {
         this.updateLinkedElementForProperty( VISIBLE_PROPERTY_TANDEM_NAME, null, this._visibleProperty.forwardingProperty );
       }
 
-      if ( this._pickablePropertyInstrumented ) {
-        assert && assert( !this._pickableProperty.forwardingProperty, 'I create the pickableProperty when pickablePropertyInstrumented:true' );
+      if ( this._pickablePropertyPhetioInstrumented ) {
+        assert && assert( !this._pickableProperty.forwardingProperty, 'I create the pickableProperty when pickablePropertyPhetioInstrumented:true' );
 
         this.ownedPhetioPickableProperty = new Property( this.pickable, merge( {
 
