@@ -46,7 +46,7 @@ const TEXT_PROPERTY_TANDEM_NAME = 'textProperty';
 
 // SVG bounds seems to be malfunctioning for Safari 5. Since we don't have a reproducible test machine for
 // fast iteration, we'll guess the user agent and use DOM bounds instead of SVG.
-// Hopefully the two contraints rule out any future Safari versions (fairly safe, but not impossible!)
+// Hopefully the two constraints rule out any future Safari versions (fairly safe, but not impossible!)
 // @private {boolean}
 const useDOMAsFastBounds = window.navigator.userAgent.indexOf( 'like Gecko) Version/5' ) !== -1 &&
                            window.navigator.userAgent.indexOf( 'Safari/' ) !== -1;
