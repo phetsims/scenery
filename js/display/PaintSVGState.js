@@ -6,97 +6,73 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 
-/**
- * Returns the SVG style string used to represent a paint.
- *
- * @param {null|string|Color|LinearGradient|RadialGradient|Pattern} paint
- * @param {SVGBlock} svgBlock
- */
-function paintToSVGStyle( paint, svgBlock ) {
-  if ( !paint ) {
-    // no paint
-    return 'none';
+class PaintSVGState {
+  constructor() {
+    this.initialize();
   }
-  else if ( paint.toCSS ) {
-    // Color object paint
-    return paint.toCSS();
-  }
-  else if ( paint.isPaint ) {
-    // reference the SVG definition with a URL
-    return 'url(#' + paint.id + '-' + ( svgBlock ? svgBlock.id : 'noblock' ) + ')';
-  }
-  else {
-    // plain CSS color
-    return paint;
-  }
-}
 
-/**
- * @constructor
- */
-function PaintSVGState() {
-  this.initialize();
-}
-
-scenery.register( 'PaintSVGState', PaintSVGState );
-
-inherit( Object, PaintSVGState, {
   /**
    * Initializes the state
    * @public
    */
-  initialize: function() {
-    this.svgBlock = null; // {SVGBlock | null}
+  initialize() {
+    // @public {SVGBlock|null}
+    this.svgBlock = null;
 
-    // {string} fill/stroke style fragments that are currently used
+    // @public {string} fill/stroke style fragments that are currently used
     this.fillStyle = 'none';
     this.strokeStyle = 'none';
 
-    // current reference-counted fill/stroke paints (gradients and fills) that will need to be released on changes
-    // or disposal
+    // @public {PaintDef} - current reference-counted fill/stroke paints (gradients and fills) that will need to be
+    // released on changes or disposal
     this.fillPaint = null;
     this.strokePaint = null;
 
     // these are used by the actual SVG element
     this.updateBaseStyle(); // the main style CSS
     this.strokeDetailStyle = ''; // width/dash/cap/join CSS
-  },
+  }
 
   /**
    * Disposes the PaintSVGState, releasing listeners as needed.
    * @public
    */
-  dispose: function() {
+  dispose() {
     // be cautious, release references
     this.releaseFillPaint();
     this.releaseStrokePaint();
-  },
+  }
 
-  releaseFillPaint: function() {
+  /**
+   * @private
+   */
+  releaseFillPaint() {
     if ( this.fillPaint ) {
       this.svgBlock.decrementPaint( this.fillPaint );
       this.fillPaint = null;
     }
-  },
+  }
 
-  releaseStrokePaint: function() {
+  /**
+   * @private
+   */
+  releaseStrokePaint() {
     if ( this.strokePaint ) {
       this.svgBlock.decrementPaint( this.strokePaint );
       this.strokePaint = null;
     }
-  },
+  }
 
   /**
    * Called when the fill needs to be updated, with the latest defs SVG block
-   * @public (scenery-internal)
+   * @public
    *
    * @param {SVGBlock} svgBlock
    * @param {null|string|Color|LinearGradient|RadialGradient|Pattern} fill
    */
-  updateFill: function( svgBlock, fill ) {
+  updateFill( svgBlock, fill ) {
     assert && assert( this.svgBlock === svgBlock );
 
     // NOTE: If fill.isPaint === true, this should be different if we switched to a different SVG block.
@@ -119,16 +95,16 @@ inherit( Object, PaintSVGState, {
       this.fillStyle = fillStyle;
       this.updateBaseStyle();
     }
-  },
+  }
 
   /**
    * Called when the stroke needs to be updated, with the latest defs SVG block
-   * @public (scenery-internal)
+   * @public
    *
    * @param {SVGBlock} svgBlock
    * @param {null|string|Color|LinearGradient|RadialGradient|Pattern} fill
    */
-  updateStroke: function( svgBlock, stroke ) {
+  updateStroke( svgBlock, stroke ) {
     assert && assert( this.svgBlock === svgBlock );
 
     // NOTE: If stroke.isPaint === true, this should be different if we switched to a different SVG block.
@@ -151,13 +127,21 @@ inherit( Object, PaintSVGState, {
       this.strokeStyle = strokeStyle;
       this.updateBaseStyle();
     }
-  },
+  }
 
-  updateBaseStyle: function() {
+  /**
+   * @private
+   */
+  updateBaseStyle() {
     this.baseStyle = 'fill: ' + this.fillStyle + '; stroke: ' + this.strokeStyle + ';';
-  },
+  }
 
-  updateStrokeDetailStyle: function( node ) {
+  /**
+   * @private
+   *
+   * @param {Node} node
+   */
+  updateStrokeDetailStyle( node ) {
     let strokeDetailStyle = '';
 
     const lineWidth = node.getLineWidth();
@@ -184,10 +168,15 @@ inherit( Object, PaintSVGState, {
     }
 
     this.strokeDetailStyle = strokeDetailStyle;
-  },
+  }
 
-  // called when the defs SVG block is switched (our SVG element was moved to another SVG top-level context)
-  updateSVGBlock: function( svgBlock ) {
+  /**
+   * Called when the defs SVG block is switched (our SVG element was moved to another SVG top-level context)
+   * @public
+   *
+   * @param {SVGBlock} svgBlock
+   */
+  updateSVGBlock( svgBlock ) {
     // remove paints from the old svgBlock
     const oldSvgBlock = this.svgBlock;
     if ( oldSvgBlock ) {
@@ -209,6 +198,33 @@ inherit( Object, PaintSVGState, {
       svgBlock.incrementPaint( this.strokePaint );
     }
   }
-} );
+}
+
+/**
+ * Returns the SVG style string used to represent a paint.
+ *
+ * @param {null|string|Color|LinearGradient|RadialGradient|Pattern} paint
+ * @param {SVGBlock} svgBlock
+ */
+function paintToSVGStyle( paint, svgBlock ) {
+  if ( !paint ) {
+    // no paint
+    return 'none';
+  }
+  else if ( paint.toCSS ) {
+    // Color object paint
+    return paint.toCSS();
+  }
+  else if ( paint.isPaint ) {
+    // reference the SVG definition with a URL
+    return 'url(#' + paint.id + '-' + ( svgBlock ? svgBlock.id : 'noblock' ) + ')';
+  }
+  else {
+    // plain CSS color
+    return paint;
+  }
+}
+
+scenery.register( 'PaintSVGState', PaintSVGState );
 
 export default PaintSVGState;

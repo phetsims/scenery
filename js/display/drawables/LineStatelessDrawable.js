@@ -22,7 +22,6 @@ const LineStatelessDrawable = memoize( type => {
      *
      * @param {number} renderer
      * @param {Instance} instance
-     * @returns {LineStatelessDrawable}
      */
     initialize( renderer, instance, ...args ) {
       super.initialize( renderer, instance, ...args );
@@ -30,8 +29,6 @@ const LineStatelessDrawable = memoize( type => {
       // @protected {boolean} - Flag marked as true if ANY of the drawable dirty flags are set (basically everything except for transforms, as we
       //                        need to accelerate the transform case.
       this.paintDirty = true;
-
-      return this; // allow for chaining
     }
 
     /**

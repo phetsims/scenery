@@ -1,6 +1,5 @@
 // Copyright 2014-2020, University of Colorado Boulder
 
-
 /**
  * An interval (implicit consecutive sequence of drawables) that has a recorded change in-between the two ends.
  * We store the closest drawables to the interval that aren't changed, or null itself to indicate "to the end".
@@ -18,26 +17,28 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../phet-core/js/inherit.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
 import scenery from '../scenery.js';
 import Drawable from './Drawable.js';
 
-/**
- * @constructor
- * @mixes Poolable
- *
- * @param drawableBefore
- * @param drawableAfter
- */
-function ChangeInterval( drawableBefore, drawableAfter ) {
-  this.initialize( drawableBefore, drawableAfter );
-}
+class ChangeInterval {
+  /**
+   * @mixes Poolable
+   *
+   * @param {Drawable} drawableBefore
+   * @param {Drawable} drawableAfter
+   */
+  constructor( drawableBefore, drawableAfter ) {
+    this.initialize( drawableBefore, drawableAfter );
+  }
 
-scenery.register( 'ChangeInterval', ChangeInterval );
-
-inherit( Object, ChangeInterval, {
-  initialize: function( drawableBefore, drawableAfter ) {
+  /**
+   * @public
+   *
+   * @param {Drawable} drawableBefore
+   * @param {Drawable} drawableAfter
+   */
+  initialize( drawableBefore, drawableAfter ) {
     assert && assert( drawableBefore === null || ( drawableBefore instanceof Drawable ),
       'drawableBefore can either be null to indicate that there is no un-changed drawable before our changes, ' +
       'or it can reference an un-changed drawable' );
@@ -49,37 +50,43 @@ inherit( Object, ChangeInterval, {
      * All @public properties
      *----------------------------------------------------------------------------*/
 
-    // {ChangeInterval|null}, singly-linked list
+    // @public {ChangeInterval|null}, singly-linked list
     this.nextChangeInterval = null;
 
-    // {Drawable|null}, the drawable before our ChangeInterval that is not modified. null indicates that we don't yet
-    // have a "before" boundary, and should be connected to the closest drawable that is unchanged.
+    // @public {Drawable|null}, the drawable before our ChangeInterval that is not modified. null indicates that we
+    // don't yet have a "before" boundary, and should be connected to the closest drawable that is unchanged.
     this.drawableBefore = drawableBefore;
 
-    // {Drawable|null}, the drawable after our ChangeInterval that is not modified. null indicates that we don't yet
-    // have a "after" boundary, and should be connected to the closest drawable that is unchanged.
+    // @public {Drawable|null}, the drawable after our ChangeInterval that is not modified. null indicates that we
+    // don't yet have a "after" boundary, and should be connected to the closest drawable that is unchanged.
     this.drawableAfter = drawableAfter;
 
-    // {boolean} If a null-to-X interval gets collapsed all the way, we want to have a flag that indicates that.
+    // @public {boolean} If a null-to-X interval gets collapsed all the way, we want to have a flag that indicates that.
     // Otherwise, it would be interpreted as a null-to-null change interval ("change everything"), instead of the
     // correct "change nothing".
     this.collapsedEmpty = false;
+  }
 
-    // chaining for PoolableMixin
-    return this;
-  },
-
-  dispose: function() {
+  /**
+   * Releases references
+   * @public
+   */
+  dispose() {
     // release our references
     this.nextChangeInterval = null;
     this.drawableBefore = null;
     this.drawableAfter = null;
 
     this.freeToPool();
-  },
+  }
 
-  // Make our interval as tight as possible (we may have over-estimated it before)
-  constrict: function() {
+  /**
+   * Make our interval as tight as possible (we may have over-estimated it before)
+   * @public
+   *
+   * @returns {boolean} - Whether it was changed
+   */
+  constrict() {
     let changed = false;
 
     if ( this.isEmpty() ) { return true; }
@@ -117,15 +124,27 @@ inherit( Object, ChangeInterval, {
     }
 
     return changed;
-  },
+  }
 
-  isEmpty: function() {
+  /**
+   * @public
+   *
+   * @returns {boolean}
+   */
+  isEmpty() {
     return this.collapsedEmpty || ( this.drawableBefore !== null && this.drawableBefore === this.drawableAfter );
-  },
+  }
 
-  // {number} The quantity of "old" internal drawables. Requires the old first/last drawables for the backbone, since
-  // we need that information for null-before/after boundaries.
-  getOldInternalDrawableCount: function( oldStitchFirstDrawable, oldStitchLastDrawable ) {
+  /**
+   * The quantity of "old" internal drawables. Requires the old first/last drawables for the backbone, since
+   * we need that information for null-before/after boundaries.
+   * @public
+   *
+   * @param {Drawable} oldStitchFirstDrawable
+   * @param {Drawable} oldStitchLastDrawable
+   * @returns {number}
+   */
+  getOldInternalDrawableCount( oldStitchFirstDrawable, oldStitchLastDrawable ) {
     const firstInclude = this.drawableBefore ? this.drawableBefore.oldNextDrawable : oldStitchFirstDrawable;
     const lastExclude = this.drawableAfter; // null is OK here
 
@@ -135,11 +154,19 @@ inherit( Object, ChangeInterval, {
     }
 
     return count;
-  },
+  }
 
-  // {number} The quantity of "new" internal drawables. Requires the old first/last drawables for the backbone, since
-  // we need that information for null-before/after boundaries.
-  getNewInternalDrawableCount: function( newStitchFirstDrawable, newStitchLastDrawable ) {
+  /**
+   * The quantity of "new" internal drawables. Requires the old first/last drawables for the backbone, since
+   * we need that information for null-before/after boundaries.
+   * @public
+   *
+   * @param {Drawable} newStitchFirstDrawable
+   * @param {Drawable} newStitchLastDrawable
+   *
+   * @returns {number}
+   */
+  getNewInternalDrawableCount( newStitchFirstDrawable, newStitchLastDrawable ) {
     const firstInclude = this.drawableBefore ? this.drawableBefore.nextDrawable : newStitchFirstDrawable;
     const lastExclude = this.drawableAfter; // null is OK here
 
@@ -150,17 +177,28 @@ inherit( Object, ChangeInterval, {
 
     return count;
   }
-} );
+
+  /**
+   * Creates a ChangeInterval that will be disposed after syncTree is complete (see Display phases).
+   * @public
+   *
+   * @param {Drawable} drawableBefore
+   * @param {Drawable} drawableAfter
+   * @param {Display} display
+   *
+   * @returns {ChangeInterval}
+   */
+  static newForDisplay( drawableBefore, drawableAfter, display ) {
+    const changeInterval = ChangeInterval.createFromPool( drawableBefore, drawableAfter );
+    display.markChangeIntervalToDispose( changeInterval );
+    return changeInterval;
+  }
+}
+
+scenery.register( 'ChangeInterval', ChangeInterval );
 
 Poolable.mixInto( ChangeInterval, {
   initialize: ChangeInterval.prototype.initialize
 } );
-
-// creates a ChangeInterval that will be disposed after syncTree is complete (see Display phases)
-ChangeInterval.newForDisplay = function( drawableBefore, drawableAfter, display ) {
-  const changeInterval = ChangeInterval.createFromPool( drawableBefore, drawableAfter );
-  display.markChangeIntervalToDispose( changeInterval );
-  return changeInterval;
-};
 
 export default ChangeInterval;

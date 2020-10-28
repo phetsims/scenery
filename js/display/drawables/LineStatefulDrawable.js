@@ -27,7 +27,6 @@ const LineStatefulDrawable = memoize( type => {
      *
      * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
      * @param {Instance} instance
-     * @returns {LineStatefulDrawable} - Self reference for chaining
      */
     initialize( renderer, instance, ...args ) {
       super.initialize( renderer, instance, ...args );
@@ -39,8 +38,6 @@ const LineStatefulDrawable = memoize( type => {
       this.dirtyY1 = true;
       this.dirtyX2 = true;
       this.dirtyY2 = true;
-
-      return this; // allow for chaining
     }
 
     /**

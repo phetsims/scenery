@@ -16,7 +16,6 @@ class CanvasSelfDrawable extends SelfDrawable {
    *
    * @param {number} renderer
    * @param {Instance} instance
-   * @returns {CanvasSelfDrawable}
    */
   initialize( renderer, instance ) {
     super.initialize( renderer, instance );
@@ -26,8 +25,6 @@ class CanvasSelfDrawable extends SelfDrawable {
 
     instance.relativeTransform.addListener( this.transformListener ); // when our relative tranform changes, notify us in the pre-repaint phase
     instance.relativeTransform.addPrecompute(); // trigger precomputation of the relative transform, since we will always need it when it is updated
-
-    return this;
   }
 
   /**

@@ -7,39 +7,34 @@
  */
 
 import Property from '../../../axon/js/Property.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 import Color from '../util/Color.js';
 import Gradient from '../util/Gradient.js';
 
-/**
- * An observer for a paint (fill or stroke), that will be able to trigger notifications when it changes.
- * @constructor
- *
- * @param {function} changeCallback - To be called on any change (with no arguments)
- */
-function PaintObserver( changeCallback ) {
+class PaintObserver {
+  /**
+   * An observer for a paint (fill or stroke), that will be able to trigger notifications when it changes.
+   *
+   * @param {function} changeCallback - To be called on any change (with no arguments)
+   */
+  constructor( changeCallback ) {
 
-  // @private {PaintDef}
-  // Our unwrapped fill/stroke value
-  this.primary = null;
+    // @private {PaintDef} - Our unwrapped fill/stroke value
+    this.primary = null;
 
-  // @private {function} - Our callback
-  this.changeCallback = changeCallback;
+    // @private {function} - Our callback
+    this.changeCallback = changeCallback;
 
-  // @private {function} - To be called when a potential change is detected
-  this.notifyChangeCallback = this.notifyChanged.bind( this );
+    // @private {function} - To be called when a potential change is detected
+    this.notifyChangeCallback = this.notifyChanged.bind( this );
 
-  // @private {function} - To be called whenever our secondary fill/stroke value may have changed
-  this.updateSecondaryListener = this.updateSecondary.bind( this );
+    // @private {function} - To be called whenever our secondary fill/stroke value may have changed
+    this.updateSecondaryListener = this.updateSecondary.bind( this );
 
-  // @private {Object} - Maps {number} property.id => {number} count (number of times we would be listening to it)
-  this.secondaryPropertyCountsMap = {};
-}
+    // @private {Object} - Maps {number} property.id => {number} count (number of times we would be listening to it)
+    this.secondaryPropertyCountsMap = {};
+  }
 
-scenery.register( 'PaintObserver', PaintObserver );
-
-inherit( Object, PaintObserver, {
   /**
    * Should be called when our paint (fill/stroke) may have changed.
    * @public (scenery-internal)
@@ -50,7 +45,7 @@ inherit( Object, PaintObserver, {
    *
    * @param {PaintDef} primary
    */
-  setPrimary: function( primary ) {
+  setPrimary( primary ) {
     if ( primary !== this.primary ) {
       sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] primary update' );
       sceneryLog && sceneryLog.Paints && sceneryLog.push();
@@ -62,13 +57,13 @@ inherit( Object, PaintObserver, {
 
       sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     }
-  },
+  }
 
   /**
    * Releases references without sending the notifications.
    * @public
    */
-  clean: function() {
+  clean() {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] clean' );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
@@ -76,7 +71,7 @@ inherit( Object, PaintObserver, {
     this.primary = null;
 
     sceneryLog && sceneryLog.Paints && sceneryLog.pop();
-  },
+  }
 
   /**
    * Called when the value of a "primary" Property (contents of one, main or as a Gradient) is potentially changed.
@@ -86,7 +81,7 @@ inherit( Object, PaintObserver, {
    * @param {string|Color} oldPaint
    * @param {Property} property
    */
-  updateSecondary: function( newPaint, oldPaint, property ) {
+  updateSecondary( newPaint, oldPaint, property ) {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] secondary update' );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
@@ -99,7 +94,7 @@ inherit( Object, PaintObserver, {
     this.notifyChangeCallback();
 
     sceneryLog && sceneryLog.Paints && sceneryLog.pop();
-  },
+  }
 
   /**
    * Attempt to attach listeners to the paint's primary (the paint itself), or something else that acts like the primary
@@ -112,7 +107,7 @@ inherit( Object, PaintObserver, {
    *
    * @param {PaintDef} paint
    */
-  attachPrimary: function( paint ) {
+  attachPrimary( paint ) {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] attachPrimary' );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
@@ -139,7 +134,7 @@ inherit( Object, PaintObserver, {
     }
 
     sceneryLog && sceneryLog.Paints && sceneryLog.pop();
-  },
+  }
 
   /**
    * Attempt to detach listeners from the paint's primary (the paint itself).
@@ -151,7 +146,7 @@ inherit( Object, PaintObserver, {
    *
    * @param {PaintDef} paint
    */
-  detachPrimary: function( paint ) {
+  detachPrimary( paint ) {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] detachPrimary' );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
@@ -171,7 +166,7 @@ inherit( Object, PaintObserver, {
     }
 
     sceneryLog && sceneryLog.Paints && sceneryLog.pop();
-  },
+  }
 
   /**
    * Attempt to attach listeners to the paint's secondary (part within the Property).
@@ -179,7 +174,7 @@ inherit( Object, PaintObserver, {
    *
    * @param {string|Color} paint
    */
-  attachSecondary: function( paint ) {
+  attachSecondary( paint ) {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] attachSecondary' );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
@@ -191,13 +186,13 @@ inherit( Object, PaintObserver, {
     }
 
     sceneryLog && sceneryLog.Paints && sceneryLog.pop();
-  },
+  }
 
   /**
    * Calls the change callback, and invalidates the paint itself if it's a gradient.
    * @private
    */
-  notifyChanged: function() {
+  notifyChanged() {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] changed' );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
@@ -207,7 +202,7 @@ inherit( Object, PaintObserver, {
     this.changeCallback();
 
     sceneryLog && sceneryLog.Paints && sceneryLog.pop();
-  },
+  }
 
   /**
    * Adds our secondary listener to the Property (unless there is already one, in which case we record the counts).
@@ -215,7 +210,7 @@ inherit( Object, PaintObserver, {
    *
    * @param {Property.<*>} property
    */
-  secondaryLazyLinkProperty: function( property ) {
+  secondaryLazyLinkProperty( property ) {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] secondaryLazyLinkProperty ' + property._id );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
@@ -230,7 +225,7 @@ inherit( Object, PaintObserver, {
     }
 
     sceneryLog && sceneryLog.Paints && sceneryLog.pop();
-  },
+  }
 
   /**
    * Removes our secondary listener from the Property (unless there were more than 1 time we needed to listen to it,
@@ -239,7 +234,7 @@ inherit( Object, PaintObserver, {
    *
    * @param {Property.<*>} property
    */
-  secondaryUnlinkProperty: function( property ) {
+  secondaryUnlinkProperty( property ) {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] secondaryUnlinkProperty ' + property._id );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
@@ -256,6 +251,7 @@ inherit( Object, PaintObserver, {
 
     sceneryLog && sceneryLog.Paints && sceneryLog.pop();
   }
-} );
+}
 
+scenery.register( 'PaintObserver', PaintObserver );
 export default PaintObserver;

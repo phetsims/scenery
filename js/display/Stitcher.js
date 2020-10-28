@@ -98,7 +98,6 @@
  */
 
 import cleanArray from '../../../phet-core/js/cleanArray.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 import CanvasBlock from './CanvasBlock.js';
 import DOMBlock from './DOMBlock.js';
@@ -107,25 +106,25 @@ import Renderer from './Renderer.js';
 import SVGBlock from './SVGBlock.js';
 import WebGLBlock from './WebGLBlock.js';
 
-function Stitcher( display, renderer ) {
-  throw new Error( 'We are too abstract for that!' );
-}
-
-scenery.register( 'Stitcher', Stitcher );
-
-inherit( Object, Stitcher, {
-  // Main stitch entry point, called directly from the backbone or cache. We are modifying our backbone's blocks and
-  // their attached drawables.
-  // @param {Drawable | null} firstStitchDrawable: What our backbone's first drawable will be after this stitch
-  // @param {Drawable | null} lastStitchDrawable: What our backbone's last drawable will be after this stitch
-  // @param {Drawable | null} oldFirstStitchDrawable: What our backbone's first drawable was before this stitch
-  // @param {Drawable | null} oldLastStitchDrawable: What our backbone's last drawable was before this stitch
-  // @param {ChangeInterval} firstChangeInterval: The first change interval of our interval linked-list
-  // @param {ChangeInterval} lastChangeInterval: The last change interval of our interval linked-list
-  // The change-interval pair denotes a linked-list of change intervals that we will need to stitch across (they
-  // contain drawables that need to be removed and added, and it may affect how we lay out blocks in the stacking
-  // order).
-  initialize: function( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
+class Stitcher {
+  /**
+   * Main stitch entry point, called directly from the backbone or cache. We are modifying our backbone's blocks and
+   * their attached drawables.
+   * @public
+   *
+   * The change-interval pair denotes a linked-list of change intervals that we will need to stitch across (they
+   * contain drawables that need to be removed and added, and it may affect how we lay out blocks in the stacking
+   * order).
+   *
+   * @param {BackboneDrawable} backbone
+   * @param {Drawable|null} firstDrawable
+   * @param {Drawable|null} lastDrawable
+   * @param {Drawable|null} oldFirstDrawable
+   * @param {Drawable|null} oldLastDrawable
+   * @param {ChangeInterval} firstChangeInterval
+   * @param {ChangeInterval} lastChangeInterval
+   */
+  initialize( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
     assert && assert( firstChangeInterval && lastChangeInterval, 'We are guaranteed at least one change interval' );
     assert && assert( !firstDrawable || firstDrawable.previousDrawable === null,
       'End boundary of drawable linked list should link to null' );
@@ -174,10 +173,13 @@ inherit( Object, Stitcher, {
 
       this.previousBlocks = backbone.blocks.slice( 0 ); // copy of previous blocks
     }
-  },
+  }
 
-  // Removes object references
-  clean: function() {
+  /**
+   * Removes object references
+   * @public
+   */
+  clean() {
     sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'clean' );
     sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( '-----------------------------------' );
 
@@ -192,11 +194,14 @@ inherit( Object, Stitcher, {
     this.lastDrawable = null;
 
     sceneryLog && sceneryLog.Stitch && sceneryLog.pop();
-  },
+  }
 
-  // Writes the first/last drawables for the entire backbone into its memory. We want to wait to do this until we have
-  // read from its previous values.
-  recordBackboneBoundaries: function() {
+  /**
+   * Writes the first/last drawables for the entire backbone into its memory. We want to wait to do this until we have
+   * read from its previous values.
+   * @protected
+   */
+  recordBackboneBoundaries() {
     sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'recording backbone boundaries: ' +
                                                           ( this.firstDrawable ? this.firstDrawable.toString() : 'null' ) +
                                                           ' to ' +
@@ -207,10 +212,16 @@ inherit( Object, Stitcher, {
     if ( assertSlow ) {
       this.boundariesRecorded = true;
     }
-  },
+  }
 
-  // Records that this {Drawable} drawable should be added/moved to the {Block} at a later time
-  notePendingAddition: function( drawable, block ) {
+  /**
+   * Records that this {Drawable} drawable should be added/moved to the {Block} at a later time
+   * @protected
+   *
+   * @param {Drawable} drawable
+   * @param {Block} block
+   */
+  notePendingAddition( drawable, block ) {
     assert && assert( drawable.renderer === block.renderer );
 
     sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'pending add: ' + drawable.toString() + ' to ' + block.toString() );
@@ -226,12 +237,18 @@ inherit( Object, Stitcher, {
     }
 
     sceneryLog && sceneryLog.Stitch && sceneryLog.pop();
-  },
+  }
 
-  // Records that this {Drawable} drawable should be moved to the {Block} at a later time (called only on external
-  // drawables). notePendingAddition and notePendingRemoval should not be called on a drawable that had
-  // notePendingMove called on it during the same stitch, and vice versa.
-  notePendingMove: function( drawable, block ) {
+  /**
+   * Records that this {Drawable} drawable should be moved to the {Block} at a later time (called only on external
+   * drawables). notePendingAddition and notePendingRemoval should not be called on a drawable that had
+   * notePendingMove called on it during the same stitch, and vice versa.
+   * @protected
+   *
+   * @param {Drawable} drawable
+   * @param {Block} block
+   */
+  notePendingMove( drawable, block ) {
     assert && assert( drawable.renderer === block.renderer );
 
     sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'pending move: ' + drawable.toString() + ' to ' + block.toString() );
@@ -247,10 +264,15 @@ inherit( Object, Stitcher, {
     }
 
     sceneryLog && sceneryLog.Stitch && sceneryLog.pop();
-  },
+  }
 
-  // Records that this {Drawable} drawable should be removed/moved from the {Block} at a later time
-  notePendingRemoval: function( drawable ) {
+  /**
+   * Records that this {Drawable} drawable should be removed/moved from the {Block} at a later time
+   * @protected
+   *
+   * @param {Drawable} drawable
+   */
+  notePendingRemoval( drawable ) {
     sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'pending remove: ' + drawable.toString() );
     sceneryLog && sceneryLog.Stitch && sceneryLog.push();
 
@@ -263,11 +285,16 @@ inherit( Object, Stitcher, {
     }
 
     sceneryLog && sceneryLog.Stitch && sceneryLog.pop();
-  },
+  }
 
-  // Records that this {Block} block should be disposed at a later time. It should not be in the blocks array at the
-  // end of the stitch.
-  markBlockForDisposal: function( block ) {
+  /**
+   * Records that this {Block} block should be disposed at a later time. It should not be in the blocks array at the
+   * end of the stitch.
+   * @protected
+   *
+   * @param {Block} block
+   */
+  markBlockForDisposal( block ) {
     sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'block for disposal: ' + block.toString() );
     sceneryLog && sceneryLog.Stitch && sceneryLog.push();
 
@@ -285,9 +312,12 @@ inherit( Object, Stitcher, {
     }
 
     sceneryLog && sceneryLog.Stitch && sceneryLog.pop();
-  },
+  }
 
-  removeAllBlocks: function() {
+  /**
+   * @protected
+   */
+  removeAllBlocks() {
     sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'marking all blocks for disposal (count ' + this.backbone.blocks.length + ')' );
     sceneryLog && sceneryLog.Stitch && sceneryLog.push();
 
@@ -299,10 +329,17 @@ inherit( Object, Stitcher, {
     }
 
     sceneryLog && sceneryLog.Stitch && sceneryLog.pop();
-  },
+  }
 
-  // Immediately notify a block of its first/last drawable.
-  notifyInterval: function( block, firstDrawable, lastDrawable ) {
+  /**
+   * Immediately notify a block of its first/last drawable.
+   * @protected
+   *
+   * @param {Block} block
+   * @param {Drawable} firstDrawable
+   * @param {Drawable} lastDrawable
+   */
+  notifyInterval( block, firstDrawable, lastDrawable ) {
     sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'notify interval: ' + block.toString() + ' ' +
                                                           firstDrawable.toString() + ' to ' + lastDrawable.toString() );
     sceneryLog && sceneryLog.Stitch && sceneryLog.push();
@@ -322,24 +359,41 @@ inherit( Object, Stitcher, {
     }
 
     sceneryLog && sceneryLog.Stitch && sceneryLog.pop();
-  },
+  }
 
-  // Note a block's tentative first drawable and block before (should be flushed later with updateBlockIntervals())
-  markBeforeBlock: function( block, firstDrawable ) {
+  /**
+   * Note a block's tentative first drawable and block before (should be flushed later with updateBlockIntervals())
+   * @protected
+   *
+   * @param {Block} block
+   * @param {Drawable} firstDrawable
+   */
+  markBeforeBlock( block, firstDrawable ) {
     sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'marking block first drawable ' + block.toString() + ' with ' + firstDrawable.toString() );
 
     block.pendingFirstDrawable = firstDrawable;
     this.touchedBlocks.push( block );
-  },
-  // Note a block's tentative last drawable and block after (should be flushed later with updateBlockIntervals())
-  markAfterBlock: function( block, lastDrawable ) {
+  }
+
+  /**
+   * Note a block's tentative last drawable and block after (should be flushed later with updateBlockIntervals())
+   * @protected
+   *
+   * @param {Block} block
+   * @param {Drawable} lastDrawable
+   */
+  markAfterBlock( block, lastDrawable ) {
     sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'marking block last drawable ' + block.toString() + ' with ' + lastDrawable.toString() );
 
     block.pendingLastDrawable = lastDrawable;
     this.touchedBlocks.push( block );
-  },
-  // Flushes markBeforeBlock/markAfterBlock changes to notifyInterval on blocks themselves.
-  updateBlockIntervals: function() {
+  }
+
+  /**
+   * Flushes markBeforeBlock/markAfterBlock changes to notifyInterval on blocks themselves.
+   * @protected
+   */
+  updateBlockIntervals() {
     while ( this.touchedBlocks.length ) {
       const block = this.touchedBlocks.pop();
 
@@ -365,11 +419,18 @@ inherit( Object, Stitcher, {
         sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'skipping update interval: ' + block.toString() + ', unused' );
       }
     }
-  },
+  }
 
-  // Creates a fresh block with the desired renderer and {Drawable} arbitrary drawable included, and adds it to
-  // our DOM.
-  createBlock: function( renderer, drawable ) {
+  /**
+   * Creates a fresh block with the desired renderer and {Drawable} arbitrary drawable included, and adds it to
+   * our DOM.
+   * @protected
+   *
+   * @param {number} renderer
+   * @param {Drawable} drawable
+   * @returns {Block}
+   */
+  createBlock( renderer, drawable ) {
     const backbone = this.backbone;
     let block;
 
@@ -416,10 +477,15 @@ inherit( Object, Stitcher, {
     }
 
     return block;
-  },
+  }
 
-  // Immediately appends a block to our blocks array
-  appendBlock: function( block ) {
+  /**
+   * Immediately appends a block to our blocks array
+   * @protected
+   *
+   * @param {Block} block
+   */
+  appendBlock( block ) {
     sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'appending block: ' + block.toString() );
 
     this.backbone.blocks.push( block );
@@ -427,10 +493,15 @@ inherit( Object, Stitcher, {
     if ( assertSlow ) {
       this.reindexed = false;
     }
-  },
+  }
 
-  // Immediately removes a block to our blocks array
-  removeBlock: function( block ) {
+  /**
+   * Immediately removes a block to our blocks array
+   * @protected
+   *
+   * @param {Block} block
+   */
+  removeBlock( block ) {
     sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'removing block: ' + block.toString() );
 
     // remove the block from our internal list
@@ -441,18 +512,24 @@ inherit( Object, Stitcher, {
     if ( assertSlow ) {
       this.reindexed = false;
     }
-  },
+  }
 
-  useNoBlocks: function() {
+  /**
+   * @protected
+   */
+  useNoBlocks() {
     sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'using no blocks' );
 
     // i.e. we will not use any blocks
     cleanArray( this.backbone.blocks );
-  },
+  }
 
-  // Triggers all blocks in the blocks array to have their z-index properties set so that they visually stack
-  // correctly.
-  reindex: function() {
+  /**
+   * Triggers all blocks in the blocks array to have their z-index properties set so that they visually stack
+   * correctly.
+   * @protected
+   */
+  reindex() {
     sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( 'reindexing blocks' );
 
     this.backbone.reindexBlocks();
@@ -460,106 +537,93 @@ inherit( Object, Stitcher, {
     if ( assertSlow ) {
       this.reindexed = true;
     }
-  },
+  }
 
-  // An audit for testing assertions
-  auditStitch: function() {
+  /**
+   * An audit for testing assertions
+   * @protected
+   */
+  auditStitch() {
     if ( assertSlow ) {
-      const self = this;
+      const blocks = this.backbone.blocks;
+      const previousBlocks = this.previousBlocks;
 
-      const blocks = self.backbone.blocks;
-      const previousBlocks = self.previousBlocks;
-
-      assertSlow( self.initialized, 'We seem to have finished a stitch without proper initialization' );
-      assertSlow( self.boundariesRecorded, 'Our stitch API requires recordBackboneBoundaries() to be called before' +
+      assertSlow( this.initialized, 'We seem to have finished a stitch without proper initialization' );
+      assertSlow( this.boundariesRecorded, 'Our stitch API requires recordBackboneBoundaries() to be called before' +
                                            ' it is finished.' );
 
       // ensure our indices are up-to-date (reindexed, or did not change)
-      assertSlow( self.reindexed || blocks.length === 0 ||
+      assertSlow( this.reindexed || blocks.length === 0 ||
                   // array equality of previousBlocks and blocks
                   ( previousBlocks.length === blocks.length &&
-                    _.every( _.zip( previousBlocks, blocks ), function( arr ) {
-                      return arr[ 0 ] === arr[ 1 ];
-                    } ) ),
+                    _.every( _.zip( previousBlocks, blocks ), arr => arr[ 0 ] === arr[ 1 ] ) ),
         'Did not reindex on a block change where we are left with blocks' );
 
       // all created blocks had intervals notified
-      _.each( self.createdBlocks, function( blockData ) {
-        assertSlow( _.some( self.intervalsNotified, function( intervalData ) {
-          return blockData.block === intervalData.block;
-        } ), 'Created block does not seem to have an interval notified: ' + blockData.block.toString() );
+      _.each( this.createdBlocks, blockData => {
+        assertSlow( _.some( this.intervalsNotified, intervalData => blockData.block === intervalData.block ), 'Created block does not seem to have an interval notified: ' + blockData.block.toString() );
       } );
 
       // no disposed blocks had intervals notified
-      _.each( self.disposedBlocks, function( blockData ) {
-        assertSlow( !_.some( self.intervalsNotified, function( intervalData ) {
-          return blockData.block === intervalData.block;
-        } ), 'Removed block seems to have an interval notified: ' + blockData.block.toString() );
+      _.each( this.disposedBlocks, blockData => {
+        assertSlow( !_.some( this.intervalsNotified, intervalData => blockData.block === intervalData.block ), 'Removed block seems to have an interval notified: ' + blockData.block.toString() );
       } );
 
       // all drawables for disposed blocks have been marked as pending removal (or moved)
-      _.each( self.disposedBlocks, function( blockData ) {
+      _.each( this.disposedBlocks, blockData => {
         const block = blockData.block;
-        _.each( Drawable.oldListToArray( block.firstDrawable, block.lastDrawable ), function( drawable ) {
-          assertSlow( _.some( self.pendingRemovals, function( removalData ) {
-            return removalData.drawable === drawable;
-          } ) || _.some( self.pendingMoves, function( moveData ) {
-            return moveData.drawable === drawable;
-          } ), 'Drawable ' + drawable.toString() + ' originally listed for disposed block ' + block.toString() +
+        _.each( Drawable.oldListToArray( block.firstDrawable, block.lastDrawable ), drawable => {
+          assertSlow( _.some( this.pendingRemovals, removalData => removalData.drawable === drawable ) || _.some( this.pendingMoves, moveData => moveData.drawable === drawable ), 'Drawable ' + drawable.toString() + ' originally listed for disposed block ' + block.toString() +
                ' does not seem to be marked for pending removal or move!' );
         } );
       } );
 
       // all drawables for created blocks have been marked as pending addition or moved for our block
-      _.each( self.createdBlocks, function( blockData ) {
+      _.each( this.createdBlocks, blockData => {
         const block = blockData.block;
-        _.each( Drawable.listToArray( block.pendingFirstDrawable, block.pendingLastDrawable ), function( drawable ) {
-          assertSlow( _.some( self.pendingAdditions, function( additionData ) {
-            return additionData.drawable === drawable && additionData.block === block;
-          } ) || _.some( self.pendingMoves, function( moveData ) {
-            return moveData.drawable === drawable && moveData.block === block;
-          } ), 'Drawable ' + drawable.toString() + ' now listed for created block ' + block.toString() +
+        _.each( Drawable.listToArray( block.pendingFirstDrawable, block.pendingLastDrawable ), drawable => {
+          assertSlow( _.some( this.pendingAdditions, additionData => additionData.drawable === drawable && additionData.block === block ) || _.some( this.pendingMoves, moveData => moveData.drawable === drawable && moveData.block === block ), 'Drawable ' + drawable.toString() + ' now listed for created block ' + block.toString() +
                ' does not seem to be marked for pending addition or move!' );
         } );
       } );
 
       // all disposed blocks should have been removed
-      _.each( self.disposedBlocks, function( blockData ) {
+      _.each( this.disposedBlocks, blockData => {
         const blockIdx = _.indexOf( blocks, blockData.block );
         assertSlow( blockIdx < 0, 'Disposed block ' + blockData.block.toString() + ' still present at index ' + blockIdx );
       } );
 
       // all created blocks should have been added
-      _.each( self.createdBlocks, function( blockData ) {
+      _.each( this.createdBlocks, blockData => {
         const blockIdx = _.indexOf( blocks, blockData.block );
         assertSlow( blockIdx >= 0, 'Created block ' + blockData.block.toString() + ' is not in the blocks array' );
       } );
 
       // all current blocks should be marked as used
-      _.each( blocks, function( block ) {
+      _.each( blocks, block => {
         assertSlow( block.used, 'All current blocks should be marked as used' );
       } );
 
-      assertSlow( blocks.length - previousBlocks.length === self.createdBlocks.length - self.disposedBlocks.length,
+      assertSlow( blocks.length - previousBlocks.length === this.createdBlocks.length - this.disposedBlocks.length,
         'The count of unmodified blocks should be constant (equal differences):\n' +
-        'created: ' + _.map( self.createdBlocks, function( n ) { return n.block.id; } ).join( ',' ) + '\n' +
-        'disposed: ' + _.map( self.disposedBlocks, function( n ) { return n.block.id; } ).join( ',' ) + '\n' +
-        'before: ' + _.map( previousBlocks, function( n ) { return n.id; } ).join( ',' ) + '\n' +
-        'after: ' + _.map( blocks, function( n ) { return n.id; } ).join( ',' ) );
+        'created: ' + _.map( this.createdBlocks, n => n.block.id ).join( ',' ) + '\n' +
+        'disposed: ' + _.map( this.disposedBlocks, n => n.block.id ).join( ',' ) + '\n' +
+        'before: ' + _.map( previousBlocks, n => n.id ).join( ',' ) + '\n' +
+        'after: ' + _.map( blocks, n => n.id ).join( ',' ) );
 
       assertSlow( this.touchedBlocks.length === 0,
         'If we marked any blocks for changes, we should have called updateBlockIntervals' );
 
       if ( blocks.length ) {
 
-        assertSlow( self.backbone.previousFirstDrawable !== null &&
-                    self.backbone.previousLastDrawable !== null,
+        assertSlow( this.backbone.previousFirstDrawable !== null &&
+                    this.backbone.previousLastDrawable !== null,
           'If we are left with at least one block, we must be tracking at least one drawable' );
 
-        assertSlow( blocks[ 0 ].pendingFirstDrawable === self.backbone.previousFirstDrawable,
+        assertSlow( blocks[ 0 ].pendingFirstDrawable === this.backbone.previousFirstDrawable,
           'Our first drawable should match the first drawable of our first block' );
 
-        assertSlow( blocks[ blocks.length - 1 ].pendingLastDrawable === self.backbone.previousLastDrawable,
+        assertSlow( blocks[ blocks.length - 1 ].pendingLastDrawable === this.backbone.previousLastDrawable,
           'Our last drawable should match the last drawable of our last block' );
 
         for ( let i = 0; i < blocks.length - 1; i++ ) {
@@ -570,54 +634,69 @@ inherit( Object, Stitcher, {
         }
       }
       else {
-        assertSlow( self.backbone.previousFirstDrawable === null &&
-                    self.backbone.previousLastDrawable === null,
+        assertSlow( this.backbone.previousFirstDrawable === null &&
+                    this.backbone.previousLastDrawable === null,
           'If we are left with no blocks, it must mean we are tracking precisely zero drawables' );
       }
     }
   }
-} );
 
-Stitcher.debugIntervals = function( firstChangeInterval ) {
-  if ( sceneryLog && sceneryLog.Stitch ) {
-    for ( let debugInterval = firstChangeInterval; debugInterval !== null; debugInterval = debugInterval.nextChangeInterval ) {
-      sceneryLog.Stitch( '  interval: ' +
-                         ( debugInterval.isEmpty() ? '(empty) ' : '' ) +
-                         ( debugInterval.drawableBefore ? debugInterval.drawableBefore.toString() : '-' ) + ' to ' +
-                         ( debugInterval.drawableAfter ? debugInterval.drawableAfter.toString() : '-' ) );
-    }
-  }
-};
-
-// logs a bunch of information about the old (useCurrent===false) or new (useCurrent===true) drawable linked list.
-Stitcher.debugDrawables = function( firstDrawable, lastDrawable, firstChangeInterval, lastChangeInterval, useCurrent ) {
-  if ( sceneryLog && sceneryLog.StitchDrawables ) {
-    if ( firstDrawable === null ) {
-      sceneryLog.StitchDrawables( 'nothing', 'color: #666;' );
-      return;
-    }
-
-    let isChanged = firstChangeInterval.drawableBefore === null;
-    let currentInterval = firstChangeInterval;
-
-    for ( let drawable = firstDrawable; ; drawable = ( useCurrent ? drawable.nextDrawable : drawable.oldNextDrawable ) ) {
-      if ( isChanged && drawable === currentInterval.drawableAfter ) {
-        isChanged = false;
-        currentInterval = currentInterval.nextChangeInterval;
-      }
-
-      const drawableString = drawable.renderer + ' ' + ( ( !useCurrent && drawable.parentDrawable ) ? drawable.parentDrawable.toString() : '' ) + ' ' + drawable.toDetailedString();
-      sceneryLog.StitchDrawables( drawableString, isChanged ? ( useCurrent ? 'color: #0a0;' : 'color: #a00;' ) : 'color: #666' );
-
-      if ( !isChanged && currentInterval && currentInterval.drawableBefore === drawable ) {
-        isChanged = true;
-      }
-
-      if ( drawable === lastDrawable ) {
-        break;
+  /**
+   * @public
+   *
+   * @param {ChangeInterval} firstChangeInterval
+   */
+  static debugIntervals( firstChangeInterval ) {
+    if ( sceneryLog && sceneryLog.Stitch ) {
+      for ( let debugInterval = firstChangeInterval; debugInterval !== null; debugInterval = debugInterval.nextChangeInterval ) {
+        sceneryLog.Stitch( '  interval: ' +
+                           ( debugInterval.isEmpty() ? '(empty) ' : '' ) +
+                           ( debugInterval.drawableBefore ? debugInterval.drawableBefore.toString() : '-' ) + ' to ' +
+                           ( debugInterval.drawableAfter ? debugInterval.drawableAfter.toString() : '-' ) );
       }
     }
   }
-};
 
+  /**
+   * Logs a bunch of information about the old (useCurrent===false) or new (useCurrent===true) drawable linked list.
+   * @public
+   *
+   * @param {Drawable|null} firstDrawable
+   * @param {Drawable|null} lastDrawable
+   * @param {ChangeInterval} firstChangeInterval
+   * @param {ChangeInterval} lastChangeInterval
+   * @param {boolean} useCurrent
+   */
+  static debugDrawables( firstDrawable, lastDrawable, firstChangeInterval, lastChangeInterval, useCurrent ) {
+    if ( sceneryLog && sceneryLog.StitchDrawables ) {
+      if ( firstDrawable === null ) {
+        sceneryLog.StitchDrawables( 'nothing', 'color: #666;' );
+        return;
+      }
+
+      let isChanged = firstChangeInterval.drawableBefore === null;
+      let currentInterval = firstChangeInterval;
+
+      for ( let drawable = firstDrawable; ; drawable = ( useCurrent ? drawable.nextDrawable : drawable.oldNextDrawable ) ) {
+        if ( isChanged && drawable === currentInterval.drawableAfter ) {
+          isChanged = false;
+          currentInterval = currentInterval.nextChangeInterval;
+        }
+
+        const drawableString = drawable.renderer + ' ' + ( ( !useCurrent && drawable.parentDrawable ) ? drawable.parentDrawable.toString() : '' ) + ' ' + drawable.toDetailedString();
+        sceneryLog.StitchDrawables( drawableString, isChanged ? ( useCurrent ? 'color: #0a0;' : 'color: #a00;' ) : 'color: #666' );
+
+        if ( !isChanged && currentInterval && currentInterval.drawableBefore === drawable ) {
+          isChanged = true;
+        }
+
+        if ( drawable === lastDrawable ) {
+          break;
+        }
+      }
+    }
+  }
+}
+
+scenery.register( 'Stitcher', Stitcher );
 export default Stitcher;

@@ -43,7 +43,6 @@ class BackboneDrawable extends Drawable {
    * @param {Instance} transformRootInstance
    * @param {number} renderer
    * @param {boolean} isDisplayRoot
-   * @returns {BackboneDrawable} - Returns 'this' reference, for chaining
    */
   initialize( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
     super.initialize( renderer );
@@ -121,8 +120,6 @@ class BackboneDrawable extends Drawable {
     this.stitcher = this.stitcher || ( useGreedyStitcher ? new GreedyStitcher() : new RebuildStitcher() );
 
     sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'initialized ' + this.toString() );
-
-    return this; // chaining
   }
 
   /**

@@ -24,7 +24,6 @@ const ImageStatefulDrawable = memoize( type => {
      *
      * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
      * @param {Instance} instance
-     * @returns {ImageStatefulDrawable} - Self reference for chaining
      */
     initialize( renderer, instance, ...args ) {
       super.initialize( renderer, instance, ...args );
@@ -35,8 +34,6 @@ const ImageStatefulDrawable = memoize( type => {
       this.dirtyImage = true;
       this.dirtyImageOpacity = true;
       this.dirtyMipmap = true;
-
-      return this; // allow for chaining
     }
 
     /**
