@@ -9,27 +9,30 @@
 
 import Poolable from '../../../phet-core/js/Poolable.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import platform from '../../../phet-core/js/platform.js';
 import scenery from '../scenery.js';
 import svgns from '../util/svgns.js';
 
-/**
- * @constructor
- * @mixes Poolable
- *
- * @param {SVGBlock} block
- * @param {Block} instance
- * @param {SVGGroup|null} parent
- */
-function SVGGroup( block, instance, parent ) {
-  this.initialize( block, instance, parent );
-}
+class SVGGroup {
+  /**
+   * @mixes Poolable
+   *
+   * @param {SVGBlock} block
+   * @param {Block} instance
+   * @param {SVGGroup|null} parent
+   */
+  constructor( block, instance, parent ) {
+    this.initialize( block, instance, parent );
+  }
 
-scenery.register( 'SVGGroup', SVGGroup );
-
-inherit( Object, SVGGroup, {
-  initialize: function( block, instance, parent ) {
+  /**
+   * @public
+   *
+   * @param {SVGBlock} block
+   * @param {Block} instance
+   * @param {SVGGroup|null} parent
+   */
+  initialize( block, instance, parent ) {
     //OHTWO TODO: add collapsing groups! they can't have self drawables, transforms, filters, etc., and we probably shouldn't de-collapse groups
 
     // @public {SVGBlock|null} - Set to null when we're disposing, checked by other code.
@@ -94,86 +97,121 @@ inherit( Object, SVGGroup, {
     this.instance.addSVGGroup( this );
 
     this.block.markDirtyGroup( this ); // so we are marked and updated properly
+  }
 
-    return this;
-  },
-
-  addSelfDrawable: function( drawable ) {
+  /**
+   * @private
+   *
+   * @param {SelfDrawable} drawable
+   */
+  addSelfDrawable( drawable ) {
     this.selfDrawable = drawable;
     this.svgGroup.insertBefore( drawable.svgElement, this.children.length ? this.children[ 0 ].svgGroup : null );
     this.hasSelfDrawable = true;
-  },
+  }
 
-  removeSelfDrawable: function( drawable ) {
+  /**
+   * @private
+   *
+   * @param {SelfDrawable} drawable
+   */
+  removeSelfDrawable( drawable ) {
     this.hasSelfDrawable = false;
     this.svgGroup.removeChild( drawable.svgElement );
     this.selfDrawable = null;
-  },
+  }
 
-  addChildGroup: function( group ) {
+  /**
+   * @private
+   *
+   * @param {SVGGroup} group
+   */
+  addChildGroup( group ) {
     this.markOrderDirty();
 
     group.parent = this;
     this.children.push( group );
     this.svgGroup.appendChild( group.svgGroup );
-  },
+  }
 
-  removeChildGroup: function( group ) {
+  /**
+   * @private
+   *
+   * @param {SVGGroup} group
+   */
+  removeChildGroup( group ) {
     this.markOrderDirty();
 
     group.parent = null;
     this.children.splice( _.indexOf( this.children, group ), 1 );
     this.svgGroup.removeChild( group.svgGroup );
-  },
+  }
 
-  markDirty: function() {
+  /**
+   * @public
+   */
+  markDirty() {
     if ( !this.dirty ) {
       this.dirty = true;
 
       this.block.markDirtyGroup( this );
     }
-  },
+  }
 
-  /*---------------------------------------------------------------------------*
-   * TODO: reduce filesize by creating these methods programatically. not done yet since I want to ensure correctness and make refactoring easier right now.
-   *----------------------------------------------------------------------------*/
-
-  markOrderDirty: function() {
+  /**
+   * @public
+   */
+  markOrderDirty() {
     if ( !this.orderDirty ) {
       this.orderDirty = true;
       this.markDirty();
     }
-  },
+  }
 
-  markTransformDirty: function() {
+  /**
+   * @public
+   */
+  markTransformDirty() {
     if ( !this.transformDirty ) {
       this.transformDirty = true;
       this.markDirty();
     }
-  },
+  }
 
-  markOpacityDirty: function() {
+  /**
+   * @public
+   */
+  markOpacityDirty() {
     if ( !this.opacityDirty ) {
       this.opacityDirty = true;
       this.markDirty();
     }
-  },
+  }
 
-  markVisibilityDirty: function() {
+  /**
+   * @public
+   */
+  markVisibilityDirty() {
     if ( !this.visibilityDirty ) {
       this.visibilityDirty = true;
       this.markDirty();
     }
-  },
+  }
 
-  markClipDirty: function() {
+  /**
+   * @public
+   */
+  markClipDirty() {
     if ( !this.clipDirty ) {
       this.clipDirty = true;
       this.markDirty();
     }
-  },
+  }
 
-  update: function() {
+  /**
+   * @public
+   */
+  update() {
     sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'update: ' + this.toString() );
 
     // we may have been disposed since being marked dirty on our block. we won't have a reference if we are disposed
@@ -314,14 +352,23 @@ inherit( Object, SVGGroup, {
     }
 
     sceneryLog && sceneryLog.SVGGroup && sceneryLog.pop();
-  },
+  }
 
-  isReleasable: function() {
+  /**
+   * @private
+   *
+   * @returns {boolean}
+   */
+  isReleasable() {
     // if we have no parent, we are the rootGroup (the block is responsible for disposing that one)
     return !this.hasSelfDrawable && !this.children.length && this.parent;
-  },
+  }
 
-  dispose: function() {
+  /**
+   * Releases references
+   * @public
+   */
+  dispose() {
     sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'dispose ' + this.toString() );
     sceneryLog && sceneryLog.SVGGroup && sceneryLog.push();
 
@@ -364,59 +411,88 @@ inherit( Object, SVGGroup, {
     this.freeToPool();
 
     sceneryLog && sceneryLog.SVGGroup && sceneryLog.pop();
-  },
+  }
 
-  toString: function() {
+  /**
+   * Returns a string form of this object
+   * @public
+   *
+   * @returns {string}
+   */
+  toString() {
     return 'SVGGroup:' + this.block.toString() + '_' + this.instance.toString();
   }
-} );
 
-// @public
-SVGGroup.addDrawable = function( block, drawable ) {
-  assert && assert( drawable.instance, 'Instance is required for a drawable to be grouped correctly in SVG' );
+  /**
+   * @public
+   *
+   * @param {SVGBlock} block
+   * @param {Drawable} drawable
+   */
+  static addDrawable( block, drawable ) {
+    assert && assert( drawable.instance, 'Instance is required for a drawable to be grouped correctly in SVG' );
 
-  const group = SVGGroup.ensureGroupsToInstance( block, drawable.instance );
-  group.addSelfDrawable( drawable );
-};
-
-// @public
-SVGGroup.removeDrawable = function( block, drawable ) {
-  drawable.instance.lookupSVGGroup( block ).removeSelfDrawable( drawable );
-
-  SVGGroup.releaseGroupsToInstance( block, drawable.instance );
-};
-
-// @private
-SVGGroup.ensureGroupsToInstance = function( block, instance ) {
-  // TODO: assertions here
-
-  let group = instance.lookupSVGGroup( block );
-
-  if ( !group ) {
-    assert && assert( instance !== block.rootGroup.instance, 'Making sure we do not walk past our rootGroup' );
-
-    const parentGroup = SVGGroup.ensureGroupsToInstance( block, instance.parent );
-
-    group = SVGGroup.createFromPool( block, instance, parentGroup );
-    parentGroup.addChildGroup( group );
+    const group = SVGGroup.ensureGroupsToInstance( block, drawable.instance );
+    group.addSelfDrawable( drawable );
   }
 
-  return group;
-};
+  /**
+   * @public
+   *
+   * @param {SVGBlock} block
+   * @param {Drawable} drawable
+   */
+  static removeDrawable( block, drawable ) {
+    drawable.instance.lookupSVGGroup( block ).removeSelfDrawable( drawable );
 
-// @private
-SVGGroup.releaseGroupsToInstance = function( block, instance ) {
-  const group = instance.lookupSVGGroup( block );
-
-  if ( group.isReleasable() ) {
-    const parentGroup = group.parent;
-    parentGroup.removeChildGroup( group );
-
-    SVGGroup.releaseGroupsToInstance( block, parentGroup.instance );
-
-    group.dispose();
+    SVGGroup.releaseGroupsToInstance( block, drawable.instance );
   }
-};
+
+  /**
+   * @private
+   *
+   * @param {SVGBlock} block
+   * @param {Instance} instance
+   * @returns {SVGGroup}
+   */
+  static ensureGroupsToInstance( block, instance ) {
+    // TODO: assertions here
+
+    let group = instance.lookupSVGGroup( block );
+
+    if ( !group ) {
+      assert && assert( instance !== block.rootGroup.instance, 'Making sure we do not walk past our rootGroup' );
+
+      const parentGroup = SVGGroup.ensureGroupsToInstance( block, instance.parent );
+
+      group = SVGGroup.createFromPool( block, instance, parentGroup );
+      parentGroup.addChildGroup( group );
+    }
+
+    return group;
+  }
+
+  /**
+   * @private
+   *
+   * @param {SVGBlock} block
+   * @param {Instance} instance
+   */
+  static releaseGroupsToInstance( block, instance ) {
+    const group = instance.lookupSVGGroup( block );
+
+    if ( group.isReleasable() ) {
+      const parentGroup = group.parent;
+      parentGroup.removeChildGroup( group );
+
+      SVGGroup.releaseGroupsToInstance( block, parentGroup.instance );
+
+      group.dispose();
+    }
+  }
+}
+
+scenery.register( 'SVGGroup', SVGGroup );
 
 Poolable.mixInto( SVGGroup, {
   initialize: SVGGroup.prototype.initialize
