@@ -27,7 +27,6 @@ const CircleStatefulDrawable = memoize( type => {
      *
      * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
      * @param {Instance} instance
-     * @returns {CircleStatefulDrawable} - Self reference for chaining
      */
     initialize( renderer, instance, ...args ) {
       super.initialize( renderer, instance, ...args );
@@ -38,8 +37,6 @@ const CircleStatefulDrawable = memoize( type => {
 
       // @protected {boolean} - Whether the radius has changed since our last update.
       this.dirtyRadius = true;
-
-      return this; // allow for chaining
     }
 
     /**

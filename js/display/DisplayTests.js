@@ -17,6 +17,8 @@ import Rectangle from '../nodes/Rectangle.js';
 import Text from '../nodes/Text.js';
 import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
 import Display from './Display.js';
+import Instance from './Instance.js';
+import Renderer from './Renderer.js';
 import CircleCanvasDrawable from './drawables/CircleCanvasDrawable.js';
 import CircleDOMDrawable from './drawables/CircleDOMDrawable.js';
 import CircleSVGDrawable from './drawables/CircleSVGDrawable.js';
@@ -34,12 +36,10 @@ import RectangleSVGDrawable from './drawables/RectangleSVGDrawable.js';
 import TextCanvasDrawable from './drawables/TextCanvasDrawable.js';
 import TextDOMDrawable from './drawables/TextDOMDrawable.js';
 import TextSVGDrawable from './drawables/TextSVGDrawable.js';
-import Instance from './Instance.js';
-import Renderer from './Renderer.js';
 
 QUnit.module( 'Display' );
 
-QUnit.test( 'Drawables (Rectangle)', function( assert ) {
+QUnit.test( 'Drawables (Rectangle)', assert => {
 
   // The stubDisplay It's a hack that implements the subset of the Display API needed where called. It will definitely
   // be removed. The reason it stores the frame ID is because much of Scenery 0.2 uses ID comparison to determine
@@ -89,7 +89,7 @@ QUnit.test( 'Drawables (Rectangle)', function( assert ) {
   assert.ok( RectangleCanvasDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
 } );
 
-QUnit.test( 'Drawables (Circle)', function( assert ) {
+QUnit.test( 'Drawables (Circle)', assert => {
   const stubDisplay = { _frameId: 5, isWebGLAllowed: () => true };
 
   const canvas = document.createElement( 'canvas' );
@@ -135,7 +135,7 @@ QUnit.test( 'Drawables (Circle)', function( assert ) {
   assert.ok( CircleCanvasDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
 } );
 
-QUnit.test( 'Drawables (Line)', function( assert ) {
+QUnit.test( 'Drawables (Line)', assert => {
   const stubDisplay = { _frameId: 5, isWebGLAllowed: () => true };
 
   const canvas = document.createElement( 'canvas' );
@@ -175,7 +175,7 @@ QUnit.test( 'Drawables (Line)', function( assert ) {
   assert.ok( LineCanvasDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
 } );
 
-QUnit.test( 'Drawables (Path)', function( assert ) {
+QUnit.test( 'Drawables (Path)', assert => {
   const stubDisplay = { _frameId: 5, isWebGLAllowed: () => true };
 
   const canvas = document.createElement( 'canvas' );
@@ -220,7 +220,7 @@ QUnit.test( 'Drawables (Path)', function( assert ) {
   assert.ok( PathCanvasDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
 } );
 
-QUnit.test( 'Drawables (Text)', function( assert ) {
+QUnit.test( 'Drawables (Text)', assert => {
   const stubDisplay = { _frameId: 5, isWebGLAllowed: () => true };
 
   const canvas = document.createElement( 'canvas' );
@@ -272,7 +272,7 @@ QUnit.test( 'Drawables (Text)', function( assert ) {
   assert.ok( TextCanvasDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
 } );
 
-QUnit.test( 'Drawables (Image)', function( assert ) {
+QUnit.test( 'Drawables (Image)', assert => {
   const stubDisplay = { _frameId: 5, isWebGLAllowed: () => true };
 
   const canvas = document.createElement( 'canvas' );
@@ -312,7 +312,7 @@ QUnit.test( 'Drawables (Image)', function( assert ) {
   assert.ok( ImageCanvasDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
 } );
 
-QUnit.test( 'Drawables (DOM)', function( assert ) {
+QUnit.test( 'Drawables (DOM)', assert => {
   const stubDisplay = { _frameId: 5, isWebGLAllowed: () => true };
 
   const r1 = new DOM( document.createElement( 'canvas' ) );
@@ -330,7 +330,7 @@ QUnit.test( 'Drawables (DOM)', function( assert ) {
   assert.ok( DOMDrawable.pool.length > 0, 'Disposed drawable returned to pool' );
 } );
 
-QUnit.test( 'Renderer order bitmask', function( assert ) {
+QUnit.test( 'Renderer order bitmask', assert => {
 
   // init test
   let mask = Renderer.createOrderBitmask( Renderer.bitmaskCanvas, Renderer.bitmaskSVG, Renderer.bitmaskDOM, Renderer.bitmaskWebGL );
@@ -414,7 +414,7 @@ QUnit.test( 'Renderer order bitmask', function( assert ) {
 
 /* eslint-disable no-undef */
 
-QUnit.test( 'Empty Display usage', function( assert ) {
+QUnit.test( 'Empty Display usage', assert => {
   const n = new Node();
   const d = new Display( n );
   d.updateDisplay();
@@ -424,7 +424,7 @@ QUnit.test( 'Empty Display usage', function( assert ) {
   d.dispose();
 } );
 
-QUnit.test( 'Simple Display usage', function( assert ) {
+QUnit.test( 'Simple Display usage', assert => {
   const r = new Rectangle( 0, 0, 50, 50, { fill: 'red' } );
   const d = new Display( r );
   d.updateDisplay();
@@ -435,7 +435,7 @@ QUnit.test( 'Simple Display usage', function( assert ) {
   d.dispose();
 } );
 
-QUnit.test( 'Stitch patterns #1', function( assert ) {
+QUnit.test( 'Stitch patterns #1', assert => {
   const n = new Node();
   const d = new Display( n );
   d.updateDisplay();
@@ -468,7 +468,7 @@ QUnit.test( 'Stitch patterns #1', function( assert ) {
   d.dispose();
 } );
 
-QUnit.test( 'Invisible append', function( assert ) {
+QUnit.test( 'Invisible append', assert => {
   const scene = new Node();
   const display = new Display( scene );
   display.updateDisplay();
@@ -486,7 +486,7 @@ QUnit.test( 'Invisible append', function( assert ) {
 
 } );
 
-QUnit.test( 'Stitching problem A (GitHub Issue #339)', function( assert ) {
+QUnit.test( 'Stitching problem A (GitHub Issue #339)', assert => {
   const scene = new Node();
   const display = new Display( scene );
 
@@ -516,7 +516,7 @@ QUnit.test( 'Stitching problem A (GitHub Issue #339)', function( assert ) {
 
 } );
 
-QUnit.test( 'SVG group disposal issue (GitHub Issue #354) A', function( assert ) {
+QUnit.test( 'SVG group disposal issue (GitHub Issue #354) A', assert => {
   const scene = new Node();
   const display = new Display( scene );
 
@@ -538,7 +538,7 @@ QUnit.test( 'SVG group disposal issue (GitHub Issue #354) A', function( assert )
 
 } );
 
-QUnit.test( 'SVG group disposal issue (GitHub Issue #354) B', function( assert ) {
+QUnit.test( 'SVG group disposal issue (GitHub Issue #354) B', assert => {
   const scene = new Node();
   const display = new Display( scene );
 
@@ -560,7 +560,7 @@ QUnit.test( 'SVG group disposal issue (GitHub Issue #354) B', function( assert )
   display.dispose();
 } );
 
-QUnit.test( 'Empty path display test', function( assert ) {
+QUnit.test( 'Empty path display test', assert => {
   const scene = new Node();
   const display = new Display( scene );
 
@@ -571,7 +571,7 @@ QUnit.test( 'Empty path display test', function( assert ) {
   display.dispose();
 } );
 
-QUnit.test( 'Double remove related to #392', function( assert ) {
+QUnit.test( 'Double remove related to #392', assert => {
   const scene = new Node();
   const display = new Display( scene );
 

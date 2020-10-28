@@ -9,13 +9,25 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 import Renderer from './Renderer.js';
 import Stitcher from './Stitcher.js';
 
-const prototype = {
-  stitch: function( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
+class RebuildStitcher extends Stitcher {
+  /**
+   * Main stitch entry point, called directly from the backbone or cache. We are modifying our backbone's blocks and
+   * their attached drawables.
+   * @public
+   *
+   * @param {BackboneDrawable} backbone
+   * @param {Drawable|null} firstStitchDrawable
+   * @param {Drawable|null} lastStitchDrawable
+   * @param {Drawable|null} oldFirstStitchDrawable
+   * @param {Drawable|null} oldLastStitchDrawable
+   * @param {ChangeInterval} firstChangeInterval
+   * @param {ChangeInterval} lastChangeInterval
+   */
+  stitch( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval ) {
     this.initialize( backbone, firstDrawable, lastDrawable, oldFirstDrawable, oldLastDrawable, firstChangeInterval, lastChangeInterval );
 
     for ( let d = backbone.previousFirstDrawable; d !== null; d = d.oldNextDrawable ) {
@@ -65,13 +77,8 @@ const prototype = {
 
     this.clean();
   }
-};
+}
 
-const RebuildStitcher = inherit( Stitcher, function RebuildStitcher() {
-  // nothing done
-}, prototype );
 scenery.register( 'RebuildStitcher', RebuildStitcher );
-
-RebuildStitcher.stitchPrototype = prototype;
 
 export default RebuildStitcher;

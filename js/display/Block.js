@@ -18,8 +18,6 @@ class Block extends Drawable {
    *
    * @param {Display} display
    * @param {number} renderer
-   *
-   * @returns {Block} - Returns 'this' reference, for chaining
    */
   initialize( display, renderer ) {
     super.initialize( renderer );
@@ -49,8 +47,6 @@ class Block extends Drawable {
     if ( assertSlow ) {
       this.drawableList = cleanArray( this.drawableList );
     }
-
-    return this;
   }
 
   /**

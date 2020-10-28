@@ -35,8 +35,6 @@ const PathStatefulDrawable = memoize( type => {
       //                        need to accelerate the transform case.
       this.paintDirty = true;
       this.dirtyShape = true;
-
-      return this; // allow for chaining
     }
 
     /**

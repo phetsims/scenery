@@ -27,7 +27,6 @@ const TextStatefulDrawable = memoize( type => {
      *
      * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
      * @param {Instance} instance
-     * @returns {TextStatefulDrawable} - Returns 'this' reference, for chaining
      */
     initialize( renderer, instance, ...args ) {
       super.initialize( renderer, instance, ...args );
@@ -38,8 +37,6 @@ const TextStatefulDrawable = memoize( type => {
       this.dirtyText = true;
       this.dirtyFont = true;
       this.dirtyBounds = true;
-
-      return this; // allow for chaining
     }
 
     /**

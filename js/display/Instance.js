@@ -43,7 +43,11 @@ let globalIdCounter = 1;
 
 // preferences top to bottom in general
 const defaultPreferredRenderers = Renderer.createOrderBitmask(
-  Renderer.bitmaskSVG, Renderer.bitmaskCanvas, Renderer.bitmaskDOM, Renderer.bitmaskWebGL );
+  Renderer.bitmaskSVG,
+  Renderer.bitmaskCanvas,
+  Renderer.bitmaskDOM,
+  Renderer.bitmaskWebGL
+);
 
 /**
  * @constructor

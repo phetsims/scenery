@@ -41,7 +41,6 @@ class CanvasBlock extends FittedBlock {
    * @param {number} renderer
    * @param {Instance} transformRootInstance
    * @param {Instance} filterRootInstance
-   * @returns {CanvasBlock} - For chaining
    */
   initialize( display, renderer, transformRootInstance, filterRootInstance ) {
     super.initialize( display, renderer, transformRootInstance, FittedBlock.COMMON_ANCESTOR );
@@ -120,8 +119,6 @@ class CanvasBlock extends FittedBlock {
 
     sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `initialized #${this.id}` );
     // TODO: dirty list of nodes (each should go dirty only once, easier than scanning all?)
-
-    return this;
   }
 
   /**

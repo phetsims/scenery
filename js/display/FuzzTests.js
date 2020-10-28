@@ -18,7 +18,7 @@ import Display from './Display.js';
 
 QUnit.module( 'Fuzz' );
 
-QUnit.test( 'Instance.addRemoveCounter === -2 failure (#392)', function( assert ) {
+QUnit.test( 'Instance.addRemoveCounter === -2 failure (#392)', assert => {
   const scene = new Node();
   const display = new Display( scene );
   display.updateDisplay();
@@ -510,7 +510,7 @@ QUnit.test( 'Instance.addRemoveCounter === -2 failure (#392)', function( assert 
   display.dispose();
 } );
 
-QUnit.test( 'RelativeTransform matrix mismatch #393', function( assert ) {
+QUnit.test( 'RelativeTransform matrix mismatch #393', assert => {
   const scene = new Node();
   const display = new Display( scene, { width: 640, height: 480, backgroundColor: '#eee' } );
   display.updateDisplay();
@@ -531,7 +531,7 @@ QUnit.test( 'RelativeTransform matrix mismatch #393', function( assert ) {
   display.dispose();
 } );
 
-QUnit.test( 'computeShapeBounds in requiresSVGBoundsWorkaround', function( assert ) {
+QUnit.test( 'computeShapeBounds in requiresSVGBoundsWorkaround', assert => {
   const scene = new Node();
   const display = new Display( scene, { width: 640, height: 480, backgroundColor: '#eee' } );
   display.updateDisplay();

@@ -1,6 +1,5 @@
 // Copyright 2014-2020, University of Colorado Boulder
 
-
 /**
  * Stitcher that only rebuilds the parts necessary, and attempts greedy block matching as an optimization.
  *
@@ -36,7 +35,6 @@
  */
 
 import cleanArray from '../../../phet-core/js/cleanArray.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 import Block from './Block.js';
 import ChangeInterval from './ChangeInterval.js';
@@ -140,19 +138,25 @@ function getLastCompatibleExternalDrawable( interval ) {
   }
 }
 
-const prototype = {
-  // Main stitch entry point, called directly from the backbone or cache. We are modifying our backbone's blocks and
-  // their attached drawables.
-  // @param {Drawable | null} firstStitchDrawable: What our backbone's first drawable will be after this stitch
-  // @param {Drawable | null} lastStitchDrawable: What our backbone's last drawable will be after this stitch
-  // @param {Drawable | null} oldFirstStitchDrawable: What our backbone's first drawable was before this stitch
-  // @param {Drawable | null} oldLastStitchDrawable: What our backbone's last drawable was before this stitch
-  // @param {ChangeInterval} firstChangeInterval: The first change interval of our interval linked-list
-  // @param {ChangeInterval} lastChangeInterval: The last change interval of our interval linked-list
-  // The change-interval pair denotes a linked-list of change intervals that we will need to stitch across (they
-  // contain drawables that need to be removed and added, and it may affect how we lay out blocks in the stacking
-  // order).
-  stitch: function( backbone, firstStitchDrawable, lastStitchDrawable, oldFirstStitchDrawable, oldLastStitchDrawable, firstChangeInterval, lastChangeInterval ) {
+class GreedyStitcher extends Stitcher {
+  /**
+   * Main stitch entry point, called directly from the backbone or cache. We are modifying our backbone's blocks and
+   * their attached drawables.
+   * @public
+   *
+   * The change-interval pair denotes a linked-list of change intervals that we will need to stitch across (they
+   * contain drawables that need to be removed and added, and it may affect how we lay out blocks in the stacking
+   * order).
+   *
+   * @param {BackboneDrawable} backbone
+   * @param {Drawable|null} firstStitchDrawable
+   * @param {Drawable|null} lastStitchDrawable
+   * @param {Drawable|null} oldFirstStitchDrawable
+   * @param {Drawable|null} oldLastStitchDrawable
+   * @param {ChangeInterval} firstChangeInterval
+   * @param {ChangeInterval} lastChangeInterval
+   */
+  stitch( backbone, firstStitchDrawable, lastStitchDrawable, oldFirstStitchDrawable, oldLastStitchDrawable, firstChangeInterval, lastChangeInterval ) {
     // required call to the Stitcher interface (see Stitcher.initialize()).
     this.initialize( backbone, firstStitchDrawable, lastStitchDrawable, oldFirstStitchDrawable, oldLastStitchDrawable, firstChangeInterval, lastChangeInterval );
 
@@ -268,10 +272,18 @@ const prototype = {
     cleanArray( this.reusableBlocks );
 
     sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.pop();
-  },
+  }
 
-  // does the main bulk of the work for each change interval
-  processInterval: function( backbone, interval, firstStitchDrawable, lastStitchDrawable ) {
+  /**
+   * Does the main bulk of the work for each change interval.
+   * @private
+   *
+   * @param {BackboneDrawable} backbone
+   * @param {ChangeInterval} interval
+   * @param {Drawable|null} firstStitchDrawable
+   * @param {Drawable|null} lastStitchDrawable
+   */
+  processInterval( backbone, interval, firstStitchDrawable, lastStitchDrawable ) {
     assert && assert( interval instanceof ChangeInterval );
     assert && assert( firstStitchDrawable instanceof Drawable, 'We assume we have a non-null remaining section' );
     assert && assert( lastStitchDrawable instanceof Drawable, 'We assume we have a non-null remaining section' );
@@ -366,10 +378,19 @@ const prototype = {
 
 
     sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
-  },
+  }
 
-  // firstDrawable and lastDrawable refer to the specific sub-block
-  processSubBlock: function( interval, firstDrawable, lastDrawable, matchedBlock, isFirst, isLast ) {
+  /**
+   * @private
+   *
+   * @param {ChangeInterval} interval
+   * @param {Drawable} firstDrawable - for the specific sub-block
+   * @param {Drawable} lastDrawable - for the specific sub-block
+   * @param {Block} matchedBlock
+   * @param {boolean} isFirst
+   * @param {boolean} isLast
+   */
+  processSubBlock( interval, firstDrawable, lastDrawable, matchedBlock, isFirst, isLast ) {
     sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose(
       'sub-block: ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() + ' ' +
       ( matchedBlock ? 'with matched: ' + matchedBlock.toString() : 'with no match' ) );
@@ -420,11 +441,18 @@ const prototype = {
     }
 
     sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
-  },
+  }
 
-  // firstDrawable and lastDrawable refer to the specific sub-block (if it exists), isLast refers to if it's the
-  // last sub-block
-  processEdgeCases: function( interval, openBefore, openAfter ) {
+  /**
+   * firstDrawable and lastDrawable refer to the specific sub-block (if it exists), isLast refers to if it's the
+   * last sub-block
+   * @private
+   *
+   * @param {ChangeInterval} interval
+   * @param {boolean} openBefore
+   * @param {boolean} openAfter
+   */
+  processEdgeCases( interval, openBefore, openAfter ) {
     // this test passes for glue and unglue cases
     if ( interval.drawableBefore !== null && interval.drawableAfter !== null ) {
       const beforeBlock = interval.drawableBefore.pendingParentDrawable;
@@ -500,13 +528,19 @@ const prototype = {
 
       sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.pop();
     }
-  },
+  }
 
-  // Marks all 'external' drawables from the end (drawableAfter) of the {ChangeInterval} interval to either the end
-  // of their old block or the drawableAfter of the next interval (whichever is sooner) as being needed to be moved to
-  // our {Block} newBlock. The next processInterval will both handle the drawables inside that next interval, and
-  // will be responsible for the 'external' drawables after that.
-  changeExternals: function( interval, newBlock ) {
+  /**
+   * Marks all 'external' drawables from the end (drawableAfter) of the {ChangeInterval} interval to either the end
+   * of their old block or the drawableAfter of the next interval (whichever is sooner) as being needed to be moved to
+   * our {Block} newBlock. The next processInterval will both handle the drawables inside that next interval, and
+   * will be responsible for the 'external' drawables after that.
+   * @private
+   *
+   * @param {ChangeInterval} interval
+   * @param {Block} newBlock
+   */
+  changeExternals( interval, newBlock ) {
     const lastExternalDrawable = getLastCompatibleExternalDrawable( interval );
     this.notePendingMoves( newBlock, interval.drawableAfter, lastExternalDrawable );
 
@@ -515,12 +549,19 @@ const prototype = {
     if ( !interval.nextChangeInterval || interval.nextChangeInterval.drawableBefore !== lastExternalDrawable ) {
       this.linkAfterDrawable( lastExternalDrawable );
     }
-  },
+  }
 
-  // Given a {Drawable} firstDrawable and {Drawable} lastDrawable, we mark all drawables in-between (inclusively) as
-  // needing to be moved to our {Block} newBlock. This should only be called on external drawables, and should only
-  // occur as needed with glue/unglue cases in the stitch.
-  notePendingMoves: function( newBlock, firstDrawable, lastDrawable ) {
+  /**
+   * Given a {Drawable} firstDrawable and {Drawable} lastDrawable, we mark all drawables in-between (inclusively) as
+   * needing to be moved to our {Block} newBlock. This should only be called on external drawables, and should only
+   * occur as needed with glue/unglue cases in the stitch.
+   * @private
+   *
+   * @param {Block} newBlock
+   * @param {Drawable} firstDrawable
+   * @param {Drawable} lastDrawable
+   */
+  notePendingMoves( newBlock, firstDrawable, lastDrawable ) {
     for ( let drawable = firstDrawable; ; drawable = drawable.nextDrawable ) {
       assert && assert( !drawable.pendingAddition && !drawable.pendingRemoval,
         'Moved drawables should be thought of as unchanged, and thus have nothing pending yet' );
@@ -528,11 +569,18 @@ const prototype = {
       this.notePendingMove( drawable, newBlock );
       if ( drawable === lastDrawable ) { break; }
     }
-  },
+  }
 
-  // If there is no currentBlock, we create one to match. Otherwise if the currentBlock is marked as 'unused' (i.e.
-  // it is in the reusableBlocks array), we mark it as used so it won't me matched elsewhere.
-  ensureUsedBlock: function( currentBlock, someIncludedDrawable ) {
+  /**
+   * If there is no currentBlock, we create one to match. Otherwise if the currentBlock is marked as 'unused' (i.e.
+   * it is in the reusableBlocks array), we mark it as used so it won't me matched elsewhere.
+   * @private
+   *
+   * @param {Block} currentBlock
+   * @param {Drawable} someIncludedDrawable
+   * @returns {Block}
+   */
+  ensureUsedBlock( currentBlock, someIncludedDrawable ) {
     // if we have a matched block (or started with one)
     if ( currentBlock ) {
       sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'using existing block: ' + currentBlock.toString() );
@@ -547,12 +595,20 @@ const prototype = {
       currentBlock = this.getBlockForRenderer( someIncludedDrawable.renderer, someIncludedDrawable );
     }
     return currentBlock;
-  },
+  }
 
-  // Attemps to find an unused block with the same renderer if possible, otherwise creates a
-  // compatible block.
-  // NOTE: this doesn't handle hooking up the block linked list
-  getBlockForRenderer: function( renderer, drawable ) {
+  /**
+   * Attemps to find an unused block with the same renderer if possible, otherwise creates a
+   * compatible block.
+   * @private
+   *
+   * NOTE: this doesn't handle hooking up the block linked list
+   *
+   * @param {number} renderer
+   * @param {Drawable} drawable
+   * @returns {Block}
+   */
+  getBlockForRenderer( renderer, drawable ) {
     let block;
 
     // If it's not a DOM block, scan our reusable blocks for one with the same renderer.
@@ -578,10 +634,15 @@ const prototype = {
     this.blockOrderChanged = true; // we created a new block, this will always happen
 
     return block;
-  },
+  }
 
-  // Marks a block as unused, moving it to the reusableBlocks array.
-  unuseBlock: function( block ) {
+  /**
+   * Marks a block as unused, moving it to the reusableBlocks array.
+   * @private
+   *
+   * @param {Block} block
+   */
+  unuseBlock( block ) {
     if ( block.used ) {
       sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'unusing block: ' + block.toString() );
       block.used = false; // mark it as unused until we pull it out (so we can reuse, or quickly identify)
@@ -590,14 +651,25 @@ const prototype = {
     else {
       sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'not using already-unused block: ' + block.toString() );
     }
-  },
+  }
 
-  // Removes a block from the list of reused blocks (done during matching)
-  useBlock: function( block ) {
+  /**
+   * Removes a block from the list of reused blocks (done during matching)
+   * @private
+   *
+   * @param {Block} block
+   */
+  useBlock( block ) {
     this.useBlockAtIndex( block, _.indexOf( this.reusableBlocks, block ) );
-  },
+  }
 
-  useBlockAtIndex: function( block, index ) {
+  /**
+   * @private
+   *
+   * @param {Block} block
+   * @param {number} index
+   */
+  useBlockAtIndex( block, index ) {
     sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'using reusable block: ' + block.toString() + ' with renderer: ' + block.renderer );
 
     assert && assert( index >= 0 && this.reusableBlocks[ index ] === block, 'bad index for useBlockAtIndex: ' + index );
@@ -609,10 +681,13 @@ const prototype = {
 
     // mark it as used
     block.used = true;
-  },
+  }
 
-  // Removes all of our unused blocks from our domElement, and marks them for disposal.
-  removeUnusedBlocks: function() {
+  /**
+   * Removes all of our unused blocks from our domElement, and marks them for disposal.
+   * @private
+   */
+  removeUnusedBlocks() {
     sceneryLog && sceneryLog.GreedyStitcher && this.reusableBlocks.length && sceneryLog.GreedyStitcher( 'removeUnusedBlocks' );
     sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.push();
     while ( this.reusableBlocks.length ) {
@@ -621,37 +696,56 @@ const prototype = {
       this.blockOrderChanged = true;
     }
     sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.pop();
-  },
+  }
 
-  // links blocks before a drawable (whether it is the first drawable or not)
-  linkBeforeDrawable: function( drawable ) {
+  /**
+   * Links blocks before a drawable (whether it is the first drawable or not)
+   * @private
+   *
+   * @param {Drawable} drawable
+   */
+  linkBeforeDrawable( drawable ) {
     sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'link before ' + drawable.toString() );
     const beforeDrawable = drawable.previousDrawable;
     this.linkBlocks( beforeDrawable ? beforeDrawable.pendingParentDrawable : null,
       drawable.pendingParentDrawable,
       beforeDrawable,
       drawable );
-  },
+  }
 
-  // links blocks after a drawable (whether it is the last drawable or not)
-  linkAfterDrawable: function( drawable ) {
+
+  /**
+   * links blocks after a drawable (whether it is the last drawable or not)
+   * @private
+   *
+   * @param {Drawable} drawable
+   */
+  linkAfterDrawable( drawable ) {
     sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'link after ' + drawable.toString() );
     const afterDrawable = drawable.nextDrawable;
     this.linkBlocks( drawable.pendingParentDrawable,
       afterDrawable ? afterDrawable.pendingParentDrawable : null,
       drawable,
       afterDrawable );
-  },
+  }
 
-  // Called to mark a boundary between blocks, or at the end of our list of blocks (one block/drawable pair being
-  // null notes that it is the start/end, and there is no previous/next block).
-  // This updates the block linked-list as necessary (noting changes when they occur) so that we can rebuild an array
-  // at the end of the stitch, avoiding O(n^2) issues if we were to do block-array-index lookups during linking
-  // operations (this results in linear time for blocks).
-  // It also marks block boundaries as dirty when necessary, so that we can make one pass through with
-  // updateBlockIntervals() that updates all of the block's boundaries (avoiding more than one update per block per
-  // frame).
-  linkBlocks: function( beforeBlock, afterBlock, beforeDrawable, afterDrawable ) {
+  /**
+   * Called to mark a boundary between blocks, or at the end of our list of blocks (one block/drawable pair being
+   * null notes that it is the start/end, and there is no previous/next block).
+   * This updates the block linked-list as necessary (noting changes when they occur) so that we can rebuild an array
+   * at the end of the stitch, avoiding O(n^2) issues if we were to do block-array-index lookups during linking
+   * operations (this results in linear time for blocks).
+   * It also marks block boundaries as dirty when necessary, so that we can make one pass through with
+   * updateBlockIntervals() that updates all of the block's boundaries (avoiding more than one update per block per
+   * frame).
+   * @private
+   *
+   * @param {Block|null} beforeBlock
+   * @param {Block|null} afterBlock
+   * @param {Drawable|null} beforeDrawable
+   * @param {Drawable|null} afterDrawable
+   */
+  linkBlocks( beforeBlock, afterBlock, beforeDrawable, afterDrawable ) {
     sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.GreedyStitcher( 'linking blocks: ' +
                                                                           ( beforeBlock ? ( beforeBlock.toString() + ' (' + beforeDrawable.toString() + ')' ) : 'null' ) +
                                                                           ' to ' +
@@ -691,10 +785,17 @@ const prototype = {
     }
 
     sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.pop();
-  },
+  }
 
-  // Rebuilds the backbone's block array from our linked-list data.
-  processBlockLinkedList: function( backbone, firstBlock, lastBlock ) {
+  /**
+   * Rebuilds the backbone's block array from our linked-list data.
+   * @private
+   *
+   * @param {BackboneDrawable} backbone
+   * @param {Block|null} firstBlock
+   * @param {Block|null} lastBlock
+   */
+  processBlockLinkedList( backbone, firstBlock, lastBlock ) {
     // for now, just clear out the array first
     while ( backbone.blocks.length ) {
       backbone.blocks.pop();
@@ -718,13 +819,7 @@ const prototype = {
 
     sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.pop();
   }
-};
+}
 
-const GreedyStitcher = inherit( Stitcher, function GreedyStitcher() {
-  // nothing done
-}, prototype );
 scenery.register( 'GreedyStitcher', GreedyStitcher );
-
-GreedyStitcher.stitchPrototype = prototype;
-
 export default GreedyStitcher;

@@ -27,7 +27,6 @@ const RectangleStatefulDrawable = memoize( type => {
      *
      * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
      * @param {Instance} instance
-     * @returns {RectangleStatefulDrawable} - Returns 'this' reference, for chaining
      */
     initialize( renderer, instance, ...args ) {
       super.initialize( renderer, instance, ...args );
@@ -41,8 +40,6 @@ const RectangleStatefulDrawable = memoize( type => {
       this.dirtyHeight = true;
       this.dirtyCornerXRadius = true;
       this.dirtyCornerYRadius = true;
-
-      return this; // allow for chaining
     }
 
     /**

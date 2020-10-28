@@ -35,7 +35,6 @@ const PaintableStatefulDrawable = memoize( type => {
      *
      * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
      * @param {Instance} instance
-     * @returns {PaintableStatefulDrawable} - Self reference for chaining
      */
     initialize( renderer, instance, ...args ) {
       super.initialize( renderer, instance, ...args );
@@ -78,8 +77,6 @@ const PaintableStatefulDrawable = memoize( type => {
       // Hook up our fill/stroke observers to this node
       this.fillObserver.setPrimary( instance.node._fill );
       this.strokeObserver.setPrimary( instance.node._stroke );
-
-      return this;
     }
 
     /**
