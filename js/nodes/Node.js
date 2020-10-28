@@ -324,7 +324,7 @@ function Node( options ) {
   // @public {TinyForwardingProperty.<boolean>} - Whether this Node (and its children) will be visible when the scene is updated.
   // Visible Nodes by default will not be pickable either.
   // NOTE: This is fired synchronously when the visibility of the Node is toggled
-  this._visibleProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.visible );
+  this._visibleProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.visible, true );
   this._visibleProperty.lazyLink( this.onVisiblePropertyChange.bind( this ) );
 
   // @public {TinyProperty.<number>} - Opacity, in the range from 0 (fully transparent) to 1 (fully opaque).
@@ -555,12 +555,6 @@ function Node( options ) {
   // to know that a Node is getting removed from its parent BUT that process has not completed yet. It would be ideal
   // to not need this.
   this._isGettingRemovedFromParent = false;
-
-  // @public (NodeTests) {Property.<boolean>|null} - TinyProperty is not instrumented for PhET-iO, so when a Node is
-  // instrumented, by default, an instrumented `Property` is forwarded to by this._visibleProperty. This field
-  // stores the default instrumented visible Property when this Node is PhET-iO instrumented and an outside visible
-  // Property isn't provided.
-  this.ownedPhetioVisibleProperty = null;
 
   PhetioObject.call( this );
 
@@ -3180,24 +3174,7 @@ inherit( PhetioObject, Node, {
    * @returns {Node} for chaining
    */
   setVisibleProperty( newTarget ) {
-
-    // We need this information eagerly for later on in the function
-    const previousTarget = this._visibleProperty.targetProperty;
-    const newPropertyIsOwnedPhetioVisibleProperty = newTarget === this.ownedPhetioVisibleProperty;
-
-    // If we had the "default instrumented" Property, we'll remove that and link our new Property. Guard on the fact
-    // that ownedPhetioVisibleProperty is added via this exact method, see Node.initializePhetioObject() for details.
-    // Do this before adding a PhET-iO LinkedElement because ownedPhetioVisibleProperty has the same phetioID as the LinkedElement
-    if ( this.ownedPhetioVisibleProperty && !newPropertyIsOwnedPhetioVisibleProperty ) {
-      this.ownedPhetioVisibleProperty.dispose();
-      this.ownedPhetioVisibleProperty = null;
-    }
-
-    this.updateLinkedElementForProperty( VISIBLE_PROPERTY_TANDEM_NAME, previousTarget, newTarget );
-
-    this._visibleProperty.setTargetProperty( newTarget );
-
-    return this; // for chaining
+    return this._visibleProperty.setTargetProperty( this, VISIBLE_PROPERTY_TANDEM_NAME, newTarget );
   },
   set visibleProperty( property ) { this.setVisibleProperty( property ); },
 
@@ -5344,36 +5321,24 @@ inherit( PhetioObject, Node, {
 
     if ( !wasInstrumented && this.isPhetioInstrumented() ) {
 
-      assert && assert( !this.ownedPhetioVisibleProperty, 'Already created the ownedPhetioVisibleProperty' );
+      // For each supported TinyForwardingProperty, if a Property was already specified in the options (in the
+      // constructor or mutate), then it will be set as this.targetProperty there. Here we only create the default
+      // instrumented one if another hasn't already been specified.
 
-      // If a visibleProperty was already specified in the options (in the constructor or mutate), then it will be set
-      // as this.visibleProperty.targetProperty.  We only create the default instrumented one if another hasn't
-      // already been specified.
-
-      if ( !this._visibleProperty.targetProperty ) {
-
-        this.ownedPhetioVisibleProperty = new BooleanProperty( this.visible, merge( {
+      this._visibleProperty.initializePhetio( this, VISIBLE_PROPERTY_TANDEM_NAME, () => new BooleanProperty( this.visible, merge( {
 
           // by default, use the value from the Node
           phetioReadOnly: this.phetioReadOnly,
           tandem: this.tandem.createTandem( VISIBLE_PROPERTY_TANDEM_NAME ),
           phetioDocumentation: 'Controls whether the Node will be visible (and interactive), see the NodeIO documentation for more details.'
-        }, config.visiblePropertyOptions ) );
-
-        this.setVisibleProperty( this.ownedPhetioVisibleProperty );
-      }
-      else {
-
-        // Since we are just now instrumented, and linked elements can't be added to linked Elements until the PhetioObject
-        // is instrumented, we need to retroactively link to whatever targetProperty may have been added before.
-        this.updateLinkedElementForProperty( VISIBLE_PROPERTY_TANDEM_NAME, null, this._visibleProperty.targetProperty );
-      }
+        }, config.visiblePropertyOptions ) )
+      );
 
       this._pickableProperty.initializePhetio( this, PICKABLE_PROPERTY_TANDEM_NAME, () => new Property( this.pickable, merge( {
 
           // by default, use the value from the Node
           phetioReadOnly: this.phetioReadOnly,
-          tandem: this.tandem.createTandem( 'pickableProperty' ),
+          tandem: this.tandem.createTandem( PICKABLE_PROPERTY_TANDEM_NAME ),
           phetioType: Property.PropertyIO( NullableIO( BooleanIO ) ),
           phetioFeatured: true, // Since this property is opt-in, we typically only opt-in when it should be featured
           phetioDocumentation: 'Sets whether the node will be pickable (and hence interactive). Pickable can take one ' +
@@ -5469,12 +5434,7 @@ inherit( PhetioObject, Node, {
     this.removeAllChildren();
     this.detach();
 
-    // We instrumented ownedPhetioVisibleProperty for PhET-iO, so we'll need to dispose it if we created it.
-    if ( this.ownedPhetioVisibleProperty ) {
-      this.ownedPhetioVisibleProperty.dispose();
-      this.ownedPhetioVisibleProperty = null;
-    }
-
+    this._visibleProperty.dispose();
     this._pickableProperty.dispose();
 
     // Tear-down in the reverse order Node was created
