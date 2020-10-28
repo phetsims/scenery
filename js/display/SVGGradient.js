@@ -7,23 +7,18 @@
  */
 
 import cleanArray from '../../../phet-core/js/cleanArray.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 import SVGGradientStop from './SVGGradientStop.js';
 
-/**
- * @constructor
- *
- * @param {SVGBlock} svgBlock
- * @param {Gradient} gradient
- */
-function SVGGradient( svgBlock, gradient ) {
-  this.initialize( svgBlock, gradient );
-}
+class SVGGradient {
+  /**
+   * @param {SVGBlock} svgBlock
+   * @param {Gradient} gradient
+   */
+  constructor( svgBlock, gradient ) {
+    this.initialize( svgBlock, gradient );
+  }
 
-scenery.register( 'SVGGradient', SVGGradient );
-
-inherit( Object, SVGGradient, {
   /**
    * Poolable initializer.
    * @private
@@ -31,7 +26,7 @@ inherit( Object, SVGGradient, {
    * @param {SVGBlock} svgBlock
    * @param {Gradient} gradient
    */
-  initialize: function( svgBlock, gradient ) {
+  initialize( svgBlock, gradient ) {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradient] initialize ' + gradient.id );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
@@ -73,7 +68,7 @@ inherit( Object, SVGGradient, {
     this.dirty = false;
 
     sceneryLog && sceneryLog.Paints && sceneryLog.pop();
-  },
+  }
 
   /**
    * Creates the gradient-type-specific definition.
@@ -82,15 +77,15 @@ inherit( Object, SVGGradient, {
    *
    * @returns {SVGGradientElement}
    */
-  createDefinition: function() {
+  createDefinition() {
     throw new Error( 'abstract method' );
-  },
+  }
 
   /**
    * Called from SVGGradientStop when a stop needs to change the actual color.
    * @public
    */
-  markDirty: function() {
+  markDirty() {
     if ( !this.dirty ) {
       sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradient] switched to dirty: ' + this.gradient.id );
       sceneryLog && sceneryLog.Paints && sceneryLog.push();
@@ -101,13 +96,13 @@ inherit( Object, SVGGradient, {
 
       sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     }
-  },
+  }
 
   /**
    * Called from SVGBlock when we need to update our color stops.
    * @public
    */
-  update: function() {
+  update() {
     if ( !this.dirty ) {
       return;
     }
@@ -121,13 +116,13 @@ inherit( Object, SVGGradient, {
     }
 
     sceneryLog && sceneryLog.Paints && sceneryLog.pop();
-  },
+  }
 
   /**
    * Disposes, so that it can be reused from the pool.
    * @public
    */
-  dispose: function() {
+  dispose() {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradient] dispose ' + this.gradient.id );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
@@ -146,6 +141,8 @@ inherit( Object, SVGGradient, {
 
     sceneryLog && sceneryLog.Paints && sceneryLog.pop();
   }
-} );
+}
+
+scenery.register( 'SVGGradient', SVGGradient );
 
 export default SVGGradient;

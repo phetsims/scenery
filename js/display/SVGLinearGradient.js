@@ -9,25 +9,11 @@
  */
 
 import Poolable from '../../../phet-core/js/Poolable.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 import svgns from '../util/svgns.js';
 import SVGGradient from './SVGGradient.js';
 
-/**
- * @constructor
- * @mixes Poolable
- *
- * @param {SVGBlock} svgBlock
- * @param {LinearGradient} linearGradient
- */
-function SVGLinearGradient( svgBlock, linearGradient ) {
-  this.initialize( svgBlock, linearGradient );
-}
-
-scenery.register( 'SVGLinearGradient', SVGLinearGradient );
-
-inherit( SVGGradient, SVGLinearGradient, {
+class SVGLinearGradient extends SVGGradient {
   /**
    * Poolable initializer.
    * @private
@@ -35,11 +21,11 @@ inherit( SVGGradient, SVGLinearGradient, {
    * @param {SVGBlock} svgBlock
    * @param {LinearGradient} linearGradient
    */
-  initialize: function( svgBlock, linearGradient ) {
+  initialize( svgBlock, linearGradient ) {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGLinearGradient] initialize ' + linearGradient.id );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
-    SVGGradient.prototype.initialize.call( this, svgBlock, linearGradient );
+    super.initialize( svgBlock, linearGradient );
 
     // seems we need the defs: http://stackoverflow.com/questions/7614209/linear-gradients-in-svg-without-defs
     // SVG: spreadMethod 'pad' 'reflect' 'repeat' - find Canvas usage
@@ -61,7 +47,7 @@ inherit( SVGGradient, SVGLinearGradient, {
     sceneryLog && sceneryLog.Paints && sceneryLog.pop();
 
     return this;
-  },
+  }
 
   /**
    * Creates the gradient-type-specific definition.
@@ -70,10 +56,12 @@ inherit( SVGGradient, SVGLinearGradient, {
    *
    * @returns {SVGLinearGradientElement}
    */
-  createDefinition: function() {
+  createDefinition() {
     return document.createElementNS( svgns, 'linearGradient' );
   }
-} );
+}
+
+scenery.register( 'SVGLinearGradient', SVGLinearGradient );
 
 Poolable.mixInto( SVGLinearGradient, {
   initialize: SVGLinearGradient.prototype.initialize
