@@ -3402,10 +3402,13 @@ inherit( PhetioObject, Node, {
    * bottom of http://phetsims.github.io/scenery/doc/implementation-notes, or scenery/assets/pickability.svg.
    *
    * @param {boolean|null} pickable
+   * @returns {Node} - for chaining
    */
   setPickable: function( pickable ) {
     assert && assert( pickable === null || typeof pickable === 'boolean' );
     this._pickableProperty.set( pickable );
+
+    return this;
   },
   set pickable( value ) { this.setPickable( value ); },
 
