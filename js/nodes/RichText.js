@@ -278,7 +278,7 @@ inherit( Node, RichText, {
   setTextProperty( newTarget ) {
 
     // We need this information eagerly for later on in the function
-    const previousTarget = this._textProperty.forwardingProperty;
+    const previousTarget = this._textProperty.targetProperty;
     const newPropertyIsOwnedPhetioTextProperty = newTarget === this.ownedPhetioTextProperty;
 
     // If we had the "default instrumented" Property, we'll remove that and link our new Property. Guard on the fact
@@ -291,7 +291,7 @@ inherit( Node, RichText, {
 
     this.updateLinkedElementForProperty( TEXT_PROPERTY_TANDEM_NAME, previousTarget, newTarget );
 
-    this._textProperty.setForwardingProperty( newTarget );
+    this._textProperty.setTargetProperty( newTarget );
 
     return this; // for chaining
   },
@@ -330,7 +330,7 @@ inherit( Node, RichText, {
 
       assert && assert( !this.ownedPhetioTextProperty, 'Already created the ownedPhetioTextProperty' );
 
-      if ( !this._textProperty.forwardingProperty ) {
+      if ( !this._textProperty.targetProperty ) {
 
         this.ownedPhetioTextProperty = new StringProperty( this.text, merge( {
 
@@ -345,8 +345,8 @@ inherit( Node, RichText, {
       else {
 
         // Since we are just now instrumented, and linked elements can't be added to linked Elements until the PhetioObject
-        // is instrumented, we need to retroactively link to whatever forwardingProperty may have been added before.
-        this.updateLinkedElementForProperty( TEXT_PROPERTY_TANDEM_NAME, null, this._textProperty.forwardingProperty );
+        // is instrumented, we need to retroactively link to whatever targetProperty may have been added before.
+        this.updateLinkedElementForProperty( TEXT_PROPERTY_TANDEM_NAME, null, this._textProperty.targetProperty );
       }
     }
   },

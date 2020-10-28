@@ -3168,7 +3168,7 @@ inherit( PhetioObject, Node, {
 
   /**
    * Sets what Property our visibleProperty is backed by, so that changes to this provided Property will change this
-   * Node's visibility, and vice versa. This does not change this._visibleProperty. See TinyForwardingProperty.setForwardingProperty()
+   * Node's visibility, and vice versa. This does not change this._visibleProperty. See TinyForwardingProperty.setTargetProperty()
    * for more info.
    *
    * Note that all instrumented Nodes create their own instrumented visibleProperty (if one is not passed in as an option).
@@ -3182,7 +3182,7 @@ inherit( PhetioObject, Node, {
   setVisibleProperty( newTarget ) {
 
     // We need this information eagerly for later on in the function
-    const previousTarget = this._visibleProperty.forwardingProperty;
+    const previousTarget = this._visibleProperty.targetProperty;
     const newPropertyIsOwnedPhetioVisibleProperty = newTarget === this.ownedPhetioVisibleProperty;
 
     // If we had the "default instrumented" Property, we'll remove that and link our new Property. Guard on the fact
@@ -3195,7 +3195,7 @@ inherit( PhetioObject, Node, {
 
     this.updateLinkedElementForProperty( VISIBLE_PROPERTY_TANDEM_NAME, previousTarget, newTarget );
 
-    this._visibleProperty.setForwardingProperty( newTarget );
+    this._visibleProperty.setTargetProperty( newTarget );
 
     return this; // for chaining
   },
@@ -3301,7 +3301,7 @@ inherit( PhetioObject, Node, {
 
   /**
    * Sets what Property our pickableProperty is backed by, so that changes to this provided Property will change this
-   * Node's pickability, and vice versa. This does not change this._pickableProperty. See TinyForwardingProperty.setForwardingProperty()
+   * Node's pickability, and vice versa. This does not change this._pickableProperty. See TinyForwardingProperty.setTargetProperty()
    * for more info.
    *
    * Instrumented Nodes do not by default create their own instrumented pickableProperty, even though Node.visibleProperty does.
@@ -3313,17 +3313,17 @@ inherit( PhetioObject, Node, {
    */
   setPickableProperty( newTarget ) {
 
-    return this._pickableProperty.setForwardingProperty( this, PICKABLE_PROPERTY_TANDEM_NAME, newTarget );
+    return this._pickableProperty.setTargetProperty( this, PICKABLE_PROPERTY_TANDEM_NAME, newTarget );
   },
   set pickableProperty( property ) { this.setPickableProperty( property ); },
 
   /**
    * Handles linking and checking child PhET-iO Properties such as visibleProperty and pickableProperty.
-   * @protected
+   * @public
    *
    * @param {string} tandemName - the name for the child tandem
-   * @param {Property.<boolean>|undefined|null} oldProperty - same typedef as TinyForwardingProperty.forwardingProperty
-   * @param {Property.<boolean>|undefined|null} newProperty - same typedef as TinyForwardingProperty.forwardingProperty
+   * @param {Property.<boolean>|undefined|null} oldProperty - same typedef as TinyForwardingProperty.targetProperty
+   * @param {Property.<boolean>|undefined|null} newProperty - same typedef as TinyForwardingProperty.targetProperty
    */
   updateLinkedElementForProperty( tandemName, oldProperty, newProperty ) {
     assert && assert( oldProperty !== newProperty, 'should not be called on same values' );
@@ -3366,7 +3366,7 @@ inherit( PhetioObject, Node, {
    * @returns {Node} - for chaining
    */
   setPickablePropertyPhetioInstrumented: function( pickablePropertyPhetioInstrumented ) {
-    return this._pickableProperty.setForwardingPropertyInstrumented( pickablePropertyPhetioInstrumented, this );
+    return this._pickableProperty.setTargetPropertyInstrumented( pickablePropertyPhetioInstrumented, this );
   },
   set pickablePropertyPhetioInstrumented( pickablePropertyPhetioInstrumented ) { this.setPickablePropertyPhetioInstrumented( pickablePropertyPhetioInstrumented );},
 
@@ -5347,10 +5347,10 @@ inherit( PhetioObject, Node, {
       assert && assert( !this.ownedPhetioVisibleProperty, 'Already created the ownedPhetioVisibleProperty' );
 
       // If a visibleProperty was already specified in the options (in the constructor or mutate), then it will be set
-      // as this.visibleProperty.forwardingProperty.  We only create the default instrumented one if another hasn't
+      // as this.visibleProperty.targetProperty.  We only create the default instrumented one if another hasn't
       // already been specified.
 
-      if ( !this._visibleProperty.forwardingProperty ) {
+      if ( !this._visibleProperty.targetProperty ) {
 
         this.ownedPhetioVisibleProperty = new BooleanProperty( this.visible, merge( {
 
@@ -5365,11 +5365,12 @@ inherit( PhetioObject, Node, {
       else {
 
         // Since we are just now instrumented, and linked elements can't be added to linked Elements until the PhetioObject
-        // is instrumented, we need to retroactively link to whatever forwardingProperty may have been added before.
-        this.updateLinkedElementForProperty( VISIBLE_PROPERTY_TANDEM_NAME, null, this._visibleProperty.forwardingProperty );
+        // is instrumented, we need to retroactively link to whatever targetProperty may have been added before.
+        this.updateLinkedElementForProperty( VISIBLE_PROPERTY_TANDEM_NAME, null, this._visibleProperty.targetProperty );
       }
 
-      this._pickableProperty.forwardingPropertyInstrumented && this._pickableProperty.initializePhetio( this, PICKABLE_PROPERTY_TANDEM_NAME, () => new Property( this.pickable, merge( {
+      // TODO: remove this guard, oops, https://github.com/phetsims/scenery/issues/1097
+      this._pickableProperty.targetPropertyInstrumented && this._pickableProperty.initializePhetio( this, PICKABLE_PROPERTY_TANDEM_NAME, () => new Property( this.pickable, merge( {
 
           // by default, use the value from the Node
           phetioReadOnly: this.phetioReadOnly,

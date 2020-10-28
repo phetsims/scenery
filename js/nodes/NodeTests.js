@@ -195,12 +195,12 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
       // uninstrumentedNode => no property (before startup)
     let uninstrumented = new Node();
-    assert.ok( uninstrumented.visibleProperty.forwardingProperty === undefined );
+    assert.ok( uninstrumented.visibleProperty.targetProperty === undefined );
     testNodeAndVisibleProperty( uninstrumented, uninstrumented.visibleProperty );
 
     // uninstrumentedNode => uninstrumented property (before startup)
     uninstrumented = new Node( { visibleProperty: uninstrumentedVisibleProperty } );
-    assert.ok( uninstrumented.visibleProperty.forwardingProperty === uninstrumentedVisibleProperty );
+    assert.ok( uninstrumented.visibleProperty.targetProperty === uninstrumentedVisibleProperty );
     testNodeAndVisibleProperty( uninstrumented, uninstrumentedVisibleProperty );
 
     //uninstrumentedNode => instrumented property (before startup)
@@ -208,7 +208,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     uninstrumented.mutate( {
       visibleProperty: instrumentedVisibleProperty
     } );
-    assert.ok( uninstrumented.visibleProperty.forwardingProperty === instrumentedVisibleProperty );
+    assert.ok( uninstrumented.visibleProperty.targetProperty === instrumentedVisibleProperty );
     testNodeAndVisibleProperty( uninstrumented, instrumentedVisibleProperty );
 
     //  uninstrumentedNode => instrumented property => instrument the Node (before startup) OK
@@ -217,7 +217,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
       visibleProperty: instrumentedVisibleProperty
     } );
     uninstrumented.mutate( { tandem: Tandem.GENERAL.createTandem( 'myNodeWithVisible' ) } );
-    assert.ok( uninstrumented.visibleProperty.forwardingProperty === instrumentedVisibleProperty );
+    assert.ok( uninstrumented.visibleProperty.targetProperty === instrumentedVisibleProperty );
     testNodeAndVisibleProperty( uninstrumented, instrumentedVisibleProperty );
     uninstrumented.dispose();
 
@@ -226,12 +226,12 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
     // uninstrumentedNode => no property (before startup)
     uninstrumented = new Node();
-    assert.ok( uninstrumented.visibleProperty.forwardingProperty === undefined );
+    assert.ok( uninstrumented.visibleProperty.targetProperty === undefined );
     testNodeAndVisibleProperty( uninstrumented, uninstrumented.visibleProperty );
 
     // uninstrumentedNode => uninstrumented property (before startup)
     uninstrumented = new Node( { visibleProperty: uninstrumentedVisibleProperty } );
-    assert.ok( uninstrumented.visibleProperty.forwardingProperty === uninstrumentedVisibleProperty );
+    assert.ok( uninstrumented.visibleProperty.targetProperty === uninstrumentedVisibleProperty );
     testNodeAndVisibleProperty( uninstrumented, uninstrumentedVisibleProperty );
 
     //uninstrumentedNode => instrumented property (before startup)
@@ -239,7 +239,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     uninstrumented.mutate( {
       visibleProperty: instrumentedVisibleProperty
     } );
-    assert.ok( uninstrumented.visibleProperty.forwardingProperty === instrumentedVisibleProperty );
+    assert.ok( uninstrumented.visibleProperty.targetProperty === instrumentedVisibleProperty );
     testNodeAndVisibleProperty( uninstrumented, instrumentedVisibleProperty );
 
     //  uninstrumentedNode => instrumented property => instrument the Node (before startup) OK
@@ -248,7 +248,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
       visibleProperty: instrumentedVisibleProperty
     } );
     uninstrumented.mutate( { tandem: Tandem.GENERAL.createTandem( 'myNodeWithVisible' ) } );
-    assert.ok( uninstrumented.visibleProperty.forwardingProperty === instrumentedVisibleProperty );
+    assert.ok( uninstrumented.visibleProperty.targetProperty === instrumentedVisibleProperty );
     testNodeAndVisibleProperty( uninstrumented, instrumentedVisibleProperty );
     uninstrumented.dispose();
     apiValidation.simHasStarted = false;
@@ -262,7 +262,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     let instrumented = new Node( {
         tandem: Tandem.GENERAL.createTandem( 'myNodeWithVisible' )
       } );
-    assert.ok( instrumented.visibleProperty.forwardingProperty === instrumented.ownedPhetioVisibleProperty );
+    assert.ok( instrumented.visibleProperty.targetProperty === instrumented.visibleProperty.ownedPhetioProperty );
     assert.ok( instrumented.linkedElements.length === 0, 'no linked elements for default visible Property' );
     testNodeAndVisibleProperty( instrumented, instrumented.visibleProperty );
     instrumented.dispose();
@@ -281,7 +281,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
       tandem: Tandem.GENERAL.createTandem( 'myNodeWithVisible' )
     } );
     instrumented.mutate( { visibleProperty: instrumentedVisibleProperty } );
-    assert.ok( instrumented.visibleProperty.forwardingProperty === instrumentedVisibleProperty );
+    assert.ok( instrumented.visibleProperty.targetProperty === instrumentedVisibleProperty );
     assert.ok( instrumented.linkedElements.length === 1, 'added linked element' );
     assert.ok( instrumented.linkedElements[ 0 ].element === instrumentedVisibleProperty,
       'added linked element should be for visibleProperty ' );
@@ -292,7 +292,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
       tandem: Tandem.GENERAL.createTandem( 'myNodeWithVisible' ),
       visibleProperty: instrumentedVisibleProperty
     } );
-    assert.ok( instrumented.visibleProperty.forwardingProperty === instrumentedVisibleProperty );
+    assert.ok( instrumented.visibleProperty.targetProperty === instrumentedVisibleProperty );
     assert.ok( instrumented.linkedElements.length === 1, 'added linked element' );
     assert.ok( instrumented.linkedElements[ 0 ].element === instrumentedVisibleProperty,
       'added linked element should be for visibleProperty ' );
@@ -323,7 +323,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     const instrumented1 = new Node( {
       tandem: Tandem.GENERAL.createTandem( 'myVisibleUniquelyNamedNodeThatWillNotBeDuplicated1' )
     } );
-    assert.ok( instrumented1.visibleProperty.forwardingProperty === instrumented1.ownedPhetioVisibleProperty );
+    assert.ok( instrumented1.visibleProperty.targetProperty === instrumented1.visibleProperty.ownedPhetioProperty );
     assert.ok( instrumented1.linkedElements.length === 0, 'no linked elements for default visible Property' );
     testNodeAndVisibleProperty( instrumented1, instrumented1.visibleProperty );
 
@@ -425,12 +425,12 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
       // uninstrumentedNode => no property (before startup)
     let uninstrumented = new Node();
-    assert.ok( uninstrumented.pickableProperty.forwardingProperty === undefined );
+    assert.ok( uninstrumented.pickableProperty.targetProperty === undefined );
     testNodeAndPickableProperty( uninstrumented, uninstrumented.pickableProperty );
 
     // uninstrumentedNode => uninstrumented property (before startup)
     uninstrumented = new Node( { pickableProperty: uninstrumentedPickableProperty } );
-    assert.ok( uninstrumented.pickableProperty.forwardingProperty === uninstrumentedPickableProperty );
+    assert.ok( uninstrumented.pickableProperty.targetProperty === uninstrumentedPickableProperty );
     testNodeAndPickableProperty( uninstrumented, uninstrumentedPickableProperty );
 
     //uninstrumentedNode => instrumented property (before startup)
@@ -438,7 +438,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     uninstrumented.mutate( {
       pickableProperty: instrumentedPickableProperty
     } );
-    assert.ok( uninstrumented.pickableProperty.forwardingProperty === instrumentedPickableProperty );
+    assert.ok( uninstrumented.pickableProperty.targetProperty === instrumentedPickableProperty );
     testNodeAndPickableProperty( uninstrumented, instrumentedPickableProperty );
 
     //  uninstrumentedNode => instrumented property => instrument the Node (before startup) OK
@@ -447,7 +447,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
       pickableProperty: instrumentedPickableProperty
     } );
     uninstrumented.mutate( { tandem: Tandem.GENERAL.createTandem( 'myNodeWithPickable' ) } );
-    assert.ok( uninstrumented.pickableProperty.forwardingProperty === instrumentedPickableProperty );
+    assert.ok( uninstrumented.pickableProperty.targetProperty === instrumentedPickableProperty );
     testNodeAndPickableProperty( uninstrumented, instrumentedPickableProperty );
     uninstrumented.dispose();
 
@@ -456,12 +456,12 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
     // uninstrumentedNode => no property (before startup)
     uninstrumented = new Node();
-    assert.ok( uninstrumented.pickableProperty.forwardingProperty === undefined );
+    assert.ok( uninstrumented.pickableProperty.targetProperty === undefined );
     testNodeAndPickableProperty( uninstrumented, uninstrumented.pickableProperty );
 
     // uninstrumentedNode => uninstrumented property (before startup)
     uninstrumented = new Node( { pickableProperty: uninstrumentedPickableProperty } );
-    assert.ok( uninstrumented.pickableProperty.forwardingProperty === uninstrumentedPickableProperty );
+    assert.ok( uninstrumented.pickableProperty.targetProperty === uninstrumentedPickableProperty );
     testNodeAndPickableProperty( uninstrumented, uninstrumentedPickableProperty );
 
     //uninstrumentedNode => instrumented property (before startup)
@@ -469,7 +469,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     uninstrumented.mutate( {
       pickableProperty: instrumentedPickableProperty
     } );
-    assert.ok( uninstrumented.pickableProperty.forwardingProperty === instrumentedPickableProperty );
+    assert.ok( uninstrumented.pickableProperty.targetProperty === instrumentedPickableProperty );
     testNodeAndPickableProperty( uninstrumented, instrumentedPickableProperty );
 
     //  uninstrumentedNode => instrumented property => instrument the Node (before startup) OK
@@ -479,7 +479,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     } );
 
     uninstrumented.mutate( { tandem: Tandem.GENERAL.createTandem( 'myNodeWithPickable' ) } );
-    assert.ok( uninstrumented.pickableProperty.forwardingProperty === instrumentedPickableProperty );
+    assert.ok( uninstrumented.pickableProperty.targetProperty === instrumentedPickableProperty );
     testNodeAndPickableProperty( uninstrumented, instrumentedPickableProperty );
     uninstrumented.dispose();
     apiValidation.simHasStarted = false;
@@ -494,7 +494,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
         tandem: Tandem.GENERAL.createTandem( 'myNodeWithPickable' ),
         pickablePropertyPhetioInstrumented: true
       } );
-    assert.ok( instrumented.pickableProperty.forwardingProperty === instrumented.ownedPhetioPickableProperty );
+    assert.ok( instrumented.pickableProperty.targetProperty === instrumented.pickableProperty.ownedPhetioProperty );
     assert.ok( instrumented.linkedElements.length === 0, 'no linked elements for default pickable Property' );
     testNodeAndPickableProperty( instrumented, instrumented.pickableProperty );
     instrumented.dispose();
@@ -515,7 +515,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
       pickablePropertyPhetioInstrumented: true
     } );
     instrumented.mutate( { pickableProperty: instrumentedPickableProperty } );
-    assert.ok( instrumented.pickableProperty.forwardingProperty === instrumentedPickableProperty );
+    assert.ok( instrumented.pickableProperty.targetProperty === instrumentedPickableProperty );
     assert.ok( instrumented.linkedElements.length === 1, 'added linked element' );
     assert.ok( instrumented.linkedElements[ 0 ].element === instrumentedPickableProperty,
       'added linked element should be for pickableProperty ' );
@@ -526,7 +526,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
       tandem: Tandem.GENERAL.createTandem( 'myNodeWithPickable' ),
       pickableProperty: instrumentedPickableProperty
     } );
-    assert.ok( instrumented.pickableProperty.forwardingProperty === instrumentedPickableProperty );
+    assert.ok( instrumented.pickableProperty.targetProperty === instrumentedPickableProperty );
     assert.ok( instrumented.linkedElements.length === 1, 'added linked element' );
     assert.ok( instrumented.linkedElements[ 0 ].element === instrumentedPickableProperty,
       'added linked element should be for pickableProperty ' );
@@ -558,7 +558,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
       tandem: Tandem.GENERAL.createTandem( 'myPickableUniquelyNamedNodeThatWillNotBeDuplicated1' ),
       pickablePropertyPhetioInstrumented: true
     } );
-    assert.ok( instrumented1.pickableProperty.forwardingProperty === instrumented1.ownedPhetioPickableProperty );
+    assert.ok( instrumented1.pickableProperty.targetProperty === instrumented1.pickableProperty.ownedPhetioProperty );
     assert.ok( instrumented1.linkedElements.length === 0, 'no linked elements for default pickable Property' );
     testNodeAndPickableProperty( instrumented1, instrumented1.pickableProperty );
 
