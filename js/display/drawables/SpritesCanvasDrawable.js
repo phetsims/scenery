@@ -7,26 +7,12 @@
  */
 
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import inherit from '../../../../phet-core/js/inherit.js';
 import Imageable from '../../nodes/Imageable.js';
 import scenery from '../../scenery.js';
 import SpriteInstance from '../../util/SpriteInstance.js';
 import CanvasSelfDrawable from '../CanvasSelfDrawable.js';
 
-/**
- * A generated CanvasSelfDrawable whose purpose will be drawing our sprites.
- * @constructor
- *
- * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
- * @param {Instance} instance
- */
-function SpritesCanvasDrawable( renderer, instance ) {
-  this.initializeCanvasSelfDrawable( renderer, instance );
-}
-
-scenery.register( 'SpritesCanvasDrawable', SpritesCanvasDrawable );
-
-inherit( CanvasSelfDrawable, SpritesCanvasDrawable, {
+class SpritesCanvasDrawable extends CanvasSelfDrawable {
   /**
    * Paints this drawable to a Canvas (the wrapper contains both a Canvas reference and its drawing context).
    * @public
@@ -40,7 +26,7 @@ inherit( CanvasSelfDrawable, SpritesCanvasDrawable, {
    * @param {Node} node - Our node that is being drawn
    * @param {Matrix3} matrix - The transformation matrix applied for this node's coordinate system.
    */
-  paintCanvas: function( wrapper, node, matrix ) {
+  paintCanvas( wrapper, node, matrix ) {
     const baseMipmapScale = Imageable.getApproximateMatrixScale( matrix ) * ( window.devicePixelRatio || 1 );
 
     const numInstances = node._spriteInstances.length;
@@ -110,8 +96,12 @@ inherit( CanvasSelfDrawable, SpritesCanvasDrawable, {
       }
     }
   }
-} );
+}
 
-Poolable.mixInto( SpritesCanvasDrawable );
+scenery.register( 'SpritesCanvasDrawable', SpritesCanvasDrawable );
+
+Poolable.mixInto( SpritesCanvasDrawable, {
+  initialize: SpritesCanvasDrawable.prototype.initialize
+} );
 
 export default SpritesCanvasDrawable;

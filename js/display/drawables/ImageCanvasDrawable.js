@@ -7,26 +7,11 @@
  */
 
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import inherit from '../../../../phet-core/js/inherit.js';
 import Imageable from '../../nodes/Imageable.js';
 import scenery from '../../scenery.js';
 import CanvasSelfDrawable from '../CanvasSelfDrawable.js';
 
-/**
- * A generated CanvasSelfDrawable whose purpose will be drawing our Image. One of these drawables will be created
- * for each displayed instance of a Image.
- * @constructor
- *
- * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
- * @param {Instance} instance
- */
-function ImageCanvasDrawable( renderer, instance ) {
-  this.initializeCanvasSelfDrawable( renderer, instance );
-}
-
-scenery.register( 'ImageCanvasDrawable', ImageCanvasDrawable );
-
-inherit( CanvasSelfDrawable, ImageCanvasDrawable, {
+class ImageCanvasDrawable extends CanvasSelfDrawable {
   /**
    * Paints this drawable to a Canvas (the wrapper contains both a Canvas reference and its drawing context).
    * @public
@@ -40,7 +25,7 @@ inherit( CanvasSelfDrawable, ImageCanvasDrawable, {
    * @param {Node} node - Our node that is being drawn
    * @param {Matrix3} matrix - The transformation matrix applied for this node's coordinate system.
    */
-  paintCanvas: function( wrapper, node, matrix ) {
+  paintCanvas( wrapper, node, matrix ) {
     const hasImageOpacity = node._imageOpacity !== 1;
 
     // Ensure that the image has been loaded by checking whether it has a width or height of 0.
@@ -66,14 +51,34 @@ inherit( CanvasSelfDrawable, ImageCanvasDrawable, {
         wrapper.context.restore();
       }
     }
-  },
+  }
 
-  // stateless dirty functions
-  markDirtyImage: function() { this.markPaintDirty(); },
-  markDirtyMipmap: function() { this.markPaintDirty(); },
-  markDirtyImageOpacity: function() { this.markPaintDirty(); }
+  /**
+   * @public
+   */
+  markDirtyImage() {
+    this.markPaintDirty();
+  }
+
+  /**
+   * @public
+   */
+  markDirtyMipmap() {
+    this.markPaintDirty();
+  }
+
+  /**
+   * @public
+   */
+  markDirtyImageOpacity() {
+    this.markPaintDirty();
+  }
+}
+
+scenery.register( 'ImageCanvasDrawable', ImageCanvasDrawable );
+
+Poolable.mixInto( ImageCanvasDrawable, {
+  initialize: ImageCanvasDrawable.prototype.initialize
 } );
-
-Poolable.mixInto( ImageCanvasDrawable );
 
 export default ImageCanvasDrawable;

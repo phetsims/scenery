@@ -8,7 +8,6 @@
 
 import Property from '../../../../axon/js/Property.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
-import inherit from '../../../../phet-core/js/inherit.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import scenery from '../../scenery.js';
 import Color from '../../util/Color.js';
@@ -18,56 +17,59 @@ import RectangleStatefulDrawable from './RectangleStatefulDrawable.js';
 
 const scratchColor = new Color( 'transparent' );
 
-/**
- * A generated WebGLSelfDrawable whose purpose will be drawing our Rectangle. One of these drawables will be created
- * for each displayed instance of a Rectangle.
- * @constructor
- *
- * NOTE: This drawable currently only supports solid fills and no strokes.
- *
- * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
- * @param {Instance} instance
- */
-function RectangleWebGLDrawable( renderer, instance ) {
-  this.initializeWebGLSelfDrawable( renderer, instance );
+class RectangleWebGLDrawable extends RectangleStatefulDrawable( WebGLSelfDrawable ) {
+  /**
+   * @public
+   * @override
+   *
+   * @param {number} renderer
+   * @param {Instance} instance
+   */
+  initialize( renderer, instance ) {
+    super.initialize( renderer, instance );
 
-  // Stateful trait initialization
-  this.initializeState( renderer, instance );
+    if ( !this.vertexArray ) {
+      // format [X Y R G B A] for all vertices
+      this.vertexArray = new Float32Array( 6 * 6 ); // 6-length components for 6 vertices (2 tris).
+    }
 
-  if ( !this.vertexArray ) {
-    // format [X Y R G B A] for all vertices
-    this.vertexArray = new Float32Array( 6 * 6 ); // 6-length components for 6 vertices (2 tris).
+    // corner vertices in the relative transform root coordinate space
+    this.upperLeft = new Vector2( 0, 0 );
+    this.lowerLeft = new Vector2( 0, 0 );
+    this.upperRight = new Vector2( 0, 0 );
+    this.lowerRight = new Vector2( 0, 0 );
+
+    this.transformDirty = true;
+    this.includeVertices = true; // used by the processor
   }
 
-  // corner vertices in the relative transform root coordinate space
-  this.upperLeft = new Vector2( 0, 0 );
-  this.lowerLeft = new Vector2( 0, 0 );
-  this.upperRight = new Vector2( 0, 0 );
-  this.lowerRight = new Vector2( 0, 0 );
-
-  this.transformDirty = true;
-  this.includeVertices = true; // used by the processor
-}
-
-scenery.register( 'RectangleWebGLDrawable', RectangleWebGLDrawable );
-
-inherit( WebGLSelfDrawable, RectangleWebGLDrawable, {
-  webglRenderer: Renderer.webglVertexColorPolygons,
-
-  onAddToBlock: function( webglBlock ) {
+  /**
+   * @public
+   *
+   * @param {WebGLBlock} webglBlock
+   */
+  onAddToBlock( webglBlock ) {
     this.webglBlock = webglBlock; // TODO: do we need this reference?
     this.markDirty();
-  },
+  }
 
-  onRemoveFromBlock: function( webglBlock ) {
-  },
+  /**
+   * @public
+   *
+   * @param {WebGLBlock} webglBlock
+   */
+  onRemoveFromBlock( webglBlock ) {
+  }
 
-  // @override
-  markTransformDirty: function() {
+  /**
+   * @public
+   * @override
+   */
+  markTransformDirty() {
     this.transformDirty = true;
 
-    WebGLSelfDrawable.prototype.markTransformDirty.call( this );
-  },
+    super.markTransformDirty();
+  }
 
   /**
    * Updates the DOM appearance of this drawable (whether by preparing/calling draw calls, DOM element updates, etc.)
@@ -77,9 +79,9 @@ inherit( WebGLSelfDrawable, RectangleWebGLDrawable, {
    * @returns {boolean} - Whether the update should continue (if false, further updates in supertype steps should not
    *                      be done).
    */
-  update: function() {
+  update() {
     // See if we need to actually update things (will bail out if we are not dirty, or if we've been disposed)
-    if ( !WebGLSelfDrawable.prototype.update.call( this ) ) {
+    if ( !super.update() ) {
       return false;
     }
 
@@ -139,25 +141,15 @@ inherit( WebGLSelfDrawable, RectangleWebGLDrawable, {
     this.cleanPaintableState();
 
     return true;
-  },
-
-  /**
-   * Disposes the drawable.
-   * @public
-   * @override
-   */
-  dispose: function() {
-    // TODO: disposal of buffers?
-
-    this.disposeState();
-
-    // super
-    WebGLSelfDrawable.prototype.dispose.call( this );
   }
+}
+
+RectangleWebGLDrawable.prototype.webglRenderer = Renderer.webglVertexColorPolygons;
+
+scenery.register( 'RectangleWebGLDrawable', RectangleWebGLDrawable );
+
+Poolable.mixInto( RectangleWebGLDrawable, {
+  initialize: RectangleWebGLDrawable.prototype.initialize
 } );
-
-RectangleStatefulDrawable.mixInto( RectangleWebGLDrawable );
-
-Poolable.mixInto( RectangleWebGLDrawable );
 
 export default RectangleWebGLDrawable;

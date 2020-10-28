@@ -6,32 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../../phet-core/js/inherit.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import scenery from '../../scenery.js';
 import CanvasSelfDrawable from '../CanvasSelfDrawable.js';
 import PaintableStatelessDrawable from './PaintableStatelessDrawable.js';
 
-/**
- * A generated CanvasSelfDrawable whose purpose will be drawing our Circle. One of these drawables will be created
- * for each displayed instance of a Circle.
- * @public (scenery-internal)
- * @constructor
- * @extends CanvasSelfDrawable
- * @mixes PaintableStatelessDrawable
- * @mixes SelfDrawable.Poolable
- *
- * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
- * @param {Instance} instance
- */
-function CircleCanvasDrawable( renderer, instance ) {
-  this.initializeCanvasSelfDrawable( renderer, instance );
-  this.initializePaintableStateless( renderer, instance );
-}
-
-scenery.register( 'CircleCanvasDrawable', CircleCanvasDrawable );
-
-inherit( CanvasSelfDrawable, CircleCanvasDrawable, {
+class CircleCanvasDrawable extends PaintableStatelessDrawable( CanvasSelfDrawable ) {
   /**
    * Paints this drawable to a Canvas (the wrapper contains both a Canvas reference and its drawing context).
    * @public
@@ -45,7 +25,7 @@ inherit( CanvasSelfDrawable, CircleCanvasDrawable, {
    * @param {Node} node - Our node that is being drawn
    * @param {Matrix3} matrix - The transformation matrix applied for this node's coordinate system.
    */
-  paintCanvas: function( wrapper, node, matrix ) {
+  paintCanvas( wrapper, node, matrix ) {
     const context = wrapper.context;
 
     context.beginPath();
@@ -62,30 +42,30 @@ inherit( CanvasSelfDrawable, CircleCanvasDrawable, {
       context.stroke();
       node.afterCanvasStroke( wrapper ); // defined in Paintable
     }
-  },
+  }
 
   /**
    * Called when the radius of the circle changes.
-   * @public (scenery-internal)
+   * @public
    */
-  markDirtyRadius: function() {
+  markDirtyRadius() {
     this.markPaintDirty();
-  },
+  }
 
   /**
    * Disposes the drawable.
-   * @public (scenery-internal)
+   * @public
    * @override
    */
-  dispose: function() {
-    CanvasSelfDrawable.prototype.dispose.call( this );
-    this.disposePaintableStateless();
+  dispose() {
+    super.dispose();
   }
+}
+
+scenery.register( 'CircleCanvasDrawable', CircleCanvasDrawable );
+
+Poolable.mixInto( CircleCanvasDrawable, {
+  initialize: CircleCanvasDrawable.prototype.initialize
 } );
-
-// Since we're not using Circle's stateful trait, we'll need to mix in the Paintable trait here (of the stateless variety).
-PaintableStatelessDrawable.mixInto( CircleCanvasDrawable );
-
-Poolable.mixInto( CircleCanvasDrawable );
 
 export default CircleCanvasDrawable;

@@ -7,7 +7,6 @@
  */
 
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import inherit from '../../../../phet-core/js/inherit.js';
 import scenery from '../../scenery.js';
 import svgns from '../../util/svgns.js';
 import SVGSelfDrawable from '../SVGSelfDrawable.js';
@@ -20,32 +19,26 @@ const keepSVGLineElements = true; // whether we should pool SVG elements for the
  * SVG Rendering
  *----------------------------------------------------------------------------*/
 
-/**
- * A generated SVGSelfDrawable whose purpose will be drawing our Line. One of these drawables will be created
- * for each displayed instance of a Line.
- * @constructor
- *
- * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
- * @param {Instance} instance
- */
-function LineSVGDrawable( renderer, instance ) {
-  // Super-type initialization
-  this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGLineElements ); // usesPaint: true
+class LineSVGDrawable extends LineStatefulDrawable( SVGSelfDrawable ) {
+  /**
+   * @public
+   * @override
+   *
+   * @param {number} renderer
+   * @param {Instance} instance
+   */
+  initialize( renderer, instance ) {
+    super.initialize( renderer, instance, true, keepSVGLineElements ); // usesPaint: true
 
-  // @protected {SVGLineElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
-  this.svgElement = this.svgElement || document.createElementNS( svgns, 'line' );
-}
+    this.svgElement = this.svgElement || document.createElementNS( svgns, 'line' );
+  }
 
-scenery.register( 'LineSVGDrawable', LineSVGDrawable );
-
-inherit( SVGSelfDrawable, LineSVGDrawable, {
   /**
    * Updates the SVG elements so that they will appear like the current node's representation.
    * @protected
-   *
-   * Implements the interface for SVGSelfDrawable (and is called from the SVGSelfDrawable's update).
+   * @override
    */
-  updateSVGSelf: function() {
+  updateSVGSelf() {
     const line = this.svgElement;
 
     if ( this.dirtyX1 ) {
@@ -64,9 +57,12 @@ inherit( SVGSelfDrawable, LineSVGDrawable, {
     // Apply any fill/stroke changes to our element.
     this.updateFillStrokeStyle( line );
   }
-} );
-LineStatefulDrawable.mixInto( LineSVGDrawable );
+}
 
-Poolable.mixInto( LineSVGDrawable );
+scenery.register( 'LineSVGDrawable', LineSVGDrawable );
+
+Poolable.mixInto( LineSVGDrawable, {
+  initialize: LineSVGDrawable.prototype.initialize
+} );
 
 export default LineSVGDrawable;

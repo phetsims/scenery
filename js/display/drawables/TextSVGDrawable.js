@@ -7,7 +7,6 @@
  */
 
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import inherit from '../../../../phet-core/js/inherit.js';
 import platform from '../../../../phet-core/js/platform.js';
 import scenery from '../../scenery.js';
 import Utils from '../../util/Utils.js';
@@ -23,45 +22,43 @@ const keepSVGTextElements = true; // whether we should pool SVG elements for the
 // See https://github.com/phetsims/scenery/issues/455 for more information.
 const useSVGTextLengthAdjustments = !platform.ie && !platform.edge;
 
-/**
- * A generated SVGSelfDrawable whose purpose will be drawing our Text. One of these drawables will be created
- * for each displayed instance of a Text node.
- * @constructor
- *
- * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
- * @param {Instance} instance
- */
-function TextSVGDrawable( renderer, instance ) {
-  // Super-type initialization
-  this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGTextElements ); // usesPaint: true
+class TextSVGDrawable extends TextStatefulDrawable( SVGSelfDrawable ) {
+  /**
+   * @public
+   * @override
+   *
+   * @param {number} renderer
+   * @param {Instance} instance
+   */
+  initialize( renderer, instance ) {
+    super.initialize( renderer, instance, true, keepSVGTextElements ); // usesPaint: true
 
-  // @private {boolean}
-  this.hasLength = false;
+    // @private {boolean}
+    this.hasLength = false;
 
-  if ( !this.svgElement ) {
-    // @protected {SVGTextElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
-    const text = document.createElementNS( svgns, 'text' );
-    this.svgElement = text;
-    text.appendChild( document.createTextNode( '' ) );
+    if ( !this.svgElement ) {
+      const text = document.createElementNS( svgns, 'text' );
 
-    // TODO: flag adjustment for SVG qualities
-    text.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
-    text.setAttribute( 'text-rendering', 'geometricPrecision' );
-    text.setAttributeNS( 'http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve' );
-    text.setAttribute( 'direction', 'ltr' );
+      // @protected {SVGTextElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
+      this.svgElement = text;
+
+      text.appendChild( document.createTextNode( '' ) );
+
+      // TODO: flag adjustment for SVG qualities
+      text.setAttribute( 'dominant-baseline', 'alphabetic' ); // to match Canvas right now
+      text.setAttribute( 'text-rendering', 'geometricPrecision' );
+      text.setAttributeNS( 'http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve' );
+      text.setAttribute( 'direction', 'ltr' );
+    }
   }
-}
 
-scenery.register( 'TextSVGDrawable', TextSVGDrawable );
-
-inherit( SVGSelfDrawable, TextSVGDrawable, {
   /**
    * Updates the SVG elements so that they will appear like the current node's representation.
    * @protected
    *
    * Implements the interface for SVGSelfDrawable (and is called from the SVGSelfDrawable's update).
    */
-  updateSVGSelf: function() {
+  updateSVGSelf() {
     const text = this.svgElement;
 
     // set all of the font attributes, since we can't use the combined one
@@ -99,10 +96,12 @@ inherit( SVGSelfDrawable, TextSVGDrawable, {
     // Apply any fill/stroke changes to our element.
     this.updateFillStrokeStyle( text );
   }
+}
+
+scenery.register( 'TextSVGDrawable', TextSVGDrawable );
+
+Poolable.mixInto( TextSVGDrawable, {
+  initialize: TextSVGDrawable.prototype.initialize
 } );
-
-TextStatefulDrawable.mixInto( TextSVGDrawable );
-
-Poolable.mixInto( TextSVGDrawable );
 
 export default TextSVGDrawable;

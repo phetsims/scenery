@@ -9,7 +9,6 @@
 import animationFrameTimer from '../../../../axon/js/animationFrameTimer.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import inherit from '../../../../phet-core/js/inherit.js';
 import platform from '../../../../phet-core/js/platform.js';
 import scenery from '../../scenery.js';
 import ShaderProgram from '../../util/ShaderProgram.js';
@@ -27,49 +26,43 @@ const lowerLeft = new Vector2( 0, 0 );
 const upperRight = new Vector2( 0, 0 );
 const lowerRight = new Vector2( 0, 0 );
 
-/**
- * A generated WebGLSelfDrawable whose purpose will be drawing our Sprites. One of these drawables will be created
- * for each displayed instance of a Sprites.
- * @constructor
- *
- * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
- * @param {Instance} instance
- */
-function SpritesWebGLDrawable( renderer, instance ) {
-  // @private {function}
-  this.contextChangeListener = this.onWebGLContextChange.bind( this );
+class SpritesWebGLDrawable extends WebGLSelfDrawable {
+  /**
+   * @public
+   * @override
+   *
+   * @param {number} renderer
+   * @param {Instance} instance
+   */
+  initialize( renderer, instance ) {
+    super.initialize( renderer, instance );
 
-  // @private {SpriteSheet}
-  this.spriteSheet = new SpriteSheet( true );
+    // @private {function}
+    this.contextChangeListener = this.onWebGLContextChange.bind( this );
 
-  // @private {Object} - Maps {number} SpriteImage.id => {Bounds2} UV bounds
-  this.spriteImageUVMap = {};
+    // @private {SpriteSheet}
+    this.spriteSheet = new SpriteSheet( true );
 
-  // @private {Float32Array}
-  this.vertexArray = new Float32Array( 128 * FLOAT_QUANTITY );
+    // @private {Object} - Maps {number} SpriteImage.id => {Bounds2} UV bounds
+    this.spriteImageUVMap = {};
 
-  // @private {Float32Array}
-  this.transformMatrixArray = new Float32Array( 9 );
+    // @private {Float32Array}
+    this.vertexArray = new Float32Array( 128 * FLOAT_QUANTITY );
 
-  this.initializeWebGLSelfDrawable( renderer, instance );
+    // @private {Float32Array}
+    this.transformMatrixArray = new Float32Array( 9 );
 
-  // @private {function}
-  this.spriteChangeListener = this.onSpriteChange.bind( this );
+    // @private {function}
+    this.spriteChangeListener = this.onSpriteChange.bind( this );
 
-  this.node._sprites.forEach( sprite => {
-    sprite.imageProperty.lazyLink( this.spriteChangeListener );
-    this.addSpriteImage( sprite.imageProperty.value );
-  } );
+    this.node._sprites.forEach( sprite => {
+      sprite.imageProperty.lazyLink( this.spriteChangeListener );
+      this.addSpriteImage( sprite.imageProperty.value );
+    } );
 
-  // @private {boolean} - See https://github.com/phetsims/natural-selection/issues/243
-  this.hasDrawn = false;
-}
-
-scenery.register( 'SpritesWebGLDrawable', SpritesWebGLDrawable );
-
-inherit( WebGLSelfDrawable, SpritesWebGLDrawable, {
-  // We use a custom renderer for the needed flexibility
-  webglRenderer: Renderer.webglCustom,
+    // @private {boolean} - See https://github.com/phetsims/natural-selection/issues/243
+    this.hasDrawn = false;
+  }
 
   /**
    * Adds a SpriteImage to our SpriteSheet.
@@ -79,7 +72,7 @@ inherit( WebGLSelfDrawable, SpritesWebGLDrawable, {
    */
   addSpriteImage( spriteImage ) {
     this.spriteImageUVMap[ spriteImage.id ] = this.spriteSheet.addImage( spriteImage.image, spriteImage.image.width, spriteImage.image.height ).uvBounds;
-  },
+  }
 
   /**
    * Removes a SpriteImage from our SpriteSheet.
@@ -91,7 +84,7 @@ inherit( WebGLSelfDrawable, SpritesWebGLDrawable, {
     this.spriteSheet.removeImage( spriteImage.image );
 
     delete this.spriteImageUVMap[ spriteImage.id ];
-  },
+  }
 
   /**
    * Called when a Sprite's SpriteImage changes.
@@ -103,14 +96,14 @@ inherit( WebGLSelfDrawable, SpritesWebGLDrawable, {
   onSpriteChange( newSpriteImage, oldSpriteImage ) {
     this.removeSpriteImage( oldSpriteImage );
     this.addSpriteImage( newSpriteImage );
-  },
+  }
 
   /**
    * Sets up everything with a new WebGL context
    *
    * @private
    */
-  setup: function() {
+  setup() {
     const gl = this.webGLBlock.gl;
 
     this.spriteSheet.initializeContext( gl );
@@ -154,15 +147,15 @@ inherit( WebGLSelfDrawable, SpritesWebGLDrawable, {
 
     gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
     gl.bufferData( gl.ARRAY_BUFFER, this.vertexArray, gl.DYNAMIC_DRAW ); // fully buffer at the start
-  },
+  }
 
   /**
    * Callback for when the WebGL context changes. We'll reconstruct the painter.
-   * @public (scenery-internal)
+   * @public
    */
-  onWebGLContextChange: function() {
+  onWebGLContextChange() {
     this.setup();
-  },
+  }
 
   /**
    * Called when this drawable is added to a block.
@@ -170,14 +163,14 @@ inherit( WebGLSelfDrawable, SpritesWebGLDrawable, {
    *
    * @param {WebGLBlock} webGLBlock
    */
-  onAddToBlock: function( webGLBlock ) {
+  onAddToBlock( webGLBlock ) {
     // @private {WebGLBlock}
     this.webGLBlock = webGLBlock;
 
     this.setup();
 
     webGLBlock.glChangedEmitter.addListener( this.contextChangeListener );
-  },
+  }
 
   /**
    * Called when this drawable is removed from a block.
@@ -185,15 +178,15 @@ inherit( WebGLSelfDrawable, SpritesWebGLDrawable, {
    *
    * @param {WebGLBlock} webGLBlock
    */
-  onRemoveFromBlock: function( webGLBlock ) {
+  onRemoveFromBlock( webGLBlock ) {
     webGLBlock.glChangedEmitter.removeListener( this.contextChangeListener );
-  },
+  }
 
   /**
    * Draws the WebGL content.
    * @public
    */
-  draw: function() {
+  draw() {
     const length = this.node._spriteInstances.length;
 
     // Don't render anything if we have nothing
@@ -310,14 +303,14 @@ inherit( WebGLSelfDrawable, SpritesWebGLDrawable, {
     this.hasDrawn = true;
 
     return 1;
-  },
+  }
 
   /**
    * Disposes the drawable.
    * @public
    * @override
    */
-  dispose: function() {
+  dispose() {
     this.node._sprites.forEach( sprite => {
       sprite.imageProperty.unlink( this.spriteChangeListener );
     } );
@@ -327,22 +320,29 @@ inherit( WebGLSelfDrawable, SpritesWebGLDrawable, {
     }
 
     // super
-    WebGLSelfDrawable.prototype.dispose.call( this );
-  },
+    super.dispose();
+  }
 
   /**
    * A "catch-all" dirty method that directly marks the paintDirty flag and triggers propagation of dirty
    * information. This can be used by other mark* methods, or directly itself if the paintDirty flag is checked.
-   * @public (scenery-internal)
+   * @public
    *
    * It should be fired (indirectly or directly) for anything besides transforms that needs to make a drawable
    * dirty.
    */
-  markPaintDirty: function() {
+  markPaintDirty() {
     this.markDirty();
   }
-} );
+}
 
-Poolable.mixInto( SpritesWebGLDrawable );
+// We use a custom renderer for the needed flexibility
+SpritesWebGLDrawable.prototype.webglRenderer = Renderer.webglCustom;
+
+scenery.register( 'SpritesWebGLDrawable', SpritesWebGLDrawable );
+
+Poolable.mixInto( SpritesWebGLDrawable, {
+  initialize: SpritesWebGLDrawable.prototype.initialize
+} );
 
 export default SpritesWebGLDrawable;

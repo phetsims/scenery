@@ -4,7 +4,7 @@
  * Something that can be displayed with a specific renderer.
  * NOTE: Drawables are assumed to be pooled with PoolableMixin, as freeToPool() is called.
  *
- * A drawable's life-cycle starts with its initialization (calling initializeDrawable once), and ends with its disposal
+ * A drawable's life-cycle starts with its initialization (calling initialize once), and ends with its disposal
  * (where it is freed to its own pool).
  *
  * Drawables are part of an unordered drawable "tree" where each drawable can have a parent references. This is used
@@ -54,20 +54,19 @@
  */
 
 import TinyProperty from '../../../axon/js/TinyProperty.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 import Renderer from './Renderer.js';
 
 let globalId = 1;
 
-function Drawable( renderer ) {
-  this.initializeDrawable( renderer );
-}
-
-scenery.register( 'Drawable', Drawable );
-
-inherit( Object, Drawable, {
-  initializeDrawable: function( renderer ) {
+class Drawable {
+  /**
+   * @public
+   *
+   * @param {number} renderer
+   * @returns {Drawable} - for chaining
+   */
+  initialize( renderer ) {
 
     assert && assert( !this.id || this.isDisposed, 'If we previously existed, we need to have been disposed' );
 
@@ -76,7 +75,7 @@ inherit( Object, Drawable, {
 
     sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( '[' + this.constructor.name + '*] initialize ' + this.toString() );
 
-    this.cleanDrawable();
+    this.clean();
 
     // @public {number} - Bitmask defined by Renderer.js
     this.renderer = renderer;
@@ -93,17 +92,30 @@ inherit( Object, Drawable, {
     this.fittableProperty = new TinyProperty( true ); // If false, will cause our parent block to not be fitted
 
     return this;
-  },
+  }
 
-  cleanDrawable: function() {
-    // what drawble we are being rendered (or put) into (will be filled in later)
+  /**
+   * Cleans the state of this drawable to the defaults.
+   * @protected
+   */
+  clean() {
+    // @public {Drawable|null} - what drawble we are being rendered (or put) into (will be filled in later)
     this.parentDrawable = null;
-    this.backbone = null; // a backbone reference (if applicable).
 
-    this.pendingParentDrawable = null; // what our parent drawable will be after the stitch is finished
-    this.pendingBackbone = null;       // what our backbone will be after the stitch is finished (if applicable)
-    this.pendingAddition = false;      // whether we are to be added to a block/backbone in our updateBlock() call
-    this.pendingRemoval = false;       // whether we are to be removed from a block/backbone in our updateBlock() call
+    // @public {BackboneDrawable|null} - a backbone reference (if applicable).
+    this.backbone = null;
+
+    // @public {Drawable|null} - what our parent drawable will be after the stitch is finished
+    this.pendingParentDrawable = null;
+
+    // @public {BackboneDrawable|null} - what our backbone will be after the stitch is finished (if applicable)
+    this.pendingBackbone = null;
+
+    // @public {boolean} - whether we are to be added to a block/backbone in our updateBlock() call
+    this.pendingAddition = false;
+
+    // @public {boolean} - whether we are to be removed from a block/backbone in our updateBlock() call
+    this.pendingRemoval = false;
 
     assert && assert( !this.previousDrawable && !this.nextDrawable,
       'By cleaning (disposal or fresh creation), we should have disconnected from the linked list' );
@@ -119,7 +131,7 @@ inherit( Object, Drawable, {
 
     this.visibleProperty && this.visibleProperty.removeAllListeners();
     this.fittableProperty && this.fittableProperty.removeAllListeners();
-  },
+  }
 
   /**
    * Updates the DOM appearance of this drawable (whether by preparing/calling draw calls, DOM element updates, etc.)
@@ -130,7 +142,7 @@ inherit( Object, Drawable, {
    * @returns {boolean} - Whether the update should continue (if false, further updates in supertype steps should not
    *                      be done).
    */
-  update: function() {
+  update() {
     let needsFurtherUpdates = false;
 
     if ( this.dirty && !this.isDisposed ) {
@@ -139,31 +151,61 @@ inherit( Object, Drawable, {
     }
 
     return needsFurtherUpdates;
-  },
+  }
 
-  setVisible: function( visible ) {
+  /**
+   * Sets whether the drawable is visible.
+   * @public
+   *
+   * @param {boolean} visible
+   */
+  setVisible( visible ) {
     this.visibleProperty.value = visible;
-  },
-  set visible( value ) { this.setVisible( value ); },
+  }
+  set visible( value ) { this.setVisible( value ); }
 
-  isVisible: function() {
+  /**
+   * Returns whether the drawable is visible.
+   * @public
+   *
+   * @returns {boolean}
+   */
+  isVisible() {
     return this.visibleProperty.value;
-  },
-  get visible() { return this.isVisible(); },
+  }
+  get visible() { return this.isVisible(); }
 
-  // Should be called just after initialization (before being added to blocks) if we aren't fittable.
-  setFittable: function( fittable ) {
+  /**
+   * Sets whether this drawable is fittable.
+   * @public
+   *
+   * NOTE: Should be called just after initialization (before being added to blocks) if we aren't fittable.
+   *
+   * @param {boolean} fittable
+   */
+  setFittable( fittable ) {
     this.fittableProperty.value = fittable;
-  },
-  set fittable( value ) { this.setFittable( value ); },
+  }
+  set fittable( value ) { this.setFittable( value ); }
 
-  isFittable: function() {
+  /**
+   * Returns whether the drawable is fittable.
+   * @public
+   *
+   * @returns {boolean}
+   */
+  isFittable() {
     return this.fittableProperty.value;
-  },
-  get fittable() { return this.isFittable(); },
+  }
+  get fittable() { return this.isFittable(); }
 
-  // called to add a block (us) as a child of a backbone
-  setBlockBackbone: function( backboneInstance ) {
+  /**
+   * Called to add a block (us) as a child of a backbone
+   * @public
+   *
+   * @param {BackboneDrawable} backboneInstance
+   */
+  setBlockBackbone( backboneInstance ) {
     sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( '[' + this.constructor.name + '*] setBlockBackbone ' +
                                                               this.toString() + ' with ' + backboneInstance.toString() );
 
@@ -176,9 +218,17 @@ inherit( Object, Drawable, {
     this.pendingBackbone = backboneInstance;
     this.pendingAddition = false;
     this.pendingRemoval = false;
-  },
+  }
 
-  notePendingAddition: function( display, block, backbone ) {
+  /**
+   * Notifies the Display of a pending addition.
+   * @public
+   *
+   * @param {Display} display
+   * @param {Block} block
+   * @param {BackboneDrawable} backbone
+   */
+  notePendingAddition( display, block, backbone ) {
     sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( '[' + this.constructor.name + '*] notePendingAddition ' +
                                                               this.toString() + ' with ' + block.toString() + ', ' +
                                                               ( backbone ? backbone.toString() : '-' ) );
@@ -194,9 +244,15 @@ inherit( Object, Drawable, {
     if ( !this.pendingRemoval ) {
       display.markDrawableChangedBlock( this );
     }
-  },
+  }
 
-  notePendingRemoval: function( display ) {
+  /**
+   * Notifies the Display of a pending removal.
+   * @public
+   *
+   * @param {Display} display
+   */
+  notePendingRemoval( display ) {
     sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( '[' + this.constructor.name + '*] notePendingRemoval ' +
                                                               this.toString() );
 
@@ -206,11 +262,19 @@ inherit( Object, Drawable, {
     if ( !this.pendingAddition ) {
       display.markDrawableChangedBlock( this );
     }
-  },
+  }
 
-  // moving a drawable that isn't changing backbones, just potentially changing its block.
-  // it should not have notePendingAddition or notePendingRemoval called on it.
-  notePendingMove: function( display, block ) {
+  /**
+   * Notifies the Display of a pending move.
+   * @public
+   *
+   * Moving a drawable that isn't changing backbones, just potentially changing its block.
+   * It should not have notePendingAddition or notePendingRemoval called on it.
+   *
+   * @param {Display} display
+   * @param {Block} block
+   */
+  notePendingMove( display, block ) {
     sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( '[' + this.constructor.name + '*] notePendingMove ' +
                                                               this.toString() + ' with ' + block.toString() );
 
@@ -225,10 +289,15 @@ inherit( Object, Drawable, {
     // set both flags, since we need it to be removed and added
     this.pendingAddition = true;
     this.pendingRemoval = true;
-  },
+  }
 
-  // returns {boolean} whether we changed our block
-  updateBlock: function() {
+  /**
+   * Updates the block.
+   * @public
+   *
+   * @returns {boolean} - Whether we changed our block
+   */
+  updateBlock() {
     sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( '[' + this.constructor.name + '*] updateBlock ' + this.toString() +
                                                               ' with add:' + this.pendingAddition +
                                                               ' remove:' + this.pendingRemoval +
@@ -279,15 +348,23 @@ inherit( Object, Drawable, {
     sceneryLog && sceneryLog.Drawable && sceneryLog.pop();
 
     return changed;
-  },
+  }
 
-  updateLinks: function() {
+  /**
+   * Moves the old-drawable-linked-list information into the current-linked-list.
+   * @public
+   */
+  updateLinks() {
     this.oldNextDrawable = this.nextDrawable;
     this.oldPreviousDrawable = this.previousDrawable;
     this.linksDirty = false;
-  },
+  }
 
-  markDirty: function() {
+  /**
+   * Marks this as needing an update.
+   * @public
+   */
+  markDirty() {
     if ( !this.dirty ) {
       this.dirty = true;
 
@@ -296,51 +373,84 @@ inherit( Object, Drawable, {
         this.parentDrawable.markDirtyDrawable( this );
       }
     }
-  },
+  }
 
-  // will ensure that after syncTree phase is done, we will have updateLinks() called on us
-  markLinksDirty: function( display ) {
+  /**
+   * Marks our linked list as dirty.
+   * @public
+   *
+   * Will ensure that after syncTree phase is done, we will have updateLinks() called on us
+   *
+   * @param {Display} display
+   */
+  markLinksDirty( display ) {
     if ( !this.linksDirty ) {
       this.linksDirty = true;
       display.markDrawableForLinksUpdate( this );
     }
-  },
+  }
 
-  // marks us for disposal in the next phase of updateDisplay(), and disconnects from the linked list
-  markForDisposal: function( display ) {
+  /**
+   * Marks us for disposal in the next phase of updateDisplay(), and disconnects from the linked list
+   * @public
+   *
+   * @param {Display} display
+   */
+  markForDisposal( display ) {
     // as we are marked for disposal, we disconnect from the linked list (so our disposal setting nulls won't cause issues)
     Drawable.disconnectBefore( this, display );
     Drawable.disconnectAfter( this, display );
 
     display.markDrawableForDisposal( this );
-  },
+  }
 
-  // disposes immediately, and makes no guarantees about out linked list's state (disconnects).
-  disposeImmediately: function( display ) {
+  /**
+   * Disposes immediately, and makes no guarantees about out linked list's state (disconnects).
+   * @public
+   *
+   * @param {Display} display
+   */
+  disposeImmediately( display ) {
     // as we are marked for disposal, we disconnect from the linked list (so our disposal setting nulls won't cause issues)
     Drawable.disconnectBefore( this, display );
     Drawable.disconnectAfter( this, display );
 
     this.dispose();
-  },
+  }
 
-  // generally do not call this directly, use markForDisposal (so Display will dispose us), or disposeImmediately.
-  dispose: function() {
+  /**
+   * Releases references
+   * @public
+   *
+   * NOTE: Generally do not call this directly, use markForDisposal (so Display will dispose us), or disposeImmediately.
+   *
+   * @param {*} !this.isDisposed
+   * @param {*} 'We should not re-dispose drawables'
+   */
+  dispose() {
     assert && assert( !this.isDisposed, 'We should not re-dispose drawables' );
 
     sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( '[' + this.constructor.name + '*] dispose ' + this.toString() );
     sceneryLog && sceneryLog.Drawable && sceneryLog.push();
 
-    this.cleanDrawable();
+    this.clean();
     this.isDisposed = true;
 
     // for now
     this.freeToPool();
 
     sceneryLog && sceneryLog.Drawable && sceneryLog.pop();
-  },
+  }
 
-  audit: function( allowPendingBlock, allowPendingList, allowDirty ) {
+  /**
+   * Runs checks on the drawable, based on certain flags.
+   * @public
+   *
+   * @param {boolean} allowPendingBlock
+   * @param {boolean} allowPendingList
+   * @param {boolean} allowDirty
+   */
+  audit( allowPendingBlock, allowPendingList, allowDirty ) {
     if ( assertSlow ) {
       assertSlow && assertSlow( !this.isDisposed,
         'If we are being audited, we assume we are in the drawable display tree, and we should not be marked as disposed' );
@@ -371,91 +481,140 @@ inherit( Object, Drawable, {
           'Should not be dirty at this phase, if we are in the drawable display tree' );
       }
     }
-  },
+  }
 
-  toString: function() {
+  /**
+   * Returns a string form of this object
+   * @public
+   *
+   * @returns {string}
+   */
+  toString() {
     return this.constructor.name + '#' + this.id;
-  },
+  }
 
-  toDetailedString: function() {
+  /**
+   * Returns a more-informative string form of this object.
+   * @public
+   *
+   * @returns {string}
+   */
+  toDetailedString() {
     return this.toString();
   }
-} );
 
-// a,b {Drawable}, connects the two drawables in the linked list, while cutting the previous connection and marking
-// the links for updates.
-Drawable.connectDrawables = function( a, b, display ) {
-  // we don't need to do anything if there is no change
-  if ( a.nextDrawable !== b ) {
-    // touch previous neighbors
-    if ( a.nextDrawable ) {
-      a.nextDrawable.markLinksDirty( display );
-      a.nextDrawable.previousDrawable = null;
-    }
-    if ( b.previousDrawable ) {
-      b.previousDrawable.markLinksDirty( display );
-      b.previousDrawable.nextDrawable = null;
-    }
+  /**
+   * Connects the two drawables in the linked list, while cutting the previous connection and marking
+   * @public
+   *
+   * @param {Drawable} a
+   * @param {Drawable} b
+   * @param {Display} display
+   */
+  static connectDrawables( a, b, display ) {
+    // we don't need to do anything if there is no change
+    if ( a.nextDrawable !== b ) {
+      // touch previous neighbors
+      if ( a.nextDrawable ) {
+        a.nextDrawable.markLinksDirty( display );
+        a.nextDrawable.previousDrawable = null;
+      }
+      if ( b.previousDrawable ) {
+        b.previousDrawable.markLinksDirty( display );
+        b.previousDrawable.nextDrawable = null;
+      }
 
-    a.nextDrawable = b;
-    b.previousDrawable = a;
+      a.nextDrawable = b;
+      b.previousDrawable = a;
 
-    // mark these as needing updates
-    a.markLinksDirty( display );
-    b.markLinksDirty( display );
-  }
-};
-
-Drawable.disconnectBefore = function( a, display ) {
-  // we don't need to do anything if there is no change
-  if ( a.previousDrawable ) {
-    a.markLinksDirty( display );
-    a.previousDrawable.markLinksDirty( display );
-    a.previousDrawable.nextDrawable = null;
-    a.previousDrawable = null;
-  }
-};
-
-Drawable.disconnectAfter = function( a, display ) {
-  // we don't need to do anything if there is no change
-  if ( a.nextDrawable ) {
-    a.markLinksDirty( display );
-    a.nextDrawable.markLinksDirty( display );
-    a.nextDrawable.previousDrawable = null;
-    a.nextDrawable = null;
-  }
-};
-
-// converts a linked list of drawables to an array (useful for debugging/assertion purposes, should not be used in production code)
-Drawable.listToArray = function( firstDrawable, lastDrawable ) {
-  const arr = [];
-
-  // assumes we'll hit lastDrawable, otherwise we'll NPE
-  for ( let drawable = firstDrawable; ; drawable = drawable.nextDrawable ) {
-    arr.push( drawable );
-
-    if ( drawable === lastDrawable ) {
-      break;
+      // mark these as needing updates
+      a.markLinksDirty( display );
+      b.markLinksDirty( display );
     }
   }
 
-  return arr;
-};
-
-// converts an old linked list of drawables to an array (useful for debugging/assertion purposes, should not be used in production code)
-Drawable.oldListToArray = function( firstDrawable, lastDrawable ) {
-  const arr = [];
-
-  // assumes we'll hit lastDrawable, otherwise we'll NPE
-  for ( let drawable = firstDrawable; ; drawable = drawable.oldNextDrawable ) {
-    arr.push( drawable );
-
-    if ( drawable === lastDrawable ) {
-      break;
+  /**
+   * Disconnects the previous/before drawable from the provided one (for the linked list).
+   * @public
+   *
+   * @param {Drawable} drawable
+   * @param {Display} display
+   */
+  static disconnectBefore( drawable, display ) {
+    // we don't need to do anything if there is no change
+    if ( drawable.previousDrawable ) {
+      drawable.markLinksDirty( display );
+      drawable.previousDrawable.markLinksDirty( display );
+      drawable.previousDrawable.nextDrawable = null;
+      drawable.previousDrawable = null;
     }
   }
 
-  return arr;
-};
+  /**
+   * Disconnects the next/after drawable from the provided one (for the linked list).
+   * @public
+   *
+   * @param {Drawable} drawable
+   * @param {Display} display
+   */
+  static disconnectAfter( drawable, display ) {
+    // we don't need to do anything if there is no change
+    if ( drawable.nextDrawable ) {
+      drawable.markLinksDirty( display );
+      drawable.nextDrawable.markLinksDirty( display );
+      drawable.nextDrawable.previousDrawable = null;
+      drawable.nextDrawable = null;
+    }
+  }
 
+  /**
+   * Converts a linked list of drawables to an array (useful for debugging/assertion purposes, should not be used in
+   * production code).
+   * @public
+   *
+   * @param {Drawable} firstDrawable
+   * @param {Drawable} lastDrawable
+   * @returns {Array.<Drawable>}
+   */
+  static listToArray( firstDrawable, lastDrawable ) {
+    const arr = [];
+
+    // assumes we'll hit lastDrawable, otherwise we'll NPE
+    for ( let drawable = firstDrawable; ; drawable = drawable.nextDrawable ) {
+      arr.push( drawable );
+
+      if ( drawable === lastDrawable ) {
+        break;
+      }
+    }
+
+    return arr;
+  }
+
+  /**
+   * Converts an old linked list of drawables to an array (useful for debugging/assertion purposes, should not be
+   * used in production code)
+   * @public
+   *
+   * @param {Drawable} firstDrawable
+   * @param {Drawable} lastDrawable
+   * @returns {Array.<Drawable>}
+   */
+  static oldListToArray( firstDrawable, lastDrawable ) {
+    const arr = [];
+
+    // assumes we'll hit lastDrawable, otherwise we'll NPE
+    for ( let drawable = firstDrawable; ; drawable = drawable.oldNextDrawable ) {
+      arr.push( drawable );
+
+      if ( drawable === lastDrawable ) {
+        break;
+      }
+    }
+
+    return arr;
+  }
+}
+
+scenery.register( 'Drawable', Drawable );
 export default Drawable;

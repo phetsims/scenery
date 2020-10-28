@@ -1,36 +1,19 @@
 // Copyright 2016-2020, University of Colorado Boulder
 
 /**
- * Canvas drawable for CanvasNode.
+ * Canvas drawable for CanvasNode. A generated CanvasSelfDrawable whose purpose will be drawing our CanvasNode.
+ * One of these drawables will be created for each displayed instance of a CanvasNode.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../../phet-core/js/inherit.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import scenery from '../../scenery.js';
 import CanvasSelfDrawable from '../CanvasSelfDrawable.js';
 
 const emptyArray = []; // constant, used for line-dash
 
-/**
- * A generated CanvasSelfDrawable whose purpose will be drawing our CanvasNode. One of these drawables will be created
- * for each displayed instance of a CanvasNode.
- * @public (scenery-internal)
- * @constructor
- * @extends CanvasSelfDrawable
- * @mixes SelfDrawable.Poolable
- *
- * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
- * @param {Instance} instance
- */
-function CanvasNodeDrawable( renderer, instance ) {
-  this.initializeCanvasSelfDrawable( renderer, instance );
-}
-
-scenery.register( 'CanvasNodeDrawable', CanvasNodeDrawable );
-
-inherit( CanvasSelfDrawable, CanvasNodeDrawable, {
+class CanvasNodeDrawable extends CanvasSelfDrawable {
   /**
    * Paints this drawable to a Canvas (the wrapper contains both a Canvas reference and its drawing context).
    * @public
@@ -44,7 +27,7 @@ inherit( CanvasSelfDrawable, CanvasNodeDrawable, {
    * @param {Node} node - Our node that is being drawn
    * @param {Matrix3} matrix - The transformation matrix applied for this node's coordinate system.
    */
-  paintCanvas: function( wrapper, node, matrix ) {
+  paintCanvas( wrapper, node, matrix ) {
     assert && assert( !node.selfBounds.isEmpty(), 'CanvasNode should not be used with an empty canvasBounds. ' +
                                                   'Please set canvasBounds (or use setCanvasBounds()) on ' + node.constructor.name );
 
@@ -68,8 +51,12 @@ inherit( CanvasSelfDrawable, CanvasNodeDrawable, {
       context.restore();
     }
   }
-} );
+}
 
-Poolable.mixInto( CanvasNodeDrawable );
+scenery.register( 'CanvasNodeDrawable', CanvasNodeDrawable );
+
+Poolable.mixInto( CanvasNodeDrawable, {
+  initialize: CanvasNodeDrawable.prototype.initialize
+} );
 
 export default CanvasNodeDrawable;

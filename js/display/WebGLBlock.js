@@ -10,9 +10,8 @@
 
 import Emitter from '../../../axon/js/Emitter.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import cleanArray from '../../../phet-core/js/cleanArray.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
+import cleanArray from '../../../phet-core/js/cleanArray.js';
 import scenery from '../scenery.js';
 import ShaderProgram from '../util/ShaderProgram.js';
 import SpriteSheet from '../util/SpriteSheet.js';
@@ -20,24 +19,31 @@ import Utils from '../util/Utils.js';
 import FittedBlock from './FittedBlock.js';
 import Renderer from './Renderer.js';
 
-/**
- * @constructor
- * @extends FittedBlock
- * @mixes Poolable
- *
- * @param display
- * @param renderer
- * @param transformRootInstance
- * @param filterRootInstance
- */
-function WebGLBlock( display, renderer, transformRootInstance, filterRootInstance ) {
-  this.initialize( display, renderer, transformRootInstance, filterRootInstance );
-}
+class WebGLBlock extends FittedBlock {
+  /**
+   * @mixes Poolable
+   *
+   * @param {Display} display
+   * @param {number} renderer
+   * @param {Instance} transformRootInstance
+   * @param {Instance} filterRootInstance
+   */
+  constructor( display, renderer, transformRootInstance, filterRootInstance ) {
+    super();
 
-scenery.register( 'WebGLBlock', WebGLBlock );
+    this.initialize( display, renderer, transformRootInstance, filterRootInstance );
+  }
 
-inherit( FittedBlock, WebGLBlock, {
-  initialize: function( display, renderer, transformRootInstance, filterRootInstance ) {
+  /**
+   * @public
+   *
+   * @param {Display} display
+   * @param {number} renderer
+   * @param {Instance} transformRootInstance
+   * @param {Instance} filterRootInstance
+   * @returns {WebGLBlock} - For chaining
+   */
+  initialize( display, renderer, transformRootInstance, filterRootInstance ) {
     sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'initialize #' + this.id );
     sceneryLog && sceneryLog.WebGLBlock && sceneryLog.push();
 
@@ -45,7 +51,7 @@ inherit( FittedBlock, WebGLBlock, {
     // Since we saw some jitter on iPad, see #318 and generally expect WebGL layers to span the entire display
     // In the future, it would be good to understand what was causing the problem and make webgl consistent
     // with svg and canvas again.
-    this.initializeFittedBlock( display, renderer, transformRootInstance, FittedBlock.FULL_DISPLAY );
+    super.initialize( display, renderer, transformRootInstance, FittedBlock.FULL_DISPLAY );
 
     // TODO: Uhh, is this not used?
     this.filterRootInstance = filterRootInstance;
@@ -71,13 +77,13 @@ inherit( FittedBlock, WebGLBlock, {
     this.projectionMatrixArray = new Float32Array( 9 );
 
     // processor for custom WebGL drawables (e.g. WebGLNode)
-    this.customProcessor = this.customProcessor || new WebGLBlock.CustomProcessor();
+    this.customProcessor = this.customProcessor || new CustomProcessor();
 
     // processor for drawing vertex-colored triangles (e.g. Path types)
-    this.vertexColorPolygonsProcessor = this.vertexColorPolygonsProcessor || new WebGLBlock.VertexColorPolygons( this.projectionMatrixArray );
+    this.vertexColorPolygonsProcessor = this.vertexColorPolygonsProcessor || new VertexColorPolygons( this.projectionMatrixArray );
 
     // processor for drawing textured triangles (e.g. Image)
-    this.texturedTrianglesProcessor = this.texturedTrianglesProcessor || new WebGLBlock.TexturedTrianglesProcessor( this.projectionMatrixArray );
+    this.texturedTrianglesProcessor = this.texturedTrianglesProcessor || new TexturedTrianglesProcessor( this.projectionMatrixArray );
 
     // @public {Emitter} - Called when the WebGL context changes to a new context.
     this.glChangedEmitter = new Emitter();
@@ -110,7 +116,7 @@ inherit( FittedBlock, WebGLBlock, {
     sceneryLog && sceneryLog.WebGLBlock && sceneryLog.pop();
 
     return this;
-  },
+  }
 
   /**
    * Forces a rebuild of the Canvas and its context (as long as a context can be obtained).
@@ -119,7 +125,7 @@ inherit( FittedBlock, WebGLBlock, {
    * This can be necessary when the browser won't restore our context that was lost (and we need to create another
    * canvas to get a valid context).
    */
-  rebuildCanvas: function() {
+  rebuildCanvas() {
     sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'rebuildCanvas #' + this.id );
     sceneryLog && sceneryLog.WebGLBlock && sceneryLog.push();
 
@@ -153,7 +159,7 @@ inherit( FittedBlock, WebGLBlock, {
     }
 
     sceneryLog && sceneryLog.WebGLBlock && sceneryLog.pop();
-  },
+  }
 
   /**
    * Takes a fresh WebGL context switches the WebGL block over to use it.
@@ -161,7 +167,7 @@ inherit( FittedBlock, WebGLBlock, {
    *
    * @param {WebGLRenderingContext} gl
    */
-  setupContext: function( gl ) {
+  setupContext( gl ) {
     sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'setupContext #' + this.id );
     sceneryLog && sceneryLog.WebGLBlock && sceneryLog.push();
 
@@ -206,13 +212,13 @@ inherit( FittedBlock, WebGLBlock, {
     this.glChangedEmitter.emit();
 
     sceneryLog && sceneryLog.WebGLBlock && sceneryLog.pop();
-  },
+  }
 
   /**
    * Attempts to force a Canvas rebuild to get a new Canvas/context pair.
    * @private
    */
-  delayedRebuildCanvas: function() {
+  delayedRebuildCanvas() {
     sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'Delaying rebuilding of Canvas #' + this.id );
     const self = this;
 
@@ -223,7 +229,7 @@ inherit( FittedBlock, WebGLBlock, {
       self.rebuildCanvas();
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.pop();
     } );
-  },
+  }
 
   /**
    * Callback for whenever our WebGL context is lost.
@@ -231,7 +237,7 @@ inherit( FittedBlock, WebGLBlock, {
    *
    * @param {WebGLContextEvent} domEvent
    */
-  onContextLoss: function( domEvent ) {
+  onContextLoss( domEvent ) {
     if ( !this.isContextLost ) {
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'Context lost #' + this.id );
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.push();
@@ -247,7 +253,7 @@ inherit( FittedBlock, WebGLBlock, {
 
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.pop();
     }
-  },
+  }
 
   /**
    * Callback for whenever our WebGL context is restored.
@@ -255,7 +261,7 @@ inherit( FittedBlock, WebGLBlock, {
    *
    * @param {WebGLContextEvent} domEvent
    */
-  onContextRestoration: function( domEvent ) {
+  onContextRestoration( domEvent ) {
     if ( this.isContextLost ) {
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'Context restored #' + this.id );
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.push();
@@ -269,7 +275,7 @@ inherit( FittedBlock, WebGLBlock, {
 
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.pop();
     }
-  },
+  }
 
   /**
    * Attempts to get a WebGL context from a Canvas.
@@ -278,7 +284,7 @@ inherit( FittedBlock, WebGLBlock, {
    * @param {HTMLCanvasElement}
    * @returns {WebGLRenderingContext|*} - If falsy, it did not succeed.
    */
-  getContextFromCanvas: function( canvas ) {
+  getContextFromCanvas( canvas ) {
     const contextOptions = {
       antialias: true,
       preserveDrawingBuffer: this.preserveDrawingBuffer
@@ -290,19 +296,27 @@ inherit( FittedBlock, WebGLBlock, {
 
     // we've already committed to using a WebGLBlock, so no use in a try-catch around our context attempt
     return canvas.getContext( 'webgl', contextOptions ) || canvas.getContext( 'experimental-webgl', contextOptions );
-  },
+  }
 
-  setSizeFullDisplay: function() {
+  /**
+   * @public
+   * @override
+   */
+  setSizeFullDisplay() {
     const size = this.display.getSize();
     this.canvas.width = Math.ceil( size.width * this.backingScale );
     this.canvas.height = Math.ceil( size.height * this.backingScale );
     this.canvas.style.width = size.width + 'px';
     this.canvas.style.height = size.height + 'px';
-  },
+  }
 
-  setSizeFitBounds: function() {
+  /**
+   * @public
+   * @override
+   */
+  setSizeFitBounds() {
     throw new Error( 'setSizeFitBounds unimplemented for WebGLBlock' );
-  },
+  }
 
   /**
    * Updates the DOM appearance of this drawable (whether by preparing/calling draw calls, DOM element updates, etc.)
@@ -312,9 +326,9 @@ inherit( FittedBlock, WebGLBlock, {
    * @returns {boolean} - Whether the update should continue (if false, further updates in supertype steps should not
    *                      be done).
    */
-  update: function() {
+  update() {
     // See if we need to actually update things (will bail out if we are not dirty, or if we've been disposed)
-    if ( !FittedBlock.prototype.update.call( this ) ) {
+    if ( !super.update() ) {
       return false;
     }
 
@@ -427,9 +441,13 @@ inherit( FittedBlock, WebGLBlock, {
     sceneryLog && sceneryLog.WebGLBlock && sceneryLog.pop();
 
     return true;
-  },
+  }
 
-  dispose: function() {
+  /**
+   * Releases references
+   * @public
+   */
+  dispose() {
     sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'dispose #' + this.id );
 
     // TODO: many things to dispose!?
@@ -437,10 +455,15 @@ inherit( FittedBlock, WebGLBlock, {
     // clear references
     cleanArray( this.dirtyDrawables );
 
-    FittedBlock.prototype.dispose.call( this );
-  },
+    super.dispose();
+  }
 
-  markDirtyDrawable: function( drawable ) {
+  /**
+   * @public
+   *
+   * @param {Drawable} drawable
+   */
+  markDirtyDrawable( drawable ) {
     sceneryLog && sceneryLog.dirty && sceneryLog.dirty( 'markDirtyDrawable on WebGLBlock#' + this.id + ' with ' + drawable.toString() );
 
     assert && assert( drawable );
@@ -449,18 +472,30 @@ inherit( FittedBlock, WebGLBlock, {
     // TODO: instance check to see if it is a canvas cache (usually we don't need to call update on our drawables)
     this.dirtyDrawables.push( drawable );
     this.markDirty();
-  },
+  }
 
-  addDrawable: function( drawable ) {
+  /**
+   * @public
+   * @override
+   *
+   * @param {Drawable} drawable
+   */
+  addDrawable( drawable ) {
     sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( '#' + this.id + '.addDrawable ' + drawable.toString() );
 
-    FittedBlock.prototype.addDrawable.call( this, drawable );
+    super.addDrawable( drawable );
 
     // will trigger changes to the spritesheets for images, or initialization for others
     drawable.onAddToBlock( this );
-  },
+  }
 
-  removeDrawable: function( drawable ) {
+  /**
+   * @public
+   * @override
+   *
+   * @param {Drawable} drawable
+   */
+  removeDrawable( drawable ) {
     sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( '#' + this.id + '.removeDrawable ' + drawable.toString() );
 
     // Ensure a removed drawable is not present in the dirtyDrawables array afterwards. Don't want to update it.
@@ -473,13 +508,14 @@ inherit( FittedBlock, WebGLBlock, {
     // wil trigger removal from spritesheets
     drawable.onRemoveFromBlock( this );
 
-    FittedBlock.prototype.removeDrawable.call( this, drawable );
-  },
+    super.removeDrawable( drawable );
+  }
 
   /**
    * Ensures we have an allocated part of a SpriteSheet for this image. If a SpriteSheet already contains this image,
    * we'll just increase the reference count. Otherwise, we'll attempt to add it into one of our SpriteSheets. If
    * it doesn't fit, we'll add a new SpriteSheet and add the image to it.
+   * @public
    *
    * @param {HTMLImageElement | HTMLCanvasElement} image
    * @param {number} width
@@ -487,7 +523,7 @@ inherit( FittedBlock, WebGLBlock, {
    *
    * @returns {Sprite} - Throws an error if we can't accommodate the image
    */
-  addSpriteSheetImage: function( image, width, height ) {
+  addSpriteSheetImage( image, width, height ) {
     let sprite = null;
     const numSpriteSheets = this.spriteSheets.length;
     // TODO: check for SpriteSheet containment first?
@@ -509,26 +545,39 @@ inherit( FittedBlock, WebGLBlock, {
       }
     }
     return sprite;
-  },
+  }
 
   /**
    * Removes the reference to the sprite in our spritesheets.
+   * @public
    *
    * @param {Sprite} sprite
    */
-  removeSpriteSheetImage: function( sprite ) {
+  removeSpriteSheetImage( sprite ) {
     sprite.spriteSheet.removeImage( sprite.image );
-  },
+  }
 
-  onIntervalChange: function( firstDrawable, lastDrawable ) {
+  /**
+   * @public
+   * @override
+   *
+   * @param {Drawable} firstDrawable
+   * @param {Drawable} lastDrawable
+   */
+  onIntervalChange( firstDrawable, lastDrawable ) {
     sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( '#' + this.id + '.onIntervalChange ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() );
 
-    FittedBlock.prototype.onIntervalChange.call( this, firstDrawable, lastDrawable );
+    super.onIntervalChange( firstDrawable, lastDrawable );
 
     this.markDirty();
-  },
+  }
 
-  onPotentiallyMovedDrawable: function( drawable ) {
+  /**
+   * @public
+   *
+   * @param {Drawable} drawable
+   */
+  onPotentiallyMovedDrawable( drawable ) {
     sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( '#' + this.id + '.onPotentiallyMovedDrawable ' + drawable.toString() );
     sceneryLog && sceneryLog.WebGLBlock && sceneryLog.push();
 
@@ -537,30 +586,36 @@ inherit( FittedBlock, WebGLBlock, {
     this.markDirty();
 
     sceneryLog && sceneryLog.WebGLBlock && sceneryLog.pop();
-  },
+  }
 
-  toString: function() {
+  /**
+   * Returns a string form of this object
+   * @public
+   *
+   * @returns {string}
+   */
+  toString() {
     return 'WebGLBlock#' + this.id + '-' + FittedBlock.fitString[ this.fit ];
   }
-} );
+}
 
-/*---------------------------------------------------------------------------*
+scenery.register( 'WebGLBlock', WebGLBlock );
+
+/**---------------------------------------------------------------------------*
  * Processors rely on the following lifecycle:
  * 1. activate()
  * 2. processDrawable() - 0 or more times
  * 3. deactivate()
  * Once deactivated, they should have executed all of the draw calls they need to make.
  *---------------------------------------------------------------------------*/
+class Processor {
+  /**
+   * @public
+   */
+  activate() {
 
-// TODO: Processor super-type?
+  }
 
-/**
- * @constructor
- */
-WebGLBlock.CustomProcessor = function() {
-  this.drawable = null;
-};
-inherit( Object, WebGLBlock.CustomProcessor, {
   /**
    * Sets the WebGL context that this processor should use.
    * @public
@@ -570,27 +625,68 @@ inherit( Object, WebGLBlock.CustomProcessor, {
    *
    * @param {WebGLRenderingContext} gl
    */
-  initializeContext: function( gl ) {
+  initializeContext( gl ) {
 
-  },
+  }
 
-  activate: function() {
+  /**
+   * @public
+   *
+   * @param {Drawable} drawable
+   */
+  processDrawable( drawable ) {
+
+  }
+
+  /**
+   * @public
+   */
+  deactivate() {
+
+  }
+}
+
+class CustomProcessor extends Processor {
+  constructor() {
+    super();
+
+    // @private {Drawable}
+    this.drawable = null;
+  }
+
+  /**
+   * @public
+   * @override
+   */
+  activate() {
     this.drawCount = 0;
-  },
+  }
 
-  processDrawable: function( drawable ) {
+  /**
+   * @public
+   * @override
+   *
+   * @param {Drawable} drawable
+   */
+  processDrawable( drawable ) {
     assert && assert( drawable.webglRenderer === Renderer.webglCustom );
 
     this.drawable = drawable;
     this.draw();
-  },
+  }
 
-  deactivate: function() {
+  /**
+   * @public
+   * @override
+   */
+  deactivate() {
     return this.drawCount;
-  },
+  }
 
-  // @private
-  draw: function() {
+  /**
+   * @private
+   */
+  draw() {
     if ( this.drawable ) {
       const count = this.drawable.draw();
       assert && assert( typeof count === 'number' );
@@ -598,36 +694,38 @@ inherit( Object, WebGLBlock.CustomProcessor, {
       this.drawable = null;
     }
   }
-} );
+}
 
-/**
- * @constructor
- *
- * @param {Float32Array} projectionMatrixArray - Projection matrix entries
- */
-WebGLBlock.VertexColorPolygons = function( projectionMatrixArray ) {
-  assert && assert( projectionMatrixArray instanceof Float32Array );
+class VertexColorPolygons extends Processor {
+  /**
+   * @param {Float32Array} projectionMatrixArray - Projection matrix entries
+   */
+  constructor( projectionMatrixArray ) {
+    assert && assert( projectionMatrixArray instanceof Float32Array );
 
-  // @private {Float32Array}
-  this.projectionMatrixArray = projectionMatrixArray;
+    super();
 
-  // @private {number} - Initial length of the vertex buffer. May increase as needed.
-  this.lastArrayLength = 128;
+    // @private {Float32Array}
+    this.projectionMatrixArray = projectionMatrixArray;
 
-  // @private {Float32Array}
-  this.vertexArray = new Float32Array( this.lastArrayLength );
-};
-inherit( Object, WebGLBlock.VertexColorPolygons, {
+    // @private {number} - Initial length of the vertex buffer. May increase as needed.
+    this.lastArrayLength = 128;
+
+    // @private {Float32Array}
+    this.vertexArray = new Float32Array( this.lastArrayLength );
+  }
+
   /**
    * Sets the WebGL context that this processor should use.
    * @public
+   * @override
    *
    * NOTE: This can be called multiple times on a single processor, in the case where the previous context was lost.
    *       We should not need to dispose anything from that.
    *
    * @param {WebGLRenderingContext} gl
    */
-  initializeContext: function( gl ) {
+  initializeContext( gl ) {
     assert && assert( gl, 'Should be an actual context' );
 
     // @private {WebGLRenderingContext}
@@ -667,16 +765,26 @@ inherit( Object, WebGLBlock.VertexColorPolygons, {
 
     gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
     gl.bufferData( gl.ARRAY_BUFFER, this.vertexArray, gl.DYNAMIC_DRAW ); // fully buffer at the start
-  },
+  }
 
-  activate: function() {
+  /**
+   * @public
+   * @override
+   */
+  activate() {
     this.shaderProgram.use();
 
     this.vertexArrayIndex = 0;
     this.drawCount = 0;
-  },
+  }
 
-  processDrawable: function( drawable ) {
+  /**
+   * @public
+   * @override
+   *
+   * @param {Drawable} drawable
+   */
+  processDrawable( drawable ) {
     if ( drawable.includeVertices ) {
       const vertexData = drawable.vertexArray;
 
@@ -693,9 +801,13 @@ inherit( Object, WebGLBlock.VertexColorPolygons, {
 
       this.drawCount++;
     }
-  },
+  }
 
-  deactivate: function() {
+  /**
+   * @public
+   * @override
+   */
+  deactivate() {
     if ( this.drawCount ) {
       this.draw();
     }
@@ -703,10 +815,12 @@ inherit( Object, WebGLBlock.VertexColorPolygons, {
     this.shaderProgram.unuse();
 
     return this.drawCount;
-  },
+  }
 
-  // @private
-  draw: function() {
+  /**
+   * @private
+   */
+  draw() {
     const gl = this.gl;
 
     // (uniform) projection transform into normalized device coordinates
@@ -730,36 +844,38 @@ inherit( Object, WebGLBlock.VertexColorPolygons, {
 
     this.vertexArrayIndex = 0;
   }
-} );
+}
 
-/**
- * @constructor
- *
- * @param {Float32Array} projectionMatrixArray - Projection matrix entries
- */
-WebGLBlock.TexturedTrianglesProcessor = function( projectionMatrixArray ) {
-  assert && assert( projectionMatrixArray instanceof Float32Array );
+class TexturedTrianglesProcessor extends Processor {
+  /**
+   * @param {Float32Array} projectionMatrixArray - Projection matrix entries
+   */
+  constructor( projectionMatrixArray ) {
+    assert && assert( projectionMatrixArray instanceof Float32Array );
 
-  // @private {Float32Array}
-  this.projectionMatrixArray = projectionMatrixArray;
+    super();
 
-  // @private {number} - Initial length of the vertex buffer. May increase as needed.
-  this.lastArrayLength = 128;
+    // @private {Float32Array}
+    this.projectionMatrixArray = projectionMatrixArray;
 
-  // @private {Float32Array}
-  this.vertexArray = new Float32Array( this.lastArrayLength );
-};
-inherit( Object, WebGLBlock.TexturedTrianglesProcessor, {
+    // @private {number} - Initial length of the vertex buffer. May increase as needed.
+    this.lastArrayLength = 128;
+
+    // @private {Float32Array}
+    this.vertexArray = new Float32Array( this.lastArrayLength );
+  }
+
   /**
    * Sets the WebGL context that this processor should use.
    * @public
+   * @override
    *
    * NOTE: This can be called multiple times on a single processor, in the case where the previous context was lost.
    *       We should not need to dispose anything from that.
    *
    * @param {WebGLRenderingContext} gl
    */
-  initializeContext: function( gl ) {
+  initializeContext( gl ) {
     assert && assert( gl, 'Should be an actual context' );
 
     // @private {WebGLRenderingContext}
@@ -804,17 +920,27 @@ inherit( Object, WebGLBlock.TexturedTrianglesProcessor, {
 
     gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
     gl.bufferData( gl.ARRAY_BUFFER, this.vertexArray, gl.DYNAMIC_DRAW ); // fully buffer at the start
-  },
+  }
 
-  activate: function() {
+  /**
+   * @public
+   * @override
+   */
+  activate() {
     this.shaderProgram.use();
 
     this.currentSpriteSheet = null;
     this.vertexArrayIndex = 0;
     this.drawCount = 0;
-  },
+  }
 
-  processDrawable: function( drawable ) {
+  /**
+   * @public
+   * @override
+   *
+   * @param {Drawable} drawable
+   */
+  processDrawable( drawable ) {
     // skip unloaded images or sprites
     if ( !drawable.sprite ) {
       return;
@@ -838,9 +964,13 @@ inherit( Object, WebGLBlock.TexturedTrianglesProcessor, {
     // copy our vertex data into the main array
     this.vertexArray.set( vertexData, this.vertexArrayIndex );
     this.vertexArrayIndex += vertexData.length;
-  },
+  }
 
-  deactivate: function() {
+  /**
+   * @public
+   * @override
+   */
+  deactivate() {
     if ( this.currentSpriteSheet ) {
       this.draw();
     }
@@ -848,10 +978,12 @@ inherit( Object, WebGLBlock.TexturedTrianglesProcessor, {
     this.shaderProgram.unuse();
 
     return this.drawCount;
-  },
+  }
 
-  // @private
-  draw: function() {
+  /**
+   * @private
+   */
+  draw() {
     assert && assert( this.currentSpriteSheet );
     const gl = this.gl;
 
@@ -888,7 +1020,7 @@ inherit( Object, WebGLBlock.TexturedTrianglesProcessor, {
     this.currentSpriteSheet = null;
     this.vertexArrayIndex = 0;
   }
-} );
+}
 
 Poolable.mixInto( WebGLBlock, {
   initialize: WebGLBlock.prototype.initialize

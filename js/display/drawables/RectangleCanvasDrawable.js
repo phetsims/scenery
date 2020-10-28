@@ -6,28 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../../phet-core/js/inherit.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import scenery from '../../scenery.js';
 import CanvasSelfDrawable from '../CanvasSelfDrawable.js';
 import PaintableStatelessDrawable from './PaintableStatelessDrawable.js';
 
-/**
- * A generated CanvasSelfDrawable whose purpose will be drawing our Rectangle. One of these drawables will be created
- * for each displayed instance of a Rectangle.
- * @constructor
- *
- * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
- * @param {Instance} instance
- */
-function RectangleCanvasDrawable( renderer, instance ) {
-  this.initializeCanvasSelfDrawable( renderer, instance );
-  this.initializePaintableStateless( renderer, instance );
-}
-
-scenery.register( 'RectangleCanvasDrawable', RectangleCanvasDrawable );
-
-inherit( CanvasSelfDrawable, RectangleCanvasDrawable, {
+class RectangleCanvasDrawable extends PaintableStatelessDrawable( CanvasSelfDrawable ) {
   /**
    * Convenience function for drawing a rectangular path (with our Rectangle node's parameters) to the Canvas context.
    * @private
@@ -35,14 +19,14 @@ inherit( CanvasSelfDrawable, RectangleCanvasDrawable, {
    * @param {CanvasRenderingContext2D} context - To execute drawing commands on.
    * @param {Node} node - The node whose rectangle we want to draw
    */
-  writeRectangularPath: function( context, node ) {
+  writeRectangularPath( context, node ) {
     context.beginPath();
     context.moveTo( node._rectX, node._rectY );
     context.lineTo( node._rectX + node._rectWidth, node._rectY );
     context.lineTo( node._rectX + node._rectWidth, node._rectY + node._rectHeight );
     context.lineTo( node._rectX, node._rectY + node._rectHeight );
     context.closePath();
-  },
+  }
 
   /**
    * Paints this drawable to a Canvas (the wrapper contains both a Canvas reference and its drawing context).
@@ -57,7 +41,7 @@ inherit( CanvasSelfDrawable, RectangleCanvasDrawable, {
    * @param {Node} node - Our node that is being drawn
    * @param {Matrix3} matrix - The transformation matrix applied for this node's coordinate system.
    */
-  paintCanvas: function( wrapper, node, matrix ) {
+  paintCanvas( wrapper, node, matrix ) {
     const context = wrapper.context;
 
     // use the standard version if it's a rounded rectangle, since there is no Canvas-optimized version for that
@@ -130,44 +114,62 @@ inherit( CanvasSelfDrawable, RectangleCanvasDrawable, {
         }
       }
     }
-  },
-
-  // stateless dirty functions
-  markDirtyRectangle: function() { this.markPaintDirty(); },
-
-  // TODO: stateless drawable handling!
-  markDirtyX: function() {
-    this.markDirtyRectangle();
-  },
-  markDirtyY: function() {
-    this.markDirtyRectangle();
-  },
-  markDirtyWidth: function() {
-    this.markDirtyRectangle();
-  },
-  markDirtyHeight: function() {
-    this.markDirtyRectangle();
-  },
-  markDirtyCornerXRadius: function() {
-    this.markDirtyRectangle();
-  },
-  markDirtyCornerYRadius: function() {
-    this.markDirtyRectangle();
-  },
+  }
 
   /**
-   * Disposes the drawable.
    * @public
-   * @override
    */
-  dispose: function() {
-    CanvasSelfDrawable.prototype.dispose.call( this );
-    this.disposePaintableStateless();
+  markDirtyRectangle() {
+    this.markPaintDirty();
   }
+
+  /**
+   * @public
+   */
+  markDirtyX() {
+    this.markDirtyRectangle();
+  }
+
+  /**
+   * @public
+   */
+  markDirtyY() {
+    this.markDirtyRectangle();
+  }
+
+  /**
+   * @public
+   */
+  markDirtyWidth() {
+    this.markDirtyRectangle();
+  }
+
+  /**
+   * @public
+   */
+  markDirtyHeight() {
+    this.markDirtyRectangle();
+  }
+
+  /**
+   * @public
+   */
+  markDirtyCornerXRadius() {
+    this.markDirtyRectangle();
+  }
+
+  /**
+   * @public
+   */
+  markDirtyCornerYRadius() {
+    this.markDirtyRectangle();
+  }
+}
+
+scenery.register( 'RectangleCanvasDrawable', RectangleCanvasDrawable );
+
+Poolable.mixInto( RectangleCanvasDrawable, {
+  initialize: RectangleCanvasDrawable.prototype.initialize
 } );
-
-PaintableStatelessDrawable.mixInto( RectangleCanvasDrawable );
-
-Poolable.mixInto( RectangleCanvasDrawable );
 
 export default RectangleCanvasDrawable;

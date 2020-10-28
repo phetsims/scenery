@@ -7,7 +7,6 @@
  */
 
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import inherit from '../../../../phet-core/js/inherit.js';
 import scenery from '../../scenery.js';
 import svgns from '../../util/svgns.js';
 import SVGSelfDrawable from '../SVGSelfDrawable.js';
@@ -16,32 +15,28 @@ import PathStatefulDrawable from './PathStatefulDrawable.js';
 // TODO: change this based on memory and performance characteristics of the platform
 const keepSVGPathElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
 
-/**
- * A generated SVGSelfDrawable whose purpose will be drawing our Path. One of these drawables will be created
- * for each displayed instance of a Path.
- * @constructor
- *
- * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
- * @param {Instance} instance
- */
-function PathSVGDrawable( renderer, instance ) {
-  // Super-type initialization
-  this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGPathElements ); // usesPaint: true
+class PathSVGDrawable extends PathStatefulDrawable( SVGSelfDrawable ) {
+  /**
+   * @public
+   * @override
+   *
+   * @param {number} renderer
+   * @param {Instance} instance
+   */
+  initialize( renderer, instance ) {
+    super.initialize( renderer, instance, true, keepSVGPathElements ); // usesPaint: true
 
-  // @protected {SVGPathElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
-  this.svgElement = this.svgElement || document.createElementNS( svgns, 'path' );
-}
+    // @protected {SVGPathElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
+    this.svgElement = this.svgElement || document.createElementNS( svgns, 'path' );
+  }
 
-scenery.register( 'PathSVGDrawable', PathSVGDrawable );
-
-inherit( SVGSelfDrawable, PathSVGDrawable, {
   /**
    * Updates the SVG elements so that they will appear like the current node's representation.
    * @protected
    *
    * Implements the interface for SVGSelfDrawable (and is called from the SVGSelfDrawable's update).
    */
-  updateSVGSelf: function() {
+  updateSVGSelf() {
     assert && assert( !this.node.requiresSVGBoundsWorkaround(),
       'No workaround for https://github.com/phetsims/scenery/issues/196 is provided at this time, please add an epsilon' );
 
@@ -61,10 +56,12 @@ inherit( SVGSelfDrawable, PathSVGDrawable, {
     // Apply any fill/stroke changes to our element.
     this.updateFillStrokeStyle( path );
   }
+}
+
+scenery.register( 'PathSVGDrawable', PathSVGDrawable );
+
+Poolable.mixInto( PathSVGDrawable, {
+  initialize: PathSVGDrawable.prototype.initialize
 } );
-
-PathStatefulDrawable.mixInto( PathSVGDrawable );
-
-Poolable.mixInto( PathSVGDrawable );
 
 export default PathSVGDrawable;
