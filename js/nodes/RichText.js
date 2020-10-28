@@ -158,11 +158,8 @@ const STYLE_KEYS = [ 'color' ].concat( FONT_STYLE_KEYS );
 function RichText( text, options ) {
 
   // @public {TinyProperty.<string>} - The text to display. We'll initialize this by mutating.
-  this._textProperty = new TinyForwardingProperty( '' );
+  this._textProperty = new TinyForwardingProperty( '', true );
   this._textProperty.lazyLink( this.onTextPropertyChange.bind( this ) );
-
-  // @public (NodeTests) {Property.<string>|null} - See documentation for Node.ownedPhetioVisibleProperty
-  this.ownedPhetioTextProperty = null;
 
   // @private {Font}
   this._font = DEFAULT_FONT;
@@ -276,29 +273,13 @@ inherit( Node, RichText, {
    * @returns {Text} for chaining
    */
   setTextProperty( newTarget ) {
-
-    // We need this information eagerly for later on in the function
-    const previousTarget = this._textProperty.targetProperty;
-    const newPropertyIsOwnedPhetioTextProperty = newTarget === this.ownedPhetioTextProperty;
-
-    // If we had the "default instrumented" Property, we'll remove that and link our new Property. Guard on the fact
-    // that ownedPhetioTextProperty is added via this exact method, see Node.initializePhetioObject() for details.
-    // Do this before adding a PhET-iO LinkedElement because ownedPhetioTextProperty has the same phetioID as the LinkedElement
-    if ( this.ownedPhetioTextProperty && !newPropertyIsOwnedPhetioTextProperty ) {
-      this.ownedPhetioTextProperty.dispose();
-      this.ownedPhetioTextProperty = null;
-    }
-
-    this.updateLinkedElementForProperty( TEXT_PROPERTY_TANDEM_NAME, previousTarget, newTarget );
-
-    this._textProperty.setTargetProperty( newTarget );
-
-    return this; // for chaining
+    return this._textProperty.setTargetProperty( this, TEXT_PROPERTY_TANDEM_NAME, newTarget );
   },
   set textProperty( property ) { this.setTextProperty( property ); },
 
   /**
-   * Like Node.getVisibleProperty, but for the text string.
+   * Like Node.getVisibleProperty, but for the text string. Note this is not the same as the Property provided in
+   * setTextProperty. Thus is the nature of TinyForwardingProperty.
    *
    * @returns {TinyForwardingProperty}
    * @public
@@ -328,26 +309,14 @@ inherit( Node, RichText, {
 
     if ( !wasInstrumented && this.isPhetioInstrumented() ) {
 
-      assert && assert( !this.ownedPhetioTextProperty, 'Already created the ownedPhetioTextProperty' );
-
-      if ( !this._textProperty.targetProperty ) {
-
-        this.ownedPhetioTextProperty = new StringProperty( this.text, merge( {
+      this._textProperty.initializePhetio( this, TEXT_PROPERTY_TANDEM_NAME, () => new StringProperty( this.text, merge( {
 
           // by default, use the value from the Node
           phetioReadOnly: this.phetioReadOnly,
           tandem: this.tandem.createTandem( TEXT_PROPERTY_TANDEM_NAME ),
           phetioDocumentation: 'Property for the displayed text'
-        }, config.textPropertyOptions ) );
-
-        this.setTextProperty( this.ownedPhetioTextProperty );
-      }
-      else {
-
-        // Since we are just now instrumented, and linked elements can't be added to linked Elements until the PhetioObject
-        // is instrumented, we need to retroactively link to whatever targetProperty may have been added before.
-        this.updateLinkedElementForProperty( TEXT_PROPERTY_TANDEM_NAME, null, this._textProperty.targetProperty );
-      }
+        }, config.textPropertyOptions ) )
+      );
     }
   },
 
@@ -499,11 +468,7 @@ inherit( Node, RichText, {
 
     Node.prototype.dispose.call( this );
 
-    // We instrumented ownedPhetioTextProperty for PhET-iO, so we'll need to dispose it if we created it.
-    if ( this.ownedPhetioTextProperty ) {
-      this.ownedPhetioTextProperty.dispose();
-      this.ownedPhetioTextProperty = null;
-    }
+    this._textProperty.dispose();
   },
 
   /**
@@ -833,7 +798,7 @@ inherit( Node, RichText, {
    * @returns {string}
    */
   getText: function() {
-    return this.textProperty.value;
+    return this._textProperty.value;
   },
   get text() { return this.getText(); },
 
