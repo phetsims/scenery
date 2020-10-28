@@ -409,8 +409,7 @@ function Node( options ) {
   // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
   // NOTE: This is fired **asynchronously** (usually as part of a Display.updateDisplay()) when the bounds of the Node
   // is changed.
-  this.boundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy() );
-  this.boundsProperty.onAccessAttempt = boundsInvalidationListener;
+  this.boundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy(), boundsInvalidationListener );
   this.boundsProperty.changeCount = boundsListenersAddedOrRemovedListener;
 
   // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds for this Node and its children in the "local" coordinate
@@ -418,8 +417,7 @@ function Node( options ) {
   // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
   // NOTE: This is fired **asynchronously** (usually as part of a Display.updateDisplay()) when the localBounds of
   // the Node is changed.
-  this.localBoundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy() );
-  this.localBoundsProperty.onAccessAttempt = boundsInvalidationListener;
+  this.localBoundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy(), boundsInvalidationListener );
   this.localBoundsProperty.changeCount = boundsListenersAddedOrRemovedListener;
 
   // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds just for children of this Node (and sub-trees), in the
@@ -427,16 +425,14 @@ function Node( options ) {
   // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
   // NOTE: This is fired **asynchronously** (usually as part of a Display.updateDisplay()) when the childBounds of the
   // Node is changed.
-  this.childBoundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy() );
-  this.childBoundsProperty.onAccessAttempt = boundsInvalidationListener;
+  this.childBoundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy(), boundsInvalidationListener );
   this.childBoundsProperty.changeCount = boundsListenersAddedOrRemovedListener;
 
   // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds just for this Node, in the "local" coordinate frame.
   // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
   // NOTE: This event can be fired synchronously, and happens with the self-bounds of a Node is changed. This is NOT
   // like the other bounds Properties, which usually fire asynchronously
-  this.selfBoundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy() );
-  this.selfBoundsProperty.onAccessAttempt = selfBoundsInvalidationListener;
+  this.selfBoundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy(), selfBoundsInvalidationListener );
 
   // @private {boolean} - Whether our localBounds have been set (with the ES5 setter/setLocalBounds()) to a custom
   // overridden value. If true, then localBounds itself will not be updated, but will instead always be the
