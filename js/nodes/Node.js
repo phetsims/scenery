@@ -3363,14 +3363,10 @@ inherit( PhetioObject, Node, {
    * from visible because pickable by default doesn't not create this forwarded Property.
    * @public
    * @param {boolean} pickablePropertyPhetioInstrumented
+   * @returns {Node} - for chaining
    */
   setPickablePropertyPhetioInstrumented: function( pickablePropertyPhetioInstrumented ) {
-    assert && assert( typeof pickablePropertyPhetioInstrumented === 'boolean' );
-
-    // See Node.initializePhetioObject for more details on this assertion
-    assert && assert( !this.isPhetioInstrumented(), 'this option only works if it is passed in before this Node is instrumented' );
-
-    this._pickableProperty.forwardingPropertyInstrumented = pickablePropertyPhetioInstrumented;
+    return this._pickableProperty.setForwardingPropertyInstrumented( pickablePropertyPhetioInstrumented, this );
   },
   set pickablePropertyPhetioInstrumented( pickablePropertyPhetioInstrumented ) { this.setPickablePropertyPhetioInstrumented( pickablePropertyPhetioInstrumented );},
 
