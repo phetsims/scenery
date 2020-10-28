@@ -5369,8 +5369,7 @@ inherit( PhetioObject, Node, {
         this.updateLinkedElementForProperty( VISIBLE_PROPERTY_TANDEM_NAME, null, this._visibleProperty.targetProperty );
       }
 
-      // TODO: remove this guard, oops, https://github.com/phetsims/scenery/issues/1097
-      this._pickableProperty.targetPropertyInstrumented && this._pickableProperty.initializePhetio( this, PICKABLE_PROPERTY_TANDEM_NAME, () => new Property( this.pickable, merge( {
+      this._pickableProperty.initializePhetio( this, PICKABLE_PROPERTY_TANDEM_NAME, () => new Property( this.pickable, merge( {
 
           // by default, use the value from the Node
           phetioReadOnly: this.phetioReadOnly,
@@ -5476,11 +5475,7 @@ inherit( PhetioObject, Node, {
       this.ownedPhetioVisibleProperty = null;
     }
 
-    // We instrumented ownedPhetioPickableProperty for PhET-iO, so we'll need to dispose it if we created it.
-    if ( this.ownedPhetioPickableProperty ) {
-      this.ownedPhetioPickableProperty.dispose();
-      this.ownedPhetioPickableProperty = null;
-    }
+    this._pickableProperty.dispose();
 
     // Tear-down in the reverse order Node was created
     PhetioObject.prototype.dispose.call( this );
