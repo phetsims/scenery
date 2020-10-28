@@ -15,31 +15,35 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 import PaintSVGState from './PaintSVGState.js';
 import SelfDrawable from './SelfDrawable.js';
 
-function SVGSelfDrawable( renderer, instance ) {
-  this.initializeSVGSelfDrawable( renderer, instance );
+class SVGSelfDrawable extends SelfDrawable {
+  /**
+   * @public
+   *
+   * @param {number} renderer
+   * @param {Instance} instance
+   * @param {boolean} usesPaint
+   * @param {boolean} keepElements
+   * @returns {SVGSelfDrawable}
+   */
+  initialize( renderer, instance, usesPaint, keepElements ) {
+    assert && assert( typeof usesPaint === 'boolean' );
+    assert && assert( typeof keepElements === 'boolean' );
 
-  throw new Error( 'Should use initialization and pooling' );
-}
+    super.initialize( renderer, instance );
 
-scenery.register( 'SVGSelfDrawable', SVGSelfDrawable );
-
-inherit( SelfDrawable, SVGSelfDrawable, {
-  initializeSVGSelfDrawable: function( renderer, instance, usesPaint, keepElements ) {
-    // super initialization
-    this.initializeSelfDrawable( renderer, instance );
-
+    // @private {boolean}
     this.usesPaint = usesPaint;
     this.keepElements = keepElements;
 
-    this.svgElement = null; // should be filled in by subtype
-    this.svgBlock = null; // will be updated by updateSVGBlock()
+    // @public {SVGElement} - should be filled in by subtype
+    this.svgElement = null;
 
-    this.initializeState( renderer, instance ); // assumes we have a state trait
+    // @public {SVGBlock} - will be updated by updateSVGBlock()
+    this.svgBlock = null;
 
     if ( this.usesPaint ) {
       if ( !this.paintState ) {
@@ -51,7 +55,7 @@ inherit( SelfDrawable, SVGSelfDrawable, {
     }
 
     return this; // allow chaining
-  },
+  }
 
   /**
    * Updates the DOM appearance of this drawable (whether by preparing/calling draw calls, DOM element updates, etc.)
@@ -61,19 +65,22 @@ inherit( SelfDrawable, SVGSelfDrawable, {
    * @returns {boolean} - Whether the update should continue (if false, further updates in supertype steps should not
    *                      be done).
    */
-  update: function() {
+  update() {
     // See if we need to actually update things (will bail out if we are not dirty, or if we've been disposed)
-    if ( !SelfDrawable.prototype.update.call( this ) ) {
+    if ( !super.update() ) {
       return false;
     }
 
     this.updateSVG();
 
     return true;
-  },
+  }
 
-  // @protected: called to update the visual appearance of our svgElement
-  updateSVG: function() {
+  /**
+   * Called to update the visual appearance of our svgElement
+   * @protected
+   */
+  updateSVG() {
     if ( this.paintDirty ) {
       this.updateSVGSelf( this.node, this.svgElement );
     }
@@ -118,10 +125,15 @@ inherit( SelfDrawable, SVGSelfDrawable, {
 
     // clear all of the dirty flags
     this.setToCleanState();
-  },
+  }
 
-  // to be used by our passed in options.updateSVG
-  updateFillStrokeStyle: function( element ) {
+  /**
+   * to be used by our passed in options.updateSVG
+   * @protected
+   *
+   * @param {SVGElement} element
+   */
+  updateFillStrokeStyle( element ) {
     if ( !this.usesPaint ) {
       return;
     }
@@ -141,9 +153,14 @@ inherit( SelfDrawable, SVGSelfDrawable, {
     }
 
     this.cleanPaintableState();
-  },
+  }
 
-  updateSVGBlock: function( svgBlock ) {
+  /**
+   * @public
+   *
+   * @param {SVGBlock} svgBlock
+   */
+  updateSVGBlock( svgBlock ) {
     // remove cached paint references from the old svgBlock
     const oldSvgBlock = this.svgBlock;
     if ( this.usesPaint && oldSvgBlock ) {
@@ -168,11 +185,14 @@ inherit( SelfDrawable, SVGSelfDrawable, {
     // since fill/stroke IDs may be block-specific, we need to mark them dirty so they will be updated
     this.usesPaint && this.markDirtyFill();
     this.usesPaint && this.markDirtyStroke();
-  },
+  }
 
-  dispose: function() {
-    this.disposeState(); // assumes subtype existence
-
+  /**
+   * Releases references
+   * @public
+   * @override
+   */
+  dispose() {
     if ( !this.keepElements ) {
       // clear the references
       this.svgElement = null;
@@ -186,8 +206,9 @@ inherit( SelfDrawable, SVGSelfDrawable, {
 
     this.svgBlock = null;
 
-    SelfDrawable.prototype.dispose.call( this );
+    super.dispose();
   }
-} );
+}
 
+scenery.register( 'SVGSelfDrawable', SVGSelfDrawable );
 export default SVGSelfDrawable;

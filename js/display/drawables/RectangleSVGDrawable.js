@@ -7,7 +7,6 @@
  */
 
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import inherit from '../../../../phet-core/js/inherit.js';
 import scenery from '../../scenery.js';
 import svgns from '../../util/svgns.js';
 import SVGSelfDrawable from '../SVGSelfDrawable.js';
@@ -16,35 +15,31 @@ import RectangleStatefulDrawable from './RectangleStatefulDrawable.js';
 // TODO: change this based on memory and performance characteristics of the platform
 const keepSVGRectangleElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
 
-/**
- * A generated SVGSelfDrawable whose purpose will be drawing our Rectangle. One of these drawables will be created
- * for each displayed instance of a Rectangle.
- * @constructor
- *
- * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
- * @param {Instance} instance
- */
-function RectangleSVGDrawable( renderer, instance ) {
-  // Super-type initialization
-  this.initializeSVGSelfDrawable( renderer, instance, true, keepSVGRectangleElements ); // usesPaint: true
+class RectangleSVGDrawable extends RectangleStatefulDrawable( SVGSelfDrawable ) {
+  /**
+   * @public
+   * @override
+   *
+   * @param {number} renderer
+   * @param {Instance} instance
+   */
+  initialize( renderer, instance ) {
+    super.initialize( renderer, instance, true, keepSVGRectangleElements ); // usesPaint: true
 
-  this.lastArcW = -1; // invalid on purpose
-  this.lastArcH = -1; // invalid on purpose
+    this.lastArcW = -1; // invalid on purpose
+    this.lastArcH = -1; // invalid on purpose
 
-  // @protected {SVGRectElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
-  this.svgElement = this.svgElement || document.createElementNS( svgns, 'rect' );
-}
+    // @protected {SVGRectElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
+    this.svgElement = this.svgElement || document.createElementNS( svgns, 'rect' );
+  }
 
-scenery.register( 'RectangleSVGDrawable', RectangleSVGDrawable );
-
-inherit( SVGSelfDrawable, RectangleSVGDrawable, {
   /**
    * Updates the SVG elements so that they will appear like the current node's representation.
    * @protected
    *
    * Implements the interface for SVGSelfDrawable (and is called from the SVGSelfDrawable's update).
    */
-  updateSVGSelf: function() {
+  updateSVGSelf() {
     const rect = this.svgElement;
 
     if ( this.dirtyX ) {
@@ -83,10 +78,12 @@ inherit( SVGSelfDrawable, RectangleSVGDrawable, {
     // Apply any fill/stroke changes to our element.
     this.updateFillStrokeStyle( rect );
   }
+}
+
+scenery.register( 'RectangleSVGDrawable', RectangleSVGDrawable );
+
+Poolable.mixInto( RectangleSVGDrawable, {
+  initialize: RectangleSVGDrawable.prototype.initialize
 } );
-
-RectangleStatefulDrawable.mixInto( RectangleSVGDrawable );
-
-Poolable.mixInto( RectangleSVGDrawable );
 
 export default RectangleSVGDrawable;

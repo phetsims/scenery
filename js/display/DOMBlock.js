@@ -1,6 +1,5 @@
 // Copyright 2014-2020, University of Colorado Boulder
 
-
 /**
  * DOM Drawable wrapper for another DOM Drawable. Used so that we can have our own independent siblings, generally as part
  * of a Backbone's layers/blocks.
@@ -8,34 +7,39 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../phet-core/js/inherit.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
 import scenery from '../scenery.js';
 import Block from './Block.js';
 
-/**
- * @constructor
- * @mixes Poolable
- *
- * @param display
- * @param domDrawable
- */
-function DOMBlock( display, domDrawable ) {
-  this.initialize( display, domDrawable );
-}
+class DOMBlock extends Block {
+  /**
+   * @mixes Poolable
+   *
+   * @param {Display} display
+   * @param {Drawable} domDrawable
+   */
+  constructor( display, domDrawable ) {
+    super();
 
-scenery.register( 'DOMBlock', DOMBlock );
+    this.initialize( display, domDrawable );
+  }
 
-inherit( Block, DOMBlock, {
-  initialize: function( display, domDrawable ) {
+  /**
+   * @public
+   *
+   * @param {Display} display
+   * @param {Drawable} domDrawable
+   * @returns {DOMBlock} - For chaining
+   */
+  initialize( display, domDrawable ) {
     // TODO: is it bad to pass the acceleration flags along?
-    this.initializeBlock( display, domDrawable.renderer );
+    super.initialize( display, domDrawable.renderer );
 
     this.domDrawable = domDrawable;
     this.domElement = domDrawable.domElement;
 
     return this;
-  },
+  }
 
   /**
    * Updates the DOM appearance of this drawable (whether by preparing/calling draw calls, DOM element updates, etc.)
@@ -45,43 +49,69 @@ inherit( Block, DOMBlock, {
    * @returns {boolean} - Whether the update should continue (if false, further updates in supertype steps should not
    *                      be done).
    */
-  update: function() {
+  update() {
     // See if we need to actually update things (will bail out if we are not dirty, or if we've been disposed)
-    if ( !Block.prototype.update.call( this ) ) {
+    if ( !super.update() ) {
       return false;
     }
 
     this.domDrawable.update();
 
     return true;
-  },
+  }
 
-  dispose: function() {
+  /**
+   * Releases references
+   * @public
+   * @override
+   */
+  dispose() {
     this.domDrawable = null;
     this.domElement = null;
 
     // super call
-    Block.prototype.dispose.call( this );
-  },
+    super.dispose();
+  }
 
-  markDirtyDrawable: function( drawable ) {
+  /**
+   * @public
+   *
+   * @param {Drawable} drawable
+   */
+  markDirtyDrawable( drawable ) {
     this.markDirty();
-  },
+  }
 
-  addDrawable: function( drawable ) {
+  /**
+   * Adds a drawable to this block.
+   * @public
+   * @override
+   *
+   * @param {Drawable} drawable
+   */
+  addDrawable( drawable ) {
     sceneryLog && sceneryLog.DOMBlock && sceneryLog.DOMBlock( '#' + this.id + '.addDrawable ' + drawable.toString() );
     assert && assert( this.domDrawable === drawable, 'DOMBlock should only be used with one drawable for now (the one it was initialized with)' );
 
-    Block.prototype.addDrawable.call( this, drawable );
-  },
+    super.addDrawable( drawable );
+  }
 
-  removeDrawable: function( drawable ) {
+  /**
+   * Removes a drawable from this block.
+   * @public
+   * @override
+   *
+   * @param {Drawable} drawable
+   */
+  removeDrawable( drawable ) {
     sceneryLog && sceneryLog.DOMBlock && sceneryLog.DOMBlock( '#' + this.id + '.removeDrawable ' + drawable.toString() );
     assert && assert( this.domDrawable === drawable, 'DOMBlock should only be used with one drawable for now (the one it was initialized with)' );
 
-    Block.prototype.removeDrawable.call( this, drawable );
+    super.removeDrawable( drawable );
   }
-} );
+}
+
+scenery.register( 'DOMBlock', DOMBlock );
 
 Poolable.mixInto( DOMBlock, {
   initialize: DOMBlock.prototype.initialize

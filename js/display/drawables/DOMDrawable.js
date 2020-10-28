@@ -6,64 +6,68 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../../phet-core/js/inherit.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import scenery from '../../scenery.js';
 import Utils from '../../util/Utils.js';
 import DOMSelfDrawable from '../DOMSelfDrawable.js';
 
-/**
- * A generated DOMSelfDrawable whose purpose will be drawing our DOM node. One of these drawables will be created
- * for each displayed instance of a DOM node.
- * @public (scenery-internal)
- * @constructor
- * @extends DOMSelfDrawable
- * @mixes SelfDrawable.Poolable
- *
- * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
- * @param {Instance} instance
- */
-function DOMDrawable( renderer, instance ) {
-  // Super-type initialization
-  this.initializeDOMSelfDrawable( renderer, instance );
+class DOMDrawable extends DOMSelfDrawable {
+  /**
+   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+   * @param {Instance} instance
+   */
+  constructor( renderer, instance ) {
+    super( renderer, instance );
 
-  // @public {HTMLElement} - Our primary DOM element. This is exposed as part of the DOMSelfDrawable API.
-  this.domElement = this.node._container;
+    // Apply CSS needed for future CSS transforms to work properly.
+    Utils.prepareForTransform( this.domElement, this.forceAcceleration );
+  }
 
-  // Apply CSS needed for future CSS transforms to work properly.
-  Utils.prepareForTransform( this.domElement, this.forceAcceleration );
-}
+  /**
+   * @public
+   * @override
+   *
+   * @param {number} renderer
+   * @param {Instance} instance
+   */
+  initialize( renderer, instance ) {
+    super.initialize( renderer, instance );
 
-scenery.register( 'DOMDrawable', DOMDrawable );
+    // @public {HTMLElement} - Our primary DOM element. This is exposed as part of the DOMSelfDrawable API.
+    this.domElement = this.node._container;
+  }
 
-inherit( DOMSelfDrawable, DOMDrawable, {
   /**
    * Updates our DOM element so that its appearance matches our node's representation.
    * @protected
    *
    * This implements part of the DOMSelfDrawable required API for subtypes.
    */
-  updateDOM: function() {
+  updateDOM() {
     if ( this.transformDirty && !this.node._preventTransform ) {
       Utils.applyPreparedTransform( this.getTransformMatrix(), this.domElement, this.forceAcceleration );
     }
 
     // clear all of the dirty flags
     this.transformDirty = false;
-  },
+  }
 
   /**
    * Disposes the drawable.
    * @public
    * @override
    */
-  dispose: function() {
-    DOMSelfDrawable.prototype.dispose.call( this );
+  dispose() {
+    super.dispose();
 
     this.domElement = null;
   }
-} );
+}
 
-Poolable.mixInto( DOMDrawable );
+scenery.register( 'DOMDrawable', DOMDrawable );
+
+Poolable.mixInto( DOMDrawable, {
+  initialize: DOMDrawable.prototype.initialize
+} );
 
 export default DOMDrawable;

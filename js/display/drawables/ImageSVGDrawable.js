@@ -7,7 +7,6 @@
  */
 
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import inherit from '../../../../phet-core/js/inherit.js';
 import platform from '../../../../phet-core/js/platform.js';
 import scenery from '../../scenery.js';
 import svgns from '../../util/svgns.js';
@@ -18,59 +17,48 @@ import ImageStatefulDrawable from './ImageStatefulDrawable.js';
 // TODO: change this based on memory and performance characteristics of the platform
 const keepSVGImageElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory
 
-/**
- * A generated SVGSelfDrawable whose purpose will be drawing our Image. One of these drawables will be created
- * for each displayed instance of a Image.
- * @constructor
- *
- * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
- * @param {Instance} instance
- */
-function ImageSVGDrawable( renderer, instance ) {
-  // Super-type initialization
-  this.initializeSVGSelfDrawable( renderer, instance, false, keepSVGImageElements ); // usesPaint: false
+class ImageSVGDrawable extends ImageStatefulDrawable( SVGSelfDrawable ) {
+  /**
+   * @public
+   * @override
+   *
+   * @param {number} renderer
+   * @param {Instance} instance
+   */
+  initialize( renderer, instance ) {
+    super.initialize( renderer, instance, false, keepSVGImageElements ); // usesPaint: false
 
-  sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' initialized for ' + instance.toString() );
-  const self = this;
+    sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' initialized for ' + instance.toString() );
 
-  // @protected {SVGImageElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
-  this.svgElement = this.svgElement || document.createElementNS( svgns, 'image' );
-  this.svgElement.setAttribute( 'x', '0' );
-  this.svgElement.setAttribute( 'y', '0' );
+    // @protected {SVGImageElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
+    this.svgElement = this.svgElement || document.createElementNS( svgns, 'image' );
+    this.svgElement.setAttribute( 'x', '0' );
+    this.svgElement.setAttribute( 'y', '0' );
 
-  // Whether we have an opacity attribute specified on the DOM element.
-  this.hasOpacity = false;
+    // @private {boolean} - Whether we have an opacity attribute specified on the DOM element.
+    this.hasOpacity = false;
 
-  this._usingMipmap = false;
-  this._mipmapLevel = -1; // will always be invalidated
+    // @private {boolean}
+    this.usingMipmap = false;
 
-  // if mipmaps are enabled, this listener will be added to when our relative transform changes
-  this._mipmapTransformListener = this._mipmapTransformListener || function() {
-    sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( self.id + ' Transform dirties mipmap' );
-    self.markDirtyMipmap();
-  };
+    // @private {number} - will always be invalidated
+    this.mipmapLevel = -1;
 
-  this._mipmapListener = this._mipmapListener || function() {
-    // sanity check
-    self.markDirtyMipmap();
+    // @private {function} - if mipmaps are enabled, this listener will be added to when our relative transform changes
+    this._mipmapTransformListener = this._mipmapTransformListener || this.onMipmapTransform.bind( this );
+    this._mipmapListener = this._mipmapListener || this.onMipmap.bind( this );
 
-    // update our mipmap usage status
-    self.updateMipmapStatus( self.node._mipmap );
-  };
-  this.node.mipmapEmitter.addListener( this._mipmapListener );
-  this.updateMipmapStatus( instance.node._mipmap );
-}
+    this.node.mipmapEmitter.addListener( this._mipmapListener );
+    this.updateMipmapStatus( instance.node._mipmap );
+  }
 
-scenery.register( 'ImageSVGDrawable', ImageSVGDrawable );
-
-inherit( SVGSelfDrawable, ImageSVGDrawable, {
   /**
    * Updates the SVG elements so that they will appear like the current node's representation.
    * @protected
    *
    * Implements the interface for SVGSelfDrawable (and is called from the SVGSelfDrawable's update).
    */
-  updateSVGSelf: function() {
+  updateSVGSelf() {
     const image = this.svgElement;
 
     if ( this.dirtyImage ) {
@@ -102,9 +90,15 @@ inherit( SVGSelfDrawable, ImageSVGDrawable, {
         image.setAttribute( 'opacity', this.node._imageOpacity );
       }
     }
-  },
+  }
 
-  updateURL: function( image, forced ) {
+  /**
+   * @private
+   *
+   * @param {SVGImageElement} image
+   * @param {boolean} forced
+   */
+  updateURL( image, forced ) {
     // determine our mipmap level, if any is used
     let level = -1; // signals a default of "we are not using mipmapping"
     if ( this.node._mipmap ) {
@@ -113,16 +107,16 @@ inherit( SVGSelfDrawable, ImageSVGDrawable, {
     }
 
     // bail out if we would use the currently-used mipmap level (or none) and there was no image change
-    if ( !forced && level === this._mipmapLevel ) {
+    if ( !forced && level === this.mipmapLevel ) {
       return;
     }
 
     // if we are switching to having no mipmap
-    if ( this._mipmapLevel >= 0 && level === -1 ) {
+    if ( this.mipmapLevel >= 0 && level === -1 ) {
       // IE guard needed since removeAttribute fails, see https://github.com/phetsims/scenery/issues/395
       ( platform.ie9 || platform.ie10 ) ? image.setAttribute( 'transform', '' ) : image.removeAttribute( 'transform' );
     }
-    this._mipmapLevel = level;
+    this.mipmapLevel = level;
 
     if ( this.node._mipmap && this.node.hasMipmaps() ) {
       sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Setting image URL to mipmap level ' + level );
@@ -143,11 +137,16 @@ inherit( SVGSelfDrawable, ImageSVGDrawable, {
       image.setAttribute( 'height', this.node.getImageHeight() + 'px' );
       image.setAttributeNS( xlinkns, 'xlink:href', this.node.getImageURL() );
     }
-  },
+  }
 
-  updateMipmapStatus: function( usingMipmap ) {
-    if ( this._usingMipmap !== usingMipmap ) {
-      this._usingMipmap = usingMipmap;
+  /**
+   * @private
+   *
+   * @param {boolean} usingMipmap
+   */
+  updateMipmapStatus( usingMipmap ) {
+    if ( this.usingMipmap !== usingMipmap ) {
+      this.usingMipmap = usingMipmap;
 
       if ( usingMipmap ) {
         sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Adding mipmap compute/listener needs' );
@@ -163,25 +162,48 @@ inherit( SVGSelfDrawable, ImageSVGDrawable, {
       // sanity check
       this.markDirtyMipmap();
     }
-  },
+  }
+
+  /**
+   * @private
+   */
+  onMipmap() {
+    // sanity check
+    this.markDirtyMipmap();
+
+    // update our mipmap usage status
+    this.updateMipmapStatus( this.node._mipmap );
+  }
+
+  /**
+   * @private
+   */
+  onMipmapTransform() {
+    sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Transform dirties mipmap' );
+
+    this.markDirtyMipmap();
+  }
 
   /**
    * Disposes the drawable.
    * @public
    * @override
    */
-  dispose: function() {
+  dispose() {
     sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' disposing' );
 
     // clean up mipmap listeners and compute needs
     this.updateMipmapStatus( false );
     this.node.mipmapEmitter.removeListener( this._mipmapListener );
 
-    SVGSelfDrawable.prototype.dispose.call( this );
+    super.dispose();
   }
-} );
-ImageStatefulDrawable.mixInto( ImageSVGDrawable );
+}
 
-Poolable.mixInto( ImageSVGDrawable );
+scenery.register( 'ImageSVGDrawable', ImageSVGDrawable );
+
+Poolable.mixInto( ImageSVGDrawable, {
+  initialize: ImageSVGDrawable.prototype.initialize
+} );
 
 export default ImageSVGDrawable;

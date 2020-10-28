@@ -6,31 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../../phet-core/js/inherit.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import scenery from '../../scenery.js';
 import CanvasSelfDrawable from '../CanvasSelfDrawable.js';
-import PaintableStatelessDrawable from './PaintableStatelessDrawable.js';
+import LineStatelessDrawable from './LineStatelessDrawable.js';
 
-// TODO: use LineStatelessDrawable instead of the custom stuff going on
-// import LineStatelessDrawable from './LineStatelessDrawable';
-
-/**
- * A generated CanvasSelfDrawable whose purpose will be drawing our Line. One of these drawables will be created
- * for each displayed instance of a Line.
- * @constructor
- *
- * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
- * @param {Instance} instance
- */
-function LineCanvasDrawable( renderer, instance ) {
-  this.initializeCanvasSelfDrawable( renderer, instance );
-  this.initializePaintableStateless( renderer, instance );
-}
-
-scenery.register( 'LineCanvasDrawable', LineCanvasDrawable );
-
-inherit( CanvasSelfDrawable, LineCanvasDrawable, {
+class LineCanvasDrawable extends LineStatelessDrawable( CanvasSelfDrawable ) {
   /**
    * Paints this drawable to a Canvas (the wrapper contains both a Canvas reference and its drawing context).
    * @public
@@ -44,7 +25,7 @@ inherit( CanvasSelfDrawable, LineCanvasDrawable, {
    * @param {Node} node - Our node that is being drawn
    * @param {Matrix3} matrix - The transformation matrix applied for this node's coordinate system.
    */
-  paintCanvas: function( wrapper, node, matrix ) {
+  paintCanvas( wrapper, node, matrix ) {
     const context = wrapper.context;
 
     context.beginPath();
@@ -56,30 +37,13 @@ inherit( CanvasSelfDrawable, LineCanvasDrawable, {
       context.stroke();
       node.afterCanvasStroke( wrapper ); // defined in Paintable
     }
-  },
-
-  // stateless dirty methods:
-  markDirtyLine: function() { this.markPaintDirty(); },
-  markDirtyP1: function() { this.markPaintDirty(); },
-  markDirtyP2: function() { this.markPaintDirty(); },
-  markDirtyX1: function() { this.markPaintDirty(); },
-  markDirtyY1: function() { this.markPaintDirty(); },
-  markDirtyX2: function() { this.markPaintDirty(); },
-  markDirtyY2: function() { this.markPaintDirty(); },
-
-  /**
-   * Disposes the drawable.
-   * @public
-   * @override
-   */
-  dispose: function() {
-    CanvasSelfDrawable.prototype.dispose.call( this );
-    this.disposePaintableStateless();
   }
+}
+
+scenery.register( 'LineCanvasDrawable', LineCanvasDrawable );
+
+Poolable.mixInto( LineCanvasDrawable, {
+  initialize: LineCanvasDrawable.prototype.initialize
 } );
-
-PaintableStatelessDrawable.mixInto( LineCanvasDrawable );
-
-Poolable.mixInto( LineCanvasDrawable );
 
 export default LineCanvasDrawable;

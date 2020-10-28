@@ -6,28 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../../phet-core/js/inherit.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import scenery from '../../scenery.js';
 import CanvasSelfDrawable from '../CanvasSelfDrawable.js';
 import PaintableStatelessDrawable from './PaintableStatelessDrawable.js';
 
-/**
- * A generated CanvasSelfDrawable whose purpose will be drawing our Text. One of these drawables will be created
- * for each displayed instance of a Text node.
- * @constructor
- *
- * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
- * @param {Instance} instance
- */
-function TextCanvasDrawable( renderer, instance ) {
-  this.initializeCanvasSelfDrawable( renderer, instance );
-  this.initializePaintableStateless( renderer, instance );
-}
-
-scenery.register( 'TextCanvasDrawable', TextCanvasDrawable );
-
-inherit( CanvasSelfDrawable, TextCanvasDrawable, {
+class TextCanvasDrawable extends PaintableStatelessDrawable( CanvasSelfDrawable ) {
   /**
    * Paints this drawable to a Canvas (the wrapper contains both a Canvas reference and its drawing context).
    * @public
@@ -41,7 +25,7 @@ inherit( CanvasSelfDrawable, TextCanvasDrawable, {
    * @param {Node} node - Our node that is being drawn
    * @param {Matrix3} matrix - The transformation matrix applied for this node's coordinate system.
    */
-  paintCanvas: function( wrapper, node, matrix ) {
+  paintCanvas( wrapper, node, matrix ) {
     const context = wrapper.context;
 
     // extra parameters we need to set, but should avoid setting if we aren't drawing anything
@@ -60,26 +44,34 @@ inherit( CanvasSelfDrawable, TextCanvasDrawable, {
       context.strokeText( node.renderedText, 0, 0 );
       node.afterCanvasStroke( wrapper ); // defined in Paintable
     }
-  },
-
-  // stateless dirty functions
-  markDirtyText: function() { this.markPaintDirty(); },
-  markDirtyFont: function() { this.markPaintDirty(); },
-  markDirtyBounds: function() { this.markPaintDirty(); },
+  }
 
   /**
-   * Disposes the drawable.
    * @public
-   * @override
    */
-  dispose: function() {
-    CanvasSelfDrawable.prototype.dispose.call( this );
-    this.disposePaintableStateless();
+  markDirtyText() {
+    this.markPaintDirty();
   }
+
+  /**
+   * @public
+   */
+  markDirtyFont() {
+    this.markPaintDirty();
+  }
+
+  /**
+   * @public
+   */
+  markDirtyBounds() {
+    this.markPaintDirty();
+  }
+}
+
+scenery.register( 'TextCanvasDrawable', TextCanvasDrawable );
+
+Poolable.mixInto( TextCanvasDrawable, {
+  initialize: TextCanvasDrawable.prototype.initialize
 } );
-
-PaintableStatelessDrawable.mixInto( TextCanvasDrawable );
-
-Poolable.mixInto( TextCanvasDrawable );
 
 export default TextCanvasDrawable;

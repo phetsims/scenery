@@ -8,9 +8,8 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import cleanArray from '../../../phet-core/js/cleanArray.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
+import cleanArray from '../../../phet-core/js/cleanArray.js';
 import scenery from '../scenery.js';
 import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
 import Utils from '../util/Utils.js';
@@ -20,32 +19,42 @@ import Renderer from './Renderer.js';
 const scratchMatrix = new Matrix3();
 const scratchMatrix2 = new Matrix3();
 
-/**
- * @constructor
- * @mixes Poolable
- *
- * @param {Display} display
- * @param {number} renderer - See Renderer.js for more information
- * @param {Instance} transformRootInstance
- * @param {Instance} filterRootInstance
- */
-function CanvasBlock( display, renderer, transformRootInstance, filterRootInstance ) {
-  this.initialize( display, renderer, transformRootInstance, filterRootInstance );
-}
+class CanvasBlock extends FittedBlock {
+  /**
+   * @mixes Poolable
+   *
+   * @param {Display} display
+   * @param {number} renderer - See Renderer.js for more information
+   * @param {Instance} transformRootInstance
+   * @param {Instance} filterRootInstance
+   */
+  constructor( display, renderer, transformRootInstance, filterRootInstance ) {
+    super();
 
-scenery.register( 'CanvasBlock', CanvasBlock );
+    this.initialize( display, renderer, transformRootInstance, filterRootInstance );
+  }
 
-inherit( FittedBlock, CanvasBlock, {
-  initialize: function( display, renderer, transformRootInstance, filterRootInstance ) {
-    this.initializeFittedBlock( display, renderer, transformRootInstance, FittedBlock.COMMON_ANCESTOR );
+  /**
+   * @public
+   *
+   * @param {Display} display
+   * @param {number} renderer
+   * @param {Instance} transformRootInstance
+   * @param {Instance} filterRootInstance
+   * @returns {CanvasBlock} - For chaining
+   */
+  initialize( display, renderer, transformRootInstance, filterRootInstance ) {
+    super.initialize( display, renderer, transformRootInstance, FittedBlock.COMMON_ANCESTOR );
 
     // @private {Instance}
     this.filterRootInstance = filterRootInstance;
 
+    // @private {Array.<Drawable>}
     this.dirtyDrawables = cleanArray( this.dirtyDrawables );
 
     if ( !this.domElement ) {
       //OHTWO TODO: support tiled Canvas handling (will need to wrap then in a div, or something)
+      // @public {HTMLCanvasElement}
       this.canvas = document.createElement( 'canvas' );
       this.canvas.style.position = 'absolute';
       this.canvas.style.left = '0';
@@ -73,6 +82,7 @@ inherit( FittedBlock, CanvasBlock, {
       // {Array.<CanvasContextWrapper>} as multiple Canvases are needed to properly render opacity within the block.
       this.wrapperStack = [ this.wrapper ];
     }
+
     // {number} - The index into the wrapperStack array where our current Canvas (that we are drawing to) is.
     this.wrapperStackIndex = 0;
 
@@ -86,6 +96,7 @@ inherit( FittedBlock, CanvasBlock, {
 
     this.canvasDrawOffset = new Vector2( 0, 0 );
 
+    // @private {Drawable|null}
     this.currentDrawable = null;
 
     // @private {boolean} - Whether we need to re-apply clipping to our current Canvas
@@ -94,20 +105,30 @@ inherit( FittedBlock, CanvasBlock, {
     // @private {number} - How many clips should be applied (given our current "position" in the walk up/down).
     this.clipCount = 0;
 
-    // store our backing scale so we don't have to look it up while fitting
+    // @private {number} - store our backing scale so we don't have to look it up while fitting
     this.backingScale = ( renderer & Renderer.bitmaskCanvasLowResolution ) ? 1 : Utils.backingScale( this.context );
+    // TODO: > You can use window.matchMedia() to check if the value of devicePixelRatio changes (which can happen,
+    // TODO: > for example, if the user drags the window to a display with a different pixel density).
+    // TODO: OH NO, we may need to figure out watching this?
 
+    // @private {function}
     this.clipDirtyListener = this.markDirty.bind( this );
     this.opacityDirtyListener = this.markDirty.bind( this );
+
+    // @private {Node}
     this.filterRootNode = this.filterRootInstance.node;
 
     sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `initialized #${this.id}` );
     // TODO: dirty list of nodes (each should go dirty only once, easier than scanning all?)
 
     return this;
-  },
+  }
 
-  setSizeFullDisplay: function() {
+  /**
+   * @public
+   * @override
+   */
+  setSizeFullDisplay() {
     const size = this.display.getSize();
     this.canvas.width = size.width * this.backingScale;
     this.canvas.height = size.height * this.backingScale;
@@ -116,9 +137,13 @@ inherit( FittedBlock, CanvasBlock, {
     this.wrapper.resetStyles();
     this.canvasDrawOffset.setXY( 0, 0 );
     Utils.unsetTransform( this.canvas );
-  },
+  }
 
-  setSizeFitBounds: function() {
+  /**
+   * @public
+   * @override
+   */
+  setSizeFitBounds() {
     const x = this.fitBounds.minX;
     const y = this.fitBounds.minY;
     this.canvasDrawOffset.setXY( -x, -y ); // subtract off so we have a tight fit
@@ -129,7 +154,7 @@ inherit( FittedBlock, CanvasBlock, {
     this.canvas.style.width = this.fitBounds.width + 'px';
     this.canvas.style.height = this.fitBounds.height + 'px';
     this.wrapper.resetStyles();
-  },
+  }
 
   /**
    * Updates the DOM appearance of this drawable (whether by preparing/calling draw calls, DOM element updates, etc.)
@@ -139,9 +164,9 @@ inherit( FittedBlock, CanvasBlock, {
    * @returns {boolean} - Whether the update should continue (if false, further updates in supertype steps should not
    *                      be done).
    */
-  update: function() {
+  update() {
     // See if we need to actually update things (will bail out if we are not dirty, or if we've been disposed)
-    if ( !FittedBlock.prototype.update.call( this ) ) {
+    if ( !super.update() ) {
       return false;
     }
 
@@ -178,7 +203,7 @@ inherit( FittedBlock, CanvasBlock, {
     sceneryLog && sceneryLog.CanvasBlock && sceneryLog.pop();
 
     return true;
-  },
+  }
 
   /**
    * Reapplies clips to the current context. It's necessary to fully apply every clipping area for every ancestor,
@@ -190,7 +215,7 @@ inherit( FittedBlock, CanvasBlock, {
    *
    * @param {CanvasSelfDrawable} Drawable
    */
-  applyClip: function( drawable ) {
+  applyClip( drawable ) {
     this.clipDirty = false;
     sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `Apply clip ${drawable.instance.trail.toDebugString()}` );
     sceneryLog && sceneryLog.CanvasBlock && sceneryLog.push();
@@ -234,7 +259,7 @@ inherit( FittedBlock, CanvasBlock, {
     }
 
     sceneryLog && sceneryLog.CanvasBlock && sceneryLog.pop();
-  },
+  }
 
   /**
    * Walk down towards the root, popping any clip/opacity effects that were needed.
@@ -243,7 +268,7 @@ inherit( FittedBlock, CanvasBlock, {
    * @param {Trail} trail
    * @param {number} branchIndex - The first index where our before and after trails have diverged.
    */
-  walkDown: function( trail, branchIndex ) {
+  walkDown( trail, branchIndex ) {
     const filterRootIndex = this.filterRootInstance.trail.length - 1;
 
     for ( let i = trail.length - 1; i >= branchIndex; i-- ) {
@@ -271,7 +296,7 @@ inherit( FittedBlock, CanvasBlock, {
         bottomWrapper.context.globalAlpha = 1;
       }
     }
-  },
+  }
 
   /**
    * Walk up towards the next leaf, pushing any clip/opacity effects that are needed.
@@ -280,7 +305,7 @@ inherit( FittedBlock, CanvasBlock, {
    * @param {Trail} trail
    * @param {number} branchIndex - The first index where our before and after trails have diverged.
    */
-  walkUp: function( trail, branchIndex ) {
+  walkUp( trail, branchIndex ) {
     const filterRootIndex = this.filterRootInstance.trail.length - 1;
 
     for ( let i = branchIndex; i < trail.length; i++ ) {
@@ -316,7 +341,7 @@ inherit( FittedBlock, CanvasBlock, {
         this.clipDirty = true;
       }
     }
-  },
+  }
 
   /**
    * Draws the drawable into our main Canvas.
@@ -328,7 +353,7 @@ inherit( FittedBlock, CanvasBlock, {
    * @param {CanvasSelfDrawable} - TODO: In the future, we'll need to support Canvas caches (this should be updated
    *                               with a proper generalized type)
    */
-  renderDrawable: function( drawable ) {
+  renderDrawable( drawable ) {
     // do not paint invisible drawables
     if ( !drawable.visible ) {
       return;
@@ -371,9 +396,13 @@ inherit( FittedBlock, CanvasBlock, {
     this.currentDrawable = drawable;
 
     sceneryLog && sceneryLog.CanvasBlock && sceneryLog.pop();
-  },
+  }
 
-  dispose: function() {
+  /**
+   * Releases references
+   * @public
+   */
+  dispose() {
     sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `dispose #${this.id}` );
 
     this.filterRootNode = null;
@@ -386,10 +415,15 @@ inherit( FittedBlock, CanvasBlock, {
     this.canvas.width = 0;
     this.canvas.height = 0;
 
-    FittedBlock.prototype.dispose.call( this );
-  },
+    super.dispose();
+  }
 
-  markDirtyDrawable: function( drawable ) {
+  /**
+   * @public
+   *
+   * @param {Drawable} drawable
+   */
+  markDirtyDrawable( drawable ) {
     sceneryLog && sceneryLog.dirty && sceneryLog.dirty( `markDirtyDrawable on CanvasBlock#${this.id} with ${drawable.toString()}` );
 
     assert && assert( drawable );
@@ -402,12 +436,18 @@ inherit( FittedBlock, CanvasBlock, {
     // TODO: instance check to see if it is a canvas cache (usually we don't need to call update on our drawables)
     this.dirtyDrawables.push( drawable );
     this.markDirty();
-  },
+  }
 
-  addDrawable: function( drawable ) {
+  /**
+   * @public
+   * @override
+   *
+   * @param {Drawable} drawable
+   */
+  addDrawable( drawable ) {
     sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `#${this.id}.addDrawable ${drawable.toString()}` );
 
-    FittedBlock.prototype.addDrawable.call( this, drawable );
+    super.addDrawable( drawable );
 
     // Add opacity listeners (from this node up to the filter root)
     for ( let instance = drawable.instance; instance && instance !== this.filterRootInstance; instance = instance.parent ) {
@@ -424,9 +464,15 @@ inherit( FittedBlock, CanvasBlock, {
         node.clipAreaProperty.lazyLink( this.clipDirtyListener );
       }
     }
-  },
+  }
 
-  removeDrawable: function( drawable ) {
+  /**
+   * @public
+   * @override
+   *
+   * @param {Drawable} drawable
+   */
+  removeDrawable( drawable ) {
     sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `#${this.id}.removeDrawable ${drawable.toString()}` );
 
     // Remove opacity listeners (from this node up to the filter root)
@@ -442,21 +488,33 @@ inherit( FittedBlock, CanvasBlock, {
       }
     }
 
-    FittedBlock.prototype.removeDrawable.call( this, drawable );
-  },
+    super.removeDrawable( drawable );
+  }
 
-  onIntervalChange: function( firstDrawable, lastDrawable ) {
+  /**
+   * @public
+   * @override
+   *
+   * @param {Drawable} firstDrawable
+   * @param {Drawable} lastDrawable
+   */
+  onIntervalChange( firstDrawable, lastDrawable ) {
     sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `#${this.id}.onIntervalChange ${firstDrawable.toString()} to ${lastDrawable.toString()}` );
 
-    FittedBlock.prototype.onIntervalChange.call( this, firstDrawable, lastDrawable );
+    super.onIntervalChange( firstDrawable, lastDrawable );
 
     // If we have an interval change, we'll need to ensure we repaint (even if we're full-display). This was a missed
     // case for https://github.com/phetsims/scenery/issues/512, where it would only clear if it was a common-ancestor
     // fitted block.
     this.markDirty();
-  },
+  }
 
-  onPotentiallyMovedDrawable: function( drawable ) {
+  /**
+   * @public
+   *
+   * @param {Drawable} drawable
+   */
+  onPotentiallyMovedDrawable( drawable ) {
     sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `#${this.id}.onPotentiallyMovedDrawable ${drawable.toString()}` );
     sceneryLog && sceneryLog.CanvasBlock && sceneryLog.push();
 
@@ -468,12 +526,20 @@ inherit( FittedBlock, CanvasBlock, {
     drawable.markDirty();
 
     sceneryLog && sceneryLog.CanvasBlock && sceneryLog.pop();
-  },
+  }
 
-  toString: function() {
+  /**
+   * Returns a string form of this object
+   * @public
+   *
+   * @returns {string}
+   */
+  toString() {
     return `CanvasBlock#${this.id}-${FittedBlock.fitString[ this.fit ]}`;
   }
-} );
+}
+
+scenery.register( 'CanvasBlock', CanvasBlock );
 
 Poolable.mixInto( CanvasBlock, {
   initialize: CanvasBlock.prototype.initialize

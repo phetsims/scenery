@@ -7,32 +7,42 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 import Drawable from './Drawable.js';
 
-/**
- * @constructor
- * @extends Drawable
- * @mixes Poolable
- *
- * @param renderer
- * @param instance
- */
-function SelfDrawable( renderer, instance ) {
-  this.initializeSelfDrawable( renderer, instance );
-}
+class SelfDrawable extends Drawable {
+  /**
+   * We have enough concrete types that want a fallback constructor to this, so we'll provide it for convenience.
+   *
+   * @param {number} renderer
+   * @param {Instance} instance
+   */
+  constructor( renderer, instance ) {
+    assert && assert( typeof renderer === 'number' );
+    assert && assert( instance );
 
-scenery.register( 'SelfDrawable', SelfDrawable );
+    super();
 
-inherit( Drawable, SelfDrawable, {
-  initializeSelfDrawable: function( renderer, instance ) {
+    this.initialize( renderer, instance );
+  }
+
+  /**
+   * @public
+   *
+   * @param {number} renderer
+   * @param {Instance} instance
+   * @returns {SelfDrawable}
+   */
+  initialize( renderer, instance ) {
+    super.initialize( renderer );
+
+    // @private {function}
     this.drawableVisibilityListener = this.drawableVisibilityListener || this.updateSelfVisibility.bind( this );
 
-    // super initialization
-    this.initializeDrawable( renderer );
-
+    // @public {Instance}
     this.instance = instance;
+
+    // @public {Node}
     this.node = instance.trail.lastNode();
     this.node.attachDrawable( this );
 
@@ -41,10 +51,14 @@ inherit( Drawable, SelfDrawable, {
     this.updateSelfVisibility();
 
     return this;
-  },
+  }
 
-  // @public
-  dispose: function() {
+  /**
+   * Releases references
+   * @public
+   * @override
+   */
+  dispose() {
     this.instance.selfVisibleEmitter.removeListener( this.drawableVisibilityListener );
 
     this.node.detachDrawable( this );
@@ -53,17 +67,29 @@ inherit( Drawable, SelfDrawable, {
     this.instance = null;
     this.node = null;
 
-    Drawable.prototype.dispose.call( this );
-  },
+    super.dispose();
+  }
 
-  updateSelfVisibility: function() {
+  /**
+   * @public
+   */
+  updateSelfVisibility() {
     // hide our drawable if it is not relatively visible
     this.visible = this.instance.selfVisible;
-  },
+  }
 
-  toDetailedString: function() {
+  /**
+   * Returns a more-informative string form of this object.
+   * @public
+   * @override
+   *
+   * @returns {string}
+   */
+  toDetailedString() {
     return this.toString() + ' (' + this.instance.trail.toPathString() + ')';
   }
-} );
+}
+
+scenery.register( 'SelfDrawable', SelfDrawable );
 
 export default SelfDrawable;
