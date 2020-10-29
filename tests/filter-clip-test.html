@@ -42,20 +42,30 @@ const createElement = () => {
 
   scene.addChild( new Rectangle( 0, 0, 320, 50, {
     fill: 'rgb(200,0,0)',
-    renderer: 'canvas'
+    renderer: 'canvas',
+    y: 120,
+    rotation: 0
   } ) );
-  scene.addChild( new Rectangle( 0, 80, 320, 50, {
+  scene.addChild( new Rectangle( 0, 0, 320, 50, {
     fill: 'rgb(0,200,0)',
-    renderer: 'svg'
+    renderer: 'svg',
+    y: 120,
+    rotation: 0.3
   } ) );
-  scene.addChild( new Rectangle( 0, 160, 320, 50, {
+  scene.addChild( new Rectangle( 0, 0, 320, 50, {
     fill: 'rgb(0,0,200)',
-    renderer: 'webgl'
+    renderer: 'webgl',
+    y: 120,
+    rotation: -0.3
   } ) );
 
   display.updateDisplay();
 
   display.domElement.style.position = 'relative';
+
+  display.rootBackbone.blocks.forEach( block => {
+    block.domElement.style.mixBlendMode = 'multiply';
+  } );
 
   return display.domElement;
 };
@@ -91,6 +101,9 @@ const createElement = () => {
 /**
 blur(5px)
   <feGaussianBlur in="SourceGraphic" stdDeviation="5"></feGaussianBlur>
+  <filter id="blur">
+    <feGaussianBlur stdDeviation="[radius radius]" edgeMode="[edge mode]" >
+  </filter>
 brightness(2) ---- Firefox is just.... offff.... FML
   <feComponentTransfer>
       <feFuncR type="linear" slope="2"></feFuncR>
@@ -106,6 +119,13 @@ contrast(2)
         <feFuncR type="linear" slope="[amount]" intercept="-(0.5 * [amount]) + 0.5"/>
       <feFuncG type="linear" slope="[amount]" intercept="-(0.5 * [amount]) + 0.5"/>
       <feFuncB type="linear" slope="[amount]" intercept="-(0.5 * [amount]) + 0.5"/>
+  <filter id="contrast">
+    <feComponentTransfer>
+        <feFuncR type="linear" slope="[amount]" intercept="-(0.5 * [amount]) + 0.5"/>
+        <feFuncG type="linear" slope="[amount]" intercept="-(0.5 * [amount]) + 0.5"/>
+        <feFuncB type="linear" slope="[amount]" intercept="-(0.5 * [amount]) + 0.5"/>
+    </feComponentTransfer>
+  </filter>
 drop-shadow(16px 16px 10px black) <offset-x> <offset-y> [<blur-radius>] [<color>]
     <feGaussianBlur in="SourceAlpha" stdDeviation="[radius]"/>
     <feOffset dx="[offset-x]" dy="[offset-y]" result="offsetblur"/>
@@ -120,6 +140,14 @@ grayscale(1)
                        0.2126 0.7152 0.0722 0 0
                        0.2126 0.7152 0.0722 0 0
                        0 0 0 1 0"></feColorMatrix>
+  <filter id="grayscale">
+    <feColorMatrix type="matrix"
+               values="
+      (0.2126 + 0.7874 * [1 - amount]) (0.7152 - 0.7152  * [1 - amount]) (0.0722 - 0.0722 * [1 - amount]) 0 0
+      (0.2126 - 0.2126 * [1 - amount]) (0.7152 + 0.2848  * [1 - amount]) (0.0722 - 0.0722 * [1 - amount]) 0 0
+      (0.2126 - 0.2126 * [1 - amount]) (0.7152 - 0.7152  * [1 - amount]) (0.0722 + 0.9278 * [1 - amount]) 0 0
+      0 0 0 1 0"/>
+  </filter>
 hue-rotate(90deg)
   <feColorMatrix type="hueRotate" values="90"></feColorMatrix>
 invert(1)
@@ -128,10 +156,22 @@ invert(1)
         <feFuncG type="table" tableValues="1 0"></feFuncG>
         <feFuncB type="table" tableValues="1 0"></feFuncB>
     </feComponentTransfer>
+  <filter id="invert">
+    <feComponentTransfer>
+        <feFuncR type="table" tableValues="[amount] (1 - [amount])"/>
+        <feFuncG type="table" tableValues="[amount] (1 - [amount])"/>
+        <feFuncB type="table" tableValues="[amount] (1 - [amount])"/>
+    </feComponentTransfer>
+  </filter>
 opacity(0.5)
   <feComponentTransfer>
         <feFuncA type="table" tableValues="0 0.5">
     </feFuncA></feComponentTransfer>
+  <filter id="opacity">
+    <feComponentTransfer>
+        <feFuncA type="table" tableValues="0 [amount]"/>
+    </feComponentTransfer>
+  </filter>
 saturate(1)
   <feColorMatrix type="saturate" values="2"></feColorMatrix>
 sepia(1)
@@ -139,6 +179,14 @@ sepia(1)
                        0.349 0.686 0.168 0 0
                        0.272 0.534 0.131 0 0
                        0 0 0 1 0"></feColorMatrix>
+  <filter id="sepia">
+    <feColorMatrix type="matrix"
+               values="
+      (0.393 + 0.607 * [1 - amount]) (0.769 - 0.769 * [1 - amount]) (0.189 - 0.189 * [1 - amount]) 0 0
+      (0.349 - 0.349 * [1 - amount]) (0.686 + 0.314 * [1 - amount]) (0.168 - 0.168 * [1 - amount]) 0 0
+      (0.272 - 0.272 * [1 - amount]) (0.534 - 0.534 * [1 - amount]) (0.131 + 0.869 * [1 - amount]) 0 0
+      0 0 0 1 0"/>
+  </filter>
 */
 
 </script>
