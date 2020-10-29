@@ -102,7 +102,6 @@ import './nodes/Circle.js';
 import './nodes/DOM.js';
 import './nodes/HBox.js';
 import './nodes/HStrut.js';
-import './nodes/HTMLText.js';
 import './nodes/Image.js';
 import './nodes/Leaf.js';
 import './nodes/Line.js';

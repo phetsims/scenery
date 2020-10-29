@@ -1026,7 +1026,7 @@ scenery.register( 'PDOMPeer', PDOMPeer );
 
 // Set up pooling
 Poolable.mixInto( PDOMPeer, {
-  initalize: PDOMPeer.prototype.initializeAccessiblePeer
+  initialize: PDOMPeer.prototype.initializeAccessiblePeer
 } );
 
 //--------------------------------------------------------------------------
