@@ -25,9 +25,10 @@ const summaryBits = [
   Renderer.bitmaskSingleSVG,
   Renderer.bitmaskNotPainted,
   Renderer.bitmaskBoundsValid,
-  Renderer.bitmaskNotAccessible, // NOTE: This could be separated out into its own implementation for this flag, since
+  // NOTE: This could be separated out into its own implementation for this flag, since
   // there are cases where we actually have nothing accessible DUE to things being pulled out by another order.
   // This is generally NOT the case, so I've left this in here because it significantly simplifies the implementation.
+  Renderer.bitmaskNotAccessible,
 
   // inverse renderer bits ("Do all painted nodes NOT support renderer X in this sub-tree?")
   Renderer.bitmaskLacksCanvas,
@@ -367,7 +368,7 @@ class RendererSummary {
     }
 
     // NOTE: If changing, see Instance.updateRenderingState
-    const requiresSplit = node._hints.requireElement || node._hints.cssTransform || node._hints.layerSplit;
+    const requiresSplit = node._hints.cssTransform || node._hints.layerSplit;
     const rendererHint = node._hints.renderer;
 
     // Whether this subtree will be able to support a single SVG element

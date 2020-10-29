@@ -392,7 +392,7 @@ class Instance {
 
     const hasClip = this.node.hasClipArea();
     const hasTransparency = this.node.opacity !== 1 || hints.usesOpacity;
-    const requiresSplit = hints.requireElement || hints.cssTransform || hints.layerSplit;
+    const requiresSplit = hints.cssTransform || hints.layerSplit;
     const backboneRequired = this.isDisplayRoot || ( !this.isUnderCanvasCache && requiresSplit );
 
     // Support either "all Canvas" or "all SVG" opacity/clip
