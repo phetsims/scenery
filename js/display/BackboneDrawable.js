@@ -51,13 +51,14 @@ class BackboneDrawable extends Drawable {
 
     this.forceAcceleration = false;
 
-    // reference to the instance that controls this backbone
+    // @public {Instance} - reference to the instance that controls this backbone
     this.backboneInstance = backboneInstance;
 
-    // where is the transform root for our generated blocks?
+    // @public {Instance} - where is the transform root for our generated blocks?
     this.transformRootInstance = transformRootInstance;
 
-    // where have filters been applied to up? our responsibility is to apply filters between this and our backboneInstance
+    // @private {Instance} - where have filters been applied to up? our responsibility is to apply filters between this
+    // and our backboneInstance
     this.filterRootAncestorInstance = backboneInstance.parent ? backboneInstance.parent.getFilterRootInstance() : backboneInstance;
 
     // where have transforms been applied up to? our responsibility is to apply transforms between this and our backboneInstance
