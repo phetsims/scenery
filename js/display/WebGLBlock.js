@@ -110,7 +110,7 @@ class WebGLBlock extends FittedBlock {
     this.gl.clear( this.gl.COLOR_BUFFER_BIT );
 
     // reset any fit transforms that were applied
-    Utils.prepareForTransform( this.canvas, false ); // Apply CSS needed for future CSS transforms to work properly.
+    Utils.prepareForTransform( this.canvas ); // Apply CSS needed for future CSS transforms to work properly.
     Utils.unsetTransform( this.canvas ); // clear out any transforms that could have been previously applied
 
     sceneryLog && sceneryLog.WebGLBlock && sceneryLog.pop();

@@ -62,9 +62,6 @@ class FittedBlock extends Block {
     this.dirtyFitListener = this.dirtyFitListener || this.markDirtyFit.bind( this );
     this.fittableListener = this.fittableListener || this.onFittabilityChange.bind( this );
 
-    // @public {boolean} - TODO: improve how we handle graphical acceleration with transforms
-    this.forceAcceleration = false;
-
     // now we always add a listener to the display size to invalidate our fit
     this.display.sizeProperty.lazyLink( this.dirtyFitListener );
 

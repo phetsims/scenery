@@ -28,7 +28,7 @@ class TextDOMDrawable extends TextStatefulDrawable( DOMSelfDrawable ) {
     super( renderer, instance );
 
     // Apply CSS needed for future CSS transforms to work properly. Just do this once for performance
-    Utils.prepareForTransform( this.domElement, this.forceAcceleration );
+    Utils.prepareForTransform( this.domElement );
   }
 
   /**
@@ -92,7 +92,7 @@ class TextDOMDrawable extends TextStatefulDrawable( DOMSelfDrawable ) {
       const translation = Matrix3.translation( 0, yOffset );
       scratchMatrix.multiplyMatrix( translation );
       translation.freeToPool();
-      Utils.applyPreparedTransform( scratchMatrix, div, this.forceAcceleration );
+      Utils.applyPreparedTransform( scratchMatrix, div );
     }
 
     // clear all of the dirty flags

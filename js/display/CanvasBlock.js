@@ -90,7 +90,7 @@ class CanvasBlock extends FittedBlock {
     this.filterListenerCountMap = this.filterListenerCountMap || {};
 
     // reset any fit transforms that were applied
-    Utils.prepareForTransform( this.canvas, this.forceAcceleration ); // Apply CSS needed for future CSS transforms to work properly.
+    Utils.prepareForTransform( this.canvas ); // Apply CSS needed for future CSS transforms to work properly.
     Utils.unsetTransform( this.canvas ); // clear out any transforms that could have been previously applied
 
     this.canvasDrawOffset = new Vector2( 0, 0 );
@@ -145,7 +145,7 @@ class CanvasBlock extends FittedBlock {
     const y = this.fitBounds.minY;
     this.canvasDrawOffset.setXY( -x, -y ); // subtract off so we have a tight fit
     //OHTWO TODO PERFORMANCE: see if we can get a speedup by putting the backing scale in our transform instead of with CSS?
-    Utils.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.canvas, this.forceAcceleration ); // reapply the translation as a CSS transform
+    Utils.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.canvas ); // reapply the translation as a CSS transform
     this.canvas.width = this.fitBounds.width * this.backingScale;
     this.canvas.height = this.fitBounds.height * this.backingScale;
     this.canvas.style.width = this.fitBounds.width + 'px';

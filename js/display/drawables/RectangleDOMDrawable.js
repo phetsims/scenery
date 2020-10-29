@@ -29,7 +29,7 @@ class RectangleDOMDrawable extends RectangleStatefulDrawable( DOMSelfDrawable ) 
     super( renderer, instance );
 
     // Apply CSS needed for future CSS transforms to work properly.
-    Utils.prepareForTransform( this.domElement, this.forceAcceleration );
+    Utils.prepareForTransform( this.domElement );
   }
 
   /**
@@ -138,7 +138,7 @@ class RectangleDOMDrawable extends RectangleStatefulDrawable( DOMSelfDrawable ) 
       const translation = Matrix3.translation( node._rectX, node._rectY );
       scratchMatrix.multiplyMatrix( translation );
       translation.freeToPool();
-      Utils.applyPreparedTransform( scratchMatrix, this.fillElement, this.forceAcceleration );
+      Utils.applyPreparedTransform( scratchMatrix, this.fillElement );
     }
 
     // clear all of the dirty flags

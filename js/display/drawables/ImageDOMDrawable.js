@@ -24,7 +24,7 @@ class ImageDOMDrawable extends ImageStatefulDrawable( DOMSelfDrawable ) {
     super( renderer, instance );
 
     // Apply CSS needed for future CSS transforms to work properly.
-    Utils.prepareForTransform( this.domElement, this.forceAcceleration );
+    Utils.prepareForTransform( this.domElement );
   }
 
   /**
@@ -82,7 +82,7 @@ class ImageDOMDrawable extends ImageStatefulDrawable( DOMSelfDrawable ) {
     }
 
     if ( this.transformDirty ) {
-      Utils.applyPreparedTransform( this.getTransformMatrix(), this.domElement, this.forceAcceleration );
+      Utils.applyPreparedTransform( this.getTransformMatrix(), this.domElement );
     }
 
     // clear all of the dirty flags

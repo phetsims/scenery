@@ -57,7 +57,7 @@ class PointerOverlay {
       svg.style.left = 0;
       svg.style[ 'pointer-events' ] = 'none';
 
-      Utils.prepareForTransform( svg, false );
+      Utils.prepareForTransform( svg );
 
       //Fit the size to the display
       svg.setAttribute( 'width', diameter );
@@ -87,7 +87,7 @@ class PointerOverlay {
           //TODO: Why is point sometimes null?
           if ( pointer.point ) {
 
-            Utils.applyPreparedTransform( scratchMatrix.setToTranslation( pointer.point.x - radius, pointer.point.y - radius ), svg, false );
+            Utils.applyPreparedTransform( scratchMatrix.setToTranslation( pointer.point.x - radius, pointer.point.y - radius ), svg );
           }
         },
 

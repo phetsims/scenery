@@ -30,8 +30,6 @@ class DOMSelfDrawable extends SelfDrawable {
     // @private {function} - this is the same across lifecycles
     this.transformListener = this.transformListener || this.markTransformDirty.bind( this );
 
-    // @private {boolean} - TODO: for now, check to see if this is used and how to use it
-    this.forceAcceleration = false;
     this.markTransformDirty();
 
     // @private {boolean}

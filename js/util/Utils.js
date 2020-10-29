@@ -42,36 +42,9 @@ var Utils = {
    * @public
    *
    * @param {Element} element
-   * @param {boolean} forceAcceleration - Whether graphical acceleration should be forced (may slow things down!)
    */
-  prepareForTransform( element, forceAcceleration ) {
+  prepareForTransform( element ) {
     element.style[ transformOriginProperty ] = 'top left';
-    if ( forceAcceleration ) {
-      Utils.setTransformAcceleration( element );
-    }
-    else {
-      Utils.unsetTransformAcceleration( element );
-    }
-  },
-
-  /**
-   * Apply CSS styles that will potentially trigger graphical acceleration. Use at your own risk.
-   * @private
-   *
-   * @param {Element} element
-   */
-  setTransformAcceleration( element ) {
-    element.style.webkitBackfaceVisibility = 'hidden';
-  },
-
-  /**
-   * Unapply CSS styles (from setTransformAcceleration) that would potentially trigger graphical acceleration.
-   * @private
-   *
-   * @param {Element} element
-   */
-  unsetTransformAcceleration( element ) {
-    element.style.webkitBackfaceVisibility = '';
   },
 
   /**
@@ -81,9 +54,8 @@ var Utils = {
    *
    * @param {Matrix3} matrix
    * @param {Element} element
-   * @param {boolean} forceAcceleration
    */
-  applyPreparedTransform( matrix, element, forceAcceleration ) {
+  applyPreparedTransform( matrix, element ) {
     // NOTE: not applying translateZ, see http://stackoverflow.com/questions/10014461/why-does-enabling-hardware-acceleration-in-css3-slow-down-performance
     element.style[ transformProperty ] = matrix.getCSSTransform();
   },
@@ -95,9 +67,8 @@ var Utils = {
    *
    * @param {string} transformString
    * @param {Element} element
-   * @param {boolean} forceAcceleration
    */
-  setTransform( transformString, element, forceAcceleration ) {
+  setTransform( transformString, element ) {
     assert && assert( typeof transformString === 'string' );
 
     element.style[ transformProperty ] = transformString;

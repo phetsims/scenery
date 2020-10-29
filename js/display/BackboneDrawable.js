@@ -49,8 +49,6 @@ class BackboneDrawable extends Drawable {
 
     this.display = display;
 
-    this.forceAcceleration = false;
-
     // @public {Instance} - reference to the instance that controls this backbone
     this.backboneInstance = backboneInstance;
 
@@ -84,7 +82,7 @@ class BackboneDrawable extends Drawable {
     this.dirtyDrawables = cleanArray( this.dirtyDrawables );
 
     // Apply CSS needed for future CSS transforms to work properly.
-    Utils.prepareForTransform( this.domElement, this.forceAcceleration );
+    Utils.prepareForTransform( this.domElement );
 
     // if we need to, watch nodes below us (and including us) and apply their filters (opacity/visibility/clip) to the backbone.
     this.watchedFilterNodes = cleanArray( this.watchedFilterNodes );
@@ -244,7 +242,7 @@ class BackboneDrawable extends Drawable {
     assert && assert( this.willApplyTransform, 'Sanity check for willApplyTransform' );
 
     // relative matrix on backbone instance should be up to date, since we added the compute flags
-    Utils.applyPreparedTransform( this.backboneInstance.relativeTransform.matrix, this.domElement, this.forceAcceleration );
+    Utils.applyPreparedTransform( this.backboneInstance.relativeTransform.matrix, this.domElement );
   }
 
   /**

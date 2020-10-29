@@ -26,7 +26,7 @@ class CircleDOMDrawable extends CircleStatefulDrawable( DOMSelfDrawable ) {
     super( renderer, instance );
 
     // Apply CSS needed for future CSS transforms to work properly.
-    Utils.prepareForTransform( this.domElement, this.forceAcceleration );
+    Utils.prepareForTransform( this.domElement );
   }
 
   /**
@@ -131,7 +131,7 @@ class CircleDOMDrawable extends CircleStatefulDrawable( DOMSelfDrawable ) {
       const translation = Matrix3.translation( -node._radius, -node._radius );
       this.matrix.multiplyMatrix( translation );
       translation.freeToPool();
-      Utils.applyPreparedTransform( this.matrix, this.fillElement, this.forceAcceleration );
+      Utils.applyPreparedTransform( this.matrix, this.fillElement );
     }
 
     // clear all of the dirty flags

@@ -84,8 +84,8 @@ class SVGBlock extends FittedBlock {
       this.domElement = this.svg;
     }
 
-    // reset what layer fitting can do (this.forceAcceleration set in fitted block initialization)
-    Utils.prepareForTransform( this.svg, this.forceAcceleration ); // Apply CSS needed for future CSS transforms to work properly.
+    // reset what layer fitting can do
+    Utils.prepareForTransform( this.svg ); // Apply CSS needed for future CSS transforms to work properly.
 
     Utils.unsetTransform( this.svg ); // clear out any transforms that could have been previously applied
     this.baseTransformGroup.setAttribute( 'transform', '' ); // no base transform
@@ -231,7 +231,7 @@ class SVGBlock extends FittedBlock {
     assert && assert( this.fitBounds.isValid(), 'Invalid fitBounds' );
 
     this.baseTransformGroup.setAttribute( 'transform', 'translate(' + ( -x ) + ',' + ( -y ) + ')' ); // subtract off so we have a tight fit
-    Utils.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.svg, this.forceAcceleration ); // reapply the translation as a CSS transform
+    Utils.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.svg ); // reapply the translation as a CSS transform
     this.svg.setAttribute( 'width', this.fitBounds.width );
     this.svg.setAttribute( 'height', this.fitBounds.height );
   }
