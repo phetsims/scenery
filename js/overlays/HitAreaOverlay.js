@@ -49,7 +49,12 @@ class HitAreaOverlay extends ShapeBasedOverlay {
     } );
   }
 
-  // @private
+  /**
+   * @private
+   *
+   * @param {Node} node
+   * @returns {Shape}
+   */
   static getLocalMouseShape( node ) {
     let shape = Shape.union( [
       node.mouseArea ? ( node.mouseArea instanceof Shape ? node.mouseArea : Shape.bounds( node.mouseArea ) ) : node.getSelfShape(),
@@ -65,8 +70,12 @@ class HitAreaOverlay extends ShapeBasedOverlay {
     return shape;
   }
 
-
-  // @private
+  /**
+   * @private
+   *
+   * @param {Node} node
+   * @returns {Shape}
+   */
   static getLocalTouchShape( node ) {
     let shape = Shape.union( [
       node.touchArea ? ( node.touchArea instanceof Shape ? node.touchArea : Shape.bounds( node.touchArea ) ) : node.getSelfShape(),

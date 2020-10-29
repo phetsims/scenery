@@ -7,23 +7,25 @@
  */
 
 import Shape from '../../../kite/js/Shape.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 import Trail from '../util/Trail.js';
 import ShapeBasedOverlay from './ShapeBasedOverlay.js';
 
-function PointerAreaOverlay( display, rootNode ) {
-  ShapeBasedOverlay.call( this, display, rootNode, 'mouseTouchAreaOverlay' );
-}
+class PointerAreaOverlay extends ShapeBasedOverlay {
+  /**
+   * @param {Display} display
+   * @param {Node} rootNode
+   */
+  constructor( display, rootNode ) {
+    super( display, rootNode, 'mouseTouchAreaOverlay' );
+  }
 
-scenery.register( 'PointerAreaOverlay', PointerAreaOverlay );
-
-inherit( ShapeBasedOverlay, PointerAreaOverlay, {
-  // @override
-  addShapes: function() {
-    const self = this;
-
-    new Trail( this.rootNode ).eachTrailUnder( function( trail ) {
+  /**
+   * @public
+   * @override
+   */
+  addShapes() {
+    new Trail( this.rootNode ).eachTrailUnder( trail => {
       const node = trail.lastNode();
       if ( !node.isVisible() ) {
         // skip this subtree if the node is invisible
@@ -33,14 +35,15 @@ inherit( ShapeBasedOverlay, PointerAreaOverlay, {
         const transform = trail.getTransform();
 
         if ( node.mouseArea ) {
-          self.addShape( transform.transformShape( node.mouseArea.isBounds ? Shape.bounds( node.mouseArea ) : node.mouseArea ), 'rgba(0,0,255,0.8)', true );
+          this.addShape( transform.transformShape( node.mouseArea.isBounds ? Shape.bounds( node.mouseArea ) : node.mouseArea ), 'rgba(0,0,255,0.8)', true );
         }
         if ( node.touchArea ) {
-          self.addShape( transform.transformShape( node.touchArea.isBounds ? Shape.bounds( node.touchArea ) : node.touchArea ), 'rgba(255,0,0,0.8)', false );
+          this.addShape( transform.transformShape( node.touchArea.isBounds ? Shape.bounds( node.touchArea ) : node.touchArea ), 'rgba(255,0,0,0.8)', false );
         }
       }
     } );
   }
-} );
+}
 
+scenery.register( 'PointerAreaOverlay', PointerAreaOverlay );
 export default PointerAreaOverlay;
