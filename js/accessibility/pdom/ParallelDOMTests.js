@@ -89,7 +89,7 @@ function accessibleAuditRootNode( rootNode ) {
   rootNode.accessibleAudit();
 }
 
-QUnit.test( 'tagName/innerContent options', function( assert ) {
+QUnit.test( 'tagName/innerContent options', assert => {
 
   // test the behavior of swapVisibility function
   const rootNode = new Node( { tagName: 'div' } );
@@ -126,7 +126,7 @@ QUnit.test( 'tagName/innerContent options', function( assert ) {
   // verify that setting inner content on an input is not allowed
   const b = new Node( { tagName: 'input', inputType: 'range' } );
   rootNode.addChild( b );
-  window.assert && assert.throws( function() {
+  window.assert && assert.throws( () => {
     b.innerContent = 'this should fail';
   }, /.*/, 'cannot set inner content on input' );
 
@@ -137,14 +137,14 @@ QUnit.test( 'tagName/innerContent options', function( assert ) {
   assert.ok( b.innerContent === TEST_LABEL, 'inner content allowed' );
 
   // revert tag name to input, should throw an error
-  window.assert && assert.throws( function() {
+  window.assert && assert.throws( () => {
     b.tagName = 'input';
   }, /.*/, 'error thrown after setting tagName to input on Node with innerContent.' );
   display.dispose();
 } );
 
 
-QUnit.test( 'containerTagName option', function( assert ) {
+QUnit.test( 'containerTagName option', assert => {
 
 
   // test the behavior of swapVisibility function
@@ -173,7 +173,7 @@ QUnit.test( 'containerTagName option', function( assert ) {
   display.dispose();
 } );
 
-QUnit.test( 'labelTagName/labelContent option', function( assert ) {
+QUnit.test( 'labelTagName/labelContent option', assert => {
 
   // test the behavior of swapVisibility function
   const rootNode = new Node( { tagName: 'div' } );
@@ -234,7 +234,7 @@ QUnit.test( 'labelTagName/labelContent option', function( assert ) {
 
 } );
 
-QUnit.test( 'container element not needed for multiple siblings', function( assert ) {
+QUnit.test( 'container element not needed for multiple siblings', assert => {
 
   // test the behavior of swapVisibility function
   const rootNode = new Node( { tagName: 'div' } );
@@ -262,7 +262,7 @@ QUnit.test( 'container element not needed for multiple siblings', function( asse
   let cPeer = c.accessibleInstances[ 0 ].peer;
   let dPeer = d.accessibleInstances[ 0 ].peer;
   assert.ok( bElement.children.length === 3, 'c.p, c.section, d.div should all be on the same level' );
-  const confirmOriginalOrder = function() {
+  const confirmOriginalOrder = () => {
     assert.ok( bElement.children[ 0 ].tagName === 'P', 'p first' );
     assert.ok( bElement.children[ 1 ].tagName === 'SECTION', 'section 2nd' );
     assert.ok( bElement.children[ 2 ].tagName === 'DIV', 'div 3rd' );
@@ -285,7 +285,7 @@ QUnit.test( 'container element not needed for multiple siblings', function( asse
   assert.ok( bElement.children.length === 5, 'e children should be added to the same PDOM level.' );
   confirmOriginalOrder();
 
-  const confirmOriginalWithE = function() {
+  const confirmOriginalWithE = () => {
     assert.ok( bElement.children[ 3 ].tagName === 'P', 'P 4rd' );
     assert.ok( bElement.children[ 4 ].tagName === 'SPAN', 'SPAN 3rd' );
     assert.ok( bElement.children[ 3 ] === ePeer.descriptionSibling, 'e description 4th' );
@@ -331,7 +331,7 @@ QUnit.test( 'container element not needed for multiple siblings', function( asse
 
 } );
 
-QUnit.test( 'descriptionTagName/descriptionContent option', function( assert ) {
+QUnit.test( 'descriptionTagName/descriptionContent option', assert => {
 
   // test the behavior of swapVisibility function
   const rootNode = new Node( { tagName: 'div' } );
@@ -372,7 +372,7 @@ QUnit.test( 'descriptionTagName/descriptionContent option', function( assert ) {
 
 } );
 
-QUnit.test( 'ParallelDOM options', function( assert ) {
+QUnit.test( 'ParallelDOM options', assert => {
 
   const rootNode = new Node();
   var display = new Display( rootNode ); // eslint-disable-line
@@ -491,7 +491,7 @@ function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
   rootNode.children = [ a, b ];
 
 
-  window.assert && assert.throws( function() {
+  window.assert && assert.throws( () => {
     a.setAccessibleAttribute( attribute, 'hello' );
   }, /.*/, 'cannot set association attributes with setAccessibleAttribute' );
 
@@ -646,7 +646,7 @@ function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
     otherElementName: PDOMPeer.LABEL_SIBLING
   } );
 
-  const checkOnYourOwnAssociations = function( node ) {
+  const checkOnYourOwnAssociations = node => {
 
     const instance = node._accessibleInstances[ 0 ];
     const nodePrimaryElement = instance.peer.primarySibling;
@@ -669,7 +669,7 @@ function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
     otherElementName: PDOMPeer.LABEL_SIBLING
   } );
   rootNode.addChild( k );
-  const testK = function() {
+  const testK = () => {
     const kValue = k._accessibleInstances[ 0 ].peer.primarySibling.getAttribute( attribute );
     const jID = j._accessibleInstances[ 0 ].peer.labelSibling.getAttribute( 'id' );
     assert.ok( jID === kValue, 'k pointing to j' );
@@ -800,27 +800,27 @@ function testAssociationAttributeBySetters( assert, attribute ) { // eslint-disa
   display.dispose();
 }
 
-QUnit.test( 'aria-labelledby', function( assert ) {
+QUnit.test( 'aria-labelledby', assert => {
 
   testAssociationAttribute( assert, 'aria-labelledby' );
   testAssociationAttributeBySetters( assert, 'aria-labelledby' );
 
 } );
-QUnit.test( 'aria-describedby', function( assert ) {
+QUnit.test( 'aria-describedby', assert => {
 
   testAssociationAttribute( assert, 'aria-describedby' );
   testAssociationAttributeBySetters( assert, 'aria-describedby' );
 
 } );
 
-QUnit.test( 'aria-activedescendant', function( assert ) {
+QUnit.test( 'aria-activedescendant', assert => {
 
   testAssociationAttribute( assert, 'aria-activedescendant' );
   testAssociationAttributeBySetters( assert, 'aria-activedescendant' );
 
 } );
 
-QUnit.test( 'ParallelDOM invalidation', function( assert ) {
+QUnit.test( 'ParallelDOM invalidation', assert => {
 
   // test invalidation of accessibility (changing content which requires )
   const a1 = new Node();
@@ -885,7 +885,7 @@ QUnit.test( 'ParallelDOM invalidation', function( assert ) {
   display.dispose();
 } );
 
-QUnit.test( 'ParallelDOM setters/getters', function( assert ) {
+QUnit.test( 'ParallelDOM setters/getters', assert => {
 
   const a1 = new Node( {
     tagName: 'div'
@@ -920,7 +920,7 @@ QUnit.test( 'ParallelDOM setters/getters', function( assert ) {
   display.dispose();
 } );
 
-QUnit.test( 'Next/Previous focusable', function( assert ) {
+QUnit.test( 'Next/Previous focusable', assert => {
   const util = PDOMUtils;
 
   const rootNode = new Node( { tagName: 'div', focusable: true } );
@@ -990,7 +990,7 @@ QUnit.test( 'Next/Previous focusable', function( assert ) {
 
 } );
 
-QUnit.test( 'Remove accessibility subtree', function( assert ) {
+QUnit.test( 'Remove accessibility subtree', assert => {
   const rootNode = new Node( { tagName: 'div', focusable: true } );
   var display = new Display( rootNode ); // eslint-disable-line
   document.body.appendChild( display.domElement );
@@ -1019,7 +1019,7 @@ QUnit.test( 'Remove accessibility subtree', function( assert ) {
 
 } );
 
-QUnit.test( 'accessible-dag', function( assert ) {
+QUnit.test( 'accessible-dag', assert => {
 
   // test accessibility for multiple instances of a node
   const rootNode = new Node( { tagName: 'div', focusable: true } );
@@ -1061,7 +1061,7 @@ QUnit.test( 'accessible-dag', function( assert ) {
 
 } );
 
-QUnit.test( 'replaceChild', function( assert ) {
+QUnit.test( 'replaceChild', assert => {
 
   // test the behavior of replaceChild function
   const rootNode = new Node( { tagName: 'div' } );
@@ -1144,7 +1144,7 @@ QUnit.test( 'replaceChild', function( assert ) {
 
 } );
 
-QUnit.test( 'accessibleVisible', function( assert ) {
+QUnit.test( 'accessibleVisible', assert => {
 
   const rootNode = new Node();
   const display = new Display( rootNode );
@@ -1234,7 +1234,7 @@ QUnit.test( 'accessibleVisible', function( assert ) {
 
 } );
 
-QUnit.test( 'inputValue', function( assert ) {
+QUnit.test( 'inputValue', assert => {
 
   const rootNode = new Node();
   const display = new Display( rootNode );
@@ -1257,7 +1257,7 @@ QUnit.test( 'inputValue', function( assert ) {
 
 } );
 
-QUnit.test( 'ariaValueText', function( assert ) {
+QUnit.test( 'ariaValueText', assert => {
 
   const rootNode = new Node();
   const display = new Display( rootNode );
@@ -1290,7 +1290,7 @@ QUnit.test( 'ariaValueText', function( assert ) {
 } );
 
 
-QUnit.test( 'setAccessibleAttribute', function( assert ) {
+QUnit.test( 'setAccessibleAttribute', assert => {
 
   const rootNode = new Node();
   const display = new Display( rootNode );
@@ -1312,7 +1312,7 @@ QUnit.test( 'setAccessibleAttribute', function( assert ) {
     elementName: PDOMPeer.LABEL_SIBLING
   } );
 
-  const testBothAttributes = function() {
+  const testBothAttributes = () => {
     aElement = getPrimarySiblingElementByNode( a );
     const aLabelElement = aElement.parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
     assert.ok( aElement.getAttribute( 'test' ) === 'testValue', 'setAccessibleAttribute for primary sibling 2' );
@@ -1336,7 +1336,7 @@ QUnit.test( 'setAccessibleAttribute', function( assert ) {
   display.dispose();
 } );
 
-QUnit.test( 'accessibleChecked', function( assert ) {
+QUnit.test( 'accessibleChecked', assert => {
 
   const rootNode = new Node();
   const display = new Display( rootNode );
@@ -1352,7 +1352,7 @@ QUnit.test( 'accessibleChecked', function( assert ) {
   assert.ok( !aElement.checked, 'should not be checked' );
 
   a.inputType = 'range';
-  window.assert && assert.throws( function() {
+  window.assert && assert.throws( () => {
     a.accessibleChecked = true;
   }, /.*/, 'should fail if inputType range' );
 
@@ -1360,7 +1360,7 @@ QUnit.test( 'accessibleChecked', function( assert ) {
 
 } );
 
-QUnit.test( 'swapVisibility', function( assert ) {
+QUnit.test( 'swapVisibility', assert => {
 
 
   // test the behavior of swapVisibility function
@@ -1428,7 +1428,7 @@ QUnit.test( 'swapVisibility', function( assert ) {
 
 } );
 
-QUnit.test( 'Aria Label Setter', function( assert ) {
+QUnit.test( 'Aria Label Setter', assert => {
 
   // test the behavior of swapVisibility function
   const rootNode = new Node( { tagName: 'div' } );
@@ -1459,7 +1459,7 @@ QUnit.test( 'Aria Label Setter', function( assert ) {
 
 } );
 
-QUnit.test( 'focusable option', function( assert ) {
+QUnit.test( 'focusable option', assert => {
 
   // test the behavior of focusable function
   const rootNode = new Node( { tagName: 'div' } );
@@ -1512,7 +1512,7 @@ QUnit.test( 'focusable option', function( assert ) {
 
 } );
 
-QUnit.test( 'append siblings/appendLabel/appendDescription setters', function( assert ) {
+QUnit.test( 'append siblings/appendLabel/appendDescription setters', assert => {
 
   // test the behavior of focusable function
   const rootNode = new Node( { tagName: 'div' } );
@@ -1597,7 +1597,7 @@ QUnit.test( 'append siblings/appendLabel/appendDescription setters', function( a
 
 } );
 
-QUnit.test( 'containerAriaRole option', function( assert ) {
+QUnit.test( 'containerAriaRole option', assert => {
 
   // test the behavior of focusable function
   const rootNode = new Node( { tagName: 'div' } );
@@ -1625,7 +1625,7 @@ QUnit.test( 'containerAriaRole option', function( assert ) {
 
 } );
 
-QUnit.test( 'ariaRole option', function( assert ) {
+QUnit.test( 'ariaRole option', assert => {
 
   // test the behavior of focusable function
   const rootNode = new Node( { tagName: 'div' } );
@@ -1655,7 +1655,7 @@ QUnit.test( 'ariaRole option', function( assert ) {
 
 
 // Higher level setter/getter options
-QUnit.test( 'accessibleName option', function( assert ) {
+QUnit.test( 'accessibleName option', assert => {
 
   assert.ok( true );
 
@@ -1683,7 +1683,7 @@ QUnit.test( 'accessibleName option', function( assert ) {
 
   const c = new Node( { containerTagName: 'div', tagName: 'div', ariaLabel: 'overrideThis' } );
   rootNode.addChild( c );
-  const accessibleNameBehavior = function( node, options, accessibleName ) {
+  const accessibleNameBehavior = ( node, options, accessibleName ) => {
 
     options.ariaLabel = accessibleName;
     return options;
@@ -1713,7 +1713,7 @@ QUnit.test( 'accessibleName option', function( assert ) {
 } );
 
 
-QUnit.test( 'accessibleHeading option', function( assert ) {
+QUnit.test( 'accessibleHeading option', assert => {
 
   assert.ok( true );
 
@@ -1734,7 +1734,7 @@ QUnit.test( 'accessibleHeading option', function( assert ) {
 
 } );
 
-QUnit.test( 'helpText option', function( assert ) {
+QUnit.test( 'helpText option', assert => {
 
 
   assert.ok( true );
@@ -1768,7 +1768,7 @@ QUnit.test( 'helpText option', function( assert ) {
   } );
   rootNode.addChild( b );
 
-  b.helpTextBehavior = function( node, options, helpText ) {
+  b.helpTextBehavior = ( node, options, helpText ) => {
 
     options.descriptionTagName = 'p';
     options.descriptionContent = helpText;
@@ -1795,7 +1795,7 @@ QUnit.test( 'helpText option', function( assert ) {
   display.dispose();
 } );
 
-QUnit.test( 'move to front/move to back', function( assert ) {
+QUnit.test( 'move to front/move to back', assert => {
 
   // make sure state is restored after moving children to front and back
   const rootNode = new Node( { tagName: 'div' } );
@@ -1827,7 +1827,7 @@ QUnit.test( 'move to front/move to back', function( assert ) {
 } );
 
 // these fuzzers take time, so it is nice when they are last
-QUnit.test( 'PDOMFuzzer with 3 nodes', function( assert ) {
+QUnit.test( 'PDOMFuzzer with 3 nodes', assert => {
   const fuzzer = new PDOMFuzzer( 3, false );
   for ( let i = 0; i < 5000; i++ ) {
     fuzzer.step();
@@ -1836,7 +1836,7 @@ QUnit.test( 'PDOMFuzzer with 3 nodes', function( assert ) {
   fuzzer.dispose();
 } );
 
-QUnit.test( 'PDOMFuzzer with 4 nodes', function( assert ) {
+QUnit.test( 'PDOMFuzzer with 4 nodes', assert => {
   const fuzzer = new PDOMFuzzer( 4, false );
   for ( let i = 0; i < 1000; i++ ) {
     fuzzer.step();
@@ -1845,7 +1845,7 @@ QUnit.test( 'PDOMFuzzer with 4 nodes', function( assert ) {
   fuzzer.dispose();
 } );
 
-QUnit.test( 'PDOMFuzzer with 5 nodes', function( assert ) {
+QUnit.test( 'PDOMFuzzer with 5 nodes', assert => {
   const fuzzer = new PDOMFuzzer( 5, false );
   for ( let i = 0; i < 300; i++ ) {
     fuzzer.step();

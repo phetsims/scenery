@@ -10,11 +10,10 @@
 
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../../dot/js/Matrix3.js';
+import Poolable from '../../../../phet-core/js/Poolable.js';
 import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
-import inherit from '../../../../phet-core/js/inherit.js';
 import merge from '../../../../phet-core/js/merge.js';
 import platform from '../../../../phet-core/js/platform.js';
-import Poolable from '../../../../phet-core/js/Poolable.js';
 import scenery from '../../scenery.js';
 import FullScreen from '../../util/FullScreen.js';
 import PDOMSiblingStyle from './PDOMSiblingStyle.js';
@@ -42,19 +41,15 @@ const globalNodeTranslationMatrix = new Matrix3();
 const globalToClientScaleMatrix = new Matrix3();
 const nodeScaleMagnitudeMatrix = new Matrix3();
 
-/**
- * @param {AccessibleInstance} accessibleInstance
- * @param {Object} [options]
- * @constructor
- * @mixes Poolable
- */
-function PDOMPeer( accessibleInstance, options ) {
-  this.initializeAccessiblePeer( accessibleInstance, options );
-}
-
-scenery.register( 'PDOMPeer', PDOMPeer );
-
-inherit( Object, PDOMPeer, {
+class PDOMPeer {
+  /**
+   * @param {AccessibleInstance} accessibleInstance
+   * @param {Object} [options]
+   * @mixes Poolable
+   */
+  constructor( accessibleInstance, options ) {
+    this.initializeAccessiblePeer( accessibleInstance, options );
+  }
 
   /**
    * Initializes the object (either from a freshly-created state, or from a "disposed" state brought back from a
@@ -67,7 +62,7 @@ inherit( Object, PDOMPeer, {
    * @param {Object} [options]
    * @returns {PDOMPeer} - Returns 'this' reference, for chaining
    */
-  initializeAccessiblePeer: function( accessibleInstance, options ) {
+  initializeAccessiblePeer( accessibleInstance, options ) {
     options = merge( {
       primarySibling: null
     }, options );
@@ -163,13 +158,13 @@ inherit( Object, PDOMPeer, {
     }
 
     return this;
-  },
+  }
 
   /**
    * Update the content of the peer. This must be called after the AccessibePeer is constructed from pool.
    * @public (scenery-internal)
    */
-  update: function() {
+  update() {
     const uniqueId = this.accessibleInstance.trail.getUniqueId();
 
     let options = this.node.getBaseOptions();
@@ -270,7 +265,7 @@ inherit( Object, PDOMPeer, {
       assert && assert( typeof callback === 'function' );
       callback();
     } );
-  },
+  }
 
   /**
    * Handle the internal ordering of the elements in the peer, this involves setting the proper value of
@@ -278,7 +273,7 @@ inherit( Object, PDOMPeer, {
    * @param {Object} [options] - the computed mixin options to be applied to the peer.
    * @private
    */
-  orderElements: function( options ) {
+  orderElements( options ) {
     if ( this._containerParent ) {
       // The first child of the container parent element should be the peer dom element
       // if undefined, the insertBefore method will insert the this._primarySibling as the first child
@@ -296,53 +291,53 @@ inherit( Object, PDOMPeer, {
     this._labelSibling && this.arrangeContentElement( this._labelSibling, options.appendLabel );
     this._descriptionSibling && this.arrangeContentElement( this._descriptionSibling, options.appendDescription );
 
-  },
+  }
 
   /**
    * Get the primary sibling element for the peer
    * @public
    * @returns {HTMLElement|null}
    */
-  getPrimarySibling: function() {
+  getPrimarySibling() {
     return this._primarySibling;
-  },
-  get primarySibling() { return this.getPrimarySibling(); },
+  }
+  get primarySibling() { return this.getPrimarySibling(); }
 
   /**
    * Get the primary sibling element for the peer
    * @public
    * @returns {HTMLElement|null}
    */
-  getLabelSibling: function() {
+  getLabelSibling() {
     return this._labelSibling;
-  },
-  get labelSibling() { return this.getLabelSibling(); },
+  }
+  get labelSibling() { return this.getLabelSibling(); }
 
   /**
    * Get the primary sibling element for the peer
    * @public
    * @returns {HTMLElement|null}
    */
-  getDescriptionSibling: function() {
+  getDescriptionSibling() {
     return this._descriptionSibling;
-  },
-  get descriptionSibling() { return this.getDescriptionSibling(); },
+  }
+  get descriptionSibling() { return this.getDescriptionSibling(); }
 
   /**
    * Get the primary sibling element for the peer
    * @public
    * @returns {HTMLElement|null}
    */
-  getContainerParent: function() {
+  getContainerParent() {
     return this._containerParent;
-  },
-  get containerParent() { return this.getContainerParent(); },
+  }
+  get containerParent() { return this.getContainerParent(); }
 
   /**
    * Recompute the aria-labelledby attributes for all of the peer's elements
    * @public
    */
-  onAriaLabelledbyAssociationChange: function() {
+  onAriaLabelledbyAssociationChange() {
     this.removeAttributeFromAllElements( 'aria-labelledby' );
 
     for ( let i = 0; i < this.node.ariaLabelledbyAssociations.length; i++ ) {
@@ -355,13 +350,13 @@ inherit( Object, PDOMPeer, {
 
       this.setAssociationAttribute( 'aria-labelledby', associationObject );
     }
-  },
+  }
 
   /**
    * Recompute the aria-describedby attributes for all of the peer's elements
    * @public
    */
-  onAriaDescribedbyAssociationChange: function() {
+  onAriaDescribedbyAssociationChange() {
     this.removeAttributeFromAllElements( 'aria-describedby' );
 
     for ( let i = 0; i < this.node.ariaDescribedbyAssociations.length; i++ ) {
@@ -374,13 +369,13 @@ inherit( Object, PDOMPeer, {
 
       this.setAssociationAttribute( 'aria-describedby', associationObject );
     }
-  },
+  }
 
   /**
    * Recompute the aria-activedescendant attributes for all of the peer's elements
    * @public
    */
-  onActiveDescendantAssociationChange: function() {
+  onActiveDescendantAssociationChange() {
     this.removeAttributeFromAllElements( 'aria-activedescendant' );
 
     for ( let i = 0; i < this.node.activeDescendantAssociations.length; i++ ) {
@@ -393,7 +388,7 @@ inherit( Object, PDOMPeer, {
 
       this.setAssociationAttribute( 'aria-activedescendant', associationObject );
     }
-  },
+  }
 
   /**
    * Set all accessible attributes onto the peer elements from the model's stored data objects
@@ -401,7 +396,7 @@ inherit( Object, PDOMPeer, {
    *
    * @param {Object} [a11yOptions] - these can override the values of the node, see this.update()
    */
-  onAttributeChange: function( a11yOptions ) {
+  onAttributeChange( a11yOptions ) {
 
     for ( let i = 0; i < this.node.accessibleAttributes.length; i++ ) {
       const dataObject = this.node.accessibleAttributes[ i ];
@@ -414,7 +409,7 @@ inherit( Object, PDOMPeer, {
       }
       this.setAttributeToElement( attribute, value, dataObject.options );
     }
-  },
+  }
 
   /**
    * Set the input value on the peer's primary sibling element. The value attribute must be set as a Property to be
@@ -423,7 +418,7 @@ inherit( Object, PDOMPeer, {
    *
    * @public (scenery-internal)
    */
-  onInputValueChange: function() {
+  onInputValueChange() {
     assert && assert( this.node.inputValue !== undefined, 'use null to remove input value attribute' );
 
     if ( this.node.inputValue === null ) {
@@ -435,7 +430,7 @@ inherit( Object, PDOMPeer, {
       const valueString = this.node.inputValue + '';
       this.setAttributeToElement( 'value', valueString, { asProperty: true } );
     }
-  },
+  }
 
   /**
    * Get an element on this node, looked up by the elementName flag passed in.
@@ -444,7 +439,7 @@ inherit( Object, PDOMPeer, {
    * @param {string} elementName - see PDOMUtils for valid associations
    * @returns {HTMLElement}
    */
-  getElementByName: function( elementName ) {
+  getElementByName( elementName ) {
     if ( elementName === PDOMPeer.PRIMARY_SIBLING ) {
       return this._primarySibling;
     }
@@ -459,7 +454,7 @@ inherit( Object, PDOMPeer, {
     }
 
     assert && assert( false, 'invalid elementName name: ' + elementName );
-  },
+  }
 
   /**
    * Sets a attribute on one of the peer's HTMLElements.
@@ -468,7 +463,7 @@ inherit( Object, PDOMPeer, {
    * @param {*} attributeValue
    * @param {Object} [options]
    */
-  setAttributeToElement: function( attribute, attributeValue, options ) {
+  setAttributeToElement( attribute, attributeValue, options ) {
 
     options = merge( {
       // {string|null} - If non-null, will set the attribute with the specified namespace. This can be required
@@ -496,7 +491,7 @@ inherit( Object, PDOMPeer, {
     else {
       element.setAttribute( attribute, attributeValue );
     }
-  },
+  }
 
   /**
    * Remove attribute from one of the peer's HTMLElements.
@@ -504,7 +499,7 @@ inherit( Object, PDOMPeer, {
    * @param {string} attribute
    * @param {Object} [options]
    */
-  removeAttributeFromElement: function( attribute, options ) {
+  removeAttributeFromElement( attribute, options ) {
 
     options = merge( {
       // {string|null} - If non-null, will set the attribute with the specified namespace. This can be required
@@ -526,20 +521,20 @@ inherit( Object, PDOMPeer, {
     else {
       element.removeAttribute( attribute );
     }
-  },
+  }
 
   /**
    * Remove the given attribute from all peer elements
    * @public (scenery-internal)
    * @param {string} attribute
    */
-  removeAttributeFromAllElements: function( attribute ) {
+  removeAttributeFromAllElements( attribute ) {
     assert && assert( typeof attribute === 'string' );
     this._primarySibling && this._primarySibling.removeAttribute( attribute );
     this._labelSibling && this._labelSibling.removeAttribute( attribute );
     this._descriptionSibling && this._descriptionSibling.removeAttribute( attribute );
     this._containerParent && this._containerParent.removeAttribute( attribute );
-  },
+  }
 
   /**
    * Set either association attribute (aria-labelledby/describedby) on one of this peer's Elements
@@ -547,7 +542,7 @@ inherit( Object, PDOMPeer, {
    * @param {string} attribute - either aria-labelledby or aria-describedby
    * @param {Object} associationObject - see addAriaLabelledbyAssociation() for schema
    */
-  setAssociationAttribute: function( attribute, associationObject ) {
+  setAssociationAttribute( attribute, associationObject ) {
     assert && assert( PDOMUtils.ASSOCIATION_ATTRIBUTES.indexOf( attribute ) >= 0,
       'unsupported attribute for setting with association object: ' + attribute );
     assert && PDOMUtils.validateAssociationObject( associationObject );
@@ -592,7 +587,7 @@ inherit( Object, PDOMPeer, {
         } );
       }
     }
-  },
+  }
 
   /**
    * The contentElement will either be a label or description element. The contentElement will be sorted relative to
@@ -608,7 +603,7 @@ inherit( Object, PDOMPeer, {
    * @param {HTMLElement} contentElement
    * @param {boolean} appendElement
    */
-  arrangeContentElement: function( contentElement, appendElement ) {
+  arrangeContentElement( contentElement, appendElement ) {
 
     // if there is a containerParent
     if ( this.topLevelElements[ 0 ] === this._containerParent ) {
@@ -633,7 +628,7 @@ inherit( Object, PDOMPeer, {
       const insertIndex = appendElement ? this.topLevelElements.length : indexOfPrimarySibling;
       this.topLevelElements.splice( insertIndex, 0, contentElement );
     }
-  },
+  }
 
   /**
    * Is this peer hidden in the PDOM
@@ -641,11 +636,11 @@ inherit( Object, PDOMPeer, {
    *
    * @returns {boolean}
    */
-  isVisible: function() {
+  isVisible() {
     if ( assert ) {
 
       let visibleElements = 0;
-      this.topLevelElements.forEach( function( element ) {
+      this.topLevelElements.forEach( element => {
 
         // support property or attribute
         if ( !element.hidden && !element.hasAttribute( 'hidden' ) ) {
@@ -657,7 +652,7 @@ inherit( Object, PDOMPeer, {
 
     }
     return this.visible === null ? true : this.visible; // default to true if visibility hasn't been set yet.
-  },
+  }
 
   /**
    * Set whether or not the peer is visible in the PDOM
@@ -665,7 +660,7 @@ inherit( Object, PDOMPeer, {
    *
    * @param {boolean} visible
    */
-  setVisible: function( visible ) {
+  setVisible( visible ) {
     assert && assert( typeof visible === 'boolean' );
     if ( this.visible !== visible ) {
 
@@ -683,32 +678,32 @@ inherit( Object, PDOMPeer, {
       // invalidate CSS transforms because when 'hidden' the content will have no dimensions in the viewport
       this.invalidateCSSPositioning();
     }
-  },
+  }
 
   /**
    * Returns if this peer is focused. A peer is focused if its primarySibling is focused.
    * @public (scenery-internal)
    * @returns {boolean}
    */
-  isFocused: function() {
+  isFocused() {
     const visualFocusTrail = scenery.PDOMInstance.guessVisualTrail( this.trail, this.display.rootNode );
     return scenery.Display.focusProperty.value && scenery.Display.focusProperty.value.trail.equals( visualFocusTrail );
-  },
+  }
 
   /**
    * Focus the primary sibling of the peer.
    * @public (scenery-internal)
    */
-  focus: function() {
+  focus() {
     assert && assert( this._primarySibling, 'must have a primary sibling to focus' );
     this._primarySibling.focus();
-  },
+  }
 
   /**
    * Blur the primary sibling of the peer.
    * @public (scenery-internal)
    */
-  blur: function() {
+  blur() {
     assert && assert( this._primarySibling, 'must have a primary sibling to blur' );
 
     // no op if primary sibling does not have focus
@@ -717,26 +712,25 @@ inherit( Object, PDOMPeer, {
       // Workaround for a bug in IE11 in Fullscreen mode where document.activeElement.blur() errors out with
       // "Invalid Function". A delay seems to be a common workaround for IE11, see
       // https://stackoverflow.com/questions/2600186/focus-doesnt-work-in-ie
-      const self = this;
       if ( platform.ie11 && FullScreen.isFullScreen() ) {
-        window.setTimeout( function() { // eslint-disable-line bad-sim-text
+        window.setTimeout( () => { // eslint-disable-line bad-sim-text
 
           // make sure that the primary sibling hasn't been removed from the document since the timeout was added
-          self._primarySibling && self._primarySibling.blur();
+          this._primarySibling && this._primarySibling.blur();
         }, 0 );
       }
       else {
         this._primarySibling.blur();
       }
     }
-  },
+  }
 
   /**
    * Make the peer focusable. Only the primary sibling is ever considered focusable.
    * @public
    * @param {boolean} focusable
    */
-  setFocusable: function( focusable ) {
+  setFocusable( focusable ) {
     assert && assert( typeof focusable === 'boolean' );
 
     const peerHadFocus = this.isFocused();
@@ -754,14 +748,14 @@ inherit( Object, PDOMPeer, {
       // reposition the sibling in the DOM, since non-focusable nodes are not positioned
       this.invalidateCSSPositioning();
     }
-  },
+  }
 
   /**
    * Responsible for setting the content for the label sibling
    * @public (scenery-internal)
    * @param {string} content - the content for the label sibling.
    */
-  setLabelSiblingContent: function( content ) {
+  setLabelSiblingContent( content ) {
     assert && assert( typeof content === 'string', 'incorrect label content type' );
 
     // no-op to support any option order
@@ -777,14 +771,14 @@ inherit( Object, PDOMPeer, {
         elementName: PDOMPeer.LABEL_SIBLING
       } );
     }
-  },
+  }
 
   /**
    * Responsible for setting the content for the description sibling
    * @public (scenery-internal)
    * @param {string} content - the content for the description sibling.
    */
-  setDescriptionSiblingContent: function( content ) {
+  setDescriptionSiblingContent( content ) {
     assert && assert( typeof content === 'string', 'incorrect description content type' );
 
     // no-op to support any option order
@@ -792,14 +786,14 @@ inherit( Object, PDOMPeer, {
       return;
     }
     PDOMUtils.setTextContent( this._descriptionSibling, content );
-  },
+  }
 
   /**
    * Responsible for setting the content for the primary sibling
    * @public (scenery-internal)
    * @param {string} content - the content for the primary sibling.
    */
-  setPrimarySiblingContent: function( content ) {
+  setPrimarySiblingContent( content ) {
     assert && assert( typeof content === 'string', 'incorrect inner content type' );
     assert && assert( this.accessibleInstance.children.length === 0, 'descendants exist with accessible content, innerContent cannot be used' );
     assert && assert( PDOMUtils.tagNameSupportsContent( this._primarySibling.tagName ),
@@ -810,16 +804,17 @@ inherit( Object, PDOMPeer, {
       return;
     }
     PDOMUtils.setTextContent( this._primarySibling, content );
-  },
+  }
 
   /**
    * Sets the pdomTransformSourceNode so that the primary sibling will be transformed with changes to along the
    * unique trail to the source node. If null, repositioning happens with transform changes along this
    * accessibleInstance's trail.
+   * @public
    *
    * @param {Node|null} node
    */
-  setPDOMTransformSourceNode: function( node ) {
+  setPDOMTransformSourceNode( node ) {
 
     // remove previous listeners before creating a new TransformTracker
     this.accessibleInstance.transformTracker.removeListener( this.transformListener );
@@ -830,7 +825,7 @@ inherit( Object, PDOMPeer, {
 
     // new trail with transforms so positioning is probably dirty
     this.invalidateCSSPositioning();
-  },
+  }
 
   /**
    * Enable or disable positioning of the sibling elements. Generally this is requiredfor accessibility to work on
@@ -840,13 +835,13 @@ inherit( Object, PDOMPeer, {
    *
    * @param {boolean} positionSiblings
    */
-  setPositionSiblings: function( positionSiblings ) {
+  setPositionSiblings( positionSiblings ) {
     this.positionSiblings = positionSiblings;
 
     // signify that it needs to be repositioned next frame, either off screen or to match
     // graphical rendering
     this.invalidateCSSPositioning();
-  },
+  }
 
   /**
    * Mark that the siblings of this PDOMPeer need to be updated in the next Display update. Possibly from a
@@ -854,7 +849,7 @@ inherit( Object, PDOMPeer, {
    *
    * @private
    */
-  invalidateCSSPositioning: function() {
+  invalidateCSSPositioning() {
     if ( !this.positionDirty && this.focusable ) {
       this.positionDirty = true;
 
@@ -866,7 +861,7 @@ inherit( Object, PDOMPeer, {
         parent = parent.parent;
       }
     }
-  },
+  }
 
   /**
    * Update the CSS positioning of the primary and label siblings. Required to support accessibility on mobile
@@ -902,7 +897,7 @@ inherit( Object, PDOMPeer, {
    *
    * @private
    */
-  positionElements: function() {
+  positionElements() {
     assert && assert( this._primarySibling, 'a primary sibling required to receive CSS positioning' );
     assert && assert( this.positionDirty, 'elements should only be repositioned if dirty' );
 
@@ -962,7 +957,7 @@ inherit( Object, PDOMPeer, {
     }
 
     this.positionDirty = false;
-  },
+  }
 
   /**
    * Update positioning of elements in the PDOM. Does a depth first search for all descendants of parentIntsance with
@@ -970,7 +965,7 @@ inherit( Object, PDOMPeer, {
    *
    * @public (scenery-internal)
    */
-  updateSubtreePositioning: function() {
+  updateSubtreePositioning() {
     this.childPositionDirty = false;
 
     if ( this.positionDirty ) {
@@ -983,13 +978,13 @@ inherit( Object, PDOMPeer, {
         this.accessibleInstance.children[ i ].peer.updateSubtreePositioning();
       }
     }
-  },
+  }
 
   /**
    * Removes external references from this peer, and places it in the pool.
    * @public (scenery-internal)
    */
-  dispose: function() {
+  dispose() {
     this.isDisposed = true;
 
     // remove focus if the disposed peer is the active element
@@ -1015,18 +1010,19 @@ inherit( Object, PDOMPeer, {
     // for now
     this.freeToPool();
   }
-}, {
+}
 
-  // @public {string} - specifies valid associations between related AccessiblePeers in the DOM
-  PRIMARY_SIBLING: PRIMARY_SIBLING, // associate with all accessible content related to this peer
-  LABEL_SIBLING: LABEL_SIBLING, // associate with just the label content of this peer
-  DESCRIPTION_SIBLING: DESCRIPTION_SIBLING, // associate with just the description content of this peer
-  CONTAINER_PARENT: CONTAINER_PARENT, // associate with everything under the container parent of this peer
+// @public {string} - specifies valid associations between related AccessiblePeers in the DOM
+PDOMPeer.PRIMARY_SIBLING = PRIMARY_SIBLING; // associate with all accessible content related to this peer
+PDOMPeer.LABEL_SIBLING = LABEL_SIBLING; // associate with just the label content of this peer
+PDOMPeer.DESCRIPTION_SIBLING = DESCRIPTION_SIBLING; // associate with just the description content of this peer
+PDOMPeer.CONTAINER_PARENT = CONTAINER_PARENT; // associate with everything under the container parent of this peer
 
-  // @public (scenery-internal) - bounds for a sibling that should be moved off-screen when not positioning, in
-  // global coordinates
-  OFFSCREEN_SIBLING_BOUNDS: new Bounds2( 0, 0, 1, 1 )
-} );
+// @public (scenery-internal) - bounds for a sibling that should be moved off-screen when not positioning, in
+// global coordinates
+PDOMPeer.OFFSCREEN_SIBLING_BOUNDS = new Bounds2( 0, 0, 1, 1 );
+
+scenery.register( 'PDOMPeer', PDOMPeer );
 
 // Set up pooling
 Poolable.mixInto( PDOMPeer, {

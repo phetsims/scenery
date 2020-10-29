@@ -24,7 +24,7 @@ var PDOMTree = {
    * @param {Node} parent
    * @param {Node} child
    */
-  addChild: function( parent, child ) {
+  addChild( parent, child ) {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'addChild parent:n#' + parent._id + ', child:n#' + child._id );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
@@ -50,7 +50,7 @@ var PDOMTree = {
    * @param {Node} parent
    * @param {Node} child
    */
-  removeChild: function( parent, child ) {
+  removeChild( parent, child ) {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'removeChild parent:n#' + parent._id + ', child:n#' + child._id );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
@@ -75,7 +75,7 @@ var PDOMTree = {
    *
    * @param {Node} node
    */
-  childrenOrderChange: function( node ) {
+  childrenOrderChange( node ) {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'childrenOrderChange node:n#' + node._id );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
@@ -99,7 +99,7 @@ var PDOMTree = {
    * @param {Array.<Node|null>|null} oldOrder
    * @param {Array.<Node|null>|null} newOrder
    */
-  accessibleOrderChange: function( node, oldOrder, newOrder ) {
+  accessibleOrderChange( node, oldOrder, newOrder ) {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'accessibleOrderChange n#' + node._id + ': ' + PDOMTree.debugOrder( oldOrder ) + ',' + PDOMTree.debugOrder( newOrder ) );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
@@ -188,7 +188,7 @@ var PDOMTree = {
    *
    * @param {Node} node
    */
-  accessibleContentChange: function( node ) {
+  accessibleContentChange( node ) {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'accessibleContentChange n#' + node._id );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
@@ -235,7 +235,7 @@ var PDOMTree = {
    *
    * @param {PDOMInstance} rootInstance
    */
-  rebuildInstanceTree: function( rootInstance ) {
+  rebuildInstanceTree( rootInstance ) {
     const rootNode = rootInstance.display.rootNode;
     assert && assert( rootNode );
 
@@ -252,7 +252,7 @@ var PDOMTree = {
    * @param {Node} child
    * @param {Array.<PartialPDOMTrail>} [accessibleTrails] - Will be computed if needed
    */
-  addTree: function( parent, child, accessibleTrails ) {
+  addTree( parent, child, accessibleTrails ) {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'addTree parent:n#' + parent._id + ', child:n#' + child._id );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
@@ -288,7 +288,7 @@ var PDOMTree = {
    * @param {Node} child
    * @param {Array.<PartialPDOMTrail>} [accessibleTrails] - Will be computed if needed
    */
-  removeTree: function( parent, child, accessibleTrails ) {
+  removeTree( parent, child, accessibleTrails ) {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'removeTree parent:n#' + parent._id + ', child:n#' + child._id );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
@@ -313,7 +313,7 @@ var PDOMTree = {
    * @param {Node} node
    * @param {Array.<PartialPDOMTrail>} [accessibleTrails] - Will be computed if needed
    */
-  reorder: function( node, accessibleTrails ) {
+  reorder( node, accessibleTrails ) {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'reorder n#' + node._id );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
@@ -342,7 +342,7 @@ var PDOMTree = {
    * @param {PDOMInstance} parentInstance - Since we don't create the root here, can't be null
    * @returns {Array.<PDOMInstance>}
    */
-  createTree: function( trail, display, parentInstance ) {
+  createTree( trail, display, parentInstance ) {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'createTree ' + trail.toString() + ' parent:' + ( parentInstance ? parentInstance.toString() : 'null' ) );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
@@ -394,7 +394,7 @@ var PDOMTree = {
    *
    * @param {Node} node - root of Node subtree whose PDOMInstance tree is being rearranged.
    */
-  beforeOp: function( node ) {
+  beforeOp( node ) {
     // paranoia about initialization order (should be safe)
     focusedNode = scenery.Display && scenery.Display.focusedNode;
 
@@ -417,7 +417,7 @@ var PDOMTree = {
    *
    * @param {Array.<Display>} blockedDisplays
    */
-  afterOp: function( blockedDisplays ) {
+  afterOp( blockedDisplays ) {
     focusedNode && focusedNode.focus();
 
     for ( let i = 0; i < blockedDisplays.length; i++ ) {
@@ -436,7 +436,7 @@ var PDOMTree = {
    * @param {Node} node
    * @returns {Array.<PartialPDOMTrail>}
    */
-  findAccessibleTrails: function( node ) {
+  findAccessibleTrails( node ) {
     const trails = [];
     PDOMTree.recursiveAccessibleTrailSearch( trails, new Trail( node ) );
     return trails;
@@ -449,7 +449,7 @@ var PDOMTree = {
    * @param {Array.<PartialPDOMTrail>} trailResults - Mutated, this is how we "return" our value.
    * @param {Trail} trail - Where to start from
    */
-  recursiveAccessibleTrailSearch: function( trailResults, trail ) {
+  recursiveAccessibleTrailSearch( trailResults, trail ) {
     const root = trail.rootNode();
     let i;
 
@@ -491,7 +491,7 @@ var PDOMTree = {
    * Ensures that the accessibleDisplays on the node (and its subtree) are accurate.
    * @public
    */
-  auditAccessibleDisplays: function( node ) {
+  auditAccessibleDisplays( node ) {
     if ( assertSlow ) {
       if ( node._accessibleDisplaysInfo.canHaveAccessibleDisplays() ) {
 
@@ -544,7 +544,7 @@ var PDOMTree = {
    *
    * @param {Node} node
    */
-  auditNodeForAccessibleCycles: function( node ) {
+  auditNodeForAccessibleCycles( node ) {
     if ( assert ) {
       const trail = new Trail( node );
 
@@ -581,12 +581,10 @@ var PDOMTree = {
    * @param {Array.<Node|null>|null} accessibleOrder
    * @returns {string}
    */
-  debugOrder: function( accessibleOrder ) {
+  debugOrder( accessibleOrder ) {
     if ( accessibleOrder === null ) { return 'null'; }
 
-    return '[' + accessibleOrder.map( function( nodeOrNull ) {
-      return nodeOrNull === null ? 'null' : nodeOrNull._id;
-    } ).join( ',' ) + ']';
+    return '[' + accessibleOrder.map( nodeOrNull => nodeOrNull === null ? 'null' : nodeOrNull._id ).join( ',' ) + ']';
   }
 };
 

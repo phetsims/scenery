@@ -26,7 +26,7 @@ function nestedEquality( assert, a, b ) {
   }
 }
 
-QUnit.test( 'Simple Test', function( assert ) {
+QUnit.test( 'Simple Test', assert => {
 
   const a1 = new Node( { tagName: 'div' } );
   const a2 = new Node( { tagName: 'div' } );
@@ -49,7 +49,7 @@ QUnit.test( 'Simple Test', function( assert ) {
   ] );
 } );
 
-QUnit.test( 'accessibleOrder Simple Test', function( assert ) {
+QUnit.test( 'accessibleOrder Simple Test', assert => {
 
   const a1 = new Node( { tagName: 'div' } );
   const a2 = new Node( { tagName: 'div' } );
@@ -72,7 +72,7 @@ QUnit.test( 'accessibleOrder Simple Test', function( assert ) {
   ] );
 } );
 
-QUnit.test( 'accessibleOrder Descendant Test', function( assert ) {
+QUnit.test( 'accessibleOrder Descendant Test', assert => {
 
   const a1 = new Node( { tagName: 'div' } );
   const a2 = new Node( { tagName: 'div' } );
@@ -95,7 +95,7 @@ QUnit.test( 'accessibleOrder Descendant Test', function( assert ) {
   ] );
 } );
 
-QUnit.test( 'accessibleOrder Descendant Pruning Test', function( assert ) {
+QUnit.test( 'accessibleOrder Descendant Pruning Test', assert => {
 
   const a1 = new Node( { tagName: 'div' } );
   const a2 = new Node( { tagName: 'div' } );
@@ -125,7 +125,7 @@ QUnit.test( 'accessibleOrder Descendant Pruning Test', function( assert ) {
   ] );
 } );
 
-QUnit.test( 'accessibleOrder Descendant Override', function( assert ) {
+QUnit.test( 'accessibleOrder Descendant Override', assert => {
 
   const a1 = new Node( { tagName: 'div' } );
   const a2 = new Node( { tagName: 'div' } );
@@ -148,7 +148,7 @@ QUnit.test( 'accessibleOrder Descendant Override', function( assert ) {
   ] );
 } );
 
-QUnit.test( 'accessibleOrder Hierarchy', function( assert ) {
+QUnit.test( 'accessibleOrder Hierarchy', assert => {
 
   const a1 = new Node( { tagName: 'div' } );
   const a2 = new Node( { tagName: 'div' } );
@@ -171,7 +171,7 @@ QUnit.test( 'accessibleOrder Hierarchy', function( assert ) {
   ] );
 } );
 
-QUnit.test( 'accessibleOrder DAG test', function( assert ) {
+QUnit.test( 'accessibleOrder DAG test', assert => {
 
   const a1 = new Node( { tagName: 'div' } );
   const a2 = new Node( { tagName: 'div' } );
@@ -191,7 +191,7 @@ QUnit.test( 'accessibleOrder DAG test', function( assert ) {
   ] );
 } );
 
-QUnit.test( 'accessibleOrder DAG test', function( assert ) {
+QUnit.test( 'accessibleOrder DAG test', assert => {
 
   const x = new Node();
   const a = new Node();
@@ -249,7 +249,7 @@ QUnit.test( 'accessibleOrder DAG test', function( assert ) {
   ] );
 } );
 
-QUnit.test( 'setting accessibleOrder', function( assert ) {
+QUnit.test( 'setting accessibleOrder', assert => {
 
   const rootNode = new Node();
   var display = new Display( rootNode ); // eslint-disable-line
@@ -278,7 +278,7 @@ QUnit.test( 'setting accessibleOrder', function( assert ) {
 
 } );
 
-QUnit.test( 'setting accessibleOrder before setting accessible content', function( assert ) {
+QUnit.test( 'setting accessibleOrder before setting accessible content', assert => {
   const rootNode = new Node();
   var display = new Display( rootNode ); // eslint-disable-line
   document.body.appendChild( display.domElement );
@@ -311,7 +311,7 @@ QUnit.test( 'setting accessibleOrder before setting accessible content', functio
 
 } );
 
-QUnit.test( 'setting accessible order on nodes with no accessible content', function( assert ) {
+QUnit.test( 'setting accessible order on nodes with no accessible content', assert => {
   const rootNode = new Node();
   var display = new Display( rootNode ); // eslint-disable-line
   document.body.appendChild( display.domElement );
@@ -346,7 +346,7 @@ QUnit.test( 'setting accessible order on nodes with no accessible content', func
 
 } );
 
-QUnit.test( 'setting accessible order on nodes with no accessible content', function( assert ) {
+QUnit.test( 'setting accessible order on nodes with no accessible content', assert => {
   const rootNode = new Node();
   var display = new Display( rootNode ); // eslint-disable-line
   document.body.appendChild( display.domElement );

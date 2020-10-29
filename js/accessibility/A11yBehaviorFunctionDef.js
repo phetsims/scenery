@@ -30,7 +30,7 @@ const A11yBehaviorFunctionDef = {
    * Will assert out if the behavior function doesn't match the expected features of A11yBehaviorFunction
    * @param {function} behaviorFunction
    */
-  validateA11yBehaviorFunctionDef: function( behaviorFunction ) {
+  validateA11yBehaviorFunctionDef( behaviorFunction ) {
     assert && assert( typeof behaviorFunction === 'function' );
     assert && assert( behaviorFunction.length === 3 || behaviorFunction.length === 4, 'behavior function should take three or four args' );
   }

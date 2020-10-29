@@ -43,7 +43,6 @@ const MAX_KEY_CODE = 127; // Delete key
 class KeyboardFuzzer {
   constructor( display, seed ) {
 
-
     // @private
     this.display = display;
     this.random = new Random( { seed: seed } );
@@ -80,7 +79,7 @@ class KeyboardFuzzer {
    * @private
    */
   clearListeners() {
-    this.keyupListeners.forEach( function( listener ) {
+    this.keyupListeners.forEach( listener => {
       stepTimer.clearTimeout( listener );
       listener();
     } );

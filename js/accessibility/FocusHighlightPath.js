@@ -13,7 +13,6 @@
 import Emitter from '../../../axon/js/Emitter.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import LineStyles from '../../../kite/js/util/LineStyles.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import Path from '../nodes/Path.js';
 import scenery from '../scenery.js';
@@ -40,107 +39,103 @@ const OUTER_LINE_WIDTH_BASE = 4;
 const GROUP_OUTER_LINE_WIDTH = 2;
 const GROUP_INNER_LINE_WIDTH = 2;
 
-/**
- * @constructor
- *
- * @param {Shape} shape - the shape for the focus highlight
- * @param {Object} [options]
- */
-function FocusHighlightPath( shape, options ) {
+class FocusHighlightPath extends Path {
+  /**
+   * @param {Shape} shape - the shape for the focus highlight
+   * @param {Object} [options]
+   */
+  constructor( shape, options ) {
 
-  options = merge( {
+    options = merge( {
 
-    // stroke options,  one for each highlight
-    outerStroke: OUTER_FOCUS_COLOR,
-    innerStroke: INNER_FOCUS_COLOR,
+      // stroke options,  one for each highlight
+      outerStroke: OUTER_FOCUS_COLOR,
+      innerStroke: INNER_FOCUS_COLOR,
 
-    // line width options, one for each highlight, will be calculated based on transform of this path unless provided
-    outerLineWidth: null,
-    innerLineWidth: null,
+      // line width options, one for each highlight, will be calculated based on transform of this path unless provided
+      outerLineWidth: null,
+      innerLineWidth: null,
 
-    // {Node|null} - If specified, this FocusHighlightPath will reposition with transform changes along the unique
-    // trail to this source Node. Otherwise you will have to position this highlight node yourself.
-    transformSourceNode: null,
+      // {Node|null} - If specified, this FocusHighlightPath will reposition with transform changes along the unique
+      // trail to this source Node. Otherwise you will have to position this highlight node yourself.
+      transformSourceNode: null,
 
-    // TODO: this could use nested options
-    // remaining paintable options applied to both highlights
-    lineDash: [],
-    lineCap: LineStyles.DEFAULT_OPTIONS.lineCap,
-    lineJoin: LineStyles.DEFAULT_OPTIONS.lineJoin,
-    miterLimit: LineStyles.DEFAULT_OPTIONS.miterLimit,
-    lineDashOffset: LineStyles.DEFAULT_OPTIONS.lineDashOffset
-  }, options );
+      // TODO: this could use nested options
+      // remaining paintable options applied to both highlights
+      lineDash: [],
+      lineCap: LineStyles.DEFAULT_OPTIONS.lineCap,
+      lineJoin: LineStyles.DEFAULT_OPTIONS.lineJoin,
+      miterLimit: LineStyles.DEFAULT_OPTIONS.miterLimit,
+      lineDashOffset: LineStyles.DEFAULT_OPTIONS.lineDashOffset
+    }, options );
 
-  // @private {PaintDef}
-  this._innerHighlightColor = options.innerStroke;
-  this._outerHighlightColor = options.outerStroke;
+    super( shape );
 
-  // @public - emitted whenever this highlight changes
-  this.highlightChangedEmitter = new Emitter();
+    // @private {PaintDef}
+    this._innerHighlightColor = options.innerStroke;
+    this._outerHighlightColor = options.outerStroke;
 
-  Path.call( this, shape );
+    // @public - emitted whenever this highlight changes
+    this.highlightChangedEmitter = new Emitter();
 
-  this.options = options; // @private TODO: only assign individual options to 'this'.
+    this.options = options; // @private TODO: only assign individual options to 'this'.
 
-  // @public {Node|null} - see options for documentation
-  this.transformSourceNode = options.transformSourceNode;
+    // @public {Node|null} - see options for documentation
+    this.transformSourceNode = options.transformSourceNode;
 
-  // options for this Path, the outer focus highlight
-  const outerHighlightOptions = merge( {
-    stroke: options.outerStroke
-  }, options ); // TODO: Should this overwrite the "stroke" given in the options rather than extend?
-  this.mutate( outerHighlightOptions );
+    // options for this Path, the outer focus highlight
+    const outerHighlightOptions = merge( {
+      stroke: options.outerStroke
+    }, options ); // TODO: Should this overwrite the "stroke" given in the options rather than extend?
+    this.mutate( outerHighlightOptions );
 
-  // create the 'inner' focus highlight, the slightly darker and more opaque path that is on the inside
-  // of the outer path to give the focus highlight a 'fade-out' appearance
-  this.innerHighlightPath = new Path( shape, {
-    stroke: options.innerStroke,
-    lineDash: options.lineDash,
-    lineCap: options.lineCap,
-    lineJoin: options.lineJoin,
-    miterLimit: options.miterLimit,
-    lineDashOffset: options.lineDashOffset
-  } );
-  this.addChild( this.innerHighlightPath );
+    // create the 'inner' focus highlight, the slightly darker and more opaque path that is on the inside
+    // of the outer path to give the focus highlight a 'fade-out' appearance
+    this.innerHighlightPath = new Path( shape, {
+      stroke: options.innerStroke,
+      lineDash: options.lineDash,
+      lineCap: options.lineCap,
+      lineJoin: options.lineJoin,
+      miterLimit: options.miterLimit,
+      lineDashOffset: options.lineDashOffset
+    } );
+    this.addChild( this.innerHighlightPath );
 
-  this.updateLineWidth();
-}
-
-scenery.register( 'FocusHighlightPath', FocusHighlightPath );
-
-inherit( Path, FocusHighlightPath, {
+    this.updateLineWidth();
+  }
 
   /**
    * Mutating convenience function to mutate both the inner highlight also
    * @public
    */
-  mutateWithInnerHighlight: function( options ) {
-    Path.prototype.mutate.call( this, options );
+  mutateWithInnerHighlight( options ) {
+    super.mutate( options );
     this.innerHighlightPath && this.innerHighlightPath.mutate( options );
     this.highlightChangedEmitter.emit();
-  },
+  }
 
   /**
    * mutate the Path to make the stroke dashed, by using `lineDash`
    * @public
    */
-  makeDashed: function() {
+  makeDashed() {
     this.mutateWithInnerHighlight( {
       lineDash: [ 7, 7 ]
     } );
-  },
+  }
 
   /**
    * Update the shape of the child path (inner highlight) and this path (outer highlight).
+   * @public
    *
    * @override
    * @param {Shape} shape
    */
-  setShape: function( shape ) {
-    Path.prototype.setShape.call( this, shape );
+  setShape( shape ) {
+    super.setShape( shape );
     this.innerHighlightPath && this.innerHighlightPath.setShape( shape );
-    this.highlightChangedEmitter.emit();
-  },
+    this.highlightChangedEmitter && this.highlightChangedEmitter.emit();
+  }
 
   /**
    * Update the line width of both Paths based on transform of this Path, or another Node passed in (usually the
@@ -149,12 +144,12 @@ inherit( Path, FocusHighlightPath, {
    * @param {Node} [node] - if provided, adjust the line width based on the transform of the node argument
    * @public
    */
-  updateLineWidth: function( node ) {
+  updateLineWidth( node ) {
     node = node || this; // update based on node passed in or on self.
     this.lineWidth = this.getOuterLineWidth( node );
     this.innerHighlightPath.lineWidth = this.getInnerLineWidth( node );
     this.highlightChangedEmitter.emit();
-  },
+  }
 
   /**
    * Given a node, return the lineWidth of this focus highlight.
@@ -162,12 +157,12 @@ inherit( Path, FocusHighlightPath, {
    * @returns {number}
    * @public
    */
-  getOuterLineWidth: function( node ) {
+  getOuterLineWidth( node ) {
     if ( this.options.outerLineWidth ) {
       return this.options.outerLineWidth;
     }
     return FocusHighlightPath.getOuterLineWidthFromNode( node );
-  },
+  }
 
   /**
    * Given a node, return the lineWidth of this focus highlight.
@@ -175,24 +170,24 @@ inherit( Path, FocusHighlightPath, {
    * @returns {number}
    * @public
    */
-  getInnerLineWidth: function( node ) {
+  getInnerLineWidth( node ) {
     if ( this.options.innerLineWidth ) {
       return this.options.innerLineWidth;
     }
     return FocusHighlightPath.getInnerLineWidthFromNode( node );
-  },
+  }
 
   /**
    * Set the inner color of this focus highlight.
    * @public
    * @param {PaintDef} color
    */
-  setInnerHighlightColor: function( color ) {
+  setInnerHighlightColor( color ) {
     this._innerHighlightColor = color;
     this.innerHighlightPath.setStroke( color );
     this.highlightChangedEmitter.emit();
-  },
-  set innerHighlightColor( color ) { this.setInnerHighlightColor( color ); },
+  }
+  set innerHighlightColor( color ) { this.setInnerHighlightColor( color ); }
 
   /**
    * Get the inner color of this focus highlight path.
@@ -200,22 +195,22 @@ inherit( Path, FocusHighlightPath, {
    *
    * @returns {PaintDef}
    */
-  getInnerHighlightColor: function() {
+  getInnerHighlightColor() {
     return this._innerHighlightColor;
-  },
-  get innerHighlightColor() { return this.getInnerHighlightColor(); },
+  }
+  get innerHighlightColor() { return this.getInnerHighlightColor(); }
 
   /**
    * Set the outer color of this focus highlight.
    * @public
    * @param {PaintDef} color
    */
-  setOuterHighlightColor: function( color ) {
+  setOuterHighlightColor( color ) {
     this._outerHighlightColor = color;
     this.setStroke( color );
     this.highlightChangedEmitter.emit();
-  },
-  set outerHighlightColor( color ) { this.setOuterHighlightColor( color ); },
+  }
+  set outerHighlightColor( color ) { this.setOuterHighlightColor( color ); }
 
   /**
    * Get the color of the outer highlight for this FocusHighlightPath
@@ -223,10 +218,10 @@ inherit( Path, FocusHighlightPath, {
    *
    * @returns {PaintDef}
    */
-  getOuterHighlightColor: function() {
+  getOuterHighlightColor() {
     return this._outerHighlightColor;
-  },
-  get outerHighlightColor() { return this.getOuterHighlightColor(); },
+  }
+  get outerHighlightColor() { return this.getOuterHighlightColor(); }
 
   /**
    * Return the trail to the transform source node being used for this focus highlight. So that we can observe
@@ -235,25 +230,11 @@ inherit( Path, FocusHighlightPath, {
    * @public (scenery-internal)
    * @returns {Trail}
    */
-  getUniqueHighlightTrail: function() {
+  getUniqueHighlightTrail() {
     assert && assert( this.transformSourceNode.instances.length <= 1, 'transformSourceNode cannot use DAG, must have single trail.' );
     return this.transformSourceNode.getUniqueTrail();
   }
-}, {
 
-  // @public
-  // @static defaults available for custom highlights
-  OUTER_FOCUS_COLOR: OUTER_FOCUS_COLOR,
-  INNER_FOCUS_COLOR: INNER_FOCUS_COLOR,
-
-  INNER_LIGHT_GROUP_FOCUS_COLOR: INNER_LIGHT_GROUP_FOCUS_COLOR,
-  OUTER_LIGHT_GROUP_FOCUS_COLOR: OUTER_LIGHT_GROUP_FOCUS_COLOR,
-
-  INNER_DARK_GROUP_FOCUS_COLOR: INNER_DARK_GROUP_FOCUS_COLOR,
-  OUTER_DARK_GROUP_FOCUS_COLOR: OUTER_DARK_GROUP_FOCUS_COLOR,
-
-  GROUP_OUTER_LINE_WIDTH: GROUP_OUTER_LINE_WIDTH,
-  GROUP_INNER_LINE_WIDTH: GROUP_INNER_LINE_WIDTH,
 
   /**
    * Get the outer line width of a focus highlight based on the node's scale and rotation transform information.
@@ -263,9 +244,9 @@ inherit( Path, FocusHighlightPath, {
    * @param {Node} node
    * @returns {number}
    */
-  getInnerLineWidthFromNode: function( node ) {
+  static getInnerLineWidthFromNode( node ) {
     return INNER_LINE_WIDTH_BASE / FocusHighlightPath.getWidthMagnitudeFromTransform( node );
-  },
+  }
 
   /**
    * Get the outer line width of a node, based on its scale and rotation transformation.
@@ -275,9 +256,9 @@ inherit( Path, FocusHighlightPath, {
    * @param {Node} node
    * @returns {number}
    */
-  getOuterLineWidthFromNode: function( node ) {
+  static getOuterLineWidthFromNode( node ) {
     return OUTER_LINE_WIDTH_BASE / FocusHighlightPath.getWidthMagnitudeFromTransform( node );
-  },
+  }
 
   /**
    * Get a scalar width based on the node's transform excluding position.
@@ -287,18 +268,20 @@ inherit( Path, FocusHighlightPath, {
    * @param {Node} node
    * @returns {number}
    */
-  getWidthMagnitudeFromTransform: function( node ) {
+  static getWidthMagnitudeFromTransform( node ) {
     return node.transform.transformDelta2( Vector2.X_UNIT ).magnitude;
-  },
+  }
 
   /**
    * Get the coefficient needed to scale the highlights bounds to surround the node being highlighted elegantly.
    * The highlight is based on a Node's bounds, so it should be scaled out a certain amount so that there is white
    * space between the edge of the component and the beginning (inside edge) of the focusHighlight
-   * @param node
+   * @public
+   *
+   * @param {Node} node
    * @returns {number}
    */
-  getDilationCoefficient: function( node ) {
+  static getDilationCoefficient( node ) {
     const widthOfFocusHighlight = FocusHighlightPath.getOuterLineWidthFromNode( node );
 
     // Dilating half of the focus highlight width will make the inner edge of the focus highlight at the bounds
@@ -310,18 +293,18 @@ inherit( Path, FocusHighlightPath, {
     const whiteSpaceScalar = .25;
 
     return widthOfFocusHighlight * ( scalarToEdgeOfBounds + whiteSpaceScalar );
-  },
+  }
 
   /**
    * Get the dilation coefficient for a group focus highlight, which extends even further beyond node bounds
    * than a regular focus highlight. The group focus highlight goes around a node whenever its descendant has focus,
    * so this will always surround the normal focus highlight.
+   * @public
    *
    * @param {Node} node
-   *
    * @returns {number}
    */
-  getGroupDilationCoefficient: function( node ) {
+  static getGroupDilationCoefficient( node ) {
     const widthOfFocusHighlight = FocusHighlightPath.getOuterLineWidthFromNode( node );
 
     // Dilating half of the focus highlight width will make the inner edge of the focus highlight at the bounds
@@ -334,6 +317,23 @@ inherit( Path, FocusHighlightPath, {
 
     return widthOfFocusHighlight * ( scalarToEdgeOfBounds + whiteSpaceScalar );
   }
-} );
+}
+
+
+// @public
+// @static defaults available for custom highlights
+FocusHighlightPath.OUTER_FOCUS_COLOR = OUTER_FOCUS_COLOR;
+FocusHighlightPath.INNER_FOCUS_COLOR = INNER_FOCUS_COLOR;
+
+FocusHighlightPath.INNER_LIGHT_GROUP_FOCUS_COLOR = INNER_LIGHT_GROUP_FOCUS_COLOR;
+FocusHighlightPath.OUTER_LIGHT_GROUP_FOCUS_COLOR = OUTER_LIGHT_GROUP_FOCUS_COLOR;
+
+FocusHighlightPath.INNER_DARK_GROUP_FOCUS_COLOR = INNER_DARK_GROUP_FOCUS_COLOR;
+FocusHighlightPath.OUTER_DARK_GROUP_FOCUS_COLOR = OUTER_DARK_GROUP_FOCUS_COLOR;
+
+FocusHighlightPath.GROUP_OUTER_LINE_WIDTH = GROUP_OUTER_LINE_WIDTH;
+FocusHighlightPath.GROUP_INNER_LINE_WIDTH = GROUP_INNER_LINE_WIDTH;
+
+scenery.register( 'FocusHighlightPath', FocusHighlightPath );
 
 export default FocusHighlightPath;
