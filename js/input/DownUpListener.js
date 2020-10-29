@@ -8,7 +8,6 @@
  */
 
 import deprecationWarning from '../../../phet-core/js/deprecationWarning.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import scenery from '../scenery.js';
@@ -16,98 +15,100 @@ import Trail from '../util/Trail.js';
 import Mouse from './Mouse.js';
 import SceneryEvent from './SceneryEvent.js';
 
-/**
- * The 'trail' parameter passed to down/upInside/upOutside will end with the node to which this DownUpListener has
- * been added.
- *
- * Allowed options: {
- *    mouseButton: 0  // The mouse button to use: left: 0, middle: 1, right: 2, see
- *                    // https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
- *    down: null      // down( event, trail ) is called when the pointer is pressed down on this node
- *                    // (and another pointer is not already down on it).
- *    up: null        // up( event, trail ) is called after 'down', regardless of the pointer's current location.
- *                    // Additionally, it is called AFTER upInside or upOutside, whichever is relevant
- *    upInside: null  // upInside( event, trail ) is called after 'down', when the pointer is released inside
- *                    // this node (it or a descendant is the top pickable node under the pointer)
- *    upOutside: null // upOutside( event, trail ) is called after 'down', when the pointer is released outside
- *                    // this node (it or a descendant is the not top pickable node under the pointer, even if the
- *                    // same instance is still directly under the pointer)
- * }
- *
- * @param {Object} [options]
- */
-function DownUpListener( options ) {
-  assert && deprecationWarning( 'DownUpListener is deprecated, please use PressListener instead' );
+class DownUpListener extends PhetioObject {
+  /**
+   * The 'trail' parameter passed to down/upInside/upOutside will end with the node to which this DownUpListener has
+   * been added.
+   *
+   * Allowed options: {
+   *    mouseButton: 0  // The mouse button to use: left: 0, middle: 1, right: 2, see
+   *                    // https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
+   *    down: null      // down( event, trail ) is called when the pointer is pressed down on this node
+   *                    // (and another pointer is not already down on it).
+   *    up: null        // up( event, trail ) is called after 'down', regardless of the pointer's current location.
+   *                    // Additionally, it is called AFTER upInside or upOutside, whichever is relevant
+   *    upInside: null  // upInside( event, trail ) is called after 'down', when the pointer is released inside
+   *                    // this node (it or a descendant is the top pickable node under the pointer)
+   *    upOutside: null // upOutside( event, trail ) is called after 'down', when the pointer is released outside
+   *                    // this node (it or a descendant is the not top pickable node under the pointer, even if the
+   *                    // same instance is still directly under the pointer)
+   * }
+   *
+   * @param {Object} [options]
+   */
+  constructor( options ) {
+    assert && deprecationWarning( 'DownUpListener is deprecated, please use PressListener instead' );
 
-  const self = this;
 
-  options = merge( {
-    mouseButton: 0 // allow a different mouse button
-  }, options );
+    options = merge( {
+      mouseButton: 0 // allow a different mouse button
+    }, options );
 
-  PhetioObject.call( this, options );
+    super( options );
 
-  // @private {Object}
-  this.options = options;
+    // @private {Object}
+    this.options = options;
 
-  // @public {boolean} - whether this listener is down
-  this.isDown = false;
+    // @public {boolean} - whether this listener is down
+    this.isDown = false;
 
-  // @public {Node|null} - 'up' is handled via a pointer lister, which will have null currentTarget, so save the
-  // 'down' currentTarget
-  this.downCurrentTarget = null;
+    // @public {Node|null} - 'up' is handled via a pointer lister, which will have null currentTarget, so save the
+    // 'down' currentTarget
+    this.downCurrentTarget = null;
 
-  // @public {Trail|null}
-  this.downTrail = null;
+    // @public {Trail|null}
+    this.downTrail = null;
 
-  // @public {Pointer|null}
-  this.pointer = null;
+    // @public {Pointer|null}
+    this.pointer = null;
 
-  // @public {boolean}
-  this.interrupted = false;
+    // @public {boolean}
+    this.interrupted = false;
 
-  // @private {function} - this listener gets added to the pointer on a 'down'
-  this.downListener = {
-    // mouse/touch up
-    up: function( event ) {
-      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener (pointer) up for ' + self.downTrail.toString() );
-      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+    // @private {function} - this listener gets added to the pointer on a 'down'
+    this.downListener = {
+      // mouse/touch up
+      up: event => {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener (pointer) up for ' + this.downTrail.toString() );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-      assert && assert( event.pointer === self.pointer );
-      if ( !( event.pointer instanceof Mouse ) || event.domEvent.button === self.options.mouseButton ) {
-        self.buttonUp( event );
+        assert && assert( event.pointer === this.pointer );
+        if ( !( event.pointer instanceof Mouse ) || event.domEvent.button === this.options.mouseButton ) {
+          this.buttonUp( event );
+        }
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
+      },
+
+      // interruption of this Pointer listener
+      interrupt: () => {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener (pointer) interrupt for ' + this.downTrail.toString() );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+        this.interrupt();
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
+      },
+
+      // touch cancel
+      cancel: event => {
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener (pointer) cancel for ' + this.downTrail.toString() );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+        assert && assert( event.pointer === this.pointer );
+        this.buttonUp( event );
+
+        sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       }
+    };
+  }
 
-      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
-    },
-
-    // interruption of this Pointer listener
-    interrupt: function() {
-      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener (pointer) interrupt for ' + self.downTrail.toString() );
-      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-
-      self.interrupt();
-
-      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
-    },
-
-    // touch cancel
-    cancel: function( event ) {
-      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener (pointer) cancel for ' + self.downTrail.toString() );
-      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
-
-      assert && assert( event.pointer === self.pointer );
-      self.buttonUp( event );
-
-      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
-    }
-  };
-}
-
-scenery.register( 'DownUpListener', DownUpListener );
-
-inherit( PhetioObject, DownUpListener, {
-  buttonDown: function( event ) {
+  /**
+   * @private
+   *
+   * @param {SceneryEvent} event
+   */
+  buttonDown( event ) {
     // already down from another pointer, don't do anything
     if ( this.isDown ) { return; }
 
@@ -130,9 +131,14 @@ inherit( PhetioObject, DownUpListener, {
     }
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
-  },
+  }
 
-  buttonUp: function( event ) {
+  /**
+   * @private
+   *
+   * @param {SceneryEvent} event
+   */
+  buttonUp( event ) {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener buttonUp' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -161,19 +167,27 @@ inherit( PhetioObject, DownUpListener, {
     event.currentTarget = currentTargetSave; // be polite to other listeners, restore currentTarget
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
-  },
+  }
 
   /*---------------------------------------------------------------------------*
    * events called from the node input listener
    *----------------------------------------------------------------------------*/
 
-  // mouse/touch down on this node
-  down: function( event ) {
+  /**
+   * mouse/touch down on this node
+   * @public (scenery-internal)
+   *
+   * @param {SceneryEvent} event
+   */
+  down( event ) {
     this.buttonDown( event );
-  },
+  }
 
-  // Called when input is interrupted on this listener, see https://github.com/phetsims/scenery/issues/218
-  interrupt: function() {
+  /**
+   * Called when input is interrupted on this listener, see https://github.com/phetsims/scenery/issues/218
+   * @public
+   */
+  interrupt() {
     if ( this.isDown ) {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener interrupt' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
@@ -191,6 +205,8 @@ inherit( PhetioObject, DownUpListener, {
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     }
   }
-} );
+}
+
+scenery.register( 'DownUpListener', DownUpListener );
 
 export default DownUpListener;
