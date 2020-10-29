@@ -7,7 +7,6 @@
  */
 
 import Shape from '../../../kite/js/Shape.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import FocusHighlightFromNode from '../accessibility/FocusHighlightFromNode.js';
 import FocusHighlightPath from '../accessibility/FocusHighlightPath.js';
 import Display from '../display/Display.js';
@@ -23,108 +22,113 @@ let innerHighlightColor = FocusHighlightPath.INNER_FOCUS_COLOR;
 let innerGroupHighlightColor = FocusHighlightPath.INNER_LIGHT_GROUP_FOCUS_COLOR;
 let outerGroupHighlightColor = FocusHighlightPath.OUTER_LIGHT_GROUP_FOCUS_COLOR;
 
-/**
- * @constructor
- *
- * @param {Display} display
- * @param {Node} focusRootNode - the root node of our display
- */
-function FocusOverlay( display, focusRootNode ) {
-  this.display = display; // @private {Display}
-  this.focusRootNode = focusRootNode; // @private {Node} - The root Node of our child display
+class FocusOverlay {
+  /**
+   * @param {Display} display
+   * @param {Node} focusRootNode - the root node of our display
+   */
+  constructor( display, focusRootNode ) {
+    this.display = display; // @private {Display}
+    this.focusRootNode = focusRootNode; // @private {Node} - The root Node of our child display
 
-  // @private {Trail|null} - trail to the node with focus, modified when focus changes
-  this.trail = null;
+    // @private {Trail|null} - trail to the node with focus, modified when focus changes
+    this.trail = null;
 
-  // @private {Node|null} - node with focus, modified when focus changes
-  this.node = null;
+    // @private {Node|null} - node with focus, modified when focus changes
+    this.node = null;
 
-  // @private {string|null} - signifies method of representing focus, 'bounds'|'node'|'shape'|'invisible', modified
-  // when focus changes
-  this.mode = null;
+    // @private {string|null} - signifies method of representing focus, 'bounds'|'node'|'shape'|'invisible', modified
+    // when focus changes
+    this.mode = null;
 
-  // @private {string|null} - signifies method off representing group focus, 'bounds'|'node', modified when
-  // focus changes
-  this.groupMode = null;
+    // @private {string|null} - signifies method off representing group focus, 'bounds'|'node', modified when
+    // focus changes
+    this.groupMode = null;
 
-  // @private {Node|null} - the group highlight node around an ancestor of this.node when focus changes,
-  // see ParallelDOM.setGroupFocusHighlight for more information on the group focus highlight, modified when
-  // focus changes
-  this.groupHighlightNode = null;
+    // @private {Node|null} - the group highlight node around an ancestor of this.node when focus changes,
+    // see ParallelDOM.setGroupFocusHighlight for more information on the group focus highlight, modified when
+    // focus changes
+    this.groupHighlightNode = null;
 
-  // @private {TransformTracker|null} - tracks transformations to the focused node and the node with a group
-  // focus highlight, modified when focus changes
-  this.transformTracker = null;
-  this.groupTransformTracker = null;
+    // @private {TransformTracker|null} - tracks transformations to the focused node and the node with a group
+    // focus highlight, modified when focus changes
+    this.transformTracker = null;
+    this.groupTransformTracker = null;
 
-  // @private {Node|null} - If a node is using a custom focus highlight, a reference is kept so that it can be
-  // removed from the overlay when node focus changes.
-  this.nodeFocusHighlight = null;
+    // @private {Node|null} - If a node is using a custom focus highlight, a reference is kept so that it can be
+    // removed from the overlay when node focus changes.
+    this.nodeFocusHighlight = null;
 
-  // @private {boolean} - if true, the next update() will trigger an update to the highlight's transform
-  this.transformDirty = true;
+    // @private {boolean} - if true, the next update() will trigger an update to the highlight's transform
+    this.transformDirty = true;
 
-  // @private {Node} - The main node for the highlight. It will be transformed.
-  this.highlightNode = new Node();
-  this.focusRootNode.addChild( this.highlightNode );
+    // @private {Node} - The main node for the highlight. It will be transformed.
+    this.highlightNode = new Node();
+    this.focusRootNode.addChild( this.highlightNode );
 
-  // @private {Display} - display that manages all focus highlights
-  this.focusDisplay = new Display( this.focusRootNode, {
-    width: this.width,
-    height: this.height,
-    allowWebGL: display.isWebGLAllowed(),
-    allowCSSHacks: false,
-    accessibility: false,
-    interactive: false
-  } );
+    // @private {Display} - display that manages all focus highlights
+    this.focusDisplay = new Display( this.focusRootNode, {
+      width: this.width,
+      height: this.height,
+      allowWebGL: display.isWebGLAllowed(),
+      allowCSSHacks: false,
+      accessibility: false,
+      interactive: false
+    } );
 
-  // @private {HTMLElement}
-  this.domElement = this.focusDisplay.domElement;
-  this.domElement.style.pointerEvents = 'none';
+    // @private {HTMLElement}
+    this.domElement = this.focusDisplay.domElement;
+    this.domElement.style.pointerEvents = 'none';
 
-  // Used as the focus highlight when the overlay is passed a shape
-  this.shapeFocusHighlightPath = new FocusHighlightPath( null );
-  this.boundsFocusHighlightPath = new FocusHighlightFromNode( null, {
-    useLocalBounds: true
-  } );
+    // Used as the focus highlight when the overlay is passed a shape
+    this.shapeFocusHighlightPath = new FocusHighlightPath( null );
+    this.boundsFocusHighlightPath = new FocusHighlightFromNode( null, {
+      useLocalBounds: true
+    } );
 
-  // @private {FocusHighlightPath} - Focus highlight for 'groups' of Nodes. When descendant node has focus, ancestor
-  // with groupFocusHighlight flag will have this extra focus highlight surround its local bounds
-  this.groupFocusHighlightPath = new FocusHighlightFromNode( null, {
-    useLocalBounds: true,
-    useGroupDilation: true,
-    outerLineWidth: FocusHighlightPath.GROUP_OUTER_LINE_WIDTH,
-    innerLineWidth: FocusHighlightPath.GROUP_INNER_LINE_WIDTH,
-    innerStroke: FocusHighlightPath.FOCUS_COLOR
-  } );
+    // @private {FocusHighlightPath} - Focus highlight for 'groups' of Nodes. When descendant node has focus, ancestor
+    // with groupFocusHighlight flag will have this extra focus highlight surround its local bounds
+    this.groupFocusHighlightPath = new FocusHighlightFromNode( null, {
+      useLocalBounds: true,
+      useGroupDilation: true,
+      outerLineWidth: FocusHighlightPath.GROUP_OUTER_LINE_WIDTH,
+      innerLineWidth: FocusHighlightPath.GROUP_INNER_LINE_WIDTH,
+      innerStroke: FocusHighlightPath.FOCUS_COLOR
+    } );
 
-  this.highlightNode.addChild( this.shapeFocusHighlightPath );
-  this.highlightNode.addChild( this.boundsFocusHighlightPath );
-  this.focusRootNode.addChild( this.groupFocusHighlightPath );
+    this.highlightNode.addChild( this.shapeFocusHighlightPath );
+    this.highlightNode.addChild( this.boundsFocusHighlightPath );
+    this.focusRootNode.addChild( this.groupFocusHighlightPath );
 
-  // @private - Listeners bound once, so we can access them for removal.
-  this.boundsListener = this.onBoundsChange.bind( this );
-  this.transformListener = this.onTransformChange.bind( this );
-  this.focusListener = this.onFocusChange.bind( this );
-  this.focusHighlightListener = this.onFocusHighlightChange.bind( this );
+    // @private - Listeners bound once, so we can access them for removal.
+    this.boundsListener = this.onBoundsChange.bind( this );
+    this.transformListener = this.onTransformChange.bind( this );
+    this.focusListener = this.onFocusChange.bind( this );
+    this.focusHighlightListener = this.onFocusHighlightChange.bind( this );
 
-  Display.focusProperty.link( this.focusListener );
-}
+    Display.focusProperty.link( this.focusListener );
+  }
 
-scenery.register( 'FocusOverlay', FocusOverlay );
-
-inherit( Object, FocusOverlay, {
-  dispose: function() {
+  /**
+   * Releases references
+   * @public
+   */
+  dispose() {
     if ( this.hasHighlight() ) {
       this.deactivateHighlight();
     }
 
     Display.focusProperty.unlink( this.focusListener );
-  },
+  }
 
-  hasHighlight: function() {
+  /**
+   * @public
+   *
+   * @returns {boolean}
+   */
+  hasHighlight() {
     return !!this.trail;
-  },
+  }
 
   /**
    * Activates the highlight, choosing a mode for whether the highlight will be a shape, node, or bounds.
@@ -132,7 +136,7 @@ inherit( Object, FocusOverlay, {
    *
    * @param {Trail} trail - The focused trail to highlight. It assumes that this trail is in this display.
    */
-  activateHighlight: function( trail ) {
+  activateHighlight( trail ) {
     this.trail = trail;
     this.node = trail.lastNode();
     const focusHighlight = this.node.focusHighlight;
@@ -205,13 +209,13 @@ inherit( Object, FocusOverlay, {
     this.updateHighlightColors();
 
     this.transformDirty = true;
-  },
+  }
 
   /**
    * Deactivates the current highlight, disposing and removing listeners as necessary.
    * @private
    */
-  deactivateHighlight: function() {
+  deactivateHighlight() {
     if ( this.mode === 'shape' ) {
       this.shapeFocusHighlightPath.visible = false;
     }
@@ -242,16 +246,15 @@ inherit( Object, FocusOverlay, {
     this.mode = null;
     this.transformTracker.removeListener( this.transformListener );
     this.transformTracker.dispose();
-  },
+  }
 
   /**
    * Activate all 'group' focus highlights by searching for ancestor nodes from the node that has focus
    * and adding a rectangle around it if it has a "groupFocusHighlight". A group highlight will only appear around
    * the closest ancestor that has a one.
-   *
    * @private
    */
-  activateGroupHighlights: function() {
+  activateGroupHighlights() {
 
     const trail = this.trail;
     for ( let i = 0; i < trail.length; i++ ) {
@@ -284,15 +287,16 @@ inherit( Object, FocusOverlay, {
         break;
       }
     }
-  },
+  }
 
   /**
    * Update focus highlight colors. This is a no-op if we are in 'node' mode, or if none of the highlight colors
    * have changed.
+   * @private
    *
    * TODO: Support updating focus highlight strokes in 'node' mode as well?
    */
-  updateHighlightColors: function() {
+  updateHighlightColors() {
 
     if ( this.mode === 'shape' ) {
       if ( this.shapeFocusHighlightPath.innerHighlightColor !== FocusOverlay.innerHighlightColor ) {
@@ -320,14 +324,14 @@ inherit( Object, FocusOverlay, {
         this.groupFocusHighlightPath.setOuterHighlightColor( FocusOverlay.outerGroupHighlightColor );
       }
     }
-  },
+  }
 
   /**
    * Remove all group focus highlights by making them invisible, or removing them from the root of this overlay,
    * depending on mode.
    * @private
    */
-  deactivateGroupHighlights: function() {
+  deactivateGroupHighlights() {
     if ( this.groupMode ) {
       if ( this.groupMode === 'bounds' ) {
         this.groupFocusHighlightPath.visible = false;
@@ -341,10 +345,13 @@ inherit( Object, FocusOverlay, {
       this.groupTransformTracker.removeListener( this.transformListener );
       this.groupTransformTracker.dispose();
     }
-  },
+  }
 
-  // Called from FocusOverlay after transforming the highlight. Only called when the transform changes.
-  afterTransform: function() {
+  /**
+   * Called from FocusOverlay after transforming the highlight. Only called when the transform changes.
+   * @private
+   */
+  afterTransform() {
     if ( this.mode === 'shape' ) {
       this.shapeFocusHighlightPath.updateLineWidth();
     }
@@ -356,19 +363,30 @@ inherit( Object, FocusOverlay, {
       // Update the transform based on the transform of the node that the focusHighlight is highlighting.
       this.node.focusHighlight.updateLineWidth( this.node );
     }
-  },
+  }
 
-  onTransformChange: function() {
+  /**
+   * @private
+   */
+  onTransformChange() {
     this.transformDirty = true;
-  },
+  }
 
-  // Called when bounds change on our node when we are in "Bounds" mode
-  onBoundsChange: function() {
+  /**
+   * Called when bounds change on our node when we are in "Bounds" mode
+   * @private
+   */
+  onBoundsChange() {
     this.boundsFocusHighlightPath.setShapeFromNode( this.node );
-  },
+  }
 
-  // Called when the main Scenery focus pair (Display,Trail) changes.
-  onFocusChange: function( focus ) {
+  /**
+   * Called when the main Scenery focus pair (Display,Trail) changes.
+   * @private
+   *
+   * @param {Focus} focus
+   */
+  onFocusChange( focus ) {
     const newTrail = ( focus && focus.display === this.display ) ? focus.trail : null;
 
     if ( this.hasHighlight() ) {
@@ -378,20 +396,24 @@ inherit( Object, FocusOverlay, {
     if ( newTrail ) {
       this.activateHighlight( newTrail );
     }
-  },
+  }
 
   /**
    * If the focused node has an updated focus highlight, we must do all the work of highlight deactivation/activation
    * as if the application focus changed. If focus highlight mode changed, we need to add/remove static listeners,
    * add/remove highlight children, and so on. Called when focus highlight changes, but should only ever be
    * necessary when the node has focus.
+   * @private
    */
-  onFocusHighlightChange: function() {
+  onFocusHighlightChange() {
     assert && assert( this.node.focused, 'update should only be necessary if node already has focus' );
     this.onFocusChange( Display.focus );
-  },
+  }
 
-  update: function() {
+  /**
+   * @public
+   */
+  update() {
     // Transform the highlight to match the position of the node
     if ( this.hasHighlight() && this.transformDirty ) {
       this.transformDirty = false;
@@ -408,18 +430,16 @@ inherit( Object, FocusOverlay, {
     this.focusDisplay.updateDisplay();
   }
 
-}, {
-
   /**
    * Set the inner color of all focus highlights.
    * @public
    *
    * @param {PaintDef} color
    */
-  setInnerHighlightColor: function( color ) {
+  static setInnerHighlightColor( color ) {
     innerHighlightColor = color;
-  },
-  set innerHighlightColor( color ) { this.setInnerHighlightColor( color ); },
+  }
+  static set innerHighlightColor( color ) { this.setInnerHighlightColor( color ); }
 
   /**
    * Get the inner color of all focus highlights.
@@ -427,10 +447,10 @@ inherit( Object, FocusOverlay, {
    *
    * @returns {PaintDef}
    */
-  getInnerHighlightColor: function() {
+  static getInnerHighlightColor() {
     return innerHighlightColor;
-  },
-  get innerHighlightColor() { return this.getInnerHighlightColor(); },
+  }
+  static get innerHighlightColor() { return this.getInnerHighlightColor(); } // eslint-disable-line bad-sim-text
 
   /**
    * Set the outer color of all focus highlights.
@@ -438,10 +458,10 @@ inherit( Object, FocusOverlay, {
    *
    * @param {PaintDef} color
    */
-  setOuterHilightColor: function( color ) {
+  static setOuterHilightColor( color ) {
     outerHighlightColor = color;
-  },
-  set outerHighlightColor( color ) { this.setOuterHilightColor( color ); },
+  }
+  static set outerHighlightColor( color ) { this.setOuterHilightColor( color ); }
 
   /**
    * Get the outer color of all focus highlights.
@@ -449,10 +469,10 @@ inherit( Object, FocusOverlay, {
    *
    * @returns {PaintDef} color
    */
-  getOuterHighlightColor: function() {
+  static getOuterHighlightColor() {
     return outerHighlightColor;
-  },
-  get outerHighlightColor() { return this.getOuterHighlightColor(); },
+  }
+  static get outerHighlightColor() { return this.getOuterHighlightColor(); } // eslint-disable-line bad-sim-text
 
   /**
    * Set the inner color of all group focus highlights.
@@ -460,10 +480,10 @@ inherit( Object, FocusOverlay, {
    *
    * @param {PaintDef} color
    */
-  setInnerGroupHighlightColor: function( color ) {
+  static setInnerGroupHighlightColor( color ) {
     innerGroupHighlightColor = color;
-  },
-  set innerGroupHighlightColor( color ) { this.setInnerGroupHighlightColor( color ); },
+  }
+  static set innerGroupHighlightColor( color ) { this.setInnerGroupHighlightColor( color ); }
 
   /**
    * Get the inner color of all group focus highlights
@@ -471,10 +491,10 @@ inherit( Object, FocusOverlay, {
    *
    * @returns {PaintDef} color
    */
-  getInnerGroupHighlightColor: function() {
+  static getInnerGroupHighlightColor() {
     return innerGroupHighlightColor;
-  },
-  get innerGroupHighlightColor() { return this.getInnerGroupHighlightColor(); },
+  }
+  static get innerGroupHighlightColor() { return this.getInnerGroupHighlightColor(); } // eslint-disable-line bad-sim-text
 
   /**
    * Set the outer color of all group focus highlight.
@@ -482,10 +502,10 @@ inherit( Object, FocusOverlay, {
    *
    * @param {PaintDef} color
    */
-  setOuterGroupHighlightColor: function( color ) {
+  static setOuterGroupHighlightColor( color ) {
     outerGroupHighlightColor = color;
-  },
-  set outerGroupHighlightColor( color ) { this.setOuterGroupHighlightColor( color ); },
+  }
+  static set outerGroupHighlightColor( color ) { this.setOuterGroupHighlightColor( color ); }
 
   /**
    * Get the outer color of all group focus highlights.
@@ -493,11 +513,11 @@ inherit( Object, FocusOverlay, {
    *
    * @returns {PaintDef} color
    */
-  getOuterGroupHighlightColor: function() {
+  static getOuterGroupHighlightColor() {
     return outerGroupHighlightColor;
-  },
-  get outerGroupHighlightColor() { return this.getOuterGroupHighlightColor(); }
+  }
+  static get outerGroupHighlightColor() { return this.getOuterGroupHighlightColor(); } // eslint-disable-line bad-sim-text
+}
 
-} );
-
+scenery.register( 'FocusOverlay', FocusOverlay );
 export default FocusOverlay;

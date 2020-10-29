@@ -39,7 +39,7 @@ function snapshotFromImage( image ) { // eslint-disable-line no-unused-vars
 const testedRenderers = [ 'canvas', 'svg', 'dom', 'webgl' ];
 
 // known clipping issues to fix
-const nonDomWebGLTestedRenderers = testedRenderers.filter( function( renderer ) { return renderer !== 'dom' && renderer !== 'webgl'; } );
+const nonDomWebGLTestedRenderers = testedRenderers.filter( renderer => renderer !== 'dom' && renderer !== 'webgl' );
 
 /* eslint-disable no-undef */
 // We can only guarantee comparisons for Firefox and Chrome
@@ -59,8 +59,8 @@ else {
    * @param {string} dataURL - The reference data URL to compare against
    * @param {number} threshold - Numerical threshold to determine how much error is acceptable
    */
-  const pixelTest = function( name, setup, dataURL, threshold, isAsync ) {
-    QUnit.test( name, function( assert ) {
+  const pixelTest = ( name, setup, dataURL, threshold, isAsync ) => {
+    QUnit.test( name, assert => {
       const done = assert.async();
       // set up the scene/display
       const scene = new Node();
@@ -88,23 +88,23 @@ else {
         let loadedCount = 0;
         var referenceImage = document.createElement( 'img' );
         var freshImage = document.createElement( 'img' );
-        referenceImage.onload = freshImage.onload = function() {
+        referenceImage.onload = freshImage.onload = () => {
           if ( ++loadedCount === 2 ) {
             compareSnapshots();
           }
         };
-        referenceImage.onerror = function() {
+        referenceImage.onerror = () => {
           assert.ok( false, name + ' reference image failed to load' );
           done();
         };
-        freshImage.onerror = function() {
+        freshImage.onerror = () => {
           assert.ok( false, name + ' fresh image failed to load' );
           done();
         };
 
         referenceImage.src = dataURL;
 
-        display.foreignObjectRasterization( function( url ) {
+        display.foreignObjectRasterization( url => {
           if ( !url ) {
             assert.ok( false, name + ' failed to rasterize the display' );
             done();
@@ -123,12 +123,12 @@ else {
   };
 
   // Like pixelTest, but for multiple listeners ({string[]}). Don't override the renderer on the scene.
-  const multipleRendererTest = function( name, setup, dataURL, threshold, renderers, isAsync ) {
+  const multipleRendererTest = ( name, setup, dataURL, threshold, renderers, isAsync ) => {
     for ( var i = 0; i < renderers.length; i++ ) {
-      ( function() {
+      ( () => {
         const renderer = renderers[ i ];
 
-        pixelTest( name + ' (' + renderer + ')', function( scene, display, asyncCallback ) {
+        pixelTest( name + ' (' + renderer + ')', ( scene, display, asyncCallback ) => {
           scene.renderer = renderer;
           setup( scene, display, asyncCallback );
         }, dataURL, threshold, isAsync );
@@ -138,7 +138,7 @@ else {
 
   const simpleRectangleDataURL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAcElEQVRYR+3YwQoAIQhFUfv/j572NQRiQTOc1ipyn0+kFpe/dnl/ocGqQgieJPhUiyfzX9VcSazBgTCCyZGbwhFEcCRgzVgzVVcgiGDE8uS3ZpiESZgkNwMO1hyvORpBBD938lcl25Lv+62KEcHfE+wTtBwp2K8YwAAAAABJRU5ErkJggg==';
   multipleRendererTest( 'Simple Rectangle',
-    function( scene, display ) {
+    ( scene, display ) => {
       display.width = 40;
       display.height = 40;
       scene.addChild( new Rectangle( 6, 6, 28, 28, {
@@ -150,7 +150,7 @@ else {
   );
 
   multipleRendererTest( 'Shifted Rectangle',
-    function( scene, display ) {
+    ( scene, display ) => {
       display.width = 40;
       display.height = 40;
       scene.addChild( new Rectangle( 0, 0, 28, 28, {
@@ -164,7 +164,7 @@ else {
   );
 
   multipleRendererTest( 'Delay-shifted Rectangle',
-    function( scene, display ) {
+    ( scene, display ) => {
       display.width = 40;
       display.height = 40;
       const rect = new Rectangle( 0, 0, 28, 28, {
@@ -182,7 +182,7 @@ else {
   );
 
   multipleRendererTest( 'Color-change Rectangle',
-    function( scene, display ) {
+    ( scene, display ) => {
       display.width = 40;
       display.height = 40;
       const rect = new Rectangle( 6, 6, 28, 28, {
@@ -198,9 +198,9 @@ else {
 
   // try rendering the image itself
   multipleRendererTest( 'Image with PNG data URL',
-    function( scene, display, asyncCallback ) {
+    ( scene, display, asyncCallback ) => {
       const img = document.createElement( 'img' );
-      img.onload = function() {
+      img.onload = () => {
         display.width = 40;
         display.height = 40;
         scene.addChild( new Image( img ) );
@@ -208,7 +208,7 @@ else {
 
         asyncCallback();
       };
-      img.error = function() {
+      img.error = () => {
         asyncCallback();
       };
       img.src = simpleRectangleDataURL;
@@ -217,7 +217,7 @@ else {
   );
 
   multipleRendererTest( 'Color change from property',
-    function( scene, display ) {
+    ( scene, display ) => {
       display.width = 40;
       display.height = 40;
       const colorProperty = new Property( 'red' );
@@ -234,7 +234,7 @@ else {
   /* eslint-enable */
 
   multipleRendererTest( 'Invisible node with rectangles (paths) above and below',
-    function( scene, display ) {
+    ( scene, display ) => {
       display.width = 32;
       display.height = 32;
       const shape = Shape.rectangle( 0, 0, 30, 30 );
@@ -263,7 +263,7 @@ else {
   );
 
   multipleRendererTest( 'Invisible => Visible',
-    function( scene, display ) {
+    ( scene, display ) => {
       display.width = 32;
       display.height = 32;
       const rect = new Rectangle( 0, 0, 16, 16, { fill: '#f00', visible: false } );
@@ -277,7 +277,7 @@ else {
   );
 
   multipleRendererTest( 'Invisible repaints',
-    function( scene, display ) {
+    ( scene, display ) => {
       display.width = 32;
       display.height = 32;
       const rect = new Rectangle( 0, 0, 16, 16, { fill: '#f00' } );
@@ -293,7 +293,7 @@ else {
   );
 
   multipleRendererTest( 'Invisible Rectangle',
-    function( scene, display ) {
+    ( scene, display ) => {
       display.width = 32;
       display.height = 32;
       const rect = new Rectangle( 0, 0, 16, 16, { fill: '#f00', visible: false } );
@@ -309,7 +309,7 @@ else {
 
   const redCenteredCircle = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABLElEQVRYR+2W0XHCMAyGP01QOgllAjpC2aCM0AlKNmADugF0gzJBYRM6gTldzDUcsWXHufNL9JKHONIX6bd/C5VDKtdnApg6kN0BB2/AHHgFXryIT8APcBL4zhF2MoBri+06RUN1FGYtoE8zkgAcbIBPM9v9go1AY31jAgwsfqv7IbCNQUQBfNt/rb8w3i9i47AAdI4quJJQYS5CCYIAXu37ksqdb1cCh75cMYAhwgvxNtIK+SFiALqvlyN14CjtuZEFcAGeRgK4CDzXBPgTmOUCVB9BdRGq6dTbhjov1xpK6UF0ln/XTN8FHkAdsN5R7CFKtFBmRrd+DXREs7jmN+24A6Hj+ErQxBl4H/VC0lWONymFCV3Jek0n2w1HOoLNNMkjMDMNXDABTB24AvQKQiGCr2i0AAAAAElFTkSuQmCC';
   multipleRendererTest( 'Simple Circle',
-    function( scene, display ) {
+    ( scene, display ) => {
       display.width = 32;
       display.height = 32;
       const circle = new Circle( 10, { fill: 'red', centerX: 16, centerY: 16 } );
@@ -320,7 +320,7 @@ else {
   );
 
   multipleRendererTest( 'Shifted Repainted Circle',
-    function( scene, display ) {
+    ( scene, display ) => {
       display.width = 32;
       display.height = 32;
       const circle = new Circle( 10, { fill: 'black' } );
@@ -335,7 +335,7 @@ else {
   );
 
   multipleRendererTest( 'Scaled Circle',
-    function( scene, display ) {
+    ( scene, display ) => {
       display.width = 32;
       display.height = 32;
       const circle = new Circle( 5, { fill: 'red', scale: 2, centerX: 16, centerY: 16 } );
@@ -346,7 +346,7 @@ else {
   );
 
   multipleRendererTest( 'Radius Change Circle',
-    function( scene, display ) {
+    ( scene, display ) => {
       display.width = 32;
       display.height = 32;
       const circle = new Circle( 5, { fill: 'red', centerX: 16, centerY: 16 } );
@@ -359,7 +359,7 @@ else {
   );
 
   multipleRendererTest( 'Static Circles',
-    function( scene, display ) {
+    ( scene, display ) => {
       display.width = 64;
       display.height = 64;
       scene.addChild( new Circle( 32, {
@@ -380,7 +380,7 @@ else {
   *----------------------------------------------------------------------------*/
 
   multipleRendererTest( 'Simple Node/Fill/Stroke Opacity',
-    function( scene, display ) {
+    ( scene, display ) => {
       display.width = 32;
       display.height = 32;
       scene.addChild( new Rectangle( 0, 0, 32, 16, {
@@ -395,7 +395,7 @@ else {
   );
 
   multipleRendererTest( 'Nested Node/Fill/Stroke Opacity',
-    function( scene, display ) {
+    ( scene, display ) => {
       display.width = 32;
       display.height = 32;
       const rect = new Rectangle( 0, 0, 32, 16, {
@@ -418,7 +418,7 @@ else {
   );
 
   multipleRendererTest( 'Simple clipping',
-    function( scene, display ) {
+    ( scene, display ) => {
       display.width = 32;
       display.height = 32;
       scene.addChild( new Rectangle( 2, 2, 28, 28, {
@@ -433,7 +433,7 @@ else {
   );
 
   multipleRendererTest( 'Nested clipping and background',
-    function( scene, display ) {
+    ( scene, display ) => {
       display.width = 64;
       display.height = 40;
       const clipShape1 = Shape.regularPolygon( 6, 27 ).transformed( Matrix3.translation( 32, 32 ) );
@@ -456,7 +456,7 @@ else {
   );
 
   multipleRendererTest( 'Ellipses and Elliptical Arcs',
-    function( scene, display ) {
+    ( scene, display ) => {
       display.width = 200;
       display.height = 50;
       let x = 32;
@@ -496,7 +496,7 @@ else {
   );
 
   multipleRendererTest( 'Circles and Arcs',
-    function( scene, display ) {
+    ( scene, display ) => {
       display.width = 200;
       display.height = 50;
       let x = 32;
@@ -536,7 +536,7 @@ else {
   );
 
   multipleRendererTest( 'DAG support',
-    function( scene, display ) {
+    ( scene, display ) => {
       display.width = 250;
       display.height = 120;
       const square = new Path( Shape.rectangle( 0, 0, 50, 50 ), {
@@ -576,7 +576,7 @@ else {
   );
 
   multipleRendererTest( 'Overlapping/nested transforms',
-    function( scene, display ) {
+    ( scene, display ) => {
       display.width = 64;
       display.height = 44;
       const container = new Node( {
@@ -611,11 +611,11 @@ else {
   const patternUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAo0lEQVQ4T7WT4Q2CMBCFPyZAN2EDcAOcQJ1MmABHkA0YBTcwL6FELhYvFpr0B+n13X2vj4zElSXeJyZwBS5AMTUYgAZobUMrcAA6oIpM9gTOwBjOrYAKyh9Yqjl9E9DYd6cntwlp4YGne9DvA+Yngrhy5wSqPar2X4EXIMO3RUg2URN5jJwNtAj6FtdjJQu6XK8FKTyCcLRtlBXnxdrtZ3LGAd6BXBwR28m13gAAAABJRU5ErkJggg==';
 
   multipleRendererTest( 'Patterns',
-    function( scene, display, asyncCallback ) {
+    ( scene, display, asyncCallback ) => {
       display.width = 64;
       display.height = 64;
       const img = document.createElement( 'img' );
-      img.onload = function() {
+      img.onload = () => {
         const pattern = new Pattern( img );
         scene.addChild( new Path( Shape.regularPolygon( 6, 22 ), {
           x: 32,
@@ -634,11 +634,11 @@ else {
   );
 
   multipleRendererTest( 'Transformed Patterns',
-    function( scene, display, asyncCallback ) {
+    ( scene, display, asyncCallback ) => {
       display.width = 64;
       display.height = 64;
       const img = document.createElement( 'img' );
-      img.onload = function() {
+      img.onload = () => {
         const pattern = new Pattern( img ).setTransformMatrix( Matrix3.rowMajor( 0.4, 0.2, 1.3, -0.2, 0.2, 7.2, 0, 0, 1 ) );
         scene.addChild( new Path( Shape.regularPolygon( 6, 22 ), {
           x: 32,
@@ -657,7 +657,7 @@ else {
   );
 
   multipleRendererTest( 'Dashes',
-    function( scene, display, asyncCallback ) {
+    ( scene, display, asyncCallback ) => {
       display.width = 64;
       display.height = 64;
       scene.addChild( new Path( Shape.rectangle( 10, 10, 44, 44 ), {
@@ -687,7 +687,7 @@ else {
   );
 
   multipleRendererTest( 'Radial Gradients',
-    function( scene, display, asyncCallback ) {
+    ( scene, display, asyncCallback ) => {
       display.width = 192;
       display.height = 64;
       const fillGradient = new RadialGradient( 22, 0, 0, 22, 0, 44 );
@@ -728,7 +728,7 @@ else {
   );
 
   multipleRendererTest( 'Linear Gradients',
-    function( scene, display, asyncCallback ) {
+    ( scene, display, asyncCallback ) => {
       display.width = 128;
       display.height = 64;
       const fillGradient = new LinearGradient( -22, 0, 22, 0 );
@@ -764,7 +764,7 @@ else {
   );
 
   multipleRendererTest( 'Cubic B\u00E9zier',
-    function( scene, display, asyncCallback ) {
+    ( scene, display, asyncCallback ) => {
       display.width = 64;
       display.height = 64;
       scene.addChild( new Path( new Shape().moveTo( -20, -20 ).cubicCurveTo( -20, 0, 0, 0, 20, 20 ).lineTo( 20, -20 ).close(), {
@@ -780,7 +780,7 @@ else {
   );
 
   multipleRendererTest( 'Quadratic B\u00E9zier',
-    function( scene, display, asyncCallback ) {
+    ( scene, display, asyncCallback ) => {
       display.width = 64;
       display.height = 64;
       scene.addChild( new Path( new Shape().moveTo( -20, -20 ).quadraticCurveTo( 20, -20, 20, 20 ).close(), {
@@ -796,7 +796,7 @@ else {
   );
 
   multipleRendererTest( 'Opacity and Blending',
-    function( scene, display, asyncCallback ) {
+    ( scene, display, asyncCallback ) => {
       display.width = 64;
       display.height = 64;
       scene.addChild( new Rectangle( 0, 12, 64, 20, { fill: '#000' } ) );
@@ -814,9 +814,9 @@ else {
   );
 
   multipleRendererTest( 'Image shifted',
-    function( scene, display, asyncCallback ) {
+    ( scene, display, asyncCallback ) => {
       const img = document.createElement( 'img' );
-      img.onload = function() {
+      img.onload = () => {
         display.width = 40;
         display.height = 40;
         const image = new Image( img );
@@ -828,7 +828,7 @@ else {
 
         asyncCallback();
       };
-      img.error = function() {
+      img.error = () => {
         asyncCallback();
       };
       img.src = simpleRectangleDataURL;
@@ -837,9 +837,9 @@ else {
   );
 
   multipleRendererTest( 'Image changed after display',
-    function( scene, display, asyncCallback ) {
+    ( scene, display, asyncCallback ) => {
       const img1 = document.createElement( 'img' );
-      img1.onload = function() {
+      img1.onload = () => {
         display.width = 32;
         display.height = 32;
         const image = new Image( img1 );
@@ -847,18 +847,18 @@ else {
         display.updateDisplay();
 
         const img2 = document.createElement( 'img' );
-        img2.onload = function() {
+        img2.onload = () => {
           image.image = img2;
           display.updateDisplay();
 
           asyncCallback();
         };
-        img2.error = function() {
+        img2.error = () => {
           asyncCallback();
         };
         img2.src = redCenteredCircle;
       };
-      img1.error = function() {
+      img1.error = () => {
         asyncCallback();
       };
       img1.src = simpleRectangleDataURL;
@@ -867,7 +867,7 @@ else {
   );
 
   multipleRendererTest( 'External image displayed before load, then after load',
-    function( scene, display, asyncCallback ) {
+    ( scene, display, asyncCallback ) => {
       display.width = 64;
       display.height = 64;
 
@@ -877,15 +877,15 @@ else {
       display.updateDisplay();
 
       // add handler after creating the image
-      img.onload = function() {
+      img.onload = () => {
         // a bit of extra time afterwards
-        setTimeout( function() { // eslint-disable-line bad-sim-text
+        setTimeout( () => { // eslint-disable-line bad-sim-text
           display.updateDisplay();
 
           asyncCallback();
         }, 200 );
       };
-      img.error = function() {
+      img.error = () => {
         asyncCallback();
       };
       img.src = '../scenery/examples/example-image-1.png';
