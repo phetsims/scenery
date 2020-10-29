@@ -6,38 +6,49 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import scenery from '../scenery.js';
 import Utils from './Utils.js';
 
-function ShaderProgram( gl, vertexSource, fragmentSource, options ) {
-  options = merge( {
-    attributes: [], // {Array.<string>} (vertex) attribute names in the shader source
-    uniforms: [] // {Array.<string>} uniform names in the shader source
-  }, options );
+class ShaderProgram {
+  /**
+   * @param {WebGL2RenderingContext} gl
+   * @param {*string} vertexSource
+   * @param {*string} fragmentSource
+   * @param {Object} [options]
+   */
+  constructor( gl, vertexSource, fragmentSource, options ) {
+    options = merge( {
+      attributes: [], // {Array.<string>} (vertex) attribute names in the shader source
+      uniforms: [] // {Array.<string>} uniform names in the shader source
+    }, options );
 
-  // store parameters so that we can recreate the shader program on context loss
-  this.vertexSource = vertexSource;
-  this.fragmentSource = fragmentSource;
-  this.attributeNames = options.attributes;
-  this.uniformNames = options.uniforms;
+    // @private store parameters so that we can recreate the shader program on context loss
+    this.vertexSource = vertexSource;
+    this.fragmentSource = fragmentSource;
+    this.attributeNames = options.attributes;
+    this.uniformNames = options.uniforms;
 
-  this.initialize( gl );
-}
+    this.initialize( gl );
+  }
 
-scenery.register( 'ShaderProgram', ShaderProgram );
-
-inherit( Object, ShaderProgram, {
-  // initializes (or reinitializes) the WebGL state and uniform/attribute references.
-  initialize: function( gl ) {
-    const self = this;
+  /**
+   * Initializes (or reinitializes) the WebGL state and uniform/attribute references.
+   * @public
+   *
+   * @param {WebGL2RenderingContext} gl
+   */
+  initialize( gl ) {
+    // @private {WebGL2RenderingContext}
     this.gl = gl; // TODO: create them with separate contexts
 
+    // @private {boolean}
     this.used = false;
 
+    // @private {WebGLProgram}
     this.program = this.gl.createProgram();
 
+    // @private {WebGLShader}
     this.vertexShader = Utils.createShader( this.gl, this.vertexSource, this.gl.VERTEX_SHADER );
     this.fragmentShader = Utils.createShader( this.gl, this.fragmentSource, this.gl.FRAGMENT_SHADER );
 
@@ -63,39 +74,47 @@ inherit( Object, ShaderProgram, {
     this.gl.deleteShader( this.vertexShader );
     this.gl.deleteShader( this.fragmentShader );
 
+    // @public {Object}
     this.uniformLocations = {}; // map name => uniform location for program
     this.attributeLocations = {}; // map name => attribute location for program
     this.activeAttributes = {}; // map name => boolean (enabled)
 
-    _.each( this.attributeNames, function( attributeName ) {
-      self.attributeLocations[ attributeName ] = self.gl.getAttribLocation( self.program, attributeName );
-      self.activeAttributes[ attributeName ] = true; // default to enabled
+    _.each( this.attributeNames, attributeName => {
+      this.attributeLocations[ attributeName ] = this.gl.getAttribLocation( this.program, attributeName );
+      this.activeAttributes[ attributeName ] = true; // default to enabled
     } );
-    _.each( this.uniformNames, function( uniformName ) {
-      self.uniformLocations[ uniformName ] = self.gl.getUniformLocation( self.program, uniformName );
+    _.each( this.uniformNames, uniformName => {
+      this.uniformLocations[ uniformName ] = this.gl.getUniformLocation( this.program, uniformName );
     } );
 
+    // @private {boolean}
     this.isInitialized = true;
-  },
+  }
 
-  use: function() {
+  /**
+   * @public
+   */
+  use() {
     if ( this.used ) { return; }
-
-    const self = this;
 
     this.used = true;
 
     this.gl.useProgram( this.program );
 
     // enable the active attributes
-    _.each( this.attributeNames, function( attributeName ) {
-      if ( self.activeAttributes[ attributeName ] ) {
-        self.enableVertexAttribArray( attributeName );
+    _.each( this.attributeNames, attributeName => {
+      if ( this.activeAttributes[ attributeName ] ) {
+        this.enableVertexAttribArray( attributeName );
       }
     } );
-  },
+  }
 
-  activateAttribute: function( attributeName ) {
+  /**
+   * @public
+   *
+   * @param {string} attributeName
+   */
+  activateAttribute( attributeName ) {
     // guarded so we don't enable twice
     if ( !this.activeAttributes[ attributeName ] ) {
       this.activeAttributes[ attributeName ] = true;
@@ -104,31 +123,47 @@ inherit( Object, ShaderProgram, {
         this.enableVertexAttribArray( attributeName );
       }
     }
-  },
+  }
 
-  enableVertexAttribArray: function( attributeName ) {
+  /**
+   * @public
+   *
+   * @param {string} attributeName
+   */
+  enableVertexAttribArray( attributeName ) {
     this.gl.enableVertexAttribArray( this.attributeLocations[ attributeName ] );
-  },
+  }
 
-  unuse: function() {
+  /**
+   * @public
+   */
+  unuse() {
     if ( !this.used ) { return; }
-
-    const self = this;
 
     this.used = false;
 
-    _.each( this.attributeNames, function( attributeName ) {
-      if ( self.activeAttributes[ attributeName ] ) {
-        self.disableVertexAttribArray( attributeName );
+    _.each( this.attributeNames, attributeName => {
+      if ( this.activeAttributes[ attributeName ] ) {
+        this.disableVertexAttribArray( attributeName );
       }
     } );
-  },
+  }
 
-  disableVertexAttribArray: function( attributeName ) {
+  /**
+   * @public
+   *
+   * @param {string} attributeName
+   */
+  disableVertexAttribArray( attributeName ) {
     this.gl.disableVertexAttribArray( this.attributeLocations[ attributeName ] );
-  },
+  }
 
-  deactivateAttribute: function( attributeName ) {
+  /**
+   * @public
+   *
+   * @param {string} attributeName
+   */
+  deactivateAttribute( attributeName ) {
     // guarded so we don't disable twice
     if ( this.activeAttributes[ attributeName ] ) {
       this.activeAttributes[ attributeName ] = false;
@@ -137,11 +172,16 @@ inherit( Object, ShaderProgram, {
         this.disableVertexAttribArray( attributeName );
       }
     }
-  },
+  }
 
-  dispose: function() {
+  /**
+   * Releases references
+   * @public
+   */
+  dispose() {
     this.gl.deleteProgram( this.program );
   }
-} );
+}
 
+scenery.register( 'ShaderProgram', ShaderProgram );
 export default ShaderProgram;

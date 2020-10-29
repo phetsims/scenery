@@ -1,6 +1,5 @@
 // Copyright 2013-2020, University of Colorado Boulder
 
-
 /**
  * Points to a specific node (with a trail), and whether it is conceptually before or after the node.
  *
@@ -13,33 +12,46 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 import Trail from './Trail.js';
 
-/*
- * isBefore: whether this points to before the node (and its children) have been rendered, or after
- */
-function TrailPointer( trail, isBefore ) {
-  assert && assert( trail instanceof Trail, 'trail is not a trail' );
-  this.trail = trail;
-  this.setBefore( isBefore );
-}
+class TrailPointer {
+  /**
+   * @param {Trail} trail
+   * @param {boolean} isBefore - whether this points to before the node (and its children) have been rendered, or after
+   */
+  constructor( trail, isBefore ) {
+    assert && assert( trail instanceof Trail, 'trail is not a trail' );
+    this.trail = trail;
+    this.setBefore( isBefore );
+  }
 
-scenery.register( 'TrailPointer', TrailPointer );
-
-inherit( Object, TrailPointer, {
-  copy: function() {
+  /**
+   * @public
+   *
+   * @returns {TrailPointer}
+   */
+  copy() {
     return new TrailPointer( this.trail.copy(), this.isBefore );
-  },
+  }
 
-  setBefore: function( isBefore ) {
+  /**
+   * @public
+   *
+   * @param {boolean} isBefore
+   */
+  setBefore( isBefore ) {
     this.isBefore = isBefore;
     this.isAfter = !isBefore;
-  },
+  }
 
-  // return the equivalent pointer that swaps before and after (may return null if it doesn't exist)
-  getRenderSwappedPointer: function() {
+  /**
+   * Return the equivalent pointer that swaps before and after (may return null if it doesn't exist)
+   * @public
+   *
+   * @returns {TrailPointer}
+   */
+  getRenderSwappedPointer() {
     const newTrail = this.isBefore ? this.trail.previous() : this.trail.next();
 
     if ( newTrail === null ) {
@@ -48,21 +60,35 @@ inherit( Object, TrailPointer, {
     else {
       return new TrailPointer( newTrail, !this.isBefore );
     }
-  },
+  }
 
-  getRenderBeforePointer: function() {
+  /**
+   * @public
+   *
+   * @returns {TrailPointer}
+   */
+  getRenderBeforePointer() {
     return this.isBefore ? this : this.getRenderSwappedPointer();
-  },
+  }
 
-  getRenderAfterPointer: function() {
+  /**
+   * @public
+   *
+   * @returns {TrailPointer}
+   */
+  getRenderAfterPointer() {
     return this.isAfter ? this : this.getRenderSwappedPointer();
-  },
+  }
 
   /*
    * In the render order, will return 0 if the pointers are equivalent, -1 if this pointer is before the
    * other pointer, and 1 if this pointer is after the other pointer.
+   * @public
+   *
+   * @param {TrailPointer} other
+   * @returns {number}
    */
-  compareRender: function( other ) {
+  compareRender( other ) {
     assert && assert( other !== null );
 
     const a = this.getRenderBeforePointer();
@@ -81,14 +107,18 @@ inherit( Object, TrailPointer, {
         return a === null ? 1 : -1;
       }
     }
-  },
+  }
 
   /*
    * Like compareRender, but for the nested (depth-first) order
+   * @public
    *
    * TODO: optimization?
+   *
+   * @param {TrailPointer} other
+   * @returns {number}
    */
-  compareNested: function( other ) {
+  compareNested( other ) {
     assert && assert( other );
 
     const comparison = this.trail.compare( other.trail );
@@ -115,24 +145,48 @@ inherit( Object, TrailPointer, {
         return comparison;
       }
     }
-  },
+  }
 
-  equalsRender: function( other ) {
+  /**
+   * @public
+   *
+   * @param {TrailPointer} other
+   * @returns {boolean}
+   */
+  equalsRender( other ) {
     return this.compareRender( other ) === 0;
-  },
+  }
 
-  equalsNested: function( other ) {
+  /**
+   * @public
+   *
+   * @param {TrailPointer} other
+   * @returns {boolean}
+   */
+  equalsNested( other ) {
     return this.compareNested( other ) === 0;
-  },
+  }
 
-  // will return false if this pointer has gone off of the beginning or end of the tree (will be marked with isAfter or isBefore though)
-  hasTrail: function() {
+  /**
+   * Will return false if this pointer has gone off of the beginning or end of the tree (will be marked with isAfter or
+   * isBefore though)
+   * @public
+   *
+   * @returns {boolean}
+   */
+  hasTrail() {
     return !!this.trail;
-  },
+  }
 
-  // TODO: refactor with "Side"-like handling
-  // moves this pointer forwards one step in the nested order
-  nestedForwards: function() {
+  /**
+   * Moves this pointer forwards one step in the nested order
+   * @public
+   *
+   * TODO: refactor with "Side"-like handling
+   *
+   * @returns {TrailPointer} - This, for chaining
+   */
+  nestedForwards() {
     if ( this.isBefore ) {
       if ( this.trail.lastNode()._children.length > 0 ) {
         // stay as before, just walk to the first child
@@ -165,10 +219,15 @@ inherit( Object, TrailPointer, {
       }
     }
     return this;
-  },
+  }
 
-  // moves this pointer backwards one step in the nested order
-  nestedBackwards: function() {
+  /**
+   * Moves this pointer backwards one step in the nested order
+   * @public
+   *
+   * @returns {TrailPointer} - This, for chaining
+   */
+  nestedBackwards() {
     if ( this.isBefore ) {
       if ( this.trail.indices.length === 0 ) {
         // jumping off the front
@@ -202,17 +261,29 @@ inherit( Object, TrailPointer, {
       }
     }
     return this;
-  },
+  }
 
-  // treats the pointer as render-ordered (includes the start pointer 'before' if applicable, excludes the end pointer 'before' if applicable
-  eachNodeBetween: function( other, callback ) {
-    this.eachTrailBetween( other, function( trail ) {
-      return callback( trail.lastNode() );
-    } );
-  },
+  /**
+   * Treats the pointer as render-ordered (includes the start pointer 'before' if applicable, excludes the end pointer
+   * 'before' if applicable
+   * @public
+   *
+   * @param {TrailPointer} other
+   * @param {function(Node)} callback
+   */
+  eachNodeBetween( other, callback ) {
+    this.eachTrailBetween( other, trail => callback( trail.lastNode() ) );
+  }
 
-  // treats the pointer as render-ordered (includes the start pointer 'before' if applicable, excludes the end pointer 'before' if applicable
-  eachTrailBetween: function( other, callback ) {
+  /**
+   * Treats the pointer as render-ordered (includes the start pointer 'before' if applicable, excludes the end pointer
+   * 'before' if applicable
+   * @public
+   *
+   * @param {TrailPointer} other
+   * @param {function(Node)} callback
+   */
+  eachTrailBetween( other, callback ) {
     // this should trigger on all pointers that have the 'before' flag, except a pointer equal to 'other'.
 
     // since we exclude endpoints in the depthFirstUntil call, we need to fire this off first
@@ -220,22 +291,27 @@ inherit( Object, TrailPointer, {
       callback( this.trail );
     }
 
-    this.depthFirstUntil( other, function( pointer ) {
+    this.depthFirstUntil( other, pointer => {
       if ( pointer.isBefore ) {
         return callback( pointer.trail );
       }
     }, true ); // exclude the endpoints so we can ignore the ending 'before' case
-  },
+  }
 
-  /*
+  /**
    * Recursively (depth-first) iterates over all pointers between this pointer and 'other', calling
    * callback( pointer ) for each pointer. If excludeEndpoints is truthy, the callback will not be
    * called if pointer is equivalent to this pointer or 'other'.
+   * @public
    *
    * If the callback returns a truthy value, the subtree for the current pointer will be skipped
    * (applies only to before-pointers)
+   *
+   * @param {TrailPointer} other
+   * @param {function(TrailPointer)} callback
+   * @param {boolean} excludeEndpoints
    */
-  depthFirstUntil: function( other, callback, excludeEndpoints ) {
+  depthFirstUntil( other, callback, excludeEndpoints ) {
     // make sure this pointer is before the other, but allow start === end if we are not excluding endpoints
     assert && assert( this.compareNested( other ) <= ( excludeEndpoints ? -1 : 0 ), 'TrailPointer.depthFirstUntil pointers out of order, possibly in both meanings of the phrase!' );
     assert && assert( this.trail.rootNode() === other.trail.rootNode(), 'TrailPointer.depthFirstUntil takes pointers with the same root' );
@@ -283,39 +359,55 @@ inherit( Object, TrailPointer, {
     if ( !excludeEndpoints ) {
       callback( pointer );
     }
-  },
+  }
 
-  toString: function() {
+  /**
+   * Returns a string form of this object
+   * @public
+   *
+   * @returns {string}
+   */
+  toString() {
     return '[' + ( this.isBefore ? 'before' : 'after' ) + ' ' + this.trail.toString().slice( 1 );
   }
-} );
 
-// same as new TrailPointer( trailA, isBeforeA ).compareNested( new TrailPointer( trailB, isBeforeB ) )
-TrailPointer.compareNested = function( trailA, isBeforeA, trailB, isBeforeB ) {
-  const comparison = trailA.compare( trailB );
+  /**
+   * Same as new TrailPointer( trailA, isBeforeA ).compareNested( new TrailPointer( trailB, isBeforeB ) )
+   * @public
+   *
+   * @param {Trail} trailA
+   * @param {boolean} isBeforeA
+   * @param {Trail} trailB
+   * @param {boolean} isBeforeB
+   * @returns {number}
+   */
+  static compareNested( trailA, isBeforeA, trailB, isBeforeB ) {
+    const comparison = trailA.compare( trailB );
 
-  if ( comparison === 0 ) {
-    // if trails are equal, just compare before/after
-    if ( isBeforeA === isBeforeB ) {
-      return 0;
+    if ( comparison === 0 ) {
+      // if trails are equal, just compare before/after
+      if ( isBeforeA === isBeforeB ) {
+        return 0;
+      }
+      else {
+        return isBeforeA ? -1 : 1;
+      }
     }
     else {
-      return isBeforeA ? -1 : 1;
+      // if one is an extension of the other, the shorter isBefore flag determines the order completely
+      if ( trailA.isExtensionOf( trailB ) ) {
+        return isBeforeB ? 1 : -1;
+      }
+      else if ( trailB.isExtensionOf( trailA ) ) {
+        return isBeforeA ? -1 : 1;
+      }
+      else {
+        // neither is a subtrail of the other, so a straight trail comparison should give the answer
+        return comparison;
+      }
     }
   }
-  else {
-    // if one is an extension of the other, the shorter isBefore flag determines the order completely
-    if ( trailA.isExtensionOf( trailB ) ) {
-      return isBeforeB ? 1 : -1;
-    }
-    else if ( trailB.isExtensionOf( trailA ) ) {
-      return isBeforeA ? -1 : 1;
-    }
-    else {
-      // neither is a subtrail of the other, so a straight trail comparison should give the answer
-      return comparison;
-    }
-  }
-};
+}
 
+scenery.register( 'TrailPointer', TrailPointer );
 export default TrailPointer;

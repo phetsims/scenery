@@ -10,65 +10,57 @@
  */
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import scenery from '../scenery.js';
 
-/**
- * Creates a transform-tracking object, where it can send out updates on transform changes, and also efficiently
- * compute the transform.
- * @constructor
- * @public
- *
- * @param {Trail} trail
- * @param {Object} [options]
- */
-function TransformTracker( trail, options ) {
-  const self = this;
+class TransformTracker {
+  /**
+   * Creates a transform-tracking object, where it can send out updates on transform changes, and also efficiently
+   * compute the transform.
+   *
+   * @param {Trail} trail
+   * @param {Object} [options]
+   */
+  constructor( trail, options ) {
 
-  options = merge( {
-    isStatic: false // {boolean} - Whether the bounds listeners should be added with on() or onStatic().
-  }, options );
-  this._isStatic = options.isStatic;
+    options = merge( {
+      isStatic: false // {boolean} - Whether the bounds listeners should be added with on() or onStatic().
+    }, options );
+    this._isStatic = options.isStatic;
 
-  // @public {Trail}
-  this.trail = trail;
+    // @public {Trail}
+    this.trail = trail;
 
-  // @private {Array.<Matrix3>|null}
-  // this._matrices[ i ] will be equal to: trail.nodes[ 1 ].matrix * ... * trail.nodes[ i + 1 ].matrix
-  //
-  this._matrices = null; // Will be initialized on first need.
+    // @private {Array.<Matrix3>|null}
+    // this._matrices[ i ] will be equal to: trail.nodes[ 1 ].matrix * ... * trail.nodes[ i + 1 ].matrix
+    //
+    this._matrices = null; // Will be initialized on first need.
 
-  // @private {number} - this._matrices[ i ] where i >= this._dirtyIndex will need to be recomputed
-  this._dirtyIndex = 0;
+    // @private {number} - this._matrices[ i ] where i >= this._dirtyIndex will need to be recomputed
+    this._dirtyIndex = 0;
 
-  // @private {Array.<Function>} - Listeners added by client, will be called on transform changes.
-  this._listeners = [];
+    // @private {Array.<Function>} - Listeners added by client, will be called on transform changes.
+    this._listeners = [];
 
-  // Hook up listeners to each Node in the trail, so we are notified of changes. Will be removed on disposal.
-  this._nodeTransformListeners = [];
-  for ( let j = 1; j < this.trail.length; j++ ) {
-    // Wrapping with closure to prevent changes
-    const nodeTransformListener = ( function( index ) {
-      return function() {
-        self.onTransformChange( index );
-      };
-    } )( j - 1 );
+    // Hook up listeners to each Node in the trail, so we are notified of changes. Will be removed on disposal.
+    this._nodeTransformListeners = [];
+    for ( let j = 1; j < this.trail.length; j++ ) {
+      // Wrapping with closure to prevent changes
+      const nodeTransformListener = ( index => () => {
+          this.onTransformChange( index );
+        } )( j - 1 );
 
-    this._nodeTransformListeners.push( nodeTransformListener );
+      this._nodeTransformListeners.push( nodeTransformListener );
 
-    trail.nodes[ j ].transformEmitter.addListener( nodeTransformListener );
+      trail.nodes[ j ].transformEmitter.addListener( nodeTransformListener );
+    }
   }
-}
 
-scenery.register( 'TransformTracker', TransformTracker );
-
-inherit( Object, TransformTracker, {
   /**
    * Gets rid of all external references and listeners. This object is inoperable afterwards.
    * @public
    */
-  dispose: function() {
+  dispose() {
     for ( let j = 1; j < this.trail.length; j++ ) {
       const nodeTransformListener = this._nodeTransformListeners[ j - 1 ];
 
@@ -76,7 +68,7 @@ inherit( Object, TransformTracker, {
         this.trail.nodes[ j ].transformEmitter.removeListener( nodeTransformListener );
       }
     }
-  },
+  }
 
   /**
    * Adds a listener function that will be synchronously called whenever the transform for this Trail changes.
@@ -84,11 +76,11 @@ inherit( Object, TransformTracker, {
    *
    * @param {Function} listener - Listener will be called with no arguments.
    */
-  addListener: function( listener ) {
+  addListener( listener ) {
     assert && assert( typeof listener === 'function' );
 
     this._listeners.push( listener );
-  },
+  }
 
   /**
    * Removes a listener that was previously added with addListener().
@@ -96,20 +88,20 @@ inherit( Object, TransformTracker, {
    *
    * @param {Function} listener
    */
-  removeListener: function( listener ) {
+  removeListener( listener ) {
     assert && assert( typeof listener === 'function' );
 
     const index = _.indexOf( this._listeners, listener );
     assert && assert( index >= 0, 'TransformTracker listener not found' );
 
     this._listeners.splice( index, 1 );
-  },
+  }
 
   /**
    * Notifies listeners of a transform change.
    * @private
    */
-  notifyListeners: function() {
+  notifyListeners() {
     let listeners = this._listeners;
 
     if ( !this._isStatic ) {
@@ -120,7 +112,7 @@ inherit( Object, TransformTracker, {
     for ( let i = 0; i < length; i++ ) {
       listeners[ i ]();
     }
-  },
+  }
 
   /**
    * Called when one of the nodes' transforms is changed.
@@ -128,10 +120,10 @@ inherit( Object, TransformTracker, {
    *
    * @param {number} matrixIndex - The index into our matrices array, e.g. this._matrices[ matrixIndex ].
    */
-  onTransformChange: function( matrixIndex ) {
+  onTransformChange( matrixIndex ) {
     this._dirtyIndex = Math.min( this._dirtyIndex, matrixIndex );
     this.notifyListeners();
-  },
+  }
 
   /**
    * Returns the local-to-global transformation matrix for the Trail, which transforms its leaf node's local
@@ -142,7 +134,7 @@ inherit( Object, TransformTracker, {
    *
    * @returns {Matrix3}
    */
-  getMatrix: function() {
+  getMatrix() {
     if ( this._matrices === null ) {
       this._matrices = [];
 
@@ -176,8 +168,9 @@ inherit( Object, TransformTracker, {
 
     // Return the last matrix, which contains our composite transformation.
     return this._matrices[ numMatrices - 1 ];
-  },
+  }
   get matrix() { return this.getMatrix(); }
-} );
+}
 
+scenery.register( 'TransformTracker', TransformTracker );
 export default TransformTracker;
