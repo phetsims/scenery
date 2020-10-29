@@ -12,7 +12,7 @@ import Color from './Color.js';
 import Gradient from './Gradient.js';
 import Paint from './Paint.js';
 
-var PaintDef = {
+const PaintDef = {
   /**
    * Returns whether the parameter is considered to be a PaintDef.
    * @public
@@ -20,7 +20,7 @@ var PaintDef = {
    * @param {*} paint
    * @returns {boolean}
    */
-  isPaintDef: function( paint ) {
+  isPaintDef( paint ) {
     return paint === null ||
            typeof paint === 'string' ||
            paint instanceof Color ||
@@ -39,7 +39,7 @@ var PaintDef = {
    * @param {PaintDef} paint
    * @returns {Color}
    */
-  toColor: function( paint ) {
+  toColor( paint ) {
     if ( typeof paint === 'string' ) {
       return new Color( paint );
     }
@@ -53,7 +53,7 @@ var PaintDef = {
       // Average the stops
       let color = Color.TRANSPARENT;
       const quantity = 0;
-      paint.stops.forEach( function( stop ) {
+      paint.stops.forEach( stop => {
         color = color.blend( PaintDef.toColor( stop.color ), 1 / ( quantity + 1 ) );
       } );
       return color;

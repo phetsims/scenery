@@ -19,7 +19,7 @@ const ColorDef = {
    * @param {*} color
    * @returns {boolean}
    */
-  isColorDef: function( color ) {
+  isColorDef( color ) {
     return color === null ||
            typeof color === 'string' ||
            color instanceof Color ||

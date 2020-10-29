@@ -9,31 +9,24 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../phet-core/js/inherit.js';
 import SVGPattern from '../display/SVGPattern.js';
 import scenery from '../scenery.js';
 import Paint from './Paint.js';
 
-/**
- * @constructor
- * @extends Paint
- *
- * @param {HTMLImageElement} image - The image to use as a repeated pattern.
- */
-function Pattern( image ) {
-  Paint.call( this );
+class Pattern extends Paint {
+  /**
+   * @param {HTMLImageElement} image - The image to use as a repeated pattern.
+   */
+  constructor( image ) {
+    super();
 
-  this.image = image;
+    // @public {HTMLImageElement}
+    this.image = image;
 
-  // use the global scratch canvas instead of creating a new Canvas
-  this.canvasPattern = scenery.scratchContext.createPattern( image, 'repeat' );
-}
+    // @public {CanvasPattern} - use the global scratch canvas instead of creating a new Canvas
+    this.canvasPattern = scenery.scratchContext.createPattern( image, 'repeat' );
+  }
 
-scenery.register( 'Pattern', Pattern );
-
-inherit( Paint, Pattern, {
-  // @public {boolean}
-  isPattern: true,
 
   /**
    * Returns an object that can be passed to a Canvas context's fillStyle or strokeStyle.
@@ -42,9 +35,9 @@ inherit( Paint, Pattern, {
    *
    * @returns {*}
    */
-  getCanvasStyle: function() {
+  getCanvasStyle() {
     return this.canvasPattern;
-  },
+  }
 
   /**
    * Creates an SVG paint object for creating/updating the SVG equivalent definition.
@@ -53,13 +46,23 @@ inherit( Paint, Pattern, {
    * @param {SVGBlock} svgBlock
    * @returns {SVGGradient|SVGPattern}
    */
-  createSVGPaint: function( svgBlock ) {
+  createSVGPaint( svgBlock ) {
     return SVGPattern.createFromPool( this );
-  },
+  }
 
-  toString: function() {
+  /**
+   * Returns a string form of this object
+   * @public
+   *
+   * @returns {string}
+   */
+  toString() {
     return 'new scenery.Pattern( $( \'<img src="' + this.image.src + '"/>\' )[0] )';
   }
-} );
+}
 
+// @public {boolean}
+Pattern.prototype.isPattern = true;
+
+scenery.register( 'Pattern', Pattern );
 export default Pattern;

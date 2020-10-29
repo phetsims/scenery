@@ -1,49 +1,53 @@
 // Copyright 2013-2020, University of Colorado Boulder
 
-
 /*
  * An HTMLImageElement that is backed by a scene. Call update() on this SceneImage to update the image from the scene.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 
-// NOTE: ideally the scene shouldn't use SVG, since rendering that to a canvas takes a callback (and usually requires canvg)
-function SceneImage( scene ) {
-  this.scene = scene;
+class SceneImage {
+  /**
+   * NOTE: ideally the scene shouldn't use SVG, since rendering that to a canvas takes a callback (and usually requires canvg)
+   *
+   * @param {Node} scene
+   */
+  constructor( scene ) {
+    this.scene = scene;
 
-  // we write the scene to a canvas, get its data URL, and pass that to the image.
-  this.canvas = document.createElement( 'canvas' );
-  this.context = this.canvas.getContext( '2d' );
+    // we write the scene to a canvas, get its data URL, and pass that to the image.
+    this.canvas = document.createElement( 'canvas' );
+    this.context = this.canvas.getContext( '2d' );
 
-  this.img = document.createElement( 'img' );
-  this.update();
-}
+    this.img = document.createElement( 'img' );
+    this.update();
+  }
 
-scenery.register( 'SceneImage', SceneImage );
-
-inherit( Object, SceneImage, {
-  // NOTE: calling this before the previous update() completes may cause the previous onComplete to not be executed
-  update: function( onComplete ) {
-    const self = this;
-
+  /**
+   * NOTE: calling this before the previous update() completes may cause the previous onComplete to not be executed
+   * @public
+   *
+   * @param {function} onComplete
+   */
+  update( onComplete ) {
     this.scene.updateScene();
 
     this.canvas.width = this.scene.getSceneWidth();
     this.canvas.height = this.scene.getSceneHeight();
 
-    this.scene.renderToCanvas( this.canvas, this.context, function() {
-      const url = self.toDataURL();
+    this.scene.renderToCanvas( this.canvas, this.context, () => {
+      const url = this.toDataURL();
 
-      self.img.onload = function() {
+      this.img.onload = () => {
         onComplete();
-        delete self.img.onload;
+        delete this.img.onload;
       };
-      self.img.src = url;
+      this.img.src = url;
     } );
   }
-} );
+}
 
+scenery.register( 'SceneImage', SceneImage );
 export default SceneImage;

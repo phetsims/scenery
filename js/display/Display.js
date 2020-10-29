@@ -2102,7 +2102,7 @@ class Display {
    *
    * @returns {Focus|null}
    */
-  static get focus() {
+  static get focus() { // eslint-disable-line bad-sim-text
     return this.focusProperty.value;
   }
 
@@ -2121,7 +2121,7 @@ class Display {
     }
     return focusedNode;
   }
-  static get focusedNode() { return this.getFocusedNode(); }
+  static get focusedNode() { return this.getFocusedNode(); } // eslint-disable-line bad-sim-text
 
   /**
    * Returns true when NO nodes in the subtree are disposed.
