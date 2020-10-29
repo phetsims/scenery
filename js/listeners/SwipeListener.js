@@ -25,7 +25,7 @@ import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
 
 // constants
-const PRESS_AND_HOLD_INTERVAL = 0.75; // in seconds, amount of time to initiate a press and hold gesture
+const PRESS_AND_HOLD_INTERVAL = 0.5; // in seconds, amount of time to initiate a press and hold gesture
 const DOUBLE_TAP_INTERVAL = 0.6; // in seconds, max time between down events that would indicate a click gesture
 
 class SwipeListener {
