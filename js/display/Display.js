@@ -57,8 +57,6 @@ import stepTimer from '../../../axon/js/stepTimer.js';
 import Dimension2 from '../../../dot/js/Dimension2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import escapeHTML from '../../../phet-core/js/escapeHTML.js';
-import extend from '../../../phet-core/js/extend.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
 import Tandem from '../../../tandem/js/Tandem.js';
@@ -90,301 +88,301 @@ import Instance from './Instance.js';
 import Renderer from './Renderer.js';
 import DOMDrawable from './drawables/DOMDrawable.js';
 
-/**
- * Constructs a Display that will show the rootNode and its subtree in a visual state. Default options provided below
- *
- * @param {Node} rootNode - Displays this node and all of its descendants
- * @param {Object} [options] - Valid parameters in the parameter object:
- * {
- *   allowSceneOverflow: false,           // Usually anything displayed outside of this $main (DOM/CSS3 transformed SVG) is hidden with CSS overflow
- *   allowCSSHacks: true,                 // Applies styling that prevents mobile browser graphical issues
- *   width: <current main width>,         // Override the main container's width
- *   height: <current main height>,       // Override the main container's height
- *   preserveDrawingBuffer: false,        // Whether WebGL Canvases should preserve their drawing buffer.
- *                                        //   WARNING!: This can significantly reduce performance if set to true.
- *   allowWebGL: true,                    // Boolean flag that indicates whether scenery is allowed to use WebGL for rendering
- *                                        // Makes it possible to disable WebGL for ease of testing on non-WebGL platforms, see #289
- *   accessibility: true                  // Whether accessibility enhancements is enabled
- *   interactive: true                    // Whether mouse/touch/keyboard inputs are enabled (if input has been added). Simulation will still step.
- * @constructor
- */
-function Display( rootNode, options ) {
-  assert && assert( rootNode, 'rootNode is a required parameter' );
+class Display {
+  /**
+   * Constructs a Display that will show the rootNode and its subtree in a visual state. Default options provided below
+   *
+   * @param {Node} rootNode - Displays this node and all of its descendants
+   * @param {Object} [options] - Valid parameters in the parameter object:
+   * {
+   *   allowSceneOverflow: false,           // Usually anything displayed outside of this $main (DOM/CSS3 transformed SVG) is hidden with CSS overflow
+   *   allowCSSHacks: true,                 // Applies styling that prevents mobile browser graphical issues
+   *   width: <current main width>,         // Override the main container's width
+   *   height: <current main height>,       // Override the main container's height
+   *   preserveDrawingBuffer: false,        // Whether WebGL Canvases should preserve their drawing buffer.
+   *                                        //   WARNING!: This can significantly reduce performance if set to true.
+   *   allowWebGL: true,                    // Boolean flag that indicates whether scenery is allowed to use WebGL for rendering
+   *                                        // Makes it possible to disable WebGL for ease of testing on non-WebGL platforms, see #289
+   *   accessibility: true                  // Whether accessibility enhancements is enabled
+   *   interactive: true                    // Whether mouse/touch/keyboard inputs are enabled (if input has been added). Simulation will still step.
+   */
+  constructor( rootNode, options ) {
+    assert && assert( rootNode, 'rootNode is a required parameter' );
 
-  //OHTWO TODO: hybrid batching (option to batch until an event like 'up' that might be needed for security issues)
+    //OHTWO TODO: hybrid batching (option to batch until an event like 'up' that might be needed for security issues)
 
-  options = merge( {
-    // {number} - Initial display width
-    width: ( options && options.container && options.container.clientWidth ) || 640,
+    options = merge( {
+      // {number} - Initial display width
+      width: ( options && options.container && options.container.clientWidth ) || 640,
 
-    // {number} - Initial display height
-    height: ( options && options.container && options.container.clientHeight ) || 480,
+      // {number} - Initial display height
+      height: ( options && options.container && options.container.clientHeight ) || 480,
 
-    // {boolean} - Applies CSS styles to the root DOM element that make it amenable to interactive content
-    allowCSSHacks: true,
+      // {boolean} - Applies CSS styles to the root DOM element that make it amenable to interactive content
+      allowCSSHacks: true,
 
-    // {boolean} - Usually anything displayed outside of our dom element is hidden with CSS overflow
-    allowSceneOverflow: false,
+      // {boolean} - Usually anything displayed outside of our dom element is hidden with CSS overflow
+      allowSceneOverflow: false,
 
-    // {string} - What cursor is used when no other cursor is specified
-    defaultCursor: 'default',
+      // {string} - What cursor is used when no other cursor is specified
+      defaultCursor: 'default',
 
-    // {ColorDef} - Intial background color
-    backgroundColor: null,
+      // {ColorDef} - Intial background color
+      backgroundColor: null,
 
-    // {boolean} - Whether WebGL will preserve the drawing buffer
-    preserveDrawingBuffer: false,
+      // {boolean} - Whether WebGL will preserve the drawing buffer
+      preserveDrawingBuffer: false,
 
-    // {boolean} - Whether WebGL is enabled at all for drawables in this Display
-    allowWebGL: true,
+      // {boolean} - Whether WebGL is enabled at all for drawables in this Display
+      allowWebGL: true,
 
-    // {boolean} - Enables accessibility features
-    accessibility: true,
+      // {boolean} - Enables accessibility features
+      accessibility: true,
 
-    // {boolean} - Whether mouse/touch/keyboard inputs are enabled (if input has been added).
-    interactive: true,
+      // {boolean} - Whether mouse/touch/keyboard inputs are enabled (if input has been added).
+      interactive: true,
 
-    // {boolean} - If true, input event listeners will be attached to the Display's DOM element instead of the window.
-    // Normally, attaching listeners to the window is preferred (it will see mouse moves/ups outside of the browser
-    // window, allowing correct button tracking), however there may be instances where a global listener is not
-    // preferred.
-    listenToOnlyElement: false,
+      // {boolean} - If true, input event listeners will be attached to the Display's DOM element instead of the window.
+      // Normally, attaching listeners to the window is preferred (it will see mouse moves/ups outside of the browser
+      // window, allowing correct button tracking), however there may be instances where a global listener is not
+      // preferred.
+      listenToOnlyElement: false,
 
-    // {boolean} - Forwarded to Input: If true, most event types will be batched until otherwise triggered.
-    batchDOMEvents: false,
+      // {boolean} - Forwarded to Input: If true, most event types will be batched until otherwise triggered.
+      batchDOMEvents: false,
 
-    // {boolean} - If true, the input event location (based on the top-left of the browser tab's viewport, with no
-    // scaling applied) will be used. Usually, this is not a safe assumption, so when false the location of the
-    // display's DOM element will be used to get the correct event location. There is a slight performance hit to
-    // doing so, thus this option is provided if the top-left location can be guaranteed.
-    // NOTE: Rotation of the Display's DOM element (e.g. with a CSS transform) will result in an incorrect event
-    //       mapping, as getBoundingClientRect() can't work with this. getBoxQuads() should fix this when browser
-    //       support is available.
-    assumeFullWindow: false,
+      // {boolean} - If true, the input event location (based on the top-left of the browser tab's viewport, with no
+      // scaling applied) will be used. Usually, this is not a safe assumption, so when false the location of the
+      // display's DOM element will be used to get the correct event location. There is a slight performance hit to
+      // doing so, thus this option is provided if the top-left location can be guaranteed.
+      // NOTE: Rotation of the Display's DOM element (e.g. with a CSS transform) will result in an incorrect event
+      //       mapping, as getBoundingClientRect() can't work with this. getBoxQuads() should fix this when browser
+      //       support is available.
+      assumeFullWindow: false,
 
-    // {boolean} - Whether Scenery will try to aggressively re-create WebGL Canvas/context instead of waiting for
-    // a context restored event. Sometimes context losses can occur without a restoration afterwards, but this can
-    // jump-start the process.
-    // See https://github.com/phetsims/scenery/issues/347.
-    aggressiveContextRecreation: true,
+      // {boolean} - Whether Scenery will try to aggressively re-create WebGL Canvas/context instead of waiting for
+      // a context restored event. Sometimes context losses can occur without a restoration afterwards, but this can
+      // jump-start the process.
+      // See https://github.com/phetsims/scenery/issues/347.
+      aggressiveContextRecreation: true,
 
-    // {boolean|null} - Whether the `passive` flag should be set when adding and removing DOM event listeners.
-    // See https://github.com/phetsims/scenery/issues/770 for more details.
-    // If it is true or false, that is the value of the passive flag that will be used. If it is null, the default
-    // behavior of the browser will be used.
-    //
-    // Safari doesn't support touch-action: none, so we NEED to not use passive events (which would not allow
-    // preventDefault to do anything, so drags actually can scroll the sim).
-    // Chrome also did the same "passive by default", but because we have `touch-action: none` in place, it doesn't
-    // affect us, and we can potentially get performance improvements by allowing passive events.
-    // See https://github.com/phetsims/scenery/issues/770 for more information.
-    passiveEvents: platform.safari ? false : null,
+      // {boolean|null} - Whether the `passive` flag should be set when adding and removing DOM event listeners.
+      // See https://github.com/phetsims/scenery/issues/770 for more details.
+      // If it is true or false, that is the value of the passive flag that will be used. If it is null, the default
+      // behavior of the browser will be used.
+      //
+      // Safari doesn't support touch-action: none, so we NEED to not use passive events (which would not allow
+      // preventDefault to do anything, so drags actually can scroll the sim).
+      // Chrome also did the same "passive by default", but because we have `touch-action: none` in place, it doesn't
+      // affect us, and we can potentially get performance improvements by allowing passive events.
+      // See https://github.com/phetsims/scenery/issues/770 for more information.
+      passiveEvents: platform.safari ? false : null,
 
-    // {boolean} - Whether, if no WebGL antialiasing is detected, the backing scale can be increased so as to
-    //             provide some antialiasing benefit. See https://github.com/phetsims/scenery/issues/859.
-    allowBackingScaleAntialiasing: true
-  }, options );
+      // {boolean} - Whether, if no WebGL antialiasing is detected, the backing scale can be increased so as to
+      //             provide some antialiasing benefit. See https://github.com/phetsims/scenery/issues/859.
+      allowBackingScaleAntialiasing: true
+    }, options );
 
-  // @public (scenery-internal) {boolean} - Whether accessibility is enabled for this particular display.
-  this._accessible = options.accessibility;
+    // @public (scenery-internal) {boolean} - Whether accessibility is enabled for this particular display.
+    this._accessible = options.accessibility;
 
-  // @public (scenery-internal) {boolean}
-  this._preserveDrawingBuffer = options.preserveDrawingBuffer;
+    // @public (scenery-internal) {boolean}
+    this._preserveDrawingBuffer = options.preserveDrawingBuffer;
 
-  // @private {boolean}
-  this._allowWebGL = options.allowWebGL;
-  this._allowCSSHacks = options.allowCSSHacks;
-  this._allowSceneOverflow = options.allowSceneOverflow;
+    // @private {boolean}
+    this._allowWebGL = options.allowWebGL;
+    this._allowCSSHacks = options.allowCSSHacks;
+    this._allowSceneOverflow = options.allowSceneOverflow;
 
-  // @private {string}
-  this._defaultCursor = options.defaultCursor;
+    // @private {string}
+    this._defaultCursor = options.defaultCursor;
 
-  // @public {Property.<Dimension2>} The (integral, > 0) dimensions of the Display's DOM element (only updates the DOM
-  // element on updateDisplay())
-  this.sizeProperty = new TinyProperty( new Dimension2( options.width, options.height ), {
-    useDeepEquality: true
-  } );
+    // @public {Property.<Dimension2>} The (integral, > 0) dimensions of the Display's DOM element (only updates the DOM
+    // element on updateDisplay())
+    this.sizeProperty = new TinyProperty( new Dimension2( options.width, options.height ), {
+      useDeepEquality: true
+    } );
 
-  // @private {Dimension2} - used to check against new size to see what we need to change
-  this._currentSize = new Dimension2( -1, -1 );
-
-  // @private {Node}
-  this._rootNode = rootNode;
-  this._rootNode.addRootedDisplay( this );
-
-  // @private {BackboneDrawable|null} - to be filled in later
-  this._rootBackbone = null;
-
-  // @private {Element}
-  this._domElement = options.container ?
-                     BackboneDrawable.repurposeBackboneContainer( options.container ) :
-                     BackboneDrawable.createDivBackbone();
-
-  // @public (scenery-internal) {Object.<nodeID:number,Instance>} - map from Node ID to Instance, for fast lookup
-  this._sharedCanvasInstances = {};
-
-  // @private {Instance|null} - will be filled with the root Instance
-  this._baseInstance = null;
-
-  // @public (scenery-internal) {number} - We have a monotonically-increasing frame ID, generally for use with a pattern
-  // where we can mark objects with this to note that they are either up-to-date or need refreshing due to this
-  // particular frame (without having to clear that information after use). This is incremented every frame
-  this._frameId = 0;
-
-  // @private {Array.<Instance>}
-  this._dirtyTransformRoots = [];
-  this._dirtyTransformRootsWithoutPass = [];
-
-  // @private {Array.<Instance>}
-  this._instanceRootsToDispose = [];
-
-  // @private {Array.<*>} - At the end of Display.update, reduceReferences will be called on all of these. It's meant to
-  // catch various objects that would usually have update() called, but if they are invisible or otherwise not updated
-  // for performance, they may need to release references another way instead.
-  // See https://github.com/phetsims/energy-forms-and-changes/issues/356
-  this._reduceReferencesNeeded = [];
-
-  // @private {Array.<Drawable>}
-  this._drawablesToDispose = [];
-
-  // @private {Array.<Drawable>} - Block changes are handled by changing the "pending" block/backbone on drawables. We
-  // want to change them all after the main stitch process has completed, so we can guarantee that a single drawable is
-  // removed from its previous block before being added to a new one. This is taken care of in an updateDisplay pass
-  // after syncTree / stitching.
-  this._drawablesToChangeBlock = [];
-
-  // @private {Array.<Drawable>} - Drawables have two implicit linked-lists, "current" and "old". syncTree modifies the
-  // "current" linked-list information so it is up-to-date, but needs to use the "old" information also. We move
-  // updating the "current" => "old" linked-list information until after syncTree and stitching is complete, and is
-  // taken care of in an updateDisplay pass.
-  this._drawablesToUpdateLinks = [];
-
-  // @private {Array.<ChangeInterval>} - We store information on {ChangeInterval}s that records change interval
-  // information, that may contain references. We don't want to leave those references dangling after we don't need
-  // them, so they are recorded and cleaned in one of updateDisplay's phases.
-  this._changeIntervalsToDispose = [];
-
-  // @private {string|null}
-  this._lastCursor = null;
-  this._currentBackgroundCSS = null;
-
-  // @private {ColorDef}
-  this._backgroundColor = null;
-
-  // @private {number} - Used for shortcut animation frame functions
-  this._requestAnimationFrameID = 0;
-
-  // @public (phet-io,scenery) - Will be filled in with a scenery.Input if event handling is enabled
-  this._input = null;
-
-  // @private {Array.<Object>} - Listeners that will be called for every event.
-  this._inputListeners = [];
-
-  // @private {boolean} - Whether mouse/touch/keyboard inputs are enabled (if input has been added). Simulation will still step.
-  this._interactive = options.interactive;
-
-  // @private {boolean} - Passed through to Input
-  this._listenToOnlyElement = options.listenToOnlyElement;
-  this._batchDOMEvents = options.batchDOMEvents;
-  this._assumeFullWindow = options.assumeFullWindow;
-
-  // @private {boolean|null}
-  this._passiveEvents = options.passiveEvents;
-
-  // @public (scenery-internal) {boolean}
-  this._aggressiveContextRecreation = options.aggressiveContextRecreation;
-
-  // @public (scenery-internal) {boolean}
-  this._allowBackingScaleAntialiasing = options.allowBackingScaleAntialiasing;
-
-  // @private {Array.<*>} - Overlays currently being displayed.
-  // API expected:
-  //   .domElement
-  //   .update()
-  this._overlays = [];
-
-  // @private {PointerOverlay|null}
-  this._pointerOverlay = null;
-
-  // @private {PointerAreaOverlay|null}
-  this._pointerAreaOverlay = null;
-
-  // @private {HitAreaOverlay|null}
-  this._hitAreaOverlay = null;
-
-  // @private {CanvasNodeBoundsOverlay|null}
-  this._canvasAreaBoundsOverlay = null;
-
-  // @private {FittedBlockBoundsOverlay|null}
-  this._fittedBlockBoundsOverlay = null;
-
-  if ( assert ) {
-    // @private @assertion-only {boolean} - Whether we are running the paint phase of updateDisplay() for this Display.
-    this._isPainting = false;
-  }
-
-  this.applyCSSHacks();
-
-  this.setBackgroundColor( options.backgroundColor );
-
-  // @public {UtteranceQueue} - data structure for managing aria-live alerts the this Display instance
-  const ariaHerald = new AriaHerald();
-  this.utteranceQueue = new UtteranceQueue( ariaHerald, !this._accessible );
-
-  if ( this._accessible ) {
-
-    // make the PDOM invisible in the browser - it has some width and is shifted off screen so that AT can read the
-    // formatting tags, see https://github.com/phetsims/scenery/issues/730
-    // SceneryStyle.addRule( '.accessibility, .accessibility * { position: relative; left: -1000px; top: 0; width: 250px; height: 0; clip: rect(0,0,0,0); pointerEvents: none }' );
+    // @private {Dimension2} - used to check against new size to see what we need to change
+    this._currentSize = new Dimension2( -1, -1 );
 
     // @private {Node}
-    this._focusRootNode = new Node();
+    this._rootNode = rootNode;
+    this._rootNode.addRootedDisplay( this );
 
-    // @private {FocusOverlay}
-    this._focusOverlay = new FocusOverlay( this, this._focusRootNode );
-    this.addOverlay( this._focusOverlay );
+    // @private {BackboneDrawable|null} - to be filled in later
+    this._rootBackbone = null;
 
-    // @private {Array.<PDOMInstance>}
-    this._unsortedAccessibleInstances = [];
+    // @private {Element}
+    this._domElement = options.container ?
+                       BackboneDrawable.repurposeBackboneContainer( options.container ) :
+                       BackboneDrawable.createDivBackbone();
 
-    // @public {boolean} (scenery-internal) - During DOM operations where HTML elements are removed from and
-    // reinserted into the PDOM, event callbacks related to focus should be blocked as these are internal operations
-    // unrelated to application behavior user input, see https://github.com/phetsims/scenery/issues/925
-    this.blockFocusCallbacks = false;
+    // @public (scenery-internal) {Object.<nodeID:number,Instance>} - map from Node ID to Instance, for fast lookup
+    this._sharedCanvasInstances = {};
 
-    // @public (scenery-internal) {PDOMInstance}
-    this._rootAccessibleInstance = PDOMInstance.createFromPool( null, this, new Trail() );
-    sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
-      'Display root instance: ' + this._rootAccessibleInstance.toString() );
-    PDOMTree.rebuildInstanceTree( this._rootAccessibleInstance );
+    // @private {Instance|null} - will be filled with the root Instance
+    this._baseInstance = null;
 
-    // add the accessible DOM as a child of this DOM element
-    this._domElement.appendChild( this._rootAccessibleInstance.peer.primarySibling );
+    // @public (scenery-internal) {number} - We have a monotonically-increasing frame ID, generally for use with a pattern
+    // where we can mark objects with this to note that they are either up-to-date or need refreshing due to this
+    // particular frame (without having to clear that information after use). This is incremented every frame
+    this._frameId = 0;
 
-    const ariaLiveContainer = ariaHerald.ariaLiveContainer;
+    // @private {Array.<Instance>}
+    this._dirtyTransformRoots = [];
+    this._dirtyTransformRootsWithoutPass = [];
 
-    // add aria-live elements to the display
-    this._domElement.appendChild( ariaLiveContainer );
+    // @private {Array.<Instance>}
+    this._instanceRootsToDispose = [];
 
-    // set `user-select: none` on the aria-live container to prevent iOS text selection issue, see
-    // https://github.com/phetsims/scenery/issues/1006
-    ariaLiveContainer.style[ Features.userSelect ] = 'none';
+    // @private {Array.<*>} - At the end of Display.update, reduceReferences will be called on all of these. It's meant to
+    // catch various objects that would usually have update() called, but if they are invisible or otherwise not updated
+    // for performance, they may need to release references another way instead.
+    // See https://github.com/phetsims/energy-forms-and-changes/issues/356
+    this._reduceReferencesNeeded = [];
+
+    // @private {Array.<Drawable>}
+    this._drawablesToDispose = [];
+
+    // @private {Array.<Drawable>} - Block changes are handled by changing the "pending" block/backbone on drawables. We
+    // want to change them all after the main stitch process has completed, so we can guarantee that a single drawable is
+    // removed from its previous block before being added to a new one. This is taken care of in an updateDisplay pass
+    // after syncTree / stitching.
+    this._drawablesToChangeBlock = [];
+
+    // @private {Array.<Drawable>} - Drawables have two implicit linked-lists, "current" and "old". syncTree modifies the
+    // "current" linked-list information so it is up-to-date, but needs to use the "old" information also. We move
+    // updating the "current" => "old" linked-list information until after syncTree and stitching is complete, and is
+    // taken care of in an updateDisplay pass.
+    this._drawablesToUpdateLinks = [];
+
+    // @private {Array.<ChangeInterval>} - We store information on {ChangeInterval}s that records change interval
+    // information, that may contain references. We don't want to leave those references dangling after we don't need
+    // them, so they are recorded and cleaned in one of updateDisplay's phases.
+    this._changeIntervalsToDispose = [];
+
+    // @private {string|null}
+    this._lastCursor = null;
+    this._currentBackgroundCSS = null;
+
+    // @private {ColorDef}
+    this._backgroundColor = null;
+
+    // @private {number} - Used for shortcut animation frame functions
+    this._requestAnimationFrameID = 0;
+
+    // @public (phet-io,scenery) - Will be filled in with a scenery.Input if event handling is enabled
+    this._input = null;
+
+    // @private {Array.<Object>} - Listeners that will be called for every event.
+    this._inputListeners = [];
+
+    // @private {boolean} - Whether mouse/touch/keyboard inputs are enabled (if input has been added). Simulation will still step.
+    this._interactive = options.interactive;
+
+    // @private {boolean} - Passed through to Input
+    this._listenToOnlyElement = options.listenToOnlyElement;
+    this._batchDOMEvents = options.batchDOMEvents;
+    this._assumeFullWindow = options.assumeFullWindow;
+
+    // @private {boolean|null}
+    this._passiveEvents = options.passiveEvents;
+
+    // @public (scenery-internal) {boolean}
+    this._aggressiveContextRecreation = options.aggressiveContextRecreation;
+
+    // @public (scenery-internal) {boolean}
+    this._allowBackingScaleAntialiasing = options.allowBackingScaleAntialiasing;
+
+    // @private {Array.<*>} - Overlays currently being displayed.
+    // API expected:
+    //   .domElement
+    //   .update()
+    this._overlays = [];
+
+    // @private {PointerOverlay|null}
+    this._pointerOverlay = null;
+
+    // @private {PointerAreaOverlay|null}
+    this._pointerAreaOverlay = null;
+
+    // @private {HitAreaOverlay|null}
+    this._hitAreaOverlay = null;
+
+    // @private {CanvasNodeBoundsOverlay|null}
+    this._canvasAreaBoundsOverlay = null;
+
+    // @private {FittedBlockBoundsOverlay|null}
+    this._fittedBlockBoundsOverlay = null;
+
+    if ( assert ) {
+      // @private @assertion-only {boolean} - Whether we are running the paint phase of updateDisplay() for this Display.
+      this._isPainting = false;
+    }
+
+    this.applyCSSHacks();
+
+    this.setBackgroundColor( options.backgroundColor );
+
+    // @public {UtteranceQueue} - data structure for managing aria-live alerts the this Display instance
+    const ariaHerald = new AriaHerald();
+    this.utteranceQueue = new UtteranceQueue( ariaHerald, !this._accessible );
+
+    if ( this._accessible ) {
+
+      // make the PDOM invisible in the browser - it has some width and is shifted off screen so that AT can read the
+      // formatting tags, see https://github.com/phetsims/scenery/issues/730
+      // SceneryStyle.addRule( '.accessibility, .accessibility * { position: relative; left: -1000px; top: 0; width: 250px; height: 0; clip: rect(0,0,0,0); pointerEvents: none }' );
+
+      // @private {Node}
+      this._focusRootNode = new Node();
+
+      // @private {FocusOverlay}
+      this._focusOverlay = new FocusOverlay( this, this._focusRootNode );
+      this.addOverlay( this._focusOverlay );
+
+      // @public {boolean} (scenery-internal) - During DOM operations where HTML elements are removed from and
+      // reinserted into the PDOM, event callbacks related to focus should be blocked as these are internal operations
+      // unrelated to application behavior user input, see https://github.com/phetsims/scenery/issues/925
+      this.blockFocusCallbacks = false;
+
+      // @public (scenery-internal) {PDOMInstance}
+      this._rootAccessibleInstance = PDOMInstance.createFromPool( null, this, new Trail() );
+      sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
+        'Display root instance: ' + this._rootAccessibleInstance.toString() );
+      PDOMTree.rebuildInstanceTree( this._rootAccessibleInstance );
+
+      // add the accessible DOM as a child of this DOM element
+      this._domElement.appendChild( this._rootAccessibleInstance.peer.primarySibling );
+
+      const ariaLiveContainer = ariaHerald.ariaLiveContainer;
+
+      // add aria-live elements to the display
+      this._domElement.appendChild( ariaLiveContainer );
+
+      // set `user-select: none` on the aria-live container to prevent iOS text selection issue, see
+      // https://github.com/phetsims/scenery/issues/1006
+      ariaLiveContainer.style[ Features.userSelect ] = 'none';
+    }
   }
-}
 
-scenery.register( 'Display', Display );
-
-inherit( Object, Display, extend( {
-  // returns the base DOM element that will be displayed by this Display
-  getDOMElement: function() {
+  /**
+   * Returns the base DOM element that will be displayed by this Display
+   * @public
+   *
+   * @returns {Element}
+   */
+  getDOMElement() {
     return this._domElement;
-  },
-  get domElement() { return this.getDOMElement(); },
+  }
+  get domElement() { return this.getDOMElement(); }
 
   /**
    * Updates the display's DOM element with the current visual state of the attached root node and its descendants
+   * @public
    */
-  updateDisplay: function() {
+  updateDisplay() {
     if ( sceneryLog && scenery.isLoggingPerformance() ) {
       this.perfSyncTreeCount = 0;
       this.perfStitchCount = 0;
@@ -567,9 +565,12 @@ inherit( Object, Display, extend( {
     PDOMTree.auditAccessibleDisplays( this.rootNode );
 
     sceneryLog && sceneryLog.Display && sceneryLog.pop();
-  },
+  }
 
-  updateSize: function() {
+  /**
+   * @private
+   */
+  updateSize() {
     let sizeDirty = false;
     //OHTWO TODO: if we aren't clipping or setting background colors, can we get away with having a 0x0 container div and using absolutely-positioned children?
     if ( this.size.width !== this._currentSize.width ) {
@@ -587,7 +588,7 @@ inherit( Object, Display, extend( {
       //TODO: 0px => 0?
       this._domElement.style.clip = 'rect(0px,' + this.size.width + 'px,' + this.size.height + 'px,0px)';
     }
-  },
+  }
 
   /**
    * @public
@@ -596,31 +597,57 @@ inherit( Object, Display, extend( {
    */
   isWebGLAllowed() {
     return this._allowWebGL;
-  },
+  }
 
-  getRootNode: function() {
+  /**
+   * Returns the Node at the root of the display.
+   * @public
+   *
+   * @returns {Node}
+   */
+  getRootNode() {
     return this._rootNode;
-  },
-  get rootNode() { return this.getRootNode(); },
+  }
+  get rootNode() { return this.getRootNode(); }
 
-  getRootBackbone: function() {
+  /**
+   * @public (scenery-internal)
+   *
+   * @returns {BackboneDrawable}
+   */
+  getRootBackbone() {
     return this._rootBackbone;
-  },
-  get rootBackbone() { return this.getRootBackbone(); },
+  }
+  get rootBackbone() { return this.getRootBackbone(); }
 
-  // The dimensions of the Display's DOM element
-  getSize: function() {
+  /**
+   * The dimensions of the Display's DOM element
+   * @public
+   *
+   * @returns {Dimension2}
+   */
+  getSize() {
     return this.sizeProperty.value;
-  },
-  get size() { return this.getSize(); },
+  }
+  get size() { return this.getSize(); }
 
-  getBounds: function() {
+  /**
+   * @public
+   *
+   * @returns {Bounds2}
+   */
+  getBounds() {
     return this.size.toBounds();
-  },
-  get bounds() { return this.getBounds(); },
+  }
+  get bounds() { return this.getBounds(); }
 
-  // size: dot.Dimension2. Changes the size that the Display's DOM element will be after the next updateDisplay()
-  setSize: function( size ) {
+  /**
+   * Changes the size that the Display's DOM element will be after the next updateDisplay()
+   * @public
+   *
+   * @param {Dimension2} size
+   */
+  setSize( size ) {
     assert && assert( size instanceof Dimension2 );
     assert && assert( size.width % 1 === 0, 'Display.width should be an integer' );
     assert && assert( size.width > 0, 'Display.width should be greater than zero' );
@@ -628,62 +655,106 @@ inherit( Object, Display, extend( {
     assert && assert( size.height > 0, 'Display.height should be greater than zero' );
 
     this.sizeProperty.value = size;
-  },
+  }
 
-  setWidthHeight: function( width, height ) {
-    // TODO: don't burn an instance here?
+  /**
+   * Changes the size that the Display's DOM element will be after the next updateDisplay()
+   * @public
+   *
+   * @param {number} width
+   * @param {number} height
+   */
+  setWidthHeight( width, height ) {
     this.setSize( new Dimension2( width, height ) );
-  },
+  }
 
-  // The width of the Display's DOM element
-  getWidth: function() {
+  /**
+   * The width of the Display's DOM element
+   * @public
+   *
+   * @returns {number}
+   */
+  getWidth() {
     return this.size.width;
-  },
-  get width() { return this.getWidth(); },
+  }
+  get width() { return this.getWidth(); }
 
-  // Sets the width that the Display's DOM element will be after the next updateDisplay(). Should be an integral value.
-  setWidth: function( width ) {
+  /**
+   * Sets the width that the Display's DOM element will be after the next updateDisplay(). Should be an integral value.
+   * @public
+   *
+   * @param {number} width
+   */
+  setWidth( width ) {
     assert && assert( typeof width === 'number', 'Display.width should be a number' );
 
     if ( this.getWidth() !== width ) {
-      // TODO: remove allocation here?
       this.setSize( new Dimension2( width, this.getHeight() ) );
     }
-  },
-  set width( value ) { this.setWidth( value ); },
+  }
+  set width( value ) { this.setWidth( value ); }
 
-  // The height of the Display's DOM element
-  getHeight: function() {
+  /**
+   * The height of the Display's DOM element
+   * @public
+   *
+   * @returns {number}
+   */
+  getHeight() {
     return this.size.height;
-  },
-  get height() { return this.getHeight(); },
+  }
+  get height() { return this.getHeight(); }
 
-  // Sets the height that the Display's DOM element will be after the next updateDisplay(). Should be an integral value.
-  setHeight: function( height ) {
+  /**
+   * Sets the height that the Display's DOM element will be after the next updateDisplay(). Should be an integral value.
+   * @public
+   *
+   * @param {number} height
+   */
+  setHeight( height ) {
     assert && assert( typeof height === 'number', 'Display.height should be a number' );
 
     if ( this.getHeight() !== height ) {
-      // TODO: remove allocation here?
       this.setSize( new Dimension2( this.getWidth(), height ) );
     }
-  },
-  set height( value ) { this.setHeight( value ); },
+  }
+  set height( value ) { this.setHeight( value ); }
 
-  // {string} (CSS), {Color} instance, or null (no background color).
-  // Will be applied to the root DOM element on updateDisplay(), and no sooner.
-  setBackgroundColor: function( color ) {
+  /**
+   * Will be applied to the root DOM element on updateDisplay(), and no sooner.
+   * @public
+   *
+   * @param {Color|string|null} color
+   */
+  setBackgroundColor( color ) {
     assert && assert( color === null || typeof color === 'string' || color instanceof Color );
 
     this._backgroundColor = color;
-  },
-  set backgroundColor( value ) { this.setBackgroundColor( value ); },
+  }
+  set backgroundColor( value ) { this.setBackgroundColor( value ); }
 
-  getBackgroundColor: function() {
+  /**
+   * @public
+   *
+   * @returns {Color|string|null}
+   */
+  getBackgroundColor() {
     return this._backgroundColor;
-  },
-  get backgroundColor() { return this.getBackgroundColor(); },
+  }
+  get backgroundColor() { return this.getBackgroundColor(); }
 
-  get interactive() { return this._interactive; },
+  /**
+   * @public
+   *
+   * @returns {boolean}
+   */
+  get interactive() { return this._interactive; }
+
+  /**
+   * @public
+   *
+   * @param {boolean} value
+   */
   set interactive( value ) {
     this._interactive = value;
     if ( !this._interactive && this._input ) {
@@ -699,57 +770,58 @@ inherit( Object, Display, extend( {
     if ( this._accessible ) {
       this.accessibleDOMElement.hidden = !this._interactive;
     }
-  },
+  }
 
-  addOverlay: function( overlay ) {
+  /**
+   * Adds an overlay to the Display. Each overlay should have a .domElement (the DOM element that will be used for
+   * display) and an .update() method.
+   * @public
+   *
+   * @param {*} overlay
+   */
+  addOverlay( overlay ) {
     this._overlays.push( overlay );
     this._domElement.appendChild( overlay.domElement );
 
     // ensure that the overlay is hidden from screen readers, all accessible content should be in the dom element
     // of the this._rootAccessibleInstance
     overlay.domElement.setAttribute( 'aria-hidden', true );
-  },
+  }
 
-  removeOverlay: function( overlay ) {
+  /**
+   * Removes an overlay from the display.
+   * @public
+   *
+   * @param {*} overlay
+   */
+  removeOverlay( overlay ) {
     this._domElement.removeChild( overlay.domElement );
     this._overlays.splice( _.indexOf( this._overlays, overlay ), 1 );
-  },
-
-  markUnsortedAccessibleInstance: function( accessibleInstance ) {
-    this._unsortedAccessibleInstances.push( accessibleInstance );
-  },
-
-
-  sortAccessibleInstances: function() {
-
-    // keep reference so we can restore focus if browser blurs element while sorting
-    const focusedNode = Display.focusedNode;
-
-    while ( this._unsortedAccessibleInstances.length ) {
-      this._unsortedAccessibleInstances.pop().sortChildren();
-    }
-    focusedNode && focusedNode.focus();
-  },
+  }
 
   /**
    * Get the root accessible DOM element which represents this display and provides semantics for assistive
    * technology.
    * @public
+   *
    * @returns {HTMLElement}
    */
-  getAccessibleDOMElement: function() {
+  getAccessibleDOMElement() {
     return this._rootAccessibleInstance.peer.primarySibling;
-  },
-  get accessibleDOMElement() { return this.getAccessibleDOMElement(); },
+  }
+  get accessibleDOMElement() { return this.getAccessibleDOMElement(); }
 
   /*
    * Returns the bitmask union of all renderers (canvas/svg/dom/webgl) that are used for display, excluding
    * BackboneDrawables (which would be DOM).
+   * @public
+   *
+   * @returns {number}
    */
-  getUsedRenderersBitmask: function() {
+  getUsedRenderersBitmask() {
     function renderersUnderBackbone( backbone ) {
       let bitmask = 0;
-      _.each( backbone.blocks, function( block ) {
+      _.each( backbone.blocks, block => {
         if ( block instanceof DOMBlock && block.domDrawable instanceof BackboneDrawable ) {
           bitmask = bitmask | renderersUnderBackbone( block.domDrawable );
         }
@@ -762,17 +834,24 @@ inherit( Object, Display, extend( {
 
     // only return the renderer-specific portion (no other hints, etc)
     return renderersUnderBackbone( this._rootBackbone ) & Renderer.bitmaskRendererArea;
-  },
+  }
 
   /*
    * Called from Instances that will need a transform update (for listeners and precomputation).
-   * @param passTransform {boolean} - Whether we should pass the first transform root when validating transforms (should be true if the instance is transformed)
+   * @public (scenery-internal)
+   *
+   * @param {Instance} instance
+   * @param {boolean} passTransform - Whether we should pass the first transform root when validating transforms (should
+   * be true if the instance is transformed)
    */
-  markTransformRootDirty: function( instance, passTransform ) {
+  markTransformRootDirty( instance, passTransform ) {
     passTransform ? this._dirtyTransformRoots.push( instance ) : this._dirtyTransformRootsWithoutPass.push( instance );
-  },
+  }
 
-  updateDirtyTransformRoots: function() {
+  /**
+   * @private
+   */
+  updateDirtyTransformRoots() {
     sceneryLog && sceneryLog.transformSystem && sceneryLog.transformSystem( 'updateDirtyTransformRoots' );
     sceneryLog && sceneryLog.transformSystem && sceneryLog.push();
     while ( this._dirtyTransformRoots.length ) {
@@ -782,55 +861,83 @@ inherit( Object, Display, extend( {
       this._dirtyTransformRootsWithoutPass.pop().relativeTransform.updateTransformListenersAndCompute( false, false, this._frameId, false );
     }
     sceneryLog && sceneryLog.transformSystem && sceneryLog.pop();
-  },
+  }
 
-  markDrawableChangedBlock: function( drawable ) {
+  /**
+   * @public (scenery-internal)
+   *
+   * @param {Drawable} drawable
+   */
+  markDrawableChangedBlock( drawable ) {
     assert && assert( drawable instanceof Drawable );
 
     sceneryLog && sceneryLog.Display && sceneryLog.Display( 'markDrawableChangedBlock: ' + drawable.toString() );
     this._drawablesToChangeBlock.push( drawable );
-  },
+  }
 
   /**
    * Marks an item for later reduceReferences() calls at the end of Display.update().
-   * @public
+   * @public (scenery-internal)
    *
    * @param {*} item
    */
-  markForReducedReferences: function( item ) {
+  markForReducedReferences( item ) {
     assert && assert( !!item.reduceReferences );
 
     this._reduceReferencesNeeded.push( item );
-  },
+  }
 
-  markInstanceRootForDisposal: function( instance ) {
+  /**
+   * @public (scenery-internal)
+   *
+   * @param {Instance} instance
+   */
+  markInstanceRootForDisposal( instance ) {
     assert && assert( instance instanceof Instance, 'How would an instance not be an instance of an instance?!?!?' );
 
     sceneryLog && sceneryLog.Display && sceneryLog.Display( 'markInstanceRootForDisposal: ' + instance.toString() );
     this._instanceRootsToDispose.push( instance );
-  },
+  }
 
-  markDrawableForDisposal: function( drawable ) {
+  /**
+   * @public (scenery-internal)
+   *
+   * @param {Drawable} drawable
+   */
+  markDrawableForDisposal( drawable ) {
     assert && assert( drawable instanceof Drawable );
 
     sceneryLog && sceneryLog.Display && sceneryLog.Display( 'markDrawableForDisposal: ' + drawable.toString() );
     this._drawablesToDispose.push( drawable );
-  },
+  }
 
-  markDrawableForLinksUpdate: function( drawable ) {
+  /**
+   * @public (scenery-internal)
+   *
+   * @param {Drawable} drawable
+   */
+  markDrawableForLinksUpdate( drawable ) {
     assert && assert( drawable instanceof Drawable );
 
     this._drawablesToUpdateLinks.push( drawable );
-  },
+  }
 
-  // Add a {ChangeInterval} for the "remove change interval info" phase (we don't want to leak memory/references)
-  markChangeIntervalToDispose: function( changeInterval ) {
+  /**
+   * Add a {ChangeInterval} for the "remove change interval info" phase (we don't want to leak memory/references)
+   * @public (scenery-internal)
+   *
+   * @param {ChangeInterval} changeInterval
+   */
+  markChangeIntervalToDispose( changeInterval ) {
     assert && assert( changeInterval instanceof ChangeInterval );
 
     this._changeIntervalsToDispose.push( changeInterval );
-  },
+  }
 
-  updateBackgroundColor: function() {
+  /**
+   * @private
+   */
+  updateBackgroundColor() {
     assert && assert( this._backgroundColor === null ||
                       typeof this._backgroundColor === 'string' ||
                       this._backgroundColor instanceof Color );
@@ -845,13 +952,16 @@ inherit( Object, Display, extend( {
 
       this._domElement.style.backgroundColor = newBackgroundCSS;
     }
-  },
+  }
 
   /*---------------------------------------------------------------------------*
    * Cursors
    *----------------------------------------------------------------------------*/
 
-  updateCursor: function() {
+  /**
+   * @private
+   */
+  updateCursor() {
     if ( this._input && this._input.mouse && this._input.mouse.point ) {
       if ( this._input.mouse.cursor ) {
         sceneryLog && sceneryLog.Cursor && sceneryLog.Cursor( 'set on pointer: ' + this._input.mouse.cursor );
@@ -868,7 +978,7 @@ inherit( Object, Display, extend( {
 
           if ( cursor ) {
             sceneryLog && sceneryLog.Cursor && sceneryLog.Cursor( cursor + ' on ' + node.constructor.name + '#' + node.id );
-            return this.setSceneCursor( cursor );
+            this.setSceneCursor( cursor );
           }
         }
       }
@@ -877,8 +987,8 @@ inherit( Object, Display, extend( {
     }
 
     // fallback case
-    return this.setSceneCursor( this._defaultCursor );
-  },
+    this.setSceneCursor( this._defaultCursor );
+  }
 
   /**
    * Sets the cursor to be displayed when over the Display.
@@ -895,9 +1005,14 @@ inherit( Object, Display, extend( {
     if ( this._assumeFullWindow ) {
       document.body.style.cursor = cursor;
     }
-  },
+  }
 
-  setSceneCursor: function( cursor ) {
+  /**
+   * @private
+   *
+   * @param {string} cursor
+   */
+  setSceneCursor( cursor ) {
     if ( cursor !== this._lastCursor ) {
       this._lastCursor = cursor;
       const customCursors = Display.customCursors[ cursor ];
@@ -911,18 +1026,19 @@ inherit( Object, Display, extend( {
         this.setElementCursor( cursor );
       }
     }
-  },
+  }
 
-  applyCSSHacks: function() {
+  /**
+   * @private
+   */
+  applyCSSHacks() {
     // to use CSS3 transforms for performance, hide anything outside our bounds by default
     if ( !this._allowSceneOverflow ) {
       this._domElement.style.overflow = 'hidden';
     }
 
     // Prevents selection cursor issues in Safari, see https://github.com/phetsims/scenery/issues/476
-    document.onselectstart = function() {
-      return false;
-    };
+    document.onselectstart = () => false;
 
     // forward all pointer events
     this._domElement.style.msTouchAction = 'none';
@@ -943,17 +1059,26 @@ inherit( Object, Display, extend( {
       Features.setStyle( this._domElement, Features.touchCallout, 'none' );
       Features.setStyle( this._domElement, Features.tapHighlightColor, 'rgba(0,0,0,0)' );
     }
-  },
+  }
 
-  // TODO: consider SVG data URLs
-  canvasDataURL: function( callback ) {
-    this.canvasSnapshot( function( canvas ) {
+  /**
+   * @public
+   *
+   * @param {function(string)} callback
+   */
+  canvasDataURL( callback ) {
+    this.canvasSnapshot( canvas => {
       callback( canvas.toDataURL() );
     } );
-  },
+  }
 
-  // renders what it can into a Canvas (so far, Canvas and SVG layers work fine)
-  canvasSnapshot: function( callback ) {
+  /**
+   * Renders what it can into a Canvas (so far, Canvas and SVG layers work fine)
+   * @public
+   *
+   * @param {function(HTMLCanvasElement,ImageData)} callback
+   */
+  canvasSnapshot( callback ) {
     const canvas = document.createElement( 'canvas' );
     canvas.width = this.size.width;
     canvas.height = this.size.height;
@@ -961,13 +1086,19 @@ inherit( Object, Display, extend( {
     const context = canvas.getContext( '2d' );
 
     //OHTWO TODO: allow actual background color directly, not having to check the style here!!!
-    this._rootNode.renderToCanvas( canvas, context, function() {
+    this._rootNode.renderToCanvas( canvas, context, () => {
       callback( canvas, context.getImageData( 0, 0, canvas.width, canvas.height ) );
     }, this.domElement.style.backgroundColor );
-  },
+  }
 
-  //TODO: reduce code duplication for handling overlays
-  setPointerDisplayVisible: function( visibility ) {
+  /**
+   * @public
+   *
+   * TODO: reduce code duplication for handling overlays
+   *
+   * @param {boolean} visibility
+   */
+  setPointerDisplayVisible( visibility ) {
     assert && assert( typeof visibility === 'boolean' );
 
     const hasOverlay = !!this._pointerOverlay;
@@ -983,10 +1114,16 @@ inherit( Object, Display, extend( {
         this.addOverlay( this._pointerOverlay );
       }
     }
-  },
+  }
 
-  //TODO: reduce code duplication for handling overlays
-  setPointerAreaDisplayVisible: function( visibility ) {
+  /**
+   * @public
+   *
+   * TODO: reduce code duplication for handling overlays
+   *
+   * @param {boolean} visibility
+   */
+  setPointerAreaDisplayVisible( visibility ) {
     assert && assert( typeof visibility === 'boolean' );
 
     const hasOverlay = !!this._pointerAreaOverlay;
@@ -1002,10 +1139,16 @@ inherit( Object, Display, extend( {
         this.addOverlay( this._pointerAreaOverlay );
       }
     }
-  },
+  }
 
-  //TODO: reduce code duplication for handling overlays
-  setHitAreaDisplayVisible: function( visibility ) {
+  /**
+   * @public
+   *
+   * TODO: reduce code duplication for handling overlays
+   *
+   * @param {boolean} visibility
+   */
+  setHitAreaDisplayVisible( visibility ) {
     assert && assert( typeof visibility === 'boolean' );
 
     const hasOverlay = !!this._hitAreaOverlay;
@@ -1021,10 +1164,16 @@ inherit( Object, Display, extend( {
         this.addOverlay( this._hitAreaOverlay );
       }
     }
-  },
+  }
 
-  //TODO: reduce code duplication for handling overlays
-  setCanvasNodeBoundsVisible: function( visibility ) {
+  /**
+   * @public
+   *
+   * TODO: reduce code duplication for handling overlays
+   *
+   * @param {boolean} visibility
+   */
+  setCanvasNodeBoundsVisible( visibility ) {
     assert && assert( typeof visibility === 'boolean' );
 
     const hasOverlay = !!this._canvasAreaBoundsOverlay;
@@ -1040,10 +1189,16 @@ inherit( Object, Display, extend( {
         this.addOverlay( this._canvasAreaBoundsOverlay );
       }
     }
-  },
+  }
 
-  //TODO: reduce code duplication for handling overlays
-  setFittedBlockBoundsVisible: function( visibility ) {
+  /**
+   * @public
+   *
+   * TODO: reduce code duplication for handling overlays
+   *
+   * @param {boolean} visibility
+   */
+  setFittedBlockBoundsVisible( visibility ) {
     assert && assert( typeof visibility === 'boolean' );
 
     const hasOverlay = !!this._fittedBlockBoundsOverlay;
@@ -1059,21 +1214,28 @@ inherit( Object, Display, extend( {
         this.addOverlay( this._fittedBlockBoundsOverlay );
       }
     }
-  },
+  }
 
-  resizeOnWindowResize: function() {
-    const self = this;
-
-    const resizer = function() {
-      self.setWidthHeight( window.innerWidth, window.innerHeight );
+  /**
+   * Sets up the Display to resize to whatever the window inner dimensions will be.
+   * @public
+   */
+  resizeOnWindowResize() {
+    const resizer = () => {
+      this.setWidthHeight( window.innerWidth, window.innerHeight );
     };
     window.addEventListener( 'resize', resizer );
     resizer();
-  },
+  }
 
-  // Updates on every request animation frame. If stepCallback is passed in, it is called before updateDisplay() with
-  // stepCallback( timeElapsedInSeconds )
-  updateOnRequestAnimationFrame: function( stepCallback ) {
+  /**
+   * Updates on every request animation frame. If stepCallback is passed in, it is called before updateDisplay() with
+   * stepCallback( timeElapsedInSeconds )
+   * @public
+   *
+   * @param {function(dt:number)} [stepCallback]
+   */
+  updateOnRequestAnimationFrame( stepCallback ) {
     // keep track of how much time elapsed over the last frame
     let lastTime = 0;
     let timeElapsedInSeconds = 0;
@@ -1095,11 +1257,14 @@ inherit( Object, Display, extend( {
       stepCallback && stepCallback( timeElapsedInSeconds );
       self.updateDisplay();
     } )();
-  },
+  }
 
-  cancelUpdateOnRequestAnimationFrame: function() {
+  /**
+   * @public
+   */
+  cancelUpdateOnRequestAnimationFrame() {
     window.cancelAnimationFrame( this._requestAnimationFrameID );
-  },
+  }
 
   /**
    * Initializes event handling, and connects the browser's input event handlers to notify this Display of events.
@@ -1108,7 +1273,7 @@ inherit( Object, Display, extend( {
    * NOTE: This can be reversed with detachEvents().
    * @param {Object} [options] - for PhET-iO
    */
-  initializeEvents: function( options ) {
+  initializeEvents( options ) {
     assert && assert( !this._input, 'Events cannot be attached twice to a display (for now)' );
 
     // TODO: refactor here
@@ -1116,18 +1281,18 @@ inherit( Object, Display, extend( {
     this._input = input;
 
     input.connectListeners();
-  },
+  }
 
   /**
    * Detach already-attached input event handling (from initializeEvents()).
    * @public
    */
-  detachEvents: function() {
+  detachEvents() {
     assert && assert( this._input, 'detachEvents() should be called only when events are attached' );
 
     this._input.disconnectListeners();
     this._input = null;
-  },
+  }
 
 
   /**
@@ -1137,7 +1302,7 @@ inherit( Object, Display, extend( {
    * @param {Object} listener
    * @returns {Display} - For chaining
    */
-  addInputListener: function( listener ) {
+  addInputListener( listener ) {
     assert && assert( !_.includes( this._inputListeners, listener ), 'Input listener already registered on this Node' );
 
     // don't allow listeners to be added multiple times
@@ -1145,7 +1310,7 @@ inherit( Object, Display, extend( {
       this._inputListeners.push( listener );
     }
     return this;
-  },
+  }
 
   /**
    * Removes an input listener that was previously added with addInputListener.
@@ -1154,14 +1319,14 @@ inherit( Object, Display, extend( {
    * @param {Object} listener
    * @returns {Display} - For chaining
    */
-  removeInputListener: function( listener ) {
+  removeInputListener( listener ) {
     // ensure the listener is in our list
     assert && assert( _.includes( this._inputListeners, listener ) );
 
     this._inputListeners.splice( _.indexOf( this._inputListeners, listener ), 1 );
 
     return this;
-  },
+  }
 
   /**
    * Returns whether this input listener is currently listening to this node.
@@ -1172,14 +1337,14 @@ inherit( Object, Display, extend( {
    * @param {Object} listener
    * @returns {boolean}
    */
-  hasInputListener: function( listener ) {
+  hasInputListener( listener ) {
     for ( let i = 0; i < this._inputListeners.length; i++ ) {
       if ( this._inputListeners[ i ] === listener ) {
         return true;
       }
     }
     return false;
-  },
+  }
 
   /**
    * Returns a copy of all of our input listeners.
@@ -1187,10 +1352,10 @@ inherit( Object, Display, extend( {
    *
    * @returns {Array.<Object>}
    */
-  getInputListeners: function() {
+  getInputListeners() {
     return this._inputListeners.slice( 0 ); // defensive copy
-  },
-  get inputListeners() { return this.getInputListeners(); },
+  }
+  get inputListeners() { return this.getInputListeners(); }
 
   /**
    * Interrupts all input listeners that are attached to this Display.
@@ -1198,7 +1363,7 @@ inherit( Object, Display, extend( {
    *
    * @returns {Display} - For chaining
    */
-  interruptInput: function() {
+  interruptInput() {
     const listenersCopy = this.inputListeners;
 
     for ( let i = 0; i < listenersCopy.length; i++ ) {
@@ -1208,15 +1373,18 @@ inherit( Object, Display, extend( {
     }
 
     return this;
-  },
+  }
 
-  ensureNotPainting: function() {
+  /**
+   * @public (scenery-internal)
+   */
+  ensureNotPainting() {
     assert && assert( !this._isPainting,
       'This should not be run in the call tree of updateDisplay(). If you see this, it is likely that either the ' +
       'last updateDisplay() had a thrown error and it is trying to be run again (in which case, investigate that ' +
       'error), OR code was run/triggered from inside an updateDisplay() that has the potential to cause an infinite ' +
       'loop, e.g. CanvasNode paintCanvas() call manipulating another Node, or a bounds listener that Scenery missed.' );
-  },
+  }
 
   /**
    * Triggers a loss of context for all WebGL blocks.
@@ -1224,10 +1392,10 @@ inherit( Object, Display, extend( {
    *
    * NOTE: Should generally only be used for debugging.
    */
-  loseWebGLContexts: function() {
+  loseWebGLContexts() {
     ( function loseBackbone( backbone ) {
       if ( backbone.blocks ) {
-        backbone.blocks.forEach( function( block ) {
+        backbone.blocks.forEach( block => {
           if ( block.gl ) {
             Utils.loseContext( block.gl );
           }
@@ -1240,15 +1408,15 @@ inherit( Object, Display, extend( {
         } );
       }
     } )( this._rootBackbone );
-  },
+  }
 
   /**
    * Makes this Display available for inspection.
    * @public
    */
-  inspect: function() {
+  inspect() {
     localStorage.scenerySnapshot = JSON.stringify( scenery.serialize( this ) );
-  },
+  }
 
   /**
    * Returns an HTML fragment that includes a large amount of debugging information, including a view of the
@@ -1257,7 +1425,7 @@ inherit( Object, Display, extend( {
    *
    * @returns {string}
    */
-  getDebugHTML: function() {
+  getDebugHTML() {
     function str( ob ) {
       return ob ? ob.toString() : ob + '';
     }
@@ -1295,7 +1463,7 @@ inherit( Object, Display, extend( {
       let count = 1; // for us
       if ( drawable.blocks ) {
         // we're a backbone
-        _.each( drawable.blocks, function( childDrawable ) {
+        _.each( drawable.blocks, childDrawable => {
           count += drawableCount( childDrawable );
         } );
       }
@@ -1512,7 +1680,7 @@ inherit( Object, Display, extend( {
       result += div;
 
       depth += 1;
-      _.each( instance.children, function( childInstance ) {
+      _.each( instance.children, childInstance => {
         printInstanceSubtree( childInstance );
       } );
       depth -= 1;
@@ -1523,7 +1691,7 @@ inherit( Object, Display, extend( {
       printInstanceSubtree( this._baseInstance );
     }
 
-    _.each( this._sharedCanvasInstances, function( instance ) {
+    _.each( this._sharedCanvasInstances, instance => {
       result += '<div style="' + headerStyle + '">Shared Canvas Instance Tree</div>';
       printInstanceSubtree( instance );
     } );
@@ -1547,7 +1715,7 @@ inherit( Object, Display, extend( {
       if ( drawable.blocks ) {
         // we're a backbone
         depth += 1;
-        _.each( drawable.blocks, function( childDrawable ) {
+        _.each( drawable.blocks, childDrawable => {
           printDrawableSubtree( childDrawable );
         } );
         depth -= 1;
@@ -1571,7 +1739,7 @@ inherit( Object, Display, extend( {
     //OHTWO TODO: add shared cache drawable trees
 
     return result;
-  },
+  }
 
   /**
    * Returns the getDebugHTML() information, but wrapped into a full HTML page included in a data URI.
@@ -1587,7 +1755,7 @@ inherit( Object, Display, extend( {
            '<body style="font-size: 12px;">' + this.getDebugHTML() + '</body>' +
            '</html>'
     );
-  },
+  }
 
   /**
    * Attempts to open a popup with the getDebugHTML() information.
@@ -1595,7 +1763,7 @@ inherit( Object, Display, extend( {
    */
   popupDebug() {
     window.open( this.getDebugURI() );
-  },
+  }
 
   /**
    * Attempts to open an iframe popup with the getDebugHTML() information in the same window. This is similar to
@@ -1634,9 +1802,14 @@ inherit( Object, Display, extend( {
         document.body.removeChild( closeButton );
       }, true );
     } );
-  },
+  }
 
-  getAccessibleDebugHTML: function() {
+  /**
+   * @public
+   *
+   * @returns {string}
+   */
+  getAccessibleDebugHTML() {
     let result = '';
 
     const headerStyle = 'font-weight: bold; font-size: 120%; margin-top: 5px;';
@@ -1648,7 +1821,7 @@ inherit( Object, Display, extend( {
 
     function recurse( instance, indentation ) {
       result += indentation + escapeHTML( ( instance.isRootInstance ? '' : instance.node.tagName ) + ' ' + instance.toString() ) + '<br>';
-      instance.children.forEach( function( child ) {
+      instance.children.forEach( child => {
         recurse( child, indentation + indent );
       } );
     }
@@ -1673,17 +1846,18 @@ inherit( Object, Display, extend( {
       }
     }
     return result;
-  },
+  }
 
   /**
    * Will attempt to call callback( {string} dataURI ) with the rasterization of the entire Display's DOM structure,
    * used for internal testing. Will call-back null if there was an error
+   * @public
    *
    * Only tested on recent Chrome and Firefox, not recommended for general use. Guaranteed not to work for IE <= 10.
    *
    * See https://github.com/phetsims/scenery/issues/394 for some details.
    */
-  foreignObjectRasterization: function( callback ) {
+  foreignObjectRasterization( callback ) {
     // Scan our drawable tree for Canvases. We'll rasterize them here (to data URLs) so we can replace them later in
     // the HTML tree (with images) before putting that in the foreignObject. That way, we can actually display
     // things rendered in Canvas in our rasterization.
@@ -1701,7 +1875,7 @@ inherit( Object, Display, extend( {
     function scanForCanvases( drawable ) {
       if ( drawable.blocks ) {
         // we're a backbone
-        _.each( drawable.blocks, function( childDrawable ) {
+        _.each( drawable.blocks, childDrawable => {
           scanForCanvases( childDrawable );
         } );
       }
@@ -1721,7 +1895,7 @@ inherit( Object, Display, extend( {
         if ( drawable.domElement instanceof window.HTMLCanvasElement ) {
           addCanvas( drawable.domElement );
         }
-        Array.prototype.forEach.call( drawable.domElement.getElementsByTagName( 'canvas' ), function( canvas ) {
+        Array.prototype.forEach.call( drawable.domElement.getElementsByTagName( 'canvas' ), canvas => {
           addCanvas( canvas );
         } );
       }
@@ -1755,7 +1929,7 @@ inherit( Object, Display, extend( {
 
     const displayWidth = this.width;
     const displayHeight = this.height;
-    const completeFunction = function() {
+    const completeFunction = () => {
       Display.elementToSVGDataURL( doc.documentElement, displayWidth, displayHeight, callback );
     };
 
@@ -1773,12 +1947,12 @@ inherit( Object, Display, extend( {
         replacedImages++;
         hasReplacedImages = true;
 
-        ( function() {
+        ( () => {
           // Closure variables need to be stored for each individual SVG image.
           const refImage = new window.Image();
           const svgImage = displaySVGImage;
 
-          refImage.onload = function() {
+          refImage.onload = () => {
             // Get a Canvas
             const refCanvas = document.createElement( 'canvas' );
             refCanvas.width = refImage.width;
@@ -1798,7 +1972,7 @@ inherit( Object, Display, extend( {
 
             assert && assert( replacedImages >= 0 );
           };
-          refImage.onerror = function() {
+          refImage.onerror = () => {
             // NOTE: not much we can do, leave this element alone.
 
             // If it's the last replaced image, go to the next step
@@ -1819,11 +1993,14 @@ inherit( Object, Display, extend( {
     if ( !hasReplacedImages ) {
       completeFunction();
     }
-  },
+  }
 
-  popupRasterization: function() {
+  /**
+   * @public
+   */
+  popupRasterization() {
     this.foreignObjectRasterization( window.open );
-  },
+  }
 
   /**
    * Releases references.
@@ -1831,7 +2008,7 @@ inherit( Object, Display, extend( {
    *
    * TODO: this dispose function is not complete.
    */
-  dispose: function() {
+  dispose() {
     if ( this._input ) {
       this.detachEvents();
     }
@@ -1851,7 +2028,7 @@ inherit( Object, Display, extend( {
 
     this.utteranceQueue && this.utteranceQueue.dispose();
   }
-} ), {
+
   /**
    * Takes a given DOM element, and asynchronously renders it to a string that is a data URL representing an SVG
    * file.
@@ -1862,7 +2039,7 @@ inherit( Object, Display, extend( {
    * @param {number} height - The height of the output SVG
    * @param {function} callback - Called as callback( url: {string} ), where the URL will be the encoded SVG file.
    */
-  elementToSVGDataURL: function( domElement, width, height, callback ) {
+  static elementToSVGDataURL( domElement, width, height, callback ) {
     const canvas = document.createElement( 'canvas' );
     const context = canvas.getContext( '2d' );
     canvas.width = width;
@@ -1882,11 +2059,11 @@ inherit( Object, Display, extend( {
 
     // Load an <img> with the SVG data URL, and when loaded draw it into our Canvas
     const img = new window.Image();
-    img.onload = function() {
+    img.onload = () => {
       context.drawImage( img, 0, 0 );
       callback( canvas.toDataURL() ); // Endpoint here
     };
-    img.onerror = function() {
+    img.onerror = () => {
       callback( null );
     };
 
@@ -1897,15 +2074,15 @@ inherit( Object, Display, extend( {
 
     // turn it to base64 and wrap it in the data URL format
     img.src = 'data:image/svg+xml;base64,' + base64;
-  },
+  }
 
   /**
    * Set the focus for Display.  Can set to null to clear focus from Display.
    * @public
    *
-   * @param  {Focus|null} value
+   * @param {Focus|null} value
    */
-  set focus( value ) {
+  static set focus( value ) {
     let previousFocus;
     if ( this.focusProperty.value ) {
       previousFocus = this.focusedNode;
@@ -1917,7 +2094,7 @@ inherit( Object, Display, extend( {
     if ( previousFocus && !value ) {
       previousFocus.blur();
     }
-  },
+  }
 
   /**
    * Get the focus for Display. Null if nothing under a Display has focus.
@@ -1925,27 +2102,46 @@ inherit( Object, Display, extend( {
    *
    * @returns {Focus|null}
    */
-  get focus() {
+  static get focus() {
     return this.focusProperty.value;
-  },
+  }
 
   /**
    * Get the currently focused Node, the leaf-most Node of the focusProperty value's Trail. Null if no
    * Node has focus.
-   *
    * @public
+   *
    * @returns {Node|null}
    */
-  getFocusedNode: function() {
+  static getFocusedNode() {
     let focusedNode = null;
     const focus = this.focusProperty.get();
     if ( focus ) {
       focusedNode = focus.trail.lastNode();
     }
     return focusedNode;
-  },
-  get focusedNode() { return this.getFocusedNode(); }
-} );
+  }
+  static get focusedNode() { return this.getFocusedNode(); }
+
+  /**
+   * Returns true when NO nodes in the subtree are disposed.
+   * @private
+   *
+   * @param {Node} node
+   * @returns {boolean}
+   */
+  static assertSubtreeDisposed( node ) {
+    assert && assert( !node.isDisposed, 'Disposed nodes should not be included in a scene graph to display.' );
+
+    if ( assert ) {
+      for ( let i = 0; i < node.children.length; i++ ) {
+        Display.assertSubtreeDisposed( node.children[ i ] );
+      }
+    }
+  }
+}
+
+scenery.register( 'Display', Display );
 
 Display.customCursors = {
   'scenery-grab-pointer': [ 'grab', '-moz-grab', '-webkit-grab', 'pointer' ],
@@ -1977,22 +2173,5 @@ Display.userGestureEmitter = new Emitter();
 // to get information about which keyboard keys are pressed down and for how long.
 Display.keyStateTracker = new KeyStateTracker();
 Display.keyStateTracker.attachToDocument();
-
-/**
- * Returns true when NO nodes in the subtree are disposed.
- * @private
- *
- * @param {Node} node
- * @returns {boolean}
- */
-Display.assertSubtreeDisposed = function( node ) {
-  assert && assert( !node.isDisposed, 'Disposed nodes should not be included in a scene graph to display.' );
-
-  if ( assert ) {
-    for ( let i = 0; i < node.children.length; i++ ) {
-      Display.assertSubtreeDisposed( node.children[ i ] );
-    }
-  }
-};
 
 export default Display;
