@@ -27,15 +27,15 @@ if ( fullscreenChangeEvent === 'msfullscreenchange' ) {
   fullscreenChangeEvent = 'MSFullscreenChange';
 }
 
-var FullScreen = {
+const FullScreen = {
 
   // @public
-  isFullScreen: function() {
+  isFullScreen() {
     return !!document[ fullscreenElementPropertyName ];
   },
 
   // @public
-  isFullScreenEnabled: function() {
+  isFullScreenEnabled() {
     return document[ fullscreenEnabledPropertyName ] && !platform.safari7;
   },
 
@@ -43,7 +43,7 @@ var FullScreen = {
    * @public
    * @param {Display} display
    */
-  enterFullScreen: function( display ) {
+  enterFullScreen( display ) {
     const requestFullscreenPropertyName = detectPrefix( document.body, 'requestFullscreen' ) ||
                                           detectPrefix( document.body, 'requestFullScreen' ); // Firefox capitalization
 
@@ -59,7 +59,7 @@ var FullScreen = {
   },
 
   // @public
-  exitFullScreen: function() {
+  exitFullScreen() {
     document[ exitFullscreenPropertyName ] && document[ exitFullscreenPropertyName ]();
   },
 
@@ -67,7 +67,7 @@ var FullScreen = {
    * @public
    * @param {Display} display
    */
-  toggleFullScreen: function( display ) {
+  toggleFullScreen( display ) {
     if ( FullScreen.isFullScreen() ) {
       FullScreen.exitFullScreen();
     }
@@ -80,10 +80,9 @@ var FullScreen = {
 };
 
 // update isFullScreenProperty on potential changes
-document.addEventListener( fullscreenChangeEvent, function( evt ) {
+document.addEventListener( fullscreenChangeEvent, evt => {
   FullScreen.isFullScreenProperty.set( FullScreen.isFullScreen() );
 } );
 
 scenery.register( 'FullScreen', FullScreen );
-
 export default FullScreen;

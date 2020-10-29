@@ -10,7 +10,7 @@ import Font from './Font.js';
 
 QUnit.module( 'Font' );
 
-QUnit.test( 'Font.fromCSS', function( assert ) {
+QUnit.test( 'Font.fromCSS', assert => {
   const font1 = Font.fromCSS( 'italic 1.2em "Fira Sans", sans-serif' );
   assert.equal( font1.style, 'italic' );
   assert.equal( font1.size, '1.2em' );

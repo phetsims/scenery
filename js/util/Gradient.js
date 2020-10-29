@@ -8,44 +8,36 @@
 
 import Property from '../../../axon/js/Property.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 import Color from './Color.js';
 import Paint from './Paint.js';
 
-/**
- * @constructor
- * @extends Paint
- *
- * TODO: add the ability to specify the color-stops inline. possibly [ [0,color1], [0.5,color2], [1,color3] ]
- */
-function Gradient() {
-  assert && assert( this.constructor.name !== 'Gradient',
-    'Please create a LinearGradient or RadialGradient. Do not directly use the supertype Gradient.' );
+class Gradient extends Paint {
+  /**
+   * TODO: add the ability to specify the color-stops inline. possibly [ [0,color1], [0.5,color2], [1,color3] ]
+   */
+  constructor() {
+    super();
 
-  Paint.call( this );
+    assert && assert( this.constructor.name !== 'Gradient',
+      'Please create a LinearGradient or RadialGradient. Do not directly use the supertype Gradient.' );
 
-  // @private {Array.<{ ratio: {number}, color: {...} }>}
-  this.stops = [];
+    // @private {Array.<{ ratio: {number}, color: {...} }>}
+    this.stops = [];
 
-  // @private {number}
-  this.lastStopRatio = 0;
+    // @private {number}
+    this.lastStopRatio = 0;
 
-  // @private {CanvasGradient|null} - Lazily created
-  this.canvasGradient = null;
+    // @private {CanvasGradient|null} - Lazily created
+    this.canvasGradient = null;
 
-  // @private {boolean} - Whether we should force a check of whether stops have changed
-  this.colorStopsDirty = false;
+    // @private {boolean} - Whether we should force a check of whether stops have changed
+    this.colorStopsDirty = false;
 
-  // @private {Array.<string>} - Used to check to see if colors have changed since last time
-  this.lastColorStopValues = [];
-}
+    // @private {Array.<string>} - Used to check to see if colors have changed since last time
+    this.lastColorStopValues = [];
+  }
 
-scenery.register( 'Gradient', Gradient );
-
-inherit( Paint, Gradient, {
-  // @public {boolean}
-  isGradient: true,
 
   /**
    * Adds a color stop to the gradient.
@@ -61,7 +53,7 @@ inherit( Paint, Gradient, {
    * @param {Color|String|Property.<Color|string>|null} color
    * @returns {Gradient} - for chaining
    */
-  addColorStop: function( ratio, color ) {
+  addColorStop( ratio, color ) {
     assert && assert( typeof ratio === 'number', 'Ratio needs to be a number' );
     assert && assert( ratio >= 0 && ratio <= 1, 'Ratio needs to be between 0,1 inclusively' );
     assert && assert( color === null ||
@@ -89,7 +81,7 @@ inherit( Paint, Gradient, {
     this.lastColorStopValues.push( '' );
 
     return this;
-  },
+  }
 
   /**
    * Subtypes should return a fresh CanvasGradient type.
@@ -98,9 +90,9 @@ inherit( Paint, Gradient, {
    *
    * @returns {CanvasGradient}
    */
-  createCanvasGradient: function() {
+  createCanvasGradient() {
     throw new Error( 'abstract method' );
-  },
+  }
 
   /**
    * Returns stops suitable for direct SVG use.
@@ -108,19 +100,19 @@ inherit( Paint, Gradient, {
    *
    * @returns {Array.<{ ratio: {number}, stop: {Color|string|Property.<Color|string|null>|null} }>}
    */
-  getSVGStops: function() {
+  getSVGStops() {
     return this.stops;
-  },
+  }
 
   /**
    * Forces a re-check of whether colors have changed, so that the Canvas gradient can be regenerated if
    * necessary.
    * @public
    */
-  invalidateCanvasGradient: function() {
+  invalidateCanvasGradient() {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( 'Invalidated Canvas Gradient for #' + this.id );
     this.colorStopsDirty = true;
-  },
+  }
 
   /**
    * Compares the current color values with the last-recorded values for the current Canvas gradient.
@@ -130,7 +122,7 @@ inherit( Paint, Gradient, {
    *
    * @returns {boolean}
    */
-  haveCanvasColorStopsChanged: function() {
+  haveCanvasColorStopsChanged() {
     if ( this.lastColorStopValues === null ) {
       return true;
     }
@@ -142,7 +134,7 @@ inherit( Paint, Gradient, {
     }
 
     return false;
-  },
+  }
 
   /**
    * Returns an object that can be passed to a Canvas context's fillStyle or strokeStyle.
@@ -151,7 +143,7 @@ inherit( Paint, Gradient, {
    *
    * @returns {*}
    */
-  getCanvasStyle: function() {
+  getCanvasStyle() {
     // Check if we need to regenerate the Canvas gradient
     if ( !this.canvasGradient || ( this.colorStopsDirty && this.haveCanvasColorStopsChanged() ) ) {
       sceneryLog && sceneryLog.Paints && sceneryLog.Paints( 'Regenerating Canvas Gradient for #' + this.id );
@@ -177,32 +169,36 @@ inherit( Paint, Gradient, {
 
     return this.canvasGradient;
   }
-} );
 
-/**
- * Returns the current value of the generally-allowed color types for Gradient, as a string.
- * @public
- *
- * @param {Color|string|Property.<Color|string|null>|null} color
- * @returns {string}
- */
-Gradient.colorToString = function( color ) {
-  // to {Color|string|null}
-  if ( color instanceof Property ) {
-    color = color.value;
+  /**
+   * Returns the current value of the generally-allowed color types for Gradient, as a string.
+   * @public
+   *
+   * @param {Color|string|Property.<Color|string|null>|null} color
+   * @returns {string}
+   */
+  static colorToString( color ) {
+    // to {Color|string|null}
+    if ( color instanceof Property ) {
+      color = color.value;
+    }
+
+    // to {Color|string}
+    if ( color === null ) {
+      color = 'transparent';
+    }
+
+    // to {string}
+    if ( color instanceof Color ) {
+      color = color.toCSS();
+    }
+
+    return color;
   }
+}
 
-  // to {Color|string}
-  if ( color === null ) {
-    color = 'transparent';
-  }
+// @public {boolean}
+Gradient.prototype.isGradient = true;
 
-  // to {string}
-  if ( color instanceof Color ) {
-    color = color.toCSS();
-  }
-
-  return color;
-};
-
+scenery.register( 'Gradient', Gradient );
 export default Gradient;

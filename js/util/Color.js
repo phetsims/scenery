@@ -13,7 +13,6 @@
 import Property from '../../../axon/js/Property.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import Utils from '../../../dot/js/Utils.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import scenery from '../scenery.js';
 
@@ -21,168 +20,42 @@ import scenery from '../scenery.js';
 const clamp = Utils.clamp;
 const linear = Utils.linear;
 
-/**
- * Creates a Color with an initial value. Multiple different types of parameters are supported:
- * - new Color( color ) is a copy constructor, for a {Color}
- * - new Color( string ) will parse the string assuming it's a CSS-compatible color, e.g. set( 'red' )
- * - new Color( r, g, b ) is equivalent to setRGBA( r, g, b, 1 ), e.g. set( 255, 0, 128 )
- * - new Color( r, g, b, a ) is equivalent to setRGBA( r, g, b, a ), e.g. set( 255, 0, 128, 0.5 )
- * - new Color( hex ) will set RGB with alpha=1, e.g. set( 0xFF0000 )
- * - new Color( hex, a ) will set RGBA, e.g. set( 0xFF0000, 1 )
- *
- * The 'r', 'g', and 'b' values stand for red, green and blue respectively, and will be clamped to integers in 0-255.
- * The 'a' value stands for alpha, and will be clamped to 0-1 (floating point)
- * 'hex' indicates a 6-decimal-digit format hex number, for example 0xFFAA00 is equivalent to r=255, g=170, b=0.
- *
- * @param {number|Color|string} r - See above for the possible overloaded values
- * @param {number} [g] - If provided, should be the green value (or the alpha value if a hex color is given)
- * @param {number} [b] - If provided, should be the blue value
- * @param {number} [a] - If provided, should be the alpha value
- */
-function Color( r, g, b, a ) {
+class Color {
+  /**
+   * Creates a Color with an initial value. Multiple different types of parameters are supported:
+   * - new Color( color ) is a copy constructor, for a {Color}
+   * - new Color( string ) will parse the string assuming it's a CSS-compatible color, e.g. set( 'red' )
+   * - new Color( r, g, b ) is equivalent to setRGBA( r, g, b, 1 ), e.g. set( 255, 0, 128 )
+   * - new Color( r, g, b, a ) is equivalent to setRGBA( r, g, b, a ), e.g. set( 255, 0, 128, 0.5 )
+   * - new Color( hex ) will set RGB with alpha=1, e.g. set( 0xFF0000 )
+   * - new Color( hex, a ) will set RGBA, e.g. set( 0xFF0000, 1 )
+   *
+   * The 'r', 'g', and 'b' values stand for red, green and blue respectively, and will be clamped to integers in 0-255.
+   * The 'a' value stands for alpha, and will be clamped to 0-1 (floating point)
+   * 'hex' indicates a 6-decimal-digit format hex number, for example 0xFFAA00 is equivalent to r=255, g=170, b=0.
+   *
+   * @param {number|Color|string} r - See above for the possible overloaded values
+   * @param {number} [g] - If provided, should be the green value (or the alpha value if a hex color is given)
+   * @param {number} [b] - If provided, should be the blue value
+   * @param {number} [a] - If provided, should be the alpha value
+   */
+  constructor( r, g, b, a ) {
 
-  // @public {Emitter}
-  this.changeEmitter = new TinyEmitter();
+    // @public {Emitter}
+    this.changeEmitter = new TinyEmitter();
 
-  this.set( r, g, b, a );
-}
-
-scenery.register( 'Color', Color );
-
-// regex utilities
-const rgbNumber = '(-?\\d{1,3}%?)'; // syntax allows negative integers and percentages
-const aNumber = '(\\d+|\\d*\\.\\d+)'; // decimal point number. technically we allow for '255', even though this will be clamped to 1.
-const rawNumber = '(\\d{1,3})'; // a 1-3 digit number
-
-// handles negative and percentage values
-function parseRGBNumber( str ) {
-  let multiplier = 1;
-
-  // if it's a percentage, strip it off and handle it that way
-  if ( str.charAt( str.length - 1 ) === '%' ) {
-    multiplier = 2.55;
-    str = str.slice( 0, str.length - 1 );
+    this.set( r, g, b, a );
   }
 
-  return Utils.roundSymmetric( parseInt( str, 10 ) * multiplier );
-}
-
-Color.formatParsers = [
-  {
-    // 'transparent'
-    regexp: /^transparent$/,
-    apply: function( color, matches ) {
-      color.setRGBA( 0, 0, 0, 0 );
-    }
-  },
-  {
-    // short hex form, a la '#fff'
-    regexp: /^#(\w{1})(\w{1})(\w{1})$/,
-    apply: function( color, matches ) {
-      color.setRGBA(
-        parseInt( matches[ 1 ] + matches[ 1 ], 16 ),
-        parseInt( matches[ 2 ] + matches[ 2 ], 16 ),
-        parseInt( matches[ 3 ] + matches[ 3 ], 16 ),
-        1 );
-    }
-  },
-  {
-    // long hex form, a la '#ffffff'
-    regexp: /^#(\w{2})(\w{2})(\w{2})$/,
-    apply: function( color, matches ) {
-      color.setRGBA(
-        parseInt( matches[ 1 ], 16 ),
-        parseInt( matches[ 2 ], 16 ),
-        parseInt( matches[ 3 ], 16 ),
-        1 );
-    }
-  },
-  {
-    // rgb(...)
-    regexp: new RegExp( '^rgb\\(' + rgbNumber + ',' + rgbNumber + ',' + rgbNumber + '\\)$' ),
-    apply: function( color, matches ) {
-      color.setRGBA(
-        parseRGBNumber( matches[ 1 ] ),
-        parseRGBNumber( matches[ 2 ] ),
-        parseRGBNumber( matches[ 3 ] ),
-        1 );
-    }
-  },
-  {
-    // rgba(...)
-    regexp: new RegExp( '^rgba\\(' + rgbNumber + ',' + rgbNumber + ',' + rgbNumber + ',' + aNumber + '\\)$' ),
-    apply: function( color, matches ) {
-      color.setRGBA(
-        parseRGBNumber( matches[ 1 ] ),
-        parseRGBNumber( matches[ 2 ] ),
-        parseRGBNumber( matches[ 3 ] ),
-        parseFloat( matches[ 4 ] ) );
-    }
-  },
-  {
-    // hsl(...)
-    regexp: new RegExp( '^hsl\\(' + rawNumber + ',' + rawNumber + '%,' + rawNumber + '%\\)$' ),
-    apply: function( color, matches ) {
-      color.setHSLA(
-        parseInt( matches[ 1 ], 10 ),
-        parseInt( matches[ 2 ], 10 ),
-        parseInt( matches[ 3 ], 10 ),
-        1 );
-    }
-  },
-  {
-    // hsla(...)
-    regexp: new RegExp( '^hsla\\(' + rawNumber + ',' + rawNumber + '%,' + rawNumber + '%,' + aNumber + '\\)$' ),
-    apply: function( color, matches ) {
-      color.setHSLA(
-        parseInt( matches[ 1 ], 10 ),
-        parseInt( matches[ 2 ], 10 ),
-        parseInt( matches[ 3 ], 10 ),
-        parseFloat( matches[ 4 ] ) );
-    }
-  }
-];
-
-// see http://www.w3.org/TR/css3-color/
-Color.hueToRGB = function( m1, m2, h ) {
-  if ( h < 0 ) {
-    h = h + 1;
-  }
-  if ( h > 1 ) {
-    h = h - 1;
-  }
-  if ( h * 6 < 1 ) {
-    return m1 + ( m2 - m1 ) * h * 6;
-  }
-  if ( h * 2 < 1 ) {
-    return m2;
-  }
-  if ( h * 3 < 2 ) {
-    return m1 + ( m2 - m1 ) * ( 2 / 3 - h ) * 6;
-  }
-  return m1;
-};
-
-/**
- * Convenience function that converts a color spec to a color object if
- * necessary, or simply returns the color object if not.
- * @param {String|Color} colorSpec
- * @returns {Color}
- */
-Color.toColor = function( colorSpec ) {
-  return colorSpec instanceof Color ? colorSpec : new Color( colorSpec );
-};
-
-inherit( Object, Color, {
   /**
    * Returns a copy of this color.
    * @public
    *
    * @returns {Color}
    */
-  copy: function() {
+  copy() {
     return new Color( this.r, this.g, this.b, this.a );
-  },
+  }
 
   /**
    * Sets the values of this Color. Supported styles:
@@ -201,7 +74,7 @@ inherit( Object, Color, {
    * @param {number} [a] - If provided, should be the alpha value
    * @returns {Color} - for chaining
    */
-  set: function( r, g, b, a ) {
+  set( r, g, b, a ) {
     assert && assert( r !== undefined, 'Can\'t call Color.set( undefined )' );
 
     // support for set( string )
@@ -233,34 +106,111 @@ inherit( Object, Color, {
     }
 
     return this; // support chaining
-  },
+  }
 
-  // red, integral 0-255
-  getRed: function() { return this.r; },
-  setRed: function( value ) { return this.setRGBA( value, this.g, this.b, this.a ); },
-  get red() { return this.getRed(); },
-  set red( value ) { return this.setRed( value ); },
+  /**
+   * Returns the red value as an integer between 0 and 255
+   * @public
+   *
+   * @returns {number}
+   */
+  getRed() {
+    return this.r;
+  }
+  get red() { return this.getRed(); }
 
-  // green, integral 0-255
-  getGreen: function() { return this.g; },
-  setGreen: function( value ) { return this.setRGBA( this.r, value, this.b, this.a ); },
-  get green() { return this.getGreen(); },
-  set green( value ) { return this.setGreen( value ); },
+  /**
+   * Sets the red value.
+   * @public
+   *
+   * @param {number} value - Will be clamped to an integer between 0 and 255
+   * @returns {Color} - This color, for chaining
+   */
+  setRed( value ) {
+    return this.setRGBA( value, this.g, this.b, this.a );
+  }
+  set red( value ) { return this.setRed( value ); }
 
-  // blue, integral 0-255
-  getBlue: function() { return this.b; },
-  setBlue: function( value ) { return this.setRGBA( this.r, this.g, value, this.a ); },
-  get blue() { return this.getBlue(); },
-  set blue( value ) { return this.setBlue( value ); },
+  /**
+   * Returns the green value as an integer between 0 and 255
+   * @public
+   *
+   * @returns {number}
+   */
+  getGreen() {
+    return this.g;
+  }
+  get green() { return this.getGreen(); }
 
-  // alpha, floating 0-1
-  getAlpha: function() { return this.a; },
-  setAlpha: function( value ) { return this.setRGBA( this.r, this.g, this.b, value ); },
-  get alpha() { return this.getAlpha(); },
-  set alpha( value ) { return this.setAlpha( value ); },
+  /**
+   * Sets the green value.
+   * @public
+   *
+   * @param {number} value - Will be clamped to an integer between 0 and 255
+   * @returns {Color} - This color, for chaining
+   */
+  setGreen( value ) {
+    return this.setRGBA( this.r, value, this.b, this.a );
+  }
+  set green( value ) { return this.setGreen( value ); }
 
-  // RGB integral between 0-255, alpha (float) between 0-1
-  setRGBA: function( red, green, blue, alpha ) {
+  /**
+   * Returns the blue value as an integer between 0 and 255
+   * @public
+   *
+   * @returns {number}
+   */
+  getBlue() {
+    return this.b;
+  }
+  get blue() { return this.getBlue(); }
+
+  /**
+   * Sets the blue value.
+   * @public
+   *
+   * @param {number} value - Will be clamped to an integer between 0 and 255
+   * @returns {Color} - This color, for chaining
+   */
+  setBlue( value ) {
+    return this.setRGBA( this.r, this.g, value, this.a );
+  }
+  set blue( value ) { return this.setBlue( value ); }
+
+  /**
+   * Returns the alpha value as a floating-point value between 0 and 1
+   * @public
+   *
+   * @returns {number}
+   */
+  getAlpha() {
+    return this.a;
+  }
+  get alpha() { return this.getAlpha(); }
+
+  /**
+   * Sets the alpha value.
+   * @public
+   *
+   * @param {number} value - Will be clamped between 0 and 1
+   * @returns {Color} - This color, for chaining
+   */
+  setAlpha( value ) {
+    return this.setRGBA( this.r, this.g, this.b, value );
+  }
+  set alpha( value ) { return this.setAlpha( value ); }
+
+  /**
+   * Sets the value of this Color using RGB integral between 0-255, alpha (float) between 0-1.
+   * @public
+   *
+   * @param {number} red
+   * @param {number} green
+   * @param {number} blue
+   * @param {number} alpha
+   * @returns {Color} - This color, for chaining
+   */
+  setRGBA( red, green, blue, alpha ) {
     this.r = Utils.roundSymmetric( clamp( red, 0, 255 ) );
     this.g = Utils.roundSymmetric( clamp( green, 0, 255 ) );
     this.b = Utils.roundSymmetric( clamp( blue, 0, 255 ) );
@@ -269,7 +219,7 @@ inherit( Object, Color, {
     this.updateColor(); // update the cached value
 
     return this; // allow chaining
-  },
+  }
 
   /**
    * A linear (gamma-corrected) interpolation between this color (ratio=0) and another color (ratio=1).
@@ -279,7 +229,7 @@ inherit( Object, Color, {
    * @param {number} ratio - Not necessarily constrained in [0, 1]
    * @returns {Color}
    */
-  blend: function( otherColor, ratio ) {
+  blend( otherColor, ratio ) {
     assert && assert( otherColor instanceof Color );
 
     const gamma = 2.4;
@@ -296,9 +246,15 @@ inherit( Object, Color, {
     const a = this.a + ( otherColor.a - this.a ) * ratio;
 
     return new Color( r, g, b, a );
-  },
+  }
 
-  computeCSS: function() {
+  /**
+   * Used internally to compute the CSS string for this color. Use toCSS()
+   * @private
+   *
+   * @returns {string}
+   */
+  computeCSS() {
     if ( this.a === 1 ) {
       return 'rgb(' + this.r + ',' + this.g + ',' + this.b + ')';
     }
@@ -315,16 +271,30 @@ inherit( Object, Color, {
       const alphaString = this.a === 0 || this.a === 1 ? this.a : alpha;
       return 'rgba(' + this.r + ',' + this.g + ',' + this.b + ',' + alphaString + ')';
     }
-  },
+  }
 
-  toCSS: function() {
+  /**
+   * Returns the value of this Color as a CSS string.
+   * @public
+   *
+   * @returns {string}
+   */
+  toCSS() {
     // verify that the cached value is correct (in debugging builds only, defeats the point of caching otherwise)
     assert && assert( this._css === this.computeCSS(), 'CSS cached value is ' + this._css + ', but the computed value appears to be ' + this.computeCSS() );
 
     return this._css;
-  },
+  }
 
-  setCSS: function( cssString ) {
+  /**
+   * Sets this color for a CSS color string.
+   * @public
+   *
+   * @param {string} cssString
+   *
+   * @returns {Color} - This color, for chaining
+   */
+  setCSS( cssString ) {
     let str = cssString.replace( / /g, '' ).toLowerCase();
     let success = false;
 
@@ -351,15 +321,25 @@ inherit( Object, Color, {
     }
 
     this.updateColor(); // update the cached value
-  },
 
-  // e.g. 0xFF00FF
-  toNumber: function() {
+    return this;
+  }
+
+  /**
+   * Returns this color's RGB information in the hexadecimal number equivalent, e.g. 0xFF00FF
+   * @public
+   *
+   * @returns {number}
+   */
+  toNumber() {
     return ( this.r << 16 ) + ( this.g << 8 ) + this.b;
-  },
+  }
 
-  // called to update the internally cached CSS value
-  updateColor: function() {
+  /**
+   * Called to update the internally cached CSS value
+   * @private
+   */
+  updateColor() {
     assert && assert( !this.immutable,
       'Cannot modify an immutable color. Likely caused by trying to mutate a color after it was used for a node fill/stroke' );
 
@@ -385,16 +365,21 @@ inherit( Object, Color, {
     if ( oldCSS !== this._css ) {
       this.changeEmitter.emit();
     }
-  },
+  }
 
-  // allow setting this Color to be immutable when assertions are disabled. any change will throw an error
-  setImmutable: function() {
+  /**
+   * Allow setting this Color to be immutable when assertions are disabled. any change will throw an error
+   * @public
+   *
+   * @returns {Color} - This color, for chaining
+   */
+  setImmutable() {
     if ( assert ) {
       this.immutable = true;
     }
 
     return this; // allow chaining
-  },
+  }
 
   /**
    * Returns an object that can be passed to a Canvas context's fillStyle or strokeStyle.
@@ -402,15 +387,26 @@ inherit( Object, Color, {
    *
    * @returns {string}
    */
-  getCanvasStyle: function() {
+  getCanvasStyle() {
     return this.toCSS(); // should be inlined, leave like this for future maintainability
-  },
+  }
 
-  // TODO: make a getHue, getSaturation, getLightness. we can then expose them via ES5!
-  setHSLA: function( hue, saturation, lightness, alpha ) {
-    hue = ( hue % 360 ) / 360;                    // integer modulo 360
-    saturation = clamp( saturation / 100, 0, 1 ); // percentage
-    lightness = clamp( lightness / 100, 0, 1 );   // percentage
+  /**
+   * Sets this color using HSLA values.
+   * @public
+   *
+   * TODO: make a getHue, getSaturation, getLightness. we can then expose them via ES5!
+   *
+   * @param {number} hue - integer modulo 360
+   * @param {number} saturation - percentage
+   * @param {number} lightness - percentage
+   * @param {number} alpha
+   * @returns {Color} - This color, for chaining
+   */
+  setHSLA( hue, saturation, lightness, alpha ) {
+    hue = ( hue % 360 ) / 360;
+    saturation = clamp( saturation / 100, 0, 1 );
+    lightness = clamp( lightness / 100, 0, 1 );
 
     // see http://www.w3.org/TR/css3-color/
     let m2;
@@ -430,79 +426,113 @@ inherit( Object, Color, {
     this.updateColor(); // update the cached value
 
     return this; // allow chaining
-  },
+  }
 
-  equals: function( color ) {
+  /**
+   * @public
+   *
+   * @param {Color} color
+   * @returns {boolean}
+   */
+  equals( color ) {
     return this.r === color.r && this.g === color.g && this.b === color.b && this.a === color.a;
-  },
+  }
 
-  withAlpha: function( alpha ) {
+  /**
+   * Returns a copy of this color with a different alpha value.
+   * @public
+   *
+   * @param {number} alpha
+   * @returns {Color}
+   */
+  withAlpha( alpha ) {
     return new Color( this.r, this.g, this.b, alpha );
-  },
+  }
 
-  checkFactor: function( factor ) {
-    if ( factor < 0 || factor > 1 ) {
-      throw new Error( 'factor must be between 0 and 1: ' + factor );
-    }
+  /**
+   * @private
+   *
+   * @param {number} [factor]
+   * @returns {number}
+   */
+  checkFactor( factor ) {
+    assert && assert( factor === undefined || ( factor >= 0 && factor <= 1 ), `factor must be between 0 and 1: ${factor}` );
+
     return ( factor === undefined ) ? 0.7 : factor;
-  },
+  }
 
-  // matches Java's Color.brighter()
-  brighterColor: function( factor ) {
+  /**
+   * Matches Java's Color.brighter()
+   * @public
+   *
+   * @param {number} [factor]
+   * @returns {Color}
+   */
+  brighterColor( factor ) {
     factor = this.checkFactor( factor );
     const red = Math.min( 255, Math.floor( this.r / factor ) );
     const green = Math.min( 255, Math.floor( this.g / factor ) );
     const blue = Math.min( 255, Math.floor( this.b / factor ) );
     return new Color( red, green, blue, this.a );
-  },
+  }
 
   /**
    * Brightens a color in RGB space. Useful when creating gradients from a single base color.
-   * @param factor 0 (no change) to 1 (white)
-   * @returns lighter (closer to white) version of the original color.
+   * @public
+   *
+   * @param {number} [factor] - 0 (no change) to 1 (white)
+   * @returns {Color} - (closer to white) version of the original color.
    */
-  colorUtilsBrighter: function( factor ) {
+  colorUtilsBrighter( factor ) {
     factor = this.checkFactor( factor );
     const red = Math.min( 255, this.getRed() + Math.floor( factor * ( 255 - this.getRed() ) ) );
     const green = Math.min( 255, this.getGreen() + Math.floor( factor * ( 255 - this.getGreen() ) ) );
     const blue = Math.min( 255, this.getBlue() + Math.floor( factor * ( 255 - this.getBlue() ) ) );
     return new Color( red, green, blue, this.getAlpha() );
-  },
+  }
 
-  // matches Java's Color.darker()
-  darkerColor: function( factor ) {
+  /**
+   * Matches Java's Color.darker()
+   * @public
+   *
+   * @param {number} [factor]
+   * @returns {Color}
+   */
+  darkerColor( factor ) {
     factor = this.checkFactor( factor );
     const red = Math.max( 0, Math.floor( factor * this.r ) );
     const green = Math.max( 0, Math.floor( factor * this.g ) );
     const blue = Math.max( 0, Math.floor( factor * this.b ) );
     return new Color( red, green, blue, this.a );
-  },
+  }
 
   /**
    * Darken a color in RGB space. Useful when creating gradients from a single
    * base color.
+   * @public
    *
-   * @param color  the original color
-   * @param factor 0 (no change) to 1 (black)
-   * @returns darker (closer to black) version of the original color.
+   * @param {number} [factor] - 0 (no change) to 1 (black)
+   * @returns {Color} - darker (closer to black) version of the original color.
    */
-  colorUtilsDarker: function( factor ) {
+  colorUtilsDarker( factor ) {
     factor = this.checkFactor( factor );
     const red = Math.max( 0, this.getRed() - Math.floor( factor * this.getRed() ) );
     const green = Math.max( 0, this.getGreen() - Math.floor( factor * this.getGreen() ) );
     const blue = Math.max( 0, this.getBlue() - Math.floor( factor * this.getBlue() ) );
     return new Color( red, green, blue, this.getAlpha() );
-  },
+  }
 
   /*
    * Like colorUtilsBrighter/Darker, however factor should be in the range -1 to 1, and it will call:
    *   colorUtilsBrighter( factor )   for factor >  0
    *   this                           for factor == 0
    *   colorUtilsDarker( -factor )    for factor <  0
-   * Thus:
-   * @param factor from -1 (black), to 0 (no change), to 1 (white)
+   * @public
+   *
+   * @param {number} factor from -1 (black), to 0 (no change), to 1 (white)
+   * @returns {Color}
    */
-  colorUtilsBrightness: function( factor ) {
+  colorUtilsBrightness( factor ) {
     if ( factor === 0 ) {
       return this;
     }
@@ -512,13 +542,24 @@ inherit( Object, Color, {
     else {
       return this.colorUtilsDarker( -factor );
     }
-  },
+  }
 
-  toString: function() {
+  /**
+   * Returns a string form of this object
+   * @public
+   *
+   * @returns {string}
+   */
+  toString() {
     return this.constructor.name + '[r:' + this.r + ' g:' + this.g + ' b:' + this.b + ' a:' + this.a + ']';
-  },
+  }
 
-  toStateObject: function() {
+  /**
+   * @public
+   *
+   * @returns {Object}
+   */
+  toStateObject() {
     return {
       r: this.r,
       g: this.g,
@@ -526,7 +567,311 @@ inherit( Object, Color, {
       a: this.a
     };
   }
-} );
+
+  /**
+   * Utility function, see http://www.w3.org/TR/css3-color/
+   * @public
+   *
+   * @param {number} m1
+   * @param {number} m2
+   * @param {number} h
+   * @returns {number}
+   */
+  static hueToRGB( m1, m2, h ) {
+    if ( h < 0 ) {
+      h = h + 1;
+    }
+    if ( h > 1 ) {
+      h = h - 1;
+    }
+    if ( h * 6 < 1 ) {
+      return m1 + ( m2 - m1 ) * h * 6;
+    }
+    if ( h * 2 < 1 ) {
+      return m2;
+    }
+    if ( h * 3 < 2 ) {
+      return m1 + ( m2 - m1 ) * ( 2 / 3 - h ) * 6;
+    }
+    return m1;
+  }
+
+  /**
+   * Convenience function that converts a color spec to a color object if
+   * necessary, or simply returns the color object if not.
+   * @public
+   *
+   * @param {String|Color} colorSpec
+   * @returns {Color}
+   */
+  static toColor( colorSpec ) {
+    return colorSpec instanceof Color ? colorSpec : new Color( colorSpec );
+  }
+
+  /**
+   * Interpolates between 2 colors in RGBA space. When distance is 0, color1
+   * is returned. When distance is 1, color2 is returned. Other values of
+   * distance return a color somewhere between color1 and color2. Each color
+   * component is interpolated separately.
+   * @public
+   *
+   * @param {Color} color1
+   * @param {Color} color2
+   * @param {number} distance distance between color1 and color2, 0 <= distance <= 1
+   * @returns {Color}
+   */
+  static interpolateRGBA( color1, color2, distance ) {
+    if ( distance < 0 || distance > 1 ) {
+      throw new Error( 'distance must be between 0 and 1: ' + distance );
+    }
+    const r = Math.floor( linear( 0, 1, color1.r, color2.r, distance ) );
+    const g = Math.floor( linear( 0, 1, color1.g, color2.g, distance ) );
+    const b = Math.floor( linear( 0, 1, color1.b, color2.b, distance ) );
+    const a = linear( 0, 1, color1.a, color2.a, distance );
+    return new Color( r, g, b, a );
+  }
+
+  /**
+   * Returns a blended color as a mix between the given colors.
+   * @public
+   *
+   * @param {Array.<Color>} colors
+   * @returns {Color}
+   */
+  static supersampleBlend( colors ) {
+    // hard-coded gamma (assuming the exponential part of the sRGB curve as a simplification)
+    const GAMMA = 2.2;
+
+    // maps to [0,1] linear colorspace
+    const reds = colors.map( color => Math.pow( color.r / 255, GAMMA ) );
+    const greens = colors.map( color => Math.pow( color.g / 255, GAMMA ) );
+    const blues = colors.map( color => Math.pow( color.b / 255, GAMMA ) );
+    const alphas = colors.map( color => Math.pow( color.a, GAMMA ) );
+
+    const alphaSum = _.sum( alphas );
+
+    if ( alphaSum === 0 ) {
+      return new Color( 0, 0, 0, 0 );
+    }
+
+    // blending of pixels, weighted by alphas
+    const red = _.sum( _.range( 0, colors.length ).map( i => reds[ i ] * alphas[ i ] ) ) / alphaSum;
+    const green = _.sum( _.range( 0, colors.length ).map( i => greens[ i ] * alphas[ i ] ) ) / alphaSum;
+    const blue = _.sum( _.range( 0, colors.length ).map( i => blues[ i ] * alphas[ i ] ) ) / alphaSum;
+    const alpha = alphaSum / colors.length; // average of alphas
+
+    return new Color(
+      Math.floor( Math.pow( red, 1 / GAMMA ) * 255 ),
+      Math.floor( Math.pow( green, 1 / GAMMA ) * 255 ),
+      Math.floor( Math.pow( blue, 1 / GAMMA ) * 255 ),
+      Math.pow( alpha, 1 / GAMMA )
+    );
+  }
+
+  /**
+   * @public
+   *
+   * @param {Object} stateObject
+   * @returns {Color}
+   */
+  static fromStateObject( stateObject ) {
+    return new Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a );
+  }
+
+  /**
+   * @public
+   *
+   * @param {number} hue
+   * @param {number} saturation
+   * @param {number} lightness
+   * @param {number} alpha
+   * @returns {Color}
+   */
+  static hsla( hue, saturation, lightness, alpha ) {
+    return new Color( 0, 0, 0, 1 ).setHSLA( hue, saturation, lightness, alpha );
+  }
+
+  /**
+   * @public
+   *
+   * @param {string} cssString
+   */
+  static checkPaintString( cssString ) {
+    if ( assert ) {
+      try {
+        scratchColor.setCSS( cssString );
+      }
+      catch( e ) {
+        assert( false, 'The CSS string is an invalid color: ' + cssString );
+      }
+    }
+  }
+
+  /**
+   * A Paint of the type that Paintable accepts as fills or strokes
+   * @public
+   *
+   * @param {PaintDef} paint
+   */
+  static checkPaint( paint ) {
+    if ( typeof paint === 'string' ) {
+      Color.checkPaintString( paint );
+    }
+    else if ( ( paint instanceof Property ) && ( typeof paint.value === 'string' ) ) {
+      Color.checkPaintString( paint.value );
+    }
+  }
+
+  /**
+   * Gets the luminance of a color, per ITU-R recommendation BT.709, https://en.wikipedia.org/wiki/Rec._709.
+   * Green contributes the most to the intensity perceived by humans, and blue the least.
+   * This algorithm works correctly with a grayscale color because the RGB coefficients sum to 1.
+   * @public
+   *
+   * @param {Color|string} color
+   * @returns {number} - a value in the range [0,255]
+   */
+  static getLuminance( color ) {
+    const sceneryColor = Color.toColor( color );
+    const luminance = ( sceneryColor.red * 0.2126 + sceneryColor.green * 0.7152 + sceneryColor.blue * 0.0722 );
+    assert && assert( luminance >= 0 && luminance <= 255, `unexpected luminance: ${luminance}` );
+    return luminance;
+  }
+
+  /**
+   * Converts a color to grayscale.
+   * @public
+   *
+   * @param {Color|string} color
+   * @returns {Color}
+   */
+  static toGrayscale( color ) {
+    const luminance = Color.getLuminance( color );
+    return new Color( luminance, luminance, luminance );
+  }
+
+  /**
+   * Determines whether a color is 'dark'.
+   * @public
+   *
+   * @param {Color|string} color
+   * @param {number} [luminanceThreshold] - colors with luminance < this value are dark, range [0,255], default 186
+   * @returns {boolean}
+   */
+  static isDarkColor( color, luminanceThreshold = 186 ) {
+    assert && assert( typeof luminanceThreshold === 'number' && luminanceThreshold >= 0 && luminanceThreshold <= 255,
+      'invalid luminanceThreshold' );
+    return ( Color.getLuminance( color ) < luminanceThreshold );
+  }
+
+  /**
+   * Determines whether a color is 'light'.
+   * @public
+   *
+   * @param {Color|string} color
+   * @param {number} [luminanceThreshold] - colors with luminance >= this value are light, range [0,255], default 186
+   * @returns {boolean}
+   */
+  static isLightColor( color, luminanceThreshold ) {
+    return !Color.isDarkColor( color, luminanceThreshold );
+  }
+}
+
+scenery.register( 'Color', Color );
+
+// regex utilities
+const rgbNumber = '(-?\\d{1,3}%?)'; // syntax allows negative integers and percentages
+const aNumber = '(\\d+|\\d*\\.\\d+)'; // decimal point number. technically we allow for '255', even though this will be clamped to 1.
+const rawNumber = '(\\d{1,3})'; // a 1-3 digit number
+
+// handles negative and percentage values
+function parseRGBNumber( str ) {
+  let multiplier = 1;
+
+  // if it's a percentage, strip it off and handle it that way
+  if ( str.charAt( str.length - 1 ) === '%' ) {
+    multiplier = 2.55;
+    str = str.slice( 0, str.length - 1 );
+  }
+
+  return Utils.roundSymmetric( parseInt( str, 10 ) * multiplier );
+}
+
+Color.formatParsers = [
+  {
+    // 'transparent'
+    regexp: /^transparent$/,
+    apply: ( color, matches ) => {
+      color.setRGBA( 0, 0, 0, 0 );
+    }
+  },
+  {
+    // short hex form, a la '#fff'
+    regexp: /^#(\w{1})(\w{1})(\w{1})$/,
+    apply: ( color, matches ) => {
+      color.setRGBA(
+        parseInt( matches[ 1 ] + matches[ 1 ], 16 ),
+        parseInt( matches[ 2 ] + matches[ 2 ], 16 ),
+        parseInt( matches[ 3 ] + matches[ 3 ], 16 ),
+        1 );
+    }
+  },
+  {
+    // long hex form, a la '#ffffff'
+    regexp: /^#(\w{2})(\w{2})(\w{2})$/,
+    apply: ( color, matches ) => {
+      color.setRGBA(
+        parseInt( matches[ 1 ], 16 ),
+        parseInt( matches[ 2 ], 16 ),
+        parseInt( matches[ 3 ], 16 ),
+        1 );
+    }
+  },
+  {
+    // rgb(...)
+    regexp: new RegExp( '^rgb\\(' + rgbNumber + ',' + rgbNumber + ',' + rgbNumber + '\\)$' ),
+    apply: ( color, matches ) => {
+      color.setRGBA(
+        parseRGBNumber( matches[ 1 ] ),
+        parseRGBNumber( matches[ 2 ] ),
+        parseRGBNumber( matches[ 3 ] ),
+        1 );
+    }
+  },
+  {
+    // rgba(...)
+    regexp: new RegExp( '^rgba\\(' + rgbNumber + ',' + rgbNumber + ',' + rgbNumber + ',' + aNumber + '\\)$' ),
+    apply: ( color, matches ) => {
+      color.setRGBA(
+        parseRGBNumber( matches[ 1 ] ),
+        parseRGBNumber( matches[ 2 ] ),
+        parseRGBNumber( matches[ 3 ] ),
+        parseFloat( matches[ 4 ] ) );
+    }
+  },
+  {
+    // hsl(...)
+    regexp: new RegExp( '^hsl\\(' + rawNumber + ',' + rawNumber + '%,' + rawNumber + '%\\)$' ),
+    apply: ( color, matches ) => {
+      color.setHSLA(
+        parseInt( matches[ 1 ], 10 ),
+        parseInt( matches[ 2 ], 10 ),
+        parseInt( matches[ 3 ], 10 ),
+        1 );
+    }
+  },
+  {
+    // hsla(...)
+    regexp: new RegExp( '^hsla\\(' + rawNumber + ',' + rawNumber + '%,' + rawNumber + '%,' + aNumber + '\\)$' ),
+    apply: ( color, matches ) => {
+      color.setHSLA(
+        parseInt( matches[ 1 ], 10 ),
+        parseInt( matches[ 2 ], 10 ),
+        parseInt( matches[ 3 ], 10 ),
+        parseFloat( matches[ 4 ] ) );
+    }
+  }
+];
 
 Color.basicColorKeywords = {
   aqua: '00ffff',
@@ -715,144 +1060,7 @@ Color.YELLOW = Color.yellow = new Color( 255, 255, 0 ).setImmutable();
 // Helper for transparent colors
 Color.TRANSPARENT = Color.transparent = new Color( 0, 0, 0, 0 ).setImmutable();
 
-/**
- * Interpolates between 2 colors in RGBA space. When distance is 0, color1
- * is returned. When distance is 1, color2 is returned. Other values of
- * distance return a color somewhere between color1 and color2. Each color
- * component is interpolated separately.
- *
- * @param {Color} color1
- * @param {Color} color2
- * @param {number} distance distance between color1 and color2, 0 <= distance <= 1
- * @returns {Color}
- */
-Color.interpolateRGBA = function( color1, color2, distance ) {
-  if ( distance < 0 || distance > 1 ) {
-    throw new Error( 'distance must be between 0 and 1: ' + distance );
-  }
-  const r = Math.floor( linear( 0, 1, color1.r, color2.r, distance ) );
-  const g = Math.floor( linear( 0, 1, color1.g, color2.g, distance ) );
-  const b = Math.floor( linear( 0, 1, color1.b, color2.b, distance ) );
-  const a = linear( 0, 1, color1.a, color2.a, distance );
-  return new Color( r, g, b, a );
-};
-
-/**
- * Returns a blended color as a mix between the given colors.
- * @public
- *
- * @param {Array.<Color>} colors
- * @returns {Color}
- */
-Color.supersampleBlend = function( colors ) {
-  // hard-coded gamma (assuming the exponential part of the sRGB curve as a simplification)
-  const GAMMA = 2.2;
-
-  // maps to [0,1] linear colorspace
-  const reds = colors.map( color => Math.pow( color.r / 255, GAMMA ) );
-  const greens = colors.map( color => Math.pow( color.g / 255, GAMMA ) );
-  const blues = colors.map( color => Math.pow( color.b / 255, GAMMA ) );
-  const alphas = colors.map( color => Math.pow( color.a, GAMMA ) );
-
-  const alphaSum = _.sum( alphas );
-
-  if ( alphaSum === 0 ) {
-    return new Color( 0, 0, 0, 0 );
-  }
-
-  // blending of pixels, weighted by alphas
-  const red = _.sum( _.range( 0, colors.length ).map( i => reds[ i ] * alphas[ i ] ) ) / alphaSum;
-  const green = _.sum( _.range( 0, colors.length ).map( i => greens[ i ] * alphas[ i ] ) ) / alphaSum;
-  const blue = _.sum( _.range( 0, colors.length ).map( i => blues[ i ] * alphas[ i ] ) ) / alphaSum;
-  const alpha = alphaSum / colors.length; // average of alphas
-
-  return new Color(
-    Math.floor( Math.pow( red, 1 / GAMMA ) * 255 ),
-    Math.floor( Math.pow( green, 1 / GAMMA ) * 255 ),
-    Math.floor( Math.pow( blue, 1 / GAMMA ) * 255 ),
-    Math.pow( alpha, 1 / GAMMA )
-  );
-};
-
-Color.fromStateObject = function( stateObject ) {
-  return new Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a );
-};
-
-Color.hsla = function( hue, saturation, lightness, alpha ) {
-  return new Color( 0, 0, 0, 1 ).setHSLA( hue, saturation, lightness, alpha );
-};
-
 const scratchColor = new Color( 'blue' );
-Color.checkPaintString = function( cssString ) {
-  if ( assert ) {
-    try {
-      scratchColor.setCSS( cssString );
-    }
-    catch( e ) {
-      assert( false, 'The CSS string is an invalid color: ' + cssString );
-    }
-  }
-};
-
-// a Paint of the type that Paintable accepts as fills or strokes
-Color.checkPaint = function( paint ) {
-  if ( typeof paint === 'string' ) {
-    Color.checkPaintString( paint );
-  }
-  else if ( ( paint instanceof Property ) && ( typeof paint.value === 'string' ) ) {
-    Color.checkPaintString( paint.value );
-  }
-};
-
-/**
- * Gets the luminance of a color, per ITU-R recommendation BT.709, https://en.wikipedia.org/wiki/Rec._709.
- * Green contributes the most to the intensity perceived by humans, and blue the least.
- * This algorithm works correctly with a grayscale color because the RGB coefficients sum to 1.
- * @param {Color|string} color
- * @returns {number} - a value in the range [0,255]
- * @public
- */
-Color.getLuminance = function( color ) {
-  const sceneryColor = Color.toColor( color );
-  const luminance = ( sceneryColor.red * 0.2126 + sceneryColor.green * 0.7152 + sceneryColor.blue * 0.0722 );
-  assert && assert( luminance >= 0 && luminance <= 255, `unexpected luminance: ${luminance}` );
-  return luminance;
-};
-
-/**
- * Converts a color to grayscale.
- * @param {Color|string} color
- * @returns {Color}
- * @public
- */
-Color.toGrayscale = function( color ) {
-  const luminance = Color.getLuminance( color );
-  return new Color( luminance, luminance, luminance );
-};
-
-/**
- * Determines whether a color is 'dark'.
- * @param {Color|string} color
- * @param {number} [luminanceThreshold] - colors with luminance < this value are dark, range [0,255], default 186
- * @returns {boolean}
- * @public
- */
-Color.isDarkColor = function( color, luminanceThreshold = 186 ) {
-  assert && assert( typeof luminanceThreshold === 'number' && luminanceThreshold >= 0 && luminanceThreshold <= 255,
-    'invalid luminanceThreshold' );
-  return ( Color.getLuminance( color ) < luminanceThreshold );
-};
-
-/**
- * Determines whether a color is 'light'.
- * @param {Color|string} color
- * @param {number} [luminanceThreshold] - colors with luminance >= this value are light, range [0,255], default 186
- * @returns {boolean}
- * @public
- */
-Color.isLightColor = function( color, luminanceThreshold ) {
-  return !Color.isDarkColor( color, luminanceThreshold );
-};
 
 Color.ColorIO = new IOType( 'ColorIO', {
   valueType: Color,
