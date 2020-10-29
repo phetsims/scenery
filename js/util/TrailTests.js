@@ -56,7 +56,7 @@ function createTestNodeTree() { // eslint-disable-line no-unused-vars
   return node;
 }
 
-QUnit.test( 'Dirty bounds propagation test', function( assert ) {
+QUnit.test( 'Dirty bounds propagation test', assert => {
   const node = createTestNodeTree();
 
   node.validateBounds();
@@ -68,7 +68,7 @@ QUnit.test( 'Dirty bounds propagation test', function( assert ) {
   assert.ok( node._childBoundsDirty );
 } );
 
-QUnit.test( 'Canvas 2D Context and Features', function( assert ) {
+QUnit.test( 'Canvas 2D Context and Features', assert => {
   const canvas = document.createElement( 'canvas' );
   const context = canvas.getContext( '2d' );
 
@@ -97,12 +97,12 @@ QUnit.test( 'Canvas 2D Context and Features', function( assert ) {
     'strokeRect',
     'strokeStyle'
   ];
-  _.each( neededMethods, function( method ) {
+  _.each( neededMethods, method => {
     assert.ok( context[ method ] !== undefined, 'context.' + method );
   } );
 } );
 
-QUnit.test( 'Trail next/previous', function( assert ) {
+QUnit.test( 'Trail next/previous', assert => {
   const node = createTestNodeTree();
 
   // walk it forward
@@ -165,7 +165,7 @@ QUnit.test( 'Trail next/previous', function( assert ) {
   assert.equal( null, trail.previous() );
 } );
 
-QUnit.test( 'Trail comparison', function( assert ) {
+QUnit.test( 'Trail comparison', assert => {
   const node = createTestNodeTree();
 
   // get a list of all trails in render order
@@ -189,7 +189,7 @@ QUnit.test( 'Trail comparison', function( assert ) {
   }
 } );
 
-QUnit.test( 'Trail eachTrailBetween', function( assert ) {
+QUnit.test( 'Trail eachTrailBetween', assert => {
   const node = createTestNodeTree();
 
   // get a list of all trails in render order
@@ -201,22 +201,22 @@ QUnit.test( 'Trail eachTrailBetween', function( assert ) {
     currentTrail = currentTrail.next();
   }
 
-  assert.equal( 13, trails.length, 'Trails: ' + _.map( trails, function( trail ) { return trail.toString(); } ).join( '\n' ) );
+  assert.equal( 13, trails.length, 'Trails: ' + _.map( trails, trail => trail.toString() ).join( '\n' ) );
 
   for ( let i = 0; i < trails.length; i++ ) {
     for ( let j = i; j < trails.length; j++ ) {
       var inclusiveList = [];
-      Trail.eachTrailBetween( trails[ i ], trails[ j ], function( trail ) {
+      Trail.eachTrailBetween( trails[ i ], trails[ j ], trail => {
         inclusiveList.push( trail.copy() );
       }, false, node );
       const trailString = i + ',' + j + ' ' + trails[ i ].toString() + ' to ' + trails[ j ].toString();
       assert.ok( inclusiveList[ 0 ].equals( trails[ i ] ), 'inclusive start on ' + trailString + ' is ' + inclusiveList[ 0 ].toString() );
       assert.ok( inclusiveList[ inclusiveList.length - 1 ].equals( trails[ j ] ), 'inclusive end on ' + trailString + 'is ' + inclusiveList[ inclusiveList.length - 1 ].toString() );
-      assert.equal( inclusiveList.length, j - i + 1, 'inclusive length on ' + trailString + ' is ' + inclusiveList.length + ', ' + _.map( inclusiveList, function( trail ) { return trail.toString(); } ).join( '\n' ) );
+      assert.equal( inclusiveList.length, j - i + 1, 'inclusive length on ' + trailString + ' is ' + inclusiveList.length + ', ' + _.map( inclusiveList, trail => trail.toString() ).join( '\n' ) );
 
       if ( i < j ) {
         var exclusiveList = [];
-        Trail.eachTrailBetween( trails[ i ], trails[ j ], function( trail ) {
+        Trail.eachTrailBetween( trails[ i ], trails[ j ], trail => {
           exclusiveList.push( trail.copy() );
         }, true, node );
         assert.equal( exclusiveList.length, j - i - 1, 'exclusive length on ' + i + ',' + j );
@@ -225,11 +225,11 @@ QUnit.test( 'Trail eachTrailBetween', function( assert ) {
   }
 } );
 
-QUnit.test( 'depthFirstUntil depthFirstUntil with subtree skipping', function( assert ) {
+QUnit.test( 'depthFirstUntil depthFirstUntil with subtree skipping', assert => {
   const node = createTestNodeTree();
   node.children[ 0 ].children[ 2 ].visible = false;
   node.children[ 0 ].children[ 3 ].visible = false;
-  new TrailPointer( new Trail( node ), true ).depthFirstUntil( new TrailPointer( new Trail( node ), false ), function( pointer ) {
+  new TrailPointer( new Trail( node ), true ).depthFirstUntil( new TrailPointer( new Trail( node ), false ), pointer => {
     if ( !pointer.trail.lastNode().isVisible() ) {
       // should skip
       return true;
@@ -238,11 +238,11 @@ QUnit.test( 'depthFirstUntil depthFirstUntil with subtree skipping', function( a
   }, false );
 } );
 
-QUnit.test( 'Trail eachTrailUnder with subtree skipping', function( assert ) {
+QUnit.test( 'Trail eachTrailUnder with subtree skipping', assert => {
   const node = createTestNodeTree();
   node.children[ 0 ].children[ 2 ].visible = false;
   node.children[ 0 ].children[ 3 ].visible = false;
-  new Trail( node ).eachTrailUnder( function( trail ) {
+  new Trail( node ).eachTrailUnder( trail => {
     if ( !trail.lastNode().isVisible() ) {
       // should skip
       return true;
@@ -251,7 +251,7 @@ QUnit.test( 'Trail eachTrailUnder with subtree skipping', function( assert ) {
   } );
 } );
 
-QUnit.test( 'TrailPointer render comparison', function( assert ) {
+QUnit.test( 'TrailPointer render comparison', assert => {
   const node = createTestNodeTree();
 
   assert.equal( 0, new TrailPointer( node.getUniqueTrail(), true ).compareRender( new TrailPointer( node.getUniqueTrail(), true ) ), 'Same before pointer' );
@@ -305,7 +305,7 @@ QUnit.test( 'TrailPointer render comparison', function( assert ) {
   }
 } );
 
-QUnit.test( 'TrailPointer nested comparison and fowards/backwards', function( assert ) {
+QUnit.test( 'TrailPointer nested comparison and fowards/backwards', assert => {
   const node = createTestNodeTree();
 
   // all pointers in the nested order
@@ -367,7 +367,7 @@ QUnit.test( 'TrailPointer nested comparison and fowards/backwards', function( as
     for ( j = i + 1; j < pointers.length; j++ ) {
       // i < j guaranteed
       var contents = [];
-      pointers[ i ].depthFirstUntil( pointers[ j ], function( pointer ) { contents.push( pointer.copy() ); }, false );
+      pointers[ i ].depthFirstUntil( pointers[ j ], pointer => { contents.push( pointer.copy() ); }, false );
       assert.equal( contents.length, j - i + 1, 'depthFirstUntil inclusive ' + i + ',' + j + ' count check' );
 
       // do an actual pointer to pointer comparison
@@ -388,7 +388,7 @@ QUnit.test( 'TrailPointer nested comparison and fowards/backwards', function( as
     for ( j = i + 1; j < pointers.length; j++ ) {
       // i < j guaranteed
       contents = [];
-      pointers[ i ].depthFirstUntil( pointers[ j ], function( pointer ) { contents.push( pointer.copy() ); }, true );
+      pointers[ i ].depthFirstUntil( pointers[ j ], pointer => { contents.push( pointer.copy() ); }, true );
       assert.equal( contents.length, j - i - 1, 'depthFirstUntil exclusive ' + i + ',' + j + ' count check' );
 
       // do an actual pointer to pointer comparison
@@ -475,14 +475,14 @@ QUnit.test( 'TrailPointer nested comparison and fowards/backwards', function( as
 //   }
 // } );
 
-QUnit.test( 'Text width measurement in canvas', function( assert ) {
+QUnit.test( 'Text width measurement in canvas', assert => {
   const canvas = document.createElement( 'canvas' );
   const context = canvas.getContext( '2d' );
   const metrics = context.measureText( 'Hello World' );
   assert.ok( metrics.width, 'metrics.width' );
 } );
 
-QUnit.test( 'Sceneless node handling', function( assert ) {
+QUnit.test( 'Sceneless node handling', assert => {
   const a = new Path( null );
   const b = new Path( null );
   const c = new Path( null );
@@ -503,23 +503,23 @@ QUnit.test( 'Sceneless node handling', function( assert ) {
   assert.ok( true, 'so we have at least 1 test in this set' );
 } );
 
-QUnit.test( 'Correct bounds on rectangle', function( assert ) {
-  const rectBounds = Utils.canvasAccurateBounds( function( context ) { context.fillRect( 100, 100, 200, 200 ); } );
+QUnit.test( 'Correct bounds on rectangle', assert => {
+  const rectBounds = Utils.canvasAccurateBounds( context => { context.fillRect( 100, 100, 200, 200 ); } );
   assert.ok( Math.abs( rectBounds.minX - 100 ) < 0.01, rectBounds.minX );
   assert.ok( Math.abs( rectBounds.minY - 100 ) < 0.01, rectBounds.minY );
   assert.ok( Math.abs( rectBounds.maxX - 300 ) < 0.01, rectBounds.maxX );
   assert.ok( Math.abs( rectBounds.maxY - 300 ) < 0.01, rectBounds.maxY );
 } );
 
-QUnit.test( 'Consistent and precise bounds range on Text', function( assert ) {
-  const textBounds = Utils.canvasAccurateBounds( function( context ) { context.fillText( 'test string', 0, 0 ); } );
+QUnit.test( 'Consistent and precise bounds range on Text', assert => {
+  const textBounds = Utils.canvasAccurateBounds( context => { context.fillText( 'test string', 0, 0 ); } );
   assert.ok( textBounds.isConsistent, textBounds.toString() );
 
   // precision of 0.001 (or lower given different parameters) is possible on non-Chome browsers (Firefox, IE9, Opera)
   assert.ok( textBounds.precision < 0.15, 'precision: ' + textBounds.precision );
 } );
 
-QUnit.test( 'Consistent and precise bounds range on Text', function( assert ) {
+QUnit.test( 'Consistent and precise bounds range on Text', assert => {
   const text = new Text( '0\u0489' );
   const textBounds = TextBounds.accurateCanvasBounds( text );
   assert.ok( textBounds.isConsistent, textBounds.toString() );
@@ -528,7 +528,7 @@ QUnit.test( 'Consistent and precise bounds range on Text', function( assert ) {
   assert.ok( textBounds.precision < 1, 'precision: ' + textBounds.precision );
 } );
 
-QUnit.test( 'ES5 Setter / Getter tests', function( assert ) {
+QUnit.test( 'ES5 Setter / Getter tests', assert => {
   const node = new Path( null );
   const fill = '#abcdef';
   node.fill = fill;
@@ -540,7 +540,7 @@ QUnit.test( 'ES5 Setter / Getter tests', function( assert ) {
   assert.equal( otherNode.fill, fill );
 } );
 
-QUnit.test( 'Piccolo-like behavior', function( assert ) {
+QUnit.test( 'Piccolo-like behavior', assert => {
   const node = new Node();
 
   node.scale( 2 );
@@ -573,7 +573,7 @@ QUnit.test( 'Piccolo-like behavior', function( assert ) {
   equalsApprox( assert, node.getMatrix().m10(), -1.288435374475382 );
 } );
 
-QUnit.test( 'Setting left/right of node', function( assert ) {
+QUnit.test( 'Setting left/right of node', assert => {
   const node = new Path( Shape.rectangle( -20, -20, 50, 50 ), {
     scale: 2
   } );
@@ -595,21 +595,21 @@ QUnit.test( 'Setting left/right of node', function( assert ) {
   equalsApprox( assert, node.right, 55 );
 } );
 
-QUnit.test( 'Path with empty shape', function( assert ) {
+QUnit.test( 'Path with empty shape', assert => {
   const scene = new Node();
   const node = new Path( new Shape() );
   scene.addChild( node );
   assert.ok( true, 'so we have at least 1 test in this set' );
 } );
 
-QUnit.test( 'Path with null shape', function( assert ) {
+QUnit.test( 'Path with null shape', assert => {
   const scene = new Node();
   const node = new Path( null );
   scene.addChild( node );
   assert.ok( true, 'so we have at least 1 test in this set' );
 } );
 
-QUnit.test( 'Display resize event', function( assert ) {
+QUnit.test( 'Display resize event', assert => {
   const scene = new Node();
   const display = new Display( scene );
 
@@ -617,7 +617,7 @@ QUnit.test( 'Display resize event', function( assert ) {
   let height;
   let count = 0;
 
-  display.sizeProperty.lazyLink( function( size ) {
+  display.sizeProperty.lazyLink( size => {
     width = size.width;
     height = size.height;
     count++;
@@ -630,7 +630,7 @@ QUnit.test( 'Display resize event', function( assert ) {
   assert.equal( count, 1, 'Scene resize count' );
 } );
 
-QUnit.test( 'Bounds events', function( assert ) {
+QUnit.test( 'Bounds events', assert => {
   const node = new Node();
   node.y = 10;
 
@@ -642,27 +642,27 @@ QUnit.test( 'Bounds events', function( assert ) {
 
   const epsilon = 0.0000001;
 
-  node.childBoundsProperty.lazyLink( function() {
+  node.childBoundsProperty.lazyLink( () => {
     assert.ok( node.childBounds.equalsEpsilon( new Bounds2( 10, 0, 110, 30 ), epsilon ), 'Parent child bounds check: ' + node.childBounds.toString() );
   } );
 
-  node.boundsProperty.lazyLink( function() {
+  node.boundsProperty.lazyLink( () => {
     assert.ok( node.bounds.equalsEpsilon( new Bounds2( 10, 10, 110, 40 ), epsilon ), 'Parent bounds check: ' + node.bounds.toString() );
   } );
 
-  node.selfBoundsProperty.lazyLink( function() {
+  node.selfBoundsProperty.lazyLink( () => {
     assert.ok( false, 'Self bounds should not change for parent node' );
   } );
 
-  rect.selfBoundsProperty.lazyLink( function() {
+  rect.selfBoundsProperty.lazyLink( () => {
     assert.ok( rect.selfBounds.equalsEpsilon( new Bounds2( 0, 0, 100, 30 ), epsilon ), 'Self bounds check: ' + rect.selfBounds.toString() );
   } );
 
-  rect.boundsProperty.lazyLink( function() {
+  rect.boundsProperty.lazyLink( () => {
     assert.ok( rect.bounds.equalsEpsilon( new Bounds2( 10, 0, 110, 30 ), epsilon ), 'Bounds check: ' + rect.bounds.toString() );
   } );
 
-  rect.childBoundsProperty.lazyLink( function() {
+  rect.childBoundsProperty.lazyLink( () => {
     assert.ok( false, 'Child bounds should not change for leaf node' );
   } );
 
@@ -670,7 +670,7 @@ QUnit.test( 'Bounds events', function( assert ) {
   node.validateBounds();
 } );
 
-QUnit.test( 'Using a color instance', function( assert ) {
+QUnit.test( 'Using a color instance', assert => {
   const scene = new Node();
 
   const rect = new Rectangle( 0, 0, 100, 50 );
@@ -681,7 +681,7 @@ QUnit.test( 'Using a color instance', function( assert ) {
   color.setRGBA( 0, 255, 0, 1 );
 } );
 
-QUnit.test( 'Bounds and Visible Bounds', function( assert ) {
+QUnit.test( 'Bounds and Visible Bounds', assert => {
   const node = new Node();
   const rect = new Rectangle( 0, 0, 100, 50 );
   node.addChild( rect );
@@ -695,7 +695,7 @@ QUnit.test( 'Bounds and Visible Bounds', function( assert ) {
   assert.ok( node.bounds.equals( new Bounds2( 0, 0, 100, 50 ) ), 'Complete Bounds Invisible' );
 } );
 
-QUnit.test( 'localBounds override', function( assert ) {
+QUnit.test( 'localBounds override', assert => {
   const node = new Node( { y: 5 } );
   const rect = new Rectangle( 0, 0, 100, 50 );
   node.addChild( rect );
@@ -735,7 +735,7 @@ function compareTrailArrays( a, b ) {
   return b.length === 0;
 }
 
-QUnit.test( 'getTrails/getUniqueTrail', function( assert ) {
+QUnit.test( 'getTrails/getUniqueTrail', assert => {
   const a = new Node();
   const b = new Node();
   const c = new Node();
@@ -750,7 +750,7 @@ QUnit.test( 'getTrails/getUniqueTrail', function( assert ) {
   c.addChild( e );
 
   // getUniqueTrail()
-  window.assert && assert.throws( function() { d.getUniqueTrail(); }, 'D has no unique trail, since there are two' );
+  window.assert && assert.throws( () => { d.getUniqueTrail(); }, 'D has no unique trail, since there are two' );
   assert.ok( a.getUniqueTrail().equals( new Trail( [ a ] ) ), 'a.getUniqueTrail()' );
   assert.ok( b.getUniqueTrail().equals( new Trail( [ a, b ] ) ), 'b.getUniqueTrail()' );
   assert.ok( c.getUniqueTrail().equals( new Trail( [ a, c ] ) ), 'c.getUniqueTrail()' );
@@ -770,19 +770,19 @@ QUnit.test( 'getTrails/getUniqueTrail', function( assert ) {
   assert.ok( trails.length === 1 && trails[ 0 ].equals( new Trail( [ a, c, e ] ) ), 'e.getTrails()' );
 
   // getUniqueTrail( predicate )
-  window.assert && assert.throws( function() { e.getUniqueTrail( function( node ) { return false; } ); }, 'Fails on false predicate' );
-  window.assert && assert.throws( function() { e.getUniqueTrail( function( node ) { return false; } ); }, 'Fails on false predicate' );
-  assert.ok( e.getUniqueTrail( function( node ) { return node === a; } ).equals( new Trail( [ a, c, e ] ) ) );
-  assert.ok( e.getUniqueTrail( function( node ) { return node === c; } ).equals( new Trail( [ c, e ] ) ) );
-  assert.ok( e.getUniqueTrail( function( node ) { return node === e; } ).equals( new Trail( [ e ] ) ) );
-  assert.ok( d.getUniqueTrail( function( node ) { return node === b; } ).equals( new Trail( [ b, d ] ) ) );
-  assert.ok( d.getUniqueTrail( function( node ) { return node === c; } ).equals( new Trail( [ c, d ] ) ) );
-  assert.ok( d.getUniqueTrail( function( node ) { return node === d; } ).equals( new Trail( [ d ] ) ) );
+  window.assert && assert.throws( () => { e.getUniqueTrail( node => false ); }, 'Fails on false predicate' );
+  window.assert && assert.throws( () => { e.getUniqueTrail( node => false ); }, 'Fails on false predicate' );
+  assert.ok( e.getUniqueTrail( node => node === a ).equals( new Trail( [ a, c, e ] ) ) );
+  assert.ok( e.getUniqueTrail( node => node === c ).equals( new Trail( [ c, e ] ) ) );
+  assert.ok( e.getUniqueTrail( node => node === e ).equals( new Trail( [ e ] ) ) );
+  assert.ok( d.getUniqueTrail( node => node === b ).equals( new Trail( [ b, d ] ) ) );
+  assert.ok( d.getUniqueTrail( node => node === c ).equals( new Trail( [ c, d ] ) ) );
+  assert.ok( d.getUniqueTrail( node => node === d ).equals( new Trail( [ d ] ) ) );
 
   // getTrails( predicate )
-  trails = d.getTrails( function( node ) { return false; } );
+  trails = d.getTrails( node => false );
   assert.ok( trails.length === 0 );
-  trails = d.getTrails( function( node ) { return true; } );
+  trails = d.getTrails( node => true );
   assert.ok( compareTrailArrays( trails, [
     new Trail( [ a, b, d ] ),
     new Trail( [ b, d ] ),
@@ -790,23 +790,23 @@ QUnit.test( 'getTrails/getUniqueTrail', function( assert ) {
     new Trail( [ c, d ] ),
     new Trail( [ d ] )
   ] ) );
-  trails = d.getTrails( function( node ) { return node === a; } );
+  trails = d.getTrails( node => node === a );
   assert.ok( compareTrailArrays( trails, [
     new Trail( [ a, b, d ] ),
     new Trail( [ a, c, d ] )
   ] ) );
-  trails = d.getTrails( function( node ) { return node === b; } );
+  trails = d.getTrails( node => node === b );
   assert.ok( compareTrailArrays( trails, [
     new Trail( [ b, d ] )
   ] ) );
-  trails = d.getTrails( function( node ) { return node.parents.length === 1; } );
+  trails = d.getTrails( node => node.parents.length === 1 );
   assert.ok( compareTrailArrays( trails, [
     new Trail( [ b, d ] ),
     new Trail( [ c, d ] )
   ] ) );
 } );
 
-QUnit.test( 'getLeafTrails', function( assert ) {
+QUnit.test( 'getLeafTrails', assert => {
   const a = new Node();
   const b = new Node();
   const c = new Node();
@@ -821,7 +821,7 @@ QUnit.test( 'getLeafTrails', function( assert ) {
   c.addChild( e );
 
   // getUniqueLeafTrail()
-  window.assert && assert.throws( function() { a.getUniqueLeafTrail(); }, 'A has no unique leaf trail, since there are three' );
+  window.assert && assert.throws( () => { a.getUniqueLeafTrail(); }, 'A has no unique leaf trail, since there are three' );
   assert.ok( b.getUniqueLeafTrail().equals( new Trail( [ b, d ] ) ), 'a.getUniqueLeafTrail()' );
   assert.ok( d.getUniqueLeafTrail().equals( new Trail( [ d ] ) ), 'b.getUniqueLeafTrail()' );
   assert.ok( e.getUniqueLeafTrail().equals( new Trail( [ e ] ) ), 'c.getUniqueLeafTrail()' );
@@ -847,14 +847,14 @@ QUnit.test( 'getLeafTrails', function( assert ) {
   assert.ok( trails.length === 1 && trails[ 0 ].equals( new Trail( [ e ] ) ), 'e.getLeafTrails()' );
 
   // getUniqueLeafTrail( predicate )
-  window.assert && assert.throws( function() { e.getUniqueLeafTrail( function( node ) { return false; } ); }, 'Fails on false predicate' );
-  window.assert && assert.throws( function() { a.getUniqueLeafTrail( function( node ) { return true; } ); }, 'Fails on multiples' );
-  assert.ok( a.getUniqueLeafTrail( function( node ) { return node === e; } ).equals( new Trail( [ a, c, e ] ) ) );
+  window.assert && assert.throws( () => { e.getUniqueLeafTrail( node => false ); }, 'Fails on false predicate' );
+  window.assert && assert.throws( () => { a.getUniqueLeafTrail( node => true ); }, 'Fails on multiples' );
+  assert.ok( a.getUniqueLeafTrail( node => node === e ).equals( new Trail( [ a, c, e ] ) ) );
 
   // getLeafTrails( predicate )
-  trails = a.getLeafTrails( function( node ) { return false; } );
+  trails = a.getLeafTrails( node => false );
   assert.ok( trails.length === 0 );
-  trails = a.getLeafTrails( function( node ) { return true; } );
+  trails = a.getLeafTrails( node => true );
   assert.ok( compareTrailArrays( trails, [
     new Trail( [ a ] ),
     new Trail( [ a, b ] ),
@@ -872,7 +872,7 @@ QUnit.test( 'getLeafTrails', function( assert ) {
   ] ) );
 } );
 
-QUnit.test( 'Line stroked bounds', function( assert ) {
+QUnit.test( 'Line stroked bounds', assert => {
   const line = new Line( 0, 0, 50, 0, { stroke: 'red', lineWidth: 5 } );
 
   const positions = [
@@ -904,10 +904,10 @@ QUnit.test( 'Line stroked bounds', function( assert ) {
     'square'
   ];
 
-  _.each( positions, function( position ) {
+  _.each( positions, position => {
     line.mutate( position );
     // line.setLine( position.x1, position.y1, position.x2, position.y2 );
-    _.each( caps, function( cap ) {
+    _.each( caps, cap => {
       line.lineCap = cap;
 
       assert.ok( line.bounds.equalsEpsilon( line.getShape().getStrokedShape( line.getLineStyles() ).bounds, 0.0001 ),
@@ -916,7 +916,7 @@ QUnit.test( 'Line stroked bounds', function( assert ) {
   } );
 } );
 
-QUnit.test( 'maxWidth/maxHeight for Node', function( assert ) {
+QUnit.test( 'maxWidth/maxHeight for Node', assert => {
   const rect = new Rectangle( 0, 0, 100, 50, { fill: 'red' } );
   const node = new Node( { children: [ rect ] } );
 
@@ -972,7 +972,7 @@ QUnit.test( 'maxWidth/maxHeight for Node', function( assert ) {
   assert.ok( node.bounds.equals( new Bounds2( 50, 0, 75, 12.5 ) ), 'After maxHeight A' );
 } );
 
-QUnit.test( 'Spacers', function( assert ) {
+QUnit.test( 'Spacers', assert => {
   const spacer = new Spacer( 100, 50, { x: 50 } );
   assert.ok( spacer.bounds.equals( new Bounds2( 50, 0, 150, 50 ) ), 'Spacer bounds with translation' );
 
@@ -982,22 +982,22 @@ QUnit.test( 'Spacers', function( assert ) {
   const vstrut = new VStrut( 100, { x: 50 } );
   assert.ok( vstrut.bounds.equals( new Bounds2( 50, 0, 50, 100 ) ), 'VStrut bounds with translation' );
 
-  assert.throws( function() {
+  assert.throws( () => {
     spacer.addChild( new Node() );
   }, 'No way to add children to Spacer' );
 
-  assert.throws( function() {
+  assert.throws( () => {
     hstrut.addChild( new Node() );
   }, 'No way to add children to HStrut' );
 
-  assert.throws( function() {
+  assert.throws( () => {
     vstrut.addChild( new Node() );
   }, 'No way to add children to VStrut' );
 } );
 
-QUnit.test( 'Renderer Summary', function( assert ) {
+QUnit.test( 'Renderer Summary', assert => {
   const canvasNode = new CanvasNode( { canvasBounds: new Bounds2( 0, 0, 10, 10 ) } );
-  const webglNode = new WebGLNode( function() {}, { canvasBounds: new Bounds2( 0, 0, 10, 10 ) } );
+  const webglNode = new WebGLNode( () => {}, { canvasBounds: new Bounds2( 0, 0, 10, 10 ) } );
   const rect = new Rectangle( 0, 0, 100, 50 );
   const node = new Node( { children: [ canvasNode, webglNode, rect ] } );
   const emptyNode = new Node();

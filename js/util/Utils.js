@@ -44,7 +44,7 @@ var Utils = {
    * @param {Element} element
    * @param {boolean} forceAcceleration - Whether graphical acceleration should be forced (may slow things down!)
    */
-  prepareForTransform: function( element, forceAcceleration ) {
+  prepareForTransform( element, forceAcceleration ) {
     element.style[ transformOriginProperty ] = 'top left';
     if ( forceAcceleration ) {
       Utils.setTransformAcceleration( element );
@@ -60,7 +60,7 @@ var Utils = {
    *
    * @param {Element} element
    */
-  setTransformAcceleration: function( element ) {
+  setTransformAcceleration( element ) {
     element.style.webkitBackfaceVisibility = 'hidden';
   },
 
@@ -70,7 +70,7 @@ var Utils = {
    *
    * @param {Element} element
    */
-  unsetTransformAcceleration: function( element ) {
+  unsetTransformAcceleration( element ) {
     element.style.webkitBackfaceVisibility = '';
   },
 
@@ -83,7 +83,7 @@ var Utils = {
    * @param {Element} element
    * @param {boolean} forceAcceleration
    */
-  applyPreparedTransform: function( matrix, element, forceAcceleration ) {
+  applyPreparedTransform( matrix, element, forceAcceleration ) {
     // NOTE: not applying translateZ, see http://stackoverflow.com/questions/10014461/why-does-enabling-hardware-acceleration-in-css3-slow-down-performance
     element.style[ transformProperty ] = matrix.getCSSTransform();
   },
@@ -97,7 +97,7 @@ var Utils = {
    * @param {Element} element
    * @param {boolean} forceAcceleration
    */
-  setTransform: function( transformString, element, forceAcceleration ) {
+  setTransform( transformString, element, forceAcceleration ) {
     assert && assert( typeof transformString === 'string' );
 
     element.style[ transformProperty ] = transformString;
@@ -109,7 +109,7 @@ var Utils = {
    *
    * @param {Element} element
    */
-  unsetTransform: function( element ) {
+  unsetTransform( element ) {
     element.style[ transformProperty ] = '';
   },
 
@@ -118,14 +118,14 @@ var Utils = {
    * otherwise using a simple setTimeout internally. See https://github.com/phetsims/scenery/issues/426
    * @public
    */
-  polyfillRequestAnimationFrame: function() {
+  polyfillRequestAnimationFrame() {
     if ( !window.requestAnimationFrame || !window.cancelAnimationFrame ) {
       // Fallback implementation if no prefixed version is available
       if ( !Features.requestAnimationFrame || !Features.cancelAnimationFrame ) {
-        window.requestAnimationFrame = function( callback ) {
+        window.requestAnimationFrame = callback => {
           const timeAtStart = Date.now();
 
-          return window.setTimeout( function() {
+          return window.setTimeout( () => {
             callback( Date.now() - timeAtStart );
           }, 16 );
         };
@@ -147,7 +147,7 @@ var Utils = {
    * @param {CanvasRenderingContext2D | WebGLRenderingContext} context
    * @returns {number} The backing store pixel ratio.
    */
-  backingStorePixelRatio: function( context ) {
+  backingStorePixelRatio( context ) {
     return context.webkitBackingStorePixelRatio ||
            context.mozBackingStorePixelRatio ||
            context.msBackingStorePixelRatio ||
@@ -164,7 +164,7 @@ var Utils = {
    * @param {CanvasRenderingContext2D | WebGLRenderingContext} context
    * @returns {number}
    */
-  backingScale: function( context ) {
+  backingScale( context ) {
     if ( 'devicePixelRatio' in window ) {
       const backingStoreRatio = Utils.backingStorePixelRatio( context );
 
@@ -187,11 +187,11 @@ var Utils = {
    * @param {number} resolution
    * @param {Transform3} transform
    */
-  scanBounds: function( imageData, resolution, transform ) {
+  scanBounds( imageData, resolution, transform ) {
 
     // entry will be true if any pixel with the given x or y value is non-rgba(0,0,0,0)
-    const dirtyX = _.map( _.range( resolution ), function() { return false; } );
-    const dirtyY = _.map( _.range( resolution ), function() { return false; } );
+    const dirtyX = _.map( _.range( resolution ), () => false );
+    const dirtyY = _.map( _.range( resolution ), () => false );
 
     for ( let x = 0; x < resolution; x++ ) {
       for ( let y = 0; y < resolution; y++ ) {
@@ -234,7 +234,7 @@ var Utils = {
    * @param {function} renderToContext - Called with the Canvas 2D context as a parameter, should draw to it.
    * @param {Object} [options]
    */
-  canvasAccurateBounds: function( renderToContext, options ) {
+  canvasAccurateBounds( renderToContext, options ) {
     // how close to the actual bounds do we need to be?
     const precision = ( options && options.precision ) ? options.precision : 0.001;
 
@@ -254,7 +254,7 @@ var Utils = {
     const context = canvas.getContext( '2d' );
 
     if ( debugChromeBoundsScanning ) {
-      $( window ).ready( function() {
+      $( window ).ready( () => {
         const header = document.createElement( 'h2' );
         $( header ).text( 'Bounds Scan' );
         $( '#display' ).append( header );
@@ -279,7 +279,7 @@ var Utils = {
         const context = canvas.getContext( '2d' );
         context.putImageData( snapshot, 0, 0 );
         $( canvas ).css( 'border', '1px solid black' );
-        $( window ).ready( function() {
+        $( window ).ready( () => {
           //$( '#display' ).append( $( document.createElement( 'div' ) ).text( 'Bounds: ' +  ) );
           $( '#display' ).append( canvas );
         } );
@@ -447,7 +447,7 @@ var Utils = {
    * @param {number} n
    * @returns {number} The smallest power of 2 that is greater than or equal n
    */
-  toPowerOf2: function( n ) {
+  toPowerOf2( n ) {
     let result = 1;
     while ( result < n ) {
       result *= 2;
@@ -461,9 +461,10 @@ var Utils = {
    *
    * @param {WebGLRenderingContext} - WebGL Rendering Context
    * @param {number} type - Should be: gl.VERTEX_SHADER or gl.FRAGMENT_SHADER
-   * @param {tring} source - The shader source code.
+   * @param {string} source - The shader source code.
+   * @returns {WebGLShader}
    */
-  createShader: function( gl, source, type ) {
+  createShader( gl, source, type ) {
     const shader = gl.createShader( type );
     gl.shaderSource( shader, source );
     gl.compileShader( shader );
@@ -481,7 +482,7 @@ var Utils = {
     return shader;
   },
 
-  applyWebGLContextDefaults: function( gl ) {
+  applyWebGLContextDefaults( gl ) {
     // What color gets set when we call gl.clear()
     gl.clearColor( 0, 0, 0, 0 );
 
@@ -514,7 +515,7 @@ var Utils = {
    * @param {Array.<string>} [extensions] - A list of WebGL extensions that need to be supported
    * @returns {boolean}
    */
-  checkWebGLSupport: function( extensions ) {
+  checkWebGLSupport( extensions ) {
 
     // The webgl check can be shut off, please see docs at webglEnabled declaration site
     if ( webglEnabled === false ) {
@@ -552,7 +553,7 @@ var Utils = {
    *
    * @returns {boolean}
    */
-  checkIE11StencilSupport: function() {
+  checkIE11StencilSupport() {
     const canvas = document.createElement( 'canvas' );
 
     try {
@@ -591,12 +592,12 @@ var Utils = {
    *
    * @param {WebGLRenderingContext} gl
    */
-  loseContext: function( gl ) {
+  loseContext( gl ) {
     const extension = gl.getExtension( 'WEBGL_lose_context' );
     if ( extension ) {
       extension.loseContext();
 
-      setTimeout( function() {
+      setTimeout( () => {
         extension.restoreContext();
       }, 1000 );
     }
@@ -620,6 +621,6 @@ var Utils = {
     }
   }
 };
-scenery.register( 'Utils', Utils );
 
+scenery.register( 'Utils', Utils );
 export default Utils;
