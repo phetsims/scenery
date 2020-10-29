@@ -26,7 +26,6 @@ import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import DerivedProperty from '../../../axon/js/DerivedProperty.js';
 import createObservableArray from '../../../axon/js/createObservableArray.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import EventType from '../../../tandem/js/EventType.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
@@ -43,267 +42,263 @@ let globalID = 0;
 // Factor out to reduce memory footprint, see https://github.com/phetsims/tandem/issues/71
 const truePredicate = _.constant( true );
 
-/**
- * @constructor
- *
- * @param {Object} [options] - See the constructor body (below) for documented options.
- */
-function PressListener( options ) {
-  options = merge( {
-    // {function} - Called as press( event: {SceneryEvent}, listener: {PressListener} ) when this listener is pressed
-    // (typically from a down event, but can be triggered by other handlers).
-    press: _.noop,
+class PressListener {
+  /**
+   * @param {Object} [options] - See the constructor body (below) for documented options.
+   */
+  constructor( options ) {
+    options = merge( {
+      // {function} - Called as press( event: {SceneryEvent}, listener: {PressListener} ) when this listener is pressed
+      // (typically from a down event, but can be triggered by other handlers).
+      press: _.noop,
 
-    // {function} - Called as release( event: {SceneryEvent|null}, listener: {PressListener} ) when this listener is
-    // released. Note that an SceneryEvent arg cannot be guaranteed from this listener. This is, in part, to support
-    // interrupt. (pointer up/cancel or interrupt when pressed/after a11y click).
-    // NOTE: This will also be called if the press is "released" due to being interrupted or canceled.
-    release: _.noop,
+      // {function} - Called as release( event: {SceneryEvent|null}, listener: {PressListener} ) when this listener is
+      // released. Note that an SceneryEvent arg cannot be guaranteed from this listener. This is, in part, to support
+      // interrupt. (pointer up/cancel or interrupt when pressed/after a11y click).
+      // NOTE: This will also be called if the press is "released" due to being interrupted or canceled.
+      release: _.noop,
 
-    // {function} - Called as drag( event: {SceneryEvent}, listener: {PressListener} ) when this listener is
-    // dragged (move events on the pointer while pressed).
-    drag: _.noop,
+      // {function} - Called as drag( event: {SceneryEvent}, listener: {PressListener} ) when this listener is
+      // dragged (move events on the pointer while pressed).
+      drag: _.noop,
 
-    // {Node|null} - If provided, the pressedTrail (calculated from the down event) will be replaced with the
-    // (sub)trail that ends with the targetNode as the leaf-most Node. This affects the parent coordinate frame
-    // computations.
-    // This is ideally used when the Node which has this input listener is different from the Node being transformed,
-    // as otherwise offsets and drag behavior would be incorrect by default.
-    targetNode: null,
+      // {Node|null} - If provided, the pressedTrail (calculated from the down event) will be replaced with the
+      // (sub)trail that ends with the targetNode as the leaf-most Node. This affects the parent coordinate frame
+      // computations.
+      // This is ideally used when the Node which has this input listener is different from the Node being transformed,
+      // as otherwise offsets and drag behavior would be incorrect by default.
+      targetNode: null,
 
-    // {boolean} - If true, this listener will not "press" while the associated pointer is attached, and when pressed,
-    // will mark itself as attached to the pointer. If this listener should not be interrupted by others and isn't
-    // a "primary" handler of the pointer's behavior, this should be set to false.
-    attach: true,
+      // {boolean} - If true, this listener will not "press" while the associated pointer is attached, and when pressed,
+      // will mark itself as attached to the pointer. If this listener should not be interrupted by others and isn't
+      // a "primary" handler of the pointer's behavior, this should be set to false.
+      attach: true,
 
-    // {number} - Restricts to the specific mouse button (but allows any touch). Only one mouse button is allowed at
-    // a time. The button numbers are defined in https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/button,
-    // where typically:
-    //   0: Left mouse button
-    //   1: Middle mouse button (or wheel press)
-    //   2: Right mouse button
-    //   3+: other specific numbered buttons that are more rare
-    mouseButton: 0,
+      // {number} - Restricts to the specific mouse button (but allows any touch). Only one mouse button is allowed at
+      // a time. The button numbers are defined in https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/button,
+      // where typically:
+      //   0: Left mouse button
+      //   1: Middle mouse button (or wheel press)
+      //   2: Right mouse button
+      //   3+: other specific numbered buttons that are more rare
+      mouseButton: 0,
 
-    // {string|null} - If the targetNode/currentTarget don't have a custom cursor, this will set the pointer cursor to
-    // this value when this listener is "pressed". This means that even when the mouse moves out of the node after
-    // pressing down, it will still have this cursor (overriding the cursor of whatever nodes the pointer may be
-    // over). Additionally, if preferTargetCursor:false is set, then this value will ALWAYS be used as the pointer
-    // cursor, regardless of the value of the targetNode/currentTarget's cursor value.
-    pressCursor: 'pointer',
+      // {string|null} - If the targetNode/currentTarget don't have a custom cursor, this will set the pointer cursor to
+      // this value when this listener is "pressed". This means that even when the mouse moves out of the node after
+      // pressing down, it will still have this cursor (overriding the cursor of whatever nodes the pointer may be
+      // over). Additionally, if preferTargetCursor:false is set, then this value will ALWAYS be used as the pointer
+      // cursor, regardless of the value of the targetNode/currentTarget's cursor value.
+      pressCursor: 'pointer',
 
-    // {boolean} - By default, the targetNode or currentTarget's cursor will be used (if it is non-null), falling back
-    // to the pressCursor option. If this option is set to false, then the pressCursor option will override any set
-    // cursor on the targetNode/currentTarget. See https://github.com/phetsims/scenery/issues/1013 for more info.
-    preferTargetCursor: true,
+      // {boolean} - By default, the targetNode or currentTarget's cursor will be used (if it is non-null), falling back
+      // to the pressCursor option. If this option is set to false, then the pressCursor option will override any set
+      // cursor on the targetNode/currentTarget. See https://github.com/phetsims/scenery/issues/1013 for more info.
+      preferTargetCursor: true,
 
-    // {function} - Checks this when trying to start a press. If this function returns false, a press will not be
-    // started. Called as canStartPress( event: {SceneryEvent|null}, listener: {PressListener} ), since sometimes the
-    // event may not be available.
-    canStartPress: truePredicate,
+      // {function} - Checks this when trying to start a press. If this function returns false, a press will not be
+      // started. Called as canStartPress( event: {SceneryEvent|null}, listener: {PressListener} ), since sometimes the
+      // event may not be available.
+      canStartPress: truePredicate,
 
-    // {number} (a11y) - How long something should 'look' pressed after an accessible click input event, in ms
-    a11yLooksPressedInterval: 100,
+      // {number} (a11y) - How long something should 'look' pressed after an accessible click input event, in ms
+      a11yLooksPressedInterval: 100,
 
-    // {boolean} - If true, multiple drag events in a row (between steps) will be collapsed into one drag event
-    // (usually for performance) by just calling the callbacks for the last drag event. Other events (press/release
-    // handling) will force through the last pending drag event. Calling step() every frame will then be generally
-    // necessary to have accurate-looking drags. NOTE that this may put in events out-of-order.
-    // This is appropriate when the drag operation is expensive performance-wise AND ideally should only be run at
-    // most once per frame (any more, and it would be a waste).
-    collapseDragEvents: false,
+      // {boolean} - If true, multiple drag events in a row (between steps) will be collapsed into one drag event
+      // (usually for performance) by just calling the callbacks for the last drag event. Other events (press/release
+      // handling) will force through the last pending drag event. Calling step() every frame will then be generally
+      // necessary to have accurate-looking drags. NOTE that this may put in events out-of-order.
+      // This is appropriate when the drag operation is expensive performance-wise AND ideally should only be run at
+      // most once per frame (any more, and it would be a waste).
+      collapseDragEvents: false,
 
-    // {Tandem} - For PhET-iO instrumentation. If only using the PressListener for hover behavior, there is no need to
-    // instrument because events are only added to the data stream for press/release and not for hover events. Please pass
-    // Tandem.OPT_OUT as the tandem option to not instrument an instance.
-    tandem: Tandem.REQUIRED,
+      // {Tandem} - For PhET-iO instrumentation. If only using the PressListener for hover behavior, there is no need to
+      // instrument because events are only added to the data stream for press/release and not for hover events. Please pass
+      // Tandem.OPT_OUT as the tandem option to not instrument an instance.
+      tandem: Tandem.REQUIRED,
 
-    // Though PressListener is not instrumented, declare these here to support properly passing this to children, see https://github.com/phetsims/tandem/issues/60.
-    // PressListener by default doesn't allow PhET-iO to trigger press/release Action events
-    phetioReadOnly: true,
-    phetioFeatured: PhetioObject.DEFAULT_OPTIONS.phetioFeatured
-  }, options );
+      // Though PressListener is not instrumented, declare these here to support properly passing this to children, see https://github.com/phetsims/tandem/issues/60.
+      // PressListener by default doesn't allow PhET-iO to trigger press/release Action events
+      phetioReadOnly: true,
+      phetioFeatured: PhetioObject.DEFAULT_OPTIONS.phetioFeatured
+    }, options );
 
-  assert && assert( typeof options.mouseButton === 'number' && options.mouseButton >= 0 && options.mouseButton % 1 === 0,
-    'mouseButton should be a non-negative integer' );
-  assert && assert( options.pressCursor === null || typeof options.pressCursor === 'string',
-    'pressCursor should either be a string or null' );
-  assert && assert( typeof options.press === 'function',
-    'The press callback should be a function' );
-  assert && assert( typeof options.release === 'function',
-    'The release callback should be a function' );
-  assert && assert( typeof options.drag === 'function',
-    'The drag callback should be a function' );
-  assert && assert( options.targetNode === null || options.targetNode instanceof Node,
-    'If provided, targetNode should be a Node' );
-  assert && assert( typeof options.attach === 'boolean', 'attach should be a boolean' );
-  assert && assert( typeof options.a11yLooksPressedInterval === 'number',
-    'a11yLooksPressedInterval should be a number' );
+    assert && assert( typeof options.mouseButton === 'number' && options.mouseButton >= 0 && options.mouseButton % 1 === 0,
+      'mouseButton should be a non-negative integer' );
+    assert && assert( options.pressCursor === null || typeof options.pressCursor === 'string',
+      'pressCursor should either be a string or null' );
+    assert && assert( typeof options.press === 'function',
+      'The press callback should be a function' );
+    assert && assert( typeof options.release === 'function',
+      'The release callback should be a function' );
+    assert && assert( typeof options.drag === 'function',
+      'The drag callback should be a function' );
+    assert && assert( options.targetNode === null || options.targetNode instanceof Node,
+      'If provided, targetNode should be a Node' );
+    assert && assert( typeof options.attach === 'boolean', 'attach should be a boolean' );
+    assert && assert( typeof options.a11yLooksPressedInterval === 'number',
+      'a11yLooksPressedInterval should be a number' );
 
-  // @private {number} - Unique global ID for this listener
-  this._id = globalID++;
+    // @private {number} - Unique global ID for this listener
+    this._id = globalID++;
 
-  sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} construction` );
+    sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} construction` );
 
-  // @private {number}
-  this._mouseButton = options.mouseButton;
-  this._a11yLooksPressedInterval = options.a11yLooksPressedInterval;
+    // @private {number}
+    this._mouseButton = options.mouseButton;
+    this._a11yLooksPressedInterval = options.a11yLooksPressedInterval;
 
-  // @private {string|null}
-  this._pressCursor = options.pressCursor;
+    // @private {string|null}
+    this._pressCursor = options.pressCursor;
 
-  // @private {function}
-  this._pressListener = options.press;
-  this._releaseListener = options.release;
-  this._dragListener = options.drag;
-  this._canStartPress = options.canStartPress;
+    // @private {function}
+    this._pressListener = options.press;
+    this._releaseListener = options.release;
+    this._dragListener = options.drag;
+    this._canStartPress = options.canStartPress;
 
-  // @private {Node|null}
-  this._targetNode = options.targetNode;
+    // @private {Node|null}
+    this._targetNode = options.targetNode;
 
-  // @private {boolean}
-  this._attach = options.attach;
-  this._collapseDragEvents = options.collapseDragEvents;
-  this._preferTargetCursor = options.preferTargetCursor;
+    // @private {boolean}
+    this._attach = options.attach;
+    this._collapseDragEvents = options.collapseDragEvents;
+    this._preferTargetCursor = options.preferTargetCursor;
 
-  // @public {ObservableArrayDef.<Pointer>} - Contains all pointers that are over our button. Tracked by adding with
-  // 'enter' events and removing with 'exit' events.
-  this.overPointers = createObservableArray();
+    // @public {ObservableArrayDef.<Pointer>} - Contains all pointers that are over our button. Tracked by adding with
+    // 'enter' events and removing with 'exit' events.
+    this.overPointers = createObservableArray();
 
-  // @public {Property.<Boolean>} (read-only) - Tracks whether this listener is "pressed" or not.
-  this.isPressedProperty = new BooleanProperty( false, { reentrant: true } );
+    // @public {Property.<Boolean>} (read-only) - Tracks whether this listener is "pressed" or not.
+    this.isPressedProperty = new BooleanProperty( false, { reentrant: true } );
 
-  // @public {Property.<boolean>} (read-only) - It will be set to true when at least one pointer is over the listener.
-  this.isOverProperty = new BooleanProperty( false );
+    // @public {Property.<boolean>} (read-only) - It will be set to true when at least one pointer is over the listener.
+    this.isOverProperty = new BooleanProperty( false );
 
-  // @public {Property.<boolean>} (read-only) - It will be set to true when either:
-  //   1. The listener is pressed and the pointer that is pressing is over the listener.
-  //   2. There is at least one unpressed pointer that is over the listener.
-  this.isHoveringProperty = new BooleanProperty( false );
+    // @public {Property.<boolean>} (read-only) - It will be set to true when either:
+    //   1. The listener is pressed and the pointer that is pressing is over the listener.
+    //   2. There is at least one unpressed pointer that is over the listener.
+    this.isHoveringProperty = new BooleanProperty( false );
 
-  // @public {Property.<Boolean>} (read-only) - It will be set to true when either:
-  //   1. The listener is pressed.
-  //   2. There is at least one unpressed pointer that is over the listener.
-  // This is essentially true when ( isPressed || isHovering ).
-  this.isHighlightedProperty = new BooleanProperty( false );
+    // @public {Property.<Boolean>} (read-only) - It will be set to true when either:
+    //   1. The listener is pressed.
+    //   2. There is at least one unpressed pointer that is over the listener.
+    // This is essentially true when ( isPressed || isHovering ).
+    this.isHighlightedProperty = new BooleanProperty( false );
 
-  // @public {Property.<boolean>} (read-only) - Whether the listener has focus (should appear to be over)
-  this.isFocusedProperty = new BooleanProperty( false );
+    // @public {Property.<boolean>} (read-only) - Whether the listener has focus (should appear to be over)
+    this.isFocusedProperty = new BooleanProperty( false );
 
-  // @public {Pointer|null} (read-only) - The current pointer, or null when not pressed.
-  this.pointer = null;
+    // @public {Pointer|null} (read-only) - The current pointer, or null when not pressed.
+    this.pointer = null;
 
-  // @public {Trail|null} (read-only) - The Trail for the press, with no descendant nodes past the currentTarget
-  // or targetNode (if provided). Will be null when not pressed.
-  this.pressedTrail = null;
+    // @public {Trail|null} (read-only) - The Trail for the press, with no descendant nodes past the currentTarget
+    // or targetNode (if provided). Will be null when not pressed.
+    this.pressedTrail = null;
 
-  // @public {boolean} (read-only) - Whether the last press was interrupted. Will be valid until the next press.
-  this.interrupted = false;
+    // @public {boolean} (read-only) - Whether the last press was interrupted. Will be valid until the next press.
+    this.interrupted = false;
 
-  // @private {SceneryEvent|null} - For the collapseDragEvents feature, this will hold the last pending drag event to
-  // trigger a call to drag() with, if one has been skipped.
-  this._pendingCollapsedDragEvent = null;
+    // @private {SceneryEvent|null} - For the collapseDragEvents feature, this will hold the last pending drag event to
+    // trigger a call to drag() with, if one has been skipped.
+    this._pendingCollapsedDragEvent = null;
 
-  // @private {boolean} - Whether our pointer listener is referenced by the pointer (need to have a flag due to
-  //                      handling disposal properly).
-  this._listeningToPointer = false;
+    // @private {boolean} - Whether our pointer listener is referenced by the pointer (need to have a flag due to
+    //                      handling disposal properly).
+    this._listeningToPointer = false;
 
-  // @private {function} - isHoveringProperty updates (not a DerivedProperty because we need to hook to passed-in
-  // properties)
-  this._isHoveringListener = this.invalidateHovering.bind( this );
+    // @private {function} - isHoveringProperty updates (not a DerivedProperty because we need to hook to passed-in
+    // properties)
+    this._isHoveringListener = this.invalidateHovering.bind( this );
 
-  // @private {function} - isHighlightedProperty updates (not a DerivedProperty because we need to hook to passed-in
-  // properties)
-  this._isHighlightedListener = this.invalidateHighlighted.bind( this );
+    // @private {function} - isHighlightedProperty updates (not a DerivedProperty because we need to hook to passed-in
+    // properties)
+    this._isHighlightedListener = this.invalidateHighlighted.bind( this );
 
-  // @public {BooleanProperty} (read-only) - Whether or not a press is being processed from an a11y click input event
-  // from the PDOM.
-  this.pdomClickingProperty = new BooleanProperty( false );
+    // @public {BooleanProperty} (read-only) - Whether or not a press is being processed from an a11y click input event
+    // from the PDOM.
+    this.pdomClickingProperty = new BooleanProperty( false );
 
-  // @public {BooleanProperty} (read-only) - This Property was added for a11y. It tracks whether or not the button
-  // should "look" down. This will be true if downProperty is true or if an a11y click is in progress. For an a11y
-  // click, the listeners are fired right away but the button will look down for as long as a11yLooksPressedInterval.
-  // See PressListener.click() for more details.
-  this.looksPressedProperty = DerivedProperty.or( [ this.pdomClickingProperty, this.isPressedProperty ] );
+    // @public {BooleanProperty} (read-only) - This Property was added for a11y. It tracks whether or not the button
+    // should "look" down. This will be true if downProperty is true or if an a11y click is in progress. For an a11y
+    // click, the listeners are fired right away but the button will look down for as long as a11yLooksPressedInterval.
+    // See PressListener.click() for more details.
+    this.looksPressedProperty = DerivedProperty.or( [ this.pdomClickingProperty, this.isPressedProperty ] );
 
-  // @private {function|null} - When a11y clicking begins, this will be added to a timeout so that the
-  // pdomClickingProperty is updated after some delay. This is required since an assistive device (like a switch) may
-  // send "click" events directly instead of keydown/keyup pairs. If a click initiates while already in progress,
-  // this listener will be removed to start the timeout over. null until timout is added.
-  this._pdomClickingTimeoutListener = null;
+    // @private {function|null} - When a11y clicking begins, this will be added to a timeout so that the
+    // pdomClickingProperty is updated after some delay. This is required since an assistive device (like a switch) may
+    // send "click" events directly instead of keydown/keyup pairs. If a click initiates while already in progress,
+    // this listener will be removed to start the timeout over. null until timout is added.
+    this._pdomClickingTimeoutListener = null;
 
-  // @private {Object} - The listener that gets added to the pointer when we are pressed
-  this._pointerListener = {
-    up: this.pointerUp.bind( this ),
-    cancel: this.pointerCancel.bind( this ),
-    move: this.pointerMove.bind( this ),
-    interrupt: this.pointerInterrupt.bind( this )
-  };
+    // @private {Object} - The listener that gets added to the pointer when we are pressed
+    this._pointerListener = {
+      up: this.pointerUp.bind( this ),
+      cancel: this.pointerCancel.bind( this ),
+      move: this.pointerMove.bind( this ),
+      interrupt: this.pointerInterrupt.bind( this )
+    };
 
-  // @private {Action} - Executed on press event
-  // The main implementation of "press" handling is implemented as a callback to the Action, so things are nested
-  // nicely for phet-io.
-  this._pressAction = new Action( this.onPress.bind( this ), {
-    tandem: options.tandem.createTandem( 'pressAction' ),
-    phetioDocumentation: 'Executes whenever a press occurs. The first argument when executing can be ' +
-                         'used to convey info about the SceneryEvent.',
-    phetioReadOnly: options.phetioReadOnly,
-    phetioFeatured: options.phetioFeatured,
-    phetioEventType: EventType.USER,
-    parameters: [ {
-      name: 'event',
-      phetioType: SceneryEvent.SceneryEventIO
-    }, {
-      phetioPrivate: true,
-      valueType: [ Node, null ]
-    }, {
-      phetioPrivate: true,
-      valueType: [ 'function', null ]
-    }
-    ]
-  } );
+    // @private {Action} - Executed on press event
+    // The main implementation of "press" handling is implemented as a callback to the Action, so things are nested
+    // nicely for phet-io.
+    this._pressAction = new Action( this.onPress.bind( this ), {
+      tandem: options.tandem.createTandem( 'pressAction' ),
+      phetioDocumentation: 'Executes whenever a press occurs. The first argument when executing can be ' +
+                           'used to convey info about the SceneryEvent.',
+      phetioReadOnly: options.phetioReadOnly,
+      phetioFeatured: options.phetioFeatured,
+      phetioEventType: EventType.USER,
+      parameters: [ {
+        name: 'event',
+        phetioType: SceneryEvent.SceneryEventIO
+      }, {
+        phetioPrivate: true,
+        valueType: [ Node, null ]
+      }, {
+        phetioPrivate: true,
+        valueType: [ 'function', null ]
+      }
+      ]
+    } );
 
-  // @private {Action} - Executed on release event
-  // The main implementation of "release" handling is implemented as a callback to the Action, so things are nested
-  // nicely for phet-io.
-  this._releaseAction = new Action( this.onRelease.bind( this ), {
-    parameters: [ {
-      name: 'event',
-      phetioType: NullableIO( SceneryEvent.SceneryEventIO )
-    }, {
-      phetioPrivate: true,
-      valueType: [ 'function', null ]
-    } ],
+    // @private {Action} - Executed on release event
+    // The main implementation of "release" handling is implemented as a callback to the Action, so things are nested
+    // nicely for phet-io.
+    this._releaseAction = new Action( this.onRelease.bind( this ), {
+      parameters: [ {
+        name: 'event',
+        phetioType: NullableIO( SceneryEvent.SceneryEventIO )
+      }, {
+        phetioPrivate: true,
+        valueType: [ 'function', null ]
+      } ],
 
-    // phet-io
-    tandem: options.tandem.createTandem( 'releaseAction' ),
-    phetioDocumentation: 'Executes whenever a release occurs.',
-    phetioReadOnly: options.phetioReadOnly,
-    phetioFeatured: options.phetioFeatured,
-    phetioEventType: EventType.USER
-  } );
+      // phet-io
+      tandem: options.tandem.createTandem( 'releaseAction' ),
+      phetioDocumentation: 'Executes whenever a release occurs.',
+      phetioReadOnly: options.phetioReadOnly,
+      phetioFeatured: options.phetioFeatured,
+      phetioEventType: EventType.USER
+    } );
 
-  // update isOverProperty (not a DerivedProperty because we need to hook to passed-in properties)
-  this.overPointers.lengthProperty.link( this.invalidateOver.bind( this ) );
-  this.isFocusedProperty.link( this.invalidateOver.bind( this ) );
+    // update isOverProperty (not a DerivedProperty because we need to hook to passed-in properties)
+    this.overPointers.lengthProperty.link( this.invalidateOver.bind( this ) );
+    this.isFocusedProperty.link( this.invalidateOver.bind( this ) );
 
-  // update isHoveringProperty (not a DerivedProperty because we need to hook to passed-in properties)
-  this.overPointers.lengthProperty.link( this._isHoveringListener );
-  this.isPressedProperty.link( this._isHoveringListener );
+    // update isHoveringProperty (not a DerivedProperty because we need to hook to passed-in properties)
+    this.overPointers.lengthProperty.link( this._isHoveringListener );
+    this.isPressedProperty.link( this._isHoveringListener );
 
-  // Update isHovering when any pointer's isDownProperty changes.
-  // NOTE: overPointers is cleared on dispose, which should remove all of these (interior) listeners)
-  this.overPointers.addItemAddedListener( pointer => pointer.isDownProperty.link( this._isHoveringListener ) );
-  this.overPointers.addItemRemovedListener( pointer => pointer.isDownProperty.unlink( this._isHoveringListener ) );
+    // Update isHovering when any pointer's isDownProperty changes.
+    // NOTE: overPointers is cleared on dispose, which should remove all of these (interior) listeners)
+    this.overPointers.addItemAddedListener( pointer => pointer.isDownProperty.link( this._isHoveringListener ) );
+    this.overPointers.addItemRemovedListener( pointer => pointer.isDownProperty.unlink( this._isHoveringListener ) );
 
-  // update isHighlightedProperty (not a DerivedProperty because we need to hook to passed-in properties)
-  this.isHoveringProperty.link( this._isHighlightedListener );
-  this.isPressedProperty.link( this._isHighlightedListener );
-}
+    // update isHighlightedProperty (not a DerivedProperty because we need to hook to passed-in properties)
+    this.isHoveringProperty.link( this._isHighlightedListener );
+    this.isPressedProperty.link( this._isHighlightedListener );
+  }
 
-scenery.register( 'PressListener', PressListener );
-
-inherit( Object, PressListener, {
   /**
    * Whether this listener is currently activated with a press.
    * @public
@@ -312,7 +307,7 @@ inherit( Object, PressListener, {
    */
   get isPressed() {
     return this.isPressedProperty.value;
-  },
+  }
 
   /**
    * The main node that this listener is responsible for dragging.
@@ -324,10 +319,10 @@ inherit( Object, PressListener, {
     assert && assert( this.isPressed, 'We have no currentTarget if we are not pressed' );
 
     return this.pressedTrail.lastNode();
-  },
+  }
   get currentTarget() {
     return this.getCurrentTarget();
-  },
+  }
 
   /**
    * Returns whether a press can be started with a particular event.
@@ -342,7 +337,7 @@ inherit( Object, PressListener, {
            ( !( event.pointer instanceof Mouse ) || event.domEvent.button === this._mouseButton ) &&
            // We can't attach to a pointer that is already attached.
            ( !this._attach || !event.pointer.isAttached() );
-  },
+  }
 
   /**
    * Returns whether this PressListener can be clicked from keyboard input. This copies part of canPress, but
@@ -355,7 +350,7 @@ inherit( Object, PressListener, {
     // If this listener is already involved in pressing something (or our options predicate returns false) we can't
     // press something.
     return !this.isPressed && this._canStartPress( null, this );
-  },
+  }
 
   /**
    * Moves the listener to the 'pressed' state if possible (attaches listeners and initializes press-related
@@ -394,7 +389,7 @@ inherit( Object, PressListener, {
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
 
     return true;
-  },
+  }
 
   /**
    * Releases a pressed listener.
@@ -418,7 +413,7 @@ inherit( Object, PressListener, {
     this._releaseAction.execute( event || null, callback || null ); // cannot pass undefined to execute call
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
-  },
+  }
 
   /**
    * Called when move events are fired on the attached pointer listener.
@@ -437,7 +432,7 @@ inherit( Object, PressListener, {
     this._dragListener( event, this );
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
-  },
+  }
 
   /**
    * Interrupts the listener, releasing it (canceling behavior).
@@ -489,7 +484,7 @@ inherit( Object, PressListener, {
     }
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
-  },
+  }
 
   /**
    * This should be called when the listened "Node" is effectively removed from the scene graph AND
@@ -502,7 +497,7 @@ inherit( Object, PressListener, {
    */
   clearOverPointers() {
     this.overPointers.clear(); // We have listeners that will trigger the proper refreshes
-  },
+  }
 
   /**
    * If collapseDragEvents is set to true, this step() should be called every frame so that the collapsed drag
@@ -511,7 +506,7 @@ inherit( Object, PressListener, {
    */
   step() {
     this.flushCollapsedDrag();
-  },
+  }
 
   /**
    * If there is a pending collapsed drag waiting, we'll fire that drag (usually before other events or during a step)
@@ -522,7 +517,7 @@ inherit( Object, PressListener, {
       this.drag( this._pendingCollapsedDragEvent );
     }
     this._pendingCollapsedDragEvent = null;
-  },
+  }
 
   /**
    * Recomputes the value for isOverProperty. Separate to reduce anonymous function closures.
@@ -548,7 +543,7 @@ inherit( Object, PressListener, {
     }
 
     this.isOverProperty.value = this.isFocusedProperty.value || ( this.overPointers.length > 0 && !pointerAttachedToOther );
-  },
+  }
 
   /**
    * Recomputes the value for isHoveringProperty. Separate to reduce anonymous function closures.
@@ -563,7 +558,7 @@ inherit( Object, PressListener, {
       }
     }
     this.isHoveringProperty.value = false;
-  },
+  }
 
   /**
    * Recomputes the value for isHighlightedProperty. Separate to reduce anonymous function closures.
@@ -571,7 +566,7 @@ inherit( Object, PressListener, {
    */
   invalidateHighlighted() {
     this.isHighlightedProperty.value = this.isHoveringProperty.value || this.isPressedProperty.value;
-  },
+  }
 
   /**
    * Internal code executed as the first step of a press.
@@ -604,7 +599,7 @@ inherit( Object, PressListener, {
     this._pressListener( event, this );
 
     callback && callback();
-  },
+  }
 
   /**
    * Internal code executed as the first step of a release.
@@ -631,7 +626,7 @@ inherit( Object, PressListener, {
     this._releaseListener( event, this );
 
     callback && callback();
-  },
+  }
 
   /**
    * Called with 'down' events (part of the listener API).
@@ -648,7 +643,7 @@ inherit( Object, PressListener, {
     this.press( event );
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
-  },
+  }
 
   /**
    * Called with 'up' events (part of the listener API).
@@ -667,7 +662,7 @@ inherit( Object, PressListener, {
     this.invalidateHovering();
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
-  },
+  }
 
   /**
    * Called with 'enter' events (part of the listener API).
@@ -684,11 +679,12 @@ inherit( Object, PressListener, {
     this.overPointers.push( event.pointer );
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
-  },
+  }
 
   /**
    * Called with `move` events (part of the listener API). It is necessary to check for `over` state changes on move
    * in case a pointer listener gets interrupted and resumes movement over a target.
+   * @public (scenery-internal)
    *
    * @param {SceneryEvent} event
    */
@@ -699,7 +695,7 @@ inherit( Object, PressListener, {
     this.invalidateOver();
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
-  },
+  }
 
   /**
    * Called with 'exit' events (part of the listener API).
@@ -719,7 +715,7 @@ inherit( Object, PressListener, {
     this.overPointers.remove( event.pointer );
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
-  },
+  }
 
   /**
    * Called with 'up' events from the pointer (part of the listener API)
@@ -743,7 +739,7 @@ inherit( Object, PressListener, {
     }
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
-  },
+  }
 
   /**
    * Called with 'cancel' events from the pointer (part of the listener API)
@@ -767,7 +763,7 @@ inherit( Object, PressListener, {
     }
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
-  },
+  }
 
   /**
    * Called with 'move' events from the pointer (part of the listener API)
@@ -796,7 +792,7 @@ inherit( Object, PressListener, {
     }
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
-  },
+  }
 
   /**
    * Called when the pointer needs to interrupt its current listener (usually so another can be added).
@@ -811,7 +807,7 @@ inherit( Object, PressListener, {
     this.interrupt();
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
-  },
+  }
 
   /**
    * Click listener, called when this is treated as an accessible input listener.
@@ -864,7 +860,7 @@ inherit( Object, PressListener, {
         }
       }, this._a11yLooksPressedInterval );
     }
-  },
+  }
 
   /**
    * Focus listener, called when this is treated as an accessible input listener.
@@ -874,7 +870,7 @@ inherit( Object, PressListener, {
   focus() {
     // On focus, button should look 'over'.
     this.isFocusedProperty.value = true;
-  },
+  }
 
   /**
    * Blur listener, called when this is treated as an accessible input listener.
@@ -884,7 +880,7 @@ inherit( Object, PressListener, {
   blur() {
     // On blur, the button should no longer look 'over'.
     this.isFocusedProperty.value = false;
-  },
+  }
 
   /**
    * Disposes the listener, releasing references. It should not be used after this.
@@ -921,7 +917,9 @@ inherit( Object, PressListener, {
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
   }
-} );
+}
+
+scenery.register( 'PressListener', PressListener );
 
 PressListener.phetioAPI = {
   pressAction: { phetioType: Action.ActionIO( [ SceneryEvent.SceneryEventIO ] ) },

@@ -8,15 +8,15 @@
  * @author Jesse Greenberg
  */
 
+import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import Bounds2 from '../../../dot/js/Bounds2.js';
 import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
+import KeyStateTracker from '../accessibility/KeyStateTracker.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import KeyboardZoomUtils from '../accessibility/KeyboardZoomUtils.js';
-import KeyStateTracker from '../accessibility/KeyStateTracker.js';
 import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
 import Display from '../display/Display.js';
 import Pointer from '../input/Pointer.js';

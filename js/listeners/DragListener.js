@@ -73,7 +73,6 @@ import Property from '../../../axon/js/Property.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Transform3 from '../../../dot/js/Transform3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import EventType from '../../../tandem/js/EventType.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
@@ -87,178 +86,173 @@ import PressListener from './PressListener.js';
 // Scratch vectors used to prevent allocations
 const scratchVector2A = new Vector2( 0, 0 );
 
-/**
- * @constructor
- * @extends PressListener
- *
- * @param {Object} [options] - See the constructor body (below) and in PressListener for documented options.
- */
-function DragListener( options ) {
-  options = merge( {
+class DragListener extends PressListener {
+  /**
+   * @param {Object} [options] - See the constructor body (below) and in PressListener for documented options.
+   */
+  constructor( options ) {
+    options = merge( {
 
-    // {Property.<Vector2>|null} - If provided, it will be synchronized with the drag position in the model coordinate
-    // frame (applying any provided transforms as needed). Typically, DURING a drag this Property should not be
-    // modified externally (as the next drag event will probably undo the change), but it's completely fine to modify
-    // this Property at any other time.
-    positionProperty: null,
+      // {Property.<Vector2>|null} - If provided, it will be synchronized with the drag position in the model coordinate
+      // frame (applying any provided transforms as needed). Typically, DURING a drag this Property should not be
+      // modified externally (as the next drag event will probably undo the change), but it's completely fine to modify
+      // this Property at any other time.
+      positionProperty: null,
 
-    // {Function|null} - Called as start( event: {SceneryEvent}, listener: {DragListener} ) when the drag is started.
-    // This is preferred over passing press(), as the drag start hasn't been fully processed at that point.
-    start: null,
+      // {Function|null} - Called as start( event: {SceneryEvent}, listener: {DragListener} ) when the drag is started.
+      // This is preferred over passing press(), as the drag start hasn't been fully processed at that point.
+      start: null,
 
-    // {Function|null} - Called as end( listener: {DragListener} ) when the drag is ended. This is preferred over
-    // passing release(), as the drag start hasn't been fully processed at that point.
-    // NOTE: This will also be called if the drag is ended due to being interrupted or canceled.
-    end: null,
+      // {Function|null} - Called as end( listener: {DragListener} ) when the drag is ended. This is preferred over
+      // passing release(), as the drag start hasn't been fully processed at that point.
+      // NOTE: This will also be called if the drag is ended due to being interrupted or canceled.
+      end: null,
 
-    // {Transform3|null} - If provided, this will be the conversion between the parent (view) and model coordinate
-    // frames. Usually most useful when paired with the positionProperty.
-    transform: null,
+      // {Transform3|null} - If provided, this will be the conversion between the parent (view) and model coordinate
+      // frames. Usually most useful when paired with the positionProperty.
+      transform: null,
 
-    // {Property.<Bounds2|null>} - If provided, the model position will be constrained to be inside these bounds.
-    dragBoundsProperty: null,
+      // {Property.<Bounds2|null>} - If provided, the model position will be constrained to be inside these bounds.
+      dragBoundsProperty: null,
 
-    // {boolean} - If true, unattached touches that move across our node will trigger a press(). This helps sometimes
-    // for small draggable objects.
-    allowTouchSnag: true,
+      // {boolean} - If true, unattached touches that move across our node will trigger a press(). This helps sometimes
+      // for small draggable objects.
+      allowTouchSnag: true,
 
-    // {boolean} - If true, the initial offset of the pointer's position is taken into account, so that drags will
-    // try to keep the pointer at the same local point of our dragged node.
-    // NOTE: The default behavior is to use the given Node (either the targetNode or the node with the listener on it)
-    // and use its transform to compute the "local point" (assuming that the node's local origin is what is
-    // transformed around). This is ideal for most situations, but it's also possible to use a parent-coordinate
-    // based approach for offsets (see useParentOffset)
-    applyOffset: true,
+      // {boolean} - If true, the initial offset of the pointer's position is taken into account, so that drags will
+      // try to keep the pointer at the same local point of our dragged node.
+      // NOTE: The default behavior is to use the given Node (either the targetNode or the node with the listener on it)
+      // and use its transform to compute the "local point" (assuming that the node's local origin is what is
+      // transformed around). This is ideal for most situations, but it's also possible to use a parent-coordinate
+      // based approach for offsets (see useParentOffset)
+      applyOffset: true,
 
-    // {boolean} - If set to true, then any offsets applied will be handled in the parent coordinate space using the
-    // positionProperty as the "ground truth", instead of looking at the Node's actual position and transform. This
-    // is useful if the position/transform cannot be applied directly to a single Node (e.g. positioning multiple
-    // independent nodes, or centering things instead of transforming based on the origin of the Node).
-    //
-    // NOTE: Use this option most likely if converting from MovableDragHandler, because it transformed based in
-    // the parent's coordinate frame. See https://github.com/phetsims/scenery/issues/1014
-    useParentOffset: false,
+      // {boolean} - If set to true, then any offsets applied will be handled in the parent coordinate space using the
+      // positionProperty as the "ground truth", instead of looking at the Node's actual position and transform. This
+      // is useful if the position/transform cannot be applied directly to a single Node (e.g. positioning multiple
+      // independent nodes, or centering things instead of transforming based on the origin of the Node).
+      //
+      // NOTE: Use this option most likely if converting from MovableDragHandler, because it transformed based in
+      // the parent's coordinate frame. See https://github.com/phetsims/scenery/issues/1014
+      useParentOffset: false,
 
-    // {boolean} - If true, ancestor transforms will be watched. If they change, it will trigger a repositioning,
-    // which will usually adjust the position/transform to maintain position.
-    trackAncestors: false,
+      // {boolean} - If true, ancestor transforms will be watched. If they change, it will trigger a repositioning,
+      // which will usually adjust the position/transform to maintain position.
+      trackAncestors: false,
 
-    // {boolean} - If true, the effective currentTarget will be translated when the drag position changes.
-    translateNode: false,
+      // {boolean} - If true, the effective currentTarget will be translated when the drag position changes.
+      translateNode: false,
 
-    // {Function|null} - function( modelPoint: {Vector2} ) : {Vector2}. If provided, it will allow custom mapping
-    // from the desired position (i.e. where the pointer is) to the actual possible position (i.e. where the dragged
-    // object ends up). For example, using dragBoundsProperty is equivalent to passing:
-    //   mapPosition: function( point ) { return dragBoundsProperty.value.closestPointTo( point ); }
-    mapPosition: null,
+      // {Function|null} - function( modelPoint: {Vector2} ) : {Vector2}. If provided, it will allow custom mapping
+      // from the desired position (i.e. where the pointer is) to the actual possible position (i.e. where the dragged
+      // object ends up). For example, using dragBoundsProperty is equivalent to passing:
+      //   mapPosition: function( point ) { return dragBoundsProperty.value.closestPointTo( point ); }
+      mapPosition: null,
 
-    // {Function|null} - function( viewPoint: {Vector2}, listener: {DragListener} ) : {Vector2}. If provided, its
-    // result will be added to the parentPoint before computation continues, to allow the ability to "offset" where
-    // the pointer position seems to be. Useful for touch, where things shouldn't be under the pointer directly.
-    offsetPosition: null,
+      // {Function|null} - function( viewPoint: {Vector2}, listener: {DragListener} ) : {Vector2}. If provided, its
+      // result will be added to the parentPoint before computation continues, to allow the ability to "offset" where
+      // the pointer position seems to be. Useful for touch, where things shouldn't be under the pointer directly.
+      offsetPosition: null,
 
-    // {Tandem} - For instrumenting
-    tandem: Tandem.REQUIRED,
+      // {Tandem} - For instrumenting
+      tandem: Tandem.REQUIRED,
 
-    // Though DragListener is not instrumented, declare these here to support properly passing this to children, see https://github.com/phetsims/tandem/issues/60.
-    // DragListener by default doesn't allow PhET-iO to trigger drag Action events
-    phetioReadOnly: true,
-    phetioFeatured: PhetioObject.DEFAULT_OPTIONS.phetioFeatured
-  }, options );
+      // Though DragListener is not instrumented, declare these here to support properly passing this to children, see https://github.com/phetsims/tandem/issues/60.
+      // DragListener by default doesn't allow PhET-iO to trigger drag Action events
+      phetioReadOnly: true,
+      phetioFeatured: PhetioObject.DEFAULT_OPTIONS.phetioFeatured
+    }, options );
 
-  assert && assert( typeof options.allowTouchSnag === 'boolean', 'allowTouchSnag should be a boolean' );
-  assert && assert( typeof options.applyOffset === 'boolean', 'applyOffset should be a boolean' );
-  assert && assert( typeof options.trackAncestors === 'boolean', 'trackAncestors should be a boolean' );
-  assert && assert( typeof options.translateNode === 'boolean', 'translateNode should be a boolean' );
-  assert && assert( options.transform === null || options.transform instanceof Transform3, 'transform, if provided, should be a Transform3' );
-  assert && assert( options.positionProperty === null || options.positionProperty instanceof Property, 'positionProperty, if provided, should be a Property' );
-  assert && assert( !options.dragBounds, 'options.dragBounds was removed in favor of options.dragBoundsProperty' );
-  assert && assert( options.dragBoundsProperty === null || options.dragBoundsProperty instanceof Property, 'dragBoundsProperty, if provided, should be a Property' );
-  assert && assert( options.mapPosition === null || typeof options.mapPosition === 'function', 'mapPosition, if provided, should be a function' );
-  assert && assert( options.offsetPosition === null || typeof options.offsetPosition === 'function', 'offsetPosition, if provided, should be a function' );
-  assert && assert( options.start === null || typeof options.start === 'function', 'start, if provided, should be a function' );
-  assert && assert( options.end === null || typeof options.end === 'function', 'end, if provided, should be a function' );
-  assert && assert( options.tandem instanceof Tandem, 'The provided tandem should be a Tandem' );
-  assert && assert( !options.useParentOffset || options.positionProperty, 'If useParentOffset is set, a positionProperty is required' );
+    assert && assert( typeof options.allowTouchSnag === 'boolean', 'allowTouchSnag should be a boolean' );
+    assert && assert( typeof options.applyOffset === 'boolean', 'applyOffset should be a boolean' );
+    assert && assert( typeof options.trackAncestors === 'boolean', 'trackAncestors should be a boolean' );
+    assert && assert( typeof options.translateNode === 'boolean', 'translateNode should be a boolean' );
+    assert && assert( options.transform === null || options.transform instanceof Transform3, 'transform, if provided, should be a Transform3' );
+    assert && assert( options.positionProperty === null || options.positionProperty instanceof Property, 'positionProperty, if provided, should be a Property' );
+    assert && assert( !options.dragBounds, 'options.dragBounds was removed in favor of options.dragBoundsProperty' );
+    assert && assert( options.dragBoundsProperty === null || options.dragBoundsProperty instanceof Property, 'dragBoundsProperty, if provided, should be a Property' );
+    assert && assert( options.mapPosition === null || typeof options.mapPosition === 'function', 'mapPosition, if provided, should be a function' );
+    assert && assert( options.offsetPosition === null || typeof options.offsetPosition === 'function', 'offsetPosition, if provided, should be a function' );
+    assert && assert( options.start === null || typeof options.start === 'function', 'start, if provided, should be a function' );
+    assert && assert( options.end === null || typeof options.end === 'function', 'end, if provided, should be a function' );
+    assert && assert( options.tandem instanceof Tandem, 'The provided tandem should be a Tandem' );
+    assert && assert( !options.useParentOffset || options.positionProperty, 'If useParentOffset is set, a positionProperty is required' );
 
-  assert && assert(
-    !( options.mapPosition && options.dragBoundsProperty ),
-    'Only one of mapPosition and dragBoundsProperty can be provided, as they handle mapping of the drag point'
-  );
+    assert && assert(
+      !( options.mapPosition && options.dragBoundsProperty ),
+      'Only one of mapPosition and dragBoundsProperty can be provided, as they handle mapping of the drag point'
+    );
 
-  PressListener.call( this, options );
+    super( options );
 
-  // @private (stored options)
-  this._allowTouchSnag = options.allowTouchSnag;
-  this._applyOffset = options.applyOffset;
-  this._useParentOffset = options.useParentOffset;
-  this._trackAncestors = options.trackAncestors;
-  this._translateNode = options.translateNode;
-  this._transform = options.transform;
-  this._positionProperty = options.positionProperty;
-  this._mapPosition = options.mapPosition;
-  this._offsetPosition = options.offsetPosition;
-  this._dragBoundsProperty = ( options.dragBoundsProperty || new Property( null ) );
-  this._start = options.start;
-  this._end = options.end;
+    // @private (stored options)
+    this._allowTouchSnag = options.allowTouchSnag;
+    this._applyOffset = options.applyOffset;
+    this._useParentOffset = options.useParentOffset;
+    this._trackAncestors = options.trackAncestors;
+    this._translateNode = options.translateNode;
+    this._transform = options.transform;
+    this._positionProperty = options.positionProperty;
+    this._mapPosition = options.mapPosition;
+    this._offsetPosition = options.offsetPosition;
+    this._dragBoundsProperty = ( options.dragBoundsProperty || new Property( null ) );
+    this._start = options.start;
+    this._end = options.end;
 
-  // @public {Property.<boolean>} - Alias for isPressedProperty (as this name makes more sense for dragging)
-  this.isUserControlledProperty = this.isPressedProperty;
+    // @public {Property.<boolean>} - Alias for isPressedProperty (as this name makes more sense for dragging)
+    this.isUserControlledProperty = this.isPressedProperty;
 
-  // @private {Vector2} - The point of the drag in the target's global coordinate frame. Updated with mutation.
-  this._globalPoint = new Vector2( 0, 0 );
+    // @private {Vector2} - The point of the drag in the target's global coordinate frame. Updated with mutation.
+    this._globalPoint = new Vector2( 0, 0 );
 
-  // @private {Vector2} - The point of the drag in the target's local coordinate frame. Updated with mutation.
-  this._localPoint = new Vector2( 0, 0 );
+    // @private {Vector2} - The point of the drag in the target's local coordinate frame. Updated with mutation.
+    this._localPoint = new Vector2( 0, 0 );
 
-  // @private {Vector2} - Current drag point in the parent coordinate frame. Updated with mutation.
-  this._parentPoint = new Vector2( 0, 0 );
+    // @private {Vector2} - Current drag point in the parent coordinate frame. Updated with mutation.
+    this._parentPoint = new Vector2( 0, 0 );
 
-  // @private {Vector2} - Current drag point in the model coordinate frame
-  this._modelPoint = new Vector2( 0, 0 );
+    // @private {Vector2} - Current drag point in the model coordinate frame
+    this._modelPoint = new Vector2( 0, 0 );
 
-  // @private {Vector2} - Stores the model delta computed during every repositioning
-  this._modelDelta = new Vector2( 0, 0 );
+    // @private {Vector2} - Stores the model delta computed during every repositioning
+    this._modelDelta = new Vector2( 0, 0 );
 
-  // @private {Vector2} - If useParentOffset is true, this will be set to the parent-coordinate offset at the start
-  // of a drag, and the "offset" will be handled by applying this offset compared to where the pointer is.
-  this._parentOffset = new Vector2( 0, 0 );
+    // @private {Vector2} - If useParentOffset is true, this will be set to the parent-coordinate offset at the start
+    // of a drag, and the "offset" will be handled by applying this offset compared to where the pointer is.
+    this._parentOffset = new Vector2( 0, 0 );
 
-  // @private {TransformTracker|null} - Handles watching ancestor transforms for callbacks.
-  this._transformTracker = null;
+    // @private {TransformTracker|null} - Handles watching ancestor transforms for callbacks.
+    this._transformTracker = null;
 
-  // @private {Function} - Listener passed to the transform tracker
-  this._transformTrackerListener = this.ancestorTransformed.bind( this );
+    // @private {Function} - Listener passed to the transform tracker
+    this._transformTrackerListener = this.ancestorTransformed.bind( this );
 
-  // @private {Pointer|null} - There are cases like https://github.com/phetsims/equality-explorer/issues/97 where if
-  // a touchenter starts a drag that is IMMEDIATELY interrupted, the touchdown would start another drag. We record
-  // interruptions here so that we can prevent future enter/down events from the same touch pointer from triggering
-  // another startDrag.
-  this._lastInterruptedTouchPointer = null;
+    // @private {Pointer|null} - There are cases like https://github.com/phetsims/equality-explorer/issues/97 where if
+    // a touchenter starts a drag that is IMMEDIATELY interrupted, the touchdown would start another drag. We record
+    // interruptions here so that we can prevent future enter/down events from the same touch pointer from triggering
+    // another startDrag.
+    this._lastInterruptedTouchPointer = null;
 
-  // @private {Action} - emitted on drag. Used for triggering phet-io events to the data stream, see https://github.com/phetsims/scenery/issues/842
-  this._dragAction = new Action( event => {
+    // @private {Action} - emitted on drag. Used for triggering phet-io events to the data stream, see https://github.com/phetsims/scenery/issues/842
+    this._dragAction = new Action( event => {
 
-    // This is done first, before the drag listener is called (from the prototype drag call)
-    if ( !this._globalPoint.equals( this.pointer.point ) ) {
-      this.reposition( this.pointer.point );
-    }
+      // This is done first, before the drag listener is called (from the prototype drag call)
+      if ( !this._globalPoint.equals( this.pointer.point ) ) {
+        this.reposition( this.pointer.point );
+      }
 
-    PressListener.prototype.drag.call( this, event );
-  }, {
-    parameters: [ { name: 'event', phetioType: SceneryEvent.SceneryEventIO } ],
-    phetioFeatured: options.phetioFeatured,
-    tandem: options.tandem.createTandem( 'dragAction' ),
-    phetioHighFrequency: true,
-    phetioDocumentation: 'Emits whenever a drag occurs with an SceneryEventIO argument.',
-    phetioReadOnly: options.phetioReadOnly,
-    phetioEventType: EventType.USER
-  } );
-}
+      PressListener.prototype.drag.call( this, event );
+    }, {
+      parameters: [ { name: 'event', phetioType: SceneryEvent.SceneryEventIO } ],
+      phetioFeatured: options.phetioFeatured,
+      tandem: options.tandem.createTandem( 'dragAction' ),
+      phetioHighFrequency: true,
+      phetioDocumentation: 'Emits whenever a drag occurs with an SceneryEventIO argument.',
+      phetioReadOnly: options.phetioReadOnly,
+      phetioEventType: EventType.USER
+    } );
+  }
 
-scenery.register( 'DragListener', DragListener );
-
-inherit( PressListener, DragListener, {
   /**
    * Attempts to start a drag with a press.
    * @public
@@ -277,7 +271,7 @@ inherit( PressListener, DragListener, {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener press' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-    const success = PressListener.prototype.press.call( this, event, targetNode, () => {
+    const success = super.press( event, targetNode, () => {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener successful press' );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -310,7 +304,7 @@ inherit( PressListener, DragListener, {
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
 
     return success;
-  },
+  }
 
   /**
    * DragListener should not be clicked for a11y, this prevents that listener from being called.
@@ -320,7 +314,7 @@ inherit( PressListener, DragListener, {
    */
   canClick() {
     return false;
-  },
+  }
 
   /**
    * Stops the drag.
@@ -337,7 +331,7 @@ inherit( PressListener, DragListener, {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener release' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-    PressListener.prototype.release.call( this, event, () => {
+    super.release( event, () => {
       this.detachTransformTracker();
 
       // Notify after the rest of release is called in order to prevent it from triggering interrupt().
@@ -347,7 +341,7 @@ inherit( PressListener, DragListener, {
     } );
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
-  },
+  }
 
   /**
    * Called when move events are fired on the attached pointer listener during a drag.
@@ -369,7 +363,7 @@ inherit( PressListener, DragListener, {
     this._dragAction.execute( event );
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
-  },
+  }
 
   /**
    * Attempts to start a touch snag, given a SceneryEvent.
@@ -388,7 +382,7 @@ inherit( PressListener, DragListener, {
     }
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
-  },
+  }
 
   /**
    * Returns a defensive copy of the local-coordinate-frame point of the drag.
@@ -398,8 +392,8 @@ inherit( PressListener, DragListener, {
    */
   getGlobalPoint() {
     return this._globalPoint.copy();
-  },
-  get globalPoint() { return this.getGlobalPoint(); },
+  }
+  get globalPoint() { return this.getGlobalPoint(); }
 
   /**
    * Returns a defensive copy of the local-coordinate-frame point of the drag.
@@ -409,8 +403,8 @@ inherit( PressListener, DragListener, {
    */
   getLocalPoint() {
     return this._localPoint.copy();
-  },
-  get localPoint() { return this.getLocalPoint(); },
+  }
+  get localPoint() { return this.getLocalPoint(); }
 
   /**
    * Returns a defensive copy of the parent-coordinate-frame point of the drag.
@@ -420,8 +414,8 @@ inherit( PressListener, DragListener, {
    */
   getParentPoint() {
     return this._parentPoint.copy();
-  },
-  get parentPoint() { return this.getParentPoint(); },
+  }
+  get parentPoint() { return this.getParentPoint(); }
 
   /**
    * Returns a defensive copy of the model-coordinate-frame point of the drag.
@@ -431,8 +425,8 @@ inherit( PressListener, DragListener, {
    */
   getModelPoint() {
     return this._modelPoint.copy();
-  },
-  get modelPoint() { return this.getModelPoint(); },
+  }
+  get modelPoint() { return this.getModelPoint(); }
 
   /**
    * Returns a defensive copy of the model-coordinate-frame delta.
@@ -442,8 +436,8 @@ inherit( PressListener, DragListener, {
    */
   getModelDelta() {
     return this._modelDelta.copy();
-  },
-  get modelDelta() { return this.getModelDelta(); },
+  }
+  get modelDelta() { return this.getModelDelta(); }
 
   /**
    * Maps a point from the global coordinate frame to our drag target's parent coordinate frame.
@@ -463,7 +457,7 @@ inherit( PressListener, DragListener, {
     this.pressedTrail.getParentTransform().getInverse().multiplyVector2( globalPoint );
     assert && assert( globalPoint.equals( referenceResult ) );
     return globalPoint;
-  },
+  }
 
   /**
    * Maps a point from the drag target's parent coordinate frame to its local coordinate frame.
@@ -483,7 +477,7 @@ inherit( PressListener, DragListener, {
     this.pressedTrail.lastNode().getTransform().getInverse().multiplyVector2( parentPoint );
     assert && assert( parentPoint.equals( referenceResult ) );
     return parentPoint;
-  },
+  }
 
   /**
    * Maps a point from the drag target's local coordinate frame to its parent coordinate frame.
@@ -503,7 +497,7 @@ inherit( PressListener, DragListener, {
     this.pressedTrail.lastNode().getMatrix().multiplyVector2( localPoint );
     assert && assert( localPoint.equals( referenceResult ) );
     return localPoint;
-  },
+  }
 
   /**
    * Maps a point from the drag target's parent coordinate frame to the model coordinate frame.
@@ -522,7 +516,7 @@ inherit( PressListener, DragListener, {
       this._transform.getInverse().multiplyVector2( parentPoint );
     }
     return parentPoint;
-  },
+  }
 
   /**
    * Maps a point from the model coordinate frame to the drag target's parent coordinate frame.
@@ -541,7 +535,7 @@ inherit( PressListener, DragListener, {
       this._transform.getMatrix().multiplyVector2( modelPoint );
     }
     return modelPoint;
-  },
+  }
 
   /**
    * Apply a mapping from from the drag target's model position to an allowed model position.
@@ -566,7 +560,7 @@ inherit( PressListener, DragListener, {
     else {
       return modelPoint;
     }
-  },
+  }
 
   /**
    * Mutates the parentPoint given to account for the initial pointer's offset from the drag target's origin.
@@ -591,7 +585,7 @@ inherit( PressListener, DragListener, {
         parentPoint.add( this.localToParentPoint( scratchVector2A.setXY( 0, 0 ) ) );
       }
     }
-  },
+  }
 
   /**
    * Triggers an update of the drag position, potentially changing position properties.
@@ -632,7 +626,7 @@ inherit( PressListener, DragListener, {
     }
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
-  },
+  }
 
   /**
    * Called with 'touchenter' events (part of the listener API).
@@ -644,7 +638,7 @@ inherit( PressListener, DragListener, {
    */
   touchenter( event ) {
     this.tryTouchSnag( event );
-  },
+  }
 
   /**
    * Called with 'touchmove' events (part of the listener API).
@@ -656,7 +650,7 @@ inherit( PressListener, DragListener, {
    */
   touchmove( event ) {
     this.tryTouchSnag( event );
-  },
+  }
 
   /**
    * Called when an ancestor's transform has changed (when trackAncestors is true).
@@ -665,7 +659,7 @@ inherit( PressListener, DragListener, {
   ancestorTransformed() {
     // Reposition based on the current point.
     this.reposition( this.pointer.point );
-  },
+  }
 
   /**
    * Attaches our transform tracker (begins listening to the ancestor transforms)
@@ -676,7 +670,7 @@ inherit( PressListener, DragListener, {
       this._transformTracker = new TransformTracker( this.pressedTrail.copy().removeDescendant() );
       this._transformTracker.addListener( this._transformTrackerListener );
     }
-  },
+  }
 
   /**
    * Detaches our transform tracker (stops listening to the ancestor transforms)
@@ -688,7 +682,7 @@ inherit( PressListener, DragListener, {
       this._transformTracker.dispose();
       this._transformTracker = null;
     }
-  },
+  }
 
   /**
    * Sets the drag bounds of the listener.
@@ -700,8 +694,8 @@ inherit( PressListener, DragListener, {
     assert && assert( bounds instanceof Bounds2 );
 
     this._dragBoundsProperty.value = bounds;
-  },
-  set dragBounds( value ) { this.setDragBounds( value ); },
+  }
+  set dragBounds( value ) { this.setDragBounds( value ); }
 
   /**
    * Returns the drag bounds of the listener.
@@ -711,8 +705,8 @@ inherit( PressListener, DragListener, {
    */
   getDragBounds() {
     return this._dragBoundsProperty.value;
-  },
-  get dragBounds() { return this.getDragBounds(); },
+  }
+  get dragBounds() { return this.getDragBounds(); }
 
   /**
    * Sets the drag transform of the listener.
@@ -724,8 +718,8 @@ inherit( PressListener, DragListener, {
     assert && assert( transform instanceof Transform3 );
 
     this._transform = transform;
-  },
-  set transform( transform ) { this.setTransform( transform ); },
+  }
+  set transform( transform ) { this.setTransform( transform ); }
 
   /**
    * Returns the transform of the listener.
@@ -735,8 +729,8 @@ inherit( PressListener, DragListener, {
    */
   getTransform() {
     return this._transform;
-  },
-  get transform() { return this.getTransform(); },
+  }
+  get transform() { return this.getTransform(); }
 
   /**
    * Interrupts the listener, releasing it (canceling behavior).
@@ -753,8 +747,8 @@ inherit( PressListener, DragListener, {
       this._lastInterruptedTouchPointer = this.pointer;
     }
 
-    PressListener.prototype.interrupt.call( this );
-  },
+    super.interrupt();
+  }
 
   /**
    * Returns whether a press can be started with a particular event.
@@ -769,8 +763,8 @@ inherit( PressListener, DragListener, {
       return false;
     }
 
-    return PressListener.prototype.canPress.call( this, event );
-  },
+    return super.canPress( event );
+  }
 
   /**
    * Disposes the listener, releasing references. It should not be used after this.
@@ -784,11 +778,11 @@ inherit( PressListener, DragListener, {
 
     this.detachTransformTracker();
 
-    PressListener.prototype.dispose.call( this );
+    super.dispose();
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
   }
-}, {
+
   /**
    * Creates an input listener that forwards events to the specified input listener.
    * @public
@@ -799,7 +793,7 @@ inherit( PressListener, DragListener, {
    * @param {Object} [options]
    * @returns {Object} a scenery input listener
    */
-  createForwardingListener( down, options ) {
+  static createForwardingListener( down, options ) {
 
     options = merge( {
       allowTouchSnag: true // see https://github.com/phetsims/scenery/issues/999
@@ -819,6 +813,8 @@ inherit( PressListener, DragListener, {
       }
     };
   }
-} );
+}
+
+scenery.register( 'DragListener', DragListener );
 
 export default DragListener;

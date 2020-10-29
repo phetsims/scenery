@@ -15,7 +15,6 @@ import scenery from '../scenery.js';
 import PressListenerAPI from './PressListenerAPI.js';
 
 class DragListenerAPI extends PressListenerAPI {
-
   /**
    * @param {Object} [options]
    */

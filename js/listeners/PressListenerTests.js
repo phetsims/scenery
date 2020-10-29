@@ -6,29 +6,29 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import phetioAPITest from '../../../tandem/js/phetioAPITest.js';
 import Tandem from '../../../tandem/js/Tandem.js';
+import phetioAPITest from '../../../tandem/js/phetioAPITest.js';
 import ListenerTestUtils from './ListenerTestUtils.js';
 import PressListener from './PressListener.js';
 import PressListenerAPI from './PressListenerAPI.js';
 
 QUnit.module( 'PressListener' );
 
-QUnit.test( 'Basics', function( assert ) {
-  ListenerTestUtils.simpleRectangleTest( function( display, rect, node ) {
+QUnit.test( 'Basics', assert => {
+  ListenerTestUtils.simpleRectangleTest( ( display, rect, node ) => {
     let pressCount = 0;
     let releaseCount = 0;
     let dragCount = 0;
     const listener = new PressListener( {
       tandem: Tandem.GENERAL.createTandem( 'myListener' ),
 
-      press: function( event, listener ) {
+      press: ( event, listener ) => {
         pressCount++;
       },
-      release: function( event, listener ) {
+      release: ( event, listener ) => {
         releaseCount++;
       },
-      drag: function( event, listener ) {
+      drag: ( event, listener ) => {
         dragCount++;
       }
     } );
@@ -93,8 +93,8 @@ QUnit.test( 'Basics', function( assert ) {
   } );
 } );
 
-QUnit.test( 'Interruption', function( assert ) {
-  ListenerTestUtils.simpleRectangleTest( function( display, rect, node ) {
+QUnit.test( 'Interruption', assert => {
+  ListenerTestUtils.simpleRectangleTest( ( display, rect, node ) => {
     const listener = new PressListener( {
       tandem: Tandem.GENERAL.createTandem( 'myListener' )
     });
@@ -109,6 +109,6 @@ QUnit.test( 'Interruption', function( assert ) {
   } );
 } );
 
-QUnit.test( 'PhET-iO API Validation', function( assert ) {
+QUnit.test( 'PhET-iO API Validation', assert => {
   phetioAPITest( assert, new PressListenerAPI(), 'pressListener', tandem => new PressListener( { tandem: tandem } ) );
 } );
