@@ -183,7 +183,7 @@ QUnit.test( 'tab focusin/focusout', assert => {
   assert.ok( buttonA.focused, 'butonA has focus initially' );
 
   const overrideFocusListener = {
-    blur: function( event ) {
+    blur: event => {
       buttonC.focus();
     }
   };
@@ -201,7 +201,7 @@ QUnit.test( 'tab focusin/focusout', assert => {
   buttonA.removeInputListener( overrideFocusListener );
   buttonA.focus();
   const makeUnfocusableListener = {
-    blur: function( event ) {
+    blur: event => {
       buttonB.focusable = false;
     }
   };
@@ -400,7 +400,7 @@ QUnit.test( 'click extra', assert => {
   assert.ok( a1.labelContent === null, 'no label on instantiation' );
 
   // add a listener
-  const listener = { click: function() { a1.labelContent = TEST_LABEL; } };
+  const listener = { click: () => { a1.labelContent = TEST_LABEL; } };
   a1.addInputListener( listener );
   assert.ok( a1.inputListeners.length === 1, 'accessible listener added' );
 

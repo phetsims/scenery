@@ -9,53 +9,46 @@
 import Permutation from '../../../../dot/js/Permutation.js';
 import Random from '../../../../dot/js/Random.js';
 import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
-import inherit from '../../../../phet-core/js/inherit.js';
 import Display from '../../display/Display.js';
 import Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import PDOMTree from './PDOMTree.js';
 
-/**
- * @constructor
- *
- * @param {number} nodeCount
- * @param {boolean} logToConsole
- * @param {number} [seed]
- */
-function PDOMFuzzer( nodeCount, logToConsole, seed ) {
-  assert && assert( nodeCount >= 2 );
+class PDOMFuzzer {
+  /**
+   * @param {number} nodeCount
+   * @param {boolean} logToConsole
+   * @param {number} [seed]
+   */
+  constructor( nodeCount, logToConsole, seed ) {
+    assert && assert( nodeCount >= 2 );
 
-  seed = seed || null;
+    seed = seed || null;
 
-  // @private {number}
-  this.nodeCount = nodeCount;
+    // @private {number}
+    this.nodeCount = nodeCount;
 
-  // @private {boolean}
-  this.logToConsole = logToConsole;
+    // @private {boolean}
+    this.logToConsole = logToConsole;
 
-  // @private {Array.<Node>}
-  this.nodes = _.range( 0, nodeCount ).map( function() {
-    return new Node();
-  } );
+    // @private {Array.<Node>}
+    this.nodes = _.range( 0, nodeCount ).map( () => new Node() );
 
-  // @private {Display}
-  this.display = new Display( this.nodes[ 0 ] );
+    // @private {Display}
+    this.display = new Display( this.nodes[ 0 ] );
 
-  // @private {Random}
-  this.random = new Random( { seed: seed } );
+    // @private {Random}
+    this.random = new Random( { seed: seed } );
 
-  // @private {Array.<Action>}
-  this.actionsTaken = [];
-}
+    // @private {Array.<Action>}
+    this.actionsTaken = [];
+  }
 
-scenery.register( 'PDOMFuzzer', PDOMFuzzer );
-
-inherit( Object, PDOMFuzzer, {
   /**
    * Runs one action randomly (printing out the action and result).
    * @public
    */
-  step: function() {
+  step() {
     const action = this.random.sample( this.enumerateActions() );
     this.logToConsole && console.log( action.text );
     this.actionsTaken.push( action );
@@ -68,7 +61,7 @@ inherit( Object, PDOMFuzzer, {
         console.log( i + '#' + node.id + ' ' + node.tagName + ' ch:' + PDOMTree.debugOrder( node.children ) + ' or:' + PDOMTree.debugOrder( node.accessibleOrder ) + ' vis:' + node.visible + ' avis:' + node.accessibleVisible );
       }
     }
-  },
+  }
 
   /**
    * Find all of the possible actions that are legal.
@@ -76,41 +69,40 @@ inherit( Object, PDOMFuzzer, {
    *
    * @returns {Array.<Object>} - like { text: {string}, execute: {function} }
    */
-  enumerateActions: function() {
-    const self = this;
+  enumerateActions() {
     const actions = [];
 
-    this.nodes.forEach( function( a ) {
+    this.nodes.forEach( a => {
       actions.push( {
         text: '#' + a.id + '.visible = ' + !a.visible,
-        execute: function() {
+        execute: () => {
           a.visible = !a.visible;
         }
       } );
       actions.push( {
         text: '#' + a.id + '.accessibleVisible = ' + !a.accessibleVisible,
-        execute: function() {
+        execute: () => {
           a.accessibleVisible = !a.accessibleVisible;
         }
       } );
-      [ 'span', 'div', null ].forEach( function( tagName ) {
+      [ 'span', 'div', null ].forEach( tagName => {
         if ( a.tagName !== tagName ) {
           actions.push( {
             text: '#' + a.id + '.tagName = ' + tagName,
-            execute: function() {
+            execute: () => {
               a.tagName = tagName;
             }
           } );
         }
       } );
 
-      self.powerSet( arrayDifference( self.nodes, [ a ] ).concat( [ null ] ) ).forEach( function( subset ) {
-        Permutation.forEachPermutation( subset, function( order ) {
+      this.powerSet( arrayDifference( this.nodes, [ a ] ).concat( [ null ] ) ).forEach( subset => {
+        Permutation.forEachPermutation( subset, order => {
           // TODO: Make sure it's not the CURRENT order?
-          if ( self.isAccessibleOrderChangeLegal( a, order ) ) {
+          if ( this.isAccessibleOrderChangeLegal( a, order ) ) {
             actions.push( {
               text: '#' + a.id + '.accessibleOrder = ' + PDOMTree.debugOrder( order ),
-              execute: function() {
+              execute: () => {
                 a.accessibleOrder = order;
               }
             } );
@@ -118,12 +110,12 @@ inherit( Object, PDOMFuzzer, {
         } );
       } );
 
-      self.nodes.forEach( function( b ) {
-        if ( self.isAddChildLegal( a, b ) ) {
-          _.range( 0, a.children.length + 1 ).forEach( function( i ) {
+      this.nodes.forEach( b => {
+        if ( this.isAddChildLegal( a, b ) ) {
+          _.range( 0, a.children.length + 1 ).forEach( i => {
             actions.push( {
               text: '#' + a.id + '.insertChild(' + i + ',#' + b.id + ')',
-              execute: function() {
+              execute: () => {
                 a.insertChild( i, b );
               }
             } );
@@ -132,7 +124,7 @@ inherit( Object, PDOMFuzzer, {
         if ( a.hasChild( b ) ) {
           actions.push( {
             text: '#' + a.id + '.removeChild(#' + b.id + ')',
-            execute: function() {
+            execute: () => {
               a.removeChild( b );
             }
           } );
@@ -141,7 +133,7 @@ inherit( Object, PDOMFuzzer, {
     } );
 
     return actions;
-  },
+  }
 
   /**
    * Checks whether the child can be added (as a child) to the parent.
@@ -151,9 +143,9 @@ inherit( Object, PDOMFuzzer, {
    * @param {Node} child
    * @returns {boolean}
    */
-  isAddChildLegal: function( parent, child ) {
+  isAddChildLegal( parent, child ) {
     return !parent.hasChild( child ) && this.isAcyclic( parent, child );
-  },
+  }
 
   /**
    * Returns the power set of a set (all subsets).
@@ -162,17 +154,15 @@ inherit( Object, PDOMFuzzer, {
    * @param {Array.<*>} list
    * @returns {Array.<Array.<*>>}
    */
-  powerSet: function( list ) {
+  powerSet( list ) {
     if ( list.length === 0 ) {
       return [ [] ];
     }
     else {
       const lists = this.powerSet( list.slice( 1 ) );
-      return lists.concat( lists.map( function( subList ) {
-        return [ list[ 0 ] ].concat( subList );
-      } ) );
+      return lists.concat( lists.map( subList => [ list[ 0 ] ].concat( subList ) ) );
     }
-  },
+  }
 
   /**
    * Returns whether an accessible order change is legal.
@@ -181,12 +171,10 @@ inherit( Object, PDOMFuzzer, {
    * @param {Node} node
    * @param {Array.<Node|null>|null} order
    */
-  isAccessibleOrderChangeLegal: function( node, order ) {
-    const self = this;
-
+  isAccessibleOrderChangeLegal( node, order ) {
     // remap for equivalence, so it's an array of nodes
     if ( order === null ) { order = []; }
-    order = order.filter( function( n ) { return n !== null; } );
+    order = order.filter( n => n !== null );
 
     if ( _.includes( order, node ) ||
          _.uniq( order ).length < order.length ) {
@@ -200,7 +188,7 @@ inherit( Object, PDOMFuzzer, {
       }
     }
 
-    const hasConnection = function( a, b ) {
+    const hasConnection = ( a, b ) => {
       if ( a === node ) {
         return a.hasChild( b ) || _.includes( order, b );
       }
@@ -210,10 +198,8 @@ inherit( Object, PDOMFuzzer, {
     };
 
     const effectiveChildren = node.children.concat( order );
-    return _.every( effectiveChildren, function( child ) {
-      return self.isAcyclic( node, child, hasConnection );
-    } );
-  },
+    return _.every( effectiveChildren, child => this.isAcyclic( node, child, hasConnection ) );
+  }
 
   /**
    * Checks whether a connection (parent-child or accessible order) is legal (doesn't cause a cycle).
@@ -224,14 +210,12 @@ inherit( Object, PDOMFuzzer, {
    * @param {function} hasConnection - determines whether there is a parent-child-style relationship between params
    * @returns {boolean}
    */
-  isAcyclic: function( parent, child, hasConnection ) {
+  isAcyclic( parent, child, hasConnection ) {
     if ( parent === child ) {
       return false;
     }
 
-    const nodes = child.children.concat( child.accessibleOrder ).filter( function( n ) {
-      return n !== null;
-    } ); // super defensive
+    const nodes = child.children.concat( child.accessibleOrder ).filter( n => n !== null ); // super defensive
 
     while ( nodes.length ) {
       var node = nodes.pop();
@@ -240,7 +224,7 @@ inherit( Object, PDOMFuzzer, {
       }
 
       if ( hasConnection ) {
-        this.nodes.forEach( function( potentialChild ) {
+        this.nodes.forEach( potentialChild => {
           if ( hasConnection( node, potentialChild ) ) {
             nodes.push( potentialChild );
           }
@@ -250,17 +234,22 @@ inherit( Object, PDOMFuzzer, {
         // Add in children and accessible children (don't worry about duplicates since perf isn't critical)
         Array.prototype.push.apply( nodes, node.children );
         if ( node.accessibleOrder ) {
-          Array.prototype.push.apply( nodes, node.accessibleOrder.filter( function( n ) { return n !== null; } ) );
+          Array.prototype.push.apply( nodes, node.accessibleOrder.filter( n => n !== null ) );
         }
       }
     }
 
     return true;
-  },
+  }
 
-  dispose: function() {
+  /**
+   * Releases references
+   * @public
+   */
+  dispose() {
     this.display.dispose();
   }
-} );
+}
 
+scenery.register( 'PDOMFuzzer', PDOMFuzzer );
 export default PDOMFuzzer;

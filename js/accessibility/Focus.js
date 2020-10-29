@@ -8,23 +8,21 @@
  * @author Jesse Greenberg
  */
 
-import inherit from '../../../phet-core/js/inherit.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import scenery from '../scenery.js';
 
-/**
- * Constructor.
- * @param {Display} display - Display containing the focused node
- * @param {Trail} trail - Trail to the focused node
- */
-function Focus( display, trail ) {
+class Focus {
+  /**
+   * @param {Display} display - Display containing the focused node
+   * @param {Trail} trail - Trail to the focused node
+   */
+  constructor( display, trail ) {
 
-  // @public (read-only)
-  this.display = display;
-  this.trail = trail;
+    // @public (read-only)
+    this.display = display;
+    this.trail = trail;
+  }
 }
-
-inherit( Object, Focus );
 
 Focus.FocusIO = new IOType( 'FocusIO', {
   valueType: Focus,
@@ -33,7 +31,7 @@ Focus.FocusIO = new IOType( 'FocusIO', {
                  'from parent-most to child-most corresponding to the PhET-iO element that was instrumented.',
   toStateObject: focus => {
     const phetioIDs = [];
-    focus.trail.nodes.forEach( function( node, i ) {
+    focus.trail.nodes.forEach( ( node, i ) => {
 
       // If the node was PhET-iO instrumented, include its phetioID instead of its index (because phetioID is more stable)
       if ( node.isPhetioInstrumented() ) {
@@ -48,5 +46,4 @@ Focus.FocusIO = new IOType( 'FocusIO', {
 } );
 
 scenery.register( 'Focus', Focus );
-
 export default Focus;
