@@ -597,8 +597,8 @@ class Color {
   }
 
   /**
-   * Convenience function that converts a color spec to a color object if
-   * necessary, or simply returns the color object if not.
+   * Convenience function that converts a color spec to a color object if necessary, or simply returns the color object
+   * if not.
    * @public
    *
    * @param {String|Color} colorSpec
@@ -609,10 +609,9 @@ class Color {
   }
 
   /**
-   * Interpolates between 2 colors in RGBA space. When distance is 0, color1
-   * is returned. When distance is 1, color2 is returned. Other values of
-   * distance return a color somewhere between color1 and color2. Each color
-   * component is interpolated separately.
+   * Interpolates between 2 colors in RGBA space. When distance is 0, color1 is returned. When distance is 1, color2 is
+   * returned. Other values of distance return a color somewhere between color1 and color2. Each color component is
+   * interpolated separately.
    * @public
    *
    * @param {Color} color1
