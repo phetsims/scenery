@@ -197,21 +197,18 @@ const domEventPropertiesToSerialize = {
 const PDOM_UNPICKABLE_EVENTS = [ 'focus', 'blur', 'focusin', 'focusout' ];
 const TARGET_SUBSTITUTE_KEY = 'targetSubstitute';
 
-/**
- * An input controller for a specific Display.
- * @constructor
- *
- * @param {Display} display
- * @param {boolean} attachToWindow - Whether to add listeners to the window (instead of the Display's domElement).
- * @param {boolean} batchDOMEvents - If true, most event types will be batched until otherwise triggered.
- * @param {boolean} assumeFullWindow - We can optimize certain things like computing points if we know the display
- *                                     fills the entire window.
- * @param {boolean|null} passiveEvents - See Display's documentation (controls the presence of the passive flag for
- *                                       events, which has some advanced considerations).
- *
- * @param {Object} [options]
- */
 class Input {
+  /**
+   * @param {Display} display
+   * @param {boolean} attachToWindow - Whether to add listeners to the window (instead of the Display's domElement).
+   * @param {boolean} batchDOMEvents - If true, most event types will be batched until otherwise triggered.
+   * @param {boolean} assumeFullWindow - We can optimize certain things like computing points if we know the display
+   *                                     fills the entire window.
+   * @param {boolean|null} passiveEvents - See Display's documentation (controls the presence of the passive flag for
+   *                                       events, which has some advanced considerations).
+   *
+   * @param {Object} [options]
+   */
   constructor( display, attachToWindow, batchDOMEvents, assumeFullWindow, passiveEvents, options ) {
     assert && assert( display instanceof Display );
     assert && assert( typeof attachToWindow === 'boolean' );

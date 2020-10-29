@@ -14,9 +14,9 @@ import Features from '../util/Features.js';
 import BatchedDOMEvent from './BatchedDOMEvent.js';
 
 // Sometimes we need to add a listener that does absolutely nothing
-const noop = function noop() {};
+const noop = () => {};
 
-var BrowserEvents = {
+const BrowserEvents = {
   /**
    * Adds a Display to the list of displays that will be notified of input events.
    * @public
@@ -26,7 +26,7 @@ var BrowserEvents = {
    *                                   attached to the Display's domElement.
    * @param {boolean|null} passiveEvents - The value of the `passive` option for adding/removing DOM event listeners
    */
-  addDisplay: function( display, attachToWindow, passiveEvents ) {
+  addDisplay( display, attachToWindow, passiveEvents ) {
     assert && assert( display instanceof Display );
     assert && assert( typeof attachToWindow === 'boolean' );
     assert && assert( !_.includes( this.attachedDisplays, display ),
@@ -56,7 +56,7 @@ var BrowserEvents = {
    * @param {boolean} attachToWindow - The value provided to addDisplay
    * @param {boolean|null} passiveEvents - The value of the `passive` option for adding/removing DOM event listeners
    */
-  removeDisplay: function( display, attachToWindow, passiveEvents ) {
+  removeDisplay( display, attachToWindow, passiveEvents ) {
     assert && assert( display instanceof Display );
     assert && assert( typeof attachToWindow === 'boolean' );
     assert && assert( _.includes( this.attachedDisplays, display ),
@@ -85,7 +85,7 @@ var BrowserEvents = {
    * @param {boolean} isMain - If false, it is used on the "document" for workarounds.
    * @returns {Object|boolean}
    */
-  getEventOptions: function( passiveEvents, isMain ) {
+  getEventOptions( passiveEvents, isMain ) {
     const passDirectPassiveFlag = Features.passive && passiveEvents !== null;
     if ( !passDirectPassiveFlag ) {
       return false;
@@ -198,7 +198,7 @@ var BrowserEvents = {
    *
    * @returns {Array.<string>}
    */
-  getNonWheelUsedTypes: function() {
+  getNonWheelUsedTypes() {
     let eventTypes;
 
     if ( this.canUsePointerEvents ) {
@@ -232,7 +232,7 @@ var BrowserEvents = {
    *
    * @param {boolean|null} passiveEvents - The value of the `passive` option for adding/removing DOM event listeners
    */
-  connectWindowListeners: function( passiveEvents ) {
+  connectWindowListeners( passiveEvents ) {
     this.addOrRemoveListeners( window, true, passiveEvents );
   },
 
@@ -242,7 +242,7 @@ var BrowserEvents = {
    *
    * @param {boolean|null} passiveEvents - The value of the `passive` option for adding/removing DOM event listeners
    */
-  disconnectWindowListeners: function( passiveEvents ) {
+  disconnectWindowListeners( passiveEvents ) {
     this.addOrRemoveListeners( window, false, passiveEvents );
   },
 
@@ -256,7 +256,7 @@ var BrowserEvents = {
    *                                       NOTE: if it is passed in as null, the default value for the browser will be
    *                                       used.
    */
-  addOrRemoveListeners: function( element, addOrRemove, passiveEvents ) {
+  addOrRemoveListeners( element, addOrRemove, passiveEvents ) {
     assert && assert( typeof addOrRemove === 'boolean' );
     assert && assert( typeof passiveEvents === 'boolean' || passiveEvents === null );
 
@@ -311,7 +311,7 @@ var BrowserEvents = {
    *                                     necessary for certain security-sensitive actions (like triggering
    *                                     full-screen).
    */
-  batchWindowEvent: function( domEvent, batchType, inputCallbackName, triggerImmediate ) {
+  batchWindowEvent( domEvent, batchType, inputCallbackName, triggerImmediate ) {
     // NOTE: For now, we don't check whether the event is actually within the display's boundingClientRect. Most
     // displays will want to receive events outside of their bounds (especially for checking drags and mouse-ups
     // outside of their bounds).
