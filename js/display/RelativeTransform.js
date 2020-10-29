@@ -86,25 +86,26 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 
-function RelativeTransform( instance ) {
-  this.instance = instance;
-}
+class RelativeTransform {
+  /**
+   * @param {Instance} instance
+   */
+  constructor( instance ) {
+    this.instance = instance;
+  }
 
-scenery.register( 'RelativeTransform', RelativeTransform );
-
-inherit( Object, RelativeTransform, {
   /**
    * Responsible for initialization and cleaning of this. If the parameters are both null, we'll want to clean our
    * external references (like Instance does).
+   * @public
    *
    * @param {Display|null} display
    * @param {Trail|null} trail
    * @returns {RelativeTransform} - Returns this, to allow chaining.
    */
-  initialize: function( display, trail ) {
+  initialize( display, trail ) {
     this.display = display;
     this.trail = trail;
     this.node = trail && trail.lastNode();
@@ -144,13 +145,23 @@ inherit( Object, RelativeTransform, {
     this.relativeTransformListeners = cleanArray( this.relativeTransformListeners );
 
     return this; // allow chaining
-  },
+  }
 
+  /**
+   * @public
+   *
+   * @returns {RelativeTransform|null}
+   */
   get parent() {
     return this.instance.parent ? this.instance.parent.relativeTransform : null;
-  },
+  }
 
-  addInstance: function( instance ) {
+  /**
+   * @public
+   *
+   * @param {Instance} instance
+   */
+  addInstance( instance ) {
     if ( instance.stateless ) {
       assert && assert( !instance.relativeTransform.hasAncestorListenerNeed(),
         'We only track changes properly if stateless instances do not have needs' );
@@ -168,53 +179,84 @@ inherit( Object, RelativeTransform, {
 
     // mark the instance's transform as dirty, so that it will be reachable in the pre-repaint traversal pass
     instance.relativeTransform.forceMarkTransformDirty();
-  },
+  }
 
-  removeInstance: function( instance ) {
+  /**
+   * @public
+   *
+   * @param {Instance} instance
+   */
+  removeInstance( instance ) {
     if ( instance.relativeTransform.hasAncestorListenerNeed() ) {
       this.decrementTransformListenerChildren();
     }
     if ( instance.relativeTransform.hasAncestorComputeNeed() ) {
       this.decrementTransformPrecomputeChildren();
     }
-  },
+  }
 
-  attachNodeListeners: function() {
+  /**
+   * @public
+   */
+  attachNodeListeners() {
     this.node.transformEmitter.addListener( this.nodeTransformListener );
-  },
+  }
 
-  detachNodeListeners: function() {
+  /**
+   * @public
+   */
+  detachNodeListeners() {
     this.node.transformEmitter.removeListener( this.nodeTransformListener );
-  },
+  }
 
   /*---------------------------------------------------------------------------*
    * Relative transform listener count recursive handling
    *----------------------------------------------------------------------------*/
 
-  // @private: Only for descendants need, ignores 'self' need on isTransformed
-  hasDescendantListenerNeed: function() {
+  /**
+   * Only for descendants need, ignores 'self' need on isTransformed
+   * @private
+   *
+   * @returns {boolean}
+   */
+  hasDescendantListenerNeed() {
     if ( this.instance.isTransformed ) {
       return this.relativeChildrenListenersCount > 0;
     }
     else {
       return this.relativeChildrenListenersCount > 0 || this.relativeTransformListeners.length > 0;
     }
-  },
-  // @private: Only for ancestors need, ignores child need on isTransformed
-  hasAncestorListenerNeed: function() {
+  }
+
+  /**
+   * Only for ancestors need, ignores child need on isTransformed
+   * @private
+   *
+   * @returns {boolean}
+   */
+  hasAncestorListenerNeed() {
     if ( this.instance.isTransformed ) {
       return this.relativeTransformListeners.length > 0;
     }
     else {
       return this.relativeChildrenListenersCount > 0 || this.relativeTransformListeners.length > 0;
     }
-  },
-  // @private
-  hasSelfListenerNeed: function() {
+  }
+
+  /**
+   * @private
+   *
+   * @returns {boolean}
+   */
+  hasSelfListenerNeed() {
     return this.relativeTransformListeners.length > 0;
-  },
-  // @private (called on the ancestor of the instance with the need)
-  incrementTransformListenerChildren: function() {
+  }
+
+  /**
+   * Called on the ancestor of the instance with the need
+   * @private
+   */
+  incrementTransformListenerChildren() {
     const before = this.hasAncestorListenerNeed();
 
     this.relativeChildrenListenersCount++;
@@ -223,9 +265,13 @@ inherit( Object, RelativeTransform, {
 
       this.parent && this.parent.incrementTransformListenerChildren();
     }
-  },
-  // @private (called on the ancestor of the instance with the need)
-  decrementTransformListenerChildren: function() {
+  }
+
+  /**
+   * Called on the ancestor of the instance with the need
+   * @private
+   */
+  decrementTransformListenerChildren() {
     const before = this.hasAncestorListenerNeed();
 
     this.relativeChildrenListenersCount--;
@@ -234,10 +280,15 @@ inherit( Object, RelativeTransform, {
 
       this.parent && this.parent.decrementTransformListenerChildren();
     }
-  },
+  }
 
-  // @public (called on the instance itself)
-  addListener: function( listener ) {
+  /**
+   * Called on the instance itself
+   * @public
+   *
+   * @param {function} listener
+   */
+  addListener( listener ) {
     const before = this.hasAncestorListenerNeed();
 
     this.relativeTransformListeners.push( listener );
@@ -251,10 +302,15 @@ inherit( Object, RelativeTransform, {
         this.forceMarkTransformDirty();
       }
     }
-  },
+  }
 
-  // @public (called on the instance itself)
-  removeListener: function( listener ) {
+  /**
+   * Called on the instance itself
+   * @public
+   *
+   * @param {function} listener
+   */
+  removeListener( listener ) {
     const before = this.hasAncestorListenerNeed();
 
     // TODO: replace with a 'remove' function call
@@ -262,36 +318,56 @@ inherit( Object, RelativeTransform, {
     if ( before !== this.hasAncestorListenerNeed() ) {
       this.parent && this.parent.decrementTransformListenerChildren();
     }
-  },
+  }
 
   /*---------------------------------------------------------------------------*
    * Relative transform precompute flag recursive handling
    *----------------------------------------------------------------------------*/
 
-  // @private: Only for descendants need, ignores 'self' need on isTransformed
-  hasDescendantComputeNeed: function() {
+  /**
+   * Only for descendants need, ignores 'self' need on isTransformed
+   * @private
+   *
+   * @returns {boolean}
+   */
+  hasDescendantComputeNeed() {
     if ( this.instance.isTransformed ) {
       return this.relativeChildrenPrecomputeCount > 0;
     }
     else {
       return this.relativeChildrenPrecomputeCount > 0 || this.relativePrecomputeCount > 0;
     }
-  },
-  // @private: Only for ancestors need, ignores child need on isTransformed
-  hasAncestorComputeNeed: function() {
+  }
+
+  /**
+   * Only for ancestors need, ignores child need on isTransformed
+   * @private
+   *
+   * @returns {boolean}
+   */
+  hasAncestorComputeNeed() {
     if ( this.instance.isTransformed ) {
       return this.relativePrecomputeCount > 0;
     }
     else {
       return this.relativeChildrenPrecomputeCount > 0 || this.relativePrecomputeCount > 0;
     }
-  },
-  // @private
-  hasSelfComputeNeed: function() {
+  }
+
+  /**
+   * @private
+   *
+   * @returns {boolean}
+   */
+  hasSelfComputeNeed() {
     return this.relativePrecomputeCount > 0;
-  },
-  // @private (called on the ancestor of the instance with the need)
-  incrementTransformPrecomputeChildren: function() {
+  }
+
+  /**
+   * Called on the ancestor of the instance with the need
+   * @private
+   */
+  incrementTransformPrecomputeChildren() {
     const before = this.hasAncestorComputeNeed();
 
     this.relativeChildrenPrecomputeCount++;
@@ -300,9 +376,13 @@ inherit( Object, RelativeTransform, {
 
       this.parent && this.parent.incrementTransformPrecomputeChildren();
     }
-  },
-  // @private (called on the ancestor of the instance with the need)
-  decrementTransformPrecomputeChildren: function() {
+  }
+
+  /**
+   * Called on the ancestor of the instance with the need
+   * @private
+   */
+  decrementTransformPrecomputeChildren() {
     const before = this.hasAncestorComputeNeed();
 
     this.relativeChildrenPrecomputeCount--;
@@ -311,10 +391,13 @@ inherit( Object, RelativeTransform, {
 
       this.parent && this.parent.decrementTransformPrecomputeChildren();
     }
-  },
+  }
 
-  // @public (called on the instance itself)
-  addPrecompute: function() {
+  /**
+   * Called on the instance itself
+   * @public
+   */
+  addPrecompute() {
     const before = this.hasAncestorComputeNeed();
 
     this.relativePrecomputeCount++;
@@ -328,30 +411,39 @@ inherit( Object, RelativeTransform, {
         this.forceMarkTransformDirty();
       }
     }
-  },
+  }
 
-  // @public (called on the instance itself)
-  removePrecompute: function() {
+  /**
+   * Called on the instance itself
+   * @public
+   */
+  removePrecompute() {
     const before = this.hasAncestorComputeNeed();
 
     this.relativePrecomputeCount--;
     if ( before !== this.hasAncestorComputeNeed() ) {
       this.parent && this.parent.decrementTransformPrecomputeChildren();
     }
-  },
+  }
 
   /*---------------------------------------------------------------------------*
    * Relative transform handling
    *----------------------------------------------------------------------------*/
 
-  // called immediately when the corresponding node has a transform change (can happen multiple times between renders)
-  onNodeTransformDirty: function() {
+  /**
+   * Called immediately when the corresponding node has a transform change (can happen multiple times between renders)
+   * @private
+   */
+  onNodeTransformDirty() {
     if ( !this.transformDirty ) {
       this.forceMarkTransformDirty();
     }
-  },
+  }
 
-  forceMarkTransformDirty: function() {
+  /**
+   * @private
+   */
+  forceMarkTransformDirty() {
     this.transformDirty = true;
     this.relativeSelfDirty = true;
 
@@ -379,10 +471,13 @@ inherit( Object, RelativeTransform, {
 
       instance = parentInstance;
     }
-  },
+  }
 
-  // @private, updates our matrix based on any parents, and the node's current transform
-  computeRelativeTransform: function() {
+  /**
+   * Updates our matrix based on any parents, and the node's current transform
+   * @private
+   */
+  computeRelativeTransform() {
     const nodeMatrix = this.node.getMatrix();
 
     if ( this.instance.parent && !this.instance.parent.isTransformed ) {
@@ -398,17 +493,24 @@ inherit( Object, RelativeTransform, {
     // mark the frame where this transform was updated, to accelerate non-precomputed access
     this.relativeFrameId = this.display._frameId;
     this.relativeSelfDirty = false;
-  },
+  }
 
-  // @public
-  isValidationNotNeeded: function() {
+  /**
+   * @public
+   *
+   * @returns {boolean}
+   */
+  isValidationNotNeeded() {
     return this.hasAncestorComputeNeed() || this.relativeFrameId === this.display._frameId;
-  },
+  }
 
-  // Called from any place in the rendering process where we are not guaranteed to have a fresh relative transform.
-  // needs to scan up the tree, so it is more expensive than precomputed transforms.
-  // @returns Whether we had to update this transform
-  validate: function() {
+  /**
+   * Called from any place in the rendering process where we are not guaranteed to have a fresh relative transform.
+   * needs to scan up the tree, so it is more expensive than precomputed transforms.
+   * @returns Whether we had to update this transform
+   * @public
+   */
+  validate() {
     // if we are clean, bail out. If we have a compute "need", we will always be clean here since this is after the
     // traversal step. If we did not have a compute "need", we check whether we were already updated this frame by
     // computeRelativeTransform.
@@ -436,11 +538,19 @@ inherit( Object, RelativeTransform, {
         this.instance.children[ i ].relativeTransform.relativeSelfDirty = true;
       }
     }
-  },
+  }
 
-  // called during the pre-repaint phase to (a) fire off all relative transform listeners that should be fired, and
-  // (b) precompute transforms were desired
-  updateTransformListenersAndCompute: function( ancestorWasDirty, ancestorIsDirty, frameId, passTransform ) {
+  /**
+   * Called during the pre-repaint phase to (a) fire off all relative transform listeners that should be fired, and
+   * (b) precompute transforms were desired.
+   * @public
+   *
+   * @param {boolean} ancestorWasDirty
+   * @param {boolean} ancestorIsDirty
+   * @param {number} frameId
+   * @param {boolean} passTransform
+   */
+  updateTransformListenersAndCompute( ancestorWasDirty, ancestorIsDirty, frameId, passTransform ) {
     sceneryLog && sceneryLog.RelativeTransform && sceneryLog.RelativeTransform(
       'update/compute: ' + this.toString() + ' ' + ancestorWasDirty + ' => ' + ancestorIsDirty +
       ( passTransform ? ' passTransform' : '' ) );
@@ -505,17 +615,25 @@ inherit( Object, RelativeTransform, {
     }
 
     sceneryLog && sceneryLog.RelativeTransform && sceneryLog.pop();
-  },
+  }
 
-  // @private
-  notifyRelativeTransformListeners: function() {
+  /**
+   * @private
+   */
+  notifyRelativeTransformListeners() {
     const len = this.relativeTransformListeners.length;
     for ( let i = 0; i < len; i++ ) {
       this.relativeTransformListeners[ i ]();
     }
-  },
+  }
 
-  audit: function( frameId, allowValidationNotNeededChecks ) {
+  /**
+   * @public
+   *
+   * @param {number} frameId
+   * @param {boolean} allowValidationNotNeededChecks
+   */
+  audit( frameId, allowValidationNotNeededChecks ) {
     // get the relative matrix, computed to be up-to-date, and ignores any flags/counts so we can check whether our
     // state is consistent
     function currentRelativeMatrix( instance ) {
@@ -581,6 +699,7 @@ inherit( Object, RelativeTransform, {
       }
     }
   }
-} );
+}
 
+scenery.register( 'RelativeTransform', RelativeTransform );
 export default RelativeTransform;
