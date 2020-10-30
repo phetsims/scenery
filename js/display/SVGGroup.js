@@ -64,13 +64,15 @@ class SVGGroup {
     // @private {SVGSelfDrawable|null}
     this.selfDrawable = null;
 
-    // general dirty flag (triggered on any other dirty event)
+    // @private {boolean} - general dirty flag (triggered on any other dirty event)
     this.dirty = true;
 
-    // we won't listen for transform changes (or even want to set a transform) if our node is beneath a transform root
+    // @private {boolean} - we won't listen for transform changes (or even want to set a transform) if our node is
+    // beneath a transform root
     this.willApplyTransforms = this.block.transformRootInstance.trail.nodes.length < this.instance.trail.nodes.length;
 
-    // we won't listen for filter changes (or set filters, like opacity or visibility) if our node is beneath a filter root
+    // @private {boolean} - we won't listen for filter changes (or set filters, like opacity or visibility) if our node
+    // is beneath a filter root
     this.willApplyFilters = this.block.filterRootInstance.trail.nodes.length < this.instance.trail.nodes.length;
 
     // transform handling
@@ -102,8 +104,8 @@ class SVGGroup {
     this.clipPath = this.clipPath !== undefined ? this.clipPath : null; // persists across disposal
     this.opacityChangeListener = this.opacityChangeListener || this.onOpacityChange.bind( this );
     this.filterChangeListener = this.opacityChangeListener || this.onFilterChange.bind( this );
-    this.visibilityDirtyListener = this.visibilityDirtyListener || this.markVisibilityDirty.bind( this );
-    this.clipDirtyListener = this.clipDirtyListener || this.markClipDirty.bind( this );
+    this.visibilityDirtyListener = this.visibilityDirtyListener || this.onVisibleChange.bind( this );
+    this.clipDirtyListener = this.clipDirtyListener || this.onClipChange.bind( this );
     this.node.visibleProperty.lazyLink( this.visibilityDirtyListener );
     if ( this.willApplyFilters ) {
       this.node.opacityProperty.lazyLink( this.opacityChangeListener );
@@ -226,9 +228,9 @@ class SVGGroup {
   }
 
   /**
-   * @public
+   * @private
    */
-  markVisibilityDirty() {
+  onVisibleChange() {
     if ( !this.visibilityDirty ) {
       this.visibilityDirty = true;
       this.markDirty();
@@ -236,9 +238,9 @@ class SVGGroup {
   }
 
   /**
-   * @public
+   * @private
    */
-  markClipDirty() {
+  onClipChange() {
     if ( !this.clipDirty ) {
       this.clipDirty = true;
       this.markDirty();
@@ -298,7 +300,6 @@ class SVGGroup {
 
       svgGroup.style.display = this.node.isVisible() ? '' : 'none';
     }
-
 
     if ( this.opacityDirty ) {
       this.opacityDirty = false;

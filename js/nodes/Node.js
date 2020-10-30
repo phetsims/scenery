@@ -267,7 +267,8 @@ const DEFAULT_OPTIONS = {
   cssTransform: false,
   excludeInvisible: false,
   webglScale: null,
-  preventFit: false
+  preventFit: false,
+  forceIsolation: false
 };
 
 /**
@@ -489,7 +490,10 @@ function Node( options ) {
     // {boolean} - If true, Scenery will not fit any blocks that contain drawables attached to Nodes underneath this
     //             Node's subtree. This will typically prevent Scenery from triggering bounds computation for this
     //             sub-tree, and movement of this Node or its descendants will never trigger the refitting of a block.
-    preventFit: DEFAULT_OPTIONS.preventFit
+    preventFit: DEFAULT_OPTIONS.preventFit,
+
+    // {boolean} - Whether isolation and a stacking context are forced for this Node.
+    forceIsolation: DEFAULT_OPTIONS.forceIsolation
   };
 
   // @public {TinyEmitter} - This is fired only once for any single operation that may change the children of a Node.
@@ -576,8 +580,8 @@ scenery.register( 'Node', Node );
 
 inherit( PhetioObject, Node, {
   /**
-   * This is an array of property (setter) names for Node.mutate(), which are also used when creating Nodes with
-   * parameter objects.
+   * {Array.<string>} - This is an array of property (setter) names for Node.mutate(), which are also used when creating
+   * Nodes with parameter objects.
    * @protected
    *
    * E.g. new scenery.Node( { x: 5, rotation: 20 } ) will create a Path, and apply setters in the order below
@@ -987,10 +991,7 @@ inherit( PhetioObject, Node, {
    * @returns {Node} - Returns 'this' reference, for chaining
    */
   moveToFront: function() {
-    const self = this;
-    _.each( this._parents.slice(), function( parent ) {
-      parent.moveChildToFront( self );
-    } );
+    _.each( this._parents.slice(), parent => parent.moveChildToFront( self ) );
 
     return this; // allow chaining
   },
@@ -1061,10 +1062,7 @@ inherit( PhetioObject, Node, {
    * @returns {Node} - Returns 'this' reference, for chaining
    */
   moveToBack: function() {
-    const self = this;
-    _.each( this._parents.slice(), function( parent ) {
-      parent.moveChildToBack( self );
-    } );
+    _.each( this._parents.slice(), parent => parent.moveChildToBack( this ) );
 
     return this; // allow chaining
   },
@@ -1116,10 +1114,7 @@ inherit( PhetioObject, Node, {
    * @returns {Node} - Returns 'this' reference, for chaining
    */
   detach: function() {
-    const self = this;
-    _.each( this._parents.slice( 0 ), function( parent ) {
-      parent.removeChild( self );
-    } );
+    _.each( this._parents.slice( 0 ), parent => parent.removeChild( this ) );
 
     return this; // allow chaining
   },
@@ -1751,6 +1746,7 @@ inherit( PhetioObject, Node, {
 
   /**
    * Returns the bounding box of this Node and all of its sub-trees (in the "parent" coordinate frame).
+   * @public
    *
    * NOTE: Do NOT mutate the returned value!
    * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
@@ -3374,6 +3370,7 @@ inherit( PhetioObject, Node, {
    * const pickableProperty = new Property( false );
    * myNode.setPickableProperty( pickableProperty )
    * => myNode.getPickableProperty() !== pickableProperty (!!!!!!)
+   * @public
    *
    * Please use this with caution. See setPickableProperty() for more information.
    *
@@ -3499,7 +3496,7 @@ inherit( PhetioObject, Node, {
    * This is equivalent to removing all current input listeners with removeInputListener() and adding all new
    * listeners (in order) with addInputListener().
    *
-   * @param {Array.<Object>} inputlisteners - The input listeners to add.
+   * @param {Array.<Object>} inputListeners - The input listeners to add.
    * @returns {Node} - For chaining
    */
   setInputListeners: function( inputListeners ) {
@@ -3921,6 +3918,12 @@ inherit( PhetioObject, Node, {
   },
   get excludeInvisibleChildrenFromBounds() { return this.isExcludeInvisibleChildrenFromBounds(); },
 
+  /**
+   * Sets the preventFit performance flag.
+   * @public
+   *
+   * @param {boolean} preventFit
+   */
   setPreventFit: function( preventFit ) {
     assert && assert( typeof preventFit === 'boolean' );
 
@@ -3942,6 +3945,34 @@ inherit( PhetioObject, Node, {
     return this._hints.preventFit;
   },
   get preventFit() { return this.isPreventFit(); },
+
+  /**
+   * Sets the forceIsolation performance flag.
+   * @public
+   *
+   * @param {boolean} forceIsolation
+   */
+  setForceIsolation: function( forceIsolation ) {
+    assert && assert( typeof forceIsolation === 'boolean' );
+
+    if ( forceIsolation !== this._hints.forceIsolation ) {
+      this._hints.forceIsolation = forceIsolation;
+
+      this.invalidateHint();
+    }
+  },
+  set forceIsolation( value ) { this.setForceIsolation( value ); },
+
+  /**
+   * Returns whether the forceIsolation performance flag is set.
+   * @public
+   *
+   * @returns {boolean}
+   */
+  isForceIsolation: function() {
+    return this._hints.forceIsolation;
+  },
+  get forceIsolation() { return this.isForceIsolation(); },
 
   /**
    * Sets whether there is a custom WebGL scale applied to the Canvas, and if so what scale.
@@ -4353,7 +4384,6 @@ inherit( PhetioObject, Node, {
    * @param {Function} callback - Called with no arguments
    * @param {string} [backgroundColor]
    */
-  // @public (API compatibility for now): Render this Node to the Canvas (clearing it first)
   renderToCanvas: function( canvas, context, callback, backgroundColor ) {
 
     assert && deprecationWarning( 'Node.renderToCanvas() is deprecated, please use Node.rasterized() instead' );
@@ -4864,6 +4894,21 @@ inherit( PhetioObject, Node, {
     return false;
   },
 
+  /**
+   * Returns whether this Node will end up creating a stacking context, which may affect blending or other operations.
+   * @public
+   *
+   * @returns {boolean}
+   */
+  isStackingContextRoot() {
+    return this.opacity !== 1 ||
+           !!this.clipArea ||
+           this._filters.length > 0 ||
+           this._hints.usesOpacity ||
+           this._hints.cssTransform ||
+           this._hints.forceIsolation;
+  },
+
   /*---------------------------------------------------------------------------*
    * Display handling
    *----------------------------------------------------------------------------*/
@@ -5220,6 +5265,7 @@ inherit( PhetioObject, Node, {
 
   /**
    * Returns the bounds of any other Node in our local coordinate frame.
+   * @public
    *
    * NOTE: If this node or the passed in Node have multiple instances (e.g. this or one ancestor has two parents), it will fail
    * with an assertion.
@@ -5235,6 +5281,7 @@ inherit( PhetioObject, Node, {
 
   /**
    * Returns the bounds of this Node in another node's local coordinate frame.
+   * @public
    *
    * NOTE: If this node or the passed in Node have multiple instances (e.g. this or one ancestor has two parents), it will fail
    * with an assertion.
@@ -5318,9 +5365,7 @@ inherit( PhetioObject, Node, {
     assert && assert( _.filter( [ 'translation', 'y', 'top', 'bottom', 'centerY', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom' ], function( key ) { return options[ key ] !== undefined; } ).length <= 1,
       'More than one mutation on this Node set the y component, check ' + Object.keys( options ).join( ',' ) );
 
-    const self = this;
-
-    _.each( this._mutatorKeys, function( key ) {
+    _.each( this._mutatorKeys, key => {
 
       // See https://github.com/phetsims/scenery/issues/580 for more about passing undefined.
       assert && assert( !options.hasOwnProperty( key ) || options[ key ] !== undefined, 'Undefined not allowed for Node key: ' + key );
@@ -5330,10 +5375,10 @@ inherit( PhetioObject, Node, {
 
         // if the key refers to a function that is not ES5 writable, it will execute that function with the single argument
         if ( descriptor && typeof descriptor.value === 'function' ) {
-          self[ key ]( options[ key ] );
+          this[ key ]( options[ key ] );
         }
         else {
-          self[ key ] = options[ key ];
+          this[ key ] = options[ key ];
         }
       }
     } );
@@ -5440,6 +5485,8 @@ inherit( PhetioObject, Node, {
    * Performs checks to see if the internal state of Instance references is correct at a certain point in/after the
    * Display's updateDisplay().
    * @private
+   *
+   * @param {Display} display
    */
   auditInstanceSubtreeForDisplay: function( display ) {
     if ( assertSlow ) {
@@ -5532,6 +5579,7 @@ inherit( PhetioObject, Node, {
 // Node is composed with this feature of Interactive Descriptions
 ParallelDOM.compose( Node );
 
+// @public {IOType}
 Node.NodeIO = new IOType( 'NodeIO', {
   valueType: Node,
   documentation: 'The base type for graphical and potentially interactive objects.'
