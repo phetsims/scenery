@@ -321,7 +321,7 @@ function Node( options ) {
   // DOM elements that need to closely track state (possibly by Canvas to maintain dirty state).
   this._drawables = [];
 
-  // @public {TinyForwardingProperty.<boolean>} - Whether this Node (and its children) will be visible when the scene is updated.
+  // @private {TinyForwardingProperty.<boolean>} - Whether this Node (and its children) will be visible when the scene is updated.
   // Visible Nodes by default will not be pickable either.
   // NOTE: This is fired synchronously when the visibility of the Node is toggled
   this._visibleProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.visible, true );
@@ -331,7 +331,7 @@ function Node( options ) {
   // NOTE: This is fired synchronously when the opacity of the Node is toggled
   this.opacityProperty = new TinyProperty( DEFAULT_OPTIONS.opacity );
 
-  // @public {TinyForwardingProperty.<boolean|null>} - See setPickable() and setPickableProperty()
+  // @private {TinyForwardingProperty.<boolean|null>} - See setPickable() and setPickableProperty()
   // NOTE: This is fired synchronously when the pickability of the Node is toggled
   this._pickableProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.pickable, DEFAULT_OPTIONS.pickablePropertyPhetioInstrumented );
   this._pickableProperty.lazyLink( this.onPickablePropertyChange.bind( this ) );
