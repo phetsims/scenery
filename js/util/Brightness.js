@@ -39,9 +39,39 @@ class Brightness extends Filter {
    * @public
    * @override
    *
+   * @param {SVGFilterElement} svgFilter
+   * @param {string} inName
+   * @param {string} [resultName]
+   */
+  applySVGFilter( svgFilter, inName, resultName ) {
+    const n = toSVGNumber( this.amount );
+
+    Filter.applyColorMatrix(
+      `${n} 0 0 0 0 ` +
+      `0 ${n} 0 0 0 ` +
+      `0 0 ${n} 0 0 ` +
+      '0 0 0 1 0',
+      svgFilter, inName, resultName
+    );
+  }
+
+  /**
+   * @public
+   * @override
+   *
    * @returns {*}
    */
   isDOMCompatible() {
+    return true;
+  }
+
+  /**
+   * @public
+   * @override
+   *
+   * @returns {boolean}
+   */
+  isSVGCompatible() {
     return true;
   }
 }

@@ -9,7 +9,6 @@
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import scenery from '../scenery.js';
 import Filter from './Filter.js';
-import svgns from './svgns.js';
 
 class Grayscale extends Filter {
   /**
@@ -60,20 +59,14 @@ class Grayscale extends Filter {
      */
 
     const n = 1 - this.amount;
-    const feColorMatrix = document.createElementNS( svgns, 'feColorMatrix' );
-    feColorMatrix.setAttribute( 'type', 'matrix' );
-    feColorMatrix.setAttribute(
-      'values',
+
+    Filter.applyColorMatrix(
       `${toSVGNumber( 0.2126 + 0.7874 * n )} ${toSVGNumber( 0.7152 - 0.7152  * n )} ${toSVGNumber( 0.0722 - 0.0722 * n )} 0 0 ` +
       `${toSVGNumber( 0.2126 - 0.2126 * n )} ${toSVGNumber( 0.7152 + 0.2848  * n )} ${toSVGNumber( 0.0722 - 0.0722 * n )} 0 0 ` +
       `${toSVGNumber( 0.2126 - 0.2126 * n )} ${toSVGNumber( 0.7152 - 0.7152  * n )} ${toSVGNumber( 0.0722 + 0.9278 * n )} 0 0 ` +
-      '0 0 0 1 0'
+      '0 0 0 1 0',
+      svgFilter, inName, resultName
     );
-    feColorMatrix.setAttribute( 'in', inName );
-    if ( resultName ) {
-      feColorMatrix.setAttribute( 'result', resultName );
-    }
-    svgFilter.appendChild( feColorMatrix );
   }
 
   /**

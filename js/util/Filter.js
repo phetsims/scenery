@@ -7,6 +7,7 @@
  */
 
 import scenery from '../scenery.js';
+import svgns from './svgns.js';
 
 let globalId = 1;
 
@@ -87,6 +88,25 @@ class Filter {
    */
   toString() {
     return this.id;
+  }
+
+  /**
+   * @public
+   *
+   * @param {string} matrixValues
+   * @param {SVGFilterElement} svgFilter
+   * @param {string} inName
+   * @param {string} [resultName]
+   */
+  static applyColorMatrix( matrixValues, svgFilter, inName, resultName ) {
+    const feColorMatrix = document.createElementNS( svgns, 'feColorMatrix' );
+    feColorMatrix.setAttribute( 'type', 'matrix' );
+    feColorMatrix.setAttribute( 'values', matrixValues );
+    feColorMatrix.setAttribute( 'in', inName );
+    if ( resultName ) {
+      feColorMatrix.setAttribute( 'result', resultName );
+    }
+    svgFilter.appendChild( feColorMatrix );
   }
 }
 

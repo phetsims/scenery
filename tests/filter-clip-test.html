@@ -99,33 +99,6 @@ const createElement = () => {
 } );
 
 /**
-blur(5px)
-  <feGaussianBlur in="SourceGraphic" stdDeviation="5"></feGaussianBlur>
-  <filter id="blur">
-    <feGaussianBlur stdDeviation="[radius radius]" edgeMode="[edge mode]" >
-  </filter>
-brightness(2) ---- Firefox is just.... offff.... FML
-  <feComponentTransfer>
-      <feFuncR type="linear" slope="2"></feFuncR>
-      <feFuncG type="linear" slope="2"></feFuncG>
-      <feFuncB type="linear" slope="2"></feFuncB>
-  </feComponentTransfer>
-contrast(2)
-  <feComponentTransfer>
-    <feFuncR type="linear" slope="2" intercept="-0.5"></feFuncR>
-    <feFuncG type="linear" slope="2" intercept="-0.5"></feFuncG>
-    <feFuncB type="linear" slope="2" intercept="-0.5"></feFuncB>
-  </feComponentTransfer>
-        <feFuncR type="linear" slope="[amount]" intercept="-(0.5 * [amount]) + 0.5"/>
-      <feFuncG type="linear" slope="[amount]" intercept="-(0.5 * [amount]) + 0.5"/>
-      <feFuncB type="linear" slope="[amount]" intercept="-(0.5 * [amount]) + 0.5"/>
-  <filter id="contrast">
-    <feComponentTransfer>
-        <feFuncR type="linear" slope="[amount]" intercept="-(0.5 * [amount]) + 0.5"/>
-        <feFuncG type="linear" slope="[amount]" intercept="-(0.5 * [amount]) + 0.5"/>
-        <feFuncB type="linear" slope="[amount]" intercept="-(0.5 * [amount]) + 0.5"/>
-    </feComponentTransfer>
-  </filter>
 drop-shadow(16px 16px 10px black) <offset-x> <offset-y> [<blur-radius>] [<color>]
     <feGaussianBlur in="SourceAlpha" stdDeviation="[radius]"/>
     <feOffset dx="[offset-x]" dy="[offset-y]" result="offsetblur"/>
