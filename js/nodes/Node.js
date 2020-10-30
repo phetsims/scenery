@@ -3514,7 +3514,7 @@ inherit( PhetioObject, Node, {
   onEnabledPropertyChange: function( enabled ) {
     this.interruptSubtreeInput();
     this.pickable = enabled;
-    this.opacity = enabled ? 1.0 : this.disabledOpacity;
+    this.opacity = enabled ? 1.0 : this._disabledOpacity;
   },
 
   /**
@@ -3524,10 +3524,10 @@ inherit( PhetioObject, Node, {
    * @param {number} disabledOpacity
    */
   setDisabledOpacity: function( disabledOpacity ) {
-    assert && assert( typeof disabledOpacity === 'number' && Number.isFinite( disabledOpacity ) );
+    assert && assert( typeof disabledOpacity === 'number' && Number.isFinite( disabledOpacity ), 'disabledOpacity should be a finite number' );
+    assert && assert( disabledOpacity <= 1 && disabledOpacity >= 0, 'disabledOpacity should be between 0 and 1' );
 
-    // This is clamped just like opacity, instead of asserted like it was in EnabledNode.
-    this._disabledOpacity = clamp( disabledOpacity, 0, 1 );
+    this._disabledOpacity = disabledOpacity;
   },
   set disabledOpacity( value ) { this.setDisabledOpacity( value ); },
 

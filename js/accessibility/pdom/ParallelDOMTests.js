@@ -895,8 +895,10 @@ QUnit.test( 'ParallelDOM setters/getters', function( assert ) {
 
   // set/get attributes
   let a1Element = getPrimarySiblingElementByNode( a1 );
+  const initialLength = a1.getAccessibleAttributes().length;
   a1.setAccessibleAttribute( 'role', 'switch' );
-  assert.ok( a1.getAccessibleAttributes()[ 0 ].attribute === 'role', 'attribute set' );
+  assert.ok( a1.getAccessibleAttributes().length === initialLength + 1, 'attribute set should only add 1' );
+  assert.ok( a1.getAccessibleAttributes()[ a1.getAccessibleAttributes().length - 1 ].attribute === 'role', 'attribute set' );
   assert.ok( a1Element.getAttribute( 'role' ) === 'switch', 'HTML attribute set' );
   assert.ok( a1.hasAccessibleAttribute( 'role' ), 'should have accessible attribute' );
 

@@ -451,6 +451,10 @@ const ParallelDOM = {
 
         // {A11yBehaviorFunctionDef} - sets the help text of the Node, this most often corresponds to description text.
         this._accessibleHeadingBehavior = DEFAULT_ACCESSIBLE_HEADING_BEHAVIOR;
+
+        // @private - PDOM specific enabled listener
+        this.pdomBoundEnabledListener = this.pdomEnabledListener.bind( this );
+        this.enabledProperty.lazyLink( this.pdomBoundEnabledListener );
       },
 
 
@@ -464,6 +468,9 @@ const ParallelDOM = {
        * @public (scenery-internal)
        */
       disposeAccessibility: function() {
+
+        this.enabledProperty.unlink( this.pdomBoundEnabledListener );
+
         // To prevent memory leaks, we want to clear our order (since otherwise nodes in our order will reference
         // this node).
         this.accessibleOrder = null;
@@ -475,6 +482,16 @@ const ParallelDOM = {
         this.setAriaLabelledbyAssociations( [] );
         this.setAriaDescribedbyAssociations( [] );
         this.setActiveDescendantAssociations( [] );
+      },
+
+      /**
+       * @private
+       * @param {boolean} enabled
+       */
+      pdomEnabledListener: function (enabled) {
+
+        // Mark this Node as disabled in the ParallelDOM
+        this.setAccessibleAttribute( 'aria-disabled', !enabled );
       },
 
       /**
