@@ -540,7 +540,7 @@ function Node( options ) {
   // @public {TinyEmitter}
   this.changedInstanceEmitter = new TinyEmitter(); // emits with {Instance}, {boolean} added
 
-  // compose accessibility
+  // compose accessibility - for some reason tests fail when you move this down to be next to super call.
   this.initializeAccessibility();
 
   // @public (scenery-internal) {number} - A bitmask which specifies which renderers this Node (and only this Node,
