@@ -7,6 +7,7 @@
  */
 
 import scenery from '../scenery.js';
+import svgns from './svgns.js';
 
 let globalId = 1;
 
@@ -28,12 +29,13 @@ class Filter {
 
   /**
    * @public
-   * @abstract
    *
    * @returns {SVGFilterElement}
    */
   createSVGFilter() {
-    throw new Error( 'abstract method' );
+    assert && assert( this.isSVGCompatible() );
+
+    return document.createElementNS( svgns, 'filter' );
   }
 
   /**

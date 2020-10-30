@@ -212,7 +212,7 @@ class SVGBlock extends FittedBlock {
    * @param {Filter} filter
    */
   incrementFilter( filter ) {
-    assert && assert( Filter instanceof Filter );
+    assert && assert( filter instanceof Filter );
 
     sceneryLog && sceneryLog.Filters && sceneryLog.Filters( `incrementFilter ${this} ${filter}` );
 
@@ -227,7 +227,7 @@ class SVGBlock extends FittedBlock {
    * @param {Filter} filter
    */
   decrementFilter( filter ) {
-    assert && assert( Filter instanceof Filter );
+    assert && assert( filter instanceof Filter );
 
     sceneryLog && sceneryLog.Filters && sceneryLog.Filters( `decrementPaint ${this} ${filter}` );
 

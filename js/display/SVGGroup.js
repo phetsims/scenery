@@ -35,6 +35,8 @@ class SVGGroup {
   initialize( block, instance, parent ) {
     //OHTWO TODO: add collapsing groups! they can't have self drawables, transforms, filters, etc., and we probably shouldn't de-collapse groups
 
+    sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'initializing ' + this.toString() );
+
     // @public {SVGBlock|null} - Set to null when we're disposing, checked by other code.
     this.block = block;
 
@@ -44,12 +46,17 @@ class SVGGroup {
     // @public {Node|null} - Set to null when we're disposed
     this.node = instance.trail.lastNode();
 
+    // @public {SVGGroup|null}
     this.parent = parent;
-    this.children = cleanArray( this.children );
-    this.hasSelfDrawable = false;
-    this.selfDrawable = null; // reference to a self drawable
 
-    sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'initializing ' + this.toString() );
+    // @public {Array.<SVGGroup>}
+    this.children = cleanArray( this.children );
+
+    // @private {boolean}
+    this.hasSelfDrawable = false;
+
+    // @private {SVGSelfDrawable|null}
+    this.selfDrawable = null;
 
     // general dirty flag (triggered on any other dirty event)
     this.dirty = true;
@@ -70,17 +77,22 @@ class SVGGroup {
 
     // filter handling
     this.opacityDirty = true;
+    this.filterDirty = true;
     this.visibilityDirty = true;
     this.clipDirty = true;
+    this.appliedFilters = []; // @private {Array.<Filter>}
     this.hasOpacity = this.hasOpacity !== undefined ? this.hasOpacity : false; // persists across disposal
+    this.hasFilter = this.hasFilter !== undefined ? this.hasFilter : false; // persists across disposal
     this.clipDefinition = this.clipDefinition !== undefined ? this.clipDefinition : null; // persists across disposal
     this.clipPath = this.clipPath !== undefined ? this.clipPath : null; // persists across disposal
-    this.opacityDirtyListener = this.opacityDirtyListener || this.markOpacityDirty.bind( this );
+    this.opacityChangeListener = this.opacityChangeListener || this.onOpacityChange.bind( this );
+    this.filterChangeListener = this.opacityChangeListener || this.onFilterChange.bind( this );
     this.visibilityDirtyListener = this.visibilityDirtyListener || this.markVisibilityDirty.bind( this );
     this.clipDirtyListener = this.clipDirtyListener || this.markClipDirty.bind( this );
     this.node.visibleProperty.lazyLink( this.visibilityDirtyListener );
     if ( this.willApplyFilters ) {
-      this.node.opacityProperty.lazyLink( this.opacityDirtyListener );
+      this.node.opacityProperty.lazyLink( this.opacityChangeListener );
+      this.node.filterChangeEmitter.addListener( this.filterChangeListener );
     }
     //OHTWO TODO: remove clip workaround
     this.node.clipAreaProperty.lazyLink( this.clipDirtyListener );
@@ -179,11 +191,21 @@ class SVGGroup {
   }
 
   /**
-   * @public
+   * @private
    */
-  markOpacityDirty() {
+  onOpacityChange() {
     if ( !this.opacityDirty ) {
       this.opacityDirty = true;
+      this.markDirty();
+    }
+  }
+
+  /**
+   * @private
+   */
+  onFilterChange() {
+    if ( !this.filterDirty ) {
+      this.filterDirty = true;
       this.markDirty();
     }
   }
@@ -275,6 +297,39 @@ class SVGGroup {
       else if ( this.hasOpacity ) {
         this.hasOpacity = false;
         svgGroup.removeAttribute( 'opacity' );
+      }
+    }
+
+    // TODO: We'll need to combine opacity into this
+    if ( this.filterDirty ) {
+      this.filterDirty = false;
+
+      sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'filter update: ' + this.toString() );
+
+      // NOTE: We'll increment filters first (so that we don't destroy and then immediately have to create filters, as
+      // if we decremented and then incremented, that would be a potential possibility)
+      let filterString = '';
+      if ( this.willApplyFilters ) {
+        for ( let i = 0; i < this.node._filters.length; i++ ) {
+          const filter = this.node._filters[ i ];
+          this.block.incrementFilter( filter );
+
+          if ( filterString ) { filterString += ' '; }
+          filterString += `url(#${filter.id}-${this.block.id})`;
+        }
+      }
+      while ( this.appliedFilters.length ) {
+        this.block.decrementFilter( this.appliedFilters.pop() );
+      }
+      this.appliedFilters.push( ...this.node._filters );
+
+      if ( filterString ) {
+        svgGroup.setAttribute( 'filter', filterString );
+        this.hasFilter = true;
+      }
+      if ( this.hasFilter && !filterString ) {
+        svgGroup.removeAttribute( 'filter' );
+        this.hasFilter = false;
       }
     }
 
@@ -374,12 +429,18 @@ class SVGGroup {
 
     assert && assert( this.children.length === 0, 'Should be empty by now' );
 
+    // Clear out filter references
+    while ( this.appliedFilters.length ) {
+      this.block.decrementFilter( this.appliedFilters.pop() );
+    }
+
     if ( this.willApplyTransforms ) {
       this.node.transformEmitter.removeListener( this.transformDirtyListener );
     }
     this.node.visibleProperty.unlink( this.visibilityDirtyListener );
     if ( this.willApplyFilters ) {
-      this.node.opacityProperty.unlink( this.opacityDirtyListener );
+      this.node.opacityProperty.unlink( this.opacityChangeListener );
+      this.node.filterChangeEmitter.removeListener( this.filterChangeListener );
     }
     //OHTWO TODO: remove clip workaround
     this.node.clipAreaProperty.unlink( this.clipDirtyListener );

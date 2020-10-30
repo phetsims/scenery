@@ -9,6 +9,7 @@
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import scenery from '../scenery.js';
 import Filter from './Filter.js';
+import svgns from './svgns.js';
 
 class Grayscale extends Filter {
   /**
@@ -40,9 +41,55 @@ class Grayscale extends Filter {
    * @public
    * @override
    *
+   * @returns {SVGFilterElement}
+   */
+  createSVGFilter() {
+    const svgFilter = super.createSVGFilter();
+
+    /*
+     * According to the spec:
+     * <filter id="grayscale">
+     *   <feColorMatrix type="matrix"
+     *              values="
+     *     (0.2126 + 0.7874 * [1 - amount]) (0.7152 - 0.7152  * [1 - amount]) (0.0722 - 0.0722 * [1 - amount]) 0 0
+     *     (0.2126 - 0.2126 * [1 - amount]) (0.7152 + 0.2848  * [1 - amount]) (0.0722 - 0.0722 * [1 - amount]) 0 0
+     *     (0.2126 - 0.2126 * [1 - amount]) (0.7152 - 0.7152  * [1 - amount]) (0.0722 + 0.9278 * [1 - amount]) 0 0
+     *     0 0 0 1 0"/>
+     * </filter>
+     */
+
+    const n = 1 - this.amount;
+    const feColorMatrix = document.createElementNS( svgns, 'feColorMatrix' );
+    feColorMatrix.setAttribute( 'type', 'matrix' );
+    feColorMatrix.setAttribute(
+      'values',
+      `${toSVGNumber( 0.2126 + 0.7874 * n )} ${toSVGNumber( 0.7152 - 0.7152  * n )} ${toSVGNumber( 0.0722 - 0.0722 * n )} 0 0 ` +
+      `${toSVGNumber( 0.2126 - 0.2126 * n )} ${toSVGNumber( 0.7152 + 0.2848  * n )} ${toSVGNumber( 0.0722 - 0.0722 * n )} 0 0 ` +
+      `${toSVGNumber( 0.2126 - 0.2126 * n )} ${toSVGNumber( 0.7152 - 0.7152  * n )} ${toSVGNumber( 0.0722 + 0.9278 * n )} 0 0 ` +
+      '0 0 0 1 0'
+    );
+    svgFilter.appendChild( feColorMatrix );
+
+    return svgFilter;
+  }
+
+  /**
+   * @public
+   * @override
+   *
    * @returns {*}
    */
   isDOMCompatible() {
+    return true;
+  }
+
+  /**
+   * @public
+   * @override
+   *
+   * @returns {boolean}
+   */
+  isSVGCompatible() {
     return true;
   }
 }
