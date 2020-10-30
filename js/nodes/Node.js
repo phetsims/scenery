@@ -179,6 +179,7 @@ import Pen from '../input/Pen.js';
 import Touch from '../input/Touch.js';
 import scenery from '../scenery.js';
 import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
+import Filter from '../util/Filter.js';
 import Picker from '../util/Picker.js';
 import RendererSummary from '../util/RendererSummary.js';
 import Trail from '../util/Trail.js';
@@ -208,6 +209,7 @@ const NODE_OPTION_KEYS = [
   'inputEnabled', // {boolean} Whether input events can reach into this subtree, see setInputEnabled() for more documentation
   'inputListeners', // {Array.<Object>} - The input listeners attached to the Node, see setInputListeners() for more documentation
   'opacity', // {number} - Opacity of this Node's subtree, see setOpacity() for more documentation
+  'filters', // {Array.<Filter>} - Non-opacity filters, see setFilters() for more documentation
   'matrix', // {Matrix3} - Transformation matrix of the Node, see setMatrix() for more documentation
   'translation', // {Vector2} - x/y translation of the Node, see setTranslation() for more documentation
   'x', // {number} - x translation of the Node, see setX() for more documentation
@@ -451,6 +453,9 @@ function Node( options ) {
     this._originalSelfBounds = this.selfBoundsProperty._value;
     this._originalChildBounds = this.childBoundsProperty._value;
   }
+
+  // @public (scenery-internal) {Array.<Filter>}
+  this._filters = [];
 
   // @public (scenery-internal) {Object} - Where rendering-specific settings are stored. They are generally modified
   // internally, so there is no ES5 setter for hints.
@@ -3275,6 +3280,34 @@ inherit( PhetioObject, Node, {
     return this.opacityProperty.value;
   },
   get opacity() { return this.getOpacity(); },
+
+  /**
+   * Sets the non-opacity filters for this Node.
+   * @public
+   *
+   * @param {Array.<Filter>} filters
+   */
+  setFilters: function( filters ) {
+    assert && assert( Array.isArray( filters ), 'filters should be an array' );
+    assert && assert( _.every( filters, filter => filter instanceof Filter ), 'filters should consist of Filter objects only' );
+
+    this._filters.length = 0;
+    this._filters.push( ...filters );
+
+    this.invalidateHint();
+  },
+  set filters( value ) { this.setFilters( value ); },
+
+  /**
+   * Returns the non-opacity filters for this Node.
+   * @public
+   *
+   * @returns {Array.<Filter>}
+   */
+  getFilters: function() {
+    return this._filters.slice();
+  },
+  get filters() { return this.getFilters(); },
 
   /**
    * Sets what Property our pickableProperty is backed by, so that changes to this provided Property will change this
