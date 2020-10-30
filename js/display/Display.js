@@ -965,7 +965,8 @@ class Display {
     if ( this._input && this._input.mouse && this._input.mouse.point ) {
       if ( this._input.mouse.cursor ) {
         sceneryLog && sceneryLog.Cursor && sceneryLog.Cursor( 'set on pointer: ' + this._input.mouse.cursor );
-        return this.setSceneCursor( this._input.mouse.cursor );
+        this.setSceneCursor( this._input.mouse.cursor );
+        return;
       }
 
       //OHTWO TODO: For a display, just return an instance and we can avoid the garbage collection/mutation at the cost of the linked-list traversal instead of an array
@@ -979,6 +980,7 @@ class Display {
           if ( cursor ) {
             sceneryLog && sceneryLog.Cursor && sceneryLog.Cursor( cursor + ' on ' + node.constructor.name + '#' + node.id );
             this.setSceneCursor( cursor );
+            return;
           }
         }
       }
