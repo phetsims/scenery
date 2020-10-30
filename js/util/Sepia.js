@@ -1,7 +1,7 @@
 // Copyright 2020, University of Colorado Boulder
 
 /**
- * Grayscale filter
+ * Sepia filter
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -10,15 +10,15 @@ import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import scenery from '../scenery.js';
 import Filter from './Filter.js';
 
-class Grayscale extends Filter {
+class Sepia extends Filter {
   /**
    * @param {number} [amount]
    */
   constructor( amount = 1 ) {
-    assert && assert( typeof amount === 'number', 'Grayscale amount should be a number' );
-    assert && assert( isFinite( amount ), 'Grayscale amount should be finite' );
-    assert && assert( amount >= 0, 'Grayscale amount should be non-negative' );
-    assert && assert( amount <= 1, 'Grayscale amount should be no greater than 1' );
+    assert && assert( typeof amount === 'number', 'Sepia amount should be a number' );
+    assert && assert( isFinite( amount ), 'Sepia amount should be finite' );
+    assert && assert( amount >= 0, 'Sepia amount should be non-negative' );
+    assert && assert( amount <= 1, 'Sepia amount should be at most 1' );
 
     super();
 
@@ -33,7 +33,7 @@ class Grayscale extends Filter {
    * @returns {string}
    */
   getCSSFilterString() {
-    return `grayscale(${toSVGNumber( this.amount )})`;
+    return `sepia(${toSVGNumber( this.amount )})`;
   }
 
   /**
@@ -47,5 +47,5 @@ class Grayscale extends Filter {
   }
 }
 
-scenery.register( 'Grayscale', Grayscale );
-export default Grayscale;
+scenery.register( 'Sepia', Sepia );
+export default Sepia;
