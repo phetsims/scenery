@@ -184,9 +184,6 @@ import Picker from '../util/Picker.js';
 import RendererSummary from '../util/RendererSummary.js';
 import Trail from '../util/Trail.js';
 
-// constants
-const clamp = Utils.clamp;
-
 let globalIdCounter = 1;
 
 const scratchBounds2 = Bounds2.NOTHING.copy(); // mutable {Bounds2} used temporarily in methods
@@ -3269,17 +3266,21 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Sets the opacity of this Node (and its sub-tree), where 0 is fully transparent, and 1 is fully opaque.
+   * Sets the opacity of this Node (and its sub-tree), where 0 is fully transparent, and 1 is fully opaque.  Values
+   * outside of that range throw an Error.
    * @public
    *
-   * NOTE: opacity is clamped to be between 0 and 1.
-   *
    * @param {number} opacity
+   * @throws Error if opacity out of range
    */
   setOpacity: function( opacity ) {
     assert && assert( typeof opacity === 'number' && isFinite( opacity ), 'opacity should be a finite number' );
 
-    this.opacityProperty.value = clamp( opacity, 0, 1 );
+    if ( opacity < 0 || opacity > 1 ) {
+      throw new Error( `opacity out of range: ${opacity}` );
+    }
+
+    this.opacityProperty.value = opacity;
   },
   set opacity( value ) { this.setOpacity( value ); },
 
