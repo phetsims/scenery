@@ -3277,24 +3277,6 @@ inherit( PhetioObject, Node, {
   get opacity() { return this.getOpacity(); },
 
   /**
-   * Sets what Property our pickableProperty is backed by, so that changes to this provided Property will change this
-   * Node's pickability, and vice versa. This does not change this._pickableProperty. See TinyForwardingProperty.setTargetProperty()
-   * for more info.
-   *
-   * Instrumented Nodes do not by default create their own instrumented pickableProperty, even though Node.visibleProperty does.
-   *
-   * @public
-   *
-   * @param {TinyProperty.<boolean>|Property.<boolean>|null} newTarget
-   * @returns {Node} for chaining
-   */
-  setPickableProperty( newTarget ) {
-
-    return this._pickableProperty.setTargetProperty( this, PICKABLE_PROPERTY_TANDEM_NAME, newTarget );
-  },
-  set pickableProperty( property ) { this.setPickableProperty( property ); },
-
-  /**
    * Handles linking and checking child PhET-iO Properties such as visibleProperty and pickableProperty.
    * @public
    *
@@ -3316,6 +3298,24 @@ inherit( PhetioObject, Node, {
       }
     }
   },
+
+  /**
+   * Sets what Property our pickableProperty is backed by, so that changes to this provided Property will change this
+   * Node's pickability, and vice versa. This does not change this._pickableProperty. See TinyForwardingProperty.setTargetProperty()
+   * for more info.
+   *
+   * Instrumented Nodes do not by default create their own instrumented pickableProperty, even though Node.visibleProperty does.
+   *
+   * @public
+   *
+   * @param {TinyProperty.<boolean>|Property.<boolean>|null} newTarget
+   * @returns {Node} for chaining
+   */
+  setPickableProperty( newTarget ) {
+
+    return this._pickableProperty.setTargetProperty( this, PICKABLE_PROPERTY_TANDEM_NAME, newTarget );
+  },
+  set pickableProperty( property ) { this.setPickableProperty( property ); },
 
   /**
    * Get this Node's pickableProperty. Note! This is not the reciprocal of setPickableProperty. Node.prototype._pickableProperty
