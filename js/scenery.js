@@ -78,6 +78,7 @@ const logProperties = {
   SVGGroup: { name: 'SVGGroup', style: '' },
   ImageSVGDrawable: { name: 'ImageSVGDrawable', style: '' },
   Paints: { name: 'Paints', style: '' },
+  Filters: { name: 'Filters', style: '' },
   AlignBox: { name: 'AlignBox', style: '' },
   AlignGroup: { name: 'AlignGroup', style: '' },
   RichText: { name: 'RichText', style: '' },

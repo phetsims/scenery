@@ -128,6 +128,7 @@ import './util/CanvasContextWrapper.js';
 import './util/Color.js';
 import './util/ColorDef.js';
 import './util/Contrast.js';
+import './util/CountMap.js';
 import './util/DisplayedProperty.js';
 import './util/DropShadow.js';
 import './util/Features.js';

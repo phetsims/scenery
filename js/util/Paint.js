@@ -46,6 +46,16 @@ class Paint {
     }
     return this;
   }
+
+  /**
+   * Returns a string form of this object
+   * @public
+   *
+   * @returns {string}
+   */
+  toString() {
+    return this.id;
+  }
 }
 
 // @public {boolean}

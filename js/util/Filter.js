@@ -28,6 +28,16 @@ class Filter {
 
   /**
    * @public
+   * @abstract
+   *
+   * @returns {SVGFilterElement}
+   */
+  createSVGFilter() {
+    throw new Error( 'abstract method' );
+  }
+
+  /**
+   * @public
    *
    * @returns {boolean}
    */
@@ -62,6 +72,16 @@ class Filter {
    */
   isWebGLCompatible() {
     return false;
+  }
+
+  /**
+   * Returns a string form of this object
+   * @public
+   *
+   * @returns {string}
+   */
+  toString() {
+    return this.id;
   }
 }
 
