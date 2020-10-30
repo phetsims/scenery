@@ -41,10 +41,11 @@ class Grayscale extends Filter {
    * @public
    * @override
    *
-   * @returns {SVGFilterElement}
+   * @param {SVGFilterElement} svgFilter
+   * @param {string} inName
+   * @param {string} [resultName]
    */
-  createSVGFilter() {
-    const svgFilter = super.createSVGFilter();
+  applySVGFilter( svgFilter, inName, resultName ) {
 
     /*
      * According to the spec:
@@ -68,9 +69,11 @@ class Grayscale extends Filter {
       `${toSVGNumber( 0.2126 - 0.2126 * n )} ${toSVGNumber( 0.7152 - 0.7152  * n )} ${toSVGNumber( 0.0722 + 0.9278 * n )} 0 0 ` +
       '0 0 0 1 0'
     );
+    feColorMatrix.setAttribute( 'in', inName );
+    if ( resultName ) {
+      feColorMatrix.setAttribute( 'result', resultName );
+    }
     svgFilter.appendChild( feColorMatrix );
-
-    return svgFilter;
   }
 
   /**

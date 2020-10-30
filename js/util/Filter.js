@@ -7,7 +7,6 @@
  */
 
 import scenery from '../scenery.js';
-import svgns from './svgns.js';
 
 let globalId = 1;
 
@@ -15,6 +14,9 @@ class Filter {
   constructor() {
     // @public (scenery-internal) {string}
     this.id = 'filter' + globalId++;
+
+    // @public {number}
+    this.filterRegionPercentageIncrease = 0;
   }
 
   /**
@@ -29,13 +31,14 @@ class Filter {
 
   /**
    * @public
+   * @abstract
    *
-   * @returns {SVGFilterElement}
+   * @param {SVGFilterElement} svgFilter
+   * @param {string} inName
+   * @param {string} [resultName]
    */
-  createSVGFilter() {
-    assert && assert( this.isSVGCompatible() );
-
-    return document.createElementNS( svgns, 'filter' );
+  applySVGFilter( svgFilter, inName, resultName ) {
+    throw new Error( 'abstract method' );
   }
 
   /**

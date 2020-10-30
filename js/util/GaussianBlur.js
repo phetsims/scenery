@@ -27,7 +27,8 @@ class GaussianBlur extends Filter {
 
     // @public {number}
     this.standardDeviation = standardDeviation;
-    this.filterRegionPercentage = filterRegionPercentage;
+
+    this.filterRegionPercentageIncrease = filterRegionPercentage;
   }
 
   /**
@@ -44,29 +45,22 @@ class GaussianBlur extends Filter {
    * @public
    * @override
    *
-   * @returns {SVGFilterElement}
+   * @param {SVGFilterElement} svgFilter
+   * @param {string} inName
+   * @param {string} [resultName]
    */
-  createSVGFilter() {
-    const svgFilter = super.createSVGFilter();
-
+  applySVGFilter( svgFilter, inName, resultName ) {
     // e.g. <feGaussianBlur stdDeviation="[radius radius]" edgeMode="[edge mode]" >
     const feGaussianBlur = document.createElementNS( svgns, 'feGaussianBlur' );
     feGaussianBlur.setAttribute( 'stdDeviation', toSVGNumber( this.standardDeviation ) );
     feGaussianBlur.setAttribute( 'edgeMode', 'none' ); // Don't pad things!
     svgFilter.appendChild( feGaussianBlur );
 
-    // Bleh, no good way to handle the filter region? https://drafts.fxtf.org/filter-effects/#filter-region
-    // If we WANT to track things by their actual display size AND pad pixels, AND copy tons of things... we could
-    // potentially use the userSpaceOnUse and pad the proper number of pixels. That sounds like an absolute pain, AND
-    // a performance drain and abstraction break.
-    const min = `-${toSVGNumber( this.filterRegionPercentage )}%`;
-    const size = `${toSVGNumber( 2 * this.filterRegionPercentage + 100 )}%`;
-    svgFilter.setAttribute( 'x', min );
-    svgFilter.setAttribute( 'y', min );
-    svgFilter.setAttribute( 'width', size );
-    svgFilter.setAttribute( 'height', size );
-
-    return svgFilter;
+    feGaussianBlur.setAttribute( 'in', inName );
+    if ( resultName ) {
+      feGaussianBlur.setAttribute( 'result', resultName );
+    }
+    svgFilter.appendChild( feGaussianBlur );
   }
 
   /**

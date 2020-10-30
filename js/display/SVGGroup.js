@@ -7,11 +7,14 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import platform from '../../../phet-core/js/platform.js';
 import scenery from '../scenery.js';
 import svgns from '../util/svgns.js';
+
+let globalId = 1;
 
 class SVGGroup {
   /**
@@ -22,6 +25,9 @@ class SVGGroup {
    * @param {SVGGroup|null} parent
    */
   constructor( block, instance, parent ) {
+    // @public {string}
+    this.id = 'group' + globalId++;
+
     this.initialize( block, instance, parent );
   }
 
@@ -75,14 +81,23 @@ class SVGGroup {
       this.node.transformEmitter.addListener( this.transformDirtyListener );
     }
 
-    // filter handling
+    // @private {boolean}
     this.opacityDirty = true;
     this.filterDirty = true;
     this.visibilityDirty = true;
     this.clipDirty = true;
-    this.appliedFilters = []; // @private {Array.<Filter>}
-    this.hasOpacity = this.hasOpacity !== undefined ? this.hasOpacity : false; // persists across disposal
-    this.hasFilter = this.hasFilter !== undefined ? this.hasFilter : false; // persists across disposal
+
+    // @private {SVGFilterElement|null} - lazily created
+    this.filterElement = this.filterElement || null;
+
+    // @private {boolean} - Whether we have an opacity attribute set on our SVG element (persists across disposal)
+    this.hasOpacity = this.hasOpacity !== undefined ? this.hasOpacity : false;
+
+    // @private {boolean} - Whether we have a filter element connected to our block (and that is being used with a filter
+    // attribute). Since this needs to be cleaned up when we are disposed, this will be set to false when disposed
+    // (with the associated attribute and defs reference cleaned up).
+    this.hasFilter = false;
+
     this.clipDefinition = this.clipDefinition !== undefined ? this.clipDefinition : null; // persists across disposal
     this.clipPath = this.clipPath !== undefined ? this.clipPath : null; // persists across disposal
     this.opacityChangeListener = this.opacityChangeListener || this.onOpacityChange.bind( this );
@@ -300,36 +315,63 @@ class SVGGroup {
       }
     }
 
-    // TODO: We'll need to combine opacity into this
+    // TODO: Check if we can leave opacity separate. If it gets applied "after" then we can have them separate
     if ( this.filterDirty ) {
       this.filterDirty = false;
 
       sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'filter update: ' + this.toString() );
 
-      // NOTE: We'll increment filters first (so that we don't destroy and then immediately have to create filters, as
-      // if we decremented and then incremented, that would be a potential possibility)
-      let filterString = '';
-      if ( this.willApplyFilters ) {
-        for ( let i = 0; i < this.node._filters.length; i++ ) {
-          const filter = this.node._filters[ i ];
-          this.block.incrementFilter( filter );
+      const needsFilter = this.willApplyFilters && this.node._filters.length;
+      const filterId = `filter-${this.id}`;
 
-          if ( filterString ) { filterString += ' '; }
-          filterString += `url(#${filter.id}-${this.block.id})`;
+      if ( needsFilter ) {
+        // Lazy creation of the filter element (if we haven't already)
+        if ( !this.filterElement ) {
+          this.filterElement = document.createElementNS( svgns, 'filter' );
+          this.filterElement.setAttribute( 'id', filterId );
         }
-      }
-      while ( this.appliedFilters.length ) {
-        this.block.decrementFilter( this.appliedFilters.pop() );
-      }
-      this.appliedFilters.push( ...this.node._filters );
 
-      if ( filterString ) {
-        svgGroup.setAttribute( 'filter', filterString );
+        // Remove all children of the filter element if we're applying filters (if not, we won't have it attached)
+        while ( this.filterElement.firstChild ) {
+          this.filterElement.removeChild( this.filterElement.lastChild );
+        }
+
+        // Fill in elements into our filter
+        let filterRegionPercentageIncrease = 10;
+        let inName = 'SourceGraphic';
+        const length = this.node._filters.length;
+        for ( let i = 0; i < length; i++ ) {
+          const filter = this.node._filters[ i ];
+
+          const resultName = i === length - 1 ? undefined : 'e' + i; // Last result should be undefined
+          filter.applySVGFilter( this.filterElement, inName, resultName );
+          filterRegionPercentageIncrease += filter.filterRegionPercentageIncrease;
+          inName = resultName;
+        }
+
+        // Bleh, no good way to handle the filter region? https://drafts.fxtf.org/filter-effects/#filter-region
+        // If we WANT to track things by their actual display size AND pad pixels, AND copy tons of things... we could
+        // potentially use the userSpaceOnUse and pad the proper number of pixels. That sounds like an absolute pain, AND
+        // a performance drain and abstraction break.
+        const min = `-${toSVGNumber( filterRegionPercentageIncrease )}%`;
+        const size = `${toSVGNumber( 2 * filterRegionPercentageIncrease + 100 )}%`;
+        this.filterElement.setAttribute( 'x', min );
+        this.filterElement.setAttribute( 'y', min );
+        this.filterElement.setAttribute( 'width', size );
+        this.filterElement.setAttribute( 'height', size );
+      }
+
+      if ( needsFilter ) {
+        if ( !this.hasFilter ) {
+          this.block.defs.appendChild( this.filterElement );
+        }
+        svgGroup.setAttribute( 'filter', `url(#${filterId})` );
         this.hasFilter = true;
       }
-      if ( this.hasFilter && !filterString ) {
+      if ( this.hasFilter && !needsFilter ) {
         svgGroup.removeAttribute( 'filter' );
         this.hasFilter = false;
+        this.block.defs.removeChild( this.filterElement );
       }
     }
 
@@ -429,9 +471,9 @@ class SVGGroup {
 
     assert && assert( this.children.length === 0, 'Should be empty by now' );
 
-    // Clear out filter references
-    while ( this.appliedFilters.length ) {
-      this.block.decrementFilter( this.appliedFilters.pop() );
+    if ( this.hasFilter ) {
+      this.hasFilter = false;
+      this.block.defs.removeChild( this.filterElement );
     }
 
     if ( this.willApplyTransforms ) {

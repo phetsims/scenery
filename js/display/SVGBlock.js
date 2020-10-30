@@ -10,7 +10,6 @@ import Poolable from '../../../phet-core/js/Poolable.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import scenery from '../scenery.js';
 import CountMap from '../util/CountMap.js';
-import Filter from '../util/Filter.js';
 import Utils from '../util/Utils.js';
 import svgns from '../util/svgns.js';
 import FittedBlock from './FittedBlock.js';
@@ -61,19 +60,6 @@ class SVGBlock extends FittedBlock {
       this.onRemovePaint.bind( this )
     );
 
-    // @private {CountMap.<Filter,SVGFilterElement>}
-    this.filterCountMap = this.filterCountMap || new CountMap(
-      this.onAddFilter.bind( this ),
-      this.onRemoveFilter.bind( this )
-    );
-
-    // Keep track of how many times each Paint is used in this SVGBlock so that when all usages have been eliminated
-    // we can remove the SVG def from our SVG tree to prevent memory leaks, etc.
-    // maps {string} paint.id => { count: {number}, paint: {Paint}, def: {SVGElement} }
-    // @private
-    this.paintMap = {};
-    this.filterMap = {}; // with filter: {Filter}, similar to paintMap
-
     // @private {boolean} - Tracks whether we have no dirty objects that would require cleanup or releases
     this.areReferencesReduced = true;
 
@@ -92,7 +78,7 @@ class SVGBlock extends FittedBlock {
       // this.svg.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
       this.svg.style[ 'pointer-events' ] = 'none';
 
-      // the <defs> block that we will be stuffing gradients and patterns into
+      // @public {SVGDefsElement} - the <defs> block that we will be stuffing gradients and patterns into
       this.defs = document.createElementNS( svgns, 'defs' );
       this.svg.appendChild( this.defs );
 
@@ -148,32 +134,6 @@ class SVGBlock extends FittedBlock {
     svgPaint.dispose();
   }
 
-  /**
-   * Callback for filterCountMap's create
-   * @private
-   *
-   * @param {Filter} filter
-   * @returns {SVGFilterElement}
-   */
-  onAddFilter( filter ) {
-    const svgFilter = filter.createSVGFilter();
-    svgFilter.setAttribute( 'id', filter.id + '-' + this.id );
-    this.defs.appendChild( svgFilter );
-
-    return svgFilter;
-  }
-
-  /**
-   * Callback for filterCountMap's destroy
-   * @private
-   *
-   * @param {Filter} filter
-   * @param {SVGFilterElement} svgFilter
-   */
-  onRemoveFilter( filter, svgFilter ) {
-    this.defs.removeChild( svgFilter );
-  }
-
   /*
    * Increases our reference count for the specified {Paint}. If it didn't exist before, we'll add the SVG def to the
    * paint can be referenced by SVG id.
@@ -202,36 +162,6 @@ class SVGBlock extends FittedBlock {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `decrementPaint ${this} ${paint}` );
 
     this.paintCountMap.decrement( paint );
-  }
-
-  /*
-   * Increases our reference count for the specified {Filter}. If it didn't exist before, we'll add the SVG def to the
-   * filter can be referenced by SVG id.
-   * @public
-   *
-   * @param {Filter} filter
-   */
-  incrementFilter( filter ) {
-    assert && assert( filter instanceof Filter );
-
-    sceneryLog && sceneryLog.Filters && sceneryLog.Filters( `incrementFilter ${this} ${filter}` );
-
-    this.filterCountMap.increment( filter );
-  }
-
-  /*
-   * Decreases our reference count for the specified {Filter}. If this was the last reference, we'll remove the SVG def
-   * from our SVG tree to prevent memory leaks, etc.
-   * @public
-   *
-   * @param {Filter} filter
-   */
-  decrementFilter( filter ) {
-    assert && assert( filter instanceof Filter );
-
-    sceneryLog && sceneryLog.Filters && sceneryLog.Filters( `decrementPaint ${this} ${filter}` );
-
-    this.filterCountMap.decrement( filter );
   }
 
   /**
@@ -441,7 +371,6 @@ class SVGBlock extends FittedBlock {
     cleanArray( this.dirtyDrawables );
 
     this.paintCountMap.clear();
-    this.filterCountMap.clear();
 
     this.baseTransformGroup.removeChild( this.rootGroup.svgGroup );
     this.rootGroup.dispose();
