@@ -188,10 +188,6 @@ class Instance {
     // transforms
     this.isTransformed = false;
 
-    // @public {boolean} - [RENDER STATE EXPORT] Whether this instance creates a new stacking context, which affects
-    // blending or other operations
-    this.isStackingContextRoot = false;
-
     // @private {boolean} - [RENDER STATE EXPORT] Whether this instance handles visibility with a group drawable
     this.isVisibilityApplied = false;
 

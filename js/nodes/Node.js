@@ -267,8 +267,7 @@ const DEFAULT_OPTIONS = {
   cssTransform: false,
   excludeInvisible: false,
   webglScale: null,
-  preventFit: false,
-  forceIsolation: false
+  preventFit: false
 };
 
 /**
@@ -490,10 +489,7 @@ function Node( options ) {
     // {boolean} - If true, Scenery will not fit any blocks that contain drawables attached to Nodes underneath this
     //             Node's subtree. This will typically prevent Scenery from triggering bounds computation for this
     //             sub-tree, and movement of this Node or its descendants will never trigger the refitting of a block.
-    preventFit: DEFAULT_OPTIONS.preventFit,
-
-    // {boolean} - Whether isolation and a stacking context are forced for this Node.
-    forceIsolation: DEFAULT_OPTIONS.forceIsolation
+    preventFit: DEFAULT_OPTIONS.preventFit
   };
 
   // @public {TinyEmitter} - This is fired only once for any single operation that may change the children of a Node.
@@ -561,7 +557,7 @@ function Node( options ) {
   // @private {number} - This signals that we can validateBounds() on this subtree and we don't have to traverse further
   this._boundsEventSelfCount = 0;
 
-  // Initialize sub-components
+  // @private {Picker} - Subcomponent dedicated to hit testing
   this._picker = new Picker( this );
 
   // @public (scenery-internal) {boolean} - There are certain specific cases (in this case due to a11y) where we need
@@ -3947,34 +3943,6 @@ inherit( PhetioObject, Node, {
   get preventFit() { return this.isPreventFit(); },
 
   /**
-   * Sets the forceIsolation performance flag.
-   * @public
-   *
-   * @param {boolean} forceIsolation
-   */
-  setForceIsolation: function( forceIsolation ) {
-    assert && assert( typeof forceIsolation === 'boolean' );
-
-    if ( forceIsolation !== this._hints.forceIsolation ) {
-      this._hints.forceIsolation = forceIsolation;
-
-      this.invalidateHint();
-    }
-  },
-  set forceIsolation( value ) { this.setForceIsolation( value ); },
-
-  /**
-   * Returns whether the forceIsolation performance flag is set.
-   * @public
-   *
-   * @returns {boolean}
-   */
-  isForceIsolation: function() {
-    return this._hints.forceIsolation;
-  },
-  get forceIsolation() { return this.isForceIsolation(); },
-
-  /**
    * Sets whether there is a custom WebGL scale applied to the Canvas, and if so what scale.
    * @public
    *
@@ -4892,21 +4860,6 @@ inherit( PhetioObject, Node, {
       }
     }
     return false;
-  },
-
-  /**
-   * Returns whether this Node will end up creating a stacking context, which may affect blending or other operations.
-   * @public
-   *
-   * @returns {boolean}
-   */
-  isStackingContextRoot() {
-    return this.opacity !== 1 ||
-           !!this.clipArea ||
-           this._filters.length > 0 ||
-           this._hints.usesOpacity ||
-           this._hints.cssTransform ||
-           this._hints.forceIsolation;
   },
 
   /*---------------------------------------------------------------------------*
