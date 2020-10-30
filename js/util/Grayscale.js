@@ -8,9 +8,9 @@
 
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import scenery from '../scenery.js';
-import Filter from './Filter.js';
+import ColorMatrixFilter from './ColorMatrixFilter.js';
 
-class Grayscale extends Filter {
+class Grayscale extends ColorMatrixFilter {
   /**
    * @param {number} [amount]
    */
@@ -20,7 +20,14 @@ class Grayscale extends Filter {
     assert && assert( amount >= 0, 'Grayscale amount should be non-negative' );
     assert && assert( amount <= 1, 'Grayscale amount should be no greater than 1' );
 
-    super();
+    const n = 1 - amount;
+
+    super(
+      0.2126 + 0.7874 * n, 0.7152 - 0.7152  * n, 0.0722 - 0.0722 * n, 0, 0,
+      0.2126 - 0.2126 * n, 0.7152 + 0.2848  * n, 0.0722 - 0.0722 * n, 0, 0,
+      0.2126 - 0.2126 * n, 0.7152 - 0.7152  * n, 0.0722 + 0.9278 * n, 0, 0,
+      0, 0, 0, 1, 0
+    );
 
     // @public {number}
     this.amount = amount;
@@ -40,52 +47,9 @@ class Grayscale extends Filter {
    * @public
    * @override
    *
-   * @param {SVGFilterElement} svgFilter
-   * @param {string} inName
-   * @param {string} [resultName]
-   */
-  applySVGFilter( svgFilter, inName, resultName ) {
-
-    /*
-     * According to the spec:
-     * <filter id="grayscale">
-     *   <feColorMatrix type="matrix"
-     *              values="
-     *     (0.2126 + 0.7874 * [1 - amount]) (0.7152 - 0.7152  * [1 - amount]) (0.0722 - 0.0722 * [1 - amount]) 0 0
-     *     (0.2126 - 0.2126 * [1 - amount]) (0.7152 + 0.2848  * [1 - amount]) (0.0722 - 0.0722 * [1 - amount]) 0 0
-     *     (0.2126 - 0.2126 * [1 - amount]) (0.7152 - 0.7152  * [1 - amount]) (0.0722 + 0.9278 * [1 - amount]) 0 0
-     *     0 0 0 1 0"/>
-     * </filter>
-     */
-
-    const n = 1 - this.amount;
-
-    Filter.applyColorMatrix(
-      `${toSVGNumber( 0.2126 + 0.7874 * n )} ${toSVGNumber( 0.7152 - 0.7152  * n )} ${toSVGNumber( 0.0722 - 0.0722 * n )} 0 0 ` +
-      `${toSVGNumber( 0.2126 - 0.2126 * n )} ${toSVGNumber( 0.7152 + 0.2848  * n )} ${toSVGNumber( 0.0722 - 0.0722 * n )} 0 0 ` +
-      `${toSVGNumber( 0.2126 - 0.2126 * n )} ${toSVGNumber( 0.7152 - 0.7152  * n )} ${toSVGNumber( 0.0722 + 0.9278 * n )} 0 0 ` +
-      '0 0 0 1 0',
-      svgFilter, inName, resultName
-    );
-  }
-
-  /**
-   * @public
-   * @override
-   *
    * @returns {*}
    */
   isDOMCompatible() {
-    return true;
-  }
-
-  /**
-   * @public
-   * @override
-   *
-   * @returns {boolean}
-   */
-  isSVGCompatible() {
     return true;
   }
 }

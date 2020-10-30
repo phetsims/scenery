@@ -8,9 +8,9 @@
 
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import scenery from '../scenery.js';
-import Filter from './Filter.js';
+import ColorMatrixFilter from './ColorMatrixFilter.js';
 
-class Contrast extends Filter {
+class Contrast extends ColorMatrixFilter {
   /**
    * @param {number} amount
    */
@@ -19,7 +19,12 @@ class Contrast extends Filter {
     assert && assert( isFinite( amount ), 'Contrast amount should be finite' );
     assert && assert( amount >= 0, 'Contrast amount should be non-negative' );
 
-    super();
+    super(
+      amount, 0, 0, 0, -( 0.5 * amount ) + 0.5,
+      0, amount, 0, 0, -( 0.5 * amount ) + 0.5,
+      0, 0, amount, 0, -( 0.5 * amount ) + 0.5,
+      0, 0, 0, 1, 0
+    );
 
     // @public {number}
     this.amount = amount;
@@ -39,40 +44,9 @@ class Contrast extends Filter {
    * @public
    * @override
    *
-   * @param {SVGFilterElement} svgFilter
-   * @param {string} inName
-   * @param {string} [resultName]
-   */
-  applySVGFilter( svgFilter, inName, resultName ) {
-    const n = toSVGNumber( this.amount );
-    const i = toSVGNumber( 0.5 - ( 0.5 * this.amount ) );
-
-    Filter.applyColorMatrix(
-      `${n} 0 0 0 ${i} ` +
-      `0 ${n} 0 0 ${i} ` +
-      `0 0 ${n} 0 ${i} ` +
-      '0 0 0 1 0',
-      svgFilter, inName, resultName
-    );
-  }
-
-  /**
-   * @public
-   * @override
-   *
    * @returns {*}
    */
   isDOMCompatible() {
-    return true;
-  }
-
-  /**
-   * @public
-   * @override
-   *
-   * @returns {boolean}
-   */
-  isSVGCompatible() {
     return true;
   }
 }

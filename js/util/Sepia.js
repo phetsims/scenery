@@ -8,9 +8,9 @@
 
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import scenery from '../scenery.js';
-import Filter from './Filter.js';
+import ColorMatrixFilter from './ColorMatrixFilter.js';
 
-class Sepia extends Filter {
+class Sepia extends ColorMatrixFilter {
   /**
    * @param {number} [amount]
    */
@@ -20,7 +20,12 @@ class Sepia extends Filter {
     assert && assert( amount >= 0, 'Sepia amount should be non-negative' );
     assert && assert( amount <= 1, 'Sepia amount should be at most 1' );
 
-    super();
+    super(
+      0.393 + 0.607 * ( 1 - amount ), 0.769 - 0.769 * ( 1 - amount ), 0.189 - 0.189 * ( 1 - amount ), 0, 0,
+      0.349 - 0.349 * ( 1 - amount ), 0.686 + 0.314 * ( 1 - amount ), 0.168 - 0.168 * ( 1 - amount ), 0, 0,
+      0.272 - 0.272 * ( 1 - amount ), 0.534 - 0.534 * ( 1 - amount ), 0.131 + 0.869 * ( 1 - amount ), 0, 0,
+      0, 0, 0, 1, 0
+    );
 
     // @public {number}
     this.amount = amount;

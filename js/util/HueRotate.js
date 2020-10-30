@@ -6,20 +6,39 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import Utils from '../../../dot/js/Utils.js';
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import scenery from '../scenery.js';
-import Filter from './Filter.js';
+import ColorMatrixFilter from './ColorMatrixFilter.js';
 
-class HueRotate extends Filter {
+class HueRotate extends ColorMatrixFilter {
   /**
-   * @param {number} amount - In degrees
+   * @param {number} amount - In radians
    */
   constructor( amount ) {
     assert && assert( typeof amount === 'number', 'HueRotate amount should be a number' );
     assert && assert( isFinite( amount ), 'HueRotate amount should be finite' );
     assert && assert( amount >= 0, 'HueRotate amount should be non-negative' );
 
-    super();
+    const cos = Math.cos( amount );
+    const sin = Math.sin( amount );
+
+    // https://drafts.fxtf.org/filter-effects/#attr-valuedef-type-huerotate
+    super(
+      0.213 + 0.787 * cos - 0.213 * sin,
+      0.715 - 0.715 * cos - 0.715 * sin,
+      0.072 - 0.072 * cos + 0.928 * sin,
+      0, 0,
+      0.213 - 0.213 * cos + 0.143 * sin,
+      0.715 + 0.285 * cos + 0.140 * sin,
+      0.072 - 0.072 * cos - 0.283 * sin,
+      0, 0,
+      0.213 - 0.213 * cos - 0.787 * sin,
+      0.715 - 0.715 * cos + 0.715 * sin,
+      0.072 + 0.928 * cos + 0.072 * sin,
+      0, 0,
+      0, 0, 0, 1, 0
+    );
 
     // @public {number}
     this.amount = amount;
@@ -32,7 +51,7 @@ class HueRotate extends Filter {
    * @returns {string}
    */
   getCSSFilterString() {
-    return `hue-rotate(${toSVGNumber( this.amount )}deg)`;
+    return `hue-rotate(${toSVGNumber( Utils.toDegrees( this.amount ) )}deg)`;
   }
 
   /**
