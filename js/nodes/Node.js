@@ -3507,7 +3507,7 @@ inherit( PhetioObject, Node, {
 
   /**
    * Called when enabledProperty changes values.
-   * @private
+   * @protected - override this to change the behavior of enabled
    *
    * @param {boolean} enabled
    */
