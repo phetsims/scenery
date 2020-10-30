@@ -152,6 +152,7 @@
  */
 
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
+import EnabledProperty from '../../../axon/js/EnabledProperty.js';
 import Property from '../../../axon/js/Property.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
@@ -192,6 +193,7 @@ const scratchBounds2 = Bounds2.NOTHING.copy(); // mutable {Bounds2} used tempora
 const scratchMatrix3 = new Matrix3();
 
 const PICKABLE_PROPERTY_TANDEM_NAME = 'pickableProperty';
+const ENABLED_PROPERTY_TANDEM_NAME = EnabledProperty.TANDEM_NAME;
 const VISIBLE_PROPERTY_TANDEM_NAME = 'visibleProperty';
 
 // Node options, in the order they are executed in the constructor/mutate()
@@ -205,6 +207,12 @@ const NODE_OPTION_KEYS = [
   'pickablePropertyPhetioInstrumented', // {boolean} - When true, create an instrumented pickableProperty when this Node is instrumented, see setPickablePropertyPhetioInstrumented() for more documentation
   'pickableProperty', // {Property.<boolean|null>|null} - Sets forwarding of the pickableProperty, see setPickableProperty() for more documentation
   'pickable', // {boolean|null} - Whether the Node is pickable, see setPickable() for more documentation
+
+  'enabledPropertyPhetioInstrumented', // {boolean} - When true, create an instrumented enabledProperty when this Node is instrumented, see setEnabledPropertyPhetioInstrumented() for more documentation
+  'enabledProperty', // {Property.<boolean|null>|null} - Sets forwarding of the enabledProperty, see setEnabledProperty() for more documentation
+  'enabled', // {boolean|null} - Whether the Node is enabled, see setEnabled() for more documentation
+  'disabledOpacity', // {number} - When the Node is enabled:false, what opacity does it have?
+
   'inputEnabled', // {boolean} Whether input events can reach into this subtree, see setInputEnabled() for more documentation
   'inputListeners', // {Array.<Object>} - The input listeners attached to the Node, see setInputListeners() for more documentation
   'opacity', // {number} - Opacity of this Node's subtree, see setOpacity() for more documentation
@@ -251,6 +259,9 @@ const DEFAULT_OPTIONS = {
   opacity: 1,
   pickable: null,
   pickablePropertyPhetioInstrumented: false,
+  enabled: true,
+  enabledPropertyPhetioInstrumented: false,
+  disabledOpacity: .45,
   inputEnabled: true,
   clipArea: null,
   mouseArea: null,
@@ -335,6 +346,13 @@ function Node( options ) {
   // NOTE: This is fired synchronously when the pickability of the Node is toggled
   this._pickableProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.pickable, DEFAULT_OPTIONS.pickablePropertyPhetioInstrumented );
   this._pickableProperty.lazyLink( this.onPickablePropertyChange.bind( this ) );
+
+  // @public {TinyForwardingProperty.<boolean>} - See setEnabled() and setEnabledProperty()
+  this._enabledProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.enabled, DEFAULT_OPTIONS.enabledPropertyPhetioInstrumented );
+  this._enabledProperty.lazyLink( this.onEnabledPropertyChange.bind( this ) );
+
+  // @private - the opacity when enabled:false
+  this._disabledOpacity = DEFAULT_OPTIONS.disabledOpacity;
 
   // @public {TinyProperty.<boolean>} - Whether input event listeners on this Node or descendants on a trail will have
   // input listeners. triggered. Note that this does NOT effect picking, and only prevents some listeners from being
@@ -3401,7 +3419,7 @@ inherit( PhetioObject, Node, {
   get pickable() { return this.isPickable(); },
 
   /**
-   * Called when our visibility Property changes values.
+   * Called when our pickableProperty changes values.
    * @private
    *
    * @param {boolean} pickable
@@ -3412,6 +3430,117 @@ inherit( PhetioObject, Node, {
     if ( assertSlow ) { this._picker.audit(); }
     // TODO: invalidate the cursor somehow? #150
   },
+
+
+  /**
+   * Sets what Property our enabledProperty is backed by, so that changes to this provided Property will change this
+   * Node's enabled, and vice versa. This does not change this._enabledProperty. See TinyForwardingProperty.setTargetProperty()
+   * for more info.
+   *
+   * Instrumented Nodes do not by default create their own instrumented enabledProperty, even though Node.visibleProperty does.
+   *
+   * @public
+   *
+   * @param {TinyProperty.<boolean>|Property.<boolean>|null} newTarget
+   * @returns {Node} for chaining
+   */
+  setEnabledProperty( newTarget ) {
+
+    return this._enabledProperty.setTargetProperty( this, ENABLED_PROPERTY_TANDEM_NAME, newTarget );
+  },
+  set enabledProperty( property ) { this.setEnabledProperty( property ); },
+
+  /**
+   * Get this Node's enabledProperty. Note! This is not the reciprocal of setEnabledProperty. Node.prototype._enabledProperty
+   * is a TinyForwardingProperty, and is set up to listen to changes from the enabledProperty provided by
+   * setEnabledProperty(), but the underlying reference does not change. This means the following:
+   * const myNode = new Node();
+   * const enabledProperty = new Property( false );
+   * myNode.setEnabledProperty( enabledProperty )
+   * => myNode.getEnabledProperty() !== enabledProperty (!!!!!!)
+   *
+   * Please use this with caution. See setEnabledProperty() for more information.
+   *
+   * @returns {TinyForwardingProperty}
+   */
+  getEnabledProperty: function() {
+    return this._enabledProperty;
+  },
+  get enabledProperty() { return this.getEnabledProperty(); },
+
+  /**
+   * Use this to automatically create a forwarded, PhET-iO instrumented enabledProperty internal to Node. This is different
+   * from visible because enabled by default doesn't not create this forwarded Property.
+   * @public
+   * @param {boolean} enabledPropertyPhetioInstrumented
+   * @returns {Node} - for chaining
+   */
+  setEnabledPropertyPhetioInstrumented: function( enabledPropertyPhetioInstrumented ) {
+    return this._enabledProperty.setTargetPropertyInstrumented( enabledPropertyPhetioInstrumented, this );
+  },
+  set enabledPropertyPhetioInstrumented( enabledPropertyPhetioInstrumented ) { this.setEnabledPropertyPhetioInstrumented( enabledPropertyPhetioInstrumented );},
+
+  /**
+   * Sets whether this Node is enabled
+   *
+   * @param {boolean|null} enabled
+   * @returns {Node} - for chaining
+   */
+  setEnabled: function( enabled ) {
+    assert && assert( enabled === null || typeof enabled === 'boolean' );
+    this._enabledProperty.set( enabled );
+
+    return this;
+  },
+  set enabled( value ) { this.setEnabled( value ); },
+
+  /**
+   * Returns the enabled of this node.
+   * @public
+   *
+   * @returns {boolean|null}
+   */
+  isEnabled: function() {
+    return this._enabledProperty.value;
+  },
+  get enabled() { return this.isEnabled(); },
+
+  /**
+   * Called when enabledProperty changes values.
+   * @private
+   *
+   * @param {boolean} enabled
+   */
+  onEnabledPropertyChange: function( enabled ) {
+    this.interruptSubtreeInput();
+    this.pickable = enabled;
+    this.opacity = enabled ? 1.0 : this.disabledOpacity;
+  },
+
+  /**
+   * The opacity when disabled (Node.isEnabled()===false)
+   * @public
+   *
+   * @param {number} disabledOpacity
+   */
+  setDisabledOpacity: function( disabledOpacity ) {
+    assert && assert( typeof disabledOpacity === 'number' && Number.isFinite( disabledOpacity ) );
+
+    // This is clamped just like opacity, instead of asserted like it was in EnabledNode.
+    this._disabledOpacity = clamp( disabledOpacity, 0, 1 );
+  },
+  set disabledOpacity( value ) { this.setDisabledOpacity( value ); },
+
+  /**
+   * Returns the opacity when disabled.
+   * @public
+   *
+   * @returns {number}
+   */
+  getDisabledOpacity: function() {
+    return this._disabledOpacity;
+  },
+  get disabledOpacity() { return this.getDisabledOpacity(); },
 
   /**
    * Sets whether input is enabled for this Node and its subtree. If false, input event listeners will not be fired
@@ -3450,7 +3579,7 @@ inherit( PhetioObject, Node, {
    * This is equivalent to removing all current input listeners with removeInputListener() and adding all new
    * listeners (in order) with addInputListener().
    *
-   * @param {Array.<Object>} inputlisteners - The input listeners to add.
+   * @param {Array.<Object>} inputListeners - The input listeners to add.
    * @returns {Node} - For chaining
    */
   setInputListeners: function( inputListeners ) {
@@ -5311,7 +5440,8 @@ inherit( PhetioObject, Node, {
       // the default, instrumented visibleProperty is conditionally created. We don't want to store these on the Node,
       // and thus they aren't support through `mutate()`.
       visiblePropertyOptions: null,
-      pickablePropertyOptions: null
+      pickablePropertyOptions: null,
+      enabledPropertyOptions: null
     }, config );
 
     // Track this, so we only override our visibleProperty once.
@@ -5350,6 +5480,14 @@ inherit( PhetioObject, Node, {
                                '</ul>' +
                                'For more about Scenery node pickability, please see <a href="http://phetsims.github.io/scenery/doc/implementation-notes#pickability">http://phetsims.github.io/scenery/doc/implementation-notes#pickability</a>'
         }, config.pickablePropertyOptions ) )
+      );
+
+      this._enabledProperty.initializePhetio( this, ENABLED_PROPERTY_TANDEM_NAME, () => new EnabledProperty( this.enabled, merge( {
+
+          // by default, use the value from the Node
+          phetioReadOnly: this.phetioReadOnly,
+          tandem: this.tandem.createTandem( ENABLED_PROPERTY_TANDEM_NAME )
+        }, config.enabledPropertyOptions ) )
       );
     }
   },
@@ -5434,8 +5572,10 @@ inherit( PhetioObject, Node, {
     this.removeAllChildren();
     this.detach();
 
-    this._visibleProperty.dispose();
+    // In opposite order of creation
+    this._enabledProperty.dispose();
     this._pickableProperty.dispose();
+    this._visibleProperty.dispose();
 
     // Tear-down in the reverse order Node was created
     PhetioObject.prototype.dispose.call( this );

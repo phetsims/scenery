@@ -635,4 +635,251 @@ if ( Tandem.PHET_IO_ENABLED ) {
       Tandem.unlaunch();
     }
   } );
+
+  QUnit.test( 'Node instrumented enabled Property', assert => {
+
+    // TODO: Use the AuxiliaryTandemRegistry?  See https://github.com/phetsims/tandem/issues/187
+    const wasLaunched = Tandem.launched;
+    if ( !Tandem.launched ) {
+      Tandem.launch();
+    }
+
+    const apiValidation = phet.tandem.phetioAPIValidation;
+    const previousEnabled = apiValidation.enabled;
+    const previousSimStarted = apiValidation.simHasStarted;
+
+    apiValidation.simHasStarted = false;
+
+    const testNodeAndEnabledProperty = ( node, property ) => {
+      const initialEnabled = node.enabled;
+      assert.ok( property.value === node.enabled, 'initial values should be the same' );
+      node.enabled = !initialEnabled;
+      assert.ok( property.value === !initialEnabled, 'property should reflect node change' );
+      property.value = initialEnabled;
+      assert.ok( node.enabled === initialEnabled, 'node should reflect property change' );
+
+      node.enabled = initialEnabled;
+    };
+
+    const instrumentedEnabledProperty = new BooleanProperty( false, { tandem: Tandem.GENERAL.createTandem( 'myEnabledProperty' ) } );
+    const otherInstrumentedEnabledProperty = new BooleanProperty( false, { tandem: Tandem.GENERAL.createTandem( 'myOtherEnabledProperty' ) } );
+    const uninstrumentedEnabledProperty = new BooleanProperty( false );
+
+    /***************************************
+     /* Testing uninstrumented Nodes
+     */
+
+
+      // uninstrumentedNode => no property (before startup)
+    let uninstrumented = new Node();
+    assert.ok( uninstrumented.enabledProperty.targetProperty === undefined );
+    testNodeAndEnabledProperty( uninstrumented, uninstrumented.enabledProperty );
+
+    // uninstrumentedNode => uninstrumented property (before startup)
+    uninstrumented = new Node( { enabledProperty: uninstrumentedEnabledProperty } );
+    assert.ok( uninstrumented.enabledProperty.targetProperty === uninstrumentedEnabledProperty );
+    testNodeAndEnabledProperty( uninstrumented, uninstrumentedEnabledProperty );
+
+    //uninstrumentedNode => instrumented property (before startup)
+    uninstrumented = new Node();
+    uninstrumented.mutate( {
+      enabledProperty: instrumentedEnabledProperty
+    } );
+    assert.ok( uninstrumented.enabledProperty.targetProperty === instrumentedEnabledProperty );
+    testNodeAndEnabledProperty( uninstrumented, instrumentedEnabledProperty );
+
+    //  uninstrumentedNode => instrumented property => instrument the Node (before startup) OK
+    uninstrumented = new Node();
+    uninstrumented.mutate( {
+      enabledProperty: instrumentedEnabledProperty
+    } );
+    uninstrumented.mutate( { tandem: Tandem.GENERAL.createTandem( 'myNodeWithEnabled' ) } );
+    assert.ok( uninstrumented.enabledProperty.targetProperty === instrumentedEnabledProperty );
+    testNodeAndEnabledProperty( uninstrumented, instrumentedEnabledProperty );
+    uninstrumented.dispose();
+
+    //////////////////////////////////////////////////
+    apiValidation.simHasStarted = true;
+
+    // uninstrumentedNode => no property (before startup)
+    uninstrumented = new Node();
+    assert.ok( uninstrumented.enabledProperty.targetProperty === undefined );
+    testNodeAndEnabledProperty( uninstrumented, uninstrumented.enabledProperty );
+
+    // uninstrumentedNode => uninstrumented property (before startup)
+    uninstrumented = new Node( { enabledProperty: uninstrumentedEnabledProperty } );
+    assert.ok( uninstrumented.enabledProperty.targetProperty === uninstrumentedEnabledProperty );
+    testNodeAndEnabledProperty( uninstrumented, uninstrumentedEnabledProperty );
+
+    //uninstrumentedNode => instrumented property (before startup)
+    uninstrumented = new Node();
+    uninstrumented.mutate( {
+      enabledProperty: instrumentedEnabledProperty
+    } );
+    assert.ok( uninstrumented.enabledProperty.targetProperty === instrumentedEnabledProperty );
+    testNodeAndEnabledProperty( uninstrumented, instrumentedEnabledProperty );
+
+    //  uninstrumentedNode => instrumented property => instrument the Node (before startup) OK
+    uninstrumented = new Node();
+    uninstrumented.mutate( {
+      enabledProperty: instrumentedEnabledProperty
+    } );
+
+    uninstrumented.mutate( { tandem: Tandem.GENERAL.createTandem( 'myNodeWithEnabled' ) } );
+    assert.ok( uninstrumented.enabledProperty.targetProperty === instrumentedEnabledProperty );
+    testNodeAndEnabledProperty( uninstrumented, instrumentedEnabledProperty );
+    uninstrumented.dispose();
+    apiValidation.simHasStarted = false;
+
+
+    /***************************************
+     /* Testing instrumented nodes
+     */
+
+      // instrumentedNodeWithDefaultInstrumentedEnabledProperty => instrumented property (before startup)
+    let instrumented = new Node( {
+        tandem: Tandem.GENERAL.createTandem( 'myNodeWithEnabled' ),
+        enabledPropertyPhetioInstrumented: true
+      } );
+    assert.ok( instrumented.enabledProperty.targetProperty === instrumented.enabledProperty.ownedPhetioProperty );
+    assert.ok( instrumented.linkedElements.length === 0, 'no linked elements for default enabled Property' );
+    testNodeAndEnabledProperty( instrumented, instrumented.enabledProperty );
+    instrumented.dispose();
+
+    // instrumentedNodeWithDefaultInstrumentedEnabledProperty => uninstrumented property (before startup)
+    instrumented = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myNodeWithEnabled' ),
+      enabledPropertyPhetioInstrumented: true
+    } );
+    window.assert && assert.throws( () => {
+      instrumented.mutate( { enabledProperty: uninstrumentedEnabledProperty } );
+    }, 'cannot remove instrumentation from the Node\'s enabledProperty' );
+    instrumented.dispose();
+
+    // instrumentedNodeWithPassedInInstrumentedEnabledProperty => instrumented property (before startup)
+    instrumented = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myNodeWithEnabled' ),
+      enabledPropertyPhetioInstrumented: true
+    } );
+    instrumented.mutate( { enabledProperty: instrumentedEnabledProperty } );
+    assert.ok( instrumented.enabledProperty.targetProperty === instrumentedEnabledProperty );
+    assert.ok( instrumented.linkedElements.length === 1, 'added linked element' );
+    assert.ok( instrumented.linkedElements[ 0 ].element === instrumentedEnabledProperty,
+      'added linked element should be for enabledProperty ' );
+    testNodeAndEnabledProperty( instrumented, instrumentedEnabledProperty );
+    instrumented.dispose();
+
+    instrumented = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myNodeWithEnabled' ),
+      enabledProperty: instrumentedEnabledProperty
+    } );
+    assert.ok( instrumented.enabledProperty.targetProperty === instrumentedEnabledProperty );
+    assert.ok( instrumented.linkedElements.length === 1, 'added linked element' );
+    assert.ok( instrumented.linkedElements[ 0 ].element === instrumentedEnabledProperty,
+      'added linked element should be for enabledProperty ' );
+    testNodeAndEnabledProperty( instrumented, instrumentedEnabledProperty );
+    instrumented.dispose();
+
+    // instrumentedNodeWithPassedInInstrumentedEnabledProperty => uninstrumented property (before startup)
+    instrumented = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myNodeWithEnabled' ),
+      enabledProperty: instrumentedEnabledProperty
+    } );
+    window.assert && assert.throws( () => {
+      instrumented.mutate( { enabledProperty: uninstrumentedEnabledProperty } );
+    }, 'cannot remove instrumentation from the Node\'s enabledProperty' );
+    instrumented.dispose();
+    instrumented = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myNodeWithEnabled' )
+    } );
+    instrumented.mutate( { enabledProperty: instrumentedEnabledProperty } );
+    window.assert && assert.throws( () => {
+      instrumented.mutate( { enabledProperty: uninstrumentedEnabledProperty } );
+    }, 'cannot remove instrumentation from the Node\'s enabledProperty' );
+    instrumented.dispose();
+
+    apiValidation.enabled = true;
+    apiValidation.simHasStarted = true;
+    // instrumentedNodeWithDefaultInstrumentedEnabledProperty => instrumented property (after startup)
+    const instrumented1 = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myEnabledUniquelyNamedNodeThatWillNotBeDuplicated1' ),
+      enabledPropertyPhetioInstrumented: true
+    } );
+    assert.ok( instrumented1.enabledProperty.targetProperty === instrumented1.enabledProperty.ownedPhetioProperty );
+    assert.ok( instrumented1.linkedElements.length === 0, 'no linked elements for default enabled Property' );
+    testNodeAndEnabledProperty( instrumented1, instrumented1.enabledProperty );
+
+    // instrumentedNodeWithDefaultInstrumentedEnabledProperty => uninstrumented property (after startup)
+    const instrumented2 = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myEnabledUniquelyNamedNodeThatWillNotBeDuplicated2' ),
+      enabledPropertyPhetioInstrumented: true
+    } );
+    window.assert && assert.throws( () => {
+      instrumented2.setEnabledProperty( uninstrumentedEnabledProperty );
+    }, 'cannot remove instrumentation from the Node\'s enabledProperty' );
+
+    // instrumentedNodeWithPassedInInstrumentedEnabledProperty => instrumented property (after startup)
+    const instrumented3 = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myEnabledUniquelyNamedNodeThatWillNotBeDuplicated3' ),
+      enabledProperty: instrumentedEnabledProperty
+    } );
+
+    window.assert && assert.throws( () => {
+      instrumented3.mutate( { enabledProperty: otherInstrumentedEnabledProperty } );
+    }, 'cannot swap out one instrumented for another' );
+
+    // instrumentedNodeWithPassedInInstrumentedEnabledProperty => uninstrumented property (after startup)
+    const instrumented4 = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myEnabledUniquelyNamedNodeThatWillNotBeDuplicated4' ),
+      enabledProperty: instrumentedEnabledProperty
+    } );
+    window.assert && assert.throws( () => {
+      instrumented4.mutate( { enabledProperty: uninstrumentedEnabledProperty } );
+    }, 'cannot remove instrumentation from the Node\'s enabledProperty' );
+    const instrumented5 = new Node( {} );
+    instrumented5.mutate( { enabledProperty: instrumentedEnabledProperty } );
+    instrumented5.mutate( { tandem: Tandem.GENERAL.createTandem( 'myEnabledUniquelyNamedNodeThatWillNotBeDuplicated5' ) } );
+    window.assert && assert.throws( () => {
+      instrumented5.mutate( { enabledProperty: uninstrumentedEnabledProperty } );
+    }, 'cannot remove instrumentation from the Node\'s enabledProperty' );
+    apiValidation.enabled = false;
+
+    instrumented1.dispose();
+
+    // These can't be disposed because they were broken while creating (on purpose in an assert.throws()). These elements
+    // have special Tandem component names to make sure that they don't interfere with other tests (since they can't be
+    // removed from the registry
+    // instrumented2.dispose();
+    // instrumented3.dispose();
+    // instrumented4.dispose();
+    // instrumented5.dispose();
+
+    instrumented = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myNodeWithEnabled' ),
+      enabledPropertyPhetioInstrumented: true
+    } );
+    window.assert && assert.throws( () => {
+      instrumented.setEnabledProperty( null );
+    }, 'cannot clear out an instrumented enabledProperty' );
+    instrumented.dispose();
+
+
+    instrumented = new Node( {
+      tandem: Tandem.GENERAL.createTandem( 'myNodeWithEnabled' )
+    } );
+    window.assert && assert.throws( () => {
+      instrumented.enabledPropertyPhetioInstrumented = true;
+    }, 'cannot set enabledPropertyPhetioInstrumented after instrumentation' );
+    instrumented.dispose();
+
+
+    instrumentedEnabledProperty.dispose();
+    otherInstrumentedEnabledProperty.dispose();
+    apiValidation.simHasStarted = previousSimStarted;
+    apiValidation.enabled = previousEnabled;
+
+    if ( !wasLaunched ) {
+      Tandem.unlaunch();
+    }
+  } );
 }
