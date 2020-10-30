@@ -7,6 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import scenery from '../scenery.js';
@@ -84,22 +85,29 @@ class BackboneDrawable extends Drawable {
     // Apply CSS needed for future CSS transforms to work properly.
     Utils.prepareForTransform( this.domElement );
 
-    // if we need to, watch nodes below us (and including us) and apply their filters (opacity/visibility/clip) to the backbone.
+    // Ff we need to, watch nodes below us (and including us) and apply their filters (opacity/visibility/clip) to the
+    // backbone. Order will be important, since we'll visit them in the order of filter application
     this.watchedFilterNodes = cleanArray( this.watchedFilterNodes );
-    this.opacityDirty = true;
+
+    // @private {boolean}
+    this.filterDirty = true;
+
+    // @private {boolean}
     this.clipDirty = true;
-    this.opacityDirtyListener = this.opacityDirtyListener || this.markOpacityDirty.bind( this );
-    this.clipDirtyListener = this.clipDirtyListener || this.markClipDirty.bind( this );
+
+    this.filterDirtyListener = this.filterDirtyListener || this.onFilterDirty.bind( this );
+    this.clipDirtyListener = this.clipDirtyListener || this.onClipDirty.bind( this );
     if ( this.willApplyFilters ) {
       assert && assert( this.filterRootAncestorInstance.trail.nodes.length < this.backboneInstance.trail.nodes.length,
         'Our backboneInstance should be deeper if we are applying filters' );
 
       // walk through to see which instances we'll need to watch for filter changes
+      // NOTE: order is important, so that the filters are applied in the correct order!
       for ( let instance = this.backboneInstance; instance !== this.filterRootAncestorInstance; instance = instance.parent ) {
         const node = instance.node;
 
         this.watchedFilterNodes.push( node );
-        node.opacityProperty.lazyLink( this.opacityDirtyListener );
+        node.filterChangeEmitter.addListener( this.filterDirtyListener );
         node.clipAreaProperty.lazyLink( this.clipDirtyListener );
       }
     }
@@ -133,7 +141,7 @@ class BackboneDrawable extends Drawable {
     while ( this.watchedFilterNodes.length ) {
       const node = this.watchedFilterNodes.pop();
 
-      node.opacityProperty.unlink( this.opacityDirtyListener );
+      node.filterChangeEmitter.removeListener( this.filterDirtyListener );
       node.clipAreaProperty.unlink( this.clipDirtyListener );
     }
 
@@ -247,20 +255,20 @@ class BackboneDrawable extends Drawable {
 
   /**
    * Marks our opacity as dirty.
-   * @public
+   * @private
    */
-  markOpacityDirty() {
-    if ( !this.opacityDirty ) {
-      this.opacityDirty = true;
+  onFilterDirty() {
+    if ( !this.filterDirty ) {
+      this.filterDirty = true;
       this.markDirty();
     }
   }
 
   /**
    * Marks our clip as dirty.
-   * @public
+   * @private
    */
-  markClipDirty() {
+  onClipDirty() {
     if ( !this.clipDirty ) {
       this.clipDirty = true;
       this.markDirty();
@@ -285,11 +293,27 @@ class BackboneDrawable extends Drawable {
       this.dirtyDrawables.pop().update();
     }
 
-    if ( this.opacityDirty ) {
-      this.opacityDirty = false;
+    if ( this.filterDirty ) {
+      this.filterDirty = false;
 
-      const filterOpacity = this.willApplyFilters ? this.getFilterOpacity() : 1;
-      this.domElement.style.opacity = ( filterOpacity !== 1 ) ? filterOpacity : '';
+      let filterString = '';
+
+      const len = this.watchedFilterNodes.length;
+      for ( let i = 0; i < len; i++ ) {
+        const node = this.watchedFilterNodes[ i ];
+        const opacity = node.getOpacity();
+
+        for ( let j = 0; j < node._filters.length; j++ ) {
+          filterString += `${filterString ? ' ' : ''}${node._filters[ j ].getCSSFilterString()}`;
+        }
+
+        // Apply opacity after other effects
+        if ( opacity !== 1 ) {
+          filterString += `${filterString ? ' ' : ''}opacity(${toSVGNumber(opacity)})`;
+        }
+      }
+
+      this.domElement.style.filter = filterString;
     }
 
     if ( this.visibilityDirty ) {
@@ -308,23 +332,6 @@ class BackboneDrawable extends Drawable {
     }
 
     return true;
-  }
-
-  /**
-   * Returns the combined opacity of nodes "above us" that will need to be applied to this backbone.
-   * @public
-   *
-   * @returns {number}
-   */
-  getFilterOpacity() {
-    let opacity = 1;
-
-    const len = this.watchedFilterNodes.length;
-    for ( let i = 0; i < len; i++ ) {
-      opacity *= this.watchedFilterNodes[ i ].getOpacity();
-    }
-
-    return opacity;
   }
 
   /**

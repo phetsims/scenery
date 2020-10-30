@@ -391,16 +391,40 @@ class Instance {
     }
 
     const hasClip = this.node.hasClipArea();
-    const hasTransparency = this.node.opacity !== 1 || hints.usesOpacity;
+    const hasFilters = this.node.opacity !== 1 || hints.usesOpacity || this.node._filters.length > 0;
+    // let hasNonDOMFilter = false;
+    let hasNonSVGFilter = false;
+    let hasNonCanvasFilter = false;
+    // let hasNonWebGLFilter = false;
+    if ( hasFilters ) {
+      // NOTE: opacity is OK with all of those (currently)
+      for ( let i = 0; i < this.node._filters.length; i++ ) {
+        const filter = this.node._filters[ i ];
+
+        // TODO: how to handle this, if we split AT the node?
+        // if ( !filter.isDOMCompatible() ) {
+        //   hasNonDOMFilter = true;
+        // }
+        if ( !filter.isSVGCompatible() ) {
+          hasNonSVGFilter = true;
+        }
+        if ( !filter.isCanvasCompatible() ) {
+          hasNonCanvasFilter = true;
+        }
+        // if ( !filter.isWebGLCompatible() ) {
+        //   hasNonWebGLFilter = true;
+        // }
+      }
+    }
     const requiresSplit = hints.cssTransform || hints.layerSplit;
     const backboneRequired = this.isDisplayRoot || ( !this.isUnderCanvasCache && requiresSplit );
 
     // Support either "all Canvas" or "all SVG" opacity/clip
     const applyTransparencyWithBlock = !backboneRequired &&
-                                       ( hasTransparency || hasClip ) &&
-                                       ( this.node._rendererSummary.isSubtreeRenderedExclusivelySVG( this.preferredRenderers ) ||
-                                         this.node._rendererSummary.isSubtreeRenderedExclusivelyCanvas( this.preferredRenderers ) );
-    const useBackbone = applyTransparencyWithBlock ? false : ( backboneRequired || hasTransparency || hasClip );
+                                       ( hasFilters || hasClip ) &&
+                                       ( ( !hasNonSVGFilter && this.node._rendererSummary.isSubtreeRenderedExclusivelySVG( this.preferredRenderers ) ) ||
+                                         ( !hasNonCanvasFilter && this.node._rendererSummary.isSubtreeRenderedExclusivelyCanvas( this.preferredRenderers ) ) );
+    const useBackbone = applyTransparencyWithBlock ? false : ( backboneRequired || hasFilters || hasClip );
 
     // check if we need a backbone or cache
     // if we are under a canvas cache, we will NEVER have a backbone
@@ -414,7 +438,7 @@ class Instance {
       //OHTWO TODO: check whether the force acceleration hint is being used by our DOMBlock
       this.groupRenderer = Renderer.bitmaskDOM; // probably won't be used
     }
-    else if ( !applyTransparencyWithBlock && ( hasTransparency || hasClip || hints.canvasCache ) ) {
+    else if ( !applyTransparencyWithBlock && ( hasFilters || hasClip || hints.canvasCache ) ) {
       // everything underneath needs to be renderable with Canvas, otherwise we cannot cache
       assert && assert( this.node._rendererSummary.isSingleCanvasSupported(),
         'hints.canvasCache provided, but not all node contents can be rendered with Canvas under ' +

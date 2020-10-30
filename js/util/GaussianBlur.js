@@ -32,7 +32,17 @@ class GaussianBlur extends Filter {
    * @returns {string}
    */
   getCSSFilterString() {
-    return `blur(${toSVGNumber( this.standardDeviation )})`;
+    return `blur(${toSVGNumber( this.standardDeviation )}px)`;
+  }
+
+  /**
+   * @public
+   * @override
+   *
+   * @returns {*}
+   */
+  isDOMCompatible() {
+    return true;
   }
 }
 

@@ -35,6 +35,16 @@ class Opacity extends Filter {
   getCSSFilterString() {
     return `opacity(${toSVGNumber( this.amount )})`;
   }
+
+  /**
+   * @public
+   * @override
+   *
+   * @returns {*}
+   */
+  isDOMCompatible() {
+    return true;
+  }
 }
 
 scenery.register( 'Opacity', Opacity );

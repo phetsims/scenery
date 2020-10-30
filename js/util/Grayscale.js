@@ -35,6 +35,16 @@ class Grayscale extends Filter {
   getCSSFilterString() {
     return `grayscale(${toSVGNumber( this.amount )})`;
   }
+
+  /**
+   * @public
+   * @override
+   *
+   * @returns {*}
+   */
+  isDOMCompatible() {
+    return true;
+  }
 }
 
 scenery.register( 'Grayscale', Grayscale );

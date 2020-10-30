@@ -332,6 +332,7 @@ function Node( options ) {
   // @public {TinyProperty.<number>} - Opacity, in the range from 0 (fully transparent) to 1 (fully opaque).
   // NOTE: This is fired synchronously when the opacity of the Node is toggled
   this.opacityProperty = new TinyProperty( DEFAULT_OPTIONS.opacity );
+  this.opacityProperty.lazyLink( this.onOpacityPropertyChange.bind( this ) );
 
   // @private {TinyForwardingProperty.<boolean|null>} - See setPickable() and setPickableProperty()
   // NOTE: This is fired synchronously when the pickability of the Node is toggled
@@ -517,6 +518,9 @@ function Node( options ) {
   // @public {TinyEmitter} - Emitted to when we need to potentially recompute our renderer summary (bitmask flags, or
   // things that could affect descendants)
   this.rendererSummaryRefreshEmitter = new TinyEmitter();
+
+  // @public {TinyEmitter} - Emitted to when we change filters (either opacity or generalized filters)
+  this.filterChangeEmitter = new TinyEmitter();
 
   // @public {TinyEmitter} - Fired when the accessible Displays for this Node have changed (see PDOMInstance)
   this.accessibleDisplaysEmitter = new TinyEmitter();
@@ -3282,6 +3286,17 @@ inherit( PhetioObject, Node, {
   get opacity() { return this.getOpacity(); },
 
   /**
+   * Called when our opacity Property changes values.
+   * @private
+   *
+   * @param {boolean} opacity
+   * @param {boolean} oldOpacity
+   */
+  onOpacityPropertyChange: function( opacity, oldOpacity ) {
+    this.filterChangeEmitter.emit();
+  },
+
+  /**
    * Sets the non-opacity filters for this Node.
    * @public
    *
@@ -3295,6 +3310,7 @@ inherit( PhetioObject, Node, {
     this._filters.push( ...filters );
 
     this.invalidateHint();
+    this.filterChangeEmitter.emit();
   },
   set filters( value ) { this.setFilters( value ); },
 

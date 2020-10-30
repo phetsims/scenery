@@ -25,6 +25,44 @@ class Filter {
   getCSSFilterString() {
     throw new Error( 'abstract method' );
   }
+
+  /**
+   * @public
+   *
+   * @returns {boolean}
+   */
+  isDOMCompatible() {
+    // TODO: We can browser-check on things like color matrix? But we want to disallow things that we can't guarantee we
+    // can support?
+    return false;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {boolean}
+   */
+  isSVGCompatible() {
+    return false;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {boolean}
+   */
+  isCanvasCompatible() {
+    return false;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {boolean}
+   */
+  isWebGLCompatible() {
+    return false;
+  }
 }
 
 scenery.register( 'Filter', Filter );
