@@ -17,7 +17,6 @@ import NumberProperty from '../../../../axon/js/NumberProperty.js';
 import Property from '../../../../axon/js/Property.js';
 import Range from '../../../../dot/js/Range.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
-import Display from '../../display/Display.js';
 import scenery from '../../scenery.js';
 
 class WebSpeaker {
@@ -90,24 +89,6 @@ class WebSpeaker {
       }
     };
     this.enabledProperty.link( enabledListener );
-
-    if ( platform.mobileSafari ) {
-
-      // on iOS Safari, speech is not enabled until certain user gestures - this workaround
-      // attempts to enable speech on first user press of the screen. As of 10/16/20 it only
-      // works for single taps - for some reason swipe gestures do not enable speech,
-      // even with the.
-      const userGestureListener = () => {
-
-        // for some reason, speaking then immediately resuming enables speech for
-        // a single press
-        this.speak( 'Speech Enabled' );
-        this.synth.resume();
-
-        Display.userGestureEmitter.removeListener( userGestureListener );
-      };
-      Display.userGestureEmitter.addListener( userGestureListener );
-    }
   }
 
   get enabled() {
