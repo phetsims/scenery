@@ -178,7 +178,9 @@ QUnit.test( 'Node.enabledProperty', assert => {
   assert.ok( node.opacity === disabledOpacity, 'test disabled opacity' );
 
   node.dispose();
-  assert.ok( node.enabledProperty.isDisposed, 'should be disposed' );
+
+  // TinyProperty.isDisposed is only defined when assertions are enabled, for performance
+  window.assert && assert.ok( node.enabledProperty.isDisposed, 'should be disposed' );
 
   const myEnabledProperty = new BooleanProperty( true );
   const defaultListenerCount = myEnabledProperty.changedEmitter.getListenerCount();
@@ -492,7 +494,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
 
     // If by default this property isn't instrumented, then this should cause an error
-    if( !ownedPropertyPhetioInstrumented){
+    if ( !ownedPropertyPhetioInstrumented ) {
 
       instrumented = new Node( {
         tandem: Tandem.GENERAL.createTandem( `${nodeField}MyNode` )
