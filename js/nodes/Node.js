@@ -3513,7 +3513,7 @@ inherit( PhetioObject, Node, {
    * @param {boolean} enabled
    */
   onEnabledPropertyChange: function( enabled ) {
-    this.interruptSubtreeInput();
+    !enabled && this.interruptSubtreeInput();
     this.pickable = enabled;
     this.opacity = enabled ? 1.0 : this._disabledOpacity;
   },
