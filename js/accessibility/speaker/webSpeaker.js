@@ -128,8 +128,8 @@ class WebSpeaker {
    */
   announce( utterance ) {
     let withCancel = true;
-    if ( this.previousUtterance && utterance instanceof SelfVoicingUtterance ) {
-      if ( this.previousUtterance === utterance ) {
+    if ( utterance instanceof SelfVoicingUtterance ) {
+      if ( this.previousUtterance && this.previousUtterance === utterance ) {
         withCancel = utterance.cancelSelf;
       }
       else {
