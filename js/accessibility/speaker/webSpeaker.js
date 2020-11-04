@@ -47,6 +47,9 @@ class WebSpeaker {
     // @public {boolean} - is the WebSpeaker initialized for use? This is prototypal so it isn't always initialized
     this.initialized = false;
 
+    // @private {boolean} - whether or not some initial speech has been made, see initialSpeech()
+    this.madeInitialSpeech = false;
+
     // whether or ot the webSpeaker is enabled - if false, there will be no speech
     this.enabledProperty = new BooleanProperty( true );
 
@@ -201,6 +204,28 @@ class WebSpeaker {
         this.synth.speak( utterance );
       }
     }
+  }
+
+  /**
+   * Speak something initially and synchronously after some user interaction. Browsers require that
+   * speech happen in response to some user interaction, with absolutely no delay. A safari workaround
+   * includes waiting to speak behind a timeout. And announce is used with the utteranceQueue, which does
+   * not speek things instantly. Use this when speech is enabled, then use speak for all other usages.
+   * @public
+   *
+   * @param utterThis
+   */
+  initialSpeech( utterThis ) {
+    assert && assert( !this.madeInitialSpeech, 'this should only be called once, use speak from now on' );
+    this.madeInitialSpeech = true;
+
+    // embidding marks (for i18n) impact the output, strip before speaking
+    const utterance = new SpeechSynthesisUtterance( stripEmbeddingMarks( utterThis ) );
+    utterance.voice = this.voiceProperty.value;
+    utterance.pitch = this.voicePitchProperty.value;
+    utterance.rate = this.voiceRateProperty.value;
+
+    this.synth.speak( utterance );
   }
 
   /**
