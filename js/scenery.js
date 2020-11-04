@@ -429,10 +429,6 @@ extend( scenery, {
         options.font = node.font;
       }
 
-      if ( scenery.HTMLText && node instanceof scenery.HTMLText ) {
-        serialization.type = 'HTMLText';
-      }
-
       if ( scenery.Image && node instanceof scenery.Image ) {
         serialization.type = 'Image';
         [
@@ -565,7 +561,7 @@ extend( scenery, {
   // @public
   deserialize: function( value ) {
     const nodeTypes = [
-      'Node', 'Path', 'Circle', 'Line', 'Rectangle', 'Text', 'HTMLText', 'Image', 'CanvasNode', 'WebGLNode', 'DOM'
+      'Node', 'Path', 'Circle', 'Line', 'Rectangle', 'Text', 'Image', 'CanvasNode', 'WebGLNode', 'DOM'
     ];
 
     if ( value.type === 'Vector2' ) {
@@ -643,9 +639,6 @@ extend( scenery, {
       }
       else if ( value.type === 'Text' ) {
         node = new scenery.Text( '' );
-      }
-      else if ( value.type === 'HTMLText' ) {
-        node = new scenery.HTMLText( '' );
       }
       else if ( value.type === 'Image' ) {
         if ( setup.imageType === 'image' || setup.imageType === 'canvas' ) {

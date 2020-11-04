@@ -1571,27 +1571,6 @@ window.assertions.disableAssertSlow();
       which is accurate and supports dirty regions, but is much slower.
     </p>
 
-    <h3 id="htmlText" class="section">HTMLText</h3>
-
-    <p>
-      HTMLText behaves exactly like <a href="#text">Text</a>, except that it displays the text as unescaped HTML.
-      It will force the DOM renderer (possibly it might also allow the SVG renderer with foreignObject in the future).
-      The <code>"accurate"</code> <a href="#text-boundsMethod">boundsMethod</a> is also disallowed, since using
-      Canvas for HTML bounds would be extremely inaccurate.
-    </p>
-
-    <div id="example-htmlText" class="exampleScene" style="width: 256px; height: 64px; margin: 0 auto;"></div>
-    <script type="text/javascript">
-      docExample( 'example-htmlText', function( scene ) {
-        /*START*/
-        scene.addChild( new scenery.HTMLText( '<strong>bold</strong>, <em>italic</em>', {
-          font: '20px sans-serif',
-          centerX: 128, centerY: 32,
-        } ) );
-        /*END*/
-      } );
-    </script>
-
     <h3 id="dom" class="section">DOM</h3>
 
     <p>
