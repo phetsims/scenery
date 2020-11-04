@@ -17,11 +17,15 @@ class Filter {
     // @public (scenery-internal) {string}
     this.id = 'filter' + globalId++;
 
-    // @public {number}
+    // @public {number} - Can be mutated by subtypes, determines what filter region increases should be used for when
+    // SVG is used for rendering.
     this.filterRegionPercentageIncrease = 0;
   }
 
   /**
+   * Returns the CSS-style filter substring specific to this single filter, e.g. `grayscale(1)`. This should be used for
+   * both DOM elements (https://developer.mozilla.org/en-US/docs/Web/CSS/filter) and when supported, Canvas
+   * (https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter).
    * @public
    * @abstract
    *
@@ -32,6 +36,10 @@ class Filter {
   }
 
   /**
+   * Appends filter sub-elements into the SVG filter element provided. Should include an in=${inName} for all inputs,
+   * and should either output using the resultName (or if not provided, the last element appended should be the output).
+   * This effectively mutates the provided filter object, and will be successively called on all Filters to build an
+   * SVG filter object.
    * @public
    * @abstract
    *
@@ -44,6 +52,9 @@ class Filter {
   }
 
   /**
+   * Given a specific canvas/context wrapper, this method should mutate its state so that the canvas now holds the
+   * filtered content. Usually this would be by using getImageData/putImageData, however redrawing or other operations
+   * are also possible.
    * @public
    * @abstract
    *

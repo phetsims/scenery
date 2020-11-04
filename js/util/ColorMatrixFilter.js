@@ -92,6 +92,10 @@ class ColorMatrixFilter extends Filter {
   }
 
   /**
+   * Appends filter sub-elements into the SVG filter element provided. Should include an in=${inName} for all inputs,
+   * and should either output using the resultName (or if not provided, the last element appended should be the output).
+   * This effectively mutates the provided filter object, and will be successively called on all Filters to build an
+   * SVG filter object.
    * @public
    * @override
    *
@@ -110,6 +114,9 @@ class ColorMatrixFilter extends Filter {
   }
 
   /**
+   * Given a specific canvas/context wrapper, this method should mutate its state so that the canvas now holds the
+   * filtered content. Usually this would be by using getImageData/putImageData, however redrawing or other operations
+   * are also possible.
    * @public
    * @override
    *

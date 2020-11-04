@@ -32,6 +32,9 @@ class GaussianBlur extends Filter {
   }
 
   /**
+   * Returns the CSS-style filter substring specific to this single filter, e.g. `grayscale(1)`. This should be used for
+   * both DOM elements (https://developer.mozilla.org/en-US/docs/Web/CSS/filter) and when supported, Canvas
+   * (https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter).
    * @public
    * @override
    *
@@ -42,6 +45,10 @@ class GaussianBlur extends Filter {
   }
 
   /**
+   * Appends filter sub-elements into the SVG filter element provided. Should include an in=${inName} for all inputs,
+   * and should either output using the resultName (or if not provided, the last element appended should be the output).
+   * This effectively mutates the provided filter object, and will be successively called on all Filters to build an
+   * SVG filter object.
    * @public
    * @override
    *
