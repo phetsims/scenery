@@ -7,6 +7,7 @@
  */
 
 import scenery from '../scenery.js';
+import Features from './Features.js';
 import svgns from './svgns.js';
 
 let globalId = 1;
@@ -44,6 +45,16 @@ class Filter {
 
   /**
    * @public
+   * @abstract
+   *
+   * @param {CanvasContextWrapper} wrapper
+   */
+  applyCanvasFilter( wrapper ) {
+    throw new Error( 'abstract method' );
+  }
+
+  /**
+   * @public
    *
    * @returns {boolean}
    */
@@ -68,7 +79,7 @@ class Filter {
    * @returns {boolean}
    */
   isCanvasCompatible() {
-    return false;
+    return Features.canvasFilter ? this.isDOMCompatible() : false;
   }
 
   /**

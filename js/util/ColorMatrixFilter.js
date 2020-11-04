@@ -8,7 +8,11 @@
 
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import scenery from '../scenery.js';
+import CanvasContextWrapper from './CanvasContextWrapper.js';
 import Filter from './Filter.js';
+import Utils from './Utils.js';
+
+const isImageDataSupported = Utils.supportsImageDataCanvasFilter();
 
 class ColorMatrixFilter extends Filter {
   /**
@@ -109,10 +113,52 @@ class ColorMatrixFilter extends Filter {
    * @public
    * @override
    *
+   * @param {CanvasContextWrapper} wrapper
+   */
+  applyCanvasFilter( wrapper, resultWrapper ) {
+    assert && assert( wrapper instanceof CanvasContextWrapper );
+
+    const width = wrapper.canvas.width;
+    const height = wrapper.canvas.height;
+
+    const imageData = wrapper.context.getImageData( 0, 0, width, height );
+
+    const size = width * height;
+    for ( let i = 0; i < size; i++ ) {
+      const index = i * 4;
+
+      const r = imageData.data[ index + 0 ];
+      const g = imageData.data[ index + 1 ];
+      const b = imageData.data[ index + 2 ];
+      const a = imageData.data[ index + 3 ];
+
+      // Clamp/round should be done by the UInt8Array, we don't do it here for performance reasons.
+      imageData.data[ index + 0 ] = r * this.m00 + g * this.m01 + b * this.m02 + a * this.m03 + this.m04;
+      imageData.data[ index + 1 ] = r * this.m10 + g * this.m11 + b * this.m12 + a * this.m13 + this.m14;
+      imageData.data[ index + 2 ] = r * this.m20 + g * this.m21 + b * this.m22 + a * this.m23 + this.m24;
+      imageData.data[ index + 3 ] = r * this.m30 + g * this.m31 + b * this.m32 + a * this.m33 + this.m34;
+    }
+
+    wrapper.context.putImageData( imageData, 0, 0 );
+  }
+
+  /**
+   * @public
+   * @override
+   *
    * @returns {boolean}
    */
   isSVGCompatible() {
     return true;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {boolean}
+   */
+  isCanvasCompatible() {
+    return super.isCanvasCompatible() || isImageDataSupported;
   }
 }
 

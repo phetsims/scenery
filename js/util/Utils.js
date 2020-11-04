@@ -144,6 +144,27 @@ var Utils = {
     return 1;
   },
 
+  /**
+   * Whether the native Canvas HTML5 api supports the 'filter' attribute (similar to the CSS/SVG filter attribute).
+   * @public
+   *
+   * @returns {boolean}
+   */
+  supportsNativeCanvasFilter() {
+    return !!Features.canvasFilter;
+  },
+
+  /**
+   * Whether we can handle arbitrary filters in Canvas by manipulating the ImageData returned. If we have a backing
+   * store pixel ratio that is non-1, we'll be blurring out things during that operation, which would be unacceptable.
+   * @public
+   *
+   * @returns {boolean}
+   */
+  supportsImageDataCanvasFilter() {
+    return Utils.backingStorePixelRatio( scenery.scratchContext ) === 1;
+  },
+
   /*---------------------------------------------------------------------------*
    * Text bounds utilities (TODO: separate file)
    *---------------------------------------------------------------------------*/

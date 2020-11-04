@@ -104,9 +104,9 @@ class Instance {
     this.visibilityDirty = true; // entire subtree of visibility will need to be updated
     this.childVisibilityDirty = true; // an ancestor needs its visibility updated
 
-    // @public {Object} - Maps another instance's `instance.id` {number} => branch index {number} (first index where
-    // the two trails are different). This effectively operates as a cache (since it's more expensive to compute the
-    // value than it is to look up the value).
+    // @private {Object.<instanceId:number,number>} - Maps another instance's `instance.id` {number} => branch index
+    // {number} (first index where the two trails are different). This effectively operates as a cache (since it's more
+    // expensive to compute the value than it is to look up the value).
     // It is also "bidirectional", such that if we add instance A's branch index to this map, we will also add the
     // same value to instance A's map (referencing this instance). In order to clean up and prevent leaks, the
     // instance references are provided in this.branchIndexReferences (on both ends), so that when one instance is
@@ -1729,6 +1729,8 @@ class Instance {
 
   /**
    * @public
+   *
+   * NOTE: used in CanvasBlock internals, performance-critical.
    *
    * @param {Instance} instance
    * @returns {number}

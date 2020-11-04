@@ -96,6 +96,7 @@ Features.createImageDataHD = detectPrefix( ctx, 'createImageDataHD' );
 Features.getImageDataHD = detectPrefix( ctx, 'getImageDataHD' );
 Features.putImageDataHD = detectPrefix( ctx, 'putImageDataHD' );
 Features.currentTransform = detectPrefix( ctx, 'currentTransform' );
+Features.canvasFilter = detectPrefix( ctx, 'filter' );
 
 const span = document.createElement( 'span' );
 const div = document.createElement( 'div' );
@@ -118,6 +119,7 @@ Features.fontSmoothing = detectPrefix( div.style, 'fontSmoothing' );
 
 Features.requestAnimationFrame = detectPrefix( window, 'requestAnimationFrame' );
 Features.cancelAnimationFrame = detectPrefix( window, 'cancelAnimationFrame' );
+
 
 // e.g. Features.setStyle( domElement, Features.transform, '...' ), and doesn't set it if no 'transform' attribute (prefixed or no) is found
 Features.setStyle = ( domElement, optionalKey, value ) => {
