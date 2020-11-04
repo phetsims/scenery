@@ -987,7 +987,7 @@ inherit( PhetioObject, Node, {
    * @returns {Node} - Returns 'this' reference, for chaining
    */
   moveToFront: function() {
-    _.each( this._parents.slice(), parent => parent.moveChildToFront( self ) );
+    _.each( this._parents.slice(), parent => parent.moveChildToFront( this ) );
 
     return this; // allow chaining
   },
