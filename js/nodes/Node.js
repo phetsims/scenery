@@ -179,6 +179,7 @@ import Pen from '../input/Pen.js';
 import Touch from '../input/Touch.js';
 import scenery from '../scenery.js';
 import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
+import Features from '../util/Features.js';
 import Filter from '../util/Filter.js';
 import Picker from '../util/Picker.js';
 import RendererSummary from '../util/RendererSummary.js';
@@ -4306,7 +4307,7 @@ inherit( PhetioObject, Node, {
       const child = this._children[ i ];
 
       if ( child.isVisible() ) {
-        const requiresScratchCanvas = child.opacity !== 1 || child.clipArea;
+        const requiresScratchCanvas = child.opacity !== 1 || child.clipArea || child._filters.length;
 
         wrapper.context.save();
         matrix.multiplyMatrix( child._transform.getMatrix() );
@@ -4330,6 +4331,17 @@ inherit( PhetioObject, Node, {
           }
           wrapper.context.setTransform( 1, 0, 0, 1, 0, 0 ); // identity
           wrapper.context.globalAlpha = child.opacity;
+
+          if ( child._filters.length ) {
+            // Filters shouldn't be too often, so less concerned about the GC here (and this is so much easier to read).
+            if ( Features.canvasFilter && _.every( child._filters, filter => filter.isDOMCompatible() ) ) {
+              wrapper.context.filter = child._filters.map( filter => filter.getCSSFilterString() ).join( ' ' );
+            }
+            else {
+              child._filters.forEach( filter => filter.applyCanvasFilter( wrapper ) );
+            }
+          }
+
           wrapper.context.drawImage( canvas, 0, 0 );
           wrapper.context.restore();
         }
