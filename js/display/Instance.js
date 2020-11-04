@@ -1989,8 +1989,6 @@ class Instance {
 scenery.register( 'Instance', Instance );
 
 // object pooling
-Poolable.mixInto( Instance, {
-  initialize: Instance.prototype.initialize
-} );
+Poolable.mixInto( Instance );
 
 export default Instance;

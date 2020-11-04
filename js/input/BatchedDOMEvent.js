@@ -120,8 +120,6 @@ BatchedDOMEvent.TOUCH_TYPE = 3;
 BatchedDOMEvent.MOUSE_TYPE = 4;
 BatchedDOMEvent.WHEEL_TYPE = 5;
 
-Poolable.mixInto( BatchedDOMEvent, {
-  initialize: BatchedDOMEvent.prototype.initialize
-} );
+Poolable.mixInto( BatchedDOMEvent );
 
 export default BatchedDOMEvent;

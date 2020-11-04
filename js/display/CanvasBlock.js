@@ -608,8 +608,6 @@ class CanvasBlock extends FittedBlock {
 
 scenery.register( 'CanvasBlock', CanvasBlock );
 
-Poolable.mixInto( CanvasBlock, {
-  initialize: CanvasBlock.prototype.initialize
-} );
+Poolable.mixInto( CanvasBlock );
 
 export default CanvasBlock;

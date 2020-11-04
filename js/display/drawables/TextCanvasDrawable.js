@@ -70,8 +70,6 @@ class TextCanvasDrawable extends PaintableStatelessDrawable( CanvasSelfDrawable 
 
 scenery.register( 'TextCanvasDrawable', TextCanvasDrawable );
 
-Poolable.mixInto( TextCanvasDrawable, {
-  initialize: TextCanvasDrawable.prototype.initialize
-} );
+Poolable.mixInto( TextCanvasDrawable );
 
 export default TextCanvasDrawable;

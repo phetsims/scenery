@@ -193,8 +193,6 @@ class SVGGradientStop {
 
 scenery.register( 'SVGGradientStop', SVGGradientStop );
 
-Poolable.mixInto( SVGGradientStop, {
-  initialize: SVGGradientStop.prototype.initialize
-} );
+Poolable.mixInto( SVGGradientStop );
 
 export default SVGGradientStop;

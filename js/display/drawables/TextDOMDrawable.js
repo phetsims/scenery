@@ -118,8 +118,6 @@ class TextDOMDrawable extends TextStatefulDrawable( DOMSelfDrawable ) {
 
 scenery.register( 'TextDOMDrawable', TextDOMDrawable );
 
-Poolable.mixInto( TextDOMDrawable, {
-  initialize: TextDOMDrawable.prototype.initialize
-} );
+Poolable.mixInto( TextDOMDrawable );
 
 export default TextDOMDrawable;

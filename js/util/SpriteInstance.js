@@ -106,8 +106,7 @@ class SpriteInstance {
 SpriteInstance.TransformType = TransformType;
 
 Poolable.mixInto( SpriteInstance, {
-  maxSize: 1000,
-  initialize: SpriteInstance.prototype.initialize
+  maxSize: 1000
 } );
 
 scenery.register( 'SpriteInstance', SpriteInstance );

@@ -100,8 +100,6 @@ class TextSVGDrawable extends TextStatefulDrawable( SVGSelfDrawable ) {
 
 scenery.register( 'TextSVGDrawable', TextSVGDrawable );
 
-Poolable.mixInto( TextSVGDrawable, {
-  initialize: TextSVGDrawable.prototype.initialize
-} );
+Poolable.mixInto( TextSVGDrawable );
 
 export default TextSVGDrawable;

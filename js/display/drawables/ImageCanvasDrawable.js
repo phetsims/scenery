@@ -77,8 +77,6 @@ class ImageCanvasDrawable extends CanvasSelfDrawable {
 
 scenery.register( 'ImageCanvasDrawable', ImageCanvasDrawable );
 
-Poolable.mixInto( ImageCanvasDrawable, {
-  initialize: ImageCanvasDrawable.prototype.initialize
-} );
+Poolable.mixInto( ImageCanvasDrawable );
 
 export default ImageCanvasDrawable;

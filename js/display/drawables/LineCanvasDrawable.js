@@ -42,8 +42,6 @@ class LineCanvasDrawable extends LineStatelessDrawable( CanvasSelfDrawable ) {
 
 scenery.register( 'LineCanvasDrawable', LineCanvasDrawable );
 
-Poolable.mixInto( LineCanvasDrawable, {
-  initialize: LineCanvasDrawable.prototype.initialize
-} );
+Poolable.mixInto( LineCanvasDrawable );
 
 export default LineCanvasDrawable;

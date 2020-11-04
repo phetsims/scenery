@@ -66,8 +66,6 @@ class DOMDrawable extends DOMSelfDrawable {
 
 scenery.register( 'DOMDrawable', DOMDrawable );
 
-Poolable.mixInto( DOMDrawable, {
-  initialize: DOMDrawable.prototype.initialize
-} );
+Poolable.mixInto( DOMDrawable );
 
 export default DOMDrawable;

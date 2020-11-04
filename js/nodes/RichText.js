@@ -1683,9 +1683,7 @@ class RichTextElement extends Node {
   }
 }
 
-Poolable.mixInto( RichTextElement, {
-  initialize: RichTextElement.prototype.initialize
-} );
+Poolable.mixInto( RichTextElement );
 
 class RichTextLeaf extends Text {
   /**
@@ -1779,9 +1777,7 @@ class RichTextLeaf extends Text {
   }
 }
 
-Poolable.mixInto( RichTextLeaf, {
-  initialize: RichTextLeaf.prototype.initialize
-} );
+Poolable.mixInto( RichTextLeaf );
 
 class RichTextLink extends Node {
   /**
@@ -1881,9 +1877,7 @@ class RichTextLink extends Node {
   }
 }
 
-Poolable.mixInto( RichTextLink, {
-  initialize: RichTextLink.prototype.initialize
-} );
+Poolable.mixInto( RichTextLink );
 
 RichText.RichTextIO = new IOType( 'RichTextIO', {
   valueType: RichText,

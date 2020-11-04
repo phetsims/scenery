@@ -197,8 +197,6 @@ class ChangeInterval {
 
 scenery.register( 'ChangeInterval', ChangeInterval );
 
-Poolable.mixInto( ChangeInterval, {
-  initialize: ChangeInterval.prototype.initialize
-} );
+Poolable.mixInto( ChangeInterval );
 
 export default ChangeInterval;

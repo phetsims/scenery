@@ -51,8 +51,6 @@ class CircleSVGDrawable extends CircleStatefulDrawable( SVGSelfDrawable ) {
 
 scenery.register( 'CircleSVGDrawable', CircleSVGDrawable );
 
-Poolable.mixInto( CircleSVGDrawable, {
-  initialize: CircleSVGDrawable.prototype.initialize
-} );
+Poolable.mixInto( CircleSVGDrawable );
 
 export default CircleSVGDrawable;

@@ -442,8 +442,6 @@ class SVGBlock extends FittedBlock {
 
 scenery.register( 'SVGBlock', SVGBlock );
 
-Poolable.mixInto( SVGBlock, {
-  initialize: SVGBlock.prototype.initialize
-} );
+Poolable.mixInto( SVGBlock );
 
 export default SVGBlock;

@@ -55,8 +55,6 @@ class CanvasNodeDrawable extends CanvasSelfDrawable {
 
 scenery.register( 'CanvasNodeDrawable', CanvasNodeDrawable );
 
-Poolable.mixInto( CanvasNodeDrawable, {
-  initialize: CanvasNodeDrawable.prototype.initialize
-} );
+Poolable.mixInto( CanvasNodeDrawable );
 
 export default CanvasNodeDrawable;

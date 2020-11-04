@@ -598,8 +598,6 @@ class SVGGroup {
 
 scenery.register( 'SVGGroup', SVGGroup );
 
-Poolable.mixInto( SVGGroup, {
-  initialize: SVGGroup.prototype.initialize
-} );
+Poolable.mixInto( SVGGroup );
 
 export default SVGGroup;

@@ -113,8 +113,6 @@ class DOMBlock extends Block {
 
 scenery.register( 'DOMBlock', DOMBlock );
 
-Poolable.mixInto( DOMBlock, {
-  initialize: DOMBlock.prototype.initialize
-} );
+Poolable.mixInto( DOMBlock );
 
 export default DOMBlock;

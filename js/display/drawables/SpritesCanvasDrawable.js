@@ -100,8 +100,6 @@ class SpritesCanvasDrawable extends CanvasSelfDrawable {
 
 scenery.register( 'SpritesCanvasDrawable', SpritesCanvasDrawable );
 
-Poolable.mixInto( SpritesCanvasDrawable, {
-  initialize: SpritesCanvasDrawable.prototype.initialize
-} );
+Poolable.mixInto( SpritesCanvasDrawable );
 
 export default SpritesCanvasDrawable;

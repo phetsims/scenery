@@ -161,8 +161,6 @@ class CircleDOMDrawable extends CircleStatefulDrawable( DOMSelfDrawable ) {
 
 scenery.register( 'CircleDOMDrawable', CircleDOMDrawable );
 
-Poolable.mixInto( CircleDOMDrawable, {
-  initialize: CircleDOMDrawable.prototype.initialize
-} );
+Poolable.mixInto( CircleDOMDrawable );
 
 export default CircleDOMDrawable;

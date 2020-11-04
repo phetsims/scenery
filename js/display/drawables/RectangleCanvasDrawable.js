@@ -168,8 +168,6 @@ class RectangleCanvasDrawable extends PaintableStatelessDrawable( CanvasSelfDraw
 
 scenery.register( 'RectangleCanvasDrawable', RectangleCanvasDrawable );
 
-Poolable.mixInto( RectangleCanvasDrawable, {
-  initialize: RectangleCanvasDrawable.prototype.initialize
-} );
+Poolable.mixInto( RectangleCanvasDrawable );
 
 export default RectangleCanvasDrawable;

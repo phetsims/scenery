@@ -547,8 +547,6 @@ class BackboneDrawable extends Drawable {
 
 scenery.register( 'BackboneDrawable', BackboneDrawable );
 
-Poolable.mixInto( BackboneDrawable, {
-  initialize: BackboneDrawable.prototype.initialize
-} );
+Poolable.mixInto( BackboneDrawable );
 
 export default BackboneDrawable;

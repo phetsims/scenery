@@ -89,8 +89,6 @@ class SVGPattern {
 
 scenery.register( 'SVGPattern', SVGPattern );
 
-Poolable.mixInto( SVGPattern, {
-  initialize: SVGPattern.prototype.initialize
-} );
+Poolable.mixInto( SVGPattern );
 
 export default SVGPattern;

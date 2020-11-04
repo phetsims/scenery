@@ -134,8 +134,6 @@ WebGLNodeDrawable.prototype.webglRenderer = Renderer.webglCustom;
 
 scenery.register( 'WebGLNodeDrawable', WebGLNodeDrawable );
 
-Poolable.mixInto( WebGLNodeDrawable, {
-  initialize: WebGLNodeDrawable.prototype.initialize
-} );
+Poolable.mixInto( WebGLNodeDrawable );
 
 export default WebGLNodeDrawable;

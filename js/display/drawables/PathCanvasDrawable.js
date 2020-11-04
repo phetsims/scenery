@@ -57,8 +57,6 @@ class PathCanvasDrawable extends PaintableStatelessDrawable( CanvasSelfDrawable 
 
 scenery.register( 'PathCanvasDrawable', PathCanvasDrawable );
 
-Poolable.mixInto( PathCanvasDrawable, {
-  initialize: PathCanvasDrawable.prototype.initialize
-} );
+Poolable.mixInto( PathCanvasDrawable );
 
 export default PathCanvasDrawable;

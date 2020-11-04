@@ -1022,8 +1022,6 @@ class TexturedTrianglesProcessor extends Processor {
   }
 }
 
-Poolable.mixInto( WebGLBlock, {
-  initialize: WebGLBlock.prototype.initialize
-} );
+Poolable.mixInto( WebGLBlock );
 
 export default WebGLBlock;

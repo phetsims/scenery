@@ -63,8 +63,6 @@ class SVGLinearGradient extends SVGGradient {
 
 scenery.register( 'SVGLinearGradient', SVGLinearGradient );
 
-Poolable.mixInto( SVGLinearGradient, {
-  initialize: SVGLinearGradient.prototype.initialize
-} );
+Poolable.mixInto( SVGLinearGradient );
 
 export default SVGLinearGradient;

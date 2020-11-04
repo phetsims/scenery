@@ -64,8 +64,6 @@ class CircleCanvasDrawable extends PaintableStatelessDrawable( CanvasSelfDrawabl
 
 scenery.register( 'CircleCanvasDrawable', CircleCanvasDrawable );
 
-Poolable.mixInto( CircleCanvasDrawable, {
-  initialize: CircleCanvasDrawable.prototype.initialize
-} );
+Poolable.mixInto( CircleCanvasDrawable );
 
 export default CircleCanvasDrawable;

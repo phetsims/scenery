@@ -202,8 +202,6 @@ class ImageSVGDrawable extends ImageStatefulDrawable( SVGSelfDrawable ) {
 
 scenery.register( 'ImageSVGDrawable', ImageSVGDrawable );
 
-Poolable.mixInto( ImageSVGDrawable, {
-  initialize: ImageSVGDrawable.prototype.initialize
-} );
+Poolable.mixInto( ImageSVGDrawable );
 
 export default ImageSVGDrawable;

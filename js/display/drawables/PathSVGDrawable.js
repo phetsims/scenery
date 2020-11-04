@@ -60,8 +60,6 @@ class PathSVGDrawable extends PathStatefulDrawable( SVGSelfDrawable ) {
 
 scenery.register( 'PathSVGDrawable', PathSVGDrawable );
 
-Poolable.mixInto( PathSVGDrawable, {
-  initialize: PathSVGDrawable.prototype.initialize
-} );
+Poolable.mixInto( PathSVGDrawable );
 
 export default PathSVGDrawable;

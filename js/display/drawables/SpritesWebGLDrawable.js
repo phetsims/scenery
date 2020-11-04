@@ -341,8 +341,6 @@ SpritesWebGLDrawable.prototype.webglRenderer = Renderer.webglCustom;
 
 scenery.register( 'SpritesWebGLDrawable', SpritesWebGLDrawable );
 
-Poolable.mixInto( SpritesWebGLDrawable, {
-  initialize: SpritesWebGLDrawable.prototype.initialize
-} );
+Poolable.mixInto( SpritesWebGLDrawable );
 
 export default SpritesWebGLDrawable;

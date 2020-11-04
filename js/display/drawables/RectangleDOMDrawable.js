@@ -166,8 +166,6 @@ class RectangleDOMDrawable extends RectangleStatefulDrawable( DOMSelfDrawable ) 
 
 scenery.register( 'RectangleDOMDrawable', RectangleDOMDrawable );
 
-Poolable.mixInto( RectangleDOMDrawable, {
-  initialize: RectangleDOMDrawable.prototype.initialize
-} );
+Poolable.mixInto( RectangleDOMDrawable );
 
 export default RectangleDOMDrawable;

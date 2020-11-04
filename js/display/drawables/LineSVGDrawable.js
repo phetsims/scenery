@@ -61,8 +61,6 @@ class LineSVGDrawable extends LineStatefulDrawable( SVGSelfDrawable ) {
 
 scenery.register( 'LineSVGDrawable', LineSVGDrawable );
 
-Poolable.mixInto( LineSVGDrawable, {
-  initialize: LineSVGDrawable.prototype.initialize
-} );
+Poolable.mixInto( LineSVGDrawable );
 
 export default LineSVGDrawable;

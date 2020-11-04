@@ -236,8 +236,6 @@ ImageWebGLDrawable.prototype.webglRenderer = Renderer.webglTexturedTriangles;
 
 scenery.register( 'ImageWebGLDrawable', ImageWebGLDrawable );
 
-Poolable.mixInto( ImageWebGLDrawable, {
-  initialize: ImageWebGLDrawable.prototype.initialize
-} );
+Poolable.mixInto( ImageWebGLDrawable );
 
 export default ImageWebGLDrawable;

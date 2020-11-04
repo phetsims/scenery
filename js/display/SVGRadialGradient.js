@@ -53,8 +53,6 @@ class SVGRadialGradient extends SVGGradient {
 
 scenery.register( 'SVGRadialGradient', SVGRadialGradient );
 
-Poolable.mixInto( SVGRadialGradient, {
-  initialize: SVGRadialGradient.prototype.initialize
-} );
+Poolable.mixInto( SVGRadialGradient );
 
 export default SVGRadialGradient;

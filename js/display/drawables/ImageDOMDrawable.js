@@ -106,8 +106,6 @@ class ImageDOMDrawable extends ImageStatefulDrawable( DOMSelfDrawable ) {
 
 scenery.register( 'ImageDOMDrawable', ImageDOMDrawable );
 
-Poolable.mixInto( ImageDOMDrawable, {
-  initialize: ImageDOMDrawable.prototype.initialize
-} );
+Poolable.mixInto( ImageDOMDrawable );
 
 export default ImageDOMDrawable;

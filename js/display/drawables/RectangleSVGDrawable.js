@@ -82,8 +82,6 @@ class RectangleSVGDrawable extends RectangleStatefulDrawable( SVGSelfDrawable ) 
 
 scenery.register( 'RectangleSVGDrawable', RectangleSVGDrawable );
 
-Poolable.mixInto( RectangleSVGDrawable, {
-  initialize: RectangleSVGDrawable.prototype.initialize
-} );
+Poolable.mixInto( RectangleSVGDrawable );
 
 export default RectangleSVGDrawable;

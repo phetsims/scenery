@@ -148,8 +148,6 @@ RectangleWebGLDrawable.prototype.webglRenderer = Renderer.webglVertexColorPolygo
 
 scenery.register( 'RectangleWebGLDrawable', RectangleWebGLDrawable );
 
-Poolable.mixInto( RectangleWebGLDrawable, {
-  initialize: RectangleWebGLDrawable.prototype.initialize
-} );
+Poolable.mixInto( RectangleWebGLDrawable );
 
 export default RectangleWebGLDrawable;
