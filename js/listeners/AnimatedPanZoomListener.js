@@ -162,7 +162,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
       const pointerHasIntent = this.hasDragIntent( this._pdomPointerWithIntent );
       if ( pointerHasIntent && this.keyStateTracker.movementKeysDown && Display.focusProperty.value !== null ) {
         const focusedNode = Display.focusedNode;
-        if ( this._panBounds.containsBounds( focusedNode.globalBounds ) ) {
+        if ( !this._panBounds.containsBounds( focusedNode.globalBounds ) ) {
           this.panToNode( focusedNode );
         }
       }
