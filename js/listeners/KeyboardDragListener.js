@@ -303,6 +303,14 @@ class KeyboardDragListener {
   keydown( event ) {
     const domEvent = event.domEvent;
 
+    // If the meta key is down (command key/windows key) prevent movement and do not preventDefault.
+    // Meta key + arrow key is a command to go back a page, and we need to allow that. But also, macOS
+    // fails to provide keyup events once the meta key is pressed, see
+    // http://web.archive.org/web/20160304022453/http://bitspushedaround.com/on-a-few-things-you-may-not-know-about-the-hellish-command-key-and-javascript-events/
+    if ( domEvent.metaKey ) {
+      return;
+    }
+
     // required to work with Safari and VoiceOver, otherwise arrow keys will move virtual cursor, see https://github.com/phetsims/balloons-and-static-electricity/issues/205#issuecomment-263428003
     // prevent default for WASD too, see https://github.com/phetsims/friction/issues/167
     if ( KeyboardUtils.isArrowKey( domEvent.keyCode ) || KeyboardUtils.isWASDKey( domEvent.keyCode ) ) {
