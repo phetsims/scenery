@@ -103,7 +103,7 @@ class SVGGroup {
     this.clipDefinition = this.clipDefinition !== undefined ? this.clipDefinition : null; // persists across disposal
     this.clipPath = this.clipPath !== undefined ? this.clipPath : null; // persists across disposal
     this.opacityChangeListener = this.opacityChangeListener || this.onOpacityChange.bind( this );
-    this.filterChangeListener = this.opacityChangeListener || this.onFilterChange.bind( this );
+    this.filterChangeListener = this.filterChangeListener || this.onFilterChange.bind( this );
     this.visibilityDirtyListener = this.visibilityDirtyListener || this.onVisibleChange.bind( this );
     this.clipDirtyListener = this.clipDirtyListener || this.onClipChange.bind( this );
     this.node.visibleProperty.lazyLink( this.visibilityDirtyListener );

@@ -57,5 +57,8 @@ class Grayscale extends ColorMatrixFilter {
   }
 }
 
+// @public {Grayscale}
+Grayscale.FULL = new Grayscale( 1 );
+
 scenery.register( 'Grayscale', Grayscale );
 export default Grayscale;
