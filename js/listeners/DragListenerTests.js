@@ -13,16 +13,16 @@ import Transform3 from '../../../dot/js/Transform3.js';
 import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector2Property from '../../../dot/js/Vector2Property.js';
-import phetioAPITest from '../../../tandem/js/phetioAPITest.js';
 import Tandem from '../../../tandem/js/Tandem.js';
+import phetioAPITest from '../../../tandem/js/phetioAPITest.js';
 import DragListener from './DragListener.js';
 import DragListenerAPI from './DragListenerAPI.js';
 import ListenerTestUtils from './ListenerTestUtils.js';
 
 QUnit.module( 'DragListener' );
 
-QUnit.test( 'translateNode', function( assert ) {
-  ListenerTestUtils.simpleRectangleTest( function( display, rect, node ) {
+QUnit.test( 'translateNode', assert => {
+  ListenerTestUtils.simpleRectangleTest( ( display, rect, node ) => {
     const listener = new DragListener( {
       tandem: Tandem.GENERAL.createTandem( 'myListener' ),
       translateNode: true
@@ -39,8 +39,8 @@ QUnit.test( 'translateNode', function( assert ) {
   } );
 } );
 
-QUnit.test( 'translateNode with applyOffset:false', function( assert ) {
-  ListenerTestUtils.simpleRectangleTest( function( display, rect, node ) {
+QUnit.test( 'translateNode with applyOffset:false', assert => {
+  ListenerTestUtils.simpleRectangleTest( ( display, rect, node ) => {
     const listener = new DragListener( {
       tandem: Tandem.GENERAL.createTandem( 'myListener' ),
       translateNode: true,
@@ -58,8 +58,8 @@ QUnit.test( 'translateNode with applyOffset:false', function( assert ) {
   } );
 } );
 
-QUnit.test( 'translateNode with trackAncestors', function( assert ) {
-  ListenerTestUtils.simpleRectangleTest( function( display, rect, node ) {
+QUnit.test( 'translateNode with trackAncestors', assert => {
+  ListenerTestUtils.simpleRectangleTest( ( display, rect, node ) => {
     const listener = new DragListener( {
       tandem: Tandem.GENERAL.createTandem( 'myListener' ),
       translateNode: true,
@@ -78,8 +78,8 @@ QUnit.test( 'translateNode with trackAncestors', function( assert ) {
   } );
 } );
 
-QUnit.test( 'positionProperty with hooks', function( assert ) {
-  ListenerTestUtils.simpleRectangleTest( function( display, rect, node ) {
+QUnit.test( 'positionProperty with hooks', assert => {
+  ListenerTestUtils.simpleRectangleTest( ( display, rect, node ) => {
     const positionProperty = new Vector2Property( Vector2.ZERO );
     positionProperty.linkAttribute( rect, 'translation' );
 
@@ -99,13 +99,13 @@ QUnit.test( 'positionProperty with hooks', function( assert ) {
   } );
 } );
 
-QUnit.test( 'positionProperty with hooks and transform', function( assert ) {
-  ListenerTestUtils.simpleRectangleTest( function( display, rect, node ) {
+QUnit.test( 'positionProperty with hooks and transform', assert => {
+  ListenerTestUtils.simpleRectangleTest( ( display, rect, node ) => {
     const positionProperty = new Vector2Property( Vector2.ZERO );
     const transform = new Transform3( Matrix3.translation( 5, 3 ).timesMatrix( Matrix3.scale( 2 ) ).timesMatrix( Matrix3.rotation2( Math.PI / 4 ) ) );
 
     // Starts at 5,3
-    positionProperty.link( function( position ) {
+    positionProperty.link( position => {
       rect.translation = transform.transformPosition2( position );
     } );
 
@@ -126,11 +126,11 @@ QUnit.test( 'positionProperty with hooks and transform', function( assert ) {
   } );
 } );
 
-QUnit.test( 'positionProperty with dragBounds', function( assert ) {
-  ListenerTestUtils.simpleRectangleTest( function( display, rect, node ) {
+QUnit.test( 'positionProperty with dragBounds', assert => {
+  ListenerTestUtils.simpleRectangleTest( ( display, rect, node ) => {
     const positionProperty = new Vector2Property( Vector2.ZERO );
 
-    positionProperty.link( function( position ) {
+    positionProperty.link( position => {
       rect.translation = position;
     } );
 
@@ -151,6 +151,6 @@ QUnit.test( 'positionProperty with dragBounds', function( assert ) {
   } );
 } );
 
-QUnit.test( 'PhET-iO API Validation', function( assert ) {
+QUnit.test( 'PhET-iO API Validation', assert => {
   phetioAPITest( assert, new DragListenerAPI(), 'dragListener', tandem => new DragListener( { tandem: tandem } ) );
 } );

@@ -1,30 +1,28 @@
 // Copyright 2013-2020, University of Colorado Boulder
 
 /**
- * TODO docs
+ * Supertype for WebGL drawables that display a specific Node.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  * @author Sam Reid
  */
 
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 import SelfDrawable from './SelfDrawable.js';
 
-function WebGLSelfDrawable( renderer, instance ) {
-  this.initializeWebGLSelfDrawable( renderer, instance );
+class WebGLSelfDrawable extends SelfDrawable {
+  /**
+   * @public
+   * @override
+   *
+   * @param {number} renderer
+   * @param {Instance} instance
+   * @returns {WebGLSelfDrawable}
+   */
+  initialize( renderer, instance ) {
+    super.initialize( renderer, instance );
 
-  throw new Error( 'Should use initialization and pooling' );
-}
-
-scenery.register( 'WebGLSelfDrawable', WebGLSelfDrawable );
-
-inherit( SelfDrawable, WebGLSelfDrawable, {
-  initializeWebGLSelfDrawable: function( renderer, instance ) {
-    // super initialization
-    this.initializeSelfDrawable( renderer, instance );
-
-    // this is the same across lifecycles
+    // @private {function} - this is the same across lifecycles
     this.transformListener = this.transformListener || this.markTransformDirty.bind( this );
 
     // when our relative transform changes, notify us in the pre-repaint phase
@@ -34,26 +32,39 @@ inherit( SelfDrawable, WebGLSelfDrawable, {
     instance.relativeTransform.addPrecompute();
 
     return this;
-  },
+  }
 
-  markTransformDirty: function() {
+  /**
+   * @public
+   */
+  markTransformDirty() {
     this.markDirty();
-  },
+  }
 
-  // @override
-  updateSelfVisibility: function() {
-    SelfDrawable.prototype.updateSelfVisibility.call( this );
+  /**
+   * @public
+   * @override
+   */
+  updateSelfVisibility() {
+    super.updateSelfVisibility();
 
     // mark us as dirty when our self visibility changes
     this.markDirty();
-  },
+  }
 
-  dispose: function() {
+  /**
+   * Releases references
+   * @public
+   * @override
+   */
+  dispose() {
     this.instance.relativeTransform.removeListener( this.transformListener );
     this.instance.relativeTransform.removePrecompute();
 
-    SelfDrawable.prototype.dispose.call( this );
+    super.dispose();
   }
-} );
+}
+
+scenery.register( 'WebGLSelfDrawable', WebGLSelfDrawable );
 
 export default WebGLSelfDrawable;

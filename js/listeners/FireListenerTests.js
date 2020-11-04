@@ -12,12 +12,12 @@ import ListenerTestUtils from './ListenerTestUtils.js';
 
 QUnit.module( 'FireListener' );
 
-QUnit.test( 'Basics', function( assert ) {
-  ListenerTestUtils.simpleRectangleTest( function( display, rect, node ) {
+QUnit.test( 'Basics', assert => {
+  ListenerTestUtils.simpleRectangleTest( ( display, rect, node ) => {
     let fireCount = 0;
     const listener = new FireListener( {
       tandem: Tandem.GENERAL.createTandem( 'myListener' ),
-      fire: function() {
+      fire: () => {
         fireCount++;
       }
     } );

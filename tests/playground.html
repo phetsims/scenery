@@ -356,9 +356,22 @@ an UI and Display made for visual testing and debugging.
 
   window.displayTest = function() {
     setTimeout( function() {
-      window.r = new scenery.Rectangle( 0, 0, 100, 50 );
-      r.rectWidth = 200;
-      console.log( r.boundsProperty.value );
+      window.n = new scenery.Node( {
+        children: [
+          new scenery.Rectangle( 0, 0, 100, 50, { fill: 'rgb(200,0,0)' } ),
+          new scenery.Rectangle( 0, 50, 100, 50, { fill: 'rgb(0,200,0)', filters: [ new scenery.Grayscale( 1 ) ] } ),
+          new scenery.Rectangle( 0, 100, 100, 50, { fill: 'rgb(0,0,200)' } )
+        ],
+        // filters: [
+        //   new scenery.Grayscale( 1 ),
+        //   // new scenery.Contrast( 2 ),
+        //   // new scenery.GaussianBlur( 3, 20 )
+        // ],
+        renderer: 'canvas',
+        preventFit: true
+      } );
+      scene.addChild( n );
+      display.updateDisplay();
     }, 400 );
   };
 

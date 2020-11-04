@@ -21,281 +21,277 @@
 
 import stepTimer from '../../../axon/js/stepTimer.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import scenery from '../scenery.js';
 
-/**
- * @constructor
- * @param {Object} [options]
- */
-function KeyboardDragListener( options ) {
+class KeyboardDragListener {
+  /**
+   * @param {Object} [options]
+   */
+  constructor( options ) {
 
-  options = merge( {
+    options = merge( {
 
-    // {number|null} - While direction key is down, this will be the 1D velocity for movement. The position will
-    // change this much in view coordinates every second.
-    dragVelocity: 600,
+      // {number|null} - While direction key is down, this will be the 1D velocity for movement. The position will
+      // change this much in view coordinates every second.
+      dragVelocity: 600,
 
-    // {number|null} - If shift key down while pressing direction key, this will be the 1D delta for movement in view
-    // coordinates every second.
-    shiftDragVelocity: 300,
+      // {number|null} - If shift key down while pressing direction key, this will be the 1D delta for movement in view
+      // coordinates every second.
+      shiftDragVelocity: 300,
 
-    // {Property.<Vector2>|null} - if provided, it will be synchronized with the drag position in the model
-    // frame, applying provided transforms as needed. Most useful when used with transform option
-    positionProperty: null,
+      // {Property.<Vector2>|null} - if provided, it will be synchronized with the drag position in the model
+      // frame, applying provided transforms as needed. Most useful when used with transform option
+      positionProperty: null,
 
-    // {Transform3|null} - if provided, this will be the conversion between the view and model coordinate frames,
-    // Usually most useful when paired with the positionProperty
-    transform: null,
+      // {Transform3|null} - if provided, this will be the conversion between the view and model coordinate frames,
+      // Usually most useful when paired with the positionProperty
+      transform: null,
 
-    // {Bounds2|null} - if provided, the model position will be constrained to be inside these bounds
-    dragBounds: null,
+      // {Bounds2|null} - if provided, the model position will be constrained to be inside these bounds
+      dragBounds: null,
 
-    // {Function|null} - Called as start( event: {SceneryEvent} ) when keyboard drag is started
-    start: null,
+      // {Function|null} - Called as start( event: {SceneryEvent} ) when keyboard drag is started
+      start: null,
 
-    // {Function|null} - Called as drag( viewDelta: {Vector2} ) during drag
-    drag: null,
+      // {Function|null} - Called as drag( viewDelta: {Vector2} ) during drag
+      drag: null,
 
-    // {Function|null} - Called as end( event: {SceneryEvent} ) when keyboard drag ends
-    end: null, // called at the end of the dragging interaction
+      // {Function|null} - Called as end( event: {SceneryEvent} ) when keyboard drag ends
+      end: null, // called at the end of the dragging interaction
 
-    // {number} - arrow keys must be pressed this long to begin movement set on moveOnHoldInterval, in ms
-    moveOnHoldDelay: 0,
+      // {number} - arrow keys must be pressed this long to begin movement set on moveOnHoldInterval, in ms
+      moveOnHoldDelay: 0,
 
-    // {number} - Time interval at which the object will change position while the arrow key is held down, in ms
-    moveOnHoldInterval: 0,
+      // {number} - Time interval at which the object will change position while the arrow key is held down, in ms
+      moveOnHoldInterval: 0,
 
-    // {number} - On initial key press, how much the position Property will change in view coordinates, generally
-    // only needed when there is a moveOnHoldDelay or moveOnHoldInterval. In ms.
-    downDelta: 0,
+      // {number} - On initial key press, how much the position Property will change in view coordinates, generally
+      // only needed when there is a moveOnHoldDelay or moveOnHoldInterval. In ms.
+      downDelta: 0,
 
-    // {number} - The amount PositionProperty changes in view coordinates, generally only needed when there
-    // is a moveOnHoldDelay or moveOnHoldInterval. In ms.
-    shiftDownDelta: 0,
+      // {number} - The amount PositionProperty changes in view coordinates, generally only needed when there
+      // is a moveOnHoldDelay or moveOnHoldInterval. In ms.
+      shiftDownDelta: 0,
 
-    // {number} - time interval at which holding down a hotkey group will trigger an associated listener, in ms
-    hotkeyHoldInterval: 800
-  }, options );
+      // {number} - time interval at which holding down a hotkey group will trigger an associated listener, in ms
+      hotkeyHoldInterval: 800
+    }, options );
 
-  // @private, mutable attributes declared from options, see options for info, as well as getters and setters
-  this._start = options.start;
-  this._drag = options.drag;
-  this._end = options.end;
-  this._dragBounds = options.dragBounds;
-  this._transform = options.transform;
-  this._positionProperty = options.positionProperty;
-  this._dragVelocity = options.dragVelocity;
-  this._shiftDragVelocity = options.shiftDragVelocity;
-  this._downDelta = options.downDelta;
-  this._shiftDownDelta = options.shiftDownDelta;
-  this._moveOnHoldDelay = options.moveOnHoldDelay;
-  this._moveOnHoldInterval = options.moveOnHoldInterval;
-  this._hotkeyHoldInterval = options.hotkeyHoldInterval;
+    // @private, mutable attributes declared from options, see options for info, as well as getters and setters
+    this._start = options.start;
+    this._drag = options.drag;
+    this._end = options.end;
+    this._dragBounds = options.dragBounds;
+    this._transform = options.transform;
+    this._positionProperty = options.positionProperty;
+    this._dragVelocity = options.dragVelocity;
+    this._shiftDragVelocity = options.shiftDragVelocity;
+    this._downDelta = options.downDelta;
+    this._shiftDownDelta = options.shiftDownDelta;
+    this._moveOnHoldDelay = options.moveOnHoldDelay;
+    this._moveOnHoldInterval = options.moveOnHoldInterval;
+    this._hotkeyHoldInterval = options.hotkeyHoldInterval;
 
-  // @private {Array.<{isDown:boolean, timeDown:number>} - tracks the state of the keyboard. JavaScript doesn't
-  // handle multiple key presses, so we track which keys are currently down and update based on state of this
-  // collection of objects. "timeDown" is in milliseconds
-  // TODO: Consider a global state object for this, see https://github.com/phetsims/scenery/issues/1054
-  this.keyState = [];
+    // @private {Array.<{isDown:boolean, timeDown:number>} - tracks the state of the keyboard. JavaScript doesn't
+    // handle multiple key presses, so we track which keys are currently down and update based on state of this
+    // collection of objects. "timeDown" is in milliseconds
+    // TODO: Consider a global state object for this, see https://github.com/phetsims/scenery/issues/1054
+    this.keyState = [];
 
-  // @private {Array.<{keys:<Array.number>, callback:function}>} - A list of hotkeys, each of which haing some
-  // behavior when each individual key of the hotkey is  pressed in order. See this.addHotkey() for more information.
-  this.hotkeys = [];
+    // @private {Array.<{keys:<Array.number>, callback:function}>} - A list of hotkeys, each of which haing some
+    // behavior when each individual key of the hotkey is  pressed in order. See this.addHotkey() for more information.
+    this.hotkeys = [];
 
-  // @private {{keys: <Array.number>, callback: <Function>}|null} - the hotkey that is currently down
-  this.currentHotkey = null;
+    // @private {{keys: <Array.number>, callback: <Function>}|null} - the hotkey that is currently down
+    this.currentHotkey = null;
 
-  // @private {boolean} - when a hotkey group is pressed down, dragging will be disabled until
-  // any keys are up again
-  this.hotkeyDisablingDragging = false;
+    // @private {boolean} - when a hotkey group is pressed down, dragging will be disabled until
+    // any keys are up again
+    this.hotkeyDisablingDragging = false;
 
-  // @private {number} - delay before calling a keygroup listener (if keygroup is being held down), incremented in
-  // step. This is initialized to the "threshold" so that the first hotkey will fire immediately. Only
-  // subsequent actions while holding the hotkey should result in a delay of this much. in ms
-  this.hotkeyHoldIntervalCounter = this._hotkeyHoldInterval;
+    // @private {number} - delay before calling a keygroup listener (if keygroup is being held down), incremented in
+    // step. This is initialized to the "threshold" so that the first hotkey will fire immediately. Only
+    // subsequent actions while holding the hotkey should result in a delay of this much. in ms
+    this.hotkeyHoldIntervalCounter = this._hotkeyHoldInterval;
 
-  // @private {number} - counters to allow for press-and-hold functionality that enables user to incrementally move
-  // the draggable object or hold the movement key for continuous or stepped movement - values in ms
-  this.moveOnHoldDelayCounter = 0;
-  this.moveOnHoldIntervalCounter = 0;
+    // @private {number} - counters to allow for press-and-hold functionality that enables user to incrementally move
+    // the draggable object or hold the movement key for continuous or stepped movement - values in ms
+    this.moveOnHoldDelayCounter = 0;
+    this.moveOnHoldIntervalCounter = 0;
 
-  // @private {boolean} - variable to determine when the initial delay is complete
-  this.delayComplete = false;
+    // @private {boolean} - variable to determine when the initial delay is complete
+    this.delayComplete = false;
 
-  // step the drag listener, must be removed in dispose
-  const stepListener = this.step.bind( this );
-  stepTimer.addListener( stepListener );
+    // step the drag listener, must be removed in dispose
+    const stepListener = this.step.bind( this );
+    stepTimer.addListener( stepListener );
 
-  // @private - called in dispose
-  this._disposeKeyboardDragListener = function() {
-    stepTimer.removeListener( stepListener );
-  };
-}
+    // @private - called in dispose
+    this._disposeKeyboardDragListener = () => {
+      stepTimer.removeListener( stepListener );
+    };
+  }
 
-scenery.register( 'KeyboardDragListener', KeyboardDragListener );
-
-inherit( Object, KeyboardDragListener, {
 
 
   /**
    * Getter for the start property, see options.start for more info.
    * @returns {function|null}
    */
-  get start() { return this._start; },
+  get start() { return this._start; }
 
   /**
    * Setter for the start property, see options.start for more info.
    * @param {function|null} start
    */
-  set start( start ) { this._start = start; },
+  set start( start ) { this._start = start; }
 
   /**
    * Getter for the drag property, see options.drag for more info.
    * @returns {function|null}
    */
-  get drag() { return this._drag; },
+  get drag() { return this._drag; }
 
   /**
    * Setter for the drag property, see options.drag for more info.
    * @param {function|null} drag
    */
-  set drag( drag ) { this._drag = drag; },
+  set drag( drag ) { this._drag = drag; }
 
   /**
    * Getter for the end property, see options.end for more info.
    * @returns {function|null}
    */
-  get end() { return this._end; },
+  get end() { return this._end; }
 
   /**
    * Setter for the end property, see options.end for more info.
    * @param {function|null} end
    */
-  set end( end ) { this._end = end; },
+  set end( end ) { this._end = end; }
 
   /**
    * Getter for the dragBounds property, see options.dragBounds for more info.
    * @returns {Bounds2|null}
    */
-  get dragBounds() { return this._dragBounds; },
+  get dragBounds() { return this._dragBounds; }
 
   /**
    * Setter for the dragBounds property, see options.dragBounds for more info.
    * @param {Bounds2|null} dragBounds
    */
-  set dragBounds( dragBounds ) { this._dragBounds = dragBounds; },
+  set dragBounds( dragBounds ) { this._dragBounds = dragBounds; }
 
   /**
    * Getter for the transform property, see options.transform for more info.
    * @returns {Transform3|null}
    */
-  get transform() { return this._transform; },
+  get transform() { return this._transform; }
 
   /**
    * Setter for the transform property, see options.transform for more info.
    * @param {Transform3|null}transform
    */
-  set transform( transform ) { this._transform = transform; },
+  set transform( transform ) { this._transform = transform; }
 
   /**
    * Getter for the positionProperty property, see options.positionProperty for more info.
    * @returns {Property.<Vector2>|null}
    */
-  get positionProperty() { return this._positionProperty; },
+  get positionProperty() { return this._positionProperty; }
 
   /**
    * Setter for the positionProperty property, see options.positionProperty for more info.
    * @param {Property.<Vector2>|null} positionProperty
    */
-  set positionProperty( positionProperty ) { this._positionProperty = positionProperty; },
+  set positionProperty( positionProperty ) { this._positionProperty = positionProperty; }
 
   /**
    * Getter for the dragVelocity property, see options.dragVelocity for more info.
    * @returns {number|null}
    */
-  get dragVelocity() { return this._dragVelocity; },
+  get dragVelocity() { return this._dragVelocity; }
 
   /**
    * Setter for the dragVelocity property, see options.dragVelocity for more info.
    * @param {number|null} dragVelocity
    */
-  set dragVelocity( dragVelocity ) { this._dragVelocity = dragVelocity; },
+  set dragVelocity( dragVelocity ) { this._dragVelocity = dragVelocity; }
 
   /**
    * Getter for the shiftDragVelocity property, see options.shiftDragVelocity for more info.
    * @returns {number|null}
    */
-  get shiftDragVelocity() { return this._shiftDragVelocity; },
+  get shiftDragVelocity() { return this._shiftDragVelocity; }
 
   /**
    * Setter for the shiftDragVelocity property, see options.shiftDragVelocity for more info.
    * @param {number|null} shiftDragVelocity
    */
-  set shiftDragVelocity( shiftDragVelocity ) { this._shiftDragVelocity = shiftDragVelocity; },
+  set shiftDragVelocity( shiftDragVelocity ) { this._shiftDragVelocity = shiftDragVelocity; }
 
   /**
    * Getter for the downDelta property, see options.downDelta for more info.
    * @returns {number|null}
    */
-  get downDelta() { return this._downDelta; },
+  get downDelta() { return this._downDelta; }
 
   /**
    * Setter for the downDelta property, see options.downDelta for more info.
    * @param {number|null} downDelta
    */
-  set downDelta( downDelta ) { this._downDelta = downDelta; },
+  set downDelta( downDelta ) { this._downDelta = downDelta; }
 
   /**
    * Getter for the shiftDownDelta property, see options.shiftDownDelta for more info.
    * @returns {number|null}
    */
-  get shiftDownDelta() { return this._shiftDownDelta; },
+  get shiftDownDelta() { return this._shiftDownDelta; }
 
   /**
    * Setter for the shiftDownDelta property, see options.shiftDownDelta for more info.
    * @param {number|null} shiftDownDelta
    */
-  set shiftDownDelta( shiftDownDelta ) { this._shiftDownDelta = shiftDownDelta; },
+  set shiftDownDelta( shiftDownDelta ) { this._shiftDownDelta = shiftDownDelta; }
 
   /**
    * Getter for the moveOnHoldDelay property, see options.moveOnHoldDelay for more info.
    * @returns {number}
    */
-  get moveOnHoldDelay() { return this._moveOnHoldDelay; },
+  get moveOnHoldDelay() { return this._moveOnHoldDelay; }
 
   /**
    * Setter for the moveOnHoldDelay property, see options.moveOnHoldDelay for more info.
    * @param {number} moveOnHoldDelay
    */
-  set moveOnHoldDelay( moveOnHoldDelay ) { this._moveOnHoldDelay = moveOnHoldDelay; },
+  set moveOnHoldDelay( moveOnHoldDelay ) { this._moveOnHoldDelay = moveOnHoldDelay; }
 
   /**
    * Getter for the moveOnHoldInterval property, see options.moveOnHoldInterval for more info.
    * @returns {number}
    */
-  get moveOnHoldInterval() { return this._moveOnHoldInterval; },
+  get moveOnHoldInterval() { return this._moveOnHoldInterval; }
 
   /**
    * Setter for the moveOnHoldInterval property, see options.moveOnHoldInterval for more info.
    * @param {number} moveOnHoldInterval
    */
-  set moveOnHoldInterval( moveOnHoldInterval ) { this._moveOnHoldInterval = moveOnHoldInterval; },
+  set moveOnHoldInterval( moveOnHoldInterval ) { this._moveOnHoldInterval = moveOnHoldInterval; }
 
   /**
    * Getter for the hotkeyHoldInterval property, see options.hotkeyHoldInterval for more info.
    * @returns {number}
    */
-  get hotkeyHoldInterval() { return this._hotkeyHoldInterval; },
+  get hotkeyHoldInterval() { return this._hotkeyHoldInterval; }
 
   /**
    * Setter for the hotkeyHoldInterval property, see options.hotkeyHoldInterval for more info.
    * @param {number} hotkeyHoldInterval
    */
-  set hotkeyHoldInterval( hotkeyHoldInterval ) { this._hotkeyHoldInterval = hotkeyHoldInterval; },
+  set hotkeyHoldInterval( hotkeyHoldInterval ) { this._hotkeyHoldInterval = hotkeyHoldInterval; }
 
   /**
    * Implements keyboard dragging when listener is attached to the Node, public so listener is attached
@@ -304,7 +300,7 @@ inherit( Object, KeyboardDragListener, {
    * @public
    * @param {SceneryEvent} event
    */
-  keydown: function( event ) {
+  keydown( event ) {
     const domEvent = event.domEvent;
 
     // required to work with Safari and VoiceOver, otherwise arrow keys will move virtual cursor, see https://github.com/phetsims/balloons-and-static-electricity/issues/205#issuecomment-263428003
@@ -351,7 +347,7 @@ inherit( Object, KeyboardDragListener, {
     // move object on first down before a delay
     const positionDelta = this.shiftKeyDown() ? this._shiftDownDelta : this._downDelta;
     this.updatePosition( positionDelta );
-  },
+  }
 
   /**
    * Behavior for keyboard 'up' DOM event. Public so it can be attached with addInputListener()
@@ -363,7 +359,7 @@ inherit( Object, KeyboardDragListener, {
    * @public
    * @param {SceneryEvent} event
    */
-  keyup: function( event ) {
+  keyup( event ) {
     const domEvent = event.domEvent;
 
     const moveKeysDown = this.movementKeysDown;
@@ -403,7 +399,7 @@ inherit( Object, KeyboardDragListener, {
     }
 
     this.resetPressAndHold();
-  },
+  }
 
 
   /**
@@ -414,7 +410,7 @@ inherit( Object, KeyboardDragListener, {
    *
    * @param {number} dt - in seconds
    */
-  step: function( dt ) {
+  step( dt ) {
     const ms = dt * 1000;
 
     // no-op unless a key is down
@@ -449,13 +445,13 @@ inherit( Object, KeyboardDragListener, {
         this.updatePosition( positionDelta );
       }
     }
-  },
+  }
 
   /**
    * Update the state of hotkeys, and fire hotkey callbacks if one is active.
    * @private
    */
-  updateHotkeys: function() {
+  updateHotkeys() {
 
     // check to see if any hotkey combinations are down
     for ( let j = 0; j < this.hotkeys.length; j++ ) {
@@ -508,7 +504,7 @@ inherit( Object, KeyboardDragListener, {
         this.currentHotkey = null;
       }
     }
-  },
+  }
 
   /**
    * Handle the actual change in position of associated object based on currently pressed keys. Called in step function
@@ -517,7 +513,7 @@ inherit( Object, KeyboardDragListener, {
    * @param {number} delta - potential change in position in x and y for the position Property
    * @private
    */
-  updatePosition: function( delta ) {
+  updatePosition( delta ) {
 
     // hotkeys may disable dragging, so do this first
     this.updateHotkeys();
@@ -572,7 +568,7 @@ inherit( Object, KeyboardDragListener, {
       }
     }
     this.moveOnHoldIntervalCounter = 0;
-  },
+  }
 
   /**
    * Returns true if any of the keys in the list are currently down.
@@ -581,7 +577,7 @@ inherit( Object, KeyboardDragListener, {
    * @returns {boolean}
    * @public
    */
-  keyInListDown: function( keys ) {
+  keyInListDown( keys ) {
     let keyIsDown = false;
     for ( let i = 0; i < this.keyState.length; i++ ) {
       if ( this.keyState[ i ].keyDown ) {
@@ -599,7 +595,7 @@ inherit( Object, KeyboardDragListener, {
     }
 
     return keyIsDown;
-  },
+  }
 
   /**
    * Return true if all keys in the list are currently held down.
@@ -608,7 +604,7 @@ inherit( Object, KeyboardDragListener, {
    * @returns {boolean}
    * @public
    */
-  allKeysInListDown: function( keys ) {
+  allKeysInListDown( keys ) {
     let allKeysDown = true;
     for ( let i = 0; i < keys.length; i++ ) {
       for ( let j = 0; j < this.keyState.length; j++ ) {
@@ -625,7 +621,7 @@ inherit( Object, KeyboardDragListener, {
 
     // all keys must be down
     return allKeysDown;
-  },
+  }
 
   /**
    * Returns true if the keystate indicates that a key is down that should move the object to the left.
@@ -633,9 +629,9 @@ inherit( Object, KeyboardDragListener, {
    * @public
    * @returns {boolean}
    */
-  leftMovementKeysDown: function() {
+  leftMovementKeysDown() {
     return this.keyInListDown( [ KeyboardUtils.KEY_A, KeyboardUtils.KEY_LEFT_ARROW ] );
-  },
+  }
 
   /**
    * Returns true if the keystate indicates that a key is down that should move the object to the right.
@@ -643,9 +639,9 @@ inherit( Object, KeyboardDragListener, {
    * @public
    * @returns {boolean}
    */
-  rightMovementKeysDown: function() {
+  rightMovementKeysDown() {
     return this.keyInListDown( [ KeyboardUtils.KEY_RIGHT_ARROW, KeyboardUtils.KEY_D ] );
-  },
+  }
 
   /**
    * Returns true if the keystate indicates that a key is down that should move the object up.
@@ -653,9 +649,9 @@ inherit( Object, KeyboardDragListener, {
    * @public
    * @returns {boolean}
    */
-  upMovementKeysDown: function() {
+  upMovementKeysDown() {
     return this.keyInListDown( [ KeyboardUtils.KEY_UP_ARROW, KeyboardUtils.KEY_W ] );
-  },
+  }
 
   /**
    * Returns true if the keystate indicates that a key is down that should move the upject down.
@@ -663,9 +659,9 @@ inherit( Object, KeyboardDragListener, {
    * @public
    * @returns {boolean}
    */
-  downMovementKeysDown: function() {
+  downMovementKeysDown() {
     return this.keyInListDown( [ KeyboardUtils.KEY_DOWN_ARROW, KeyboardUtils.KEY_S ] );
-  },
+  }
 
   /**
    * Returns true if any of the movement keys are down (arrow keys or WASD keys).
@@ -673,11 +669,11 @@ inherit( Object, KeyboardDragListener, {
    * @returns {boolean}
    * @public
    */
-  getMovementKeysDown: function() {
+  getMovementKeysDown() {
     return this.rightMovementKeysDown() || this.leftMovementKeysDown() ||
            this.upMovementKeysDown() || this.downMovementKeysDown();
-  },
-  get movementKeysDown() { return this.getMovementKeysDown(); },
+  }
+  get movementKeysDown() { return this.getMovementKeysDown(); }
 
   /**
    * Returns true if the enter key is currently pressed down.
@@ -685,9 +681,9 @@ inherit( Object, KeyboardDragListener, {
    * @returns {boolean}
    * @public
    */
-  enterKeyDown: function() {
+  enterKeyDown() {
     return this.keyInListDown( [ KeyboardUtils.KEY_ENTER ] );
-  },
+  }
 
   /**
    * Returns true if the keystate indicates that the shift key is currently down.
@@ -695,9 +691,9 @@ inherit( Object, KeyboardDragListener, {
    * @returns {boolean}
    * @public
    */
-  shiftKeyDown: function() {
+  shiftKeyDown() {
     return this.keyInListDown( [ KeyboardUtils.KEY_SHIFT ] );
-  },
+  }
 
   /**
    * Add a hotkey that behaves such that the desired callback will be called when
@@ -706,9 +702,9 @@ inherit( Object, KeyboardDragListener, {
    * @param {{keys: Array.<number>, callback:function}} hotkey
    * @public
    */
-  addHotkey: function( hotkey ) {
+  addHotkey( hotkey ) {
     this.hotkeys.push( hotkey );
-  },
+  }
 
   /**
    * Add mutliple sets of hotkey groups that behave such that the desired callback will be called
@@ -720,51 +716,51 @@ inherit( Object, KeyboardDragListener, {
    * @param {Array.<{keys: Array.<number>, callback:function}>} hotkeys
    * @public
    */
-  addHotkeys: function( hotkeys ) {
+  addHotkeys( hotkeys ) {
     for ( let i = 0; i < hotkeys.length; i++ ) {
       this.addHotkey( hotkeys[ i ] );
     }
-  },
+  }
 
   /**
    * Resets the timers and control variables for the press and hold functionality.
    *
    * @private
    */
-  resetPressAndHold: function() {
+  resetPressAndHold() {
     this.delayComplete = false;
     this.moveOnHoldDelayCounter = 0;
     this.moveOnHoldIntervalCounter = 0;
-  },
+  }
 
   /**
    * Resets the timers and control variables for the hotkey functionality.
    * @private
    */
-  resetHotkeyState: function() {
+  resetHotkeyState() {
     this.currentHotkey = null;
     this.hotkeyHoldIntervalCounter = this._hotkeyHoldInterval; // reset to threshold so the hotkey fires immediately next time.
     this.hotkeyDisablingDragging = false;
-  },
+  }
 
   /**
    * Reset the keystate Object tracking which keys are currently pressed down.
    *
    * @public
    */
-  interrupt: function() {
+  interrupt() {
     this.keyState = [];
     this.resetHotkeyState();
     this.resetPressAndHold();
-  },
+  }
 
   /**
    * @public
    */
-  dispose: function() {
+  dispose() {
     this._disposeKeyboardDragListener();
   }
-}, {
+
 
   /**
    * Returns true if the keycode corresponds to a key that should move the object to the left.
@@ -772,9 +768,9 @@ inherit( Object, KeyboardDragListener, {
    * @private
    * @returns {boolean}
    */
-  isLeftMovementKey: function( keyCode ) {
+  static isLeftMovementKey( keyCode ) {
     return keyCode === KeyboardUtils.KEY_A || keyCode === KeyboardUtils.KEY_LEFT_ARROW;
-  },
+  }
 
   /**
    * Returns true if the keycode corresponds to a key that should move the object to the right.
@@ -782,9 +778,9 @@ inherit( Object, KeyboardDragListener, {
    * @public
    * @returns {boolean}
    */
-  isRightMovementKey: function( keyCode ) {
+  static isRightMovementKey( keyCode ) {
     return keyCode === KeyboardUtils.KEY_D || keyCode === KeyboardUtils.KEY_RIGHT_ARROW;
-  },
+  }
 
   /**
    * Returns true if the keycode corresponds to a key that should move the object up.
@@ -792,9 +788,9 @@ inherit( Object, KeyboardDragListener, {
    * @public
    * @returns {boolean}
    */
-  isUpMovementKey: function( keyCode ) {
+  static isUpMovementKey( keyCode ) {
     return keyCode === KeyboardUtils.KEY_W || keyCode === KeyboardUtils.KEY_UP_ARROW;
-  },
+  }
 
   /**
    * Returns true if the keycode corresponds to a key that should move the object down.
@@ -802,9 +798,11 @@ inherit( Object, KeyboardDragListener, {
    * @public
    * @returns {boolean}
    */
-  isDownMovementKey: function( keyCode ) {
+  static isDownMovementKey( keyCode ) {
     return keyCode === KeyboardUtils.KEY_S || keyCode === KeyboardUtils.KEY_DOWN_ARROW;
   }
-} );
+}
+
+scenery.register( 'KeyboardDragListener', KeyboardDragListener );
 
 export default KeyboardDragListener;

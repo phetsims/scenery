@@ -20,7 +20,7 @@ const SceneryStyle = {
   stylesheet: stylesheet,
   styleElement: styleElement,
 
-  addRule: function( ruleString ) {
+  addRule( ruleString ) {
     // using a this reference so it doesn't need to be a closure
     this.stylesheet.insertRule( ruleString, 0 );
   }

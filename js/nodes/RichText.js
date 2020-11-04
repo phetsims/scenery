@@ -60,11 +60,10 @@
 import StringProperty from '../../../axon/js/StringProperty.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
+import Poolable from '../../../phet-core/js/Poolable.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import openPopup from '../../../phet-core/js/openPopup.js';
-import Poolable from '../../../phet-core/js/Poolable.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import ButtonListener from '../input/ButtonListener.js';
@@ -146,123 +145,110 @@ const FONT_STYLE_MAP = {
 const FONT_STYLE_KEYS = Object.keys( FONT_STYLE_MAP );
 const STYLE_KEYS = [ 'color' ].concat( FONT_STYLE_KEYS );
 
-/**
- * @public
- * @constructor
- * @extends Node
- *
- * @param {string|number} text
- * @param {Object} [options] - RichText-specific options are documented in RICH_TEXT_OPTION_KEYS above, and can be
- *                             provided along-side options for Node.
- */
-function RichText( text, options ) {
-
-  // @public {TinyProperty.<string>} - The text to display. We'll initialize this by mutating.
-  this._textProperty = new TinyForwardingProperty( '', true );
-  this._textProperty.lazyLink( this.onTextPropertyChange.bind( this ) );
-
-  // @private {Font}
-  this._font = DEFAULT_FONT;
-
-  // @private {string}
-  this._boundsMethod = 'hybrid';
-
-  // @private {PaintDef}
-  this._fill = '#000000';
-  this._stroke = null;
-
-  // @private {number}
-  this._lineWidth = 1;
-
-  // @private {number}
-  this._subScale = 0.75;
-  this._subXSpacing = 0;
-  this._subYOffset = 0;
-
-  // @private {number}
-  this._supScale = 0.75;
-  this._supXSpacing = 0;
-  this._supYOffset = 0;
-
-  // @private {number}
-  this._capHeightScale = 0.75;
-
-  // @private {number}
-  this._underlineLineWidth = 1;
-  this._underlineHeightScale = 0.15;
-
-  // @private {number}
-  this._strikethroughLineWidth = 1;
-  this._strikethroughHeightScale = 0.3;
-
-  // @private {paint}
-  this._linkFill = 'rgb(27,0,241)';
-
-  // @private {boolean}
-  this._linkEventsHandled = false;
-
-  // @private {Object|boolean} - If an object, values are either {string} or {function}
-  this._links = {};
-
-  // @private {string}
-  this._align = 'left'; // 'left', 'center', or 'right'
-
-  // @private {number}
-  this._leading = 0;
-
-  // @private {number|null}
-  this._lineWrap = null;
-
-  // @private {Array.<{ element: {*}, node: {Node}, href: {string} }>} - We need to consolidate links (that could be
-  // split across multiple lines) under one "link" node, so we track created link fragments here so they can get
-  // pieced together later.
-  this._linkItems = [];
-
-  // @private {boolean} - Whether something has been added to this line yet. We don't want to infinite-loop out if
-  // something is longer than our lineWrap, so we'll place one item on its own on an otherwise empty line.
-  this._hasAddedLeafToLine = false;
-
-  options = extendDefined( {
-    fill: '#000000',
-    text: text,
-    tandem: Tandem.OPTIONAL,
-    phetioType: RichText.RichTextIO
-  }, options );
-
-  Node.call( this );
-
-  // @private {Node} - Normal layout container of lines (separate, so we can clear it easily)
-  this.lineContainer = new Node( {} );
-  this.addChild( this.lineContainer );
-
-  // Initialize to an empty state, so we are immediately valid (since now we need to create an empty leaf even if we
-  // have empty text).
-  this.rebuildRichText();
-
-  this.mutate( options );
-}
-
-scenery.register( 'RichText', RichText );
-
-inherit( Node, RichText, {
+class RichText extends Node {
   /**
-   * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
-   * order they will be evaluated in.
-   * @protected
+   * @public
    *
-   * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
-   *       cases that may apply.
+   * @param {string|number} text
+   * @param {Object} [options] - RichText-specific options are documented in RICH_TEXT_OPTION_KEYS above, and can be
+   *                             provided along-side options for Node.
    */
-  _mutatorKeys: RICH_TEXT_OPTION_KEYS.concat( Node.prototype._mutatorKeys ),
+  constructor( text, options ) {
+
+    super();
+
+    // @public {TinyProperty.<string>} - The text to display. We'll initialize this by mutating.
+    this._textProperty = new TinyForwardingProperty( '', true );
+    this._textProperty.lazyLink( this.onTextPropertyChange.bind( this ) );
+
+    // @private {Font}
+    this._font = DEFAULT_FONT;
+
+    // @private {string}
+    this._boundsMethod = 'hybrid';
+
+    // @private {PaintDef}
+    this._fill = '#000000';
+    this._stroke = null;
+
+    // @private {number}
+    this._lineWidth = 1;
+
+    // @private {number}
+    this._subScale = 0.75;
+    this._subXSpacing = 0;
+    this._subYOffset = 0;
+
+    // @private {number}
+    this._supScale = 0.75;
+    this._supXSpacing = 0;
+    this._supYOffset = 0;
+
+    // @private {number}
+    this._capHeightScale = 0.75;
+
+    // @private {number}
+    this._underlineLineWidth = 1;
+    this._underlineHeightScale = 0.15;
+
+    // @private {number}
+    this._strikethroughLineWidth = 1;
+    this._strikethroughHeightScale = 0.3;
+
+    // @private {paint}
+    this._linkFill = 'rgb(27,0,241)';
+
+    // @private {boolean}
+    this._linkEventsHandled = false;
+
+    // @private {Object|boolean} - If an object, values are either {string} or {function}
+    this._links = {};
+
+    // @private {string}
+    this._align = 'left'; // 'left', 'center', or 'right'
+
+    // @private {number}
+    this._leading = 0;
+
+    // @private {number|null}
+    this._lineWrap = null;
+
+    // @private {Array.<{ element: {*}, node: {Node}, href: {string} }>} - We need to consolidate links (that could be
+    // split across multiple lines) under one "link" node, so we track created link fragments here so they can get
+    // pieced together later.
+    this._linkItems = [];
+
+    // @private {boolean} - Whether something has been added to this line yet. We don't want to infinite-loop out if
+    // something is longer than our lineWrap, so we'll place one item on its own on an otherwise empty line.
+    this._hasAddedLeafToLine = false;
+
+    options = extendDefined( {
+      fill: '#000000',
+      text: text,
+      tandem: Tandem.OPTIONAL,
+      phetioType: RichText.RichTextIO
+    }, options );
+
+    // @private {Node} - Normal layout container of lines (separate, so we can clear it easily)
+    this.lineContainer = new Node( {} );
+    this.addChild( this.lineContainer );
+
+    // Initialize to an empty state, so we are immediately valid (since now we need to create an empty leaf even if we
+    // have empty text).
+    this.rebuildRichText();
+
+    this.mutate( options );
+  }
+
 
 
   /**
    * Called when our text Property changes values.
    * @private
    */
-  onTextPropertyChange: function() {
+  onTextPropertyChange() {
     this.rebuildRichText();
-  },
+  }
 
   /**
    * See documentation for Node.setVisibleProperty, except this is for the text string.
@@ -274,8 +260,8 @@ inherit( Node, RichText, {
    */
   setTextProperty( newTarget ) {
     return this._textProperty.setTargetProperty( this, TEXT_PROPERTY_TANDEM_NAME, newTarget );
-  },
-  set textProperty( property ) { this.setTextProperty( property ); },
+  }
+  set textProperty( property ) { this.setTextProperty( property ); }
 
   /**
    * Like Node.getVisibleProperty, but for the text string. Note this is not the same as the Property provided in
@@ -284,10 +270,10 @@ inherit( Node, RichText, {
    * @returns {TinyForwardingProperty}
    * @public
    */
-  getTextProperty: function() {
+  getTextProperty() {
     return this._textProperty;
-  },
-  get textProperty() { return this.getTextProperty(); },
+  }
+  get textProperty() { return this.getTextProperty(); }
 
   /**
    * See documentation and comments in Node.initializePhetioObject
@@ -296,7 +282,7 @@ inherit( Node, RichText, {
    * @override
    * @protected
    */
-  initializePhetioObject: function( baseOptions, config ) {
+  initializePhetioObject( baseOptions, config ) {
 
     config = merge( {
       textPropertyOptions: null
@@ -305,7 +291,7 @@ inherit( Node, RichText, {
     // Track this, so we only override our textProperty once.
     const wasInstrumented = this.isPhetioInstrumented();
 
-    Node.prototype.initializePhetioObject.call( this, baseOptions, config );
+    super.initializePhetioObject( baseOptions, config );
 
     if ( !wasInstrumented && this.isPhetioInstrumented() ) {
 
@@ -318,15 +304,13 @@ inherit( Node, RichText, {
         }, config.textPropertyOptions ) )
       );
     }
-  },
+  }
 
   /**
    * When called, will rebuild the node structure for this RichText
    * @private
    */
-  rebuildRichText: function() {
-    const self = this;
-
+  rebuildRichText() {
     this.freeChildrenToPool();
 
     // Bail early, particularly if we are being constructed.
@@ -409,29 +393,29 @@ inherit( Node, RichText, {
     // ancestor that has listeners and a11y)
     while ( this._linkItems.length ) {
       // Close over the href and other references
-      ( function() {
-        const linkElement = self._linkItems[ 0 ].element;
-        const href = self._linkItems[ 0 ].href;
+      ( () => {
+        const linkElement = this._linkItems[ 0 ].element;
+        const href = this._linkItems[ 0 ].href;
         let i;
 
         // Find all nodes that are for the same link
         const nodes = [];
-        for ( i = self._linkItems.length - 1; i >= 0; i-- ) {
-          const item = self._linkItems[ i ];
+        for ( i = this._linkItems.length - 1; i >= 0; i-- ) {
+          const item = this._linkItems[ i ];
           if ( item.element === linkElement ) {
             nodes.push( item.node );
-            self._linkItems.splice( i, 1 );
+            this._linkItems.splice( i, 1 );
           }
         }
 
         const linkRootNode = RichTextLink.createFromPool( linkElement.innerContent, href );
-        self.lineContainer.addChild( linkRootNode );
+        this.lineContainer.addChild( linkRootNode );
 
         // Detach the node from its location, adjust its transform, and reattach under the link. This should keep each
         // fragment in the same place, but changes its parent.
         for ( i = 0; i < nodes.length; i++ ) {
           const node = nodes[ i ];
-          const matrix = node.getUniqueTrailTo( self.lineContainer ).getMatrix();
+          const matrix = node.getUniqueTrailTo( this.lineContainer ).getMatrix();
           node.detach();
           node.matrix = matrix;
           linkRootNode.addChild( node );
@@ -443,33 +427,33 @@ inherit( Node, RichText, {
     this._linkItems.length = 0;
 
     sceneryLog && sceneryLog.RichText && sceneryLog.pop();
-  },
+  }
 
   /**
    * Cleans "recursively temporary disposes" the children.
    * @private
    */
-  freeChildrenToPool: function() {
+  freeChildrenToPool() {
     // Clear any existing lines or link fragments (higher performance, and return them to pools also)
     while ( this.lineContainer._children.length ) {
       const child = this.lineContainer._children[ this.lineContainer._children.length - 1 ];
       this.lineContainer.removeChild( child );
       child.clean();
     }
-  },
+  }
 
   /**
    * Releases references.
    * @public
    * @override
    */
-  dispose: function() {
+  dispose() {
     this.freeChildrenToPool();
 
-    Node.prototype.dispose.call( this );
+    super.dispose();
 
     this._textProperty.dispose();
-  },
+  }
 
   /**
    * Appends a finished line, applying any necessary leading.
@@ -477,7 +461,7 @@ inherit( Node, RichText, {
    *
    * @param {RichTextElement} lineNode
    */
-  appendLine: function( lineNode ) {
+  appendLine( lineNode ) {
     // Apply leading
     if ( this.lineContainer.bounds.isValid() ) {
       lineNode.top = this.lineContainer.bottom + this._leading;
@@ -487,24 +471,24 @@ inherit( Node, RichText, {
     }
 
     this.lineContainer.addChild( lineNode );
-  },
+  }
 
   /**
    * If we end up with the equivalent of "no" content, toss in a basically empty leaf so that we get valid bounds
    * (0 width, correctly-positioned height). See https://github.com/phetsims/scenery/issues/769.
    * @private
    */
-  appendEmptyLeaf: function() {
+  appendEmptyLeaf() {
     assert && assert( this.lineContainer.getChildrenCount() === 0 );
 
     this.appendLine( RichTextLeaf.createFromPool( '', true, this._font, this._boundsMethod, this._fill, this._stroke, this._lineWidth ) );
-  },
+  }
 
   /**
    * Aligns all lines attached to the lineContainer.
    * @private
    */
-  alignLines: function() {
+  alignLines() {
     // All nodes will either share a 'left', 'centerX' or 'right'.
     const coordinateName = this._align === 'center' ? 'centerX' : this._align;
 
@@ -512,7 +496,7 @@ inherit( Node, RichText, {
     for ( let i = 0; i < this.lineContainer.getChildrenCount(); i++ ) {
       this.lineContainer.getChildAt( i )[ coordinateName ] = ideal;
     }
-  },
+  }
 
   /**
    * Main recursive function for constructing the RichText Node tree.
@@ -531,7 +515,7 @@ inherit( Node, RichText, {
    * @param {number} widthAvailable - How much width we have available before forcing a line break (for lineWrap)
    * @returns {LineBreakState} - Whether a line break was reached
    */
-  appendElement: function( containerNode, element, font, fill, isLTR, widthAvailable ) {
+  appendElement( containerNode, element, font, fill, isLTR, widthAvailable ) {
     let lineBreakState = LineBreakState.NONE;
 
     // {Node|Text} - The main Node for the element that we are adding
@@ -618,7 +602,7 @@ inherit( Node, RichText, {
 
       if ( element.attributes.style ) {
         const css = element.attributes.style;
-        assert && Object.keys( css ).forEach( function( key ) {
+        assert && Object.keys( css ).forEach( key => {
           assert( _.includes( STYLE_KEYS, key ), 'See supported style CSS keys' );
         } );
 
@@ -758,16 +742,14 @@ inherit( Node, RichText, {
     const wasAdded = containerNode.addElement( node );
     if ( !wasAdded ) {
       // Remove it from the linkItems if we didn't actually add it.
-      this._linkItems = this._linkItems.filter( function( item ) {
-        return item.node !== node;
-      } );
+      this._linkItems = this._linkItems.filter( item => item.node !== node );
 
       // And since we won't dispose it (since it's not a child), clean it here
       node.clean();
     }
 
     return lineBreakState;
-  },
+  }
 
   /**
    * Sets the text displayed by our node.
@@ -778,7 +760,7 @@ inherit( Node, RichText, {
    * @param {string|number} text - The text to display. If it's a number, it will be cast to a string
    * @returns {RichText} - For chaining
    */
-  setText: function( text ) {
+  setText( text ) {
     assert && assert( text !== null && text !== undefined, 'Text should be defined and non-null. Use the empty string if needed.' );
     assert && assert( typeof text === 'number' || typeof text === 'string', 'text should be a string or number' );
 
@@ -788,8 +770,8 @@ inherit( Node, RichText, {
     this._textProperty.set( text );
 
     return this;
-  },
-  set text( value ) { this.setText( value ); },
+  }
+  set text( value ) { this.setText( value ); }
 
   /**
    * Returns the text displayed by our node.
@@ -797,10 +779,10 @@ inherit( Node, RichText, {
    *
    * @returns {string}
    */
-  getText: function() {
+  getText() {
     return this._textProperty.value;
-  },
-  get text() { return this.getText(); },
+  }
+  get text() { return this.getText(); }
 
   /**
    * Sets the method that is used to determine bounds from the text. See Text.setBoundsMethod for details
@@ -809,15 +791,15 @@ inherit( Node, RichText, {
    * @param {string} method
    * @returns {RichText} - For chaining.
    */
-  setBoundsMethod: function( method ) {
+  setBoundsMethod( method ) {
     assert && assert( method === 'fast' || method === 'fastCanvas' || method === 'accurate' || method === 'hybrid', 'Unknown Text boundsMethod' );
     if ( method !== this._boundsMethod ) {
       this._boundsMethod = method;
       this.rebuildRichText();
     }
     return this;
-  },
-  set boundsMethod( value ) { this.setBoundsMethod( value ); },
+  }
+  set boundsMethod( value ) { this.setBoundsMethod( value ); }
 
   /**
    * Returns the current method to estimate the bounds of the text. See setBoundsMethod() for more information.
@@ -825,10 +807,10 @@ inherit( Node, RichText, {
    *
    * @returns {string}
    */
-  getBoundsMethod: function() {
+  getBoundsMethod() {
     return this._boundsMethod;
-  },
-  get boundsMethod() { return this.getBoundsMethod(); },
+  }
+  get boundsMethod() { return this.getBoundsMethod(); }
 
   /**
    * Sets the font of our node.
@@ -837,7 +819,7 @@ inherit( Node, RichText, {
    * @param {Font|string} font
    * @returns {RichText} - For chaining.
    */
-  setFont: function( font ) {
+  setFont( font ) {
     assert && assert( font instanceof Font || typeof font === 'string',
       'Fonts provided to setFont should be a Font object or a string in the CSS3 font shortcut format' );
 
@@ -846,8 +828,8 @@ inherit( Node, RichText, {
       this.rebuildRichText();
     }
     return this;
-  },
-  set font( value ) { this.setFont( value ); },
+  }
+  set font( value ) { this.setFont( value ); }
 
   /**
    * Returns the current Font
@@ -855,10 +837,10 @@ inherit( Node, RichText, {
    *
    * @returns {Font|string}
    */
-  getFont: function() {
+  getFont() {
     return this._font;
-  },
-  get font() { return this.getFont(); },
+  }
+  get font() { return this.getFont(); }
 
   /**
    * Sets the fill of our text.
@@ -867,14 +849,14 @@ inherit( Node, RichText, {
    * @param {PaintDef} fill
    * @returns {RichText} - For chaining.
    */
-  setFill: function( fill ) {
+  setFill( fill ) {
     if ( this._fill !== fill ) {
       this._fill = fill;
       this.rebuildRichText();
     }
     return this;
-  },
-  set fill( value ) { this.setFill( value ); },
+  }
+  set fill( value ) { this.setFill( value ); }
 
   /**
    * Returns the current fill.
@@ -882,10 +864,10 @@ inherit( Node, RichText, {
    *
    * @returns {Font|string}
    */
-  getFill: function() {
+  getFill() {
     return this._fill;
-  },
-  get fill() { return this.getFill(); },
+  }
+  get fill() { return this.getFill(); }
 
   /**
    * Sets the stroke of our text.
@@ -894,14 +876,14 @@ inherit( Node, RichText, {
    * @param {PaintDef} stroke
    * @returns {RichText} - For chaining.
    */
-  setStroke: function( stroke ) {
+  setStroke( stroke ) {
     if ( this._stroke !== stroke ) {
       this._stroke = stroke;
       this.rebuildRichText();
     }
     return this;
-  },
-  set stroke( value ) { this.setStroke( value ); },
+  }
+  set stroke( value ) { this.setStroke( value ); }
 
   /**
    * Returns the current stroke.
@@ -909,10 +891,10 @@ inherit( Node, RichText, {
    *
    * @returns {Font|string}
    */
-  getStroke: function() {
+  getStroke() {
     return this._stroke;
-  },
-  get stroke() { return this.getStroke(); },
+  }
+  get stroke() { return this.getStroke(); }
 
   /**
    * Sets the lineWidth of our text.
@@ -921,14 +903,14 @@ inherit( Node, RichText, {
    * @param {number} lineWidth
    * @returns {RichText} - For chaining.
    */
-  setLineWidth: function( lineWidth ) {
+  setLineWidth( lineWidth ) {
     if ( this._lineWidth !== lineWidth ) {
       this._lineWidth = lineWidth;
       this.rebuildRichText();
     }
     return this;
-  },
-  set lineWidth( value ) { this.setLineWidth( value ); },
+  }
+  set lineWidth( value ) { this.setLineWidth( value ); }
 
   /**
    * Returns the current lineWidth.
@@ -936,10 +918,10 @@ inherit( Node, RichText, {
    *
    * @returns {number}
    */
-  getLineWidth: function() {
+  getLineWidth() {
     return this._lineWidth;
-  },
-  get lineWidth() { return this.getLineWidth(); },
+  }
+  get lineWidth() { return this.getLineWidth(); }
 
   /**
    * Sets the scale (relative to 1) of any text under subscript (<sub>) elements.
@@ -948,7 +930,7 @@ inherit( Node, RichText, {
    * @param {number} subScale
    * @returs {RichText} - For chaining
    */
-  setSubScale: function( subScale ) {
+  setSubScale( subScale ) {
     assert && assert( typeof subScale === 'number' && isFinite( subScale ) && subScale > 0 );
 
     if ( this._subScale !== subScale ) {
@@ -956,8 +938,8 @@ inherit( Node, RichText, {
       this.rebuildRichText();
     }
     return this;
-  },
-  set subScale( value ) { this.setSubScale( value ); },
+  }
+  set subScale( value ) { this.setSubScale( value ); }
 
   /**
    * Returns the scale (relative to 1) of any text under subscript (<sub>) elements.
@@ -965,10 +947,10 @@ inherit( Node, RichText, {
    *
    * @returns {number}
    */
-  getSubScale: function() {
+  getSubScale() {
     return this._subScale;
-  },
-  get subScale() { return this.getSubScale(); },
+  }
+  get subScale() { return this.getSubScale(); }
 
   /**
    * Sets the horizontal spacing before any subscript (<sub>) elements.
@@ -977,7 +959,7 @@ inherit( Node, RichText, {
    * @param {number} subXSpacing
    * @returs {RichText} - For chaining
    */
-  setSubXSpacing: function( subXSpacing ) {
+  setSubXSpacing( subXSpacing ) {
     assert && assert( typeof subXSpacing === 'number' && isFinite( subXSpacing ) );
 
     if ( this._subXSpacing !== subXSpacing ) {
@@ -985,8 +967,8 @@ inherit( Node, RichText, {
       this.rebuildRichText();
     }
     return this;
-  },
-  set subXSpacing( value ) { this.setSubXSpacing( value ); },
+  }
+  set subXSpacing( value ) { this.setSubXSpacing( value ); }
 
   /**
    * Returns the horizontal spacing before any subscript (<sub>) elements.
@@ -994,10 +976,10 @@ inherit( Node, RichText, {
    *
    * @returns {number}
    */
-  getSubXSpacing: function() {
+  getSubXSpacing() {
     return this._subXSpacing;
-  },
-  get subXSpacing() { return this.getSubXSpacing(); },
+  }
+  get subXSpacing() { return this.getSubXSpacing(); }
 
   /**
    * Sets the adjustment offset to the vertical placement of any subscript (<sub>) elements.
@@ -1006,7 +988,7 @@ inherit( Node, RichText, {
    * @param {number} subYOffset
    * @returs {RichText} - For chaining
    */
-  setSubYOffset: function( subYOffset ) {
+  setSubYOffset( subYOffset ) {
     assert && assert( typeof subYOffset === 'number' && isFinite( subYOffset ) );
 
     if ( this._subYOffset !== subYOffset ) {
@@ -1014,8 +996,8 @@ inherit( Node, RichText, {
       this.rebuildRichText();
     }
     return this;
-  },
-  set subYOffset( value ) { this.setSubYOffset( value ); },
+  }
+  set subYOffset( value ) { this.setSubYOffset( value ); }
 
   /**
    * Returns the adjustment offset to the vertical placement of any subscript (<sub>) elements.
@@ -1023,10 +1005,10 @@ inherit( Node, RichText, {
    *
    * @returns {number}
    */
-  getSubYOffset: function() {
+  getSubYOffset() {
     return this._subYOffset;
-  },
-  get subYOffset() { return this.getSubYOffset(); },
+  }
+  get subYOffset() { return this.getSubYOffset(); }
 
   /**
    * Sets the scale (relative to 1) of any text under superscript (<sup>) elements.
@@ -1035,7 +1017,7 @@ inherit( Node, RichText, {
    * @param {number} supScale
    * @returs {RichText} - For chaining
    */
-  setSupScale: function( supScale ) {
+  setSupScale( supScale ) {
     assert && assert( typeof supScale === 'number' && isFinite( supScale ) && supScale > 0 );
 
     if ( this._supScale !== supScale ) {
@@ -1043,8 +1025,8 @@ inherit( Node, RichText, {
       this.rebuildRichText();
     }
     return this;
-  },
-  set supScale( value ) { this.setSupScale( value ); },
+  }
+  set supScale( value ) { this.setSupScale( value ); }
 
   /**
    * Returns the scale (relative to 1) of any text under superscript (<sup>) elements.
@@ -1052,10 +1034,10 @@ inherit( Node, RichText, {
    *
    * @returns {number}
    */
-  getSupScale: function() {
+  getSupScale() {
     return this._supScale;
-  },
-  get supScale() { return this.getSupScale(); },
+  }
+  get supScale() { return this.getSupScale(); }
 
   /**
    * Sets the horizontal spacing before any superscript (<sup>) elements.
@@ -1064,7 +1046,7 @@ inherit( Node, RichText, {
    * @param {number} supXSpacing
    * @returs {RichText} - For chaining
    */
-  setSupXSpacing: function( supXSpacing ) {
+  setSupXSpacing( supXSpacing ) {
     assert && assert( typeof supXSpacing === 'number' && isFinite( supXSpacing ) );
 
     if ( this._supXSpacing !== supXSpacing ) {
@@ -1072,8 +1054,8 @@ inherit( Node, RichText, {
       this.rebuildRichText();
     }
     return this;
-  },
-  set supXSpacing( value ) { this.setSupXSpacing( value ); },
+  }
+  set supXSpacing( value ) { this.setSupXSpacing( value ); }
 
   /**
    * Returns the horizontal spacing before any superscript (<sup>) elements.
@@ -1081,10 +1063,10 @@ inherit( Node, RichText, {
    *
    * @returns {number}
    */
-  getSupXSpacing: function() {
+  getSupXSpacing() {
     return this._supXSpacing;
-  },
-  get supXSpacing() { return this.getSupXSpacing(); },
+  }
+  get supXSpacing() { return this.getSupXSpacing(); }
 
   /**
    * Sets the adjustment offset to the vertical placement of any superscript (<sup>) elements.
@@ -1093,7 +1075,7 @@ inherit( Node, RichText, {
    * @param {number} supYOffset
    * @returs {RichText} - For chaining
    */
-  setSupYOffset: function( supYOffset ) {
+  setSupYOffset( supYOffset ) {
     assert && assert( typeof supYOffset === 'number' && isFinite( supYOffset ) );
 
     if ( this._supYOffset !== supYOffset ) {
@@ -1101,8 +1083,8 @@ inherit( Node, RichText, {
       this.rebuildRichText();
     }
     return this;
-  },
-  set supYOffset( value ) { this.setSupYOffset( value ); },
+  }
+  set supYOffset( value ) { this.setSupYOffset( value ); }
 
   /**
    * Returns the adjustment offset to the vertical placement of any superscript (<sup>) elements.
@@ -1110,10 +1092,10 @@ inherit( Node, RichText, {
    *
    * @returns {number}
    */
-  getSupYOffset: function() {
+  getSupYOffset() {
     return this._supYOffset;
-  },
-  get supYOffset() { return this.getSupYOffset(); },
+  }
+  get supYOffset() { return this.getSupYOffset(); }
 
   /**
    * Sets the expected cap height (baseline to top of capital letters) as a scale of the detected distance from the
@@ -1123,7 +1105,7 @@ inherit( Node, RichText, {
    * @param {number} capHeightScale
    * @returs {RichText} - For chaining
    */
-  setCapHeightScale: function( capHeightScale ) {
+  setCapHeightScale( capHeightScale ) {
     assert && assert( typeof capHeightScale === 'number' && isFinite( capHeightScale ) && capHeightScale > 0 );
 
     if ( this._capHeightScale !== capHeightScale ) {
@@ -1131,8 +1113,8 @@ inherit( Node, RichText, {
       this.rebuildRichText();
     }
     return this;
-  },
-  set capHeightScale( value ) { this.setCapHeightScale( value ); },
+  }
+  set capHeightScale( value ) { this.setCapHeightScale( value ); }
 
   /**
    * Returns the expected cap height (baseline to top of capital letters) as a scale of the detected distance from the
@@ -1141,10 +1123,10 @@ inherit( Node, RichText, {
    *
    * @returns {number}
    */
-  getCapHeightScale: function() {
+  getCapHeightScale() {
     return this._capHeightScale;
-  },
-  get capHeightScale() { return this.getCapHeightScale(); },
+  }
+  get capHeightScale() { return this.getCapHeightScale(); }
 
   /**
    * Sets the lineWidth of underline lines.
@@ -1153,7 +1135,7 @@ inherit( Node, RichText, {
    * @param {number} underlineLineWidth
    * @returs {RichText} - For chaining
    */
-  setUnderlineLineWidth: function( underlineLineWidth ) {
+  setUnderlineLineWidth( underlineLineWidth ) {
     assert && assert( typeof underlineLineWidth === 'number' && isFinite( underlineLineWidth ) && underlineLineWidth > 0 );
 
     if ( this._underlineLineWidth !== underlineLineWidth ) {
@@ -1161,8 +1143,8 @@ inherit( Node, RichText, {
       this.rebuildRichText();
     }
     return this;
-  },
-  set underlineLineWidth( value ) { this.setUnderlineLineWidth( value ); },
+  }
+  set underlineLineWidth( value ) { this.setUnderlineLineWidth( value ); }
 
   /**
    * Returns the lineWidth of underline lines.
@@ -1170,10 +1152,10 @@ inherit( Node, RichText, {
    *
    * @returns {number}
    */
-  getUnderlineLineWidth: function() {
+  getUnderlineLineWidth() {
     return this._underlineLineWidth;
-  },
-  get underlineLineWidth() { return this.getUnderlineLineWidth(); },
+  }
+  get underlineLineWidth() { return this.getUnderlineLineWidth(); }
 
   /**
    * Sets the underline height adjustment as a proportion of the detected distance from the baseline to the top of the
@@ -1183,7 +1165,7 @@ inherit( Node, RichText, {
    * @param {number} underlineHeightScale
    * @returs {RichText} - For chaining
    */
-  setUnderlineHeightScale: function( underlineHeightScale ) {
+  setUnderlineHeightScale( underlineHeightScale ) {
     assert && assert( typeof underlineHeightScale === 'number' && isFinite( underlineHeightScale ) && underlineHeightScale > 0 );
 
     if ( this._underlineHeightScale !== underlineHeightScale ) {
@@ -1191,8 +1173,8 @@ inherit( Node, RichText, {
       this.rebuildRichText();
     }
     return this;
-  },
-  set underlineHeightScale( value ) { this.setUnderlineHeightScale( value ); },
+  }
+  set underlineHeightScale( value ) { this.setUnderlineHeightScale( value ); }
 
   /**
    * Returns the underline height adjustment as a proportion of the detected distance from the baseline to the top of the
@@ -1201,10 +1183,10 @@ inherit( Node, RichText, {
    *
    * @returns {number}
    */
-  getUnderlineHeightScale: function() {
+  getUnderlineHeightScale() {
     return this._underlineHeightScale;
-  },
-  get underlineHeightScale() { return this.getUnderlineHeightScale(); },
+  }
+  get underlineHeightScale() { return this.getUnderlineHeightScale(); }
 
   /**
    * Sets the lineWidth of strikethrough lines.
@@ -1213,7 +1195,7 @@ inherit( Node, RichText, {
    * @param {number} strikethroughLineWidth
    * @returs {RichText} - For chaining
    */
-  setStrikethroughLineWidth: function( strikethroughLineWidth ) {
+  setStrikethroughLineWidth( strikethroughLineWidth ) {
     assert && assert( typeof strikethroughLineWidth === 'number' && isFinite( strikethroughLineWidth ) && strikethroughLineWidth > 0 );
 
     if ( this._strikethroughLineWidth !== strikethroughLineWidth ) {
@@ -1221,8 +1203,8 @@ inherit( Node, RichText, {
       this.rebuildRichText();
     }
     return this;
-  },
-  set strikethroughLineWidth( value ) { this.setStrikethroughLineWidth( value ); },
+  }
+  set strikethroughLineWidth( value ) { this.setStrikethroughLineWidth( value ); }
 
   /**
    * Returns the lineWidth of strikethrough lines.
@@ -1230,10 +1212,10 @@ inherit( Node, RichText, {
    *
    * @returns {number}
    */
-  getStrikethroughLineWidth: function() {
+  getStrikethroughLineWidth() {
     return this._strikethroughLineWidth;
-  },
-  get strikethroughLineWidth() { return this.getStrikethroughLineWidth(); },
+  }
+  get strikethroughLineWidth() { return this.getStrikethroughLineWidth(); }
 
   /**
    * Sets the strikethrough height adjustment as a proportion of the detected distance from the baseline to the top of the
@@ -1243,7 +1225,7 @@ inherit( Node, RichText, {
    * @param {number} strikethroughHeightScale
    * @returs {RichText} - For chaining
    */
-  setStrikethroughHeightScale: function( strikethroughHeightScale ) {
+  setStrikethroughHeightScale( strikethroughHeightScale ) {
     assert && assert( typeof strikethroughHeightScale === 'number' && isFinite( strikethroughHeightScale ) && strikethroughHeightScale > 0 );
 
     if ( this._strikethroughHeightScale !== strikethroughHeightScale ) {
@@ -1251,8 +1233,8 @@ inherit( Node, RichText, {
       this.rebuildRichText();
     }
     return this;
-  },
-  set strikethroughHeightScale( value ) { this.setStrikethroughHeightScale( value ); },
+  }
+  set strikethroughHeightScale( value ) { this.setStrikethroughHeightScale( value ); }
 
   /**
    * Returns the strikethrough height adjustment as a proportion of the detected distance from the baseline to the top of the
@@ -1261,10 +1243,10 @@ inherit( Node, RichText, {
    *
    * @returns {number}
    */
-  getStrikethroughHeightScale: function() {
+  getStrikethroughHeightScale() {
     return this._strikethroughHeightScale;
-  },
-  get strikethroughHeightScale() { return this.getStrikethroughHeightScale(); },
+  }
+  get strikethroughHeightScale() { return this.getStrikethroughHeightScale(); }
 
   /**
    * Sets the color of links. If null, no fill will be overridden.
@@ -1273,14 +1255,14 @@ inherit( Node, RichText, {
    * @param {paint} linkFill
    * @returs {RichText} - For chaining
    */
-  setLinkFill: function( linkFill ) {
+  setLinkFill( linkFill ) {
     if ( this._linkFill !== linkFill ) {
       this._linkFill = linkFill;
       this.rebuildRichText();
     }
     return this;
-  },
-  set linkFill( value ) { this.setLinkFill( value ); },
+  }
+  set linkFill( value ) { this.setLinkFill( value ); }
 
   /**
    * Returns the color of links.
@@ -1288,10 +1270,10 @@ inherit( Node, RichText, {
    *
    * @returns {paint}
    */
-  getLinkFill: function() {
+  getLinkFill() {
     return this._linkFill;
-  },
-  get linkFill() { return this.getLinkFill(); },
+  }
+  get linkFill() { return this.getLinkFill(); }
 
   /**
    * Sets whether link clicks will call event.handle().
@@ -1300,7 +1282,7 @@ inherit( Node, RichText, {
    * @param {boolean} linkEventsHandled
    * @returs {RichText} - For chaining
    */
-  setLinkEventsHandled: function( linkEventsHandled ) {
+  setLinkEventsHandled( linkEventsHandled ) {
     assert && assert( typeof linkEventsHandled === 'boolean' );
 
     if ( this._linkEventsHandled !== linkEventsHandled ) {
@@ -1308,8 +1290,8 @@ inherit( Node, RichText, {
       this.rebuildRichText();
     }
     return this;
-  },
-  set linkEventsHandled( value ) { this.setLinkEventsHandled( value ); },
+  }
+  set linkEventsHandled( value ) { this.setLinkEventsHandled( value ); }
 
   /**
    * Returns whether link events will be handled.
@@ -1317,10 +1299,10 @@ inherit( Node, RichText, {
    *
    * @returns {boolean}
    */
-  getLinkEventsHandled: function() {
+  getLinkEventsHandled() {
     return this._linkEventsHandled;
-  },
-  get linkEventsHandled() { return this.getLinkEventsHandled(); },
+  }
+  get linkEventsHandled() { return this.getLinkEventsHandled(); }
 
   /**
    * Sets the map of href placeholder => actual href/callback used for links. However if set to true ({boolean}) as a
@@ -1353,7 +1335,7 @@ inherit( Node, RichText, {
    * @param {Object|boolean} links
    * @returs {RichText} - For chaining
    */
-  setLinks: function( links ) {
+  setLinks( links ) {
     assert && assert( links !== false || Object.getPrototypeOf( links ) === Object.prototype );
 
     if ( this._links !== links ) {
@@ -1361,8 +1343,8 @@ inherit( Node, RichText, {
       this.rebuildRichText();
     }
     return this;
-  },
-  set links( value ) { this.setLinks( value ); },
+  }
+  set links( value ) { this.setLinks( value ); }
 
   /**
    * Returns whether link events will be handled.
@@ -1370,10 +1352,10 @@ inherit( Node, RichText, {
    *
    * @returns {Object}
    */
-  getLinks: function() {
+  getLinks() {
     return this._links;
-  },
-  get links() { return this.getLinks(); },
+  }
+  get links() { return this.getLinks(); }
 
   /**
    * Sets the alignment of text (only relevant if there are multiple lines).
@@ -1382,7 +1364,7 @@ inherit( Node, RichText, {
    * @param {string} align
    * @returns {RichText} - For chaining
    */
-  setAlign: function( align ) {
+  setAlign( align ) {
     assert && assert( align === 'left' || align === 'center' || align === 'right' );
 
     if ( this._align !== align ) {
@@ -1390,8 +1372,8 @@ inherit( Node, RichText, {
       this.rebuildRichText();
     }
     return this;
-  },
-  set align( value ) { this.setAlign( value ); },
+  }
+  set align( value ) { this.setAlign( value ); }
 
   /**
    * Returns the current alignment of the text (only relevant if there are multiple lines).
@@ -1399,10 +1381,10 @@ inherit( Node, RichText, {
    *
    * @returns {string}
    */
-  getAlign: function() {
+  getAlign() {
     return this._align;
-  },
-  get align() { return this.getAlign(); },
+  }
+  get align() { return this.getAlign(); }
 
   /**
    * Sets the leading (spacing between lines)
@@ -1411,7 +1393,7 @@ inherit( Node, RichText, {
    * @param {number} leading
    * @returns {RichText} - For chaining
    */
-  setLeading: function( leading ) {
+  setLeading( leading ) {
     assert && assert( typeof leading === 'number' && isFinite( leading ) );
 
     if ( this._leading !== leading ) {
@@ -1419,8 +1401,8 @@ inherit( Node, RichText, {
       this.rebuildRichText();
     }
     return this;
-  },
-  set leading( value ) { this.setLeading( value ); },
+  }
+  set leading( value ) { this.setLeading( value ); }
 
   /**
    * Returns the leading (spacing between lines)
@@ -1428,10 +1410,10 @@ inherit( Node, RichText, {
    *
    * @returns {number}
    */
-  getLeading: function() {
+  getLeading() {
     return this._leading;
-  },
-  get leading() { return this.getLeading(); },
+  }
+  get leading() { return this.getLeading(); }
 
   /**
    * Sets the line wrap width for the text (or null if none is desired). Lines longer than this length will wrap
@@ -1441,7 +1423,7 @@ inherit( Node, RichText, {
    * @param {number|null} lineWrap - If it's a number, it should be greater than 0.
    * @returns {RichText} - For chaining
    */
-  setLineWrap: function( lineWrap ) {
+  setLineWrap( lineWrap ) {
     assert && assert( lineWrap === null || ( typeof lineWrap === 'number' && isFinite( lineWrap ) && lineWrap > 0 ) );
 
     if ( this._lineWrap !== lineWrap ) {
@@ -1449,8 +1431,8 @@ inherit( Node, RichText, {
       this.rebuildRichText();
     }
     return this;
-  },
-  set lineWrap( value ) { this.setLineWrap( value ); },
+  }
+  set lineWrap( value ) { this.setLineWrap( value ); }
 
   /**
    * Returns the line wrap width.
@@ -1458,11 +1440,11 @@ inherit( Node, RichText, {
    *
    * @returns {number|null}
    */
-  getLineWrap: function() {
+  getLineWrap() {
     return this._lineWrap;
-  },
+  }
   get lineWrap() { return this.getLineWrap(); }
-}, {
+
   /**
    * Returns a wrapped version of the string with a font specifier that uses the given font object.
    * @public
@@ -1474,7 +1456,7 @@ inherit( Node, RichText, {
    * @param {Font} font
    * @returns {string}
    */
-  stringWithFont: function( str, font ) {
+  static stringWithFont( str, font ) {
     // TODO: ES6 string interpolation.
     return '<span style=\'' +
            'font-style: ' + font.style + ';' +
@@ -1485,7 +1467,7 @@ inherit( Node, RichText, {
            'font-family: ' + font.family + ';' +
            'line-height: ' + font.lineHeight + ';' +
            '\'>' + str + '</span>';
-  },
+  }
 
   /**
    * Stringifies an HTML subtree defined by the given element.
@@ -1495,7 +1477,7 @@ inherit( Node, RichText, {
    * @param {boolean} isLTR
    * @returns {string}
    */
-  himalayaElementToString: function( element, isLTR ) {
+  static himalayaElementToString( element, isLTR ) {
     if ( element.type === 'Text' ) {
       return RichText.contentToString( element.content, isLTR );
     }
@@ -1505,14 +1487,12 @@ inherit( Node, RichText, {
       }
 
       // Process children
-      return element.children.map( function( child ) {
-        return RichText.himalayaElementToString( child, isLTR );
-      } ).join( '' );
+      return element.children.map( child => RichText.himalayaElementToString( child, isLTR ) ).join( '' );
     }
     else {
       return '';
     }
-  },
+  }
 
   /**
    * Stringifies an HTML subtree defined by the given element, but removing certain tags that we don't need for
@@ -1523,7 +1503,7 @@ inherit( Node, RichText, {
    * @param {boolean} isLTR
    * @returns {string}
    */
-  himalayaElementToAccessibleString: function( element, isLTR ) {
+  static himalayaElementToAccessibleString( element, isLTR ) {
     if ( element.type === 'Text' ) {
       return RichText.contentToString( element.content, isLTR );
     }
@@ -1533,9 +1513,7 @@ inherit( Node, RichText, {
       }
 
       // Process children
-      const content = element.children.map( function( child ) {
-        return RichText.himalayaElementToAccessibleString( child, isLTR );
-      } ).join( '' );
+      const content = element.children.map( child => RichText.himalayaElementToAccessibleString( child, isLTR ) ).join( '' );
 
       if ( _.includes( ACCESSIBLE_TAGS, element.tagName ) ) {
         return '<' + element.tagName + '>' + content + '</' + element.tagName + '>';
@@ -1547,7 +1525,7 @@ inherit( Node, RichText, {
     else {
       return '';
     }
-  },
+  }
 
   /**
    * Takes the element.content from himalaya, unescapes HTML entities, and applies the proper directional tags.
@@ -1559,27 +1537,38 @@ inherit( Node, RichText, {
    * @param {boolean} isLTR
    * @returns {string}
    */
-  contentToString: function( content, isLTR ) {
+  static contentToString( content, isLTR ) {
     const unescapedContent = he.decode( content );
     return isLTR ? ( '\u202a' + unescapedContent + '\u202c' ) : ( '\u202b' + unescapedContent + '\u202c' );
   }
-} );
-
-/**
- * A container of other RichText elements and leaves.
- * @constructor
- * @private
- *
- * @param {boolean} isLTR - Whether this container will lay out elements in the left-to-right order (if false, will be
- *                          right-to-left).
- */
-function RichTextElement( isLTR ) {
-  Node.call( this );
-
-  this.initialize( isLTR );
 }
 
-inherit( Node, RichTextElement, {
+/**
+ * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
+ * order they will be evaluated in.
+ * @protected
+ *
+ * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
+ *       cases that may apply.
+ */
+RichText.prototype._mutatorKeys = RICH_TEXT_OPTION_KEYS.concat( Node.prototype._mutatorKeys );
+
+scenery.register( 'RichText', RichText );
+
+class RichTextElement extends Node {
+  /**
+   * A container of other RichText elements and leaves.
+   * @private
+   *
+   * @param {boolean} isLTR - Whether this container will lay out elements in the left-to-right order (if false, will be
+   *                          right-to-left).
+   */
+  constructor( isLTR ) {
+    super();
+
+    this.initialize( isLTR );
+  }
+
   /**
    * Sets up state
    * @public
@@ -1587,7 +1576,7 @@ inherit( Node, RichTextElement, {
    * @param {boolean} isLTR
    * @returns {RichTextElement} - Self reference
    */
-  initialize: function( isLTR ) {
+  initialize( isLTR ) {
     // @private {boolean}
     this.isLTR = isLTR;
 
@@ -1596,13 +1585,13 @@ inherit( Node, RichTextElement, {
     this.rightSpacing = 0;
 
     return this;
-  },
+  }
 
   /**
    * Releases references
    * @public
    */
-  clean: function() {
+  clean() {
     // Remove all children (and recursively clean)
     while ( this._children.length ) {
       const child = this._children[ this._children.length - 1 ];
@@ -1613,7 +1602,7 @@ inherit( Node, RichTextElement, {
     this.matrix = Matrix3.IDENTITY;
 
     this.freeToPool();
-  },
+  }
 
   /**
    * Adds a child element.
@@ -1622,7 +1611,7 @@ inherit( Node, RichTextElement, {
    * @param {RichTextElement|RichTextLeaf} element
    * @returns {boolean} - Whether the item was actually added.
    */
-  addElement: function( element ) {
+  addElement( element ) {
 
     const hadChild = this.children.length > 0;
     const hasElement = element.width > 0;
@@ -1676,7 +1665,7 @@ inherit( Node, RichTextElement, {
       return true;
     }
     return false;
-  },
+  }
 
   /**
    * Adds an amount of spacing to the "before" side.
@@ -1684,7 +1673,7 @@ inherit( Node, RichTextElement, {
    *
    * @param {number} amount
    */
-  addExtraBeforeSpacing: function( amount ) {
+  addExtraBeforeSpacing( amount ) {
     if ( this.isLTR ) {
       this.leftSpacing += amount;
     }
@@ -1692,31 +1681,30 @@ inherit( Node, RichTextElement, {
       this.rightSpacing += amount;
     }
   }
-} );
+}
 
 Poolable.mixInto( RichTextElement, {
   initialize: RichTextElement.prototype.initialize
 } );
 
-/**
- * A leaf (text) node.
- * @constructor
- *
- * @param {string} content
- * @param {boolean} isLTR
- * @param {Font|string} font
- * @param {string} boundsMethod
- * @param {PaintDef} fill
- * @param {PaintDef} stroke
- * @param {number} lineWidth
- */
-function RichTextLeaf( content, isLTR, font, boundsMethod, fill, stroke, lineWidth ) {
-  Text.call( this, '' );
+class RichTextLeaf extends Text {
+  /**
+   * A leaf (text) node.
+   *
+   * @param {string} content
+   * @param {boolean} isLTR
+   * @param {Font|string} font
+   * @param {string} boundsMethod
+   * @param {PaintDef} fill
+   * @param {PaintDef} stroke
+   * @param {number} lineWidth
+   */
+  constructor( content, isLTR, font, boundsMethod, fill, stroke, lineWidth ) {
+    super( '' );
 
-  this.initialize( content, isLTR, font, boundsMethod, fill, stroke, lineWidth );
-}
+    this.initialize( content, isLTR, font, boundsMethod, fill, stroke, lineWidth );
+  }
 
-inherit( Text, RichTextLeaf, {
   /**
    * Set up this text's state
    * @public
@@ -1730,7 +1718,7 @@ inherit( Text, RichTextLeaf, {
    * @param {number} lineWidth
    * @returns {RichTextLeaf} - Self reference
    */
-  initialize: function( content, isLTR, font, boundsMethod, fill, stroke, lineWidth ) {
+  initialize( content, isLTR, font, boundsMethod, fill, stroke, lineWidth ) {
 
     // Grab all spaces at the (logical) start
     let whitespaceBefore = '';
@@ -1762,19 +1750,20 @@ inherit( Text, RichTextLeaf, {
     this.rightSpacing = isLTR ? spacingAfter : spacingBefore;
 
     return this;
-  },
+  }
 
   /**
    * Cleans references that could cause memory leaks (as those things may contain other references).
+   * @public
    */
-  clean: function() {
+  clean() {
     this.fill = null;
     this.stroke = null;
 
     this.matrix = Matrix3.IDENTITY;
 
     this.freeToPool();
-  },
+  }
 
   /**
    * Whether this leaf will fit in the specified amount of space (including, if required, the amount of spacing on
@@ -1785,38 +1774,37 @@ inherit( Text, RichTextLeaf, {
    * @param {boolean} hasAddedLeafToLine
    * @param {boolean} isContainerLTR
    */
-  fitsIn: function( widthAvailable, hasAddedLeafToLine, isContainerLTR ) {
+  fitsIn( widthAvailable, hasAddedLeafToLine, isContainerLTR ) {
     return this.width + ( hasAddedLeafToLine ? ( isContainerLTR ? this.leftSpacing : this.rightSpacing ) : 0 ) <= widthAvailable;
   }
-} );
+}
 
 Poolable.mixInto( RichTextLeaf, {
   initialize: RichTextLeaf.prototype.initialize
 } );
 
-/**
- * A link node
- * @constructor
- *
- * @param {string} innerContent
- * @param {function|string} href
- */
-function RichTextLink( innerContent, href ) {
-  Node.call( this, {
-    cursor: 'pointer',
-    tagName: 'a'
-  } );
+class RichTextLink extends Node {
+  /**
+   * A link node
+   *
+   * @param {string} innerContent
+   * @param {function|string} href
+   */
+  constructor( innerContent, href ) {
+    super( {
+      cursor: 'pointer',
+      tagName: 'a'
+    } );
 
-  // @private {ButtonListener|null}
-  this.buttonListener = null;
+    // @private {ButtonListener|null}
+    this.buttonListener = null;
 
-  // @private {function|null}
-  this.accessibleInputListener = null;
+    // @private {function|null}
+    this.accessibleInputListener = null;
 
-  this.initialize( innerContent, href );
-}
+    this.initialize( innerContent, href );
+  }
 
-inherit( Node, RichTextLink, {
   /**
    * Set up this state
    * @public
@@ -1825,7 +1813,7 @@ inherit( Node, RichTextLink, {
    * @param {function|string} href
    * @returns {RichTextLink} - Self reference
    */
-  initialize: function( innerContent, href ) {
+  initialize( innerContent, href ) {
     // pdom - open the link in the new tab when activated with a keyboard.
     // also see https://github.com/phetsims/joist/issues/430
     this.innerContent = innerContent;
@@ -1839,7 +1827,7 @@ inherit( Node, RichTextLink, {
       this.setAccessibleAttribute( 'href', '#' ); // Required so that the click listener will get called.
       this.setAccessibleAttribute( 'target', '_self' ); // This is the default (easier than conditionally removing)
       this.accessibleInputListener = {
-        click: function( event ) {
+        click: event => {
           event.domEvent.preventDefault();
 
           href();
@@ -1850,7 +1838,7 @@ inherit( Node, RichTextLink, {
     // Otherwise our href is a {string}, and we should open a window pointing to it (assuming it's a URL)
     else {
       this.buttonListener = new ButtonListener( {
-        fire: function( event ) {
+        fire: event => {
           if ( event.isFromPDOM() ) {
 
             // prevent default from a11y activation so we don't also open a new tab from native DOM input on a link
@@ -1866,12 +1854,13 @@ inherit( Node, RichTextLink, {
     }
 
     return this;
-  },
+  }
 
   /**
    * Cleans references that could cause memory leaks (as those things may contain other references).
+   * @public
    */
-  clean: function() {
+  clean() {
     // Remove all children (and recursively clean)
     while ( this._children.length ) {
       const child = this._children[ this._children.length - 1 ];
@@ -1890,7 +1879,7 @@ inherit( Node, RichTextLink, {
 
     this.freeToPool();
   }
-} );
+}
 
 Poolable.mixInto( RichTextLink, {
   initialize: RichTextLink.prototype.initialize

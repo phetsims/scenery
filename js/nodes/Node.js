@@ -180,6 +180,8 @@ import Pen from '../input/Pen.js';
 import Touch from '../input/Touch.js';
 import scenery from '../scenery.js';
 import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
+import Features from '../util/Features.js';
+import Filter from '../util/Filter.js';
 import Picker from '../util/Picker.js';
 import RendererSummary from '../util/RendererSummary.js';
 import Trail from '../util/Trail.js';
@@ -213,6 +215,7 @@ const NODE_OPTION_KEYS = [
   'inputEnabled', // {boolean} Whether input events can reach into this subtree, see setInputEnabled() for more documentation
   'inputListeners', // {Array.<Object>} - The input listeners attached to the Node, see setInputListeners() for more documentation
   'opacity', // {number} - Opacity of this Node's subtree, see setOpacity() for more documentation
+  'filters', // {Array.<Filter>} - Non-opacity filters, see setFilters() for more documentation
   'matrix', // {Matrix3} - Transformation matrix of the Node, see setMatrix() for more documentation
   'translation', // {Vector2} - x/y translation of the Node, see setTranslation() for more documentation
   'x', // {number} - x translation of the Node, see setX() for more documentation
@@ -329,7 +332,7 @@ function Node( options ) {
   // DOM elements that need to closely track state (possibly by Canvas to maintain dirty state).
   this._drawables = [];
 
-  // @public {TinyForwardingProperty.<boolean>} - Whether this Node (and its children) will be visible when the scene is updated.
+  // @private {TinyForwardingProperty.<boolean>} - Whether this Node (and its children) will be visible when the scene is updated.
   // Visible Nodes by default will not be pickable either.
   // NOTE: This is fired synchronously when the visibility of the Node is toggled
   this._visibleProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.visible, true );
@@ -338,8 +341,9 @@ function Node( options ) {
   // @public {TinyProperty.<number>} - Opacity, in the range from 0 (fully transparent) to 1 (fully opaque).
   // NOTE: This is fired synchronously when the opacity of the Node is toggled
   this.opacityProperty = new TinyProperty( DEFAULT_OPTIONS.opacity );
+  this.opacityProperty.lazyLink( this.onOpacityPropertyChange.bind( this ) );
 
-  // @public {TinyForwardingProperty.<boolean|null>} - See setPickable() and setPickableProperty()
+  // @private {TinyForwardingProperty.<boolean|null>} - See setPickable() and setPickableProperty()
   // NOTE: This is fired synchronously when the pickability of the Node is toggled
   this._pickableProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.pickable, DEFAULT_OPTIONS.pickablePropertyPhetioInstrumented );
   this._pickableProperty.lazyLink( this.onPickablePropertyChange.bind( this ) );
@@ -467,6 +471,9 @@ function Node( options ) {
     this._originalChildBounds = this.childBoundsProperty._value;
   }
 
+  // @public (scenery-internal) {Array.<Filter>}
+  this._filters = [];
+
   // @public (scenery-internal) {Object} - Where rendering-specific settings are stored. They are generally modified
   // internally, so there is no ES5 setter for hints.
   this._hints = {
@@ -528,6 +535,9 @@ function Node( options ) {
   // things that could affect descendants)
   this.rendererSummaryRefreshEmitter = new TinyEmitter();
 
+  // @public {TinyEmitter} - Emitted to when we change filters (either opacity or generalized filters)
+  this.filterChangeEmitter = new TinyEmitter();
+
   // @public {TinyEmitter} - Fired when the accessible Displays for this Node have changed (see PDOMInstance)
   this.accessibleDisplaysEmitter = new TinyEmitter();
 
@@ -563,7 +573,7 @@ function Node( options ) {
   // @private {number} - This signals that we can validateBounds() on this subtree and we don't have to traverse further
   this._boundsEventSelfCount = 0;
 
-  // Initialize sub-components
+  // @private {Picker} - Subcomponent dedicated to hit testing
   this._picker = new Picker( this );
 
   // @public (scenery-internal) {boolean} - There are certain specific cases (in this case due to a11y) where we need
@@ -582,8 +592,8 @@ scenery.register( 'Node', Node );
 
 inherit( PhetioObject, Node, {
   /**
-   * This is an array of property (setter) names for Node.mutate(), which are also used when creating Nodes with
-   * parameter objects.
+   * {Array.<string>} - This is an array of property (setter) names for Node.mutate(), which are also used when creating
+   * Nodes with parameter objects.
    * @protected
    *
    * E.g. new scenery.Node( { x: 5, rotation: 20 } ) will create a Path, and apply setters in the order below
@@ -993,10 +1003,7 @@ inherit( PhetioObject, Node, {
    * @returns {Node} - Returns 'this' reference, for chaining
    */
   moveToFront: function() {
-    const self = this;
-    _.each( this._parents.slice(), function( parent ) {
-      parent.moveChildToFront( self );
-    } );
+    _.each( this._parents.slice(), parent => parent.moveChildToFront( this ) );
 
     return this; // allow chaining
   },
@@ -1067,10 +1074,7 @@ inherit( PhetioObject, Node, {
    * @returns {Node} - Returns 'this' reference, for chaining
    */
   moveToBack: function() {
-    const self = this;
-    _.each( this._parents.slice(), function( parent ) {
-      parent.moveChildToBack( self );
-    } );
+    _.each( this._parents.slice(), parent => parent.moveChildToBack( this ) );
 
     return this; // allow chaining
   },
@@ -1122,10 +1126,7 @@ inherit( PhetioObject, Node, {
    * @returns {Node} - Returns 'this' reference, for chaining
    */
   detach: function() {
-    const self = this;
-    _.each( this._parents.slice( 0 ), function( parent ) {
-      parent.removeChild( self );
-    } );
+    _.each( this._parents.slice( 0 ), parent => parent.removeChild( this ) );
 
     return this; // allow chaining
   },
@@ -1757,6 +1758,7 @@ inherit( PhetioObject, Node, {
 
   /**
    * Returns the bounding box of this Node and all of its sub-trees (in the "parent" coordinate frame).
+   * @public
    *
    * NOTE: Do NOT mutate the returned value!
    * NOTE: This may require computation of this node's subtree bounds, which may incur some performance loss.
@@ -3296,6 +3298,64 @@ inherit( PhetioObject, Node, {
   get opacity() { return this.getOpacity(); },
 
   /**
+   * Called when our opacity Property changes values.
+   * @private
+   *
+   * @param {boolean} opacity
+   * @param {boolean} oldOpacity
+   */
+  onOpacityPropertyChange: function( opacity, oldOpacity ) {
+    this.filterChangeEmitter.emit();
+  },
+
+  /**
+   * Sets the non-opacity filters for this Node.
+   * @public
+   *
+   * @param {Array.<Filter>} filters
+   */
+  setFilters: function( filters ) {
+    assert && assert( Array.isArray( filters ), 'filters should be an array' );
+    assert && assert( _.every( filters, filter => filter instanceof Filter ), 'filters should consist of Filter objects only' );
+
+    this._filters.length = 0;
+    this._filters.push( ...filters );
+
+    this.invalidateHint();
+    this.filterChangeEmitter.emit();
+  },
+  set filters( value ) { this.setFilters( value ); },
+
+  /**
+   * Returns the non-opacity filters for this Node.
+   * @public
+   *
+   * @returns {Array.<Filter>}
+   */
+  getFilters: function() {
+    return this._filters.slice();
+  },
+  get filters() { return this.getFilters(); },
+
+  /**
+   * Sets what Property our pickableProperty is backed by, so that changes to this provided Property will change this
+   * Node's pickability, and vice versa. This does not change this._pickableProperty. See TinyForwardingProperty.setTargetProperty()
+   * for more info.
+   *
+   * Instrumented Nodes do not by default create their own instrumented pickableProperty, even though Node.visibleProperty does.
+   *
+   * @public
+   *
+   * @param {TinyProperty.<boolean>|Property.<boolean>|null} newTarget
+   * @returns {Node} for chaining
+   */
+  setPickableProperty( newTarget ) {
+
+    return this._pickableProperty.setTargetProperty( this, PICKABLE_PROPERTY_TANDEM_NAME, newTarget );
+  },
+  set pickableProperty( property ) { this.setPickableProperty( property ); },
+
+  /**
    * Handles linking and checking child PhET-iO Properties such as visibleProperty and pickableProperty.
    * @public
    *
@@ -3319,24 +3379,6 @@ inherit( PhetioObject, Node, {
   },
 
   /**
-   * Sets what Property our pickableProperty is backed by, so that changes to this provided Property will change this
-   * Node's pickability, and vice versa. This does not change this._pickableProperty. See TinyForwardingProperty.setTargetProperty()
-   * for more info.
-   *
-   * Instrumented Nodes do not by default create their own instrumented pickableProperty, even though Node.visibleProperty does.
-   *
-   * @public
-   *
-   * @param {TinyProperty.<boolean>|Property.<boolean>|null} newTarget
-   * @returns {Node} for chaining
-   */
-  setPickableProperty( newTarget ) {
-
-    return this._pickableProperty.setTargetProperty( this, PICKABLE_PROPERTY_TANDEM_NAME, newTarget );
-  },
-  set pickableProperty( property ) { this.setPickableProperty( property ); },
-
-  /**
    * Get this Node's pickableProperty. Note! This is not the reciprocal of setPickableProperty. Node.prototype._pickableProperty
    * is a TinyForwardingProperty, and is set up to listen to changes from the pickableProperty provided by
    * setPickableProperty(), but the underlying reference does not change. This means the following:
@@ -3344,6 +3386,7 @@ inherit( PhetioObject, Node, {
    * const pickableProperty = new Property( false );
    * myNode.setPickableProperty( pickableProperty )
    * => myNode.getPickableProperty() !== pickableProperty (!!!!!!)
+   * @public
    *
    * Please use this with caution. See setPickableProperty() for more information.
    *
@@ -4002,6 +4045,12 @@ inherit( PhetioObject, Node, {
   },
   get excludeInvisibleChildrenFromBounds() { return this.isExcludeInvisibleChildrenFromBounds(); },
 
+  /**
+   * Sets the preventFit performance flag.
+   * @public
+   *
+   * @param {boolean} preventFit
+   */
   setPreventFit: function( preventFit ) {
     assert && assert( typeof preventFit === 'boolean' );
 
@@ -4388,7 +4437,7 @@ inherit( PhetioObject, Node, {
       const child = this._children[ i ];
 
       if ( child.isVisible() ) {
-        const requiresScratchCanvas = child.opacity !== 1 || child.clipArea;
+        const requiresScratchCanvas = child.opacity !== 1 || child.clipArea || child._filters.length;
 
         wrapper.context.save();
         matrix.multiplyMatrix( child._transform.getMatrix() );
@@ -4412,6 +4461,17 @@ inherit( PhetioObject, Node, {
           }
           wrapper.context.setTransform( 1, 0, 0, 1, 0, 0 ); // identity
           wrapper.context.globalAlpha = child.opacity;
+
+          if ( child._filters.length ) {
+            // Filters shouldn't be too often, so less concerned about the GC here (and this is so much easier to read).
+            if ( Features.canvasFilter && _.every( child._filters, filter => filter.isDOMCompatible() ) ) {
+              wrapper.context.filter = child._filters.map( filter => filter.getCSSFilterString() ).join( ' ' );
+            }
+            else {
+              child._filters.forEach( filter => filter.applyCanvasFilter( wrapper ) );
+            }
+          }
+
           wrapper.context.drawImage( canvas, 0, 0 );
           wrapper.context.restore();
         }
@@ -4434,7 +4494,6 @@ inherit( PhetioObject, Node, {
    * @param {Function} callback - Called with no arguments
    * @param {string} [backgroundColor]
    */
-  // @public (API compatibility for now): Render this Node to the Canvas (clearing it first)
   renderToCanvas: function( canvas, context, callback, backgroundColor ) {
 
     assert && deprecationWarning( 'Node.renderToCanvas() is deprecated, please use Node.rasterized() instead' );
@@ -5301,6 +5360,7 @@ inherit( PhetioObject, Node, {
 
   /**
    * Returns the bounds of any other Node in our local coordinate frame.
+   * @public
    *
    * NOTE: If this node or the passed in Node have multiple instances (e.g. this or one ancestor has two parents), it will fail
    * with an assertion.
@@ -5316,6 +5376,7 @@ inherit( PhetioObject, Node, {
 
   /**
    * Returns the bounds of this Node in another node's local coordinate frame.
+   * @public
    *
    * NOTE: If this node or the passed in Node have multiple instances (e.g. this or one ancestor has two parents), it will fail
    * with an assertion.
@@ -5399,9 +5460,7 @@ inherit( PhetioObject, Node, {
     assert && assert( _.filter( [ 'translation', 'y', 'top', 'bottom', 'centerY', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom' ], function( key ) { return options[ key ] !== undefined; } ).length <= 1,
       'More than one mutation on this Node set the y component, check ' + Object.keys( options ).join( ',' ) );
 
-    const self = this;
-
-    _.each( this._mutatorKeys, function( key ) {
+    _.each( this._mutatorKeys, key => {
 
       // See https://github.com/phetsims/scenery/issues/580 for more about passing undefined.
       assert && assert( !options.hasOwnProperty( key ) || options[ key ] !== undefined, 'Undefined not allowed for Node key: ' + key );
@@ -5411,10 +5470,10 @@ inherit( PhetioObject, Node, {
 
         // if the key refers to a function that is not ES5 writable, it will execute that function with the single argument
         if ( descriptor && typeof descriptor.value === 'function' ) {
-          self[ key ]( options[ key ] );
+          this[ key ]( options[ key ] );
         }
         else {
-          self[ key ] = options[ key ];
+          this[ key ] = options[ key ];
         }
       }
     } );
@@ -5530,6 +5589,8 @@ inherit( PhetioObject, Node, {
    * Performs checks to see if the internal state of Instance references is correct at a certain point in/after the
    * Display's updateDisplay().
    * @private
+   *
+   * @param {Display} display
    */
   auditInstanceSubtreeForDisplay: function( display ) {
     if ( assertSlow ) {
@@ -5624,6 +5685,7 @@ inherit( PhetioObject, Node, {
 // Node is composed with this feature of Interactive Descriptions
 ParallelDOM.compose( Node );
 
+// @public {IOType}
 Node.NodeIO = new IOType( 'NodeIO', {
   valueType: Node,
   documentation: 'The base type for graphical and potentially interactive objects.'

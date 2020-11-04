@@ -10,7 +10,7 @@ import Color from './Color.js';
 
 QUnit.module( 'Color' );
 
-QUnit.test( 'RGB Hex', function( assert ) {
+QUnit.test( 'RGB Hex', assert => {
   const ff00cc = new Color( '#ff00cc' );
   assert.equal( ff00cc.r, 0xff, 'ff00cc red' );
   assert.equal( ff00cc.g, 0, 'ff00cc green' );
@@ -26,7 +26,7 @@ QUnit.test( 'RGB Hex', function( assert ) {
   assert.equal( f0c.toCSS(), 'rgb(255,0,204)', 'f0c css' );
 } );
 
-QUnit.test( 'RGB Hex direct', function( assert ) {
+QUnit.test( 'RGB Hex direct', assert => {
   const ff00cc = new Color( 0xff00cc );
   assert.equal( ff00cc.r, 0xff, 'ff00cc red' );
   assert.equal( ff00cc.g, 0, 'ff00cc green' );
@@ -42,7 +42,7 @@ QUnit.test( 'RGB Hex direct', function( assert ) {
   assert.equal( ff00ccHalf.toCSS(), 'rgba(255,0,204,0.5)', 'ff00ccHalf css' );
 } );
 
-QUnit.test( 'RGB/A direct', function( assert ) {
+QUnit.test( 'RGB/A direct', assert => {
   const ff00cc = new Color( 0xff, 0x00, 0xcc );
   assert.equal( ff00cc.r, 0xff, 'ff00cc red' );
   assert.equal( ff00cc.g, 0, 'ff00cc green' );
@@ -58,7 +58,7 @@ QUnit.test( 'RGB/A direct', function( assert ) {
   assert.equal( ff00ccHalf.toCSS(), 'rgba(255,0,204,0.5)', 'ff00ccHalf css' );
 } );
 
-QUnit.test( 'Copy Constructor', function( assert ) {
+QUnit.test( 'Copy Constructor', assert => {
   const ff00cc = new Color( 0xff, 0x00, 0xcc );
   const copy = new Color( ff00cc );
 
@@ -68,7 +68,7 @@ QUnit.test( 'Copy Constructor', function( assert ) {
   assert.equal( ff00cc.a, copy.a );
 } );
 
-QUnit.test( 'Keywords', function( assert ) {
+QUnit.test( 'Keywords', assert => {
   const yellow = new Color( 'yellow' );
   assert.equal( yellow.r, 0xff, 'yellow red' );
   assert.equal( yellow.g, 0xff, 'yellow green' );
@@ -79,7 +79,7 @@ QUnit.test( 'Keywords', function( assert ) {
   assert.equal( transparent.r + transparent.g + transparent.b + transparent.a, 0, 'transparent sum' );
 } );
 
-QUnit.test( 'rgb', function( assert ) {
+QUnit.test( 'rgb', assert => {
   const rgb = new Color( 'rgb(100,250,10)' );
   assert.equal( rgb.r, 100, 'rgb red' );
   assert.equal( rgb.g, 250, 'rgb green' );
@@ -93,7 +93,7 @@ QUnit.test( 'rgb', function( assert ) {
   assert.equal( clamped.b, 255, 'clamped rgb blue' );
 } );
 
-QUnit.test( 'rgba', function( assert ) {
+QUnit.test( 'rgba', assert => {
   const rgba = new Color( 'rgba(100,100%,0%,0)' );
   assert.equal( rgba.r, 100, 'rgba red' );
   assert.equal( rgba.g, 255, 'rgba green' );
@@ -108,7 +108,7 @@ QUnit.test( 'rgba', function( assert ) {
   assert.equal( clamped.a, 1, 'clamped rgba alpha' );
 } );
 
-QUnit.test( 'hsl', function( assert ) {
+QUnit.test( 'hsl', assert => {
   let hsl = new Color( 'hsl(0,100%,50%)' );
   assert.equal( hsl.r, 255, 'hsl 1 red' );
   assert.equal( hsl.g, 0, 'hsl 1 green' );
@@ -130,7 +130,7 @@ QUnit.test( 'hsl', function( assert ) {
   assert.equal( hsl.b, 175, 'hsl 4 blue' );
 } );
 
-QUnit.test( 'hsla', function( assert ) {
+QUnit.test( 'hsla', assert => {
   let hsl = new Color( 'hsla(90,25%,75%,0.25)' );
   assert.equal( hsl.r, 191, 'hsla red' );
   assert.equal( hsl.g, 207, 'hsla green' );

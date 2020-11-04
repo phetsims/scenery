@@ -21,7 +21,7 @@ const ListenerTestUtils = {
    * @param {number} x
    * @param {number} y
    */
-  mouseDown: function( display, x, y ) {
+  mouseDown( display, x, y ) {
     const domEvent = document.createEvent( 'MouseEvent' );
 
     // technically deprecated, but DOM4 event constructors not out yet. people on #whatwg said to use it
@@ -43,7 +43,7 @@ const ListenerTestUtils = {
    * @param {number} x
    * @param {number} y
    */
-  mouseUp: function( display, x, y ) {
+  mouseUp( display, x, y ) {
     const domEvent = document.createEvent( 'MouseEvent' );
 
     // technically deprecated, but DOM4 event constructors not out yet. people on #whatwg said to use it
@@ -65,7 +65,7 @@ const ListenerTestUtils = {
    * @param {number} x
    * @param {number} y
    */
-  mouseMove: function( display, x, y ) {
+  mouseMove( display, x, y ) {
     const domEvent = document.createEvent( 'MouseEvent' );
 
     // technically deprecated, but DOM4 event constructors not out yet. people on #whatwg said to use it
@@ -86,7 +86,7 @@ const ListenerTestUtils = {
    *
    * @param {Function} callback - Called with callback( {Display}, {Node}, {Node} ) - First node is the draggable rect
    */
-  simpleRectangleTest: function( callback ) {
+  simpleRectangleTest( callback ) {
     const node = new Node();
     const display = new Display( node, { width: 640, height: 480 } );
     display.initializeEvents();

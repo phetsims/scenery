@@ -9,25 +9,11 @@
  */
 
 import Poolable from '../../../phet-core/js/Poolable.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 import svgns from '../util/svgns.js';
 import SVGGradient from './SVGGradient.js';
 
-/**
- * @constructor
- * @mixes Poolable
- *
- * @param {SVGBlock} svgBlock
- * @param {RadialGradient} radialGradient
- */
-function SVGRadialGradient( svgBlock, radialGradient ) {
-  this.initialize( svgBlock, radialGradient );
-}
-
-scenery.register( 'SVGRadialGradient', SVGRadialGradient );
-
-inherit( SVGGradient, SVGRadialGradient, {
+class SVGRadialGradient extends SVGGradient {
   /**
    * Poolable initializer.
    * @private
@@ -35,11 +21,11 @@ inherit( SVGGradient, SVGRadialGradient, {
    * @param {SVGBlock} svgBlock
    * @param {RadialGradient} radialGradient
    */
-  initialize: function( svgBlock, radialGradient ) {
+  initialize( svgBlock, radialGradient ) {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGRadialGradient] initialize ' + radialGradient.id );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
-    SVGGradient.prototype.initialize.call( this, svgBlock, radialGradient );
+    super.initialize( svgBlock, radialGradient );
 
     // Radial-specific setup
     this.definition.setAttribute( 'cx', radialGradient.largePoint.x );
@@ -51,7 +37,7 @@ inherit( SVGGradient, SVGRadialGradient, {
     sceneryLog && sceneryLog.Paints && sceneryLog.pop();
 
     return this;
-  },
+  }
 
   /**
    * Creates the gradient-type-specific definition.
@@ -60,10 +46,12 @@ inherit( SVGGradient, SVGRadialGradient, {
    *
    * @returns {SVGRadialGradientElement}
    */
-  createDefinition: function() {
+  createDefinition() {
     return document.createElementNS( svgns, 'radialGradient' );
   }
-} );
+}
+
+scenery.register( 'SVGRadialGradient', SVGRadialGradient );
 
 Poolable.mixInto( SVGRadialGradient, {
   initialize: SVGRadialGradient.prototype.initialize

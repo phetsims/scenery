@@ -43,7 +43,7 @@ var TextBounds = {
    * @param {string} renderedText - Text to display (with any special characters replaced)
    * @returns {Bounds2}
    */
-  approximateSVGBounds: function( font, renderedText ) {
+  approximateSVGBounds( font, renderedText ) {
     assert && assert( font instanceof Font, 'Font required' );
     assert && assert( typeof renderedText === 'string', 'renderedText required' );
 
@@ -78,7 +78,7 @@ var TextBounds = {
    * @param {string} renderedText
    * @returns {Bounds2}
    */
-  guessSVGBounds: function( font, renderedText ) {
+  guessSVGBounds( font, renderedText ) {
     const px = font.getNumericSize();
     const isBold = font.weight === 'bold';
 
@@ -99,7 +99,7 @@ var TextBounds = {
    * @param {Text} text - The Text node
    * @returns {Bounds2}
    */
-  accurateCanvasBounds: function( text ) {
+  accurateCanvasBounds( text ) {
     // this seems to be slower than expected, mostly due to Font getters
     const svgBounds = TextBounds.approximateSVGBounds( text._font, text.renderedText );
 
@@ -109,7 +109,7 @@ var TextBounds = {
     }
 
     // NOTE: should return new instance, so that it can be mutated later
-    const accurateBounds = Utils.canvasAccurateBounds( function( context ) {
+    const accurateBounds = Utils.canvasAccurateBounds( context => {
       context.font = text._font.toCSS();
       context.direction = 'ltr';
       context.fillText( text.renderedText, 0, 0 );
@@ -137,7 +137,7 @@ var TextBounds = {
    * @param {Font} font - The font of the text
    * @returns {Bounds2}
    */
-  getVerticalBounds: function( font ) {
+  getVerticalBounds( font ) {
     assert && assert( font instanceof Font, 'Font required' );
 
     const css = font.toCSS();
@@ -159,7 +159,7 @@ var TextBounds = {
    * @param {string} renderedText - Text to display (with any special characters replaced)
    * @returns {number}
    */
-  approximateCanvasWidth: function( font, renderedText ) {
+  approximateCanvasWidth( font, renderedText ) {
     assert && assert( font instanceof Font, 'Font required' );
     assert && assert( typeof renderedText === 'string', 'renderedText required' );
 
@@ -181,7 +181,7 @@ var TextBounds = {
    * @param {string} renderedText - Text to display (with any special characters replaced)
    * @returns {Bounds2}
    */
-  approximateHybridBounds: function( font, renderedText ) {
+  approximateHybridBounds( font, renderedText ) {
     assert && assert( font instanceof Font, 'Font required' );
     assert && assert( typeof renderedText === 'string', 'renderedText required' );
 
@@ -203,7 +203,7 @@ var TextBounds = {
    * @param {Element} element - DOM element created for the text. This is required, as the text handles HTML and non-HTML text differently.
    * @returns {Bounds2}
    */
-  approximateDOMBounds: function( font, element ) {
+  approximateDOMBounds( font, element ) {
     assert && assert( font instanceof Font, 'Font required' );
 
     const maxHeight = 1024; // technically this will fail if the font is taller than this!
@@ -260,7 +260,7 @@ var TextBounds = {
    * @param {Element} element - DOM element created for the text. This is required, as the text handles HTML and non-HTML text differently.
    * @returns {Bounds2}
    */
-  approximateImprovedDOMBounds: function( font, element ) {
+  approximateImprovedDOMBounds( font, element ) {
     assert && assert( font instanceof Font, 'Font required' );
 
     // TODO: reuse this div?
@@ -293,7 +293,7 @@ var TextBounds = {
    * @param {Font} font - The font of the text
    * @param {string} renderedText - Text to display (with any special characters replaced)
    */
-  setSVGTextAttributes: function( textElement, font, renderedText ) {
+  setSVGTextAttributes( textElement, font, renderedText ) {
     assert && assert( font instanceof Font, 'Font required' );
     assert && assert( typeof renderedText === 'string', 'renderedText required' );
 
@@ -310,7 +310,7 @@ var TextBounds = {
    * Initializes containers and elements required for SVG text measurement.
    * @public
    */
-  initializeTextBounds: function() {
+  initializeTextBounds() {
     svgTextSizeContainer = document.getElementById( TEXT_SIZE_CONTAINER_ID );
 
     if ( !svgTextSizeContainer ) {

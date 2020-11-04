@@ -7,9 +7,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import cleanArray from '../../../phet-core/js/cleanArray.js';
-import inherit from '../../../phet-core/js/inherit.js';
+import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
+import cleanArray from '../../../phet-core/js/cleanArray.js';
 import scenery from '../scenery.js';
 import Utils from '../util/Utils.js';
 import Drawable from './Drawable.js';
@@ -20,46 +20,44 @@ import Stitcher from './Stitcher.js';
 // constants
 const useGreedyStitcher = true;
 
-/**
- * @constructor
- * @mixes Poolable
- *
- * @param {Display} display
- * @param {Instance} backboneInstance
- * @param {Instance} transformRootInstance
- * @param {number} renderer
- * @param {boolean} isDisplayRoot
- */
-function BackboneDrawable( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
-  this.initialize( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
-}
-
-scenery.register( 'BackboneDrawable', BackboneDrawable );
-
-inherit( Drawable, BackboneDrawable, {
-
+class BackboneDrawable extends Drawable {
   /**
+   * @mixes Poolable
+   *
    * @param {Display} display
    * @param {Instance} backboneInstance
    * @param {Instance} transformRootInstance
    * @param {number} renderer
    * @param {boolean} isDisplayRoot
-   * @returns {BackboneDrawable} - Returns 'this' reference, for chaining
    */
-  initialize: function( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
-    Drawable.call( this, renderer );
+  constructor( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
+    super();
+
+    this.initialize( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot );
+  }
+
+  /**
+   * @public
+   *
+   * @param {Display} display
+   * @param {Instance} backboneInstance
+   * @param {Instance} transformRootInstance
+   * @param {number} renderer
+   * @param {boolean} isDisplayRoot
+   */
+  initialize( display, backboneInstance, transformRootInstance, renderer, isDisplayRoot ) {
+    super.initialize( renderer );
 
     this.display = display;
 
-    this.forceAcceleration = false;
-
-    // reference to the instance that controls this backbone
+    // @public {Instance} - reference to the instance that controls this backbone
     this.backboneInstance = backboneInstance;
 
-    // where is the transform root for our generated blocks?
+    // @public {Instance} - where is the transform root for our generated blocks?
     this.transformRootInstance = transformRootInstance;
 
-    // where have filters been applied to up? our responsibility is to apply filters between this and our backboneInstance
+    // @private {Instance} - where have filters been applied to up? our responsibility is to apply filters between this
+    // and our backboneInstance
     this.filterRootAncestorInstance = backboneInstance.parent ? backboneInstance.parent.getFilterRootInstance() : backboneInstance;
 
     // where have transforms been applied up to? our responsibility is to apply transforms between this and our backboneInstance
@@ -85,24 +83,31 @@ inherit( Drawable, BackboneDrawable, {
     this.dirtyDrawables = cleanArray( this.dirtyDrawables );
 
     // Apply CSS needed for future CSS transforms to work properly.
-    Utils.prepareForTransform( this.domElement, this.forceAcceleration );
+    Utils.prepareForTransform( this.domElement );
 
-    // if we need to, watch nodes below us (and including us) and apply their filters (opacity/visibility/clip) to the backbone.
+    // Ff we need to, watch nodes below us (and including us) and apply their filters (opacity/visibility/clip) to the
+    // backbone. Order will be important, since we'll visit them in the order of filter application
     this.watchedFilterNodes = cleanArray( this.watchedFilterNodes );
-    this.opacityDirty = true;
+
+    // @private {boolean}
+    this.filterDirty = true;
+
+    // @private {boolean}
     this.clipDirty = true;
-    this.opacityDirtyListener = this.opacityDirtyListener || this.markOpacityDirty.bind( this );
-    this.clipDirtyListener = this.clipDirtyListener || this.markClipDirty.bind( this );
+
+    this.filterDirtyListener = this.filterDirtyListener || this.onFilterDirty.bind( this );
+    this.clipDirtyListener = this.clipDirtyListener || this.onClipDirty.bind( this );
     if ( this.willApplyFilters ) {
       assert && assert( this.filterRootAncestorInstance.trail.nodes.length < this.backboneInstance.trail.nodes.length,
         'Our backboneInstance should be deeper if we are applying filters' );
 
       // walk through to see which instances we'll need to watch for filter changes
+      // NOTE: order is important, so that the filters are applied in the correct order!
       for ( let instance = this.backboneInstance; instance !== this.filterRootAncestorInstance; instance = instance.parent ) {
         const node = instance.node;
 
         this.watchedFilterNodes.push( node );
-        node.opacityProperty.lazyLink( this.opacityDirtyListener );
+        node.filterChangeEmitter.addListener( this.filterDirtyListener );
         node.clipAreaProperty.lazyLink( this.clipDirtyListener );
       }
     }
@@ -122,11 +127,13 @@ inherit( Drawable, BackboneDrawable, {
     this.stitcher = this.stitcher || ( useGreedyStitcher ? new GreedyStitcher() : new RebuildStitcher() );
 
     sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'initialized ' + this.toString() );
+  }
 
-    return this; // chaining
-  },
-
-  dispose: function() {
+  /**
+   * Releases references
+   * @public
+   */
+  dispose() {
     sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'dispose ' + this.toString() );
     sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.push();
 
@@ -134,7 +141,7 @@ inherit( Drawable, BackboneDrawable, {
     while ( this.watchedFilterNodes.length ) {
       const node = this.watchedFilterNodes.pop();
 
-      node.opacityProperty.unlink( this.opacityDirtyListener );
+      node.filterChangeEmitter.removeListener( this.filterDirtyListener );
       node.clipAreaProperty.unlink( this.clipDirtyListener );
     }
 
@@ -165,13 +172,16 @@ inherit( Drawable, BackboneDrawable, {
     this.previousFirstDrawable = null;
     this.previousLastDrawable = null;
 
-    Drawable.prototype.dispose.call( this );
+    super.dispose();
 
     sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.pop();
-  },
+  }
 
-  // dispose all of the blocks while clearing our references to them
-  markBlocksForDisposal: function() {
+  /**
+   * Dispose all of the blocks while clearing our references to them
+   * @public
+   */
+  markBlocksForDisposal() {
     while ( this.blocks.length ) {
       const block = this.blocks.pop();
       sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( this.toString() + ' removing block: ' + block.toString() );
@@ -182,19 +192,30 @@ inherit( Drawable, BackboneDrawable, {
       }
       block.markForDisposal( this.display );
     }
-  },
+  }
 
-  updateBackboneVisibility: function() {
+  /**
+   * @private
+   */
+  updateBackboneVisibility() {
     this.visible = this.backboneInstance.relativeVisible;
 
     if ( !this.visibilityDirty ) {
       this.visibilityDirty = true;
       this.markDirty();
     }
-  },
+  }
 
-  // should be called during syncTree
-  markForDisposal: function( display ) {
+  /**
+   * Marks this backbone for disposal.
+   * @public
+   * @override
+   *
+   * NOTE: Should be called during syncTree
+   *
+   * @param {Display} display
+   */
+  markForDisposal( display ) {
     for ( let d = this.previousFirstDrawable; d !== null; d = d.oldNextDrawable ) {
       d.notePendingRemoval( this.display );
       if ( d === this.previousLastDrawable ) { break; }
@@ -202,10 +223,16 @@ inherit( Drawable, BackboneDrawable, {
     this.removedDrawables = true;
 
     // super call
-    Drawable.prototype.markForDisposal.call( this, display );
-  },
+    super.markForDisposal( display );
+  }
 
-  markDirtyDrawable: function( drawable ) {
+  /**
+   * Marks a drawable as dirty.
+   * @public
+   *
+   * @param {Drawable} drawable
+   */
+  markDirtyDrawable( drawable ) {
     if ( assert ) {
       // Catch infinite loops
       this.display.ensureNotPainting();
@@ -213,28 +240,40 @@ inherit( Drawable, BackboneDrawable, {
 
     this.dirtyDrawables.push( drawable );
     this.markDirty();
-  },
+  }
 
-  markTransformDirty: function() {
+  /**
+   * Marks our transform as dirty.
+   * @public
+   */
+  markTransformDirty() {
     assert && assert( this.willApplyTransform, 'Sanity check for willApplyTransform' );
 
     // relative matrix on backbone instance should be up to date, since we added the compute flags
-    Utils.applyPreparedTransform( this.backboneInstance.relativeTransform.matrix, this.domElement, this.forceAcceleration );
-  },
+    Utils.applyPreparedTransform( this.backboneInstance.relativeTransform.matrix, this.domElement );
+  }
 
-  markOpacityDirty: function() {
-    if ( !this.opacityDirty ) {
-      this.opacityDirty = true;
+  /**
+   * Marks our opacity as dirty.
+   * @private
+   */
+  onFilterDirty() {
+    if ( !this.filterDirty ) {
+      this.filterDirty = true;
       this.markDirty();
     }
-  },
+  }
 
-  markClipDirty: function() {
+  /**
+   * Marks our clip as dirty.
+   * @private
+   */
+  onClipDirty() {
     if ( !this.clipDirty ) {
       this.clipDirty = true;
       this.markDirty();
     }
-  },
+  }
 
   /**
    * Updates the DOM appearance of this drawable (whether by preparing/calling draw calls, DOM element updates, etc.)
@@ -244,9 +283,9 @@ inherit( Drawable, BackboneDrawable, {
    * @returns {boolean} - Whether the update should continue (if false, further updates in supertype steps should not
    *                      be done).
    */
-  update: function() {
+  update() {
     // See if we need to actually update things (will bail out if we are not dirty, or if we've been disposed)
-    if ( !Drawable.prototype.update.call( this ) ) {
+    if ( !super.update() ) {
       return false;
     }
 
@@ -254,11 +293,27 @@ inherit( Drawable, BackboneDrawable, {
       this.dirtyDrawables.pop().update();
     }
 
-    if ( this.opacityDirty ) {
-      this.opacityDirty = false;
+    if ( this.filterDirty ) {
+      this.filterDirty = false;
 
-      const filterOpacity = this.willApplyFilters ? this.getFilterOpacity() : 1;
-      this.domElement.style.opacity = ( filterOpacity !== 1 ) ? filterOpacity : '';
+      let filterString = '';
+
+      const len = this.watchedFilterNodes.length;
+      for ( let i = 0; i < len; i++ ) {
+        const node = this.watchedFilterNodes[ i ];
+        const opacity = node.getOpacity();
+
+        for ( let j = 0; j < node._filters.length; j++ ) {
+          filterString += `${filterString ? ' ' : ''}${node._filters[ j ].getCSSFilterString()}`;
+        }
+
+        // Apply opacity after other effects
+        if ( opacity !== 1 ) {
+          filterString += `${filterString ? ' ' : ''}opacity(${toSVGNumber(opacity)})`;
+        }
+      }
+
+      this.domElement.style.filter = filterString;
     }
 
     if ( this.visibilityDirty ) {
@@ -277,20 +332,16 @@ inherit( Drawable, BackboneDrawable, {
     }
 
     return true;
-  },
+  }
 
-  getFilterOpacity: function() {
-    let opacity = 1;
-
-    const len = this.watchedFilterNodes.length;
-    for ( let i = 0; i < len; i++ ) {
-      opacity *= this.watchedFilterNodes[ i ].getOpacity();
-    }
-
-    return opacity;
-  },
-
-  getFilterVisibility: function() {
+  /**
+   * Returns the combined visibility of nodes "above us" that will need to be taken into account for displaying this
+   * backbone.
+   * @public
+   *
+   * @returns {boolean}
+   */
+  getFilterVisibility() {
     const len = this.watchedFilterNodes.length;
     for ( let i = 0; i < len; i++ ) {
       if ( !this.watchedFilterNodes[ i ].isVisible() ) {
@@ -299,9 +350,15 @@ inherit( Drawable, BackboneDrawable, {
     }
 
     return true;
-  },
+  }
 
-  getFilterClip: function() {
+  /**
+   * Returns the combined clipArea (string???) for nodes "above us".
+   * @public
+   *
+   * @returns {string}
+   */
+  getFilterClip() {
     const clip = '';
 
     //OHTWO TODO: proper clipping support
@@ -313,10 +370,13 @@ inherit( Drawable, BackboneDrawable, {
     // }
 
     return clip;
-  },
+  }
 
-  // ensures that z-indices are strictly increasing, while trying to minimize the number of times we must change it
-  reindexBlocks: function() {
+  /**
+   * Ensures that z-indices are strictly increasing, while trying to minimize the number of times we must change it
+   * @public
+   */
+  reindexBlocks() {
     // full-pass change for zindex.
     let zIndex = 0; // don't start below 1 (we ensure > in loop)
     for ( let k = 0; k < this.blocks.length; k++ ) {
@@ -342,9 +402,18 @@ inherit( Drawable, BackboneDrawable, {
 
     // sanity check
     this.lastZIndex = zIndex + 1;
-  },
+  }
 
-  stitch: function( firstDrawable, lastDrawable, firstChangeInterval, lastChangeInterval ) {
+  /**
+   * Stitches multiple change intervals.
+   * @public
+   *
+   * @param {Drawable} firstDrawable
+   * @param {Drawable} lastDrawable
+   * @param {ChangeInterval} firstChangeInterval
+   * @param {ChangeInterval} lastChangeInterval
+   */
+  stitch( firstDrawable, lastDrawable, firstChangeInterval, lastChangeInterval ) {
     // no stitch necessary if there are no change intervals
     if ( firstChangeInterval === null || lastChangeInterval === null ) {
       assert && assert( firstChangeInterval === null );
@@ -419,11 +488,20 @@ inherit( Drawable, BackboneDrawable, {
     }
 
     this.stitcher.stitch( this, firstDrawable, lastDrawable, this.previousFirstDrawable, this.previousLastDrawable, firstChangeInterval, lastChangeInterval );
-  },
+  }
 
-  audit: function( allowPendingBlock, allowPendingList, allowDirty ) {
+  /**
+   * Runs checks on the drawable, based on certain flags.
+   * @public
+   * @override
+   *
+   * @param {boolean} allowPendingBlock
+   * @param {boolean} allowPendingList
+   * @param {boolean} allowDirty
+   */
+  audit( allowPendingBlock, allowPendingList, allowDirty ) {
     if ( assertSlow ) {
-      Drawable.prototype.audit.call( this, allowPendingBlock, allowPendingList, allowDirty );
+      super.audit( allowPendingBlock, allowPendingList, allowDirty );
 
       assertSlow && assertSlow( this.backboneInstance.isBackbone, 'We should reference an instance that requires a backbone' );
       assertSlow && assertSlow( this.transformRootInstance.isTransformed, 'Transform root should be transformed' );
@@ -433,26 +511,41 @@ inherit( Drawable, BackboneDrawable, {
       }
     }
   }
-} );
 
-BackboneDrawable.createDivBackbone = function() {
-  const div = document.createElement( 'div' );
-  div.style.position = 'absolute';
-  div.style.left = '0';
-  div.style.top = '0';
-  div.style.width = '0';
-  div.style.height = '0';
-  return div;
-};
-
-BackboneDrawable.repurposeBackboneContainer = function( element ) {
-  if ( element.style.position !== 'relative' || element.style.position !== 'absolute' ) {
-    element.style.position = 'relative';
+  /**
+   * Creates a base DOM element for a backbone.
+   * @public
+   *
+   * @returns {HTMLDivElement}
+   */
+  static createDivBackbone() {
+    const div = document.createElement( 'div' );
+    div.style.position = 'absolute';
+    div.style.left = '0';
+    div.style.top = '0';
+    div.style.width = '0';
+    div.style.height = '0';
+    return div;
   }
-  element.style.left = '0';
-  element.style.top = '0';
-  return element;
-};
+
+  /**
+   * Given an external element, we apply the necessary style to make it compatible as a backbone DOM element.
+   * @public
+   *
+   * @param {Element} element
+   * @returns {Element} - For chaining
+   */
+  static repurposeBackboneContainer( element ) {
+    if ( element.style.position !== 'relative' || element.style.position !== 'absolute' ) {
+      element.style.position = 'relative';
+    }
+    element.style.left = '0';
+    element.style.top = '0';
+    return element;
+  }
+}
+
+scenery.register( 'BackboneDrawable', BackboneDrawable );
 
 Poolable.mixInto( BackboneDrawable, {
   initialize: BackboneDrawable.prototype.initialize

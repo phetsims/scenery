@@ -7,30 +7,41 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import platform from '../../../phet-core/js/platform.js';
 import scenery from '../scenery.js';
 import svgns from '../util/svgns.js';
 
-/**
- * @constructor
- * @mixes Poolable
- *
- * @param {SVGBlock} block
- * @param {Block} instance
- * @param {SVGGroup|null} parent
- */
-function SVGGroup( block, instance, parent ) {
-  this.initialize( block, instance, parent );
-}
+let globalId = 1;
 
-scenery.register( 'SVGGroup', SVGGroup );
+class SVGGroup {
+  /**
+   * @mixes Poolable
+   *
+   * @param {SVGBlock} block
+   * @param {Block} instance
+   * @param {SVGGroup|null} parent
+   */
+  constructor( block, instance, parent ) {
+    // @public {string}
+    this.id = 'group' + globalId++;
 
-inherit( Object, SVGGroup, {
-  initialize: function( block, instance, parent ) {
+    this.initialize( block, instance, parent );
+  }
+
+  /**
+   * @public
+   *
+   * @param {SVGBlock} block
+   * @param {Block} instance
+   * @param {SVGGroup|null} parent
+   */
+  initialize( block, instance, parent ) {
     //OHTWO TODO: add collapsing groups! they can't have self drawables, transforms, filters, etc., and we probably shouldn't de-collapse groups
+
+    sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'initializing ' + this.toString() );
 
     // @public {SVGBlock|null} - Set to null when we're disposing, checked by other code.
     this.block = block;
@@ -41,20 +52,27 @@ inherit( Object, SVGGroup, {
     // @public {Node|null} - Set to null when we're disposed
     this.node = instance.trail.lastNode();
 
+    // @public {SVGGroup|null}
     this.parent = parent;
+
+    // @public {Array.<SVGGroup>}
     this.children = cleanArray( this.children );
+
+    // @private {boolean}
     this.hasSelfDrawable = false;
-    this.selfDrawable = null; // reference to a self drawable
 
-    sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'initializing ' + this.toString() );
+    // @private {SVGSelfDrawable|null}
+    this.selfDrawable = null;
 
-    // general dirty flag (triggered on any other dirty event)
+    // @private {boolean} - general dirty flag (triggered on any other dirty event)
     this.dirty = true;
 
-    // we won't listen for transform changes (or even want to set a transform) if our node is beneath a transform root
+    // @private {boolean} - we won't listen for transform changes (or even want to set a transform) if our node is
+    // beneath a transform root
     this.willApplyTransforms = this.block.transformRootInstance.trail.nodes.length < this.instance.trail.nodes.length;
 
-    // we won't listen for filter changes (or set filters, like opacity or visibility) if our node is beneath a filter root
+    // @private {boolean} - we won't listen for filter changes (or set filters, like opacity or visibility) if our node
+    // is beneath a filter root
     this.willApplyFilters = this.block.filterRootInstance.trail.nodes.length < this.instance.trail.nodes.length;
 
     // transform handling
@@ -65,19 +83,33 @@ inherit( Object, SVGGroup, {
       this.node.transformEmitter.addListener( this.transformDirtyListener );
     }
 
-    // filter handling
+    // @private {boolean}
     this.opacityDirty = true;
+    this.filterDirty = true;
     this.visibilityDirty = true;
     this.clipDirty = true;
-    this.hasOpacity = this.hasOpacity !== undefined ? this.hasOpacity : false; // persists across disposal
+
+    // @private {SVGFilterElement|null} - lazily created
+    this.filterElement = this.filterElement || null;
+
+    // @private {boolean} - Whether we have an opacity attribute set on our SVG element (persists across disposal)
+    this.hasOpacity = this.hasOpacity !== undefined ? this.hasOpacity : false;
+
+    // @private {boolean} - Whether we have a filter element connected to our block (and that is being used with a filter
+    // attribute). Since this needs to be cleaned up when we are disposed, this will be set to false when disposed
+    // (with the associated attribute and defs reference cleaned up).
+    this.hasFilter = false;
+
     this.clipDefinition = this.clipDefinition !== undefined ? this.clipDefinition : null; // persists across disposal
     this.clipPath = this.clipPath !== undefined ? this.clipPath : null; // persists across disposal
-    this.opacityDirtyListener = this.opacityDirtyListener || this.markOpacityDirty.bind( this );
-    this.visibilityDirtyListener = this.visibilityDirtyListener || this.markVisibilityDirty.bind( this );
-    this.clipDirtyListener = this.clipDirtyListener || this.markClipDirty.bind( this );
+    this.opacityChangeListener = this.opacityChangeListener || this.onOpacityChange.bind( this );
+    this.filterChangeListener = this.opacityChangeListener || this.onFilterChange.bind( this );
+    this.visibilityDirtyListener = this.visibilityDirtyListener || this.onVisibleChange.bind( this );
+    this.clipDirtyListener = this.clipDirtyListener || this.onClipChange.bind( this );
     this.node.visibleProperty.lazyLink( this.visibilityDirtyListener );
     if ( this.willApplyFilters ) {
-      this.node.opacityProperty.lazyLink( this.opacityDirtyListener );
+      this.node.opacityProperty.lazyLink( this.opacityChangeListener );
+      this.node.filterChangeEmitter.addListener( this.filterChangeListener );
     }
     //OHTWO TODO: remove clip workaround
     this.node.clipAreaProperty.lazyLink( this.clipDirtyListener );
@@ -94,86 +126,131 @@ inherit( Object, SVGGroup, {
     this.instance.addSVGGroup( this );
 
     this.block.markDirtyGroup( this ); // so we are marked and updated properly
+  }
 
-    return this;
-  },
-
-  addSelfDrawable: function( drawable ) {
+  /**
+   * @private
+   *
+   * @param {SelfDrawable} drawable
+   */
+  addSelfDrawable( drawable ) {
     this.selfDrawable = drawable;
     this.svgGroup.insertBefore( drawable.svgElement, this.children.length ? this.children[ 0 ].svgGroup : null );
     this.hasSelfDrawable = true;
-  },
+  }
 
-  removeSelfDrawable: function( drawable ) {
+  /**
+   * @private
+   *
+   * @param {SelfDrawable} drawable
+   */
+  removeSelfDrawable( drawable ) {
     this.hasSelfDrawable = false;
     this.svgGroup.removeChild( drawable.svgElement );
     this.selfDrawable = null;
-  },
+  }
 
-  addChildGroup: function( group ) {
+  /**
+   * @private
+   *
+   * @param {SVGGroup} group
+   */
+  addChildGroup( group ) {
     this.markOrderDirty();
 
     group.parent = this;
     this.children.push( group );
     this.svgGroup.appendChild( group.svgGroup );
-  },
+  }
 
-  removeChildGroup: function( group ) {
+  /**
+   * @private
+   *
+   * @param {SVGGroup} group
+   */
+  removeChildGroup( group ) {
     this.markOrderDirty();
 
     group.parent = null;
     this.children.splice( _.indexOf( this.children, group ), 1 );
     this.svgGroup.removeChild( group.svgGroup );
-  },
+  }
 
-  markDirty: function() {
+  /**
+   * @public
+   */
+  markDirty() {
     if ( !this.dirty ) {
       this.dirty = true;
 
       this.block.markDirtyGroup( this );
     }
-  },
+  }
 
-  /*---------------------------------------------------------------------------*
-   * TODO: reduce filesize by creating these methods programatically. not done yet since I want to ensure correctness and make refactoring easier right now.
-   *----------------------------------------------------------------------------*/
-
-  markOrderDirty: function() {
+  /**
+   * @public
+   */
+  markOrderDirty() {
     if ( !this.orderDirty ) {
       this.orderDirty = true;
       this.markDirty();
     }
-  },
+  }
 
-  markTransformDirty: function() {
+  /**
+   * @public
+   */
+  markTransformDirty() {
     if ( !this.transformDirty ) {
       this.transformDirty = true;
       this.markDirty();
     }
-  },
+  }
 
-  markOpacityDirty: function() {
+  /**
+   * @private
+   */
+  onOpacityChange() {
     if ( !this.opacityDirty ) {
       this.opacityDirty = true;
       this.markDirty();
     }
-  },
+  }
 
-  markVisibilityDirty: function() {
+  /**
+   * @private
+   */
+  onFilterChange() {
+    if ( !this.filterDirty ) {
+      this.filterDirty = true;
+      this.markDirty();
+    }
+  }
+
+  /**
+   * @private
+   */
+  onVisibleChange() {
     if ( !this.visibilityDirty ) {
       this.visibilityDirty = true;
       this.markDirty();
     }
-  },
+  }
 
-  markClipDirty: function() {
+  /**
+   * @private
+   */
+  onClipChange() {
     if ( !this.clipDirty ) {
       this.clipDirty = true;
       this.markDirty();
     }
-  },
+  }
 
-  update: function() {
+  /**
+   * @public
+   */
+  update() {
     sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'update: ' + this.toString() );
 
     // we may have been disposed since being marked dirty on our block. we won't have a reference if we are disposed
@@ -224,7 +301,6 @@ inherit( Object, SVGGroup, {
       svgGroup.style.display = this.node.isVisible() ? '' : 'none';
     }
 
-
     if ( this.opacityDirty ) {
       this.opacityDirty = false;
 
@@ -237,6 +313,66 @@ inherit( Object, SVGGroup, {
       else if ( this.hasOpacity ) {
         this.hasOpacity = false;
         svgGroup.removeAttribute( 'opacity' );
+      }
+    }
+
+    // TODO: Check if we can leave opacity separate. If it gets applied "after" then we can have them separate
+    if ( this.filterDirty ) {
+      this.filterDirty = false;
+
+      sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'filter update: ' + this.toString() );
+
+      const needsFilter = this.willApplyFilters && this.node._filters.length;
+      const filterId = `filter-${this.id}`;
+
+      if ( needsFilter ) {
+        // Lazy creation of the filter element (if we haven't already)
+        if ( !this.filterElement ) {
+          this.filterElement = document.createElementNS( svgns, 'filter' );
+          this.filterElement.setAttribute( 'id', filterId );
+        }
+
+        // Remove all children of the filter element if we're applying filters (if not, we won't have it attached)
+        while ( this.filterElement.firstChild ) {
+          this.filterElement.removeChild( this.filterElement.lastChild );
+        }
+
+        // Fill in elements into our filter
+        let filterRegionPercentageIncrease = 10;
+        let inName = 'SourceGraphic';
+        const length = this.node._filters.length;
+        for ( let i = 0; i < length; i++ ) {
+          const filter = this.node._filters[ i ];
+
+          const resultName = i === length - 1 ? undefined : 'e' + i; // Last result should be undefined
+          filter.applySVGFilter( this.filterElement, inName, resultName );
+          filterRegionPercentageIncrease += filter.filterRegionPercentageIncrease;
+          inName = resultName;
+        }
+
+        // Bleh, no good way to handle the filter region? https://drafts.fxtf.org/filter-effects/#filter-region
+        // If we WANT to track things by their actual display size AND pad pixels, AND copy tons of things... we could
+        // potentially use the userSpaceOnUse and pad the proper number of pixels. That sounds like an absolute pain, AND
+        // a performance drain and abstraction break.
+        const min = `-${toSVGNumber( filterRegionPercentageIncrease )}%`;
+        const size = `${toSVGNumber( 2 * filterRegionPercentageIncrease + 100 )}%`;
+        this.filterElement.setAttribute( 'x', min );
+        this.filterElement.setAttribute( 'y', min );
+        this.filterElement.setAttribute( 'width', size );
+        this.filterElement.setAttribute( 'height', size );
+      }
+
+      if ( needsFilter ) {
+        if ( !this.hasFilter ) {
+          this.block.defs.appendChild( this.filterElement );
+        }
+        svgGroup.setAttribute( 'filter', `url(#${filterId})` );
+        this.hasFilter = true;
+      }
+      if ( this.hasFilter && !needsFilter ) {
+        svgGroup.removeAttribute( 'filter' );
+        this.hasFilter = false;
+        this.block.defs.removeChild( this.filterElement );
       }
     }
 
@@ -314,25 +450,40 @@ inherit( Object, SVGGroup, {
     }
 
     sceneryLog && sceneryLog.SVGGroup && sceneryLog.pop();
-  },
+  }
 
-  isReleasable: function() {
+  /**
+   * @private
+   *
+   * @returns {boolean}
+   */
+  isReleasable() {
     // if we have no parent, we are the rootGroup (the block is responsible for disposing that one)
     return !this.hasSelfDrawable && !this.children.length && this.parent;
-  },
+  }
 
-  dispose: function() {
+  /**
+   * Releases references
+   * @public
+   */
+  dispose() {
     sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'dispose ' + this.toString() );
     sceneryLog && sceneryLog.SVGGroup && sceneryLog.push();
 
     assert && assert( this.children.length === 0, 'Should be empty by now' );
+
+    if ( this.hasFilter ) {
+      this.hasFilter = false;
+      this.block.defs.removeChild( this.filterElement );
+    }
 
     if ( this.willApplyTransforms ) {
       this.node.transformEmitter.removeListener( this.transformDirtyListener );
     }
     this.node.visibleProperty.unlink( this.visibilityDirtyListener );
     if ( this.willApplyFilters ) {
-      this.node.opacityProperty.unlink( this.opacityDirtyListener );
+      this.node.opacityProperty.unlink( this.opacityChangeListener );
+      this.node.filterChangeEmitter.removeListener( this.filterChangeListener );
     }
     //OHTWO TODO: remove clip workaround
     this.node.clipAreaProperty.unlink( this.clipDirtyListener );
@@ -364,59 +515,88 @@ inherit( Object, SVGGroup, {
     this.freeToPool();
 
     sceneryLog && sceneryLog.SVGGroup && sceneryLog.pop();
-  },
+  }
 
-  toString: function() {
+  /**
+   * Returns a string form of this object
+   * @public
+   *
+   * @returns {string}
+   */
+  toString() {
     return 'SVGGroup:' + this.block.toString() + '_' + this.instance.toString();
   }
-} );
 
-// @public
-SVGGroup.addDrawable = function( block, drawable ) {
-  assert && assert( drawable.instance, 'Instance is required for a drawable to be grouped correctly in SVG' );
+  /**
+   * @public
+   *
+   * @param {SVGBlock} block
+   * @param {Drawable} drawable
+   */
+  static addDrawable( block, drawable ) {
+    assert && assert( drawable.instance, 'Instance is required for a drawable to be grouped correctly in SVG' );
 
-  const group = SVGGroup.ensureGroupsToInstance( block, drawable.instance );
-  group.addSelfDrawable( drawable );
-};
-
-// @public
-SVGGroup.removeDrawable = function( block, drawable ) {
-  drawable.instance.lookupSVGGroup( block ).removeSelfDrawable( drawable );
-
-  SVGGroup.releaseGroupsToInstance( block, drawable.instance );
-};
-
-// @private
-SVGGroup.ensureGroupsToInstance = function( block, instance ) {
-  // TODO: assertions here
-
-  let group = instance.lookupSVGGroup( block );
-
-  if ( !group ) {
-    assert && assert( instance !== block.rootGroup.instance, 'Making sure we do not walk past our rootGroup' );
-
-    const parentGroup = SVGGroup.ensureGroupsToInstance( block, instance.parent );
-
-    group = SVGGroup.createFromPool( block, instance, parentGroup );
-    parentGroup.addChildGroup( group );
+    const group = SVGGroup.ensureGroupsToInstance( block, drawable.instance );
+    group.addSelfDrawable( drawable );
   }
 
-  return group;
-};
+  /**
+   * @public
+   *
+   * @param {SVGBlock} block
+   * @param {Drawable} drawable
+   */
+  static removeDrawable( block, drawable ) {
+    drawable.instance.lookupSVGGroup( block ).removeSelfDrawable( drawable );
 
-// @private
-SVGGroup.releaseGroupsToInstance = function( block, instance ) {
-  const group = instance.lookupSVGGroup( block );
-
-  if ( group.isReleasable() ) {
-    const parentGroup = group.parent;
-    parentGroup.removeChildGroup( group );
-
-    SVGGroup.releaseGroupsToInstance( block, parentGroup.instance );
-
-    group.dispose();
+    SVGGroup.releaseGroupsToInstance( block, drawable.instance );
   }
-};
+
+  /**
+   * @private
+   *
+   * @param {SVGBlock} block
+   * @param {Instance} instance
+   * @returns {SVGGroup}
+   */
+  static ensureGroupsToInstance( block, instance ) {
+    // TODO: assertions here
+
+    let group = instance.lookupSVGGroup( block );
+
+    if ( !group ) {
+      assert && assert( instance !== block.rootGroup.instance, 'Making sure we do not walk past our rootGroup' );
+
+      const parentGroup = SVGGroup.ensureGroupsToInstance( block, instance.parent );
+
+      group = SVGGroup.createFromPool( block, instance, parentGroup );
+      parentGroup.addChildGroup( group );
+    }
+
+    return group;
+  }
+
+  /**
+   * @private
+   *
+   * @param {SVGBlock} block
+   * @param {Instance} instance
+   */
+  static releaseGroupsToInstance( block, instance ) {
+    const group = instance.lookupSVGGroup( block );
+
+    if ( group.isReleasable() ) {
+      const parentGroup = group.parent;
+      parentGroup.removeChildGroup( group );
+
+      SVGGroup.releaseGroupsToInstance( block, parentGroup.instance );
+
+      group.dispose();
+    }
+  }
+}
+
+scenery.register( 'SVGGroup', SVGGroup );
 
 Poolable.mixInto( SVGGroup, {
   initialize: SVGGroup.prototype.initialize

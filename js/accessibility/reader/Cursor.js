@@ -16,7 +16,6 @@
  */
 
 import Property from '../../../../axon/js/Property.js';
-import inherit from '../../../../phet-core/js/inherit.js';
 import scenery from '../../scenery.js';
 
 // constants
@@ -27,227 +26,223 @@ const LINE_WORD_LENGTH = 15; // number of words read in a single line
 const NEXT = 'NEXT'; // constant that marks the direction of traversal
 const PREVIOUS = 'PREVIOUS'; // constant that marks the direction of tragersal through the DOM
 
-/**
- * Constructor.
- */
-function Cursor( domElement ) {
+class Cursor {
+  /**
+   * @param {Element} domElement
+   */
+  constructor( domElement ) {
 
-  const self = this;
+    const self = this;
 
-  // the output utterance for the cursor, to be read by the synth and handled in various ways
-  // initial output is the document title
-  // @public (read-only)
-  this.outputUtteranceProperty = new Property( new Utterance( document.title, 'off' ) );
+    // the output utterance for the cursor, to be read by the synth and handled in various ways
+    // initial output is the document title
+    // @public (read-only)
+    this.outputUtteranceProperty = new Property( new Utterance( document.title, 'off' ) );
 
-  // @private - a linear representation of the DOM which is navigated by the user
-  this.linearDOM = this.getLinearDOMElements( domElement );
+    // @private - a linear representation of the DOM which is navigated by the user
+    this.linearDOM = this.getLinearDOMElements( domElement );
 
-  // @private - the active element is element that is under navigation in the parallel DOM
-  this.activeElement = null;
+    // @private - the active element is element that is under navigation in the parallel DOM
+    this.activeElement = null;
 
-  // @private - the active line is the current line being read and navigated with the cursor
-  this.activeLine = null;
+    // @private - the active line is the current line being read and navigated with the cursor
+    this.activeLine = null;
 
-  // the letter position is the position of the cursor in the active line to support reading on a
-  // letter by letter basis.  This is relative to the length of the active line.
-  // @private
-  this.letterPosition = 0;
+    // the letter position is the position of the cursor in the active line to support reading on a
+    // letter by letter basis.  This is relative to the length of the active line.
+    // @private
+    this.letterPosition = 0;
 
-  // the positionInLine is the position in words marking the end location of the active line
-  // this must be tracked to support content and descriptions longer than 15 words
-  // @private
-  this.positionInLine = 0;
+    // the positionInLine is the position in words marking the end location of the active line
+    // this must be tracked to support content and descriptions longer than 15 words
+    // @private
+    this.positionInLine = 0;
 
-  // the position of the word in the active line to support navigation on a word by word basis
-  // @private
-  this.wordPosition = 0;
+    // the position of the word in the active line to support navigation on a word by word basis
+    // @private
+    this.wordPosition = 0;
 
-  // we need to track the mutation observers so that they can be discconnected
-  // @private
-  this.observers = [];
+    // we need to track the mutation observers so that they can be discconnected
+    // @private
+    this.observers = [];
 
-  // track a keystate in order to handle when multiple key presses happen at once
-  // @private
-  this.keyState = {};
+    // track a keystate in order to handle when multiple key presses happen at once
+    // @private
+    this.keyState = {};
 
-  // the document will listen for keyboard interactions
-  // this listener implements common navigation strategies for a typical screen reader
-  //
-  // see https://dequeuniversity.com/screenreaders/nvda-keyboard-shortcuts
-  // for a list of common navigation strategies
-  //
-  // TODO: Use this.keyState object instead of referencing the event directly
-  document.addEventListener( 'keydown', function( event ) {
+    // the document will listen for keyboard interactions
+    // this listener implements common navigation strategies for a typical screen reader
+    //
+    // see https://dequeuniversity.com/screenreaders/nvda-keyboard-shortcuts
+    // for a list of common navigation strategies
+    //
+    // TODO: Use this.keyState object instead of referencing the event directly
+    document.addEventListener( 'keydown', event => {
 
-    // update the keystate object
-    self.keyState[ event.keyCode ] = true;
+      // update the keystate object
+      this.keyState[ event.keyCode ] = true;
 
-    // store the output text here
-    let outputText;
+      // store the output text here
+      let outputText;
 
-    // check to see if shift key pressed
-    // TODO: we can optionally use the keyState object for this
-    const shiftKeyDown = event.shiftKey;
+      // check to see if shift key pressed
+      // TODO: we can optionally use the keyState object for this
+      const shiftKeyDown = event.shiftKey;
 
-    // direction to navigate through the DOM - usually, holding shift indicates the user wants to travers
-    // backwards through the DOM
-    const direction = shiftKeyDown ? PREVIOUS : NEXT;
+      // direction to navigate through the DOM - usually, holding shift indicates the user wants to travers
+      // backwards through the DOM
+      const direction = shiftKeyDown ? PREVIOUS : NEXT;
 
-    // the dom can change at any time, make sure that we are reading a copy that is up to date
-    self.linearDOM = self.getLinearDOMElements( domElement );
+      // the dom can change at any time, make sure that we are reading a copy that is up to date
+      this.linearDOM = this.getLinearDOMElements( domElement );
 
-    // update the list of live elements
-    self.updateLiveElementList();
+      // update the list of live elements
+      this.updateLiveElementList();
 
-    // if the element has an 'application' like behavior, keyboard should be free for the application
-    // TODO: This may be insufficient if we need the 'arrow' keys to continue to work for an application role
-    if ( self.activeElement && self.activeElement.getAttribute( 'role' ) === 'application' ) {
-      return;
-    }
+      // if the element has an 'application' like behavior, keyboard should be free for the application
+      // TODO: This may be insufficient if we need the 'arrow' keys to continue to work for an application role
+      if ( this.activeElement && this.activeElement.getAttribute( 'role' ) === 'application' ) {
+        return;
+      }
 
-    // otherwise, handle all key events here
-    if ( self.keyState[ 40 ] && !self.keyState[ 45 ] ) {
-      // read the next line on 'down arrow'
-      outputText = self.readNextPreviousLine( NEXT );
-    }
-    else if ( self.keyState[ 38 ] && !self.keyState[ 45 ] ) {
-      // read the previous line on 'up arrow'
-      outputText = self.readNextPreviousLine( PREVIOUS );
-    }
-    else if ( self.keyState[ 72 ] ) {
-      // read the previous or next headings depending on whether the shift key is pressed
-      const headingLevels = [ 'H1', 'H2', 'H3', 'H4', 'H5', 'H6' ];
-      outputText = self.readNextPreviousHeading( headingLevels, direction );
-    }
-    else if ( self.keyState[ 9 ] ) {
-      // let the browser naturally handle 'tab' for forms elements and elements with a tabIndex
-    }
-    else if ( self.keyState[ 39 ] && !self.keyState[ 17 ] ) {
-      // read the next character of the active line on 'right arrow'
-      outputText = self.readNextPreviousCharacter( NEXT );
-    }
-    else if ( self.keyState[ 37 ] && !self.keyState[ 17 ] ) {
-      // read the previous character on 'left arrow'
-      outputText = self.readNextPreviousCharacter( PREVIOUS );
-    }
-    else if ( self.keyState[ 37 ] && self.keyState[ 17 ] ) {
-      // read the previous word on 'control + left arrow'
-      outputText = self.readNextPreviousWord( PREVIOUS );
-    }
-    else if ( self.keyState[ 39 ] && self.keyState[ 17 ] ) {
-      // read the next word on 'control + right arrow'
-      outputText = self.readNextPreviousWord( NEXT );
-    }
-    else if ( self.keyState[ 45 ] && self.keyState[ 38 ] ) {
-      // repeat the active line on 'insert + up arrow'
-      outputText = self.readActiveLine();
-    }
-    else if ( self.keyState[ 49 ] ) {
-      // find the previous/next heading level 1 on '1'
-      outputText = self.readNextPreviousHeading( [ 'H1' ], direction );
-    }
-    else if ( self.keyState[ 50 ] ) {
-      // find the previous/next heading level 2 on '2'
-      outputText = self.readNextPreviousHeading( [ 'H2' ], direction );
-    }
-    else if ( self.keyState[ 51 ] ) {
-      // find the previous/next heading level 3 on '3'
-      outputText = self.readNextPreviousHeading( [ 'H3' ], direction );
-    }
-    else if ( self.keyState[ 52 ] ) {
-      // find the previous/next heading level 4 on '4'
-      outputText = self.readNextPreviousHeading( [ 'H4' ], direction );
-    }
-    else if ( self.keyState[ 53 ] ) {
-      // find the previous/next heading level 5 on '5'
-      outputText = self.readNextPreviousHeading( [ 'H5' ], direction );
-    }
-    else if ( self.keyState[ 54 ] ) {
-      // find the previous/next heading level 6 on '6'
-      outputText = self.readNextPreviousHeading( [ 'H6' ], direction );
-    }
-    else if ( self.keyState[ 70 ] ) {
-      // find the previous/next form element on 'f'
-      outputText = self.readNextPreviousFormElement( direction );
-    }
-    else if ( self.keyState[ 66 ] ) {
-      // find the previous/next button element on 'b'
-      outputText = self.readNextPreviousButton( direction );
-    }
-    else if ( self.keyState[ 76 ] ) {
-      // find the previous/next list on 'L'
-      outputText = self.readNextPreviousList( direction );
-    }
-    else if ( self.keyState[ 73 ] ) {
-      // find the previous/next list item on 'I'
-      outputText = self.readNextPreviousListItem( direction );
-    }
-    else if ( self.keyState[ 45 ] && self.keyState[ 40 ] ) {
-      // read entire document on 'insert + down arrow'
-      self.readEntireDocument();
-    }
+      // otherwise, handle all key events here
+      if ( this.keyState[ 40 ] && !this.keyState[ 45 ] ) {
+        // read the next line on 'down arrow'
+        outputText = this.readNextPreviousLine( NEXT );
+      }
+      else if ( this.keyState[ 38 ] && !this.keyState[ 45 ] ) {
+        // read the previous line on 'up arrow'
+        outputText = this.readNextPreviousLine( PREVIOUS );
+      }
+      else if ( this.keyState[ 72 ] ) {
+        // read the previous or next headings depending on whether the shift key is pressed
+        const headingLevels = [ 'H1', 'H2', 'H3', 'H4', 'H5', 'H6' ];
+        outputText = this.readNextPreviousHeading( headingLevels, direction );
+      }
+      else if ( this.keyState[ 9 ] ) {
+        // let the browser naturally handle 'tab' for forms elements and elements with a tabIndex
+      }
+      else if ( this.keyState[ 39 ] && !this.keyState[ 17 ] ) {
+        // read the next character of the active line on 'right arrow'
+        outputText = this.readNextPreviousCharacter( NEXT );
+      }
+      else if ( this.keyState[ 37 ] && !this.keyState[ 17 ] ) {
+        // read the previous character on 'left arrow'
+        outputText = this.readNextPreviousCharacter( PREVIOUS );
+      }
+      else if ( this.keyState[ 37 ] && this.keyState[ 17 ] ) {
+        // read the previous word on 'control + left arrow'
+        outputText = this.readNextPreviousWord( PREVIOUS );
+      }
+      else if ( this.keyState[ 39 ] && this.keyState[ 17 ] ) {
+        // read the next word on 'control + right arrow'
+        outputText = this.readNextPreviousWord( NEXT );
+      }
+      else if ( this.keyState[ 45 ] && this.keyState[ 38 ] ) {
+        // repeat the active line on 'insert + up arrow'
+        outputText = this.readActiveLine();
+      }
+      else if ( this.keyState[ 49 ] ) {
+        // find the previous/next heading level 1 on '1'
+        outputText = this.readNextPreviousHeading( [ 'H1' ], direction );
+      }
+      else if ( this.keyState[ 50 ] ) {
+        // find the previous/next heading level 2 on '2'
+        outputText = this.readNextPreviousHeading( [ 'H2' ], direction );
+      }
+      else if ( this.keyState[ 51 ] ) {
+        // find the previous/next heading level 3 on '3'
+        outputText = this.readNextPreviousHeading( [ 'H3' ], direction );
+      }
+      else if ( this.keyState[ 52 ] ) {
+        // find the previous/next heading level 4 on '4'
+        outputText = this.readNextPreviousHeading( [ 'H4' ], direction );
+      }
+      else if ( this.keyState[ 53 ] ) {
+        // find the previous/next heading level 5 on '5'
+        outputText = this.readNextPreviousHeading( [ 'H5' ], direction );
+      }
+      else if ( this.keyState[ 54 ] ) {
+        // find the previous/next heading level 6 on '6'
+        outputText = this.readNextPreviousHeading( [ 'H6' ], direction );
+      }
+      else if ( this.keyState[ 70 ] ) {
+        // find the previous/next form element on 'f'
+        outputText = this.readNextPreviousFormElement( direction );
+      }
+      else if ( this.keyState[ 66 ] ) {
+        // find the previous/next button element on 'b'
+        outputText = this.readNextPreviousButton( direction );
+      }
+      else if ( this.keyState[ 76 ] ) {
+        // find the previous/next list on 'L'
+        outputText = this.readNextPreviousList( direction );
+      }
+      else if ( this.keyState[ 73 ] ) {
+        // find the previous/next list item on 'I'
+        outputText = this.readNextPreviousListItem( direction );
+      }
+      else if ( this.keyState[ 45 ] && this.keyState[ 40 ] ) {
+        // read entire document on 'insert + down arrow'
+        this.readEntireDocument();
+      }
 
-    // if the active element is focusable, set the focus to it so that the virtual cursor can
-    // directly interact with elements
-    if ( self.activeElement && self.isFocusable( self.activeElement ) ) {
-      self.activeElement.focus();
-    }
+      // if the active element is focusable, set the focus to it so that the virtual cursor can
+      // directly interact with elements
+      if ( this.activeElement && this.isFocusable( this.activeElement ) ) {
+        this.activeElement.focus();
+      }
 
-    // if the output text is a space, we want it to be read as 'blank' or 'space'
-    if ( outputText === SPACE ) {
-      outputText = 'space';
-    }
-
-    if ( outputText ) {
-      // for now, all utterances are off for aria-live
-      self.outputUtteranceProperty.set( new Utterance( outputText, 'off' ) );
-    }
-
-    // TODO: everything else in https://dequeuniversity.com/screenreaders/nvda-keyboard-shortcuts
-
-  } );
-
-  // update the keystate object on keyup to handle multiple key presses at once
-  document.addEventListener( 'keyup', function( event ) {
-    self.keyState[ event.keyCode ] = false;
-  } );
-
-  // listen for when an element is about to receive focus
-  // we are using focusin (and not focus) because we want the event to bubble up the document
-  // this will handle both tab navigation AND programatic focus by the simulation
-  document.addEventListener( 'focusin', function( event ) {
-
-    // anounce the new focus if it is different from the active element
-    if ( event.target !== self.activeElement ) {
-      self.activeElement = event.target;
-
-      // so read out all content from aria markup since focus moved via application behavior
-      const withApplicationContent = true;
-      const outputText = self.getAccessibleText( this.activeElement, withApplicationContent );
+      // if the output text is a space, we want it to be read as 'blank' or 'space'
+      if ( outputText === SPACE ) {
+        outputText = 'space';
+      }
 
       if ( outputText ) {
-        const liveRole = self.activeElement.getAttribute( 'aria-live' );
-        self.outputUtteranceProperty.set( new Utterance( outputText, liveRole ) );
+        // for now, all utterances are off for aria-live
+        this.outputUtteranceProperty.set( new Utterance( outputText, 'off' ) );
       }
-    }
-  } );
 
-}
+      // TODO: everything else in https://dequeuniversity.com/screenreaders/nvda-keyboard-shortcuts
 
-scenery.register( 'Cursor', Cursor );
+    } );
 
-inherit( Object, Cursor, {
+    // update the keystate object on keyup to handle multiple key presses at once
+    document.addEventListener( 'keyup', event => {
+      this.keyState[ event.keyCode ] = false;
+    } );
+
+    // listen for when an element is about to receive focus
+    // we are using focusin (and not focus) because we want the event to bubble up the document
+    // this will handle both tab navigation AND programatic focus by the simulation
+    document.addEventListener( 'focusin', function( event ) {
+
+      // anounce the new focus if it is different from the active element
+      if ( event.target !== self.activeElement ) {
+        self.activeElement = event.target;
+
+        // so read out all content from aria markup since focus moved via application behavior
+        const withApplicationContent = true;
+        const outputText = self.getAccessibleText( this.activeElement, withApplicationContent );
+
+        if ( outputText ) {
+          const liveRole = self.activeElement.getAttribute( 'aria-live' );
+          self.outputUtteranceProperty.set( new Utterance( outputText, liveRole ) );
+        }
+      }
+    } );
+  }
 
   /**
    * Get all 'element' nodes off the parent element, placing them in an array
    * for easy traversal.  Note that this includes all elements, even those
    * that are 'hidden' or purely for structure.
+   * @private
    *
    * @param  {HTMLElement} domElement - the parent element to linearize
    * @returns {Array.<HTMLElement>}
-   * @private
    */
-  getLinearDOMElements: function( domElement ) {
+  getLinearDOMElements( domElement ) {
     // gets ALL descendent children for the element
     const children = domElement.getElementsByTagName( '*' );
 
@@ -258,22 +253,23 @@ inherit( Object, Cursor, {
       }
     }
     return linearDOM;
-  },
+  }
 
   /**
    * Get the live role from the DOM element.  If the element is not live, return null.
+   * @private
    *
-   * @param  {HTMLElement} domElement
+   * @param {HTMLElement} domElement
    * @returns {string}
    */
-  getLiveRole: function( domElement ) {
+  getLiveRole( domElement ) {
     let liveRole = null;
 
     // collection of all roles that can produce 'live region' behavior
     // see https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Live_Regions
     const roles = [ 'log', 'status', 'alert', 'progressbar', 'marquee', 'timer', 'assertive', 'polite' ];
 
-    roles.forEach( function( role ) {
+    roles.forEach( role => {
       if ( domElement.getAttribute( 'aria-live' ) === role || domElement.getAttribute( 'role' ) === role ) {
         liveRole = role;
         return;
@@ -281,15 +277,16 @@ inherit( Object, Cursor, {
     } );
 
     return liveRole;
-  },
+  }
 
   /**
    * Get the next or previous element in the DOM, depending on the desired direction.
+   * @private
    *
-   * @param  {[type]} direction - NEXT || PREVIOUS
+   * @param {[type]} direction - NEXT || PREVIOUS
    * @returns {HTMLElement}
    */
-  getNextPreviousElement: function( direction ) {
+  getNextPreviousElement( direction ) {
     if ( !this.activeElement ) {
       this.activeElement = this.linearDOM[ 0 ];
     }
@@ -299,19 +296,21 @@ inherit( Object, Cursor, {
 
     const nextIndex = activeIndex + searchDelta;
     return this.linearDOM[ nextIndex ];
-  },
+  }
 
   /**
    * Get the label for a particular id
-   * @param  {string} id
+   * @private
+
+   * @param {string} id
    * @returns {HTMLElement}
    */
-  getLabel: function( id ) {
+  getLabel( id ) {
     const labels = document.getElementsByTagName( 'label' );
 
     // loop through NodeList
     let labelWithId;
-    Array.prototype.forEach.call( labels, function( label ) {
+    Array.prototype.forEach.call( labels, label => {
       if ( label.getAttribute( 'for' ) ) {
         labelWithId = label;
       }
@@ -319,17 +318,18 @@ inherit( Object, Cursor, {
     assert && assert( labelWithId, 'No label found for id' );
 
     return labelWithId;
-  },
+  }
 
   /**
    * Get the accessible text from the element.  Depending on the navigation strategy,
    * we may or may not want to include all application content text from the markup.
+   * @private
    *
-   * @param  {HTMLElement} element
-   * @param  {boolean} withApplicationContent - do you want to include all aria text content?
+   * @param {HTMLElement} element
+   * @param {boolean} withApplicationContent - do you want to include all aria text content?
    * @returns {string}
    */
-  getAccessibleText: function( element, withApplicationContent ) {
+  getAccessibleText( element, withApplicationContent ) {
 
     // placeholder for the text content that we will build up from the markup
     let textContent = '';
@@ -506,7 +506,7 @@ inherit( Object, Cursor, {
 
         let descriptionElement;
         let descriptionText;
-        descriptionIDs.forEach( function( descriptionID ) {
+        descriptionIDs.forEach( descriptionID => {
           descriptionElement = document.getElementById( descriptionID );
           descriptionText = descriptionElement.textContent;
 
@@ -522,16 +522,17 @@ inherit( Object, Cursor, {
     }
 
     return textContent;
-  },
+  }
 
   /**
    * Get the next or previous element in the DOM that has accessible text content, relative to the current
    * active element.
+   * @private
    *
    * @param  {string} direction - NEXT || PREVIOUS
    * @returns {HTMLElement}
    */
-  getNextPreviousElementWithAccessibleContent: function( direction ) {
+  getNextPreviousElementWithAccessibleContent( direction ) {
     let accessibleContent;
     while ( !accessibleContent ) {
       // set the selected element to the next element in the DOM
@@ -540,17 +541,18 @@ inherit( Object, Cursor, {
     }
 
     return this.activeElement;
-  },
+  }
 
   /**
    * Get the next element in the DOM with on of the desired tagNames, types, or roles.  This does not set the active element, it
    * only traverses the document looking for elements.
+   * @private
    *
    * @param  {Array.<string>} roles - list of desired DOM tag names, types, or aria roles
    * @param  {[type]} direction - direction flag for to search through the DOM - NEXT || PREVIOUS
    * @returns {HTMLElement}
    */
-  getNextPreviousElementWithRole: function( roles, direction ) {
+  getNextPreviousElementWithRole( roles, direction ) {
 
     let element = null;
     const searchDelta = ( direction === NEXT ) ? 1 : -1;
@@ -581,9 +583,15 @@ inherit( Object, Cursor, {
     }
 
     return element;
-  },
+  }
 
-  readNextPreviousLine: function( direction ) {
+  /**
+   * @private
+   *
+   * @param {string} direction
+   * @returns {string}
+   */
+  readNextPreviousLine( direction ) {
     let line = '';
 
     // reset the content letter and word positions because we are reading a new line
@@ -643,14 +651,15 @@ inherit( Object, Cursor, {
 
     this.activeLine = line;
     return line;
-  },
+  }
 
   /**
    * Read the active line without incrementing the word count.
+   * @private
    *
    * @returns {[type]} [description]
    */
-  readActiveLine: function() {
+  readActiveLine() {
 
     let line = '';
 
@@ -679,9 +688,15 @@ inherit( Object, Cursor, {
     }
 
     return line;
-  },
+  }
 
-  readNextPreviousWord: function( direction ) {
+  /**
+   * @private
+   *
+   * @param {string} direction
+   * @returns {string}
+   */
+  readNextPreviousWord( direction ) {
     // if there is no active line, find the next one
     if ( !this.activeLine ) {
       this.activeLine = this.readNextPreviousLine( direction );
@@ -712,17 +727,18 @@ inherit( Object, Cursor, {
     this.wordPosition += searchDelta;
 
     return outputText;
-  },
+  }
 
   /**
    * Read the next or previous heading with one of the levels specified in headingLevels and in the direction
    * specified by the direction flag.
+   * @private
    *
    * @param  {Array.<string>} headingLevels
    * @param  {[type]} direction - direction of traversal through the DOM - NEXT || PREVIOUS
    * @returns {string}
    */
-  readNextPreviousHeading: function( headingLevels, direction ) {
+  readNextPreviousHeading( headingLevels, direction ) {
 
     // get the next element in the DOM with one of the above heading levels which has accessible content
     // to read
@@ -762,15 +778,17 @@ inherit( Object, Cursor, {
     // set element as the next active element and return the text
     this.activeElement = nextElement;
     return accessibleText;
-  },
+  }
 
   /**
    * Read the next/previous button element.  A button can have the tagname button, have the aria button role, or
    * or have one of the following types: submit, button, reset
+   * @private
+   *
    * @param  {string}} direction
    * @returns {HTMLElement}
    */
-  readNextPreviousButton: function( direction ) {
+  readNextPreviousButton( direction ) {
     // the following roles should handle 'role=button', 'type=button', 'tagName=BUTTON'
     const roles = [ 'button', 'BUTTON', 'submit', 'reset' ];
 
@@ -795,9 +813,15 @@ inherit( Object, Cursor, {
 
     this.activeElement = nextElement;
     return accessibleText;
-  },
+  }
 
-  readNextPreviousFormElement: function( direction ) {
+  /**
+   * @private
+   *
+   * @param {string} direction
+   * @returns {string}
+   */
+  readNextPreviousFormElement( direction ) {
     // TODO: support more form elements!
     const tagNames = [ 'INPUT', 'BUTTON' ];
     const ariaRoles = [ 'button' ];
@@ -826,9 +850,15 @@ inherit( Object, Cursor, {
 
     this.activeElement = nextElement;
     return accessibleText;
-  },
+  }
 
-  readNextPreviousListItem: function( direction ) {
+  /**
+   * @private
+   *
+   * @param {string} direction
+   * @returns {string}
+   */
+  readNextPreviousListItem( direction ) {
     if ( !this.activeElement ) {
       this.activeElement = this.getNextPreviousElementWithAccessibleContent( direction );
     }
@@ -869,9 +899,15 @@ inherit( Object, Cursor, {
     }
 
     return accessibleText;
-  },
+  }
 
-  readNextPreviousList: function( direction ) {
+  /**
+   * @private
+   *
+   * @param {string} direction
+   * @returns {string}
+   */
+  readNextPreviousList( direction ) {
     if ( !this.activeElement ) {
       this.activeElement = this.getNextPreviousElementWithAccessibleContent( direction );
     }
@@ -912,9 +948,15 @@ inherit( Object, Cursor, {
     }
 
     return listText + ', ' + itemText;
-  },
+  }
 
-  readNextPreviousCharacter: function( direction ) {
+  /**
+   * @private
+   *
+   * @param {string} direction
+   * @returns {string}
+   */
+  readNextPreviousCharacter( direction ) {
     // if there is no active line, find the next one
     if ( !this.activeLine ) {
       this.activeLine = this.readNextPreviousLine( NEXT );
@@ -949,16 +991,15 @@ inherit( Object, Cursor, {
     this.letterPosition += searchDelta;
 
     return outputText;
-  },
+  }
 
   /**
    * Update the list of elements, and add Mutation Observers to each one.  MutationObservers
    * provide a way to listen to changes in the DOM,
    * see https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
+   * @private
    */
-  updateLiveElementList: function() {
-
-    const self = this;
+  updateLiveElementList() {
 
     // remove all previous observers
     // TODO: only update the observer list if necessary
@@ -974,31 +1015,31 @@ inherit( Object, Cursor, {
     // search through the DOM, looking for elements with a 'live region' attribute
     for ( i = 0; i < this.linearDOM.length; i++ ) {
       const domElement = this.linearDOM[ i ];
-      const liveRole = self.getLiveRole( domElement );
+      const liveRole = this.getLiveRole( domElement );
 
       if ( liveRole ) {
-        var mutationObserverCallback = function( mutations ) {
-          mutations.forEach( function( mutation ) {
+        var mutationObserverCallback = mutations => {
+          mutations.forEach( mutation => {
             let liveRole;
             let mutatedElement = mutation.target;
 
             // look for the type of live role that is associated with this mutation
             // if the target has no live attribute, search through the element's ancestors to find the attribute
             while ( !liveRole ) {
-              liveRole = self.getLiveRole( mutatedElement );
+              liveRole = this.getLiveRole( mutatedElement );
               mutatedElement = mutatedElement.parentElement;
             }
 
             // we only care about nodes added
             if ( mutation.addedNodes[ 0 ] ) {
               const updatedText = mutation.addedNodes[ 0 ].data;
-              self.outputUtteranceProperty.set( new Utterance( updatedText, liveRole ) );
+              this.outputUtteranceProperty.set( new Utterance( updatedText, liveRole ) );
             }
           } );
         };
 
         // create a mutation observer for this live element
-        const observer = new MutationObserver( function( mutations ) {
+        const observer = new MutationObserver( mutations => {
           mutationObserverCallback( mutations );
         } );
 
@@ -1006,20 +1047,21 @@ inherit( Object, Cursor, {
         const observerConfig = { childList: true, subtree: true };
 
         observer.observe( domElement, observerConfig );
-        self.observers.push( observer );
+        this.observers.push( observer );
       }
     }
-  },
+  }
 
   /**
    * Read continuously from the current active element.  Accessible content is read by reader with a 'polite'
    * utterance so that new text is added to the queue line by line.
+   * @private
    *
    * TODO: If the read is cancelled, the active element should be set appropriately.
    *
    * @returns {string}
    */
-  readEntireDocument: function() {
+  readEntireDocument() {
 
     const liveRole = 'polite';
     let outputText = this.getAccessibleText( this.activeElement );
@@ -1034,23 +1076,24 @@ inherit( Object, Cursor, {
       }
       this.outputUtteranceProperty.set( new Utterance( outputText, liveRole ) );
     }
-  },
+  }
 
   /**
    * Return true if the element is focusable.  A focusable element has a tab index, is a
    * form element, or has a role which adds it to the navigation order.
+   * @private
    *
    * TODO: Populate with the rest of the focusable elements.
    * @param  {HTMLElement} domElement
    * @returns {boolean}
    */
-  isFocusable: function( domElement ) {
+  isFocusable( domElement ) {
     // list of attributes and tag names which should be in the navigation order
     // TODO: more roles!
     const focusableRoles = [ 'tabindex', 'BUTTON', 'INPUT' ];
 
     let focusable = false;
-    focusableRoles.forEach( function( role ) {
+    focusableRoles.forEach( role => {
 
       if ( domElement.getAttribute( role ) ) {
         focusable = true;
@@ -1063,27 +1106,29 @@ inherit( Object, Cursor, {
     } );
     return focusable;
   }
-} );
-
-/**
- * Create an experimental type to create unique utterances for the reader.
- * Type is simply a collection of text and a priority for aria-live that
- * lets the reader know whether to queue the next utterance or cancel it in the order.
- *
- * TODO: This is where we could deviate from traditional screen reader behavior. For instance, instead of
- * just liveRole, perhaps we should have a liveIndex that specifies order of the live update? We may also
- * need additional flags here for the reader.
- *
- * @param {string} text - the text to be read as the utterance for the synth
- * @param {string} liveRole - see https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Live_Regions
- */
-function Utterance( text, liveRole ) {
-
-  this.text = text;
-  this.liveRole = liveRole;
-
 }
 
-inherit( Object, Utterance );
+scenery.register( 'Cursor', Cursor );
+
+class Utterance {
+  /**
+   * Create an experimental type to create unique utterances for the reader.
+   * Type is simply a collection of text and a priority for aria-live that
+   * lets the reader know whether to queue the next utterance or cancel it in the order.
+   *
+   * TODO: This is where we could deviate from traditional screen reader behavior. For instance, instead of
+   * just liveRole, perhaps we should have a liveIndex that specifies order of the live update? We may also
+   * need additional flags here for the reader.
+   *
+   * @param {string} text - the text to be read as the utterance for the synth
+   * @param {string} liveRole - see https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Live_Regions
+   */
+  constructor( text, liveRole ) {
+
+    this.text = text;
+    this.liveRole = liveRole;
+
+  }
+}
 
 export default Cursor;

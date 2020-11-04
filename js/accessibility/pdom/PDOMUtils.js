@@ -10,8 +10,8 @@
  * @author Jesse Greenberg
  */
 
-import validate from '../../../../axon/js/validate.js';
 import ValidatorDef from '../../../../axon/js/ValidatorDef.js';
+import validate from '../../../../axon/js/validate.js';
 import merge from '../../../../phet-core/js/merge.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
 import scenery from '../../scenery.js';
@@ -182,7 +182,7 @@ function tagNameSupportsContent( tagName ) {
   return !_.includes( ELEMENTS_WITHOUT_CLOSING_TAG, tagName.toUpperCase() );
 }
 
-var PDOMUtils = {
+const PDOMUtils = {
 
   /**
    * Get the next focusable element. This should very rarely be used.  The next focusable element can almost
@@ -193,7 +193,7 @@ var PDOMUtils = {
    * @param{HTMLElement} [parentElement] - optional, search will be limited to elements under this element
    * @returns {HTMLElement}
    */
-  getNextFocusable: function( parentElement ) {
+  getNextFocusable( parentElement ) {
     return getNextPreviousFocusable( NEXT, parentElement );
   },
 
@@ -206,7 +206,7 @@ var PDOMUtils = {
    * @param {HTMLElement} [parentElement] - optional, search will be limited to elements under this parent
    * @returns {HTMLElement}
    */
-  getPreviousFocusable: function( parentElement ) {
+  getPreviousFocusable( parentElement ) {
     return getNextPreviousFocusable( PREVIOUS, parentElement );
   },
 
@@ -217,7 +217,7 @@ var PDOMUtils = {
    * @parma {Random} random
    * @returns {HTMLElement}
    */
-  getRandomFocusable: function( random ) {
+  getRandomFocusable( random ) {
     assert && assert( random, 'Random expected' );
 
     const linearDOM = getLinearDOMElements( document.body );
@@ -237,7 +237,7 @@ var PDOMUtils = {
    * @param {string} textContent
    * @returns {boolean}
    */
-  containsFormattingTags: function( textContent ) {
+  containsFormattingTags( textContent ) {
 
     // no-op for null case
     if ( textContent === null ) {
@@ -304,7 +304,7 @@ var PDOMUtils = {
    * @param {Element} domElement
    * @param {string} textContent - could have acceptable HTML "formatting" tags in it
    */
-  setTextContent: function( domElement, textContent ) {
+  setTextContent( domElement, textContent ) {
     assert && assert( domElement instanceof Element ); // parent to HTMLElement, to support other namespaces
     assert && assert( typeof textContent === 'string' );
 
@@ -338,7 +338,7 @@ var PDOMUtils = {
    * @param tagName
    * @returns {boolean}
    */
-  tagIsDefaultFocusable: function( tagName ) {
+  tagIsDefaultFocusable( tagName ) {
     return _.includes( DEFAULT_FOCUSABLE_TAGS, tagName.toUpperCase() );
   },
 
@@ -349,7 +349,7 @@ var PDOMUtils = {
    * @param {HTMLElement} domElement
    * @returns {boolean}
    */
-  isElementFocusable: function( domElement ) {
+  isElementFocusable( domElement ) {
 
     if ( !document.body.contains( domElement ) ) {
       return false;
@@ -374,7 +374,7 @@ var PDOMUtils = {
    * @param {string} tagName
    * @returns {boolean} - true if the tag does support inner content
    */
-  tagNameSupportsContent: function( tagName ) {
+  tagNameSupportsContent( tagName ) {
     return tagNameSupportsContent( tagName );
   },
 
@@ -385,7 +385,7 @@ var PDOMUtils = {
    * @param {HTMLElement} element
    * @param {Array.<HTMLElement>} childrenToRemove
    */
-  removeElements: function( element, childrenToRemove ) {
+  removeElements( element, childrenToRemove ) {
 
     for ( let i = 0; i < childrenToRemove.length; i++ ) {
       const childToRemove = childrenToRemove[ i ];
@@ -405,7 +405,7 @@ var PDOMUtils = {
    * @param {Array.<HTMLElement>} childrenToAdd
    * @param {HTMLElement} [beforeThisElement] - if not supplied, the insertBefore call will just use 'null'
    */
-  insertElements: function( element, childrenToAdd, beforeThisElement ) {
+  insertElements( element, childrenToAdd, beforeThisElement ) {
     assert && assert( element instanceof HTMLElement );
     assert && assert( Array.isArray( childrenToAdd ) );
     for ( let i = 0; i < childrenToAdd.length; i++ ) {
@@ -420,7 +420,7 @@ var PDOMUtils = {
    *
    * @param {Object} associationObject
    */
-  validateAssociationObject: function( associationObject ) {
+  validateAssociationObject( associationObject ) {
     assert && assert( typeof associationObject === 'object' );
 
     const expectedKeys = [ 'thisElementName', 'otherNode', 'otherElementName' ];
@@ -452,7 +452,7 @@ var PDOMUtils = {
    * @param {Object} [options]
    * @returns {HTMLElement}
    */
-  createElement: function( tagName, focusable, options ) {
+  createElement( tagName, focusable, options ) {
     options = merge( {
       // {string|null} - If non-null, the element will be created with the specific namespace
       namespace: null,
@@ -502,7 +502,7 @@ var PDOMUtils = {
    * @param {HTMLElement} element
    * @param {boolean} focusable
    */
-  overrideFocusWithTabIndex: function( element, focusable ) {
+  overrideFocusWithTabIndex( element, focusable ) {
     const defaultFocusable = PDOMUtils.tagIsDefaultFocusable( element.tagName );
 
     // only add a tabindex when we are overriding the default focusable bahvior of the browser for the tag name

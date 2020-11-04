@@ -122,8 +122,8 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
-import validate from '../../../../axon/js/validate.js';
 import ValidatorDef from '../../../../axon/js/ValidatorDef.js';
+import validate from '../../../../axon/js/validate.js';
 import Shape from '../../../../kite/js/Shape.js';
 import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
 import extend from '../../../../phet-core/js/extend.js';
@@ -146,7 +146,7 @@ const DEFAULT_DESCRIPTION_TAG_NAME = P_TAG;
 const DEFAULT_LABEL_TAG_NAME = P_TAG;
 
 // see setAccessibleHeadingBehavior for more details
-const DEFAULT_ACCESSIBLE_HEADING_BEHAVIOR = function( node, options, heading ) {
+const DEFAULT_ACCESSIBLE_HEADING_BEHAVIOR = ( node, options, heading ) => {
 
   options.labelTagName = 'h' + node.headingLevel; // TODO: make sure heading level change fires a full peer rebuild, see https://github.com/phetsims/scenery/issues/867
   options.labelContent = heading;
@@ -226,7 +226,7 @@ const ParallelDOM = {
    *
    * @param {function} type - the constructor for Node
    */
-  compose: function( type ) {
+  compose( type ) {
     // Can't avoid circular dependency, so no assertion here. Ensure that 'type' is the constructor for Node.
     const proto = type.prototype;
 
@@ -2050,13 +2050,11 @@ const ParallelDOM = {
       setAccessibleOrder: function( accessibleOrder ) {
         assert && assert( Array.isArray( accessibleOrder ) || accessibleOrder === null,
           'Array or null expected, received: ' + accessibleOrder );
-        assert && accessibleOrder && accessibleOrder.forEach( function( node, index ) {
+        assert && accessibleOrder && accessibleOrder.forEach( ( node, index ) => {
           assert( node === null || node instanceof Node,
             'Elements of accessibleOrder should be either a Node or null. Element at index ' + index + ' is: ' + node );
         } );
-        assert && accessibleOrder && assert( this.getTrails( function( node ) {
-          return _.includes( accessibleOrder, node );
-        } ).length === 0, 'accessibleOrder should not include any ancestors or the node itself' );
+        assert && accessibleOrder && assert( this.getTrails( node => _.includes( accessibleOrder, node ) ).length === 0, 'accessibleOrder should not include any ancestors or the node itself' );
 
         // Only update if it has changed
         if ( this._accessibleOrder !== accessibleOrder ) {
@@ -2620,7 +2618,7 @@ const ParallelDOM = {
           // otherwise we could end up having multiple references to the same trail (which should be disallowed).
           let pruneCount = 0;
           // count the number of times our node appears in the pruneStack
-          _.each( pruneStack, function( pruneNode ) {
+          _.each( pruneStack, pruneNode => {
             if ( node === pruneNode ) {
               pruneCount++;
             }
@@ -2649,11 +2647,11 @@ const ParallelDOM = {
           pruneStack = pruneStack.concat( arrayAccessibleOrder );
 
           // Visiting trails to ordered nodes.
-          _.each( arrayAccessibleOrder, function( descendant ) {
+          _.each( arrayAccessibleOrder, descendant => {
             // Find all descendant references to the node.
             // NOTE: We are not reordering trails (due to descendant constraints) if there is more than one instance for
             // this descendant node.
-            _.each( node.getLeafTrailsTo( descendant ), function( descendantTrail ) {
+            _.each( node.getLeafTrailsTo( descendant ), descendantTrail => {
               descendantTrail.removeAncestor(); // strip off 'node', so that we handle only children
 
               // same as the normal order, but adding a full trail (since we may be referencing a descendant node)
@@ -2674,7 +2672,7 @@ const ParallelDOM = {
           }
 
           // pop focused nodes from the stack (that were added above)
-          _.each( arrayAccessibleOrder, function() {
+          _.each( arrayAccessibleOrder, () => {
             pruneStack.pop();
           } );
 
@@ -2732,9 +2730,7 @@ const ParallelDOM = {
           // Prune the search (because milliseconds don't grow on trees, even if we do have assertions enabled)
           if ( descendant._rendererSummary.isNotAccessible() ) { return; }
 
-          descendant.accessibleOrder && assert( descendant.getTrails( function( node ) {
-            return _.includes( descendant.accessibleOrder, node );
-          } ).length === 0, 'accessibleOrder should not include any ancestors or the node itself' );
+          descendant.accessibleOrder && assert( descendant.getTrails( node => _.includes( descendant.accessibleOrder, node ) ).length === 0, 'accessibleOrder should not include any ancestors or the node itself' );
         } )( node );
 
         assert && PDOMTree.auditNodeForAccessibleCycles( this );
@@ -2827,7 +2823,7 @@ const ParallelDOM = {
    * @public
    * @type {a11yBehaviorFunction}
    */
-  BASIC_ACCESSIBLE_NAME_BEHAVIOR: function( node, options, accessibleName ) {
+  BASIC_ACCESSIBLE_NAME_BEHAVIOR( node, options, accessibleName ) {
     if ( node.tagName === 'input' ) {
       options.labelTagName = 'label';
       options.labelContent = accessibleName;
@@ -2845,7 +2841,7 @@ const ParallelDOM = {
    * @public
    * @type {a11yBehaviorFunction}
    */
-  HELP_TEXT_BEFORE_CONTENT: function( node, options, helpText ) {
+  HELP_TEXT_BEFORE_CONTENT( node, options, helpText ) {
     options.descriptionTagName = PDOMUtils.DEFAULT_DESCRIPTION_TAG_NAME;
     options.descriptionContent = helpText;
     options.appendDescription = false;
@@ -2856,7 +2852,7 @@ const ParallelDOM = {
    * @public
    * @type {a11yBehaviorFunction}
    */
-  HELP_TEXT_AFTER_CONTENT: function( node, options, helpText ) {
+  HELP_TEXT_AFTER_CONTENT( node, options, helpText ) {
     options.descriptionTagName = PDOMUtils.DEFAULT_DESCRIPTION_TAG_NAME;
     options.descriptionContent = helpText;
     options.appendDescription = true;
@@ -2865,5 +2861,4 @@ const ParallelDOM = {
 };
 
 scenery.register( 'ParallelDOM', ParallelDOM );
-
 export default ParallelDOM;

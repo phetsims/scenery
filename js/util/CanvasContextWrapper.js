@@ -11,31 +11,29 @@
  */
 
 import Property from '../../../axon/js/Property.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 
-/**
- * @constructor
- *
- * @param {HTMLCanvasElement} canvas
- * @param {CanvasRenderingContext2D} context
- */
-function CanvasContextWrapper( canvas, context ) {
+class CanvasContextWrapper {
+  /**
+   * @param {HTMLCanvasElement} canvas
+   * @param {CanvasRenderingContext2D} context
+   */
+  constructor( canvas, context ) {
 
-  // @public {HTMLCanvasElement}
-  this.canvas = canvas;
+    // @public {HTMLCanvasElement}
+    this.canvas = canvas;
 
-  // @public {CanvasRenderingContext2D}
-  this.context = context;
+    // @public {CanvasRenderingContext2D}
+    this.context = context;
 
-  this.resetStyles();
-}
+    this.resetStyles();
+  }
 
-scenery.register( 'CanvasContextWrapper', CanvasContextWrapper );
-
-inherit( Object, CanvasContextWrapper, {
-  // set local styles to undefined, so that they will be invalidated later
-  resetStyles: function() {
+  /**
+   * Set local styles to undefined, so that they will be invalidated later
+   * @public
+   */
+  resetStyles() {
     this.fillStyle = undefined; // null
     this.strokeStyle = undefined; // null
     this.lineWidth = undefined; // 1
@@ -47,14 +45,16 @@ inherit( Object, CanvasContextWrapper, {
 
     this.font = undefined; // '10px sans-serif'
     this.direction = undefined; // 'inherit'
-  },
+  }
 
   /**
    * Sets a (possibly) new width and height, and clears the canvas.
-   * @param width
-   * @param height
+   * @public
+   *
+   * @param {number} width
+   * @param {number} height
    */
-  setDimensions: function( width, height ) {
+  setDimensions( width, height ) {
 
     //Don't guard against width and height, because we need to clear the canvas.
     //TODO: Is it expensive to clear by setting both the width and the height?  Maybe we just need to set the width to clear it.
@@ -63,9 +63,14 @@ inherit( Object, CanvasContextWrapper, {
 
     // assume all persistent data could have changed
     this.resetStyles();
-  },
+  }
 
-  setFillStyle: function( style ) {
+  /**
+   * @public
+   *
+   * @param {string|Color|Property.<string>} style
+   */
+  setFillStyle( style ) {
     // turn {Property}s into their values when necessary
     if ( style && style instanceof Property ) {
       style = style.value;
@@ -82,9 +87,14 @@ inherit( Object, CanvasContextWrapper, {
       // allow gradients / patterns
       this.context.fillStyle = style;
     }
-  },
+  }
 
-  setStrokeStyle: function( style ) {
+  /**
+   * @public
+   *
+   * @param {string|Color|Property.<string>} style
+   */
+  setStrokeStyle( style ) {
     // turn {Property}s into their values when necessary
     if ( style && style instanceof Property ) {
       style = style.value;
@@ -101,38 +111,63 @@ inherit( Object, CanvasContextWrapper, {
       // allow gradients / patterns
       this.context.strokeStyle = style;
     }
-  },
+  }
 
-  setLineWidth: function( width ) {
+  /**
+   * @public
+   *
+   * @param {number} width
+   */
+  setLineWidth( width ) {
     if ( this.lineWidth !== width ) {
       this.lineWidth = width;
       this.context.lineWidth = width;
     }
-  },
+  }
 
-  setLineCap: function( cap ) {
+  /**
+   * @public
+   *
+   * @param {string} cap
+   */
+  setLineCap( cap ) {
     if ( this.lineCap !== cap ) {
       this.lineCap = cap;
       this.context.lineCap = cap;
     }
-  },
+  }
 
-  setLineJoin: function( join ) {
+  /**
+   * @public
+   *
+   * @param {string} join
+   */
+  setLineJoin( join ) {
     if ( this.lineJoin !== join ) {
       this.lineJoin = join;
       this.context.lineJoin = join;
     }
-  },
+  }
 
-  setMiterLimit: function( miterLimit ) {
+  /**
+   * @public
+   *
+   * @param {number} miterLimit
+   */
+  setMiterLimit( miterLimit ) {
     assert && assert( typeof miterLimit === 'number' );
     if ( this.miterLimit !== miterLimit ) {
       this.miterLimit = miterLimit;
       this.context.miterLimit = miterLimit;
     }
-  },
+  }
 
-  setLineDash: function( dash ) {
+  /**
+   * @public
+   *
+   * @param {Array.<number>|null} dash
+   */
+  setLineDash( dash ) {
     assert && assert( dash !== undefined, 'undefined line dash would cause hard-to-trace errors' );
     if ( this.lineDash !== dash ) {
       this.lineDash = dash;
@@ -149,9 +184,14 @@ inherit( Object, CanvasContextWrapper, {
         // unsupported line dash! do... nothing?
       }
     }
-  },
+  }
 
-  setLineDashOffset: function( lineDashOffset ) {
+  /**
+   * @public
+   *
+   * @param {number} lineDashOffset
+   */
+  setLineDashOffset( lineDashOffset ) {
     if ( this.lineDashOffset !== lineDashOffset ) {
       this.lineDashOffset = lineDashOffset;
       if ( this.context.lineDashOffset !== undefined ) {
@@ -164,21 +204,32 @@ inherit( Object, CanvasContextWrapper, {
         // unsupported line dash! do... nothing?
       }
     }
-  },
+  }
 
-  setFont: function( font ) {
+  /**
+   * @public
+   *
+   * @param {string} font
+   */
+  setFont( font ) {
     if ( this.font !== font ) {
       this.font = font;
       this.context.font = font;
     }
-  },
+  }
 
-  setDirection: function( direction ) {
+  /**
+   * @public
+   *
+   * @param {string} direction
+   */
+  setDirection( direction ) {
     if ( this.direction !== direction ) {
       this.direction = direction;
       this.context.direction = direction;
     }
   }
-} );
+}
 
+scenery.register( 'CanvasContextWrapper', CanvasContextWrapper );
 export default CanvasContextWrapper;

@@ -8,35 +8,28 @@
  */
 
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import inherit from '../../../../phet-core/js/inherit.js';
 import WebGLNode from '../../nodes/WebGLNode.js';
 import scenery from '../../scenery.js';
 import Renderer from '../Renderer.js';
 import WebGLSelfDrawable from '../WebGLSelfDrawable.js';
 
-/**
- * A generated WebGLSelfDrawable whose purpose will be drawing our WebGLNode. One of these drawables will be created
- * for each displayed instance of a WebGLNode.
- * @constructor
- *
- * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
- * @param {Instance} instance
- */
-function WebGLNodeDrawable( renderer, instance ) {
-  // @private {function}
-  this.contextChangeListener = this.onWebGLContextChange.bind( this );
+class WebGLNodeDrawable extends WebGLSelfDrawable {
+  /**
+   * @public
+   * @override
+   *
+   * @param {number} renderer
+   * @param {Instance} instance
+   */
+  initialize( renderer, instance ) {
+    super.initialize( renderer, instance );
 
-  // @private {*} - Will be set to whatever type node.painterType is.
-  this.painter = null;
+    // @private {function}
+    this.contextChangeListener = this.contextChangeListener || this.onWebGLContextChange.bind( this );
 
-  this.initializeWebGLSelfDrawable( renderer, instance );
-}
-
-scenery.register( 'WebGLNodeDrawable', WebGLNodeDrawable );
-
-inherit( WebGLSelfDrawable, WebGLNodeDrawable, {
-  // We use a custom renderer for the needed flexibility
-  webglRenderer: Renderer.webglCustom,
+    // @private {*} - Will be set to whatever type node.painterType is.
+    this.painter = null;
+  }
 
   /**
    * Creates an instance of our Node's "painter" type.
@@ -44,36 +37,51 @@ inherit( WebGLSelfDrawable, WebGLNodeDrawable, {
    *
    * @returns {*} - Whatever node.painterType is will be the type.
    */
-  createPainter: function() {
+  createPainter() {
     const PainterType = this.node.painterType;
     return new PainterType( this.webGLBlock.gl, this.node );
-  },
+  }
 
   /**
    * Callback for when the WebGL context changes. We'll reconstruct the painter.
-   * @public (scenery-internal)
+   * @public
    */
-  onWebGLContextChange: function() {
+  onWebGLContextChange() {
     //TODO: Should a function be added for "disposeNonWebGL"?
 
     // Create the new painter
     this.painter = this.createPainter();
-  },
+  }
 
-  onAddToBlock: function( webGLBlock ) {
+  /**
+   * @public
+   *
+   * @param {WebGLBlock} webGLBlock
+   */
+  onAddToBlock( webGLBlock ) {
     // @private {WebGLBlock}
     this.webGLBlock = webGLBlock;
 
     this.painter = this.createPainter();
 
     webGLBlock.glChangedEmitter.addListener( this.contextChangeListener );
-  },
+  }
 
-  onRemoveFromBlock: function( webGLBlock ) {
+  /**
+   * @public
+   *
+   * @param {WebGLBlock} webGLBlock
+   */
+  onRemoveFromBlock( webGLBlock ) {
     webGLBlock.glChangedEmitter.removeListener( this.contextChangeListener );
-  },
+  }
 
-  draw: function() {
+  /**
+   * @public
+   *
+   * @returns {WebGLNode.PAINTED_NOTHING|WebGLNode.PAINTED_SOMETHING}
+   */
+  draw() {
     // we have a precompute need
     const matrix = this.instance.relativeTransform.matrix;
 
@@ -84,14 +92,14 @@ inherit( WebGLSelfDrawable, WebGLNodeDrawable, {
       'Ensure we can pass the value through directly to indicate whether draw calls were made' );
 
     return painted;
-  },
+  }
 
   /**
    * Disposes the drawable.
    * @public
    * @override
    */
-  dispose: function() {
+  dispose() {
     this.painter.dispose();
     this.painter = null;
 
@@ -100,27 +108,34 @@ inherit( WebGLSelfDrawable, WebGLNodeDrawable, {
     }
 
     // super
-    WebGLSelfDrawable.prototype.dispose.call( this );
-  },
+    super.dispose();
+  }
 
   /**
    * A "catch-all" dirty method that directly marks the paintDirty flag and triggers propagation of dirty
    * information. This can be used by other mark* methods, or directly itself if the paintDirty flag is checked.
-   * @public (scenery-internal)
+   * @public
    *
    * It should be fired (indirectly or directly) for anything besides transforms that needs to make a drawable
    * dirty.
    */
-  markPaintDirty: function() {
+  markPaintDirty() {
     this.markDirty();
-  },
+  }
 
   // forward call to the WebGLNode
   get shaderAttributes() {
     return this.node.shaderAttributes;
   }
-} );
+}
 
-Poolable.mixInto( WebGLNodeDrawable );
+// We use a custom renderer for the needed flexibility
+WebGLNodeDrawable.prototype.webglRenderer = Renderer.webglCustom;
+
+scenery.register( 'WebGLNodeDrawable', WebGLNodeDrawable );
+
+Poolable.mixInto( WebGLNodeDrawable, {
+  initialize: WebGLNodeDrawable.prototype.initialize
+} );
 
 export default WebGLNodeDrawable;

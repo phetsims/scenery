@@ -48,7 +48,7 @@ const siblingBoundsCorrect = node => {
 };
 
 // tests
-QUnit.test( 'sibling positioning', function( assert ) {
+QUnit.test( 'sibling positioning', assert => {
 
   const rootNode = new Node( { tagName: 'div' } );
   const display = new Display( rootNode ); // eslint-disable-line

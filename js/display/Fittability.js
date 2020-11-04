@@ -9,31 +9,27 @@
  */
 
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 
-/**
- * @constructor
- *
- * @param {Instance} instance - Our Instance, never changes.
- */
-function Fittability( instance ) {
-  // @private {Instance}
-  this.instance = instance;
-}
+class Fittability {
+  /**
+   * @param {Instance} instance - Our Instance, never changes.
+   */
+  constructor( instance ) {
+    // @private {Instance}
+    this.instance = instance;
+  }
 
-scenery.register( 'Fittability', Fittability );
-
-inherit( Object, Fittability, {
   /**
    * Responsible for initialization and cleaning of this. If the parameters are both null, we'll want to clean our
    * external references (like Instance does).
+   * @public
    *
    * @param {Display|null} display
    * @param {Trail|null} trail
    * @returns {Fittability} - Returns this, to allow chaining.
    */
-  initialize: function( display, trail ) {
+  initialize( display, trail ) {
     this.display = display; // @private {Display}
     this.trail = trail; // @private {Trail}
     this.node = trail && trail.lastNode(); // @private {Node}
@@ -62,7 +58,7 @@ inherit( Object, Fittability, {
     this.subtreeFittabilityChangeEmitter = this.subtreeFittabilityChangeEmitter || new TinyEmitter();
 
     return this; // allow chaining
-  },
+  }
 
   /**
    * Easy access to our parent Instance's Fittability, if it exists.
@@ -72,19 +68,19 @@ inherit( Object, Fittability, {
    */
   get parent() {
     return this.instance.parent ? this.instance.parent.fittability : null;
-  },
+  }
 
   /**
    * Called when the instance is updating its rendering state (as any fittability changes to existing instances will
    * trigger an update there).
    * @public
    */
-  checkSelfFittability: function() {
+  checkSelfFittability() {
     const newSelfFittable = this.isSelfFitSupported();
     if ( this.selfFittable !== newSelfFittable ) {
       this.updateSelfFittable();
     }
-  },
+  }
 
   /**
    * Whether our node's performance flags allows the subtree to be fitted.
@@ -94,16 +90,16 @@ inherit( Object, Fittability, {
    *
    * @returns {boolean}
    */
-  isSelfFitSupported: function() {
+  isSelfFitSupported() {
     return !this.node.isPreventFit();
-  },
+  }
 
   /**
    * Called when our parent just became fittable. Responsible for flagging subtrees with the ancestorsFittable flag,
    * up to the point where they are fittable.
    * @private
    */
-  markSubtreeFittable: function() {
+  markSubtreeFittable() {
     // Bail if we can't be fittable ourselves
     if ( !this.selfFittable ) {
       return;
@@ -118,14 +114,14 @@ inherit( Object, Fittability, {
 
     // Update the Instance's drawables, so that their blocks can potentially now be fitted.
     this.instance.updateDrawableFittability( true );
-  },
+  }
 
   /**
    * Called when our parent just became unfittable and we are fittable. Responsible for flagging subtrees with
    * the !ancestorsFittable flag, up to the point where they are unfittable.
    * @private
    */
-  markSubtreeUnfittable: function() {
+  markSubtreeUnfittable() {
     // Bail if we are already unfittable
     if ( !this.ancestorsFittable ) {
       return;
@@ -140,13 +136,13 @@ inherit( Object, Fittability, {
 
     // Update the Instance's drawables, so that their blocks can potentially now be prevented from being fitted.
     this.instance.updateDrawableFittability( false );
-  },
+  }
 
   /**
    * Called when our Node's self fit-ability has changed.
    * @private
    */
-  updateSelfFittable: function() {
+  updateSelfFittable() {
     const newSelfFittable = this.isSelfFitSupported();
     assert && assert( this.selfFittable !== newSelfFittable );
 
@@ -165,14 +161,14 @@ inherit( Object, Fittability, {
     else {
       this.incrementSubtreeUnfittableCount();
     }
-  },
+  }
 
   /**
    * A child instance's subtree became unfittable, OR our 'self' became unfittable. This is responsible for updating
    * the subtreeFittableCount for this instance AND up to all ancestors that would be affected by the change.
    * @private
    */
-  incrementSubtreeUnfittableCount: function() {
+  incrementSubtreeUnfittableCount() {
     this.subtreeUnfittableCount++;
 
     // If now something in our subtree can't be fitted, we need to notify our parent
@@ -182,14 +178,14 @@ inherit( Object, Fittability, {
       // Notify anything listening that the condition ( this.subtreeUnfittableCount > 0 ) changed.
       this.subtreeFittabilityChangeEmitter.emit();
     }
-  },
+  }
 
   /**
    * A child instance's subtree became fittable, OR our 'self' became fittable. This is responsible for updating
    * the subtreeFittableCount for this instance AND up to all ancestors that would be affected by the change.
    * @private
    */
-  decrementSubtreeUnfittableCount: function() {
+  decrementSubtreeUnfittableCount() {
     this.subtreeUnfittableCount--;
 
     // If now our subtree can all be fitted, we need to notify our parent
@@ -199,7 +195,7 @@ inherit( Object, Fittability, {
       // Notify anything listening that the condition ( this.subtreeUnfittableCount > 0 ) changed.
       this.subtreeFittabilityChangeEmitter.emit();
     }
-  },
+  }
 
   /**
    * Called when an instance is added as a child to our instance. Updates necessary counts.
@@ -207,7 +203,7 @@ inherit( Object, Fittability, {
    *
    * @param {Fittability} childFittability - The Fittability of the new child instance.
    */
-  onInsert: function( childFittability ) {
+  onInsert( childFittability ) {
     if ( !this.ancestorsFittable ) {
       childFittability.markSubtreeUnfittable();
     }
@@ -215,7 +211,7 @@ inherit( Object, Fittability, {
     if ( childFittability.subtreeUnfittableCount > 0 ) {
       this.incrementSubtreeUnfittableCount();
     }
-  },
+  }
 
   /**
    * Called when a child instance is removed from our instance. Updates necessary counts.
@@ -223,7 +219,7 @@ inherit( Object, Fittability, {
    *
    * @param {Fittability} childFittability - The Fittability of the old child instance.
    */
-  onRemove: function( childFittability ) {
+  onRemove( childFittability ) {
     if ( !this.ancestorsFittable ) {
       childFittability.markSubtreeFittable();
     }
@@ -231,13 +227,13 @@ inherit( Object, Fittability, {
     if ( childFittability.subtreeUnfittableCount > 0 ) {
       this.decrementSubtreeUnfittableCount();
     }
-  },
+  }
 
   /**
    * Sanity checks that run when slow assertions are enabled. Enforces the invariants of the Fittability subsystem.
    * @public
    */
-  audit: function() {
+  audit() {
     if ( assertSlow ) {
       assertSlow( this.selfFittable === this.isSelfFitSupported(),
         'selfFittable diverged from isSelfFitSupported()' );
@@ -251,7 +247,7 @@ inherit( Object, Fittability, {
       if ( !this.selfFittable ) {
         subtreeUnfittableCount++;
       }
-      _.each( this.instance.children, function( instance ) {
+      _.each( this.instance.children, instance => {
         if ( instance.fittability.subtreeUnfittableCount > 0 ) {
           subtreeUnfittableCount++;
         }
@@ -259,6 +255,7 @@ inherit( Object, Fittability, {
       assertSlow( this.subtreeUnfittableCount === subtreeUnfittableCount, 'Incorrect subtreeUnfittableCount' );
     }
   }
-} );
+}
 
+scenery.register( 'Fittability', Fittability );
 export default Fittability;

@@ -42,7 +42,7 @@ function supportsDataURLFormatOrigin( name, black1x1Url ) {
   const img = document.createElement( 'img' );
   img.crossOrigin = 'Anonymous'; // maybe setting the CORS attribute will help?
 
-  const loadCall = function() {
+  const loadCall = () => {
     try {
       context.drawImage( img, 0, 0 );
       canvas.toDataURL();
@@ -96,6 +96,7 @@ Features.createImageDataHD = detectPrefix( ctx, 'createImageDataHD' );
 Features.getImageDataHD = detectPrefix( ctx, 'getImageDataHD' );
 Features.putImageDataHD = detectPrefix( ctx, 'putImageDataHD' );
 Features.currentTransform = detectPrefix( ctx, 'currentTransform' );
+Features.canvasFilter = detectPrefix( ctx, 'filter' );
 
 const span = document.createElement( 'span' );
 const div = document.createElement( 'div' );
@@ -119,8 +120,9 @@ Features.fontSmoothing = detectPrefix( div.style, 'fontSmoothing' );
 Features.requestAnimationFrame = detectPrefix( window, 'requestAnimationFrame' );
 Features.cancelAnimationFrame = detectPrefix( window, 'cancelAnimationFrame' );
 
+
 // e.g. Features.setStyle( domElement, Features.transform, '...' ), and doesn't set it if no 'transform' attribute (prefixed or no) is found
-Features.setStyle = function( domElement, optionalKey, value ) {
+Features.setStyle = ( domElement, optionalKey, value ) => {
   if ( optionalKey !== undefined ) {
     domElement.style[ optionalKey ] = value;
   }
@@ -130,7 +132,7 @@ Features.setStyle = function( domElement, optionalKey, value ) {
 // see https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#Improving_scrolling_performance_with_passive_listeners
 Features.passive = false;
 window.addEventListener( 'test', null, Object.defineProperty( {}, 'passive', {
-  get: function() { // eslint-disable-line getter-return
+  get: () => { // eslint-disable-line getter-return
     Features.passive = true;
   }
 } ) );

@@ -11,76 +11,71 @@
  */
 
 import Shape from '../../../kite/js/Shape.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
 import FocusHighlightPath from './FocusHighlightPath.js';
 
-/**
- *
- * @param {Node|null} node
- * @param {Object} [options]
- * @extends FocusHighlightPath
- * @constructor
- */
-function FocusHighlightFromNode( node, options ) {
+class FocusHighlightFromNode extends FocusHighlightPath {
+  /**
+   * @param {Node|null} node
+   * @param {Object} [options]
+   */
+  constructor( node, options ) {
 
-  options = merge( {
+    options = merge( {
 
-    // {boolean} - if true, highlight will surround local bounds
-    useLocalBounds: true,
+      // {boolean} - if true, highlight will surround local bounds
+      useLocalBounds: true,
 
-    // {Node|null} - see FocusHighlightPath for more documentation
-    transformSourceNode: node,
+      // {Node|null} - see FocusHighlightPath for more documentation
+      transformSourceNode: node,
 
-    // line width options, one for each highlight, will be calculated based on transform of this path unless provided
-    outerLineWidth: null,
-    innerLineWidth: null,
+      // line width options, one for each highlight, will be calculated based on transform of this path unless provided
+      outerLineWidth: null,
+      innerLineWidth: null,
 
-    // {null|number] - default value is function of node transform (minus translation), but can be set explicitly
-    // see FocusHighlightPath.getDilationCoefficient(). A number here refers to the amount in pixels to dilate the
-    // focus highlight by
-    dilationCoefficient: null,
+      // {null|number] - default value is function of node transform (minus translation), but can be set explicitly
+      // see FocusHighlightPath.getDilationCoefficient(). A number here refers to the amount in pixels to dilate the
+      // focus highlight by
+      dilationCoefficient: null,
 
-    // {boolean} - if true, dilation for bounds around node will increase, see setShapeFromNode()
-    useGroupDilation: false
-  }, options );
+      // {boolean} - if true, dilation for bounds around node will increase, see setShapeFromNode()
+      useGroupDilation: false
+    }, options );
 
-  this.useLocalBounds = options.useLocalBounds; // @private
-  this.useGroupDilation = options.useGroupDilation; // @private
-  this.dilationCoefficient = options.dilationCoefficient; // @private
+    super( null, options );
 
-  FocusHighlightPath.call( this, null, options );
+    this.useLocalBounds = options.useLocalBounds; // @private
+    this.useGroupDilation = options.useGroupDilation; // @private
+    this.dilationCoefficient = options.dilationCoefficient; // @private
 
-  // @private - from options, will override line width calculations based on the node's size
-  this.outerLineWidth = options.outerLineWidth;
-  this.innerLineWidth = options.innerLineWidth;
+    // @private - from options, will override line width calculations based on the node's size
+    this.outerLineWidth = options.outerLineWidth;
+    this.innerLineWidth = options.innerLineWidth;
 
-  // @private {Property.<Bounds2>} - keep track to remove listener
-  this.observedBoundsProperty = null;
+    // @private {Property.<Bounds2>} - keep track to remove listener
+    this.observedBoundsProperty = null;
 
-  // @private {function} - keep track of the listener so that it can be removed
-  this.boundsListener = null;
+    // @private {function} - keep track of the listener so that it can be removed
+    this.boundsListener = null;
 
-  if ( node ) {
-    this.setShapeFromNode( node );
+    if ( node ) {
+      this.setShapeFromNode( node );
+    }
   }
-}
 
-scenery.register( 'FocusHighlightFromNode', FocusHighlightFromNode );
-
-inherit( FocusHighlightPath, FocusHighlightFromNode, {
 
   /**
    * Update the focusHighlight shape on the path given the node passed in. Depending on options supplied to this
    * FocusHighlightFromNode, the shape will surround the node's bounds or its local bounds, dilated by an amount
    * that is dependent on whether or not this highlight is for group content or for the node itself. See
    * ParallelDOM.setGroupFocusHighlight() for more information on group highlights.
+   * @public
    *
    * @param {Node} node
    */
-  setShapeFromNode: function( node ) {
+  setShapeFromNode( node ) {
     assert && assert( node instanceof Node );
 
     // cleanup the previous listener
@@ -118,19 +113,21 @@ inherit( FocusHighlightPath, FocusHighlightFromNode, {
       this.setShape( Shape.bounds( dilatedBounds ) );
     };
     this.observedBoundsProperty.link( this.boundsListener );
-  },
+  }
 
   /**
    * @private
    * Update the line width of both Paths based on transform.
    * @param node
    */
-  updateLineWidthFromNode: function( node ) {
+  updateLineWidthFromNode( node ) {
 
     // Default options can override
     this.lineWidth = this.outerLineWidth || FocusHighlightPath.getOuterLineWidthFromNode( node );
     this.innerHighlightPath.lineWidth = this.innerLineWidth || FocusHighlightPath.getInnerLineWidthFromNode( node );
   }
-} );
+}
+
+scenery.register( 'FocusHighlightFromNode', FocusHighlightFromNode );
 
 export default FocusHighlightFromNode;

@@ -1,6 +1,5 @@
 // Copyright 2013-2020, University of Colorado Boulder
 
-
 /**
  * An instance that is specific to the display (not necessarily a global instance, could be in a Canvas cache, etc),
  * that is needed to tracking instance-specific display information, and signals to the display system when other
@@ -25,7 +24,6 @@ import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 import Trail from '../util/Trail.js';
 import Utils from '../util/Utils.js';
@@ -43,38 +41,41 @@ let globalIdCounter = 1;
 
 // preferences top to bottom in general
 const defaultPreferredRenderers = Renderer.createOrderBitmask(
-  Renderer.bitmaskSVG, Renderer.bitmaskCanvas, Renderer.bitmaskDOM, Renderer.bitmaskWebGL );
+  Renderer.bitmaskSVG,
+  Renderer.bitmaskCanvas,
+  Renderer.bitmaskDOM,
+  Renderer.bitmaskWebGL
+);
 
-/**
- * @constructor
- * @mixes Poolable
- *
- * See initialize() for documentation
- *
- * @param display
- * @param trail
- * @param isDisplayRoot
- * @param isSharedCanvasCacheRoot
- */
-function Instance( display, trail, isDisplayRoot, isSharedCanvasCacheRoot ) {
+class Instance {
+  /**
+   * @mixes Poolable
+   *
+   * See initialize() for documentation
+   *
+   * @param {Display} display
+   * @param {Trail} trail
+   * @param {boolean} isDisplayRoot
+   * @param {boolean} isSharedCanvasCacheRoot
+   */
+  constructor( display, trail, isDisplayRoot, isSharedCanvasCacheRoot ) {
 
-  // @private {boolean}
-  this.active = false;
+    // @private {boolean}
+    this.active = false;
 
-  this.initialize( display, trail, isDisplayRoot, isSharedCanvasCacheRoot );
-}
+    this.initialize( display, trail, isDisplayRoot, isSharedCanvasCacheRoot );
+  }
 
-scenery.register( 'Instance', Instance );
-
-inherit( Object, Instance, {
-  /*
+  /**
+   * @public
+   *
    * @param {Display} display - Instances are bound to a single display
    * @param {Trail} trail - The list of ancestors going back up to our root instance (for the display, or for a cache)
    * @param {boolean} isDisplayRoot - Whether our instance is for the root node provided to the Display.
    * @param {boolean} isSharedCanvasCacheRoot - Whether our instance is the root for a shared Canvas cache (which can
    *                                            be used multiple places in the main instance tree)
    */
-  initialize: function( display, trail, isDisplayRoot, isSharedCanvasCacheRoot ) {
+  initialize( display, trail, isDisplayRoot, isSharedCanvasCacheRoot ) {
     assert && assert( !this.active,
       'We should never try to initialize an already active object' );
 
@@ -87,25 +88,25 @@ inherit( Object, Instance, {
     // @public {boolean}
     this.isWebGLSupported = display.isWebGLAllowed() && Utils.isWebGLSupported;
 
-    // {RelativeTransform}, provides high-performance access to 'relative' transforms (from our nearest
-    // transform root), and allows for listening to when our relative transform changes (called during
-    // a phase of Display.updateDisplay()).
+    // @public {RelativeTransform} - provides high-performance access to 'relative' transforms (from our nearest
+    // transform root), and allows for listening to when our relative transform changes (called during a phase of
+    // Display.updateDisplay()).
     this.relativeTransform = ( this.relativeTransform || new RelativeTransform( this ) );
 
-    // {Fittability}, provides logic for whether our drawables (or common-fit ancestors) will support fitting for
-    // FittedBlock subtypes. See https://github.com/phetsims/scenery/issues/406.
+    // @public {Fittability} - provides logic for whether our drawables (or common-fit ancestors) will support fitting
+    // for FittedBlock subtypes. See https://github.com/phetsims/scenery/issues/406.
     this.fittability = ( this.fittability || new Fittability( this ) );
 
-    // Tracking of visibility {boolean} and associated boolean flags.
+    // @public {boolean} - Tracking of visibility {boolean} and associated boolean flags.
     this.visible = true; // global visibility (whether this instance will end up appearing on the display)
     this.relativeVisible = true; // relative visibility (ignores the closest ancestral visibility root and below)
     this.selfVisible = true; // like relative visibility, but is always true if we are a visibility root
     this.visibilityDirty = true; // entire subtree of visibility will need to be updated
     this.childVisibilityDirty = true; // an ancestor needs its visibility updated
 
-    // @public {Object} - Maps another instance's `instance.id` {number} => branch index {number} (first index where
-    // the two trails are different). This effectively operates as a cache (since it's more expensive to compute the
-    // value than it is to look up the value).
+    // @private {Object.<instanceId:number,number>} - Maps another instance's `instance.id` {number} => branch index
+    // {number} (first index where the two trails are different). This effectively operates as a cache (since it's more
+    // expensive to compute the value than it is to look up the value).
     // It is also "bidirectional", such that if we add instance A's branch index to this map, we will also add the
     // same value to instance A's map (referencing this instance). In order to clean up and prevent leaks, the
     // instance references are provided in this.branchIndexReferences (on both ends), so that when one instance is
@@ -115,28 +116,29 @@ inherit( Object, Instance, {
     // @public {Array.<Instance>} - All instances where we have entries in our map. See docs for branchIndexMap.
     this.branchIndexReferences = cleanArray( this.branchIndexReferences );
 
-    // In the range (-1,0), to help us track insertions and removals of this instance's node to its parent
-    // (did we get removed but added back?).
+    // @private {number} - In the range (-1,0), to help us track insertions and removals of this instance's node to its
+    // parent (did we get removed but added back?).
     // If it's -1 at its parent's syncTree, we'll end up removing our reference to it.
     // We use an integer just for sanity checks (if it ever reaches -2 or 1, we've reached an invalid state)
     this.addRemoveCounter = 0;
 
-    // If equal to the current frame ID (it is initialized as such), then it is treated during the change interval
-    // waterfall as "completely changed", and an interval for the entire instance is used.
+    // @private {number} - If equal to the current frame ID (it is initialized as such), then it is treated during the
+    // change interval waterfall as "completely changed", and an interval for the entire instance is used.
     this.stitchChangeFrame = display._frameId;
 
-    // If equal to the current frame ID, an instance was removed from before or after this instance, so we'll want to
-    // add in a proper change interval (related to siblings)
+    // @private {number} - If equal to the current frame ID, an instance was removed from before or after this instance,
+    // so we'll want to add in a proper change interval (related to siblings)
     this.stitchChangeBefore = 0;
     this.stitchChangeAfter = 0;
 
-    // If equal to the current frame ID, child instances were added or removed from this instance.
+    // @private {number} - If equal to the current frame ID, child instances were added or removed from this instance.
     this.stitchChangeOnChildren = 0;
 
-    // whether we have been included in our parent's drawables the previous frame
+    // @private {boolean} - whether we have been included in our parent's drawables the previous frame
     this.stitchChangeIncluded = false;
 
-    // Node listeners for tracking children. Listeners should be added only when we become stateful
+    // @private {function} - Node listeners for tracking children. Listeners should be added only when we become
+    // stateful
     this.childInsertedListener = this.childInsertedListener || this.onChildInserted.bind( this );
     this.childRemovedListener = this.childRemovedListener || this.onChildRemoved.bind( this );
     this.childrenReorderedListener = this.childrenReorderedListener || this.onChildrenReordered.bind( this );
@@ -154,33 +156,66 @@ inherit( Object, Instance, {
     // syncTree was called.
     this.node.addInstance( this );
 
-    // Outstanding external references. used for shared cache instances, where multiple instances can point to us.
+    // @private {number} - Outstanding external references. used for shared cache instances, where multiple instances
+    // can point to us.
     this.externalReferenceCount = 0;
 
-    this.stateless = true; // {boolean} - Whether we have had our state initialized yet
+    // @public {boolean} - Whether we have had our state initialized yet
+    this.stateless = true;
 
-    // Rendering state constants (will not change over the life of an instance)
-    this.isDisplayRoot = isDisplayRoot; // {boolean} - Whether we are the root instance for a Display
-    this.isSharedCanvasCacheRoot = isSharedCanvasCacheRoot; // {boolean} - Whether we are the root of a Canvas cache
+    // @public {boolean} - Whether we are the root instance for a Display. Rendering state constant (will not change
+    // over the life of an instance)
+    this.isDisplayRoot = isDisplayRoot;
 
-    // 'Cascading' render state for the instance tree. These are properties that can affect the entire subtree when set
-    this.preferredRenderers = 0; // {number} - Packed renderer order bitmask (what our renderer preferences are)
-    this.isUnderCanvasCache = isSharedCanvasCacheRoot; // {boolean} - Whether we are beneath a Canvas cache (Canvas required)
+    // @public {boolean} - Whether we are the root of a Canvas cache. Rendering state constant (will not change over the
+    // life of an instance)
+    this.isSharedCanvasCacheRoot = isSharedCanvasCacheRoot;
 
-    // Render state exports for this instance.
-    this.isBackbone = false; // {boolean} - Whether we will have a BackboneDrawable group drawable
-    this.isTransformed = false;  // {boolean} - Whether this instance creates a new "root" for the relative trail transforms
-    this.isVisibilityApplied = false; // {boolean} - Whether this instance handles visibility with a group drawable
-    this.isInstanceCanvasCache = false; // {boolean} - Whether we have a Canvas cache specific to this instance's position
-    this.isSharedCanvasCachePlaceholder = false; // {boolean}
-    this.isSharedCanvasCacheSelf = isSharedCanvasCacheRoot; // {boolean}
-    this.selfRenderer = 0; // {number} Renderer bitmask for the 'self' drawable (if our Node is painted)
-    this.groupRenderer = 0; // {number} Renderer bitmask for the 'group' drawable (if applicable)
-    this.sharedCacheRenderer = 0; // {number} Renderer bitmask for the cache drawable (if applicable)
+    // @private {number} - [CASCADING RENDER STATE] Packed renderer order bitmask (what our renderer preferences are).
+    // Part of the 'cascading' render state for the instance tree. These are properties that can affect the entire
+    // subtree when set
+    this.preferredRenderers = 0;
 
-    // pruning flags (whether we need to be visited, whether updateRenderingState is required, and whether to visit children)
-    this.renderStateDirtyFrame = display._frameId; // {number} - When equal to the current frame it is considered "dirty"
-    this.skipPruningFrame = display._frameId; // {number} - When equal to the current frame we can't prune at this instance
+    // @private {boolean} - [CASCADING RENDER STATE] Whether we are beneath a Canvas cache (Canvas required). Part of
+    // the 'cascading' render state for the instance tree. These are properties that can affect the entire subtree when
+    // set
+    this.isUnderCanvasCache = isSharedCanvasCacheRoot;
+
+    // @public {boolean} - [RENDER STATE EXPORT] Whether we will have a BackboneDrawable group drawable
+    this.isBackbone = false;
+
+    // @public {boolean} - [RENDER STATE EXPORT] Whether this instance creates a new "root" for the relative trail
+    // transforms
+    this.isTransformed = false;
+
+    // @private {boolean} - [RENDER STATE EXPORT] Whether this instance handles visibility with a group drawable
+    this.isVisibilityApplied = false;
+
+    // @private {boolean} - [RENDER STATE EXPORT] Whether we have a Canvas cache specific to this instance's position
+    this.isInstanceCanvasCache = false;
+
+    // @private {boolean} - [RENDER STATE EXPORT]
+    this.isSharedCanvasCachePlaceholder = false;
+
+    // @private {boolean} - [RENDER STATE EXPORT]
+    this.isSharedCanvasCacheSelf = isSharedCanvasCacheRoot;
+
+    // @private {number} - [RENDER STATE EXPORT] Renderer bitmask for the 'self' drawable (if our Node is painted)
+    this.selfRenderer = 0;
+
+    // @private {number} - [RENDER STATE EXPORT] Renderer bitmask for the 'group' drawable (if applicable)
+    this.groupRenderer = 0;
+
+    // @private {number} - [RENDER STATE EXPORT] Renderer bitmask for the cache drawable (if applicable)
+    this.sharedCacheRenderer = 0;
+
+    // @private {number} - When equal to the current frame it is considered "dirty". Is a pruning flag (whether we need
+    // to be visited, whether updateRenderingState is required, and whether to visit children)
+    this.renderStateDirtyFrame = display._frameId;
+
+    // @private {number} - When equal to the current frame we can't prune at this instance. Is a pruning flag (whether
+    // we need to be visited, whether updateRenderingState is required, and whether to visit children)
+    this.skipPruningFrame = display._frameId;
 
     sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'initialized ' + this.toString() );
 
@@ -188,91 +223,113 @@ inherit( Object, Instance, {
     this.active = true;
 
     return this;
-  },
+  }
 
-  /*
+  /**
    * Called for initialization of properties (via initialize(), via constructor), and to clean the instance for
    * placement in the pool (don't leak memory).
+   * @private
    *
    * If the parameters are null, we remove all external references so that we don't leak memory.
    *
    * @param {Display|null} display - Instances are bound to a single display
    * @param {Trail|null} trail - The list of ancestors going back up to our root instance (for the display, or for a cache)
    */
-  cleanInstance: function( display, trail ) {
+  cleanInstance( display, trail ) {
+    // @public {Display|null}
     this.display = display;
+
+    // @public {Trail|null}
     this.trail = trail;
+
+    // @public {Node|null}
     this.node = trail ? trail.lastNode() : null;
-    this.parent = null; // will be set as needed
-    this.oldParent = null; // set when removed from us, so that we can easily reattach it when necessary
-    // NOTE: reliance on correct order after syncTree by at least SVGBlock/SVGGroup
-    this.children = cleanArray( this.children ); // Array[Instance].
-    this.sharedCacheInstance = null; // reference to a shared cache instance (different than a child)
+
+    // @public {Instance|null} - will be set as needed
+    this.parent = null;
+
+    // @private {Instance|null} - set when removed from us, so that we can easily reattach it when necessary
+    this.oldParent = null;
+
+    // @public {Array.<Instance>} - NOTE: reliance on correct order after syncTree by at least SVGBlock/SVGGroup
+    this.children = cleanArray( this.children );
+
+    // @private {Instance|null} - reference to a shared cache instance (different than a child)
+    this.sharedCacheInstance = null;
 
     // initialize/clean sub-components
     this.relativeTransform.initialize( display, trail );
     this.fittability.initialize( display, trail );
 
-    // {Instance[]} - Child instances are pushed to here when their node is removed from our node.
+    // @private {Array.<Instance>} - Child instances are pushed to here when their node is removed from our node.
     // We don't immediately dispose, since it may be added back.
     this.instanceRemovalCheckList = cleanArray( this.instanceRemovalCheckList );
 
-    // {Drawable} - references to our drawables in the drawable tree
+    // @public {Drawable|null} - Our self-drawable in the drawable tree
     this.selfDrawable = null;
-    this.groupDrawable = null; // e.g. backbone or non-shared cache
-    this.sharedCacheDrawable = null; // our drawable if we are a shared cache
 
-    // {Drawable} - references into the linked list of drawables (null if nothing is drawable under this)
+    // @public {Drawable|null} - Our backbone or non-shared cache
+    this.groupDrawable = null;
+
+    // @public {Drawable|null} - Our drawable if we are a shared cache
+    this.sharedCacheDrawable = null;
+
+    // @private {Drawable} - references into the linked list of drawables (null if nothing is drawable under this)
     this.firstDrawable = null;
     this.lastDrawable = null;
 
-    // {Drawable} - references into the linked list of drawables (excludes any group drawables handling)
+    // @private {Drawable} - references into the linked list of drawables (excludes any group drawables handling)
     this.firstInnerDrawable = null;
     this.lastInnerDrawable = null;
 
-    // {SVGGroup[]} - List of SVG groups associated with this display instance
+    // @private {Array.<SVGGroup>} - List of SVG groups associated with this display instance
     this.svgGroups = cleanArray( this.svgGroups );
 
     this.cleanSyncTreeResults();
-  },
+  }
 
-  /*
+  /**
    * Initializes or clears properties that are all set as pseudo 'return values' of the syncTree() method. It is the
    * responsibility of the caller of syncTree() to afterwards (optionally read these results and) clear the references
    * using this method to prevent memory leaks.
+   * @private
    *
    * TODO: consider a pool of (or a single global) typed return object(s), since setting these values on the instance
    * generally means hitting the heap, and can slow us down.
    */
-  cleanSyncTreeResults: function() {
+  cleanSyncTreeResults() {
     // Tracking bounding indices / drawables for what has changed, so we don't have to over-stitch things.
 
-    // if (not iff) child's index <= beforeStableIndex, it hasn't been added/removed. relevant to current children.
+    // @private {number} - if (not iff) child's index <= beforeStableIndex, it hasn't been added/removed. relevant to
+    // current children.
     this.beforeStableIndex = this.children.length;
 
-    // if (not iff) child's index >= afterStableIndex, it hasn't been added/removed. relevant to current children.
+    // @private {number} - if (not iff) child's index >= afterStableIndex, it hasn't been added/removed. relevant to
+    // current children.
     this.afterStableIndex = -1;
 
     // NOTE: both of these being null indicates "there are no change intervals", otherwise it assumes it points to
     // a linked-list of change intervals. We use {ChangeInterval}s to hold this information, see ChangeInterval to see
     // the individual properties that are considered part of a change interval.
 
-    // {ChangeInterval}, first change interval (should have nextChangeInterval linked-list to lastChangeInterval)
+    // @private {ChangeInterval}, first change interval (should have nextChangeInterval linked-list to
+    // lastChangeInterval)
     this.firstChangeInterval = null;
 
-    // {ChangeInterval}, last change interval
+    // @private {ChangeInterval}, last change interval
     this.lastChangeInterval = null;
 
-    // {boolean} - render state change flags, all set in updateRenderingState()
-    this.incompatibleStateChange = false; // {boolean} - Whether we need to recreate the instance tree
-    this.groupChanged = false; // {boolean} - Whether we need to force a rebuild of the group drawable
-    this.cascadingStateChange = false; // {boolean} - Whether we had a render state change that requires visiting all children
-    this.anyStateChange = false; // {boolean} - Whether there was any change of rendering state with the last updateRenderingState()
-  },
+    // @private {boolean} - render state change flags, all set in updateRenderingState()
+    this.incompatibleStateChange = false; // Whether we need to recreate the instance tree
+    this.groupChanged = false; // Whether we need to force a rebuild of the group drawable
+    this.cascadingStateChange = false; // Whether we had a render state change that requires visiting all children
+    this.anyStateChange = false; // Whether there was any change of rendering state with the last updateRenderingState()
+  }
 
-  /*
+  /**
    * Updates the rendering state properties, and returns a {boolean} flag of whether it was successful if we were
    * already stateful.
+   * @private
    *
    * Rendering state properties determine how we construct the drawable tree from our instance tree (e.g. do we
    * create an SVG or Canvas rectangle, where to place CSS transforms, how to handle opacity, etc.)
@@ -290,7 +347,7 @@ inherit( Object, Instance, {
    * - isUnderCanvasCache
    * - preferredRenderers
    */
-  updateRenderingState: function() {
+  updateRenderingState() {
     sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'updateRenderingState ' + this.toString() +
                                                               ( this.stateless ? ' (stateless)' : '' ) );
     sceneryLog && sceneryLog.Instance && sceneryLog.push();
@@ -334,16 +391,40 @@ inherit( Object, Instance, {
     }
 
     const hasClip = this.node.hasClipArea();
-    const hasTransparency = this.node.opacity !== 1 || hints.usesOpacity;
-    const requiresSplit = hints.requireElement || hints.cssTransform || hints.layerSplit;
+    const hasFilters = this.node.opacity !== 1 || hints.usesOpacity || this.node._filters.length > 0;
+    // let hasNonDOMFilter = false;
+    let hasNonSVGFilter = false;
+    let hasNonCanvasFilter = false;
+    // let hasNonWebGLFilter = false;
+    if ( hasFilters ) {
+      // NOTE: opacity is OK with all of those (currently)
+      for ( let i = 0; i < this.node._filters.length; i++ ) {
+        const filter = this.node._filters[ i ];
+
+        // TODO: how to handle this, if we split AT the node?
+        // if ( !filter.isDOMCompatible() ) {
+        //   hasNonDOMFilter = true;
+        // }
+        if ( !filter.isSVGCompatible() ) {
+          hasNonSVGFilter = true;
+        }
+        if ( !filter.isCanvasCompatible() ) {
+          hasNonCanvasFilter = true;
+        }
+        // if ( !filter.isWebGLCompatible() ) {
+        //   hasNonWebGLFilter = true;
+        // }
+      }
+    }
+    const requiresSplit = hints.cssTransform || hints.layerSplit;
     const backboneRequired = this.isDisplayRoot || ( !this.isUnderCanvasCache && requiresSplit );
 
     // Support either "all Canvas" or "all SVG" opacity/clip
     const applyTransparencyWithBlock = !backboneRequired &&
-                                       ( hasTransparency || hasClip ) &&
-                                       ( this.node._rendererSummary.isSubtreeRenderedExclusivelySVG( this.preferredRenderers ) ||
-                                         this.node._rendererSummary.isSubtreeRenderedExclusivelyCanvas( this.preferredRenderers ) );
-    const useBackbone = applyTransparencyWithBlock ? false : ( backboneRequired || hasTransparency || hasClip );
+                                       ( hasFilters || hasClip ) &&
+                                       ( ( !hasNonSVGFilter && this.node._rendererSummary.isSubtreeRenderedExclusivelySVG( this.preferredRenderers ) ) ||
+                                         ( !hasNonCanvasFilter && this.node._rendererSummary.isSubtreeRenderedExclusivelyCanvas( this.preferredRenderers ) ) );
+    const useBackbone = applyTransparencyWithBlock ? false : ( backboneRequired || hasFilters || hasClip );
 
     // check if we need a backbone or cache
     // if we are under a canvas cache, we will NEVER have a backbone
@@ -357,7 +438,7 @@ inherit( Object, Instance, {
       //OHTWO TODO: check whether the force acceleration hint is being used by our DOMBlock
       this.groupRenderer = Renderer.bitmaskDOM; // probably won't be used
     }
-    else if ( !applyTransparencyWithBlock && ( hasTransparency || hasClip || hints.canvasCache ) ) {
+    else if ( !applyTransparencyWithBlock && ( hasFilters || hasClip || hints.canvasCache ) ) {
       // everything underneath needs to be renderable with Canvas, otherwise we cannot cache
       assert && assert( this.node._rendererSummary.isSingleCanvasSupported(),
         'hints.canvasCache provided, but not all node contents can be rendered with Canvas under ' +
@@ -450,12 +531,15 @@ inherit( Object, Instance, {
 
     sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'new: ' + this.getStateString() );
     sceneryLog && sceneryLog.Instance && sceneryLog.pop();
-  },
+  }
 
-  /*
-   * @returns A short string that contains a summary of the rendering state, for debugging/logging purposes.
+  /**
+   * A short string that contains a summary of the rendering state, for debugging/logging purposes.
+   * @public
+   *
+   * @returns {string}
    */
-  getStateString: function() {
+  getStateString() {
     const result = 'S[ ' +
                    ( this.isDisplayRoot ? 'displayRoot ' : '' ) +
                    ( this.isBackbone ? 'backbone ' : '' ) +
@@ -468,24 +552,26 @@ inherit( Object, Instance, {
                    ( this.groupRenderer ? this.groupRenderer.toString( 16 ) : '-' ) + ',' +
                    ( this.sharedCacheRenderer ? this.sharedCacheRenderer.toString( 16 ) : '-' ) + ' ';
     return result + ']';
-  },
+  }
 
-  /*
+  /**
    * The main entry point for syncTree(), called on the root instance. See syncTree() for more information.
+   * @public
    */
-  baseSyncTree: function() {
+  baseSyncTree() {
     assert && assert( this.isDisplayRoot, 'baseSyncTree() should only be called on the root instance' );
 
     sceneryLog && sceneryLog.Instance && sceneryLog.Instance( '-------- START baseSyncTree ' + this.toString() + ' --------' );
     this.syncTree();
     sceneryLog && sceneryLog.Instance && sceneryLog.Instance( '-------- END baseSyncTree ' + this.toString() + ' --------' );
     this.cleanSyncTreeResults();
-  },
+  }
 
-  /*
+  /**
    * Updates the rendering state, synchronizes the instance sub-tree (so that our instance tree matches
    * the Node tree the client provided), and back-propagates {ChangeInterval} information for stitching backbones
    * and/or caches.
+   * @private
    *
    * syncTree() also sets a number of pseudo 'return values' (documented in cleanSyncTreeResults()). After calling
    * syncTree() and optionally reading those results, cleanSyncTreeResults() should be called on the same instance
@@ -493,7 +579,7 @@ inherit( Object, Instance, {
    *
    * @returns {boolean} - Whether the sync was possible. If it wasn't, a new instance subtree will need to be created.
    */
-  syncTree: function() {
+  syncTree() {
     sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'syncTree ' + this.toString() + ' ' + this.getStateString() +
                                                               ( this.stateless ? ' (stateless)' : '' ) );
     sceneryLog && sceneryLog.Instance && sceneryLog.push();
@@ -585,13 +671,16 @@ inherit( Object, Instance, {
     sceneryLog && sceneryLog.Instance && sceneryLog.pop();
 
     return true;
-  },
+  }
 
-  /*
+  /**
    * Responsible for syncing children, connecting the drawable linked list as needed, and outputting change intervals
    * and first/last drawable information.
+   * @private
+   *
+   * @param {boolean} selfChanged
    */
-  localSyncTree: function( selfChanged ) {
+  localSyncTree( selfChanged ) {
     const frameId = this.display._frameId;
 
     // local variables, since we can't overwrite our instance properties yet
@@ -807,14 +896,15 @@ inherit( Object, Instance, {
       assertSlow( firstDrawableCheck === this.firstDrawable );
       assertSlow( lastDrawableCheck === this.lastDrawable );
     }
-  },
+  }
 
-  /*
+  /**
    * If necessary, create/replace/remove our selfDrawable.
+   * @private
    *
    * @returns whether the selfDrawable changed
    */
-  updateSelfDrawable: function() {
+  updateSelfDrawable() {
     if ( this.node.isPainted() ) {
       const selfRenderer = this.selfRenderer; // our new self renderer bitmask
 
@@ -842,10 +932,17 @@ inherit( Object, Instance, {
     }
 
     return false;
-  },
+  }
 
-  // returns the up-to-date instance
-  updateIncompatibleChildInstance: function( childInstance, index ) {
+  /**
+   * Returns the up-to-date instance.
+   * @private
+   *
+   * @param {Instance} childInstance
+   * @param {number} index
+   * @returns {Instance}
+   */
+  updateIncompatibleChildInstance( childInstance, index ) {
     if ( sceneryLog && scenery.isLoggingPerformance() ) {
       const affectedInstanceCount = childInstance.getDescendantCount() + 1; // +1 for itself
 
@@ -867,9 +964,14 @@ inherit( Object, Instance, {
     const replacementInstance = Instance.createFromPool( this.display, this.trail.copy().addDescendant( childInstance.node, index ), false, false );
     this.replaceInstanceWithIndex( childInstance, replacementInstance, index );
     return replacementInstance;
-  },
+  }
 
-  groupSyncTree: function( wasStateless ) {
+  /**
+   * @private
+   *
+   * @param {boolean} wasStateless
+   */
+  groupSyncTree( wasStateless ) {
     const groupRenderer = this.groupRenderer;
     assert && assert( ( this.isBackbone ? 1 : 0 ) +
                       ( this.isInstanceCanvasCache ? 1 : 0 ) +
@@ -941,9 +1043,12 @@ inherit( Object, Instance, {
       // our group didn't have to change at all, so we prevent any change intervals
       this.firstChangeInterval = this.lastChangeInterval = null;
     }
-  },
+  }
 
-  sharedSyncTree: function() {
+  /**
+   * @private
+   */
+  sharedSyncTree() {
     //OHTWO TODO: we are probably missing syncTree for shared trees properly with pruning. investigate!!
 
     this.ensureSharedCacheInitialized();
@@ -968,9 +1073,14 @@ inherit( Object, Instance, {
       // basically everything changed now, and won't from now on
       this.firstChangeInterval = this.lastChangeInterval = ChangeInterval.newForDisplay( null, null, this.display );
     }
-  },
+  }
 
-  prepareChildInstances: function( wasStateless ) {
+  /**
+   * @private
+   *
+   * @param {boolean} wasStateless
+   */
+  prepareChildInstances( wasStateless ) {
     // mark all removed instances to be disposed (along with their subtrees)
     while ( this.instanceRemovalCheckList.length ) {
       const instanceToMark = this.instanceRemovalCheckList.pop();
@@ -988,9 +1098,12 @@ inherit( Object, Instance, {
         this.appendInstance( Instance.createFromPool( this.display, this.trail.copy().addDescendant( child, k ), false, false ) );
       }
     }
-  },
+  }
 
-  ensureSharedCacheInitialized: function() {
+  /**
+   * @private
+   */
+  ensureSharedCacheInitialized() {
     // we only need to initialize this shared cache reference once
     if ( !this.sharedCacheInstance ) {
       const instanceKey = this.node.getId();
@@ -1017,15 +1130,28 @@ inherit( Object, Instance, {
         this.display.markTransformRootDirty( this, true );
       }
     }
-  },
+  }
 
-  // @private, whether out drawables (from firstDrawable to lastDrawable) should be included in our parent's drawables
-  shouldIncludeInParentDrawables: function() {
+  /**
+   * Whether out drawables (from firstDrawable to lastDrawable) should be included in our parent's drawables
+   * @private
+   *
+   * @returns {boolean}
+   */
+  shouldIncludeInParentDrawables() {
     return this.node.isVisible() || !this.node.isExcludeInvisible();
-  },
+  }
 
-  // @private, finds the closest drawable (not including the child instance at childIndex) using lastDrawable, or null
-  findPreviousDrawable: function( childIndex ) {
+  /**
+   * Finds the closest drawable (not including the child instance at childIndex) using lastDrawable, or null
+   * @private
+   *
+   * TODO: check usage?
+   *
+   * @param {number} childIndex
+   * @returns {Drawable|null}
+   */
+  findPreviousDrawable( childIndex ) {
     for ( let i = childIndex - 1; i >= 0; i-- ) {
       const option = this.children[ i ].lastDrawable;
       if ( option !== null ) {
@@ -1034,10 +1160,18 @@ inherit( Object, Instance, {
     }
 
     return null;
-  },
+  }
 
-  // @private, finds the closest drawable (not including the child instance at childIndex) using nextDrawable, or null
-  findNextDrawable: function( childIndex ) {
+  /**
+   * Finds the closest drawable (not including the child instance at childIndex) using nextDrawable, or null
+   * @private
+   *
+   * TODO: check usage?
+   *
+   * @param {number} childIndex
+   * @returns {Drawable|null}
+   */
+  findNextDrawable( childIndex ) {
     const len = this.children.length;
     for ( let i = childIndex + 1; i < len; i++ ) {
       const option = this.children[ i ].firstDrawable;
@@ -1047,18 +1181,30 @@ inherit( Object, Instance, {
     }
 
     return null;
-  },
+  }
 
   /*---------------------------------------------------------------------------*
    * Children handling
    *----------------------------------------------------------------------------*/
 
-  appendInstance: function( instance ) {
+  /**
+   * @private
+   *
+   * @param {Instance} instance
+   */
+  appendInstance( instance ) {
     this.insertInstance( instance, this.children.length );
-  },
+  }
 
-  // NOTE: different parameter order compared to Node
-  insertInstance: function( instance, index ) {
+  /**
+   * @private
+   *
+   * NOTE: different parameter order compared to Node
+   *
+   * @param {Instance} instance
+   * @param {number} index
+   */
+  insertInstance( instance, index ) {
     assert && assert( instance instanceof Instance );
     assert && assert( index >= 0 && index <= this.children.length,
       'Instance insertion bounds check for index ' + index + ' with previous children length ' +
@@ -1095,13 +1241,24 @@ inherit( Object, Instance, {
     this.markChildVisibilityDirty();
 
     sceneryLog && sceneryLog.InstanceTree && sceneryLog.pop();
-  },
+  }
 
-  removeInstance: function( instance ) {
-    return this.removeInstanceWithIndex( instance, _.indexOf( this.children, instance ) );
-  },
+  /**
+   * @private
+   *
+   * @param {Instance} instance
+   */
+  removeInstance( instance ) {
+    this.removeInstanceWithIndex( instance, _.indexOf( this.children, instance ) );
+  }
 
-  removeInstanceWithIndex: function( instance, index ) {
+  /**
+   * @private
+   *
+   * @param {Instance} instance
+   * @param {number} index
+   */
+  removeInstanceWithIndex( instance, index ) {
     assert && assert( instance instanceof Instance );
     assert && assert( index >= 0 && index < this.children.length,
       'Instance removal bounds check for index ' + index + ' with previous children length ' +
@@ -1146,13 +1303,20 @@ inherit( Object, Instance, {
     this.relativeTransform.removeInstance( instance );
 
     sceneryLog && sceneryLog.InstanceTree && sceneryLog.pop();
-  },
+  }
 
-  replaceInstanceWithIndex: function( childInstance, replacementInstance, index ) {
+  /**
+   * @private
+   *
+   * @param {Instance} childInstance
+   * @param {Instance} replacementInstance
+   * @param {number} index
+   */
+  replaceInstanceWithIndex( childInstance, replacementInstance, index ) {
     // TODO: optimization? hopefully it won't happen often, so we just do this for now
     this.removeInstanceWithIndex( childInstance, index );
     this.insertInstance( replacementInstance, index );
-  },
+  }
 
   /**
    * For handling potential reordering of child instances inclusively between the min and max indices.
@@ -1161,7 +1325,7 @@ inherit( Object, Instance, {
    * @param {number} minChangeIndex
    * @param {number} maxChangeIndex
    */
-  reorderInstances: function( minChangeIndex, maxChangeIndex ) {
+  reorderInstances( minChangeIndex, maxChangeIndex ) {
     assert && assert( typeof minChangeIndex === 'number' );
     assert && assert( typeof maxChangeIndex === 'number' );
     assert && assert( minChangeIndex <= maxChangeIndex );
@@ -1198,10 +1362,16 @@ inherit( Object, Instance, {
     this.afterStableIndex = Math.max( this.afterStableIndex, maxChangeIndex + 1 );
 
     sceneryLog && sceneryLog.InstanceTree && sceneryLog.pop();
-  },
+  }
 
-  // if we have a child instance that corresponds to this node, return it (otherwise null)
-  findChildInstanceOnNode: function( node ) {
+  /**
+   * If we have a child instance that corresponds to this node, return it (otherwise null).
+   * @private
+   *
+   * @param {Node} node
+   * @returns {Instance|null}
+   */
+  findChildInstanceOnNode( node ) {
     const instances = node.getInstances();
     for ( let i = 0; i < instances.length; i++ ) {
       if ( instances[ i ].oldParent === this ) {
@@ -1209,10 +1379,16 @@ inherit( Object, Instance, {
       }
     }
     return null;
-  },
+  }
 
-  // event callback for Node's 'childInserted' event, used to track children
-  onChildInserted: function( childNode, index ) {
+  /**
+   * Event callback for Node's 'childInserted' event, used to track children.
+   * @private
+   *
+   * @param {Node} childNode
+   * @param {number} index
+   */
+  onChildInserted( childNode, index ) {
     sceneryLog && sceneryLog.Instance && sceneryLog.Instance(
       'inserting child node ' + childNode.constructor.name + '#' + childNode.id + ' into ' + this.toString() );
     sceneryLog && sceneryLog.Instance && sceneryLog.push();
@@ -1240,10 +1416,16 @@ inherit( Object, Instance, {
     this.markSkipPruning();
 
     sceneryLog && sceneryLog.Instance && sceneryLog.pop();
-  },
+  }
 
-  // event callback for Node's 'childRemoved' event, used to track children
-  onChildRemoved: function( childNode, index ) {
+  /**
+   * Event callback for Node's 'childRemoved' event, used to track children.
+   * @private
+   *
+   * @param {Node} childNode
+   * @param {number} index
+   */
+  onChildRemoved( childNode, index ) {
     sceneryLog && sceneryLog.Instance && sceneryLog.Instance(
       'removing child node ' + childNode.constructor.name + '#' + childNode.id + ' from ' + this.toString() );
     sceneryLog && sceneryLog.Instance && sceneryLog.push();
@@ -1267,10 +1449,16 @@ inherit( Object, Instance, {
     this.markSkipPruning();
 
     sceneryLog && sceneryLog.Instance && sceneryLog.pop();
-  },
+  }
 
-  // event callback for Node's 'childrenReordered' event
-  onChildrenReordered: function( minChangeIndex, maxChangeIndex ) {
+  /**
+   * Event callback for Node's 'childrenReordered' event
+   * @private
+   *
+   * @param {number} minChangeIndex
+   * @param {number} maxChangeIndex
+   */
+  onChildrenReordered( minChangeIndex, maxChangeIndex ) {
     sceneryLog && sceneryLog.Instance && sceneryLog.Instance(
       'reordering children for ' + this.toString() );
     sceneryLog && sceneryLog.Instance && sceneryLog.push();
@@ -1281,10 +1469,13 @@ inherit( Object, Instance, {
     this.markSkipPruning();
 
     sceneryLog && sceneryLog.Instance && sceneryLog.pop();
-  },
+  }
 
-  // event callback for Node's 'visibility' event, used to notify about stitch changes
-  onVisibilityChange: function() {
+  /**
+   * Event callback for Node's 'visibility' event, used to notify about stitch changes.
+   * @private
+   */
+  onVisibilityChange() {
     assert && assert( !this.stateless, 'If we are stateless, we should not receive these notifications' );
 
     // for now, just mark which frame we were changed for our change interval
@@ -1296,21 +1487,27 @@ inherit( Object, Instance, {
     // mark visibility changes
     this.visibilityDirty = true;
     this.parent && this.parent.markChildVisibilityDirty();
-  },
+  }
 
-  // event callback for Node's 'opacity' change event
-  onOpacityChange: function() {
+  /**
+   * Event callback for Node's 'opacity' change event.
+   * @private
+   */
+  onOpacityChange() {
     assert && assert( !this.stateless, 'If we are stateless, we should not receive these notifications' );
 
     this.markRenderStateDirty();
-  },
+  }
 
-  markChildVisibilityDirty: function() {
+  /**
+   * @private
+   */
+  markChildVisibilityDirty() {
     if ( !this.childVisibilityDirty ) {
       this.childVisibilityDirty = true;
       this.parent && this.parent.markChildVisibilityDirty();
     }
-  },
+  }
 
   /**
    * Updates the currently fittability for all of the drawables attached to this instance.
@@ -1318,20 +1515,21 @@ inherit( Object, Instance, {
    *
    * @param {boolean} fittable
    */
-  updateDrawableFittability: function( fittable ) {
+  updateDrawableFittability( fittable ) {
     this.selfDrawable && this.selfDrawable.setFittable( fittable );
     this.groupDrawable && this.groupDrawable.setFittable( fittable );
     // this.sharedCacheDrawable && this.sharedCacheDrawable.setFittable( fittable );
-  },
+  }
 
   /**
    * Updates the visible/relativeVisible flags on the Instance and its entire subtree.
+   * @public
    *
    * @param {boolean} parentGloballyVisible - Whether our parent (if any) is globally visible
    * @param {boolean} parentRelativelyVisible - Whether our parent (if any) is relatively visible
    * @param {boolean} updateFullSubtree - If true, we will visit the entire subtree to ensure visibility is correct.
    */
-  updateVisibility: function( parentGloballyVisible, parentRelativelyVisible, updateFullSubtree ) {
+  updateVisibility( parentGloballyVisible, parentRelativelyVisible, updateFullSubtree ) {
     // If our visibility flag for ourself is dirty, we need to update our entire subtree
     if ( this.visibilityDirty ) {
       updateFullSubtree = true;
@@ -1369,35 +1567,53 @@ inherit( Object, Instance, {
     if ( this.selfVisible !== wasSelfVisible ) {
       this.selfVisibleEmitter.emit();
     }
-  },
+  }
 
-  getDescendantCount: function() {
+  /**
+   * @private
+   *
+   * @returns {number}
+   */
+  getDescendantCount() {
     let count = this.children.length;
     for ( let i = 0; i < this.children.length; i++ ) {
       count += this.children[ i ].getDescendantCount();
     }
     return count;
-  },
+  }
 
   /*---------------------------------------------------------------------------*
    * Miscellaneous
    *----------------------------------------------------------------------------*/
 
-  // add a reference for an SVG group (fastest way to track them)
-  addSVGGroup: function( group ) {
+  /**
+   * Add a reference for an SVG group (fastest way to track them)
+   * @public
+   *
+   * @param {SVGGroup} group
+   */
+  addSVGGroup( group ) {
     this.svgGroups.push( group );
-  },
+  }
 
-  // remove a reference for an SVG group (fastest way to track them)
-  removeSVGGroup: function( group ) {
-    const index = _.indexOf( this.svgGroups, group );
-    assert && assert( index >= 0, 'Tried to remove an SVGGroup from an Instance when it did not exist' );
+  /**
+   * Remove a reference for an SVG group (fastest way to track them)
+   * @public
+   *
+   * @param {SVGGroup} group
+   */
+  removeSVGGroup( group ) {
+    arrayRemove( this.svgGroups, group );
+  }
 
-    this.svgGroups.splice( index, 1 ); // TODO: remove function
-  },
-
-  // returns null when a lookup fails (which is legitimate)
-  lookupSVGGroup: function( block ) {
+  /**
+   * Returns null when a lookup fails (which is legitimate)
+   * @public
+   *
+   * @param {SVGBlock} block
+   * @returns {SVGGroup|null}
+   */
+  lookupSVGGroup( block ) {
     const len = this.svgGroups.length;
     for ( let i = 0; i < len; i++ ) {
       const group = this.svgGroups[ i ];
@@ -1406,38 +1622,56 @@ inherit( Object, Instance, {
       }
     }
     return null;
-  },
+  }
 
-  // what instance have filters (opacity/visibility/clip) been applied up to?
-  getFilterRootInstance: function() {
+  /**
+   * What instance have filters (opacity/visibility/clip) been applied up to?
+   * @public
+   *
+   * @returns {Instance}
+   */
+  getFilterRootInstance() {
     if ( this.isBackbone || this.isInstanceCanvasCache || !this.parent ) {
       return this;
     }
     else {
       return this.parent.getFilterRootInstance();
     }
-  },
+  }
 
-  // what instance transforms have been applied up to?
-  getTransformRootInstance: function() {
+  /**
+   * What instance transforms have been applied up to?
+   * @public
+   *
+   * @returns {Instance}
+   */
+  getTransformRootInstance() {
     if ( this.isTransformed || !this.parent ) {
       return this;
     }
     else {
       return this.parent.getTransformRootInstance();
     }
-  },
+  }
 
-  getVisibilityRootInstance: function() {
+  /**
+   * @public
+   *
+   * @returns {Instance}
+   */
+  getVisibilityRootInstance() {
     if ( this.isVisibilityApplied || !this.parent ) {
       return this;
     }
     else {
       return this.parent.getVisibilityRootInstance();
     }
-  },
+  }
 
-  attachNodeListeners: function() {
+  /**
+   * @private
+   */
+  attachNodeListeners() {
     // attach listeners to our node
     this.relativeTransform.attachNodeListeners();
 
@@ -1451,9 +1685,12 @@ inherit( Object, Instance, {
       this.node.clipAreaProperty.lazyLink( this.markRenderStateDirtyListener );
       this.node.instanceRefreshEmitter.addListener( this.markRenderStateDirtyListener );
     }
-  },
+  }
 
-  detachNodeListeners: function() {
+  /**
+   * @private
+   */
+  detachNodeListeners() {
     this.relativeTransform.detachNodeListeners();
 
     if ( !this.isSharedCanvasCachePlaceholder ) {
@@ -1466,25 +1703,39 @@ inherit( Object, Instance, {
       this.node.clipAreaProperty.unlink( this.markRenderStateDirtyListener );
       this.node.instanceRefreshEmitter.removeListener( this.markRenderStateDirtyListener );
     }
-  },
+  }
 
-  // ensure that the render state is updated in the next syncTree()
-  markRenderStateDirty: function() {
+  /**
+   * Ensure that the render state is updated in the next syncTree()
+   * @private
+   */
+  markRenderStateDirty() {
     this.renderStateDirtyFrame = this.display._frameId;
 
     // ensure we aren't pruned (not set on this instance, since we may not need to visit our children)
     this.parent && this.parent.markSkipPruning();
-  },
+  }
 
-  // ensure that this instance and its children will be visited in the next syncTree()
-  markSkipPruning: function() {
+  /**
+   * Ensure that this instance and its children will be visited in the next syncTree()
+   * @private
+   */
+  markSkipPruning() {
     this.skipPruningFrame = this.display._frameId;
 
     // walk it up to the root
     this.parent && this.parent.markSkipPruning();
-  },
+  }
 
-  getBranchIndexTo: function( instance ) {
+  /**
+   * @public
+   *
+   * NOTE: used in CanvasBlock internals, performance-critical.
+   *
+   * @param {Instance} instance
+   * @returns {number}
+   */
+  getBranchIndexTo( instance ) {
     const cachedValue = this.branchIndexMap[ instance.id ];
     if ( cachedValue !== undefined ) {
       return cachedValue;
@@ -1497,10 +1748,13 @@ inherit( Object, Instance, {
     instance.branchIndexReferences.push( this );
 
     return branchIndex;
-  },
+  }
 
-  // clean up listeners and garbage, so that we can be recycled (or pooled)
-  dispose: function() {
+  /**
+   * Clean up listeners and garbage, so that we can be recycled (or pooled)
+   * @public
+   */
+  dispose() {
     sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'dispose ' + this.toString() );
     sceneryLog && sceneryLog.Instance && sceneryLog.push();
 
@@ -1563,9 +1817,15 @@ inherit( Object, Instance, {
     this.freeToPool();
 
     sceneryLog && sceneryLog.Instance && sceneryLog.pop();
-  },
+  }
 
-  audit: function( frameId, allowValidationNotNeededChecks ) {
+  /**
+   * @public
+   *
+   * @param {number} frameId
+   * @param {boolean} allowValidationNotNeededChecks
+   */
+  audit( frameId, allowValidationNotNeededChecks ) {
     if ( assertSlow ) {
       if ( frameId === undefined ) {
         frameId = this.display._frameId;
@@ -1603,10 +1863,15 @@ inherit( Object, Instance, {
 
       this.fittability.audit();
     }
-  },
+  }
 
-  // @public (scenery-internal) - Applies checks to make sure our visibility tracking is working as expected.
-  auditVisibility: function( parentVisible ) {
+  /**
+   * Applies checks to make sure our visibility tracking is working as expected.
+   * @public
+   *
+   * @param {boolean} parentVisible
+   */
+  auditVisibility( parentVisible ) {
     if ( assertSlow ) {
       const visible = parentVisible && this.node.isVisible();
       const trailVisible = this.trail.isVisible();
@@ -1620,9 +1885,17 @@ inherit( Object, Instance, {
         childInstance.auditVisibility( visible );
       }
     }
-  },
+  }
 
-  auditChangeIntervals: function( oldFirstDrawable, oldLastDrawable, newFirstDrawable, newLastDrawable ) {
+  /**
+   * @private
+   *
+   * @param {Drawable|null} oldFirstDrawable
+   * @param {Drawable|null} oldLastDrawable
+   * @param {Drawable|null} newFirstDrawable
+   * @param {Drawable|null} newLastDrawable
+   */
+  auditChangeIntervals( oldFirstDrawable, oldLastDrawable, newFirstDrawable, newLastDrawable ) {
     if ( oldFirstDrawable ) {
       let oldOne = oldFirstDrawable;
 
@@ -1700,12 +1973,20 @@ inherit( Object, Instance, {
         }
       }
     }
-  },
+  }
 
-  toString: function() {
+  /**
+   * Returns a string form of this object
+   * @public
+   *
+   * @returns {string}
+   */
+  toString() {
     return this.id + '#' + ( this.node ? ( this.node.constructor.name ? this.node.constructor.name : '?' ) + '#' + this.node.id : '-' );
   }
-} );
+}
+
+scenery.register( 'Instance', Instance );
 
 // object pooling
 Poolable.mixInto( Instance, {

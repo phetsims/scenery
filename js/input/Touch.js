@@ -8,30 +8,24 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 import Pointer from './Pointer.js'; // extends Pointer
 
-/**
- * @extends Pointer
- *
- * @param {number} id
- * @param {Vector2} point
- * @param {Event} event
- * @constructor
- */
-function Touch( id, point, event ) {
-  Pointer.call( this, point, true, 'touch' ); // true: touches always start in the down state
+class Touch extends Pointer {
+  /**
+   * @param {number} id
+   * @param {Vector2} point
+   * @param {Event} event
+   */
+  constructor( id, point, event ) {
+    super( point, true, 'touch' ); // true: touches always start in the down state
 
-  // @public {number} - For tracking which touch is which
-  this.id = id;
+    // @public {number} - For tracking which touch is which
+    this.id = id;
 
-  sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'Created ' + this.toString() );
-}
+    sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'Created ' + this.toString() );
+  }
 
-scenery.register( 'Touch', Touch );
-
-inherit( Pointer, Touch, {
 
   /**
    * Sets information in this Touch for a given touch move.
@@ -41,12 +35,12 @@ inherit( Pointer, Touch, {
    * @param {Event} event
    * @returns {boolean} - Whether the point changed
    */
-  move: function( point, event ) {
+  move( point, event ) {
     const pointChanged = this.hasPointChanged( point );
 
     this.point = point;
     return pointChanged;
-  },
+  }
 
   /**
    * Sets information in this Touch for a given touch end.
@@ -56,13 +50,13 @@ inherit( Pointer, Touch, {
    * @param {Event} event
    * @returns {boolean} - Whether the point changed
    */
-  end: function( point, event ) {
+  end( point, event ) {
     const pointChanged = this.hasPointChanged( point );
 
     this.point = point;
     this.isDown = false;
     return pointChanged;
-  },
+  }
 
   /**
    * Sets information in this Touch for a given touch cancel.
@@ -72,13 +66,13 @@ inherit( Pointer, Touch, {
    * @param {Event} event
    * @returns {boolean} - Whether the point changed
    */
-  cancel: function( point, event ) {
+  cancel( point, event ) {
     const pointChanged = this.hasPointChanged( point );
 
     this.point = point;
     this.isDown = false;
     return pointChanged;
-  },
+  }
 
   /**
    * Returns an improved string representation of this object.
@@ -87,9 +81,10 @@ inherit( Pointer, Touch, {
    *
    * @returns {string}
    */
-  toString: function() {
+  toString() {
     return 'Touch#' + this.id;
   }
-} );
+}
 
+scenery.register( 'Touch', Touch );
 export default Touch;

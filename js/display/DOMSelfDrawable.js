@@ -12,29 +12,27 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 import SelfDrawable from './SelfDrawable.js';
 
-function DOMSelfDrawable( renderer, instance ) {
-  this.initializeDOMSelfDrawable( renderer, instance );
+class DOMSelfDrawable extends SelfDrawable {
+  /**
+   * @public
+   * @override
+   *
+   * @param {number} renderer
+   * @param {Instance} instance
+   * @returns {DOMSelfDrawable}
+   */
+  initialize( renderer, instance ) {
+    super.initialize( renderer, instance );
 
-  throw new Error( 'Should use initialization and pooling' );
-}
-
-scenery.register( 'DOMSelfDrawable', DOMSelfDrawable );
-
-inherit( SelfDrawable, DOMSelfDrawable, {
-  initializeDOMSelfDrawable: function( renderer, instance ) {
-    // this is the same across lifecycles
+    // @private {function} - this is the same across lifecycles
     this.transformListener = this.transformListener || this.markTransformDirty.bind( this );
 
-    // super initialization
-    this.initializeSelfDrawable( renderer, instance );
-
-    this.forceAcceleration = false; // TODO: for now, check to see if this is used and how to use it
     this.markTransformDirty();
 
+    // @private {boolean}
     this.visibilityDirty = true;
 
     // handle transform changes
@@ -42,20 +40,29 @@ inherit( SelfDrawable, DOMSelfDrawable, {
     instance.relativeTransform.addPrecompute(); // trigger precomputation of the relative transform, since we will always need it when it is updated
 
     return this;
-  },
+  }
 
-  markTransformDirty: function() {
+  /**
+   * @public
+   */
+  markTransformDirty() {
     // update the visual state available to updateDOM, so that it will update the transform (Text needs to change the transform, so it is included)
     this.transformDirty = true;
 
     this.markDirty();
-  },
+  }
 
-  // called from the Node, probably during updateDOM
-  getTransformMatrix: function() {
+  /**
+   * @public
+   *
+   * Called from the Node, probably during updateDOM
+   *
+   * @returns {Matrix3}
+   */
+  getTransformMatrix() {
     this.instance.relativeTransform.validate();
     return this.instance.relativeTransform.matrix;
-  },
+  }
 
   /**
    * Updates the DOM appearance of this drawable (whether by preparing/calling draw calls, DOM element updates, etc.)
@@ -65,9 +72,9 @@ inherit( SelfDrawable, DOMSelfDrawable, {
    * @returns {boolean} - Whether the update should continue (if false, further updates in supertype steps should not
    *                      be done).
    */
-  update: function() {
+  update() {
     // See if we need to actually update things (will bail out if we are not dirty, or if we've been disposed)
-    if ( !SelfDrawable.prototype.update.call( this ) ) {
+    if ( !super.update() ) {
       return false;
     }
 
@@ -82,30 +89,43 @@ inherit( SelfDrawable, DOMSelfDrawable, {
     this.cleanPaintableState && this.cleanPaintableState();
 
     return true;
-  },
+  }
 
-  // @protected: called to update the visual appearance of our domElement
-  updateDOM: function() {
+  /**
+   * Called to update the visual appearance of our domElement
+   * @protected
+   * @abstract
+   */
+  updateDOM() {
     // should generally be overridden by drawable subtypes to implement the update
-  },
+  }
 
-  // @override
-  updateSelfVisibility: function() {
-    SelfDrawable.prototype.updateSelfVisibility.call( this );
+  /**
+   * @public
+   * @override
+   */
+  updateSelfVisibility() {
+    super.updateSelfVisibility();
 
     if ( !this.visibilityDirty ) {
       this.visibilityDirty = true;
       this.markDirty();
     }
-  },
+  }
 
-  dispose: function() {
+  /**
+   * Releases references
+   * @public
+   * @override
+   */
+  dispose() {
     this.instance.relativeTransform.removeListener( this.transformListener );
     this.instance.relativeTransform.removePrecompute();
 
     // super call
-    SelfDrawable.prototype.dispose.call( this );
+    super.dispose();
   }
-} );
+}
 
+scenery.register( 'DOMSelfDrawable', DOMSelfDrawable );
 export default DOMSelfDrawable;

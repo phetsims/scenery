@@ -11,8 +11,8 @@ import Action from '../../../axon/js/Action.js';
 import ActionAPI from '../../../axon/js/ActionAPI.js';
 import merge from '../../../phet-core/js/merge.js';
 import EventType from '../../../tandem/js/EventType.js';
-import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import UninstrumentedAPI from '../../../tandem/js/UninstrumentedAPI.js';
+import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import SceneryEvent from '../input/SceneryEvent.js';
 import scenery from '../scenery.js';
 

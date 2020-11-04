@@ -10,13 +10,13 @@
  */
 
 import BooleanProperty from '../../../../axon/js/BooleanProperty.js';
-import platform from '../../../../phet-core/js/platform.js';
 import Emitter from '../../../../axon/js/Emitter.js';
-import SelfVoicingUtterance from '../../../../utterance-queue/js/SelfVoicingUtterance.js';
 import NumberProperty from '../../../../axon/js/NumberProperty.js';
 import Property from '../../../../axon/js/Property.js';
 import Range from '../../../../dot/js/Range.js';
+import platform from '../../../../phet-core/js/platform.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
+import SelfVoicingUtterance from '../../../../utterance-queue/js/SelfVoicingUtterance.js';
 import scenery from '../../scenery.js';
 
 class WebSpeaker {

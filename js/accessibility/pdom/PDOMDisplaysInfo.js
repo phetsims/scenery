@@ -7,44 +7,40 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../../phet-core/js/inherit.js';
 import Renderer from '../../display/Renderer.js';
 import scenery from '../../scenery.js';
 
-/**
- * Tracks accessible display information for our given node.
- * @public (scenery-internal)
- * @constructor
- *
- * @param {Node} node
- */
-function PDOMDisplaysInfo( node ) {
+class PDOMDisplaysInfo {
+  /**
+   * Tracks accessible display information for our given node.
+   * @public (scenery-internal)
+   *
+   * @param {Node} node
+   */
+  constructor( node ) {
 
-  // @public {Node}
-  this.node = node;
+    // @public {Node}
+    this.node = node;
 
-  // @public (scenery-internal) {Array.<Display>} - (duplicates allowed) - There is one copy of each accessible
-  // Display for each trail (from its root node to this node) that is fully visible (assuming this subtree is
-  // accessible).
-  // Thus, the value of this is:
-  // - If this node is invisible OR the subtree has no accessibleContent/accessibleOrder: []
-  // - Otherwise, it is the concatenation of our parents' accessibleDisplays (AND any accessible displays rooted
-  //   at this node).
-  // This value is synchronously updated, and supports accessibleInstances by letting them know when certain
-  // nodes are visible on the display.
-  this.accessibleDisplays = [];
-}
+    // @public (scenery-internal) {Array.<Display>} - (duplicates allowed) - There is one copy of each accessible
+    // Display for each trail (from its root node to this node) that is fully visible (assuming this subtree is
+    // accessible).
+    // Thus, the value of this is:
+    // - If this node is invisible OR the subtree has no accessibleContent/accessibleOrder: []
+    // - Otherwise, it is the concatenation of our parents' accessibleDisplays (AND any accessible displays rooted
+    //   at this node).
+    // This value is synchronously updated, and supports accessibleInstances by letting them know when certain
+    // nodes are visible on the display.
+    this.accessibleDisplays = [];
+  }
 
-scenery.register( 'PDOMDisplaysInfo', PDOMDisplaysInfo );
-
-inherit( Object, PDOMDisplaysInfo, {
   /**
    * Called when the node is added as a child to this node AND the node's subtree contains accessible content.
    * @public (scenery-internal)
    *
    * @param {Node} node
    */
-  onAddChild: function( node ) {
+  onAddChild( node ) {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onAddChild n#' + node.id + ' (parent:n#' + this.node.id + ')' );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
@@ -53,7 +49,7 @@ inherit( Object, PDOMDisplaysInfo, {
     }
 
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
-  },
+  }
 
   /**
    * Called when the node is removed as a child from this node AND the node's subtree contains accessible content.
@@ -61,7 +57,7 @@ inherit( Object, PDOMDisplaysInfo, {
    *
    * @param {Node} node
    */
-  onRemoveChild: function( node ) {
+  onRemoveChild( node ) {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onRemoveChild n#' + node.id + ' (parent:n#' + this.node.id + ')' );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
@@ -70,7 +66,7 @@ inherit( Object, PDOMDisplaysInfo, {
     }
 
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
-  },
+  }
 
   /**
    * Called when our summary bitmask changes
@@ -79,7 +75,7 @@ inherit( Object, PDOMDisplaysInfo, {
    * @param {number} oldBitmask
    * @param {number} newBitmask
    */
-  onSummaryChange: function( oldBitmask, newBitmask ) {
+  onSummaryChange( oldBitmask, newBitmask ) {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onSummaryChange n#' + this.node.id + ' wasA11y:' + !( Renderer.bitmaskNotAccessible & oldBitmask ) + ', isA11y:' + !( Renderer.bitmaskNotAccessible & newBitmask ) );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
@@ -100,7 +96,7 @@ inherit( Object, PDOMDisplaysInfo, {
     }
 
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
-  },
+  }
 
   /**
    * Called when our visibility changes.
@@ -108,7 +104,7 @@ inherit( Object, PDOMDisplaysInfo, {
    *
    * @param {boolean} visible
    */
-  onVisibilityChange: function( visible ) {
+  onVisibilityChange( visible ) {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onVisibilityChange n#' + this.node.id + ' visible:' + visible );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
@@ -123,7 +119,7 @@ inherit( Object, PDOMDisplaysInfo, {
     }
 
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
-  },
+  }
 
   /**
    * Called when our accessibleVisibility changes.
@@ -131,7 +127,7 @@ inherit( Object, PDOMDisplaysInfo, {
    *
    * @param {boolean} visible
    */
-  onAccessibleVisibilityChange: function( visible ) {
+  onAccessibleVisibilityChange( visible ) {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onAccessibleVisibilityChange n#' + this.node.id + ' accessibleVisible:' + visible );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
@@ -146,7 +142,7 @@ inherit( Object, PDOMDisplaysInfo, {
     }
 
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
-  },
+  }
 
   /**
    * Called when we have a rooted display added to this node.
@@ -154,7 +150,7 @@ inherit( Object, PDOMDisplaysInfo, {
    *
    * @param {Display} display
    */
-  onAddedRootedDisplay: function( display ) {
+  onAddedRootedDisplay( display ) {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onAddedRootedDisplay n#' + this.node.id );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
@@ -163,7 +159,7 @@ inherit( Object, PDOMDisplaysInfo, {
     }
 
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
-  },
+  }
 
   /**
    * Called when we have a rooted display removed from this node.
@@ -171,7 +167,7 @@ inherit( Object, PDOMDisplaysInfo, {
    *
    * @param {Display} display
    */
-  onRemovedRootedDisplay: function( display ) {
+  onRemovedRootedDisplay( display ) {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onRemovedRootedDisplay n#' + this.node.id );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
@@ -180,7 +176,7 @@ inherit( Object, PDOMDisplaysInfo, {
     }
 
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
-  },
+  }
 
   /**
    * Returns whether we can have accessibleDisplays specified in our array.
@@ -188,15 +184,15 @@ inherit( Object, PDOMDisplaysInfo, {
    *
    * @returns {boolean}
    */
-  canHaveAccessibleDisplays: function() {
+  canHaveAccessibleDisplays() {
     return this.node.visible && this.node.accessibleVisible && !this.node._rendererSummary.isNotAccessible();
-  },
+  }
 
   /**
    * Adds all of our accessible displays to our array (and propagates).
    * @private
    */
-  addAllAccessibleDisplays: function() {
+  addAllAccessibleDisplays() {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'addAllAccessibleDisplays n#' + this.node.id );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
@@ -222,13 +218,13 @@ inherit( Object, PDOMDisplaysInfo, {
     this.addAccessibleDisplays( displays );
 
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
-  },
+  }
 
   /**
    * Removes all of our accessible displays from our array (and propagates).
    * @private
    */
-  removeAllAccessibleDisplays: function() {
+  removeAllAccessibleDisplays() {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'removeAllAccessibleDisplays n#' + this.node.id );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
@@ -240,7 +236,7 @@ inherit( Object, PDOMDisplaysInfo, {
     assert && assert( this.accessibleDisplays.length === 0, 'Should be empty after removing everything' );
 
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
-  },
+  }
 
   /**
    * Adds a list of accessible displays to our internal list. See accessibleDisplays documentation.
@@ -248,7 +244,7 @@ inherit( Object, PDOMDisplaysInfo, {
    *
    * @param {Array.<Display>} displays
    */
-  addAccessibleDisplays: function( displays ) {
+  addAccessibleDisplays( displays ) {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'addAccessibleDisplays n#' + this.node.id + ' numDisplays:' + displays.length );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
@@ -270,7 +266,7 @@ inherit( Object, PDOMDisplaysInfo, {
     }
 
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
-  },
+  }
 
   /**
    * Removes a list of accessible displays from our internal list. See accessibleDisplays documentation.
@@ -278,7 +274,7 @@ inherit( Object, PDOMDisplaysInfo, {
    *
    * @param {Array.<Display>} displays
    */
-  removeAccessibleDisplays: function( displays ) {
+  removeAccessibleDisplays( displays ) {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'removeAccessibleDisplays n#' + this.node.id + ' numDisplays:' + displays.length );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
@@ -311,6 +307,7 @@ inherit( Object, PDOMDisplaysInfo, {
 
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
   }
-} );
+}
 
+scenery.register( 'PDOMDisplaysInfo', PDOMDisplaysInfo );
 export default PDOMDisplaysInfo;

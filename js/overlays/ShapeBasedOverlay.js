@@ -6,39 +6,48 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 import svgns from '../util/svgns.js';
 
-function ShapeBasedOverlay( display, rootNode, name ) {
-  this.display = display;
-  this.rootNode = rootNode;
+class ShapeBasedOverlay {
+  /**
+   * @param {Display} display
+   * @param {Node} rootNode
+   * @param {string} name
+   */
+  constructor( display, rootNode, name ) {
+    this.display = display;
+    this.rootNode = rootNode;
 
-  const svg = document.createElementNS( svgns, 'svg' );
-  svg.style.position = 'absolute';
-  svg.setAttribute( 'class', name );
-  svg.style.top = 0;
-  svg.style.left = 0;
-  svg.style[ 'pointer-events' ] = 'none';
-  this.svg = svg;
+    const svg = document.createElementNS( svgns, 'svg' );
+    svg.style.position = 'absolute';
+    svg.setAttribute( 'class', name );
+    svg.style.top = 0;
+    svg.style.left = 0;
+    svg.style[ 'pointer-events' ] = 'none';
+    this.svg = svg;
 
-  function resize( width, height ) {
-    svg.setAttribute( 'width', width );
-    svg.setAttribute( 'height', height );
-    svg.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
+    function resize( width, height ) {
+      svg.setAttribute( 'width', width );
+      svg.setAttribute( 'height', height );
+      svg.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
+    }
+
+    display.sizeProperty.link( dimension => {
+      resize( dimension.width, dimension.height );
+    } );
+
+    this.domElement = svg;
   }
 
-  display.sizeProperty.link( function( dimension ) {
-    resize( dimension.width, dimension.height );
-  } );
-
-  this.domElement = svg;
-}
-
-scenery.register( 'ShapeBasedOverlay', ShapeBasedOverlay );
-
-inherit( Object, ShapeBasedOverlay, {
-  addShape: function( shape, color, isOffset ) {
+  /**
+   * @public
+   *
+   * @param {Shape} shape
+   * @param {string} color
+   * @param {boolean} isOffset
+   */
+  addShape( shape, color, isOffset ) {
     const path = document.createElementNS( svgns, 'path' );
     let svgPath = shape.getSVGPath();
 
@@ -57,24 +66,35 @@ inherit( Object, ShapeBasedOverlay, {
 
     path.setAttribute( 'style', 'fill: none; stroke: ' + color + '; stroke-dasharray: 5, 3; stroke-dashoffset: ' + ( isOffset ? 5 : 0 ) + '; stroke-width: 3;' );
     this.svg.appendChild( path );
-  },
+  }
 
-  update: function() {
+  /**
+   * @public
+   */
+  update() {
     while ( this.svg.childNodes.length ) {
       this.svg.removeChild( this.svg.childNodes[ this.svg.childNodes.length - 1 ] );
     }
 
     this.addShapes();
-  },
+  }
 
-  // STUB to be overridden
-  addShapes: function() {
-
-  },
-
-  dispose: function() {
+  /**
+   * @public
+   * @abstract
+   */
+  addShapes() {
 
   }
-} );
 
+  /**
+   * Releases references
+   * @public
+   */
+  dispose() {
+
+  }
+}
+
+scenery.register( 'ShapeBasedOverlay', ShapeBasedOverlay );
 export default ShapeBasedOverlay;

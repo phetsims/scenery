@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <!-- <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/> -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <!-- runs in full-screen mode on iOS devices -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <title>Filter/clip testing for 707</title>
+
+  <!-- jQuery and LoDash are dependencies -->
+  <script src="../../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <script src="../../../sherpa/lib/lodash-4.17.4.min.js"></script>
+
+  <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
+  <script src="../build/scenery.min.js"></script>
+
+  <style type="text/css">
+
+  </style>
+</head>
+<body>
+
+<script type="module">
+
+import Node from '../js/nodes/Node.js';
+import Rectangle from '../js/nodes/Rectangle.js';
+import Display from '../js/display/Display.js';
+
+const createElement = () => {
+  const scene = new Node();
+  const display = new Display( scene, {
+
+    width: 320,
+    height: 240,
+    allowCSSHacks: false
+  } );
+
+  scene.addChild( new Rectangle( 0, 0, 320, 50, {
+    fill: 'rgb(200,0,0)',
+    renderer: 'canvas',
+    y: 120,
+    rotation: 0
+  } ) );
+  scene.addChild( new Rectangle( 0, 0, 320, 50, {
+    fill: 'rgb(0,200,0)',
+    renderer: 'svg',
+    y: 120,
+    rotation: 0.3
+  } ) );
+  scene.addChild( new Rectangle( 0, 0, 320, 50, {
+    fill: 'rgb(0,0,200)',
+    renderer: 'webgl',
+    y: 120,
+    rotation: -0.3
+  } ) );
+
+  display.updateDisplay();
+
+  display.domElement.style.position = 'relative';
+
+  display.rootBackbone.blocks.forEach( block => {
+    block.domElement.style.mixBlendMode = 'multiply';
+  } );
+
+  return display.domElement;
+};
+
+// const blurElement = createElement();
+// // blurElement.style.filter = 'url("#svgFilter2")';
+// // blurElement.style.filter = 'grayscale(1)';
+// // blurElement.style.filter = 'url(#svgFilter2)';
+// // blurElement.style.filter = 'url(#displacementFilter)';
+// // blurElement.style.filter = 'url(#f1)';
+// // blurElement.style['-webkit-filter'] = 'url(#f1)';
+// blurElement.style.filter = 'grayscale(0.95) blur(4px)';
+// document.body.appendChild( blurElement );
+
+[
+  '',
+  'blur(5px)',
+  // 'brightness(20)', -- because Firefox doesn't support it well
+  'contrast(2)',
+  'drop-shadow(16px 16px 10px black)',
+  'grayscale(1)',
+  'hue-rotate(90deg)',
+  'invert(1)',
+  'opacity(0.5)',
+  'saturate(0.2)',
+  'sepia(1)'
+].forEach( style => {
+  const element = createElement();
+  element.style.filter = style;
+  document.body.appendChild( element );
+} );
+
+/**
+drop-shadow(16px 16px 10px black) <offset-x> <offset-y> [<blur-radius>] [<color>]
+    <feGaussianBlur in="SourceAlpha" stdDeviation="[radius]"/>
+    <feOffset dx="[offset-x]" dy="[offset-y]" result="offsetblur"/>
+    <feFlood flood-color="[color]"/>
+    <feComposite in2="offsetblur" operator="in"/>
+    <feMerge>
+      <feMergeNode/>
+      <feMergeNode in="SourceGraphic"/>
+    </feMerge>
+hue-rotate(90deg)
+  <feColorMatrix type="hueRotate" values="90"></feColorMatrix>
+invert(1)
+  <feComponentTransfer>
+        <feFuncR type="table" tableValues="1 0"></feFuncR>
+        <feFuncG type="table" tableValues="1 0"></feFuncG>
+        <feFuncB type="table" tableValues="1 0"></feFuncB>
+    </feComponentTransfer>
+  <filter id="invert">
+    <feComponentTransfer>
+        <feFuncR type="table" tableValues="[amount] (1 - [amount])"/>
+        <feFuncG type="table" tableValues="[amount] (1 - [amount])"/>
+        <feFuncB type="table" tableValues="[amount] (1 - [amount])"/>
+    </feComponentTransfer>
+  </filter>
+opacity(0.5)
+  <feComponentTransfer>
+        <feFuncA type="table" tableValues="0 0.5">
+    </feFuncA></feComponentTransfer>
+  <filter id="opacity">
+    <feComponentTransfer>
+        <feFuncA type="table" tableValues="0 [amount]"/>
+    </feComponentTransfer>
+  </filter>
+saturate(1)
+  <feColorMatrix type="saturate" values="2"></feColorMatrix>
+*/
+
+</script>
+
+</body>
+</html>

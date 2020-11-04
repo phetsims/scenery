@@ -11,7 +11,7 @@ import PDOMUtils from './PDOMUtils.js';
 QUnit.module( 'AccessibilityUtilsTests' );
 
 // tests
-QUnit.test( 'insertElements', function( assert ) {
+QUnit.test( 'insertElements', assert => {
 
   const div1 = document.createElement( 'div1' );
   const div2 = document.createElement( 'div2' );
@@ -39,7 +39,7 @@ QUnit.test( 'insertElements', function( assert ) {
   assert.ok( div1.childNodes[ 5 ] === div4, 'inserted div4 order of elements' );
 } );
 
-QUnit.test( 'getNextPreviousFocusable', function( assert ) {
+QUnit.test( 'getNextPreviousFocusable', assert => {
   const parent = PDOMUtils.createElement( 'div', false );
 
   const button = PDOMUtils.createElement( 'button', true ); // focusable
@@ -68,7 +68,7 @@ QUnit.test( 'getNextPreviousFocusable', function( assert ) {
   document.body.removeChild( parent );
 } );
 
-QUnit.test( 'overrideFocusWithTabIndex', function( assert ) {
+QUnit.test( 'overrideFocusWithTabIndex', assert => {
 
   // test function directly
   const testButton = document.createElement( 'button' );
@@ -117,7 +117,7 @@ QUnit.test( 'overrideFocusWithTabIndex', function( assert ) {
   assert.ok( customDiv.getAttribute( 'tabindex' ) === '0', 'custom button removed from focus' );
 } );
 
-QUnit.test( 'setTextContent', function( assert ) {
+QUnit.test( 'setTextContent', assert => {
   const toyElement = PDOMUtils.createElement( 'div' );
 
   // basic string

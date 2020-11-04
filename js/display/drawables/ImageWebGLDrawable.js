@@ -7,7 +7,6 @@
  */
 
 import Vector2 from '../../../../dot/js/Vector2.js';
-import inherit from '../../../../phet-core/js/inherit.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import scenery from '../../scenery.js';
 import Renderer from '../Renderer.js';
@@ -31,54 +30,60 @@ const VERTEX_U_OFFSET = 2;
 const VERTEX_V_OFFSET = 3;
 const VERTEX_A_OFFSET = 4;
 
-/**
- * A generated WebGLSelfDrawable whose purpose will be drawing our Image. One of these drawables will be created
- * for each displayed instance of an Image.
- * @constructor
- *
- * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
- * @param {Instance} instance
- */
-function ImageWebGLDrawable( renderer, instance ) {
-  this.initializeWebGLSelfDrawable( renderer, instance );
+class ImageWebGLDrawable extends ImageStatefulDrawable( WebGLSelfDrawable ) {
+  /**
+   * @public
+   * @override
+   *
+   * @param {number} renderer
+   * @param {Instance} instance
+   */
+  initialize( renderer, instance ) {
+    super.initialize( renderer, instance );
 
-  if ( !this.vertexArray ) {
-    // for 6 vertices
-    this.vertexArray = new Float32Array( WEBGL_COMPONENTS * 6 ); // 5-length components for 6 vertices (2 tris).
+    // @public {Float32Array} - 5-length components for 6 vertices (2 tris), for 6 vertices
+    this.vertexArray = this.vertexArray || new Float32Array( WEBGL_COMPONENTS * 6 );
+
+    // @private {Vector2} - corner vertices in the relative transform root coordinate space
+    this.upperLeft = new Vector2( 0, 0 );
+    this.lowerLeft = new Vector2( 0, 0 );
+    this.upperRight = new Vector2( 0, 0 );
+    this.lowerRight = new Vector2( 0, 0 );
+
+    // @private {boolean}
+    this.xyDirty = true; // is our vertex position information out of date?
+    this.uvDirty = true; // is our UV information out of date?
+    this.updatedOnce = false;
+
+    // {SpriteSheet.Sprite} exported for WebGLBlock's rendering loop
+    this.sprite = null;
   }
 
-  // corner vertices in the relative transform root coordinate space
-  this.upperLeft = new Vector2( 0, 0 );
-  this.lowerLeft = new Vector2( 0, 0 );
-  this.upperRight = new Vector2( 0, 0 );
-  this.lowerRight = new Vector2( 0, 0 );
-
-  this.xyDirty = true; // is our vertex position information out of date?
-  this.uvDirty = true; // is our UV information out of date?
-  this.updatedOnce = false;
-
-  // {SpriteSheet.Sprite} exported for WebGLBlock's rendering loop
-  this.sprite = null;
-}
-
-scenery.register( 'ImageWebGLDrawable', ImageWebGLDrawable );
-
-inherit( WebGLSelfDrawable, ImageWebGLDrawable, {
-  // TODO: doc
-  webglRenderer: Renderer.webglTexturedTriangles,
-
-  onAddToBlock: function( webglBlock ) {
+  /**
+   * @public
+   *
+   * @param {WebGLBlock} webGLBlock
+   */
+  onAddToBlock( webglBlock ) {
     this.webglBlock = webglBlock; // TODO: do we need this reference?
     this.markDirty();
 
     this.reserveSprite();
-  },
+  }
 
-  onRemoveFromBlock: function( webglBlock ) {
+  /**
+   * @public
+   *
+   * @param {WebGLBlock} webGLBlock
+   */
+  onRemoveFromBlock( webglBlock ) {
     this.unreserveSprite();
-  },
+  }
 
-  reserveSprite: function() {
+  /**
+   * @private
+   */
+  reserveSprite() {
     if ( this.sprite ) {
       // if we already reserved a sprite for the image, bail out
       if ( this.sprite.image === this.node._image ) {
@@ -100,36 +105,42 @@ inherit( WebGLSelfDrawable, ImageWebGLDrawable, {
     // full updates on everything if our sprite changes
     this.xyDirty = true;
     this.uvDirty = true;
-  },
+  }
 
-  unreserveSprite: function() {
+  /**
+   * @private
+   */
+  unreserveSprite() {
     if ( this.sprite ) {
       this.webglBlock.removeSpriteSheetImage( this.sprite );
     }
     this.sprite = null;
-  },
+  }
 
-  // @override
-  markTransformDirty: function() {
+  /**
+   * @public
+   * @override
+   */
+  markTransformDirty() {
     this.xyDirty = true;
 
-    WebGLSelfDrawable.prototype.markTransformDirty.call( this );
-  },
+    super.markTransformDirty();
+  }
 
   /**
    * A "catch-all" dirty method that directly marks the paintDirty flag and triggers propagation of dirty
    * information. This can be used by other mark* methods, or directly itself if the paintDirty flag is checked.
-   * @public (scenery-internal)
+   * @public
    *
    * It should be fired (indirectly or directly) for anything besides transforms that needs to make a drawable
    * dirty.
    */
-  markPaintDirty: function() {
+  markPaintDirty() {
     this.xyDirty = true; // vertex positions can depend on image width/height
     this.uvDirty = true;
 
     this.markDirty();
-  },
+  }
 
   /**
    * Updates the DOM appearance of this drawable (whether by preparing/calling draw calls, DOM element updates, etc.)
@@ -139,9 +150,9 @@ inherit( WebGLSelfDrawable, ImageWebGLDrawable, {
    * @returns {boolean} - Whether the update should continue (if false, further updates in supertype steps should not
    *                      be done).
    */
-  update: function() {
+  update() {
     // See if we need to actually update things (will bail out if we are not dirty, or if we've been disposed)
-    if ( !WebGLSelfDrawable.prototype.update.call( this ) ) {
+    if ( !super.update() ) {
       return false;
     }
 
@@ -217,22 +228,16 @@ inherit( WebGLSelfDrawable, ImageWebGLDrawable, {
     }
 
     return true;
-  },
-
-  /**
-   * Disposes the drawable.
-   * @public
-   * @override
-   */
-  dispose: function() {
-    // TODO: disposal of buffers?
-
-    // super
-    WebGLSelfDrawable.prototype.dispose.call( this );
   }
-} );
-ImageStatefulDrawable.mixInto( ImageWebGLDrawable );
+}
 
-Poolable.mixInto( ImageWebGLDrawable );
+// TODO: doc
+ImageWebGLDrawable.prototype.webglRenderer = Renderer.webglTexturedTriangles;
+
+scenery.register( 'ImageWebGLDrawable', ImageWebGLDrawable );
+
+Poolable.mixInto( ImageWebGLDrawable, {
+  initialize: ImageWebGLDrawable.prototype.initialize
+} );
 
 export default ImageWebGLDrawable;

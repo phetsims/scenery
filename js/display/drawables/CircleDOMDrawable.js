@@ -7,7 +7,6 @@
  */
 
 import Matrix3 from '../../../../dot/js/Matrix3.js';
-import inherit from '../../../../phet-core/js/inherit.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import scenery from '../../scenery.js';
 import Features from '../../util/Features.js';
@@ -18,72 +17,68 @@ import CircleStatefulDrawable from './CircleStatefulDrawable.js';
 // TODO: change this based on memory and performance characteristics of the platform
 const keepDOMCircleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
 
-/**
- * A generated DOMSelfDrawable whose purpose will be drawing our Circle. One of these drawables will be created
- * for each displayed instance of a Circle.
- * @public (scenery-internal)
- * @constructor
- * @extends DOMSelfDrawable
- * @mixes Circle.CircleStatefulDrawable
- * @mixes Paintable.PaintableStatefulDrawable
- * @mixes SelfDrawable.Poolable
- *
- * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
- * @param {Instance} instance
- */
-function CircleDOMDrawable( renderer, instance ) {
-  // Super-type initialization
-  this.initializeDOMSelfDrawable( renderer, instance );
+class CircleDOMDrawable extends CircleStatefulDrawable( DOMSelfDrawable ) {
+  /**
+   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+   * @param {Instance} instance
+   */
+  constructor( renderer, instance ) {
+    super( renderer, instance );
 
-  // Stateful trait initialization
-  this.initializeState( renderer, instance );
-
-  // @protected {Matrix3} - We need to store an independent matrix, as our CSS transform actually depends on the radius.
-  this.matrix = this.matrix || Matrix3.dirtyFromPool();
-
-  // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
-  // allocation and performance costs)
-  if ( !this.fillElement || !this.strokeElement ) {
-    // @protected {HTMLDivElement} - Will contain the fill by manipulating borderRadius
-    const fillElement = document.createElement( 'div' );
-    this.fillElement = fillElement;
-
-    // @protected {HTMLDivElement} - Will contain the stroke by manipulating borderRadius
-    const strokeElement = document.createElement( 'div' );
-    this.strokeElement = strokeElement;
-
-    fillElement.style.display = 'block';
-    fillElement.style.position = 'absolute';
-    fillElement.style.left = '0';
-    fillElement.style.top = '0';
-    fillElement.style.pointerEvents = 'none';
-    strokeElement.style.display = 'block';
-    strokeElement.style.position = 'absolute';
-    strokeElement.style.left = '0';
-    strokeElement.style.top = '0';
-    strokeElement.style.pointerEvents = 'none';
-
-    // Nesting allows us to transform only one AND to guarantee that the stroke is on top.
-    fillElement.appendChild( strokeElement );
+    // Apply CSS needed for future CSS transforms to work properly.
+    Utils.prepareForTransform( this.domElement );
   }
 
-  // @protected {HTMLElement} - Our primary DOM element. This is exposed as part of the DOMSelfDrawable API.
-  this.domElement = this.fillElement;
+  /**
+   * @public
+   * @override
+   *
+   * @param {number} renderer
+   * @param {Instance} instance
+   */
+  initialize( renderer, instance ) {
+    super.initialize( renderer, instance );
 
-  // Apply CSS needed for future CSS transforms to work properly.
-  Utils.prepareForTransform( this.domElement, this.forceAcceleration );
-}
+    // @protected {Matrix3} - We need to store an independent matrix, as our CSS transform actually depends on the radius.
+    this.matrix = this.matrix || Matrix3.dirtyFromPool();
 
-scenery.register( 'CircleDOMDrawable', CircleDOMDrawable );
+    // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
+    // allocation and performance costs)
+    if ( !this.fillElement || !this.strokeElement ) {
+      // @protected {HTMLDivElement} - Will contain the fill by manipulating borderRadius
+      const fillElement = document.createElement( 'div' );
+      this.fillElement = fillElement;
 
-inherit( DOMSelfDrawable, CircleDOMDrawable, {
+      // @protected {HTMLDivElement} - Will contain the stroke by manipulating borderRadius
+      const strokeElement = document.createElement( 'div' );
+      this.strokeElement = strokeElement;
+
+      fillElement.style.display = 'block';
+      fillElement.style.position = 'absolute';
+      fillElement.style.left = '0';
+      fillElement.style.top = '0';
+      fillElement.style.pointerEvents = 'none';
+      strokeElement.style.display = 'block';
+      strokeElement.style.position = 'absolute';
+      strokeElement.style.left = '0';
+      strokeElement.style.top = '0';
+      strokeElement.style.pointerEvents = 'none';
+
+      // Nesting allows us to transform only one AND to guarantee that the stroke is on top.
+      fillElement.appendChild( strokeElement );
+    }
+
+    // @protected {HTMLElement} - Our primary DOM element. This is exposed as part of the DOMSelfDrawable API.
+    this.domElement = this.fillElement;
+  }
+
   /**
    * Updates our DOM element so that its appearance matches our node's representation.
    * @protected
    *
    * This implements part of the DOMSelfDrawable required API for subtypes.
    */
-  updateDOM: function() {
+  updateDOM() {
     const node = this.node;
     const fillElement = this.fillElement;
     const strokeElement = this.strokeElement;
@@ -136,23 +131,21 @@ inherit( DOMSelfDrawable, CircleDOMDrawable, {
       const translation = Matrix3.translation( -node._radius, -node._radius );
       this.matrix.multiplyMatrix( translation );
       translation.freeToPool();
-      Utils.applyPreparedTransform( this.matrix, this.fillElement, this.forceAcceleration );
+      Utils.applyPreparedTransform( this.matrix, this.fillElement );
     }
 
     // clear all of the dirty flags
     this.setToCleanState();
     this.cleanPaintableState();
     this.transformDirty = false;
-  },
+  }
 
   /**
    * Disposes the drawable.
-   * @public (scenery-internal)
+   * @public
    * @override
    */
-  dispose: function() {
-    this.disposeState();
-
+  dispose() {
     // Release the DOM elements from the poolable visual state so they aren't kept in memory.
     // May not be done on platforms where we have enough memory to pool these
     if ( !keepDOMCircleElements ) {
@@ -162,13 +155,14 @@ inherit( DOMSelfDrawable, CircleDOMDrawable, {
       this.domElement = null;
     }
 
-    DOMSelfDrawable.prototype.dispose.call( this );
+    super.dispose();
   }
+}
+
+scenery.register( 'CircleDOMDrawable', CircleDOMDrawable );
+
+Poolable.mixInto( CircleDOMDrawable, {
+  initialize: CircleDOMDrawable.prototype.initialize
 } );
-
-// Include Circle's stateful trait (used for dirty flags)
-CircleStatefulDrawable.mixInto( CircleDOMDrawable );
-
-Poolable.mixInto( CircleDOMDrawable );
 
 export default CircleDOMDrawable;

@@ -8,7 +8,6 @@
 
 import Matrix3 from '../../../../dot/js/Matrix3.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import inherit from '../../../../phet-core/js/inherit.js';
 import scenery from '../../scenery.js';
 import Features from '../../util/Features.js';
 import Utils from '../../util/Utils.js';
@@ -21,59 +20,60 @@ const keepDOMRectangleElements = true; // whether we should pool DOM elements fo
 // scratch matrix used in DOM rendering
 const scratchMatrix = Matrix3.dirtyFromPool();
 
-/**
- * A generated DOMSelfDrawable whose purpose will be drawing our Rectangle. One of these drawables will be created
- * for each displayed instance of a Rectangle.
- * @constructor
- *
- * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
- * @param {Instance} instance
- */
-function RectangleDOMDrawable( renderer, instance ) {
-  // Super-type initialization
-  this.initializeDOMSelfDrawable( renderer, instance );
+class RectangleDOMDrawable extends RectangleStatefulDrawable( DOMSelfDrawable ) {
+  /**
+   * @param {number} renderer
+   * @param {Instance} instance
+   */
+  constructor( renderer, instance ) {
+    super( renderer, instance );
 
-  // Stateful trait initialization
-  this.initializeState( renderer, instance );
-
-  // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
-  // allocation and performance costs)
-  if ( !this.fillElement || !this.strokeElement ) {
-    const fillElement = document.createElement( 'div' );
-    this.fillElement = fillElement;
-    fillElement.style.display = 'block';
-    fillElement.style.position = 'absolute';
-    fillElement.style.left = '0';
-    fillElement.style.top = '0';
-    fillElement.style.pointerEvents = 'none';
-
-    const strokeElement = document.createElement( 'div' );
-    this.strokeElement = strokeElement;
-    strokeElement.style.display = 'block';
-    strokeElement.style.position = 'absolute';
-    strokeElement.style.left = '0';
-    strokeElement.style.top = '0';
-    strokeElement.style.pointerEvents = 'none';
-    fillElement.appendChild( strokeElement );
+    // Apply CSS needed for future CSS transforms to work properly.
+    Utils.prepareForTransform( this.domElement );
   }
 
-  // @protected {HTMLElement} - Our primary DOM element. This is exposed as part of the DOMSelfDrawable API.
-  this.domElement = this.fillElement;
+  /**
+   * @public
+   * @override
+   *
+   * @param {number} renderer
+   * @param {Instance} instance
+   */
+  initialize( renderer, instance ) {
+    super.initialize( renderer, instance );
 
-  // Apply CSS needed for future CSS transforms to work properly.
-  Utils.prepareForTransform( this.domElement, this.forceAcceleration );
-}
+    // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
+    // allocation and performance costs)
+    if ( !this.fillElement || !this.strokeElement ) {
+      const fillElement = document.createElement( 'div' );
+      this.fillElement = fillElement;
+      fillElement.style.display = 'block';
+      fillElement.style.position = 'absolute';
+      fillElement.style.left = '0';
+      fillElement.style.top = '0';
+      fillElement.style.pointerEvents = 'none';
 
-scenery.register( 'RectangleDOMDrawable', RectangleDOMDrawable );
+      const strokeElement = document.createElement( 'div' );
+      this.strokeElement = strokeElement;
+      strokeElement.style.display = 'block';
+      strokeElement.style.position = 'absolute';
+      strokeElement.style.left = '0';
+      strokeElement.style.top = '0';
+      strokeElement.style.pointerEvents = 'none';
+      fillElement.appendChild( strokeElement );
+    }
 
-inherit( DOMSelfDrawable, RectangleDOMDrawable, {
+    // @protected {HTMLElement} - Our primary DOM element. This is exposed as part of the DOMSelfDrawable API.
+    this.domElement = this.fillElement;
+  }
+
   /**
    * Updates our DOM element so that its appearance matches our node's representation.
    * @protected
    *
    * This implements part of the DOMSelfDrawable required API for subtypes.
    */
-  updateDOM: function() {
+  updateDOM() {
     const node = this.node;
     const fillElement = this.fillElement;
     const strokeElement = this.strokeElement;
@@ -138,23 +138,21 @@ inherit( DOMSelfDrawable, RectangleDOMDrawable, {
       const translation = Matrix3.translation( node._rectX, node._rectY );
       scratchMatrix.multiplyMatrix( translation );
       translation.freeToPool();
-      Utils.applyPreparedTransform( scratchMatrix, this.fillElement, this.forceAcceleration );
+      Utils.applyPreparedTransform( scratchMatrix, this.fillElement );
     }
 
     // clear all of the dirty flags
     this.setToCleanState();
     this.cleanPaintableState();
     this.transformDirty = false;
-  },
+  }
 
   /**
    * Disposes the drawable.
    * @public
    * @override
    */
-  dispose: function() {
-    this.disposeState();
-
+  dispose() {
     if ( !keepDOMRectangleElements ) {
       // clear the references
       this.fillElement = null;
@@ -162,12 +160,14 @@ inherit( DOMSelfDrawable, RectangleDOMDrawable, {
       this.domElement = null;
     }
 
-    DOMSelfDrawable.prototype.dispose.call( this );
+    super.dispose();
   }
+}
+
+scenery.register( 'RectangleDOMDrawable', RectangleDOMDrawable );
+
+Poolable.mixInto( RectangleDOMDrawable, {
+  initialize: RectangleDOMDrawable.prototype.initialize
 } );
-
-RectangleStatefulDrawable.mixInto( RectangleDOMDrawable );
-
-Poolable.mixInto( RectangleDOMDrawable );
 
 export default RectangleDOMDrawable;

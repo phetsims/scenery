@@ -7,30 +7,25 @@
  */
 
 import Poolable from '../../../phet-core/js/Poolable.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 import svgns from '../util/svgns.js';
 import xlinkns from '../util/xlinkns.js';
 
-/**
- * @constructor
- *
- * @param {Pattern} pattern
- */
-function SVGPattern( pattern ) {
-  this.initialize( pattern );
-}
+class SVGPattern {
+  /**
+   * @param {Pattern} pattern
+   */
+  constructor( pattern ) {
+    this.initialize( pattern );
+  }
 
-scenery.register( 'SVGPattern', SVGPattern );
-
-inherit( Object, SVGPattern, {
   /**
    * Poolable initializer.
    * @private
    *
    * @param {Pattern} pattern
    */
-  initialize: function( pattern ) {
+  initialize( pattern ) {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGPattern] initialize: ' + pattern.id );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
@@ -73,24 +68,26 @@ inherit( Object, SVGPattern, {
     sceneryLog && sceneryLog.Paints && sceneryLog.pop();
 
     return this;
-  },
+  }
 
   /**
    * Called from SVGBlock, matches other paints.
    * @public
    */
-  update: function() {
+  update() {
     // Nothing
-  },
+  }
 
   /**
    * Disposes, so that it can be reused from the pool.
    * @public
    */
-  dispose: function() {
+  dispose() {
     this.freeToPool();
   }
-} );
+}
+
+scenery.register( 'SVGPattern', SVGPattern );
 
 Poolable.mixInto( SVGPattern, {
   initialize: SVGPattern.prototype.initialize

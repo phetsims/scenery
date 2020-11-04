@@ -7,70 +7,93 @@
  */
 
 import inheritance from '../../../../phet-core/js/inheritance.js';
+import memoize from '../../../../phet-core/js/memoize.js';
 import scenery from '../../scenery.js';
 import SelfDrawable from '../SelfDrawable.js';
 import PaintableStatelessDrawable from './PaintableStatelessDrawable.js';
 
-const LineStatelessDrawable = {
-  mixInto: function( drawableType ) {
-    assert && assert( _.includes( inheritance( drawableType ), SelfDrawable ) );
+const LineStatelessDrawable = memoize( type => {
+  assert && assert( _.includes( inheritance( type ), SelfDrawable ) );
 
-    const proto = drawableType.prototype;
+  return class extends PaintableStatelessDrawable( type ) {
+    /**
+     * @public
+     * @override
+     *
+     * @param {number} renderer
+     * @param {Instance} instance
+     */
+    initialize( renderer, instance, ...args ) {
+      super.initialize( renderer, instance, ...args );
 
-    // initializes, and resets (so we can support pooled states)
-    proto.initializeLineStateless = function() {
       // @protected {boolean} - Flag marked as true if ANY of the drawable dirty flags are set (basically everything except for transforms, as we
       //                        need to accelerate the transform case.
       this.paintDirty = true;
-      return this; // allow for chaining
-    };
+    }
 
     /**
      * A "catch-all" dirty method that directly marks the paintDirty flag and triggers propagation of dirty
      * information. This can be used by other mark* methods, or directly itself if the paintDirty flag is checked.
-     * @public (scenery-internal)
+     * @public
      *
      * It should be fired (indirectly or directly) for anything besides transforms that needs to make a drawable
      * dirty.
      */
-    proto.markPaintDirty = function() {
+    markPaintDirty() {
       this.paintDirty = true;
       this.markDirty();
-    };
+    }
 
-    proto.markDirtyLine = function() {
+    /**
+     * @public
+     */
+    markDirtyLine() {
       this.markPaintDirty();
-    };
+    }
 
-    proto.markDirtyP1 = function() {
+    /**
+     * @public
+     */
+    markDirtyP1() {
       this.markPaintDirty();
-    };
+    }
 
-    proto.markDirtyP2 = function() {
+    /**
+     * @public
+     */
+    markDirtyP2() {
       this.markPaintDirty();
-    };
+    }
 
-    proto.markDirtyX1 = function() {
+    /**
+     * @public
+     */
+    markDirtyX1() {
       this.markPaintDirty();
-    };
+    }
 
-    proto.markDirtyY1 = function() {
+    /**
+     * @public
+     */
+    markDirtyY1() {
       this.markPaintDirty();
-    };
+    }
 
-    proto.markDirtyX2 = function() {
+    /**
+     * @public
+     */
+    markDirtyX2() {
       this.markPaintDirty();
-    };
+    }
 
-    proto.markDirtyY2 = function() {
+    /**
+     * @public
+     */
+    markDirtyY2() {
       this.markPaintDirty();
-    };
-
-    // TODO: egad! mixing in the wrong drawable???
-    PaintableStatelessDrawable.mixInto( drawableType );
-  }
-};
+    }
+  };
+} );
 
 scenery.register( 'LineStatelessDrawable', LineStatelessDrawable );
-
 export default LineStatelessDrawable;

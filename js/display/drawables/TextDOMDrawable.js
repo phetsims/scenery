@@ -7,7 +7,6 @@
  */
 
 import Matrix3 from '../../../../dot/js/Matrix3.js';
-import inherit from '../../../../phet-core/js/inherit.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import scenery from '../../scenery.js';
 import Utils from '../../util/Utils.js';
@@ -20,48 +19,49 @@ const keepDOMTextElements = true; // whether we should pool DOM elements for the
 // scratch matrix used in DOM rendering
 const scratchMatrix = Matrix3.dirtyFromPool();
 
-/**
- * A generated DOMSelfDrawable whose purpose will be drawing our Text node. One of these drawables will be created
- * for each displayed instance of a Text node.
- * @constructor
- *
- * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
- * @param {Instance} instance
- */
-function TextDOMDrawable( renderer, instance ) {
-  // Super-type initialization
-  this.initializeDOMSelfDrawable( renderer, instance );
+class TextDOMDrawable extends TextStatefulDrawable( DOMSelfDrawable ) {
+  /**
+   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+   * @param {Instance} instance
+   */
+  constructor( renderer, instance ) {
+    super( renderer, instance );
 
-  // Stateful trait initialization
-  this.initializeState( renderer, instance );
-
-  // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
-  // allocation and performance costs)
-  if ( !this.domElement ) {
-    // @protected {HTMLElement} - Our primary DOM element. This is exposed as part of the DOMSelfDrawable API.
-    this.domElement = document.createElement( 'div' );
-    this.domElement.style.display = 'block';
-    this.domElement.style.position = 'absolute';
-    this.domElement.style.pointerEvents = 'none';
-    this.domElement.style.left = '0';
-    this.domElement.style.top = '0';
-    this.domElement.setAttribute( 'dir', 'ltr' );
+    // Apply CSS needed for future CSS transforms to work properly. Just do this once for performance
+    Utils.prepareForTransform( this.domElement );
   }
 
-  // Apply CSS needed for future CSS transforms to work properly.
-  Utils.prepareForTransform( this.domElement, this.forceAcceleration );
-}
+  /**
+   * @public
+   * @override
+   *
+   * @param {number} renderer
+   * @param {Instance} instance
+   */
+  initialize( renderer, instance ) {
+    super.initialize( renderer, instance );
 
-scenery.register( 'TextDOMDrawable', TextDOMDrawable );
+    // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
+    // allocation and performance costs)
+    if ( !this.domElement ) {
+      // @protected {HTMLElement} - Our primary DOM element. This is exposed as part of the DOMSelfDrawable API.
+      this.domElement = document.createElement( 'div' );
+      this.domElement.style.display = 'block';
+      this.domElement.style.position = 'absolute';
+      this.domElement.style.pointerEvents = 'none';
+      this.domElement.style.left = '0';
+      this.domElement.style.top = '0';
+      this.domElement.setAttribute( 'dir', 'ltr' );
+    }
+  }
 
-inherit( DOMSelfDrawable, TextDOMDrawable, {
   /**
    * Updates our DOM element so that its appearance matches our node's representation.
    * @protected
    *
    * This implements part of the DOMSelfDrawable required API for subtypes.
    */
-  updateDOM: function() {
+  updateDOM() {
     const node = this.node;
 
     const div = this.domElement;
@@ -92,33 +92,34 @@ inherit( DOMSelfDrawable, TextDOMDrawable, {
       const translation = Matrix3.translation( 0, yOffset );
       scratchMatrix.multiplyMatrix( translation );
       translation.freeToPool();
-      Utils.applyPreparedTransform( scratchMatrix, div, this.forceAcceleration );
+      Utils.applyPreparedTransform( scratchMatrix, div );
     }
 
     // clear all of the dirty flags
     this.setToCleanState();
     this.cleanPaintableState();
     this.transformDirty = false;
-  },
+  }
 
   /**
    * Disposes the drawable.
    * @public
    * @override
    */
-  dispose: function() {
-    this.disposeState();
-
+  dispose() {
     if ( !keepDOMTextElements ) {
       // clear the references
       this.domElement = null;
     }
 
-    DOMSelfDrawable.prototype.dispose.call( this );
+    super.dispose();
   }
-} );
-TextStatefulDrawable.mixInto( TextDOMDrawable );
+}
 
-Poolable.mixInto( TextDOMDrawable );
+scenery.register( 'TextDOMDrawable', TextDOMDrawable );
+
+Poolable.mixInto( TextDOMDrawable, {
+  initialize: TextDOMDrawable.prototype.initialize
+} );
 
 export default TextDOMDrawable;

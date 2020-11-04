@@ -6,42 +6,31 @@
  * necessary for an attribute that changed back to its original/currently-displayed value). Generally, this is used
  * for DOM and SVG drawables.
  *
- * This trait assumes the PaintableStateful trait is also mixed (always the case for Line stateful drawables).
+ * This will also mix in PaintableStatefulDrawable
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 import inheritance from '../../../../phet-core/js/inheritance.js';
+import memoize from '../../../../phet-core/js/memoize.js';
 import scenery from '../../scenery.js';
 import SelfDrawable from '../SelfDrawable.js';
 import PaintableStatefulDrawable from './PaintableStatefulDrawable.js';
 
-const LineStatefulDrawable = {
-  /**
-   * Given the type (constructor) of a drawable, we'll mix in a combination of:
-   * - initialization/disposal with the *State suffix
-   * - mark* methods to be called on all drawables of nodes of this type, that set specific dirty flags
-   *
-   * This will allow drawables that mix in this type to do the following during an update:
-   * 1. Check specific dirty flags (e.g. if the fill changed, update the fill of our SVG element).
-   * 2. Call setToCleanState() once done, to clear the dirty flags.
-   *
-   * @param {function} drawableType - The constructor for the drawable type
-   */
-  mixInto: function( drawableType ) {
-    assert && assert( _.includes( inheritance( drawableType ), SelfDrawable ) );
+const LineStatefulDrawable = memoize( type => {
+  assert && assert( _.includes( inheritance( type ), SelfDrawable ) );
 
-    const proto = drawableType.prototype;
-
+  return class extends PaintableStatefulDrawable( type ) {
     /**
-     * Initializes the stateful trait state, starting its "lifetime" until it is disposed with disposeState().
-     * @protected
+     * @public
+     * @override
      *
      * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
      * @param {Instance} instance
-     * @returns {LineStatefulDrawable} - Self reference for chaining
      */
-    proto.initializeState = function( renderer, instance ) {
+    initialize( renderer, instance, ...args ) {
+      super.initialize( renderer, instance, ...args );
+
       // @protected {boolean} - Flag marked as true if ANY of the drawable dirty flags are set (basically everything except for transforms, as we
       //                        need to accelerate the transform case.
       this.paintDirty = true;
@@ -49,90 +38,95 @@ const LineStatefulDrawable = {
       this.dirtyY1 = true;
       this.dirtyX2 = true;
       this.dirtyY2 = true;
-
-      // After adding flags, we'll initialize the mixed-in PaintableStateful state.
-      this.initializePaintableState( renderer, instance );
-
-      return this; // allow for chaining
-    };
-
-    /**
-     * Disposes the stateful trait state, so it can be put into the pool to be initialized again.
-     * @protected
-     */
-    proto.disposeState = function() {
-      this.disposePaintableState();
-    };
+    }
 
     /**
      * A "catch-all" dirty method that directly marks the paintDirty flag and triggers propagation of dirty
      * information. This can be used by other mark* methods, or directly itself if the paintDirty flag is checked.
-     * @public (scenery-internal)
+     * @public
      *
      * It should be fired (indirectly or directly) for anything besides transforms that needs to make a drawable
      * dirty.
      */
-    proto.markPaintDirty = function() {
+    markPaintDirty() {
       this.paintDirty = true;
       this.markDirty();
-    };
+    }
 
-    proto.markDirtyLine = function() {
+    /**
+     * @public
+     */
+    markDirtyLine() {
       this.dirtyX1 = true;
       this.dirtyY1 = true;
       this.dirtyX2 = true;
       this.dirtyY2 = true;
       this.markPaintDirty();
-    };
+    }
 
-    proto.markDirtyP1 = function() {
+    /**
+     * @public
+     */
+    markDirtyP1() {
       this.dirtyX1 = true;
       this.dirtyY1 = true;
       this.markPaintDirty();
-    };
+    }
 
-    proto.markDirtyP2 = function() {
+    /**
+     * @public
+     */
+    markDirtyP2() {
       this.dirtyX2 = true;
       this.dirtyY2 = true;
       this.markPaintDirty();
-    };
+    }
 
-    proto.markDirtyX1 = function() {
+    /**
+     * @public
+     */
+    markDirtyX1() {
       this.dirtyX1 = true;
       this.markPaintDirty();
-    };
+    }
 
-    proto.markDirtyY1 = function() {
+    /**
+     * @public
+     */
+    markDirtyY1() {
       this.dirtyY1 = true;
       this.markPaintDirty();
-    };
+    }
 
-    proto.markDirtyX2 = function() {
+    /**
+     * @public
+     */
+    markDirtyX2() {
       this.dirtyX2 = true;
       this.markPaintDirty();
-    };
+    }
 
-    proto.markDirtyY2 = function() {
+    /**
+     * @public
+     */
+    markDirtyY2() {
       this.dirtyY2 = true;
       this.markPaintDirty();
-    };
+    }
 
     /**
      * Clears all of the dirty flags (after they have been checked), so that future mark* methods will be able to flag them again.
-     * @public (scenery-internal)
+     * @public
      */
-    proto.setToCleanState = function() {
+    setToCleanState() {
       this.paintDirty = false;
       this.dirtyX1 = false;
       this.dirtyY1 = false;
       this.dirtyX2 = false;
       this.dirtyY2 = false;
-    };
-
-    PaintableStatefulDrawable.mixInto( drawableType );
-  }
-};
+    }
+  };
+} );
 
 scenery.register( 'LineStatefulDrawable', LineStatefulDrawable );
-
 export default LineStatefulDrawable;

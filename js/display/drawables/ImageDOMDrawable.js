@@ -6,7 +6,6 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../../phet-core/js/inherit.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import scenery from '../../scenery.js';
 import Utils from '../../util/Utils.js';
@@ -16,50 +15,51 @@ import ImageStatefulDrawable from './ImageStatefulDrawable.js';
 // TODO: change this based on memory and performance characteristics of the platform
 const keepDOMImageElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
 
-/**
- * A generated DOMSelfDrawable whose purpose will be drawing our Image. One of these drawables will be created
- * for each displayed instance of a Image.
- * @constructor
- *
- * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
- * @param {Instance} instance
- */
-function ImageDOMDrawable( renderer, instance ) {
-  // Super-type initialization
-  this.initializeDOMSelfDrawable( renderer, instance );
+class ImageDOMDrawable extends ImageStatefulDrawable( DOMSelfDrawable ) {
+  /**
+   * @param {number} renderer - Renderer bitmask, see Renderer's documentation for more details.
+   * @param {Instance} instance
+   */
+  constructor( renderer, instance ) {
+    super( renderer, instance );
 
-  // Stateful trait initialization
-  this.initializeState( renderer, instance );
-
-  // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
-  // allocation and performance costs)
-  if ( !this.domElement ) {
-    // @protected {HTMLElement} - Our primary DOM element. This is exposed as part of the DOMSelfDrawable API.
-    this.domElement = document.createElement( 'img' );
-    this.domElement.style.display = 'block';
-    this.domElement.style.position = 'absolute';
-    this.domElement.style.pointerEvents = 'none';
-    this.domElement.style.left = '0';
-    this.domElement.style.top = '0';
+    // Apply CSS needed for future CSS transforms to work properly.
+    Utils.prepareForTransform( this.domElement );
   }
 
-  // Whether we have an opacity attribute specified on the DOM element.
-  this.hasOpacity = false;
+  /**
+   * @public
+   * @override
+   *
+   * @param {number} renderer
+   * @param {Instance} instance
+   */
+  initialize( renderer, instance ) {
+    super.initialize( renderer, instance );
 
-  // Apply CSS needed for future CSS transforms to work properly.
-  Utils.prepareForTransform( this.domElement, this.forceAcceleration );
-}
+    // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
+    // allocation and performance costs)
+    if ( !this.domElement ) {
+      // @protected {HTMLElement} - Our primary DOM element. This is exposed as part of the DOMSelfDrawable API.
+      this.domElement = document.createElement( 'img' );
+      this.domElement.style.display = 'block';
+      this.domElement.style.position = 'absolute';
+      this.domElement.style.pointerEvents = 'none';
+      this.domElement.style.left = '0';
+      this.domElement.style.top = '0';
+    }
 
-scenery.register( 'ImageDOMDrawable', ImageDOMDrawable );
+    // Whether we have an opacity attribute specified on the DOM element.
+    this.hasOpacity = false;
+  }
 
-inherit( DOMSelfDrawable, ImageDOMDrawable, {
   /**
    * Updates our DOM element so that its appearance matches our node's representation.
    * @protected
    *
    * This implements part of the DOMSelfDrawable required API for subtypes.
    */
-  updateDOM: function() {
+  updateDOM() {
     const node = this.node;
     const img = this.domElement;
 
@@ -82,31 +82,32 @@ inherit( DOMSelfDrawable, ImageDOMDrawable, {
     }
 
     if ( this.transformDirty ) {
-      Utils.applyPreparedTransform( this.getTransformMatrix(), this.domElement, this.forceAcceleration );
+      Utils.applyPreparedTransform( this.getTransformMatrix(), this.domElement );
     }
 
     // clear all of the dirty flags
     this.setToCleanState();
     this.transformDirty = false;
-  },
+  }
 
   /**
    * Disposes the drawable.
    * @public
    * @override
    */
-  dispose: function() {
-    this.disposeState();
-
+  dispose() {
     if ( !keepDOMImageElements ) {
       this.domElement = null; // clear our DOM reference if we want to toss it
     }
 
-    DOMSelfDrawable.prototype.dispose.call( this );
+    super.dispose();
   }
-} );
-ImageStatefulDrawable.mixInto( ImageDOMDrawable );
+}
 
-Poolable.mixInto( ImageDOMDrawable );
+scenery.register( 'ImageDOMDrawable', ImageDOMDrawable );
+
+Poolable.mixInto( ImageDOMDrawable, {
+  initialize: ImageDOMDrawable.prototype.initialize
+} );
 
 export default ImageDOMDrawable;

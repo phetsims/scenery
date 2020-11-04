@@ -9,49 +9,52 @@
  */
 
 import cleanArray from '../../../phet-core/js/cleanArray.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 import Drawable from './Drawable.js';
 
-function Block( display, renderer ) {
-  throw new Error( 'Should never be called' );
-}
-
-scenery.register( 'Block', Block );
-
-inherit( Drawable, Block, {
-
+class Block extends Drawable {
   /**
+   * @public
+   *
    * @param {Display} display
    * @param {number} renderer
-   * @returns {Block} - Returns 'this' reference, for chaining
    */
-  initializeBlock: function( display, renderer ) {
-    this.initializeDrawable( renderer );
-    this.display = display;
-    this.drawableCount = 0;
-    this.used = true; // flag handled in the stitch
+  initialize( display, renderer ) {
+    super.initialize( renderer );
 
+    // @public {Display}
+    this.display = display;
+
+    // @public {number}
+    this.drawableCount = 0;
+
+    // @public {boolean} - flag handled in the stitch
+    this.used = true;
+
+    // @public {Drawable|null}
     this.firstDrawable = null;
     this.lastDrawable = null;
     this.pendingFirstDrawable = null;
     this.pendingLastDrawable = null;
 
-    // linked-list handling for blocks
+    // @public {Block|null} - linked-list handling for blocks
     this.previousBlock = null;
     this.nextBlock = null;
 
-    // last set z-index, valid if > 0.
+    // @public {number} - last set z-index, valid if > 0.
     this.zIndex = 0;
 
     if ( assertSlow ) {
       this.drawableList = cleanArray( this.drawableList );
     }
+  }
 
-    return this;
-  },
-
-  dispose: function() {
+  /**
+   * Releases references
+   * @public
+   * @override
+   */
+  dispose() {
     assert && assert( this.drawableCount === 0, 'There should be no drawables on a block when it is disposed' );
 
     // clear references
@@ -64,14 +67,21 @@ inherit( Drawable, Block, {
     this.previousBlock = null;
     this.nextBlock = null;
 
+    // TODO: are we potentially leaking drawable lists here?
     if ( assertSlow ) {
       cleanArray( this.drawableList );
     }
 
-    Drawable.prototype.dispose.call( this );
-  },
+    super.dispose();
+  }
 
-  addDrawable: function( drawable ) {
+  /**
+   * Adds a drawable to this block.
+   * @public
+   *
+   * @param {Drawable} drawable
+   */
+  addDrawable( drawable ) {
     this.drawableCount++;
     this.markDirtyDrawable( drawable );
 
@@ -82,9 +92,15 @@ inherit( Drawable, Block, {
 
       assertSlow && assertSlow( this.drawableCount === this.drawableList.length, 'Count sanity check, to make sure our assertions are not buggy' );
     }
-  },
+  }
 
-  removeDrawable: function( drawable ) {
+  /**
+   * Removes a drawable from this block.
+   * @public
+   *
+   * @param {Drawable} drawable
+   */
+  removeDrawable( drawable ) {
     this.drawableCount--;
     this.markDirty();
 
@@ -95,14 +111,22 @@ inherit( Drawable, Block, {
 
       assertSlow && assertSlow( this.drawableCount === this.drawableList.length, 'Count sanity check, to make sure our assertions are not buggy' );
     }
-  },
+  }
 
-  // @protected
-  onIntervalChange: function( firstDrawable, lastDrawable ) {
+  /**
+   * @protected
+   *
+   * @param {Drawable} firstDrawable
+   * @param {Drawable} lastDrawable
+   */
+  onIntervalChange( firstDrawable, lastDrawable ) {
     // stub, should be filled in with behavior in blocks
-  },
+  }
 
-  updateInterval: function() {
+  /**
+   * @public
+   */
+  updateInterval() {
     if ( this.pendingFirstDrawable !== this.firstDrawable ||
          this.pendingLastDrawable !== this.lastDrawable ) {
       this.onIntervalChange( this.pendingFirstDrawable, this.pendingLastDrawable );
@@ -110,18 +134,33 @@ inherit( Drawable, Block, {
       this.firstDrawable = this.pendingFirstDrawable;
       this.lastDrawable = this.pendingLastDrawable;
     }
-  },
+  }
 
-  notifyInterval: function( firstDrawable, lastDrawable ) {
+  /**
+   * @public
+   *
+   * @param {Drawable} firstDrawable
+   * @param {Drawable} lastDrawable
+   */
+  notifyInterval( firstDrawable, lastDrawable ) {
     this.pendingFirstDrawable = firstDrawable;
     this.pendingLastDrawable = lastDrawable;
 
     this.updateInterval();
-  },
+  }
 
-  audit: function( allowPendingBlock, allowPendingList, allowDirty ) {
+  /**
+   * Runs checks on the drawable, based on certain flags.
+   * @public
+   * @override
+   *
+   * @param {boolean} allowPendingBlock
+   * @param {boolean} allowPendingList
+   * @param {boolean} allowDirty
+   */
+  audit( allowPendingBlock, allowPendingList, allowDirty ) {
     if ( assertSlow ) {
-      Drawable.prototype.audit.call( this, allowPendingBlock, allowPendingList, allowDirty );
+      super.audit( allowPendingBlock, allowPendingList, allowDirty );
 
       let count = 0;
 
@@ -151,6 +190,7 @@ inherit( Drawable, Block, {
       }
     }
   }
-} );
+}
 
+scenery.register( 'Block', Block );
 export default Block;

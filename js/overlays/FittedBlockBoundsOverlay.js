@@ -8,26 +8,30 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Shape from '../../../kite/js/Shape.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 import ShapeBasedOverlay from './ShapeBasedOverlay.js';
 
-function FittedBlockBoundsOverlay( display, rootNode ) {
-  ShapeBasedOverlay.call( this, display, rootNode, 'canvasNodeBoundsOverlay' );
-}
+class FittedBlockBoundsOverlay extends ShapeBasedOverlay {
+  /**
+   * @param {Display} display
+   * @param {Node} rootNode
+   */
+  constructor( display, rootNode ) {
+    super( display, rootNode, 'canvasNodeBoundsOverlay' );
+  }
 
-scenery.register( 'FittedBlockBoundsOverlay', FittedBlockBoundsOverlay );
-
-inherit( ShapeBasedOverlay, FittedBlockBoundsOverlay, {
-  // @override
-  addShapes: function() {
+  /**
+   * @public
+   * @override
+   */
+  addShapes() {
     const self = this;
 
     function processBackbone( backbone, matrix ) {
       if ( backbone.willApplyTransform ) {
         matrix = matrix.timesMatrix( backbone.backboneInstance.relativeTransform.matrix );
       }
-      backbone.blocks.forEach( function( block ) {
+      backbone.blocks.forEach( block => {
         processBlock( block, matrix );
       } );
     }
@@ -53,6 +57,7 @@ inherit( ShapeBasedOverlay, FittedBlockBoundsOverlay, {
 
     processBackbone( this.display.rootBackbone, Matrix3.IDENTITY );
   }
-} );
+}
 
+scenery.register( 'FittedBlockBoundsOverlay', FittedBlockBoundsOverlay );
 export default FittedBlockBoundsOverlay;

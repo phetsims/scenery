@@ -18,11 +18,11 @@
  * @author Jesse Greenberg
  */
 
+import stepTimer from '../../../axon/js/stepTimer.js';
+import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
 import Display from '../display/Display.js';
 import Pointer from '../input/Pointer.js';
 import scenery from '../scenery.js';
-import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
-import stepTimer from '../../../axon/js/stepTimer.js';
 
 // constants
 const PRESS_AND_HOLD_INTERVAL = 0.5; // in seconds, amount of time to initiate a press and hold gesture

@@ -8,66 +8,60 @@
 
 import Random from '../../../dot/js/Random.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 
-/**
- * @constructor
- *
- * @param {Display} display
- * @param {number} seed
- */
-function InputFuzzer( display, seed ) {
-  const self = this;
+class InputFuzzer {
+  /**
+   * @param {Display} display
+   * @param {number} seed
+   */
+  constructor( display, seed ) {
 
-  // @private {Display}
-  this.display = display;
+    // @private {Display}
+    this.display = display;
 
-  // @private {Array.<Object>} - { id: {number}, position: {Vector2} }
-  this.touches = [];
+    // @private {Array.<Object>} - { id: {number}, position: {Vector2} }
+    this.touches = [];
 
-  // @private {number}
-  this.nextTouchID = 1;
+    // @private {number}
+    this.nextTouchID = 1;
 
-  // @private {boolean}
-  this.isMouseDown = false;
+    // @private {boolean}
+    this.isMouseDown = false;
 
-  // @private {Vector2} - Starts at 0,0, because why not
-  this.mousePosition = new Vector2( 0, 0 );
+    // @private {Vector2} - Starts at 0,0, because why not
+    this.mousePosition = new Vector2( 0, 0 );
 
-  // @private {Random}
-  this.random = new Random( { seed: seed } );
+    // @private {Random}
+    this.random = new Random( { seed: seed } );
 
-  // @private {function} - All of the various actions that may be options at certain times.
-  this.mouseToggleAction = function() {
-    self.mouseToggle();
-  };
-  this.mouseMoveAction = function() {
-    self.mouseMove();
-  };
-  this.touchStartAction = function() {
-    const touch = self.createTouch( self.getRandomPosition() );
-    self.touchStart( touch );
-  };
-  this.touchMoveAction = function() {
-    const touch = self.random.sample( self.touches );
-    self.touchMove( touch );
-  };
-  this.touchEndAction = function() {
-    const touch = self.random.sample( self.touches );
-    self.touchEnd( touch );
-    self.removeTouch( touch );
-  };
-  this.touchCancelAction = function() {
-    const touch = self.random.sample( self.touches );
-    self.touchCancel( touch );
-    self.removeTouch( touch );
-  };
-}
+    // @private {function} - All of the various actions that may be options at certain times.
+    this.mouseToggleAction = () => {
+      this.mouseToggle();
+    };
+    this.mouseMoveAction = () => {
+      this.mouseMove();
+    };
+    this.touchStartAction = () => {
+      const touch = this.createTouch( this.getRandomPosition() );
+      this.touchStart( touch );
+    };
+    this.touchMoveAction = () => {
+      const touch = this.random.sample( this.touches );
+      this.touchMove( touch );
+    };
+    this.touchEndAction = () => {
+      const touch = this.random.sample( this.touches );
+      this.touchEnd( touch );
+      this.removeTouch( touch );
+    };
+    this.touchCancelAction = () => {
+      const touch = this.random.sample( this.touches );
+      this.touchCancel( touch );
+      this.removeTouch( touch );
+    };
+  }
 
-scenery.register( 'InputFuzzer', InputFuzzer );
-
-inherit( Object, InputFuzzer, {
   /**
    * Sends a certain (expected) number of random events through the input system for the display.
    * @public
@@ -77,7 +71,7 @@ inherit( Object, InputFuzzer, {
    * @param {boolean} allowTouch
    * @param {number} maximumPointerCount
    */
-  fuzzEvents: function( averageEventCount, allowMouse, allowTouch, maximumPointerCount ) {
+  fuzzEvents( averageEventCount, allowMouse, allowTouch, maximumPointerCount ) {
     assert && assert( averageEventCount > 0, 'averageEventCount must be positive: ' + averageEventCount );
 
     // run a variable number of events, with a certain chance of bailing out (so no events are possible)
@@ -110,7 +104,7 @@ inherit( Object, InputFuzzer, {
       const action = this.random.sample( potentialActions );
       action();
     }
-  },
+  }
 
   /**
    * Creates a touch event from multiple touch "items".
@@ -120,27 +114,23 @@ inherit( Object, InputFuzzer, {
    * @param {Array.<Object>} touches - A subset of touch objects stored on the fuzzer itself.
    * @returns {Event} - If possible a TouchEvent, but may be a CustomEvent
    */
-  createTouchEvent: function( type, touches ) {
+  createTouchEvent( type, touches ) {
     const domElement = this.display.domElement;
 
     // A specification that looks like a Touch object (and may be used to create one)
-    const touchItems = touches.map( function( touch ) {
-      return {
+    const touchItems = touches.map( touch => ( {
         identifier: touch.id,
         target: domElement,
         clientX: touch.position.x,
         clientY: touch.position.y
-      };
-    } );
+      } ) );
 
     // Check if we can use Touch/TouchEvent constructors, see https://www.chromestatus.com/feature/4923255479599104
     if ( window.Touch !== undefined &&
          window.TouchEvent !== undefined &&
          window.Touch.length === 1 &&
          window.TouchEvent.length === 1 ) {
-      const rawTouches = touchItems.map( function( touchItem ) {
-        return new window.Touch( touchItem );
-      } );
+      const rawTouches = touchItems.map( touchItem => new window.Touch( touchItem ) );
 
       return new window.TouchEvent( type, {
         cancelable: true,
@@ -161,7 +151,7 @@ inherit( Object, InputFuzzer, {
       } );
       return event;
     }
-  },
+  }
 
   /**
    * Returns a random position somewhere in the display's global coordinates.
@@ -169,12 +159,12 @@ inherit( Object, InputFuzzer, {
    *
    * @returns {Vector2}
    */
-  getRandomPosition: function() {
+  getRandomPosition() {
     return new Vector2(
       Math.floor( this.random.nextDouble() * this.display.width ),
       Math.floor( this.random.nextDouble() * this.display.height )
     );
-  },
+  }
 
   /**
    * Creates a touch from a position (and adds it).
@@ -183,14 +173,14 @@ inherit( Object, InputFuzzer, {
    * @param {Vector2} position
    * @returns {Object}
    */
-  createTouch: function( position ) {
+  createTouch( position ) {
     const touch = {
       id: this.nextTouchID++,
       position: position
     };
     this.touches.push( touch );
     return touch;
-  },
+  }
 
   /**
    * Removes a touch from our list.
@@ -198,9 +188,9 @@ inherit( Object, InputFuzzer, {
    *
    * @param {Object} touch
    */
-  removeTouch: function( touch ) {
+  removeTouch( touch ) {
     this.touches.splice( this.touches.indexOf( touch ), 1 );
-  },
+  }
 
   /**
    * Triggers a touchStart for the given touch.
@@ -208,12 +198,12 @@ inherit( Object, InputFuzzer, {
    *
    * @param {Object} touch
    */
-  touchStart: function( touch ) {
+  touchStart( touch ) {
     const event = this.createTouchEvent( 'touchstart', [ touch ] );
 
     this.display._input.validatePointers();
     this.display._input.touchStart( touch.id, touch.position, event );
-  },
+  }
 
   /**
    * Triggers a touchMove for the given touch (to a random position in the display).
@@ -221,14 +211,14 @@ inherit( Object, InputFuzzer, {
    *
    * @param {Object} touch
    */
-  touchMove: function( touch ) {
+  touchMove( touch ) {
     touch.position = this.getRandomPosition();
 
     const event = this.createTouchEvent( 'touchmove', [ touch ] );
 
     this.display._input.validatePointers();
     this.display._input.touchMove( touch.id, touch.position, event );
-  },
+  }
 
   /**
    * Triggers a touchEnd for the given touch.
@@ -236,12 +226,12 @@ inherit( Object, InputFuzzer, {
    *
    * @param {Object} touch
    */
-  touchEnd: function( touch ) {
+  touchEnd( touch ) {
     const event = this.createTouchEvent( 'touchend', [ touch ] );
 
     this.display._input.validatePointers();
     this.display._input.touchEnd( touch.id, touch.position, event );
-  },
+  }
 
   /**
    * Triggers a touchCancel for the given touch.
@@ -249,18 +239,18 @@ inherit( Object, InputFuzzer, {
    *
    * @param {Object} touch
    */
-  touchCancel: function( touch ) {
+  touchCancel( touch ) {
     const event = this.createTouchEvent( 'touchcancel', [ touch ] );
 
     this.display._input.validatePointers();
     this.display._input.touchCancel( touch.id, touch.position, event );
-  },
+  }
 
   /**
    * Triggers a mouse toggle (switching from down => up or vice versa).
    * @private
    */
-  mouseToggle: function() {
+  mouseToggle() {
     const domEvent = document.createEvent( 'MouseEvent' );
 
     // technically deprecated, but DOM4 event constructors not out yet. people on #whatwg said to use it
@@ -280,13 +270,13 @@ inherit( Object, InputFuzzer, {
       this.display._input.mouseDown( this.mousePosition, domEvent );
       this.isMouseDown = true;
     }
-  },
+  }
 
   /**
    * Triggers a mouse move (to a random position in the display).
    * @private
    */
-  mouseMove: function() {
+  mouseMove() {
     this.mousePosition = this.getRandomPosition();
 
     // our move event
@@ -302,6 +292,7 @@ inherit( Object, InputFuzzer, {
     this.display._input.validatePointers();
     this.display._input.mouseMove( this.mousePosition, domEvent );
   }
-} );
+}
 
+scenery.register( 'InputFuzzer', InputFuzzer );
 export default InputFuzzer;

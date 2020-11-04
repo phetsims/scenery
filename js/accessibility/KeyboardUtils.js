@@ -72,29 +72,29 @@ var KeyboardUtils = {
   MOVEMENT_KEYS: ARROW_KEYS.concat( WASD_KEYS ),
 
   // returns whether or not the keyCode corresponds to pressing an arrow key
-  isArrowKey: function( keyCode ) {
+  isArrowKey( keyCode ) {
     return ( keyCode === KeyboardUtils.KEY_RIGHT_ARROW || keyCode === KeyboardUtils.KEY_LEFT_ARROW ||
              keyCode === KeyboardUtils.KEY_UP_ARROW || keyCode === KeyboardUtils.KEY_DOWN_ARROW );
   },
 
   // returns true if keycode is one of keys used for range inputs (key codes 33 - 40, inclusive)
-  isRangeKey: function( keyCode ) {
+  isRangeKey( keyCode ) {
     return ( keyCode >= KeyboardUtils.KEY_PAGE_UP && keyCode <= KeyboardUtils.KEY_DOWN_ARROW );
   },
 
   // returns whether or not the keyCode corresponds to pressing a number key
-  isNumberKey: function( keyCode ) {
+  isNumberKey( keyCode ) {
     return ( keyCode > KeyboardUtils.KEY_0 && keyCode < KeyboardUtils.KEY_9 );
   },
 
   // returns whether or not the keyCode corresponds to one of the WASD movement keys
-  isWASDKey: function( keyCode ) {
+  isWASDKey( keyCode ) {
     return ( keyCode === KeyboardUtils.KEY_W || keyCode === KeyboardUtils.KEY_A ||
              keyCode === KeyboardUtils.KEY_S || keyCode === KeyboardUtils.KEY_D );
   },
 
   // returns true if the keycode indicates a 'movement' key in keyboard dragging
-  isMovementKey: function( keyCode ) {
+  isMovementKey( keyCode ) {
     return KeyboardUtils.MOVEMENT_KEYS.includes( keyCode );
   }
 };

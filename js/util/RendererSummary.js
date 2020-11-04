@@ -9,7 +9,6 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../phet-core/js/inherit.js';
 import Renderer from '../display/Renderer.js';
 import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
@@ -26,9 +25,10 @@ const summaryBits = [
   Renderer.bitmaskSingleSVG,
   Renderer.bitmaskNotPainted,
   Renderer.bitmaskBoundsValid,
-  Renderer.bitmaskNotAccessible, // NOTE: This could be separated out into its own implementation for this flag, since
+  // NOTE: This could be separated out into its own implementation for this flag, since
   // there are cases where we actually have nothing accessible DUE to things being pulled out by another order.
   // This is generally NOT the case, so I've left this in here because it significantly simplifies the implementation.
+  Renderer.bitmaskNotAccessible,
 
   // inverse renderer bits ("Do all painted nodes NOT support renderer X in this sub-tree?")
   Renderer.bitmaskLacksCanvas,
@@ -44,46 +44,42 @@ for ( let l = 0; l < numSummaryBits; l++ ) {
   bitmaskAll |= summaryBits[ l ];
 }
 
-/**
- * @constructor
- *
- * @param {Node} node
- */
-function RendererSummary( node ) {
-  assert && assert( node instanceof Node );
+class RendererSummary {
+  /**
+   * @param {Node} node
+   */
+  constructor( node ) {
+    assert && assert( node instanceof Node );
 
-  // NOTE: assumes that we are created in the Node constructor
-  assert && assert( node._rendererBitmask === Renderer.bitmaskNodeDefault, 'Node must have a default bitmask when creating a RendererSummary' );
-  assert && assert( node._children.length === 0, 'Node cannot have children when creating a RendererSummary' );
+    // NOTE: assumes that we are created in the Node constructor
+    assert && assert( node._rendererBitmask === Renderer.bitmaskNodeDefault, 'Node must have a default bitmask when creating a RendererSummary' );
+    assert && assert( node._children.length === 0, 'Node cannot have children when creating a RendererSummary' );
 
-  // @private {Node}
-  this.node = node;
+    // @private {Node}
+    this.node = node;
 
-  // @private {Object} Maps stringified bitmask bit (e.g. "1" for Canvas, since Renderer.bitmaskCanvas is 0x01) to
-  // a count of how many children (or self) have that property (e.g. can't renderer all of their contents with Canvas)
-  this._counts = {};
-  for ( let i = 0; i < numSummaryBits; i++ ) {
-    this._counts[ summaryBits[ i ] ] = 0; // set everything to 0 at first
+    // @private {Object} Maps stringified bitmask bit (e.g. "1" for Canvas, since Renderer.bitmaskCanvas is 0x01) to
+    // a count of how many children (or self) have that property (e.g. can't renderer all of their contents with Canvas)
+    this._counts = {};
+    for ( let i = 0; i < numSummaryBits; i++ ) {
+      this._counts[ summaryBits[ i ] ] = 0; // set everything to 0 at first
+    }
+
+    // @public {number} (scenery-internal)
+    this.bitmask = bitmaskAll;
+
+    // @private {number}
+    this.selfBitmask = RendererSummary.summaryBitmaskForNodeSelf( node );
+
+    this.summaryChange( this.bitmask, this.selfBitmask );
+
+    // required listeners to update our summary based on painted/non-painted information
+    const listener = this.selfChange.bind( this );
+    this.node.opacityProperty.lazyLink( listener );
+    this.node.clipAreaProperty.lazyLink( listener );
+    this.node.rendererSummaryRefreshEmitter.addListener( listener );
   }
 
-  // @public {number} (scenery-internal)
-  this.bitmask = bitmaskAll;
-
-  // @private {number}
-  this.selfBitmask = RendererSummary.summaryBitmaskForNodeSelf( node );
-
-  this.summaryChange( this.bitmask, this.selfBitmask );
-
-  // required listeners to update our summary based on painted/non-painted information
-  const listener = this.selfChange.bind( this );
-  this.node.opacityProperty.lazyLink( listener );
-  this.node.clipAreaProperty.lazyLink( listener );
-  this.node.rendererSummaryRefreshEmitter.addListener( listener );
-}
-
-scenery.register( 'RendererSummary', RendererSummary );
-
-inherit( Object, RendererSummary, {
   /**
    * Use a bitmask of all 1s to represent 'does not exist' since we count zeros
    * @public
@@ -91,7 +87,7 @@ inherit( Object, RendererSummary, {
    * @param {number} oldBitmask
    * @param {number} newBitmask
    */
-  summaryChange: function( oldBitmask, newBitmask ) {
+  summaryChange( oldBitmask, newBitmask ) {
     assert && this.audit();
 
     const changeBitmask = oldBitmask ^ newBitmask; // bit set only if it changed
@@ -153,20 +149,26 @@ inherit( Object, RendererSummary, {
     }
 
     assert && this.audit();
-  },
+  }
 
-  // @public
-  selfChange: function() {
+  /**
+   * @public
+   */
+  selfChange() {
     const oldBitmask = this.selfBitmask;
     const newBitmask = RendererSummary.summaryBitmaskForNodeSelf( this.node );
     if ( oldBitmask !== newBitmask ) {
       this.summaryChange( oldBitmask, newBitmask );
       this.selfBitmask = newBitmask;
     }
-  },
+  }
 
-  // @private
-  computeBitmask: function() {
+  /**
+   * @private
+   *
+   * @returns {number}
+   */
+  computeBitmask() {
     let bitmask = 0;
     for ( let i = 0; i < numSummaryBits; i++ ) {
       if ( this._counts[ summaryBits[ i ] ] === 0 ) {
@@ -174,7 +176,7 @@ inherit( Object, RendererSummary, {
       }
     }
     return bitmask;
-  },
+  }
 
   /**
    * @public
@@ -184,9 +186,9 @@ inherit( Object, RendererSummary, {
    * @param {number} renderer - Single bit preferred. If multiple bits set, requires ALL painted nodes are compatible
    *                            with ALL of the bits.
    */
-  isSubtreeFullyCompatible: function( renderer ) {
+  isSubtreeFullyCompatible( renderer ) {
     return !!( renderer & this.bitmask );
-  },
+  }
 
   /**
    * @public
@@ -195,36 +197,65 @@ inherit( Object, RendererSummary, {
    * @param {number} renderer - Single bit preferred. If multiple bits set, will return if a single painted node is
    *                            compatible with at least one of the bits.
    */
-  isSubtreeContainingCompatible: function( renderer ) {
+  isSubtreeContainingCompatible( renderer ) {
     return !( ( renderer << Renderer.bitmaskLacksShift ) & this.bitmask );
-  },
+  }
 
-  isSingleCanvasSupported: function() {
+  /**
+   * @public
+   *
+   * @returns {boolean}
+   */
+  isSingleCanvasSupported() {
     return !!( Renderer.bitmaskSingleCanvas & this.bitmask );
-  },
+  }
 
-  isSingleSVGSupported: function() {
+  /**
+   * @public
+   *
+   * @returns {boolean}
+   */
+  isSingleSVGSupported() {
     return !!( Renderer.bitmaskSingleSVG & this.bitmask );
-  },
+  }
 
-  isNotPainted: function() {
+  /**
+   * @public
+   *
+   * @returns {boolean}
+   */
+  isNotPainted() {
     return !!( Renderer.bitmaskNotPainted & this.bitmask );
-  },
+  }
 
-  isNotAccessible: function() {
+  /**
+   * @public
+   *
+   * @returns {boolean}
+   */
+  isNotAccessible() {
     return !!( Renderer.bitmaskNotAccessible & this.bitmask );
-  },
+  }
 
-  areBoundsValid: function() {
+  /**
+   * @public
+   *
+   * @returns {boolean}
+   */
+  areBoundsValid() {
     return !!( Renderer.bitmaskBoundsValid & this.bitmask );
-  },
+  }
 
   /**
    * Given a bitmask representing a list of ordered preferred renderers, we check to see if all of our nodes can be
    * displayed in a single SVG block, AND that given the preferred renderers, that it will actually happen in our
    * rendering process.
+   * @public
+   *
+   * @param {number} preferredRenderers
+   * @returns {boolean}
    */
-  isSubtreeRenderedExclusivelySVG: function( preferredRenderers ) {
+  isSubtreeRenderedExclusivelySVG( preferredRenderers ) {
     // Check if we have anything that would PREVENT us from having a single SVG block
     if ( !this.isSingleSVGSupported() ) {
       return false;
@@ -248,14 +279,18 @@ inherit( Object, RendererSummary, {
     }
 
     return false; // sanity check
-  },
+  }
 
   /**
    * Given a bitmask representing a list of ordered preferred renderers, we check to see if all of our nodes can be
    * displayed in a single Canvas block, AND that given the preferred renderers, that it will actually happen in our
    * rendering process.
+   * @public
+   *
+   * @param {number} preferredRenderers
+   * @returns {boolean}
    */
-  isSubtreeRenderedExclusivelyCanvas: function( preferredRenderers ) {
+  isSubtreeRenderedExclusivelyCanvas( preferredRenderers ) {
     // Check if we have anything that would PREVENT us from having a single Canvas block
     if ( !this.isSingleCanvasSupported() ) {
       return false;
@@ -279,10 +314,13 @@ inherit( Object, RendererSummary, {
     }
 
     return false; // sanity check
-  },
+  }
 
-  // for debugging purposes
-  audit: function() {
+  /**
+   * For debugging purposes
+   * @public
+   */
+  audit() {
     if ( assert ) {
       for ( let i = 0; i < numSummaryBits; i++ ) {
         const bit = summaryBits[ i ];
@@ -291,10 +329,15 @@ inherit( Object, RendererSummary, {
         assert( countIsZero === bitmaskContainsBit, 'Bits should be set if count is zero' );
       }
     }
-  },
+  }
 
-  // for debugging purposes
-  toString: function() {
+  /**
+   * Returns a string form of this object
+   * @public
+   *
+   * @returns {string}
+   */
+  toString() {
     let result = RendererSummary.bitmaskToString( this.bitmask );
     for ( let i = 0; i < numSummaryBits; i++ ) {
       const bit = summaryBits[ i ];
@@ -305,17 +348,16 @@ inherit( Object, RendererSummary, {
     }
     return result;
   }
-}, {
-  bitmaskAll: bitmaskAll,
 
   /**
    * Determines which of the summary bits can be set for a specific Node (ignoring children/ancestors).
    * For instance, for bitmaskSingleSVG, we only don't include the flag if THIS node prevents its usage
    * (even though child nodes may prevent it in the renderer summary itself).
+   * @public
    *
    * @param {Node} node
    */
-  summaryBitmaskForNodeSelf: function( node ) {
+  static summaryBitmaskForNodeSelf( node ) {
     let bitmask = node._rendererBitmask;
 
     if ( node.isPainted() ) {
@@ -326,7 +368,7 @@ inherit( Object, RendererSummary, {
     }
 
     // NOTE: If changing, see Instance.updateRenderingState
-    const requiresSplit = node._hints.requireElement || node._hints.cssTransform || node._hints.layerSplit;
+    const requiresSplit = node._hints.cssTransform || node._hints.layerSplit;
     const rendererHint = node._hints.renderer;
 
     // Whether this subtree will be able to support a single SVG element
@@ -356,10 +398,16 @@ inherit( Object, RendererSummary, {
     }
 
     return bitmask;
-  },
+  }
 
-  // for debugging purposes
-  bitToString: function( bit ) {
+  /**
+   * For debugging purposes
+   * @public
+   *
+   * @param {number} bit
+   * @returns {string}
+   */
+  static bitToString( bit ) {
     if ( bit === Renderer.bitmaskCanvas ) { return 'Canvas'; }
     if ( bit === Renderer.bitmaskSVG ) { return 'SVG'; }
     if ( bit === Renderer.bitmaskDOM ) { return 'DOM'; }
@@ -374,10 +422,16 @@ inherit( Object, RendererSummary, {
     if ( bit === Renderer.bitmaskBoundsValid ) { return 'BoundsValid'; }
     if ( bit === Renderer.bitmaskNotAccessible ) { return 'NotAccessible'; }
     return '?';
-  },
+  }
 
-  // for debugging purposes
-  bitmaskToString: function( bitmask ) {
+  /**
+   * For debugging purposes
+   * @public
+   *
+   * @param {number} bitmask
+   * @returns {string}
+   */
+  static bitmaskToString( bitmask ) {
     let result = '';
     for ( let i = 0; i < numSummaryBits; i++ ) {
       const bit = summaryBits[ i ];
@@ -387,6 +441,10 @@ inherit( Object, RendererSummary, {
     }
     return result;
   }
-} );
+}
 
+// @public {number}
+RendererSummary.bitmaskAll = bitmaskAll;
+
+scenery.register( 'RendererSummary', RendererSummary );
 export default RendererSummary;

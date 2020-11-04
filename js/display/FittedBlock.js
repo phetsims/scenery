@@ -9,26 +9,30 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import Vector2 from '../../../dot/js/Vector2.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 import Block from './Block.js';
 
 const scratchBounds2 = Bounds2.NOTHING.copy();
 
-function FittedBlock( display, renderer, transformRootInstance ) {
-  this.initialize( display, renderer, transformRootInstance );
-}
+class FittedBlock extends Block {
+  /**
+   * @public
+   *
+   * @param {Display} display
+   * @param {number} renderer
+   * @param {Instance} transformRootInstance
+   * @param {FittedBlock.Fit} preferredFit
+   * @returns {FittedBlock} - For chaining
+   */
+  initialize( display, renderer, transformRootInstance, preferredFit ) {
+    super.initialize( display, renderer );
 
-scenery.register( 'FittedBlock', FittedBlock );
-
-inherit( Block, FittedBlock, {
-  initializeFittedBlock: function( display, renderer, transformRootInstance, preferredFit ) {
-    this.initializeBlock( display, renderer );
-
+    // @private {Instance}
     this.transformRootInstance = transformRootInstance;
 
     assert && assert( typeof transformRootInstance.isDisplayRoot === 'boolean' );
+
+    // @private {boolean}
     this.canBeFullDisplay = transformRootInstance.isDisplayRoot;
 
     assert && assert( preferredFit === FittedBlock.FULL_DISPLAY || preferredFit === FittedBlock.COMMON_ANCESTOR );
@@ -39,27 +43,31 @@ inherit( Block, FittedBlock, {
     // @protected {FittedBlock.Fit} - Our current fitting method.
     this.fit = preferredFit;
 
+    // @protected {boolean}
     this.dirtyFit = true;
-    this.dirtyFitListener = this.dirtyFitListener || this.markDirtyFit.bind( this );
-    this.commonFitInstance = null; // filled in if COMMON_ANCESTOR
-    this.fitBounds = Bounds2.NOTHING.copy(); // tracks the "tight" bounds for fitting, not the actually-displayed bounds
-    this.oldFitBounds = Bounds2.NOTHING.copy(); // copy for storage
-    this.fitOffset = new Vector2( 0, 0 );
+
+    // @private {Instance|null} - filled in if COMMON_ANCESTOR
+    this.commonFitInstance = null;
+
+    // @public {Bounds2} - tracks the "tight" bounds for fitting, not the actually-displayed bounds
+    this.fitBounds = Bounds2.NOTHING.copy();
+
+    // @private {Bounds2} - copy for storage
+    this.oldFitBounds = Bounds2.NOTHING.copy();
 
     // {number} - Number of child drawables that are marked as unfittable.
     this.unfittableDrawableCount = 0;
 
-    this.fittableListener = this.onFittabilityChange.bind( this );
-
-    // TODO: improve how we handle graphical acceleration with transforms
-    this.forceAcceleration = false;
+    // @private {function}
+    this.dirtyFitListener = this.dirtyFitListener || this.markDirtyFit.bind( this );
+    this.fittableListener = this.fittableListener || this.onFittabilityChange.bind( this );
 
     // now we always add a listener to the display size to invalidate our fit
     this.display.sizeProperty.lazyLink( this.dirtyFitListener );
 
     // TODO: add count of boundsless objects?
     return this;
-  },
+  }
 
   /**
    * Changes the current fit, if it's currently different from the argument.
@@ -67,7 +75,7 @@ inherit( Block, FittedBlock, {
    *
    * @param {FittedBlock.Fit} fit
    */
-  setFit: function( fit ) {
+  setFit( fit ) {
     // We can't allow full-display fits sometimes
     if ( !this.canBeFullDisplay && fit === FittedBlock.FULL_DISPLAY ) {
       fit = FittedBlock.COMMON_ANCESTOR;
@@ -88,20 +96,24 @@ inherit( Block, FittedBlock, {
         this.removeCommonFitInstance();
       }
     }
-  },
+  }
 
-  markDirtyFit: function() {
+  /**
+   * @public
+   */
+  markDirtyFit() {
     sceneryLog && sceneryLog.dirty && sceneryLog.dirty( 'markDirtyFit on FittedBlock#' + this.id );
     this.dirtyFit = true;
 
     // Make sure we are visited in the repaint phase
     this.markDirty();
-  },
+  }
 
-  /*
+  /**
    * Should be called from update() whenever this block is dirty
+   * @protected
    */
-  updateFit: function() {
+  updateFit() {
     assert && assert( this.fit === FittedBlock.FULL_DISPLAY || this.fit === FittedBlock.COMMON_ANCESTOR,
       'Unsupported fit' );
 
@@ -173,33 +185,52 @@ inherit( Block, FittedBlock, {
     else {
       throw new Error( 'unknown fit' );
     }
-  },
+  }
 
-  setSizeFullDisplay: function() {
+  /**
+   * @public
+   */
+  setSizeFullDisplay() {
     // override in subtypes, use this.display.getSize()
-  },
+  }
 
-  setSizeFitBounds: function() {
+  /**
+   * @public
+   */
+  setSizeFitBounds() {
     // override in subtypes, use this.fitBounds
-  },
+  }
 
-  addCommonFitInstance: function( instance ) {
+  /**
+   * @public
+   *
+   * @param {Instance|null} instance
+   */
+  addCommonFitInstance( instance ) {
     assert && assert( this.commonFitInstance === null );
 
     if ( instance ) {
       this.commonFitInstance = instance;
       this.commonFitInstance.fittability.subtreeFittabilityChangeEmitter.addListener( this.dirtyFitListener );
     }
-  },
+  }
 
-  removeCommonFitInstance: function() {
+  /**
+   * @public
+   */
+  removeCommonFitInstance() {
     if ( this.commonFitInstance ) {
       this.commonFitInstance.fittability.subtreeFittabilityChangeEmitter.removeListener( this.dirtyFitListener );
       this.commonFitInstance = null;
     }
-  },
+  }
 
-  dispose: function() {
+  /**
+   * Releases references
+   * @public
+   * @override
+   */
+  dispose() {
     sceneryLog && sceneryLog.FittedBlock && sceneryLog.FittedBlock( 'dispose #' + this.id );
 
     this.display.sizeProperty.unlink( this.dirtyFitListener );
@@ -209,40 +240,42 @@ inherit( Block, FittedBlock, {
     // clear references
     this.transformRootInstance = null;
 
-    Block.prototype.dispose.call( this );
-  },
+    super.dispose();
+  }
 
   /**
-   * @override
    * Track the fittability of the added drawable.
+   * @public
+   * @override
    *
    * @param {Drawable} drawable
    */
-  addDrawable: function( drawable ) {
-    Block.prototype.addDrawable.call( this, drawable );
+  addDrawable( drawable ) {
+    super.addDrawable( drawable );
 
     drawable.fittableProperty.lazyLink( this.fittableListener );
 
     if ( !drawable.fittable ) {
       this.incrementUnfittable();
     }
-  },
+  }
 
   /**
-   * @override
    * Stop tracking the fittability of the removed drawable.
+   * @public
+   * @override
    *
    * @param {Drawable} drawable
    */
-  removeDrawable: function( drawable ) {
-    Block.prototype.removeDrawable.call( this, drawable );
+  removeDrawable( drawable ) {
+    super.removeDrawable( drawable );
 
     drawable.fittableProperty.unlink( this.fittableListener );
 
     if ( !drawable.fittable ) {
       this.decrementUnfittable();
     }
-  },
+  }
 
   /**
    * Called from the fittability listener attached to child drawables when their fittability changes.
@@ -250,44 +283,44 @@ inherit( Block, FittedBlock, {
    *
    * @param {boolean} fittable - Whether the particular child drawable is fittable
    */
-  onFittabilityChange: function( fittable ) {
+  onFittabilityChange( fittable ) {
     if ( fittable ) {
       this.decrementUnfittable();
     }
     else {
       this.incrementUnfittable();
     }
-  },
+  }
 
   /**
    * The number of unfittable child drawables was increased by 1.
    * @private
    */
-  incrementUnfittable: function() {
+  incrementUnfittable() {
     this.unfittableDrawableCount++;
 
     if ( this.unfittableDrawableCount === 1 ) {
       this.checkFitConstraints();
     }
-  },
+  }
 
   /**
    * The number of unfittable child drawables was decreased by 1.
    * @private
    */
-  decrementUnfittable: function() {
+  decrementUnfittable() {
     this.unfittableDrawableCount--;
 
     if ( this.unfittableDrawableCount === 0 ) {
       this.checkFitConstraints();
     }
-  },
+  }
 
   /**
    * Check to make sure we are using the correct current fit.
    * @private
    */
-  checkFitConstraints: function() {
+  checkFitConstraints() {
     // If we have ANY unfittable drawables, take up the full display.
     if ( this.unfittableDrawableCount > 0 && this.canBeFullDisplay ) {
       this.setFit( FittedBlock.FULL_DISPLAY );
@@ -296,9 +329,14 @@ inherit( Block, FittedBlock, {
     else {
       this.setFit( this.preferredFit );
     }
-  },
+  }
 
-  computeCommonAncestorInstance: function() {
+  /**
+   * @private
+   *
+   * @returns {Instance}
+   */
+  computeCommonAncestorInstance() {
     assert && assert( this.firstDrawable.instance && this.lastDrawable.instance,
       'For common-ancestor fits, we need the first and last drawables to have direct instance references' );
 
@@ -325,12 +363,19 @@ inherit( Block, FittedBlock, {
     assert && assert( commonFitInstance.trail.length >= this.transformRootInstance.trail.length );
 
     return commonFitInstance;
-  },
+  }
 
-  onIntervalChange: function( firstDrawable, lastDrawable ) {
+  /**
+   * @public
+   * @override
+   *
+   * @param {Drawable} firstDrawable
+   * @param {Drawable} lastDrawable
+   */
+  onIntervalChange( firstDrawable, lastDrawable ) {
     sceneryLog && sceneryLog.FittedBlock && sceneryLog.FittedBlock( '#' + this.id + '.onIntervalChange ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() );
 
-    Block.prototype.onIntervalChange.call( this, firstDrawable, lastDrawable );
+    super.onIntervalChange( firstDrawable, lastDrawable );
 
     // if we use a common ancestor fit, find the common ancestor instance
     if ( this.fit === FittedBlock.COMMON_ANCESTOR ) {
@@ -338,12 +383,15 @@ inherit( Block, FittedBlock, {
       this.markDirtyFit();
     }
   }
-} );
+}
+
+scenery.register( 'FittedBlock', FittedBlock );
 
 // Defines the FittedBlock.Fit enumeration type.
 FittedBlock.FULL_DISPLAY = 1;
 FittedBlock.COMMON_ANCESTOR = 2;
 
+// TODO: enumeration these?
 FittedBlock.fitString = {
   1: 'fullDisplay',
   2: 'commonAncestor'

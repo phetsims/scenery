@@ -27,10 +27,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import cleanArray from '../../../../phet-core/js/cleanArray.js';
-import inherit from '../../../../phet-core/js/inherit.js';
-import platform from '../../../../phet-core/js/platform.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
+import cleanArray from '../../../../phet-core/js/cleanArray.js';
+import platform from '../../../../phet-core/js/platform.js';
 import scenery from '../../scenery.js';
 import TransformTracker from '../../util/TransformTracker.js';
 import PDOMPeer from './PDOMPeer.js';
@@ -38,22 +37,19 @@ import PDOMUtils from './PDOMUtils.js';
 
 let globalId = 1;
 
-/**
- * Constructor for PDOMInstance, uses an initialize method for pooling.
- * @constructor
- * @mixes Poolable
- *
- * @param {PDOMInstance|null} parent - parent of this instance, null if root of PDOMInstance tree
- * @param {Display} display
- * @param {Trail} trail - trail to the node for this PDOMInstance
- */
-function PDOMInstance( parent, display, trail ) {
-  this.initializeAccessibleInstance( parent, display, trail );
-}
+class PDOMInstance {
+  /**
+   * Constructor for PDOMInstance, uses an initialize method for pooling.
+   * @mixes Poolable
+   *
+   * @param {PDOMInstance|null} parent - parent of this instance, null if root of PDOMInstance tree
+   * @param {Display} display
+   * @param {Trail} trail - trail to the node for this PDOMInstance
+   */
+  constructor( parent, display, trail ) {
+    this.initializeAccessibleInstance( parent, display, trail );
+  }
 
-scenery.register( 'PDOMInstance', PDOMInstance );
-
-inherit( Object, PDOMInstance, {
 
   /**
    * Initializes an PDOMInstance, implements construction for pooling.
@@ -64,7 +60,7 @@ inherit( Object, PDOMInstance, {
    * @param {Trail} trail - trail to node for this PDOMInstance
    * @returns {PDOMInstance} - Returns 'this' reference, for chaining
    */
-  initializeAccessibleInstance: function( parent, display, trail ) {
+  initializeAccessibleInstance( parent, display, trail ) {
     assert && assert( !this.id || this.isDisposed, 'If we previously existed, we need to have been disposed' );
 
     // unique ID
@@ -158,7 +154,7 @@ inherit( Object, PDOMInstance, {
       'Initialized ' + this.toString() );
 
     return this;
-  },
+  }
 
   /**
    * Adds a series of (sorted) accessible instances as children.
@@ -166,9 +162,9 @@ inherit( Object, PDOMInstance, {
    *
    * @param {Array.<PDOMInstance>} accessibleInstances
    */
-  addConsecutiveInstances: function( accessibleInstances ) {
+  addConsecutiveInstances( accessibleInstances ) {
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
-      'addConsecutiveInstances on ' + this.toString() + ' with: ' + accessibleInstances.map( function( inst ) { return inst.toString(); } ).join( ',' ) );
+      'addConsecutiveInstances on ' + this.toString() + ' with: ' + accessibleInstances.map( inst => inst.toString() ).join( ',' ) );
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.push();
 
     const hadChildren = this.children.length > 0;
@@ -186,7 +182,7 @@ inherit( Object, PDOMInstance, {
     }
 
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.pop();
-  },
+  }
 
   /**
    * Removes any child instances that are based on the provided trail.
@@ -194,7 +190,7 @@ inherit( Object, PDOMInstance, {
    *
    * @param {Trail} trail
    */
-  removeInstancesForTrail: function( trail ) {
+  removeInstancesForTrail( trail ) {
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
       'removeInstancesForTrail on ' + this.toString() + ' with trail ' + trail.toString() );
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.push();
@@ -222,13 +218,13 @@ inherit( Object, PDOMInstance, {
     }
 
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.pop();
-  },
+  }
 
   /**
    * Removes all of the children.
    * @public
    */
-  removeAllChildren: function() {
+  removeAllChildren() {
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance( 'removeAllChildren on ' + this.toString() );
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.push();
 
@@ -237,7 +233,7 @@ inherit( Object, PDOMInstance, {
     }
 
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.pop();
-  },
+  }
 
   /**
    * Returns an PDOMInstance child (if one exists with the given Trail), or null otherwise.
@@ -246,7 +242,7 @@ inherit( Object, PDOMInstance, {
    * @param {Trail} trail
    * @returns {PDOMInstance|null}
    */
-  findChildWithTrail: function( trail ) {
+  findChildWithTrail( trail ) {
     for ( let i = 0; i < this.children.length; i++ ) {
       const child = this.children[ i ];
       if ( child.trail.equals( trail ) ) {
@@ -254,7 +250,7 @@ inherit( Object, PDOMInstance, {
       }
     }
     return null;
-  },
+  }
 
   /**
    * Remove a subtree of AccessibleInstances from this PDOMInstance
@@ -263,7 +259,7 @@ inherit( Object, PDOMInstance, {
    *                        of the trail.
    * @public (scenery-internal)
    */
-  removeSubtree: function( trail ) {
+  removeSubtree( trail ) {
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
       'removeSubtree on ' + this.toString() + ' with trail ' + trail.toString() );
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.push();
@@ -281,7 +277,7 @@ inherit( Object, PDOMInstance, {
     }
 
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.pop();
-  },
+  }
 
   /**
    * Checks to see whether our visibility needs an update based on an accessibleDisplays change.
@@ -289,7 +285,7 @@ inherit( Object, PDOMInstance, {
    *
    * @param {number} index - Index into the relativeNodes array (which node had the notification)
    */
-  checkAccessibleDisplayVisibility: function( index ) {
+  checkAccessibleDisplayVisibility( index ) {
     const isNodeVisible = _.includes( this.relativeNodes[ index ]._accessibleDisplaysInfo.accessibleDisplays, this.display );
     const wasNodeVisible = this.relativeVisibilities[ index ];
 
@@ -307,7 +303,7 @@ inherit( Object, PDOMInstance, {
         this.updateVisibility();
       }
     }
-  },
+  }
 
   /**
    * Update visibility of this peer's accessible DOM content. The hidden attribute will hide all of the descendant
@@ -315,7 +311,7 @@ inherit( Object, PDOMInstance, {
    * will do this for us.
    * @private
    */
-  updateVisibility: function() {
+  updateVisibility() {
     this.peer.setVisible( this.invisibleCount <= 0 );
 
     // if we hid a parent element, blur focus if active element was an ancestor
@@ -334,7 +330,7 @@ inherit( Object, PDOMInstance, {
       this.display.getAccessibleDOMElement().style.display = 'none';
       this.display.getAccessibleDOMElement().style.display = 'block';
     }
-  },
+  }
 
   /**
    * Returns whether the parallel DOM for this instance and its ancestors are not hidden.
@@ -342,7 +338,7 @@ inherit( Object, PDOMInstance, {
    *
    * @returns {boolean}
    */
-  isGloballyVisible: function() {
+  isGloballyVisible() {
 
     // If this peer is hidden, then return because that attribute will bubble down to children,
     // otherwise recurse to parent.
@@ -355,7 +351,7 @@ inherit( Object, PDOMInstance, {
     else { // base case at root
       return true;
     }
-  },
+  }
 
   /**
    * Returns what our list of children (after sorting) should be.
@@ -365,7 +361,7 @@ inherit( Object, PDOMInstance, {
    *                        node (if we are the root PDOMInstance)
    * @returns {Array.<PDOMInstance>}
    */
-  getChildOrdering: function( trail ) {
+  getChildOrdering( trail ) {
     const node = trail.lastNode();
     const effectiveChildren = node.getEffectiveChildren();
     let i;
@@ -402,7 +398,7 @@ inherit( Object, PDOMInstance, {
     }
 
     return instances;
-  },
+  }
 
   /**
    * Sort our child accessible instances in the order they should appear in the parallel DOM. We do this by
@@ -412,7 +408,7 @@ inherit( Object, PDOMInstance, {
    *
    * @public (scenery-internal)
    */
-  sortChildren: function() {
+  sortChildren() {
     // It's simpler/faster to just grab our order directly with one recursion, rather than specifying a sorting
     // function (since a lot gets re-evaluated in that case).
     const targetChildren = this.getChildOrdering( new scenery.Trail( this.isRootInstance ? this.display.rootNode : this.node ) );
@@ -447,7 +443,7 @@ inherit( Object, PDOMInstance, {
         i--;
       }
     }
-  },
+  }
 
   /**
    * Create a new TransformTracker that will observe transforms along the trail of this PDOMInstance OR
@@ -469,14 +465,14 @@ inherit( Object, PDOMInstance, {
     }
 
     this.transformTracker = new TransformTracker( trackedTrail );
-  },
+  }
 
   /**
    * Recursive disposal, to make eligible for garbage collection.
    *
    * @public (scenery-internal)
    */
-  dispose: function() {
+  dispose() {
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
       'Disposing ' + this.toString() );
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.push();
@@ -520,7 +516,7 @@ inherit( Object, PDOMInstance, {
     this.freeToPool();
 
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.pop();
-  },
+  }
 
   /**
    * For debugging purposes.
@@ -528,9 +524,9 @@ inherit( Object, PDOMInstance, {
    *
    * @returns {string}
    */
-  toString: function() {
+  toString() {
     return this.id + '#{' + this.trail.toString() + '}';
-  },
+  }
 
   /**
    * For debugging purposes, inspect the tree of AccessibleInstances from the root.
@@ -539,7 +535,7 @@ inherit( Object, PDOMInstance, {
    *
    * @public (scenery-internal)
    */
-  auditRoot: function() {
+  auditRoot() {
     if ( !assert ) { return; }
 
     const rootNode = this.display.rootNode;
@@ -562,9 +558,7 @@ inherit( Object, PDOMInstance, {
       let shouldBeVisible = true;
       for ( i = 0; i < accessibleInstance.trail.length; i++ ) {
         const node = accessibleInstance.trail.nodes[ i ];
-        const trails = node.getTrailsTo( rootNode ).filter( function( trail ) {
-          return trail.isAccessibleVisible();
-        } );
+        const trails = node.getTrailsTo( rootNode ).filter( trail => trail.isAccessibleVisible() );
         if ( trails.length === 0 ) {
           shouldBeVisible = false;
           break;
@@ -576,7 +570,7 @@ inherit( Object, PDOMInstance, {
 
     audit( PDOMInstance.createFakeAccessibleTree( rootNode ), this );
   }
-}, {
+
 
   /**
    * Since a "Trail" on PDOMInstance can have discontinuous jumps (due to accessibleOrder), this finds the best
@@ -587,7 +581,7 @@ inherit( Object, PDOMInstance, {
    * @param {Node} rootNode - root of a Display
    * @returns {Trail}
    */
-  guessVisualTrail: function( trail, rootNode ) {
+  static guessVisualTrail( trail, rootNode ) {
     trail.reindex();
 
     // Search for places in the trail where adjacent nodes do NOT have a parent-child relationship, i.e.
@@ -621,7 +615,7 @@ inherit( Object, PDOMInstance, {
     assert && assert( baseTrail.isValid(), 'trail not valid: ' + trail.uniqueId );
 
     return baseTrail;
-  },
+  }
 
   /**
    * Creates a fake PDOMInstance-like tree structure (with the equivalent nodes and children structure).
@@ -631,7 +625,7 @@ inherit( Object, PDOMInstance, {
    * @param {Node} rootNode
    * @returns {Object} - Type FakeAccessibleInstance: { node: {Node}, children: {Array.<FakeAccessibleInstance>} }
    */
-  createFakeAccessibleTree: function( rootNode ) {
+  static createFakeAccessibleTree( rootNode ) {
     function createFakeTree( node ) {
       let fakeInstances = _.flatten( node.getEffectiveChildren().map( createFakeTree ) );
       if ( node.hasPDOMContent ) {
@@ -648,7 +642,9 @@ inherit( Object, PDOMInstance, {
       children: createFakeTree( rootNode )
     };
   }
-} );
+}
+
+scenery.register( 'PDOMInstance', PDOMInstance );
 
 Poolable.mixInto( PDOMInstance, {
   initialize: PDOMInstance.prototype.initializeAccessibleInstance

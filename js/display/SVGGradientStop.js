@@ -8,28 +8,24 @@
 
 import Property from '../../../axon/js/Property.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 import Color from '../util/Color.js';
 import svgns from '../util/svgns.js';
 
 const scratchColor = new Color( 'transparent' );
 
-/**
- * @constructor
- * @mixes Poolable
- *
- * @param {SVGGradient} svgGradient
- * @param {number} ratio
- * @param {Color|string|Property.<Color|string|null>|null} color
- */
-function SVGGradientStop( svgGradient, ratio, color ) {
-  this.initialize( svgGradient, ratio, color );
-}
+class SVGGradientStop {
+  /**
+   * @mixes Poolable
+   *
+   * @param {SVGGradient} svgGradient
+   * @param {number} ratio
+   * @param {Color|string|Property.<Color|string|null>|null} color
+   */
+  constructor( svgGradient, ratio, color ) {
+    this.initialize( svgGradient, ratio, color );
+  }
 
-scenery.register( 'SVGGradientStop', SVGGradientStop );
-
-inherit( Object, SVGGradientStop, {
   /**
    * Poolable initializer.
    * @private
@@ -38,7 +34,7 @@ inherit( Object, SVGGradientStop, {
    * @param {number} ratio
    * @param {Color|string|Property.<Color|string|null>|null} color
    */
-  initialize: function( svgGradient, ratio, color ) {
+  initialize( svgGradient, ratio, color ) {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] initialize: ' + svgGradient.gradient.id + ' : ' + ratio );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
@@ -81,7 +77,7 @@ inherit( Object, SVGGradientStop, {
     sceneryLog && sceneryLog.Paints && sceneryLog.pop();
 
     return this;
-  },
+  }
 
   /**
    * Called when our color is a Property and it changes.
@@ -90,7 +86,7 @@ inherit( Object, SVGGradientStop, {
    * @param {Color|string|null} newValue
    * @param {Color|string|null} oldValue
    */
-  onPropertyChange: function( newValue, oldValue ) {
+  onPropertyChange( newValue, oldValue ) {
     if ( oldValue instanceof Color ) {
       sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] removing Color listener: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );
       oldValue.changeEmitter.removeListener( this.colorListener );
@@ -101,22 +97,22 @@ inherit( Object, SVGGradientStop, {
     }
 
     this.markDirty();
-  },
+  }
 
   /**
    * Should be called when the color stop's value may have changed.
    * @private
    */
-  markDirty: function() {
+  markDirty() {
     this.dirty = true;
     this.svgGradient.markDirty();
-  },
+  }
 
   /**
    * Updates the color stop to whatever the current color should be.
    * @public
    */
-  update: function() {
+  update() {
     if ( !this.dirty ) {
       return;
     }
@@ -159,13 +155,13 @@ inherit( Object, SVGGradientStop, {
     this.svgElement.setAttribute( 'style', stopColorRule + ' ' + stopOpacityRule );
 
     sceneryLog && sceneryLog.Paints && sceneryLog.pop();
-  },
+  }
 
   /**
    * Disposes, so that it can be reused from the pool.
    * @public
    */
-  dispose: function() {
+  dispose() {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] dispose: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
@@ -193,7 +189,9 @@ inherit( Object, SVGGradientStop, {
 
     sceneryLog && sceneryLog.Paints && sceneryLog.pop();
   }
-} );
+}
+
+scenery.register( 'SVGGradientStop', SVGGradientStop );
 
 Poolable.mixInto( SVGGradientStop, {
   initialize: SVGGradientStop.prototype.initialize

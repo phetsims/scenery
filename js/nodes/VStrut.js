@@ -7,24 +7,21 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 import Spacer from './Spacer.js';
 
-/**
- * Creates a strut with x=0 and y in the range [0,height].
- * @public
- * @constructor
- * @extends Spacer
- *
- * @param {number} height - Height of the strut
- * @param {Object} [options] - Passed to Spacer/Node
- */
-function VStrut( height, options ) {
-  Spacer.call( this, 0, height, options );
+class VStrut extends Spacer {
+  /**
+   * Creates a strut with x=0 and y in the range [0,height].
+   * @public
+   *
+   * @param {number} height - Height of the strut
+   * @param {Object} [options] - Passed to Spacer/Node
+   */
+  constructor( height, options ) {
+    super( 0, height, options );
+  }
 }
 
 scenery.register( 'VStrut', VStrut );
-
-inherit( Spacer, VStrut );
 export default VStrut;

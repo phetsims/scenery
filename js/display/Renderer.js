@@ -1,6 +1,5 @@
 // Copyright 2013-2020, University of Colorado Boulder
 
-
 /**
  * An enumeration of different back-end technologies used for rendering. It also essentially represents the API that
  * nodes need to implement to be used with this specified back-end.
