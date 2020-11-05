@@ -3313,12 +3313,32 @@ inherit( PhetioObject, Node, {
    * Sets the non-opacity filters for this Node.
    * @public
    *
+   * The default is an empty array (no filters). It should be an array of Filter objects, which will be effectively
+   * applied in-order on this Node (and its subtree), and will be applied BEFORE opacity/clipping.
+   *
+   * NOTE: Some filters may decrease performance (and this may be platform-specific). Please read documentation for each
+   * filter before using.
+   *
+   * Typical filter types to use are:
+   * - Brightness
+   * - Contrast
+   * - DropShadow (EXPERIMENTAL)
+   * - GaussianBlur (EXPERIMENTAL)
+   * - Grayscale (Grayscale.FULL for the full effect)
+   * - HueRotate
+   * - Invert (Invert.FULL for the full effect)
+   * - Saturate
+   * - Sepia (Sepia.FULL for the full effect)
+   *
+   * Filter.js has more information in general on filters.
+   *
    * @param {Array.<Filter>} filters
    */
   setFilters: function( filters ) {
     assert && assert( Array.isArray( filters ), 'filters should be an array' );
     assert && assert( _.every( filters, filter => filter instanceof Filter ), 'filters should consist of Filter objects only' );
 
+    // We re-use the same array internally, so we don't reference a potentially-mutable array from outside.
     this._filters.length = 0;
     this._filters.push( ...filters );
 

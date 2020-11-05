@@ -12,7 +12,7 @@ import ColorMatrixFilter from './ColorMatrixFilter.js';
 
 class Brightness extends ColorMatrixFilter {
   /**
-   * @param {number} amount
+   * @param {number} amount - How bright to be, from 0 (dark), 1 (normal), or larger values to brighten
    */
   constructor( amount ) {
     assert && assert( typeof amount === 'number', 'Brightness amount should be a number' );
@@ -53,6 +53,9 @@ class Brightness extends ColorMatrixFilter {
     return true;
   }
 }
+
+// @public {Brightness} - Fully darkens the content
+Brightness.BLACKEN = new Brightness( 0 );
 
 scenery.register( 'Brightness', Brightness );
 export default Brightness;

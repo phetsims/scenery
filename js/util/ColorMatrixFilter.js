@@ -18,6 +18,22 @@ const useFakeGamma = platform.chromium;
 
 class ColorMatrixFilter extends Filter {
   /**
+   * NOTE: It is possible but not generally recommended to create custom ColorMatrixFilter types. They should be
+   * compatible with Canvas and SVG, HOWEVER any WebGL/DOM content cannot work with those custom filters, and any
+   * combination of multiple SVG or Canvas elements will ALSO not work (since there is no CSS filter function that can
+   * do arbitrary color matrix operations). This means that performance will likely be reduced UNLESS all content is
+   * within a single SVG block.
+   *
+   * Please prefer the named subtypes where possible.
+   *
+   * The resulting color is the result of the matrix multiplication:
+   *
+   * [ m00 m01 m02 m03 m04 ]   [ r ]
+   * [ m10 m11 m12 m13 m14 ]   [ g ]
+   * [ m20 m21 m22 m23 m24 ] * [ b ]
+   * [ m30 m31 m32 m33 m34 ]   [ a ]
+   *                           [ 1 ]
+   *
    * @param {number} m00
    * @param {number} m01
    * @param {number} m02

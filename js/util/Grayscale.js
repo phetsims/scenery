@@ -12,7 +12,7 @@ import ColorMatrixFilter from './ColorMatrixFilter.js';
 
 class Grayscale extends ColorMatrixFilter {
   /**
-   * @param {number} [amount]
+   * @param {number} [amount] - The amount of the effect, from 0 (none) to 1 (full)
    */
   constructor( amount = 1 ) {
     assert && assert( typeof amount === 'number', 'Grayscale amount should be a number' );

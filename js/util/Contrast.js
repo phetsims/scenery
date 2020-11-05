@@ -12,7 +12,7 @@ import ColorMatrixFilter from './ColorMatrixFilter.js';
 
 class Contrast extends ColorMatrixFilter {
   /**
-   * @param {number} amount
+   * @param {number} amount - The amount of the effect, from 0 (gray), 1 (normal), or above for high-contrast
    */
   constructor( amount ) {
     assert && assert( typeof amount === 'number', 'Contrast amount should be a number' );
@@ -53,6 +53,9 @@ class Contrast extends ColorMatrixFilter {
     return true;
   }
 }
+
+// @public {Contrast} - Turns the content gray
+Contrast.GRAY = new Contrast( 0 );
 
 scenery.register( 'Contrast', Contrast );
 export default Contrast;

@@ -12,7 +12,7 @@ import ColorMatrixFilter from './ColorMatrixFilter.js';
 
 class Saturate extends ColorMatrixFilter {
   /**
-   * @param {number} amount
+   * @param {number} amount - The amount of the effect, from 0 (no saturation), 1 (normal), or higher to over-saturate
    */
   constructor( amount ) {
     assert && assert( typeof amount === 'number', 'Saturate amount should be a number' );

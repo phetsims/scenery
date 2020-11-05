@@ -13,7 +13,7 @@ import ColorMatrixFilter from './ColorMatrixFilter.js';
 
 class HueRotate extends ColorMatrixFilter {
   /**
-   * @param {number} amount - In radians
+   * @param {number} amount - In radians, the amount of hue to color-shift
    */
   constructor( amount ) {
     assert && assert( typeof amount === 'number', 'HueRotate amount should be a number' );

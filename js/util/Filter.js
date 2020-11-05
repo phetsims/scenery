@@ -3,6 +3,27 @@
 /**
  * Base type for filters
  *
+ * Filters have different ways of being applied, depending on what the platform supports AND what content is below.
+ * These different ways have potentially different performance characteristics, and potentially quality differences.
+ *
+ * The current ways are:
+ * - DOM element with CSS filter specified (can include mixed content and WebGL underneath, and this is used as a
+ *   general fallback). NOTE: General color matrix support is NOT provided under this, we only have specific named
+ *   filters that can be used.
+ * - SVG filter elements (which are very flexible, a combination of filters may be combined into SVG filter elements).
+ *   This only works if ALL of the content under the filter(s) can be placed in one SVG element, so a layerSplit or
+ *   non-SVG content can prevent this from being used.
+ * - Canvas filter attribute (similar to DOM CSS). Similar to DOM CSS, but not as accelerated (requires applying the
+ *   filter by drawing into another Canvas). Chromium-based browsers seem to have issues with the color space used,
+ *   so this can't be used on that platform. Additionally, this only works if ALL the content under the filter(s) can
+ *   be placed in one Canvas, so a layerSplit or non-SVG content can prevent this from being used.
+ * - Canvas ImageData. This is a fallback where we directly get, manipulate, and set pixel data in a Canvas (with the
+ *   corresponding performance hit that it takes to CPU-process every pixel). Additionally, this only works if ALL the
+ *   content under the filter(s) can   be placed in one Canvas, so a layerSplit or non-SVG content can prevent this from
+ *   being used.
+ *
+ * Some filters may have slightly different appearances depending on the browser/platform/renderer.
+ *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -113,6 +134,7 @@ class Filter {
   }
 
   /**
+   * Applies a color matrix effect into an existing SVG filter.
    * @public
    *
    * @param {string} matrixValues
@@ -122,10 +144,15 @@ class Filter {
    */
   static applyColorMatrix( matrixValues, svgFilter, inName, resultName ) {
     const feColorMatrix = document.createElementNS( svgns, 'feColorMatrix' );
+
     feColorMatrix.setAttribute( 'type', 'matrix' );
     feColorMatrix.setAttribute( 'values', matrixValues );
     feColorMatrix.setAttribute( 'in', inName );
+
+    // Since the DOM effects are done with sRGB and we can't manipulate that, we'll instead adjust SVG to apply the
+    // effects in sRGB so that we have consistency
     feColorMatrix.setAttribute( 'color-interpolation-filters', 'sRGB' );
+
     if ( resultName ) {
       feColorMatrix.setAttribute( 'result', resultName );
     }

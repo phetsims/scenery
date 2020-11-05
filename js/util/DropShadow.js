@@ -3,6 +3,8 @@
 /**
  * DropShadow filter
  *
+ * EXPERIMENTAL! DO not use in production code yet
+ *
  * TODO: preventFit OR handle bounds increase (or both)
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
