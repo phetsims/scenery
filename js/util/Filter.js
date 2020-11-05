@@ -125,6 +125,7 @@ class Filter {
     feColorMatrix.setAttribute( 'type', 'matrix' );
     feColorMatrix.setAttribute( 'values', matrixValues );
     feColorMatrix.setAttribute( 'in', inName );
+    feColorMatrix.setAttribute( 'color-interpolation-filters', 'sRGB' );
     if ( resultName ) {
       feColorMatrix.setAttribute( 'result', resultName );
     }

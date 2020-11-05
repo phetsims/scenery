@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <!-- <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/> -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <!-- runs in full-screen mode on iOS devices -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <title>Filter/clip testing for 707</title>
+
+  <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
+  <script src="../../aqua/js/pageload-connector.js"></script>
+
+  <!-- jQuery and LoDash are dependencies -->
+  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
+
+  <script src="../../assert/js/assert.js"></script>
+  <script src="../../tandem/js/PhetioIDUtils.js"></script>
+  <script src="../../sherpa/lib/himalaya-0.2.7.js"></script>
+  <script src="../../sherpa/lib/he-1.1.1.js"></script>
+
+  <script type="text/javascript">
+    window.assertions.enableAssert();
+    window.assertions.enableAssertSlow();
+  </script>
+
+  <style type="text/css">
+
+  </style>
+</head>
+<body>
+
+<script type="module">
+
+import Node from '../js/nodes/Node.js';
+import HBox from '../js/nodes/HBox.js';
+import Rectangle from '../js/nodes/Rectangle.js';
+import Text from '../js/nodes/Text.js';
+import Display from '../js/display/Display.js';
+import Grayscale from '../js/util/Grayscale.js';
+import LinearGradient from '../js/util/LinearGradient.js';
+
+const scene = new Node();
+const display = new Display( scene, {
+  width: 1024,
+  height: 1024,
+  allowCSSHacks: false
+} );
+
+const demoNode = new Rectangle( 0, 0, 100, 40, {
+  fill: new LinearGradient( 0, 0, 100, 0 )
+        .addColorStop( 0, 'rgb(200,25,25)' )
+        .addColorStop( 0.5, 'rgb(25,25,200)' )
+        .addColorStop( 1, 'rgb(200,25,25)' ),
+  children: [
+    new Rectangle( 0, 0, 100, 20, {
+      fill: new LinearGradient( 0, 0, 100, 0 )
+      .addColorStop( 0, 'rgba(255,255,255,0)' )
+      .addColorStop( 0.5, 'rgba(0,255,0,170)' )
+      .addColorStop( 1, 'rgba(0,0,0,255)' )
+    } ),
+    new Text( 'Testing', { centerX: 50, centerY: 20, fill: 'white', fontSize: 20 } ),
+    new Rectangle( 0, 40, 100, 10, { fill: 'rgb(255,0,0)' } ),
+    new Rectangle( 0, 50, 100, 10, { fill: 'rgb(200,0,0)' } ),
+    new Rectangle( 0, 60, 100, 10, { fill: 'rgb(100,0,0)' } ),
+    new Rectangle( 0, 70, 100, 10, { fill: 'rgb(0,0,0)' } ),
+    new Rectangle( 0, 80, 100, 10, { fill: 'rgb(200,50,100)' } ),
+    new Rectangle( 0, 90, 100, 10, { fill: 'rgb(100,200,50)' } ),
+    new Rectangle( 0, 100, 100, 10, { fill: 'rgb(50,230,120)' } ),
+    new Rectangle( 0, 110, 100, 10, { fill: 'rgb(150,150,150)' } ),
+    new Rectangle( 0, 120, 100, 10, { fill: 'rgb(230,230,230)' } ),
+    new Rectangle( 0, 130, 100, 10, { fill: 'rgb(255,255,255)' } )
+  ]
+} );
+
+const remap = ( filter, dom, svg, canvas ) => {
+  filter.isDOMCompatible = () => dom;
+  filter.isSVGCompatible = () => svg;
+  filter.isCanvasCompatible = () => canvas;
+  return filter;
+};
+
+scene.addChild( new HBox( {
+  children: [
+    new Node( {
+      children: [ demoNode ],
+      renderer: 'svg'
+    } ),
+    new Node( {
+      children: [ demoNode, new Text( 'DOM CSS filter', { top: 0, centerX: 50, fill: 'white' } ) ],
+      filters: [ remap( new Grayscale( 1 ), true, false, false ) ],
+      renderer: 'svg'
+    } ),
+    new Node( {
+      children: [ demoNode, new Text( 'SVG filter element', { top: 0, centerX: 50, fill: 'white' } ) ],
+      filters: [ remap( new Grayscale( 1 ), false, true, false ) ],
+      renderer: 'svg'
+    } ),
+    new Node( {
+      children: [ demoNode, new Text( 'Canvas ImageData', { top: 0, centerX: 50, fill: 'white' } ) ],
+      filters: [ remap( new Grayscale( 1 ), false, false, true ) ],
+      renderer: 'canvas'
+    } ),
+    new Node( {
+      children: [ demoNode, new Text( 'Canvas filter(?)', { top: 0, centerX: 50, fill: 'white' } ) ],
+      filters: [ remap( new Grayscale( 1 ), true, false, true ) ],
+      renderer: 'canvas'
+    } ),
+    new HBox( {
+      filters: [ new Grayscale( 1 ) ],
+      children: [
+        new Node( {
+          children: [ demoNode, new Text( 'SVG-DOM', { top: 0, centerX: 50, fill: 'white' } ) ],
+          renderer: 'svg'
+        } ),
+        new Node( {
+          children: [ demoNode, new Text( 'Canvas-DOM', { top: 0, centerX: 50, fill: 'white' } ) ],
+          renderer: 'canvas'
+        } )
+      ]
+    } )
+  ]
+} ) );
+
+scene.addChild( new HBox( {
+  y: 140,
+  children: [
+    new Node( {
+      children: [ demoNode, new Text( 'SVG', { top: 0, centerX: 50, fill: 'white' } ) ],
+      renderer: 'svg'
+    } ),
+    new Node( {
+      children: [ demoNode, new Text( 'Canvas', { top: 0, centerX: 50, fill: 'white' } ) ],
+      renderer: 'canvas'
+    } ),
+    new Node( {
+      children: [ demoNode, new Text( 'DOM', { top: 0, centerX: 50, fill: 'white' } ) ],
+      renderer: 'dom'
+    } )
+  ]
+} ) );
+
+scene.addChild( new HBox( {
+  y: 280,
+  children: [
+    new Node( {
+      children: [ demoNode, new Text( 'SVG', { top: 0, centerX: 50, fill: 'white' } ) ],
+      renderer: 'svg',
+      filters: [ new Grayscale( 0.5 ) ]
+    } ),
+    new Node( {
+      children: [ demoNode, new Text( 'Canvas', { top: 0, centerX: 50, fill: 'white' } ) ],
+      renderer: 'canvas',
+      filters: [ new Grayscale( 0.5 ) ]
+    } ),
+    new HBox( {
+      filters: [ new Grayscale( 0.5 ) ],
+      children: [
+        new Node( {
+          children: [ demoNode, new Text( 'SVG-DOM', { top: 0, centerX: 50, fill: 'white' } ) ],
+          renderer: 'svg'
+        } ),
+        new Node( {
+          children: [ demoNode, new Text( 'Canvas-DOM', { top: 0, centerX: 50, fill: 'white' } ) ],
+          renderer: 'canvas'
+        } )
+      ]
+    } )
+  ]
+} ) );
+
+display.updateDisplay();
+document.body.appendChild( display.domElement );
+
+</script>
+
+</body>
+</html>

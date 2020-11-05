@@ -10,6 +10,7 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
+import platform from '../../../phet-core/js/platform.js';
 import scenery from '../scenery.js';
 import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
 import Features from '../util/Features.js';
@@ -323,7 +324,9 @@ class CanvasBlock extends FittedBlock {
           bottomWrapper.context.setTransform( 1, 0, 0, 1, 0, 0 );
 
           const filters = node._filters;
-          let canUseInternalFilter = Features.canvasFilter;
+          // We need to fall back to a different filter behavior with Chrome, since it over-darkens otherwise with the
+          // built-in feature.
+          let canUseInternalFilter = Features.canvasFilter && !platform.chromium;
           for ( let j = 0; j < filters.length; j++ ) {
             // If we use context.filter, it's equivalent to checking DOM compatibility on all of them.
             canUseInternalFilter = canUseInternalFilter && filters[ j ].isDOMCompatible();

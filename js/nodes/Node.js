@@ -168,6 +168,7 @@ import arrayDifference from '../../../phet-core/js/arrayDifference.js';
 import deprecationWarning from '../../../phet-core/js/deprecationWarning.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
+import platform from '../../../phet-core/js/platform.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
@@ -4464,7 +4465,7 @@ inherit( PhetioObject, Node, {
 
           if ( child._filters.length ) {
             // Filters shouldn't be too often, so less concerned about the GC here (and this is so much easier to read).
-            if ( Features.canvasFilter && _.every( child._filters, filter => filter.isDOMCompatible() ) ) {
+            if ( Features.canvasFilter && !platform.chromium && _.every( child._filters, filter => filter.isDOMCompatible() ) ) {
               wrapper.context.filter = child._filters.map( filter => filter.getCSSFilterString() ).join( ' ' );
             }
             else {
