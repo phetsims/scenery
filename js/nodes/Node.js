@@ -349,6 +349,7 @@ function Node( options ) {
 
   // @public {TinyForwardingProperty.<boolean>} - See setEnabled() and setEnabledProperty()
   this._enabledProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.enabled, DEFAULT_OPTIONS.enabledPropertyPhetioInstrumented );
+  this._enabledProperty.lazyLink( this.onEnabledPropertyChange.bind( this ) );
 
   // @public {TinyProperty.<boolean>} - Whether input event listeners on this Node or descendants on a trail will have
   // input listeners. triggered. Note that this does NOT effect picking, and only prevents some listeners from being
@@ -3563,6 +3564,16 @@ inherit( PhetioObject, Node, {
     return this._enabledProperty.value;
   },
   get enabled() { return this.isEnabled(); },
+
+  /**
+   * Called when enabledProperty changes values.
+   * @protected - override this to change the behavior of enabled
+   *
+   * @param {boolean} enabled
+   */
+  onEnabledPropertyChange: function( enabled ) {
+    !enabled && this.interruptSubtreeInput();
+  },
 
   /**
    * Sets whether input is enabled for this Node and its subtree. If false, input event listeners will not be fired
