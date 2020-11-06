@@ -12,7 +12,7 @@ import Filter from './Filter.js';
 
 class Invert extends Filter {
   /**
-   * @param {number} [amount]
+   * @param {number} [amount] - The amount of the effect, from 0 (none) to 1 (full)
    */
   constructor( amount = 1 ) {
     assert && assert( typeof amount === 'number', 'Invert amount should be a number' );
@@ -49,6 +49,9 @@ class Invert extends Filter {
     return true;
   }
 }
+
+// @public {Invert}
+Invert.FULL = new Invert( 1 );
 
 scenery.register( 'Invert', Invert );
 export default Invert;

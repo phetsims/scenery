@@ -7,15 +7,33 @@
  */
 
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
+import platform from '../../../phet-core/js/platform.js';
 import scenery from '../scenery.js';
 import CanvasContextWrapper from './CanvasContextWrapper.js';
 import Filter from './Filter.js';
 import Utils from './Utils.js';
 
 const isImageDataSupported = Utils.supportsImageDataCanvasFilter();
+const useFakeGamma = platform.chromium;
 
 class ColorMatrixFilter extends Filter {
   /**
+   * NOTE: It is possible but not generally recommended to create custom ColorMatrixFilter types. They should be
+   * compatible with Canvas and SVG, HOWEVER any WebGL/DOM content cannot work with those custom filters, and any
+   * combination of multiple SVG or Canvas elements will ALSO not work (since there is no CSS filter function that can
+   * do arbitrary color matrix operations). This means that performance will likely be reduced UNLESS all content is
+   * within a single SVG block.
+   *
+   * Please prefer the named subtypes where possible.
+   *
+   * The resulting color is the result of the matrix multiplication:
+   *
+   * [ m00 m01 m02 m03 m04 ]   [ r ]
+   * [ m10 m11 m12 m13 m14 ]   [ g ]
+   * [ m20 m21 m22 m23 m24 ] * [ b ]
+   * [ m30 m31 m32 m33 m34 ]   [ a ]
+   *                           [ 1 ]
+   *
    * @param {number} m00
    * @param {number} m01
    * @param {number} m02
@@ -40,7 +58,7 @@ class ColorMatrixFilter extends Filter {
   constructor( m00, m01, m02, m03, m04,
                m10, m11, m12, m13, m14,
                m20, m21, m22, m23, m24,
-               m30, m31, m32, m33, m34  ) {
+               m30, m31, m32, m33, m34 ) {
 
     assert && assert( typeof m00 === 'number' && isFinite( m00 ), 'm00 should be a finite number' );
     assert && assert( typeof m01 === 'number' && isFinite( m01 ), 'm01 should be a finite number' );
@@ -134,16 +152,33 @@ class ColorMatrixFilter extends Filter {
     for ( let i = 0; i < size; i++ ) {
       const index = i * 4;
 
-      const r = imageData.data[ index + 0 ];
-      const g = imageData.data[ index + 1 ];
-      const b = imageData.data[ index + 2 ];
-      const a = imageData.data[ index + 3 ];
+      if ( useFakeGamma ) {
+        // Gamma-corrected version, which seems to match SVG/DOM
+        // Eek, this seems required for chromium Canvas to have a standard behavior?
+        const gamma = 1.45;
+        const r = Math.pow( imageData.data[ index + 0 ] / 255, gamma );
+        const g = Math.pow( imageData.data[ index + 1 ] / 255, gamma );
+        const b = Math.pow( imageData.data[ index + 2 ] / 255, gamma );
+        const a = Math.pow( imageData.data[ index + 3 ] / 255, gamma );
 
-      // Clamp/round should be done by the UInt8Array, we don't do it here for performance reasons.
-      imageData.data[ index + 0 ] = r * this.m00 + g * this.m01 + b * this.m02 + a * this.m03 + this.m04;
-      imageData.data[ index + 1 ] = r * this.m10 + g * this.m11 + b * this.m12 + a * this.m13 + this.m14;
-      imageData.data[ index + 2 ] = r * this.m20 + g * this.m21 + b * this.m22 + a * this.m23 + this.m24;
-      imageData.data[ index + 3 ] = r * this.m30 + g * this.m31 + b * this.m32 + a * this.m33 + this.m34;
+        // Clamp/round should be done by the UInt8Array, we don't do it here for performance reasons.
+        imageData.data[ index + 0 ] = 255 * Math.pow( r * this.m00 + g * this.m01 + b * this.m02 + a * this.m03 + this.m04, 1 / gamma );
+        imageData.data[ index + 1 ] = 255 * Math.pow( r * this.m10 + g * this.m11 + b * this.m12 + a * this.m13 + this.m14, 1 / gamma );
+        imageData.data[ index + 2 ] = 255 * Math.pow( r * this.m20 + g * this.m21 + b * this.m22 + a * this.m23 + this.m24, 1 / gamma );
+        imageData.data[ index + 3 ] = 255 * Math.pow( r * this.m30 + g * this.m31 + b * this.m32 + a * this.m33 + this.m34, 1 / gamma );
+      }
+      else {
+        const r = imageData.data[ index + 0 ];
+        const g = imageData.data[ index + 1 ];
+        const b = imageData.data[ index + 2 ];
+        const a = imageData.data[ index + 3 ];
+
+        // Clamp/round should be done by the UInt8Array, we don't do it here for performance reasons.
+        imageData.data[ index + 0 ] = r * this.m00 + g * this.m01 + b * this.m02 + a * this.m03 + this.m04;
+        imageData.data[ index + 1 ] = r * this.m10 + g * this.m11 + b * this.m12 + a * this.m13 + this.m14;
+        imageData.data[ index + 2 ] = r * this.m20 + g * this.m21 + b * this.m22 + a * this.m23 + this.m24;
+        imageData.data[ index + 3 ] = r * this.m30 + g * this.m31 + b * this.m32 + a * this.m33 + this.m34;
+      }
     }
 
     wrapper.context.putImageData( imageData, 0, 0 );

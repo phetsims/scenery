@@ -12,7 +12,7 @@ import ColorMatrixFilter from './ColorMatrixFilter.js';
 
 class Grayscale extends ColorMatrixFilter {
   /**
-   * @param {number} [amount]
+   * @param {number} [amount] - The amount of the effect, from 0 (none) to 1 (full)
    */
   constructor( amount = 1 ) {
     assert && assert( typeof amount === 'number', 'Grayscale amount should be a number' );
@@ -22,6 +22,11 @@ class Grayscale extends ColorMatrixFilter {
 
     const n = 1 - amount;
 
+    // https://drafts.fxtf.org/filter-effects/#grayscaleEquivalent
+    // (0.2126 + 0.7874 * [1 - amount]) (0.7152 - 0.7152  * [1 - amount]) (0.0722 - 0.0722 * [1 - amount]) 0 0
+    // (0.2126 - 0.2126 * [1 - amount]) (0.7152 + 0.2848  * [1 - amount]) (0.0722 - 0.0722 * [1 - amount]) 0 0
+    // (0.2126 - 0.2126 * [1 - amount]) (0.7152 - 0.7152  * [1 - amount]) (0.0722 + 0.9278 * [1 - amount]) 0 0
+    // 0 0 0 1 0
     super(
       0.2126 + 0.7874 * n, 0.7152 - 0.7152  * n, 0.0722 - 0.0722 * n, 0, 0,
       0.2126 - 0.2126 * n, 0.7152 + 0.2848  * n, 0.0722 - 0.0722 * n, 0, 0,

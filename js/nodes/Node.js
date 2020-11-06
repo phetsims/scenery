@@ -168,6 +168,7 @@ import arrayDifference from '../../../phet-core/js/arrayDifference.js';
 import deprecationWarning from '../../../phet-core/js/deprecationWarning.js';
 import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
+import platform from '../../../phet-core/js/platform.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
@@ -3306,12 +3307,32 @@ inherit( PhetioObject, Node, {
    * Sets the non-opacity filters for this Node.
    * @public
    *
+   * The default is an empty array (no filters). It should be an array of Filter objects, which will be effectively
+   * applied in-order on this Node (and its subtree), and will be applied BEFORE opacity/clipping.
+   *
+   * NOTE: Some filters may decrease performance (and this may be platform-specific). Please read documentation for each
+   * filter before using.
+   *
+   * Typical filter types to use are:
+   * - Brightness
+   * - Contrast
+   * - DropShadow (EXPERIMENTAL)
+   * - GaussianBlur (EXPERIMENTAL)
+   * - Grayscale (Grayscale.FULL for the full effect)
+   * - HueRotate
+   * - Invert (Invert.FULL for the full effect)
+   * - Saturate
+   * - Sepia (Sepia.FULL for the full effect)
+   *
+   * Filter.js has more information in general on filters.
+   *
    * @param {Array.<Filter>} filters
    */
   setFilters: function( filters ) {
     assert && assert( Array.isArray( filters ), 'filters should be an array' );
     assert && assert( _.every( filters, filter => filter instanceof Filter ), 'filters should consist of Filter objects only' );
 
+    // We re-use the same array internally, so we don't reference a potentially-mutable array from outside.
     this._filters.length = 0;
     this._filters.push( ...filters );
 
@@ -4421,7 +4442,7 @@ inherit( PhetioObject, Node, {
 
           if ( child._filters.length ) {
             // Filters shouldn't be too often, so less concerned about the GC here (and this is so much easier to read).
-            if ( Features.canvasFilter && _.every( child._filters, filter => filter.isDOMCompatible() ) ) {
+            if ( Features.canvasFilter && !platform.chromium && _.every( child._filters, filter => filter.isDOMCompatible() ) ) {
               wrapper.context.filter = child._filters.map( filter => filter.getCSSFilterString() ).join( ' ' );
             }
             else {

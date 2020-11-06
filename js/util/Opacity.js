@@ -12,7 +12,9 @@ import Filter from './Filter.js';
 
 class Opacity extends Filter {
   /**
-   * @param {number} amount
+   * NOTE: Generally prefer setting a Node's opacity, unless this is required for stacking of filters.
+   *
+   * @param {number} amount - The amount of opacity, from 0 (invisible) to 1 (fully visible)
    */
   constructor( amount ) {
     assert && assert( typeof amount === 'number', 'Opacity amount should be a number' );

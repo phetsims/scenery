@@ -12,7 +12,7 @@ import ColorMatrixFilter from './ColorMatrixFilter.js';
 
 class Sepia extends ColorMatrixFilter {
   /**
-   * @param {number} [amount]
+   * @param {number} [amount] - The amount of the effect, from 0 (none) to 1 (full sepia)
    */
   constructor( amount = 1 ) {
     assert && assert( typeof amount === 'number', 'Sepia amount should be a number' );
@@ -54,6 +54,9 @@ class Sepia extends ColorMatrixFilter {
     return true;
   }
 }
+
+// @public {Sepia}
+Sepia.FULL = new Sepia( 1 );
 
 scenery.register( 'Sepia', Sepia );
 export default Sepia;
