@@ -1828,6 +1828,29 @@ QUnit.test( 'move to front/move to back', assert => {
 
 } );
 
+QUnit.test( 'Node.enabledProperty with PDOM', assert => {
+
+  const rootNode = new Node( { tagName: 'div' } );
+  var display = new Display( rootNode ); // eslint-disable-line
+  document.body.appendChild( display.domElement );
+
+  const a11yNode = new Node( {
+    tagName: 'p'
+  } );
+
+  rootNode.addChild( a11yNode );
+  assert.ok( a11yNode.accessibleInstances.length === 1, 'should have an instance when attached to display' );
+  assert.ok( !!a11yNode.accessibleInstances[ 0 ].peer, 'should have a peer' );
+
+  // TODO: is it important that aria-disabled is false on all enabled Nodes? See https://github.com/phetsims/scenery/issues/1100
+  // assert.ok( a11yNode.accessibleInstances[ 0 ].peer.primarySibling.getAttribute( 'aria-disabled' ) === 'false', 'should be enabled' );
+
+  a11yNode.enabled = false;
+  assert.ok( a11yNode.accessibleInstances[ 0 ].peer.primarySibling.getAttribute( 'aria-disabled' ) === 'true', 'should be enabled' );
+  a11yNode.dispose;
+  display.dispose();
+} );
+
 // these fuzzers take time, so it is nice when they are last
 QUnit.test( 'PDOMFuzzer with 3 nodes', assert => {
   const fuzzer = new PDOMFuzzer( 3, false );

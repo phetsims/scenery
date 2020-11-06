@@ -210,7 +210,6 @@ const NODE_OPTION_KEYS = [
   'enabledPropertyPhetioInstrumented', // {boolean} - When true, create an instrumented enabledProperty when this Node is instrumented, see setEnabledPropertyPhetioInstrumented() for more documentation
   'enabledProperty', // {Property.<boolean|null>|null} - Sets forwarding of the enabledProperty, see setEnabledProperty() for more documentation
   'enabled', // {boolean|null} - Whether the Node is enabled, see setEnabled() for more documentation
-  'disabledOpacity', // {number} - When the Node is enabled:false, what opacity does it have?
 
   'inputEnabled', // {boolean} Whether input events can reach into this subtree, see setInputEnabled() for more documentation
   'inputListeners', // {Array.<Object>} - The input listeners attached to the Node, see setInputListeners() for more documentation
@@ -261,7 +260,6 @@ const DEFAULT_OPTIONS = {
   pickablePropertyPhetioInstrumented: false,
   enabled: true,
   enabledPropertyPhetioInstrumented: false,
-  disabledOpacity: .45,
   inputEnabled: true,
   clipArea: null,
   mouseArea: null,
@@ -350,10 +348,6 @@ function Node( options ) {
 
   // @public {TinyForwardingProperty.<boolean>} - See setEnabled() and setEnabledProperty()
   this._enabledProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.enabled, DEFAULT_OPTIONS.enabledPropertyPhetioInstrumented );
-  this._enabledProperty.lazyLink( this.onEnabledPropertyChange.bind( this ) );
-
-  // @private - the opacity when enabled:false
-  this._disabledOpacity = DEFAULT_OPTIONS.disabledOpacity;
 
   // @public {TinyProperty.<boolean>} - Whether input event listeners on this Node or descendants on a trail will have
   // input listeners. triggered. Note that this does NOT effect picking, and only prevents some listeners from being
@@ -3548,43 +3542,6 @@ inherit( PhetioObject, Node, {
     return this._enabledProperty.value;
   },
   get enabled() { return this.isEnabled(); },
-
-  /**
-   * Called when enabledProperty changes values.
-   * @protected - override this to change the behavior of enabled
-   *
-   * @param {boolean} enabled
-   */
-  onEnabledPropertyChange: function( enabled ) {
-    !enabled && this.interruptSubtreeInput();
-    this.pickable = enabled;
-    this.opacity = enabled ? 1.0 : this._disabledOpacity;
-  },
-
-  /**
-   * The opacity when disabled (Node.isEnabled()===false)
-   * @public
-   *
-   * @param {number} disabledOpacity
-   */
-  setDisabledOpacity: function( disabledOpacity ) {
-    assert && assert( typeof disabledOpacity === 'number' && Number.isFinite( disabledOpacity ), 'disabledOpacity should be a finite number' );
-    assert && assert( disabledOpacity <= 1 && disabledOpacity >= 0, 'disabledOpacity should be between 0 and 1' );
-
-    this._disabledOpacity = disabledOpacity;
-  },
-  set disabledOpacity( value ) { this.setDisabledOpacity( value ); },
-
-  /**
-   * Returns the opacity when disabled.
-   * @public
-   *
-   * @returns {number}
-   */
-  getDisabledOpacity: function() {
-    return this._disabledOpacity;
-  },
-  get disabledOpacity() { return this.getDisabledOpacity(); },
 
   /**
    * Sets whether input is enabled for this Node and its subtree. If false, input event listeners will not be fired
