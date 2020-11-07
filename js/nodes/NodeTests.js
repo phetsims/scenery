@@ -175,12 +175,6 @@ if ( Tandem.PHET_IO_ENABLED ) {
    */
   const testInstrumentedNodeProperty = ( assert, nodeField, nodeProperty, nodePropertySetter, ownedPropertyPhetioInstrumented ) => {
 
-    // TODO: Use the AuxiliaryTandemRegistry?  See https://github.com/phetsims/tandem/issues/187
-    const wasLaunched = Tandem.launched;
-    if ( !Tandem.launched ) {
-      Tandem.launch();
-    }
-
     const apiValidation = phet.tandem.phetioAPIValidation;
     const previousAPIValidationEnabled = apiValidation.enabled;
     const previousSimStarted = apiValidation.simHasStarted;
@@ -418,9 +412,5 @@ if ( Tandem.PHET_IO_ENABLED ) {
     otherInstrumentedProperty.dispose();
     apiValidation.simHasStarted = previousSimStarted;
     apiValidation.enabled = previousAPIValidationEnabled;
-
-    if ( !wasLaunched ) {
-      Tandem.unlaunch();
-    }
   };
 }
