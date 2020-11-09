@@ -117,6 +117,7 @@ class Color {
   getRed() {
     return this.r;
   }
+
   get red() { return this.getRed(); }
 
   /**
@@ -129,6 +130,7 @@ class Color {
   setRed( value ) {
     return this.setRGBA( value, this.g, this.b, this.a );
   }
+
   set red( value ) { return this.setRed( value ); }
 
   /**
@@ -140,6 +142,7 @@ class Color {
   getGreen() {
     return this.g;
   }
+
   get green() { return this.getGreen(); }
 
   /**
@@ -152,6 +155,7 @@ class Color {
   setGreen( value ) {
     return this.setRGBA( this.r, value, this.b, this.a );
   }
+
   set green( value ) { return this.setGreen( value ); }
 
   /**
@@ -163,6 +167,7 @@ class Color {
   getBlue() {
     return this.b;
   }
+
   get blue() { return this.getBlue(); }
 
   /**
@@ -175,6 +180,7 @@ class Color {
   setBlue( value ) {
     return this.setRGBA( this.r, this.g, value, this.a );
   }
+
   set blue( value ) { return this.setBlue( value ); }
 
   /**
@@ -186,6 +192,7 @@ class Color {
   getAlpha() {
     return this.a;
   }
+
   get alpha() { return this.getAlpha(); }
 
   /**
@@ -198,6 +205,7 @@ class Color {
   setAlpha( value ) {
     return this.setRGBA( this.r, this.g, this.b, value );
   }
+
   set alpha( value ) { return this.setAlpha( value ); }
 
   /**
@@ -564,7 +572,8 @@ class Color {
       r: this.r,
       g: this.g,
       b: this.b,
-      a: this.a
+      a: this.a,
+      hex: '#' + this.toNumber().toString( 16 )
     };
   }
 
@@ -1065,7 +1074,9 @@ Color.ColorIO = new IOType( 'ColorIO', {
   valueType: Color,
   documentation: 'A color, with rgba',
   toStateObject: color => color.toStateObject(),
-  fromStateObject: stateObject => new Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a )
+  fromStateObject: stateObject => {
+    return stateObject.hex ? new Color( stateObject.hex ) : new Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a );
+  }
 } );
 
 export default Color;
