@@ -4451,18 +4451,23 @@ inherit( PhetioObject, Node, {
           wrapper.context.setTransform( 1, 0, 0, 1, 0, 0 ); // identity
           wrapper.context.globalAlpha = child.opacity;
 
+          let setFilter = false;
           if ( child._filters.length ) {
             // Filters shouldn't be too often, so less concerned about the GC here (and this is so much easier to read).
             if ( Features.canvasFilter && !platform.chromium && _.every( child._filters, filter => filter.isDOMCompatible() ) ) {
               wrapper.context.filter = child._filters.map( filter => filter.getCSSFilterString() ).join( ' ' );
+              setFilter = true;
             }
             else {
-              child._filters.forEach( filter => filter.applyCanvasFilter( wrapper ) );
+              child._filters.forEach( filter => filter.applyCanvasFilter( childWrapper ) );
             }
           }
 
           wrapper.context.drawImage( canvas, 0, 0 );
           wrapper.context.restore();
+          if ( setFilter ) {
+            wrapper.context.filter = 'none';
+          }
         }
         else {
           child.renderToCanvasSubtree( wrapper, matrix );
