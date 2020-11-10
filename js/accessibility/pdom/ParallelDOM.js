@@ -488,10 +488,17 @@ const ParallelDOM = {
        * @private
        * @param {boolean} enabled
        */
-      pdomEnabledListener: function (enabled) {
+      pdomEnabledListener: function( enabled ) {
 
         // Mark this Node as disabled in the ParallelDOM
         this.setAccessibleAttribute( 'aria-disabled', !enabled );
+
+        // By returning false, we prevent the component from toggling native HTML element attributes that convey state.
+        // For example,this will prevent a checkbox from changing `checked` property while it is disabled. This way
+        // we can keep the component in tab order and don't need to add the `disabled` attribute. See
+        // https://github.com/phetsims/sun/issues/519 and https://github.com/phetsims/sun/issues/640
+        // This solution was found at https://stackoverflow.com/a/12267350/3408502
+        this.setAccessibleAttribute( 'onclick', enabled ? '' : 'return false' );
       },
 
       /**
