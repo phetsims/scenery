@@ -473,6 +473,7 @@ class SVGGroup {
     assert && assert( this.children.length === 0, 'Should be empty by now' );
 
     if ( this.hasFilter ) {
+      this.svgGroup.removeAttribute( 'filter' );
       this.hasFilter = false;
       this.block.defs.removeChild( this.filterElement );
     }
