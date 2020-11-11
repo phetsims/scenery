@@ -234,7 +234,7 @@ inherit( Node, Text, {
 
     Node.prototype.initializePhetioObject.call( this, baseOptions, config );
 
-    if ( !wasInstrumented && this.isPhetioInstrumented() ) {
+    if ( Tandem.PHET_IO_ENABLED && !wasInstrumented && this.isPhetioInstrumented() ) {
       this._textProperty.initializePhetio( this, TEXT_PROPERTY_TANDEM_NAME, () => new StringProperty( this.text, merge( {
 
           // by default, use the value from the Node

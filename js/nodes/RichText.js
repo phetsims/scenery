@@ -294,7 +294,7 @@ class RichText extends Node {
 
     super.initializePhetioObject( baseOptions, config );
 
-    if ( !wasInstrumented && this.isPhetioInstrumented() ) {
+    if ( Tandem.PHET_IO_ENABLED && !wasInstrumented && this.isPhetioInstrumented() ) {
 
       this._textProperty.initializePhetio( this, TEXT_PROPERTY_TANDEM_NAME, () => new StringProperty( this.text, merge( {
 

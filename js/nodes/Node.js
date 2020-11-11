@@ -170,6 +170,7 @@ import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
+import Tandem from '../../../tandem/js/Tandem.js';
 import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
@@ -5503,7 +5504,7 @@ inherit( PhetioObject, Node, {
 
     PhetioObject.prototype.initializePhetioObject.call( this, baseOptions, config );
 
-    if ( !wasInstrumented && this.isPhetioInstrumented() ) {
+    if ( Tandem.PHET_IO_ENABLED &&  !wasInstrumented && this.isPhetioInstrumented() ) {
 
       // For each supported TinyForwardingProperty, if a Property was already specified in the options (in the
       // constructor or mutate), then it will be set as this.targetProperty there. Here we only create the default
