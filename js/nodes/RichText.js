@@ -60,10 +60,10 @@
 import StringProperty from '../../../axon/js/StringProperty.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import Poolable from '../../../phet-core/js/Poolable.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
 import merge from '../../../phet-core/js/merge.js';
 import openPopup from '../../../phet-core/js/openPopup.js';
+import Poolable from '../../../phet-core/js/Poolable.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import ButtonListener from '../input/ButtonListener.js';
@@ -241,7 +241,6 @@ class RichText extends Node {
   }
 
 
-
   /**
    * Called when our text Property changes values.
    * @private
@@ -261,6 +260,7 @@ class RichText extends Node {
   setTextProperty( newTarget ) {
     return this._textProperty.setTargetProperty( this, TEXT_PROPERTY_TANDEM_NAME, newTarget );
   }
+
   set textProperty( property ) { this.setTextProperty( property ); }
 
   /**
@@ -273,6 +273,7 @@ class RichText extends Node {
   getTextProperty() {
     return this._textProperty;
   }
+
   get textProperty() { return this.getTextProperty(); }
 
   /**
@@ -771,6 +772,7 @@ class RichText extends Node {
 
     return this;
   }
+
   set text( value ) { this.setText( value ); }
 
   /**
@@ -782,6 +784,7 @@ class RichText extends Node {
   getText() {
     return this._textProperty.value;
   }
+
   get text() { return this.getText(); }
 
   /**
@@ -799,6 +802,7 @@ class RichText extends Node {
     }
     return this;
   }
+
   set boundsMethod( value ) { this.setBoundsMethod( value ); }
 
   /**
@@ -810,6 +814,7 @@ class RichText extends Node {
   getBoundsMethod() {
     return this._boundsMethod;
   }
+
   get boundsMethod() { return this.getBoundsMethod(); }
 
   /**
@@ -829,6 +834,7 @@ class RichText extends Node {
     }
     return this;
   }
+
   set font( value ) { this.setFont( value ); }
 
   /**
@@ -840,6 +846,7 @@ class RichText extends Node {
   getFont() {
     return this._font;
   }
+
   get font() { return this.getFont(); }
 
   /**
@@ -856,6 +863,7 @@ class RichText extends Node {
     }
     return this;
   }
+
   set fill( value ) { this.setFill( value ); }
 
   /**
@@ -867,6 +875,7 @@ class RichText extends Node {
   getFill() {
     return this._fill;
   }
+
   get fill() { return this.getFill(); }
 
   /**
@@ -883,6 +892,7 @@ class RichText extends Node {
     }
     return this;
   }
+
   set stroke( value ) { this.setStroke( value ); }
 
   /**
@@ -894,6 +904,7 @@ class RichText extends Node {
   getStroke() {
     return this._stroke;
   }
+
   get stroke() { return this.getStroke(); }
 
   /**
@@ -910,6 +921,7 @@ class RichText extends Node {
     }
     return this;
   }
+
   set lineWidth( value ) { this.setLineWidth( value ); }
 
   /**
@@ -921,6 +933,7 @@ class RichText extends Node {
   getLineWidth() {
     return this._lineWidth;
   }
+
   get lineWidth() { return this.getLineWidth(); }
 
   /**
@@ -939,6 +952,7 @@ class RichText extends Node {
     }
     return this;
   }
+
   set subScale( value ) { this.setSubScale( value ); }
 
   /**
@@ -950,6 +964,7 @@ class RichText extends Node {
   getSubScale() {
     return this._subScale;
   }
+
   get subScale() { return this.getSubScale(); }
 
   /**
@@ -968,6 +983,7 @@ class RichText extends Node {
     }
     return this;
   }
+
   set subXSpacing( value ) { this.setSubXSpacing( value ); }
 
   /**
@@ -979,6 +995,7 @@ class RichText extends Node {
   getSubXSpacing() {
     return this._subXSpacing;
   }
+
   get subXSpacing() { return this.getSubXSpacing(); }
 
   /**
@@ -997,6 +1014,7 @@ class RichText extends Node {
     }
     return this;
   }
+
   set subYOffset( value ) { this.setSubYOffset( value ); }
 
   /**
@@ -1008,6 +1026,7 @@ class RichText extends Node {
   getSubYOffset() {
     return this._subYOffset;
   }
+
   get subYOffset() { return this.getSubYOffset(); }
 
   /**
@@ -1026,6 +1045,7 @@ class RichText extends Node {
     }
     return this;
   }
+
   set supScale( value ) { this.setSupScale( value ); }
 
   /**
@@ -1037,6 +1057,7 @@ class RichText extends Node {
   getSupScale() {
     return this._supScale;
   }
+
   get supScale() { return this.getSupScale(); }
 
   /**
@@ -1055,6 +1076,7 @@ class RichText extends Node {
     }
     return this;
   }
+
   set supXSpacing( value ) { this.setSupXSpacing( value ); }
 
   /**
@@ -1066,6 +1088,7 @@ class RichText extends Node {
   getSupXSpacing() {
     return this._supXSpacing;
   }
+
   get supXSpacing() { return this.getSupXSpacing(); }
 
   /**
@@ -1084,6 +1107,7 @@ class RichText extends Node {
     }
     return this;
   }
+
   set supYOffset( value ) { this.setSupYOffset( value ); }
 
   /**
@@ -1095,6 +1119,7 @@ class RichText extends Node {
   getSupYOffset() {
     return this._supYOffset;
   }
+
   get supYOffset() { return this.getSupYOffset(); }
 
   /**
@@ -1114,6 +1139,7 @@ class RichText extends Node {
     }
     return this;
   }
+
   set capHeightScale( value ) { this.setCapHeightScale( value ); }
 
   /**
@@ -1126,6 +1152,7 @@ class RichText extends Node {
   getCapHeightScale() {
     return this._capHeightScale;
   }
+
   get capHeightScale() { return this.getCapHeightScale(); }
 
   /**
@@ -1144,6 +1171,7 @@ class RichText extends Node {
     }
     return this;
   }
+
   set underlineLineWidth( value ) { this.setUnderlineLineWidth( value ); }
 
   /**
@@ -1155,6 +1183,7 @@ class RichText extends Node {
   getUnderlineLineWidth() {
     return this._underlineLineWidth;
   }
+
   get underlineLineWidth() { return this.getUnderlineLineWidth(); }
 
   /**
@@ -1174,6 +1203,7 @@ class RichText extends Node {
     }
     return this;
   }
+
   set underlineHeightScale( value ) { this.setUnderlineHeightScale( value ); }
 
   /**
@@ -1186,6 +1216,7 @@ class RichText extends Node {
   getUnderlineHeightScale() {
     return this._underlineHeightScale;
   }
+
   get underlineHeightScale() { return this.getUnderlineHeightScale(); }
 
   /**
@@ -1204,6 +1235,7 @@ class RichText extends Node {
     }
     return this;
   }
+
   set strikethroughLineWidth( value ) { this.setStrikethroughLineWidth( value ); }
 
   /**
@@ -1215,6 +1247,7 @@ class RichText extends Node {
   getStrikethroughLineWidth() {
     return this._strikethroughLineWidth;
   }
+
   get strikethroughLineWidth() { return this.getStrikethroughLineWidth(); }
 
   /**
@@ -1234,6 +1267,7 @@ class RichText extends Node {
     }
     return this;
   }
+
   set strikethroughHeightScale( value ) { this.setStrikethroughHeightScale( value ); }
 
   /**
@@ -1246,6 +1280,7 @@ class RichText extends Node {
   getStrikethroughHeightScale() {
     return this._strikethroughHeightScale;
   }
+
   get strikethroughHeightScale() { return this.getStrikethroughHeightScale(); }
 
   /**
@@ -1262,6 +1297,7 @@ class RichText extends Node {
     }
     return this;
   }
+
   set linkFill( value ) { this.setLinkFill( value ); }
 
   /**
@@ -1273,6 +1309,7 @@ class RichText extends Node {
   getLinkFill() {
     return this._linkFill;
   }
+
   get linkFill() { return this.getLinkFill(); }
 
   /**
@@ -1291,6 +1328,7 @@ class RichText extends Node {
     }
     return this;
   }
+
   set linkEventsHandled( value ) { this.setLinkEventsHandled( value ); }
 
   /**
@@ -1302,6 +1340,7 @@ class RichText extends Node {
   getLinkEventsHandled() {
     return this._linkEventsHandled;
   }
+
   get linkEventsHandled() { return this.getLinkEventsHandled(); }
 
   /**
@@ -1344,6 +1383,7 @@ class RichText extends Node {
     }
     return this;
   }
+
   set links( value ) { this.setLinks( value ); }
 
   /**
@@ -1355,6 +1395,7 @@ class RichText extends Node {
   getLinks() {
     return this._links;
   }
+
   get links() { return this.getLinks(); }
 
   /**
@@ -1373,6 +1414,7 @@ class RichText extends Node {
     }
     return this;
   }
+
   set align( value ) { this.setAlign( value ); }
 
   /**
@@ -1384,6 +1426,7 @@ class RichText extends Node {
   getAlign() {
     return this._align;
   }
+
   get align() { return this.getAlign(); }
 
   /**
@@ -1402,6 +1445,7 @@ class RichText extends Node {
     }
     return this;
   }
+
   set leading( value ) { this.setLeading( value ); }
 
   /**
@@ -1413,6 +1457,7 @@ class RichText extends Node {
   getLeading() {
     return this._leading;
   }
+
   get leading() { return this.getLeading(); }
 
   /**
@@ -1432,6 +1477,7 @@ class RichText extends Node {
     }
     return this;
   }
+
   set lineWrap( value ) { this.setLineWrap( value ); }
 
   /**
@@ -1443,6 +1489,7 @@ class RichText extends Node {
   getLineWrap() {
     return this._lineWrap;
   }
+
   get lineWrap() { return this.getLineWrap(); }
 
   /**
