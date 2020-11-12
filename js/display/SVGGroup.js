@@ -338,7 +338,7 @@ class SVGGroup {
         }
 
         // Fill in elements into our filter
-        let filterRegionPercentageIncrease = 10;
+        let filterRegionPercentageIncrease = 50;
         let inName = 'SourceGraphic';
         const length = this.node._filters.length;
         for ( let i = 0; i < length; i++ ) {
