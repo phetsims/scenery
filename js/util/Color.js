@@ -585,8 +585,7 @@ class Color {
       r: this.r,
       g: this.g,
       b: this.b,
-      a: this.a,
-      hex: this.toHexString()
+      a: this.a
     };
   }
 
@@ -1087,9 +1086,7 @@ Color.ColorIO = new IOType( 'ColorIO', {
   valueType: Color,
   documentation: 'A color, with rgba',
   toStateObject: color => color.toStateObject(),
-  fromStateObject: stateObject => {
-    return stateObject.hex ? new Color( stateObject.hex ) : new Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a );
-  }
+  fromStateObject: stateObject => new Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a )
 } );
 
 export default Color;
