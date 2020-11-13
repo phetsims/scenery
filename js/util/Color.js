@@ -563,6 +563,19 @@ class Color {
   }
 
   /**
+   * Convert to a hex string, that starts with "#".
+   * @public
+   * @returns {string}
+   */
+  toHex() {
+    let hexString = this.toNumber().toString( 16 );
+    while ( hexString.length < 6 ) {
+      hexString = `0${hexString}`;
+    }
+    return `#${hexString}`;
+  }
+
+  /**
    * @public
    *
    * @returns {Object}
@@ -573,7 +586,7 @@ class Color {
       g: this.g,
       b: this.b,
       a: this.a,
-      hex: '#' + this.toNumber().toString( 16 )
+      hex: this.toHex()
     };
   }
 
