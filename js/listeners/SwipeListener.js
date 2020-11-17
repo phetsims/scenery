@@ -115,7 +115,7 @@ class SwipeListener {
 
             // for upcoming interviews, lets limit the focus to be within the simulation,
             // don't allow it to go into the (uninstrumented) navigation bar
-            if ( Display.focusedNode.innerContent === 'Reset All' ) {
+            if ( Display.focusedNode && Display.focusedNode.innerContent === 'Reset All' ) {
               return;
             }
             PDOMUtils.getNextFocusable( document.body ).focus();
