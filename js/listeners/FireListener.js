@@ -35,6 +35,7 @@ class FireListener extends PressListener {
       fireOnDown: false,
 
       // fire-on-hold feature, see https://github.com/phetsims/scenery/issues/1004
+      // TODO: these options are not supported with PDOM interaction, see https://github.com/phetsims/scenery/issues/1117
       fireOnHold: false, // {boolean} - is the fire-on-hold feature enabled?
       fireOnHoldDelay: 400, // {number} - start to fire continuously after pressing for this long (milliseconds)
       fireOnHoldInterval: 100, // {number} - fire continuously at this interval (milliseconds)
