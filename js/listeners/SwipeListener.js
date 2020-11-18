@@ -29,7 +29,11 @@ const PRESS_AND_HOLD_INTERVAL = 0.5; // in seconds, amount of time to initiate a
 const DOUBLE_TAP_INTERVAL = 0.6; // in seconds, max time between down events that would indicate a click gesture
 
 class SwipeListener {
-  constructor() {
+
+  /**
+   * @param {Input} input
+   */
+  constructor( input ) {
 
     // @private - reference to the pointer taken on down, to watch for the user gesture
     this._pointer = null;
@@ -40,6 +44,9 @@ class SwipeListener {
     // @private - reference to the down event initially so we can pass it to swipeStart
     // if the pointer remains down for long enough
     this.downEvent = null;
+
+    // @public - is the input listener enabled?
+    this.enabled = false;
 
     // @private {Vector2} - point of the last Pointer on down
     this.lastPoint = null;
@@ -63,6 +70,26 @@ class SwipeListener {
     // @private - a reference to the focused Node so that we can call swipe functions
     // implemented on the Node when a swipe to drag gesture has been initiated
     this.focusedNode = null;
+
+    // @private - listener that gets attached to the Pointer right as it is added to Input,
+    // to prevent any other input handling or dispatching
+    this.handleEventListener = {
+      down: event => {
+
+        // do not allow any other input handling, this listener assumes control
+        event.handle();
+        event.abort();
+
+        // start the event handling, down will add Pointer listeners to respond to swipes
+        // and other gestures
+        this.handleDown( event );
+      }
+    };
+    input.addPointerAddedListener( pointer => {
+      if ( this.enabled ) {
+        pointer.addInputListener( this.handleEventListener, true );
+      }
+    } );
 
     // @private - listener added to the pointer with atachment to call swipe functions
     // on a particular node with focus
@@ -163,12 +190,10 @@ class SwipeListener {
   }
 
   /**
-   * Part of the scenery input API.
-   *
    * @public (scenery-internal)
    * @param event
    */
-  down( event ) {
+  handleDown( event ) {
     event.pointer.addIntent( Pointer.Intent.DRAG );
     this.downPointers.push( event.pointer );
 
@@ -178,29 +203,26 @@ class SwipeListener {
       event.pointer.removeIntent( Pointer.Intent.DRAG );
     }
 
-    if ( this._pointer === null && event.pointer.type === 'touch' ) {
+    assert && assert( event.pointer.attachedProperty.get(), 'should be attached to the handle listener' );
+    event.pointer.removeInputListener( this.handleEventListener );
 
-      // this listener will take priority, remove any other listeners
-      event.pointer.interruptAll();
+    if ( this._pointer === null && event.pointer.type === 'touch' ) {
 
       // don't add new listeners if we weren't able to successfully detach and interrupt
       // the previous listener
-      if ( !event.pointer.isAttached() ) {
-        this._pointer = event.pointer;
+      this._pointer = event.pointer;
+      event.pointer.addInputListener( this._pointerListener, true );
 
-        event.pointer.addInputListener( this._pointerListener, true );
+      // this takes priority, no other listeners should fire
+      event.abort();
 
-        // this takes priority, no other listeners should fire
-        event.abort();
+      // keep a reference to the event on down so we can use it in the swipeStart
+      // callback if the pointer remains down for long enough
+      this.downEvent = event;
 
-        // keep a reference to the event on down so we can use it in the swipeStart
-        // callback if the pointer remains down for long enough
-        this.downEvent = event;
-
-        this.downPoint = event.pointer.point;
-        this.currentPoint = this.downPoint.copy();
-        this.previousPoint = this.currentPoint.copy();
-      }
+      this.downPoint = event.pointer.point;
+      this.currentPoint = this.downPoint.copy();
+      this.previousPoint = this.currentPoint.copy();
     }
   }
 
