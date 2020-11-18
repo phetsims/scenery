@@ -6,8 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import phetioAPITest from '../../../tandem/js/phetioAPITest.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import FireListener from './FireListener.js';
+import FireListenerAPI from './FireListenerAPI.js';
 import ListenerTestUtils from './ListenerTestUtils.js';
 
 QUnit.module( 'FireListener' );
@@ -62,4 +64,8 @@ QUnit.test( 'Basics', assert => {
 
     listener.dispose();
   } );
+} );
+
+QUnit.test( 'PhET-iO API Validation', assert => {
+  phetioAPITest( assert, new FireListenerAPI(), 'fireListener', tandem => new FireListener( { tandem: tandem } ) );
 } );

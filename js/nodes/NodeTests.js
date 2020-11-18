@@ -10,9 +10,11 @@ import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Shape from '../../../kite/js/Shape.js';
+import phetioAPITest from '../../../tandem/js/phetioAPITest.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import Touch from '../input/Touch.js';
 import Node from './Node.js';
+import NodeAPI from './NodeAPI.js';
 import Rectangle from './Rectangle.js';
 
 QUnit.module( 'Node' );
@@ -413,4 +415,34 @@ if ( Tandem.PHET_IO_ENABLED ) {
     apiValidation.simHasStarted = previousSimStarted;
     apiValidation.enabled = previousAPIValidationEnabled;
   };
+
+  QUnit.test( 'PhET-iO API Validation', assert => {
+    phetioAPITest( assert, new NodeAPI( {
+      enabledPropertyPhetioInstrumented: true,
+      pickablePropertyPhetioInstrumented: true
+    } ), 'node', tandem => new Node( {
+      enabledPropertyPhetioInstrumented: true,
+      pickablePropertyPhetioInstrumented: true,
+      tandem: tandem
+    } ) );
+
+    phetioAPITest( assert, new NodeAPI( {
+      pickablePropertyPhetioInstrumented: true
+    } ), 'node', tandem => new Node( {
+      pickablePropertyPhetioInstrumented: true,
+      tandem: tandem
+    } ) );
+
+
+    phetioAPITest( assert, new NodeAPI( {
+      enabledPropertyPhetioInstrumented: true
+    } ), 'node', tandem => new Node( {
+      enabledPropertyPhetioInstrumented: true,
+      tandem: tandem
+    } ) );
+
+    phetioAPITest( assert, new NodeAPI(), 'node', tandem => new Node( {
+      tandem: tandem
+    } ) );
+  } );
 }

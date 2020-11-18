@@ -32,7 +32,8 @@ class NodeAPI extends PhetioObjectAPI {
 
       pickablePropertyPhetioInstrumented: false,
       pickablePropertyOptions: {
-        phetioType: Property.PropertyIO( NullableIO( BooleanIO ) )
+        phetioType: Property.PropertyIO( NullableIO( BooleanIO ) ),
+        phetioFeatured: true
       },
 
       enabledPropertyPhetioInstrumented: false,
