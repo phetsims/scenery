@@ -122,8 +122,8 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
-import ValidatorDef from '../../../../axon/js/ValidatorDef.js';
 import validate from '../../../../axon/js/validate.js';
+import ValidatorDef from '../../../../axon/js/ValidatorDef.js';
 import Shape from '../../../../kite/js/Shape.js';
 import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
 import extend from '../../../../phet-core/js/extend.js';
