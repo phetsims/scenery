@@ -1,38 +1,39 @@
 // Copyright 2020, University of Colorado Boulder
 
 /**
- * PhET-iO API type for DragListener.
+ * PhET-iO API type for FireListener.
  *
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
-import Action from '../../../axon/js/Action.js';
 import ActionAPI from '../../../axon/js/ActionAPI.js';
+import Emitter from '../../../axon/js/Emitter.js';
 import merge from '../../../phet-core/js/merge.js';
 import EventType from '../../../tandem/js/EventType.js';
+import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import SceneryEvent from '../input/SceneryEvent.js';
 import scenery from '../scenery.js';
 import PressListenerAPI from './PressListenerAPI.js';
 
-class DragListenerAPI extends PressListenerAPI {
+class FireListenerAPI extends PressListenerAPI {
+
   /**
    * @param {Object} [options]
    */
   constructor( options ) {
     options = merge( {
-      dragActionOptions: {
-        phetioType: Action.ActionIO( [ SceneryEvent.SceneryEventIO ] ),
-        phetioEventType: EventType.USER,
-        phetioHighFrequency: true,
-        phetioReadOnly: true
+      firedEmitterOptions: {
+        phetioType: Emitter.EmitterIO( [ NullableIO( SceneryEvent.SceneryEventIO ) ] ),
+        phetioEventType: EventType.USER
       }
     }, options );
+
     super( options );
 
     // @public (read-only)
-    this.dragAction = new ActionAPI( options.dragActionOptions );
+    this.firedEmitter = new ActionAPI( options.firedEmitterOptions );
   }
 }
 
-scenery.register( 'DragListenerAPI', DragListenerAPI );
-export default DragListenerAPI;
+scenery.register( 'FireListenerAPI', FireListenerAPI );
+export default FireListenerAPI;

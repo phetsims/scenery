@@ -7,8 +7,8 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
-import PropertyAPI from '../../../axon/js/PropertyAPI.js';
 import Property from '../../../axon/js/Property.js';
+import PropertyAPI from '../../../axon/js/PropertyAPI.js';
 import merge from '../../../phet-core/js/merge.js';
 import PhetioObjectAPI from '../../../tandem/js/PhetioObjectAPI.js';
 import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
@@ -43,18 +43,25 @@ class NodeAPI extends PhetioObjectAPI {
     }, options );
     super( options );
 
+    // @public (read-only)
     this.visibleProperty = new PropertyAPI( options.visiblePropertyOptions );
 
     if ( options.pickablePropertyPhetioInstrumented ) {
+
+      // @public (read-only)
       this.pickableProperty = new PropertyAPI( options.pickablePropertyOptions );
     }
 
     if ( options.enabledPropertyPhetioInstrumented ) {
+
+      // @public (read-only)
       this.enabledProperty = new PropertyAPI( options.enabledPropertyOptions );
     }
 
     // TODO: not supported yet, see https://github.com/phetsims/scenery/issues/1098
     if ( options.opacityPropertyInstrumented ) {
+
+      // @public (read-only)
       this.opacityProperty = new PropertyAPI( options.opacityPropertyOptions );
     }
   }

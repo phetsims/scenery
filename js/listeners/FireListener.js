@@ -40,7 +40,7 @@ class FireListener extends PressListener {
       fireOnHoldDelay: 400, // {number} - start to fire continuously after pressing for this long (milliseconds)
       fireOnHoldInterval: 100, // {number} - fire continuously at this interval (milliseconds)
 
-      // {Tandem}
+      // phet-io
       tandem: Tandem.REQUIRED,
 
       // Though FireListener is not instrumented, declare these here to support properly passing this to children

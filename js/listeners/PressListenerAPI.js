@@ -37,6 +37,7 @@ class PressListenerAPI extends UninstrumentedAPI {
 
     super();
 
+    // @public (read-only)
     this.pressAction = new ActionAPI( options.pressActionOptions );
     this.releaseAction = new ActionAPI( options.releaseActionOptions );
   }

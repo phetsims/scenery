@@ -245,7 +245,7 @@ class PressListener {
       tandem: options.tandem.createTandem( 'pressAction' ),
       phetioDocumentation: 'Executes whenever a press occurs. The first argument when executing can be ' +
                            'used to convey info about the SceneryEvent.',
-      phetioReadOnly: options.phetioReadOnly,
+      phetioReadOnly: true,
       phetioFeatured: options.phetioFeatured,
       phetioEventType: EventType.USER,
       parameters: [ {
@@ -276,7 +276,7 @@ class PressListener {
       // phet-io
       tandem: options.tandem.createTandem( 'releaseAction' ),
       phetioDocumentation: 'Executes whenever a release occurs.',
-      phetioReadOnly: options.phetioReadOnly,
+      phetioReadOnly: true,
       phetioFeatured: options.phetioFeatured,
       phetioEventType: EventType.USER
     } );
