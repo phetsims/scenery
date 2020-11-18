@@ -33,6 +33,12 @@ class NodeAPI extends PhetioObjectAPI {
       pickablePropertyPhetioInstrumented: false,
       pickablePropertyOptions: {
         phetioType: Property.PropertyIO( NullableIO( BooleanIO ) )
+      },
+
+      enabledPropertyPhetioInstrumented: false,
+      enabledPropertyOptions: {
+        phetioFeatured: true,
+        phetioType: Property.PropertyIO( BooleanIO )
       }
     }, options );
     super( options );
@@ -41,6 +47,10 @@ class NodeAPI extends PhetioObjectAPI {
 
     if ( options.pickablePropertyPhetioInstrumented ) {
       this.pickableProperty = new PropertyAPI( options.pickablePropertyOptions );
+    }
+
+    if ( options.enabledPropertyPhetioInstrumented ) {
+      this.enabledProperty = new PropertyAPI( options.enabledPropertyOptions );
     }
 
     // TODO: not supported yet, see https://github.com/phetsims/scenery/issues/1098
