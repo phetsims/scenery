@@ -25,7 +25,10 @@ import Pointer from '../input/Pointer.js';
 import scenery from '../scenery.js';
 
 // constants
-const PRESS_AND_HOLD_INTERVAL = 0.5; // in seconds, amount of time to initiate a press and hold gesture
+// in seconds, amount of time to initiate a press and hold gesture - note, it must be at least this long
+// or else vibrations won't start from a press and hold gesture because the default press and hold
+// vibration from safari interferes, see https://github.com/phetsims/gravity-force-lab-basics/issues/260
+const PRESS_AND_HOLD_INTERVAL = 1.0;
 const DOUBLE_TAP_INTERVAL = 0.6; // in seconds, max time between down events that would indicate a click gesture
 
 class SwipeListener {
