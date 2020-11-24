@@ -52,8 +52,8 @@
 
 import Emitter from '../../../axon/js/Emitter.js';
 import Property from '../../../axon/js/Property.js';
-import TinyProperty from '../../../axon/js/TinyProperty.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
+import TinyProperty from '../../../axon/js/TinyProperty.js';
 import Dimension2 from '../../../dot/js/Dimension2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import escapeHTML from '../../../phet-core/js/escapeHTML.js';
@@ -84,9 +84,9 @@ import BackboneDrawable from './BackboneDrawable.js';
 import ChangeInterval from './ChangeInterval.js';
 import DOMBlock from './DOMBlock.js';
 import Drawable from './Drawable.js';
+import DOMDrawable from './drawables/DOMDrawable.js';
 import Instance from './Instance.js';
 import Renderer from './Renderer.js';
-import DOMDrawable from './drawables/DOMDrawable.js';
 
 class Display {
   /**
@@ -376,6 +376,7 @@ class Display {
   getDOMElement() {
     return this._domElement;
   }
+
   get domElement() { return this.getDOMElement(); }
 
   /**
@@ -608,6 +609,7 @@ class Display {
   getRootNode() {
     return this._rootNode;
   }
+
   get rootNode() { return this.getRootNode(); }
 
   /**
@@ -618,6 +620,7 @@ class Display {
   getRootBackbone() {
     return this._rootBackbone;
   }
+
   get rootBackbone() { return this.getRootBackbone(); }
 
   /**
@@ -629,6 +632,7 @@ class Display {
   getSize() {
     return this.sizeProperty.value;
   }
+
   get size() { return this.getSize(); }
 
   /**
@@ -639,6 +643,7 @@ class Display {
   getBounds() {
     return this.size.toBounds();
   }
+
   get bounds() { return this.getBounds(); }
 
   /**
@@ -677,6 +682,7 @@ class Display {
   getWidth() {
     return this.size.width;
   }
+
   get width() { return this.getWidth(); }
 
   /**
@@ -692,6 +698,7 @@ class Display {
       this.setSize( new Dimension2( width, this.getHeight() ) );
     }
   }
+
   set width( value ) { this.setWidth( value ); }
 
   /**
@@ -703,6 +710,7 @@ class Display {
   getHeight() {
     return this.size.height;
   }
+
   get height() { return this.getHeight(); }
 
   /**
@@ -718,6 +726,7 @@ class Display {
       this.setSize( new Dimension2( this.getWidth(), height ) );
     }
   }
+
   set height( value ) { this.setHeight( value ); }
 
   /**
@@ -731,6 +740,7 @@ class Display {
 
     this._backgroundColor = color;
   }
+
   set backgroundColor( value ) { this.setBackgroundColor( value ); }
 
   /**
@@ -741,6 +751,7 @@ class Display {
   getBackgroundColor() {
     return this._backgroundColor;
   }
+
   get backgroundColor() { return this.getBackgroundColor(); }
 
   /**
@@ -809,6 +820,7 @@ class Display {
   getAccessibleDOMElement() {
     return this._rootAccessibleInstance.peer.primarySibling;
   }
+
   get accessibleDOMElement() { return this.getAccessibleDOMElement(); }
 
   /*
@@ -1357,6 +1369,7 @@ class Display {
   getInputListeners() {
     return this._inputListeners.slice( 0 ); // defensive copy
   }
+
   get inputListeners() { return this.getInputListeners(); }
 
   /**
@@ -2123,6 +2136,7 @@ class Display {
     }
     return focusedNode;
   }
+
   static get focusedNode() { return this.getFocusedNode(); } // eslint-disable-line bad-sim-text
 
   /**
