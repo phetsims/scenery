@@ -555,7 +555,6 @@ const ParallelDOM = {
           const peer = this._accessibleInstances[ 0 ].peer;
           assert && assert( peer, 'must have a peer to blur' );
           peer.blur();
-          this.interruptInput(); // interrupt any listeners that attached to this Node
         }
       },
 
