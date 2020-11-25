@@ -930,39 +930,6 @@ class AnimatedPanZoomListener extends PanZoomListener {
   dispose() {
     this.disposeAnimatedPanZoomListener();
   }
-
-  /**
-   * Returns true if the provided trail has any listeners that use keydown or keyup. If we find such a listener
-   * we want to prevent panning with a keyboard. Excludes this listener in the search, and stops searching once we
-   * hit it.
-   * @private
-   *
-   * @param {Trail} trail
-   * @returns {boolean}
-   */
-  hasKeyListeners( trail ) {
-    let hasKeyListeners = false;
-    let foundThisListener = false;
-
-    // search backwards because it is most likely that nodes adjacent to the focus have a keydown/keyup listener,
-    // and so we can stop searching when we find this MultiListener
-    for ( let i = trail.length - 1; i >= 0; i-- ) {
-      const node = trail.nodes[ i ];
-      hasKeyListeners = _.some( node.inputListeners, listener => {
-        if ( !foundThisListener && listener === this ) {
-          foundThisListener = true;
-        }
-        const hasListeners = _.intersection( _.keys( listener ), [ 'keydown', 'keyup' ] ).length > 0;
-
-        return ( !foundThisListener && hasListeners );
-      } );
-
-      // don't keep searching if we find this listener or any with the above listeners
-      if ( hasKeyListeners || foundThisListener ) { break; }
-    }
-
-    return hasKeyListeners;
-  }
 }
 
 /**
