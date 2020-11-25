@@ -1191,6 +1191,10 @@ inherit( PhetioObject, Node, {
    * @returns {boolean} - Was something potentially updated?
    */
   validateBounds: function() {
+
+    sceneryLog && sceneryLog.bounds && sceneryLog.bounds( `validateBounds #${this._id}` );
+    sceneryLog && sceneryLog.bounds && sceneryLog.push();
+
     let i;
     const notificationThreshold = 1e-13;
 
@@ -1205,6 +1209,8 @@ inherit( PhetioObject, Node, {
     // validate bounds of children if necessary
     if ( this._childBoundsDirty ) {
       wasDirtyBefore = true;
+
+      sceneryLog && sceneryLog.bounds && sceneryLog.bounds( 'childBounds dirty' );
 
       // have each child validate their own bounds
       i = this._children.length;
@@ -1226,6 +1232,7 @@ inherit( PhetioObject, Node, {
 
       // run this before firing the event
       this._childBoundsDirty = false;
+      sceneryLog && sceneryLog.bounds && sceneryLog.bounds( `childBounds: ${ourChildBounds}` );
 
       if ( !ourChildBounds.equals( oldChildBounds ) ) {
         // notifies only on an actual change
@@ -1238,6 +1245,8 @@ inherit( PhetioObject, Node, {
     if ( this._localBoundsDirty && !this._localBoundsOverridden ) {
       wasDirtyBefore = true;
 
+      sceneryLog && sceneryLog.bounds && sceneryLog.bounds( 'localBounds dirty' );
+
       this._localBoundsDirty = false; // we only need this to set local bounds as dirty
 
       const oldLocalBounds = scratchBounds2.set( ourLocalBounds ); // store old value in a temporary Bounds2
@@ -1249,6 +1258,8 @@ inherit( PhetioObject, Node, {
       if ( this.hasClipArea() ) {
         ourLocalBounds.constrainBounds( this.clipArea.bounds );
       }
+
+      sceneryLog && sceneryLog.bounds && sceneryLog.bounds( `localBounds: ${ourLocalBounds}` );
 
       if ( !ourLocalBounds.equals( oldLocalBounds ) ) {
         // sanity check, see https://github.com/phetsims/scenery/issues/1071, we're running this before the localBounds
@@ -1270,6 +1281,8 @@ inherit( PhetioObject, Node, {
 
     if ( this._boundsDirty ) {
       wasDirtyBefore = true;
+
+      sceneryLog && sceneryLog.bounds && sceneryLog.bounds( 'bounds dirty' );
 
       // run this before firing the event
       this._boundsDirty = false;
@@ -1297,6 +1310,8 @@ inherit( PhetioObject, Node, {
         this.transformBoundsFromLocalToParent( ourBounds );
       }
 
+      sceneryLog && sceneryLog.bounds && sceneryLog.bounds( `bounds: ${ourBounds}` );
+
       if ( !ourBounds.equals( oldBounds ) ) {
         // if we have a bounds change, we need to invalidate our parents so they can be recomputed
         i = this._parents.length;
@@ -1313,6 +1328,8 @@ inherit( PhetioObject, Node, {
 
     // if there were side-effects, run the validation again until we are clean
     if ( this._childBoundsDirty || this._boundsDirty ) {
+      sceneryLog && sceneryLog.bounds && sceneryLog.bounds( 'revalidation' );
+
       // TODO: if there are side-effects in listeners, this could overflow the stack. we should report an error
       // instead of locking up
       this.validateBounds();
@@ -1351,12 +1368,13 @@ inherit( PhetioObject, Node, {
           this.childBoundsProperty._value.toString() + ', expected: ' + childBounds.toString() );
         assertSlow && assertSlow( this._localBoundsOverridden ||
                                   this._transformBounds ||
-                                  this.boundsProperty._value.equalsEpsilon( fullBounds, epsilon ) ||
                                   this.boundsProperty._value.equalsEpsilon( fullBounds, epsilon ),
           'Bounds mismatch after validateBounds: ' + this.boundsProperty._value.toString() +
           ', expected: ' + fullBounds.toString() );
       } )();
     }
+
+    sceneryLog && sceneryLog.bounds && sceneryLog.pop();
 
     return wasDirtyBefore; // whether any dirty flags were set
   },
