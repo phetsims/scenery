@@ -773,6 +773,7 @@ class Display {
       this._input.clearBatchedEvents();
       this._input.removeTemporaryPointers();
       this._rootNode.interruptSubtreeInput();
+      this.interruptInput();
     }
 
     // when not interactive, all keyboard navigation is disabled
