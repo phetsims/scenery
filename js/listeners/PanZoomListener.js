@@ -77,6 +77,11 @@ class PanZoomListener extends MultiListener {
     if ( transformedBounds.bottom < this._panBounds.bottom ) {
       this._targetNode.bottom = this._panBounds.bottom + ( this._targetNode.bottom - transformedBounds.bottom );
     }
+
+    // update Property with matrix once position has been corrected, using notifyListenersStatic
+    // to avoid creating a new Matrix3 instance
+    this.matrixProperty.set( this._targetNode.matrix );
+    this.matrixProperty.notifyListenersStatic();
   }
 
   /**

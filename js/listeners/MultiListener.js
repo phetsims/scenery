@@ -21,12 +21,14 @@
  * @author Jesse Greenberg
  */
 
+import Property from '../../../axon/js/Property.js';
 import Matrix from '../../../dot/js/Matrix.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import SingularValueDecomposition from '../../../dot/js/SingularValueDecomposition.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import merge from '../../../phet-core/js/merge.js';
+import Tandem from '../../../tandem/js/Tandem.js';
 import Mouse from '../input/Mouse.js';
 import Pointer from '../input/Pointer.js';
 import scenery from '../scenery.js';
@@ -76,7 +78,10 @@ class MultiListener {
 
       // {number} - magnitude limits for scaling in both x and y
       minScale: 1,
-      maxScale: 4
+      maxScale: 4,
+
+      // {Tandem}
+      tandem: Tandem.REQUIRED
     }, options );
 
     // @private {Node} - the Node that will be transformed by this listener
@@ -104,6 +109,18 @@ class MultiListener {
     // the other listeners. Related to options "allowMoveInterrupt" and "allowMultitouchInterrupt", where
     // other Pointer listeners are interrupted in these cases.
     this._backgroundPresses = [];
+
+    // @protected {Property.<Matrix3>} - The matrix applied to the targetNode in response to various
+    // input for the MultiListener
+    this.matrixProperty = new Property( targetNode.matrix.copy(), {
+      phetioType: Property.PropertyIO( Matrix3.Matrix3IO ),
+      tandem: options.tandem.createTandem( 'matrixProperty' )
+    } );
+
+    // assign the matrix to the targetNode whenever it changes
+    this.matrixProperty.link( matrix => {
+      this._targetNode.matrix = matrix;
+    } );
 
     // @private - attached to the Pointer when a Press is added
     this._pressListener = {
@@ -469,7 +486,7 @@ class MultiListener {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener reposition' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-    this._targetNode.matrix = this.computeMatrix();
+    this.matrixProperty.set( this.computeMatrix() );
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
   }
@@ -720,6 +737,7 @@ class MultiListener {
    */
   resetTransform() {
     this._targetNode.resetTransform();
+    this.matrixProperty.set( this._targetNode.matrix.copy() );
   }
 }
 
