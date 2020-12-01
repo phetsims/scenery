@@ -413,4 +413,7 @@ Font.FontIO = new IOType( 'FontIO', {
 // @public {Font} - Default Font object (since they are immutable).
 Font.DEFAULT = new Font();
 
+// @public {string[]} - valid values for options.style
+Font.VALID_STYLES = VALID_STYLES;
+
 export default Font;
