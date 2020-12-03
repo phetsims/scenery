@@ -21,7 +21,6 @@ import KeyboardUtils from './KeyboardUtils.js';
 
 class KeyStateTracker {
   constructor( options ) {
-
     options = merge( {
 
       // {Tandem}
@@ -79,15 +78,14 @@ class KeyStateTracker {
     }, {
       phetioPlayback: true,
       tandem: options.tandem.createTandem( 'keydownUpdateAction' ),
-      parameters: [
-        { name: 'event', phetioType: EventIO }
-      ],
-      phetioEventType: EventType.USER
+      parameters: [ { name: 'event', phetioType: EventIO } ],
+      phetioEventType: EventType.USER,
+      phetioDocumentation: 'Action that executes whenever a keydown occurs from the input listeners this keyStateTracker adds (most likely to the document).'
     } );
 
     // @private {Action} - Action which updates the state of the KeyStateTracker on key release. This
     // is wrapped in an Action so that state is captured for PhET-iO
-    this.keyUpUpdateAction = new Action( domEvent => {
+    this.keyupUpdateAction = new Action( domEvent => {
 
       const keyCode = domEvent.keyCode;
 
@@ -106,10 +104,9 @@ class KeyStateTracker {
     }, {
       phetioPlayback: true,
       tandem: options.tandem.createTandem( 'keydownAction' ),
-      parameters: [
-        { name: 'event', phetioType: EventIO }
-      ],
-      phetioEventType: EventType.USER
+      parameters: [ { name: 'event', phetioType: EventIO } ],
+      phetioEventType: EventType.USER,
+      phetioDocumentation: 'Action that executes whenever a keyup occurs from the input listeners this keyStateTracker adds (most likely to the document).'
     } );
 
     const stepListener = this.step.bind( this );
@@ -194,7 +191,7 @@ class KeyStateTracker {
    * @param {Event} domEvent
    */
   keyupUpdate( domEvent ) {
-    this.keyUpUpdateAction.execute( domEvent );
+    this.keyupUpdateAction.execute( domEvent );
   }
 
   /**

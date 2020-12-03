@@ -2188,7 +2188,9 @@ Display.userGestureEmitter = new Emitter();
 
 // @public (read-only) {KeyStateTracker} - A global object that tracks the state of the keyboard for all Displays. Use this
 // to get information about which keyboard keys are pressed down and for how long.
-Display.keyStateTracker = new KeyStateTracker( { tandem: Tandem.GENERAL_MODEL.createTandem( 'keyStateTracker' ) } );
+Display.keyStateTracker = new KeyStateTracker( {
+  tandem: Tandem.GENERAL_MODEL.createTandem( 'keyStateTracker' )
+} );
 Display.keyStateTracker.attachToDocument();
 
 export default Display;
