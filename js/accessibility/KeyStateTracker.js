@@ -103,7 +103,7 @@ class KeyStateTracker {
       this.keyupEmitter.emit( domEvent );
     }, {
       phetioPlayback: true,
-      tandem: options.tandem.createTandem( 'keydownAction' ),
+      tandem: options.tandem.createTandem( 'keyupUpdateAction' ),
       parameters: [ { name: 'event', phetioType: EventIO } ],
       phetioEventType: EventType.USER,
       phetioDocumentation: 'Action that executes whenever a keyup occurs from the input listeners this keyStateTracker adds (most likely to the document).'
