@@ -9,13 +9,24 @@
  * @author Michael Barlow
  */
 
+import Action from '../../../axon/js/Action.js';
 import Emitter from '../../../axon/js/Emitter.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
+import merge from '../../../phet-core/js/merge.js';
+import EventType from '../../../tandem/js/EventType.js';
+import Tandem from '../../../tandem/js/Tandem.js';
+import EventIO from '../input/EventIO.js';
 import scenery from '../scenery.js';
 import KeyboardUtils from './KeyboardUtils.js';
 
 class KeyStateTracker {
-  constructor() {
+  constructor( options ) {
+
+    options = merge( {
+
+      // {Tandem}
+      tandem: Tandem.OPTIONAL
+    }, options );
 
     // @private { Object.<number,{ keyCode: {number}, isDown: {boolean}, timeDown: [boolean] }> } - where the Object
     // keys are the keycode. JavaScript doesn't handle multiple key presses, so we track which keys are currently
@@ -34,6 +45,72 @@ class KeyStateTracker {
     // keyState so that keystate is up to date in time for listeners.
     this.keydownEmitter = new Emitter( { parameters: [ { valueType: Event } ] } ); // valueType is a native DOM event
     this.keyupEmitter = new Emitter( { parameters: [ { valueType: Event } ] } );
+
+    // @private {Action} - Action which updates the KeyStateTracker, when it is time to do so - the update
+    // is wrapped by an Action so that the KeyStateTracker state is captured for PhET-iO
+    this.keydownUpdateAction = new Action( domEvent => {
+
+      // The dom event might have a modifier key that we weren't able to catch, if that is the case update the keystate.
+      // This is likely to happen when pressing browser key commands like "ctrl + tab" to switch tabs.
+      this.correctModifierKeys( domEvent );
+
+      if ( assert && domEvent.keyCode !== KeyboardUtils.KEY_SHIFT ) {
+        assert( !!domEvent.shiftKey === !!this.shiftKeyDown, 'shift key inconsistency between event and keystate.' );
+      }
+      if ( assert && domEvent.keyCode !== KeyboardUtils.KEY_ALT ) {
+        assert( !!domEvent.altKey === !!this.altKeyDown, 'alt key inconsistency between event and keystate.' );
+      }
+      if ( assert && domEvent.keyCode !== KeyboardUtils.KEY_CTRL ) {
+        assert( !!domEvent.ctrlKey === !!this.ctrlKeyDown, 'ctrl key inconsistency between event and keystate.' );
+      }
+
+      // if the key is already down, don't do anything else (we don't want to create a new keystate object
+      // for a key that is already being tracked and down)
+      if ( !this.isKeyDown( domEvent.keyCode ) ) {
+        this.keyState[ domEvent.keyCode ] = {
+          keyDown: true,
+          keyCode: domEvent.keyCode,
+          timeDown: 0 // in ms
+        };
+      }
+
+      // keydown update received, notify listeners
+      this.keydownEmitter.emit( domEvent );
+    }, {
+      phetioPlayback: true,
+      tandem: options.tandem.createTandem( 'keydownUpdateAction' ),
+      parameters: [
+        { name: 'event', phetioType: EventIO }
+      ],
+      phetioEventType: EventType.USER
+    } );
+
+    // @private {Action} - Action which updates the state of the KeyStateTracker on key release. This
+    // is wrapped in an Action so that state is captured for PhET-iO
+    this.keyUpUpdateAction = new Action( domEvent => {
+
+      const keyCode = domEvent.keyCode;
+
+      // correct keystate in case browser didn't receive keydown/keyup events for a modifier key
+      this.correctModifierKeys( domEvent );
+
+      // Remove this key data from the state - There are many cases where we might receive a keyup before keydown like
+      // on first tab into scenery Display or when using specific operating system keys with the browser or PrtScn so
+      // an assertion for this is too strict. See https://github.com/phetsims/scenery/issues/918
+      if ( this.isKeyDown( keyCode ) ) {
+        delete this.keyState[ keyCode ];
+      }
+
+      // keyup event received, notify listeners
+      this.keyupEmitter.emit( domEvent );
+    }, {
+      phetioPlayback: true,
+      tandem: options.tandem.createTandem( 'keydownAction' ),
+      parameters: [
+        { name: 'event', phetioType: EventIO }
+      ],
+      phetioEventType: EventType.USER
+    } );
 
     const stepListener = this.step.bind( this );
     stepTimer.addListener( stepListener );
@@ -59,33 +136,7 @@ class KeyStateTracker {
    * @param {Event} domEvent
    */
   keydownUpdate( domEvent ) {
-
-    // The dom event might have a modifier key that we weren't able to catch, if that is the case update the keystate.
-    // This is likely to happen when pressing browser key commands like "ctrl + tab" to switch tabs.
-    this.correctModifierKeys( domEvent );
-
-    if ( assert && domEvent.keyCode !== KeyboardUtils.KEY_SHIFT ) {
-      assert( !!domEvent.shiftKey === !!this.shiftKeyDown, 'shift key inconsistency between event and keystate.' );
-    }
-    if ( assert && domEvent.keyCode !== KeyboardUtils.KEY_ALT ) {
-      assert( !!domEvent.altKey === !!this.altKeyDown, 'alt key inconsistency between event and keystate.' );
-    }
-    if ( assert && domEvent.keyCode !== KeyboardUtils.KEY_CTRL ) {
-      assert( !!domEvent.ctrlKey === !!this.ctrlKeyDown, 'ctrl key inconsistency between event and keystate.' );
-    }
-
-    // if the key is already down, don't do anything else (we don't want to create a new keystate object
-    // for a key that is already being tracked and down)
-    if ( !this.isKeyDown( domEvent.keyCode ) ) {
-      this.keyState[ domEvent.keyCode ] = {
-        keyDown: true,
-        keyCode: domEvent.keyCode,
-        timeDown: 0 // in ms
-      };
-    }
-
-    // keydown update received, notify listeners
-    this.keydownEmitter.emit( domEvent );
+    this.keydownUpdateAction.execute( domEvent );
   }
 
   /**
@@ -143,20 +194,7 @@ class KeyStateTracker {
    * @param {Event} domEvent
    */
   keyupUpdate( domEvent ) {
-    const keyCode = domEvent.keyCode;
-
-    // correct keystate in case browser didn't receive keydown/keyup events for a modifier key
-    this.correctModifierKeys( domEvent );
-
-    // Remove this key data from the state - There are many cases where we might receive a keyup before keydown like
-    // on first tab into scenery Display or when using specific operating system keys with the browser or PrtScn so
-    // an assertion for this is too strict. See https://github.com/phetsims/scenery/issues/918
-    if ( this.isKeyDown( keyCode ) ) {
-      delete this.keyState[ keyCode ];
-    }
-
-    // keyup event received, notify listeners
-    this.keyupEmitter.emit( domEvent );
+    this.keyUpUpdateAction.execute( domEvent );
   }
 
   /**

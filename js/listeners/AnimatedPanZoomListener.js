@@ -14,6 +14,7 @@ import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
+import Tandem from '../../../tandem/js/Tandem.js';
 import KeyStateTracker from '../accessibility/KeyStateTracker.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import KeyboardZoomUtils from '../accessibility/KeyboardZoomUtils.js';
@@ -40,10 +41,17 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * @param {Object} [options]
    */
   constructor( targetNode, options ) {
+
+    options = merge( {
+      tandem: Tandem.REQUIRED
+    }, options );
+
     super( targetNode, options );
 
     // @private {KeyStateTracker}
-    this.keyStateTracker = new KeyStateTracker();
+    this.keyStateTracker = new KeyStateTracker( {
+      tandem: options.tandem.createTandem( 'keyStateTracker' )
+    } );
     this.keyStateTracker.attachToDocument();
 
     // @private {null|Vector2} - This point is the center of the transformedPanBounds (see PanZoomListener) in
