@@ -52,7 +52,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
     this.keyStateTracker = new KeyStateTracker( {
       tandem: options.tandem.createTandem( 'keyStateTracker' )
     } );
-    this.keyStateTracker.attachToDocument();
+    this.keyStateTracker.attachToWindow();
 
     // @private {null|Vector2} - This point is the center of the transformedPanBounds (see PanZoomListener) in
     // the parent coordinate frame of the targetNode. This is the current center of the transformedPanBounds, and

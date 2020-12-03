@@ -2191,6 +2191,6 @@ Display.userGestureEmitter = new Emitter();
 Display.keyStateTracker = new KeyStateTracker( {
   tandem: Tandem.GENERAL_MODEL.createTandem( 'keyStateTracker' )
 } );
-Display.keyStateTracker.attachToDocument();
+Display.keyStateTracker.attachToWindow();
 
 export default Display;

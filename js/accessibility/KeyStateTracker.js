@@ -36,7 +36,7 @@ class KeyStateTracker {
     this.attachedToDocument = false;
 
     // @private {null|function} - Listeners potentially attached to the document to update the state of this
-    // KeyStateTracker, see attachToDocument()
+    // KeyStateTracker, see attachToWindow()
     this.documentKeyupListener = null;
     this.documentKeydownListener = null;
 
@@ -346,7 +346,7 @@ class KeyStateTracker {
    * useful if you want to observe key presses while DOM focus not within the PDOM root.
    * @public
    */
-  attachToDocument() {
+  attachToWindow() {
     assert && assert( !this.attachedToDocument, 'KeyStateTracker is already attached to document.' );
 
     this.documentKeydownListener = event => {
