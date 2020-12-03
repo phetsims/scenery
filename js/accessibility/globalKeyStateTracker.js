@@ -21,7 +21,7 @@ class GlobalKeyStateTracker extends KeyStateTracker {
 
 // @public (read-only) {KeyStateTracker} -
 const globalKeyStateTracker = new GlobalKeyStateTracker( {
-  tandem: Tandem.GENERAL_VIEW.createTandem( 'keyStateTracker' )
+  tandem: Tandem.GENERAL_CONTROLLER.createTandem( 'keyStateTracker' )
 } );
 
 scenery.register( 'globalKeyStateTracker', globalKeyStateTracker );
