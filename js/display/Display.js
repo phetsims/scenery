@@ -64,7 +64,6 @@ import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import AriaHerald from '../../../utterance-queue/js/AriaHerald.js';
 import UtteranceQueue from '../../../utterance-queue/js/UtteranceQueue.js';
 import Focus from '../accessibility/Focus.js';
-import KeyStateTracker from '../accessibility/KeyStateTracker.js';
 import PDOMInstance from '../accessibility/pdom/PDOMInstance.js';
 import PDOMTree from '../accessibility/pdom/PDOMTree.js';
 import Input from '../input/Input.js';
@@ -2185,12 +2184,5 @@ Display.focusProperty = new Property( null, {
 // See https://github.com/phetsims/scenery/issues/802 and https://github.com/phetsims/vibe/issues/32 for more
 // information.
 Display.userGestureEmitter = new Emitter();
-
-// @public (read-only) {KeyStateTracker} - A global object that tracks the state of the keyboard for all Displays. Use this
-// to get information about which keyboard keys are pressed down and for how long.
-Display.keyStateTracker = new KeyStateTracker( {
-  tandem: Tandem.GENERAL_MODEL.createTandem( 'keyStateTracker' )
-} );
-Display.keyStateTracker.attachToWindow();
 
 export default Display;

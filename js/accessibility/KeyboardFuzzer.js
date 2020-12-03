@@ -9,8 +9,8 @@
 
 import stepTimer from '../../../axon/js/stepTimer.js';
 import Random from '../../../dot/js/Random.js';
-import Display from '../display/Display.js';
 import scenery from '../scenery.js';
+import globalKeyStateTracker from './globalKeyStateTracker.js';
 import KeyboardUtils from './KeyboardUtils.js';
 import PDOMUtils from './pdom/PDOMUtils.js';
 
@@ -217,13 +217,13 @@ class KeyboardFuzzer {
     eventObj.which = keyCode;
 
     // add any modifier keys to the event
-    if ( Display.keyStateTracker.shiftKeyDown ) {
+    if ( globalKeyStateTracker.shiftKeyDown ) {
       eventObj.shiftKey = true;
     }
-    if ( Display.keyStateTracker.altKeyDown ) {
+    if ( globalKeyStateTracker.altKeyDown ) {
       eventObj.altKey = true;
     }
-    if ( Display.keyStateTracker.ctrlKeyDown ) {
+    if ( globalKeyStateTracker.ctrlKeyDown ) {
       eventObj.ctrlKey = true;
     }
 

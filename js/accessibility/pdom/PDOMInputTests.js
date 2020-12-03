@@ -11,6 +11,7 @@ import merge from '../../../../phet-core/js/merge.js';
 import Display from '../../display/Display.js';
 import Node from '../../nodes/Node.js';
 import Rectangle from '../../nodes/Rectangle.js';
+import globalKeyStateTracker from '../globalKeyStateTracker.js';
 import KeyboardUtils from '../KeyboardUtils.js';
 
 // constants
@@ -569,7 +570,7 @@ QUnit.test( 'Global KeyStateTracker tests', assert => {
   const dPrimarySibling = d.accessibleInstances[ 0 ].peer.primarySibling;
   triggerDOMEvent( 'keydown', dPrimarySibling, KeyboardUtils.KEY_RIGHT_ARROW );
 
-  assert.ok( Display.keyStateTracker.isKeyDown( KeyboardUtils.KEY_RIGHT_ARROW ), 'global keyStateTracker should be updated with right arrow key down' );
+  assert.ok( globalKeyStateTracker.isKeyDown( KeyboardUtils.KEY_RIGHT_ARROW ), 'global keyStateTracker should be updated with right arrow key down' );
 
   afterTest( display );
 } );

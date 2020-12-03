@@ -15,7 +15,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import KeyStateTracker from '../accessibility/KeyStateTracker.js';
+import globalKeyStateTracker from '../accessibility/globalKeyStateTracker.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import KeyboardZoomUtils from '../accessibility/KeyboardZoomUtils.js';
 import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
@@ -47,12 +47,6 @@ class AnimatedPanZoomListener extends PanZoomListener {
     }, options );
 
     super( targetNode, options );
-
-    // @private {KeyStateTracker}
-    this.keyStateTracker = new KeyStateTracker( {
-      tandem: options.tandem.createTandem( 'keyStateTracker' )
-    } );
-    this.keyStateTracker.attachToWindow();
 
     // @private {null|Vector2} - This point is the center of the transformedPanBounds (see PanZoomListener) in
     // the parent coordinate frame of the targetNode. This is the current center of the transformedPanBounds, and
@@ -130,7 +124,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
     // Handle key input from events outside of the PDOM - in this case it is impossible for the a11y pointer
     // to be attached so we have free reign over the keyboard
-    this.keyStateTracker.keydownEmitter.addListener( this.documentKeydown.bind( this ) );
+    globalKeyStateTracker.keydownEmitter.addListener( this.windowKeydown.bind( this ) );
 
     const displayFocusListener = focus => {
       if ( focus ) {
@@ -148,8 +142,6 @@ class AnimatedPanZoomListener extends PanZoomListener {
       boundGestureChangeListener && window.removeEventListener( 'gestureChange', boundGestureChangeListener );
 
       Display.focusProperty.unlink( displayFocusListener );
-
-      this.keyStateTracker.dispose();
     };
   }
 
@@ -168,7 +160,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // the pan bounds so that it is always visible while being moved around
     if ( this._pdomPointerWithIntent ) {
       const pointerHasIntent = this.hasDragIntent( this._pdomPointerWithIntent );
-      if ( pointerHasIntent && this.keyStateTracker.movementKeysDown && Display.focusProperty.value !== null ) {
+      if ( pointerHasIntent && globalKeyStateTracker.movementKeysDown && Display.focusProperty.value !== null ) {
         const focusedNode = Display.focusedNode;
         if ( !this._panBounds.containsBounds( focusedNode.globalBounds ) ) {
           this.panToNode( focusedNode );
@@ -322,7 +314,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
    *
    * @param {Event} domEvent
    */
-  documentKeydown( domEvent ) {
+  windowKeydown( domEvent ) {
 
     // on any keyboard reposition interrupt the middle press panning
     this.cancelMiddlePress();
@@ -333,7 +325,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
       // handle translation without worry of the pointer being attached because there is no pointer at this level
       if ( KeyboardUtils.isArrowKey( domEvent.keyCode ) ) {
-        const keyPress = new KeyPress( this.keyStateTracker, this.getCurrentScale(), this._targetScale );
+        const keyPress = new KeyPress( globalKeyStateTracker, this.getCurrentScale(), this._targetScale );
         this.repositionFromKeys( keyPress );
       }
     }
@@ -365,7 +357,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener handle arrow key down' );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-        const keyPress = new KeyPress( this.keyStateTracker, this.getCurrentScale(), this._targetScale );
+        const keyPress = new KeyPress( globalKeyStateTracker, this.getCurrentScale(), this._targetScale );
         this.repositionFromKeys( keyPress );
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
@@ -397,7 +389,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
       domEvent.preventDefault();
 
       const nextScale = this.getNextDiscreteScale( zoomInCommandDown );
-      const keyPress = new KeyPress( this.keyStateTracker, nextScale, this._targetScale );
+      const keyPress = new KeyPress( globalKeyStateTracker, nextScale, this._targetScale );
       this.repositionFromKeys( keyPress );
     }
     else if ( KeyboardZoomUtils.isZoomResetCommand( domEvent ) ) {
