@@ -5522,7 +5522,7 @@ inherit( PhetioObject, Node, {
 
     PhetioObject.prototype.initializePhetioObject.call( this, baseOptions, config );
 
-    if ( Tandem.PHET_IO_ENABLED &&  !wasInstrumented && this.isPhetioInstrumented() ) {
+    if ( Tandem.PHET_IO_ENABLED && !wasInstrumented && this.isPhetioInstrumented() ) {
 
       // For each supported TinyForwardingProperty, if a Property was already specified in the options (in the
       // constructor or mutate), then it will be set as this.targetProperty there. Here we only create the default
