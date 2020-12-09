@@ -136,6 +136,21 @@ class AnimatedPanZoomListener extends PanZoomListener {
     };
     Display.focusProperty.link( displayFocusListener );
 
+    // set source and destination positions and scales after setting from state
+    // to initialize values for animation with AnimatedPanZoomListener
+    this.sourceFramePanBoundsProperty.lazyLink( () => {
+      if ( ( _.hasIn( window, 'phet.joist.sim' ) && phet.joist.sim.isSettingPhetioStateProperty.value ) ) {
+        this.initializePositions();
+        this.sourceScale = this.getCurrentScale();
+        this.setDestinationScale( this.sourceScale );
+      }
+    }, {
+
+      // guarantee that the matrixProperty value is up to date when this listener
+      // is called
+      phetioDependencies: [ this.matrixProperty ]
+    } );
+
     // @private - called by dispose
     this.disposeAnimatedPanZoomListener = () => {
       boundGestureStartListener && window.removeEventListener( 'gesturestart', boundGestureStartListener );

@@ -8,8 +8,11 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
+import Property from '../../../axon/js/Property.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
+import Matrix3 from '../../../dot/js/Matrix3.js';
 import merge from '../../../phet-core/js/merge.js';
+import ModelViewTransform2 from '../../../phetcommon/js/view/ModelViewTransform2.js';
 import scenery from '../scenery.js';
 import MultiListener from './MultiListener.js';
 
@@ -51,6 +54,33 @@ class PanZoomListener extends MultiListener {
 
     // @protected {number}
     this._targetScale = options.targetScale;
+
+    // @public {Property.<Bounds2>} - For PhET-iO stateSetEmitter below. The pan bounds of the source
+    // so if the destination bounds are different due to a differently sized iframe or window,
+    // this can be used to determine a correction for the destination targetNode transform.
+    // This could be removed by work recommended in
+    this.sourceFramePanBoundsProperty = new Property( this._panBounds, {
+      tandem: options.tandem.createTandem( 'sourceFramePanBoundsProperty' ),
+      phetioType: Property.PropertyIO( Bounds2.Bounds2IO )
+    } );
+
+    this.sourceFramePanBoundsProperty.lazyLink( () => {
+      if ( ( _.hasIn( window, 'phet.joist.sim' ) && phet.joist.sim.isSettingPhetioStateProperty.value ) ) {
+
+        // The matrixProperty has transformations relative to the global view coordinates of the source simulation,
+        // so it will not be correct if source and destination frames are different sizes. This will map transforamtions
+        // if destination frame has different size.
+        const sourceDestinationTransform = ModelViewTransform2.createRectangleMapping( this.sourceFramePanBoundsProperty.get(), this._panBounds );
+
+        const newTranslation = this._targetNode.matrix.translation.componentMultiply( sourceDestinationTransform.matrix.getScaleVector() );
+        const scale = this.matrixProperty.get().getScaleVector();
+        this.matrixProperty.set( Matrix3.translationFromVector( newTranslation ).timesMatrix( Matrix3.scaling( scale.x, scale.y ) ) );
+      }
+    }, {
+
+        // so that the listener will be called only after the matrixProperty is up to date in the downstream sim
+        phetioDependencies: [ this.matrixProperty ]
+    } );
   }
 
   /**
@@ -130,6 +160,7 @@ class PanZoomListener extends MultiListener {
    */
   setPanBounds( panBounds ) {
     this._panBounds = panBounds;
+    this.sourceFramePanBoundsProperty.set( this._panBounds );
     this.correctReposition();
   }
 
