@@ -8,6 +8,11 @@
  */
 
 import Property from '../../../axon/js/Property.js';
+import IOType from '../../../tandem/js/types/IOType.js';
+import NullableIO from '../../../tandem/js/types/NullableIO.js';
+import OrIO from '../../../tandem/js/types/OrIO.js';
+import ReferenceIO from '../../../tandem/js/types/ReferenceIO.js';
+import StringIO from '../../../tandem/js/types/StringIO.js';
 import scenery from '../scenery.js';
 import Color from './Color.js';
 
@@ -30,6 +35,12 @@ const ColorDef = {
            ) );
   }
 };
+
+// @public - phet-io IOType for serialization and documentation
+ColorDef.ColorDefIO = new IOType( 'ColorDefIO', {
+  isValidValue: ColorDef.isColorDef,
+  supertype: NullableIO( OrIO( [ StringIO, Color.ColorIO, ReferenceIO( Property.PropertyIO( NullableIO( OrIO( [ StringIO, Color.ColorIO ] ) ) ) ) ] ) )
+} );
 
 scenery.register( 'ColorDef', ColorDef );
 
