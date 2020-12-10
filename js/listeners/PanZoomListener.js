@@ -13,6 +13,7 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import merge from '../../../phet-core/js/merge.js';
 import ModelViewTransform2 from '../../../phetcommon/js/view/ModelViewTransform2.js';
+import Tandem from '../../../tandem/js/Tandem.js';
 import scenery from '../scenery.js';
 import MultiListener from './MultiListener.js';
 
@@ -43,7 +44,10 @@ class PanZoomListener extends MultiListener {
       targetScale: 1,
 
       // {boolean} - by default, the PanZoomListener does now allow rotation
-      allowRotation: false
+      allowRotation: false,
+
+      // {Tandem}
+      tandem: Tandem.REQUIRED
     }, options );
 
     super( targetNode, options );
