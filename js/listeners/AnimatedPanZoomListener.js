@@ -146,8 +146,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
       }
     }, {
 
-      // guarantee that the matrixProperty value is up to date when this listener
-      // is called
+      // guarantee that the matrixProperty value is up to date when this listener is called
       phetioDependencies: [ this.matrixProperty ]
     } );
 

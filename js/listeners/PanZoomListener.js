@@ -59,7 +59,7 @@ class PanZoomListener extends MultiListener {
     // @protected {number}
     this._targetScale = options.targetScale;
 
-    // @public {Property.<Bounds2>} - For PhET-iO stateSetEmitter below. The pan bounds of the source
+    // @protected {Property.<Bounds2>} - Only needed for PhET-iO instrumented. The pan bounds of the source
     // so if the destination bounds are different due to a differently sized iframe or window,
     // this can be used to determine a correction for the destination targetNode transform.
     // This could be removed by work recommended in
@@ -82,8 +82,8 @@ class PanZoomListener extends MultiListener {
       }
     }, {
 
-        // so that the listener will be called only after the matrixProperty is up to date in the downstream sim
-        phetioDependencies: [ this.matrixProperty ]
+      // so that the listener will be called only after the matrixProperty is up to date in the downstream sim
+      phetioDependencies: [ this.matrixProperty ]
     } );
   }
 
