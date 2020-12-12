@@ -47,7 +47,7 @@ class PanZoomListener extends MultiListener {
       allowRotation: false,
 
       // {Tandem}
-      tandem: Tandem.REQUIRED
+      tandem: Tandem.OPTIONAL
     }, options );
 
     super( targetNode, options );
