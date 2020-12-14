@@ -687,8 +687,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
    */
   hasDragIntent( pointer ) {
     return pointer.hasIntent( Pointer.Intent.KEYBOARD_DRAG ) ||
-           pointer.hasIntent( Pointer.Intent.DRAG ) ||
-           pointer.hasIntent( Pointer.Intent.MULTI_DRAG );
+           pointer.hasIntent( Pointer.Intent.DRAG );
   }
 
   /**
