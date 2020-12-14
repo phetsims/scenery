@@ -795,6 +795,17 @@ class Color {
   static isLightColor( color, luminanceThreshold ) {
     return !Color.isDarkColor( color, luminanceThreshold );
   }
+
+  /**
+   * Creates a Color that is a shade of gray.
+   * @param {number} rgb - used for red, blue, and green components
+   * @param {number} [a] - defaults to 1
+   * @returns {Color}
+   * @public
+   */
+  static grayColor( rgb, a ) {
+    return new Color( rgb, rgb, rgb, a );
+  }
 }
 
 scenery.register( 'Color', Color );
