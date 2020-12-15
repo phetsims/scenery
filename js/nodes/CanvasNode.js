@@ -11,38 +11,24 @@
  */
 
 import Shape from '../../../kite/js/Shape.js';
-import inherit from '../../../phet-core/js/inherit.js';
-import CanvasNodeDrawable from '../display/drawables/CanvasNodeDrawable.js';
 import Renderer from '../display/Renderer.js';
+import CanvasNodeDrawable from '../display/drawables/CanvasNodeDrawable.js';
 import scenery from '../scenery.js';
 import Node from './Node.js';
 
-/**
- * @public
- * @constructor
- * @extends Node
- *
- * @param {Object} [options] - Can contain Node's options, and/or CanvasNode options (e.g. canvasBounds)
- */
-function CanvasNode( options ) {
-  Node.call( this, options );
-
-  // This shouldn't change, as we only support one renderer
-  this.setRendererBitmask( Renderer.bitmaskCanvas );
-}
-
-scenery.register( 'CanvasNode', CanvasNode );
-
-inherit( Node, CanvasNode, {
+class CanvasNode extends Node {
   /**
-   * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
-   * order they will be evaluated in.
-   * @protected
+   * @public
    *
-   * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
-   *       cases that may apply.
+   * @param {Object} [options] - Can contain Node's options, and/or CanvasNode options (e.g. canvasBounds)
    */
-  _mutatorKeys: [ 'canvasBounds' ].concat( Node.prototype._mutatorKeys ),
+  constructor( options ) {
+    super( options );
+
+    // This shouldn't change, as we only support one renderer
+    this.setRendererBitmask( Renderer.bitmaskCanvas );
+  }
+
 
   /**
    * Sets the bounds that are used for layout/repainting.
@@ -53,10 +39,10 @@ inherit( Node, CanvasNode, {
    *
    * @param {Bounds2} selfBounds
    */
-  setCanvasBounds: function( selfBounds ) {
+  setCanvasBounds( selfBounds ) {
     this.invalidateSelf( selfBounds );
-  },
-  set canvasBounds( value ) { this.setCanvasBounds( value ); },
+  }
+  set canvasBounds( value ) { this.setCanvasBounds( value ); }
 
   /**
    * Returns the previously-set canvasBounds, or Bounds2.NOTHING if it has not been set yet.
@@ -64,10 +50,10 @@ inherit( Node, CanvasNode, {
    *
    * @returns {Bounds2}
    */
-  getCanvasBounds: function() {
+  getCanvasBounds() {
     return this.getSelfBounds();
-  },
-  get canvasBounds() { return this.getCanvasBounds(); },
+  }
+  get canvasBounds() { return this.getCanvasBounds(); }
 
   /**
    * Whether this Node itself is painted (displays something itself).
@@ -76,10 +62,10 @@ inherit( Node, CanvasNode, {
    *
    * @returns {boolean}
    */
-  isPainted: function() {
+  isPainted() {
     // Always true for CanvasNode
     return true;
-  },
+  }
 
   /**
    * Override paintCanvas with a faster version, since fillRect and drawRect don't affect the current default path.
@@ -92,9 +78,9 @@ inherit( Node, CanvasNode, {
    *
    * @param {CanvasRenderingContext2D} context
    */
-  paintCanvas: function( context ) {
+  paintCanvas( context ) {
     throw new Error( 'CanvasNode needs paintCanvas implemented' );
-  },
+  }
 
   /**
    * Should be called when this node needs to be repainted. When not called, Scenery assumes that this node does
@@ -103,12 +89,12 @@ inherit( Node, CanvasNode, {
    *
    * This sets a "dirty" flag, so that it will be repainted the next time it would be displayed.
    */
-  invalidatePaint: function() {
+  invalidatePaint() {
     const stateLen = this._drawables.length;
     for ( let i = 0; i < stateLen; i++ ) {
       this._drawables[ i ].markDirty();
     }
-  },
+  }
 
   /**
    * Draws the current Node's self representation, assuming the wrapper's Canvas context is already in the local
@@ -119,9 +105,9 @@ inherit( Node, CanvasNode, {
    * @param {CanvasContextWrapper} wrapper
    * @param {Matrix3} matrix - The transformation matrix already applied to the context.
    */
-  canvasPaintSelf: function( wrapper, matrix ) {
+  canvasPaintSelf( wrapper, matrix ) {
     this.paintCanvas( wrapper.context );
-  },
+  }
 
   /**
    * Computes whether the provided point is "inside" (contained) in this Node's self content, or "outside".
@@ -133,9 +119,9 @@ inherit( Node, CanvasNode, {
    * @param {Vector2} point - Considered to be in the local coordinate frame
    * @returns {boolean}
    */
-  containsPointSelf: function( point ) {
+  containsPointSelf( point ) {
     return false;
-  },
+  }
 
   /**
    * Returns a Shape that represents the area covered by containsPointSelf.
@@ -144,9 +130,9 @@ inherit( Node, CanvasNode, {
    *
    * @returns {Shape}
    */
-  getSelfShape: function() {
+  getSelfShape() {
     return new Shape();
-  },
+  }
 
   /**
    * Creates a Canvas drawable for this CanvasNode.
@@ -157,9 +143,21 @@ inherit( Node, CanvasNode, {
    * @param {Instance} instance - Instance object that will be associated with the drawable
    * @returns {CanvasSelfDrawable}
    */
-  createCanvasDrawable: function( renderer, instance ) {
+  createCanvasDrawable( renderer, instance ) {
     return CanvasNodeDrawable.createFromPool( renderer, instance );
   }
-} );
+}
+
+/**
+ * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
+ * order they will be evaluated in.
+ * @protected
+ *
+ * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
+ *       cases that may apply.
+ */
+CanvasNode.prototype._mutatorKeys = [ 'canvasBounds' ].concat( Node.prototype._mutatorKeys );
+
+scenery.register( 'CanvasNode', CanvasNode );
 
 export default CanvasNode;

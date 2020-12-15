@@ -12,17 +12,16 @@ import StringProperty from '../../../axon/js/StringProperty.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import escapeHTML from '../../../phet-core/js/escapeHTML.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
 import VoidIO from '../../../tandem/js/types/VoidIO.js';
+import Renderer from '../display/Renderer.js';
 import TextCanvasDrawable from '../display/drawables/TextCanvasDrawable.js';
 import TextDOMDrawable from '../display/drawables/TextDOMDrawable.js';
 import TextSVGDrawable from '../display/drawables/TextSVGDrawable.js';
-import Renderer from '../display/Renderer.js';
 import scenery from '../scenery.js';
 import Font from '../util/Font.js';
 import TextBounds from '../util/TextBounds.js';
@@ -51,75 +50,53 @@ const TEXT_PROPERTY_TANDEM_NAME = 'textProperty';
 const useDOMAsFastBounds = window.navigator.userAgent.indexOf( 'like Gecko) Version/5' ) !== -1 &&
                            window.navigator.userAgent.indexOf( 'Safari/' ) !== -1;
 
-/**
- * @public
- * @constructor
- * @extends Node
- *
- * @param {string|number} text - See setText() for more documentation
- * @param {Object} [options] - Text-specific options are documented in TEXT_OPTION_KEYS above, and can be provided
- *                             along-side options for Node
- */
-function Text( text, options ) {
-  assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
-    'Extra prototype on Node options object is a code smell' );
-
-  // @public {TinyProperty.<string>} - The text to display. We'll initialize this by mutating.
-  this._textProperty = new TinyForwardingProperty( '', true );
-  this._textProperty.lazyLink( this.onTextPropertyChange.bind( this ) );
-
-  // @private {Font} - The font with which to display the text.
-  this._font = Font.DEFAULT;
-
-  // @private {string}
-  this._boundsMethod = 'hybrid';
-
-  // @private {boolean} - Whether the text is rendered as HTML or not. if defined (in a subtype constructor), use that value instead
-  this._isHTML = this._isHTML === undefined ? false : this._isHTML;
-
-  // {null|string} - The actual string displayed (can have non-breaking spaces and embedding marks rewritten).
-  // When this is null, its value needs to be recomputed
-  this._cachedRenderedText = null;
-
-  options = extendDefined( {
-    fill: '#000000', // Default to black filled text
-    text: text,
-    tandem: Tandem.OPTIONAL,
-    phetioType: Text.TextIO
-  }, options );
-
-  this.textTandem = options.tandem; // @private (phet-io) - property name avoids namespace of the Node setter
-
-  Node.call( this );
-
-  this.initializePaintable();
-
-  this.mutate( options );
-
-  this.invalidateSupportedRenderers(); // takes care of setting up supported renderers
-}
-
-scenery.register( 'Text', Text );
-
-inherit( Node, Text, {
+class Text extends Node {
   /**
-   * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
-   * order they will be evaluated in.
-   * @protected
+   * @public
    *
-   * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
-   *       cases that may apply.
+   * @param {string|number} text - See setText() for more documentation
+   * @param {Object} [options] - Text-specific options are documented in TEXT_OPTION_KEYS above, and can be provided
+   *                             along-side options for Node
    */
-  _mutatorKeys: TEXT_OPTION_KEYS.concat( Node.prototype._mutatorKeys ),
+  constructor( text, options ) {
+    assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
+      'Extra prototype on Node options object is a code smell' );
 
-  /**
-   * {Array.<String>} - List of all dirty flags that should be available on drawables created from this node (or
-   *                    subtype). Given a flag (e.g. radius), it indicates the existence of a function
-   *                    drawable.markDirtyRadius() that will indicate to the drawable that the radius has changed.
-   * @public (scenery-internal)
-   * @override
-   */
-  drawableMarkFlags: Node.prototype.drawableMarkFlags.concat( [ 'text', 'font', 'bounds' ] ),
+    super();
+
+    // @public {TinyProperty.<string>} - The text to display. We'll initialize this by mutating.
+    this._textProperty = new TinyForwardingProperty( '', true );
+    this._textProperty.lazyLink( this.onTextPropertyChange.bind( this ) );
+
+    // @private {Font} - The font with which to display the text.
+    this._font = Font.DEFAULT;
+
+    // @private {string}
+    this._boundsMethod = 'hybrid';
+
+    // @private {boolean} - Whether the text is rendered as HTML or not. if defined (in a subtype constructor), use that value instead
+    this._isHTML = this._isHTML === undefined ? false : this._isHTML;
+
+    // {null|string} - The actual string displayed (can have non-breaking spaces and embedding marks rewritten).
+    // When this is null, its value needs to be recomputed
+    this._cachedRenderedText = null;
+
+    options = extendDefined( {
+      fill: '#000000', // Default to black filled text
+      text: text,
+      tandem: Tandem.OPTIONAL,
+      phetioType: Text.TextIO
+    }, options );
+
+    this.textTandem = options.tandem; // @private (phet-io) - property name avoids namespace of the Node setter
+
+    this.initializePaintable();
+
+    this.mutate( options );
+
+    this.invalidateSupportedRenderers(); // takes care of setting up supported renderers
+  }
+
 
   /**
    * Sets the text displayed by our node.
@@ -128,7 +105,7 @@ inherit( Node, Text, {
    * @param {string|number} text - The text to display. If it's a number, it will be cast to a string
    * @returns {Text} - For chaining
    */
-  setText: function( text ) {
+  setText( text ) {
     assert && assert( text !== null && text !== undefined, 'Text should be defined and non-null. Use the empty string if needed.' );
     assert && assert( typeof text === 'number' || typeof text === 'string', 'text should be a string or number' );
 
@@ -138,8 +115,8 @@ inherit( Node, Text, {
     this._textProperty.set( text );
 
     return this;
-  },
-  set text( value ) { this.setText( value ); },
+  }
+  set text( value ) { this.setText( value ); }
 
   /**
    * Returns the text displayed by our node.
@@ -149,10 +126,10 @@ inherit( Node, Text, {
    *
    * @returns {string}
    */
-  getText: function() {
+  getText() {
     return this._textProperty.value;
-  },
-  get text() { return this.getText(); },
+  }
+  get text() { return this.getText(); }
 
   /**
    * Returns a potentially modified version of this.text, where spaces are replaced with non-breaking spaces,
@@ -161,7 +138,7 @@ inherit( Node, Text, {
    *
    * @returns {string}
    */
-  getRenderedText: function() {
+  getRenderedText() {
     if ( this._cachedRenderedText === null ) {
       // Using the non-breaking space (&nbsp;) encoded as 0x00A0 in UTF-8
       this._cachedRenderedText = this.text.replace( ' ', '\xA0' );
@@ -173,14 +150,14 @@ inherit( Node, Text, {
     }
 
     return this._cachedRenderedText;
-  },
-  get renderedText() { return this.getRenderedText(); },
+  }
+  get renderedText() { return this.getRenderedText(); }
 
   /**
    * Called when our text Property changes values.
    * @private
    */
-  onTextPropertyChange: function() {
+  onTextPropertyChange() {
     this._cachedRenderedText = null;
 
     const stateLen = this._drawables.length;
@@ -189,7 +166,7 @@ inherit( Node, Text, {
     }
 
     this.invalidateText();
-  },
+  }
 
   /**
    * See documentation for Node.setVisibleProperty, except this is for the text string.
@@ -201,8 +178,8 @@ inherit( Node, Text, {
    */
   setTextProperty( newTarget ) {
     return this._textProperty.setTargetProperty( this, TEXT_PROPERTY_TANDEM_NAME, newTarget );
-  },
-  set textProperty( property ) { this.setTextProperty( property ); },
+  }
+  set textProperty( property ) { this.setTextProperty( property ); }
 
   /**
    * Like Node.getVisibleProperty(), but for the text string. Note this is not the same as the Property provided in
@@ -211,10 +188,10 @@ inherit( Node, Text, {
    * @returns {TinyForwardingProperty}
    * @public
    */
-  getTextProperty: function() {
+  getTextProperty() {
     return this._textProperty;
-  },
-  get textProperty() { return this.getTextProperty(); },
+  }
+  get textProperty() { return this.getTextProperty(); }
 
   /**
    * See documentation and comments in Node.initializePhetioObject
@@ -223,7 +200,7 @@ inherit( Node, Text, {
    * @override
    * @protected
    */
-  initializePhetioObject: function( baseOptions, config ) {
+  initializePhetioObject( baseOptions, config ) {
 
     config = merge( {
       textPropertyOptions: null
@@ -232,7 +209,7 @@ inherit( Node, Text, {
     // Track this, so we only override our textProperty once.
     const wasInstrumented = this.isPhetioInstrumented();
 
-    Node.prototype.initializePhetioObject.call( this, baseOptions, config );
+    super.initializePhetioObject( baseOptions, config );
 
     if ( Tandem.PHET_IO_ENABLED && !wasInstrumented && this.isPhetioInstrumented() ) {
       this._textProperty.initializePhetio( this, TEXT_PROPERTY_TANDEM_NAME, () => new StringProperty( this.text, merge( {
@@ -244,7 +221,7 @@ inherit( Node, Text, {
         }, config.textPropertyOptions ) )
       );
     }
-  },
+  }
 
   /**
    * Sets the method that is used to determine bounds from the text.
@@ -268,7 +245,7 @@ inherit( Node, Text, {
    * @param {string} method - One of the above methods
    * @returns {Text} - For chaining.
    */
-  setBoundsMethod: function( method ) {
+  setBoundsMethod( method ) {
     assert && assert( method === 'fast' || method === 'fastCanvas' || method === 'accurate' || method === 'hybrid', 'Unknown Text boundsMethod' );
     if ( method !== this._boundsMethod ) {
       this._boundsMethod = method;
@@ -284,8 +261,8 @@ inherit( Node, Text, {
       this.rendererSummaryRefreshEmitter.emit(); // whether our self bounds are valid may have changed
     }
     return this;
-  },
-  set boundsMethod( value ) { this.setBoundsMethod( value ); },
+  }
+  set boundsMethod( value ) { this.setBoundsMethod( value ); }
 
   /**
    * Returns the current method to estimate the bounds of the text. See setBoundsMethod() for more information.
@@ -293,10 +270,10 @@ inherit( Node, Text, {
    *
    * @returns {string}
    */
-  getBoundsMethod: function() {
+  getBoundsMethod() {
     return this._boundsMethod;
-  },
-  get boundsMethod() { return this.getBoundsMethod(); },
+  }
+  get boundsMethod() { return this.getBoundsMethod(); }
 
   /**
    * Returns a bitmask representing the supported renderers for the current configuration of the Text node.
@@ -304,7 +281,7 @@ inherit( Node, Text, {
    *
    * @returns {number} - A bitmask that includes supported renderers, see Renderer for details.
    */
-  getTextRendererBitmask: function() {
+  getTextRendererBitmask() {
     let bitmask = 0;
 
     // canvas support (fast bounds may leak out of dirty rectangles)
@@ -319,7 +296,7 @@ inherit( Node, Text, {
     bitmask |= Renderer.bitmaskDOM;
 
     return bitmask;
-  },
+  }
 
   /**
    * Triggers a check and update for what renderers the current configuration supports.
@@ -327,16 +304,16 @@ inherit( Node, Text, {
    * be isHTML, boundsMethod, etc.)
    * @public
    */
-  invalidateSupportedRenderers: function() {
+  invalidateSupportedRenderers() {
     this.setRendererBitmask( this.getFillRendererBitmask() & this.getStrokeRendererBitmask() & this.getTextRendererBitmask() );
-  },
+  }
 
   /**
    * Notifies that something about the text's potential bounds have changed (different text, different stroke or font,
    * etc.)
    * @private
    */
-  invalidateText: function() {
+  invalidateText() {
     this.invalidateSelf();
 
     // TODO: consider replacing this with a general dirty flag notification, and have DOM update bounds every frame?
@@ -347,7 +324,7 @@ inherit( Node, Text, {
 
     // we may have changed renderers if parameters were changed!
     this.invalidateSupportedRenderers();
-  },
+  }
 
   /**
    * Computes a more efficient selfBounds for our Text.
@@ -356,7 +333,7 @@ inherit( Node, Text, {
    *
    * @returns {boolean} - Whether the self bounds changed.
    */
-  updateSelfBounds: function() {
+  updateSelfBounds() {
     // TODO: don't create another Bounds2 object just for this!
     let selfBounds;
 
@@ -385,27 +362,27 @@ inherit( Node, Text, {
       this.selfBoundsProperty._value.set( selfBounds );
     }
     return changed;
-  },
+  }
 
   /**
    * Called from (and overridden in) the Paintable trait, invalidates our current stroke, triggering recomputation of
    * anything that depended on the old stroke's value.
    * @protected (scenery-internal)
    */
-  invalidateStroke: function() {
+  invalidateStroke() {
     // stroke can change both the bounds and renderer
     this.invalidateText();
-  },
+  }
 
   /**
    * Called from (and overridden in) the Paintable trait, invalidates our current fill, triggering recomputation of
    * anything that depended on the old fill's value.
    * @protected (scenery-internal)
    */
-  invalidateFill: function() {
+  invalidateFill() {
     // fill type can change the renderer (gradient/fill not supported by DOM)
     this.invalidateText();
-  },
+  }
 
   /**
    * Draws the current Node's self representation, assuming the wrapper's Canvas context is already in the local
@@ -416,10 +393,10 @@ inherit( Node, Text, {
    * @param {CanvasContextWrapper} wrapper
    * @param {Matrix3} matrix - The transformation matrix already applied to the context.
    */
-  canvasPaintSelf: function( wrapper, matrix ) {
+  canvasPaintSelf( wrapper, matrix ) {
     //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily.
     TextCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
-  },
+  }
 
   /**
    * Creates a DOM drawable for this Text.
@@ -430,9 +407,9 @@ inherit( Node, Text, {
    * @param {Instance} instance - Instance object that will be associated with the drawable
    * @returns {DOMSelfDrawable}
    */
-  createDOMDrawable: function( renderer, instance ) {
+  createDOMDrawable( renderer, instance ) {
     return TextDOMDrawable.createFromPool( renderer, instance );
-  },
+  }
 
   /**
    * Creates a SVG drawable for this Text.
@@ -443,9 +420,9 @@ inherit( Node, Text, {
    * @param {Instance} instance - Instance object that will be associated with the drawable
    * @returns {SVGSelfDrawable}
    */
-  createSVGDrawable: function( renderer, instance ) {
+  createSVGDrawable( renderer, instance ) {
     return TextSVGDrawable.createFromPool( renderer, instance );
-  },
+  }
 
   /**
    * Creates a Canvas drawable for this Text.
@@ -456,9 +433,9 @@ inherit( Node, Text, {
    * @param {Instance} instance - Instance object that will be associated with the drawable
    * @returns {CanvasSelfDrawable}
    */
-  createCanvasDrawable: function( renderer, instance ) {
+  createCanvasDrawable( renderer, instance ) {
     return TextCanvasDrawable.createFromPool( renderer, instance );
-  },
+  }
 
   /**
    * Returns a DOM element that contains the specified text.
@@ -468,7 +445,7 @@ inherit( Node, Text, {
    *
    * @returns {Element}
    */
-  getDOMTextNode: function() {
+  getDOMTextNode() {
     if ( this._isHTML ) {
       const span = document.createElement( 'span' );
       span.innerHTML = this.text;
@@ -477,7 +454,7 @@ inherit( Node, Text, {
     else {
       return document.createTextNode( this.renderedText );
     }
-  },
+  }
 
   /**
    * Returns a bounding box that should contain all self content in the local coordinate frame (our normal self bounds
@@ -490,14 +467,14 @@ inherit( Node, Text, {
    *
    * @returns {Bounds2}
    */
-  getSafeSelfBounds: function() {
+  getSafeSelfBounds() {
     const expansionFactor = 1; // we use a new bounding box with a new size of size * ( 1 + 2 * expansionFactor )
 
     const selfBounds = this.getSelfBounds();
 
     // NOTE: we'll keep this as an estimate for the bounds including stroke miters
     return selfBounds.dilatedXY( expansionFactor * selfBounds.width, expansionFactor * selfBounds.height );
-  },
+  }
 
   /**
    * Sets the font of the Text node.
@@ -510,7 +487,7 @@ inherit( Node, Text, {
    * @param {Font|string} font
    * @returns {Node} - For chaining.
    */
-  setFont: function( font ) {
+  setFont( font ) {
     assert && assert( font instanceof Font || typeof font === 'string',
       'Fonts provided to setFont should be a Font object or a string in the CSS3 font shortcut format' );
 
@@ -529,8 +506,8 @@ inherit( Node, Text, {
       this.invalidateText();
     }
     return this;
-  },
-  set font( value ) { this.setFont( value ); },
+  }
+  set font( value ) { this.setFont( value ); }
 
   /**
    * Returns a string representation of the current Font.
@@ -544,10 +521,10 @@ inherit( Node, Text, {
    *
    * @returns {string}
    */
-  getFont: function() {
+  getFont() {
     return this._font.getFont();
-  },
-  get font() { return this.getFont(); },
+  }
+  get font() { return this.getFont(); }
 
   /**
    * Sets the weight of this node's font.
@@ -560,12 +537,12 @@ inherit( Node, Text, {
    * @param {string|number} weight - See above
    * @returns {Text} - For chaining.
    */
-  setFontWeight: function( weight ) {
+  setFontWeight( weight ) {
     return this.setFont( this._font.copy( {
       weight: weight
     } ) );
-  },
-  set fontWeight( value ) { this.setFontWeight( value ); },
+  }
+  set fontWeight( value ) { this.setFontWeight( value ); }
 
   /**
    * Returns the weight of this node's font, see setFontWeight() for details.
@@ -575,10 +552,10 @@ inherit( Node, Text, {
    *
    * @returns {string}
    */
-  getFontWeight: function() {
+  getFontWeight() {
     return this._font.getWeight();
-  },
-  get fontWeight() { return this.getFontWeight(); },
+  }
+  get fontWeight() { return this.getFontWeight(); }
 
   /**
    * Sets the family of this node's font.
@@ -590,12 +567,12 @@ inherit( Node, Text, {
    *                          surrounded by double quotes.
    * @returns {Text} - For chaining.
    */
-  setFontFamily: function( family ) {
+  setFontFamily( family ) {
     return this.setFont( this._font.copy( {
       family: family
     } ) );
-  },
-  set fontFamily( value ) { this.setFontFamily( value ); },
+  }
+  set fontFamily( value ) { this.setFontFamily( value ); }
 
   /**
    * Returns the family of this node's font, see setFontFamily() for details.
@@ -603,10 +580,10 @@ inherit( Node, Text, {
    *
    * @returns {string}
    */
-  getFontFamily: function() {
+  getFontFamily() {
     return this._font.getFamily();
-  },
-  get fontFamily() { return this.getFontFamily(); },
+  }
+  get fontFamily() { return this.getFontFamily(); }
 
   /**
    * Sets the stretch of this node's font.
@@ -619,12 +596,12 @@ inherit( Node, Text, {
    * @param {string} stretch - See above
    * @returns {Text} - For chaining.
    */
-  setFontStretch: function( stretch ) {
+  setFontStretch( stretch ) {
     return this.setFont( this._font.copy( {
       stretch: stretch
     } ) );
-  },
-  set fontStretch( value ) { this.setFontStretch( value ); },
+  }
+  set fontStretch( value ) { this.setFontStretch( value ); }
 
   /**
    * Returns the stretch of this node's font, see setFontStretch() for details.
@@ -632,10 +609,10 @@ inherit( Node, Text, {
    *
    * @returns {string}
    */
-  getFontStretch: function() {
+  getFontStretch() {
     return this._font.getStretch();
-  },
-  get fontStretch() { return this.getFontStretch(); },
+  }
+  get fontStretch() { return this.getFontStretch(); }
 
   /**
    * Sets the style of this node's font.
@@ -646,12 +623,12 @@ inherit( Node, Text, {
    * @param {string} style - See above
    * @returns {Text} - For chaining.
    */
-  setFontStyle: function( style ) {
+  setFontStyle( style ) {
     return this.setFont( this._font.copy( {
       style: style
     } ) );
-  },
-  set fontStyle( value ) { this.setFontStyle( value ); },
+  }
+  set fontStyle( value ) { this.setFontStyle( value ); }
 
   /**
    * Returns the style of this node's font, see setFontStyle() for details.
@@ -659,10 +636,10 @@ inherit( Node, Text, {
    *
    * @returns {string}
    */
-  getFontStyle: function() {
+  getFontStyle() {
     return this._font.getStyle();
-  },
-  get fontStyle() { return this.getFontStyle(); },
+  }
+  get fontStyle() { return this.getFontStyle(); }
 
   /**
    * Sets the size of this node's font.
@@ -674,12 +651,12 @@ inherit( Node, Text, {
    * @param {string|number} size - See above
    * @returns {Text} - For chaining.
    */
-  setFontSize: function( size ) {
+  setFontSize( size ) {
     return this.setFont( this._font.copy( {
       size: size
     } ) );
-  },
-  set fontSize( value ) { this.setFontSize( value ); },
+  }
+  set fontSize( value ) { this.setFontSize( value ); }
 
   /**
    * Returns the size of this node's font, see setFontSize() for details.
@@ -690,10 +667,10 @@ inherit( Node, Text, {
    *
    * @returns {string}
    */
-  getFontSize: function() {
+  getFontSize() {
     return this._font.getSize();
-  },
-  get fontSize() { return this.getFontSize(); },
+  }
+  get fontSize() { return this.getFontSize(); }
 
   /**
    * Whether this Node itself is painted (displays something itself).
@@ -702,10 +679,10 @@ inherit( Node, Text, {
    *
    * @returns {boolean}
    */
-  isPainted: function() {
+  isPainted() {
     // Always true for Text nodes
     return true;
-  },
+  }
 
   /**
    * Whether this Node's selfBounds are considered to be valid (always containing the displayed self content
@@ -717,9 +694,9 @@ inherit( Node, Text, {
    *
    * @returns {boolean}
    */
-  areSelfBoundsValid: function() {
+  areSelfBoundsValid() {
     return this._boundsMethod === 'accurate';
-  },
+  }
 
   /**
    * Override for extra information in the debugging output (from Display.getDebugHTML()).
@@ -728,17 +705,175 @@ inherit( Node, Text, {
    *
    * @returns {string}
    */
-  getDebugHTMLExtras: function() {
+  getDebugHTMLExtras() {
     return ' "' + escapeHTML( this.renderedText ) + '"' + ( this._isHTML ? ' (html)' : '' );
-  },
+  }
 
   // @public
   dispose() {
-    Node.prototype.dispose.call( this );
+    super.dispose();
 
     this._textProperty.dispose();
   }
-} );
+
+  /**
+   * Replaces embedding mark characters with visible strings. Useful for debugging for strings with embedding marks.
+   * @public
+   *
+   * @param {string} string
+   * @returns {string} - With embedding marks replaced.
+   */
+  static embeddedDebugString( string ) {
+    return string.replace( /\u202a/g, '[LTR]' ).replace( /\u202b/g, '[RTL]' ).replace( /\u202c/g, '[POP]' );
+  }
+
+  /**
+   * Returns a (potentially) modified string where embedding marks have been simplified.
+   * @public
+   *
+   * This simplification wouldn't usually be necessary, but we need to prevent cases like
+   * https://github.com/phetsims/scenery/issues/520 where Edge decides to turn [POP][LTR] (after another [LTR]) into
+   * a 'box' character, when nothing should be rendered.
+   *
+   * This will remove redundant nesting:
+   *   e.g. [LTR][LTR]boo[POP][POP] => [LTR]boo[POP])
+   * and will also combine adjacent directions:
+   *   e.g. [LTR]Mail[POP][LTR]Man[POP] => [LTR]MailMan[Pop]
+   *
+   * Note that it will NOT combine in this way if there was a space between the two LTRs:
+   *   e.g. [LTR]Mail[POP] [LTR]Man[Pop])
+   * as in the general case, we'll want to preserve the break there between embeddings.
+   *
+   * TODO: A stack-based implementation that doesn't create a bunch of objects/closures would be nice for performance.
+   *
+   * @param {string} string
+   * @returns {string}
+   */
+  static simplifyEmbeddingMarks( string ) {
+    // First, we'll convert the string into a tree form, where each node is either a string object OR an object of the
+    // node type { dir: {LTR||RTL}, children: {Array.<node>}, parent: {null|node} }. Thus each LTR...POP and RTL...POP
+    // become a node with their interiors becoming children.
+
+    // Root node (no direction, so we preserve root LTR/RTLs)
+    const root = {
+      dir: null,
+      children: [],
+      parent: null
+    };
+    let current = root;
+    for ( let i = 0; i < string.length; i++ ) {
+      const chr = string.charAt( i );
+
+      // Push a direction
+      if ( chr === LTR || chr === RTL ) {
+        const node = {
+          dir: chr,
+          children: [],
+          parent: current
+        };
+        current.children.push( node );
+        current = node;
+      }
+      // Pop a direction
+      else if ( chr === POP ) {
+        assert && assert( current.parent, 'Bad nesting of embedding marks: ' + Text.embeddedDebugString( string ) );
+        current = current.parent;
+      }
+      // Append characters to the current direction
+      else {
+        current.children.push( chr );
+      }
+    }
+    assert && assert( current === root, 'Bad nesting of embedding marks: ' + Text.embeddedDebugString( string ) );
+
+    // Remove redundant nesting (e.g. [LTR][LTR]...[POP][POP])
+    function collapseNesting( node ) {
+      for ( let i = node.children.length - 1; i >= 0; i-- ) {
+        const child = node.children[ i ];
+        if ( node.dir === child.dir ) {
+          Array.prototype.splice.apply( node.children, [ i, 1 ].concat( child.children ) );
+        }
+      }
+    }
+
+    // Remove overridden nesting (e.g. [LTR][RTL]...[POP][POP]), since the outer one is not needed
+    function collapseUnnecessary( node ) {
+      if ( node.children.length === 1 && node.children[ 0 ].dir ) {
+        node.dir = node.children[ 0 ].dir;
+        node.children = node.children[ 0 ].children;
+      }
+    }
+
+    // Collapse adjacent matching dirs, e.g. [LTR]...[POP][LTR]...[POP]
+    function collapseAdjacent( node ) {
+      for ( let i = node.children.length - 1; i >= 1; i-- ) {
+        const previousChild = node.children[ i - 1 ];
+        const child = node.children[ i ];
+        if ( child.dir && previousChild.dir === child.dir ) {
+          previousChild.children = previousChild.children.concat( child.children );
+          node.children.splice( i, 1 );
+
+          // Now try to collapse adjacent items in the child, since we combined children arrays
+          collapseAdjacent( previousChild );
+        }
+      }
+    }
+
+    // Simplifies the tree using the above functions
+    function simplify( node ) {
+      if ( typeof node === 'string' ) {
+        return;
+      }
+
+      for ( let i = 0; i < node.children.length; i++ ) {
+        simplify( node.children[ i ] );
+      }
+
+      collapseUnnecessary( node );
+      collapseNesting( node );
+      collapseAdjacent( node );
+
+      return node;
+    }
+
+    // Turns a tree into a string
+    function stringify( node ) {
+      if ( typeof node === 'string' ) {
+        return node;
+      }
+      const childString = node.children.map( stringify ).join( '' );
+      if ( node.dir ) {
+        return node.dir + childString + '\u202c';
+      }
+      else {
+        return childString;
+      }
+    }
+
+    return stringify( simplify( root ) );
+  }
+}
+
+/**
+ * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
+ * order they will be evaluated in.
+ * @protected
+ *
+ * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
+ *       cases that may apply.
+ */
+Text.prototype._mutatorKeys = TEXT_OPTION_KEYS.concat( Node.prototype._mutatorKeys );
+
+/**
+ * {Array.<String>} - List of all dirty flags that should be available on drawables created from this node (or
+ *                    subtype). Given a flag (e.g. radius), it indicates the existence of a function
+ *                    drawable.markDirtyRadius() that will indicate to the drawable that the radius has changed.
+ * @public (scenery-internal)
+ * @override
+ */
+Text.prototype.drawableMarkFlags = Node.prototype.drawableMarkFlags.concat( [ 'text', 'font', 'bounds' ] );
+
+scenery.register( 'Text', Text );
 
 // mix in support for fills and strokes
 Paintable.mixInto( Text );
@@ -748,143 +883,6 @@ Paintable.mixInto( Text );
 const LTR = '\u202a';
 const RTL = '\u202b';
 const POP = '\u202c';
-
-/**
- * Replaces embedding mark characters with visible strings. Useful for debugging for strings with embedding marks.
- * @public
- *
- * @param {string} string
- * @returns {string} - With embedding marks replaced.
- */
-Text.embeddedDebugString = function( string ) {
-  return string.replace( /\u202a/g, '[LTR]' ).replace( /\u202b/g, '[RTL]' ).replace( /\u202c/g, '[POP]' );
-};
-
-/**
- * Returns a (potentially) modified string where embedding marks have been simplified.
- * @public
- *
- * This simplification wouldn't usually be necessary, but we need to prevent cases like
- * https://github.com/phetsims/scenery/issues/520 where Edge decides to turn [POP][LTR] (after another [LTR]) into
- * a 'box' character, when nothing should be rendered.
- *
- * This will remove redundant nesting:
- *   e.g. [LTR][LTR]boo[POP][POP] => [LTR]boo[POP])
- * and will also combine adjacent directions:
- *   e.g. [LTR]Mail[POP][LTR]Man[POP] => [LTR]MailMan[Pop]
- *
- * Note that it will NOT combine in this way if there was a space between the two LTRs:
- *   e.g. [LTR]Mail[POP] [LTR]Man[Pop])
- * as in the general case, we'll want to preserve the break there between embeddings.
- *
- * TODO: A stack-based implementation that doesn't create a bunch of objects/closures would be nice for performance.
- *
- * @param {string} string
- * @returns {string}
- */
-Text.simplifyEmbeddingMarks = function( string ) {
-  // First, we'll convert the string into a tree form, where each node is either a string object OR an object of the
-  // node type { dir: {LTR||RTL}, children: {Array.<node>}, parent: {null|node} }. Thus each LTR...POP and RTL...POP
-  // become a node with their interiors becoming children.
-
-  // Root node (no direction, so we preserve root LTR/RTLs)
-  const root = {
-    dir: null,
-    children: [],
-    parent: null
-  };
-  let current = root;
-  for ( let i = 0; i < string.length; i++ ) {
-    const chr = string.charAt( i );
-
-    // Push a direction
-    if ( chr === LTR || chr === RTL ) {
-      const node = {
-        dir: chr,
-        children: [],
-        parent: current
-      };
-      current.children.push( node );
-      current = node;
-    }
-    // Pop a direction
-    else if ( chr === POP ) {
-      assert && assert( current.parent, 'Bad nesting of embedding marks: ' + Text.embeddedDebugString( string ) );
-      current = current.parent;
-    }
-    // Append characters to the current direction
-    else {
-      current.children.push( chr );
-    }
-  }
-  assert && assert( current === root, 'Bad nesting of embedding marks: ' + Text.embeddedDebugString( string ) );
-
-  // Remove redundant nesting (e.g. [LTR][LTR]...[POP][POP])
-  function collapseNesting( node ) {
-    for ( let i = node.children.length - 1; i >= 0; i-- ) {
-      const child = node.children[ i ];
-      if ( node.dir === child.dir ) {
-        Array.prototype.splice.apply( node.children, [ i, 1 ].concat( child.children ) );
-      }
-    }
-  }
-
-  // Remove overridden nesting (e.g. [LTR][RTL]...[POP][POP]), since the outer one is not needed
-  function collapseUnnecessary( node ) {
-    if ( node.children.length === 1 && node.children[ 0 ].dir ) {
-      node.dir = node.children[ 0 ].dir;
-      node.children = node.children[ 0 ].children;
-    }
-  }
-
-  // Collapse adjacent matching dirs, e.g. [LTR]...[POP][LTR]...[POP]
-  function collapseAdjacent( node ) {
-    for ( let i = node.children.length - 1; i >= 1; i-- ) {
-      const previousChild = node.children[ i - 1 ];
-      const child = node.children[ i ];
-      if ( child.dir && previousChild.dir === child.dir ) {
-        previousChild.children = previousChild.children.concat( child.children );
-        node.children.splice( i, 1 );
-
-        // Now try to collapse adjacent items in the child, since we combined children arrays
-        collapseAdjacent( previousChild );
-      }
-    }
-  }
-
-  // Simplifies the tree using the above functions
-  function simplify( node ) {
-    if ( typeof node === 'string' ) {
-      return;
-    }
-
-    for ( let i = 0; i < node.children.length; i++ ) {
-      simplify( node.children[ i ] );
-    }
-
-    collapseUnnecessary( node );
-    collapseNesting( node );
-    collapseAdjacent( node );
-
-    return node;
-  }
-
-  // Turns a tree into a string
-  function stringify( node ) {
-    if ( typeof node === 'string' ) {
-      return node;
-    }
-    const childString = node.children.map( stringify ).join( '' );
-    if ( node.dir ) {
-      return node.dir + childString + '\u202c';
-    }
-    else {
-      return childString;
-    }
-  }
-
-  return stringify( simplify( root ) );
-};
 
 // Initialize computation of hybrid text
 TextBounds.initializeTextBounds();

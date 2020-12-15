@@ -6,31 +6,27 @@
  * @author Sam Reid
  */
 
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 import LayoutBox from './LayoutBox.js';
 
-/**
- * @public
- * @constructor
- * @extends LayoutBox
- *
- * @param {Object} [options] see LayoutBox
- */
-function VBox( options ) {
+class VBox extends LayoutBox {
+  /**
+   * @param {Object} [options] see LayoutBox
+   */
+  constructor( options ) {
 
-  options = options || {};
+    options = options || {};
 
-  assert && assert( Object.getPrototypeOf( options ) === Object.prototype,
-    'Extra prototype on Node options object is a code smell' );
+    assert && assert( Object.getPrototypeOf( options ) === Object.prototype,
+      'Extra prototype on Node options object is a code smell' );
 
-  assert && assert( !options.orientation, 'VBox sets orientation' );
-  options.orientation = 'vertical';
+    assert && assert( !options.orientation, 'VBox sets orientation' );
+    options.orientation = 'vertical';
 
-  LayoutBox.call( this, options );
+    super( options );
+  }
 }
 
 scenery.register( 'VBox', VBox );
 
-inherit( LayoutBox, VBox );
 export default VBox;

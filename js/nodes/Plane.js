@@ -10,22 +10,18 @@
  * @author Sam Reid
  */
 
-import inherit from '../../../phet-core/js/inherit.js';
 import scenery from '../scenery.js';
 import Rectangle from './Rectangle.js';
 
-/**
- * @public
- * @constructor
- * @extends Rectangle
- *
- * @param {Object} [options] Passed to Rectangle. See Rectangle for more documentation
- */
-function Plane( options ) {
-  Rectangle.call( this, -2000, -2000, 6000, 6000, options );
+class Plane extends Rectangle {
+  /**
+   * @param {Object} [options] Passed to Rectangle. See Rectangle for more documentation
+   */
+  constructor( options ) {
+    super( -2000, -2000, 6000, 6000, options );
+  }
 }
 
 scenery.register( 'Plane', Plane );
 
-inherit( Rectangle, Plane );
 export default Plane;

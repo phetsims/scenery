@@ -8,15 +8,14 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import KiteLine from '../../../kite/js/segments/Line.js'; // eslint-disable-line require-statement-match
 import Shape from '../../../kite/js/Shape.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
-import inherit from '../../../phet-core/js/inherit.js';
+import Renderer from '../display/Renderer.js';
 import LineCanvasDrawable from '../display/drawables/LineCanvasDrawable.js';
 import LineSVGDrawable from '../display/drawables/LineSVGDrawable.js';
-import Renderer from '../display/Renderer.js';
 import scenery from '../scenery.js';
 import Path from './Path.js';
+import KiteLine from '../../../kite/js/segments/Line.js'; // eslint-disable-line require-statement-match
 
 const LINE_OPTION_KEYS = [
   'p1', // {Vector2} - Start position
@@ -27,120 +26,97 @@ const LINE_OPTION_KEYS = [
   'y2' // {number} - End y position
 ];
 
-/**
- * @public
- * @constructor
- * @extends Path
- *
- * Currently, all numerical parameters should be finite.
- * x1: {number} - x-position of the start
- * y1: {number} - y-position of the start
- * x2: {number} - x-position of the end
- * y2: {number} - y-position of the end
- * p1: {Vector2} - position of the start
- * p2: {Vector2} - position of the end
- *
- * Available constructors (with "..." denoting options parameters):
- * - new Line( x1, y1, x2, y2, { ... } )
- * - new Line( p1, p2, { ... } )
- * - A combination of options that sets all of the x's and y's, e.g.:
- *   - new Line( { p1: p1, p2: p2, ... } )
- *   - new Line( { p1: p1, x2: x2, y2: y2, ... } )
- *   - new Line( { x1: x1, y1: y1, x2: x2, y2: y2, ... } )
- *
- * @param {number|Object|Vector2} x1
- * @param {number|Vector2} [y1]
- * @param {number|Object} [x2]
- * @param {number} [y2]
- * @param {Object} [options] - Line-specific options are documented in LINE_OPTION_KEYS above, and can be provided
- *                             along-side options for Node
- */
-function Line( x1, y1, x2, y2, options ) {
-  // @private {number} - The x coordinate of the start point (point 1)
-  this._x1 = 0;
+class Line extends Path {
+  /**
+   * @public
+   *
+   * Currently, all numerical parameters should be finite.
+   * x1: {number} - x-position of the start
+   * y1: {number} - y-position of the start
+   * x2: {number} - x-position of the end
+   * y2: {number} - y-position of the end
+   * p1: {Vector2} - position of the start
+   * p2: {Vector2} - position of the end
+   *
+   * Available constructors (with "..." denoting options parameters):
+   * - new Line( x1, y1, x2, y2, { ... } )
+   * - new Line( p1, p2, { ... } )
+   * - A combination of options that sets all of the x's and y's, e.g.:
+   *   - new Line( { p1: p1, p2: p2, ... } )
+   *   - new Line( { p1: p1, x2: x2, y2: y2, ... } )
+   *   - new Line( { x1: x1, y1: y1, x2: x2, y2: y2, ... } )
+   *
+   * @param {number|Object|Vector2} x1
+   * @param {number|Vector2} [y1]
+   * @param {number|Object} [x2]
+   * @param {number} [y2]
+   * @param {Object} [options] - Line-specific options are documented in LINE_OPTION_KEYS above, and can be provided
+   *                             along-side options for Node
+   */
+  constructor( x1, y1, x2, y2, options ) {
+    super( null );
 
-  // @private {number} - The y coordinate of the start point (point 1)
-  this._y1 = 0;
+    // @private {number} - The x coordinate of the start point (point 1)
+    this._x1 = 0;
 
-  // @private {number} - The x coordinate of the start point (point 2)
-  this._x2 = 0;
+    // @private {number} - The y coordinate of the start point (point 1)
+    this._y1 = 0;
 
-  // @private {number} - The y coordinate of the start point (point 2)
-  this._y2 = 0;
+    // @private {number} - The x coordinate of the start point (point 2)
+    this._x2 = 0;
 
-  // Remap constructor parameters to options
-  if ( typeof x1 === 'object' ) {
-    if ( x1 instanceof Vector2 ) {
-      // assumes Line( Vector2, Vector2, options ), where x2 is our options
-      assert && assert( y1 instanceof Vector2 );
-      assert && assert( x2 === undefined || typeof x2 === 'object' );
-      assert && assert( x2 === undefined || Object.getPrototypeOf( x2 ) === Object.prototype,
+    // @private {number} - The y coordinate of the start point (point 2)
+    this._y2 = 0;
+
+    // Remap constructor parameters to options
+    if ( typeof x1 === 'object' ) {
+      if ( x1 instanceof Vector2 ) {
+        // assumes Line( Vector2, Vector2, options ), where x2 is our options
+        assert && assert( y1 instanceof Vector2 );
+        assert && assert( x2 === undefined || typeof x2 === 'object' );
+        assert && assert( x2 === undefined || Object.getPrototypeOf( x2 ) === Object.prototype,
+          'Extra prototype on Node options object is a code smell' );
+
+        options = extendDefined( {
+          // First Vector2 is under the x1 name
+          x1: x1.x,
+          y1: x1.y,
+          // Second Vector2 is under the y1 name
+          x2: y1.x,
+          y2: y1.y
+        }, x2 ); // Options object (if available) is under the x2 name
+      }
+      else {
+        // assumes Line( { ... } ), init to zero for now
+        assert && assert( y1 === undefined );
+
+        // Options object is under the x1 name
+        options = x1;
+
+        assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
+          'Extra prototype on Node options object is a code smell' );
+      }
+    }
+    else {
+      // new Line( x1, y1, x2, y2, [options] )
+      assert && assert( typeof x1 === 'number' &&
+      typeof y1 === 'number' &&
+      typeof x2 === 'number' &&
+      typeof y2 === 'number' );
+      assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
         'Extra prototype on Node options object is a code smell' );
 
       options = extendDefined( {
-        // First Vector2 is under the x1 name
-        x1: x1.x,
-        y1: x1.y,
-        // Second Vector2 is under the y1 name
-        x2: y1.x,
-        y2: y1.y
-      }, x2 ); // Options object (if available) is under the x2 name
+        x1: x1,
+        y1: y1,
+        x2: x2,
+        y2: y2
+      }, options );
     }
-    else {
-      // assumes Line( { ... } ), init to zero for now
-      assert && assert( y1 === undefined );
 
-      // Options object is under the x1 name
-      options = x1;
-
-      assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
-        'Extra prototype on Node options object is a code smell' );
-    }
-  }
-  else {
-    // new Line( x1, y1, x2, y2, [options] )
-    assert && assert( typeof x1 === 'number' &&
-    typeof y1 === 'number' &&
-    typeof x2 === 'number' &&
-    typeof y2 === 'number' );
-    assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
-      'Extra prototype on Node options object is a code smell' );
-
-    options = extendDefined( {
-      x1: x1,
-      y1: y1,
-      x2: x2,
-      y2: y2
-    }, options );
+    this.mutate( options );
   }
 
-  Path.call( this, null, options );
-}
-
-scenery.register( 'Line', Line );
-
-inherit( Path, Line, {
-  /**
-   * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
-   * order they will be evaluated in.
-   * @protected
-   *
-   * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
-   *       cases that may apply.
-   */
-  _mutatorKeys: LINE_OPTION_KEYS.concat( Path.prototype._mutatorKeys ),
-
-  /**
-   * {Array.<String>} - List of all dirty flags that should be available on drawables created from this node (or
-   *                    subtype). Given a flag (e.g. radius), it indicates the existence of a function
-   *                    drawable.markDirtyRadius() that will indicate to the drawable that the radius has changed.
-   * @public (scenery-internal)
-   * @override
-   */
-  drawableMarkFlags: Path.prototype.drawableMarkFlags.concat( [ 'line', 'p1', 'p2', 'x1', 'x2', 'y1', 'y2' ] ).filter( function( flag ) {
-    // We don't want the shape flag, as that won't be called for Path subtypes.
-    return flag !== 'shape';
-  } ),
 
   /**
    * Set all of the line's x and y values.
@@ -152,7 +128,7 @@ inherit( Path, Line, {
    * @param {number} y2 - the end y coordinate
    * @returns {Line} - For chaining
    */
-  setLine: function( x1, y1, x2, y2 ) {
+  setLine( x1, y1, x2, y2 ) {
     assert && assert( x1 !== undefined &&
     y1 !== undefined &&
     x2 !== undefined &&
@@ -172,7 +148,7 @@ inherit( Path, Line, {
     this.invalidateLine();
 
     return this;
-  },
+  }
 
   /**
    * Set the line's first point's x and y values
@@ -191,7 +167,7 @@ inherit( Path, Line, {
    * @param {number} y1 - the start y coordinate
    * @returns {Line} - For chaining
    */
-  setPoint1: function( x1, y1 ) {
+  setPoint1( x1, y1 ) {
     if ( typeof x1 === 'number' ) {
       // setPoint1( x1, y1 );
       assert && assert( x1 !== undefined && y1 !== undefined, 'parameters need to be defined' );
@@ -212,9 +188,9 @@ inherit( Path, Line, {
     this.invalidateLine();
 
     return this;
-  },
-  set p1( point ) { this.setPoint1( point ); },
-  get p1() { return new Vector2( this._x1, this._y1 ); },
+  }
+  set p1( point ) { this.setPoint1( point ); }
+  get p1() { return new Vector2( this._x1, this._y1 ); }
 
   /**
    * Set the line's second point's x and y values
@@ -233,7 +209,7 @@ inherit( Path, Line, {
    * @param {number} y2 - the start y coordinate
    * @returns {Line} - For chaining
    */
-  setPoint2: function( x2, y2 ) {
+  setPoint2( x2, y2 ) {
     if ( typeof x2 === 'number' ) {
       // setPoint2( x2, y2 );
       assert && assert( x2 !== undefined && y2 !== undefined, 'parameters need to be defined' );
@@ -254,9 +230,9 @@ inherit( Path, Line, {
     this.invalidateLine();
 
     return this;
-  },
-  set p2( point ) { this.setPoint2( point ); },
-  get p2() { return new Vector2( this._x2, this._y2 ); },
+  }
+  set p2( point ) { this.setPoint2( point ); }
+  get p2() { return new Vector2( this._x2, this._y2 ); }
 
   /**
    * Sets the x coordinate of the first point of the line.
@@ -265,7 +241,7 @@ inherit( Path, Line, {
    * @param {number} x1
    * @returns {Line} - For chaining.
    */
-  setX1: function( x1 ) {
+  setX1( x1 ) {
     if ( this._x1 !== x1 ) {
       this._x1 = x1;
 
@@ -277,8 +253,8 @@ inherit( Path, Line, {
       this.invalidateLine();
     }
     return this;
-  },
-  set x1( value ) { this.setX1( value ); },
+  }
+  set x1( value ) { this.setX1( value ); }
 
   /**
    * Returns the x coordinate of the first point of the line.
@@ -286,10 +262,10 @@ inherit( Path, Line, {
    *
    * @returns {number}
    */
-  getX1: function() {
+  getX1() {
     return this._x1;
-  },
-  get x1() { return this.getX1(); },
+  }
+  get x1() { return this.getX1(); }
 
   /**
    * Sets the y coordinate of the first point of the line.
@@ -298,7 +274,7 @@ inherit( Path, Line, {
    * @param {number} y1
    * @returns {Line} - For chaining.
    */
-  setY1: function( y1 ) {
+  setY1( y1 ) {
     if ( this._y1 !== y1 ) {
       this._y1 = y1;
 
@@ -310,8 +286,8 @@ inherit( Path, Line, {
       this.invalidateLine();
     }
     return this;
-  },
-  set y1( value ) { this.setY1( value ); },
+  }
+  set y1( value ) { this.setY1( value ); }
 
   /**
    * Returns the y coordinate of the first point of the line.
@@ -319,10 +295,10 @@ inherit( Path, Line, {
    *
    * @returns {number}
    */
-  getY1: function() {
+  getY1() {
     return this._y1;
-  },
-  get y1() { return this.getY1(); },
+  }
+  get y1() { return this.getY1(); }
 
   /**
    * Sets the x coordinate of the second point of the line.
@@ -331,7 +307,7 @@ inherit( Path, Line, {
    * @param {number} x2
    * @returns {Line} - For chaining.
    */
-  setX2: function( x2 ) {
+  setX2( x2 ) {
     if ( this._x2 !== x2 ) {
       this._x2 = x2;
 
@@ -343,8 +319,8 @@ inherit( Path, Line, {
       this.invalidateLine();
     }
     return this;
-  },
-  set x2( value ) { this.setX2( value ); },
+  }
+  set x2( value ) { this.setX2( value ); }
 
   /**
    * Returns the x coordinate of the second point of the line.
@@ -352,10 +328,10 @@ inherit( Path, Line, {
    *
    * @returns {number}
    */
-  getX2: function() {
+  getX2() {
     return this._x2;
-  },
-  get x2() { return this.getX2(); },
+  }
+  get x2() { return this.getX2(); }
 
   /**
    * Sets the y coordinate of the second point of the line.
@@ -364,7 +340,7 @@ inherit( Path, Line, {
    * @param {number} y2
    * @returns {Line} - For chaining.
    */
-  setY2: function( y2 ) {
+  setY2( y2 ) {
     if ( this._y2 !== y2 ) {
       this._y2 = y2;
 
@@ -376,8 +352,8 @@ inherit( Path, Line, {
       this.invalidateLine();
     }
     return this;
-  },
-  set y2( value ) { this.setY2( value ); },
+  }
+  set y2( value ) { this.setY2( value ); }
 
   /**
    * Returns the y coordinate of the second point of the line.
@@ -385,10 +361,10 @@ inherit( Path, Line, {
    *
    * @returns {number}
    */
-  getY2: function() {
+  getY2() {
     return this._y2;
-  },
-  get y2() { return this.getY2(); },
+  }
+  get y2() { return this.getY2(); }
 
   /**
    * Returns a Shape that is equivalent to our rendered display. Generally used to lazily create a Shape instance
@@ -397,15 +373,15 @@ inherit( Path, Line, {
    *
    * @returns {Shape}
    */
-  createLineShape: function() {
+  createLineShape() {
     return Shape.lineSegment( this._x1, this._y1, this._x2, this._y2 ).makeImmutable();
-  },
+  }
 
   /**
    * Notifies that the line has changed and invalidates path information and our cached shape.
    * @private
    */
-  invalidateLine: function() {
+  invalidateLine() {
     assert && assert( isFinite( this._x1 ), 'A rectangle needs to have a finite x1 (' + this._x1 + ')' );
     assert && assert( isFinite( this._y1 ), 'A rectangle needs to have a finite y1 (' + this._y1 + ')' );
     assert && assert( isFinite( this._x2 ), 'A rectangle needs to have a finite x2 (' + this._x2 + ')' );
@@ -416,7 +392,7 @@ inherit( Path, Line, {
 
     // should invalidate the path and ensure a redraw
     this.invalidatePath();
-  },
+  }
 
   /**
    * Computes whether the provided point is "inside" (contained) in this Line's self content, or "outside".
@@ -428,14 +404,14 @@ inherit( Path, Line, {
    * @param {Vector2} point - Considered to be in the local coordinate frame
    * @returns {boolean}
    */
-  containsPointSelf: function( point ) {
+  containsPointSelf( point ) {
     if ( this._strokePickable ) {
-      return Path.prototype.containsPointSelf.call( this, point );
+      return super.containsPointSelf( point );
     }
     else {
       return false; // nothing is in a line! (although maybe we should handle edge points properly?)
     }
-  },
+  }
 
   /**
    * Returns whether this Line's selfBounds is intersected by the specified bounds.
@@ -444,10 +420,10 @@ inherit( Path, Line, {
    * @param {Bounds2} bounds - Bounds to test, assumed to be in the local coordinate frame.
    * @returns {boolean}
    */
-  intersectsBoundsSelf: function( bounds ) {
+  intersectsBoundsSelf( bounds ) {
     // TODO: optimization
     return new KiteLine( this.p1, this.p2 ).intersectsBounds( bounds );
-  },
+  }
 
   /**
    * Draws the current Node's self representation, assuming the wrapper's Canvas context is already in the local
@@ -458,10 +434,10 @@ inherit( Path, Line, {
    * @param {CanvasContextWrapper} wrapper
    * @param {Matrix3} matrix - The transformation matrix already applied to the context.
    */
-  canvasPaintSelf: function( wrapper, matrix ) {
+  canvasPaintSelf( wrapper, matrix ) {
     //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily.
     LineCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
-  },
+  }
 
   /**
    * Computes the bounds of the Line, including any applied stroke. Overridden for efficiency.
@@ -470,7 +446,7 @@ inherit( Path, Line, {
    *
    * @returns {Bounds2}
    */
-  computeShapeBounds: function() {
+  computeShapeBounds() {
     // optimized form for a single line segment (no joins, just two caps)
     if ( this._stroke ) {
       const lineCap = this.getLineCap();
@@ -521,7 +497,7 @@ inherit( Path, Line, {
       fillBounds.addCoordinates( this._x2, this._y2 );
       return fillBounds;
     }
-  },
+  }
 
   /**
    * Creates a SVG drawable for this Line.
@@ -532,9 +508,9 @@ inherit( Path, Line, {
    * @param {Instance} instance - Instance object that will be associated with the drawable
    * @returns {SVGSelfDrawable}
    */
-  createSVGDrawable: function( renderer, instance ) {
+  createSVGDrawable( renderer, instance ) {
     return LineSVGDrawable.createFromPool( renderer, instance );
-  },
+  }
 
   /**
    * Creates a Canvas drawable for this Line.
@@ -545,9 +521,9 @@ inherit( Path, Line, {
    * @param {Instance} instance - Instance object that will be associated with the drawable
    * @returns {CanvasSelfDrawable}
    */
-  createCanvasDrawable: function( renderer, instance ) {
+  createCanvasDrawable( renderer, instance ) {
     return LineCanvasDrawable.createFromPool( renderer, instance );
-  },
+  }
 
   /**
    * It is impossible to set another shape on this Path subtype, as its effective shape is determined by other
@@ -557,7 +533,7 @@ inherit( Path, Line, {
    *
    * @param {Shape|null} Shape - Throws an error if it is not null.
    */
-  setShape: function( shape ) {
+  setShape( shape ) {
     if ( shape !== null ) {
       throw new Error( 'Cannot set the shape of a Line to something non-null' );
     }
@@ -565,7 +541,7 @@ inherit( Path, Line, {
       // probably called from the Path constructor
       this.invalidatePath();
     }
-  },
+  }
 
   /**
    * Returns an immutable copy of this Path subtype's representation.
@@ -576,12 +552,12 @@ inherit( Path, Line, {
    *
    * @returns {Shape}
    */
-  getShape: function() {
+  getShape() {
     if ( !this._shape ) {
       this._shape = this.createLineShape();
     }
     return this._shape;
-  },
+  }
 
   /**
    * Returns whether this Path has an associated Shape (instead of no shape, represented by null)
@@ -590,9 +566,9 @@ inherit( Path, Line, {
    *
    * @returns {boolean}
    */
-  hasShape: function() {
+  hasShape() {
     return true;
-  },
+  }
 
   /**
    * Returns available fill renderers.
@@ -603,9 +579,30 @@ inherit( Path, Line, {
    *
    * @returns {number} - See Renderer for more information on the bitmasks
    */
-  getFillRendererBitmask: function() {
+  getFillRendererBitmask() {
     return Renderer.bitmaskCanvas | Renderer.bitmaskSVG | Renderer.bitmaskDOM | Renderer.bitmaskWebGL;
   }
-} );
+}
+
+/**
+ * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
+ * order they will be evaluated in.
+ * @protected
+ *
+ * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
+ *       cases that may apply.
+ */
+Line.prototype._mutatorKeys = LINE_OPTION_KEYS.concat( Path.prototype._mutatorKeys );
+
+/**
+ * {Array.<String>} - List of all dirty flags that should be available on drawables created from this node (or
+ *                    subtype). Given a flag (e.g. radius), it indicates the existence of a function
+ *                    drawable.markDirtyRadius() that will indicate to the drawable that the radius has changed.
+ * @public (scenery-internal)
+ * @override
+ */
+Line.prototype.drawableMarkFlags = Path.prototype.drawableMarkFlags.concat( [ 'line', 'p1', 'p2', 'x1', 'x2', 'y1', 'y2' ] ).filter( flag => flag !== 'shape' );
+
+scenery.register( 'Line', Line );
 
 export default Line;

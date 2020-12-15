@@ -166,7 +166,6 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import Shape from '../../../kite/js/Shape.js';
 import arrayDifference from '../../../phet-core/js/arrayDifference.js';
 import deprecationWarning from '../../../phet-core/js/deprecationWarning.js';
-import inherit from '../../../phet-core/js/inherit.js';
 import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
@@ -279,344 +278,313 @@ const DEFAULT_OPTIONS = {
   preventFit: false
 };
 
-/**
- * Creates a Node with options.
- * @public
- * @constructor
- * @mixes ParallelDOM
- *
- * NOTE: Directly created Nodes (not of any subtype, but created with "new Node( ... )") are generally used as
- *       containers, which can hold other Nodes, subtypes of Node that can display things.
- *
- * Node and its subtypes generally have the last constructor parameter reserved for the 'options' object. This is a
- * key-value map that specifies relevant options that are used by Node and subtypes.
- *
- * For example, one of Node's options is bottom, and one of Circle's options is radius. When a circle is created:
- *   var circle = new Circle( {
- *     radius: 10,
- *     bottom: 200
- *   } );
- * This will create a Circle, set its radius (by executing circle.radius = 10, which uses circle.setRadius()), and
- * then will align the bottom of the circle along y=200 (by executing circle.bottom = 200, which uses
- * node.setBottom()).
- *
- * The options are executed in the order specified by each types _mutatorKeys property.
- *
- * The options object is currently not checked to see whether there are property (key) names that are not used, so it
- * is currently legal to do "new Node( { fork_kitchen_spoon: 5 } )".
- *
- * Usually, an option (e.g. 'visible'), when used in a constructor or mutate() call, will directly use the ES5 setter
- * for that property (e.g. node.visible = ...), which generally forwards to a non-ES5 setter function
- * (e.g. node.setVisible( ... )) that is responsible for the behavior. Documentation is generally on these methods
- * (e.g. setVisible), although some methods may be dynamically created to avoid verbosity (like node.leftTop).
- *
- * Sometimes, options invoke a function instead (e.g. 'scale') because the verb and noun are identical. In this case,
- * instead of setting the setter (node.scale = ..., which would override the function), it will instead call
- * the method directly (e.g. node.scale( ... )).
- *
- * @param {Object} [options] - Optional options object, as described above.
- */
-function Node( options ) {
-  // NOTE: All member properties with names starting with '_' are assumed to be @private!
-
-  // @private {number} - Assigns a unique ID to this Node (allows trails to get a unique list of IDs)
-  this._id = globalIdCounter++;
-
-  // @protected {Array.<Instance>} - All of the Instances tracking this Node
-  this._instances = [];
-
-  // @protected {Array.<Display>} - All displays where this Node is the root.
-  this._rootedDisplays = [];
-
-  // @protected {Array.<Drawable>} - Drawable states that need to be updated on mutations. Generally added by SVG and
-  // DOM elements that need to closely track state (possibly by Canvas to maintain dirty state).
-  this._drawables = [];
-
-  // @private {TinyForwardingProperty.<boolean>} - Whether this Node (and its children) will be visible when the scene is updated.
-  // Visible Nodes by default will not be pickable either.
-  // NOTE: This is fired synchronously when the visibility of the Node is toggled
-  this._visibleProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.visible, true );
-  this._visibleProperty.lazyLink( this.onVisiblePropertyChange.bind( this ) );
-
-  // @public {TinyProperty.<number>} - Opacity, in the range from 0 (fully transparent) to 1 (fully opaque).
-  // NOTE: This is fired synchronously when the opacity of the Node is toggled
-  this.opacityProperty = new TinyProperty( DEFAULT_OPTIONS.opacity );
-  this.opacityProperty.lazyLink( this.onOpacityPropertyChange.bind( this ) );
-
-  // @private {TinyForwardingProperty.<boolean|null>} - See setPickable() and setPickableProperty()
-  // NOTE: This is fired synchronously when the pickability of the Node is toggled
-  this._pickableProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.pickable, DEFAULT_OPTIONS.pickablePropertyPhetioInstrumented );
-  this._pickableProperty.lazyLink( this.onPickablePropertyChange.bind( this ) );
-
-  // @public {TinyForwardingProperty.<boolean>} - See setEnabled() and setEnabledProperty()
-  this._enabledProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.enabled, DEFAULT_OPTIONS.enabledPropertyPhetioInstrumented );
-  this._enabledProperty.lazyLink( this.onEnabledPropertyChange.bind( this ) );
-
-  // @public {TinyProperty.<boolean>} - Whether input event listeners on this Node or descendants on a trail will have
-  // input listeners. triggered. Note that this does NOT effect picking, and only prevents some listeners from being
-  // fired.
-  this.inputEnabledProperty = new TinyProperty( DEFAULT_OPTIONS.inputEnabled );
-
-  // @private {TinyProperty.<Shape|null>} - This Node and all children will be clipped by this shape (in addition to any
-  // other clipping shapes). The shape should be in the local coordinate frame.
-  // NOTE: This is fired synchronously when the clipArea of the Node is toggled
-  this.clipAreaProperty = new TinyProperty( DEFAULT_OPTIONS.clipArea );
-
-  // @private - Areas for hit intersection. If set on a Node, no descendants can handle events.
-  this._mouseArea = DEFAULT_OPTIONS.mouseArea; // {Shape|Bounds2} for mouse position in the local coordinate frame
-  this._touchArea = DEFAULT_OPTIONS.touchArea; // {Shape|Bounds2} for touch and pen position in the local coordinate frame
-
-  // @private {string|null} - The CSS cursor to be displayed over this Node. null should be the default (inherit) value.
-  this._cursor = DEFAULT_OPTIONS.cursor;
-
-  // @public (scenery-internal) - Not for public use, but used directly internally for performance.
-  this._children = []; // {Array.<Node>} - Ordered array of child Nodes.
-  this._parents = []; // {Array.<Node>} - Unordered array of parent Nodes.
-
-  // @private {boolean} - Whether we will do more accurate (and tight) bounds computations for rotations and shears.
-  this._transformBounds = DEFAULT_OPTIONS.transformBounds;
-
-  /*
-   * Set up the transform reference. we add a listener so that the transform itself can be modified directly
-   * by reference, triggering the event notifications for Scenery The reference to the Transform3 will never change.
-   */
-  this._transform = new Transform3(); // @private {Transform3}
-  this._transformListener = this.onTransformChange.bind( this ); // @private {Function}
-  this._transform.changeEmitter.addListener( this._transformListener ); // NOTE: Listener/transform bound to this Node.
-
-  /*
-   * Maximum dimensions for the Node's local bounds before a corrective scaling factor is applied to maintain size.
-   * The maximum dimensions are always compared to local bounds, and applied "before" the Node's transform.
-   * Whenever the local bounds or maximum dimensions of this Node change and it has at least one maximum dimension
-   * (width or height), an ideal scale is computed (either the smallest scale for our local bounds to fit the
-   * dimension constraints, OR 1, whichever is lower). Then the Node's transform will be scaled (prepended) with
-   * a scale adjustment of ( idealScale / alreadyAppliedScaleFactor ).
-   * In the simple case where the Node isn't otherwise transformed, this will apply and update the Node's scale so that
-   * the Node matches the maximum dimensions, while never scaling over 1. Note that manually applying transforms to
-   * the Node is fine, but may make the Node's width greater than the maximum width.
-   * NOTE: If a dimension constraint is null, no resizing will occur due to it. If both maxWidth and maxHeight are null,
-   * no scale adjustment will be applied.
+class Node extends PhetioObject {
+  /**
+   * Creates a Node with options.
+   * @public
+   * @mixes ParallelDOM
    *
-   * Also note that setting maxWidth/maxHeight is like adding a local bounds listener (will trigger validation of
-   * bounds during the updateDisplay step). NOTE: this means updates to the transform (on a local bounds change) will
-   * happen when bounds are validated (validateBounds()), which does not happen synchronously on a child's size
-   * change. It does happen at least once in updateDisplay() before rendering, and calling validateBounds() can force
-   * a re-check and transform.
+   * NOTE: Directly created Nodes (not of any subtype, but created with "new Node( ... )") are generally used as
+   *       containers, which can hold other Nodes, subtypes of Node that can display things.
+   *
+   * Node and its subtypes generally have the last constructor parameter reserved for the 'options' object. This is a
+   * key-value map that specifies relevant options that are used by Node and subtypes.
+   *
+   * For example, one of Node's options is bottom, and one of Circle's options is radius. When a circle is created:
+   *   var circle = new Circle( {
+   *     radius: 10,
+   *     bottom: 200
+   *   } );
+   * This will create a Circle, set its radius (by executing circle.radius = 10, which uses circle.setRadius()), and
+   * then will align the bottom of the circle along y=200 (by executing circle.bottom = 200, which uses
+   * node.setBottom()).
+   *
+   * The options are executed in the order specified by each types _mutatorKeys property.
+   *
+   * The options object is currently not checked to see whether there are property (key) names that are not used, so it
+   * is currently legal to do "new Node( { fork_kitchen_spoon: 5 } )".
+   *
+   * Usually, an option (e.g. 'visible'), when used in a constructor or mutate() call, will directly use the ES5 setter
+   * for that property (e.g. node.visible = ...), which generally forwards to a non-ES5 setter function
+   * (e.g. node.setVisible( ... )) that is responsible for the behavior. Documentation is generally on these methods
+   * (e.g. setVisible), although some methods may be dynamically created to avoid verbosity (like node.leftTop).
+   *
+   * Sometimes, options invoke a function instead (e.g. 'scale') because the verb and noun are identical. In this case,
+   * instead of setting the setter (node.scale = ..., which would override the function), it will instead call
+   * the method directly (e.g. node.scale( ... )).
+   *
+   * @param {Object} [options] - Optional options object, as described above.
    */
-  this._maxWidth = DEFAULT_OPTIONS.maxWidth; // @private {number|null}
-  this._maxHeight = DEFAULT_OPTIONS.maxHeight; // @private {number|null}
-  this._appliedScaleFactor = 1; // @private {number} - Scale applied due to the maximum dimension constraints.
+  constructor( options ) {
 
-  // @private {Array.<Function>} - For user input handling (mouse/touch).
-  this._inputListeners = [];
+    super();
 
-  // Add listener count change notifications into these Properties, since we need to know when their number of listeners
-  // changes dynamically.
-  const boundsListenersAddedOrRemovedListener = this.onBoundsListenersAddedOrRemoved.bind( this );
+    // NOTE: All member properties with names starting with '_' are assumed to be @private!
 
-  const boundsInvalidationListener = this.validateBounds.bind( this );
-  const selfBoundsInvalidationListener = this.validateSelfBounds.bind( this );
+    // @private {number} - Assigns a unique ID to this Node (allows trails to get a unique list of IDs)
+    this._id = globalIdCounter++;
 
-  // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds for this Node and its children in the "parent" coordinate
-  // frame.
-  // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
-  // NOTE: This is fired **asynchronously** (usually as part of a Display.updateDisplay()) when the bounds of the Node
-  // is changed.
-  this.boundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy(), boundsInvalidationListener );
-  this.boundsProperty.changeCount = boundsListenersAddedOrRemovedListener;
+    // @protected {Array.<Instance>} - All of the Instances tracking this Node
+    this._instances = [];
 
-  // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds for this Node and its children in the "local" coordinate
-  // frame.
-  // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
-  // NOTE: This is fired **asynchronously** (usually as part of a Display.updateDisplay()) when the localBounds of
-  // the Node is changed.
-  this.localBoundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy(), boundsInvalidationListener );
-  this.localBoundsProperty.changeCount = boundsListenersAddedOrRemovedListener;
+    // @protected {Array.<Display>} - All displays where this Node is the root.
+    this._rootedDisplays = [];
 
-  // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds just for children of this Node (and sub-trees), in the
-  // "local" coordinate frame.
-  // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
-  // NOTE: This is fired **asynchronously** (usually as part of a Display.updateDisplay()) when the childBounds of the
-  // Node is changed.
-  this.childBoundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy(), boundsInvalidationListener );
-  this.childBoundsProperty.changeCount = boundsListenersAddedOrRemovedListener;
+    // @protected {Array.<Drawable>} - Drawable states that need to be updated on mutations. Generally added by SVG and
+    // DOM elements that need to closely track state (possibly by Canvas to maintain dirty state).
+    this._drawables = [];
 
-  // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds just for this Node, in the "local" coordinate frame.
-  // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
-  // NOTE: This event can be fired synchronously, and happens with the self-bounds of a Node is changed. This is NOT
-  // like the other bounds Properties, which usually fire asynchronously
-  this.selfBoundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy(), selfBoundsInvalidationListener );
+    // @private {TinyForwardingProperty.<boolean>} - Whether this Node (and its children) will be visible when the scene is updated.
+    // Visible Nodes by default will not be pickable either.
+    // NOTE: This is fired synchronously when the visibility of the Node is toggled
+    this._visibleProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.visible, true );
+    this._visibleProperty.lazyLink( this.onVisiblePropertyChange.bind( this ) );
 
-  // @private {boolean} - Whether our localBounds have been set (with the ES5 setter/setLocalBounds()) to a custom
-  // overridden value. If true, then localBounds itself will not be updated, but will instead always be the
-  // overridden value.
-  this._localBoundsOverridden = false;
+    // @public {TinyProperty.<number>} - Opacity, in the range from 0 (fully transparent) to 1 (fully opaque).
+    // NOTE: This is fired synchronously when the opacity of the Node is toggled
+    this.opacityProperty = new TinyProperty( DEFAULT_OPTIONS.opacity );
+    this.opacityProperty.lazyLink( this.onOpacityPropertyChange.bind( this ) );
 
-  // @private {boolean} - [mutable] Whether invisible children will be excluded from this Node's bounds
-  this._excludeInvisibleChildrenFromBounds = false;
+    // @private {TinyForwardingProperty.<boolean|null>} - See setPickable() and setPickableProperty()
+    // NOTE: This is fired synchronously when the pickability of the Node is toggled
+    this._pickableProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.pickable, DEFAULT_OPTIONS.pickablePropertyPhetioInstrumented );
+    this._pickableProperty.lazyLink( this.onPickablePropertyChange.bind( this ) );
 
-  this._boundsDirty = true; // @private {boolean} - Whether bounds needs to be recomputed to be valid.
-  this._localBoundsDirty = true; // @private {boolean} - Whether localBounds needs to be recomputed to be valid.
-  this._selfBoundsDirty = true; // @private {boolean} - Whether selfBounds needs to be recomputed to be valid.
-  this._childBoundsDirty = true; // @private {boolean} - Whether childBounds needs to be recomputed to be valid.
+    // @public {TinyForwardingProperty.<boolean>} - See setEnabled() and setEnabledProperty()
+    this._enabledProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.enabled, DEFAULT_OPTIONS.enabledPropertyPhetioInstrumented );
+    this._enabledProperty.lazyLink( this.onEnabledPropertyChange.bind( this ) );
 
-  if ( assert ) {
-    // for assertions later to ensure that we are using the same Bounds2 copies as before
-    this._originalBounds = this.boundsProperty._value;
-    this._originalLocalBounds = this.localBoundsProperty._value;
-    this._originalSelfBounds = this.selfBoundsProperty._value;
-    this._originalChildBounds = this.childBoundsProperty._value;
+    // @public {TinyProperty.<boolean>} - Whether input event listeners on this Node or descendants on a trail will have
+    // input listeners. triggered. Note that this does NOT effect picking, and only prevents some listeners from being
+    // fired.
+    this.inputEnabledProperty = new TinyProperty( DEFAULT_OPTIONS.inputEnabled );
+
+    // @private {TinyProperty.<Shape|null>} - This Node and all children will be clipped by this shape (in addition to any
+    // other clipping shapes). The shape should be in the local coordinate frame.
+    // NOTE: This is fired synchronously when the clipArea of the Node is toggled
+    this.clipAreaProperty = new TinyProperty( DEFAULT_OPTIONS.clipArea );
+
+    // @private - Areas for hit intersection. If set on a Node, no descendants can handle events.
+    this._mouseArea = DEFAULT_OPTIONS.mouseArea; // {Shape|Bounds2} for mouse position in the local coordinate frame
+    this._touchArea = DEFAULT_OPTIONS.touchArea; // {Shape|Bounds2} for touch and pen position in the local coordinate frame
+
+    // @private {string|null} - The CSS cursor to be displayed over this Node. null should be the default (inherit) value.
+    this._cursor = DEFAULT_OPTIONS.cursor;
+
+    // @public (scenery-internal) - Not for public use, but used directly internally for performance.
+    this._children = []; // {Array.<Node>} - Ordered array of child Nodes.
+    this._parents = []; // {Array.<Node>} - Unordered array of parent Nodes.
+
+    // @private {boolean} - Whether we will do more accurate (and tight) bounds computations for rotations and shears.
+    this._transformBounds = DEFAULT_OPTIONS.transformBounds;
+
+    /*
+     * Set up the transform reference. we add a listener so that the transform itself can be modified directly
+     * by reference, triggering the event notifications for Scenery The reference to the Transform3 will never change.
+     */
+    this._transform = new Transform3(); // @private {Transform3}
+    this._transformListener = this.onTransformChange.bind( this ); // @private {Function}
+    this._transform.changeEmitter.addListener( this._transformListener ); // NOTE: Listener/transform bound to this Node.
+
+    /*
+     * Maximum dimensions for the Node's local bounds before a corrective scaling factor is applied to maintain size.
+     * The maximum dimensions are always compared to local bounds, and applied "before" the Node's transform.
+     * Whenever the local bounds or maximum dimensions of this Node change and it has at least one maximum dimension
+     * (width or height), an ideal scale is computed (either the smallest scale for our local bounds to fit the
+     * dimension constraints, OR 1, whichever is lower). Then the Node's transform will be scaled (prepended) with
+     * a scale adjustment of ( idealScale / alreadyAppliedScaleFactor ).
+     * In the simple case where the Node isn't otherwise transformed, this will apply and update the Node's scale so that
+     * the Node matches the maximum dimensions, while never scaling over 1. Note that manually applying transforms to
+     * the Node is fine, but may make the Node's width greater than the maximum width.
+     * NOTE: If a dimension constraint is null, no resizing will occur due to it. If both maxWidth and maxHeight are null,
+     * no scale adjustment will be applied.
+     *
+     * Also note that setting maxWidth/maxHeight is like adding a local bounds listener (will trigger validation of
+     * bounds during the updateDisplay step). NOTE: this means updates to the transform (on a local bounds change) will
+     * happen when bounds are validated (validateBounds()), which does not happen synchronously on a child's size
+     * change. It does happen at least once in updateDisplay() before rendering, and calling validateBounds() can force
+     * a re-check and transform.
+     */
+    this._maxWidth = DEFAULT_OPTIONS.maxWidth; // @private {number|null}
+    this._maxHeight = DEFAULT_OPTIONS.maxHeight; // @private {number|null}
+    this._appliedScaleFactor = 1; // @private {number} - Scale applied due to the maximum dimension constraints.
+
+    // @private {Array.<Function>} - For user input handling (mouse/touch).
+    this._inputListeners = [];
+
+    // Add listener count change notifications into these Properties, since we need to know when their number of listeners
+    // changes dynamically.
+    const boundsListenersAddedOrRemovedListener = this.onBoundsListenersAddedOrRemoved.bind( this );
+
+    const boundsInvalidationListener = this.validateBounds.bind( this );
+    const selfBoundsInvalidationListener = this.validateSelfBounds.bind( this );
+
+    // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds for this Node and its children in the "parent" coordinate
+    // frame.
+    // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
+    // NOTE: This is fired **asynchronously** (usually as part of a Display.updateDisplay()) when the bounds of the Node
+    // is changed.
+    this.boundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy(), boundsInvalidationListener );
+    this.boundsProperty.changeCount = boundsListenersAddedOrRemovedListener;
+
+    // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds for this Node and its children in the "local" coordinate
+    // frame.
+    // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
+    // NOTE: This is fired **asynchronously** (usually as part of a Display.updateDisplay()) when the localBounds of
+    // the Node is changed.
+    this.localBoundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy(), boundsInvalidationListener );
+    this.localBoundsProperty.changeCount = boundsListenersAddedOrRemovedListener;
+
+    // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds just for children of this Node (and sub-trees), in the
+    // "local" coordinate frame.
+    // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
+    // NOTE: This is fired **asynchronously** (usually as part of a Display.updateDisplay()) when the childBounds of the
+    // Node is changed.
+    this.childBoundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy(), boundsInvalidationListener );
+    this.childBoundsProperty.changeCount = boundsListenersAddedOrRemovedListener;
+
+    // @public {TinyStaticProperty.<Bounds2>} - [mutable] Bounds just for this Node, in the "local" coordinate frame.
+    // NOTE: The reference here will not change, we will just notify using the equivalent static notification method.
+    // NOTE: This event can be fired synchronously, and happens with the self-bounds of a Node is changed. This is NOT
+    // like the other bounds Properties, which usually fire asynchronously
+    this.selfBoundsProperty = new TinyStaticProperty( Bounds2.NOTHING.copy(), selfBoundsInvalidationListener );
+
+    // @private {boolean} - Whether our localBounds have been set (with the ES5 setter/setLocalBounds()) to a custom
+    // overridden value. If true, then localBounds itself will not be updated, but will instead always be the
+    // overridden value.
+    this._localBoundsOverridden = false;
+
+    // @private {boolean} - [mutable] Whether invisible children will be excluded from this Node's bounds
+    this._excludeInvisibleChildrenFromBounds = false;
+
+    this._boundsDirty = true; // @private {boolean} - Whether bounds needs to be recomputed to be valid.
+    this._localBoundsDirty = true; // @private {boolean} - Whether localBounds needs to be recomputed to be valid.
+    this._selfBoundsDirty = true; // @private {boolean} - Whether selfBounds needs to be recomputed to be valid.
+    this._childBoundsDirty = true; // @private {boolean} - Whether childBounds needs to be recomputed to be valid.
+
+    if ( assert ) {
+      // for assertions later to ensure that we are using the same Bounds2 copies as before
+      this._originalBounds = this.boundsProperty._value;
+      this._originalLocalBounds = this.localBoundsProperty._value;
+      this._originalSelfBounds = this.selfBoundsProperty._value;
+      this._originalChildBounds = this.childBoundsProperty._value;
+    }
+
+    // @public (scenery-internal) {Array.<Filter>}
+    this._filters = [];
+
+    // @public (scenery-internal) {Object} - Where rendering-specific settings are stored. They are generally modified
+    // internally, so there is no ES5 setter for hints.
+    this._hints = {
+      // {number} - What type of renderer should be forced for this Node. Uses the internal bitmask structure declared
+      //            in scenery.js and Renderer.js.
+      renderer: DEFAULT_OPTIONS.renderer === null ? 0 : Renderer.fromName( DEFAULT_OPTIONS.renderer ),
+
+      // {boolean} - Whether it is anticipated that opacity will be switched on. If so, having this set to true will
+      //             make switching back-and-forth between opacity:1 and other opacities much faster.
+      usesOpacity: DEFAULT_OPTIONS.usesOpacity,
+
+      // {boolean} - Whether layers should be split before and after this Node.
+      layerSplit: DEFAULT_OPTIONS.layerSplit,
+
+      // {boolean} - Whether this Node and its subtree should handle transforms by using a CSS transform of a div.
+      cssTransform: DEFAULT_OPTIONS.cssTransform,
+
+      // {boolean} - When rendered as Canvas, whether we should use full (device) resolution on retina-like devices.
+      //             TODO: ensure that this is working? 0.2 may have caused a regression.
+      fullResolution: false,
+
+      // {boolean} - Whether SVG (or other) content should be excluded from the DOM tree when invisible
+      //             (instead of just being hidden)
+      excludeInvisible: DEFAULT_OPTIONS.excludeInvisible,
+
+      // {number|null} - If non-null, a multiplier to the detected pixel-to-pixel scaling of the WebGL Canvas
+      webglScale: DEFAULT_OPTIONS.webglScale,
+
+      // {boolean} - If true, Scenery will not fit any blocks that contain drawables attached to Nodes underneath this
+      //             Node's subtree. This will typically prevent Scenery from triggering bounds computation for this
+      //             sub-tree, and movement of this Node or its descendants will never trigger the refitting of a block.
+      preventFit: DEFAULT_OPTIONS.preventFit
+    };
+
+    // @public {TinyEmitter} - This is fired only once for any single operation that may change the children of a Node.
+    // For example, if a Node's children are [ a, b ] and setChildren( [ a, x, y, z ] ) is called on it, the
+    // childrenChanged event will only be fired once after the entire operation of changing the children is completed.
+    this.childrenChangedEmitter = new TinyEmitter();
+
+    // @public {TinyEmitter} - For every single added child Node, emits with {Node} Node, {number} indexOfChild
+    this.childInsertedEmitter = new TinyEmitter();
+
+    // @public {TinyEmitter} - For every single removed child Node, emits with {Node} Node, {number} indexOfChild
+    this.childRemovedEmitter = new TinyEmitter();
+
+    // @public {TinyEmitter} - Provides a given range that may be affected by the reordering. Emits with
+    // {number} minChangedIndex, {number} maxChangedIndex
+    this.childrenReorderedEmitter = new TinyEmitter();
+
+    // @public {TinyEmitter} - Fired synchronously when the transform (transformation matrix) of a Node is changed. Any
+    // change to a Node's translation/rotation/scale/etc. will trigger this event.
+    this.transformEmitter = new TinyEmitter();
+
+    // @public {TinyEmitter} - Should be emitted when we need to check full metadata updates directly on Instances,
+    // to see if we need to change drawable types, etc.
+    this.instanceRefreshEmitter = new TinyEmitter();
+
+    // @public {TinyEmitter} - Emitted to when we need to potentially recompute our renderer summary (bitmask flags, or
+    // things that could affect descendants)
+    this.rendererSummaryRefreshEmitter = new TinyEmitter();
+
+    // @public {TinyEmitter} - Emitted to when we change filters (either opacity or generalized filters)
+    this.filterChangeEmitter = new TinyEmitter();
+
+    // @public {TinyEmitter} - Fired when the accessible Displays for this Node have changed (see PDOMInstance)
+    this.accessibleDisplaysEmitter = new TinyEmitter();
+
+    // @public {TinyEmitter}
+    this.focusHighlightChangedEmitter = new TinyEmitter();
+
+    // @public {TinyEmitter}
+    this.changedInstanceEmitter = new TinyEmitter(); // emits with {Instance}, {boolean} added
+
+    // compose accessibility - for some reason tests fail when you move this down to be next to super call.
+    this.initializeAccessibility();
+
+    // @public (scenery-internal) {number} - A bitmask which specifies which renderers this Node (and only this Node,
+    // not its subtree) supports.
+    this._rendererBitmask = Renderer.bitmaskNodeDefault;
+
+    // @public (scenery-internal) {RendererSummary} - A bitmask-like summary of what renderers and options are supported
+    // by this Node and all of its descendants
+    this._rendererSummary = new RendererSummary( this );
+
+    /*
+     * So we can traverse only the subtrees that require bounds validation for events firing.
+     * This is a sum of the number of events requiring bounds validation on this Node, plus the number of children whose
+     * count is non-zero.
+     * NOTE: this means that if A has a child B, and B has a boundsEventCount of 5, it only contributes 1 to A's count.
+     * This allows us to have changes localized (increasing B's count won't change A or any of A's ancestors), and
+     * guarantees that we will know whether a subtree has bounds listeners. Also important: decreasing B's
+     * boundsEventCount down to 0 will allow A to decrease its count by 1, without having to check its other children
+     * (if we were just using a boolean value, this operation would require A to check if any OTHER children besides
+     * B had bounds listeners)
+     */
+    this._boundsEventCount = 0; // @private {number}
+    // @private {number} - This signals that we can validateBounds() on this subtree and we don't have to traverse further
+    this._boundsEventSelfCount = 0;
+
+    // @private {Picker} - Subcomponent dedicated to hit testing
+    this._picker = new Picker( this );
+
+    // @public (scenery-internal) {boolean} - There are certain specific cases (in this case due to a11y) where we need
+    // to know that a Node is getting removed from its parent BUT that process has not completed yet. It would be ideal
+    // to not need this.
+    this._isGettingRemovedFromParent = false;
+
+    if ( options ) {
+      this.mutate( options );
+    }
   }
 
-  // @public (scenery-internal) {Array.<Filter>}
-  this._filters = [];
-
-  // @public (scenery-internal) {Object} - Where rendering-specific settings are stored. They are generally modified
-  // internally, so there is no ES5 setter for hints.
-  this._hints = {
-    // {number} - What type of renderer should be forced for this Node. Uses the internal bitmask structure declared
-    //            in scenery.js and Renderer.js.
-    renderer: DEFAULT_OPTIONS.renderer === null ? 0 : Renderer.fromName( DEFAULT_OPTIONS.renderer ),
-
-    // {boolean} - Whether it is anticipated that opacity will be switched on. If so, having this set to true will
-    //             make switching back-and-forth between opacity:1 and other opacities much faster.
-    usesOpacity: DEFAULT_OPTIONS.usesOpacity,
-
-    // {boolean} - Whether layers should be split before and after this Node.
-    layerSplit: DEFAULT_OPTIONS.layerSplit,
-
-    // {boolean} - Whether this Node and its subtree should handle transforms by using a CSS transform of a div.
-    cssTransform: DEFAULT_OPTIONS.cssTransform,
-
-    // {boolean} - When rendered as Canvas, whether we should use full (device) resolution on retina-like devices.
-    //             TODO: ensure that this is working? 0.2 may have caused a regression.
-    fullResolution: false,
-
-    // {boolean} - Whether SVG (or other) content should be excluded from the DOM tree when invisible
-    //             (instead of just being hidden)
-    excludeInvisible: DEFAULT_OPTIONS.excludeInvisible,
-
-    // {number|null} - If non-null, a multiplier to the detected pixel-to-pixel scaling of the WebGL Canvas
-    webglScale: DEFAULT_OPTIONS.webglScale,
-
-    // {boolean} - If true, Scenery will not fit any blocks that contain drawables attached to Nodes underneath this
-    //             Node's subtree. This will typically prevent Scenery from triggering bounds computation for this
-    //             sub-tree, and movement of this Node or its descendants will never trigger the refitting of a block.
-    preventFit: DEFAULT_OPTIONS.preventFit
-  };
-
-  // @public {TinyEmitter} - This is fired only once for any single operation that may change the children of a Node.
-  // For example, if a Node's children are [ a, b ] and setChildren( [ a, x, y, z ] ) is called on it, the
-  // childrenChanged event will only be fired once after the entire operation of changing the children is completed.
-  this.childrenChangedEmitter = new TinyEmitter();
-
-  // @public {TinyEmitter} - For every single added child Node, emits with {Node} Node, {number} indexOfChild
-  this.childInsertedEmitter = new TinyEmitter();
-
-  // @public {TinyEmitter} - For every single removed child Node, emits with {Node} Node, {number} indexOfChild
-  this.childRemovedEmitter = new TinyEmitter();
-
-  // @public {TinyEmitter} - Provides a given range that may be affected by the reordering. Emits with
-  // {number} minChangedIndex, {number} maxChangedIndex
-  this.childrenReorderedEmitter = new TinyEmitter();
-
-  // @public {TinyEmitter} - Fired synchronously when the transform (transformation matrix) of a Node is changed. Any
-  // change to a Node's translation/rotation/scale/etc. will trigger this event.
-  this.transformEmitter = new TinyEmitter();
-
-  // @public {TinyEmitter} - Should be emitted when we need to check full metadata updates directly on Instances,
-  // to see if we need to change drawable types, etc.
-  this.instanceRefreshEmitter = new TinyEmitter();
-
-  // @public {TinyEmitter} - Emitted to when we need to potentially recompute our renderer summary (bitmask flags, or
-  // things that could affect descendants)
-  this.rendererSummaryRefreshEmitter = new TinyEmitter();
-
-  // @public {TinyEmitter} - Emitted to when we change filters (either opacity or generalized filters)
-  this.filterChangeEmitter = new TinyEmitter();
-
-  // @public {TinyEmitter} - Fired when the accessible Displays for this Node have changed (see PDOMInstance)
-  this.accessibleDisplaysEmitter = new TinyEmitter();
-
-  // @public {TinyEmitter}
-  this.focusHighlightChangedEmitter = new TinyEmitter();
-
-  // @public {TinyEmitter}
-  this.changedInstanceEmitter = new TinyEmitter(); // emits with {Instance}, {boolean} added
-
-  // compose accessibility - for some reason tests fail when you move this down to be next to super call.
-  this.initializeAccessibility();
-
-  // @public (scenery-internal) {number} - A bitmask which specifies which renderers this Node (and only this Node,
-  // not its subtree) supports.
-  this._rendererBitmask = Renderer.bitmaskNodeDefault;
-
-  // @public (scenery-internal) {RendererSummary} - A bitmask-like summary of what renderers and options are supported
-  // by this Node and all of its descendants
-  this._rendererSummary = new RendererSummary( this );
-
-  /*
-   * So we can traverse only the subtrees that require bounds validation for events firing.
-   * This is a sum of the number of events requiring bounds validation on this Node, plus the number of children whose
-   * count is non-zero.
-   * NOTE: this means that if A has a child B, and B has a boundsEventCount of 5, it only contributes 1 to A's count.
-   * This allows us to have changes localized (increasing B's count won't change A or any of A's ancestors), and
-   * guarantees that we will know whether a subtree has bounds listeners. Also important: decreasing B's
-   * boundsEventCount down to 0 will allow A to decrease its count by 1, without having to check its other children
-   * (if we were just using a boolean value, this operation would require A to check if any OTHER children besides
-   * B had bounds listeners)
-   */
-  this._boundsEventCount = 0; // @private {number}
-  // @private {number} - This signals that we can validateBounds() on this subtree and we don't have to traverse further
-  this._boundsEventSelfCount = 0;
-
-  // @private {Picker} - Subcomponent dedicated to hit testing
-  this._picker = new Picker( this );
-
-  // @public (scenery-internal) {boolean} - There are certain specific cases (in this case due to a11y) where we need
-  // to know that a Node is getting removed from its parent BUT that process has not completed yet. It would be ideal
-  // to not need this.
-  this._isGettingRemovedFromParent = false;
-
-  PhetioObject.call( this );
-
-  if ( options ) {
-    this.mutate( options );
-  }
-}
-
-scenery.register( 'Node', Node );
-
-inherit( PhetioObject, Node, {
-  /**
-   * {Array.<string>} - This is an array of property (setter) names for Node.mutate(), which are also used when creating
-   * Nodes with parameter objects.
-   * @protected
-   *
-   * E.g. new scenery.Node( { x: 5, rotation: 20 } ) will create a Path, and apply setters in the order below
-   * (node.x = 5; node.rotation = 20)
-   *
-   * Some special cases exist (for function names). new scenery.Node( { scale: 2 } ) will actually call
-   * node.scale( 2 ).
-   *
-   * The order below is important! Don't change this without knowing the implications.
-   *
-   * NOTE: Translation-based mutators come before rotation/scale, since typically we think of their operations
-   *       occurring "after" the rotation / scaling
-   * NOTE: left/right/top/bottom/centerX/centerY are at the end, since they rely potentially on rotation / scaling
-   *       changes of bounds that may happen beforehand
-   */
-  _mutatorKeys: NODE_OPTION_KEYS,
-
-  /**
-   * {Array.<String>} - List of all dirty flags that should be available on drawables created from this Node (or
-   *                    subtype). Given a flag (e.g. radius), it indicates the existence of a function
-   *                    drawable.markDirtyRadius() that will indicate to the drawable that the radius has changed.
-   * @public (scenery-internal)
-   *
-   * Should be overridden by subtypes.
-   */
-  drawableMarkFlags: [],
 
   /**
    * Inserts a child Node at a specific index.
@@ -635,7 +603,7 @@ inherit( PhetioObject, Node, {
    * @param {boolean} [isComposite] - (scenery-internal) If true, the childrenChanged event will not be sent out.
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  insertChild: function( index, node, isComposite ) {
+  insertChild( index, node, isComposite ) {
     assert && assert( node !== null && node !== undefined, 'insertChild cannot insert a null/undefined child' );
     assert && assert( node instanceof Node,
       'addChild/insertChild requires the child to be a Node. Constructor: ' +
@@ -670,7 +638,7 @@ inherit( PhetioObject, Node, {
     if ( assertSlow ) { this._picker.audit(); }
 
     return this; // allow chaining
-  },
+  }
 
   /**
    * Appends a child Node to our list of children.
@@ -682,11 +650,11 @@ inherit( PhetioObject, Node, {
    * @param {boolean} [isComposite] - (scenery-internal) If true, the childrenChanged event will not be sent out.
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  addChild: function( node, isComposite ) {
+  addChild( node, isComposite ) {
     this.insertChild( this._children.length, node, isComposite );
 
     return this; // allow chaining
-  },
+  }
 
   /**
    * Removes a child Node from our list of children, see http://phetsims.github.io/scenery/doc/#node-removeChild
@@ -697,7 +665,7 @@ inherit( PhetioObject, Node, {
    * @param {boolean} [isComposite] - (scenery-internal) If true, the childrenChanged event will not be sent out.
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  removeChild: function( node, isComposite ) {
+  removeChild( node, isComposite ) {
     assert && assert( node && node instanceof Node, 'Need to call node.removeChild() with a Node.' );
     assert && assert( this.hasChild( node ), 'Attempted to removeChild with a node that was not a child.' );
 
@@ -706,7 +674,7 @@ inherit( PhetioObject, Node, {
     this.removeChildWithIndex( node, indexOfChild, isComposite );
 
     return this; // allow chaining
-  },
+  }
 
   /**
    * Removes a child Node at a specific index (node.children[ index ]) from our list of children.
@@ -717,7 +685,7 @@ inherit( PhetioObject, Node, {
    * @param {boolean} [isComposite] - (scenery-internal) If true, the childrenChanged event will not be sent out.
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  removeChildAt: function( index, isComposite ) {
+  removeChildAt( index, isComposite ) {
     assert && assert( index >= 0 );
     assert && assert( index < this._children.length );
 
@@ -726,7 +694,7 @@ inherit( PhetioObject, Node, {
     this.removeChildWithIndex( node, index, isComposite );
 
     return this; // allow chaining
-  },
+  }
 
   /**
    * Internal method for removing a Node (always has the Node and index).
@@ -738,7 +706,7 @@ inherit( PhetioObject, Node, {
    * @param {number} indexOfChild - Should satisfy this.children[ indexOfChild ] === node
    * @param {boolean} [isComposite] - (scenery-internal) If true, the childrenChanged event will not be sent out.
    */
-  removeChildWithIndex: function( node, indexOfChild, isComposite ) {
+  removeChildWithIndex( node, indexOfChild, isComposite ) {
     assert && assert( node && node instanceof Node, 'Need to call node.removeChildWithIndex() with a Node.' );
     assert && assert( this.hasChild( node ), 'Attempted to removeChild with a node that was not a child.' );
     assert && assert( this._children[ indexOfChild ] === node, 'Incorrect index for removeChildWithIndex' );
@@ -771,7 +739,7 @@ inherit( PhetioObject, Node, {
     !isComposite && this.childrenChangedEmitter.emit();
 
     if ( assertSlow ) { this._picker.audit(); }
-  },
+  }
 
   /**
    * If a child is not at the given index, it is moved to the given index. This reorders the children of this Node so
@@ -782,7 +750,7 @@ inherit( PhetioObject, Node, {
    * @param {number} index - The desired index (into the children array) of the child.
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  moveChildToIndex: function( node, index ) {
+  moveChildToIndex( node, index ) {
     assert && assert( node && node instanceof Node, 'Need to call node.moveChildToIndex() with a Node.' );
     assert && assert( this.hasChild( node ), 'Attempted to moveChildToIndex with a node that was not a child.' );
     assert && assert( typeof index === 'number' && index % 1 === 0 && index >= 0 && index < this._children.length,
@@ -804,7 +772,7 @@ inherit( PhetioObject, Node, {
     }
 
     return this;
-  },
+  }
 
   /**
    * Removes all children from this Node.
@@ -812,11 +780,11 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  removeAllChildren: function() {
+  removeAllChildren() {
     this.setChildren( [] );
 
     return this; // allow chaining
-  },
+  }
 
   /**
    * Sets the children of the Node to be equivalent to the passed-in array of Nodes.
@@ -827,7 +795,7 @@ inherit( PhetioObject, Node, {
    * @param {Array.<Node>} children
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  setChildren: function( children ) {
+  setChildren( children ) {
     // The implementation is split into basically three stages:
     // 1. Remove current children that are not in the new children array.
     // 2. Reorder children that exist both before/after the change.
@@ -906,8 +874,8 @@ inherit( PhetioObject, Node, {
 
     // allow chaining
     return this;
-  },
-  set children( value ) { this.setChildren( value ); },
+  }
+  set children( value ) { this.setChildren( value ); }
 
   /**
    * Returns a defensive copy of the array of direct children of this node, ordered by what is in front (nodes at
@@ -918,11 +886,11 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Array.<Node>}
    */
-  getChildren: function() {
+  getChildren() {
     // TODO: ensure we are not triggering this in Scenery code when not necessary!
     return this._children.slice( 0 ); // create a defensive copy
-  },
-  get children() { return this.getChildren(); },
+  }
+  get children() { return this.getChildren(); }
 
   /**
    * Returns a count of children, without needing to make a defensive copy.
@@ -930,9 +898,9 @@ inherit( PhetioObject, Node, {
    *
    * @returns {number}
    */
-  getChildrenCount: function() {
+  getChildrenCount() {
     return this._children.length;
-  },
+  }
 
   /**
    * Returns a defensive copy of our parents. This is an array of parent nodes that is returned in no particular
@@ -943,10 +911,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Array.<Node>}
    */
-  getParents: function() {
+  getParents() {
     return this._parents.slice( 0 ); // create a defensive copy
-  },
-  get parents() { return this.getParents(); },
+  }
+  get parents() { return this.getParents(); }
 
   /**
    * Returns a single parent if it exists, otherwise null (no parents), or an assertion failure (multiple parents).
@@ -954,11 +922,11 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Node|null}
    */
-  getParent: function() {
+  getParent() {
     assert && assert( this._parents.length <= 1, 'Cannot call getParent on a node with multiple parents' );
     return this._parents.length ? this._parents[ 0 ] : null;
-  },
-  get parent() { return this.getParent(); },
+  }
+  get parent() { return this.getParent(); }
 
   /**
    * Gets the child at a specific index into the children array.
@@ -967,9 +935,9 @@ inherit( PhetioObject, Node, {
    * @param {number} index
    * @returns {Node}
    */
-  getChildAt: function( index ) {
+  getChildAt( index ) {
     return this._children[ index ];
-  },
+  }
 
   /**
    * Finds the index of a parent Node in the parents array.
@@ -978,9 +946,9 @@ inherit( PhetioObject, Node, {
    * @param {Node} parent - Should be a parent of this node.
    * @returns {number} - An index such that this.parents[ index ] === parent
    */
-  indexOfParent: function( parent ) {
+  indexOfParent( parent ) {
     return _.indexOf( this._parents, parent );
-  },
+  }
 
   /**
    * Finds the index of a child Node in the children array.
@@ -989,9 +957,9 @@ inherit( PhetioObject, Node, {
    * @param {Node} child - Should be a child of this node.
    * @returns {number} - An index such that this.children[ index ] === child
    */
-  indexOfChild: function( child ) {
+  indexOfChild( child ) {
     return _.indexOf( this._children, child );
-  },
+  }
 
   /**
    * Moves this Node to the front (end) of all of its parents children array.
@@ -999,11 +967,11 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  moveToFront: function() {
+  moveToFront() {
     _.each( this._parents.slice(), parent => parent.moveChildToFront( this ) );
 
     return this; // allow chaining
-  },
+  }
 
   /**
    * Moves one of our children to the front (end) of our children array.
@@ -1012,19 +980,19 @@ inherit( PhetioObject, Node, {
    * @param {Node} child - Our child to move to the front.
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  moveChildToFront: function( child ) {
+  moveChildToFront( child ) {
     return this.moveChildToIndex( child, this._children.length - 1 );
-  },
+  }
 
   /**
    * Move this node one index forward in each of its parents.  If the Node is already at the front, this is a no-op.
    * @returns {Node}
    * @public
    */
-  moveForward: function() {
+  moveForward() {
     this._parents.forEach( parent => parent.moveChildForward( this ) ); // TODO: Do we need slice like moveToFront has?
     return this; // chaining
-  },
+  }
 
   /**
    * Moves the specified child forward by one index.  If the child is already at the front, this is a no-op.
@@ -1032,23 +1000,23 @@ inherit( PhetioObject, Node, {
    * @returns {Node}
    * @public
    */
-  moveChildForward: function( child ) {
+  moveChildForward( child ) {
     const index = this.indexOfChild( child );
     if ( index < this.getChildrenCount() - 1 ) {
       this.moveChildToIndex( child, index + 1 );
     }
     return this; // chaining
-  },
+  }
 
   /**
    * Move this node one index backward in each of its parents.  If the Node is already at the back, this is a no-op.
    * @returns {Node}
    * @public
    */
-  moveBackward: function() {
+  moveBackward() {
     this._parents.forEach( parent => parent.moveChildBackward( this ) ); // TODO: Do we need slice like moveToFront has?
     return this; // chaining
-  },
+  }
 
   /**
    * Moves the specified child forward by one index.  If the child is already at the back, this is a no-op.
@@ -1056,13 +1024,13 @@ inherit( PhetioObject, Node, {
    * @returns {Node}
    * @public
    */
-  moveChildBackward: function( child ) {
+  moveChildBackward( child ) {
     const index = this.indexOfChild( child );
     if ( index > 0 ) {
       this.moveChildToIndex( child, index - 1 );
     }
     return this; // chaining
-  },
+  }
 
   /**
    * Moves this Node to the back (front) of all of its parents children array.
@@ -1070,11 +1038,11 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  moveToBack: function() {
+  moveToBack() {
     _.each( this._parents.slice(), parent => parent.moveChildToBack( this ) );
 
     return this; // allow chaining
-  },
+  }
 
   /**
    * Moves one of our children to the back (front) of our children array.
@@ -1083,19 +1051,20 @@ inherit( PhetioObject, Node, {
    * @param {Node} child - Our child to move to the back.
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  moveChildToBack: function( child ) {
+  moveChildToBack( child ) {
     return this.moveChildToIndex( child, 0 );
-  },
+  }
 
   /**
    * Replace a child in this node's children array with another node. If the old child had accessible focus and
    * the new child is focusable, the new child will receive focus after it is added.
+   * @public
    *
    * @param {Node} oldChild
    * @param {Node} newChild
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  replaceChild: function( oldChild, newChild ) {
+  replaceChild( oldChild, newChild ) {
     assert && assert( oldChild instanceof Node, 'child to replace must be a Node' );
     assert && assert( newChild instanceof Node, 'new child must be a Node' );
     assert && assert( this.hasChild( oldChild ), 'Attempted to replace a node that was not a child.' );
@@ -1114,7 +1083,7 @@ inherit( PhetioObject, Node, {
     }
 
     return this; // allow chaining
-  },
+  }
 
   /**
    * Removes this Node from all of its parents.
@@ -1122,11 +1091,11 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  detach: function() {
+  detach() {
     _.each( this._parents.slice( 0 ), parent => parent.removeChild( this ) );
 
     return this; // allow chaining
-  },
+  }
 
   /**
    * Update our event count, usually by 1 or -1. See documentation on _boundsEventCount in constructor.
@@ -1134,7 +1103,7 @@ inherit( PhetioObject, Node, {
    *
    * @param {number} n - How to increment/decrement the bounds event listener count
    */
-  changeBoundsEventCount: function( n ) {
+  changeBoundsEventCount( n ) {
     if ( n !== 0 ) {
       const zeroBefore = this._boundsEventCount === 0;
 
@@ -1153,7 +1122,7 @@ inherit( PhetioObject, Node, {
         }
       }
     }
-  },
+  }
 
   /**
    * Ensures that the cached selfBounds of this Node is accurate. Returns true if any sort of dirty flag was set
@@ -1162,7 +1131,7 @@ inherit( PhetioObject, Node, {
    *
    * @returns {boolean} - Was the self-bounds potentially updated?
    */
-  validateSelfBounds: function() {
+  validateSelfBounds() {
     // validate bounds of ourself if necessary
     if ( this._selfBoundsDirty ) {
       const oldSelfBounds = scratchBounds2.set( this.selfBoundsProperty._value );
@@ -1181,7 +1150,7 @@ inherit( PhetioObject, Node, {
     }
 
     return false;
-  },
+  }
 
   /**
    * Ensures that cached bounds stored on this Node (and all children) are accurate. Returns true if any sort of dirty
@@ -1190,7 +1159,7 @@ inherit( PhetioObject, Node, {
    *
    * @returns {boolean} - Was something potentially updated?
    */
-  validateBounds: function() {
+  validateBounds() {
 
     sceneryLog && sceneryLog.bounds && sceneryLog.bounds( `validateBounds #${this._id}` );
     sceneryLog && sceneryLog.bounds && sceneryLog.push();
@@ -1377,7 +1346,7 @@ inherit( PhetioObject, Node, {
     sceneryLog && sceneryLog.bounds && sceneryLog.pop();
 
     return wasDirtyBefore; // whether any dirty flags were set
-  },
+  }
 
   /**
    * Recursion for accurate transformed bounds handling. Mutates bounds with the added bounds.
@@ -1387,7 +1356,7 @@ inherit( PhetioObject, Node, {
    * @param {Matrix3} matrix
    * @param {Bounds2} bounds
    */
-  _includeTransformedSubtreeBounds: function( matrix, bounds ) {
+  _includeTransformedSubtreeBounds( matrix, bounds ) {
     if ( !this.selfBounds.isEmpty() ) {
       bounds.includeBounds( this.getTransformedSelfBounds( matrix ) );
     }
@@ -1402,7 +1371,7 @@ inherit( PhetioObject, Node, {
     }
 
     return bounds;
-  },
+  }
 
   /**
    * Traverses this subtree and validates bounds only for subtrees that have bounds listeners (trying to exclude as
@@ -1414,14 +1383,14 @@ inherit( PhetioObject, Node, {
    *
    * NOTE: this should pass by (ignore) any overridden localBounds, to trigger listeners below.
    */
-  validateWatchedBounds: function() {
+  validateWatchedBounds() {
     // Since a bounds listener on one of the roots could invalidate bounds on the other, we need to keep running this
     // until they are all clean. Otherwise, side-effects could occur from bounds validations
     // TODO: consider a way to prevent infinite loops here that occur due to bounds listeners triggering cycles
     while ( this.watchedBoundsScan() ) {
       // do nothing
     }
-  },
+  }
 
   /**
    * Recursive function for validateWatchedBounds. Returned whether any validateBounds() returned true (means we have
@@ -1430,7 +1399,7 @@ inherit( PhetioObject, Node, {
    *
    * @returns {boolean} - Whether there could have been any changes.
    */
-  watchedBoundsScan: function() {
+  watchedBoundsScan() {
     if ( this._boundsEventSelfCount !== 0 ) {
       // we are a root that should be validated. return whether we updated anything
       return this.validateBounds();
@@ -1448,13 +1417,13 @@ inherit( PhetioObject, Node, {
       // if _boundsEventCount is zero, no bounds are watched below us (don't traverse), and it wasn't changed
       return false;
     }
-  },
+  }
 
   /**
    * Marks the bounds of this Node as invalid, so they are recomputed before being accessed again.
    * @public
    */
-  invalidateBounds: function() {
+  invalidateBounds() {
     // TODO: sometimes we won't need to invalidate local bounds! it's not too much of a hassle though?
     this._boundsDirty = true;
     this._localBoundsDirty = true;
@@ -1464,13 +1433,13 @@ inherit( PhetioObject, Node, {
     while ( i-- ) {
       this._parents[ i ].invalidateChildBounds();
     }
-  },
+  }
 
   /**
    * Recursively tag all ancestors with _childBoundsDirty
    * @public (scenery-internal)
    */
-  invalidateChildBounds: function() {
+  invalidateChildBounds() {
     // don't bother updating if we've already been tagged
     if ( !this._childBoundsDirty ) {
       this._childBoundsDirty = true;
@@ -1480,7 +1449,7 @@ inherit( PhetioObject, Node, {
         this._parents[ i ].invalidateChildBounds();
       }
     }
-  },
+  }
 
   /**
    * Should be called to notify that our selfBounds needs to change to this new value.
@@ -1488,7 +1457,7 @@ inherit( PhetioObject, Node, {
    *
    * @param {Bounds2} [newSelfBounds]
    */
-  invalidateSelf: function( newSelfBounds ) {
+  invalidateSelf( newSelfBounds ) {
     assert && assert( newSelfBounds === undefined || newSelfBounds instanceof Bounds2,
       'invalidateSelf\'s newSelfBounds, if provided, needs to be Bounds2' );
 
@@ -1524,7 +1493,7 @@ inherit( PhetioObject, Node, {
     }
 
     if ( assertSlow ) { this._picker.audit(); }
-  },
+  }
 
   /**
    * Meant to be overridden by Node sub-types to compute self bounds (if invalidateSelf() with no argments was called).
@@ -1532,11 +1501,11 @@ inherit( PhetioObject, Node, {
    *
    * @returns {boolean} - Whether the self bounds changed.
    */
-  updateSelfBounds: function() {
+  updateSelfBounds() {
     // The Node implementation (un-overridden) will never change the self bounds (always NOTHING).
     assert && assert( this.selfBoundsProperty._value.equals( Bounds2.NOTHING ) );
     return false;
-  },
+  }
 
   /**
    * Returns whether a Node is a child of this node.
@@ -1545,12 +1514,12 @@ inherit( PhetioObject, Node, {
    * @param {Node} potentialChild
    * @returns {boolean} - Whether potentialChild is actually our child.
    */
-  hasChild: function( potentialChild ) {
+  hasChild( potentialChild ) {
     assert && assert( potentialChild && ( potentialChild instanceof Node ), 'hasChild needs to be called with a Node' );
     const isOurChild = _.includes( this._children, potentialChild );
     assert && assert( isOurChild === _.includes( potentialChild._parents, this ), 'child-parent reference should match parent-child reference' );
     return isOurChild;
-  },
+  }
 
   /**
    * Returns a Shape that represents the area covered by containsPointSelf.
@@ -1558,7 +1527,7 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Shape}
    */
-  getSelfShape: function() {
+  getSelfShape() {
     const selfBounds = this.selfBounds;
     if ( selfBounds.isEmpty() ) {
       return new Shape();
@@ -1566,7 +1535,7 @@ inherit( PhetioObject, Node, {
     else {
       return Shape.bounds( this.selfBounds );
     }
-  },
+  }
 
   /**
    * Returns our selfBounds (the bounds for this Node's content in the local coordinates, excluding anything from our
@@ -1577,10 +1546,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Bounds2}
    */
-  getSelfBounds: function() {
+  getSelfBounds() {
     return this.selfBoundsProperty.value;
-  },
-  get selfBounds() { return this.getSelfBounds(); },
+  }
+  get selfBounds() { return this.getSelfBounds(); }
 
   /**
    * Returns a bounding box that should contain all self content in the local coordinate frame (our normal self bounds
@@ -1591,10 +1560,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Bounds2}
    */
-  getSafeSelfBounds: function() {
+  getSafeSelfBounds() {
     return this.selfBoundsProperty.value;
-  },
-  get safeSelfBounds() { return this.getSafeSelfBounds(); },
+  }
+  get safeSelfBounds() { return this.getSafeSelfBounds(); }
 
   /**
    * Returns the bounding box that should contain all content of our children in our local coordinate frame. Does not
@@ -1605,10 +1574,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Bounds2}
    */
-  getChildBounds: function() {
+  getChildBounds() {
     return this.childBoundsProperty.value;
-  },
-  get childBounds() { return this.getChildBounds(); },
+  }
+  get childBounds() { return this.getChildBounds(); }
 
   /**
    * Returns the bounding box that should contain all content of our children AND our self in our local coordinate
@@ -1619,10 +1588,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Bounds2}
    */
-  getLocalBounds: function() {
+  getLocalBounds() {
     return this.localBoundsProperty.value;
-  },
-  get localBounds() { return this.getLocalBounds(); },
+  }
+  get localBounds() { return this.getLocalBounds(); }
 
   /**
    * Allows overriding the value of localBounds (and thus changing things like 'bounds' that depend on localBounds).
@@ -1634,7 +1603,7 @@ inherit( PhetioObject, Node, {
    * @param {Bounds2|null} localBounds
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  setLocalBounds: function( localBounds ) {
+  setLocalBounds( localBounds ) {
     assert && assert( localBounds === null || localBounds instanceof Bounds2, 'localBounds override should be set to either null or a Bounds2' );
     assert && assert( localBounds === null || !isNaN( localBounds.minX ), 'minX for localBounds should not be NaN' );
     assert && assert( localBounds === null || !isNaN( localBounds.minY ), 'minY for localBounds should not be NaN' );
@@ -1668,8 +1637,8 @@ inherit( PhetioObject, Node, {
     }
 
     return this; // allow chaining
-  },
-  set localBounds( value ) { return this.setLocalBounds( value ); },
+  }
+  set localBounds( value ) { return this.setLocalBounds( value ); }
 
   /**
    * Meant to be overridden in sub-types that have more accurate bounds determination for when we are transformed.
@@ -1679,10 +1648,10 @@ inherit( PhetioObject, Node, {
    * @param {Matrix3} matrix
    * @returns {Bounds2}
    */
-  getTransformedSelfBounds: function( matrix ) {
+  getTransformedSelfBounds( matrix ) {
     // assume that we take up the entire rectangular bounds by default
     return this.selfBounds.transformed( matrix );
-  },
+  }
 
   /**
    * Meant to be overridden in sub-types that have more accurate bounds determination for when we are transformed.
@@ -1695,9 +1664,9 @@ inherit( PhetioObject, Node, {
    * @param {Matrix3} matrix
    * @returns {Bounds2}
    */
-  getTransformedSafeSelfBounds: function( matrix ) {
+  getTransformedSafeSelfBounds( matrix ) {
     return this.safeSelfBounds.transformed( matrix );
-  },
+  }
 
   /**
    * Returns the visual "safe" bounds that are taken up by this Node and its subtree. Notably, this is essentially the
@@ -1712,7 +1681,7 @@ inherit( PhetioObject, Node, {
    *                             given matrix.
    * @returns {Bounds2}
    */
-  getSafeTransformedVisibleBounds: function( matrix ) {
+  getSafeTransformedVisibleBounds( matrix ) {
     const localMatrix = ( matrix || Matrix3.IDENTITY ).timesMatrix( this.matrix );
 
     const bounds = Bounds2.NOTHING.copy();
@@ -1730,8 +1699,8 @@ inherit( PhetioObject, Node, {
     }
 
     return bounds;
-  },
-  get safeTransformedVisibleBounds() { return this.getSafeTransformedVisibleBounds(); },
+  }
+  get safeTransformedVisibleBounds() { return this.getSafeTransformedVisibleBounds(); }
 
   /**
    * Sets the flag that determines whether we will require more accurate (and expensive) bounds computation for this
@@ -1747,7 +1716,7 @@ inherit( PhetioObject, Node, {
    * @param {boolean} transformBounds - Whether accurate transform bounds should be used.
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  setTransformBounds: function( transformBounds ) {
+  setTransformBounds( transformBounds ) {
     assert && assert( typeof transformBounds === 'boolean', 'transformBounds should be boolean' );
 
     if ( this._transformBounds !== transformBounds ) {
@@ -1757,8 +1726,8 @@ inherit( PhetioObject, Node, {
     }
 
     return this; // allow chaining
-  },
-  set transformBounds( value ) { return this.setTransformBounds( value ); },
+  }
+  set transformBounds( value ) { return this.setTransformBounds( value ); }
 
   /**
    * Returns whether accurate transformation bounds are used in bounds computation (see setTransformBounds).
@@ -1766,10 +1735,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {boolean}
    */
-  getTransformBounds: function() {
+  getTransformBounds() {
     return this._transformBounds;
-  },
-  get transformBounds() { return this.getTransformBounds(); },
+  }
+  get transformBounds() { return this.getTransformBounds(); }
 
   /**
    * Returns the bounding box of this Node and all of its sub-trees (in the "parent" coordinate frame).
@@ -1780,10 +1749,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Bounds2}
    */
-  getBounds: function() {
+  getBounds() {
     return this.boundsProperty.value;
-  },
-  get bounds() { return this.getBounds(); },
+  }
+  get bounds() { return this.getBounds(); }
 
   /**
    * Like getLocalBounds() in the "local" coordinate frame, but includes only visible nodes.
@@ -1791,7 +1760,7 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Bounds2}
    */
-  getVisibleLocalBounds: function() {
+  getVisibleLocalBounds() {
     // defensive copy, since we use mutable modifications below
     const bounds = this.selfBounds.copy();
 
@@ -1805,8 +1774,8 @@ inherit( PhetioObject, Node, {
 
     assert && assert( bounds.isFinite() || bounds.isEmpty(), 'Visible bounds should not be infinite' );
     return bounds;
-  },
-  get visibleLocalBounds() { return this.getVisibleLocalBounds(); },
+  }
+  get visibleLocalBounds() { return this.getVisibleLocalBounds(); }
 
   /**
    * Like getBounds() in the "parent" coordinate frame, but includes only visible nodes
@@ -1814,10 +1783,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Bounds2}
    */
-  getVisibleBounds: function() {
+  getVisibleBounds() {
     return this.getVisibleLocalBounds().transform( this.getMatrix() );
-  },
-  get visibleBounds() { return this.getVisibleBounds(); },
+  }
+  get visibleBounds() { return this.getVisibleBounds(); }
 
   /**
    * Tests whether the given point is "contained" in this node's subtree (optionally using mouse/touch areas), and if
@@ -1853,7 +1822,7 @@ inherit( PhetioObject, Node, {
    * @param {boolean} [isTouch] - Whether touchAreas should be used.
    * @returns {Trail|null} - Returns null if the point is not contained in the subtree.
    */
-  hitTest: function( point, isMouse, isTouch ) {
+  hitTest( point, isMouse, isTouch ) {
     assert && assert( point instanceof Vector2 && point.isFinite(), 'The point should be a finite Vector2' );
     assert && assert( isMouse === undefined || typeof isMouse === 'boolean',
       'If isMouse is provided, it should be a boolean' );
@@ -1861,7 +1830,7 @@ inherit( PhetioObject, Node, {
       'If isTouch is provided, it should be a boolean' );
 
     return this._picker.hitTest( point, !!isMouse, !!isTouch );
-  },
+  }
 
   /**
    * Hit-tests what is under the pointer, and returns a {Trail} to that Node (or null if there is no matching node).
@@ -1872,9 +1841,9 @@ inherit( PhetioObject, Node, {
    * @param {Pointer} pointer
    * @returns {Trail|null}
    */
-  trailUnderPointer: function( pointer ) {
+  trailUnderPointer( pointer ) {
     return this.hitTest( pointer.point, pointer instanceof Mouse, pointer instanceof Touch || pointer instanceof Pen );
-  },
+  }
 
   /**
    * Returns whether a point (in parent coordinates) is contained in this node's sub-tree.
@@ -1885,9 +1854,9 @@ inherit( PhetioObject, Node, {
    * @param {Vector2} point
    * @returns {boolean} - Whether the point is contained.
    */
-  containsPoint: function( point ) {
+  containsPoint( point ) {
     return this.hitTest( point ) !== null;
-  },
+  }
 
   /**
    * Override this for computation of whether a point is inside our self content (defaults to selfBounds check).
@@ -1896,10 +1865,10 @@ inherit( PhetioObject, Node, {
    * @param {Vector2} point - Considered to be in the local coordinate frame
    * @returns {boolean}
    */
-  containsPointSelf: function( point ) {
+  containsPointSelf( point ) {
     // if self bounds are not null default to checking self bounds
     return this.selfBounds.containsPoint( point );
-  },
+  }
 
   /**
    * Returns whether this node's selfBounds is intersected by the specified bounds.
@@ -1908,10 +1877,10 @@ inherit( PhetioObject, Node, {
    * @param {Bounds2} bounds - Bounds to test, assumed to be in the local coordinate frame.
    * @returns {boolean}
    */
-  intersectsBoundsSelf: function( bounds ) {
+  intersectsBoundsSelf( bounds ) {
     // if self bounds are not null, child should override this
     return this.selfBounds.intersectsBounds( bounds );
-  },
+  }
 
   /**
    * Whether this Node itself is painted (displays something itself). Meant to be overridden.
@@ -1919,10 +1888,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {boolean}
    */
-  isPainted: function() {
+  isPainted() {
     // Normal nodes don't render anything
     return false;
-  },
+  }
 
   /**
    * Whether this Node's selfBounds are considered to be valid (always containing the displayed self content
@@ -1933,9 +1902,9 @@ inherit( PhetioObject, Node, {
    *
    * @returns {boolean}
    */
-  areSelfBoundsValid: function() {
+  areSelfBoundsValid() {
     return true;
-  },
+  }
 
   /**
    * Returns whether this Node has any parents at all.
@@ -1943,9 +1912,9 @@ inherit( PhetioObject, Node, {
    *
    * @returns {boolean}
    */
-  hasParent: function() {
+  hasParent() {
     return this._parents.length !== 0;
-  },
+  }
 
   /**
    * Returns whether this Node has any children at all.
@@ -1953,9 +1922,9 @@ inherit( PhetioObject, Node, {
    *
    * @returns {boolean}
    */
-  hasChildren: function() {
+  hasChildren() {
     return this._children.length > 0;
-  },
+  }
 
   /**
    * Returns whether a child should be included for layout (if this Node is a layout container).
@@ -1964,11 +1933,11 @@ inherit( PhetioObject, Node, {
    * @param {Node} child
    * @returns {boolean}
    */
-  isChildIncludedInLayout: function( child ) {
+  isChildIncludedInLayout( child ) {
     assert && assert( child instanceof Node );
 
     return child.bounds.isValid() && ( !this._excludeInvisibleChildrenFromBounds || child.visible );
-  },
+  }
 
   /**
    * Calls the callback on nodes recursively in a depth-first manner.
@@ -1976,13 +1945,13 @@ inherit( PhetioObject, Node, {
    *
    * @param {Function} callback
    */
-  walkDepthFirst: function( callback ) {
+  walkDepthFirst( callback ) {
     callback( this );
     const length = this._children.length;
     for ( let i = 0; i < length; i++ ) {
       this._children[ i ].walkDepthFirst( callback );
     }
-  },
+  }
 
   /**
    * Adds an input listener.
@@ -1993,7 +1962,7 @@ inherit( PhetioObject, Node, {
    * @param {Object} listener
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  addInputListener: function( listener ) {
+  addInputListener( listener ) {
     assert && assert( !_.includes( this._inputListeners, listener ), 'Input listener already registered on this Node' );
     assert && assert( listener !== null, 'Input listener cannot be null' );
     assert && assert( listener !== undefined, 'Input listener cannot be undefined' );
@@ -2005,7 +1974,7 @@ inherit( PhetioObject, Node, {
       if ( assertSlow ) { this._picker.audit(); }
     }
     return this;
-  },
+  }
 
   /**
    * Removes an input listener that was previously added with addInputListener.
@@ -2014,7 +1983,7 @@ inherit( PhetioObject, Node, {
    * @param {Object} listener
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  removeInputListener: function( listener ) {
+  removeInputListener( listener ) {
     const index = _.indexOf( this._inputListeners, listener );
 
     // ensure the listener is in our list (ignore assertion for disposal, see https://github.com/phetsims/sun/issues/394)
@@ -2026,7 +1995,7 @@ inherit( PhetioObject, Node, {
     }
 
     return this;
-  },
+  }
 
   /**
    * Returns whether this input listener is currently listening to this node.
@@ -2037,14 +2006,14 @@ inherit( PhetioObject, Node, {
    * @param {Object} listener
    * @returns {boolean}
    */
-  hasInputListener: function( listener ) {
+  hasInputListener( listener ) {
     for ( let i = 0; i < this._inputListeners.length; i++ ) {
       if ( this._inputListeners[ i ] === listener ) {
         return true;
       }
     }
     return false;
-  },
+  }
 
   /**
    * Interrupts all input listeners that are attached to this node.
@@ -2052,7 +2021,7 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Node} - For chaining
    */
-  interruptInput: function() {
+  interruptInput() {
     const listenersCopy = this.inputListeners;
 
     for ( let i = 0; i < listenersCopy.length; i++ ) {
@@ -2062,7 +2031,7 @@ inherit( PhetioObject, Node, {
     }
 
     return this;
-  },
+  }
 
   /**
    * Interrupts all input listeners that are attached to either this node, or a descendant node.
@@ -2070,7 +2039,7 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Node} - For chaining
    */
-  interruptSubtreeInput: function() {
+  interruptSubtreeInput() {
     this.interruptInput();
 
     const children = this._children.slice();
@@ -2079,7 +2048,7 @@ inherit( PhetioObject, Node, {
     }
 
     return this;
-  },
+  }
 
   /**
    * Changes the transform of this Node by adding a transform. The default "appends" the transform, so that it will
@@ -2101,7 +2070,7 @@ inherit( PhetioObject, Node, {
    * @param {number} y - The y coordinate
    * @param {boolean} [prependInstead] - Whether the transform should be prepended (defaults to false)
    */
-  translate: function( x, y, prependInstead ) {
+  translate( x, y, prependInstead ) {
     if ( typeof x === 'number' ) {
       // translate( x, y, prependInstead )
       assert && assert( typeof x === 'number' && isFinite( x ), 'x should be a finite number' );
@@ -2123,7 +2092,7 @@ inherit( PhetioObject, Node, {
       if ( !vector.x && !vector.y ) { return; } // bail out if both are zero
       this.translate( vector.x, vector.y, y ); // forward to full version
     }
-  },
+  }
 
   /**
    * Scales the node's transform. The default "appends" the transform, so that it will
@@ -2144,7 +2113,7 @@ inherit( PhetioObject, Node, {
    * @param {number} y - Scales in the Y direction
    * @param {boolean} [prependInstead] - Whether the transform should be prepended (defaults to false)
    */
-  scale: function( x, y, prependInstead ) {
+  scale( x, y, prependInstead ) {
     if ( typeof x === 'number' ) {
       assert && assert( isFinite( x ), 'scales should be finite' );
       if ( y === undefined || typeof y === 'boolean' ) {
@@ -2171,7 +2140,7 @@ inherit( PhetioObject, Node, {
       assert && assert( vector instanceof Vector2 && vector.isFinite(), 'scale should be a finite Vector2 if not a finite number' );
       this.scale( vector.x, vector.y, y ); // forward to full version
     }
-  },
+  }
 
   /**
    * Rotates the node's transform. The default "appends" the transform, so that it will
@@ -2186,7 +2155,7 @@ inherit( PhetioObject, Node, {
    * @param {number} angle - The angle (in radians) to rotate by
    * @param {boolean} [prependInstead] - Whether the transform should be prepended (defaults to false)
    */
-  rotate: function( angle, prependInstead ) {
+  rotate( angle, prependInstead ) {
     assert && assert( typeof angle === 'number' && isFinite( angle ), 'angle should be a finite number' );
     assert && assert( prependInstead === undefined || typeof prependInstead === 'boolean' );
     if ( angle % ( 2 * Math.PI ) === 0 ) { return; } // bail out if our angle is effectively 0
@@ -2196,7 +2165,7 @@ inherit( PhetioObject, Node, {
     else {
       this.appendMatrix( Matrix3.rotation2( angle ) );
     }
-  },
+  }
 
   /**
    * Rotates the node's transform around a specific point (in the parent coordinate frame) by prepending the transform.
@@ -2208,7 +2177,7 @@ inherit( PhetioObject, Node, {
    * @param {number} angle - In radians
    * @returns {Node} - For chaining
    */
-  rotateAround: function( point, angle ) {
+  rotateAround( point, angle ) {
     assert && assert( point instanceof Vector2 && point.isFinite(), 'point should be a finite Vector2' );
     assert && assert( typeof angle === 'number' && isFinite( angle ), 'angle should be a finite number' );
 
@@ -2217,7 +2186,7 @@ inherit( PhetioObject, Node, {
     matrix = Matrix3.translation( point.x, point.y ).timesMatrix( matrix );
     this.prependMatrix( matrix );
     return this;
-  },
+  }
 
   /**
    * Shifts the x coordinate (in the parent coordinate frame) of where the node's origin is transformed to.
@@ -2226,13 +2195,13 @@ inherit( PhetioObject, Node, {
    * @param {number} x
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  setX: function( x ) {
+  setX( x ) {
     assert && assert( typeof x === 'number' && isFinite( x ), 'x should be a finite number' );
 
     this.translate( x - this.getX(), 0, true );
     return this;
-  },
-  set x( value ) { this.setX( value ); },
+  }
+  set x( value ) { this.setX( value ); }
 
   /**
    * Returns the x coordinate (in the parent coorindate frame) of where the node's origin is transformed to.
@@ -2240,10 +2209,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {number}
    */
-  getX: function() {
+  getX() {
     return this._transform.getMatrix().m02();
-  },
-  get x() { return this.getX(); },
+  }
+  get x() { return this.getX(); }
 
   /**
    * Shifts the y coordinate (in the parent coordinate frame) of where the node's origin is transformed to.
@@ -2252,13 +2221,13 @@ inherit( PhetioObject, Node, {
    * @param {number} y
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  setY: function( y ) {
+  setY( y ) {
     assert && assert( typeof y === 'number' && isFinite( y ), 'y should be a finite number' );
 
     this.translate( 0, y - this.getY(), true );
     return this;
-  },
-  set y( value ) { this.setY( value ); },
+  }
+  set y( value ) { this.setY( value ); }
 
   /**
    * Returns the y coordinate (in the parent coorindate frame) of where the node's origin is transformed to.
@@ -2266,10 +2235,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {number}
    */
-  getY: function() {
+  getY() {
     return this._transform.getMatrix().m12();
-  },
-  get y() { return this.getY(); },
+  }
+  get y() { return this.getY(); }
 
   /**
    * Typically without rotations or negative parameters, this sets the scale for each axis. In its more general form,
@@ -2290,7 +2259,7 @@ inherit( PhetioObject, Node, {
    * @param {Vector2} vector - Scale for the x/y axes in the vector's components.
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  setScaleMagnitude: function( a, b ) {
+  setScaleMagnitude( a, b ) {
     const currentScale = this.getScaleVector();
 
     if ( typeof a === 'number' ) {
@@ -2310,7 +2279,7 @@ inherit( PhetioObject, Node, {
       this.appendMatrix( Matrix3.scaling( a.x / currentScale.x, a.y / currentScale.y ) );
     }
     return this;
-  },
+  }
 
   /**
    * Returns a vector with an entry for each axis, e.g. (5,2) for an affine matrix with rows ((5,0,0),(0,2,0),(0,0,1)).
@@ -2321,9 +2290,9 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Vector2}
    */
-  getScaleVector: function() {
+  getScaleVector() {
     return this._transform.getMatrix().getScaleVector();
-  },
+  }
 
   /**
    * Rotates this node's transform so that a unit (1,0) vector would be rotated by this node's transform by the
@@ -2333,14 +2302,14 @@ inherit( PhetioObject, Node, {
    * @param {number} rotation - In radians
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  setRotation: function( rotation ) {
+  setRotation( rotation ) {
     assert && assert( typeof rotation === 'number' && isFinite( rotation ),
       'rotation should be a finite number' );
 
     this.appendMatrix( scratchMatrix3.setToRotationZ( rotation - this.getRotation() ) );
     return this;
-  },
-  set rotation( value ) { this.setRotation( value ); },
+  }
+  set rotation( value ) { this.setRotation( value ); }
 
   /**
    * Returns the rotation (in radians) that would be applied to a unit (1,0) vector when transformed with this Node's
@@ -2349,10 +2318,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {number}
    */
-  getRotation: function() {
+  getRotation() {
     return this._transform.getMatrix().getRotation();
-  },
-  get rotation() { return this.getRotation(); },
+  }
+  get rotation() { return this.getRotation(); }
 
   /**
    * Modifies the translation of this Node's transform so that the node's local-coordinate origin will be transformed
@@ -2368,7 +2337,7 @@ inherit( PhetioObject, Node, {
    * @param {Vector2} vector - Vector with x/y translation in components
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  setTranslation: function( a, b ) {
+  setTranslation( a, b ) {
     const m = this._transform.getMatrix();
     const tx = m.m02();
     const ty = m.m12();
@@ -2391,8 +2360,8 @@ inherit( PhetioObject, Node, {
     this.translate( dx, dy, true );
 
     return this;
-  },
-  set translation( value ) { this.setTranslation( value ); },
+  }
+  set translation( value ) { this.setTranslation( value ); }
 
   /**
    * Returns a vector of where this Node's local-coordinate origin will be transformed by it's own transform.
@@ -2400,11 +2369,11 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Vector2}
    */
-  getTranslation: function() {
+  getTranslation() {
     const matrix = this._transform.getMatrix();
     return new Vector2( matrix.m02(), matrix.m12() );
-  },
-  get translation() { return this.getTranslation(); },
+  }
+  get translation() { return this.getTranslation(); }
 
   /**
    * Appends a transformation matrix to this Node's transform. Appending means this transform is conceptually applied
@@ -2413,11 +2382,11 @@ inherit( PhetioObject, Node, {
    *
    * @param {Matrix3} matrix
    */
-  appendMatrix: function( matrix ) {
+  appendMatrix( matrix ) {
     assert && assert( matrix instanceof Matrix3 && matrix.isFinite(), 'matrix should be a finite Matrix3' );
     assert && assert( matrix.getDeterminant() !== 0, 'matrix should not map plane to a line or point' );
     this._transform.append( matrix );
-  },
+  }
 
   /**
    * Prepends a transformation matrix to this Node's transform. Prepending means this transform is conceptually applied
@@ -2426,11 +2395,11 @@ inherit( PhetioObject, Node, {
    *
    * @param {Matrix3} matrix
    */
-  prependMatrix: function( matrix ) {
+  prependMatrix( matrix ) {
     assert && assert( matrix instanceof Matrix3 && matrix.isFinite(), 'matrix should be a finite Matrix3' );
     assert && assert( matrix.getDeterminant() !== 0, 'matrix should not map plane to a line or point' );
     this._transform.prepend( matrix );
-  },
+  }
 
   /**
    * Prepends an (x,y) translation to our Node's transform in an efficient manner without allocating a matrix.
@@ -2440,14 +2409,14 @@ inherit( PhetioObject, Node, {
    * @param {number} x
    * @param {number} y
    */
-  prependTranslation: function( x, y ) {
+  prependTranslation( x, y ) {
     assert && assert( typeof x === 'number' && isFinite( x ), 'x should be a finite number' );
     assert && assert( typeof y === 'number' && isFinite( y ), 'y should be a finite number' );
 
     if ( !x && !y ) { return; } // bail out if both are zero
 
     this._transform.prependTranslation( x, y );
-  },
+  }
 
   /**
    * Changes this Node's transform to match the passed-in transformation matrix.
@@ -2455,13 +2424,13 @@ inherit( PhetioObject, Node, {
    *
    * @param {Matrix3} matrix
    */
-  setMatrix: function( matrix ) {
+  setMatrix( matrix ) {
     assert && assert( matrix instanceof Matrix3 && matrix.isFinite(), 'matrix should be a finite Matrix3' );
     assert && assert( matrix.getDeterminant() !== 0, 'matrix should not map plane to a line or point' );
 
     this._transform.setMatrix( matrix );
-  },
-  set matrix( value ) { this.setMatrix( value ); },
+  }
+  set matrix( value ) { this.setMatrix( value ); }
 
   /**
    * Returns a Matrix3 representing our Node's transform.
@@ -2471,10 +2440,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Matrix3}
    */
-  getMatrix: function() {
+  getMatrix() {
     return this._transform.getMatrix();
-  },
-  get matrix() { return this.getMatrix(); },
+  }
+  get matrix() { return this.getMatrix(); }
 
   /**
    * Returns a reference to our Node's transform
@@ -2482,25 +2451,25 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Transform3}
    */
-  getTransform: function() {
+  getTransform() {
     // for now, return an actual copy. we can consider listening to changes in the future
     return this._transform;
-  },
-  get transform() { return this.getTransform(); },
+  }
+  get transform() { return this.getTransform(); }
 
   /**
    * Resets our Node's transform to an identity transform (i.e. no transform is applied).
    * @public
    */
-  resetTransform: function() {
+  resetTransform() {
     this.setMatrix( Matrix3.IDENTITY );
-  },
+  }
 
   /**
    * Callback function that should be called when our transform is changed.
    * @private
    */
-  onTransformChange: function() {
+  onTransformChange() {
     // TODO: why is local bounds invalidation needed here?
     this.invalidateBounds();
 
@@ -2508,7 +2477,7 @@ inherit( PhetioObject, Node, {
     if ( assertSlow ) { this._picker.audit(); }
 
     this.transformEmitter.emit();
-  },
+  }
 
   /**
    * Called when our summary bitmask changes
@@ -2517,10 +2486,10 @@ inherit( PhetioObject, Node, {
    * @param {number} oldBitmask
    * @param {number} newBitmask
    */
-  onSummaryChange: function( oldBitmask, newBitmask ) {
+  onSummaryChange( oldBitmask, newBitmask ) {
     // Defined in ParallelDOM.js
     this._accessibleDisplaysInfo.onSummaryChange( oldBitmask, newBitmask );
-  },
+  }
 
   /**
    * Updates our node's scale and applied scale factor if we need to change our scale to fit within the maximum
@@ -2529,7 +2498,7 @@ inherit( PhetioObject, Node, {
    *
    * @param {Bounds2} localBounds
    */
-  updateMaxDimension: function( localBounds ) {
+  updateMaxDimension( localBounds ) {
     const currentScale = this._appliedScaleFactor;
     let idealScale = 1;
 
@@ -2553,7 +2522,7 @@ inherit( PhetioObject, Node, {
 
       this._appliedScaleFactor = idealScale;
     }
-  },
+  }
 
   /**
    * Increments/decrements bounds "listener" count based on the values of maxWidth/maxHeight before and after.
@@ -2564,7 +2533,7 @@ inherit( PhetioObject, Node, {
    * @param {null | number} beforeMaxLength
    * @param {null | number} afterMaxLength
    */
-  onMaxDimensionChange: function( beforeMaxLength, afterMaxLength ) {
+  onMaxDimensionChange( beforeMaxLength, afterMaxLength ) {
     if ( beforeMaxLength === null && afterMaxLength !== null ) {
       this.changeBoundsEventCount( 1 );
       this._boundsEventSelfCount++;
@@ -2573,7 +2542,7 @@ inherit( PhetioObject, Node, {
       this.changeBoundsEventCount( -1 );
       this._boundsEventSelfCount--;
     }
-  },
+  }
 
   /**
    * Sets the maximum width of the Node (see constructor for documentation on how maximum dimensions work).
@@ -2581,7 +2550,7 @@ inherit( PhetioObject, Node, {
    *
    * @param {number|null} maxWidth
    */
-  setMaxWidth: function( maxWidth ) {
+  setMaxWidth( maxWidth ) {
     assert && assert( maxWidth === null || ( typeof maxWidth === 'number' && maxWidth > 0 ),
       'maxWidth should be null (no constraint) or a positive number' );
 
@@ -2593,8 +2562,8 @@ inherit( PhetioObject, Node, {
 
       this.updateMaxDimension( this.localBoundsProperty.value );
     }
-  },
-  set maxWidth( value ) { this.setMaxWidth( value ); },
+  }
+  set maxWidth( value ) { this.setMaxWidth( value ); }
 
   /**
    * Returns the maximum width (if any) of the Node.
@@ -2602,10 +2571,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {number|null}
    */
-  getMaxWidth: function() {
+  getMaxWidth() {
     return this._maxWidth;
-  },
-  get maxWidth() { return this.getMaxWidth(); },
+  }
+  get maxWidth() { return this.getMaxWidth(); }
 
   /**
    * Sets the maximum height of the Node (see constructor for documentation on how maximum dimensions work).
@@ -2613,7 +2582,7 @@ inherit( PhetioObject, Node, {
    *
    * @param {number|null} maxHeight
    */
-  setMaxHeight: function( maxHeight ) {
+  setMaxHeight( maxHeight ) {
     assert && assert( maxHeight === null || ( typeof maxHeight === 'number' && maxHeight > 0 ),
       'maxHeight should be null (no constraint) or a positive number' );
 
@@ -2625,8 +2594,8 @@ inherit( PhetioObject, Node, {
 
       this.updateMaxDimension( this.localBoundsProperty.value );
     }
-  },
-  set maxHeight( value ) { this.setMaxHeight( value ); },
+  }
+  set maxHeight( value ) { this.setMaxHeight( value ); }
 
   /**
    * Returns the maximum height (if any) of the Node.
@@ -2634,10 +2603,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {number|null}
    */
-  getMaxHeight: function() {
+  getMaxHeight() {
     return this._maxHeight;
-  },
-  get maxHeight() { return this.getMaxHeight(); },
+  }
+  get maxHeight() { return this.getMaxHeight(); }
 
   /**
    * Shifts this Node horizontally so that its left bound (in the parent coordinate frame) is equal to the passed-in
@@ -2649,7 +2618,7 @@ inherit( PhetioObject, Node, {
    * @param {number} left - After this operation, node.left should approximately equal this value.
    * @returns {Node} - For chaining
    */
-  setLeft: function( left ) {
+  setLeft( left ) {
     assert && assert( typeof left === 'number' );
 
     const currentLeft = this.getLeft();
@@ -2658,8 +2627,8 @@ inherit( PhetioObject, Node, {
     }
 
     return this; // allow chaining
-  },
-  set left( value ) { this.setLeft( value ); },
+  }
+  set left( value ) { this.setLeft( value ); }
 
   /**
    * Returns the X value of the left side of the bounding box of this Node (in the parent coordinate frame).
@@ -2669,10 +2638,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {number}
    */
-  getLeft: function() {
+  getLeft() {
     return this.getBounds().minX;
-  },
-  get left() { return this.getLeft(); },
+  }
+  get left() { return this.getLeft(); }
 
   /**
    * Shifts this Node horizontally so that its right bound (in the parent coordinate frame) is equal to the passed-in
@@ -2684,7 +2653,7 @@ inherit( PhetioObject, Node, {
    * @param {number} right - After this operation, node.right should approximately equal this value.
    * @returns {Node} - For chaining
    */
-  setRight: function( right ) {
+  setRight( right ) {
     assert && assert( typeof right === 'number' );
 
     const currentRight = this.getRight();
@@ -2692,8 +2661,8 @@ inherit( PhetioObject, Node, {
       this.translate( right - currentRight, 0, true );
     }
     return this; // allow chaining
-  },
-  set right( value ) { this.setRight( value ); },
+  }
+  set right( value ) { this.setRight( value ); }
 
   /**
    * Returns the X value of the right side of the bounding box of this Node (in the parent coordinate frame).
@@ -2703,10 +2672,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {number}
    */
-  getRight: function() {
+  getRight() {
     return this.getBounds().maxX;
-  },
-  get right() { return this.getRight(); },
+  }
+  get right() { return this.getRight(); }
 
   /**
    * Shifts this Node horizontally so that its horizontal center (in the parent coordinate frame) is equal to the
@@ -2718,7 +2687,7 @@ inherit( PhetioObject, Node, {
    * @param {number} x - After this operation, node.centerX should approximately equal this value.
    * @returns {Node} - For chaining
    */
-  setCenterX: function( x ) {
+  setCenterX( x ) {
     assert && assert( typeof x === 'number' );
 
     const currentCenterX = this.getCenterX();
@@ -2727,8 +2696,8 @@ inherit( PhetioObject, Node, {
     }
 
     return this; // allow chaining
-  },
-  set centerX( value ) { this.setCenterX( value ); },
+  }
+  set centerX( value ) { this.setCenterX( value ); }
 
   /**
    * Returns the X value of this node's horizontal center (in the parent coordinate frame)
@@ -2738,10 +2707,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {number}
    */
-  getCenterX: function() {
+  getCenterX() {
     return this.getBounds().getCenterX();
-  },
-  get centerX() { return this.getCenterX(); },
+  }
+  get centerX() { return this.getCenterX(); }
 
   /**
    * Shifts this Node vertically so that its vertical center (in the parent coordinate frame) is equal to the
@@ -2753,7 +2722,7 @@ inherit( PhetioObject, Node, {
    * @param {number} y - After this operation, node.centerY should approximately equal this value.
    * @returns {Node} - For chaining
    */
-  setCenterY: function( y ) {
+  setCenterY( y ) {
     assert && assert( typeof y === 'number' );
 
     const currentCenterY = this.getCenterY();
@@ -2762,8 +2731,8 @@ inherit( PhetioObject, Node, {
     }
 
     return this; // allow chaining
-  },
-  set centerY( value ) { this.setCenterY( value ); },
+  }
+  set centerY( value ) { this.setCenterY( value ); }
 
   /**
    * Returns the Y value of this node's vertical center (in the parent coordinate frame)
@@ -2773,10 +2742,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {number}
    */
-  getCenterY: function() {
+  getCenterY() {
     return this.getBounds().getCenterY();
-  },
-  get centerY() { return this.getCenterY(); },
+  }
+  get centerY() { return this.getCenterY(); }
 
   /**
    * Shifts this Node vertically so that its top (in the parent coordinate frame) is equal to the passed-in Y value.
@@ -2788,7 +2757,7 @@ inherit( PhetioObject, Node, {
    * @param {number} top - After this operation, node.top should approximately equal this value.
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  setTop: function( top ) {
+  setTop( top ) {
     assert && assert( typeof top === 'number' );
 
     const currentTop = this.getTop();
@@ -2797,8 +2766,8 @@ inherit( PhetioObject, Node, {
     }
 
     return this; // allow chaining
-  },
-  set top( value ) { this.setTop( value ); },
+  }
+  set top( value ) { this.setTop( value ); }
 
   /**
    * Returns the lowest Y value of this node's bounding box (in the parent coordinate frame).
@@ -2808,10 +2777,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {number}
    */
-  getTop: function() {
+  getTop() {
     return this.getBounds().minY;
-  },
-  get top() { return this.getTop(); },
+  }
+  get top() { return this.getTop(); }
 
   /**
    * Shifts this Node vertically so that its bottom (in the parent coordinate frame) is equal to the passed-in Y value.
@@ -2823,7 +2792,7 @@ inherit( PhetioObject, Node, {
    * @param {number} bottom - After this operation, node.bottom should approximately equal this value.
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  setBottom: function( bottom ) {
+  setBottom( bottom ) {
     assert && assert( typeof bottom === 'number' );
 
     const currentBottom = this.getBottom();
@@ -2832,8 +2801,8 @@ inherit( PhetioObject, Node, {
     }
 
     return this; // allow chaining
-  },
-  set bottom( value ) { this.setBottom( value ); },
+  }
+  set bottom( value ) { this.setBottom( value ); }
 
   /**
    * Returns the highest Y value of this node's bounding box (in the parent coordinate frame).
@@ -2843,10 +2812,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {number}
    */
-  getBottom: function() {
+  getBottom() {
     return this.getBounds().maxY;
-  },
-  get bottom() { return this.getBottom(); },
+  }
+  get bottom() { return this.getBottom(); }
 
   /*
    * Convenience locations
@@ -2869,7 +2838,7 @@ inherit( PhetioObject, Node, {
    * @param {Vector2} leftTop
    * @returns {Node} - For chaining
    */
-  setLeftTop: function( leftTop ) {
+  setLeftTop( leftTop ) {
     assert && assert( leftTop instanceof Vector2 && leftTop.isFinite(), 'leftTop should be a finite Vector2' );
 
     const currentLeftTop = this.getLeftTop();
@@ -2878,8 +2847,8 @@ inherit( PhetioObject, Node, {
     }
 
     return this;
-  },
-  set leftTop( value ) { this.setLeftTop( value ); },
+  }
+  set leftTop( value ) { this.setLeftTop( value ); }
 
   /**
    * Returns the upper-left corner of this node's bounds.
@@ -2887,10 +2856,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Vector2}
    */
-  getLeftTop: function() {
+  getLeftTop() {
     return this.getBounds().getLeftTop();
-  },
-  get leftTop() { return this.getLeftTop(); },
+  }
+  get leftTop() { return this.getLeftTop(); }
 
   /**
    * Sets the position of the center-top location of this node's bounds to the specified point.
@@ -2899,7 +2868,7 @@ inherit( PhetioObject, Node, {
    * @param {Vector2} centerTop
    * @returns {Node} - For chaining
    */
-  setCenterTop: function( centerTop ) {
+  setCenterTop( centerTop ) {
     assert && assert( centerTop instanceof Vector2 && centerTop.isFinite(), 'centerTop should be a finite Vector2' );
 
     const currentCenterTop = this.getCenterTop();
@@ -2908,8 +2877,8 @@ inherit( PhetioObject, Node, {
     }
 
     return this;
-  },
-  set centerTop( value ) { this.setCenterTop( value ); },
+  }
+  set centerTop( value ) { this.setCenterTop( value ); }
 
   /**
    * Returns the center-top location of this node's bounds.
@@ -2917,10 +2886,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Vector2}
    */
-  getCenterTop: function() {
+  getCenterTop() {
     return this.getBounds().getCenterTop();
-  },
-  get centerTop() { return this.getCenterTop(); },
+  }
+  get centerTop() { return this.getCenterTop(); }
 
   /**
    * Sets the position of the upper-right corner of this node's bounds to the specified point.
@@ -2929,7 +2898,7 @@ inherit( PhetioObject, Node, {
    * @param {Vector2} rightTop
    * @returns {Node} - For chaining
    */
-  setRightTop: function( rightTop ) {
+  setRightTop( rightTop ) {
     assert && assert( rightTop instanceof Vector2 && rightTop.isFinite(), 'rightTop should be a finite Vector2' );
 
     const currentRightTop = this.getRightTop();
@@ -2938,8 +2907,8 @@ inherit( PhetioObject, Node, {
     }
 
     return this;
-  },
-  set rightTop( value ) { this.setRightTop( value ); },
+  }
+  set rightTop( value ) { this.setRightTop( value ); }
 
   /**
    * Returns the upper-right corner of this node's bounds.
@@ -2947,10 +2916,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Vector2}
    */
-  getRightTop: function() {
+  getRightTop() {
     return this.getBounds().getRightTop();
-  },
-  get rightTop() { return this.getRightTop(); },
+  }
+  get rightTop() { return this.getRightTop(); }
 
   /**
    * Sets the position of the center-left of this node's bounds to the specified point.
@@ -2959,7 +2928,7 @@ inherit( PhetioObject, Node, {
    * @param {Vector2} leftCenter
    * @returns {Node} - For chaining
    */
-  setLeftCenter: function( leftCenter ) {
+  setLeftCenter( leftCenter ) {
     assert && assert( leftCenter instanceof Vector2 && leftCenter.isFinite(), 'leftCenter should be a finite Vector2' );
 
     const currentLeftCenter = this.getLeftCenter();
@@ -2968,8 +2937,8 @@ inherit( PhetioObject, Node, {
     }
 
     return this;
-  },
-  set leftCenter( value ) { this.setLeftCenter( value ); },
+  }
+  set leftCenter( value ) { this.setLeftCenter( value ); }
 
   /**
    * Returns the center-left corner of this node's bounds.
@@ -2977,10 +2946,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Vector2}
    */
-  getLeftCenter: function() {
+  getLeftCenter() {
     return this.getBounds().getLeftCenter();
-  },
-  get leftCenter() { return this.getLeftCenter(); },
+  }
+  get leftCenter() { return this.getLeftCenter(); }
 
   /**
    * Sets the center of this node's bounds to the specified point.
@@ -2989,7 +2958,7 @@ inherit( PhetioObject, Node, {
    * @param {Vector2} center
    * @returns {Node} - For chaining
    */
-  setCenter: function( center ) {
+  setCenter( center ) {
     assert && assert( center instanceof Vector2 && center.isFinite(), 'center should be a finite Vector2' );
 
     const currentCenter = this.getCenter();
@@ -2998,8 +2967,8 @@ inherit( PhetioObject, Node, {
     }
 
     return this;
-  },
-  set center( value ) { this.setCenter( value ); },
+  }
+  set center( value ) { this.setCenter( value ); }
 
   /**
    * Returns the center of this node's bounds.
@@ -3007,10 +2976,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Vector2}
    */
-  getCenter: function() {
+  getCenter() {
     return this.getBounds().getCenter();
-  },
-  get center() { return this.getCenter(); },
+  }
+  get center() { return this.getCenter(); }
 
   /**
    * Sets the position of the center-right of this node's bounds to the specified point.
@@ -3019,7 +2988,7 @@ inherit( PhetioObject, Node, {
    * @param {Vector2} rightCenter
    * @returns {Node} - For chaining
    */
-  setRightCenter: function( rightCenter ) {
+  setRightCenter( rightCenter ) {
     assert && assert( rightCenter instanceof Vector2 && rightCenter.isFinite(), 'rightCenter should be a finite Vector2' );
 
     const currentRightCenter = this.getRightCenter();
@@ -3028,8 +2997,8 @@ inherit( PhetioObject, Node, {
     }
 
     return this;
-  },
-  set rightCenter( value ) { this.setRightCenter( value ); },
+  }
+  set rightCenter( value ) { this.setRightCenter( value ); }
 
   /**
    * Returns the center-right of this node's bounds.
@@ -3037,10 +3006,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Vector2}
    */
-  getRightCenter: function() {
+  getRightCenter() {
     return this.getBounds().getRightCenter();
-  },
-  get rightCenter() { return this.getRightCenter(); },
+  }
+  get rightCenter() { return this.getRightCenter(); }
 
   /**
    * Sets the position of the lower-left corner of this node's bounds to the specified point.
@@ -3049,7 +3018,7 @@ inherit( PhetioObject, Node, {
    * @param {Vector2} leftBottom
    * @returns {Node} - For chaining
    */
-  setLeftBottom: function( leftBottom ) {
+  setLeftBottom( leftBottom ) {
     assert && assert( leftBottom instanceof Vector2 && leftBottom.isFinite(), 'leftBottom should be a finite Vector2' );
 
     const currentLeftBottom = this.getLeftBottom();
@@ -3058,8 +3027,8 @@ inherit( PhetioObject, Node, {
     }
 
     return this;
-  },
-  set leftBottom( value ) { this.setLeftBottom( value ); },
+  }
+  set leftBottom( value ) { this.setLeftBottom( value ); }
 
   /**
    * Returns the lower-left corner of this node's bounds.
@@ -3067,10 +3036,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Vector2}
    */
-  getLeftBottom: function() {
+  getLeftBottom() {
     return this.getBounds().getLeftBottom();
-  },
-  get leftBottom() { return this.getLeftBottom(); },
+  }
+  get leftBottom() { return this.getLeftBottom(); }
 
   /**
    * Sets the position of the center-bottom of this node's bounds to the specified point.
@@ -3079,7 +3048,7 @@ inherit( PhetioObject, Node, {
    * @param {Vector2} centerBottom
    * @returns {Node} - For chaining
    */
-  setCenterBottom: function( centerBottom ) {
+  setCenterBottom( centerBottom ) {
     assert && assert( centerBottom instanceof Vector2 && centerBottom.isFinite(), 'centerBottom should be a finite Vector2' );
 
     const currentCenterBottom = this.getCenterBottom();
@@ -3088,8 +3057,8 @@ inherit( PhetioObject, Node, {
     }
 
     return this;
-  },
-  set centerBottom( value ) { this.setCenterBottom( value ); },
+  }
+  set centerBottom( value ) { this.setCenterBottom( value ); }
 
   /**
    * Returns the center-bottom of this node's bounds.
@@ -3097,10 +3066,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Vector2}
    */
-  getCenterBottom: function() {
+  getCenterBottom() {
     return this.getBounds().getCenterBottom();
-  },
-  get centerBottom() { return this.getCenterBottom(); },
+  }
+  get centerBottom() { return this.getCenterBottom(); }
 
   /**
    * Sets the position of the lower-right corner of this node's bounds to the specified point.
@@ -3109,7 +3078,7 @@ inherit( PhetioObject, Node, {
    * @param {Vector2} rightBottom
    * @returns {Node} - For chaining
    */
-  setRightBottom: function( rightBottom ) {
+  setRightBottom( rightBottom ) {
     assert && assert( rightBottom instanceof Vector2 && rightBottom.isFinite(), 'rightBottom should be a finite Vector2' );
 
     const currentRightBottom = this.getRightBottom();
@@ -3118,8 +3087,8 @@ inherit( PhetioObject, Node, {
     }
 
     return this;
-  },
-  set rightBottom( value ) { this.setRightBottom( value ); },
+  }
+  set rightBottom( value ) { this.setRightBottom( value ); }
 
   /**
    * Returns the lower-right corner of this node's bounds.
@@ -3127,10 +3096,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Vector2}
    */
-  getRightBottom: function() {
+  getRightBottom() {
     return this.getBounds().getRightBottom();
-  },
-  get rightBottom() { return this.getRightBottom(); },
+  }
+  get rightBottom() { return this.getRightBottom(); }
 
   /**
    * Returns the width of this node's bounding box (in the parent coordinate frame).
@@ -3140,10 +3109,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {number}
    */
-  getWidth: function() {
+  getWidth() {
     return this.getBounds().getWidth();
-  },
-  get width() { return this.getWidth(); },
+  }
+  get width() { return this.getWidth(); }
 
   /**
    * Returns the height of this node's bounding box (in the parent coordinate frame).
@@ -3153,10 +3122,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {number}
    */
-  getHeight: function() {
+  getHeight() {
     return this.getBounds().getHeight();
-  },
-  get height() { return this.getHeight(); },
+  }
+  get height() { return this.getHeight(); }
 
   /**
    * Returns the unique integral ID for this node.
@@ -3164,10 +3133,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {number}
    */
-  getId: function() {
+  getId() {
     return this._id;
-  },
-  get id() { return this.getId(); },
+  }
+  get id() { return this.getId(); }
 
   /**
    * Called when our visibility Property changes values.
@@ -3175,7 +3144,7 @@ inherit( PhetioObject, Node, {
    *
    * @param {boolean} visible
    */
-  onVisiblePropertyChange: function( visible ) {
+  onVisiblePropertyChange( visible ) {
     // changing visibility can affect pickability pruning, which affects mouse/touch bounds
     this._picker.onVisibilityChange();
 
@@ -3190,7 +3159,7 @@ inherit( PhetioObject, Node, {
         parent.invalidateChildBounds();
       }
     }
-  },
+  }
 
   /**
    * Sets what Property our visibleProperty is backed by, so that changes to this provided Property will change this
@@ -3207,8 +3176,8 @@ inherit( PhetioObject, Node, {
    */
   setVisibleProperty( newTarget ) {
     return this._visibleProperty.setTargetProperty( this, VISIBLE_PROPERTY_TANDEM_NAME, newTarget );
-  },
-  set visibleProperty( property ) { this.setVisibleProperty( property ); },
+  }
+  set visibleProperty( property ) { this.setVisibleProperty( property ); }
 
   /**
    * Get this Node's visibleProperty. Note! This is not the reciprocal of setVisibleProperty. Node.prototype._visibleProperty
@@ -3218,15 +3187,16 @@ inherit( PhetioObject, Node, {
    * const visibleProperty = new Property( false );
    * myNode.setVisibleProperty( visibleProperty )
    * => myNode.getVisibleProperty() !== visibleProperty (!!!!!!)
+   * @public
    *
    * Please use this with caution. See setVisibleProperty() for more information.
    *
    * @returns {TinyForwardingProperty}
    */
-  getVisibleProperty: function() {
+  getVisibleProperty() {
     return this._visibleProperty;
-  },
-  get visibleProperty() { return this.getVisibleProperty(); },
+  }
+  get visibleProperty() { return this.getVisibleProperty(); }
 
   /**
    * Sets whether this Node is visible.
@@ -3235,14 +3205,14 @@ inherit( PhetioObject, Node, {
    * @param {boolean} visible
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  setVisible: function( visible ) {
+  setVisible( visible ) {
     assert && assert( typeof visible === 'boolean', 'Node visibility should be a boolean value' );
 
     this.visibleProperty.set( visible );
 
     return this;
-  },
-  set visible( value ) { this.setVisible( value ); },
+  }
+  set visible( value ) { this.setVisible( value ); }
 
   /**
    * Returns whether this Node is visible.
@@ -3250,10 +3220,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {boolean}
    */
-  isVisible: function() {
+  isVisible() {
     return this.visibleProperty.value;
-  },
-  get visible() { return this.isVisible(); },
+  }
+  get visible() { return this.isVisible(); }
 
   /**
    * Swap the visibility of this node with another node. The Node that is made visible will receive keyboard focus
@@ -3263,7 +3233,7 @@ inherit( PhetioObject, Node, {
    * @param {Node} otherNode
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  swapVisibility: function( otherNode ) {
+  swapVisibility( otherNode ) {
     assert && assert( this.visible !== otherNode.visible );
 
     const visibleNode = this.visible ? this : otherNode;
@@ -3280,7 +3250,7 @@ inherit( PhetioObject, Node, {
     }
 
     return this; // allow chaining
-  },
+  }
 
   /**
    * Sets the opacity of this Node (and its sub-tree), where 0 is fully transparent, and 1 is fully opaque.  Values
@@ -3290,7 +3260,7 @@ inherit( PhetioObject, Node, {
    * @param {number} opacity
    * @throws Error if opacity out of range
    */
-  setOpacity: function( opacity ) {
+  setOpacity( opacity ) {
     assert && assert( typeof opacity === 'number' && isFinite( opacity ), 'opacity should be a finite number' );
 
     if ( opacity < 0 || opacity > 1 ) {
@@ -3298,8 +3268,8 @@ inherit( PhetioObject, Node, {
     }
 
     this.opacityProperty.value = opacity;
-  },
-  set opacity( value ) { this.setOpacity( value ); },
+  }
+  set opacity( value ) { this.setOpacity( value ); }
 
   /**
    * Returns the opacity of this node.
@@ -3307,10 +3277,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {number}
    */
-  getOpacity: function() {
+  getOpacity() {
     return this.opacityProperty.value;
-  },
-  get opacity() { return this.getOpacity(); },
+  }
+  get opacity() { return this.getOpacity(); }
 
   /**
    * Called when our opacity Property changes values.
@@ -3319,9 +3289,9 @@ inherit( PhetioObject, Node, {
    * @param {boolean} opacity
    * @param {boolean} oldOpacity
    */
-  onOpacityPropertyChange: function( opacity, oldOpacity ) {
+  onOpacityPropertyChange( opacity, oldOpacity ) {
     this.filterChangeEmitter.emit();
-  },
+  }
 
   /**
    * Sets the non-opacity filters for this Node.
@@ -3348,7 +3318,7 @@ inherit( PhetioObject, Node, {
    *
    * @param {Array.<Filter>} filters
    */
-  setFilters: function( filters ) {
+  setFilters( filters ) {
     assert && assert( Array.isArray( filters ), 'filters should be an array' );
     assert && assert( _.every( filters, filter => filter instanceof Filter ), 'filters should consist of Filter objects only' );
 
@@ -3358,8 +3328,8 @@ inherit( PhetioObject, Node, {
 
     this.invalidateHint();
     this.filterChangeEmitter.emit();
-  },
-  set filters( value ) { this.setFilters( value ); },
+  }
+  set filters( value ) { this.setFilters( value ); }
 
   /**
    * Returns the non-opacity filters for this Node.
@@ -3367,10 +3337,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Array.<Filter>}
    */
-  getFilters: function() {
+  getFilters() {
     return this._filters.slice();
-  },
-  get filters() { return this.getFilters(); },
+  }
+  get filters() { return this.getFilters(); }
 
   /**
    * Sets what Property our pickableProperty is backed by, so that changes to this provided Property will change this
@@ -3387,8 +3357,8 @@ inherit( PhetioObject, Node, {
   setPickableProperty( newTarget ) {
 
     return this._pickableProperty.setTargetProperty( this, PICKABLE_PROPERTY_TANDEM_NAME, newTarget );
-  },
-  set pickableProperty( property ) { this.setPickableProperty( property ); },
+  }
+  set pickableProperty( property ) { this.setPickableProperty( property ); }
 
   /**
    * Handles linking and checking child PhET-iO Properties such as visibleProperty and pickableProperty.
@@ -3411,7 +3381,7 @@ inherit( PhetioObject, Node, {
         this.addLinkedElement( newProperty, { tandem: tandem } );
       }
     }
-  },
+  }
 
   /**
    * Get this Node's pickableProperty. Note! This is not the reciprocal of setPickableProperty. Node.prototype._pickableProperty
@@ -3427,10 +3397,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {TinyForwardingProperty}
    */
-  getPickableProperty: function() {
+  getPickableProperty() {
     return this._pickableProperty;
-  },
-  get pickableProperty() { return this.getPickableProperty(); },
+  }
+  get pickableProperty() { return this.getPickableProperty(); }
 
   /**
    * Use this to automatically create a forwarded, PhET-iO instrumented pickableProperty internal to Node. This is different
@@ -3439,10 +3409,10 @@ inherit( PhetioObject, Node, {
    * @param {boolean} pickablePropertyPhetioInstrumented
    * @returns {Node} - for chaining
    */
-  setPickablePropertyPhetioInstrumented: function( pickablePropertyPhetioInstrumented ) {
+  setPickablePropertyPhetioInstrumented( pickablePropertyPhetioInstrumented ) {
     return this._pickableProperty.setTargetPropertyInstrumented( pickablePropertyPhetioInstrumented, this );
-  },
-  set pickablePropertyPhetioInstrumented( pickablePropertyPhetioInstrumented ) { this.setPickablePropertyPhetioInstrumented( pickablePropertyPhetioInstrumented );},
+  }
+  set pickablePropertyPhetioInstrumented( pickablePropertyPhetioInstrumented ) { this.setPickablePropertyPhetioInstrumented( pickablePropertyPhetioInstrumented );}
 
   /**
    * Sets whether this Node (and its subtree) will allow hit-testing (and thus user interaction), controlling what
@@ -3478,13 +3448,13 @@ inherit( PhetioObject, Node, {
    * @param {boolean|null} pickable
    * @returns {Node} - for chaining
    */
-  setPickable: function( pickable ) {
+  setPickable( pickable ) {
     assert && assert( pickable === null || typeof pickable === 'boolean' );
     this._pickableProperty.set( pickable );
 
     return this;
-  },
-  set pickable( value ) { this.setPickable( value ); },
+  }
+  set pickable( value ) { this.setPickable( value ); }
 
   /**
    * Returns the pickability of this node.
@@ -3492,10 +3462,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {boolean|null}
    */
-  isPickable: function() {
+  isPickable() {
     return this._pickableProperty.value;
-  },
-  get pickable() { return this.isPickable(); },
+  }
+  get pickable() { return this.isPickable(); }
 
   /**
    * Called when our pickableProperty changes values.
@@ -3504,11 +3474,11 @@ inherit( PhetioObject, Node, {
    * @param {boolean} pickable
    * @param {boolean} oldPickable
    */
-  onPickablePropertyChange: function( pickable, oldPickable ) {
+  onPickablePropertyChange( pickable, oldPickable ) {
     this._picker.onPickableChange( oldPickable, pickable );
     if ( assertSlow ) { this._picker.audit(); }
     // TODO: invalidate the cursor somehow? #150
-  },
+  }
 
 
   /**
@@ -3526,8 +3496,8 @@ inherit( PhetioObject, Node, {
   setEnabledProperty( newTarget ) {
 
     return this._enabledProperty.setTargetProperty( this, ENABLED_PROPERTY_TANDEM_NAME, newTarget );
-  },
-  set enabledProperty( property ) { this.setEnabledProperty( property ); },
+  }
+  set enabledProperty( property ) { this.setEnabledProperty( property ); }
 
   /**
    * Get this Node's enabledProperty. Note! This is not the reciprocal of setEnabledProperty. Node.prototype._enabledProperty
@@ -3537,15 +3507,16 @@ inherit( PhetioObject, Node, {
    * const enabledProperty = new Property( false );
    * myNode.setEnabledProperty( enabledProperty )
    * => myNode.getEnabledProperty() !== enabledProperty (!!!!!!)
+   * @public
    *
    * Please use this with caution. See setEnabledProperty() for more information.
    *
    * @returns {TinyForwardingProperty}
    */
-  getEnabledProperty: function() {
+  getEnabledProperty() {
     return this._enabledProperty;
-  },
-  get enabledProperty() { return this.getEnabledProperty(); },
+  }
+  get enabledProperty() { return this.getEnabledProperty(); }
 
   /**
    * Use this to automatically create a forwarded, PhET-iO instrumented enabledProperty internal to Node. This is different
@@ -3554,24 +3525,25 @@ inherit( PhetioObject, Node, {
    * @param {boolean} enabledPropertyPhetioInstrumented
    * @returns {Node} - for chaining
    */
-  setEnabledPropertyPhetioInstrumented: function( enabledPropertyPhetioInstrumented ) {
+  setEnabledPropertyPhetioInstrumented( enabledPropertyPhetioInstrumented ) {
     return this._enabledProperty.setTargetPropertyInstrumented( enabledPropertyPhetioInstrumented, this );
-  },
-  set enabledPropertyPhetioInstrumented( enabledPropertyPhetioInstrumented ) { this.setEnabledPropertyPhetioInstrumented( enabledPropertyPhetioInstrumented );},
+  }
+  set enabledPropertyPhetioInstrumented( enabledPropertyPhetioInstrumented ) { this.setEnabledPropertyPhetioInstrumented( enabledPropertyPhetioInstrumented );}
 
   /**
    * Sets whether this Node is enabled
+   * @public
    *
    * @param {boolean|null} enabled
    * @returns {Node} - for chaining
    */
-  setEnabled: function( enabled ) {
+  setEnabled( enabled ) {
     assert && assert( enabled === null || typeof enabled === 'boolean' );
     this._enabledProperty.set( enabled );
 
     return this;
-  },
-  set enabled( value ) { this.setEnabled( value ); },
+  }
+  set enabled( value ) { this.setEnabled( value ); }
 
   /**
    * Returns the enabled of this node.
@@ -3579,10 +3551,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {boolean|null}
    */
-  isEnabled: function() {
+  isEnabled() {
     return this._enabledProperty.value;
-  },
-  get enabled() { return this.isEnabled(); },
+  }
+  get enabled() { return this.isEnabled(); }
 
   /**
    * Called when enabledProperty changes values.
@@ -3590,9 +3562,9 @@ inherit( PhetioObject, Node, {
    *
    * @param {boolean} enabled
    */
-  onEnabledPropertyChange: function( enabled ) {
+  onEnabledPropertyChange( enabled ) {
     !enabled && this.interruptSubtreeInput();
-  },
+  }
 
   /**
    * Sets whether input is enabled for this Node and its subtree. If false, input event listeners will not be fired
@@ -3606,12 +3578,12 @@ inherit( PhetioObject, Node, {
    *
    * @param {boolean} inputEnabled
    */
-  setInputEnabled: function( inputEnabled ) {
+  setInputEnabled( inputEnabled ) {
     assert && assert( typeof inputEnabled === 'boolean' );
 
     this.inputEnabledProperty.value = inputEnabled;
-  },
-  set inputEnabled( value ) { this.setInputEnabled( value ); },
+  }
+  set inputEnabled( value ) { this.setInputEnabled( value ); }
 
   /**
    * Returns whether input is enabled for this Node and its subtree. See setInputEnabled for more documentation.
@@ -3619,10 +3591,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {boolean}
    */
-  isInputEnabled: function() {
+  isInputEnabled() {
     return this.inputEnabledProperty.value;
-  },
-  get inputEnabled() { return this.isInputEnabled(); },
+  }
+  get inputEnabled() { return this.isInputEnabled(); }
 
   /**
    * Sets all of the input listeners attached to this Node.
@@ -3634,7 +3606,7 @@ inherit( PhetioObject, Node, {
    * @param {Array.<Object>} inputListeners - The input listeners to add.
    * @returns {Node} - For chaining
    */
-  setInputListeners: function( inputListeners ) {
+  setInputListeners( inputListeners ) {
     assert && assert( Array.isArray( inputListeners ) );
 
     // Remove all old input listeners
@@ -3648,8 +3620,8 @@ inherit( PhetioObject, Node, {
     }
 
     return this;
-  },
-  set inputListeners( value ) { this.setInputListeners( value ); },
+  }
+  set inputListeners( value ) { this.setInputListeners( value ); }
 
   /**
    * Returns a copy of all of our input listeners.
@@ -3657,10 +3629,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Array.<Object>}
    */
-  getInputListeners: function() {
+  getInputListeners() {
     return this._inputListeners.slice( 0 ); // defensive copy
-  },
-  get inputListeners() { return this.getInputListeners(); },
+  }
+  get inputListeners() { return this.getInputListeners(); }
 
   /**
    * Sets the CSS cursor string that should be used when the mouse is over this node. null is the default, and
@@ -3669,7 +3641,7 @@ inherit( PhetioObject, Node, {
    *
    * @param {string|null} cursor - A CSS cursor string, like 'pointer', or 'none'
    */
-  setCursor: function( cursor ) {
+  setCursor( cursor ) {
     assert && assert( typeof cursor === 'string' || cursor === null );
 
     // TODO: consider a mapping of types to set reasonable defaults
@@ -3681,8 +3653,8 @@ inherit( PhetioObject, Node, {
 
     // allow the 'auto' cursor type to let the ancestors or scene pick the cursor type
     this._cursor = cursor === 'auto' ? null : cursor;
-  },
-  set cursor( value ) { this.setCursor( value ); },
+  }
+  set cursor( value ) { this.setCursor( value ); }
 
   /**
    * Returns the CSS cursor string for this node, or null if there is no cursor specified.
@@ -3690,10 +3662,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {string|null}
    */
-  getCursor: function() {
+  getCursor() {
     return this._cursor;
-  },
-  get cursor() { return this.getCursor(); },
+  }
+  get cursor() { return this.getCursor(); }
 
   /**
    * Sets the hit-tested mouse area for this Node (see constructor for more advanced documentation). Use null for the
@@ -3702,7 +3674,7 @@ inherit( PhetioObject, Node, {
    *
    * @param {Bounds2|Shape|null} area
    */
-  setMouseArea: function( area ) {
+  setMouseArea( area ) {
     assert && assert( area === null || area instanceof Shape || area instanceof Bounds2, 'mouseArea needs to be a kite.Shape, dot.Bounds2, or null' );
 
     if ( this._mouseArea !== area ) {
@@ -3711,8 +3683,8 @@ inherit( PhetioObject, Node, {
       this._picker.onMouseAreaChange();
       if ( assertSlow ) { this._picker.audit(); }
     }
-  },
-  set mouseArea( value ) { this.setMouseArea( value ); },
+  }
+  set mouseArea( value ) { this.setMouseArea( value ); }
 
   /**
    * Returns the hit-tested mouse area for this node.
@@ -3720,10 +3692,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Bounds2|Shape|null}
    */
-  getMouseArea: function() {
+  getMouseArea() {
     return this._mouseArea;
-  },
-  get mouseArea() { return this.getMouseArea(); },
+  }
+  get mouseArea() { return this.getMouseArea(); }
 
   /**
    * Sets the hit-tested touch area for this Node (see constructor for more advanced documentation). Use null for the
@@ -3732,7 +3704,7 @@ inherit( PhetioObject, Node, {
    *
    * @param {Bounds2|Shape|null} area
    */
-  setTouchArea: function( area ) {
+  setTouchArea( area ) {
     assert && assert( area === null || area instanceof Shape || area instanceof Bounds2, 'touchArea needs to be a kite.Shape, dot.Bounds2, or null' );
 
     if ( this._touchArea !== area ) {
@@ -3741,8 +3713,8 @@ inherit( PhetioObject, Node, {
       this._picker.onTouchAreaChange();
       if ( assertSlow ) { this._picker.audit(); }
     }
-  },
-  set touchArea( value ) { this.setTouchArea( value ); },
+  }
+  set touchArea( value ) { this.setTouchArea( value ); }
 
   /**
    * Returns the hit-tested touch area for this node.
@@ -3750,10 +3722,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Bounds2|Shape|null}
    */
-  getTouchArea: function() {
+  getTouchArea() {
     return this._touchArea;
-  },
-  get touchArea() { return this.getTouchArea(); },
+  }
+  get touchArea() { return this.getTouchArea(); }
 
   /**
    * Sets a clipped shape where only content in our local coordinate frame that is inside the clip area will be shown
@@ -3762,7 +3734,7 @@ inherit( PhetioObject, Node, {
    *
    * @param {Shape|null} shape
    */
-  setClipArea: function( shape ) {
+  setClipArea( shape ) {
     assert && assert( shape === null || shape instanceof Shape, 'clipArea needs to be a kite.Shape, or null' );
 
     if ( this.clipArea !== shape ) {
@@ -3773,8 +3745,8 @@ inherit( PhetioObject, Node, {
 
       if ( assertSlow ) { this._picker.audit(); }
     }
-  },
-  set clipArea( value ) { this.setClipArea( value ); },
+  }
+  set clipArea( value ) { this.setClipArea( value ); }
 
   /**
    * Returns the clipped area for this node.
@@ -3782,10 +3754,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Shape|null}
    */
-  getClipArea: function() {
+  getClipArea() {
     return this.clipAreaProperty.value;
-  },
-  get clipArea() { return this.getClipArea(); },
+  }
+  get clipArea() { return this.getClipArea(); }
 
   /**
    * Returns whether this Node has a clip area.
@@ -3793,9 +3765,9 @@ inherit( PhetioObject, Node, {
    *
    * @returns {boolean}
    */
-  hasClipArea: function() {
+  hasClipArea() {
     return this.clipArea !== null;
-  },
+  }
 
   /**
    * Sets what self renderers (and other bitmask flags) are supported by this node.
@@ -3803,7 +3775,7 @@ inherit( PhetioObject, Node, {
    *
    * @param {number} bitmask
    */
-  setRendererBitmask: function( bitmask ) {
+  setRendererBitmask( bitmask ) {
     assert && assert( typeof bitmask === 'number' && isFinite( bitmask ) );
 
     if ( bitmask !== this._rendererBitmask ) {
@@ -3813,15 +3785,15 @@ inherit( PhetioObject, Node, {
 
       this.instanceRefreshEmitter.emit();
     }
-  },
+  }
 
   /**
    * Meant to be overridden, so that it can be called to ensure that the renderer bitmask will be up-to-date.
    * @protected
    */
-  invalidateSupportedRenderers: function() {
+  invalidateSupportedRenderers() {
 
-  },
+  }
 
   /*---------------------------------------------------------------------------*
    * Hints
@@ -3832,10 +3804,10 @@ inherit( PhetioObject, Node, {
    * in the future, but hint changes are not particularly common performance bottleneck).
    * @private
    */
-  invalidateHint: function() {
+  invalidateHint() {
     this.rendererSummaryRefreshEmitter.emit();
     this.instanceRefreshEmitter.emit();
-  },
+  }
 
   /**
    * Sets a preferred renderer for this Node and its sub-tree. Scenery will attempt to use this renderer under here
@@ -3849,7 +3821,7 @@ inherit( PhetioObject, Node, {
    *
    * @param {string|null} renderer
    */
-  setRenderer: function( renderer ) {
+  setRenderer( renderer ) {
     assert && assert( renderer === null || renderer === 'canvas' || renderer === 'svg' || renderer === 'dom' || renderer === 'webgl',
       'Renderer input should be null, or one of: "canvas", "svg", "dom" or "webgl".' );
 
@@ -3874,8 +3846,8 @@ inherit( PhetioObject, Node, {
 
       this.invalidateHint();
     }
-  },
-  set renderer( value ) { this.setRenderer( value ); },
+  }
+  set renderer( value ) { this.setRenderer( value ); }
 
   /**
    * Returns the preferred renderer (if any) of this node, as a string.
@@ -3883,7 +3855,7 @@ inherit( PhetioObject, Node, {
    *
    * @returns {string|null}
    */
-  getRenderer: function() {
+  getRenderer() {
     if ( this._hints.renderer === 0 ) {
       return null;
     }
@@ -3901,8 +3873,8 @@ inherit( PhetioObject, Node, {
     }
     assert && assert( false, 'Seems to be an invalid renderer?' );
     return this._hints.renderer;
-  },
-  get renderer() { return this.getRenderer(); },
+  }
+  get renderer() { return this.getRenderer(); }
 
   /**
    * Sets whether or not Scenery will try to put this Node (and its descendants) into a separate SVG/Canvas/WebGL/etc.
@@ -3911,7 +3883,7 @@ inherit( PhetioObject, Node, {
    *
    * @param {boolean} split
    */
-  setLayerSplit: function( split ) {
+  setLayerSplit( split ) {
     assert && assert( typeof split === 'boolean' );
 
     if ( split !== this._hints.layerSplit ) {
@@ -3919,8 +3891,8 @@ inherit( PhetioObject, Node, {
 
       this.invalidateHint();
     }
-  },
-  set layerSplit( value ) { this.setLayerSplit( value ); },
+  }
+  set layerSplit( value ) { this.setLayerSplit( value ); }
 
   /**
    * Returns whether the layerSplit performance flag is set.
@@ -3928,10 +3900,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {boolean}
    */
-  isLayerSplit: function() {
+  isLayerSplit() {
     return this._hints.layerSplit;
-  },
-  get layerSplit() { return this.isLayerSplit(); },
+  }
+  get layerSplit() { return this.isLayerSplit(); }
 
   /**
    * Sets whether or not Scenery will take into account that this Node plans to use opacity. Can have performance
@@ -3940,7 +3912,7 @@ inherit( PhetioObject, Node, {
    *
    * @param {boolean} usesOpacity
    */
-  setUsesOpacity: function( usesOpacity ) {
+  setUsesOpacity( usesOpacity ) {
     assert && assert( typeof usesOpacity === 'boolean' );
 
     if ( usesOpacity !== this._hints.usesOpacity ) {
@@ -3948,8 +3920,8 @@ inherit( PhetioObject, Node, {
 
       this.invalidateHint();
     }
-  },
-  set usesOpacity( value ) { this.setUsesOpacity( value ); },
+  }
+  set usesOpacity( value ) { this.setUsesOpacity( value ); }
 
   /**
    * Returns whether the usesOpacity performance flag is set.
@@ -3957,10 +3929,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {boolean}
    */
-  getUsesOpacity: function() {
+  getUsesOpacity() {
     return this._hints.usesOpacity;
-  },
-  get usesOpacity() { return this.getUsesOpacity(); },
+  }
+  get usesOpacity() { return this.getUsesOpacity(); }
 
   /**
    * Sets a flag for whether whether the contents of this Node and its children should be displayed in a separate
@@ -3970,7 +3942,7 @@ inherit( PhetioObject, Node, {
    *
    * @param {boolean} cssTransform
    */
-  setCSSTransform: function( cssTransform ) {
+  setCSSTransform( cssTransform ) {
     assert && assert( typeof cssTransform === 'boolean' );
 
     if ( cssTransform !== this._hints.cssTransform ) {
@@ -3978,8 +3950,8 @@ inherit( PhetioObject, Node, {
 
       this.invalidateHint();
     }
-  },
-  set cssTransform( value ) { this.setCSSTransform( value ); },
+  }
+  set cssTransform( value ) { this.setCSSTransform( value ); }
 
   /**
    * Returns wehther the cssTransform performance flag is set.
@@ -3987,10 +3959,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {boolean}
    */
-  isCSSTransformed: function() {
+  isCSSTransformed() {
     return this._hints.cssTransform;
-  },
-  get cssTransform() { return this._hints.cssTransform; },
+  }
+  get cssTransform() { return this._hints.cssTransform; }
 
   /**
    * Sets a performance flag for whether layers/DOM elements should be excluded (or included) when things are
@@ -3999,7 +3971,7 @@ inherit( PhetioObject, Node, {
    *
    * @param {boolean} excludeInvisible
    */
-  setExcludeInvisible: function( excludeInvisible ) {
+  setExcludeInvisible( excludeInvisible ) {
     assert && assert( typeof excludeInvisible === 'boolean' );
 
     if ( excludeInvisible !== this._hints.excludeInvisible ) {
@@ -4007,8 +3979,8 @@ inherit( PhetioObject, Node, {
 
       this.invalidateHint();
     }
-  },
-  set excludeInvisible( value ) { this.setExcludeInvisible( value ); },
+  }
+  set excludeInvisible( value ) { this.setExcludeInvisible( value ); }
 
   /**
    * Returns whether the excludeInvisible performance flag is set.
@@ -4016,10 +3988,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {boolean}
    */
-  isExcludeInvisible: function() {
+  isExcludeInvisible() {
     return this._hints.excludeInvisible;
-  },
-  get excludeInvisible() { return this.isExcludeInvisible(); },
+  }
+  get excludeInvisible() { return this.isExcludeInvisible(); }
 
   /**
    * If this is set to true, child nodes that are invisible will NOT contribute to the bounds of this node.
@@ -4030,7 +4002,7 @@ inherit( PhetioObject, Node, {
    *
    * @param {boolean} excludeInvisibleChildrenFromBounds
    */
-  setExcludeInvisibleChildrenFromBounds: function( excludeInvisibleChildrenFromBounds ) {
+  setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds ) {
     assert && assert( typeof excludeInvisibleChildrenFromBounds === 'boolean' );
 
     if ( excludeInvisibleChildrenFromBounds !== this._excludeInvisibleChildrenFromBounds ) {
@@ -4038,8 +4010,8 @@ inherit( PhetioObject, Node, {
 
       this.invalidateBounds();
     }
-  },
-  set excludeInvisibleChildrenFromBounds( value ) { this.setExcludeInvisibleChildrenFromBounds( value ); },
+  }
+  set excludeInvisibleChildrenFromBounds( value ) { this.setExcludeInvisibleChildrenFromBounds( value ); }
 
   /**
    * Returns whether the excludeInvisibleChildrenFromBounds flag is set, see
@@ -4048,10 +4020,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {boolean}
    */
-  isExcludeInvisibleChildrenFromBounds: function() {
+  isExcludeInvisibleChildrenFromBounds() {
     return this._excludeInvisibleChildrenFromBounds;
-  },
-  get excludeInvisibleChildrenFromBounds() { return this.isExcludeInvisibleChildrenFromBounds(); },
+  }
+  get excludeInvisibleChildrenFromBounds() { return this.isExcludeInvisibleChildrenFromBounds(); }
 
   /**
    * Sets the preventFit performance flag.
@@ -4059,7 +4031,7 @@ inherit( PhetioObject, Node, {
    *
    * @param {boolean} preventFit
    */
-  setPreventFit: function( preventFit ) {
+  setPreventFit( preventFit ) {
     assert && assert( typeof preventFit === 'boolean' );
 
     if ( preventFit !== this._hints.preventFit ) {
@@ -4067,8 +4039,8 @@ inherit( PhetioObject, Node, {
 
       this.invalidateHint();
     }
-  },
-  set preventFit( value ) { this.setPreventFit( value ); },
+  }
+  set preventFit( value ) { this.setPreventFit( value ); }
 
   /**
    * Returns whether the preventFit performance flag is set.
@@ -4076,10 +4048,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {boolean}
    */
-  isPreventFit: function() {
+  isPreventFit() {
     return this._hints.preventFit;
-  },
-  get preventFit() { return this.isPreventFit(); },
+  }
+  get preventFit() { return this.isPreventFit(); }
 
   /**
    * Sets whether there is a custom WebGL scale applied to the Canvas, and if so what scale.
@@ -4087,7 +4059,7 @@ inherit( PhetioObject, Node, {
    *
    * @param {number|null} webglScale
    */
-  setWebGLScale: function( webglScale ) {
+  setWebGLScale( webglScale ) {
     assert && assert( webglScale === null || ( typeof webglScale === 'number' && isFinite( webglScale ) ) );
 
     if ( webglScale !== this._hints.webglScale ) {
@@ -4095,8 +4067,8 @@ inherit( PhetioObject, Node, {
 
       this.invalidateHint();
     }
-  },
-  set webglScale( value ) { this.setWebGLScale( value ); },
+  }
+  set webglScale( value ) { this.setWebGLScale( value ); }
 
   /**
    * Returns the value of the webglScale performance flag.
@@ -4104,10 +4076,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {number|null}
    */
-  getWebGLScale: function() {
+  getWebGLScale() {
     return this._hints.webglScale;
-  },
-  get webglScale() { return this.getWebGLScale(); },
+  }
+  get webglScale() { return this.getWebGLScale(); }
 
   /*---------------------------------------------------------------------------*
    * Trail operations
@@ -4123,7 +4095,7 @@ inherit( PhetioObject, Node, {
    *                                                   satisfies predicate( node ) == true
    * @returns {Trail}
    */
-  getUniqueTrail: function( predicate ) {
+  getUniqueTrail( predicate ) {
 
     // Without a predicate, we'll be able to bail out the instant we hit a Node with 2+ parents, and it makes the
     // logic easier.
@@ -4150,7 +4122,7 @@ inherit( PhetioObject, Node, {
 
       return trails[ 0 ];
     }
-  },
+  }
 
   /**
    * Returns a Trail rooted at rootNode and ends at this node. Throws an assertion if the number of trails that match
@@ -4160,11 +4132,9 @@ inherit( PhetioObject, Node, {
    * @param {Node} rootNode
    * @returns {Trail}
    */
-  getUniqueTrailTo: function( rootNode ) {
-    return this.getUniqueTrail( function( node ) {
-      return rootNode === node;
-    } );
-  },
+  getUniqueTrailTo( rootNode ) {
+    return this.getUniqueTrail( node => rootNode === node );
+  }
 
   /**
    * Returns an array of all Trails that start from nodes with no parent (or if a predicate is present, those that
@@ -4175,7 +4145,7 @@ inherit( PhetioObject, Node, {
    *                                                   satisfy predicate( node ) == true.
    * @returns {Array.<Trail>}
    */
-  getTrails: function( predicate ) {
+  getTrails( predicate ) {
     predicate = predicate || Node.defaultTrailPredicate;
 
     const trails = [];
@@ -4183,7 +4153,7 @@ inherit( PhetioObject, Node, {
     Trail.appendAncestorTrailsWithPredicate( trails, trail, predicate );
 
     return trails;
-  },
+  }
 
   /**
    * Returns an array of all Trails rooted at rootNode and end at this node.
@@ -4192,11 +4162,9 @@ inherit( PhetioObject, Node, {
    * @param {Node} rootNode
    * @returns {Array.<Trail>}
    */
-  getTrailsTo: function( rootNode ) {
-    return this.getTrails( function( node ) {
-      return node === rootNode;
-    } );
-  },
+  getTrailsTo( rootNode ) {
+    return this.getTrails( node => node === rootNode );
+  }
 
   /**
    * Returns an array of all Trails rooted at this Node and end with nodes with no children (or if a predicate is
@@ -4207,7 +4175,7 @@ inherit( PhetioObject, Node, {
    *                                                   satisfy predicate( node ) == true.
    * @returns {Array.<Trail>}
    */
-  getLeafTrails: function( predicate ) {
+  getLeafTrails( predicate ) {
     predicate = predicate || Node.defaultLeafTrailPredicate;
 
     const trails = [];
@@ -4215,7 +4183,7 @@ inherit( PhetioObject, Node, {
     Trail.appendDescendantTrailsWithPredicate( trails, trail, predicate );
 
     return trails;
-  },
+  }
 
   /**
    * Returns an array of all Trails rooted at this Node and end with leafNode.
@@ -4224,11 +4192,9 @@ inherit( PhetioObject, Node, {
    * @param {Node} leafNode
    * @returns {Array.<Trail>}
    */
-  getLeafTrailsTo: function( leafNode ) {
-    return this.getLeafTrails( function( node ) {
-      return node === leafNode;
-    } );
-  },
+  getLeafTrailsTo( leafNode ) {
+    return this.getLeafTrails( node => node === leafNode );
+  }
 
   /**
    * Returns a Trail rooted at this node and ending at a Node that has no children (or if a predicate is provided, a
@@ -4239,14 +4205,14 @@ inherit( PhetioObject, Node, {
    *                                                   satisfies predicate( node ) == true
    * @returns {Trail}
    */
-  getUniqueLeafTrail: function( predicate ) {
+  getUniqueLeafTrail( predicate ) {
     const trails = this.getLeafTrails( predicate );
 
     assert && assert( trails.length === 1,
       'getUniqueLeafTrail found ' + trails.length + ' matching trails for the predicate' );
 
     return trails[ 0 ];
-  },
+  }
 
   /**
    * Returns a Trail rooted at this Node and ending at leafNode. If more than one trail matches this description,
@@ -4256,11 +4222,9 @@ inherit( PhetioObject, Node, {
    * @param {Node} leafNode
    * @returns {Trail}
    */
-  getUniqueLeafTrailTo: function( leafNode ) {
-    return this.getUniqueLeafTrail( function( node ) {
-      return node === leafNode;
-    } );
-  },
+  getUniqueLeafTrailTo( leafNode ) {
+    return this.getUniqueLeafTrail( node => node === leafNode );
+  }
 
   /**
    * Returns all nodes in the connected component, returned in an arbitrary order, including nodes that are ancestors
@@ -4269,7 +4233,7 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Array.<Node>}
    */
-  getConnectedNodes: function() {
+  getConnectedNodes() {
     const result = [];
     let fresh = this._children.concat( this._parents ).concat( this );
     while ( fresh.length ) {
@@ -4280,7 +4244,7 @@ inherit( PhetioObject, Node, {
       }
     }
     return result;
-  },
+  }
 
   /**
    * Returns all nodes in the subtree with this Node as its root, returned in an arbitrary order. Like
@@ -4289,7 +4253,7 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Array.<Node>}
    */
-  getSubtreeNodes: function() {
+  getSubtreeNodes() {
     const result = [];
     let fresh = this._children.concat( this );
     while ( fresh.length ) {
@@ -4300,7 +4264,7 @@ inherit( PhetioObject, Node, {
       }
     }
     return result;
-  },
+  }
 
   /**
    * Returns all nodes that are connected to this node, sorted in topological order.
@@ -4308,15 +4272,15 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Array.<Node>}
    */
-  getTopologicallySortedNodes: function() {
+  getTopologicallySortedNodes() {
     // see http://en.wikipedia.org/wiki/Topological_sorting
     const edges = {};
     const s = [];
     const l = [];
     let n;
-    _.each( this.getConnectedNodes(), function( node ) {
+    _.each( this.getConnectedNodes(), node => {
       edges[ node.id ] = {};
-      _.each( node._children, function( m ) {
+      _.each( node._children, m => {
         edges[ node.id ][ m.id ] = true;
       } );
       if ( !node.parents.length ) {
@@ -4326,7 +4290,7 @@ inherit( PhetioObject, Node, {
 
     function handleChild( m ) {
       delete edges[ n.id ][ m.id ];
-      if ( _.every( edges, function( children ) { return !children[ m.id ]; } ) ) {
+      if ( _.every( edges, children => !children[ m.id ] ) ) {
         // there are no more edges to m
         s.push( m );
       }
@@ -4340,12 +4304,10 @@ inherit( PhetioObject, Node, {
     }
 
     // ensure that there are no edges left, since then it would contain a circular reference
-    assert && assert( _.every( edges, function( children ) {
-      return _.every( children, function( final ) { return false; } );
-    } ), 'circular reference check' );
+    assert && assert( _.every( edges, children => _.every( children, final => false ) ), 'circular reference check' );
 
     return l;
-  },
+  }
 
   /**
    * Returns whether this.addChild( child ) will not cause circular references.
@@ -4354,7 +4316,7 @@ inherit( PhetioObject, Node, {
    * @param {Node} child
    * @returns {boolean}
    */
-  canAddChild: function( child ) {
+  canAddChild( child ) {
     if ( this === child || _.includes( this._children, child ) ) {
       return false;
     }
@@ -4365,9 +4327,9 @@ inherit( PhetioObject, Node, {
     const s = [];
     const l = [];
     let n;
-    _.each( this.getConnectedNodes().concat( child.getConnectedNodes() ), function( node ) {
+    _.each( this.getConnectedNodes().concat( child.getConnectedNodes() ), node => {
       edges[ node.id ] = {};
-      _.each( node._children, function( m ) {
+      _.each( node._children, m => {
         edges[ node.id ][ m.id ] = true;
       } );
       if ( !node.parents.length && node !== child ) {
@@ -4377,7 +4339,7 @@ inherit( PhetioObject, Node, {
     edges[ this.id ][ child.id ] = true; // add in our 'new' edge
     function handleChild( m ) {
       delete edges[ n.id ][ m.id ];
-      if ( _.every( edges, function( children ) { return !children[ m.id ]; } ) ) {
+      if ( _.every( edges, children => !children[ m.id ] ) ) {
         // there are no more edges to m
         s.push( m );
       }
@@ -4396,10 +4358,8 @@ inherit( PhetioObject, Node, {
     }
 
     // ensure that there are no edges left, since then it would contain a circular reference
-    return _.every( edges, function( children ) {
-      return _.every( children, function( final ) { return false; } );
-    } );
-  },
+    return _.every( edges, children => _.every( children, final => false ) );
+  }
 
   /**
    * To be overridden in paintable Node types. Should hook into the drawable's prototype (presumably).
@@ -4411,9 +4371,9 @@ inherit( PhetioObject, Node, {
    * @param {CanvasContextWrapper} wrapper
    * @param {Matrix3} matrix - The transformation matrix already applied to the context.
    */
-  canvasPaintSelf: function( wrapper, matrix ) {
+  canvasPaintSelf( wrapper, matrix ) {
 
-  },
+  }
 
   /**
    * Renders this Node only (its self) into the Canvas wrapper, in its local coordinate frame.
@@ -4422,11 +4382,11 @@ inherit( PhetioObject, Node, {
    * @param {CanvasContextWrapper} wrapper
    * @param {Matrix3} matrix - The current transformation matrix associated with the wrapper
    */
-  renderToCanvasSelf: function( wrapper, matrix ) {
+  renderToCanvasSelf( wrapper, matrix ) {
     if ( this.isPainted() && ( this._rendererBitmask & Renderer.bitmaskCanvas ) ) {
       this.canvasPaintSelf( wrapper, matrix );
     }
-  },
+  }
 
   /**
    * Renders this Node and its descendants into the Canvas wrapper.
@@ -4435,7 +4395,7 @@ inherit( PhetioObject, Node, {
    * @param {CanvasContextWrapper} wrapper
    * @param {Matrix3} [matrix] - Optional transform to be applied
    */
-  renderToCanvasSubtree: function( wrapper, matrix ) {
+  renderToCanvasSubtree( wrapper, matrix ) {
     matrix = matrix || Matrix3.identity();
 
     wrapper.resetStyles();
@@ -4495,7 +4455,7 @@ inherit( PhetioObject, Node, {
         wrapper.context.restore();
       }
     }
-  },
+  }
 
   /**
    * @deprecated
@@ -4507,7 +4467,7 @@ inherit( PhetioObject, Node, {
    * @param {Function} callback - Called with no arguments
    * @param {string} [backgroundColor]
    */
-  renderToCanvas: function( canvas, context, callback, backgroundColor ) {
+  renderToCanvas( canvas, context, callback, backgroundColor ) {
 
     assert && deprecationWarning( 'Node.renderToCanvas() is deprecated, please use Node.rasterized() instead' );
 
@@ -4524,7 +4484,7 @@ inherit( PhetioObject, Node, {
     this.renderToCanvasSubtree( wrapper, Matrix3.identity() );
 
     callback && callback(); // this was originally asynchronous, so we had a callback
-  },
+  }
 
   /**
    * Renders this Node to an HTMLCanvasElement. If toCanvas( callback ) is used, the canvas will contain the node's
@@ -4537,7 +4497,7 @@ inherit( PhetioObject, Node, {
    * @param {number} [width] - The width of the Canvas output
    * @param {number} [height] - The height of the Canvas output
    */
-  toCanvas: function( callback, x, y, width, height ) {
+  toCanvas( callback, x, y, width, height ) {
     assert && assert( typeof callback === 'function' );
     assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
     assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
@@ -4575,7 +4535,7 @@ inherit( PhetioObject, Node, {
     this.renderToCanvasSubtree( wrapper, Matrix3.translation( x, y ).timesMatrix( this._transform.getMatrix() ) );
 
     callback( canvas, x, y, width, height ); // we used to be asynchronous
-  },
+  }
 
   /**
    * Renders this Node to a Canvas, then calls the callback with the data URI from it.
@@ -4587,7 +4547,7 @@ inherit( PhetioObject, Node, {
    * @param {number} [width] - The width of the Canvas output
    * @param {number} [height] - The height of the Canvas output
    */
-  toDataURL: function( callback, x, y, width, height ) {
+  toDataURL( callback, x, y, width, height ) {
     assert && assert( typeof callback === 'function' );
     assert && assert( x === undefined || typeof x === 'number', 'If provided, x should be a number' );
     assert && assert( y === undefined || typeof y === 'number', 'If provided, y should be a number' );
@@ -4596,11 +4556,11 @@ inherit( PhetioObject, Node, {
     assert && assert( height === undefined || ( typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
       'If provided, height should be a non-negative integer' );
 
-    this.toCanvas( function( canvas, x, y, width, height ) {
+    this.toCanvas( ( canvas, x, y, width, height ) => {
       // this x and y shadow the outside parameters, and will be different if the outside parameters are undefined
       callback( canvas.toDataURL(), x, y, width, height );
     }, x, y, width, height );
-  },
+  }
 
   /**
    * Calls the callback with an HTMLImageElement that contains this Node's subtree's visual form.
@@ -4615,7 +4575,7 @@ inherit( PhetioObject, Node, {
    * @param {number} [width] - The width of the Canvas output
    * @param {number} [height] - The height of the Canvas output
    */
-  toImage: function( callback, x, y, width, height ) {
+  toImage( callback, x, y, width, height ) {
 
     assert && deprecationWarning( 'Node.toImage() is deprecated, please use Node.rasterized() instead' );
 
@@ -4627,10 +4587,10 @@ inherit( PhetioObject, Node, {
     assert && assert( height === undefined || ( typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
       'If provided, height should be a non-negative integer' );
 
-    this.toDataURL( function( url, x, y ) {
+    this.toDataURL( ( url, x, y ) => {
       // this x and y shadow the outside parameters, and will be different if the outside parameters are undefined
       const img = document.createElement( 'img' );
-      img.onload = function() {
+      img.onload = () => {
         callback( img, x, y );
         try {
           delete img.onload;
@@ -4641,7 +4601,7 @@ inherit( PhetioObject, Node, {
       };
       img.src = url;
     }, x, y, width, height );
-  },
+  }
 
   /**
    * Calls the callback with an Image Node that contains this Node's subtree's visual form. This is always
@@ -4655,7 +4615,7 @@ inherit( PhetioObject, Node, {
    * @param {number} [width] - The width of the Canvas output
    * @param {number} [height] - The height of the Canvas output
    */
-  toImageNodeAsynchronous: function( callback, x, y, width, height ) {
+  toImageNodeAsynchronous( callback, x, y, width, height ) {
 
     assert && deprecationWarning( 'Node.toImageNodeAsyncrhonous() is deprecated, please use Node.rasterized() instead' );
 
@@ -4667,14 +4627,14 @@ inherit( PhetioObject, Node, {
     assert && assert( height === undefined || ( typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
       'If provided, height should be a non-negative integer' );
 
-    this.toImage( function( image, x, y ) {
-      callback( new Node( {
+    this.toImage( ( image, x, y ) => {
+      callback( new Node( { // eslint-disable-line no-html-constructors
         children: [
           new scenery.Image( image, { x: -x, y: -y } )
         ]
       } ) );
     }, x, y, width, height );
-  },
+  }
 
   /**
    * Creates a Node containing an Image Node that contains this Node's subtree's visual form. This is always
@@ -4687,7 +4647,7 @@ inherit( PhetioObject, Node, {
    * @param {number} [width] - The width of the Canvas output
    * @param {number} [height] - The height of the Canvas output
    */
-  toCanvasNodeSynchronous: function( x, y, width, height ) {
+  toCanvasNodeSynchronous( x, y, width, height ) {
 
     assert && deprecationWarning( 'Node.toCanvasNodeSynchronous() is deprecated, please use Node.rasterized() instead' );
 
@@ -4699,8 +4659,8 @@ inherit( PhetioObject, Node, {
       'If provided, height should be a non-negative integer' );
 
     let result = null;
-    this.toCanvas( function( canvas, x, y ) {
-      result = new Node( {
+    this.toCanvas( ( canvas, x, y ) => {
+      result = new Node( { // eslint-disable-line no-html-constructors
         children: [
           new scenery.Image( canvas, { x: -x, y: -y } )
         ]
@@ -4708,7 +4668,7 @@ inherit( PhetioObject, Node, {
     }, x, y, width, height );
     assert && assert( result, 'toCanvasNodeSynchronous requires that the node can be rendered only using Canvas' );
     return result;
-  },
+  }
 
   /**
    * Returns an Image that renders this Node. This is always synchronous, and sets initialWidth/initialHeight so that
@@ -4725,7 +4685,7 @@ inherit( PhetioObject, Node, {
    * @param {number} [height] - The height of the Canvas output
    * @returns {Image}
    */
-  toDataURLImageSynchronous: function( x, y, width, height ) {
+  toDataURLImageSynchronous( x, y, width, height ) {
 
     assert && deprecationWarning( 'Node.toDataURLImageSychronous() is deprecated, please use Node.rasterized() instead' );
 
@@ -4737,12 +4697,12 @@ inherit( PhetioObject, Node, {
       'If provided, height should be a non-negative integer' );
 
     let result;
-    this.toDataURL( function( dataURL, x, y, width, height ) {
+    this.toDataURL( ( dataURL, x, y, width, height ) => {
       result = new scenery.Image( dataURL, { x: -x, y: -y, initialWidth: width, initialHeight: height } );
     }, x, y, width, height );
     assert && assert( result, 'toDataURL failed to return a result synchronously' );
     return result;
-  },
+  }
 
   /**
    * Returns a Node that contains this Node's subtree's visual form. This is always synchronous, and sets
@@ -4757,7 +4717,7 @@ inherit( PhetioObject, Node, {
    * @param {number} [width] - The width of the Canvas output
    * @param {number} [height] - The height of the Canvas output
    */
-  toDataURLNodeSynchronous: function( x, y, width, height ) {
+  toDataURLNodeSynchronous( x, y, width, height ) {
 
     assert && deprecationWarning( 'Node.toDataURLNodeSynchronous() is deprecated, please use Node.rasterized() instead' );
 
@@ -4768,12 +4728,12 @@ inherit( PhetioObject, Node, {
     assert && assert( height === undefined || ( typeof height === 'number' && height >= 0 && ( height % 1 === 0 ) ),
       'If provided, height should be a non-negative integer' );
 
-    return new Node( {
+    return new Node( { // eslint-disable-line no-html-constructors
       children: [
         this.toDataURLImageSynchronous( x, y, width, height )
       ]
     } );
-  },
+  }
 
   /**
    * Returns a Node (backed by a scenery Image) that is a rasterized version of this node.
@@ -4782,7 +4742,7 @@ inherit( PhetioObject, Node, {
    * @param {Object} [options] - See below options. This is also passed directly to the created Image object.
    * @returns {Node}
    */
-  rasterized: function( options ) {
+  rasterized( options ) {
     options = merge( {
       // {number} - Controls the resolution of the image relative to the local view units. For example, if our Node is
       // ~100 view units across (in the local coordinate frame) but you want the image to actually have a ~200-pixel
@@ -4826,7 +4786,7 @@ inherit( PhetioObject, Node, {
     }
 
     // We'll need to wrap it in a container Node temporarily (while rasterizing) for the scale
-    const wrapperNode = new Node( {
+    const wrapperNode = new Node( { // eslint-disable-line no-html-constructors
       scale: resolution,
       children: [ this ]
     } );
@@ -4882,7 +4842,7 @@ inherit( PhetioObject, Node, {
     }
 
     if ( options.wrap ) {
-      const wrappedNode = new Node( { children: [ image ] } );
+      const wrappedNode = new Node( { children: [ image ] } ); // eslint-disable-line no-html-constructors
       if ( options.useTargetBounds ) {
         wrappedNode.localBounds = finalParentBounds;
       }
@@ -4894,7 +4854,7 @@ inherit( PhetioObject, Node, {
       }
       return image;
     }
-  },
+  }
 
   /**
    * Creates a DOM drawable for this Node's self representation.
@@ -4907,9 +4867,9 @@ inherit( PhetioObject, Node, {
    * @param {Instance} instance - Instance object that will be associated with the drawable
    * @returns {DOMSelfDrawable}
    */
-  createDOMDrawable: function( renderer, instance ) {
+  createDOMDrawable( renderer, instance ) {
     throw new Error( 'createDOMDrawable is abstract. The subtype should either override this method, or not support the DOM renderer' );
-  },
+  }
 
   /**
    * Creates an SVG drawable for this Node's self representation.
@@ -4922,9 +4882,9 @@ inherit( PhetioObject, Node, {
    * @param {Instance} instance - Instance object that will be associated with the drawable
    * @returns {SVGSelfDrawable}
    */
-  createSVGDrawable: function( renderer, instance ) {
+  createSVGDrawable( renderer, instance ) {
     throw new Error( 'createSVGDrawable is abstract. The subtype should either override this method, or not support the DOM renderer' );
-  },
+  }
 
   /**
    * Creates a Canvas drawable for this Node's self representation.
@@ -4937,9 +4897,9 @@ inherit( PhetioObject, Node, {
    * @param {Instance} instance - Instance object that will be associated with the drawable
    * @returns {CanvasSelfDrawable}
    */
-  createCanvasDrawable: function( renderer, instance ) {
+  createCanvasDrawable( renderer, instance ) {
     throw new Error( 'createCanvasDrawable is abstract. The subtype should either override this method, or not support the DOM renderer' );
-  },
+  }
 
   /**
    * Creates a WebGL drawable for this Node's self representation.
@@ -4952,9 +4912,9 @@ inherit( PhetioObject, Node, {
    * @param {Instance} instance - Instance object that will be associated with the drawable
    * @returns {WebGLSelfDrawable}
    */
-  createWebGLDrawable: function( renderer, instance ) {
+  createWebGLDrawable( renderer, instance ) {
     throw new Error( 'createWebGLDrawable is abstract. The subtype should either override this method, or not support the DOM renderer' );
-  },
+  }
 
   /*---------------------------------------------------------------------------*
    * Instance handling
@@ -4966,10 +4926,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Array.<Instance>}
    */
-  getInstances: function() {
+  getInstances() {
     return this._instances;
-  },
-  get instances() { return this.getInstances(); },
+  }
+  get instances() { return this.getInstances(); }
 
   /**
    * Adds an Instance reference to our array.
@@ -4977,12 +4937,12 @@ inherit( PhetioObject, Node, {
    *
    * @param {Instance} instance
    */
-  addInstance: function( instance ) {
+  addInstance( instance ) {
     assert && assert( instance instanceof Instance );
     this._instances.push( instance );
 
     this.changedInstanceEmitter.emit( instance, true );
-  },
+  }
 
   /**
    * Removes an Instance reference from our array.
@@ -4990,14 +4950,14 @@ inherit( PhetioObject, Node, {
    *
    * @param {Instance} instance
    */
-  removeInstance: function( instance ) {
+  removeInstance( instance ) {
     assert && assert( instance instanceof Instance );
     const index = _.indexOf( this._instances, instance );
     assert && assert( index !== -1, 'Cannot remove a Instance from a Node if it was not there' );
     this._instances.splice( index, 1 );
 
     this.changedInstanceEmitter.emit( instance, false );
-  },
+  }
 
   /**
    * Returns whether this Node was visually rendered/displayed by a Display in the last updateDisplay() call.
@@ -5006,7 +4966,7 @@ inherit( PhetioObject, Node, {
    * @param {Display} display
    * @returns {boolean}
    */
-  wasDisplayed: function( display ) {
+  wasDisplayed( display ) {
     for ( let i = 0; i < this._instances.length; i++ ) {
       const instance = this._instances[ i ];
 
@@ -5015,7 +4975,7 @@ inherit( PhetioObject, Node, {
       }
     }
     return false;
-  },
+  }
 
   /*---------------------------------------------------------------------------*
    * Display handling
@@ -5027,10 +4987,10 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Array.<Display>}
    */
-  getRootedDisplays: function() {
+  getRootedDisplays() {
     return this._rootedDisplays;
-  },
-  get rootedDisplays() { return this.getRootedDisplays(); },
+  }
+  get rootedDisplays() { return this.getRootedDisplays(); }
 
   /**
    * Adds an display reference to our array.
@@ -5038,13 +4998,13 @@ inherit( PhetioObject, Node, {
    *
    * @param {Display} display
    */
-  addRootedDisplay: function( display ) {
+  addRootedDisplay( display ) {
     assert && assert( display instanceof scenery.Display );
     this._rootedDisplays.push( display );
 
     // Defined in ParallelDOM.js
     this._accessibleDisplaysInfo.onAddedRootedDisplay( display );
-  },
+  }
 
   /**
    * Removes a Display reference from our array.
@@ -5052,7 +5012,7 @@ inherit( PhetioObject, Node, {
    *
    * @param {Display} display
    */
-  removeRootedDisplay: function( display ) {
+  removeRootedDisplay( display ) {
     assert && assert( display instanceof scenery.Display );
     const index = _.indexOf( this._rootedDisplays, display );
     assert && assert( index !== -1, 'Cannot remove a Display from a Node if it was not there' );
@@ -5060,7 +5020,7 @@ inherit( PhetioObject, Node, {
 
     // Defined in ParallelDOM.js
     this._accessibleDisplaysInfo.onRemovedRootedDisplay( display );
-  },
+  }
 
   /*---------------------------------------------------------------------------*
    * Coordinate transform methods
@@ -5074,9 +5034,9 @@ inherit( PhetioObject, Node, {
    * @param {Vector2} point
    * @returns {Vector2}
    */
-  localToParentPoint: function( point ) {
+  localToParentPoint( point ) {
     return this._transform.transformPosition2( point );
-  },
+  }
 
   /**
    * Returns bounds transformed from our local coordinate frame into our parent coordinate frame. If it includes a
@@ -5087,9 +5047,9 @@ inherit( PhetioObject, Node, {
    * @param {Bounds2} bounds
    * @returns {Bounds2}
    */
-  localToParentBounds: function( bounds ) {
+  localToParentBounds( bounds ) {
     return this._transform.transformBounds2( bounds );
-  },
+  }
 
   /**
    * Returns a point transformed from our parent coordinate frame into our local coordinate frame. Applies the inverse
@@ -5099,9 +5059,9 @@ inherit( PhetioObject, Node, {
    * @param {Vector2} point
    * @returns {Vector2}
    */
-  parentToLocalPoint: function( point ) {
+  parentToLocalPoint( point ) {
     return this._transform.inversePosition2( point );
-  },
+  }
 
   /**
    * Returns bounds transformed from our parent coordinate frame into our local coordinate frame. If it includes a
@@ -5112,9 +5072,9 @@ inherit( PhetioObject, Node, {
    * @param {Bounds2} bounds
    * @returns {Bounds2}
    */
-  parentToLocalBounds: function( bounds ) {
+  parentToLocalBounds( bounds ) {
     return this._transform.inverseBounds2( bounds );
-  },
+  }
 
   /**
    * A mutable-optimized form of localToParentBounds() that will modify the provided bounds, transforming it from our
@@ -5124,9 +5084,9 @@ inherit( PhetioObject, Node, {
    * @param {Bounds2} bounds
    * @returns {Bounds2} - The same bounds object.
    */
-  transformBoundsFromLocalToParent: function( bounds ) {
+  transformBoundsFromLocalToParent( bounds ) {
     return bounds.transform( this._transform.getMatrix() );
-  },
+  }
 
   /**
    * A mutable-optimized form of parentToLocalBounds() that will modify the provided bounds, transforming it from our
@@ -5136,9 +5096,9 @@ inherit( PhetioObject, Node, {
    * @param {Bounds2} bounds
    * @returns {Bounds2} - The same bounds object.
    */
-  transformBoundsFromParentToLocal: function( bounds ) {
+  transformBoundsFromParentToLocal( bounds ) {
     return bounds.transform( this._transform.getInverse() );
-  },
+  }
 
   /**
    * Returns a new matrix (fresh copy) that would transform points from our local coordinate frame to the global
@@ -5150,7 +5110,7 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Matrix3}
    */
-  getLocalToGlobalMatrix: function() {
+  getLocalToGlobalMatrix() {
     let node = this; // eslint-disable-line consistent-this
 
     // we need to apply the transformations in the reverse order, so we temporarily store them
@@ -5172,7 +5132,7 @@ inherit( PhetioObject, Node, {
 
     // NOTE: always return a fresh copy, getGlobalToLocalMatrix depends on it to minimize instance usage!
     return matrix;
-  },
+  }
 
   /**
    * Returns a Transform3 that would transform things from our local coordinate frame to the global coordinate frame.
@@ -5184,9 +5144,9 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Transform3}
    */
-  getUniqueTransform: function() {
+  getUniqueTransform() {
     return new Transform3( this.getLocalToGlobalMatrix() );
-  },
+  }
 
   /**
    * Returns a new matrix (fresh copy) that would transform points from the global coordinate frame to our local
@@ -5198,9 +5158,9 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Matrix3}
    */
-  getGlobalToLocalMatrix: function() {
+  getGlobalToLocalMatrix() {
     return this.getLocalToGlobalMatrix().invert();
-  },
+  }
 
   /**
    * Transforms a point from our local coordinate frame to the global coordinate frame.
@@ -5212,7 +5172,7 @@ inherit( PhetioObject, Node, {
    * @param {Vector2} point
    * @returns {Vector2}
    */
-  localToGlobalPoint: function( point ) {
+  localToGlobalPoint( point ) {
     let node = this; // eslint-disable-line consistent-this
     const resultPoint = point.copy();
     while ( node ) {
@@ -5222,7 +5182,7 @@ inherit( PhetioObject, Node, {
       node = node._parents[ 0 ];
     }
     return resultPoint;
-  },
+  }
 
   /**
    * Transforms a point from the global coordinate frame to our local coordinate frame.
@@ -5234,7 +5194,7 @@ inherit( PhetioObject, Node, {
    * @param {Vector2} point
    * @returns {Vector2}
    */
-  globalToLocalPoint: function( point ) {
+  globalToLocalPoint( point ) {
     let node = this; // eslint-disable-line consistent-this
     // TODO: performance: test whether it is faster to get a total transform and then invert (won't compute individual inverses)
 
@@ -5253,7 +5213,7 @@ inherit( PhetioObject, Node, {
       transforms[ i ].getInverse().multiplyVector2( resultPoint );
     }
     return resultPoint;
-  },
+  }
 
   /**
    * Transforms bounds from our local coordinate frame to the global coordinate frame. If it includes a
@@ -5267,11 +5227,11 @@ inherit( PhetioObject, Node, {
    * @param {Bounds2} bounds
    * @returns {Bounds2}
    */
-  localToGlobalBounds: function( bounds ) {
+  localToGlobalBounds( bounds ) {
     // apply the bounds transform only once, so we can minimize the expansion encountered from multiple rotations
     // it also seems to be a bit faster this way
     return bounds.transformed( this.getLocalToGlobalMatrix() );
-  },
+  }
 
   /**
    * Transforms bounds from the global coordinate frame to our local coordinate frame. If it includes a
@@ -5285,10 +5245,10 @@ inherit( PhetioObject, Node, {
    * @param {Bounds2} bounds
    * @returns {Bounds2}
    */
-  globalToLocalBounds: function( bounds ) {
+  globalToLocalBounds( bounds ) {
     // apply the bounds transform only once, so we can minimize the expansion encountered from multiple rotations
     return bounds.transformed( this.getGlobalToLocalMatrix() );
-  },
+  }
 
   /**
    * Transforms a point from our parent coordinate frame to the global coordinate frame.
@@ -5300,10 +5260,10 @@ inherit( PhetioObject, Node, {
    * @param {Vector2} point
    * @returns {Vector2}
    */
-  parentToGlobalPoint: function( point ) {
+  parentToGlobalPoint( point ) {
     assert && assert( this.parents.length <= 1, 'parentToGlobalPoint unable to work for DAG' );
     return this.parents.length ? this.parents[ 0 ].localToGlobalPoint( point ) : point;
-  },
+  }
 
   /**
    * Transforms bounds from our parent coordinate frame to the global coordinate frame. If it includes a
@@ -5317,10 +5277,10 @@ inherit( PhetioObject, Node, {
    * @param {Bounds2} bounds
    * @returns {Bounds2}
    */
-  parentToGlobalBounds: function( bounds ) {
+  parentToGlobalBounds( bounds ) {
     assert && assert( this.parents.length <= 1, 'parentToGlobalBounds unable to work for DAG' );
     return this.parents.length ? this.parents[ 0 ].localToGlobalBounds( bounds ) : bounds;
-  },
+  }
 
   /**
    * Transforms a point from the global coordinate frame to our parent coordinate frame.
@@ -5332,10 +5292,10 @@ inherit( PhetioObject, Node, {
    * @param {Vector2} point
    * @returns {Vector2}
    */
-  globalToParentPoint: function( point ) {
+  globalToParentPoint( point ) {
     assert && assert( this.parents.length <= 1, 'globalToParentPoint unable to work for DAG' );
     return this.parents.length ? this.parents[ 0 ].globalToLocalPoint( point ) : point;
-  },
+  }
 
   /**
    * Transforms bounds from the global coordinate frame to our parent coordinate frame. If it includes a
@@ -5349,10 +5309,10 @@ inherit( PhetioObject, Node, {
    * @param {Bounds2} bounds
    * @returns {Bounds2}
    */
-  globalToParentBounds: function( bounds ) {
+  globalToParentBounds( bounds ) {
     assert && assert( this.parents.length <= 1, 'globalToParentBounds unable to work for DAG' );
     return this.parents.length ? this.parents[ 0 ].globalToLocalBounds( bounds ) : bounds;
-  },
+  }
 
   /**
    * Returns a bounding box for this Node (and its sub-tree) in the global coordinate frame.
@@ -5365,11 +5325,11 @@ inherit( PhetioObject, Node, {
    *
    * @returns {Bounds2}
    */
-  getGlobalBounds: function() {
+  getGlobalBounds() {
     assert && assert( this.parents.length <= 1, 'globalBounds unable to work for DAG' );
     return this.parentToGlobalBounds( this.getBounds() );
-  },
-  get globalBounds() { return this.getGlobalBounds(); },
+  }
+  get globalBounds() { return this.getGlobalBounds(); }
 
   /**
    * Returns the bounds of any other Node in our local coordinate frame.
@@ -5383,9 +5343,9 @@ inherit( PhetioObject, Node, {
    * @param {Node} node
    * @returns {Bounds2}
    */
-  boundsOf: function( node ) {
+  boundsOf( node ) {
     return this.globalToLocalBounds( node.getGlobalBounds() );
-  },
+  }
 
   /**
    * Returns the bounds of this Node in another node's local coordinate frame.
@@ -5399,9 +5359,9 @@ inherit( PhetioObject, Node, {
    * @param {Node} node
    * @returns {Bounds2}
    */
-  boundsTo: function( node ) {
+  boundsTo( node ) {
     return node.globalToLocalBounds( this.getGlobalBounds() );
-  },
+  }
 
   /*---------------------------------------------------------------------------*
    * Drawable handling
@@ -5414,10 +5374,10 @@ inherit( PhetioObject, Node, {
    * @param {Drawable} drawable
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  attachDrawable: function( drawable ) {
+  attachDrawable( drawable ) {
     this._drawables.push( drawable );
     return this; // allow chaining
-  },
+  }
 
   /**
    * Removes the drawable from our list of drawables to notify of visual changes.
@@ -5426,14 +5386,14 @@ inherit( PhetioObject, Node, {
    * @param {Drawable} drawable
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  detachDrawable: function( drawable ) {
+  detachDrawable( drawable ) {
     const index = _.indexOf( this._drawables, drawable );
 
     assert && assert( index >= 0, 'Invalid operation: trying to detach a non-referenced drawable' );
 
     this._drawables.splice( index, 1 ); // TODO: replace with a remove() function
     return this;
-  },
+  }
 
   /**
    * Scans the options object for key names that correspond to ES5 setters or other setter functions, and calls those
@@ -5458,7 +5418,7 @@ inherit( PhetioObject, Node, {
    * @param {Object} [options]
    * @returns {Node} - Returns 'this' reference, for chaining
    */
-  mutate: function( options ) {
+  mutate( options ) {
 
     if ( !options ) {
       return this;
@@ -5467,10 +5427,10 @@ inherit( PhetioObject, Node, {
     assert && assert( Object.getPrototypeOf( options ) === Object.prototype,
       'Extra prototype on Node options object is a code smell' );
 
-    assert && assert( _.filter( [ 'translation', 'x', 'left', 'right', 'centerX', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom' ], function( key ) { return options[ key ] !== undefined; } ).length <= 1,
+    assert && assert( _.filter( [ 'translation', 'x', 'left', 'right', 'centerX', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom' ], key => options[ key ] !== undefined ).length <= 1,
       'More than one mutation on this Node set the x component, check ' + Object.keys( options ).join( ',' ) );
 
-    assert && assert( _.filter( [ 'translation', 'y', 'top', 'bottom', 'centerY', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom' ], function( key ) { return options[ key ] !== undefined; } ).length <= 1,
+    assert && assert( _.filter( [ 'translation', 'y', 'top', 'bottom', 'centerY', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom' ], key => options[ key ] !== undefined ).length <= 1,
       'More than one mutation on this Node set the y component, check ' + Object.keys( options ).join( ',' ) );
 
     _.each( this._mutatorKeys, key => {
@@ -5494,7 +5454,7 @@ inherit( PhetioObject, Node, {
     this.initializePhetioObject( { phetioType: Node.NodeIO, phetioState: false }, options );
 
     return this; // allow chaining
-  },
+  }
 
   /**
    * @param {Object} baseOptions
@@ -5502,7 +5462,7 @@ inherit( PhetioObject, Node, {
    * @override
    * @protected
    */
-  initializePhetioObject: function( baseOptions, config ) {
+  initializePhetioObject( baseOptions, config ) {
 
     config = merge( {
 
@@ -5520,7 +5480,7 @@ inherit( PhetioObject, Node, {
     // Track this, so we only override our visibleProperty once.
     const wasInstrumented = this.isPhetioInstrumented();
 
-    PhetioObject.prototype.initializePhetioObject.call( this, baseOptions, config );
+    super.initializePhetioObject( baseOptions, config );
 
     if ( Tandem.PHET_IO_ENABLED && !wasInstrumented && this.isPhetioInstrumented() ) {
 
@@ -5563,7 +5523,7 @@ inherit( PhetioObject, Node, {
         }, config.enabledPropertyOptions ) )
       );
     }
-  },
+  }
 
   /**
    * Override for extra information in the debugging output (from Display.getDebugHTML()).
@@ -5571,21 +5531,21 @@ inherit( PhetioObject, Node, {
    *
    * @returns {string}
    */
-  getDebugHTMLExtras: function() {
+  getDebugHTMLExtras() {
     return '';
-  },
+  }
 
   /**
    * Makes this Node's subtree available for inspection.
    * @public
    */
-  inspect: function() {
+  inspect() {
     localStorage.scenerySnapshot = JSON.stringify( {
       type: 'Subtree',
       rootNodeId: this.id,
       nodes: scenery.serializeConnectedNodes( this )
     } );
-  },
+  }
 
   /**
    * Returns a debugging string that is an attempted serialization of this node's sub-tree.
@@ -5594,9 +5554,9 @@ inherit( PhetioObject, Node, {
    * @param {string} spaces - Whitespace to add
    * @param {boolean} [includeChildren]
    */
-  toString: function( spaces, includeChildren ) {
+  toString( spaces, includeChildren ) {
     return this.constructor.name + '#' + this.id;
-  },
+  }
 
   /**
    * Performs checks to see if the internal state of Instance references is correct at a certain point in/after the
@@ -5605,7 +5565,7 @@ inherit( PhetioObject, Node, {
    *
    * @param {Display} display
    */
-  auditInstanceSubtreeForDisplay: function( display ) {
+  auditInstanceSubtreeForDisplay( display ) {
     if ( assertSlow ) {
       const numInstances = this._instances.length;
       for ( let i = 0; i < numInstances; i++ ) {
@@ -5617,11 +5577,11 @@ inherit( PhetioObject, Node, {
       }
 
       // audit all of the children
-      this.children.forEach( function( child ) {
+      this.children.forEach( child => {
         child.auditInstanceSubtreeForDisplay( display );
       } );
     }
-  },
+  }
 
   /**
    * When we add or remove any number of bounds listeners, we want to increment/decrement internal information.
@@ -5629,16 +5589,16 @@ inherit( PhetioObject, Node, {
    *
    * @param {number} deltaQuantity - If positive, the number of listeners being added, otherwise the number removed
    */
-  onBoundsListenersAddedOrRemoved: function( deltaQuantity ) {
+  onBoundsListenersAddedOrRemoved( deltaQuantity ) {
     this.changeBoundsEventCount( deltaQuantity );
     this._boundsEventSelfCount += deltaQuantity;
-  },
+  }
 
   /**
    * Disposes the node, releasing all references that it maintained.
    * @public
    */
-  dispose: function() {
+  dispose() {
 
     // remove all accessibility input listeners
     this.disposeAccessibility();
@@ -5653,8 +5613,8 @@ inherit( PhetioObject, Node, {
     this._visibleProperty.dispose();
 
     // Tear-down in the reverse order Node was created
-    PhetioObject.prototype.dispose.call( this );
-  },
+    super.dispose();
+  }
 
   /**
    * Disposes this Node and all other descendant nodes.
@@ -5663,7 +5623,7 @@ inherit( PhetioObject, Node, {
    * NOTE: Use with caution, as you should not re-use any Node touched by this. Not compatible with most DAG
    *       techniques.
    */
-  disposeSubtree: function() {
+  disposeSubtree() {
     if ( !this.isDisposed ) {
       // makes a copy before disposing
       const children = this.children;
@@ -5675,9 +5635,7 @@ inherit( PhetioObject, Node, {
       }
     }
   }
-}, {
-  // @public {Object} - A mapping of all of the default options provided to Node
-  DEFAULT_OPTIONS: DEFAULT_OPTIONS,
+
 
   /**
    * A default for getTrails() searches, returns whether the Node has no parents.
@@ -5686,14 +5644,55 @@ inherit( PhetioObject, Node, {
    * @param {Node} node
    * @returns {boolean}
    */
-  defaultTrailPredicate: function( node ) {
+  static defaultTrailPredicate( node ) {
     return node._parents.length === 0;
-  },
+  }
 
-  defaultLeafTrailPredicate: function( node ) {
+  /**
+   * A default for getLeafTrails() searches, returns whether the Node has no parents.
+   * @public
+   *
+   * @param {Node} node
+   * @returns {boolean}
+   */
+  static defaultLeafTrailPredicate( node ) {
     return node._children.length === 0;
   }
-} );
+}
+
+/**
+ * {Array.<string>} - This is an array of property (setter) names for Node.mutate(), which are also used when creating
+ * Nodes with parameter objects.
+ * @protected
+ *
+ * E.g. new scenery.Node( { x: 5, rotation: 20 } ) will create a Path, and apply setters in the order below
+ * (node.x = 5; node.rotation = 20)
+ *
+ * Some special cases exist (for function names). new scenery.Node( { scale: 2 } ) will actually call
+ * node.scale( 2 ).
+ *
+ * The order below is important! Don't change this without knowing the implications.
+ *
+ * NOTE: Translation-based mutators come before rotation/scale, since typically we think of their operations
+ *       occurring "after" the rotation / scaling
+ * NOTE: left/right/top/bottom/centerX/centerY are at the end, since they rely potentially on rotation / scaling
+ *       changes of bounds that may happen beforehand
+ */
+Node.prototype._mutatorKeys = NODE_OPTION_KEYS;
+
+/**
+ * {Array.<String>} - List of all dirty flags that should be available on drawables created from this Node (or
+ *                    subtype). Given a flag (e.g. radius), it indicates the existence of a function
+ *                    drawable.markDirtyRadius() that will indicate to the drawable that the radius has changed.
+ * @public (scenery-internal)
+ *
+ * Should be overridden by subtypes.
+ */
+Node.prototype.drawableMarkFlags = [];
+// @public {Object} - A mapping of all of the default options provided to Node
+Node.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
+
+scenery.register( 'Node', Node );
 
 // Node is composed with this feature of Interactive Descriptions
 ParallelDOM.compose( Node );
