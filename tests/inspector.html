@@ -60,53 +60,57 @@
     }
   } );
 
-  function Divider( preferredBoundsProperty, orientation, initialSeparatorLocation, pushFromMax ) {
-    var self = this;
+  class Divider extends scenery.Rectangle {
+    constructor( preferredBoundsProperty, orientation, initialSeparatorLocation, pushFromMax ) {
 
-    this.minBoundsProperty = new axon.Property( new dot.Bounds2( 0, 0, 0, 0 ) );
-    this.maxBoundsProperty = new axon.Property( new dot.Bounds2( 0, 0, 0, 0 ) );
+      super( {
+        fill: '#666',
+        cursor: orientation === 'horizontal' ? 'w-resize' : 'n-resize'
+      } );
 
-    this.preferredBoundsProperty = preferredBoundsProperty;
-    this.orientation = orientation;
-    this.primaryCoordinate = orientation === 'horizontal' ? 'x' : 'y';
-    this.secondaryCoordinate = orientation === 'horizontal' ? 'y' : 'x';
-    this.primaryName = orientation === 'horizontal' ? 'width' : 'height';
-    this.secondaryName = orientation === 'horizontal' ? 'height' : 'width';
-    this.primaryRectName = orientation === 'horizontal' ? 'rectWidth' : 'rectHeight';
-    this.secondaryRectName = orientation === 'horizontal' ? 'rectHeight' : 'rectWidth';
-    this.minCoordinate = orientation === 'horizontal' ? 'left' : 'top';
-    this.maxCoordinate = orientation === 'horizontal' ? 'right' : 'bottom';
-    this.centerName = orientation === 'horizontal' ? 'centerX' : 'centerY';
-    this.minimum = 100;
+      this.minBoundsProperty = new axon.Property( new dot.Bounds2( 0, 0, 0, 0 ) );
+      this.maxBoundsProperty = new axon.Property( new dot.Bounds2( 0, 0, 0, 0 ) );
 
-    this.separatorLocation = initialSeparatorLocation;
+      this.preferredBoundsProperty = preferredBoundsProperty;
+      this.orientation = orientation;
+      this.primaryCoordinate = orientation === 'horizontal' ? 'x' : 'y';
+      this.secondaryCoordinate = orientation === 'horizontal' ? 'y' : 'x';
+      this.primaryName = orientation === 'horizontal' ? 'width' : 'height';
+      this.secondaryName = orientation === 'horizontal' ? 'height' : 'width';
+      this.primaryRectName = orientation === 'horizontal' ? 'rectWidth' : 'rectHeight';
+      this.secondaryRectName = orientation === 'horizontal' ? 'rectHeight' : 'rectWidth';
+      this.minCoordinate = orientation === 'horizontal' ? 'left' : 'top';
+      this.maxCoordinate = orientation === 'horizontal' ? 'right' : 'bottom';
+      this.centerName = orientation === 'horizontal' ? 'centerX' : 'centerY';
+      this.minimum = 100;
 
-    scenery.Rectangle.call( this, {
-      fill: '#666',
-      cursor: orientation === 'horizontal' ? 'w-resize' : 'n-resize'
-    } );
-    this[ this.primaryRectName ] = 2;
+      this.separatorLocation = initialSeparatorLocation;
 
-    var dragListener = new scenery.DragListener( {
-      drag: function( event ) {
-        self.separatorLocation = dragListener.parentPoint[ self.primaryCoordinate ];
-        self.layout();
-      }
-    } );
-    this.addInputListener( dragListener );
+      this[ this.primaryRectName ] = 2;
 
-    preferredBoundsProperty.link( function( newPreferredBounds, oldPreferredBounds ) {
-      if ( pushFromMax && oldPreferredBounds ) {
-        self.separatorLocation += newPreferredBounds[ self.maxCoordinate ] - oldPreferredBounds[ self.maxCoordinate ];
-      }
-      if ( !pushFromMax && oldPreferredBounds ) {
-        self.separatorLocation += newPreferredBounds[ self.minCoordinate ] - oldPreferredBounds[ self.minCoordinate ];
-      }
-      self.layout();
-    } );
-  }
-  phetCore.inherit( scenery.Rectangle, Divider, {
-    layout: function() {
+      var dragListener = new scenery.DragListener( {
+        drag: event => {
+          this.separatorLocation = dragListener.parentPoint[ this.primaryCoordinate ];
+          this.layout();
+        }
+      } );
+      this.addInputListener( dragListener );
+
+      preferredBoundsProperty.link( ( newPreferredBounds, oldPreferredBounds ) => {
+        if ( pushFromMax && oldPreferredBounds ) {
+          this.separatorLocation += newPreferredBounds[ this.maxCoordinate ] - oldPreferredBounds[ this.maxCoordinate ];
+        }
+        if ( !pushFromMax && oldPreferredBounds ) {
+          this.separatorLocation += newPreferredBounds[ this.minCoordinate ] - oldPreferredBounds[ this.minCoordinate ];
+        }
+        this.layout();
+      } );
+    }
+
+    /**
+     * @public
+     */
+    layout() {
       var preferredBounds = this.preferredBoundsProperty.value;
       var separatorLocation = this.separatorLocation;
 
@@ -146,180 +150,182 @@
       this.minBoundsProperty.value = minBounds;
       this.maxBoundsProperty.value = maxBounds;
     }
-  } );
-
-  function TreeNode( displayNode, trail ) {
-    scenery.Node.call( this );
-
-    var self = this;
-
-    this.displayNode = displayNode;
-    this.trail = trail;
-
-    displayNode.addInputListener( {
-      over: function( event ) {
-        if ( event.target === displayNode ) {
-          activeTreeNodeProperty.value = self;
-          focusActive();
-        }
-      },
-      out: function( event ) {
-        if ( event.target === displayNode ) {
-          activeTreeNodeProperty.value = null;
-          focusSelected();
-        }
-      },
-      down: function( event ) {
-        if ( event.target === displayNode ) {
-          selectedTreeNodeProperty.value = self;
-          focusSelected();
-        }
-      }
-    } );
-
-    this.expandedProperty = new axon.Property( true );
-
-    var serialization = displayNode._serialization;
-    var isVisible = _.every( trail.nodes, function( node ) {
-      return node._serialization.options.visible !== false;
-    } );
-
-    var selfNode = new scenery.HBox( {
-      spacing: 5
-    } );
-
-    var buttonSize = 12;
-    var expandButton = new scenery.Rectangle( -buttonSize / 2, -buttonSize / 2, buttonSize, buttonSize, {
-      children: [
-        new scenery.Path( kite.Shape.regularPolygon( 3, buttonSize / 2.5 ), {
-          fill: '#444'
-        } )
-      ],
-      visible: false,
-      cursor: 'pointer'
-    } );
-    expandButton.addInputListener( new scenery.FireListener( {
-      fire: function() {
-        self.expandedProperty.toggle();
-      }
-    } ) );
-    selfNode.addChild( expandButton );
-
-    var TREE_FONT = new scenery.Font( { size: 12 } );
-
-    selfNode.addChild( new scenery.Text( serialization.name, {
-      font: TREE_FONT,
-      pickable: false,
-      fill: isVisible ? '#000' : '#60a'
-    } ) );
-    if ( serialization.name !== serialization.type && serialization.type !== 'Node' ) {
-      selfNode.addChild( new scenery.Text( '(' + serialization.type + ')', {
-        font: TREE_FONT,
-        pickable: false,
-        fill: '#666'
-      } ) );
-    }
-    if ( serialization.type === 'Text' ) {
-      selfNode.addChild( new scenery.Text( '"' + displayNode.text + '"', {
-        font: TREE_FONT,
-        pickable: false,
-        fill: '#666'
-      } ) );
-    }
-
-    var selfBackground = this.selfBackground = scenery.Rectangle.bounds( selfNode.bounds, {
-      children: [ selfNode ],
-      cursor: 'pointer',
-      fill: new axon.DerivedProperty( [ selectedTreeNodeProperty, activeTreeNodeProperty ], function( selected, active ) {
-        if ( self === selected ) {
-          return 'rgba(0,128,255,0.4)';
-        }
-        else if ( self === active ) {
-          return 'rgba(0,128,255,0.2)';
-        }
-        else {
-          return 'transparent';
-        }
-      } )
-    } );
-    selfBackground.addInputListener( {
-      enter: function( event ) {
-        activeTreeNodeProperty.value = self;
-      },
-      exit: function( event ) {
-        activeTreeNodeProperty.value = null;
-      }
-    } );
-    selfBackground.addInputListener( new scenery.FireListener( {
-      fire: function() {
-        selectedTreeNodeProperty.value = self;
-      }
-    } ) );
-    this.addChild( selfBackground );
-
-    this.childTreeNodes = displayNode.children.filter( function( child ) {
-      return !!child._serialization;
-    } ).map( function( child, index ) {
-      return new TreeNode( child, trail.copy().addDescendant( child, index ) );
-    } );
-
-    var childrenNode = new scenery.VBox( {
-      spacing: 0,
-      align: 'left',
-      children: this.childTreeNodes
-    } );
-
-    var column = new scenery.Rectangle( {
-      rectWidth: 2,
-      rectHeight: 5,
-      fill: 'rgba(0,0,0,0.1)'
-    } );
-
-    var expandedNode = new scenery.Node( {
-      children: [
-        childrenNode,
-        // column
-      ]
-    } );
-
-    if ( childrenNode.bounds.isFinite() ) {
-      childrenNode.left = selfNode.left + 13;
-      childrenNode.top = selfNode.bottom;
-      column.centerX = selfNode.left + buttonSize / 2;
-      column.top = selfNode.bottom;
-
-      expandButton.visible = true;
-      this.addChild( expandedNode );
-
-      self.expandedProperty.link( function( expanded ) {
-        expandButton.rotation = expanded ? Math.PI / 2 : 0;
-        if ( expanded && !self.hasChild( expandedNode ) ) {
-          self.addChild( expandedNode );
-        }
-        if ( !expanded && self.hasChild( expandedNode ) ) {
-          self.removeChild( expandedNode );
-        }
-      } );
-
-      childrenNode.boundsProperty.lazyLink( function() {
-        column.rectHeight = childrenNode.height;
-      } );
-    }
   }
-  phetCore.inherit( scenery.Node, TreeNode, {
-    expandRecusively: function() {
+
+  class TreeNode extends scenery.Node {
+    constructor( displayNode, trail ) {
+      super();
+
+      var self = this;
+
+      this.displayNode = displayNode;
+      this.trail = trail;
+
+      displayNode.addInputListener( {
+        over: function( event ) {
+          if ( event.target === displayNode ) {
+            activeTreeNodeProperty.value = self;
+            focusActive();
+          }
+        },
+        out: function( event ) {
+          if ( event.target === displayNode ) {
+            activeTreeNodeProperty.value = null;
+            focusSelected();
+          }
+        },
+        down: function( event ) {
+          if ( event.target === displayNode ) {
+            selectedTreeNodeProperty.value = self;
+            focusSelected();
+          }
+        }
+      } );
+
+      this.expandedProperty = new axon.Property( true );
+
+      var serialization = displayNode._serialization;
+      var isVisible = _.every( trail.nodes, function( node ) {
+        return node._serialization.options.visible !== false;
+      } );
+
+      var selfNode = new scenery.HBox( {
+        spacing: 5
+      } );
+
+      var buttonSize = 12;
+      var expandButton = new scenery.Rectangle( -buttonSize / 2, -buttonSize / 2, buttonSize, buttonSize, {
+        children: [
+          new scenery.Path( kite.Shape.regularPolygon( 3, buttonSize / 2.5 ), {
+            fill: '#444'
+          } )
+        ],
+        visible: false,
+        cursor: 'pointer'
+      } );
+      expandButton.addInputListener( new scenery.FireListener( {
+        fire: function() {
+          self.expandedProperty.toggle();
+        }
+      } ) );
+      selfNode.addChild( expandButton );
+
+      var TREE_FONT = new scenery.Font( { size: 12 } );
+
+      selfNode.addChild( new scenery.Text( serialization.name, {
+        font: TREE_FONT,
+        pickable: false,
+        fill: isVisible ? '#000' : '#60a'
+      } ) );
+      if ( serialization.name !== serialization.type && serialization.type !== 'Node' ) {
+        selfNode.addChild( new scenery.Text( '(' + serialization.type + ')', {
+          font: TREE_FONT,
+          pickable: false,
+          fill: '#666'
+        } ) );
+      }
+      if ( serialization.type === 'Text' ) {
+        selfNode.addChild( new scenery.Text( '"' + displayNode.text + '"', {
+          font: TREE_FONT,
+          pickable: false,
+          fill: '#666'
+        } ) );
+      }
+
+      var selfBackground = this.selfBackground = scenery.Rectangle.bounds( selfNode.bounds, {
+        children: [ selfNode ],
+        cursor: 'pointer',
+        fill: new axon.DerivedProperty( [ selectedTreeNodeProperty, activeTreeNodeProperty ], function( selected, active ) {
+          if ( self === selected ) {
+            return 'rgba(0,128,255,0.4)';
+          }
+          else if ( self === active ) {
+            return 'rgba(0,128,255,0.2)';
+          }
+          else {
+            return 'transparent';
+          }
+        } )
+      } );
+      selfBackground.addInputListener( {
+        enter: function( event ) {
+          activeTreeNodeProperty.value = self;
+        },
+        exit: function( event ) {
+          activeTreeNodeProperty.value = null;
+        }
+      } );
+      selfBackground.addInputListener( new scenery.FireListener( {
+        fire: function() {
+          selectedTreeNodeProperty.value = self;
+        }
+      } ) );
+      this.addChild( selfBackground );
+
+      this.childTreeNodes = displayNode.children.filter( function( child ) {
+        return !!child._serialization;
+      } ).map( function( child, index ) {
+        return new TreeNode( child, trail.copy().addDescendant( child, index ) );
+      } );
+
+      var childrenNode = new scenery.VBox( {
+        spacing: 0,
+        align: 'left',
+        children: this.childTreeNodes
+      } );
+
+      var column = new scenery.Rectangle( {
+        rectWidth: 2,
+        rectHeight: 5,
+        fill: 'rgba(0,0,0,0.1)'
+      } );
+
+      var expandedNode = new scenery.Node( {
+        children: [
+          childrenNode,
+          // column
+        ]
+      } );
+
+      if ( childrenNode.bounds.isFinite() ) {
+        childrenNode.left = selfNode.left + 13;
+        childrenNode.top = selfNode.bottom;
+        column.centerX = selfNode.left + buttonSize / 2;
+        column.top = selfNode.bottom;
+
+        expandButton.visible = true;
+        this.addChild( expandedNode );
+
+        self.expandedProperty.link( function( expanded ) {
+          expandButton.rotation = expanded ? Math.PI / 2 : 0;
+          if ( expanded && !self.hasChild( expandedNode ) ) {
+            self.addChild( expandedNode );
+          }
+          if ( !expanded && self.hasChild( expandedNode ) ) {
+            self.removeChild( expandedNode );
+          }
+        } );
+
+        childrenNode.boundsProperty.lazyLink( function() {
+          column.rectHeight = childrenNode.height;
+        } );
+      }
+    }
+
+    expandRecusively() {
       this.expandedProperty.value = true;
-      this.childTreeNodes.forEach( function( treeNode ) {
+      this.childTreeNodes.forEach( treeNode => {
         treeNode.expandRecusively();
       } );
-    },
-    collapseRecursively: function() {
+    }
+
+    collapseRecursively() {
       this.expandedProperty.value = false;
-      this.childTreeNodes.forEach( function( treeNode ) {
+      this.childTreeNodes.forEach( treeNode => {
         treeNode.collapseRecursively();
       } );
     }
-  } );
+  }
 
   var rightWidth = 600;
   var bottomHeight = 0.22 * window.innerHeight;

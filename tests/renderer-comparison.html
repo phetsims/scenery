@@ -288,59 +288,59 @@
           height: 200,
           draw: function( scene, updateDisplayCallback ) {
 
-            function LinesNode( options ) {
-              scenery.WebGLNode.call( this, LinesPainter, options );
+            class LinesNode extends scenery.WebGLNode {
+              constructor( options ) {
+                super( LinesPainter, options );
+              }
             }
 
-            var LinesNode = phetCore.inherit( scenery.WebGLNode, LinesNode, {} );
+            class LinesPainter {
+              constructor( gl, node ) {
+                this.gl = gl;
+                this.node = node;
 
-            function LinesPainter( gl, node ) {
-              this.gl = gl;
-              this.node = node;
+                // Simple example for custom shader
+                var lineVertexShaderSource = [
+                  // Position
+                  'attribute vec3 aPosition;',
+                  'uniform mat3 uModelViewMatrix;',
+                  'uniform mat3 uProjectionMatrix;',
 
-              // Simple example for custom shader
-              var lineVertexShaderSource = [
-                // Position
-                'attribute vec3 aPosition;',
-                'uniform mat3 uModelViewMatrix;',
-                'uniform mat3 uProjectionMatrix;',
+                  'void main( void ) {',
+                  // homogeneous model-view transformation
+                  '  vec3 view = uModelViewMatrix * vec3( aPosition.xy, 1 );',
+                  // homogeneous map to to normalized device coordinates
+                  '  vec3 ndc = uProjectionMatrix * vec3( view.xy, 1 );',
+                  // combine with the z coordinate specified
+                  '  gl_Position = vec4( ndc.xy, aPosition.z, 1.0 );',
+                  '}'
+                ].join( '\n' );
 
-                'void main( void ) {',
-                // homogeneous model-view transformation
-                '  vec3 view = uModelViewMatrix * vec3( aPosition.xy, 1 );',
-                // homogeneous map to to normalized device coordinates
-                '  vec3 ndc = uProjectionMatrix * vec3( view.xy, 1 );',
-                // combine with the z coordinate specified
-                '  gl_Position = vec4( ndc.xy, aPosition.z, 1.0 );',
-                '}'
-              ].join( '\n' );
+                // Simple demo for custom shader
+                var lineFragmentShaderSource = [
+                  'precision mediump float;',
 
-              // Simple demo for custom shader
-              var lineFragmentShaderSource = [
-                'precision mediump float;',
+                  // Returns the color from the vertex shader
+                  'void main( void ) {',
+                  '  gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );',
+                  '}'
+                ].join( '\n' );
 
-                // Returns the color from the vertex shader
-                'void main( void ) {',
-                '  gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );',
-                '}'
-              ].join( '\n' );
+                this.shaderProgram = new ShaderProgram( gl, lineVertexShaderSource, lineFragmentShaderSource, {
+                  attributes: [ 'aPosition' ],
+                  uniforms: [ 'uModelViewMatrix', 'uProjectionMatrix' ]
+                } );
 
-              this.shaderProgram = new ShaderProgram( gl, lineVertexShaderSource, lineFragmentShaderSource, {
-                attributes: [ 'aPosition' ],
-                uniforms: [ 'uModelViewMatrix', 'uProjectionMatrix' ]
-              } );
+                this.vertexBuffer = gl.createBuffer();
 
-              this.vertexBuffer = gl.createBuffer();
+                gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
+                gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [
+                  0, 0, 0.1,
+                  50, 30, 0.1
+                ] ), gl.STATIC_DRAW );
+              }
 
-              gl.bindBuffer( gl.ARRAY_BUFFER, this.vertexBuffer );
-              gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [
-                0, 0, 0.1,
-                50, 30, 0.1
-              ] ), gl.STATIC_DRAW );
-            }
-
-            phetCore.inherit( Object, LinesPainter, {
-              paint: function( modelViewMatrix, projectionMatrix ) {
+              paint( modelViewMatrix, projectionMatrix ) {
                 var gl = this.gl;
                 var shaderProgram = this.shaderProgram;
 
@@ -357,15 +357,15 @@
                 shaderProgram.unuse();
 
                 return scenery.WebGLNode.PAINTED_SOMETHING;
-              },
+              }
 
-              dispose: function() {
+              dispose() {
                 this.shaderProgram.dispose();
                 this.gl.deleteBuffer( this.vertexBuffer );
 
                 this.shaderProgram = null;
               }
-            } );
+            }
 
             var linesNode = new LinesNode( {
               canvasBounds: new dot.Bounds2( 0, 0, 100, 100 ),
