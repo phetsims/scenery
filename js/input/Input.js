@@ -197,6 +197,10 @@ const domEventPropertiesToSerialize = {
 const PDOM_UNPICKABLE_EVENTS = [ 'focus', 'blur', 'focusin', 'focusout' ];
 const TARGET_SUBSTITUTE_KEY = 'targetSubstitute';
 
+// A bit more than the maximum amount of time that iOS 14 VoiceOver was observed to delay between
+// sending a mouseup event and a click event.
+const PDOM_CLICK_DELAY = 80;
+
 class Input {
   /**
    * @param {Display} display
@@ -252,6 +256,12 @@ class Input {
     // @public {boolean} - Whether we are currently firing events. We need to track this to handle re-entrant cases
     // like https://github.com/phetsims/balloons-and-static-electricity/issues/406.
     this.currentlyFiringEvents = false;
+
+    // @private {number} - in miliseconds, the DOMEvent timeStamp when we receive a logical up event.
+    // We can compare this to the timeStamp on a click vent to filter out the click events
+    // when some screen readers send both down/up events AND click events to the target
+    // element, see https://github.com/phetsims/scenery/issues/1094
+    this.upTimeStamp = 0;
 
     ////////////////////////////////////////////////////
     // Declare the Actions that send scenery input events to the PhET-iO data stream.  Note they use the default value
@@ -629,8 +639,14 @@ class Input {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'click(' + Input.debugText( null, event ) + ');' );
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-        const trail = this.updateTrailForPDOMDispatch( event );
-        this.dispatchA11yEvent( trail, 'click', event, true );
+        // Only dispatch the event if the click did not happen rapidly after an up event. It is
+        // likely that the screen reader dispatched both pointer AND click events in this case, and
+        // we only want to respond to one or the other. See
+        // https://github.com/phetsims/scenery/issues/1094
+        if ( event.timeStamp - this.upTimeStamp > PDOM_CLICK_DELAY ) {
+          const trail = this.updateTrailForPDOMDispatch( event );
+          this.dispatchA11yEvent( trail, 'click', event, true );
+        }
 
         sceneryLog && sceneryLog.Input && sceneryLog.pop();
       }, {
@@ -1179,11 +1195,7 @@ class Input {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchStart(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-
-    // ignore this touch event if it came from the PDOM
-    if ( !this.isTargetUnderPDOM( event.target ) ) {
-      this.touchStartAction.execute( id, point, event );
-    }
+    this.touchStartAction.execute( id, point, event );
 
     sceneryLog && sceneryLog.Input && sceneryLog.pop();
   }
@@ -1203,10 +1215,7 @@ class Input {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchEnd(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-    // ignore this touch event if it came from the PDOM
-    if ( !this.isTargetUnderPDOM( event.target ) ) {
-      this.touchEndAction.execute( id, point, event );
-    }
+    this.touchEndAction.execute( id, point, event );
 
     sceneryLog && sceneryLog.Input && sceneryLog.pop();
   }
@@ -1539,12 +1548,7 @@ class Input {
    */
   upEvent( pointer, event, pointChanged ) {
 
-    // if the event target is within the PDOM the AT is sending a fake pointer event to the document - do not
-    // dispatch this since the PDOM should only handle Input.A11Y_EVENT_TYPES, and all other pointer input should
-    // go through the Display div. Otherwise, activation will be duplicated when we handle pointer and PDOM events
-    if ( this.isTargetUnderPDOM( event.target ) ) {
-      return;
-    }
+    this.upTimeStamp = event.timeStamp;
 
     sceneryLog && sceneryLog.Input && sceneryLog.Input( 'upEvent ' + pointer.toString() + ' changed:' + pointChanged );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
@@ -1574,13 +1578,6 @@ class Input {
    * @param {boolean} pointChanged
    */
   downEvent( pointer, event, pointChanged ) {
-
-    // if the event target is within the PDOM the AT is sending a fake pointer event to the document - do not
-    // dispatch this since the PDOM should only handle Input.A11Y_EVENT_TYPES, and all other pointer input should
-    // go through the Display div. Otherwise, activation will be duplicated when we handle pointer and PDOM events
-    if ( this.isTargetUnderPDOM( event.target ) ) {
-      return;
-    }
 
     sceneryLog && sceneryLog.Input && sceneryLog.Input( 'downEvent ' + pointer.toString() + ' changed:' + pointChanged );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
