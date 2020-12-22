@@ -1548,13 +1548,20 @@ class Input {
    */
   upEvent( pointer, event, pointChanged ) {
 
-    this.upTimeStamp = event.timeStamp;
+    // if the event target is within the PDOM the AT is sending a fake pointer event to the document - do not
+    // dispatch this since the PDOM should only handle Input.A11Y_EVENT_TYPES, and all other pointer input should
+    // go through the Display div. Otherwise, activation will be duplicated when we handle pointer and PDOM events
+    if ( this.isTargetUnderPDOM( event.target ) ) {
+      return;
+    }
 
     sceneryLog && sceneryLog.Input && sceneryLog.Input( 'upEvent ' + pointer.toString() + ' changed:' + pointChanged );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
 
     assert && assert( pointer instanceof Pointer );
     assert && assert( typeof pointChanged === 'boolean' );
+
+    this.upTimeStamp = event.timeStamp;
 
     // We'll use this trail for the entire dispatch of this event.
     const eventTrail = this.branchChangeEvents( pointer, event, pointChanged );
@@ -1578,6 +1585,13 @@ class Input {
    * @param {boolean} pointChanged
    */
   downEvent( pointer, event, pointChanged ) {
+
+    // if the event target is within the PDOM the AT is sending a fake pointer event to the document - do not
+    // dispatch this since the PDOM should only handle Input.A11Y_EVENT_TYPES, and all other pointer input should
+    // go through the Display div. Otherwise, activation will be duplicated when we handle pointer and PDOM events
+    if ( this.isTargetUnderPDOM( event.target ) ) {
+      return;
+    }
 
     sceneryLog && sceneryLog.Input && sceneryLog.Input( 'downEvent ' + pointer.toString() + ' changed:' + pointChanged );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
