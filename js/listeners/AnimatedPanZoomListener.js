@@ -129,7 +129,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
     const displayFocusListener = focus => {
       if ( focus ) {
         const node = focus.trail.lastNode();
-        if ( !this._panBounds.containsBounds( node.globalBounds ) ) {
+        if ( this._panBounds.isFinite() && !this._panBounds.containsBounds( node.globalBounds ) ) {
           this.panToNode( node );
         }
       }
@@ -698,6 +698,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * @param {Node} node
    */
   panToNode( node ) {
+    assert && assert( this._panBounds.isFinite(), 'panBounds should be defined when panning.' );
+
     const globalPosition = node.globalBounds.center;
 
     // the center of the Node in the local coordinate frame of the target node
@@ -853,6 +855,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * @param {Vector2} destination
    */
   setDestinationPosition( destination ) {
+    assert && assert( this.sourcePosition !== null, 'initializePositions must be called at least once before animating' );
 
     // limit destination position to be within the available bounds pan bounds
     scratchBounds.setMinMax(
@@ -862,8 +865,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
       this.sourcePosition.y + this._panBounds.bottom - this._transformedPanBounds.bottom
     );
 
-    const constrainedDestination = scratchBounds.closestPointTo( destination );
-    this.destinationPosition = constrainedDestination;
+    this.destinationPosition = scratchBounds.closestPointTo( destination );
   }
 
   /**
@@ -895,8 +897,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
     const maxScaleFactor = 5;
 
     // speed falls away exponentially as we get closer to our destination so that the draft doesn't go for too long
-    const translationSpeed = scaleDistance * ( 1 / ( Math.pow( scaleDistance, 2 ) - Math.pow( maxScaleFactor, 2 ) ) + maxScaleFactor );
-    return translationSpeed;
+    return scaleDistance * ( 1 / ( Math.pow( scaleDistance, 2 ) - Math.pow( maxScaleFactor, 2 ) ) + maxScaleFactor );
   }
 
   /**
