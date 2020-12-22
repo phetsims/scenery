@@ -200,34 +200,19 @@ class KeyboardFuzzer {
    * Taken from example in http://output.jsbin.com/awenaq/3,
    * @param {string} event
    * @param {HTMLElement} element
-   * @param {number} [keycode]
+   * @param {number} keycode
    * @private
    */
-  triggerDOMEvent( event, element, keyCode ) {
-    const eventObj = document.createEventObject ?
-                     document.createEventObject() : document.createEvent( 'Events' );
+  triggerDOMEvent( event, element, keycode ) {
+    const eventObj = new KeyboardEvent( event, {
+      code: keycode,
+      which: keycode,
+      shiftKey: globalKeyStateTracker.shiftKeyDown,
+      altKey: globalKeyStateTracker.altKeyDown,
+      ctrlKey: globalKeyStateTracker.ctrlKeyDown
+    } );
 
-    if ( eventObj.initEvent ) {
-      eventObj.initEvent( event, true, true );
-    }
-
-    eventObj.key = '';
-    eventObj.keyCode = keyCode;
-    // eventObj.shiftKey = true; // TODO: we can add modifier keys in here with options?
-    eventObj.which = keyCode;
-
-    // add any modifier keys to the event
-    if ( globalKeyStateTracker.shiftKeyDown ) {
-      eventObj.shiftKey = true;
-    }
-    if ( globalKeyStateTracker.altKeyDown ) {
-      eventObj.altKey = true;
-    }
-    if ( globalKeyStateTracker.ctrlKeyDown ) {
-      eventObj.ctrlKey = true;
-    }
-
-    element.dispatchEvent ? element.dispatchEvent( eventObj ) : element.fireEvent( 'on' + event, eventObj );
+    element.dispatchEvent( eventObj );
   }
 }
 
