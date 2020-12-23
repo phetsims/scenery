@@ -393,6 +393,7 @@ class DragListener extends PressListener {
   getGlobalPoint() {
     return this._globalPoint.copy();
   }
+
   get globalPoint() { return this.getGlobalPoint(); }
 
   /**
@@ -404,6 +405,7 @@ class DragListener extends PressListener {
   getLocalPoint() {
     return this._localPoint.copy();
   }
+
   get localPoint() { return this.getLocalPoint(); }
 
   /**
@@ -415,6 +417,7 @@ class DragListener extends PressListener {
   getParentPoint() {
     return this._parentPoint.copy();
   }
+
   get parentPoint() { return this.getParentPoint(); }
 
   /**
@@ -426,6 +429,7 @@ class DragListener extends PressListener {
   getModelPoint() {
     return this._modelPoint.copy();
   }
+
   get modelPoint() { return this.getModelPoint(); }
 
   /**
@@ -437,6 +441,7 @@ class DragListener extends PressListener {
   getModelDelta() {
     return this._modelDelta.copy();
   }
+
   get modelDelta() { return this.getModelDelta(); }
 
   /**
@@ -695,6 +700,7 @@ class DragListener extends PressListener {
 
     this._dragBoundsProperty.value = bounds;
   }
+
   set dragBounds( value ) { this.setDragBounds( value ); }
 
   /**
@@ -706,6 +712,7 @@ class DragListener extends PressListener {
   getDragBounds() {
     return this._dragBoundsProperty.value;
   }
+
   get dragBounds() { return this.getDragBounds(); }
 
   /**
@@ -719,6 +726,7 @@ class DragListener extends PressListener {
 
     this._transform = transform;
   }
+
   set transform( transform ) { this.setTransform( transform ); }
 
   /**
@@ -730,6 +738,7 @@ class DragListener extends PressListener {
   getTransform() {
     return this._transform;
   }
+
   get transform() { return this.getTransform(); }
 
   /**
@@ -784,7 +793,8 @@ class DragListener extends PressListener {
   }
 
   /**
-   * Creates an input listener that forwards events to the specified input listener.
+   * Creates an input listener that forwards events to the specified input listener. The target listener should
+   * probably be using PressListener.options.targetNode so that the forwarded drag has the correct Trail
    * @public
    *
    * See https://github.com/phetsims/scenery/issues/639
