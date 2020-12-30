@@ -1667,9 +1667,9 @@ class Input {
    * @returns {Trail} - The current trail of the pointer
    */
   branchChangeEvents( pointer, event, sendMove ) {
-    sceneryLog && sceneryLog.Input && sceneryLog.Input(
+    sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent(
       'branchChangeEvents: ' + pointer.toString() + ' sendMove:' + sendMove );
-    sceneryLog && sceneryLog.Input && sceneryLog.push();
+    sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
 
     assert && assert( pointer instanceof Pointer );
     assert && assert( typeof sendMove === 'boolean' );
@@ -1681,7 +1681,7 @@ class Input {
 
     const branchIndex = Trail.branchIndex( trail, oldTrail );
     const isBranchChange = branchIndex !== trail.length || branchIndex !== oldTrail.length;
-    isBranchChange && sceneryLog && sceneryLog.Input && sceneryLog.Input(
+    isBranchChange && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent(
       'changed from ' + oldTrail.toString() + ' to ' + trail.toString() );
 
     // event order matches http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
@@ -1698,7 +1698,7 @@ class Input {
 
     pointer.trail = trail;
 
-    sceneryLog && sceneryLog.Input && sceneryLog.pop();
+    sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
     return trail;
   }
 
