@@ -223,7 +223,7 @@ class Circle extends Path {
     }
     return this;
   }
-  set radius( value ) { return this.setRadius( value ); }
+  set radius( value ) { this.setRadius( value ); }
 
   /**
    * Returns the radius of the circle.

@@ -131,7 +131,7 @@ class Color {
     return this.setRGBA( value, this.g, this.b, this.a );
   }
 
-  set red( value ) { return this.setRed( value ); }
+  set red( value ) { this.setRed( value ); }
 
   /**
    * Returns the green value as an integer between 0 and 255
@@ -156,7 +156,7 @@ class Color {
     return this.setRGBA( this.r, value, this.b, this.a );
   }
 
-  set green( value ) { return this.setGreen( value ); }
+  set green( value ) { this.setGreen( value ); }
 
   /**
    * Returns the blue value as an integer between 0 and 255
@@ -181,7 +181,7 @@ class Color {
     return this.setRGBA( this.r, this.g, value, this.a );
   }
 
-  set blue( value ) { return this.setBlue( value ); }
+  set blue( value ) { this.setBlue( value ); }
 
   /**
    * Returns the alpha value as a floating-point value between 0 and 1
@@ -206,7 +206,7 @@ class Color {
     return this.setRGBA( this.r, this.g, this.b, value );
   }
 
-  set alpha( value ) { return this.setAlpha( value ); }
+  set alpha( value ) { this.setAlpha( value ); }
 
   /**
    * Sets the value of this Color using RGB integral between 0-255, alpha (float) between 0-1.

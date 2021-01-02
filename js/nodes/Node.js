@@ -1638,7 +1638,7 @@ class Node extends PhetioObject {
 
     return this; // allow chaining
   }
-  set localBounds( value ) { return this.setLocalBounds( value ); }
+  set localBounds( value ) { this.setLocalBounds( value ); }
 
   /**
    * Meant to be overridden in sub-types that have more accurate bounds determination for when we are transformed.
@@ -1727,7 +1727,7 @@ class Node extends PhetioObject {
 
     return this; // allow chaining
   }
-  set transformBounds( value ) { return this.setTransformBounds( value ); }
+  set transformBounds( value ) { this.setTransformBounds( value ); }
 
   /**
    * Returns whether accurate transformation bounds are used in bounds computation (see setTransformBounds).

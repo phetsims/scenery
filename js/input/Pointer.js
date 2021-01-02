@@ -116,7 +116,7 @@ class Pointer {
 
     return this; // TODO: is chaining actually used? Not that helpful of a pattern with pointers.
   }
-  set cursor( value ) { return this.setCursor( value ); }
+  set cursor( value ) { this.setCursor( value ); }
 
   /**
    * Returns the current cursor override (or null if there is one). See setCursor().
