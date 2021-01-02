@@ -1594,7 +1594,7 @@ const ParallelDOM = {
           this.addAriaLabelledbyAssociation( ariaLabelledbyAssociation );
         }
       },
-      set ariaLabelledbyAssociations( ariaLabelledbyAssociations ) { return this.setAriaLabelledbyAssociations( ariaLabelledbyAssociations ); },
+      set ariaLabelledbyAssociations( ariaLabelledbyAssociations ) { this.setAriaLabelledbyAssociations( ariaLabelledbyAssociations ); },
 
       /**
        * @public
@@ -1740,7 +1740,7 @@ const ParallelDOM = {
           this.addAriaDescribedbyAssociation( ariaDescribedbyAssociation );
         }
       },
-      set ariaDescribedbyAssociations( ariaDescribedbyAssociations ) { return this.setAriaDescribedbyAssociations( ariaDescribedbyAssociations ); },
+      set ariaDescribedbyAssociations( ariaDescribedbyAssociations ) { this.setAriaDescribedbyAssociations( ariaDescribedbyAssociations ); },
 
       /**
        * @public
@@ -1897,7 +1897,7 @@ const ParallelDOM = {
           this.addActiveDescendantAssociation( activeDescendantAssociation );
         }
       },
-      set activeDescendantAssociations( activeDescendantAssociations ) { return this.setActiveDescendantAssociations( activeDescendantAssociations ); },
+      set activeDescendantAssociations( activeDescendantAssociations ) { this.setActiveDescendantAssociations( activeDescendantAssociations ); },
 
       /**
        * @public
