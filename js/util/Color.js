@@ -303,14 +303,8 @@ class Color {
    * @returns {Color} - This color, for chaining
    */
   setCSS( cssString ) {
-    let str = cssString.replace( / /g, '' ).toLowerCase();
     let success = false;
-
-    // replace colors based on keywords
-    const keywordMatch = Color.colorKeywords[ str ];
-    if ( keywordMatch ) {
-      str = '#' + keywordMatch;
-    }
+    const str = Color.preprocessCSS( cssString );
 
     // run through the available text formats
     for ( let i = 0; i < Color.formatParsers.length; i++ ) {
@@ -805,6 +799,48 @@ class Color {
    */
   static grayColor( rgb, a ) {
     return new Color( rgb, rgb, rgb, a );
+  }
+
+  /**
+   * Converts a CSS color string into a standard format, lower-casing and keyword-matching it.
+   * @private
+   *
+   * @param {string} cssString
+   * @returns {string}
+   */
+  static preprocessCSS( cssString ) {
+    let str = cssString.replace( / /g, '' ).toLowerCase();
+
+    // replace colors based on keywords
+    const keywordMatch = Color.colorKeywords[ str ];
+    if ( keywordMatch ) {
+      str = '#' + keywordMatch;
+    }
+
+    return str;
+  }
+
+  /**
+   * Whether the specified CSS string is a valid CSS color stirng
+   * @public
+   *
+   * @param {string} cssString
+   * @returns {boolean}
+   */
+  static isCSSColorString( cssString ) {
+    const str = Color.preprocessCSS( cssString );
+
+    // run through the available text formats
+    for ( let i = 0; i < Color.formatParsers.length; i++ ) {
+      const parser = Color.formatParsers[ i ];
+
+      const matches = parser.regexp.exec( str );
+      if ( matches ) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }
 
