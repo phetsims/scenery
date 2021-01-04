@@ -1339,7 +1339,8 @@ class Node extends PhetioObject {
                                   this._transformBounds ||
                                   this.boundsProperty._value.equalsEpsilon( fullBounds, epsilon ),
           'Bounds mismatch after validateBounds: ' + this.boundsProperty._value.toString() +
-          ', expected: ' + fullBounds.toString() );
+          ', expected: ' + fullBounds.toString() + '. This could have happened if a bounds instance owned by a Node' +
+          ' was directly mutated (e.g. bounds.erode())' );
       } )();
     }
 
