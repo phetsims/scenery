@@ -20,7 +20,6 @@ import PaintDef from '../util/PaintDef.js';
 import Node from './Node.js';
 
 const isSafari5 = platform.safari5;
-const isIE9 = platform.ie9;
 
 const PAINTABLE_OPTION_KEYS = [
   'fill', // {PaintDef} - Sets the fill of this Node, see setFill() for documentation.
@@ -881,10 +880,7 @@ const Paintable = {
       getStrokeRendererBitmask: function() {
         let bitmask = 0;
 
-        // IE9 has bad dashed strokes, let's force a different renderer in case
-        if ( !( isIE9 && this.hasStroke() && this.hasLineDash() ) ) {
-          bitmask |= Renderer.bitmaskCanvas;
-        }
+        bitmask |= Renderer.bitmaskCanvas;
 
         // always have SVG support (for now?)
         bitmask |= Renderer.bitmaskSVG;
