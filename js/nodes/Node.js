@@ -2106,13 +2106,14 @@ class Node extends PhetioObject {
    * scale( 2, true ) will shift the Node to (200,0).
    *
    * Allowed call signatures:
-   * scale( s {number|Vector2}, [prependInstead] {boolean} )
-   * scale( x {number}, y {number}, [prependInstead] {boolean} )
+   * (s invocation): scale( s {number|Vector2}, [prependInstead] {boolean} )
+   * (x,y invocation): scale( x {number}, y {number}, [prependInstead] {boolean} )
    *
-   * @param {number} s - Scales in both the X and Y directions
-   * @param {number} x - Scales in the X direction
-   * @param {number} y - Scales in the Y direction
-   * @param {boolean} [prependInstead] - Whether the transform should be prepended (defaults to false)
+   * @param {number|Vector2} x - (s invocation): {number} scales both dimensions equally, or {Vector2} scales independently
+   *                           - (x,y invocation): {number} scale for the x-dimension
+   * @param {number|boolean} [y] - (s invocation): {boolean} prependInstead - Whether the transform should be prepended (defaults to false)
+   *                             - (x,y invocation): {number} y - scale for the y-dimension
+   * @param {boolean} [prependInstead] - (x,y invocation) Whether the transform should be prepended (defaults to false)
    */
   scale( x, y, prependInstead ) {
     if ( typeof x === 'number' ) {
