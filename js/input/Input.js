@@ -542,22 +542,11 @@ class Input {
 
     // wire up accessibility listeners on the display's root accessible DOM element.
     if ( this.display._accessible ) {
-
-      // In IE11, the focusin event can be sent twice since we often have to restore focus to event.relatedTarget
-      // after calling focusout callbacks. So this flag is set to prevent focusin callbacks from firing twice
-      // when that happens. See https://github.com/phetsims/scenery/issues/925
-      let ieBlockCallbacks = false;
-
       // @private
       this.focusinAction = new Action( event => {
 
         // ignore any focusout callbacks if they are initiated due to implementation details in PDOM manipulation
         if ( this.display.blockFocusCallbacks ) {
-          return;
-        }
-
-        if ( ieBlockCallbacks ) {
-          ieBlockCallbacks = false;
           return;
         }
 
@@ -616,9 +605,6 @@ class Input {
           const focusMovedInCallbacks = this.isTargetUnderPDOM( document.activeElement );
           const targetFocusable = PDOMUtils.isElementFocusable( event.relatedTarget );
           if ( targetFocusable && !focusMovedInCallbacks ) {
-            if ( platform.ie ) {
-              ieBlockCallbacks = true;
-            }
             event.relatedTarget.focus();
           }
         }
@@ -800,7 +786,7 @@ class Input {
     // http://www.html5rocks.com/en/mobile/touchandmouse/ for more information.
     // Additionally, IE had some issues with skipping prevent default, see
     // https://github.com/phetsims/scenery/issues/464 for mouse handling.
-    if ( !( this.passiveEvents === true ) && ( callback !== this.mouseDown || platform.ie || platform.edge ) ) {
+    if ( !( this.passiveEvents === true ) && ( callback !== this.mouseDown || platform.edge ) ) {
       // We cannot prevent a passive event, so don't try
       domEvent.preventDefault();
     }
@@ -1967,9 +1953,7 @@ class Input {
    * @returns {Event}
    */
   static deserializeDomEvent( eventObject ) {
-
-    // IE doesn't support `new Event()`, but document.createEvent is largely deprecated, so only use it when we must.
-    const domEvent = platform.ie ? document.createEvent( 'Event' ) : new window.Event( 'Event' );
+    const domEvent = new window.Event( 'Event' );
     for ( const key in eventObject ) {
 
       // `type` is readonly, so don't try to set it.

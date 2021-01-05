@@ -20,7 +20,7 @@ const keepSVGTextElements = true; // whether we should pool SVG elements for the
 // Some browsers (IE/Edge) can't handle our UTF-8 embedding marks AND SVG textLength/spacingAndGlyphs. We disable
 // using these features, because they aren't necessary on these browsers.
 // See https://github.com/phetsims/scenery/issues/455 for more information.
-const useSVGTextLengthAdjustments = !platform.ie && !platform.edge;
+const useSVGTextLengthAdjustments = !platform.edge;
 
 class TextSVGDrawable extends TextStatefulDrawable( SVGSelfDrawable ) {
   /**

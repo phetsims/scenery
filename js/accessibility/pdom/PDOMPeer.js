@@ -13,9 +13,7 @@ import Matrix3 from '../../../../dot/js/Matrix3.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
 import merge from '../../../../phet-core/js/merge.js';
-import platform from '../../../../phet-core/js/platform.js';
 import scenery from '../../scenery.js';
-import FullScreen from '../../util/FullScreen.js';
 import PDOMSiblingStyle from './PDOMSiblingStyle.js';
 import PDOMUtils from './PDOMUtils.js';
 
@@ -708,20 +706,7 @@ class PDOMPeer {
 
     // no op if primary sibling does not have focus
     if ( document.activeElement === this._primarySibling ) {
-
-      // Workaround for a bug in IE11 in Fullscreen mode where document.activeElement.blur() errors out with
-      // "Invalid Function". A delay seems to be a common workaround for IE11, see
-      // https://stackoverflow.com/questions/2600186/focus-doesnt-work-in-ie
-      if ( platform.ie11 && FullScreen.isFullScreen() ) {
-        window.setTimeout( () => { // eslint-disable-line bad-sim-text
-
-          // make sure that the primary sibling hasn't been removed from the document since the timeout was added
-          this._primarySibling && this._primarySibling.blur();
-        }, 0 );
-      }
-      else {
-        this._primarySibling.blur();
-      }
+      this._primarySibling.blur();
     }
   }
 

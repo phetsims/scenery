@@ -10,7 +10,6 @@
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
-import platform from '../../../phet-core/js/platform.js';
 import scenery from '../scenery.js';
 import svgns from '../util/svgns.js';
 
@@ -279,16 +278,14 @@ class SVGGroup {
         }
         else if ( this.hasTransform ) {
           this.hasTransform = false;
-          // IE guard needed since removeAttribute fails, see https://github.com/phetsims/scenery/issues/395
-          ( platform.ie9 || platform.ie10 ) ? svgGroup.setAttribute( 'transform', '' ) : svgGroup.removeAttribute( 'transform' );
+          svgGroup.removeAttribute( 'transform' );
         }
       }
       else {
         // we want no transforms if we won't be applying transforms
         if ( this.hasTransform ) {
           this.hasTransform = false;
-          // IE guard needed since removeAttribute fails, see https://github.com/phetsims/scenery/issues/395
-          ( platform.ie9 || platform.ie10 ) ? svgGroup.setAttribute( 'transform', '' ) : svgGroup.removeAttribute( 'transform' );
+          svgGroup.removeAttribute( 'transform' );
         }
       }
     }

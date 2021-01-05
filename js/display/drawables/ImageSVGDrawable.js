@@ -7,7 +7,6 @@
  */
 
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import platform from '../../../../phet-core/js/platform.js';
 import scenery from '../../scenery.js';
 import svgns from '../../util/svgns.js';
 import xlinkns from '../../util/xlinkns.js';
@@ -113,8 +112,7 @@ class ImageSVGDrawable extends ImageStatefulDrawable( SVGSelfDrawable ) {
 
     // if we are switching to having no mipmap
     if ( this.mipmapLevel >= 0 && level === -1 ) {
-      // IE guard needed since removeAttribute fails, see https://github.com/phetsims/scenery/issues/395
-      ( platform.ie9 || platform.ie10 ) ? image.setAttribute( 'transform', '' ) : image.removeAttribute( 'transform' );
+      image.removeAttribute( 'transform' );
     }
     this.mipmapLevel = level;
 

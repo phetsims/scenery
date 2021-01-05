@@ -47,15 +47,7 @@ const FullScreen = {
     const requestFullscreenPropertyName = detectPrefix( document.body, 'requestFullscreen' ) ||
                                           detectPrefix( document.body, 'requestFullScreen' ); // Firefox capitalization
 
-    if ( !platform.ie9 && !platform.ie10 ) {
-      display.domElement[ requestFullscreenPropertyName ] && display.domElement[ requestFullscreenPropertyName ]();
-    }
-    else if ( typeof window.ActiveXObject !== 'undefined' ) { // Older IE.
-      const wscript = new window.ActiveXObject( 'WScript.Shell' );
-      if ( wscript !== null ) {
-        wscript.SendKeys( '{F11}' );
-      }
-    }
+    display.domElement[ requestFullscreenPropertyName ] && display.domElement[ requestFullscreenPropertyName ]();
   },
 
   // @public
