@@ -60,13 +60,13 @@
 import StringProperty from '../../../axon/js/StringProperty.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
+import Poolable from '../../../phet-core/js/Poolable.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
 import merge from '../../../phet-core/js/merge.js';
 import openPopup from '../../../phet-core/js/openPopup.js';
-import Poolable from '../../../phet-core/js/Poolable.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
-import ButtonListener from '../input/ButtonListener.js';
+import FireListener from '../listeners/FireListener.js';
 import scenery from '../scenery.js';
 import Color from '../util/Color.js';
 import Font from '../util/Font.js';
@@ -1839,8 +1839,8 @@ class RichTextLink extends Node {
       tagName: 'a'
     } );
 
-    // @private {ButtonListener|null}
-    this.buttonListener = null;
+    // @private {FireListener|null}
+    this.fireListener = null;
 
     // @private {function|null}
     this.accessibleInputListener = null;
@@ -1863,10 +1863,11 @@ class RichTextLink extends Node {
 
     // If our href is a function, it should be called when the user clicks on the link
     if ( typeof href === 'function' ) {
-      this.buttonListener = new ButtonListener( {
-        fire: href
+      this.fireListener = new FireListener( {
+        fire: href,
+        tandem: Tandem.OPT_OUT
       } );
-      this.addInputListener( this.buttonListener );
+      this.addInputListener( this.fireListener );
       this.setAccessibleAttribute( 'href', '#' ); // Required so that the click listener will get called.
       this.setAccessibleAttribute( 'target', '_self' ); // This is the default (easier than conditionally removing)
       this.accessibleInputListener = {
@@ -1880,7 +1881,7 @@ class RichTextLink extends Node {
     }
     // Otherwise our href is a {string}, and we should open a window pointing to it (assuming it's a URL)
     else {
-      this.buttonListener = new ButtonListener( {
+      this.fireListener = new FireListener( {
         fire: event => {
           if ( event.isFromPDOM() ) {
 
@@ -1889,9 +1890,10 @@ class RichTextLink extends Node {
           }
           self._linkEventsHandled && event.handle();
           openPopup( href ); // open in a new window/tab
-        }
+        },
+        tandem: Tandem.OPT_OUT
       } );
-      this.addInputListener( this.buttonListener );
+      this.addInputListener( this.fireListener );
       this.setAccessibleAttribute( 'href', href );
       this.setAccessibleAttribute( 'target', '_blank' );
     }
@@ -1911,8 +1913,8 @@ class RichTextLink extends Node {
       child.clean();
     }
 
-    this.removeInputListener( this.buttonListener );
-    this.buttonListener = null;
+    this.removeInputListener( this.fireListener );
+    this.fireListener = null;
     if ( this.accessibleInputListener ) {
       this.removeInputListener( this.accessibleInputListener );
       this.accessibleInputListener = null;
