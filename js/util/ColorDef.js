@@ -17,49 +17,6 @@ import scenery from '../scenery.js';
 import Color from './Color.js';
 
 const ColorDef = {
-
-  /**
-   * Link a listener to the given colorDef instance.  For a non-Property, this just calls back the listener with the value.
-   * For a Property, it is linked and called back with the value.
-   * @param {ColorDef} color
-   * @param {function} listener
-   * @public
-   * @static
-   */
-  link( color, listener ) {
-    assert && assert( ColorDef.isColorDef( color ), 'must be a colorDef' );
-    if ( color instanceof Property ) {
-      color.link( listener );
-    }
-    else {
-      listener( color );
-    }
-  },
-
-  /**
-   * Unlink a listener from a colorDef instance.  For a non-Property, this is a no-op. For a Property, it is linked and
-   * called back with the value.
-   * @param {ColorDef} color
-   * @param {function} listener
-   * @public
-   * @static
-   */
-  unlink( color, listener ) {
-    assert && assert( ColorDef.isColorDef( color ), 'must be a colorDef' );
-    if ( color instanceof Property ) {
-      color.unlink( listener );
-    }
-  },
-
-  // @returns {string|null}
-  toCSS( color ) {
-    assert && assert( ColorDef.isColorDef( color ), 'must be a colorDef' );
-    return color === null ? null :
-           typeof color === 'string' ? color :
-           color instanceof Color ? color.toCSS() :
-           ColorDef.toCSS( color.value );
-  },
-
   /**
    * Returns whether the parameter is considered to be a ColorDef.
    * @public
