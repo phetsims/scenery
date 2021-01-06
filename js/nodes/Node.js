@@ -161,7 +161,6 @@ import TinyStaticProperty from '../../../axon/js/TinyStaticProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Transform3 from '../../../dot/js/Transform3.js';
-import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Shape from '../../../kite/js/Shape.js';
 import arrayDifference from '../../../phet-core/js/arrayDifference.js';
@@ -4782,8 +4781,8 @@ class Node extends PhetioObject {
       assert( sourceBounds === null || sourceBounds instanceof Bounds2, 'sourceBounds should be null or a Bounds2' );
       if ( sourceBounds ) {
         assert( sourceBounds.isValid(), 'sourceBounds should be valid (finite non-negative)' );
-        assert( Utils.isInteger( sourceBounds.width ), 'sourceBounds.width should be an integer' );
-        assert( Utils.isInteger( sourceBounds.height ), 'sourceBounds.height should be an integer' );
+        assert( Number.isInteger( sourceBounds.width ), 'sourceBounds.width should be an integer' );
+        assert( Number.isInteger( sourceBounds.height ), 'sourceBounds.height should be an integer' );
       }
     }
 
