@@ -29,12 +29,13 @@ class Color {
    * - new Color( r, g, b, a ) is equivalent to setRGBA( r, g, b, a ), e.g. set( 255, 0, 128, 0.5 )
    * - new Color( hex ) will set RGB with alpha=1, e.g. set( 0xFF0000 )
    * - new Color( hex, a ) will set RGBA, e.g. set( 0xFF0000, 1 )
+   * - new Color( null ) will be transparent
    *
    * The 'r', 'g', and 'b' values stand for red, green and blue respectively, and will be clamped to integers in 0-255.
    * The 'a' value stands for alpha, and will be clamped to 0-1 (floating point)
    * 'hex' indicates a 6-decimal-digit format hex number, for example 0xFFAA00 is equivalent to r=255, g=170, b=0.
    *
-   * @param {number|Color|string} r - See above for the possible overloaded values
+   * @param {number|Color|string|null} r - See above for the possible overloaded values
    * @param {number} [g] - If provided, should be the green value (or the alpha value if a hex color is given)
    * @param {number} [b] - If provided, should be the blue value
    * @param {number} [a] - If provided, should be the alpha value
@@ -67,8 +68,9 @@ class Color {
    * - set( r, g, b, a ) is equivalent to setRGBA( r, g, b, a ), e.g. set( 255, 0, 128, 0.5 )
    * - set( hex ) will set RGB with alpha=1, e.g. set( 0xFF0000 )
    * - set( hex, alpha ) will set RGBA, e.g. set( 0xFF0000, 1 )
+   * - set( null ) will be transparent
    *
-   * @param {number|Color|string} r - See above for the possible overloaded values
+   * @param {number|Color|string|null} r - See above for the possible overloaded values
    * @param {number} [g] - If provided, should be the green value (or the alpha value if a hex color is given)
    * @param {number} [b] - If provided, should be the blue value
    * @param {number} [a] - If provided, should be the alpha value
@@ -77,8 +79,11 @@ class Color {
   set( r, g, b, a ) {
     assert && assert( r !== undefined, 'Can\'t call Color.set( undefined )' );
 
+    if ( r === null ) {
+      this.setRGBA( 0, 0, 0, 0 );
+    }
     // support for set( string )
-    if ( typeof r === 'string' ) {
+    else if ( typeof r === 'string' ) {
       this.setCSS( r );
     }
     // support for set( color )
