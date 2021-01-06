@@ -621,7 +621,7 @@ class Color {
    * if not.
    * @public
    *
-   * @param {String|Color|null} colorSpec
+   * @param {string|Color|null} colorSpec
    * @returns {Color}
    */
   static toColor( colorSpec ) {
