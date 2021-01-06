@@ -616,11 +616,21 @@ class Color {
    * if not.
    * @public
    *
-   * @param {String|Color} colorSpec
+   * @param {String|Color|null} colorSpec
    * @returns {Color}
    */
   static toColor( colorSpec ) {
-    return colorSpec instanceof Color ? colorSpec : new Color( colorSpec );
+    assert && assert( colorSpec === null || typeof colorSpec === 'string' || colorSpec instanceof Color );
+
+    if ( colorSpec === null ) {
+      return Color.TRANSPARENT;
+    }
+    else if ( colorSpec instanceof Color ) {
+      return colorSpec;
+    }
+    else {
+      return new Color( colorSpec );
+    }
   }
 
   /**
