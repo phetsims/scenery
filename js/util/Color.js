@@ -828,6 +828,8 @@ class Color {
    * @returns {boolean}
    */
   static isCSSColorString( cssString ) {
+    assert && assert( typeof cssString === 'string' );
+
     const str = Color.preprocessCSS( cssString );
 
     // run through the available text formats
