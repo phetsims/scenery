@@ -823,6 +823,16 @@ class Display {
 
   get accessibleDOMElement() { return this.getAccessibleDOMElement(); }
 
+  /**
+   * Sets whether or not focus highlights are shown for this Display.
+   * @public
+   *
+   * @param {boolean} visible
+   */
+  setFocusHighlightVisible( visible ) {
+    this._focusOverlay.setVisible( visible );
+  }
+
   /*
    * Returns the bitmask union of all renderers (canvas/svg/dom/webgl) that are used for display, excluding
    * BackboneDrawables (which would be DOM).

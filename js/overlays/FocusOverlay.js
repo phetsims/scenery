@@ -86,6 +86,9 @@ class FocusOverlay {
       useLocalBounds: true
     } );
 
+    this.highlightNode.addChild( this.shapeFocusHighlightPath );
+    this.highlightNode.addChild( this.boundsFocusHighlightPath );
+
     // @private {FocusHighlightPath} - Focus highlight for 'groups' of Nodes. When descendant node has focus, ancestor
     // with groupFocusHighlight flag will have this extra focus highlight surround its local bounds
     this.groupFocusHighlightPath = new FocusHighlightFromNode( null, {
@@ -96,9 +99,12 @@ class FocusOverlay {
       innerStroke: FocusHighlightPath.FOCUS_COLOR
     } );
 
-    this.highlightNode.addChild( this.shapeFocusHighlightPath );
-    this.highlightNode.addChild( this.boundsFocusHighlightPath );
-    this.focusRootNode.addChild( this.groupFocusHighlightPath );
+    // @private {Node} - a parent Node for group focus highlights so visibility of all group highlights can easily
+    // becontrolled
+    this.groupFocusHighlightParent = new Node( {
+      children: [ this.groupFocusHighlightPath ]
+    } );
+    this.focusRootNode.addChild( this.groupFocusHighlightParent );
 
     // @private - Listeners bound once, so we can access them for removal.
     this.boundsListener = this.onBoundsChange.bind( this );
@@ -119,6 +125,18 @@ class FocusOverlay {
     }
 
     Display.focusProperty.unlink( this.focusListener );
+  }
+
+  /**
+   * Sets whether or not focus highlights will be visible. Effectively enables/disables visual highlights that
+   * follow DOM focus.
+   * @public
+   *
+   * @param {boolean} visible
+   */
+  setVisible( visible ) {
+    this.highlightNode.visible = visible;
+    this.groupFocusHighlightParent.visible = visible;
   }
 
   /**
@@ -278,7 +296,7 @@ class FocusOverlay {
         }
         else if ( highlight instanceof Node ) {
           this.groupHighlightNode = highlight;
-          this.focusRootNode.addChild( highlight );
+          this.groupFocusHighlightParent.addChild( highlight );
 
           this.groupMode = 'node';
         }
@@ -337,7 +355,7 @@ class FocusOverlay {
         this.groupFocusHighlightPath.visible = false;
       }
       else if ( this.groupMode === 'node' ) {
-        this.focusRootNode.removeChild( this.groupHighlightNode );
+        this.groupFocusHighlightParent.removeChild( this.groupHighlightNode );
       }
 
       this.groupMode = null;
@@ -439,6 +457,7 @@ class FocusOverlay {
   static setInnerHighlightColor( color ) {
     innerHighlightColor = color;
   }
+
   static set innerHighlightColor( color ) { this.setInnerHighlightColor( color ); }
 
   /**
@@ -450,6 +469,7 @@ class FocusOverlay {
   static getInnerHighlightColor() {
     return innerHighlightColor;
   }
+
   static get innerHighlightColor() { return this.getInnerHighlightColor(); } // eslint-disable-line bad-sim-text
 
   /**
@@ -461,6 +481,7 @@ class FocusOverlay {
   static setOuterHilightColor( color ) {
     outerHighlightColor = color;
   }
+
   static set outerHighlightColor( color ) { this.setOuterHilightColor( color ); }
 
   /**
@@ -472,6 +493,7 @@ class FocusOverlay {
   static getOuterHighlightColor() {
     return outerHighlightColor;
   }
+
   static get outerHighlightColor() { return this.getOuterHighlightColor(); } // eslint-disable-line bad-sim-text
 
   /**
@@ -483,6 +505,7 @@ class FocusOverlay {
   static setInnerGroupHighlightColor( color ) {
     innerGroupHighlightColor = color;
   }
+
   static set innerGroupHighlightColor( color ) { this.setInnerGroupHighlightColor( color ); }
 
   /**
@@ -494,6 +517,7 @@ class FocusOverlay {
   static getInnerGroupHighlightColor() {
     return innerGroupHighlightColor;
   }
+
   static get innerGroupHighlightColor() { return this.getInnerGroupHighlightColor(); } // eslint-disable-line bad-sim-text
 
   /**
@@ -505,6 +529,7 @@ class FocusOverlay {
   static setOuterGroupHighlightColor( color ) {
     outerGroupHighlightColor = color;
   }
+
   static set outerGroupHighlightColor( color ) { this.setOuterGroupHighlightColor( color ); }
 
   /**
@@ -516,6 +541,7 @@ class FocusOverlay {
   static getOuterGroupHighlightColor() {
     return outerGroupHighlightColor;
   }
+
   static get outerGroupHighlightColor() { return this.getOuterGroupHighlightColor(); } // eslint-disable-line bad-sim-text
 }
 
