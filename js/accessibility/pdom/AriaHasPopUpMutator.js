@@ -17,18 +17,18 @@ const AriaHasPopUpMutator = {
   /**
    * @public
    * @param {Node} node - Node whose ParallelDOM.js fields will change
-   * @param {boolean} hasPopUp
+   * @param {boolean|string} value - Valid value for aria-haspopup attribute, or false to remove the attribute
    */
-  mutateNode( node, hasPopUp ) {
-    if ( hasPopUp ) {
-      node.setAccessibleAttribute( 'aria-haspopup', true );
+  mutateNode( node, value ) {
+    if ( value ) {
+      node.setAccessibleAttribute( 'aria-haspopup', value );
     }
     else {
       assert && assert( node.hasAccessibleAttribute( 'aria-haspopup' ), 'Set aria-haspopup once before removing it.' );
       node.removeAccessibleAttribute( 'aria-haspopup' );
     }
 
-    node.positionSiblings = hasPopUp;
+    node.positionSiblings = !!value;
   }
 };
 
