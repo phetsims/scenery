@@ -420,9 +420,9 @@ const ParallelDOM = {
         this._accessibleInstances = [];
 
         // @private {boolean} - Determines if DOM siblings are positioned in the viewport. This
-        // is required for focusable elements to be accessible on mobile screen readers. But this
-        // layout is also very performance intensive. Set to false when necessary to improve performance.
-        this._positionSiblings = true;
+        // is required for Nodes that require unique input gestures with iOS VoiceOver like "Drag and Drop".
+        // See setPositionSiblings for more information.
+        this._positionSiblings = false;
 
         // @public (read-only, scenery-internal) {boolean} - If true, any DOM events received on the label sibling
         // will not dispatch SceneryEvents through the scene graph, see setExcludeLabelSiblingFromInput()
@@ -2534,8 +2534,13 @@ const ParallelDOM = {
 
       /**
        * Sets whether the PDOM sibling elements are positioned in the correct place in the viewport. Doing so is a
-       * requirement for accessibility on touch based screen readers. However, doing this DOM layout is expensive so
-       * you may wish to disable positioning for certain elements during animation or dragging input.
+       * requirement for custom gestures on touch based screen readers. However, doing this DOM layout is expensive so
+       * only do this when necessary. Generally only needed for elements that utilize a "double tap and hold" gesture
+       * to drag and drop.
+       *
+       * Positioning the PDOM element will caused some screen readers to send both click and pointer events to the
+       * location of the Node in global coordinates. Do not position elements that use click listeners since activation
+       * will fire twice (once for the pointer event listeners and once for the click event listeners).
        * @public
        *
        * @param {boolean} positionSiblings

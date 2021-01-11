@@ -106,7 +106,7 @@ QUnit.test( 'PDOM transform source Node', assert => {
   const display = new Display( rootNode ); // eslint-disable-line
   document.body.appendChild( display.domElement );
 
-  const buttonNode = new Rectangle( 5, 5, 5, 5, { tagName: 'button' } );
+  const buttonNode = new Rectangle( 5, 5, 5, 5, { tagName: 'button', positionSiblings: true } );
   const transformSourceNode = new Rectangle( 0, 0, 25, 25 );
 
   rootNode.addChild( buttonNode );
