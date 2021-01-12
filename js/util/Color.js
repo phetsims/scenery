@@ -836,7 +836,7 @@ class Color {
   }
 
   /**
-   * Whether the specified CSS string is a valid CSS color stirng
+   * Whether the specified CSS string is a valid CSS color string
    * @public
    *
    * @param {string} cssString
