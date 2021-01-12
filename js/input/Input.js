@@ -625,14 +625,8 @@ class Input {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( 'click(' + Input.debugText( null, event ) + ');' );
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-        // Only dispatch the event if the click did not happen rapidly after an up event. It is
-        // likely that the screen reader dispatched both pointer AND click events in this case, and
-        // we only want to respond to one or the other. See
-        // https://github.com/phetsims/scenery/issues/1094
-        if ( event.timeStamp - this.upTimeStamp > PDOM_CLICK_DELAY ) {
-          const trail = this.updateTrailForPDOMDispatch( event );
-          this.dispatchA11yEvent( trail, 'click', event, true );
-        }
+        const trail = this.updateTrailForPDOMDispatch( event );
+        this.dispatchA11yEvent( trail, 'click', event, true );
 
         sceneryLog && sceneryLog.Input && sceneryLog.pop();
       }, {
@@ -736,8 +730,18 @@ class Input {
           sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `Input.${eventName}FromBrowser` );
           sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
 
-          // Create the a11yPointer lazily
-          this[ actionName ].execute( event );
+          const trailId = this.getTrailId( event );
+          const trail = trailId ? Trail.fromUniqueId( this.display.rootNode, trailId ) : null;
+
+          // Only dispatch the event if the click did not happen rapidly after an up event. It is
+          // likely that the screen reader dispatched both pointer AND click events in this case, and
+          // we only want to respond to one or the other. See https://github.com/phetsims/scenery/issues/1094.
+          // This is outside of the clickAction execution so that blocked clicks are not part of the PhET-iO data
+          // stream.
+          if ( trail && !( _.some( trail.nodes, node => node.positionSiblings ) && eventName === 'click' &&
+               event.timeStamp - this.upTimeStamp <= PDOM_CLICK_DELAY ) ) {
+            this[ actionName ].execute( event );
+          }
 
           sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
         }, accessibleEventOptions );
@@ -1362,6 +1366,10 @@ class Input {
    * @param {Event} event
    */
   pointerUp( id, type, point, event ) {
+
+    // update this outside of the Action executions so that PhET-iO event playback does not override it
+    this.upTimeStamp = event.timeStamp;
+
     type = this.handleUnknownPointerType( type, id );
     switch( type ) {
       case 'mouse':
@@ -1546,8 +1554,6 @@ class Input {
 
     assert && assert( pointer instanceof Pointer );
     assert && assert( typeof pointChanged === 'boolean' );
-
-    this.upTimeStamp = event.timeStamp;
 
     // We'll use this trail for the entire dispatch of this event.
     const eventTrail = this.branchChangeEvents( pointer, event, pointChanged );
