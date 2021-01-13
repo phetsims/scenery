@@ -6,6 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import Shape from '../../../kite/js/Shape.js';
 import FocusHighlightFromNode from '../accessibility/FocusHighlightFromNode.js';
 import FocusHighlightPath from '../accessibility/FocusHighlightPath.js';
@@ -66,6 +67,8 @@ class FocusOverlay {
     this.highlightNode = new Node();
     this.focusRootNode.addChild( this.highlightNode );
 
+    this.highlightsVisibleProperty = new BooleanProperty( true );
+
     // @private {Display} - display that manages all focus highlights
     this.focusDisplay = new Display( this.focusRootNode, {
       width: this.width,
@@ -111,8 +114,10 @@ class FocusOverlay {
     this.transformListener = this.onTransformChange.bind( this );
     this.focusListener = this.onFocusChange.bind( this );
     this.focusHighlightListener = this.onFocusHighlightChange.bind( this );
+    this.visibilityListener = this.onVisibilityChange.bind( this );
 
     Display.focusProperty.link( this.focusListener );
+    this.highlightsVisibleProperty.link( this.visibilityListener );
   }
 
   /**
@@ -125,6 +130,7 @@ class FocusOverlay {
     }
 
     Display.focusProperty.unlink( this.focusListener );
+    this.highlightsVisibleProperty.unlink( this.visibilityListener );
   }
 
   /**
@@ -135,8 +141,7 @@ class FocusOverlay {
    * @param {boolean} visible
    */
   setVisible( visible ) {
-    this.highlightNode.visible = visible;
-    this.groupFocusHighlightParent.visible = visible;
+    this.highlightsVisibleProperty.set( visible );
   }
 
   /**
@@ -189,9 +194,12 @@ class FocusOverlay {
       assert && assert( this.nodeFocusHighlight.shape !== null,
         'The shape of the Node focusHighlight should be set by now. Does it have bounds?' );
 
-      // If focusHighlightLayerable, then the focusHighlight is just a node in the scene graph, so set it visible
       if ( this.node.focusHighlightLayerable ) {
-        this.nodeFocusHighlight.visible = true;
+
+        // the focusHighlight is just a node in the scene graph, so set it visible - visibility of other highlights
+        // controlled by visibility of parent Nodes but that cannot be done in this case because the highlight
+        // can be anywhere in the scene graph, so have to check highlightsVisibleProperty
+        this.nodeFocusHighlight.visible = this.highlightsVisibleProperty.get();
       }
       else {
         this.nodeFocusHighlight.visible = true;
@@ -245,8 +253,10 @@ class FocusOverlay {
       }
       else {
         this.highlightNode.removeChild( this.nodeFocusHighlight );
-        this.nodeFocusHighlight = null;
       }
+
+      // node focus highlight can be cleared now that it has been removed
+      this.nodeFocusHighlight = null;
     }
     else if ( this.mode === 'bounds' ) {
       this.boundsFocusHighlightPath.visible = false;
@@ -426,6 +436,22 @@ class FocusOverlay {
   onFocusHighlightChange() {
     assert && assert( this.node.focused, 'update should only be necessary if node already has focus' );
     this.onFocusChange( Display.focus );
+  }
+
+  /**
+   * @private
+   */
+  onVisibilityChange() {
+    const visible = this.highlightsVisibleProperty.get();
+
+    this.highlightNode.visible = visible;
+    this.groupFocusHighlightParent.visible = visible;
+
+    // reference stored if focus highlight is layerable (somewhere else in the
+    // scene graph)
+    if ( this.nodeFocusHighlight ) {
+      this.nodeFocusHighlight.visible = visible;
+    }
   }
 
   /**
