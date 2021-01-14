@@ -255,21 +255,18 @@ class MultiListener {
   }
 
   /**
-   * Returns whether or not the pointer already in its list of background presses. findBackgroundPress will return
-   * the Pointer for use (or error if not found), this will let you know if it exists to decide how to proceed.
+   * Returns true if the press is already contained in one of this._backgroundPresses or this._presses. There are cases
+   * where we may try to add the same pointer twice (user opened context menu, using a mouse during fuzz testing), and
+   * we want to avoid adding a press again in those cases.
    * @private
    *
-   * @param {Pointer} pointer
+   * @param {Press} press
    * @returns {boolean}
    */
-  hasBackgroundPress( pointer ) {
-    for ( let i = 0; i < this._backgroundPresses.length; i++ ) {
-      if ( this._backgroundPresses[ i ].pointer === pointer ) {
-        return true;
-      }
-    }
-
-    return false;
+  hasPress( press ) {
+    return _.some( this._presses.concat( this._backgroundPresses ), existingPress => {
+      return existingPress.pointer === press.pointer;
+    } );
   }
 
   /**
@@ -373,13 +370,15 @@ class MultiListener {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener addPress' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-    this._presses.push( press );
+    if ( !this.hasPress( press ) ) {
+      this._presses.push( press );
 
-    press.pointer.cursor = this._pressCursor;
-    press.pointer.addInputListener( this._pressListener, true );
+      press.pointer.cursor = this._pressCursor;
+      press.pointer.addInputListener( this._pressListener, true );
 
-    this.recomputeLocals();
-    this.reposition();
+      this.recomputeLocals();
+      this.reposition();
+    }
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
   }
@@ -433,7 +432,7 @@ class MultiListener {
     // its possible that the press pointer already has the listener - for instance in Chrome we fail to get
     // "up" events once the context menu is open (like after a right click), so only add to the Pointer
     // if it isn't already added
-    if ( !this.hasBackgroundPress( press.pointer ) ) {
+    if ( !this.hasPress( press ) ) {
       this._backgroundPresses.push( press );
       press.pointer.addInputListener( this._backgroundListener, false );
     }
