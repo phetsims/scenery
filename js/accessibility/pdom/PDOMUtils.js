@@ -61,8 +61,8 @@ const FORMATTING_TAGS = [ BOLD_TAG, STRONG_TAG, I_TAG, EM_TAG, MARK_TAG, SMALL_T
 // these elements, not necessary what is legal html.
 const ELEMENTS_WITHOUT_CLOSING_TAG = [ INPUT_TAG ];
 
-// valid DOM events that the display adds listeners to. For a list of scenery events that support a11y features
-// see Input.A11Y_EVENT_TYPES
+// valid DOM events that the display adds listeners to. For a list of scenery events that support pdom features
+// see Input.PDOM_EVENT_TYPES
 const DOM_EVENTS = [ 'focusin', 'focusout', 'input', 'change', 'click', 'keydown', 'keyup' ];
 
 const ARIA_LABELLEDBY = 'aria-labelledby';

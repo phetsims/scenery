@@ -1543,7 +1543,7 @@ class Input {
   upEvent( pointer, event, pointChanged ) {
 
     // if the event target is within the PDOM the AT is sending a fake pointer event to the document - do not
-    // dispatch this since the PDOM should only handle Input.A11Y_EVENT_TYPES, and all other pointer input should
+    // dispatch this since the PDOM should only handle Input.PDOM_EVENT_TYPES, and all other pointer input should
     // go through the Display div. Otherwise, activation will be duplicated when we handle pointer and PDOM events
     if ( this.isTargetUnderPDOM( event.target ) ) {
       return;
@@ -1579,7 +1579,7 @@ class Input {
   downEvent( pointer, event, pointChanged ) {
 
     // if the event target is within the PDOM the AT is sending a fake pointer event to the document - do not
-    // dispatch this since the PDOM should only handle Input.A11Y_EVENT_TYPES, and all other pointer input should
+    // dispatch this since the PDOM should only handle Input.PDOM_EVENT_TYPES, and all other pointer input should
     // go through the Display div. Otherwise, activation will be duplicated when we handle pointer and PDOM events
     if ( this.isTargetUnderPDOM( event.target ) ) {
       return;
@@ -2022,7 +2022,7 @@ Input.BASIC_EVENT_TYPES = () => {
 
 // @public {Array.<string>} - Valid accessibility event types, these largely follow the HTML spec for the same names.
 //                            See the doc at the top of this file for more information.
-Input.A11Y_EVENT_TYPES = () => {
+Input.PDOM_EVENT_TYPES = () => {
   return [ 'focus', 'blur', 'click', 'input', 'change', 'keydown', 'keyup', 'focusin', 'focusout' ];
 };
 
@@ -2037,7 +2037,7 @@ Input.ALL_EVENT_TYPES = () => {
     return Input.BASIC_EVENT_TYPES.map( eventName => {
       return prefix + eventName;
     } );
-  } ).concat( [ Input.A11Y_EVENT_TYPES ] );
+  } ).concat( [ Input.PDOM_EVENT_TYPES ] );
 };
 
 scenery.register( 'Input', Input );
