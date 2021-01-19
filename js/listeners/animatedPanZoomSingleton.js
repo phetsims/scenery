@@ -51,7 +51,7 @@ class AnimatedPanZoomSingleton {
    * @returns {boolean}
    */
   get initialized() {
-    return !! this._listener;
+    return !!this._listener;
   }
 }
 

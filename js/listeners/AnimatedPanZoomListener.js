@@ -96,11 +96,6 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // then user likely trying to pull an object back into view so we prevent panning during drag
     this._downInDragBounds = false;
 
-    // @private - reference to the PDOMPointer that is currently down, to determine if its
-    // has been reserved with intent for dragging - if so, we will try to keep the Pointer's
-    // target visible and pan to it while user is dragging with keyboard
-    this._pdomPointerWithIntent = null;
-
     // listeners that will be bound to `this` if we are on a (non-touchscreen) safari platform, referenced for
     // removal on dispose
     let boundGestureStartListener = null;
@@ -128,10 +123,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
     const displayFocusListener = focus => {
       if ( focus ) {
-        const node = focus.trail.lastNode();
-        if ( this._panBounds.isFinite() && !this._panBounds.containsBounds( node.globalBounds ) ) {
-          this.panToNode( node );
-        }
+        this.keepNodeInView( focus.trail.lastNode() );
       }
     };
     Display.focusProperty.link( displayFocusListener );
@@ -168,18 +160,6 @@ class AnimatedPanZoomListener extends PanZoomListener {
   step( dt ) {
     if ( this.middlePress ) {
       this.handleMiddlePress( dt );
-    }
-
-    // if dragging focused item with drag intent, make sure that the Node stays within
-    // the pan bounds so that it is always visible while being moved around
-    if ( this._pdomPointerWithIntent ) {
-      const pointerHasIntent = this.hasDragIntent( this._pdomPointerWithIntent );
-      if ( pointerHasIntent && globalKeyStateTracker.movementKeysDown && Display.focusProperty.value !== null ) {
-        const focusedNode = Display.focusedNode;
-        if ( !this._panBounds.containsBounds( focusedNode.globalBounds ) ) {
-          this.panToNode( focusedNode );
-        }
-      }
     }
 
     // if dragging an item with a mouse or touch pointer, make sure that it
@@ -348,8 +328,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
   /**
    * For the Scenery listener API, handle a keydown event. This SceneryEvent will have been dispatched from
    * Input.dispatchEvent and so the Event target must be within the PDOM. In this case, we may
-   * need to prevent translation if the PDOMPointer is attached or the Pointer indicates that it
-   * is intended to for arrow key control.
+   * need to prevent translation if the PDOMPointer is attached.
    * @public (scenery-internal)
    *
    * @param {SceneryEvent} event
@@ -375,9 +354,6 @@ class AnimatedPanZoomListener extends PanZoomListener {
         this.repositionFromKeys( keyPress );
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
-      }
-      else {
-        this._pdomPointerWithIntent = event.pointer;
       }
     }
   }
@@ -732,6 +708,19 @@ class AnimatedPanZoomListener extends PanZoomListener {
     }
 
     this.setDestinationPosition( positionInTargetFrame );
+  }
+
+  /**
+   * If the Node is outside of panBounds (the bounds that should always be filled with content) pan to the Node so that
+   * it remains in view.
+   * @public
+   *
+   * @param {Node} node
+   */
+  keepNodeInView( node ) {
+    if ( this._panBounds.isFinite() && !this._panBounds.containsBounds( node.globalBounds ) ) {
+      this.panToNode( node );
+    }
   }
 
   /**

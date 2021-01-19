@@ -19,6 +19,7 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
+import Emitter from '../../../axon/js/Emitter.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import merge from '../../../phet-core/js/merge.js';
@@ -125,6 +126,9 @@ class KeyboardDragListener {
     // @private {boolean} - variable to determine when the initial delay is complete
     this.delayComplete = false;
 
+    // @public {Emitter} - Emits an event every drag
+    this.dragEmitter = new Emitter();
+
     // step the drag listener, must be removed in dispose
     const stepListener = this.step.bind( this );
     stepTimer.addListener( stepListener );
@@ -134,8 +138,6 @@ class KeyboardDragListener {
       stepTimer.removeListener( stepListener );
     };
   }
-
-
 
   /**
    * Getter for the start property, see options.start for more info.
@@ -573,6 +575,8 @@ class KeyboardDragListener {
         if ( this._drag ) {
           this._drag( vectorDelta );
         }
+
+        this.dragEmitter.emit();
       }
     }
     this.moveOnHoldIntervalCounter = 0;
@@ -681,6 +685,7 @@ class KeyboardDragListener {
     return this.rightMovementKeysDown() || this.leftMovementKeysDown() ||
            this.upMovementKeysDown() || this.downMovementKeysDown();
   }
+
   get movementKeysDown() { return this.getMovementKeysDown(); }
 
   /**
