@@ -166,7 +166,6 @@ import Shape from '../../../kite/js/Shape.js';
 import arrayDifference from '../../../phet-core/js/arrayDifference.js';
 import deprecationWarning from '../../../phet-core/js/deprecationWarning.js';
 import merge from '../../../phet-core/js/merge.js';
-import platform from '../../../phet-core/js/platform.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
@@ -4433,8 +4432,12 @@ class Node extends PhetioObject {
 
           let setFilter = false;
           if ( child._filters.length ) {
+            console.log( child._filters );
+            console.log( child.getUniqueTrail().toPathString() );
             // Filters shouldn't be too often, so less concerned about the GC here (and this is so much easier to read).
-            if ( Features.canvasFilter && !platform.chromium && _.every( child._filters, filter => filter.isDOMCompatible() ) ) {
+            // Performance bottleneck for not using this fallback style, so we're allowing it for Chrome even though
+            // the visual differences may be present, see https://github.com/phetsims/scenery/issues/1139
+            if ( Features.canvasFilter && _.every( child._filters, filter => filter.isDOMCompatible() ) ) {
               wrapper.context.filter = child._filters.map( filter => filter.getCSSFilterString() ).join( ' ' );
               setFilter = true;
             }

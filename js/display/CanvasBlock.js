@@ -10,7 +10,6 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
-import platform from '../../../phet-core/js/platform.js';
 import scenery from '../scenery.js';
 import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
 import Features from '../util/Features.js';
@@ -326,7 +325,9 @@ class CanvasBlock extends FittedBlock {
           const filters = node._filters;
           // We need to fall back to a different filter behavior with Chrome, since it over-darkens otherwise with the
           // built-in feature.
-          let canUseInternalFilter = Features.canvasFilter && !platform.chromium;
+          // NOTE: Not blocking chromium anymore, see https://github.com/phetsims/scenery/issues/1139
+          // We'll go for the higher-performance but potentially-visually-different option.
+          let canUseInternalFilter = Features.canvasFilter;
           for ( let j = 0; j < filters.length; j++ ) {
             // If we use context.filter, it's equivalent to checking DOM compatibility on all of them.
             canUseInternalFilter = canUseInternalFilter && filters[ j ].isDOMCompatible();
