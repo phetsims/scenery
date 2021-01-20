@@ -152,9 +152,9 @@ class KeyboardFuzzer {
    */
   fuzzBoardEvents( fuzzRate ) {
 
-    const a11yPointer = this.display._input.a11yPointer;
-    if ( a11yPointer && !a11yPointer.blockTrustedEvents ) {
-      a11yPointer.blockTrustedEvents = true;
+    const pdomPointer = this.display._input.pdomPointer;
+    if ( pdomPointer && !pdomPointer.blockTrustedEvents ) {
+      pdomPointer.blockTrustedEvents = true;
     }
 
     for ( let i = 0; i < this.numberOfComponentsTested; i++ ) {

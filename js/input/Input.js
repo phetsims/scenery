@@ -241,7 +241,7 @@ class Input {
     this.batchedEvents = [];
 
     // @public {PDOMPointer|null} - Pointer for accessibility, only created lazily on first a11y event.
-    this.a11yPointer = null;
+    this.pdomPointer = null;
 
     // @public {Mouse|null} - Pointer for mouse, only created lazily on first mouse event, so no mouse is allocated on.
     // tablets.
@@ -582,8 +582,8 @@ class Input {
         // recompute the trail on focusout if necessary - since a blur/focusout may have been initiated from a
         // focus/focusin listener, it is possible that focusout was called more than once before focusin is called on the
         // next active element, see https://github.com/phetsims/scenery/issues/898
-        if ( !this.a11yPointer ) { this.initA11yPointer(); }
-        this.a11yPointer.invalidateTrail( this.getTrailId( event ) );
+        if ( !this.pdomPointer ) { this.initA11yPointer(); }
+        this.pdomPointer.invalidateTrail( this.getTrailId( event ) );
 
         const trail = this.updateTrailForPDOMDispatch( event );
         this.dispatchA11yEvent( trail, 'blur', event, false );
@@ -591,7 +591,7 @@ class Input {
 
         // clear the trail to make sure that our assertions aren't testing a stale trail, do this before
         // focusing event.relatedTarget below so that trail isn't cleared after focus
-        this.a11yPointer.trail = null;
+        this.pdomPointer.trail = null;
 
         // If there exists an event.relatedTarget, user is moving to the next item with "tab" like navigation and
         // event.relatedTarget is the element focus is moving to. If the relatedTarget element is removed from the
@@ -1011,9 +1011,9 @@ class Input {
    * @private
    */
   initA11yPointer() {
-    this.a11yPointer = new PDOMPointer( this.display );
+    this.pdomPointer = new PDOMPointer( this.display );
 
-    this.addPointer( this.a11yPointer );
+    this.addPointer( this.pdomPointer );
   }
 
   /**
@@ -1039,7 +1039,7 @@ class Input {
       if ( !canFireListeners ) {
         trail = new Trail( [] );
       }
-      this.dispatchEvent( trail, eventType, this.a11yPointer, domEvent, bubbles );
+      this.dispatchEvent( trail, eventType, this.pdomPointer, domEvent, bubbles );
     }
   }
 
@@ -1052,8 +1052,8 @@ class Input {
    * @returns {Trail}
    */
   updateTrailForPDOMDispatch( domEvent ) {
-    if ( !this.a11yPointer ) { this.initA11yPointer(); }
-    return this.a11yPointer.updateTrail( this.getTrailId( domEvent ) );
+    if ( !this.pdomPointer ) { this.initA11yPointer(); }
+    return this.pdomPointer.updateTrail( this.getTrailId( domEvent ) );
   }
 
   /**
