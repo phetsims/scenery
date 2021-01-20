@@ -4432,8 +4432,6 @@ class Node extends PhetioObject {
 
           let setFilter = false;
           if ( child._filters.length ) {
-            console.log( child._filters );
-            console.log( child.getUniqueTrail().toPathString() );
             // Filters shouldn't be too often, so less concerned about the GC here (and this is so much easier to read).
             // Performance bottleneck for not using this fallback style, so we're allowing it for Chrome even though
             // the visual differences may be present, see https://github.com/phetsims/scenery/issues/1139
