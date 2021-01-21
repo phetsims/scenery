@@ -22,7 +22,7 @@ const PaintDef = {
    */
   isPaintDef( paint ) {
     // NOTE: Property.<Paint> is not supported. PaintObserver would technically need to listen to 3 different levels if
-    // we add that (or could be recursive if we allow Property<paintDef>. Notably, the Property value could change,
+    // we add that (or could be recursive if we allow Property.<paintDef>. Notably, the Property value could change,
     // Color Properties in the Gradient could change, AND the Colors themselves specified in those Properties could
     // change. So it would be more code and more memory usage in general to support it.
     // See https://github.com/phetsims/scenery-phet/issues/651

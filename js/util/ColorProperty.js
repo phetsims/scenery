@@ -6,7 +6,7 @@ import Color from './Color.js';
 import scenery from '../scenery.js';
 
 /**
- * Convenience type for creating Property<Color>
+ * Convenience type for creating Property.<Color>
  *
  * @author Sam Reid (PhET Interactive Simulations)
  */
