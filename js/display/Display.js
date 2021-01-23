@@ -50,6 +50,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import Emitter from '../../../axon/js/Emitter.js';
 import Property from '../../../axon/js/Property.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
@@ -330,15 +331,16 @@ class Display {
 
     if ( this._accessible ) {
 
-      // make the PDOM invisible in the browser - it has some width and is shifted off screen so that AT can read the
-      // formatting tags, see https://github.com/phetsims/scenery/issues/730
-      // SceneryStyle.addRule( '.accessibility, .accessibility * { position: relative; left: -1000px; top: 0; width: 250px; height: 0; clip: rect(0,0,0,0); pointerEvents: none }' );
-
       // @private {Node}
       this._focusRootNode = new Node();
 
+      // @public - to control if the focusHighlights is visible on this accessible Display.
+      this.focusHighlightsVisibleProperty = new BooleanProperty( true );
+
       // @private {FocusOverlay}
-      this._focusOverlay = new FocusOverlay( this, this._focusRootNode );
+      this._focusOverlay = new FocusOverlay( this, this._focusRootNode, {
+        focusHighlightsVisibleProperty: this.focusHighlightsVisibleProperty
+      } );
       this.addOverlay( this._focusOverlay );
 
       // @public {boolean} (scenery-internal) - During DOM operations where HTML elements are removed from and
@@ -812,25 +814,24 @@ class Display {
 
   /**
    * Get the root accessible DOM element which represents this display and provides semantics for assistive
-   * technology.
+   * technology. If this Display is not accessible, returns null.
    * @public
    *
-   * @returns {HTMLElement}
+   * @returns {HTMLElement|null}
    */
   getAccessibleDOMElement() {
-    return this._rootAccessibleInstance.peer.primarySibling;
+    return this._accessible ? this._rootAccessibleInstance.peer.primarySibling : null;
   }
 
   get accessibleDOMElement() { return this.getAccessibleDOMElement(); }
 
   /**
-   * Sets whether or not focus highlights are shown for this Display.
+   * Has this Display enabled accessibility features like PDOM creation and support.
    * @public
-   *
-   * @param {boolean} visible
+   * @returns {boolean}
    */
-  setFocusHighlightVisible( visible ) {
-    this._focusOverlay.setVisible( visible );
+  isAccessible() {
+    return this._accessible;
   }
 
   /*

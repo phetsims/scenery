@@ -23,8 +23,8 @@
 
 import Action from '../../../axon/js/Action.js';
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
-import DerivedProperty from '../../../axon/js/DerivedProperty.js';
 import createObservableArray from '../../../axon/js/createObservableArray.js';
+import DerivedProperty from '../../../axon/js/DerivedProperty.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
 import merge from '../../../phet-core/js/merge.js';
 import EventType from '../../../tandem/js/EventType.js';
@@ -172,7 +172,12 @@ class PressListener {
     this.isPressedProperty = new BooleanProperty( false, { reentrant: true } );
 
     // @public {Property.<boolean>} (read-only) - It will be set to true when at least one pointer is over the listener.
+    // This is not effected by PDOM focus.
     this.isOverProperty = new BooleanProperty( false );
+
+    // @public {Property.<boolean>} (read-only) - True when either isOverProperty is true, or when focused and the
+    // related Display is showing its focusHighlights, see this.validateOver() for details.
+    this.looksOverProperty = new BooleanProperty( false );
 
     // @public {Property.<boolean>} (read-only) - It will be set to true when either:
     //   1. The listener is pressed and the pointer that is pressing is over the listener.
@@ -281,6 +286,14 @@ class PressListener {
       phetioEventType: EventType.USER
     } );
 
+    // {Display|null} To support looksOverProperty being true based on focus, we need to monitor the display from which
+    // the event has come from to see if that display is showing its focusHighlights, see
+    // Display.prototype.focusHighlightsVisibleProperty for details.
+    this.display = null;
+
+    // @private - we need the same exact function to add and remove as a listener
+    this.boundInvalidateOverListener = this.invalidateOver.bind( this );
+
     // update isOverProperty (not a DerivedProperty because we need to hook to passed-in properties)
     this.overPointers.lengthProperty.link( this.invalidateOver.bind( this ) );
     this.isFocusedProperty.link( this.invalidateOver.bind( this ) );
@@ -320,6 +333,7 @@ class PressListener {
 
     return this.pressedTrail.lastNode();
   }
+
   get currentTarget() {
     return this.getCurrentTarget();
   }
@@ -542,7 +556,11 @@ class PressListener {
       }
     }
 
-    this.isOverProperty.value = this.isFocusedProperty.value || ( this.overPointers.length > 0 && !pointerAttachedToOther );
+    // isOverProperty is only for the `over` event, looksOverProperty includes focused pressListeners (only when the
+    // display is showing focus highlights)
+    this.isOverProperty.value = ( this.overPointers.length > 0 && !pointerAttachedToOther );
+    this.looksOverProperty.value = this.isOverProperty.value ||
+                                   ( this.isFocusedProperty.value && !!this.display && this.display.focusHighlightsVisibleProperty.value );
   }
 
   /**
@@ -864,11 +882,20 @@ class PressListener {
   }
 
   /**
-   * Focus listener, called when this is treated as an accessible input listener.
+   * Focus listener, called when this is treated as an accessible input listener and its target is focused.
    * @public (scenery-internal)
    * @pdom
    */
-  focus() {
+  focus( event ) {
+
+    // Get the Display related to this accessible event.
+    const accessibleDisplays = event.trail.rootNode().getRootedDisplays().filter( display => display.isAccessible() );
+    assert && assert( accessibleDisplays.length === 1,
+      'cannot focus node with zero or multiple accessible displays attached' );
+    //
+    this.display = accessibleDisplays[ 0 ];
+    this.display.focusHighlightsVisibleProperty.link( this.boundInvalidateOverListener );
+
     // On focus, button should look 'over'.
     this.isFocusedProperty.value = true;
   }
@@ -879,6 +906,11 @@ class PressListener {
    * @pdom
    */
   blur() {
+    if ( this.display ) {
+      this.display.focusHighlightsVisibleProperty.unlink( this.boundInvalidateOverListener );
+      this.display = null;
+    }
+
     // On blur, the button should no longer look 'over'.
     this.isFocusedProperty.value = false;
   }
@@ -915,6 +947,12 @@ class PressListener {
     this.looksPressedProperty.dispose();
     this._pressAction.dispose();
     this._releaseAction.dispose();
+
+    // Remove references to the stored display, if we have any.
+    if ( this.display ) {
+      this.display.focusHighlightsVisibleProperty.unlink( this.boundInvalidateOverListener );
+      this.display = null;
+    }
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
   }

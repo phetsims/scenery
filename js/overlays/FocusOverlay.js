@@ -8,6 +8,7 @@
 
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import Shape from '../../../kite/js/Shape.js';
+import merge from '../../../phet-core/js/merge.js';
 import FocusHighlightFromNode from '../accessibility/FocusHighlightFromNode.js';
 import FocusHighlightPath from '../accessibility/FocusHighlightPath.js';
 import Display from '../display/Display.js';
@@ -24,11 +25,18 @@ let innerGroupHighlightColor = FocusHighlightPath.INNER_LIGHT_GROUP_FOCUS_COLOR;
 let outerGroupHighlightColor = FocusHighlightPath.OUTER_LIGHT_GROUP_FOCUS_COLOR;
 
 class FocusOverlay {
+
   /**
    * @param {Display} display
    * @param {Node} focusRootNode - the root node of our display
+   * @param {Object} [options]
    */
-  constructor( display, focusRootNode ) {
+  constructor( display, focusRootNode, options ) {
+
+    options = merge( {
+      focusHighlightsVisibleProperty: new BooleanProperty( true )
+    }, options );
+
     this.display = display; // @private {Display}
     this.focusRootNode = focusRootNode; // @private {Node} - The root Node of our child display
 
@@ -67,7 +75,8 @@ class FocusOverlay {
     this.highlightNode = new Node();
     this.focusRootNode.addChild( this.highlightNode );
 
-    this.highlightsVisibleProperty = new BooleanProperty( true );
+    // @public - control if highlights are visible on this overlay
+    this.focusHighlightsVisibleProperty = options.focusHighlightsVisibleProperty;
 
     // @private {Display} - display that manages all focus highlights
     this.focusDisplay = new Display( this.focusRootNode, {
@@ -117,7 +126,7 @@ class FocusOverlay {
     this.visibilityListener = this.onVisibilityChange.bind( this );
 
     Display.focusProperty.link( this.focusListener );
-    this.highlightsVisibleProperty.link( this.visibilityListener );
+    this.focusHighlightsVisibleProperty.link( this.visibilityListener );
   }
 
   /**
@@ -130,18 +139,7 @@ class FocusOverlay {
     }
 
     Display.focusProperty.unlink( this.focusListener );
-    this.highlightsVisibleProperty.unlink( this.visibilityListener );
-  }
-
-  /**
-   * Sets whether or not focus highlights will be visible. Effectively enables/disables visual highlights that
-   * follow DOM focus.
-   * @public
-   *
-   * @param {boolean} visible
-   */
-  setVisible( visible ) {
-    this.highlightsVisibleProperty.set( visible );
+    this.focusHighlightsVisibleProperty.unlink( this.visibilityListener );
   }
 
   /**
@@ -199,7 +197,7 @@ class FocusOverlay {
         // the focusHighlight is just a node in the scene graph, so set it visible - visibility of other highlights
         // controlled by visibility of parent Nodes but that cannot be done in this case because the highlight
         // can be anywhere in the scene graph, so have to check highlightsVisibleProperty
-        this.nodeFocusHighlight.visible = this.highlightsVisibleProperty.get();
+        this.nodeFocusHighlight.visible = this.focusHighlightsVisibleProperty.get();
       }
       else {
         this.nodeFocusHighlight.visible = true;
@@ -442,7 +440,7 @@ class FocusOverlay {
    * @private
    */
   onVisibilityChange() {
-    const visible = this.highlightsVisibleProperty.get();
+    const visible = this.focusHighlightsVisibleProperty.get();
 
     this.highlightNode.visible = visible;
     this.groupFocusHighlightParent.visible = visible;
