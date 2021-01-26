@@ -45,8 +45,10 @@ class FireListenerSpecification extends PressListenerSpecification {
   // @public
   test( fireListener ) {
     super.test( fireListener );
-    const firedEmitter = phet.phetio.phetioEngine.getPhetioObject( this.options.tandem.createTandem( 'firedEmitter' ).phetioID );
-    this.firedEmitter && this.firedEmitter.test( firedEmitter );
+    if ( Tandem.VALIDATION ) {
+      const firedEmitter = phet.phetio.phetioEngine.getPhetioObject( this.options.tandem.createTandem( 'firedEmitter' ).phetioID );
+      this.firedEmitter && this.firedEmitter.test( firedEmitter );
+    }
   }
 }
 
