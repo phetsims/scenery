@@ -33,8 +33,6 @@ class FireListenerSpecification extends PressListenerSpecification {
 
     super( options );
 
-    // In PhET-iO, we can look up the concrete emitter.
-    // TODO: The firedEmitter is actually private in FireListener--we could make it public for testing? see https://github.com/phetsims/phet-io/issues/1657
     if ( Tandem.VALIDATION && options.tandem.supplied ) {
 
       // @public (read-only)
@@ -46,6 +44,10 @@ class FireListenerSpecification extends PressListenerSpecification {
   test( fireListener ) {
     super.test( fireListener );
     if ( Tandem.VALIDATION ) {
+
+      // In PhET-iO, we can look up the concrete emitter.
+      // TODO: The firedEmitter is actually private in FireListener--we could make it public for testing? see https://github.com/phetsims/phet-io/issues/1657
+      // But this test actually tests the tandem as well
       const firedEmitter = phet.phetio.phetioEngine.getPhetioObject( this.options.tandem.createTandem( 'firedEmitter' ).phetioID );
       this.firedEmitter && this.firedEmitter.test( firedEmitter );
     }
