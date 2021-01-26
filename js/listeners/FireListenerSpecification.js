@@ -43,7 +43,7 @@ class FireListenerSpecification extends PressListenerSpecification {
   // @public
   test( fireListener ) {
     super.test( fireListener );
-    if ( Tandem.VALIDATION ) {
+    if ( Tandem.VALIDATION && this.options.tandem.supplied ) {
 
       // In PhET-iO, we can look up the concrete emitter.
       // TODO: The firedEmitter is actually private in FireListener--we could make it public for testing? see https://github.com/phetsims/phet-io/issues/1657
