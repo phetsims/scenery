@@ -28,7 +28,7 @@ class FireListener extends PressListener {
    */
   constructor( options ) {
     const _options = options; // capture for testing. Stripped out in the build, does not create a closure variable
-    assert && onInstance( () => new FireListenerSpecification( this, _options ) );
+    assert && onInstance( () => new FireListenerSpecification( _options ).test( this ) );
 
     options = merge( {
 

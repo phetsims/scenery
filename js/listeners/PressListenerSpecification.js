@@ -1,7 +1,7 @@
 // Copyright 2020, University of Colorado Boulder
 
 import Action from '../../../axon/js/Action.js';
-import ActionAPI from '../../../axon/js/ActionAPI.js';
+import ActionSpecification from '../../../axon/js/ActionSpecification.js';
 import merge from '../../../phet-core/js/merge.js';
 import EventType from '../../../tandem/js/EventType.js';
 import ObjectSpecification from '../../../tandem/js/ObjectSpecification.js';
@@ -12,10 +12,9 @@ import scenery from '../scenery.js';
 class PressListenerSpecification extends ObjectSpecification {
 
   /**
-   * TODO: https://github.com/phetsims/phet-io/issues/1657 Pass instance instead of getter
    * @param {Object} [options]
    */
-  constructor( getParent, childName, options ) {
+  constructor( options ) {
     options = merge( {
       pressActionOptions: {
         phetioType: Action.ActionIO( [ SceneryEvent.SceneryEventIO ] ),
@@ -29,11 +28,17 @@ class PressListenerSpecification extends ObjectSpecification {
       }
     }, options );
 
-    super( getParent, childName );
+    super( options );
 
     // @public (read-only)
-    this.pressAction = new ActionAPI( options.pressActionOptions );
-    this.releaseAction = new ActionAPI( options.releaseActionOptions );
+    this.pressAction = new ActionSpecification( options.pressActionOptions );
+    this.releaseAction = new ActionSpecification( options.releaseActionOptions );
+  }
+
+  // @public
+  test( pressListener ) {
+    super.test( pressListener );
+    // TODO: https://github.com/phetsims/phet-io/issues/1657 look up the Actions via phetioEngine and run test on them.
   }
 }
 

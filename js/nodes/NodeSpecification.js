@@ -11,10 +11,9 @@ import Node from './Node.js';
 class NodeSpecification extends PhetioObjectSpecification {
 
   /**
-   * @param {Node} node
    * @param {Object} [options]
    */
-  constructor( node, options ) {
+  constructor( options ) {
 
     options = merge( {
       phetioType: Node.NodeIO,
@@ -36,32 +35,32 @@ class NodeSpecification extends PhetioObjectSpecification {
       }
     }, options );
 
-    super( node, options );
+    super( options );
 
 
     // TODO: https://github.com/phetsims/phet-io/issues/1657 Add these back in
-      // @public (read-only)
+    // @public (read-only)
 
-      // this.visibleProperty = new PropertyAPI( options.visiblePropertyOptions );
-      //
-      // if ( options.pickablePropertyPhetioInstrumented ) {
-      //
-      //   // @public (read-only)
-      //   this.pickableProperty = new PropertyAPI( options.pickablePropertyOptions );
-      // }
-      //
-      // if ( options.enabledPropertyPhetioInstrumented ) {
-      //
-      //   // @public (read-only)
-      //   this.enabledProperty = new PropertyAPI( options.enabledPropertyOptions );
-      // }
-      //
-      // // TODO: not supported yet, see https://github.com/phetsims/scenery/issues/1098
-      // if ( options.opacityPropertyInstrumented ) {
-      //
-      //   // @public (read-only)
-      //   this.opacityProperty = new PropertyAPI( options.opacityPropertyOptions );
-      // }
+    // this.visibleProperty = new PropertyAPI( options.visiblePropertyOptions );
+    //
+    // if ( options.pickablePropertyPhetioInstrumented ) {
+    //
+    //   // @public (read-only)
+    //   this.pickableProperty = new PropertyAPI( options.pickablePropertyOptions );
+    // }
+    //
+    // if ( options.enabledPropertyPhetioInstrumented ) {
+    //
+    //   // @public (read-only)
+    //   this.enabledProperty = new PropertyAPI( options.enabledPropertyOptions );
+    // }
+    //
+    // // TODO: not supported yet, see https://github.com/phetsims/scenery/issues/1098
+    // if ( options.opacityPropertyInstrumented ) {
+    //
+    //   // @public (read-only)
+    //   this.opacityProperty = new PropertyAPI( options.opacityPropertyOptions );
+    // }
   }
 }
 

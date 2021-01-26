@@ -18,10 +18,9 @@ import PressListenerSpecification from './PressListenerSpecification.js';
 class FireListenerSpecification extends PressListenerSpecification {
 
   /**
-   * @param {FireListener} fireListener
    * @param {Object} [options]
    */
-  constructor( fireListener, options ) {
+  constructor( options ) {
     options = merge( {
       firedEmitterOptions: {
         phetioType: Emitter.EmitterIO( [ NullableIO( SceneryEvent.SceneryEventIO ) ] ),
@@ -38,11 +37,16 @@ class FireListenerSpecification extends PressListenerSpecification {
     // TODO: The firedEmitter is actually private in FireListener--we could make it public for testing? see https://github.com/phetsims/phet-io/issues/1657
     if ( Tandem.VALIDATION && options.tandem.supplied ) {
 
-      const firedEmitter = phet.phetio.phetioEngine.getPhetioObject( options.tandem.createTandem( 'firedEmitter' ).phetioID );
-
       // @public (read-only)
-      this.firedEmitter = new EmitterSpecification( firedEmitter, options.firedEmitterOptions );
+      this.firedEmitter = new EmitterSpecification( options.firedEmitterOptions );
     }
+  }
+
+  // @public
+  test( fireListener ) {
+    super.test( fireListener );
+    const firedEmitter = phet.phetio.phetioEngine.getPhetioObject( this.options.tandem.createTandem( 'firedEmitter' ).phetioID );
+    this.firedEmitter && this.firedEmitter.test( firedEmitter );
   }
 }
 
