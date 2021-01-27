@@ -48,9 +48,6 @@ class PointerOverlay {
     //Display a pointer that was added.  Use a separate SVG layer for each pointer so it can be hardware accelerated, otherwise it is too slow just setting svg internal attributes
     this.pointerAdded = pointer => {
 
-      // TODO: I believe this can be removed? Double-check
-      if ( pointer.isKey ) { return; }
-
       const svg = document.createElementNS( svgns, 'svg' );
       svg.style.position = 'absolute';
       svg.style.top = 0;
