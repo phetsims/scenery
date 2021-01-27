@@ -212,6 +212,7 @@ class KeyboardFuzzer {
    */
   triggerDOMEvent( event, element, keycode ) {
     const eventObj = new KeyboardEvent( event, {
+      bubbles: true,
       code: keycode,
       which: keycode,
       shiftKey: globalKeyStateTracker.shiftKeyDown,
