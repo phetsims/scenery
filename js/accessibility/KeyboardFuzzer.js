@@ -215,6 +215,7 @@ class KeyboardFuzzer {
       bubbles: true,
       code: keycode,
       which: keycode,
+      keyCode: keycode,
       shiftKey: globalKeyStateTracker.shiftKeyDown,
       altKey: globalKeyStateTracker.altKeyDown,
       ctrlKey: globalKeyStateTracker.ctrlKeyDown
