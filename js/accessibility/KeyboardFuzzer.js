@@ -80,8 +80,10 @@ class KeyboardFuzzer {
    */
   clearListeners() {
     this.keyupListeners.forEach( listener => {
-      stepTimer.clearTimeout( listener );
+      assert && assert( typeof listener.timeout === 'function', 'should have an attached timeout' );
+      stepTimer.clearTimeout( listener.timeout );
       listener();
+      assert && assert( !this.keyupListeners.includes( listener ), 'calling listener should remove itself from the keyupListeners.' );
     } );
   }
 
@@ -114,12 +116,17 @@ class KeyboardFuzzer {
     // TODO: screen readers normally take our keydown events, but may not here, is the descrpency ok?
     this.triggerDOMEvent( KEY_DOWN, element, keyCode );
 
-    const timeout = this.random.nextInt( MAX_MS_KEY_HOLD_DOWN );
+    const randomTimeForKeypress = this.random.nextInt( MAX_MS_KEY_HOLD_DOWN );
 
-    this.keyupListeners.push( stepTimer.setTimeout( () => {
+    const keyupListener = () => {
       this.triggerDOMEvent( KEY_UP, element, keyCode );
+      if ( this.keyupListeners.includes( keyupListener ) ) {
+        this.keyupListeners.splice( this.keyupListeners.indexOf( keyupListener ), 1 );
+      }
+    };
 
-    }, timeout === MAX_MS_KEY_HOLD_DOWN ? 2000 : timeout ) );
+    keyupListener.timeout = stepTimer.setTimeout( keyupListener, randomTimeForKeypress === MAX_MS_KEY_HOLD_DOWN ? 2000 : randomTimeForKeypress );
+    this.keyupListeners.push( keyupListener );
 
     sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.pop();
   }
