@@ -894,7 +894,9 @@ class PressListener {
       'cannot focus node with zero or multiple accessible displays attached' );
     //
     this.display = accessibleDisplays[ 0 ];
-    this.display.focusHighlightsVisibleProperty.link( this.boundInvalidateOverListener );
+    if ( !this.display.focusHighlightsVisibleProperty.hasListener( this.boundInvalidateOverListener ) ) {
+      this.display.focusHighlightsVisibleProperty.link( this.boundInvalidateOverListener );
+    }
 
     // On focus, button should look 'over'.
     this.isFocusedProperty.value = true;
@@ -907,7 +909,9 @@ class PressListener {
    */
   blur() {
     if ( this.display ) {
-      this.display.focusHighlightsVisibleProperty.unlink( this.boundInvalidateOverListener );
+      if ( this.display.focusHighlightsVisibleProperty.hasListener( this.boundInvalidateOverListener ) ) {
+        this.display.focusHighlightsVisibleProperty.unlink( this.boundInvalidateOverListener );
+      }
       this.display = null;
     }
 
