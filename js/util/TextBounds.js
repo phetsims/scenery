@@ -242,7 +242,7 @@ var TextBounds = {
     const rect = span.getBoundingClientRect();
     const divRect = div.getBoundingClientRect();
     // add 1 pixel to rect.right to prevent HTML text wrapping
-    const result = new Bounds2( rect.left, rect.top - maxHeight, rect.right + 1, rect.bottom - maxHeight ).shifted( -divRect.left, -divRect.top );
+    const result = new Bounds2( rect.left, rect.top - maxHeight, rect.right + 1, rect.bottom - maxHeight ).shiftedXY( -divRect.left, -divRect.top );
     document.body.removeChild( div );
 
     return result;
