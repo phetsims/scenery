@@ -39,7 +39,7 @@ QUnit.test( 'insertElements', assert => {
   assert.ok( div1.childNodes[ 5 ] === div4, 'inserted div4 order of elements' );
 } );
 
-QUnit.test( 'getNextPreviousFocusable', assert => {
+QUnit.test( 'getNext/PreviousFocusable', assert => {
   const parent = PDOMUtils.createElement( 'div', false );
 
   const button = PDOMUtils.createElement( 'button', true ); // focusable
