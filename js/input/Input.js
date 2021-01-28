@@ -1785,6 +1785,11 @@ class Input {
     // Notify input listeners on the Display
     this.dispatchToListeners( pointer, this.display.getInputListeners(), type, inputEvent );
 
+    // Notify input listeners to any Display
+    if ( Display.inputListeners.length ) {
+      this.dispatchToListeners( pointer, Display.inputListeners.slice(), type, inputEvent );
+    }
+
     sceneryLog && sceneryLog.EventDispatch && sceneryLog.pop();
   }
 

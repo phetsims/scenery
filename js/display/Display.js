@@ -1328,7 +1328,7 @@ class Display {
    * @returns {Display} - For chaining
    */
   addInputListener( listener ) {
-    assert && assert( !_.includes( this._inputListeners, listener ), 'Input listener already registered on this Node' );
+    assert && assert( !_.includes( this._inputListeners, listener ), 'Input listener already registered on this Display' );
 
     // don't allow listeners to be added multiple times
     if ( !_.includes( this._inputListeners, listener ) ) {
@@ -1354,10 +1354,10 @@ class Display {
   }
 
   /**
-   * Returns whether this input listener is currently listening to this node.
+   * Returns whether this input listener is currently listening to this Display.
    * @public
    *
-   * More efficient than checking node.inputListeners, as that includes a defensive copy.
+   * More efficient than checking display.inputListeners, as that includes a defensive copy.
    *
    * @param {Object} listener
    * @returns {boolean}
@@ -2166,6 +2166,48 @@ class Display {
       }
     }
   }
+
+  /**
+   * Adds an input listener to be fired for ANY Display
+   * @public
+   *
+   * @param {Object} listener
+   */
+  static addInputListener( listener ) {
+    assert && assert( !_.includes( Display.inputListeners, listener ), 'Input listener already registered' );
+
+    // don't allow listeners to be added multiple times
+    if ( !_.includes( Display.inputListeners, listener ) ) {
+      Display.inputListeners.push( listener );
+    }
+  }
+
+  /**
+   * Removes an input listener that was previously added with Display.addInputListener.
+   * @public
+   *
+   * @param {Object} listener
+   */
+  static removeInputListener( listener ) {
+    // ensure the listener is in our list
+    assert && assert( _.includes( Display.inputListeners, listener ) );
+
+    Display.inputListeners.splice( _.indexOf( Display.inputListeners, listener ), 1 );
+  }
+
+  /**
+   * Interrupts all input listeners that are attached to all Displays.
+   * @public
+   */
+  static interruptInput() {
+    const listenersCopy = Display.inputListeners.slice( 0 );
+
+    for ( let i = 0; i < listenersCopy.length; i++ ) {
+      const listener = listenersCopy[ i ];
+
+      listener.interrupt && listener.interrupt();
+    }
+  }
 }
 
 scenery.register( 'Display', Display );
@@ -2195,5 +2237,9 @@ Display.focusProperty = new Property( null, {
 // See https://github.com/phetsims/scenery/issues/802 and https://github.com/phetsims/vibe/issues/32 for more
 // information.
 Display.userGestureEmitter = new Emitter();
+
+// @public {Array.<Object>} - Listeners that will be called for every event on ANY Display, see
+// https://github.com/phetsims/scenery/issues/1149. Do not directly modify this!
+Display.inputListeners = [];
 
 export default Display;
