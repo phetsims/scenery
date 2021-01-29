@@ -207,15 +207,15 @@ class KeyboardFuzzer {
    * Taken from example in http://output.jsbin.com/awenaq/3,
    * @param {string} event
    * @param {HTMLElement} element
-   * @param {number} keycode
+   * @param {number} keyCode
    * @private
    */
-  triggerDOMEvent( event, element, keycode ) {
+  triggerDOMEvent( event, element, keyCode ) {
     const eventObj = new KeyboardEvent( event, {
       bubbles: true,
-      code: keycode,
-      which: keycode,
-      keyCode: keycode,
+      code: keyCode,
+      which: keyCode,
+      keyCode: keyCode,
       shiftKey: globalKeyStateTracker.shiftKeyDown,
       altKey: globalKeyStateTracker.altKeyDown,
       ctrlKey: globalKeyStateTracker.ctrlKeyDown

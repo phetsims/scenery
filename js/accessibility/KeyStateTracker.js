@@ -28,7 +28,7 @@ class KeyStateTracker {
     }, options );
 
     // @private { Object.<number,{ keyCode: {number}, isDown: {boolean}, timeDown: [boolean] }> } - where the Object
-    // keys are the keycode. JavaScript doesn't handle multiple key presses, so we track which keys are currently
+    // keys are the keyCode. JavaScript doesn't handle multiple key presses, so we track which keys are currently
     // down and update based on state of this collection of objects.
     this.keyState = {};
 
@@ -205,7 +205,7 @@ class KeyStateTracker {
   }
 
   /**
-   * Returns true if a key with the keycode is currently down.
+   * Returns true if a key with the keyCode is currently down.
    *
    * @public
    * @param  {number} keyCode
@@ -224,7 +224,7 @@ class KeyStateTracker {
   /**
    * Returns true if any of the keys in the list are currently down.
    *
-   * @param  {Array.<number>} keys - array of keycodes
+   * @param  {Array.<number>} keys - array of keyCodes
    * @returns {boolean}
    * @public
    */
@@ -241,7 +241,7 @@ class KeyStateTracker {
   /**
    * Returns true if and only if all of the keys in the list are currently down.
    *
-   * @param  {Array.<number>} keys - array of keycodes
+   * @param  {Array.<number>} keys - array of keyCodes
    * @returns {boolean}
    * @public
    */

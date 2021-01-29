@@ -113,8 +113,8 @@ class PDOMPeer {
 
     // @private {boolean} - Indicates that this peer will position sibling elements so that
     // they are in the right location in the viewport, which is a requirement for touch based
-    // screen readers. See setPositionSiblings.
-    this.positionSiblings = true;
+    // screen readers. See setPositionInPDOM.
+    this.positionInPDOM = true;
 
     // @private {MutationObserver} - An observer that will call back any time a property of the primary
     // sibling changes. Used to reposition the sibling elements if the bounding box resizes. No need to loop over
@@ -241,8 +241,8 @@ class PDOMPeer {
 
     this.setFocusable( this.node.focusable );
 
-    // set the positionSiblings field to our updated instance
-    this.setPositionSiblings( this.node.positionSiblings );
+    // set the positionInPDOM field to our updated instance
+    this.setPositionInPDOM( this.node.positionInPDOM );
 
     // recompute and assign the association attributes that link two elements (like aria-labelledby)
     this.onAriaLabelledbyAssociationChange();
@@ -818,10 +818,10 @@ class PDOMPeer {
    * false to optimize when positioning is not necessary.
    * @public (scenery-internal)
    *
-   * @param {boolean} positionSiblings
+   * @param {boolean} positionInPDOM
    */
-  setPositionSiblings( positionSiblings ) {
-    this.positionSiblings = positionSiblings;
+  setPositionInPDOM( positionInPDOM ) {
+    this.positionInPDOM = positionInPDOM;
 
     // signify that it needs to be repositioned next frame, either off screen or to match
     // graphical rendering
@@ -890,7 +890,7 @@ class PDOMPeer {
     // by gesture navigation with the virtual cursor. Bounds for non-focusable elements in the ViewPort don't
     // need to be accurate because the AT doesn't need to send events to them.
     if ( this.node.focusable ) {
-      if ( this.positionSiblings ) {
+      if ( this.positionInPDOM ) {
         const transformSourceNode = this.node.pdomTransformSourceNode || this.node;
 
         scratchGlobalBounds.set( transformSourceNode.localBounds );

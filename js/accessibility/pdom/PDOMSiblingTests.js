@@ -43,7 +43,7 @@ const siblingBoundsCorrect = node => {
   const sourceNodeBounds = transformSourceNode ? transformSourceNode.globalBounds : node.globalBounds;
 
   const siblingBounds = getSiblingBounds( node );
-  const comparedBounds = node.positionSiblings ? sourceNodeBounds : PDOMPeer.OFFSCREEN_SIBLING_BOUNDS;
+  const comparedBounds = node.positionInPDOM ? sourceNodeBounds : PDOMPeer.OFFSCREEN_SIBLING_BOUNDS;
   return siblingBounds.equalsEpsilon( comparedBounds, PIXEL_PADDING );
 };
 
@@ -106,7 +106,7 @@ QUnit.test( 'PDOM transform source Node', assert => {
   const display = new Display( rootNode ); // eslint-disable-line
   document.body.appendChild( display.domElement );
 
-  const buttonNode = new Rectangle( 5, 5, 5, 5, { tagName: 'button', positionSiblings: true } );
+  const buttonNode = new Rectangle( 5, 5, 5, 5, { tagName: 'button', positionInPDOM: true } );
   const transformSourceNode = new Rectangle( 0, 0, 25, 25 );
 
   rootNode.addChild( buttonNode );
@@ -154,19 +154,19 @@ QUnit.test( 'setPositionElements test', assert => {
   const display = new Display( rootNode ); // eslint-disable-line
   document.body.appendChild( display.domElement );
 
-  const buttonNode = new Rectangle( 5, 5, 5, 5, { tagName: 'button' } );
+  const buttonNode = new Rectangle( 5, 5, 5, 5, { tagName: 'button', positionInPDOM: true } );
   rootNode.addChild( buttonNode );
 
   display.updateDisplay();
   assert.ok( siblingBoundsCorrect( buttonNode ), 'sibling bounds initially correct' );
 
-  buttonNode.setPositionSiblings( false );
+  buttonNode.setPositionInPDOM( false );
   display.updateDisplay();
-  assert.ok( siblingBoundsCorrect( buttonNode ), 'sibling bounds correct after positionSiblings false' );
+  assert.ok( siblingBoundsCorrect( buttonNode ), 'sibling bounds correct after positionInPDOM false' );
 
-  buttonNode.setPositionSiblings( true );
+  buttonNode.setPositionInPDOM( true );
   display.updateDisplay();
-  assert.ok( siblingBoundsCorrect( buttonNode ), 'sibling bounds repositioned after positionSiblings true' );
+  assert.ok( siblingBoundsCorrect( buttonNode ), 'sibling bounds repositioned after positionInPDOM true' );
 
   // remove the display element so it doesn't interfere with qunit api
   document.body.removeChild( display.domElement );

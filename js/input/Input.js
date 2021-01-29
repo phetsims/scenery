@@ -738,7 +738,7 @@ class Input {
           // we only want to respond to one or the other. See https://github.com/phetsims/scenery/issues/1094.
           // This is outside of the clickAction execution so that blocked clicks are not part of the PhET-iO data
           // stream.
-          if ( trail && !( _.some( trail.nodes, node => node.positionSiblings ) && eventName === 'click' &&
+          if ( trail && !( _.some( trail.nodes, node => node.positionInPDOM ) && eventName === 'click' &&
                event.timeStamp - this.upTimeStamp <= PDOM_CLICK_DELAY ) ) {
             this[ actionName ].execute( event );
           }

@@ -1,7 +1,7 @@
 // Copyright 2017-2020, University of Colorado Boulder
 
 /**
- * Collection of utility constants and functions for managing keyboard input. Constants are keycodes. Keycode is marked
+ * Collection of utility constants and functions for managing keyboard input. Constants are keyCodes. Keycode is marked
  * as deprecated, but alternatives do not have browser support. Once they do, consider replacing Event.keyCode
  * with Event.code.
  *
@@ -61,8 +61,8 @@ var KeyboardUtils = {
   KEY_K: 75,
   KEY_L: 76,
 
-  // beware that "="" and "+" keys share the same keycode, distinguish with shfitKey Event property
-  // also, these keycodes are different in Firefox, see http://www.javascripter.net/faq/keycodes.htm
+  // beware that "="" and "+" keys share the same keyCode, distinguish with shfitKey Event property
+  // also, these keyCodes are different in Firefox, see http://www.javascripter.net/faq/keyCodes.htm
   KEY_EQUALS: platform.firefox ? 61 : 187,
   KEY_PLUS: platform.firefox ? 61 : 187,
   KEY_MINUS: platform.firefox ? 173 : 189,
@@ -77,7 +77,7 @@ var KeyboardUtils = {
              keyCode === KeyboardUtils.KEY_UP_ARROW || keyCode === KeyboardUtils.KEY_DOWN_ARROW );
   },
 
-  // returns true if keycode is one of keys used for range inputs (key codes 33 - 40, inclusive)
+  // returns true if keyCode is one of keys used for range inputs (key codes 33 - 40, inclusive)
   isRangeKey( keyCode ) {
     return ( keyCode >= KeyboardUtils.KEY_PAGE_UP && keyCode <= KeyboardUtils.KEY_DOWN_ARROW );
   },
@@ -93,7 +93,7 @@ var KeyboardUtils = {
              keyCode === KeyboardUtils.KEY_S || keyCode === KeyboardUtils.KEY_D );
   },
 
-  // returns true if the keycode indicates a 'movement' key in keyboard dragging
+  // returns true if the keyCode indicates a 'movement' key in keyboard dragging
   isMovementKey( keyCode ) {
     return KeyboardUtils.MOVEMENT_KEYS.includes( keyCode );
   }

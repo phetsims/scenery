@@ -326,7 +326,7 @@ class KeyboardDragListener {
     // for a key that is already being tracked and down, nor call startDrag every keydown event)
     if ( this.keyInListDown( [ domEvent.keyCode ] ) ) { return; }
 
-    // Prevent a VoiceOver bug where pressing multiple arrow keys at once causes the AT to send the wrong keycodes
+    // Prevent a VoiceOver bug where pressing multiple arrow keys at once causes the AT to send the wrong keyCodes
     // through the keyup event - as a workaround, we only allow one arrow key to be down at a time. If two are pressed
     // down, we immediately clear the keystate and return
     // see https://github.com/phetsims/balloons-and-static-electricity/issues/384
@@ -776,7 +776,7 @@ class KeyboardDragListener {
 
 
   /**
-   * Returns true if the keycode corresponds to a key that should move the object to the left.
+   * Returns true if the keyCode corresponds to a key that should move the object to the left.
    *
    * @private
    * @returns {boolean}
@@ -786,7 +786,7 @@ class KeyboardDragListener {
   }
 
   /**
-   * Returns true if the keycode corresponds to a key that should move the object to the right.
+   * Returns true if the keyCode corresponds to a key that should move the object to the right.
    *
    * @public
    * @returns {boolean}
@@ -796,7 +796,7 @@ class KeyboardDragListener {
   }
 
   /**
-   * Returns true if the keycode corresponds to a key that should move the object up.
+   * Returns true if the keyCode corresponds to a key that should move the object up.
    *
    * @public
    * @returns {boolean}
@@ -806,7 +806,7 @@ class KeyboardDragListener {
   }
 
   /**
-   * Returns true if the keycode corresponds to a key that should move the object down.
+   * Returns true if the keyCode corresponds to a key that should move the object down.
    *
    * @public
    * @returns {boolean}
