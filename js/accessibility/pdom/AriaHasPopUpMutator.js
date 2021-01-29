@@ -28,7 +28,7 @@ const AriaHasPopUpMutator = {
       node.removeAccessibleAttribute( 'aria-haspopup' );
     }
 
-    node.positionSiblings = !!value;
+    node.positionInPDOM = !!value;
   }
 };
 
