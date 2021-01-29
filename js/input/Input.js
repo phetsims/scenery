@@ -273,7 +273,7 @@ class Input {
       let i = this.pointers.length;
       while ( i-- ) {
         const pointer = this.pointers[ i ];
-        if ( pointer.point ) {
+        if ( pointer.point && pointer !== this.pdomPointer ) {
           this.branchChangeEvents( pointer, pointer.lastDOMEvent, false );
         }
       }

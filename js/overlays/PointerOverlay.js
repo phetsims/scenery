@@ -10,15 +10,16 @@
  */
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
+import PDOMPointer from '../input/PDOMPointer.js';
 import Touch from '../input/Touch.js';
 import scenery from '../scenery.js';
-import Utils from '../util/Utils.js';
 import svgns from '../util/svgns.js';
+import Utils from '../util/Utils.js';
 
 class PointerOverlay {
   /**
    * @param {Display} display
-   * @param {Node} focusRootNode - the root node of our display
+   * @param {Node} rootNode - the root node of our display
    */
   constructor( display, rootNode ) {
     this.display = display;
@@ -70,26 +71,37 @@ class PointerOverlay {
       circle.setAttribute( 'style', 'stroke:white;' );
       circle.setAttribute( 'opacity', '0.4' );
 
+      const updateToPoint = point => Utils.applyPreparedTransform( scratchMatrix.setToTranslation( point.x - radius, point.y - radius ), svg );
+
       //Add a move listener to the pointer to update position when it has moved
       const pointerRemoved = () => {
 
-        //For touches that get a touch up event, remove them.  But when the mouse button is released, don't stop showing the mouse location
+        // For touches that get a touch up event, remove them.  But when the mouse button is released, don't stop
+        // showing the mouse location
         if ( pointer instanceof Touch ) {
           this.pointerSVGContainer.removeChild( svg );
           pointer.removeInputListener( moveListener );
         }
       };
       var moveListener = {
-        move: () => {
-          //TODO: Why is point sometimes null?
-          if ( pointer.point ) {
 
-            Utils.applyPreparedTransform( scratchMatrix.setToTranslation( pointer.point.x - radius, pointer.point.y - radius ), svg );
+        // Mouse/Touch/Pen
+        move: () => {
+          pointer.point && updateToPoint( pointer.point );
+        },
+        up: pointerRemoved,
+        cancel: pointerRemoved,
+
+        // PDOMPointer
+        focus: () => {
+          if ( pointer instanceof PDOMPointer && pointer.point ) {
+            updateToPoint( pointer.point );
+            this.pointerSVGContainer.appendChild( svg );
           }
         },
-
-        up: pointerRemoved,
-        cancel: pointerRemoved
+        blur: () => {
+          this.pointerSVGContainer.removeChild( svg );
+        }
       };
       pointer.addInputListener( moveListener );
 
@@ -100,7 +112,7 @@ class PointerOverlay {
     display._input.addPointerAddedListener( this.pointerAdded );
 
     //if there is already a mouse, add it here
-    //TODO: if there already other non-mouse touches, could be added here
+    // TODO: if there already other non-mouse touches, could be added here
     if ( display._input && display._input.mouse ) {
       this.pointerAdded( display._input.mouse );
     }
