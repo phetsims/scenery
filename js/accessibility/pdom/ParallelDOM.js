@@ -1341,7 +1341,7 @@ const ParallelDOM = {
        * clear this attribute.
        *
        * @public
-       * @param {string|number} ariaValueText
+       * @param {string|null} ariaValueText
        */
       setAriaValueText: function( ariaValueText ) {
         assert && assert( ariaValueText === null || typeof ariaValueText === 'string' );
