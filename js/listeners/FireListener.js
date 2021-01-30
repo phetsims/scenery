@@ -13,13 +13,11 @@ import CallbackTimer from '../../../axon/js/CallbackTimer.js';
 import Emitter from '../../../axon/js/Emitter.js';
 import merge from '../../../phet-core/js/merge.js';
 import EventType from '../../../tandem/js/EventType.js';
-import onInstance from '../../../tandem/js/onInstance.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import SceneryEvent from '../input/SceneryEvent.js';
 import scenery from '../scenery.js';
-import FireListenerSpecification from './FireListenerSpecification.js';
 import PressListener from './PressListener.js';
 
 class FireListener extends PressListener {
@@ -27,9 +25,6 @@ class FireListener extends PressListener {
    * @param {Object} [options] - See the constructor body (below) and in PressListener for documented options.
    */
   constructor( options ) {
-    const _options = options; // capture for testing. Stripped out in the build, does not create a closure variable
-    assert && onInstance( () => new FireListenerSpecification( _options ).test( this ) );
-
     options = merge( {
 
       // {Function} - Called as fire() when the button is fired.
