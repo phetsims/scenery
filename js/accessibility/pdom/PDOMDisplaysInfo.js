@@ -78,7 +78,7 @@ class PDOMDisplaysInfo {
    * @param {number} newBitmask
    */
   onSummaryChange( oldBitmask, newBitmask ) {
-    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onSummaryChange n#' + this.node.id + ' wasA11y:' + !( Renderer.bitmaskNoPDOM & oldBitmask ) + ', isA11y:' + !( Renderer.bitmaskNoPDOM & newBitmask ) );
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onSummaryChange n#' + this.node.id + ' wasPDOM:' + !( Renderer.bitmaskNoPDOM & oldBitmask ) + ', isPDOM:' + !( Renderer.bitmaskNoPDOM & newBitmask ) );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     // If we are invisible, our pdomDisplays would not have changed ([] => [])

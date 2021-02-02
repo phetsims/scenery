@@ -1885,7 +1885,7 @@ class RichTextLink extends Node {
         fire: event => {
           if ( event.isFromPDOM() ) {
 
-            // prevent default from a11y activation so we don't also open a new tab from native DOM input on a link
+            // prevent default from pdom activation so we don't also open a new tab from native DOM input on a link
             event.domEvent.preventDefault();
           }
           self._linkEventsHandled && event.handle();

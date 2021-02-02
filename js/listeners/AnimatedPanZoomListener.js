@@ -117,7 +117,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
       window.addEventListener( 'gesturechange', boundGestureChangeListener );
     }
 
-    // Handle key input from events outside of the PDOM - in this case it is impossible for the a11y pointer
+    // Handle key input from events outside of the PDOM - in this case it is impossible for the PDOMPointer
     // to be attached so we have free reign over the keyboard
     globalKeyStateTracker.keydownEmitter.addListener( this.windowKeydown.bind( this ) );
 

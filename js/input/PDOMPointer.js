@@ -103,7 +103,7 @@ class PDOMPointer extends Pointer {
 
   /**
    * Recompute the trail to the node under this PDOMPointer. Updating the trail here is generally not necessary since
-   * it is recomputed on focus. But there are times where a11y events can be called out of order with focus/blur
+   * it is recomputed on focus. But there are times where pdom events can be called out of order with focus/blur
    * and the trail will either be null or stale. This might happen more often when scripting fake browser events
    * with a timeout (like in fuzzBoard).
    *

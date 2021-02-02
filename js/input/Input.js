@@ -240,7 +240,7 @@ class Input {
     // @private {Array.<BatchedDOMEvent}>
     this.batchedEvents = [];
 
-    // @public {PDOMPointer|null} - Pointer for accessibility, only created lazily on first a11y event.
+    // @public {PDOMPointer|null} - Pointer for accessibility, only created lazily on first pdom event.
     this.pdomPointer = null;
 
     // @public {Mouse|null} - Pointer for mouse, only created lazily on first mouse event, so no mouse is allocated on.
@@ -554,8 +554,8 @@ class Input {
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
         const trail = this.updateTrailForPDOMDispatch( event );
-        this.dispatchA11yEvent( trail, 'focus', event, false );
-        this.dispatchA11yEvent( trail, 'focusin', event, true );
+        this.dispatchPDOMEvent( trail, 'focus', event, false );
+        this.dispatchPDOMEvent( trail, 'focusin', event, true );
 
         sceneryLog && sceneryLog.Input && sceneryLog.pop();
       }, {
@@ -586,8 +586,8 @@ class Input {
         this.pdomPointer.invalidateTrail( this.getTrailId( event ) );
 
         const trail = this.updateTrailForPDOMDispatch( event );
-        this.dispatchA11yEvent( trail, 'blur', event, false );
-        this.dispatchA11yEvent( trail, 'focusout', event, true );
+        this.dispatchPDOMEvent( trail, 'blur', event, false );
+        this.dispatchPDOMEvent( trail, 'focusout', event, true );
 
         // clear the trail to make sure that our assertions aren't testing a stale trail, do this before
         // focusing event.relatedTarget below so that trail isn't cleared after focus
@@ -626,7 +626,7 @@ class Input {
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
         const trail = this.updateTrailForPDOMDispatch( event );
-        this.dispatchA11yEvent( trail, 'click', event, true );
+        this.dispatchPDOMEvent( trail, 'click', event, true );
 
         sceneryLog && sceneryLog.Input && sceneryLog.pop();
       }, {
@@ -645,7 +645,7 @@ class Input {
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
         const trail = this.updateTrailForPDOMDispatch( event );
-        this.dispatchA11yEvent( trail, 'input', event, true );
+        this.dispatchPDOMEvent( trail, 'input', event, true );
 
         sceneryLog && sceneryLog.Input && sceneryLog.pop();
       }, {
@@ -664,7 +664,7 @@ class Input {
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
         const trail = this.updateTrailForPDOMDispatch( event );
-        this.dispatchA11yEvent( trail, 'change', event, true );
+        this.dispatchPDOMEvent( trail, 'change', event, true );
 
         sceneryLog && sceneryLog.Input && sceneryLog.pop();
       }, {
@@ -683,7 +683,7 @@ class Input {
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
         const trail = this.updateTrailForPDOMDispatch( event );
-        this.dispatchA11yEvent( trail, 'keydown', event, true );
+        this.dispatchPDOMEvent( trail, 'keydown', event, true );
 
         sceneryLog && sceneryLog.Input && sceneryLog.pop();
       }, {
@@ -702,7 +702,7 @@ class Input {
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
         const trail = this.updateTrailForPDOMDispatch( event );
-        this.dispatchA11yEvent( trail, 'keyup', event, true );
+        this.dispatchPDOMEvent( trail, 'keyup', event, true );
 
         sceneryLog && sceneryLog.Input && sceneryLog.pop();
       }, {
@@ -747,7 +747,7 @@ class Input {
         }, accessibleEventOptions );
       } );
 
-      // Add a listener to the document body that will capture any keydown for a11y before focus is in this display.
+      // Add a listener to the document body that will capture any keydown for pdom before focus is in this display.
       document.body.addEventListener( 'keydown', this.handleDocumentKeydown.bind( this ) );
     }
   }
@@ -1007,7 +1007,7 @@ class Input {
   }
 
   /**
-   * Initializes the accessible pointer object on the first a11y event.
+   * Initializes the accessible pointer object on the first pdom event.
    * @private
    */
   initPDOMPointer() {
@@ -1017,7 +1017,7 @@ class Input {
   }
 
   /**
-   * Steps to dispatch an a11y related event. Before dispatch, the PDOMPointer is initialized if it
+   * Steps to dispatch an pdom-related event. Before dispatch, the PDOMPointer is initialized if it
    * hasn't been created yet and a userGestureEmitter emits to indicate that a user has begun an interaction.
    * @private
    *
@@ -1026,7 +1026,7 @@ class Input {
    * @param {Event} domEvent
    * @param {boolean} bubbles
    */
-  dispatchA11yEvent( trail, eventType, domEvent, bubbles ) {
+  dispatchPDOMEvent( trail, eventType, domEvent, bubbles ) {
     Display.userGestureEmitter.emit();
 
     // This workaround hopefully won't be here forever, see ParallelDOM.setExcludeLabelSiblingFromInput() and https://github.com/phetsims/a11y-research/issues/156
@@ -1880,9 +1880,10 @@ class Input {
   }
 
   /**
-   * A listener for the document body that will capture any keydown for a11y before focus is within the root of
+   * A listener for the document body that will capture any keydown before focus is within the root of
    * the PDOM or handled by scenery. This is mostly useful for platform specific workarounds or signifying to the
-   * Display that user interaction has begun. Otherwise, most a11y listeners should instead go through dispatchEvent.
+   * Display that user interaction has begun. Otherwise, most listeners from the pdom should instead go through
+   * dispatchEvent.
    * @private
    *
    * @param {Event} event

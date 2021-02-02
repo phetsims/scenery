@@ -392,9 +392,9 @@ class PDOMPeer {
    * Set all pdom attributes onto the peer elements from the model's stored data objects
    * @private
    *
-   * @param {Object} [a11yOptions] - these can override the values of the node, see this.update()
+   * @param {Object} [pdomOptions] - these can override the values of the node, see this.update()
    */
-  onAttributeChange( a11yOptions ) {
+  onAttributeChange( pdomOptions ) {
 
     for ( let i = 0; i < this.node.pdomAttributes.length; i++ ) {
       const dataObject = this.node.pdomAttributes[ i ];
@@ -402,8 +402,8 @@ class PDOMPeer {
       let value = dataObject.value;
 
       // allow overriding of aria-label for accessibleName setter
-      if ( attribute === 'aria-label' && a11yOptions && typeof a11yOptions.ariaLabel === 'string' && dataObject.options.elementName === PRIMARY_SIBLING ) {
-        value = a11yOptions.ariaLabel;
+      if ( attribute === 'aria-label' && pdomOptions && typeof pdomOptions.ariaLabel === 'string' && dataObject.options.elementName === PRIMARY_SIBLING ) {
+        value = pdomOptions.ariaLabel;
       }
       this.setAttributeToElement( attribute, value, dataObject.options );
     }

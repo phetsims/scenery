@@ -54,7 +54,7 @@ class PressListener {
 
       // {function} - Called as release( event: {SceneryEvent|null}, listener: {PressListener} ) when this listener is
       // released. Note that an SceneryEvent arg cannot be guaranteed from this listener. This is, in part, to support
-      // interrupt. (pointer up/cancel or interrupt when pressed/after a11y click).
+      // interrupt. (pointer up/cancel or interrupt when pressed/after click from the pdom).
       // NOTE: This will also be called if the press is "released" due to being interrupted or canceled.
       release: _.noop,
 
@@ -219,17 +219,17 @@ class PressListener {
     // properties)
     this._isHighlightedListener = this.invalidateHighlighted.bind( this );
 
-    // @public {BooleanProperty} (read-only) - Whether or not a press is being processed from an a11y click input event
+    // @public {BooleanProperty} (read-only) - Whether or not a press is being processed from a pdom click input event
     // from the PDOM.
     this.pdomClickingProperty = new BooleanProperty( false );
 
-    // @public {BooleanProperty} (read-only) - This Property was added for a11y. It tracks whether or not the button
-    // should "look" down. This will be true if downProperty is true or if an a11y click is in progress. For an a11y
-    // click, the listeners are fired right away but the button will look down for as long as a11yLooksPressedInterval.
-    // See PressListener.click() for more details.
+    // @public {BooleanProperty} (read-only) - This Property was added to support input from the PDOM. It tracks whether
+    // or not the button should "look" down. This will be true if downProperty is true or if a pdom click is in
+    // progress. For a click event from the pdom, the listeners are fired right away but the button will look down for
+    // as long as a11yLooksPressedInterval. See PressListener.click() for more details.
     this.looksPressedProperty = DerivedProperty.or( [ this.pdomClickingProperty, this.isPressedProperty ] );
 
-    // @private {function|null} - When a11y clicking begins, this will be added to a timeout so that the
+    // @private {function|null} - When pdom clicking begins, this will be added to a timeout so that the
     // pdomClickingProperty is updated after some delay. This is required since an assistive device (like a switch) may
     // send "click" events directly instead of keydown/keyup pairs. If a click initiates while already in progress,
     // this listener will be removed to start the timeout over. null until timout is added.
@@ -461,7 +461,7 @@ class PressListener {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} interrupt` );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-    // handle a11y interrupt
+    // handle pdom interrupt
     if ( this.pdomClickingProperty.value ) {
       this.interrupted = true;
 
@@ -477,7 +477,7 @@ class PressListener {
         this._releaseListener( null, this );
       }
 
-      // clear the clicking timer, specific to a11y input
+      // clear the clicking timer, specific to pdom input
       if ( stepTimer.hasListener( this._pdomClickingTimeoutListener ) ) {
         stepTimer.clearTimeout( this._pdomClickingTimeoutListener );
 
@@ -830,12 +830,12 @@ class PressListener {
 
   /**
    * Click listener, called when this is treated as an accessible input listener.
-   * @public - In general not needed to be public, but just used in edge cases to get proper click logic for a11y.
+   * @public - In general not needed to be public, but just used in edge cases to get proper click logic for pdom.
    * @pdom
    *
-   * Handle the click event from DOM for a11y. Clicks by calling press and release immediately.
+   * Handle the click event from DOM for PDOM. Clicks by calling press and release immediately.
    * When assistive technology is used, the browser may not receive 'keydown' or 'keyup' events on input elements, but
-   * only a single 'click' event. For a11y we need to toggle the pressed state from the single 'click' event.
+   * only a single 'click' event. We need to toggle the pressed state from the single 'click' event.
    *
    * This will fire listeners immediately, but adds a delay for the pdomClickingProperty so that you can make a
    * button look pressed from a single DOM click event. For example usage, see sun/ButtonModel.looksPressedProperty.

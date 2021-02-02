@@ -149,7 +149,7 @@ extend( scenery, {
       this.enableIndividualLog( 'EventDispatch' );
       return;
     }
-    if ( name === 'a11y' ) {
+    if ( name === 'a11y' || name === 'pdom' ) {
       this.enableIndividualLog( 'ParallelDOM' );
       this.enableIndividualLog( 'PDOMInstance' );
       this.enableIndividualLog( 'PDOMTree' );

@@ -307,7 +307,7 @@ class DragListener extends PressListener {
   }
 
   /**
-   * DragListener should not be clicked for a11y, this prevents that listener from being called.
+   * DragListener should not be clicked by pdom listeners, this prevents that listener from being called.
    * See https://github.com/phetsims/scenery/issues/903
    * @public
    * @returns {boolean}

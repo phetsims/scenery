@@ -13,10 +13,10 @@
 import scenery from '../scenery.js';
 
 /**
- * @name a11yBehaviorFunction
- * A function that will mutate given options object to achieve the correct a11y structure in the PDOM.
+ * @name pdomBehaviorFunction
+ * A function that will mutate given options object to achieve the correct structure in the PDOM.
  * @function
- * @param {Node} node - the node that the a11y behavior is being applied to
+ * @param {Node} node - the node that the pdom behavior is being applied to
  * @param {Object} [options] - options to mutate within the function
  * @param {string} value - the value that you are setting the behavior of, like the accessibleName
  * @param {function[]} callbacksForOtherNodes - behavior function also support taking state from a Node and using it to
@@ -27,7 +27,7 @@ import scenery from '../scenery.js';
 const PDOMBehaviorFunctionDef = {
 
   /**
-   * Will assert out if the behavior function doesn't match the expected features of A11yBehaviorFunction
+   * Will assert out if the behavior function doesn't match the expected features of pdomBehaviorFunction
    * @param {function} behaviorFunction
    */
   validatePDOMBehaviorFunctionDef( behaviorFunction ) {

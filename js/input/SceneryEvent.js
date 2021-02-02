@@ -89,7 +89,7 @@ class SceneryEvent {
 
   /**
    * Specifies whether or not the SceneryEvent came from alternative input. See Input.PDOM_EVENT_TYPES for a list of events
-   * a11y related events supported by scenery. These events are exclusively supported by the ParallelDOM for Interactive
+   * pdom-related events supported by scenery. These events are exclusively supported by the ParallelDOM for Interactive
    * description.
    * @public
    * @returns {boolean}

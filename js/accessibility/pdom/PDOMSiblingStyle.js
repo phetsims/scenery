@@ -15,12 +15,11 @@ import scenery from '../../scenery.js';
 import SceneryStyle from '../../util/SceneryStyle.js';
 
 // constants
-// REVIEW: Consider renaming this to a11y-pdom-element (or something more universal)
-const SIBLING_CLASS_NAME = 'pdom-sibling';
-const ROOT_CLASS_NAME = 'pdom-root';
+const SIBLING_CLASS_NAME = 'a11y-pdom-element';
+const ROOT_CLASS_NAME = 'a11y-pdom-root';
 
 // All elements that use PDOMUtils.createElement should have this style. The only exception is the root of
-// the PDOM, which should use 'a11y-root' class attributes instead.
+// the PDOM, which should use root class attributes instead.
 SceneryStyle.addRule( '.' + SIBLING_CLASS_NAME +
                       '{' +
 

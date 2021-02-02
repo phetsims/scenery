@@ -130,7 +130,7 @@ var PDOMTree = {
       }
     }
 
-    // NOTE: Performance could be improved in some cases if we can avoid rebuilding an a11y tree for DIRECT children
+    // NOTE: Performance could be improved in some cases if we can avoid rebuilding an pdom tree for DIRECT children
     // when changing whether they are present in the pdomOrder. Basically, if something is a child and NOT
     // in an pdomOrder, changing its parent's order to include it (or vice versa) triggers a rebuild when it
     // would not strictly be necessary.
@@ -388,7 +388,7 @@ var PDOMTree = {
   },
 
   /**
-   * Prepares for an a11y-tree-changing operation (saving some state). During DOM operations we don't want Display
+   * Prepares for an pdom-tree-changing operation (saving some state). During DOM operations we don't want Display
    * input to dispatch events as focus changes.
    * @private
    *
@@ -412,7 +412,7 @@ var PDOMTree = {
   },
 
   /**
-   * Finalizes an a11y-tree-changing operation (restoring some state).
+   * Finalizes an pdom-tree-changing operation (restoring some state).
    * @private
    *
    * @param {Array.<Display>} blockedDisplays
@@ -502,7 +502,7 @@ var PDOMTree = {
           Array.prototype.push.apply( displays, node._parents[ i ]._pdomDisplaysInfo.pdomDisplays );
         }
 
-        // And concatenation of any rooted displays (that are a11y)
+        // And concatenation of any rooted displays (that support pdom)
         for ( i = 0; i < node._rootedDisplays.length; i++ ) {
           const display = node._rootedDisplays[ i ];
           if ( display._accessible ) {

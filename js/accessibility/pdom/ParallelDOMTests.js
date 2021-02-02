@@ -1834,20 +1834,20 @@ QUnit.test( 'Node.enabledProperty with PDOM', assert => {
   var display = new Display( rootNode ); // eslint-disable-line
   document.body.appendChild( display.domElement );
 
-  const a11yNode = new Node( {
+  const pdomNode = new Node( {
     tagName: 'p'
   } );
 
-  rootNode.addChild( a11yNode );
-  assert.ok( a11yNode.pdomInstances.length === 1, 'should have an instance when attached to display' );
-  assert.ok( !!a11yNode.pdomInstances[ 0 ].peer, 'should have a peer' );
+  rootNode.addChild( pdomNode );
+  assert.ok( pdomNode.pdomInstances.length === 1, 'should have an instance when attached to display' );
+  assert.ok( !!pdomNode.pdomInstances[ 0 ].peer, 'should have a peer' );
 
   // TODO: is it important that aria-disabled is false on all enabled Nodes? See https://github.com/phetsims/scenery/issues/1100
-  // assert.ok( a11yNode.pdomInstances[ 0 ].peer.primarySibling.getAttribute( 'aria-disabled' ) === 'false', 'should be enabled' );
+  // assert.ok( pdomNode.pdomInstances[ 0 ].peer.primarySibling.getAttribute( 'aria-disabled' ) === 'false', 'should be enabled' );
 
-  a11yNode.enabled = false;
-  assert.ok( a11yNode.pdomInstances[ 0 ].peer.primarySibling.getAttribute( 'aria-disabled' ) === 'true', 'should be enabled' );
-  a11yNode.dispose;
+  pdomNode.enabled = false;
+  assert.ok( pdomNode.pdomInstances[ 0 ].peer.primarySibling.getAttribute( 'aria-disabled' ) === 'true', 'should be enabled' );
+  pdomNode.dispose;
   display.dispose();
 } );
 
