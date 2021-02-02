@@ -82,11 +82,11 @@ function getPrimarySiblingElementByNode( node ) {
 
 /**
  * Audit the root node for accessible content within a test, to make sure that content is accessible as we expect,
- * and so that our accessibleAudit function may catch things that have gone wrong.
+ * and so that our pdomAudit function may catch things that have gone wrong.
  * @param {Node} rootNode - the root Node attached to the Display being tested
  */
-function accessibleAuditRootNode( rootNode ) {
-  rootNode.accessibleAudit();
+function pdomAuditRootNode( rootNode ) {
+  rootNode.pdomAudit();
 }
 
 QUnit.test( 'tagName/innerContent options', assert => {
@@ -432,7 +432,7 @@ QUnit.test( 'ParallelDOM options', assert => {
   //    <p>Test Description</p>
   //  </div>
   // </div>
-  accessibleAuditRootNode( rootNode );
+  pdomAuditRootNode( rootNode );
   let buttonElement = getPrimarySiblingElementByNode( buttonNode );
 
   const buttonParent = buttonElement.parentNode;
@@ -676,7 +676,7 @@ function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
   };
 
   // audit the content we have created
-  accessibleAuditRootNode( rootNode );
+  pdomAuditRootNode( rootNode );
 
   // Check basic associations within single node
   checkOnYourOwnAssociations( j );
@@ -917,7 +917,7 @@ QUnit.test( 'ParallelDOM setters/getters', assert => {
   assert.ok( a1Element.hidden, true, 'hidden set as Property' );
   assert.ok( a1Element.getAttribute( 'hidden' ) === '', 'hidden should not be set as attribute' );
 
-  accessibleAuditRootNode( a1 );
+  pdomAuditRootNode( a1 );
 
   display.dispose();
 } );
@@ -987,7 +987,7 @@ QUnit.test( 'Next/Previous focusable', assert => {
   util.getNextFocusable( rootElement ).focus();
   assert.ok( document.activeElement.id === aElement.id, 'a only element focusable' );
 
-  accessibleAuditRootNode( rootNode );
+  pdomAuditRootNode( rootNode );
   display.dispose();
 
 } );
@@ -1456,7 +1456,7 @@ QUnit.test( 'Aria Label Setter', assert => {
   assert.ok( buttonA.innerHTML === '', 'no inner html with aria-label setter when clearing' );
   assert.ok( a.ariaLabel === null, 'cleared in Node model.' );
 
-  accessibleAuditRootNode( rootNode );
+  pdomAuditRootNode( rootNode );
   display.dispose();
 
 } );
@@ -1594,7 +1594,7 @@ QUnit.test( 'append siblings/appendLabel/appendDescription setters', assert => {
   assert.ok( bElementParent.childNodes[ indexOfPrimaryElement ] === bElement, 'b primary sibling second with no container, description appended' );
   assert.ok( bElementParent.childNodes[ indexOfPrimaryElement + 1 ] === bPeer.descriptionSibling, 'b description sibling third with no container, description appended' );
 
-  accessibleAuditRootNode( rootNode );
+  pdomAuditRootNode( rootNode );
   display.dispose();
 
 } );
@@ -1622,7 +1622,7 @@ QUnit.test( 'containerAriaRole option', assert => {
   aElement = getPrimarySiblingElementByNode( a );
   assert.ok( aElement.parentElement.getAttribute( 'role' ) === null, 'role attribute should be cleared on parent element' );
 
-  accessibleAuditRootNode( rootNode );
+  pdomAuditRootNode( rootNode );
   display.dispose();
 
 } );
@@ -1650,7 +1650,7 @@ QUnit.test( 'ariaRole option', assert => {
   aElement = getPrimarySiblingElementByNode( a );
   assert.ok( aElement.getAttribute( 'role' ) === null, 'role attribute should be cleared on element' );
 
-  accessibleAuditRootNode( rootNode );
+  pdomAuditRootNode( rootNode );
   display.dispose();
 
 } );
@@ -1709,7 +1709,7 @@ QUnit.test( 'accessibleName option', assert => {
   cLabelElement = getPrimarySiblingElementByNode( c ).parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
   assert.ok( cLabelElement.getAttribute( 'aria-label' ) === 'overrideThis', 'accessibleNameBehavior should not work until there is accessible name' );
 
-  accessibleAuditRootNode( rootNode );
+  pdomAuditRootNode( rootNode );
   display.dispose();
 
 } );
@@ -1793,7 +1793,7 @@ QUnit.test( 'helpText option', assert => {
   bDescriptionElement = getPrimarySiblingElementByNode( b ).parentElement.children[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
   assert.ok( bDescriptionElement.textContent === 'overrideThis', 'helpTextBehavior should not work until there is help text' );
 
-  accessibleAuditRootNode( rootNode );
+  pdomAuditRootNode( rootNode );
   display.dispose();
 } );
 
