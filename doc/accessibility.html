@@ -644,7 +644,7 @@
 
     <h4 id="enable-a11y">Enabling A11y</h4>
     <p>
-      Accessibility features are hidden behind an <code>?supportsDescriptions</code> query parameter. This hides a11y features
+      Accessibility features are hidden behind an <code>?supportsDescription</code> query parameter. This hides a11y features
       until they are ready for production. When ready, accessibility can be enabled by default by adding
       <code>Sim</code>
       option <code>accessibility: true</code> to <code>{{sim}}-main.js</code>.
@@ -676,7 +676,7 @@
 
     <h4>Beginning a11y work on a sim</h4>
     <p>
-      When beginning a11y work in a simulation, add <code>"supportsInteractiveDescriptions": true</code> to the sim's package.json.
+      When beginning a11y work in a simulation, add <code>"supportsInteractiveDescription": true</code> to the sim's package.json.
       Then regenerate the lists to add the simulation to perennial/data/interactive-descriptions list, and generate an
       a11y-view HTML document to assist with development (<code>grunt generate-a11y-view-html</code>).
     </p>

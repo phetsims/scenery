@@ -308,7 +308,7 @@ const PDOMUtils = {
     assert && assert( domElement instanceof Element ); // parent to HTMLElement, to support other namespaces
     assert && assert( typeof textContent === 'string' );
 
-    // TODO: this line must be removed to support i18n Interactive Descriptions, see https://github.com/phetsims/chipper/issues/798
+    // TODO: this line must be removed to support i18n Interactive Description, see https://github.com/phetsims/chipper/issues/798
     const textWithoutEmbeddingMarks = stripEmbeddingMarks( textContent );
 
     // Disallow any unfilled template variables to be set in the PDOM.

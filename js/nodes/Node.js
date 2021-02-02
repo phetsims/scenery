@@ -5696,7 +5696,7 @@ Node.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
 scenery.register( 'Node', Node );
 
-// Node is composed with this feature of Interactive Descriptions
+// Node is composed with this feature of Interactive Description
 ParallelDOM.compose( Node );
 
 // @public {IOType}
