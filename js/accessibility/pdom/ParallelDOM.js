@@ -190,7 +190,7 @@ const ACCESSIBILITY_OPTION_KEYS = [
   'innerContent', // {string|null} - Sets the inner text or HTML for a node's primary sibling element
   'inputType', // {string|null} - Sets the input type for the primary sibling DOM element, only relevant if tagName is 'input'
   'inputValue', // {string|null} - Sets the input value for the primary sibling DOM element, only relevant if tagName is 'input'
-  'accessibleChecked', // {string|null} - Sets the 'checked' state for inputs of type 'radio' and 'checkbox'
+  'pdomChecked', // {string|null} - Sets the 'checked' state for inputs of type 'radio' and 'checkbox'
   'pdomNamespace', // {string|null} - Sets the namespace for the primary element
   'ariaLabel', // {string|null} - Sets the value of the 'aria-label' attribute on the primary sibling of this Node
   'ariaRole', // {string|null} - Sets the ARIA role for the primary sibling of this Node
@@ -281,7 +281,7 @@ const ParallelDOM = {
 
         // @private {boolean} - whether or not the accessible input is considered 'checked', only useful for inputs of
         // type 'radio' and 'checkbox'
-        this._accessibleChecked = false;
+        this._pdomChecked = false;
 
         // @private {boolean} - By default the label will be prepended before the primary sibling in the PDOM. This
         // option allows you to instead have the label added after the primary sibling. Note: The label will always
@@ -569,9 +569,9 @@ const ParallelDOM = {
         if ( this.hasPDOMContent && assert ) {
 
           this._inputType && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support inputType' );
-          this._accessibleChecked && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support accessibleChecked.' );
+          this._pdomChecked && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support pdomChecked.' );
           this._inputValue && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support inputValue' );
-          this._accessibleChecked && assert( INPUT_TYPES_THAT_SUPPORT_CHECKED.indexOf( this._inputType.toUpperCase() ) >= 0, 'inputType does not support checked attribute: ' + this._inputType );
+          this._pdomChecked && assert( INPUT_TYPES_THAT_SUPPORT_CHECKED.indexOf( this._inputType.toUpperCase() ) >= 0, 'inputType does not support checked attribute: ' + this._inputType );
           this._focusHighlightLayerable && assert( this.focusHighlight instanceof Node, 'focusHighlight must be Node if highlight is layerable' );
           this._tagName.toUpperCase() === INPUT_TAG && assert( typeof this._inputType === 'string', ' inputType expected for input' );
 
@@ -2262,7 +2262,7 @@ const ParallelDOM = {
        * @public
        * @param {boolean} checked
        */
-      setAccessibleChecked: function( checked ) {
+      setPDOMChecked: function( checked ) {
         assert && assert( typeof checked === 'boolean' );
 
         if ( this._tagName ) {
@@ -2272,15 +2272,15 @@ const ParallelDOM = {
           assert && assert( INPUT_TYPES_THAT_SUPPORT_CHECKED.indexOf( this._inputType.toUpperCase() ) >= 0, 'inputType does not support checked: ' + this._inputType );
         }
 
-        if ( this._accessibleChecked !== checked ) {
-          this._accessibleChecked = checked;
+        if ( this._pdomChecked !== checked ) {
+          this._pdomChecked = checked;
 
           this.setAccessibleAttribute( 'checked', checked, {
             asProperty: true
           } );
         }
       },
-      set accessibleChecked( checked ) { this.setAccessibleChecked( checked ); },
+      set pdomChecked( checked ) { this.setPDOMChecked( checked ); },
 
       /**
        * Get whether or not the accessible input is 'checked'.
@@ -2288,10 +2288,10 @@ const ParallelDOM = {
        * @public
        * @returns {boolean}
        */
-      getAccessibleChecked: function() {
-        return this._accessibleChecked;
+      getPDOMChecked: function() {
+        return this._pdomChecked;
       },
-      get accessibleChecked() { return this.getAccessibleChecked(); },
+      get pdomChecked() { return this.getPDOMChecked(); },
 
       /**
        * Get an array containing all accessible attributes that have been added to this Node's primary sibling.

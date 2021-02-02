@@ -1338,24 +1338,24 @@ QUnit.test( 'setAccessibleAttribute', assert => {
   display.dispose();
 } );
 
-QUnit.test( 'accessibleChecked', assert => {
+QUnit.test( 'pdomChecked', assert => {
 
   const rootNode = new Node();
   const display = new Display( rootNode );
   document.body.appendChild( display.domElement );
 
-  const a = new Node( { tagName: 'input', inputType: 'radio', accessibleChecked: true } );
+  const a = new Node( { tagName: 'input', inputType: 'radio', pdomChecked: true } );
   rootNode.addChild( a );
   let aElement = getPrimarySiblingElementByNode( a );
   assert.ok( aElement.checked, 'should be checked' );
 
-  a.accessibleChecked = false;
+  a.pdomChecked = false;
   aElement = getPrimarySiblingElementByNode( a );
   assert.ok( !aElement.checked, 'should not be checked' );
 
   a.inputType = 'range';
   window.assert && assert.throws( () => {
-    a.accessibleChecked = true;
+    a.pdomChecked = true;
   }, /.*/, 'should fail if inputType range' );
 
   display.dispose();
