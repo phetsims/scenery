@@ -136,15 +136,15 @@ class Trail {
   }
 
   /**
-   * This trail is visible only if all nodes on it are marked as visible
+   * This trail is pdomVisible only if all nodes on it are marked as pdomVisible
    * @public
    *
    * @returns {boolean}
    */
-  isAccessibleVisible() {
+  isPDOMVisible() {
     let i = this.nodes.length;
     while ( i-- ) {
-      if ( !this.nodes[ i ].isVisible() || !this.nodes[ i ].getAccessibleVisible() ) {
+      if ( !this.nodes[ i ].isVisible() || !this.nodes[ i ].isPDOMVisible() ) {
         return false;
       }
     }

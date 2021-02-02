@@ -395,7 +395,7 @@ QUnit.test( 'ParallelDOM options', assert => {
   const divNode = new Node( {
     tagName: 'div',
     ariaLabel: TEST_LABEL, // use ARIA label attribute
-    accessibleVisible: false, // hidden from screen readers (and browser)
+    pdomVisible: false, // hidden from screen readers (and browser)
     descriptionContent: TEST_DESCRIPTION, // default to a <p> tag
     containerTagName: 'div'
   } );
@@ -415,7 +415,7 @@ QUnit.test( 'ParallelDOM options', assert => {
 
   assert.ok( divNode.tagName === 'div', 'Tag name' );
   assert.ok( divNode.ariaLabel === TEST_LABEL, 'Use aria label' );
-  assert.ok( divNode.accessibleVisible === false, 'Accessible visible' );
+  assert.ok( divNode.pdomVisible === false, 'Accessible visible' );
   assert.ok( divNode.labelTagName === null, 'Label tag name with aria label is independent' );
   assert.ok( divNode.descriptionTagName.toUpperCase() === DEFAULT_DESCRIPTION_TAG_NAME, 'Description tag name' );
 
@@ -981,7 +981,7 @@ QUnit.test( 'Next/Previous focusable', assert => {
 
   // this should hide everything except a
   b.focusable = false;
-  c.accessibleVisible = false;
+  c.pdomVisible = false;
 
   a.focus();
   util.getNextFocusable( rootElement ).focus();
@@ -1146,7 +1146,7 @@ QUnit.test( 'replaceChild', assert => {
 
 } );
 
-QUnit.test( 'accessibleVisible', assert => {
+QUnit.test( 'pdomVisible', assert => {
 
   const rootNode = new Node();
   const display = new Display( rootNode );
@@ -1203,31 +1203,31 @@ QUnit.test( 'accessibleVisible', assert => {
   assert.ok( _.includes( divEChildren, buttonG1 ), 'button G1 should be an immediate child of div E' );
 
   // make node B invisible for accessibility - it should should visible, but hidden from screen readers
-  b.accessibleVisible = false;
+  b.pdomVisible = false;
   assert.ok( b.visible === true, 'b should be visible after becoming hidden for screen readers' );
-  assert.ok( b.accessibleVisible === false, 'b state should reflect it is hidden for screen readers' );
+  assert.ok( b.pdomVisible === false, 'b state should reflect it is hidden for screen readers' );
   assert.ok( buttonB.hidden === true, 'buttonB should be hidden for screen readers' );
-  assert.ok( b.accessibleDisplayed === false, 'accessibleVisible=false, b should have no representation in the PDOM' );
-  b.accessibleVisible = true;
+  assert.ok( b.accessibleDisplayed === false, 'pdomVisible=false, b should have no representation in the PDOM' );
+  b.pdomVisible = true;
 
   // make node B invisible - it should not be visible, and it should be hidden for screen readers
   b.visible = false;
   assert.ok( b.visible === false, 'state of node b is visible' );
   assert.ok( buttonB.hidden === true, 'buttonB is hidden from screen readers after becoming invisible' );
-  assert.ok( b.accessibleVisible === true, 'state of node b still reflects accessible visibility when invisible' );
+  assert.ok( b.pdomVisible === true, 'state of node b still reflects accessible visibility when invisible' );
   assert.ok( b.accessibleDisplayed === false, 'b invisible and should have no representation in the PDOM' );
   b.visible = true;
 
-  // make node f invisible - g's trail that goes through f should be invisible to AT, tcomhe child of c should remain accessibleVisible
+  // make node f invisible - g's trail that goes through f should be invisible to AT, tcomhe child of c should remain pdomVisible
   f.visible = false;
-  assert.ok( g.getAccessibleVisible() === true, 'state of accessibleVisible should remain true on node g' );
+  assert.ok( g.isPDOMVisible() === true, 'state of pdomVisible should remain true on node g' );
   assert.ok( !buttonG1.hidden, 'buttonG1 (child of e) should not be hidden after parent node f made invisible (no accessible content on node f)' );
   assert.ok( buttonG2.hidden === true, 'buttonG2 should be hidden after parent node f made invisible (no accessible content on node f)' );
   assert.ok( g.accessibleDisplayed === true, 'one parent still visible, g still has one PDOMInstance displayed in PDOM' );
   f.visible = true;
 
   // make node c (no accessible content) invisible to screen, e should be hidden and g2 should be hidden
-  c.accessibleVisible = false;
+  c.pdomVisible = false;
   assert.ok( c.visible === true, 'c should still be visible after becoming invisible to screen readers' );
   assert.ok( divE.hidden === true, 'div E should be hidden after parent node c (no accessible content) is made invisible to screen readers' );
   assert.ok( buttonG2.hidden === true, 'buttonG2 should be hidden after ancestor node c (no accessible content) is made invisible to screen readers' );

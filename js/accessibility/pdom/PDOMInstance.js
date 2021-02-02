@@ -558,7 +558,7 @@ class PDOMInstance {
       let shouldBeVisible = true;
       for ( i = 0; i < accessibleInstance.trail.length; i++ ) {
         const node = accessibleInstance.trail.nodes[ i ];
-        const trails = node.getTrailsTo( rootNode ).filter( trail => trail.isAccessibleVisible() );
+        const trails = node.getTrailsTo( rootNode ).filter( trail => trail.isPDOMVisible() );
         if ( trails.length === 0 ) {
           shouldBeVisible = false;
           break;

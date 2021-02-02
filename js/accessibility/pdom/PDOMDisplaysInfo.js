@@ -80,7 +80,7 @@ class PDOMDisplaysInfo {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     // If we are invisible, our accessibleDisplays would not have changed ([] => [])
-    if ( this.node.visible && this.node.accessibleVisible ) {
+    if ( this.node.visible && this.node.pdomVisible ) {
       const wasAccessible = !( Renderer.bitmaskNotAccessible & oldBitmask );
       const isAccessible = !( Renderer.bitmaskNotAccessible & newBitmask );
 
@@ -108,8 +108,8 @@ class PDOMDisplaysInfo {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onVisibilityChange n#' + this.node.id + ' visible:' + visible );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
-    // If we are not accessible (or accessibleVisible), our accessibleDisplays would not have changed ([] => [])
-    if ( this.node.accessibleVisible && !this.node._rendererSummary.isNotAccessible() ) {
+    // If we are not accessible (or pdomVisible), our accessibleDisplays would not have changed ([] => [])
+    if ( this.node.pdomVisible && !this.node._rendererSummary.isNotAccessible() ) {
       if ( visible ) {
         this.addAllAccessibleDisplays();
       }
@@ -128,7 +128,7 @@ class PDOMDisplaysInfo {
    * @param {boolean} visible
    */
   onAccessibleVisibilityChange( visible ) {
-    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onAccessibleVisibilityChange n#' + this.node.id + ' accessibleVisible:' + visible );
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onAccessibleVisibilityChange n#' + this.node.id + ' pdomVisible:' + visible );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     // If we are not accessible, our accessibleDisplays would not have changed ([] => [])
@@ -185,7 +185,7 @@ class PDOMDisplaysInfo {
    * @returns {boolean}
    */
   canHaveAccessibleDisplays() {
-    return this.node.visible && this.node.accessibleVisible && !this.node._rendererSummary.isNotAccessible();
+    return this.node.visible && this.node.pdomVisible && !this.node._rendererSummary.isNotAccessible();
   }
 
   /**

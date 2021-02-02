@@ -207,7 +207,7 @@ const ACCESSIBILITY_OPTION_KEYS = [
   'focusHighlight', // {Node|Shape|null} - Sets the focus highlight for the node
   'focusHighlightLayerable', // {boolean} Flag to determine if the focus highlight node can be layered in the scene graph
   'groupFocusHighlight', // {boolean|Node} - Sets the outer focus highlight for this node when a descendant has focus
-  'accessibleVisible', // {boolean} - Sets whether or not the node's DOM element is visible in the parallel DOM
+  'pdomVisible', // {boolean} - Sets whether or not the node's DOM element is visible in the parallel DOM
   'pdomOrder', // {Array.<Node|null>|null} - Modifies the order of accessible  navigation
 
   'ariaLabelledbyAssociations', // {Array.<Object>} - sets the list of aria-labelledby associations between from this node to others (including itself)
@@ -391,11 +391,11 @@ const ParallelDOM = {
         this._groupFocusHighlight = false;
 
         // @private {boolean} - Whether or not the accessible content will be visible from the browser and assistive
-        // technologies.  When accessibleVisible is false, the Node's primary sibling will not be focusable, and it cannot
+        // technologies.  When pdomVisible is false, the Node's primary sibling will not be focusable, and it cannot
         // be found by the assistive technology virtual cursor. For more information on how assistive technologies
         // read with the virtual cursor see
         // http://www.ssbbartgroup.com/blog/how-windows-screen-readers-work-on-the-web/
-        this._accessibleVisible = true;
+        this._pdomVisible = true;
 
         // @private {Array.<Node|null>|null} - (a11y) If provided, it will override the focus order between children
         // (and optionally arbitrary subtrees). If not provided, the focus order will default to the rendering order
@@ -535,7 +535,7 @@ const ParallelDOM = {
           // when accessibility is widely used, this assertion can be added back in
           // assert && assert( this._accessibleInstances.length > 0, 'there must be accessible content for the node to receive focus' );
           assert && assert( this.focusable, 'trying to set focus on a node that is not focusable' );
-          assert && assert( this._accessibleVisible, 'trying to set focus on a node with invisible accessible content' );
+          assert && assert( this._pdomVisible, 'trying to set focus on a node with invisible accessible content' );
           assert && assert( this._accessibleInstances.length === 1, 'focus() unsupported for Nodes using DAG, accessible content is not unique' );
 
           const peer = this._accessibleInstances[ 0 ].peer;
@@ -2021,7 +2021,7 @@ const ParallelDOM = {
        *       f
        *         h
        *
-       * and we specify b.pdomOrder = [ e, f, d, c ], then the accessible structure will act as if the tree is:
+       * and we specify b.pdomOrder = [ e, f, d, c ], then the pdom structure will act as if the tree is:
        *  a
        *    b
        *      e
@@ -2108,7 +2108,7 @@ const ParallelDOM = {
       },
 
       /**
-       * Returns our "accessible parent" if available: the node that specifies this node in its pdomOrder.
+       * Returns our "pdom parent" if available: the node that specifies this node in its pdomOrder.
        * @public
        *
        * @returns {Node|null}
@@ -2180,31 +2180,30 @@ const ParallelDOM = {
        *
        * @param {boolean} visible
        */
-      setAccessibleVisible: function( visible ) {
+      setPDOMVisible: function( visible ) {
         assert && assert( typeof visible === 'boolean' );
-        if ( this._accessibleVisible !== visible ) {
-          this._accessibleVisible = visible;
+        if ( this._pdomVisible !== visible ) {
+          this._pdomVisible = visible;
 
           this._accessibleDisplaysInfo.onAccessibleVisibilityChange( visible );
         }
       },
-      set accessibleVisible( visible ) { this.setAccessibleVisible( visible ); },
+      set pdomVisible( visible ) { this.setPDOMVisible( visible ); },
 
       /**
        * Get whether or not this node's representative DOM element is visible.
        * @public
-       * TODO: rename isAccessibleVisible()
        *
        * @returns {boolean}
        */
-      getAccessibleVisible: function() {
-        return this._accessibleVisible;
+      isPDOMVisible: function() {
+        return this._pdomVisible;
       },
-      get accessibleVisible() { return this.getAccessibleVisible(); },
+      get pdomVisible() { return this.isPDOMVisible(); },
 
       /**
        * Returns true if any of the PDOMInstances for the Node are globally visible and displayed in the PDOM. A
-       * PDOMInstance is globally visible if Node and all ancestors are accessibleVisible. PDOMInstance visibility is
+       * PDOMInstance is globally visible if Node and all ancestors are pdomVisible. PDOMInstance visibility is
        * updated synchronously, so this returns the most up-to-date information without requiring Display.updateDisplay
        * (unlike Node.wasDisplayed()).
        * @public
@@ -2715,7 +2714,7 @@ const ParallelDOM = {
 
       /**
        * Returns whether or not this Node has any representation for the Parallel DOM.
-       * Note this is still true if the content is accessibleVisible=false or is otherwise hidden.
+       * Note this is still true if the content is pdomVisible=false or is otherwise hidden.
        *
        * @public
        *
@@ -2791,7 +2790,7 @@ const ParallelDOM = {
       },
 
       /*---------------------------------------------------------------------------*/
-      // Accessible Instance handling
+      // PDOM Instance handling
 
       /**
        * Returns a reference to the accessible instances array.
