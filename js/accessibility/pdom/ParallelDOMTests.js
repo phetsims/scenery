@@ -50,18 +50,18 @@ QUnit.module( 'ParallelDOMTests' );
  * @returns {PDOMPeer}
  */
 function getAccessiblePeerByNode( node ) {
-  if ( node.accessibleInstances.length === 0 ) {
-    throw new Error( 'No accessibleInstances. Was your node added to the scene graph?' );
+  if ( node.pdomInstances.length === 0 ) {
+    throw new Error( 'No pdomInstances. Was your node added to the scene graph?' );
   }
 
-  else if ( node.accessibleInstances.length > 1 ) {
+  else if ( node.pdomInstances.length > 1 ) {
     throw new Error( 'There should one and only one accessible instance for the node' );
   }
-  else if ( !node.accessibleInstances[ 0 ].peer ) {
-    throw new Error( 'accessibleInstance\'s peer should exist.' );
+  else if ( !node.pdomInstances[ 0 ].peer ) {
+    throw new Error( 'pdomInstance\'s peer should exist.' );
   }
 
-  return node.accessibleInstances[ 0 ].peer;
+  return node.pdomInstances[ 0 ].peer;
 }
 
 /**
@@ -102,7 +102,7 @@ QUnit.test( 'tagName/innerContent options', assert => {
   rootNode.addChild( a );
 
   const aElement = getPrimarySiblingElementByNode( a );
-  assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
+  assert.ok( a.pdomInstances.length === 1, 'only 1 instance' );
   assert.ok( aElement.parentElement.childNodes.length === 1, 'parent contains one primary siblings' );
   assert.ok( aElement.tagName === 'BUTTON', 'default label tagName' );
   assert.ok( aElement.textContent === TEST_LABEL, 'no html should use textContent' );
@@ -114,7 +114,7 @@ QUnit.test( 'tagName/innerContent options', assert => {
   assert.ok( aElement.innerHTML === TEST_LABEL_HTML_2, 'html label should use innerHTML, overwrite from html' );
 
   a.tagName = null;
-  assert.ok( a.accessibleInstances.length === 0, 'set to null should clear accessible instances' );
+  assert.ok( a.pdomInstances.length === 0, 'set to null should clear accessible instances' );
 
   // make sure that no errors when setting innerContent with tagName null.
   a.innerContent = 'hello';
@@ -156,20 +156,20 @@ QUnit.test( 'containerTagName option', assert => {
   const a = new Node( { tagName: 'button' } );
 
   rootNode.addChild( a );
-  assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
-  assert.ok( a.accessibleInstances[ 0 ].peer.containerParent === null, 'no container parent for just button' );
-  assert.ok( rootNode._accessibleInstances[ 0 ].peer.primarySibling.children[ 0 ] === a._accessibleInstances[ 0 ].peer.primarySibling,
+  assert.ok( a.pdomInstances.length === 1, 'only 1 instance' );
+  assert.ok( a.pdomInstances[ 0 ].peer.containerParent === null, 'no container parent for just button' );
+  assert.ok( rootNode._pdomInstances[ 0 ].peer.primarySibling.children[ 0 ] === a._pdomInstances[ 0 ].peer.primarySibling,
     'rootNode peer should hold node a\'s peer in the PDOM' );
 
   a.containerTagName = 'div';
 
-  assert.ok( a.accessibleInstances[ 0 ].peer.containerParent.id.indexOf( 'container' ) >= 0, 'container parent is div if specified' );
-  assert.ok( rootNode._accessibleInstances[ 0 ].peer.primarySibling.children[ 0 ] === a._accessibleInstances[ 0 ].peer.containerParent,
+  assert.ok( a.pdomInstances[ 0 ].peer.containerParent.id.indexOf( 'container' ) >= 0, 'container parent is div if specified' );
+  assert.ok( rootNode._pdomInstances[ 0 ].peer.primarySibling.children[ 0 ] === a._pdomInstances[ 0 ].peer.containerParent,
     'container parent is div if specified' );
 
   a.containerTagName = null;
 
-  assert.ok( !a.accessibleInstances[ 0 ].peer.containerParent, 'container parent is cleared if specified' );
+  assert.ok( !a.pdomInstances[ 0 ].peer.containerParent, 'container parent is cleared if specified' );
   display.dispose();
 } );
 
@@ -187,7 +187,7 @@ QUnit.test( 'labelTagName/labelContent option', assert => {
 
   const aElement = getPrimarySiblingElementByNode( a );
   const labelSibling = aElement.parentElement.childNodes[ 0 ];
-  assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
+  assert.ok( a.pdomInstances.length === 1, 'only 1 instance' );
   assert.ok( aElement.parentElement.childNodes.length === 2, 'parent contains two siblings' );
   assert.ok( labelSibling.tagName === DEFAULT_LABEL_TAG_NAME, 'default label tagName' );
   assert.ok( labelSibling.textContent === TEST_LABEL, 'no html should use textContent' );
@@ -218,17 +218,17 @@ QUnit.test( 'labelTagName/labelContent option', assert => {
 
   const b = new Node( { tagName: 'p', labelContent: 'I am groot' } );
   rootNode.addChild( b );
-  let bLabelElement = document.getElementById( b.accessibleInstances[ 0 ].peer.labelSibling.id );
+  let bLabelElement = document.getElementById( b.pdomInstances[ 0 ].peer.labelSibling.id );
   assert.ok( !bLabelElement.getAttribute( 'for' ), 'for attribute should not be on non label label sibling.' );
   b.labelTagName = 'label';
-  bLabelElement = document.getElementById( b.accessibleInstances[ 0 ].peer.labelSibling.id );
+  bLabelElement = document.getElementById( b.pdomInstances[ 0 ].peer.labelSibling.id );
   assert.ok( bLabelElement.getAttribute( 'for' ) !== null, 'for attribute should be on "label" tag for label sibling.' );
 
   const c = new Node( { tagName: 'p' } );
   rootNode.addChild( c );
   c.labelTagName = 'label';
   c.labelContent = TEST_LABEL;
-  const cLabelElement = document.getElementById( c.accessibleInstances[ 0 ].peer.labelSibling.id );
+  const cLabelElement = document.getElementById( c.pdomInstances[ 0 ].peer.labelSibling.id );
   assert.ok( cLabelElement.getAttribute( 'for' ) !== null, 'order should not matter' );
   display.dispose();
 
@@ -259,8 +259,8 @@ QUnit.test( 'container element not needed for multiple siblings', assert => {
   b.addChild( c );
   b.addChild( d );
   let bElement = getPrimarySiblingElementByNode( b );
-  let cPeer = c.accessibleInstances[ 0 ].peer;
-  let dPeer = d.accessibleInstances[ 0 ].peer;
+  let cPeer = c.pdomInstances[ 0 ].peer;
+  let dPeer = d.pdomInstances[ 0 ].peer;
   assert.ok( bElement.children.length === 3, 'c.p, c.section, d.div should all be on the same level' );
   const confirmOriginalOrder = () => {
     assert.ok( bElement.children[ 0 ].tagName === 'P', 'p first' );
@@ -279,9 +279,9 @@ QUnit.test( 'container element not needed for multiple siblings', assert => {
   } );
   b.addChild( e );
   bElement = getPrimarySiblingElementByNode( b ); // refresh the DOM Elements
-  cPeer = c.accessibleInstances[ 0 ].peer; // refresh the DOM Elements
-  dPeer = d.accessibleInstances[ 0 ].peer; // refresh the DOM Elements
-  let ePeer = e.accessibleInstances[ 0 ].peer;
+  cPeer = c.pdomInstances[ 0 ].peer; // refresh the DOM Elements
+  dPeer = d.pdomInstances[ 0 ].peer; // refresh the DOM Elements
+  let ePeer = e.pdomInstances[ 0 ].peer;
   assert.ok( bElement.children.length === 5, 'e children should be added to the same PDOM level.' );
   confirmOriginalOrder();
 
@@ -295,9 +295,9 @@ QUnit.test( 'container element not needed for multiple siblings', assert => {
   // dynamically adding parent
   e.containerTagName = 'article';
   bElement = getPrimarySiblingElementByNode( b ); // refresh the DOM Elements
-  cPeer = c.accessibleInstances[ 0 ].peer; // refresh the DOM Elements
-  dPeer = d.accessibleInstances[ 0 ].peer; // refresh the DOM Elements
-  ePeer = e.accessibleInstances[ 0 ].peer;
+  cPeer = c.pdomInstances[ 0 ].peer; // refresh the DOM Elements
+  dPeer = d.pdomInstances[ 0 ].peer; // refresh the DOM Elements
+  ePeer = e.pdomInstances[ 0 ].peer;
   assert.ok( bElement.children.length === 4, 'e children should now be under e\'s container.' );
   confirmOriginalOrder();
   assert.ok( bElement.children[ 3 ].tagName === 'ARTICLE', 'SPAN 3rd' );
@@ -306,9 +306,9 @@ QUnit.test( 'container element not needed for multiple siblings', assert => {
   // clear container
   e.containerTagName = null;
   bElement = getPrimarySiblingElementByNode( b ); // refresh the DOM Elements
-  cPeer = c.accessibleInstances[ 0 ].peer; // refresh the DOM Elements
-  dPeer = d.accessibleInstances[ 0 ].peer; // refresh the DOM Elements
-  ePeer = e.accessibleInstances[ 0 ].peer;
+  cPeer = c.pdomInstances[ 0 ].peer; // refresh the DOM Elements
+  dPeer = d.pdomInstances[ 0 ].peer; // refresh the DOM Elements
+  ePeer = e.pdomInstances[ 0 ].peer;
   assert.ok( bElement.children.length === 5, 'e children should be added to the same PDOM level again.' );
   confirmOriginalOrder();
   confirmOriginalWithE();
@@ -317,14 +317,14 @@ QUnit.test( 'container element not needed for multiple siblings', assert => {
   e.dispose();
   bElement = getPrimarySiblingElementByNode( b );
   assert.ok( bElement.children.length === 3, 'e children should have been removed' );
-  assert.ok( e.accessibleInstances.length === 0, 'e is disposed' );
+  assert.ok( e.pdomInstances.length === 0, 'e is disposed' );
   confirmOriginalOrder();
 
   // reorder d correctly when c removed
   b.removeChild( c );
   assert.ok( bElement.children.length === 1, 'c children should have been removed, only d container' );
   bElement = getPrimarySiblingElementByNode( b );
-  dPeer = d.accessibleInstances[ 0 ].peer;
+  dPeer = d.pdomInstances[ 0 ].peer;
   assert.ok( bElement.children[ 0 ].tagName === 'DIV', 'DIV first' );
   assert.ok( bElement.children[ 0 ] === dPeer.containerParent, 'd container first' );
   display.dispose();
@@ -345,7 +345,7 @@ QUnit.test( 'descriptionTagName/descriptionContent option', assert => {
 
   const aElement = getPrimarySiblingElementByNode( a );
   const descriptionSibling = aElement.parentElement.childNodes[ 0 ];
-  assert.ok( a.accessibleInstances.length === 1, 'only 1 instance' );
+  assert.ok( a.pdomInstances.length === 1, 'only 1 instance' );
   assert.ok( aElement.parentElement.childNodes.length === 2, 'parent contains two siblings' );
   assert.ok( descriptionSibling.tagName === DEFAULT_DESCRIPTION_TAG_NAME, 'default label tagName' );
   assert.ok( descriptionSibling.textContent === TEST_DESCRIPTION, 'no html should use textContent' );
@@ -648,7 +648,7 @@ function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
 
   const checkOnYourOwnAssociations = node => {
 
-    const instance = node._accessibleInstances[ 0 ];
+    const instance = node._pdomInstances[ 0 ];
     const nodePrimaryElement = instance.peer.primarySibling;
     const nodeParent = nodePrimaryElement.parentElement;
     const nodeLabelElement = nodeParent.childNodes[ DEFAULT_LABEL_SIBLING_INDEX ];
@@ -670,8 +670,8 @@ function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
   } );
   rootNode.addChild( k );
   const testK = () => {
-    const kValue = k._accessibleInstances[ 0 ].peer.primarySibling.getAttribute( attribute );
-    const jID = j._accessibleInstances[ 0 ].peer.labelSibling.getAttribute( 'id' );
+    const kValue = k._pdomInstances[ 0 ].peer.primarySibling.getAttribute( attribute );
+    const jID = j._pdomInstances[ 0 ].peer.labelSibling.getAttribute( 'id' );
     assert.ok( jID === kValue, 'k pointing to j' );
   };
 
@@ -844,7 +844,7 @@ QUnit.test( 'ParallelDOM invalidation', assert => {
   a1.descriptionTagName = 'p';
   a1.containerTagName = 'div';
 
-  let buttonElement = a1.accessibleInstances[ 0 ].peer.primarySibling;
+  let buttonElement = a1.pdomInstances[ 0 ].peer.primarySibling;
   let parentElement = buttonElement.parentElement;
   const buttonPeers = parentElement.childNodes;
 
@@ -873,13 +873,13 @@ QUnit.test( 'ParallelDOM invalidation', assert => {
   // </div>
 
   // redefine the HTML elements (references will point to old elements before mutation)
-  buttonElement = a1.accessibleInstances[ 0 ].peer.primarySibling;
+  buttonElement = a1.pdomInstances[ 0 ].peer.primarySibling;
   parentElement = buttonElement.parentElement;
   assert.ok( parentElement.childNodes[ 0 ] === getPrimarySiblingElementByNode( a1 ), 'div first' );
   assert.ok( parentElement.childNodes[ 1 ].id.indexOf( 'description' ) >= 0, 'description after div when appending both elements' );
   assert.ok( parentElement.childNodes.length === 2, 'no label peer when using just aria-label attribute' );
 
-  const elementInDom = document.getElementById( a1.accessibleInstances[ 0 ].peer.primarySibling.id );
+  const elementInDom = document.getElementById( a1.pdomInstances[ 0 ].peer.primarySibling.id );
   assert.ok( elementInDom.getAttribute( 'aria-label' ) === TEST_LABEL, 'aria-label set' );
 
   display.dispose();
@@ -1051,8 +1051,8 @@ QUnit.test( 'accessible-dag', assert => {
   //       <div id="e-instance2">
   //     <div id="d">
   //       <div id="e-instance2">
-  const instances = e.accessibleInstances;
-  assert.ok( e.accessibleInstances.length === 3, 'node e should have 3 accessible instances' );
+  const instances = e.pdomInstances;
+  assert.ok( e.pdomInstances.length === 3, 'node e should have 3 accessible instances' );
   assert.ok( ( instances[ 0 ].peer.primarySibling.id !== instances[ 1 ].peer.primarySibling.id ) &&
              ( instances[ 1 ].peer.primarySibling.id !== instances[ 2 ].peer.primarySibling.id ) &&
              ( instances[ 0 ].peer.primarySibling.id !== instances[ 2 ].peer.primarySibling.id ), 'each dom element should be unique' );
@@ -1117,7 +1117,7 @@ QUnit.test( 'replaceChild', assert => {
   assert.ok( a.hasChild( testNode ), 'a should now have child testNode' );
   assert.ok( !f.focused, 'f no longer has focus after being replaced' );
   assert.ok( testNode.focused, 'testNode has focus after replacing focused node f' );
-  assert.ok( testNode.accessibleInstances[ 0 ].peer.primarySibling === document.activeElement, 'browser is focusing testNode' );
+  assert.ok( testNode.pdomInstances[ 0 ].peer.primarySibling === document.activeElement, 'browser is focusing testNode' );
 
   testNode.blur();
   assert.ok( !!testNode, 'testNode blurred before being replaced' );
@@ -1128,7 +1128,7 @@ QUnit.test( 'replaceChild', assert => {
   assert.ok( !a.hasChild( testNode ), 'testNode should no longer be a child of node a' );
   assert.ok( !testNode.focused, 'testNode should not have focus after being replaced' );
   assert.ok( !f.focused, 'f should not have focus after replacing testNode, testNode did not have focus' );
-  assert.ok( f.accessibleInstances[ 0 ].peer.primarySibling !== document.activeElement, 'browser should not be focusing node f' );
+  assert.ok( f.pdomInstances[ 0 ].peer.primarySibling !== document.activeElement, 'browser should not be focusing node f' );
 
   // focus node d and replace with non-focusable testNode, neither should have focus since testNode is not focusable
   d.focus();
@@ -1187,12 +1187,12 @@ QUnit.test( 'pdomVisible', assert => {
   //      <button id="g1">
   //   <button id="g2">
 
-  // get the accessible primary siblings - looking into accessibleInstances for testing, there is no getter for primarySibling
-  const divA = a.accessibleInstances[ 0 ].peer.primarySibling;
-  const buttonB = b.accessibleInstances[ 0 ].peer.primarySibling;
-  const divE = e.accessibleInstances[ 0 ].peer.primarySibling;
-  const buttonG1 = g.accessibleInstances[ 0 ].peer.primarySibling;
-  const buttonG2 = g.accessibleInstances[ 1 ].peer.primarySibling;
+  // get the accessible primary siblings - looking into pdomInstances for testing, there is no getter for primarySibling
+  const divA = a.pdomInstances[ 0 ].peer.primarySibling;
+  const buttonB = b.pdomInstances[ 0 ].peer.primarySibling;
+  const divE = e.pdomInstances[ 0 ].peer.primarySibling;
+  const buttonG1 = g.pdomInstances[ 0 ].peer.primarySibling;
+  const buttonG2 = g.pdomInstances[ 1 ].peer.primarySibling;
 
   const divAChildren = divA.childNodes;
   const divEChildren = divE.childNodes;
@@ -1253,7 +1253,7 @@ QUnit.test( 'inputValue', assert => {
   assert.ok( aElement.getAttribute( 'value' ) === differentValue, 'should have different value' );
 
   rootNode.addChild( new Node( { children: [ a ] } ) );
-  aElement = a.accessibleInstances[ 1 ].peer.primarySibling;
+  aElement = a.pdomInstances[ 1 ].peer.primarySibling;
   assert.ok( aElement.getAttribute( 'value' ) === differentValue, 'should have the same different value' );
   display.dispose();
 
@@ -1279,12 +1279,12 @@ QUnit.test( 'ariaValueText', assert => {
   assert.ok( a.ariaValueText === differentValue, 'should have different value text, getter' );
 
   rootNode.addChild( new Node( { children: [ a ] } ) );
-  aElement = a.accessibleInstances[ 1 ].peer.primarySibling;
+  aElement = a.pdomInstances[ 1 ].peer.primarySibling;
   assert.ok( aElement.getAttribute( 'aria-valuetext' ) === differentValue, 'should have the same different value text after children moving' );
   assert.ok( a.ariaValueText === differentValue, 'should have the same different value text after children moving, getter' );
 
   a.tagName = 'div';
-  aElement = a.accessibleInstances[ 1 ].peer.primarySibling;
+  aElement = a.pdomInstances[ 1 ].peer.primarySibling;
   assert.ok( aElement.getAttribute( 'aria-valuetext' ) === differentValue, 'value text as div' );
   assert.ok( a.ariaValueText === differentValue, 'value text as div, getter' );
   display.dispose();
@@ -1445,13 +1445,13 @@ QUnit.test( 'Aria Label Setter', assert => {
   assert.ok( a.innerContent === null, 'no inner content set with aria-label' );
 
   rootNode.addChild( a );
-  let buttonA = a.accessibleInstances[ 0 ].peer.primarySibling;
+  let buttonA = a.pdomInstances[ 0 ].peer.primarySibling;
   assert.ok( buttonA.getAttribute( 'aria-label' ) === TEST_LABEL_2, 'setter on dom element' );
   assert.ok( buttonA.innerHTML === '', 'no inner html with aria-label setter' );
 
   a.ariaLabel = null;
 
-  buttonA = a.accessibleInstances[ 0 ].peer.primarySibling;
+  buttonA = a.pdomInstances[ 0 ].peer.primarySibling;
   assert.ok( !buttonA.hasAttribute( 'aria-label' ), 'setter can clear on dom element' );
   assert.ok( buttonA.innerHTML === '', 'no inner html with aria-label setter when clearing' );
   assert.ok( a.ariaLabel === null, 'cleared in Node model.' );
@@ -1839,14 +1839,14 @@ QUnit.test( 'Node.enabledProperty with PDOM', assert => {
   } );
 
   rootNode.addChild( a11yNode );
-  assert.ok( a11yNode.accessibleInstances.length === 1, 'should have an instance when attached to display' );
-  assert.ok( !!a11yNode.accessibleInstances[ 0 ].peer, 'should have a peer' );
+  assert.ok( a11yNode.pdomInstances.length === 1, 'should have an instance when attached to display' );
+  assert.ok( !!a11yNode.pdomInstances[ 0 ].peer, 'should have a peer' );
 
   // TODO: is it important that aria-disabled is false on all enabled Nodes? See https://github.com/phetsims/scenery/issues/1100
-  // assert.ok( a11yNode.accessibleInstances[ 0 ].peer.primarySibling.getAttribute( 'aria-disabled' ) === 'false', 'should be enabled' );
+  // assert.ok( a11yNode.pdomInstances[ 0 ].peer.primarySibling.getAttribute( 'aria-disabled' ) === 'false', 'should be enabled' );
 
   a11yNode.enabled = false;
-  assert.ok( a11yNode.accessibleInstances[ 0 ].peer.primarySibling.getAttribute( 'aria-disabled' ) === 'true', 'should be enabled' );
+  assert.ok( a11yNode.pdomInstances[ 0 ].peer.primarySibling.getAttribute( 'aria-disabled' ) === 'true', 'should be enabled' );
   a11yNode.dispose;
   display.dispose();
 } );

@@ -47,7 +47,7 @@ class PDOMInstance {
    * @param {Trail} trail - trail to the node for this PDOMInstance
    */
   constructor( parent, display, trail ) {
-    this.initializeAccessibleInstance( parent, display, trail );
+    this.initializePDOMInstance( parent, display, trail );
   }
 
 
@@ -60,7 +60,7 @@ class PDOMInstance {
    * @param {Trail} trail - trail to node for this PDOMInstance
    * @returns {PDOMInstance} - Returns 'this' reference, for chaining
    */
-  initializeAccessibleInstance( parent, display, trail ) {
+  initializePDOMInstance( parent, display, trail ) {
     assert && assert( !this.id || this.isDisposed, 'If we previously existed, we need to have been disposed' );
 
     // unique ID
@@ -85,7 +85,7 @@ class PDOMInstance {
 
     // If we are the root accessible instance, we won't actually have a reference to a node.
     if ( this.node ) {
-      this.node.addAccessibleInstance( this );
+      this.node.addPDOMInstance( this );
     }
 
     // @public {PDOMPeer}
@@ -160,21 +160,21 @@ class PDOMInstance {
    * Adds a series of (sorted) accessible instances as children.
    * @public
    *
-   * @param {Array.<PDOMInstance>} accessibleInstances
+   * @param {Array.<PDOMInstance>} pdomInstances
    */
-  addConsecutiveInstances( accessibleInstances ) {
+  addConsecutiveInstances( pdomInstances ) {
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
-      'addConsecutiveInstances on ' + this.toString() + ' with: ' + accessibleInstances.map( inst => inst.toString() ).join( ',' ) );
+      'addConsecutiveInstances on ' + this.toString() + ' with: ' + pdomInstances.map( inst => inst.toString() ).join( ',' ) );
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.push();
 
     const hadChildren = this.children.length > 0;
 
-    Array.prototype.push.apply( this.children, accessibleInstances );
+    Array.prototype.push.apply( this.children, pdomInstances );
 
-    for ( let i = 0; i < accessibleInstances.length; i++ ) {
+    for ( let i = 0; i < pdomInstances.length; i++ ) {
       // Append the container parent to the end (so that, when provided in order, we don't have to resort below
       // when initializing).
-      PDOMUtils.insertElements( this.peer.primarySibling, accessibleInstances[ i ].peer.topLevelElements );
+      PDOMUtils.insertElements( this.peer.primarySibling, pdomInstances[ i ].peer.topLevelElements );
     }
 
     if ( hadChildren ) {
@@ -253,7 +253,7 @@ class PDOMInstance {
   }
 
   /**
-   * Remove a subtree of AccessibleInstances from this PDOMInstance
+   * Remove a subtree of PDOMInstances from this PDOMInstance
    *
    * @param {Trail} trail - children of this PDOMInstance will be removed if the child trails are extensions
    *                        of the trail.
@@ -271,7 +271,7 @@ class PDOMInstance {
           'Remove parent: ' + this.toString() + ', child: ' + childInstance.toString() );
         this.children.splice( i, 1 ); // remove it from the children array
 
-        // Dispose the entire subtree of AccessibleInstances
+        // Dispose the entire subtree of PDOMInstances
         childInstance.dispose();
       }
     }
@@ -307,7 +307,7 @@ class PDOMInstance {
 
   /**
    * Update visibility of this peer's accessible DOM content. The hidden attribute will hide all of the descendant
-   * DOM content, so it is not necessary to update the subtree of AccessibleInstances since the browser
+   * DOM content, so it is not necessary to update the subtree of PDOMInstances since the browser
    * will do this for us.
    * @private
    */
@@ -369,7 +369,7 @@ class PDOMInstance {
 
     // base case, node has accessible content, but don't match the "root" node of this accessible instance
     if ( node.hasPDOMContent && node !== this.node ) {
-      const potentialInstances = node.accessibleInstances;
+      const potentialInstances = node.pdomInstances;
 
       instanceLoop:
         for ( i = 0; i < potentialInstances.length; i++ ) {
@@ -404,7 +404,7 @@ class PDOMInstance {
    * Sort our child accessible instances in the order they should appear in the parallel DOM. We do this by
    * creating a comparison function between two accessible instances. The function walks along the trails
    * of the children, looking for specified accessible orders that would determine the ordering for the two
-   * AccessibleInstances.
+   * PDOMInstances.
    *
    * @public (scenery-internal)
    */
@@ -503,7 +503,7 @@ class PDOMInstance {
 
     // If we are the root accessible instance, we won't actually have a reference to a node.
     if ( this.node ) {
-      this.node.removeAccessibleInstance( this );
+      this.node.removePDOMInstance( this );
     }
 
     this.relativeNodes = null;
@@ -529,9 +529,9 @@ class PDOMInstance {
   }
 
   /**
-   * For debugging purposes, inspect the tree of AccessibleInstances from the root.
+   * For debugging purposes, inspect the tree of PDOMInstances from the root.
    *
-   * Only ever called from the _rootAccessibleInstance of the display.
+   * Only ever called from the _rootPDOMInstance of the display.
    *
    * @public (scenery-internal)
    */
@@ -543,21 +543,21 @@ class PDOMInstance {
     assert( this.trail.length === 0,
       'Should only call auditRoot() on the root PDOMInstance for a display' );
 
-    function audit( fakeInstance, accessibleInstance ) {
-      assert( fakeInstance.children.length === accessibleInstance.children.length,
+    function audit( fakeInstance, pdomInstance ) {
+      assert( fakeInstance.children.length === pdomInstance.children.length,
         'Different number of children in accessible instance' );
 
-      assert( fakeInstance.node === accessibleInstance.node, 'Node mismatch for PDOMInstance' );
+      assert( fakeInstance.node === pdomInstance.node, 'Node mismatch for PDOMInstance' );
 
-      for ( var i = 0; i < accessibleInstance.children.length; i++ ) {
-        audit( fakeInstance.children[ i ], accessibleInstance.children[ i ] );
+      for ( var i = 0; i < pdomInstance.children.length; i++ ) {
+        audit( fakeInstance.children[ i ], pdomInstance.children[ i ] );
       }
 
-      const isVisible = accessibleInstance.isGloballyVisible();
+      const isVisible = pdomInstance.isGloballyVisible();
 
       let shouldBeVisible = true;
-      for ( i = 0; i < accessibleInstance.trail.length; i++ ) {
-        const node = accessibleInstance.trail.nodes[ i ];
+      for ( i = 0; i < pdomInstance.trail.length; i++ ) {
+        const node = pdomInstance.trail.nodes[ i ];
         const trails = node.getTrailsTo( rootNode ).filter( trail => trail.isPDOMVisible() );
         if ( trails.length === 0 ) {
           shouldBeVisible = false;
@@ -623,7 +623,7 @@ class PDOMInstance {
    * @private
    *
    * @param {Node} rootNode
-   * @returns {Object} - Type FakeAccessibleInstance: { node: {Node}, children: {Array.<FakeAccessibleInstance>} }
+   * @returns {Object} - Type FakePDOMInstance: { node: {Node}, children: {Array.<FakePDOMInstance>} }
    */
   static createFakeAccessibleTree( rootNode ) {
     function createFakeTree( node ) {
@@ -647,7 +647,7 @@ class PDOMInstance {
 scenery.register( 'PDOMInstance', PDOMInstance );
 
 Poolable.mixInto( PDOMInstance, {
-  initialize: PDOMInstance.prototype.initializeAccessibleInstance
+  initialize: PDOMInstance.prototype.initializePDOMInstance
 } );
 
 export default PDOMInstance;

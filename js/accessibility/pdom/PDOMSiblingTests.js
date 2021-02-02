@@ -24,7 +24,7 @@ QUnit.module( 'PDOMSiblingTests' );
  * @returns {Bounds2}
  */
 const getSiblingBounds = node => {
-  const siblingRect = node.accessibleInstances[ 0 ].peer.primarySibling.getBoundingClientRect();
+  const siblingRect = node.pdomInstances[ 0 ].peer.primarySibling.getBoundingClientRect();
   return new Bounds2( siblingRect.x, siblingRect.y, siblingRect.x + siblingRect.width, siblingRect.y + siblingRect.height );
 };
 

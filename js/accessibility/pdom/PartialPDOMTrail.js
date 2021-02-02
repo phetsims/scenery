@@ -10,21 +10,21 @@ import scenery from '../../scenery.js';
 
 class PartialPDOMTrail {
   /**
-   * @param {AccessibleInstance} accessibleInstance
+   * @param {PDOMInstance} pdomInstance
    * @param {Trail} trail
    * @param {boolean} isRoot
    */
-  constructor( accessibleInstance, trail, isRoot ) {
+  constructor( pdomInstance, trail, isRoot ) {
 
     // @public
-    this.accessibleInstance = accessibleInstance;
+    this.pdomInstance = pdomInstance;
     this.trail = trail;
 
-    // TODO: remove this, since it can be computed from the accessibleInstance
+    // TODO: remove this, since it can be computed from the pdomInstance
     this.isRoot = isRoot;
 
     // @public {Trail} - a full Trail (rooted at our display) to our trail's final node.
-    this.fullTrail = this.accessibleInstance.trail.copy();
+    this.fullTrail = this.pdomInstance.trail.copy();
     // NOTE: Only if the parent instance is the root instance do we want to include our partial trail's root.
     // For other instances, this node in the trail will already be included
     // TODO: add Trail.concat()

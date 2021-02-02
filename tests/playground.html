@@ -154,14 +154,14 @@ an UI and Display made for visual testing and debugging.
         }
       } );
 
-      a._accessibleInstances[ 0 ].peer._primarySibling.addEventListener( 'focusin', () => console.log( 'primary focusin' ) );
-      a._accessibleInstances[ 0 ].peer._primarySibling.addEventListener( 'focus', () => console.log( 'primary focus' ) );
+      a._pdomInstances[ 0 ].peer._primarySibling.addEventListener( 'focusin', () => console.log( 'primary focusin' ) );
+      a._pdomInstances[ 0 ].peer._primarySibling.addEventListener( 'focus', () => console.log( 'primary focus' ) );
       display.accessibleDOMElement.addEventListener( 'focusin', () => console.log( 'element focusin' ) );
       display.accessibleDOMElement.addEventListener( 'focus', () => console.log( 'element focus' ) );
 
       a.focus();
 
-      window.element = a._accessibleInstances[ 0 ].peer._primarySibling;
+      window.element = a._pdomInstances[ 0 ].peer._primarySibling;
       element.focus();
 
       debugger;
@@ -322,8 +322,8 @@ an UI and Display made for visual testing and debugging.
     } );
   };
 
-  window.debugAccessibleInstances = function() {
-    recurse( display._rootAccessibleInstance, '' );
+  window.debugPDOMInstances = function() {
+    recurse( display._rootPDOMInstance, '' );
 
     function recurse( instance, indentation ) {
       console.log( indentation + ( instance.isRootInstance ? '' : instance.node.tagName ) + ' ' + instance.toString() );
@@ -332,7 +332,7 @@ an UI and Display made for visual testing and debugging.
   };
 
   window.debugDOM = function() {
-    var parallelDOM = display._rootAccessibleInstance.peer.primarySibling.outerHTML;
+    var parallelDOM = display._rootPDOMInstance.peer.primarySibling.outerHTML;
     parallelDOM = parallelDOM.replace( /\>\</g, '>\n<' );
     var lines = parallelDOM.split( '\n' );
 

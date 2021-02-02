@@ -176,8 +176,8 @@ QUnit.test( 'tab focusin/focusout', assert => {
   const buttonC = new Rectangle( 0, 0, 5, 5, { tagName: 'button' } );
   rootNode.children = [ buttonA, buttonB, buttonC ];
 
-  const aPrimarySibling = buttonA.accessibleInstances[ 0 ].peer.primarySibling;
-  const bPrimarySibling = buttonB.accessibleInstances[ 0 ].peer.primarySibling;
+  const aPrimarySibling = buttonA.pdomInstances[ 0 ].peer.primarySibling;
+  const bPrimarySibling = buttonB.pdomInstances[ 0 ].peer.primarySibling;
 
   // test that a blur listener on a node overides the "tab" like navigation moving focus to the next element
   buttonA.focus();
@@ -245,9 +245,9 @@ QUnit.test( 'click', assert => {
   } );
 
 
-  a.accessibleInstances[ 0 ].peer.primarySibling.focus();
+  a.pdomInstances[ 0 ].peer.primarySibling.focus();
   assert.ok( gotFocus && !gotClick, 'focus first' );
-  a.accessibleInstances[ 0 ].peer.primarySibling.click(); // this works because it's a button
+  a.pdomInstances[ 0 ].peer.primarySibling.click(); // this works because it's a button
   assert.ok( gotClick && gotFocus && aClickCounter === 1, 'a should have been clicked' );
 
   let bClickCounter = 0;
@@ -262,10 +262,10 @@ QUnit.test( 'click', assert => {
 
   a.addChild( b );
 
-  b.accessibleInstances[ 0 ].peer.primarySibling.focus();
-  b.accessibleInstances[ 0 ].peer.primarySibling.click();
+  b.pdomInstances[ 0 ].peer.primarySibling.focus();
+  b.pdomInstances[ 0 ].peer.primarySibling.click();
   assert.ok( bClickCounter === 1 && aClickCounter === 2, 'a should have been clicked with b' );
-  a.accessibleInstances[ 0 ].peer.primarySibling.click();
+  a.pdomInstances[ 0 ].peer.primarySibling.click();
   assert.ok( bClickCounter === 1 && aClickCounter === 3, 'b still should not have been clicked.' );
 
 
@@ -286,7 +286,7 @@ QUnit.test( 'click', assert => {
   assert.ok( a1.hasInputListener( listener ) === true, 'found with hasInputListener' );
 
   // fire the event
-  a1.accessibleInstances[ 0 ].peer.primarySibling.click();
+  a1.pdomInstances[ 0 ].peer.primarySibling.click();
   assert.ok( a1.labelContent === TEST_LABEL, 'click fired, label set' );
 
   const c = new Rectangle( 0, 0, 20, 20, { tagName: 'button' } );
@@ -317,17 +317,17 @@ QUnit.test( 'click', assert => {
     }
   } );
 
-  e.accessibleInstances[ 0 ].peer.primarySibling.click();
+  e.pdomInstances[ 0 ].peer.primarySibling.click();
 
   assert.ok( cClickCount === dClickCount && cClickCount === eClickCount && cClickCount === 1,
     'click should have bubbled to all parents' );
 
-  d.accessibleInstances[ 0 ].peer.primarySibling.click();
+  d.pdomInstances[ 0 ].peer.primarySibling.click();
 
 
   assert.ok( cClickCount === 2 && dClickCount === 2 && eClickCount === 1,
     'd should not trigger click on e' );
-  c.accessibleInstances[ 0 ].peer.primarySibling.click();
+  c.pdomInstances[ 0 ].peer.primarySibling.click();
 
 
   assert.ok( cClickCount === 3 && dClickCount === 2 && eClickCount === 1,
@@ -340,15 +340,15 @@ QUnit.test( 'click', assert => {
 
   c.pdomOrder = [ d, e ];
 
-  e.accessibleInstances[ 0 ].peer.primarySibling.click();
+  e.pdomInstances[ 0 ].peer.primarySibling.click();
   assert.ok( cClickCount === 1 && dClickCount === 0 && eClickCount === 1,
     'pdomOrder means click should bypass d' );
 
-  c.accessibleInstances[ 0 ].peer.primarySibling.click();
+  c.pdomInstances[ 0 ].peer.primarySibling.click();
   assert.ok( cClickCount === 2 && dClickCount === 0 && eClickCount === 1,
     'click c should not effect e or d.' );
 
-  d.accessibleInstances[ 0 ].peer.primarySibling.click();
+  d.pdomInstances[ 0 ].peer.primarySibling.click();
   assert.ok( cClickCount === 3 && dClickCount === 1 && eClickCount === 1,
     'click d should not effect e.' );
 
@@ -379,7 +379,7 @@ QUnit.test( 'click', assert => {
       f
   */
 
-  f.accessibleInstances[ 0 ].peer.primarySibling.click();
+  f.pdomInstances[ 0 ].peer.primarySibling.click();
   assert.ok( cClickCount === 1 && dClickCount === 1 && eClickCount === 0 && fClickCount === 1,
     'click d should not effect e.' );
 
@@ -409,7 +409,7 @@ QUnit.test( 'click extra', assert => {
   assert.ok( a1.hasInputListener( listener ) === true, 'found with hasInputListener' );
 
   // fire the event
-  a1.accessibleInstances[ 0 ].peer.primarySibling.click();
+  a1.pdomInstances[ 0 ].peer.primarySibling.click();
   assert.ok( a1.labelContent === TEST_LABEL, 'click fired, label set' );
 
   // remove the listener
@@ -425,7 +425,7 @@ QUnit.test( 'click extra', assert => {
   assert.ok( a1.labelContent === TEST_LABEL_2, 'before click' );
 
   // setting the label redrew the pdom, so get a reference to the new dom element.
-  a1.accessibleInstances[ 0 ].peer.primarySibling.click();
+  a1.pdomInstances[ 0 ].peer.primarySibling.click();
   assert.ok( a1.labelContent === TEST_LABEL_2, 'click should not change label' );
 
   // verify disposal removes accessible input listeners
@@ -463,10 +463,10 @@ QUnit.test( 'input', assert => {
     }
   } );
 
-  a.accessibleInstances[ 0 ].peer.primarySibling.focus();
+  a.pdomInstances[ 0 ].peer.primarySibling.focus();
   assert.ok( gotFocus && !gotInput, 'focus first' );
 
-  dispatchEvent( a.accessibleInstances[ 0 ].peer.primarySibling, 'input' );
+  dispatchEvent( a.pdomInstances[ 0 ].peer.primarySibling, 'input' );
 
   assert.ok( gotInput && gotFocus, 'a should have been an input' );
 
@@ -499,10 +499,10 @@ QUnit.test( 'change', assert => {
     }
   } );
 
-  a.accessibleInstances[ 0 ].peer.primarySibling.focus();
+  a.pdomInstances[ 0 ].peer.primarySibling.focus();
   assert.ok( gotFocus && !gotChange, 'focus first' );
 
-  dispatchEvent( a.accessibleInstances[ 0 ].peer.primarySibling, 'change' );
+  dispatchEvent( a.pdomInstances[ 0 ].peer.primarySibling, 'change' );
 
   assert.ok( gotChange && gotFocus, 'a should have been an input' );
 
@@ -538,14 +538,14 @@ QUnit.test( 'keydown/keyup', assert => {
     }
   } );
 
-  a.accessibleInstances[ 0 ].peer.primarySibling.focus();
+  a.pdomInstances[ 0 ].peer.primarySibling.focus();
   assert.ok( gotFocus && !gotKeydown, 'focus first' );
 
-  dispatchEvent( a.accessibleInstances[ 0 ].peer.primarySibling, 'keydown' );
+  dispatchEvent( a.pdomInstances[ 0 ].peer.primarySibling, 'keydown' );
 
   assert.ok( gotKeydown && gotFocus, 'a should have had keydown' );
 
-  dispatchEvent( a.accessibleInstances[ 0 ].peer.primarySibling, 'keyup' );
+  dispatchEvent( a.pdomInstances[ 0 ].peer.primarySibling, 'keyup' );
   assert.ok( gotKeydown && gotKeyup && gotFocus, 'a should have had keyup' );
 
   afterTest( display );
@@ -567,7 +567,7 @@ QUnit.test( 'Global KeyStateTracker tests', assert => {
   c.addChild( d );
   rootNode.addChild( a );
 
-  const dPrimarySibling = d.accessibleInstances[ 0 ].peer.primarySibling;
+  const dPrimarySibling = d.pdomInstances[ 0 ].peer.primarySibling;
   triggerDOMEvent( 'keydown', dPrimarySibling, KeyboardUtils.KEY_RIGHT_ARROW );
 
   assert.ok( globalKeyStateTracker.isKeyDown( KeyboardUtils.KEY_RIGHT_ARROW ), 'global keyStateTracker should be updated with right arrow key down' );

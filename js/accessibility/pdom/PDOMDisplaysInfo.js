@@ -29,7 +29,7 @@ class PDOMDisplaysInfo {
     // - If this node is invisible OR the subtree has no pdomContent/pdomOrder: []
     // - Otherwise, it is the concatenation of our parents' accessibleDisplays (AND any accessible displays rooted
     //   at this node).
-    // This value is synchronously updated, and supports accessibleInstances by letting them know when certain
+    // This value is synchronously updated, and supports pdomInstances by letting them know when certain
     // nodes are visible on the display.
     this.accessibleDisplays = [];
   }

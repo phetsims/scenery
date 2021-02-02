@@ -349,13 +349,13 @@ class Display {
       this.blockFocusCallbacks = false;
 
       // @public (scenery-internal) {PDOMInstance}
-      this._rootAccessibleInstance = PDOMInstance.createFromPool( null, this, new Trail() );
+      this._rootPDOMInstance = PDOMInstance.createFromPool( null, this, new Trail() );
       sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
-        'Display root instance: ' + this._rootAccessibleInstance.toString() );
-      PDOMTree.rebuildInstanceTree( this._rootAccessibleInstance );
+        'Display root instance: ' + this._rootPDOMInstance.toString() );
+      PDOMTree.rebuildInstanceTree( this._rootPDOMInstance );
 
       // add the accessible DOM as a child of this DOM element
-      this._domElement.appendChild( this._rootAccessibleInstance.peer.primarySibling );
+      this._domElement.appendChild( this._rootPDOMInstance.peer.primarySibling );
 
       const ariaLiveContainer = ariaHerald.ariaLiveContainer;
 
@@ -413,14 +413,14 @@ class Display {
     if ( this._accessible ) {
 
       // update positioning of focusable peer siblings so they are discoverable on mobile assistive devices
-      this._rootAccessibleInstance.peer.updateSubtreePositioning();
+      this._rootPDOMInstance.peer.updateSubtreePositioning();
     }
 
     // validate bounds for everywhere that could trigger bounds listeners. we want to flush out any changes, so that we can call validateBounds()
     // from code below without triggering side effects (we assume that we are not reentrant).
     this._rootNode.validateWatchedBounds();
 
-    if ( assertSlow ) { this._accessible && this._rootAccessibleInstance.auditRoot(); }
+    if ( assertSlow ) { this._accessible && this._rootPDOMInstance.auditRoot(); }
 
     if ( assertSlow ) { this._rootNode._picker.audit(); }
 
@@ -797,7 +797,7 @@ class Display {
     this._domElement.appendChild( overlay.domElement );
 
     // ensure that the overlay is hidden from screen readers, all accessible content should be in the dom element
-    // of the this._rootAccessibleInstance
+    // of the this._rootPDOMInstance
     overlay.domElement.setAttribute( 'aria-hidden', true );
   }
 
@@ -820,7 +820,7 @@ class Display {
    * @returns {HTMLElement|null}
    */
   getAccessibleDOMElement() {
-    return this._accessible ? this._rootAccessibleInstance.peer.primarySibling : null;
+    return this._accessible ? this._rootPDOMInstance.peer.primarySibling : null;
   }
 
   get accessibleDOMElement() { return this.getAccessibleDOMElement(); }
@@ -1843,7 +1843,7 @@ class Display {
 
     result += '<div style="' + headerStyle + '">Accessible Instances</div><br>';
 
-    recurse( this._rootAccessibleInstance, '' );
+    recurse( this._rootPDOMInstance, '' );
 
     function recurse( instance, indentation ) {
       result += indentation + escapeHTML( ( instance.isRootInstance ? '' : instance.node.tagName ) + ' ' + instance.toString() ) + '<br>';
@@ -1854,7 +1854,7 @@ class Display {
 
     result += '<br><div style="' + headerStyle + '">Parallel DOM</div><br>';
 
-    let parallelDOM = this._rootAccessibleInstance.peer.primarySibling.outerHTML;
+    let parallelDOM = this._rootPDOMInstance.peer.primarySibling.outerHTML;
     parallelDOM = parallelDOM.replace( /></g, '>\n<' );
     const lines = parallelDOM.split( '\n' );
 
@@ -2041,7 +2041,7 @@ class Display {
     this._rootNode.removeRootedDisplay( this );
 
     if ( this._accessible ) {
-      this._rootAccessibleInstance.dispose();
+      this._rootPDOMInstance.dispose();
     }
 
     this._focusOverlay && this._focusOverlay.dispose();

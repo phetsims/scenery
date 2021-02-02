@@ -220,7 +220,7 @@ var PDOMTree = {
     for ( i = 0; i < node._rootedDisplays.length; i++ ) {
       const display = node._rootedDisplays[ i ];
       if ( display._accessible ) {
-        PDOMTree.rebuildInstanceTree( display._rootAccessibleInstance );
+        PDOMTree.rebuildInstanceTree( display._rootPDOMInstance );
       }
     }
 
@@ -261,11 +261,11 @@ var PDOMTree = {
     accessibleTrails = accessibleTrails || PDOMTree.findAccessibleTrails( parent );
 
     for ( let i = 0; i < accessibleTrails.length; i++ ) {
-      sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'trail: ' + accessibleTrails[ i ].trail.toString() + ' full:' + accessibleTrails[ i ].fullTrail.toString() + ' for ' + accessibleTrails[ i ].accessibleInstance.toString() + ' root:' + accessibleTrails[ i ].isRoot );
+      sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'trail: ' + accessibleTrails[ i ].trail.toString() + ' full:' + accessibleTrails[ i ].fullTrail.toString() + ' for ' + accessibleTrails[ i ].pdomInstance.toString() + ' root:' + accessibleTrails[ i ].isRoot );
       sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
       const partialTrail = accessibleTrails[ i ];
-      const parentInstance = partialTrail.accessibleInstance;
+      const parentInstance = partialTrail.pdomInstance;
 
       // The full trail doesn't have the child in it, so we temporarily add that for tree creation
       partialTrail.fullTrail.addDescendant( child );
@@ -299,7 +299,7 @@ var PDOMTree = {
 
       // The full trail doesn't have the child in it, so we temporarily add that for tree removal
       partialTrail.fullTrail.addDescendant( child );
-      partialTrail.accessibleInstance.removeInstancesForTrail( partialTrail.fullTrail );
+      partialTrail.pdomInstance.removeInstancesForTrail( partialTrail.fullTrail );
       partialTrail.fullTrail.removeDescendant( child );
     }
 
@@ -323,7 +323,7 @@ var PDOMTree = {
       const partialTrail = accessibleTrails[ i ];
 
       // TODO: does it optimize things to pass the partial trail in (so we scan less)?
-      partialTrail.accessibleInstance.sortChildren();
+      partialTrail.pdomInstance.sortChildren();
     }
 
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.pop();
@@ -403,7 +403,7 @@ var PDOMTree = {
 
     const accessibleTrails = this.findAccessibleTrails( node );
     for ( let i = 0; i < accessibleTrails.length; i++ ) {
-      const display = accessibleTrails[ i ].accessibleInstance.display;
+      const display = accessibleTrails[ i ].pdomInstance.display;
       display.blockFocusCallbacks = true;
       displays.push( display );
     }
@@ -456,7 +456,7 @@ var PDOMTree = {
     // will have accessible instances. We only care about these accessible instances, as they already have any DAG
     // deduplication applied.
     if ( root.hasPDOMContent ) {
-      const instances = root.accessibleInstances;
+      const instances = root.pdomInstances;
 
       for ( i = 0; i < instances.length; i++ ) {
         trailResults.push( new PartialPDOMTrail( instances[ i ], trail.copy(), false ) );
@@ -470,7 +470,7 @@ var PDOMTree = {
         const display = rootedDisplays[ i ];
 
         if ( display._accessible ) {
-          trailResults.push( new PartialPDOMTrail( display._rootAccessibleInstance, trail.copy(), true ) );
+          trailResults.push( new PartialPDOMTrail( display._rootPDOMInstance, trail.copy(), true ) );
         }
       }
     }

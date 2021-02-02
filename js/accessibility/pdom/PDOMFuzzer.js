@@ -53,7 +53,7 @@ class PDOMFuzzer {
     this.logToConsole && console.log( action.text );
     this.actionsTaken.push( action );
     action.execute();
-    this.display._rootAccessibleInstance.auditRoot();
+    this.display._rootPDOMInstance.auditRoot();
     PDOMTree.auditAccessibleDisplays( this.display.rootNode );
     if ( this.logToConsole ) {
       for ( let i = 0; i < this.nodes.length; i++ ) {

@@ -264,11 +264,11 @@ QUnit.test( 'setting pdomOrder', assert => {
   // reverse accessible order
   rootNode.pdomOrder = [ d, c, b, a ];
 
-  const divRoot = display._rootAccessibleInstance.peer.primarySibling;
-  const divA = a.accessibleInstances[ 0 ].peer.primarySibling;
-  const divB = b.accessibleInstances[ 0 ].peer.primarySibling;
-  const divC = c.accessibleInstances[ 0 ].peer.primarySibling;
-  const divD = d.accessibleInstances[ 0 ].peer.primarySibling;
+  const divRoot = display._rootPDOMInstance.peer.primarySibling;
+  const divA = a.pdomInstances[ 0 ].peer.primarySibling;
+  const divB = b.pdomInstances[ 0 ].peer.primarySibling;
+  const divC = c.pdomInstances[ 0 ].peer.primarySibling;
+  const divD = d.pdomInstances[ 0 ].peer.primarySibling;
 
   assert.ok( divRoot.children[ 0 ] === divD, 'divD should be first child' );
   assert.ok( divRoot.children[ 1 ] === divC, 'divC should be second child' );
@@ -297,11 +297,11 @@ QUnit.test( 'setting pdomOrder before setting accessible content', assert => {
   c.tagName = 'div';
   d.tagName = 'div';
 
-  const divRoot = display._rootAccessibleInstance.peer.primarySibling;
-  const divA = a.accessibleInstances[ 0 ].peer.primarySibling;
-  const divB = b.accessibleInstances[ 0 ].peer.primarySibling;
-  const divC = c.accessibleInstances[ 0 ].peer.primarySibling;
-  const divD = d.accessibleInstances[ 0 ].peer.primarySibling;
+  const divRoot = display._rootPDOMInstance.peer.primarySibling;
+  const divA = a.pdomInstances[ 0 ].peer.primarySibling;
+  const divB = b.pdomInstances[ 0 ].peer.primarySibling;
+  const divC = c.pdomInstances[ 0 ].peer.primarySibling;
+  const divD = d.pdomInstances[ 0 ].peer.primarySibling;
 
   assert.ok( divRoot.children[ 0 ] === divD, 'divD should be first child' );
   assert.ok( divRoot.children[ 1 ] === divC, 'divC should be second child' );
@@ -336,9 +336,9 @@ QUnit.test( 'setting accessible order on nodes with no accessible content', asse
   c.addChild( f );
   b.pdomOrder = [ e, c ];
 
-  const divB = b.accessibleInstances[ 0 ].peer.primarySibling;
-  const divC = c.accessibleInstances[ 0 ].peer.primarySibling;
-  const divE = e.accessibleInstances[ 0 ].peer.primarySibling;
+  const divB = b.pdomInstances[ 0 ].peer.primarySibling;
+  const divC = c.pdomInstances[ 0 ].peer.primarySibling;
+  const divE = e.pdomInstances[ 0 ].peer.primarySibling;
 
   assert.ok( divB.children[ 0 ] === divE, 'div E should be first child of div B' );
   assert.ok( divB.children[ 1 ] === divC, 'div C should be second child of div B' );
@@ -365,9 +365,9 @@ QUnit.test( 'setting accessible order on nodes with no accessible content', asse
   c.addChild( f );
   a.pdomOrder = [ e, c ];
 
-  const divA = a.accessibleInstances[ 0 ].peer.primarySibling;
-  const divC = c.accessibleInstances[ 0 ].peer.primarySibling;
-  const divE = e.accessibleInstances[ 0 ].peer.primarySibling;
+  const divA = a.pdomInstances[ 0 ].peer.primarySibling;
+  const divC = c.pdomInstances[ 0 ].peer.primarySibling;
+  const divE = e.pdomInstances[ 0 ].peer.primarySibling;
 
   assert.ok( divA.children[ 0 ] === divE, 'div E should be first child of div B' );
   assert.ok( divA.children[ 1 ] === divC, 'div C should be second child of div B' );

@@ -3,11 +3,11 @@
 /**
  * A trait that is meant to be composed with Node, adding accessibility by defining content for the Parallel DOM.
  *
- * The parallel DOM is an HTML structure that provides semantics for assistive technologies. For web content to be
+ * The Parallel DOM is an HTML structure that provides semantics for assistive technologies. For web content to be
  * accessible, assistive technologies require HTML markup, which is something that pure graphical content does not
  * include. This trait adds the accessible HTML content for any Node in the scene graph.
  *
- * Any Node can have accessible content, but they have to opt into it. The structure of the accessible content will
+ * Any Node can have pdom content, but they have to opt into it. The structure of the pdom content will
  * match the structure of the scene graph.
  *
  * Say we have the following scene graph:
@@ -20,7 +20,7 @@
  *        \
  *         F
  *
- * And say that nodes A, B, C, D, and F specify accessible content for the DOM.  Scenery will render the accessible
+ * And say that nodes A, B, C, D, and F specify pdom content for the DOM.  Scenery will render the pdom
  * content like so:
  *
  * <div id="node-A">
@@ -32,8 +32,8 @@
  * </div>
  *
  * In this example, each element is represented by a div, but any HTML element could be used. Note that in this example,
- * node E did not specify accessible content, so node F was added as a child under node C.  If node E had specified
- * accessible content, content for node F would have been added as a child under the content for node E.
+ * node E did not specify pdom content, so node F was added as a child under node C.  If node E had specified
+ * pdom content, content for node F would have been added as a child under the content for node E.
  *
  * --------------------------------------------------------------------------------------------------------------------
  * #BASIC EXAMPLE
@@ -208,7 +208,7 @@ const ACCESSIBILITY_OPTION_KEYS = [
   'focusHighlightLayerable', // {boolean} Flag to determine if the focus highlight node can be layered in the scene graph
   'groupFocusHighlight', // {boolean|Node} - Sets the outer focus highlight for this node when a descendant has focus
   'pdomVisible', // {boolean} - Sets whether or not the node's DOM element is visible in the parallel DOM
-  'pdomOrder', // {Array.<Node|null>|null} - Modifies the order of accessible  navigation
+  'pdomOrder', // {Array.<Node|null>|null} - Modifies the order of accessible navigation
 
   'ariaLabelledbyAssociations', // {Array.<Object>} - sets the list of aria-labelledby associations between from this node to others (including itself)
   'ariaDescribedbyAssociations', // {Array.<Object>} - sets the list of aria-describedby associations between from this node to others (including itself)
@@ -279,7 +279,7 @@ const ParallelDOM = {
         // string because the `value` attribute is a DOMString. null value indicates no value.
         this._inputValue = null;
 
-        // @private {boolean} - whether or not the accessible input is considered 'checked', only useful for inputs of
+        // @private {boolean} - whether or not the pdom input is considered 'checked', only useful for inputs of
         // type 'radio' and 'checkbox'
         this._pdomChecked = false;
 
@@ -341,7 +341,7 @@ const ParallelDOM = {
 
         // Keep a reference to all nodes that are aria-labelledby this node, i.e. that have store one of this Node's
         // peer HTMLElement's id in their peer HTMLElement's aria-labelledby attribute. This way we can tell other
-        // nodes to update their aria-labelledby associations when this Node rebuilds its accessible content.
+        // nodes to update their aria-labelledby associations when this Node rebuilds its pdom content.
         // @private
         // {Array.<Node>}
         this._nodesThatAreAriaLabelledbyThisNode = [];
@@ -352,7 +352,7 @@ const ParallelDOM = {
 
         // Keep a reference to all nodes that are aria-describedby this node, i.e. that have store one of this Node's
         // peer HTMLElement's id in their peer HTMLElement's aria-describedby attribute. This way we can tell other
-        // nodes to update their aria-describedby associations when this Node rebuilds its accessible content.
+        // nodes to update their aria-describedby associations when this Node rebuilds its pdom content.
         // @private
         // {Array.<Node>}
         this._nodesThatAreAriaDescribedbyThisNode = [];
@@ -363,7 +363,7 @@ const ParallelDOM = {
 
         // Keep a reference to all nodes that are aria-activedescendant this node, i.e. that have store one of this Node's
         // peer HTMLElement's id in their peer HTMLElement's aria-activedescendant attribute. This way we can tell other
-        // nodes to update their aria-activedescendant associations when this Node rebuilds its accessible content.
+        // nodes to update their aria-activedescendant associations when this Node rebuilds its pdom content.
         // @private
         // {Array.<Node>}
         this._nodesThatAreActiveDescendantToThisNode = [];
@@ -390,7 +390,7 @@ const ParallelDOM = {
         // highlight will go around local bounds of this node. Otherwise the custom node will be used as the highlight/
         this._groupFocusHighlight = false;
 
-        // @private {boolean} - Whether or not the accessible content will be visible from the browser and assistive
+        // @private {boolean} - Whether or not the pdom content will be visible from the browser and assistive
         // technologies.  When pdomVisible is false, the Node's primary sibling will not be focusable, and it cannot
         // be found by the assistive technology virtual cursor. For more information on how assistive technologies
         // read with the virtual cursor see
@@ -412,12 +412,12 @@ const ParallelDOM = {
         // pdomTransformSourceNode cannot use DAG.
         this._pdomTransformSourceNode = null;
 
-        // @public (scenery-internal) {AccessibleDisplaysInfo} - Contains information about what accessible displays
+        // @public (scenery-internal) {AccessibleDisplaysInfo} - Contains information about what pdom displays
         // this node is "visible" for, see AccessibleDisplaysInfo.js for more information.
         this._accessibleDisplaysInfo = new AccessibleDisplaysInfo( this );
 
         // @protected {Array.<PDOMInstance>} - Empty unless the node contains some accessible instance.
-        this._accessibleInstances = [];
+        this._pdomInstances = [];
 
         // @private {boolean} - Determines if DOM siblings are positioned in the viewport. This
         // is required for Nodes that require unique input gestures with iOS VoiceOver like "Drag and Drop".
@@ -508,8 +508,8 @@ const ParallelDOM = {
        * @returns {boolean}
        */
       isFocused: function() {
-        for ( let i = 0; i < this._accessibleInstances.length; i++ ) {
-          const peer = this._accessibleInstances[ i ].peer;
+        for ( let i = 0; i < this._pdomInstances.length; i++ ) {
+          const peer = this._pdomInstances[ i ].peer;
           if ( peer.isFocused() ) {
             return true;
           }
@@ -522,7 +522,7 @@ const ParallelDOM = {
        * Focus this node's primary dom element. The element must not be hidden, and it must be focusable. If the node
        * has more than one instance, this will fail because the DOM element is not uniquely defined. If accessibility
        * is not enabled, this will be a no op. When ParallelDOM is more widely used, the no op can be replaced
-       * with an assertion that checks for accessible content.
+       * with an assertion that checks for pdom content.
        *
        * @public
        */
@@ -530,15 +530,15 @@ const ParallelDOM = {
 
         // if a sim is running without accessibility enabled, there will be no accessible instances, but focus() might
         // still be called without accessibility enabled
-        if ( this._accessibleInstances.length > 0 ) {
+        if ( this._pdomInstances.length > 0 ) {
 
           // when accessibility is widely used, this assertion can be added back in
-          // assert && assert( this._accessibleInstances.length > 0, 'there must be accessible content for the node to receive focus' );
+          // assert && assert( this._pdomInstances.length > 0, 'there must be pdom content for the node to receive focus' );
           assert && assert( this.focusable, 'trying to set focus on a node that is not focusable' );
-          assert && assert( this._pdomVisible, 'trying to set focus on a node with invisible accessible content' );
-          assert && assert( this._accessibleInstances.length === 1, 'focus() unsupported for Nodes using DAG, accessible content is not unique' );
+          assert && assert( this._pdomVisible, 'trying to set focus on a node with invisible pdom content' );
+          assert && assert( this._pdomInstances.length === 1, 'focus() unsupported for Nodes using DAG, pdom content is not unique' );
 
-          const peer = this._accessibleInstances[ 0 ].peer;
+          const peer = this._pdomInstances[ 0 ].peer;
           assert && assert( peer, 'must have a peer to focus' );
           peer.focus();
         }
@@ -550,9 +550,9 @@ const ParallelDOM = {
        * @public
        */
       blur: function() {
-        if ( this._accessibleInstances.length > 0 ) {
-          assert && assert( this._accessibleInstances.length === 1, 'blur() unsupported for Nodes using DAG, accessible content is not unique' );
-          const peer = this._accessibleInstances[ 0 ].peer;
+        if ( this._pdomInstances.length > 0 ) {
+          assert && assert( this._pdomInstances.length === 1, 'blur() unsupported for Nodes using DAG, pdom content is not unique' );
+          const peer = this._pdomInstances[ 0 ].peer;
           assert && assert( peer, 'must have a peer to blur' );
           peer.blur();
         }
@@ -590,11 +590,11 @@ const ParallelDOM = {
       // HIGHER LEVEL API: GETTERS AND SETTERS FOR A11Y API OPTIONS
       //
       // These functions utilize the lower level API to achieve a consistence, and convenient API for adding
-      // accessible content to the PDOM. See https://github.com/phetsims/scenery/issues/795
+      // pdom content to the PDOM. See https://github.com/phetsims/scenery/issues/795
       /***********************************************************************************************************/
 
       /**
-       * Set the Node's accessible content in a way that will define the Accessible Name for the browser. Different
+       * Set the Node's pdom content in a way that will define the Accessible Name for the browser. Different
        * HTML components and code situations require different methods of setting the Accessible Name. See
        * setAccessibleNameBehavior for details on how this string is rendered in the PDOM. Setting to null will clear
        * this Node's accessibleName
@@ -629,12 +629,12 @@ const ParallelDOM = {
       get accessibleName() { return this.getAccessibleName(); },
 
       /**
-       * Remove this Node from the PDOM by clearing its accessible content. This can be useful when creating icons from
-       * accessible content.
+       * Remove this Node from the PDOM by clearing its pdom content. This can be useful when creating icons from
+       * pdom content.
        * @public
        */
       removeFromPDOM: function() {
-        assert && assert( this._tagName !== null, 'There is no accessible content to clear from the PDOM' );
+        assert && assert( this._tagName !== null, 'There is no pdom content to clear from the PDOM' );
         this.tagName = null;
       },
 
@@ -869,7 +869,7 @@ const ParallelDOM = {
       /**
        * Set the tag name for the primary sibling in the PDOM. DOM element tag names are read-only, so this
        * function will create a new DOM element each time it is called for the Node's PDOMPeer and
-       * reset the accessible content.
+       * reset the pdom content.
        * @public
        *
        * @param {string|null} tagName
@@ -980,7 +980,7 @@ const ParallelDOM = {
 
       /**
        * Sets the type for an input element.  Element must have the INPUT tag name. The input attribute is not
-       * specified as readonly, so invalidating accessible content is not necessary.
+       * specified as readonly, so invalidating pdom content is not necessary.
        * @public
        *
        * @param {string|null} inputType
@@ -992,8 +992,8 @@ const ParallelDOM = {
         if ( inputType !== this._inputType ) {
 
           this._inputType = inputType;
-          for ( let i = 0; i < this._accessibleInstances.length; i++ ) {
-            const peer = this._accessibleInstances[ i ].peer;
+          for ( let i = 0; i < this._pdomInstances.length; i++ ) {
+            const peer = this._pdomInstances[ i ].peer;
 
             // remove the attribute if cleared by setting to 'null'
             if ( inputType === null ) {
@@ -1161,8 +1161,8 @@ const ParallelDOM = {
             this.setLabelTagName( DEFAULT_LABEL_TAG_NAME );
           }
 
-          for ( let i = 0; i < this._accessibleInstances.length; i++ ) {
-            const peer = this._accessibleInstances[ i ].peer;
+          for ( let i = 0; i < this._pdomInstances.length; i++ ) {
+            const peer = this._pdomInstances[ i ].peer;
             peer.setLabelSiblingContent( this._labelContent );
           }
         }
@@ -1194,8 +1194,8 @@ const ParallelDOM = {
         if ( this._innerContent !== content ) {
           this._innerContent = content;
 
-          for ( let i = 0; i < this._accessibleInstances.length; i++ ) {
-            const peer = this._accessibleInstances[ i ].peer;
+          for ( let i = 0; i < this._pdomInstances.length; i++ ) {
+            const peer = this._pdomInstances[ i ].peer;
             peer.setPrimarySiblingContent( this._innerContent );
           }
         }
@@ -1232,8 +1232,8 @@ const ParallelDOM = {
             this.setDescriptionTagName( DEFAULT_DESCRIPTION_TAG_NAME );
           }
 
-          for ( let i = 0; i < this._accessibleInstances.length; i++ ) {
-            const peer = this._accessibleInstances[ i ].peer;
+          for ( let i = 0; i < this._pdomInstances.length; i++ ) {
+            const peer = this._pdomInstances[ i ].peer;
             peer.setDescriptionSiblingContent( this._descriptionContent );
           }
         }
@@ -1666,8 +1666,8 @@ const ParallelDOM = {
        * @public
        */
       updateAriaLabelledbyAssociationsInPeers: function() {
-        for ( let i = 0; i < this.accessibleInstances.length; i++ ) {
-          const peer = this.accessibleInstances[ i ].peer;
+        for ( let i = 0; i < this.pdomInstances.length; i++ ) {
+          const peer = this.pdomInstances[ i ].peer;
           peer.onAriaLabelledbyAssociationChange();
         }
       },
@@ -1679,7 +1679,7 @@ const ParallelDOM = {
       updateOtherNodesAriaLabelledby: function() {
 
         // if any other nodes are aria-labelledby this Node, update those associations too. Since this node's
-        // accessible content needs to be recreated, they need to update their aria-labelledby associations accordingly.
+        // pdom content needs to be recreated, they need to update their aria-labelledby associations accordingly.
         for ( let i = 0; i < this._nodesThatAreAriaLabelledbyThisNode.length; i++ ) {
           const otherNode = this._nodesThatAreAriaLabelledbyThisNode[ i ];
           otherNode.updateAriaLabelledbyAssociationsInPeers();
@@ -1821,8 +1821,8 @@ const ParallelDOM = {
        * @public
        */
       updateAriaDescribedbyAssociationsInPeers: function() {
-        for ( let i = 0; i < this.accessibleInstances.length; i++ ) {
-          const peer = this.accessibleInstances[ i ].peer;
+        for ( let i = 0; i < this.pdomInstances.length; i++ ) {
+          const peer = this.pdomInstances[ i ].peer;
           peer.onAriaDescribedbyAssociationChange();
         }
       },
@@ -1834,7 +1834,7 @@ const ParallelDOM = {
       updateOtherNodesAriaDescribedby: function() {
 
         // if any other nodes are aria-describedby this Node, update those associations too. Since this node's
-        // accessible content needs to be recreated, they need to update their aria-describedby associations accordingly.
+        // pdom content needs to be recreated, they need to update their aria-describedby associations accordingly.
         // TODO: only use unique elements of the array (_.unique)
         for ( let i = 0; i < this._nodesThatAreAriaDescribedbyThisNode.length; i++ ) {
           const otherNode = this._nodesThatAreAriaDescribedbyThisNode[ i ];
@@ -1966,8 +1966,8 @@ const ParallelDOM = {
        * @public
        */
       updateActiveDescendantAssociationsInPeers: function() {
-        for ( let i = 0; i < this.accessibleInstances.length; i++ ) {
-          const peer = this.accessibleInstances[ i ].peer;
+        for ( let i = 0; i < this.pdomInstances.length; i++ ) {
+          const peer = this.pdomInstances[ i ].peer;
           peer.onActiveDescendantAssociationChange();
         }
       },
@@ -1979,7 +1979,7 @@ const ParallelDOM = {
       updateOtherNodesActiveDescendant: function() {
 
         // if any other nodes are aria-activeDescendant this Node, update those associations too. Since this node's
-        // accessible content needs to be recreated, they need to update their aria-activeDescendant associations accordingly.
+        // pdom content needs to be recreated, they need to update their aria-activeDescendant associations accordingly.
         // TODO: only use unique elements of the array (_.unique)
         for ( let i = 0; i < this._nodesThatAreActiveDescendantToThisNode.length; i++ ) {
           const otherNode = this._nodesThatAreActiveDescendantToThisNode[ i ];
@@ -2209,8 +2209,8 @@ const ParallelDOM = {
        * @public
        */
       isPDOMDisplayed: function() {
-        for ( let i = 0; i < this._accessibleInstances.length; i++ ) {
-          if ( this._accessibleInstances[ i ].isGloballyVisible() ) {
+        for ( let i = 0; i < this._pdomInstances.length; i++ ) {
+          if ( this._pdomInstances[ i ].isGloballyVisible() ) {
             return true;
           }
         }
@@ -2235,8 +2235,8 @@ const ParallelDOM = {
         if ( value !== this._inputValue ) {
           this._inputValue = value;
 
-          for ( let i = 0; i < this.accessibleInstances.length; i++ ) {
-            const peer = this.accessibleInstances[ i ].peer;
+          for ( let i = 0; i < this.pdomInstances.length; i++ ) {
+            const peer = this.pdomInstances[ i ].peer;
             peer.onInputValueChange();
           }
         }
@@ -2256,7 +2256,7 @@ const ParallelDOM = {
 
       /**
        * Set whether or not the checked attribute appears on the dom elements associated with this Node's
-       * accessible content.  This is only useful for inputs of type 'radio' and 'checkbox'. A 'checked' input
+       * pdom content.  This is only useful for inputs of type 'radio' and 'checkbox'. A 'checked' input
        * is considered selected to the browser and assistive technology.
        *
        * @public
@@ -2356,8 +2356,8 @@ const ParallelDOM = {
           options: options
         } );
 
-        for ( let j = 0; j < this._accessibleInstances.length; j++ ) {
-          const peer = this._accessibleInstances[ j ].peer;
+        for ( let j = 0; j < this._pdomInstances.length; j++ ) {
+          const peer = this._pdomInstances[ j ].peer;
           peer.setAttributeToElement( attribute, value, options );
         }
       },
@@ -2394,8 +2394,8 @@ const ParallelDOM = {
         }
         assert && assert( attributeRemoved, 'Node does not have pdom attribute ' + attribute );
 
-        for ( let j = 0; j < this._accessibleInstances.length; j++ ) {
-          const peer = this._accessibleInstances[ j ].peer;
+        for ( let j = 0; j < this._pdomInstances.length; j++ ) {
+          const peer = this._pdomInstances[ j ].peer;
           peer.removeAttributeFromElement( attribute, options );
         }
       },
@@ -2464,11 +2464,11 @@ const ParallelDOM = {
         if ( this._focusableOverride !== focusable ) {
           this._focusableOverride = focusable;
 
-          for ( let i = 0; i < this._accessibleInstances.length; i++ ) {
+          for ( let i = 0; i < this._pdomInstances.length; i++ ) {
 
             // after the override is set, update the focusability of the peer based on this node's value for focusable
             // which may be true or false (but not null)
-            this._accessibleInstances[ i ].peer.setFocusable( this.focusable );
+            this._pdomInstances[ i ].peer.setFocusable( this.focusable );
           }
         }
       },
@@ -2503,7 +2503,7 @@ const ParallelDOM = {
        *
        * The transformSourceNode cannot use DAG for now because we need a unique trail to observe transforms.
        *
-       * By default, transforms along trails to all of this Node's AccessibleInstances are observed. But this
+       * By default, transforms along trails to all of this Node's PDOMInstances are observed. But this
        * function can be used if you have a visual Node represented in the PDOM by a different Node in the scene
        * graph but still need the other Node's PDOM content positioned over the visual node. For example, this could
        * be required to catch all fake pointer events that may come from certain types of screen readers.
@@ -2514,8 +2514,8 @@ const ParallelDOM = {
       setPDOMTransformSourceNode: function( node ) {
         this._pdomTransformSourceNode = node;
 
-        for ( let i = 0; i < this._accessibleInstances.length; i++ ) {
-          this._accessibleInstances[ i ].peer.setPDOMTransformSourceNode( this._pdomTransformSourceNode );
+        for ( let i = 0; i < this._pdomInstances.length; i++ ) {
+          this._pdomInstances[ i ].peer.setPDOMTransformSourceNode( this._pdomTransformSourceNode );
         }
       },
       set pdomTransformSourceNode( node ) { this.setPDOMTransformSourceNode( node ); },
@@ -2547,8 +2547,8 @@ const ParallelDOM = {
       setPositionInPDOM( positionInPDOM ) {
         this._positionInPDOM = positionInPDOM;
 
-        for ( let i = 0; i < this._accessibleInstances.length; i++ ) {
-          this._accessibleInstances[ i ].peer.setPositionInPDOM( positionInPDOM );
+        for ( let i = 0; i < this._pdomInstances.length; i++ ) {
+          this._pdomInstances[ i ].peer.setPositionInPDOM( positionInPDOM );
         }
       },
       set positionInPDOM( positionInPDOM ) { this.setPositionInPDOM( positionInPDOM ); },
@@ -2603,7 +2603,7 @@ const ParallelDOM = {
       },
 
       /**
-       * Returns a recursive data structure that represents the nested ordering of accessible content for this Node's
+       * Returns a recursive data structure that represents the nested ordering of pdom content for this Node's
        * subtree. Each "Item" will have the type { trail: {Trail}, children: {Array.<Item>} }, forming a tree-like
        * structure.
        * @public (scenery-internal)
@@ -2698,7 +2698,7 @@ const ParallelDOM = {
       },
 
       /**
-       * Sets the accessible content for a Node. See constructor for more information. Not part of the ParallelDOM
+       * Sets the pdom content for a Node. See constructor for more information. Not part of the ParallelDOM
        * API
        * @public (scenery-internal)
        */
@@ -2725,7 +2725,7 @@ const ParallelDOM = {
       },
 
       /**
-       * Called when the node is added as a child to this node AND the node's subtree contains accessible content.
+       * Called when the node is added as a child to this node AND the node's subtree contains pdom content.
        * We need to notify all Displays that can see this change, so that they can update the PDOMInstance tree.
        * @protected (called from Node.js)
        *
@@ -2753,7 +2753,7 @@ const ParallelDOM = {
       },
 
       /**
-       * Called when the node is removed as a child from this node AND the node's subtree contains accessible content.
+       * Called when the node is removed as a child from this node AND the node's subtree contains pdom content.
        * We need to notify all Displays that can see this change, so that they can update the PDOMInstance tree.
        * @private
        *
@@ -2796,35 +2796,35 @@ const ParallelDOM = {
        * Returns a reference to the accessible instances array.
        * @public (scenery-internal)
        *
-       * @returns {Array.<AccessibleInstance>}
+       * @returns {Array.<PDOMInstance>}
        */
-      getAccessibleInstances: function() {
-        return this._accessibleInstances;
+      getPDOMInstances: function() {
+        return this._pdomInstances;
       },
-      get accessibleInstances() { return this.getAccessibleInstances(); },
+      get pdomInstances() { return this.getPDOMInstances(); },
 
       /**
        * Adds an PDOMInstance reference to our array.
        * @public (scenery-internal)
        *
-       * @param {AccessibleInstance} accessibleInstance
+       * @param {PDOMInstance} pdomInstance
        */
-      addAccessibleInstance: function( accessibleInstance ) {
-        assert && assert( accessibleInstance instanceof PDOMInstance );
-        this._accessibleInstances.push( accessibleInstance );
+      addPDOMInstance: function( pdomInstance ) {
+        assert && assert( pdomInstance instanceof PDOMInstance );
+        this._pdomInstances.push( pdomInstance );
       },
 
       /**
        * Removes an PDOMInstance reference from our array.
        * @public (scenery-internal)
        *
-       * @param {AccessibleInstance} accessibleInstance
+       * @param {PDOMInstance} pdomInstance
        */
-      removeAccessibleInstance: function( accessibleInstance ) {
-        assert && assert( accessibleInstance instanceof PDOMInstance );
-        const index = _.indexOf( this._accessibleInstances, accessibleInstance );
+      removePDOMInstance: function( pdomInstance ) {
+        assert && assert( pdomInstance instanceof PDOMInstance );
+        const index = _.indexOf( this._pdomInstances, pdomInstance );
         assert && assert( index !== -1, 'Cannot remove an PDOMInstance from a Node if it was not there' );
-        this._accessibleInstances.splice( index, 1 );
+        this._pdomInstances.splice( index, 1 );
       }
     } );
   },

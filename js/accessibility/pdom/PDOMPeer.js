@@ -41,12 +41,12 @@ const nodeScaleMagnitudeMatrix = new Matrix3();
 
 class PDOMPeer {
   /**
-   * @param {AccessibleInstance} accessibleInstance
+   * @param {PDOMInstance} pdomInstance
    * @param {Object} [options]
    * @mixes Poolable
    */
-  constructor( accessibleInstance, options ) {
-    this.initializePDOMPeer( accessibleInstance, options );
+  constructor( pdomInstance, options ) {
+    this.initializePDOMPeer( pdomInstance, options );
   }
 
   /**
@@ -56,11 +56,11 @@ class PDOMPeer {
    * NOTE: the PDOMPeer is not fully constructed until calling PDOMPeer.update() after creating from pool.
    * @private
    *
-   * @param {PDOMInstance} accessibleInstance
+   * @param {PDOMInstance} pdomInstance
    * @param {Object} [options]
    * @returns {PDOMPeer} - Returns 'this' reference, for chaining
    */
-  initializePDOMPeer( accessibleInstance, options ) {
+  initializePDOMPeer( pdomInstance, options ) {
     options = merge( {
       primarySibling: null
     }, options );
@@ -71,16 +71,16 @@ class PDOMPeer {
     this.id = this.id || globalId++;
 
     // @public {PDOMInstance}
-    this.accessibleInstance = accessibleInstance;
+    this.pdomInstance = pdomInstance;
 
-    // @public {Node|null} only null for the root accessibleInstance
-    this.node = this.accessibleInstance.node;
+    // @public {Node|null} only null for the root pdomInstance
+    this.node = this.pdomInstance.node;
 
     // @public {Display} - Each peer is associated with a specific Display.
-    this.display = accessibleInstance.display;
+    this.display = pdomInstance.display;
 
     // @public {Trail} - NOTE: May have "gaps" due to pdomOrder usage.
-    this.trail = accessibleInstance.trail;
+    this.trail = pdomInstance.trail;
 
     // @private {boolean|null} - whether or not this PDOMPeer is visible in the PDOM
     // Only initialized to null, should not be set to it. isVisible() will return true if this.visible is null
@@ -107,8 +107,8 @@ class PDOMPeer {
     // the siblings need to be repositioned in the next Display.updateDisplay()
     this.positionDirty = false;
 
-    // @private {boolean} - indicates that this peer's accessibleInstance has a descendant that is dirty. Used to
-    // quickly find peers with positionDirty when we traverse the tree of AccessibleInstances
+    // @private {boolean} - indicates that this peer's pdomInstance has a descendant that is dirty. Used to
+    // quickly find peers with positionDirty when we traverse the tree of PDOMInstances
     this.childPositionDirty = false;
 
     // @private {boolean} - Indicates that this peer will position sibling elements so that
@@ -140,14 +140,14 @@ class PDOMPeer {
 
     // @private {function} - must be removed on disposal
     this.transformListener = this.transformListener || this.invalidateCSSPositioning.bind( this );
-    this.accessibleInstance.transformTracker.addListener( this.transformListener );
+    this.pdomInstance.transformTracker.addListener( this.transformListener );
 
     // @private {boolean} - Whether we are currently in a "disposed" (in the pool) state, or are available to be
     // interacted with.
     this.isDisposed = false;
 
     // edge case for root accessibility
-    if ( this.accessibleInstance.isRootInstance ) {
+    if ( this.pdomInstance.isRootInstance ) {
 
       // @private {HTMLElement} - The main element associated with this peer. If focusable, this is the element that gets
       // the focus. It also will contain any children.
@@ -163,7 +163,7 @@ class PDOMPeer {
    * @public (scenery-internal)
    */
   update() {
-    const uniqueId = this.accessibleInstance.trail.getUniqueId();
+    const uniqueId = this.pdomInstance.trail.getUniqueId();
 
     let options = this.node.getBaseOptions();
 
@@ -545,26 +545,26 @@ class PDOMPeer {
       'unsupported attribute for setting with association object: ' + attribute );
     assert && PDOMUtils.validateAssociationObject( associationObject );
 
-    const otherNodeAccessibleInstances = associationObject.otherNode.getAccessibleInstances();
+    const otherNodePDOMInstances = associationObject.otherNode.getPDOMInstances();
 
     // If the other node hasn't been added to the scene graph yet, it won't have any accessible instances, so no op.
     // This will be recalculated when that node is added to the scene graph
-    if ( otherNodeAccessibleInstances.length > 0 ) {
+    if ( otherNodePDOMInstances.length > 0 ) {
 
       // We are just using the first PDOMInstance for simplicity, but it is OK because the accessible
-      // content for all AccessibleInstances will be the same, so the Accessible Names (in the browser's
+      // content for all PDOMInstances will be the same, so the Accessible Names (in the browser's
       // accessibility tree) of elements that are referenced by the attribute value id will all have the same content
-      const firstAccessibleInstance = otherNodeAccessibleInstances[ 0 ];
+      const firstPDOMInstance = otherNodePDOMInstances[ 0 ];
 
       // Handle a case where you are associating to yourself, and the peer has not been constructed yet.
-      if ( firstAccessibleInstance === this.accessibleInstance ) {
-        firstAccessibleInstance.peer = this;
+      if ( firstPDOMInstance === this.pdomInstance ) {
+        firstPDOMInstance.peer = this;
       }
 
-      assert && assert( firstAccessibleInstance.peer, 'peer should exist' );
+      assert && assert( firstPDOMInstance.peer, 'peer should exist' );
 
       // we can use the same element's id to update all of this Node's peers
-      const otherPeerElement = firstAccessibleInstance.peer.getElementByName( associationObject.otherElementName );
+      const otherPeerElement = firstPDOMInstance.peer.getElementByName( associationObject.otherElementName );
 
       const element = this.getElementByName( associationObject.thisElementName );
 
@@ -780,7 +780,7 @@ class PDOMPeer {
    */
   setPrimarySiblingContent( content ) {
     assert && assert( typeof content === 'string', 'incorrect inner content type' );
-    assert && assert( this.accessibleInstance.children.length === 0, 'descendants exist with accessible content, innerContent cannot be used' );
+    assert && assert( this.pdomInstance.children.length === 0, 'descendants exist with accessible content, innerContent cannot be used' );
     assert && assert( PDOMUtils.tagNameSupportsContent( this._primarySibling.tagName ),
       'tagName: ' + this._tagName + ' does not support inner content' );
 
@@ -794,7 +794,7 @@ class PDOMPeer {
   /**
    * Sets the pdomTransformSourceNode so that the primary sibling will be transformed with changes to along the
    * unique trail to the source node. If null, repositioning happens with transform changes along this
-   * accessibleInstance's trail.
+   * pdomInstance's trail.
    * @public
    *
    * @param {Node|null} node
@@ -802,11 +802,11 @@ class PDOMPeer {
   setPDOMTransformSourceNode( node ) {
 
     // remove previous listeners before creating a new TransformTracker
-    this.accessibleInstance.transformTracker.removeListener( this.transformListener );
-    this.accessibleInstance.updateTransformTracker( node );
+    this.pdomInstance.transformTracker.removeListener( this.transformListener );
+    this.pdomInstance.updateTransformTracker( node );
 
     // add listeners back after update
-    this.accessibleInstance.transformTracker.addListener( this.transformListener );
+    this.pdomInstance.transformTracker.addListener( this.transformListener );
 
     // new trail with transforms so positioning is probably dirty
     this.invalidateCSSPositioning();
@@ -840,7 +840,7 @@ class PDOMPeer {
 
       // mark all ancestors of this peer so that we can quickly find this dirty peer when we traverse
       // the PDOMInstance tree
-      let parent = this.accessibleInstance.parent;
+      let parent = this.pdomInstance.parent;
       while ( parent ) {
         parent.peer.childPositionDirty = true;
         parent = parent.parent;
@@ -895,7 +895,7 @@ class PDOMPeer {
 
         scratchGlobalBounds.set( transformSourceNode.localBounds );
         if ( scratchGlobalBounds.isFinite() ) {
-          scratchGlobalBounds.transform( this.accessibleInstance.transformTracker.getMatrix() );
+          scratchGlobalBounds.transform( this.pdomInstance.transformTracker.getMatrix() );
 
           // no need to position if the node is fully outside of the Display bounds (out of view)
           const displayBounds = this.display.bounds;
@@ -957,10 +957,10 @@ class PDOMPeer {
       this.positionElements();
     }
 
-    for ( let i = 0; i < this.accessibleInstance.children.length; i++ ) {
-      const childPeer = this.accessibleInstance.children[ i ].peer;
+    for ( let i = 0; i < this.pdomInstance.children.length; i++ ) {
+      const childPeer = this.pdomInstance.children[ i ].peer;
       if ( childPeer.positionDirty || childPeer.childPositionDirty ) {
-        this.accessibleInstance.children[ i ].peer.updateSubtreePositioning();
+        this.pdomInstance.children[ i ].peer.updateSubtreePositioning();
       }
     }
   }
@@ -978,11 +978,11 @@ class PDOMPeer {
     // remove listeners
     this._primarySibling.removeEventListener( 'blur', this.blurEventListener );
     this._primarySibling.removeEventListener( 'focus', this.focusEventListener );
-    this.accessibleInstance.transformTracker.removeListener( this.transformListener );
+    this.pdomInstance.transformTracker.removeListener( this.transformListener );
     this.mutationObserver.disconnect();
 
     // zero-out references
-    this.accessibleInstance = null;
+    this.pdomInstance = null;
     this.node = null;
     this.display = null;
     this.trail = null;
