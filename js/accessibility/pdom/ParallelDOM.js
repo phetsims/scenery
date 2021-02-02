@@ -404,7 +404,7 @@ const ParallelDOM = {
         this._pdomOrder = null;
 
         // @public (scenery-internal) {Node|null} - (a11y) If this node is specified in another node's
-        // pdomOrder, then this will have the value of that other (accessible parent) node. Otherwise it's null.
+        // pdomOrder, then this will have the value of that other (PDOM parent) Node. Otherwise it's null.
         this._pdomParent = null;
 
         // @public (scenery-internal) {Node|null} - If this is specified, the primary sibling will be positioned
@@ -2108,7 +2108,7 @@ const ParallelDOM = {
       },
 
       /**
-       * Returns our "pdom parent" if available: the node that specifies this node in its pdomOrder.
+       * Returns our "PDOM parent" if available: the node that specifies this node in its pdomOrder.
        * @public
        *
        * @returns {Node|null}
@@ -2124,19 +2124,19 @@ const ParallelDOM = {
        * @public
        *
        * If there is no pdomOrder specified, this is basically "all children that don't have accessible panrets"
-       * (a node has an "accessible parent" if it is specified in an pdomOrder).
+       * (a Node has a "PDOM parent" if it is specified in an pdomOrder).
        *
        * Otherwise (if it has an pdomOrder), it is the pdomOrder, with the above list of nodes placed
        * in at the location of the placeholder. If there is no placeholder, it acts like a placeholder was the last
        * element of the pdomOrder (see setPDOMOrder for more documentation information).
        *
        * NOTE: If you specify a child in the pdomOrder, it will NOT be double-included (since it will have an
-       * accessible parent).
+       * PDOM parent).
        *
        * @returns {Array.<Node>}
        */
       getEffectiveChildren: function() {
-        // Find all children without accessible parents.
+        // Find all children without PDOM parents.
         const nonOrderedChildren = [];
         for ( let i = 0; i < this._children.length; i++ ) {
           const child = this._children[ i ];
