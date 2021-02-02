@@ -21,7 +21,7 @@ class PDOMPointer extends Pointer {
    * @param {Display} display
    */
   constructor( display ) {
-    super( null, false, 'a11y' );
+    super( null, false, 'pdom' );
 
     // @private
     this.display = display;
