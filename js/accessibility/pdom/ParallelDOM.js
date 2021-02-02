@@ -416,7 +416,7 @@ const ParallelDOM = {
         // this node is "visible" for, see PDOMDisplaysInfo.js for more information.
         this._pdomDisplaysInfo = new PDOMDisplaysInfo( this );
 
-        // @protected {Array.<PDOMInstance>} - Empty unless the Node contains some accessible pdom instance.
+        // @protected {Array.<PDOMInstance>} - Empty unless the Node contains some pdom content (PDOMInstance).
         this._pdomInstances = [];
 
         // @private {boolean} - Determines if DOM siblings are positioned in the viewport. This
@@ -1181,7 +1181,7 @@ const ParallelDOM = {
       get labelContent() { return this.getLabelContent(); },
 
       /**
-       * Set the inner content for the primary sibling of the AccessiblePeers of this node. Will be set as textContent
+       * Set the inner content for the primary sibling of the PDOMPeers of this Node. Will be set as textContent
        * unless content is html which uses exclusively formatting tags. A node with inner content cannot
        * have accessible descendants because this content will override the HTML of descendants of this node.
        *
@@ -1774,7 +1774,7 @@ const ParallelDOM = {
         // this node to restore the association appropriately.
         associationObject.otherNode._nodesThatAreAriaDescribedbyThisNode.push( this );
 
-        // update the accessiblePeers with this aria-describedby association
+        // update the PDOMPeers with this aria-describedby association
         this.updateAriaDescribedbyAssociationsInPeers();
       },
 
@@ -1928,7 +1928,7 @@ const ParallelDOM = {
         // this node to restore the association appropriately.
         associationObject.otherNode._nodesThatAreActiveDescendantToThisNode.push( this );
 
-        // update the accessiblePeers with this aria-activeDescendant association
+        // update the pdomPeers with this aria-activeDescendant association
         this.updateActiveDescendantAssociationsInPeers();
       },
 
@@ -2000,13 +2000,13 @@ const ParallelDOM = {
 
 
       /**
-       * Sets the accessible focus order for this node. This includes not only focused items, but elements that can be
+       * Sets the PDOM/DOM focus order for this node. This includes not only focused items, but elements that can be
        * placed in the parallel DOM. If provided, it will override the focus order between children (and
        * optionally arbitrary subtrees). If not provided, the focus order will default to the rendering order
        * (first children first, last children last), determined by the children array.
        * @public
        *
-       * In the general case, when an accessible order is specified, it's an array of nodes, with optionally one
+       * In the general case, when an pdom order is specified, it's an array of nodes, with optionally one
        * element being a placeholder for "the rest of the children", signified by null. This means that, for
        * accessibility, it will act as if the children for this node WERE the pdomOrder (potentially
        * supplemented with other children via the placeholder).
@@ -2037,14 +2037,14 @@ const ParallelDOM = {
        * i.e. `[null]`.
        *
        * Some general constraints for the orders are:
-       * - Nodes must be attached to a Display (in a scene graph) to be shown in an accessible order.
+       * - Nodes must be attached to a Display (in a scene graph) to be shown in an pdom order.
        * - You can't specify a node in more than one pdomOrder, and you can't specify duplicates of a value
        *   in an pdomOrder.
        * - You can't specify an ancestor of a node in that node's pdomOrder
        *   (e.g. this.pdomOrder = this.parents ).
        *
        * Note that specifying something in an pdomOrder will effectively remove it from all of its parents for
-       * the accessible tree (so if you create `tmpNode.pdomOrder = [ a ]` then toss the tmpNode without
+       * the pdom tree (so if you create `tmpNode.pdomOrder = [ a ]` then toss the tmpNode without
        * disposing it, `a` won't show up in the parallel DOM). If there is a need for that, disposing a Node
        * effectively removes its pdomOrder.
        *
@@ -2078,7 +2078,7 @@ const ParallelDOM = {
       set pdomOrder( value ) { this.setPDOMOrder( value ); },
 
       /**
-       * Returns the accessible (focus) order for this node.
+       * Returns the pdom (focus) order for this node.
        * @public
        *
        * @returns {Array.<Node|null>|null}
@@ -2123,7 +2123,7 @@ const ParallelDOM = {
        * excluded subtrees).
        * @public
        *
-       * If there is no pdomOrder specified, this is basically "all children that don't have accessible panrets"
+       * If there is no pdomOrder specified, this is basically "all children that don't have pdom parents"
        * (a Node has a "PDOM parent" if it is specified in an pdomOrder).
        *
        * Otherwise (if it has an pdomOrder), it is the pdomOrder, with the above list of nodes placed
@@ -2641,7 +2641,7 @@ const ParallelDOM = {
             return;
           }
 
-          // Pushing item and its children array, if accessible
+          // Pushing item and its children array, if has pdom content
           if ( node.hasPDOMContent ) {
             const item = {
               trail: currentTrail.copy(),
@@ -2686,7 +2686,7 @@ const ParallelDOM = {
             pruneStack.pop();
           } );
 
-          // Popping children array if accessible
+          // Popping children array if has pdom content
           if ( node.hasPDOMContent ) {
             nestedChildStack.pop();
           }
@@ -2793,7 +2793,7 @@ const ParallelDOM = {
       // PDOM Instance handling
 
       /**
-       * Returns a reference to the accessible instances array.
+       * Returns a reference to the pdom instances array.
        * @public (scenery-internal)
        *
        * @returns {Array.<PDOMInstance>}
