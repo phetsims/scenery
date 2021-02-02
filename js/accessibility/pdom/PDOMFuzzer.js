@@ -183,7 +183,7 @@ class PDOMFuzzer {
 
     // Can't include nodes that are included in other accessible orders
     for ( let i = 0; i < order.length; i++ ) {
-      if ( order[ i ]._accessibleParent && order[ i ]._accessibleParent !== node ) {
+      if ( order[ i ]._pdomParent && order[ i ]._pdomParent !== node ) {
         return false;
       }
     }

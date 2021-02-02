@@ -34,7 +34,7 @@ var PDOMTree = {
 
     const blockedDisplays = PDOMTree.beforeOp( child );
 
-    if ( !child._accessibleParent ) {
+    if ( !child._pdomParent ) {
       PDOMTree.addTree( parent, child );
     }
 
@@ -60,7 +60,7 @@ var PDOMTree = {
 
     const blockedDisplays = PDOMTree.beforeOp( child );
 
-    if ( !child._accessibleParent ) {
+    if ( !child._pdomParent ) {
       PDOMTree.removeTree( parent, child );
     }
 
@@ -121,11 +121,11 @@ var PDOMTree = {
     // Check some initial conditions
     if ( assert ) {
       for ( i = 0; i < removedItems; i++ ) {
-        assert( removedItems[ i ] === null || removedItems[ i ]._accessibleParent === node,
+        assert( removedItems[ i ] === null || removedItems[ i ]._pdomParent === node,
           'Node should have had an pdomOrder' );
       }
       for ( i = 0; i < addedItems; i++ ) {
-        assert( addedItems[ i ] === null || addedItems[ i ]._accessibleParent === null,
+        assert( addedItems[ i ] === null || addedItems[ i ]._pdomParent === null,
           'Node is already specified in an pdomOrder' );
       }
     }
@@ -142,7 +142,7 @@ var PDOMTree = {
       const removedItemToRemove = removedItems[ i ];
       if ( removedItemToRemove ) {
         PDOMTree.removeTree( node, removedItemToRemove, accessibleTrails );
-        removedItemToRemove._accessibleParent = null;
+        removedItemToRemove._pdomParent = null;
       }
     }
 
@@ -154,7 +154,7 @@ var PDOMTree = {
         for ( j = 0; j < removedParents.length; j++ ) {
           PDOMTree.removeTree( removedParents[ j ], addedItemToRemove );
         }
-        addedItemToRemove._accessibleParent = node;
+        addedItemToRemove._pdomParent = node;
       }
     }
 
@@ -197,7 +197,7 @@ var PDOMTree = {
     const blockedDisplays = PDOMTree.beforeOp( node );
 
     let i;
-    const parents = node._accessibleParent ? [ node._accessibleParent ] : node._parents;
+    const parents = node._pdomParent ? [ node._pdomParent ] : node._parents;
     const accessibleTrailsList = []; // accessibleTrailsList[ i ] := AccessibilityTree.findAccessibleTrails( parents[ i ] )
 
     // For now, just regenerate the full tree. Could optimize in the future, if we can swap the content for an
@@ -476,7 +476,7 @@ var PDOMTree = {
       }
     }
 
-    const parents = root._accessibleParent ? [ root._accessibleParent ] : root._parents;
+    const parents = root._pdomParent ? [ root._pdomParent ] : root._parents;
     const parentCount = parents.length;
     for ( i = 0; i < parentCount; i++ ) {
       const parent = parents[ i ];
@@ -536,7 +536,7 @@ var PDOMTree = {
 
   /**
    * Checks a given Node (with assertions) to ensure it is not part of a cycle in the combined graph with edges
-   * defined by "there is a parent-child or accessibleParent-pdomOrder" relationship between the two nodes.
+   * defined by "there is a parent-child or pdomParent-pdomOrder" relationship between the two nodes.
    * @public (scenery-internal)
    *
    * See https://github.com/phetsims/scenery/issues/787 for more information (and for some detail on the cases
@@ -564,9 +564,9 @@ var PDOMTree = {
           recursiveSearch();
           trail.removeAncestor();
         }
-        // Only visit the accessibleParent if we didn't already visit it as a parent.
-        if ( root._accessibleParent && !root._accessibleParent.hasChild( root ) ) {
-          trail.addAncestor( root._accessibleParent );
+        // Only visit the pdomParent if we didn't already visit it as a parent.
+        if ( root._pdomParent && !root._pdomParent.hasChild( root ) ) {
+          trail.addAncestor( root._pdomParent );
           recursiveSearch();
           trail.removeAncestor();
         }
