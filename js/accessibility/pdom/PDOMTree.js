@@ -183,13 +183,13 @@ var PDOMTree = {
   },
 
   /**
-   * Called when a node has an accessibleContent change.
+   * Called when a node has an pdomContent change.
    * @public
    *
    * @param {Node} node
    */
-  accessibleContentChange( node ) {
-    sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'accessibleContentChange n#' + node._id );
+  pdomContentChange( node ) {
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'pdomContentChange n#' + node._id );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
     assert && assert( node instanceof Node );

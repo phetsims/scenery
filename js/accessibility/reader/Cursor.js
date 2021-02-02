@@ -532,12 +532,12 @@ class Cursor {
    * @param  {string} direction - NEXT || PREVIOUS
    * @returns {HTMLElement}
    */
-  getNextPreviousElementWithAccessibleContent( direction ) {
-    let accessibleContent;
-    while ( !accessibleContent ) {
+  getNextPreviousElementWithPDOMContent( direction ) {
+    let pdomContent;
+    while ( !pdomContent ) {
       // set the selected element to the next element in the DOM
       this.activeElement = this.getNextPreviousElement( direction );
-      accessibleContent = this.getAccessibleText( this.activeElement, false );
+      pdomContent = this.getAccessibleText( this.activeElement, false );
     }
 
     return this.activeElement;
@@ -600,7 +600,7 @@ class Cursor {
 
     // if there is no active element, set to the next element with accessible content
     if ( !this.activeElement ) {
-      this.activeElement = this.getNextPreviousElementWithAccessibleContent( direction );
+      this.activeElement = this.getNextPreviousElementWithPDOMContent( direction );
     }
 
     // get the accessible content for the active element, without any 'application' content, and split into words
@@ -620,7 +620,7 @@ class Cursor {
       const previousElement = this.activeElement;
 
       // update the active element and set the accessible content from this element
-      this.activeElement = this.getNextPreviousElementWithAccessibleContent( direction );
+      this.activeElement = this.getNextPreviousElementWithPDOMContent( direction );
 
       accessibleText = this.getAccessibleText( this.activeElement, false ).split( ' ' );
 
@@ -860,7 +860,7 @@ class Cursor {
    */
   readNextPreviousListItem( direction ) {
     if ( !this.activeElement ) {
-      this.activeElement = this.getNextPreviousElementWithAccessibleContent( direction );
+      this.activeElement = this.getNextPreviousElementWithPDOMContent( direction );
     }
 
     let accessibleText;
@@ -909,7 +909,7 @@ class Cursor {
    */
   readNextPreviousList( direction ) {
     if ( !this.activeElement ) {
-      this.activeElement = this.getNextPreviousElementWithAccessibleContent( direction );
+      this.activeElement = this.getNextPreviousElementWithPDOMContent( direction );
     }
 
     // if we are inside of a list already, step out of it to begin searching there

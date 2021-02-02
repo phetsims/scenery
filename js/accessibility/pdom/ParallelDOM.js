@@ -610,7 +610,7 @@ const ParallelDOM = {
         if ( this._accessibleName !== accessibleName ) {
           this._accessibleName = accessibleName;
 
-          this.onAccessibleContentChange();
+          this.onPDOMContentChange();
         }
       },
       set accessibleName( accessibleName ) { this.setAccessibleName( accessibleName ); },
@@ -669,7 +669,7 @@ const ParallelDOM = {
 
           this._accessibleNameBehavior = accessibleNameBehavior;
 
-          this.onAccessibleContentChange();
+          this.onPDOMContentChange();
         }
       },
       set accessibleNameBehavior( accessibleNameBehavior ) { this.setAccessibleNameBehavior( accessibleNameBehavior ); },
@@ -701,7 +701,7 @@ const ParallelDOM = {
         if ( this._pdomHeading !== pdomHeading ) {
           this._pdomHeading = pdomHeading;
 
-          this.onAccessibleContentChange();
+          this.onPDOMContentChange();
         }
       },
       set pdomHeading( pdomHeading ) { this.setPDOMHeading( pdomHeading ); },
@@ -734,7 +734,7 @@ const ParallelDOM = {
 
           this._pdomHeadingBehavior = pdomHeadingBehavior;
 
-          this.onAccessibleContentChange();
+          this.onPDOMContentChange();
         }
       },
       set pdomHeadingBehavior( pdomHeadingBehavior ) { this.setPDOMHeadingBehavior( pdomHeadingBehavior ); },
@@ -812,7 +812,7 @@ const ParallelDOM = {
 
           this._helpText = helpText;
 
-          this.onAccessibleContentChange();
+          this.onPDOMContentChange();
         }
       },
       set helpText( helpText ) { this.setHelpText( helpText ); },
@@ -844,7 +844,7 @@ const ParallelDOM = {
 
           this._helpTextBehavior = helpTextBehavior;
 
-          this.onAccessibleContentChange();
+          this.onPDOMContentChange();
         }
       },
       set helpTextBehavior( helpTextBehavior ) { this.setHelpTextBehavior( helpTextBehavior ); },
@@ -881,7 +881,7 @@ const ParallelDOM = {
           this._tagName = tagName;
 
           // TODO: this could be setting a11y content twice
-          this.onAccessibleContentChange();
+          this.onPDOMContentChange();
         }
       },
       set tagName( tagName ) { this.setTagName( tagName ); },
@@ -921,7 +921,7 @@ const ParallelDOM = {
         if ( tagName !== this._labelTagName ) {
           this._labelTagName = tagName;
 
-          this.onAccessibleContentChange();
+          this.onPDOMContentChange();
         }
       },
       set labelTagName( tagName ) { this.setLabelTagName( tagName ); },
@@ -962,7 +962,7 @@ const ParallelDOM = {
 
           this._descriptionTagName = tagName;
 
-          this.onAccessibleContentChange();
+          this.onPDOMContentChange();
         }
       },
       set descriptionTagName( tagName ) { this.setDescriptionTagName( tagName ); },
@@ -1039,7 +1039,7 @@ const ParallelDOM = {
         if ( this._appendLabel !== appendLabel ) {
           this._appendLabel = appendLabel;
 
-          this.onAccessibleContentChange();
+          this.onPDOMContentChange();
         }
       },
       set appendLabel( appendLabel ) { this.setAppendLabel( appendLabel ); },
@@ -1076,7 +1076,7 @@ const ParallelDOM = {
         if ( this._appendDescription !== appendDescription ) {
           this._appendDescription = appendDescription;
 
-          this.onAccessibleContentChange();
+          this.onPDOMContentChange();
         }
       },
       set appendDescription( appendDescription ) { this.setAppendDescription( appendDescription ); },
@@ -1122,7 +1122,7 @@ const ParallelDOM = {
 
         if ( this._containerTagName !== tagName ) {
           this._containerTagName = tagName;
-          this.onAccessibleContentChange();
+          this.onPDOMContentChange();
         }
       },
       set containerTagName( tagName ) { this.setContainerTagName( tagName ); },
@@ -1391,7 +1391,7 @@ const ParallelDOM = {
           this._pdomNamespace = pdomNamespace;
 
           // If the namespace changes, tear down the view and redraw the whole thing, there is no easy mutable solution here.
-          this.onAccessibleContentChange();
+          this.onPDOMContentChange();
         }
 
         return this;
@@ -2576,7 +2576,7 @@ const ParallelDOM = {
        */
       setExcludeLabelSiblingFromInput: function() {
         this.excludeLabelSiblingFromInput = true;
-        this.onAccessibleContentChange();
+        this.onPDOMContentChange();
       },
 
       /***********************************************************************************************************/
@@ -2702,9 +2702,9 @@ const ParallelDOM = {
        * API
        * @public (scenery-internal)
        */
-      onAccessibleContentChange: function() {
+      onPDOMContentChange: function() {
 
-        PDOMTree.accessibleContentChange( this );
+        PDOMTree.pdomContentChange( this );
 
         // recompute the heading level for this node if it is using the pdomHeading API.
         this._pdomHeading && this.computeHeadingLevel();
