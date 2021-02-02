@@ -406,7 +406,7 @@ const PDOMUtils = {
    * @param {HTMLElement} [beforeThisElement] - if not supplied, the insertBefore call will just use 'null'
    */
   insertElements( element, childrenToAdd, beforeThisElement ) {
-    assert && assert( element instanceof HTMLElement );
+    assert && assert( element instanceof window.Element );
     assert && assert( Array.isArray( childrenToAdd ) );
     for ( let i = 0; i < childrenToAdd.length; i++ ) {
       const childToAdd = childrenToAdd[ i ];

@@ -191,7 +191,7 @@ const ACCESSIBILITY_OPTION_KEYS = [
   'inputType', // {string|null} - Sets the input type for the primary sibling DOM element, only relevant if tagName is 'input'
   'inputValue', // {string|null} - Sets the input value for the primary sibling DOM element, only relevant if tagName is 'input'
   'accessibleChecked', // {string|null} - Sets the 'checked' state for inputs of type 'radio' and 'checkbox'
-  'accessibleNamespace', // {string|null} - Sets the namespace for the primary element
+  'pdomNamespace', // {string|null} - Sets the namespace for the primary element
   'ariaLabel', // {string|null} - Sets the value of the 'aria-label' attribute on the primary sibling of this Node
   'ariaRole', // {string|null} - Sets the ARIA role for the primary sibling of this Node
   'ariaValueText', // {string|null} - sets the aria-valuetext attribute of the primary sibling
@@ -314,7 +314,7 @@ const ParallelDOM = {
 
         // @private {string|null} - If provided, it will create the primary DOM element with the specified namespace.
         // This may be needed, for example, with MathML/SVG/etc.
-        this._accessibleNamespace = null;
+        this._pdomNamespace = null;
 
         // @private {string|null} - if provided, "aria-label" will be added as an inline attribute on the node's DOM
         // element and set to this value. This will determine how the Accessible Name is provided for the DOM element.
@@ -1376,19 +1376,19 @@ const ParallelDOM = {
        * @public
        *
        * For example, to create a MathML element:
-       * { tagName: 'math', accessibleNamespace: 'http://www.w3.org/1998/Math/MathML' }
+       * { tagName: 'math', pdomNamespace: 'http://www.w3.org/1998/Math/MathML' }
        *
        * or for SVG:
-       * { tagName: 'svg', accessibleNamespace: 'http://www.w3.org/2000/svg' }
+       * { tagName: 'svg', pdomNamespace: 'http://www.w3.org/2000/svg' }
        *
-       * @param {string|null} accessibleNamespace - Null indicates no namespace.
+       * @param {string|null} pdomNamespace - Null indicates no namespace.
        * @returns {Node} - For chaining
        */
-      setAccessibleNamespace: function( accessibleNamespace ) {
-        assert && assert( accessibleNamespace === null || typeof accessibleNamespace === 'string' );
+      setPDOMNamespace: function( pdomNamespace ) {
+        assert && assert( pdomNamespace === null || typeof pdomNamespace === 'string' );
 
-        if ( this._accessibleNamespace !== accessibleNamespace ) {
-          this._accessibleNamespace = accessibleNamespace;
+        if ( this._pdomNamespace !== pdomNamespace ) {
+          this._pdomNamespace = pdomNamespace;
 
           // If the namespace changes, tear down the view and redraw the whole thing, there is no easy mutable solution here.
           this.onAccessibleContentChange();
@@ -1396,18 +1396,18 @@ const ParallelDOM = {
 
         return this;
       },
-      set accessibleNamespace( value ) { this.setAccessibleNamespace( value ); },
+      set pdomNamespace( value ) { this.setPDOMNamespace( value ); },
 
       /**
-       * Returns the accessible namespace (see setAccessibleNamespace for more information).
+       * Returns the accessible namespace (see setPDOMNamespace for more information).
        * @public
        *
        * @returns {string|null}
        */
-      getAccessibleNamespace: function() {
-        return this._accessibleNamespace;
+      getPDOMNamespace: function() {
+        return this._pdomNamespace;
       },
-      get accessibleNamespace() { return this.getAccessibleNamespace(); },
+      get pdomNamespace() { return this.getPDOMNamespace(); },
 
       /**
        * Sets the 'aria-label' attribute for labelling the Node's primary sibling. By using the

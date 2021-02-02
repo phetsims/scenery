@@ -2,7 +2,7 @@
 
 /**
  * An accessible peer controls the appearance of an accessible Node's instance in the parallel DOM. An PDOMPeer can
- * have up to four HTMLElements displayed in the PDOM, see ftructor for details.
+ * have up to four window.Elements displayed in the PDOM, see ftructor for details.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  * @author Jesse Greenberg
@@ -99,7 +99,7 @@ class PDOMPeer {
     this._containerParent = null;
 
     // @public {Array.<HTMLElement>} Rather than guarantee that a peer is a tree with a root DOMElement,
-    // allow multiple HTMLElements at the top level of the peer. This is used for sorting the instance.
+    // allow multiple window.Elements at the top level of the peer. This is used for sorting the instance.
     // See this.orderElements for more info.
     this.topLevelElements = [];
 
@@ -187,7 +187,7 @@ class PDOMPeer {
     // create the base DOM element representing this accessible instance
     // TODO: why not just options.focusable?
     this._primarySibling = createElement( options.tagName, this.node.focusable, uniqueId, {
-      namespace: options.accessibleNamespace
+      namespace: options.pdomNamespace
     } );
 
     // create the container parent for the dom siblings
@@ -455,7 +455,7 @@ class PDOMPeer {
   }
 
   /**
-   * Sets a attribute on one of the peer's HTMLElements.
+   * Sets a attribute on one of the peer's window.Elements.
    * @public (scenery-internal)
    * @param {string} attribute
    * @param {*} attributeValue
@@ -492,7 +492,7 @@ class PDOMPeer {
   }
 
   /**
-   * Remove attribute from one of the peer's HTMLElements.
+   * Remove attribute from one of the peer's window.Elements.
    * @public (scenery-internal)
    * @param {string} attribute
    * @param {Object} [options]
