@@ -21,11 +21,11 @@ const AriaHasPopUpMutator = {
    */
   mutateNode( node, value ) {
     if ( value ) {
-      node.setAccessibleAttribute( 'aria-haspopup', value );
+      node.setPDOMAttribute( 'aria-haspopup', value );
     }
     else {
-      assert && assert( node.hasAccessibleAttribute( 'aria-haspopup' ), 'Set aria-haspopup once before removing it.' );
-      node.removeAccessibleAttribute( 'aria-haspopup' );
+      assert && assert( node.hasPDOMAttribute( 'aria-haspopup' ), 'Set aria-haspopup once before removing it.' );
+      node.removePDOMAttribute( 'aria-haspopup' );
     }
 
     node.positionInPDOM = !!value;

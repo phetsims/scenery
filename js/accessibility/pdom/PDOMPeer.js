@@ -389,15 +389,15 @@ class PDOMPeer {
   }
 
   /**
-   * Set all accessible attributes onto the peer elements from the model's stored data objects
+   * Set all pdom attributes onto the peer elements from the model's stored data objects
    * @private
    *
    * @param {Object} [a11yOptions] - these can override the values of the node, see this.update()
    */
   onAttributeChange( a11yOptions ) {
 
-    for ( let i = 0; i < this.node.accessibleAttributes.length; i++ ) {
-      const dataObject = this.node.accessibleAttributes[ i ];
+    for ( let i = 0; i < this.node.pdomAttributes.length; i++ ) {
+      const dataObject = this.node.pdomAttributes[ i ];
       const attribute = dataObject.attribute;
       let value = dataObject.value;
 

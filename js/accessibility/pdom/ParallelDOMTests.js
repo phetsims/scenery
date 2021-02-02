@@ -492,8 +492,8 @@ function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
 
 
   window.assert && assert.throws( () => {
-    a.setAccessibleAttribute( attribute, 'hello' );
-  }, /.*/, 'cannot set association attributes with setAccessibleAttribute' );
+    a.setPDOMAttribute( attribute, 'hello' );
+  }, /.*/, 'cannot set association attributes with setPDOMAttribute' );
 
 
   a[ addAssociationFunction ]( {
@@ -895,15 +895,15 @@ QUnit.test( 'ParallelDOM setters/getters', assert => {
 
   // set/get attributes
   let a1Element = getPrimarySiblingElementByNode( a1 );
-  const initialLength = a1.getAccessibleAttributes().length;
-  a1.setAccessibleAttribute( 'role', 'switch' );
-  assert.ok( a1.getAccessibleAttributes().length === initialLength + 1, 'attribute set should only add 1' );
-  assert.ok( a1.getAccessibleAttributes()[ a1.getAccessibleAttributes().length - 1 ].attribute === 'role', 'attribute set' );
+  const initialLength = a1.getPDOMAttributes().length;
+  a1.setPDOMAttribute( 'role', 'switch' );
+  assert.ok( a1.getPDOMAttributes().length === initialLength + 1, 'attribute set should only add 1' );
+  assert.ok( a1.getPDOMAttributes()[ a1.getPDOMAttributes().length - 1 ].attribute === 'role', 'attribute set' );
   assert.ok( a1Element.getAttribute( 'role' ) === 'switch', 'HTML attribute set' );
-  assert.ok( a1.hasAccessibleAttribute( 'role' ), 'should have accessible attribute' );
+  assert.ok( a1.hasPDOMAttribute( 'role' ), 'should have pdom attribute' );
 
-  a1.removeAccessibleAttribute( 'role' );
-  assert.ok( !a1.hasAccessibleAttribute( 'role' ), 'should not have accessible attribute' );
+  a1.removePDOMAttribute( 'role' );
+  assert.ok( !a1.hasPDOMAttribute( 'role' ), 'should not have pdom attribute' );
   assert.ok( !a1Element.getAttribute( 'role' ), 'attribute removed' );
 
   const b = new Node( { focusable: true } );
@@ -912,7 +912,7 @@ QUnit.test( 'ParallelDOM setters/getters', assert => {
   assert.ok( getPrimarySiblingElementByNode( b ).tabIndex >= 0, 'set tagName after focusable' );
 
   // test setting attribute as DOM property, should NOT have attribute value pair (DOM uses empty string for empty)
-  a1.setAccessibleAttribute( 'hidden', true, { asProperty: true } );
+  a1.setPDOMAttribute( 'hidden', true, { asProperty: true } );
   a1Element = getPrimarySiblingElementByNode( a1 );
   assert.ok( a1Element.hidden, true, 'hidden set as Property' );
   assert.ok( a1Element.getAttribute( 'hidden' ) === '', 'hidden should not be set as attribute' );
@@ -1292,7 +1292,7 @@ QUnit.test( 'ariaValueText', assert => {
 } );
 
 
-QUnit.test( 'setAccessibleAttribute', assert => {
+QUnit.test( 'setPDOMAttribute', assert => {
 
   const rootNode = new Node();
   const display = new Display( rootNode );
@@ -1301,24 +1301,24 @@ QUnit.test( 'setAccessibleAttribute', assert => {
   const a = new Node( { tagName: 'div', labelContent: 'hello' } );
   rootNode.addChild( a );
 
-  a.setAccessibleAttribute( 'test', 'test1' );
+  a.setPDOMAttribute( 'test', 'test1' );
   let aElement = getPrimarySiblingElementByNode( a );
-  assert.ok( aElement.getAttribute( 'test' ) === 'test1', 'setAccessibleAttribute for primary sibling' );
+  assert.ok( aElement.getAttribute( 'test' ) === 'test1', 'setPDOMAttribute for primary sibling' );
 
-  a.removeAccessibleAttribute( 'test' );
+  a.removePDOMAttribute( 'test' );
   aElement = getPrimarySiblingElementByNode( a );
-  assert.ok( aElement.getAttribute( 'test' ) === null, 'removeAccessibleAttribute for primary sibling' );
+  assert.ok( aElement.getAttribute( 'test' ) === null, 'removePDOMAttribute for primary sibling' );
 
-  a.setAccessibleAttribute( 'test', 'testValue' );
-  a.setAccessibleAttribute( 'test', 'testValueLabel', {
+  a.setPDOMAttribute( 'test', 'testValue' );
+  a.setPDOMAttribute( 'test', 'testValueLabel', {
     elementName: PDOMPeer.LABEL_SIBLING
   } );
 
   const testBothAttributes = () => {
     aElement = getPrimarySiblingElementByNode( a );
     const aLabelElement = aElement.parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
-    assert.ok( aElement.getAttribute( 'test' ) === 'testValue', 'setAccessibleAttribute for primary sibling 2' );
-    assert.ok( aLabelElement.getAttribute( 'test' ) === 'testValueLabel', 'setAccessibleAttribute for label sibling' );
+    assert.ok( aElement.getAttribute( 'test' ) === 'testValue', 'setPDOMAttribute for primary sibling 2' );
+    assert.ok( aLabelElement.getAttribute( 'test' ) === 'testValueLabel', 'setPDOMAttribute for label sibling' );
   };
   testBothAttributes();
 
@@ -1328,13 +1328,13 @@ QUnit.test( 'setAccessibleAttribute', assert => {
   testBothAttributes();
 
 
-  a.removeAccessibleAttribute( 'test', {
+  a.removePDOMAttribute( 'test', {
     elementName: PDOMPeer.LABEL_SIBLING
   } );
   aElement = getPrimarySiblingElementByNode( a );
   const aLabelElement = aElement.parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
-  assert.ok( aElement.getAttribute( 'test' ) === 'testValue', 'removeAccessibleAttribute for label should not effect primary sibling ' );
-  assert.ok( aLabelElement.getAttribute( 'test' ) === null, 'removeAccessibleAttribute for label sibling' );
+  assert.ok( aElement.getAttribute( 'test' ) === 'testValue', 'removePDOMAttribute for label should not effect primary sibling ' );
+  assert.ok( aLabelElement.getAttribute( 'test' ) === null, 'removePDOMAttribute for label sibling' );
   display.dispose();
 } );
 

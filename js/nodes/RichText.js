@@ -1868,8 +1868,8 @@ class RichTextLink extends Node {
         tandem: Tandem.OPT_OUT
       } );
       this.addInputListener( this.fireListener );
-      this.setAccessibleAttribute( 'href', '#' ); // Required so that the click listener will get called.
-      this.setAccessibleAttribute( 'target', '_self' ); // This is the default (easier than conditionally removing)
+      this.setPDOMAttribute( 'href', '#' ); // Required so that the click listener will get called.
+      this.setPDOMAttribute( 'target', '_self' ); // This is the default (easier than conditionally removing)
       this.accessibleInputListener = {
         click: event => {
           event.domEvent.preventDefault();
@@ -1894,8 +1894,8 @@ class RichTextLink extends Node {
         tandem: Tandem.OPT_OUT
       } );
       this.addInputListener( this.fireListener );
-      this.setAccessibleAttribute( 'href', href );
-      this.setAccessibleAttribute( 'target', '_blank' );
+      this.setPDOMAttribute( 'href', href );
+      this.setPDOMAttribute( 'target', '_blank' );
     }
 
     return this;

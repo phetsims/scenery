@@ -299,7 +299,7 @@ const ParallelDOM = {
 
         // @private {Array.<Object> - array of attributes that are on the node's DOM element.  Objects will have the
         // form { attribute:{string}, value:{*}, namespace:{string|null} }
-        this._accessibleAttributes = [];
+        this._pdomAttributes = [];
 
         // @private {string|null} - the label content for this node's DOM element.  There are multiple ways that a label
         // can be associated with a node's dom element, see setLabelContent() for more documentation
@@ -491,14 +491,14 @@ const ParallelDOM = {
       pdomEnabledListener: function( enabled ) {
 
         // Mark this Node as disabled in the ParallelDOM
-        this.setAccessibleAttribute( 'aria-disabled', !enabled );
+        this.setPDOMAttribute( 'aria-disabled', !enabled );
 
         // By returning false, we prevent the component from toggling native HTML element attributes that convey state.
         // For example,this will prevent a checkbox from changing `checked` property while it is disabled. This way
         // we can keep the component in tab order and don't need to add the `disabled` attribute. See
         // https://github.com/phetsims/sun/issues/519 and https://github.com/phetsims/sun/issues/640
         // This solution was found at https://stackoverflow.com/a/12267350/3408502
-        this.setAccessibleAttribute( 'onclick', enabled ? '' : 'return false' );
+        this.setPDOMAttribute( 'onclick', enabled ? '' : 'return false' );
       },
 
       /**
@@ -1272,10 +1272,10 @@ const ParallelDOM = {
           this._ariaRole = ariaRole;
 
           if ( ariaRole !== null ) {
-            this.setAccessibleAttribute( 'role', ariaRole );
+            this.setPDOMAttribute( 'role', ariaRole );
           }
           else {
-            this.removeAccessibleAttribute( 'role' );
+            this.removePDOMAttribute( 'role' );
           }
         }
       },
@@ -1311,14 +1311,14 @@ const ParallelDOM = {
 
           // clear out the attribute
           if ( this._containerAriaRole === null ) {
-            this.removeAccessibleAttribute( 'role', {
+            this.removePDOMAttribute( 'role', {
               elementName: PDOMPeer.CONTAINER_PARENT
             } );
           }
 
           // add the attribute
           else {
-            this.setAccessibleAttribute( 'role', ariaRole, {
+            this.setPDOMAttribute( 'role', ariaRole, {
               elementName: PDOMPeer.CONTAINER_PARENT
             } );
           }
@@ -1350,10 +1350,10 @@ const ParallelDOM = {
           this._ariaValueText = ariaValueText;
 
           if ( this._ariaValueText === null ) {
-            this.removeAccessibleAttribute( 'aria-valuetext' );
+            this.removePDOMAttribute( 'aria-valuetext' );
           }
           else {
-            this.setAccessibleAttribute( 'aria-valuetext', ariaValueText );
+            this.setPDOMAttribute( 'aria-valuetext', ariaValueText );
           }
         }
       },
@@ -1424,10 +1424,10 @@ const ParallelDOM = {
           this._ariaLabel = ariaLabel;
 
           if ( this._ariaLabel === null ) {
-            this.removeAccessibleAttribute( 'aria-label' );
+            this.removePDOMAttribute( 'aria-label' );
           }
           else {
-            this.setAccessibleAttribute( 'aria-label', ariaLabel );
+            this.setPDOMAttribute( 'aria-label', ariaLabel );
           }
         }
       },
@@ -2275,7 +2275,7 @@ const ParallelDOM = {
         if ( this._pdomChecked !== checked ) {
           this._pdomChecked = checked;
 
-          this.setAccessibleAttribute( 'checked', checked, {
+          this.setPDOMAttribute( 'checked', checked, {
             asProperty: true
           } );
         }
@@ -2294,19 +2294,19 @@ const ParallelDOM = {
       get pdomChecked() { return this.getPDOMChecked(); },
 
       /**
-       * Get an array containing all accessible attributes that have been added to this Node's primary sibling.
+       * Get an array containing all pdom attributes that have been added to this Node's primary sibling.
        * @public
        *
        * @returns {Array.<Object>} - Returns objects with: {
        *   attribute: {string} // the name of the attribute
        *   value: {*} // the value of the attribute
-       *   options: {options} see options in setAccessibleAttribute
+       *   options: {options} see options in setPDOMAttribute
        * }
        */
-      getAccessibleAttributes: function() {
-        return this._accessibleAttributes.slice( 0 ); // defensive copy
+      getPDOMAttributes: function() {
+        return this._pdomAttributes.slice( 0 ); // defensive copy
       },
-      get accessibleAttributes() { return this.getAccessibleAttributes(); },
+      get pdomAttributes() { return this.getPDOMAttributes(); },
 
       /**
        * Set a particular attribute or property for this Node's primary sibling, generally to provide extra semantic information for
@@ -2317,11 +2317,11 @@ const ParallelDOM = {
        * @param {Object} [options]
        * @public
        */
-      setAccessibleAttribute: function( attribute, value, options ) {
+      setPDOMAttribute: function( attribute, value, options ) {
         assert && assert( typeof attribute === 'string' );
         assert && assert( typeof value === 'string' || typeof value === 'boolean' || typeof value === 'number' );
         assert && options && assert( Object.getPrototypeOf( options ) === Object.prototype,
-          'Extra prototype on accessibleAttribute options object is a code smell' );
+          'Extra prototype on pdomAttribute options object is a code smell' );
         assert && typeof value === 'string' && validate( value, ValidatorDef.STRING_WITHOUT_TEMPLATE_VARS_VALIDATOR );
 
         options = merge( {
@@ -2336,21 +2336,21 @@ const ParallelDOM = {
           elementName: PDOMPeer.PRIMARY_SIBLING // see PDOMPeer.getElementName() for valid values, default to the primary sibling
         }, options );
 
-        assert && assert( ASSOCIATION_ATTRIBUTES.indexOf( attribute ) < 0, 'setAccessibleAttribute does not support association attributes' );
+        assert && assert( ASSOCIATION_ATTRIBUTES.indexOf( attribute ) < 0, 'setPDOMAttribute does not support association attributes' );
 
-        // if the accessible attribute already exists in the list, remove it - no need
+        // if the pdom attribute already exists in the list, remove it - no need
         // to remove from the peers, existing attributes will simply be replaced in the DOM
-        for ( let i = 0; i < this._accessibleAttributes.length; i++ ) {
-          const currentAttribute = this._accessibleAttributes[ i ];
+        for ( let i = 0; i < this._pdomAttributes.length; i++ ) {
+          const currentAttribute = this._pdomAttributes[ i ];
           if ( currentAttribute.attribute === attribute &&
                currentAttribute.options.namespace === options.namespace &&
                currentAttribute.options.asProperty === options.asProperty &&
                currentAttribute.options.elementName === options.elementName ) {
-            this._accessibleAttributes.splice( i, 1 );
+            this._pdomAttributes.splice( i, 1 );
           }
         }
 
-        this._accessibleAttributes.push( {
+        this._pdomAttributes.push( {
           attribute: attribute,
           value: value,
           options: options
@@ -2369,10 +2369,10 @@ const ParallelDOM = {
        * @param {Object} [options]
        * @public
        */
-      removeAccessibleAttribute: function( attribute, options ) {
+      removePDOMAttribute: function( attribute, options ) {
         assert && assert( typeof attribute === 'string' );
         assert && options && assert( Object.getPrototypeOf( options ) === Object.prototype,
-          'Extra prototype on accessibleAttribute options object is a code smell' );
+          'Extra prototype on pdomAttribute options object is a code smell' );
 
         options = merge( {
 
@@ -2384,15 +2384,15 @@ const ParallelDOM = {
         }, options );
 
         let attributeRemoved = false;
-        for ( let i = 0; i < this._accessibleAttributes.length; i++ ) {
-          if ( this._accessibleAttributes[ i ].attribute === attribute &&
-               this._accessibleAttributes[ i ].options.namespace === options.namespace &&
-               this._accessibleAttributes[ i ].options.elementName === options.elementName ) {
-            this._accessibleAttributes.splice( i, 1 );
+        for ( let i = 0; i < this._pdomAttributes.length; i++ ) {
+          if ( this._pdomAttributes[ i ].attribute === attribute &&
+               this._pdomAttributes[ i ].options.namespace === options.namespace &&
+               this._pdomAttributes[ i ].options.elementName === options.elementName ) {
+            this._pdomAttributes.splice( i, 1 );
             attributeRemoved = true;
           }
         }
-        assert && assert( attributeRemoved, 'Node does not have accessible attribute ' + attribute );
+        assert && assert( attributeRemoved, 'Node does not have pdom attribute ' + attribute );
 
         for ( let j = 0; j < this._accessibleInstances.length; j++ ) {
           const peer = this._accessibleInstances[ j ].peer;
@@ -2404,14 +2404,14 @@ const ParallelDOM = {
        * Remove all attributes from this node's dom element.
        * @public
        */
-      removeAccessibleAttributes: function() {
+      removePDOMAttributes: function() {
 
         // all attributes currently on this Node's primary sibling
-        const attributes = this.getAccessibleAttributes();
+        const attributes = this.getPDOMAttributes();
 
         for ( let i = 0; i < attributes.length; i++ ) {
           const attribute = attributes[ i ].attribute;
-          this.removeAccessibleAttribute( attribute );
+          this.removePDOMAttribute( attribute );
         }
       },
 
@@ -2423,10 +2423,10 @@ const ParallelDOM = {
        * @returns {boolean}
        * @public
        */
-      hasAccessibleAttribute: function( attribute, options ) {
+      hasPDOMAttribute: function( attribute, options ) {
         assert && assert( typeof attribute === 'string' );
         assert && options && assert( Object.getPrototypeOf( options ) === Object.prototype,
-          'Extra prototype on accessibleAttribute options object is a code smell' );
+          'Extra prototype on pdomAttribute options object is a code smell' );
 
         options = merge( {
 
@@ -2438,10 +2438,10 @@ const ParallelDOM = {
         }, options );
 
         let attributeFound = false;
-        for ( let i = 0; i < this._accessibleAttributes.length; i++ ) {
-          if ( this._accessibleAttributes[ i ].attribute === attribute &&
-               this._accessibleAttributes[ i ].options.namespace === options.namespace &&
-               this._accessibleAttributes[ i ].options.elementName === options.elementName ) {
+        for ( let i = 0; i < this._pdomAttributes.length; i++ ) {
+          if ( this._pdomAttributes[ i ].attribute === attribute &&
+               this._pdomAttributes[ i ].options.namespace === options.namespace &&
+               this._pdomAttributes[ i ].options.elementName === options.elementName ) {
             attributeFound = true;
           }
         }
