@@ -26,9 +26,9 @@ const summaryBits = [
   Renderer.bitmaskNotPainted,
   Renderer.bitmaskBoundsValid,
   // NOTE: This could be separated out into its own implementation for this flag, since
-  // there are cases where we actually have nothing accessible DUE to things being pulled out by another order.
+  // there are cases where we actually have nothing fromt he PDOM DUE to things being pulled out by another pdom order.
   // This is generally NOT the case, so I've left this in here because it significantly simplifies the implementation.
-  Renderer.bitmaskNotAccessible,
+  Renderer.bitmaskNoPDOM,
 
   // inverse renderer bits ("Do all painted nodes NOT support renderer X in this sub-tree?")
   Renderer.bitmaskLacksCanvas,
@@ -233,8 +233,8 @@ class RendererSummary {
    *
    * @returns {boolean}
    */
-  isNotAccessible() {
-    return !!( Renderer.bitmaskNotAccessible & this.bitmask );
+  hasNoPDOM() {
+    return !!( Renderer.bitmaskNoPDOM & this.bitmask );
   }
 
   /**
@@ -394,7 +394,7 @@ class RendererSummary {
       bitmask |= Renderer.bitmaskBoundsValid;
     }
     if ( !node.hasPDOMContent && !node.hasPDOMOrder() ) {
-      bitmask |= Renderer.bitmaskNotAccessible;
+      bitmask |= Renderer.bitmaskNoPDOM;
     }
 
     return bitmask;
@@ -420,7 +420,7 @@ class RendererSummary {
     if ( bit === Renderer.bitmaskSingleSVG ) { return 'SingleSVG'; }
     if ( bit === Renderer.bitmaskNotPainted ) { return 'NotPainted'; }
     if ( bit === Renderer.bitmaskBoundsValid ) { return 'BoundsValid'; }
-    if ( bit === Renderer.bitmaskNotAccessible ) { return 'NotAccessible'; }
+    if ( bit === Renderer.bitmaskNoPDOM ) { return 'NotAccessible'; }
     return '?';
   }
 

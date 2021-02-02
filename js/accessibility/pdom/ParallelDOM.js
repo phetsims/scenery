@@ -2738,12 +2738,12 @@ const ParallelDOM = {
         // Find descendants with pdomOrders and check them against all of their ancestors/self
         assert && ( function recur( descendant ) {
           // Prune the search (because milliseconds don't grow on trees, even if we do have assertions enabled)
-          if ( descendant._rendererSummary.isNotAccessible() ) { return; }
+          if ( descendant._rendererSummary.hasNoPDOM() ) { return; }
 
           descendant.pdomOrder && assert( descendant.getTrails( node => _.includes( descendant.pdomOrder, node ) ).length === 0, 'pdomOrder should not include any ancestors or the node itself' );
         } )( node );
 
-        assert && PDOMTree.auditNodeForAccessibleCycles( this );
+        assert && PDOMTree.auditNodeForPDOMCycles( this );
 
         this._pdomDisplaysInfo.onAddChild( node );
 

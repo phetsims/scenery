@@ -1,7 +1,7 @@
 // Copyright 2018-2020, University of Colorado Boulder
 
 /**
- * The main logic for maintaining the accessible instance tree (see https://github.com/phetsims/scenery-phet/issues/365)
+ * The main logic for maintaining the PDOM instance tree (see https://github.com/phetsims/scenery-phet/issues/365)
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -18,7 +18,7 @@ let focusedNode = null;
 
 var PDOMTree = {
   /**
-   * Called when a child node is added to a parent node (and the child is likely to have accessible content).
+   * Called when a child node is added to a parent node (and the child is likely to have pdom content).
    * @public
    *
    * @param {Node} parent
@@ -30,7 +30,7 @@ var PDOMTree = {
 
     assert && assert( parent instanceof Node );
     assert && assert( child instanceof Node );
-    assert && assert( !child._rendererSummary.isNotAccessible() );
+    assert && assert( !child._rendererSummary.hasNoPDOM() );
 
     const blockedDisplays = PDOMTree.beforeOp( child );
 
@@ -44,7 +44,7 @@ var PDOMTree = {
   },
 
   /**
-   * Called when a child node is removed from a parent node (and the child is likely to have accessible content).
+   * Called when a child node is removed from a parent node (and the child is likely to have pdom content).
    * @public
    *
    * @param {Node} parent
@@ -56,7 +56,7 @@ var PDOMTree = {
 
     assert && assert( parent instanceof Node );
     assert && assert( child instanceof Node );
-    assert && assert( !child._rendererSummary.isNotAccessible() );
+    assert && assert( !child._rendererSummary.hasNoPDOM() );
 
     const blockedDisplays = PDOMTree.beforeOp( child );
 
@@ -80,7 +80,7 @@ var PDOMTree = {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
     assert && assert( node instanceof Node );
-    assert && assert( !node._rendererSummary.isNotAccessible() );
+    assert && assert( !node._rendererSummary.hasNoPDOM() );
 
     const blockedDisplays = PDOMTree.beforeOp( node );
 
@@ -135,13 +135,13 @@ var PDOMTree = {
     // in an pdomOrder, changing its parent's order to include it (or vice versa) triggers a rebuild when it
     // would not strictly be necessary.
 
-    const accessibleTrails = PDOMTree.findAccessibleTrails( node );
+    const pdomTrails = PDOMTree.findPDOMTrails( node );
 
     // Remove subtrees from us (that were removed)
     for ( i = 0; i < removedItems.length; i++ ) {
       const removedItemToRemove = removedItems[ i ];
       if ( removedItemToRemove ) {
-        PDOMTree.removeTree( node, removedItemToRemove, accessibleTrails );
+        PDOMTree.removeTree( node, removedItemToRemove, pdomTrails );
         removedItemToRemove._pdomParent = null;
       }
     }
@@ -172,10 +172,10 @@ var PDOMTree = {
     // Add subtrees to us (that were added in this order change)
     for ( i = 0; i < addedItems.length; i++ ) {
       const addedItemToAdd = addedItems[ i ];
-      addedItemToAdd && PDOMTree.addTree( node, addedItemToAdd, accessibleTrails );
+      addedItemToAdd && PDOMTree.addTree( node, addedItemToAdd, pdomTrails );
     }
 
-    PDOMTree.reorder( node, accessibleTrails );
+    PDOMTree.reorder( node, pdomTrails );
 
     PDOMTree.afterOp( blockedDisplays );
 
@@ -198,22 +198,22 @@ var PDOMTree = {
 
     let i;
     const parents = node._pdomParent ? [ node._pdomParent ] : node._parents;
-    const accessibleTrailsList = []; // accessibleTrailsList[ i ] := AccessibilityTree.findAccessibleTrails( parents[ i ] )
+    const pdomTrailsList = []; // pdomTrailsList[ i ] := PDOMTree.findPDOMTrails( parents[ i ] )
 
     // For now, just regenerate the full tree. Could optimize in the future, if we can swap the content for an
     // PDOMInstance.
     for ( i = 0; i < parents.length; i++ ) {
       const parent = parents[ i ];
 
-      const accessibleTrails = PDOMTree.findAccessibleTrails( parent );
-      accessibleTrailsList.push( accessibleTrails );
+      const pdomTrails = PDOMTree.findPDOMTrails( parent );
+      pdomTrailsList.push( pdomTrails );
 
-      PDOMTree.removeTree( parent, node, accessibleTrails );
+      PDOMTree.removeTree( parent, node, pdomTrails );
     }
 
     // Do all removals before adding anything back in.
     for ( i = 0; i < parents.length; i++ ) {
-      PDOMTree.addTree( parents[ i ], node, accessibleTrailsList[ i ] );
+      PDOMTree.addTree( parents[ i ], node, pdomTrailsList[ i ] );
     }
 
     // An edge case is where we change the rootNode of the display (and don't have an effective parent)
@@ -245,26 +245,26 @@ var PDOMTree = {
   },
 
   /**
-   * Handles the conceptual addition of an accessible subtree.
+   * Handles the conceptual addition of an pdom subtree.
    * @private
    *
    * @param {Node} parent
    * @param {Node} child
-   * @param {Array.<PartialPDOMTrail>} [accessibleTrails] - Will be computed if needed
+   * @param {Array.<PartialPDOMTrail>} [pdomTrails] - Will be computed if needed
    */
-  addTree( parent, child, accessibleTrails ) {
+  addTree( parent, child, pdomTrails ) {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'addTree parent:n#' + parent._id + ', child:n#' + child._id );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
-    assert && PDOMTree.auditNodeForAccessibleCycles( parent );
+    assert && PDOMTree.auditNodeForPDOMCycles( parent );
 
-    accessibleTrails = accessibleTrails || PDOMTree.findAccessibleTrails( parent );
+    pdomTrails = pdomTrails || PDOMTree.findPDOMTrails( parent );
 
-    for ( let i = 0; i < accessibleTrails.length; i++ ) {
-      sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'trail: ' + accessibleTrails[ i ].trail.toString() + ' full:' + accessibleTrails[ i ].fullTrail.toString() + ' for ' + accessibleTrails[ i ].pdomInstance.toString() + ' root:' + accessibleTrails[ i ].isRoot );
+    for ( let i = 0; i < pdomTrails.length; i++ ) {
+      sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'trail: ' + pdomTrails[ i ].trail.toString() + ' full:' + pdomTrails[ i ].fullTrail.toString() + ' for ' + pdomTrails[ i ].pdomInstance.toString() + ' root:' + pdomTrails[ i ].isRoot );
       sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
-      const partialTrail = accessibleTrails[ i ];
+      const partialTrail = pdomTrails[ i ];
       const parentInstance = partialTrail.pdomInstance;
 
       // The full trail doesn't have the child in it, so we temporarily add that for tree creation
@@ -281,21 +281,21 @@ var PDOMTree = {
   },
 
   /**
-   * Handles the conceptual removal of an accessible subtree.
+   * Handles the conceptual removal of an pdom subtree.
    * @private
    *
    * @param {Node} parent
    * @param {Node} child
-   * @param {Array.<PartialPDOMTrail>} [accessibleTrails] - Will be computed if needed
+   * @param {Array.<PartialPDOMTrail>} [pdomTrails] - Will be computed if needed
    */
-  removeTree( parent, child, accessibleTrails ) {
+  removeTree( parent, child, pdomTrails ) {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'removeTree parent:n#' + parent._id + ', child:n#' + child._id );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
-    accessibleTrails = accessibleTrails || PDOMTree.findAccessibleTrails( parent );
+    pdomTrails = pdomTrails || PDOMTree.findPDOMTrails( parent );
 
-    for ( let i = 0; i < accessibleTrails.length; i++ ) {
-      const partialTrail = accessibleTrails[ i ];
+    for ( let i = 0; i < pdomTrails.length; i++ ) {
+      const partialTrail = pdomTrails[ i ];
 
       // The full trail doesn't have the child in it, so we temporarily add that for tree removal
       partialTrail.fullTrail.addDescendant( child );
@@ -307,20 +307,20 @@ var PDOMTree = {
   },
 
   /**
-   * Handles the conceptual sorting of an accessible subtree.
+   * Handles the conceptual sorting of an pdom subtree.
    * @private
    *
    * @param {Node} node
-   * @param {Array.<PartialPDOMTrail>} [accessibleTrails] - Will be computed if needed
+   * @param {Array.<PartialPDOMTrail>} [pdomTrails] - Will be computed if needed
    */
-  reorder( node, accessibleTrails ) {
+  reorder( node, pdomTrails ) {
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'reorder n#' + node._id );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
-    accessibleTrails = accessibleTrails || PDOMTree.findAccessibleTrails( node );
+    pdomTrails = pdomTrails || PDOMTree.findPDOMTrails( node );
 
-    for ( let i = 0; i < accessibleTrails.length; i++ ) {
-      const partialTrail = accessibleTrails[ i ];
+    for ( let i = 0; i < pdomTrails.length; i++ ) {
+      const partialTrail = pdomTrails[ i ];
 
       // TODO: does it optimize things to pass the partial trail in (so we scan less)?
       partialTrail.pdomInstance.sortChildren();
@@ -330,7 +330,7 @@ var PDOMTree = {
   },
 
   /**
-   * Creates accessible instances, returning an array of instances that should be added to the next level.
+   * Creates PDOM instances, returning an array of instances that should be added to the next level.
    * @private
    *
    * NOTE: Trails for which an already-existing instance exists will NOT create a new instance here. We only want to
@@ -351,7 +351,7 @@ var PDOMTree = {
 
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'effectiveChildren: ' + PDOMTree.debugOrder( effectiveChildren ) );
 
-    // If we are accessible ourself, we need to create the instance (so we can provide it to child instances).
+    // If we have pdom content ourself, we need to create the instance (so we can provide it to child instances).
     let instance;
     let existed = false;
     if ( node.hasPDOMContent ) {
@@ -401,9 +401,9 @@ var PDOMTree = {
     // list of displays to stop blocking focus callbacks in afterOp
     const displays = [];
 
-    const accessibleTrails = this.findAccessibleTrails( node );
-    for ( let i = 0; i < accessibleTrails.length; i++ ) {
-      const display = accessibleTrails[ i ].pdomInstance.display;
+    const pdomTrails = this.findPDOMTrails( node );
+    for ( let i = 0; i < pdomTrails.length; i++ ) {
+      const display = pdomTrails[ i ].pdomInstance.display;
       display.blockFocusCallbacks = true;
       displays.push( display );
     }
@@ -426,34 +426,34 @@ var PDOMTree = {
   },
 
   /**
-   * Returns all "accessible" trails from this node ancestor-wise to nodes that have display roots.
+   * Returns all "pdom" trails from this node ancestor-wise to nodes that have display roots.
    * @private
    *
-   * NOTE: "accessible" trails may not have strict parent-child relationships between adjacent nodes, as remapping of
+   * NOTE: "pdom" trails may not have strict parent-child relationships between adjacent nodes, as remapping of
    * the tree can have a "PDOM parent" and "pdom child" case (the child is in the parent's pdomOrder).
    *
    * @param {Node} node
    * @returns {Array.<PartialPDOMTrail>}
    */
-  findAccessibleTrails( node ) {
+  findPDOMTrails( node ) {
     const trails = [];
-    PDOMTree.recursiveAccessibleTrailSearch( trails, new Trail( node ) );
+    PDOMTree.recursivePDOMTrailSearch( trails, new Trail( node ) );
     return trails;
   },
 
   /**
-   * Finds all partial "accessible" trails
+   * Finds all partial "pdom" trails
    * @private
    *
    * @param {Array.<PartialPDOMTrail>} trailResults - Mutated, this is how we "return" our value.
    * @param {Trail} trail - Where to start from
    */
-  recursiveAccessibleTrailSearch( trailResults, trail ) {
+  recursivePDOMTrailSearch( trailResults, trail ) {
     const root = trail.rootNode();
     let i;
 
-    // If we find accessible content, our search ends here. IF it is connected to any accessible displays somehow, it
-    // will have accessible instances. We only care about these accessible instances, as they already have any DAG
+    // If we find pdom content, our search ends here. IF it is connected to any accessible pdom displays somehow, it
+    // will have pdom instances. We only care about these pdom instances, as they already have any DAG
     // deduplication applied.
     if ( root.hasPDOMContent ) {
       const instances = root.pdomInstances;
@@ -463,7 +463,7 @@ var PDOMTree = {
       }
       return;
     }
-    // Otherwise check for accessible displays for which our node is the rootNode.
+    // Otherwise check for accessible pdom displays for which our node is the rootNode.
     else {
       const rootedDisplays = root.rootedDisplays;
       for ( i = 0; i < rootedDisplays.length; i++ ) {
@@ -481,25 +481,25 @@ var PDOMTree = {
       const parent = parents[ i ];
 
       trail.addAncestor( parent );
-      PDOMTree.recursiveAccessibleTrailSearch( trailResults, trail );
+      PDOMTree.recursivePDOMTrailSearch( trailResults, trail );
       trail.removeAncestor();
     }
   },
 
   /**
-   * Ensures that the accessibleDisplays on the node (and its subtree) are accurate.
+   * Ensures that the pdomDisplays on the node (and its subtree) are accurate.
    * @public
    */
-  auditAccessibleDisplays( node ) {
+  auditPDOMDisplays( node ) {
     if ( assertSlow ) {
-      if ( node._pdomDisplaysInfo.canHaveAccessibleDisplays() ) {
+      if ( node._pdomDisplaysInfo.canHavePDOMDisplays() ) {
 
         let i;
         const displays = [];
 
-        // Concatenation of our parents' accessibleDisplays
+        // Concatenation of our parents' pdomDisplays
         for ( i = 0; i < node._parents.length; i++ ) {
-          Array.prototype.push.apply( displays, node._parents[ i ]._pdomDisplaysInfo.accessibleDisplays );
+          Array.prototype.push.apply( displays, node._parents[ i ]._pdomDisplaysInfo.pdomDisplays );
         }
 
         // And concatenation of any rooted displays (that are a11y)
@@ -510,7 +510,7 @@ var PDOMTree = {
           }
         }
 
-        const actualArray = node._pdomDisplaysInfo.accessibleDisplays.slice();
+        const actualArray = node._pdomDisplaysInfo.pdomDisplays.slice();
         const expectedArray = displays.slice(); // slice helps in debugging
         assertSlow( actualArray.length === expectedArray.length );
 
@@ -525,10 +525,10 @@ var PDOMTree = {
           }
         }
 
-        assertSlow( actualArray.length === 0 && expectedArray.length === 0, 'Mismatch with accessible displays' );
+        assertSlow( actualArray.length === 0 && expectedArray.length === 0, 'Mismatch with accessible pdom displays' );
       }
       else {
-        assertSlow( node._pdomDisplaysInfo.accessibleDisplays.length === 0, 'Invisible/nonaccessible things should have no displays' );
+        assertSlow( node._pdomDisplaysInfo.pdomDisplays.length === 0, 'Invisible/nonaccessible things should have no displays' );
       }
     }
   },
@@ -543,7 +543,7 @@ var PDOMTree = {
    *
    * @param {Node} node
    */
-  auditNodeForAccessibleCycles( node ) {
+  auditNodeForPDOMCycles( node ) {
     if ( assert ) {
       const trail = new Trail( node );
 
@@ -551,7 +551,7 @@ var PDOMTree = {
         const root = trail.rootNode();
 
         assert( trail.length <= 1 || root !== node,
-          'Accessible graph cycle detected. The combined scene-graph DAG with pdomOrder defining additional ' +
+          'Accessible PDOM graph cycle detected. The combined scene-graph DAG with pdomOrder defining additional ' +
           'parent-child relationships should still be a DAG. Cycle detected with the trail: ' + trail.toString() +
           ' path: ' + trail.toPathString() );
 

@@ -92,13 +92,13 @@ class PDOMInstance {
     this.peer = null; // Filled in below
 
     // @private {number} - The number of nodes in our trail that are NOT in our parent's trail and do NOT have our
-    // display in their accessibleDisplays. For non-root instances, this is initialized later in the constructor.
+    // display in their pdomDisplays. For non-root instances, this is initialized later in the constructor.
     this.invisibleCount = 0;
 
     // @private {Array.<Node>} - Nodes that are in our trail (but not those of our parent)
     this.relativeNodes = [];
 
-    // @private {Array.<boolean>} - Whether our display is in the respective relativeNodes' accessibleDisplays
+    // @private {Array.<boolean>} - Whether our display is in the respective relativeNodes' pdomDisplays
     this.relativeVisibilities = [];
 
     // @private {function} - The listeners added to the respective relativeNodes
@@ -128,22 +128,22 @@ class PDOMInstance {
 
       assert && assert( this.peer.primarySibling, 'accessible peer must have a primarySibling upon completion of construction' );
 
-      // Scan over all of the nodes in our trail (that are NOT in our parent's trail) to check for accessibleDisplays
+      // Scan over all of the nodes in our trail (that are NOT in our parent's trail) to check for pdomDisplays
       // so we can initialize our invisibleCount and add listeners.
       const parentTrail = this.parent.trail;
       for ( let i = parentTrail.length; i < trail.length; i++ ) {
         const relativeNode = trail.nodes[ i ];
         this.relativeNodes.push( relativeNode );
 
-        const accessibleDisplays = relativeNode._pdomDisplaysInfo.accessibleDisplays;
-        const isVisible = _.includes( accessibleDisplays, display );
+        const pdomDisplays = relativeNode._pdomDisplaysInfo.pdomDisplays;
+        const isVisible = _.includes( pdomDisplays, display );
         this.relativeVisibilities.push( isVisible );
         if ( !isVisible ) {
           this.invisibleCount++;
         }
 
         const listener = this.checkAccessibleDisplayVisibility.bind( this, i - parentTrail.length );
-        relativeNode.accessibleDisplaysEmitter.addListener( listener );
+        relativeNode.pdomDisplaysEmitter.addListener( listener );
         this.relativeListeners.push( listener );
       }
 
@@ -280,13 +280,13 @@ class PDOMInstance {
   }
 
   /**
-   * Checks to see whether our visibility needs an update based on an accessibleDisplays change.
+   * Checks to see whether our visibility needs an update based on an pdomDisplays change.
    * @private
    *
    * @param {number} index - Index into the relativeNodes array (which node had the notification)
    */
   checkAccessibleDisplayVisibility( index ) {
-    const isNodeVisible = _.includes( this.relativeNodes[ index ]._pdomDisplaysInfo.accessibleDisplays, this.display );
+    const isNodeVisible = _.includes( this.relativeNodes[ index ]._pdomDisplaysInfo.pdomDisplays, this.display );
     const wasNodeVisible = this.relativeVisibilities[ index ];
 
     if ( isNodeVisible !== wasNodeVisible ) {
@@ -485,7 +485,7 @@ class PDOMInstance {
       PDOMUtils.removeElements( this.parent.peer.primarySibling, this.peer.topLevelElements );
 
       for ( let i = 0; i < this.relativeNodes.length; i++ ) {
-        this.relativeNodes[ i ].accessibleDisplaysEmitter.removeListener( this.relativeListeners[ i ] );
+        this.relativeNodes[ i ].pdomDisplaysEmitter.removeListener( this.relativeListeners[ i ] );
       }
     }
 

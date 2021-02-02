@@ -564,7 +564,7 @@ class Display {
       }
     }
 
-    PDOMTree.auditAccessibleDisplays( this.rootNode );
+    PDOMTree.auditPDOMDisplays( this.rootNode );
 
     sceneryLog && sceneryLog.Display && sceneryLog.pop();
   }

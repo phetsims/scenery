@@ -54,7 +54,7 @@ class PDOMFuzzer {
     this.actionsTaken.push( action );
     action.execute();
     this.display._rootPDOMInstance.auditRoot();
-    PDOMTree.auditAccessibleDisplays( this.display.rootNode );
+    PDOMTree.auditPDOMDisplays( this.display.rootNode );
     if ( this.logToConsole ) {
       for ( let i = 0; i < this.nodes.length; i++ ) {
         const node = this.nodes[ i ];

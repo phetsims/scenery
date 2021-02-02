@@ -42,7 +42,7 @@ Renderer.bitmaskSingleSVG = 0x200;
 // reserved gap 0x400, 0x800, 0x1000, 0x2000, 0x4000, 0x8000 for future renderer-specific single information
 Renderer.bitmaskNotPainted = 0x1000;
 Renderer.bitmaskBoundsValid = 0x2000;
-Renderer.bitmaskNotAccessible = 0x4000;
+Renderer.bitmaskNoPDOM = 0x4000;
 // summary bits for whether a renderer could be potentially used to display a Node.
 Renderer.bitmaskLacksCanvas = Renderer.bitmaskCanvas << Renderer.bitmaskLacksShift; // 0x10000
 Renderer.bitmaskLacksSVG = Renderer.bitmaskSVG << Renderer.bitmaskLacksShift; // 0x20000

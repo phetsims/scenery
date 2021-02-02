@@ -536,7 +536,7 @@ class Node extends PhetioObject {
     this.filterChangeEmitter = new TinyEmitter();
 
     // @public {TinyEmitter} - Fired when the accessible Displays for this Node have changed (see PDOMInstance)
-    this.accessibleDisplaysEmitter = new TinyEmitter();
+    this.pdomDisplaysEmitter = new TinyEmitter();
 
     // @public {TinyEmitter}
     this.focusHighlightChangedEmitter = new TinyEmitter();
@@ -620,7 +620,7 @@ class Node extends PhetioObject {
     this._children.splice( index, 0, node );
 
     // If this added subtree contains accessible content, we need to notify any relevant displays
-    if ( !node._rendererSummary.isNotAccessible() ) {
+    if ( !node._rendererSummary.hasNoPDOM() ) {
       this.onPDOMAddChild( node );
     }
 
@@ -716,7 +716,7 @@ class Node extends PhetioObject {
 
     // If this added subtree contains accessible content, we need to notify any relevant displays
     // NOTE: Potentially removes bounds listeners here!
-    if ( !node._rendererSummary.isNotAccessible() ) {
+    if ( !node._rendererSummary.hasNoPDOM() ) {
       this.onPDOMRemoveChild( node );
     }
 
@@ -761,7 +761,7 @@ class Node extends PhetioObject {
       this._children.splice( currentIndex, 1 );
       this._children.splice( index, 0, node );
 
-      if ( !this._rendererSummary.isNotAccessible() ) {
+      if ( !this._rendererSummary.hasNoPDOM() ) {
         this.onPDOMReorderedChildren();
       }
 
@@ -834,7 +834,7 @@ class Node extends PhetioObject {
 
     // Immediate consequences/updates from reordering
     if ( hasReorderingChange ) {
-      if ( !this._rendererSummary.isNotAccessible() ) {
+      if ( !this._rendererSummary.hasNoPDOM() ) {
         this.onPDOMReorderedChildren();
       }
 
