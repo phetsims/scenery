@@ -150,7 +150,7 @@
     <!--<div class="ph2"><a href="#PDOM">The Parallel DOM</a></div>-->
     <!--<div class="ph2"><a href="#overall-structure">Type Structure</a></div>-->
 
-    <div class="ph2"><a href="#a11y-api">The Accessibility API</a></div>
+    <div class="ph2"><a href="#pdom-api">The Accessibility API</a></div>
     <div class="navlink"><a href="#ex-basic">A Basic Example</a></div>
     <div class="sublink"><a href="#ex-basic">tagName</a></div>
     <div class="sublink"><a href="#ex-basic">innerContent</a></div>
@@ -188,11 +188,10 @@
     <div class="sublink"><a href="#performance-considerations">Performance Considerations</a></div>
 
     <div class="navlink"><a href="#phet-info">PhET Specific Info</a></div>
-    <div class="sublink"><a href="#enable-a11y">Enabling A11y</a></div>
-    <div class="sublink"><a href="#a11y-strings">Handling A11y Specific strings</a></div>
-    <div class="sublink"><a href="#a11y-view">The A11y View</a></div>
+    <div class="sublink"><a href="#enable-pdom">Enabling PDOM</a></div>
+    <div class="sublink"><a href="#a11y-view">The PDOM View</a></div>
 
-    <div class="navlink"><a href="#a11y-resources">Next Steps for Understanding</a></div>
+    <div class="navlink"><a href="#pdom-resources">Next Steps for Understanding</a></div>
   </div>
   <div class="span6">
 
@@ -255,12 +254,12 @@
       content will represent the node in the parallel DOM tree.
     </p>
 
-    <h2 id="a11y-api">Scenery's Accessibility API</h2>
+    <h2 id="pdom-api">Scenery's Accessibility API (powered by the PDOM)</h2>
 
     <p>
       Most of Scenery's accessibility features are defined and implemented in <code>ParallelDOM.js</code>.
       <code>ParallelDOM.js</code> is a trait that is mixed in to <code>Node.js</code>. It adds getters and setters
-      for accessibility properties, so all we have to do is pass in a11y specific options like normal into the
+      for accessibility properties, so all we have to do is pass in pdom specific options like normal into the
       Parent.call() or mutate() function calls.
     </p>
 
@@ -275,7 +274,7 @@
 
     <h3 id="ex-basic">A Basic Example</h3>
 
-    <p>The primary way that developers will implement a11y is through options passed through to <code>Node.js</code>.
+    <p>The primary way that developers will implement accessibility is through options passed through to <code>Node.js</code>.
       First off, each <code>Node</code> that wants content in the PDOM will need an HTML element in the PDOM to
       represent it.
       To do this, use the <code>tagName</code> option:</p>
@@ -283,14 +282,14 @@
     <script type="text/javascript">
       docExample( 'example-accessibleTag', function( scene, display ) {
         /*START*/
-        var a11yNode = new scenery.Rectangle( 0, 0, 64, 64, {
+        var pdomNode = new scenery.Rectangle( 0, 0, 64, 64, {
           fill: 'blue',
 
-          // a11y
+          // pdom
           tagName: 'p',
           innerContent: 'I am a beautiful, blue rectangle.'
         } );
-        scene.addChild( a11yNode );
+        scene.addChild( pdomNode );
         display.updateOnRequestAnimationFrame();
         /*END*/
       } );
@@ -302,7 +301,7 @@
     <h3 id="ex-all-siblings">Multiple DOM Elements per Node</h3>
 
     <p>Up to this point there has been a one to one correlation of Nodes to HTML elements in the PDOM,
-      but the a11y api supports a richer architecture to represent a <code>Node</code> to AT: each
+      but the parallel dom api supports a richer architecture to represent a <code>Node</code> to AT: each
       <code>Node</code> can have multiple DOM Elements. A <code>Node</code>'s HTML Elements, or the
       <code>Node</code>'s peer, can be thought of
       as collectively equating to the <code>Node</code>. (Note: a "peer" is of type <code>PDOMPeer</code>).
@@ -343,9 +342,9 @@
     <script type="text/javascript">
       docExample( 'example-all-siblings', function( scene, display ) {
         /*START*/
-        var a11yNode = new scenery.Node( {
+        var pdomNode = new scenery.Node( {
 
-          // a11y
+          // pdom
           tagName: 'button',
           innerContent: 'Grab Magnet',
           labelTagName: 'h3',
@@ -358,10 +357,10 @@
         // the visual representation of the magnet
         var southPole = new scenery.Rectangle( 0, 0, 48, 64, { fill: 'grey' } );
         var northPole = new scenery.Rectangle( 48, 0, 48, 64, { fill: 'red' } );
-        a11yNode.children = [ southPole, northPole ];
+        pdomNode.children = [ southPole, northPole ];
 
-        scene.addChild( a11yNode );
-        a11yNode.addChild( new scenery.Text( 'North South Magnet', { stroke: 'black', center: a11yNode.center } ) );
+        scene.addChild( pdomNode );
+        pdomNode.addChild( new scenery.Text( 'North South Magnet', { stroke: 'black', center: pdomNode.center } ) );
         display.updateOnRequestAnimationFrame();
         /*END*/
       } );
@@ -376,7 +375,7 @@
 
     <p>A few notes here:</p>
     <ul>
-      <li>All supplemental HTML Elements (container, description and label) have default tags in the a11y api.
+      <li>All supplemental HTML Elements (container, description and label) have default tags in the pdom api.
         Specifying a "*Content" option without the "*TagName" option will produce an element of the default. See
         <code>PDOMUtils</code> for the default tag names.
       </li>
@@ -403,7 +402,7 @@
     <h4 id="scene-graph">Leveraging the Scene Graph</h4>
 
     <p>
-      Consider the following example where we have a box filled with circles and the desired a11y representation is an
+      Consider the following example where we have a box filled with circles and the desired pdom representation is an
       unordered list filled with list items.
     </p>
     <div id="example-accessible-graph" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
@@ -416,7 +415,7 @@
         var rectangle = new scenery.Rectangle( 0, 0, dimension, dimension, {
           fill: 'lightblue',
 
-          // a11y
+          // pdom
           tagName: 'ul'
         } );
         scene.addChild( rectangle );
@@ -428,7 +427,7 @@
             fill: 'red',
             center: new dot.Vector2( Math.random() * dimension, Math.random() * dimension ),
 
-            // a11y
+            // pdom
             tagName: 'li',
             innerContent: innerContent
           } ) );
@@ -447,7 +446,7 @@
     <h4 id="text-in-pdom">Flexibility</h4>
 
     <p>
-      The a11y api can provide lots of flexibility in how to display content in the PDOM. Each sibling of the peer
+      The pdom api can provide lots of flexibility in how to display content in the PDOM. Each sibling of the peer
       has a name (like label or description), but at its core it is still just an HTML element, and it can be any
       tag name specified. Below is an example of a <code>Node</code> that is used just to add text content to the
       PDOM. In looking at the example, remember that there are default tag names for supplementary peer
@@ -457,15 +456,15 @@
     <script type="text/javascript">
       docExample( 'example-lots-of-text', function( scene, display ) {
         /*START*/
-        var a11yNode = new scenery.Node( {
+        var pdomNode = new scenery.Node( {
 
-          // a11y
+          // pdom
           tagName: 'p',
           innerContent: 'Don\'t forget about Chemistry too!',
           labelContent: 'This is paragraph 1. Physics is the best, and this Node is going to tell the world!',
           descriptionContent: 'This is paragraph 2. Math is also pretty cool.'
         } );
-        scene.addChild( a11yNode );
+        scene.addChild( pdomNode );
         display.updateOnRequestAnimationFrame();
         /*END*/
       } );
@@ -479,7 +478,7 @@
 
     <h3 id="keyboard-nav">Keyboard Navigation</h3>
     <p>
-      The a11y api supports keyboard navigation only on the Node's primary sibling.
+      The pdom api supports keyboard navigation only on the Node's primary sibling.
       A general philosophy to follow is to have the DOM Element hold as much semantic information as possible.
       For example, if there is a button in the sim, it is an obvious choice to use a "button" element as the
       Node's primary sibling tag. Another solution that works, although it is much worse, would be to choose
@@ -501,16 +500,16 @@
     <script type="text/javascript">
       docExample( 'example-input-type', function( scene, display ) {
         /*START*/
-        var a11yNode = new scenery.Rectangle( 0, 0, 64, 64, {
+        var pdomNode = new scenery.Rectangle( 0, 0, 64, 64, {
           fill: 'blue',
 
-          // a11y
+          // pdom
           tagName: 'input',
           inputType: 'checkbox',
           labelContent: 'Toggle sim state'
         } );
 
-        scene.addChild( a11yNode );
+        scene.addChild( pdomNode );
         display.updateOnRequestAnimationFrame();
         /*END*/
       } );
@@ -577,11 +576,11 @@
       understanding this is imperative to successfully creating an accessible PDOM. For more info see
       <a href="#accessible-name-link">background reading</a> about the topic.
     </p>
-    <p>Here is an overview about the various ways to set the Accessible Name via the Scenery a11y api.
+    <p>Here is an overview about the various ways to set the Accessible Name via the Scenery pdom api.
     </p>
     <ul>
       <li>Element's Content: Example <code>&lt;button&gt;My Button&lt;/button&gt;</code>. To accomplish this with the
-        a11y api use <code>innerContent</code>.
+        pdom api use <code>innerContent</code>.
       </li>
       <li><code>label</code> Element: a label element can be associated with an interactive <code>input</code> type
         that does not have inner content in order to provide the input with an
@@ -592,13 +591,13 @@
         To add an Accessible Name via a <code>label</code>, set the <code>labelTagName</code> to "label" and the "for"
         attribute will automatically be filled in to point to the primary sibling.
       </li>
-      <li><code>aria-label</code> Attribute: an ARIA attribute that can provide an accessible name. For the a11y
+      <li><code>aria-label</code> Attribute: an ARIA attribute that can provide an accessible name. For the pdom
         api use the <code>ariaLabel</code> option to set the value of said attribute on the primary DOM Element.
       </li>
       <li>
         <code>aria-labelledby</code> Attribute: this can be used to associate an HTML
         element other than the label element to another element. The elements do not have to be right beside each
-        other. <strong>TODO: the a11y api docs to come. Also
+        other. <strong>TODO: the pdom api docs to come. Also
         add describedby? see <a href="https://github.com/phetsims/scenery/issues/701">phetsims&#47;scenery&#35;701</a>
       </strong>
       </li>
@@ -642,43 +641,19 @@
     <h2 id="phet-info">PhET Specific Information</h2>
     <p>The following information is specific to PhET's work with accessibility and this api.</p>
 
-    <h4 id="enable-a11y">Enabling A11y</h4>
+    <h4 id="enable-pdom">Enabling PDOM</h4>
     <p>
-      Accessibility features are hidden behind an <code>?supportsDescription</code> query parameter. This hides a11y features
+      Accessibility features are hidden behind an <code>?supportsDescription</code> query parameter. This hides pdom features
       until they are ready for production. When ready, accessibility can be enabled by default by adding
       <code>Sim</code>
       option <code>accessibility: true</code> to <code>{{sim}}-main.js</code>.
     </p>
 
-    <h4 id="a11y-strings">A11y Specific Strings</h4>
-    <p>Accessibility specific strings are not yet translatable. That being said PhET has every intention of getting to
-      the point, we just don't have the infrastructure set up yet. Keeping that in mind, please follow
-      the
-      following conventions. This will help us greatly when it comes time to move these a11y strings into the
-      translatable
-      strings json file.
-    </p>
-    <ul>
-      <li>We currently store a11y strings in a js file, name this file <code>{{SIM}}A11yStrings.js</code>.</li>
-      <li>When using these strings, please think of it with the same convention and lint rule mind set as with the
-        <code>string!</code> plugin. This means:
-        <ul>
-          <li>Name a11y string keys without the "String" at the end of the key.</li>
-          <li>Have variable names that end in "String" when declaring.</li>
-          <li>Declare all a11y strings at the top of the file (like their own module)</li>
-          <li>String keys should hold an object with a "value" key that stores the a11y string. This is the same
-            convention as with other PhET strings.
-          </li>
-        </ul>
-      </li>
-      <li>See <code>OhmsLawA11yStrings.js</code> for an model example.</li>
-    </ul>
-
-    <h4>Beginning a11y work on a sim</h4>
+    <h4>Beginning pdom work on a sim</h4>
     <p>
-      When beginning a11y work in a simulation, add <code>"supportsInteractiveDescription": true</code> to the sim's package.json.
+      When beginning pdom work in a simulation, add <code>"supportsInteractiveDescription": true</code> to the sim's package.json.
       Then regenerate the lists to add the simulation to perennial/data/interactive-descriptions list, and generate an
-      a11y-view HTML document to assist with development (<code>grunt generate-a11y-view-html</code>).
+      pdom-view HTML document to assist with development (<code>grunt generate-a11y-view-html</code>).
     </p>
 
     <h4 id="a11y-view">The a11y-view</h4>
@@ -694,7 +669,7 @@
       The PDOM in PhET sims are specific and designed to give the most semantic and pedagogical information possible.
       These priorities can differ from those displayed in the visual simulation. We use
       <code>Node.accessibleOrder</code> to help manage this discrepancy. As a PhET Developer, please use the following
-      guide to develop the a11y ordering in the PDOM versus the traditional rendering order of the scene graph. Each
+      guide to develop the pdom ordering in the PDOM versus the traditional rendering order of the scene graph. Each
       item in the list is ranked, such that you should start with item 1, and then if that doesn't work for your
       situation, try the next item down.
     </p>
@@ -732,9 +707,9 @@
         element has an accessible name.
       </li>
       <li>
-        Conventionally, it is preferred to specify a11y parameters as options whenever possible, and only use the
-        setters if the situation requires it. Please label a11y specific options separately with a <code>&#47;&#47;
-        a11y</code> comment as a header.
+        Conventionally, it is preferred to specify pdom parameters as options whenever possible, and only use the
+        setters if the situation requires it. Please label pdom specific options separately with a <code>&#47;&#47;
+        pdom</code> comment as a header.
       </li>
       <li>
         The HTML of the PDOM acts as just another input/output modality to a PhET sim's model. You can interact with it
@@ -752,7 +727,7 @@
 
     </ul>
 
-    <h2 id="a11y-resources">Next Steps for Understanding</h2>
+    <h2 id="pdom-resources">Next Steps for Understanding</h2>
     <p>Please discuss developer related questions or problems with @jessegreenberg, @zepumph, or @mbarlow12 and
       update this document accordingly to help those who follow in your footsteps. Also @terracoda is a great
       resource on questions about ARIA and accessibility in general.
