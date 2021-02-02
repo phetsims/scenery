@@ -2780,8 +2780,8 @@ const ParallelDOM = {
        * Called when this node's children are reordered (with nothing added/removed).
        * @private
        */
-      onAccessibleReorderedChildren: function() {
-        sceneryLog && sceneryLog.ParallelDOM && sceneryLog.ParallelDOM( 'onAccessibleReorderedChildren (parent:n#' + this.id + ')' );
+      onPDOMReorderedChildren: function() {
+        sceneryLog && sceneryLog.ParallelDOM && sceneryLog.ParallelDOM( 'onPDOMReorderedChildren (parent:n#' + this.id + ')' );
         sceneryLog && sceneryLog.ParallelDOM && sceneryLog.push();
 
         PDOMTree.childrenOrderChange( this );
