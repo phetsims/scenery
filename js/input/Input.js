@@ -725,7 +725,7 @@ class Input {
         assert && assert( this[ actionName ], `action not defined on Input: ${actionName}` );
 
         // These exist for the lifetime of the display, and need not be disposed.
-        this.display.accessibleDOMElement.addEventListener( eventName, event => {
+        this.display.pdomRootElement.addEventListener( eventName, event => {
 
           sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `Input.${eventName}FromBrowser` );
           sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
@@ -1876,7 +1876,7 @@ class Input {
    * @returns {boolean}
    */
   isTargetUnderPDOM( element ) {
-    return this.display._accessible && this.display.accessibleDOMElement.contains( element );
+    return this.display._accessible && this.display.pdomRootElement.contains( element );
   }
 
   /**
@@ -1894,7 +1894,7 @@ class Input {
     // from an iframe by keeping focus in the display. getNext/getPreviousFocusable will return active element
     // if there are no more elements in that direction. See https://github.com/phetsims/scenery/issues/883
     if ( FullScreen.isFullScreen() && event.keyCode === KeyboardUtils.KEY_TAB ) {
-      const rootElement = this.display.accessibleDOMElement;
+      const rootElement = this.display.pdomRootElement;
       const nextElement = event.shiftKey ? PDOMUtils.getPreviousFocusable( rootElement ) :
                           PDOMUtils.getNextFocusable( rootElement );
       if ( nextElement === event.target ) {

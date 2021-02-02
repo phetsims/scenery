@@ -125,7 +125,7 @@
   function updatePDOMDisplay( display ) {
     'use strict';
     //format PDOM code and add to container
-    var PDOMHTMLBlock = display.accessibleDOMElement.outerHTML;
+    var PDOMHTMLBlock = display.pdomRootElement.outerHTML;
     var formattedPDOM = PDOMHTMLBlock
       .replace( new RegExp( '<[/]?\\w*[ >]', 'g' ), '\n$&' ) // add breaks in the string
       .replace( new RegExp( '<p', 'g' ), '\t<p' ) //formatting for opening paragraph tag

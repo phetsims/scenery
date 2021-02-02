@@ -293,7 +293,7 @@
       //format the p-dom code
       var buttonRegex = new RegExp( '(<button.*?>)((.|\\n)*?)(<\/button>)', 'gm' );
       var pRegex = new RegExp( '(<p.*?>)((.|\\n)*?)(<\/p>)', 'gm' );
-      var PDOMHTMLBlock = display.accessibleDOMElement.outerHTML;
+      var PDOMHTMLBlock = display.pdomRootElement.outerHTML;
       var formattedPDOM = PDOMHTMLBlock
         .replace( new RegExp( '<[/]?\\w*[ >]', 'g' ), '\n$&' ) // add breaks in the string
         .replace( new RegExp( pRegex, 'g' ), '\t$1\n\t\t$2\t<\/p>' ) //formatting for opening paragraph tag

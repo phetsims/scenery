@@ -248,7 +248,7 @@
     // update displayed p-dom text
     const updatePDOMDisplay = () => {
 
-      var formattedPDOM = display.accessibleDOMElement.outerHTML
+      var formattedPDOM = display.pdomRootElement.outerHTML
         // add breaks in the string
         .replace( new RegExp( '<[/]?\\w*[ >]', 'g' ), '\n$&' )
 

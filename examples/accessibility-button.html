@@ -69,7 +69,7 @@
     draw( scene, display );
     display.updateDisplay();
 
-    var pdomHTMLBlock = display.accessibleDOMElement.outerHTML;
+    var pdomHTMLBlock = display.pdomRootElement.outerHTML;
     var formattedPDOM = pdomHTMLBlock.replace( new RegExp( '<[/]?\\w*[ >]', 'g' ), '\n$&' ); // add breaks in the string
     var $PDOMcode = $( '<pre class="brush: html"></pre>' ).text( formattedPDOM );
 

@@ -156,8 +156,8 @@ an UI and Display made for visual testing and debugging.
 
       a._pdomInstances[ 0 ].peer._primarySibling.addEventListener( 'focusin', () => console.log( 'primary focusin' ) );
       a._pdomInstances[ 0 ].peer._primarySibling.addEventListener( 'focus', () => console.log( 'primary focus' ) );
-      display.accessibleDOMElement.addEventListener( 'focusin', () => console.log( 'element focusin' ) );
-      display.accessibleDOMElement.addEventListener( 'focus', () => console.log( 'element focus' ) );
+      display.pdomRootElement.addEventListener( 'focusin', () => console.log( 'element focusin' ) );
+      display.pdomRootElement.addEventListener( 'focus', () => console.log( 'element focus' ) );
 
       a.focus();
 
