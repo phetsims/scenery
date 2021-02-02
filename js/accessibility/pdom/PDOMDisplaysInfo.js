@@ -1,8 +1,10 @@
 // Copyright 2018-2020, University of Colorado Boulder
 
 /**
- * Per-node information required to track what accessible Displays our node is visible under. Acts like a multimap
- * (duplicates allowed) to indicate how many times we appear in an accessible display.
+ * Per-node information required to track what PDOM Displays our Node is visible under. A PDOM display is a Display that
+ * is marked true with the `accessibility` option, and thus creates and manages a ParallelDOM (see ParallelDOM and
+ * general scenery accessibility doc for more details). Acts like a multimap
+ * (duplicates allowed) to indicate how many times we appear in an pdom display.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -12,7 +14,7 @@ import scenery from '../../scenery.js';
 
 class PDOMDisplaysInfo {
   /**
-   * Tracks accessible display information for our given node.
+   * Tracks pdom display information for our given node.
    * @public (scenery-internal)
    *
    * @param {Node} node
@@ -22,12 +24,12 @@ class PDOMDisplaysInfo {
     // @public {Node}
     this.node = node;
 
-    // @public (scenery-internal) {Array.<Display>} - (duplicates allowed) - There is one copy of each accessible
-    // Display for each trail (from its root node to this node) that is fully visible (assuming this subtree is
-    // accessible).
+    // @public (scenery-internal) {Array.<Display>} - (duplicates allowed) - There is one copy of each pdom
+    // Display for each trail (from its root node to this node) that is fully visible (assuming this subtree has
+    // pdom content).
     // Thus, the value of this is:
     // - If this node is invisible OR the subtree has no pdomContent/pdomOrder: []
-    // - Otherwise, it is the concatenation of our parents' pdomDisplays (AND any accessible displays rooted
+    // - Otherwise, it is the concatenation of our parents' pdomDisplays (AND any pdom displays rooted
     //   at this node).
     // This value is synchronously updated, and supports pdomInstances by letting them know when certain
     // nodes are visible on the display.
@@ -35,7 +37,7 @@ class PDOMDisplaysInfo {
   }
 
   /**
-   * Called when the node is added as a child to this node AND the node's subtree contains accessible content.
+   * Called when the node is added as a child to this node AND the node's subtree contains pdom content.
    * @public (scenery-internal)
    *
    * @param {Node} node
@@ -45,14 +47,14 @@ class PDOMDisplaysInfo {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     if ( node._pdomDisplaysInfo.canHavePDOMDisplays() ) {
-      node._pdomDisplaysInfo.addAccessibleDisplays( this.pdomDisplays );
+      node._pdomDisplaysInfo.addPDOMDisplays( this.pdomDisplays );
     }
 
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
   }
 
   /**
-   * Called when the node is removed as a child from this node AND the node's subtree contains accessible content.
+   * Called when the node is removed as a child from this node AND the node's subtree contains pdom content.
    * @public (scenery-internal)
    *
    * @param {Node} node
@@ -62,7 +64,7 @@ class PDOMDisplaysInfo {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     if ( node._pdomDisplaysInfo.canHavePDOMDisplays() ) {
-      node._pdomDisplaysInfo.removeAccessibleDisplays( this.pdomDisplays );
+      node._pdomDisplaysInfo.removePDOMDisplays( this.pdomDisplays );
     }
 
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
@@ -81,17 +83,17 @@ class PDOMDisplaysInfo {
 
     // If we are invisible, our pdomDisplays would not have changed ([] => [])
     if ( this.node.visible && this.node.pdomVisible ) {
-      const wasAccessible = !( Renderer.bitmaskNoPDOM & oldBitmask );
-      const isAccessible = !( Renderer.bitmaskNoPDOM & newBitmask );
+      const hadPDOM = !( Renderer.bitmaskNoPDOM & oldBitmask );
+      const hasPDOM = !( Renderer.bitmaskNoPDOM & newBitmask );
 
-      // If we changed to be accessible, we need to recursively add accessible displays.
-      if ( isAccessible && !wasAccessible ) {
-        this.addAllAccessibleDisplays();
+      // If we changed to have pdom content, we need to recursively add pdom displays.
+      if ( hasPDOM && !hadPDOM ) {
+        this.addAllPDOMDisplays();
       }
 
-      // If we changed to NOT be accessible, we need to recursively remove accessible displays.
-      if ( !isAccessible && wasAccessible ) {
-        this.removeAllAccessibleDisplays();
+      // If we changed to NOT have pdom content, we need to recursively remove pdom displays.
+      if ( !hasPDOM && hadPDOM ) {
+        this.removeAllPDOMDisplays();
       }
     }
 
@@ -108,13 +110,13 @@ class PDOMDisplaysInfo {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onVisibilityChange n#' + this.node.id + ' visible:' + visible );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
-    // If we are not accessible (or pdomVisible), our pdomDisplays would not have changed ([] => [])
+    // If we don't have pdom (or pdomVisible), our pdomDisplays would not have changed ([] => [])
     if ( this.node.pdomVisible && !this.node._rendererSummary.hasNoPDOM() ) {
       if ( visible ) {
-        this.addAllAccessibleDisplays();
+        this.addAllPDOMDisplays();
       }
       else {
-        this.removeAllAccessibleDisplays();
+        this.removeAllPDOMDisplays();
       }
     }
 
@@ -122,22 +124,22 @@ class PDOMDisplaysInfo {
   }
 
   /**
-   * Called when our accessibleVisibility changes.
+   * Called when our pdomVisibility changes.
    * @public (scenery-internal)
    *
    * @param {boolean} visible
    */
-  onAccessibleVisibilityChange( visible ) {
-    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onAccessibleVisibilityChange n#' + this.node.id + ' pdomVisible:' + visible );
+  onPDOMVisibilityChange( visible ) {
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onPDOMVisibilityChange n#' + this.node.id + ' pdomVisible:' + visible );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
-    // If we are not accessible, our pdomDisplays would not have changed ([] => [])
+    // If we don't have pdom, our pdomDisplays would not have changed ([] => [])
     if ( this.node.visible && !this.node._rendererSummary.hasNoPDOM() ) {
       if ( visible ) {
-        this.addAllAccessibleDisplays();
+        this.addAllPDOMDisplays();
       }
       else {
-        this.removeAllAccessibleDisplays();
+        this.removeAllPDOMDisplays();
       }
     }
 
@@ -155,7 +157,7 @@ class PDOMDisplaysInfo {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     if ( display._accessible && this.canHavePDOMDisplays() ) {
-      this.addAccessibleDisplays( [ display ] );
+      this.addPDOMDisplays( [ display ] );
     }
 
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
@@ -172,7 +174,7 @@ class PDOMDisplaysInfo {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     if ( display._accessible && this.canHavePDOMDisplays() ) {
-      this.removeAccessibleDisplays( [ display ] );
+      this.removePDOMDisplays( [ display ] );
     }
 
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
@@ -189,11 +191,11 @@ class PDOMDisplaysInfo {
   }
 
   /**
-   * Adds all of our accessible displays to our array (and propagates).
+   * Adds all of our pdom displays to our array (and propagates).
    * @private
    */
-  addAllAccessibleDisplays() {
-    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'addAllAccessibleDisplays n#' + this.node.id );
+  addAllPDOMDisplays() {
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'addAllPDOMDisplays n#' + this.node.id );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     assert && assert( this.pdomDisplays.length === 0, 'Should be empty before adding everything' );
@@ -215,23 +217,23 @@ class PDOMDisplaysInfo {
       }
     }
 
-    this.addAccessibleDisplays( displays );
+    this.addPDOMDisplays( displays );
 
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
   }
 
   /**
-   * Removes all of our accessible displays from our array (and propagates).
+   * Removes all of our pdom displays from our array (and propagates).
    * @private
    */
-  removeAllAccessibleDisplays() {
-    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'removeAllAccessibleDisplays n#' + this.node.id );
+  removeAllPDOMDisplays() {
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'removeAllPDOMDisplays n#' + this.node.id );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     assert && assert( !this.canHavePDOMDisplays(), 'Should happen when we cannot store pdomDisplays' );
 
     // TODO: is there a way to avoid a copy?
-    this.removeAccessibleDisplays( this.pdomDisplays.slice() );
+    this.removePDOMDisplays( this.pdomDisplays.slice() );
 
     assert && assert( this.pdomDisplays.length === 0, 'Should be empty after removing everything' );
 
@@ -239,13 +241,13 @@ class PDOMDisplaysInfo {
   }
 
   /**
-   * Adds a list of accessible displays to our internal list. See pdomDisplays documentation.
+   * Adds a list of pdom displays to our internal list. See pdomDisplays documentation.
    * @private
    *
    * @param {Array.<Display>} displays
    */
-  addAccessibleDisplays( displays ) {
-    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'addAccessibleDisplays n#' + this.node.id + ' numDisplays:' + displays.length );
+  addPDOMDisplays( displays ) {
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'addPDOMDisplays n#' + this.node.id + ' numDisplays:' + displays.length );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     assert && assert( Array.isArray( displays ) );
@@ -258,7 +260,7 @@ class PDOMDisplaysInfo {
       for ( let i = 0; i < this.node._children.length; i++ ) {
         const child = this.node._children[ i ];
         if ( child._pdomDisplaysInfo.canHavePDOMDisplays() ) {
-          this.node._children[ i ]._pdomDisplaysInfo.addAccessibleDisplays( displays );
+          this.node._children[ i ]._pdomDisplaysInfo.addPDOMDisplays( displays );
         }
       }
 
@@ -269,13 +271,13 @@ class PDOMDisplaysInfo {
   }
 
   /**
-   * Removes a list of accessible displays from our internal list. See pdomDisplays documentation.
+   * Removes a list of pdom displays from our internal list. See pdomDisplays documentation.
    * @private
    *
    * @param {Array.<Display>} displays
    */
-  removeAccessibleDisplays( displays ) {
-    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'removeAccessibleDisplays n#' + this.node.id + ' numDisplays:' + displays.length );
+  removePDOMDisplays( displays ) {
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'removePDOMDisplays n#' + this.node.id + ' numDisplays:' + displays.length );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     assert && assert( Array.isArray( displays ) );
@@ -298,7 +300,7 @@ class PDOMDisplaysInfo {
         // modification happens), we DO NOT want to traverse to the child node getting removed. Ideally a better
         // solution than this flag should be found.
         if ( child._pdomDisplaysInfo.canHavePDOMDisplays() && !child._isGettingRemovedFromParent ) {
-          child._pdomDisplaysInfo.removeAccessibleDisplays( displays );
+          child._pdomDisplaysInfo.removePDOMDisplays( displays );
         }
       }
 

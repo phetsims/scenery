@@ -2185,7 +2185,7 @@ const ParallelDOM = {
         if ( this._pdomVisible !== visible ) {
           this._pdomVisible = visible;
 
-          this._pdomDisplaysInfo.onAccessibleVisibilityChange( visible );
+          this._pdomDisplaysInfo.onPDOMVisibilityChange( visible );
         }
       },
       set pdomVisible( visible ) { this.setPDOMVisible( visible ); },
