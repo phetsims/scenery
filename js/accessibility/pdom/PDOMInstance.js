@@ -327,8 +327,8 @@ class PDOMInstance {
     // recommended by https://stackoverflow.com/questions/8840580/force-dom-redraw-refresh-on-chrome-mac, also see
     // https://github.com/phetsims/a11y-research/issues/30
     if ( platform.edge ) {
-      this.display.getAccessibleDOMElement().style.display = 'none';
-      this.display.getAccessibleDOMElement().style.display = 'block';
+      this.display.getPDOMRootElement().style.display = 'none';
+      this.display.getPDOMRootElement().style.display = 'block';
     }
   }
 

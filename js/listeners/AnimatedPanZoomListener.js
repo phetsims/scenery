@@ -314,7 +314,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
     this.cancelMiddlePress();
 
     const displayAccessible = phet.joist.display._accessible;
-    if ( !displayAccessible || !phet.joist.display.accessibleDOMElement.contains( domEvent.target ) ) {
+    if ( !displayAccessible || !phet.joist.display.pdomRootElement.contains( domEvent.target ) ) {
       this.handleZoomCommands( domEvent );
 
       // handle translation without worry of the pointer being attached because there is no pointer at this level

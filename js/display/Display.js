@@ -781,7 +781,7 @@ class Display {
     // TODO: disable keyboard nav without hiding content so that it is still readable with a screen reader,
     // see https://github.com/phetsims/phet-io/issues/995
     if ( this._accessible ) {
-      this.accessibleDOMElement.hidden = !this._interactive;
+      this.pdomRootElement.hidden = !this._interactive;
     }
   }
 
@@ -819,11 +819,11 @@ class Display {
    *
    * @returns {HTMLElement|null}
    */
-  getAccessibleDOMElement() {
+  getPDOMRootElement() {
     return this._accessible ? this._rootPDOMInstance.peer.primarySibling : null;
   }
 
-  get accessibleDOMElement() { return this.getAccessibleDOMElement(); }
+  get pdomRootElement() { return this.getPDOMRootElement(); }
 
   /**
    * Has this Display enabled accessibility features like PDOM creation and support.
