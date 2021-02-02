@@ -545,7 +545,7 @@ class Node extends PhetioObject {
     this.changedInstanceEmitter = new TinyEmitter(); // emits with {Instance}, {boolean} added
 
     // compose accessibility - for some reason tests fail when you move this down to be next to super call.
-    this.initializeAccessibility();
+    this.initializeParallelDOM();
 
     // @public (scenery-internal) {number} - A bitmask which specifies which renderers this Node (and only this Node,
     // not its subtree) supports.
@@ -5603,7 +5603,7 @@ class Node extends PhetioObject {
   dispose() {
 
     // remove all accessibility input listeners
-    this.disposeAccessibility();
+    this.disposeParallelDOM();
 
     // When disposing, remove all children and parents. See https://github.com/phetsims/scenery/issues/629
     this.removeAllChildren();

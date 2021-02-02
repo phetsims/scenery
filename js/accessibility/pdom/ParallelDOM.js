@@ -250,7 +250,7 @@ const ParallelDOM = {
        * This should be called in the constructor to initialize the accessibility-specific parts of Node.
        * @protected
        */
-      initializeAccessibility: function() {
+      initializeParallelDOM: function() {
 
         // @private {string|null} - the HTML tag name of the element representing this node in the DOM
         this._tagName = null;
@@ -467,7 +467,7 @@ const ParallelDOM = {
        * by calling Node.dispose(), so this function is scenery-internal.
        * @public (scenery-internal)
        */
-      disposeAccessibility: function() {
+      disposeParallelDOM: function() {
 
         this.enabledProperty.unlink( this.pdomBoundEnabledListener );
 
