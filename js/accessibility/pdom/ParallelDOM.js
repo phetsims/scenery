@@ -208,7 +208,7 @@ const ACCESSIBILITY_OPTION_KEYS = [
   'focusHighlightLayerable', // {boolean} Flag to determine if the focus highlight node can be layered in the scene graph
   'groupFocusHighlight', // {boolean|Node} - Sets the outer focus highlight for this node when a descendant has focus
   'accessibleVisible', // {boolean} - Sets whether or not the node's DOM element is visible in the parallel DOM
-  'accessibleOrder', // {Array.<Node|null>|null} - Modifies the order of accessible  navigation
+  'pdomOrder', // {Array.<Node|null>|null} - Modifies the order of accessible  navigation
 
   'ariaLabelledbyAssociations', // {Array.<Object>} - sets the list of aria-labelledby associations between from this node to others (including itself)
   'ariaDescribedbyAssociations', // {Array.<Object>} - sets the list of aria-describedby associations between from this node to others (including itself)
@@ -400,11 +400,11 @@ const ParallelDOM = {
         // @private {Array.<Node|null>|null} - (a11y) If provided, it will override the focus order between children
         // (and optionally arbitrary subtrees). If not provided, the focus order will default to the rendering order
         // (first children first, last children last) determined by the children array.
-        // See setAccessibleOrder() for more documentation.
-        this._accessibleOrder = null;
+        // See setPDOMOrder() for more documentation.
+        this._pdomOrder = null;
 
         // @public (scenery-internal) {Node|null} - (a11y) If this node is specified in another node's
-        // accessibleOrder, then this will have the value of that other (accessible parent) node. Otherwise it's null.
+        // pdomOrder, then this will have the value of that other (accessible parent) node. Otherwise it's null.
         this._accessibleParent = null;
 
         // @public (scenery-internal) {Node|null} - If this is specified, the primary sibling will be positioned
@@ -473,7 +473,7 @@ const ParallelDOM = {
 
         // To prevent memory leaks, we want to clear our order (since otherwise nodes in our order will reference
         // this node).
-        this.accessibleOrder = null;
+        this.pdomOrder = null;
 
         // clear references to the pdomTransformSourceNode
         this.setPDOMTransformSourceNode( null );
@@ -2008,7 +2008,7 @@ const ParallelDOM = {
        *
        * In the general case, when an accessible order is specified, it's an array of nodes, with optionally one
        * element being a placeholder for "the rest of the children", signified by null. This means that, for
-       * accessibility, it will act as if the children for this node WERE the accessibleOrder (potentially
+       * accessibility, it will act as if the children for this node WERE the pdomOrder (potentially
        * supplemented with other children via the placeholder).
        *
        * For example, if you have the tree:
@@ -2021,7 +2021,7 @@ const ParallelDOM = {
        *       f
        *         h
        *
-       * and we specify b.accessibleOrder = [ e, f, d, c ], then the accessible structure will act as if the tree is:
+       * and we specify b.pdomOrder = [ e, f, d, c ], then the accessible structure will act as if the tree is:
        *  a
        *    b
        *      e
@@ -2031,51 +2031,51 @@ const ParallelDOM = {
        *      c <--- note that `g` is NOT under `c` anymore, because it got pulled out under b directly
        *        g
        *
-       * The placeholder (`null`) will get filled in with all direct children that are NOT in any accessibleOrder.
+       * The placeholder (`null`) will get filled in with all direct children that are NOT in any pdomOrder.
        * If there is no placeholder specified, it will act as if the placeholder is at the end of the order.
        * The value `null` (the default) and the empty array (`[]`) both act as if the only order is the placeholder,
        * i.e. `[null]`.
        *
        * Some general constraints for the orders are:
        * - Nodes must be attached to a Display (in a scene graph) to be shown in an accessible order.
-       * - You can't specify a node in more than one accessibleOrder, and you can't specify duplicates of a value
-       *   in an accessibleOrder.
-       * - You can't specify an ancestor of a node in that node's accessibleOrder
-       *   (e.g. this.accessibleOrder = this.parents ).
+       * - You can't specify a node in more than one pdomOrder, and you can't specify duplicates of a value
+       *   in an pdomOrder.
+       * - You can't specify an ancestor of a node in that node's pdomOrder
+       *   (e.g. this.pdomOrder = this.parents ).
        *
-       * Note that specifying something in an accessibleOrder will effectively remove it from all of its parents for
-       * the accessible tree (so if you create `tmpNode.accessibleOrder = [ a ]` then toss the tmpNode without
+       * Note that specifying something in an pdomOrder will effectively remove it from all of its parents for
+       * the accessible tree (so if you create `tmpNode.pdomOrder = [ a ]` then toss the tmpNode without
        * disposing it, `a` won't show up in the parallel DOM). If there is a need for that, disposing a Node
-       * effectively removes its accessibleOrder.
+       * effectively removes its pdomOrder.
        *
        * See https://github.com/phetsims/scenery-phet/issues/365#issuecomment-381302583 for more information on the
        * decisions and design for this feature.
        *
-       * @param {Array.<Node|null>|null} accessibleOrder
+       * @param {Array.<Node|null>|null} pdomOrder
        */
-      setAccessibleOrder: function( accessibleOrder ) {
-        assert && assert( Array.isArray( accessibleOrder ) || accessibleOrder === null,
-          'Array or null expected, received: ' + accessibleOrder );
-        assert && accessibleOrder && accessibleOrder.forEach( ( node, index ) => {
+      setPDOMOrder: function( pdomOrder ) {
+        assert && assert( Array.isArray( pdomOrder ) || pdomOrder === null,
+          'Array or null expected, received: ' + pdomOrder );
+        assert && pdomOrder && pdomOrder.forEach( ( node, index ) => {
           assert( node === null || node instanceof Node,
-            'Elements of accessibleOrder should be either a Node or null. Element at index ' + index + ' is: ' + node );
+            'Elements of pdomOrder should be either a Node or null. Element at index ' + index + ' is: ' + node );
         } );
-        assert && accessibleOrder && assert( this.getTrails( node => _.includes( accessibleOrder, node ) ).length === 0, 'accessibleOrder should not include any ancestors or the node itself' );
+        assert && pdomOrder && assert( this.getTrails( node => _.includes( pdomOrder, node ) ).length === 0, 'pdomOrder should not include any ancestors or the node itself' );
 
         // Only update if it has changed
-        if ( this._accessibleOrder !== accessibleOrder ) {
-          const oldAccessibleOrder = this._accessibleOrder;
+        if ( this._pdomOrder !== pdomOrder ) {
+          const oldPDOMOrder = this._pdomOrder;
 
           // Store our own reference to this, so client modifications to the input array won't silently break things.
           // See https://github.com/phetsims/scenery/issues/786
-          this._accessibleOrder = accessibleOrder === null ? null : accessibleOrder.slice();
+          this._pdomOrder = pdomOrder === null ? null : pdomOrder.slice();
 
-          PDOMTree.accessibleOrderChange( this, oldAccessibleOrder, accessibleOrder );
+          PDOMTree.pdomOrderChange( this, oldPDOMOrder, pdomOrder );
 
           this.rendererSummaryRefreshEmitter.emit();
         }
       },
-      set accessibleOrder( value ) { this.setAccessibleOrder( value ); },
+      set pdomOrder( value ) { this.setPDOMOrder( value ); },
 
       /**
        * Returns the accessible (focus) order for this node.
@@ -2083,16 +2083,16 @@ const ParallelDOM = {
        *
        * @returns {Array.<Node|null>|null}
        */
-      getAccessibleOrder: function() {
-        if ( this._accessibleOrder ) {
-          return this._accessibleOrder.slice( 0 ); // create a defensive copy
+      getPDOMOrder: function() {
+        if ( this._pdomOrder ) {
+          return this._pdomOrder.slice( 0 ); // create a defensive copy
         }
-        return this._accessibleOrder;
+        return this._pdomOrder;
       },
-      get accessibleOrder() { return this.getAccessibleOrder(); },
+      get pdomOrder() { return this.getPDOMOrder(); },
 
       /**
-       * Returns whether this node has an accessibleOrder that is effectively different than the default.
+       * Returns whether this node has an pdomOrder that is effectively different than the default.
        * @public
        *
        * NOTE: `null`, `[]` and `[null]` are all effectively the same thing, so this will return true for any of
@@ -2101,14 +2101,14 @@ const ParallelDOM = {
        *
        * @returns {boolean}
        */
-      hasAccessibleOrder: function() {
-        return this._accessibleOrder !== null &&
-               this._accessibleOrder.length !== 0 &&
-               ( this._accessibleOrder.length > 1 || this._accessibleOrder[ 0 ] !== null );
+      hasPDOMOrder: function() {
+        return this._pdomOrder !== null &&
+               this._pdomOrder.length !== 0 &&
+               ( this._pdomOrder.length > 1 || this._pdomOrder[ 0 ] !== null );
       },
 
       /**
-       * Returns our "accessible parent" if available: the node that specifies this node in its accessibleOrder.
+       * Returns our "accessible parent" if available: the node that specifies this node in its pdomOrder.
        * @public
        *
        * @returns {Node|null}
@@ -2123,14 +2123,14 @@ const ParallelDOM = {
        * excluded subtrees).
        * @public
        *
-       * If there is no accessibleOrder specified, this is basically "all children that don't have accessible panrets"
-       * (a node has an "accessible parent" if it is specified in an accessibleOrder).
+       * If there is no pdomOrder specified, this is basically "all children that don't have accessible panrets"
+       * (a node has an "accessible parent" if it is specified in an pdomOrder).
        *
-       * Otherwise (if it has an accessibleOrder), it is the accessibleOrder, with the above list of nodes placed
+       * Otherwise (if it has an pdomOrder), it is the pdomOrder, with the above list of nodes placed
        * in at the location of the placeholder. If there is no placeholder, it acts like a placeholder was the last
-       * element of the accessibleOrder (see setAccessibleOrder for more documentation information).
+       * element of the pdomOrder (see setPDOMOrder for more documentation information).
        *
-       * NOTE: If you specify a child in the accessibleOrder, it will NOT be double-included (since it will have an
+       * NOTE: If you specify a child in the pdomOrder, it will NOT be double-included (since it will have an
        * accessible parent).
        *
        * @returns {Array.<Node>}
@@ -2147,8 +2147,8 @@ const ParallelDOM = {
         }
 
         // Override the order, and replace the placeholder if it exists.
-        if ( this.hasAccessibleOrder() ) {
-          const effectiveChildren = this.accessibleOrder.slice();
+        if ( this.hasPDOMOrder() ) {
+          const effectiveChildren = this.pdomOrder.slice();
 
           const placeholderIndex = effectiveChildren.indexOf( null );
 
@@ -2611,7 +2611,7 @@ const ParallelDOM = {
        *
        * @returns {Array.<Item>}
        */
-      getNestedAccessibleOrder: function() {
+      getNestedPDOMOrder: function() {
         const currentTrail = new Trail( this );
         let pruneStack = []; // {Array.<Node>} - A list of nodes to prune
 
@@ -2625,7 +2625,7 @@ const ParallelDOM = {
         const nestedChildStack = [ result ];
 
         function addTrailsForNode( node, overridePruning ) {
-          // If subtrees were specified with accessibleOrder, they should be skipped from the ordering of ancestor subtrees,
+          // If subtrees were specified with pdomOrder, they should be skipped from the ordering of ancestor subtrees,
           // otherwise we could end up having multiple references to the same trail (which should be disallowed).
           let pruneCount = 0;
           // count the number of times our node appears in the pruneStack
@@ -2636,7 +2636,7 @@ const ParallelDOM = {
           } );
 
           // If overridePruning is set, we ignore one reference to our node in the prune stack. If there are two copies,
-          // however, it means a node was specified in a accessibleOrder that already needs to be pruned (so we skip it instead
+          // however, it means a node was specified in a pdomOrder that already needs to be pruned (so we skip it instead
           // of creating duplicate references in the tab order).
           if ( pruneCount > 1 || ( pruneCount === 1 && !overridePruning ) ) {
             return;
@@ -2652,13 +2652,13 @@ const ParallelDOM = {
             nestedChildStack.push( item.children );
           }
 
-          const arrayAccessibleOrder = node._accessibleOrder === null ? [] : node._accessibleOrder;
+          const arrayPDOMOrder = node._pdomOrder === null ? [] : node._pdomOrder;
 
           // push specific focused nodes to the stack
-          pruneStack = pruneStack.concat( arrayAccessibleOrder );
+          pruneStack = pruneStack.concat( arrayPDOMOrder );
 
           // Visiting trails to ordered nodes.
-          _.each( arrayAccessibleOrder, descendant => {
+          _.each( arrayPDOMOrder, descendant => {
             // Find all descendant references to the node.
             // NOTE: We are not reordering trails (due to descendant constraints) if there is more than one instance for
             // this descendant node.
@@ -2672,7 +2672,7 @@ const ParallelDOM = {
             } );
           } );
 
-          // Visit everything. If there is an accessibleOrder, those trails were already visited, and will be excluded.
+          // Visit everything. If there is an pdomOrder, those trails were already visited, and will be excluded.
           const numChildren = node._children.length;
           for ( let i = 0; i < numChildren; i++ ) {
             const child = node._children[ i ];
@@ -2683,7 +2683,7 @@ const ParallelDOM = {
           }
 
           // pop focused nodes from the stack (that were added above)
-          _.each( arrayAccessibleOrder, () => {
+          _.each( arrayPDOMOrder, () => {
             pruneStack.pop();
           } );
 
@@ -2736,12 +2736,12 @@ const ParallelDOM = {
         sceneryLog && sceneryLog.ParallelDOM && sceneryLog.ParallelDOM( 'onAccessibleAddChild n#' + node.id + ' (parent:n#' + this.id + ')' );
         sceneryLog && sceneryLog.ParallelDOM && sceneryLog.push();
 
-        // Find descendants with accessibleOrders and check them against all of their ancestors/self
+        // Find descendants with pdomOrders and check them against all of their ancestors/self
         assert && ( function recur( descendant ) {
           // Prune the search (because milliseconds don't grow on trees, even if we do have assertions enabled)
           if ( descendant._rendererSummary.isNotAccessible() ) { return; }
 
-          descendant.accessibleOrder && assert( descendant.getTrails( node => _.includes( descendant.accessibleOrder, node ) ).length === 0, 'accessibleOrder should not include any ancestors or the node itself' );
+          descendant.pdomOrder && assert( descendant.getTrails( node => _.includes( descendant.pdomOrder, node ) ).length === 0, 'pdomOrder should not include any ancestors or the node itself' );
         } )( node );
 
         assert && PDOMTree.auditNodeForAccessibleCycles( this );
