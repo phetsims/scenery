@@ -397,13 +397,13 @@ const ParallelDOM = {
         // http://www.ssbbartgroup.com/blog/how-windows-screen-readers-work-on-the-web/
         this._pdomVisible = true;
 
-        // @private {Array.<Node|null>|null} - (a11y) If provided, it will override the focus order between children
+        // @private {Array.<Node|null>|null} - If provided, it will override the focus order between children
         // (and optionally arbitrary subtrees). If not provided, the focus order will default to the rendering order
         // (first children first, last children last) determined by the children array.
         // See setPDOMOrder() for more documentation.
         this._pdomOrder = null;
 
-        // @public (scenery-internal) {Node|null} - (a11y) If this node is specified in another node's
+        // @public (scenery-internal) {Node|null} - If this node is specified in another node's
         // pdomOrder, then this will have the value of that other (PDOM parent) Node. Otherwise it's null.
         this._pdomParent = null;
 
@@ -587,7 +587,7 @@ const ParallelDOM = {
       },
 
       /***********************************************************************************************************/
-      // HIGHER LEVEL API: GETTERS AND SETTERS FOR A11Y API OPTIONS
+      // HIGHER LEVEL API: GETTERS AND SETTERS FOR PDOM API OPTIONS
       //
       // These functions utilize the lower level API to achieve a consistence, and convenient API for adding
       // pdom content to the PDOM. See https://github.com/phetsims/scenery/issues/795
@@ -600,7 +600,7 @@ const ParallelDOM = {
        * this Node's accessibleName
        * @public
        *
-       * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
+       * @experimental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
        *
        * @param {string|null} accessibleName
        */
@@ -619,7 +619,7 @@ const ParallelDOM = {
        * Get the tag name of the DOM element representing this node for accessibility.
        * @public
        *
-       * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
+       * @experimental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
        *
        * @returns {string|null}
        */
@@ -659,7 +659,7 @@ const ParallelDOM = {
        * For more information about setting an Accessible Name on HTML see the scenery docs for accessibility,
        * and see https://developer.paciellogroup.com/blog/2017/04/what-is-an-accessible-name/
        *
-       * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
+       * @experimental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
        * @param {PDOMBehaviorFunctionDef} accessibleNameBehavior
        */
       setAccessibleNameBehavior: function( accessibleNameBehavior ) {
@@ -678,7 +678,7 @@ const ParallelDOM = {
        * Get the help text of the interactive element.
        * @public
        *
-       * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
+       * @experimental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
        * @returns {function}
        */
       getAccessibleNameBehavior: function() {
@@ -692,7 +692,7 @@ const ParallelDOM = {
        * Nodes are heading nodes. See computeHeadingLevel() for more info
        * @public
        *
-       * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
+       * @experimental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
        * @param {string|null} pdomHeading
        */
       setPDOMHeading: function( pdomHeading ) {
@@ -710,7 +710,7 @@ const ParallelDOM = {
        * Get the value of this Node's heading. Use null to clear the heading
        * @public
        *
-       * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
+       * @experimental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
        * @returns {string|null}
        */
       getPDOMHeading: function() {
@@ -724,7 +724,7 @@ const ParallelDOM = {
        * information.
        * @public
        *
-       * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
+       * @experimental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
        * @param {PDOMBehaviorFunctionDef} pdomHeadingBehavior
        */
       setPDOMHeadingBehavior: function( pdomHeadingBehavior ) {
@@ -743,7 +743,7 @@ const ParallelDOM = {
        * Get the help text of the interactive element.
        * @public
        *
-       * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
+       * @experimental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
        * @returns {function}
        */
       getPDOMHeadingBehavior: function() {
@@ -756,7 +756,7 @@ const ParallelDOM = {
        * Get the tag name of the DOM element representing this node for accessibility.
        * @public
        *
-       * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
+       * @experimental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
        * @returns {number|null}
        */
       getHeadingLevel: function() {
@@ -771,7 +771,7 @@ const ParallelDOM = {
        * is nested under.
        * @private
        *
-       * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
+       * @experimental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
        * @returns {number}
        */
       computeHeadingLevel: function() {
@@ -802,7 +802,7 @@ const ParallelDOM = {
        * rendered in the PDOM. Null will clear the help text for this Node.
        * @public
        *
-       * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
+       * @experimental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
        * @param {string|null} helpText
        */
       setHelpText: function( helpText ) {
@@ -821,7 +821,7 @@ const ParallelDOM = {
        * Get the help text of the interactive element.
        * @public
        *
-       * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
+       * @experimental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
        * @returns {string|null}
        */
       getHelpText: function() {
@@ -834,7 +834,7 @@ const ParallelDOM = {
        * "Help Text".
        * @public
        *
-       * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
+       * @experimental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
        * @param {PDOMBehaviorFunctionDef} helpTextBehavior
        */
       setHelpTextBehavior: function( helpTextBehavior ) {
@@ -853,7 +853,7 @@ const ParallelDOM = {
        * Get the help text of the interactive element.
        * @public
        *
-       * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
+       * @experimental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
        * @returns {function}
        */
       getHelpTextBehavior: function() {
@@ -863,7 +863,7 @@ const ParallelDOM = {
 
 
       /***********************************************************************************************************/
-      // LOWER LEVEL GETTERS AND SETTERS FOR A11Y API OPTIONS
+      // LOWER LEVEL GETTERS AND SETTERS FOR PDOM API OPTIONS
       /***********************************************************************************************************/
 
       /**
@@ -880,7 +880,7 @@ const ParallelDOM = {
         if ( tagName !== this._tagName ) {
           this._tagName = tagName;
 
-          // TODO: this could be setting a11y content twice
+          // TODO: this could be setting PDOM content twice
           this.onPDOMContentChange();
         }
       },
@@ -2119,7 +2119,7 @@ const ParallelDOM = {
       get pdomParent() { return this.getPDOMParent(); },
 
       /**
-       * Returns the "effective" a11y children for the node (which may be different based on the order or other
+       * Returns the "effective" pdom children for the node (which may be different based on the order or other
        * excluded subtrees).
        * @public
        *
@@ -2831,7 +2831,7 @@ const ParallelDOM = {
 
   /**
    * @public
-   * @type {a11yBehaviorFunction}
+   * @type {pdomBehaviorFunction}
    */
   BASIC_ACCESSIBLE_NAME_BEHAVIOR( node, options, accessibleName ) {
     if ( node.tagName === 'input' ) {
@@ -2849,7 +2849,7 @@ const ParallelDOM = {
 
   /**
    * @public
-   * @type {a11yBehaviorFunction}
+   * @type {pdomBehaviorFunction}
    */
   HELP_TEXT_BEFORE_CONTENT( node, options, helpText ) {
     options.descriptionTagName = PDOMUtils.DEFAULT_DESCRIPTION_TAG_NAME;
@@ -2860,7 +2860,7 @@ const ParallelDOM = {
 
   /**
    * @public
-   * @type {a11yBehaviorFunction}
+   * @type {pdomBehaviorFunction}
    */
   HELP_TEXT_AFTER_CONTENT( node, options, helpText ) {
     options.descriptionTagName = PDOMUtils.DEFAULT_DESCRIPTION_TAG_NAME;
