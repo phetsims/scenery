@@ -393,7 +393,7 @@ class RendererSummary {
     if ( node.areSelfBoundsValid() ) {
       bitmask |= Renderer.bitmaskBoundsValid;
     }
-    if ( !node.hasPDOMContent && !node.hasAccessibleOrder() ) {
+    if ( !node.hasPDOMContent && !node.hasPDOMOrder() ) {
       bitmask |= Renderer.bitmaskNotAccessible;
     }
 

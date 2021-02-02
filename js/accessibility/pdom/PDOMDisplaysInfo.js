@@ -26,7 +26,7 @@ class PDOMDisplaysInfo {
     // Display for each trail (from its root node to this node) that is fully visible (assuming this subtree is
     // accessible).
     // Thus, the value of this is:
-    // - If this node is invisible OR the subtree has no accessibleContent/accessibleOrder: []
+    // - If this node is invisible OR the subtree has no accessibleContent/pdomOrder: []
     // - Otherwise, it is the concatenation of our parents' accessibleDisplays (AND any accessible displays rooted
     //   at this node).
     // This value is synchronously updated, and supports accessibleInstances by letting them know when certain

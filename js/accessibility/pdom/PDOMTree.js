@@ -92,15 +92,15 @@ var PDOMTree = {
   },
 
   /**
-   * Called when a node has an accessibleOrder change.
+   * Called when a node has an pdomOrder change.
    * @public
    *
    * @param {Node} node
    * @param {Array.<Node|null>|null} oldOrder
    * @param {Array.<Node|null>|null} newOrder
    */
-  accessibleOrderChange( node, oldOrder, newOrder ) {
-    sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'accessibleOrderChange n#' + node._id + ': ' + PDOMTree.debugOrder( oldOrder ) + ',' + PDOMTree.debugOrder( newOrder ) );
+  pdomOrderChange( node, oldOrder, newOrder ) {
+    sceneryLog && sceneryLog.PDOMTree && sceneryLog.PDOMTree( 'pdomOrderChange n#' + node._id + ': ' + PDOMTree.debugOrder( oldOrder ) + ',' + PDOMTree.debugOrder( newOrder ) );
     sceneryLog && sceneryLog.PDOMTree && sceneryLog.push();
 
     assert && assert( node instanceof Node );
@@ -122,17 +122,17 @@ var PDOMTree = {
     if ( assert ) {
       for ( i = 0; i < removedItems; i++ ) {
         assert( removedItems[ i ] === null || removedItems[ i ]._accessibleParent === node,
-          'Node should have had an accessibleOrder' );
+          'Node should have had an pdomOrder' );
       }
       for ( i = 0; i < addedItems; i++ ) {
         assert( addedItems[ i ] === null || addedItems[ i ]._accessibleParent === null,
-          'Node is already specified in an accessibleOrder' );
+          'Node is already specified in an pdomOrder' );
       }
     }
 
     // NOTE: Performance could be improved in some cases if we can avoid rebuilding an a11y tree for DIRECT children
-    // when changing whether they are present in the accessibleOrder. Basically, if something is a child and NOT
-    // in an accessibleOrder, changing its parent's order to include it (or vice versa) triggers a rebuild when it
+    // when changing whether they are present in the pdomOrder. Basically, if something is a child and NOT
+    // in an pdomOrder, changing its parent's order to include it (or vice versa) triggers a rebuild when it
     // would not strictly be necessary.
 
     const accessibleTrails = PDOMTree.findAccessibleTrails( node );
@@ -335,7 +335,7 @@ var PDOMTree = {
    *
    * NOTE: Trails for which an already-existing instance exists will NOT create a new instance here. We only want to
    * fill in the "missing" structure. There are cases (a.children=[b,c], b.children=[c]) where removing an
-   * accessibleOrder can trigger addTree(a,b) AND addTree(b,c), and we can't create duplicate content.
+   * pdomOrder can trigger addTree(a,b) AND addTree(b,c), and we can't create duplicate content.
    *
    * @param {Trail} trail
    * @param {Display} display
@@ -431,7 +431,7 @@ var PDOMTree = {
    *
    * NOTE: "accessible" trails may not have strict parent-child relationships between adjacent nodes, as remapping of
    * the tree can have an "accessible parent" and "accessible child" case (the child is in the parent's
-   * accessibleOrder).
+   * pdomOrder).
    *
    * @param {Node} node
    * @returns {Array.<PartialPDOMTrail>}
@@ -536,7 +536,7 @@ var PDOMTree = {
 
   /**
    * Checks a given Node (with assertions) to ensure it is not part of a cycle in the combined graph with edges
-   * defined by "there is a parent-child or accessibleParent-accessibleOrder" relationship between the two nodes.
+   * defined by "there is a parent-child or accessibleParent-pdomOrder" relationship between the two nodes.
    * @public (scenery-internal)
    *
    * See https://github.com/phetsims/scenery/issues/787 for more information (and for some detail on the cases
@@ -552,7 +552,7 @@ var PDOMTree = {
         const root = trail.rootNode();
 
         assert( trail.length <= 1 || root !== node,
-          'Accessible graph cycle detected. The combined scene-graph DAG with accessibleOrder defining additional ' +
+          'Accessible graph cycle detected. The combined scene-graph DAG with pdomOrder defining additional ' +
           'parent-child relationships should still be a DAG. Cycle detected with the trail: ' + trail.toString() +
           ' path: ' + trail.toPathString() );
 
@@ -578,13 +578,13 @@ var PDOMTree = {
    * Returns a string representation of an order (using Node ids) for debugging.
    * @private
    *
-   * @param {Array.<Node|null>|null} accessibleOrder
+   * @param {Array.<Node|null>|null} pdomOrder
    * @returns {string}
    */
-  debugOrder( accessibleOrder ) {
-    if ( accessibleOrder === null ) { return 'null'; }
+  debugOrder( pdomOrder ) {
+    if ( pdomOrder === null ) { return 'null'; }
 
-    return '[' + accessibleOrder.map( nodeOrNull => nodeOrNull === null ? 'null' : nodeOrNull._id ).join( ',' ) + ']';
+    return '[' + pdomOrder.map( nodeOrNull => nodeOrNull === null ? 'null' : nodeOrNull._id ).join( ',' ) + ']';
   }
 };
 

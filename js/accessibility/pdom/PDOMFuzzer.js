@@ -58,7 +58,7 @@ class PDOMFuzzer {
     if ( this.logToConsole ) {
       for ( let i = 0; i < this.nodes.length; i++ ) {
         const node = this.nodes[ i ];
-        console.log( i + '#' + node.id + ' ' + node.tagName + ' ch:' + PDOMTree.debugOrder( node.children ) + ' or:' + PDOMTree.debugOrder( node.accessibleOrder ) + ' vis:' + node.visible + ' avis:' + node.accessibleVisible );
+        console.log( i + '#' + node.id + ' ' + node.tagName + ' ch:' + PDOMTree.debugOrder( node.children ) + ' or:' + PDOMTree.debugOrder( node.pdomOrder ) + ' vis:' + node.visible + ' avis:' + node.accessibleVisible );
       }
     }
   }
@@ -99,11 +99,11 @@ class PDOMFuzzer {
       this.powerSet( arrayDifference( this.nodes, [ a ] ).concat( [ null ] ) ).forEach( subset => {
         Permutation.forEachPermutation( subset, order => {
           // TODO: Make sure it's not the CURRENT order?
-          if ( this.isAccessibleOrderChangeLegal( a, order ) ) {
+          if ( this.isPDOMOrderChangeLegal( a, order ) ) {
             actions.push( {
-              text: '#' + a.id + '.accessibleOrder = ' + PDOMTree.debugOrder( order ),
+              text: '#' + a.id + '.pdomOrder = ' + PDOMTree.debugOrder( order ),
               execute: () => {
-                a.accessibleOrder = order;
+                a.pdomOrder = order;
               }
             } );
           }
@@ -171,7 +171,7 @@ class PDOMFuzzer {
    * @param {Node} node
    * @param {Array.<Node|null>|null} order
    */
-  isAccessibleOrderChangeLegal( node, order ) {
+  isPDOMOrderChangeLegal( node, order ) {
     // remap for equivalence, so it's an array of nodes
     if ( order === null ) { order = []; }
     order = order.filter( n => n !== null );
@@ -193,7 +193,7 @@ class PDOMFuzzer {
         return a.hasChild( b ) || _.includes( order, b );
       }
       else {
-        return a.hasChild( b ) || ( !!a.accessibleOrder && _.includes( a.accessibleOrder, b ) );
+        return a.hasChild( b ) || ( !!a.pdomOrder && _.includes( a.pdomOrder, b ) );
       }
     };
 
@@ -215,7 +215,7 @@ class PDOMFuzzer {
       return false;
     }
 
-    const nodes = child.children.concat( child.accessibleOrder ).filter( n => n !== null ); // super defensive
+    const nodes = child.children.concat( child.pdomOrder ).filter( n => n !== null ); // super defensive
 
     while ( nodes.length ) {
       var node = nodes.pop();
@@ -233,8 +233,8 @@ class PDOMFuzzer {
       else {
         // Add in children and accessible children (don't worry about duplicates since perf isn't critical)
         Array.prototype.push.apply( nodes, node.children );
-        if ( node.accessibleOrder ) {
-          Array.prototype.push.apply( nodes, node.accessibleOrder.filter( n => n !== null ) );
+        if ( node.pdomOrder ) {
+          Array.prototype.push.apply( nodes, node.pdomOrder.filter( n => n !== null ) );
         }
       }
     }

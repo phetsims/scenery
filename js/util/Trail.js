@@ -1270,12 +1270,12 @@ class Trail {
       const trailId = trailIdNumbers.shift();
 
       // if accessible order is set, the trail might not match the hierarchy of children - search through nodes
-      // in accessibleOrder first because accessibleOrder is an override for scene graph structure
-      const accessibleOrder = currentNode.accessibleOrder || [];
-      const children = accessibleOrder.concat( currentNode.children );
+      // in pdomOrder first because pdomOrder is an override for scene graph structure
+      const pdomOrder = currentNode.pdomOrder || [];
+      const children = pdomOrder.concat( currentNode.children );
       for ( let j = 0; j < children.length; j++ ) {
 
-        // accessibleOrder supports null entries to fill in with default order
+        // pdomOrder supports null entries to fill in with default order
         if ( children[ j ] !== null && children[ j ].id === trailId ) {
           const childAlongTrail = children[ j ];
           nodes.push( childAlongTrail );

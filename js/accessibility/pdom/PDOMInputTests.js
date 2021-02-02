@@ -338,11 +338,11 @@ QUnit.test( 'click', assert => {
   dClickCount = 0;
   eClickCount = 0;
 
-  c.accessibleOrder = [ d, e ];
+  c.pdomOrder = [ d, e ];
 
   e.accessibleInstances[ 0 ].peer.primarySibling.click();
   assert.ok( cClickCount === 1 && dClickCount === 0 && eClickCount === 1,
-    'accessibleOrder means click should bypass d' );
+    'pdomOrder means click should bypass d' );
 
   c.accessibleInstances[ 0 ].peer.primarySibling.click();
   assert.ok( cClickCount === 2 && dClickCount === 0 && eClickCount === 1,
@@ -369,7 +369,7 @@ QUnit.test( 'click', assert => {
 
   // so its a chain in the scene graph c->d->e->f
 
-  d.accessibleOrder = [ f ];
+  d.pdomOrder = [ f ];
 
   /* accessible instance tree:
        c

@@ -79,7 +79,7 @@ class PDOMPeer {
     // @public {Display} - Each peer is associated with a specific Display.
     this.display = accessibleInstance.display;
 
-    // @public {Trail} - NOTE: May have "gaps" due to accessibleOrder usage.
+    // @public {Trail} - NOTE: May have "gaps" due to pdomOrder usage.
     this.trail = accessibleInstance.trail;
 
     // @private {boolean|null} - whether or not this PDOMPeer is visible in the PDOM

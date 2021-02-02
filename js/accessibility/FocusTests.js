@@ -39,7 +39,7 @@ QUnit.test( 'Simple Test', assert => {
 
   const root = new Node( { children: [ a, b ] } );
 
-  const nestedOrder = root.getNestedAccessibleOrder();
+  const nestedOrder = root.getNestedPDOMOrder();
 
   nestedEquality( assert, nestedOrder, [
     { trail: new Trail( [ root, a, a1 ] ), children: [] },
@@ -49,7 +49,7 @@ QUnit.test( 'Simple Test', assert => {
   ] );
 } );
 
-QUnit.test( 'accessibleOrder Simple Test', assert => {
+QUnit.test( 'pdomOrder Simple Test', assert => {
 
   const a1 = new Node( { tagName: 'div' } );
   const a2 = new Node( { tagName: 'div' } );
@@ -60,9 +60,9 @@ QUnit.test( 'accessibleOrder Simple Test', assert => {
   const a = new Node( { children: [ a1, a2 ] } );
   const b = new Node( { children: [ b1, b2 ] } );
 
-  const root = new Node( { children: [ a, b ], accessibleOrder: [ b, a ] } );
+  const root = new Node( { children: [ a, b ], pdomOrder: [ b, a ] } );
 
-  const nestedOrder = root.getNestedAccessibleOrder();
+  const nestedOrder = root.getNestedPDOMOrder();
 
   nestedEquality( assert, nestedOrder, [
     { trail: new Trail( [ root, b, b1 ] ), children: [] },
@@ -72,7 +72,7 @@ QUnit.test( 'accessibleOrder Simple Test', assert => {
   ] );
 } );
 
-QUnit.test( 'accessibleOrder Descendant Test', assert => {
+QUnit.test( 'pdomOrder Descendant Test', assert => {
 
   const a1 = new Node( { tagName: 'div' } );
   const a2 = new Node( { tagName: 'div' } );
@@ -83,9 +83,9 @@ QUnit.test( 'accessibleOrder Descendant Test', assert => {
   const a = new Node( { children: [ a1, a2 ] } );
   const b = new Node( { children: [ b1, b2 ] } );
 
-  const root = new Node( { children: [ a, b ], accessibleOrder: [ a1, b1, a2, b2 ] } );
+  const root = new Node( { children: [ a, b ], pdomOrder: [ a1, b1, a2, b2 ] } );
 
-  const nestedOrder = root.getNestedAccessibleOrder();
+  const nestedOrder = root.getNestedPDOMOrder();
 
   nestedEquality( assert, nestedOrder, [
     { trail: new Trail( [ root, a, a1 ] ), children: [] },
@@ -95,7 +95,7 @@ QUnit.test( 'accessibleOrder Descendant Test', assert => {
   ] );
 } );
 
-QUnit.test( 'accessibleOrder Descendant Pruning Test', assert => {
+QUnit.test( 'pdomOrder Descendant Pruning Test', assert => {
 
   const a1 = new Node( { tagName: 'div' } );
   const a2 = new Node( { tagName: 'div' } );
@@ -111,9 +111,9 @@ QUnit.test( 'accessibleOrder Descendant Pruning Test', assert => {
   const a = new Node( { children: [ a1, a2, c ] } );
   const b = new Node( { children: [ b1, b2 ] } );
 
-  const root = new Node( { children: [ a, b ], accessibleOrder: [ c1, a, a2, b2 ] } );
+  const root = new Node( { children: [ a, b ], pdomOrder: [ c1, a, a2, b2 ] } );
 
-  const nestedOrder = root.getNestedAccessibleOrder();
+  const nestedOrder = root.getNestedPDOMOrder();
 
   nestedEquality( assert, nestedOrder, [
     { trail: new Trail( [ root, a, c, c1 ] ), children: [] },
@@ -125,7 +125,7 @@ QUnit.test( 'accessibleOrder Descendant Pruning Test', assert => {
   ] );
 } );
 
-QUnit.test( 'accessibleOrder Descendant Override', assert => {
+QUnit.test( 'pdomOrder Descendant Override', assert => {
 
   const a1 = new Node( { tagName: 'div' } );
   const a2 = new Node( { tagName: 'div' } );
@@ -134,11 +134,11 @@ QUnit.test( 'accessibleOrder Descendant Override', assert => {
   const b2 = new Node( { tagName: 'div' } );
 
   const a = new Node( { children: [ a1, a2 ] } );
-  const b = new Node( { children: [ b1, b2 ], accessibleOrder: [ b1, b2 ] } );
+  const b = new Node( { children: [ b1, b2 ], pdomOrder: [ b1, b2 ] } );
 
-  const root = new Node( { children: [ a, b ], accessibleOrder: [ b, b1, a ] } );
+  const root = new Node( { children: [ a, b ], pdomOrder: [ b, b1, a ] } );
 
-  const nestedOrder = root.getNestedAccessibleOrder();
+  const nestedOrder = root.getNestedPDOMOrder();
 
   nestedEquality( assert, nestedOrder, [
     { trail: new Trail( [ root, b, b2 ] ), children: [] },
@@ -148,7 +148,7 @@ QUnit.test( 'accessibleOrder Descendant Override', assert => {
   ] );
 } );
 
-QUnit.test( 'accessibleOrder Hierarchy', assert => {
+QUnit.test( 'pdomOrder Hierarchy', assert => {
 
   const a1 = new Node( { tagName: 'div' } );
   const a2 = new Node( { tagName: 'div' } );
@@ -156,12 +156,12 @@ QUnit.test( 'accessibleOrder Hierarchy', assert => {
   const b1 = new Node( { tagName: 'div' } );
   const b2 = new Node( { tagName: 'div' } );
 
-  const a = new Node( { children: [ a1, a2 ], accessibleOrder: [ a2 ] } );
-  const b = new Node( { children: [ b1, b2 ], accessibleOrder: [ b2, b1 ] } );
+  const a = new Node( { children: [ a1, a2 ], pdomOrder: [ a2 ] } );
+  const b = new Node( { children: [ b1, b2 ], pdomOrder: [ b2, b1 ] } );
 
-  const root = new Node( { children: [ a, b ], accessibleOrder: [ b, a ] } );
+  const root = new Node( { children: [ a, b ], pdomOrder: [ b, a ] } );
 
-  const nestedOrder = root.getNestedAccessibleOrder();
+  const nestedOrder = root.getNestedPDOMOrder();
 
   nestedEquality( assert, nestedOrder, [
     { trail: new Trail( [ root, b, b2 ] ), children: [] },
@@ -171,17 +171,17 @@ QUnit.test( 'accessibleOrder Hierarchy', assert => {
   ] );
 } );
 
-QUnit.test( 'accessibleOrder DAG test', assert => {
+QUnit.test( 'pdomOrder DAG test', assert => {
 
   const a1 = new Node( { tagName: 'div' } );
   const a2 = new Node( { tagName: 'div' } );
 
-  const a = new Node( { children: [ a1, a2 ], accessibleOrder: [ a2, a1 ] } );
-  const b = new Node( { children: [ a1, a2 ], accessibleOrder: [ a1, a2 ] } );
+  const a = new Node( { children: [ a1, a2 ], pdomOrder: [ a2, a1 ] } );
+  const b = new Node( { children: [ a1, a2 ], pdomOrder: [ a1, a2 ] } );
 
   const root = new Node( { children: [ a, b ] } );
 
-  const nestedOrder = root.getNestedAccessibleOrder();
+  const nestedOrder = root.getNestedPDOMOrder();
 
   nestedEquality( assert, nestedOrder, [
     { trail: new Trail( [ root, a, a2 ] ), children: [] },
@@ -191,7 +191,7 @@ QUnit.test( 'accessibleOrder DAG test', assert => {
   ] );
 } );
 
-QUnit.test( 'accessibleOrder DAG test', assert => {
+QUnit.test( 'pdomOrder DAG test', assert => {
 
   const x = new Node();
   const a = new Node();
@@ -214,11 +214,11 @@ QUnit.test( 'accessibleOrder DAG test', assert => {
   e.children = [ j, f, g ];
   f.children = [ h, i ];
 
-  x.accessibleOrder = [ f, c, d, l ];
-  a.accessibleOrder = [ c, b ];
-  e.accessibleOrder = [ g, f, j ];
+  x.pdomOrder = [ f, c, d, l ];
+  a.pdomOrder = [ c, b ];
+  e.pdomOrder = [ g, f, j ];
 
-  const nestedOrder = x.getNestedAccessibleOrder();
+  const nestedOrder = x.getNestedPDOMOrder();
 
   nestedEquality( assert, nestedOrder, [
     // x order's F
@@ -249,7 +249,7 @@ QUnit.test( 'accessibleOrder DAG test', assert => {
   ] );
 } );
 
-QUnit.test( 'setting accessibleOrder', assert => {
+QUnit.test( 'setting pdomOrder', assert => {
 
   const rootNode = new Node();
   var display = new Display( rootNode ); // eslint-disable-line
@@ -262,7 +262,7 @@ QUnit.test( 'setting accessibleOrder', assert => {
   rootNode.children = [ a, b, c, d ];
 
   // reverse accessible order
-  rootNode.accessibleOrder = [ d, c, b, a ];
+  rootNode.pdomOrder = [ d, c, b, a ];
 
   const divRoot = display._rootAccessibleInstance.peer.primarySibling;
   const divA = a.accessibleInstances[ 0 ].peer.primarySibling;
@@ -278,7 +278,7 @@ QUnit.test( 'setting accessibleOrder', assert => {
 
 } );
 
-QUnit.test( 'setting accessibleOrder before setting accessible content', assert => {
+QUnit.test( 'setting pdomOrder before setting accessible content', assert => {
   const rootNode = new Node();
   var display = new Display( rootNode ); // eslint-disable-line
   document.body.appendChild( display.domElement );
@@ -290,7 +290,7 @@ QUnit.test( 'setting accessibleOrder before setting accessible content', assert 
   rootNode.children = [ a, b, c, d ];
 
   // reverse accessible order
-  rootNode.accessibleOrder = [ d, c, b, a ];
+  rootNode.pdomOrder = [ d, c, b, a ];
 
   a.tagName = 'div';
   b.tagName = 'div';
@@ -334,7 +334,7 @@ QUnit.test( 'setting accessible order on nodes with no accessible content', asse
   b.addChild( e );
   c.addChild( d );
   c.addChild( f );
-  b.accessibleOrder = [ e, c ];
+  b.pdomOrder = [ e, c ];
 
   const divB = b.accessibleInstances[ 0 ].peer.primarySibling;
   const divC = c.accessibleInstances[ 0 ].peer.primarySibling;
@@ -363,7 +363,7 @@ QUnit.test( 'setting accessible order on nodes with no accessible content', asse
   b.addChild( e );
   c.addChild( d );
   c.addChild( f );
-  a.accessibleOrder = [ e, c ];
+  a.pdomOrder = [ e, c ];
 
   const divA = a.accessibleInstances[ 0 ].peer.primarySibling;
   const divC = c.accessibleInstances[ 0 ].peer.primarySibling;

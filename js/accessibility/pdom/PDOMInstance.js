@@ -573,7 +573,7 @@ class PDOMInstance {
 
 
   /**
-   * Since a "Trail" on PDOMInstance can have discontinuous jumps (due to accessibleOrder), this finds the best
+   * Since a "Trail" on PDOMInstance can have discontinuous jumps (due to pdomOrder), this finds the best
    * actual visual Trail to use, from the trail of an PDOMInstance to the root of a Display.
    * @public
    *
