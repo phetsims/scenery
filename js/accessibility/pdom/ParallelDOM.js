@@ -131,7 +131,7 @@ import merge from '../../../../phet-core/js/merge.js';
 import Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import Trail from '../../util/Trail.js';
-import A11yBehaviorFunctionDef from '../A11yBehaviorFunctionDef.js';
+import PDOMBehaviorFunctionDef from '../PDOMBehaviorFunctionDef.js';
 import PDOMDisplaysInfo from './PDOMDisplaysInfo.js';
 import PDOMInstance from './PDOMInstance.js';
 import PDOMPeer from './PDOMPeer.js';
@@ -175,11 +175,11 @@ const ACCESSIBILITY_OPTION_KEYS = [
    * Higher Level API Functions
    */
   'accessibleName', // {string|null} - Sets the name of this node, read when this node receives focus and inserted appropriately based on accessibleNameBehavior
-  'accessibleNameBehavior', // {A11yBehaviorFunctionDef} - Sets the way in which accessibleName will be set for the Node, see DEFAULT_ACCESSIBLE_NAME_BEHAVIOR for example
+  'accessibleNameBehavior', // {PDOMBehaviorFunctionDef} - Sets the way in which accessibleName will be set for the Node, see DEFAULT_ACCESSIBLE_NAME_BEHAVIOR for example
   'helpText', // {string|null} - Sets the descriptive content for this node, read by the virtual cursor, inserted into DOM appropriately based on helpTextBehavior
-  'helpTextBehavior', // {A11yBehaviorFunctionDef} - Sets the way in which help text will be set for the Node, see DEFAULT_HELP_TEXT_BEHAVIOR for example
+  'helpTextBehavior', // {PDOMBehaviorFunctionDef} - Sets the way in which help text will be set for the Node, see DEFAULT_HELP_TEXT_BEHAVIOR for example
   'pdomHeading', // {string|null} - Sets content for the heading whose level will be automatically generated if specified
-  'pdomHeadingBehavior', // {A11yBehaviorFunctionDef} - Set to modify default behavior for inserting pdomHeading string
+  'pdomHeadingBehavior', // {PDOMBehaviorFunctionDef} - Set to modify default behavior for inserting pdomHeading string
 
   /*
    * Lower Level API Functions
@@ -433,13 +433,13 @@ const ParallelDOM = {
         // {string|null} - sets the "Accessible Name" of the Node, as defined by the Browser's ParallelDOM Tree
         this._accessibleName = null;
 
-        // {A11yBehaviorFunctionDef} - function that returns the options needed to set the appropriate accessible name for the Node
+        // {PDOMBehaviorFunctionDef} - function that returns the options needed to set the appropriate accessible name for the Node
         this._accessibleNameBehavior = ParallelDOM.BASIC_ACCESSIBLE_NAME_BEHAVIOR;
 
         // {string|null} - sets the help text of the Node, this most often corresponds to description text.
         this._helpText = null;
 
-        // {A11yBehaviorFunctionDef} - sets the help text of the Node, this most often corresponds to description text.
+        // {PDOMBehaviorFunctionDef} - sets the help text of the Node, this most often corresponds to description text.
         this._helpTextBehavior = ParallelDOM.HELP_TEXT_AFTER_CONTENT;
 
         // {string|null} - sets the help text of the Node, this most often corresponds to label sibling text.
@@ -449,7 +449,7 @@ const ParallelDOM = {
         // {number|null} - the number that corresponds to the heading tag the node will get if using the pdomHeading api,.
         this._headingLevel = null;
 
-        // {A11yBehaviorFunctionDef} - sets the help text of the Node, this most often corresponds to description text.
+        // {PDOMBehaviorFunctionDef} - sets the help text of the Node, this most often corresponds to description text.
         this._pdomHeadingBehavior = DEFAULT_PDOM_HEADING_BEHAVIOR;
 
         // @private - PDOM specific enabled listener
@@ -660,10 +660,10 @@ const ParallelDOM = {
        * and see https://developer.paciellogroup.com/blog/2017/04/what-is-an-accessible-name/
        *
        * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
-       * @param {A11yBehaviorFunctionDef} accessibleNameBehavior
+       * @param {PDOMBehaviorFunctionDef} accessibleNameBehavior
        */
       setAccessibleNameBehavior: function( accessibleNameBehavior ) {
-        assert && A11yBehaviorFunctionDef.validateA11yBehaviorFunctionDef( accessibleNameBehavior );
+        assert && PDOMBehaviorFunctionDef.validatePDOMBehaviorFunctionDef( accessibleNameBehavior );
 
         if ( this._accessibleNameBehavior !== accessibleNameBehavior ) {
 
@@ -725,10 +725,10 @@ const ParallelDOM = {
        * @public
        *
        * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
-       * @param {A11yBehaviorFunctionDef} pdomHeadingBehavior
+       * @param {PDOMBehaviorFunctionDef} pdomHeadingBehavior
        */
       setPDOMHeadingBehavior: function( pdomHeadingBehavior ) {
-        assert && A11yBehaviorFunctionDef.validateA11yBehaviorFunctionDef( pdomHeadingBehavior );
+        assert && PDOMBehaviorFunctionDef.validatePDOMBehaviorFunctionDef( pdomHeadingBehavior );
 
         if ( this._pdomHeadingBehavior !== pdomHeadingBehavior ) {
 
@@ -835,10 +835,10 @@ const ParallelDOM = {
        * @public
        *
        * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
-       * @param {A11yBehaviorFunctionDef} helpTextBehavior
+       * @param {PDOMBehaviorFunctionDef} helpTextBehavior
        */
       setHelpTextBehavior: function( helpTextBehavior ) {
-        assert && A11yBehaviorFunctionDef.validateA11yBehaviorFunctionDef( helpTextBehavior );
+        assert && PDOMBehaviorFunctionDef.validatePDOMBehaviorFunctionDef( helpTextBehavior );
 
         if ( this._helpTextBehavior !== helpTextBehavior ) {
 

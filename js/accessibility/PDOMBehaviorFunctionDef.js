@@ -24,18 +24,18 @@ import scenery from '../scenery.js';
  * this list for execution after this Node is fully created. See discussion in https://github.com/phetsims/sun/issues/503#issuecomment-676541373
  * @returns {Object} - the options that have been mutated by the behavior function.
  */
-const A11yBehaviorFunctionDef = {
+const PDOMBehaviorFunctionDef = {
 
   /**
    * Will assert out if the behavior function doesn't match the expected features of A11yBehaviorFunction
    * @param {function} behaviorFunction
    */
-  validateA11yBehaviorFunctionDef( behaviorFunction ) {
+  validatePDOMBehaviorFunctionDef( behaviorFunction ) {
     assert && assert( typeof behaviorFunction === 'function' );
     assert && assert( behaviorFunction.length === 3 || behaviorFunction.length === 4, 'behavior function should take three or four args' );
   }
 };
 
-scenery.register( 'A11yBehaviorFunctionDef', A11yBehaviorFunctionDef );
+scenery.register( 'PDOMBehaviorFunctionDef', PDOMBehaviorFunctionDef );
 
-export default A11yBehaviorFunctionDef;
+export default PDOMBehaviorFunctionDef;
