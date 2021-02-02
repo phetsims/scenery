@@ -10,8 +10,8 @@ import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
 import Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import Trail from '../../util/Trail.js';
-import PDOMInstance from './PDOMInstance.js';
 import PartialPDOMTrail from './PartialPDOMTrail.js';
+import PDOMInstance from './PDOMInstance.js';
 
 // globals (for restoring focus)
 let focusedNode = null;
@@ -430,8 +430,7 @@ var PDOMTree = {
    * @private
    *
    * NOTE: "accessible" trails may not have strict parent-child relationships between adjacent nodes, as remapping of
-   * the tree can have an "accessible parent" and "accessible child" case (the child is in the parent's
-   * pdomOrder).
+   * the tree can have a "PDOM parent" and "pdom child" case (the child is in the parent's pdomOrder).
    *
    * @param {Node} node
    * @returns {Array.<PartialPDOMTrail>}
