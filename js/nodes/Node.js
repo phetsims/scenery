@@ -762,7 +762,7 @@ class Node extends PhetioObject {
       this._children.splice( index, 0, node );
 
       if ( !this._rendererSummary.isNotAccessible() ) {
-        this.onAccessibleReorderedChildren();
+        this.onPDOMReorderedChildren();
       }
 
       this.childrenReorderedEmitter.emit( Math.min( currentIndex, index ), Math.max( currentIndex, index ) );
@@ -835,7 +835,7 @@ class Node extends PhetioObject {
     // Immediate consequences/updates from reordering
     if ( hasReorderingChange ) {
       if ( !this._rendererSummary.isNotAccessible() ) {
-        this.onAccessibleReorderedChildren();
+        this.onPDOMReorderedChildren();
       }
 
       this.childrenReorderedEmitter.emit( minChangeIndex, maxChangeIndex );
