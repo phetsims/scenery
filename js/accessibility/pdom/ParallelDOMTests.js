@@ -1207,7 +1207,7 @@ QUnit.test( 'pdomVisible', assert => {
   assert.ok( b.visible === true, 'b should be visible after becoming hidden for screen readers' );
   assert.ok( b.pdomVisible === false, 'b state should reflect it is hidden for screen readers' );
   assert.ok( buttonB.hidden === true, 'buttonB should be hidden for screen readers' );
-  assert.ok( b.accessibleDisplayed === false, 'pdomVisible=false, b should have no representation in the PDOM' );
+  assert.ok( b.pdomDisplayed === false, 'pdomVisible=false, b should have no representation in the PDOM' );
   b.pdomVisible = true;
 
   // make node B invisible - it should not be visible, and it should be hidden for screen readers
@@ -1215,7 +1215,7 @@ QUnit.test( 'pdomVisible', assert => {
   assert.ok( b.visible === false, 'state of node b is visible' );
   assert.ok( buttonB.hidden === true, 'buttonB is hidden from screen readers after becoming invisible' );
   assert.ok( b.pdomVisible === true, 'state of node b still reflects pdom visibility when invisible' );
-  assert.ok( b.accessibleDisplayed === false, 'b invisible and should have no representation in the PDOM' );
+  assert.ok( b.pdomDisplayed === false, 'b invisible and should have no representation in the PDOM' );
   b.visible = true;
 
   // make node f invisible - g's trail that goes through f should be invisible to AT, tcomhe child of c should remain pdomVisible
@@ -1223,7 +1223,7 @@ QUnit.test( 'pdomVisible', assert => {
   assert.ok( g.isPDOMVisible() === true, 'state of pdomVisible should remain true on node g' );
   assert.ok( !buttonG1.hidden, 'buttonG1 (child of e) should not be hidden after parent node f made invisible (no accessible content on node f)' );
   assert.ok( buttonG2.hidden === true, 'buttonG2 should be hidden after parent node f made invisible (no accessible content on node f)' );
-  assert.ok( g.accessibleDisplayed === true, 'one parent still visible, g still has one PDOMInstance displayed in PDOM' );
+  assert.ok( g.pdomDisplayed === true, 'one parent still visible, g still has one PDOMInstance displayed in PDOM' );
   f.visible = true;
 
   // make node c (no accessible content) invisible to screen, e should be hidden and g2 should be hidden
