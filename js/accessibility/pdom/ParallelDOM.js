@@ -564,7 +564,7 @@ const ParallelDOM = {
        * and labelContent declared
        * @public (only called by Screen.js)
        */
-      accessibleAudit: function() {
+      pdomAudit: function() {
 
         if ( this.hasPDOMContent && assert ) {
 
@@ -582,7 +582,7 @@ const ParallelDOM = {
         }
 
         for ( let i = 0; i < this.children.length; i++ ) {
-          this.children[ i ].accessibleAudit();
+          this.children[ i ].pdomAudit();
         }
       },
 
