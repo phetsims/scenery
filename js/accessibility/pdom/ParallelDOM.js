@@ -2208,7 +2208,7 @@ const ParallelDOM = {
        * (unlike Node.wasDisplayed()).
        * @public
        */
-      isAccessibleDisplayed: function() {
+      isPDOMDisplayed: function() {
         for ( let i = 0; i < this._accessibleInstances.length; i++ ) {
           if ( this._accessibleInstances[ i ].isGloballyVisible() ) {
             return true;
@@ -2216,7 +2216,7 @@ const ParallelDOM = {
         }
         return false;
       },
-      get accessibleDisplayed() { return this.isAccessibleDisplayed(); },
+      get pdomDisplayed() { return this.isPDOMDisplayed(); },
 
       /**
        * Set the value of an input element.  Element must be a form element to support the value attribute. The input
