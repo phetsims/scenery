@@ -44,8 +44,8 @@ class PDOMDisplaysInfo {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onAddChild n#' + node.id + ' (parent:n#' + this.node.id + ')' );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
-    if ( node._accessibleDisplaysInfo.canHaveAccessibleDisplays() ) {
-      node._accessibleDisplaysInfo.addAccessibleDisplays( this.accessibleDisplays );
+    if ( node._pdomDisplaysInfo.canHaveAccessibleDisplays() ) {
+      node._pdomDisplaysInfo.addAccessibleDisplays( this.accessibleDisplays );
     }
 
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
@@ -61,8 +61,8 @@ class PDOMDisplaysInfo {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onRemoveChild n#' + node.id + ' (parent:n#' + this.node.id + ')' );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
-    if ( node._accessibleDisplaysInfo.canHaveAccessibleDisplays() ) {
-      node._accessibleDisplaysInfo.removeAccessibleDisplays( this.accessibleDisplays );
+    if ( node._pdomDisplaysInfo.canHaveAccessibleDisplays() ) {
+      node._pdomDisplaysInfo.removeAccessibleDisplays( this.accessibleDisplays );
     }
 
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.pop();
@@ -204,7 +204,7 @@ class PDOMDisplaysInfo {
 
     // Concatenation of our parents' accessibleDisplays
     for ( i = 0; i < this.node._parents.length; i++ ) {
-      Array.prototype.push.apply( displays, this.node._parents[ i ]._accessibleDisplaysInfo.accessibleDisplays );
+      Array.prototype.push.apply( displays, this.node._parents[ i ]._pdomDisplaysInfo.accessibleDisplays );
     }
 
     // AND any acessible displays rooted at this node
@@ -257,8 +257,8 @@ class PDOMDisplaysInfo {
       // Propagate the change to our children
       for ( let i = 0; i < this.node._children.length; i++ ) {
         const child = this.node._children[ i ];
-        if ( child._accessibleDisplaysInfo.canHaveAccessibleDisplays() ) {
-          this.node._children[ i ]._accessibleDisplaysInfo.addAccessibleDisplays( displays );
+        if ( child._pdomDisplaysInfo.canHaveAccessibleDisplays() ) {
+          this.node._children[ i ]._pdomDisplaysInfo.addAccessibleDisplays( displays );
         }
       }
 
@@ -297,8 +297,8 @@ class PDOMDisplaysInfo {
         // NOTE: Since this gets called many times from the RendererSummary (which happens before the actual child
         // modification happens), we DO NOT want to traverse to the child node getting removed. Ideally a better
         // solution than this flag should be found.
-        if ( child._accessibleDisplaysInfo.canHaveAccessibleDisplays() && !child._isGettingRemovedFromParent ) {
-          child._accessibleDisplaysInfo.removeAccessibleDisplays( displays );
+        if ( child._pdomDisplaysInfo.canHaveAccessibleDisplays() && !child._isGettingRemovedFromParent ) {
+          child._pdomDisplaysInfo.removeAccessibleDisplays( displays );
         }
       }
 

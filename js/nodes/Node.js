@@ -2488,7 +2488,7 @@ class Node extends PhetioObject {
    */
   onSummaryChange( oldBitmask, newBitmask ) {
     // Defined in ParallelDOM.js
-    this._accessibleDisplaysInfo.onSummaryChange( oldBitmask, newBitmask );
+    this._pdomDisplaysInfo.onSummaryChange( oldBitmask, newBitmask );
   }
 
   /**
@@ -3151,7 +3151,7 @@ class Node extends PhetioObject {
     if ( assertSlow ) { this._picker.audit(); }
 
     // Defined in ParallelDOM.js
-    this._accessibleDisplaysInfo.onVisibilityChange( visible );
+    this._pdomDisplaysInfo.onVisibilityChange( visible );
 
     for ( let i = 0; i < this._parents.length; i++ ) {
       const parent = this._parents[ i ];
@@ -5005,7 +5005,7 @@ class Node extends PhetioObject {
     this._rootedDisplays.push( display );
 
     // Defined in ParallelDOM.js
-    this._accessibleDisplaysInfo.onAddedRootedDisplay( display );
+    this._pdomDisplaysInfo.onAddedRootedDisplay( display );
   }
 
   /**
@@ -5021,7 +5021,7 @@ class Node extends PhetioObject {
     this._rootedDisplays.splice( index, 1 );
 
     // Defined in ParallelDOM.js
-    this._accessibleDisplaysInfo.onRemovedRootedDisplay( display );
+    this._pdomDisplaysInfo.onRemovedRootedDisplay( display );
   }
 
   /*---------------------------------------------------------------------------*

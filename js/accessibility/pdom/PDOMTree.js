@@ -492,14 +492,14 @@ var PDOMTree = {
    */
   auditAccessibleDisplays( node ) {
     if ( assertSlow ) {
-      if ( node._accessibleDisplaysInfo.canHaveAccessibleDisplays() ) {
+      if ( node._pdomDisplaysInfo.canHaveAccessibleDisplays() ) {
 
         let i;
         const displays = [];
 
         // Concatenation of our parents' accessibleDisplays
         for ( i = 0; i < node._parents.length; i++ ) {
-          Array.prototype.push.apply( displays, node._parents[ i ]._accessibleDisplaysInfo.accessibleDisplays );
+          Array.prototype.push.apply( displays, node._parents[ i ]._pdomDisplaysInfo.accessibleDisplays );
         }
 
         // And concatenation of any rooted displays (that are a11y)
@@ -510,7 +510,7 @@ var PDOMTree = {
           }
         }
 
-        const actualArray = node._accessibleDisplaysInfo.accessibleDisplays.slice();
+        const actualArray = node._pdomDisplaysInfo.accessibleDisplays.slice();
         const expectedArray = displays.slice(); // slice helps in debugging
         assertSlow( actualArray.length === expectedArray.length );
 
@@ -528,7 +528,7 @@ var PDOMTree = {
         assertSlow( actualArray.length === 0 && expectedArray.length === 0, 'Mismatch with accessible displays' );
       }
       else {
-        assertSlow( node._accessibleDisplaysInfo.accessibleDisplays.length === 0, 'Invisible/nonaccessible things should have no displays' );
+        assertSlow( node._pdomDisplaysInfo.accessibleDisplays.length === 0, 'Invisible/nonaccessible things should have no displays' );
       }
     }
   },

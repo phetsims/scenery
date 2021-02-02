@@ -135,7 +135,7 @@ class PDOMInstance {
         const relativeNode = trail.nodes[ i ];
         this.relativeNodes.push( relativeNode );
 
-        const accessibleDisplays = relativeNode._accessibleDisplaysInfo.accessibleDisplays;
+        const accessibleDisplays = relativeNode._pdomDisplaysInfo.accessibleDisplays;
         const isVisible = _.includes( accessibleDisplays, display );
         this.relativeVisibilities.push( isVisible );
         if ( !isVisible ) {
@@ -286,7 +286,7 @@ class PDOMInstance {
    * @param {number} index - Index into the relativeNodes array (which node had the notification)
    */
   checkAccessibleDisplayVisibility( index ) {
-    const isNodeVisible = _.includes( this.relativeNodes[ index ]._accessibleDisplaysInfo.accessibleDisplays, this.display );
+    const isNodeVisible = _.includes( this.relativeNodes[ index ]._pdomDisplaysInfo.accessibleDisplays, this.display );
     const wasNodeVisible = this.relativeVisibilities[ index ];
 
     if ( isNodeVisible !== wasNodeVisible ) {

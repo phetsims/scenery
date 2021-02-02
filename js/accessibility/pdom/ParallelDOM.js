@@ -132,7 +132,7 @@ import Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import Trail from '../../util/Trail.js';
 import A11yBehaviorFunctionDef from '../A11yBehaviorFunctionDef.js';
-import AccessibleDisplaysInfo from './PDOMDisplaysInfo.js';
+import PDOMDisplaysInfo from './PDOMDisplaysInfo.js';
 import PDOMInstance from './PDOMInstance.js';
 import PDOMPeer from './PDOMPeer.js';
 import PDOMTree from './PDOMTree.js';
@@ -412,11 +412,11 @@ const ParallelDOM = {
         // pdomTransformSourceNode cannot use DAG.
         this._pdomTransformSourceNode = null;
 
-        // @public (scenery-internal) {AccessibleDisplaysInfo} - Contains information about what pdom displays
-        // this node is "visible" for, see AccessibleDisplaysInfo.js for more information.
-        this._accessibleDisplaysInfo = new AccessibleDisplaysInfo( this );
+        // @public (scenery-internal) {PDOMDisplaysInfo} - Contains information about what pdom displays
+        // this node is "visible" for, see PDOMDisplaysInfo.js for more information.
+        this._pdomDisplaysInfo = new PDOMDisplaysInfo( this );
 
-        // @protected {Array.<PDOMInstance>} - Empty unless the node contains some accessible instance.
+        // @protected {Array.<PDOMInstance>} - Empty unless the Node contains some accessible pdom instance.
         this._pdomInstances = [];
 
         // @private {boolean} - Determines if DOM siblings are positioned in the viewport. This
@@ -2185,7 +2185,7 @@ const ParallelDOM = {
         if ( this._pdomVisible !== visible ) {
           this._pdomVisible = visible;
 
-          this._accessibleDisplaysInfo.onAccessibleVisibilityChange( visible );
+          this._pdomDisplaysInfo.onAccessibleVisibilityChange( visible );
         }
       },
       set pdomVisible( visible ) { this.setPDOMVisible( visible ); },
@@ -2745,7 +2745,7 @@ const ParallelDOM = {
 
         assert && PDOMTree.auditNodeForAccessibleCycles( this );
 
-        this._accessibleDisplaysInfo.onAddChild( node );
+        this._pdomDisplaysInfo.onAddChild( node );
 
         PDOMTree.addChild( this, node );
 
@@ -2763,7 +2763,7 @@ const ParallelDOM = {
         sceneryLog && sceneryLog.ParallelDOM && sceneryLog.ParallelDOM( 'onPDOMRemoveChild n#' + node.id + ' (parent:n#' + this.id + ')' );
         sceneryLog && sceneryLog.ParallelDOM && sceneryLog.push();
 
-        this._accessibleDisplaysInfo.onRemoveChild( node );
+        this._pdomDisplaysInfo.onRemoveChild( node );
 
         PDOMTree.removeChild( this, node );
 
