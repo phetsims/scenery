@@ -19,7 +19,6 @@ import Namespace from '../../phet-core/js/Namespace.js';
 
 // @public (scenery-internal)
 window.sceneryLog = null;
-window.sceneryAccessibilityLog = null;
 
 const scratchCanvas = document.createElement( 'canvas' );
 const scratchContext = scratchCanvas.getContext( '2d' );
