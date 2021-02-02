@@ -2731,8 +2731,8 @@ const ParallelDOM = {
        *
        * @param {Node} node
        */
-      onAccessibleAddChild: function( node ) {
-        sceneryLog && sceneryLog.ParallelDOM && sceneryLog.ParallelDOM( 'onAccessibleAddChild n#' + node.id + ' (parent:n#' + this.id + ')' );
+      onPDOMAddChild: function( node ) {
+        sceneryLog && sceneryLog.ParallelDOM && sceneryLog.ParallelDOM( 'onPDOMAddChild n#' + node.id + ' (parent:n#' + this.id + ')' );
         sceneryLog && sceneryLog.ParallelDOM && sceneryLog.push();
 
         // Find descendants with pdomOrders and check them against all of their ancestors/self
@@ -2759,8 +2759,8 @@ const ParallelDOM = {
        *
        * @param {Node} node
        */
-      onAccessibleRemoveChild: function( node ) {
-        sceneryLog && sceneryLog.ParallelDOM && sceneryLog.ParallelDOM( 'onAccessibleRemoveChild n#' + node.id + ' (parent:n#' + this.id + ')' );
+      onPDOMRemoveChild: function( node ) {
+        sceneryLog && sceneryLog.ParallelDOM && sceneryLog.ParallelDOM( 'onPDOMRemoveChild n#' + node.id + ' (parent:n#' + this.id + ')' );
         sceneryLog && sceneryLog.ParallelDOM && sceneryLog.push();
 
         this._accessibleDisplaysInfo.onRemoveChild( node );

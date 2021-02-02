@@ -621,7 +621,7 @@ class Node extends PhetioObject {
 
     // If this added subtree contains accessible content, we need to notify any relevant displays
     if ( !node._rendererSummary.isNotAccessible() ) {
-      this.onAccessibleAddChild( node );
+      this.onPDOMAddChild( node );
     }
 
     node.invalidateBounds();
@@ -717,7 +717,7 @@ class Node extends PhetioObject {
     // If this added subtree contains accessible content, we need to notify any relevant displays
     // NOTE: Potentially removes bounds listeners here!
     if ( !node._rendererSummary.isNotAccessible() ) {
-      this.onAccessibleRemoveChild( node );
+      this.onPDOMRemoveChild( node );
     }
 
     // needs to be early to prevent re-entrant children modifications
