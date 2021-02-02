@@ -582,7 +582,7 @@ class Input {
         // recompute the trail on focusout if necessary - since a blur/focusout may have been initiated from a
         // focus/focusin listener, it is possible that focusout was called more than once before focusin is called on the
         // next active element, see https://github.com/phetsims/scenery/issues/898
-        if ( !this.pdomPointer ) { this.initA11yPointer(); }
+        if ( !this.pdomPointer ) { this.initPDOMPointer(); }
         this.pdomPointer.invalidateTrail( this.getTrailId( event ) );
 
         const trail = this.updateTrailForPDOMDispatch( event );
@@ -1010,7 +1010,7 @@ class Input {
    * Initializes the accessible pointer object on the first a11y event.
    * @private
    */
-  initA11yPointer() {
+  initPDOMPointer() {
     this.pdomPointer = new PDOMPointer( this.display );
 
     this.addPointer( this.pdomPointer );
@@ -1052,7 +1052,7 @@ class Input {
    * @returns {Trail}
    */
   updateTrailForPDOMDispatch( domEvent ) {
-    if ( !this.pdomPointer ) { this.initA11yPointer(); }
+    if ( !this.pdomPointer ) { this.initPDOMPointer(); }
     return this.pdomPointer.updateTrail( this.getTrailId( domEvent ) );
   }
 
