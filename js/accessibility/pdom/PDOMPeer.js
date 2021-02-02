@@ -174,8 +174,8 @@ class PDOMPeer {
       assert && assert( typeof options === 'object', 'should return an object' );
     }
 
-    if ( this.node.accessibleHeading !== null ) {
-      options = this.node.accessibleHeadingBehavior( this.node, options, this.node.accessibleHeading, otherNodeCallbacks );
+    if ( this.node.pdomHeading !== null ) {
+      options = this.node.pdomHeadingBehavior( this.node, options, this.node.pdomHeading, otherNodeCallbacks );
       assert && assert( typeof options === 'object', 'should return an object' );
     }
 

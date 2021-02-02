@@ -145,8 +145,8 @@ const P_TAG = PDOMUtils.TAGS.P;
 const DEFAULT_DESCRIPTION_TAG_NAME = P_TAG;
 const DEFAULT_LABEL_TAG_NAME = P_TAG;
 
-// see setAccessibleHeadingBehavior for more details
-const DEFAULT_ACCESSIBLE_HEADING_BEHAVIOR = ( node, options, heading ) => {
+// see setPDOMHeadingBehavior for more details
+const DEFAULT_PDOM_HEADING_BEHAVIOR = ( node, options, heading ) => {
 
   options.labelTagName = 'h' + node.headingLevel; // TODO: make sure heading level change fires a full peer rebuild, see https://github.com/phetsims/scenery/issues/867
   options.labelContent = heading;
@@ -178,8 +178,8 @@ const ACCESSIBILITY_OPTION_KEYS = [
   'accessibleNameBehavior', // {A11yBehaviorFunctionDef} - Sets the way in which accessibleName will be set for the Node, see DEFAULT_ACCESSIBLE_NAME_BEHAVIOR for example
   'helpText', // {string|null} - Sets the descriptive content for this node, read by the virtual cursor, inserted into DOM appropriately based on helpTextBehavior
   'helpTextBehavior', // {A11yBehaviorFunctionDef} - Sets the way in which help text will be set for the Node, see DEFAULT_HELP_TEXT_BEHAVIOR for example
-  'accessibleHeading', // {string|null} - Sets content for the heading whose level will be automatically generated if specified
-  'accessibleHeadingBehavior', // {A11yBehaviorFunctionDef} - Set to modify default behavior for inserting accessibleHeading string
+  'pdomHeading', // {string|null} - Sets content for the heading whose level will be automatically generated if specified
+  'pdomHeadingBehavior', // {A11yBehaviorFunctionDef} - Set to modify default behavior for inserting pdomHeading string
 
   /*
    * Lower Level API Functions
@@ -443,14 +443,14 @@ const ParallelDOM = {
         this._helpTextBehavior = ParallelDOM.HELP_TEXT_AFTER_CONTENT;
 
         // {string|null} - sets the help text of the Node, this most often corresponds to label sibling text.
-        this._accessibleHeading = null;
+        this._pdomHeading = null;
 
         // TODO: implement headingLevel override, see https://github.com/phetsims/scenery/issues/855
-        // {number|null} - the number that corresponds to the heading tag the node will get if using the accessibleHeading api,.
+        // {number|null} - the number that corresponds to the heading tag the node will get if using the pdomHeading api,.
         this._headingLevel = null;
 
         // {A11yBehaviorFunctionDef} - sets the help text of the Node, this most often corresponds to description text.
-        this._accessibleHeadingBehavior = DEFAULT_ACCESSIBLE_HEADING_BEHAVIOR;
+        this._pdomHeadingBehavior = DEFAULT_PDOM_HEADING_BEHAVIOR;
 
         // @private - PDOM specific enabled listener
         this.pdomBoundEnabledListener = this.pdomEnabledListener.bind( this );
@@ -693,18 +693,18 @@ const ParallelDOM = {
        * @public
        *
        * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
-       * @param {string|null} accessibleHeading
+       * @param {string|null} pdomHeading
        */
-      setAccessibleHeading: function( accessibleHeading ) {
-        assert && assert( accessibleHeading === null || typeof accessibleHeading === 'string' );
+      setPDOMHeading: function( pdomHeading ) {
+        assert && assert( pdomHeading === null || typeof pdomHeading === 'string' );
 
-        if ( this._accessibleHeading !== accessibleHeading ) {
-          this._accessibleHeading = accessibleHeading;
+        if ( this._pdomHeading !== pdomHeading ) {
+          this._pdomHeading = pdomHeading;
 
           this.onAccessibleContentChange();
         }
       },
-      set accessibleHeading( accessibleHeading ) { this.setAccessibleHeading( accessibleHeading ); },
+      set pdomHeading( pdomHeading ) { this.setPDOMHeading( pdomHeading ); },
 
       /**
        * Get the value of this Node's heading. Use null to clear the heading
@@ -713,31 +713,31 @@ const ParallelDOM = {
        * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
        * @returns {string|null}
        */
-      getAccessibleHeading: function() {
-        return this._accessibleHeading;
+      getPDOMHeading: function() {
+        return this._pdomHeading;
       },
-      get accessibleHeading() { return this.getAccessibleHeading(); },
+      get pdomHeading() { return this.getPDOMHeading(); },
 
 
       /**
-       * Set the behavior of how `this.accessibleHeading` is set in the PDOM. See default behavior function for more
+       * Set the behavior of how `this.pdomHeading` is set in the PDOM. See default behavior function for more
        * information.
        * @public
        *
        * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
-       * @param {A11yBehaviorFunctionDef} accessibleHeadingBehavior
+       * @param {A11yBehaviorFunctionDef} pdomHeadingBehavior
        */
-      setAccessibleHeadingBehavior: function( accessibleHeadingBehavior ) {
-        assert && A11yBehaviorFunctionDef.validateA11yBehaviorFunctionDef( accessibleHeadingBehavior );
+      setPDOMHeadingBehavior: function( pdomHeadingBehavior ) {
+        assert && A11yBehaviorFunctionDef.validateA11yBehaviorFunctionDef( pdomHeadingBehavior );
 
-        if ( this._accessibleHeadingBehavior !== accessibleHeadingBehavior ) {
+        if ( this._pdomHeadingBehavior !== pdomHeadingBehavior ) {
 
-          this._accessibleHeadingBehavior = accessibleHeadingBehavior;
+          this._pdomHeadingBehavior = pdomHeadingBehavior;
 
           this.onAccessibleContentChange();
         }
       },
-      set accessibleHeadingBehavior( accessibleHeadingBehavior ) { this.setAccessibleHeadingBehavior( accessibleHeadingBehavior ); },
+      set pdomHeadingBehavior( pdomHeadingBehavior ) { this.setPDOMHeadingBehavior( pdomHeadingBehavior ); },
 
       /**
        * Get the help text of the interactive element.
@@ -746,10 +746,10 @@ const ParallelDOM = {
        * @experemental - NOTE: use with caution, a11y team reserves the right to change api (though unlikely). Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
        * @returns {function}
        */
-      getAccessibleHeadingBehavior: function() {
-        return this._accessibleHeadingBehavior;
+      getPDOMHeadingBehavior: function() {
+        return this._pdomHeadingBehavior;
       },
-      get accessibleHeadingBehavior() { return this.getAccessibleHeadingBehavior(); },
+      get pdomHeadingBehavior() { return this.getPDOMHeadingBehavior(); },
 
 
       /**
@@ -780,14 +780,14 @@ const ParallelDOM = {
         // Either ^ which may break during construction, or V (below)
         //  base case to heading level 1
         if ( !this._accessibleParent ) {
-          if ( this._accessibleHeading ) {
+          if ( this._pdomHeading ) {
             this._headingLevel = 1;
             return 1;
           }
           return 0; // so that the first node with a heading is headingLevel 1
         }
 
-        if ( this._accessibleHeading ) {
+        if ( this._pdomHeading ) {
           const level = this._accessibleParent.computeHeadingLevel() + 1;
           this._headingLevel = level;
           return level;
@@ -2283,7 +2283,7 @@ const ParallelDOM = {
       set pdomChecked( checked ) { this.setPDOMChecked( checked ); },
 
       /**
-       * Get whether or not the accessible input is 'checked'.
+       * Get whether or not the pdom input is 'checked'.
        *
        * @public
        * @returns {boolean}
@@ -2706,8 +2706,8 @@ const ParallelDOM = {
 
         PDOMTree.accessibleContentChange( this );
 
-        // recompute the heading level for this node if it is using the accessibleHeading API.
-        this._accessibleHeading && this.computeHeadingLevel();
+        // recompute the heading level for this node if it is using the pdomHeading API.
+        this._pdomHeading && this.computeHeadingLevel();
 
         this.rendererSummaryRefreshEmitter.emit();
       },

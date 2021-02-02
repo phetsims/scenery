@@ -415,7 +415,7 @@ QUnit.test( 'ParallelDOM options', assert => {
 
   assert.ok( divNode.tagName === 'div', 'Tag name' );
   assert.ok( divNode.ariaLabel === TEST_LABEL, 'Use aria label' );
-  assert.ok( divNode.pdomVisible === false, 'Accessible visible' );
+  assert.ok( divNode.pdomVisible === false, 'pdom visible' );
   assert.ok( divNode.labelTagName === null, 'Label tag name with aria label is independent' );
   assert.ok( divNode.descriptionTagName.toUpperCase() === DEFAULT_DESCRIPTION_TAG_NAME, 'Description tag name' );
 
@@ -1214,7 +1214,7 @@ QUnit.test( 'pdomVisible', assert => {
   b.visible = false;
   assert.ok( b.visible === false, 'state of node b is visible' );
   assert.ok( buttonB.hidden === true, 'buttonB is hidden from screen readers after becoming invisible' );
-  assert.ok( b.pdomVisible === true, 'state of node b still reflects accessible visibility when invisible' );
+  assert.ok( b.pdomVisible === true, 'state of node b still reflects pdom visibility when invisible' );
   assert.ok( b.accessibleDisplayed === false, 'b invisible and should have no representation in the PDOM' );
   b.visible = true;
 
@@ -1715,7 +1715,7 @@ QUnit.test( 'accessibleName option', assert => {
 } );
 
 
-QUnit.test( 'accessibleHeading option', assert => {
+QUnit.test( 'pdomHeading option', assert => {
 
   assert.ok( true );
 
@@ -1724,14 +1724,14 @@ QUnit.test( 'accessibleHeading option', assert => {
   var display = new Display( rootNode ); // eslint-disable-line
   document.body.appendChild( display.domElement );
 
-  const a = new Node( { tagName: 'div', accessibleHeading: TEST_LABEL, containerTagName: 'div' } );
+  const a = new Node( { tagName: 'div', pdomHeading: TEST_LABEL, containerTagName: 'div' } );
   rootNode.addChild( a );
 
-  assert.ok( a.accessibleHeading === TEST_LABEL, 'accessibleName getter' );
+  assert.ok( a.pdomHeading === TEST_LABEL, 'accessibleName getter' );
 
   const aLabelSibling = getPrimarySiblingElementByNode( a ).parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
-  assert.ok( aLabelSibling.textContent === TEST_LABEL, 'accessibleHeading setter on div' );
-  assert.ok( aLabelSibling.tagName === 'H1', 'accessibleHeading setter should be h1' );
+  assert.ok( aLabelSibling.textContent === TEST_LABEL, 'pdomHeading setter on div' );
+  assert.ok( aLabelSibling.tagName === 'H1', 'pdomHeading setter should be h1' );
   display.dispose();
 
 } );
