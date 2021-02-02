@@ -1064,7 +1064,7 @@ class Input {
    * @returns {string}
    */
   getTrailId( domEvent ) {
-    assert && assert( this.display._accessible, 'Display must be accessible to get trail IDs from AccessiblePeers' );
+    assert && assert( this.display._accessible, 'Display must be accessible to get trail IDs from PDOMPeers' );
     assert && assert( domEvent.target || domEvent[ TARGET_SUBSTITUTE_KEY ], 'need a way to get the target' );
 
     // could be serialized event for phet-io playbacks, see Input.serializeDOMEvent()

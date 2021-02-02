@@ -1835,7 +1835,7 @@ class Display {
    *
    * @returns {string}
    */
-  getAccessibleDebugHTML() {
+  getPDOMDebugHTML() {
     let result = '';
 
     const headerStyle = 'font-weight: bold; font-size: 120%; margin-top: 5px;';

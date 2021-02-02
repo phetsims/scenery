@@ -49,7 +49,7 @@ QUnit.module( 'ParallelDOMTests' );
  * @param  {Node} node
  * @returns {PDOMPeer}
  */
-function getAccessiblePeerByNode( node ) {
+function getPDOMPeerByNode( node ) {
   if ( node.pdomInstances.length === 0 ) {
     throw new Error( 'No pdomInstances. Was your node added to the scene graph?' );
   }
@@ -76,7 +76,7 @@ function getAccessiblePeerByNode( node ) {
  */
 function getPrimarySiblingElementByNode( node ) {
 
-  const uniquePeer = getAccessiblePeerByNode( node );
+  const uniquePeer = getPDOMPeerByNode( node );
   return document.getElementById( uniquePeer.primarySibling.id );
 }
 
@@ -1571,7 +1571,7 @@ QUnit.test( 'append siblings/appendLabel/appendDescription setters', assert => {
   } );
   rootNode.addChild( b );
 
-  let bPeer = getAccessiblePeerByNode( b );
+  let bPeer = getPDOMPeerByNode( b );
   let bElement = getPrimarySiblingElementByNode( b );
   let bElementParent = bElement.parentElement;
   let indexOfPrimaryElement = Array.prototype.indexOf.call( bElementParent.childNodes, bElement );
@@ -1585,7 +1585,7 @@ QUnit.test( 'append siblings/appendLabel/appendDescription setters', assert => {
   b.appendLabel = false;
 
   // refresh since operation may have created new Objects
-  bPeer = getAccessiblePeerByNode( b );
+  bPeer = getPDOMPeerByNode( b );
   bElement = getPrimarySiblingElementByNode( b );
   bElementParent = bElement.parentElement;
   indexOfPrimaryElement = Array.prototype.indexOf.call( bElementParent.childNodes, bElement );

@@ -997,7 +997,7 @@ class PDOMPeer {
   }
 }
 
-// @public {string} - specifies valid associations between related AccessiblePeers in the DOM
+// @public {string} - specifies valid associations between related PDOMPeers in the DOM
 PDOMPeer.PRIMARY_SIBLING = PRIMARY_SIBLING; // associate with all accessible content related to this peer
 PDOMPeer.LABEL_SIBLING = LABEL_SIBLING; // associate with just the label content of this peer
 PDOMPeer.DESCRIPTION_SIBLING = DESCRIPTION_SIBLING; // associate with just the description content of this peer

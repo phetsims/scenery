@@ -568,7 +568,7 @@ class PDOMInstance {
       assert( isVisible === shouldBeVisible, 'Instance visibility mismatch' );
     }
 
-    audit( PDOMInstance.createFakeAccessibleTree( rootNode ), this );
+    audit( PDOMInstance.createFakePDOMTree( rootNode ), this );
   }
 
 
@@ -625,7 +625,7 @@ class PDOMInstance {
    * @param {Node} rootNode
    * @returns {Object} - Type FakePDOMInstance: { node: {Node}, children: {Array.<FakePDOMInstance>} }
    */
-  static createFakeAccessibleTree( rootNode ) {
+  static createFakePDOMTree( rootNode ) {
     function createFakeTree( node ) {
       let fakeInstances = _.flatten( node.getEffectiveChildren().map( createFakeTree ) );
       if ( node.hasPDOMContent ) {
