@@ -46,7 +46,7 @@ class PDOMPeer {
    * @mixes Poolable
    */
   constructor( accessibleInstance, options ) {
-    this.initializeAccessiblePeer( accessibleInstance, options );
+    this.initializePDOMPeer( accessibleInstance, options );
   }
 
   /**
@@ -60,7 +60,7 @@ class PDOMPeer {
    * @param {Object} [options]
    * @returns {PDOMPeer} - Returns 'this' reference, for chaining
    */
-  initializeAccessiblePeer( accessibleInstance, options ) {
+  initializePDOMPeer( accessibleInstance, options ) {
     options = merge( {
       primarySibling: null
     }, options );
@@ -1011,7 +1011,7 @@ scenery.register( 'PDOMPeer', PDOMPeer );
 
 // Set up pooling
 Poolable.mixInto( PDOMPeer, {
-  initialize: PDOMPeer.prototype.initializeAccessiblePeer
+  initialize: PDOMPeer.prototype.initializePDOMPeer
 } );
 
 //--------------------------------------------------------------------------
