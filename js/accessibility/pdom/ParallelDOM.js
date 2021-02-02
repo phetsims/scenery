@@ -405,7 +405,7 @@ const ParallelDOM = {
 
         // @public (scenery-internal) {Node|null} - (a11y) If this node is specified in another node's
         // pdomOrder, then this will have the value of that other (accessible parent) node. Otherwise it's null.
-        this._accessibleParent = null;
+        this._pdomParent = null;
 
         // @public (scenery-internal) {Node|null} - If this is specified, the primary sibling will be positioned
         // to align with this source node and observe the transforms along this node's trail. At this time the
@@ -776,10 +776,10 @@ const ParallelDOM = {
        */
       computeHeadingLevel: function() {
 
-        // TODO: assert??? assert( this.headingLevel || this._accessibleParent); see https://github.com/phetsims/scenery/issues/855
+        // TODO: assert??? assert( this.headingLevel || this._pdomParent); see https://github.com/phetsims/scenery/issues/855
         // Either ^ which may break during construction, or V (below)
         //  base case to heading level 1
-        if ( !this._accessibleParent ) {
+        if ( !this._pdomParent ) {
           if ( this._pdomHeading ) {
             this._headingLevel = 1;
             return 1;
@@ -788,12 +788,12 @@ const ParallelDOM = {
         }
 
         if ( this._pdomHeading ) {
-          const level = this._accessibleParent.computeHeadingLevel() + 1;
+          const level = this._pdomParent.computeHeadingLevel() + 1;
           this._headingLevel = level;
           return level;
         }
         else {
-          return this._accessibleParent.computeHeadingLevel();
+          return this._pdomParent.computeHeadingLevel();
         }
       },
 
@@ -2113,10 +2113,10 @@ const ParallelDOM = {
        *
        * @returns {Node|null}
        */
-      getAccessibleParent: function() {
-        return this._accessibleParent;
+      getPDOMParent: function() {
+        return this._pdomParent;
       },
-      get accessibleParent() { return this.getAccessibleParent(); },
+      get pdomParent() { return this.getPDOMParent(); },
 
       /**
        * Returns the "effective" a11y children for the node (which may be different based on the order or other
@@ -2141,7 +2141,7 @@ const ParallelDOM = {
         for ( let i = 0; i < this._children.length; i++ ) {
           const child = this._children[ i ];
 
-          if ( !child._accessibleParent ) {
+          if ( !child._pdomParent ) {
             nonOrderedChildren.push( child );
           }
         }
