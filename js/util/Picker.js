@@ -126,7 +126,7 @@ class Picker {
    * @param {Vector2} point
    * @param {boolean} useMouse
    * @param {boolean} useTouch
-   * @param {boolean} isInclusive
+   * @param {boolean} isInclusive - Essentially true if there is an ancestor or self with an input listener
    * @returns {Trail|null}
    */
   recursiveHitTest( point, useMouse, useTouch, isInclusive ) {

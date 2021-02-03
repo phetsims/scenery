@@ -97,7 +97,8 @@ const logProperties = {
   OnInput: { name: 'OnInput', style: '' },
   Pointer: { name: 'Pointer', style: '' },
   Input: { name: 'Input', style: '' }, // When "logical" input functions are called, and related tasks
-  EventDispatch: { name: 'EventDispatch', style: '' } // When an event is dispatched, and when listeners are triggered
+  EventDispatch: { name: 'EventDispatch', style: '' }, // When an event is dispatched, and when listeners are triggered
+  EventPath: { name: 'EventPath', style: '' } // User-readable form for whenever an event is dispatched
 };
 
 // will be filled in by other modules
@@ -147,6 +148,7 @@ extend( scenery, {
       this.enableIndividualLog( 'Pointer' );
       this.enableIndividualLog( 'Input' );
       this.enableIndividualLog( 'EventDispatch' );
+      this.enableIndividualLog( 'EventPath' );
       return;
     }
     if ( name === 'a11y' || name === 'pdom' ) {

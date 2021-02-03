@@ -1772,6 +1772,8 @@ class Input {
 
     assert && assert( trail, 'Falsy trail for dispatchEvent' );
 
+    sceneryLog && sceneryLog.EventPath && sceneryLog.EventPath( `${type} ${trail.toPathString()}` );
+
     // NOTE: event is not immutable, as its currentTarget changes
     const inputEvent = new SceneryEvent( trail, type, pointer, event );
 
