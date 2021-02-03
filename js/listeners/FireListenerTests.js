@@ -18,7 +18,7 @@ QUnit.test( 'Basics', assert => {
   ListenerTestUtils.simpleRectangleTest( ( display, rect, node ) => {
     let fireCount = 0;
     const listener = new FireListener( {
-      tandem: Tandem.GENERAL.createTandem( 'myListener' ),
+      tandem: Tandem.ROOT_TEST.createTandem( 'myListener' ),
       fire: () => {
         fireCount++;
       }

@@ -24,7 +24,7 @@ QUnit.module( 'DragListener' );
 QUnit.test( 'translateNode', assert => {
   ListenerTestUtils.simpleRectangleTest( ( display, rect, node ) => {
     const listener = new DragListener( {
-      tandem: Tandem.GENERAL.createTandem( 'myListener' ),
+      tandem: Tandem.ROOT_TEST.createTandem( 'myListener' ),
       translateNode: true
     } );
     rect.addInputListener( listener );
@@ -42,7 +42,7 @@ QUnit.test( 'translateNode', assert => {
 QUnit.test( 'translateNode with applyOffset:false', assert => {
   ListenerTestUtils.simpleRectangleTest( ( display, rect, node ) => {
     const listener = new DragListener( {
-      tandem: Tandem.GENERAL.createTandem( 'myListener' ),
+      tandem: Tandem.ROOT_TEST.createTandem( 'myListener' ),
       translateNode: true,
       applyOffset: false
     } );
@@ -61,7 +61,7 @@ QUnit.test( 'translateNode with applyOffset:false', assert => {
 QUnit.test( 'translateNode with trackAncestors', assert => {
   ListenerTestUtils.simpleRectangleTest( ( display, rect, node ) => {
     const listener = new DragListener( {
-      tandem: Tandem.GENERAL.createTandem( 'myListener' ),
+      tandem: Tandem.ROOT_TEST.createTandem( 'myListener' ),
       translateNode: true,
       trackAncestors: true
     } );
@@ -84,7 +84,7 @@ QUnit.test( 'positionProperty with hooks', assert => {
     positionProperty.linkAttribute( rect, 'translation' );
 
     const listener = new DragListener( {
-      tandem: Tandem.GENERAL.createTandem( 'myListener' ),
+      tandem: Tandem.ROOT_TEST.createTandem( 'myListener' ),
       positionProperty: positionProperty
     } );
     rect.addInputListener( listener );
@@ -110,7 +110,7 @@ QUnit.test( 'positionProperty with hooks and transform', assert => {
     } );
 
     const listener = new DragListener( {
-      tandem: Tandem.GENERAL.createTandem( 'myListener' ),
+      tandem: Tandem.ROOT_TEST.createTandem( 'myListener' ),
       positionProperty: positionProperty,
       transform: transform
     } );
@@ -135,7 +135,7 @@ QUnit.test( 'positionProperty with dragBounds', assert => {
     } );
 
     const listener = new DragListener( {
-      tandem: Tandem.GENERAL.createTandem( 'myListener' ),
+      tandem: Tandem.ROOT_TEST.createTandem( 'myListener' ),
       positionProperty: positionProperty,
       dragBoundsProperty: new Property( new Bounds2( 0, 0, 5, 5 ) )
     } );
