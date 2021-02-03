@@ -43,7 +43,7 @@ const KeyboardZoomUtils = {
   isZoomCommand: ( event, zoomIn ) => {
     const zoomKey = zoomIn ? KeyboardUtils.KEY_EQUALS : KeyboardUtils.KEY_MINUS;
     const metaKey = KeyboardZoomUtils.getPlatformZoomMetaKey();
-    return event[ metaKey ] && event.keyCode === zoomKey;
+    return event[ metaKey ] && event.key.toLowerCase() === zoomKey;
   },
 
   /**
@@ -55,7 +55,7 @@ const KeyboardZoomUtils = {
    */
   isZoomResetCommand: event => {
     const metaKey = KeyboardZoomUtils.getPlatformZoomMetaKey();
-    return event[ metaKey ] && event.keyCode === KeyboardUtils.KEY_0;
+    return event[ metaKey ] && event.key.toLowerCase() === KeyboardUtils.KEY_0;
   }
 };
 

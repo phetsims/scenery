@@ -1,27 +1,25 @@
 // Copyright 2017-2020, University of Colorado Boulder
 
 /**
- * Collection of utility constants and functions for managing keyboard input. Constants are keyCodes. Keycode is marked
- * as deprecated, but alternatives do not have browser support. Once they do, consider replacing Event.keyCode
- * with Event.code.
+ * Collection of utility constants and functions for managing keyboard input. Constants are values of Event.key, as
+ * well as helper functions and collections.
  *
  * @author Jesse Greenberg
  */
 
-import platform from '../../../phet-core/js/platform.js';
 import scenery from '../scenery.js';
 
-const KEY_RIGHT_ARROW = 39;
-const KEY_LEFT_ARROW = 37;
-const KEY_UP_ARROW = 38;
-const KEY_DOWN_ARROW = 40;
-const KEY_SHIFT = 16;
-const KEY_CTRL = 17;
-const KEY_ALT = 18;
-const KEY_W = 87;
-const KEY_A = 65;
-const KEY_S = 83;
-const KEY_D = 68;
+const KEY_RIGHT_ARROW = 'arrowright';
+const KEY_LEFT_ARROW = 'arrowleft';
+const KEY_UP_ARROW = 'arrowup';
+const KEY_DOWN_ARROW = 'arrowdown';
+const KEY_SHIFT = 'shift';
+const KEY_CTRL = 'control';
+const KEY_ALT = 'alt';
+const KEY_W = 'w';
+const KEY_A = 'a';
+const KEY_S = 's';
+const KEY_D = 'd';
 
 const ARROW_KEYS = [ KEY_RIGHT_ARROW, KEY_LEFT_ARROW, KEY_UP_ARROW, KEY_DOWN_ARROW ];
 const WASD_KEYS = [ KEY_W, KEY_S, KEY_A, KEY_D ];
@@ -29,10 +27,9 @@ const WASD_KEYS = [ KEY_W, KEY_S, KEY_A, KEY_D ];
 // constants
 var KeyboardUtils = {
 
-  // TODO: See if these can be replaced by DOM/Browser API support
-  KEY_SPACE: 32,
-  KEY_ENTER: 13,
-  KEY_TAB: 9,
+  KEY_SPACE: ' ',
+  KEY_ENTER: 'enter',
+  KEY_TAB: 'tab',
   KEY_RIGHT_ARROW: KEY_RIGHT_ARROW,
   KEY_LEFT_ARROW: KEY_LEFT_ARROW,
   KEY_UP_ARROW: KEY_UP_ARROW,
@@ -40,64 +37,127 @@ var KeyboardUtils = {
   KEY_SHIFT: KEY_SHIFT,
   KEY_CTRL: KEY_CTRL,
   KEY_ALT: KEY_ALT,
-  KEY_ESCAPE: 27,
-  KEY_DELETE: 46,
-  KEY_BACKSPACE: 8,
-  KEY_PAGE_UP: 33,
-  KEY_PAGE_DOWN: 34,
-  KEY_END: 35,
-  KEY_HOME: 36,
-  KEY_PRINT_SCREEN: 44,
-  KEY_0: 48,
-  KEY_9: 57,
-  KEY_A: 65,
-  KEY_D: 68,
-  KEY_C: 67,
-  KEY_H: 72,
-  KEY_J: 74,
-  KEY_N: 78,
-  KEY_S: 83,
-  KEY_W: 87,
-  KEY_K: 75,
-  KEY_L: 76,
+  KEY_ESCAPE: 'escape',
+  KEY_DELETE: 'delete',
+  KEY_BACKSPACE: 'backspace',
+  KEY_PAGE_UP: 'pageup',
+  KEY_PAGE_DOWN: 'pagedown',
+  KEY_END: 'end',
+  KEY_HOME: 'home',
+  KEY_0: '0',
+  KEY_1: '1',
+  KEY_2: '2',
+  KEY_3: '3',
+  KEY_4: '4',
+  KEY_5: '5',
+  KEY_6: '6',
+  KEY_7: '7',
+  KEY_8: '8',
+  KEY_9: '9',
+  KEY_A: 'a',
+  KEY_B: 'b',
+  KEY_C: 'c',
+  KEY_D: 'd',
+  KEY_E: 'e',
+  KEY_F: 'f',
+  KEY_G: 'g',
+  KEY_H: 'h',
+  KEY_I: 'I',
+  KEY_J: 'j',
+  KEY_K: 'k',
+  KEY_L: 'l',
+  KEY_M: 'm',
+  KEY_N: 'n',
+  KEY_O: 'o',
+  KEY_P: 'p',
+  KEY_Q: 'q',
+  KEY_R: 'r',
+  KEY_S: 's',
+  KEY_T: 't',
+  KEY_U: 'u',
+  KEY_V: 'v',
+  KEY_W: 'w',
+  KEY_X: 'x',
+  KEY_Y: 'y',
+  KEY_Z: 'z',
 
-  // beware that "="" and "+" keys share the same keyCode, distinguish with shfitKey Event property
-  // also, these keyCodes are different in Firefox, see http://www.javascripter.net/faq/keyCodes.htm
-  KEY_EQUALS: platform.firefox ? 61 : 187,
-  KEY_PLUS: platform.firefox ? 61 : 187,
-  KEY_MINUS: platform.firefox ? 173 : 189,
+  KEY_EQUALS: '=',
+  KEY_PLUS: '+',
+  KEY_MINUS: '-',
 
   ARROW_KEYS: ARROW_KEYS,
   WASD_KEYS: WASD_KEYS,
   MOVEMENT_KEYS: ARROW_KEYS.concat( WASD_KEYS ),
 
-  // returns whether or not the keyCode corresponds to pressing an arrow key
-  isArrowKey( keyCode ) {
-    return ( keyCode === KeyboardUtils.KEY_RIGHT_ARROW || keyCode === KeyboardUtils.KEY_LEFT_ARROW ||
-             keyCode === KeyboardUtils.KEY_UP_ARROW || keyCode === KeyboardUtils.KEY_DOWN_ARROW );
+  // returns whether or not the key corresponds to pressing an arrow key
+  isArrowKey( key ) {
+    assert && assert( typeof key === 'string' );
+    key = key.toLowerCase();
+    return key === KeyboardUtils.KEY_RIGHT_ARROW ||
+           key === KeyboardUtils.KEY_LEFT_ARROW ||
+           key === KeyboardUtils.KEY_UP_ARROW ||
+           key === KeyboardUtils.KEY_DOWN_ARROW;
   },
 
-  // returns true if keyCode is one of keys used for range inputs (key codes 33 - 40, inclusive)
-  isRangeKey( keyCode ) {
-    return ( keyCode >= KeyboardUtils.KEY_PAGE_UP && keyCode <= KeyboardUtils.KEY_DOWN_ARROW );
+  // returns true if key is one of keys used for range inputs (key codes 33 - 40, inclusive)
+  isRangeKey( key ) {
+    assert && assert( typeof key === 'string' );
+    key = key.toLowerCase();
+    return key === KeyboardUtils.KEY_PAGE_UP ||
+           key === KeyboardUtils.KEY_PAGE_DOWN ||
+           key === KeyboardUtils.KEY_HOME ||
+           key === KeyboardUtils.KEY_END ||
+           KeyboardUtils.isArrowKey( key );
   },
 
-  // returns whether or not the keyCode corresponds to pressing a number key
-  isNumberKey( keyCode ) {
-    return ( keyCode > KeyboardUtils.KEY_0 && keyCode < KeyboardUtils.KEY_9 );
+  // returns whether or not the key corresponds to pressing a number key
+  isNumberKey( key ) {
+    assert && assert( typeof key === 'string' );
+    key = key.toLowerCase();
+    return !isNaN( parseInt( key, 10 ) );
   },
 
-  // returns whether or not the keyCode corresponds to one of the WASD movement keys
-  isWASDKey( keyCode ) {
-    return ( keyCode === KeyboardUtils.KEY_W || keyCode === KeyboardUtils.KEY_A ||
-             keyCode === KeyboardUtils.KEY_S || keyCode === KeyboardUtils.KEY_D );
+  // returns whether or not the key corresponds to one of the WASD movement keys
+  isWASDKey( key ) {
+    assert && assert( typeof key === 'string' );
+    key = key.toLowerCase();
+    return key === KeyboardUtils.KEY_W ||
+           key === KeyboardUtils.KEY_A ||
+           key === KeyboardUtils.KEY_S ||
+           key === KeyboardUtils.KEY_D;
   },
 
-  // returns true if the keyCode indicates a 'movement' key in keyboard dragging
-  isMovementKey( keyCode ) {
-    return KeyboardUtils.MOVEMENT_KEYS.includes( keyCode );
+  // returns true if the key indicates a 'movement' key in keyboard dragging
+  isMovementKey( key ) {
+    assert && assert( typeof key === 'string' );
+    key = key.toLowerCase();
+    return KeyboardUtils.MOVEMENT_KEYS.includes( key );
   }
 };
+
+const ALL_KEYS = [];
+for ( const keyKey in KeyboardUtils ) {
+
+  // No functions or key-groups allowed
+  if ( KeyboardUtils.hasOwnProperty( keyKey ) && typeof KeyboardUtils[ keyKey ] === 'string' ) {
+    ALL_KEYS.push( KeyboardUtils[ keyKey ] );
+  }
+}
+
+// @public - Not really all of them, but all that are in the above list. If you see one you wish was in here, then add it!
+KeyboardUtils.ALL_KEYS = ALL_KEYS;
+
+/**
+ * @typedef KeyDef
+ * @extends {String}
+ * @public
+ *
+ * The value of KeyboardEvent.key, but lower case for easy comparison independent of modifier keys,
+ * see https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
+ *
+ * In general, it is best to use globalKeyStateTracker or a similar KeyStateTracker to determine if modifier keys are
+ * down.
+ */
 
 scenery.register( 'KeyboardUtils', KeyboardUtils );
 

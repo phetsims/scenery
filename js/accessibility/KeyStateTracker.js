@@ -27,9 +27,9 @@ class KeyStateTracker {
       tandem: Tandem.OPTIONAL
     }, options );
 
-    // @private { Object.<number,{ keyCode: {number}, isDown: {boolean}, timeDown: [boolean] }> } - where the Object
-    // keys are the keyCode. JavaScript doesn't handle multiple key presses, so we track which keys are currently
-    // down and update based on state of this collection of objects.
+    // @private { Object.<KeyDef,{ key: {KeyDef}, isDown: {boolean}, timeDown: [boolean] }> } - where the Object
+    // keys are the Event.key (lowercase). JavaScript doesn't handle multiple key presses, so we track which keys are
+    // currently down and update based on state of this collection of objects.
     this.keyState = {};
 
     // @private {boolean} - whether or not this KeyStateTracker is attached to the document
@@ -53,22 +53,25 @@ class KeyStateTracker {
       // This is likely to happen when pressing browser key commands like "ctrl + tab" to switch tabs.
       this.correctModifierKeys( domEvent );
 
-      if ( assert && domEvent.keyCode !== KeyboardUtils.KEY_SHIFT ) {
+      const key = domEvent.key.toLowerCase();
+
+      if ( assert && key !== KeyboardUtils.KEY_SHIFT ) {
         assert( !!domEvent.shiftKey === !!this.shiftKeyDown, 'shift key inconsistency between event and keystate.' );
       }
-      if ( assert && domEvent.keyCode !== KeyboardUtils.KEY_ALT ) {
+      if ( assert && key !== KeyboardUtils.KEY_ALT ) {
         assert( !!domEvent.altKey === !!this.altKeyDown, 'alt key inconsistency between event and keystate.' );
       }
-      if ( assert && domEvent.keyCode !== KeyboardUtils.KEY_CTRL ) {
+      if ( assert && key !== KeyboardUtils.KEY_CTRL ) {
         assert( !!domEvent.ctrlKey === !!this.ctrlKeyDown, 'ctrl key inconsistency between event and keystate.' );
       }
 
       // if the key is already down, don't do anything else (we don't want to create a new keystate object
       // for a key that is already being tracked and down)
-      if ( !this.isKeyDown( domEvent.keyCode ) ) {
-        this.keyState[ domEvent.keyCode ] = {
+      if ( !this.isKeyDown( key ) ) {
+        const key = domEvent.key.toLowerCase();
+        this.keyState[ key ] = {
           keyDown: true,
-          keyCode: domEvent.keyCode,
+          key: key,
           timeDown: 0 // in ms
         };
       }
@@ -87,7 +90,7 @@ class KeyStateTracker {
     // is wrapped in an Action so that state is captured for PhET-iO
     this.keyupUpdateAction = new Action( domEvent => {
 
-      const keyCode = domEvent.keyCode;
+      const key = domEvent.key.toLowerCase();
 
       // correct keystate in case browser didn't receive keydown/keyup events for a modifier key
       this.correctModifierKeys( domEvent );
@@ -95,8 +98,8 @@ class KeyStateTracker {
       // Remove this key data from the state - There are many cases where we might receive a keyup before keydown like
       // on first tab into scenery Display or when using specific operating system keys with the browser or PrtScn so
       // an assertion for this is too strict. See https://github.com/phetsims/scenery/issues/918
-      if ( this.isKeyDown( keyCode ) ) {
-        delete this.keyState[ keyCode ];
+      if ( this.isKeyDown( key ) ) {
+        delete this.keyState[ key ];
       }
 
       // keyup event received, notify listeners
@@ -145,25 +148,27 @@ class KeyStateTracker {
    */
   correctModifierKeys( domEvent ) {
 
+    const key = domEvent.key.toLowerCase();
+
     // add modifier keys if they aren't down
     if ( domEvent.shiftKey && !this.shiftKeyDown ) {
       this.keyState[ KeyboardUtils.KEY_SHIFT ] = {
         keyDown: true,
-        keyCode: domEvent.keyCode,
+        key: key,
         timeDown: 0 // in ms
       };
     }
     if ( domEvent.altKey && !this.altKeyDown ) {
       this.keyState[ KeyboardUtils.KEY_ALT ] = {
         keyDown: true,
-        keyCode: domEvent.keyCode,
+        key: key,
         timeDown: 0 // in ms
       };
     }
     if ( domEvent.ctrlKey && !this.ctrlKeyDown ) {
       this.keyState[ KeyboardUtils.KEY_CTRL ] = {
         keyDown: true,
-        keyCode: domEvent.keyCode,
+        key: key,
         timeDown: 0 // in ms
       };
     }
@@ -205,26 +210,26 @@ class KeyStateTracker {
   }
 
   /**
-   * Returns true if a key with the keyCode is currently down.
+   * Returns true if a key with the Event.key is currently down.
    *
    * @public
-   * @param  {number} keyCode
+   * @param  {KeyDef} key
    * @returns {boolean}
    */
-  isKeyDown( keyCode ) {
-    if ( !this.keyState[ keyCode ] ) {
+  isKeyDown( key ) {
+    if ( !this.keyState[ key ] ) {
 
       // key hasn't been pressed once yet
       return false;
     }
 
-    return this.keyState[ keyCode ].keyDown;
+    return this.keyState[ key ].keyDown;
   }
 
   /**
    * Returns true if any of the keys in the list are currently down.
    *
-   * @param  {Array.<number>} keys - array of keyCodes
+   * @param  {Array.<KeyDef>} keyList - array of KeyDef key states
    * @returns {boolean}
    * @public
    */
@@ -241,7 +246,7 @@ class KeyStateTracker {
   /**
    * Returns true if and only if all of the keys in the list are currently down.
    *
-   * @param  {Array.<number>} keys - array of keyCodes
+   * @param  {Array.<KeyDef>} keyList - array of KeyDef key states
    * @returns {boolean}
    * @public
    */
@@ -298,13 +303,13 @@ class KeyStateTracker {
 
   /**
    * Will assert if the key isn't currently pressed down
-   * @param {number} keyCode
+   * @param {KeyDef} key
    * @returns {number} how long the key has been down
    * @public
    */
-  timeDownForKey( keyCode ) {
-    assert && assert( this.isKeyDown( keyCode ), 'cannot get timeDown on a key that is not pressed down' );
-    return this.keyState[ keyCode ].timeDown;
+  timeDownForKey( key ) {
+    assert && assert( this.isKeyDown( key ), 'cannot get timeDown on a key that is not pressed down' );
+    return this.keyState[ key ].timeDown;
   }
 
   /**

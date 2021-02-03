@@ -1,8 +1,8 @@
-// Copyright 2018-2020, University of Colorado Boulder
+// Copyright 2018-2021, University of Colorado Boulder
 
 /**
  * ?fuzzBoard keyboard fuzzer
- * TODO: keep track of keystate so that we don't trigger a keydown of keyA before the previous keyA keyup event has been called.
+ * TODO: keep track of keyState so that we don't trigger a keydown of keyA before the previous keyA keyup event has been called.
  *
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
@@ -23,6 +23,8 @@ const keyboardTestingSchema = {
   BUTTON: [ KeyboardUtils.KEY_ENTER, KeyboardUtils.KEY_SPACE ]
 };
 
+const ALL_KEYS = KeyboardUtils.ALL_KEYS;
+
 const MAX_MS_KEY_HOLD_DOWN = 100;
 const NEXT_ELEMENT_THRESHOLD = .1;
 
@@ -31,9 +33,6 @@ const CLICK_EVENT_THRESHOLD = DO_KNOWN_KEYS_THRESHOLD + .10; // 10 percent of th
 
 const KEY_DOWN = 'keydown';
 const KEY_UP = 'keyup';
-
-const MIN_KEY_CODE = 8; // Backspace key
-const MAX_KEY_CODE = 127; // Delete key
 
 /**
  *
@@ -105,21 +104,20 @@ class KeyboardFuzzer {
    * @private
    *
    * @param {HTMLElement} element
-   * @param {number} keyCode
+   * @param {KeyDef} key
    */
-  triggerKeyDownUpEvents( element, keyCode ) {
+  triggerKeyDownUpEvents( element, key ) {
 
-    sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( 'trigger keydown/up: ' + keyCode );
+    sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( 'trigger keydown/up: ' + key );
     sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.push();
 
-
-    // TODO: screen readers normally take our keydown events, but may not here, is the descrpency ok?
-    this.triggerDOMEvent( KEY_DOWN, element, keyCode );
+    // TODO: screen readers normally take our keydown events, but may not here, is the discrepancy ok?
+    this.triggerDOMEvent( KEY_DOWN, element, key );
 
     const randomTimeForKeypress = this.random.nextInt( MAX_MS_KEY_HOLD_DOWN );
 
     const keyupListener = () => {
-      this.triggerDOMEvent( KEY_UP, element, keyCode );
+      this.triggerDOMEvent( KEY_UP, element, key );
       if ( this.keyupListeners.includes( keyupListener ) ) {
         this.keyupListeners.splice( this.keyupListeners.indexOf( keyupListener ), 1 );
       }
@@ -132,24 +130,24 @@ class KeyboardFuzzer {
   }
 
   /**
-   * Trigger a keydown/keyup pair with a random keyCode
+   * Trigger a keydown/keyup pair with a random key
    * @private
    * @param {HTMLElement} element
    */
   triggerRandomKeyDownUpEvents( element ) {
 
-    const randomKeyCode = Math.floor( this.random.nextDouble() * ( MAX_KEY_CODE - MIN_KEY_CODE ) + MIN_KEY_CODE );
+    const randomKey = ALL_KEYS[ Math.floor( this.random.nextDouble() * ( ALL_KEYS.length - 1 ) ) ];
 
-    sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( 'trigger random keydown/up: ' + randomKeyCode );
+    sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( 'trigger random keydown/up: ' + randomKey );
     sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.push();
 
-    this.triggerKeyDownUpEvents( element, randomKeyCode );
+    this.triggerKeyDownUpEvents( element, randomKey );
 
     sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.pop();
   }
 
   /**
-   * A random event creater that sends keyboard events. Based on the idea of fuzzMouse, but to test/spam accessibility
+   * A random event creator that sends keyboard events. Based on the idea of fuzzMouse, but to test/spam accessibility
    * related keyboard navigation and alternate input implementation.
    *
    * @public
@@ -181,9 +179,9 @@ class KeyboardFuzzer {
 
           const randomNumber = this.random.nextDouble();
           if ( randomNumber < DO_KNOWN_KEYS_THRESHOLD ) {
-            const keyCodes = keyboardTestingSchema[ elementWithFocus.tagName ];
-            const keyCode = this.random.sample( keyCodes );
-            this.triggerKeyDownUpEvents( elementWithFocus, keyCode );
+            const keyValues = keyboardTestingSchema[ elementWithFocus.tagName ];
+            const key = this.random.sample( keyValues );
+            this.triggerKeyDownUpEvents( elementWithFocus, key );
           }
           else if ( randomNumber < CLICK_EVENT_THRESHOLD ) {
             this.triggerClickEvent( elementWithFocus );
@@ -207,15 +205,13 @@ class KeyboardFuzzer {
    * Taken from example in http://output.jsbin.com/awenaq/3,
    * @param {string} event
    * @param {HTMLElement} element
-   * @param {number} keyCode
+   * @param {KeyDef} key
    * @private
    */
-  triggerDOMEvent( event, element, keyCode ) {
+  triggerDOMEvent( event, element, key ) {
     const eventObj = new KeyboardEvent( event, {
       bubbles: true,
-      code: keyCode,
-      which: keyCode,
-      keyCode: keyCode,
+      key: key,
       shiftKey: globalKeyStateTracker.shiftKeyDown,
       altKey: globalKeyStateTracker.altKeyDown,
       ctrlKey: globalKeyStateTracker.ctrlKeyDown

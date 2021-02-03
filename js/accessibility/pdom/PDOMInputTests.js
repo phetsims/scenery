@@ -40,14 +40,16 @@ const afterTest = display => {
 };
 
 const dispatchEvent = ( domElement, event ) => {
-  domElement.dispatchEvent( new window.Event( event, {
-    'bubbles': true // that is vital to all that scenery events hold near and dear to their hearts.
+  const Constructor = event.startsWith( 'key' ) ? window.KeyboardEvent : window.Event;
+  domElement.dispatchEvent( new Constructor( event, {
+    bubbles: true, // that is vital to all that scenery events hold near and dear to their hearts.
+    key: KeyboardUtils.KEY_TAB
   } ) );
 };
 
 // create a fake DOM event and delegate to an HTMLElement
-// TODO: Can this replace the dispatchEvent function above?
-const triggerDOMEvent = ( event, element, keyCode, options ) => {
+// TODO: Can this replace the dispatchEvent function above? EXTRA_TODO use KeyboardFuzzer.triggerDOMEvent as a guide to rewrite this.
+const triggerDOMEvent = ( event, element, key, options ) => {
 
   options = merge( {
 
@@ -62,8 +64,7 @@ const triggerDOMEvent = ( event, element, keyCode, options ) => {
     eventObj.initEvent( event, true, true );
   }
 
-  eventObj.keyCode = keyCode;
-  eventObj.which = keyCode;
+  eventObj.key = key;
   eventObj.relatedTarget = options.relatedTarget;
 
   element.dispatchEvent ? element.dispatchEvent( eventObj ) : element.fireEvent( 'on' + event, eventObj );

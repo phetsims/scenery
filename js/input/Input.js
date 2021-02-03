@@ -186,7 +186,7 @@ import Touch from './Touch.js';
 // Object literal makes it easy to check for the existence of an attribute (compared to [].indexOf()>=0)
 const domEventPropertiesToSerialize = {
   type: true,
-  button: true, keyCode: true,
+  button: true, keyCode: true, key: true,
   deltaX: true, deltaY: true, deltaZ: true, deltaMode: true, pointerId: true,
   pointerType: true, charCode: true, which: true, clientX: true, clientY: true, changedTouches: true,
   target: true,
@@ -1886,19 +1886,19 @@ class Input {
    * dispatchEvent.
    * @private
    *
-   * @param {Event} event
+   * @param {Event} domEvent
    */
-  handleDocumentKeydown( event ) {
+  handleDocumentKeydown( domEvent ) {
 
     // If navigating in full screen mode, prevent a bug where focus gets lost if fullscreen mode was initiated
     // from an iframe by keeping focus in the display. getNext/getPreviousFocusable will return active element
     // if there are no more elements in that direction. See https://github.com/phetsims/scenery/issues/883
-    if ( FullScreen.isFullScreen() && event.keyCode === KeyboardUtils.KEY_TAB ) {
+    if ( FullScreen.isFullScreen() && domEvent.key.toLowerCase() === KeyboardUtils.KEY_TAB ) {
       const rootElement = this.display.pdomRootElement;
-      const nextElement = event.shiftKey ? PDOMUtils.getPreviousFocusable( rootElement ) :
+      const nextElement = domEvent.shiftKey ? PDOMUtils.getPreviousFocusable( rootElement ) :
                           PDOMUtils.getNextFocusable( rootElement );
-      if ( nextElement === event.target ) {
-        event.preventDefault();
+      if ( nextElement === domEvent.target ) {
+        domEvent.preventDefault();
       }
     }
   }

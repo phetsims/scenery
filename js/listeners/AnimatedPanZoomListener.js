@@ -318,7 +318,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
       this.handleZoomCommands( domEvent );
 
       // handle translation without worry of the pointer being attached because there is no pointer at this level
-      if ( KeyboardUtils.isArrowKey( domEvent.keyCode ) ) {
+      if ( KeyboardUtils.isArrowKey( domEvent.key.toLowerCase() ) ) {
         const keyPress = new KeyPress( globalKeyStateTracker, this.getCurrentScale(), this._targetScale );
         this.repositionFromKeys( keyPress );
       }
@@ -343,7 +343,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
     this.handleZoomCommands( domEvent );
 
     // handle translation
-    if ( KeyboardUtils.isArrowKey( domEvent.keyCode ) ) {
+    if ( KeyboardUtils.isArrowKey( domEvent.key.toLowerCase() ) ) {
       const keyboardDragIntent = event.pointer.hasIntent( Pointer.Intent.KEYBOARD_DRAG );
 
       if ( !keyboardDragIntent ) {

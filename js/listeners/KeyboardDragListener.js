@@ -96,17 +96,17 @@ class KeyboardDragListener {
     this._moveOnHoldInterval = options.moveOnHoldInterval;
     this._hotkeyHoldInterval = options.hotkeyHoldInterval;
 
-    // @private {Array.<{isDown:boolean, timeDown:number>} - tracks the state of the keyboard. JavaScript doesn't
+    // @private {Array.<{isDown:boolean, timeDown:number, key:{KeyDef}>} - tracks the state of the keyboard. JavaScript doesn't
     // handle multiple key presses, so we track which keys are currently down and update based on state of this
     // collection of objects. "timeDown" is in milliseconds
     // TODO: Consider a global state object for this, see https://github.com/phetsims/scenery/issues/1054
     this.keyState = [];
 
-    // @private {Array.<{keys:<Array.number>, callback:function}>} - A list of hotkeys, each of which haing some
+    // @private {Array.<{keys:<Array.KeyDef>, callback:function}>} - A list of hotkeys, each of which haing some
     // behavior when each individual key of the hotkey is  pressed in order. See this.addHotkey() for more information.
     this.hotkeys = [];
 
-    // @private {{keys: <Array.number>, callback: <Function>}|null} - the hotkey that is currently down
+    // @private {{keys: <Array.KeyDef>, callback: <Function>}|null} - the hotkey that is currently down
     this.currentHotkey = null;
 
     // @private {boolean} - when a hotkey group is pressed down, dragging will be disabled until
@@ -304,6 +304,7 @@ class KeyboardDragListener {
    */
   keydown( event ) {
     const domEvent = event.domEvent;
+    const key = domEvent.key.toLowerCase();
 
     // If the meta key is down (command key/windows key) prevent movement and do not preventDefault.
     // Meta key + arrow key is a command to go back a page, and we need to allow that. But also, macOS
@@ -315,7 +316,7 @@ class KeyboardDragListener {
 
     // required to work with Safari and VoiceOver, otherwise arrow keys will move virtual cursor, see https://github.com/phetsims/balloons-and-static-electricity/issues/205#issuecomment-263428003
     // prevent default for WASD too, see https://github.com/phetsims/friction/issues/167
-    if ( KeyboardUtils.isArrowKey( domEvent.keyCode ) || KeyboardUtils.isWASDKey( domEvent.keyCode ) ) {
+    if ( KeyboardUtils.isArrowKey( key ) || KeyboardUtils.isWASDKey( key ) ) {
       domEvent.preventDefault();
     }
 
@@ -324,14 +325,14 @@ class KeyboardDragListener {
 
     // if the key is already down, don't do anything else (we don't want to create a new keystate object
     // for a key that is already being tracked and down, nor call startDrag every keydown event)
-    if ( this.keyInListDown( [ domEvent.keyCode ] ) ) { return; }
+    if ( this.keyInListDown( [ key ] ) ) { return; }
 
-    // Prevent a VoiceOver bug where pressing multiple arrow keys at once causes the AT to send the wrong keyCodes
+    // Prevent a VoiceOver bug where pressing multiple arrow keys at once causes the AT to send the wrong keys
     // through the keyup event - as a workaround, we only allow one arrow key to be down at a time. If two are pressed
     // down, we immediately clear the keystate and return
     // see https://github.com/phetsims/balloons-and-static-electricity/issues/384
     if ( platform.safari ) {
-      if ( KeyboardUtils.isArrowKey( domEvent.keyCode ) ) {
+      if ( KeyboardUtils.isArrowKey( key ) ) {
         if ( this.keyInListDown( [
           KeyboardUtils.KEY_RIGHT_ARROW, KeyboardUtils.KEY_LEFT_ARROW,
           KeyboardUtils.KEY_UP_ARROW, KeyboardUtils.KEY_DOWN_ARROW ] ) ) {
@@ -344,7 +345,7 @@ class KeyboardDragListener {
     // update the key state
     this.keyState.push( {
       keyDown: true,
-      keyCode: domEvent.keyCode,
+      key: key,
       timeDown: 0 // in ms
     } );
 
@@ -371,25 +372,26 @@ class KeyboardDragListener {
    */
   keyup( event ) {
     const domEvent = event.domEvent;
+    const key = domEvent.key.toLowerCase();
 
     const moveKeysDown = this.movementKeysDown;
 
     // if the shift key is down when we navigate to the object, add it to the keystate because it won't be added until
     // the next keydown event
-    if ( domEvent.keyCode === KeyboardUtils.KEY_TAB ) {
+    if ( key === KeyboardUtils.KEY_TAB ) {
       if ( domEvent.shiftKey ) {
 
         // add 'shift' to the keystate until it is released again
         this.keyState.push( {
           keyDown: true,
-          keyCode: KeyboardUtils.KEY_SHIFT,
+          key: KeyboardUtils.KEY_SHIFT,
           timeDown: 0 // in ms
         } );
       }
     }
 
     for ( let i = 0; i < this.keyState.length; i++ ) {
-      if ( domEvent.keyCode === this.keyState[ i ].keyCode ) {
+      if ( key === this.keyState[ i ].key ) {
         this.keyState.splice( i, 1 );
       }
     }
@@ -470,7 +472,7 @@ class KeyboardDragListener {
 
       for ( let k = 0; k < keys.length; k++ ) {
         for ( let l = 0; l < this.keyState.length; l++ ) {
-          if ( this.keyState[ l ].keyCode === keys[ k ] ) {
+          if ( this.keyState[ l ].key === keys[ k ] ) {
             hotkeysDownList.push( this.keyState[ l ] );
           }
         }
@@ -594,7 +596,7 @@ class KeyboardDragListener {
     for ( let i = 0; i < this.keyState.length; i++ ) {
       if ( this.keyState[ i ].keyDown ) {
         for ( let j = 0; j < keys.length; j++ ) {
-          if ( keys[ j ] === this.keyState[ i ].keyCode ) {
+          if ( keys[ j ] === this.keyState[ i ].key ) {
             keyIsDown = true;
             break;
           }
@@ -726,7 +728,7 @@ class KeyboardDragListener {
    *
    * For the purposes of this class, a "hotkey" is an ordered list of keys.
    *
-   * @param {Array.<{keys: Array.<number>, callback:function}>} hotkeys
+   * @param {Array.<{keys: Array.<KeyDef>, callback:function}>} hotkeys
    * @public
    */
   addHotkeys( hotkeys ) {
@@ -776,43 +778,47 @@ class KeyboardDragListener {
 
 
   /**
-   * Returns true if the keyCode corresponds to a key that should move the object to the left.
+   * Returns true if the key corresponds to a key that should move the object to the left.
    *
    * @private
+   * @param {KeyDef} key
    * @returns {boolean}
    */
-  static isLeftMovementKey( keyCode ) {
-    return keyCode === KeyboardUtils.KEY_A || keyCode === KeyboardUtils.KEY_LEFT_ARROW;
+  static isLeftMovementKey( key ) {
+    return key === KeyboardUtils.KEY_A || key === KeyboardUtils.KEY_LEFT_ARROW;
   }
 
   /**
-   * Returns true if the keyCode corresponds to a key that should move the object to the right.
+   * Returns true if the key corresponds to a key that should move the object to the right.
    *
    * @public
+   * @param {KeyDef} key
    * @returns {boolean}
    */
-  static isRightMovementKey( keyCode ) {
-    return keyCode === KeyboardUtils.KEY_D || keyCode === KeyboardUtils.KEY_RIGHT_ARROW;
+  static isRightMovementKey( key ) {
+    return key === KeyboardUtils.KEY_D || key === KeyboardUtils.KEY_RIGHT_ARROW;
   }
 
   /**
-   * Returns true if the keyCode corresponds to a key that should move the object up.
+   * Returns true if the key corresponds to a key that should move the object up.
    *
    * @public
+   * @param {KeyDef} key
    * @returns {boolean}
    */
-  static isUpMovementKey( keyCode ) {
-    return keyCode === KeyboardUtils.KEY_W || keyCode === KeyboardUtils.KEY_UP_ARROW;
+  static isUpMovementKey( key ) {
+    return key === KeyboardUtils.KEY_W || key === KeyboardUtils.KEY_UP_ARROW;
   }
 
   /**
-   * Returns true if the keyCode corresponds to a key that should move the object down.
+   * Returns true if the key corresponds to a key that should move the object down.
    *
    * @public
+   * @param {KeyDef} key
    * @returns {boolean}
    */
-  static isDownMovementKey( keyCode ) {
-    return keyCode === KeyboardUtils.KEY_S || keyCode === KeyboardUtils.KEY_DOWN_ARROW;
+  static isDownMovementKey( key ) {
+    return key === KeyboardUtils.KEY_S || key === KeyboardUtils.KEY_DOWN_ARROW;
   }
 }
 
