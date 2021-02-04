@@ -18,10 +18,10 @@ import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
 import VoidIO from '../../../tandem/js/types/VoidIO.js';
-import Renderer from '../display/Renderer.js';
 import TextCanvasDrawable from '../display/drawables/TextCanvasDrawable.js';
 import TextDOMDrawable from '../display/drawables/TextDOMDrawable.js';
 import TextSVGDrawable from '../display/drawables/TextSVGDrawable.js';
+import Renderer from '../display/Renderer.js';
 import scenery from '../scenery.js';
 import Font from '../util/Font.js';
 import TextBounds from '../util/TextBounds.js';
@@ -116,6 +116,7 @@ class Text extends Node {
 
     return this;
   }
+
   set text( value ) { this.setText( value ); }
 
   /**
@@ -129,6 +130,7 @@ class Text extends Node {
   getText() {
     return this._textProperty.value;
   }
+
   get text() { return this.getText(); }
 
   /**
@@ -151,6 +153,7 @@ class Text extends Node {
 
     return this._cachedRenderedText;
   }
+
   get renderedText() { return this.getRenderedText(); }
 
   /**
@@ -179,6 +182,7 @@ class Text extends Node {
   setTextProperty( newTarget ) {
     return this._textProperty.setTargetProperty( this, TEXT_PROPERTY_TANDEM_NAME, newTarget );
   }
+
   set textProperty( property ) { this.setTextProperty( property ); }
 
   /**
@@ -191,6 +195,7 @@ class Text extends Node {
   getTextProperty() {
     return this._textProperty;
   }
+
   get textProperty() { return this.getTextProperty(); }
 
   /**
@@ -262,6 +267,7 @@ class Text extends Node {
     }
     return this;
   }
+
   set boundsMethod( value ) { this.setBoundsMethod( value ); }
 
   /**
@@ -273,6 +279,7 @@ class Text extends Node {
   getBoundsMethod() {
     return this._boundsMethod;
   }
+
   get boundsMethod() { return this.getBoundsMethod(); }
 
   /**
@@ -507,6 +514,7 @@ class Text extends Node {
     }
     return this;
   }
+
   set font( value ) { this.setFont( value ); }
 
   /**
@@ -524,6 +532,7 @@ class Text extends Node {
   getFont() {
     return this._font.getFont();
   }
+
   get font() { return this.getFont(); }
 
   /**
@@ -542,6 +551,7 @@ class Text extends Node {
       weight: weight
     } ) );
   }
+
   set fontWeight( value ) { this.setFontWeight( value ); }
 
   /**
@@ -555,6 +565,7 @@ class Text extends Node {
   getFontWeight() {
     return this._font.getWeight();
   }
+
   get fontWeight() { return this.getFontWeight(); }
 
   /**
@@ -572,6 +583,7 @@ class Text extends Node {
       family: family
     } ) );
   }
+
   set fontFamily( value ) { this.setFontFamily( value ); }
 
   /**
@@ -583,6 +595,7 @@ class Text extends Node {
   getFontFamily() {
     return this._font.getFamily();
   }
+
   get fontFamily() { return this.getFontFamily(); }
 
   /**
@@ -601,6 +614,7 @@ class Text extends Node {
       stretch: stretch
     } ) );
   }
+
   set fontStretch( value ) { this.setFontStretch( value ); }
 
   /**
@@ -612,6 +626,7 @@ class Text extends Node {
   getFontStretch() {
     return this._font.getStretch();
   }
+
   get fontStretch() { return this.getFontStretch(); }
 
   /**
@@ -628,6 +643,7 @@ class Text extends Node {
       style: style
     } ) );
   }
+
   set fontStyle( value ) { this.setFontStyle( value ); }
 
   /**
@@ -639,6 +655,7 @@ class Text extends Node {
   getFontStyle() {
     return this._font.getStyle();
   }
+
   get fontStyle() { return this.getFontStyle(); }
 
   /**
@@ -656,6 +673,7 @@ class Text extends Node {
       size: size
     } ) );
   }
+
   set fontSize( value ) { this.setFontSize( value ); }
 
   /**
@@ -670,6 +688,7 @@ class Text extends Node {
   getFontSize() {
     return this._font.getSize();
   }
+
   get fontSize() { return this.getFontSize(); }
 
   /**

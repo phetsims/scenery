@@ -345,6 +345,7 @@ class Sprite {
     this.count = initialCount;
   }
 }
+
 SpriteSheet.Sprite = Sprite;
 
 // @public (read-only) the size of a sprite sheet

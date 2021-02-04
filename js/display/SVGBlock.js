@@ -6,12 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Poolable from '../../../phet-core/js/Poolable.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
+import Poolable from '../../../phet-core/js/Poolable.js';
 import scenery from '../scenery.js';
 import CountMap from '../util/CountMap.js';
-import Utils from '../util/Utils.js';
 import svgns from '../util/svgns.js';
+import Utils from '../util/Utils.js';
 import FittedBlock from './FittedBlock.js';
 import SVGGroup from './SVGGroup.js';
 

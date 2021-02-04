@@ -141,6 +141,7 @@ class Font extends PhetioObject {
   getFont() {
     return this._font;
   }
+
   get font() { return this.getFont(); }
 
   /**
@@ -152,6 +153,7 @@ class Font extends PhetioObject {
   getStyle() {
     return this._style;
   }
+
   get style() { return this.getStyle(); }
 
   /**
@@ -163,6 +165,7 @@ class Font extends PhetioObject {
   getVariant() {
     return this._variant;
   }
+
   get variant() { return this.getVariant(); }
 
   /**
@@ -176,6 +179,7 @@ class Font extends PhetioObject {
   getWeight() {
     return this._weight;
   }
+
   get weight() { return this.getWeight(); }
 
   /**
@@ -187,6 +191,7 @@ class Font extends PhetioObject {
   getStretch() {
     return this._stretch;
   }
+
   get stretch() { return this.getStretch(); }
 
   /**
@@ -200,6 +205,7 @@ class Font extends PhetioObject {
   getSize() {
     return this._size;
   }
+
   get size() { return this.getSize(); }
 
   /**
@@ -226,6 +232,7 @@ class Font extends PhetioObject {
 
     return 12; // a guess?
   }
+
   get numericSize() { return this.getNumericSize(); }
 
   /**
@@ -237,6 +244,7 @@ class Font extends PhetioObject {
   getLineHeight() {
     return this._lineHeight;
   }
+
   get lineHeight() { return this.getLineHeight(); }
 
   /**
@@ -248,6 +256,7 @@ class Font extends PhetioObject {
   getFamily() {
     return this._family;
   }
+
   get family() { return this.getFamily(); }
 
   /**

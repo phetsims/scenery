@@ -10,8 +10,8 @@
 
 import Emitter from '../../../axon/js/Emitter.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import Poolable from '../../../phet-core/js/Poolable.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
+import Poolable from '../../../phet-core/js/Poolable.js';
 import scenery from '../scenery.js';
 import ShaderProgram from '../util/ShaderProgram.js';
 import SpriteSheet from '../util/SpriteSheet.js';

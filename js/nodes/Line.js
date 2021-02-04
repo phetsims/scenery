@@ -8,14 +8,14 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
+import KiteLine from '../../../kite/js/segments/Line.js'; // eslint-disable-line require-statement-match
 import Shape from '../../../kite/js/Shape.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
-import Renderer from '../display/Renderer.js';
 import LineCanvasDrawable from '../display/drawables/LineCanvasDrawable.js';
 import LineSVGDrawable from '../display/drawables/LineSVGDrawable.js';
+import Renderer from '../display/Renderer.js';
 import scenery from '../scenery.js';
 import Path from './Path.js';
-import KiteLine from '../../../kite/js/segments/Line.js'; // eslint-disable-line require-statement-match
 
 const LINE_OPTION_KEYS = [
   'p1', // {Vector2} - Start position
@@ -189,7 +189,9 @@ class Line extends Path {
 
     return this;
   }
+
   set p1( point ) { this.setPoint1( point ); }
+
   get p1() { return new Vector2( this._x1, this._y1 ); }
 
   /**
@@ -231,7 +233,9 @@ class Line extends Path {
 
     return this;
   }
+
   set p2( point ) { this.setPoint2( point ); }
+
   get p2() { return new Vector2( this._x2, this._y2 ); }
 
   /**
@@ -254,6 +258,7 @@ class Line extends Path {
     }
     return this;
   }
+
   set x1( value ) { this.setX1( value ); }
 
   /**
@@ -265,6 +270,7 @@ class Line extends Path {
   getX1() {
     return this._x1;
   }
+
   get x1() { return this.getX1(); }
 
   /**
@@ -287,6 +293,7 @@ class Line extends Path {
     }
     return this;
   }
+
   set y1( value ) { this.setY1( value ); }
 
   /**
@@ -298,6 +305,7 @@ class Line extends Path {
   getY1() {
     return this._y1;
   }
+
   get y1() { return this.getY1(); }
 
   /**
@@ -320,6 +328,7 @@ class Line extends Path {
     }
     return this;
   }
+
   set x2( value ) { this.setX2( value ); }
 
   /**
@@ -331,6 +340,7 @@ class Line extends Path {
   getX2() {
     return this._x2;
   }
+
   get x2() { return this.getX2(); }
 
   /**
@@ -353,6 +363,7 @@ class Line extends Path {
     }
     return this;
   }
+
   set y2( value ) { this.setY2( value ); }
 
   /**
@@ -364,6 +375,7 @@ class Line extends Path {
   getY2() {
     return this._y2;
   }
+
   get y2() { return this.getY2(); }
 
   /**

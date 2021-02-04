@@ -47,8 +47,8 @@ class TransformTracker {
     for ( let j = 1; j < this.trail.length; j++ ) {
       // Wrapping with closure to prevent changes
       const nodeTransformListener = ( index => () => {
-          this.onTransformChange( index );
-        } )( j - 1 );
+        this.onTransformChange( index );
+      } )( j - 1 );
 
       this._nodeTransformListeners.push( nodeTransformListener );
 
@@ -169,6 +169,7 @@ class TransformTracker {
     // Return the last matrix, which contains our composite transformation.
     return this._matrices[ numMatrices - 1 ];
   }
+
   get matrix() { return this.getMatrix(); }
 }
 

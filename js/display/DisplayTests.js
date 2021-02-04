@@ -17,8 +17,6 @@ import Rectangle from '../nodes/Rectangle.js';
 import Text from '../nodes/Text.js';
 import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
 import Display from './Display.js';
-import Instance from './Instance.js';
-import Renderer from './Renderer.js';
 import CircleCanvasDrawable from './drawables/CircleCanvasDrawable.js';
 import CircleDOMDrawable from './drawables/CircleDOMDrawable.js';
 import CircleSVGDrawable from './drawables/CircleSVGDrawable.js';
@@ -36,6 +34,8 @@ import RectangleSVGDrawable from './drawables/RectangleSVGDrawable.js';
 import TextCanvasDrawable from './drawables/TextCanvasDrawable.js';
 import TextDOMDrawable from './drawables/TextDOMDrawable.js';
 import TextSVGDrawable from './drawables/TextSVGDrawable.js';
+import Instance from './Instance.js';
+import Renderer from './Renderer.js';
 
 QUnit.module( 'Display' );
 

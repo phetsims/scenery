@@ -9,10 +9,10 @@
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Shape from '../../../kite/js/Shape.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
-import Renderer from '../display/Renderer.js';
 import CircleCanvasDrawable from '../display/drawables/CircleCanvasDrawable.js';
 import CircleDOMDrawable from '../display/drawables/CircleDOMDrawable.js';
 import CircleSVGDrawable from '../display/drawables/CircleSVGDrawable.js';
+import Renderer from '../display/Renderer.js';
 import scenery from '../scenery.js';
 import Features from '../util/Features.js';
 import Path from './Path.js';
@@ -223,6 +223,7 @@ class Circle extends Path {
     }
     return this;
   }
+
   set radius( value ) { this.setRadius( value ); }
 
   /**
@@ -234,6 +235,7 @@ class Circle extends Path {
   getRadius() {
     return this._radius;
   }
+
   get radius() { return this.getRadius(); }
 
   /**

@@ -68,6 +68,7 @@ class Sprites extends Node {
   setCanvasBounds( selfBounds ) {
     this.invalidateSelf( selfBounds );
   }
+
   set canvasBounds( value ) { this.setCanvasBounds( value ); }
 
   /**
@@ -79,6 +80,7 @@ class Sprites extends Node {
   getCanvasBounds() {
     return this.getSelfBounds();
   }
+
   get canvasBounds() { return this.getCanvasBounds(); }
 
   /**

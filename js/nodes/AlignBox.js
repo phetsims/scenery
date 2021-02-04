@@ -137,6 +137,7 @@ class AlignBox extends Node {
     }
     return this;
   }
+
   set alignBounds( value ) { this.setAlignBounds( value ); }
 
   /**
@@ -148,6 +149,7 @@ class AlignBox extends Node {
   getAlignBounds() {
     return this._alignBounds;
   }
+
   get alignBounds() { return this.getAlignBounds(); }
 
   /**
@@ -176,6 +178,7 @@ class AlignBox extends Node {
 
     return this;
   }
+
   set group( value ) { this.setGroup( value ); }
 
   /**
@@ -187,6 +190,7 @@ class AlignBox extends Node {
   getGroup() {
     return this._group;
   }
+
   get group() { return this.getGroup(); }
 
   /**
@@ -211,6 +215,7 @@ class AlignBox extends Node {
 
     return this;
   }
+
   set xAlign( value ) { this.setXAlign( value ); }
 
   /**
@@ -222,6 +227,7 @@ class AlignBox extends Node {
   getXAlign() {
     return this._xAlign;
   }
+
   get xAlign() { return this.getXAlign(); }
 
   /**
@@ -246,6 +252,7 @@ class AlignBox extends Node {
 
     return this;
   }
+
   set yAlign( value ) { this.setYAlign( value ); }
 
   /**
@@ -257,6 +264,7 @@ class AlignBox extends Node {
   getYAlign() {
     return this._yAlign;
   }
+
   get yAlign() { return this.getYAlign(); }
 
   /**
@@ -285,6 +293,7 @@ class AlignBox extends Node {
 
     return this;
   }
+
   set margin( value ) { this.setMargin( value ); }
 
   /**
@@ -300,6 +309,7 @@ class AlignBox extends Node {
       'Getting margin does not have a unique result if the left and right margins are different' );
     return this._leftMargin;
   }
+
   get margin() { return this.getMargin(); }
 
   /**
@@ -325,6 +335,7 @@ class AlignBox extends Node {
 
     return this;
   }
+
   set xMargin( value ) { this.setXMargin( value ); }
 
   /**
@@ -338,6 +349,7 @@ class AlignBox extends Node {
       'Getting xMargin does not have a unique result if the left and right margins are different' );
     return this._leftMargin;
   }
+
   get xMargin() { return this.getXMargin(); }
 
   /**
@@ -363,6 +375,7 @@ class AlignBox extends Node {
 
     return this;
   }
+
   set yMargin( value ) { this.setYMargin( value ); }
 
   /**
@@ -376,6 +389,7 @@ class AlignBox extends Node {
       'Getting yMargin does not have a unique result if the top and bottom margins are different' );
     return this._topMargin;
   }
+
   get yMargin() { return this.getYMargin(); }
 
   /**
@@ -401,6 +415,7 @@ class AlignBox extends Node {
 
     return this;
   }
+
   set leftMargin( value ) { this.setLeftMargin( value ); }
 
   /**
@@ -412,6 +427,7 @@ class AlignBox extends Node {
   getLeftMargin() {
     return this._leftMargin;
   }
+
   get leftMargin() { return this.getLeftMargin(); }
 
   /**
@@ -437,6 +453,7 @@ class AlignBox extends Node {
 
     return this;
   }
+
   set rightMargin( value ) { this.setRightMargin( value ); }
 
   /**
@@ -448,6 +465,7 @@ class AlignBox extends Node {
   getRightMargin() {
     return this._rightMargin;
   }
+
   get rightMargin() { return this.getRightMargin(); }
 
   /**
@@ -473,6 +491,7 @@ class AlignBox extends Node {
 
     return this;
   }
+
   set topMargin( value ) { this.setTopMargin( value ); }
 
   /**
@@ -484,6 +503,7 @@ class AlignBox extends Node {
   getTopMargin() {
     return this._topMargin;
   }
+
   get topMargin() { return this.getTopMargin(); }
 
   /**
@@ -509,6 +529,7 @@ class AlignBox extends Node {
 
     return this;
   }
+
   set bottomMargin( value ) { this.setBottomMargin( value ); }
 
   /**
@@ -520,6 +541,7 @@ class AlignBox extends Node {
   getBottomMargin() {
     return this._bottomMargin;
   }
+
   get bottomMargin() { return this.getBottomMargin(); }
 
   /**

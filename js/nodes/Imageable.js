@@ -233,6 +233,7 @@ const Imageable = type => {
       }
       return this;
     }
+
     set image( value ) { this.setImage( value ); }
 
     /**
@@ -248,6 +249,7 @@ const Imageable = type => {
     getImage() {
       return this._image;
     }
+
     get image() { return this.getImage(); }
 
     /**
@@ -311,6 +313,7 @@ const Imageable = type => {
         this._imageOpacity = imageOpacity;
       }
     }
+
     set imageOpacity( value ) { this.setImageOpacity( value ); }
 
     /**
@@ -324,6 +327,7 @@ const Imageable = type => {
     getImageOpacity() {
       return this._imageOpacity;
     }
+
     get imageOpacity() { return this.getImageOpacity(); }
 
     /**
@@ -357,6 +361,7 @@ const Imageable = type => {
 
       return this;
     }
+
     set initialWidth( value ) { this.setInitialWidth( value ); }
 
     /**
@@ -370,6 +375,7 @@ const Imageable = type => {
     getInitialWidth() {
       return this._initialWidth;
     }
+
     get initialWidth() { return this.getInitialWidth(); }
 
     /**
@@ -403,6 +409,7 @@ const Imageable = type => {
 
       return this;
     }
+
     set initialHeight( value ) { this.setInitialHeight( value ); }
 
     /**
@@ -416,6 +423,7 @@ const Imageable = type => {
     getInitialHeight() {
       return this._initialHeight;
     }
+
     get initialHeight() { return this.getInitialHeight(); }
 
     /**
@@ -442,6 +450,7 @@ const Imageable = type => {
 
       return this;
     }
+
     set mipmap( value ) { this.setMipmap( value ); }
 
     /**
@@ -455,6 +464,7 @@ const Imageable = type => {
     isMipmap() {
       return this._mipmap;
     }
+
     get mipmap() { return this.isMipmap(); }
 
     /**
@@ -486,6 +496,7 @@ const Imageable = type => {
 
       return this;
     }
+
     set mipmapBias( value ) { this.setMipmapBias( value ); }
 
     /**
@@ -499,6 +510,7 @@ const Imageable = type => {
     getMipmapBias() {
       return this._mipmapBias;
     }
+
     get mipmapBias() { return this.getMipmapBias(); }
 
     /**
@@ -521,6 +533,7 @@ const Imageable = type => {
 
       return this;
     }
+
     set mipmapInitialLevel( value ) { this.setMipmapInitialLevel( value ); }
 
     /**
@@ -534,6 +547,7 @@ const Imageable = type => {
     getMipmapInitialLevel() {
       return this._mipmapInitialLevel;
     }
+
     get mipmapInitialLevel() { return this.getMipmapInitialLevel(); }
 
     /**
@@ -559,6 +573,7 @@ const Imageable = type => {
 
       return this;
     }
+
     set mipmapMaxLevel( value ) { this.setMipmapMaxLevel( value ); }
 
     /**
@@ -572,6 +587,7 @@ const Imageable = type => {
     getMipmapMaxLevel() {
       return this._mipmapMaxLevel;
     }
+
     get mipmapMaxLevel() { return this.getMipmapMaxLevel(); }
 
     /**
@@ -595,6 +611,7 @@ const Imageable = type => {
 
       return this;
     }
+
     set hitTestPixels( value ) { this.setHitTestPixels( value ); }
 
     /**
@@ -608,6 +625,7 @@ const Imageable = type => {
     getHitTestPixels() {
       return this._hitTestPixels;
     }
+
     get hitTestPixels() { return this.getHitTestPixels(); }
 
     /**
@@ -820,6 +838,7 @@ const Imageable = type => {
         return detectedWidth;
       }
     }
+
     get imageWidth() { return this.getImageWidth(); }
 
     /**
@@ -841,6 +860,7 @@ const Imageable = type => {
         return detectedHeight;
       }
     }
+
     get imageHeight() { return this.getImageHeight(); }
 
     /**

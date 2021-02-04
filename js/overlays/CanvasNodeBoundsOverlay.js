@@ -9,7 +9,7 @@
 import Shape from '../../../kite/js/Shape.js';
 import CanvasNode from '../nodes/CanvasNode.js';
 import scenery from '../scenery.js';
-import Trail from'../util/Trail.js';
+import Trail from '../util/Trail.js';
 import ShapeBasedOverlay from './ShapeBasedOverlay.js';
 
 class CanvasNodeBoundsOverlay extends ShapeBasedOverlay {

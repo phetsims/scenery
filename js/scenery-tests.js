@@ -6,6 +6,7 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
+import qunitStart from '../../chipper/js/sim-tests/qunitStart.js';
 import './accessibility/FocusTests.js';
 import './accessibility/KeyStateTrackerTests.js';
 import './accessibility/pdom/ParallelDOMTests.js';
@@ -20,7 +21,6 @@ import './listeners/PressListenerTests.js';
 import './nodes/AlignBoxTests.js';
 import './nodes/NodeTests.js';
 import './nodes/ShapeTests.js';
-import qunitStart from '../../chipper/js/sim-tests/qunitStart.js';
 import scenery from './scenery.js';
 import './tests/MiscellaneousTests.js';
 import './tests/PixelComparisonTests.js';

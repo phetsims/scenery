@@ -10,8 +10,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Vector2 from '../../../dot/js/Vector2.js';
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
+import Vector2 from '../../../dot/js/Vector2.js';
 import scenery from '../scenery.js';
 import ColorDef from './ColorDef.js';
 import Filter from './Filter.js';

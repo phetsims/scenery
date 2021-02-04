@@ -21,9 +21,9 @@
  */
 
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
-import Poolable from '../../../phet-core/js/Poolable.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
+import Poolable from '../../../phet-core/js/Poolable.js';
 import scenery from '../scenery.js';
 import Trail from '../util/Trail.js';
 import Utils from '../util/Utils.js';

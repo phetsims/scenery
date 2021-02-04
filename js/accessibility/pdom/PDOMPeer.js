@@ -10,9 +10,9 @@
 
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../../dot/js/Matrix3.js';
-import Poolable from '../../../../phet-core/js/Poolable.js';
 import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
 import merge from '../../../../phet-core/js/merge.js';
+import Poolable from '../../../../phet-core/js/Poolable.js';
 import scenery from '../../scenery.js';
 import PDOMSiblingStyle from './PDOMSiblingStyle.js';
 import PDOMUtils from './PDOMUtils.js';
@@ -299,6 +299,7 @@ class PDOMPeer {
   getPrimarySibling() {
     return this._primarySibling;
   }
+
   get primarySibling() { return this.getPrimarySibling(); }
 
   /**
@@ -309,6 +310,7 @@ class PDOMPeer {
   getLabelSibling() {
     return this._labelSibling;
   }
+
   get labelSibling() { return this.getLabelSibling(); }
 
   /**
@@ -319,6 +321,7 @@ class PDOMPeer {
   getDescriptionSibling() {
     return this._descriptionSibling;
   }
+
   get descriptionSibling() { return this.getDescriptionSibling(); }
 
   /**
@@ -329,6 +332,7 @@ class PDOMPeer {
   getContainerParent() {
     return this._containerParent;
   }
+
   get containerParent() { return this.getContainerParent(); }
 
   /**

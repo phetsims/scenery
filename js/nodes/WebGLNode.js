@@ -13,8 +13,8 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Shape from '../../../kite/js/Shape.js';
-import Renderer from '../display/Renderer.js';
 import WebGLNodeDrawable from '../display/drawables/WebGLNodeDrawable.js';
+import Renderer from '../display/Renderer.js';
 import scenery from '../scenery.js';
 import Utils from '../util/Utils.js';
 import Node from './Node.js';
@@ -78,6 +78,7 @@ class WebGLNode extends Node {
 
     return this;
   }
+
   set canvasBounds( value ) { this.setCanvasBounds( value ); }
 
   /**
@@ -89,6 +90,7 @@ class WebGLNode extends Node {
   getCanvasBounds() {
     return this.getSelfBounds();
   }
+
   get canvasBounds() { return this.getCanvasBounds(); }
 
 

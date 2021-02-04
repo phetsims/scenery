@@ -27,9 +27,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Poolable from '../../../../phet-core/js/Poolable.js';
 import cleanArray from '../../../../phet-core/js/cleanArray.js';
 import platform from '../../../../phet-core/js/platform.js';
+import Poolable from '../../../../phet-core/js/Poolable.js';
 import scenery from '../../scenery.js';
 import TransformTracker from '../../util/TransformTracker.js';
 import PDOMPeer from './PDOMPeer.js';

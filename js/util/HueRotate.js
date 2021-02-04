@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Utils from '../../../dot/js/Utils.js';
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
+import Utils from '../../../dot/js/Utils.js';
 import scenery from '../scenery.js';
 import ColorMatrixFilter from './ColorMatrixFilter.js';
 

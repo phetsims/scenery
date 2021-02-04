@@ -2,8 +2,8 @@
 
 import Property from '../../../axon/js/Property.js';
 import merge from '../../../phet-core/js/merge.js';
-import Color from './Color.js';
 import scenery from '../scenery.js';
+import Color from './Color.js';
 
 /**
  * Convenience type for creating Property.<Color>

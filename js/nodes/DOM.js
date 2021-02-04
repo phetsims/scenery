@@ -8,8 +8,8 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
-import Renderer from '../display/Renderer.js';
 import DOMDrawable from '../display/drawables/DOMDrawable.js';
+import Renderer from '../display/Renderer.js';
 import scenery from '../scenery.js';
 import Node from './Node.js';
 
@@ -182,6 +182,7 @@ class DOM extends Node {
 
     return this; // allow chaining
   }
+
   set element( value ) { this.setElement( value ); }
 
   /**
@@ -193,6 +194,7 @@ class DOM extends Node {
   getElement() {
     return this._element;
   }
+
   get element() { return this.getElement(); }
 
   /**
@@ -212,6 +214,7 @@ class DOM extends Node {
       this._preventTransform = preventTransform;
     }
   }
+
   set preventTransform( value ) { this.setPreventTransform( value ); }
 
   /**
@@ -225,6 +228,7 @@ class DOM extends Node {
   isTransformPrevented() {
     return this._preventTransform;
   }
+
   get preventTransform() { return this.isTransformPrevented(); }
 }
 

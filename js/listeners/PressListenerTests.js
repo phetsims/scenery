@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Tandem from '../../../tandem/js/Tandem.js';
 import phetioAPITest from '../../../tandem/js/phetioAPITest.js';
+import Tandem from '../../../tandem/js/Tandem.js';
 import ListenerTestUtils from './ListenerTestUtils.js';
 import PressListener from './PressListener.js';
 import PressListenerAPI from './PressListenerAPI.js';
@@ -97,7 +97,7 @@ QUnit.test( 'Interruption', assert => {
   ListenerTestUtils.simpleRectangleTest( ( display, rect, node ) => {
     const listener = new PressListener( {
       tandem: Tandem.GENERAL.createTandem( 'myListener' )
-    });
+    } );
     rect.addInputListener( listener );
 
     ListenerTestUtils.mouseDown( display, 10, 10 );

@@ -295,6 +295,7 @@ class LayoutBox extends Node {
 
     return this;
   }
+
   set orientation( value ) { this.setOrientation( value ); }
 
   /**
@@ -308,6 +309,7 @@ class LayoutBox extends Node {
   getOrientation() {
     return this._orientation;
   }
+
   get orientation() { return this.getOrientation(); }
 
   /**
@@ -329,6 +331,7 @@ class LayoutBox extends Node {
 
     return this;
   }
+
   set spacing( value ) { this.setSpacing( value ); }
 
   /**
@@ -342,6 +345,7 @@ class LayoutBox extends Node {
   getSpacing() {
     return this._spacing;
   }
+
   get spacing() { return this.getSpacing(); }
 
   /**
@@ -385,6 +389,7 @@ class LayoutBox extends Node {
 
     return this;
   }
+
   set align( value ) { this.setAlign( value ); }
 
   /**
@@ -398,6 +403,7 @@ class LayoutBox extends Node {
   getAlign() {
     return this._align;
   }
+
   get align() { return this.getAlign(); }
 
   /**
@@ -437,6 +443,7 @@ class LayoutBox extends Node {
 
     return this;
   }
+
   set resize( value ) { this.setResize( value ); }
 
   /**
@@ -450,6 +457,7 @@ class LayoutBox extends Node {
   isResize() {
     return this._resize;
   }
+
   get resize() { return this.isResize(); }
 }
 

@@ -873,6 +873,7 @@ class Node extends PhetioObject {
     // allow chaining
     return this;
   }
+
   set children( value ) { this.setChildren( value ); }
 
   /**
@@ -888,6 +889,7 @@ class Node extends PhetioObject {
     // TODO: ensure we are not triggering this in Scenery code when not necessary!
     return this._children.slice( 0 ); // create a defensive copy
   }
+
   get children() { return this.getChildren(); }
 
   /**
@@ -912,6 +914,7 @@ class Node extends PhetioObject {
   getParents() {
     return this._parents.slice( 0 ); // create a defensive copy
   }
+
   get parents() { return this.getParents(); }
 
   /**
@@ -924,6 +927,7 @@ class Node extends PhetioObject {
     assert && assert( this._parents.length <= 1, 'Cannot call getParent on a node with multiple parents' );
     return this._parents.length ? this._parents[ 0 ] : null;
   }
+
   get parent() { return this.getParent(); }
 
   /**
@@ -1548,6 +1552,7 @@ class Node extends PhetioObject {
   getSelfBounds() {
     return this.selfBoundsProperty.value;
   }
+
   get selfBounds() { return this.getSelfBounds(); }
 
   /**
@@ -1562,6 +1567,7 @@ class Node extends PhetioObject {
   getSafeSelfBounds() {
     return this.selfBoundsProperty.value;
   }
+
   get safeSelfBounds() { return this.getSafeSelfBounds(); }
 
   /**
@@ -1576,6 +1582,7 @@ class Node extends PhetioObject {
   getChildBounds() {
     return this.childBoundsProperty.value;
   }
+
   get childBounds() { return this.getChildBounds(); }
 
   /**
@@ -1590,6 +1597,7 @@ class Node extends PhetioObject {
   getLocalBounds() {
     return this.localBoundsProperty.value;
   }
+
   get localBounds() { return this.getLocalBounds(); }
 
   /**
@@ -1637,6 +1645,7 @@ class Node extends PhetioObject {
 
     return this; // allow chaining
   }
+
   set localBounds( value ) { this.setLocalBounds( value ); }
 
   /**
@@ -1699,6 +1708,7 @@ class Node extends PhetioObject {
 
     return bounds;
   }
+
   get safeTransformedVisibleBounds() { return this.getSafeTransformedVisibleBounds(); }
 
   /**
@@ -1726,6 +1736,7 @@ class Node extends PhetioObject {
 
     return this; // allow chaining
   }
+
   set transformBounds( value ) { this.setTransformBounds( value ); }
 
   /**
@@ -1737,6 +1748,7 @@ class Node extends PhetioObject {
   getTransformBounds() {
     return this._transformBounds;
   }
+
   get transformBounds() { return this.getTransformBounds(); }
 
   /**
@@ -1751,6 +1763,7 @@ class Node extends PhetioObject {
   getBounds() {
     return this.boundsProperty.value;
   }
+
   get bounds() { return this.getBounds(); }
 
   /**
@@ -1774,6 +1787,7 @@ class Node extends PhetioObject {
     assert && assert( bounds.isFinite() || bounds.isEmpty(), 'Visible bounds should not be infinite' );
     return bounds;
   }
+
   get visibleLocalBounds() { return this.getVisibleLocalBounds(); }
 
   /**
@@ -1785,6 +1799,7 @@ class Node extends PhetioObject {
   getVisibleBounds() {
     return this.getVisibleLocalBounds().transform( this.getMatrix() );
   }
+
   get visibleBounds() { return this.getVisibleBounds(); }
 
   /**
@@ -2201,6 +2216,7 @@ class Node extends PhetioObject {
     this.translate( x - this.getX(), 0, true );
     return this;
   }
+
   set x( value ) { this.setX( value ); }
 
   /**
@@ -2212,6 +2228,7 @@ class Node extends PhetioObject {
   getX() {
     return this._transform.getMatrix().m02();
   }
+
   get x() { return this.getX(); }
 
   /**
@@ -2227,6 +2244,7 @@ class Node extends PhetioObject {
     this.translate( 0, y - this.getY(), true );
     return this;
   }
+
   set y( value ) { this.setY( value ); }
 
   /**
@@ -2238,6 +2256,7 @@ class Node extends PhetioObject {
   getY() {
     return this._transform.getMatrix().m12();
   }
+
   get y() { return this.getY(); }
 
   /**
@@ -2309,6 +2328,7 @@ class Node extends PhetioObject {
     this.appendMatrix( scratchMatrix3.setToRotationZ( rotation - this.getRotation() ) );
     return this;
   }
+
   set rotation( value ) { this.setRotation( value ); }
 
   /**
@@ -2321,6 +2341,7 @@ class Node extends PhetioObject {
   getRotation() {
     return this._transform.getMatrix().getRotation();
   }
+
   get rotation() { return this.getRotation(); }
 
   /**
@@ -2361,6 +2382,7 @@ class Node extends PhetioObject {
 
     return this;
   }
+
   set translation( value ) { this.setTranslation( value ); }
 
   /**
@@ -2373,6 +2395,7 @@ class Node extends PhetioObject {
     const matrix = this._transform.getMatrix();
     return new Vector2( matrix.m02(), matrix.m12() );
   }
+
   get translation() { return this.getTranslation(); }
 
   /**
@@ -2430,6 +2453,7 @@ class Node extends PhetioObject {
 
     this._transform.setMatrix( matrix );
   }
+
   set matrix( value ) { this.setMatrix( value ); }
 
   /**
@@ -2443,6 +2467,7 @@ class Node extends PhetioObject {
   getMatrix() {
     return this._transform.getMatrix();
   }
+
   get matrix() { return this.getMatrix(); }
 
   /**
@@ -2455,6 +2480,7 @@ class Node extends PhetioObject {
     // for now, return an actual copy. we can consider listening to changes in the future
     return this._transform;
   }
+
   get transform() { return this.getTransform(); }
 
   /**
@@ -2563,6 +2589,7 @@ class Node extends PhetioObject {
       this.updateMaxDimension( this.localBoundsProperty.value );
     }
   }
+
   set maxWidth( value ) { this.setMaxWidth( value ); }
 
   /**
@@ -2574,6 +2601,7 @@ class Node extends PhetioObject {
   getMaxWidth() {
     return this._maxWidth;
   }
+
   get maxWidth() { return this.getMaxWidth(); }
 
   /**
@@ -2595,6 +2623,7 @@ class Node extends PhetioObject {
       this.updateMaxDimension( this.localBoundsProperty.value );
     }
   }
+
   set maxHeight( value ) { this.setMaxHeight( value ); }
 
   /**
@@ -2606,6 +2635,7 @@ class Node extends PhetioObject {
   getMaxHeight() {
     return this._maxHeight;
   }
+
   get maxHeight() { return this.getMaxHeight(); }
 
   /**
@@ -2628,6 +2658,7 @@ class Node extends PhetioObject {
 
     return this; // allow chaining
   }
+
   set left( value ) { this.setLeft( value ); }
 
   /**
@@ -2641,6 +2672,7 @@ class Node extends PhetioObject {
   getLeft() {
     return this.getBounds().minX;
   }
+
   get left() { return this.getLeft(); }
 
   /**
@@ -2662,6 +2694,7 @@ class Node extends PhetioObject {
     }
     return this; // allow chaining
   }
+
   set right( value ) { this.setRight( value ); }
 
   /**
@@ -2675,6 +2708,7 @@ class Node extends PhetioObject {
   getRight() {
     return this.getBounds().maxX;
   }
+
   get right() { return this.getRight(); }
 
   /**
@@ -2697,6 +2731,7 @@ class Node extends PhetioObject {
 
     return this; // allow chaining
   }
+
   set centerX( value ) { this.setCenterX( value ); }
 
   /**
@@ -2710,6 +2745,7 @@ class Node extends PhetioObject {
   getCenterX() {
     return this.getBounds().getCenterX();
   }
+
   get centerX() { return this.getCenterX(); }
 
   /**
@@ -2732,6 +2768,7 @@ class Node extends PhetioObject {
 
     return this; // allow chaining
   }
+
   set centerY( value ) { this.setCenterY( value ); }
 
   /**
@@ -2745,6 +2782,7 @@ class Node extends PhetioObject {
   getCenterY() {
     return this.getBounds().getCenterY();
   }
+
   get centerY() { return this.getCenterY(); }
 
   /**
@@ -2767,6 +2805,7 @@ class Node extends PhetioObject {
 
     return this; // allow chaining
   }
+
   set top( value ) { this.setTop( value ); }
 
   /**
@@ -2780,6 +2819,7 @@ class Node extends PhetioObject {
   getTop() {
     return this.getBounds().minY;
   }
+
   get top() { return this.getTop(); }
 
   /**
@@ -2802,6 +2842,7 @@ class Node extends PhetioObject {
 
     return this; // allow chaining
   }
+
   set bottom( value ) { this.setBottom( value ); }
 
   /**
@@ -2815,6 +2856,7 @@ class Node extends PhetioObject {
   getBottom() {
     return this.getBounds().maxY;
   }
+
   get bottom() { return this.getBottom(); }
 
   /*
@@ -2848,6 +2890,7 @@ class Node extends PhetioObject {
 
     return this;
   }
+
   set leftTop( value ) { this.setLeftTop( value ); }
 
   /**
@@ -2859,6 +2902,7 @@ class Node extends PhetioObject {
   getLeftTop() {
     return this.getBounds().getLeftTop();
   }
+
   get leftTop() { return this.getLeftTop(); }
 
   /**
@@ -2878,6 +2922,7 @@ class Node extends PhetioObject {
 
     return this;
   }
+
   set centerTop( value ) { this.setCenterTop( value ); }
 
   /**
@@ -2889,6 +2934,7 @@ class Node extends PhetioObject {
   getCenterTop() {
     return this.getBounds().getCenterTop();
   }
+
   get centerTop() { return this.getCenterTop(); }
 
   /**
@@ -2908,6 +2954,7 @@ class Node extends PhetioObject {
 
     return this;
   }
+
   set rightTop( value ) { this.setRightTop( value ); }
 
   /**
@@ -2919,6 +2966,7 @@ class Node extends PhetioObject {
   getRightTop() {
     return this.getBounds().getRightTop();
   }
+
   get rightTop() { return this.getRightTop(); }
 
   /**
@@ -2938,6 +2986,7 @@ class Node extends PhetioObject {
 
     return this;
   }
+
   set leftCenter( value ) { this.setLeftCenter( value ); }
 
   /**
@@ -2949,6 +2998,7 @@ class Node extends PhetioObject {
   getLeftCenter() {
     return this.getBounds().getLeftCenter();
   }
+
   get leftCenter() { return this.getLeftCenter(); }
 
   /**
@@ -2968,6 +3018,7 @@ class Node extends PhetioObject {
 
     return this;
   }
+
   set center( value ) { this.setCenter( value ); }
 
   /**
@@ -2979,6 +3030,7 @@ class Node extends PhetioObject {
   getCenter() {
     return this.getBounds().getCenter();
   }
+
   get center() { return this.getCenter(); }
 
   /**
@@ -2998,6 +3050,7 @@ class Node extends PhetioObject {
 
     return this;
   }
+
   set rightCenter( value ) { this.setRightCenter( value ); }
 
   /**
@@ -3009,6 +3062,7 @@ class Node extends PhetioObject {
   getRightCenter() {
     return this.getBounds().getRightCenter();
   }
+
   get rightCenter() { return this.getRightCenter(); }
 
   /**
@@ -3028,6 +3082,7 @@ class Node extends PhetioObject {
 
     return this;
   }
+
   set leftBottom( value ) { this.setLeftBottom( value ); }
 
   /**
@@ -3039,6 +3094,7 @@ class Node extends PhetioObject {
   getLeftBottom() {
     return this.getBounds().getLeftBottom();
   }
+
   get leftBottom() { return this.getLeftBottom(); }
 
   /**
@@ -3058,6 +3114,7 @@ class Node extends PhetioObject {
 
     return this;
   }
+
   set centerBottom( value ) { this.setCenterBottom( value ); }
 
   /**
@@ -3069,6 +3126,7 @@ class Node extends PhetioObject {
   getCenterBottom() {
     return this.getBounds().getCenterBottom();
   }
+
   get centerBottom() { return this.getCenterBottom(); }
 
   /**
@@ -3088,6 +3146,7 @@ class Node extends PhetioObject {
 
     return this;
   }
+
   set rightBottom( value ) { this.setRightBottom( value ); }
 
   /**
@@ -3099,6 +3158,7 @@ class Node extends PhetioObject {
   getRightBottom() {
     return this.getBounds().getRightBottom();
   }
+
   get rightBottom() { return this.getRightBottom(); }
 
   /**
@@ -3112,6 +3172,7 @@ class Node extends PhetioObject {
   getWidth() {
     return this.getBounds().getWidth();
   }
+
   get width() { return this.getWidth(); }
 
   /**
@@ -3125,6 +3186,7 @@ class Node extends PhetioObject {
   getHeight() {
     return this.getBounds().getHeight();
   }
+
   get height() { return this.getHeight(); }
 
   /**
@@ -3136,6 +3198,7 @@ class Node extends PhetioObject {
   getId() {
     return this._id;
   }
+
   get id() { return this.getId(); }
 
   /**
@@ -3177,6 +3240,7 @@ class Node extends PhetioObject {
   setVisibleProperty( newTarget ) {
     return this._visibleProperty.setTargetProperty( this, VISIBLE_PROPERTY_TANDEM_NAME, newTarget );
   }
+
   set visibleProperty( property ) { this.setVisibleProperty( property ); }
 
   /**
@@ -3196,6 +3260,7 @@ class Node extends PhetioObject {
   getVisibleProperty() {
     return this._visibleProperty;
   }
+
   get visibleProperty() { return this.getVisibleProperty(); }
 
   /**
@@ -3212,6 +3277,7 @@ class Node extends PhetioObject {
 
     return this;
   }
+
   set visible( value ) { this.setVisible( value ); }
 
   /**
@@ -3223,6 +3289,7 @@ class Node extends PhetioObject {
   isVisible() {
     return this.visibleProperty.value;
   }
+
   get visible() { return this.isVisible(); }
 
   /**
@@ -3269,6 +3336,7 @@ class Node extends PhetioObject {
 
     this.opacityProperty.value = opacity;
   }
+
   set opacity( value ) { this.setOpacity( value ); }
 
   /**
@@ -3280,6 +3348,7 @@ class Node extends PhetioObject {
   getOpacity() {
     return this.opacityProperty.value;
   }
+
   get opacity() { return this.getOpacity(); }
 
   /**
@@ -3329,6 +3398,7 @@ class Node extends PhetioObject {
     this.invalidateHint();
     this.filterChangeEmitter.emit();
   }
+
   set filters( value ) { this.setFilters( value ); }
 
   /**
@@ -3340,6 +3410,7 @@ class Node extends PhetioObject {
   getFilters() {
     return this._filters.slice();
   }
+
   get filters() { return this.getFilters(); }
 
   /**
@@ -3358,6 +3429,7 @@ class Node extends PhetioObject {
 
     return this._pickableProperty.setTargetProperty( this, PICKABLE_PROPERTY_TANDEM_NAME, newTarget );
   }
+
   set pickableProperty( property ) { this.setPickableProperty( property ); }
 
   /**
@@ -3400,6 +3472,7 @@ class Node extends PhetioObject {
   getPickableProperty() {
     return this._pickableProperty;
   }
+
   get pickableProperty() { return this.getPickableProperty(); }
 
   /**
@@ -3412,6 +3485,7 @@ class Node extends PhetioObject {
   setPickablePropertyPhetioInstrumented( pickablePropertyPhetioInstrumented ) {
     return this._pickableProperty.setTargetPropertyInstrumented( pickablePropertyPhetioInstrumented, this );
   }
+
   set pickablePropertyPhetioInstrumented( pickablePropertyPhetioInstrumented ) { this.setPickablePropertyPhetioInstrumented( pickablePropertyPhetioInstrumented );}
 
   /**
@@ -3454,6 +3528,7 @@ class Node extends PhetioObject {
 
     return this;
   }
+
   set pickable( value ) { this.setPickable( value ); }
 
   /**
@@ -3465,6 +3540,7 @@ class Node extends PhetioObject {
   isPickable() {
     return this._pickableProperty.value;
   }
+
   get pickable() { return this.isPickable(); }
 
   /**
@@ -3497,6 +3573,7 @@ class Node extends PhetioObject {
 
     return this._enabledProperty.setTargetProperty( this, ENABLED_PROPERTY_TANDEM_NAME, newTarget );
   }
+
   set enabledProperty( property ) { this.setEnabledProperty( property ); }
 
   /**
@@ -3516,6 +3593,7 @@ class Node extends PhetioObject {
   getEnabledProperty() {
     return this._enabledProperty;
   }
+
   get enabledProperty() { return this.getEnabledProperty(); }
 
   /**
@@ -3528,6 +3606,7 @@ class Node extends PhetioObject {
   setEnabledPropertyPhetioInstrumented( enabledPropertyPhetioInstrumented ) {
     return this._enabledProperty.setTargetPropertyInstrumented( enabledPropertyPhetioInstrumented, this );
   }
+
   set enabledPropertyPhetioInstrumented( enabledPropertyPhetioInstrumented ) { this.setEnabledPropertyPhetioInstrumented( enabledPropertyPhetioInstrumented );}
 
   /**
@@ -3543,6 +3622,7 @@ class Node extends PhetioObject {
 
     return this;
   }
+
   set enabled( value ) { this.setEnabled( value ); }
 
   /**
@@ -3554,6 +3634,7 @@ class Node extends PhetioObject {
   isEnabled() {
     return this._enabledProperty.value;
   }
+
   get enabled() { return this.isEnabled(); }
 
   /**
@@ -3583,6 +3664,7 @@ class Node extends PhetioObject {
 
     this.inputEnabledProperty.value = inputEnabled;
   }
+
   set inputEnabled( value ) { this.setInputEnabled( value ); }
 
   /**
@@ -3594,6 +3676,7 @@ class Node extends PhetioObject {
   isInputEnabled() {
     return this.inputEnabledProperty.value;
   }
+
   get inputEnabled() { return this.isInputEnabled(); }
 
   /**
@@ -3621,6 +3704,7 @@ class Node extends PhetioObject {
 
     return this;
   }
+
   set inputListeners( value ) { this.setInputListeners( value ); }
 
   /**
@@ -3632,6 +3716,7 @@ class Node extends PhetioObject {
   getInputListeners() {
     return this._inputListeners.slice( 0 ); // defensive copy
   }
+
   get inputListeners() { return this.getInputListeners(); }
 
   /**
@@ -3654,6 +3739,7 @@ class Node extends PhetioObject {
     // allow the 'auto' cursor type to let the ancestors or scene pick the cursor type
     this._cursor = cursor === 'auto' ? null : cursor;
   }
+
   set cursor( value ) { this.setCursor( value ); }
 
   /**
@@ -3665,6 +3751,7 @@ class Node extends PhetioObject {
   getCursor() {
     return this._cursor;
   }
+
   get cursor() { return this.getCursor(); }
 
   /**
@@ -3684,6 +3771,7 @@ class Node extends PhetioObject {
       if ( assertSlow ) { this._picker.audit(); }
     }
   }
+
   set mouseArea( value ) { this.setMouseArea( value ); }
 
   /**
@@ -3695,6 +3783,7 @@ class Node extends PhetioObject {
   getMouseArea() {
     return this._mouseArea;
   }
+
   get mouseArea() { return this.getMouseArea(); }
 
   /**
@@ -3714,6 +3803,7 @@ class Node extends PhetioObject {
       if ( assertSlow ) { this._picker.audit(); }
     }
   }
+
   set touchArea( value ) { this.setTouchArea( value ); }
 
   /**
@@ -3725,6 +3815,7 @@ class Node extends PhetioObject {
   getTouchArea() {
     return this._touchArea;
   }
+
   get touchArea() { return this.getTouchArea(); }
 
   /**
@@ -3746,6 +3837,7 @@ class Node extends PhetioObject {
       if ( assertSlow ) { this._picker.audit(); }
     }
   }
+
   set clipArea( value ) { this.setClipArea( value ); }
 
   /**
@@ -3757,6 +3849,7 @@ class Node extends PhetioObject {
   getClipArea() {
     return this.clipAreaProperty.value;
   }
+
   get clipArea() { return this.getClipArea(); }
 
   /**
@@ -3847,6 +3940,7 @@ class Node extends PhetioObject {
       this.invalidateHint();
     }
   }
+
   set renderer( value ) { this.setRenderer( value ); }
 
   /**
@@ -3874,6 +3968,7 @@ class Node extends PhetioObject {
     assert && assert( false, 'Seems to be an invalid renderer?' );
     return this._hints.renderer;
   }
+
   get renderer() { return this.getRenderer(); }
 
   /**
@@ -3892,6 +3987,7 @@ class Node extends PhetioObject {
       this.invalidateHint();
     }
   }
+
   set layerSplit( value ) { this.setLayerSplit( value ); }
 
   /**
@@ -3903,6 +3999,7 @@ class Node extends PhetioObject {
   isLayerSplit() {
     return this._hints.layerSplit;
   }
+
   get layerSplit() { return this.isLayerSplit(); }
 
   /**
@@ -3921,6 +4018,7 @@ class Node extends PhetioObject {
       this.invalidateHint();
     }
   }
+
   set usesOpacity( value ) { this.setUsesOpacity( value ); }
 
   /**
@@ -3932,6 +4030,7 @@ class Node extends PhetioObject {
   getUsesOpacity() {
     return this._hints.usesOpacity;
   }
+
   get usesOpacity() { return this.getUsesOpacity(); }
 
   /**
@@ -3951,6 +4050,7 @@ class Node extends PhetioObject {
       this.invalidateHint();
     }
   }
+
   set cssTransform( value ) { this.setCSSTransform( value ); }
 
   /**
@@ -3962,6 +4062,7 @@ class Node extends PhetioObject {
   isCSSTransformed() {
     return this._hints.cssTransform;
   }
+
   get cssTransform() { return this._hints.cssTransform; }
 
   /**
@@ -3980,6 +4081,7 @@ class Node extends PhetioObject {
       this.invalidateHint();
     }
   }
+
   set excludeInvisible( value ) { this.setExcludeInvisible( value ); }
 
   /**
@@ -3991,6 +4093,7 @@ class Node extends PhetioObject {
   isExcludeInvisible() {
     return this._hints.excludeInvisible;
   }
+
   get excludeInvisible() { return this.isExcludeInvisible(); }
 
   /**
@@ -4011,6 +4114,7 @@ class Node extends PhetioObject {
       this.invalidateBounds();
     }
   }
+
   set excludeInvisibleChildrenFromBounds( value ) { this.setExcludeInvisibleChildrenFromBounds( value ); }
 
   /**
@@ -4023,6 +4127,7 @@ class Node extends PhetioObject {
   isExcludeInvisibleChildrenFromBounds() {
     return this._excludeInvisibleChildrenFromBounds;
   }
+
   get excludeInvisibleChildrenFromBounds() { return this.isExcludeInvisibleChildrenFromBounds(); }
 
   /**
@@ -4040,6 +4145,7 @@ class Node extends PhetioObject {
       this.invalidateHint();
     }
   }
+
   set preventFit( value ) { this.setPreventFit( value ); }
 
   /**
@@ -4051,6 +4157,7 @@ class Node extends PhetioObject {
   isPreventFit() {
     return this._hints.preventFit;
   }
+
   get preventFit() { return this.isPreventFit(); }
 
   /**
@@ -4068,6 +4175,7 @@ class Node extends PhetioObject {
       this.invalidateHint();
     }
   }
+
   set webglScale( value ) { this.setWebGLScale( value ); }
 
   /**
@@ -4079,6 +4187,7 @@ class Node extends PhetioObject {
   getWebGLScale() {
     return this._hints.webglScale;
   }
+
   get webglScale() { return this.getWebGLScale(); }
 
   /*---------------------------------------------------------------------------*
@@ -4931,6 +5040,7 @@ class Node extends PhetioObject {
   getInstances() {
     return this._instances;
   }
+
   get instances() { return this.getInstances(); }
 
   /**
@@ -4992,6 +5102,7 @@ class Node extends PhetioObject {
   getRootedDisplays() {
     return this._rootedDisplays;
   }
+
   get rootedDisplays() { return this.getRootedDisplays(); }
 
   /**
@@ -5331,6 +5442,7 @@ class Node extends PhetioObject {
     assert && assert( this.parents.length <= 1, 'globalBounds unable to work for DAG' );
     return this.parentToGlobalBounds( this.getBounds() );
   }
+
   get globalBounds() { return this.getGlobalBounds(); }
 
   /**

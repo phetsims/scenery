@@ -162,6 +162,7 @@ class Drawable {
   setVisible( visible ) {
     this.visibleProperty.value = visible;
   }
+
   set visible( value ) { this.setVisible( value ); }
 
   /**
@@ -173,6 +174,7 @@ class Drawable {
   isVisible() {
     return this.visibleProperty.value;
   }
+
   get visible() { return this.isVisible(); }
 
   /**
@@ -186,6 +188,7 @@ class Drawable {
   setFittable( fittable ) {
     this.fittableProperty.value = fittable;
   }
+
   set fittable( value ) { this.setFittable( value ); }
 
   /**
@@ -197,6 +200,7 @@ class Drawable {
   isFittable() {
     return this.fittableProperty.value;
   }
+
   get fittable() { return this.isFittable(); }
 
   /**

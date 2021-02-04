@@ -10,11 +10,11 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Dimension2 from '../../../dot/js/Dimension2.js';
 import Shape from '../../../kite/js/Shape.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
-import Renderer from '../display/Renderer.js';
 import RectangleCanvasDrawable from '../display/drawables/RectangleCanvasDrawable.js';
 import RectangleDOMDrawable from '../display/drawables/RectangleDOMDrawable.js';
 import RectangleSVGDrawable from '../display/drawables/RectangleSVGDrawable.js';
 import RectangleWebGLDrawable from '../display/drawables/RectangleWebGLDrawable.js';
+import Renderer from '../display/Renderer.js';
 import scenery from '../scenery.js';
 import Features from '../util/Features.js';
 import Path from './Path.js';
@@ -303,6 +303,7 @@ class Rectangle extends Path {
     }
     return this;
   }
+
   set rectX( value ) { this.setRectX( value ); }
 
   /**
@@ -314,6 +315,7 @@ class Rectangle extends Path {
   getRectX() {
     return this._rectX;
   }
+
   get rectX() { return this.getRectX(); }
 
   /**
@@ -337,6 +339,7 @@ class Rectangle extends Path {
     }
     return this;
   }
+
   set rectY( value ) { this.setRectY( value ); }
 
   /**
@@ -348,6 +351,7 @@ class Rectangle extends Path {
   getRectY() {
     return this._rectY;
   }
+
   get rectY() { return this.getRectY(); }
 
   /**
@@ -371,6 +375,7 @@ class Rectangle extends Path {
     }
     return this;
   }
+
   set rectWidth( value ) { this.setRectWidth( value ); }
 
   /**
@@ -382,6 +387,7 @@ class Rectangle extends Path {
   getRectWidth() {
     return this._rectWidth;
   }
+
   get rectWidth() { return this.getRectWidth(); }
 
   /**
@@ -405,6 +411,7 @@ class Rectangle extends Path {
     }
     return this;
   }
+
   set rectHeight( value ) { this.setRectHeight( value ); }
 
   /**
@@ -416,6 +423,7 @@ class Rectangle extends Path {
   getRectHeight() {
     return this._rectHeight;
   }
+
   get rectHeight() { return this.getRectHeight(); }
 
   /**
@@ -445,6 +453,7 @@ class Rectangle extends Path {
     }
     return this;
   }
+
   set cornerXRadius( value ) { this.setCornerXRadius( value ); }
 
   /**
@@ -456,6 +465,7 @@ class Rectangle extends Path {
   getCornerXRadius() {
     return this._cornerXRadius;
   }
+
   get cornerXRadius() { return this.getCornerXRadius(); }
 
   /**
@@ -485,6 +495,7 @@ class Rectangle extends Path {
     }
     return this;
   }
+
   set cornerYRadius( value ) { this.setCornerYRadius( value ); }
 
   /**
@@ -496,6 +507,7 @@ class Rectangle extends Path {
   getCornerYRadius() {
     return this._cornerYRadius;
   }
+
   get cornerYRadius() { return this.getCornerYRadius(); }
 
   /**
@@ -512,6 +524,7 @@ class Rectangle extends Path {
 
     return this;
   }
+
   set rectBounds( value ) { this.setRectBounds( value ); }
 
   /**
@@ -523,6 +536,7 @@ class Rectangle extends Path {
   getRectBounds() {
     return Bounds2.rect( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
   }
+
   get rectBounds() { return this.getRectBounds(); }
 
   /**
@@ -540,6 +554,7 @@ class Rectangle extends Path {
 
     return this;
   }
+
   set rectSize( value ) { this.setRectSize( value ); }
 
   /**
@@ -551,6 +566,7 @@ class Rectangle extends Path {
   getRectSize() {
     return new Dimension2( this._rectWidth, this._rectHeight );
   }
+
   get rectSize() { return this.getRectSize(); }
 
   /**
@@ -571,7 +587,9 @@ class Rectangle extends Path {
 
     return this;
   }
+
   set rectWidthFromRight( value ) { this.setRectWidthFromRight( value ); }
+
   get rectWidthFromRight() { return this.getRectWidth(); } // because JSHint complains
 
   /**
@@ -592,7 +610,9 @@ class Rectangle extends Path {
 
     return this;
   }
+
   set rectHeightFromBottom( value ) { this.setRectHeightFromBottom( value ); }
+
   get rectHeightFromBottom() { return this.getRectHeight(); } // because JSHint complains
 
   /**
@@ -860,6 +880,7 @@ class Rectangle extends Path {
     this.setCornerYRadius( cornerRadius );
     return this;
   }
+
   set cornerRadius( value ) { this.setCornerRadius( value ); }
 
   /**
@@ -876,6 +897,7 @@ class Rectangle extends Path {
 
     return this._cornerXRadius;
   }
+
   get cornerRadius() { return this.getCornerRadius(); }
 
   /**

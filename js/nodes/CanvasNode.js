@@ -11,8 +11,8 @@
  */
 
 import Shape from '../../../kite/js/Shape.js';
-import Renderer from '../display/Renderer.js';
 import CanvasNodeDrawable from '../display/drawables/CanvasNodeDrawable.js';
+import Renderer from '../display/Renderer.js';
 import scenery from '../scenery.js';
 import Node from './Node.js';
 
@@ -42,6 +42,7 @@ class CanvasNode extends Node {
   setCanvasBounds( selfBounds ) {
     this.invalidateSelf( selfBounds );
   }
+
   set canvasBounds( value ) { this.setCanvasBounds( value ); }
 
   /**
@@ -53,6 +54,7 @@ class CanvasNode extends Node {
   getCanvasBounds() {
     return this.getSelfBounds();
   }
+
   get canvasBounds() { return this.getCanvasBounds(); }
 
   /**

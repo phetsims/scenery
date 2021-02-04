@@ -8,8 +8,8 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import Poolable from '../../../phet-core/js/Poolable.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
+import Poolable from '../../../phet-core/js/Poolable.js';
 import scenery from '../scenery.js';
 import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
 import Features from '../util/Features.js';
@@ -383,7 +383,7 @@ class CanvasBlock extends FittedBlock {
       const node = trail.nodes[ i ];
 
       // We should not apply opacity at or below the filter root
-      if ( i > filterRootIndex  ) {
+      if ( i > filterRootIndex ) {
         if ( node.getOpacity() !== 1 ) {
           sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `Push opacity ${trail.subtrailTo( node ).toDebugString()}` );
 

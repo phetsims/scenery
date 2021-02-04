@@ -84,6 +84,7 @@ class AlignGroup {
   getMaxWidth() {
     return this._maxWidthProperty.value;
   }
+
   get maxWidth() { return this.getMaxWidth(); }
 
   /**
@@ -95,6 +96,7 @@ class AlignGroup {
   getMaxWidthProperty() {
     return this._maxWidthProperty;
   }
+
   get maxWidthProperty() { return this.getMaxWidthProperty(); }
 
   /**
@@ -106,6 +108,7 @@ class AlignGroup {
   getMaxHeight() {
     return this._maxHeightProperty.value;
   }
+
   get maxHeight() { return this.getMaxHeight(); }
 
   /**
@@ -117,6 +120,7 @@ class AlignGroup {
   getMaxHeightProperty() {
     return this._maxHeightProperty;
   }
+
   get maxHeightProperty() { return this.getMaxHeightProperty(); }
 
   /**
@@ -156,6 +160,7 @@ class AlignGroup {
 
     return this;
   }
+
   set matchHorizontal( value ) { this.setMatchHorizontal( value ); }
 
   /**
@@ -167,6 +172,7 @@ class AlignGroup {
   getMatchHorizontal() {
     return this._matchHorizontal;
   }
+
   get matchHorizontal() { return this.getMatchHorizontal(); }
 
   /**
@@ -189,6 +195,7 @@ class AlignGroup {
 
     return this;
   }
+
   set matchVertical( value ) { this.setMatchVertical( value ); }
 
   /**
@@ -200,6 +207,7 @@ class AlignGroup {
   getMatchVertical() {
     return this._matchVertical;
   }
+
   get matchVertical() { return this.getMatchVertical(); }
 
   /**

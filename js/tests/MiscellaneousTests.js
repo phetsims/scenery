@@ -1,4 +1,3 @@
-
 // Copyright 2013-2019, University of Colorado Boulder
 
 /**

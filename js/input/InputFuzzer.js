@@ -119,11 +119,11 @@ class InputFuzzer {
 
     // A specification that looks like a Touch object (and may be used to create one)
     const touchItems = touches.map( touch => ( {
-        identifier: touch.id,
-        target: domElement,
-        clientX: touch.position.x,
-        clientY: touch.position.y
-      } ) );
+      identifier: touch.id,
+      target: domElement,
+      clientX: touch.position.x,
+      clientY: touch.position.y
+    } ) );
 
     // Check if we can use Touch/TouchEvent constructors, see https://www.chromestatus.com/feature/4923255479599104
     if ( window.Touch !== undefined &&

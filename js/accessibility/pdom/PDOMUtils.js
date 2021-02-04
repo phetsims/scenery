@@ -10,8 +10,8 @@
  * @author Jesse Greenberg
  */
 
-import ValidatorDef from '../../../../axon/js/ValidatorDef.js';
 import validate from '../../../../axon/js/validate.js';
+import ValidatorDef from '../../../../axon/js/ValidatorDef.js';
 import merge from '../../../../phet-core/js/merge.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
 import scenery from '../../scenery.js';

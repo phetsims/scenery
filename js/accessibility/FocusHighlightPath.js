@@ -187,6 +187,7 @@ class FocusHighlightPath extends Path {
     this.innerHighlightPath.setStroke( color );
     this.highlightChangedEmitter.emit();
   }
+
   set innerHighlightColor( color ) { this.setInnerHighlightColor( color ); }
 
   /**
@@ -198,6 +199,7 @@ class FocusHighlightPath extends Path {
   getInnerHighlightColor() {
     return this._innerHighlightColor;
   }
+
   get innerHighlightColor() { return this.getInnerHighlightColor(); }
 
   /**
@@ -210,6 +212,7 @@ class FocusHighlightPath extends Path {
     this.setStroke( color );
     this.highlightChangedEmitter.emit();
   }
+
   set outerHighlightColor( color ) { this.setOuterHighlightColor( color ); }
 
   /**
@@ -221,6 +224,7 @@ class FocusHighlightPath extends Path {
   getOuterHighlightColor() {
     return this._outerHighlightColor;
   }
+
   get outerHighlightColor() { return this.getOuterHighlightColor(); }
 
   /**

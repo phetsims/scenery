@@ -10,9 +10,9 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Shape from '../../../kite/js/Shape.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
 import merge from '../../../phet-core/js/merge.js';
-import Renderer from '../display/Renderer.js';
 import PathCanvasDrawable from '../display/drawables/PathCanvasDrawable.js';
 import PathSVGDrawable from '../display/drawables/PathSVGDrawable.js';
+import Renderer from '../display/Renderer.js';
 import scenery from '../scenery.js';
 import Node from './Node.js';
 import Paintable from './Paintable.js';
@@ -130,6 +130,7 @@ class Path extends Node {
     }
     return this;
   }
+
   set shape( value ) { this.setShape( value ); }
 
   /**
@@ -145,6 +146,7 @@ class Path extends Node {
   getShape() {
     return this._shape;
   }
+
   get shape() { return this.getShape(); }
 
   /**
@@ -298,6 +300,7 @@ class Path extends Node {
     }
     return this;
   }
+
   set boundsMethod( value ) { this.setBoundsMethod( value ); }
 
   /**
@@ -309,6 +312,7 @@ class Path extends Node {
   getBoundsMethod() {
     return this._boundsMethod;
   }
+
   get boundsMethod() { return this.getBoundsMethod(); }
 
   /**

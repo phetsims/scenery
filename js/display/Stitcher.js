@@ -574,7 +574,7 @@ class Stitcher {
         const block = blockData.block;
         _.each( Drawable.oldListToArray( block.firstDrawable, block.lastDrawable ), drawable => {
           assertSlow( _.some( this.pendingRemovals, removalData => removalData.drawable === drawable ) || _.some( this.pendingMoves, moveData => moveData.drawable === drawable ), 'Drawable ' + drawable.toString() + ' originally listed for disposed block ' + block.toString() +
-               ' does not seem to be marked for pending removal or move!' );
+                                                                                                                                                                                   ' does not seem to be marked for pending removal or move!' );
         } );
       } );
 
@@ -583,7 +583,7 @@ class Stitcher {
         const block = blockData.block;
         _.each( Drawable.listToArray( block.pendingFirstDrawable, block.pendingLastDrawable ), drawable => {
           assertSlow( _.some( this.pendingAdditions, additionData => additionData.drawable === drawable && additionData.block === block ) || _.some( this.pendingMoves, moveData => moveData.drawable === drawable && moveData.block === block ), 'Drawable ' + drawable.toString() + ' now listed for created block ' + block.toString() +
-               ' does not seem to be marked for pending addition or move!' );
+                                                                                                                                                                                                                                                  ' does not seem to be marked for pending addition or move!' );
         } );
       } );
 

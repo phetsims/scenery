@@ -8,8 +8,8 @@
 
 import animationFrameTimer from '../../../../axon/js/animationFrameTimer.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
-import Poolable from '../../../../phet-core/js/Poolable.js';
 import platform from '../../../../phet-core/js/platform.js';
+import Poolable from '../../../../phet-core/js/Poolable.js';
 import scenery from '../../scenery.js';
 import ShaderProgram from '../../util/ShaderProgram.js';
 import SpriteSheet from '../../util/SpriteSheet.js';

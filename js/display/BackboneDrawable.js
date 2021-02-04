@@ -8,8 +8,8 @@
  */
 
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
-import Poolable from '../../../phet-core/js/Poolable.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
+import Poolable from '../../../phet-core/js/Poolable.js';
 import scenery from '../scenery.js';
 import Utils from '../util/Utils.js';
 import Drawable from './Drawable.js';
@@ -309,7 +309,7 @@ class BackboneDrawable extends Drawable {
 
         // Apply opacity after other effects
         if ( opacity !== 1 ) {
-          filterString += `${filterString ? ' ' : ''}opacity(${toSVGNumber(opacity)})`;
+          filterString += `${filterString ? ' ' : ''}opacity(${toSVGNumber( opacity )})`;
         }
       }
 

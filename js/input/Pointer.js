@@ -116,6 +116,7 @@ class Pointer {
 
     return this; // TODO: is chaining actually used? Not that helpful of a pattern with pointers.
   }
+
   set cursor( value ) { this.setCursor( value ); }
 
   /**
@@ -127,6 +128,7 @@ class Pointer {
   getCursor() {
     return this._cursor;
   }
+
   get cursor() { return this.getCursor(); }
 
   /**
@@ -138,6 +140,7 @@ class Pointer {
   getListeners() {
     return this._listeners.slice();
   }
+
   get listeners() { return this.getListeners(); }
 
   /**
