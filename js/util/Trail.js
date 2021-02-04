@@ -1012,8 +1012,13 @@ class Trail {
    * @returns {string}
    */
   toPathString() {
-    const specialNodes = _.filter( this.nodes, n => n.constructor.name !== 'Node' );
-    return _.map( specialNodes, n => n.constructor.name ).join( '/' );
+    return _.map( this.nodes, n => {
+      let string = n.constructor.name;
+      if ( string === 'Node' ) {
+        string = '.';
+      }
+      return string;
+    } ).join( '/' );
   }
 
   /**

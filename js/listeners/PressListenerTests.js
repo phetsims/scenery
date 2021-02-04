@@ -20,7 +20,7 @@ QUnit.test( 'Basics', assert => {
     let releaseCount = 0;
     let dragCount = 0;
     const listener = new PressListener( {
-      tandem: Tandem.GENERAL.createTandem( 'myListener' ),
+      tandem: Tandem.ROOT_TEST.createTandem( 'myListener' ),
 
       press: ( event, listener ) => {
         pressCount++;
@@ -96,7 +96,7 @@ QUnit.test( 'Basics', assert => {
 QUnit.test( 'Interruption', assert => {
   ListenerTestUtils.simpleRectangleTest( ( display, rect, node ) => {
     const listener = new PressListener( {
-      tandem: Tandem.GENERAL.createTandem( 'myListener' )
+      tandem: Tandem.ROOT_TEST.createTandem( 'myListener' )
     } );
     rect.addInputListener( listener );
 

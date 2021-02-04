@@ -194,8 +194,8 @@ if ( Tandem.PHET_IO_ENABLED ) {
       node[ nodeField ] = initialValue;
     };
 
-    const instrumentedProperty = new BooleanProperty( false, { tandem: Tandem.GENERAL.createTandem( `${nodeField}MyProperty` ) } );
-    const otherInstrumentedProperty = new BooleanProperty( false, { tandem: Tandem.GENERAL.createTandem( `${nodeField}MyOtherProperty` ) } );
+    const instrumentedProperty = new BooleanProperty( false, { tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyProperty` ) } );
+    const otherInstrumentedProperty = new BooleanProperty( false, { tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyOtherProperty` ) } );
     const uninstrumentedProperty = new BooleanProperty( false );
 
     /***************************************
@@ -226,7 +226,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     uninstrumented.mutate( {
       [ nodeProperty ]: instrumentedProperty
     } );
-    uninstrumented.mutate( { tandem: Tandem.GENERAL.createTandem( `${nodeField}MyNode` ) } );
+    uninstrumented.mutate( { tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` ) } );
     assert.ok( uninstrumented[ nodeProperty ].targetProperty === instrumentedProperty );
     testNodeAndProperty( uninstrumented, instrumentedProperty );
     uninstrumented.dispose();
@@ -258,7 +258,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
       [ nodeProperty ]: instrumentedProperty
     } );
 
-    uninstrumented.mutate( { tandem: Tandem.GENERAL.createTandem( `${nodeField}MyNode` ) } );
+    uninstrumented.mutate( { tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` ) } );
     assert.ok( uninstrumented[ nodeProperty ].targetProperty === instrumentedProperty );
     testNodeAndProperty( uninstrumented, instrumentedProperty );
     uninstrumented.dispose();
@@ -271,7 +271,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
       // instrumentedNodeWithDefaultInstrumentedProperty => instrumented property (before startup)
     let instrumented = new Node( {
-        tandem: Tandem.GENERAL.createTandem( `${nodeField}MyNode` ),
+        tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` ),
         [ `${nodeProperty}PhetioInstrumented` ]: true
       } );
     assert.ok( instrumented[ nodeProperty ].targetProperty === instrumented[ nodeProperty ].ownedPhetioProperty );
@@ -281,7 +281,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
     // instrumentedNodeWithDefaultInstrumentedProperty => uninstrumented property (before startup)
     instrumented = new Node( {
-      tandem: Tandem.GENERAL.createTandem( `${nodeField}MyNode` ),
+      tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` ),
       [ `${nodeProperty}PhetioInstrumented` ]: true
     } );
     window.assert && assert.throws( () => {
@@ -291,7 +291,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
     // instrumentedNodeWithPassedInInstrumentedProperty => instrumented property (before startup)
     instrumented = new Node( {
-      tandem: Tandem.GENERAL.createTandem( `${nodeField}MyNode` ),
+      tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` ),
       [ `${nodeProperty}PhetioInstrumented` ]: true
     } );
     instrumented.mutate( { [ nodeProperty ]: instrumentedProperty } );
@@ -303,7 +303,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     instrumented.dispose();
 
     instrumented = new Node( {
-      tandem: Tandem.GENERAL.createTandem( `${nodeField}MyNode` ),
+      tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` ),
       [ nodeProperty ]: instrumentedProperty
     } );
     assert.ok( instrumented[ nodeProperty ].targetProperty === instrumentedProperty );
@@ -315,7 +315,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
     // instrumentedNodeWithPassedInInstrumentedProperty => uninstrumented property (before startup)
     instrumented = new Node( {
-      tandem: Tandem.GENERAL.createTandem( `${nodeField}MyNode` ),
+      tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` ),
       [ nodeProperty ]: instrumentedProperty
     } );
     window.assert && assert.throws( () => {
@@ -323,7 +323,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     }, `cannot remove instrumentation from the Node's ${nodeProperty}` );
     instrumented.dispose();
     instrumented = new Node( {
-      tandem: Tandem.GENERAL.createTandem( `${nodeField}MyNode` )
+      tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` )
     } );
     instrumented.mutate( { [ nodeProperty ]: instrumentedProperty } );
     window.assert && assert.throws( () => {
@@ -335,7 +335,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     apiValidation.simHasStarted = true;
     // instrumentedNodeWithDefaultInstrumentedProperty => instrumented property (after startup)
     const instrumented1 = new Node( {
-      tandem: Tandem.GENERAL.createTandem( `${nodeField}MyUniquelyNamedNodeThatWillNotBeDuplicated1` ),
+      tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyUniquelyNamedNodeThatWillNotBeDuplicated1` ),
       [ `${nodeProperty}PhetioInstrumented` ]: true
     } );
     assert.ok( instrumented1[ nodeProperty ].targetProperty === instrumented1[ nodeProperty ].ownedPhetioProperty );
@@ -344,7 +344,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
     // instrumentedNodeWithDefaultInstrumentedProperty => uninstrumented property (after startup)
     const instrumented2 = new Node( {
-      tandem: Tandem.GENERAL.createTandem( `${nodeField}MyUniquelyNamedNodeThatWillNotBeDuplicated2` ),
+      tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyUniquelyNamedNodeThatWillNotBeDuplicated2` ),
       [ `${nodeProperty}PhetioInstrumented` ]: true
     } );
     window.assert && assert.throws( () => {
@@ -353,7 +353,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
     // instrumentedNodeWithPassedInInstrumentedProperty => instrumented property (after startup)
     const instrumented3 = new Node( {
-      tandem: Tandem.GENERAL.createTandem( `${nodeField}MyUniquelyNamedNodeThatWillNotBeDuplicated3` ),
+      tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyUniquelyNamedNodeThatWillNotBeDuplicated3` ),
       [ nodeProperty ]: instrumentedProperty
     } );
 
@@ -363,7 +363,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
     // instrumentedNodeWithPassedInInstrumentedProperty => uninstrumented property (after startup)
     const instrumented4 = new Node( {
-      tandem: Tandem.GENERAL.createTandem( `${nodeField}MyUniquelyNamedNodeThatWillNotBeDuplicated4` ),
+      tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyUniquelyNamedNodeThatWillNotBeDuplicated4` ),
       [ nodeProperty ]: instrumentedProperty
     } );
     window.assert && assert.throws( () => {
@@ -371,7 +371,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     }, `cannot remove instrumentation from the Node's ${nodeProperty}` );
     const instrumented5 = new Node( {} );
     instrumented5.mutate( { [ nodeProperty ]: instrumentedProperty } );
-    instrumented5.mutate( { tandem: Tandem.GENERAL.createTandem( `${nodeField}MyUniquelyNamedNodeThatWillNotBeDuplicated5` ) } );
+    instrumented5.mutate( { tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyUniquelyNamedNodeThatWillNotBeDuplicated5` ) } );
     window.assert && assert.throws( () => {
       instrumented5.mutate( { [ nodeProperty ]: uninstrumentedProperty } );
     }, `cannot remove instrumentation from the Node's ${nodeProperty}` );
@@ -388,7 +388,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     // instrumented5.dispose();
 
     instrumented = new Node( {
-      tandem: Tandem.GENERAL.createTandem( `${nodeField}MyNode` ),
+      tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` ),
       [ `${nodeProperty}PhetioInstrumented` ]: true
     } );
     window.assert && assert.throws( () => {
@@ -401,7 +401,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     if ( !ownedPropertyPhetioInstrumented ) {
 
       instrumented = new Node( {
-        tandem: Tandem.GENERAL.createTandem( `${nodeField}MyNode` )
+        tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` )
       } );
       window.assert && assert.throws( () => {
         instrumented[ `${nodeProperty}PhetioInstrumented` ] = true;
