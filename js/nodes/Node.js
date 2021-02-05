@@ -4952,6 +4952,10 @@ class Node extends PhetioObject {
       finalParentBounds = sourceBounds.intersection( finalParentBounds );
     }
 
+    if ( options.useTargetBounds ) {
+      image.imageBounds = finalParentBounds.shifted( image.translation.negated() );
+    }
+
     if ( options.wrap ) {
       const wrappedNode = new Node( { children: [ image ] } ); // eslint-disable-line no-html-constructors
       if ( options.useTargetBounds ) {

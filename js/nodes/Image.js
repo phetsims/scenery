@@ -27,6 +27,7 @@ import Node from './Node.js';
 const IMAGE_OPTION_KEYS = [
   'image', // {string|HTMLImageElement|HTMLCanvasElement|Array} - Changes the image displayed, see setImage() for documentation
   'imageOpacity', // {number} - Controls opacity of this image (and not children), see setImageOpacity() for documentation
+  'imageBounds', // {Bounds2|null} - Controls the amount of the image that is hit-tested or considered "inside" the image, see setImageBounds()
   'initialWidth', // {number} - Width of an image not-yet loaded (for layout), see setInitialWidth() for documentation
   'initialHeight', // {number} - Height of an image not-yet loaded (for layout), see setInitialHeight() for documentation
   'mipmap', // {boolean} - Whether mipmapped output is supported, see setMipmap() for documentation
@@ -55,6 +56,10 @@ class Image extends Imageable( Node ) {
       image: image
     }, options );
 
+    // @private {Bounds2|null} - If non-null, determines what is considered "inside" the image for containment and
+    // hit-testing.
+    this._imageBounds = null;
+
     this.mutate( options );
 
     this.invalidateSupportedRenderers();
@@ -73,7 +78,7 @@ class Image extends Imageable( Node ) {
    */
   invalidateImage() {
     if ( this._image ) {
-      this.invalidateSelf( new Bounds2( 0, 0, this.getImageWidth(), this.getImageHeight() ) );
+      this.invalidateSelf( this._imageBounds || new Bounds2( 0, 0, this.getImageWidth(), this.getImageHeight() ) );
     }
     else {
       this.invalidateSelf( Bounds2.NOTHING );
@@ -140,6 +145,36 @@ class Image extends Imageable( Node ) {
       }
     }
   }
+
+  /**
+   * Sets the imageBounds value for the Image. If non-null, determines what is considered "inside" the image for
+   * containment and hit-testing.
+   * @public
+   *
+   * NOTE: This is accomplished by using any provided imageBounds as the node's own selfBounds. This will affect layout,
+   * hit-testing, and anything else using the bounds of this node.
+   *
+   * @param {Bounds2|null} imageBounds
+   */
+  setImageBounds( imageBounds ) {
+    if ( this._imageBounds !== imageBounds ) {
+      this._imageBounds = imageBounds;
+
+      this.invalidateImage();
+    }
+  }
+  set imageBounds( value ) { this.setImageBounds( value ); }
+
+  /**
+   * Returns the imageBounds, see setImageBounds for details.
+   * @public
+   *
+   * @returns {Bounds2|null}
+   */
+  getImageBounds() {
+    return this._imageBounds;
+  }
+  get imageBounds() { return this._imageBounds; }
 
   /**
    * Whether this Node itself is painted (displays something itself).
