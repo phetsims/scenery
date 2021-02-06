@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<!--
+Unlike all the other tests, this test runs in unbuilt mode, and uses ES6 modules.
+@author Sam Reid (PhET Interactive Simulations)
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport"
+        content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <title>Font Awesome Icons - Scenery Example</title>
+
+  <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
+  <script src="../../aqua/js/pageload-connector.js"></script>
+
+  <!-- jQuery and lodash are dependencies -->
+  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
+  <script src="../../assert/js/assert.js"></script>
+  <script src="../../tandem/js/PhetioIDUtils.js"></script>
+
+  <style>
+    /* so the centering of the text is obvious */
+    #example-scene {
+      width: 1024px;
+      height: 9999px;
+    }
+  </style>
+</head>
+<body>
+<div id="example-scene"></div>
+<script type="module">
+
+  import Node from '../js/nodes/Node.js';
+  import HBox from '../js/nodes/HBox.js';
+  import Image from '../js/nodes/Image.js';
+  import VBox from '../js/nodes/VBox.js';
+  import Display from '../js/display/Display.js';
+  import AlignGroup from '../js/nodes/AlignGroup.js';
+  import DragListener from '../js/listeners/DragListener.js';
+  import iconList from '../../sherpa/js/fontawesome-5/iconList.js';
+
+  // Create a scene graph over the block-level element. Everything inside is replaced
+  var scene = new Node();
+  var display = new Display( scene, {
+    container: document.getElementById( 'example-scene' )
+  } );
+
+  const iconAlignGroup = new AlignGroup();
+  const icons = iconList.map( Icon => new Icon( {
+    maxWidth: 75, maxHeight: 75,
+    fill: 'black'
+  } ) ).filter( n => n !== null ).map( node => iconAlignGroup.createBox( node, {} ) );
+  const groups = _.chunk( icons, 12 ).map( g => new HBox( { spacing: 1, children: g } ) );
+  const node = new Node( {
+    children: [ new VBox( { spacing: 1, children: groups, left: 0, top: 0 } ) ]
+  } );
+  scene.addChild( node );
+
+  display.updateDisplay();
+</script>
+</body>
+</html>
