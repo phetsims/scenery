@@ -163,7 +163,7 @@ class SwipeListener {
               this.timeSinceLastDown = 0;
 
               // send a click event to the active element
-              const pdomRoot = document.getElementsByClassName( 'pdom-root' )[ 0 ];
+              const pdomRoot = document.getElementsByClassName( 'a11y-pdom-root' )[ 0 ];
               if ( pdomRoot && pdomRoot.contains( document.activeElement ) ) {
                 document.activeElement.click();
               }
