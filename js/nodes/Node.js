@@ -874,7 +874,15 @@ class Node extends PhetioObject {
     return this;
   }
 
-  set children( value ) { this.setChildren( value ); }
+  /**
+   * See setChildren() for more information
+   * @public
+   *
+   * @param {Array.<Node>} value
+   */
+  set children( value ) {
+    this.setChildren( value );
+  }
 
   /**
    * Returns a defensive copy of the array of direct children of this node, ordered by what is in front (nodes at
@@ -890,7 +898,15 @@ class Node extends PhetioObject {
     return this._children.slice( 0 ); // create a defensive copy
   }
 
-  get children() { return this.getChildren(); }
+  /**
+   * See getChildren() for more information
+   * @public
+   *
+   * @returns {Array.<Node>}
+   */
+  get children() {
+    return this.getChildren();
+  }
 
   /**
    * Returns a count of children, without needing to make a defensive copy.
@@ -915,7 +931,15 @@ class Node extends PhetioObject {
     return this._parents.slice( 0 ); // create a defensive copy
   }
 
-  get parents() { return this.getParents(); }
+  /**
+   * See getParents() for more information
+   * @public
+   *
+   * @returns {Array.<Node>}
+   */
+  get parents() {
+    return this.getParents();
+  }
 
   /**
    * Returns a single parent if it exists, otherwise null (no parents), or an assertion failure (multiple parents).
@@ -928,7 +952,15 @@ class Node extends PhetioObject {
     return this._parents.length ? this._parents[ 0 ] : null;
   }
 
-  get parent() { return this.getParent(); }
+  /**
+   * See getParent() for more information
+   * @public
+   *
+   * @returns {Node|null}
+   */
+  get parent() {
+    return this.getParent();
+  }
 
   /**
    * Gets the child at a specific index into the children array.
@@ -1553,7 +1585,15 @@ class Node extends PhetioObject {
     return this.selfBoundsProperty.value;
   }
 
-  get selfBounds() { return this.getSelfBounds(); }
+  /**
+   * See getSelfBounds() for more information
+   * @public
+   *
+   * @returns {Bounds2}
+   */
+  get selfBounds() {
+    return this.getSelfBounds();
+  }
 
   /**
    * Returns a bounding box that should contain all self content in the local coordinate frame (our normal self bounds
@@ -1568,7 +1608,15 @@ class Node extends PhetioObject {
     return this.selfBoundsProperty.value;
   }
 
-  get safeSelfBounds() { return this.getSafeSelfBounds(); }
+  /**
+   * See getSafeSelfBounds() for more information
+   * @public
+   *
+   * @returns {Bounds2}
+   */
+  get safeSelfBounds() {
+    return this.getSafeSelfBounds();
+  }
 
   /**
    * Returns the bounding box that should contain all content of our children in our local coordinate frame. Does not
@@ -1583,7 +1631,15 @@ class Node extends PhetioObject {
     return this.childBoundsProperty.value;
   }
 
-  get childBounds() { return this.getChildBounds(); }
+  /**
+   * See getChildBounds() for more information
+   * @public
+   *
+   * @returns {Bounds2}
+   */
+  get childBounds() {
+    return this.getChildBounds();
+  }
 
   /**
    * Returns the bounding box that should contain all content of our children AND our self in our local coordinate
@@ -1598,7 +1654,15 @@ class Node extends PhetioObject {
     return this.localBoundsProperty.value;
   }
 
-  get localBounds() { return this.getLocalBounds(); }
+  /**
+   * See getLocalBounds() for more information
+   * @public
+   *
+   * @returns {Bounds2}
+   */
+  get localBounds() {
+    return this.getLocalBounds();
+  }
 
   /**
    * Allows overriding the value of localBounds (and thus changing things like 'bounds' that depend on localBounds).
@@ -1646,7 +1710,15 @@ class Node extends PhetioObject {
     return this; // allow chaining
   }
 
-  set localBounds( value ) { this.setLocalBounds( value ); }
+  /**
+   * See setLocalBounds() for more information
+   * @public
+   *
+   * @param {Bounds2|null} value
+   */
+  set localBounds( value ) {
+    this.setLocalBounds( value );
+  }
 
   /**
    * Meant to be overridden in sub-types that have more accurate bounds determination for when we are transformed.
@@ -1709,7 +1781,15 @@ class Node extends PhetioObject {
     return bounds;
   }
 
-  get safeTransformedVisibleBounds() { return this.getSafeTransformedVisibleBounds(); }
+  /**
+   * See getSafeTransformedVisibleBounds() for more information -- This is called without any initial parameter
+   * @public
+   *
+   * @returns {Bounds2}
+   */
+  get safeTransformedVisibleBounds() {
+    return this.getSafeTransformedVisibleBounds();
+  }
 
   /**
    * Sets the flag that determines whether we will require more accurate (and expensive) bounds computation for this
@@ -1737,7 +1817,15 @@ class Node extends PhetioObject {
     return this; // allow chaining
   }
 
-  set transformBounds( value ) { this.setTransformBounds( value ); }
+  /**
+   * See setTransformBounds() for more information
+   * @public
+   *
+   * @param {boolean} value
+   */
+  set transformBounds( value ) {
+    this.setTransformBounds( value );
+  }
 
   /**
    * Returns whether accurate transformation bounds are used in bounds computation (see setTransformBounds).
@@ -1749,7 +1837,15 @@ class Node extends PhetioObject {
     return this._transformBounds;
   }
 
-  get transformBounds() { return this.getTransformBounds(); }
+  /**
+   * See getTransformBounds() for more information
+   * @public
+   *
+   * @returns {boolean}
+   */
+  get transformBounds() {
+    return this.getTransformBounds();
+  }
 
   /**
    * Returns the bounding box of this Node and all of its sub-trees (in the "parent" coordinate frame).
@@ -1764,7 +1860,15 @@ class Node extends PhetioObject {
     return this.boundsProperty.value;
   }
 
-  get bounds() { return this.getBounds(); }
+  /**
+   * See getBounds() for more information
+   * @public
+   *
+   * @returns {Bounds2}
+   */
+  get bounds() {
+    return this.getBounds();
+  }
 
   /**
    * Like getLocalBounds() in the "local" coordinate frame, but includes only visible nodes.
@@ -1788,7 +1892,15 @@ class Node extends PhetioObject {
     return bounds;
   }
 
-  get visibleLocalBounds() { return this.getVisibleLocalBounds(); }
+  /**
+   * See getVisibleLocalBounds() for more information
+   * @public
+   *
+   * @returns {Bounds2}
+   */
+  get visibleLocalBounds() {
+    return this.getVisibleLocalBounds();
+  }
 
   /**
    * Like getBounds() in the "parent" coordinate frame, but includes only visible nodes
@@ -1800,7 +1912,15 @@ class Node extends PhetioObject {
     return this.getVisibleLocalBounds().transform( this.getMatrix() );
   }
 
-  get visibleBounds() { return this.getVisibleBounds(); }
+  /**
+   * See getVisibleBounds() for more information
+   * @public
+   *
+   * @returns {Bounds2}
+   */
+  get visibleBounds() {
+    return this.getVisibleBounds();
+  }
 
   /**
    * Tests whether the given point is "contained" in this node's subtree (optionally using mouse/touch areas), and if
@@ -2217,7 +2337,15 @@ class Node extends PhetioObject {
     return this;
   }
 
-  set x( value ) { this.setX( value ); }
+  /**
+   * See setX() for more information
+   * @public
+   *
+   * @param {number} value
+   */
+  set x( value ) {
+    this.setX( value );
+  }
 
   /**
    * Returns the x coordinate (in the parent coorindate frame) of where the node's origin is transformed to.
@@ -2229,7 +2357,15 @@ class Node extends PhetioObject {
     return this._transform.getMatrix().m02();
   }
 
-  get x() { return this.getX(); }
+  /**
+   * See getX() for more information
+   * @public
+   *
+   * @returns {number}
+   */
+  get x() {
+    return this.getX();
+  }
 
   /**
    * Shifts the y coordinate (in the parent coordinate frame) of where the node's origin is transformed to.
@@ -2245,7 +2381,15 @@ class Node extends PhetioObject {
     return this;
   }
 
-  set y( value ) { this.setY( value ); }
+  /**
+   * See setY() for more information
+   * @public
+   *
+   * @param {number} value
+   */
+  set y( value ) {
+    this.setY( value );
+  }
 
   /**
    * Returns the y coordinate (in the parent coorindate frame) of where the node's origin is transformed to.
@@ -2257,7 +2401,15 @@ class Node extends PhetioObject {
     return this._transform.getMatrix().m12();
   }
 
-  get y() { return this.getY(); }
+  /**
+   * See getY() for more information
+   * @public
+   *
+   * @returns {number}
+   */
+  get y() {
+    return this.getY();
+  }
 
   /**
    * Typically without rotations or negative parameters, this sets the scale for each axis. In its more general form,
@@ -2329,7 +2481,15 @@ class Node extends PhetioObject {
     return this;
   }
 
-  set rotation( value ) { this.setRotation( value ); }
+  /**
+   * See setRotation() for more information
+   * @public
+   *
+   * @param {number} value
+   */
+  set rotation( value ) {
+    this.setRotation( value );
+  }
 
   /**
    * Returns the rotation (in radians) that would be applied to a unit (1,0) vector when transformed with this Node's
@@ -2342,7 +2502,15 @@ class Node extends PhetioObject {
     return this._transform.getMatrix().getRotation();
   }
 
-  get rotation() { return this.getRotation(); }
+  /**
+   * See getRotation() for more information
+   * @public
+   *
+   * @returns {number}
+   */
+  get rotation() {
+    return this.getRotation();
+  }
 
   /**
    * Modifies the translation of this Node's transform so that the node's local-coordinate origin will be transformed
@@ -2383,7 +2551,15 @@ class Node extends PhetioObject {
     return this;
   }
 
-  set translation( value ) { this.setTranslation( value ); }
+  /**
+   * See setTranslation() for more information - this should only be used with Vector2
+   * @public
+   *
+   * @param {Vector2} value
+   */
+  set translation( value ) {
+    this.setTranslation( value );
+  }
 
   /**
    * Returns a vector of where this Node's local-coordinate origin will be transformed by it's own transform.
@@ -2396,7 +2572,15 @@ class Node extends PhetioObject {
     return new Vector2( matrix.m02(), matrix.m12() );
   }
 
-  get translation() { return this.getTranslation(); }
+  /**
+   * See getTranslation() for more information
+   * @public
+   *
+   * @returns {Vector2}
+   */
+  get translation() {
+    return this.getTranslation();
+  }
 
   /**
    * Appends a transformation matrix to this Node's transform. Appending means this transform is conceptually applied
@@ -2454,7 +2638,15 @@ class Node extends PhetioObject {
     this._transform.setMatrix( matrix );
   }
 
-  set matrix( value ) { this.setMatrix( value ); }
+  /**
+   * See setMatrix() for more information
+   * @public
+   *
+   * @param {Matrix3} value
+   */
+  set matrix( value ) {
+    this.setMatrix( value );
+  }
 
   /**
    * Returns a Matrix3 representing our Node's transform.
@@ -2468,7 +2660,15 @@ class Node extends PhetioObject {
     return this._transform.getMatrix();
   }
 
-  get matrix() { return this.getMatrix(); }
+  /**
+   * See getMatrix() for more information
+   * @public
+   *
+   * @returns {Matrix3}
+   */
+  get matrix() {
+    return this.getMatrix();
+  }
 
   /**
    * Returns a reference to our Node's transform
@@ -2481,6 +2681,12 @@ class Node extends PhetioObject {
     return this._transform;
   }
 
+  /**
+   * See getTransform() for more information
+   * @public
+   *
+   * @returns {Transform3}
+   */
   get transform() { return this.getTransform(); }
 
   /**
@@ -2590,7 +2796,15 @@ class Node extends PhetioObject {
     }
   }
 
-  set maxWidth( value ) { this.setMaxWidth( value ); }
+  /**
+   * See setMaxWidth() for more information
+   * @public
+   *
+   * @param {number|null} value
+   */
+  set maxWidth( value ) {
+    this.setMaxWidth( value );
+  }
 
   /**
    * Returns the maximum width (if any) of the Node.
@@ -2602,7 +2816,15 @@ class Node extends PhetioObject {
     return this._maxWidth;
   }
 
-  get maxWidth() { return this.getMaxWidth(); }
+  /**
+   * See getMaxWidth() for more information
+   * @public
+   *
+   * @returns {number|null}
+   */
+  get maxWidth() {
+    return this.getMaxWidth();
+  }
 
   /**
    * Sets the maximum height of the Node (see constructor for documentation on how maximum dimensions work).
@@ -2624,7 +2846,15 @@ class Node extends PhetioObject {
     }
   }
 
-  set maxHeight( value ) { this.setMaxHeight( value ); }
+  /**
+   * See setMaxHeight() for more information
+   * @public
+   *
+   * @param {number|null} value
+   */
+  set maxHeight( value ) {
+    this.setMaxHeight( value );
+  }
 
   /**
    * Returns the maximum height (if any) of the Node.
@@ -2636,7 +2866,15 @@ class Node extends PhetioObject {
     return this._maxHeight;
   }
 
-  get maxHeight() { return this.getMaxHeight(); }
+  /**
+   * See getMaxHeight() for more information
+   * @public
+   *
+   * @returns {number|null}
+   */
+  get maxHeight() {
+    return this.getMaxHeight();
+  }
 
   /**
    * Shifts this Node horizontally so that its left bound (in the parent coordinate frame) is equal to the passed-in
@@ -2659,7 +2897,15 @@ class Node extends PhetioObject {
     return this; // allow chaining
   }
 
-  set left( value ) { this.setLeft( value ); }
+  /**
+   * See setLeft() for more information
+   * @public
+   *
+   * @param {number} value
+   */
+  set left( value ) {
+    this.setLeft( value );
+  }
 
   /**
    * Returns the X value of the left side of the bounding box of this Node (in the parent coordinate frame).
@@ -2673,7 +2919,15 @@ class Node extends PhetioObject {
     return this.getBounds().minX;
   }
 
-  get left() { return this.getLeft(); }
+  /**
+   * See getLeft() for more information
+   * @public
+   *
+   * @returns {number}
+   */
+  get left() {
+    return this.getLeft();
+  }
 
   /**
    * Shifts this Node horizontally so that its right bound (in the parent coordinate frame) is equal to the passed-in
@@ -2695,7 +2949,15 @@ class Node extends PhetioObject {
     return this; // allow chaining
   }
 
-  set right( value ) { this.setRight( value ); }
+  /**
+   * See setRight() for more information
+   * @public
+   *
+   * @param {number} value
+   */
+  set right( value ) {
+    this.setRight( value );
+  }
 
   /**
    * Returns the X value of the right side of the bounding box of this Node (in the parent coordinate frame).
@@ -2709,7 +2971,15 @@ class Node extends PhetioObject {
     return this.getBounds().maxX;
   }
 
-  get right() { return this.getRight(); }
+  /**
+   * See getRight() for more information
+   * @public
+   *
+   * @returns {number}
+   */
+  get right() {
+    return this.getRight();
+  }
 
   /**
    * Shifts this Node horizontally so that its horizontal center (in the parent coordinate frame) is equal to the
@@ -2732,7 +3002,15 @@ class Node extends PhetioObject {
     return this; // allow chaining
   }
 
-  set centerX( value ) { this.setCenterX( value ); }
+  /**
+   * See setCenterX() for more information
+   * @public
+   *
+   * @param {number} value
+   */
+  set centerX( value ) {
+    this.setCenterX( value );
+  }
 
   /**
    * Returns the X value of this node's horizontal center (in the parent coordinate frame)
@@ -2746,7 +3024,15 @@ class Node extends PhetioObject {
     return this.getBounds().getCenterX();
   }
 
-  get centerX() { return this.getCenterX(); }
+  /**
+   * See getCenterX() for more information
+   * @public
+   *
+   * @returns {number}
+   */
+  get centerX() {
+    return this.getCenterX();
+  }
 
   /**
    * Shifts this Node vertically so that its vertical center (in the parent coordinate frame) is equal to the
@@ -2769,6 +3055,12 @@ class Node extends PhetioObject {
     return this; // allow chaining
   }
 
+  /**
+   * See setCenterY() for more information
+   * @public
+   *
+   * @param {number} value
+   */
   set centerY( value ) { this.setCenterY( value ); }
 
   /**
@@ -2783,7 +3075,15 @@ class Node extends PhetioObject {
     return this.getBounds().getCenterY();
   }
 
-  get centerY() { return this.getCenterY(); }
+  /**
+   * See getCenterX() for more information
+   * @public
+   *
+   * @returns {number}
+   */
+  get centerY() {
+    return this.getCenterY();
+  }
 
   /**
    * Shifts this Node vertically so that its top (in the parent coordinate frame) is equal to the passed-in Y value.
@@ -2806,7 +3106,15 @@ class Node extends PhetioObject {
     return this; // allow chaining
   }
 
-  set top( value ) { this.setTop( value ); }
+  /**
+   * See setTop() for more information
+   * @public
+   *
+   * @param {number} value
+   */
+  set top( value ) {
+    this.setTop( value );
+  }
 
   /**
    * Returns the lowest Y value of this node's bounding box (in the parent coordinate frame).
@@ -2820,7 +3128,15 @@ class Node extends PhetioObject {
     return this.getBounds().minY;
   }
 
-  get top() { return this.getTop(); }
+  /**
+   * See getTop() for more information
+   * @public
+   *
+   * @returns {number}
+   */
+  get top() {
+    return this.getTop();
+  }
 
   /**
    * Shifts this Node vertically so that its bottom (in the parent coordinate frame) is equal to the passed-in Y value.
@@ -2843,7 +3159,15 @@ class Node extends PhetioObject {
     return this; // allow chaining
   }
 
-  set bottom( value ) { this.setBottom( value ); }
+  /**
+   * See setBottom() for more information
+   * @public
+   *
+   * @param {number} value
+   */
+  set bottom( value ) {
+    this.setBottom( value );
+  }
 
   /**
    * Returns the highest Y value of this node's bounding box (in the parent coordinate frame).
@@ -2857,7 +3181,15 @@ class Node extends PhetioObject {
     return this.getBounds().maxY;
   }
 
-  get bottom() { return this.getBottom(); }
+  /**
+   * See getBottom() for more information
+   * @public
+   *
+   * @returns {number}
+   */
+  get bottom() {
+    return this.getBottom();
+  }
 
   /*
    * Convenience locations
@@ -2891,7 +3223,15 @@ class Node extends PhetioObject {
     return this;
   }
 
-  set leftTop( value ) { this.setLeftTop( value ); }
+  /**
+   * See setLeftTop() for more information
+   * @public
+   *
+   * @param {Vector2} value
+   */
+  set leftTop( value ) {
+    this.setLeftTop( value );
+  }
 
   /**
    * Returns the upper-left corner of this node's bounds.
@@ -2903,7 +3243,15 @@ class Node extends PhetioObject {
     return this.getBounds().getLeftTop();
   }
 
-  get leftTop() { return this.getLeftTop(); }
+  /**
+   * See getLeftTop() for more information
+   * @public
+   *
+   * @returns {Vector2}
+   */
+  get leftTop() {
+    return this.getLeftTop();
+  }
 
   /**
    * Sets the position of the center-top location of this node's bounds to the specified point.
@@ -2923,7 +3271,15 @@ class Node extends PhetioObject {
     return this;
   }
 
-  set centerTop( value ) { this.setCenterTop( value ); }
+  /**
+   * See setCenterTop() for more information
+   * @public
+   *
+   * @param {Vector2} value
+   */
+  set centerTop( value ) {
+    this.setCenterTop( value );
+  }
 
   /**
    * Returns the center-top location of this node's bounds.
@@ -2935,7 +3291,15 @@ class Node extends PhetioObject {
     return this.getBounds().getCenterTop();
   }
 
-  get centerTop() { return this.getCenterTop(); }
+  /**
+   * See getCenterTop() for more information
+   * @public
+   *
+   * @returns {Vector2}
+   */
+  get centerTop() {
+    return this.getCenterTop();
+  }
 
   /**
    * Sets the position of the upper-right corner of this node's bounds to the specified point.
@@ -2955,7 +3319,15 @@ class Node extends PhetioObject {
     return this;
   }
 
-  set rightTop( value ) { this.setRightTop( value ); }
+  /**
+   * See setRightTop() for more information
+   * @public
+   *
+   * @param {Vector2} value
+   */
+  set rightTop( value ) {
+    this.setRightTop( value );
+  }
 
   /**
    * Returns the upper-right corner of this node's bounds.
@@ -2967,7 +3339,15 @@ class Node extends PhetioObject {
     return this.getBounds().getRightTop();
   }
 
-  get rightTop() { return this.getRightTop(); }
+  /**
+   * See getRightTop() for more information
+   * @public
+   *
+   * @returns {Vector2}
+   */
+  get rightTop() {
+    return this.getRightTop();
+  }
 
   /**
    * Sets the position of the center-left of this node's bounds to the specified point.
@@ -2987,7 +3367,15 @@ class Node extends PhetioObject {
     return this;
   }
 
-  set leftCenter( value ) { this.setLeftCenter( value ); }
+  /**
+   * See setLeftCenter() for more information
+   * @public
+   *
+   * @param {Vector2} value
+   */
+  set leftCenter( value ) {
+    this.setLeftCenter( value );
+  }
 
   /**
    * Returns the center-left corner of this node's bounds.
@@ -2999,7 +3387,15 @@ class Node extends PhetioObject {
     return this.getBounds().getLeftCenter();
   }
 
-  get leftCenter() { return this.getLeftCenter(); }
+  /**
+   * See getLeftCenter() for more information
+   * @public
+   *
+   * @returns {Vector2}
+   */
+  get leftCenter() {
+    return this.getLeftCenter();
+  }
 
   /**
    * Sets the center of this node's bounds to the specified point.
@@ -3019,7 +3415,15 @@ class Node extends PhetioObject {
     return this;
   }
 
-  set center( value ) { this.setCenter( value ); }
+  /**
+   * See setCenter() for more information
+   * @public
+   *
+   * @param {Vector2} value
+   */
+  set center( value ) {
+    this.setCenter( value );
+  }
 
   /**
    * Returns the center of this node's bounds.
@@ -3031,7 +3435,15 @@ class Node extends PhetioObject {
     return this.getBounds().getCenter();
   }
 
-  get center() { return this.getCenter(); }
+  /**
+   * See getCenter() for more information
+   * @public
+   *
+   * @returns {Vector2}
+   */
+  get center() {
+    return this.getCenter();
+  }
 
   /**
    * Sets the position of the center-right of this node's bounds to the specified point.
@@ -3051,7 +3463,15 @@ class Node extends PhetioObject {
     return this;
   }
 
-  set rightCenter( value ) { this.setRightCenter( value ); }
+  /**
+   * See setRightCenter() for more information
+   * @public
+   *
+   * @param {Vector2} value
+   */
+  set rightCenter( value ) {
+    this.setRightCenter( value );
+  }
 
   /**
    * Returns the center-right of this node's bounds.
@@ -3063,7 +3483,15 @@ class Node extends PhetioObject {
     return this.getBounds().getRightCenter();
   }
 
-  get rightCenter() { return this.getRightCenter(); }
+  /**
+   * See getRightCenter() for more information
+   * @public
+   *
+   * @returns {Vector2}
+   */
+  get rightCenter() {
+    return this.getRightCenter();
+  }
 
   /**
    * Sets the position of the lower-left corner of this node's bounds to the specified point.
@@ -3083,7 +3511,15 @@ class Node extends PhetioObject {
     return this;
   }
 
-  set leftBottom( value ) { this.setLeftBottom( value ); }
+  /**
+   * See setLeftBottom() for more information
+   * @public
+   *
+   * @param {Vector2} value
+   */
+  set leftBottom( value ) {
+    this.setLeftBottom( value );
+  }
 
   /**
    * Returns the lower-left corner of this node's bounds.
@@ -3095,7 +3531,15 @@ class Node extends PhetioObject {
     return this.getBounds().getLeftBottom();
   }
 
-  get leftBottom() { return this.getLeftBottom(); }
+  /**
+   * See getLeftBottom() for more information
+   * @public
+   *
+   * @returns {Vector2}
+   */
+  get leftBottom() {
+    return this.getLeftBottom();
+  }
 
   /**
    * Sets the position of the center-bottom of this node's bounds to the specified point.
@@ -3115,7 +3559,15 @@ class Node extends PhetioObject {
     return this;
   }
 
-  set centerBottom( value ) { this.setCenterBottom( value ); }
+  /**
+   * See setCenterBottom() for more information
+   * @public
+   *
+   * @param {Vector2} value
+   */
+  set centerBottom( value ) {
+    this.setCenterBottom( value );
+  }
 
   /**
    * Returns the center-bottom of this node's bounds.
@@ -3127,7 +3579,15 @@ class Node extends PhetioObject {
     return this.getBounds().getCenterBottom();
   }
 
-  get centerBottom() { return this.getCenterBottom(); }
+  /**
+   * See getCenterBottom() for more information
+   * @public
+   *
+   * @returns {Vector2}
+   */
+  get centerBottom() {
+    return this.getCenterBottom();
+  }
 
   /**
    * Sets the position of the lower-right corner of this node's bounds to the specified point.
@@ -3147,7 +3607,15 @@ class Node extends PhetioObject {
     return this;
   }
 
-  set rightBottom( value ) { this.setRightBottom( value ); }
+  /**
+   * See setRightBottom() for more information
+   * @public
+   *
+   * @param {Vector2} value
+   */
+  set rightBottom( value ) {
+    this.setRightBottom( value );
+  }
 
   /**
    * Returns the lower-right corner of this node's bounds.
@@ -3159,7 +3627,15 @@ class Node extends PhetioObject {
     return this.getBounds().getRightBottom();
   }
 
-  get rightBottom() { return this.getRightBottom(); }
+  /**
+   * See getRightBottom() for more information
+   * @public
+   *
+   * @returns {Vector2}
+   */
+  get rightBottom() {
+    return this.getRightBottom();
+  }
 
   /**
    * Returns the width of this node's bounding box (in the parent coordinate frame).
@@ -3173,7 +3649,15 @@ class Node extends PhetioObject {
     return this.getBounds().getWidth();
   }
 
-  get width() { return this.getWidth(); }
+  /**
+   * See getWidth() for more information
+   * @public
+   *
+   * @returns {number}
+   */
+  get width() {
+    return this.getWidth();
+  }
 
   /**
    * Returns the height of this node's bounding box (in the parent coordinate frame).
@@ -3187,7 +3671,15 @@ class Node extends PhetioObject {
     return this.getBounds().getHeight();
   }
 
-  get height() { return this.getHeight(); }
+  /**
+   * See getHeight() for more information
+   * @public
+   *
+   * @returns {number}
+   */
+  get height() {
+    return this.getHeight();
+  }
 
   /**
    * Returns the unique integral ID for this node.
@@ -3199,7 +3691,15 @@ class Node extends PhetioObject {
     return this._id;
   }
 
-  get id() { return this.getId(); }
+  /**
+   * See getId() for more information
+   * @public
+   *
+   * @returns {number}
+   */
+  get id() {
+    return this.getId();
+  }
 
   /**
    * Called when our visibility Property changes values.
@@ -3241,7 +3741,15 @@ class Node extends PhetioObject {
     return this._visibleProperty.setTargetProperty( this, VISIBLE_PROPERTY_TANDEM_NAME, newTarget );
   }
 
-  set visibleProperty( property ) { this.setVisibleProperty( property ); }
+  /**
+   * See setVisibleProperty() for more information
+   * @public
+   *
+   * @param {TinyProperty.<boolean>|Property.<boolean>|null} property
+   */
+  set visibleProperty( property ) {
+    this.setVisibleProperty( property );
+  }
 
   /**
    * Get this Node's visibleProperty. Note! This is not the reciprocal of setVisibleProperty. Node.prototype._visibleProperty
@@ -3255,13 +3763,21 @@ class Node extends PhetioObject {
    *
    * Please use this with caution. See setVisibleProperty() for more information.
    *
-   * @returns {TinyForwardingProperty}
+   * @returns {TinyForwardingProperty.<boolean>}
    */
   getVisibleProperty() {
     return this._visibleProperty;
   }
 
-  get visibleProperty() { return this.getVisibleProperty(); }
+  /**
+   * See getVisibleProperty() for more information
+   * @public
+   *
+   * @returns {TinyForwardingProperty.<boolean>}
+   */
+  get visibleProperty() {
+    return this.getVisibleProperty();
+  }
 
   /**
    * Sets whether this Node is visible.
@@ -3278,7 +3794,15 @@ class Node extends PhetioObject {
     return this;
   }
 
-  set visible( value ) { this.setVisible( value ); }
+  /**
+   * See setVisible() for more information
+   * @public
+   *
+   * @param {boolean} value
+   */
+  set visible( value ) {
+    this.setVisible( value );
+  }
 
   /**
    * Returns whether this Node is visible.
@@ -3290,7 +3814,15 @@ class Node extends PhetioObject {
     return this.visibleProperty.value;
   }
 
-  get visible() { return this.isVisible(); }
+  /**
+   * See isVisible() for more information
+   * @public
+   *
+   * @returns {boolean}
+   */
+  get visible() {
+    return this.isVisible();
+  }
 
   /**
    * Swap the visibility of this node with another node. The Node that is made visible will receive keyboard focus
@@ -3337,7 +3869,15 @@ class Node extends PhetioObject {
     this.opacityProperty.value = opacity;
   }
 
-  set opacity( value ) { this.setOpacity( value ); }
+  /**
+   * See setOpacity() for more information
+   * @public
+   *
+   * @param {number} value
+   */
+  set opacity( value ) {
+    this.setOpacity( value );
+  }
 
   /**
    * Returns the opacity of this node.
@@ -3349,7 +3889,15 @@ class Node extends PhetioObject {
     return this.opacityProperty.value;
   }
 
-  get opacity() { return this.getOpacity(); }
+  /**
+   * See getOpacity() for more information
+   * @public
+   *
+   * @returns {number}
+   */
+  get opacity() {
+    return this.getOpacity();
+  }
 
   /**
    * Called when our opacity Property changes values.
@@ -3399,7 +3947,15 @@ class Node extends PhetioObject {
     this.filterChangeEmitter.emit();
   }
 
-  set filters( value ) { this.setFilters( value ); }
+  /**
+   * See setFilters() for more information
+   * @public
+   *
+   * @param {Array.<Filter>} value
+   */
+  set filters( value ) {
+    this.setFilters( value );
+  }
 
   /**
    * Returns the non-opacity filters for this Node.
@@ -3411,7 +3967,15 @@ class Node extends PhetioObject {
     return this._filters.slice();
   }
 
-  get filters() { return this.getFilters(); }
+  /**
+   * See getFilters() for more information
+   * @public
+   *
+   * @returns {Array.<Filter>}
+   */
+  get filters() {
+    return this.getFilters();
+  }
 
   /**
    * Sets what Property our pickableProperty is backed by, so that changes to this provided Property will change this
@@ -3426,11 +3990,18 @@ class Node extends PhetioObject {
    * @returns {Node} for chaining
    */
   setPickableProperty( newTarget ) {
-
     return this._pickableProperty.setTargetProperty( this, PICKABLE_PROPERTY_TANDEM_NAME, newTarget );
   }
 
-  set pickableProperty( property ) { this.setPickableProperty( property ); }
+  /**
+   * See setPickableProperty() for more information
+   * @public
+   *
+   * @param {TinyProperty.<boolean>|Property.<boolean>|null} property
+   */
+  set pickableProperty( property ) {
+    this.setPickableProperty( property );
+  }
 
   /**
    * Handles linking and checking child PhET-iO Properties such as visibleProperty and pickableProperty.
@@ -3467,18 +4038,27 @@ class Node extends PhetioObject {
    *
    * Please use this with caution. See setPickableProperty() for more information.
    *
-   * @returns {TinyForwardingProperty}
+   * @returns {TinyForwardingProperty.<boolean|null>}
    */
   getPickableProperty() {
     return this._pickableProperty;
   }
 
-  get pickableProperty() { return this.getPickableProperty(); }
+  /**
+   * See getPickableProperty() for more information
+   * @public
+   *
+   * @returns {TinyForwardingProperty.<boolean|null>}
+   */
+  get pickableProperty() {
+    return this.getPickableProperty();
+  }
 
   /**
    * Use this to automatically create a forwarded, PhET-iO instrumented pickableProperty internal to Node. This is different
    * from visible because pickable by default doesn't not create this forwarded Property.
    * @public
+   *
    * @param {boolean} pickablePropertyPhetioInstrumented
    * @returns {Node} - for chaining
    */
@@ -3486,7 +4066,15 @@ class Node extends PhetioObject {
     return this._pickableProperty.setTargetPropertyInstrumented( pickablePropertyPhetioInstrumented, this );
   }
 
-  set pickablePropertyPhetioInstrumented( pickablePropertyPhetioInstrumented ) { this.setPickablePropertyPhetioInstrumented( pickablePropertyPhetioInstrumented );}
+  /**
+   * See setPickablePropertyPhetioInstrumented() for more information
+   * @public
+   *
+   * @param {boolean} value
+   */
+  set pickablePropertyPhetioInstrumented( value ) {
+    this.setPickablePropertyPhetioInstrumented( value );
+  }
 
   /**
    * Sets whether this Node (and its subtree) will allow hit-testing (and thus user interaction), controlling what
@@ -3529,7 +4117,15 @@ class Node extends PhetioObject {
     return this;
   }
 
-  set pickable( value ) { this.setPickable( value ); }
+  /**
+   * See setPickable() for more information
+   * @public
+   *
+   * @param {boolean|null} value
+   */
+  set pickable( value ) {
+    this.setPickable( value );
+  }
 
   /**
    * Returns the pickability of this node.
@@ -3541,7 +4137,15 @@ class Node extends PhetioObject {
     return this._pickableProperty.value;
   }
 
-  get pickable() { return this.isPickable(); }
+  /**
+   * See isPickable() for more information
+   * @public
+   *
+   * @returns {boolean|null}
+   */
+  get pickable() {
+    return this.isPickable();
+  }
 
   /**
    * Called when our pickableProperty changes values.
@@ -3556,7 +4160,6 @@ class Node extends PhetioObject {
     // TODO: invalidate the cursor somehow? #150
   }
 
-
   /**
    * Sets what Property our enabledProperty is backed by, so that changes to this provided Property will change this
    * Node's enabled, and vice versa. This does not change this._enabledProperty. See TinyForwardingProperty.setTargetProperty()
@@ -3570,11 +4173,18 @@ class Node extends PhetioObject {
    * @returns {Node} for chaining
    */
   setEnabledProperty( newTarget ) {
-
     return this._enabledProperty.setTargetProperty( this, ENABLED_PROPERTY_TANDEM_NAME, newTarget );
   }
 
-  set enabledProperty( property ) { this.setEnabledProperty( property ); }
+  /**
+   * See setEnabledProperty() for more information
+   * @public
+   *
+   * @param {TinyProperty.<boolean>|Property.<boolean>|null} property
+   */
+  set enabledProperty( property ) {
+    this.setEnabledProperty( property );
+  }
 
   /**
    * Get this Node's enabledProperty. Note! This is not the reciprocal of setEnabledProperty. Node.prototype._enabledProperty
@@ -3588,13 +4198,21 @@ class Node extends PhetioObject {
    *
    * Please use this with caution. See setEnabledProperty() for more information.
    *
-   * @returns {TinyForwardingProperty}
+   * @returns {TinyForwardingProperty.<boolean>}
    */
   getEnabledProperty() {
     return this._enabledProperty;
   }
 
-  get enabledProperty() { return this.getEnabledProperty(); }
+  /**
+   * See getEnabledProperty() for more information
+   * @public
+   *
+   * @returns {TinyForwardingProperty.<boolean>}
+   */
+  get enabledProperty() {
+    return this.getEnabledProperty();
+  }
 
   /**
    * Use this to automatically create a forwarded, PhET-iO instrumented enabledProperty internal to Node. This is different
@@ -3607,7 +4225,15 @@ class Node extends PhetioObject {
     return this._enabledProperty.setTargetPropertyInstrumented( enabledPropertyPhetioInstrumented, this );
   }
 
-  set enabledPropertyPhetioInstrumented( enabledPropertyPhetioInstrumented ) { this.setEnabledPropertyPhetioInstrumented( enabledPropertyPhetioInstrumented );}
+  /**
+   * See setEnabledPropertyPhetioInstrumented() for more information
+   * @public
+   *
+   * @param {boolean} value
+   */
+  set enabledPropertyPhetioInstrumented( value ) {
+    this.setEnabledPropertyPhetioInstrumented( value );
+  }
 
   /**
    * Sets whether this Node is enabled
@@ -3623,7 +4249,15 @@ class Node extends PhetioObject {
     return this;
   }
 
-  set enabled( value ) { this.setEnabled( value ); }
+  /**
+   * See setEnabled() for more information
+   * @public
+   *
+   * @param {boolean} value
+   */
+  set enabled( value ) {
+    this.setEnabled( value );
+  }
 
   /**
    * Returns the enabled of this node.
@@ -3635,7 +4269,15 @@ class Node extends PhetioObject {
     return this._enabledProperty.value;
   }
 
-  get enabled() { return this.isEnabled(); }
+  /**
+   * See isEnabled() for more information
+   * @public
+   *
+   * @returns {boolean}
+   */
+  get enabled() {
+    return this.isEnabled();
+  }
 
   /**
    * Called when enabledProperty changes values.
@@ -3665,7 +4307,15 @@ class Node extends PhetioObject {
     this.inputEnabledProperty.value = inputEnabled;
   }
 
-  set inputEnabled( value ) { this.setInputEnabled( value ); }
+  /**
+   * See setInputEnabled() for more information
+   * @public
+   *
+   * @param {boolean} value
+   */
+  set inputEnabled( value ) {
+    this.setInputEnabled( value );
+  }
 
   /**
    * Returns whether input is enabled for this Node and its subtree. See setInputEnabled for more documentation.
@@ -3677,7 +4327,15 @@ class Node extends PhetioObject {
     return this.inputEnabledProperty.value;
   }
 
-  get inputEnabled() { return this.isInputEnabled(); }
+  /**
+   * See isInputEnabled() for more information
+   * @public
+   *
+   * @returns {boolean}
+   */
+  get inputEnabled() {
+    return this.isInputEnabled();
+  }
 
   /**
    * Sets all of the input listeners attached to this Node.
@@ -3705,7 +4363,15 @@ class Node extends PhetioObject {
     return this;
   }
 
-  set inputListeners( value ) { this.setInputListeners( value ); }
+  /**
+   * See setInputListeners() for more information
+   * @public
+   *
+   * @param {Array.<Object>} value
+   */
+  set inputListeners( value ) {
+    this.setInputListeners( value );
+  }
 
   /**
    * Returns a copy of all of our input listeners.
@@ -3717,7 +4383,15 @@ class Node extends PhetioObject {
     return this._inputListeners.slice( 0 ); // defensive copy
   }
 
-  get inputListeners() { return this.getInputListeners(); }
+  /**
+   * See getInputListeners() for more information
+   * @public
+   *
+   * @returns {Array.<Object>}
+   */
+  get inputListeners() {
+    return this.getInputListeners();
+  }
 
   /**
    * Sets the CSS cursor string that should be used when the mouse is over this node. null is the default, and
@@ -3740,7 +4414,15 @@ class Node extends PhetioObject {
     this._cursor = cursor === 'auto' ? null : cursor;
   }
 
-  set cursor( value ) { this.setCursor( value ); }
+  /**
+   * See setCursor() for more information
+   * @public
+   *
+   * @param {string|null} value
+   */
+  set cursor( value ) {
+    this.setCursor( value );
+  }
 
   /**
    * Returns the CSS cursor string for this node, or null if there is no cursor specified.
@@ -3752,7 +4434,15 @@ class Node extends PhetioObject {
     return this._cursor;
   }
 
-  get cursor() { return this.getCursor(); }
+  /**
+   * See getCursor() for more information
+   * @public
+   *
+   * @returns {string|null}
+   */
+  get cursor() {
+    return this.getCursor();
+  }
 
   /**
    * Sets the hit-tested mouse area for this Node (see constructor for more advanced documentation). Use null for the
@@ -3772,7 +4462,15 @@ class Node extends PhetioObject {
     }
   }
 
-  set mouseArea( value ) { this.setMouseArea( value ); }
+  /**
+   * See setMouseArea() for more information
+   * @public
+   *
+   * @param {Bounds2|Shape|null} value
+   */
+  set mouseArea( value ) {
+    this.setMouseArea( value );
+  }
 
   /**
    * Returns the hit-tested mouse area for this node.
@@ -3784,7 +4482,15 @@ class Node extends PhetioObject {
     return this._mouseArea;
   }
 
-  get mouseArea() { return this.getMouseArea(); }
+  /**
+   * See getMouseArea() for more information
+   * @public
+   *
+   * @returns {Bounds2|Shape|null}
+   */
+  get mouseArea() {
+    return this.getMouseArea();
+  }
 
   /**
    * Sets the hit-tested touch area for this Node (see constructor for more advanced documentation). Use null for the
@@ -3804,7 +4510,15 @@ class Node extends PhetioObject {
     }
   }
 
-  set touchArea( value ) { this.setTouchArea( value ); }
+  /**
+   * See setTouchArea() for more information
+   * @public
+   *
+   * @param {Bounds2|Shape|null} value
+   */
+  set touchArea( value ) {
+    this.setTouchArea( value );
+  }
 
   /**
    * Returns the hit-tested touch area for this node.
@@ -3816,7 +4530,15 @@ class Node extends PhetioObject {
     return this._touchArea;
   }
 
-  get touchArea() { return this.getTouchArea(); }
+  /**
+   * See getTouchArea() for more information
+   * @public
+   *
+   * @returns {Bounds2|Shape|null}
+   */
+  get touchArea() {
+    return this.getTouchArea();
+  }
 
   /**
    * Sets a clipped shape where only content in our local coordinate frame that is inside the clip area will be shown
@@ -3838,7 +4560,15 @@ class Node extends PhetioObject {
     }
   }
 
-  set clipArea( value ) { this.setClipArea( value ); }
+  /**
+   * See setClipArea() for more information
+   * @public
+   *
+   * @param {Shape|null} value
+   */
+  set clipArea( value ) {
+    this.setClipArea( value );
+  }
 
   /**
    * Returns the clipped area for this node.
@@ -3850,7 +4580,15 @@ class Node extends PhetioObject {
     return this.clipAreaProperty.value;
   }
 
-  get clipArea() { return this.getClipArea(); }
+  /**
+   * See getClipArea() for more information
+   * @public
+   *
+   * @returns {Shape|null}
+   */
+  get clipArea() {
+    return this.getClipArea();
+  }
 
   /**
    * Returns whether this Node has a clip area.
@@ -3941,7 +4679,15 @@ class Node extends PhetioObject {
     }
   }
 
-  set renderer( value ) { this.setRenderer( value ); }
+  /**
+   * See setRenderer() for more information
+   * @public
+   *
+   * @param {string|null} value
+   */
+  set renderer( value ) {
+    this.setRenderer( value );
+  }
 
   /**
    * Returns the preferred renderer (if any) of this node, as a string.
@@ -3969,7 +4715,15 @@ class Node extends PhetioObject {
     return this._hints.renderer;
   }
 
-  get renderer() { return this.getRenderer(); }
+  /**
+   * See getRenderer() for more information
+   * @public
+   *
+   * @returns {string|null}
+   */
+  get renderer() {
+    return this.getRenderer();
+  }
 
   /**
    * Sets whether or not Scenery will try to put this Node (and its descendants) into a separate SVG/Canvas/WebGL/etc.
@@ -3988,7 +4742,15 @@ class Node extends PhetioObject {
     }
   }
 
-  set layerSplit( value ) { this.setLayerSplit( value ); }
+  /**
+   * See setLayerSplit() for more information
+   * @public
+   *
+   * @param {boolean} value
+   */
+  set layerSplit( value ) {
+    this.setLayerSplit( value );
+  }
 
   /**
    * Returns whether the layerSplit performance flag is set.
@@ -4000,7 +4762,15 @@ class Node extends PhetioObject {
     return this._hints.layerSplit;
   }
 
-  get layerSplit() { return this.isLayerSplit(); }
+  /**
+   * See isLayerSplit() for more information
+   * @public
+   *
+   * @returns {boolean}
+   */
+  get layerSplit() {
+    return this.isLayerSplit();
+  }
 
   /**
    * Sets whether or not Scenery will take into account that this Node plans to use opacity. Can have performance
@@ -4019,7 +4789,15 @@ class Node extends PhetioObject {
     }
   }
 
-  set usesOpacity( value ) { this.setUsesOpacity( value ); }
+  /**
+   * See setUsesOpacity() for more information
+   * @public
+   *
+   * @param {boolean} value
+   */
+  set usesOpacity( value ) {
+    this.setUsesOpacity( value );
+  }
 
   /**
    * Returns whether the usesOpacity performance flag is set.
@@ -4031,7 +4809,15 @@ class Node extends PhetioObject {
     return this._hints.usesOpacity;
   }
 
-  get usesOpacity() { return this.getUsesOpacity(); }
+  /**
+   * See getUsesOpacity() for more information
+   * @public
+   *
+   * @returns {boolean}
+   */
+  get usesOpacity() {
+    return this.getUsesOpacity();
+  }
 
   /**
    * Sets a flag for whether whether the contents of this Node and its children should be displayed in a separate
@@ -4051,7 +4837,15 @@ class Node extends PhetioObject {
     }
   }
 
-  set cssTransform( value ) { this.setCSSTransform( value ); }
+  /**
+   * See setCSSTransform() for more information
+   * @public
+   *
+   * @param {boolean} value
+   */
+  set cssTransform( value ) {
+    this.setCSSTransform( value );
+  }
 
   /**
    * Returns wehther the cssTransform performance flag is set.
@@ -4063,7 +4857,15 @@ class Node extends PhetioObject {
     return this._hints.cssTransform;
   }
 
-  get cssTransform() { return this._hints.cssTransform; }
+  /**
+   * See isCSSTransformed() for more information
+   * @public
+   *
+   * @returns {boolean}
+   */
+  get cssTransform() {
+    return this.isCSSTransformed();
+  }
 
   /**
    * Sets a performance flag for whether layers/DOM elements should be excluded (or included) when things are
@@ -4082,7 +4884,15 @@ class Node extends PhetioObject {
     }
   }
 
-  set excludeInvisible( value ) { this.setExcludeInvisible( value ); }
+  /**
+   * See setExcludeInvisible() for more information
+   * @public
+   *
+   * @param {boolean} value
+   */
+  set excludeInvisible( value ) {
+    this.setExcludeInvisible( value );
+  }
 
   /**
    * Returns whether the excludeInvisible performance flag is set.
@@ -4094,7 +4904,15 @@ class Node extends PhetioObject {
     return this._hints.excludeInvisible;
   }
 
-  get excludeInvisible() { return this.isExcludeInvisible(); }
+  /**
+   * See isExcludeInvisible() for more information
+   * @public
+   *
+   * @returns {boolean}
+   */
+  get excludeInvisible() {
+    return this.isExcludeInvisible();
+  }
 
   /**
    * If this is set to true, child nodes that are invisible will NOT contribute to the bounds of this node.
@@ -4115,7 +4933,15 @@ class Node extends PhetioObject {
     }
   }
 
-  set excludeInvisibleChildrenFromBounds( value ) { this.setExcludeInvisibleChildrenFromBounds( value ); }
+  /**
+   * See setExcludeInvisibleChildrenFromBounds() for more information
+   * @public
+   *
+   * @param {boolean} value
+   */
+  set excludeInvisibleChildrenFromBounds( value ) {
+    this.setExcludeInvisibleChildrenFromBounds( value );
+  }
 
   /**
    * Returns whether the excludeInvisibleChildrenFromBounds flag is set, see
@@ -4128,7 +4954,15 @@ class Node extends PhetioObject {
     return this._excludeInvisibleChildrenFromBounds;
   }
 
-  get excludeInvisibleChildrenFromBounds() { return this.isExcludeInvisibleChildrenFromBounds(); }
+  /**
+   * See isExcludeInvisibleChildrenFromBounds() for more information
+   * @public
+   *
+   * @returns {boolean}
+   */
+  get excludeInvisibleChildrenFromBounds() {
+    return this.isExcludeInvisibleChildrenFromBounds();
+  }
 
   /**
    * Sets the preventFit performance flag.
@@ -4146,7 +4980,15 @@ class Node extends PhetioObject {
     }
   }
 
-  set preventFit( value ) { this.setPreventFit( value ); }
+  /**
+   * See setPreventFit() for more information
+   * @public
+   *
+   * @param {boolean} value
+   */
+  set preventFit( value ) {
+    this.setPreventFit( value );
+  }
 
   /**
    * Returns whether the preventFit performance flag is set.
@@ -4158,7 +5000,15 @@ class Node extends PhetioObject {
     return this._hints.preventFit;
   }
 
-  get preventFit() { return this.isPreventFit(); }
+  /**
+   * See isPreventFit() for more information
+   * @public
+   *
+   * @returns {boolean}
+   */
+  get preventFit() {
+    return this.isPreventFit();
+  }
 
   /**
    * Sets whether there is a custom WebGL scale applied to the Canvas, and if so what scale.
@@ -4176,7 +5026,15 @@ class Node extends PhetioObject {
     }
   }
 
-  set webglScale( value ) { this.setWebGLScale( value ); }
+  /**
+   * See setWebGLScale() for more information
+   * @public
+   *
+   * @param {number|null} value
+   */
+  set webglScale( value ) {
+    this.setWebGLScale( value );
+  }
 
   /**
    * Returns the value of the webglScale performance flag.
@@ -4188,7 +5046,15 @@ class Node extends PhetioObject {
     return this._hints.webglScale;
   }
 
-  get webglScale() { return this.getWebGLScale(); }
+  /**
+   * See getWebGLScale() for more information
+   * @public
+   *
+   * @returns {number|null}
+   */
+  get webglScale() {
+    return this.getWebGLScale();
+  }
 
   /*---------------------------------------------------------------------------*
    * Trail operations
@@ -5045,7 +5911,15 @@ class Node extends PhetioObject {
     return this._instances;
   }
 
-  get instances() { return this.getInstances(); }
+  /**
+   * See getInstances() for more information
+   * @public (scenery-internal)
+   *
+   * @returns {Array.<Instance>}
+   */
+  get instances() {
+    return this.getInstances();
+  }
 
   /**
    * Adds an Instance reference to our array.
@@ -5107,7 +5981,15 @@ class Node extends PhetioObject {
     return this._rootedDisplays;
   }
 
-  get rootedDisplays() { return this.getRootedDisplays(); }
+  /**
+   * See getRootedDisplays() for more information
+   * @public (scenery-internal)
+   *
+   * @returns {Array.<Display>}
+   */
+  get rootedDisplays() {
+    return this.getRootedDisplays();
+  }
 
   /**
    * Adds an display reference to our array.
@@ -5447,7 +6329,15 @@ class Node extends PhetioObject {
     return this.parentToGlobalBounds( this.getBounds() );
   }
 
-  get globalBounds() { return this.getGlobalBounds(); }
+  /**
+   * See getGlobalBounds() for more information
+   * @public
+   *
+   * @returns {Bounds2}
+   */
+  get globalBounds() {
+    return this.getGlobalBounds();
+  }
 
   /**
    * Returns the bounds of any other Node in our local coordinate frame.
