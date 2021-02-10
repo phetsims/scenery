@@ -199,9 +199,7 @@ class Display {
 
     // @public {Property.<Dimension2>} The (integral, > 0) dimensions of the Display's DOM element (only updates the DOM
     // element on updateDisplay())
-    this.sizeProperty = new TinyProperty( new Dimension2( options.width, options.height ), {
-      useDeepEquality: true
-    } );
+    this.sizeProperty = new TinyProperty( new Dimension2( options.width, options.height ) );
 
     // @private {Dimension2} - used to check against new size to see what we need to change
     this._currentSize = new Dimension2( -1, -1 );
