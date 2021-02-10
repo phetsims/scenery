@@ -5819,7 +5819,7 @@ class Node extends PhetioObject {
     }
 
     if ( options.useTargetBounds ) {
-      image.imageBounds = finalParentBounds.shifted( image.translation.negated() );
+      image.imageBounds = image.parentToLocalBounds( finalParentBounds );
     }
 
     if ( options.wrap ) {
