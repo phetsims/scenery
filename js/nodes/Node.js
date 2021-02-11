@@ -335,22 +335,21 @@ class Node extends PhetioObject {
     // @private {TinyForwardingProperty.<boolean>} - Whether this Node (and its children) will be visible when the scene is updated.
     // Visible Nodes by default will not be pickable either.
     // NOTE: This is fired synchronously when the visibility of the Node is toggled
-    this._visibleProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.visible, true );
-    this._visibleProperty.lazyLink( this.onVisiblePropertyChange.bind( this ) );
+    this._visibleProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.visible, true,
+      this.onVisiblePropertyChange.bind( this ) );
 
     // @public {TinyProperty.<number>} - Opacity, in the range from 0 (fully transparent) to 1 (fully opaque).
     // NOTE: This is fired synchronously when the opacity of the Node is toggled
-    this.opacityProperty = new TinyProperty( DEFAULT_OPTIONS.opacity );
-    this.opacityProperty.lazyLink( this.onOpacityPropertyChange.bind( this ) );
+    this.opacityProperty = new TinyProperty( DEFAULT_OPTIONS.opacity, this.onOpacityPropertyChange.bind( this ) );
 
     // @private {TinyForwardingProperty.<boolean|null>} - See setPickable() and setPickableProperty()
     // NOTE: This is fired synchronously when the pickability of the Node is toggled
-    this._pickableProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.pickable, DEFAULT_OPTIONS.pickablePropertyPhetioInstrumented );
-    this._pickableProperty.lazyLink( this.onPickablePropertyChange.bind( this ) );
+    this._pickableProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.pickable,
+      DEFAULT_OPTIONS.pickablePropertyPhetioInstrumented, this.onPickablePropertyChange.bind( this ) );
 
     // @public {TinyForwardingProperty.<boolean>} - See setEnabled() and setEnabledProperty()
-    this._enabledProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.enabled, DEFAULT_OPTIONS.enabledPropertyPhetioInstrumented );
-    this._enabledProperty.lazyLink( this.onEnabledPropertyChange.bind( this ) );
+    this._enabledProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.enabled,
+      DEFAULT_OPTIONS.enabledPropertyPhetioInstrumented, this.onEnabledPropertyChange.bind( this ) );
 
     // @public {TinyProperty.<boolean>} - Whether input event listeners on this Node or descendants on a trail will have
     // input listeners. triggered. Note that this does NOT effect picking, and only prevents some listeners from being
@@ -3708,6 +3707,7 @@ class Node extends PhetioObject {
    * @param {boolean} visible
    */
   onVisiblePropertyChange( visible ) {
+
     // changing visibility can affect pickability pruning, which affects mouse/touch bounds
     this._picker.onVisibilityChange();
 
@@ -3903,10 +3903,8 @@ class Node extends PhetioObject {
    * Called when our opacity Property changes values.
    * @private
    *
-   * @param {boolean} opacity
-   * @param {boolean} oldOpacity
    */
-  onOpacityPropertyChange( opacity, oldOpacity ) {
+  onOpacityPropertyChange() {
     this.filterChangeEmitter.emit();
   }
 

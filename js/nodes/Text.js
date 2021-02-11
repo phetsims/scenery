@@ -65,8 +65,7 @@ class Text extends Node {
     super();
 
     // @public {TinyProperty.<string>} - The text to display. We'll initialize this by mutating.
-    this._textProperty = new TinyForwardingProperty( '', true );
-    this._textProperty.lazyLink( this.onTextPropertyChange.bind( this ) );
+    this._textProperty = new TinyForwardingProperty( '', true, this.onTextPropertyChange.bind( this ) );
 
     // @private {Font} - The font with which to display the text.
     this._font = Font.DEFAULT;

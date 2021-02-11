@@ -158,8 +158,7 @@ class RichText extends Node {
     super();
 
     // @public {TinyProperty.<string>} - The text to display. We'll initialize this by mutating.
-    this._textProperty = new TinyForwardingProperty( '', true );
-    this._textProperty.lazyLink( this.onTextPropertyChange.bind( this ) );
+    this._textProperty = new TinyForwardingProperty( '', true, this.onTextPropertyChange.bind( this ) );
 
     // @private {Font}
     this._font = DEFAULT_FONT;
