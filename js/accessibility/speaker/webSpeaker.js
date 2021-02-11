@@ -38,8 +38,8 @@ class WebSpeaker {
     // replace the emitters above?
     this.speakingProperty = new BooleanProperty( false );
 
-    // create the synthesizer
-    this.synth = window.speechSynthesis;
+    // {SpeechSynthesis|null} - synth from Web Speech API that drives speech
+    this.synth = null;
 
     // @public {SpeechSynthesisVoice[]} - possible voices for Web Speech synthesis
     this.voices = [];
@@ -72,16 +72,6 @@ class WebSpeaker {
     // when we are done with an utterance - see #215
     this.utterances = [];
 
-    // On chrome, synth.getVoices() returns an empty array until the onvoiceschanged event, so we have to
-    // wait to populate
-    const populateVoicesListener = () => {
-      this.populateVoices();
-
-      // remove the listener after they have been populated once from this event
-      this.synth.onvoiceschanged = null;
-    };
-    this.synth.onvoiceschanged = populateVoicesListener;
-
     // when becoming disabled, we want to cancel any current speech
     const enabledListener = enabled => {
       if ( !enabled ) {
@@ -102,7 +92,20 @@ class WebSpeaker {
   initialize() {
     this.initialized = true;
 
-    // try to populate voice options first
+    this.synth = window.speechSynthesis;
+    assert && assert( this.synth, 'SpeechSynthesis not supported on your platform.' );
+
+    // On chrome, synth.getVoices() returns an empty array until the onvoiceschanged event, so we have to
+    // wait to populate
+    const populateVoicesListener = () => {
+      this.populateVoices();
+
+      // remove the listener after they have been populated once from this event
+      this.synth.onvoiceschanged = null;
+    };
+    this.synth.onvoiceschanged = populateVoicesListener;
+
+    // otherwise, try to populate voices immediately
     this.populateVoices();
   }
 
@@ -204,11 +207,37 @@ class WebSpeaker {
   }
 
   /**
+   * Speak something initially and synchronously after some user interaction. Browsers require that
+   * speech happen in response to some user interaction, with absolutely no delay. A safari workaround
+   * includes waiting to speak behind a timeout. And announce is used with the utteranceQueue, which does
+   * not speek things instantly. Use this when speech is enabled, then use speak for all other usages.
+   * @public
+   *
+   * @param utterThis
+   */
+  initialSpeech( utterThis ) {
+    if ( this.initialized ) {
+      assert && assert( !this.madeInitialSpeech, 'this should only be called once, use speak from now on' );
+      this.madeInitialSpeech = true;
+
+      // embidding marks (for i18n) impact the output, strip before speaking
+      const utterance = new SpeechSynthesisUtterance( stripEmbeddingMarks( utterThis ) );
+      utterance.voice = this.voiceProperty.value;
+      utterance.pitch = this.voicePitchProperty.value;
+      utterance.rate = this.voiceRateProperty.value;
+
+      this.synth.speak( utterance );
+    }
+  }
+
+  /**
    * Stops all current speech as well and removes all utterances in the queue.
    * @public
    */
   cancel() {
-    this.synth.cancel();
+    if ( this.initialized ) {
+      this.synth.cancel();
+    }
   }
 }
 
