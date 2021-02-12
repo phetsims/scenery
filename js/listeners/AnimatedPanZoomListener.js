@@ -406,7 +406,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // prevent Safari from doing anything native with this gesture
     domEvent.preventDefault();
     this.trackpadGestureStartScale = domEvent.scale;
-    this.scaleGestureTargetPosition = new Vector2( event.pageX, event.pageY );
+    this.scaleGestureTargetPosition = new Vector2( domEvent.pageX, domEvent.pageY );
   }
 
   /**
