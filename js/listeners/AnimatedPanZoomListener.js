@@ -718,7 +718,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * @param {Node} node
    */
   keepNodeInView( node ) {
-    if ( this._panBounds.isFinite() && !this._panBounds.containsBounds( node.globalBounds ) ) {
+    if ( this._panBounds.isFinite() && node.bounds.isFinite() && !this._panBounds.containsBounds( node.globalBounds ) ) {
       this.panToNode( node );
     }
   }
@@ -995,8 +995,10 @@ class KeyPress {
     // default cause, scale target will be origin of the screen
     scratchScaleTargetVector.setXY( 0, 0 );
 
+    // zoom into the focused Node if it has defined bounds, it may not if it is for controlling the
+    // virtual cursor and has an invisible focus highlight
     const focusedNode = Display.focusedNode;
-    if ( focusedNode ) {
+    if ( focusedNode && focusedNode.bounds.isFinite() ) {
       scratchScaleTargetVector.set( focusedNode.parentToGlobalPoint( focusedNode.center ) );
     }
     else {
@@ -1017,6 +1019,7 @@ class KeyPress {
       }
     }
 
+    assert && assert( scratchScaleTargetVector.isFinite(), 'target position not defined' );
     return scratchScaleTargetVector;
   }
 }
