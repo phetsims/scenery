@@ -61,7 +61,7 @@ class SwipeListener {
     this.timeSinceLastDown = 0;
 
     // @private - list of all pointers that are currently down for this listener - if there are more than one
-    // we will allow responding to zoom guestures, but if there is only one pointer we will prevent pan
+    // we will allow responding to zoom gestures, but if there is only one pointer we will prevent pan
     // gestures because we are taking over for swipe gestures instead
     this.downPointers = [];
 
