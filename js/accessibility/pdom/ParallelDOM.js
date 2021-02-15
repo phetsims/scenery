@@ -189,8 +189,8 @@ const ACCESSIBILITY_OPTION_KEYS = [
 
   'innerContent', // {string|null} - Sets the inner text or HTML for a node's primary sibling element
   'inputType', // {string|null} - Sets the input type for the primary sibling DOM element, only relevant if tagName is 'input'
-  'inputValue', // {string|null} - Sets the input value for the primary sibling DOM element, only relevant if tagName is 'input'
-  'pdomChecked', // {string|null} - Sets the 'checked' state for inputs of type 'radio' and 'checkbox'
+  'inputValue', // {string|null|number} - Sets the input value for the primary sibling DOM element, only relevant if tagName is 'input'
+  'pdomChecked', // {boolean} - Sets the 'checked' state for inputs of type 'radio' and 'checkbox'
   'pdomNamespace', // {string|null} - Sets the namespace for the primary element
   'ariaLabel', // {string|null} - Sets the value of the 'aria-label' attribute on the primary sibling of this Node
   'ariaRole', // {string|null} - Sets the ARIA role for the primary sibling of this Node
