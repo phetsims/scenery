@@ -302,26 +302,33 @@ const PDOMUtils = {
    * @public
    *
    * @param {Element} domElement
-   * @param {string} textContent - could have acceptable HTML "formatting" tags in it
+   * @param {string|null} textContent - domElement is cleared of content if null, could have acceptable HTML
+   *                                    "formatting" tags in it
    */
   setTextContent( domElement, textContent ) {
     assert && assert( domElement instanceof Element ); // parent to HTMLElement, to support other namespaces
-    assert && assert( typeof textContent === 'string' );
+    assert && assert( textContent === null || typeof textContent === 'string' );
 
-    // TODO: this line must be removed to support i18n Interactive Description, see https://github.com/phetsims/chipper/issues/798
-    const textWithoutEmbeddingMarks = stripEmbeddingMarks( textContent );
+    if ( textContent === null ) {
+      domElement.innerHTML = '';
+    }
+    else {
 
-    // Disallow any unfilled template variables to be set in the PDOM.
-    validate( textWithoutEmbeddingMarks, ValidatorDef.STRING_WITHOUT_TEMPLATE_VARS_VALIDATOR );
+      // TODO: this line must be removed to support i18n Interactive Description, see https://github.com/phetsims/chipper/issues/798
+      const textWithoutEmbeddingMarks = stripEmbeddingMarks( textContent );
 
-    if ( tagNameSupportsContent( domElement.tagName ) ) {
+      // Disallow any unfilled template variables to be set in the PDOM.
+      validate( textWithoutEmbeddingMarks, ValidatorDef.STRING_WITHOUT_TEMPLATE_VARS_VALIDATOR );
 
-      // only returns true if content contains listed formatting tags
-      if ( PDOMUtils.containsFormattingTags( textWithoutEmbeddingMarks ) ) {
-        domElement.innerHTML = textWithoutEmbeddingMarks;
-      }
-      else {
-        domElement.textContent = textWithoutEmbeddingMarks;
+      if ( tagNameSupportsContent( domElement.tagName ) ) {
+
+        // only returns true if content contains listed formatting tags
+        if ( PDOMUtils.containsFormattingTags( textWithoutEmbeddingMarks ) ) {
+          domElement.innerHTML = textWithoutEmbeddingMarks;
+        }
+        else {
+          domElement.textContent = textWithoutEmbeddingMarks;
+        }
       }
     }
   },

@@ -113,6 +113,9 @@ QUnit.test( 'tagName/innerContent options', assert => {
   a.innerContent = TEST_LABEL_HTML_2;
   assert.ok( aElement.innerHTML === TEST_LABEL_HTML_2, 'html label should use innerHTML, overwrite from html' );
 
+  a.innerContent = null;
+  assert.ok( aElement.innerHTML === '', 'innerHTML should be empty after clearing innerContent' );
+
   a.tagName = null;
   assert.ok( a.pdomInstances.length === 0, 'set to null should clear accessible instances' );
 
@@ -140,6 +143,7 @@ QUnit.test( 'tagName/innerContent options', assert => {
   window.assert && assert.throws( () => {
     b.tagName = 'input';
   }, /.*/, 'error thrown after setting tagName to input on Node with innerContent.' );
+
   display.dispose();
 } );
 
@@ -194,6 +198,9 @@ QUnit.test( 'labelTagName/labelContent option', assert => {
 
   a.labelContent = TEST_LABEL_HTML;
   assert.ok( labelSibling.innerHTML === TEST_LABEL_HTML, 'html label should use innerHTML' );
+
+  a.labelContent = null;
+  assert.ok( labelSibling.innerHTML === '', 'label content should be empty after setting to null' );
 
   a.labelContent = TEST_LABEL_HTML_2;
   assert.ok( labelSibling.innerHTML === TEST_LABEL_HTML_2, 'html label should use innerHTML, overwrite from html' );
@@ -352,6 +359,9 @@ QUnit.test( 'descriptionTagName/descriptionContent option', assert => {
 
   a.descriptionContent = TEST_DESCRIPTION_HTML;
   assert.ok( descriptionSibling.innerHTML === TEST_DESCRIPTION_HTML, 'html label should use innerHTML' );
+
+  a.descriptionContent = null;
+  assert.ok( descriptionSibling.innerHTML === '', 'description content should be cleared' );
 
   a.descriptionContent = TEST_DESCRIPTION_HTML_2;
   assert.ok( descriptionSibling.innerHTML === TEST_DESCRIPTION_HTML_2, 'html label should use innerHTML, overwrite from html' );

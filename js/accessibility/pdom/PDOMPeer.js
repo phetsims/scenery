@@ -742,10 +742,10 @@ class PDOMPeer {
   /**
    * Responsible for setting the content for the label sibling
    * @public (scenery-internal)
-   * @param {string} content - the content for the label sibling.
+   * @param {string|null} content - the content for the label sibling.
    */
   setLabelSiblingContent( content ) {
-    assert && assert( typeof content === 'string', 'incorrect label content type' );
+    assert && assert( content === null || typeof content === 'string', 'incorrect label content type' );
 
     // no-op to support any option order
     if ( !this._labelSibling ) {
@@ -765,10 +765,10 @@ class PDOMPeer {
   /**
    * Responsible for setting the content for the description sibling
    * @public (scenery-internal)
-   * @param {string} content - the content for the description sibling.
+   * @param {string|null} content - the content for the description sibling.
    */
   setDescriptionSiblingContent( content ) {
-    assert && assert( typeof content === 'string', 'incorrect description content type' );
+    assert && assert( content === null || typeof content === 'string', 'incorrect description content type' );
 
     // no-op to support any option order
     if ( !this._descriptionSibling ) {
@@ -780,10 +780,10 @@ class PDOMPeer {
   /**
    * Responsible for setting the content for the primary sibling
    * @public (scenery-internal)
-   * @param {string} content - the content for the primary sibling.
+   * @param {string|null} content - the content for the primary sibling.
    */
   setPrimarySiblingContent( content ) {
-    assert && assert( typeof content === 'string', 'incorrect inner content type' );
+    assert && assert( content === null || typeof content === 'string', 'incorrect inner content type' );
     assert && assert( this.pdomInstance.children.length === 0, 'descendants exist with accessible content, innerContent cannot be used' );
     assert && assert( PDOMUtils.tagNameSupportsContent( this._primarySibling.tagName ),
       'tagName: ' + this._tagName + ' does not support inner content' );
