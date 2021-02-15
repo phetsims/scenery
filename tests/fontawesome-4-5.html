@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<!--
+Unlike all the other tests, this test runs in unbuilt mode, and uses ES6 modules.
+@author Sam Reid (PhET Interactive Simulations)
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport"
+        content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <title>Font Awesome Icons - Scenery Example</title>
+
+  <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
+  <script src="../../aqua/js/pageload-connector.js"></script>
+
+  <!-- jQuery and lodash are dependencies -->
+  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
+  <script src="../../assert/js/assert.js"></script>
+  <script src="../../tandem/js/PhetioIDUtils.js"></script>
+
+  <style>
+    /* so the centering of the text is obvious */
+    #example-scene {
+      width: 1024px;
+      height: 9999px;
+    }
+  </style>
+</head>
+<body>
+<div id="example-scene"></div>
+<script type="module">
+
+  import FontAwesomeIcons4_5 from '../../sherpa/js/fontawesome-4/FontAwesomeIcons4_5.js';
+  import Replyd from '../../sherpa/js/fontawesome-5/brands/Replyd.js';
+  import EyeSlash from '../../sherpa/js/fontawesome-5/solid/EyeSlash.js';
+  import EyeSlashReg from '../../sherpa/js/fontawesome-5/regular/EyeSlash.js';
+  import Snowflake from '../../sherpa/js/fontawesome-5/solid/Snowflake.js';
+  import SnowflakeReg from '../../sherpa/js/fontawesome-5/regular/Snowflake.js';
+  import Camera from '../../sherpa/js/fontawesome-5/solid/Camera.js';
+  import Check from '../../sherpa/js/fontawesome-5/solid/Check.js';
+  import Comment from '../../sherpa/js/fontawesome-5/solid/Comment.js';
+  import CommentReg from '../../sherpa/js/fontawesome-5/regular/Comment.js';
+  import CheckSquare from '../../sherpa/js/fontawesome-5/solid/CheckSquare.js';
+  import CheckSquareReg from '../../sherpa/js/fontawesome-5/regular/CheckSquare.js';
+  import Cut from '../../sherpa/js/fontawesome-5/solid/Cut.js';
+  import Dna from '../../sherpa/js/fontawesome-5/solid/Dna.js';
+  import Exclamation from '../../sherpa/js/fontawesome-5/solid/Exclamation.js';
+  import Eye from '../../sherpa/js/fontawesome-5/solid/Eye.js';
+  import EyeReg from '../../sherpa/js/fontawesome-5/regular/Eye.js';
+  import HandScissors from '../../sherpa/js/fontawesome-5/solid/HandScissors.js';
+  import HandScissorsReg from '../../sherpa/js/fontawesome-5/regular/HandScissors.js';
+  import Home from '../../sherpa/js/fontawesome-5/solid/Home.js';
+  import InfoCircle from '../../sherpa/js/fontawesome-5/solid/InfoCircle.js';
+  import LevelDownAlt from '../../sherpa/js/fontawesome-5/solid/LevelDownAlt.js';
+  import Music from '../../sherpa/js/fontawesome-5/solid/Music.js';
+  import PencilAlt from '../../sherpa/js/fontawesome-5/solid/PencilAlt.js';
+  import PencilRuler from '../../sherpa/js/fontawesome-5/solid/PencilRuler.js';
+  import Reply from '../../sherpa/js/fontawesome-5/solid/Reply.js';
+  import ReplyAll from '../../sherpa/js/fontawesome-5/solid/ReplyAll.js';
+  import Sun from '../../sherpa/js/fontawesome-5/solid/Sun.js';
+  import SunReg from '../../sherpa/js/fontawesome-5/regular/Sun.js';
+  import Times from '../../sherpa/js/fontawesome-5/solid/Times.js';
+  import TimesCircle from '../../sherpa/js/fontawesome-5/solid/TimesCircle.js';
+  import TimesCircleReg from '../../sherpa/js/fontawesome-5/regular/TimesCircle.js';
+  import Trash from '../../sherpa/js/fontawesome-5/solid/Trash.js';
+  import Undo from '../../sherpa/js/fontawesome-5/solid/Undo.js';
+  import UndoAlt from '../../sherpa/js/fontawesome-5/solid/UndoAlt.js';
+  import UserCheck from '../../sherpa/js/fontawesome-5/solid/UserCheck.js';
+  import VolumeOff from '../../sherpa/js/fontawesome-5/solid/VolumeOff.js';
+  import VolumeUp from '../../sherpa/js/fontawesome-5/solid/VolumeUp.js';
+  import FontAwesomeNode from '../../sun/js/FontAwesomeNode.js';
+  import Node from '../js/nodes/Node.js';
+  import HBox from '../js/nodes/HBox.js';
+  import VBox from '../js/nodes/VBox.js';
+  import Display from '../js/display/Display.js';
+
+  // Create a scene graph over the block-level element. Everything inside is replaced
+  var scene = new Node();
+  var display = new Display( scene, {
+    container: document.getElementById( 'example-scene' )
+  } );
+
+  const iconList = Object.keys( FontAwesomeIcons4_5 );
+  // const fiveIcon = new Camera()
+  const alternates = {
+    camera: [ Camera ],
+    check: [ Check ],
+    check_empty: [  ],
+    check_square_o: [CheckSquareReg],
+    comment: [ Comment ],
+    cut: [ Cut ],
+    dna_solid: [ Dna ],
+    eye_close: [ EyeSlash,EyeSlashReg ],
+    eye_open: [ EyeReg ],
+    exclamation: [ Exclamation ],
+    exchange: [],
+    home: [ Home ],
+    info_circle: [ InfoCircle ],
+    level_down: [ LevelDownAlt ],
+    music_solid: [ Music ],
+    pencil_square_o: [ PencilAlt, PencilRuler ],
+    refresh: [],
+    reply: [ Reply, ReplyAll, Replyd ],
+    snowflake: [ Snowflake, SnowflakeReg ],
+    sun_solid: [ Sun, SunReg ],
+    times: [ Times ],
+    times_circle: [ TimesCircle ],
+    times_circle_regular: [ TimesCircleReg ],
+    trash: [ Trash ],
+    undo: [ UndoAlt ],
+    volume_off: [ VolumeOff ],
+    volume_up: [ VolumeUp ],
+    warning_sign: []
+  };
+  const types = iconList.map( key => {
+    const alts = alternates[ key ];
+    const child = new FontAwesomeNode( key );
+    let tooTall = false;
+    if ( child.width > child.height ) {
+      child.scale( 100 / child.width );
+    }
+    else {
+      tooTall = true;
+      child.scale( 100 / child.height );
+    }
+
+    const children = [ child ];
+    if ( alts ) {
+      children.push( ...alts.map( Icon => {
+        const icon = new Icon( { fill: 'black' } );
+        if ( tooTall ) {
+          icon.scale( 100 / icon.height );
+        }
+        else {
+          icon.scale( 100 / icon.width );
+        }
+
+        return icon;
+      } ) );
+    }
+    return new HBox( { spacing: 5, children: children } );
+  } );
+
+  // const groups = _.chunk( types, 12 ).map( g => new HBox( { spacing: 1, children: g } ) );
+  const node = new Node( {
+    children: [ new VBox( { align: 'left', spacing: 5, children: types, left: 0, top: 0 } ) ]
+  } );
+  scene.addChild( node );
+
+  display.updateDisplay();
+</script>
+</body>
+</html>
