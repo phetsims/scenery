@@ -387,7 +387,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
       // this is a native command, but we are taking over
-      event.preventDefault();
+      domEvent.preventDefault();
       this.resetTransform();
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
