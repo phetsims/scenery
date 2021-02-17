@@ -172,6 +172,15 @@ var KeyboardUtils = {
   getKeyDef( domEvent ) {
     validate( domEvent, DOM_EVENT_VALIDATOR );
     return domEvent.key ? domEvent.key.toLowerCase() : null;
+  },
+
+  /**
+   * Return true if the param is of type KeyDef
+   * @param {*} key
+   * @returns {boolean}
+   */
+  isKeyDef( key ) {
+    return typeof key === 'string' && key.toLowerCase() === key;
   }
 };
 
