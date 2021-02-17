@@ -239,6 +239,30 @@ const FlowConfigurable = memoize( type => {
      *
      * @returns {number|null}
      */
+    get grow() {
+      return this._grow;
+    }
+
+    /**
+     * @public
+     *
+     * @param {number|null} value
+     */
+    set grow( value ) {
+      assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) && value >= 0 ) );
+
+      if ( this._grow !== value ) {
+        this._grow = value;
+
+        this.changedEmitter.emit();
+      }
+    }
+
+    /**
+     * @public
+     *
+     * @returns {number|null}
+     */
     get xMargin() {
       assert && assert( this._leftMargin === this._rightMargin );
 

@@ -26,7 +26,7 @@ class Constraint {
     // @private {number} - Prevents layout() from running while true. Generally will be unlocked and laid out.
     this._layoutLockCount = 0;
 
-    // @private {function}
+    // @protected {function}
     this._updateLayoutListener = this.updateLayoutAutomatically.bind( this );
 
     // @private {Set.<Node>}

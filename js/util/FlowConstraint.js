@@ -55,7 +55,7 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
     this._orientation = Orientation.HORIZONTAL;
 
     // @private {FlowConstraint.Justify}
-    this._justify = FlowConstraint.Justify.SPACE_BETWEEN;
+    this._justify = FlowConstraint.Justify.SPACE_BETWEEN; // TODO: decide on a good default here
 
     // @private {boolean}
     this._wrap = false;
@@ -80,14 +80,12 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
     this.mutateConfigurable( options );
     mutate( this, FLOW_CONSTRAINT_OPTION_KEYS, options );
 
-    const updateListener = () => this.updateLayoutAutomatically();
-
     // Key configuration changes to relayout
-    this.changedEmitter.addListener( updateListener );
+    this.changedEmitter.addListener( this._updateLayoutListener );
 
     // TODO: Add disposal capabilities?
-    this.preferredWidthProperty.lazyLink( updateListener );
-    this.preferredHeightProperty.lazyLink( updateListener );
+    this.preferredWidthProperty.lazyLink( this._updateLayoutListener );
+    this.preferredHeightProperty.lazyLink( this._updateLayoutListener );
   }
 
   /**
@@ -197,7 +195,7 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
       // Grow potential sizes if possible
       // TODO: This looks unfun to read... check this with a fresh mind
       let growableCells;
-      while ( spaceRemaining > 1e7 && ( growableCells = line.filter( ( cell, index ) => {
+      while ( spaceRemaining > 1e7 && ( growableCells = line.filter( cell => {
         if ( cell.grow !== null ) {
           if ( cell.grow === 0 ) {
             return false;
@@ -454,6 +452,7 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
 
     this.cells.splice( index, 0, cell );
     this.addNode( cell.node );
+    cell.changedEmitter.addListener( this._updateLayoutListener );
 
     this.updateLayoutAutomatically();
   }
@@ -467,8 +466,10 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
     assert && assert( cell instanceof FlowCell );
     assert && assert( _.includes( this.cells, cell ) );
 
+    // TODO: handle disposing here?
     arrayRemove( this.cells, cell );
     this.removeNode( cell.node );
+    cell.changedEmitter.removeListener( this._updateLayoutListener );
 
     this.updateLayoutAutomatically();
   }

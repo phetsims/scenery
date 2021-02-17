@@ -10,7 +10,6 @@ import Utils from '../../../dot/js/Utils.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
 import scenery from '../scenery.js';
 import FlowConfigurable from './FlowConfigurable.js';
-import Sizable from './Sizable.js';
 
 class FlowCell extends FlowConfigurable( Object ) {
   /**
@@ -83,21 +82,21 @@ class FlowCell extends FlowConfigurable( Object ) {
    * @returns {number}
    */
   getMaximumSize( orientation, defaultConfig ) {
-    const isSizable = this.node instanceof Sizable;
+    const isSizable = this.node.sizable;
 
     if ( orientation === Orientation.HORIZONTAL ) {
       return this.withDefault( 'leftMargin', defaultConfig ) +
              Math.min(
-               isSizable ? this.node.maximumWidth : this.node.width,
-               this.withDefault( 'maxCellWidth', defaultConfig ) || 0
+               isSizable ? Number.POSITIVE_INFINITY : this.node.width,
+               this.withDefault( 'maxCellWidth', defaultConfig ) || Number.POSITIVE_INFINITY
              ) +
              this.withDefault( 'rightMargin', defaultConfig );
     }
     else {
       return this.withDefault( 'topMargin', defaultConfig ) +
              Math.min(
-               isSizable ? this.node.maximumHeight : this.node.height,
-               this.withDefault( 'maxCellHeight', defaultConfig ) || 0
+               isSizable ? Number.POSITIVE_INFINITY : this.node.height,
+               this.withDefault( 'maxCellHeight', defaultConfig ) || Number.POSITIVE_INFINITY
              ) +
              this.withDefault( 'bottomMargin', defaultConfig );
     }
@@ -116,7 +115,6 @@ class FlowCell extends FlowConfigurable( Object ) {
       const maximumSize = this.getMaximumSize( orientation, defaultConfig );
 
       assert && assert( isFinite( minimumSize ) );
-      assert && assert( isFinite( maximumSize ) );
       assert && assert( maximumSize >= minimumSize );
 
       value = Utils.clamp( value, minimumSize, maximumSize );
