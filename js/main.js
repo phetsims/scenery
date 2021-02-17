@@ -161,6 +161,7 @@ import './util/SceneImage.js';
 import './util/SceneryStyle.js';
 import './util/Sepia.js';
 import './util/ShaderProgram.js';
+import './util/Sizable.js';
 import './util/Sprite.js';
 import './util/SpriteImage.js';
 import './util/SpriteInstance.js';

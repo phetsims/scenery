@@ -21,14 +21,15 @@ const FLOW_CONFIGURABLE_KEYS = [
   'leftMargin',
   'rightMargin',
   'topMargin',
-  'bottomMargin'
+  'bottomMargin',
+  'minCellWidth',
+  'minCellHeight',
+  'maxCellWidth',
+  'maxCellHeight'
 ];
 
 const FlowConfigurable = memoize( type => {
   return class extends type {
-    /**
-     * @param {Object} [options]
-     */
     constructor( ...args ) {
       super( ...args );
 
@@ -41,6 +42,10 @@ const FlowConfigurable = memoize( type => {
       this._topMargin = null;
       this._bottomMargin = null;
       this._grow = null;
+      this._minCellWidth = null;
+      this._minCellHeight = null;
+      this._maxCellWidth = null;
+      this._maxCellHeight = null;
 
       // @public {TinyEmitter}
       this.changedEmitter = new TinyEmitter();
@@ -65,6 +70,10 @@ const FlowConfigurable = memoize( type => {
       this._topMargin = 0;
       this._bottomMargin = 0;
       this._grow = 0;
+      this._minCellWidth = null;
+      this._minCellHeight = null;
+      this._maxCellWidth = null;
+      this._maxCellHeight = null;
 
       this.changedEmitter.emit();
     }
@@ -80,8 +89,23 @@ const FlowConfigurable = memoize( type => {
       this._topMargin = null;
       this._bottomMargin = null;
       this._grow = null;
+      this._minCellWidth = null;
+      this._minCellHeight = null;
+      this._maxCellWidth = null;
+      this._maxCellHeight = null;
 
       this.changedEmitter.emit();
+    }
+
+    /**
+     * @public
+     *
+     * @param {string} propertyName
+     * @param {FlowConfigurable} defaultConfig
+     * @returns {*}
+     */
+    withDefault( propertyName, defaultConfig ) {
+      return this[ propertyName ] !== null ? this[ propertyName ] : defaultConfig[ propertyName ];
     }
 
     /**
@@ -292,6 +316,94 @@ const FlowConfigurable = memoize( type => {
         this._rightMargin = value;
         this._topMargin = value;
         this._bottomMargin = value;
+
+        this.changedEmitter.emit();
+      }
+    }
+
+    /**
+     * @public
+     *
+     * @returns {number|null}
+     */
+    get minCellWidth() {
+      return this._minCellWidth;
+    }
+
+    /**
+     * @public
+     *
+     * @param {number|null} value
+     */
+    set minCellWidth( value ) {
+      if ( this._minCellWidth !== value ) {
+        this._minCellWidth = value;
+
+        this.changedEmitter.emit();
+      }
+    }
+
+    /**
+     * @public
+     *
+     * @returns {number|null}
+     */
+    get minCellHeight() {
+      return this._minCellHeight;
+    }
+
+    /**
+     * @public
+     *
+     * @param {number|null} value
+     */
+    set minCellHeight( value ) {
+      if ( this._minCellHeight !== value ) {
+        this._minCellHeight = value;
+
+        this.changedEmitter.emit();
+      }
+    }
+
+    /**
+     * @public
+     *
+     * @returns {number|null}
+     */
+    get maxCellWidth() {
+      return this._maxCellWidth;
+    }
+
+    /**
+     * @public
+     *
+     * @param {number|null} value
+     */
+    set maxCellWidth( value ) {
+      if ( this._maxCellWidth !== value ) {
+        this._maxCellWidth = value;
+
+        this.changedEmitter.emit();
+      }
+    }
+
+    /**
+     * @public
+     *
+     * @returns {number|null}
+     */
+    get maxCellHeight() {
+      return this._maxCellHeight;
+    }
+
+    /**
+     * @public
+     *
+     * @param {number|null} value
+     */
+    set maxCellHeight( value ) {
+      if ( this._maxCellHeight !== value ) {
+        this._maxCellHeight = value;
 
         this.changedEmitter.emit();
       }
