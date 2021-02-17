@@ -54,7 +54,7 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
     this._orientation = Orientation.HORIZONTAL;
 
     // @private {FlowConstraint.Justify}
-    this._justify = FlowConstraint.Justify.START;
+    this._justify = FlowConstraint.Justify.SPACE_BETWEEN;
 
     // @private {boolean}
     this._wrap = false;
