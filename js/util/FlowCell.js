@@ -140,10 +140,18 @@ class FlowCell extends FlowConfigurable( Object ) {
    */
   positionStart( orientation, defaultConfig, value ) {
     if ( orientation === Orientation.HORIZONTAL ) {
-      this.node.left = this.withDefault( 'leftMargin', defaultConfig ) + value;
+      const left = this.withDefault( 'leftMargin', defaultConfig ) + value;
+
+      if ( Math.abs( this.node.left - left ) > 1e-9 ) {
+        this.node.left = left;
+      }
     }
     else {
-      this.node.top = this.withDefault( 'topMargin', defaultConfig ) + value;
+      const top = this.withDefault( 'topMargin', defaultConfig ) + value;
+
+      if ( Math.abs( this.node.top - top ) > 1e-9 ) {
+        this.node.top = top;
+      }
     }
   }
 }

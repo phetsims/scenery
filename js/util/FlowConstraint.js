@@ -347,6 +347,7 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
     assert && assert( !_.includes( this.cells, cell ) );
 
     this.cells.splice( index, 0, cell );
+    this.addNode( cell.node );
 
     this.updateLayoutAutomatically();
   }
@@ -361,6 +362,7 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
     assert && assert( _.includes( this.cells, cell ) );
 
     arrayRemove( this.cells, cell );
+    this.removeNode( cell.node );
 
     this.updateLayoutAutomatically();
   }
