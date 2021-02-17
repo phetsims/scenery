@@ -18,7 +18,6 @@ import Tandem from '../../../tandem/js/Tandem.js';
 import scenery from '../scenery.js';
 import Mouse from './Mouse.js';
 import SceneryEvent from './SceneryEvent.js';
-import Touch from './Touch.js';
 
 class SimpleDragHandler extends PhetioObject {
   /**
@@ -102,7 +101,7 @@ class SimpleDragHandler extends PhetioObject {
     // a touchenter starts a drag that is IMMEDIATELY interrupted, the touchdown would start another drag. We record
     // interruptions here so that we can prevent future enter/down events from the same touch pointer from triggering
     // another startDrag.
-    this.lastInterruptedTouchPointer = null;
+    this.lastInterruptedTouchLikePointer = null;
 
     // @private {boolean}
     this._attach = options.attach;
@@ -371,8 +370,8 @@ class SimpleDragHandler extends PhetioObject {
 
       this.interrupted = true;
 
-      if ( this.pointer instanceof Touch ) {
-        this.lastInterruptedTouchPointer = this.pointer;
+      if ( this.pointer.isTouchLike() ) {
+        this.lastInterruptedTouchLikePointer = this.pointer;
       }
 
       // We create a synthetic event here, as there is no available event here.
@@ -410,7 +409,7 @@ class SimpleDragHandler extends PhetioObject {
     if ( !this.dragging &&
          // Don't check pointer.dragging if we don't attach, see https://github.com/phetsims/scenery/issues/206
          ( !event.pointer.dragging || !this._attach ) &&
-         event.pointer !== this.lastInterruptedTouchPointer &&
+         event.pointer !== this.lastInterruptedTouchLikePointer &&
          event.canStartPress() ) {
       this.startDrag( event );
     }

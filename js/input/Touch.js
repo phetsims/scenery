@@ -84,6 +84,17 @@ class Touch extends Pointer {
   toString() {
     return 'Touch#' + this.id;
   }
+
+
+  /**
+   * @override
+   * @public
+   *
+   * @returns {boolean}
+   */
+  isTouchLike() {
+    return true;
+  }
 }
 
 scenery.register( 'Touch', Touch );
