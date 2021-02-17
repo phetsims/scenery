@@ -195,13 +195,9 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
       // Grow potential sizes if possible
       // TODO: This looks unfun to read... check this with a fresh mind
       let growableCells;
-      while ( spaceRemaining > 1e7 && ( growableCells = line.filter( cell => {
-        if ( cell.grow !== null ) {
-          if ( cell.grow === 0 ) {
-            return false;
-          }
-        }
-        else if ( this.grow === 0 ) {
+      while ( spaceRemaining > 1e-7 && ( growableCells = line.filter( cell => {
+        const grow = cell.withDefault( 'grow', this );
+        if ( grow === 0 ) {
           return false;
         }
         return cell._pendingSize < cell.getMaximumSize( orientation, this ) - 1e-7;
