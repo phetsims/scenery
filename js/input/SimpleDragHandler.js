@@ -370,7 +370,7 @@ class SimpleDragHandler extends PhetioObject {
 
       this.interrupted = true;
 
-      if ( this.pointer.isTouchLike() ) {
+      if ( this.pointer && this.pointer.isTouchLike() ) {
         this.lastInterruptedTouchLikePointer = this.pointer;
       }
 
