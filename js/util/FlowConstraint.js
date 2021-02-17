@@ -202,18 +202,19 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
         }
         return cell._pendingSize < cell.getMaximumSize( orientation, this ) - 1e-7;
       } ) ).length ) {
+        const totalGrow = _.sum( growableCells.map( cell => cell.grow ) );
         // TODO: we need to do asymmetric grows! We're not using the grow amount here!!!
-        const amountEachToGrow = Math.min(
-          _.min( growableCells.map( cell => cell.getMaximumSize( orientation, this ) - cell._pendingSize ) ),
-          spaceRemaining / growableCells.length
+        const amountToGrow = Math.min(
+          _.min( growableCells.map( cell => ( cell.getMaximumSize( orientation, this ) - cell._pendingSize ) / cell.grow ) ),
+          spaceRemaining / totalGrow
         );
 
-        assert && assert( amountEachToGrow > 1e-11 );
+        assert && assert( amountToGrow > 1e-11 );
 
         growableCells.forEach( cell => {
-          cell._pendingSize += amountEachToGrow;
+          cell._pendingSize += amountToGrow * cell.grow;
         } );
-        spaceRemaining -= amountEachToGrow * growableCells.length;
+        spaceRemaining -= amountToGrow * totalGrow;
       }
 
       // Update preferred dimension based on the pending size
