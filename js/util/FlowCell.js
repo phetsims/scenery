@@ -196,6 +196,21 @@ class FlowCell extends FlowConfigurable( Object ) {
   }
 
   /**
+   * @public
+   *
+   * @param {FlowConfigurable} defaultConfig
+   * @returns {Bounds2}
+   */
+  getCellBounds( defaultConfig ) {
+    const leftMargin = this.withDefault( 'leftMargin', defaultConfig );
+    const rightMargin = this.withDefault( 'rightMargin', defaultConfig );
+    const topMargin = this.withDefault( 'topMargin', defaultConfig );
+    const bottomMargin = this.withDefault( 'bottomMargin', defaultConfig );
+
+    return this.node.bounds.withOffsets( leftMargin, topMargin, rightMargin, bottomMargin );
+  }
+
+  /**
    * Releases references
    * @public
    */

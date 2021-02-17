@@ -173,13 +173,11 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
     // {number} - Increase things if our preferred size is larger than our minimums (we'll figure out how to compensate
     // for the extra space below).
     const size = Math.max( minimumCurrentSize, preferredSize || 0 );
-    const oppositeSize = Math.max( minimumCurrentOppositeSize, preferredOppositeSize || 0 );
 
-    // We're taking up these layout bounds (nodes could use them for localBounds)
-    // TODO: How to handle this with align:origin!!!
-    this.layoutBoundsProperty.value = new Bounds2( 0, 0, orientation === Orientation.HORIZONTAL ? size : oppositeSize, orientation === Orientation.HORIZONTAL ? oppositeSize : size );
-
-    // TODO: align-content flexbox equivalent
+    const minCoordinate = 0;
+    const maxCoordinate = size;
+    let minOppositeCoordinate = Number.POSITIVE_INFINITY;
+    let maxOppositeCoordinate = Number.NEGATIVE_INFINITY;
 
     // Primary-direction layout
     lines.forEach( line => {
@@ -273,10 +271,37 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
             cell.positionStart( oppositeOrientation, this, secondaryPosition + ( maximumSize - size ) * padRatio );
           }
         }
+
+        const cellBounds = cell.getCellBounds( this );
+        assert && assert( cellBounds.isFinite() );
+
+        minOppositeCoordinate = Math.min( minOppositeCoordinate, oppositeOrientation === Orientation.HORIZONTAL ? cellBounds.minX : cellBounds.minY );
+        maxOppositeCoordinate = Math.max( maxOppositeCoordinate, oppositeOrientation === Orientation.HORIZONTAL ? cellBounds.maxX : cellBounds.maxY );
       } );
 
+      // TODO: This is insufficient for origin, if we wrap, our origin setup will be off
       secondaryPosition += maximumSize + this.lineSpacing;
     } );
+
+    // TODO: align-content flexbox equivalent
+    // For now, we'll just pad ourself out
+    if ( preferredOppositeSize && ( maxOppositeCoordinate - minOppositeCoordinate ) < preferredOppositeSize ) {
+      maxOppositeCoordinate = minOppositeCoordinate + preferredOppositeSize;
+    }
+
+    // We're taking up these layout bounds (nodes could use them for localBounds)
+    // TODO: How to handle this with align:origin!!!
+    this.layoutBoundsProperty.value = orientation === Orientation.HORIZONTAL ? new Bounds2(
+      minCoordinate,
+      minOppositeCoordinate,
+      maxCoordinate,
+      maxOppositeCoordinate
+    ) : new Bounds2(
+      minOppositeCoordinate,
+      minCoordinate,
+      maxOppositeCoordinate,
+      maxCoordinate
+    );
   }
 
   /**
