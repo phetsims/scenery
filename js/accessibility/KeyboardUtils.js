@@ -1,12 +1,14 @@
-// Copyright 2017-2020, University of Colorado Boulder
+// Copyright 2017-2021, University of Colorado Boulder
 
 /**
  * Collection of utility constants and functions for managing keyboard input. Constants are values of Event.key, as
  * well as helper functions and collections.
  *
  * @author Jesse Greenberg
+ * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
+import validate from '../../../axon/js/validate.js';
 import scenery from '../scenery.js';
 
 const KEY_RIGHT_ARROW = 'arrowright';
@@ -24,9 +26,10 @@ const KEY_D = 'd';
 const ARROW_KEYS = [ KEY_RIGHT_ARROW, KEY_LEFT_ARROW, KEY_UP_ARROW, KEY_DOWN_ARROW ];
 const WASD_KEYS = [ KEY_W, KEY_S, KEY_A, KEY_D ];
 
+const DOM_EVENT_VALIDATOR = { valueType: Event };
+
 // constants
 var KeyboardUtils = {
-
   KEY_SPACE: ' ',
   KEY_ENTER: 'enter',
   KEY_TAB: 'tab',
@@ -89,49 +92,86 @@ var KeyboardUtils = {
   WASD_KEYS: WASD_KEYS,
   MOVEMENT_KEYS: ARROW_KEYS.concat( WASD_KEYS ),
 
-  // returns whether or not the key corresponds to pressing an arrow key
-  isArrowKey( key ) {
-    assert && assert( typeof key === 'string' );
-    key = key.toLowerCase();
-    return key === KeyboardUtils.KEY_RIGHT_ARROW ||
-           key === KeyboardUtils.KEY_LEFT_ARROW ||
-           key === KeyboardUtils.KEY_UP_ARROW ||
-           key === KeyboardUtils.KEY_DOWN_ARROW;
+  /**
+   * Returns whether or not the key corresponds to pressing an arrow key
+   * @param {Event} domEvent
+   * @returns {boolean}
+   */
+  isArrowKey( domEvent ) {
+    return KeyboardUtils.isAnyKeyEvent( domEvent, ARROW_KEYS );
   },
 
-  // returns true if key is one of keys used for range inputs (key codes 33 - 40, inclusive)
-  isRangeKey( key ) {
-    assert && assert( typeof key === 'string' );
-    key = key.toLowerCase();
-    return key === KeyboardUtils.KEY_PAGE_UP ||
-           key === KeyboardUtils.KEY_PAGE_DOWN ||
-           key === KeyboardUtils.KEY_HOME ||
-           key === KeyboardUtils.KEY_END ||
-           KeyboardUtils.isArrowKey( key );
+  /**
+   * Returns true if key is one of keys used for range inputs
+   * @param {Event} domEvent
+   * @returns {boolean}
+   */
+  isRangeKey( domEvent ) {
+    return KeyboardUtils.isArrowKey( domEvent ) ||
+           KeyboardUtils.isAnyKeyEvent( domEvent, [
+             KeyboardUtils.KEY_PAGE_UP,
+             KeyboardUtils.KEY_PAGE_DOWN,
+             KeyboardUtils.KEY_HOME,
+             KeyboardUtils.KEY_END
+           ] );
   },
 
-  // returns whether or not the key corresponds to pressing a number key
-  isNumberKey( key ) {
-    assert && assert( typeof key === 'string' );
-    key = key.toLowerCase();
-    return !isNaN( parseInt( key, 10 ) );
+  /**
+   * Returns whether or not the key corresponds to pressing a number key
+   * @param {Event} domEvent
+   * @returns {boolean}
+   */
+  isNumberKey( domEvent ) {
+    return !isNaN( parseInt( KeyboardUtils.getKeyDef( domEvent ), 10 ) );
   },
 
-  // returns whether or not the key corresponds to one of the WASD movement keys
-  isWASDKey( key ) {
-    assert && assert( typeof key === 'string' );
-    key = key.toLowerCase();
-    return key === KeyboardUtils.KEY_W ||
-           key === KeyboardUtils.KEY_A ||
-           key === KeyboardUtils.KEY_S ||
-           key === KeyboardUtils.KEY_D;
+  /**
+   * Returns whether or not the key corresponds to one of the WASD movement keys
+   * @param {Event} domEvent
+   * @returns {boolean}
+   */
+  isWASDKey( domEvent ) {
+    return KeyboardUtils.isAnyKeyEvent( domEvent, WASD_KEYS );
   },
 
-  // returns true if the key indicates a 'movement' key in keyboard dragging
-  isMovementKey( key ) {
-    assert && assert( typeof key === 'string' );
-    key = key.toLowerCase();
-    return KeyboardUtils.MOVEMENT_KEYS.includes( key );
+  /**
+   * Returns true if the key indicates a 'movement' key in keyboard dragging
+   * @param {Event} domEvent
+   * @returns {boolean}
+   */
+  isMovementKey( domEvent ) {
+    return KeyboardUtils.isAnyKeyEvent( domEvent, KeyboardUtils.MOVEMENT_KEYS );
+  },
+
+  /**
+   * If the domEvent cooresponds to any of the probided keys in the list
+   * @param {Event} domEvent
+   * @param {KeyDef[]} keyboardUtilsKeys
+   * @returns {*}
+   */
+  isAnyKeyEvent( domEvent, keyboardUtilsKeys ) {
+    validate( domEvent, DOM_EVENT_VALIDATOR );
+    return keyboardUtilsKeys.includes( KeyboardUtils.getKeyDef( domEvent ) );
+  },
+
+  /**
+   * Whether or not the event was of the provided KeyboardUtils KeyDef.
+   * @param {Event} domEvent
+   * @param {KeyDef} keyboardUtilsKey
+   * @returns {boolean}
+   */
+  isKeyEvent( domEvent, keyboardUtilsKey ) {
+    return KeyboardUtils.getKeyDef( domEvent ) === keyboardUtilsKey;
+  },
+
+  /**
+   *
+   * @param {Event} domEvent
+   * @returns {KeyDef|null} - null if there is no `key` property on the provided Event.
+   */
+  getKeyDef( domEvent ) {
+    validate( domEvent, DOM_EVENT_VALIDATOR );
+    return domEvent.key ? domEvent.key.toLowerCase() : null;
   }
 };
 
