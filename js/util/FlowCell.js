@@ -6,6 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import Orientation from '../../../phet-core/js/Orientation.js';
 import scenery from '../scenery.js';
 import FlowConfigurable from './FlowConfigurable.js';
 
@@ -40,6 +41,22 @@ class FlowCell extends FlowConfigurable( Object ) {
   //     this._node = value;
   //   }
   // }
+
+  /**
+   * @public
+   *
+   * @param {Orientation} orientation
+   * @returns {number}
+   */
+  getMinimumSize( orientation ) {
+    // TODO: better handling for preferred size
+    if ( orientation === Orientation.HORIZONTAL ) {
+      return this.leftMargin + this.node.width + this.rightMargin;
+    }
+    else {
+      return this.topMargin + this.node.height + this.bottomMargin;
+    }
+  }
 }
 
 scenery.register( 'FlowCell', FlowCell );

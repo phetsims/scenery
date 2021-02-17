@@ -7,6 +7,7 @@
  */
 
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
+import Enumeration from '../../../phet-core/js/Enumeration.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import mutate from '../../../phet-core/js/mutate.js';
 import scenery from '../scenery.js';
@@ -31,7 +32,7 @@ const FlowConfigurable = memoize( type => {
     constructor( ...args ) {
       super( ...args );
 
-      // @private {string|null} - Null value inherits from a base config
+      // @private {FlowConfigurable.Align|null} - Null value inherits from a base config
       this._align = null;
 
       // @private {number|null} - Null value inherits from a base config
@@ -58,7 +59,7 @@ const FlowConfigurable = memoize( type => {
      * @public
      */
     setConfigToBaseDefault() {
-      this._align = 'center';
+      this._align = FlowConfigurable.Align.CENTER;
       this._leftMargin = 0;
       this._rightMargin = 0;
       this._topMargin = 0;
@@ -86,7 +87,7 @@ const FlowConfigurable = memoize( type => {
     /**
      * @public
      *
-     * @returns {string|null}
+     * @returns {FlowConfigurable.Align|null}
      */
     get align() {
       return this._align;
@@ -95,9 +96,17 @@ const FlowConfigurable = memoize( type => {
     /**
      * @public
      *
-     * @param {string|null} value
+     * @param {FlowConfigurable.Align|string|null} value
      */
     set align( value ) {
+      // remapping align values to an independent set, so they aren't orientation-dependent
+      // TODO: consider if this is wise
+      if ( typeof value === 'string' ) {
+        value = alignMapping[ value ];
+      }
+
+      assert && assert( value === null || FlowConfigurable.Align.includes( value ) );
+
       if ( this._align !== value ) {
         this._align = value;
 
@@ -120,6 +129,8 @@ const FlowConfigurable = memoize( type => {
      * @param {number|null} value
      */
     set leftMargin( value ) {
+      assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
+
       if ( this._leftMargin !== value ) {
         this._leftMargin = value;
 
@@ -142,6 +153,8 @@ const FlowConfigurable = memoize( type => {
      * @param {number|null} value
      */
     set rightMargin( value ) {
+      assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
+
       if ( this._rightMargin !== value ) {
         this._rightMargin = value;
 
@@ -164,6 +177,8 @@ const FlowConfigurable = memoize( type => {
      * @param {number|null} value
      */
     set topMargin( value ) {
+      assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
+
       if ( this._topMargin !== value ) {
         this._topMargin = value;
 
@@ -186,6 +201,8 @@ const FlowConfigurable = memoize( type => {
      * @param {number|null} value
      */
     set bottomMargin( value ) {
+      assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
+
       if ( this._bottomMargin !== value ) {
         this._bottomMargin = value;
 
@@ -210,6 +227,8 @@ const FlowConfigurable = memoize( type => {
      * @param {number|null} value
      */
     set xMargin( value ) {
+      assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
+
       if ( this._leftMargin !== value || this._rightMargin !== value ) {
         this._leftMargin = value;
         this._rightMargin = value;
@@ -235,6 +254,8 @@ const FlowConfigurable = memoize( type => {
      * @param {number|null} value
      */
     set yMargin( value ) {
+      assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
+
       if ( this._topMargin !== value || this._bottomMargin !== value ) {
         this._topMargin = value;
         this._bottomMargin = value;
@@ -264,6 +285,8 @@ const FlowConfigurable = memoize( type => {
      * @param {number|null} value
      */
     set margin( value ) {
+      assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
+
       if ( this._leftMargin !== value || this._rightMargin !== value || this._topMargin !== value || this._bottomMargin !== value ) {
         this._leftMargin = value;
         this._rightMargin = value;
@@ -276,6 +299,23 @@ const FlowConfigurable = memoize( type => {
   };
 } );
 
-scenery.register( 'FlowConfigurable', FlowConfigurable );
+FlowConfigurable.Align = Enumeration.byKeys( [
+  'START',
+  'END',
+  'CENTER',
+  'ORIGIN',
+  'STRETCH'
+] );
 
+const alignMapping = {
+  'left': FlowConfigurable.Align.START,
+  'top': FlowConfigurable.Align.START,
+  'right': FlowConfigurable.Align.END,
+  'bottom': FlowConfigurable.Align.END,
+  'center': FlowConfigurable.Align.CENTER,
+  'origin': FlowConfigurable.Align.ORIGIN,
+  'stretch': FlowConfigurable.Align.STRETCH
+};
+
+scenery.register( 'FlowConfigurable', FlowConfigurable );
 export default FlowConfigurable;
