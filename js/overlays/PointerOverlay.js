@@ -99,7 +99,7 @@ class PointerOverlay {
           }
         },
         blur: () => {
-          this.pointerSVGContainer.removeChild( svg );
+          this.pointerSVGContainer.contains( svg ) && this.pointerSVGContainer.removeChild( svg );
         }
       };
       pointer.addInputListener( moveListener );
