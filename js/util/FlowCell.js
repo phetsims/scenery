@@ -25,6 +25,27 @@ class FlowCell extends FlowConfigurable( Object ) {
     // @public (scenery-internal) {number}
     this._pendingSize = 0;
 
+    this.setOptions( options );
+
+    // @private {function}
+    this.layoutOptionsListener = this.onLayoutOptionsChange.bind( this );
+
+    this.node.layoutOptionsChangedEmitter.addListener( this.layoutOptionsListener );
+  }
+
+  /**
+   * @private
+   */
+  onLayoutOptionsChange() {
+    this.setOptions( this.node.layoutOptions || undefined );
+  }
+
+  /**
+   * @private
+   *
+   * @param {Object} [options]
+   */
+  setOptions( options ) {
     this.setConfigToInherit();
     this.mutateConfigurable( options );
   }
@@ -172,6 +193,14 @@ class FlowCell extends FlowConfigurable( Object ) {
         this.node.y = value;
       }
     }
+  }
+
+  /**
+   * Releases references
+   * @public
+   */
+  dispose() {
+    this.node.layoutOptionsChangedEmitter.removeListener( this.layoutOptionsListener );
   }
 }
 

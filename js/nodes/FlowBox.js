@@ -96,7 +96,7 @@ class FlowBox extends Sizable( Node ) {
    * @param {number} index
    */
   onFlowBoxChildInserted( node, index ) {
-    const cell = new FlowCell( node );
+    const cell = new FlowCell( node, node.layoutOptions );
     this._cellMap.set( node, cell );
 
     // TODO: Consider having FlowConfigurable stuff on the node or some way of specifying this better?
@@ -116,6 +116,8 @@ class FlowBox extends Sizable( Node ) {
     this._cellMap.delete( node );
 
     this._constraint.removeCell( cell );
+
+    cell.dispose();
   }
 
   /**
@@ -507,6 +509,19 @@ class FlowBox extends Sizable( Node ) {
    */
   set maxCellHeight( value ) {
     this._constraint.maxCellHeight = value;
+  }
+
+  /**
+   * Releases references
+   * @public
+   * @override
+   */
+  dispose() {
+    super.dispose();
+
+    this._cellMap.values().forEach( cell => {
+      cell.dispose();
+    } );
   }
 }
 
