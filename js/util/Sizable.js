@@ -27,6 +27,9 @@ const Sizable = memoize( type => {
       this.preferredHeightProperty = new TinyProperty( null );
       this.minimumWidthProperty = new TinyProperty( null );
       this.minimumHeightProperty = new TinyProperty( null );
+
+      // @public {boolean} - Flag for detection of the feature
+      this.sizable = true;
     }
 
     /**

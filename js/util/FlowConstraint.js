@@ -71,8 +71,14 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
     this.mutateConfigurable( options );
     mutate( this, FLOW_CONSTRAINT_KEYS, options );
 
+    const updateListener = () => this.updateLayoutAutomatically();
+
     // Key configuration changes to relayout
-    this.changedEmitter.link( () => this.updateLayoutAutomatically() );
+    this.changedEmitter.addListener( updateListener );
+
+    // TODO: Add disposal capabilities?
+    this.preferredWidthProperty.lazyLink( updateListener );
+    this.preferredHeightProperty.lazyLink( updateListener );
   }
 
   /**
@@ -347,6 +353,17 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
     arrayRemove( this.cells, cell );
 
     this.updateLayoutAutomatically();
+  }
+
+  /**
+   * @public
+   *
+   * @param {Node} rootNode
+   * @param {Object} [options]
+   * @returns {FlowConstraint}
+   */
+  static create( rootNode, options ) {
+    return new FlowConstraint( rootNode, options );
   }
 }
 
