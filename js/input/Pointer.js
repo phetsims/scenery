@@ -204,6 +204,17 @@ class Pointer {
   }
 
   /**
+   * Some pointers are treated differently because they behave like a touch. This is not exclusive to `Touch and touch
+   * events though. See https://github.com/phetsims/scenery/issues/1156
+   * @public
+   *
+   * @returns {boolean}
+   */
+  isTouchLike(){
+    return false;
+  }
+
+  /**
    * Sets whether this pointer is down/pressed, or up.
    * @public
    *

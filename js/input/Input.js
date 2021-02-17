@@ -1561,7 +1561,7 @@ class Input {
     this.dispatchEvent( eventTrail, 'up', pointer, event, true );
 
     // touch pointers are transient, so fire exit/out to the trail afterwards
-    if ( pointer instanceof Touch ) {
+    if ( pointer.isTouchLike() ) {
       this.exitEvents( pointer, event, eventTrail, 0, true );
     }
 
@@ -1639,7 +1639,7 @@ class Input {
     this.dispatchEvent( eventTrail, 'cancel', pointer, event, true );
 
     // touch pointers are transient, so fire exit/out to the trail afterwards
-    if ( pointer instanceof Touch ) {
+    if ( pointer.isTouchLike() ) {
       this.exitEvents( pointer, event, eventTrail, 0, true );
     }
 
