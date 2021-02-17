@@ -95,7 +95,10 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
   layout() {
     super.layout();
 
+    // The orientation along the laid-out lines
     const orientation = this.orientation;
+
+    // The perpendicular orientation, where alignment is handled
     const oppositeOrientation = this.orientation.opposite;
 
     const cells = this.cells.filter( cell => {
@@ -107,27 +110,66 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
       return;
     }
 
-    let lines;
+    // {number|null} Determine our preferred sizes (they can be null, in which case)
+    const preferredSize = orientation === Orientation.HORIZONTAL ? this.preferredWidthProperty.value : this.preferredHeightProperty.value;
+    const preferredOppositeSize = orientation === Orientation.HORIZONTAL ? this.preferredHeightProperty.value : this.preferredWidthProperty.value;
+
+    // What is the largest of the minimum sizes of cells (e.g. if we're wrapping, this would be our minimum size)
+    const maxMinimumCellSize = _.max( cells.map( cell => cell.getMinimumSize( orientation, this ) ) );
+
+    assert && assert( maxMinimumCellSize <= preferredSize || Number.POSITIVE_INFINITY, 'Will not be able to fit in this preferred size' );
+
+    // Wrapping into lines
+    const lines = [];
     if ( this.wrap ) {
-      lines = [ cells ]; // TODO: wrapping!!!
+      let currentLine = [];
+      let availableSpace = preferredSize || Number.POSITIVE_INFINITY;
+
+      while ( cells.length ) {
+        const cell = cells.shift();
+        const cellSpace = cell.getMinimumSize( orientation, this );
+
+        if ( currentLine.length === 0 ) {
+          currentLine.push( cell );
+          availableSpace -= cellSpace;
+        }
+        else if ( this.spacing + cellSpace <= availableSpace ) {
+          currentLine.push( cell );
+          availableSpace -= this.spacing + cellSpace;
+        }
+        else {
+          lines.push( currentLine );
+          currentLine = [ cell ];
+          availableSpace = preferredSize || Number.POSITIVE_INFINITY;
+        }
+      }
+
+      if ( currentLine.length ) {
+        lines.push( currentLine );
+      }
     }
     else {
-      lines = [ cells ];
+      lines.push( cells );
     }
 
     // {number}
-    const minimumSize = _.max( lines.map( line => {
+    const minimumCurrentSize = _.max( lines.map( line => {
       return ( line.length - 1 ) * this.spacing + _.sum( line.map( cell => cell.getMinimumSize( orientation, this ) ) );
     } ) );
-    const minimumOppositeSize = _.sum( lines.map( line => {
+    const minimumCurrentOppositeSize = _.sum( lines.map( line => {
       return _.max( line.map( cell => cell.getMinimumSize( oppositeOrientation, this ) ) );
     } ) );
-    this.minimumWidthProperty.value = orientation === Orientation.HORIZONTAL ? minimumSize : minimumOppositeSize;
-    this.minimumHeightProperty.value = orientation === Orientation.HORIZONTAL ? minimumOppositeSize : minimumSize;
 
-    // {number}
-    const size = Math.max( minimumSize, ( orientation === Orientation.HORIZONTAL ? this.preferredWidthProperty.value : this.preferredHeightProperty.value ) || 0 );
-    const oppositeSize = Math.max( minimumOppositeSize, ( orientation === Orientation.HORIZONTAL ? this.preferredHeightProperty.value : this.preferredWidthProperty.value ) || 0 );
+    // Used for determining our "minimum" size for preferred sizes... if wrapping is enabled, we can be smaller than current minimums
+    const minimumAllowableSize = this.wrap ? maxMinimumCellSize : minimumCurrentSize;
+
+    this.minimumWidthProperty.value = orientation === Orientation.HORIZONTAL ? minimumAllowableSize : minimumCurrentOppositeSize;
+    this.minimumHeightProperty.value = orientation === Orientation.HORIZONTAL ? minimumCurrentOppositeSize : minimumAllowableSize;
+
+    // {number} - Increase things if our preferred size is larger
+    const size = Math.max( minimumCurrentSize, preferredSize || 0 );
+    const oppositeSize = Math.max( minimumCurrentOppositeSize, preferredOppositeSize || 0 );
+
 
     this.layoutBoundsProperty.value = new Bounds2( 0, 0, orientation === Orientation.HORIZONTAL ? size : oppositeSize, orientation === Orientation.HORIZONTAL ? oppositeSize : size );
     // TODO: opposite-dimension layout
