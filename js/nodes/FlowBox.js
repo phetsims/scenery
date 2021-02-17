@@ -244,6 +244,24 @@ class FlowBox extends Sizable( Node ) {
   /**
    * @public
    *
+   * @returns {number}
+   */
+  get lineSpacing() {
+    return this._constraint.lineSpacing;
+  }
+
+  /**
+   * @public
+   *
+   * @param {number} value
+   */
+  set lineSpacing( value ) {
+    this._constraint.lineSpacing = value;
+  }
+
+  /**
+   * @public
+   *
    * @returns {FlowConstraint.Justify}
    */
   get justify() {
