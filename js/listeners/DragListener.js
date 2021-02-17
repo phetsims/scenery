@@ -78,7 +78,6 @@ import EventType from '../../../tandem/js/EventType.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import SceneryEvent from '../input/SceneryEvent.js';
-import Touch from '../input/Touch.js';
 import scenery from '../scenery.js';
 import TransformTracker from '../util/TransformTracker.js';
 import PressListener from './PressListener.js';
@@ -231,7 +230,7 @@ class DragListener extends PressListener {
     // a touchenter starts a drag that is IMMEDIATELY interrupted, the touchdown would start another drag. We record
     // interruptions here so that we can prevent future enter/down events from the same touch pointer from triggering
     // another startDrag.
-    this._lastInterruptedTouchPointer = null;
+    this._lastInterruptedTouchLikePointer = null;
 
     // @private {Action} - emitted on drag. Used for triggering phet-io events to the data stream, see https://github.com/phetsims/scenery/issues/842
     this._dragAction = new Action( event => {
@@ -752,8 +751,8 @@ class DragListener extends PressListener {
    * This can be called manually, but can also be called through node.interruptSubtreeInput().
    */
   interrupt() {
-    if ( this.pointer && this.pointer instanceof Touch ) {
-      this._lastInterruptedTouchPointer = this.pointer;
+    if ( this.pointer && this.pointer.isTouchLike() ) {
+      this._lastInterruptedTouchLikePointer = this.pointer;
     }
 
     super.interrupt();
@@ -768,7 +767,7 @@ class DragListener extends PressListener {
    * @returns {boolean}
    */
   canPress( event ) {
-    if ( event.pointer === this._lastInterruptedTouchPointer ) {
+    if ( event.pointer === this._lastInterruptedTouchLikePointer ) {
       return false;
     }
 

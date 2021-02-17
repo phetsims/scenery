@@ -11,7 +11,6 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import PDOMPointer from '../input/PDOMPointer.js';
-import Touch from '../input/Touch.js';
 import scenery from '../scenery.js';
 import svgns from '../util/svgns.js';
 import Utils from '../util/Utils.js';
@@ -76,9 +75,9 @@ class PointerOverlay {
       //Add a move listener to the pointer to update position when it has moved
       const pointerRemoved = () => {
 
-        // For touches that get a touch up event, remove them.  But when the mouse button is released, don't stop
+        // For touche-like events that get a touch up event, remove them.  But when the mouse button is released, don't stop
         // showing the mouse location
-        if ( pointer instanceof Touch ) {
+        if ( pointer.isTouchLike() ) {
           this.pointerSVGContainer.removeChild( svg );
           pointer.removeInputListener( moveListener );
         }

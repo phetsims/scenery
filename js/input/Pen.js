@@ -81,6 +81,16 @@ class Pen extends Pointer {
   toString() {
     return 'Pen#' + this.id;
   }
+
+  /**
+   * @override
+   * @public
+   *
+   * @returns {boolean}
+   */
+  isTouchLike() {
+    return true;
+  }
 }
 
 scenery.register( 'Pen', Pen );

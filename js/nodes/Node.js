@@ -175,8 +175,6 @@ import ParallelDOM from '../accessibility/pdom/ParallelDOM.js';
 import Instance from '../display/Instance.js';
 import Renderer from '../display/Renderer.js';
 import Mouse from '../input/Mouse.js';
-import Pen from '../input/Pen.js';
-import Touch from '../input/Touch.js';
 import scenery from '../scenery.js';
 import CanvasContextWrapper from '../util/CanvasContextWrapper.js';
 import Features from '../util/Features.js';
@@ -1986,7 +1984,7 @@ class Node extends PhetioObject {
    * @returns {Trail|null}
    */
   trailUnderPointer( pointer ) {
-    return this.hitTest( pointer.point, pointer instanceof Mouse, pointer instanceof Touch || pointer instanceof Pen );
+    return this.hitTest( pointer.point, pointer instanceof Mouse, pointer.isTouchLike() );
   }
 
   /**
