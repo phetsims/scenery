@@ -23,6 +23,7 @@ import FlowConfigurable from './FlowConfigurable.js';
 const FLOW_CONSTRAINT_OPTION_KEYS = [
   'orientation',
   'spacing',
+  'lineSpacing',
   'justify',
   'wrap',
   'excludeInvisible'
@@ -61,6 +62,7 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
 
     // @private {number}
     this._spacing = 0;
+    this._lineSpacing = 0;
 
     // @private {boolean}
     this._excludeInvisible = true;
@@ -119,7 +121,7 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
 
     assert && assert( maxMinimumCellSize <= preferredSize || Number.POSITIVE_INFINITY, 'Will not be able to fit in this preferred size' );
 
-    // Wrapping into lines
+    // Wrapping all of the cells into lines
     const lines = [];
     if ( this.wrap ) {
       let currentLine = [];
@@ -133,14 +135,16 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
           currentLine.push( cell );
           availableSpace -= cellSpace;
         }
-        else if ( this.spacing + cellSpace <= availableSpace ) {
+        else if ( this.spacing + cellSpace <= availableSpace + 1e-7 ) {
           currentLine.push( cell );
           availableSpace -= this.spacing + cellSpace;
         }
         else {
           lines.push( currentLine );
-          currentLine = [ cell ];
           availableSpace = preferredSize || Number.POSITIVE_INFINITY;
+
+          currentLine = [ cell ];
+          availableSpace -= cellSpace;
         }
       }
 
@@ -152,27 +156,30 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
       lines.push( cells );
     }
 
-    // {number}
+    // {number} - Given our wrapped lines, what is our minimum size we could take up?
     const minimumCurrentSize = _.max( lines.map( line => {
       return ( line.length - 1 ) * this.spacing + _.sum( line.map( cell => cell.getMinimumSize( orientation, this ) ) );
     } ) );
     const minimumCurrentOppositeSize = _.sum( lines.map( line => {
       return _.max( line.map( cell => cell.getMinimumSize( oppositeOrientation, this ) ) );
-    } ) );
+    } ) ) + ( lines.length - 1 ) * this.lineSpacing;
 
-    // Used for determining our "minimum" size for preferred sizes... if wrapping is enabled, we can be smaller than current minimums
+    // Used for determining our "minimum" size for preferred sizes... if wrapping is enabled, we can be smaller than
+    // current minimums
     const minimumAllowableSize = this.wrap ? maxMinimumCellSize : minimumCurrentSize;
 
+    // Tell others about our new "minimum" sizes
     this.minimumWidthProperty.value = orientation === Orientation.HORIZONTAL ? minimumAllowableSize : minimumCurrentOppositeSize;
     this.minimumHeightProperty.value = orientation === Orientation.HORIZONTAL ? minimumCurrentOppositeSize : minimumAllowableSize;
 
-    // {number} - Increase things if our preferred size is larger
+    // {number} - Increase things if our preferred size is larger than our minimums (we'll figure out how to compensate
+    // for the extra space below).
     const size = Math.max( minimumCurrentSize, preferredSize || 0 );
     const oppositeSize = Math.max( minimumCurrentOppositeSize, preferredOppositeSize || 0 );
 
-
+    // We're taking up these layout bounds (nodes could use them for localBounds)
+    // TODO: How to handle this with align:origin!!!
     this.layoutBoundsProperty.value = new Bounds2( 0, 0, orientation === Orientation.HORIZONTAL ? size : oppositeSize, orientation === Orientation.HORIZONTAL ? oppositeSize : size );
-    // TODO: opposite-dimension layout
 
     // TODO: align-content flexbox equivalent
 
@@ -242,6 +249,39 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
     } );
 
     // Secondary-direction layout
+    let secondaryPosition = 0;
+    lines.forEach( line => {
+      const maximumSize = _.max( line.map( cell => cell.getMinimumSize( oppositeOrientation, this ) ) );
+
+      line.forEach( cell => {
+        const align = cell.withDefault( 'align', this );
+        const size = cell.getMinimumSize( oppositeOrientation, this );
+
+        if ( align === FlowConfigurable.Align.STRETCH ) {
+          cell.attemptedPreferredSize( oppositeOrientation, this, maximumSize );
+          cell.positionStart( oppositeOrientation, this, secondaryPosition );
+        }
+        else {
+          cell.attemptedPreferredSize( oppositeOrientation, this, size );
+
+          if ( align === FlowConfigurable.Align.ORIGIN ) {
+            // TODO: handle layout bounds
+            cell.positionOrigin( oppositeOrientation, this, secondaryPosition );
+          }
+          else {
+            // TODO: optimize
+            const padRatio = {
+              [ FlowConfigurable.Align.START ]: 0,
+              [ FlowConfigurable.Align.CENTER ]: 0.5,
+              [ FlowConfigurable.Align.END ]: 1
+            }[ align ];
+            cell.positionStart( oppositeOrientation, this, secondaryPosition + ( maximumSize - size ) * padRatio );
+          }
+        }
+      } );
+
+      secondaryPosition += maximumSize + this.lineSpacing;
+    } );
   }
 
   /**
@@ -346,6 +386,30 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
 
     if ( this._spacing !== value ) {
       this._spacing = value;
+
+      this.updateLayoutAutomatically();
+    }
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number}
+   */
+  get lineSpacing() {
+    return this._lineSpacing;
+  }
+
+  /**
+   * @public
+   *
+   * @param {number} value
+   */
+  set lineSpacing( value ) {
+    assert && assert( typeof value === 'number' && isFinite( value ) && value >= 0 );
+
+    if ( this._lineSpacing !== value ) {
+      this._lineSpacing = value;
 
       this.updateLayoutAutomatically();
     }

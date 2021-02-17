@@ -139,6 +139,7 @@ class FlowCell extends FlowConfigurable( Object ) {
    * @param {number} value
    */
   positionStart( orientation, defaultConfig, value ) {
+    // TODO: coordinate transform handling, to our rootNode!!!!!
     if ( orientation === Orientation.HORIZONTAL ) {
       const left = this.withDefault( 'leftMargin', defaultConfig ) + value;
 
@@ -151,6 +152,26 @@ class FlowCell extends FlowConfigurable( Object ) {
 
       if ( Math.abs( this.node.top - top ) > 1e-9 ) {
         this.node.top = top;
+      }
+    }
+  }
+
+  /**
+   * @public
+   *
+   * @param {Orientation} orientation
+   * @param {FlowConfigurable} defaultConfig
+   * @param {number} value
+   */
+  positionOrigin( orientation, defaultConfig, value ) {
+    if ( orientation === Orientation.HORIZONTAL ) {
+      if ( Math.abs( this.node.x - value ) > 1e-9 ) {
+        this.node.x = value;
+      }
+    }
+    else {
+      if ( Math.abs( this.node.y - value ) > 1e-9 ) {
+        this.node.y = value;
       }
     }
   }
