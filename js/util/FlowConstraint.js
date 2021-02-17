@@ -126,8 +126,8 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
     this.minimumHeightProperty.value = orientation === Orientation.HORIZONTAL ? minimumOppositeSize : minimumSize;
 
     // {number}
-    const size = Math.max( minimumSize, orientation === Orientation.HORIZONTAL ? this.preferredWidthProperty.value : this.preferredHeightProperty.value );
-    const oppositeSize = Math.max( minimumOppositeSize, orientation === Orientation.HORIZONTAL ? this.preferredHeightProperty.value : this.preferredWidthProperty.value );
+    const size = Math.max( minimumSize, ( orientation === Orientation.HORIZONTAL ? this.preferredWidthProperty.value : this.preferredHeightProperty.value ) || 0 );
+    const oppositeSize = Math.max( minimumOppositeSize, ( orientation === Orientation.HORIZONTAL ? this.preferredHeightProperty.value : this.preferredWidthProperty.value ) || 0 );
 
     this.layoutBoundsProperty.value = new Bounds2( 0, 0, orientation === Orientation.HORIZONTAL ? size : oppositeSize, orientation === Orientation.HORIZONTAL ? oppositeSize : size );
     // TODO: opposite-dimension layout
