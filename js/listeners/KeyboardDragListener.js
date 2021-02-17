@@ -316,7 +316,7 @@ class KeyboardDragListener {
 
     // required to work with Safari and VoiceOver, otherwise arrow keys will move virtual cursor, see https://github.com/phetsims/balloons-and-static-electricity/issues/205#issuecomment-263428003
     // prevent default for WASD too, see https://github.com/phetsims/friction/issues/167
-    if ( KeyboardUtils.isArrowKey( key ) || KeyboardUtils.isWASDKey( key ) ) {
+    if ( KeyboardUtils.isMovementKey( domEvent ) ) {
       domEvent.preventDefault();
     }
 
@@ -332,7 +332,7 @@ class KeyboardDragListener {
     // down, we immediately clear the keystate and return
     // see https://github.com/phetsims/balloons-and-static-electricity/issues/384
     if ( platform.safari ) {
-      if ( KeyboardUtils.isArrowKey( key ) ) {
+      if ( KeyboardUtils.isArrowKey( domEvent ) ) {
         if ( this.keyInListDown( [
           KeyboardUtils.KEY_RIGHT_ARROW, KeyboardUtils.KEY_LEFT_ARROW,
           KeyboardUtils.KEY_UP_ARROW, KeyboardUtils.KEY_DOWN_ARROW ] ) ) {
