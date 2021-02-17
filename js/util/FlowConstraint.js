@@ -202,6 +202,7 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
         }
         return cell._pendingSize < cell.getMaximumSize( orientation, this ) - 1e-7;
       } ) ).length ) {
+        // TODO: we need to do asymmetric grows! We're not using the grow amount here!!!
         const amountEachToGrow = Math.min(
           _.min( growableCells.map( cell => cell.getMaximumSize( orientation, this ) - cell._pendingSize ) ),
           spaceRemaining / growableCells.length
