@@ -8,13 +8,18 @@
 
 import scenery from '../scenery.js';
 import Constraint from './Constraint.js';
+import FlowConfigurable from './FlowConfigurable.js';
 
-class FlowConstraint extends Constraint {
+class FlowConstraint extends FlowConfigurable( Constraint ) {
   /**
    * @param {Node} rootNode
+   * @param {Object} [options]
    */
-  constructor( rootNode ) {
+  constructor( rootNode, options ) {
     super( rootNode );
+
+    this.setConfigToBaseDefault();
+    this.mutateConfigurable( options );
   }
 }
 

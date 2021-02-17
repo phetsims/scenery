@@ -107,6 +107,28 @@ class Constraint {
   }
 
   /**
+   * @public
+   *
+   * @returns {boolean}
+   */
+  get enabled() {
+    return this._enabled;
+  }
+
+  /**
+   * @public
+   *
+   * @param {boolean} value
+   */
+  set enabled( value ) {
+    if ( this._enabled !== value ) {
+      this._enabled = value;
+
+      this.updateLayoutAutomatically();
+    }
+  }
+
+  /**
    * Releases references
    * @public
    */

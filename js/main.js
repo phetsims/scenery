@@ -134,6 +134,8 @@ import './util/DisplayedProperty.js';
 import './util/DropShadow.js';
 import './util/Features.js';
 import './util/Filter.js';
+import './util/FlowCell.js';
+import './util/FlowConfigurable.js';
 import './util/FlowConstraint.js';
 import './util/Font.js';
 import './util/FullScreen.js';
