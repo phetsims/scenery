@@ -1688,11 +1688,14 @@ class Node extends PhetioObject {
     assert && assert( localBounds === null || !isNaN( localBounds.maxY ), 'maxY for localBounds should not be NaN' );
 
     const ourLocalBounds = this.localBoundsProperty._value;
+    const oldLocalBounds = ourLocalBounds.copy();
 
     if ( localBounds === null ) {
       // we can just ignore this if we weren't actually overriding local bounds before
       if ( this._localBoundsOverridden ) {
+
         this._localBoundsOverridden = false;
+        this.localBoundsProperty.notifyListeners( oldLocalBounds );
         this.invalidateBounds();
       }
     }
@@ -1709,6 +1712,7 @@ class Node extends PhetioObject {
       }
 
       if ( changed ) {
+        this.localBoundsProperty.notifyListeners( oldLocalBounds );
         this.invalidateBounds();
       }
     }
