@@ -53,7 +53,7 @@ class KeyStateTracker {
       // This is likely to happen when pressing browser key commands like "ctrl + tab" to switch tabs.
       this.correctModifierKeys( domEvent );
 
-      const key = domEvent.key.toLowerCase();
+      const key = KeyboardUtils.getKeyDef( domEvent );
 
       if ( assert && key !== KeyboardUtils.KEY_SHIFT ) {
         assert( !!domEvent.shiftKey === !!this.shiftKeyDown, 'shift key inconsistency between event and keystate.' );
@@ -68,7 +68,7 @@ class KeyStateTracker {
       // if the key is already down, don't do anything else (we don't want to create a new keystate object
       // for a key that is already being tracked and down)
       if ( !this.isKeyDown( key ) ) {
-        const key = domEvent.key.toLowerCase();
+        const key = KeyboardUtils.getKeyDef( domEvent );
         this.keyState[ key ] = {
           keyDown: true,
           key: key,
@@ -90,7 +90,7 @@ class KeyStateTracker {
     // is wrapped in an Action so that state is captured for PhET-iO
     this.keyupUpdateAction = new Action( domEvent => {
 
-      const key = domEvent.key.toLowerCase();
+      const key = KeyboardUtils.getKeyDef( domEvent );
 
       // correct keystate in case browser didn't receive keydown/keyup events for a modifier key
       this.correctModifierKeys( domEvent );
@@ -148,7 +148,7 @@ class KeyStateTracker {
    */
   correctModifierKeys( domEvent ) {
 
-    const key = domEvent.key.toLowerCase();
+    const key = KeyboardUtils.getKeyDef( domEvent );
 
     // add modifier keys if they aren't down
     if ( domEvent.shiftKey && !this.shiftKeyDown ) {

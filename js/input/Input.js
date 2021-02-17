@@ -1895,7 +1895,7 @@ class Input {
     // If navigating in full screen mode, prevent a bug where focus gets lost if fullscreen mode was initiated
     // from an iframe by keeping focus in the display. getNext/getPreviousFocusable will return active element
     // if there are no more elements in that direction. See https://github.com/phetsims/scenery/issues/883
-    if ( FullScreen.isFullScreen() && domEvent.key.toLowerCase() === KeyboardUtils.KEY_TAB ) {
+    if ( FullScreen.isFullScreen() && KeyboardUtils.isKeyEvent( domEvent, KeyboardUtils.KEY_TAB ) ) {
       const rootElement = this.display.pdomRootElement;
       const nextElement = domEvent.shiftKey ? PDOMUtils.getPreviousFocusable( rootElement ) :
                           PDOMUtils.getNextFocusable( rootElement );

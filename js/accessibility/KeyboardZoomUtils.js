@@ -43,19 +43,18 @@ const KeyboardZoomUtils = {
   isZoomCommand: ( event, zoomIn ) => {
     const zoomKey = zoomIn ? KeyboardUtils.KEY_EQUALS : KeyboardUtils.KEY_MINUS;
     const metaKey = KeyboardZoomUtils.getPlatformZoomMetaKey();
-    return event[ metaKey ] && event.key.toLowerCase() === zoomKey;
+    return event[ metaKey ] && KeyboardUtils.isKeyEvent( event, zoomKey );
   },
 
   /**
    * Returns true if the keyboard command indicates a "zoom reset". This is ctrl + 0 on Win and cmd + 0 on mac.
    *
-   * TODO: I suspect that these zoom specific functions should be moved out of KeyboardUtils.js
    * @param {Event} event
    * @returns {boolean}
    */
   isZoomResetCommand: event => {
     const metaKey = KeyboardZoomUtils.getPlatformZoomMetaKey();
-    return event[ metaKey ] && event.key.toLowerCase() === KeyboardUtils.KEY_0;
+    return event[ metaKey ] && KeyboardUtils.isKeyEvent( event, KeyboardUtils.KEY_0 );
   }
 };
 

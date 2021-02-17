@@ -304,7 +304,7 @@ class KeyboardDragListener {
    */
   keydown( event ) {
     const domEvent = event.domEvent;
-    const key = domEvent.key.toLowerCase();
+    const key = KeyboardUtils.getKeyDef( domEvent );
 
     // If the meta key is down (command key/windows key) prevent movement and do not preventDefault.
     // Meta key + arrow key is a command to go back a page, and we need to allow that. But also, macOS
@@ -372,7 +372,7 @@ class KeyboardDragListener {
    */
   keyup( event ) {
     const domEvent = event.domEvent;
-    const key = domEvent.key.toLowerCase();
+    const key = KeyboardUtils.getKeyDef( domEvent );
 
     const moveKeysDown = this.movementKeysDown;
 
@@ -587,7 +587,7 @@ class KeyboardDragListener {
   /**
    * Returns true if any of the keys in the list are currently down.
    *
-   * @param  {Array.<number>} keys
+   * @param  {Array.<KeyDef>} keys
    * @returns {boolean}
    * @public
    */
@@ -614,7 +614,7 @@ class KeyboardDragListener {
   /**
    * Return true if all keys in the list are currently held down.
    *
-   * @param {Array.<number>} keys
+   * @param {Array.<KeyDef>} keys
    * @returns {boolean}
    * @public
    */
@@ -714,7 +714,7 @@ class KeyboardDragListener {
    * Add a hotkey that behaves such that the desired callback will be called when
    * all keys listed in the array are pressed down in order.
    *
-   * @param {{keys: Array.<number>, callback:function}} hotkey
+   * @param {{keys: Array.<KeyDef>, callback:function}} hotkey
    * @public
    */
   addHotkey( hotkey ) {
