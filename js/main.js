@@ -100,6 +100,7 @@ import './nodes/AlignGroup.js';
 import './nodes/CanvasNode.js';
 import './nodes/Circle.js';
 import './nodes/DOM.js';
+import './nodes/FlowBox.js';
 import './nodes/HBox.js';
 import './nodes/HStrut.js';
 import './nodes/Image.js';

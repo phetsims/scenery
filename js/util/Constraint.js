@@ -23,8 +23,8 @@ class Constraint {
     // @private {boolean}
     this._enabled = true;
 
-    // @private {boolean} - Prevents layout() from running while true. Generally will be unlocked and laid out.
-    this._updateLayoutLocked = false;
+    // @private {number} - Prevents layout() from running while true. Generally will be unlocked and laid out.
+    this._layoutLockCount = 0;
 
     // @private {function}
     this._updateLayoutListener = this.updateLayoutAutomatically.bind( this );
@@ -42,6 +42,7 @@ class Constraint {
     assert && assert( node instanceof Node );
     assert && assert( !this._listenedNodes.has( node ) );
 
+    // TODO: listen or un-listen based on whether we are enabled?
     // TODO: listen to things in-between!!
     node.boundsProperty.lazyLink( this._updateLayoutListener );
     node.visibleProperty.lazyLink( this._updateLayoutListener );
@@ -72,15 +73,40 @@ class Constraint {
   }
 
   /**
+   * @public
+   *
+   * @returns {boolean}
+   */
+  get isLocked() {
+    return this._layoutLockCount > 0;
+  }
+
+  /**
+   * @public
+   */
+  lock() {
+    this._layoutLockCount++;
+  }
+
+  /**
+   * @public
+   */
+  unlock() {
+    this._layoutLockCount--;
+  }
+
+  /**
    * Updates the layout of this LayoutBox. Called automatically during initialization, when children change (if
    * resize is true), or when client wants to call this public method for any reason.
    * @public
    */
   updateLayout() {
-    if ( !this._updateLayoutLocked ) {
-      this._updateLayoutLocked = true;
+    if ( !this.isLocked ) {
+      this.lock();
+
       this.layout();
-      this._updateLayoutLocked = false;
+
+      this.unlock();
     }
   }
 

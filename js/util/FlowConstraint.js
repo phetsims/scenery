@@ -6,7 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import Property from '../../../axon/js/Property.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
+import Bounds2 from '../../../dot/js/Bounds2.js';
 import Enumeration from '../../../phet-core/js/Enumeration.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
@@ -18,12 +20,13 @@ import Constraint from './Constraint.js';
 import FlowCell from './FlowCell.js';
 import FlowConfigurable from './FlowConfigurable.js';
 
-const FLOW_CONSTRAINT_KEYS = [
+const FLOW_CONSTRAINT_OPTION_KEYS = [
   'orientation',
   'spacing',
   'justify',
-  'wrap'
-];
+  'wrap',
+  'excludeInvisible'
+].concat( FlowConfigurable.FLOW_CONFIGURABLE_OPTION_KEYS );
 
 // TODO: Have LayoutBox use this when we're ready
 class FlowConstraint extends FlowConfigurable( Constraint ) {
@@ -60,7 +63,11 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
     this._spacing = 0;
 
     // @private {boolean}
-    this._excludeInvisibleChildrenFromBounds = true;
+    this._excludeInvisible = true;
+
+    // @public {Property.<Bounds2>} - Reports out the used layout bounds (may be larger than actual bounds, since it
+    // will include margins, etc.)
+    this.layoutBoundsProperty = new Property( Bounds2.NOTHING );
 
     this.preferredWidthProperty = options.preferredWidthProperty;
     this.preferredHeightProperty = options.preferredHeightProperty;
@@ -69,7 +76,7 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
 
     this.setConfigToBaseDefault();
     this.mutateConfigurable( options );
-    mutate( this, FLOW_CONSTRAINT_KEYS, options );
+    mutate( this, FLOW_CONSTRAINT_OPTION_KEYS, options );
 
     const updateListener = () => this.updateLayoutAutomatically();
 
@@ -93,7 +100,7 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
 
     const cells = this.cells.filter( cell => {
       // TODO: Also don't lay out disconnected nodes!!!!
-      return cell.node.bounds.isValid() && ( !this._excludeInvisibleChildrenFromBounds || cell.node.visible );
+      return cell.node.bounds.isValid() && ( !this._excludeInvisible || cell.node.visible );
     } );
 
     if ( !cells.length ) {
@@ -120,7 +127,9 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
 
     // {number}
     const size = Math.max( minimumSize, orientation === Orientation.HORIZONTAL ? this.preferredWidthProperty.value : this.preferredHeightProperty.value );
-    // const oppositeSize = Math.max( minimumOppositeSize, orientation === Orientation.HORIZONTAL ? this.preferredHeightProperty.value : this.preferredWidthProperty.value );
+    const oppositeSize = Math.max( minimumOppositeSize, orientation === Orientation.HORIZONTAL ? this.preferredHeightProperty.value : this.preferredWidthProperty.value );
+
+    this.layoutBoundsProperty.value = new Bounds2( 0, 0, orientation === Orientation.HORIZONTAL ? size : oppositeSize, orientation === Orientation.HORIZONTAL ? oppositeSize : size );
     // TODO: opposite-dimension layout
 
     // TODO: align-content flexbox equivalent
@@ -184,6 +193,7 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
         if ( index > 0 ) {
           position += this.spacing;
         }
+        // TODO: handle coordinate transforms properly
         cell.positionStart( orientation, this, position );
         position += cell._pendingSize;
       } );
@@ -304,8 +314,8 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
    *
    * @returns {string}
    */
-  get excludeInvisibleChildrenFromBounds() {
-    return this._excludeInvisibleChildrenFromBounds;
+  get excludeInvisible() {
+    return this._excludeInvisible;
   }
 
   /**
@@ -313,11 +323,11 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
    *
    * @param {Orientation|string} value
    */
-  set excludeInvisibleChildrenFromBounds( value ) {
+  set excludeInvisible( value ) {
     assert && assert( typeof value === 'boolean' );
 
-    if ( this._excludeInvisibleChildrenFromBounds !== value ) {
-      this._excludeInvisibleChildrenFromBounds = value;
+    if ( this._excludeInvisible !== value ) {
+      this._excludeInvisible = value;
 
       this.updateLayoutAutomatically();
     }
@@ -358,6 +368,21 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
   /**
    * @public
    *
+   * @param {Array.<FlowCell>} cells
+   * @param {number} minChangeIndex
+   * @param {number} maxChangeIndex
+   */
+  reorderCells( cells, minChangeIndex, maxChangeIndex ) {
+    // TODO: assertions for this!!! So many things could go wrong here
+
+    this.cells.splice( minChangeIndex, maxChangeIndex - minChangeIndex + 1, ...cells );
+
+    this.updateLayoutAutomatically();
+  }
+
+  /**
+   * @public
+   *
    * @param {Node} rootNode
    * @param {Object} [options]
    * @returns {FlowConstraint}
@@ -389,6 +414,9 @@ const justifyMap = {
   'spaceAround': FlowConstraint.Justify.SPACE_AROUND,
   'spaceEvenly': FlowConstraint.Justify.SPACE_EVENLY
 };
+
+// @public {Array.<string>}
+FlowConstraint.FLOW_CONSTRAINT_OPTION_KEYS = FLOW_CONSTRAINT_OPTION_KEYS;
 
 scenery.register( 'FlowConstraint', FlowConstraint );
 export default FlowConstraint;

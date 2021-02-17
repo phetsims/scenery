@@ -12,7 +12,7 @@ import memoize from '../../../phet-core/js/memoize.js';
 import mutate from '../../../phet-core/js/mutate.js';
 import scenery from '../scenery.js';
 
-const FLOW_CONFIGURABLE_KEYS = [
+const FLOW_CONFIGURABLE_OPTION_KEYS = [
   'align',
   'grow',
   'margin',
@@ -57,7 +57,7 @@ const FlowConfigurable = memoize( type => {
      * @param {Object} [options]
      */
     mutateConfigurable( options ) {
-      mutate( this, FLOW_CONFIGURABLE_KEYS, options );
+      mutate( this, FLOW_CONFIGURABLE_OPTION_KEYS, options );
     }
 
     /**
@@ -411,6 +411,7 @@ const FlowConfigurable = memoize( type => {
   };
 } );
 
+// @public {Enumeration}
 FlowConfigurable.Align = Enumeration.byKeys( [
   'START',
   'END',
@@ -428,6 +429,9 @@ const alignMapping = {
   'origin': FlowConfigurable.Align.ORIGIN,
   'stretch': FlowConfigurable.Align.STRETCH
 };
+
+// @public {Object}
+FlowConfigurable.FLOW_CONFIGURABLE_OPTION_KEYS = FLOW_CONFIGURABLE_OPTION_KEYS;
 
 scenery.register( 'FlowConfigurable', FlowConfigurable );
 export default FlowConfigurable;
