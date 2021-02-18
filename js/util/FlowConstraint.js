@@ -83,7 +83,6 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
     // Key configuration changes to relayout
     this.changedEmitter.addListener( this._updateLayoutListener );
 
-    // TODO: Add disposal capabilities?
     this.preferredWidthProperty.lazyLink( this._updateLayoutListener );
     this.preferredHeightProperty.lazyLink( this._updateLayoutListener );
   }
@@ -290,7 +289,6 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
     }
 
     // We're taking up these layout bounds (nodes could use them for localBounds)
-    // TODO: How to handle this with align:origin!!!
     this.layoutBoundsProperty.value = orientation === Orientation.HORIZONTAL ? new Bounds2(
       minCoordinate,
       minOppositeCoordinate,
@@ -488,7 +486,6 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
     assert && assert( cell instanceof FlowCell );
     assert && assert( _.includes( this.cells, cell ) );
 
-    // TODO: handle disposing here?
     arrayRemove( this.cells, cell );
     this.removeNode( cell.node );
     cell.changedEmitter.removeListener( this._updateLayoutListener );
@@ -509,6 +506,21 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
     this.cells.splice( minChangeIndex, maxChangeIndex - minChangeIndex + 1, ...cells );
 
     this.updateLayoutAutomatically();
+  }
+
+  /**
+   * Releases references
+   * @public
+   * @override
+   */
+  dispose() {
+    // In case they're from external sources
+    this.preferredWidthProperty.unlink( this._updateLayoutListener );
+    this.preferredHeightProperty.unlink( this._updateLayoutListener );
+
+    this.cells.forEach( cell => this.removeCell( cell ) );
+
+    super.dispose();
   }
 
   /**

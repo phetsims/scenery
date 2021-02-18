@@ -99,8 +99,6 @@ class FlowBox extends Sizable( Node ) {
     const cell = new FlowCell( node, node.layoutOptions );
     this._cellMap.set( node, cell );
 
-    // TODO: Consider having FlowConfigurable stuff on the node or some way of specifying this better?
-    // TODO: for instance, not having to respecify cell settings if removed and added?
     this._constraint.insertCell( index, cell );
   }
 
@@ -535,11 +533,13 @@ class FlowBox extends Sizable( Node ) {
    * @override
    */
   dispose() {
-    super.dispose();
+    this._constraint.dispose();
 
     this._cellMap.values().forEach( cell => {
       cell.dispose();
     } );
+
+    super.dispose();
   }
 }
 
