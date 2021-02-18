@@ -144,6 +144,7 @@ import './util/GaussianBlur.js';
 import './util/Gradient.js';
 import './util/Grayscale.js';
 import './util/GridConstraint.js';
+import './util/HSizable.js';
 import './util/HueRotate.js';
 import './util/Invert.js';
 import './util/LayoutProxy.js';
@@ -162,7 +163,6 @@ import './util/SceneImage.js';
 import './util/SceneryStyle.js';
 import './util/Sepia.js';
 import './util/ShaderProgram.js';
-import './util/Sizable.js';
 import './util/Sprite.js';
 import './util/SpriteImage.js';
 import './util/SpriteInstance.js';
@@ -172,6 +172,7 @@ import './util/Trail.js';
 import './util/TrailPointer.js';
 import './util/TransformTracker.js';
 import './util/Utils.js';
+import './util/VSizable.js';
 
 // note: we don't need any of the other parts, we just need to specify them as dependencies so they fill in the scenery namespace
 export default scenery;

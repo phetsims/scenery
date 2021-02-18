@@ -15,7 +15,8 @@ import merge from '../../../phet-core/js/merge.js';
 import scenery from '../scenery.js';
 import FlowCell from '../util/FlowCell.js';
 import FlowConstraint from '../util/FlowConstraint.js';
-import Sizable from '../util/Sizable.js';
+import HSizable from '../util/HSizable.js';
+import VSizable from '../util/VSizable.js';
 import Node from './Node.js';
 
 // FlowBox-specific options that can be passed in the constructor or mutate() call.
@@ -30,7 +31,7 @@ const DEFAULT_OPTIONS = {
   resize: true
 };
 
-class FlowBox extends Sizable( Node ) {
+class FlowBox extends HSizable( VSizable( Node ) ) {
   /**
    * @public
    *
@@ -551,7 +552,7 @@ class FlowBox extends Sizable( Node ) {
  * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
  *       cases that may apply.
  */
-FlowBox.prototype._mutatorKeys = Sizable( Node ).prototype._mutatorKeys.concat( FLOWBOX_OPTION_KEYS ).filter( key => key !== 'excludeInvisible' );
+FlowBox.prototype._mutatorKeys = HSizable( Node ).prototype._mutatorKeys.concat( VSizable( Node ).prototype._mutatorKeys ).concat( FLOWBOX_OPTION_KEYS ).filter( key => key !== 'excludeInvisible' );
 
 // @public {Object}
 FlowBox.DEFAULT_OPTIONS = DEFAULT_OPTIONS;

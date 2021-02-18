@@ -10,46 +10,24 @@ import TinyProperty from '../../../axon/js/TinyProperty.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import scenery from '../scenery.js';
 
-const SIZABLE_OPTION_KEYS = [
+const V_SIZABLE_OPTION_KEYS = [
   'preferredWidth',
   'preferredHeight',
   'minimumWidth',
   'minimumHeight'
 ];
 
-const Sizable = memoize( type => {
+const VSizable = memoize( type => {
   const clazz = class extends type {
     constructor( ...args ) {
       super( ...args );
 
       // @public {Property.<number|null>}
-      this.preferredWidthProperty = new TinyProperty( null );
       this.preferredHeightProperty = new TinyProperty( null );
-      this.minimumWidthProperty = new TinyProperty( null );
       this.minimumHeightProperty = new TinyProperty( null );
 
       // @public {boolean} - Flag for detection of the feature
-      this.sizable = true;
-    }
-
-    /**
-     * @public
-     *
-     * @returns {number|null}
-     */
-    get preferredWidth() {
-      return this.preferredWidthProperty.value;
-    }
-
-    /**
-     * @public
-     *
-     * @param {number|null} value
-     */
-    set preferredWidth( value ) {
-      assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
-
-      this.preferredWidthProperty.value = value;
+      this.vSizable = true;
     }
 
     /**
@@ -77,26 +55,6 @@ const Sizable = memoize( type => {
      *
      * @returns {number|null}
      */
-    get minimumWidth() {
-      return this.minimumWidthProperty.value;
-    }
-
-    /**
-     * @public
-     *
-     * @param {number|null} value
-     */
-    set minimumWidth( value ) {
-      assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
-
-      this.minimumWidthProperty.value = value;
-    }
-
-    /**
-     * @public
-     *
-     * @returns {number|null}
-     */
     get minimumHeight() {
       return this.minimumHeightProperty.value;
     }
@@ -116,11 +74,11 @@ const Sizable = memoize( type => {
   // If we're extending into a Node type, include option keys
   // TODO: This is ugly, we'll need to mutate after construction, no?
   if ( type.prototype._mutatorKeys ) {
-    clazz.prototype._mutatorKeys = type.prototype._mutatorKeys.concat( SIZABLE_OPTION_KEYS );
+    clazz.prototype._mutatorKeys = type.prototype._mutatorKeys.concat( V_SIZABLE_OPTION_KEYS );
   }
 
   return clazz;
 } );
 
-scenery.register( 'Sizable', Sizable );
-export default Sizable;
+scenery.register( 'VSizable', VSizable );
+export default VSizable;
