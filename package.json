@@ -30,6 +30,9 @@
   },
   "eslintConfig": {
     "extends": "../chipper/eslint/sim_eslintrc.js",
+    "rules": {
+      "no-bitwise": "off"
+    },
     "globals": {
       "himalaya": false,
       "sceneryLog": false,
