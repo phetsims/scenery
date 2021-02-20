@@ -189,13 +189,17 @@ const domEventPropertiesToSerialize = {
   button: true, keyCode: true, key: true,
   deltaX: true, deltaY: true, deltaZ: true, deltaMode: true, pointerId: true,
   pointerType: true, charCode: true, which: true, clientX: true, clientY: true, changedTouches: true,
-  target: true,
+  target: true, relatedTarget: true,
   ctrlKey: true, shiftKey: true, altKey: true, metaKey: true
 };
+
+// A list of keys on events that need to be serialized into HTMLElements
+const EVENT_KEY_VALUES_AS_ELEMENTS = [ 'target', 'relatedTarget' ];
 
 // A list of events that should still fire, even when the Node is not pickable
 const PDOM_UNPICKABLE_EVENTS = [ 'focus', 'blur', 'focusin', 'focusout' ];
 const TARGET_SUBSTITUTE_KEY = 'targetSubstitute';
+const RELATED_TARGET_SUBSTITUTE_KEY = 'relatedTargetSubstitute';
 
 // A bit more than the maximum amount of time that iOS 14 VoiceOver was observed to delay between
 // sending a mouseup event and a click event.
@@ -593,19 +597,22 @@ class Input {
         // focusing event.relatedTarget below so that trail isn't cleared after focus
         this.pdomPointer.trail = null;
 
+        const relatedTarget = event[ RELATED_TARGET_SUBSTITUTE_KEY ] || event.relatedTarget;
+
         // If there exists an event.relatedTarget, user is moving to the next item with "tab" like navigation and
         // event.relatedTarget is the element focus is moving to. If the relatedTarget element is removed from the
         // document then added back in during focusout callbacks (which is done in AccessibilityTree operations),
         // some browsers (IE11 and Safari) will fail to focus the element. So we manually focus the relatedTarget
         // so that focus isn't lost. Skipped if focusout callbacks sent focus to an element other than the
-        // relatedTarget, or if callbacks made relatedTarget unfocusable.
+        // in the PDOM (like on removal), or if callbacks made relatedTarget unfocusable.
         //
         // Focus is set with DOM API to avoid the performance hit of looking up the Node from trail id.
-        if ( event.relatedTarget ) {
+        if ( relatedTarget ) {
+
           const focusMovedInCallbacks = this.isTargetUnderPDOM( document.activeElement );
-          const targetFocusable = PDOMUtils.isElementFocusable( event.relatedTarget );
+          const targetFocusable = PDOMUtils.isElementFocusable( relatedTarget );
           if ( targetFocusable && !focusMovedInCallbacks ) {
-            event.relatedTarget.focus();
+            relatedTarget.focus();
           }
         }
 
@@ -1917,8 +1924,8 @@ class Input {
    */
   static serializeDomEvent( domEvent ) {
     const entries = {};
-    for ( const property in domEvent ) {
 
+    for ( const property in domEvent ) {
       // we shouldn't check if domEvent.hasOwnProperty because some properties come from supertypes
       if ( domEventPropertiesToSerialize[ property ] ) {
 
@@ -1942,14 +1949,15 @@ class Input {
           entries[ property ] = touchArray;
         }
 
-        // If the target came from the accessibility PDOM, then we want to store the Node trail id of where it came from.
-        if ( property === 'target' && domEventProperty !== null &&
+        else if ( EVENT_KEY_VALUES_AS_ELEMENTS.includes( property ) && domEventProperty !== null &&
 
-             // Some event targets like HTMLDocument may not have this method, see https://github.com/phetsims/scenery/issues/979
-             typeof domEventProperty.getAttribute === 'function' &&
+                  // Some event targets like HTMLDocument may not have this method, see https://github.com/phetsims/scenery/issues/979
+                  typeof domEventProperty.getAttribute === 'function' &&
 
-             // If false, then this target isn't a PDOM element, so we can skip this serialization
-             domEventProperty.hasAttribute( PDOMUtils.DATA_TRAIL_ID ) ) {
+                  // If false, then this target isn't a PDOM element, so we can skip this serialization
+                  domEventProperty.hasAttribute( PDOMUtils.DATA_TRAIL_ID ) ) {
+
+          // If the target came from the accessibility PDOM, then we want to store the Node trail id of where it came from.
 
           entries[ property ] = {};
           entries[ property ][ PDOMUtils.DATA_TRAIL_ID ] = domEventProperty.getAttribute( PDOMUtils.DATA_TRAIL_ID );
@@ -1979,6 +1987,14 @@ class Input {
         // Special case for target since we can't set that read-only property. Instead use a substitute key.
         if ( key === 'target' ) {
           domEvent[ TARGET_SUBSTITUTE_KEY ] = eventObject[ key ];
+        }
+        else if ( key === 'relatedTarget' ) {
+          if ( eventObject[ key ] ) {
+
+            const htmlElement = document.getElementById( eventObject[ key ][ PDOMUtils.DATA_TRAIL_ID ] );
+            assert && assert( htmlElement, 'cannot deserialize event when related target is not in the DOM.' );
+            domEvent[ RELATED_TARGET_SUBSTITUTE_KEY ] = htmlElement;
+          }
         }
         else {
           domEvent[ key ] = eventObject[ key ];
