@@ -730,17 +730,20 @@ class Input {
           sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `Input.${eventName}FromBrowser` );
           sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
 
-          const trailId = this.getTrailId( event );
-          const trail = trailId ? Trail.fromUniqueId( this.display.rootNode, trailId ) : null;
+          if ( this.display.interactive ) {
 
-          // Only dispatch the event if the click did not happen rapidly after an up event. It is
-          // likely that the screen reader dispatched both pointer AND click events in this case, and
-          // we only want to respond to one or the other. See https://github.com/phetsims/scenery/issues/1094.
-          // This is outside of the clickAction execution so that blocked clicks are not part of the PhET-iO data
-          // stream.
-          if ( trail && !( _.some( trail.nodes, node => node.positionInPDOM ) && eventName === 'click' &&
-               event.timeStamp - this.upTimeStamp <= PDOM_CLICK_DELAY ) ) {
-            this[ actionName ].execute( event );
+            const trailId = this.getTrailId( event );
+            const trail = trailId ? Trail.fromUniqueId( this.display.rootNode, trailId ) : null;
+
+            // Only dispatch the event if the click did not happen rapidly after an up event. It is
+            // likely that the screen reader dispatched both pointer AND click events in this case, and
+            // we only want to respond to one or the other. See https://github.com/phetsims/scenery/issues/1094.
+            // This is outside of the clickAction execution so that blocked clicks are not part of the PhET-iO data
+            // stream.
+            if ( trail && !( _.some( trail.nodes, node => node.positionInPDOM ) && eventName === 'click' &&
+                 event.timeStamp - this.upTimeStamp <= PDOM_CLICK_DELAY ) ) {
+              this[ actionName ].execute( event );
+            }
           }
 
           sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
