@@ -774,13 +774,6 @@ class Display {
       this._rootNode.interruptSubtreeInput();
       this.interruptInput();
     }
-
-    // when not interactive, all keyboard navigation is disabled
-    // TODO: disable keyboard nav without hiding content so that it is still readable with a screen reader,
-    // see https://github.com/phetsims/phet-io/issues/995
-    if ( this._accessible ) {
-      this.pdomRootElement.hidden = !this._interactive;
-    }
   }
 
   /**
