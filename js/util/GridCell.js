@@ -122,7 +122,6 @@ class GridCell extends GridConfigurable( Object ) {
   getMaximumWidth( defaultConfig ) {
     return this.withDefault( 'leftMargin', defaultConfig ) +
            Math.min(
-             this.node.hSizable ? Number.POSITIVE_INFINITY : this.node.width,
              this.withDefault( 'maxCellWidth', defaultConfig ) || Number.POSITIVE_INFINITY
            ) +
            this.withDefault( 'rightMargin', defaultConfig );
@@ -137,7 +136,6 @@ class GridCell extends GridConfigurable( Object ) {
   getMaximumHeight( defaultConfig ) {
     return this.withDefault( 'topMargin', defaultConfig ) +
            Math.min(
-             this.node.vSizable ? Number.POSITIVE_INFINITY : this.node.height,
              this.withDefault( 'maxCellHeight', defaultConfig ) || Number.POSITIVE_INFINITY
            ) +
            this.withDefault( 'bottomMargin', defaultConfig );
@@ -250,6 +248,44 @@ class GridCell extends GridConfigurable( Object ) {
     const bottomMargin = this.withDefault( 'bottomMargin', defaultConfig );
 
     return this.node.bounds.withOffsets( leftMargin, topMargin, rightMargin, bottomMargin );
+  }
+
+  /**
+   * @public
+   *
+   * @param {number} row
+   * @returns {boolean}
+   */
+  containsRow( row ) {
+    return row >= this.y && row < this.y + this.height;
+  }
+
+  /**
+   * @public
+   *
+   * @param {number} column
+   * @returns {boolean}
+   */
+  containsColumn( column ) {
+    return column >= this.x && column < this.x + this.width;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number}
+   */
+  getRowIndices() {
+    return _.range( this.y, this.y + this.height );
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number}
+   */
+  getColumnIndices() {
+    return _.range( this.x, this.x + this.width );
   }
 
   /**
