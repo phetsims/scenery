@@ -1,13 +1,8 @@
 // Copyright 2014-2020, University of Colorado Boulder
 
 /**
- * FlowBox lays out its children in a row, either horizontally or vertically (based on an optional parameter).
- * VBox and HBox are convenience subtypes that specify the orientation.
- * See https://github.com/phetsims/scenery/issues/281
+ * TODO: doc
  *
- * @author Sam Reid
- * @author Aaron Davis
- * @author Chris Malley (PixelZoom, Inc.)
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 

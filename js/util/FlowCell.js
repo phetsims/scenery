@@ -130,7 +130,7 @@ class FlowCell extends FlowConfigurable( Object ) {
    * @param {FlowConfigurable} defaultConfig
    * @param {number} value
    */
-  attemptedPreferredSize( orientation, defaultConfig, value ) {
+  attemptPreferredSize( orientation, defaultConfig, value ) {
     if ( orientation === Orientation.HORIZONTAL ? this.node.hSizable : this.node.vSizable ) {
       const minimumSize = this.getMinimumSize( orientation, defaultConfig );
       const maximumSize = this.getMaximumSize( orientation, defaultConfig );
@@ -220,5 +220,4 @@ class FlowCell extends FlowConfigurable( Object ) {
 }
 
 scenery.register( 'FlowCell', FlowCell );
-
 export default FlowCell;

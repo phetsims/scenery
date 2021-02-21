@@ -168,5 +168,4 @@ class Constraint {
 }
 
 scenery.register( 'Constraint', Constraint );
-
 export default Constraint;

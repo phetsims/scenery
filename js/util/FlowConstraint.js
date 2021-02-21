@@ -106,6 +106,7 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
     } );
 
     if ( !cells.length ) {
+      this.layoutBoundsProperty.value = Bounds2.NOTHING;
       return;
     }
 
@@ -214,7 +215,7 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
       }
 
       // Update preferred dimension based on the pending size
-      line.forEach( cell => cell.attemptedPreferredSize( orientation, this, cell._pendingSize ) );
+      line.forEach( cell => cell.attemptPreferredSize( orientation, this, cell._pendingSize ) );
 
       // TODO: optimize, OMG, but is this generally a good idea?
       // TODO: Only I would write this code in this mental state?
@@ -250,11 +251,11 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
         const size = cell.getMinimumSize( oppositeOrientation, this );
 
         if ( align === FlowConfigurable.Align.STRETCH ) {
-          cell.attemptedPreferredSize( oppositeOrientation, this, maximumSize );
+          cell.attemptPreferredSize( oppositeOrientation, this, maximumSize );
           cell.positionStart( oppositeOrientation, this, secondaryPosition );
         }
         else {
-          cell.attemptedPreferredSize( oppositeOrientation, this, size );
+          cell.attemptPreferredSize( oppositeOrientation, this, size );
 
           if ( align === FlowConfigurable.Align.ORIGIN ) {
             // TODO: handle layout bounds
