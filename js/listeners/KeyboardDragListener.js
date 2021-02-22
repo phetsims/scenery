@@ -780,7 +780,7 @@ class KeyboardDragListener {
   /**
    * Returns true if the key corresponds to a key that should move the object to the left.
    *
-   * @private
+   * @public
    * @param {KeyDef} key
    * @returns {boolean}
    */
