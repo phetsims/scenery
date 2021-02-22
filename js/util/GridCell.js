@@ -75,14 +75,6 @@ class GridCell extends GridConfigurable( Object ) {
     return this._node;
   }
 
-  // TODO: Can swap out the Node?
-  // TODO: Can pool these?
-  // set node( value ) {
-  //   if ( this._node !== value ) {
-  //     this._node = value;
-  //   }
-  // }
-
   /**
    * @public
    *
