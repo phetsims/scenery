@@ -563,6 +563,29 @@
       }, { resize: 'horizontal' } );
     </script>
 
+    <p>These options use the default on the container, but can be overridden by cells:</p>
+
+    <div id="override-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'override-example', function( scene ) {
+        /*START*/
+        return new scenery.FlowBox( {
+          topMargin: 10,
+          align: 'top',
+          children: [
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 2 ],
+              layoutOptions: { topMargin: 0 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'horizontal' } );
+    </script>
+
     <p>Stretch alignment will have a resizable element take up the entire row/column size:</p>
 
     <div id="stretch-example"></div>
