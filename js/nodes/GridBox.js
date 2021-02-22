@@ -52,6 +52,10 @@ class GridBox extends HSizable( VSizable( Node ) ) {
       excludeInvisible: false // Should be handled by the options mutate above
     } );
 
+    // @private {number} - For handling the shortcut-style API
+    this._nextX = 0;
+    this._nextY = 0;
+
     this.childInsertedEmitter.addListener( this.onGridBoxChildInserted.bind( this ) );
     this.childRemovedEmitter.addListener( this.onGridBoxChildRemoved.bind( this ) );
 
@@ -84,7 +88,31 @@ class GridBox extends HSizable( VSizable( Node ) ) {
    * @param {number} index
    */
   onGridBoxChildInserted( node, index ) {
-    const cell = new GridCell( node, node.layoutOptions );
+    let layoutOptions = node.layoutOptions;
+
+    if ( !layoutOptions || ( typeof layoutOptions.x !== 'number' && typeof layoutOptions.y !== 'number' ) ) {
+      layoutOptions = merge( {
+        x: this._nextX,
+        y: this._nextY
+      }, layoutOptions );
+    }
+
+    if ( layoutOptions.wrap ) {
+      // TODO: how to handle wrapping with larger spans?
+      this._nextX = 0;
+      this._nextY++;
+    }
+    else {
+      this._nextX = layoutOptions.x + ( layoutOptions.width || 1 );
+      this._nextY = layoutOptions.y;
+    }
+
+    // Go to the next spot
+    while ( this._constraint.getCell( this._nextY, this._nextX ) ) {
+      this._nextX++;
+    }
+
+    const cell = new GridCell( node, layoutOptions );
     this._cellMap.set( node, cell );
 
     this._constraint.addCell( cell );
