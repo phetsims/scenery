@@ -56,6 +56,12 @@ class GridBox extends HSizable( VSizable( Node ) ) {
     this.childRemovedEmitter.addListener( this.onGridBoxChildRemoved.bind( this ) );
 
     this.mutate( options );
+    this._constraint.updateLayout();
+
+    // Adjust the localBounds to be the laid-out area
+    this._constraint.layoutBoundsProperty.link( layoutBounds => {
+      this.localBounds = layoutBounds;
+    } );
   }
 
   /**
