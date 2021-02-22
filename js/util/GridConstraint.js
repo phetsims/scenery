@@ -50,9 +50,8 @@ class GridConstraint extends GridConfigurable( Constraint ) {
     // @private {boolean}
     this._excludeInvisible = true;
 
-    // @private {number|Array.<number>}
-    this._xSpacing = 0;
-    this._ySpacing = 0;
+    // @private {OrientationPair.<number|Array.<number>>}
+    this._spacing = new OrientationPair( 0, 0 );
 
     // @public {Property.<Bounds2>} - Reports out the used layout bounds (may be larger than actual bounds, since it
     // will include margins, etc.)
@@ -96,94 +95,98 @@ class GridConstraint extends GridConfigurable( Constraint ) {
 
     // Handle horizontal first, so if we re-wrap we can handle vertical later.
     [ Orientation.HORIZONTAL ].forEach( orientation => {
+      const orientedSpacing = this._spacing.get( orientation );
+      const capLetter = orientation === Orientation.HORIZONTAL ? 'X' : 'Y';
+      const minField = `min${capLetter}`;
+      const maxField = `max${capLetter}`;
 
-      const columnIndices = this.getIndices( orientation );
-      const columnMap = new Map(); // index => column
-      const columns = columnIndices.map( index => {
-        const cells = this.getColumnCells( index );
+      const lineIndices = this.getIndices( orientation );
+      const lineMap = new Map(); // index => column
+      const lines = lineIndices.map( index => {
+        const cells = this.getCells( orientation, index );
 
-        const column = {
+        const line = {
           index: index,
           cells: cells,
-          grow: _.max( cells.map( cell => cell.withDefault( 'xGrow', this ) ) ),
+          grow: _.max( cells.map( cell => cell.withDefault( orientation === Orientation.HORIZONTAL ? 'xGrow' : 'yGrow', this ) ) ),
           min: 0,
           max: Number.POSITIVE_INFINITY,
-
-          // TODO: rename to orientation-independent
-          width: 0,
-          x: 0
+          size: 0,
+          position: 0
         };
-        columnMap.set( index, column );
+        lineMap.set( index, line );
 
-        return column;
+        return line;
       } );
-      const columnSpacings = typeof this._xSpacing === 'number' ?
-                             _.range( 0, columns.length - 1 ).map( () => this._xSpacing ) :
-                             this._xSpacing.slice( 0, columns.length - 1 );
-      assert && assert( columnSpacings.length === columns.length - 1 );
+      const lineSpacings = typeof orientedSpacing === 'number' ?
+                             _.range( 0, lines.length - 1 ).map( () => orientedSpacing ) :
+                             orientedSpacing.slice( 0, lines.length - 1 );
+      assert && assert( lineSpacings.length === lines.length - 1 );
+
       // Scan widths for single-column cells first
       this.cells.forEach( cell => {
         if ( cell.size.get( orientation ) === 1 ) {
-          const column = columnMap.get( cell.position.get( orientation ) );
-          column.min = Math.max( column.min, cell.getMinimumSize( orientation, this ) );
-          column.max = Math.min( column.max, cell.getMaximumSize( orientation, this ) );
+          const line = lineMap.get( cell.position.get( orientation ) );
+          line.min = Math.max( line.min, cell.getMinimumSize( orientation, this ) );
+          line.max = Math.min( line.max, cell.getMaximumSize( orientation, this ) );
         }
       } );
+
       // Then increase for spanning cells as necessary
       this.cells.forEach( cell => {
         if ( cell.size.get( orientation ) > 1 ) {
-          // TODO: don't bump mins over maxes here (if columns have maxes, redistribute otherwise)
+          // TODO: don't bump mins over maxes here (if lines have maxes, redistribute otherwise)
           // TODO: also handle maxes
-          const columns = cell.getIndices( orientation ).map( index => columnMap.get( index ) );
-          const currentMin = _.sum( columns.map( column => column.min ) );
+          const lines = cell.getIndices( orientation ).map( index => lineMap.get( index ) );
+          const currentMin = _.sum( lines.map( column => column.min ) );
           const neededMin = cell.getMinimumSize( orientation, this );
           if ( neededMin > currentMin ) {
-            const columnDelta = ( neededMin - currentMin ) / columns.length;
-            columns.forEach( column => {
+            const columnDelta = ( neededMin - currentMin ) / lines.length;
+            lines.forEach( column => {
               column.min += columnDelta;
             } );
           }
         }
       } );
       // Adjust column widths to the min
-      columns.forEach( column => {
-        column.width = column.min;
+      lines.forEach( column => {
+        column.size = column.min;
       } );
-      const minWidthAndSpacing = _.sum( columns.map( column => column.min ) ) + _.sum( columnSpacings );
+      const minWidthAndSpacing = _.sum( lines.map( column => column.min ) ) + _.sum( lineSpacings );
       const width = Math.max( minWidthAndSpacing, preferredSizes.get( orientation ) || 0 );
       let widthRemaining = width - minWidthAndSpacing;
       let growableColumns;
-      while ( widthRemaining > 1e-7 && ( growableColumns = columns.filter( column => {
-        return column.grow > 0 && column.width < column.max - 1e-7;
+      while ( widthRemaining > 1e-7 && ( growableColumns = lines.filter( column => {
+        return column.grow > 0 && column.size < column.max - 1e-7;
       } ) ).length ) {
         const totalGrow = _.sum( growableColumns.map( column => column.grow ) );
         const amountToGrow = Math.min(
-          _.min( growableColumns.map( column => ( column.max - column.width ) / column.grow ) ),
+          _.min( growableColumns.map( column => ( column.max - column.size ) / column.grow ) ),
           widthRemaining / totalGrow
         );
 
         assert && assert( amountToGrow > 1e-11 );
 
         growableColumns.forEach( column => {
-          column.width += amountToGrow * column.grow;
+          column.size += amountToGrow * column.grow;
         } );
         widthRemaining -= amountToGrow * totalGrow;
       }
       // Horizontal layout
-      layoutBounds.minX = 0;
-      layoutBounds.maxX = width;
-      columns.forEach( ( column, arrayIndex ) => {
-        column.x = _.sum( columns.slice( 0, arrayIndex ).map( column => column.width ) ) + _.sum( columnSpacings.slice( 0, column.index ) );
+      layoutBounds[ minField ] = 0;
+      layoutBounds[ maxField ] = width;
+      lines.forEach( ( column, arrayIndex ) => {
+        column.position = _.sum( lines.slice( 0, arrayIndex ).map( column => column.size ) ) + _.sum( lineSpacings.slice( 0, column.index ) );
       } );
       this.cells.forEach( cell => {
         const cellPosition = cell.position.get( orientation );
         const cellSize = cell.size.get( orientation );
-        const cellColumns = cell.getIndices( orientation ).map( index => columnMap.get( index ) );
-        const firstColumn = columnMap.get( cellPosition );
-        const cellSpacings = columnSpacings.slice( cellPosition, cellPosition + cellSize - 1 );
+        const cellColumns = cell.getIndices( orientation ).map( index => lineMap.get( index ) );
+        const firstColumn = lineMap.get( cellPosition );
+        const cellSpacings = lineSpacings.slice( cellPosition, cellPosition + cellSize - 1 );
         const cellAvailableWidth = _.sum( cellColumns.map( cell => cellSize ) ) + _.sum( cellSpacings );
         const cellMinimumWidth = cell.getMinimumSize( orientation, this );
-        const cellX = firstColumn.x;
+        const cellX = firstColumn.position;
 
         const align = cell.withDefault( orientation === Orientation.HORIZONTAL ? 'xAlign' : 'yAlign', this );
 
@@ -214,8 +217,8 @@ class GridConstraint extends GridConfigurable( Constraint ) {
         const cellBounds = cell.getCellBounds( this );
         assert && assert( cellBounds.isFinite() );
 
-        layoutBounds.minX = Math.min( layoutBounds.minX, cellBounds.minX );
-        layoutBounds.maxX = Math.max( layoutBounds.maxX, cellBounds.maxX );
+        layoutBounds[ minField ] = Math.min( layoutBounds[ minField ], cellBounds[ minField ] );
+        layoutBounds[ maxField ] = Math.max( layoutBounds[ maxField ], cellBounds[ maxField ] );
       } );
     } );
 
@@ -253,7 +256,7 @@ class GridConstraint extends GridConfigurable( Constraint ) {
    * @returns {number|Array.<number>}
    */
   get xSpacing() {
-    return this._xSpacing;
+    return this._spacing.get( Orientation.HORIZONTAL );
   }
 
   /**
@@ -265,8 +268,8 @@ class GridConstraint extends GridConfigurable( Constraint ) {
     assert && assert( ( typeof value === 'number' && isFinite( value ) && value >= 0 ) ||
                       ( Array.isArray( value ) && _.every( value, item => ( typeof item === 'number' && isFinite( item ) && item >= 0 ) ) ) );
 
-    if ( this._xSpacing !== value ) {
-      this._xSpacing = value;
+    if ( this._spacing.get( Orientation.HORIZONTAL ) !== value ) {
+      this._spacing.set( Orientation.HORIZONTAL, value );
 
       this.updateLayoutAutomatically();
     }
@@ -278,7 +281,7 @@ class GridConstraint extends GridConfigurable( Constraint ) {
    * @returns {number|Array.<number>}
    */
   get ySpacing() {
-    return this._ySpacing;
+    return this._spacing.get( Orientation.VERTICAL );
   }
 
   /**
@@ -290,8 +293,8 @@ class GridConstraint extends GridConfigurable( Constraint ) {
     assert && assert( ( typeof value === 'number' && isFinite( value ) && value >= 0 ) ||
                       ( Array.isArray( value ) && _.every( value, item => ( typeof item === 'number' && isFinite( item ) && item >= 0 ) ) ) );
 
-    if ( this._ySpacing !== value ) {
-      this._ySpacing = value;
+    if ( this._spacing.get( Orientation.VERTICAL ) !== value ) {
+      this._spacing.set( Orientation.VERTICAL, value );
 
       this.updateLayoutAutomatically();
     }
@@ -375,21 +378,11 @@ class GridConstraint extends GridConfigurable( Constraint ) {
   /**
    * @public
    *
-   * @param {number} row
-   * @returns {Array.<GridCell>}
+   * @param {Orientation} orientation
+   * @param {number} index
    */
-  getRowCells( row ) {
-    return _.filter( [ ...this.cells ], cell => cell.containsRow( row ) );
-  }
-
-  /**
-   * @public
-   *
-   * @param {number} column
-   * @returns {Array.<GridCell>}
-   */
-  getColumnCells( column ) {
-    return _.filter( [ ...this.cells ], cell => cell.containsColumn( column ) );
+  getCells( orientation, index ) {
+    return _.filter( [ ...this.cells ], cell => cell.containsIndex( orientation, index ) );
   }
 
   /**
