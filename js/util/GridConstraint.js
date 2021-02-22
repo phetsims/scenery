@@ -82,7 +82,7 @@ class GridConstraint extends GridConfigurable( Constraint ) {
     const preferredWidth = this.preferredWidthProperty.value;
     // const preferredHeight = this.preferredHeightProperty.value;
 
-    const cells = this.cells.values().filter( cell => {
+    const cells = [ ...this.cells ].filter( cell => {
       // TODO: Also don't lay out disconnected nodes!!!!
       return cell.node.bounds.isValid() && ( !this._excludeInvisible || cell.node.visible );
     } );
@@ -138,6 +138,10 @@ class GridConstraint extends GridConfigurable( Constraint ) {
           } );
         }
       }
+    } );
+    // Adjust column widths to the min
+    columns.forEach( column => {
+      column.width = column.min;
     } );
     const minWidthAndSpacing = _.sum( columns.map( column => column.min ) ) + _.sum( columnSpacings );
     const width = Math.max( minWidthAndSpacing, preferredWidth || 0 );
@@ -205,8 +209,6 @@ class GridConstraint extends GridConfigurable( Constraint ) {
       minX = Math.min( minX, cellBounds.minX );
       maxX = Math.max( maxX, cellBounds.maxX );
     } );
-
-    // TODO: you know, some layout and stuff
 
     // We're taking up these layout bounds (nodes could use them for localBounds)
     this.layoutBoundsProperty.value = new Bounds2( minX, 0, maxX, 0 ); // TODO: layoutBounds
@@ -293,7 +295,7 @@ class GridConstraint extends GridConfigurable( Constraint ) {
    */
   addCell( cell ) {
     assert && assert( cell instanceof GridCell );
-    assert && assert( !_.includes( this.cells, cell ) );
+    assert && assert( !this.cells.has( cell ) );
 
     this.cells.add( cell );
     this.addNode( cell.node );
@@ -328,7 +330,7 @@ class GridConstraint extends GridConfigurable( Constraint ) {
     this.preferredWidthProperty.unlink( this._updateLayoutListener );
     this.preferredHeightProperty.unlink( this._updateLayoutListener );
 
-    this.cells.values().forEach( cell => this.removeCell( cell ) );
+    [ ...this.cells ].forEach( cell => this.removeCell( cell ) );
 
     super.dispose();
   }
@@ -371,7 +373,8 @@ class GridConstraint extends GridConfigurable( Constraint ) {
    * @returns {GridCell|null}
    */
   getCell( row, column ) {
-    return _.find( this.cells, cell => cell.containsRow( row ) && cell.containsColumn( column ) ) || null;
+    // TODO: If we have to do ridiculousness like this, just go back to array?
+    return _.find( [ ...this.cells ], cell => cell.containsRow( row ) && cell.containsColumn( column ) ) || null;
   }
 
   /**
@@ -381,7 +384,7 @@ class GridConstraint extends GridConfigurable( Constraint ) {
    * @returns {Array.<GridCell>}
    */
   getRowCells( row ) {
-    return _.filter( this.cells, cell => cell.containsRow( row ) );
+    return _.filter( [ ...this.cells ], cell => cell.containsRow( row ) );
   }
 
   /**
@@ -391,7 +394,7 @@ class GridConstraint extends GridConfigurable( Constraint ) {
    * @returns {Array.<GridCell>}
    */
   getColumnCells( column ) {
-    return _.filter( this.cells, cell => cell.containsColumn( column ) );
+    return _.filter( [ ...this.cells ], cell => cell.containsColumn( column ) );
   }
 
   /**

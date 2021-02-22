@@ -93,7 +93,7 @@ class GridCell extends GridConfigurable( Object ) {
     return this.withDefault( 'leftMargin', defaultConfig ) +
            Math.max(
              this.node.hSizable ? this.node.minimumWidth : this.node.width,
-             this.withDefault( 'minCellWidth' )
+             this.withDefault( 'minCellWidth', defaultConfig )
            ) +
            this.withDefault( 'rightMargin', defaultConfig );
   }
@@ -108,7 +108,7 @@ class GridCell extends GridConfigurable( Object ) {
     return this.withDefault( 'topMargin', defaultConfig ) +
            Math.max(
              this.node.vSizable ? this.node.minimumHeight : this.node.height,
-             this.withDefault( 'minCellHeight' )
+             this.withDefault( 'minCellHeight', defaultConfig )
            ) +
            this.withDefault( 'bottomMargin', defaultConfig );
   }

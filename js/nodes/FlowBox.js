@@ -17,7 +17,7 @@ import Node from './Node.js';
 // FlowBox-specific options that can be passed in the constructor or mutate() call.
 const FLOWBOX_OPTION_KEYS = [
   'resize' // {boolean} - Whether we should update the layout when children change, see setResize for documentation
-].concat( FlowConstraint.FLOW_CONSTRAINT_OPTION_KEYS );
+].concat( FlowConstraint.FLOW_CONSTRAINT_OPTION_KEYS ).filter( key => key !== 'excludeInvisible' );
 
 const DEFAULT_OPTIONS = {
   orientation: 'horizontal',
@@ -547,7 +547,7 @@ class FlowBox extends HSizable( VSizable( Node ) ) {
  * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
  *       cases that may apply.
  */
-FlowBox.prototype._mutatorKeys = HSizable( Node ).prototype._mutatorKeys.concat( VSizable( Node ).prototype._mutatorKeys ).concat( FLOWBOX_OPTION_KEYS ).filter( key => key !== 'excludeInvisible' );
+FlowBox.prototype._mutatorKeys = HSizable( Node ).prototype._mutatorKeys.concat( VSizable( Node ).prototype._mutatorKeys ).concat( FLOWBOX_OPTION_KEYS );
 
 // @public {Object}
 FlowBox.DEFAULT_OPTIONS = DEFAULT_OPTIONS;

@@ -17,7 +17,7 @@ import Node from './Node.js';
 // GridBox-specific options that can be passed in the constructor or mutate() call.
 const GRIDBOX_OPTION_KEYS = [
   'resize' // {boolean} - Whether we should update the layout when children change, see setResize for documentation
-].concat( GridConstraint.GRID_CONSTRAINT_OPTION_KEYS );
+].concat( GridConstraint.GRID_CONSTRAINT_OPTION_KEYS ).filter( key => key !== 'excludeInvisible' );
 
 const DEFAULT_OPTIONS = {
   resize: true
@@ -37,6 +37,9 @@ class GridBox extends HSizable( VSizable( Node ) ) {
     }, options );
 
     super();
+
+    // @private {Map.<Node,FlowCell>}
+    this._cellMap = new Map();
 
     // @private {GridConstraint}
     this._constraint = new GridConstraint( this, {
@@ -109,10 +112,325 @@ class GridBox extends HSizable( VSizable( Node ) ) {
   /**
    * @public
    *
-   * @param {boolean} value
+   * @returns {number|Array.<number>}
    */
-  set resize( value ) {
-    this._constraint.enabled = value;
+  get xSpacing() {
+    return this._constraint.xSpacing;
+  }
+
+  /**
+   * @public
+   *
+   * @param {number|Array.<number>} value
+   */
+  set xSpacing( value ) {
+    this._constraint.xSpacing = value;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number|Array.<number>}
+   */
+  get ySpacing() {
+    return this._constraint.ySpacing;
+  }
+
+  /**
+   * @public
+   *
+   * @param {number|Array.<number>} value
+   */
+  set ySpacing( value ) {
+    this._constraint.ySpacing = value;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {GridConfigurable.Align|null}
+   */
+  get xAlign() {
+    return this._constraint.xAlign;
+  }
+
+  /**
+   * @public
+   *
+   * @param {GridConfigurable.Align|string|null} value
+   */
+  set xAlign( value ) {
+    this._constraint.xAlign = value;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {GridConfigurable.Align|null}
+   */
+  get yAlign() {
+    return this._constraint.yAlign;
+  }
+
+  /**
+   * @public
+   *
+   * @param {GridConfigurable.Align|string|null} value
+   */
+  set yAlign( value ) {
+    this._constraint.yAlign = value;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number|null}
+   */
+  get grow() {
+    return this._constraint.grow;
+  }
+
+  /**
+   * @public
+   *
+   * @param {number|null} value
+   */
+  set grow( value ) {
+    this._constraint.grow = value;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number|null}
+   */
+  get xGrow() {
+    return this._constraint.xGrow;
+  }
+
+  /**
+   * @public
+   *
+   * @param {number|null} value
+   */
+  set xGrow( value ) {
+    this._constraint.xGrow = value;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number|null}
+   */
+  get yGrow() {
+    return this._constraint.yGrow;
+  }
+
+  /**
+   * @public
+   *
+   * @param {number|null} value
+   */
+  set yGrow( value ) {
+    this._constraint.yGrow = value;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number|null}
+   */
+  get margin() {
+    return this._constraint.margin;
+  }
+
+  /**
+   * @public
+   *
+   * @param {number|null} value
+   */
+  set margin( value ) {
+    this._constraint.margin = value;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number|null}
+   */
+  get xMargin() {
+    return this._constraint.xMargin;
+  }
+
+  /**
+   * @public
+   *
+   * @param {number|null} value
+   */
+  set xMargin( value ) {
+    this._constraint.xMargin = value;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number|null}
+   */
+  get yMargin() {
+    return this._constraint.yMargin;
+  }
+
+  /**
+   * @public
+   *
+   * @param {number|null} value
+   */
+  set yMargin( value ) {
+    this._constraint.yMargin = value;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number|null}
+   */
+  get leftMargin() {
+    return this._constraint.leftMargin;
+  }
+
+  /**
+   * @public
+   *
+   * @param {number|null} value
+   */
+  set leftMargin( value ) {
+    this._constraint.leftMargin = value;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number|null}
+   */
+  get rightMargin() {
+    return this._constraint.rightMargin;
+  }
+
+  /**
+   * @public
+   *
+   * @param {number|null} value
+   */
+  set rightMargin( value ) {
+    this._constraint.rightMargin = value;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number|null}
+   */
+  get topMargin() {
+    return this._constraint.topMargin;
+  }
+
+  /**
+   * @public
+   *
+   * @param {number|null} value
+   */
+  set topMargin( value ) {
+    this._constraint.topMargin = value;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number|null}
+   */
+  get bottomMargin() {
+    return this._constraint.bottomMargin;
+  }
+
+  /**
+   * @public
+   *
+   * @param {number|null} value
+   */
+  set bottomMargin( value ) {
+    this._constraint.bottomMargin = value;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number|null}
+   */
+  get minCellWidth() {
+    return this._constraint.minCellWidth;
+  }
+
+  /**
+   * @public
+   *
+   * @param {number|null} value
+   */
+  set minCellWidth( value ) {
+    this._constraint.minCellWidth = value;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number|null}
+   */
+  get minCellHeight() {
+    return this._constraint.minCellHeight;
+  }
+
+  /**
+   * @public
+   *
+   * @param {number|null} value
+   */
+  set minCellHeight( value ) {
+    this._constraint.minCellHeight = value;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number|null}
+   */
+  get maxCellWidth() {
+    return this._constraint.maxCellWidth;
+  }
+
+  /**
+   * @public
+   *
+   * @param {number|null} value
+   */
+  set maxCellWidth( value ) {
+    this._constraint.maxCellWidth = value;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number|null}
+   */
+  get maxCellHeight() {
+    return this._constraint.maxCellHeight;
+  }
+
+  /**
+   * @public
+   *
+   * @param {number|null} value
+   */
+  set maxCellHeight( value ) {
+    this._constraint.maxCellHeight = value;
   }
 }
 
@@ -124,7 +442,7 @@ class GridBox extends HSizable( VSizable( Node ) ) {
  * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
  *       cases that may apply.
  */
-GridBox.prototype._mutatorKeys = HSizable( Node ).prototype._mutatorKeys.concat( VSizable( Node ).prototype._mutatorKeys ).concat( GRIDBOX_OPTION_KEYS ).filter( key => key !== 'excludeInvisible' );
+GridBox.prototype._mutatorKeys = HSizable( Node ).prototype._mutatorKeys.concat( VSizable( Node ).prototype._mutatorKeys ).concat( GRIDBOX_OPTION_KEYS );
 
 // @public {Object}
 GridBox.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
