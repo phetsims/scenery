@@ -259,6 +259,34 @@ class GridConstraint extends GridConfigurable( Constraint ) {
    *
    * @returns {number|Array.<number>}
    */
+  get spacing() {
+    assert && assert( this.xSpacing === this.ySpacing );
+
+    return this.xSpacing;
+  }
+
+  /**
+   * @public
+   *
+   * @param {number|Array.<number>} value
+   */
+  set spacing( value ) {
+    assert && assert( ( typeof value === 'number' && isFinite( value ) && value >= 0 ) ||
+                      ( Array.isArray( value ) && _.every( value, item => ( typeof item === 'number' && isFinite( item ) && item >= 0 ) ) ) );
+
+    if ( this._spacing.get( Orientation.HORIZONTAL ) !== value || this._spacing.get( Orientation.VERTICAL ) !== value ) {
+      this._spacing.set( Orientation.HORIZONTAL, value );
+      this._spacing.set( Orientation.VERTICAL, value );
+
+      this.updateLayoutAutomatically();
+    }
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number|Array.<number>}
+   */
   get xSpacing() {
     return this._spacing.get( Orientation.HORIZONTAL );
   }
