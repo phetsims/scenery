@@ -174,7 +174,8 @@ class GridConstraint extends GridConfigurable( Constraint ) {
         } );
         sizeRemaining -= amountToGrow * totalGrow;
       }
-      // Horizontal layout
+
+      // Layout
       layoutBounds[ minField ] = 0;
       layoutBounds[ maxField ] = size;
       lines.forEach( ( column, arrayIndex ) => {
