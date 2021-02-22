@@ -9,6 +9,8 @@
 import Property from '../../../axon/js/Property.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
+import Orientation from '../../../phet-core/js/Orientation.js';
+import OrientationPair from '../../../phet-core/js/OrientationPair.js';
 import merge from '../../../phet-core/js/merge.js';
 import mutate from '../../../phet-core/js/mutate.js';
 import Node from '../nodes/Node.js';
@@ -79,9 +81,6 @@ class GridConstraint extends GridConfigurable( Constraint ) {
   layout() {
     super.layout();
 
-    const preferredWidth = this.preferredWidthProperty.value;
-    // const preferredHeight = this.preferredHeightProperty.value;
-
     const cells = [ ...this.cells ].filter( cell => {
       // TODO: Also don't lay out disconnected nodes!!!!
       return cell.node.bounds.isValid() && ( !this._excludeInvisible || cell.node.visible );
@@ -92,126 +91,132 @@ class GridConstraint extends GridConfigurable( Constraint ) {
       return;
     }
 
+    const preferredSizes = new OrientationPair( this.preferredWidthProperty.value, this.preferredHeightProperty.value );
+    const layoutBounds = new Bounds2( 0, 0, 0, 0 ); // TODO: Bounds2.NOTHING.copy() once we have both dimensions handled
+
     // Handle horizontal first, so if we re-wrap we can handle vertical later.
-    const columnIndices = this.getColumnIndices();
-    const columnMap = new Map(); // index => column
-    const columns = columnIndices.map( index => {
-      const cells = this.getColumnCells( index );
+    [ Orientation.HORIZONTAL ].forEach( orientation => {
 
-      const column = {
-        index: index,
-        cells: cells,
-        grow: _.max( cells.map( cell => cell.withDefault( 'xGrow', this ) ) ),
-        min: 0,
-        max: Number.POSITIVE_INFINITY,
-        width: 0,
-        x: 0
-      };
-      columnMap.set( index, column );
+      const columnIndices = this.getColumnIndices();
+      const columnMap = new Map(); // index => column
+      const columns = columnIndices.map( index => {
+        const cells = this.getColumnCells( index );
 
-      return column;
-    } );
-    const columnSpacings = typeof this._xSpacing === 'number' ?
-                           _.range( 0, columns.length - 1 ).map( () => this._xSpacing ) :
-                           this._xSpacing.slice( 0, columns.length - 1 );
-    assert && assert( columnSpacings.length === columns.length - 1 );
-    // Scan widths for single-column cells first
-    this.cells.forEach( cell => {
-      if ( cell.width === 1 ) {
-        const column = columnMap.get( cell.x );
-        column.min = Math.max( column.min, cell.getMinimumWidth( this ) );
-        column.max = Math.min( column.max, cell.getMaximumWidth( this ) );
-      }
-    } );
-    // Then increase for spanning cells as necessary
-    this.cells.forEach( cell => {
-      if ( cell.width > 1 ) {
-        // TODO: don't bump mins over maxes here (if columns have maxes, redistribute otherwise)
-        // TODO: also handle maxes
-        const columns = cell.getColumnIndices().map( index => columnMap.get( index ) );
-        const currentMin = _.sum( columns.map( column => column.min ) );
-        const neededMin = cell.getMinimumWidth( this );
-        if ( neededMin > currentMin ) {
-          const columnDelta = ( neededMin - currentMin ) / columns.length;
-          columns.forEach( column => {
-            column.min += columnDelta;
-          } );
-        }
-      }
-    } );
-    // Adjust column widths to the min
-    columns.forEach( column => {
-      column.width = column.min;
-    } );
-    const minWidthAndSpacing = _.sum( columns.map( column => column.min ) ) + _.sum( columnSpacings );
-    const width = Math.max( minWidthAndSpacing, preferredWidth || 0 );
-    let widthRemaining = width - minWidthAndSpacing;
-    let growableColumns;
-    while ( widthRemaining > 1e-7 && ( growableColumns = columns.filter( column => {
-      return column.grow > 0 && column.width < column.max - 1e-7;
-    } ) ).length ) {
-      const totalGrow = _.sum( growableColumns.map( column => column.grow ) );
-      const amountToGrow = Math.min(
-        _.min( growableColumns.map( column => ( column.max - column.width ) / column.grow ) ),
-        widthRemaining / totalGrow
-      );
+        const column = {
+          index: index,
+          cells: cells,
+          grow: _.max( cells.map( cell => cell.withDefault( 'xGrow', this ) ) ),
+          min: 0,
+          max: Number.POSITIVE_INFINITY,
+          width: 0,
+          x: 0
+        };
+        columnMap.set( index, column );
 
-      assert && assert( amountToGrow > 1e-11 );
-
-      growableColumns.forEach( column => {
-        column.width += amountToGrow * column.grow;
+        return column;
       } );
-      widthRemaining -= amountToGrow * totalGrow;
-    }
-    // Horizontal layout
-    let minX = 0;
-    let maxX = width;
-    columns.forEach( ( column, arrayIndex ) => {
-      column.x = _.sum( columns.slice( 0, arrayIndex ).map( column => column.width ) ) + _.sum( columnSpacings.slice( 0, column.index ) );
-    } );
-    this.cells.forEach( cell => {
-      const cellColumns = cell.getColumnIndices().map( index => columnMap.get( index ) );
-      const firstColumn = columnMap.get( cell.x );
-      const cellSpacings = columnSpacings.slice( cell.x, cell.x + cell.width - 1 );
-      const cellAvailableWidth = _.sum( cellColumns.map( cell => cell.width ) ) + _.sum( cellSpacings );
-      const cellMinimumWidth = cell.getMinimumWidth( this );
-      const cellX = firstColumn.x;
+      const columnSpacings = typeof this._xSpacing === 'number' ?
+                             _.range( 0, columns.length - 1 ).map( () => this._xSpacing ) :
+                             this._xSpacing.slice( 0, columns.length - 1 );
+      assert && assert( columnSpacings.length === columns.length - 1 );
+      // Scan widths for single-column cells first
+      this.cells.forEach( cell => {
+        if ( cell.width === 1 ) {
+          const column = columnMap.get( cell.x );
+          column.min = Math.max( column.min, cell.getMinimumWidth( this ) );
+          column.max = Math.min( column.max, cell.getMaximumWidth( this ) );
+        }
+      } );
+      // Then increase for spanning cells as necessary
+      this.cells.forEach( cell => {
+        if ( cell.width > 1 ) {
+          // TODO: don't bump mins over maxes here (if columns have maxes, redistribute otherwise)
+          // TODO: also handle maxes
+          const columns = cell.getColumnIndices().map( index => columnMap.get( index ) );
+          const currentMin = _.sum( columns.map( column => column.min ) );
+          const neededMin = cell.getMinimumWidth( this );
+          if ( neededMin > currentMin ) {
+            const columnDelta = ( neededMin - currentMin ) / columns.length;
+            columns.forEach( column => {
+              column.min += columnDelta;
+            } );
+          }
+        }
+      } );
+      // Adjust column widths to the min
+      columns.forEach( column => {
+        column.width = column.min;
+      } );
+      const minWidthAndSpacing = _.sum( columns.map( column => column.min ) ) + _.sum( columnSpacings );
+      const width = Math.max( minWidthAndSpacing, preferredSizes.get( orientation ) || 0 );
+      let widthRemaining = width - minWidthAndSpacing;
+      let growableColumns;
+      while ( widthRemaining > 1e-7 && ( growableColumns = columns.filter( column => {
+        return column.grow > 0 && column.width < column.max - 1e-7;
+      } ) ).length ) {
+        const totalGrow = _.sum( growableColumns.map( column => column.grow ) );
+        const amountToGrow = Math.min(
+          _.min( growableColumns.map( column => ( column.max - column.width ) / column.grow ) ),
+          widthRemaining / totalGrow
+        );
 
-      const align = cell.withDefault( 'xAlign', this );
+        assert && assert( amountToGrow > 1e-11 );
 
-      if ( align === GridConfigurable.Align.STRETCH ) {
-        cell.attemptedPreferredWidth( this, cellAvailableWidth );
-        cell.xStart( this, cellX );
+        growableColumns.forEach( column => {
+          column.width += amountToGrow * column.grow;
+        } );
+        widthRemaining -= amountToGrow * totalGrow;
       }
-      else {
-        cell.attemptedPreferredWidth( this, cellMinimumWidth );
+      // Horizontal layout
+      layoutBounds.minX = 0;
+      layoutBounds.maxX = width;
+      columns.forEach( ( column, arrayIndex ) => {
+        column.x = _.sum( columns.slice( 0, arrayIndex ).map( column => column.width ) ) + _.sum( columnSpacings.slice( 0, column.index ) );
+      } );
+      this.cells.forEach( cell => {
+        const cellColumns = cell.getColumnIndices().map( index => columnMap.get( index ) );
+        const firstColumn = columnMap.get( cell.x );
+        const cellSpacings = columnSpacings.slice( cell.x, cell.x + cell.width - 1 );
+        const cellAvailableWidth = _.sum( cellColumns.map( cell => cell.width ) ) + _.sum( cellSpacings );
+        const cellMinimumWidth = cell.getMinimumWidth( this );
+        const cellX = firstColumn.x;
 
-        if ( align === GridConfigurable.Align.ORIGIN ) {
-          // TODO: handle layout bounds
-          // TODO: OMG this is horribly broken right? We would need to align stuff first
-          // TODO: Do a pass to handle origin cells first (and in FLOW too)
-          cell.xOrigin( this, cellX );
+        const align = cell.withDefault( 'xAlign', this );
+
+        if ( align === GridConfigurable.Align.STRETCH ) {
+          cell.attemptedPreferredWidth( this, cellAvailableWidth );
+          cell.xStart( this, cellX );
         }
         else {
-          // TODO: optimize
-          const padRatio = {
-            [ GridConfigurable.Align.START ]: 0,
-            [ GridConfigurable.Align.CENTER ]: 0.5,
-            [ GridConfigurable.Align.END ]: 1
-          }[ align ];
-          cell.xStart( this, cellX + ( cellAvailableWidth - cellMinimumWidth ) * padRatio );
+          cell.attemptedPreferredWidth( this, cellMinimumWidth );
+
+          if ( align === GridConfigurable.Align.ORIGIN ) {
+            // TODO: handle layout bounds
+            // TODO: OMG this is horribly broken right? We would need to align stuff first
+            // TODO: Do a pass to handle origin cells first (and in FLOW too)
+            cell.xOrigin( this, cellX );
+          }
+          else {
+            // TODO: optimize
+            const padRatio = {
+              [ GridConfigurable.Align.START ]: 0,
+              [ GridConfigurable.Align.CENTER ]: 0.5,
+              [ GridConfigurable.Align.END ]: 1
+            }[ align ];
+            cell.xStart( this, cellX + ( cellAvailableWidth - cellMinimumWidth ) * padRatio );
+          }
         }
-      }
 
-      const cellBounds = cell.getCellBounds( this );
-      assert && assert( cellBounds.isFinite() );
+        const cellBounds = cell.getCellBounds( this );
+        assert && assert( cellBounds.isFinite() );
 
-      minX = Math.min( minX, cellBounds.minX );
-      maxX = Math.max( maxX, cellBounds.maxX );
+        layoutBounds.minX = Math.min( layoutBounds.minX, cellBounds.minX );
+        layoutBounds.maxX = Math.max( layoutBounds.maxX, cellBounds.maxX );
+      } );
     } );
 
     // We're taking up these layout bounds (nodes could use them for localBounds)
-    this.layoutBoundsProperty.value = new Bounds2( minX, 0, maxX, 0 ); // TODO: layoutBounds
+    this.layoutBoundsProperty.value = layoutBounds;
   }
 
   /**
