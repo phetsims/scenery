@@ -7,6 +7,8 @@
  */
 
 import Utils from '../../../dot/js/Utils.js';
+import Orientation from '../../../phet-core/js/Orientation.js';
+import OrientationPair from '../../../phet-core/js/OrientationPair.js';
 import merge from '../../../phet-core/js/merge.js';
 import scenery from '../scenery.js';
 import GridConfigurable from './GridConfigurable.js';
@@ -32,11 +34,9 @@ class GridCell extends GridConfigurable( Object ) {
 
     super();
 
-    // @public {number} - These are only set initially, and ignored for the future
-    this.x = options.x;
-    this.y = options.y;
-    this.width = options.width;
-    this.height = options.height;
+    // @public {OrientationPair.<number>} - These are only set initially, and ignored for the future
+    this.position = new OrientationPair( options.x, options.y );
+    this.size = new OrientationPair( options.width, options.height );
 
     // @private {Node}
     this._node = node;
@@ -257,7 +257,9 @@ class GridCell extends GridConfigurable( Object ) {
    * @returns {boolean}
    */
   containsRow( row ) {
-    return row >= this.y && row < this.y + this.height;
+    const position = this.position.get( Orientation.VERTICAL );
+    const size = this.size.get( Orientation.VERTICAL );
+    return row >= position && row < position + size;
   }
 
   /**
@@ -267,7 +269,9 @@ class GridCell extends GridConfigurable( Object ) {
    * @returns {boolean}
    */
   containsColumn( column ) {
-    return column >= this.x && column < this.x + this.width;
+    const position = this.position.get( Orientation.HORIZONTAL );
+    const size = this.size.get( Orientation.HORIZONTAL );
+    return column >= position && column < position + size;
   }
 
   /**
@@ -276,7 +280,9 @@ class GridCell extends GridConfigurable( Object ) {
    * @returns {number}
    */
   getRowIndices() {
-    return _.range( this.y, this.y + this.height );
+    const position = this.position.get( Orientation.VERTICAL );
+    const size = this.size.get( Orientation.VERTICAL );
+    return _.range( position, position + size );
   }
 
   /**
@@ -285,7 +291,9 @@ class GridCell extends GridConfigurable( Object ) {
    * @returns {number}
    */
   getColumnIndices() {
-    return _.range( this.x, this.x + this.width );
+    const position = this.position.get( Orientation.HORIZONTAL );
+    const size = this.size.get( Orientation.HORIZONTAL );
+    return _.range( position, position + size );
   }
 
   /**

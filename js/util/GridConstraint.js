@@ -108,6 +108,8 @@ class GridConstraint extends GridConfigurable( Constraint ) {
           grow: _.max( cells.map( cell => cell.withDefault( 'xGrow', this ) ) ),
           min: 0,
           max: Number.POSITIVE_INFINITY,
+
+          // TODO: rename to orientation-independent
           width: 0,
           x: 0
         };
@@ -121,15 +123,15 @@ class GridConstraint extends GridConfigurable( Constraint ) {
       assert && assert( columnSpacings.length === columns.length - 1 );
       // Scan widths for single-column cells first
       this.cells.forEach( cell => {
-        if ( cell.width === 1 ) {
-          const column = columnMap.get( cell.x );
+        if ( cell.size.get( orientation ) === 1 ) {
+          const column = columnMap.get( cell.position.get( orientation ) );
           column.min = Math.max( column.min, cell.getMinimumWidth( this ) );
           column.max = Math.min( column.max, cell.getMaximumWidth( this ) );
         }
       } );
       // Then increase for spanning cells as necessary
       this.cells.forEach( cell => {
-        if ( cell.width > 1 ) {
+        if ( cell.size.get( orientation ) > 1 ) {
           // TODO: don't bump mins over maxes here (if columns have maxes, redistribute otherwise)
           // TODO: also handle maxes
           const columns = cell.getColumnIndices().map( index => columnMap.get( index ) );
@@ -174,10 +176,12 @@ class GridConstraint extends GridConfigurable( Constraint ) {
         column.x = _.sum( columns.slice( 0, arrayIndex ).map( column => column.width ) ) + _.sum( columnSpacings.slice( 0, column.index ) );
       } );
       this.cells.forEach( cell => {
+        const cellPosition = cell.position.get( orientation );
+        const cellSize = cell.size.get( orientation );
         const cellColumns = cell.getColumnIndices().map( index => columnMap.get( index ) );
-        const firstColumn = columnMap.get( cell.x );
-        const cellSpacings = columnSpacings.slice( cell.x, cell.x + cell.width - 1 );
-        const cellAvailableWidth = _.sum( cellColumns.map( cell => cell.width ) ) + _.sum( cellSpacings );
+        const firstColumn = columnMap.get( cellPosition );
+        const cellSpacings = columnSpacings.slice( cellPosition, cellPosition + cellSize - 1 );
+        const cellAvailableWidth = _.sum( cellColumns.map( cell => cellSize ) ) + _.sum( cellSpacings );
         const cellMinimumWidth = cell.getMinimumWidth( this );
         const cellX = firstColumn.x;
 
