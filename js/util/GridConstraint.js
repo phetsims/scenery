@@ -21,6 +21,7 @@ import GridConfigurable from './GridConfigurable.js';
 
 const GRID_CONSTRAINT_OPTION_KEYS = [
   'excludeInvisible',
+  'spacing',
   'xSpacing',
   'ySpacing'
 ].concat( GridConfigurable.GRID_CONFIGURABLE_OPTION_KEYS );

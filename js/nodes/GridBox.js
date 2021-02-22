@@ -120,6 +120,24 @@ class GridBox extends HSizable( VSizable( Node ) ) {
    *
    * @returns {number|Array.<number>}
    */
+  get spacing() {
+    return this._constraint.spacing;
+  }
+
+  /**
+   * @public
+   *
+   * @param {number|Array.<number>} value
+   */
+  set spacing( value ) {
+    this._constraint.spacing = value;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number|Array.<number>}
+   */
   get xSpacing() {
     return this._constraint.xSpacing;
   }
