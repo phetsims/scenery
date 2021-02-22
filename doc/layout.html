@@ -206,28 +206,58 @@
 
     <div id="dynamic-example"></div>
     <script type="text/javascript">
-      let circle;
-      let step;
-      dynamicDemo( 'dynamic-example', function( scene ) {
-        /*START*/
-        circle = new scenery.Circle( 25, { fill: colors[ 6 ] } );
-        let time = 0;
-        step = dt => {
-          time += dt;
-          circle.radius = 25 + 10 * Math.sin( 4 * time );
-        };
-        return new scenery.FlowBox( {
-          children: [
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
-            circle,
-            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
-          ]
-        } );
-        /*END*/
-      }, { resize: 'none', useMinWidth: false, adjustDisplay: true, step: dt => step( dt ) } );
+      {
+        let circle;
+        let step;
+        dynamicDemo( 'dynamic-example', function( scene ) {
+          /*START*/
+          circle = new scenery.Circle( 25, { fill: colors[ 6 ] } );
+          let time = 0;
+          step = dt => {
+            time += dt;
+            circle.radius = 25 + 10 * Math.sin( 4 * time );
+          };
+          return new scenery.FlowBox( {
+            children: [
+              new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+              new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+              circle,
+              new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+            ]
+          } );
+          /*END*/
+        }, { resize: 'none', useMinWidth: false, adjustDisplay: true, step: dt => step( dt ) } );
+      }
     </script>
 
+    <p>Resizing/layout can be disabled with resize:false:</p>
+
+    <div id="locked-sizing-example"></div>
+    <script type="text/javascript">
+      {
+        let circle;
+        let step;
+        dynamicDemo( 'locked-sizing-example', function( scene ) {
+          /*START*/
+          circle = new scenery.Circle( 25, { fill: colors[ 6 ] } );
+          let time = 0;
+          step = dt => {
+            time += dt;
+            circle.radius = 25 + 10 * Math.sin( 4 * time );
+          };
+          return new scenery.FlowBox( {
+            resize: false,
+            children: [
+              new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+              new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+              circle,
+              new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+            ]
+          } );
+          /*END*/
+        }, { resize: 'none', useMinWidth: false, adjustDisplay: true, step: dt => step( dt ) } );
+      }
+    </script>
 
     <p>Invisible nodes are not included in layout/bounds by default:</p>
 
@@ -236,6 +266,25 @@
       dynamicDemo( 'invis-example', function( scene ) {
         /*START*/
         return new scenery.FlowBox( {
+          children: [
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ], visible: false } ),
+            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'horizontal' } );
+    </script>
+
+    <p>Invisible nodes can be forced into the layout:</p>
+
+    <div id="force-vis-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'force-vis-example', function( scene ) {
+        /*START*/
+        return new scenery.FlowBox( {
+          excludeInvisibleChildrenFromBounds: false,
           children: [
             new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
             new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ], visible: false } ),
