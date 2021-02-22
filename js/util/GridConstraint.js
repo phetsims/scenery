@@ -97,7 +97,7 @@ class GridConstraint extends GridConfigurable( Constraint ) {
     // Handle horizontal first, so if we re-wrap we can handle vertical later.
     [ Orientation.HORIZONTAL ].forEach( orientation => {
 
-      const columnIndices = this.getColumnIndices();
+      const columnIndices = this.getIndices( orientation );
       const columnMap = new Map(); // index => column
       const columns = columnIndices.map( index => {
         const cells = this.getColumnCells( index );
@@ -125,8 +125,8 @@ class GridConstraint extends GridConfigurable( Constraint ) {
       this.cells.forEach( cell => {
         if ( cell.size.get( orientation ) === 1 ) {
           const column = columnMap.get( cell.position.get( orientation ) );
-          column.min = Math.max( column.min, cell.getMinimumWidth( this ) );
-          column.max = Math.min( column.max, cell.getMaximumWidth( this ) );
+          column.min = Math.max( column.min, cell.getMinimumSize( orientation, this ) );
+          column.max = Math.min( column.max, cell.getMaximumSize( orientation, this ) );
         }
       } );
       // Then increase for spanning cells as necessary
@@ -134,9 +134,9 @@ class GridConstraint extends GridConfigurable( Constraint ) {
         if ( cell.size.get( orientation ) > 1 ) {
           // TODO: don't bump mins over maxes here (if columns have maxes, redistribute otherwise)
           // TODO: also handle maxes
-          const columns = cell.getColumnIndices().map( index => columnMap.get( index ) );
+          const columns = cell.getIndices( orientation ).map( index => columnMap.get( index ) );
           const currentMin = _.sum( columns.map( column => column.min ) );
-          const neededMin = cell.getMinimumWidth( this );
+          const neededMin = cell.getMinimumSize( orientation, this );
           if ( neededMin > currentMin ) {
             const columnDelta = ( neededMin - currentMin ) / columns.length;
             columns.forEach( column => {
@@ -178,27 +178,27 @@ class GridConstraint extends GridConfigurable( Constraint ) {
       this.cells.forEach( cell => {
         const cellPosition = cell.position.get( orientation );
         const cellSize = cell.size.get( orientation );
-        const cellColumns = cell.getColumnIndices().map( index => columnMap.get( index ) );
+        const cellColumns = cell.getIndices( orientation ).map( index => columnMap.get( index ) );
         const firstColumn = columnMap.get( cellPosition );
         const cellSpacings = columnSpacings.slice( cellPosition, cellPosition + cellSize - 1 );
         const cellAvailableWidth = _.sum( cellColumns.map( cell => cellSize ) ) + _.sum( cellSpacings );
-        const cellMinimumWidth = cell.getMinimumWidth( this );
+        const cellMinimumWidth = cell.getMinimumSize( orientation, this );
         const cellX = firstColumn.x;
 
-        const align = cell.withDefault( 'xAlign', this );
+        const align = cell.withDefault( orientation === Orientation.HORIZONTAL ? 'xAlign' : 'yAlign', this );
 
         if ( align === GridConfigurable.Align.STRETCH ) {
-          cell.attemptedPreferredWidth( this, cellAvailableWidth );
-          cell.xStart( this, cellX );
+          cell.attemptedPreferredSize( orientation, this, cellAvailableWidth );
+          cell.positionStart( orientation, this, cellX );
         }
         else {
-          cell.attemptedPreferredWidth( this, cellMinimumWidth );
+          cell.attemptedPreferredSize( orientation, this, cellMinimumWidth );
 
           if ( align === GridConfigurable.Align.ORIGIN ) {
             // TODO: handle layout bounds
             // TODO: OMG this is horribly broken right? We would need to align stuff first
             // TODO: Do a pass to handle origin cells first (and in FLOW too)
-            cell.xOrigin( this, cellX );
+            cell.positionOrigin( orientation, this, cellX );
           }
           else {
             // TODO: optimize
@@ -207,7 +207,7 @@ class GridConstraint extends GridConfigurable( Constraint ) {
               [ GridConfigurable.Align.CENTER ]: 0.5,
               [ GridConfigurable.Align.END ]: 1
             }[ align ];
-            cell.xStart( this, cellX + ( cellAvailableWidth - cellMinimumWidth ) * padRatio );
+            cell.positionStart( orientation, this, cellX + ( cellAvailableWidth - cellMinimumWidth ) * padRatio );
           }
         }
 
@@ -347,28 +347,14 @@ class GridConstraint extends GridConfigurable( Constraint ) {
   /**
    * @public
    *
+   * @param {Orientation} orientation
    * @returns {Array.<number>}
    */
-  getRowIndices() {
+  getIndices( orientation ) {
     const result = [];
 
     this.cells.forEach( cell => {
-      result.push( ...cell.getRowIndices() );
-    } );
-
-    return _.sortedUniq( _.sortBy( result ) );
-  }
-
-  /**
-   * @public
-   *
-   * @returns {Array.<number>}
-   */
-  getColumnIndices() {
-    const result = [];
-
-    this.cells.forEach( cell => {
-      result.push( ...cell.getColumnIndices() );
+      result.push( ...cell.getIndices( orientation ) );
     } );
 
     return _.sortedUniq( _.sortBy( result ) );

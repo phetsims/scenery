@@ -86,6 +86,17 @@ class GridCell extends GridConfigurable( Object ) {
   /**
    * @public
    *
+   * @param {Orientation} orientation
+   * @param {GridConfigurable} defaultConfig
+   * @returns {number}
+   */
+  getMinimumSize( orientation, defaultConfig ) {
+    return orientation === Orientation.HORIZONTAL ? this.getMinimumWidth( defaultConfig ) : this.getMinimumHeight( defaultConfig );
+  }
+
+  /**
+   * @public
+   *
    * @param {GridConfigurable} defaultConfig
    * @returns {number}
    */
@@ -116,6 +127,17 @@ class GridCell extends GridConfigurable( Object ) {
   /**
    * @public
    *
+   * @param {Orientation} orientation
+   * @param {GridConfigurable} defaultConfig
+   * @returns {number}
+   */
+  getMaximumSize( orientation, defaultConfig ) {
+    return orientation === Orientation.HORIZONTAL ? this.getMaximumWidth( defaultConfig ) : this.getMaximumHeight( defaultConfig );
+  }
+
+  /**
+   * @public
+   *
    * @param {GridConfigurable} defaultConfig
    * @returns {number}
    */
@@ -139,6 +161,17 @@ class GridCell extends GridConfigurable( Object ) {
              this.withDefault( 'maxCellHeight', defaultConfig ) || Number.POSITIVE_INFINITY
            ) +
            this.withDefault( 'bottomMargin', defaultConfig );
+  }
+
+  /**
+   * @public
+   *
+   * @param {Orientation} orientation
+   * @param {GridConfigurable} defaultConfig
+   * @param {number} value
+   */
+  attemptedPreferredSize( orientation, defaultConfig, value ) {
+    orientation === Orientation.HORIZONTAL ? this.attemptedPreferredWidth( defaultConfig, value ) : this.attemptedPreferredHeight( defaultConfig, value );
   }
 
   /**
@@ -184,6 +217,17 @@ class GridCell extends GridConfigurable( Object ) {
   /**
    * @public
    *
+   * @param {Orientation} orientation
+   * @param {GridConfigurable} defaultConfig
+   * @param {number} value
+   */
+  positionStart( orientation, defaultConfig, value ) {
+    orientation === Orientation.HORIZONTAL ? this.xStart( defaultConfig, value ) : this.yStart( defaultConfig, value );
+  }
+
+  /**
+   * @public
+   *
    * @param {GridConfigurable} defaultConfig
    * @param {number} value
    */
@@ -209,6 +253,17 @@ class GridCell extends GridConfigurable( Object ) {
     if ( Math.abs( this.node.top - top ) > 1e-9 ) {
       this.node.top = top;
     }
+  }
+
+  /**
+   * @public
+   *
+   * @param {Orientation} orientation
+   * @param {GridConfigurable} defaultConfig
+   * @param {number} value
+   */
+  positionOrigin( orientation, defaultConfig, value ) {
+    orientation === Orientation.HORIZONTAL ? this.xOrigin( defaultConfig, value ) : this.yOrigin( defaultConfig, value );
   }
 
   /**
@@ -253,13 +308,24 @@ class GridCell extends GridConfigurable( Object ) {
   /**
    * @public
    *
+   * @param {Orientation} orientation
+   * @param {number} index
+   * @returns {boolean}
+   */
+  containsIndex( orientation, index ) {
+    const position = this.position.get( orientation );
+    const size = this.size.get( orientation );
+    return index >= position && index < position + size;
+  }
+
+  /**
+   * @public
+   *
    * @param {number} row
    * @returns {boolean}
    */
   containsRow( row ) {
-    const position = this.position.get( Orientation.VERTICAL );
-    const size = this.size.get( Orientation.VERTICAL );
-    return row >= position && row < position + size;
+    return this.containsIndex( Orientation.VERTICAL, row );
   }
 
   /**
@@ -269,30 +335,18 @@ class GridCell extends GridConfigurable( Object ) {
    * @returns {boolean}
    */
   containsColumn( column ) {
-    const position = this.position.get( Orientation.HORIZONTAL );
-    const size = this.size.get( Orientation.HORIZONTAL );
-    return column >= position && column < position + size;
+    return this.containsIndex( Orientation.HORIZONTAL, column );
   }
 
   /**
    * @public
    *
+   * @param {Orientation} orientation
    * @returns {number}
    */
-  getRowIndices() {
-    const position = this.position.get( Orientation.VERTICAL );
-    const size = this.size.get( Orientation.VERTICAL );
-    return _.range( position, position + size );
-  }
-
-  /**
-   * @public
-   *
-   * @returns {number}
-   */
-  getColumnIndices() {
-    const position = this.position.get( Orientation.HORIZONTAL );
-    const size = this.size.get( Orientation.HORIZONTAL );
+  getIndices( orientation ) {
+    const position = this.position.get( orientation );
+    const size = this.size.get( orientation );
     return _.range( position, position + size );
   }
 
