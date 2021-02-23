@@ -28,8 +28,6 @@ const DEFAULT_OPTIONS = {
 
 class FlowBox extends HSizable( VSizable( Node ) ) {
   /**
-   * @public
-   *
    * @param {Object} [options] - FlowBox-specific options are documented in FLOWBOX_OPTION_KEYS above, and can be
    *                             provided along-side options for Node.
    */

@@ -668,6 +668,30 @@
       }, { resize: 'horizontal' } );
     </script>
 
+    <p>Dividers are also available for easy of use (dividers at the visible start/end and duplicates will be marked as invisible, while all other dividers will be marked as visible:</p>
+
+    <div id="divider-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'divider-example', () => {
+        /*START*/
+        return new scenery.FlowBox( {
+          margin: 5,
+          children: [
+            new scenery.HDivider(),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+            new scenery.HDivider(),
+            new scenery.HDivider(),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
+            new scenery.HDivider(),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } ),
+            new scenery.HDivider()
+          ]
+        } );
+        /*END*/
+      }, { resize: 'horizontal' } );
+    </script>
+
     <h2>GridBox</h2>
 
     <p>Can be constructed with absolute coordinates (which can include gaps):</p>

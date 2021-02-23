@@ -25,8 +25,6 @@ const DEFAULT_OPTIONS = {
 
 class GridBox extends HSizable( VSizable( Node ) ) {
   /**
-   * @public
-   *
    * @param {Object} [options] - GridBox-specific options are documented in GRIDBOX_OPTION_KEYS above, and can be
    *                             provided along-side options for Node.
    */

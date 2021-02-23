@@ -14,6 +14,7 @@ import Orientation from '../../../phet-core/js/Orientation.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import merge from '../../../phet-core/js/merge.js';
 import mutate from '../../../phet-core/js/mutate.js';
+import Divider from '../nodes/Divider.js';
 import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
 import Constraint from './Constraint.js';
@@ -99,6 +100,30 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
 
     // The perpendicular orientation, where alignment is handled
     const oppositeOrientation = this.orientation.opposite;
+
+    // Scan for dividers, toggling visibility as desired. Leave the "last" divider visible, as if they are marking
+    // sections "after" themselves.
+    let hasVisibleNonDivider = false;
+    for ( let i = this.cells.length - 1; i >= 0; i-- ) {
+      const cell = this.cells[ i ];
+      if ( cell.node instanceof Divider ) {
+        cell.node.visible = hasVisibleNonDivider;
+        hasVisibleNonDivider = false;
+      }
+      else if ( cell.node.visible ) {
+        hasVisibleNonDivider = true;
+      }
+    }
+    // Then scan from the front, until we hit the first visible non-divider
+    for ( let i = 0; i < this.cells.length; i++ ) {
+      const cell = this.cells[ i ];
+      if ( cell.node instanceof Divider ) {
+        cell.node.visible = false;
+      }
+      else if ( cell.node.visible ) {
+        break;
+      }
+    }
 
     const cells = this.cells.filter( cell => {
       // TODO: Also don't lay out disconnected nodes!!!!
