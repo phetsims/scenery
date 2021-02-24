@@ -7,25 +7,28 @@
  */
 
 import merge from '../../../phet-core/js/merge.js';
+import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
-import GridCell from '../util/GridCell.js';
-import GridConstraint from '../util/GridConstraint.js';
-import HSizable from '../util/HSizable.js';
-import VSizable from '../util/VSizable.js';
-import Node from './Node.js';
+import FlowCell from './FlowCell.js';
+import FlowConstraint from './FlowConstraint.js';
+import HSizable from './HSizable.js';
+import VSizable from './VSizable.js';
 
-// GridBox-specific options that can be passed in the constructor or mutate() call.
-const GRIDBOX_OPTION_KEYS = [
+// FlowBox-specific options that can be passed in the constructor or mutate() call.
+const FLOWBOX_OPTION_KEYS = [
   'resize' // {boolean} - Whether we should update the layout when children change, see setResize for documentation
-].concat( GridConstraint.GRID_CONSTRAINT_OPTION_KEYS ).filter( key => key !== 'excludeInvisible' );
+].concat( FlowConstraint.FLOW_CONSTRAINT_OPTION_KEYS ).filter( key => key !== 'excludeInvisible' );
 
 const DEFAULT_OPTIONS = {
+  orientation: 'horizontal',
+  spacing: 0,
+  align: 'center',
   resize: true
 };
 
-class GridBox extends HSizable( VSizable( Node ) ) {
+class FlowBox extends HSizable( VSizable( Node ) ) {
   /**
-   * @param {Object} [options] - GridBox-specific options are documented in GRIDBOX_OPTION_KEYS above, and can be
+   * @param {Object} [options] - FlowBox-specific options are documented in FLOWBOX_OPTION_KEYS above, and can be
    *                             provided along-side options for Node.
    */
   constructor( options ) {
@@ -36,26 +39,27 @@ class GridBox extends HSizable( VSizable( Node ) ) {
 
     super();
 
-    // @private {Map.<Node,FlowCell>}
-    this._cellMap = new Map();
-
-    // @private {GridConstraint}
-    this._constraint = new GridConstraint( this, {
+    // @private {FlowConstraint}
+    this._constraint = new FlowConstraint( this, {
       preferredWidthProperty: this.preferredWidthProperty,
       preferredHeightProperty: this.preferredHeightProperty,
       minimumWidthProperty: this.minimumWidthProperty,
       minimumHeightProperty: this.minimumHeightProperty,
 
+      orientation: DEFAULT_OPTIONS.orientation,
+      spacing: DEFAULT_OPTIONS.spacing,
+      align: DEFAULT_OPTIONS.align,
       resize: DEFAULT_OPTIONS.resize,
       excludeInvisible: false // Should be handled by the options mutate above
     } );
 
-    // @private {number} - For handling the shortcut-style API
-    this._nextX = 0;
-    this._nextY = 0;
+    // @private {Map.<Node,FlowCell>}
+    this._cellMap = new Map();
 
-    this.childInsertedEmitter.addListener( this.onGridBoxChildInserted.bind( this ) );
-    this.childRemovedEmitter.addListener( this.onGridBoxChildRemoved.bind( this ) );
+    this.childInsertedEmitter.addListener( this.onFlowBoxChildInserted.bind( this ) );
+    this.childRemovedEmitter.addListener( this.onFlowBoxChildRemoved.bind( this ) );
+    this.childrenReorderedEmitter.addListener( this.onFlowBoxChildrenReordered.bind( this ) );
+    this.childrenChangedEmitter.addListener( this.onFlowBoxChildrenChanged.bind( this ) );
 
     this.mutate( options );
     this._constraint.updateLayout();
@@ -85,35 +89,11 @@ class GridBox extends HSizable( VSizable( Node ) ) {
    * @param {Node} node
    * @param {number} index
    */
-  onGridBoxChildInserted( node, index ) {
-    let layoutOptions = node.layoutOptions;
-
-    if ( !layoutOptions || ( typeof layoutOptions.x !== 'number' && typeof layoutOptions.y !== 'number' ) ) {
-      layoutOptions = merge( {
-        x: this._nextX,
-        y: this._nextY
-      }, layoutOptions );
-    }
-
-    if ( layoutOptions.wrap ) {
-      // TODO: how to handle wrapping with larger spans?
-      this._nextX = 0;
-      this._nextY++;
-    }
-    else {
-      this._nextX = layoutOptions.x + ( layoutOptions.width || 1 );
-      this._nextY = layoutOptions.y;
-    }
-
-    // Go to the next spot
-    while ( this._constraint.getCell( this._nextY, this._nextX ) ) {
-      this._nextX++;
-    }
-
-    const cell = new GridCell( node, layoutOptions );
+  onFlowBoxChildInserted( node, index ) {
+    const cell = new FlowCell( node, node.layoutOptions );
     this._cellMap.set( node, cell );
 
-    this._constraint.addCell( cell );
+    this._constraint.insertCell( index, cell );
   }
 
   /**
@@ -122,7 +102,7 @@ class GridBox extends HSizable( VSizable( Node ) ) {
    *
    * @param {Node} node
    */
-  onGridBoxChildRemoved( node ) {
+  onFlowBoxChildRemoved( node ) {
 
     const cell = this._cellMap.get( node );
     this._cellMap.delete( node );
@@ -130,6 +110,73 @@ class GridBox extends HSizable( VSizable( Node ) ) {
     this._constraint.removeCell( cell );
 
     cell.dispose();
+  }
+
+  /**
+   * Called when children are rearranged
+   * @private
+   *
+   * @param {number} minChangeIndex
+   * @param {number} maxChangeIndex
+   */
+  onFlowBoxChildrenReordered( minChangeIndex, maxChangeIndex ) {
+    this._constraint.reorderCells(
+      this._children.slice( minChangeIndex, maxChangeIndex + 1 ).map( node => this._cellMap.get( node ) ),
+      minChangeIndex,
+      maxChangeIndex
+    );
+  }
+
+  /**
+   * Called on change of children (child added, removed, order changed, etc.)
+   * @private
+   */
+  onFlowBoxChildrenChanged() {
+    this._constraint.updateLayoutAutomatically();
+  }
+
+  /**
+   * Sets the children of the Node to be equivalent to the passed-in array of Nodes. Does this by removing all current
+   * children, and adding in children from the array.
+   * @public
+   * @override
+   *
+   * Overridden so we can group together setChildren() and only update layout (a) at the end, and (b) if there
+   * are changes.
+   *
+   * @param {Array.<Node>} children
+   * @returns {FlowBox} - Returns 'this' reference, for chaining
+   */
+  setChildren( children ) {
+    // If the layout is already locked, we need to bail and only call Node's setChildren.
+    if ( this._constraint.isLocked ) {
+      return super.setChildren( children );
+    }
+
+    const oldChildren = this.getChildren(); // defensive copy
+
+    // Lock layout while the children are removed and added
+    this._constraint.lock();
+    super.setChildren( children );
+    this._constraint.unlock();
+
+    // Determine if the children array has changed. We'll gain a performance benefit by not triggering layout when
+    // the children haven't changed.
+    if ( !_.isEqual( oldChildren, children ) ) {
+      this._constraint.updateLayoutAutomatically();
+    }
+
+    return this;
+  }
+
+  /**
+   * @public
+   *
+   * @param {Node} node
+   * @returns {FlowCell}
+   */
+  getCell( node ) {
+    return this._cellMap.get( node );
   }
 
   /**
@@ -144,7 +191,34 @@ class GridBox extends HSizable( VSizable( Node ) ) {
   /**
    * @public
    *
-   * @returns {number|Array.<number>}
+   * @param {boolean} value
+   */
+  set resize( value ) {
+    this._constraint.enabled = value;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {Orientation}
+   */
+  get orientation() {
+    return this._constraint.orientation;
+  }
+
+  /**
+   * @public
+   *
+   * @param {Orientation|string} value
+   */
+  set orientation( value ) {
+    this._constraint.orientation = value;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number}
    */
   get spacing() {
     return this._constraint.spacing;
@@ -153,7 +227,7 @@ class GridBox extends HSizable( VSizable( Node ) ) {
   /**
    * @public
    *
-   * @param {number|Array.<number>} value
+   * @param {number} value
    */
   set spacing( value ) {
     this._constraint.spacing = value;
@@ -162,73 +236,73 @@ class GridBox extends HSizable( VSizable( Node ) ) {
   /**
    * @public
    *
-   * @returns {number|Array.<number>}
+   * @returns {number}
    */
-  get xSpacing() {
-    return this._constraint.xSpacing;
+  get lineSpacing() {
+    return this._constraint.lineSpacing;
   }
 
   /**
    * @public
    *
-   * @param {number|Array.<number>} value
+   * @param {number} value
    */
-  set xSpacing( value ) {
-    this._constraint.xSpacing = value;
+  set lineSpacing( value ) {
+    this._constraint.lineSpacing = value;
   }
 
   /**
    * @public
    *
-   * @returns {number|Array.<number>}
+   * @returns {FlowConstraint.Justify}
    */
-  get ySpacing() {
-    return this._constraint.ySpacing;
+  get justify() {
+    return this._constraint.justify;
   }
 
   /**
    * @public
    *
-   * @param {number|Array.<number>} value
+   * @param {FlowConstraint.Justify|string} value
    */
-  set ySpacing( value ) {
-    this._constraint.ySpacing = value;
+  set justify( value ) {
+    this._constraint.justify = value;
   }
 
   /**
    * @public
    *
-   * @returns {GridConfigurable.Align|null}
+   * @returns {boolean}
    */
-  get xAlign() {
-    return this._constraint.xAlign;
+  get wrap() {
+    return this._constraint.wrap;
   }
 
   /**
    * @public
    *
-   * @param {GridConfigurable.Align|string|null} value
+   * @param {boolean} value
    */
-  set xAlign( value ) {
-    this._constraint.xAlign = value;
+  set wrap( value ) {
+    this._constraint.wrap = value;
   }
 
   /**
    * @public
    *
-   * @returns {GridConfigurable.Align|null}
+   * @returns {FlowConfigurable.Align|null}
    */
-  get yAlign() {
-    return this._constraint.yAlign;
+  get align() {
+    return this._constraint.align;
   }
 
   /**
    * @public
    *
-   * @param {GridConfigurable.Align|string|null} value
+   * @param {FlowConfigurable.Align|string|null} value
    */
-  set yAlign( value ) {
-    this._constraint.yAlign = value;
+  set align( value ) {
+    this._constraint.align = value;
   }
 
   /**
@@ -247,42 +321,6 @@ class GridBox extends HSizable( VSizable( Node ) ) {
    */
   set grow( value ) {
     this._constraint.grow = value;
-  }
-
-  /**
-   * @public
-   *
-   * @returns {number|null}
-   */
-  get xGrow() {
-    return this._constraint.xGrow;
-  }
-
-  /**
-   * @public
-   *
-   * @param {number|null} value
-   */
-  set xGrow( value ) {
-    this._constraint.xGrow = value;
-  }
-
-  /**
-   * @public
-   *
-   * @returns {number|null}
-   */
-  get yGrow() {
-    return this._constraint.yGrow;
-  }
-
-  /**
-   * @public
-   *
-   * @param {number|null} value
-   */
-  set yGrow( value ) {
-    this._constraint.yGrow = value;
   }
 
   /**
@@ -482,6 +520,21 @@ class GridBox extends HSizable( VSizable( Node ) ) {
   set maxCellHeight( value ) {
     this._constraint.maxCellHeight = value;
   }
+
+  /**
+   * Releases references
+   * @public
+   * @override
+   */
+  dispose() {
+    this._constraint.dispose();
+
+    this._cellMap.values().forEach( cell => {
+      cell.dispose();
+    } );
+
+    super.dispose();
+  }
 }
 
 /**
@@ -492,10 +545,10 @@ class GridBox extends HSizable( VSizable( Node ) ) {
  * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
  *       cases that may apply.
  */
-GridBox.prototype._mutatorKeys = HSizable( Node ).prototype._mutatorKeys.concat( VSizable( Node ).prototype._mutatorKeys ).concat( GRIDBOX_OPTION_KEYS );
+FlowBox.prototype._mutatorKeys = HSizable( Node ).prototype._mutatorKeys.concat( VSizable( Node ).prototype._mutatorKeys ).concat( FLOWBOX_OPTION_KEYS );
 
 // @public {Object}
-GridBox.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
+FlowBox.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
-scenery.register( 'GridBox', GridBox );
-export default GridBox;
+scenery.register( 'FlowBox', FlowBox );
+export default FlowBox;

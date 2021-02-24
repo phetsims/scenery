@@ -14,10 +14,10 @@ import Orientation from '../../../phet-core/js/Orientation.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import merge from '../../../phet-core/js/merge.js';
 import mutate from '../../../phet-core/js/mutate.js';
-import Divider from '../nodes/Divider.js';
 import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
 import Constraint from './Constraint.js';
+import Divider from './Divider.js';
 import FlowCell from './FlowCell.js';
 import FlowConfigurable from './FlowConfigurable.js';
 

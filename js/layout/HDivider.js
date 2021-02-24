@@ -7,21 +7,21 @@
  */
 
 import scenery from '../scenery.js';
-import HSizable from '../util/HSizable.js';
 import Divider from './Divider.js';
+import VSizable from './VSizable.js';
 
-class VDivider extends HSizable( Divider ) {
+class HDivider extends VSizable( Divider ) {
   /**
    * @param {Object} [options]
    */
   constructor( options ) {
     super( options );
 
-    this.preferredWidthProperty.link( width => {
-      this.x2 = width;
+    this.preferredHeightProperty.link( height => {
+      this.y2 = height;
     } );
   }
 }
 
-scenery.register( 'VDivider', VDivider );
-export default VDivider;
+scenery.register( 'HDivider', HDivider );
+export default HDivider;

@@ -7,8 +7,8 @@
  */
 
 import merge from '../../../phet-core/js/merge.js';
+import Line from '../nodes/Line.js';
 import scenery from '../scenery.js';
-import Line from './Line.js';
 
 class Divider extends Line {
   /**
