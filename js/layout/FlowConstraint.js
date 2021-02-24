@@ -101,6 +101,8 @@ class FlowConstraint extends FlowConfigurable( Constraint ) {
     // The perpendicular orientation, where alignment is handled
     const oppositeOrientation = this.orientation.opposite;
 
+    assert && assert( _.every( this.cells, cell => !cell.node.isDisposed ) );
+
     // Scan for dividers, toggling visibility as desired. Leave the "last" divider visible, as if they are marking
     // sections "after" themselves.
     let hasVisibleNonDivider = false;

@@ -52,6 +52,8 @@ class ManualConstraint extends Constraint {
   layout() {
     super.layout();
 
+    assert && assert( _.every( this.nodes, node => !node.isDisposed ) );
+
     const proxies = this.nodes.map( this.proxyFactory );
 
     this.layoutCallback.apply( null, proxies );
