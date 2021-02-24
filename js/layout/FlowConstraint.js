@@ -16,10 +16,10 @@ import merge from '../../../phet-core/js/merge.js';
 import mutate from '../../../phet-core/js/mutate.js';
 import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
-import Constraint from './Constraint.js';
 import Divider from './Divider.js';
 import FlowCell from './FlowCell.js';
 import FlowConfigurable from './FlowConfigurable.js';
+import LayoutConstraint from './LayoutConstraint.js';
 
 const FLOW_CONSTRAINT_OPTION_KEYS = [
   'orientation',
@@ -31,7 +31,7 @@ const FLOW_CONSTRAINT_OPTION_KEYS = [
 ].concat( FlowConfigurable.FLOW_CONFIGURABLE_OPTION_KEYS );
 
 // TODO: Have LayoutBox use this when we're ready
-class FlowConstraint extends FlowConfigurable( Constraint ) {
+class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
   /**
    * @param {Node} ancestorNode
    * @param {Object} [options]

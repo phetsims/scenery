@@ -9,9 +9,9 @@
 import merge from '../../../phet-core/js/merge.js';
 import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
-import Constraint from './Constraint.js';
+import LayoutConstraint from './LayoutConstraint.js';
 
-class ManualConstraint extends Constraint {
+class ManualConstraint extends LayoutConstraint {
   /**
    * @param {Node} ancestorNode
    * @param {Array.<Node>} nodes

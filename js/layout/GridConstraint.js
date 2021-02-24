@@ -15,9 +15,9 @@ import merge from '../../../phet-core/js/merge.js';
 import mutate from '../../../phet-core/js/mutate.js';
 import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
-import Constraint from './Constraint.js';
 import GridCell from './GridCell.js';
 import GridConfigurable from './GridConfigurable.js';
+import LayoutConstraint from './LayoutConstraint.js';
 
 const GRID_CONSTRAINT_OPTION_KEYS = [
   'excludeInvisible',
@@ -27,7 +27,7 @@ const GRID_CONSTRAINT_OPTION_KEYS = [
 ].concat( GridConfigurable.GRID_CONFIGURABLE_OPTION_KEYS );
 
 // TODO: Have LayoutBox use this when we're ready
-class GridConstraint extends GridConfigurable( Constraint ) {
+class GridConstraint extends GridConfigurable( LayoutConstraint ) {
   /**
    * @param {Node} ancestorNode
    * @param {Object} [options]

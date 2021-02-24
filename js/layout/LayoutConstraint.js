@@ -10,7 +10,7 @@ import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
 import LayoutProxy from './LayoutProxy.js';
 
-class Constraint {
+class LayoutConstraint {
   /**
    * @param {Node} ancestorNode
    */
@@ -167,5 +167,5 @@ class Constraint {
   }
 }
 
-scenery.register( 'Constraint', Constraint );
-export default Constraint;
+scenery.register( 'LayoutConstraint', LayoutConstraint );
+export default LayoutConstraint;
