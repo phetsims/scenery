@@ -144,7 +144,8 @@ var KeyboardUtils = {
   },
 
   /**
-   * If the domEvent cooresponds to any of the probided keys in the list
+   * If the domEvent corresponds to any of the provided keys in the list.
+   *
    * @param {Event} domEvent
    * @param {KeyDef[]} keyboardUtilsKeys
    * @returns {*}
