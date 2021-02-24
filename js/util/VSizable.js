@@ -11,9 +11,7 @@ import memoize from '../../../phet-core/js/memoize.js';
 import scenery from '../scenery.js';
 
 const V_SIZABLE_OPTION_KEYS = [
-  'preferredWidth',
   'preferredHeight',
-  'minimumWidth',
   'minimumHeight'
 ];
 

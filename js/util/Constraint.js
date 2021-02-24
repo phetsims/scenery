@@ -112,7 +112,7 @@ class Constraint {
 
   /**
    * Called when we attempt to automatically layout components.
-   * @private
+   * @protected
    */
   updateLayoutAutomatically() {
     if ( this._enabled ) {
