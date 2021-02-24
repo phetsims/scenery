@@ -12,13 +12,13 @@ import LayoutProxy from './LayoutProxy.js';
 
 class Constraint {
   /**
-   * @param {Node} rootNode
+   * @param {Node} ancestorNode
    */
-  constructor( rootNode ) {
-    assert && assert( rootNode instanceof Node );
+  constructor( ancestorNode ) {
+    assert && assert( ancestorNode instanceof Node );
 
     // @private {Node}
-    this.rootNode = rootNode;
+    this.ancestorNode = ancestorNode;
 
     // @private {boolean}
     this._enabled = true;
@@ -129,7 +129,7 @@ class Constraint {
   createLayoutProxy( node ) {
     // TODO: How to handle the case where there is no trail?
 
-    return LayoutProxy.createFromPool( node.getUniqueTrailTo( this.rootNode ).removeAncestor() );
+    return LayoutProxy.createFromPool( node.getUniqueTrailTo( this.ancestorNode ).removeAncestor() );
   }
 
   /**

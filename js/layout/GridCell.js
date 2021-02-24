@@ -224,7 +224,7 @@ class GridCell extends GridConfigurable( Object ) {
    * @param {number} value
    */
   xStart( defaultConfig, value ) {
-    // TODO: coordinate transform handling, to our rootNode!!!!!
+    // TODO: coordinate transform handling, to our ancestorNode!!!!!
     const left = this.withDefault( 'leftMargin', defaultConfig ) + value;
 
     if ( Math.abs( this.node.left - left ) > 1e-9 ) {
@@ -239,7 +239,7 @@ class GridCell extends GridConfigurable( Object ) {
    * @param {number} value
    */
   yStart( defaultConfig, value ) {
-    // TODO: coordinate transform handling, to our rootNode!!!!!
+    // TODO: coordinate transform handling, to our ancestorNode!!!!!
     const top = this.withDefault( 'topMargin', defaultConfig ) + value;
 
     if ( Math.abs( this.node.top - top ) > 1e-9 ) {

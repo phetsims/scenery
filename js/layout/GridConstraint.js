@@ -29,11 +29,11 @@ const GRID_CONSTRAINT_OPTION_KEYS = [
 // TODO: Have LayoutBox use this when we're ready
 class GridConstraint extends GridConfigurable( Constraint ) {
   /**
-   * @param {Node} rootNode
+   * @param {Node} ancestorNode
    * @param {Object} [options]
    */
-  constructor( rootNode, options ) {
-    assert && assert( rootNode instanceof Node );
+  constructor( ancestorNode, options ) {
+    assert && assert( ancestorNode instanceof Node );
 
     options = merge( {
       // As options, so we could hook into a Node's preferred/minimum sizes if desired
@@ -43,7 +43,7 @@ class GridConstraint extends GridConfigurable( Constraint ) {
       minimumHeightProperty: new TinyProperty( null )
     }, options );
 
-    super( rootNode );
+    super( ancestorNode );
 
     // @private {Set.<GridCell>}
     this.cells = new Set();
@@ -420,12 +420,12 @@ class GridConstraint extends GridConfigurable( Constraint ) {
   /**
    * @public
    *
-   * @param {Node} rootNode
+   * @param {Node} ancestorNode
    * @param {Object} [options]
    * @returns {GridConstraint}
    */
-  static create( rootNode, options ) {
-    return new GridConstraint( rootNode, options );
+  static create( ancestorNode, options ) {
+    return new GridConstraint( ancestorNode, options );
   }
 }
 

@@ -13,14 +13,14 @@ import Constraint from './Constraint.js';
 
 class ManualConstraint extends Constraint {
   /**
-   * @param {Node} rootNode
+   * @param {Node} ancestorNode
    * @param {Array.<Node>} nodes
    * @param {function(LayoutProxy+)} layoutCallback
    * @param {Object} [options]
    */
-  constructor( rootNode, nodes, layoutCallback, options ) {
+  constructor( ancestorNode, nodes, layoutCallback, options ) {
 
-    assert && assert( rootNode instanceof Node );
+    assert && assert( ancestorNode instanceof Node );
     assert && assert( Array.isArray( nodes ) && _.every( nodes, node => node instanceof Node ) );
     assert && assert( typeof layoutCallback === 'function' );
 
@@ -28,10 +28,10 @@ class ManualConstraint extends Constraint {
 
     }, options );
 
-    super( rootNode );
+    super( ancestorNode );
 
     // @private
-    this.rootNode = rootNode;
+    this.ancestorNode = ancestorNode;
     this.nodes = nodes;
     this.layoutCallback = layoutCallback;
 
@@ -65,14 +65,14 @@ class ManualConstraint extends Constraint {
   /**
    * @public
    *
-   * @param {Node} rootNode
+   * @param {Node} ancestorNode
    * @param {Array.<Node>} nodes
    * @param {function(LayoutProxy+)} layoutCallback
    * @param {Object} [options]
    * @returns {ManualConstraint}
    */
-  static create( rootNode, nodes, layoutCallback, options ) {
-    return new ManualConstraint( rootNode, nodes, layoutCallback, options );
+  static create( ancestorNode, nodes, layoutCallback, options ) {
+    return new ManualConstraint( ancestorNode, nodes, layoutCallback, options );
   }
 }
 

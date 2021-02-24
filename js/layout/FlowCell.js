@@ -150,7 +150,7 @@ class FlowCell extends FlowConfigurable( Object ) {
    * @param {number} value
    */
   positionStart( orientation, defaultConfig, value ) {
-    // TODO: coordinate transform handling, to our rootNode!!!!!
+    // TODO: coordinate transform handling, to our ancestorNode!!!!!
     if ( orientation === Orientation.HORIZONTAL ) {
       const left = this.withDefault( 'leftMargin', defaultConfig ) + value;
 
