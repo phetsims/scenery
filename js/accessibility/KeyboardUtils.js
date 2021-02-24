@@ -94,6 +94,8 @@ var KeyboardUtils = {
 
   /**
    * Returns whether or not the key corresponds to pressing an arrow key
+   * @public
+   *
    * @param {Event} domEvent
    * @returns {boolean}
    */
@@ -103,6 +105,8 @@ var KeyboardUtils = {
 
   /**
    * Returns true if key is one of keys used for range inputs
+   * @public
+   *
    * @param {Event} domEvent
    * @returns {boolean}
    */
@@ -118,6 +122,8 @@ var KeyboardUtils = {
 
   /**
    * Returns whether or not the key corresponds to pressing a number key
+   * @public
+   *
    * @param {Event} domEvent
    * @returns {boolean}
    */
@@ -126,7 +132,9 @@ var KeyboardUtils = {
   },
 
   /**
-   * Returns whether or not the key corresponds to one of the WASD movement keys
+   * Returns whether or not the key corresponds to one of the WASD movement keys.
+   * @public
+   *
    * @param {Event} domEvent
    * @returns {boolean}
    */
@@ -136,6 +144,8 @@ var KeyboardUtils = {
 
   /**
    * Returns true if the key indicates a 'movement' key in keyboard dragging
+   * @public
+   *
    * @param {Event} domEvent
    * @returns {boolean}
    */
@@ -145,6 +155,7 @@ var KeyboardUtils = {
 
   /**
    * If the domEvent corresponds to any of the provided keys in the list.
+   * @public
    *
    * @param {Event} domEvent
    * @param {KeyDef[]} keyboardUtilsKeys
@@ -157,6 +168,8 @@ var KeyboardUtils = {
 
   /**
    * Whether or not the event was of the provided KeyboardUtils KeyDef.
+   * @public
+   *
    * @param {Event} domEvent
    * @param {KeyDef} keyboardUtilsKey
    * @returns {boolean}
@@ -166,7 +179,15 @@ var KeyboardUtils = {
   },
 
   /**
+   * Returns a KeyDef that can be used to determine the keyboard keys of a KeyboardEvent object. An example
+   * usage might look like
    *
+   *  const key = KeyboardUtils.getKeyDef( domEvent );
+   *  if ( key === KeyboardUtils.KEY_A ) {
+   *    // You pressed the A key!
+   *  }
+   *
+   * @public
    * @param {Event} domEvent
    * @returns {KeyDef|null} - null if there is no `key` property on the provided Event.
    */
@@ -176,7 +197,9 @@ var KeyboardUtils = {
   },
 
   /**
-   * Return true if the param is of type KeyDef
+   * Return true if the param is of type KeyDef.
+   * @public
+   *
    * @param {*} key
    * @returns {boolean}
    */
