@@ -219,6 +219,7 @@ const NODE_OPTION_KEYS = [
   'rotation', // {number} - rotation (in radians) of the Node, see setRotation() for more documentation
   'scale', // {number} - scale of the Node, see scale() for more documentation
   'excludeInvisibleChildrenFromBounds', // {boolean} - Controls bounds depending on child visibility, see setExcludeInvisibleChildrenFromBounds() for more documentation
+  'layoutOptions', // {Object|null} - Provided to layout containers for options, see setLayoutOptions() for more documentation
   'localBounds', // {Bounds2|null} - bounds of subtree in local coordinate frame, see setLocalBounds() for more documentation
   'maxWidth', // {number|null} - Constrains width of this Node, see setMaxWidth() for more documentation
   'maxHeight', // {number|null} - Constrains height of this Node, see setMaxHeight() for more documentation
@@ -452,6 +453,9 @@ class Node extends PhetioObject {
     // @private {boolean} - [mutable] Whether invisible children will be excluded from this Node's bounds
     this._excludeInvisibleChildrenFromBounds = false;
 
+    // @private {Object|null} - Options that can be provided to layout managers to adjust positioning for this node.
+    this._layoutOptions = null;
+
     this._boundsDirty = true; // @private {boolean} - Whether bounds needs to be recomputed to be valid.
     this._localBoundsDirty = true; // @private {boolean} - Whether localBounds needs to be recomputed to be valid.
     this._selfBoundsDirty = true; // @private {boolean} - Whether selfBounds needs to be recomputed to be valid.
@@ -540,6 +544,9 @@ class Node extends PhetioObject {
 
     // @public {TinyEmitter}
     this.changedInstanceEmitter = new TinyEmitter(); // emits with {Instance}, {boolean} added
+
+    // @public {TinyEmitter} - Fired when layoutOptions changes
+    this.layoutOptionsChangedEmitter = new TinyEmitter();
 
     // compose accessibility - for some reason tests fail when you move this down to be next to super call.
     this.initializeParallelDOM();
@@ -1679,11 +1686,14 @@ class Node extends PhetioObject {
     assert && assert( localBounds === null || !isNaN( localBounds.maxY ), 'maxY for localBounds should not be NaN' );
 
     const ourLocalBounds = this.localBoundsProperty._value;
+    const oldLocalBounds = ourLocalBounds.copy();
 
     if ( localBounds === null ) {
       // we can just ignore this if we weren't actually overriding local bounds before
       if ( this._localBoundsOverridden ) {
+
         this._localBoundsOverridden = false;
+        this.localBoundsProperty.notifyListeners( oldLocalBounds );
         this.invalidateBounds();
       }
     }
@@ -1700,6 +1710,7 @@ class Node extends PhetioObject {
       }
 
       if ( changed ) {
+        this.localBoundsProperty.notifyListeners( oldLocalBounds );
         this.invalidateBounds();
       }
     }
@@ -4958,6 +4969,50 @@ class Node extends PhetioObject {
    */
   get excludeInvisibleChildrenFromBounds() {
     return this.isExcludeInvisibleChildrenFromBounds();
+  }
+
+  /**
+   * Sets options that are provided to layout managers in order to customize positioning of this node.
+   * @public
+   *
+   * @param {Object|null} layoutOptions
+   */
+  setLayoutOptions( layoutOptions ) {
+    assert && assert( layoutOptions === null || ( typeof layoutOptions === 'object' && Object.getPrototypeOf( layoutOptions ) === Object.prototype ),
+      'layoutOptions should be null or an plain options-style object' );
+
+    if ( layoutOptions !== this._layoutOptions ) {
+      this._layoutOptions = layoutOptions;
+
+      this.layoutOptionsChangedEmitter.emit();
+    }
+  }
+
+  /**
+   * @public
+   *
+   * @param {Object|null} layoutOptions
+   */
+  set layoutOptions( value ) {
+    this.setLayoutOptions( value );
+  }
+
+  /**
+   * @public
+   *
+   * @returns {Object|null}
+   */
+  getLayoutOptions() {
+    return this._layoutOptions;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {Object|null}
+   */
+  get layoutOptions() {
+    return this.getLayoutOptions();
   }
 
   /**

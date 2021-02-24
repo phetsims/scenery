@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Scenery Layout</title>
+
+  <link rel="stylesheet" href="../../sherpa/lib/bootstrap-2.2.2.css">
+  <link rel="stylesheet" href="../../sherpa/lib/bootstrap-responsive-2.2.2.css">
+  <link rel="stylesheet" href="../../sherpa/lib/syntaxhighlighter-3.0.83/shCore.css">
+  <link rel="stylesheet" href="../../sherpa/lib/syntaxhighlighter-3.0.83/shThemeDefault.css">
+  <link rel="stylesheet" href="../assets/scenery.css">
+
+  <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
+  <script src="../../aqua/js/pageload-connector.js"></script>
+
+  <!-- jQuery and LoDash are dependencies -->
+  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
+
+  <!-- For the styling -->
+  <script src="../../sherpa/lib/bootstrap-2.2.2.js"></script>
+
+  <script src="../../sherpa/lib/syntaxhighlighter-3.0.83/shCore.js"></script>
+  <script src="../../sherpa/lib/syntaxhighlighter-3.0.83/shBrushJScript.js"></script>
+  <script src="../../sherpa/lib/syntaxhighlighter-3.0.83/shBrushXml.js"></script>
+
+  <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
+  <script src="../build/scenery.min.js"></script>
+
+  <script type="text/javascript">
+    scenery.Utils.polyfillRequestAnimationFrame();
+
+    function dynamicDemo( id, getBox, options ) {
+      options = phetCore.merge( {
+        resize: 'both',
+        useMinWidth: true,
+        useMinHeight: false,
+        adjustDisplay: false,
+        step: null
+      }, options );
+
+      const container = document.getElementById( id );
+      const scene = new scenery.Node();
+      const box = getBox();
+      scene.addChild( box );
+      const display = new scenery.Display( scene );
+      display.domElement.classList.add( 'exampleScene' );
+      display.domElement.style.position = 'relative';
+      display.domElement.style.resize = options.resize;
+
+      // Initials
+      display.width = Math.ceil( scene.right );
+      display.height = Math.ceil( scene.bottom );
+      display.domElement.style.width = display.width + 'px';
+      display.domElement.style.height = display.height + 'px';
+      if ( options.useMinWidth ) {
+        display.domElement.style.minWidth = display.width + 'px';
+      }
+      if ( options.useMinHeight ) {
+        display.domElement.style.minHeight = display.height + 'px';
+      }
+
+      display.updateOnRequestAnimationFrame( dt => {
+        options.step && options.step( dt );
+
+        if ( options.adjustDisplay ) {
+          display.width = Math.ceil( scene.right );
+          display.height = Math.ceil( scene.bottom );
+          display.domElement.style.width = display.width + 'px';
+          display.domElement.style.height = display.height + 'px';
+        }
+        else {
+          if ( display.domElement.clientWidth ) {
+            display.width = display.domElement.clientWidth;
+            box.preferredWidth = display.domElement.clientWidth;
+          }
+          if ( display.domElement.clientHeight ) {
+            display.height = display.domElement.clientHeight;
+            box.preferredHeight = display.domElement.clientHeight;
+          }
+        }
+      } );
+
+      container.appendChild( display.domElement );
+
+      const code = document.createElement( 'pre' );
+      code.classList.add( 'brush:' );
+      code.classList.add( 'js' );
+      code.innerHTML = getBox.toString().match( /\/\*START\*\/((.|\n)*)\/\*END\*\// )[ 1 ];
+      container.appendChild( code );
+    }
+
+    class ExampleExpandingRectangle extends scenery.WidthSizable( scenery.HeightSizable( scenery.Rectangle ) ) {
+      constructor( ...args ) {
+        super( ...args );
+
+        this.minimumWidth = 50;
+        this.minimumHeight = 50;
+
+        this.preferredWidthProperty.lazyLink( width => {
+          if ( width ) {
+            this.rectWidth = Math.max( this.minimumWidth, width );
+          }
+        } );
+        this.preferredHeightProperty.lazyLink( height => {
+          if ( height ) {
+            this.rectHeight = Math.max( this.minimumHeight, height );
+          }
+        } );
+      }
+    }
+
+    const colors = [
+      new scenery.Color( 62, 171, 3 ),
+      new scenery.Color( 23, 180, 77 ),
+      new scenery.Color( 24, 183, 138 ),
+      new scenery.Color( 23, 178, 194 ),
+      new scenery.Color( 20, 163, 238 ),
+      new scenery.Color( 71, 136, 255 ),
+      new scenery.Color( 171, 101, 255 ),
+      new scenery.Color( 228, 72, 235 ),
+      new scenery.Color( 252, 66, 186 ),
+      new scenery.Color( 252, 82, 127 )
+    ];
+  </script>
+
+  <style type="text/css">
+
+    .exampleScene {
+      margin: 15px auto;
+      border: 1px solid black;
+      position: relative;
+      left: 0;
+      top: 0;
+    }
+
+  </style>
+
+</head>
+
+<body>
+<div class="navbar navbar-inverse navbar-static-top">
+  <div class="navbar-inner">
+    <a class="brand" href="/scenery">Scenery</a>
+    <ul class="nav">
+      <li><a href="../">Home</a></li>
+      <li class="active"><a href="../doc">Documentation</a></li>
+      <li><a href="../examples">Examples</a></li>
+      <li><a href="../tests">Tests</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="row-fluid">
+  <div class="span2"></div>
+  <div class="span8">
+    <div class="page-header" style="text-align: center;">
+      <h1>Scenery Layout</h1>
+    </div>
+
+    <p>Currently some examples. Resizing from the lower-right corner adjusts the preferred size</p>
+
+    <h2>FlowBox</h2>
+
+    <p>Simple container, defaults to horizontal currently:</p>
+
+    <div id="simple-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'simple-example', () => {
+        /*START*/
+        return new scenery.FlowBox( {
+          children: [
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'horizontal' } );
+    </script>
+
+    <p>Also works vertically:</p>
+
+    <div id="vertical-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'vertical-example', () => {
+        /*START*/
+        return new scenery.FlowBox( {
+          orientation: 'vertical',
+          children: [
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'vertical', useMinWidth: false, useMinHeight: true } );
+    </script>
+
+    <p>The box adjusts to changing cell sizes:</p>
+
+    <div id="dynamic-example"></div>
+    <script type="text/javascript">
+      {
+        let circle;
+        let step;
+        dynamicDemo( 'dynamic-example', () => {
+          /*START*/
+          circle = new scenery.Circle( 25, { fill: colors[ 6 ] } );
+          let time = 0;
+          step = dt => {
+            time += dt;
+            circle.radius = 25 + 10 * Math.sin( 4 * time );
+          };
+          return new scenery.FlowBox( {
+            children: [
+              new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+              new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+              circle,
+              new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+            ]
+          } );
+          /*END*/
+        }, { resize: 'none', useMinWidth: false, adjustDisplay: true, step: dt => step( dt ) } );
+      }
+    </script>
+
+    <p>Resizing/layout can be disabled with resize:false:</p>
+
+    <div id="locked-sizing-example"></div>
+    <script type="text/javascript">
+      {
+        let circle;
+        let step;
+        dynamicDemo( 'locked-sizing-example', () => {
+          /*START*/
+          circle = new scenery.Circle( 25, { fill: colors[ 6 ] } );
+          let time = 0;
+          step = dt => {
+            time += dt;
+            circle.radius = 25 + 10 * Math.sin( 4 * time );
+          };
+          return new scenery.FlowBox( {
+            resize: false,
+            children: [
+              new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+              new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+              circle,
+              new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+            ]
+          } );
+          /*END*/
+        }, { resize: 'none', useMinWidth: false, adjustDisplay: true, step: dt => step( dt ) } );
+      }
+    </script>
+
+    <p>Invisible nodes are not included in layout/bounds by default:</p>
+
+    <div id="invis-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'invis-example', () => {
+        /*START*/
+        return new scenery.FlowBox( {
+          children: [
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ], visible: false } ),
+            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'horizontal' } );
+    </script>
+
+    <p>Invisible nodes can be forced into the layout:</p>
+
+    <div id="force-vis-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'force-vis-example', () => {
+        /*START*/
+        return new scenery.FlowBox( {
+          excludeInvisibleChildrenFromBounds: false,
+          children: [
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ], visible: false } ),
+            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'horizontal' } );
+    </script>
+
+    <p>Nodes with preferred sizes can be added, and the grow in layoutOptions will attempt to put extra space into that cell</p>
+
+    <div id="resizable-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'resizable-example', () => {
+        /*START*/
+        return new scenery.FlowBox( {
+          children: [
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+            new ExampleExpandingRectangle( {
+              fill: 'gray',
+              layoutOptions: { grow: 1 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'horizontal' } );
+    </script>
+
+    <p>Extra space can be allocated proportionally:</p>
+
+    <div id="grow-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'grow-example', () => {
+        /*START*/
+        return new scenery.FlowBox( {
+          children: [
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+            new ExampleExpandingRectangle( {
+              fill: 'gray',
+              layoutOptions: { grow: 1 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+            new ExampleExpandingRectangle( {
+              fill: 'gray',
+              layoutOptions: { grow: 4 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'horizontal' } );
+    </script>
+
+    <p>Maximums can be applied to constrain this:</p>
+
+    <div id="maxContentWidth-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'maxContentWidth-example', () => {
+        /*START*/
+        return new scenery.FlowBox( {
+          children: [
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+            new ExampleExpandingRectangle( {
+              fill: 'gray',
+              layoutOptions: { grow: 1, maxContentWidth: 150 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'horizontal' } );
+    </script>
+
+    <p>Minimums can also force a certain expansion:</p>
+
+    <div id="minContentWidth-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'minContentWidth-example', () => {
+        /*START*/
+        return new scenery.FlowBox( {
+          children: [
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+            new ExampleExpandingRectangle( {
+              fill: 'gray',
+              layoutOptions: { grow: 1, minContentWidth: 100 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'horizontal' } );
+    </script>
+
+    <p>Justification controls how extra space is allocated around cells:</p>
+
+    <div id="justification-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'justification-example', () => {
+        const createBoxes = label => [
+          new scenery.Rectangle( 0, 0, 170, 30, { fill: colors[ 2 ], children: [
+            new scenery.Text( label, { fontSize: 16, centerY: 15 } )
+          ] } ),
+          new scenery.Rectangle( 0, 0, 50, 30, { fill: colors[ 4 ] } ),
+          new scenery.Circle( 15, { fill: colors[ 6 ] } ),
+          new scenery.Rectangle( 0, 0, 50, 30, { fill: colors[ 8 ] } )
+        ];
+        /*START*/
+        const boxes = [
+          new scenery.FlowBox( {
+            justify: 'left',
+            children: createBoxes( 'justify:left' )
+          } ),
+          new scenery.FlowBox( {
+            justify: 'right',
+            children: createBoxes( 'justify:right' )
+          } ),
+          new scenery.FlowBox( {
+            justify: 'spaceBetween',
+            children: createBoxes( 'justify:spaceBetween' )
+          } ),
+          new scenery.FlowBox( {
+            justify: 'spaceAround',
+            children: createBoxes( 'justify:spaceAround' )
+          } ),
+          new scenery.FlowBox( {
+            justify: 'spaceEvenly',
+            children: createBoxes( 'justify:spaceEvenly' )
+          } ),
+          new scenery.FlowBox( {
+            justify: 'center',
+            children: createBoxes( 'justify:center' )
+          } )
+        ];
+        /*END*/
+        // TODO: preferred width with align-content!!!
+        const container = new ( scenery.WidthSizable( scenery.VBox ) )( {
+          orientation: 'vertical',
+          justify: 'top',
+          children: boxes
+        } );
+        container.preferredWidthProperty.link( preferredWidth => boxes.forEach( box => {
+          box.preferredWidth = preferredWidth;
+        } ) );
+        return container;
+      }, { resize: 'horizontal' } );
+    </script>
+
+    <p>Wrapping will shift content that doesn't fit the preferred size into new rows/columns:</p>
+
+    <div id="wrap-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'wrap-example', () => {
+        /*START*/
+        return new scenery.FlowBox( {
+          wrap: true,
+          justify: 'left',
+          children: [
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'both', useMinWidth: false } );
+    </script>
+
+    <p>Alignment controls how cells are positioned in the secondary orientation:</p>
+
+    <div id="align-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'align-example', () => {
+        /*START*/
+        const boxes = [
+          'top',
+          'bottom',
+          'center',
+          'stretch',
+          'origin'
+        ].map( align => {
+          const expandingRect = new ExampleExpandingRectangle( 0, 0, 50, 10, { fill: 'gray' } );
+          expandingRect.minimumHeight = 10;
+          return new scenery.FlowBox( {
+            children: [
+              new scenery.Rectangle( 0, 0, 50, 15, { fill: colors[ 9 ] } ),
+              new scenery.Rectangle( 0, 0, 50, 20, { fill: colors[ 6 ] } ),
+              expandingRect,
+              new scenery.Rectangle( 0, 0, 50, 5, { fill: colors[ 4 ] } ),
+              new scenery.Rectangle( 0, 0, 50, 15, { fill: colors[ 2 ] } ),
+              new scenery.Circle( 7, { fill: colors[ 0 ] } ),
+              new scenery.Text( `Alignment: ${align}` )
+            ],
+            justify: 'left',
+            align: align
+          } );
+        } );
+        /*END*/
+        return new scenery.VBox( {
+          children: boxes,
+          spacing: 10,
+          align: 'left'
+        } );
+      }, { resize: 'none', useMinWidth: false } );
+    </script>
+
+    <p>Spacing can be added, that is applied between cells:</p>
+
+    <div id="spacing-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'spacing-example', () => {
+        /*START*/
+        return new scenery.FlowBox( {
+          spacing: 10,
+          children: [
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'horizontal' } );
+    </script>
+
+    <p>Spacing between lines (rows/cols) can also be added, which applies when wrapped:</p>
+
+    <div id="lineSpacing-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'lineSpacing-example', () => {
+        /*START*/
+        return new scenery.FlowBox( {
+          lineSpacing: 10,
+          wrap: true,
+          children: [
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'both', useMinWidth: false } );
+    </script>
+
+    <p>Margins can also be added to every cell:</p>
+
+    <div id="margin-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'margin-example', () => {
+        /*START*/
+        return new scenery.FlowBox( {
+          leftMargin: 10,
+          yMargin: 10, // controls topMargin and bottomMargin
+          children: [
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'horizontal' } );
+    </script>
+
+    <p>Margins can also be applied to individual cells:</p>
+
+    <div id="marginCell-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'marginCell-example', () => {
+        /*START*/
+        return new scenery.FlowBox( {
+          align: 'top',
+          children: [
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 2 ],
+              layoutOptions: { topMargin: 10 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 8 ],
+              layoutOptions: { leftMargin: 10 }
+            } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'horizontal' } );
+    </script>
+
+    <p>Similarly, alignment can also be customized to individual cells:</p>
+
+    <div id="alignCell-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'alignCell-example', () => {
+        /*START*/
+        return new scenery.FlowBox( {
+          children: [
+            new scenery.Rectangle( 0, 0, 50, 100, {
+              fill: colors[ 2 ]
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 4 ],
+              layoutOptions: { align: 'top' }
+            } ),
+            new scenery.Circle( 25, {
+              fill: colors[ 6 ],
+              layoutOptions: { align: 'bottom' }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 8 ],
+              layoutOptions: { align: 'center' }
+            } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'horizontal' } );
+    </script>
+
+    <p>These options use the default on the container, but can be overridden by cells:</p>
+
+    <div id="override-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'override-example', () => {
+        /*START*/
+        return new scenery.FlowBox( {
+          topMargin: 10,
+          align: 'top',
+          children: [
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 2 ],
+              layoutOptions: { topMargin: 0 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'horizontal' } );
+    </script>
+
+    <p>Stretch alignment will have a resizable element take up the entire row/column size:</p>
+
+    <div id="stretch-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'stretch-example', () => {
+        /*START*/
+        return new scenery.FlowBox( {
+          children: [
+            new scenery.Rectangle( 0, 0, 50, 100, {
+              fill: colors[ 2 ]
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 4 ],
+              layoutOptions: { align: 'top' }
+            } ),
+            new ExampleExpandingRectangle( {
+              fill: 'gray',
+              layoutOptions: { align: 'stretch' }
+            } ),
+            new scenery.Circle( 25, {
+              fill: colors[ 6 ],
+              layoutOptions: { align: 'bottom' }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 8 ],
+              layoutOptions: { align: 'center' }
+            } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'horizontal' } );
+    </script>
+
+    <p>Dividers are also available for easy of use (dividers at the visible start/end and duplicates will be marked as invisible, while all other dividers will be marked as visible:</p>
+
+    <div id="divider-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'divider-example', () => {
+        /*START*/
+        return new scenery.FlowBox( {
+          margin: 5,
+          children: [
+            new scenery.HDivider(),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
+            new scenery.HDivider(),
+            new scenery.HDivider(),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
+            new scenery.Circle( 25, { fill: colors[ 6 ] } ),
+            new scenery.HDivider(),
+            new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 8 ] } ),
+            new scenery.HDivider()
+          ]
+        } );
+        /*END*/
+      }, { resize: 'horizontal' } );
+    </script>
+
+    <h2>GridBox</h2>
+
+    <p>Can be constructed with absolute coordinates (which can include gaps):</p>
+
+    <div id="absolute-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'absolute-example', () => {
+        /*START*/
+        return new scenery.GridBox( {
+          children: [
+            new scenery.Rectangle( 0, 0, 75, 50, {
+              fill: colors[ 0 ],
+              layoutOptions: { x: 0, y: 0 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 75, {
+              fill: colors[ 2 ],
+              layoutOptions: { x: 1, y: 0 }
+            } ),
+            new scenery.Circle( 25, {
+              fill: colors[ 4 ],
+              layoutOptions: { x: 2, y: 0 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 6 ],
+              layoutOptions: { x: 0, y: 1 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 8 ],
+              layoutOptions: { x: 1, y: 2 }
+            } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'none', useMinHeight: true } );
+    </script>
+
+    <p>Can be constructed with computed indices (use wrap:true to go to the next line) as a shortcut:</p>
+
+    <div id="shortcut-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'shortcut-example', () => {
+        /*START*/
+        return new scenery.GridBox( {
+          children: [
+            new scenery.Rectangle( 0, 0, 75, 50, {
+              fill: colors[ 0 ]
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 75, {
+              fill: colors[ 2 ]
+            } ),
+            new scenery.Circle( 25, {
+              fill: colors[ 4 ],
+              layoutOptions: { wrap: true }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 6 ]
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 8 ]
+            } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'none', useMinHeight: true } );
+    </script>
+
+    <p>Grids by default don't auto-expand all rows/columns in size to the preferred size, but they can with a similar style to FlowBox:</p>
+
+    <div id="grow-grid-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'grow-grid-example', () => {
+        /*START*/
+        return new scenery.GridBox( {
+          grow: 1,
+          children: [
+            new scenery.Rectangle( 0, 0, 75, 50, {
+              fill: colors[ 0 ]
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 75, {
+              fill: colors[ 2 ]
+            } ),
+            new scenery.Circle( 25, {
+              fill: colors[ 4 ],
+              layoutOptions: { wrap: true }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 6 ]
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 8 ]
+            } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'both', useMinHeight: true } );
+    </script>
+
+    <p>This space can be grown in specified rows/columns only (and independently):</p>
+
+    <div id="grow-2-grid-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'grow-2-grid-example', () => {
+        /*START*/
+        return new scenery.GridBox( {
+          children: [
+            new scenery.Rectangle( 0, 0, 75, 50, {
+              fill: colors[ 0 ],
+              layoutOptions: { xGrow: 1 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 75, {
+              fill: colors[ 2 ]
+            } ),
+            new scenery.Circle( 25, {
+              fill: colors[ 4 ],
+              layoutOptions: { wrap: true }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 6 ]
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 8 ],
+              layoutOptions: { yGrow: 1 }
+            } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'both', useMinHeight: true } );
+    </script>
+
+    <p>Growing with cells that can adjust their size dynamically with preferred dimensions works well:</p>
+
+    <div id="preferred-grid-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'preferred-grid-example', () => {
+        /*START*/
+        return new scenery.GridBox( {
+          children: [
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 0 ]
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 2 ]
+            } ),
+            new scenery.Circle( 25, {
+              fill: colors[ 4 ],
+              layoutOptions: { wrap: true }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 6 ]
+            } ),
+            new ExampleExpandingRectangle( {
+              fill: 'gray',
+              layoutOptions: { grow: 1, xAlign: 'stretch', yAlign: 'stretch' }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 8 ]
+            } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'both', useMinHeight: true } );
+    </script>
+
+    <p>Cells can be aligned in a similar way to FlowBox, but in both dimensions:</p>
+
+    <div id="align-grid-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'align-grid-example', () => {
+        /*START*/
+        return new scenery.GridBox( {
+          grow: 1,
+          children: [
+            new scenery.Rectangle( 0, 0, 75, 50, {
+              fill: colors[ 0 ],
+              layoutOptions: { xAlign: 'left', yAlign: 'top' }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 75, {
+              fill: colors[ 2 ]
+            } ),
+            new scenery.Circle( 25, {
+              fill: colors[ 4 ],
+              layoutOptions: { wrap: true, yAlign: 'bottom' }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 6 ]
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 8 ],
+              layoutOptions: { yAlign: 'top' }
+            } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'both', useMinHeight: true } );
+    </script>
+
+    <p>Cells can take up more than one row/column with the width/height layout options:</p>
+
+    <div id="span-grid-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'span-grid-example', () => {
+        /*START*/
+        return new scenery.GridBox( {
+          grow: 1,
+          children: [
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 0 ],
+              layoutOptions: { x: 0, y: 0 }
+            } ),
+            new scenery.Rectangle( 0, 0, 100, 50, {
+              fill: colors[ 2 ],
+              layoutOptions: { x: 1, y: 0, width: 2 }
+            } ),
+            new scenery.Rectangle( 0, 0, 100, 100, {
+              fill: colors[ 4 ],
+              layoutOptions: { x: 0, y: 1, width: 2, height: 2 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 6 ],
+              layoutOptions: { x: 2, y: 1 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 8 ],
+              layoutOptions: { x: 2, y: 2 }
+            } ),
+            new scenery.Circle( 25, {
+              fill: colors[ 0 ],
+              layoutOptions: { x: 0, y: 3 }
+            } ),
+            new scenery.Circle( 25, {
+              fill: colors[ 1 ],
+              layoutOptions: { x: 1, y: 3 }
+            } ),
+            new scenery.Circle( 25, {
+              fill: colors[ 2 ],
+              layoutOptions: { x: 2, y: 3 }
+            } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'both', useMinHeight: true } );
+    </script>
+
+    <p>Grids can have consistent internal spacing:</p>
+
+    <div id="grid-spacing-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'grid-spacing-example', () => {
+        /*START*/
+        return new scenery.GridBox( {
+          spacing: 10,
+          children: [
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 0 ],
+              layoutOptions: { x: 0, y: 0 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 2 ],
+              layoutOptions: { x: 1, y: 0 }
+            } ),
+            new scenery.Circle( 25, {
+              fill: colors[ 4 ],
+              layoutOptions: { x: 2, y: 0 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 6 ],
+              layoutOptions: { x: 0, y: 1 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 8 ],
+              layoutOptions: { x: 1, y: 1 }
+            } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'none', useMinHeight: true } );
+    </script>
+
+    <p>Grids can have different spacing on each dimension:</p>
+
+    <div id="grid-2-spacing-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'grid-2-spacing-example', () => {
+        /*START*/
+        return new scenery.GridBox( {
+          xSpacing: 5,
+          ySpacing: 15,
+          children: [
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 0 ],
+              layoutOptions: { x: 0, y: 0 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 2 ],
+              layoutOptions: { x: 1, y: 0 }
+            } ),
+            new scenery.Circle( 25, {
+              fill: colors[ 4 ],
+              layoutOptions: { x: 2, y: 0 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 6 ],
+              layoutOptions: { x: 0, y: 1 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 8 ],
+              layoutOptions: { x: 1, y: 1 }
+            } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'none', useMinHeight: true } );
+    </script>
+
+    <p>Grids can have custom arrays adjusting the spacing between every single row/column:</p>
+
+    <div id="grid-3-spacing-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'grid-3-spacing-example', () => {
+        /*START*/
+        return new scenery.GridBox( {
+          xSpacing: [ 10, 0 ],
+          ySpacing: [ 5 ],
+          children: [
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 0 ],
+              layoutOptions: { x: 0, y: 0 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 2 ],
+              layoutOptions: { x: 1, y: 0 }
+            } ),
+            new scenery.Circle( 25, {
+              fill: colors[ 4 ],
+              layoutOptions: { x: 2, y: 0 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 6 ],
+              layoutOptions: { x: 0, y: 1 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 8 ],
+              layoutOptions: { x: 1, y: 1 }
+            } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'none', useMinHeight: true } );
+    </script>
+
+    <p>Similar to FlowBox, grids can have margins applied to all elements:</p>
+
+    <div id="margin-1-spacing-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'margin-1-spacing-example', () => {
+        /*START*/
+        return new scenery.GridBox( {
+          margin: 5,
+          children: [
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 0 ],
+              layoutOptions: { x: 0, y: 0 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 2 ],
+              layoutOptions: { x: 1, y: 0 }
+            } ),
+            new scenery.Circle( 25, {
+              fill: colors[ 4 ],
+              layoutOptions: { x: 2, y: 0 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 6 ],
+              layoutOptions: { x: 0, y: 1 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 8 ],
+              layoutOptions: { x: 1, y: 1 }
+            } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'none', useMinHeight: true } );
+    </script>
+
+    <p>Or can have margins specified on individual elements:</p>
+
+    <div id="margin-2-spacing-example"></div>
+    <script type="text/javascript">
+      dynamicDemo( 'margin-2-spacing-example', () => {
+        /*START*/
+        return new scenery.GridBox( {
+          yAlign: 'top',
+          children: [
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 0 ],
+              layoutOptions: { x: 0, y: 0 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 2 ],
+              layoutOptions: { x: 1, y: 0, topMargin: 10 }
+            } ),
+            new scenery.Circle( 25, {
+              fill: colors[ 4 ],
+              layoutOptions: { x: 2, y: 0 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 6 ],
+              layoutOptions: { x: 0, y: 1 }
+            } ),
+            new scenery.Rectangle( 0, 0, 50, 50, {
+              fill: colors[ 8 ],
+              layoutOptions: { x: 1, y: 1 }
+            } )
+          ]
+        } );
+        /*END*/
+      }, { resize: 'none', useMinHeight: true } );
+    </script>
+
+  </div>
+  <div class="span2"></div>
+</div>
+
+<footer style="background-color: #191919;">
+  <a class="brand" href="/scenery">Scenery</a>
+</footer>
+
+<script type="text/javascript">
+  SyntaxHighlighter.all();
+</script>
+</body>
+</html>
