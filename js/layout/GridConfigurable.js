@@ -25,10 +25,10 @@ const GRID_CONFIGURABLE_OPTION_KEYS = [
   'rightMargin',
   'topMargin',
   'bottomMargin',
-  'minCellWidth',
-  'minCellHeight',
-  'maxCellWidth',
-  'maxCellHeight'
+  'minContentWidth',
+  'minContentHeight',
+  'maxContentWidth',
+  'maxContentHeight'
 ];
 
 const GridConfigurable = memoize( type => {
@@ -47,10 +47,10 @@ const GridConfigurable = memoize( type => {
       this._bottomMargin = null;
       this._xGrow = null;
       this._yGrow = null;
-      this._minCellWidth = null;
-      this._minCellHeight = null;
-      this._maxCellWidth = null;
-      this._maxCellHeight = null;
+      this._minContentWidth = null;
+      this._minContentHeight = null;
+      this._maxContentWidth = null;
+      this._maxContentHeight = null;
 
       // @public {TinyEmitter}
       this.changedEmitter = new TinyEmitter();
@@ -77,10 +77,10 @@ const GridConfigurable = memoize( type => {
       this._bottomMargin = 0;
       this._xGrow = 0;
       this._yGrow = 0;
-      this._minCellWidth = null;
-      this._minCellHeight = null;
-      this._maxCellWidth = null;
-      this._maxCellHeight = null;
+      this._minContentWidth = null;
+      this._minContentHeight = null;
+      this._maxContentWidth = null;
+      this._maxContentHeight = null;
 
       this.changedEmitter.emit();
     }
@@ -98,10 +98,10 @@ const GridConfigurable = memoize( type => {
       this._bottomMargin = null;
       this._xGrow = null;
       this._yGrow = null;
-      this._minCellWidth = null;
-      this._minCellHeight = null;
-      this._maxCellWidth = null;
-      this._maxCellHeight = null;
+      this._minContentWidth = null;
+      this._minContentHeight = null;
+      this._maxContentWidth = null;
+      this._maxContentHeight = null;
 
       this.changedEmitter.emit();
     }
@@ -440,8 +440,8 @@ const GridConfigurable = memoize( type => {
      *
      * @returns {number|null}
      */
-    get minCellWidth() {
-      return this._minCellWidth;
+    get minContentWidth() {
+      return this._minContentWidth;
     }
 
     /**
@@ -449,9 +449,9 @@ const GridConfigurable = memoize( type => {
      *
      * @param {number|null} value
      */
-    set minCellWidth( value ) {
-      if ( this._minCellWidth !== value ) {
-        this._minCellWidth = value;
+    set minContentWidth( value ) {
+      if ( this._minContentWidth !== value ) {
+        this._minContentWidth = value;
 
         this.changedEmitter.emit();
       }
@@ -462,8 +462,8 @@ const GridConfigurable = memoize( type => {
      *
      * @returns {number|null}
      */
-    get minCellHeight() {
-      return this._minCellHeight;
+    get minContentHeight() {
+      return this._minContentHeight;
     }
 
     /**
@@ -471,9 +471,9 @@ const GridConfigurable = memoize( type => {
      *
      * @param {number|null} value
      */
-    set minCellHeight( value ) {
-      if ( this._minCellHeight !== value ) {
-        this._minCellHeight = value;
+    set minContentHeight( value ) {
+      if ( this._minContentHeight !== value ) {
+        this._minContentHeight = value;
 
         this.changedEmitter.emit();
       }
@@ -484,8 +484,8 @@ const GridConfigurable = memoize( type => {
      *
      * @returns {number|null}
      */
-    get maxCellWidth() {
-      return this._maxCellWidth;
+    get maxContentWidth() {
+      return this._maxContentWidth;
     }
 
     /**
@@ -493,9 +493,9 @@ const GridConfigurable = memoize( type => {
      *
      * @param {number|null} value
      */
-    set maxCellWidth( value ) {
-      if ( this._maxCellWidth !== value ) {
-        this._maxCellWidth = value;
+    set maxContentWidth( value ) {
+      if ( this._maxContentWidth !== value ) {
+        this._maxContentWidth = value;
 
         this.changedEmitter.emit();
       }
@@ -506,8 +506,8 @@ const GridConfigurable = memoize( type => {
      *
      * @returns {number|null}
      */
-    get maxCellHeight() {
-      return this._maxCellHeight;
+    get maxContentHeight() {
+      return this._maxContentHeight;
     }
 
     /**
@@ -515,9 +515,9 @@ const GridConfigurable = memoize( type => {
      *
      * @param {number|null} value
      */
-    set maxCellHeight( value ) {
-      if ( this._maxCellHeight !== value ) {
-        this._maxCellHeight = value;
+    set maxContentHeight( value ) {
+      if ( this._maxContentHeight !== value ) {
+        this._maxContentHeight = value;
 
         this.changedEmitter.emit();
       }

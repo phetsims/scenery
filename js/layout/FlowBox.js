@@ -454,8 +454,8 @@ class FlowBox extends HSizable( VSizable( Node ) ) {
    *
    * @returns {number|null}
    */
-  get minCellWidth() {
-    return this._constraint.minCellWidth;
+  get minContentWidth() {
+    return this._constraint.minContentWidth;
   }
 
   /**
@@ -463,8 +463,8 @@ class FlowBox extends HSizable( VSizable( Node ) ) {
    *
    * @param {number|null} value
    */
-  set minCellWidth( value ) {
-    this._constraint.minCellWidth = value;
+  set minContentWidth( value ) {
+    this._constraint.minContentWidth = value;
   }
 
   /**
@@ -472,8 +472,8 @@ class FlowBox extends HSizable( VSizable( Node ) ) {
    *
    * @returns {number|null}
    */
-  get minCellHeight() {
-    return this._constraint.minCellHeight;
+  get minContentHeight() {
+    return this._constraint.minContentHeight;
   }
 
   /**
@@ -481,8 +481,8 @@ class FlowBox extends HSizable( VSizable( Node ) ) {
    *
    * @param {number|null} value
    */
-  set minCellHeight( value ) {
-    this._constraint.minCellHeight = value;
+  set minContentHeight( value ) {
+    this._constraint.minContentHeight = value;
   }
 
   /**
@@ -490,8 +490,8 @@ class FlowBox extends HSizable( VSizable( Node ) ) {
    *
    * @returns {number|null}
    */
-  get maxCellWidth() {
-    return this._constraint.maxCellWidth;
+  get maxContentWidth() {
+    return this._constraint.maxContentWidth;
   }
 
   /**
@@ -499,8 +499,8 @@ class FlowBox extends HSizable( VSizable( Node ) ) {
    *
    * @param {number|null} value
    */
-  set maxCellWidth( value ) {
-    this._constraint.maxCellWidth = value;
+  set maxContentWidth( value ) {
+    this._constraint.maxContentWidth = value;
   }
 
   /**
@@ -508,8 +508,8 @@ class FlowBox extends HSizable( VSizable( Node ) ) {
    *
    * @returns {number|null}
    */
-  get maxCellHeight() {
-    return this._constraint.maxCellHeight;
+  get maxContentHeight() {
+    return this._constraint.maxContentHeight;
   }
 
   /**
@@ -517,8 +517,8 @@ class FlowBox extends HSizable( VSizable( Node ) ) {
    *
    * @param {number|null} value
    */
-  set maxCellHeight( value ) {
-    this._constraint.maxCellHeight = value;
+  set maxContentHeight( value ) {
+    this._constraint.maxContentHeight = value;
   }
 
   /**

@@ -345,16 +345,16 @@
 
     <p>Maximums can be applied to constrain this:</p>
 
-    <div id="maxCellWidth-example"></div>
+    <div id="maxContentWidth-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'maxCellWidth-example', () => {
+      dynamicDemo( 'maxContentWidth-example', () => {
         /*START*/
         return new scenery.FlowBox( {
           children: [
             new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
             new ExampleExpandingRectangle( {
               fill: 'gray',
-              layoutOptions: { grow: 1, maxCellWidth: 150 }
+              layoutOptions: { grow: 1, maxContentWidth: 150 }
             } ),
             new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
             new scenery.Circle( 25, { fill: colors[ 6 ] } ),
@@ -367,16 +367,16 @@
 
     <p>Minimums can also force a certain expansion:</p>
 
-    <div id="minCellWidth-example"></div>
+    <div id="minContentWidth-example"></div>
     <script type="text/javascript">
-      dynamicDemo( 'minCellWidth-example', () => {
+      dynamicDemo( 'minContentWidth-example', () => {
         /*START*/
         return new scenery.FlowBox( {
           children: [
             new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 2 ] } ),
             new ExampleExpandingRectangle( {
               fill: 'gray',
-              layoutOptions: { grow: 1, minCellWidth: 100 }
+              layoutOptions: { grow: 1, minContentWidth: 100 }
             } ),
             new scenery.Rectangle( 0, 0, 50, 50, { fill: colors[ 4 ] } ),
             new scenery.Circle( 25, { fill: colors[ 6 ] } ),

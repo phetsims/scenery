@@ -73,7 +73,7 @@ class FlowCell extends FlowConfigurable( Object ) {
       return this.withDefault( 'leftMargin', defaultConfig ) +
              Math.max(
                isSizable ? this.node.minimumWidth : this.node.width,
-               this.withDefault( 'minCellWidth', defaultConfig ) || 0
+               this.withDefault( 'minContentWidth', defaultConfig ) || 0
              ) +
              this.withDefault( 'rightMargin', defaultConfig );
     }
@@ -81,7 +81,7 @@ class FlowCell extends FlowConfigurable( Object ) {
       return this.withDefault( 'topMargin', defaultConfig ) +
              Math.max(
                isSizable ? this.node.minimumHeight : this.node.height,
-               this.withDefault( 'minCellHeight', defaultConfig ) || 0
+               this.withDefault( 'minContentHeight', defaultConfig ) || 0
              ) +
              this.withDefault( 'bottomMargin', defaultConfig );
     }
@@ -101,7 +101,7 @@ class FlowCell extends FlowConfigurable( Object ) {
       return this.withDefault( 'leftMargin', defaultConfig ) +
              Math.min(
                isSizable ? Number.POSITIVE_INFINITY : this.node.width,
-               this.withDefault( 'maxCellWidth', defaultConfig ) || Number.POSITIVE_INFINITY
+               this.withDefault( 'maxContentWidth', defaultConfig ) || Number.POSITIVE_INFINITY
              ) +
              this.withDefault( 'rightMargin', defaultConfig );
     }
@@ -109,7 +109,7 @@ class FlowCell extends FlowConfigurable( Object ) {
       return this.withDefault( 'topMargin', defaultConfig ) +
              Math.min(
                isSizable ? Number.POSITIVE_INFINITY : this.node.height,
-               this.withDefault( 'maxCellHeight', defaultConfig ) || Number.POSITIVE_INFINITY
+               this.withDefault( 'maxContentHeight', defaultConfig ) || Number.POSITIVE_INFINITY
              ) +
              this.withDefault( 'bottomMargin', defaultConfig );
     }
