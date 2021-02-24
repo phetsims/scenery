@@ -95,7 +95,7 @@ class GridCell extends GridConfigurable( Object ) {
   getMinimumWidth( defaultConfig ) {
     return this.withDefault( 'leftMargin', defaultConfig ) +
            Math.max(
-             this.node.hSizable ? this.node.minimumWidth : this.node.width,
+             this.node.widthSizable ? this.node.minimumWidth : this.node.width,
              this.withDefault( 'minContentWidth', defaultConfig )
            ) +
            this.withDefault( 'rightMargin', defaultConfig );
@@ -110,7 +110,7 @@ class GridCell extends GridConfigurable( Object ) {
   getMinimumHeight( defaultConfig ) {
     return this.withDefault( 'topMargin', defaultConfig ) +
            Math.max(
-             this.node.vSizable ? this.node.minimumHeight : this.node.height,
+             this.node.heightSizable ? this.node.minimumHeight : this.node.height,
              this.withDefault( 'minContentHeight', defaultConfig )
            ) +
            this.withDefault( 'bottomMargin', defaultConfig );
@@ -173,7 +173,7 @@ class GridCell extends GridConfigurable( Object ) {
    * @param {number} value
    */
   attemptedPreferredWidth( defaultConfig, value ) {
-    if ( this.node.hSizable ) {
+    if ( this.node.widthSizable ) {
       const minimumWidth = this.getMinimumWidth( defaultConfig );
       const maximumWidth = this.getMaximumWidth( defaultConfig );
 
@@ -193,7 +193,7 @@ class GridCell extends GridConfigurable( Object ) {
    * @param {number} value
    */
   attemptedPreferredHeight( defaultConfig, value ) {
-    if ( this.node.vSizable ) {
+    if ( this.node.heightSizable ) {
       const minimumHeight = this.getMinimumHeight( defaultConfig );
       const maximumHeight = this.getMaximumHeight( defaultConfig );
 

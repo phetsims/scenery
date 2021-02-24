@@ -11,8 +11,8 @@ import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
 import FlowCell from './FlowCell.js';
 import FlowConstraint from './FlowConstraint.js';
-import HSizable from './HSizable.js';
-import VSizable from './VSizable.js';
+import WidthSizable from './WidthSizable.js';
+import HeightSizable from './HeightSizable.js';
 
 // FlowBox-specific options that can be passed in the constructor or mutate() call.
 const FLOWBOX_OPTION_KEYS = [
@@ -26,7 +26,7 @@ const DEFAULT_OPTIONS = {
   resize: true
 };
 
-class FlowBox extends HSizable( VSizable( Node ) ) {
+class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
   /**
    * @param {Object} [options] - FlowBox-specific options are documented in FLOWBOX_OPTION_KEYS above, and can be
    *                             provided along-side options for Node.
@@ -545,7 +545,7 @@ class FlowBox extends HSizable( VSizable( Node ) ) {
  * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
  *       cases that may apply.
  */
-FlowBox.prototype._mutatorKeys = HSizable( Node ).prototype._mutatorKeys.concat( VSizable( Node ).prototype._mutatorKeys ).concat( FLOWBOX_OPTION_KEYS );
+FlowBox.prototype._mutatorKeys = WidthSizable( Node ).prototype._mutatorKeys.concat( HeightSizable( Node ).prototype._mutatorKeys ).concat( FLOWBOX_OPTION_KEYS );
 
 // @public {Object}
 FlowBox.DEFAULT_OPTIONS = DEFAULT_OPTIONS;

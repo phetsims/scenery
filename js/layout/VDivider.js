@@ -8,9 +8,9 @@
 
 import scenery from '../scenery.js';
 import Divider from './Divider.js';
-import HSizable from './HSizable.js';
+import WidthSizable from './WidthSizable.js';
 
-class VDivider extends HSizable( Divider ) {
+class VDivider extends WidthSizable( Divider ) {
   /**
    * @param {Object} [options]
    */

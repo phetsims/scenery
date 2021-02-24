@@ -67,7 +67,7 @@ class FlowCell extends FlowConfigurable( Object ) {
    * @returns {number}
    */
   getMinimumSize( orientation, defaultConfig ) {
-    const isSizable = !!( orientation === Orientation.HORIZONTAL ? this.node.hSizable : this.node.vSizable );
+    const isSizable = !!( orientation === Orientation.HORIZONTAL ? this.node.widthSizable : this.node.heightSizable );
 
     if ( orientation === Orientation.HORIZONTAL ) {
       return this.withDefault( 'leftMargin', defaultConfig ) +
@@ -95,7 +95,7 @@ class FlowCell extends FlowConfigurable( Object ) {
    * @returns {number}
    */
   getMaximumSize( orientation, defaultConfig ) {
-    const isSizable = !!( orientation === Orientation.HORIZONTAL ? this.node.hSizable : this.node.vSizable );
+    const isSizable = !!( orientation === Orientation.HORIZONTAL ? this.node.widthSizable : this.node.heightSizable );
 
     if ( orientation === Orientation.HORIZONTAL ) {
       return this.withDefault( 'leftMargin', defaultConfig ) +
@@ -123,7 +123,7 @@ class FlowCell extends FlowConfigurable( Object ) {
    * @param {number} value
    */
   attemptPreferredSize( orientation, defaultConfig, value ) {
-    if ( orientation === Orientation.HORIZONTAL ? this.node.hSizable : this.node.vSizable ) {
+    if ( orientation === Orientation.HORIZONTAL ? this.node.widthSizable : this.node.heightSizable ) {
       const minimumSize = this.getMinimumSize( orientation, defaultConfig );
       const maximumSize = this.getMaximumSize( orientation, defaultConfig );
 

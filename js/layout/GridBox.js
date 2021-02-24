@@ -7,8 +7,8 @@
  */
 
 import merge from '../../../phet-core/js/merge.js';
-import HSizable from './HSizable.js';
-import VSizable from './VSizable.js';
+import WidthSizable from './WidthSizable.js';
+import HeightSizable from './HeightSizable.js';
 import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
 import GridCell from './GridCell.js';
@@ -23,7 +23,7 @@ const DEFAULT_OPTIONS = {
   resize: true
 };
 
-class GridBox extends HSizable( VSizable( Node ) ) {
+class GridBox extends WidthSizable( HeightSizable( Node ) ) {
   /**
    * @param {Object} [options] - GridBox-specific options are documented in GRIDBOX_OPTION_KEYS above, and can be
    *                             provided along-side options for Node.
@@ -492,7 +492,7 @@ class GridBox extends HSizable( VSizable( Node ) ) {
  * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
  *       cases that may apply.
  */
-GridBox.prototype._mutatorKeys = HSizable( Node ).prototype._mutatorKeys.concat( VSizable( Node ).prototype._mutatorKeys ).concat( GRIDBOX_OPTION_KEYS );
+GridBox.prototype._mutatorKeys = WidthSizable( Node ).prototype._mutatorKeys.concat( HeightSizable( Node ).prototype._mutatorKeys ).concat( GRIDBOX_OPTION_KEYS );
 
 // @public {Object}
 GridBox.DEFAULT_OPTIONS = DEFAULT_OPTIONS;

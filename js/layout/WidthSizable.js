@@ -10,22 +10,22 @@ import TinyProperty from '../../../axon/js/TinyProperty.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import scenery from '../scenery.js';
 
-const V_SIZABLE_OPTION_KEYS = [
-  'preferredHeight',
-  'minimumHeight'
+const WIDTH_SIZABLE_OPTION_KEYS = [
+  'preferredWidth',
+  'minimumWidth'
 ];
 
-const VSizable = memoize( type => {
+const WidthSizable = memoize( type => {
   const clazz = class extends type {
     constructor( ...args ) {
       super( ...args );
 
       // @public {Property.<number|null>}
-      this.preferredHeightProperty = new TinyProperty( null );
-      this.minimumHeightProperty = new TinyProperty( null );
+      this.preferredWidthProperty = new TinyProperty( null );
+      this.minimumWidthProperty = new TinyProperty( null );
 
       // @public {boolean} - Flag for detection of the feature
-      this.vSizable = true;
+      this.widthSizable = true;
     }
 
     /**
@@ -33,8 +33,8 @@ const VSizable = memoize( type => {
      *
      * @returns {number|null}
      */
-    get preferredHeight() {
-      return this.preferredHeightProperty.value;
+    get preferredWidth() {
+      return this.preferredWidthProperty.value;
     }
 
     /**
@@ -42,10 +42,10 @@ const VSizable = memoize( type => {
      *
      * @param {number|null} value
      */
-    set preferredHeight( value ) {
+    set preferredWidth( value ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
 
-      this.preferredHeightProperty.value = value;
+      this.preferredWidthProperty.value = value;
     }
 
     /**
@@ -53,8 +53,8 @@ const VSizable = memoize( type => {
      *
      * @returns {number|null}
      */
-    get minimumHeight() {
-      return this.minimumHeightProperty.value;
+    get minimumWidth() {
+      return this.minimumWidthProperty.value;
     }
 
     /**
@@ -62,21 +62,21 @@ const VSizable = memoize( type => {
      *
      * @param {number|null} value
      */
-    set minimumHeight( value ) {
+    set minimumWidth( value ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
 
-      this.minimumHeightProperty.value = value;
+      this.minimumWidthProperty.value = value;
     }
   };
 
   // If we're extending into a Node type, include option keys
   // TODO: This is ugly, we'll need to mutate after construction, no?
   if ( type.prototype._mutatorKeys ) {
-    clazz.prototype._mutatorKeys = type.prototype._mutatorKeys.concat( V_SIZABLE_OPTION_KEYS );
+    clazz.prototype._mutatorKeys = type.prototype._mutatorKeys.concat( WIDTH_SIZABLE_OPTION_KEYS );
   }
 
   return clazz;
 } );
 
-scenery.register( 'VSizable', VSizable );
-export default VSizable;
+scenery.register( 'WidthSizable', WidthSizable );
+export default WidthSizable;

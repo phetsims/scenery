@@ -93,7 +93,7 @@
       container.appendChild( code );
     }
 
-    class ExampleExpandingRectangle extends scenery.HSizable( scenery.VSizable( scenery.Rectangle ) ) {
+    class ExampleExpandingRectangle extends scenery.WidthSizable( scenery.HeightSizable( scenery.Rectangle ) ) {
       constructor( ...args ) {
         super( ...args );
 
@@ -429,7 +429,7 @@
         ];
         /*END*/
         // TODO: preferred width with align-content!!!
-        const container = new ( scenery.HSizable( scenery.VBox ) )( {
+        const container = new ( scenery.WidthSizable( scenery.VBox ) )( {
           orientation: 'vertical',
           justify: 'top',
           children: boxes
