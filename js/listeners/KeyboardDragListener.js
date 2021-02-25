@@ -140,42 +140,6 @@ class KeyboardDragListener {
   }
 
   /**
-   * Getter for the start property, see options.start for more info.
-   * @returns {function|null}
-   */
-  get start() { return this._start; }
-
-  /**
-   * Setter for the start property, see options.start for more info.
-   * @param {function|null} start
-   */
-  set start( start ) { this._start = start; }
-
-  /**
-   * Getter for the drag property, see options.drag for more info.
-   * @returns {function|null}
-   */
-  get drag() { return this._drag; }
-
-  /**
-   * Setter for the drag property, see options.drag for more info.
-   * @param {function|null} drag
-   */
-  set drag( drag ) { this._drag = drag; }
-
-  /**
-   * Getter for the end property, see options.end for more info.
-   * @returns {function|null}
-   */
-  get end() { return this._end; }
-
-  /**
-   * Setter for the end property, see options.end for more info.
-   * @param {function|null} end
-   */
-  set end( end ) { this._end = end; }
-
-  /**
    * Getter for the dragBounds property, see options.dragBounds for more info.
    * @returns {Bounds2|null}
    */
@@ -198,18 +162,6 @@ class KeyboardDragListener {
    * @param {Transform3|null}transform
    */
   set transform( transform ) { this._transform = transform; }
-
-  /**
-   * Getter for the positionProperty property, see options.positionProperty for more info.
-   * @returns {Property.<Vector2>|null}
-   */
-  get positionProperty() { return this._positionProperty; }
-
-  /**
-   * Setter for the positionProperty property, see options.positionProperty for more info.
-   * @param {Property.<Vector2>|null} positionProperty
-   */
-  set positionProperty( positionProperty ) { this._positionProperty = positionProperty; }
 
   /**
    * Getter for the dragVelocity property, see options.dragVelocity for more info.
