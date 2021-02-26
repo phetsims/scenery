@@ -535,19 +535,19 @@ GridConfigurable.Align = Enumeration.byKeys( [
 ] );
 
 const xAlignMapping = {
-  'left': GridConfigurable.Align.START,
-  'right': GridConfigurable.Align.END,
-  'center': GridConfigurable.Align.CENTER,
-  'origin': GridConfigurable.Align.ORIGIN,
-  'stretch': GridConfigurable.Align.STRETCH
+  left: GridConfigurable.Align.START,
+  right: GridConfigurable.Align.END,
+  center: GridConfigurable.Align.CENTER,
+  origin: GridConfigurable.Align.ORIGIN,
+  stretch: GridConfigurable.Align.STRETCH
 };
 
 const yAlignMapping = {
-  'top': GridConfigurable.Align.START,
-  'bottom': GridConfigurable.Align.END,
-  'center': GridConfigurable.Align.CENTER,
-  'origin': GridConfigurable.Align.ORIGIN,
-  'stretch': GridConfigurable.Align.STRETCH
+  top: GridConfigurable.Align.START,
+  bottom: GridConfigurable.Align.END,
+  center: GridConfigurable.Align.CENTER,
+  origin: GridConfigurable.Align.ORIGIN,
+  stretch: GridConfigurable.Align.STRETCH
 };
 
 // @public {Object}

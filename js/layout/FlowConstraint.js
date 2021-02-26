@@ -572,18 +572,18 @@ FlowConstraint.Justify = Enumeration.byKeys( [
   'SPACE_EVENLY'
 ] );
 const justifyMap = {
-  'start': FlowConstraint.Justify.START,
-  'top': FlowConstraint.Justify.START,
-  'left': FlowConstraint.Justify.START,
+  start: FlowConstraint.Justify.START,
+  top: FlowConstraint.Justify.START,
+  left: FlowConstraint.Justify.START,
 
-  'end': FlowConstraint.Justify.END,
-  'bottom': FlowConstraint.Justify.END,
-  'right': FlowConstraint.Justify.END,
+  end: FlowConstraint.Justify.END,
+  bottom: FlowConstraint.Justify.END,
+  right: FlowConstraint.Justify.END,
 
-  'center': FlowConstraint.Justify.CENTER,
-  'spaceBetween': FlowConstraint.Justify.SPACE_BETWEEN,
-  'spaceAround': FlowConstraint.Justify.SPACE_AROUND,
-  'spaceEvenly': FlowConstraint.Justify.SPACE_EVENLY
+  center: FlowConstraint.Justify.CENTER,
+  spaceBetween: FlowConstraint.Justify.SPACE_BETWEEN,
+  spaceAround: FlowConstraint.Justify.SPACE_AROUND,
+  spaceEvenly: FlowConstraint.Justify.SPACE_EVENLY
 };
 
 // @public {Array.<string>}

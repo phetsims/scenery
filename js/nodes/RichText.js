@@ -133,13 +133,13 @@ const scratchText = new Text( '' );
 
 // himalaya converts dash separated CSS to camel case - use CSS compatible style with dashes, see above for examples
 const FONT_STYLE_MAP = {
-  'fontFamily': 'family',
-  'fontSize': 'size',
-  'fontStretch': 'stretch',
-  'fontStyle': 'style',
-  'fontVariant': 'variant',
-  'fontWeight': 'weight',
-  'lineHeight': 'lineHeight'
+  fontFamily: 'family',
+  fontSize: 'size',
+  fontStretch: 'stretch',
+  fontStyle: 'style',
+  fontVariant: 'variant',
+  fontWeight: 'weight',
+  lineHeight: 'lineHeight'
 };
 
 const FONT_STYLE_KEYS = Object.keys( FONT_STYLE_MAP );

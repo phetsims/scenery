@@ -445,13 +445,13 @@ FlowConfigurable.Align = Enumeration.byKeys( [
 ] );
 
 const alignMapping = {
-  'left': FlowConfigurable.Align.START,
-  'top': FlowConfigurable.Align.START,
-  'right': FlowConfigurable.Align.END,
-  'bottom': FlowConfigurable.Align.END,
-  'center': FlowConfigurable.Align.CENTER,
-  'origin': FlowConfigurable.Align.ORIGIN,
-  'stretch': FlowConfigurable.Align.STRETCH
+  left: FlowConfigurable.Align.START,
+  top: FlowConfigurable.Align.START,
+  right: FlowConfigurable.Align.END,
+  bottom: FlowConfigurable.Align.END,
+  center: FlowConfigurable.Align.CENTER,
+  origin: FlowConfigurable.Align.ORIGIN,
+  stretch: FlowConfigurable.Align.STRETCH
 };
 
 // @public {Object}
