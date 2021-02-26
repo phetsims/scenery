@@ -319,9 +319,9 @@ const FlowConfigurable = memoize( type => {
      */
     get margin() {
       assert && assert(
-        this._leftMargin === this._rightMargin &&
-        this._leftMargin === this._topMargin &&
-        this._leftMargin === this._bottomMargin
+      this._leftMargin === this._rightMargin &&
+      this._leftMargin === this._topMargin &&
+      this._leftMargin === this._bottomMargin
       );
 
       return this._topMargin;

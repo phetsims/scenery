@@ -6662,8 +6662,8 @@ class Node extends PhetioObject {
 
           // by default, use the value from the Node
           phetioReadOnly: this.phetioReadOnly,
-        phetioDocumentation: 'Sets whether the node is enabled. This will set whether input is enabled for this Node and' +
-                             'most often children as well. It will also control and toggle the "disabled look" of the node.',
+          phetioDocumentation: 'Sets whether the node is enabled. This will set whether input is enabled for this Node and' +
+                               'most often children as well. It will also control and toggle the "disabled look" of the node.',
           tandem: this.tandem.createTandem( ENABLED_PROPERTY_TANDEM_NAME )
         }, config.enabledPropertyOptions ) )
       );

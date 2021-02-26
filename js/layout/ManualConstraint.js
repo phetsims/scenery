@@ -24,9 +24,7 @@ class ManualConstraint extends LayoutConstraint {
     assert && assert( Array.isArray( nodes ) && _.every( nodes, node => node instanceof Node ) );
     assert && assert( typeof layoutCallback === 'function' );
 
-    options = merge( {
-
-    }, options );
+    options = merge( {}, options );
 
     super( ancestorNode );
 

@@ -163,6 +163,7 @@ class Image extends Imageable( Node ) {
       this.invalidateImage();
     }
   }
+
   set imageBounds( value ) { this.setImageBounds( value ); }
 
   /**
@@ -174,6 +175,7 @@ class Image extends Imageable( Node ) {
   getImageBounds() {
     return this._imageBounds;
   }
+
   get imageBounds() { return this._imageBounds; }
 
   /**

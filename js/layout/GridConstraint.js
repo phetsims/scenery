@@ -123,8 +123,8 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
         return line;
       } );
       const lineSpacings = typeof orientedSpacing === 'number' ?
-                             _.range( 0, lines.length - 1 ).map( () => orientedSpacing ) :
-                             orientedSpacing.slice( 0, lines.length - 1 );
+                           _.range( 0, lines.length - 1 ).map( () => orientedSpacing ) :
+                           orientedSpacing.slice( 0, lines.length - 1 );
       assert && assert( lineSpacings.length === lines.length - 1 );
 
       // Scan sizes for single-line cells first

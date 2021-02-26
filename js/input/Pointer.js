@@ -213,7 +213,7 @@ class Pointer {
    *
    * @returns {boolean}
    */
-  isTouchLike(){
+  isTouchLike() {
     return false;
   }
 
