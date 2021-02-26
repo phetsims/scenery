@@ -60,10 +60,11 @@
 import StringProperty from '../../../axon/js/StringProperty.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
+import Poolable from '../../../phet-core/js/Poolable.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
+import memoize from '../../../phet-core/js/memoize.js';
 import merge from '../../../phet-core/js/merge.js';
 import openPopup from '../../../phet-core/js/openPopup.js';
-import Poolable from '../../../phet-core/js/Poolable.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import FireListener from '../listeners/FireListener.js';
@@ -1601,7 +1602,40 @@ RichText.prototype._mutatorKeys = RICH_TEXT_OPTION_KEYS.concat( Node.prototype._
 
 scenery.register( 'RichText', RichText );
 
-class RichTextElement extends Node {
+const RichTextCleanable = memoize( type => {
+  return class extends type {
+    /**
+     * @public
+     *
+     * @returns {boolean}
+     */
+    get isCleanable() {
+      return true;
+    }
+
+    /**
+     * Releases references
+     * @public
+     */
+    clean() {
+      // Remove all children (and recursively clean)
+      for ( let i = this._children.length - 1; i >= 0; i-- ) {
+        const child = this._children[ i ];
+
+        if ( child.isCleanable ) {
+          this.removeChild( child );
+          child.clean();
+        }
+      }
+
+      this.matrix = Matrix3.IDENTITY;
+
+      this.freeToPool();
+    }
+  };
+} );
+
+class RichTextElement extends RichTextCleanable( Node ) {
   /**
    * A container of other RichText elements and leaves.
    * @private
@@ -1631,23 +1665,6 @@ class RichTextElement extends Node {
     this.rightSpacing = 0;
 
     return this;
-  }
-
-  /**
-   * Releases references
-   * @public
-   */
-  clean() {
-    // Remove all children (and recursively clean)
-    while ( this._children.length ) {
-      const child = this._children[ this._children.length - 1 ];
-      this.removeChild( child );
-      child.clean();
-    }
-
-    this.matrix = Matrix3.IDENTITY;
-
-    this.freeToPool();
   }
 
   /**
@@ -1731,7 +1748,7 @@ class RichTextElement extends Node {
 
 Poolable.mixInto( RichTextElement );
 
-class RichTextLeaf extends Text {
+class RichTextLeaf extends RichTextCleanable( Text ) {
   /**
    * A leaf (text) node.
    *
@@ -1801,12 +1818,10 @@ class RichTextLeaf extends Text {
    * @public
    */
   clean() {
+    super.clean();
+
     this.fill = null;
     this.stroke = null;
-
-    this.matrix = Matrix3.IDENTITY;
-
-    this.freeToPool();
   }
 
   /**
@@ -1825,7 +1840,7 @@ class RichTextLeaf extends Text {
 
 Poolable.mixInto( RichTextLeaf );
 
-class RichTextLink extends Node {
+class RichTextLink extends RichTextCleanable( Node ) {
   /**
    * A link node
    *
@@ -1905,12 +1920,7 @@ class RichTextLink extends Node {
    * @public
    */
   clean() {
-    // Remove all children (and recursively clean)
-    while ( this._children.length ) {
-      const child = this._children[ this._children.length - 1 ];
-      this.removeChild( child );
-      child.clean();
-    }
+    super.clean();
 
     this.removeInputListener( this.fireListener );
     this.fireListener = null;
@@ -1918,10 +1928,6 @@ class RichTextLink extends Node {
       this.removeInputListener( this.accessibleInputListener );
       this.accessibleInputListener = null;
     }
-
-    this.matrix = Matrix3.IDENTITY;
-
-    this.freeToPool();
   }
 }
 
