@@ -191,6 +191,7 @@ const scratchMatrix3 = new Matrix3();
 const PICKABLE_PROPERTY_TANDEM_NAME = 'pickableProperty';
 const ENABLED_PROPERTY_TANDEM_NAME = EnabledProperty.TANDEM_NAME;
 const VISIBLE_PROPERTY_TANDEM_NAME = 'visibleProperty';
+const INPUT_ENABLED_PROPERTY_TANDEM_NAME = 'inputEnabledProperty';
 
 // Node options, in the order they are executed in the constructor/mutate()
 const NODE_OPTION_KEYS = [
@@ -205,9 +206,11 @@ const NODE_OPTION_KEYS = [
   'pickable', // {boolean|null} - Whether the Node is pickable, see setPickable() for more documentation
 
   'enabledPropertyPhetioInstrumented', // {boolean} - When true, create an instrumented enabledProperty when this Node is instrumented, see setEnabledPropertyPhetioInstrumented() for more documentation
-  'enabledProperty', // {Property.<boolean|null>|null} - Sets forwarding of the enabledProperty, see setEnabledProperty() for more documentation
-  'enabled', // {boolean|null} - Whether the Node is enabled, see setEnabled() for more documentation
+  'enabledProperty', // {Property.<boolean>|null} - Sets forwarding of the enabledProperty, see setEnabledProperty() for more documentation
+  'enabled', // {boolean} - Whether the Node is enabled, see setEnabled() for more documentation
 
+  'inputEnabledPropertyPhetioInstrumented', // {boolean} - When true, create an instrumented inputEnabledProperty when this Node is instrumented, see setInputEnabledPropertyPhetioInstrumented() for more documentation
+  'inputEnabledProperty', // {Property.<boolean>|null} - Sets forwarding of the inputEnabledProperty, see setInputEnabledProperty() for more documentation
   'inputEnabled', // {boolean} Whether input events can reach into this subtree, see setInputEnabled() for more documentation
   'inputListeners', // {Array.<Object>} - The input listeners attached to the Node, see setInputListeners() for more documentation
   'opacity', // {number} - Opacity of this Node's subtree, see setOpacity() for more documentation
@@ -259,6 +262,7 @@ const DEFAULT_OPTIONS = {
   enabled: true,
   enabledPropertyPhetioInstrumented: false,
   inputEnabled: true,
+  inputEnabledPropertyPhetioInstrumented: false,
   clipArea: null,
   mouseArea: null,
   touchArea: null,
@@ -353,7 +357,8 @@ class Node extends PhetioObject {
     // @public {TinyProperty.<boolean>} - Whether input event listeners on this Node or descendants on a trail will have
     // input listeners. triggered. Note that this does NOT effect picking, and only prevents some listeners from being
     // fired.
-    this.inputEnabledProperty = new TinyProperty( DEFAULT_OPTIONS.inputEnabled );
+    this._inputEnabledProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.inputEnabled,
+      DEFAULT_OPTIONS.inputEnabledPropertyPhetioInstrumented );
 
     // @private {TinyProperty.<Shape|null>} - This Node and all children will be clipped by this shape (in addition to any
     // other clipping shapes). The shape should be in the local coordinate frame.
@@ -3989,7 +3994,7 @@ class Node extends PhetioObject {
    * Node's pickability, and vice versa. This does not change this._pickableProperty. See TinyForwardingProperty.setTargetProperty()
    * for more info.
    *
-   * Instrumented Nodes do not by default create their own instrumented pickableProperty, even though Node.visibleProperty does.
+   * PhET-iO Instrumented Nodes do not by default create their own instrumented pickableProperty, even though Node.visibleProperty does.
    *
    * @public
    *
@@ -4172,7 +4177,7 @@ class Node extends PhetioObject {
    * Node's enabled, and vice versa. This does not change this._enabledProperty. See TinyForwardingProperty.setTargetProperty()
    * for more info.
    *
-   * Instrumented Nodes do not by default create their own instrumented enabledProperty, even though Node.visibleProperty does.
+   * PhET-iO Instrumented Nodes do not by default create their own instrumented enabledProperty, even though Node.visibleProperty does.
    *
    * @public
    *
@@ -4294,6 +4299,84 @@ class Node extends PhetioObject {
    */
   onEnabledPropertyChange( enabled ) {
     !enabled && this.interruptSubtreeInput();
+  }
+
+
+  /**
+   * Sets what Property our inputEnabledProperty is backed by, so that changes to this provided Property will change this whether this
+   * Node's input is enabled, and vice versa. This does not change this._inputEnabledProperty. See TinyForwardingProperty.setTargetProperty()
+   * for more info.
+   *
+   * PhET-iO Instrumented Nodes do not by default create their own instrumented inputEnabledProperty, even though Node.visibleProperty does.
+   *
+   * @public
+   *
+   * @param {TinyProperty.<boolean>|Property.<boolean>} newTarget
+   * @returns {Node} for chaining
+   */
+  setInputEnabledProperty( newTarget ) {
+    return this._inputEnabledProperty.setTargetProperty( this, INPUT_ENABLED_PROPERTY_TANDEM_NAME, newTarget );
+  }
+
+  /**
+   * See setInputEnabledProperty() for more information
+   * @public
+   *
+   * @param {TinyProperty.<boolean>|Property.<boolean>} property
+   */
+  set inputEnabledProperty( property ) {
+    this.setInputEnabledProperty( property );
+  }
+
+  /**
+   * Get this Node's inputEnabledProperty. Note! This is not the reciprocal of setInputEnabledProperty. Node.prototype._inputEnabledProperty
+   * is a TinyForwardingProperty, and is set up to listen to changes from the inputEnabledProperty provided by
+   * setInputEnabledProperty(), but the underlying reference does not change. This means the following:
+   * const myNode = new Node();
+   * const inputEnabledProperty = new Property( false );
+   * myNode.setInputEnabledProperty( inputEnabledProperty )
+   * => myNode.getInputEnabledProperty() !== inputEnabledProperty (!!!!!!)
+   * @public
+   *
+   * Please use this with caution. See setInputEnabledProperty() for more information.
+   *
+   * @returns {TinyForwardingProperty.<boolean>}
+   */
+  getInputEnabledProperty() {
+    return this._inputEnabledProperty;
+  }
+
+  /**
+   * See getInputEnabledProperty() for more information
+   * @public
+   *
+   *
+   * @returns {TinyForwardingProperty.<boolean>}
+   */
+  get inputEnabledProperty() {
+    return this.getInputEnabledProperty();
+  }
+
+  /**
+   * Use this to automatically create a forwarded, PhET-iO instrumented inputEnabledProperty internal to Node. This is different
+   * from visible because inputEnabled by default doesn't not create this forwarded Property.
+   * @public
+   *
+   * @param {boolean} inputEnabledPropertyPhetioInstrumented
+   * @returns {Node} - for chaining
+   */
+  setInputEnabledPropertyPhetioInstrumented( inputEnabledPropertyPhetioInstrumented ) {
+    return this._inputEnabledProperty.setTargetPropertyInstrumented( inputEnabledPropertyPhetioInstrumented, this );
+  }
+
+  /**
+   * See setInputEnabledPropertyPhetioInstrumented() for more information
+   * @public
+   *
+   * @param {boolean} value
+   */
+  set inputEnabledPropertyPhetioInstrumented( value ) {
+    this.setInputEnabledPropertyPhetioInstrumented( value );
   }
 
   /**
@@ -6533,7 +6616,8 @@ class Node extends PhetioObject {
       // and thus they aren't support through `mutate()`.
       visiblePropertyOptions: null,
       pickablePropertyOptions: null,
-      enabledPropertyOptions: null
+      enabledPropertyOptions: null,
+      inputEnabledPropertyOptions: null
     }, config );
 
     // Track this, so we only override our visibleProperty once.
@@ -6552,7 +6636,7 @@ class Node extends PhetioObject {
           // by default, use the value from the Node
           phetioReadOnly: this.phetioReadOnly,
           tandem: this.tandem.createTandem( VISIBLE_PROPERTY_TANDEM_NAME ),
-          phetioDocumentation: 'Controls whether the Node will be visible (and interactive), see the NodeIO documentation for more details.'
+          phetioDocumentation: 'Controls whether the Node will be visible (and interactive).'
         }, config.visiblePropertyOptions ) )
       );
 
@@ -6578,9 +6662,25 @@ class Node extends PhetioObject {
 
           // by default, use the value from the Node
           phetioReadOnly: this.phetioReadOnly,
+        phetioDocumentation: 'Sets whether the node is enabled. This will set whether input is enabled for this Node and' +
+                             'most often children as well. It will also control and toggle the "disabled look" of the node.',
           tandem: this.tandem.createTandem( ENABLED_PROPERTY_TANDEM_NAME )
         }, config.enabledPropertyOptions ) )
       );
+
+      this._inputEnabledProperty.initializePhetio( this, INPUT_ENABLED_PROPERTY_TANDEM_NAME, () => new Property( this.inputEnabled, merge( {
+
+          // by default, use the value from the Node
+          phetioReadOnly: this.phetioReadOnly,
+          tandem: this.tandem.createTandem( INPUT_ENABLED_PROPERTY_TANDEM_NAME ),
+          phetioType: Property.PropertyIO( BooleanIO ),
+          phetioFeatured: true, // Since this property is opt-in, we typically only opt-in when it should be featured
+          phetioDocumentation: 'Sets whether the node will have input enabled for (and hence interactive). This is a ' +
+                               'subset of enabledProperty, which controls if input is enabled as well as changing style ' +
+                               'etc.'
+        }, config.pickablePropertyOptions ) )
+      );
+
     }
   }
 
@@ -6667,6 +6767,7 @@ class Node extends PhetioObject {
     this.detach();
 
     // In opposite order of creation
+    this._inputEnabledProperty.dispose();
     this._enabledProperty.dispose();
     this._pickableProperty.dispose();
     this._visibleProperty.dispose();
