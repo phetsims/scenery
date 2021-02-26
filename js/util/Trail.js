@@ -658,13 +658,7 @@ class Trail {
    * @returns {number}
    */
   getCursorCheckIndex() {
-    const lastInputEnabledIndex = this.getLastInputEnabledIndex();
-    if ( lastInputEnabledIndex + 1 < this.length ) {
-      return lastInputEnabledIndex + 1;
-    }
-    else {
-      return lastInputEnabledIndex;
-    }
+    return this.getLastInputEnabledIndex();
   }
 
   /**
