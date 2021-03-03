@@ -2205,7 +2205,7 @@ const ParallelDOM = {
        * Returns true if any of the PDOMInstances for the Node are globally visible and displayed in the PDOM. A
        * PDOMInstance is globally visible if Node and all ancestors are pdomVisible. PDOMInstance visibility is
        * updated synchronously, so this returns the most up-to-date information without requiring Display.updateDisplay
-       * (unlike Node.wasDisplayed()).
+       * (unlike Node.wasVisuallyDisplayed()).
        * @public
        */
       isPDOMDisplayed: function() {
