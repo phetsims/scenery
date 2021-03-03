@@ -6090,7 +6090,7 @@ class Node extends PhetioObject {
    * @param {Display} display
    * @returns {boolean}
    */
-  wasDisplayed( display ) {
+  wasVisuallyDisplayed( display ) {
     for ( let i = 0; i < this._instances.length; i++ ) {
       const instance = this._instances[ i ];
 

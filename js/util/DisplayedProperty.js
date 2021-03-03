@@ -52,7 +52,7 @@ class DisplayedProperty extends BooleanProperty {
    * @private
    */
   updateValue() {
-    this.value = this.node.wasDisplayed( this.display );
+    this.value = this.node.wasVisuallyDisplayed( this.display );
   }
 
   /**
