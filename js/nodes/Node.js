@@ -6084,17 +6084,19 @@ class Node extends PhetioObject {
   }
 
   /**
-   * Returns whether this Node was visually rendered/displayed by a Display in the last updateDisplay() call.
+   * Returns whether this Node was visually rendered/displayed by any Display in the last updateDisplay() call. Note
+   * that something can be independently displayed visually, and in the PDOM; this method only checks visually.
    * @public
    *
-   * @param {Display} display
+   * @param {Display} [display] - if provided, only check if was visible on this particular Display
    * @returns {boolean}
    */
   wasVisuallyDisplayed( display ) {
     for ( let i = 0; i < this._instances.length; i++ ) {
       const instance = this._instances[ i ];
 
-      if ( instance.display === display && instance.visible ) {
+      // If no display is provided, any instance visibility is enough to be visually displayed
+      if ( instance.visible && ( !display || instance.display === display ) ) {
         return true;
       }
     }

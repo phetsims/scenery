@@ -14,6 +14,7 @@
  */
 
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
+import merge from '../../../phet-core/js/merge.js';
 import scenery from '../scenery.js';
 
 class DisplayedProperty extends BooleanProperty {
@@ -22,23 +23,28 @@ class DisplayedProperty extends BooleanProperty {
    * @extends {BooleanProperty}
    *
    * @param {Node} node
-   * @param {Display} display
    * @param {Object} [options] - Passed through to the BooleanProperty
    */
-  constructor( node, display, options ) {
+  constructor( node, options ) {
+
+    options = merge( {
+      display: null // {Display|null} if null, this will check on any Display
+    }, options );
+
     super( false, options );
 
     // @private {Node}
     this.node = node;
 
-    // @private {Display}
-    this.display = display;
+    // @private {Display|null}
+    this.display = options.display;
 
     // @private {function}
     this.updateListener = this.updateValue.bind( this );
     this.changedInstanceListener = this.changedInstance.bind( this );
 
     node.changedInstanceEmitter.addListener( this.changedInstanceListener );
+    // node.pdomDisplaysEmitter.addListener( this.updateListener ); // TODO support pdom visibility, https://github.com/phetsims/scenery/issues/1167
 
     // Add any instances the node may already have/
     const instances = node.instances;
@@ -53,6 +59,9 @@ class DisplayedProperty extends BooleanProperty {
    */
   updateValue() {
     this.value = this.node.wasVisuallyDisplayed( this.display );
+
+    // TODO support pdom visibility, https://github.com/phetsims/scenery/issues/1167
+    // this.value = this.node.wasVisuallyDisplayed( this.display ) || this.node.isPDOMDisplayed();
   }
 
   /**
@@ -86,6 +95,9 @@ class DisplayedProperty extends BooleanProperty {
     }
 
     this.node.changedInstanceEmitter.removeListener( this.changedInstanceListener );
+
+    // TODO support pdom visibility, https://github.com/phetsims/scenery/issues/1167
+    // this.node.pdomDisplaysEmitter.removeListener( this.updateListener );
 
     super.dispose();
   }
