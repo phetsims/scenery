@@ -150,7 +150,6 @@ QUnit.test( 'tagName/innerContent options', assert => {
 
 QUnit.test( 'containerTagName option', assert => {
 
-
   // test the behavior of swapVisibility function
   const rootNode = new Node( { tagName: 'div' } );
   var display = new Display( rootNode ); // eslint-disable-line
@@ -429,7 +428,6 @@ QUnit.test( 'ParallelDOM options', assert => {
   assert.ok( divNode.labelTagName === null, 'Label tag name with aria label is independent' );
   assert.ok( divNode.descriptionTagName.toUpperCase() === DEFAULT_DESCRIPTION_TAG_NAME, 'Description tag name' );
 
-
   // verify DOM structure - options above should create something like:
   // <div id="display-root">
   //  <div id="parent-container-id">
@@ -490,7 +488,6 @@ function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
     throw new Error( 'incorrect attribute name while in testAssociationAttribute' );
   }
 
-
   const rootNode = new Node();
   var display = new Display( rootNode ); // eslint-disable-line
   document.body.appendChild( display.domElement );
@@ -500,11 +497,9 @@ function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
   const b = new Node( { tagName: 'p', innerContent: TEST_LABEL_2 } );
   rootNode.children = [ a, b ];
 
-
   window.assert && assert.throws( () => {
     a.setPDOMAttribute( attribute, 'hello' );
   }, /.*/, 'cannot set association attributes with setPDOMAttribute' );
-
 
   a[ addAssociationFunction ]( {
     otherNode: b,
@@ -559,7 +554,6 @@ function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
   assert.ok( bParentContainer.getAttribute( attribute ) !== oldValue, 'should have invalidated on tree change' );
   assert.ok( bParentContainer.getAttribute( attribute ) === dDescriptionElement.id,
     'b parent container element is ' + attribute + ' d description sibling' );
-
 
   // say we have a scene graph that looks like:
   //    e
@@ -730,11 +724,9 @@ function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
 
 function testAssociationAttributeBySetters( assert, attribute ) { // eslint-disable-line
 
-
   const rootNode = new Node();
   var display = new Display( rootNode ); // eslint-disable-line
   document.body.appendChild( display.domElement );
-
 
   // use a different setter depending on if testing labelledby or describedby
   const associationsArrayName = attribute === 'aria-labelledby' ? 'ariaLabelledbyAssociations' :
@@ -747,7 +739,6 @@ function testAssociationAttributeBySetters( assert, attribute ) { // eslint-disa
                                      attribute === 'aria-describedby' ? 'removeAriaDescribedbyAssociation' :
                                      attribute === 'aria-activedescendant' ? 'removeActiveDescendantAssociation' :
                                      null;
-
 
   const options = {
     tagName: 'p',
@@ -770,7 +761,6 @@ function testAssociationAttributeBySetters( assert, attribute ) { // eslint-disa
   const nElement = getPrimarySiblingElementByNode( n );
   const oElement = getPrimarySiblingElementByNode( o );
   assert.ok( oElement.getAttribute( attribute ).indexOf( nElement.id ) >= 0, attribute + ' for two nodes with setter.' );
-
 
   // make a list of associations to test as a setter
   const randomAssociationObject = {
@@ -1332,11 +1322,9 @@ QUnit.test( 'setPDOMAttribute', assert => {
   };
   testBothAttributes();
 
-
   rootNode.removeChild( a );
   rootNode.addChild( new Node( { children: [ a ] } ) );
   testBothAttributes();
-
 
   a.removePDOMAttribute( 'test', {
     elementName: PDOMPeer.LABEL_SIBLING
@@ -1373,7 +1361,6 @@ QUnit.test( 'pdomChecked', assert => {
 } );
 
 QUnit.test( 'swapVisibility', assert => {
-
 
   // test the behavior of swapVisibility function
   const rootNode = new Node( { tagName: 'div' } );
@@ -1546,7 +1533,6 @@ QUnit.test( 'append siblings/appendLabel/appendDescription setters', assert => {
   let containerElement = aElement.parentElement;
   assert.ok( containerElement.tagName.toUpperCase() === 'SECTION', 'container parent is set to right tag' );
 
-
   assert.ok( containerElement.childNodes.length === 3, 'expected three siblings' );
   assert.ok( containerElement.childNodes[ 0 ].tagName.toUpperCase() === DEFAULT_DESCRIPTION_TAG_NAME, 'description first sibling' );
   assert.ok( containerElement.childNodes[ 1 ].tagName.toUpperCase() === 'LI', 'primary sibling second sibling' );
@@ -1692,7 +1678,6 @@ QUnit.test( 'accessibleName option', assert => {
   assert.ok( bLabelSibling.textContent === TEST_LABEL, 'accessibleName sets label sibling' );
   assert.ok( bLabelSibling.getAttribute( 'for' ).indexOf( bElement.id ) >= 0, 'accessibleName sets label\'s "for" attribute' );
 
-
   const c = new Node( { containerTagName: 'div', tagName: 'div', ariaLabel: 'overrideThis' } );
   rootNode.addChild( c );
   const accessibleNameBehavior = ( node, options, accessibleName ) => {
@@ -1748,7 +1733,6 @@ QUnit.test( 'pdomHeading option', assert => {
 
 QUnit.test( 'helpText option', assert => {
 
-
   assert.ok( true );
 
   // test the behavior of focusable function
@@ -1797,7 +1781,6 @@ QUnit.test( 'helpText option', assert => {
 
   bDescriptionElement = getPrimarySiblingElementByNode( b ).parentElement.children[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
   assert.ok( bDescriptionElement.textContent === '', 'helpTextBehavior should work for empty string' );
-
 
   b.helpText = null;
   bDescriptionElement = getPrimarySiblingElementByNode( b ).parentElement.children[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
@@ -1859,6 +1842,186 @@ QUnit.test( 'Node.enabledProperty with PDOM', assert => {
   assert.ok( pdomNode.pdomInstances[ 0 ].peer.primarySibling.getAttribute( 'aria-disabled' ) === 'true', 'should be enabled' );
   pdomNode.dispose;
   display.dispose();
+} );
+
+// these fuzzers take time, so it is nice when they are last
+QUnit.test( 'Display.interactive toggling in the PDOM', assert => {
+
+  const rootNode = new Node( { tagName: 'div' } );
+  var display = new Display( rootNode ); // eslint-disable-line
+  display.initializeEvents();
+  document.body.appendChild( display.domElement );
+
+  const pdomRangeChild = new Node( { tagName: 'input', inputType: 'range' } );
+  const pdomParagraphChild = new Node( { tagName: 'p' } );
+  const pdomButtonChild = new Node( { tagName: 'button' } );
+
+  const pdomParent = new Node( {
+    tagName: 'button',
+    children: [ pdomRangeChild, pdomParagraphChild, pdomButtonChild ]
+  } );
+
+  const DISABLED_TRUE = true;
+
+  // For of list of html elements that support disabled, see https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/disabled
+  const DEFAULT_DISABLED_WHEN_SUPPORTED = false;
+  const DEFAULT_DISABLED_WHEN_NOT_SUPPORTED = undefined;
+
+  rootNode.addChild( pdomParent );
+
+  assert.ok( true, 'initial case' );
+
+  const testDisabled = ( node, disabled, message, pdomInstance = 0 ) => {
+    assert.ok( node.pdomInstances[ pdomInstance ].peer.primarySibling.disabled === disabled, message );
+  };
+
+  testDisabled( pdomParent, DEFAULT_DISABLED_WHEN_SUPPORTED, 'pdomParent initial no disabled' );
+  testDisabled( pdomRangeChild, DEFAULT_DISABLED_WHEN_SUPPORTED, 'pdomRangeChild initial no disabled' );
+  testDisabled( pdomParagraphChild, DEFAULT_DISABLED_WHEN_NOT_SUPPORTED, 'pdomParagraphChild initial no disabled' );
+  testDisabled( pdomButtonChild, DEFAULT_DISABLED_WHEN_SUPPORTED, 'pdomButtonChild initial no disabled' );
+
+  display.interactive = false;
+
+  testDisabled( pdomParent, DISABLED_TRUE, 'pdomParent toggled not interactive' );
+  testDisabled( pdomRangeChild, DISABLED_TRUE, 'pdomRangeChild toggled not interactive' );
+  testDisabled( pdomParagraphChild, DISABLED_TRUE, 'pdomParagraphChild toggled not interactive' );
+  testDisabled( pdomButtonChild, DISABLED_TRUE, 'pdomButtonChild toggled not interactive' );
+
+  display.interactive = true;
+
+  testDisabled( pdomParent, DEFAULT_DISABLED_WHEN_SUPPORTED, 'pdomParent toggled back to interactive' );
+  testDisabled( pdomRangeChild, DEFAULT_DISABLED_WHEN_SUPPORTED, 'pdomRangeChild toggled back to interactive' );
+  testDisabled( pdomParagraphChild, DEFAULT_DISABLED_WHEN_NOT_SUPPORTED, 'pdomParagraphChild toggled back to interactive' );
+  testDisabled( pdomButtonChild, DEFAULT_DISABLED_WHEN_SUPPORTED, 'pdomButtonChild toggled back to interactive' );
+
+  display.interactive = false;
+
+  testDisabled( pdomParent, DISABLED_TRUE, 'pdomParent second toggled not interactive' );
+  testDisabled( pdomRangeChild, DISABLED_TRUE, 'pdomRangeChild second toggled not interactive' );
+  testDisabled( pdomParagraphChild, DISABLED_TRUE, 'pdomParagraphChild second toggled not interactive' );
+  testDisabled( pdomButtonChild, DISABLED_TRUE, 'pdomButtonChild second toggled not interactive' );
+
+  pdomParent.setPDOMAttribute( 'disabled', true, { asProperty: true } );
+  pdomRangeChild.setPDOMAttribute( 'disabled', true, { asProperty: true } );
+  pdomParagraphChild.setPDOMAttribute( 'disabled', true, { asProperty: true } );
+  pdomButtonChild.setPDOMAttribute( 'disabled', true, { asProperty: true } );
+
+  testDisabled( pdomParent, DISABLED_TRUE, 'pdomParent not interactive after setting disabled manually as property, display not interactive' );
+  testDisabled( pdomRangeChild, DISABLED_TRUE, 'pdomRangeChild not interactive after setting disabled manually as property, display not interactive' );
+  testDisabled( pdomParagraphChild, DISABLED_TRUE, 'pdomParagraphChild not interactive after setting disabled manually as property, display not interactive' );
+  testDisabled( pdomButtonChild, DISABLED_TRUE, 'pdomButtonChild not interactive after setting disabled manually as property, display not interactive' );
+
+  display.interactive = true;
+
+  testDisabled( pdomParent, DISABLED_TRUE, 'pdomParent not interactive after setting disabled manually as property display interactive' );
+  testDisabled( pdomRangeChild, DISABLED_TRUE, 'pdomRangeChild not interactive after setting disabled manually as property display interactive' );
+  testDisabled( pdomParagraphChild, DISABLED_TRUE, 'pdomParagraphChild not interactive after setting disabled manually as property display interactive' );
+  testDisabled( pdomButtonChild, DISABLED_TRUE, 'pdomButtonChild not interactive after setting disabled manually as property display interactive' );
+
+  display.interactive = false;
+
+  testDisabled( pdomParent, DISABLED_TRUE, 'pdomParent still disabled when display is not interactive again.' );
+  testDisabled( pdomRangeChild, DISABLED_TRUE, 'pdomRangeChild still disabled when display is not interactive again.' );
+  testDisabled( pdomParagraphChild, DISABLED_TRUE, 'pdomParagraphChild still disabled when display is not interactive again.' );
+  testDisabled( pdomButtonChild, DISABLED_TRUE, 'pdomButtonChild still disabled when display is not interactive again.' );
+
+  pdomParent.removePDOMAttribute( 'disabled' );
+  pdomRangeChild.removePDOMAttribute( 'disabled' );
+  pdomParagraphChild.removePDOMAttribute( 'disabled' );
+  pdomButtonChild.removePDOMAttribute( 'disabled' );
+
+  testDisabled( pdomParent, DISABLED_TRUE, 'pdomParent still disabled from display not interactive after local property removed.' );
+  testDisabled( pdomRangeChild, DISABLED_TRUE, 'pdomRangeChild still disabled from display not interactive after local property removed.' );
+  testDisabled( pdomParagraphChild, DISABLED_TRUE, 'pdomParagraphChild still disabled from display not interactive after local property removed.' );
+  testDisabled( pdomButtonChild, DISABLED_TRUE, 'pdomButtonChild still disabled from display not interactive after local property removed.' );
+
+  display.interactive = true;
+
+  testDisabled( pdomParent, DEFAULT_DISABLED_WHEN_SUPPORTED, 'pdomParent interactive now without local property.' );
+  testDisabled( pdomRangeChild, DEFAULT_DISABLED_WHEN_SUPPORTED, 'pdomRangeChild interactive now without local property.' );
+  testDisabled( pdomParagraphChild, DEFAULT_DISABLED_WHEN_SUPPORTED, 'pdomParagraphChild interactive now without local property.' );
+  testDisabled( pdomButtonChild, DEFAULT_DISABLED_WHEN_SUPPORTED, 'pdomButtonChild interactive now without local property.' );
+
+  pdomParent.setPDOMAttribute( 'disabled', '' );
+  pdomRangeChild.setPDOMAttribute( 'disabled', '' );
+  pdomParagraphChild.setPDOMAttribute( 'disabled', '' );
+  pdomButtonChild.setPDOMAttribute( 'disabled', '' );
+
+  testDisabled( pdomParent, DISABLED_TRUE, 'pdomParent not interactive after setting disabled manually as attribute, display not interactive' );
+  testDisabled( pdomRangeChild, DISABLED_TRUE, 'pdomRangeChild not interactive after setting disabled manually as attribute, display not interactive' );
+  testDisabled( pdomButtonChild, DISABLED_TRUE, 'pdomButtonChild not interactive after setting disabled manually as attribute, display not interactive' );
+
+  display.interactive = true;
+
+  testDisabled( pdomParent, DISABLED_TRUE, 'pdomParent not interactive after setting disabled manually as attribute display interactive' );
+  testDisabled( pdomRangeChild, DISABLED_TRUE, 'pdomRangeChild not interactive after setting disabled manually as attribute display interactive' );
+  testDisabled( pdomButtonChild, DISABLED_TRUE, 'pdomButtonChild not interactive after setting disabled manually as attribute display interactive' );
+
+  // This test doesn't work, because paragraphs don't support disabled, so the attribute "disabled" won't
+  // automatically transfer over to the property value like for the others. For a list of Elements that support "disabled", see https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/disabled
+  // testDisabled( pdomParagraphChild, DISABLED_TRUE, 'pdomParagraphChild not interactive after setting disabled manually as attribute, display  interactive' );
+
+  display.interactive = false;
+
+  testDisabled( pdomParent, DISABLED_TRUE, 'pdomParent still disabled when display is not interactive again.' );
+  testDisabled( pdomRangeChild, DISABLED_TRUE, 'pdomRangeChild still disabled when display is not interactive again.' );
+  testDisabled( pdomParagraphChild, DISABLED_TRUE, 'pdomParagraphChild still disabled when display is not interactive again.' );
+  testDisabled( pdomButtonChild, DISABLED_TRUE, 'pdomButtonChild still disabled when display is not interactive again.' );
+
+  pdomParent.removePDOMAttribute( 'disabled' );
+  pdomRangeChild.removePDOMAttribute( 'disabled' );
+  pdomParagraphChild.removePDOMAttribute( 'disabled' );
+  pdomButtonChild.removePDOMAttribute( 'disabled' );
+
+  testDisabled( pdomParent, DISABLED_TRUE, 'pdomParent still disabled from display not interactive after local attribute removed.' );
+  testDisabled( pdomRangeChild, DISABLED_TRUE, 'pdomRangeChild still disabled from display not interactive after local attribute removed.' );
+  testDisabled( pdomParagraphChild, DISABLED_TRUE, 'pdomParagraphChild still disabled from display not interactive after local attribute removed.' );
+  testDisabled( pdomButtonChild, DISABLED_TRUE, 'pdomButtonChild still disabled from display not interactive after local attribute removed.' );
+
+  display.interactive = true;
+
+  testDisabled( pdomParent, DEFAULT_DISABLED_WHEN_SUPPORTED, 'pdomParent interactive now without local attribute.' );
+  testDisabled( pdomRangeChild, DEFAULT_DISABLED_WHEN_SUPPORTED, 'pdomRangeChild interactive now without local attribute.' );
+  testDisabled( pdomParagraphChild, DEFAULT_DISABLED_WHEN_SUPPORTED, 'pdomParagraphChild interactive now without local attribute.' );
+  testDisabled( pdomButtonChild, DEFAULT_DISABLED_WHEN_SUPPORTED, 'pdomButtonChild interactive now without local attribute.' );
+
+  const containerOfDAGButton = new Node( {
+    children: [ pdomButtonChild ]
+  } );
+  pdomParent.addChild( containerOfDAGButton );
+
+  testDisabled( pdomButtonChild, DEFAULT_DISABLED_WHEN_SUPPORTED, 'pdomButtonChild default not disabled.' );
+  testDisabled( pdomButtonChild, DEFAULT_DISABLED_WHEN_SUPPORTED, 'pdomButtonChild default not disabled with dag.', 1 );
+
+  display.interactive = false;
+
+  testDisabled( pdomButtonChild, DISABLED_TRUE, 'pdomButtonChild turned disabled.' );
+  testDisabled( pdomButtonChild, DISABLED_TRUE, 'pdomButtonChild turned disabled with dag.', 1 );
+
+  pdomButtonChild.setPDOMAttribute( 'disabled', true, { asProperty: true } );
+
+  testDisabled( pdomButtonChild, DISABLED_TRUE, 'pdomButtonChild turned disabled set property too.' );
+  testDisabled( pdomButtonChild, DISABLED_TRUE, 'pdomButtonChild turned disabled set property too, with dag.', 1 );
+
+  display.interactive = true;
+
+  testDisabled( pdomButtonChild, DISABLED_TRUE, 'pdomButtonChild turned not disabled set property too.' );
+  testDisabled( pdomButtonChild, DISABLED_TRUE, 'pdomButtonChild turned not disabled set property too, with dag.', 1 );
+
+  display.interactive = false;
+
+  testDisabled( pdomButtonChild, DISABLED_TRUE, 'pdomButtonChild turned disabled again.' );
+  testDisabled( pdomButtonChild, DISABLED_TRUE, 'pdomButtonChild turned disabled again, with dag.', 1 );
+
+  pdomButtonChild.removePDOMAttribute( 'disabled' );
+
+  testDisabled( pdomButtonChild, DISABLED_TRUE, 'pdomButtonChild remove disabled while not interactive.' );
+  testDisabled( pdomButtonChild, DISABLED_TRUE, 'pdomButtonChild remove disabled while not interactive, with dag.', 1 );
+
+  display.interactive = true;
+
+  testDisabled( pdomButtonChild, DEFAULT_DISABLED_WHEN_SUPPORTED, 'pdomButtonChild default not disabled after interactive again.' );
+  testDisabled( pdomButtonChild, DEFAULT_DISABLED_WHEN_SUPPORTED, 'pdomButtonChild default not disabled after interactive again with dag.', 1 );
 } );
 
 // these fuzzers take time, so it is nice when they are last

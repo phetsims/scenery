@@ -766,6 +766,10 @@ class Display {
    * @param {boolean} value
    */
   set interactive( value ) {
+    if ( this._accessible && value !== this._interactive ) {
+      this._rootPDOMInstance.peer.recursiveDisable( !value );
+    }
+
     this._interactive = value;
     if ( !this._interactive && this._input ) {
       this._input.interruptPointers();

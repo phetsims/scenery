@@ -24,6 +24,7 @@ const DESCRIPTION_SIBLING = 'DESCRIPTION_SIBLING';
 const CONTAINER_PARENT = 'CONTAINER_PARENT';
 const LABEL_TAG = PDOMUtils.TAGS.LABEL;
 const INPUT_TAG = PDOMUtils.TAGS.INPUT;
+const DISABLED_ATTRIBUTE_NAME = 'disabled';
 
 // DOM observers that apply new CSS transformations are triggered when children, or inner content change. Updating
 // style/positioning of the element will change attributes so we can't observe those changes since it would trigger
@@ -141,6 +142,12 @@ class PDOMPeer {
     // @private {function} - must be removed on disposal
     this.transformListener = this.transformListener || this.invalidateCSSPositioning.bind( this );
     this.pdomInstance.transformTracker.addListener( this.transformListener );
+
+    // @private {*} - To support setting the Display.interactive=false (which sets disabled on all primarySiblings,
+    // we need to set disabled on a separate channel from this.setAttributeToElement. That way we cover the case where
+    // `disabled` was set through the ParallelDOM api when we need to toggle it specifically for Display.interactive.
+    // This way we can conserve the previous `disabled` attribute/property value through toggling Display.interactive.
+    this._preservedDisabledValue = null;
 
     // @private {boolean} - Whether we are currently in a "disposed" (in the pool) state, or are available to be
     // interacted with.
@@ -484,6 +491,12 @@ class PDOMPeer {
 
     const element = options.element || this.getElementByName( options.elementName );
 
+    if ( attribute === DISABLED_ATTRIBUTE_NAME && !this.display.interactive ) {
+
+      // The presence of the `disabled` attribute means it is always disabled.
+      this._preservedDisabledValue = options.asProperty ? attributeValue : true;
+    }
+
     if ( options.namespace ) {
       element.setAttributeNS( options.namespace, attribute, attributeValue );
     }
@@ -520,6 +533,10 @@ class PDOMPeer {
     if ( options.namespace ) {
       element.removeAttributeNS( options.namespace, attribute );
     }
+    else if ( attribute === DISABLED_ATTRIBUTE_NAME && !this.display.interactive ) {
+      // maintain our interal disabled state in case the display toggles back to be interactive.
+      this._preservedDisabledValue = false;
+    }
     else {
       element.removeAttribute( attribute );
     }
@@ -531,6 +548,7 @@ class PDOMPeer {
    * @param {string} attribute
    */
   removeAttributeFromAllElements( attribute ) {
+    assert && assert( attribute !== DISABLED_ATTRIBUTE_NAME, 'this method does not currently support disabled, to make Display.interactive toggling easier to implement' );
     assert && assert( typeof attribute === 'string' );
     this._primarySibling && this._primarySibling.removeAttribute( attribute );
     this._labelSibling && this._labelSibling.removeAttribute( attribute );
@@ -966,6 +984,27 @@ class PDOMPeer {
       if ( childPeer.positionDirty || childPeer.childPositionDirty ) {
         this.pdomInstance.children[ i ].peer.updateSubtreePositioning();
       }
+    }
+  }
+
+  /**
+   * Recursively set this PDOMPeer and children to be disabled. This will overwrite any previous value of disabled
+   * that may have been set, but will keep track of the old value, and restore its state upon re-enabling.
+   * @param {boolean} disabled
+   * @public
+   */
+  recursiveDisable( disabled ) {
+
+    if ( disabled ) {
+      this._preservedDisabledValue = this._primarySibling.disabled;
+      this._primarySibling.disabled = true;
+    }
+    else {
+      this._primarySibling.disabled = this._preservedDisabledValue;
+    }
+
+    for ( let i = 0; i < this.pdomInstance.children.length; i++ ) {
+      this.pdomInstance.children[ i ].peer.recursiveDisable( disabled );
     }
   }
 
