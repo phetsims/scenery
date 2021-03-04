@@ -34,9 +34,9 @@
       "no-bitwise": "off"
     },
     "globals": {
-      "himalaya": false,
-      "sceneryLog": false,
-      "he": false
+      "himalaya": "readonly",
+      "sceneryLog": "readonly",
+      "he": "readonly"
     }
   }
 }
