@@ -140,3 +140,37 @@ QUnit.test( 'test tracking with time', async assert => {
     }, secondPressTime );
   }, firstPressTime );
 } );
+
+
+QUnit.test( 'KeyStateTracker.enabled', async assert => {
+
+  const keyStateTracker = new KeyStateTracker();
+
+  keyStateTracker.keydownUpdate( tabKeyDownEvent );
+
+  assert.ok( keyStateTracker.enabled, 'default enabled' );
+  assert.ok( keyStateTracker.isKeyDown( KeyboardUtils.KEY_TAB ), 'tab key down' );
+
+  keyStateTracker.enabled = false;
+
+
+  assert.ok( !keyStateTracker.enabled, 'disabled' );
+  assert.ok( !keyStateTracker.isKeyDown( KeyboardUtils.KEY_TAB ), 'tab key down cleared upon disabled' );
+  assert.ok( !keyStateTracker.keysAreDown(), 'no keys down' );
+
+  keyStateTracker.keydownUpdate( tabKeyDownEvent );
+  assert.ok( !keyStateTracker.isKeyDown( KeyboardUtils.KEY_TAB ), 'tab key not registered when disabled' );
+
+  keyStateTracker.keydownUpdate( shiftTabKeyDownEvent );
+
+  assert.ok( !keyStateTracker.isKeyDown( KeyboardUtils.KEY_SHIFT ), 'shift key should not be down' );
+
+
+  keyStateTracker.enabled = true;
+
+  keyStateTracker.keydownUpdate( shiftTabKeyDownEvent );
+
+  assert.ok( keyStateTracker.isKeyDown( KeyboardUtils.KEY_SHIFT ), 'shift key should be down' );
+  assert.ok( keyStateTracker.isKeyDown( KeyboardUtils.KEY_TAB ), 'tab key should  be down' );
+
+} );

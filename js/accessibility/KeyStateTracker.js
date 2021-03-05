@@ -40,6 +40,9 @@ class KeyStateTracker {
     this.documentKeyupListener = null;
     this.documentKeydownListener = null;
 
+    // @private - if the key state tracker is enabled. If disabled, the keyState will be cleared, and listeners will noop.
+    this._enabled = true;
+
     // @public - Emits events when keyup/keydown updates are received. These will emit after any updates to the
     // keyState so that keystate is up to date in time for listeners.
     this.keydownEmitter = new Emitter( { parameters: [ { valueType: Event } ] } ); // valueType is a native DOM event
@@ -127,7 +130,8 @@ class KeyStateTracker {
 
   /**
    * Implements keyboard dragging when listener is attached to the Node, public so listener is attached
-   * with addInputListener()
+   * with addInputListener(). Only updated when enabled.
+   *
    *
    * Note that this event is assigned in the constructor, and not to the prototype. As of writing this,
    * `Node.addInputListener` only supports type properties as event listeners, and not the event keys as
@@ -136,7 +140,7 @@ class KeyStateTracker {
    * @param {Event} domEvent
    */
   keydownUpdate( domEvent ) {
-    this.keydownUpdateAction.execute( domEvent );
+    this.enabled && this.keydownUpdateAction.execute( domEvent );
   }
 
   /**
@@ -186,7 +190,8 @@ class KeyStateTracker {
   }
 
   /**
-   * Behavior for keyboard 'up' DOM event. Public so it can be attached with addInputListener()
+   * Behavior for keyboard 'up' DOM event. Public so it can be attached with addInputListener(). Only updated when
+   * enabled.
    *
    * Note that this event is assigned in the constructor, and not to the prototype. As of writing this,
    * `Node.addInputListener` only supports type properties as event listeners, and not the event keys as
@@ -196,7 +201,7 @@ class KeyStateTracker {
    * @param {Event} domEvent
    */
   keyupUpdate( domEvent ) {
-    this.keyupUpdateAction.execute( domEvent );
+    this.enabled && this.keyupUpdateAction.execute( domEvent );
   }
 
   /**
@@ -391,6 +396,32 @@ class KeyStateTracker {
       addListenersToDocument();
     }
   }
+
+  /**
+   * @public
+   * @param {boolean} enabled
+   */
+  setEnabled( enabled ) {
+    if ( this._enabled !== enabled ) {
+      this._enabled = enabled;
+
+      // clear state when disabled
+      !enabled && this.clearState();
+    }
+  }
+
+  // @public
+  set enabled( enabled ) { this.setEnabled( enabled ); }
+
+  /**
+   * @public
+   * @returns {boolean}
+   */
+  isEnabled() { return this._enabled; }
+
+  // @public
+  get enabled() { return this.isEnabled(); }
+
 
   /**
    * Detach listeners from the document that would update the state of this KeyStateTracker on key presses.
