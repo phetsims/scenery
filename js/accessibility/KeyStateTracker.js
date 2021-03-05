@@ -1,11 +1,12 @@
 // Copyright 2018-2020, University of Colorado Boulder
 
 /**
- * A type that will manage the state of the keyboard. Will track which keys are being held down and for how long.
- * Offers convenience methds to determine whether or not specific keys are down like shift or enter.
+ * A type that will manage the state of the keyboard. This will track which keys are being held down and for how long.
+ * It also offers convenience methods to determine whether or not specific keys are down like shift or enter using
+ * KeyboardUtils' key schema.
  *
- * @author Michael Kauzmann
- * @author Jesse Greenberg
+ * @author Michael Kauzmann (PhET Interactive Simulations)
+ * @author Jesse Greenberg (PhET Interactive Simulations)
  * @author Michael Barlow
  */
 
@@ -20,6 +21,10 @@ import scenery from '../scenery.js';
 import KeyboardUtils from './KeyboardUtils.js';
 
 class KeyStateTracker {
+
+  /**
+   * @param {Object} [options]
+   */
   constructor( options ) {
     options = merge( {
 
@@ -27,9 +32,9 @@ class KeyStateTracker {
       tandem: Tandem.OPTIONAL
     }, options );
 
-    // @private { Object.<KeyDef,{ key: {KeyDef}, isDown: {boolean}, timeDown: [boolean] }> } - where the Object
-    // keys are the Event.key (lowercase). JavaScript doesn't handle multiple key presses, so we track which keys are
-    // currently down and update based on state of this collection of objects.
+    // @private {Object.<KeyDef,{ key: {KeyDef}, isDown: {boolean}, timeDown: [boolean] }>} - where the Object
+    // keys are the KeyDef (as defined by KeyboardUtils). JavaScript doesn't handle multiple key presses, so we track
+    // which keys are currently down and update based on state of this collection of objects. Cleared when disabled.
     this.keyState = {};
 
     // @private {boolean} - whether or not this KeyStateTracker is attached to the document
@@ -44,7 +49,7 @@ class KeyStateTracker {
     this._enabled = true;
 
     // @public - Emits events when keyup/keydown updates are received. These will emit after any updates to the
-    // keyState so that keystate is up to date in time for listeners.
+    // keyState so that keyState is up to date in time for listeners.
     this.keydownEmitter = new Emitter( { parameters: [ { valueType: Event } ] } ); // valueType is a native DOM event
     this.keyupEmitter = new Emitter( { parameters: [ { valueType: Event } ] } );
 
@@ -52,23 +57,23 @@ class KeyStateTracker {
     // is wrapped by an Action so that the KeyStateTracker state is captured for PhET-iO
     this.keydownUpdateAction = new Action( domEvent => {
 
-      // The dom event might have a modifier key that we weren't able to catch, if that is the case update the keystate.
+      // The dom event might have a modifier key that we weren't able to catch, if that is the case update the keyState.
       // This is likely to happen when pressing browser key commands like "ctrl + tab" to switch tabs.
       this.correctModifierKeys( domEvent );
 
       const key = KeyboardUtils.getKeyDef( domEvent );
 
       if ( assert && key !== KeyboardUtils.KEY_SHIFT ) {
-        assert( !!domEvent.shiftKey === !!this.shiftKeyDown, 'shift key inconsistency between event and keystate.' );
+        assert( !!domEvent.shiftKey === !!this.shiftKeyDown, 'shift key inconsistency between event and keyState.' );
       }
       if ( assert && key !== KeyboardUtils.KEY_ALT ) {
-        assert( !!domEvent.altKey === !!this.altKeyDown, 'alt key inconsistency between event and keystate.' );
+        assert( !!domEvent.altKey === !!this.altKeyDown, 'alt key inconsistency between event and keyState.' );
       }
       if ( assert && key !== KeyboardUtils.KEY_CTRL ) {
-        assert( !!domEvent.ctrlKey === !!this.ctrlKeyDown, 'ctrl key inconsistency between event and keystate.' );
+        assert( !!domEvent.ctrlKey === !!this.ctrlKeyDown, 'ctrl key inconsistency between event and keyState.' );
       }
 
-      // if the key is already down, don't do anything else (we don't want to create a new keystate object
+      // if the key is already down, don't do anything else (we don't want to create a new keyState object
       // for a key that is already being tracked and down)
       if ( !this.isKeyDown( key ) ) {
         const key = KeyboardUtils.getKeyDef( domEvent );
@@ -95,7 +100,7 @@ class KeyStateTracker {
 
       const key = KeyboardUtils.getKeyDef( domEvent );
 
-      // correct keystate in case browser didn't receive keydown/keyup events for a modifier key
+      // correct keyState in case browser didn't receive keydown/keyup events for a modifier key
       this.correctModifierKeys( domEvent );
 
       // Remove this key data from the state - There are many cases where we might receive a keyup before keydown like
@@ -119,7 +124,7 @@ class KeyStateTracker {
     stepTimer.addListener( stepListener );
 
     // @private
-    this._disposeKeystateTracker = () => {
+    this._disposeKeyStateTracker = () => {
       stepTimer.removeListener( stepListener );
 
       if ( this.attachedToDocument ) {
@@ -283,7 +288,7 @@ class KeyStateTracker {
   }
 
   /**
-   * @returns {boolean} - true if the keystate indicates that the shift key is currently down.
+   * @returns {boolean} - true if the keyState indicates that the shift key is currently down.
    * @public
    */
   get shiftKeyDown() {
@@ -291,7 +296,7 @@ class KeyStateTracker {
   }
 
   /**
-   * @returns {boolean} - true if the keystate indicates that the alt key is currently down.
+   * @returns {boolean} - true if the keyState indicates that the alt key is currently down.
    * @public
    */
   get altKeyDown() {
@@ -299,7 +304,7 @@ class KeyStateTracker {
   }
 
   /**
-   * @returns {boolean} - true if the keystate indicates that the ctrl key is currently down.
+   * @returns {boolean} - true if the keyState indicates that the ctrl key is currently down.
    * @public
    */
   get ctrlKeyDown() {
@@ -384,7 +389,7 @@ class KeyStateTracker {
     if ( !document ) {
 
       // attach listeners on window load to ensure that the document is defined
-      const loadListener = event => {
+      const loadListener = () => {
         addListenersToDocument();
         window.removeEventListener( 'load', loadListener );
       };
@@ -431,7 +436,7 @@ class KeyStateTracker {
   detachFromDocument() {
     assert && assert( this.attachedToDocument, 'KeyStateTracker is not attached to document.' );
 
-    window.removeEventListener( 'keyuop', this.documentKeyupListener );
+    window.removeEventListener( 'keyup', this.documentKeyupListener );
     window.removeEventListener( 'keydown', this.documentKeydownListener );
 
     this.documentKeyupListener = null;
@@ -445,7 +450,7 @@ class KeyStateTracker {
    * @public
    */
   dispose() {
-    this._disposeKeystateTracker();
+    this._disposeKeyStateTracker();
   }
 }
 
