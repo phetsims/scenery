@@ -3794,7 +3794,8 @@ class Node extends PhetioObject {
   }
 
   /**
-   * Sets whether this Node is visible.
+   * Sets whether this Node is visible.  DO NOT override this as a way of adding additional behavior when a Node's
+   * visibility changes, add a listener to this.visibleProperty instead.
    * @public
    *
    * @param {boolean} visible
