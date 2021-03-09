@@ -1863,10 +1863,12 @@ class Input {
       return;
     }
 
+    const inputEnabledIndex = trail.getLastInputEnabledIndex();
+
     for ( let i = trail.nodes.length - 1; i >= 0; bubbles ? i-- : i = -1 ) {
 
       const target = trail.nodes[ i ];
-      if ( target.isDisposed || !target.inputEnabled ) {
+      if ( target.isDisposed || inputEnabledIndex <= i ) {
         continue;
       }
 
