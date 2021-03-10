@@ -10,6 +10,7 @@
  */
 
 import BooleanProperty from '../../../../axon/js/BooleanProperty.js';
+import DerivedProperty from '../../../../axon/js/DerivedProperty.js';
 import Emitter from '../../../../axon/js/Emitter.js';
 import NumberProperty from '../../../../axon/js/NumberProperty.js';
 import Property from '../../../../axon/js/Property.js';
@@ -17,6 +18,7 @@ import Range from '../../../../dot/js/Range.js';
 import platform from '../../../../phet-core/js/platform.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
 import SelfVoicingUtterance from '../../../../utterance-queue/js/SelfVoicingUtterance.js';
+import Utterance from '../../../../utterance-queue/js/Utterance.js';
 import scenery from '../../scenery.js';
 
 class WebSpeaker {
@@ -26,13 +28,15 @@ class WebSpeaker {
     this.voiceProperty = new Property( null );
 
     // @public {NumberProperty} - controls the speaking rate of Web Speech
-    this.voiceRateProperty = new NumberProperty( 1.2, { range: new Range( 1, 1.8 ) } );
+    this.voiceRateProperty = new NumberProperty( 1.0, { range: new Range( 0.8, 1.5 ) } );
 
     // {NumberProperty} - controls the pitch of the synth
-    this.voicePitchProperty = new NumberProperty( 1.02, { range: new Range( 1, 1.1 ) } );
+    this.voicePitchProperty = new NumberProperty( 1.0, { range: new Range( 0.8, 1.5 ) } );
 
-    this.startSpeakingEmitter = new Emitter();
-    this.endSpeakingEmitter = new Emitter();
+    // @public {Emitter} - emits events when the speaker starts/stops speaking, with the Utterance that is
+    // either starting or stopping
+    this.startSpeakingEmitter = new Emitter( { parameters: [ { valueType: Utterance } ] } );
+    this.endSpeakingEmitter = new Emitter( { parameters: [ { valueType: Utterance } ] } );
 
     // @public - whether or not the synth is speaking - perhaps this should
     // replace the emitters above?
@@ -47,11 +51,8 @@ class WebSpeaker {
     // @public {boolean} - is the WebSpeaker initialized for use? This is prototypal so it isn't always initialized
     this.initialized = false;
 
-    // @private {boolean} - whether or not some initial speech has been made, see initialSpeech()
-    this.madeInitialSpeech = false;
-
     // whether or ot the webSpeaker is enabled - if false, there will be no speech
-    this.enabledProperty = new BooleanProperty( true );
+    this.enabledProperty = new BooleanProperty( false );
 
     // @public {BooleanProperty} - whether or not speech is enabled. If false, nothing will be spoken. Note this
     // does not control whether or not the self-voicing feature is enabled, only whether or not speech will actually
@@ -115,6 +116,10 @@ class WebSpeaker {
 
     // otherwise, try to populate voices immediately
     this.populateVoices();
+
+    this.canSpeakProperty = DerivedProperty.and( [
+      this.enabledProperty, this.speechEnabledProperty, window.phet.joist.sim.soundEnabledProperty
+    ] );
   }
 
   /**
@@ -148,68 +153,66 @@ class WebSpeaker {
       }
     }
 
-    // Note that getTextToAlert may have side effects on the Utterance - this function
-    // may change the content if the Utterance changes itself based on how frequently it
-    // is used
-    webSpeaker.speak( utterance.getTextToAlert(), withCancel );
-    this.previousUtterance = utterance;
+    webSpeaker.speak( utterance, withCancel );
   }
 
   /**
    * Use speech synthesis to speak an utterance. No-op unless webSpeaker is initialized.
    * @public
    *
-   * @param {string} utterThis
+   * @param {Utterance} utterance
    * @param {boolean} withCancel - if true, any utterances remaining in the queue will be removed and this utterance
    *                               will take priority. Hopefully this works on all platforms, if it does not we
    *                               need to implement our own queing system.
    */
-  speak( utterThis, withCancel = true ) {
-    if ( this.initialized && this.enabled && !this.onHold ) {
+  speak( utterance, withCancel = true ) {
+    if ( this.initialized && this.canSpeakProperty.value && !this.onHold ) {
       withCancel && this.synth.cancel();
 
       // since the "end" event doesn't come through all the time after cancel() on
       // safari, we broadcast this right away to indicate that any previous speaking
       // is done
-      if ( this.speakingProperty.get() && withCancel ) {
-        this.endSpeakingEmitter.emit();
+      if ( this.speakingProperty.get() && this.previousUtterance && withCancel ) {
+        this.endSpeakingEmitter.emit( this.previousUtterance );
         this.speakingProperty.value = false;
       }
 
-      // embidding marks (for i18n) impact the output, strip before speaking
-      const utterance = new SpeechSynthesisUtterance( stripEmbeddingMarks( utterThis ) );
-      utterance.voice = this.voiceProperty.value;
-      utterance.pitch = this.voicePitchProperty.value;
-      utterance.rate = this.voiceRateProperty.value;
+      // embeddding marks (for i18n) impact the output, strip before speaking
+      const speechSynthUtterance = new SpeechSynthesisUtterance( stripEmbeddingMarks( utterance.getTextToAlert() ) );
+      speechSynthUtterance.voice = this.voiceProperty.value;
+      speechSynthUtterance.pitch = this.voicePitchProperty.value;
+      speechSynthUtterance.rate = this.voiceRateProperty.value;
 
-      // kep a reference to teh WebSpeechUtterance or Safari, so the browser
+      // keep a reference to teh WebSpeechUtterance or Safari, so the browser
       // doesn't dispose of it before firing, see #215
-      this.utterances.push( utterance );
+      this.utterances.push( speechSynthUtterance );
 
       const startListener = () => {
-        this.startSpeakingEmitter.emit();
+        this.startSpeakingEmitter.emit( utterance );
         this.speakingProperty.set( true );
-        utterance.removeEventListener( 'start', startListener );
+        speechSynthUtterance.removeEventListener( 'start', startListener );
+
+        this.previousUtterance = utterance;
       };
 
       const endListener = () => {
-        this.endSpeakingEmitter.emit();
+        this.endSpeakingEmitter.emit( utterance );
         this.speakingProperty.set( false );
-        utterance.removeEventListener( 'end', endListener );
+        speechSynthUtterance.removeEventListener( 'end', endListener );
       };
 
-      utterance.addEventListener( 'start', startListener );
-      utterance.addEventListener( 'end', endListener );
+      speechSynthUtterance.addEventListener( 'start', startListener );
+      speechSynthUtterance.addEventListener( 'end', endListener );
 
       // on safari, giving a bit of a delay to the speak request makes the `end`
       // SpeechSynthesisUtterance event come through much more consistently
       if ( platform.safari ) {
         window.setTimeout( () => {
-          this.synth.speak( utterance );
+          this.synth.speak( speechSynthUtterance );
         }, 500 );
       }
       else {
-        this.synth.speak( utterance );
+        this.synth.speak( speechSynthUtterance );
       }
     }
   }
@@ -225,8 +228,6 @@ class WebSpeaker {
    */
   initialSpeech( utterThis ) {
     if ( this.initialized ) {
-      assert && assert( !this.madeInitialSpeech, 'this should only be called once, use speak from now on' );
-      this.madeInitialSpeech = true;
 
       // embidding marks (for i18n) impact the output, strip before speaking
       const utterance = new SpeechSynthesisUtterance( stripEmbeddingMarks( utterThis ) );
