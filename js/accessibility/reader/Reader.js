@@ -62,7 +62,7 @@ class Reader {
         this.synth.getVoices().forEach( voice => {
           if ( voice.default ) {
             defaultVoice = voice;
-            return;
+            
           }
         } );
 

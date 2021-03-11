@@ -272,7 +272,7 @@ class Cursor {
     roles.forEach( role => {
       if ( domElement.getAttribute( 'aria-live' ) === role || domElement.getAttribute( 'role' ) === role ) {
         liveRole = role;
-        return;
+        
       }
     } );
 
@@ -1097,11 +1097,11 @@ class Cursor {
 
       if ( domElement.getAttribute( role ) ) {
         focusable = true;
-        return;
+        
       }
       else if ( domElement.tagName === role ) {
         focusable = true;
-        return;
+        
       }
     } );
     return focusable;
