@@ -26,10 +26,10 @@ const keyboardTestingSchema = {
 const ALL_KEYS = KeyboardUtils.ALL_KEYS;
 
 const MAX_MS_KEY_HOLD_DOWN = 100;
-const NEXT_ELEMENT_THRESHOLD = .1;
+const NEXT_ELEMENT_THRESHOLD = 0.1;
 
-const DO_KNOWN_KEYS_THRESHOLD = .60; // for keydown/up, 60 percent of the events
-const CLICK_EVENT_THRESHOLD = DO_KNOWN_KEYS_THRESHOLD + .10; // 10 percent of the events
+const DO_KNOWN_KEYS_THRESHOLD = 0.60; // for keydown/up, 60 percent of the events
+const CLICK_EVENT_THRESHOLD = DO_KNOWN_KEYS_THRESHOLD + 0.10; // 10 percent of the events
 
 const KEY_DOWN = 'keydown';
 const KEY_UP = 'keyup';

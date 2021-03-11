@@ -290,11 +290,11 @@ class FocusHighlightPath extends Path {
 
     // Dilating half of the focus highlight width will make the inner edge of the focus highlight at the bounds
     // of the node being highlighted.
-    const scalarToEdgeOfBounds = .5;
+    const scalarToEdgeOfBounds = 0.5;
 
     // Dilate the focus highlight slightly more to give whitespace in between the node being highlighted's bounds and
     // the inner edge of the highlight.
-    const whiteSpaceScalar = .25;
+    const whiteSpaceScalar = 0.25;
 
     return widthOfFocusHighlight * ( scalarToEdgeOfBounds + whiteSpaceScalar );
   }
@@ -313,7 +313,7 @@ class FocusHighlightPath extends Path {
 
     // Dilating half of the focus highlight width will make the inner edge of the focus highlight at the bounds
     // of the node being highlighted.
-    const scalarToEdgeOfBounds = .5;
+    const scalarToEdgeOfBounds = 0.5;
 
     // Dilate the group focus highlight slightly more to give whitespace in between the node being highlighted's
     // bounds and the inner edge of the highlight.
