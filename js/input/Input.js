@@ -1913,12 +1913,16 @@ class Input {
       return;
     }
 
+    const inputEnabledIndex = trail.getLastInputEnabledIndex();
+
     for ( let i = trail.nodes.length - 1; i >= 0; bubbles ? i-- : i = -1 ) {
 
       const target = trail.nodes[ i ];
 
+      const trailInputDisabled = inputEnabledIndex < i;
+
       // TODO: what about handling input disabled nodes that are manually getting exit events called on them in branchChangeEvents, https://github.com/phetsims/scenery/issues/1116
-      if ( target.isDisposed || ( !fireOnInputDisabled && !target.inputEnabled ) ) {
+      if ( target.isDisposed || ( !fireOnInputDisabled && trailInputDisabled ) ) {
         continue;
       }
 
