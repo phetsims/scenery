@@ -1677,11 +1677,38 @@ class Input {
     assert && assert( typeof sendMove === 'boolean' );
 
     const trail = this.getPointerTrail( pointer );
-    const oldTrail = pointer.trail || new Trail( this.rootNode ); // TODO: consider a static trail reference
-
+    const oldTrail = pointer.trail || new Trail( this.rootNode ); // TODO: consider a static trail reference <----MK wonders if we should do this@!?!?!? https://github.com/phetsims/scenery/issues/1116
     const lastNodeChanged = oldTrail.lastNode() !== trail.lastNode();
-
     const branchIndex = Trail.branchIndex( trail, oldTrail );
+
+    const inputEnabledTrail = trail.slice( 0, Math.min( trail.nodes.length, trail.getLastInputEnabledIndex() + 1 ) );
+    const oldInputEnabledTrail = pointer.inputEnabledTrail || new Trail( this.rootNode ); // TODO: consider a static trail reference <----MK wonders if we should do this@!?!?!? https://github.com/phetsims/scenery/issues/1116
+
+    assert && assert( oldTrail.nodes[ 0 ] === oldInputEnabledTrail.nodes[ 0 ], 'should have same root' );
+
+    // TODO: this is a general TODO about updating params jsdoc in exitEvents, enterEvents, dispatchEvent, and dispatchToTargets, https://github.com/phetsims/scenery/issues/1116
+
+    // TODO: Right now these are a Trail[], but I feel like we could make them more sparse by avoiding `subtrailTo` https://github.com/phetsims/scenery/issues/1116
+    const turnedInputEnabled = [];
+    const turnedInputDisabled = [];
+
+    for ( let i = 0; i < trail.nodes.length; i++ ) {
+      const currentNode = trail.nodes[ i ];
+
+      // If we only care under this, then we don't duplicate exit events for nodes after this index
+      if ( i < branchIndex ) {
+        if ( inputEnabledTrail.nodes.includes( currentNode ) && !oldInputEnabledTrail.nodes.includes( currentNode ) ) {
+          turnedInputEnabled.push( inputEnabledTrail.subtrailTo( currentNode ) );
+        }
+        if ( !inputEnabledTrail.nodes.includes( currentNode ) && oldInputEnabledTrail.nodes.includes( currentNode ) ) {
+          turnedInputDisabled.push( oldInputEnabledTrail.subtrailTo( currentNode ) ); // TODO: don't we want to be able to dispatch exit/enter without needing a trail?!?!
+        }
+      }
+      else {
+        break; // TODO: needed?    https://github.com/phetsims/scenery/issues/1116
+      }
+    }
+
     const isBranchChange = branchIndex !== trail.length || branchIndex !== oldTrail.length;
     isBranchChange && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent(
       'changed from ' + oldTrail.toString() + ' to ' + trail.toString() );
@@ -1693,12 +1720,12 @@ class Input {
 
     // we want to approximately mimic http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
     // TODO: if a node gets moved down 1 depth, it may see both an exit and enter?
-    if ( isBranchChange ) {
-      this.exitEvents( pointer, event, oldTrail, branchIndex, lastNodeChanged );
-      this.enterEvents( pointer, event, trail, branchIndex, lastNodeChanged );
-    }
+    // TODO: passing in isBranchChange here is annoying and changes the api for these methods which are used elsewhere, https://github.com/phetsims/scenery/issues/1116
+    this.exitEvents( pointer, event, oldTrail, branchIndex, lastNodeChanged, isBranchChange, turnedInputDisabled );
+    this.enterEvents( pointer, event, trail, branchIndex, lastNodeChanged, isBranchChange, turnedInputEnabled );
 
     pointer.trail = trail;
+    pointer.inputEnabledTrail = inputEnabledTrail;
 
     sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
     return trail;
@@ -1721,16 +1748,27 @@ class Input {
    *                               for this node and all "descendant" nodes in the relevant trail.
    * @param {boolean} lastNodeChanged - If the last node didn't change, we won't sent an over event.
    */
-  enterEvents( pointer, event, trail, branchIndex, lastNodeChanged ) {
-    if ( trail.length > branchIndex ) {
-      for ( let newIndex = trail.length - 1; newIndex >= branchIndex; newIndex-- ) {
-        // TODO: for performance, we should mutate a trail instead of returning a slice.
-        this.dispatchEvent( trail.slice( 0, newIndex + 1 ), 'enter', pointer, event, false );
+  enterEvents( pointer, event, trail, branchIndex, lastNodeChanged, isBranchChange = true, turnedInputEnabled = [] ) {
+    if ( isBranchChange ) {
+
+      if ( trail.length > branchIndex ) {
+        for ( let newIndex = trail.length - 1; newIndex >= branchIndex; newIndex-- ) {
+          // TODO: for performance, we should mutate a trail instead of returning a slice.
+          this.dispatchEvent( trail.slice( 0, newIndex + 1 ), 'enter', pointer, event, false );
+        }
+      }
+
+      if ( lastNodeChanged ) {
+        this.dispatchEvent( trail, 'over', pointer, event, true );
       }
     }
 
-    if ( lastNodeChanged ) {
-      this.dispatchEvent( trail, 'over', pointer, event, true );
+    if ( turnedInputEnabled.length > 0 ) {
+      for ( let i = 0; i < turnedInputEnabled.length; i++ ) {
+
+        // TODO: duplicate calls to dispatchEvent, boooo, https://github.com/phetsims/scenery/issues/1116
+        this.dispatchEvent( turnedInputEnabled[ i ], 'enter', pointer, event, false );
+      }
     }
   }
 
@@ -1752,15 +1790,26 @@ class Input {
    *                               for this node and all "descendant" nodes in the relevant trail.
    * @param {boolean} lastNodeChanged - If the last node didn't change, we won't sent an out event.
    */
-  exitEvents( pointer, event, trail, branchIndex, lastNodeChanged ) {
-    if ( lastNodeChanged ) {
-      this.dispatchEvent( trail, 'out', pointer, event, true );
+  exitEvents( pointer, event, trail, branchIndex, lastNodeChanged, isBranchChange = true, turnedInputDisabled = [] ) {
+    if ( isBranchChange ) {
+
+      if ( lastNodeChanged ) {
+        this.dispatchEvent( trail, 'out', pointer, event, true );
+      }
+
+      if ( trail.length > branchIndex ) {
+        for ( let oldIndex = branchIndex; oldIndex < trail.length; oldIndex++ ) {
+          // TODO: for performance, we should mutate a trail instead of returning a slice.
+          this.dispatchEvent( trail.slice( 0, oldIndex + 1 ), 'exit', pointer, event, false );
+        }
+      }
     }
 
-    if ( trail.length > branchIndex ) {
-      for ( let oldIndex = branchIndex; oldIndex < trail.length; oldIndex++ ) {
-        // TODO: for performance, we should mutate a trail instead of returning a slice.
-        this.dispatchEvent( trail.slice( 0, oldIndex + 1 ), 'exit', pointer, event, false );
+    if ( turnedInputDisabled ) {
+      for ( let i = 0; i < turnedInputDisabled.length; i++ ) {
+
+        // TODO: duplicate calls to dispatchEvent, boooo, https://github.com/phetsims/scenery/issues/1116
+        this.dispatchEvent( turnedInputDisabled[ i ], 'exit', pointer, event, false, true );
       }
     }
   }
@@ -1774,8 +1823,9 @@ class Input {
    * @param {Pointer} pointer
    * @param {Event|null} event
    * @param {boolean} bubbles - If bubbles is false, the event is only dispatched to the leaf node of the trail.
+   * @param fireOnInputDisabled - TODO: is this really the only way to pass this through, and should listeners fire on pointer and display when a non bubbling even fires on an inputDisabled Node? https://github.com/phetsims/scenery/issues/1116
    */
-  dispatchEvent( trail, type, pointer, event, bubbles ) {
+  dispatchEvent( trail, type, pointer, event, bubbles, fireOnInputDisabled = false ) {
     sceneryLog && sceneryLog.EventDispatch && sceneryLog.EventDispatch(
       type + ' trail:' + trail.toString() + ' pointer:' + pointer.toString() + ' at ' + pointer.point.toString() );
     sceneryLog && sceneryLog.EventDispatch && sceneryLog.push();
@@ -1792,7 +1842,7 @@ class Input {
 
     // if not yet handled, run through the trail in order to see if one of them will handle the event
     // at the base of the trail should be the scene node, so the scene will be notified last
-    this.dispatchToTargets( trail, type, pointer, inputEvent, bubbles );
+    this.dispatchToTargets( trail, type, pointer, inputEvent, bubbles, fireOnInputDisabled );
 
     // Notify input listeners on the Display
     this.dispatchToListeners( pointer, this.display.getInputListeners(), type, inputEvent );
@@ -1856,7 +1906,7 @@ class Input {
    * @param {SceneryEvent} inputEvent
    * @param {boolean} bubbles - If bubbles is false, the event is only dispatched to the leaf node of the trail.
    */
-  dispatchToTargets( trail, type, pointer, inputEvent, bubbles ) {
+  dispatchToTargets( trail, type, pointer, inputEvent, bubbles, fireOnInputDisabled = false ) {
     assert && assert( inputEvent instanceof SceneryEvent );
 
     if ( inputEvent.aborted || inputEvent.handled ) {
@@ -1866,7 +1916,9 @@ class Input {
     for ( let i = trail.nodes.length - 1; i >= 0; bubbles ? i-- : i = -1 ) {
 
       const target = trail.nodes[ i ];
-      if ( target.isDisposed || !target.inputEnabled ) {
+
+      // TODO: what about handling input disabled nodes that are manually getting exit events called on them in branchChangeEvents, https://github.com/phetsims/scenery/issues/1116
+      if ( target.isDisposed || ( !fireOnInputDisabled && !target.inputEnabled ) ) {
         continue;
       }
 

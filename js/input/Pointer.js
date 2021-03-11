@@ -63,6 +63,10 @@ class Pointer {
     //                        specific trail, then a trail with only the display's rootNode will be set.
     this.trail = null;
 
+    // @public {Trail|null} - The subset of Pointer.trail that is Node.inputEnabled. See Trail.getLastInputEnabledIndex()
+    //                        for details. This is kept separately so that it can be detected when inputEnabled changes.
+    this.inputEnabledTrail = null;
+
     // @deprecated @public {BooleanProperty} - Whether this pointer is 'down' (pressed).
     // Will be phased out in https://github.com/phetsims/scenery/issues/803 to something that is specific for the actual
     // mouse/pen button (since this doesn't generalize well to the left/right mouse buttons).
