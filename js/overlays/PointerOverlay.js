@@ -108,7 +108,7 @@ class PointerOverlay {
       svg.appendChild( circle );
       this.pointerSVGContainer.appendChild( svg );
     };
-    display._input.addPointerAddedListener( this.pointerAdded );
+    display._input.pointerAddedEmitter.addListener( this.pointerAdded );
 
     //if there is already a mouse, add it here
     // TODO: if there already other non-mouse touches, could be added here
@@ -124,7 +124,7 @@ class PointerOverlay {
    * @public
    */
   dispose() {
-    this.display._input.removePointerAddedListener( this.pointerAdded );
+    this.display._input.pointerAddedEmitter.removeListener( this.pointerAdded );
   }
 
   /**

@@ -159,6 +159,7 @@
  */
 
 import Action from '../../../axon/js/Action.js';
+import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import merge from '../../../phet-core/js/merge.js';
@@ -254,8 +255,8 @@ class Input {
     // @public {Array.<Pointer>} - All active pointers.
     this.pointers = [];
 
-    // TODO: replace this with an Emitter
-    this.pointerAddedListeners = [];
+    // @public {TinyEmitter.<Pointer>}
+    this.pointerAddedEmitter = new TinyEmitter();
 
     // @public {boolean} - Whether we are currently firing events. We need to track this to handle re-entrant cases
     // like https://github.com/phetsims/balloons-and-static-electricity/issues/406.
@@ -939,34 +940,7 @@ class Input {
   addPointer( pointer ) {
     this.pointers.push( pointer );
 
-    // Callback for showing pointer events.  Optimized for performance.
-    if ( this.pointerAddedListeners.length ) {
-      for ( let i = 0; i < this.pointerAddedListeners.length; i++ ) {
-        this.pointerAddedListeners[ i ]( pointer );
-      }
-    }
-  }
-
-  /**
-   * Add a listener to be called when a Pointer is added.
-   * TODO: Just use an emitter
-   * @public
-   * @param {function} listener
-   */
-  addPointerAddedListener( listener ) {
-    this.pointerAddedListeners.push( listener );
-  }
-
-  /**
-   * Remove a listener being called when a Pointer is added.
-   * @public
-   * @param listener
-   */
-  removePointerAddedListener( listener ) {
-    const index = this.pointerAddedListeners.indexOf( listener );
-    if ( index !== -1 ) {
-      this.pointerAddedListeners.splice( index, 1 );
-    }
+    this.pointerAddedEmitter.emit( pointer );
   }
 
   /**

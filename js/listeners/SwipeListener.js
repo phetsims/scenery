@@ -88,7 +88,7 @@ class SwipeListener {
         this.handleDown( event );
       }
     };
-    input.addPointerAddedListener( pointer => {
+    input.pointerAddedEmitter.addListener( pointer => {
       if ( this.enabled ) {
         pointer.addInputListener( this.handleEventListener, true );
       }
