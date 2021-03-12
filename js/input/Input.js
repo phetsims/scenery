@@ -189,7 +189,8 @@ const domEventPropertiesToSerialize = {
   type: true,
   button: true, keyCode: true, key: true,
   deltaX: true, deltaY: true, deltaZ: true, deltaMode: true, pointerId: true,
-  pointerType: true, charCode: true, which: true, clientX: true, clientY: true, changedTouches: true,
+  pointerType: true, charCode: true, which: true, clientX: true, clientY: true, pageX: true, pageY: true, changedTouches: true,
+  scale: true,
   target: true, relatedTarget: true,
   ctrlKey: true, shiftKey: true, altKey: true, metaKey: true
 };
