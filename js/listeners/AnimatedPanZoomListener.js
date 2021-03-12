@@ -107,7 +107,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // @private {Action} - Action wrapping work to be done when a gesture starts on a macOS trackpad (specific
     // to that platform!). Wrapped in an action so that state is captured for PhET-iO
     this.gestureStartAction = new Action( domEvent => {
-      assert && assert( domEvent instanceof Event );
+      assert && assert( domEvent instanceof window.Event );
       assert && assert( domEvent.pageX, 'pageX required on DOMEvent' );
       assert && assert( domEvent.pageY, 'pageY required on DOMEvent' );
       assert && assert( domEvent.scale, 'scale required on DOMEvent' );
@@ -128,7 +128,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // @private {Action} - Action wrapping work to be done when gesture changes on a macOS trackpad (specfic to that
     // platform!). Wrapped in an action so state is captured for PhET-iO
     this.gestureChangeAction = new Action( domEvent => {
-      assert && assert( domEvent instanceof Event );
+      assert && assert( domEvent instanceof window.Event );
       assert && assert( domEvent.scale, 'scale required on DOMEvent' );
 
       // prevent Safari from changing position or scale natively
