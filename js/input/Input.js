@@ -869,7 +869,7 @@ class Input {
    */
   removeTemporaryPointers() {
     const fakeDomEvent = {
-      // TODO: Does this break anything
+      eek: 'This is a fake DOM event created in removeTemporaryPointers(), called from a Scenery exit event. Our attempt to masquerade seems unsuccessful! :('
     };
 
     for ( let i = this.pointers.length - 1; i >= 0; i-- ) {
@@ -878,7 +878,6 @@ class Input {
         this.pointers.splice( i, 1 );
 
         // Send exit events. As we can't get a DOM event, we'll send a fake object instead.
-        //TODO: consider exit() not taking an event?
         const exitTrail = pointer.trail || new Trail( this.rootNode );
         this.exitEvents( pointer, fakeDomEvent, exitTrail, 0, true );
       }
@@ -1032,7 +1031,7 @@ class Input {
    * DOMEvent, this ensures that all will dispatch to the same Trail.
    * @private
    *
-   * @param domEvent
+   * @param {Event} domEvent
    * @returns {Trail}
    */
   updateTrailForPDOMDispatch( domEvent ) {
@@ -1044,7 +1043,7 @@ class Input {
    * Get the trail ID of the node represented by a DOM element in the accessible PDOM.
    * @private
    *
-   * @param  {Event} domEvent
+   * @param {Event} domEvent
    * @returns {string}
    */
   getTrailId( domEvent ) {
@@ -1509,7 +1508,7 @@ class Input {
    * Given a pointer reference, hit test it and determine the Trail that the pointer is over.
    * @private
    *
-   * @param {Pointer}
+   * @param {Pointer} pointer
    * @returns {Trail}
    */
   getPointerTrail( pointer ) {
@@ -1653,12 +1652,12 @@ class Input {
     const trail = this.getPointerTrail( pointer );
 
     const inputEnabledTrail = trail.slice( 0, Math.min( trail.nodes.length, trail.getLastInputEnabledIndex() + 1 ) );
-    const oldInputEnabledTrail = pointer.inputEnabledTrail || new Trail( this.rootNode ); // TODO: consider a static trail reference <----MK wonders if we should do this@!?!?!? https://github.com/phetsims/scenery/issues/1116
+    const oldInputEnabledTrail = pointer.inputEnabledTrail || new Trail( this.rootNode );
     const branchInputEnabledIndex = Trail.branchIndex( inputEnabledTrail, oldInputEnabledTrail );
     const lastInputEnabledNodeChanged = oldInputEnabledTrail.lastNode() !== inputEnabledTrail.lastNode();
 
     if ( sceneryLog && sceneryLog.InputEvent ) {
-      const oldTrail = pointer.trail || new Trail( this.rootNode ); // TODO: consider a static trail reference <----MK wonders if we should do this@!?!?!? https://github.com/phetsims/scenery/issues/1116
+      const oldTrail = pointer.trail || new Trail( this.rootNode );
       const branchIndex = Trail.branchIndex( trail, oldTrail );
 
       ( branchIndex !== trail.length || branchIndex !== oldTrail.length ) && sceneryLog.InputEvent(
@@ -1676,12 +1675,6 @@ class Input {
 
     pointer.trail = trail;
     pointer.inputEnabledTrail = inputEnabledTrail;
-
-    // TODO: this is a general TODO about updating params jsdoc in exitEvents, enterEvents, dispatchEvent, and dispatchToTargets, https://github.com/phetsims/scenery/issues/1116
-    // TODO: update docs about order
-
-    // TODO: if a node gets moved down 1 depth, it may see both an exit and enter?
-    //       Yes, by design
 
     sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
     return trail;
@@ -1706,7 +1699,7 @@ class Input {
    */
   enterEvents( pointer, event, trail, branchIndex, lastNodeChanged ) {
     if ( lastNodeChanged ) {
-      this.dispatchEvent( trail, 'over', pointer, event, true );
+      this.dispatchEvent( trail, 'over', pointer, event, true, true );
     }
 
     for ( let i = branchIndex; i < trail.length; i++ ) {
@@ -1734,7 +1727,7 @@ class Input {
    */
   exitEvents( pointer, event, trail, branchIndex, lastNodeChanged ) {
     for ( let i = trail.length - 1; i >= branchIndex; i-- ) {
-      this.dispatchEvent( trail.slice( 0, i + 1 ), 'exit', pointer, event, false );
+      this.dispatchEvent( trail.slice( 0, i + 1 ), 'exit', pointer, event, false, true );
     }
 
     if ( lastNodeChanged ) {
@@ -1751,7 +1744,7 @@ class Input {
    * @param {Pointer} pointer
    * @param {Event|null} event
    * @param {boolean} bubbles - If bubbles is false, the event is only dispatched to the leaf node of the trail.
-   * @param fireOnInputDisabled - TODO: is this really the only way to pass this through, and should listeners fire on pointer and display when a non bubbling even fires on an inputDisabled Node? https://github.com/phetsims/scenery/issues/1116
+   * @param {boolean} fireOnInputDisabled - Whether to fire this event even if nodes have inputEnabled:false
    */
   dispatchEvent( trail, type, pointer, event, bubbles, fireOnInputDisabled = false ) {
     sceneryLog && sceneryLog.EventDispatch && sceneryLog.EventDispatch(
@@ -1833,6 +1826,7 @@ class Input {
    * @param {Pointer} pointer
    * @param {SceneryEvent} inputEvent
    * @param {boolean} bubbles - If bubbles is false, the event is only dispatched to the leaf node of the trail.
+   * @param {boolean} [fireOnInputDisabled]
    */
   dispatchToTargets( trail, type, pointer, inputEvent, bubbles, fireOnInputDisabled = false ) {
     assert && assert( inputEvent instanceof SceneryEvent );
@@ -1849,7 +1843,6 @@ class Input {
 
       const trailInputDisabled = inputEnabledIndex < i;
 
-      // TODO: what about handling input disabled nodes that are manually getting exit events called on them in branchChangeEvents, https://github.com/phetsims/scenery/issues/1116
       if ( target.isDisposed || ( !fireOnInputDisabled && trailInputDisabled ) ) {
         continue;
       }
