@@ -159,6 +159,7 @@
  */
 
 import Action from '../../../axon/js/Action.js';
+import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import merge from '../../../phet-core/js/merge.js';
@@ -254,8 +255,8 @@ class Input {
     // @public {Array.<Pointer>} - All active pointers.
     this.pointers = [];
 
-    // TODO: replace this with an Emitter
-    this.pointerAddedListeners = [];
+    // @public {TinyEmitter.<Pointer>}
+    this.pointerAddedEmitter = new TinyEmitter();
 
     // @public {boolean} - Whether we are currently firing events. We need to track this to handle re-entrant cases
     // like https://github.com/phetsims/balloons-and-static-electricity/issues/406.
@@ -868,7 +869,7 @@ class Input {
    */
   removeTemporaryPointers() {
     const fakeDomEvent = {
-      // TODO: Does this break anything
+      eek: 'This is a fake DOM event created in removeTemporaryPointers(), called from a Scenery exit event. Our attempt to masquerade seems unsuccessful! :('
     };
 
     for ( let i = this.pointers.length - 1; i >= 0; i-- ) {
@@ -877,7 +878,6 @@ class Input {
         this.pointers.splice( i, 1 );
 
         // Send exit events. As we can't get a DOM event, we'll send a fake object instead.
-        //TODO: consider exit() not taking an event?
         const exitTrail = pointer.trail || new Trail( this.rootNode );
         this.exitEvents( pointer, fakeDomEvent, exitTrail, 0, true );
       }
@@ -939,34 +939,7 @@ class Input {
   addPointer( pointer ) {
     this.pointers.push( pointer );
 
-    // Callback for showing pointer events.  Optimized for performance.
-    if ( this.pointerAddedListeners.length ) {
-      for ( let i = 0; i < this.pointerAddedListeners.length; i++ ) {
-        this.pointerAddedListeners[ i ]( pointer );
-      }
-    }
-  }
-
-  /**
-   * Add a listener to be called when a Pointer is added.
-   * TODO: Just use an emitter
-   * @public
-   * @param {function} listener
-   */
-  addPointerAddedListener( listener ) {
-    this.pointerAddedListeners.push( listener );
-  }
-
-  /**
-   * Remove a listener being called when a Pointer is added.
-   * @public
-   * @param listener
-   */
-  removePointerAddedListener( listener ) {
-    const index = this.pointerAddedListeners.indexOf( listener );
-    if ( index !== -1 ) {
-      this.pointerAddedListeners.splice( index, 1 );
-    }
+    this.pointerAddedEmitter.emit( pointer );
   }
 
   /**
@@ -1058,7 +1031,7 @@ class Input {
    * DOMEvent, this ensures that all will dispatch to the same Trail.
    * @private
    *
-   * @param domEvent
+   * @param {Event} domEvent
    * @returns {Trail}
    */
   updateTrailForPDOMDispatch( domEvent ) {
@@ -1070,7 +1043,7 @@ class Input {
    * Get the trail ID of the node represented by a DOM element in the accessible PDOM.
    * @private
    *
-   * @param  {Event} domEvent
+   * @param {Event} domEvent
    * @returns {string}
    */
   getTrailId( domEvent ) {
@@ -1535,7 +1508,7 @@ class Input {
    * Given a pointer reference, hit test it and determine the Trail that the pointer is over.
    * @private
    *
-   * @param {Pointer}
+   * @param {Pointer} pointer
    * @returns {Trail}
    */
   getPointerTrail( pointer ) {
@@ -1677,28 +1650,31 @@ class Input {
     assert && assert( typeof sendMove === 'boolean' );
 
     const trail = this.getPointerTrail( pointer );
-    const oldTrail = pointer.trail || new Trail( this.rootNode ); // TODO: consider a static trail reference
 
-    const lastNodeChanged = oldTrail.lastNode() !== trail.lastNode();
+    const inputEnabledTrail = trail.slice( 0, Math.min( trail.nodes.length, trail.getLastInputEnabledIndex() + 1 ) );
+    const oldInputEnabledTrail = pointer.inputEnabledTrail || new Trail( this.rootNode );
+    const branchInputEnabledIndex = Trail.branchIndex( inputEnabledTrail, oldInputEnabledTrail );
+    const lastInputEnabledNodeChanged = oldInputEnabledTrail.lastNode() !== inputEnabledTrail.lastNode();
 
-    const branchIndex = Trail.branchIndex( trail, oldTrail );
-    const isBranchChange = branchIndex !== trail.length || branchIndex !== oldTrail.length;
-    isBranchChange && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent(
-      `changed from ${oldTrail.toString()} to ${trail.toString()}` );
+    if ( sceneryLog && sceneryLog.InputEvent ) {
+      const oldTrail = pointer.trail || new Trail( this.rootNode );
+      const branchIndex = Trail.branchIndex( trail, oldTrail );
+
+      ( branchIndex !== trail.length || branchIndex !== oldTrail.length ) && sceneryLog.InputEvent(
+        `changed from ${oldTrail.toString()} to ${trail.toString()}` );
+    }
 
     // event order matches http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
     if ( sendMove ) {
       this.dispatchEvent( trail, 'move', pointer, event, true );
     }
 
-    // we want to approximately mimic http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
-    // TODO: if a node gets moved down 1 depth, it may see both an exit and enter?
-    if ( isBranchChange ) {
-      this.exitEvents( pointer, event, oldTrail, branchIndex, lastNodeChanged );
-      this.enterEvents( pointer, event, trail, branchIndex, lastNodeChanged );
-    }
+    // We want to approximately mimic http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
+    this.exitEvents( pointer, event, oldInputEnabledTrail, branchInputEnabledIndex, lastInputEnabledNodeChanged );
+    this.enterEvents( pointer, event, inputEnabledTrail, branchInputEnabledIndex, lastInputEnabledNodeChanged );
 
     pointer.trail = trail;
+    pointer.inputEnabledTrail = inputEnabledTrail;
 
     sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
     return trail;
@@ -1710,8 +1686,8 @@ class Input {
    *
    * For example, if we change from a trail [ a, b, c, d, e ] => [ a, b, x, y ], it will fire:
    *
-   * - enter y
    * - enter x
+   * - enter y
    * - over y (bubbles)
    *
    * @param {Pointer} pointer
@@ -1722,15 +1698,12 @@ class Input {
    * @param {boolean} lastNodeChanged - If the last node didn't change, we won't sent an over event.
    */
   enterEvents( pointer, event, trail, branchIndex, lastNodeChanged ) {
-    if ( trail.length > branchIndex ) {
-      for ( let newIndex = trail.length - 1; newIndex >= branchIndex; newIndex-- ) {
-        // TODO: for performance, we should mutate a trail instead of returning a slice.
-        this.dispatchEvent( trail.slice( 0, newIndex + 1 ), 'enter', pointer, event, false );
-      }
+    if ( lastNodeChanged ) {
+      this.dispatchEvent( trail, 'over', pointer, event, true, true );
     }
 
-    if ( lastNodeChanged ) {
-      this.dispatchEvent( trail, 'over', pointer, event, true );
+    for ( let i = branchIndex; i < trail.length; i++ ) {
+      this.dispatchEvent( trail.slice( 0, i + 1 ), 'enter', pointer, event, false );
     }
   }
 
@@ -1753,15 +1726,12 @@ class Input {
    * @param {boolean} lastNodeChanged - If the last node didn't change, we won't sent an out event.
    */
   exitEvents( pointer, event, trail, branchIndex, lastNodeChanged ) {
-    if ( lastNodeChanged ) {
-      this.dispatchEvent( trail, 'out', pointer, event, true );
+    for ( let i = trail.length - 1; i >= branchIndex; i-- ) {
+      this.dispatchEvent( trail.slice( 0, i + 1 ), 'exit', pointer, event, false, true );
     }
 
-    if ( trail.length > branchIndex ) {
-      for ( let oldIndex = branchIndex; oldIndex < trail.length; oldIndex++ ) {
-        // TODO: for performance, we should mutate a trail instead of returning a slice.
-        this.dispatchEvent( trail.slice( 0, oldIndex + 1 ), 'exit', pointer, event, false );
-      }
+    if ( lastNodeChanged ) {
+      this.dispatchEvent( trail, 'out', pointer, event, true );
     }
   }
 
@@ -1774,8 +1744,9 @@ class Input {
    * @param {Pointer} pointer
    * @param {Event|null} event
    * @param {boolean} bubbles - If bubbles is false, the event is only dispatched to the leaf node of the trail.
+   * @param {boolean} fireOnInputDisabled - Whether to fire this event even if nodes have inputEnabled:false
    */
-  dispatchEvent( trail, type, pointer, event, bubbles ) {
+  dispatchEvent( trail, type, pointer, event, bubbles, fireOnInputDisabled = false ) {
     sceneryLog && sceneryLog.EventDispatch && sceneryLog.EventDispatch(
       `${type} trail:${trail.toString()} pointer:${pointer.toString()} at ${pointer.point.toString()}` );
     sceneryLog && sceneryLog.EventDispatch && sceneryLog.push();
@@ -1792,7 +1763,7 @@ class Input {
 
     // if not yet handled, run through the trail in order to see if one of them will handle the event
     // at the base of the trail should be the scene node, so the scene will be notified last
-    this.dispatchToTargets( trail, type, pointer, inputEvent, bubbles );
+    this.dispatchToTargets( trail, type, pointer, inputEvent, bubbles, fireOnInputDisabled );
 
     // Notify input listeners on the Display
     this.dispatchToListeners( pointer, this.display.getInputListeners(), type, inputEvent );
@@ -1855,18 +1826,24 @@ class Input {
    * @param {Pointer} pointer
    * @param {SceneryEvent} inputEvent
    * @param {boolean} bubbles - If bubbles is false, the event is only dispatched to the leaf node of the trail.
+   * @param {boolean} [fireOnInputDisabled]
    */
-  dispatchToTargets( trail, type, pointer, inputEvent, bubbles ) {
+  dispatchToTargets( trail, type, pointer, inputEvent, bubbles, fireOnInputDisabled = false ) {
     assert && assert( inputEvent instanceof SceneryEvent );
 
     if ( inputEvent.aborted || inputEvent.handled ) {
       return;
     }
 
+    const inputEnabledIndex = trail.getLastInputEnabledIndex();
+
     for ( let i = trail.nodes.length - 1; i >= 0; bubbles ? i-- : i = -1 ) {
 
       const target = trail.nodes[ i ];
-      if ( target.isDisposed || !target.inputEnabled ) {
+
+      const trailInputDisabled = inputEnabledIndex < i;
+
+      if ( target.isDisposed || ( !fireOnInputDisabled && trailInputDisabled ) ) {
         continue;
       }
 

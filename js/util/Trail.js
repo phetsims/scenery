@@ -220,10 +220,10 @@ class Trail {
    * TODO: consider renaming to subtrailToExcluding and subtrailToIncluding?
    *
    * @param {Node} node
-   * @param {Node} excludeNode
+   * @param {Node} [excludeNode=false]
    * @returns {Trail}
    */
-  subtrailTo( node, excludeNode ) {
+  subtrailTo( node, excludeNode = false ) {
     return this.slice( 0, _.indexOf( this.nodes, node ) + ( excludeNode ? 0 : 1 ) );
   }
 
@@ -825,6 +825,10 @@ class Trail {
     assert && assert( this.nodes[ 0 ] === other.nodes[ 0 ], 'for Trail comparison, trails must have the same root node' );
     assertSlow && assertSlow( this.areIndicesValid(), `Trail.compare this.areIndicesValid() failed on ${this.toString()}` );
     assertSlow && assertSlow( other.areIndicesValid(), `Trail.compare other.areIndicesValid() failed on ${other.toString()}` );
+
+    // TODO: separate from main issue questions, but isn't this needed!?!? https://github.com/phetsims/scenery/issues/1116
+    this.reindex();
+    other.reindex();
 
     const minNodeIndex = Math.min( this.indices.length, other.indices.length );
     for ( let i = 0; i < minNodeIndex; i++ ) {

@@ -261,11 +261,11 @@
     <ol>
       <li>The <strong>move</strong> event is fired (and bubbles).</li>
       <li>An <strong>out</strong> event is fired for the old topmost Node (and bubbles).</li>
-      <li><strong>exit</strong> events are fired for all Nodes in the Trail hierarchy that are now not under the pointer, from the root-most to the
-        leaf-most. Does not bubble.
+      <li><strong>exit</strong> events are fired for all Nodes in the Trail hierarchy that are now not under the pointer, from the leaf-most to the
+        root-most. Does not bubble.
       </li>
       <li><strong>enter</strong> events are fired for all Nodes in the Trail hierarchy that were not under the pointer (but now are), from the
-        leaf-most to the root-most. Does not bubble.
+        root-most to the leaf-most. Does not bubble.
       </li>
       <li>An <strong>over</strong> event is fired for the new topmost Node (and bubbles).</li>
     </ol>
