@@ -81,7 +81,7 @@ class BatchedDOMEvent {
       callback.call( input, domEvent );
     }
     else {
-      throw new Error( 'bad type value: ' + this.type );
+      throw new Error( `bad type value: ${this.type}` );
     }
 
     sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();

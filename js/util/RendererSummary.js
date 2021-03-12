@@ -343,7 +343,7 @@ class RendererSummary {
       const bit = summaryBits[ i ];
       const countForBit = this._counts[ bit ];
       if ( countForBit !== 0 ) {
-        result += ' ' + RendererSummary.bitToString( bit ) + ':' + countForBit;
+        result += ` ${RendererSummary.bitToString( bit )}:${countForBit}`;
       }
     }
     return result;
@@ -436,7 +436,7 @@ class RendererSummary {
     for ( let i = 0; i < numSummaryBits; i++ ) {
       const bit = summaryBits[ i ];
       if ( bitmask & bit ) {
-        result += RendererSummary.bitToString( bit ) + ' ';
+        result += `${RendererSummary.bitToString( bit )} `;
       }
     }
     return result;

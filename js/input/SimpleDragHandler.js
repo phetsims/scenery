@@ -173,7 +173,7 @@ class SimpleDragHandler extends PhetioObject {
 
       assert && assert( event.pointer === this.pointer, 'Wrong pointer in move' );
 
-      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler (pointer) move for ' + this.trail.toString() );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `SimpleDragHandler (pointer) move for ${this.trail.toString()}` );
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
       // move by the delta between the previous point, using the precomputed transform
@@ -284,7 +284,7 @@ class SimpleDragHandler extends PhetioObject {
       up: event => {
         if ( !this.dragging || this.isDisposed ) { return; }
 
-        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler (pointer) up for ' + this.trail.toString() );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `SimpleDragHandler (pointer) up for ${this.trail.toString()}` );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
         assert && assert( event.pointer === this.pointer, 'Wrong pointer in up' );
@@ -302,7 +302,7 @@ class SimpleDragHandler extends PhetioObject {
       cancel: event => {
         if ( !this.dragging || this.isDisposed ) { return; }
 
-        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'SimpleDragHandler (pointer) cancel for ' + this.trail.toString() );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `SimpleDragHandler (pointer) cancel for ${this.trail.toString()}` );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
         assert && assert( event.pointer === this.pointer, 'Wrong pointer in cancel' );

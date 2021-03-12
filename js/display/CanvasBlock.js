@@ -62,7 +62,7 @@ class CanvasBlock extends FittedBlock {
       this.canvas.style.pointerEvents = 'none';
 
       // @private {number} - unique ID so that we can support rasterization with Display.foreignObjectRasterization
-      this.canvasId = this.canvas.id = 'scenery-canvas' + this.id;
+      this.canvasId = this.canvas.id = `scenery-canvas${this.id}`;
 
       // @private {CanvasRenderingContext2D}
       this.context = this.canvas.getContext( '2d' );
@@ -129,8 +129,8 @@ class CanvasBlock extends FittedBlock {
     const size = this.display.getSize();
     this.canvas.width = size.width * this.backingScale;
     this.canvas.height = size.height * this.backingScale;
-    this.canvas.style.width = size.width + 'px';
-    this.canvas.style.height = size.height + 'px';
+    this.canvas.style.width = `${size.width}px`;
+    this.canvas.style.height = `${size.height}px`;
     this.wrapper.resetStyles();
     this.canvasDrawOffset.setXY( 0, 0 );
     Utils.unsetTransform( this.canvas );
@@ -145,11 +145,11 @@ class CanvasBlock extends FittedBlock {
     const y = this.fitBounds.minY;
     this.canvasDrawOffset.setXY( -x, -y ); // subtract off so we have a tight fit
     //OHTWO TODO PERFORMANCE: see if we can get a speedup by putting the backing scale in our transform instead of with CSS?
-    Utils.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.canvas ); // reapply the translation as a CSS transform
+    Utils.setTransform( `matrix(1,0,0,1,${x},${y})`, this.canvas ); // reapply the translation as a CSS transform
     this.canvas.width = this.fitBounds.width * this.backingScale;
     this.canvas.height = this.fitBounds.height * this.backingScale;
-    this.canvas.style.width = this.fitBounds.width + 'px';
-    this.canvas.style.height = this.fitBounds.height + 'px';
+    this.canvas.style.width = `${this.fitBounds.width}px`;
+    this.canvas.style.height = `${this.fitBounds.height}px`;
     this.wrapper.resetStyles();
   }
 

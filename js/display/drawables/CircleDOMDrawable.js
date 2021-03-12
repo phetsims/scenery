@@ -86,9 +86,9 @@ class CircleDOMDrawable extends CircleStatefulDrawable( DOMSelfDrawable ) {
     // If paintDirty is false, there are no updates that are needed.
     if ( this.paintDirty ) {
       if ( this.dirtyRadius ) {
-        fillElement.style.width = ( 2 * node._radius ) + 'px';
-        fillElement.style.height = ( 2 * node._radius ) + 'px';
-        fillElement.style[ Features.borderRadius ] = node._radius + 'px';
+        fillElement.style.width = `${2 * node._radius}px`;
+        fillElement.style.height = `${2 * node._radius}px`;
+        fillElement.style[ Features.borderRadius ] = `${node._radius}px`;
       }
       if ( this.dirtyFill ) {
         fillElement.style.backgroundColor = node.getCSSFill();
@@ -110,14 +110,14 @@ class CircleDOMDrawable extends CircleStatefulDrawable( DOMSelfDrawable ) {
         const hadNoStrokeBefore = !this.hadStroke;
 
         if ( hadNoStrokeBefore || this.dirtyLineWidth || this.dirtyRadius ) {
-          strokeElement.style.width = ( 2 * node._radius - node.getLineWidth() ) + 'px';
-          strokeElement.style.height = ( 2 * node._radius - node.getLineWidth() ) + 'px';
-          strokeElement.style[ Features.borderRadius ] = ( node._radius + node.getLineWidth() / 2 ) + 'px';
+          strokeElement.style.width = `${2 * node._radius - node.getLineWidth()}px`;
+          strokeElement.style.height = `${2 * node._radius - node.getLineWidth()}px`;
+          strokeElement.style[ Features.borderRadius ] = `${node._radius + node.getLineWidth() / 2}px`;
         }
         if ( hadNoStrokeBefore || this.dirtyLineWidth ) {
-          strokeElement.style.left = ( -node.getLineWidth() / 2 ) + 'px';
-          strokeElement.style.top = ( -node.getLineWidth() / 2 ) + 'px';
-          strokeElement.style.borderWidth = node.getLineWidth() + 'px';
+          strokeElement.style.left = `${-node.getLineWidth() / 2}px`;
+          strokeElement.style.top = `${-node.getLineWidth() / 2}px`;
+          strokeElement.style.borderWidth = `${node.getLineWidth()}px`;
         }
         if ( hadNoStrokeBefore || this.dirtyStroke ) {
           strokeElement.style.borderColor = node.getSimpleCSSStroke();

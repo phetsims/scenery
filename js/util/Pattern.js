@@ -57,7 +57,7 @@ class Pattern extends Paint {
    * @returns {string}
    */
   toString() {
-    return 'new scenery.Pattern( $( \'<img src="' + this.image.src + '"/>\' )[0] )';
+    return `new scenery.Pattern( $( '<img src="${this.image.src}"/>' )[0] )`;
   }
 }
 

@@ -23,7 +23,7 @@ function supportsDataURLFormatOutput( format ) {
     context.fillRect( 0, 0, 1, 1 );
     const url = canvas.toDataURL( [ format ] );
 
-    const target = 'data:' + format;
+    const target = `data:${format}`;
     // var pngFallback = 'data:image/png';
 
     return url.slice( 0, target.length ) === target;

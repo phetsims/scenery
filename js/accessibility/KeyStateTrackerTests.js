@@ -128,12 +128,12 @@ QUnit.test( 'test tracking with time', async assert => {
   stepTimer.setTimeout( () => { // eslint-disable-line bad-sim-text
     currentTimeDown = testTracker.timeDownForKey( spaceKeyDownEvent.key );
 
-    assert.ok( currentTimeDown >= firstPressTime && currentTimeDown <= totalPressTime, 'key pressed for ' + firstPressTime + ' ms' );
+    assert.ok( currentTimeDown >= firstPressTime && currentTimeDown <= totalPressTime, `key pressed for ${firstPressTime} ms` );
 
     stepTimer.setTimeout( () => { // eslint-disable-line bad-sim-text
       currentTimeDown = testTracker.timeDownForKey( spaceKeyDownEvent.key );
 
-      assert.ok( currentTimeDown >= totalPressTime, 'key pressed for ' + secondPressTime + ' more ms.' );
+      assert.ok( currentTimeDown >= totalPressTime, `key pressed for ${secondPressTime} more ms.` );
 
       testTracker.keyupUpdate( spaceKeyUpEvent );
       done();

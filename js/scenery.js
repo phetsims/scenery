@@ -38,7 +38,7 @@ scenery.register( 'scratchContext', scratchContext );
 
 // @private - Scenery internal log function to be used to log to scenery.logString (does not include color/css)
 function stringLogFunction( message ) {
-  scenery.logString += message.replace( /%c/g, '' ) + '\n';
+  scenery.logString += `${message.replace( /%c/g, '' )}\n`;
 }
 
 // @private - Scenery internal log function to be used to log to the console.
@@ -161,14 +161,14 @@ extend( scenery, {
 
     if ( name ) {
       assert && assert( logProperties[ name ],
-        'Unknown logger: ' + name + ', please use periods (.) to separate different log names' );
+        `Unknown logger: ${name}, please use periods (.) to separate different log names` );
 
       window.sceneryLog[ name ] = window.sceneryLog[ name ] || function( ob, styleOverride ) {
         const data = logProperties[ name ];
 
-        const prefix = data.name ? '[' + data.name + '] ' : '';
+        const prefix = data.name ? `[${data.name}] ` : '';
         const padStyle = 'color: #ddd;';
-        scenery.logFunction( '%c' + logPadding + '%c' + prefix + ob, padStyle, styleOverride ? styleOverride : data.style );
+        scenery.logFunction( `%c${logPadding}%c${prefix}${ob}`, padStyle, styleOverride ? styleOverride : data.style );
       };
     }
   },

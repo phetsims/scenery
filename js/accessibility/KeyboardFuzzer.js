@@ -108,7 +108,7 @@ class KeyboardFuzzer {
    */
   triggerKeyDownUpEvents( element, key ) {
 
-    sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( 'trigger keydown/up: ' + key );
+    sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( `trigger keydown/up: ${key}` );
     sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.push();
 
     // TODO: screen readers normally take our keydown events, but may not here, is the discrepancy ok?
@@ -138,7 +138,7 @@ class KeyboardFuzzer {
 
     const randomKey = ALL_KEYS[ Math.floor( this.random.nextDouble() * ( ALL_KEYS.length - 1 ) ) ];
 
-    sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( 'trigger random keydown/up: ' + randomKey );
+    sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( `trigger random keydown/up: ${randomKey}` );
     sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.push();
 
     this.triggerKeyDownUpEvents( element, randomKey );
@@ -169,7 +169,7 @@ class KeyboardFuzzer {
 
       for ( let i = 0; i < fuzzRate / this.numberOfComponentsTested; i++ ) {
 
-        sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( 'main loop, i=' + i );
+        sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( `main loop, i=${i}` );
         sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.push();
 
         // get active element, focus might have changed in the last press

@@ -307,7 +307,7 @@ const Imageable = type => {
     setImageOpacity( imageOpacity ) {
       assert && assert( typeof imageOpacity === 'number', 'imageOpacity was not a number' );
       assert && assert( isFinite( imageOpacity ) && imageOpacity >= 0 && imageOpacity <= 1,
-        'imageOpacity out of range: ' + imageOpacity );
+        `imageOpacity out of range: ${imageOpacity}` );
 
       if ( this._imageOpacity !== imageOpacity ) {
         this._imageOpacity = imageOpacity;
@@ -1017,8 +1017,8 @@ Imageable.createSVGImage = ( url, width, height ) => {
   const element = document.createElementNS( svgns, 'image' );
   element.setAttribute( 'x', '0' );
   element.setAttribute( 'y', '0' );
-  element.setAttribute( 'width', width + 'px' );
-  element.setAttribute( 'height', height + 'px' );
+  element.setAttribute( 'width', `${width}px` );
+  element.setAttribute( 'height', `${height}px` );
   element.setAttributeNS( xlinkns, 'xlink:href', url );
 
   return element;

@@ -509,7 +509,7 @@ function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
 
   let aElement = getPrimarySiblingElementByNode( a );
   let bElement = getPrimarySiblingElementByNode( b );
-  assert.ok( aElement.getAttribute( attribute ).indexOf( bElement.id ) >= 0, attribute + ' for one node.' );
+  assert.ok( aElement.getAttribute( attribute ).indexOf( bElement.id ) >= 0, `${attribute} for one node.` );
 
   const c = new Node( { tagName: 'div', innerContent: TEST_LABEL } );
   rootNode.addChild( c );
@@ -524,7 +524,7 @@ function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
   bElement = getPrimarySiblingElementByNode( b );
   let cElement = getPrimarySiblingElementByNode( c );
   const expectedValue = [ bElement.id, cElement.id ].join( ' ' );
-  assert.ok( aElement.getAttribute( attribute ) === expectedValue, attribute + ' two nodes' );
+  assert.ok( aElement.getAttribute( attribute ) === expectedValue, `${attribute} two nodes` );
 
   // Make c invalidate
   rootNode.removeChild( c );
@@ -553,7 +553,7 @@ function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
   const dDescriptionElement = getPrimarySiblingElementByNode( d ).parentElement.childNodes[ 0 ];
   assert.ok( bParentContainer.getAttribute( attribute ) !== oldValue, 'should have invalidated on tree change' );
   assert.ok( bParentContainer.getAttribute( attribute ) === dDescriptionElement.id,
-    'b parent container element is ' + attribute + ' d description sibling' );
+    `b parent container element is ${attribute} d description sibling` );
 
   // say we have a scene graph that looks like:
   //    e
@@ -595,9 +595,9 @@ function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
   let fElement = getPrimarySiblingElementByNode( f );
   let gElement = getPrimarySiblingElementByNode( g );
   let hElement = getPrimarySiblingElementByNode( h );
-  assert.ok( eElement.getAttribute( attribute ) === fElement.id, 'eElement should be ' + attribute + ' fElement' );
-  assert.ok( fElement.getAttribute( attribute ) === gElement.id, 'fElement should be ' + attribute + ' gElement' );
-  assert.ok( gElement.getAttribute( attribute ) === hElement.id, 'gElement should be ' + attribute + ' hElement' );
+  assert.ok( eElement.getAttribute( attribute ) === fElement.id, `eElement should be ${attribute} fElement` );
+  assert.ok( fElement.getAttribute( attribute ) === gElement.id, `fElement should be ${attribute} gElement` );
+  assert.ok( gElement.getAttribute( attribute ) === hElement.id, `gElement should be ${attribute} hElement` );
 
   // re-arrange the scene graph and make sure that the attribute ids remain up to date
   //    e
@@ -618,9 +618,9 @@ function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
   fElement = getPrimarySiblingElementByNode( f );
   gElement = getPrimarySiblingElementByNode( g );
   hElement = getPrimarySiblingElementByNode( h );
-  assert.ok( eElement.getAttribute( attribute ) === fElement.id, 'eElement should still be ' + attribute + ' fElement' );
-  assert.ok( fElement.getAttribute( attribute ) === gElement.id, 'fElement should still be ' + attribute + ' gElement' );
-  assert.ok( gElement.getAttribute( attribute ) === hElement.id, 'gElement should still be ' + attribute + ' hElement' );
+  assert.ok( eElement.getAttribute( attribute ) === fElement.id, `eElement should still be ${attribute} fElement` );
+  assert.ok( fElement.getAttribute( attribute ) === gElement.id, `fElement should still be ${attribute} gElement` );
+  assert.ok( gElement.getAttribute( attribute ) === hElement.id, `gElement should still be ${attribute} hElement` );
 
   // test aria labelled by your self, but a different peer Element, multiple attribute ids included in the test.
   const containerTagName = 'div';
@@ -658,10 +658,10 @@ function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
     const nodeLabelElement = nodeParent.childNodes[ DEFAULT_LABEL_SIBLING_INDEX ];
     const nodeDescriptionElement = nodeParent.childNodes[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
 
-    assert.ok( nodePrimaryElement.getAttribute( attribute ).indexOf( nodeLabelElement.id ) >= 0, attribute + ' your own label element.' );
-    assert.ok( nodeParent.getAttribute( attribute ).indexOf( nodeDescriptionElement.id ) >= 0, 'parent ' + attribute + ' your own description.' );
+    assert.ok( nodePrimaryElement.getAttribute( attribute ).indexOf( nodeLabelElement.id ) >= 0, `${attribute} your own label element.` );
+    assert.ok( nodeParent.getAttribute( attribute ).indexOf( nodeDescriptionElement.id ) >= 0, `parent ${attribute} your own description.` );
 
-    assert.ok( nodeParent.getAttribute( attribute ).indexOf( nodeLabelElement.id ) >= 0, 'parent ' + attribute + ' your own label.' );
+    assert.ok( nodeParent.getAttribute( attribute ).indexOf( nodeLabelElement.id ) >= 0, `parent ${attribute} your own label.` );
 
   };
 
@@ -760,7 +760,7 @@ function testAssociationAttributeBySetters( assert, attribute ) { // eslint-disa
 
   const nElement = getPrimarySiblingElementByNode( n );
   const oElement = getPrimarySiblingElementByNode( o );
-  assert.ok( oElement.getAttribute( attribute ).indexOf( nElement.id ) >= 0, attribute + ' for two nodes with setter.' );
+  assert.ok( oElement.getAttribute( attribute ).indexOf( nElement.id ) >= 0, `${attribute} for two nodes with setter.` );
 
   // make a list of associations to test as a setter
   const randomAssociationObject = {

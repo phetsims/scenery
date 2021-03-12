@@ -613,8 +613,8 @@ class Node extends PhetioObject {
   insertChild( index, node, isComposite ) {
     assert && assert( node !== null && node !== undefined, 'insertChild cannot insert a null/undefined child' );
     assert && assert( node instanceof Node,
-      'addChild/insertChild requires the child to be a Node. Constructor: ' +
-      ( node.constructor ? node.constructor.name : 'none' ) );
+      `addChild/insertChild requires the child to be a Node. Constructor: ${
+       node.constructor ? node.constructor.name : 'none'}` );
     assert && assert( !_.includes( this._children, node ), 'Parent already contains child' );
     assert && assert( node !== this, 'Cannot add self as a child' );
     assert && assert( node._parents !== null, 'Tried to insert a disposed child node?' );
@@ -761,7 +761,7 @@ class Node extends PhetioObject {
     assert && assert( node && node instanceof Node, 'Need to call node.moveChildToIndex() with a Node.' );
     assert && assert( this.hasChild( node ), 'Attempted to moveChildToIndex with a node that was not a child.' );
     assert && assert( typeof index === 'number' && index % 1 === 0 && index >= 0 && index < this._children.length,
-      'Invalid index: ' + index );
+      `Invalid index: ${index}` );
 
     const currentIndex = this.indexOfChild( node );
     if ( this._children[ index ] !== node ) {
@@ -1376,13 +1376,13 @@ class Node extends PhetioObject {
         const fullBounds = this.localToParentBounds( localBounds );
 
         assertSlow && assertSlow( this.childBoundsProperty._value.equalsEpsilon( childBounds, epsilon ),
-          'Child bounds mismatch after validateBounds: ' +
-          this.childBoundsProperty._value.toString() + ', expected: ' + childBounds.toString() );
+          `Child bounds mismatch after validateBounds: ${
+          this.childBoundsProperty._value.toString()}, expected: ${childBounds.toString()}` );
         assertSlow && assertSlow( this._localBoundsOverridden ||
                                   this._transformBounds ||
                                   this.boundsProperty._value.equalsEpsilon( fullBounds, epsilon ),
-          'Bounds mismatch after validateBounds: ' + this.boundsProperty._value.toString() +
-          ', expected: ' + fullBounds.toString() + '. This could have happened if a bounds instance owned by a Node' +
+          `Bounds mismatch after validateBounds: ${this.boundsProperty._value.toString()
+          }, expected: ${fullBounds.toString()}. This could have happened if a bounds instance owned by a Node` +
           ' was directly mutated (e.g. bounds.erode())' );
       } )();
     }
@@ -5215,7 +5215,7 @@ class Node extends PhetioObject {
 
       while ( node ) {
         assert && assert( node._parents.length <= 1,
-          'getUniqueTrail found a Node with ' + node._parents.length + ' parents.' );
+          `getUniqueTrail found a Node with ${node._parents.length} parents.` );
 
         trail.addAncestor( node );
         node = node._parents[ 0 ]; // should be undefined if there aren't any parents
@@ -5228,7 +5228,7 @@ class Node extends PhetioObject {
       const trails = this.getTrails( predicate );
 
       assert && assert( trails.length === 1,
-        'getUniqueTrail found ' + trails.length + ' matching trails for the predicate' );
+        `getUniqueTrail found ${trails.length} matching trails for the predicate` );
 
       return trails[ 0 ];
     }
@@ -5319,7 +5319,7 @@ class Node extends PhetioObject {
     const trails = this.getLeafTrails( predicate );
 
     assert && assert( trails.length === 1,
-      'getUniqueLeafTrail found ' + trails.length + ' matching trails for the predicate' );
+      `getUniqueLeafTrail found ${trails.length} matching trails for the predicate` );
 
     return trails[ 0 ];
   }
@@ -6573,15 +6573,15 @@ class Node extends PhetioObject {
       'Extra prototype on Node options object is a code smell' );
 
     assert && assert( _.filter( [ 'translation', 'x', 'left', 'right', 'centerX', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom' ], key => options[ key ] !== undefined ).length <= 1,
-      'More than one mutation on this Node set the x component, check ' + Object.keys( options ).join( ',' ) );
+      `More than one mutation on this Node set the x component, check ${Object.keys( options ).join( ',' )}` );
 
     assert && assert( _.filter( [ 'translation', 'y', 'top', 'bottom', 'centerY', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom' ], key => options[ key ] !== undefined ).length <= 1,
-      'More than one mutation on this Node set the y component, check ' + Object.keys( options ).join( ',' ) );
+      `More than one mutation on this Node set the y component, check ${Object.keys( options ).join( ',' )}` );
 
     _.each( this._mutatorKeys, key => {
 
       // See https://github.com/phetsims/scenery/issues/580 for more about passing undefined.
-      assert && assert( !options.hasOwnProperty( key ) || options[ key ] !== undefined, 'Undefined not allowed for Node key: ' + key );
+      assert && assert( !options.hasOwnProperty( key ) || options[ key ] !== undefined, `Undefined not allowed for Node key: ${key}` );
 
       if ( options[ key ] !== undefined ) {
         const descriptor = Object.getOwnPropertyDescriptor( Node.prototype, key );
@@ -6717,7 +6717,7 @@ class Node extends PhetioObject {
    * @param {boolean} [includeChildren]
    */
   toString( spaces, includeChildren ) {
-    return this.constructor.name + '#' + this.id;
+    return `${this.constructor.name}#${this.id}`;
   }
 
   /**
@@ -6734,7 +6734,7 @@ class Node extends PhetioObject {
         const instance = this._instances[ i ];
         if ( instance.display === display ) {
           assertSlow( instance.trail.isValid(),
-            'Invalid trail on Instance: ' + instance.toString() + ' with trail ' + instance.trail.toString() );
+            `Invalid trail on Instance: ${instance.toString()} with trail ${instance.trail.toString()}` );
         }
       }
 

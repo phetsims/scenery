@@ -666,16 +666,16 @@ class Rectangle extends Path {
    * @protected
    */
   invalidateRectangle() {
-    assert && assert( isFinite( this._rectX ), 'A rectangle needs to have a finite x (' + this._rectX + ')' );
-    assert && assert( isFinite( this._rectY ), 'A rectangle needs to have a finite y (' + this._rectY + ')' );
+    assert && assert( isFinite( this._rectX ), `A rectangle needs to have a finite x (${this._rectX})` );
+    assert && assert( isFinite( this._rectY ), `A rectangle needs to have a finite y (${this._rectY})` );
     assert && assert( this._rectWidth >= 0 && isFinite( this._rectWidth ),
-      'A rectangle needs to have a non-negative finite width (' + this._rectWidth + ')' );
+      `A rectangle needs to have a non-negative finite width (${this._rectWidth})` );
     assert && assert( this._rectHeight >= 0 && isFinite( this._rectHeight ),
-      'A rectangle needs to have a non-negative finite height (' + this._rectHeight + ')' );
+      `A rectangle needs to have a non-negative finite height (${this._rectHeight})` );
     assert && assert( this._cornerXRadius >= 0 && isFinite( this._cornerXRadius ),
-      'A rectangle needs to have a non-negative finite arcWidth (' + this._cornerXRadius + ')' );
+      `A rectangle needs to have a non-negative finite arcWidth (${this._cornerXRadius})` );
     assert && assert( this._cornerYRadius >= 0 && isFinite( this._cornerYRadius ),
-      'A rectangle needs to have a non-negative finite arcHeight (' + this._cornerYRadius + ')' );
+      `A rectangle needs to have a non-negative finite arcHeight (${this._cornerYRadius})` );
 
     // sets our 'cache' to null, so we don't always have to recompute our shape
     this._shape = null;

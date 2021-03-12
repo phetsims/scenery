@@ -110,7 +110,7 @@ class Gradient extends Paint {
    * @public
    */
   invalidateCanvasGradient() {
-    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( 'Invalidated Canvas Gradient for #' + this.id );
+    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `Invalidated Canvas Gradient for #${this.id}` );
     this.colorStopsDirty = true;
   }
 
@@ -146,7 +146,7 @@ class Gradient extends Paint {
   getCanvasStyle() {
     // Check if we need to regenerate the Canvas gradient
     if ( !this.canvasGradient || ( this.colorStopsDirty && this.haveCanvasColorStopsChanged() ) ) {
-      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( 'Regenerating Canvas Gradient for #' + this.id );
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `Regenerating Canvas Gradient for #${this.id}` );
       sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
       this.colorStopsDirty = false;

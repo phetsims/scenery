@@ -25,7 +25,7 @@ class SVGGroup {
    */
   constructor( block, instance, parent ) {
     // @public {string}
-    this.id = 'group' + globalId++;
+    this.id = `group${globalId++}`;
 
     this.initialize( block, instance, parent );
   }
@@ -40,7 +40,7 @@ class SVGGroup {
   initialize( block, instance, parent ) {
     //OHTWO TODO: add collapsing groups! they can't have self drawables, transforms, filters, etc., and we probably shouldn't de-collapse groups
 
-    sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'initializing ' + this.toString() );
+    sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( `initializing ${this.toString()}` );
 
     // @public {SVGBlock|null} - Set to null when we're disposing, checked by other code.
     this.block = block;
@@ -250,7 +250,7 @@ class SVGGroup {
    * @public
    */
   update() {
-    sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'update: ' + this.toString() );
+    sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( `update: ${this.toString()}` );
 
     // we may have been disposed since being marked dirty on our block. we won't have a reference if we are disposed
     if ( !this.block ) {
@@ -266,7 +266,7 @@ class SVGGroup {
     if ( this.transformDirty ) {
       this.transformDirty = false;
 
-      sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'transform update: ' + this.toString() );
+      sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( `transform update: ${this.toString()}` );
 
       if ( this.willApplyTransforms ) {
 
@@ -293,7 +293,7 @@ class SVGGroup {
     if ( this.visibilityDirty ) {
       this.visibilityDirty = false;
 
-      sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'visibility update: ' + this.toString() );
+      sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( `visibility update: ${this.toString()}` );
 
       svgGroup.style.display = this.node.isVisible() ? '' : 'none';
     }
@@ -301,7 +301,7 @@ class SVGGroup {
     if ( this.opacityDirty ) {
       this.opacityDirty = false;
 
-      sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'opacity update: ' + this.toString() );
+      sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( `opacity update: ${this.toString()}` );
 
       if ( this.willApplyFilters && this.node.opacity !== 1 ) {
         this.hasOpacity = true;
@@ -317,7 +317,7 @@ class SVGGroup {
     if ( this.filterDirty ) {
       this.filterDirty = false;
 
-      sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'filter update: ' + this.toString() );
+      sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( `filter update: ${this.toString()}` );
 
       const needsFilter = this.willApplyFilters && this.node._filters.length;
       const filterId = `filter-${this.id}`;
@@ -341,7 +341,7 @@ class SVGGroup {
         for ( let i = 0; i < length; i++ ) {
           const filter = this.node._filters[ i ];
 
-          const resultName = i === length - 1 ? undefined : 'e' + i; // Last result should be undefined
+          const resultName = i === length - 1 ? undefined : `e${i}`; // Last result should be undefined
           filter.applySVGFilter( this.filterElement, inName, resultName );
           filterRegionPercentageIncrease += filter.filterRegionPercentageIncrease;
           inName = resultName;
@@ -376,12 +376,12 @@ class SVGGroup {
     if ( this.clipDirty ) {
       this.clipDirty = false;
 
-      sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'clip update: ' + this.toString() );
+      sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( `clip update: ${this.toString()}` );
 
       //OHTWO TODO: remove clip workaround (use this.willApplyFilters)
       if ( this.node.clipArea ) {
         if ( !this.clipDefinition ) {
-          const clipId = 'clip' + this.node.getId();
+          const clipId = `clip${this.node.getId()}`;
 
           this.clipDefinition = document.createElementNS( svgns, 'clipPath' );
           this.clipDefinition.setAttribute( 'id', clipId );
@@ -391,7 +391,7 @@ class SVGGroup {
           this.clipPath = document.createElementNS( svgns, 'path' );
           this.clipDefinition.appendChild( this.clipPath );
 
-          svgGroup.setAttribute( 'clip-path', 'url(#' + clipId + ')' );
+          svgGroup.setAttribute( 'clip-path', `url(#${clipId})` );
         }
 
         this.clipPath.setAttribute( 'd', this.node.clipArea.getSVGPath() );
@@ -409,7 +409,7 @@ class SVGGroup {
     if ( this.orderDirty ) {
       this.orderDirty = false;
 
-      sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'order update: ' + this.toString() );
+      sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( `order update: ${this.toString()}` );
       sceneryLog && sceneryLog.SVGGroup && sceneryLog.push();
 
       // our instance should have the proper order of children. we check that way.
@@ -422,7 +422,7 @@ class SVGGroup {
           // ensure that the spot in our array (and in the DOM) at [idx] is correct
           if ( this.children[ idx ] !== group ) {
             // out of order, rearrange
-            sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'group out of order: ' + idx + ' for ' + group.toString() );
+            sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( `group out of order: ${idx} for ${group.toString()}` );
 
             // in the DOM first (since we reference the children array to know what to insertBefore)
             // see http://stackoverflow.com/questions/9732624/how-to-swap-dom-child-nodes-in-javascript
@@ -435,7 +435,7 @@ class SVGGroup {
             this.children.splice( idx, 0, group );
           }
           else {
-            sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'group in place: ' + idx + ' for ' + group.toString() );
+            sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( `group in place: ${idx} for ${group.toString()}` );
           }
 
           // if there was a group for that instance, we move on to the next spot
@@ -464,7 +464,7 @@ class SVGGroup {
    * @public
    */
   dispose() {
-    sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( 'dispose ' + this.toString() );
+    sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( `dispose ${this.toString()}` );
     sceneryLog && sceneryLog.SVGGroup && sceneryLog.push();
 
     assert && assert( this.children.length === 0, 'Should be empty by now' );
@@ -522,7 +522,7 @@ class SVGGroup {
    * @returns {string}
    */
   toString() {
-    return 'SVGGroup:' + this.block.toString() + '_' + this.instance.toString();
+    return `SVGGroup:${this.block.toString()}_${this.instance.toString()}`;
   }
 
   /**

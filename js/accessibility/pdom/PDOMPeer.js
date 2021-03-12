@@ -436,7 +436,7 @@ class PDOMPeer {
     else {
 
       // type conversion for DOM spec
-      const valueString = this.node.inputValue + '';
+      const valueString = `${this.node.inputValue}`;
       this.setAttributeToElement( 'value', valueString, { asProperty: true } );
     }
   }
@@ -462,7 +462,7 @@ class PDOMPeer {
       return this._containerParent;
     }
 
-    assert && assert( false, 'invalid elementName name: ' + elementName );
+    assert && assert( false, `invalid elementName name: ${elementName}` );
   }
 
   /**
@@ -564,7 +564,7 @@ class PDOMPeer {
    */
   setAssociationAttribute( attribute, associationObject ) {
     assert && assert( PDOMUtils.ASSOCIATION_ATTRIBUTES.indexOf( attribute ) >= 0,
-      'unsupported attribute for setting with association object: ' + attribute );
+      `unsupported attribute for setting with association object: ${attribute}` );
     assert && PDOMUtils.validateAssociationObject( associationObject );
 
     const otherNodePDOMInstances = associationObject.otherNode.getPDOMInstances();
@@ -804,7 +804,7 @@ class PDOMPeer {
     assert && assert( content === null || typeof content === 'string', 'incorrect inner content type' );
     assert && assert( this.pdomInstance.children.length === 0, 'descendants exist with accessible content, innerContent cannot be used' );
     assert && assert( PDOMUtils.tagNameSupportsContent( this._primarySibling.tagName ),
-      'tagName: ' + this._tagName + ' does not support inner content' );
+      `tagName: ${this._tagName} does not support inner content` );
 
     // no-op to support any option order
     if ( !this._primarySibling ) {
@@ -1149,10 +1149,10 @@ function getClientDimensions( siblingElement ) {
  * @param {Bounds2} bounds - desired bounds, in pixels
  */
 function setClientBounds( siblingElement, bounds ) {
-  siblingElement.style.top = bounds.top + 'px';
-  siblingElement.style.left = bounds.left + 'px';
-  siblingElement.style.width = bounds.width + 'px';
-  siblingElement.style.height = bounds.height + 'px';
+  siblingElement.style.top = `${bounds.top}px`;
+  siblingElement.style.left = `${bounds.left}px`;
+  siblingElement.style.width = `${bounds.width}px`;
+  siblingElement.style.height = `${bounds.height}px`;
 }
 
 export default PDOMPeer;

@@ -43,7 +43,7 @@ class PDOMDisplaysInfo {
    * @param {Node} node
    */
   onAddChild( node ) {
-    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onAddChild n#' + node.id + ' (parent:n#' + this.node.id + ')' );
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( `onAddChild n#${node.id} (parent:n#${this.node.id})` );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     if ( node._pdomDisplaysInfo.canHavePDOMDisplays() ) {
@@ -60,7 +60,7 @@ class PDOMDisplaysInfo {
    * @param {Node} node
    */
   onRemoveChild( node ) {
-    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onRemoveChild n#' + node.id + ' (parent:n#' + this.node.id + ')' );
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( `onRemoveChild n#${node.id} (parent:n#${this.node.id})` );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     if ( node._pdomDisplaysInfo.canHavePDOMDisplays() ) {
@@ -78,7 +78,7 @@ class PDOMDisplaysInfo {
    * @param {number} newBitmask
    */
   onSummaryChange( oldBitmask, newBitmask ) {
-    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onSummaryChange n#' + this.node.id + ' wasPDOM:' + !( Renderer.bitmaskNoPDOM & oldBitmask ) + ', isPDOM:' + !( Renderer.bitmaskNoPDOM & newBitmask ) );
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( `onSummaryChange n#${this.node.id} wasPDOM:${!( Renderer.bitmaskNoPDOM & oldBitmask )}, isPDOM:${!( Renderer.bitmaskNoPDOM & newBitmask )}` );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     // If we are invisible, our pdomDisplays would not have changed ([] => [])
@@ -107,7 +107,7 @@ class PDOMDisplaysInfo {
    * @param {boolean} visible
    */
   onVisibilityChange( visible ) {
-    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onVisibilityChange n#' + this.node.id + ' visible:' + visible );
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( `onVisibilityChange n#${this.node.id} visible:${visible}` );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     // If we don't have pdom (or pdomVisible), our pdomDisplays would not have changed ([] => [])
@@ -130,7 +130,7 @@ class PDOMDisplaysInfo {
    * @param {boolean} visible
    */
   onPDOMVisibilityChange( visible ) {
-    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onPDOMVisibilityChange n#' + this.node.id + ' pdomVisible:' + visible );
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( `onPDOMVisibilityChange n#${this.node.id} pdomVisible:${visible}` );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     // If we don't have pdom, our pdomDisplays would not have changed ([] => [])
@@ -153,7 +153,7 @@ class PDOMDisplaysInfo {
    * @param {Display} display
    */
   onAddedRootedDisplay( display ) {
-    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onAddedRootedDisplay n#' + this.node.id );
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( `onAddedRootedDisplay n#${this.node.id}` );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     if ( display._accessible && this.canHavePDOMDisplays() ) {
@@ -170,7 +170,7 @@ class PDOMDisplaysInfo {
    * @param {Display} display
    */
   onRemovedRootedDisplay( display ) {
-    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'onRemovedRootedDisplay n#' + this.node.id );
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( `onRemovedRootedDisplay n#${this.node.id}` );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     if ( display._accessible && this.canHavePDOMDisplays() ) {
@@ -195,7 +195,7 @@ class PDOMDisplaysInfo {
    * @private
    */
   addAllPDOMDisplays() {
-    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'addAllPDOMDisplays n#' + this.node.id );
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( `addAllPDOMDisplays n#${this.node.id}` );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     assert && assert( this.pdomDisplays.length === 0, 'Should be empty before adding everything' );
@@ -227,7 +227,7 @@ class PDOMDisplaysInfo {
    * @private
    */
   removeAllPDOMDisplays() {
-    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'removeAllPDOMDisplays n#' + this.node.id );
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( `removeAllPDOMDisplays n#${this.node.id}` );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     assert && assert( !this.canHavePDOMDisplays(), 'Should happen when we cannot store pdomDisplays' );
@@ -247,7 +247,7 @@ class PDOMDisplaysInfo {
    * @param {Array.<Display>} displays
    */
   addPDOMDisplays( displays ) {
-    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'addPDOMDisplays n#' + this.node.id + ' numDisplays:' + displays.length );
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( `addPDOMDisplays n#${this.node.id} numDisplays:${displays.length}` );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     assert && assert( Array.isArray( displays ) );
@@ -277,7 +277,7 @@ class PDOMDisplaysInfo {
    * @param {Array.<Display>} displays
    */
   removePDOMDisplays( displays ) {
-    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( 'removePDOMDisplays n#' + this.node.id + ' numDisplays:' + displays.length );
+    sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( `removePDOMDisplays n#${this.node.id} numDisplays:${displays.length}` );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     assert && assert( Array.isArray( displays ) );

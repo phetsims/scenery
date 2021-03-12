@@ -40,7 +40,7 @@ class PointerOverlay {
     display.sizeProperty.lazyLink( dimension => {
       this.pointerSVGContainer.setAttribute( 'width', dimension.width );
       this.pointerSVGContainer.setAttribute( 'height', dimension.height );
-      this.pointerSVGContainer.style.clip = 'rect(0px,' + dimension.width + 'px,' + dimension.height + 'px,0px)';
+      this.pointerSVGContainer.style.clip = `rect(0px,${dimension.width}px,${dimension.height}px,0px)`;
     } );
 
     const scratchMatrix = Matrix3.IDENTITY.copy();

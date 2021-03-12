@@ -22,7 +22,7 @@ class SVGLinearGradient extends SVGGradient {
    * @param {LinearGradient} linearGradient
    */
   initialize( svgBlock, linearGradient ) {
-    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGLinearGradient] initialize ' + linearGradient.id );
+    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGLinearGradient] initialize ${linearGradient.id}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
     super.initialize( svgBlock, linearGradient );

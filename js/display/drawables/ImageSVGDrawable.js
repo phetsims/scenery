@@ -27,7 +27,7 @@ class ImageSVGDrawable extends ImageStatefulDrawable( SVGSelfDrawable ) {
   initialize( renderer, instance ) {
     super.initialize( renderer, instance, false, keepSVGImageElements ); // usesPaint: false
 
-    sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' initialized for ' + instance.toString() );
+    sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( `${this.id} initialized for ${instance.toString()}` );
 
     // @protected {SVGImageElement} - Sole SVG element for this drawable, implementing API for SVGSelfDrawable
     this.svgElement = this.svgElement || document.createElementNS( svgns, 'image' );
@@ -61,7 +61,7 @@ class ImageSVGDrawable extends ImageStatefulDrawable( SVGSelfDrawable ) {
     const image = this.svgElement;
 
     if ( this.dirtyImage ) {
-      sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Updating dirty image' );
+      sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( `${this.id} Updating dirty image` );
       if ( this.node._image ) {
         // like <image xlink:href='http://phet.colorado.edu/images/phet-logo-yellow.png' x='0' y='0' height='127px' width='242px'/>
         this.updateURL( image, true );
@@ -73,7 +73,7 @@ class ImageSVGDrawable extends ImageStatefulDrawable( SVGSelfDrawable ) {
       }
     }
     else if ( this.dirtyMipmap && this.node._image ) {
-      sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Updating dirty mipmap' );
+      sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( `${this.id} Updating dirty mipmap` );
       this.updateURL( image, false );
     }
 
@@ -102,7 +102,7 @@ class ImageSVGDrawable extends ImageStatefulDrawable( SVGSelfDrawable ) {
     let level = -1; // signals a default of "we are not using mipmapping"
     if ( this.node._mipmap ) {
       level = this.node.getMipmapLevel( this.instance.relativeTransform.matrix );
-      sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Mipmap level: ' + level );
+      sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( `${this.id} Mipmap level: ${level}` );
     }
 
     // bail out if we would use the currently-used mipmap level (or none) and there was no image change
@@ -117,22 +117,22 @@ class ImageSVGDrawable extends ImageStatefulDrawable( SVGSelfDrawable ) {
     this.mipmapLevel = level;
 
     if ( this.node._mipmap && this.node.hasMipmaps() ) {
-      sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Setting image URL to mipmap level ' + level );
+      sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( `${this.id} Setting image URL to mipmap level ${level}` );
       const url = this.node.getMipmapURL( level );
       const canvas = this.node.getMipmapCanvas( level );
-      image.setAttribute( 'width', canvas.width + 'px' );
-      image.setAttribute( 'height', canvas.height + 'px' );
+      image.setAttribute( 'width', `${canvas.width}px` );
+      image.setAttribute( 'height', `${canvas.height}px` );
       // Since SVG doesn't support parsing scientific notation (e.g. 7e5), we need to output fixed decimal-point strings.
       // Since this needs to be done quickly, and we don't particularly care about slight rounding differences (it's
       // being used for display purposes only, and is never shown to the user), we use the built-in JS toFixed instead of
       // Dot's version of toFixed. See https://github.com/phetsims/kite/issues/50
-      image.setAttribute( 'transform', 'scale(' + Math.pow( 2, level ).toFixed( 20 ) + ')' );
+      image.setAttribute( 'transform', `scale(${Math.pow( 2, level ).toFixed( 20 )})` );
       image.setAttributeNS( xlinkns, 'xlink:href', url );
     }
     else {
-      sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Setting image URL' );
-      image.setAttribute( 'width', this.node.getImageWidth() + 'px' );
-      image.setAttribute( 'height', this.node.getImageHeight() + 'px' );
+      sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( `${this.id} Setting image URL` );
+      image.setAttribute( 'width', `${this.node.getImageWidth()}px` );
+      image.setAttribute( 'height', `${this.node.getImageHeight()}px` );
       image.setAttributeNS( xlinkns, 'xlink:href', this.node.getImageURL() );
     }
   }
@@ -147,12 +147,12 @@ class ImageSVGDrawable extends ImageStatefulDrawable( SVGSelfDrawable ) {
       this.usingMipmap = usingMipmap;
 
       if ( usingMipmap ) {
-        sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Adding mipmap compute/listener needs' );
+        sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( `${this.id} Adding mipmap compute/listener needs` );
         this.instance.relativeTransform.addListener( this._mipmapTransformListener ); // when our relative tranform changes, notify us in the pre-repaint phase
         this.instance.relativeTransform.addPrecompute(); // trigger precomputation of the relative transform, since we will always need it when it is updated
       }
       else {
-        sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Removing mipmap compute/listener needs' );
+        sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( `${this.id} Removing mipmap compute/listener needs` );
         this.instance.relativeTransform.removeListener( this._mipmapTransformListener );
         this.instance.relativeTransform.removePrecompute();
       }
@@ -177,7 +177,7 @@ class ImageSVGDrawable extends ImageStatefulDrawable( SVGSelfDrawable ) {
    * @private
    */
   onMipmapTransform() {
-    sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' Transform dirties mipmap' );
+    sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( `${this.id} Transform dirties mipmap` );
 
     this.markDirtyMipmap();
   }
@@ -188,7 +188,7 @@ class ImageSVGDrawable extends ImageStatefulDrawable( SVGSelfDrawable ) {
    * @override
    */
   dispose() {
-    sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( this.id + ' disposing' );
+    sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( `${this.id} disposing` );
 
     // clean up mipmap listeners and compute needs
     this.updateMipmapStatus( false );

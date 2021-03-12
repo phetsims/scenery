@@ -320,7 +320,7 @@ class RichText extends Node {
       return;
     }
 
-    sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'RichText#' + this.id + ' rebuild' );
+    sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `RichText#${this.id} rebuild` );
     sceneryLog && sceneryLog.RichText && sceneryLog.push();
 
     // Turn bidirectional marks into explicit elements, so that the nesting is applied correctly.
@@ -349,7 +349,7 @@ class RichText extends Node {
 
       // Add the element in
       const lineBreakState = this.appendElement( currentLine, element, this._font, this._fill, isRootLTR, widthAvailable - currentLineWidth );
-      sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'lineBreakState: ' + lineBreakState );
+      sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `lineBreakState: ${lineBreakState}` );
 
       // If there was a line break (we'll need to swap to a new line node)
       if ( lineBreakState !== LineBreakState.NONE ) {
@@ -524,7 +524,7 @@ class RichText extends Node {
 
     // If we're a leaf
     if ( element.type === 'Text' ) {
-      sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'appending leaf: ' + element.content );
+      sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `appending leaf: ${element.content}` );
       sceneryLog && sceneryLog.RichText && sceneryLog.push();
 
       node = RichTextLeaf.createFromPool( element.content, isLTR, font, this._boundsMethod, fill, this._stroke, this._lineWidth );
@@ -537,7 +537,7 @@ class RichText extends Node {
         // Didn't fit, lets break into words to see what we can fit
         const words = element.content.split( ' ' );
 
-        sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'Overflow leafAdded:' + this._hasAddedLeafToLine + ', words: ' + words.length );
+        sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `Overflow leafAdded:${this._hasAddedLeafToLine}, words: ${words.length}` );
 
         // If we need to add something (and there is only a single word), then add it
         if ( this._hasAddedLeafToLine || words.length > 1 ) {
@@ -554,11 +554,11 @@ class RichText extends Node {
             // If we haven't added anything to the line and we are down to the first word, we need to just add it.
             if ( !node.fitsIn( widthAvailable - containerSpacing, this._hasAddedLeafToLine, isLTR ) &&
                  ( this._hasAddedLeafToLine || words.length > 1 ) ) {
-              sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'Skipping word ' + words[ words.length - 1 ] );
+              sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `Skipping word ${words[ words.length - 1 ]}` );
               skippedWords.unshift( words.pop() );
             }
             else {
-              sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'Success with ' + words.join( ' ' ) );
+              sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `Success with ${words.join( ' ' )}` );
               success = true;
               break;
             }
@@ -568,7 +568,7 @@ class RichText extends Node {
           if ( success ) {
             lineBreakState = LineBreakState.INCOMPLETE;
             element.content = skippedWords.join( ' ' );
-            sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'Remaining content: ' + element.content );
+            sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `Remaining content: ${element.content}` );
           }
           else {
             return LineBreakState.INCOMPLETE;
@@ -766,7 +766,7 @@ class RichText extends Node {
     assert && assert( typeof text === 'number' || typeof text === 'string', 'text should be a string or number' );
 
     // cast it to a string (for numbers, etc., and do it before the change guard so we don't accidentally trigger on non-changed text)
-    text = '' + text;
+    text = `${text}`;
 
     this._textProperty.set( text );
 
@@ -1505,15 +1505,15 @@ class RichText extends Node {
    */
   static stringWithFont( str, font ) {
     // TODO: ES6 string interpolation.
-    return '<span style=\'' +
-           'font-style: ' + font.style + ';' +
-           'font-variant: ' + font.variant + ';' +
-           'font-weight: ' + font.weight + ';' +
-           'font-stretch: ' + font.stretch + ';' +
-           'font-size: ' + font.size + ';' +
-           'font-family: ' + font.family + ';' +
-           'line-height: ' + font.lineHeight + ';' +
-           '\'>' + str + '</span>';
+    return `${'<span style=\'' +
+           'font-style: '}${font.style};` +
+           `font-variant: ${font.variant};` +
+           `font-weight: ${font.weight};` +
+           `font-stretch: ${font.stretch};` +
+           `font-size: ${font.size};` +
+           `font-family: ${font.family};` +
+           `line-height: ${font.lineHeight};` +
+           `'>${str}</span>`;
   }
 
   /**
@@ -1563,7 +1563,7 @@ class RichText extends Node {
       const content = element.children.map( child => RichText.himalayaElementToAccessibleString( child, isLTR ) ).join( '' );
 
       if ( _.includes( ACCESSIBLE_TAGS, element.tagName ) ) {
-        return '<' + element.tagName + '>' + content + '</' + element.tagName + '>';
+        return `<${element.tagName}>${content}</${element.tagName}>`;
       }
       else {
         return content;
@@ -1586,7 +1586,7 @@ class RichText extends Node {
    */
   static contentToString( content, isLTR ) {
     const unescapedContent = he.decode( content );
-    return isLTR ? ( '\u202a' + unescapedContent + '\u202c' ) : ( '\u202b' + unescapedContent + '\u202c' );
+    return isLTR ? ( `\u202a${unescapedContent}\u202c` ) : ( `\u202b${unescapedContent}\u202c` );
   }
 }
 
@@ -1690,7 +1690,7 @@ class RichTextElement extends RichTextCleanable( Node ) {
       return;
     }
     else if ( !hadChild ) {
-      sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'First child, ltr:' + this.isLTR + ', spacing: ' + ( this.isLTR ? rightElementSpacing : leftElementSpacing ) );
+      sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `First child, ltr:${this.isLTR}, spacing: ${this.isLTR ? rightElementSpacing : leftElementSpacing}` );
       if ( this.isLTR ) {
         element.left = 0;
         this.leftSpacing = leftElementSpacing;
@@ -1705,7 +1705,7 @@ class RichTextElement extends RichTextCleanable( Node ) {
       return true;
     }
     else if ( !hasElement ) {
-      sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'No element, adding spacing, ltr:' + this.isLTR + ', spacing: ' + ( leftElementSpacing + rightElementSpacing ) );
+      sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `No element, adding spacing, ltr:${this.isLTR}, spacing: ${leftElementSpacing + rightElementSpacing}` );
       if ( this.isLTR ) {
         this.rightSpacing += leftElementSpacing + rightElementSpacing;
       }
@@ -1715,12 +1715,12 @@ class RichTextElement extends RichTextCleanable( Node ) {
     }
     else {
       if ( this.isLTR ) {
-        sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'LTR add ' + this.rightSpacing + ' + ' + leftElementSpacing );
+        sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `LTR add ${this.rightSpacing} + ${leftElementSpacing}` );
         element.left = this.localBounds.right + this.rightSpacing + leftElementSpacing;
         this.rightSpacing = rightElementSpacing;
       }
       else {
-        sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'RTL add ' + this.leftSpacing + ' + ' + rightElementSpacing );
+        sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `RTL add ${this.leftSpacing} + ${rightElementSpacing}` );
         element.right = this.localBounds.left - this.leftSpacing - rightElementSpacing;
         this.leftSpacing = leftElementSpacing;
       }

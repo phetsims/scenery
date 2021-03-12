@@ -30,7 +30,7 @@ class Mouse extends Pointer {
     // https://developer.mozilla.org/en-US/docs/Web/Events/wheel
     this.wheelDeltaMode = 0;
 
-    sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'Created ' + this.toString() );
+    sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( `Created ${this.toString()}` );
   }
 
   /**
@@ -43,7 +43,7 @@ class Mouse extends Pointer {
    */
   down( point, event ) {
     const pointChanged = this.hasPointChanged( point );
-    point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'mouse down at ' + point.toString() );
+    point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `mouse down at ${point.toString()}` );
 
     this.point = point;
     this.isDown = true;
@@ -73,7 +73,7 @@ class Mouse extends Pointer {
    */
   up( point, event ) {
     const pointChanged = this.hasPointChanged( point );
-    point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'mouse up at ' + point.toString() );
+    point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `mouse up at ${point.toString()}` );
 
     this.point = point;
     this.isDown = false;
@@ -103,7 +103,7 @@ class Mouse extends Pointer {
    */
   move( point, event ) {
     const pointChanged = this.hasPointChanged( point );
-    point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'mouse move at ' + point.toString() );
+    point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `mouse move at ${point.toString()}` );
 
     this.point = point;
     return pointChanged;
@@ -119,7 +119,7 @@ class Mouse extends Pointer {
    */
   over( point, event ) {
     const pointChanged = this.hasPointChanged( point );
-    point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'mouse over at ' + point.toString() );
+    point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `mouse over at ${point.toString()}` );
 
     this.point = point;
     return pointChanged;
@@ -135,7 +135,7 @@ class Mouse extends Pointer {
    */
   out( point, event ) {
     const pointChanged = this.hasPointChanged( point );
-    point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'mouse out at ' + point.toString() );
+    point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `mouse out at ${point.toString()}` );
 
     // TODO: how to handle the mouse out-of-bounds
     this.point = null;

@@ -151,7 +151,7 @@ class PDOMInstance {
     }
 
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
-      'Initialized ' + this.toString() );
+      `Initialized ${this.toString()}` );
 
     return this;
   }
@@ -164,7 +164,7 @@ class PDOMInstance {
    */
   addConsecutiveInstances( pdomInstances ) {
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
-      'addConsecutiveInstances on ' + this.toString() + ' with: ' + pdomInstances.map( inst => inst.toString() ).join( ',' ) );
+      `addConsecutiveInstances on ${this.toString()} with: ${pdomInstances.map( inst => inst.toString() ).join( ',' )}` );
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.push();
 
     const hadChildren = this.children.length > 0;
@@ -192,7 +192,7 @@ class PDOMInstance {
    */
   removeInstancesForTrail( trail ) {
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
-      'removeInstancesForTrail on ' + this.toString() + ' with trail ' + trail.toString() );
+      `removeInstancesForTrail on ${this.toString()} with trail ${trail.toString()}` );
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.push();
 
     for ( let i = 0; i < this.children.length; i++ ) {
@@ -225,7 +225,7 @@ class PDOMInstance {
    * @public
    */
   removeAllChildren() {
-    sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance( 'removeAllChildren on ' + this.toString() );
+    sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance( `removeAllChildren on ${this.toString()}` );
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.push();
 
     while ( this.children.length ) {
@@ -261,14 +261,14 @@ class PDOMInstance {
    */
   removeSubtree( trail ) {
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
-      'removeSubtree on ' + this.toString() + ' with trail ' + trail.toString() );
+      `removeSubtree on ${this.toString()} with trail ${trail.toString()}` );
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.push();
 
     for ( let i = this.children.length - 1; i >= 0; i-- ) {
       const childInstance = this.children[ i ];
       if ( childInstance.trail.isExtensionOf( trail, true ) ) {
         sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
-          'Remove parent: ' + this.toString() + ', child: ' + childInstance.toString() );
+          `Remove parent: ${this.toString()}, child: ${childInstance.toString()}` );
         this.children.splice( i, 1 ); // remove it from the children array
 
         // Dispose the entire subtree of PDOMInstances
@@ -474,7 +474,7 @@ class PDOMInstance {
    */
   dispose() {
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
-      'Disposing ' + this.toString() );
+      `Disposing ${this.toString()}` );
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.push();
 
     // Disconnect DOM and remove listeners
@@ -525,7 +525,7 @@ class PDOMInstance {
    * @returns {string}
    */
   toString() {
-    return this.id + '#{' + this.trail.toString() + '}';
+    return `${this.id}#{${this.trail.toString()}}`;
   }
 
   /**
@@ -612,7 +612,7 @@ class PDOMInstance {
       baseTrail.addDescendant( trail.nodes[ i ] );
     }
 
-    assert && assert( baseTrail.isValid(), 'trail not valid: ' + trail.uniqueId );
+    assert && assert( baseTrail.isValid(), `trail not valid: ${trail.uniqueId}` );
 
     return baseTrail;
   }

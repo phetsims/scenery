@@ -67,7 +67,7 @@ const triggerDOMEvent = ( event, element, key, options ) => {
   eventObj.key = key;
   eventObj.relatedTarget = options.relatedTarget;
 
-  element.dispatchEvent ? element.dispatchEvent( eventObj ) : element.fireEvent( 'on' + event, eventObj );
+  element.dispatchEvent ? element.dispatchEvent( eventObj ) : element.fireEvent( `on${event}`, eventObj );
 };
 
 QUnit.test( 'focusin/focusout (focus/blur)', assert => {

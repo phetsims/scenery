@@ -72,7 +72,7 @@ class InputFuzzer {
    * @param {number} maximumPointerCount
    */
   fuzzEvents( averageEventCount, allowMouse, allowTouch, maximumPointerCount ) {
-    assert && assert( averageEventCount > 0, 'averageEventCount must be positive: ' + averageEventCount );
+    assert && assert( averageEventCount > 0, `averageEventCount must be positive: ${averageEventCount}` );
 
     // run a variable number of events, with a certain chance of bailing out (so no events are possible)
     // models a geometric distribution of events

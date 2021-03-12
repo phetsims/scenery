@@ -36,7 +36,7 @@ let globalId = 1;
 class Filter {
   constructor() {
     // @public (scenery-internal) {string}
-    this.id = 'filter' + globalId++;
+    this.id = `filter${globalId++}`;
 
     // @public {number} - Can be mutated by subtypes, determines what filter region increases should be used for when
     // SVG is used for rendering.

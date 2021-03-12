@@ -368,7 +368,7 @@ class TrailPointer {
    * @returns {string}
    */
   toString() {
-    return '[' + ( this.isBefore ? 'before' : 'after' ) + ' ' + this.trail.toString().slice( 1 );
+    return `[${this.isBefore ? 'before' : 'after'} ${this.trail.toString().slice( 1 )}`;
   }
 
   /**

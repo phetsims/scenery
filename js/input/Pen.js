@@ -21,7 +21,7 @@ class Pen extends Pointer {
     // @public {number} - For tracking which pen is which
     this.id = id;
 
-    sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'Created ' + this.toString() );
+    sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( `Created ${this.toString()}` );
   }
 
   /**
@@ -79,7 +79,7 @@ class Pen extends Pointer {
    * @returns {string}
    */
   toString() {
-    return 'Pen#' + this.id;
+    return `Pen#${this.id}`;
   }
 
   /**

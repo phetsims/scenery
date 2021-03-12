@@ -35,7 +35,7 @@ class SVGGradientStop {
    * @param {Color|string|Property.<Color|string|null>|null} color
    */
   initialize( svgGradient, ratio, color ) {
-    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] initialize: ' + svgGradient.gradient.id + ' : ' + ratio );
+    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] initialize: ${svgGradient.gradient.id} : ${ratio}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
     // @private {SVGGradient} - transient
@@ -62,15 +62,15 @@ class SVGGradientStop {
     this.colorListener = this.colorListener || this.markDirty.bind( this );
 
     if ( color instanceof Property ) {
-      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] adding Property listener: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] adding Property listener: ${this.svgGradient.gradient.id} : ${this.ratio}` );
       color.lazyLink( this.propertyListener );
       if ( color.value instanceof Color ) {
-        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] adding Color listener: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] adding Color listener: ${this.svgGradient.gradient.id} : ${this.ratio}` );
         color.value.changeEmitter.addListener( this.colorListener );
       }
     }
     else if ( color instanceof Color ) {
-      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] adding Color listener: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] adding Color listener: ${this.svgGradient.gradient.id} : ${this.ratio}` );
       color.changeEmitter.addListener( this.colorListener );
     }
 
@@ -88,11 +88,11 @@ class SVGGradientStop {
    */
   onPropertyChange( newValue, oldValue ) {
     if ( oldValue instanceof Color ) {
-      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] removing Color listener: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] removing Color listener: ${this.svgGradient.gradient.id} : ${this.ratio}` );
       oldValue.changeEmitter.removeListener( this.colorListener );
     }
     if ( newValue instanceof Color ) {
-      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] adding Color listener: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] adding Color listener: ${this.svgGradient.gradient.id} : ${this.ratio}` );
       newValue.changeEmitter.addListener( this.colorListener );
     }
 
@@ -118,7 +118,7 @@ class SVGGradientStop {
     }
     this.dirty = false;
 
-    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] update: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );
+    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] update: ${this.svgGradient.gradient.id} : ${this.ratio}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
     // {Color|string|Property.<Color|string|null>|null}
@@ -146,13 +146,13 @@ class SVGGradientStop {
     // Since this needs to be done quickly, and we don't particularly care about slight rounding differences (it's
     // being used for display purposes only, and is never shown to the user), we use the built-in JS toFixed instead of
     // Dot's version of toFixed. See https://github.com/phetsims/kite/issues/50
-    const stopOpacityRule = 'stop-opacity: ' + scratchColor.a.toFixed( 20 ) + ';';
+    const stopOpacityRule = `stop-opacity: ${scratchColor.a.toFixed( 20 )};`;
 
     // For GC, mutate the color so it is just RGB and output that CSS also
     scratchColor.alpha = 1;
-    const stopColorRule = 'stop-color: ' + scratchColor.toCSS() + ';';
+    const stopColorRule = `stop-color: ${scratchColor.toCSS()};`;
 
-    this.svgElement.setAttribute( 'style', stopColorRule + ' ' + stopOpacityRule );
+    this.svgElement.setAttribute( 'style', `${stopColorRule} ${stopOpacityRule}` );
 
     sceneryLog && sceneryLog.Paints && sceneryLog.pop();
   }
@@ -162,23 +162,23 @@ class SVGGradientStop {
    * @public
    */
   dispose() {
-    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] dispose: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );
+    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] dispose: ${this.svgGradient.gradient.id} : ${this.ratio}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
     const color = this.color;
 
     if ( color instanceof Property ) {
-      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] removing Property listener: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] removing Property listener: ${this.svgGradient.gradient.id} : ${this.ratio}` );
       if ( color.hasListener( this.propertyListener ) ) {
         color.unlink( this.propertyListener );
       }
       if ( color.value instanceof Color ) {
-        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] removing Color listener: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] removing Color listener: ${this.svgGradient.gradient.id} : ${this.ratio}` );
         color.value.changeEmitter.removeListener( this.colorListener );
       }
     }
     else if ( color instanceof Color ) {
-      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradientStop] removing Color listener: ' + this.svgGradient.gradient.id + ' : ' + this.ratio );
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] removing Color listener: ${this.svgGradient.gradient.id} : ${this.ratio}` );
       color.changeEmitter.removeListener( this.colorListener );
     }
 

@@ -109,7 +109,7 @@ class Text extends Node {
     assert && assert( typeof text === 'number' || typeof text === 'string', 'text should be a string or number' );
 
     // cast it to a string (for numbers, etc., and do it before the change guard so we don't accidentally trigger on non-changed text)
-    text = '' + text;
+    text = `${text}`;
 
     this._textProperty.set( text );
 
@@ -724,7 +724,7 @@ class Text extends Node {
    * @returns {string}
    */
   getDebugHTMLExtras() {
-    return ' "' + escapeHTML( this.renderedText ) + '"' + ( this._isHTML ? ' (html)' : '' );
+    return ` "${escapeHTML( this.renderedText )}"${this._isHTML ? ' (html)' : ''}`;
   }
 
   // @public
@@ -794,7 +794,7 @@ class Text extends Node {
       }
       // Pop a direction
       else if ( chr === POP ) {
-        assert && assert( current.parent, 'Bad nesting of embedding marks: ' + Text.embeddedDebugString( string ) );
+        assert && assert( current.parent, `Bad nesting of embedding marks: ${Text.embeddedDebugString( string )}` );
         current = current.parent;
       }
       // Append characters to the current direction
@@ -802,7 +802,7 @@ class Text extends Node {
         current.children.push( chr );
       }
     }
-    assert && assert( current === root, 'Bad nesting of embedding marks: ' + Text.embeddedDebugString( string ) );
+    assert && assert( current === root, `Bad nesting of embedding marks: ${Text.embeddedDebugString( string )}` );
 
     // Remove redundant nesting (e.g. [LTR][LTR]...[POP][POP])
     function collapseNesting( node ) {
@@ -861,7 +861,7 @@ class Text extends Node {
       }
       const childString = node.children.map( stringify ).join( '' );
       if ( node.dir ) {
-        return node.dir + childString + '\u202c';
+        return `${node.dir + childString}\u202c`;
       }
       else {
         return childString;

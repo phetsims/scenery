@@ -289,10 +289,10 @@ class GreedyStitcher extends Stitcher {
     assert && assert( lastStitchDrawable instanceof Drawable, 'We assume we have a non-null remaining section' );
     assert && assert( !interval.isEmpty(), 'We now guarantee that the intervals are non-empty' );
 
-    sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'interval: ' +
-                                                                        ( interval.drawableBefore ? interval.drawableBefore.toString() : 'null' ) +
-                                                                        ' to ' +
-                                                                        ( interval.drawableAfter ? interval.drawableAfter.toString() : 'null' ) );
+    sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( `interval: ${
+                                                                         interval.drawableBefore ? interval.drawableBefore.toString() : 'null'
+                                                                        } to ${
+                                                                         interval.drawableAfter ? interval.drawableAfter.toString() : 'null'}` );
     sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
 
     // check if our interval removes everything, we may need a glue
@@ -350,7 +350,7 @@ class GreedyStitcher extends Stitcher {
         if ( matchedBlock === null && drawable.parentDrawable && !drawable.parentDrawable.used && drawable.backbone === backbone &&
              drawable.parentDrawable.parentDrawable === backbone ) {
           matchedBlock = drawable.parentDrawable;
-          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'matching at ' + drawable.toString() + ' with ' + matchedBlock );
+          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( `matching at ${drawable.toString()} with ${matchedBlock}` );
         }
 
         if ( isLast || hasGapBetweenDrawables( drawable, nextDrawable ) ) {
@@ -392,8 +392,8 @@ class GreedyStitcher extends Stitcher {
    */
   processSubBlock( interval, firstDrawable, lastDrawable, matchedBlock, isFirst, isLast ) {
     sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose(
-      'sub-block: ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() + ' ' +
-      ( matchedBlock ? 'with matched: ' + matchedBlock.toString() : 'with no match' ) );
+      `sub-block: ${firstDrawable.toString()} to ${lastDrawable.toString()} ${
+       matchedBlock ? `with matched: ${matchedBlock.toString()}` : 'with no match'}` );
     sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
 
     const openBefore = isOpenBefore( firstDrawable );
@@ -408,13 +408,13 @@ class GreedyStitcher extends Stitcher {
     // if our sub-block gets combined into the previous block, use its block instead of any match-scanned blocks
     if ( openBefore ) {
       matchedBlock = firstDrawable.previousDrawable.pendingParentDrawable;
-      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'combining into before block: ' + matchedBlock.toString() );
+      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( `combining into before block: ${matchedBlock.toString()}` );
     }
 
     // if our sub-block gets combined into the next block, use its block instead of any match-scanned blocks
     if ( openAfter ) {
       matchedBlock = lastDrawable.nextDrawable.pendingParentDrawable;
-      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'combining into after block: ' + matchedBlock.toString() );
+      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( `combining into after block: ${matchedBlock.toString()}` );
     }
 
     // create a block if matchedBlock is null, otherwise mark it as used (if it is in reusableBlocks)
@@ -469,17 +469,17 @@ class GreedyStitcher extends Stitcher {
       }
 
       sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose(
-        'edge case: ' +
-        ( openBefore ? 'open-before ' : '' ) +
-        ( openAfter ? 'open-after ' : '' ) +
-        beforeBlock.toString() + ' to ' + afterBlock.toString() );
+        `edge case: ${
+         openBefore ? 'open-before ' : ''
+         }${openAfter ? 'open-after ' : ''
+        }${beforeBlock.toString()} to ${afterBlock.toString()}` );
       sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
 
       // deciding what new block should be used for the external group of drawables after our change interval
       let newAfterBlock;
       // if we have no gaps/boundaries, we should not have two different blocks
       if ( openBefore && openAfter ) {
-        sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'glue using ' + beforeBlock.toString() );
+        sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( `glue using ${beforeBlock.toString()}` );
         newAfterBlock = beforeBlock;
       }
       else {
@@ -494,7 +494,7 @@ class GreedyStitcher extends Stitcher {
         }
         // otherwise we can use our after block
         else {
-          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'split with same afterBlock ' + afterBlock.toString() );
+          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( `split with same afterBlock ${afterBlock.toString()}` );
           newAfterBlock = afterBlock;
         }
       }
@@ -520,7 +520,7 @@ class GreedyStitcher extends Stitcher {
 
         // If our block wasn't added yet, it wouldn't ever be added later naturally (so we mark it as reusable).
         if ( !this.blockWasAdded ) {
-          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'unusing ' + afterBlock.toString() );
+          sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( `unusing ${afterBlock.toString()}` );
           this.unuseBlock( afterBlock );
         }
         this.blockWasAdded = false;
@@ -583,7 +583,7 @@ class GreedyStitcher extends Stitcher {
   ensureUsedBlock( currentBlock, someIncludedDrawable ) {
     // if we have a matched block (or started with one)
     if ( currentBlock ) {
-      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'using existing block: ' + currentBlock.toString() );
+      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( `using existing block: ${currentBlock.toString()}` );
       // since our currentBlock may be from reusableBlocks, we will need to mark it as used now.
       if ( !currentBlock.used ) {
         this.useBlock( currentBlock );
@@ -644,12 +644,12 @@ class GreedyStitcher extends Stitcher {
    */
   unuseBlock( block ) {
     if ( block.used ) {
-      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'unusing block: ' + block.toString() );
+      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( `unusing block: ${block.toString()}` );
       block.used = false; // mark it as unused until we pull it out (so we can reuse, or quickly identify)
       this.reusableBlocks.push( block );
     }
     else {
-      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'not using already-unused block: ' + block.toString() );
+      sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( `not using already-unused block: ${block.toString()}` );
     }
   }
 
@@ -670,9 +670,9 @@ class GreedyStitcher extends Stitcher {
    * @param {number} index
    */
   useBlockAtIndex( block, index ) {
-    sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'using reusable block: ' + block.toString() + ' with renderer: ' + block.renderer );
+    sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( `using reusable block: ${block.toString()} with renderer: ${block.renderer}` );
 
-    assert && assert( index >= 0 && this.reusableBlocks[ index ] === block, 'bad index for useBlockAtIndex: ' + index );
+    assert && assert( index >= 0 && this.reusableBlocks[ index ] === block, `bad index for useBlockAtIndex: ${index}` );
 
     assert && assert( !block.used, 'Should be called on an unused (reusable) block' );
 
@@ -705,7 +705,7 @@ class GreedyStitcher extends Stitcher {
    * @param {Drawable} drawable
    */
   linkBeforeDrawable( drawable ) {
-    sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'link before ' + drawable.toString() );
+    sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( `link before ${drawable.toString()}` );
     const beforeDrawable = drawable.previousDrawable;
     this.linkBlocks( beforeDrawable ? beforeDrawable.pendingParentDrawable : null,
       drawable.pendingParentDrawable,
@@ -721,7 +721,7 @@ class GreedyStitcher extends Stitcher {
    * @param {Drawable} drawable
    */
   linkAfterDrawable( drawable ) {
-    sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( 'link after ' + drawable.toString() );
+    sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( `link after ${drawable.toString()}` );
     const afterDrawable = drawable.nextDrawable;
     this.linkBlocks( drawable.pendingParentDrawable,
       afterDrawable ? afterDrawable.pendingParentDrawable : null,
@@ -746,10 +746,10 @@ class GreedyStitcher extends Stitcher {
    * @param {Drawable|null} afterDrawable
    */
   linkBlocks( beforeBlock, afterBlock, beforeDrawable, afterDrawable ) {
-    sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.GreedyStitcher( 'linking blocks: ' +
-                                                                          ( beforeBlock ? ( beforeBlock.toString() + ' (' + beforeDrawable.toString() + ')' ) : 'null' ) +
-                                                                          ' to ' +
-                                                                          ( afterBlock ? ( afterBlock.toString() + ' (' + afterDrawable.toString() + ')' ) : 'null' ) );
+    sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.GreedyStitcher( `linking blocks: ${
+                                                                           beforeBlock ? ( `${beforeBlock.toString()} (${beforeDrawable.toString()})` ) : 'null'
+                                                                          } to ${
+                                                                           afterBlock ? ( `${afterBlock.toString()} (${afterDrawable.toString()})` ) : 'null'}` );
     sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.push();
 
     assert && assert( ( beforeBlock === null && beforeDrawable === null ) ||
@@ -801,7 +801,7 @@ class GreedyStitcher extends Stitcher {
       backbone.blocks.pop();
     }
 
-    sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.GreedyStitcher( 'processBlockLinkedList: ' + firstBlock.toString() + ' to ' + lastBlock.toString() );
+    sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.GreedyStitcher( `processBlockLinkedList: ${firstBlock.toString()} to ${lastBlock.toString()}` );
     sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.push();
 
     // leave the array as-is if there are no blocks

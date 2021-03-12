@@ -439,7 +439,7 @@ const PDOMUtils = {
     if ( assert ) {
       for ( let i = 0; i < objectKeys.length; i++ ) {
         const objectKey = objectKeys[ i ];
-        assert && assert( expectedKeys.indexOf( objectKey ) >= 0, 'unexpected key: ' + objectKey );
+        assert && assert( expectedKeys.indexOf( objectKey ) >= 0, `unexpected key: ${objectKey}` );
       }
     }
 

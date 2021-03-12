@@ -163,14 +163,14 @@ Renderer.createSelfDrawable = function( instance, node, selfRenderer, fittable )
     drawable = node.createWebGLDrawable( selfRenderer, instance );
   }
   else {
-    throw new Error( 'Unrecognized renderer: ' + selfRenderer );
+    throw new Error( `Unrecognized renderer: ${selfRenderer}` );
   }
 
   // Check to make sure that all of the drawables have the required mark-dirty methods available.
   if ( assert ) {
     _.each( node.drawableMarkFlags, flag => {
-      const methodName = 'markDirty' + flag[ 0 ].toUpperCase() + flag.slice( 1 );
-      assert( typeof drawable[ methodName ] === 'function', 'Did not find ' + methodName );
+      const methodName = `markDirty${flag[ 0 ].toUpperCase()}${flag.slice( 1 )}`;
+      assert( typeof drawable[ methodName ] === 'function', `Did not find ${methodName}` );
     } );
   }
 

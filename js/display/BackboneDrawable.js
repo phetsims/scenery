@@ -126,7 +126,7 @@ class BackboneDrawable extends Drawable {
 
     this.stitcher = this.stitcher || ( useGreedyStitcher ? new GreedyStitcher() : new RebuildStitcher() );
 
-    sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'initialized ' + this.toString() );
+    sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( `initialized ${this.toString()}` );
   }
 
   /**
@@ -134,7 +134,7 @@ class BackboneDrawable extends Drawable {
    * @public
    */
   dispose() {
-    sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( 'dispose ' + this.toString() );
+    sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( `dispose ${this.toString()}` );
     sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.push();
 
 
@@ -184,7 +184,7 @@ class BackboneDrawable extends Drawable {
   markBlocksForDisposal() {
     while ( this.blocks.length ) {
       const block = this.blocks.pop();
-      sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( this.toString() + ' removing block: ' + block.toString() );
+      sceneryLog && sceneryLog.BackboneDrawable && sceneryLog.BackboneDrawable( `${this.toString()} removing block: ${block.toString()}` );
       //TODO: PERFORMANCE: does this cause reflows / style calculation
       if ( block.domElement.parentNode === this.domElement ) {
         // guarded, since we may have a (new) child drawable add it before we can remove it
@@ -424,7 +424,7 @@ class BackboneDrawable extends Drawable {
     assert && assert( lastChangeInterval.nextChangeInterval === null, 'This allows us to have less checks in the loop' );
 
     if ( sceneryLog && sceneryLog.Stitch ) {
-      sceneryLog.Stitch( 'Stitch intervals before constricting: ' + this.toString() );
+      sceneryLog.Stitch( `Stitch intervals before constricting: ${this.toString()}` );
       sceneryLog.push();
       Stitcher.debugIntervals( firstChangeInterval );
       sceneryLog.pop();
@@ -466,7 +466,7 @@ class BackboneDrawable extends Drawable {
     lastChangeInterval.nextChangeInterval = null;
 
     if ( sceneryLog && sceneryLog.Stitch && intervalsChanged ) {
-      sceneryLog.Stitch( 'Stitch intervals after constricting: ' + this.toString() );
+      sceneryLog.Stitch( `Stitch intervals after constricting: ${this.toString()}` );
       sceneryLog.push();
       Stitcher.debugIntervals( firstChangeInterval );
       sceneryLog.pop();

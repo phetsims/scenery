@@ -44,7 +44,7 @@ class WebGLBlock extends FittedBlock {
    * @returns {WebGLBlock} - For chaining
    */
   initialize( display, renderer, transformRootInstance, filterRootInstance ) {
-    sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'initialize #' + this.id );
+    sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( `initialize #${this.id}` );
     sceneryLog && sceneryLog.WebGLBlock && sceneryLog.push();
 
     // WebGLBlocks are hard-coded to take the full display size (as opposed to svg and canvas)
@@ -126,7 +126,7 @@ class WebGLBlock extends FittedBlock {
    * canvas to get a valid context).
    */
   rebuildCanvas() {
-    sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'rebuildCanvas #' + this.id );
+    sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( `rebuildCanvas #${this.id}` );
     sceneryLog && sceneryLog.WebGLBlock && sceneryLog.push();
 
     const canvas = document.createElement( 'canvas' );
@@ -148,7 +148,7 @@ class WebGLBlock extends FittedBlock {
       this.canvas.style.pointerEvents = 'none';
 
       // @private {number} - unique ID so that we can support rasterization with Display.foreignObjectRasterization
-      this.canvasId = this.canvas.id = 'scenery-webgl' + this.id;
+      this.canvasId = this.canvas.id = `scenery-webgl${this.id}`;
 
       this.canvas.addEventListener( 'webglcontextlost', this.contextLostListener, false );
       this.canvas.addEventListener( 'webglcontextrestored', this.contextRestoreListener, false );
@@ -168,7 +168,7 @@ class WebGLBlock extends FittedBlock {
    * @param {WebGLRenderingContext} gl
    */
   setupContext( gl ) {
-    sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'setupContext #' + this.id );
+    sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( `setupContext #${this.id}` );
     sceneryLog && sceneryLog.WebGLBlock && sceneryLog.push();
 
     assert && assert( gl, 'Should have an actual context if this is called' );
@@ -219,12 +219,12 @@ class WebGLBlock extends FittedBlock {
    * @private
    */
   delayedRebuildCanvas() {
-    sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'Delaying rebuilding of Canvas #' + this.id );
+    sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( `Delaying rebuilding of Canvas #${this.id}` );
     const self = this;
 
     // TODO: Can we move this to before the update() step? Could happen same-frame in that case.
     window.setTimeout( function() {
-      sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'Executing delayed rebuilding #' + this.id );
+      sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( `Executing delayed rebuilding #${this.id}` );
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.push();
       self.rebuildCanvas();
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.pop();
@@ -239,7 +239,7 @@ class WebGLBlock extends FittedBlock {
    */
   onContextLoss( domEvent ) {
     if ( !this.isContextLost ) {
-      sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'Context lost #' + this.id );
+      sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( `Context lost #${this.id}` );
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.push();
 
       this.isContextLost = true;
@@ -263,7 +263,7 @@ class WebGLBlock extends FittedBlock {
    */
   onContextRestoration( domEvent ) {
     if ( this.isContextLost ) {
-      sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'Context restored #' + this.id );
+      sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( `Context restored #${this.id}` );
       sceneryLog && sceneryLog.WebGLBlock && sceneryLog.push();
 
       const gl = this.getContextFromCanvas( this.canvas );
@@ -306,8 +306,8 @@ class WebGLBlock extends FittedBlock {
     const size = this.display.getSize();
     this.canvas.width = Math.ceil( size.width * this.backingScale );
     this.canvas.height = Math.ceil( size.height * this.backingScale );
-    this.canvas.style.width = size.width + 'px';
-    this.canvas.style.height = size.height + 'px';
+    this.canvas.style.width = `${size.width}px`;
+    this.canvas.style.height = `${size.height}px`;
   }
 
   /**
@@ -332,7 +332,7 @@ class WebGLBlock extends FittedBlock {
       return false;
     }
 
-    sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'update #' + this.id );
+    sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( `update #${this.id}` );
     sceneryLog && sceneryLog.WebGLBlock && sceneryLog.push();
 
     const gl = this.gl;
@@ -448,7 +448,7 @@ class WebGLBlock extends FittedBlock {
    * @public
    */
   dispose() {
-    sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( 'dispose #' + this.id );
+    sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( `dispose #${this.id}` );
 
     // TODO: many things to dispose!?
 
@@ -464,7 +464,7 @@ class WebGLBlock extends FittedBlock {
    * @param {Drawable} drawable
    */
   markDirtyDrawable( drawable ) {
-    sceneryLog && sceneryLog.dirty && sceneryLog.dirty( 'markDirtyDrawable on WebGLBlock#' + this.id + ' with ' + drawable.toString() );
+    sceneryLog && sceneryLog.dirty && sceneryLog.dirty( `markDirtyDrawable on WebGLBlock#${this.id} with ${drawable.toString()}` );
 
     assert && assert( drawable );
     assert && assert( !drawable.isDisposed );
@@ -481,7 +481,7 @@ class WebGLBlock extends FittedBlock {
    * @param {Drawable} drawable
    */
   addDrawable( drawable ) {
-    sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( '#' + this.id + '.addDrawable ' + drawable.toString() );
+    sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( `#${this.id}.addDrawable ${drawable.toString()}` );
 
     super.addDrawable( drawable );
 
@@ -496,7 +496,7 @@ class WebGLBlock extends FittedBlock {
    * @param {Drawable} drawable
    */
   removeDrawable( drawable ) {
-    sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( '#' + this.id + '.removeDrawable ' + drawable.toString() );
+    sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( `#${this.id}.removeDrawable ${drawable.toString()}` );
 
     // Ensure a removed drawable is not present in the dirtyDrawables array afterwards. Don't want to update it.
     // See https://github.com/phetsims/scenery/issues/635
@@ -565,7 +565,7 @@ class WebGLBlock extends FittedBlock {
    * @param {Drawable} lastDrawable
    */
   onIntervalChange( firstDrawable, lastDrawable ) {
-    sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( '#' + this.id + '.onIntervalChange ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() );
+    sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( `#${this.id}.onIntervalChange ${firstDrawable.toString()} to ${lastDrawable.toString()}` );
 
     super.onIntervalChange( firstDrawable, lastDrawable );
 
@@ -578,7 +578,7 @@ class WebGLBlock extends FittedBlock {
    * @param {Drawable} drawable
    */
   onPotentiallyMovedDrawable( drawable ) {
-    sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( '#' + this.id + '.onPotentiallyMovedDrawable ' + drawable.toString() );
+    sceneryLog && sceneryLog.WebGLBlock && sceneryLog.WebGLBlock( `#${this.id}.onPotentiallyMovedDrawable ${drawable.toString()}` );
     sceneryLog && sceneryLog.WebGLBlock && sceneryLog.push();
 
     assert && assert( drawable.parentDrawable === this );
@@ -595,7 +595,7 @@ class WebGLBlock extends FittedBlock {
    * @returns {string}
    */
   toString() {
-    return 'WebGLBlock#' + this.id + '-' + FittedBlock.fitString[ this.fit ];
+    return `WebGLBlock#${this.id}-${FittedBlock.fitString[ this.fit ]}`;
   }
 }
 

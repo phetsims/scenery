@@ -26,7 +26,7 @@ class SVGPattern {
    * @param {Pattern} pattern
    */
   initialize( pattern ) {
-    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGPattern] initialize: ' + pattern.id );
+    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGPattern] initialize: ${pattern.id}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
     const hasPreviousDefinition = this.definition !== undefined;
@@ -58,8 +58,8 @@ class SVGPattern {
     this.imageElement = this.imageElement || document.createElementNS( svgns, 'image' );
     this.imageElement.setAttribute( 'x', '0' );
     this.imageElement.setAttribute( 'y', '0' );
-    this.imageElement.setAttribute( 'width', pattern.image.width + 'px' );
-    this.imageElement.setAttribute( 'height', pattern.image.height + 'px' );
+    this.imageElement.setAttribute( 'width', `${pattern.image.width}px` );
+    this.imageElement.setAttribute( 'height', `${pattern.image.height}px` );
     this.imageElement.setAttributeNS( xlinkns, 'xlink:href', pattern.image.src );
     if ( !hasPreviousDefinition ) {
       this.definition.appendChild( this.imageElement );

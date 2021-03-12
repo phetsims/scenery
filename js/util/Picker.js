@@ -90,7 +90,7 @@ class Picker {
   hitTest( point, useMouse, useTouch ) {
     assert && assert( point, 'trailUnderPointer requires a point' );
 
-    sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( '-------------- ' + this.node.constructor.name + '#' + this.node.id );
+    sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( `-------------- ${this.node.constructor.name}#${this.node.id}` );
 
     const isBaseInclusive = this.selfInclusive;
 
@@ -135,8 +135,8 @@ class Picker {
     // If we are selfPruned, ignore this node and its subtree (invisible or pickable:false).
     // If the search is NOT inclusive (no listener equivalent), also ignore this subtree if subtreePrunable is true.
     if ( this.selfPruned || ( !isInclusive && this.subtreePrunable ) ) {
-      sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( this.node.constructor.name + '#' + this.node.id +
-                                                              ' pruned ' + ( this.selfPruned ? '(self)' : '(subtree)' ) );
+      sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( `${this.node.constructor.name}#${this.node.id
+                                                              } pruned ${this.selfPruned ? '(self)' : '(subtree)'}` );
       return null;
     }
 
@@ -157,7 +157,7 @@ class Picker {
 
     // Bail quickly if our point is not inside the bounds for the subtree.
     if ( !pruningBounds.containsPoint( point ) ) {
-      sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( this.node.constructor.name + '#' + this.node.id + ' pruned: ' + ( useMouse ? 'mouse' : ( useTouch ? 'touch' : 'regular' ) ) );
+      sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( `${this.node.constructor.name}#${this.node.id} pruned: ${useMouse ? 'mouse' : ( useTouch ? 'touch' : 'regular' )}` );
       return null; // not in our bounds, so this point can't possibly be contained
     }
 
@@ -166,11 +166,11 @@ class Picker {
 
     // If our point is outside of the local-coordinate clipping area, there should be no hit.
     if ( this.node.hasClipArea() && !this.node.clipArea.containsPoint( localPoint ) ) {
-      sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( this.node.constructor.name + '#' + this.node.id + ' out of clip area' );
+      sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( `${this.node.constructor.name}#${this.node.id} out of clip area` );
       return null;
     }
 
-    sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( this.node.constructor.name + '#' + this.node.id );
+    sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( `${this.node.constructor.name}#${this.node.id}` );
 
     // Check children before our "self", since the children are rendered on top.
     // Manual iteration here so we can return directly, and so we can iterate backwards (last node is in front).
@@ -189,12 +189,12 @@ class Picker {
 
     // Tests for mouse and touch hit areas before testing containsPointSelf
     if ( useMouse && this.node._mouseArea ) {
-      sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( this.node.constructor.name + '#' + this.node.id + ' mouse area hit' );
+      sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( `${this.node.constructor.name}#${this.node.id} mouse area hit` );
       // NOTE: both Bounds2 and Shape have containsPoint! We use both here!
       return this.node._mouseArea.containsPoint( localPoint ) ? new Trail( this.node ) : null;
     }
     if ( useTouch && this.node._touchArea ) {
-      sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( this.node.constructor.name + '#' + this.node.id + ' touch area hit' );
+      sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( `${this.node.constructor.name}#${this.node.id} touch area hit` );
       // NOTE: both Bounds2 and Shape have containsPoint! We use both here!
       return this.node._touchArea.containsPoint( localPoint ) ? new Trail( this.node ) : null;
     }
@@ -203,7 +203,7 @@ class Picker {
     // avoid hit-testing the actual object (which may be more expensive).
     if ( this.node.selfBounds.containsPoint( localPoint ) ) {
       if ( this.node.containsPointSelf( localPoint ) ) {
-        sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( this.node.constructor.name + '#' + this.node.id + ' self hit' );
+        sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( `${this.node.constructor.name}#${this.node.id} self hit` );
         return new Trail( this.node );
       }
     }

@@ -83,13 +83,13 @@ class RectangleDOMDrawable extends RectangleStatefulDrawable( DOMSelfDrawable ) 
       const borderRadiusDirty = this.dirtyCornerXRadius || this.dirtyCornerYRadius;
 
       if ( this.dirtyWidth ) {
-        fillElement.style.width = node._rectWidth + 'px';
+        fillElement.style.width = `${node._rectWidth}px`;
       }
       if ( this.dirtyHeight ) {
-        fillElement.style.height = node._rectHeight + 'px';
+        fillElement.style.height = `${node._rectHeight}px`;
       }
       if ( borderRadiusDirty ) {
-        fillElement.style[ Features.borderRadius ] = borderRadius + 'px'; // if one is zero, we are not rounded, so we do the min here
+        fillElement.style[ Features.borderRadius ] = `${borderRadius}px`; // if one is zero, we are not rounded, so we do the min here
       }
       if ( this.dirtyFill ) {
         fillElement.style.backgroundColor = node.getCSSFill();
@@ -111,15 +111,15 @@ class RectangleDOMDrawable extends RectangleStatefulDrawable( DOMSelfDrawable ) 
         const hadNoStrokeBefore = !this.hadStroke;
 
         if ( hadNoStrokeBefore || this.dirtyWidth || this.dirtyLineWidth ) {
-          strokeElement.style.width = ( node._rectWidth - node.getLineWidth() ) + 'px';
+          strokeElement.style.width = `${node._rectWidth - node.getLineWidth()}px`;
         }
         if ( hadNoStrokeBefore || this.dirtyHeight || this.dirtyLineWidth ) {
-          strokeElement.style.height = ( node._rectHeight - node.getLineWidth() ) + 'px';
+          strokeElement.style.height = `${node._rectHeight - node.getLineWidth()}px`;
         }
         if ( hadNoStrokeBefore || this.dirtyLineWidth ) {
-          strokeElement.style.left = ( -node.getLineWidth() / 2 ) + 'px';
-          strokeElement.style.top = ( -node.getLineWidth() / 2 ) + 'px';
-          strokeElement.style.borderWidth = node.getLineWidth() + 'px';
+          strokeElement.style.left = `${-node.getLineWidth() / 2}px`;
+          strokeElement.style.top = `${-node.getLineWidth() / 2}px`;
+          strokeElement.style.borderWidth = `${node.getLineWidth()}px`;
         }
 
         if ( hadNoStrokeBefore || this.dirtyStroke ) {
@@ -127,7 +127,7 @@ class RectangleDOMDrawable extends RectangleStatefulDrawable( DOMSelfDrawable ) 
         }
 
         if ( hadNoStrokeBefore || borderRadiusDirty || this.dirtyLineWidth || this.dirtyLineOptions ) {
-          strokeElement.style[ Features.borderRadius ] = ( node.isRounded() || node.getLineJoin() === 'round' ) ? ( borderRadius + node.getLineWidth() / 2 ) + 'px' : '0';
+          strokeElement.style[ Features.borderRadius ] = ( node.isRounded() || node.getLineJoin() === 'round' ) ? `${borderRadius + node.getLineWidth() / 2}px` : '0';
         }
       }
     }

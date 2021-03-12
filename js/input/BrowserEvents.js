@@ -290,7 +290,7 @@ const BrowserEvents = {
         document[ method ]( type, noop, BrowserEvents.getEventOptions( passiveEvents, false ) );
       }
 
-      const callback = this[ 'on' + type ];
+      const callback = this[ `on${type}` ];
       assert && assert( !!callback );
 
       // Workaround for older browsers needed,

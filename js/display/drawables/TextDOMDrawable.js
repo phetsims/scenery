@@ -74,8 +74,8 @@ class TextDOMDrawable extends TextStatefulDrawable( DOMSelfDrawable ) {
         div.style.color = node.getCSSFill();
       }
       if ( this.dirtyBounds ) { // TODO: this condition is set on invalidateText, so it's almost always true?
-        div.style.width = node.getSelfBounds().width + 'px';
-        div.style.height = node.getSelfBounds().height + 'px';
+        div.style.width = `${node.getSelfBounds().width}px`;
+        div.style.height = `${node.getSelfBounds().height}px`;
         // TODO: do we require the jQuery versions here, or are they vestigial?
         // $div.width( node.getSelfBounds().width );
         // $div.height( node.getSelfBounds().height );

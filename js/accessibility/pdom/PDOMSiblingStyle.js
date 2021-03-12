@@ -20,8 +20,8 @@ const ROOT_CLASS_NAME = 'a11y-pdom-root';
 
 // All elements that use PDOMUtils.createElement should have this style. The only exception is the root of
 // the PDOM, which should use root class attributes instead.
-SceneryStyle.addRule( '.' + SIBLING_CLASS_NAME +
-                      '{' +
+SceneryStyle.addRule( `.${SIBLING_CLASS_NAME
+                      }{` +
 
                       // 'fixed' positions elements relative to the ViewPort (global coordinate frame), a requirement for the approach
                       // in PDOMPeer.positionElements
@@ -60,8 +60,8 @@ SceneryStyle.addRule( '.' + SIBLING_CLASS_NAME +
                       '}'
 );
 
-SceneryStyle.addRule( '.' + ROOT_CLASS_NAME +
-                      '{' +
+SceneryStyle.addRule( `.${ROOT_CLASS_NAME
+                      }{` +
                       // so that this root can also be positioned
                       'position: absolute;' +
 

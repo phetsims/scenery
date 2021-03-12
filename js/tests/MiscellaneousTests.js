@@ -43,7 +43,7 @@ if ( includeBleedingEdgeCanvasTests ) {
       'resetTransform'
     ];
     _.each( neededMethods, method => {
-      assert.ok( context[ method ] !== undefined, 'context.' + method );
+      assert.ok( context[ method ] !== undefined, `context.${method}` );
     } );
   } );
 
@@ -56,7 +56,7 @@ if ( includeBleedingEdgeCanvasTests ) {
     const context = canvas.getContext( '2d' );
     const metrics = context.measureText( 'Hello World' );
     _.each( [ 'actualBoundingBoxLeft', 'actualBoundingBoxRight', 'actualBoundingBoxAscent', 'actualBoundingBoxDescent' ], method => {
-      assert.ok( metrics[ method ] !== undefined, 'metrics.' + method );
+      assert.ok( metrics[ method ] !== undefined, `metrics.${method}` );
     } );
   } );
 }

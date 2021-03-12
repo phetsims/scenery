@@ -30,7 +30,7 @@ class ShapeBasedOverlay {
     function resize( width, height ) {
       svg.setAttribute( 'width', width );
       svg.setAttribute( 'height', height );
-      svg.style.clip = 'rect(0px,' + width + 'px,' + height + 'px,0px)';
+      svg.style.clip = `rect(0px,${width}px,${height}px,0px)`;
     }
 
     display.sizeProperty.link( dimension => {
@@ -64,7 +64,7 @@ class ShapeBasedOverlay {
       path.removeAttribute( 'd' );
     }
 
-    path.setAttribute( 'style', 'fill: none; stroke: ' + color + '; stroke-dasharray: 5, 3; stroke-dashoffset: ' + ( isOffset ? 5 : 0 ) + '; stroke-width: 3;' );
+    path.setAttribute( 'style', `fill: none; stroke: ${color}; stroke-dasharray: 5, 3; stroke-dashoffset: ${isOffset ? 5 : 0}; stroke-width: 3;` );
     this.svg.appendChild( path );
   }
 

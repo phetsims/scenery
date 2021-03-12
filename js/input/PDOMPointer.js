@@ -38,7 +38,7 @@ class PDOMPointer extends Pointer {
     // TODO: Can we do this for more than keydown/keyup? See https://github.com/phetsims/scenery/issues/942
     this.keydownTargetNode = null;
 
-    sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'Created ' + this.toString() );
+    sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( `Created ${this.toString()}` );
   }
 
   /**

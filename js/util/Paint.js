@@ -13,7 +13,7 @@ let globalId = 1;
 class Paint {
   constructor() {
     // @public (scenery-internal) {string}
-    this.id = 'paint' + globalId++;
+    this.id = `paint${globalId++}`;
 
     // @protected {Matrix3|null}
     this.transformMatrix = null;

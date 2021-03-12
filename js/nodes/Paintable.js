@@ -299,7 +299,7 @@ const Paintable = {
        * @returns {Paintable} - Returns 'this' reference, for chaining
        */
       setStrokePickable: function( pickable ) {
-        assert && assert( typeof pickable === 'boolean', 'strokePickable should be a boolean, not ' + pickable );
+        assert && assert( typeof pickable === 'boolean', `strokePickable should be a boolean, not ${pickable}` );
 
         if ( this._strokePickable !== pickable ) {
           this._strokePickable = pickable;
@@ -330,8 +330,8 @@ const Paintable = {
        * @returns {Paintable} - Returns 'this' reference, for chaining
        */
       setLineWidth: function( lineWidth ) {
-        assert && assert( typeof lineWidth === 'number', 'lineWidth should be a number, not ' + lineWidth );
-        assert && assert( lineWidth >= 0, 'lineWidth should be non-negative instead of ' + lineWidth );
+        assert && assert( typeof lineWidth === 'number', `lineWidth should be a number, not ${lineWidth}` );
+        assert && assert( lineWidth >= 0, `lineWidth should be non-negative instead of ${lineWidth}` );
 
         if ( this.getLineWidth() !== lineWidth ) {
           this._lineDrawingStyles.lineWidth = lineWidth;
@@ -369,7 +369,7 @@ const Paintable = {
        */
       setLineCap: function( lineCap ) {
         assert && assert( lineCap === 'butt' || lineCap === 'round' || lineCap === 'square',
-          'lineCap should be one of "butt", "round" or "square", not ' + lineCap );
+          `lineCap should be one of "butt", "round" or "square", not ${lineCap}` );
 
         if ( this._lineDrawingStyles.lineCap !== lineCap ) {
           this._lineDrawingStyles.lineCap = lineCap;
@@ -408,7 +408,7 @@ const Paintable = {
        */
       setLineJoin: function( lineJoin ) {
         assert && assert( lineJoin === 'miter' || lineJoin === 'round' || lineJoin === 'bevel',
-          'lineJoin should be one of "miter", "round" or "bevel", not ' + lineJoin );
+          `lineJoin should be one of "miter", "round" or "bevel", not ${lineJoin}` );
 
         if ( this._lineDrawingStyles.lineJoin !== lineJoin ) {
           this._lineDrawingStyles.lineJoin = lineJoin;
@@ -524,7 +524,7 @@ const Paintable = {
        */
       setLineDashOffset: function( lineDashOffset ) {
         assert && assert( typeof lineDashOffset === 'number' && isFinite( lineDashOffset ),
-          'lineDashOffset should be a number, not ' + lineDashOffset );
+          `lineDashOffset should be a number, not ${lineDashOffset}` );
 
         if ( this._lineDrawingStyles.lineDashOffset !== lineDashOffset ) {
           this._lineDrawingStyles.lineDashOffset = lineDashOffset;
@@ -769,10 +769,10 @@ const Paintable = {
             result += ',\n';
           }
           if ( typeof this.getFillValue() === 'string' ) {
-            result += spaces + 'fill: \'' + this.getFillValue() + '\'';
+            result += `${spaces}fill: '${this.getFillValue()}'`;
           }
           else {
-            result += spaces + 'fill: ' + this.getFillValue().toString();
+            result += `${spaces}fill: ${this.getFillValue().toString()}`;
           }
         }
 
@@ -796,10 +796,10 @@ const Paintable = {
             result += ',\n';
           }
           if ( !nowrap && typeof value === 'string' ) {
-            result += spaces + key + ': \'' + value + '\'';
+            result += `${spaces + key}: '${value}'`;
           }
           else {
-            result += spaces + key + ': ' + value;
+            result += `${spaces + key}: ${value}`;
           }
         }
 

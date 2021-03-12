@@ -97,7 +97,7 @@ class AlignBox extends Node {
    * re-check.
    */
   invalidateAlignment() {
-    sceneryLog && sceneryLog.AlignBox && sceneryLog.AlignBox( 'AlignBox#' + this.id + ' invalidateAlignment' );
+    sceneryLog && sceneryLog.AlignBox && sceneryLog.AlignBox( `AlignBox#${this.id} invalidateAlignment` );
     sceneryLog && sceneryLog.AlignBox && sceneryLog.push();
 
     // The group update will change our alignBounds if required.
@@ -551,7 +551,7 @@ class AlignBox extends Node {
    * @returns {Bounds2}
    */
   getContentBounds() {
-    sceneryLog && sceneryLog.AlignBox && sceneryLog.AlignBox( 'AlignBox#' + this.id + ' getContentBounds' );
+    sceneryLog && sceneryLog.AlignBox && sceneryLog.AlignBox( `AlignBox#${this.id} getContentBounds` );
     sceneryLog && sceneryLog.AlignBox && sceneryLog.push();
 
     const bounds = this._content.bounds;
@@ -593,7 +593,7 @@ class AlignBox extends Node {
     if ( this._layoutLock ) { return; }
     this._layoutLock = true;
 
-    sceneryLog && sceneryLog.AlignBox && sceneryLog.AlignBox( 'AlignBox#' + this.id + ' updateLayout' );
+    sceneryLog && sceneryLog.AlignBox && sceneryLog.AlignBox( `AlignBox#${this.id} updateLayout` );
     sceneryLog && sceneryLog.AlignBox && sceneryLog.push();
 
     // If we have alignBounds, use that.
@@ -620,7 +620,7 @@ class AlignBox extends Node {
         this.updateProperty( 'right', -this._rightMargin );
       }
       else {
-        assert && assert( 'Bad xAlign: ' + this._xAlign );
+        assert && assert( `Bad xAlign: ${this._xAlign}` );
       }
 
       if ( this._yAlign === 'center' ) {
@@ -633,7 +633,7 @@ class AlignBox extends Node {
         this.updateProperty( 'bottom', -this._bottomMargin );
       }
       else {
-        assert && assert( 'Bad yAlign: ' + this._yAlign );
+        assert && assert( `Bad yAlign: ${this._yAlign}` );
       }
     }
 

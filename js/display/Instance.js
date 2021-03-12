@@ -217,7 +217,7 @@ class Instance {
     // we need to be visited, whether updateRenderingState is required, and whether to visit children)
     this.skipPruningFrame = display._frameId;
 
-    sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'initialized ' + this.toString() );
+    sceneryLog && sceneryLog.Instance && sceneryLog.Instance( `initialized ${this.toString()}` );
 
     // Whether we have been instantiated. false if we are in a pool waiting to be instantiated.
     this.active = true;
@@ -348,11 +348,11 @@ class Instance {
    * - preferredRenderers
    */
   updateRenderingState() {
-    sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'updateRenderingState ' + this.toString() +
-                                                              ( this.stateless ? ' (stateless)' : '' ) );
+    sceneryLog && sceneryLog.Instance && sceneryLog.Instance( `updateRenderingState ${this.toString()
+                                                               }${this.stateless ? ' (stateless)' : ''}` );
     sceneryLog && sceneryLog.Instance && sceneryLog.push();
 
-    sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'old: ' + this.getStateString() );
+    sceneryLog && sceneryLog.Instance && sceneryLog.Instance( `old: ${this.getStateString()}` );
 
     // old state information, so we can compare what was changed
     const wasBackbone = this.isBackbone;
@@ -441,8 +441,8 @@ class Instance {
     else if ( !applyTransparencyWithBlock && ( hasFilters || hasClip || hints.canvasCache ) ) {
       // everything underneath needs to be renderable with Canvas, otherwise we cannot cache
       assert && assert( this.node._rendererSummary.isSingleCanvasSupported(),
-        'hints.canvasCache provided, but not all node contents can be rendered with Canvas under ' +
-        this.node.constructor.name );
+        `hints.canvasCache provided, but not all node contents can be rendered with Canvas under ${
+        this.node.constructor.name}` );
 
       if ( hints.singleCache ) {
         // TODO: scale options - fixed size, match highest resolution (adaptive), or mipmapped
@@ -455,8 +455,8 @@ class Instance {
           // everything underneath needs to guarantee that its bounds are valid
           //OHTWO TODO: We'll probably remove this if we go with the "safe bounds" approach
           assert && assert( this.node._rendererSummary.areBoundsValid(),
-            'hints.singleCache provided, but not all node contents have valid bounds under ' +
-            this.node.constructor.name );
+            `hints.singleCache provided, but not all node contents have valid bounds under ${
+            this.node.constructor.name}` );
 
           this.isSharedCanvasCachePlaceholder = true;
         }
@@ -529,7 +529,7 @@ class Instance {
     // update of rendering state).
     this.fittability.checkSelfFittability();
 
-    sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'new: ' + this.getStateString() );
+    sceneryLog && sceneryLog.Instance && sceneryLog.Instance( `new: ${this.getStateString()}` );
     sceneryLog && sceneryLog.Instance && sceneryLog.pop();
   }
 
@@ -540,18 +540,18 @@ class Instance {
    * @returns {string}
    */
   getStateString() {
-    const result = 'S[ ' +
-                   ( this.isDisplayRoot ? 'displayRoot ' : '' ) +
-                   ( this.isBackbone ? 'backbone ' : '' ) +
-                   ( this.isInstanceCanvasCache ? 'instanceCache ' : '' ) +
-                   ( this.isSharedCanvasCachePlaceholder ? 'sharedCachePlaceholder ' : '' ) +
-                   ( this.isSharedCanvasCacheSelf ? 'sharedCacheSelf ' : '' ) +
-                   ( this.isTransformed ? 'TR ' : '' ) +
-                   ( this.isVisibilityApplied ? 'VIS ' : '' ) +
-                   ( this.selfRenderer ? this.selfRenderer.toString( 16 ) : '-' ) + ',' +
-                   ( this.groupRenderer ? this.groupRenderer.toString( 16 ) : '-' ) + ',' +
-                   ( this.sharedCacheRenderer ? this.sharedCacheRenderer.toString( 16 ) : '-' ) + ' ';
-    return result + ']';
+    const result = `S[ ${
+                    this.isDisplayRoot ? 'displayRoot ' : ''
+                    }${this.isBackbone ? 'backbone ' : ''
+                    }${this.isInstanceCanvasCache ? 'instanceCache ' : ''
+                    }${this.isSharedCanvasCachePlaceholder ? 'sharedCachePlaceholder ' : ''
+                    }${this.isSharedCanvasCacheSelf ? 'sharedCacheSelf ' : ''
+                    }${this.isTransformed ? 'TR ' : ''
+                    }${this.isVisibilityApplied ? 'VIS ' : ''
+                    }${this.selfRenderer ? this.selfRenderer.toString( 16 ) : '-'},${
+                    this.groupRenderer ? this.groupRenderer.toString( 16 ) : '-'},${
+                    this.sharedCacheRenderer ? this.sharedCacheRenderer.toString( 16 ) : '-'} `;
+    return `${result}]`;
   }
 
   /**
@@ -561,9 +561,9 @@ class Instance {
   baseSyncTree() {
     assert && assert( this.isDisplayRoot, 'baseSyncTree() should only be called on the root instance' );
 
-    sceneryLog && sceneryLog.Instance && sceneryLog.Instance( '-------- START baseSyncTree ' + this.toString() + ' --------' );
+    sceneryLog && sceneryLog.Instance && sceneryLog.Instance( `-------- START baseSyncTree ${this.toString()} --------` );
     this.syncTree();
-    sceneryLog && sceneryLog.Instance && sceneryLog.Instance( '-------- END baseSyncTree ' + this.toString() + ' --------' );
+    sceneryLog && sceneryLog.Instance && sceneryLog.Instance( `-------- END baseSyncTree ${this.toString()} --------` );
     this.cleanSyncTreeResults();
   }
 
@@ -580,8 +580,8 @@ class Instance {
    * @returns {boolean} - Whether the sync was possible. If it wasn't, a new instance subtree will need to be created.
    */
   syncTree() {
-    sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'syncTree ' + this.toString() + ' ' + this.getStateString() +
-                                                              ( this.stateless ? ' (stateless)' : '' ) );
+    sceneryLog && sceneryLog.Instance && sceneryLog.Instance( `syncTree ${this.toString()} ${this.getStateString()
+                                                               }${this.stateless ? ' (stateless)' : ''}` );
     sceneryLog && sceneryLog.Instance && sceneryLog.push();
 
     if ( sceneryLog && scenery.isLoggingPerformance() ) {
@@ -606,7 +606,7 @@ class Instance {
     }
 
     if ( !wasStateless && this.incompatibleStateChange ) {
-      sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'incompatible instance ' + this.toString() + ' ' + this.getStateString() + ', aborting' );
+      sceneryLog && sceneryLog.Instance && sceneryLog.Instance( `incompatible instance ${this.toString()} ${this.getStateString()}, aborting` );
       sceneryLog && sceneryLog.Instance && sceneryLog.pop();
 
       // The false return will signal that a new instance needs to be used. our tree will be disposed soon.
@@ -734,15 +734,15 @@ class Instance {
        * Change intervals
        *----------------------------------------------------------------------------*/
 
-      sceneryLog && sceneryLog.ChangeInterval && sceneryLog.ChangeInterval( 'changes for ' + childInstance.toString() +
-                                                                            ' in ' + this.toString() );
+      sceneryLog && sceneryLog.ChangeInterval && sceneryLog.ChangeInterval( `changes for ${childInstance.toString()
+                                                                            } in ${this.toString()}` );
       sceneryLog && sceneryLog.ChangeInterval && sceneryLog.push();
 
       const wasIncluded = childInstance.stitchChangeIncluded;
       const isIncluded = includeChildDrawables;
       childInstance.stitchChangeIncluded = isIncluded;
 
-      sceneryLog && sceneryLog.ChangeInterval && sceneryLog.ChangeInterval( 'included: ' + wasIncluded + ' => ' + isIncluded );
+      sceneryLog && sceneryLog.ChangeInterval && sceneryLog.ChangeInterval( `included: ${wasIncluded} => ${isIncluded}` );
 
       // check for forcing full change-interval on child
       if ( childInstance.stitchChangeFrame === frameId ) {
@@ -915,7 +915,7 @@ class Instance {
       // force-acceleration flag! That's stripped out here.
       if ( !this.selfDrawable || ( ( this.selfDrawable.renderer & selfRenderer & Renderer.bitmaskRendererArea ) === 0 ) ) {
         if ( this.selfDrawable ) {
-          sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'replacing old drawable ' + this.selfDrawable.toString() + ' with new renderer' );
+          sceneryLog && sceneryLog.Instance && sceneryLog.Instance( `replacing old drawable ${this.selfDrawable.toString()} with new renderer` );
 
           // scrap the previous selfDrawable, we need to create one with a different renderer.
           this.selfDrawable.markForDisposal( this.display );
@@ -947,13 +947,13 @@ class Instance {
       const affectedInstanceCount = childInstance.getDescendantCount() + 1; // +1 for itself
 
       if ( affectedInstanceCount > 100 ) {
-        sceneryLog.PerfCritical && sceneryLog.PerfCritical( 'incompatible instance rebuild at ' + this.trail.toPathString() + ': ' + affectedInstanceCount );
+        sceneryLog.PerfCritical && sceneryLog.PerfCritical( `incompatible instance rebuild at ${this.trail.toPathString()}: ${affectedInstanceCount}` );
       }
       else if ( affectedInstanceCount > 40 ) {
-        sceneryLog.PerfMajor && sceneryLog.PerfMajor( 'incompatible instance rebuild at ' + this.trail.toPathString() + ': ' + affectedInstanceCount );
+        sceneryLog.PerfMajor && sceneryLog.PerfMajor( `incompatible instance rebuild at ${this.trail.toPathString()}: ${affectedInstanceCount}` );
       }
       else if ( affectedInstanceCount > 0 ) {
-        sceneryLog.PerfMinor && sceneryLog.PerfMinor( 'incompatible instance rebuild at ' + this.trail.toPathString() + ': ' + affectedInstanceCount );
+        sceneryLog.PerfMinor && sceneryLog.PerfMinor( `incompatible instance rebuild at ${this.trail.toPathString()}: ${affectedInstanceCount}` );
       }
     }
 
@@ -986,7 +986,7 @@ class Instance {
     // if there is a change, prepare
     if ( groupChanged ) {
       if ( this.groupDrawable ) {
-        sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'replacing group drawable ' + this.groupDrawable.toString() );
+        sceneryLog && sceneryLog.Instance && sceneryLog.Instance( `replacing group drawable ${this.groupDrawable.toString()}` );
 
         this.groupDrawable.markForDisposal( this.display );
         this.groupDrawable = null;
@@ -1059,7 +1059,7 @@ class Instance {
       //OHTWO TODO: mark everything as changed (big change interval)
 
       if ( this.sharedCacheDrawable ) {
-        sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'replacing shared cache drawable ' + this.sharedCacheDrawable.toString() );
+        sceneryLog && sceneryLog.Instance && sceneryLog.Instance( `replacing shared cache drawable ${this.sharedCacheDrawable.toString()}` );
 
         this.sharedCacheDrawable.markForDisposal( this.display );
       }
@@ -1207,11 +1207,11 @@ class Instance {
   insertInstance( instance, index ) {
     assert && assert( instance instanceof Instance );
     assert && assert( index >= 0 && index <= this.children.length,
-      'Instance insertion bounds check for index ' + index + ' with previous children length ' +
-      this.children.length );
+      `Instance insertion bounds check for index ${index} with previous children length ${
+      this.children.length}` );
 
     sceneryLog && sceneryLog.InstanceTree && sceneryLog.InstanceTree(
-      'inserting ' + instance.toString() + ' into ' + this.toString() );
+      `inserting ${instance.toString()} into ${this.toString()}` );
     sceneryLog && sceneryLog.InstanceTree && sceneryLog.push();
 
     // mark it as changed during this frame, so that we can properly set the change interval
@@ -1261,11 +1261,11 @@ class Instance {
   removeInstanceWithIndex( instance, index ) {
     assert && assert( instance instanceof Instance );
     assert && assert( index >= 0 && index < this.children.length,
-      'Instance removal bounds check for index ' + index + ' with previous children length ' +
-      this.children.length );
+      `Instance removal bounds check for index ${index} with previous children length ${
+      this.children.length}` );
 
     sceneryLog && sceneryLog.InstanceTree && sceneryLog.InstanceTree(
-      'removing ' + instance.toString() + ' from ' + this.toString() );
+      `removing ${instance.toString()} from ${this.toString()}` );
     sceneryLog && sceneryLog.InstanceTree && sceneryLog.push();
 
     const frameId = this.display._frameId;
@@ -1330,7 +1330,7 @@ class Instance {
     assert && assert( typeof maxChangeIndex === 'number' );
     assert && assert( minChangeIndex <= maxChangeIndex );
 
-    sceneryLog && sceneryLog.InstanceTree && sceneryLog.InstanceTree( 'Reordering ' + this.toString() );
+    sceneryLog && sceneryLog.InstanceTree && sceneryLog.InstanceTree( `Reordering ${this.toString()}` );
     sceneryLog && sceneryLog.InstanceTree && sceneryLog.push();
 
     // NOTE: For implementation, we've basically set parameters as if we removed all of the relevant instances and
@@ -1390,7 +1390,7 @@ class Instance {
    */
   onChildInserted( childNode, index ) {
     sceneryLog && sceneryLog.Instance && sceneryLog.Instance(
-      'inserting child node ' + childNode.constructor.name + '#' + childNode.id + ' into ' + this.toString() );
+      `inserting child node ${childNode.constructor.name}#${childNode.id} into ${this.toString()}` );
     sceneryLog && sceneryLog.Instance && sceneryLog.push();
 
     assert && assert( !this.stateless, 'If we are stateless, we should not receive these notifications' );
@@ -1427,7 +1427,7 @@ class Instance {
    */
   onChildRemoved( childNode, index ) {
     sceneryLog && sceneryLog.Instance && sceneryLog.Instance(
-      'removing child node ' + childNode.constructor.name + '#' + childNode.id + ' from ' + this.toString() );
+      `removing child node ${childNode.constructor.name}#${childNode.id} from ${this.toString()}` );
     sceneryLog && sceneryLog.Instance && sceneryLog.push();
 
     assert && assert( !this.stateless, 'If we are stateless, we should not receive these notifications' );
@@ -1460,7 +1460,7 @@ class Instance {
    */
   onChildrenReordered( minChangeIndex, maxChangeIndex ) {
     sceneryLog && sceneryLog.Instance && sceneryLog.Instance(
-      'reordering children for ' + this.toString() );
+      `reordering children for ${this.toString()}` );
     sceneryLog && sceneryLog.Instance && sceneryLog.push();
 
     this.reorderInstances( minChangeIndex, maxChangeIndex );
@@ -1755,7 +1755,7 @@ class Instance {
    * @public
    */
   dispose() {
-    sceneryLog && sceneryLog.Instance && sceneryLog.Instance( 'dispose ' + this.toString() );
+    sceneryLog && sceneryLog.Instance && sceneryLog.Instance( `dispose ${this.toString()}` );
     sceneryLog && sceneryLog.Instance && sceneryLog.push();
 
     assert && assert( this.active, 'Seems like we tried to dispose this Instance twice, it is not active' );
@@ -1982,7 +1982,7 @@ class Instance {
    * @returns {string}
    */
   toString() {
-    return this.id + '#' + ( this.node ? ( this.node.constructor.name ? this.node.constructor.name : '?' ) + '#' + this.node.id : '-' );
+    return `${this.id}#${this.node ? `${this.node.constructor.name ? this.node.constructor.name : '?'}#${this.node.id}` : '-'}`;
   }
 }
 

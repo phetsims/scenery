@@ -148,7 +148,7 @@ const DEFAULT_LABEL_TAG_NAME = P_TAG;
 // see setPDOMHeadingBehavior for more details
 const DEFAULT_PDOM_HEADING_BEHAVIOR = ( node, options, heading ) => {
 
-  options.labelTagName = 'h' + node.headingLevel; // TODO: make sure heading level change fires a full peer rebuild, see https://github.com/phetsims/scenery/issues/867
+  options.labelTagName = `h${node.headingLevel}`; // TODO: make sure heading level change fires a full peer rebuild, see https://github.com/phetsims/scenery/issues/867
   options.labelContent = heading;
   return options;
 };
@@ -571,7 +571,7 @@ const ParallelDOM = {
           this._inputType && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support inputType' );
           this._pdomChecked && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support pdomChecked.' );
           this._inputValue && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support inputValue' );
-          this._pdomChecked && assert( INPUT_TYPES_THAT_SUPPORT_CHECKED.indexOf( this._inputType.toUpperCase() ) >= 0, 'inputType does not support checked attribute: ' + this._inputType );
+          this._pdomChecked && assert( INPUT_TYPES_THAT_SUPPORT_CHECKED.indexOf( this._inputType.toUpperCase() ) >= 0, `inputType does not support checked attribute: ${this._inputType}` );
           this._focusHighlightLayerable && assert( this.focusHighlight instanceof Node, 'focusHighlight must be Node if highlight is layerable' );
           this._tagName.toUpperCase() === INPUT_TAG && assert( typeof this._inputType === 'string', ' inputType expected for input' );
 
@@ -1118,7 +1118,7 @@ const ParallelDOM = {
        * @param {string|null} tagName
        */
       setContainerTagName: function( tagName ) {
-        assert && assert( tagName === null || typeof tagName === 'string', 'invalid tagName argument: ' + tagName );
+        assert && assert( tagName === null || typeof tagName === 'string', `invalid tagName argument: ${tagName}` );
 
         if ( this._containerTagName !== tagName ) {
           this._containerTagName = tagName;
@@ -2055,10 +2055,10 @@ const ParallelDOM = {
        */
       setPDOMOrder: function( pdomOrder ) {
         assert && assert( Array.isArray( pdomOrder ) || pdomOrder === null,
-          'Array or null expected, received: ' + pdomOrder );
+          `Array or null expected, received: ${pdomOrder}` );
         assert && pdomOrder && pdomOrder.forEach( ( node, index ) => {
           assert( node === null || node instanceof Node,
-            'Elements of pdomOrder should be either a Node or null. Element at index ' + index + ' is: ' + node );
+            `Elements of pdomOrder should be either a Node or null. Element at index ${index} is: ${node}` );
         } );
         assert && pdomOrder && assert( this.getTrails( node => _.includes( pdomOrder, node ) ).length === 0, 'pdomOrder should not include any ancestors or the node itself' );
 
@@ -2230,7 +2230,7 @@ const ParallelDOM = {
         assert && this._tagName && assert( _.includes( FORM_ELEMENTS, this._tagName.toUpperCase() ), 'dom element must be a form element to support value' );
 
         // type cast
-        value = '' + value;
+        value = `${value}`;
 
         if ( value !== this._inputValue ) {
           this._inputValue = value;
@@ -2269,7 +2269,7 @@ const ParallelDOM = {
           assert && assert( this._tagName.toUpperCase() === INPUT_TAG, 'Cannot set checked on a non input tag.' );
         }
         if ( this._inputType ) {
-          assert && assert( INPUT_TYPES_THAT_SUPPORT_CHECKED.indexOf( this._inputType.toUpperCase() ) >= 0, 'inputType does not support checked: ' + this._inputType );
+          assert && assert( INPUT_TYPES_THAT_SUPPORT_CHECKED.indexOf( this._inputType.toUpperCase() ) >= 0, `inputType does not support checked: ${this._inputType}` );
         }
 
         if ( this._pdomChecked !== checked ) {
@@ -2392,7 +2392,7 @@ const ParallelDOM = {
             attributeRemoved = true;
           }
         }
-        assert && assert( attributeRemoved, 'Node does not have pdom attribute ' + attribute );
+        assert && assert( attributeRemoved, `Node does not have pdom attribute ${attribute}` );
 
         for ( let j = 0; j < this._pdomInstances.length; j++ ) {
           const peer = this._pdomInstances[ j ].peer;
@@ -2732,7 +2732,7 @@ const ParallelDOM = {
        * @param {Node} node
        */
       onPDOMAddChild: function( node ) {
-        sceneryLog && sceneryLog.ParallelDOM && sceneryLog.ParallelDOM( 'onPDOMAddChild n#' + node.id + ' (parent:n#' + this.id + ')' );
+        sceneryLog && sceneryLog.ParallelDOM && sceneryLog.ParallelDOM( `onPDOMAddChild n#${node.id} (parent:n#${this.id})` );
         sceneryLog && sceneryLog.ParallelDOM && sceneryLog.push();
 
         // Find descendants with pdomOrders and check them against all of their ancestors/self
@@ -2760,7 +2760,7 @@ const ParallelDOM = {
        * @param {Node} node
        */
       onPDOMRemoveChild: function( node ) {
-        sceneryLog && sceneryLog.ParallelDOM && sceneryLog.ParallelDOM( 'onPDOMRemoveChild n#' + node.id + ' (parent:n#' + this.id + ')' );
+        sceneryLog && sceneryLog.ParallelDOM && sceneryLog.ParallelDOM( `onPDOMRemoveChild n#${node.id} (parent:n#${this.id})` );
         sceneryLog && sceneryLog.ParallelDOM && sceneryLog.push();
 
         this._pdomDisplaysInfo.onRemoveChild( node );
@@ -2781,7 +2781,7 @@ const ParallelDOM = {
        * @private
        */
       onPDOMReorderedChildren: function() {
-        sceneryLog && sceneryLog.ParallelDOM && sceneryLog.ParallelDOM( 'onPDOMReorderedChildren (parent:n#' + this.id + ')' );
+        sceneryLog && sceneryLog.ParallelDOM && sceneryLog.ParallelDOM( `onPDOMReorderedChildren (parent:n#${this.id})` );
         sceneryLog && sceneryLog.ParallelDOM && sceneryLog.push();
 
         PDOMTree.childrenOrderChange( this );

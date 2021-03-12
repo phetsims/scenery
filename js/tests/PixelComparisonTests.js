@@ -94,11 +94,11 @@ else {
           }
         };
         referenceImage.onerror = () => {
-          assert.ok( false, name + ' reference image failed to load' );
+          assert.ok( false, `${name} reference image failed to load` );
           done();
         };
         freshImage.onerror = () => {
-          assert.ok( false, name + ' fresh image failed to load' );
+          assert.ok( false, `${name} fresh image failed to load` );
           done();
         };
 
@@ -106,7 +106,7 @@ else {
 
         display.foreignObjectRasterization( url => {
           if ( !url ) {
-            assert.ok( false, name + ' failed to rasterize the display' );
+            assert.ok( false, `${name} failed to rasterize the display` );
             done();
             return;
           }
@@ -128,7 +128,7 @@ else {
       ( () => {
         const renderer = renderers[ i ];
 
-        pixelTest( name + ' (' + renderer + ')', ( scene, display, asyncCallback ) => {
+        pixelTest( `${name} (${renderer})`, ( scene, display, asyncCallback ) => {
           scene.renderer = renderer;
           setup( scene, display, asyncCallback );
         }, dataURL, threshold, isAsync );

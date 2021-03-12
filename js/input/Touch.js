@@ -23,7 +23,7 @@ class Touch extends Pointer {
     // @public {number} - For tracking which touch is which
     this.id = id;
 
-    sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'Created ' + this.toString() );
+    sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( `Created ${this.toString()}` );
   }
 
 
@@ -82,7 +82,7 @@ class Touch extends Pointer {
    * @returns {string}
    */
   toString() {
-    return 'Touch#' + this.id;
+    return `Touch#${this.id}`;
   }
 
 

@@ -21,7 +21,7 @@ function s( value ) {
 }
 
 function log( message ) {
-  console.log( 'context.' + message + ';' );
+  console.log( `context.${message};` );
 }
 
 function attributeGet( name ) {
@@ -29,22 +29,22 @@ function attributeGet( name ) {
 }
 
 function attributeSet( name, value ) {
-  log( name + ' = ' + s( value ) );
+  log( `${name} = ${s( value )}` );
 }
 
 function command( name, args ) {
   if ( args === undefined || args.length === 0 ) {
-    log( name + '()' );
+    log( `${name}()` );
   }
   else {
-    log( name + '( ' + _.reduce( args, ( memo, arg ) => {
+    log( `${name}( ${_.reduce( args, ( memo, arg ) => {
       if ( memo.length > 0 ) {
-        return memo + ', ' + s( arg );
+        return `${memo}, ${s( arg )}`;
       }
       else {
         return s( arg );
       }
-    }, '' ) + ' )' );
+    }, '' )} )` );
   }
 }
 

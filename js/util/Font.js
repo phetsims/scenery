@@ -96,7 +96,7 @@ class Font extends PhetioObject {
     this._variant = options.variant;
 
     // @private {string} - See https://www.w3.org/TR/css-fonts-3/#propdef-font-weight
-    this._weight = '' + options.weight; // cast to string
+    this._weight = `${options.weight}`; // cast to string
 
     // @private {string} - See https://www.w3.org/TR/css-fonts-3/#propdef-font-stretch
     this._stretch = options.stretch;
@@ -289,13 +289,13 @@ class Font extends PhetioObject {
    */
   computeShorthand() {
     let ret = '';
-    if ( this._style !== 'normal' ) { ret += this._style + ' '; }
-    if ( this._variant !== 'normal' ) { ret += this._variant + ' '; }
-    if ( this._weight !== 'normal' ) { ret += this._weight + ' '; }
-    if ( this._stretch !== 'normal' ) { ret += this._stretch + ' '; }
+    if ( this._style !== 'normal' ) { ret += `${this._style} `; }
+    if ( this._variant !== 'normal' ) { ret += `${this._variant} `; }
+    if ( this._weight !== 'normal' ) { ret += `${this._weight} `; }
+    if ( this._stretch !== 'normal' ) { ret += `${this._stretch} `; }
     ret += this._size;
-    if ( this._lineHeight !== 'normal' ) { ret += '/' + this._lineHeight; }
-    ret += ' ' + this._family;
+    if ( this._lineHeight !== 'normal' ) { ret += `/${this._lineHeight}`; }
+    ret += ` ${this._family}`;
     return ret;
   }
 
@@ -324,7 +324,7 @@ class Font extends PhetioObject {
    */
   static castSize( size ) {
     if ( typeof size === 'number' ) {
-      return size + 'px'; // add the pixels suffix by default for numbers
+      return `${size}px`; // add the pixels suffix by default for numbers
     }
     else {
       return size; // assume that it's a valid to-spec string
@@ -358,19 +358,19 @@ class Font extends PhetioObject {
         // nothing has to be done, everything already normal as default
       }
       else if ( _.includes( VALID_STYLES, token ) ) {
-        assert && assert( options.style === undefined, 'Style cannot be applied twice. Already set to "' + options.style + '", attempt to replace with "' + token + '"' );
+        assert && assert( options.style === undefined, `Style cannot be applied twice. Already set to "${options.style}", attempt to replace with "${token}"` );
         options.style = token;
       }
       else if ( _.includes( VALID_VARIANTS, token ) ) {
-        assert && assert( options.variant === undefined, 'Variant cannot be applied twice. Already set to "' + options.variant + '", attempt to replace with "' + token + '"' );
+        assert && assert( options.variant === undefined, `Variant cannot be applied twice. Already set to "${options.variant}", attempt to replace with "${token}"` );
         options.variant = token;
       }
       else if ( _.includes( VALID_WEIGHTS, token ) ) {
-        assert && assert( options.weight === undefined, 'Weight cannot be applied twice. Already set to "' + options.weight + '", attempt to replace with "' + token + '"' );
+        assert && assert( options.weight === undefined, `Weight cannot be applied twice. Already set to "${options.weight}", attempt to replace with "${token}"` );
         options.weight = token;
       }
       else if ( _.includes( VALID_STRETCHES, token ) ) {
-        assert && assert( options.stretch === undefined, 'Stretch cannot be applied twice. Already set to "' + options.stretch + '", attempt to replace with "' + token + '"' );
+        assert && assert( options.stretch === undefined, `Stretch cannot be applied twice. Already set to "${options.stretch}", attempt to replace with "${token}"` );
         options.stretch = token;
       }
       else {

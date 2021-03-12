@@ -102,7 +102,7 @@ class FittedBlock extends Block {
    * @public
    */
   markDirtyFit() {
-    sceneryLog && sceneryLog.dirty && sceneryLog.dirty( 'markDirtyFit on FittedBlock#' + this.id );
+    sceneryLog && sceneryLog.dirty && sceneryLog.dirty( `markDirtyFit on FittedBlock#${this.id}` );
     this.dirtyFit = true;
 
     // Make sure we are visited in the repaint phase
@@ -122,7 +122,7 @@ class FittedBlock extends Block {
       return;
     }
 
-    sceneryLog && sceneryLog.FittedBlock && sceneryLog.FittedBlock( 'updateFit #' + this.id );
+    sceneryLog && sceneryLog.FittedBlock && sceneryLog.FittedBlock( `updateFit #${this.id}` );
 
     this.dirtyFit = false;
 
@@ -231,7 +231,7 @@ class FittedBlock extends Block {
    * @override
    */
   dispose() {
-    sceneryLog && sceneryLog.FittedBlock && sceneryLog.FittedBlock( 'dispose #' + this.id );
+    sceneryLog && sceneryLog.FittedBlock && sceneryLog.FittedBlock( `dispose #${this.id}` );
 
     this.display.sizeProperty.unlink( this.dirtyFitListener );
 
@@ -373,7 +373,7 @@ class FittedBlock extends Block {
    * @param {Drawable} lastDrawable
    */
   onIntervalChange( firstDrawable, lastDrawable ) {
-    sceneryLog && sceneryLog.FittedBlock && sceneryLog.FittedBlock( '#' + this.id + '.onIntervalChange ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() );
+    sceneryLog && sceneryLog.FittedBlock && sceneryLog.FittedBlock( `#${this.id}.onIntervalChange ${firstDrawable.toString()} to ${lastDrawable.toString()}` );
 
     super.onIntervalChange( firstDrawable, lastDrawable );
 

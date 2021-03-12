@@ -211,7 +211,7 @@ class PaintObserver {
    * @param {Property.<*>} property
    */
   secondaryLazyLinkProperty( property ) {
-    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] secondaryLazyLinkProperty ' + property._id );
+    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[PaintObserver] secondaryLazyLinkProperty ${property._id}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
     const id = property.id;
@@ -235,7 +235,7 @@ class PaintObserver {
    * @param {Property.<*>} property
    */
   secondaryUnlinkProperty( property ) {
-    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[PaintObserver] secondaryUnlinkProperty ' + property._id );
+    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[PaintObserver] secondaryUnlinkProperty ${property._id}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
     const id = property.id;

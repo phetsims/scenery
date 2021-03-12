@@ -254,7 +254,7 @@ const miterAnglesInDegrees = [ 5, 8, 10, 11.5, 13, 20, 24, 30, 45 ];
 
 _.each( miterAnglesInDegrees, miterAngle => {
   const miterAngleRadians = miterAngle * Math.PI / 180;
-  QUnit.test( 'Miter limit angle (degrees): ' + miterAngle + ' would change at ' + 1 / Math.sin( miterAngleRadians / 2 ), assert => {
+  QUnit.test( `Miter limit angle (degrees): ${miterAngle} would change at ${1 / Math.sin( miterAngleRadians / 2 )}`, assert => {
     const styles = new LineStyles();
     styles.lineWidth = 30;
 

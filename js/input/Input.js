@@ -554,7 +554,7 @@ class Input {
           return;
         }
 
-        sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusin(' + Input.debugText( null, event ) + ');' );
+        sceneryLog && sceneryLog.Input && sceneryLog.Input( `focusin(${Input.debugText( null, event )});` );
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
         const trail = this.updateTrailForPDOMDispatch( event );
@@ -580,7 +580,7 @@ class Input {
           return;
         }
 
-        sceneryLog && sceneryLog.Input && sceneryLog.Input( 'focusOut(' + Input.debugText( null, event ) + ');' );
+        sceneryLog && sceneryLog.Input && sceneryLog.Input( `focusOut(${Input.debugText( null, event )});` );
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
         // recompute the trail on focusout if necessary - since a blur/focusout may have been initiated from a
@@ -629,7 +629,7 @@ class Input {
 
       // @private
       this.clickAction = new Action( event => {
-        sceneryLog && sceneryLog.Input && sceneryLog.Input( 'click(' + Input.debugText( null, event ) + ');' );
+        sceneryLog && sceneryLog.Input && sceneryLog.Input( `click(${Input.debugText( null, event )});` );
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
         const trail = this.updateTrailForPDOMDispatch( event );
@@ -648,7 +648,7 @@ class Input {
 
       // @private
       this.inputAction = new Action( event => {
-        sceneryLog && sceneryLog.Input && sceneryLog.Input( 'input(' + Input.debugText( null, event ) + ');' );
+        sceneryLog && sceneryLog.Input && sceneryLog.Input( `input(${Input.debugText( null, event )});` );
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
         const trail = this.updateTrailForPDOMDispatch( event );
@@ -667,7 +667,7 @@ class Input {
 
       // @private
       this.changeAction = new Action( event => {
-        sceneryLog && sceneryLog.Input && sceneryLog.Input( 'change(' + Input.debugText( null, event ) + ');' );
+        sceneryLog && sceneryLog.Input && sceneryLog.Input( `change(${Input.debugText( null, event )});` );
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
         const trail = this.updateTrailForPDOMDispatch( event );
@@ -686,7 +686,7 @@ class Input {
 
       // @private
       this.keydownAction = new Action( event => {
-        sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keydown(' + Input.debugText( null, event ) + ');' );
+        sceneryLog && sceneryLog.Input && sceneryLog.Input( `keydown(${Input.debugText( null, event )});` );
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
         const trail = this.updateTrailForPDOMDispatch( event );
@@ -705,7 +705,7 @@ class Input {
 
       // @private
       this.keyupAction = new Action( event => {
-        sceneryLog && sceneryLog.Input && sceneryLog.Input( 'keyup(' + Input.debugText( null, event ) + ');' );
+        sceneryLog && sceneryLog.Input && sceneryLog.Input( `keyup(${Input.debugText( null, event )});` );
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
         const trail = this.updateTrailForPDOMDispatch( event );
@@ -728,7 +728,7 @@ class Input {
       // Add a listener to the root accessible DOM element for each event we want to monitor.
       PDOMUtils.DOM_EVENTS.forEach( eventName => {
 
-        const actionName = eventName + 'Action';
+        const actionName = `${eventName}Action`;
         assert && assert( this[ actionName ], `action not defined on Input: ${actionName}` );
 
         // These exist for the lifetime of the display, and need not be disposed.
@@ -817,7 +817,7 @@ class Input {
       'REENTRANCE DETECTED' );
     // Don't re-entrantly enter our loop, see https://github.com/phetsims/balloons-and-static-electricity/issues/406
     if ( !this.currentlyFiringEvents && this.batchedEvents.length ) {
-      sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.fireBatchedEvents length:' + this.batchedEvents.length );
+      sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `Input.fireBatchedEvents length:${this.batchedEvents.length}` );
       sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
 
       this.currentlyFiringEvents = true;
@@ -1099,7 +1099,7 @@ class Input {
    * @param {Event} event
    */
   mouseDown( point, event ) {
-    sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseDown(' + Input.debugText( point, event ) + ');' );
+    sceneryLog && sceneryLog.Input && sceneryLog.Input( `mouseDown(${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.mouseDownAction.execute( point, event );
     sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -1116,7 +1116,7 @@ class Input {
    * @param {Event} event
    */
   mouseUp( point, event ) {
-    sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseUp(' + Input.debugText( point, event ) + ');' );
+    sceneryLog && sceneryLog.Input && sceneryLog.Input( `mouseUp(${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.mouseUpAction.execute( point, event );
     sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -1133,7 +1133,7 @@ class Input {
    * @param {Event} event
    */
   mouseMove( point, event ) {
-    sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseMove(' + Input.debugText( point, event ) + ');' );
+    sceneryLog && sceneryLog.Input && sceneryLog.Input( `mouseMove(${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.mouseMoveAction.execute( point, event );
     sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -1147,7 +1147,7 @@ class Input {
    * @param {Event} event
    */
   mouseOver( point, event ) {
-    sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseOver(' + Input.debugText( point, event ) + ');' );
+    sceneryLog && sceneryLog.Input && sceneryLog.Input( `mouseOver(${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.mouseOverAction.execute( point, event );
     sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -1161,7 +1161,7 @@ class Input {
    * @param {Event} event
    */
   mouseOut( point, event ) {
-    sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseOut(' + Input.debugText( point, event ) + ');' );
+    sceneryLog && sceneryLog.Input && sceneryLog.Input( `mouseOut(${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.mouseOutAction.execute( point, event );
     sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -1174,7 +1174,7 @@ class Input {
    * @param {Event} event
    */
   wheel( event ) {
-    sceneryLog && sceneryLog.Input && sceneryLog.Input( 'wheel(' + Input.debugText( null, event ) + ');' );
+    sceneryLog && sceneryLog.Input && sceneryLog.Input( `wheel(${Input.debugText( null, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.wheelScrollAction.execute( event );
     sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -1192,7 +1192,7 @@ class Input {
    * @param {Event} event
    */
   touchStart( id, point, event ) {
-    sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchStart(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
+    sceneryLog && sceneryLog.Input && sceneryLog.Input( `touchStart('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
 
     this.touchStartAction.execute( id, point, event );
@@ -1212,7 +1212,7 @@ class Input {
    * @param {Event} event
    */
   touchEnd( id, point, event ) {
-    sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchEnd(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
+    sceneryLog && sceneryLog.Input && sceneryLog.Input( `touchEnd('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
 
     this.touchEndAction.execute( id, point, event );
@@ -1232,7 +1232,7 @@ class Input {
    * @param {Event} event
    */
   touchMove( id, point, event ) {
-    sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchMove(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
+    sceneryLog && sceneryLog.Input && sceneryLog.Input( `touchMove('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.touchMoveAction.execute( id, point, event );
     sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -1250,7 +1250,7 @@ class Input {
    * @param {Event} event
    */
   touchCancel( id, point, event ) {
-    sceneryLog && sceneryLog.Input && sceneryLog.Input( 'touchCancel(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
+    sceneryLog && sceneryLog.Input && sceneryLog.Input( `touchCancel('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.touchCancelAction.execute( id, point, event );
     sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -1268,7 +1268,7 @@ class Input {
    * @param {Event} event
    */
   penStart( id, point, event ) {
-    sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penStart(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
+    sceneryLog && sceneryLog.Input && sceneryLog.Input( `penStart('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.penStartAction.execute( id, point, event );
     sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -1286,7 +1286,7 @@ class Input {
    * @param {Event} event
    */
   penEnd( id, point, event ) {
-    sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penEnd(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
+    sceneryLog && sceneryLog.Input && sceneryLog.Input( `penEnd('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.penEndAction.execute( id, point, event );
     sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -1304,7 +1304,7 @@ class Input {
    * @param {Event} event
    */
   penMove( id, point, event ) {
-    sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penMove(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
+    sceneryLog && sceneryLog.Input && sceneryLog.Input( `penMove('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.penMoveAction.execute( id, point, event );
     sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -1322,7 +1322,7 @@ class Input {
    * @param {Event} event
    */
   penCancel( id, point, event ) {
-    sceneryLog && sceneryLog.Input && sceneryLog.Input( 'penCancel(\'' + id + '\',' + Input.debugText( point, event ) + ');' );
+    sceneryLog && sceneryLog.Input && sceneryLog.Input( `penCancel('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.penCancelAction.execute( id, point, event );
     sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -1361,7 +1361,7 @@ class Input {
         break;
       default:
         if ( assert ) {
-          throw new Error( 'Unknown pointer type: ' + type );
+          throw new Error( `Unknown pointer type: ${type}` );
         }
     }
   }
@@ -1394,7 +1394,7 @@ class Input {
         break;
       default:
         if ( assert ) {
-          throw new Error( 'Unknown pointer type: ' + type );
+          throw new Error( `Unknown pointer type: ${type}` );
         }
     }
   }
@@ -1424,7 +1424,7 @@ class Input {
         break;
       default:
         if ( console.log ) {
-          console.log( 'Unknown pointer type: ' + type );
+          console.log( `Unknown pointer type: ${type}` );
         }
     }
   }
@@ -1452,7 +1452,7 @@ class Input {
         break;
       default:
         if ( console.log ) {
-          console.log( 'Unknown pointer type: ' + type );
+          console.log( `Unknown pointer type: ${type}` );
         }
     }
   }
@@ -1559,7 +1559,7 @@ class Input {
       return;
     }
 
-    sceneryLog && sceneryLog.Input && sceneryLog.Input( 'upEvent ' + pointer.toString() + ' changed:' + pointChanged );
+    sceneryLog && sceneryLog.Input && sceneryLog.Input( `upEvent ${pointer.toString()} changed:${pointChanged}` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
 
     assert && assert( pointer instanceof Pointer );
@@ -1595,7 +1595,7 @@ class Input {
       return;
     }
 
-    sceneryLog && sceneryLog.Input && sceneryLog.Input( 'downEvent ' + pointer.toString() + ' changed:' + pointChanged );
+    sceneryLog && sceneryLog.Input && sceneryLog.Input( `downEvent ${pointer.toString()} changed:${pointChanged}` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
 
     assert && assert( pointer instanceof Pointer );
@@ -1617,7 +1617,7 @@ class Input {
    * @param {Event} event
    */
   moveEvent( pointer, event ) {
-    sceneryLog && sceneryLog.Input && sceneryLog.Input( 'moveEvent ' + pointer.toString() );
+    sceneryLog && sceneryLog.Input && sceneryLog.Input( `moveEvent ${pointer.toString()}` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
 
     assert && assert( pointer instanceof Pointer );
@@ -1637,7 +1637,7 @@ class Input {
    * @param {boolean} pointChanged
    */
   cancelEvent( pointer, event, pointChanged ) {
-    sceneryLog && sceneryLog.Input && sceneryLog.Input( 'cancelEvent ' + pointer.toString() + ' changed:' + pointChanged );
+    sceneryLog && sceneryLog.Input && sceneryLog.Input( `cancelEvent ${pointer.toString()} changed:${pointChanged}` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
 
     assert && assert( pointer instanceof Pointer );
@@ -1670,7 +1670,7 @@ class Input {
    */
   branchChangeEvents( pointer, event, sendMove ) {
     sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent(
-      'branchChangeEvents: ' + pointer.toString() + ' sendMove:' + sendMove );
+      `branchChangeEvents: ${pointer.toString()} sendMove:${sendMove}` );
     sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
 
     assert && assert( pointer instanceof Pointer );
@@ -1684,7 +1684,7 @@ class Input {
     const branchIndex = Trail.branchIndex( trail, oldTrail );
     const isBranchChange = branchIndex !== trail.length || branchIndex !== oldTrail.length;
     isBranchChange && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent(
-      'changed from ' + oldTrail.toString() + ' to ' + trail.toString() );
+      `changed from ${oldTrail.toString()} to ${trail.toString()}` );
 
     // event order matches http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
     if ( sendMove ) {
@@ -1777,7 +1777,7 @@ class Input {
    */
   dispatchEvent( trail, type, pointer, event, bubbles ) {
     sceneryLog && sceneryLog.EventDispatch && sceneryLog.EventDispatch(
-      type + ' trail:' + trail.toString() + ' pointer:' + pointer.toString() + ' at ' + pointer.point.toString() );
+      `${type} trail:${trail.toString()} pointer:${pointer.toString()} at ${pointer.point.toString()}` );
     sceneryLog && sceneryLog.EventDispatch && sceneryLog.push();
 
     assert && assert( trail, 'Falsy trail for dispatchEvent' );
@@ -2013,9 +2013,9 @@ class Input {
    * @param {Event} domEvent
    */
   static debugText( point, domEvent ) {
-    let result = domEvent.timeStamp + ' ' + domEvent.type;
+    let result = `${domEvent.timeStamp} ${domEvent.type}`;
     if ( point !== null ) {
-      result = point.x + ',' + point.y + ' ' + result;
+      result = `${point.x},${point.y} ${result}`;
     }
     return result;
   }

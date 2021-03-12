@@ -335,7 +335,7 @@ class Trail {
 
     this.length++;
     // accelerated version of this.updateUniqueId()
-    this.uniqueId = ( this.uniqueId ? node.id + ID_SEPARATOR + this.uniqueId : node.id + '' );
+    this.uniqueId = ( this.uniqueId ? node.id + ID_SEPARATOR + this.uniqueId : `${node.id}` );
 
     return this;
   }
@@ -380,7 +380,7 @@ class Trail {
 
     this.length++;
     // accelerated version of this.updateUniqueId()
-    this.uniqueId = ( this.uniqueId ? this.uniqueId + ID_SEPARATOR + node.id : node.id + '' );
+    this.uniqueId = ( this.uniqueId ? this.uniqueId + ID_SEPARATOR + node.id : `${node.id}` );
 
     return this;
   }
@@ -823,8 +823,8 @@ class Trail {
     assert && assert( !this.isEmpty(), 'cannot compare with an empty trail' );
     assert && assert( !other.isEmpty(), 'cannot compare with an empty trail' );
     assert && assert( this.nodes[ 0 ] === other.nodes[ 0 ], 'for Trail comparison, trails must have the same root node' );
-    assertSlow && assertSlow( this.areIndicesValid(), 'Trail.compare this.areIndicesValid() failed on ' + this.toString() );
-    assertSlow && assertSlow( other.areIndicesValid(), 'Trail.compare other.areIndicesValid() failed on ' + other.toString() );
+    assertSlow && assertSlow( this.areIndicesValid(), `Trail.compare this.areIndicesValid() failed on ${this.toString()}` );
+    assertSlow && assertSlow( other.areIndicesValid(), `Trail.compare other.areIndicesValid() failed on ${other.toString()}` );
 
     const minNodeIndex = Math.min( this.indices.length, other.indices.length );
     for ( let i = 0; i < minNodeIndex; i++ ) {
@@ -996,7 +996,7 @@ class Trail {
     if ( !this.length ) {
       return 'Empty Trail';
     }
-    return '[Trail ' + this.indices.join( '.' ) + ' ' + this.getUniqueId() + ']';
+    return `[Trail ${this.indices.join( '.' )} ${this.getUniqueId()}]`;
   }
 
   /**
@@ -1022,7 +1022,7 @@ class Trail {
    * @returns {string}
    */
   toDebugString() {
-    return this.toString() + ' ' + this.toPathString();
+    return `${this.toString()} ${this.toPathString()}`;
   }
 
   /**

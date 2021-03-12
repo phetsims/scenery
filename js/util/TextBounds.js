@@ -230,7 +230,7 @@ const TextBounds = {
       'vertical-align': 'baseline',
       display: 'inline-block',
       width: 0,
-      height: maxHeight + 'px',
+      height: `${maxHeight}px`,
       margin: '0 !important',
       padding: '0 !important'
     } );

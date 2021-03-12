@@ -22,7 +22,7 @@ class SVGRadialGradient extends SVGGradient {
    * @param {RadialGradient} radialGradient
    */
   initialize( svgBlock, radialGradient ) {
-    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGRadialGradient] initialize ' + radialGradient.id );
+    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGRadialGradient] initialize ${radialGradient.id}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
     super.initialize( svgBlock, radialGradient );

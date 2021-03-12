@@ -232,7 +232,7 @@ class AlignGroup {
     this._resizeLock = true;
 
     sceneryLog && sceneryLog.AlignGroup && sceneryLog.AlignGroup(
-      'AlignGroup#' + this.id + ' updateLayout' );
+      `AlignGroup#${this.id} updateLayout` );
     sceneryLog && sceneryLog.AlignGroup && sceneryLog.push();
 
     sceneryLog && sceneryLog.AlignGroup && sceneryLog.AlignGroup( 'AlignGroup computing maximum dimension' );

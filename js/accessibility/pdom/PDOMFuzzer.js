@@ -58,7 +58,7 @@ class PDOMFuzzer {
     if ( this.logToConsole ) {
       for ( let i = 0; i < this.nodes.length; i++ ) {
         const node = this.nodes[ i ];
-        console.log( i + '#' + node.id + ' ' + node.tagName + ' ch:' + PDOMTree.debugOrder( node.children ) + ' or:' + PDOMTree.debugOrder( node.pdomOrder ) + ' vis:' + node.visible + ' avis:' + node.pdomVisible );
+        console.log( `${i}#${node.id} ${node.tagName} ch:${PDOMTree.debugOrder( node.children )} or:${PDOMTree.debugOrder( node.pdomOrder )} vis:${node.visible} avis:${node.pdomVisible}` );
       }
     }
   }
@@ -74,13 +74,13 @@ class PDOMFuzzer {
 
     this.nodes.forEach( a => {
       actions.push( {
-        text: '#' + a.id + '.visible = ' + !a.visible,
+        text: `#${a.id}.visible = ${!a.visible}`,
         execute: () => {
           a.visible = !a.visible;
         }
       } );
       actions.push( {
-        text: '#' + a.id + '.pdomVisible = ' + !a.pdomVisible,
+        text: `#${a.id}.pdomVisible = ${!a.pdomVisible}`,
         execute: () => {
           a.pdomVisible = !a.pdomVisible;
         }
@@ -88,7 +88,7 @@ class PDOMFuzzer {
       [ 'span', 'div', null ].forEach( tagName => {
         if ( a.tagName !== tagName ) {
           actions.push( {
-            text: '#' + a.id + '.tagName = ' + tagName,
+            text: `#${a.id}.tagName = ${tagName}`,
             execute: () => {
               a.tagName = tagName;
             }
@@ -101,7 +101,7 @@ class PDOMFuzzer {
           // TODO: Make sure it's not the CURRENT order?
           if ( this.isPDOMOrderChangeLegal( a, order ) ) {
             actions.push( {
-              text: '#' + a.id + '.pdomOrder = ' + PDOMTree.debugOrder( order ),
+              text: `#${a.id}.pdomOrder = ${PDOMTree.debugOrder( order )}`,
               execute: () => {
                 a.pdomOrder = order;
               }
@@ -114,7 +114,7 @@ class PDOMFuzzer {
         if ( this.isAddChildLegal( a, b ) ) {
           _.range( 0, a.children.length + 1 ).forEach( i => {
             actions.push( {
-              text: '#' + a.id + '.insertChild(' + i + ',#' + b.id + ')',
+              text: `#${a.id}.insertChild(${i},#${b.id})`,
               execute: () => {
                 a.insertChild( i, b );
               }
@@ -123,7 +123,7 @@ class PDOMFuzzer {
         }
         if ( a.hasChild( b ) ) {
           actions.push( {
-            text: '#' + a.id + '.removeChild(#' + b.id + ')',
+            text: `#${a.id}.removeChild(#${b.id})`,
             execute: () => {
               a.removeChild( b );
             }

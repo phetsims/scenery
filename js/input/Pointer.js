@@ -152,7 +152,7 @@ class Pointer {
    * @param {boolean} [attach]
    */
   addInputListener( listener, attach ) {
-    sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'addInputListener to ' + this.toString() + ' attach:' + attach );
+    sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( `addInputListener to ${this.toString()} attach:${attach}` );
     sceneryLog && sceneryLog.Pointer && sceneryLog.push();
 
     assert && assert( listener, 'A listener must be provided' );
@@ -178,7 +178,7 @@ class Pointer {
    * @param {Object} listener - See top-level documentation for description of the listener API
    */
   removeInputListener( listener ) {
-    sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'removeInputListener to ' + this.toString() );
+    sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( `removeInputListener to ${this.toString()}` );
     sceneryLog && sceneryLog.Pointer && sceneryLog.push();
 
     assert && assert( listener, 'A listener must be provided' );
@@ -274,7 +274,7 @@ class Pointer {
    * @param {Object} listener
    */
   attach( listener ) {
-    sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'Attaching to ' + this.toString() );
+    sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( `Attaching to ${this.toString()}` );
 
     assert && assert( !this.isAttached(), 'Attempted to attach to an already attached pointer' );
 
@@ -289,7 +289,7 @@ class Pointer {
    * @param {Object} listener
    */
   detach( listener ) {
-    sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'Detaching from ' + this.toString() );
+    sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( `Detaching from ${this.toString()}` );
 
     assert && assert( this.isAttached(), 'Cannot detach a listener if one is not attached' );
     assert && assert( this._attachedListener === listener, 'Cannot detach a different listener' );
@@ -414,7 +414,7 @@ class Pointer {
    * @public
    */
   dispose() {
-    sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'Disposing ' + this.toString() );
+    sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( `Disposing ${this.toString()}` );
 
     // remove listeners that would clear intent on disposal
     if ( this._listeners.indexOf( this._listenerForDragReserve ) >= 0 ) { this.removeInputListener( this._listenerForDragReserve ); }

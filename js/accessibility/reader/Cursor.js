@@ -369,20 +369,20 @@ class Cursor {
       textContent += element.textContent;
     }
     if ( element.tagName === 'H1' ) {
-      textContent += 'Heading Level 1, ' + element.textContent;
+      textContent += `Heading Level 1, ${element.textContent}`;
     }
     if ( element.tagName === 'H2' ) {
-      textContent += 'Heading Level 2, ' + element.textContent;
+      textContent += `Heading Level 2, ${element.textContent}`;
     }
     if ( element.tagName === 'H3' ) {
-      textContent += 'Heading Level 3, ' + element.textContent;
+      textContent += `Heading Level 3, ${element.textContent}`;
     }
     if ( element.tagName === 'UL' ) {
       const listLength = element.children.length;
-      textContent += 'List with ' + listLength + ' items';
+      textContent += `List with ${listLength} items`;
     }
     if ( element.tagName === 'LI' ) {
-      textContent += 'List Item: ' + element.textContent;
+      textContent += `List Item: ${element.textContent}`;
     }
     if ( element.tagName === 'BUTTON' ) {
       const buttonLabel = ' Button';
@@ -408,7 +408,7 @@ class Cursor {
     }
     if ( element.tagName === 'INPUT' ) {
       if ( element.type === 'reset' ) {
-        textContent += element.getAttribute( 'value' ) + ' Button';
+        textContent += `${element.getAttribute( 'value' )} Button`;
       }
       if ( element.type === 'checkbox' ) {
         // the checkbox should have a label - find the correct one
@@ -421,7 +421,7 @@ class Cursor {
           const ariaChecked = element.getAttribute( 'aria-checked' );
           if ( ariaChecked ) {
             const switchedString = ( ariaChecked === 'true' ) ? 'On' : 'Off';
-            textContent += labelContent + COMMA + SPACE + 'switch' + COMMA + SPACE + switchedString;
+            textContent += `${labelContent + COMMA + SPACE}switch${COMMA}${SPACE}${switchedString}`;
           }
           else {
             assert && assert( false, 'checkbox switch must have aria-checked attribute' );
@@ -429,7 +429,7 @@ class Cursor {
         }
         else {
           const checkedString = element.checked ? ' Checked' : ' Not Checked';
-          textContent += element.textContent + ' Checkbox' + checkedString;
+          textContent += `${element.textContent} Checkbox${checkedString}`;
         }
       }
     }
@@ -483,18 +483,18 @@ class Cursor {
 
         // label if the role is a button
         if ( role === 'button' ) {
-          textContent += SPACE + 'Button';
+          textContent += `${SPACE}Button`;
         }
       }
 
       // check to see if this element is draggable
       if ( element.draggable ) {
-        textContent += SPACE + 'draggable' + COMMA;
+        textContent += `${SPACE}draggable${COMMA}`;
       }
 
       // look for aria-grabbed markup to let the user know if the element is grabbed
       if ( element.getAttribute( 'aria-grabbed' ) === 'true' ) {
-        textContent += SPACE + 'grabbed' + COMMA;
+        textContent += `${SPACE}grabbed${COMMA}`;
       }
 
       // look for an element in the DOM that describes this one
@@ -760,7 +760,7 @@ class Cursor {
       // let the user know that there are no more headings at the desired level
       const directionDescriptionString = ( direction === NEXT ) ? 'more' : 'previous';
       if ( headingLevels.length === 1 ) {
-        const noNextHeadingString = 'No ' + directionDescriptionString + ' headings at ';
+        const noNextHeadingString = `No ${directionDescriptionString} headings at `;
 
         const headingLevel = headingLevels[ 0 ];
         const levelString = headingLevel === 'H1' ? 'Level 1' :
@@ -771,7 +771,7 @@ class Cursor {
                             'Level 6';
         return noNextHeadingString + levelString;
       }
-      return 'No ' + directionDescriptionString + ' headings';
+      return `No ${directionDescriptionString} headings`;
     }
 
     // set element as the next active element and return the text
@@ -807,7 +807,7 @@ class Cursor {
     if ( !nextElement ) {
       this.activeElement = previousElement;
       const directionDescriptionString = direction === NEXT ? 'more' : 'previous';
-      return 'No ' + directionDescriptionString + ' buttons';
+      return `No ${directionDescriptionString} buttons`;
     }
 
     this.activeElement = nextElement;
@@ -844,7 +844,7 @@ class Cursor {
     if ( accessibleText === END_OF_DOCUMENT ) {
       this.activeElement = previousElement;
       const directionDescriptionString = direction === NEXT ? 'next' : 'previous';
-      return 'No ' + directionDescriptionString + ' form field';
+      return `No ${directionDescriptionString} form field`;
     }
 
     this.activeElement = nextElement;
@@ -894,7 +894,7 @@ class Cursor {
 
     if ( !accessibleText ) {
       const directionDescriptionString = ( direction === NEXT ) ? 'more' : 'previous';
-      return 'No ' + directionDescriptionString + ' list items';
+      return `No ${directionDescriptionString} list items`;
     }
 
     return accessibleText;
@@ -932,7 +932,7 @@ class Cursor {
 
       // let the user know that there are no more lists and move to the next element
       const directionDescriptionString = direction === NEXT ? 'more' : 'previous';
-      return 'No ' + directionDescriptionString + ' lists';
+      return `No ${directionDescriptionString} lists`;
     }
 
     // get the content from the list element
@@ -946,7 +946,7 @@ class Cursor {
       this.activeElement = firstItem;
     }
 
-    return listText + ', ' + itemText;
+    return `${listText}, ${itemText}`;
   }
 
   /**

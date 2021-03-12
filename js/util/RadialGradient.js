@@ -148,10 +148,10 @@ class RadialGradient extends Gradient {
    * @returns {string}
    */
   toString() {
-    let result = 'new scenery.RadialGradient( ' + this.start.x + ', ' + this.start.y + ', ' + this.startRadius + ', ' + this.end.x + ', ' + this.end.y + ', ' + this.endRadius + ' )';
+    let result = `new scenery.RadialGradient( ${this.start.x}, ${this.start.y}, ${this.startRadius}, ${this.end.x}, ${this.end.y}, ${this.endRadius} )`;
 
     _.each( this.stops, stop => {
-      result += '.addColorStop( ' + stop.ratio + ', \'' + stop.color.toString() + '\' )';
+      result += `.addColorStop( ${stop.ratio}, '${stop.color.toString()}' )`;
     } );
 
     return result;

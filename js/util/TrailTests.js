@@ -32,7 +32,7 @@ QUnit.module( 'Trail' );
 /* eslint-disable no-undef */
 
 function equalsApprox( assert, a, b, message ) { // eslint-disable-line no-unused-vars
-  assert.ok( Math.abs( a - b ) < 0.0000001, ( message ? message + ': ' : '' ) + a + ' =? ' + b );
+  assert.ok( Math.abs( a - b ) < 0.0000001, `${( message ? `${message}: ` : '' ) + a} =? ${b}` );
 }
 
 function createTestNodeTree() { // eslint-disable-line no-unused-vars
@@ -98,7 +98,7 @@ QUnit.test( 'Canvas 2D Context and Features', assert => {
     'strokeStyle'
   ];
   _.each( neededMethods, method => {
-    assert.ok( context[ method ] !== undefined, 'context.' + method );
+    assert.ok( context[ method ] !== undefined, `context.${method}` );
   } );
 } );
 
@@ -184,7 +184,7 @@ QUnit.test( 'Trail comparison', assert => {
       const comparison = trails[ i ].compare( trails[ j ] );
 
       // make sure that every trail compares as expected (0 and they are equal, -1 and i < j)
-      assert.equal( i === j ? 0 : ( i < j ? -1 : 1 ), comparison, i + ',' + j );
+      assert.equal( i === j ? 0 : ( i < j ? -1 : 1 ), comparison, `${i},${j}` );
     }
   }
 } );
@@ -201,7 +201,7 @@ QUnit.test( 'Trail eachTrailBetween', assert => {
     currentTrail = currentTrail.next();
   }
 
-  assert.equal( 13, trails.length, 'Trails: ' + _.map( trails, trail => trail.toString() ).join( '\n' ) );
+  assert.equal( 13, trails.length, `Trails: ${_.map( trails, trail => trail.toString() ).join( '\n' )}` );
 
   for ( let i = 0; i < trails.length; i++ ) {
     for ( let j = i; j < trails.length; j++ ) {
@@ -209,17 +209,17 @@ QUnit.test( 'Trail eachTrailBetween', assert => {
       Trail.eachTrailBetween( trails[ i ], trails[ j ], trail => {
         inclusiveList.push( trail.copy() );
       }, false, node );
-      const trailString = i + ',' + j + ' ' + trails[ i ].toString() + ' to ' + trails[ j ].toString();
-      assert.ok( inclusiveList[ 0 ].equals( trails[ i ] ), 'inclusive start on ' + trailString + ' is ' + inclusiveList[ 0 ].toString() );
-      assert.ok( inclusiveList[ inclusiveList.length - 1 ].equals( trails[ j ] ), 'inclusive end on ' + trailString + 'is ' + inclusiveList[ inclusiveList.length - 1 ].toString() );
-      assert.equal( inclusiveList.length, j - i + 1, 'inclusive length on ' + trailString + ' is ' + inclusiveList.length + ', ' + _.map( inclusiveList, trail => trail.toString() ).join( '\n' ) );
+      const trailString = `${i},${j} ${trails[ i ].toString()} to ${trails[ j ].toString()}`;
+      assert.ok( inclusiveList[ 0 ].equals( trails[ i ] ), `inclusive start on ${trailString} is ${inclusiveList[ 0 ].toString()}` );
+      assert.ok( inclusiveList[ inclusiveList.length - 1 ].equals( trails[ j ] ), `inclusive end on ${trailString}is ${inclusiveList[ inclusiveList.length - 1 ].toString()}` );
+      assert.equal( inclusiveList.length, j - i + 1, `inclusive length on ${trailString} is ${inclusiveList.length}, ${_.map( inclusiveList, trail => trail.toString() ).join( '\n' )}` );
 
       if ( i < j ) {
         const exclusiveList = [];
         Trail.eachTrailBetween( trails[ i ], trails[ j ], trail => {
           exclusiveList.push( trail.copy() );
         }, true, node );
-        assert.equal( exclusiveList.length, j - i - 1, 'exclusive length on ' + i + ',' + j );
+        assert.equal( exclusiveList.length, j - i - 1, `exclusive length on ${i},${j}` );
       }
     }
   }
@@ -234,7 +234,7 @@ QUnit.test( 'depthFirstUntil depthFirstUntil with subtree skipping', assert => {
       // should skip
       return true;
     }
-    assert.ok( pointer.trail.isVisible(), 'Trail visibility for ' + pointer.trail.toString() );
+    assert.ok( pointer.trail.isVisible(), `Trail visibility for ${pointer.trail.toString()}` );
   }, false );
 } );
 
@@ -247,7 +247,7 @@ QUnit.test( 'Trail eachTrailUnder with subtree skipping', assert => {
       // should skip
       return true;
     }
-    assert.ok( trail.isVisible(), 'Trail visibility for ' + trail.toString() );
+    assert.ok( trail.isVisible(), `Trail visibility for ${trail.toString()}` );
   } );
 } );
 
@@ -296,10 +296,10 @@ QUnit.test( 'TrailPointer render comparison', assert => {
       const comparison = pointers[ i ].compareRender( pointers[ j ] );
 
       if ( comparison === -1 ) {
-        assert.ok( i < j, i + ',' + j );
+        assert.ok( i < j, `${i},${j}` );
       }
       if ( comparison === 1 ) {
-        assert.ok( i > j, i + ',' + j );
+        assert.ok( i > j, `${i},${j}` );
       }
     }
   }
@@ -344,7 +344,7 @@ QUnit.test( 'TrailPointer nested comparison and fowards/backwards', assert => {
       const comparison = pointers[ i ].compareNested( pointers[ j ] );
 
       // make sure that every pointer compares as expected (0 and they are equal, -1 and i < j)
-      assert.equal( comparison, i === j ? 0 : ( i < j ? -1 : 1 ), 'compareNested: ' + i + ',' + j );
+      assert.equal( comparison, i === j ? 0 : ( i < j ? -1 : 1 ), `compareNested: ${i},${j}` );
     }
   }
 
@@ -355,11 +355,11 @@ QUnit.test( 'TrailPointer nested comparison and fowards/backwards', assert => {
 
     const forwardsCopy = a.copy();
     forwardsCopy.nestedForwards();
-    assert.equal( forwardsCopy.compareNested( b ), 0, 'forwardsPointerCheck ' + ( i - 1 ) + ' to ' + i );
+    assert.equal( forwardsCopy.compareNested( b ), 0, `forwardsPointerCheck ${i - 1} to ${i}` );
 
     const backwardsCopy = b.copy();
     backwardsCopy.nestedBackwards();
-    assert.equal( backwardsCopy.compareNested( a ), 0, 'backwardsPointerCheck ' + i + ' to ' + ( i - 1 ) );
+    assert.equal( backwardsCopy.compareNested( a ), 0, `backwardsPointerCheck ${i} to ${i - 1}` );
   }
 
   // exhaustively check depthFirstUntil inclusive
@@ -368,18 +368,18 @@ QUnit.test( 'TrailPointer nested comparison and fowards/backwards', assert => {
       // i < j guaranteed
       const contents = [];
       pointers[ i ].depthFirstUntil( pointers[ j ], pointer => { contents.push( pointer.copy() ); }, false );
-      assert.equal( contents.length, j - i + 1, 'depthFirstUntil inclusive ' + i + ',' + j + ' count check' );
+      assert.equal( contents.length, j - i + 1, `depthFirstUntil inclusive ${i},${j} count check` );
 
       // do an actual pointer to pointer comparison
       let isOk = true;
       for ( let k = 0; k < contents.length; k++ ) {
         comparison = contents[ k ].compareNested( pointers[ i + k ] );
         if ( comparison !== 0 ) {
-          assert.equal( comparison, 0, 'depthFirstUntil inclusive ' + i + ',' + j + ',' + k + ' comparison check ' + contents[ k ].trail.indices.join() + ' - ' + pointers[ i + k ].trail.indices.join() );
+          assert.equal( comparison, 0, `depthFirstUntil inclusive ${i},${j},${k} comparison check ${contents[ k ].trail.indices.join()} - ${pointers[ i + k ].trail.indices.join()}` );
           isOk = false;
         }
       }
-      assert.ok( isOk, 'depthFirstUntil inclusive ' + i + ',' + j + ' comparison check' );
+      assert.ok( isOk, `depthFirstUntil inclusive ${i},${j} comparison check` );
     }
   }
 
@@ -389,18 +389,18 @@ QUnit.test( 'TrailPointer nested comparison and fowards/backwards', assert => {
       // i < j guaranteed
       contents = [];
       pointers[ i ].depthFirstUntil( pointers[ j ], pointer => { contents.push( pointer.copy() ); }, true );
-      assert.equal( contents.length, j - i - 1, 'depthFirstUntil exclusive ' + i + ',' + j + ' count check' );
+      assert.equal( contents.length, j - i - 1, `depthFirstUntil exclusive ${i},${j} count check` );
 
       // do an actual pointer to pointer comparison
       isOk = true;
       for ( k = 0; k < contents.length; k++ ) {
         comparison = contents[ k ].compareNested( pointers[ i + k + 1 ] );
         if ( comparison !== 0 ) {
-          assert.equal( comparison, 0, 'depthFirstUntil exclusive ' + i + ',' + j + ',' + k + ' comparison check ' + contents[ k ].trail.indices.join() + ' - ' + pointers[ i + k ].trail.indices.join() );
+          assert.equal( comparison, 0, `depthFirstUntil exclusive ${i},${j},${k} comparison check ${contents[ k ].trail.indices.join()} - ${pointers[ i + k ].trail.indices.join()}` );
           isOk = false;
         }
       }
-      assert.ok( isOk, 'depthFirstUntil exclusive ' + i + ',' + j + ' comparison check' );
+      assert.ok( isOk, `depthFirstUntil exclusive ${i},${j} comparison check` );
     }
   }
 } );
@@ -516,7 +516,7 @@ QUnit.test( 'Consistent and precise bounds range on Text', assert => {
   assert.ok( textBounds.isConsistent, textBounds.toString() );
 
   // precision of 0.001 (or lower given different parameters) is possible on non-Chome browsers (Firefox, IE9, Opera)
-  assert.ok( textBounds.precision < 0.15, 'precision: ' + textBounds.precision );
+  assert.ok( textBounds.precision < 0.15, `precision: ${textBounds.precision}` );
 } );
 
 QUnit.test( 'Consistent and precise bounds range on Text', assert => {
@@ -525,7 +525,7 @@ QUnit.test( 'Consistent and precise bounds range on Text', assert => {
   assert.ok( textBounds.isConsistent, textBounds.toString() );
 
   // precision of 0.001 (or lower given different parameters) is possible on non-Chome browsers (Firefox, IE9, Opera)
-  assert.ok( textBounds.precision < 1, 'precision: ' + textBounds.precision );
+  assert.ok( textBounds.precision < 1, `precision: ${textBounds.precision}` );
 } );
 
 QUnit.test( 'ES5 Setter / Getter tests', assert => {
@@ -643,11 +643,11 @@ QUnit.test( 'Bounds events', assert => {
   const epsilon = 0.0000001;
 
   node.childBoundsProperty.lazyLink( () => {
-    assert.ok( node.childBounds.equalsEpsilon( new Bounds2( 10, 0, 110, 30 ), epsilon ), 'Parent child bounds check: ' + node.childBounds.toString() );
+    assert.ok( node.childBounds.equalsEpsilon( new Bounds2( 10, 0, 110, 30 ), epsilon ), `Parent child bounds check: ${node.childBounds.toString()}` );
   } );
 
   node.boundsProperty.lazyLink( () => {
-    assert.ok( node.bounds.equalsEpsilon( new Bounds2( 10, 10, 110, 40 ), epsilon ), 'Parent bounds check: ' + node.bounds.toString() );
+    assert.ok( node.bounds.equalsEpsilon( new Bounds2( 10, 10, 110, 40 ), epsilon ), `Parent bounds check: ${node.bounds.toString()}` );
   } );
 
   node.selfBoundsProperty.lazyLink( () => {
@@ -655,11 +655,11 @@ QUnit.test( 'Bounds events', assert => {
   } );
 
   rect.selfBoundsProperty.lazyLink( () => {
-    assert.ok( rect.selfBounds.equalsEpsilon( new Bounds2( 0, 0, 100, 30 ), epsilon ), 'Self bounds check: ' + rect.selfBounds.toString() );
+    assert.ok( rect.selfBounds.equalsEpsilon( new Bounds2( 0, 0, 100, 30 ), epsilon ), `Self bounds check: ${rect.selfBounds.toString()}` );
   } );
 
   rect.boundsProperty.lazyLink( () => {
-    assert.ok( rect.bounds.equalsEpsilon( new Bounds2( 10, 0, 110, 30 ), epsilon ), 'Bounds check: ' + rect.bounds.toString() );
+    assert.ok( rect.bounds.equalsEpsilon( new Bounds2( 10, 0, 110, 30 ), epsilon ), `Bounds check: ${rect.bounds.toString()}` );
   } );
 
   rect.childBoundsProperty.lazyLink( () => {
@@ -911,7 +911,7 @@ QUnit.test( 'Line stroked bounds', assert => {
       line.lineCap = cap;
 
       assert.ok( line.bounds.equalsEpsilon( line.getShape().getStrokedShape( line.getLineStyles() ).bounds, 0.0001 ),
-        'Line stroked bounds with ' + JSON.stringify( position ) + ' and ' + cap + ' ' + line.bounds.toString() );
+        `Line stroked bounds with ${JSON.stringify( position )} and ${cap} ${line.bounds.toString()}` );
     } );
   } );
 } );

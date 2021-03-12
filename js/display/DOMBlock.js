@@ -90,7 +90,7 @@ class DOMBlock extends Block {
    * @param {Drawable} drawable
    */
   addDrawable( drawable ) {
-    sceneryLog && sceneryLog.DOMBlock && sceneryLog.DOMBlock( '#' + this.id + '.addDrawable ' + drawable.toString() );
+    sceneryLog && sceneryLog.DOMBlock && sceneryLog.DOMBlock( `#${this.id}.addDrawable ${drawable.toString()}` );
     assert && assert( this.domDrawable === drawable, 'DOMBlock should only be used with one drawable for now (the one it was initialized with)' );
 
     super.addDrawable( drawable );
@@ -104,7 +104,7 @@ class DOMBlock extends Block {
    * @param {Drawable} drawable
    */
   removeDrawable( drawable ) {
-    sceneryLog && sceneryLog.DOMBlock && sceneryLog.DOMBlock( '#' + this.id + '.removeDrawable ' + drawable.toString() );
+    sceneryLog && sceneryLog.DOMBlock && sceneryLog.DOMBlock( `#${this.id}.removeDrawable ${drawable.toString()}` );
     assert && assert( this.domDrawable === drawable, 'DOMBlock should only be used with one drawable for now (the one it was initialized with)' );
 
     super.removeDrawable( drawable );

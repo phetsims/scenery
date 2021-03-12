@@ -269,7 +269,7 @@ class Color {
    */
   computeCSS() {
     if ( this.a === 1 ) {
-      return 'rgb(' + this.r + ',' + this.g + ',' + this.b + ')';
+      return `rgb(${this.r},${this.g},${this.b})`;
     }
     else {
       // Since SVG doesn't support parsing scientific notation (e.g. 7e5), we need to output fixed decimal-point strings.
@@ -282,7 +282,7 @@ class Color {
       }
 
       const alphaString = this.a === 0 || this.a === 1 ? this.a : alpha;
-      return 'rgba(' + this.r + ',' + this.g + ',' + this.b + ',' + alphaString + ')';
+      return `rgba(${this.r},${this.g},${this.b},${alphaString})`;
     }
   }
 
@@ -294,7 +294,7 @@ class Color {
    */
   toCSS() {
     // verify that the cached value is correct (in debugging builds only, defeats the point of caching otherwise)
-    assert && assert( this._css === this.computeCSS(), 'CSS cached value is ' + this._css + ', but the computed value appears to be ' + this.computeCSS() );
+    assert && assert( this._css === this.computeCSS(), `CSS cached value is ${this._css}, but the computed value appears to be ${this.computeCSS()}` );
 
     return this._css;
   }
@@ -324,7 +324,7 @@ class Color {
     }
 
     if ( !success ) {
-      throw new Error( 'Color unable to parse color string: ' + cssString );
+      throw new Error( `Color unable to parse color string: ${cssString}` );
     }
 
     this.updateColor(); // update the cached value
@@ -354,7 +354,7 @@ class Color {
     typeof this.green === 'number' &&
     typeof this.blue === 'number' &&
     typeof this.alpha === 'number',
-      'Ensure color components are numeric: ' + this.toString() );
+      `Ensure color components are numeric: ${this.toString()}` );
 
     assert && assert( isFinite( this.red ) && isFinite( this.green ) && isFinite( this.blue ) && isFinite( this.alpha ),
       'Ensure color components are finite and not NaN' );
@@ -363,7 +363,7 @@ class Color {
     this.green >= 0 && this.green <= 255 &&
     this.red >= 0 && this.red <= 255 &&
     this.alpha >= 0 && this.alpha <= 1,
-      'Ensure color components are in the proper ranges: ' + this.toString() );
+      `Ensure color components are in the proper ranges: ${this.toString()}` );
 
     const oldCSS = this._css;
     this._css = this.computeCSS();
@@ -558,7 +558,7 @@ class Color {
    * @returns {string}
    */
   toString() {
-    return this.constructor.name + '[r:' + this.r + ' g:' + this.g + ' b:' + this.b + ' a:' + this.a + ']';
+    return `${this.constructor.name}[r:${this.r} g:${this.g} b:${this.b} a:${this.a}]`;
   }
 
   /**
@@ -651,7 +651,7 @@ class Color {
    */
   static interpolateRGBA( color1, color2, distance ) {
     if ( distance < 0 || distance > 1 ) {
-      throw new Error( 'distance must be between 0 and 1: ' + distance );
+      throw new Error( `distance must be between 0 and 1: ${distance}` );
     }
     const r = Math.floor( linear( 0, 1, color1.r, color2.r, distance ) );
     const g = Math.floor( linear( 0, 1, color1.g, color2.g, distance ) );
@@ -731,7 +731,7 @@ class Color {
         scratchColor.setCSS( cssString );
       }
       catch( e ) {
-        assert( false, 'The CSS string is an invalid color: ' + cssString );
+        assert( false, `The CSS string is an invalid color: ${cssString}` );
       }
     }
   }
@@ -829,7 +829,7 @@ class Color {
     // replace colors based on keywords
     const keywordMatch = Color.colorKeywords[ str ];
     if ( keywordMatch ) {
-      str = '#' + keywordMatch;
+      str = `#${keywordMatch}`;
     }
 
     return str;
@@ -913,7 +913,7 @@ Color.formatParsers = [
   },
   {
     // rgb(...)
-    regexp: new RegExp( '^rgb\\(' + rgbNumber + ',' + rgbNumber + ',' + rgbNumber + '\\)$' ),
+    regexp: new RegExp( `^rgb\\(${rgbNumber},${rgbNumber},${rgbNumber}\\)$` ),
     apply: ( color, matches ) => {
       color.setRGBA(
         parseRGBNumber( matches[ 1 ] ),
@@ -924,7 +924,7 @@ Color.formatParsers = [
   },
   {
     // rgba(...)
-    regexp: new RegExp( '^rgba\\(' + rgbNumber + ',' + rgbNumber + ',' + rgbNumber + ',' + aNumber + '\\)$' ),
+    regexp: new RegExp( `^rgba\\(${rgbNumber},${rgbNumber},${rgbNumber},${aNumber}\\)$` ),
     apply: ( color, matches ) => {
       color.setRGBA(
         parseRGBNumber( matches[ 1 ] ),
@@ -935,7 +935,7 @@ Color.formatParsers = [
   },
   {
     // hsl(...)
-    regexp: new RegExp( '^hsl\\(' + rawNumber + ',' + rawNumber + '%,' + rawNumber + '%\\)$' ),
+    regexp: new RegExp( `^hsl\\(${rawNumber},${rawNumber}%,${rawNumber}%\\)$` ),
     apply: ( color, matches ) => {
       color.setHSLA(
         parseInt( matches[ 1 ], 10 ),
@@ -946,7 +946,7 @@ Color.formatParsers = [
   },
   {
     // hsla(...)
-    regexp: new RegExp( '^hsla\\(' + rawNumber + ',' + rawNumber + '%,' + rawNumber + '%,' + aNumber + '\\)$' ),
+    regexp: new RegExp( `^hsla\\(${rawNumber},${rawNumber}%,${rawNumber}%,${aNumber}\\)$` ),
     apply: ( color, matches ) => {
       color.setHSLA(
         parseInt( matches[ 1 ], 10 ),

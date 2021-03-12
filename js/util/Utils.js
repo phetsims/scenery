@@ -325,8 +325,8 @@ const Utils = {
         // sanity check - break out of an infinite loop!
         if ( debugChromeBoundsScanning ) {
           console.log( 'warning, exiting infinite loop!' );
-          console.log( 'transformed "min" minX: ' + idealTransform( new Bounds2( maxBounds.minX, maxBounds.minY, minBounds.minX, maxBounds.maxY ) ).transformPosition2( p( minBounds.minX, 0 ) ) );
-          console.log( 'transformed "max" minX: ' + idealTransform( new Bounds2( maxBounds.minX, maxBounds.minY, minBounds.minX, maxBounds.maxY ) ).transformPosition2( p( maxBounds.minX, 0 ) ) );
+          console.log( `transformed "min" minX: ${idealTransform( new Bounds2( maxBounds.minX, maxBounds.minY, minBounds.minX, maxBounds.maxY ) ).transformPosition2( p( minBounds.minX, 0 ) )}` );
+          console.log( `transformed "max" minX: ${idealTransform( new Bounds2( maxBounds.minX, maxBounds.minY, minBounds.minX, maxBounds.maxY ) ).transformPosition2( p( maxBounds.minX, 0 ) )}` );
         }
         break;
       }
@@ -401,8 +401,8 @@ const Utils = {
     }
 
     if ( debugChromeBoundsScanning ) {
-      console.log( 'minBounds: ' + minBounds );
-      console.log( 'maxBounds: ' + maxBounds );
+      console.log( `minBounds: ${minBounds}` );
+      console.log( `maxBounds: ${maxBounds}` );
     }
 
     const result = new Bounds2(

@@ -68,10 +68,10 @@ class LinearGradient extends Gradient {
    * @returns {string}
    */
   toString() {
-    let result = 'new scenery.LinearGradient( ' + this.start.x + ', ' + this.start.y + ', ' + this.end.x + ', ' + this.end.y + ' )';
+    let result = `new scenery.LinearGradient( ${this.start.x}, ${this.start.y}, ${this.end.x}, ${this.end.y} )`;
 
     _.each( this.stops, stop => {
-      result += '.addColorStop( ' + stop.ratio + ', \'' + ( stop.color.toCSS ? stop.color.toCSS() : stop.color.toString() ) + '\' )';
+      result += `.addColorStop( ${stop.ratio}, '${stop.color.toCSS ? stop.color.toCSS() : stop.color.toString()}' )`;
     } );
 
     return result;

@@ -62,7 +62,7 @@ function snapshotEquals( assert, a, b, threshold, message, extraDom ) {
     $( note ).text( message );
     display.append( note );
     const differenceDiv = document.createElement( 'div' );
-    $( differenceDiv ).text( '(actual) (expected) (color diff) (alpha diff) Diffs max: ' + largestDifference + ', average: ' + averageDifference );
+    $( differenceDiv ).text( `(actual) (expected) (color diff) (alpha diff) Diffs max: ${largestDifference}, average: ${averageDifference}` );
     display.append( differenceDiv );
 
     display.append( snapshotToCanvas( a ) );

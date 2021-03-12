@@ -27,7 +27,7 @@ class SVGGradient {
    * @param {Gradient} gradient
    */
   initialize( svgBlock, gradient ) {
-    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradient] initialize ' + gradient.id );
+    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradient] initialize ${gradient.id}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
     // @private {SVGBlock} - transient
@@ -87,7 +87,7 @@ class SVGGradient {
    */
   markDirty() {
     if ( !this.dirty ) {
-      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradient] switched to dirty: ' + this.gradient.id );
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradient] switched to dirty: ${this.gradient.id}` );
       sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
       this.dirty = true;
@@ -108,7 +108,7 @@ class SVGGradient {
     }
     this.dirty = false;
 
-    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradient] update: ' + this.gradient.id );
+    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradient] update: ${this.gradient.id}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
     for ( let i = 0; i < this.stops.length; i++ ) {
@@ -123,7 +123,7 @@ class SVGGradient {
    * @public
    */
   dispose() {
-    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( '[SVGGradient] dispose ' + this.gradient.id );
+    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradient] dispose ${this.gradient.id}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
     // Dispose and clean up stops

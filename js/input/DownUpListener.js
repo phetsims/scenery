@@ -69,7 +69,7 @@ class DownUpListener extends PhetioObject {
     this.downListener = {
       // mouse/touch up
       up: event => {
-        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener (pointer) up for ' + this.downTrail.toString() );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `DownUpListener (pointer) up for ${this.downTrail.toString()}` );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
         assert && assert( event.pointer === this.pointer );
@@ -82,7 +82,7 @@ class DownUpListener extends PhetioObject {
 
       // interruption of this Pointer listener
       interrupt: () => {
-        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener (pointer) interrupt for ' + this.downTrail.toString() );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `DownUpListener (pointer) interrupt for ${this.downTrail.toString()}` );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
         this.interrupt();
@@ -92,7 +92,7 @@ class DownUpListener extends PhetioObject {
 
       // touch cancel
       cancel: event => {
-        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DownUpListener (pointer) cancel for ' + this.downTrail.toString() );
+        sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `DownUpListener (pointer) cancel for ${this.downTrail.toString()}` );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
         assert && assert( event.pointer === this.pointer );

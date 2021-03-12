@@ -133,7 +133,7 @@ class PaintSVGState {
    * @private
    */
   updateBaseStyle() {
-    this.baseStyle = 'fill: ' + this.fillStyle + '; stroke: ' + this.strokeStyle + ';';
+    this.baseStyle = `fill: ${this.fillStyle}; stroke: ${this.strokeStyle};`;
   }
 
   /**
@@ -146,25 +146,25 @@ class PaintSVGState {
 
     const lineWidth = node.getLineWidth();
     if ( lineWidth !== 1 ) {
-      strokeDetailStyle += 'stroke-width: ' + lineWidth + ';';
+      strokeDetailStyle += `stroke-width: ${lineWidth};`;
     }
 
     const lineCap = node.getLineCap();
     if ( lineCap !== 'butt' ) {
-      strokeDetailStyle += 'stroke-linecap: ' + lineCap + ';';
+      strokeDetailStyle += `stroke-linecap: ${lineCap};`;
     }
 
     const lineJoin = node.getLineJoin();
     if ( lineJoin !== 'miter' ) {
-      strokeDetailStyle += 'stroke-linejoin: ' + lineJoin + ';';
+      strokeDetailStyle += `stroke-linejoin: ${lineJoin};`;
     }
 
     const miterLimit = node.getMiterLimit();
-    strokeDetailStyle += 'stroke-miterlimit: ' + miterLimit + ';';
+    strokeDetailStyle += `stroke-miterlimit: ${miterLimit};`;
 
     if ( node.hasLineDash() ) {
-      strokeDetailStyle += 'stroke-dasharray: ' + node.getLineDash().join( ',' ) + ';';
-      strokeDetailStyle += 'stroke-dashoffset: ' + node.getLineDashOffset() + ';';
+      strokeDetailStyle += `stroke-dasharray: ${node.getLineDash().join( ',' )};`;
+      strokeDetailStyle += `stroke-dashoffset: ${node.getLineDashOffset()};`;
     }
 
     this.strokeDetailStyle = strokeDetailStyle;
@@ -217,7 +217,7 @@ function paintToSVGStyle( paint, svgBlock ) {
   }
   else if ( paint.isPaint ) {
     // reference the SVG definition with a URL
-    return 'url(#' + paint.id + '-' + ( svgBlock ? svgBlock.id : 'noblock' ) + ')';
+    return `url(#${paint.id}-${svgBlock ? svgBlock.id : 'noblock'})`;
   }
   else {
     // plain CSS color

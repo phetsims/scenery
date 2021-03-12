@@ -349,7 +349,7 @@ class Display {
       // @public (scenery-internal) {PDOMInstance}
       this._rootPDOMInstance = PDOMInstance.createFromPool( null, this, new Trail() );
       sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
-        'Display root instance: ' + this._rootPDOMInstance.toString() );
+        `Display root instance: ${this._rootPDOMInstance.toString()}` );
       PDOMTree.rebuildInstanceTree( this._rootPDOMInstance );
 
       // add the accessible DOM as a child of this DOM element
@@ -396,7 +396,7 @@ class Display {
       Display.assertSubtreeDisposed( this._rootNode );
     }
 
-    sceneryLog && sceneryLog.Display && sceneryLog.Display( 'updateDisplay frame ' + this._frameId );
+    sceneryLog && sceneryLog.Display && sceneryLog.Display( `updateDisplay frame ${this._frameId}` );
     sceneryLog && sceneryLog.Display && sceneryLog.push();
 
     const firstRun = !!this._baseInstance;
@@ -531,7 +531,7 @@ class Display {
     this._frameId++;
 
     if ( sceneryLog && scenery.isLoggingPerformance() ) {
-      const syncTreeMessage = 'syncTree count: ' + this.perfSyncTreeCount;
+      const syncTreeMessage = `syncTree count: ${this.perfSyncTreeCount}`;
       if ( this.perfSyncTreeCount > 500 ) {
         sceneryLog.PerfCritical && sceneryLog.PerfCritical( syncTreeMessage );
       }
@@ -545,9 +545,9 @@ class Display {
         sceneryLog.PerfVerbose && sceneryLog.PerfVerbose( syncTreeMessage );
       }
 
-      const drawableBlockCountMessage = 'drawable block changes: ' + this.perfDrawableBlockChangeCount + ' for' +
-                                        ' -' + this.perfDrawableOldIntervalCount +
-                                        ' +' + this.perfDrawableNewIntervalCount;
+      const drawableBlockCountMessage = `drawable block changes: ${this.perfDrawableBlockChangeCount} for` +
+                                        ` -${this.perfDrawableOldIntervalCount
+                                        } +${this.perfDrawableNewIntervalCount}`;
       if ( this.perfDrawableBlockChangeCount > 200 ) {
         sceneryLog.PerfCritical && sceneryLog.PerfCritical( drawableBlockCountMessage );
       }
@@ -576,17 +576,17 @@ class Display {
     if ( this.size.width !== this._currentSize.width ) {
       sizeDirty = true;
       this._currentSize.width = this.size.width;
-      this._domElement.style.width = this.size.width + 'px';
+      this._domElement.style.width = `${this.size.width}px`;
     }
     if ( this.size.height !== this._currentSize.height ) {
       sizeDirty = true;
       this._currentSize.height = this.size.height;
-      this._domElement.style.height = this.size.height + 'px';
+      this._domElement.style.height = `${this.size.height}px`;
     }
     if ( sizeDirty && !this._allowSceneOverflow ) {
       // to prevent overflow, we add a CSS clip
       //TODO: 0px => 0?
-      this._domElement.style.clip = 'rect(0px,' + this.size.width + 'px,' + this.size.height + 'px,0px)';
+      this._domElement.style.clip = `rect(0px,${this.size.width}px,${this.size.height}px,0px)`;
     }
   }
 
@@ -889,7 +889,7 @@ class Display {
   markDrawableChangedBlock( drawable ) {
     assert && assert( drawable instanceof Drawable );
 
-    sceneryLog && sceneryLog.Display && sceneryLog.Display( 'markDrawableChangedBlock: ' + drawable.toString() );
+    sceneryLog && sceneryLog.Display && sceneryLog.Display( `markDrawableChangedBlock: ${drawable.toString()}` );
     this._drawablesToChangeBlock.push( drawable );
   }
 
@@ -913,7 +913,7 @@ class Display {
   markInstanceRootForDisposal( instance ) {
     assert && assert( instance instanceof Instance, 'How would an instance not be an instance of an instance?!?!?' );
 
-    sceneryLog && sceneryLog.Display && sceneryLog.Display( 'markInstanceRootForDisposal: ' + instance.toString() );
+    sceneryLog && sceneryLog.Display && sceneryLog.Display( `markInstanceRootForDisposal: ${instance.toString()}` );
     this._instanceRootsToDispose.push( instance );
   }
 
@@ -925,7 +925,7 @@ class Display {
   markDrawableForDisposal( drawable ) {
     assert && assert( drawable instanceof Drawable );
 
-    sceneryLog && sceneryLog.Display && sceneryLog.Display( 'markDrawableForDisposal: ' + drawable.toString() );
+    sceneryLog && sceneryLog.Display && sceneryLog.Display( `markDrawableForDisposal: ${drawable.toString()}` );
     this._drawablesToDispose.push( drawable );
   }
 
@@ -982,7 +982,7 @@ class Display {
   updateCursor() {
     if ( this._input && this._input.mouse && this._input.mouse.point ) {
       if ( this._input.mouse.cursor ) {
-        sceneryLog && sceneryLog.Cursor && sceneryLog.Cursor( 'set on pointer: ' + this._input.mouse.cursor );
+        sceneryLog && sceneryLog.Cursor && sceneryLog.Cursor( `set on pointer: ${this._input.mouse.cursor}` );
         this.setSceneCursor( this._input.mouse.cursor );
         return;
       }
@@ -996,14 +996,14 @@ class Display {
           const cursor = node.getCursor();
 
           if ( cursor ) {
-            sceneryLog && sceneryLog.Cursor && sceneryLog.Cursor( cursor + ' on ' + node.constructor.name + '#' + node.id );
+            sceneryLog && sceneryLog.Cursor && sceneryLog.Cursor( `${cursor} on ${node.constructor.name}#${node.id}` );
             this.setSceneCursor( cursor );
             return;
           }
         }
       }
 
-      sceneryLog && sceneryLog.Cursor && sceneryLog.Cursor( '--- for ' + ( mouseTrail ? mouseTrail.toString() : '(no hit)' ) );
+      sceneryLog && sceneryLog.Cursor && sceneryLog.Cursor( `--- for ${mouseTrail ? mouseTrail.toString() : '(no hit)'}` );
     }
 
     // fallback case
@@ -1448,7 +1448,7 @@ class Display {
    */
   getDebugHTML() {
     function str( ob ) {
-      return ob ? ob.toString() : ob + '';
+      return ob ? ob.toString() : `${ob}`;
     }
 
     const headerStyle = 'font-weight: bold; font-size: 120%; margin-top: 5px;';
@@ -1457,8 +1457,8 @@ class Display {
 
     let result = '';
 
-    result += '<div style="' + headerStyle + '">Display Summary</div>';
-    result += this.size.toString() + ' frame:' + this._frameId + ' input:' + !!this._input + ' cursor:' + this._lastCursor + '<br/>';
+    result += `<div style="${headerStyle}">Display Summary</div>`;
+    result += `${this.size.toString()} frame:${this._frameId} input:${!!this._input} cursor:${this._lastCursor}<br/>`;
 
     function nodeCount( node ) {
       let count = 1; // for us
@@ -1468,7 +1468,7 @@ class Display {
       return count;
     }
 
-    result += 'Nodes: ' + nodeCount( this._rootNode ) + '<br/>';
+    result += `Nodes: ${nodeCount( this._rootNode )}<br/>`;
 
     function instanceCount( instance ) {
       let count = 1; // for us
@@ -1478,7 +1478,7 @@ class Display {
       return count;
     }
 
-    result += this._baseInstance ? ( 'Instances: ' + instanceCount( this._baseInstance ) + '<br/>' ) : '';
+    result += this._baseInstance ? ( `Instances: ${instanceCount( this._baseInstance )}<br/>` ) : '';
 
     function drawableCount( drawable ) {
       let count = 1; // for us
@@ -1498,7 +1498,7 @@ class Display {
       return count;
     }
 
-    result += this._rootBackbone ? ( 'Drawables: ' + drawableCount( this._rootBackbone ) + '<br/>' ) : '';
+    result += this._rootBackbone ? ( `Drawables: ${drawableCount( this._rootBackbone )}<br/>` ) : '';
 
     const drawableCountMap = {}; // {string} drawable constructor name => {number} count of seen
     // increment the count in our map
@@ -1532,9 +1532,9 @@ class Display {
       return count;
     }
 
-    result += this._baseInstance ? ( 'Retained Drawables: ' + retainedDrawableCount( this._baseInstance ) + '<br/>' ) : '';
+    result += this._baseInstance ? ( `Retained Drawables: ${retainedDrawableCount( this._baseInstance )}<br/>` ) : '';
     for ( const drawableName in drawableCountMap ) {
-      result += '&nbsp;&nbsp;&nbsp;&nbsp;' + drawableName + ': ' + drawableCountMap[ drawableName ] + '<br/>';
+      result += `&nbsp;&nbsp;&nbsp;&nbsp;${drawableName}: ${drawableCountMap[ drawableName ]}<br/>`;
     }
 
     function blockSummary( block ) {
@@ -1545,11 +1545,11 @@ class Display {
 
       const hasBackbone = block.domDrawable && block.domDrawable.blocks;
 
-      let div = '<div style="margin-left: ' + ( depth * 20 ) + 'px">';
+      let div = `<div style="margin-left: ${depth * 20}px">`;
 
       div += block.toString();
       if ( !hasBackbone ) {
-        div += ' (' + block.drawableCount + ' drawables)';
+        div += ` (${block.drawableCount} drawables)`;
       }
 
       div += '</div>';
@@ -1566,7 +1566,7 @@ class Display {
     }
 
     if ( this._rootBackbone ) {
-      result += '<div style="' + headerStyle + '">Block Summary</div>';
+      result += `<div style="${headerStyle}">Block Summary</div>`;
       for ( let i = 0; i < this._rootBackbone.blocks.length; i++ ) {
         result += blockSummary( this._rootBackbone.blocks[ i ] );
       }
@@ -1576,14 +1576,14 @@ class Display {
       let iSummary = '';
 
       function addQualifier( text ) {
-        iSummary += ' <span style="color: #008">' + text + '</span>';
+        iSummary += ` <span style="color: #008">${text}</span>`;
       }
 
       const node = instance.node;
 
       iSummary += instance.id;
-      iSummary += ' ' + ( node.constructor.name ? node.constructor.name : '?' );
-      iSummary += ' <span style="font-weight: ' + ( node.isPainted() ? 'bold' : 'normal' ) + '">' + node.id + '</span>';
+      iSummary += ` ${node.constructor.name ? node.constructor.name : '?'}`;
+      iSummary += ` <span style="font-weight: ${node.isPainted() ? 'bold' : 'normal'}">${node.id}</span>`;
       iSummary += node.getDebugHTMLExtras();
 
       if ( !node.visible ) {
@@ -1626,17 +1626,17 @@ class Display {
         addQualifier( 'inputListeners' );
       }
       if ( node.getRenderer() ) {
-        addQualifier( 'renderer:' + node.getRenderer() );
+        addQualifier( `renderer:${node.getRenderer()}` );
       }
       if ( node.isLayerSplit() ) {
         addQualifier( 'layerSplit' );
       }
       if ( node.opacity < 1 ) {
-        addQualifier( 'opacity:' + node.opacity );
+        addQualifier( `opacity:${node.opacity}` );
       }
 
       if ( node._boundsEventCount > 0 ) {
-        addQualifier( '<span style="color: #800">boundsListen:' + node._boundsEventCount + ':' + node._boundsEventSelfCount + '</span>' );
+        addQualifier( `<span style="color: #800">boundsListen:${node._boundsEventCount}:${node._boundsEventSelfCount}</span>` );
       }
 
       let transformType = '';
@@ -1657,15 +1657,15 @@ class Display {
           transformType = 'other';
           break;
         default:
-          throw new Error( 'invalid matrix type: ' + node.transform.getMatrix().type );
+          throw new Error( `invalid matrix type: ${node.transform.getMatrix().type}` );
       }
       if ( transformType ) {
-        iSummary += ' <span style="color: #88f" title="' + node.transform.getMatrix().toString().replace( '\n', '&#10;' ) + '">' + transformType + '</span>';
+        iSummary += ` <span style="color: #88f" title="${node.transform.getMatrix().toString().replace( '\n', '&#10;' )}">${transformType}</span>`;
       }
 
-      iSummary += ' <span style="color: #888">[Trail ' + instance.trail.indices.join( '.' ) + ']</span>';
-      iSummary += ' <span style="color: #c88">' + str( instance.state ) + '</span>';
-      iSummary += ' <span style="color: #8c8">' + node._rendererSummary.bitmask.toString( 16 ) + ( node._rendererBitmask !== Renderer.bitmaskNodeDefault ? ' (' + node._rendererBitmask.toString( 16 ) + ')' : '' ) + '</span>';
+      iSummary += ` <span style="color: #888">[Trail ${instance.trail.indices.join( '.' )}]</span>`;
+      iSummary += ` <span style="color: #c88">${str( instance.state )}</span>`;
+      iSummary += ` <span style="color: #8c8">${node._rendererSummary.bitmask.toString( 16 )}${node._rendererBitmask !== Renderer.bitmaskNodeDefault ? ` (${node._rendererBitmask.toString( 16 )})` : ''}</span>`;
 
       return iSummary;
     }
@@ -1673,7 +1673,7 @@ class Display {
     function drawableSummary( drawable ) {
       let drawableString = drawable.toString();
       if ( drawable.visible ) {
-        drawableString = '<strong>' + drawableString + '</strong>';
+        drawableString = `<strong>${drawableString}</strong>`;
       }
       if ( drawable.dirty ) {
         drawableString += ( drawable.dirty ? ' <span style="color: #c00;">[x]</span>' : '' );
@@ -1685,10 +1685,10 @@ class Display {
     }
 
     function printInstanceSubtree( instance ) {
-      let div = '<div style="margin-left: ' + ( depth * 20 ) + 'px">';
+      let div = `<div style="margin-left: ${depth * 20}px">`;
 
       function addDrawable( name, drawable ) {
-        div += ' <span style="color: #888">' + name + ':' + drawableSummary( drawable ) + '</span>';
+        div += ` <span style="color: #888">${name}:${drawableSummary( drawable )}</span>`;
       }
 
       div += instanceSummary( instance );
@@ -1708,26 +1708,26 @@ class Display {
     }
 
     if ( this._baseInstance ) {
-      result += '<div style="' + headerStyle + '">Root Instance Tree</div>';
+      result += `<div style="${headerStyle}">Root Instance Tree</div>`;
       printInstanceSubtree( this._baseInstance );
     }
 
     _.each( this._sharedCanvasInstances, instance => {
-      result += '<div style="' + headerStyle + '">Shared Canvas Instance Tree</div>';
+      result += `<div style="${headerStyle}">Shared Canvas Instance Tree</div>`;
       printInstanceSubtree( instance );
     } );
 
     function printDrawableSubtree( drawable ) {
-      let div = '<div style="margin-left: ' + ( depth * 20 ) + 'px">';
+      let div = `<div style="margin-left: ${depth * 20}px">`;
 
       div += drawableSummary( drawable );
       if ( drawable.instance ) {
-        div += ' <span style="color: #0a0;">(' + drawable.instance.trail.toPathString() + ')</span>';
-        div += '&nbsp;&nbsp;&nbsp;' + instanceSummary( drawable.instance );
+        div += ` <span style="color: #0a0;">(${drawable.instance.trail.toPathString()})</span>`;
+        div += `&nbsp;&nbsp;&nbsp;${instanceSummary( drawable.instance )}`;
       }
       else if ( drawable.backboneInstance ) {
-        div += ' <span style="color: #a00;">(' + drawable.backboneInstance.trail.toPathString() + ')</span>';
-        div += '&nbsp;&nbsp;&nbsp;' + instanceSummary( drawable.backboneInstance );
+        div += ` <span style="color: #a00;">(${drawable.backboneInstance.trail.toPathString()})</span>`;
+        div += `&nbsp;&nbsp;&nbsp;${instanceSummary( drawable.backboneInstance )}`;
       }
 
       div += '</div>';
@@ -1769,13 +1769,13 @@ class Display {
    * @returns {string}
    */
   getDebugURI() {
-    return 'data:text/html;charset=utf-8,' + encodeURIComponent(
-           '<!DOCTYPE html>' +
+    return `data:text/html;charset=utf-8,${encodeURIComponent(
+           `${'<!DOCTYPE html>' +
            '<html lang="en">' +
            '<head><title>Scenery Debug Snapshot</title></head>' +
-           '<body style="font-size: 12px;">' + this.getDebugHTML() + '</body>' +
+           '<body style="font-size: 12px;">'}${this.getDebugHTML()}</body>` +
            '</html>'
-    );
+    )}`;
   }
 
   /**
@@ -1836,18 +1836,18 @@ class Display {
     const headerStyle = 'font-weight: bold; font-size: 120%; margin-top: 5px;';
     const indent = '&nbsp;&nbsp;&nbsp;&nbsp;';
 
-    result += '<div style="' + headerStyle + '">Accessible Instances</div><br>';
+    result += `<div style="${headerStyle}">Accessible Instances</div><br>`;
 
     recurse( this._rootPDOMInstance, '' );
 
     function recurse( instance, indentation ) {
-      result += indentation + escapeHTML( ( instance.isRootInstance ? '' : instance.node.tagName ) + ' ' + instance.toString() ) + '<br>';
+      result += `${indentation + escapeHTML( `${instance.isRootInstance ? '' : instance.node.tagName} ${instance.toString()}` )}<br>`;
       instance.children.forEach( child => {
         recurse( child, indentation + indent );
       } );
     }
 
-    result += '<br><div style="' + headerStyle + '">Parallel DOM</div><br>';
+    result += `<br><div style="${headerStyle}">Parallel DOM</div><br>`;
 
     let parallelDOM = this._rootPDOMInstance.peer.primarySibling.outerHTML;
     parallelDOM = parallelDOM.replace( /></g, '>\n<' );
@@ -1861,7 +1861,7 @@ class Display {
       if ( isEndTag ) {
         indentation = indentation.slice( indent.length );
       }
-      result += indentation + escapeHTML( line ) + '<br>';
+      result += `${indentation + escapeHTML( line )}<br>`;
       if ( !isEndTag ) {
         indentation += indent;
       }
@@ -1888,7 +1888,7 @@ class Display {
 
     function addCanvas( canvas ) {
       if ( !canvas.id ) {
-        canvas.id = 'unknown-canvas-' + unknownIds++;
+        canvas.id = `unknown-canvas-${unknownIds++}`;
       }
       canvasUrlMap[ canvas.id ] = canvas.toDataURL();
     }
@@ -2070,11 +2070,11 @@ class Display {
     const xhtml = new window.XMLSerializer().serializeToString( domElement );
 
     // Create an SVG container with a foreignObject.
-    const data = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '">' +
+    const data = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
                  '<foreignObject width="100%" height="100%">' +
-                 '<div xmlns="http://www.w3.org/1999/xhtml">' +
-                 xhtml +
-                 '</div>' +
+                 `<div xmlns="http://www.w3.org/1999/xhtml">${
+                 xhtml
+                 }</div>` +
                  '</foreignObject>' +
                  '</svg>';
 
@@ -2094,7 +2094,7 @@ class Display {
     const base64 = window.fromByteArray( uint8array );
 
     // turn it to base64 and wrap it in the data URL format
-    img.src = 'data:image/svg+xml;base64,' + base64;
+    img.src = `data:image/svg+xml;base64,${base64}`;
   }
 
   /**

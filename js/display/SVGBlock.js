@@ -116,7 +116,7 @@ class SVGBlock extends FittedBlock {
    */
   onAddPaint( paint ) {
     const svgPaint = paint.createSVGPaint( this );
-    svgPaint.definition.setAttribute( 'id', paint.id + '-' + this.id );
+    svgPaint.definition.setAttribute( 'id', `${paint.id}-${this.id}` );
     this.defs.appendChild( svgPaint.definition );
 
     return svgPaint;
@@ -195,7 +195,7 @@ class SVGBlock extends FittedBlock {
    * @param {Drawable} drawable
    */
   markDirtyDrawable( drawable ) {
-    sceneryLog && sceneryLog.dirty && sceneryLog.dirty( 'markDirtyDrawable on SVGBlock#' + this.id + ' with ' + drawable.toString() );
+    sceneryLog && sceneryLog.dirty && sceneryLog.dirty( `markDirtyDrawable on SVGBlock#${this.id} with ${drawable.toString()}` );
     this.dirtyDrawables.push( drawable );
     this.markDirty();
 
@@ -210,7 +210,7 @@ class SVGBlock extends FittedBlock {
    * @override
    */
   setSizeFullDisplay() {
-    sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( 'setSizeFullDisplay #' + this.id );
+    sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( `setSizeFullDisplay #${this.id}` );
 
     this.baseTransformGroup.removeAttribute( 'transform' );
     Utils.unsetTransform( this.svg );
@@ -225,7 +225,7 @@ class SVGBlock extends FittedBlock {
    * @override
    */
   setSizeFitBounds() {
-    sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( 'setSizeFitBounds #' + this.id + ' with ' + this.fitBounds.toString() );
+    sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( `setSizeFitBounds #${this.id} with ${this.fitBounds.toString()}` );
 
     const x = this.fitBounds.minX;
     const y = this.fitBounds.minY;
@@ -233,8 +233,8 @@ class SVGBlock extends FittedBlock {
     assert && assert( isFinite( x ) && isFinite( y ), 'Invalid SVG transform for SVGBlock' );
     assert && assert( this.fitBounds.isValid(), 'Invalid fitBounds' );
 
-    this.baseTransformGroup.setAttribute( 'transform', 'translate(' + ( -x ) + ',' + ( -y ) + ')' ); // subtract off so we have a tight fit
-    Utils.setTransform( 'matrix(1,0,0,1,' + x + ',' + y + ')', this.svg ); // reapply the translation as a CSS transform
+    this.baseTransformGroup.setAttribute( 'transform', `translate(${-x},${-y})` ); // subtract off so we have a tight fit
+    Utils.setTransform( `matrix(1,0,0,1,${x},${y})`, this.svg ); // reapply the translation as a CSS transform
     this.svg.setAttribute( 'width', this.fitBounds.width );
     this.svg.setAttribute( 'height', this.fitBounds.height );
   }
@@ -253,7 +253,7 @@ class SVGBlock extends FittedBlock {
       return false;
     }
 
-    sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( 'update #' + this.id );
+    sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( `update #${this.id}` );
 
     //OHTWO TODO: call here!
     // TODO: What does the above TODO mean?
@@ -391,7 +391,7 @@ class SVGBlock extends FittedBlock {
    * @param {Drawable} drawable
    */
   addDrawable( drawable ) {
-    sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( '#' + this.id + '.addDrawable ' + drawable.toString() );
+    sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( `#${this.id}.addDrawable ${drawable.toString()}` );
 
     super.addDrawable( drawable );
 
@@ -406,7 +406,7 @@ class SVGBlock extends FittedBlock {
    * @param {Drawable} drawable
    */
   removeDrawable( drawable ) {
-    sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( '#' + this.id + '.removeDrawable ' + drawable.toString() );
+    sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( `#${this.id}.removeDrawable ${drawable.toString()}` );
 
     SVGGroup.removeDrawable( this, drawable );
 
@@ -424,7 +424,7 @@ class SVGBlock extends FittedBlock {
    * @param {Drawable} lastDrawable
    */
   onIntervalChange( firstDrawable, lastDrawable ) {
-    sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( '#' + this.id + '.onIntervalChange ' + firstDrawable.toString() + ' to ' + lastDrawable.toString() );
+    sceneryLog && sceneryLog.SVGBlock && sceneryLog.SVGBlock( `#${this.id}.onIntervalChange ${firstDrawable.toString()} to ${lastDrawable.toString()}` );
 
     super.onIntervalChange( firstDrawable, lastDrawable );
   }
@@ -436,7 +436,7 @@ class SVGBlock extends FittedBlock {
    * @returns {string}
    */
   toString() {
-    return 'SVGBlock#' + this.id + '-' + FittedBlock.fitString[ this.fit ];
+    return `SVGBlock#${this.id}-${FittedBlock.fitString[ this.fit ]}`;
   }
 }
 

@@ -552,8 +552,8 @@ class RelativeTransform {
    */
   updateTransformListenersAndCompute( ancestorWasDirty, ancestorIsDirty, frameId, passTransform ) {
     sceneryLog && sceneryLog.RelativeTransform && sceneryLog.RelativeTransform(
-      'update/compute: ' + this.toString() + ' ' + ancestorWasDirty + ' => ' + ancestorIsDirty +
-      ( passTransform ? ' passTransform' : '' ) );
+      `update/compute: ${this.toString()} ${ancestorWasDirty} => ${ancestorIsDirty
+       }${passTransform ? ' passTransform' : ''}` );
     sceneryLog && sceneryLog.RelativeTransform && sceneryLog.push();
 
     let len;

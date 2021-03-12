@@ -89,7 +89,7 @@ class ButtonListener extends DownUpListener {
   setButtonState( event, state ) {
     if ( state !== this.buttonState ) {
       sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent(
-        'ButtonListener state change to ' + state + ' from ' + this.buttonState + ' for ' + ( this.downTrail ? this.downTrail.toString() : this.downTrail ) );
+        `ButtonListener state change to ${state} from ${this.buttonState} for ${this.downTrail ? this.downTrail.toString() : this.downTrail}` );
       const oldState = this.buttonState;
 
       this.buttonState = state;
@@ -128,7 +128,7 @@ class ButtonListener extends DownUpListener {
    */
   enter( event ) {
     sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent(
-      'ButtonListener enter for ' + ( this.downTrail ? this.downTrail.toString() : this.downTrail ) );
+      `ButtonListener enter for ${this.downTrail ? this.downTrail.toString() : this.downTrail}` );
     this._overCount++;
     if ( this._overCount === 1 ) {
       this.setButtonState( event, this.isDown ? 'down' : 'over' );
@@ -142,7 +142,7 @@ class ButtonListener extends DownUpListener {
    */
   exit( event ) {
     sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent(
-      'ButtonListener exit for ' + ( this.downTrail ? this.downTrail.toString() : this.downTrail ) );
+      `ButtonListener exit for ${this.downTrail ? this.downTrail.toString() : this.downTrail}` );
     assert && assert( this._overCount > 0, 'Exit events not matched by an enter' );
     this._overCount--;
     if ( this._overCount === 0 ) {

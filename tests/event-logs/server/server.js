@@ -34,8 +34,8 @@ http.createServer( ( req, res ) => {
   }
 
   const logname = decodeURIComponent( req.url.slice( 1 ) );
-  if ( logname.indexOf( '..' ) !== -1 ) { throw new Error( 'bad logname: ' + logname ); } // brief check, there are probably other bad ways
-  const logfile = '../data/' + logname + '.js';
+  if ( logname.indexOf( '..' ) !== -1 ) { throw new Error( `bad logname: ${logname}` ); } // brief check, there are probably other bad ways
+  const logfile = `../data/${logname}.js`;
 
   // interpret a POST as a file write
   if ( req.method === 'POST' ) {
@@ -45,7 +45,7 @@ http.createServer( ( req, res ) => {
     } );
     req.on( 'end', () => {
       // logname = decodeURIComponent( req.url.slice( 1 ) );
-      console.log( 'write to logfile: ' + logfile );
+      console.log( `write to logfile: ${logfile}` );
 
       fs.writeFile( logfile, postdata, err => {
         if ( err ) {
@@ -79,5 +79,5 @@ http.createServer( ( req, res ) => {
     } );
   }
 } ).listen( port );
-console.log( 'ip: ' + ip );
-console.log( 'port: ' + port );
+console.log( `ip: ${ip}` );
+console.log( `port: ${port}` );

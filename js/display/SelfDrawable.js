@@ -86,7 +86,7 @@ class SelfDrawable extends Drawable {
    * @returns {string}
    */
   toDetailedString() {
-    return this.toString() + ' (' + this.instance.trail.toPathString() + ')';
+    return `${this.toString()} (${this.instance.trail.toPathString()})`;
   }
 }
 

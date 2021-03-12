@@ -383,11 +383,11 @@ class LayoutBox extends Node {
     if ( assert ) {
       if ( this._orientation === 'vertical' ) {
         assert( this._align === 'left' || this._align === 'center' || this._align === 'right' || this._align === 'origin',
-          'Illegal vertical LayoutBox alignment: ' + align );
+          `Illegal vertical LayoutBox alignment: ${align}` );
       }
       else {
         assert( this._align === 'top' || this._align === 'center' || this._align === 'bottom' || this._align === 'origin',
-          'Illegal horizontal LayoutBox alignment: ' + align );
+          `Illegal horizontal LayoutBox alignment: ${align}` );
       }
     }
 
