@@ -205,7 +205,7 @@ QUnit.test( 'Trail eachTrailBetween', assert => {
 
   for ( let i = 0; i < trails.length; i++ ) {
     for ( let j = i; j < trails.length; j++ ) {
-      var inclusiveList = [];
+      const inclusiveList = [];
       Trail.eachTrailBetween( trails[ i ], trails[ j ], trail => {
         inclusiveList.push( trail.copy() );
       }, false, node );
@@ -215,7 +215,7 @@ QUnit.test( 'Trail eachTrailBetween', assert => {
       assert.equal( inclusiveList.length, j - i + 1, 'inclusive length on ' + trailString + ' is ' + inclusiveList.length + ', ' + _.map( inclusiveList, trail => trail.toString() ).join( '\n' ) );
 
       if ( i < j ) {
-        var exclusiveList = [];
+        const exclusiveList = [];
         Trail.eachTrailBetween( trails[ i ], trails[ j ], trail => {
           exclusiveList.push( trail.copy() );
         }, true, node );
@@ -339,9 +339,9 @@ QUnit.test( 'TrailPointer nested comparison and fowards/backwards', assert => {
   ];
 
   // exhaustively verify the ordering between each ordered pair
-  for ( var i = 0; i < pointers.length; i++ ) {
-    for ( var j = i; j < pointers.length; j++ ) {
-      var comparison = pointers[ i ].compareNested( pointers[ j ] );
+  for ( let i = 0; i < pointers.length; i++ ) {
+    for ( let j = i; j < pointers.length; j++ ) {
+      const comparison = pointers[ i ].compareNested( pointers[ j ] );
 
       // make sure that every pointer compares as expected (0 and they are equal, -1 and i < j)
       assert.equal( comparison, i === j ? 0 : ( i < j ? -1 : 1 ), 'compareNested: ' + i + ',' + j );
@@ -366,13 +366,13 @@ QUnit.test( 'TrailPointer nested comparison and fowards/backwards', assert => {
   for ( i = 0; i < pointers.length; i++ ) {
     for ( j = i + 1; j < pointers.length; j++ ) {
       // i < j guaranteed
-      var contents = [];
+      const contents = [];
       pointers[ i ].depthFirstUntil( pointers[ j ], pointer => { contents.push( pointer.copy() ); }, false );
       assert.equal( contents.length, j - i + 1, 'depthFirstUntil inclusive ' + i + ',' + j + ' count check' );
 
       // do an actual pointer to pointer comparison
-      var isOk = true;
-      for ( var k = 0; k < contents.length; k++ ) {
+      let isOk = true;
+      for ( let k = 0; k < contents.length; k++ ) {
         comparison = contents[ k ].compareNested( pointers[ i + k ] );
         if ( comparison !== 0 ) {
           assert.equal( comparison, 0, 'depthFirstUntil inclusive ' + i + ',' + j + ',' + k + ' comparison check ' + contents[ k ].trail.indices.join() + ' - ' + pointers[ i + k ].trail.indices.join() );
@@ -406,11 +406,11 @@ QUnit.test( 'TrailPointer nested comparison and fowards/backwards', assert => {
 } );
 
 // QUnit.test( 'TrailInterval', function(assert) {
-//   var node = createTestNodeTree();
-//   var i, j;
+//   let node = createTestNodeTree();
+//   let i, j;
 
 //   // a subset of trails to test on
-//   var trails = [
+//   let trails = [
 //     null,
 //     node.children[0].getUniqueTrail(),
 //     node.children[0].children[1].getUniqueTrail(), // commented out since it quickly creates many tests to include
@@ -420,20 +420,20 @@ QUnit.test( 'TrailPointer nested comparison and fowards/backwards', assert => {
 //   ];
 
 //   // get a list of all trails
-//   var allTrails = [];
-//   var t = node.getUniqueTrail();
+//   let allTrails = [];
+//   let t = node.getUniqueTrail();
 //   while ( t ) {
 //     allTrails.push( t );
 //     t = t.next();
 //   }
 
 //   // get a list of all intervals using our 'trails' array
-//   var intervals = [];
+//   let intervals = [];
 
 //   for ( i = 0; i < trails.length; i++ ) {
 //     // only create proper intervals where i < j, since we specified them in order
 //     for ( j = i + 1; j < trails.length; j++ ) {
-//       var interval = new TrailInterval( trails[i], trails[j] );
+//       let interval = new TrailInterval( trails[i], trails[j] );
 //       intervals.push( interval );
 
 //       // tag the interval, so we can do additional verification later
@@ -444,21 +444,21 @@ QUnit.test( 'TrailPointer nested comparison and fowards/backwards', assert => {
 
 //   // check every combination of intervals
 //   for ( i = 0; i < intervals.length; i++ ) {
-//     var a = intervals[i];
+//     let a = intervals[i];
 //     for ( j = 0; j < intervals.length; j++ ) {
-//       var b = intervals[j];
+//       let b = intervals[j];
 
-//       var union = a.union( b );
+//       let union = a.union( b );
 //       if ( a.exclusiveUnionable( b ) ) {
 //         _.each( allTrails, function( trail ) {
 //           if ( trail ) {
-//             var msg = 'union check of trail ' + trail.toString() + ' with ' + a.toString() + ' and ' + b.toString() + ' with union ' + union.toString();
+//             let msg = 'union check of trail ' + trail.toString() + ' with ' + a.toString() + ' and ' + b.toString() + ' with union ' + union.toString();
 //            assert.equal( a.exclusiveContains( trail ) || b.exclusiveContains( trail ), union.exclusiveContains( trail ), msg );
 //           }
 //         } );
 //       } else {
-//         var wouldBeBadUnion = false;
-//         var containsAnything = false;
+//         let wouldBeBadUnion = false;
+//         let containsAnything = false;
 //         _.each( allTrails, function( trail ) {
 //           if ( trail ) {
 //             if ( union.exclusiveContains( trail ) ) {

@@ -31,7 +31,7 @@ const transformOriginProperty = Features.transformOrigin || 'transformOrigin'; /
 // see https://github.com/phetsims/scenery/issues/621
 let webglEnabled = true;
 
-var Utils = {
+const Utils = {
   /*---------------------------------------------------------------------------*
    * Transformation Utilities (TODO: separate file)
    *---------------------------------------------------------------------------*/

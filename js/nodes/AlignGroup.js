@@ -241,7 +241,7 @@ class AlignGroup {
     // Compute the maximum dimension of our alignBoxs' content
     let maxWidth = 0;
     let maxHeight = 0;
-    for ( var i = 0; i < this._alignBoxes.length; i++ ) {
+    for ( let i = 0; i < this._alignBoxes.length; i++ ) {
       const alignBox = this._alignBoxes[ i ];
 
       const bounds = alignBox.getContentBounds();
@@ -264,7 +264,7 @@ class AlignGroup {
 
     if ( maxWidth > 0 && maxHeight > 0 ) {
       // Apply that maximum dimension for each alignBox
-      for ( i = 0; i < this._alignBoxes.length; i++ ) {
+      for ( let i = 0; i < this._alignBoxes.length; i++ ) {
         this.setBoxBounds( this._alignBoxes[ i ], maxWidth, maxHeight );
       }
     }

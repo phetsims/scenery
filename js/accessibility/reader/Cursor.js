@@ -1002,7 +1002,7 @@ class Cursor {
 
     // remove all previous observers
     // TODO: only update the observer list if necessary
-    for ( var i = 0; i < this.observers.length; i++ ) {
+    for ( let i = 0; i < this.observers.length; i++ ) {
       if ( this.observers[ i ] ) {
         this.observers[ i ].disconnect();
       }
@@ -1012,12 +1012,12 @@ class Cursor {
     this.observers = [];
 
     // search through the DOM, looking for elements with a 'live region' attribute
-    for ( i = 0; i < this.linearDOM.length; i++ ) {
+    for ( let i = 0; i < this.linearDOM.length; i++ ) {
       const domElement = this.linearDOM[ i ];
       const liveRole = this.getLiveRole( domElement );
 
       if ( liveRole ) {
-        var mutationObserverCallback = mutations => {
+        const mutationObserverCallback = mutations => {
           mutations.forEach( mutation => {
             let liveRole;
             let mutatedElement = mutation.target;

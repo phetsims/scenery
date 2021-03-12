@@ -82,7 +82,7 @@ class PointerOverlay {
           pointer.removeInputListener( moveListener );
         }
       };
-      var moveListener = {
+      const moveListener = {
 
         // Mouse/Touch/Pen
         move: () => {

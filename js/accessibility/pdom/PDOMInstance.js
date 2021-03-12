@@ -549,14 +549,14 @@ class PDOMInstance {
 
       assert( fakeInstance.node === pdomInstance.node, 'Node mismatch for PDOMInstance' );
 
-      for ( var i = 0; i < pdomInstance.children.length; i++ ) {
+      for ( let i = 0; i < pdomInstance.children.length; i++ ) {
         audit( fakeInstance.children[ i ], pdomInstance.children[ i ] );
       }
 
       const isVisible = pdomInstance.isGloballyVisible();
 
       let shouldBeVisible = true;
-      for ( i = 0; i < pdomInstance.trail.length; i++ ) {
+      for ( let i = 0; i < pdomInstance.trail.length; i++ ) {
         const node = pdomInstance.trail.nodes[ i ];
         const trails = node.getTrailsTo( rootNode ).filter( trail => trail.isPDOMVisible() );
         if ( trails.length === 0 ) {

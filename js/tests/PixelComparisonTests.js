@@ -86,8 +86,8 @@ else {
 
         // load images to compare
         let loadedCount = 0;
-        var referenceImage = document.createElement( 'img' );
-        var freshImage = document.createElement( 'img' );
+        const referenceImage = document.createElement( 'img' );
+        const freshImage = document.createElement( 'img' );
         referenceImage.onload = freshImage.onload = () => {
           if ( ++loadedCount === 2 ) {
             compareSnapshots();
@@ -124,7 +124,7 @@ else {
 
   // Like pixelTest, but for multiple listeners ({string[]}). Don't override the renderer on the scene.
   const multipleRendererTest = ( name, setup, dataURL, threshold, renderers, isAsync ) => {
-    for ( var i = 0; i < renderers.length; i++ ) {
+    for ( let i = 0; i < renderers.length; i++ ) {
       ( () => {
         const renderer = renderers[ i ];
 

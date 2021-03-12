@@ -37,8 +37,8 @@ class RadialGradient extends Gradient {
     // If we are using Safari, we need to work around incorrect gradient handling for now,
     // see https://github.com/phetsims/sun/issues/526
     if ( platform.safari ) {
-      var x = ( x0 + x1 ) / 2;
-      var y = ( y0 + y1 ) / 2;
+      const x = ( x0 + x1 ) / 2;
+      const y = ( y0 + y1 ) / 2;
       this.start.x = x;
       this.start.y = y;
       this.end.x = x;

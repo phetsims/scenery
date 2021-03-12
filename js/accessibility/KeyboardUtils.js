@@ -29,7 +29,7 @@ const WASD_KEYS = [ KEY_W, KEY_S, KEY_A, KEY_D ];
 const DOM_EVENT_VALIDATOR = { valueType: Event };
 
 // constants
-var KeyboardUtils = {
+const KeyboardUtils = {
   KEY_SPACE: ' ',
   KEY_ENTER: 'enter',
   KEY_TAB: 'tab',

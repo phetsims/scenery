@@ -16,7 +16,7 @@ import PDOMInstance from './PDOMInstance.js';
 // globals (for restoring focus)
 let focusedNode = null;
 
-var PDOMTree = {
+const PDOMTree = {
   /**
    * Called when a child node is added to a parent node (and the child is likely to have pdom content).
    * @public

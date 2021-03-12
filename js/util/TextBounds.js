@@ -30,7 +30,7 @@ const hybridFontVerticalCache = {};
 
 let deliveredWarning = false;
 
-var TextBounds = {
+const TextBounds = {
   /**
    * Returns a new Bounds2 that is the approximate bounds of a Text node displayed with the specified font and renderedText.
    * @public

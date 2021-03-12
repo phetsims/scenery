@@ -1962,8 +1962,8 @@ class Display {
     let hasReplacedImages = false; // Whether any images are replaced
     const displaySVGImages = Array.prototype.slice.call( doc.documentElement.getElementsByTagName( 'image' ) );
     for ( let j = 0; j < displaySVGImages.length; j++ ) {
-      var displaySVGImage = displaySVGImages[ j ];
-      var currentHref = displaySVGImage.getAttribute( 'xlink:href' );
+      const displaySVGImage = displaySVGImages[ j ];
+      const currentHref = displaySVGImage.getAttribute( 'xlink:href' );
       if ( currentHref.slice( 0, 5 ) !== 'data:' ) {
         replacedImages++;
         hasReplacedImages = true;

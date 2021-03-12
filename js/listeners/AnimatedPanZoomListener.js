@@ -464,8 +464,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
     const pointInLocalFrame = this._targetNode.globalToLocalPoint( globalPoint );
     const pointInParentFrame = this._targetNode.globalToParentPoint( globalPoint );
 
-    var fromLocalPoint = Matrix3.translation( -pointInLocalFrame.x, -pointInLocalFrame.y );
-    var toTargetPoint = Matrix3.translation( pointInParentFrame.x, pointInParentFrame.y );
+    const fromLocalPoint = Matrix3.translation( -pointInLocalFrame.x, -pointInLocalFrame.y );
+    const toTargetPoint = Matrix3.translation( pointInParentFrame.x, pointInParentFrame.y );
 
     const nextScale = this.limitScale( this.getCurrentScale() + scaleDelta );
 
@@ -490,8 +490,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
     const pointInLocalFrame = this._targetNode.globalToLocalPoint( globalPoint );
     const pointInParentFrame = this._targetNode.globalToParentPoint( globalPoint );
 
-    var fromLocalPoint = Matrix3.translation( -pointInLocalFrame.x, -pointInLocalFrame.y );
-    var toTargetPoint = Matrix3.translation( pointInParentFrame.x, pointInParentFrame.y );
+    const fromLocalPoint = Matrix3.translation( -pointInLocalFrame.x, -pointInLocalFrame.y );
+    const toTargetPoint = Matrix3.translation( pointInParentFrame.x, pointInParentFrame.y );
 
     const nextScale = this.limitScale( scale );
 
@@ -528,7 +528,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
     const singleInitialPoint = this._targetNode.globalToParentPoint( initialPoint );
     const singleTargetPoint = this._targetNode.globalToParentPoint( targetPoint );
-    var delta = singleTargetPoint.minus( singleInitialPoint );
+    const delta = singleTargetPoint.minus( singleInitialPoint );
     this._targetNode.matrix = Matrix3.translationFromVector( delta ).timesMatrix( this._targetNode.getMatrix() );
 
     this.correctReposition();

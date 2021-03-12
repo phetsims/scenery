@@ -10,8 +10,8 @@
 const http = require( 'http' );
 const fs = require( 'fs' );
 
-var ip = 'localhost'; // hardcoded for now, maybe 'localhost' will work?
-var port = 8083;
+const ip = 'localhost'; // hardcoded for now, maybe 'localhost' will work?
+const port = 8083;
 
 http.createServer( function( req, res ) {
   'use strict';

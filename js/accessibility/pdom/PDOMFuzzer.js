@@ -218,7 +218,7 @@ class PDOMFuzzer {
     const nodes = child.children.concat( child.pdomOrder ).filter( n => n !== null ); // super defensive
 
     while ( nodes.length ) {
-      var node = nodes.pop();
+      const node = nodes.pop();
       if ( node === parent ) {
         return false;
       }
