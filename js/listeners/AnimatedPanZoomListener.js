@@ -8,18 +8,21 @@
  * @author Jesse Greenberg
  */
 
+import Action from '../../../axon/js/Action.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
+import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import globalKeyStateTracker from '../accessibility/globalKeyStateTracker.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import KeyboardZoomUtils from '../accessibility/KeyboardZoomUtils.js';
 import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
 import Display from '../display/Display.js';
+import EventIO from '../input/EventIO.js';
 import Pointer from '../input/Pointer.js';
 import scenery from '../scenery.js';
 import PanZoomListener from './PanZoomListener.js';
@@ -100,6 +103,46 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // removal on dispose
     let boundGestureStartListener = null;
     let boundGestureChangeListener = null;
+
+    // @private {Action} - Action wrapping work to be done when a gesture starts on a macOS trackpad (specific
+    // to that platform!). Wrapped in an action so that state is captured for PhET-iO
+    this.gestureStartAction = new Action( domEvent => {
+      assert && assert( domEvent instanceof Event );
+      assert && assert( domEvent.pageX, 'pageX required on DOMEvent' );
+      assert && assert( domEvent.pageY, 'pageY required on DOMEvent' );
+      assert && assert( domEvent.scale, 'scale required on DOMEvent' );
+
+      // prevent Safari from doing anything native with this gesture
+      domEvent.preventDefault();
+
+      this.trackpadGestureStartScale = domEvent.scale;
+      this.scaleGestureTargetPosition = new Vector2( domEvent.pageX, domEvent.pageY );
+    }, {
+      phetioPlayback: true,
+      tandem: options.tandem.createTandem( 'gestureStartAction' ),
+      parameters: [ { name: 'event', phetioType: EventIO } ],
+      phetioEventType: EventType.USER,
+      phetioDocumentation: 'Action that executes whenever a gesture starts on a trackpad in macOS Safari.'
+    } );
+
+    // @private {Action} - Action wrapping work to be done when gesture changes on a macOS trackpad (specfic to that
+    // platform!). Wrapped in an action so state is captured for PhET-iO
+    this.gestureChangeAction = new Action( domEvent => {
+      assert && assert( domEvent instanceof Event );
+      assert && assert( domEvent.scale, 'scale required on DOMEvent' );
+
+      // prevent Safari from changing position or scale natively
+      domEvent.preventDefault();
+
+      const newScale = this.sourceScale + domEvent.scale - this.trackpadGestureStartScale;
+      this.setDestinationScale( newScale );
+    }, {
+      phetioPlayback: true,
+      tandem: options.tandem.createTandem( 'gestureChangeAction' ),
+      parameters: [ { name: 'event', phetioType: EventIO } ],
+      phetioEventType: EventType.USER,
+      phetioDocumentation: 'Action that executes whenever a gesture changes on a trackpad in macOS Safari.'
+    } );
 
     // respond to macOS trackpad input, but don't respond to this input on an iOS touch screen
     if ( platform.safari && !platform.mobileSafari ) {
@@ -402,11 +445,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * @param {Event} domEvent
    */
   handleGestureStartEvent( domEvent ) {
-
-    // prevent Safari from doing anything native with this gesture
-    domEvent.preventDefault();
-    this.trackpadGestureStartScale = domEvent.scale;
-    this.scaleGestureTargetPosition = new Vector2( event.pageX, event.pageY );
+    this.gestureStartAction.execute( domEvent );
   }
 
   /**
@@ -417,12 +456,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * @param {Event} domEvent
    */
   handleGestureChangeEvent( domEvent ) {
-
-    // prevent Safari from changing position or scale natively
-    domEvent.preventDefault();
-
-    const newScale = this.sourceScale + domEvent.scale - this.trackpadGestureStartScale;
-    this.setDestinationScale( newScale );
+    this.gestureChangeAction.execute( domEvent );
   }
 
   /**
