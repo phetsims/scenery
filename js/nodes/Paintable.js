@@ -478,7 +478,7 @@ const Paintable = {
        * @returns {Paintable} - Returns 'this' reference, for chaining
        */
       setLineDash: function( lineDash ) {
-        assert && assert( Array.isArray( lineDash ) && lineDash.every( function( n ) { return typeof n === 'number' && isFinite( n ) && n >= 0; } ),
+        assert && assert( Array.isArray( lineDash ) && lineDash.every( n => typeof n === 'number' && isFinite( n ) && n >= 0 ),
           'lineDash should be an array of finite non-negative numbers' );
 
         if ( this._lineDrawingStyles.lineDash !== lineDash ) {
@@ -592,7 +592,7 @@ const Paintable = {
        * @returns {Paintable} - Returns 'this' reference, for chaining
        */
       setCachedPaints: function( paints ) {
-        this._cachedPaints = paints.filter( function( paint ) { return paint && paint.isPaint; } );
+        this._cachedPaints = paints.filter( paint => paint && paint.isPaint );
 
         const stateLen = this._drawables.length;
         for ( let i = 0; i < stateLen; i++ ) {
@@ -812,7 +812,7 @@ const Paintable = {
             addProp( 'stroke', this.getStrokeValue().toString(), true );
           }
 
-          _.each( [ 'lineWidth', 'lineCap', 'miterLimit', 'lineJoin', 'lineDashOffset' ], function( prop ) {
+          _.each( [ 'lineWidth', 'lineCap', 'miterLimit', 'lineJoin', 'lineDashOffset' ], prop => {
             if ( self[ prop ] !== defaultStyles[ prop ] ) {
               addProp( prop, self[ prop ] );
             }

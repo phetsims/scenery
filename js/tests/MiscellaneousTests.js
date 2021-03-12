@@ -10,7 +10,7 @@ QUnit.module( 'Miscellaneous' );
 
 const includeBleedingEdgeCanvasTests = false;
 
-QUnit.test( 'ES5 Object.defineProperty get/set', function( assert ) {
+QUnit.test( 'ES5 Object.defineProperty get/set', assert => {
   const ob = { _key: 5 };
   Object.defineProperty( ob, 'key', {
     enumerable: true,

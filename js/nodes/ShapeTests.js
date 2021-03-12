@@ -59,13 +59,13 @@ function sceneEquals( assert, constructionA, constructionB, message, threshold )
 // TODO: factor out
 function strokeEqualsFill( assert, shapeToStroke, shapeToFill, strokeNodeSetup, message ) { // eslint-disable-line no-unused-vars
 
-  sceneEquals( assert, function( scene ) {
+  sceneEquals( assert, scene => {
     const node = new Path( null );
     node.setShape( shapeToStroke );
     node.setStroke( '#000000' );
     if ( strokeNodeSetup ) { strokeNodeSetup( node ); }
     scene.addChild( node );
-  }, function( scene ) {
+  }, scene => {
     const node = new Path( null );
     node.setShape( shapeToFill );
     node.setFill( '#000000' );
@@ -83,26 +83,26 @@ function p( x, y ) { return new Vector2( x, y ); }
 
 /* eslint-disable no-undef */
 
-QUnit.test( 'Verifying Line/Rect', function( assert ) {
+QUnit.test( 'Verifying Line/Rect', assert => {
   const lineWidth = 50;
   // /shapeToStroke, shapeToFill, strokeNodeSetup, message, debugFlag
   const strokeShape = Shape.lineSegment( p( 100, 100 ), p( 300, 100 ) );
   const fillShape = Shape.rectangle( 100, 100 - lineWidth / 2, 200, lineWidth );
 
-  strokeEqualsFill( assert, strokeShape, fillShape, function( node ) { node.setLineWidth( lineWidth ); }, QUnit.config.current.testName );
+  strokeEqualsFill( assert, strokeShape, fillShape, node => { node.setLineWidth( lineWidth ); }, QUnit.config.current.testName );
 } );
 
-QUnit.test( 'Line Segment - butt', function( assert ) {
+QUnit.test( 'Line Segment - butt', assert => {
   const styles = new LineStyles();
   styles.lineWidth = 50;
 
   const strokeShape = Shape.lineSegment( p( 100, 100 ), p( 300, 100 ) );
   const fillShape = strokeShape.getStrokedShape( styles );
 
-  strokeEqualsFill( assert, strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
+  strokeEqualsFill( assert, strokeShape, fillShape, node => { node.setLineStyles( styles ); }, QUnit.config.current.testName );
 } );
 
-QUnit.test( 'Line Segment - square', function( assert ) {
+QUnit.test( 'Line Segment - square', assert => {
   const styles = new LineStyles();
   styles.lineWidth = 50;
   styles.lineCap = 'square';
@@ -110,10 +110,10 @@ QUnit.test( 'Line Segment - square', function( assert ) {
   const strokeShape = Shape.lineSegment( p( 100, 100 ), p( 300, 100 ) );
   const fillShape = strokeShape.getStrokedShape( styles );
 
-  strokeEqualsFill( assert, strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
+  strokeEqualsFill( assert, strokeShape, fillShape, node => { node.setLineStyles( styles ); }, QUnit.config.current.testName );
 } );
 
-QUnit.test( 'Line Segment - round', function( assert ) {
+QUnit.test( 'Line Segment - round', assert => {
   const styles = new LineStyles();
   styles.lineWidth = 50;
   styles.lineCap = 'round';
@@ -121,10 +121,10 @@ QUnit.test( 'Line Segment - round', function( assert ) {
   const strokeShape = Shape.lineSegment( p( 100, 100 ), p( 300, 100 ) );
   const fillShape = strokeShape.getStrokedShape( styles );
 
-  strokeEqualsFill( assert, strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
+  strokeEqualsFill( assert, strokeShape, fillShape, node => { node.setLineStyles( styles ); }, QUnit.config.current.testName );
 } );
 
-QUnit.test( 'Line Join - Miter', function( assert ) {
+QUnit.test( 'Line Join - Miter', assert => {
   const styles = new LineStyles();
   styles.lineWidth = 30;
   styles.lineJoin = 'miter';
@@ -135,10 +135,10 @@ QUnit.test( 'Line Join - Miter', function( assert ) {
   strokeShape.lineTo( 210, 70 );
   const fillShape = strokeShape.getStrokedShape( styles );
 
-  strokeEqualsFill( assert, strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
+  strokeEqualsFill( assert, strokeShape, fillShape, node => { node.setLineStyles( styles ); }, QUnit.config.current.testName );
 } );
 
-QUnit.test( 'Line Join - Miter - Closed', function( assert ) {
+QUnit.test( 'Line Join - Miter - Closed', assert => {
   const styles = new LineStyles();
   styles.lineWidth = 30;
   styles.lineJoin = 'miter';
@@ -150,10 +150,10 @@ QUnit.test( 'Line Join - Miter - Closed', function( assert ) {
   strokeShape.close();
   const fillShape = strokeShape.getStrokedShape( styles );
 
-  strokeEqualsFill( assert, strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
+  strokeEqualsFill( assert, strokeShape, fillShape, node => { node.setLineStyles( styles ); }, QUnit.config.current.testName );
 } );
 
-QUnit.test( 'Line Join - Round', function( assert ) {
+QUnit.test( 'Line Join - Round', assert => {
   const styles = new LineStyles();
   styles.lineWidth = 30;
   styles.lineJoin = 'round';
@@ -164,10 +164,10 @@ QUnit.test( 'Line Join - Round', function( assert ) {
   strokeShape.lineTo( 210, 70 );
   const fillShape = strokeShape.getStrokedShape( styles );
 
-  strokeEqualsFill( assert, strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
+  strokeEqualsFill( assert, strokeShape, fillShape, node => { node.setLineStyles( styles ); }, QUnit.config.current.testName );
 } );
 
-QUnit.test( 'Line Join - Round - Closed', function( assert ) {
+QUnit.test( 'Line Join - Round - Closed', assert => {
   const styles = new LineStyles();
   styles.lineWidth = 30;
   styles.lineJoin = 'round';
@@ -179,10 +179,10 @@ QUnit.test( 'Line Join - Round - Closed', function( assert ) {
   strokeShape.close();
   const fillShape = strokeShape.getStrokedShape( styles );
 
-  strokeEqualsFill( assert, strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
+  strokeEqualsFill( assert, strokeShape, fillShape, node => { node.setLineStyles( styles ); }, QUnit.config.current.testName );
 } );
 
-QUnit.test( 'Line Join - Bevel - Closed', function( assert ) {
+QUnit.test( 'Line Join - Bevel - Closed', assert => {
   const styles = new LineStyles();
   styles.lineWidth = 30;
   styles.lineJoin = 'bevel';
@@ -194,20 +194,20 @@ QUnit.test( 'Line Join - Bevel - Closed', function( assert ) {
   strokeShape.close();
   const fillShape = strokeShape.getStrokedShape( styles );
 
-  strokeEqualsFill( assert, strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
+  strokeEqualsFill( assert, strokeShape, fillShape, node => { node.setLineStyles( styles ); }, QUnit.config.current.testName );
 } );
 
-QUnit.test( 'Rect', function( assert ) {
+QUnit.test( 'Rect', assert => {
   const styles = new LineStyles();
   styles.lineWidth = 30;
 
   const strokeShape = Shape.rectangle( 40, 40, 150, 150 );
   const fillShape = strokeShape.getStrokedShape( styles );
 
-  strokeEqualsFill( assert, strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
+  strokeEqualsFill( assert, strokeShape, fillShape, node => { node.setLineStyles( styles ); }, QUnit.config.current.testName );
 } );
 
-QUnit.test( 'Manual Rect', function( assert ) {
+QUnit.test( 'Manual Rect', assert => {
   const styles = new LineStyles();
   styles.lineWidth = 30;
 
@@ -220,20 +220,20 @@ QUnit.test( 'Manual Rect', function( assert ) {
   strokeShape.close();
   const fillShape = strokeShape.getStrokedShape( styles );
 
-  strokeEqualsFill( assert, strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
+  strokeEqualsFill( assert, strokeShape, fillShape, node => { node.setLineStyles( styles ); }, QUnit.config.current.testName );
 } );
 
-QUnit.test( 'Hex', function( assert ) {
+QUnit.test( 'Hex', assert => {
   const styles = new LineStyles();
   styles.lineWidth = 30;
 
   const strokeShape = Shape.regularPolygon( 6, 100 ).transformed( Matrix3.translation( 130, 130 ) );
   const fillShape = strokeShape.getStrokedShape( styles );
 
-  strokeEqualsFill( assert, strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
+  strokeEqualsFill( assert, strokeShape, fillShape, node => { node.setLineStyles( styles ); }, QUnit.config.current.testName );
 } );
 
-QUnit.test( 'Overlap', function( assert ) {
+QUnit.test( 'Overlap', assert => {
   const styles = new LineStyles();
   styles.lineWidth = 30;
 
@@ -246,15 +246,15 @@ QUnit.test( 'Overlap', function( assert ) {
   strokeShape.close();
   const fillShape = strokeShape.getStrokedShape( styles );
 
-  strokeEqualsFill( assert, strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
+  strokeEqualsFill( assert, strokeShape, fillShape, node => { node.setLineStyles( styles ); }, QUnit.config.current.testName );
 } );
 
 const miterMagnitude = 160;
 const miterAnglesInDegrees = [ 5, 8, 10, 11.5, 13, 20, 24, 30, 45 ];
 
-_.each( miterAnglesInDegrees, function( miterAngle ) {
+_.each( miterAnglesInDegrees, miterAngle => {
   const miterAngleRadians = miterAngle * Math.PI / 180;
-  QUnit.test( 'Miter limit angle (degrees): ' + miterAngle + ' would change at ' + 1 / Math.sin( miterAngleRadians / 2 ), function( assert ) {
+  QUnit.test( 'Miter limit angle (degrees): ' + miterAngle + ' would change at ' + 1 / Math.sin( miterAngleRadians / 2 ), assert => {
     const styles = new LineStyles();
     styles.lineWidth = 30;
 
@@ -267,11 +267,11 @@ _.each( miterAnglesInDegrees, function( miterAngle ) {
     strokeShape.lineToPoint( point );
     const fillShape = strokeShape.getStrokedShape( styles );
 
-    strokeEqualsFill( assert, strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
+    strokeEqualsFill( assert, strokeShape, fillShape, node => { node.setLineStyles( styles ); }, QUnit.config.current.testName );
   } );
 } );
 
-QUnit.test( 'Overlapping rectangles', function( assert ) {
+QUnit.test( 'Overlapping rectangles', assert => {
   const styles = new LineStyles();
   styles.lineWidth = 30;
 
@@ -281,10 +281,10 @@ QUnit.test( 'Overlapping rectangles', function( assert ) {
   strokeShape.rect( 80, 80, 100, 100 );
   const fillShape = strokeShape.getStrokedShape( styles );
 
-  strokeEqualsFill( assert, strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
+  strokeEqualsFill( assert, strokeShape, fillShape, node => { node.setLineStyles( styles ); }, QUnit.config.current.testName );
 } );
 
-QUnit.test( 'Bezier Offset', function( assert ) {
+QUnit.test( 'Bezier Offset', assert => {
   const styles = new LineStyles();
   styles.lineWidth = 30;
 
@@ -294,5 +294,5 @@ QUnit.test( 'Bezier Offset', function( assert ) {
   // strokeShape.close();
   const fillShape = strokeShape.getStrokedShape( styles );
 
-  strokeEqualsFill( assert, strokeShape, fillShape, function( node ) { node.setLineStyles( styles ); }, QUnit.config.current.testName );
+  strokeEqualsFill( assert, strokeShape, fillShape, node => { node.setLineStyles( styles ); }, QUnit.config.current.testName );
 } );

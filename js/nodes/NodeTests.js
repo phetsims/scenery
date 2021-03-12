@@ -23,7 +23,7 @@ function fakeTouchPointer( vector ) {
   return new Touch( 0, vector, {} );
 }
 
-QUnit.test( 'Mouse and Touch areas', function( assert ) {
+QUnit.test( 'Mouse and Touch areas', assert => {
   const node = new Node();
   const rect = new Rectangle( 0, 0, 100, 50 );
   rect.pickable = true;
@@ -55,7 +55,7 @@ QUnit.test( 'Mouse and Touch areas', function( assert ) {
 
 const epsilon = 0.000000001;
 
-QUnit.test( 'Points (parent and child)', function( assert ) {
+QUnit.test( 'Points (parent and child)', assert => {
   const a = new Node();
   const b = new Node();
   a.addChild( b );
@@ -82,7 +82,7 @@ QUnit.test( 'Points (parent and child)', function( assert ) {
 
 } );
 
-QUnit.test( 'Bounds (parent and child)', function( assert ) {
+QUnit.test( 'Bounds (parent and child)', assert => {
   const a = new Node();
   const b = new Node();
   a.addChild( b );
@@ -110,7 +110,7 @@ QUnit.test( 'Bounds (parent and child)', function( assert ) {
   assert.ok( new Bounds2( 4, 4, 20, 30 ).equalsEpsilon( a.globalToParentBounds( bounds ), epsilon ), 'globalToParentBounds on root' );
 } );
 
-QUnit.test( 'Points (order of transforms)', function( assert ) {
+QUnit.test( 'Points (order of transforms)', assert => {
   const a = new Node();
   const b = new Node();
   const c = new Node();
@@ -126,7 +126,7 @@ QUnit.test( 'Points (order of transforms)', function( assert ) {
   assert.ok( new Vector2( -2.5, 2.5 ).equalsEpsilon( c.globalToParentPoint( new Vector2( 5, 5 ) ), epsilon ), 'globalToParentPoint' );
 } );
 
-QUnit.test( 'Bounds (order of transforms)', function( assert ) {
+QUnit.test( 'Bounds (order of transforms)', assert => {
   const a = new Node();
   const b = new Node();
   const c = new Node();
@@ -144,7 +144,7 @@ QUnit.test( 'Bounds (order of transforms)', function( assert ) {
   assert.ok( new Bounds2( -3, 2, 5, 15 ).equalsEpsilon( c.globalToParentBounds( bounds ), epsilon ), 'globalToParentBounds' );
 } );
 
-QUnit.test( 'Trail and Node transform equivalence', function( assert ) {
+QUnit.test( 'Trail and Node transform equivalence', assert => {
   const a = new Node();
   const b = new Node();
   const c = new Node();

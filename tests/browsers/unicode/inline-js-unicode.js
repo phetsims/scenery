@@ -1,6 +1,6 @@
 // Copyright 2016, University of Colorado Boulder
 
-$( window ).ready( function() {
+$( window ).ready( () => {
   'use strict';
   
   let element;

@@ -13,7 +13,7 @@ import Rectangle from './Rectangle.js';
 
 QUnit.module( 'AlignBox' );
 
-QUnit.test( 'Single Box Group', function( assert ) {
+QUnit.test( 'Single Box Group', assert => {
   const circle = new Circle( 20 );
 
   const group = new AlignGroup();
@@ -53,7 +53,7 @@ QUnit.test( 'Single Box Group', function( assert ) {
   group.dispose();
 } );
 
-QUnit.test( 'Multiple Boxes in a Group', function( assert ) {
+QUnit.test( 'Multiple Boxes in a Group', assert => {
   const circle = new Circle( 10 );
   const rectangle = new Rectangle( 0, 0, 60, 60 );
 

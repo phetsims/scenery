@@ -13,7 +13,7 @@ const fs = require( 'fs' );
 const ip = 'localhost'; // hardcoded for now, maybe 'localhost' will work?
 const port = 8083;
 
-http.createServer( function( req, res ) {
+http.createServer( ( req, res ) => {
   'use strict';
 
   // see http://nodejs.org/api/http.html#http_request_method for docs
@@ -40,14 +40,14 @@ http.createServer( function( req, res ) {
   // interpret a POST as a file write
   if ( req.method === 'POST' ) {
     let postdata = '';
-    req.on( 'data', function( chunk ) {
+    req.on( 'data', chunk => {
       postdata += chunk;
     } );
-    req.on( 'end', function() {
+    req.on( 'end', () => {
       // logname = decodeURIComponent( req.url.slice( 1 ) );
       console.log( 'write to logfile: ' + logfile );
 
-      fs.writeFile( logfile, postdata, function( err ) {
+      fs.writeFile( logfile, postdata, err => {
         if ( err ) {
           console.log( err );
 
@@ -67,7 +67,7 @@ http.createServer( function( req, res ) {
 
   // interpret a GET as a file read
   if ( req.method === 'GET' ) {
-    fs.readFile( logfile, function( err, data ) {
+    fs.readFile( logfile, ( err, data ) => {
       if ( err ) {
         res.writeHead( 500, headers );
         res.end( 'Failure' );

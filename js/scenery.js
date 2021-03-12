@@ -292,7 +292,7 @@ extend( scenery, {
       }
 
       if ( scenery.Gradient && value instanceof scenery.Gradient ) {
-        paintSerialization.stops = value.stops.map( function( stop ) {
+        paintSerialization.stops = value.stops.map( stop => {
           return {
             ratio: stop.ratio,
             stop: scenery.serialize( stop.color )
@@ -350,7 +350,7 @@ extend( scenery, {
         'excludeInvisible',
         'webglScale',
         'preventFit'
-      ].forEach( function( simpleKey ) {
+      ].forEach( simpleKey => {
         if ( node[ simpleKey ] !== scenery.Node.DEFAULT_OPTIONS[ simpleKey ] ) {
           options[ simpleKey ] = node[ simpleKey ];
         }
@@ -362,7 +362,7 @@ extend( scenery, {
         'clipArea',
         'mouseArea',
         'touchArea'
-      ].forEach( function( serializedKey ) {
+      ].forEach( serializedKey => {
         if ( node[ serializedKey ] !== scenery.Node.DEFAULT_OPTIONS[ serializedKey ] ) {
           setup[ serializedKey ] = scenery.serialize( node[ serializedKey ] );
         }
@@ -373,7 +373,7 @@ extend( scenery, {
       if ( node._localBoundsOverridden ) {
         setup.localBounds = scenery.serialize( node.localBounds );
       }
-      setup.children = node.children.map( function( child ) {
+      setup.children = node.children.map( child => {
         return child.id;
       } );
       setup.hasInputListeners = node.inputListeners.length > 0;
@@ -381,7 +381,7 @@ extend( scenery, {
       const serialization = {
         id: node.id,
         type: 'Node',
-        types: inheritance( node.constructor ).map( function( type ) { return type.name; } ).filter( function( name ) {
+        types: inheritance( node.constructor ).map( type => type.name ).filter( name => {
           return name && name !== 'Object' && name !== 'Node';
         } ),
         name: node.constructor.name,
@@ -439,7 +439,7 @@ extend( scenery, {
           'mipmapBias',
           'mipmapInitialLevel',
           'mipmapMaxLevel'
-        ].forEach( function( simpleKey ) {
+        ].forEach( simpleKey => {
           if ( node[ simpleKey ] !== scenery.Image.DEFAULT_OPTIONS[ simpleKey ] ) {
             options[ simpleKey ] = node[ simpleKey ];
           }
@@ -451,7 +451,7 @@ extend( scenery, {
         // Initialized with a mipmap
         if ( node._mipmapData ) {
           setup.imageType = 'mipmapData';
-          setup.mipmapData = node._mipmapData.map( function( level ) {
+          setup.mipmapData = node._mipmapData.map( level => {
             return {
               url: level.url,
               width: level.width,
@@ -482,7 +482,7 @@ extend( scenery, {
         setup.canvasBounds = scenery.serialize( node.canvasBounds );
 
         // Identify the approximate scale of the node
-        let scale = Math.min( 5, node._drawables.length ? ( 1 / _.mean( node._drawables.map( function( drawable ) {
+        let scale = Math.min( 5, node._drawables.length ? ( 1 / _.mean( node._drawables.map( drawable => {
           const scaleVector = drawable.instance.trail.getMatrix().getScaleVector();
           return ( scaleVector.x + scaleVector.y ) / 2;
         } ) ) ) : 1 );
@@ -517,7 +517,7 @@ extend( scenery, {
           'lineJoin',
           'lineDashOffset',
           'miterLimit'
-        ].forEach( function( simpleKey ) {
+        ].forEach( simpleKey => {
           if ( node[ simpleKey ] !== scenery.Paintable.DEFAULT_OPTIONS[ simpleKey ] ) {
             options[ simpleKey ] = node[ simpleKey ];
           }
@@ -607,7 +607,7 @@ extend( scenery, {
           paint = new scenery.RadialGradient( start.x, start.y, value.startRadius, end.x, end.y, value.endRadius );
         }
 
-        value.stops.forEach( function( stop ) {
+        value.stops.forEach( stop => {
           paint.addColorStop( stop.ratio, scenery.deserialize( stop.stop ) );
         } );
       }
@@ -649,7 +649,7 @@ extend( scenery, {
           }
         }
         else if ( setup.imageType === 'mipmapData' ) {
-          const mipmapData = setup.mipmapData.map( function( level ) {
+          const mipmapData = setup.mipmapData.map( level => {
             const result = {
               width: level.width,
               height: level.height,
@@ -732,13 +732,13 @@ extend( scenery, {
       const nodes = value.nodes.map( scenery.deserialize );
 
       // Index them
-      nodes.forEach( function( node ) {
+      nodes.forEach( node => {
         nodeMap[ node._serialization.id ] = node;
       } );
 
       // Connect children
-      nodes.forEach( function( node ) {
-        node._serialization.setup.children.forEach( function( childId ) {
+      nodes.forEach( node => {
+        node._serialization.setup.children.forEach( childId => {
           node.addChild( nodeMap[ childId ] );
         } );
       } );
