@@ -375,7 +375,7 @@ class PDOMInstance {
         for ( i = 0; i < potentialInstances.length; i++ ) {
           const potentialInstance = potentialInstances[ i ];
           if ( potentialInstance.parent !== this ) {
-            continue instanceLoop;
+            continue;
           }
 
           for ( let j = 0; j < trail.length; j++ ) {
