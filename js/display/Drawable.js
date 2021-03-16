@@ -211,7 +211,7 @@ class Drawable {
    */
   setBlockBackbone( backboneInstance ) {
     sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( `[${this.constructor.name}*] setBlockBackbone ${
-                                                              this.toString()} with ${backboneInstance.toString()}` );
+      this.toString()} with ${backboneInstance.toString()}` );
 
     // if this is being called, Block will be guaranteed to be loaded
     assert && assert( this instanceof scenery.Block );
@@ -234,8 +234,8 @@ class Drawable {
    */
   notePendingAddition( display, block, backbone ) {
     sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( `[${this.constructor.name}*] notePendingAddition ${
-                                                              this.toString()} with ${block.toString()}, ${
-                                                               backbone ? backbone.toString() : '-'}` );
+      this.toString()} with ${block.toString()}, ${
+      backbone ? backbone.toString() : '-'}` );
 
     assert && assert( backbone !== undefined, 'backbone can be either null or a backbone' );
     assert && assert( block instanceof scenery.Block );
@@ -258,7 +258,7 @@ class Drawable {
    */
   notePendingRemoval( display ) {
     sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( `[${this.constructor.name}*] notePendingRemoval ${
-                                                              this.toString()}` );
+      this.toString()}` );
 
     this.pendingRemoval = true;
 
@@ -280,7 +280,7 @@ class Drawable {
    */
   notePendingMove( display, block ) {
     sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( `[${this.constructor.name}*] notePendingMove ${
-                                                              this.toString()} with ${block.toString()}` );
+      this.toString()} with ${block.toString()}` );
 
     assert && assert( block instanceof scenery.Block );
 
@@ -303,10 +303,10 @@ class Drawable {
    */
   updateBlock() {
     sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( `[${this.constructor.name}*] updateBlock ${this.toString()
-                                                              } with add:${this.pendingAddition
-                                                              } remove:${this.pendingRemoval
-                                                              } old:${this.parentDrawable ? this.parentDrawable.toString() : '-'
-                                                              } new:${this.pendingParentDrawable ? this.pendingParentDrawable.toString() : '-'}` );
+    } with add:${this.pendingAddition
+    } remove:${this.pendingRemoval
+    } old:${this.parentDrawable ? this.parentDrawable.toString() : '-'
+    } new:${this.pendingParentDrawable ? this.pendingParentDrawable.toString() : '-'}` );
     sceneryLog && sceneryLog.Drawable && sceneryLog.push();
 
     let changed = false;

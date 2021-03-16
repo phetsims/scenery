@@ -136,7 +136,7 @@ class Picker {
     // If the search is NOT inclusive (no listener equivalent), also ignore this subtree if subtreePrunable is true.
     if ( this.selfPruned || ( !isInclusive && this.subtreePrunable ) ) {
       sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( `${this.node.constructor.name}#${this.node.id
-                                                              } pruned ${this.selfPruned ? '(self)' : '(subtree)'}` );
+      } pruned ${this.selfPruned ? '(self)' : '(subtree)'}` );
       return null;
     }
 

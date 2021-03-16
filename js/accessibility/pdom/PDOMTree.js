@@ -552,7 +552,7 @@ const PDOMTree = {
 
         assert( trail.length <= 1 || root !== node,
           `${'Accessible PDOM graph cycle detected. The combined scene-graph DAG with pdomOrder defining additional ' +
-          'parent-child relationships should still be a DAG. Cycle detected with the trail: '}${trail.toString()
+             'parent-child relationships should still be a DAG. Cycle detected with the trail: '}${trail.toString()
           } path: ${trail.toPathString()}` );
 
         const parentCount = root._parents.length;

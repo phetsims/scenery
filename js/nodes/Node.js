@@ -614,7 +614,7 @@ class Node extends PhetioObject {
     assert && assert( node !== null && node !== undefined, 'insertChild cannot insert a null/undefined child' );
     assert && assert( node instanceof Node,
       `addChild/insertChild requires the child to be a Node. Constructor: ${
-       node.constructor ? node.constructor.name : 'none'}` );
+        node.constructor ? node.constructor.name : 'none'}` );
     assert && assert( !_.includes( this._children, node ), 'Parent already contains child' );
     assert && assert( node !== this, 'Cannot add self as a child' );
     assert && assert( node._parents !== null, 'Tried to insert a disposed child node?' );
@@ -1377,7 +1377,7 @@ class Node extends PhetioObject {
 
         assertSlow && assertSlow( this.childBoundsProperty._value.equalsEpsilon( childBounds, epsilon ),
           `Child bounds mismatch after validateBounds: ${
-          this.childBoundsProperty._value.toString()}, expected: ${childBounds.toString()}` );
+            this.childBoundsProperty._value.toString()}, expected: ${childBounds.toString()}` );
         assertSlow && assertSlow( this._localBoundsOverridden ||
                                   this._transformBounds ||
                                   this.boundsProperty._value.equalsEpsilon( fullBounds, epsilon ),

@@ -29,7 +29,7 @@ class CanvasNodeDrawable extends CanvasSelfDrawable {
    */
   paintCanvas( wrapper, node, matrix ) {
     assert && assert( !node.selfBounds.isEmpty(), `${'CanvasNode should not be used with an empty canvasBounds. ' +
-                                                  'Please set canvasBounds (or use setCanvasBounds()) on '}${node.constructor.name}` );
+                                                     'Please set canvasBounds (or use setCanvasBounds()) on '}${node.constructor.name}` );
 
     if ( !node.selfBounds.isEmpty() ) {
       const context = wrapper.context;

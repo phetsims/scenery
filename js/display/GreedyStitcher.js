@@ -290,9 +290,9 @@ class GreedyStitcher extends Stitcher {
     assert && assert( !interval.isEmpty(), 'We now guarantee that the intervals are non-empty' );
 
     sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose( `interval: ${
-                                                                         interval.drawableBefore ? interval.drawableBefore.toString() : 'null'
-                                                                        } to ${
-                                                                         interval.drawableAfter ? interval.drawableAfter.toString() : 'null'}` );
+      interval.drawableBefore ? interval.drawableBefore.toString() : 'null'
+    } to ${
+      interval.drawableAfter ? interval.drawableAfter.toString() : 'null'}` );
     sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
 
     // check if our interval removes everything, we may need a glue
@@ -393,7 +393,7 @@ class GreedyStitcher extends Stitcher {
   processSubBlock( interval, firstDrawable, lastDrawable, matchedBlock, isFirst, isLast ) {
     sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose(
       `sub-block: ${firstDrawable.toString()} to ${lastDrawable.toString()} ${
-       matchedBlock ? `with matched: ${matchedBlock.toString()}` : 'with no match'}` );
+        matchedBlock ? `with matched: ${matchedBlock.toString()}` : 'with no match'}` );
     sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
 
     const openBefore = isOpenBefore( firstDrawable );
@@ -470,8 +470,8 @@ class GreedyStitcher extends Stitcher {
 
       sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.GreedyVerbose(
         `edge case: ${
-         openBefore ? 'open-before ' : ''
-         }${openAfter ? 'open-after ' : ''
+          openBefore ? 'open-before ' : ''
+        }${openAfter ? 'open-after ' : ''
         }${beforeBlock.toString()} to ${afterBlock.toString()}` );
       sceneryLog && sceneryLog.GreedyVerbose && sceneryLog.push();
 
@@ -747,9 +747,9 @@ class GreedyStitcher extends Stitcher {
    */
   linkBlocks( beforeBlock, afterBlock, beforeDrawable, afterDrawable ) {
     sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.GreedyStitcher( `linking blocks: ${
-                                                                           beforeBlock ? ( `${beforeBlock.toString()} (${beforeDrawable.toString()})` ) : 'null'
-                                                                          } to ${
-                                                                           afterBlock ? ( `${afterBlock.toString()} (${afterDrawable.toString()})` ) : 'null'}` );
+      beforeBlock ? ( `${beforeBlock.toString()} (${beforeDrawable.toString()})` ) : 'null'
+    } to ${
+      afterBlock ? ( `${afterBlock.toString()} (${afterDrawable.toString()})` ) : 'null'}` );
     sceneryLog && sceneryLog.GreedyStitcher && sceneryLog.push();
 
     assert && assert( ( beforeBlock === null && beforeDrawable === null ) ||

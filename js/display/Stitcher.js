@@ -133,10 +133,10 @@ class Stitcher {
 
     if ( sceneryLog && sceneryLog.Stitch ) {
       sceneryLog.Stitch( `stitch ${backbone.toString()
-                         } first:${firstDrawable ? firstDrawable.toString() : 'null'
-                         } last:${lastDrawable ? lastDrawable.toString() : 'null'
-                         } oldFirst:${oldFirstDrawable ? oldFirstDrawable.toString() : 'null'
-                         } oldLast:${oldLastDrawable ? oldLastDrawable.toString() : 'null'}` );
+      } first:${firstDrawable ? firstDrawable.toString() : 'null'
+      } last:${lastDrawable ? lastDrawable.toString() : 'null'
+      } oldFirst:${oldFirstDrawable ? oldFirstDrawable.toString() : 'null'
+      } oldLast:${oldLastDrawable ? oldLastDrawable.toString() : 'null'}` );
       sceneryLog.push();
     }
     if ( sceneryLog && sceneryLog.StitchDrawables ) {
@@ -203,9 +203,9 @@ class Stitcher {
    */
   recordBackboneBoundaries() {
     sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( `recording backbone boundaries: ${
-                                                           this.firstDrawable ? this.firstDrawable.toString() : 'null'
-                                                          } to ${
-                                                           this.lastDrawable ? this.lastDrawable.toString() : 'null'}` );
+      this.firstDrawable ? this.firstDrawable.toString() : 'null'
+    } to ${
+      this.lastDrawable ? this.lastDrawable.toString() : 'null'}` );
     this.backbone.previousFirstDrawable = this.firstDrawable;
     this.backbone.previousLastDrawable = this.lastDrawable;
 
@@ -341,7 +341,7 @@ class Stitcher {
    */
   notifyInterval( block, firstDrawable, lastDrawable ) {
     sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( `notify interval: ${block.toString()} ${
-                                                          firstDrawable.toString()} to ${lastDrawable.toString()}` );
+      firstDrawable.toString()} to ${lastDrawable.toString()}` );
     sceneryLog && sceneryLog.Stitch && sceneryLog.push();
 
     block.notifyInterval( firstDrawable, lastDrawable );
@@ -399,7 +399,7 @@ class Stitcher {
 
       if ( block.used ) {
         sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( `update interval: ${block.toString()} ${
-                                                              block.pendingFirstDrawable.toString()} to ${block.pendingLastDrawable.toString()}` );
+          block.pendingFirstDrawable.toString()} to ${block.pendingLastDrawable.toString()}` );
 
         block.updateInterval();
 
@@ -452,8 +452,8 @@ class Stitcher {
     }
 
     sceneryLog && sceneryLog.Stitch && sceneryLog.Stitch( `created block: ${block.toString()
-                                                          } with renderer: ${renderer
-                                                          } for drawable: ${drawable.toString()}` );
+    } with renderer: ${renderer
+    } for drawable: ${drawable.toString()}` );
 
     block.setBlockBackbone( backbone );
 
@@ -574,7 +574,7 @@ class Stitcher {
         const block = blockData.block;
         _.each( Drawable.oldListToArray( block.firstDrawable, block.lastDrawable ), drawable => {
           assertSlow( _.some( this.pendingRemovals, removalData => removalData.drawable === drawable ) || _.some( this.pendingMoves, moveData => moveData.drawable === drawable ), `Drawable ${drawable.toString()} originally listed for disposed block ${block.toString()
-                                                                                                                                                                                   } does not seem to be marked for pending removal or move!` );
+          } does not seem to be marked for pending removal or move!` );
         } );
       } );
 
@@ -583,7 +583,7 @@ class Stitcher {
         const block = blockData.block;
         _.each( Drawable.listToArray( block.pendingFirstDrawable, block.pendingLastDrawable ), drawable => {
           assertSlow( _.some( this.pendingAdditions, additionData => additionData.drawable === drawable && additionData.block === block ) || _.some( this.pendingMoves, moveData => moveData.drawable === drawable && moveData.block === block ), `Drawable ${drawable.toString()} now listed for created block ${block.toString()
-                                                                                                                                                                                                                                                  } does not seem to be marked for pending addition or move!` );
+          } does not seem to be marked for pending addition or move!` );
         } );
       } );
 
@@ -650,9 +650,9 @@ class Stitcher {
     if ( sceneryLog && sceneryLog.Stitch ) {
       for ( let debugInterval = firstChangeInterval; debugInterval !== null; debugInterval = debugInterval.nextChangeInterval ) {
         sceneryLog.Stitch( `  interval: ${
-                            debugInterval.isEmpty() ? '(empty) ' : ''
-                            }${debugInterval.drawableBefore ? debugInterval.drawableBefore.toString() : '-'} to ${
-                            debugInterval.drawableAfter ? debugInterval.drawableAfter.toString() : '-'}` );
+          debugInterval.isEmpty() ? '(empty) ' : ''
+        }${debugInterval.drawableBefore ? debugInterval.drawableBefore.toString() : '-'} to ${
+          debugInterval.drawableAfter ? debugInterval.drawableAfter.toString() : '-'}` );
       }
     }
   }

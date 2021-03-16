@@ -349,7 +349,7 @@ class Instance {
    */
   updateRenderingState() {
     sceneryLog && sceneryLog.Instance && sceneryLog.Instance( `updateRenderingState ${this.toString()
-                                                               }${this.stateless ? ' (stateless)' : ''}` );
+    }${this.stateless ? ' (stateless)' : ''}` );
     sceneryLog && sceneryLog.Instance && sceneryLog.push();
 
     sceneryLog && sceneryLog.Instance && sceneryLog.Instance( `old: ${this.getStateString()}` );
@@ -442,7 +442,7 @@ class Instance {
       // everything underneath needs to be renderable with Canvas, otherwise we cannot cache
       assert && assert( this.node._rendererSummary.isSingleCanvasSupported(),
         `hints.canvasCache provided, but not all node contents can be rendered with Canvas under ${
-        this.node.constructor.name}` );
+          this.node.constructor.name}` );
 
       if ( hints.singleCache ) {
         // TODO: scale options - fixed size, match highest resolution (adaptive), or mipmapped
@@ -456,7 +456,7 @@ class Instance {
           //OHTWO TODO: We'll probably remove this if we go with the "safe bounds" approach
           assert && assert( this.node._rendererSummary.areBoundsValid(),
             `hints.singleCache provided, but not all node contents have valid bounds under ${
-            this.node.constructor.name}` );
+              this.node.constructor.name}` );
 
           this.isSharedCanvasCachePlaceholder = true;
         }
@@ -541,16 +541,16 @@ class Instance {
    */
   getStateString() {
     const result = `S[ ${
-                    this.isDisplayRoot ? 'displayRoot ' : ''
-                    }${this.isBackbone ? 'backbone ' : ''
-                    }${this.isInstanceCanvasCache ? 'instanceCache ' : ''
-                    }${this.isSharedCanvasCachePlaceholder ? 'sharedCachePlaceholder ' : ''
-                    }${this.isSharedCanvasCacheSelf ? 'sharedCacheSelf ' : ''
-                    }${this.isTransformed ? 'TR ' : ''
-                    }${this.isVisibilityApplied ? 'VIS ' : ''
-                    }${this.selfRenderer ? this.selfRenderer.toString( 16 ) : '-'},${
-                    this.groupRenderer ? this.groupRenderer.toString( 16 ) : '-'},${
-                    this.sharedCacheRenderer ? this.sharedCacheRenderer.toString( 16 ) : '-'} `;
+      this.isDisplayRoot ? 'displayRoot ' : ''
+    }${this.isBackbone ? 'backbone ' : ''
+    }${this.isInstanceCanvasCache ? 'instanceCache ' : ''
+    }${this.isSharedCanvasCachePlaceholder ? 'sharedCachePlaceholder ' : ''
+    }${this.isSharedCanvasCacheSelf ? 'sharedCacheSelf ' : ''
+    }${this.isTransformed ? 'TR ' : ''
+    }${this.isVisibilityApplied ? 'VIS ' : ''
+    }${this.selfRenderer ? this.selfRenderer.toString( 16 ) : '-'},${
+      this.groupRenderer ? this.groupRenderer.toString( 16 ) : '-'},${
+      this.sharedCacheRenderer ? this.sharedCacheRenderer.toString( 16 ) : '-'} `;
     return `${result}]`;
   }
 
@@ -581,7 +581,7 @@ class Instance {
    */
   syncTree() {
     sceneryLog && sceneryLog.Instance && sceneryLog.Instance( `syncTree ${this.toString()} ${this.getStateString()
-                                                               }${this.stateless ? ' (stateless)' : ''}` );
+    }${this.stateless ? ' (stateless)' : ''}` );
     sceneryLog && sceneryLog.Instance && sceneryLog.push();
 
     if ( sceneryLog && scenery.isLoggingPerformance() ) {
@@ -735,7 +735,7 @@ class Instance {
        *----------------------------------------------------------------------------*/
 
       sceneryLog && sceneryLog.ChangeInterval && sceneryLog.ChangeInterval( `changes for ${childInstance.toString()
-                                                                            } in ${this.toString()}` );
+      } in ${this.toString()}` );
       sceneryLog && sceneryLog.ChangeInterval && sceneryLog.push();
 
       const wasIncluded = childInstance.stitchChangeIncluded;
@@ -1208,7 +1208,7 @@ class Instance {
     assert && assert( instance instanceof Instance );
     assert && assert( index >= 0 && index <= this.children.length,
       `Instance insertion bounds check for index ${index} with previous children length ${
-      this.children.length}` );
+        this.children.length}` );
 
     sceneryLog && sceneryLog.InstanceTree && sceneryLog.InstanceTree(
       `inserting ${instance.toString()} into ${this.toString()}` );
@@ -1262,7 +1262,7 @@ class Instance {
     assert && assert( instance instanceof Instance );
     assert && assert( index >= 0 && index < this.children.length,
       `Instance removal bounds check for index ${index} with previous children length ${
-      this.children.length}` );
+        this.children.length}` );
 
     sceneryLog && sceneryLog.InstanceTree && sceneryLog.InstanceTree(
       `removing ${instance.toString()} from ${this.toString()}` );

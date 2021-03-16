@@ -1770,11 +1770,11 @@ class Display {
    */
   getDebugURI() {
     return `data:text/html;charset=utf-8,${encodeURIComponent(
-           `${'<!DOCTYPE html>' +
-           '<html lang="en">' +
-           '<head><title>Scenery Debug Snapshot</title></head>' +
-           '<body style="font-size: 12px;">'}${this.getDebugHTML()}</body>` +
-           '</html>'
+      `${'<!DOCTYPE html>' +
+      '<html lang="en">' +
+      '<head><title>Scenery Debug Snapshot</title></head>' +
+      '<body style="font-size: 12px;">'}${this.getDebugHTML()}</body>` +
+      '</html>'
     )}`;
   }
 
@@ -2073,7 +2073,7 @@ class Display {
     const data = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
                  '<foreignObject width="100%" height="100%">' +
                  `<div xmlns="http://www.w3.org/1999/xhtml">${
-                 xhtml
+                   xhtml
                  }</div>` +
                  '</foreignObject>' +
                  '</svg>';
