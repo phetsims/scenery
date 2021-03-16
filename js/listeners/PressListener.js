@@ -645,8 +645,8 @@ class PressListener {
 
     callback && callback();
 
-    // Unset these properties after the Property value change and after invoking the callbacks so that they can be
-    // referenced.
+    // These properties are cleared now, at the end of the onRelease, in case they were needed by the callback or in
+    // listeners on the pressed Property.
     this.pointer.cursor = null;
     this.pointer = null;
     this.pressedTrail = null;
