@@ -53,6 +53,9 @@
       },
       "eslintConfig": {
         "extends": "../chipper/eslint/sim_eslintrc.js",
+        "rules": {
+          "no-bitwise": "off"
+        },
         "globals": {
           "himalaya": "readonly",
           "sceneryLog": "readonly",
@@ -109,6 +112,7 @@
 
   if ( brand === 'phet-io' ) {
     preloads = preloads.concat( [
+      '../chipper/js/phet-io/phetioCompareAPIs.js',
       '../phet-io/js/phet-io-initialize-globals.js'
     ] );
   }
