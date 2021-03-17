@@ -541,12 +541,6 @@ class Node extends PhetioObject {
     // @public {TinyEmitter} - Emitted to when we change filters (either opacity or generalized filters)
     this.filterChangeEmitter = new TinyEmitter();
 
-    // @public {TinyEmitter} - Fired when the PDOM Displays for this Node have changed (see PDOMInstance)
-    this.pdomDisplaysEmitter = new TinyEmitter();
-
-    // @public {TinyEmitter}
-    this.focusHighlightChangedEmitter = new TinyEmitter();
-
     // @public {TinyEmitter}
     this.changedInstanceEmitter = new TinyEmitter(); // emits with {Instance}, {boolean} added
 

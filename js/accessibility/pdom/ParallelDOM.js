@@ -122,6 +122,7 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
+import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import validate from '../../../../axon/js/validate.js';
 import ValidatorDef from '../../../../axon/js/ValidatorDef.js';
 import Shape from '../../../../kite/js/Shape.js';
@@ -451,6 +452,12 @@ const ParallelDOM = {
 
         // {PDOMBehaviorFunctionDef} - sets the help text of the Node, this most often corresponds to description text.
         this._pdomHeadingBehavior = DEFAULT_PDOM_HEADING_BEHAVIOR;
+
+        // @public {TinyEmitter} - Emits an event when the focus highlight is changed.
+        this.focusHighlightChangedEmitter = new TinyEmitter();
+
+        // @public {TinyEmitter} - Fired when the PDOM Displays for this Node have changed (see PDOMInstance)
+        this.pdomDisplaysEmitter = new TinyEmitter();
 
         // @private - PDOM specific enabled listener
         this.pdomBoundEnabledListener = this.pdomEnabledListener.bind( this );
