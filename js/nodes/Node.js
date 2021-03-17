@@ -170,7 +170,6 @@ import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
-import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import ParallelDOM from '../accessibility/pdom/ParallelDOM.js';
 import Instance from '../display/Instance.js';
 import Renderer from '../display/Renderer.js';
@@ -188,7 +187,6 @@ let globalIdCounter = 1;
 const scratchBounds2 = Bounds2.NOTHING.copy(); // mutable {Bounds2} used temporarily in methods
 const scratchMatrix3 = new Matrix3();
 
-const PICKABLE_PROPERTY_TANDEM_NAME = 'pickableProperty';
 const ENABLED_PROPERTY_TANDEM_NAME = EnabledProperty.TANDEM_NAME;
 const VISIBLE_PROPERTY_TANDEM_NAME = 'visibleProperty';
 const INPUT_ENABLED_PROPERTY_TANDEM_NAME = 'inputEnabledProperty';
@@ -201,7 +199,6 @@ const NODE_OPTION_KEYS = [
   'visibleProperty', // {Property.<boolean>|null} - Sets forwarding of the visibleProperty, see setVisibleProperty() for more documentation
   'visible', // {boolean} - Whether the Node is visible, see setVisible() for more documentation
 
-  'pickablePropertyPhetioInstrumented', // {boolean} - When true, create an instrumented pickableProperty when this Node is instrumented, see setPickablePropertyPhetioInstrumented() for more documentation
   'pickableProperty', // {Property.<boolean|null>|null} - Sets forwarding of the pickableProperty, see setPickableProperty() for more documentation
   'pickable', // {boolean|null} - Whether the Node is pickable, see setPickable() for more documentation
 
@@ -258,7 +255,6 @@ const DEFAULT_OPTIONS = {
   visible: true,
   opacity: 1,
   pickable: null,
-  pickablePropertyPhetioInstrumented: false,
   enabled: true,
   enabledPropertyPhetioInstrumented: false,
   inputEnabled: true,
@@ -348,7 +344,7 @@ class Node extends PhetioObject {
     // @private {TinyForwardingProperty.<boolean|null>} - See setPickable() and setPickableProperty()
     // NOTE: This is fired synchronously when the pickability of the Node is toggled
     this._pickableProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.pickable,
-      DEFAULT_OPTIONS.pickablePropertyPhetioInstrumented, this.onPickablePropertyChange.bind( this ) );
+      false, this.onPickablePropertyChange.bind( this ) );
 
     // @public {TinyForwardingProperty.<boolean>} - See setEnabled() and setEnabledProperty()
     this._enabledProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.enabled,
@@ -4003,7 +3999,7 @@ class Node extends PhetioObject {
    * @returns {Node} for chaining
    */
   setPickableProperty( newTarget ) {
-    return this._pickableProperty.setTargetProperty( this, PICKABLE_PROPERTY_TANDEM_NAME, newTarget );
+    return this._pickableProperty.setTargetProperty( this, null, newTarget );
   }
 
   /**
@@ -4014,29 +4010,6 @@ class Node extends PhetioObject {
    */
   set pickableProperty( property ) {
     this.setPickableProperty( property );
-  }
-
-  /**
-   * Handles linking and checking child PhET-iO Properties such as visibleProperty and pickableProperty.
-   * @public
-   *
-   * @param {string} tandemName - the name for the child tandem
-   * @param {Property.<boolean>|undefined|null} oldProperty - same typedef as TinyForwardingProperty.targetProperty
-   * @param {Property.<boolean>|undefined|null} newProperty - same typedef as TinyForwardingProperty.targetProperty
-   */
-  updateLinkedElementForProperty( tandemName, oldProperty, newProperty ) {
-    assert && assert( oldProperty !== newProperty, 'should not be called on same values' );
-
-    // Only update linked elements if this Node is instrumented for PhET-iO
-    if ( this.isPhetioInstrumented() ) {
-
-      oldProperty && oldProperty.isPhetioInstrumented() && this.removeLinkedElements( oldProperty );
-
-      const tandem = this.tandem.createTandem( tandemName );
-      if ( newProperty && newProperty.isPhetioInstrumented() && tandem !== newProperty.tandem ) {
-        this.addLinkedElement( newProperty, { tandem: tandem } );
-      }
-    }
   }
 
   /**
@@ -4065,28 +4038,6 @@ class Node extends PhetioObject {
    */
   get pickableProperty() {
     return this.getPickableProperty();
-  }
-
-  /**
-   * Use this to automatically create a forwarded, PhET-iO instrumented pickableProperty internal to Node. This is different
-   * from visible because pickable by default doesn't not create this forwarded Property.
-   * @public
-   *
-   * @param {boolean} pickablePropertyPhetioInstrumented
-   * @returns {Node} - for chaining
-   */
-  setPickablePropertyPhetioInstrumented( pickablePropertyPhetioInstrumented ) {
-    return this._pickableProperty.setTargetPropertyInstrumented( pickablePropertyPhetioInstrumented, this );
-  }
-
-  /**
-   * See setPickablePropertyPhetioInstrumented() for more information
-   * @public
-   *
-   * @param {boolean} value
-   */
-  set pickablePropertyPhetioInstrumented( value ) {
-    this.setPickablePropertyPhetioInstrumented( value );
   }
 
   /**
@@ -4171,6 +4122,30 @@ class Node extends PhetioObject {
     this._picker.onPickableChange( oldPickable, pickable );
     if ( assertSlow ) { this._picker.audit(); }
     // TODO: invalidate the cursor somehow? #150
+  }
+
+
+  /**
+   * Handles linking and checking child PhET-iO Properties such as visibleProperty and enabledProperty.
+   * @public
+   *
+   * @param {string} tandemName - the name for the child tandem
+   * @param {Property.<boolean>|undefined|null} oldProperty - same typedef as TinyForwardingProperty.targetProperty
+   * @param {Property.<boolean>|undefined|null} newProperty - same typedef as TinyForwardingProperty.targetProperty
+   */
+  updateLinkedElementForProperty( tandemName, oldProperty, newProperty ) {
+    assert && assert( oldProperty !== newProperty, 'should not be called on same values' );
+
+    // Only update linked elements if this Node is instrumented for PhET-iO
+    if ( this.isPhetioInstrumented() ) {
+
+      oldProperty && oldProperty.isPhetioInstrumented() && this.removeLinkedElements( oldProperty );
+
+      const tandem = this.tandem.createTandem( tandemName );
+      if ( newProperty && newProperty.isPhetioInstrumented() && tandem !== newProperty.tandem ) {
+        this.addLinkedElement( newProperty, { tandem: tandem } );
+      }
+    }
   }
 
   /**
@@ -6618,10 +6593,11 @@ class Node extends PhetioObject {
       // the default, instrumented visibleProperty is conditionally created. We don't want to store these on the Node,
       // and thus they aren't support through `mutate()`.
       visiblePropertyOptions: null,
-      pickablePropertyOptions: null,
       enabledPropertyOptions: null,
       inputEnabledPropertyOptions: null
     }, config );
+
+    assert && assert( !config.hasOwnProperty( 'pickablePropertyOptions' ), 'DEBUG, remove me!!!!' );
 
     // Track this, so we only override our visibleProperty once.
     const wasInstrumented = this.isPhetioInstrumented();
@@ -6641,24 +6617,6 @@ class Node extends PhetioObject {
           tandem: this.tandem.createTandem( VISIBLE_PROPERTY_TANDEM_NAME ),
           phetioDocumentation: 'Controls whether the Node will be visible (and interactive).'
         }, config.visiblePropertyOptions ) )
-      );
-
-      this._pickableProperty.initializePhetio( this, PICKABLE_PROPERTY_TANDEM_NAME, () => new Property( this.pickable, merge( {
-
-          // by default, use the value from the Node
-          phetioReadOnly: this.phetioReadOnly,
-          tandem: this.tandem.createTandem( PICKABLE_PROPERTY_TANDEM_NAME ),
-          phetioType: Property.PropertyIO( NullableIO( BooleanIO ) ),
-          phetioFeatured: true, // Since this property is opt-in, we typically only opt-in when it should be featured
-          phetioDocumentation: 'Sets whether the node will be pickable (and hence interactive). Pickable can take one ' +
-                               'of three values:<br>' +
-                               '<ul>' +
-                               '<li>null: pass-through behavior. Nodes with input listeners are pickable, but nodes without input listeners won\'t block events for nodes behind it.</li>' +
-                               '<li>false: The node cannot be interacted with, and it blocks events for nodes behind it.</li>' +
-                               '<li>true: The node can be interacted with (if it has an input listener).</li>' +
-                               '</ul>' +
-                               'For more about Scenery node pickability, please see <a href="http://phetsims.github.io/scenery/doc/implementation-notes#pickability">http://phetsims.github.io/scenery/doc/implementation-notes#pickability</a>'
-        }, config.pickablePropertyOptions ) )
       );
 
       this._enabledProperty.initializePhetio( this, ENABLED_PROPERTY_TANDEM_NAME, () => new EnabledProperty( this.enabled, merge( {
@@ -6681,9 +6639,8 @@ class Node extends PhetioObject {
           phetioDocumentation: 'Sets whether the node will have input enabled for (and hence interactive). This is a ' +
                                'subset of enabledProperty, which controls if input is enabled as well as changing style ' +
                                'etc.'
-        }, config.pickablePropertyOptions ) )
+        }, config.inputEnabledPropertyOptions ) )
       );
-
     }
   }
 

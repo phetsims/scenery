@@ -162,9 +162,7 @@ QUnit.test( 'Trail and Node transform equivalence', assert => {
 if ( Tandem.PHET_IO_ENABLED ) {
 
   QUnit.test( 'Node instrumented visibleProperty', assert => testInstrumentedNodeProperty( assert, 'visible', 'visibleProperty', 'setVisibleProperty', true ) );
-
-  QUnit.test( 'Node instrumented pickableProperty', assert => testInstrumentedNodeProperty( assert, 'pickable', 'pickableProperty', 'setPickableProperty', Node.DEFAULT_OPTIONS.pickablePropertyPhetioInstrumented ) );
-
+  
   QUnit.test( 'Node instrumented enabledProperty', assert => testInstrumentedNodeProperty( assert, 'enabled', 'enabledProperty', 'setEnabledProperty', Node.DEFAULT_OPTIONS.enabledPropertyPhetioInstrumented ) );
 
   QUnit.test( 'Node instrumented inputEnabledProperty', assert => testInstrumentedNodeProperty( assert, 'inputEnabled', 'inputEnabledProperty', 'setInputEnabledProperty', Node.DEFAULT_OPTIONS.inputEnabledPropertyPhetioInstrumented ) );
@@ -421,17 +419,17 @@ if ( Tandem.PHET_IO_ENABLED ) {
   QUnit.test( 'PhET-iO API Validation', assert => {
     phetioAPITest( assert, new NodeAPI( {
       enabledPropertyPhetioInstrumented: true,
-      pickablePropertyPhetioInstrumented: true
+      inputEnabledPropertyPhetioInstrumented: true
     } ), 'node', tandem => new Node( {
       enabledPropertyPhetioInstrumented: true,
-      pickablePropertyPhetioInstrumented: true,
+      inputEnabledPropertyPhetioInstrumented: true,
       tandem: tandem
     } ) );
 
     phetioAPITest( assert, new NodeAPI( {
-      pickablePropertyPhetioInstrumented: true
+      inputEnabledPropertyPhetioInstrumented: true
     } ), 'node', tandem => new Node( {
-      pickablePropertyPhetioInstrumented: true,
+      inputEnabledPropertyPhetioInstrumented: true,
       tandem: tandem
     } ) );
 

@@ -12,7 +12,6 @@ import PropertyAPI from '../../../axon/js/PropertyAPI.js';
 import merge from '../../../phet-core/js/merge.js';
 import PhetioObjectAPI from '../../../tandem/js/PhetioObjectAPI.js';
 import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
-import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import scenery from '../scenery.js';
 import Node from './Node.js';
 
@@ -30,9 +29,9 @@ class NodeAPI extends PhetioObjectAPI {
         phetioType: Property.PropertyIO( BooleanIO )
       },
 
-      pickablePropertyPhetioInstrumented: false,
-      pickablePropertyOptions: {
-        phetioType: Property.PropertyIO( NullableIO( BooleanIO ) ),
+      inputEnabledPropertyPhetioInstrumented: false,
+      inputEnabledPropertyOptions: {
+        phetioType: Property.PropertyIO( BooleanIO ),
         phetioFeatured: true
       },
 
@@ -47,10 +46,10 @@ class NodeAPI extends PhetioObjectAPI {
     // @public (read-only)
     this.visibleProperty = new PropertyAPI( options.visiblePropertyOptions );
 
-    if ( options.pickablePropertyPhetioInstrumented ) {
+    if ( options.inputEnabledPropertyPhetioInstrumented ) {
 
       // @public (read-only)
-      this.pickableProperty = new PropertyAPI( options.pickablePropertyOptions );
+      this.inputEnabledProperty = new PropertyAPI( options.inputEnabledPropertyOptions );
     }
 
     if ( options.enabledPropertyPhetioInstrumented ) {
