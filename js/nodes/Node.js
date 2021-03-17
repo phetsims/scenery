@@ -541,7 +541,7 @@ class Node extends PhetioObject {
     // @public {TinyEmitter} - Emitted to when we change filters (either opacity or generalized filters)
     this.filterChangeEmitter = new TinyEmitter();
 
-    // @public {TinyEmitter} - Fired when the accessible Displays for this Node have changed (see PDOMInstance)
+    // @public {TinyEmitter} - Fired when the PDOM Displays for this Node have changed (see PDOMInstance)
     this.pdomDisplaysEmitter = new TinyEmitter();
 
     // @public {TinyEmitter}
@@ -553,7 +553,7 @@ class Node extends PhetioObject {
     // @public {TinyEmitter} - Fired when layoutOptions changes
     this.layoutOptionsChangedEmitter = new TinyEmitter();
 
-    // compose accessibility - for some reason tests fail when you move this down to be next to super call.
+    // compose ParallelDOM - for some reason tests fail when you move this down to be next to super call.
     this.initializeParallelDOM();
 
     // @public (scenery-internal) {number} - A bitmask which specifies which renderers this Node (and only this Node,
@@ -628,7 +628,7 @@ class Node extends PhetioObject {
     node._parents.push( this );
     this._children.splice( index, 0, node );
 
-    // If this added subtree contains accessible content, we need to notify any relevant displays
+    // If this added subtree contains PDOM content, we need to notify any relevant displays
     if ( !node._rendererSummary.hasNoPDOM() ) {
       this.onPDOMAddChild( node );
     }
@@ -723,7 +723,7 @@ class Node extends PhetioObject {
 
     node._isGettingRemovedFromParent = true;
 
-    // If this added subtree contains accessible content, we need to notify any relevant displays
+    // If this added subtree contains PDOM content, we need to notify any relevant displays
     // NOTE: Potentially removes bounds listeners here!
     if ( !node._rendererSummary.hasNoPDOM() ) {
       this.onPDOMRemoveChild( node );
@@ -1099,7 +1099,7 @@ class Node extends PhetioObject {
   }
 
   /**
-   * Replace a child in this node's children array with another node. If the old child had accessible focus and
+   * Replace a child in this node's children array with another node. If the old child had DOM focus and
    * the new child is focusable, the new child will receive focus after it is added.
    * @public
    *
@@ -6762,7 +6762,7 @@ class Node extends PhetioObject {
    */
   dispose() {
 
-    // remove all accessibility input listeners
+    // remove all PDOM input listeners
     this.disposeParallelDOM();
 
     // When disposing, remove all children and parents. See https://github.com/phetsims/scenery/issues/629
