@@ -67,6 +67,7 @@ import UtteranceQueue from '../../../utterance-queue/js/UtteranceQueue.js';
 import Focus from '../accessibility/Focus.js';
 import PDOMInstance from '../accessibility/pdom/PDOMInstance.js';
 import PDOMTree from '../accessibility/pdom/PDOMTree.js';
+import webSpeaker from '../accessibility/speaker/webSpeaker.js';
 import Input from '../input/Input.js';
 import Node from '../nodes/Node.js';
 import CanvasNodeBoundsOverlay from '../overlays/CanvasNodeBoundsOverlay.js';
@@ -139,6 +140,10 @@ class Display {
       // {boolean} - Enables accessibility features
       accessibility: true,
 
+      // {boolean} - Enables "Voicing" features, using SpeechSynthesis to support speaking about
+      // Nodes in the Display
+      voicing: false,
+
       // {boolean} - Whether mouse/touch/keyboard inputs are enabled (if input has been added).
       interactive: true,
 
@@ -185,6 +190,9 @@ class Display {
 
     // @public (scenery-internal) {boolean} - Whether accessibility is enabled for this particular display.
     this._accessible = options.accessibility;
+
+    // @private {boolean} - Whether the Display supports Voucing with SpeechSynthesis
+    this._voicing = options.voicing;
 
     // @public (scenery-internal) {boolean}
     this._preserveDrawingBuffer = options.preserveDrawingBuffer;
@@ -363,6 +371,15 @@ class Display {
       // set `user-select: none` on the aria-live container to prevent iOS text selection issue, see
       // https://github.com/phetsims/scenery/issues/1006
       ariaLiveContainer.style[ Features.userSelect ] = 'none';
+    }
+
+    if ( this._voicing ) {
+      webSpeaker.initialize();
+
+      // The Display supports Voicing, create an UtteranceQueue to manage SpeechSynthesisUtterances. This
+      // could be a singleton shared among Displays but the screen reader utteranceQueue needs to be
+      // one per display so doing the same for voicingUtteranceQueue to match.
+      this.voicingUtteranceQueue = new UtteranceQueue( webSpeaker, false );
     }
   }
 
