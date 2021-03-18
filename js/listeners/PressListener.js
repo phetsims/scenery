@@ -193,11 +193,15 @@ class PressListener {
     // @public {Property.<boolean>} (read-only) - Whether the listener has focus (should appear to be over)
     this.isFocusedProperty = new BooleanProperty( false );
 
-    // @public {Pointer|null} (read-only) - The current pointer, or null when not pressed.
+    // @public {Pointer|null} (read-only) - The current pointer, or null when not pressed. There can be short periods of
+    // time when this has a value when isPressedProperty.value is false, such as during the processing of a pointer
+    // release, but these periods should be very brief.
     this.pointer = null;
 
     // @public {Trail|null} (read-only) - The Trail for the press, with no descendant nodes past the currentTarget
-    // or targetNode (if provided). Will be null when not pressed.
+    // or targetNode (if provided). Will generally be null when not pressed, though there can be short periods of time
+    // where this has a value when isPressedProperty.value is false, such as during the processing of a release, but
+    // these periods should be very brief.
     this.pressedTrail = null;
 
     // @public {boolean} (read-only) - Whether the last press was interrupted. Will be valid until the next press.
@@ -632,18 +636,20 @@ class PressListener {
     this.pointer.removeInputListener( this._pointerListener );
     this._listeningToPointer = false;
 
-    this.pointer.cursor = null;
-
-    // Unset this properties after the property change, so they are visible to listeners beforehand.
-    this.pointer = null;
-    this.pressedTrail = null;
-
+    // Set the pressed state false *before* invoking the callback, otherwise an infinite loop can result in some
+    // circumstances.
     this.isPressedProperty.value = false;
 
     // Notify after the rest of release is called in order to prevent it from triggering interrupt().
     this._releaseListener( event, this );
 
     callback && callback();
+
+    // These properties are cleared now, at the end of the onRelease, in case they were needed by the callback or in
+    // listeners on the pressed Property.
+    this.pointer.cursor = null;
+    this.pointer = null;
+    this.pressedTrail = null;
   }
 
   /**

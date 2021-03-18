@@ -96,7 +96,8 @@ const Utils = {
         window.requestAnimationFrame = callback => {
           const timeAtStart = Date.now();
 
-          return window.setTimeout( () => {
+          // NOTE: We don't want to rely on a common timer, so we're using the built-in form on purpose.
+          return window.setTimeout( () => { // eslint-disable-line bad-sim-text
             callback( Date.now() - timeAtStart );
           }, 16 );
         };
@@ -589,7 +590,8 @@ const Utils = {
     if ( extension ) {
       extension.loseContext();
 
-      setTimeout( () => {
+      // NOTE: We don't want to rely on a common timer, so we're using the built-in form on purpose.
+      setTimeout( () => { // eslint-disable-line bad-sim-text
         extension.restoreContext();
       }, 1000 );
     }
