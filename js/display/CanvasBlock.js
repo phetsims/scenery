@@ -419,8 +419,9 @@ class CanvasBlock extends FittedBlock {
    *                               with a proper generalized type)
    */
   renderDrawable( drawable ) {
-    // do not paint invisible drawables
-    if ( !drawable.visible ) {
+
+    // do not paint invisible drawables, or drawables that are out of view
+    if ( !drawable.visible || this.canvas.width === 0 || this.canvas.height === 0 ) {
       return;
     }
 
