@@ -167,12 +167,10 @@ import platform from '../../../phet-core/js/platform.js';
 import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
-import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
 import Display from '../display/Display.js';
 import scenery from '../scenery.js';
 import Features from '../util/Features.js';
-import FullScreen from '../util/FullScreen.js';
 import Trail from '../util/Trail.js';
 import BatchedDOMEvent from './BatchedDOMEvent.js';
 import BrowserEvents from './BrowserEvents.js';
@@ -758,9 +756,6 @@ class Input {
           sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
         }, accessibleEventOptions );
       } );
-
-      // Add a listener to the document body that will capture any keydown for pdom before focus is in this display.
-      document.body.addEventListener( 'keydown', this.handleDocumentKeydown.bind( this ) );
     }
   }
 
@@ -1868,30 +1863,6 @@ class Input {
    */
   isTargetUnderPDOM( element ) {
     return this.display._accessible && this.display.pdomRootElement.contains( element );
-  }
-
-  /**
-   * A listener for the document body that will capture any keydown before focus is within the root of
-   * the PDOM or handled by scenery. This is mostly useful for platform specific workarounds or signifying to the
-   * Display that user interaction has begun. Otherwise, most listeners from the pdom should instead go through
-   * dispatchEvent.
-   * @private
-   *
-   * @param {Event} domEvent
-   */
-  handleDocumentKeydown( domEvent ) {
-
-    // If navigating in full screen mode, prevent a bug where focus gets lost if fullscreen mode was initiated
-    // from an iframe by keeping focus in the display. getNext/getPreviousFocusable will return active element
-    // if there are no more elements in that direction. See https://github.com/phetsims/scenery/issues/883
-    if ( FullScreen.isFullScreen() && KeyboardUtils.isKeyEvent( domEvent, KeyboardUtils.KEY_TAB ) ) {
-      const rootElement = this.display.pdomRootElement;
-      const nextElement = domEvent.shiftKey ? PDOMUtils.getPreviousFocusable( rootElement ) :
-                          PDOMUtils.getNextFocusable( rootElement );
-      if ( nextElement === domEvent.target ) {
-        domEvent.preventDefault();
-      }
-    }
   }
 
   /**

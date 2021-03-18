@@ -65,8 +65,11 @@ import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import AriaHerald from '../../../utterance-queue/js/AriaHerald.js';
 import UtteranceQueue from '../../../utterance-queue/js/UtteranceQueue.js';
 import Focus from '../accessibility/Focus.js';
+import globalKeyStateTracker from '../accessibility/globalKeyStateTracker.js';
+import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import PDOMInstance from '../accessibility/pdom/PDOMInstance.js';
 import PDOMTree from '../accessibility/pdom/PDOMTree.js';
+import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
 import webSpeaker from '../accessibility/speaker/webSpeaker.js';
 import Input from '../input/Input.js';
 import Node from '../nodes/Node.js';
@@ -79,6 +82,7 @@ import PointerOverlay from '../overlays/PointerOverlay.js';
 import scenery from '../scenery.js';
 import Color from '../util/Color.js';
 import Features from '../util/Features.js';
+import FullScreen from '../util/FullScreen.js';
 import Trail from '../util/Trail.js';
 import Utils from '../util/Utils.js';
 import BackboneDrawable from './BackboneDrawable.js';
@@ -371,6 +375,12 @@ class Display {
       // set `user-select: none` on the aria-live container to prevent iOS text selection issue, see
       // https://github.com/phetsims/scenery/issues/1006
       ariaLiveContainer.style[ Features.userSelect ] = 'none';
+
+      // Prevent focus from being lost in FullScreen mode, listener on the globalKeyStateTracker
+      // because tab navigation may happen before focus is within the PDOM. See handleFullScreenNavigation
+      // for more.
+      this._boundHandleFullScreenNavigation = this.handleFullScreenNavigation.bind( this );
+      globalKeyStateTracker.keydownEmitter.addListener( this._boundHandleFullScreenNavigation );
     }
 
     if ( this._voicing ) {
@@ -844,6 +854,26 @@ class Display {
    */
   isAccessible() {
     return this._accessible;
+  }
+
+  /**
+   * Implements a workaround that prevents DOM focus from leaving the Display in FullScreen mode. There is
+   * a bug in some browsers where DOM focus can be permanently lost if tabbing out of the FullScreen element,
+   * see https://github.com/phetsims/scenery/issues/883.
+   * @private
+   * @param {Event} domEvent
+   */
+  handleFullScreenNavigation( domEvent ) {
+    assert && assert( this.pdomRootElement, 'There must be a PDOM to support keyboard navigation' );
+
+    if ( FullScreen.isFullScreen() && KeyboardUtils.isKeyEvent( domEvent, KeyboardUtils.KEY_TAB ) ) {
+      const rootElement = this.pdomRootElement;
+      const nextElement = domEvent.shiftKey ? PDOMUtils.getPreviousFocusable( rootElement ) :
+                          PDOMUtils.getNextFocusable( rootElement );
+      if ( nextElement === domEvent.target ) {
+        domEvent.preventDefault();
+      }
+    }
   }
 
   /*
@@ -2053,6 +2083,7 @@ class Display {
     this._rootNode.removeRootedDisplay( this );
 
     if ( this._accessible ) {
+      globalKeyStateTracker.keydownEmitter.removeListener( this._boundHandleFullScreenNavigation );
       this._rootPDOMInstance.dispose();
     }
 
