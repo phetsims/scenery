@@ -349,7 +349,7 @@ QUnit.test( 'TrailPointer nested comparison and fowards/backwards', assert => {
   }
 
   // verify forwards and backwards, as well as copy constructors
-  for ( i = 1; i < pointers.length; i++ ) {
+  for ( let i = 1; i < pointers.length; i++ ) {
     const a = pointers[ i - 1 ];
     const b = pointers[ i ];
 
@@ -363,8 +363,8 @@ QUnit.test( 'TrailPointer nested comparison and fowards/backwards', assert => {
   }
 
   // exhaustively check depthFirstUntil inclusive
-  for ( i = 0; i < pointers.length; i++ ) {
-    for ( j = i + 1; j < pointers.length; j++ ) {
+  for ( let i = 0; i < pointers.length; i++ ) {
+    for ( let j = i + 1; j < pointers.length; j++ ) {
       // i < j guaranteed
       const contents = [];
       pointers[ i ].depthFirstUntil( pointers[ j ], pointer => { contents.push( pointer.copy() ); }, false );
@@ -373,7 +373,7 @@ QUnit.test( 'TrailPointer nested comparison and fowards/backwards', assert => {
       // do an actual pointer to pointer comparison
       let isOk = true;
       for ( let k = 0; k < contents.length; k++ ) {
-        comparison = contents[ k ].compareNested( pointers[ i + k ] );
+        const comparison = contents[ k ].compareNested( pointers[ i + k ] );
         if ( comparison !== 0 ) {
           assert.equal( comparison, 0, `depthFirstUntil inclusive ${i},${j},${k} comparison check ${contents[ k ].trail.indices.join()} - ${pointers[ i + k ].trail.indices.join()}` );
           isOk = false;
@@ -384,17 +384,17 @@ QUnit.test( 'TrailPointer nested comparison and fowards/backwards', assert => {
   }
 
   // exhaustively check depthFirstUntil exclusive
-  for ( i = 0; i < pointers.length; i++ ) {
-    for ( j = i + 1; j < pointers.length; j++ ) {
+  for ( let i = 0; i < pointers.length; i++ ) {
+    for ( let j = i + 1; j < pointers.length; j++ ) {
       // i < j guaranteed
-      contents = [];
+      const contents = [];
       pointers[ i ].depthFirstUntil( pointers[ j ], pointer => { contents.push( pointer.copy() ); }, true );
       assert.equal( contents.length, j - i - 1, `depthFirstUntil exclusive ${i},${j} count check` );
 
       // do an actual pointer to pointer comparison
-      isOk = true;
-      for ( k = 0; k < contents.length; k++ ) {
-        comparison = contents[ k ].compareNested( pointers[ i + k + 1 ] );
+      let isOk = true;
+      for ( let k = 0; k < contents.length; k++ ) {
+        const comparison = contents[ k ].compareNested( pointers[ i + k + 1 ] );
         if ( comparison !== 0 ) {
           assert.equal( comparison, 0, `depthFirstUntil exclusive ${i},${j},${k} comparison check ${contents[ k ].trail.indices.join()} - ${pointers[ i + k ].trail.indices.join()}` );
           isOk = false;
