@@ -6591,8 +6591,6 @@ class Node extends PhetioObject {
       inputEnabledPropertyOptions: null
     }, config );
 
-    assert && assert( !config.hasOwnProperty( 'pickablePropertyOptions' ), 'DEBUG, remove me!!!!' );
-
     // Track this, so we only override our visibleProperty once.
     const wasInstrumented = this.isPhetioInstrumented();
 
