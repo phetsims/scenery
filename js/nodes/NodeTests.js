@@ -162,7 +162,7 @@ QUnit.test( 'Trail and Node transform equivalence', assert => {
 if ( Tandem.PHET_IO_ENABLED ) {
 
   QUnit.test( 'Node instrumented visibleProperty', assert => testInstrumentedNodeProperty( assert, 'visible', 'visibleProperty', 'setVisibleProperty', true ) );
-  
+
   QUnit.test( 'Node instrumented enabledProperty', assert => testInstrumentedNodeProperty( assert, 'enabled', 'enabledProperty', 'setEnabledProperty', Node.DEFAULT_OPTIONS.enabledPropertyPhetioInstrumented ) );
 
   QUnit.test( 'Node instrumented inputEnabledProperty', assert => testInstrumentedNodeProperty( assert, 'inputEnabled', 'inputEnabledProperty', 'setInputEnabledProperty', Node.DEFAULT_OPTIONS.inputEnabledPropertyPhetioInstrumented ) );
