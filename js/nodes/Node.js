@@ -6628,9 +6628,7 @@ class Node extends PhetioObject {
           tandem: this.tandem.createTandem( INPUT_ENABLED_PROPERTY_TANDEM_NAME ),
           phetioType: Property.PropertyIO( BooleanIO ),
           phetioFeatured: true, // Since this property is opt-in, we typically only opt-in when it should be featured
-          phetioDocumentation: 'Sets whether the node will have input enabled for (and hence interactive). This is a ' +
-                               'subset of enabledProperty, which controls if input is enabled as well as changing style ' +
-                               'etc.'
+          phetioDocumentation: 'Sets whether the element will have input enabled, and hence be interactive.'
         }, config.inputEnabledPropertyOptions ) )
       );
     }
