@@ -189,7 +189,10 @@ class Display {
 
       // {boolean} - Whether, if no WebGL antialiasing is detected, the backing scale can be increased so as to
       //             provide some antialiasing benefit. See https://github.com/phetsims/scenery/issues/859.
-      allowBackingScaleAntialiasing: true
+      allowBackingScaleAntialiasing: true,
+
+      // phet-io
+      tandem: Tandem.OPTIONAL
     }, options );
 
     // @public (scenery-internal) {boolean} - Whether accessibility is enabled for this particular display.
@@ -337,7 +340,9 @@ class Display {
 
     // @public {UtteranceQueue} - data structure for managing aria-live alerts the this Display instance
     const ariaHerald = new AriaHerald();
-    this.utteranceQueue = new UtteranceQueue( ariaHerald, !this._accessible );
+    this.utteranceQueue = new UtteranceQueue( ariaHerald, !this._accessible, {
+      tandem: options.tandem.createTandem( 'utteranceQueue' )
+    } );
 
     if ( this._accessible ) {
 
