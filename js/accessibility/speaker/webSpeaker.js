@@ -14,6 +14,7 @@ import DerivedProperty from '../../../../axon/js/DerivedProperty.js';
 import Emitter from '../../../../axon/js/Emitter.js';
 import NumberProperty from '../../../../axon/js/NumberProperty.js';
 import Property from '../../../../axon/js/Property.js';
+import stepTimer from '../../../../axon/js/stepTimer.js';
 import Range from '../../../../dot/js/Range.js';
 import platform from '../../../../phet-core/js/platform.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
@@ -207,7 +208,7 @@ class WebSpeaker {
       // on safari, giving a bit of a delay to the speak request makes the `end`
       // SpeechSynthesisUtterance event come through much more consistently
       if ( platform.safari ) {
-        window.setTimeout( () => {
+        stepTimer.setTimeout( () => {
           this.synth.speak( speechSynthUtterance );
         }, 500 );
       }
