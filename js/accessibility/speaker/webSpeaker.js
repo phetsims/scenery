@@ -29,10 +29,10 @@ class WebSpeaker {
     this.voiceProperty = new Property( null );
 
     // @public {NumberProperty} - controls the speaking rate of Web Speech
-    this.voiceRateProperty = new NumberProperty( 1.0, { range: new Range( 0.8, 1.5 ) } );
+    this.voiceRateProperty = new NumberProperty( 1.0, { range: new Range( 0.75, 2 ) } );
 
     // {NumberProperty} - controls the pitch of the synth
-    this.voicePitchProperty = new NumberProperty( 1.0, { range: new Range( 0.8, 1.5 ) } );
+    this.voicePitchProperty = new NumberProperty( 1.0, { range: new Range( 0.5, 2 ) } );
 
     // @public {Emitter} - emits events when the speaker starts/stops speaking, with the Utterance that is
     // either starting or stopping
