@@ -18,7 +18,7 @@ import stepTimer from '../../../../axon/js/stepTimer.js';
 import Range from '../../../../dot/js/Range.js';
 import platform from '../../../../phet-core/js/platform.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
-import SelfVoicingUtterance from '../../../../utterance-queue/js/SelfVoicingUtterance.js';
+import VoicingUtterance from '../../../../utterance-queue/js/VoicingUtterance.js';
 import Utterance from '../../../../utterance-queue/js/Utterance.js';
 import scenery from '../../scenery.js';
 
@@ -61,7 +61,7 @@ class WebSpeaker {
     this.speechEnabledProperty = new BooleanProperty( true );
 
     // @private {Utterance} - A reference to the last utterance spoken, so we can determine
-    // cancelling behavior when it is time to speak the next utterance. See SelfVoicingUtterance options.
+    // cancelling behavior when it is time to speak the next utterance. See VoicingUtterance options.
     this.previousUtterance = null;
 
     // @public {boolean} - a more interal way to disable speaking - the enabledProperty
@@ -119,7 +119,7 @@ class WebSpeaker {
     this.populateVoices();
 
     this.canSpeakProperty = DerivedProperty.and( [
-      this.enabledProperty, this.speechEnabledProperty, window.phet.joist.sim.soundEnabledProperty
+      this.enabledProperty, this.speechEnabledProperty
     ] );
   }
 
@@ -145,7 +145,7 @@ class WebSpeaker {
    */
   announce( utterance ) {
     let withCancel = true;
-    if ( utterance instanceof SelfVoicingUtterance ) {
+    if ( utterance instanceof VoicingUtterance ) {
       if ( this.previousUtterance && this.previousUtterance === utterance ) {
         withCancel = utterance.cancelSelf;
       }
