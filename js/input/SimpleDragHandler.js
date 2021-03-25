@@ -131,6 +131,11 @@ define( function( require ) {
           self.options.drag.call( null, event, self.trail ); // new position (old position?) delta
           event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
         }
+      },
+
+      // pointer interruption
+      interrupt: () => {
+        self.interrupt();
       }
     };
   }
