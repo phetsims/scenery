@@ -151,6 +151,11 @@ define( function( require ) {
           event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
         }
         window.phet && phet.phetio && self.endedCallbacksForDraggedEmitter.emit();
+      },
+
+      // pointer interruption
+      interrupt: () => {
+        self.interrupt();
       }
     };
     options.tandem.addInstance( this, TSimpleDragHandler );
