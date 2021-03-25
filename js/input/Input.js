@@ -221,6 +221,7 @@ define( function( require ) {
 
     this.mouseUpEmitter.addListener( function( point, event ) {
       if ( !self.mouse ) { self.initMouse(); }
+      self.mouse.id = null;
       var pointChanged = self.mouse.up( point, event );
       self.upEvent( self.mouse, event, pointChanged );
     } );
@@ -492,10 +493,11 @@ define( function( require ) {
      * NOTE: This may also be called from the pointer event handler (pointerDown) or from things like fuzzing or
      * playback. The event may be "faked" for certain purposes.
      *
+     * @param {number} id
      * @param {Vector2} point
      * @param {DOMEvent} event
      */
-    mouseDown: function( point, event ) {
+    mouseDown: function( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseDown(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -506,6 +508,7 @@ define( function( require ) {
         }, NORMAL_FREQUENCY );
       }
       if ( !this.mouse ) { this.initMouse(); }
+      this.mouse.id = id;
       var pointChanged = this.mouse.down( point, event );
       this.downEvent( this.mouse, event, pointChanged );
 
@@ -903,7 +906,7 @@ define( function( require ) {
       switch( type ) {
         case 'mouse':
           // The actual event afterwards
-          this.mouseDown( point, event );
+          this.mouseDown( id, point, event );
           break;
         case 'touch':
           this.touchStart( id, point, event );
@@ -972,6 +975,50 @@ define( function( require ) {
             console.log( 'Unknown pointer type: ' + type );
           }
       }
+    },
+
+    /**
+     * Handles a gotpointercapture event, forwarding it to the proper logical event.
+     * @public (scenery-internal)
+     *
+     * @param {number} id
+     * @param {string} type
+     * @param {Vector2} point
+     * @param {Event} event
+     */
+    gotPointerCapture( id, type, point, event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( `gotPointerCapture('${id}',${Input.debugText( null, event )});` );
+      sceneryLog && sceneryLog.Input && sceneryLog.push();
+
+      const pointer = this.findPointerById( id );
+
+      if ( pointer ) {
+        pointer.onGotPointerCapture();
+      }
+
+      sceneryLog && sceneryLog.Input && sceneryLog.pop();
+    },
+
+    /**
+     * Handles a lostpointercapture event, forwarding it to the proper logical event.
+     * @public (scenery-internal)
+     *
+     * @param {number} id
+     * @param {string} type
+     * @param {Vector2} point
+     * @param {Event} event
+     */
+    lostPointerCapture( id, type, point, event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( `lostPointerCapture('${id}',${Input.debugText( null, event )});` );
+      sceneryLog && sceneryLog.Input && sceneryLog.push();
+
+      const pointer = this.findPointerById( id );
+
+      if ( pointer ) {
+        pointer.onLostPointerCapture();
+      }
+
+      sceneryLog && sceneryLog.Input && sceneryLog.pop();
     },
 
     /**
