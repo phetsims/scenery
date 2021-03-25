@@ -69,6 +69,9 @@ define( function( require ) {
     this._cursor = null;
 
     phetAllocation && phetAllocation( 'Pointer' );
+
+    // @private {boolean}
+    this._pointerCaptured = false;
   }
 
   scenery.register( 'Pointer', Pointer );
@@ -255,6 +258,41 @@ define( function( require ) {
      */
     hasPointChanged: function( point ) {
       return this.point !== point && ( !point || !this.point || !this.point.equals( point ) );
+    },
+
+    /**
+     * This is called when a capture starts on this pointer. We request it on pointerstart, and if received, we should
+     * generally receive events outside the window.
+     * @public
+     */
+    onGotPointerCapture() {
+      this._pointerCaptured = true;
+    },
+
+    /**
+     * This is called when a capture ends on this pointer. This happens normally when the user releases the pointer above
+     * the sim or outside, but also in cases where we have NOT received an up/end.
+     * @public
+     *
+     * See https://github.com/phetsims/scenery/issues/1186 for more information. We'll want to interrupt the pointer
+     * on this case regardless,
+     */
+    onLostPointerCapture() {
+      if ( this._pointerCaptured ) {
+        this.interruptAll();
+      }
+      this._pointerCaptured = false;
+    },
+
+    /**
+     * Releases references so it can be garbage collected.
+     * @public
+     */
+    dispose: function() {
+      sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( 'Disposing ' + this.toString() );
+
+      assert && assert( this._attachedListener === null, 'Attached listeners should be cleared before pointer disposal' );
+      assert && assert( this._listeners.length === 0, 'Should not have listeners when a pointer is disposed' );
     }
   } );
 
