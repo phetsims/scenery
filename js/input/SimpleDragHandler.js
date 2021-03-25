@@ -301,6 +301,10 @@ define( function( require ) {
       // mouse/touch move
       move: function( event ) {
         self.draggedEmitter.emit( event.pointer.point, event );
+      },
+
+      interrupt: function( event ) {
+        self.interrupt();
       }
     };
     PhetioObject.call( this, options );

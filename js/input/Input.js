@@ -134,6 +134,7 @@ define( require => {
   const FullScreen = require( 'SCENERY/util/FullScreen' );
   const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
   const Mouse = require( 'SCENERY/input/Mouse' );
+  const NullableIO = require( 'TANDEM/types/NullableIO' );
   const NumberIO = require( 'TANDEM/types/NumberIO' );
   const Pen = require( 'SCENERY/input/Pen' );
   const PhetioObject = require( 'TANDEM/PhetioObject' );
@@ -153,7 +154,7 @@ define( require => {
     pointerType: true, charCode: true, which: true, clientX: true, clientY: true, changedTouches: true,
     target: true
   };
-  
+
   const TARGET_SUBSTITUTE_KEY = 'targetSubstitute';
 
   /**
@@ -250,6 +251,7 @@ define( require => {
         phetioDocumentation: 'Emits when a mouse button is released',
         first: ( point, event ) => {
           if ( !this.mouse ) { this.initMouse(); }
+          this.mouse.id = null;
           const pointChanged = this.mouse.up( point, event );
           this.upEvent( this.mouse, event, pointChanged );
         }
@@ -261,13 +263,15 @@ define( require => {
         tandem: options.tandem.createTandem( 'mouseDownEmitter' ),
 
         phetioType: EmitterIO( [
+          { name: 'id', type: NullableIO( NumberIO ) },
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
         phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when a mouse button is pressed',
-        first: ( point, event ) => {
+        first: ( id, point, event ) => {
           if ( !this.mouse ) { this.initMouse(); }
+          this.mouse.id = id;
           const pointChanged = this.mouse.down( point, event );
           this.downEvent( this.mouse, event, pointChanged );
         }
@@ -522,6 +526,44 @@ define( require => {
         }
       } );
 
+      // @private {Emitter} - Emits to the PhET-iO data stream.
+      this.gotPointerCaptureEmitter = new Emitter( {
+        phetioPlayback: true,
+        tandem: options.tandem.createTandem( 'gotPointerCaptureEmitter' ),
+        phetioType: EmitterIO( [
+          { name: 'id', type: NumberIO },
+          { name: 'event', type: DOMEventIO }
+        ] ),
+        phetioEventType: 'user',
+        phetioDocumentation: 'Emits when a pointer is captured (normally at the start of an interaction)',
+        first: ( id, event ) => {
+          const pointer = this.findPointerById( id );
+
+          if ( pointer ) {
+            pointer.onGotPointerCapture();
+          }
+        }
+      } );
+
+      // @private {Emitter} - Emits to the PhET-iO data stream.
+      this.lostPointerCaptureEmitter = new Emitter( {
+        phetioPlayback: true,
+        tandem: options.tandem.createTandem( 'lostPointerCaptureEmitter' ),
+        phetioType: EmitterIO( [
+          { name: 'id', type: NumberIO },
+          { name: 'event', type: DOMEventIO }
+        ] ),
+        phetioEventType: 'user',
+        phetioDocumentation: 'Emits when a pointer is captured (normally at the start of an interaction)',
+        first: ( id, event ) => {
+          const pointer = this.findPointerById( id );
+
+          if ( pointer ) {
+            pointer.onLostPointerCapture();
+          }
+        }
+      } );
+
       // wire up accessibility listeners on the display's root accessible DOM element.
       if ( this.display._accessible ) {
 
@@ -620,7 +662,7 @@ define( require => {
             // some browsers (IE11 and Safari) will fail to focus the element. So we manually focus the relatedTarget
             // so that focus isn't lost. Skipped if focusout callbacks sent focus to an element other than the
             // relatedTarget, or if callbacks made relatedTarget unfocusable.
-            // 
+            //
             // Focus is set with DOM API to avoid the performance hit of looking up the Node from trail id.
             if ( event.relatedTarget ) {
               var focusMovedInCallbacks = this.display.accessibleDOMElement.contains( document.activeElement );
@@ -1038,13 +1080,14 @@ define( require => {
      * NOTE: This may also be called from the pointer event handler (pointerDown) or from things like fuzzing or
      * playback. The event may be "faked" for certain purposes.
      *
+     * @param {number} id
      * @param {Vector2} point
      * @param {DOMEvent} event
      */
-    mouseDown( point, event ) {
+    mouseDown( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseDown(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.mouseDownEmitter.emit( point, event );
+      this.mouseDownEmitter.emit( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
@@ -1288,7 +1331,7 @@ define( require => {
       switch( type ) {
         case 'mouse':
           // The actual event afterwards
-          this.mouseDown( point, event );
+          this.mouseDown( id, point, event );
           break;
         case 'touch':
           this.touchStart( id, point, event );
@@ -1357,6 +1400,38 @@ define( require => {
             console.log( 'Unknown pointer type: ' + type );
           }
       }
+    }
+
+    /**
+     * Handles a gotpointercapture event, forwarding it to the proper logical event.
+     * @public (scenery-internal)
+     *
+     * @param {number} id
+     * @param {string} type
+     * @param {Vector2} point
+     * @param {Event} event
+     */
+    gotPointerCapture( id, type, point, event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( `gotPointerCapture('${id}',${Input.debugText( null, event )});` );
+      sceneryLog && sceneryLog.Input && sceneryLog.push();
+      this.gotPointerCaptureEmitter.emit( id, event );
+      sceneryLog && sceneryLog.Input && sceneryLog.pop();
+    }
+
+    /**
+     * Handles a lostpointercapture event, forwarding it to the proper logical event.
+     * @public (scenery-internal)
+     *
+     * @param {number} id
+     * @param {string} type
+     * @param {Vector2} point
+     * @param {Event} event
+     */
+    lostPointerCapture( id, type, point, event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( `lostPointerCapture('${id}',${Input.debugText( null, event )});` );
+      sceneryLog && sceneryLog.Input && sceneryLog.push();
+      this.lostPointerCaptureEmitter.emit( id, event );
+      sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
     /**
