@@ -56,7 +56,7 @@ class WebSpeaker {
     this.enabledProperty = new BooleanProperty( false );
 
     // @public {BooleanProperty} - whether or not speech is enabled. If false, nothing will be spoken. Note this
-    // does not control whether or not the self-voicing feature is enabled, only whether or not speech will actually
+    // does not control whether or not the voicing feature is enabled, only whether or not speech will actually
     // be heard.
     this.speechEnabledProperty = new BooleanProperty( true );
 

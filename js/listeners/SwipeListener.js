@@ -11,7 +11,7 @@
  * - Press and hold, initiate drag of focused item (forwarding press to item)
  *
  * We hope that the above input strategies will allow BVI users to interact with the sim
- * without the use of a screen reader, but in combination with the self-voicing feature set.
+ * without the use of a screen reader, but in combination with the voicing feature set.
  *
  * PROTOTYPE. DO NOT USE IN PRODUCTION CODE.
  *

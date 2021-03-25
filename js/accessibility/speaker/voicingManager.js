@@ -1,7 +1,7 @@
 // Copyright 2021, University of Colorado Boulder
 
 /**
- * Manages "self-voicing" content as it is read with speech synthesis. Output is categorized into
+ * Manages "voicing" content as it is read with speech synthesis. Output is categorized into
  *    "Object Responses" - Speech describing the object as it receives interaction
  *    "Context Responses" - Speech describing surrounding contextual changes in response to user interaction
  *    "Hints" - General hint content to guide a particular user interaction
@@ -14,7 +14,7 @@
 import scenery from '../../scenery.js';
 import BooleanProperty from '../../../../axon/js/BooleanProperty.js';
 
-class SelfVoicingManager {
+class VoicingManager {
   constructor() {
 
     // @public {BooleanProperty} - whether or not "Object Responses" are read as interactive components change
@@ -77,6 +77,6 @@ class SelfVoicingManager {
   }
 }
 
-const selfVoicingManager = new SelfVoicingManager();
-scenery.register( 'selfVoicingManager', selfVoicingManager );
-export default selfVoicingManager;
+const voicingManager = new VoicingManager();
+scenery.register( 'voicingManager', voicingManager );
+export default voicingManager;
