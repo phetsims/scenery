@@ -32,7 +32,7 @@ const ListenerTestUtils = {
       null );
 
     display._input.validatePointers();
-    display._input.mouseDown( new Vector2( x, y ), domEvent );
+    display._input.mouseDown( null, new Vector2( x, y ), domEvent );
   },
 
   /**
