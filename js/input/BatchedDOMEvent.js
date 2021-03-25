@@ -69,7 +69,12 @@ define( function( require ) {
         }
       }
       else if ( this.type === BatchedDOMEvent.MOUSE_TYPE ) {
-        callback.call( input, input.pointFromEvent( domEvent ), domEvent );
+        if ( callback === input.mouseDown ) {
+          callback.call( input, null, input.pointFromEvent( domEvent ), domEvent );
+        }
+        else {
+          callback.call( input, input.pointFromEvent( domEvent ), domEvent );
+        }
       }
       else if ( this.type === BatchedDOMEvent.WHEEL_TYPE ) {
         callback.call( input, domEvent );
