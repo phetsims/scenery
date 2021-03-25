@@ -4269,6 +4269,7 @@ class Node extends PhetioObject {
    */
   onEnabledPropertyChange( enabled ) {
     !enabled && this.interruptSubtreeInput();
+    this.inputEnabled = enabled;
   }
 
 
