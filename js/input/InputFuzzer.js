@@ -280,7 +280,7 @@ define( require => {
         this.isMouseDown = false;
       }
       else {
-        this.display._input.mouseDown( this.mousePosition, domEvent );
+        this.display._input.mouseDown( null, this.mousePosition, domEvent );
         this.isMouseDown = true;
       }
     },
