@@ -292,6 +292,11 @@ define( function( require ) {
       // mouse/touch move
       move: function( event ) {
         self.dragAction.execute( event.pointer.point, event );
+      },
+
+      // pointer interruption
+      interrupt: () => {
+        self.interrupt();
       }
     };
     PhetioObject.call( this, options );
