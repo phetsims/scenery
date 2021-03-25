@@ -544,6 +544,44 @@ class Input {
       phetioDocumentation: 'Emits when a pen is canceled.'
     } );
 
+    // @private {Action} - Emits to the PhET-iO data stream.
+    this.gotPointerCaptureAction = new Action( ( id, event ) => {
+      const pointer = this.findPointerById( id );
+
+      if ( pointer ) {
+        pointer.onGotPointerCapture();
+      }
+    }, {
+      phetioPlayback: true,
+      tandem: options.tandem.createTandem( 'gotPointerCaptureAction' ),
+      parameters: [
+        { name: 'id', phetioType: NumberIO },
+        { name: 'event', phetioType: EventIO }
+      ],
+      phetioEventType: EventType.USER,
+      phetioDocumentation: 'Emits when a pointer is captured (normally at the start of an interaction)',
+      phetioHighFrequency: true
+    } );
+
+    // @private {Action} - Emits to the PhET-iO data stream.
+    this.lostPointerCaptureAction = new Action( ( id, event ) => {
+      const pointer = this.findPointerById( id );
+
+      if ( pointer ) {
+        pointer.onLostPointerCapture();
+      }
+    }, {
+      phetioPlayback: true,
+      tandem: options.tandem.createTandem( 'lostPointerCaptureAction' ),
+      parameters: [
+        { name: 'id', phetioType: NumberIO },
+        { name: 'event', phetioType: EventIO }
+      ],
+      phetioEventType: EventType.USER,
+      phetioDocumentation: 'Emits when a pointer loses its capture (normally at the end of an interaction)',
+      phetioHighFrequency: true
+    } );
+
     // wire up accessibility listeners on the display's root accessible DOM element.
     if ( this.display._accessible ) {
       // @private
@@ -1396,6 +1434,38 @@ class Input {
           console.log( `Unknown pointer type: ${type}` );
         }
     }
+  }
+
+  /**
+   * Handles a gotpointercapture event, forwarding it to the proper logical event.
+   * @public (scenery-internal)
+   *
+   * @param {number} id
+   * @param {string} type
+   * @param {Vector2} point
+   * @param {Event} event
+   */
+  gotPointerCapture( id, type, point, event ) {
+    sceneryLog && sceneryLog.Input && sceneryLog.Input( `gotPointerCapture('${id}',${Input.debugText( null, event )});` );
+    sceneryLog && sceneryLog.Input && sceneryLog.push();
+    this.gotPointerCaptureAction.execute( id, event );
+    sceneryLog && sceneryLog.Input && sceneryLog.pop();
+  }
+
+  /**
+   * Handles a lostpointercapture event, forwarding it to the proper logical event.
+   * @public (scenery-internal)
+   *
+   * @param {number} id
+   * @param {string} type
+   * @param {Vector2} point
+   * @param {Event} event
+   */
+  lostPointerCapture( id, type, point, event ) {
+    sceneryLog && sceneryLog.Input && sceneryLog.Input( `lostPointerCapture('${id}',${Input.debugText( null, event )});` );
+    sceneryLog && sceneryLog.Input && sceneryLog.push();
+    this.lostPointerCaptureAction.execute( id, event );
+    sceneryLog && sceneryLog.Input && sceneryLog.pop();
   }
 
   /**
