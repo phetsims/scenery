@@ -340,7 +340,8 @@ class Display {
 
     // @public {UtteranceQueue} - data structure for managing aria-live alerts the this Display instance
     const ariaHerald = new AriaHerald();
-    this.utteranceQueue = new UtteranceQueue( ariaHerald, !this._accessible, {
+    this.utteranceQueue = new UtteranceQueue( ariaHerald, {
+      implementAsSkeleton: !this._accessible,
       tandem: options.tandem.createTandem( 'utteranceQueue' )
     } );
 
@@ -394,7 +395,7 @@ class Display {
       // The Display supports Voicing, create an UtteranceQueue to manage SpeechSynthesisUtterances. This
       // could be a singleton shared among Displays but the screen reader utteranceQueue needs to be
       // one per display so doing the same for voicingUtteranceQueue to match.
-      this.voicingUtteranceQueue = new UtteranceQueue( webSpeaker, false );
+      this.voicingUtteranceQueue = new UtteranceQueue( webSpeaker );
     }
   }
 
