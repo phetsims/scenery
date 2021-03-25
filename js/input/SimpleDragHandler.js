@@ -151,6 +151,11 @@ define( function( require ) {
           event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
         }
         self.endEvent();
+      },
+
+      // pointer interruption
+      interrupt: () => {
+        self.interrupt();
       }
     };
     PhetioObject.call( this, options );

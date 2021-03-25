@@ -328,7 +328,7 @@ define( function( require ) {
       this.addPointer( this.mouse );
     },
 
-    mouseDown: function( point, event ) {
+    mouseDown: function( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseDown(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -339,6 +339,8 @@ define( function( require ) {
         }, NORMAL_FREQUENCY );
       }
       if ( !this.mouse ) { this.initMouse(); }
+
+      this.mouse.id = id;
       var pointChanged = this.mouse.down( point, event );
       if ( pointChanged ) {
         this.moveEvent( this.mouse, event );
@@ -359,6 +361,8 @@ define( function( require ) {
         }, NORMAL_FREQUENCY );
       }
       if ( !this.mouse ) { this.initMouse(); }
+
+      this.mouse.id = null;
       var pointChanged = this.mouse.up( point, event );
       if ( pointChanged ) {
         this.moveEvent( this.mouse, event );
@@ -628,7 +632,7 @@ define( function( require ) {
       switch( type ) {
         case 'mouse':
           // The actual event afterwards
-          this.mouseDown( point, event );
+          this.mouseDown( id, point, event );
           break;
         case 'touch':
           this.touchStart( id, point, event );
@@ -699,8 +703,52 @@ define( function( require ) {
       }
     },
 
-    pointerOver: function( id, type, point, event ) {
+    /**
+     * Handles a gotpointercapture event, forwarding it to the proper logical event.
+     * @public (scenery-internal)
+     *
+     * @param {number} id
+     * @param {string} type
+     * @param {Vector2} point
+     * @param {Event} event
+     */
+    gotPointerCapture( id, type, point, event ) {
+      const pointer = this.findPointerById( id );
 
+      if ( pointer ) {
+        pointer.onGotPointerCapture();
+      }
+    },
+
+    /**
+     * Handles a lostpointercapture event, forwarding it to the proper logical event.
+     * @public (scenery-internal)
+     *
+     * @param {number} id
+     * @param {string} type
+     * @param {Vector2} point
+     * @param {Event} event
+     */
+    lostPointerCapture( id, type, point, event ) {
+      const pointer = this.findPointerById( id );
+
+      if ( pointer ) {
+        pointer.onLostPointerCapture();
+      }
+    },
+
+    /**
+     * Handles a pointerover event, forwarding it to the proper logical event.
+     * @public (scenery-internal)
+     *
+     * @param {number} id
+     * @param {string} type
+     * @param {Vector2} point
+     * @param {DOMEvent} event
+     */
+    pointerOver( id, type, point, event ) {
+      // TODO: accumulate mouse/touch info in the object if needed?
+      // TODO: do we want to branch change on these types of events?
     },
 
     pointerOut: function( id, type, point, event ) {
