@@ -147,7 +147,9 @@ define( function( require ) {
       'pointermove',
       'pointerover',
       'pointerout',
-      'pointercancel'
+      'pointercancel',
+      'gotpointercapture',
+      'lostpointercapture'
     ],
 
     /**
@@ -422,6 +424,38 @@ define( function( require ) {
 
       // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
       BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, 'pointerCancel', false );
+
+      sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
+    },
+
+    /**
+     * Listener for window's gotpointercapture event.
+     * @private
+     *
+     * @param {Event} domEvent
+     */
+    ongotpointercapture: function ongotpointercapture( domEvent ) {
+      sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'gotpointercapture' );
+      sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
+      // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
+      BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, 'gotPointerCapture', false );
+
+      sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
+    },
+
+    /**
+     * Listener for window's lostpointercapture event.
+     * @private
+     *
+     * @param {Event} domEvent
+     */
+    onlostpointercapture: function onlostpointercapture( domEvent ) {
+      sceneryLog && sceneryLog.OnInput && sceneryLog.OnInput( 'lostpointercapture' );
+      sceneryLog && sceneryLog.OnInput && sceneryLog.push();
+
+      // NOTE: Will be called without a proper 'this' reference. Do NOT rely on it here.
+      BrowserEvents.batchWindowEvent( domEvent, BatchedDOMEvent.POINTER_TYPE, 'lostPointerCapture', false );
 
       sceneryLog && sceneryLog.OnInput && sceneryLog.pop();
     },

@@ -239,6 +239,11 @@ define( function( require ) {
         self.draggedEmitter.emit( event.pointer.point, delta, event );
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
+      },
+
+      // pointer interruption
+      interrupt: () => {
+        self.interrupt();
       }
     };
     PhetioObject.call( this, options );
