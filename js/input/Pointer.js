@@ -96,6 +96,9 @@ define( require => {
     // certain behavior for the life of the listener. Other listeners can observe the Intent on the Pointer and
     // react accordingly
     this._intent = null;
+
+    // @private {boolean}
+    this._pointerCaptured = false;
   }
 
   scenery.register( 'Pointer', Pointer );
@@ -314,6 +317,30 @@ define( require => {
       return this._intent;
     },
     get intent() { return this.getIntent(); },
+
+    /*
+     * This is called when a capture starts on this pointer. We request it on pointerstart, and if received, we should
+     * generally receive events outside the window.
+     * @public
+     */
+    onGotPointerCapture() {
+      this._pointerCaptured = true;
+    },
+
+    /**
+     * This is called when a capture ends on this pointer. This happens normally when the user releases the pointer above
+     * the sim or outside, but also in cases where we have NOT received an up/end.
+     * @public
+     *
+     * See https://github.com/phetsims/scenery/issues/1186 for more information. We'll want to interrupt the pointer
+     * on this case regardless,
+     */
+    onLostPointerCapture() {
+      if ( this._pointerCaptured ) {
+        this.interruptAll();
+      }
+      this._pointerCaptured = false;
+    },
 
     /**
      * Releases references so it can be garbage collected.
