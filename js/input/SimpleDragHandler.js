@@ -324,6 +324,11 @@ class SimpleDragHandler extends PhetioObject {
       // mouse/touch move
       move: event => {
         this.dragAction.execute( event.pointer.point, event );
+      },
+
+      // pointer interruption
+      interrupt: () => {
+        this.interrupt();
       }
     };
 
