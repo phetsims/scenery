@@ -1230,7 +1230,7 @@ define( function( require ) {
             this._fuzzMouseIsDown = false;
           }
           else {
-            this._input.mouseDown( this._fuzzMousePosition, domEvent );
+            this._input.mouseDown( null, this._fuzzMousePosition, domEvent );
             this._fuzzMouseIsDown = true;
           }
 
