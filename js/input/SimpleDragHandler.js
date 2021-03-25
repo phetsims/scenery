@@ -143,6 +143,11 @@ define( function( require ) {
           event.currentTarget = saveCurrentTarget; // be polite to other listeners, restore currentTarget
         }
         phetioEvents.end( id );
+      },
+
+      // pointer interruption
+      interrupt: () => {
+        self.interrupt();
       }
     };
     options.tandem.addInstance( this, TSimpleDragHandler, options );
