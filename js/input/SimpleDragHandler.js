@@ -325,6 +325,11 @@ function SimpleDragHandler( options ) {
     // mouse/touch move
     move: function( event ) {
       self.dragAction.execute( event.pointer.point, event );
+    },
+
+    // pointer interruption
+    interrupt: () => {
+      this.interrupt();
     }
   };
   PhetioObject.call( this, options );
