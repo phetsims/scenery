@@ -202,6 +202,11 @@ define( function( require ) {
         self.phetioEndEvent();
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
+      },
+
+      // pointer interruption
+      interrupt: () => {
+        self.interrupt();
       }
     };
     PhetioObject.call( this, options );
