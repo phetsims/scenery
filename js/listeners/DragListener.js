@@ -376,7 +376,7 @@ class DragListener extends PressListener {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener tryTouchSnag' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-    if ( this._allowTouchSnag && !event.pointer.isAttached() ) {
+    if ( this._allowTouchSnag && ( !this.attach || !event.pointer.isAttached() ) ) {
       this.press( event );
     }
 
