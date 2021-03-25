@@ -134,6 +134,7 @@ define( require => {
   const FullScreen = require( 'SCENERY/util/FullScreen' );
   const KeyboardUtil = require( 'SCENERY/accessibility/KeyboardUtil' );
   const Mouse = require( 'SCENERY/input/Mouse' );
+  const NullableIO = require( 'TANDEM/types/NullableIO' );
   const NumberIO = require( 'TANDEM/types/NumberIO' );
   const Pen = require( 'SCENERY/input/Pen' );
   const PhetioObject = require( 'TANDEM/PhetioObject' );
@@ -244,6 +245,7 @@ define( require => {
       this.mouseUpAction = new Action( ( point, event ) => {
         if ( !this.mouse ) { this.initMouse(); }
         const pointChanged = this.mouse.up( point, event );
+        this.mouse.id = null;
         this.upEvent( this.mouse, event, pointChanged );
       }, {
         phetioPlayback: true,
@@ -258,8 +260,9 @@ define( require => {
       } );
 
       // @private {Action} - Emits to the PhET-iO data stream.
-      this.mouseDownAction = new Action( ( point, event ) => {
+      this.mouseDownAction = new Action( ( id, point, event ) => {
         if ( !this.mouse ) { this.initMouse(); }
+        this.mouse.id = id;
         const pointChanged = this.mouse.down( point, event );
         this.downEvent( this.mouse, event, pointChanged );
       }, {
@@ -267,6 +270,7 @@ define( require => {
         tandem: options.tandem.createTandem( 'mouseDownAction' ),
 
         phetioType: ActionIO( [
+          { name: 'id', type: NullableIO( NumberIO ) },
           { name: 'point', type: Vector2IO },
           { name: 'event', type: DOMEventIO }
         ] ),
@@ -509,6 +513,46 @@ define( require => {
         ] ),
         phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when a pen is canceled'
+      } );
+
+      // @private {Action} - Emits to the PhET-iO data stream.
+      this.gotPointerCaptureAction = new Action( ( id, event ) => {
+        const pointer = this.findPointerById( id );
+
+        if ( pointer ) {
+          pointer.onGotPointerCapture();
+        }
+      }, {
+        phetioPlayback: true,
+        tandem: options.tandem.createTandem( 'gotPointerCaptureAction' ),
+
+        phetioType: ActionIO( [
+          { name: 'id', type: NumberIO },
+          { name: 'event', type: DOMEventIO }
+        ] ),
+        phetioEventType: PhetioObject.EventType.USER,
+        phetioDocumentation: 'Emits when a pointer is captured (normally at the start of an interaction)',
+        phetioHighFrequency: true
+      } );
+
+      // @private {Action} - Emits to the PhET-iO data stream.
+      this.lostPointerCaptureAction = new Action( ( id, event ) => {
+        const pointer = this.findPointerById( id );
+
+        if ( pointer ) {
+          pointer.onLostPointerCapture();
+        }
+      }, {
+        phetioPlayback: true,
+        tandem: options.tandem.createTandem( 'lostPointerCaptureAction' ),
+
+        phetioType: ActionIO( [
+          { name: 'id', type: NumberIO },
+          { name: 'event', type: DOMEventIO }
+        ] ),
+        phetioEventType: PhetioObject.EventType.USER,
+        phetioDocumentation: 'Emits when a pointer loses its capture (normally at the end of an interaction)',
+        phetioHighFrequency: true
       } );
 
       // wire up accessibility listeners on the display's root accessible DOM element.
@@ -1031,13 +1075,14 @@ define( require => {
      * NOTE: This may also be called from the pointer event handler (pointerDown) or from things like fuzzing or
      * playback. The event may be "faked" for certain purposes.
      *
+     * @param {number|null} id
      * @param {Vector2} point
      * @param {DOMEvent} event
      */
-    mouseDown( point, event ) {
-      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseDown(' + Input.debugText( point, event ) + ');' );
+    mouseDown( id, point, event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseDown(' + id + ', ' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.mouseDownAction.execute( point, event );
+      this.mouseDownAction.execute( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
@@ -1281,7 +1326,7 @@ define( require => {
       switch( type ) {
         case 'mouse':
           // The actual event afterwards
-          this.mouseDown( point, event );
+          this.mouseDown( id, point, event );
           break;
         case 'touch':
           this.touchStart( id, point, event );
@@ -1377,6 +1422,38 @@ define( require => {
             console.log( 'Unknown pointer type: ' + type );
           }
       }
+    }
+
+    /**
+     * Handles a gotpointercapture event, forwarding it to the proper logical event.
+     * @public (scenery-internal)
+     *
+     * @param {number} id
+     * @param {string} type
+     * @param {Vector2} point
+     * @param {Event} event
+     */
+    gotPointerCapture( id, type, point, event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( `gotPointerCapture('${id}',${Input.debugText( null, event )});` );
+      sceneryLog && sceneryLog.Input && sceneryLog.push();
+      this.gotPointerCaptureAction.execute( id, event );
+      sceneryLog && sceneryLog.Input && sceneryLog.pop();
+    }
+
+    /**
+     * Handles a lostpointercapture event, forwarding it to the proper logical event.
+     * @public (scenery-internal)
+     *
+     * @param {number} id
+     * @param {string} type
+     * @param {Vector2} point
+     * @param {Event} event
+     */
+    lostPointerCapture( id, type, point, event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( `lostPointerCapture('${id}',${Input.debugText( null, event )});` );
+      sceneryLog && sceneryLog.Input && sceneryLog.push();
+      this.lostPointerCaptureAction.execute( id, event );
+      sceneryLog && sceneryLog.Input && sceneryLog.pop();
     }
 
     /**
