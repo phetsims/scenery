@@ -132,6 +132,7 @@ define( function( require ) {
   var Features = require( 'SCENERY/util/Features' );
   var inherit = require( 'PHET_CORE/inherit' );
   var Mouse = require( 'SCENERY/input/Mouse' );
+  var NullableIO = require( 'TANDEM/types/NullableIO' );
   var NumberIO = require( 'TANDEM/types/NumberIO' );
   var Pen = require( 'SCENERY/input/Pen' );
   var platform = require( 'PHET_CORE/platform' );
@@ -231,7 +232,7 @@ define( function( require ) {
       listener: validatePointers
     } );
 
-    // @private {Emitter} - Emits to the PhET-iO data stream.  
+    // @private {Emitter} - Emits to the PhET-iO data stream.
     this.mouseUpEmitter = new Emitter( {
       phetioPlayback: true,
       tandem: options.tandem.createTandem( 'mouseUpEmitter' ),
@@ -243,29 +244,32 @@ define( function( require ) {
       phetioDocumentation: 'Emits when a mouse button is released',
       listener: function( point, event ) {
         if ( !self.mouse ) { self.initMouse(); }
+        self.mouse.id = null;
         var pointChanged = self.mouse.up( point, event );
         self.upEvent( self.mouse, event, pointChanged );
       }
     } );
 
-    // @private {Emitter} - Emits to the PhET-iO data stream.  
+    // @private {Emitter} - Emits to the PhET-iO data stream.
     this.mouseDownEmitter = new Emitter( {
       phetioPlayback: true,
       tandem: options.tandem.createTandem( 'mouseDownEmitter' ),
       phetioType: EmitterIO( [
+        { name: 'id', type: NullableIO( NumberIO ) },
         { name: 'point', type: Vector2IO },
         { name: 'event', type: DOMEventIO }
       ] ),
       phetioEventType: 'user',
       phetioDocumentation: 'Emits when a mouse button is pressed',
-      listener: function( point, event ) {
+      listener: function( id, point, event ) {
         if ( !self.mouse ) { self.initMouse(); }
+        self.mouse.id = id;
         var pointChanged = self.mouse.down( point, event );
         self.downEvent( self.mouse, event, pointChanged );
       }
     } );
 
-    // @private {Emitter} - Emits to the PhET-iO data stream.  
+    // @private {Emitter} - Emits to the PhET-iO data stream.
     this.mouseMovedEmitter = new Emitter( {
       phetioPlayback: true,
       tandem: options.tandem.createTandem( 'mouseMovedEmitter' ),
@@ -283,7 +287,7 @@ define( function( require ) {
       }
     } );
 
-    // @private {Emitter} - Emits to the PhET-iO data stream.  
+    // @private {Emitter} - Emits to the PhET-iO data stream.
     this.mouseOverEmitter = new Emitter( {
       phetioPlayback: true,
       tandem: options.tandem.createTandem( 'mouseOverEmitter' ),
@@ -300,7 +304,7 @@ define( function( require ) {
       }
     } );
 
-    // @private {Emitter} - Emits to the PhET-iO data stream.  
+    // @private {Emitter} - Emits to the PhET-iO data stream.
     this.mouseOutEmitter = new Emitter( {
       phetioPlayback: true,
       tandem: options.tandem.createTandem( 'mouseOutEmitter' ),
@@ -317,7 +321,7 @@ define( function( require ) {
       }
     } );
 
-    // @private {Emitter} - Emits to the PhET-iO data stream.  
+    // @private {Emitter} - Emits to the PhET-iO data stream.
     this.wheelScrolledEmitter = new Emitter( {
       phetioPlayback: true,
       tandem: options.tandem.createTandem( 'wheelScrolledEmitter' ),
@@ -498,6 +502,44 @@ define( function( require ) {
           var pointChanged = pen.cancel( point, event );
           self.cancelEvent( pen, event, pointChanged );
           self.removePointer( pen );
+        }
+      }
+    } );
+
+    // @private {Emitter} - Emits to the PhET-iO data stream.
+    this.gotPointerCaptureEmitter = new Emitter( {
+      phetioPlayback: true,
+      tandem: options.tandem.createTandem( 'gotPointerCaptureEmitter' ),
+      phetioType: EmitterIO( [
+        { name: 'id', type: NumberIO },
+        { name: 'event', type: DOMEventIO }
+      ] ),
+      phetioEventType: 'user',
+      phetioDocumentation: 'Emits when a pointer is captured (normally at the start of an interaction)',
+      listener: function( id, point, event ) {
+        const pointer = self.findPointerById( id );
+
+        if ( pointer ) {
+          pointer.onGotPointerCapture();
+        }
+      }
+    } );
+
+    // @private {Emitter} - Emits to the PhET-iO data stream.
+    this.lostPointerCaptureEmitter = new Emitter( {
+      phetioPlayback: true,
+      tandem: options.tandem.createTandem( 'lostPointerCaptureEmitter' ),
+      phetioType: EmitterIO( [
+        { name: 'id', type: NumberIO },
+        { name: 'event', type: DOMEventIO }
+      ] ),
+      phetioEventType: 'user',
+      phetioDocumentation: 'Emits when a pointer loses its capture (normally at the end of an interaction)',
+      listener: function( id, point, event ) {
+        const pointer = self.findPointerById( id );
+
+        if ( pointer ) {
+          pointer.onLostPointerCapture();
         }
       }
     } );
@@ -978,13 +1020,14 @@ define( function( require ) {
      * NOTE: This may also be called from the pointer event handler (pointerDown) or from things like fuzzing or
      * playback. The event may be "faked" for certain purposes.
      *
+     * @param {number} id
      * @param {Vector2} point
      * @param {DOMEvent} event
      */
-    mouseDown: function( point, event ) {
+    mouseDown: function( id, point, event ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseDown(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
-      this.mouseDownEmitter.emit( point, event );
+      this.mouseDownEmitter.emit( id, point, event );
       sceneryLog && sceneryLog.Input && sceneryLog.pop();
     },
 
@@ -1228,7 +1271,7 @@ define( function( require ) {
       switch( type ) {
         case 'mouse':
           // The actual event afterwards
-          this.mouseDown( point, event );
+          this.mouseDown( id, point, event );
           break;
         case 'touch':
           this.touchStart( id, point, event );
@@ -1297,6 +1340,38 @@ define( function( require ) {
             console.log( 'Unknown pointer type: ' + type );
           }
       }
+    },
+
+    /**
+     * Handles a gotpointercapture event, forwarding it to the proper logical event.
+     * @public (scenery-internal)
+     *
+     * @param {number} id
+     * @param {string} type
+     * @param {Vector2} point
+     * @param {Event} event
+     */
+    gotPointerCapture( id, type, point, event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( `gotPointerCapture('${id}',${Input.debugText( null, event )});` );
+      sceneryLog && sceneryLog.Input && sceneryLog.push();
+      this.gotPointerCaptureEmitter.emit( id, event );
+      sceneryLog && sceneryLog.Input && sceneryLog.pop();
+    },
+
+    /**
+     * Handles a lostpointercapture event, forwarding it to the proper logical event.
+     * @public (scenery-internal)
+     *
+     * @param {number} id
+     * @param {string} type
+     * @param {Vector2} point
+     * @param {Event} event
+     */
+    lostPointerCapture( id, type, point, event ) {
+      sceneryLog && sceneryLog.Input && sceneryLog.Input( `lostPointerCapture('${id}',${Input.debugText( null, event )});` );
+      sceneryLog && sceneryLog.Input && sceneryLog.push();
+      this.lostPointerCaptureEmitter.emit( id, event );
+      sceneryLog && sceneryLog.Input && sceneryLog.pop();
     },
 
     /**
