@@ -339,6 +339,7 @@ extend( scenery, {
       [
         'visible',
         'opacity',
+        'effectiveOpacity',
         'pickable',
         'inputEnabled',
         'cursor',

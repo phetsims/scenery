@@ -352,7 +352,7 @@ class CanvasBlock extends FittedBlock {
           }
         }
 
-        if ( node.getOpacity() !== 1 ) {
+        if ( node.getEffectiveOpacity() !== 1 ) {
           sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `Pop opacity ${trail.subtrailTo( node ).toDebugString()}` );
           // Pop opacity
           const topWrapper = this.wrapperStack[ this.wrapperStackIndex ];
@@ -361,7 +361,7 @@ class CanvasBlock extends FittedBlock {
 
           // Draw the transparent content into the next-level Canvas.
           bottomWrapper.context.setTransform( 1, 0, 0, 1, 0, 0 );
-          bottomWrapper.context.globalAlpha = node.getOpacity();
+          bottomWrapper.context.globalAlpha = node.getEffectiveOpacity();
           bottomWrapper.context.drawImage( topWrapper.canvas, 0, 0 );
           bottomWrapper.context.globalAlpha = 1;
         }
@@ -384,7 +384,7 @@ class CanvasBlock extends FittedBlock {
 
       // We should not apply opacity at or below the filter root
       if ( i > filterRootIndex ) {
-        if ( node.getOpacity() !== 1 ) {
+        if ( node.getEffectiveOpacity() !== 1 ) {
           sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `Push opacity ${trail.subtrailTo( node ).toDebugString()}` );
 
           // Push opacity
@@ -532,7 +532,7 @@ class CanvasBlock extends FittedBlock {
       else {
         this.filterListenerCountMap[ node.id ] = 1;
 
-        node.opacityProperty.lazyLink( this.opacityDirtyListener );
+        node.filterChangeEmitter.addListener( this.opacityDirtyListener );
         node.clipAreaProperty.lazyLink( this.clipDirtyListener );
       }
     }
@@ -556,7 +556,7 @@ class CanvasBlock extends FittedBlock {
         delete this.filterListenerCountMap[ node.id ];
 
         node.clipAreaProperty.unlink( this.clipDirtyListener );
-        node.opacityProperty.unlink( this.opacityDirtyListener );
+        node.clipAreaProperty.removeListener( this.opacityDirtyListener );
       }
     }
 

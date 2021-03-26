@@ -301,7 +301,7 @@ class BackboneDrawable extends Drawable {
       const len = this.watchedFilterNodes.length;
       for ( let i = 0; i < len; i++ ) {
         const node = this.watchedFilterNodes[ i ];
-        const opacity = node.getOpacity();
+        const opacity = node.getEffectiveOpacity();
 
         for ( let j = 0; j < node._filters.length; j++ ) {
           filterString += `${filterString ? ' ' : ''}${node._filters[ j ].getCSSFilterString()}`;

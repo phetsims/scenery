@@ -1687,6 +1687,9 @@ class Display {
       if ( node.opacity < 1 ) {
         addQualifier( `opacity:${node.opacity}` );
       }
+      if ( node.disabledOpacity < 1 ) {
+        addQualifier( `disabledOpacity:${node.disabledOpacity}` );
+      }
 
       if ( node._boundsEventCount > 0 ) {
         addQualifier( `<span style="color: #800">boundsListen:${node._boundsEventCount}:${node._boundsEventSelfCount}</span>` );

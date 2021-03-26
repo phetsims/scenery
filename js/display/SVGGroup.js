@@ -83,7 +83,6 @@ class SVGGroup {
     }
 
     // @private {boolean}
-    this.opacityDirty = true;
     this.filterDirty = true;
     this.visibilityDirty = true;
     this.clipDirty = true;
@@ -101,13 +100,11 @@ class SVGGroup {
 
     this.clipDefinition = this.clipDefinition !== undefined ? this.clipDefinition : null; // persists across disposal
     this.clipPath = this.clipPath !== undefined ? this.clipPath : null; // persists across disposal
-    this.opacityChangeListener = this.opacityChangeListener || this.onOpacityChange.bind( this );
     this.filterChangeListener = this.filterChangeListener || this.onFilterChange.bind( this );
     this.visibilityDirtyListener = this.visibilityDirtyListener || this.onVisibleChange.bind( this );
     this.clipDirtyListener = this.clipDirtyListener || this.onClipChange.bind( this );
     this.node.visibleProperty.lazyLink( this.visibilityDirtyListener );
     if ( this.willApplyFilters ) {
-      this.node.opacityProperty.lazyLink( this.opacityChangeListener );
       this.node.filterChangeEmitter.addListener( this.filterChangeListener );
     }
     //OHTWO TODO: remove clip workaround
@@ -209,16 +206,6 @@ class SVGGroup {
   /**
    * @private
    */
-  onOpacityChange() {
-    if ( !this.opacityDirty ) {
-      this.opacityDirty = true;
-      this.markDirty();
-    }
-  }
-
-  /**
-   * @private
-   */
   onFilterChange() {
     if ( !this.filterDirty ) {
       this.filterDirty = true;
@@ -298,26 +285,21 @@ class SVGGroup {
       svgGroup.style.display = this.node.isVisible() ? '' : 'none';
     }
 
-    if ( this.opacityDirty ) {
-      this.opacityDirty = false;
-
-      sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( `opacity update: ${this.toString()}` );
-
-      if ( this.willApplyFilters && this.node.opacity !== 1 ) {
-        this.hasOpacity = true;
-        svgGroup.setAttribute( 'opacity', this.node.opacity );
-      }
-      else if ( this.hasOpacity ) {
-        this.hasOpacity = false;
-        svgGroup.removeAttribute( 'opacity' );
-      }
-    }
-
     // TODO: Check if we can leave opacity separate. If it gets applied "after" then we can have them separate
     if ( this.filterDirty ) {
       this.filterDirty = false;
 
       sceneryLog && sceneryLog.SVGGroup && sceneryLog.SVGGroup( `filter update: ${this.toString()}` );
+
+      const opacity = this.node.effectiveOpacity;
+      if ( this.willApplyFilters && opacity !== 1 ) {
+        this.hasOpacity = true;
+        svgGroup.setAttribute( 'opacity', opacity );
+      }
+      else if ( this.hasOpacity ) {
+        this.hasOpacity = false;
+        svgGroup.removeAttribute( 'opacity' );
+      }
 
       const needsFilter = this.willApplyFilters && this.node._filters.length;
       const filterId = `filter-${this.id}`;
@@ -480,7 +462,6 @@ class SVGGroup {
     }
     this.node.visibleProperty.unlink( this.visibilityDirtyListener );
     if ( this.willApplyFilters ) {
-      this.node.opacityProperty.unlink( this.opacityChangeListener );
       this.node.filterChangeEmitter.removeListener( this.filterChangeListener );
     }
     //OHTWO TODO: remove clip workaround
