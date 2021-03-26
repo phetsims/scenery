@@ -75,7 +75,7 @@ class RendererSummary {
 
     // required listeners to update our summary based on painted/non-painted information
     const listener = this.selfChange.bind( this );
-    this.node.opacityProperty.lazyLink( listener );
+    this.node.filterChangeEmitter.addListener( listener );
     this.node.clipAreaProperty.lazyLink( listener );
     this.node.rendererSummaryRefreshEmitter.addListener( listener );
   }

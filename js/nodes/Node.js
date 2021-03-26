@@ -211,6 +211,7 @@ const NODE_OPTION_KEYS = [
   'inputEnabled', // {boolean} Whether input events can reach into this subtree, see setInputEnabled() for more documentation
   'inputListeners', // {Array.<Object>} - The input listeners attached to the Node, see setInputListeners() for more documentation
   'opacity', // {number} - Opacity of this Node's subtree, see setOpacity() for more documentation
+  'disabledOpacity', // {number} - A multiplier to the opacity of this Node's subtree when the node is disabled, see setDisabledOpacity() for more documentation
   'filters', // {Array.<Filter>} - Non-opacity filters, see setFilters() for more documentation
   'matrix', // {Matrix3} - Transformation matrix of the Node, see setMatrix() for more documentation
   'translation', // {Vector2} - x/y translation of the Node, see setTranslation() for more documentation
@@ -254,6 +255,7 @@ const NODE_OPTION_KEYS = [
 const DEFAULT_OPTIONS = {
   visible: true,
   opacity: 1,
+  disabledOpacity: 1,
   pickable: null,
   enabled: true,
   enabledPropertyPhetioInstrumented: false,
@@ -340,6 +342,11 @@ class Node extends PhetioObject {
     // @public {TinyProperty.<number>} - Opacity, in the range from 0 (fully transparent) to 1 (fully opaque).
     // NOTE: This is fired synchronously when the opacity of the Node is toggled
     this.opacityProperty = new TinyProperty( DEFAULT_OPTIONS.opacity, this.onOpacityPropertyChange.bind( this ) );
+
+    // @public {TinyProperty.<number>} - Disabled opacity, in the range from 0 (fully transparent) to 1 (fully opaque).
+    // Combined with the normal opacity ONLY when the node is disabled.
+    // NOTE: This is fired synchronously when the opacity of the Node is toggled
+    this.disabledOpacityProperty = new TinyProperty( DEFAULT_OPTIONS.disabledOpacity, this.onDisabledOpacityPropertyChange.bind( this ) );
 
     // @private {TinyForwardingProperty.<boolean|null>} - See setPickable() and setPickableProperty()
     // NOTE: This is fired synchronously when the pickability of the Node is toggled
@@ -3905,12 +3912,91 @@ class Node extends PhetioObject {
   }
 
   /**
-   * Called when our opacity Property changes values.
+   * Sets the disabledOpacity of this Node (and its sub-tree), where 0 is fully transparent, and 1 is fully opaque.
+   * Values outside of that range throw an Error.
+   * @public
+   *
+   * @param {number} disabledOpacity
+   * @throws Error if disabledOpacity out of range
+   */
+  setDisabledOpacity( disabledOpacity ) {
+    assert && assert( typeof disabledOpacity === 'number' && isFinite( disabledOpacity ), 'disabledOpacity should be a finite number' );
+
+    if ( disabledOpacity < 0 || disabledOpacity > 1 ) {
+      throw new Error( `disabledOpacity out of range: ${disabledOpacity}` );
+    }
+
+    this.disabledOpacityProperty.value = disabledOpacity;
+  }
+
+  /**
+   * See setDisabledOpacity() for more information
+   * @public
+   *
+   * @param {number} value
+   */
+  set disabledOpacity( value ) {
+    this.setDisabledOpacity( value );
+  }
+
+  /**
+   * Returns the disabledOpacity of this node.
+   * @public
+   *
+   * @returns {number}
+   */
+  getDisabledOpacity() {
+    return this.disabledOpacityProperty.value;
+  }
+
+  /**
+   * See getDisabledOpacity() for more information
+   * @public
+   *
+   * @returns {number}
+   */
+  get disabledOpacity() {
+    return this.getDisabledOpacity();
+  }
+
+  /**
+   * Returns the opacity actually applied to the node.
+   * @public
+   *
+   * @returns {number}
+   */
+  getEffectiveOpacity() {
+    return this.opacityProperty.value * ( this.enabledProperty.value ? 1 : this.disabledOpacityProperty.value );
+  }
+
+  /**
+   * See getDisabledOpacity() for more information
+   * @public
+   *
+   * @returns {number}
+   */
+  get effectiveOpacity() {
+    return this.getEffectiveOpacity();
+  }
+
+  /**
+   * Called when our opacity or other filter changes values
    * @private
    *
    */
   onOpacityPropertyChange() {
     this.filterChangeEmitter.emit();
+  }
+
+  /**
+   * Called when our opacity or other filter changes values
+   * @private
+   *
+   */
+  onDisabledOpacityPropertyChange() {
+    if ( !this._enabledProperty.value ) {
+      this.filterChangeEmitter.emit();
+    }
   }
 
   /**
@@ -4270,6 +4356,10 @@ class Node extends PhetioObject {
   onEnabledPropertyChange( enabled ) {
     !enabled && this.interruptSubtreeInput();
     this.inputEnabled = enabled;
+
+    if ( this.disabledOpacityProperty.value !== 1 ) {
+      this.filterChangeEmitter.emit();
+    }
   }
 
 
@@ -5485,7 +5575,7 @@ class Node extends PhetioObject {
       const child = this._children[ i ];
 
       if ( child.isVisible() ) {
-        const requiresScratchCanvas = child.opacity !== 1 || child.clipArea || child._filters.length;
+        const requiresScratchCanvas = child.effectiveOpacity !== 1 || child.clipArea || child._filters.length;
 
         wrapper.context.save();
         matrix.multiplyMatrix( child._transform.getMatrix() );
@@ -5508,7 +5598,7 @@ class Node extends PhetioObject {
             wrapper.context.clip();
           }
           wrapper.context.setTransform( 1, 0, 0, 1, 0, 0 ); // identity
-          wrapper.context.globalAlpha = child.opacity;
+          wrapper.context.globalAlpha = child.effectiveOpacity;
 
           let setFilter = false;
           if ( child._filters.length ) {

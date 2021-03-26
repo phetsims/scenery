@@ -391,7 +391,7 @@ class Instance {
     }
 
     const hasClip = this.node.hasClipArea();
-    const hasFilters = this.node.opacity !== 1 || hints.usesOpacity || this.node._filters.length > 0;
+    const hasFilters = this.node.effectiveOpacity !== 1 || hints.usesOpacity || this.node._filters.length > 0;
     // let hasNonDOMFilter = false;
     let hasNonSVGFilter = false;
     let hasNonCanvasFilter = false;
@@ -1681,7 +1681,7 @@ class Instance {
       this.node.childrenReorderedEmitter.addListener( this.childrenReorderedListener );
       this.node.visibleProperty.lazyLink( this.visibilityListener );
 
-      this.node.opacityProperty.lazyLink( this.markRenderStateDirtyListener );
+      this.node.filterChangeEmitter.addListener( this.markRenderStateDirtyListener );
       this.node.clipAreaProperty.lazyLink( this.markRenderStateDirtyListener );
       this.node.instanceRefreshEmitter.addListener( this.markRenderStateDirtyListener );
     }
@@ -1699,7 +1699,7 @@ class Instance {
       this.node.childrenReorderedEmitter.removeListener( this.childrenReorderedListener );
       this.node.visibleProperty.unlink( this.visibilityListener );
 
-      this.node.opacityProperty.unlink( this.markRenderStateDirtyListener );
+      this.node.filterChangeEmitter.removeListener( this.markRenderStateDirtyListener );
       this.node.clipAreaProperty.unlink( this.markRenderStateDirtyListener );
       this.node.instanceRefreshEmitter.removeListener( this.markRenderStateDirtyListener );
     }
