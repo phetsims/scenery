@@ -146,7 +146,7 @@ class SVGGradientStop {
     // Since this needs to be done quickly, and we don't particularly care about slight rounding differences (it's
     // being used for display purposes only, and is never shown to the user), we use the built-in JS toFixed instead of
     // Dot's version of toFixed. See https://github.com/phetsims/kite/issues/50
-    const stopOpacityRule = `stop-opacity: ${scratchColor.a.toFixed( 20 )};`;
+    const stopOpacityRule = `stop-opacity: ${scratchColor.a.toFixed( 20 )};`; // eslint-disable-line bad-sim-text
 
     // For GC, mutate the color so it is just RGB and output that CSS also
     scratchColor.alpha = 1;

@@ -276,7 +276,7 @@ class Color {
       // Since this needs to be done quickly, and we don't particularly care about slight rounding differences (it's
       // being used for display purposes only, and is never shown to the user), we use the built-in JS toFixed instead of
       // Dot's version of toFixed. See https://github.com/phetsims/kite/issues/50
-      let alpha = this.a.toFixed( 20 );
+      let alpha = this.a.toFixed( 20 ); // eslint-disable-line bad-sim-text
       while ( alpha.length >= 2 && alpha[ alpha.length - 1 ] === '0' && alpha[ alpha.length - 2 ] !== '.' ) {
         alpha = alpha.slice( 0, alpha.length - 1 );
       }
