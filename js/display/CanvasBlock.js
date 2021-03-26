@@ -556,7 +556,7 @@ class CanvasBlock extends FittedBlock {
         delete this.filterListenerCountMap[ node.id ];
 
         node.clipAreaProperty.unlink( this.clipDirtyListener );
-        node.clipAreaProperty.removeListener( this.opacityDirtyListener );
+        node.filterChangeEmitter.removeListener( this.opacityDirtyListener );
       }
     }
 
