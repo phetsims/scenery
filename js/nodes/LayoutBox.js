@@ -69,9 +69,6 @@ class LayoutBox extends Node {
       // Allow dynamic layout by default, see https://github.com/phetsims/joist/issues/608
       excludeInvisibleChildrenFromBounds: true,
 
-      // {function(boolean, Node, Object:options):void} - function for controlling the appearance when toggling enabled.
-      enabledAppearanceStrategy: SunConstants.componentEnabledListener,
-
       disabledOpacity: SunConstants.DISABLED_OPACITY
     }, options );
 
@@ -109,10 +106,6 @@ class LayoutBox extends Node {
     this.mutate( options );
 
     this._layoutMutating = false;
-
-    // No need to dispose because enabledProperty is disposed in Node
-    this.enabledProperty.link( enabled =>
-      options.enabledAppearanceStrategy( enabled, this, { disabledOpacity: options.disabledOpacity } ) );
   }
 
 
