@@ -135,7 +135,7 @@ import './nodes/VStrut.js';
 import './nodes/WebGLNode.js';
 import './overlays/CanvasNodeBoundsOverlay.js';
 import './overlays/FittedBlockBoundsOverlay.js';
-import './overlays/FocusOverlay.js';
+import './overlays/HighlightOverlay.js';
 import './overlays/PointerAreaOverlay.js';
 import './overlays/PointerOverlay.js';
 import scenery from './scenery.js';

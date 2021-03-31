@@ -24,7 +24,7 @@ let innerHighlightColor = FocusHighlightPath.INNER_FOCUS_COLOR;
 let innerGroupHighlightColor = FocusHighlightPath.INNER_LIGHT_GROUP_FOCUS_COLOR;
 let outerGroupHighlightColor = FocusHighlightPath.OUTER_LIGHT_GROUP_FOCUS_COLOR;
 
-class FocusOverlay {
+class HighlightOverlay {
 
   /**
    * @param {Display} display
@@ -325,29 +325,29 @@ class FocusOverlay {
   updateHighlightColors() {
 
     if ( this.mode === 'shape' ) {
-      if ( this.shapeFocusHighlightPath.innerHighlightColor !== FocusOverlay.innerHighlightColor ) {
-        this.shapeFocusHighlightPath.setInnerHighlightColor( FocusOverlay.innerHighlightColor );
+      if ( this.shapeFocusHighlightPath.innerHighlightColor !== HighlightOverlay.innerHighlightColor ) {
+        this.shapeFocusHighlightPath.setInnerHighlightColor( HighlightOverlay.innerHighlightColor );
       }
-      if ( this.shapeFocusHighlightPath.outerHighlightColor !== FocusOverlay.outerHighlightColor ) {
-        this.shapeFocusHighlightPath.setOuterHighlightColor( FocusOverlay.outerHighlightColor );
+      if ( this.shapeFocusHighlightPath.outerHighlightColor !== HighlightOverlay.outerHighlightColor ) {
+        this.shapeFocusHighlightPath.setOuterHighlightColor( HighlightOverlay.outerHighlightColor );
       }
     }
     else if ( this.mode === 'bounds' ) {
-      if ( this.boundsFocusHighlightPath.innerHighlightColor !== FocusOverlay.innerHighlightColor ) {
-        this.boundsFocusHighlightPath.setInnerHighlightColor( FocusOverlay.innerHighlightColor );
+      if ( this.boundsFocusHighlightPath.innerHighlightColor !== HighlightOverlay.innerHighlightColor ) {
+        this.boundsFocusHighlightPath.setInnerHighlightColor( HighlightOverlay.innerHighlightColor );
       }
-      if ( this.boundsFocusHighlightPath.outerHighlightColor !== FocusOverlay.outerHighlightColor ) {
-        this.boundsFocusHighlightPath.setOuterHighlightColor( FocusOverlay.outerHighlightColor );
+      if ( this.boundsFocusHighlightPath.outerHighlightColor !== HighlightOverlay.outerHighlightColor ) {
+        this.boundsFocusHighlightPath.setOuterHighlightColor( HighlightOverlay.outerHighlightColor );
       }
     }
 
     // if a group focus highlight is active, update strokes
     if ( this.groupMode ) {
-      if ( this.groupFocusHighlightPath.innerHighlightColor !== FocusOverlay.innerGroupHighlightColor ) {
-        this.groupFocusHighlightPath.setInnerHighlightColor( FocusOverlay.innerGroupHighlightColor );
+      if ( this.groupFocusHighlightPath.innerHighlightColor !== HighlightOverlay.innerGroupHighlightColor ) {
+        this.groupFocusHighlightPath.setInnerHighlightColor( HighlightOverlay.innerGroupHighlightColor );
       }
-      if ( this.groupFocusHighlightPath.outerHighlightColor !== FocusOverlay.outerGroupHighlightColor ) {
-        this.groupFocusHighlightPath.setOuterHighlightColor( FocusOverlay.outerGroupHighlightColor );
+      if ( this.groupFocusHighlightPath.outerHighlightColor !== HighlightOverlay.outerGroupHighlightColor ) {
+        this.groupFocusHighlightPath.setOuterHighlightColor( HighlightOverlay.outerGroupHighlightColor );
       }
     }
   }
@@ -374,7 +374,7 @@ class FocusOverlay {
   }
 
   /**
-   * Called from FocusOverlay after transforming the highlight. Only called when the transform changes.
+   * Called from HighlightOverlay after transforming the highlight. Only called when the transform changes.
    * @private
    */
   afterTransform() {
@@ -569,5 +569,5 @@ class FocusOverlay {
   static get outerGroupHighlightColor() { return this.getOuterGroupHighlightColor(); } // eslint-disable-line bad-sim-text
 }
 
-scenery.register( 'FocusOverlay', FocusOverlay );
-export default FocusOverlay;
+scenery.register( 'HighlightOverlay', HighlightOverlay );
+export default HighlightOverlay;

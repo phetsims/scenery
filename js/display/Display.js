@@ -75,7 +75,7 @@ import Input from '../input/Input.js';
 import Node from '../nodes/Node.js';
 import CanvasNodeBoundsOverlay from '../overlays/CanvasNodeBoundsOverlay.js';
 import FittedBlockBoundsOverlay from '../overlays/FittedBlockBoundsOverlay.js';
-import FocusOverlay from '../overlays/FocusOverlay.js';
+import HighlightOverlay from '../overlays/HighlightOverlay.js';
 import HitAreaOverlay from '../overlays/HitAreaOverlay.js';
 import PointerAreaOverlay from '../overlays/PointerAreaOverlay.js';
 import PointerOverlay from '../overlays/PointerOverlay.js';
@@ -353,8 +353,8 @@ class Display {
       // @public - to control if the focusHighlights is visible on this accessible Display.
       this.focusHighlightsVisibleProperty = new BooleanProperty( true );
 
-      // @private {FocusOverlay}
-      this._focusOverlay = new FocusOverlay( this, this._focusRootNode, {
+      // @private {HighlightOverlay}
+      this._focusOverlay = new HighlightOverlay( this, this._focusRootNode, {
         focusHighlightsVisibleProperty: this.focusHighlightsVisibleProperty
       } );
       this.addOverlay( this._focusOverlay );
