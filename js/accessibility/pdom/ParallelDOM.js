@@ -381,7 +381,7 @@ const ParallelDOM = {
         // bounds.
         this._focusHighlight = null;
 
-        // @private {boolean} - A flag that allows prevents focus highlight from being displayed in the FocusOverlay.
+        // @private {boolean} - A flag that allows prevents focus highlight from being displayed in the HighlightOverlay.
         // If true, the focus highlight for this node will be layerable in the scene graph.  Client is responsible
         // for placement of the focus highlight in the scene graph.
         this._focusHighlightLayerable = false;
