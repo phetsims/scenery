@@ -284,10 +284,10 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
         if ( currentTargetExists && hasDragIntent ) {
 
-          const globalTargetBounds = this._downTrail.parentToGlobalBounds( this._downTrail.lastNode().bounds );
+          const globalTargetBounds = this._downTrail.lastNode().globalBounds;
           const targetInBounds = this._panBounds.containsBounds( globalTargetBounds );
           if ( !targetInBounds ) {
-            this._repositionDuringDragPoint = event.pointer.point;
+            this._repositionDuringDragPoint = globalTargetBounds.center;
           }
         }
       }
