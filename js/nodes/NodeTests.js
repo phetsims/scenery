@@ -269,11 +269,13 @@ if ( Tandem.PHET_IO_ENABLED ) {
      /* Testing instrumented nodes
      */
 
-      // instrumentedNodeWithDefaultInstrumentedProperty => instrumented property (before startup)
+    const nodePropertyPhetioInstrumentedKeyName = `${nodeProperty}PhetioInstrumented`;
+
+    // instrumentedNodeWithDefaultInstrumentedProperty => instrumented property (before startup)
     let instrumented = new Node( {
-        tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` ),
-        [ `${nodeProperty}PhetioInstrumented` ]: true
-      } );
+      tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` ),
+      [ `${nodeProperty}PhetioInstrumented` ]: true
+    } );
     assert.ok( instrumented[ nodeProperty ].targetProperty === instrumented[ nodeProperty ].ownedPhetioProperty );
     assert.ok( instrumented.linkedElements.length === 0, `no linked elements for default ${nodeProperty}` );
     testNodeAndProperty( instrumented, instrumented[ nodeProperty ] );
@@ -282,8 +284,9 @@ if ( Tandem.PHET_IO_ENABLED ) {
     // instrumentedNodeWithDefaultInstrumentedProperty => uninstrumented property (before startup)
     instrumented = new Node( {
       tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` ),
-      [ `${nodeProperty}PhetioInstrumented` ]: true
+      [ nodePropertyPhetioInstrumentedKeyName ]: true
     } );
+    instrumented.hasOwnProperty( 'nodePropertyPhetioInstrumentedKeyName' ) && assert.ok( instrumented[ nodePropertyPhetioInstrumentedKeyName ] === true, 'getter should work' );
     window.assert && assert.throws( () => {
       instrumented.mutate( { [ nodeProperty ]: uninstrumentedProperty } );
     }, `cannot remove instrumentation from the Node's ${nodeProperty}` );
@@ -292,7 +295,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     // instrumentedNodeWithPassedInInstrumentedProperty => instrumented property (before startup)
     instrumented = new Node( {
       tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` ),
-      [ `${nodeProperty}PhetioInstrumented` ]: true
+      [ nodePropertyPhetioInstrumentedKeyName ]: true
     } );
     instrumented.mutate( { [ nodeProperty ]: instrumentedProperty } );
     assert.ok( instrumented[ nodeProperty ].targetProperty === instrumentedProperty );
@@ -336,7 +339,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     // instrumentedNodeWithDefaultInstrumentedProperty => instrumented property (after startup)
     const instrumented1 = new Node( {
       tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyUniquelyNamedNodeThatWillNotBeDuplicated1` ),
-      [ `${nodeProperty}PhetioInstrumented` ]: true
+      [ nodePropertyPhetioInstrumentedKeyName ]: true
     } );
     assert.ok( instrumented1[ nodeProperty ].targetProperty === instrumented1[ nodeProperty ].ownedPhetioProperty );
     assert.ok( instrumented1.linkedElements.length === 0, `no linked elements for default ${nodeProperty}` );
@@ -345,7 +348,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     // instrumentedNodeWithDefaultInstrumentedProperty => uninstrumented property (after startup)
     const instrumented2 = new Node( {
       tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyUniquelyNamedNodeThatWillNotBeDuplicated2` ),
-      [ `${nodeProperty}PhetioInstrumented` ]: true
+      [ nodePropertyPhetioInstrumentedKeyName ]: true
     } );
     window.assert && assert.throws( () => {
       instrumented2[ nodePropertySetter ]( uninstrumentedProperty );
@@ -389,7 +392,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
     instrumented = new Node( {
       tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` ),
-      [ `${nodeProperty}PhetioInstrumented` ]: true
+      [ nodePropertyPhetioInstrumentedKeyName ]: true
     } );
     window.assert && assert.throws( () => {
       instrumented[ nodePropertySetter ]( null );
@@ -404,7 +407,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
         tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` )
       } );
       window.assert && assert.throws( () => {
-        instrumented[ `${nodeProperty}PhetioInstrumented` ] = true;
+        instrumented[ nodePropertyPhetioInstrumentedKeyName ] = true;
       }, `cannot set ${nodeProperty}PhetioInstrumented after instrumentation` );
       instrumented.dispose();
     }

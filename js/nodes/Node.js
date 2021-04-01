@@ -4304,6 +4304,24 @@ class Node extends PhetioObject {
   }
 
   /**
+   * @public
+   * @returns {boolean}
+   */
+  getEnabledPropertyPhetioInstrumented() {
+    return this._enabledProperty.getTargetPropertyInstrumented();
+  }
+
+  /**
+   * See getEnabledPropertyPhetioInstrumented() for more information
+   * @public
+   *
+   * @returns {boolean}
+   */
+  get enabledPropertyPhetioInstrumented() {
+    return this.getEnabledPropertyPhetioInstrumented();
+  }
+
+  /**
    * Sets whether this Node is enabled
    * @public
    *
@@ -4438,6 +4456,24 @@ class Node extends PhetioObject {
    */
   set inputEnabledPropertyPhetioInstrumented( value ) {
     this.setInputEnabledPropertyPhetioInstrumented( value );
+  }
+
+  /**
+   * @public
+   * @returns {boolean}
+   */
+  getInputEnabledPropertyPhetioInstrumented() {
+    return this._inputEnabledProperty.getTargetPropertyInstrumented();
+  }
+
+  /**
+   * See getInputEnabledPropertyPhetioInstrumented() for more information
+   * @public
+   *
+   * @returns {boolean}
+   */
+  get inputEnabledPropertyPhetioInstrumented() {
+    return this.getInputEnabledPropertyPhetioInstrumented();
   }
 
   /**
