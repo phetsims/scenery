@@ -2086,6 +2086,9 @@ class Display {
    * TODO: this dispose function is not complete.
    */
   dispose() {
+
+    this.domElement.parentElement && this.domElement.parentElement.removeChild( this.domElement );
+
     if ( this._input ) {
       this.detachEvents();
     }
