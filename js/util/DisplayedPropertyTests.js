@@ -44,6 +44,7 @@ QUnit.test( 'basics', assert => {
 
   assert.ok( aDisplayedProperty.value === true, 'back to visible, displayed' );
 
+  display.dispose();
 } );
 
 
@@ -81,4 +82,6 @@ QUnit.test( 'pdom visibility', assert => {
   // toggle instance visibility in the PDOM trail
 
   // swap pdom order and make sure DisplayedProperty updates
+
+  display.dispose();
 } );

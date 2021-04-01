@@ -2022,6 +2022,8 @@ QUnit.test( 'Display.interactive toggling in the PDOM', assert => {
 
   testDisabled( pdomButtonChild, DEFAULT_DISABLED_WHEN_SUPPORTED, 'pdomButtonChild default not disabled after interactive again.' );
   testDisabled( pdomButtonChild, DEFAULT_DISABLED_WHEN_SUPPORTED, 'pdomButtonChild default not disabled after interactive again with dag.', 1 );
+
+  display.dispose();
 } );
 
 // these fuzzers take time, so it is nice when they are last
