@@ -13,10 +13,8 @@ import Transform3 from '../../../dot/js/Transform3.js';
 import Utils from '../../../dot/js/Utils.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Vector2Property from '../../../dot/js/Vector2Property.js';
-import phetioAPITest from '../../../tandem/js/phetioAPITest.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import DragListener from './DragListener.js';
-import DragListenerAPI from './DragListenerAPI.js';
 import ListenerTestUtils from './ListenerTestUtils.js';
 
 QUnit.module( 'DragListener' );
@@ -149,8 +147,4 @@ QUnit.test( 'positionProperty with dragBounds', assert => {
     assert.equal( positionProperty.value.y, 5, '[y] Should be limited to 5 by dragBounds  ' );
     listener.dispose();
   } );
-} );
-
-QUnit.test( 'PhET-iO API Validation', assert => {
-  phetioAPITest( assert, new DragListenerAPI(), 'dragListener', tandem => new DragListener( { tandem: tandem } ) );
 } );
