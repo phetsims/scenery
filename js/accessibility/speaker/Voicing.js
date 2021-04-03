@@ -34,26 +34,21 @@ const Voicing = {
       initializeVoicing( options ) {
         options = merge( {
 
-          // {string|null} - The content to be voiced when the object response is spoken in response to focus.
-          voicingObjectFocusResponse: null,
+          // {function(event: SceneryEvent):string|null} - Create the content for the Node that will be spoken on
+          // down, focus, and click events when the user has selected to hear object responses.
+          voicingCreateObjectResponse: event => null,
 
-          // {string|null} - The content to be voiced when the object response is spoken in response to a mouse
-          // click or keyboard activation with enter/spacebar.
-          voicingObjectActivationResponse: null,
+          // {function(event: SceneryEvent):string|null} - Create the content for the Node that will be spoken on
+          // down, focus, and click events when the user has selected to hear context responses.
+          voicingCreateContextResponse: event => null,
 
-          // {string|null - The content to be spoken when the context response is spoken. This is on focus, click, and
-          // down on voicing Nodes, if context responses are enabled. Generally, context responses are made in
-          // some other Property or other change so it is unlikely that this will be used very often
-          voicingContextResponse: null,
+          // {function(event: SceneryEvent):string|null} - Create the content for the Node that will be spoken on
+          // down, focus, and click events when the user has selected to hear hints.
+          voicingCreateHintResponse: event => null,
 
-          // {string|null} - The content to be spoken whenever the hint should be spoken. This is on focus, click,
-          // and down on the voicing Nodes, if hints are enabled.
-          voicingHintResponse: null,
-
-          // {string|null} - The content to be voiced whenever this Node receives an activation with click, mouse, or
-          // touch events. This will be spoken no matter what speech output level the user has selected, as long
-          // as voicing is enabled.
-          voicingOverrideResponse: null,
+          // {function(event: SceneryEvent):string|null} - Create the content for the Node that will be spoken on down,
+          // focus, and click events regardless of what ouptut the user has selected as long as voicing is enabled.
+          voicingCreateOverrideResponse: event => null,
 
           // {Shape|null} The shape used to determine if a pointer is over this Node for the purposes of voicing and
           // highlights. In the local coordinate frame of the Node. Depending on which features are enabled, a highlight
@@ -83,135 +78,124 @@ const Voicing = {
         this.voicing = true;
 
         // @private
-        this._voicingObjectFocusResponse = null;
-        this._voicingObjectActivationResponse = null;
-        this._voicingContextResponse = null;
-        this._voicingOverrideResponse = null;
         this._voicingHitShape = null;
         this._voicingHighlight = null;
         this._voicingFocusableProperty = null;
         this._voicingTagName = null;
-        this._voicingHintResponse = null;
+        this._voicingCreateObjectResponse = null;
+        this._voicingCreateContextResponse = null;
+        this._voicingCreateHintResponse = null;
+        this._voicingCreateOverrideResponse = null;
 
         // @private
         this.focusableChangeListener = this.onFocusableChange.bind( this );
 
         // NOTE: should be using mutate for this
-        this.setVoicingObjectFocusResponse( options.voicingObjectFocusResponse );
-        this.setVoicingObjectActivationResponse( options.voicingObjectActivationResponse );
-        this.setVoicingContextResponse( options.voicingContextResponse );
-        this.setVoicingHintResponse( options.voicingHintResponse );
-        this.setVoicingOverrideResponse( options.voicingActivationResponse );
-        this.setVoicingHitShape( options.voicingHitShape );
         this.setVoicingHitShape( options.voicingHitShape );
         this.setVoicingHighlight( options.voicingHighlight );
         this.setVoicingTagName( options.voicingTagName );
         this.setVoicingFocusableProperty( options.voicingFocusableProperty );
+        this.setVoicingCreateObjectResponse( options.voicingCreateObjectResponse );
+        this.setVoicingCreateContextResponse( options.voicingCreateContextResponse );
+        this.setVoicingCreateHintResponse( options.voicingCreateHintResponse );
+        this.setVoicingCreateOverrideResponse( options.voicingCreateOverrideResponse );
       },
 
+
       /**
-       * Sets the response to be spoken by speech synthesis when this Node receives focus and voicing is enabled.
+       * Set the function that will create an object response for the Node, and is spoken if the user has selected hear
+       * object responses.
        * @public
        *
-       * @param {string} response
+       * @param {function(event: SceneryEvent):(string|null)} createResponse
        */
-      setVoicingObjectFocusResponse( response ) {
-        this._voicingObjectFocusResponse = response;
+      setVoicingCreateObjectResponse( createResponse ) {
+        this._voicingCreateObjectResponse = createResponse;
       },
-      set voicingObjectFocusResponse( response ) { this.setVoicingObjectFocusResponse( response ); },
+      set voicingCreateObjectResponse( createResponse ) { this.setVoicingCreateObjectResponse( createResponse ); },
 
       /**
-       * Gets the response that is spoken by speech synthesis when this Node receives focus.
+       * Gets the function that will create an object response for the Node in response to user input, spoken when
+       * the user has selected to hear object responses.
        * @public
        *
-       * @returns {string|null}
+       * @returns {function(event: SceneryEvent):(string|null)}
        */
-      getVoicingObjectFocusResponse() {
-        return this._voicingObjectFocusResponse;
+      getVoicingCreateObjectResponse() {
+        return this._voicingCreateObjectResponse;
       },
-      get voicingObjectFocusResponse() { return this.getVoicingObjectFocusResponse(); },
+      get voicingCreateObjectResponse() { return this.getVoicingCreateObjectResponse(); },
 
       /**
-       * Sets the response to be spoken by speech synthesis when this Node receives focus and voicing is enabled.
+       * Sets the function that will create an object response for the Node after user input.
        * @public
        *
-       * @param {string} response
+       * @param {function(event: SceneryEvent):(string|null)} createResponse
        */
-      setVoicingObjectActivationResponse( response ) {
-        this._voicingObjectActivationResponse = response;
+      setVoicingCreateContextResponse( createResponse ) {
+        this._voicingCreateContextResponse = createResponse;
       },
-      set voicingObjectActivationResponse( response ) { this.setVoicingObjectActivationResponse( response ); },
+      set voicingCreateContextResponse( createResponse ) { this.setVoicingCreateContextResponse( createResponse ); },
 
       /**
-       * Gets the response that is spoken by speech synthesis when this Node receives focus.
+       * Get the function that will create a context response for the Node. Content returned by this function will only
+       * be spoken if the user has selected to hear context responses.
        * @public
        *
-       * @returns {string|null}
+       * @returns {function(event: SceneryEvent):(string|null)}
        */
-      getVoicingObjectActivationResponse() {
-        return this._voicingObjectActivationResponse;
+      getVoicingCreateContextResponse() {
+        return this._voicingCreateContextResponse;
       },
-      get voicingObjectActivationResponse() { return this.getVoicingObjectActivationResponse(); },
+      get voicingCreateContextResponse() { return this.getVoicingCreateContextResponse(); },
 
       /**
-       * Sets the context response for the Voicing Node.
+       * Set the function that wll create hint response for the Voicing Node. Content returned by the createResponse
+       * function will only be spoken if the user has selected to hear hints.
        * @public
        *
-       * @param {string} response
+       * @param {function(event: SceneryEvent):(string|null)} createResponse
        */
-      setVoicingContextResponse( response ) {
-        this._voicingContextResponse = response;
+      setVoicingCreateHintResponse( createResponse ) {
+        this._voicingCreateHintResponse = createResponse;
       },
-      set voicingContextResponse( response ) { this.setVoicingContextResponse( response ); },
+      set voicingCreateHintResponse( createResponse ) { this.setVoicingCreateHintResponse( createResponse ); },
 
       /**
-       * Gets the response that is spoken by speech synthesis when this Node receives focus.
+       * Get the function that will create a hint response for the Voicing Node. This content is only spoken
+       * when user has selected to hear hints.
        * @public
        *
-       * @returns {string|null}
+       * @returns {function(event: SceneryEvent):(string|null)}
        */
-      getVoicingContextResponse() {
-        return this._voicingContextResponse;
+      getVoicingCreateHintResponse() {
+        return this._voicingCreateHintResponse;
       },
-      get voicingContextResponse() { return this.getVoicingContextResponse(); },
+      get voicingCreateHintResponse() { return this.getVoicingCreateHintResponse(); },
 
       /**
-       * Sets the response for this Node when it receives an activation (either click or pointer down).
-       * @param response
-       */
-      setVoicingOverrideResponse( response ) {
-        this._voicingOverrideResponse = response;
-      },
-      set voicingOverrideResponse( response ) { this.setVoicingOverrideResponse( response ); },
-
-      /**
-       * Get the response for this when an activation event occurs on this Node.
+       * Set the function that will create the override response for the VoicingNode. This response will always be
+       * spoken, regardless of user selection.
        * @public
        *
-       * @returns {string|null}
+       * @param {function(event: SceneryEvent):(string|null)} createResponse
        */
-      getVoicingOverrideResponse() {
-        return this._voicingOverrideResponse;
+      setVoicingCreateOverrideResponse( createResponse ) {
+        this._voicingCreateOverrideResponse = createResponse;
       },
-      get voicingOverrideResponse() { return this.getVoicingOverrideResponse(); },
+      set voicingCreateOverrideResponse( createResponse ) { this.setVoicingCreateOverrideResponse( createResponse ); },
 
       /**
-       * Set the hint response for this Voicing Node.
-       * @param {string} response
+       * Get the function that will create the override response for the VoicingNode. This response will always be
+       * spoken, regardless of what speech output levels the user has selected.
+       * @public
+       *
+       * @returns {function(event: SceneryEvent):(string|null)}
        */
-      setVoicingHintResponse( response ) {
-        this._voicingHintResponse = response;
+      getVoicingCreateOverrideResponse() {
+        return this._voicingCreateOverrideResponse;
       },
-      set voicingHintResponse( response ) { this.setVoicingHintResponse( response ); },
-
-      /**
-       * Get the hint response that will be spoken for this Voicing Node.
-       * @returns {null|string}
-       */
-      getVoicingHintResponse() {
-        return this._voicingHintResponse;
-      },
-      get voicingHintResponse() { return this.getVoicingHintResponse(); },
+      get voicingCreateOverrideResponse() { return this.getVoicingCreateOverrideResponse(); },
 
       /**
        * Sets the hit shape used to determine if a Pointer is over this Node for the purposes of voicing. If the

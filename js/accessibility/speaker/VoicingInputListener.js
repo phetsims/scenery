@@ -47,12 +47,7 @@ class VoicingInputListener {
     if ( voicingNode ) {
 
       // there is never a context response on focus
-      const response = voicingManager.collectResponses( {
-        objectResponse: voicingNode.voicingObjectFocusResponse,
-        interactionHint: voicingNode.voicingHintResponse,
-        overrideResponse: voicingNode.voicingOverrideResponse
-      } );
-      this.display.voicingUtteranceQueue.addToBack( response );
+      this.speakVoicingContent( voicingNode, event );
     }
   }
 
@@ -117,7 +112,7 @@ class VoicingInputListener {
    * @param {SceneryEvent} event
    */
   down( event ) {
-    this.responseToActivation();
+    this.respondToActivation( event );
   }
 
   /**
@@ -127,27 +122,37 @@ class VoicingInputListener {
    * @param {SceneryEvent} event
    */
   click( event ) {
-    this.responseToActivation();
+    this.respondToActivation( event );
   }
 
   /**
    * Collect responses that would come from an activation event (pointer down or alternative input click).
    * @private
    */
-  responseToActivation() {
+  respondToActivation( event ) {
     if ( this.activeTrail ) {
       const voicingNode = this.activeTrail.lastNode();
       if ( voicingNode ) {
-        console.log( 'here' );
-        const response = voicingManager.collectResponses( {
-          objectResponse: voicingNode.voicingObjectActivationResponse,
-          contextResponse: voicingNode.voicingContextResponse,
-          interactionHint: voicingNode.voicingHintResponse,
-          overrideResponse: voicingNode.voicingOverrideResponse
-        } );
-        this.display.voicingUtteranceQueue.addToBack( response );
+        this.speakVoicingContent( voicingNode, event );
       }
     }
+  }
+
+  /**
+   * Speek the content from the VoicingNod in response to input.
+   * @private
+   *
+   * @param {Node} voicingNode
+   * @param {SceneryEvent} event
+   */
+  speakVoicingContent( voicingNode, event ) {
+    const response = voicingManager.collectResponses( {
+      objectResponse: voicingNode.voicingCreateObjectResponse( event ),
+      interactionHint: voicingNode.voicingCreateHintResponse( event ),
+      contextResponse: voicingNode.voicingCreateContextResponse( event ),
+      overrideResponse: voicingNode.voicingCreateOverrideResponse( event )
+    } );
+    this.display.voicingUtteranceQueue.addToBack( response );
   }
 
   /**
