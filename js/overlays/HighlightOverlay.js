@@ -491,10 +491,12 @@ class HighlightOverlay {
       this.deactivateHighlight();
     }
 
-    // only activate focus highlights if they are intended to be visible
     if ( newTrail && this.focusHighlightsVisibleProperty.value ) {
       const node = newTrail.lastNode();
       this.activateHighlight( newTrail, node, node.focusHighlight, node.focusHighlightLayerable, node.focusHighlightChangedEmitter );
+    }
+    else if ( this.display.pointerFocusProperty.value ) {
+      this.onPointerFocusChange( this.display.pointerFocusProperty.value );
     }
   }
 
@@ -519,9 +521,7 @@ class HighlightOverlay {
       const highlight = node.voicingHighlight || node.focusHighlight;
       this.activateHighlight( newTrail, node, highlight, false, node.focusHighlightChangedEmitter );
     }
-    else {
-
-      // no trail that can have a highlight under the pointer, re-activate the highlight for focus if necessary
+    else if ( Display.focus ) {
       this.onFocusChange( Display.focus );
     }
   }
