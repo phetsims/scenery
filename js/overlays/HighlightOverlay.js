@@ -3,6 +3,7 @@
 /**
  * Focus highlight overlay for accessible displays.
  *
+ * @author Jesse Greenberg (PhET Interactive Simulations)
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -11,6 +12,7 @@ import Shape from '../../../kite/js/Shape.js';
 import merge from '../../../phet-core/js/merge.js';
 import FocusHighlightFromNode from '../accessibility/FocusHighlightFromNode.js';
 import FocusHighlightPath from '../accessibility/FocusHighlightPath.js';
+import webSpeaker from '../accessibility/speaker/webSpeaker.js';
 import Display from '../display/Display.js';
 import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
@@ -24,6 +26,9 @@ let innerHighlightColor = FocusHighlightPath.INNER_FOCUS_COLOR;
 let innerGroupHighlightColor = FocusHighlightPath.INNER_LIGHT_GROUP_FOCUS_COLOR;
 let outerGroupHighlightColor = FocusHighlightPath.OUTER_LIGHT_GROUP_FOCUS_COLOR;
 
+// color for the 'speaking' highlight, shown for certain Nodes with Voicing when while the webSpeaker is speaking
+let speakingHighlightColor = 'rgba(255,255,0,0.5)';
+
 class HighlightOverlay {
 
   /**
@@ -34,7 +39,12 @@ class HighlightOverlay {
   constructor( display, focusRootNode, options ) {
 
     options = merge( {
-      focusHighlightsVisibleProperty: new BooleanProperty( true )
+
+      // {BooleanProperty} - controls whether highlights are shown in response to focus events
+      focusHighlightsVisibleProperty: new BooleanProperty( true ),
+
+      // {BooleanProperty} - controls whether highlights related to the Voicing feature are shown
+      voicingHighlightsVisibleProperty: new BooleanProperty( true )
     }, options );
 
     this.display = display; // @private {Display}
@@ -45,6 +55,8 @@ class HighlightOverlay {
 
     // @private {Node|null} - node with focus, modified when focus changes
     this.node = null;
+
+    this.activeHighlight = null;
 
     // @private {string|null} - signifies method of representing focus, 'bounds'|'node'|'shape'|'invisible', modified
     // when focus changes
@@ -77,6 +89,7 @@ class HighlightOverlay {
 
     // @public - control if highlights are visible on this overlay
     this.focusHighlightsVisibleProperty = options.focusHighlightsVisibleProperty;
+    this.voicingHighlightsVisibleProperty = options.voicingHighlightsVisibleProperty;
 
     // @private {Display} - display that manages all focus highlights
     this.focusDisplay = new Display( this.focusRootNode, {
@@ -118,15 +131,35 @@ class HighlightOverlay {
     } );
     this.focusRootNode.addChild( this.groupFocusHighlightParent );
 
+    // @private {Node} - The highlight shown around certain Nodes while the webSpeaker is speaking. For
+    // Voicing Nodes that specify a voicingHighlight, this FocusHighlightPath will take the shape of the
+    // activeHighlight to show that the webSpeaker is speaking and indicate what is being spoken about.
+    this.speakingHighlightPath = new FocusHighlightPath( null, {
+      innerStroke: null,
+      outerStroke: null,
+      fill: speakingHighlightColor
+    } );
+    this.highlightNode.addChild( this.speakingHighlightPath );
+
     // @private - Listeners bound once, so we can access them for removal.
     this.boundsListener = this.onBoundsChange.bind( this );
     this.transformListener = this.onTransformChange.bind( this );
     this.focusListener = this.onFocusChange.bind( this );
     this.focusHighlightListener = this.onFocusHighlightChange.bind( this );
-    this.visibilityListener = this.onVisibilityChange.bind( this );
+    this.focusHighlightsVisibleListener = this.onFocusHighlightsVisibleChange.bind( this );
+    this.voicingHighlightsVisibleListener = this.onVoicingHighlightsVisibleChange.bind( this );
+    this.pointerFocusListener = this.onPointerFocusChange.bind( this );
+    this.startSpeakingListener = this.onSpeakingStart.bind( this );
+    this.endSpeakingListener = this.onSpeakingEnd.bind( this );
 
     Display.focusProperty.link( this.focusListener );
-    this.focusHighlightsVisibleProperty.link( this.visibilityListener );
+    this.focusHighlightsVisibleProperty.link( this.focusHighlightsVisibleListener );
+    this.voicingHighlightsVisibleProperty.link( this.voicingHighlightsVisibleListener );
+
+    display.pointerFocusProperty.link( this.pointerFocusListener );
+
+    webSpeaker.startSpeakingEmitter.addListener( this.startSpeakingListener );
+    webSpeaker.endSpeakingEmitter.addListener( this.endSpeakingListener );
   }
 
   /**
@@ -139,7 +172,12 @@ class HighlightOverlay {
     }
 
     Display.focusProperty.unlink( this.focusListener );
-    this.focusHighlightsVisibleProperty.unlink( this.visibilityListener );
+    this.focusHighlightsVisibleProperty.unlink( this.focusHighlightsVisibleListener );
+
+    this.display.pointerFocusProperty.unlink( this.pointerFocusListener );
+
+    webSpeaker.startSpeakingEmitter.removeListener( this.startSpeakingListener );
+    webSpeaker.endSpeakingEmitter.removeListener( this.endSpeakingListener );
   }
 
   /**
@@ -156,43 +194,47 @@ class HighlightOverlay {
    * @private
    *
    * @param {Trail} trail - The focused trail to highlight. It assumes that this trail is in this display.
+   * @param {Node} node - Node receiving the highlight
+   * @param {Node|Shape|string} highlight
+   * @param {boolean} layerable - whether or not the highlight is layerable in the scene graph
+   * @param {TinyEmitter} changedEmitter - Emitter that indicates that the active highlight has changed
    */
-  activateHighlight( trail ) {
+  activateHighlight( trail, node, highlight, layerable, changedEmitter ) {
     this.trail = trail;
-    this.node = trail.lastNode();
-    const focusHighlight = this.node.focusHighlight;
+    this.node = node;
+    this.activeHighlight = highlight;
 
     // we may or may not track this trail depending on whether the focus highlight surrounds the trail's leaf node or
     // a different node
     let trailToTrack = trail;
 
     // Invisible mode - no focus highlight; this is only for testing mode, when Nodes rarely have bounds.
-    if ( focusHighlight === 'invisible' ) {
+    if ( highlight === 'invisible' ) {
       this.mode = 'invisible';
     }
     // Shape mode
-    else if ( focusHighlight instanceof Shape ) {
+    else if ( highlight instanceof Shape ) {
       this.mode = 'shape';
 
       this.shapeFocusHighlightPath.visible = true;
-      this.shapeFocusHighlightPath.setShape( focusHighlight );
+      this.shapeFocusHighlightPath.setShape( highlight );
     }
     // Node mode
-    else if ( focusHighlight instanceof Node ) {
+    else if ( highlight instanceof Node ) {
       this.mode = 'node';
 
       // if using a focus highlight from another node, we will track that node's transform instead of the focused node
-      if ( focusHighlight.transformSourceNode ) {
-        trailToTrack = focusHighlight.getUniqueHighlightTrail();
+      if ( highlight.transformSourceNode ) {
+        trailToTrack = highlight.getUniqueHighlightTrail();
       }
 
       // store the focus highlight so that it can be removed later
-      this.nodeFocusHighlight = focusHighlight;
+      this.nodeFocusHighlight = highlight;
 
       assert && assert( this.nodeFocusHighlight.shape !== null,
-        'The shape of the Node focusHighlight should be set by now. Does it have bounds?' );
+        'The shape of the Node highlight should be set by now. Does it have bounds?' );
 
-      if ( this.node.focusHighlightLayerable ) {
+      if ( layerable ) {
 
         // the focusHighlight is just a node in the scene graph, so set it visible - visibility of other highlights
         // controlled by visibility of parent Nodes but that cannot be done in this case because the highlight
@@ -219,7 +261,7 @@ class HighlightOverlay {
     }
 
     // handle any changes to the focus highlight while the node has focus
-    this.node.focusHighlightChangedEmitter.addListener( this.focusHighlightListener );
+    changedEmitter.addListener( this.focusHighlightListener );
 
     this.transformTracker = new TransformTracker( trailToTrack, {
       isStatic: true
@@ -236,10 +278,38 @@ class HighlightOverlay {
   }
 
   /**
+   * Activate the "speaking" highlights. This highlight is separate from others in the overlay and will always
+   * take the shape of the active highlight. It is shown in response to certain input on Nodes with Voicing while
+   * the webSpeaker is speaking.
+   * @private
+   */
+  activateSpeakingHighlight() {
+    if ( this.activeHighlight && this.node.voicingHighlight ) {
+      const speakingHighlightShape = Shape.bounds( this.activeHighlight.bounds );
+      this.speakingHighlightPath.shape = speakingHighlightShape;
+      this.speakingHighlightPath.visible = true;
+
+      this.speakingHighlightPath.fill = speakingHighlightColor;
+    }
+  }
+
+  /**
+   * Deactivate the speaking highlight by making it invisible.
+   * @private
+   */
+  deactivateSpeakingHighlight() {
+    this.speakingHighlightPath.visible = false;
+  }
+
+  /**
    * Deactivates the current highlight, disposing and removing listeners as necessary.
    * @private
    */
   deactivateHighlight() {
+
+    // immediately remove speaking highlights when deactivating other highlights so it doesn't stick to others
+    this.deactivateSpeakingHighlight();
+
     if ( this.mode === 'shape' ) {
       this.shapeFocusHighlightPath.visible = false;
     }
@@ -270,6 +340,7 @@ class HighlightOverlay {
     this.trail = null;
     this.node = null;
     this.mode = null;
+    this.activeHighlight = null;
     this.transformTracker.removeListener( this.transformListener );
     this.transformTracker.dispose();
   }
@@ -384,10 +455,10 @@ class HighlightOverlay {
     else if ( this.mode === 'bounds' ) {
       this.boundsFocusHighlightPath.updateLineWidth();
     }
-    else if ( this.mode === 'node' && this.node.focusHighlight.updateLineWidth ) {
+    else if ( this.mode === 'node' && this.activeHighlight.updateLineWidth ) {
 
       // Update the transform based on the transform of the node that the focusHighlight is highlighting.
-      this.node.focusHighlight.updateLineWidth( this.node );
+      this.activeHighlight.updateLineWidth( this.node );
     }
   }
 
@@ -407,7 +478,8 @@ class HighlightOverlay {
   }
 
   /**
-   * Called when the main Scenery focus pair (Display,Trail) changes.
+   * Called when the main Scenery focus pair (Display,Trail) changes. The Trail points to the Node that has
+   * focus and a highlight will appear around this Node if focus highlights are visible.
    * @private
    *
    * @param {Focus} focus
@@ -419,9 +491,55 @@ class HighlightOverlay {
       this.deactivateHighlight();
     }
 
-    if ( newTrail ) {
-      this.activateHighlight( newTrail );
+    // only activate focus highlights if they are intended to be visible
+    if ( newTrail && this.focusHighlightsVisibleProperty.value ) {
+      const node = newTrail.lastNode();
+      this.activateHighlight( newTrail, node, node.focusHighlight, node.focusHighlightLayerable, node.focusHighlightChangedEmitter );
     }
+  }
+
+  /**
+   * Called when the pointerFocusProperty changes. pointerFocusProperty will have the Trail to the
+   * Node that composes Voicing and is under the Pointer. A highlight will appear around this Node if
+   * voicing highlights are visible.
+   * @private
+   *
+   * @param {Focus} focus
+   */
+  onPointerFocusChange( focus ) {
+    const newTrail = ( focus && focus.display === this.display ) ? focus.trail : null;
+
+    if ( this.hasHighlight() ) {
+      this.deactivateHighlight();
+    }
+
+    if ( newTrail && this.voicingHighlightsVisibleProperty.value ) {
+      const node = newTrail.lastNode();
+
+      const highlight = node.voicingHighlight || node.focusHighlight;
+      this.activateHighlight( newTrail, node, highlight, false, node.focusHighlightChangedEmitter );
+    }
+    else {
+
+      // no trail that can have a highlight under the pointer, re-activate the highlight for focus if necessary
+      this.onFocusChange( Display.focus );
+    }
+  }
+
+  /**
+   * Bound to this and called when the webSpeaker starts speaking.
+   * @private
+   */
+  onSpeakingStart() {
+    this.activateSpeakingHighlight();
+  }
+
+  /**
+   * Bound to this and called when the webSpeaker stops speaking.
+   * @private
+   */
+  onSpeakingEnd() {
+    this.deactivateSpeakingHighlight();
   }
 
   /**
@@ -437,19 +555,22 @@ class HighlightOverlay {
   }
 
   /**
+   * When focus highlight visibility changes, deactivate highlights or reactivate the highlight around the Node
+   * with focus.
    * @private
    */
-  onVisibilityChange() {
-    const visible = this.focusHighlightsVisibleProperty.get();
+  onFocusHighlightsVisibleChange() {
+    this.onFocusChange( Display.focus );
+  }
 
-    this.highlightNode.visible = visible;
-    this.groupFocusHighlightParent.visible = visible;
-
-    // reference stored if focus highlight is layerable (somewhere else in the
-    // scene graph)
-    if ( this.nodeFocusHighlight ) {
-      this.nodeFocusHighlight.visible = visible;
-    }
+  /**
+   * When voicing highlight visibility changes, deactivate highlights ore reactivate the highlight around the Node
+   * with focus. Note that when voicing is disabled we will never set the display.pointerFocusProperty to prevent
+   * extra work in VoicingInputListener, so this function shouldn't do much. But it is here to complete the API.
+   * @private
+   */
+  onVoicingHighlightsVisibleChange() {
+    this.onPointerFocusChange( this.display.pointerFocusProperty.value );
   }
 
   /**
@@ -567,6 +688,16 @@ class HighlightOverlay {
   }
 
   static get outerGroupHighlightColor() { return this.getOuterGroupHighlightColor(); } // eslint-disable-line bad-sim-text
+
+  /**
+   * Set the color of 'speaking' highlights, shown for certain Nodes with Voicing while the webSpeaker is speaking.
+   * @public
+   *
+   * @param {PaintDef} color
+   */
+  static setSpeakingHighlightColor( color ) {
+    speakingHighlightColor = color;
+  }
 }
 
 scenery.register( 'HighlightOverlay', HighlightOverlay );

@@ -11,6 +11,7 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
+import merge from '../../../../phet-core/js/merge.js';
 import scenery from '../../scenery.js';
 import BooleanProperty from '../../../../axon/js/BooleanProperty.js';
 
@@ -34,45 +35,69 @@ class VoicingManager {
    * about stays lit for the entire combination of responses.
    * @public
    *
-   * @param {string|undefined} [objectResponse]
-   * @param {string|undefined} [contextResponse]
-   * @param {string|undefined} [interactionHint]
    * @param {Object} [options]
    */
-  collectResponses( objectResponse, contextResponse, interactionHint, options ) {
+  collectResponses( options ) {
+
+    options = merge( {
+
+      // {string|null} - spoken when object responses are enabled
+      objectResponse: null,
+
+      // {string|null} - spoken when context responses are enabled
+      contextResponse: null,
+
+      // {string|null} - spoken when interaction hints are enabled
+      interactionHint: null,
+
+      // {string|null} - If this is provided, it is the ONLY spoken string, and it is always spoken regardless of
+      // speech output levels selected by the user as long as speech is enabled.
+      overrideResponse: null
+    }, options );
+
     const objectChanges = this.objectChangesProperty.get();
     const contextChanges = this.contextChangesProperty.get();
     const interactionHints = this.hintsProperty.get();
+
     let usedObjectString = '';
     let usedContextString = '';
     let usedInteractionHint = '';
-    if ( objectChanges && objectResponse ) {
-      usedObjectString = objectResponse;
+
+    if ( objectChanges && options.objectResponse ) {
+      usedObjectString = options.objectResponse;
     }
-    if ( contextChanges && contextResponse ) {
-      usedContextString = contextResponse;
+    if ( contextChanges && options.contextResponse ) {
+      usedContextString = options.contextResponse;
     }
-    if ( interactionHints && interactionHint ) {
-      usedInteractionHint = interactionHint;
+    if ( interactionHints && options.interactionHint ) {
+      usedInteractionHint = options.interactionHint;
     }
+
     // used to combine with string literal, but we need to conditionally include punctuation so that
-    // it isn't always read
+    // it isn't always read - it would be more clear if we had a number of string patterns and assembled
+    // that way
     let outputString = '';
-    if ( usedObjectString ) {
-      outputString += usedObjectString;
+    if ( options.overrideResponse ) {
+      outputString = options.overrideResponse;
     }
-    if ( usedContextString ) {
-      if ( outputString.length > 0 ) {
-        outputString += ', ';
+    else {
+      if ( usedObjectString ) {
+        outputString += usedObjectString;
       }
-      outputString = outputString + usedContextString;
-    }
-    if ( usedInteractionHint ) {
-      if ( outputString.length > 0 ) {
-        outputString += ', ';
+      if ( usedContextString ) {
+        if ( outputString.length > 0 ) {
+          outputString += ', ';
+        }
+        outputString = outputString + usedContextString;
       }
-      outputString = outputString + usedInteractionHint;
+      if ( usedInteractionHint ) {
+        if ( outputString.length > 0 ) {
+          outputString += ', ';
+        }
+        outputString = outputString + usedInteractionHint;
+      }
     }
+
     return outputString;
   }
 }
