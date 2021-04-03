@@ -361,10 +361,10 @@ class Display {
 
       // @public {BooleanProperty} - whether "interactive highlights" are enabled, controlling the visibility
       // of highlights that will surround Nodes that are interactive
-      this.interactiveHighlightsEnabledProperty = new BooleanProperty( false );
+      this.interactiveHighlightsVisibleProperty = new BooleanProperty( false );
 
       // @private {VoicingInputListener} - reference kept for disposal
-      this.voicingInputListener = new VoicingInputListener( this, webSpeaker.enabledProperty, this.interactiveHighlightsEnabledProperty );
+      this.voicingInputListener = new VoicingInputListener( this, webSpeaker.enabledProperty, this.interactiveHighlightsVisibleProperty );
       this.addInputListener( this.voicingInputListener );
     }
 
