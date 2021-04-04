@@ -122,6 +122,12 @@ class MultiListener {
       this._targetNode.matrix = matrix;
     } );
 
+    // @private {boolean} - Whether or not the listener was interrupted, in which case we may need to prevent certain
+    // behavior. If the listener was interrupted, pointer listeners might still be called since input is dispatched to
+    // a defensive copy of the Pointer's listeners. But presses will have been cleared in this case so we won't try
+    // to do any work on them.
+    this._interrupted = false;
+
     // @private - attached to the Pointer when a Press is added
     this._pressListener = {
       move: event => {
@@ -170,7 +176,9 @@ class MultiListener {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener background up' );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-        this.removeBackgroundPress( this.findBackgroundPress( event.pointer ) );
+        if ( !this._interrupted ) {
+          this.removeBackgroundPress( this.findBackgroundPress( event.pointer ) );
+        }
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       },
@@ -204,7 +212,9 @@ class MultiListener {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener background cancel' );
         sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-        this.removeBackgroundPress( this.findBackgroundPress( event.pointer ) );
+        if ( !this._interrupted ) {
+          this.removeBackgroundPress( this.findBackgroundPress( event.pointer ) );
+        }
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
       },
@@ -232,7 +242,6 @@ class MultiListener {
         return this._presses[ i ];
       }
     }
-    assert && assert( false, 'Did not find press' );
     return null;
   }
 
@@ -250,7 +259,6 @@ class MultiListener {
         return this._backgroundPresses[ i ];
       }
     }
-    assert && assert( false, 'Did not find press' );
     return null;
   }
 
@@ -322,6 +330,9 @@ class MultiListener {
       sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener abort: wrong mouse button' );
       return;
     }
+
+    // clears the flag for MultiListener behavior
+    this._interrupted = false;
 
     let pressTrail;
     if ( !_.includes( event.trail.nodes, this._targetNode ) ) {
@@ -520,6 +531,8 @@ class MultiListener {
     while ( this._backgroundPresses.length ) {
       this.removeBackgroundPress( this._backgroundPresses[ this._backgroundPresses.length - 1 ] );
     }
+
+    this._interrupted = true;
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
   }
