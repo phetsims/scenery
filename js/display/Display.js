@@ -70,6 +70,7 @@ import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import PDOMInstance from '../accessibility/pdom/PDOMInstance.js';
 import PDOMTree from '../accessibility/pdom/PDOMTree.js';
 import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
+import VoicingInputListener from '../accessibility/speaker/VoicingInputListener.js';
 import webSpeaker from '../accessibility/speaker/webSpeaker.js';
 import Input from '../input/Input.js';
 import Node from '../nodes/Node.js';
@@ -345,6 +346,28 @@ class Display {
       tandem: options.tandem.createTandem( 'utteranceQueue' )
     } );
 
+    // @public {Property.<Focus>} - The Property that indicates where Focus is under the Pointer for the Voicing
+    // feature. Nodes that compose Voicing can receive this Focus and a highlight may appear or speech may be
+    // made depending on which features are enabled.
+    this.pointerFocusProperty = new Property( null );
+
+    if ( this._voicing ) {
+      webSpeaker.initialize();
+
+      // The Display supports Voicing, create an UtteranceQueue to manage SpeechSynthesisUtterances. This
+      // could be a singleton shared among Displays but the screen reader utteranceQueue needs to be
+      // one per display so doing the same for voicingUtteranceQueue to match.
+      this.voicingUtteranceQueue = new UtteranceQueue( webSpeaker );
+
+      // @public {BooleanProperty} - whether "interactive highlights" are enabled, controlling the visibility
+      // of highlights that will surround Nodes that are interactive
+      this.interactiveHighlightsVisibleProperty = new BooleanProperty( false );
+
+      // @private {VoicingInputListener} - reference kept for disposal
+      this.voicingInputListener = new VoicingInputListener( this, webSpeaker.enabledProperty, this.interactiveHighlightsVisibleProperty );
+      this.addInputListener( this.voicingInputListener );
+    }
+
     if ( this._accessible ) {
 
       // @private {Node}
@@ -387,15 +410,6 @@ class Display {
       // for more.
       this._boundHandleFullScreenNavigation = this.handleFullScreenNavigation.bind( this );
       globalKeyStateTracker.keydownEmitter.addListener( this._boundHandleFullScreenNavigation );
-    }
-
-    if ( this._voicing ) {
-      webSpeaker.initialize();
-
-      // The Display supports Voicing, create an UtteranceQueue to manage SpeechSynthesisUtterances. This
-      // could be a singleton shared among Displays but the screen reader utteranceQueue needs to be
-      // one per display so doing the same for voicingUtteranceQueue to match.
-      this.voicingUtteranceQueue = new UtteranceQueue( webSpeaker );
     }
   }
 
@@ -2108,6 +2122,11 @@ class Display {
     this._baseInstance && this._baseInstance.dispose();
 
     this.utteranceQueue && this.utteranceQueue.dispose();
+
+    if ( this._voicing ) {
+      this.voicingUtteranceQueue.dispose();
+      this.removeInputListener( this.voicingInputListener );
+    }
   }
 
   /**
