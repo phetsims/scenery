@@ -156,10 +156,10 @@ class HighlightOverlay {
     this.endSpeakingListener = this.onSpeakingEnd.bind( this );
 
     Display.focusProperty.link( this.focusListener );
+    display.pointerFocusProperty.link( this.pointerFocusListener );
+
     this.focusHighlightsVisibleProperty.link( this.focusHighlightsVisibleListener );
     this.voicingHighlightsVisibleProperty.link( this.voicingHighlightsVisibleListener );
-
-    display.pointerFocusProperty.link( this.pointerFocusListener );
 
     webSpeaker.startSpeakingEmitter.addListener( this.startSpeakingListener );
     webSpeaker.endSpeakingEmitter.addListener( this.endSpeakingListener );
