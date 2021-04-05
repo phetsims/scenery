@@ -1333,6 +1333,24 @@ QUnit.test( 'setPDOMAttribute', assert => {
   const aLabelElement = aElement.parentElement.children[ DEFAULT_LABEL_SIBLING_INDEX ];
   assert.ok( aElement.getAttribute( 'test' ) === 'testValue', 'removePDOMAttribute for label should not effect primary sibling ' );
   assert.ok( aLabelElement.getAttribute( 'test' ) === null, 'removePDOMAttribute for label sibling' );
+
+  a.removePDOMAttributes();
+  const attributeName = 'multiTest';
+  a.setPDOMAttribute( attributeName, 'true', {
+    asProperty: false
+  } );
+  aElement = getPrimarySiblingElementByNode( a );
+  assert.ok( aElement.getAttribute( attributeName ) === 'true', 'asProperty:false should set attribute' );
+
+  a.setPDOMAttribute( attributeName, false, {
+    asProperty: true
+  } );
+  assert.ok( !aElement.getAttribute( attributeName ), 'asProperty:true should remove attribute' );
+  assert.ok( aElement[ attributeName ] === false, 'asProperty:true should set property' );
+
+  const testAttributes = a.getPDOMAttributes().filter( a => a.attribute === attributeName );
+  assert.ok( testAttributes.length === 1, 'asProperty change should alter the attribute, not add a new one.' );
+
   display.dispose();
 } );
 
