@@ -56,6 +56,7 @@ class HighlightOverlay {
     // @private {Node|null} - node with focus, modified when focus changes
     this.node = null;
 
+    // @private {Node|Shape|string|null} - A references to the highlight from the Node that is highlighted.
     this.activeHighlight = null;
 
     // @private {string|null} - signifies method of representing focus, 'bounds'|'node'|'shape'|'invisible', modified
@@ -195,7 +196,7 @@ class HighlightOverlay {
    *
    * @param {Trail} trail - The focused trail to highlight. It assumes that this trail is in this display.
    * @param {Node} node - Node receiving the highlight
-   * @param {Node|Shape|string} highlight
+   * @param {Node|Shape|string|null} highlight
    * @param {boolean} layerable - whether or not the highlight is layerable in the scene graph
    * @param {TinyEmitter} changedEmitter - Emitter that indicates that the active highlight has changed
    */
