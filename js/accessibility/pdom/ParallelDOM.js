@@ -2351,9 +2351,16 @@ const ParallelDOM = {
           const currentAttribute = this._pdomAttributes[ i ];
           if ( currentAttribute.attribute === attribute &&
                currentAttribute.options.namespace === options.namespace &&
-               currentAttribute.options.asProperty === options.asProperty &&
                currentAttribute.options.elementName === options.elementName ) {
-            this._pdomAttributes.splice( i, 1 );
+
+            if ( currentAttribute.options.asProperty === options.asProperty ) {
+              this._pdomAttributes.splice( i, 1 );
+            }
+            else {
+
+              // Swapping asProperty setting strategies should remove the attribute so it can be set as a property.
+              this.removePDOMAttribute( currentAttribute.attribute, currentAttribute.options );
+            }
           }
         }
 
