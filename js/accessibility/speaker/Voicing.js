@@ -1,10 +1,9 @@
 // Copyright 2021, University of Colorado Boulder
 
 /**
- * A trait for the Voicing feature that can be composed with a Node. Allows you to specify responses that get spoken
- * with speech synthesis in response to input.
- *
- * A work in progress, don't use yet.
+ * A trait for the Voicing feature that can be composed with a Node. Allows you to specify callbacks that generate
+ * responses that are spoken with the speech synthesis, highlights that are only displayed when voicing is enabled,
+ * and other attributes of the feature at the Node level.
  *
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
@@ -285,6 +284,13 @@ const Voicing = {
       },
       set voicingFocusableProperty( voicingFocusableProperty ) { this.setVoicingFocusableProperty( voicingFocusableProperty ); },
 
+      /**
+       * Gets the Property that controls whether this Node is focusable for the purposes of Voicing.
+       * @public
+       *
+       * @param {BooleanProperty} voicingFocusableProperty
+       * @returns {null|BooleanProperty}
+       */
       getVoicingFocusableProperty( voicingFocusableProperty ) {
         return this._voicingFocusableProperty;
       },
