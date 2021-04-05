@@ -176,6 +176,7 @@ class HighlightOverlay {
 
     Display.focusProperty.unlink( this.focusListener );
     this.focusHighlightsVisibleProperty.unlink( this.focusHighlightsVisibleListener );
+    this.voicingHighlightsVisibleProperty.unlink( this.voicingHighlightsVisibleListener );
 
     this.display.pointerFocusProperty.unlink( this.pointerFocusListener );
 
