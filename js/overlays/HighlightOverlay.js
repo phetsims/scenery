@@ -1,7 +1,9 @@
 // Copyright 2015-2020, University of Colorado Boulder
 
 /**
- * Focus highlight overlay for accessible displays.
+ * An overlay that implements highlights for a Display. This is responsible for drawing the highlights and
+ * observing Properties or Emitters that dictate when highlights should become active. A highlight surrounds a Node
+ * to indicate that it is in focus or relevant.
  *
  * @author Jesse Greenberg (PhET Interactive Simulations)
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
