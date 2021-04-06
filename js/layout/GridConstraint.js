@@ -197,28 +197,12 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
         const align = cell.withDefault( orientation === Orientation.HORIZONTAL ? 'xAlign' : 'yAlign', this );
 
         if ( align === GridConfigurable.Align.STRETCH ) {
-          cell.attemptedPreferredSize( orientation, this, cellAvailableSize );
-          cell.positionStart( orientation, this, cellPosition );
+          cell.attemptPreferredSize( orientation, this, cellAvailableSize );
         }
         else {
-          cell.attemptedPreferredSize( orientation, this, cellMinimumSize );
-
-          if ( align === GridConfigurable.Align.ORIGIN ) {
-            // TODO: handle layout bounds
-            // TODO: OMG this is horribly broken right? We would need to align stuff first
-            // TODO: Do a pass to handle origin cells first (and in FLOW too)
-            cell.positionOrigin( orientation, this, cellPosition );
-          }
-          else {
-            // TODO: optimize
-            const padRatio = {
-              [ GridConfigurable.Align.START ]: 0,
-              [ GridConfigurable.Align.CENTER ]: 0.5,
-              [ GridConfigurable.Align.END ]: 1
-            }[ align ];
-            cell.positionStart( orientation, this, cellPosition + ( cellAvailableSize - cellMinimumSize ) * padRatio );
-          }
+          cell.attemptPreferredSize( orientation, this, cellMinimumSize );
         }
+        cell.attemptPosition( orientation, align, this, cellPosition, cellAvailableSize );
 
         const cellBounds = cell.getCellBounds( this );
         assert && assert( cellBounds.isFinite() );

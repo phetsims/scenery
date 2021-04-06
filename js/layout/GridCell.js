@@ -13,6 +13,21 @@ import merge from '../../../phet-core/js/merge.js';
 import scenery from '../scenery.js';
 import GridConfigurable from './GridConfigurable.js';
 
+// {Object.<GridConfigurable.Align,number>}
+const padRatioMap = {
+  [ GridConfigurable.Align.STRETCH ]: 0,
+  [ GridConfigurable.Align.START ]: 0,
+  [ GridConfigurable.Align.CENTER ]: 0.5,
+  [ GridConfigurable.Align.END ]: 1
+};
+
+const sizableFlagPair = new OrientationPair( 'widthSizable', 'heightSizable' );
+const minimumSizePair = new OrientationPair( 'minimumWidth', 'minimumHeight' );
+const preferredSizePair = new OrientationPair( 'preferredWidth', 'preferredHeight' );
+
+// {number} - Position changes smaller than this will be ignored
+const CHANGE_POSITION_THRESHOLD = 1e-9;
+
 class GridCell extends GridConfigurable( Object ) {
   /**
    * @param {Node} node
@@ -83,37 +98,12 @@ class GridCell extends GridConfigurable( Object ) {
    * @returns {number}
    */
   getMinimumSize( orientation, defaultConfig ) {
-    return orientation === Orientation.HORIZONTAL ? this.getMinimumWidth( defaultConfig ) : this.getMinimumHeight( defaultConfig );
-  }
-
-  /**
-   * @public
-   *
-   * @param {GridConfigurable} defaultConfig
-   * @returns {number}
-   */
-  getMinimumWidth( defaultConfig ) {
-    return this.withDefault( 'leftMargin', defaultConfig ) +
+    return this.getMinMargin( orientation, defaultConfig ) +
            Math.max(
-             this.node.widthSizable ? this.node.minimumWidth : this.node.width,
-             this.withDefault( 'minContentWidth', defaultConfig )
+             this.node[ sizableFlagPair.get( orientation ) ] ? this.node[ minimumSizePair.get( orientation ) ] : this.node[ orientation.size ],
+             this.getMinContentSize( orientation, defaultConfig )
            ) +
-           this.withDefault( 'rightMargin', defaultConfig );
-  }
-
-  /**
-   * @public
-   *
-   * @param {GridConfigurable} defaultConfig
-   * @returns {number}
-   */
-  getMinimumHeight( defaultConfig ) {
-    return this.withDefault( 'topMargin', defaultConfig ) +
-           Math.max(
-             this.node.heightSizable ? this.node.minimumHeight : this.node.height,
-             this.withDefault( 'minContentHeight', defaultConfig )
-           ) +
-           this.withDefault( 'bottomMargin', defaultConfig );
+           this.getMaxMargin( orientation, defaultConfig );
   }
 
   /**
@@ -124,35 +114,11 @@ class GridCell extends GridConfigurable( Object ) {
    * @returns {number}
    */
   getMaximumSize( orientation, defaultConfig ) {
-    return orientation === Orientation.HORIZONTAL ? this.getMaximumWidth( defaultConfig ) : this.getMaximumHeight( defaultConfig );
-  }
-
-  /**
-   * @public
-   *
-   * @param {GridConfigurable} defaultConfig
-   * @returns {number}
-   */
-  getMaximumWidth( defaultConfig ) {
-    return this.withDefault( 'leftMargin', defaultConfig ) +
+    return this.getMinMargin( orientation, defaultConfig ) +
            Math.min(
-             this.withDefault( 'maxContentWidth', defaultConfig ) || Number.POSITIVE_INFINITY
+             this.getMaxContentSize( orientation, defaultConfig ) || Number.POSITIVE_INFINITY
            ) +
-           this.withDefault( 'rightMargin', defaultConfig );
-  }
-
-  /**
-   * @public
-   *
-   * @param {GridConfigurable} defaultConfig
-   * @returns {number}
-   */
-  getMaximumHeight( defaultConfig ) {
-    return this.withDefault( 'topMargin', defaultConfig ) +
-           Math.min(
-             this.withDefault( 'maxContentHeight', defaultConfig ) || Number.POSITIVE_INFINITY
-           ) +
-           this.withDefault( 'bottomMargin', defaultConfig );
+           this.getMaxMargin( orientation, defaultConfig );
   }
 
   /**
@@ -162,47 +128,47 @@ class GridCell extends GridConfigurable( Object ) {
    * @param {GridConfigurable} defaultConfig
    * @param {number} value
    */
-  attemptedPreferredSize( orientation, defaultConfig, value ) {
-    orientation === Orientation.HORIZONTAL ? this.attemptedPreferredWidth( defaultConfig, value ) : this.attemptedPreferredHeight( defaultConfig, value );
-  }
+  attemptPreferredSize( orientation, defaultConfig, value ) {
+    if ( this.node[ sizableFlagPair.get( orientation ) ] ) {
+      const minimumSize = this.getMinimumSize( orientation, defaultConfig );
+      const maximumSize = this.getMaximumSize( orientation, defaultConfig );
 
-  /**
-   * @public
-   *
-   * @param {GridConfigurable} defaultConfig
-   * @param {number} value
-   */
-  attemptedPreferredWidth( defaultConfig, value ) {
-    if ( this.node.widthSizable ) {
-      const minimumWidth = this.getMinimumWidth( defaultConfig );
-      const maximumWidth = this.getMaximumWidth( defaultConfig );
+      assert && assert( isFinite( minimumSize ) );
+      assert && assert( maximumSize >= minimumSize );
 
-      assert && assert( isFinite( minimumWidth ) );
-      assert && assert( maximumWidth >= minimumWidth );
+      value = Utils.clamp( value, minimumSize, maximumSize );
 
-      value = Utils.clamp( value, minimumWidth, maximumWidth );
-
-      this.node.preferredWidth = value - this.withDefault( 'leftMargin', defaultConfig ) - this.withDefault( 'rightMargin', defaultConfig );
+      this.node[ preferredSizePair.get( orientation ) ] = value - this.getMinMargin( orientation, defaultConfig ) - this.getMaxMargin( orientation, defaultConfig );
     }
   }
 
   /**
    * @public
    *
+   * @param {Orientation} orientation
+   * @param {GridConfigurable.Align} align
    * @param {GridConfigurable} defaultConfig
    * @param {number} value
+   * @param {number} availableSize
    */
-  attemptedPreferredHeight( defaultConfig, value ) {
-    if ( this.node.heightSizable ) {
-      const minimumHeight = this.getMinimumHeight( defaultConfig );
-      const maximumHeight = this.getMaximumHeight( defaultConfig );
+  attemptPosition( orientation, align, defaultConfig, value, availableSize ) {
+    if ( align === GridConfigurable.Align.ORIGIN ) {
+      // TODO: handle layout bounds
+      // TODO: OMG this is horribly broken right? We would need to align stuff first
+      // TODO: Do a pass to handle origin cells first (and in FLOW too)
+      if ( Math.abs( this.node[ orientation.coordinate ] - value ) > CHANGE_POSITION_THRESHOLD ) {
+        // TODO: coordinate transform handling, to our ancestorNode!!!!!
+        this.node[ orientation.coordinate ] = value;
+      }
+    }
+    else {
+      const extraSpace = availableSize - this.node[ orientation.size ];
+      value += this.getMinMargin( orientation, defaultConfig ) + extraSpace * padRatioMap[ align ];
 
-      assert && assert( isFinite( minimumHeight ) );
-      assert && assert( maximumHeight >= minimumHeight );
-
-      value = Utils.clamp( value, minimumHeight, maximumHeight );
-
-      this.node.preferredHeight = value - this.withDefault( 'topMargin', defaultConfig ) - this.withDefault( 'bottomMargin', defaultConfig );
+      if ( Math.abs( this.node[ orientation.minSide ] - value ) > CHANGE_POSITION_THRESHOLD ) {
+        // TODO: coordinate transform handling, to our ancestorNode!!!!!
+        this.node[ orientation.minSide ] = value;
+      }
     }
   }
 
@@ -211,40 +177,9 @@ class GridCell extends GridConfigurable( Object ) {
    *
    * @param {Orientation} orientation
    * @param {GridConfigurable} defaultConfig
-   * @param {number} value
    */
-  positionStart( orientation, defaultConfig, value ) {
-    orientation === Orientation.HORIZONTAL ? this.xStart( defaultConfig, value ) : this.yStart( defaultConfig, value );
-  }
-
-  /**
-   * @public
-   *
-   * @param {GridConfigurable} defaultConfig
-   * @param {number} value
-   */
-  xStart( defaultConfig, value ) {
-    // TODO: coordinate transform handling, to our ancestorNode!!!!!
-    const left = this.withDefault( 'leftMargin', defaultConfig ) + value;
-
-    if ( Math.abs( this.node.left - left ) > 1e-9 ) {
-      this.node.left = left;
-    }
-  }
-
-  /**
-   * @public
-   *
-   * @param {GridConfigurable} defaultConfig
-   * @param {number} value
-   */
-  yStart( defaultConfig, value ) {
-    // TODO: coordinate transform handling, to our ancestorNode!!!!!
-    const top = this.withDefault( 'topMargin', defaultConfig ) + value;
-
-    if ( Math.abs( this.node.top - top ) > 1e-9 ) {
-      this.node.top = top;
-    }
+  getMinMargin( orientation, defaultConfig ) {
+    return this.withDefault( orientation === Orientation.HORIZONTAL ? 'leftMargin' : 'topMargin', defaultConfig );
   }
 
   /**
@@ -252,34 +187,29 @@ class GridCell extends GridConfigurable( Object ) {
    *
    * @param {Orientation} orientation
    * @param {GridConfigurable} defaultConfig
-   * @param {number} value
    */
-  positionOrigin( orientation, defaultConfig, value ) {
-    orientation === Orientation.HORIZONTAL ? this.xOrigin( defaultConfig, value ) : this.yOrigin( defaultConfig, value );
+  getMaxMargin( orientation, defaultConfig ) {
+    return this.withDefault( orientation === Orientation.HORIZONTAL ? 'rightMargin' : 'bottomMargin', defaultConfig );
   }
 
   /**
    * @public
    *
+   * @param {Orientation} orientation
    * @param {GridConfigurable} defaultConfig
-   * @param {number} value
    */
-  xOrigin( defaultConfig, value ) {
-    if ( Math.abs( this.node.x - value ) > 1e-9 ) {
-      this.node.x = value;
-    }
+  getMinContentSize( orientation, defaultConfig ) {
+    return this.withDefault( orientation === Orientation.HORIZONTAL ? 'minContentWidth' : 'minContentHeight', defaultConfig );
   }
 
   /**
    * @public
    *
+   * @param {Orientation} orientation
    * @param {GridConfigurable} defaultConfig
-   * @param {number} value
    */
-  yOrigin( defaultConfig, value ) {
-    if ( Math.abs( this.node.y - value ) > 1e-9 ) {
-      this.node.y = value;
-    }
+  getMaxContentSize( orientation, defaultConfig ) {
+    return this.withDefault( orientation === Orientation.HORIZONTAL ? 'maxContentWidth' : 'maxContentHeight', defaultConfig );
   }
 
   /**
