@@ -22,7 +22,6 @@ import FlowConfigurable from './FlowConfigurable.js';
 import LayoutConstraint from './LayoutConstraint.js';
 
 const FLOW_CONSTRAINT_OPTION_KEYS = [
-  'orientation',
   'spacing',
   'lineSpacing',
   'justify',
@@ -52,9 +51,6 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
     // @private {Array.<FlowCell>}
     this.cells = [];
 
-    // @private {Orientation}
-    this._orientation = Orientation.HORIZONTAL;
-
     // @private {FlowConstraint.Justify}
     this._justify = FlowConstraint.Justify.SPACE_BETWEEN; // TODO: decide on a good default here
 
@@ -83,6 +79,13 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
 
     // Key configuration changes to relayout
     this.changedEmitter.addListener( this._updateLayoutListener );
+
+    // TODO: optimize?
+    this.orientationChangedEmitter.addListener( () => {
+      this.cells.forEach( cell => {
+        cell.orientation = this.orientation;
+      } );
+    } );
 
     this.preferredWidthProperty.lazyLink( this._updateLayoutListener );
     this.preferredHeightProperty.lazyLink( this._updateLayoutListener );
@@ -333,37 +336,6 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
   /**
    * @public
    *
-   * @returns {Orientation}
-   */
-  get orientation() {
-    return this._orientation;
-  }
-
-  /**
-   * @public
-   *
-   * @param {Orientation|string} value
-   */
-  set orientation( value ) {
-    if ( value === 'horizontal' ) {
-      value = Orientation.HORIZONTAL;
-    }
-    if ( value === 'vertical' ) {
-      value = Orientation.VERTICAL;
-    }
-
-    assert && assert( Orientation.includes( value ) );
-
-    if ( this._orientation !== value ) {
-      this._orientation = value;
-
-      this.updateLayoutAutomatically();
-    }
-  }
-
-  /**
-   * @public
-   *
    * @returns {FlowConstraint.Justify}
    */
   get justify() {
@@ -497,6 +469,8 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
     assert && assert( index <= this.cells.length );
     assert && assert( cell instanceof FlowCell );
     assert && assert( !_.includes( this.cells, cell ) );
+
+    cell.orientation = this.orientation;
 
     this.cells.splice( index, 0, cell );
     this.addNode( cell.node );

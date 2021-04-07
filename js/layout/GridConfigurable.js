@@ -120,6 +120,31 @@ const GridConfigurable = memoize( type => {
     /**
      * @public
      *
+     * @param {GridConfigurable} defaultConfig
+     * @returns {GridConfigurable}
+     */
+    withDefaults( defaultConfig ) {
+      const configurable = new GridConfigurableObject();
+
+      configurable._xAlign = this._xAlign !== null ? this._xAlign : defaultConfig._xAlign;
+      configurable._yAlign = this._yAlign !== null ? this._yAlign : defaultConfig._yAlign;
+      configurable._leftMargin = this._leftMargin !== null ? this._leftMargin : defaultConfig._leftMargin;
+      configurable._rightMargin = this._rightMargin !== null ? this._rightMargin : defaultConfig._rightMargin;
+      configurable._topMargin = this._topMargin !== null ? this._topMargin : defaultConfig._topMargin;
+      configurable._bottomMargin = this._bottomMargin !== null ? this._bottomMargin : defaultConfig._bottomMargin;
+      configurable._xGrow = this._xGrow !== null ? this._xGrow : defaultConfig._xGrow;
+      configurable._yGrow = this._yGrow !== null ? this._yGrow : defaultConfig._yGrow;
+      configurable._minContentWidth = this._minContentWidth !== null ? this._minContentWidth : defaultConfig._minContentWidth;
+      configurable._minContentHeight = this._minContentHeight !== null ? this._minContentHeight : defaultConfig._minContentHeight;
+      configurable._maxContentWidth = this._maxContentWidth !== null ? this._maxContentWidth : defaultConfig._maxContentWidth;
+      configurable._maxContentHeight = this._maxContentHeight !== null ? this._maxContentHeight : defaultConfig._maxContentHeight;
+
+      return configurable;
+    }
+
+    /**
+     * @public
+     *
      * @returns {GridConfigurable.Align|null}
      */
     get xAlign() {
@@ -552,6 +577,8 @@ const yAlignMapping = {
 
 // @public {Object}
 GridConfigurable.GRID_CONFIGURABLE_OPTION_KEYS = GRID_CONFIGURABLE_OPTION_KEYS;
+
+const GridConfigurableObject = GridConfigurable( Object );
 
 scenery.register( 'GridConfigurable', GridConfigurable );
 export default GridConfigurable;

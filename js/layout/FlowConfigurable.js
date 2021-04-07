@@ -8,11 +8,13 @@
 
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import Enumeration from '../../../phet-core/js/Enumeration.js';
+import Orientation from '../../../phet-core/js/Orientation.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import mutate from '../../../phet-core/js/mutate.js';
 import scenery from '../scenery.js';
 
 const FLOW_CONFIGURABLE_OPTION_KEYS = [
+  'orientation',
   'align',
   'grow',
   'margin',
@@ -33,6 +35,9 @@ const FlowConfigurable = memoize( type => {
     constructor( ...args ) {
       super( ...args );
 
+      // @private {Orientation}
+      this._orientation = Orientation.HORIZONTAL;
+
       // @private {FlowConfigurable.Align|null} - Null value inherits from a base config
       this._align = null;
 
@@ -49,6 +54,7 @@ const FlowConfigurable = memoize( type => {
 
       // @public {TinyEmitter}
       this.changedEmitter = new TinyEmitter();
+      this.orientationChangedEmitter = new TinyEmitter();
     }
 
     /**
@@ -106,6 +112,62 @@ const FlowConfigurable = memoize( type => {
      */
     withDefault( propertyName, defaultConfig ) {
       return this[ propertyName ] !== null ? this[ propertyName ] : defaultConfig[ propertyName ];
+    }
+
+    /**
+     * @public
+     *
+     * @param {FlowConfigurable} defaultConfig
+     * @returns {FlowConfigurable}
+     */
+    withDefaults( defaultConfig ) {
+      const configurable = new FlowConfigurableObject();
+
+      configurable._align = this._align !== null ? this._align : defaultConfig._align;
+      configurable._leftMargin = this._leftMargin !== null ? this._leftMargin : defaultConfig._leftMargin;
+      configurable._rightMargin = this._rightMargin !== null ? this._rightMargin : defaultConfig._rightMargin;
+      configurable._topMargin = this._topMargin !== null ? this._topMargin : defaultConfig._topMargin;
+      configurable._bottomMargin = this._bottomMargin !== null ? this._bottomMargin : defaultConfig._bottomMargin;
+      configurable._grow = this._grow !== null ? this._grow : defaultConfig._grow;
+      configurable._minContentWidth = this._minContentWidth !== null ? this._minContentWidth : defaultConfig._minContentWidth;
+      configurable._minContentHeight = this._minContentHeight !== null ? this._minContentHeight : defaultConfig._minContentHeight;
+      configurable._maxContentWidth = this._maxContentWidth !== null ? this._maxContentWidth : defaultConfig._maxContentWidth;
+      configurable._maxContentHeight = this._maxContentHeight !== null ? this._maxContentHeight : defaultConfig._maxContentHeight;
+
+      return configurable;
+    }
+
+    /**
+     * @public
+     *
+     * @returns {Orientation}
+     */
+    get orientation() {
+      // TODO: Consider the returning 'horizontal/vertical'? Bleh
+      return this._orientation;
+    }
+
+    /**
+     * @public
+     *
+     * @param {Orientation|string} value
+     */
+    set orientation( value ) {
+      if ( value === 'horizontal' ) {
+        value = Orientation.HORIZONTAL;
+      }
+      if ( value === 'vertical' ) {
+        value = Orientation.VERTICAL;
+      }
+
+      assert && assert( Orientation.includes( value ) );
+
+      if ( this._orientation !== value ) {
+        this._orientation = value;
+
+        this.orientationChangedEmitter.emit();
+        this.changedEmitter.emit();
+      }
     }
 
     /**
@@ -456,6 +518,8 @@ const alignMapping = {
 
 // @public {Object}
 FlowConfigurable.FLOW_CONFIGURABLE_OPTION_KEYS = FLOW_CONFIGURABLE_OPTION_KEYS;
+
+const FlowConfigurableObject = FlowConfigurable( Object );
 
 scenery.register( 'FlowConfigurable', FlowConfigurable );
 export default FlowConfigurable;
