@@ -185,13 +185,16 @@ const FlowConfigurable = memoize( type => {
      * @param {FlowConfigurable.Align|string|null} value
      */
     set align( value ) {
+      const initialValue = value;
+
       // remapping align values to an independent set, so they aren't orientation-dependent
       // TODO: consider if this is wise
       if ( typeof value === 'string' ) {
-        value = alignMapping[ value ];
+        value = alignMapping[ this._orientation ][ value ];
       }
 
-      assert && assert( value === null || FlowConfigurable.Align.includes( value ) );
+      assert && assert( value === null || FlowConfigurable.Align.includes( value ),
+        `align:${initialValue} not compatible, with orientation:${this._orientation} the allowed values are null or one of ${Object.keys( alignMapping[ this._orientation ] )}` );
 
       if ( this._align !== value ) {
         this._align = value;
@@ -507,13 +510,20 @@ FlowConfigurable.Align = Enumeration.byKeys( [
 ] );
 
 const alignMapping = {
-  left: FlowConfigurable.Align.START,
-  top: FlowConfigurable.Align.START,
-  right: FlowConfigurable.Align.END,
-  bottom: FlowConfigurable.Align.END,
-  center: FlowConfigurable.Align.CENTER,
-  origin: FlowConfigurable.Align.ORIGIN,
-  stretch: FlowConfigurable.Align.STRETCH
+  [ Orientation.HORIZONTAL ]: {
+    top: FlowConfigurable.Align.START,
+    bottom: FlowConfigurable.Align.END,
+    center: FlowConfigurable.Align.CENTER,
+    origin: FlowConfigurable.Align.ORIGIN,
+    stretch: FlowConfigurable.Align.STRETCH
+  },
+  [ Orientation.VERTICAL ]: {
+    left: FlowConfigurable.Align.START,
+    right: FlowConfigurable.Align.END,
+    center: FlowConfigurable.Align.CENTER,
+    origin: FlowConfigurable.Align.ORIGIN,
+    stretch: FlowConfigurable.Align.STRETCH
+  }
 };
 
 // @public {Object}
