@@ -5196,6 +5196,15 @@ class Node extends PhetioObject {
   }
 
   /**
+   * @public
+   *
+   * @param {Object} [layoutOptions]
+   */
+  mutateLayoutOptions( layoutOptions ) {
+    this.layoutOptions = merge( {}, this.layoutOptions, layoutOptions );
+  }
+
+  /**
    * Sets the preventFit performance flag.
    * @public
    *
