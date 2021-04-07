@@ -103,16 +103,16 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
       const minField = `min${capLetter}`;
       const maxField = `max${capLetter}`;
 
-      const lineIndices = this.getIndices( orientation );
+      const lineIndices = _.sortedUniq( _.sortBy( _.flatten( cells.map( cell => cell.getIndices( orientation ) ) ) ) );
       const lineMap = new Map(); // index => line
       const lines = lineIndices.map( index => {
-        const cells = this.getCells( orientation, index );
+        const subCells = _.filter( cells, cell => cell.containsIndex( orientation, index ) );
 
         // TODO: poolable type?
         const line = {
           index: index,
-          cells: cells,
-          grow: _.max( cells.map( cell => cell.withDefault( orientation === Orientation.HORIZONTAL ? 'xGrow' : 'yGrow', this ) ) ),
+          cells: subCells,
+          grow: _.max( subCells.map( cell => cell.withDefault( orientation === Orientation.HORIZONTAL ? 'xGrow' : 'yGrow', this ) ) ),
           min: 0,
           max: Number.POSITIVE_INFINITY,
           size: 0,
@@ -128,7 +128,7 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
       assert && assert( lineSpacings.length === lines.length - 1 );
 
       // Scan sizes for single-line cells first
-      this.cells.forEach( cell => {
+      cells.forEach( cell => {
         if ( cell.size.get( orientation ) === 1 ) {
           const line = lineMap.get( cell.position.get( orientation ) );
           line.min = Math.max( line.min, cell.getMinimumSize( orientation, this ) );
@@ -137,7 +137,7 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
       } );
 
       // Then increase for spanning cells as necessary
-      this.cells.forEach( cell => {
+      cells.forEach( cell => {
         if ( cell.size.get( orientation ) > 1 ) {
           // TODO: don't bump mins over maxes here (if lines have maxes, redistribute otherwise)
           // TODO: also handle maxes
@@ -184,7 +184,7 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
       lines.forEach( ( column, arrayIndex ) => {
         column.position = _.sum( lines.slice( 0, arrayIndex ).map( column => column.size ) ) + _.sum( lineSpacings.slice( 0, column.index ) );
       } );
-      this.cells.forEach( cell => {
+      cells.forEach( cell => {
         const cellIndexPosition = cell.position.get( orientation );
         const cellSize = cell.size.get( orientation );
         const cellLines = cell.getIndices( orientation ).map( index => lineMap.get( index ) );
