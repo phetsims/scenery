@@ -187,10 +187,6 @@
     <div class="sublink"><a href="#interactive-alerts">UtteranceQueue</a></div>
     <div class="sublink"><a href="#performance-considerations">Performance Considerations</a></div>
 
-    <div class="navlink"><a href="#phet-info">PhET Specific Info</a></div>
-    <div class="sublink"><a href="#enable-pdom">Enabling PDOM</a></div>
-    <div class="sublink"><a href="#a11y-view">The PDOM View</a></div>
-
     <div class="navlink"><a href="#pdom-resources">Next Steps for Understanding</a></div>
   </div>
   <div class="span6">
@@ -668,101 +664,11 @@
     <ul>
       <li><a href="https://github.com/phetsims/scenery/issues/663">Batching PDOM changes</a></li>
     </ul>
-    <h2 id="phet-info">PhET Specific Information</h2>
-    <p>The following information is specific to PhET's work with accessibility and this api.</p>
-
-    <h4 id="enable-pdom">Enabling PDOM</h4>
-    <p>
-      Accessibility features are hidden behind an <code>?supportsDescription</code> query parameter. This hides pdom
-      features
-      until they are ready for production. When ready, accessibility can be enabled by default by adding
-      <code>Sim</code>
-      option <code>accessibility: true</code> to <code>{{sim}}-main.js</code>.
-    </p>
-
-    <h4>Beginning PDOM work on a sim</h4>
-    <p>
-      When beginning PDOM work in a simulation, add <code>"supportsInteractiveDescription": true</code> to the sim's
-      package.json.
-      Then regenerate the lists to add the simulation to perennial/data/interactive-description list, and generate an
-      pdom-view HTML document to assist with development (<code>grunt generate-a11y-view-html</code>).
-    </p>
-
-    <h4 id="a11y-view">The a11y-view</h4>
-    <p>
-      The 'A11y view' is an HTML page that runs the simulation in an iframe and shows an up-to-date copy of the PDOM
-      next to the sim. It can be used to assist in development of accessibility features by allowing you to see the
-      accessible labels, descriptions, and alerts without requiring screen reader testing. This should be generated
-      by Bayes, but it can be generated manually with <code>grunt generate-a11y-view-html</code> in the sim repo.
-    </p>
-
-    <h4>Accessible Order for PhET Sims</h4>
-    <p>
-      The PDOM in PhET sims are specific and designed to give the most semantic and pedagogical information possible.
-      These priorities can differ from those displayed in the visual simulation. We use
-      <code>Node.pdomOrder</code> to help manage this discrepancy. As a PhET Developer, please use the following
-      guide to develop the PDOM ordering in the PDOM versus the traditional rendering order of the scene graph. Each
-      item in the list is ranked, such that you should start with item 1, and then if that doesn't work for your
-      situation, try the next item down.
-    </p>
-    <p>
-      NOTE: This list was created with a mindset of instrumenting a simulation with accessibility. If a new sim is
-      being created, then likely this list is irrelevant because the design process from the beginning will be focused
-      on accessibility and regular sim development together.
-    </p>
-    <ol>
-      <li>
-        Add accessibility to the simulation, see if order is correct. If not. . .
-      </li>
-      <li>use <code>setPDOMOrder</code> on local children, if not. . .</li>
-      <li>
-        Change z-order in the scene graph structure to get the order correct, if there is not an overriding constraint
-        from the visible rendering order, if not. . .
-      </li>
-      <li>
-        Discuss with the design team to inform them the order is unnatural OR we may decide another order based on
-        simplifying implementation--revise desired order. if not. . .
-      </li>
-      <li>use <code>setPDOMOrder</code> on descendants (can be local vars like <code>controlPanel.flashlight.button.label</code>)
-      </li>
-    </ol>
-
-    <p>
-      If <code>setPDOMOrder</code> is needed on Nodes that are not descendants, then likely there is a structural
-      issue that needs to be addressed fully, rather than hacked at by using <code>Node.etPDOMOrder</code>,
-      although the setter will accept any <code>Node</code> in the scene graph.
-    </p>
-
-    <h4>Other misc notes for PhET Devs</h4>
-    <ul>
-      <li>As a sim developer, it is your responsibility to make sure that each interactive
-        element has an accessible name.
-      </li>
-      <li>
-        Conventionally, it is preferred to specify PDOM parameters as options whenever possible, and only use the
-        setters if the situation requires it. Please label PDOM specific options separately with a <code>&#47;&#47;
-        pdom</code> comment as a header.
-      </li>
-      <li>
-        The HTML of the PDOM acts as just another input/output modality to a PhET sim's model. You can interact with it
-        to control
-        the simulation, and you can get information out of it, as the PDOM can be updated in real time in response to
-        changes
-        in the simulation.
-      </li>
-      <li>About aria-labelledby: In a PhET Sim one might want to associate a heading element with a region or
-        group. For example, an H2 heading is associated with the Play Area region through an
-        <code>aria-labelledby</code> attribute.
-        With this association the H2's content, "Play Area", provides the region with an accessible name in the
-        Accessibility Tree which is accessed by assistive technology.
-      </li>
-
-    </ul>
 
     <h2 id="pdom-resources">Next Steps for Understanding</h2>
-    <p>Please discuss developer related questions or problems with @jessegreenberg, @zepumph, or @mbarlow12 and
+    <p>Please discuss developer related questions or problems with @jessegreenberg or @zepumph, and
       update this document accordingly to help those who follow in your footsteps. Also @terracoda is a great
-      resource on questions about ARIA and accessibility in general.
+      resource on questions about ARIA and web accessibility in general.
     </p>
     <h4>PhET Published Resources</h4>
     <ul>
