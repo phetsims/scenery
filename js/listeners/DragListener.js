@@ -455,8 +455,9 @@ class DragListener extends PressListener {
    * @returns {Vector2}
    */
   globalToParentPoint( globalPoint ) {
+    let referenceResult;
     if ( assert ) {
-      var referenceResult = this.pressedTrail.globalToParentPoint( globalPoint ); // eslint-disable-line no-var
+      referenceResult = this.pressedTrail.globalToParentPoint( globalPoint );
     }
     this.pressedTrail.getParentTransform().getInverse().multiplyVector2( globalPoint );
     assert && assert( globalPoint.equals( referenceResult ) );
@@ -475,8 +476,9 @@ class DragListener extends PressListener {
    * @returns {Vector2}
    */
   parentToLocalPoint( parentPoint ) {
+    let referenceResult;
     if ( assert ) {
-      var referenceResult = this.pressedTrail.lastNode().parentToLocalPoint( parentPoint ); // eslint-disable-line no-var
+      referenceResult = this.pressedTrail.lastNode().parentToLocalPoint( parentPoint );
     }
     this.pressedTrail.lastNode().getTransform().getInverse().multiplyVector2( parentPoint );
     assert && assert( parentPoint.equals( referenceResult ) );
@@ -495,8 +497,9 @@ class DragListener extends PressListener {
    * @returns {Vector2}
    */
   localToParentPoint( localPoint ) {
+    let referenceResult;
     if ( assert ) {
-      var referenceResult = this.pressedTrail.lastNode().localToParentPoint( localPoint ); // eslint-disable-line no-var
+      referenceResult = this.pressedTrail.lastNode().localToParentPoint( localPoint );
     }
     this.pressedTrail.lastNode().getMatrix().multiplyVector2( localPoint );
     assert && assert( localPoint.equals( referenceResult ) );
