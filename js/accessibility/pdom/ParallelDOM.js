@@ -2007,10 +2007,12 @@ const ParallelDOM = {
 
 
       /**
-       * Sets the PDOM/DOM focus order for this node. This includes not only focused items, but elements that can be
-       * placed in the parallel DOM. If provided, it will override the focus order between children (and
+       * Sets the PDOM/DOM order for this Node. This includes not only focused items, but elements that can be
+       * placed in the Parallel DOM. If provided, it will override the focus order between children (and
        * optionally arbitrary subtrees). If not provided, the focus order will default to the rendering order
-       * (first children first, last children last), determined by the children array.
+       * (first children first, last children last), determined by the children array. A Node must be conected to a scene
+       * graph (via children) in order for PDOM order to apply. Thus `setPDOMOrder` cannot be used in exchange for
+       * setting a node as a child.
        * @public
        *
        * In the general case, when an pdom order is specified, it's an array of nodes, with optionally one
