@@ -191,6 +191,8 @@ const ENABLED_PROPERTY_TANDEM_NAME = EnabledProperty.TANDEM_NAME;
 const VISIBLE_PROPERTY_TANDEM_NAME = 'visibleProperty';
 const INPUT_ENABLED_PROPERTY_TANDEM_NAME = 'inputEnabledProperty';
 
+const PHET_IO_STATE_DEFAULT = false;
+
 // Node options, in the order they are executed in the constructor/mutate()
 const NODE_OPTION_KEYS = [
   'children', // {Array.<Node>}- List of children to add (in order), see setChildren for more documentation
@@ -6701,7 +6703,7 @@ class Node extends PhetioObject {
       }
     } );
 
-    this.initializePhetioObject( { phetioType: Node.NodeIO, phetioState: false }, options );
+    this.initializePhetioObject( { phetioType: Node.NodeIO, phetioState: PHET_IO_STATE_DEFAULT }, options );
 
     return this; // allow chaining
   }
@@ -6946,7 +6948,10 @@ ParallelDOM.compose( Node );
 // @public {IOType}
 Node.NodeIO = new IOType( 'NodeIO', {
   valueType: Node,
-  documentation: 'The base type for graphical and potentially interactive objects.'
+  documentation: 'The base type for graphical and potentially interactive objects.',
+  metadataDefaults: {
+    phetioState: PHET_IO_STATE_DEFAULT
+  }
 } );
 
 export default Node;
