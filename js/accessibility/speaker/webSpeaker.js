@@ -21,6 +21,8 @@ import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js
 import VoicingUtterance from '../../../../utterance-queue/js/VoicingUtterance.js';
 import Utterance from '../../../../utterance-queue/js/Utterance.js';
 import scenery from '../../scenery.js';
+import globalKeyStateTracker from '../globalKeyStateTracker.js';
+import KeyboardUtils from '../KeyboardUtils.js';
 
 class WebSpeaker {
   constructor() {
@@ -96,7 +98,8 @@ class WebSpeaker {
   }
 
   /**
-   * Indicate that the webSpeaker is ready for use, and attempt to populate voices (if they are ready yet).
+   * Indicate that the webSpeaker is ready for use, and attempt to populate voices (if they are ready yet). Adds
+   * listeners that control speech.
    * @public
    */
   initialize() {
@@ -121,6 +124,14 @@ class WebSpeaker {
     this.canSpeakProperty = DerivedProperty.and( [
       this.enabledProperty, this.speechEnabledProperty
     ] );
+
+    // The control key will stop the synth from speaking if there is an active utterance. This key was decided because
+    // most major screen readers will stop speech when this key is pressed
+    globalKeyStateTracker.keyupEmitter.addListener( domEvent => {
+      if ( KeyboardUtils.isKeyEvent( domEvent, KeyboardUtils.KEY_CTRL ) ) {
+        this.cancel();
+      }
+    } );
   }
 
   /**
