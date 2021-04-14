@@ -45,7 +45,11 @@
       var scene = new scenery.Node();
       var display = new scenery.Display( scene, {
         width: $container.width(),
-        height: $container.height()
+        height: $container.height(),
+        accessibility: false,
+
+        // so Display input does not interfere with documentation links
+        listenToOnlyElement: true
       } );
       $container[ 0 ].appendChild( display.domElement );
       draw( scene, display );
