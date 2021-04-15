@@ -46,7 +46,7 @@ class HighlightOverlay {
       focusHighlightsVisibleProperty: new BooleanProperty( true ),
 
       // {BooleanProperty} - controls whether highlights related to the Voicing feature are shown
-      voicingHighlightsVisibleProperty: new BooleanProperty( true )
+      voicingHighlightsVisibleProperty: new BooleanProperty( false )
     }, options );
 
     this.display = display; // @private {Display}
@@ -499,7 +499,7 @@ class HighlightOverlay {
       const node = newTrail.lastNode();
       this.activateHighlight( newTrail, node, node.focusHighlight, node.focusHighlightLayerable, node.focusHighlightChangedEmitter );
     }
-    else if ( this.display.pointerFocusProperty.value ) {
+    else if ( this.display.pointerFocusProperty.value && this.voicingHighlightsVisibleProperty.value ) {
       this.onPointerFocusChange( this.display.pointerFocusProperty.value );
     }
   }
@@ -525,7 +525,7 @@ class HighlightOverlay {
       const highlight = node.voicingHighlight || node.focusHighlight;
       this.activateHighlight( newTrail, node, highlight, false, node.focusHighlightChangedEmitter );
     }
-    else if ( Display.focus ) {
+    else if ( Display.focus && this.focusHighlightsVisibleProperty.value ) {
       this.onFocusChange( Display.focus );
     }
   }

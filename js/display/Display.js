@@ -359,12 +359,8 @@ class Display {
       // one per display so doing the same for voicingUtteranceQueue to match.
       this.voicingUtteranceQueue = new UtteranceQueue( webSpeaker );
 
-      // @public {BooleanProperty} - whether "interactive highlights" are enabled, controlling the visibility
-      // of highlights that will surround Nodes that are interactive
-      this.interactiveHighlightsVisibleProperty = new BooleanProperty( false );
-
       // @private {VoicingInputListener} - reference kept for disposal
-      this.voicingInputListener = new VoicingInputListener( this, webSpeaker.enabledProperty, this.interactiveHighlightsVisibleProperty );
+      this.voicingInputListener = new VoicingInputListener( this, webSpeaker.enabledProperty );
       this.addInputListener( this.voicingInputListener );
     }
 
@@ -376,9 +372,14 @@ class Display {
       // @public - to control if the focusHighlights is visible on this accessible Display.
       this.focusHighlightsVisibleProperty = new BooleanProperty( true );
 
+      // @public {BooleanProperty} - whether "interactive highlights" are enabled, controlling the visibility
+      // of highlights that will surround Nodes that are interactive
+      this.interactiveHighlightsVisibleProperty = new BooleanProperty( false );
+
       // @private {HighlightOverlay}
       this._focusOverlay = new HighlightOverlay( this, this._focusRootNode, {
-        focusHighlightsVisibleProperty: this.focusHighlightsVisibleProperty
+        focusHighlightsVisibleProperty: this.focusHighlightsVisibleProperty,
+        voicingHighlightsVisibleProperty: this.interactiveHighlightsVisibleProperty
       } );
       this.addOverlay( this._focusOverlay );
 

@@ -19,25 +19,27 @@ class VoicingInputListener {
 
   /**
    * @param {BooleanProperty} voicingEnabledProperty
-   * @param {BooleanProperty} interactiveHighlightsEnabledProperty
    * @param {Display} display
    */
-  constructor( display, voicingEnabledProperty, interactiveHighlightsEnabledProperty ) {
+  constructor( display, voicingEnabledProperty ) {
 
     // @private {Display}
     this.display = display;
 
-    // @private {Trail|null} - reference to the activeTrail updated on move, used on down and click to get the voicing
-    // responses upon those events
-    this.activeTrail = null;
+    // @private {Trail|null} - reference to the active trail under DOM focus, updated in response to getting the trail
+    // for those events
+    this.activeFocusTrail = null;
+
+    // @private {Trail|null} - references to the active trail under the mouse/touch pointer, used on down and over
+    // to get responses for those events
+    this.activePointerTrail = null;
 
     // @private {BooleanProperty}
     this.voicingEnabledProperty = voicingEnabledProperty;
-    this.interactiveHighlightsEnabledProperty = interactiveHighlightsEnabledProperty;
   }
 
   /**
-   * Called in response to a Pointer move event.
+   * Called in response to a change of focus.
    * @public (part of the scenery listener API)
    *
    * @param event
@@ -45,10 +47,23 @@ class VoicingInputListener {
   focus( event ) {
     const voicingNode = this.findVoicingNode( event.trail );
     if ( voicingNode ) {
+      this.activeFocusTrail = event.trail;
 
       // there is never a context response on focus
       this.speakVoicingContent( voicingNode, event );
     }
+    else {
+      this.activeFocusTrail = null;
+    }
+  }
+
+  /**
+   * Called in response to loss of focus.
+   * @public
+   * @param event
+   */
+  blur( event ) {
+    this.activeFocusTrail = null;
   }
 
   /**
@@ -76,31 +91,31 @@ class VoicingInputListener {
           }
         }
       } );
-    }
 
-    // if we haven't found a hit yet, search for Nodes that compose Voicing that don't use a hit shape - these
-    // will be interactive
-    if ( !hitNode && this.interactiveHighlightsEnabledProperty.value ) {
+      // if we haven't found a hit yet, search for Nodes that compose Voicing that don't use a hit shape - these
+      // will be interactive
+      if ( !hitNode ) {
 
-      // check for interactive Nodes
-      for ( let i = event.trail.nodes.length - 1; i >= 0; i-- ) {
-        const node = event.trail.nodes[ i ];
-        if ( node.voicing && !node.voicingHighlight ) {
-          hitNode = node;
-          break;
+        // check for interactive Nodes that compose voicing
+        for ( let i = event.trail.nodes.length - 1; i >= 0; i-- ) {
+          const node = event.trail.nodes[ i ];
+          if ( node.voicing && !node.voicingHighlight ) {
+            hitNode = node;
+            break;
+          }
         }
       }
     }
 
     if ( hitNode ) {
       const uniqueTrail = hitNode.getUniqueTrail();
-      if ( this.activeTrail === null || !uniqueTrail.equals( this.activeTrail ) ) {
-        this.activeTrail = uniqueTrail;
+      if ( this.activePointerTrail === null || !uniqueTrail.equals( this.activePointerTrail ) ) {
+        this.activePointerTrail = uniqueTrail;
         this.display.pointerFocusProperty.set( new Focus( this.display, uniqueTrail ) );
       }
     }
-    else {
-      this.activeTrail = null;
+    else if ( this.activePointerTrail !== null ) {
+      this.activePointerTrail = null;
       this.display.pointerFocusProperty.set( null );
     }
   }
@@ -130,8 +145,9 @@ class VoicingInputListener {
    * @private
    */
   respondToActivation( event ) {
-    if ( this.activeTrail ) {
-      const voicingNode = this.activeTrail.lastNode();
+    const activeTrail = this.activePointerTrail || this.activeFocusTrail;
+    if ( activeTrail ) {
+      const voicingNode = activeTrail.lastNode();
       if ( voicingNode ) {
         this.speakVoicingContent( voicingNode, event );
       }
