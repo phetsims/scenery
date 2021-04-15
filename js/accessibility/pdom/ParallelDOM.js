@@ -908,17 +908,8 @@ const ParallelDOM = {
        * Set the tag name for the accessible label sibling for this Node. DOM element tag names are read-only,
        * so this will require creating a new PDOMPeer for this Node (reconstructing all DOM Elements). If
        * labelContent is specified without calling this method, then the DEFAULT_LABEL_TAG_NAME will be used as the
-       * tag name for the label sibling.
+       * tag name for the label sibling. Use null to clear the label sibling element from the PDOM.
        * @public
-       *
-       * Use null to clear the label sibling element from the PDOM.
-       *
-       * NOTE: This method will create a container parent tagName if none has been specified, because all sibling
-       * elements must be children of the container. If you clear the labelTagName and no longer want any
-       * content save the primary sibling (this means the container parent as well), then you must manually null out
-       * the containerTagName option as well. Although this isn't the greatest strategy, it works for now, and
-       * @zepumph and @jessegreenberg can't think of another way to handle this. See for details: https://github.com/phetsims/scenery/issues/761
-       *
        *
        * @param {string|null} tagName
        */
@@ -951,13 +942,6 @@ const ParallelDOM = {
        * then descriptionTagName will be set to DEFAULT_DESCRIPTION_TAG_NAME.
        *
        * Passing 'null' will clear away the description sibling.
-       *
-       * NOTE: This method will create a container parent tagName if none has been specified. This is because all
-       * siblings must be children of the parent container element to appear in the DOM. If you clear
-       * the descriptionTagName and no longer want any content other than the primary sibling, you must manually
-       * null out the containerTagName option. Although this isn't the greatest strategy, it works for now, and
-       * @zepumph and @jessegreenberg can't think of another way to handle this. See for
-       * details: https://github.com/phetsims/scenery/issues/761
        *
        * @public
        * @param {string|null} tagName
@@ -1115,12 +1099,6 @@ const ParallelDOM = {
        *   <p>Button label</p>
        *   <p>Button description</p>
        * </section>
-       *
-       * Setting the containerTagName to null directly will result in a no-op if there are still siblings defined for
-       * the peer. This is because labelTagName and descriptionTagName will create a parent automatically if one isn't
-       * specified. This can result in some weird logic, and @zepumph and @jessegreenberg aren't sure if this is the
-       * best way, but it is the way it works for now. See https://github.com/phetsims/scenery/issues/761 for details
-       * and if you have opinions to share.
        *
        * @param {string|null} tagName
        */
