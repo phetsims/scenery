@@ -740,13 +740,15 @@ class RichText extends Node {
       sceneryLog && sceneryLog.RichText && sceneryLog.pop();
     }
 
-    const wasAdded = containerNode.addElement( node );
-    if ( !wasAdded ) {
-      // Remove it from the linkItems if we didn't actually add it.
-      this._linkItems = this._linkItems.filter( item => item.node !== node );
+    if ( node ) {
+      const wasAdded = containerNode.addElement( node );
+      if ( !wasAdded ) {
+        // Remove it from the linkItems if we didn't actually add it.
+        this._linkItems = this._linkItems.filter( item => item.node !== node );
 
-      // And since we won't dispose it (since it's not a child), clean it here
-      node.clean();
+        // And since we won't dispose it (since it's not a child), clean it here
+        node.clean();
+      }
     }
 
     return lineBreakState;
