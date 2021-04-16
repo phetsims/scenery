@@ -159,7 +159,14 @@ class DragListener extends PressListener {
       // Though DragListener is not instrumented, declare these here to support properly passing this to children, see https://github.com/phetsims/tandem/issues/60.
       // DragListener by default doesn't allow PhET-iO to trigger drag Action events
       phetioReadOnly: true,
-      phetioFeatured: PhetioObject.DEFAULT_OPTIONS.phetioFeatured
+      phetioFeatured: PhetioObject.DEFAULT_OPTIONS.phetioFeatured,
+
+      // pdom
+      // {boolean} - Whether or not to allow `click` events to trigger behavior in the supertype PressListener.
+      // Generally DragListener should not respond to click events, but there are some exceptions where drag
+      // functionality is nice but a click should still activate the component. See
+      // https://github.com/phetsims/sun/issues/696
+      allowClick: false
     }, options );
 
     assert && assert( typeof options.allowTouchSnag === 'boolean', 'allowTouchSnag should be a boolean' );
@@ -197,6 +204,7 @@ class DragListener extends PressListener {
     this._dragBoundsProperty = ( options.dragBoundsProperty || new Property( null ) );
     this._start = options.start;
     this._end = options.end;
+    this._allowClick = options.allowClick;
 
     // @public {Property.<boolean>} - Alias for isPressedProperty (as this name makes more sense for dragging)
     this.isUserControlledProperty = this.isPressedProperty;
@@ -306,16 +314,6 @@ class DragListener extends PressListener {
   }
 
   /**
-   * DragListener should not be clicked by pdom listeners, this prevents that listener from being called.
-   * See https://github.com/phetsims/scenery/issues/903
-   * @public
-   * @returns {boolean}
-   */
-  canClick() {
-    return false;
-  }
-
-  /**
    * Stops the drag.
    * @public
    * @override
@@ -340,6 +338,53 @@ class DragListener extends PressListener {
     } );
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
+  }
+
+  /**
+   * Components using DragListener should generally not be activated with a click. A single click from alternative
+   * input would pick up the component then immediately release it. But occasionally that is desirable and can be
+   * controlled with the allowClick option.
+   * @public
+   *
+   * @returns {boolean}
+   */
+  canClick() {
+    return super.canClick() && this._allowClick;
+  }
+
+  /**
+   * Activate the DragListener with a click activation. Usually, DragListener will NOT be activated with a click
+   * and canClick will return false. Components that can be dragged usually should not be picked up/released
+   * from a single click event that may have even come from event bubbling. But it can be optionally allowed for some
+   * components that have drag functionality but can still be activated with a single click event.
+   * @public (scenery-internal) (part of the scenery listener API)
+   *
+   * @param {SceneryEvent} event
+   * @param {function} callback
+   * @returns {boolean}
+   */
+  click( event, callback ) {
+    sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener click' );
+    sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+    const success = super.click( event, () => {
+      sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener successful press' );
+      sceneryLog && sceneryLog.InputListener && sceneryLog.push();
+
+      // notify that we have started a change
+      this._start && this._start( event, this );
+
+      callback && callback();
+
+      // notify that we have finished a 'drag' activation through click
+      this._end && this._end( this );
+
+      sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
+    } );
+
+    sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
+
+    return success;
   }
 
   /**

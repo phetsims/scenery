@@ -848,6 +848,7 @@ class PressListener {
    *
    * @param {SceneryEvent|null} event
    * @param {function} [callback] optionally called immediately after press, but only on successful click
+   * @returns {boolean} success - Returns whether the press was actually started
    */
   click( event, callback ) {
     if ( this.canClick() ) {
@@ -885,6 +886,8 @@ class PressListener {
         }
       }, this._a11yLooksPressedInterval );
     }
+
+    return true;
   }
 
   /**
