@@ -70,7 +70,12 @@ const Voicing = {
 
           // {string|null} - The tagName (of ParallelDOM.js) that will be applied to this Node when this Node is
           // focusable.
-          voicingTagName: null
+          voicingTagName: null,
+
+          // {UtteranceQueue} - The utteranceQueue that content for this VoicingNode will be spoken through. By default,
+          // it will go through the Display's VoicingUtteranceQueue, but you may need separate UtteranceQueues for
+          // different areas of content in your application to manage complex alerts.
+          utteranceQueue: null
         }, options );
 
         // @public (read-only)
@@ -85,6 +90,7 @@ const Voicing = {
         this._voicingCreateContextResponse = null;
         this._voicingCreateHintResponse = null;
         this._voicingCreateOverrideResponse = null;
+        this._utteranceQueue = null;
 
         // @private
         this.focusableChangeListener = this.onFocusableChange.bind( this );
@@ -98,6 +104,7 @@ const Voicing = {
         this.setVoicingCreateContextResponse( options.voicingCreateContextResponse );
         this.setVoicingCreateHintResponse( options.voicingCreateHintResponse );
         this.setVoicingCreateOverrideResponse( options.voicingCreateOverrideResponse );
+        this.setUtteranceQueue( options.utteranceQueue );
       },
 
 
@@ -318,6 +325,30 @@ const Voicing = {
         return this._voicingTagName;
       },
       get voicingTagName() { return this.getVoicingTagName(); },
+
+      /**
+       * Sets the utteranceQueue through which voicing associated with this Node will be spoken. By default,
+       * the Display's voicingUtteranceQueue is used. But you can specify a different one if more complicated
+       * management of voicing is necessary.
+       * @public
+       *
+       * @param {UtteranceQueue} utteranceQueue
+       */
+      setUtteranceQueue( utteranceQueue ) {
+        this._utteranceQueue = utteranceQueue;
+      },
+      set utteranceQueue( utteranceQueue ) { this.setUtteranceQueue( utteranceQueue ); },
+
+      /**
+       * Gets the utteranceQueue through which voicing associated with this Node will be spoken.
+       * @public
+       *
+       * @returns {UtteranceQueue}
+       */
+      getUtteranceQueue() {
+        return this._utteranceQueue;
+      },
+      get utteranceQueue() { return this.getUtteranceQueue(); },
 
       /**
        * When the voicingFocusableProperty changes, updates ParallelDOM properties that make this Node focusable.

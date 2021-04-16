@@ -168,7 +168,9 @@ class VoicingInputListener {
       contextResponse: voicingNode.voicingCreateContextResponse( event ),
       overrideResponse: voicingNode.voicingCreateOverrideResponse( event )
     } );
-    this.display.voicingUtteranceQueue.addToBack( response );
+
+    const utteranceQueue = voicingNode.utteranceQueue || this.display.voicingUtteranceQueue;
+    utteranceQueue.addToBack( response );
   }
 
   /**

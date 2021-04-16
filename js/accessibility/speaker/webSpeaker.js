@@ -10,7 +10,6 @@
  */
 
 import BooleanProperty from '../../../../axon/js/BooleanProperty.js';
-import DerivedProperty from '../../../../axon/js/DerivedProperty.js';
 import Emitter from '../../../../axon/js/Emitter.js';
 import NumberProperty from '../../../../axon/js/NumberProperty.js';
 import Property from '../../../../axon/js/Property.js';
@@ -121,10 +120,6 @@ class WebSpeaker {
     // otherwise, try to populate voices immediately
     this.populateVoices();
 
-    this.canSpeakProperty = DerivedProperty.and( [
-      this.enabledProperty, this.speechEnabledProperty
-    ] );
-
     // The control key will stop the synth from speaking if there is an active utterance. This key was decided because
     // most major screen readers will stop speech when this key is pressed
     globalKeyStateTracker.keyupEmitter.addListener( domEvent => {
@@ -178,7 +173,7 @@ class WebSpeaker {
    *                               need to implement our own queing system.
    */
   speak( utterance, withCancel = true ) {
-    if ( this.initialized && this.canSpeakProperty.value && !this.onHold ) {
+    if ( this.initialized && webSpeaker.enabledProperty && !this.onHold ) {
       withCancel && this.synth.cancel();
 
       // since the "end" event doesn't come through all the time after cancel() on
