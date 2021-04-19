@@ -10,6 +10,7 @@
  */
 
 import BooleanProperty from '../../../../axon/js/BooleanProperty.js';
+import DerivedProperty from '../../../../axon/js/DerivedProperty.js';
 import Emitter from '../../../../axon/js/Emitter.js';
 import NumberProperty from '../../../../axon/js/NumberProperty.js';
 import Property from '../../../../axon/js/Property.js';
@@ -17,8 +18,8 @@ import stepTimer from '../../../../axon/js/stepTimer.js';
 import Range from '../../../../dot/js/Range.js';
 import platform from '../../../../phet-core/js/platform.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
-import VoicingUtterance from '../../../../utterance-queue/js/VoicingUtterance.js';
 import Utterance from '../../../../utterance-queue/js/Utterance.js';
+import VoicingUtterance from '../../../../utterance-queue/js/VoicingUtterance.js';
 import scenery from '../../scenery.js';
 import globalKeyStateTracker from '../globalKeyStateTracker.js';
 import KeyboardUtils from '../KeyboardUtils.js';
@@ -56,10 +57,13 @@ class WebSpeaker {
     // whether or ot the webSpeaker is enabled - if false, there will be no speech
     this.enabledProperty = new BooleanProperty( true );
 
-    // @public {BooleanProperty} - whether or not speech is enabled. If false, nothing will be spoken. Note this
-    // does not control whether or not the voicing feature is enabled, only whether or not speech will actually
-    // be heard.
-    this.speechEnabledProperty = new BooleanProperty( true );
+    // @private {DerivedProperty} - Controls whether or not speech is allowed with synthesis.
+    // This controlling Property can be set with setCanSpeakProperty.
+    this._canSpeakProperty = new DerivedProperty( [ this.enabledProperty ], value => value );
+
+    // @private {function} - bound so we can link and unlink to canSpeakProperty if a new canSpeakProperty is set
+    this.boundHandleCanSpeakChange = this.handleCanSpeakChange.bind( this );
+    this._canSpeakProperty.link( this.boundHandleCanSpeakChange );
 
     // @private {Utterance} - A reference to the last utterance spoken, so we can determine
     // cancelling behavior when it is time to speak the next utterance. See VoicingUtterance options.
@@ -82,14 +86,6 @@ class WebSpeaker {
     // clearing this, though it is a bit tricky since we don't have a way to know
     // when we are done with an utterance - see #215
     this.utterances = [];
-
-    // when becoming disabled, we want to cancel any current speech
-    const enabledListener = enabled => {
-      if ( !enabled ) {
-        this.cancel();
-      }
-    };
-    this.enabledProperty.link( enabledListener );
   }
 
   get enabled() {
@@ -102,6 +98,7 @@ class WebSpeaker {
    * @public
    */
   initialize() {
+    assert && assert( this.initialized === false, 'can only be initialized once' );
     this.initialized = true;
 
     this.synth = window.speechSynthesis;
@@ -127,6 +124,48 @@ class WebSpeaker {
         this.cancel();
       }
     } );
+  }
+
+  /**
+   * Sets the DerivedProperty controlling whether speech will be made with speech synthesis. The enabledProperty
+   * is pushed onto provided Properties in this function, do not include it.
+   * @public
+   *
+   * @param {Property[]} properties - list of Properties for the canSpeakProperty DerivedProperty
+   * @param {function} derivation - derivation for the canSpeakProperty from properties array
+   */
+  setCanSpeakProperty( properties, derivation ) {
+    this._canSpeakProperty.unlink( this.boundHandleCanSpeakChange );
+    this._canSpeakProperty.dispose();
+
+    properties.push( this.enabledProperty );
+    this._canSpeakProperty = new DerivedProperty( properties, ( ...args ) => {
+      return derivation( ...args ) && this.enabledProperty.value;
+    } );
+
+    this._canSpeakProperty.link( this.boundHandleCanSpeakChange );
+  }
+
+  /**
+   * Get a reference to the DerivedProperty controlling whether speech is allowed.
+   * @public
+   *
+   * @returns {DerivedProperty}
+   */
+  getCanSpeakProperty() {
+    return this._canSpeakProperty;
+  }
+
+  get canSpeakProperty() { return this.getCanSpeakProperty(); }
+
+  /**
+   * When we can no longer speak, cancel all speech to silence everything.
+   * @private
+   *
+   * @param {boolean} canSpeak
+   */
+  handleCanSpeakChange( canSpeak ) {
+    if ( !canSpeak ) { this.cancel(); }
   }
 
   /**
@@ -173,7 +212,7 @@ class WebSpeaker {
    *                               need to implement our own queing system.
    */
   speak( utterance, withCancel = true ) {
-    if ( this.initialized && webSpeaker.enabledProperty && !this.onHold ) {
+    if ( this.initialized && this._canSpeakProperty.value && !this.onHold ) {
       withCancel && this.synth.cancel();
 
       // since the "end" event doesn't come through all the time after cancel() on
@@ -225,15 +264,17 @@ class WebSpeaker {
   }
 
   /**
-   * Speak something initially and synchronously after some user interaction. Browsers require that
-   * speech happen in response to some user interaction, with absolutely no delay. A safari workaround
-   * includes waiting to speak behind a timeout. And announce is used with the utteranceQueue, which does
-   * not speek things instantly. Use this when speech is enabled, then use speak for all other usages.
+   * Speak something initially and synchronously after some user interaction. This is helpful for a couple of cases:
+   *   1) Browsers require that speech happen in response to some user interaction, with absolutely no delay.
+   *   announce() is used with the utteranceQueue, which does not speak things instantly. Use this when speech is
+   *   enabled, then use speak for all other usages.
+   *   2) There are rare cases where we need to speak even when when canSpeakProperty is false (like speaking
+   *   that voicing has been successfully turned off).
    * @public
    *
    * @param utterThis
    */
-  initialSpeech( utterThis ) {
+  speakImmediately( utterThis ) {
     if ( this.initialized ) {
 
       // embidding marks (for i18n) impact the output, strip before speaking
