@@ -546,7 +546,7 @@ define( require => {
         tandem: options.tandem.createTandem( 'gotPointerCaptureAction' ),
         parameters: [
           { name: 'id', phetioType: NumberIO },
-          { name: 'event', phetioType: DOMEventIO }
+          { name: 'event', phetioType: EventIO }
         ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a pointer is captured (normally at the start of an interaction)',
@@ -565,7 +565,7 @@ define( require => {
         tandem: options.tandem.createTandem( 'lostPointerCaptureAction' ),
         parameters: [
           { name: 'id', phetioType: NumberIO },
-          { name: 'event', phetioType: DOMEventIO }
+          { name: 'event', phetioType: EventIO }
         ],
         phetioEventType: EventType.USER,
         phetioDocumentation: 'Emits when a pointer loses its capture (normally at the end of an interaction)',
