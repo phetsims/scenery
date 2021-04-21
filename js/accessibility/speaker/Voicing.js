@@ -9,7 +9,6 @@
  */
 
 import inheritance from '../../../../phet-core/js/inheritance.js';
-import merge from '../../../../phet-core/js/merge.js';
 import Node from '../../nodes/Node.js';
 import extend from '../../../../phet-core/js/extend.js';
 import scenery from '../../scenery.js';
@@ -17,6 +16,21 @@ import scenery from '../../scenery.js';
 // The collection of Shapes that define the hit areas for Voicing. Used by VoicingInputListener to determine
 // when the pointer is over a Node that is composed with Voicing.
 const VoicingHitShapes = new Map();
+
+const CREATE_EMPTY_RESPONSE_CONTENT = event => null;
+
+// options that are supported by Voicing.js. Added to mutator keys so that Voicing properties can be set with mutate.
+const VOICING_OPTION_KEYS = [
+  'voicingCreateObjectResponse',
+  'voicingCreateContextResponse',
+  'voicingCreateHintResponse',
+  'voicingCreateOverrideResponse',
+  'voicingHitShape',
+  'voicingHighlight',
+  'voicingFocusableProperty',
+  'voicingTagName',
+  'utteranceQueue'
+];
 
 const Voicing = {
   compose( type ) {
@@ -27,86 +41,69 @@ const Voicing = {
     extend( proto, {
 
       /**
-       * Initialize in the type being composed with Voicing. Call this in the constructor.
-       * @param {Object} [options]
+       * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in
+       * the order they will be evaluated.
+       * @protected
+       *
+       * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
+       *       cases that may apply.
        */
-      initializeVoicing( options ) {
-        options = merge( {
+      _mutatorKeys: VOICING_OPTION_KEYS.concat( proto._mutatorKeys ),
 
-          // {function(event: SceneryEvent):string|null} - Create the content for the Node that will be spoken on
-          // down, focus, and click events when the user has selected to hear object responses.
-          voicingCreateObjectResponse: event => null,
-
-          // {function(event: SceneryEvent):string|null} - Create the content for the Node that will be spoken on
-          // down, focus, and click events when the user has selected to hear context responses.
-          voicingCreateContextResponse: event => null,
-
-          // {function(event: SceneryEvent):string|null} - Create the content for the Node that will be spoken on
-          // down, focus, and click events when the user has selected to hear hints.
-          voicingCreateHintResponse: event => null,
-
-          // {function(event: SceneryEvent):string|null} - Create the content for the Node that will be spoken on down,
-          // focus, and click events regardless of what ouptut the user has selected as long as voicing is enabled.
-          voicingCreateOverrideResponse: event => null,
-
-          // {Shape|null} The shape used to determine if a pointer is over this Node for the purposes of voicing and
-          // highlights. In the local coordinate frame of the Node. Depending on which features are enabled, a highlight
-          // may appear over this Node when a Pointer hits this Shape. Used by SpeakerHighlighter.
-          voicingHitShape: null,
-
-          // {VoicingHighlight|null} - Sets the highlight that will surround this Node when a Pointer is over the
-          // voicingHitShape when voicing is enabled. Typically used with Nodes that are not otherwise interactive
-          // but have become clickable for the purposes of Voicing. VoicingHighlight is styled differently from
-          // other focus highlights to distinguish this. Null value means that NO voicingHighlight will be used,
-          // there are no default voicing highlights.
-          voicingHighlight: null,
-
-          // {boolean}
-          voicingHighlightOnly: false,
-
-          // {null|BooleanProperty} - Controls whether this voicingNode is focusable. Generally useful for Nodes
-          // that would not otherwise be focusable when the voicing feature is disabled.
-          voicingFocusableProperty: null,
-
-          // {string|null} - The tagName (of ParallelDOM.js) that will be applied to this Node when this Node is
-          // focusable.
-          voicingTagName: null,
-
-          // {UtteranceQueue} - The utteranceQueue that content for this VoicingNode will be spoken through. By default,
-          // it will go through the Display's VoicingUtteranceQueue, but you may need separate UtteranceQueues for
-          // different areas of content in your application to manage complex alerts.
-          utteranceQueue: null
-        }, options );
+      /**
+       * Initialize in the type being composed with Voicing. Call this in the constructor.
+       * @public
+       */
+      initializeVoicing() {
 
         // @public (read-only)
         this.voicing = true;
 
-        // @private
+        // @private {function(event: SceneryEvent):string|null} - Create the content for the Node that will be spoken on
+        // down, focus, and click events when the user has selected to hear object responses.
+        this._voicingCreateObjectResponse = CREATE_EMPTY_RESPONSE_CONTENT;
+
+        // @private {Shape|null} The shape used to determine if a pointer is over this Node for the purposes of voicing and
+        // highlights. In the local coordinate frame of the Node. Depending on which features are enabled, a highlight
+        // may appear over this Node when a Pointer hits this Shape. Used by SpeakerHighlighter.
         this._voicingHitShape = null;
+
+        // @private {VoicingHighlight|null} - Sets the highlight that will surround this Node when a Pointer is over the
+        // voicingHitShape when voicing is enabled. Typically used with Nodes that are not otherwise interactive
+        // but have become clickable for the purposes of Voicing. VoicingHighlight is styled differently from
+        // other focus highlights to distinguish this. Null value means that NO voicingHighlight will be used,
+        // there are no default voicing highlights.
         this._voicingHighlight = null;
+
+        // @private {null|BooleanProperty} - Controls whether this voicingNode is focusable. Generally useful for Nodes
+        // that would not otherwise be focusable when the voicing feature is disabled.
         this._voicingFocusableProperty = null;
+
+        // @private {string|null} - The tagName (of ParallelDOM.js) that will be applied to this Node when this Node is
+        // focusable.
         this._voicingTagName = null;
-        this._voicingCreateObjectResponse = null;
-        this._voicingCreateContextResponse = null;
-        this._voicingCreateHintResponse = null;
-        this._voicingCreateOverrideResponse = null;
-        this._utteranceQueue = null;
 
-        // @private
+        // @private {function(event: SceneryEvent):string|null} - Create the content for the Node that will be spoken on
+        // down, focus, and click events when the user has selected to hear context responses.
+        this._voicingCreateContextResponse = CREATE_EMPTY_RESPONSE_CONTENT;
+
+        // @private {function(event: SceneryEvent):string|null} - Create the content for the Node that will be spoken on
+        // down, focus, and click events when the user has selected to hear hints.
+        this._voicingCreateHintResponse = CREATE_EMPTY_RESPONSE_CONTENT;
+
+        // @private {function(event: SceneryEvent):string|null} - Create the content for the Node that will be spoken
+        // on down, focus, and click events regardless of what ouptut the user has selected as long as voicing is
+        // enabled.
+        this._voicingCreateOverrideResponse = CREATE_EMPTY_RESPONSE_CONTENT;
+
+        // @private {UtteranceQueue} - The utteranceQueue that content for this VoicingNode will be spoken through.
+        // By default, it will go through the Display's VoicingUtteranceQueue, but you may need separate
+        // UtteranceQueues for different areas of content in your application to manage complex alerts.
+        this._voicingUtteranceQueue = null;
+
+        // @private - reference kept so this listener can be added/removed when the voicingFocusableProperty changes
         this.focusableChangeListener = this.onFocusableChange.bind( this );
-
-        // NOTE: should be using mutate for this
-        this.setVoicingHitShape( options.voicingHitShape );
-        this.setVoicingHighlight( options.voicingHighlight );
-        this.setVoicingTagName( options.voicingTagName );
-        this.setVoicingFocusableProperty( options.voicingFocusableProperty );
-        this.setVoicingCreateObjectResponse( options.voicingCreateObjectResponse );
-        this.setVoicingCreateContextResponse( options.voicingCreateContextResponse );
-        this.setVoicingCreateHintResponse( options.voicingCreateHintResponse );
-        this.setVoicingCreateOverrideResponse( options.voicingCreateOverrideResponse );
-        this.setUtteranceQueue( options.utteranceQueue );
       },
-
 
       /**
        * Set the function that will create an object response for the Node, and is spoken if the user has selected hear
@@ -334,10 +331,10 @@ const Voicing = {
        *
        * @param {UtteranceQueue} utteranceQueue
        */
-      setUtteranceQueue( utteranceQueue ) {
-        this._utteranceQueue = utteranceQueue;
+      setVoicingUtteranceQueue( utteranceQueue ) {
+        this._voicingUtteranceQueue = utteranceQueue;
       },
-      set utteranceQueue( utteranceQueue ) { this.setUtteranceQueue( utteranceQueue ); },
+      set utteranceQueue( utteranceQueue ) { this.setVoicingUtteranceQueue( utteranceQueue ); },
 
       /**
        * Gets the utteranceQueue through which voicing associated with this Node will be spoken.
@@ -346,7 +343,7 @@ const Voicing = {
        * @returns {UtteranceQueue}
        */
       getUtteranceQueue() {
-        return this._utteranceQueue;
+        return this._voicingUtteranceQueue;
       },
       get utteranceQueue() { return this.getUtteranceQueue(); },
 
