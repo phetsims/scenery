@@ -159,11 +159,17 @@ QUnit.test( 'Trail and Node transform equivalence', assert => {
 
 if ( Tandem.PHET_IO_ENABLED ) {
 
-  QUnit.test( 'Node instrumented visibleProperty', assert => testInstrumentedNodeProperty( assert, 'visible', 'visibleProperty', 'setVisibleProperty', true ) );
+  QUnit.test( 'Node instrumented visibleProperty', assert => testInstrumentedNodeProperty( assert, 'visible',
+    'visibleProperty', 'setVisibleProperty',
+    true, 'phetioVisiblePropertyInstrumented' ) );
 
-  QUnit.test( 'Node instrumented enabledProperty', assert => testInstrumentedNodeProperty( assert, 'enabled', 'enabledProperty', 'setEnabledProperty', Node.DEFAULT_OPTIONS.enabledPropertyPhetioInstrumented ) );
+  QUnit.test( 'Node instrumented enabledProperty', assert => testInstrumentedNodeProperty( assert, 'enabled',
+    'enabledProperty', 'setEnabledProperty',
+    Node.DEFAULT_OPTIONS.phetioEnabledPropertyInstrumented, 'phetioEnabledPropertyInstrumented' ) );
 
-  QUnit.test( 'Node instrumented inputEnabledProperty', assert => testInstrumentedNodeProperty( assert, 'inputEnabled', 'inputEnabledProperty', 'setInputEnabledProperty', Node.DEFAULT_OPTIONS.inputEnabledPropertyPhetioInstrumented ) );
+  QUnit.test( 'Node instrumented inputEnabledProperty', assert => testInstrumentedNodeProperty( assert, 'inputEnabled',
+    'inputEnabledProperty', 'setInputEnabledProperty',
+    Node.DEFAULT_OPTIONS.phetioInputEnabledPropertyInstrumented, 'phetioInputEnabledPropertyInstrumented' ) );
 
   /**
    * Factor out a way to test added Properties to Node and their PhET-iO instrumentation
@@ -171,9 +177,12 @@ if ( Tandem.PHET_IO_ENABLED ) {
    * @param {string} nodeField - name of getter/setter, like `visible`
    * @param {string} nodeProperty - name of public property, like `visibleProperty`
    * @param {string} nodePropertySetter - name of setter function, like `setVisibleProperty`
-   * @param {boolean} ownedPropertyPhetioInstrumented - default value of *PhetioInstrumented option in Node.
+   * @param {boolean} ownedPropertyInstrumented - default value of phetioNodePropertyInstrumentedKeyName option in Node.
+   * @param {string} phetioNodePropertyInstrumentedKeyName - key name for setting opt-in PhET-iO instrumentation
    */
-  const testInstrumentedNodeProperty = ( assert, nodeField, nodeProperty, nodePropertySetter, ownedPropertyPhetioInstrumented ) => {
+  const testInstrumentedNodeProperty = ( assert, nodeField,
+                                         nodeProperty, nodePropertySetter,
+                                         ownedPropertyInstrumented, phetioNodePropertyInstrumentedKeyName ) => {
 
     const apiValidation = phet.tandem.phetioAPIValidation;
     const previousAPIValidationEnabled = apiValidation.enabled;
@@ -267,13 +276,11 @@ if ( Tandem.PHET_IO_ENABLED ) {
      /* Testing instrumented nodes
      */
 
-    const nodePropertyPhetioInstrumentedKeyName = `${nodeProperty}PhetioInstrumented`;
-
-    // instrumentedNodeWithDefaultInstrumentedProperty => instrumented property (before startup)
+      // instrumentedNodeWithDefaultInstrumentedProperty => instrumented property (before startup)
     let instrumented = new Node( {
-      tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` ),
-      [ `${nodeProperty}PhetioInstrumented` ]: true
-    } );
+        tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` ),
+        [ phetioNodePropertyInstrumentedKeyName ]: true
+      } );
     assert.ok( instrumented[ nodeProperty ].targetProperty === instrumented[ nodeProperty ].ownedPhetioProperty );
     assert.ok( instrumented.linkedElements.length === 0, `no linked elements for default ${nodeProperty}` );
     testNodeAndProperty( instrumented, instrumented[ nodeProperty ] );
@@ -282,9 +289,9 @@ if ( Tandem.PHET_IO_ENABLED ) {
     // instrumentedNodeWithDefaultInstrumentedProperty => uninstrumented property (before startup)
     instrumented = new Node( {
       tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` ),
-      [ nodePropertyPhetioInstrumentedKeyName ]: true
+      [ phetioNodePropertyInstrumentedKeyName ]: true
     } );
-    instrumented.hasOwnProperty( 'nodePropertyPhetioInstrumentedKeyName' ) && assert.ok( instrumented[ nodePropertyPhetioInstrumentedKeyName ] === true, 'getter should work' );
+    instrumented.hasOwnProperty( 'phetioNodePropertyInstrumentedKeyName' ) && assert.ok( instrumented[ phetioNodePropertyInstrumentedKeyName ] === true, 'getter should work' );
     window.assert && assert.throws( () => {
       instrumented.mutate( { [ nodeProperty ]: uninstrumentedProperty } );
     }, `cannot remove instrumentation from the Node's ${nodeProperty}` );
@@ -293,7 +300,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     // instrumentedNodeWithPassedInInstrumentedProperty => instrumented property (before startup)
     instrumented = new Node( {
       tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` ),
-      [ nodePropertyPhetioInstrumentedKeyName ]: true
+      [ phetioNodePropertyInstrumentedKeyName ]: true
     } );
     instrumented.mutate( { [ nodeProperty ]: instrumentedProperty } );
     assert.ok( instrumented[ nodeProperty ].targetProperty === instrumentedProperty );
@@ -337,7 +344,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     // instrumentedNodeWithDefaultInstrumentedProperty => instrumented property (after startup)
     const instrumented1 = new Node( {
       tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyUniquelyNamedNodeThatWillNotBeDuplicated1` ),
-      [ nodePropertyPhetioInstrumentedKeyName ]: true
+      [ phetioNodePropertyInstrumentedKeyName ]: true
     } );
     assert.ok( instrumented1[ nodeProperty ].targetProperty === instrumented1[ nodeProperty ].ownedPhetioProperty );
     assert.ok( instrumented1.linkedElements.length === 0, `no linked elements for default ${nodeProperty}` );
@@ -346,7 +353,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
     // instrumentedNodeWithDefaultInstrumentedProperty => uninstrumented property (after startup)
     const instrumented2 = new Node( {
       tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyUniquelyNamedNodeThatWillNotBeDuplicated2` ),
-      [ nodePropertyPhetioInstrumentedKeyName ]: true
+      [ phetioNodePropertyInstrumentedKeyName ]: true
     } );
     window.assert && assert.throws( () => {
       instrumented2[ nodePropertySetter ]( uninstrumentedProperty );
@@ -390,7 +397,7 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
     instrumented = new Node( {
       tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` ),
-      [ nodePropertyPhetioInstrumentedKeyName ]: true
+      [ phetioNodePropertyInstrumentedKeyName ]: true
     } );
     window.assert && assert.throws( () => {
       instrumented[ nodePropertySetter ]( null );
@@ -399,14 +406,14 @@ if ( Tandem.PHET_IO_ENABLED ) {
 
 
     // If by default this property isn't instrumented, then this should cause an error
-    if ( !ownedPropertyPhetioInstrumented ) {
+    if ( !ownedPropertyInstrumented ) {
 
       instrumented = new Node( {
         tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode` )
       } );
       window.assert && assert.throws( () => {
-        instrumented[ nodePropertyPhetioInstrumentedKeyName ] = true;
-      }, `cannot set ${nodeProperty}PhetioInstrumented after instrumentation` );
+        instrumented[ phetioNodePropertyInstrumentedKeyName ] = true;
+      }, `cannot set ${phetioNodePropertyInstrumentedKeyName} after instrumentation` );
       instrumented.dispose();
     }
 

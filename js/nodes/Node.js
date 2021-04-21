@@ -204,11 +204,11 @@ const NODE_OPTION_KEYS = [
   'pickableProperty', // {Property.<boolean|null>|null} - Sets forwarding of the pickableProperty, see setPickableProperty() for more documentation
   'pickable', // {boolean|null} - Whether the Node is pickable, see setPickable() for more documentation
 
-  'enabledPropertyPhetioInstrumented', // {boolean} - When true, create an instrumented enabledProperty when this Node is instrumented, see setEnabledPropertyPhetioInstrumented() for more documentation
+  'phetioEnabledPropertyInstrumented', // {boolean} - When true, create an instrumented enabledProperty when this Node is instrumented, see setPhetioEnabledPropertyInstrumented() for more documentation
   'enabledProperty', // {Property.<boolean>|null} - Sets forwarding of the enabledProperty, see setEnabledProperty() for more documentation
   'enabled', // {boolean} - Whether the Node is enabled, see setEnabled() for more documentation
 
-  'inputEnabledPropertyPhetioInstrumented', // {boolean} - When true, create an instrumented inputEnabledProperty when this Node is instrumented, see setInputEnabledPropertyPhetioInstrumented() for more documentation
+  'phetioInputEnabledPropertyInstrumented', // {boolean} - When true, create an instrumented inputEnabledProperty when this Node is instrumented, see setPhetioInputEnabledPropertyInstrumented() for more documentation
   'inputEnabledProperty', // {Property.<boolean>|null} - Sets forwarding of the inputEnabledProperty, see setInputEnabledProperty() for more documentation
   'inputEnabled', // {boolean} Whether input events can reach into this subtree, see setInputEnabled() for more documentation
   'inputListeners', // {Array.<Object>} - The input listeners attached to the Node, see setInputListeners() for more documentation
@@ -260,9 +260,9 @@ const DEFAULT_OPTIONS = {
   disabledOpacity: 1,
   pickable: null,
   enabled: true,
-  enabledPropertyPhetioInstrumented: false,
+  phetioEnabledPropertyInstrumented: false,
   inputEnabled: true,
-  inputEnabledPropertyPhetioInstrumented: false,
+  phetioInputEnabledPropertyInstrumented: false,
   clipArea: null,
   mouseArea: null,
   touchArea: null,
@@ -357,13 +357,13 @@ class Node extends PhetioObject {
 
     // @public {TinyForwardingProperty.<boolean>} - See setEnabled() and setEnabledProperty()
     this._enabledProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.enabled,
-      DEFAULT_OPTIONS.enabledPropertyPhetioInstrumented, this.onEnabledPropertyChange.bind( this ) );
+      DEFAULT_OPTIONS.phetioEnabledPropertyInstrumented, this.onEnabledPropertyChange.bind( this ) );
 
     // @public {TinyProperty.<boolean>} - Whether input event listeners on this Node or descendants on a trail will have
     // input listeners. triggered. Note that this does NOT effect picking, and only prevents some listeners from being
     // fired.
     this._inputEnabledProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.inputEnabled,
-      DEFAULT_OPTIONS.inputEnabledPropertyPhetioInstrumented );
+      DEFAULT_OPTIONS.phetioInputEnabledPropertyInstrumented );
 
     // @private {TinyProperty.<Shape|null>} - This Node and all children will be clipped by this shape (in addition to any
     // other clipping shapes). The shape should be in the local coordinate frame.
@@ -4288,39 +4288,39 @@ class Node extends PhetioObject {
    * Use this to automatically create a forwarded, PhET-iO instrumented enabledProperty internal to Node. This is different
    * from visible because enabled by default doesn't not create this forwarded Property.
    * @public
-   * @param {boolean} enabledPropertyPhetioInstrumented
+   * @param {boolean} phetioEnabledPropertyInstrumented
    * @returns {Node} - for chaining
    */
-  setEnabledPropertyPhetioInstrumented( enabledPropertyPhetioInstrumented ) {
-    return this._enabledProperty.setTargetPropertyInstrumented( enabledPropertyPhetioInstrumented, this );
+  setPhetioEnabledPropertyInstrumented( phetioEnabledPropertyInstrumented ) {
+    return this._enabledProperty.setTargetPropertyInstrumented( phetioEnabledPropertyInstrumented, this );
   }
 
   /**
-   * See setEnabledPropertyPhetioInstrumented() for more information
+   * See setPhetioEnabledPropertyInstrumented() for more information
    * @public
    *
    * @param {boolean} value
    */
-  set enabledPropertyPhetioInstrumented( value ) {
-    this.setEnabledPropertyPhetioInstrumented( value );
+  set phetioEnabledPropertyInstrumented( value ) {
+    this.setPhetioEnabledPropertyInstrumented( value );
   }
 
   /**
    * @public
    * @returns {boolean}
    */
-  getEnabledPropertyPhetioInstrumented() {
+  getPhetioEnabledPropertyInstrumented() {
     return this._enabledProperty.getTargetPropertyInstrumented();
   }
 
   /**
-   * See getEnabledPropertyPhetioInstrumented() for more information
+   * See getPhetioEnabledPropertyInstrumented() for more information
    * @public
    *
    * @returns {boolean}
    */
-  get enabledPropertyPhetioInstrumented() {
-    return this.getEnabledPropertyPhetioInstrumented();
+  get phetioEnabledPropertyInstrumented() {
+    return this.getPhetioEnabledPropertyInstrumented();
   }
 
   /**
@@ -4443,39 +4443,39 @@ class Node extends PhetioObject {
    * from visible because inputEnabled by default doesn't not create this forwarded Property.
    * @public
    *
-   * @param {boolean} inputEnabledPropertyPhetioInstrumented
+   * @param {boolean} phetioInputEnabledPropertyInstrumented
    * @returns {Node} - for chaining
    */
-  setInputEnabledPropertyPhetioInstrumented( inputEnabledPropertyPhetioInstrumented ) {
-    return this._inputEnabledProperty.setTargetPropertyInstrumented( inputEnabledPropertyPhetioInstrumented, this );
+  setPhetioInputEnabledPropertyInstrumented( phetioInputEnabledPropertyInstrumented ) {
+    return this._inputEnabledProperty.setTargetPropertyInstrumented( phetioInputEnabledPropertyInstrumented, this );
   }
 
   /**
-   * See setInputEnabledPropertyPhetioInstrumented() for more information
+   * See setPhetioInputEnabledPropertyInstrumented() for more information
    * @public
    *
    * @param {boolean} value
    */
-  set inputEnabledPropertyPhetioInstrumented( value ) {
-    this.setInputEnabledPropertyPhetioInstrumented( value );
+  set phetioInputEnabledPropertyInstrumented( value ) {
+    this.setPhetioInputEnabledPropertyInstrumented( value );
   }
 
   /**
    * @public
    * @returns {boolean}
    */
-  getInputEnabledPropertyPhetioInstrumented() {
+  getPhetioInputEnabledPropertyInstrumented() {
     return this._inputEnabledProperty.getTargetPropertyInstrumented();
   }
 
   /**
-   * See getInputEnabledPropertyPhetioInstrumented() for more information
+   * See getPhetioInputEnabledPropertyInstrumented() for more information
    * @public
    *
    * @returns {boolean}
    */
-  get inputEnabledPropertyPhetioInstrumented() {
-    return this.getInputEnabledPropertyPhetioInstrumented();
+  get phetioInputEnabledPropertyInstrumented() {
+    return this.getPhetioInputEnabledPropertyInstrumented();
   }
 
   /**
