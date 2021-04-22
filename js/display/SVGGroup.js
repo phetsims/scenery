@@ -301,7 +301,8 @@ class SVGGroup {
         svgGroup.removeAttribute( 'opacity' );
       }
 
-      const needsFilter = this.willApplyFilters && this.node._filters.length;
+      const filters = this.node.getInternalFilters();
+      const needsFilter = this.willApplyFilters && filters.length;
       const filterId = `filter-${this.id}`;
 
       if ( needsFilter ) {
@@ -319,9 +320,9 @@ class SVGGroup {
         // Fill in elements into our filter
         let filterRegionPercentageIncrease = 50;
         let inName = 'SourceGraphic';
-        const length = this.node._filters.length;
+        const length = filters.length;
         for ( let i = 0; i < length; i++ ) {
-          const filter = this.node._filters[ i ];
+          const filter = filters[ i ];
 
           const resultName = i === length - 1 ? undefined : `e${i}`; // Last result should be undefined
           filter.applySVGFilter( this.filterElement, inName, resultName );

@@ -804,7 +804,7 @@ class PDOMPeer {
     assert && assert( content === null || typeof content === 'string', 'incorrect inner content type' );
     assert && assert( this.pdomInstance.children.length === 0, 'descendants exist with accessible content, innerContent cannot be used' );
     assert && assert( PDOMUtils.tagNameSupportsContent( this._primarySibling.tagName ),
-      `tagName: ${this._tagName} does not support inner content` );
+      `tagName: ${this.tagName} does not support inner content` );
 
     // no-op to support any option order
     if ( !this._primarySibling ) {

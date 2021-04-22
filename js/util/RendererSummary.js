@@ -368,8 +368,8 @@ class RendererSummary {
     }
 
     // NOTE: If changing, see Instance.updateRenderingState
-    const requiresSplit = node._hints.cssTransform || node._hints.layerSplit;
-    const rendererHint = node._hints.renderer;
+    const requiresSplit = node.cssTransform || node.layerSplit;
+    const rendererHint = node.getInternalRenderer();
 
     // Whether this subtree will be able to support a single SVG element
     // NOTE: If changing, see Instance.updateRenderingState

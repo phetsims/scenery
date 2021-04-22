@@ -378,7 +378,7 @@ class Instance {
     this.groupRenderer = 0;
     this.sharedCacheRenderer = 0;
 
-    const hints = this.node._hints;
+    const renderer = this.node.getInternalRenderer();
 
     this.isUnderCanvasCache = this.isSharedCanvasCacheRoot ||
                               ( this.parent ? ( this.parent.isUnderCanvasCache || this.parent.isInstanceCanvasCache || this.parent.isSharedCanvasCacheSelf ) : false );
@@ -386,20 +386,21 @@ class Instance {
     // set up our preferred renderer list (generally based on the parent)
     this.preferredRenderers = this.parent ? this.parent.preferredRenderers : defaultPreferredRenderers;
     // allow the node to modify its preferred renderers (and those of its descendants)
-    if ( hints.renderer ) {
-      this.preferredRenderers = Renderer.pushOrderBitmask( this.preferredRenderers, hints.renderer );
+    if ( renderer ) {
+      this.preferredRenderers = Renderer.pushOrderBitmask( this.preferredRenderers, renderer );
     }
 
     const hasClip = this.node.hasClipArea();
-    const hasFilters = this.node.effectiveOpacity !== 1 || hints.usesOpacity || this.node._filters.length > 0;
+    const filters = this.node.getInternalFilters();
+    const hasFilters = this.node.effectiveOpacity !== 1 || this.node.usesOpacity || filters.length > 0;
     // let hasNonDOMFilter = false;
     let hasNonSVGFilter = false;
     let hasNonCanvasFilter = false;
     // let hasNonWebGLFilter = false;
     if ( hasFilters ) {
       // NOTE: opacity is OK with all of those (currently)
-      for ( let i = 0; i < this.node._filters.length; i++ ) {
-        const filter = this.node._filters[ i ];
+      for ( let i = 0; i < filters.length; i++ ) {
+        const filter = filters[ i ];
 
         // TODO: how to handle this, if we split AT the node?
         // if ( !filter.isDOMCompatible() ) {
@@ -416,7 +417,8 @@ class Instance {
         // }
       }
     }
-    const requiresSplit = hints.cssTransform || hints.layerSplit;
+    const cssTransform = this.node.cssTransform;
+    const requiresSplit = cssTransform || this.node.layerSplit;
     const backboneRequired = this.isDisplayRoot || ( !this.isUnderCanvasCache && requiresSplit );
 
     // Support either "all Canvas" or "all SVG" opacity/clip
@@ -426,6 +428,9 @@ class Instance {
                                          ( !hasNonCanvasFilter && this.node._rendererSummary.isSubtreeRenderedExclusivelyCanvas( this.preferredRenderers ) ) );
     const useBackbone = applyTransparencyWithBlock ? false : ( backboneRequired || hasFilters || hasClip );
 
+    const canvasCacheHint = false;
+    const singleCacheHint = false;
+
     // check if we need a backbone or cache
     // if we are under a canvas cache, we will NEVER have a backbone
     // splits are accomplished just by having a backbone
@@ -434,17 +439,17 @@ class Instance {
     if ( useBackbone ) {
       this.isBackbone = true;
       this.isVisibilityApplied = true;
-      this.isTransformed = this.isDisplayRoot || !!hints.cssTransform; // for now, only trigger CSS transform if we have the specific hint
+      this.isTransformed = this.isDisplayRoot || !!cssTransform; // for now, only trigger CSS transform if we have the specific hint
       //OHTWO TODO: check whether the force acceleration hint is being used by our DOMBlock
       this.groupRenderer = Renderer.bitmaskDOM; // probably won't be used
     }
-    else if ( !applyTransparencyWithBlock && ( hasFilters || hasClip || hints.canvasCache ) ) {
+    else if ( !applyTransparencyWithBlock && ( hasFilters || hasClip || canvasCacheHint ) ) {
       // everything underneath needs to be renderable with Canvas, otherwise we cannot cache
       assert && assert( this.node._rendererSummary.isSingleCanvasSupported(),
         `hints.canvasCache provided, but not all node contents can be rendered with Canvas under ${
           this.node.constructor.name}` );
 
-      if ( hints.singleCache ) {
+      if ( singleCacheHint ) {
         // TODO: scale options - fixed size, match highest resolution (adaptive), or mipmapped
         if ( this.isSharedCanvasCacheRoot ) {
           this.isSharedCanvasCacheSelf = true;

@@ -313,7 +313,8 @@ class CanvasBlock extends FittedBlock {
 
       // We should not apply opacity or other filters at or below the filter root
       if ( i > filterRootIndex ) {
-        if ( node._filters.length ) {
+        const filters = node.getInternalFilters();
+        if ( filters.length ) {
           sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `Pop filters ${trail.subtrailTo( node ).toDebugString()}` );
 
           const topWrapper = this.wrapperStack[ this.wrapperStackIndex ];
@@ -322,7 +323,6 @@ class CanvasBlock extends FittedBlock {
 
           bottomWrapper.context.setTransform( 1, 0, 0, 1, 0, 0 );
 
-          const filters = node._filters;
           // We need to fall back to a different filter behavior with Chrome, since it over-darkens otherwise with the
           // built-in feature.
           // NOTE: Not blocking chromium anymore, see https://github.com/phetsims/scenery/issues/1139
@@ -391,7 +391,7 @@ class CanvasBlock extends FittedBlock {
           this.pushWrapper();
         }
 
-        if ( node._filters.length ) {
+        if ( node.getInternalFilters().length ) {
           sceneryLog && sceneryLog.CanvasBlock && sceneryLog.CanvasBlock( `Push filters ${trail.subtrailTo( node ).toDebugString()}` );
 
           // Push filters

@@ -226,6 +226,7 @@ const ParallelDOM = {
    * Given the constructor for Node, add accessibility functions into the prototype.
    *
    * @param {function} type - the constructor for Node
+   * @returns {Object} - The recordConfig for Node's Record
    */
   compose( type ) {
     // Can't avoid circular dependency, so no assertion here. Ensure that 'type' is the constructor for Node.
@@ -254,164 +255,164 @@ const ParallelDOM = {
       initializeParallelDOM: function() {
 
         // @private {string|null} - the HTML tag name of the element representing this node in the DOM
-        this._tagName = null;
+        // this.tagName = null;
 
         // @private {string|null} - the HTML tag name for a container parent element for this node in the DOM. This
         // container parent will contain the node's DOM element, as well as peer elements for any label or description
         // content. See setContainerTagName() for more documentation. If this option is needed (like to
         // contain multiple siblings with the primary sibling), it will default to the value of DEFAULT_CONTAINER_TAG_NAME.
-        this._containerTagName = null;
+        // this._containerTagName = null;
 
         // @private {string|null} - the HTML tag name for the label element that will contain the label content for
         // this dom element. There are ways in which you can have a label without specifying a label tag name,
         // see setLabelContent() for the list of ways.
-        this._labelTagName = null;
+        // this._labelTagName = null;
 
         // @private {string|null} - the HTML tag name for the description element that will contain descsription content
         // for this dom element. If a description is set before a tag name is defined, a paragraph element
         // will be created for the description.
-        this._descriptionTagName = null;
+        // this._descriptionTagName = null;
 
         // @private {string|null} - the type for an element with tag name of INPUT.  This should only be used
         // if the element has a tag name INPUT.
-        this._inputType = null;
+        // this._inputType = null;
 
         // @private {string|number|null} - the value of the input, only relevant if the tag name is of type "INPUT". Is a
         // string because the `value` attribute is a DOMString. null value indicates no value.
-        this._inputValue = null;
+        // this._inputValue = null;
 
         // @private {boolean} - whether or not the pdom input is considered 'checked', only useful for inputs of
         // type 'radio' and 'checkbox'
-        this._pdomChecked = false;
+        // this._pdomChecked = false;
 
         // @private {boolean} - By default the label will be prepended before the primary sibling in the PDOM. This
         // option allows you to instead have the label added after the primary sibling. Note: The label will always
         // be in front of the description sibling. If this flag is set with `appendDescription: true`, the order will be
         // (1) primary sibling, (2) label sibling, (3) description sibling. All siblings will be placed within the
         // containerParent.
-        this._appendLabel = false;
+        // this._appendLabel = false;
 
         // @private {boolean} - By default the description will be prepended before the primary sibling in the PDOM. This
         // option allows you to instead have the description added after the primary sibling. Note: The description
         // will always be after the label sibling. If this flag is set with `appendLabel: true`, the order will be
         // (1) primary sibling, (2) label sibling, (3) description sibling. All siblings will be placed within the
         // containerParent.
-        this._appendDescription = false;
+        // this._appendDescription = false;
 
         // @private {Array.<Object> - array of attributes that are on the node's DOM element.  Objects will have the
         // form { attribute:{string}, value:{*}, namespace:{string|null} }
-        this._pdomAttributes = [];
+        // this._pdomAttributes = [];
 
         // @private {string|null} - the label content for this node's DOM element.  There are multiple ways that a label
         // can be associated with a node's dom element, see setLabelContent() for more documentation
-        this._labelContent = null;
+        // this._labelContent = null;
 
         // @private {string|null} - the inner label content for this node's primary sibling. Set as inner HTML
         // or text content of the actual DOM element. If this is used, the node should not have children.
-        this._innerContent = null;
+        // this._innerContent = null;
 
         // @private {string|null} - the description content for this node's DOM element.
-        this._descriptionContent = null;
+        // this._descriptionContent = null;
 
         // @private {string|null} - If provided, it will create the primary DOM element with the specified namespace.
         // This may be needed, for example, with MathML/SVG/etc.
-        this._pdomNamespace = null;
+        // this._pdomNamespace = null;
 
         // @private {string|null} - if provided, "aria-label" will be added as an inline attribute on the node's DOM
         // element and set to this value. This will determine how the Accessible Name is provided for the DOM element.
-        this._ariaLabel = null;
+        // this._ariaLabel = null;
 
         // @private {string|null} - the ARIA role for this Node's primary sibling, added as an HTML attribute.  For a complete
         // list of ARIA roles, see https://www.w3.org/TR/wai-aria/roles.  Beware that many roles are not supported
         // by browsers or assistive technologies, so use vanilla HTML for accessibility semantics where possible.
-        this._ariaRole = null;
+        // this._ariaRole = null;
 
         // @private {string|null} - the ARIA role for the container parent element, added as an HTML attribute. For a
         // complete list of ARIA roles, see https://www.w3.org/TR/wai-aria/roles. Beware that many roles are not
         // supported by browsers or assistive technologies, so use vanilla HTML for accessibility semantics where
         // possible.
-        this._containerAriaRole = null;
+        // this._containerAriaRole = null;
 
         // @private {string|null} - if provided, "aria-valuetext" will be added as an inline attribute on the Node's
         // primary sibling and set to this value. Setting back to null will clear this attribute in the view.
-        this._ariaValueText = null;
+        // this._ariaValueText = null;
 
         // @private {Array.<Object>} - Keep track of what this Node is aria-labelledby via "associationObjects"
         // see addAriaLabelledbyAssociation for why we support more than one association.
-        this._ariaLabelledbyAssociations = [];
+        // this._ariaLabelledbyAssociations = [];
 
         // Keep a reference to all nodes that are aria-labelledby this node, i.e. that have store one of this Node's
         // peer HTMLElement's id in their peer HTMLElement's aria-labelledby attribute. This way we can tell other
         // nodes to update their aria-labelledby associations when this Node rebuilds its pdom content.
         // @private
         // {Array.<Node>}
-        this._nodesThatAreAriaLabelledbyThisNode = [];
+        // this._nodesThatAreAriaLabelledbyThisNode = [];
 
         // @private {Array.<Object>} - Keep track of what this Node is aria-describedby via "associationObjects"
         // see addAriaDescribedbyAssociation for why we support more than one association.
-        this._ariaDescribedbyAssociations = [];
+        // this._ariaDescribedbyAssociations = [];
 
         // Keep a reference to all nodes that are aria-describedby this node, i.e. that have store one of this Node's
         // peer HTMLElement's id in their peer HTMLElement's aria-describedby attribute. This way we can tell other
         // nodes to update their aria-describedby associations when this Node rebuilds its pdom content.
         // @private
         // {Array.<Node>}
-        this._nodesThatAreAriaDescribedbyThisNode = [];
+        // this._nodesThatAreAriaDescribedbyThisNode = [];
 
         // @private {Array.<Object>} - Keep track of what this Node is aria-activedescendant via "associationObjects"
         // see addActiveDescendantAssociation for why we support more than one association.
-        this._activeDescendantAssociations = [];
+        // this._activeDescendantAssociations = [];
 
         // Keep a reference to all nodes that are aria-activedescendant this node, i.e. that have store one of this Node's
         // peer HTMLElement's id in their peer HTMLElement's aria-activedescendant attribute. This way we can tell other
         // nodes to update their aria-activedescendant associations when this Node rebuilds its pdom content.
         // @private
         // {Array.<Node>}
-        this._nodesThatAreActiveDescendantToThisNode = [];
+        // this._nodesThatAreActiveDescendantToThisNode = [];
 
         // @private {boolean|null} - whether or not this Node's primary sibling has been explicitly set to receive focus from
         // tab navigation. Sets the tabIndex attribute on the Node's primary sibling. Setting to false will not remove the
         // node's DOM from the document, but will ensure that it cannot receive focus by pressing 'tab'.  Several
         // HTMLElements (such as HTML form elements) can be focusable by default, without setting this property. The
         // native HTML function from these form elements can be overridden with this property.
-        this._focusableOverride = null;
+        // this._focusableOverride = null;
 
         // @private {Shape|Node|string.<'invisible'>|null} - the focus highlight that will surround this node when it
         // is focused.  By default, the focus highlight will be a pink rectangle that surrounds the Node's local
         // bounds.
-        this._focusHighlight = null;
+        // this._focusHighlight = null;
 
         // @private {boolean} - A flag that allows prevents focus highlight from being displayed in the HighlightOverlay.
         // If true, the focus highlight for this node will be layerable in the scene graph.  Client is responsible
         // for placement of the focus highlight in the scene graph.
-        this._focusHighlightLayerable = false;
+        // this._focusHighlightLayerable = false;
 
         // @private {boolean|Node} - Adds a group focus highlight that surrounds this node when a descendant has
         // focus. Typically useful to indicate focus if focus enters a group of elements. If 'true', group
         // highlight will go around local bounds of this node. Otherwise the custom node will be used as the highlight/
-        this._groupFocusHighlight = false;
+        // this._groupFocusHighlight = false;
 
         // @private {boolean} - Whether or not the pdom content will be visible from the browser and assistive
         // technologies.  When pdomVisible is false, the Node's primary sibling will not be focusable, and it cannot
         // be found by the assistive technology virtual cursor. For more information on how assistive technologies
         // read with the virtual cursor see
         // http://www.ssbbartgroup.com/blog/how-windows-screen-readers-work-on-the-web/
-        this._pdomVisible = true;
+        // this._pdomVisible = true;
 
         // @private {Array.<Node|null>|null} - If provided, it will override the focus order between children
         // (and optionally arbitrary subtrees). If not provided, the focus order will default to the rendering order
         // (first children first, last children last) determined by the children array.
         // See setPDOMOrder() for more documentation.
-        this._pdomOrder = null;
+        // this._pdomOrder = null;
 
         // @public (scenery-internal) {Node|null} - If this node is specified in another node's
         // pdomOrder, then this will have the value of that other (PDOM parent) Node. Otherwise it's null.
-        this._pdomParent = null;
+        // this._pdomParent = null;
 
         // @public (scenery-internal) {Node|null} - If this is specified, the primary sibling will be positioned
         // to align with this source node and observe the transforms along this node's trail. At this time the
         // pdomTransformSourceNode cannot use DAG.
-        this._pdomTransformSourceNode = null;
+        // this._pdomTransformSourceNode = null;
 
         // @public (scenery-internal) {PDOMDisplaysInfo} - Contains information about what pdom displays
         // this node is "visible" for, see PDOMDisplaysInfo.js for more information.
@@ -423,35 +424,35 @@ const ParallelDOM = {
         // @private {boolean} - Determines if DOM siblings are positioned in the viewport. This
         // is required for Nodes that require unique input gestures with iOS VoiceOver like "Drag and Drop".
         // See setPositionInPDOM for more information.
-        this._positionInPDOM = false;
+        // this._positionInPDOM = false;
 
         // @public (read-only, scenery-internal) {boolean} - If true, any DOM events received on the label sibling
         // will not dispatch SceneryEvents through the scene graph, see setExcludeLabelSiblingFromInput()
-        this.excludeLabelSiblingFromInput = false;
+        // this.excludeLabelSiblingFromInput = false;
 
         // HIGHER LEVEL API INITIALIZATION
 
         // {string|null} - sets the "Accessible Name" of the Node, as defined by the Browser's ParallelDOM Tree
-        this._accessibleName = null;
+        // this._accessibleName = null;
 
         // {PDOMBehaviorFunctionDef} - function that returns the options needed to set the appropriate accessible name for the Node
-        this._accessibleNameBehavior = ParallelDOM.BASIC_ACCESSIBLE_NAME_BEHAVIOR;
+        // this._accessibleNameBehavior = ParallelDOM.BASIC_ACCESSIBLE_NAME_BEHAVIOR;
 
         // {string|null} - sets the help text of the Node, this most often corresponds to description text.
-        this._helpText = null;
+        // this._helpText = null;
 
         // {PDOMBehaviorFunctionDef} - sets the help text of the Node, this most often corresponds to description text.
-        this._helpTextBehavior = ParallelDOM.HELP_TEXT_AFTER_CONTENT;
+        // this._helpTextBehavior = ParallelDOM.HELP_TEXT_AFTER_CONTENT;
 
         // {string|null} - sets the help text of the Node, this most often corresponds to label sibling text.
-        this._pdomHeading = null;
+        // this._pdomHeading = null;
+
+        // {PDOMBehaviorFunctionDef} - sets the help text of the Node, this most often corresponds to description text.
+        // this._pdomHeadingBehavior = DEFAULT_PDOM_HEADING_BEHAVIOR;
 
         // TODO: implement headingLevel override, see https://github.com/phetsims/scenery/issues/855
         // {number|null} - the number that corresponds to the heading tag the node will get if using the pdomHeading api,.
-        this._headingLevel = null;
-
-        // {PDOMBehaviorFunctionDef} - sets the help text of the Node, this most often corresponds to description text.
-        this._pdomHeadingBehavior = DEFAULT_PDOM_HEADING_BEHAVIOR;
+        // this._headingLevel = null;
 
         // @public {TinyEmitter} - Emits an event when the focus highlight is changed.
         this.focusHighlightChangedEmitter = new TinyEmitter();
@@ -542,7 +543,7 @@ const ParallelDOM = {
           // when accessibility is widely used, this assertion can be added back in
           // assert && assert( this._pdomInstances.length > 0, 'there must be pdom content for the node to receive focus' );
           assert && assert( this.focusable, 'trying to set focus on a node that is not focusable' );
-          assert && assert( this._pdomVisible, 'trying to set focus on a node with invisible pdom content' );
+          assert && assert( this.pdomVisible, 'trying to set focus on a node with invisible pdom content' );
           assert && assert( this._pdomInstances.length === 1, 'focus() unsupported for Nodes using DAG, pdom content is not unique' );
 
           const peer = this._pdomInstances[ 0 ].peer;
@@ -575,17 +576,17 @@ const ParallelDOM = {
 
         if ( this.hasPDOMContent && assert ) {
 
-          this._inputType && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support inputType' );
-          this._pdomChecked && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support pdomChecked.' );
-          this._inputValue && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support inputValue' );
-          this._pdomChecked && assert( INPUT_TYPES_THAT_SUPPORT_CHECKED.indexOf( this._inputType.toUpperCase() ) >= 0, `inputType does not support checked attribute: ${this._inputType}` );
-          this._focusHighlightLayerable && assert( this.focusHighlight instanceof Node, 'focusHighlight must be Node if highlight is layerable' );
-          this._tagName.toUpperCase() === INPUT_TAG && assert( typeof this._inputType === 'string', ' inputType expected for input' );
+          this.inputType && assert( this.tagName.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support inputType' );
+          this.pdomChecked && assert( this.tagName.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support pdomChecked.' );
+          this.inputValue && assert( this.tagName.toUpperCase() === INPUT_TAG, 'tagName must be INPUT to support inputValue' );
+          this.pdomChecked && assert( INPUT_TYPES_THAT_SUPPORT_CHECKED.indexOf( this.inputType.toUpperCase() ) >= 0, `inputType does not support checked attribute: ${this.inputType}` );
+          this.focusHighlightLayerable && assert( this.focusHighlight instanceof Node, 'focusHighlight must be Node if highlight is layerable' );
+          this.tagName.toUpperCase() === INPUT_TAG && assert( typeof this.inputType === 'string', ' inputType expected for input' );
 
           // note that most things that are not focusable by default need innerContent to be focusable on VoiceOver,
           // but this will catch most cases since often things that get added to the focus order have the application
           // role for custom input
-          this.ariaRole === 'application' && assert( this._innerContent, 'must have some innerContent or element will never be focusable in VoiceOver' );
+          this.ariaRole === 'application' && assert( this.innerContent, 'must have some innerContent or element will never be focusable in VoiceOver' );
         }
 
         for ( let i = 0; i < this.children.length; i++ ) {
@@ -601,6 +602,15 @@ const ParallelDOM = {
       /***********************************************************************************************************/
 
       /**
+       * @protected
+       *
+       * @param {string|null} accessibleName
+       */
+      validateAccessibleName( accessibleName ) {
+        assert && assert( accessibleName === null || typeof accessibleName === 'string' );
+      },
+
+      /**
        * Set the Node's pdom content in a way that will define the Accessible Name for the browser. Different
        * HTML components and code situations require different methods of setting the Accessible Name. See
        * setAccessibleNameBehavior for details on how this string is rendered in the PDOM. Setting to null will clear
@@ -612,13 +622,7 @@ const ParallelDOM = {
        * @param {string|null} accessibleName
        */
       setAccessibleName: function( accessibleName ) {
-        assert && assert( accessibleName === null || typeof accessibleName === 'string' );
-
-        if ( this._accessibleName !== accessibleName ) {
-          this._accessibleName = accessibleName;
-
-          this.onPDOMContentChange();
-        }
+        this._record._set_( 'accessibleName', accessibleName );
       },
       set accessibleName( accessibleName ) { this.setAccessibleName( accessibleName ); },
 
@@ -631,7 +635,7 @@ const ParallelDOM = {
        * @returns {string|null}
        */
       getAccessibleName: function() {
-        return this._accessibleName;
+        return this._record._get_( 'accessibleName' );
       },
       get accessibleName() { return this.getAccessibleName(); },
 
@@ -641,10 +645,18 @@ const ParallelDOM = {
        * @public
        */
       removeFromPDOM: function() {
-        assert && assert( this._tagName !== null, 'There is no pdom content to clear from the PDOM' );
+        assert && assert( this.tagName !== null, 'There is no pdom content to clear from the PDOM' );
         this.tagName = null;
       },
 
+      /**
+       * @protected
+       *
+       * @param {PDOMBehaviorFunctionDef} accessibleNameBehavior
+       */
+      validateAccessibleNameBehavior( accessibleNameBehavior ) {
+        assert && PDOMBehaviorFunctionDef.validatePDOMBehaviorFunctionDef( accessibleNameBehavior );
+      },
 
       /**
        * accessibleNameBehavior is a function that will set the appropriate options on this node to get the desired
@@ -670,14 +682,7 @@ const ParallelDOM = {
        * @param {PDOMBehaviorFunctionDef} accessibleNameBehavior
        */
       setAccessibleNameBehavior: function( accessibleNameBehavior ) {
-        assert && PDOMBehaviorFunctionDef.validatePDOMBehaviorFunctionDef( accessibleNameBehavior );
-
-        if ( this._accessibleNameBehavior !== accessibleNameBehavior ) {
-
-          this._accessibleNameBehavior = accessibleNameBehavior;
-
-          this.onPDOMContentChange();
-        }
+        this._record._set_( 'accessibleNameBehavior', accessibleNameBehavior );
       },
       set accessibleNameBehavior( accessibleNameBehavior ) { this.setAccessibleNameBehavior( accessibleNameBehavior ); },
 
@@ -689,10 +694,18 @@ const ParallelDOM = {
        * @returns {function}
        */
       getAccessibleNameBehavior: function() {
-        return this._accessibleNameBehavior;
+        return this._record._get_( 'accessibleNameBehavior' );
       },
       get accessibleNameBehavior() { return this.getAccessibleNameBehavior(); },
 
+      /**
+       * @protected
+       *
+       * @param {string|null} pdomHeading
+       */
+      validatePDOMHeading( pdomHeading ) {
+        assert && assert( pdomHeading === null || typeof pdomHeading === 'string' );
+      },
 
       /**
        * Set the Node heading content. This by default will be a heading tag whose level is dependent on how many parents
@@ -703,13 +716,7 @@ const ParallelDOM = {
        * @param {string|null} pdomHeading
        */
       setPDOMHeading: function( pdomHeading ) {
-        assert && assert( pdomHeading === null || typeof pdomHeading === 'string' );
-
-        if ( this._pdomHeading !== pdomHeading ) {
-          this._pdomHeading = pdomHeading;
-
-          this.onPDOMContentChange();
-        }
+        this._record._set_( 'pdomHeading', pdomHeading );
       },
       set pdomHeading( pdomHeading ) { this.setPDOMHeading( pdomHeading ); },
 
@@ -721,10 +728,18 @@ const ParallelDOM = {
        * @returns {string|null}
        */
       getPDOMHeading: function() {
-        return this._pdomHeading;
+        return this._record._get_( 'pdomHeading' );
       },
       get pdomHeading() { return this.getPDOMHeading(); },
 
+      /**
+       * @protected
+       *
+       * @param {PDOMBehaviorFunctionDef} pdomHeadingBehavior
+       */
+      validatePDOMHeadingBehavior( pdomHeadingBehavior ) {
+        assert && PDOMBehaviorFunctionDef.validatePDOMBehaviorFunctionDef( pdomHeadingBehavior );
+      },
 
       /**
        * Set the behavior of how `this.pdomHeading` is set in the PDOM. See default behavior function for more
@@ -735,14 +750,7 @@ const ParallelDOM = {
        * @param {PDOMBehaviorFunctionDef} pdomHeadingBehavior
        */
       setPDOMHeadingBehavior: function( pdomHeadingBehavior ) {
-        assert && PDOMBehaviorFunctionDef.validatePDOMBehaviorFunctionDef( pdomHeadingBehavior );
-
-        if ( this._pdomHeadingBehavior !== pdomHeadingBehavior ) {
-
-          this._pdomHeadingBehavior = pdomHeadingBehavior;
-
-          this.onPDOMContentChange();
-        }
+        this._record._set_( 'pdomHeadingBehavior', pdomHeadingBehavior );
       },
       set pdomHeadingBehavior( pdomHeadingBehavior ) { this.setPDOMHeadingBehavior( pdomHeadingBehavior ); },
 
@@ -754,10 +762,19 @@ const ParallelDOM = {
        * @returns {function}
        */
       getPDOMHeadingBehavior: function() {
-        return this._pdomHeadingBehavior;
+        return this._record._get_( 'pdomHeadingBehavior' );
       },
       get pdomHeadingBehavior() { return this.getPDOMHeadingBehavior(); },
 
+      /**
+       * @private
+       *
+       * @param {number|null} headingLevel
+       */
+      setHeadingLevel( headingLevel ) {
+        this._record._set_( 'headingLevel', headingLevel );
+      },
+      set headingLevel( value ) { this.setHeadingLevel( value ); },
 
       /**
        * Get the tag name of the DOM element representing this node for accessibility.
@@ -767,7 +784,7 @@ const ParallelDOM = {
        * @returns {number|null}
        */
       getHeadingLevel: function() {
-        return this._headingLevel;
+        return this._record._get_( 'headingLevel' );
       },
       get headingLevel() { return this.getHeadingLevel(); },
 
@@ -782,26 +799,37 @@ const ParallelDOM = {
        * @returns {number}
        */
       computeHeadingLevel: function() {
+        const pdomParent = this.pdomParent;
+        const pdomHeading = this.pdomHeading;
 
-        // TODO: assert??? assert( this.headingLevel || this._pdomParent); see https://github.com/phetsims/scenery/issues/855
+        // TODO: assert??? assert( this.headingLevel || this.pdomParent); see https://github.com/phetsims/scenery/issues/855
         // Either ^ which may break during construction, or V (below)
         //  base case to heading level 1
-        if ( !this._pdomParent ) {
-          if ( this._pdomHeading ) {
-            this._headingLevel = 1;
+        if ( !pdomParent ) {
+          if ( pdomHeading ) {
+            this.headingLevel = 1;
             return 1;
           }
           return 0; // so that the first node with a heading is headingLevel 1
         }
 
-        if ( this._pdomHeading ) {
-          const level = this._pdomParent.computeHeadingLevel() + 1;
-          this._headingLevel = level;
+        if ( pdomHeading ) {
+          const level = pdomParent.computeHeadingLevel() + 1;
+          this.headingLevel = level;
           return level;
         }
         else {
-          return this._pdomParent.computeHeadingLevel();
+          return pdomParent.computeHeadingLevel();
         }
+      },
+
+      /**
+       * @protected
+       *
+       * @param {string|null} helpText
+       */
+      validateHelpText( helpText ) {
+        assert && assert( helpText === null || typeof helpText === 'string' );
       },
 
       /**
@@ -813,14 +841,7 @@ const ParallelDOM = {
        * @param {string|null} helpText
        */
       setHelpText: function( helpText ) {
-        assert && assert( helpText === null || typeof helpText === 'string' );
-
-        if ( this._helpText !== helpText ) {
-
-          this._helpText = helpText;
-
-          this.onPDOMContentChange();
-        }
+        this._record._set_( 'helpText', helpText );
       },
       set helpText( helpText ) { this.setHelpText( helpText ); },
 
@@ -832,9 +853,18 @@ const ParallelDOM = {
        * @returns {string|null}
        */
       getHelpText: function() {
-        return this._helpText;
+        return this._record._get_( 'helpText' );
       },
       get helpText() { return this.getHelpText(); },
+
+      /**
+       * @protected
+       *
+       * @param {PDOMBehaviorFunctionDef} helpTextBehavior
+       */
+      validateHelpTextBehavior( helpTextBehavior ) {
+        assert && PDOMBehaviorFunctionDef.validatePDOMBehaviorFunctionDef( helpTextBehavior );
+      },
 
       /**
        * helpTextBehavior is a function that will set the appropriate options on this node to get the desired
@@ -845,14 +875,7 @@ const ParallelDOM = {
        * @param {PDOMBehaviorFunctionDef} helpTextBehavior
        */
       setHelpTextBehavior: function( helpTextBehavior ) {
-        assert && PDOMBehaviorFunctionDef.validatePDOMBehaviorFunctionDef( helpTextBehavior );
-
-        if ( this._helpTextBehavior !== helpTextBehavior ) {
-
-          this._helpTextBehavior = helpTextBehavior;
-
-          this.onPDOMContentChange();
-        }
+        this._record._set_( 'helpTextBehavior', helpTextBehavior );
       },
       set helpTextBehavior( helpTextBehavior ) { this.setHelpTextBehavior( helpTextBehavior ); },
 
@@ -864,7 +887,7 @@ const ParallelDOM = {
        * @returns {function}
        */
       getHelpTextBehavior: function() {
-        return this._helpTextBehavior;
+        return this._record._get_( 'helpTextBehavior' );
       },
       get helpTextBehavior() { return this.getHelpTextBehavior(); },
 
@@ -872,6 +895,15 @@ const ParallelDOM = {
       /***********************************************************************************************************/
       // LOWER LEVEL GETTERS AND SETTERS FOR PDOM API OPTIONS
       /***********************************************************************************************************/
+
+      /**
+       * @protected
+       *
+       * @param {string|null} tagName
+       */
+      validateTagName( tagName ) {
+        assert && assert( tagName === null || typeof tagName === 'string' );
+      },
 
       /**
        * Set the tag name for the primary sibling in the PDOM. DOM element tag names are read-only, so this
@@ -882,14 +914,7 @@ const ParallelDOM = {
        * @param {string|null} tagName
        */
       setTagName: function( tagName ) {
-        assert && assert( tagName === null || typeof tagName === 'string' );
-
-        if ( tagName !== this._tagName ) {
-          this._tagName = tagName;
-
-          // TODO: this could be setting PDOM content twice
-          this.onPDOMContentChange();
-        }
+        this._record._set_( 'tagName', tagName );
       },
       set tagName( tagName ) { this.setTagName( tagName ); },
 
@@ -900,9 +925,18 @@ const ParallelDOM = {
        * @returns {string|null}
        */
       getTagName: function() {
-        return this._tagName;
+        return this._record._get_( 'tagName' );
       },
       get tagName() { return this.getTagName(); },
+
+      /**
+       * @protected
+       *
+       * @param {string|null} tagName
+       */
+      validateLabelTagName( tagName ) {
+        assert && assert( tagName === null || typeof tagName === 'string' );
+      },
 
       /**
        * Set the tag name for the accessible label sibling for this Node. DOM element tag names are read-only,
@@ -914,13 +948,7 @@ const ParallelDOM = {
        * @param {string|null} tagName
        */
       setLabelTagName: function( tagName ) {
-        assert && assert( tagName === null || typeof tagName === 'string' );
-
-        if ( tagName !== this._labelTagName ) {
-          this._labelTagName = tagName;
-
-          this.onPDOMContentChange();
-        }
+        this._record._set_( 'labelTagName', tagName );
       },
       set labelTagName( tagName ) { this.setLabelTagName( tagName ); },
 
@@ -931,9 +959,18 @@ const ParallelDOM = {
        * @returns {string|null}
        */
       getLabelTagName: function() {
-        return this._labelTagName;
+        return this._record._get_( 'labelTagName' );
       },
       get labelTagName() { return this.getLabelTagName(); },
+
+      /**
+       * @protected
+       *
+       * @param {string|null} tagName
+       */
+      validateDescriptionTagName( tagName ) {
+        assert && assert( tagName === null || typeof tagName === 'string' );
+      },
 
       /**
        * Set the tag name for the description sibling. HTML element tag names are read-only, so this will require creating
@@ -947,14 +984,7 @@ const ParallelDOM = {
        * @param {string|null} tagName
        */
       setDescriptionTagName: function( tagName ) {
-        assert && assert( tagName === null || typeof tagName === 'string' );
-
-        if ( tagName !== this._descriptionTagName ) {
-
-          this._descriptionTagName = tagName;
-
-          this.onPDOMContentChange();
-        }
+        this._record._set_( 'descriptionTagName', tagName );
       },
       set descriptionTagName( tagName ) { this.setDescriptionTagName( tagName ); },
 
@@ -965,9 +995,38 @@ const ParallelDOM = {
        * @returns {string|null}
        */
       getDescriptionTagName: function() {
-        return this._descriptionTagName;
+        return this._record._get_( 'descriptionTagName' );
       },
       get descriptionTagName() { return this.getDescriptionTagName(); },
+
+      /**
+       * @protected
+       *
+       * @param {string|null} inputType
+       */
+      validateInputType( inputType ) {
+        assert && assert( inputType === null || typeof inputType === 'string' );
+        assert && this.tagName && assert( this.tagName.toUpperCase() === INPUT_TAG, 'tag name must be INPUT to support inputType' );
+      },
+
+      /**
+       * @protected
+       *
+       * @param {string|null} inputType
+       */
+      onAfterInputType( inputType ) {
+        for ( let i = 0; i < this._pdomInstances.length; i++ ) {
+          const peer = this._pdomInstances[ i ].peer;
+
+          // remove the attribute if cleared by setting to 'null'
+          if ( inputType === null ) {
+            peer.removeAttributeFromElement( 'type' );
+          }
+          else {
+            peer.setAttributeToElement( 'type', inputType );
+          }
+        }
+      },
 
       /**
        * Sets the type for an input element.  Element must have the INPUT tag name. The input attribute is not
@@ -977,24 +1036,7 @@ const ParallelDOM = {
        * @param {string|null} inputType
        */
       setInputType: function( inputType ) {
-        assert && assert( inputType === null || typeof inputType === 'string' );
-        assert && this.tagName && assert( this._tagName.toUpperCase() === INPUT_TAG, 'tag name must be INPUT to support inputType' );
-
-        if ( inputType !== this._inputType ) {
-
-          this._inputType = inputType;
-          for ( let i = 0; i < this._pdomInstances.length; i++ ) {
-            const peer = this._pdomInstances[ i ].peer;
-
-            // remove the attribute if cleared by setting to 'null'
-            if ( inputType === null ) {
-              peer.removeAttributeFromElement( 'type' );
-            }
-            else {
-              peer.setAttributeToElement( 'type', inputType );
-            }
-          }
-        }
+        this._record._set_( 'inputType', inputType );
       },
       set inputType( inputType ) { this.setInputType( inputType ); },
 
@@ -1005,9 +1047,18 @@ const ParallelDOM = {
        * @returns {string|null}
        */
       getInputType: function() {
-        return this._inputType;
+        return this._record._get_( 'inputType' );
       },
       get inputType() { return this.getInputType(); },
+
+      /**
+       * @protected
+       *
+       * @param {boolean} appendLabel
+       */
+      validateAppendLabel( appendLabel ) {
+        assert && assert( typeof appendLabel === 'boolean' );
+      },
 
       /**
        * By default the label will be prepended before the primary sibling in the PDOM. This
@@ -1025,13 +1076,7 @@ const ParallelDOM = {
        * @param {boolean} appendLabel
        */
       setAppendLabel: function( appendLabel ) {
-        assert && assert( typeof appendLabel === 'boolean' );
-
-        if ( this._appendLabel !== appendLabel ) {
-          this._appendLabel = appendLabel;
-
-          this.onPDOMContentChange();
-        }
+        this._record._set_( 'appendLabel', appendLabel );
       },
       set appendLabel( appendLabel ) { this.setAppendLabel( appendLabel ); },
 
@@ -1042,9 +1087,18 @@ const ParallelDOM = {
        * @returns {boolean}
        */
       getAppendLabel: function() {
-        return this._appendLabel;
+        return this._record._get_( 'appendLabel' );
       },
       get appendLabel() { return this.getAppendLabel(); },
+
+      /**
+       * @protected
+       *
+       * @param {boolean} appendDescription
+       */
+      validateAppendDescription( appendDescription ) {
+        assert && assert( typeof appendDescription === 'boolean' );
+      },
 
       /**
        * By default the label will be prepended before the primary sibling in the PDOM. This
@@ -1062,13 +1116,7 @@ const ParallelDOM = {
        * @param {boolean} appendDescription
        */
       setAppendDescription: function( appendDescription ) {
-        assert && assert( typeof appendDescription === 'boolean' );
-
-        if ( this._appendDescription !== appendDescription ) {
-          this._appendDescription = appendDescription;
-
-          this.onPDOMContentChange();
-        }
+        this._record._set_( 'appendDescription', appendDescription );
       },
       set appendDescription( appendDescription ) { this.setAppendDescription( appendDescription ); },
 
@@ -1079,10 +1127,19 @@ const ParallelDOM = {
        * @returns {boolean}
        */
       getAppendDescription: function() {
-        return this._appendDescription;
+        return this._record._get_( 'appendDescription' );
       },
       get appendDescription() { return this.getAppendDescription(); },
 
+
+      /**
+       * @protected
+       *
+       * @param {string|null} tagName
+       */
+      validateContainerTagName( tagName ) {
+        assert && assert( tagName === null || typeof tagName === 'string', `invalid tagName argument: ${tagName}` );
+      },
 
       /**
        * Set the container parent tag name. By specifying this container parent, an element will be created that
@@ -1103,12 +1160,7 @@ const ParallelDOM = {
        * @param {string|null} tagName
        */
       setContainerTagName: function( tagName ) {
-        assert && assert( tagName === null || typeof tagName === 'string', `invalid tagName argument: ${tagName}` );
-
-        if ( this._containerTagName !== tagName ) {
-          this._containerTagName = tagName;
-          this.onPDOMContentChange();
-        }
+        this._record._set_( 'containerTagName', tagName );
       },
       set containerTagName( tagName ) { this.setContainerTagName( tagName ); },
 
@@ -1119,9 +1171,35 @@ const ParallelDOM = {
        * @returns {string|null}
        */
       getContainerTagName: function() {
-        return this._containerTagName;
+        return this._record._get_( 'containerTagName' );
       },
       get containerTagName() { return this.getContainerTagName(); },
+
+      /**
+       * @protected
+       *
+       * @param {string|null} label
+       */
+      validateLabelContent( label ) {
+        assert && assert( label === null || typeof label === 'string', 'label must be null or string' );
+      },
+
+      /**
+       * @protected
+       *
+       * @param {string|null} label
+       */
+      onAfterLabelContent( label ) {
+        // if trying to set labelContent, make sure that there is a labelTagName default
+        if ( !this.labelTagName ) {
+          this.setLabelTagName( DEFAULT_LABEL_TAG_NAME );
+        }
+
+        for ( let i = 0; i < this._pdomInstances.length; i++ ) {
+          const peer = this._pdomInstances[ i ].peer;
+          peer.setLabelSiblingContent( this.labelContent );
+        }
+      },
 
       /**
        * Set the content of the label sibling for the this node.  The label sibling will default to the value of
@@ -1136,21 +1214,7 @@ const ParallelDOM = {
        * @param {string|null} label
        */
       setLabelContent: function( label ) {
-        assert && assert( label === null || typeof label === 'string', 'label must be null or string' );
-
-        if ( this._labelContent !== label ) {
-          this._labelContent = label;
-
-          // if trying to set labelContent, make sure that there is a labelTagName default
-          if ( !this._labelTagName ) {
-            this.setLabelTagName( DEFAULT_LABEL_TAG_NAME );
-          }
-
-          for ( let i = 0; i < this._pdomInstances.length; i++ ) {
-            const peer = this._pdomInstances[ i ].peer;
-            peer.setLabelSiblingContent( this._labelContent );
-          }
-        }
+        this._record._set_( 'labelContent', label );
       },
       set labelContent( label ) { this.setLabelContent( label ); },
 
@@ -1161,9 +1225,30 @@ const ParallelDOM = {
        * @returns {string|null}
        */
       getLabelContent: function() {
-        return this._labelContent;
+        return this._record._get_( 'labelContent' );
       },
       get labelContent() { return this.getLabelContent(); },
+
+      /**
+       * @protected
+       *
+       * @param {string|null} content
+       */
+      validateInnerContent( content ) {
+        assert && assert( content === null || typeof content === 'string' );
+      },
+
+      /**
+       * @protected
+       *
+       * @param {string|null} content
+       */
+      onAfterInnerContent( content ) {
+        for ( let i = 0; i < this._pdomInstances.length; i++ ) {
+          const peer = this._pdomInstances[ i ].peer;
+          peer.setPrimarySiblingContent( this.innerContent );
+        }
+      },
 
       /**
        * Set the inner content for the primary sibling of the PDOMPeers of this Node. Will be set as textContent
@@ -1174,16 +1259,7 @@ const ParallelDOM = {
        * @public
        */
       setInnerContent: function( content ) {
-        assert && assert( content === null || typeof content === 'string' );
-
-        if ( this._innerContent !== content ) {
-          this._innerContent = content;
-
-          for ( let i = 0; i < this._pdomInstances.length; i++ ) {
-            const peer = this._pdomInstances[ i ].peer;
-            peer.setPrimarySiblingContent( this._innerContent );
-          }
-        }
+        this._record._set_( 'innerContent', content );
       },
       set innerContent( content ) { this.setInnerContent( content ); },
 
@@ -1194,9 +1270,35 @@ const ParallelDOM = {
        * @public
        */
       getInnerContent: function() {
-        return this._innerContent;
+        return this._record._get_( 'innerContent' );
       },
       get innerContent() { return this.getInnerContent(); },
+
+      /**
+       * @protected
+       *
+       * @param {string|null} descriptionContent
+       */
+      validateDescriptionContent( descriptionContent ) {
+        assert && assert( descriptionContent === null || typeof descriptionContent === 'string', 'description must be null or string' );
+      },
+
+      /**
+       * @protected
+       *
+       * @param {string|null} descriptionContent
+       */
+      onAfterDescriptionContent( descriptionContent ) {
+        // if there is no description element, assume that a paragraph element should be used
+        if ( !this.descriptionTagName ) {
+          this.setDescriptionTagName( DEFAULT_DESCRIPTION_TAG_NAME );
+        }
+
+        for ( let i = 0; i < this._pdomInstances.length; i++ ) {
+          const peer = this._pdomInstances[ i ].peer;
+          peer.setDescriptionSiblingContent( this.descriptionContent );
+        }
+      },
 
       /**
        * Set the description content for this Node's primary sibling. The description sibling tag name must support
@@ -1207,21 +1309,7 @@ const ParallelDOM = {
        * @param {string|null} descriptionContent
        */
       setDescriptionContent: function( descriptionContent ) {
-        assert && assert( descriptionContent === null || typeof descriptionContent === 'string', 'description must be null or string' );
-
-        if ( this._descriptionContent !== descriptionContent ) {
-          this._descriptionContent = descriptionContent;
-
-          // if there is no description element, assume that a paragraph element should be used
-          if ( !this._descriptionTagName ) {
-            this.setDescriptionTagName( DEFAULT_DESCRIPTION_TAG_NAME );
-          }
-
-          for ( let i = 0; i < this._pdomInstances.length; i++ ) {
-            const peer = this._pdomInstances[ i ].peer;
-            peer.setDescriptionSiblingContent( this._descriptionContent );
-          }
-        }
+        this._record._set_( 'descriptionContent', descriptionContent );
       },
       set descriptionContent( textContent ) { this.setDescriptionContent( textContent ); },
 
@@ -1232,9 +1320,32 @@ const ParallelDOM = {
        * @returns {string|null}
        */
       getDescriptionContent: function() {
-        return this._descriptionContent;
+        return this._record._get_( 'descriptionContent' );
       },
       get descriptionContent() { return this.getDescriptionContent(); },
+
+      /**
+       * @protected
+       *
+       * @param {string|null} ariaRole
+       */
+      validateAriaRole( ariaRole ) {
+        assert && assert( ariaRole === null || typeof ariaRole === 'string' );
+      },
+
+      /**
+       * @protected
+       *
+       * @param {string|null} ariaRole
+       */
+      onAfterAriaRole( ariaRole ) {
+        if ( ariaRole !== null ) {
+          this.setPDOMAttribute( 'role', ariaRole );
+        }
+        else {
+          this.removePDOMAttribute( 'role' );
+        }
+      },
 
       /**
        * Set the ARIA role for this Node's primary sibling. According to the W3C, the ARIA role is read-only for a DOM
@@ -1250,19 +1361,7 @@ const ParallelDOM = {
        *                            for a list of roles, states, and properties.
        */
       setAriaRole: function( ariaRole ) {
-        assert && assert( ariaRole === null || typeof ariaRole === 'string' );
-
-        if ( this._ariaRole !== ariaRole ) {
-
-          this._ariaRole = ariaRole;
-
-          if ( ariaRole !== null ) {
-            this.setPDOMAttribute( 'role', ariaRole );
-          }
-          else {
-            this.removePDOMAttribute( 'role' );
-          }
-        }
+        this._record._set_( 'ariaRole', ariaRole );
       },
       set ariaRole( ariaRole ) { this.setAriaRole( ariaRole ); },
 
@@ -1273,9 +1372,39 @@ const ParallelDOM = {
        * @returns {string|null}
        */
       getAriaRole: function() {
-        return this._ariaRole;
+        return this._record._get_( 'ariaRole' );
       },
       get ariaRole() { return this.getAriaRole(); },
+
+      /**
+       * @protected
+       *
+       * @param {string|null} ariaRole
+       */
+      validateContainerAriaRole( ariaRole ) {
+        assert && assert( ariaRole === null || typeof ariaRole === 'string' );
+      },
+
+      /**
+       * @protected
+       *
+       * @param {string|null} ariaRole
+       */
+      onAfterContainerAriaRole( ariaRole ) {
+        // clear out the attribute
+        if ( ariaRole === null ) {
+          this.removePDOMAttribute( 'role', {
+            elementName: PDOMPeer.CONTAINER_PARENT
+          } );
+        }
+
+        // add the attribute
+        else {
+          this.setPDOMAttribute( 'role', ariaRole, {
+            elementName: PDOMPeer.CONTAINER_PARENT
+          } );
+        }
+      },
 
       /**
        * Set the ARIA role for this node's container parent element.  According to the W3C, the ARIA role is read-only
@@ -1288,26 +1417,7 @@ const ParallelDOM = {
        *                            for a list of roles, states, and properties.
        */
       setContainerAriaRole: function( ariaRole ) {
-        assert && assert( ariaRole === null || typeof ariaRole === 'string' );
-
-        if ( this._containerAriaRole !== ariaRole ) {
-
-          this._containerAriaRole = ariaRole;
-
-          // clear out the attribute
-          if ( this._containerAriaRole === null ) {
-            this.removePDOMAttribute( 'role', {
-              elementName: PDOMPeer.CONTAINER_PARENT
-            } );
-          }
-
-          // add the attribute
-          else {
-            this.setPDOMAttribute( 'role', ariaRole, {
-              elementName: PDOMPeer.CONTAINER_PARENT
-            } );
-          }
-        }
+        this._record._set_( 'containerAriaRole', ariaRole );
       },
       set containerAriaRole( ariaRole ) { this.setContainerAriaRole( ariaRole ); },
 
@@ -1317,9 +1427,32 @@ const ParallelDOM = {
        * @returns {string|null}
        */
       getContainerAriaRole: function() {
-        return this._containerAriaRole;
+        return this._record._get_( 'containerAriaRole' );
       },
       get containerAriaRole() { return this.getContainerAriaRole(); },
+
+      /**
+       * @protected
+       *
+       * @param {string|null} ariaValueText
+       */
+      validateAriaValueText( ariaValueText ) {
+        assert && assert( ariaValueText === null || typeof ariaValueText === 'string' );
+      },
+
+      /**
+       * @protected
+       *
+       * @param {string|null} ariaValueText
+       */
+      onAfterAriaValueText( ariaValueText ) {
+        if ( ariaValueText === null ) {
+          this.removePDOMAttribute( 'aria-valuetext' );
+        }
+        else {
+          this.setPDOMAttribute( 'aria-valuetext', ariaValueText );
+        }
+      },
 
       /**
        * Set the aria-valuetext of this Node independently from the changing value, if necessary. Setting to null will
@@ -1329,18 +1462,7 @@ const ParallelDOM = {
        * @param {string|null} ariaValueText
        */
       setAriaValueText: function( ariaValueText ) {
-        assert && assert( ariaValueText === null || typeof ariaValueText === 'string' );
-
-        if ( this._ariaValueText !== ariaValueText ) {
-          this._ariaValueText = ariaValueText;
-
-          if ( this._ariaValueText === null ) {
-            this.removePDOMAttribute( 'aria-valuetext' );
-          }
-          else {
-            this.setPDOMAttribute( 'aria-valuetext', ariaValueText );
-          }
-        }
+        this._record._set_( 'ariaValueText', ariaValueText );
       },
       set ariaValueText( ariaValueText ) { this.setAriaValueText( ariaValueText ); },
 
@@ -1352,9 +1474,18 @@ const ParallelDOM = {
        * @returns {string|null}
        */
       getAriaValueText: function() {
-        return this._ariaValueText;
+        return this._record._get_( 'ariaValueText' );
       },
       get ariaValueText() { return this.getAriaValueText(); },
+
+      /**
+       * @protected
+       *
+       * @param {string|null} pdomNamespace
+       */
+      validatePDOMNamespace( pdomNamespace ) {
+        assert && assert( pdomNamespace === null || typeof pdomNamespace === 'string' );
+      },
 
       /**
        * Sets the namespace for the primary element (relevant for MathML/SVG/etc.)
@@ -1370,15 +1501,7 @@ const ParallelDOM = {
        * @returns {Node} - For chaining
        */
       setPDOMNamespace: function( pdomNamespace ) {
-        assert && assert( pdomNamespace === null || typeof pdomNamespace === 'string' );
-
-        if ( this._pdomNamespace !== pdomNamespace ) {
-          this._pdomNamespace = pdomNamespace;
-
-          // If the namespace changes, tear down the view and redraw the whole thing, there is no easy mutable solution here.
-          this.onPDOMContentChange();
-        }
-
+        this._record._set_( 'pdomNamespace', pdomNamespace );
         return this;
       },
       set pdomNamespace( value ) { this.setPDOMNamespace( value ); },
@@ -1390,9 +1513,32 @@ const ParallelDOM = {
        * @returns {string|null}
        */
       getPDOMNamespace: function() {
-        return this._pdomNamespace;
+        return this._record._get_( 'pdomNamespace' );
       },
       get pdomNamespace() { return this.getPDOMNamespace(); },
+
+      /**
+       * @protected
+       *
+       * @param {string|null} ariaLabel
+       */
+      validateAriaLabel( ariaLabel ) {
+        assert && assert( ariaLabel === null || typeof ariaLabel === 'string' );
+      },
+
+      /**
+       * @protected
+       *
+       * @param {string|null} ariaLabel
+       */
+      onAfterAriaLabel( ariaLabel ) {
+        if ( ariaLabel === null ) {
+          this.removePDOMAttribute( 'aria-label' );
+        }
+        else {
+          this.setPDOMAttribute( 'aria-label', ariaLabel );
+        }
+      },
 
       /**
        * Sets the 'aria-label' attribute for labelling the Node's primary sibling. By using the
@@ -1403,18 +1549,7 @@ const ParallelDOM = {
        * @param {string|null} ariaLabel - the text for the aria label attribute
        */
       setAriaLabel: function( ariaLabel ) {
-        assert && assert( ariaLabel === null || typeof ariaLabel === 'string' );
-
-        if ( this._ariaLabel !== ariaLabel ) {
-          this._ariaLabel = ariaLabel;
-
-          if ( this._ariaLabel === null ) {
-            this.removePDOMAttribute( 'aria-label' );
-          }
-          else {
-            this.setPDOMAttribute( 'aria-label', ariaLabel );
-          }
-        }
+        this._record._set_( 'ariaLabel', ariaLabel );
       },
       set ariaLabel( ariaLabel ) { this.setAriaLabel( ariaLabel ); },
 
@@ -1425,9 +1560,39 @@ const ParallelDOM = {
        * @returns {string|null}
        */
       getAriaLabel: function() {
-        return this._ariaLabel;
+        return this._record._get_( 'ariaLabel' );
       },
       get ariaLabel() { return this.getAriaLabel(); },
+
+      /**
+       * @protected
+       *
+       * @param {Node|Shape|string.<'invisible'>} focusHighlight
+       */
+      validateFocusHighlight( focusHighlight ) {
+        assert && assert( focusHighlight === null ||
+                          focusHighlight instanceof Node ||
+                          focusHighlight instanceof Shape ||
+                          focusHighlight === 'invisible' );
+      },
+
+      /**
+       * @protected
+       *
+       * @param {Node|Shape|string.<'invisible'>} focusHighlight
+       */
+      onAfterFocusHighlight( focusHighlight ) {
+        // if the focus highlight is layerable in the scene graph, update visibility so that it is only
+        // visible when associated node has focus
+        if ( this.focusHighlightLayerable ) {
+
+          // if focus highlight is layerable, it must be a node in the scene graph
+          assert && assert( focusHighlight instanceof Node );
+          focusHighlight.visible = this.focused;
+        }
+
+        this.focusHighlightChangedEmitter.emit();
+      },
 
       /**
        * Set the focus highlight for this node. By default, the focus highlight will be a pink rectangle that
@@ -1438,25 +1603,7 @@ const ParallelDOM = {
        * @param {Node|Shape|string.<'invisible'>} focusHighlight
        */
       setFocusHighlight: function( focusHighlight ) {
-        assert && assert( focusHighlight === null ||
-                          focusHighlight instanceof Node ||
-                          focusHighlight instanceof Shape ||
-                          focusHighlight === 'invisible' );
-
-        if ( this._focusHighlight !== focusHighlight ) {
-          this._focusHighlight = focusHighlight;
-
-          // if the focus highlight is layerable in the scene graph, update visibility so that it is only
-          // visible when associated node has focus
-          if ( this._focusHighlightLayerable ) {
-
-            // if focus highlight is layerable, it must be a node in the scene graph
-            assert && assert( focusHighlight instanceof Node );
-            focusHighlight.visible = this.focused;
-          }
-
-          this.focusHighlightChangedEmitter.emit();
-        }
+        this._record._set_( 'focusHighlight', focusHighlight );
       },
       set focusHighlight( focusHighlight ) { this.setFocusHighlight( focusHighlight ); },
 
@@ -1467,9 +1614,34 @@ const ParallelDOM = {
        * @returns {Node|Shape|string<'invisible'>}
        */
       getFocusHighlight: function() {
-        return this._focusHighlight;
+        return this._record._get_( 'focusHighlight' );
       },
       get focusHighlight() { return this.getFocusHighlight(); },
+
+      /**
+       * @protected
+       *
+       * @param {boolean} focusHighlightLayerable
+       */
+      validateFocusHighlightLayerable( focusHighlightLayerable ) {
+        assert && assert( typeof focusHighlightLayerable === 'boolean' );
+      },
+
+      /**
+       * @protected
+       *
+       * @param {boolean} focusHighlightLayerable
+       */
+      onAfterFocusHighlightLayerable( focusHighlightLayerable ) {
+        const focusHighlight = this.focusHighlight;
+
+        // if a focus highlight is defined (it must be a node), update its visibility so it is linked to focus
+        // of the associated node
+        if ( focusHighlight ) {
+          assert && assert( focusHighlight instanceof Node );
+          focusHighlight.visible = this.focused;
+        }
+      },
 
       /**
        * Setting a flag to break default and allow the focus highlight to be (z) layered into the scene graph.
@@ -1480,17 +1652,7 @@ const ParallelDOM = {
        * @param {Boolean} focusHighlightLayerable
        */
       setFocusHighlightLayerable: function( focusHighlightLayerable ) {
-
-        if ( this._focusHighlightLayerable !== focusHighlightLayerable ) {
-          this._focusHighlightLayerable = focusHighlightLayerable;
-
-          // if a focus highlight is defined (it must be a node), update its visibility so it is linked to focus
-          // of the associated node
-          if ( this._focusHighlight ) {
-            assert && assert( this._focusHighlight instanceof Node );
-            this._focusHighlight.visible = this.focused;
-          }
-        }
+        this._record._set_( 'focusHighlightLayerable', focusHighlightLayerable );
       },
       set focusHighlightLayerable( focusHighlightLayerable ) { this.setFocusHighlightLayerable( focusHighlightLayerable ); },
 
@@ -1501,9 +1663,18 @@ const ParallelDOM = {
        * @returns {Boolean}
        */
       getFocusHighlightLayerable: function() {
-        return this._focusHighlightLayerable;
+        return this._record._get_( 'focusHighlightLayerable' );
       },
       get focusHighlightLayerable() { return this.getFocusHighlightLayerable(); },
+
+      /**
+       * @protected
+       *
+       * @param {boolean|Node} groupHighlight
+       */
+      validateGroupFocusHighlight( groupHighlight ) {
+        assert && assert( typeof groupHighlight === 'boolean' || groupHighlight instanceof Node );
+      },
 
       /**
        * Set whether or not this node has a group focus highlight. If this node has a group focus highlight, an extra
@@ -1517,8 +1688,7 @@ const ParallelDOM = {
        * @param {boolean|Node} groupHighlight
        */
       setGroupFocusHighlight: function( groupHighlight ) {
-        assert && assert( typeof groupHighlight === 'boolean' || groupHighlight instanceof Node );
-        this._groupFocusHighlight = groupHighlight;
+        this._record._set_( 'groupFocusHighlight', groupHighlight );
       },
       set groupFocusHighlight( groupHighlight ) { this.setGroupFocusHighlight( groupHighlight ); },
 
@@ -1526,10 +1696,10 @@ const ParallelDOM = {
        * Get whether or not this node has a 'group' focus highlight, see setter for more information.
        * @public
        *
-       * @returns {Boolean}
+       * @returns {boolean|Node}
        */
       getGroupFocusHighlight: function() {
-        return this._groupFocusHighlight;
+        return this._record._get_( 'groupFocusHighlight' );
       },
       get groupFocusHighlight() { return this.getGroupFocusHighlight(); },
 
@@ -1537,7 +1707,7 @@ const ParallelDOM = {
       /**
        * Very similar algorithm to setChildren in Node.js
        * @public
-       * @param {Array.<Object>} ariaLabelledbyAssociations - list of associationObjects, see this._ariaLabelledbyAssociations.
+       * @param {Array.<Object>} ariaLabelledbyAssociations - list of associationObjects, see this.ariaLabelledbyAssociations.
        */
       setAriaLabelledbyAssociations: function( ariaLabelledbyAssociations ) {
         let associationObject;
@@ -1553,7 +1723,7 @@ const ParallelDOM = {
         }
 
         // no work to be done if both are empty, return early
-        if ( ariaLabelledbyAssociations.length === 0 && this._ariaLabelledbyAssociations.length === 0 ) {
+        if ( ariaLabelledbyAssociations.length === 0 && this._record._getLength_( 'ariaLabelledbyAssociations' ) === 0 ) {
           return;
         }
 
@@ -1562,7 +1732,7 @@ const ParallelDOM = {
         const inBoth = []; // Child nodes that "stay". Will be ordered for the "after" case.
 
         // get a difference of the desired new list, and the old
-        arrayDifference( ariaLabelledbyAssociations, this._ariaLabelledbyAssociations, afterOnly, beforeOnly, inBoth );
+        arrayDifference( ariaLabelledbyAssociations, this.ariaLabelledbyAssociations, afterOnly, beforeOnly, inBoth );
 
         // remove each current associationObject that isn't in the new list
         for ( i = 0; i < beforeOnly.length; i++ ) {
@@ -1570,7 +1740,7 @@ const ParallelDOM = {
           this.removeAriaLabelledbyAssociation( associationObject );
         }
 
-        assert && assert( this._ariaLabelledbyAssociations.length === inBoth.length,
+        assert && assert( this.ariaLabelledbyAssociations.length === inBoth.length,
           'Removing associations should not have triggered other association changes' );
 
         // add each association from the new list that hasn't been added yet
@@ -1586,7 +1756,7 @@ const ParallelDOM = {
        * @returns {Array.<Object>} - the list of current association objects
        */
       getAriaLabelledbyAssociations: function() {
-        return this._ariaLabelledbyAssociations;
+        return this._record._get_( 'ariaLabelledbyAssociations' );
       },
       get ariaLabelledbyAssociations() { return this.getAriaLabelledbyAssociations(); },
 
@@ -1607,13 +1777,15 @@ const ParallelDOM = {
       addAriaLabelledbyAssociation: function( associationObject ) {
         assert && PDOMUtils.validateAssociationObject( associationObject );
 
+        const ariaLabelledbyAssociations = this._record._get_mutable_( 'ariaLabelledbyAssociations' );
+
         // TODO: assert if this associationObject is already in the association objects list! https://github.com/phetsims/scenery/issues/832
 
-        this._ariaLabelledbyAssociations.push( associationObject ); // Keep track of this association.
+        ariaLabelledbyAssociations.push( associationObject ); // Keep track of this association.
 
         // Flag that this node is is being labelled by the other node, so that if the other node changes it can tell
         // this node to restore the association appropriately.
-        associationObject.otherNode._nodesThatAreAriaLabelledbyThisNode.push( this );
+        associationObject.otherNode._record._get_mutable_( 'nodesThatAreAriaLabelledbyThisNode' ).push( this );
 
         this.updateAriaLabelledbyAssociationsInPeers();
       },
@@ -1623,10 +1795,12 @@ const ParallelDOM = {
        * @public
        */
       removeAriaLabelledbyAssociation: function( associationObject ) {
-        assert && assert( _.includes( this._ariaLabelledbyAssociations, associationObject ) );
+        const ariaLabelledbyAssociations = this._record._get_mutable_( 'ariaLabelledbyAssociations' );
+
+        assert && assert( _.includes( ariaLabelledbyAssociations, associationObject ) );
 
         // remove the
-        const removedObject = this._ariaLabelledbyAssociations.splice( _.indexOf( this._ariaLabelledbyAssociations, associationObject ), 1 );
+        const removedObject = ariaLabelledbyAssociations.splice( _.indexOf( ariaLabelledbyAssociations, associationObject ), 1 );
 
         // remove the reference from the other node back to this node because we don't need it anymore
         removedObject[ 0 ].otherNode.removeNodeThatIsAriaLabelledByThisNode( this );
@@ -1641,9 +1815,12 @@ const ParallelDOM = {
        */
       removeNodeThatIsAriaLabelledByThisNode: function( node ) {
         assert && assert( node instanceof Node );
-        const indexOfNode = _.indexOf( this._nodesThatAreAriaLabelledbyThisNode, node );
+
+        const nodesThatAreAriaLabelledbyThisNode = this._record._get_mutable_( 'nodesThatAreAriaLabelledbyThisNode' );
+
+        const indexOfNode = _.indexOf( nodesThatAreAriaLabelledbyThisNode, node );
         assert && assert( indexOfNode >= 0 );
-        this._nodesThatAreAriaLabelledbyThisNode.splice( indexOfNode, 1 );
+        nodesThatAreAriaLabelledbyThisNode.splice( indexOfNode, 1 );
       },
 
       /**
@@ -1662,11 +1839,12 @@ const ParallelDOM = {
        * @public (scenery-internal)
        */
       updateOtherNodesAriaLabelledby: function() {
+        const nodesThatAreAriaLabelledbyThisNode = this.nodesThatAreAriaLabelledbyThisNode;
 
         // if any other nodes are aria-labelledby this Node, update those associations too. Since this node's
         // pdom content needs to be recreated, they need to update their aria-labelledby associations accordingly.
-        for ( let i = 0; i < this._nodesThatAreAriaLabelledbyThisNode.length; i++ ) {
-          const otherNode = this._nodesThatAreAriaLabelledbyThisNode[ i ];
+        for ( let i = 0; i < nodesThatAreAriaLabelledbyThisNode.length; i++ ) {
+          const otherNode = nodesThatAreAriaLabelledbyThisNode[ i ];
           otherNode.updateAriaLabelledbyAssociationsInPeers();
         }
       },
@@ -1678,14 +1856,14 @@ const ParallelDOM = {
        * @returns {Array.<Node>}
        */
       getNodesThatAreAriaLabelledbyThisNode: function() {
-        return this._nodesThatAreAriaLabelledbyThisNode;
+        return this._record._get_( 'nodesThatAreAriaLabelledbyThisNode' );
       },
       get nodesThatAreAriaLabelledbyThisNode() { return this.getNodesThatAreAriaLabelledbyThisNode(); },
 
 
       /**
        * @public
-       * @param {Array.<Object>} ariaDescribedbyAssociations - list of associationObjects, see this._ariaDescribedbyAssociations.
+       * @param {Array.<Object>} ariaDescribedbyAssociations - list of associationObjects, see this.ariaDescribedbyAssociations.
        */
       setAriaDescribedbyAssociations: function( ariaDescribedbyAssociations ) {
         let associationObject;
@@ -1698,7 +1876,7 @@ const ParallelDOM = {
         }
 
         // no work to be done if both are empty
-        if ( ariaDescribedbyAssociations.length === 0 && this._ariaDescribedbyAssociations.length === 0 ) {
+        if ( ariaDescribedbyAssociations.length === 0 && this.ariaDescribedbyAssociations.length === 0 ) {
           return;
         }
 
@@ -1708,7 +1886,7 @@ const ParallelDOM = {
         let i;
 
         // get a difference of the desired new list, and the old
-        arrayDifference( ariaDescribedbyAssociations, this._ariaDescribedbyAssociations, afterOnly, beforeOnly, inBoth );
+        arrayDifference( ariaDescribedbyAssociations, this.ariaDescribedbyAssociations, afterOnly, beforeOnly, inBoth );
 
         // remove each current associationObject that isn't in the new list
         for ( i = 0; i < beforeOnly.length; i++ ) {
@@ -1716,7 +1894,7 @@ const ParallelDOM = {
           this.removeAriaDescribedbyAssociation( associationObject );
         }
 
-        assert && assert( this._ariaDescribedbyAssociations.length === inBoth.length,
+        assert && assert( this.ariaDescribedbyAssociations.length === inBoth.length,
           'Removing associations should not have triggered other association changes' );
 
         // add each association from the new list that hasn't been added yet
@@ -1732,7 +1910,7 @@ const ParallelDOM = {
        * @returns {Array.<Object>} - the list of current association objects
        */
       getAriaDescribedbyAssociations: function() {
-        return this._ariaDescribedbyAssociations;
+        return this._record._get_( 'ariaDescribedbyAssociations' );
       },
       get ariaDescribedbyAssociations() { return this.getAriaDescribedbyAssociations(); },
 
@@ -1751,13 +1929,15 @@ const ParallelDOM = {
        */
       addAriaDescribedbyAssociation: function( associationObject ) {
         assert && PDOMUtils.validateAssociationObject( associationObject );
-        assert && assert( !_.includes( this._ariaDescribedbyAssociations, associationObject ), 'describedby association already registed' );
+        assert && assert( !_.includes( this.ariaDescribedbyAssociations, associationObject ), 'describedby association already registed' );
 
-        this._ariaDescribedbyAssociations.push( associationObject ); // Keep track of this association.
+        const ariaDescribedbyAssociations = this._record._get_mutable_( 'ariaDescribedbyAssociations' );
+
+        ariaDescribedbyAssociations.push( associationObject ); // Keep track of this association.
 
         // Flag that this node is is being described by the other node, so that if the other node changes it can tell
         // this node to restore the association appropriately.
-        associationObject.otherNode._nodesThatAreAriaDescribedbyThisNode.push( this );
+        associationObject.otherNode._record._get_mutable_( 'nodesThatAreAriaDescribedbyThisNode' ).push( this );
 
         // update the PDOMPeers with this aria-describedby association
         this.updateAriaDescribedbyAssociationsInPeers();
@@ -1769,7 +1949,7 @@ const ParallelDOM = {
        * @returns {boolean}
        */
       hasAriaDescribedbyAssociation: function( associationObject ) {
-        return _.includes( this._ariaDescribedbyAssociations, associationObject );
+        return _.includes( this.ariaDescribedbyAssociations, associationObject );
       },
 
       /**
@@ -1777,10 +1957,12 @@ const ParallelDOM = {
        * @public
        */
       removeAriaDescribedbyAssociation: function( associationObject ) {
-        assert && assert( _.includes( this._ariaDescribedbyAssociations, associationObject ) );
+        assert && assert( _.includes( this.ariaDescribedbyAssociations, associationObject ) );
+
+        const ariaDescribedbyAssociations = this._record._get_mutable_( 'ariaDescribedbyAssociations' );
 
         // remove the
-        const removedObject = this._ariaDescribedbyAssociations.splice( _.indexOf( this._ariaDescribedbyAssociations, associationObject ), 1 );
+        const removedObject = ariaDescribedbyAssociations.splice( _.indexOf( ariaDescribedbyAssociations, associationObject ), 1 );
 
         // remove the reference from the other node back to this node because we don't need it anymore
         removedObject[ 0 ].otherNode.removeNodeThatIsAriaDescribedByThisNode( this );
@@ -1795,9 +1977,12 @@ const ParallelDOM = {
        */
       removeNodeThatIsAriaDescribedByThisNode: function( node ) {
         assert && assert( node instanceof Node );
-        const indexOfNode = _.indexOf( this._nodesThatAreAriaDescribedbyThisNode, node );
+
+        const nodesThatAreAriaDescribedbyThisNode = this._record._get_mutable_( 'nodesThatAreAriaDescribedbyThisNode' );
+
+        const indexOfNode = _.indexOf( nodesThatAreAriaDescribedbyThisNode, node );
         assert && assert( indexOfNode >= 0 );
-        this._nodesThatAreAriaDescribedbyThisNode.splice( indexOfNode, 1 );
+        nodesThatAreAriaDescribedbyThisNode.splice( indexOfNode, 1 );
 
       },
 
@@ -1818,11 +2003,13 @@ const ParallelDOM = {
        */
       updateOtherNodesAriaDescribedby: function() {
 
+        const nodesThatAreAriaDescribedbyThisNode = this.nodesThatAreAriaDescribedbyThisNode;
+
         // if any other nodes are aria-describedby this Node, update those associations too. Since this node's
         // pdom content needs to be recreated, they need to update their aria-describedby associations accordingly.
         // TODO: only use unique elements of the array (_.unique)
-        for ( let i = 0; i < this._nodesThatAreAriaDescribedbyThisNode.length; i++ ) {
-          const otherNode = this._nodesThatAreAriaDescribedbyThisNode[ i ];
+        for ( let i = 0; i < nodesThatAreAriaDescribedbyThisNode.length; i++ ) {
+          const otherNode = nodesThatAreAriaDescribedbyThisNode[ i ];
           otherNode.updateAriaDescribedbyAssociationsInPeers();
         }
       },
@@ -1834,14 +2021,14 @@ const ParallelDOM = {
        * @returns {Array.<Node>}
        */
       getNodesThatAreAriaDescribedbyThisNode: function() {
-        return this._nodesThatAreAriaDescribedbyThisNode;
+        return this._record._get_( 'nodesThatAreAriaDescribedbyThisNode' );
       },
       get nodesThatAreAriaDescribedbyThisNode() { return this.getNodesThatAreAriaDescribedbyThisNode(); },
 
 
       /**
        * @public
-       * @param {Array.<Object>} activeDescendantAssociations - list of associationObjects, see this._activeDescendantAssociations.
+       * @param {Array.<Object>} activeDescendantAssociations - list of associationObjects, see this.activeDescendantAssociations.
        */
       setActiveDescendantAssociations: function( activeDescendantAssociations ) {
 
@@ -1855,7 +2042,7 @@ const ParallelDOM = {
         }
 
         // no work to be done if both are empty, safe to return early
-        if ( activeDescendantAssociations.length === 0 && this._activeDescendantAssociations.length === 0 ) {
+        if ( activeDescendantAssociations.length === 0 && this.activeDescendantAssociations.length === 0 ) {
           return;
         }
 
@@ -1865,7 +2052,7 @@ const ParallelDOM = {
         let i;
 
         // get a difference of the desired new list, and the old
-        arrayDifference( activeDescendantAssociations, this._activeDescendantAssociations, afterOnly, beforeOnly, inBoth );
+        arrayDifference( activeDescendantAssociations, this.activeDescendantAssociations, afterOnly, beforeOnly, inBoth );
 
         // remove each current associationObject that isn't in the new list
         for ( i = 0; i < beforeOnly.length; i++ ) {
@@ -1873,7 +2060,7 @@ const ParallelDOM = {
           this.removeActiveDescendantAssociation( associationObject );
         }
 
-        assert && assert( this._activeDescendantAssociations.length === inBoth.length,
+        assert && assert( this.activeDescendantAssociations.length === inBoth.length,
           'Removing associations should not have triggered other association changes' );
 
         // add each association from the new list that hasn't been added yet
@@ -1889,7 +2076,7 @@ const ParallelDOM = {
        * @returns {Array.<Object>} - the list of current association objects
        */
       getActiveDescendantAssociations: function() {
-        return this._activeDescendantAssociations;
+        return this._record._get_( 'activeDescendantAssociations' );
       },
       get activeDescendantAssociations() { return this.getActiveDescendantAssociations(); },
 
@@ -1907,11 +2094,11 @@ const ParallelDOM = {
         assert && PDOMUtils.validateAssociationObject( associationObject );
 
         // TODO: assert if this associationObject is already in the association objects list! https://github.com/phetsims/scenery/issues/832
-        this._activeDescendantAssociations.push( associationObject ); // Keep track of this association.
+        this._record._get_mutable_( 'activeDescendantAssociations' ).push( associationObject ); // Keep track of this association.
 
         // Flag that this node is is being described by the other node, so that if the other node changes it can tell
         // this node to restore the association appropriately.
-        associationObject.otherNode._nodesThatAreActiveDescendantToThisNode.push( this );
+        associationObject.otherNode._record._get_mutable_( 'nodesThatAreActiveDescendantToThisNode' ).push( this );
 
         // update the pdomPeers with this aria-activeDescendant association
         this.updateActiveDescendantAssociationsInPeers();
@@ -1922,10 +2109,12 @@ const ParallelDOM = {
        * @public
        */
       removeActiveDescendantAssociation: function( associationObject ) {
-        assert && assert( _.includes( this._activeDescendantAssociations, associationObject ) );
+        assert && assert( _.includes( this.activeDescendantAssociations, associationObject ) );
+
+        const activeDescendantAssociations = this._record._get_mutable_( 'activeDescendantAssociations' );
 
         // remove the
-        const removedObject = this._activeDescendantAssociations.splice( _.indexOf( this._activeDescendantAssociations, associationObject ), 1 );
+        const removedObject = activeDescendantAssociations.splice( _.indexOf( activeDescendantAssociations, associationObject ), 1 );
 
         // remove the reference from the other node back to this node because we don't need it anymore
         removedObject[ 0 ].otherNode.removeNodeThatIsActiveDescendantThisNode( this );
@@ -1940,9 +2129,12 @@ const ParallelDOM = {
        */
       removeNodeThatIsActiveDescendantThisNode: function( node ) {
         assert && assert( node instanceof Node );
-        const indexOfNode = _.indexOf( this._nodesThatAreActiveDescendantToThisNode, node );
+
+        const nodesThatAreActiveDescendantToThisNode = this._record._get_mutable_( 'nodesThatAreActiveDescendantToThisNode' );
+
+        const indexOfNode = _.indexOf( nodesThatAreActiveDescendantToThisNode, node );
         assert && assert( indexOfNode >= 0 );
-        this._nodesThatAreActiveDescendantToThisNode.splice( indexOfNode, 1 );
+        nodesThatAreActiveDescendantToThisNode.splice( indexOfNode, 1 );
 
       },
 
@@ -1963,11 +2155,13 @@ const ParallelDOM = {
        */
       updateOtherNodesActiveDescendant: function() {
 
+        const nodesThatAreActiveDescendantToThisNode = this.nodesThatAreActiveDescendantToThisNode;
+
         // if any other nodes are aria-activeDescendant this Node, update those associations too. Since this node's
         // pdom content needs to be recreated, they need to update their aria-activeDescendant associations accordingly.
         // TODO: only use unique elements of the array (_.unique)
-        for ( let i = 0; i < this._nodesThatAreActiveDescendantToThisNode.length; i++ ) {
-          const otherNode = this._nodesThatAreActiveDescendantToThisNode[ i ];
+        for ( let i = 0; i < nodesThatAreActiveDescendantToThisNode.length; i++ ) {
+          const otherNode = nodesThatAreActiveDescendantToThisNode[ i ];
           otherNode.updateActiveDescendantAssociationsInPeers();
         }
       },
@@ -1979,10 +2173,47 @@ const ParallelDOM = {
        * @returns {Array.<Node>}
        */
       getNodesThatAreActiveDescendantToThisNode: function() {
-        return this._nodesThatAreActiveDescendantToThisNode;
+        return this._record._get_( 'nodesThatAreActiveDescendantToThisNode' );
       },
       get nodesThatAreActiveDescendantToThisNode() { return this.getNodesThatAreActiveDescendantToThisNode(); },
 
+      /**
+       * @protected
+       *
+       * @param {Array.<Node|null>|null} pdomOrder
+       */
+      validatePDOMOrder( pdomOrder ) {
+        assert && assert( Array.isArray( pdomOrder ) || pdomOrder === null,
+          `Array or null expected, received: ${pdomOrder}` );
+        assert && pdomOrder && pdomOrder.forEach( ( node, index ) => {
+          assert( node === null || node instanceof Node,
+            `Elements of pdomOrder should be either a Node or null. Element at index ${index} is: ${node}` );
+        } );
+        assert && pdomOrder && assert( this.getTrails( node => _.includes( pdomOrder, node ) ).length === 0, 'pdomOrder should not include any ancestors or the node itself' );
+      },
+
+      /**
+       * @protected
+       *
+       * @param {Array.<Node|null>|null} pdomOrder
+       */
+      onBeforePDOMOrder( pdomOrder ) {
+        // Store our own reference to this, so client modifications to the input array won't silently break things.
+        // See https://github.com/phetsims/scenery/issues/786
+        return pdomOrder === null ? null : pdomOrder.slice();
+      },
+
+      /**
+       * @protected
+       *
+       * @param {Array.<Node|null>|null} pdomOrder
+       * @param {Array.<Node|null>|null} oldPDOMOrder
+       */
+      onAfterPDOMOrder( pdomOrder, oldPDOMOrder ) {
+        PDOMTree.pdomOrderChange( this, oldPDOMOrder, pdomOrder );
+
+        this.rendererSummaryRefreshEmitter.emit();
+      },
 
       /**
        * Sets the PDOM/DOM order for this Node. This includes not only focused items, but elements that can be
@@ -2041,26 +2272,7 @@ const ParallelDOM = {
        * @param {Array.<Node|null>|null} pdomOrder
        */
       setPDOMOrder: function( pdomOrder ) {
-        assert && assert( Array.isArray( pdomOrder ) || pdomOrder === null,
-          `Array or null expected, received: ${pdomOrder}` );
-        assert && pdomOrder && pdomOrder.forEach( ( node, index ) => {
-          assert( node === null || node instanceof Node,
-            `Elements of pdomOrder should be either a Node or null. Element at index ${index} is: ${node}` );
-        } );
-        assert && pdomOrder && assert( this.getTrails( node => _.includes( pdomOrder, node ) ).length === 0, 'pdomOrder should not include any ancestors or the node itself' );
-
-        // Only update if it has changed
-        if ( this._pdomOrder !== pdomOrder ) {
-          const oldPDOMOrder = this._pdomOrder;
-
-          // Store our own reference to this, so client modifications to the input array won't silently break things.
-          // See https://github.com/phetsims/scenery/issues/786
-          this._pdomOrder = pdomOrder === null ? null : pdomOrder.slice();
-
-          PDOMTree.pdomOrderChange( this, oldPDOMOrder, pdomOrder );
-
-          this.rendererSummaryRefreshEmitter.emit();
-        }
+        this._record._set_( 'pdomOrder', pdomOrder );
       },
       set pdomOrder( value ) { this.setPDOMOrder( value ); },
 
@@ -2071,12 +2283,23 @@ const ParallelDOM = {
        * @returns {Array.<Node|null>|null}
        */
       getPDOMOrder: function() {
-        if ( this._pdomOrder ) {
-          return this._pdomOrder.slice( 0 ); // create a defensive copy
+        const pdomOrder = this.getInternalPDOMOrder();
+
+        if ( pdomOrder ) {
+          return pdomOrder.slice( 0 ); // create a defensive copy
         }
-        return this._pdomOrder;
+        return pdomOrder;
       },
       get pdomOrder() { return this.getPDOMOrder(); },
+
+      /**
+       * @protected
+       *
+       * @returns {Array.<Node|null>|null}
+       */
+      getInternalPDOMOrder() {
+        return this._record._get_( 'pdomOrder' );
+      },
 
       /**
        * Returns whether this node has an pdomOrder that is effectively different than the default.
@@ -2089,9 +2312,20 @@ const ParallelDOM = {
        * @returns {boolean}
        */
       hasPDOMOrder: function() {
-        return this._pdomOrder !== null &&
-               this._pdomOrder.length !== 0 &&
-               ( this._pdomOrder.length > 1 || this._pdomOrder[ 0 ] !== null );
+        const pdomOrder = this.getInternalPDOMOrder();
+
+        return pdomOrder !== null &&
+               pdomOrder.length !== 0 &&
+               ( pdomOrder.length > 1 || pdomOrder[ 0 ] !== null );
+      },
+
+      /**
+       * @public (scenery-internal)
+       *
+       * @param {Node|null} pdomParent
+       */
+      set pdomParent( pdomParent ) {
+        this._record._set_( 'pdomParent', pdomParent );
       },
 
       /**
@@ -2101,7 +2335,7 @@ const ParallelDOM = {
        * @returns {Node|null}
        */
       getPDOMParent: function() {
-        return this._pdomParent;
+        return this._record._get_( 'pdomParent' );
       },
       get pdomParent() { return this.getPDOMParent(); },
 
@@ -2128,7 +2362,7 @@ const ParallelDOM = {
         for ( let i = 0; i < this._children.length; i++ ) {
           const child = this._children[ i ];
 
-          if ( !child._pdomParent ) {
+          if ( !child.pdomParent ) {
             nonOrderedChildren.push( child );
           }
         }
@@ -2158,6 +2392,24 @@ const ParallelDOM = {
       },
 
       /**
+       * @protected
+       *
+       * @param {boolean} visible
+       */
+      validatePDOMVisible( visible ) {
+        assert && assert( typeof visible === 'boolean' );
+      },
+
+      /**
+       * @protected
+       *
+       * @param {boolean} visible
+       */
+      onAfterPDOMVisible( visible ) {
+        this._pdomDisplaysInfo.onPDOMVisibilityChange( visible );
+      },
+
+      /**
        * Hide completely from a screen reader and the browser by setting the hidden attribute on the node's
        * representative DOM element. If the sibling DOM Elements have a container parent, the container
        * should be hidden so that all PDOM elements are hidden as well.  Hiding the element will remove it from the focus
@@ -2168,12 +2420,7 @@ const ParallelDOM = {
        * @param {boolean} visible
        */
       setPDOMVisible: function( visible ) {
-        assert && assert( typeof visible === 'boolean' );
-        if ( this._pdomVisible !== visible ) {
-          this._pdomVisible = visible;
-
-          this._pdomDisplaysInfo.onPDOMVisibilityChange( visible );
-        }
+        this._record._set_( 'pdomVisible', visible );
       },
       set pdomVisible( visible ) { this.setPDOMVisible( visible ); },
 
@@ -2184,7 +2431,7 @@ const ParallelDOM = {
        * @returns {boolean}
        */
       isPDOMVisible: function() {
-        return this._pdomVisible;
+        return this._record._get_( 'pdomVisible' );
       },
       get pdomVisible() { return this.isPDOMVisible(); },
 
@@ -2206,27 +2453,46 @@ const ParallelDOM = {
       get pdomDisplayed() { return this.isPDOMDisplayed(); },
 
       /**
+       * @protected
+       *
+       * @param {string|number|null} value
+       */
+      validateInputValue( value ) {
+        assert && assert( value === null || typeof value === 'string' || typeof value === 'number' );
+        assert && this.tagName && assert( _.includes( FORM_ELEMENTS, this.tagName.toUpperCase() ), 'dom element must be a form element to support value' );
+      },
+
+      /**
+       * @protected
+       *
+       * @param {string|number|null} value
+       * @returns {string}
+       */
+      onBeforeInputValue( value ) {
+        return `${value}`;
+      },
+
+      /**
+       * @protected
+       *
+       * @param {string|number|null} value
+       */
+      onAfterInputValue( value ) {
+        for ( let i = 0; i < this.pdomInstances.length; i++ ) {
+          const peer = this.pdomInstances[ i ].peer;
+          peer.onInputValueChange();
+        }
+      },
+
+      /**
        * Set the value of an input element.  Element must be a form element to support the value attribute. The input
        * value is converted to string since input values are generally string for HTML.
        * @public
        *
-       * @param {string|number} value
+       * @param {string|number|null} value
        */
       setInputValue: function( value ) {
-        assert && assert( value === null || typeof value === 'string' || typeof value === 'number' );
-        assert && this._tagName && assert( _.includes( FORM_ELEMENTS, this._tagName.toUpperCase() ), 'dom element must be a form element to support value' );
-
-        // type cast
-        value = `${value}`;
-
-        if ( value !== this._inputValue ) {
-          this._inputValue = value;
-
-          for ( let i = 0; i < this.pdomInstances.length; i++ ) {
-            const peer = this.pdomInstances[ i ].peer;
-            peer.onInputValueChange();
-          }
-        }
+        this._record._set_( 'inputValue', value );
       },
       set inputValue( value ) { this.setInputValue( value ); },
 
@@ -2237,9 +2503,36 @@ const ParallelDOM = {
        * @returns {string}
        */
       getInputValue: function() {
-        return this._inputValue;
+        return this._record._get_( 'inputValue' );
       },
       get inputValue() { return this.getInputValue(); },
+
+      /**
+       * @protected
+       *
+       * @param {boolean} checked
+       */
+      validatePDOMChecked( checked ) {
+        assert && assert( typeof checked === 'boolean' );
+
+        if ( this.tagName ) {
+          assert && assert( this.tagName.toUpperCase() === INPUT_TAG, 'Cannot set checked on a non input tag.' );
+        }
+        if ( this.inputType ) {
+          assert && assert( INPUT_TYPES_THAT_SUPPORT_CHECKED.indexOf( this.inputType.toUpperCase() ) >= 0, `inputType does not support checked: ${this.inputType}` );
+        }
+      },
+
+      /**
+       * @protected
+       *
+       * @param {boolean} checked
+       */
+      onAfterPDOMChecked( checked ) {
+        this.setPDOMAttribute( 'checked', checked, {
+          asProperty: true
+        } );
+      },
 
       /**
        * Set whether or not the checked attribute appears on the dom elements associated with this Node's
@@ -2250,22 +2543,7 @@ const ParallelDOM = {
        * @param {boolean} checked
        */
       setPDOMChecked: function( checked ) {
-        assert && assert( typeof checked === 'boolean' );
-
-        if ( this._tagName ) {
-          assert && assert( this._tagName.toUpperCase() === INPUT_TAG, 'Cannot set checked on a non input tag.' );
-        }
-        if ( this._inputType ) {
-          assert && assert( INPUT_TYPES_THAT_SUPPORT_CHECKED.indexOf( this._inputType.toUpperCase() ) >= 0, `inputType does not support checked: ${this._inputType}` );
-        }
-
-        if ( this._pdomChecked !== checked ) {
-          this._pdomChecked = checked;
-
-          this.setPDOMAttribute( 'checked', checked, {
-            asProperty: true
-          } );
-        }
+        this._record._set_( 'pdomChecked', checked );
       },
       set pdomChecked( checked ) { this.setPDOMChecked( checked ); },
 
@@ -2276,7 +2554,7 @@ const ParallelDOM = {
        * @returns {boolean}
        */
       getPDOMChecked: function() {
-        return this._pdomChecked;
+        return this._record._get_( 'pdomChecked' );
       },
       get pdomChecked() { return this.getPDOMChecked(); },
 
@@ -2291,9 +2569,18 @@ const ParallelDOM = {
        * }
        */
       getPDOMAttributes: function() {
-        return this._pdomAttributes.slice( 0 ); // defensive copy
+        return this.getInternalPDOMAttributes().slice( 0 ); // defensive copy
       },
       get pdomAttributes() { return this.getPDOMAttributes(); },
+
+      /**
+       * @public (scenery-internal)
+       *
+       * @returns {Array.<Object>}
+       */
+      getInternalPDOMAttributes() {
+        return this._record._get_( 'pdomAttributes' );
+      },
 
       /**
        * Set a particular attribute or property for this Node's primary sibling, generally to provide extra semantic information for
@@ -2325,16 +2612,18 @@ const ParallelDOM = {
 
         assert && assert( ASSOCIATION_ATTRIBUTES.indexOf( attribute ) < 0, 'setPDOMAttribute does not support association attributes' );
 
+        const pdomAttributes = this._record._get_mutable_( 'pdomAttributes' );
+
         // if the pdom attribute already exists in the list, remove it - no need
         // to remove from the peers, existing attributes will simply be replaced in the DOM
-        for ( let i = 0; i < this._pdomAttributes.length; i++ ) {
-          const currentAttribute = this._pdomAttributes[ i ];
+        for ( let i = 0; i < pdomAttributes.length; i++ ) {
+          const currentAttribute = pdomAttributes[ i ];
           if ( currentAttribute.attribute === attribute &&
                currentAttribute.options.namespace === options.namespace &&
                currentAttribute.options.elementName === options.elementName ) {
 
             if ( currentAttribute.options.asProperty === options.asProperty ) {
-              this._pdomAttributes.splice( i, 1 );
+              pdomAttributes.splice( i, 1 );
             }
             else {
 
@@ -2344,7 +2633,7 @@ const ParallelDOM = {
           }
         }
 
-        this._pdomAttributes.push( {
+        pdomAttributes.push( {
           attribute: attribute,
           value: value,
           options: options
@@ -2378,11 +2667,12 @@ const ParallelDOM = {
         }, options );
 
         let attributeRemoved = false;
-        for ( let i = 0; i < this._pdomAttributes.length; i++ ) {
-          if ( this._pdomAttributes[ i ].attribute === attribute &&
-               this._pdomAttributes[ i ].options.namespace === options.namespace &&
-               this._pdomAttributes[ i ].options.elementName === options.elementName ) {
-            this._pdomAttributes.splice( i, 1 );
+        const pdomAttributes = this._record._get_mutable_( 'pdomAttributes' );
+        for ( let i = 0; i < pdomAttributes.length; i++ ) {
+          if ( pdomAttributes[ i ].attribute === attribute &&
+               pdomAttributes[ i ].options.namespace === options.namespace &&
+               pdomAttributes[ i ].options.elementName === options.elementName ) {
+            pdomAttributes.splice( i, 1 );
             attributeRemoved = true;
           }
         }
@@ -2432,16 +2722,39 @@ const ParallelDOM = {
         }, options );
 
         let attributeFound = false;
-        for ( let i = 0; i < this._pdomAttributes.length; i++ ) {
-          if ( this._pdomAttributes[ i ].attribute === attribute &&
-               this._pdomAttributes[ i ].options.namespace === options.namespace &&
-               this._pdomAttributes[ i ].options.elementName === options.elementName ) {
+        const pdomAttributes = this.getInternalPDOMAttributes();
+        for ( let i = 0; i < pdomAttributes.length; i++ ) {
+          if ( pdomAttributes[ i ].attribute === attribute &&
+               pdomAttributes[ i ].options.namespace === options.namespace &&
+               pdomAttributes[ i ].options.elementName === options.elementName ) {
             attributeFound = true;
           }
         }
         return attributeFound;
       },
 
+      /**
+       * @protected
+       *
+       * @param {boolean|null} focusable
+       */
+      validateFocusable( focusable ) {
+        assert && assert( focusable === null || typeof focusable === 'boolean' );
+      },
+
+      /**
+       * @protected
+       *
+       * @param {boolean|null} focusable
+       */
+      onAfterFocusable( focusable ) {
+        for ( let i = 0; i < this._pdomInstances.length; i++ ) {
+
+          // after the override is set, update the focusability of the peer based on this node's value for focusable
+          // which may be true or false (but not null)
+          this._pdomInstances[ i ].peer.setFocusable( this.focusable );
+        }
+      },
 
       /**
        * Make the DOM element explicitly focusable with a tab index. Native HTML form elements will generally be in
@@ -2453,18 +2766,7 @@ const ParallelDOM = {
        * @param {boolean|null} focusable - null to use the default browser focus for the primary element
        */
       setFocusable: function( focusable ) {
-        assert && assert( focusable === null || typeof focusable === 'boolean' );
-
-        if ( this._focusableOverride !== focusable ) {
-          this._focusableOverride = focusable;
-
-          for ( let i = 0; i < this._pdomInstances.length; i++ ) {
-
-            // after the override is set, update the focusability of the peer based on this node's value for focusable
-            // which may be true or false (but not null)
-            this._pdomInstances[ i ].peer.setFocusable( this.focusable );
-          }
-        }
+        this._record._set_( 'focusableOverride', focusable );
       },
       set focusable( isFocusable ) { this.setFocusable( isFocusable ); },
 
@@ -2476,20 +2778,32 @@ const ParallelDOM = {
        * @returns {boolean}
        */
       isFocusable: function() {
-        if ( this._focusableOverride !== null ) {
-          return this._focusableOverride;
+        const focusableOverride = this._record._get_( 'focusableOverride' );
+
+        if ( focusableOverride !== null ) {
+          return focusableOverride;
         }
 
         // if there isn't a tagName yet, then there isn't an element, so we aren't focusable. To support option order.
-        else if ( this._tagName === null ) {
+        else if ( this.tagName === null ) {
           return false;
         }
         else {
-          return PDOMUtils.tagIsDefaultFocusable( this._tagName );
+          return PDOMUtils.tagIsDefaultFocusable( this.tagName );
         }
       },
       get focusable() { return this.isFocusable(); },
 
+      /**
+       * @protected
+       *
+       * @param {Node|null} node
+       */
+      onAfterPDOMTransformSourceNode( node ) {
+        for ( let i = 0; i < this._pdomInstances.length; i++ ) {
+          this._pdomInstances[ i ].peer.setPDOMTransformSourceNode( node );
+        }
+      },
 
       /**
        * Sets the source Node that controls positioning of the primary sibling. Transforms along the trail to this
@@ -2506,11 +2820,7 @@ const ParallelDOM = {
        * @param {Node|null} node
        */
       setPDOMTransformSourceNode: function( node ) {
-        this._pdomTransformSourceNode = node;
-
-        for ( let i = 0; i < this._pdomInstances.length; i++ ) {
-          this._pdomInstances[ i ].peer.setPDOMTransformSourceNode( this._pdomTransformSourceNode );
-        }
+        this._record._set_( 'pdomTransformSourceNode', node );
       },
       set pdomTransformSourceNode( node ) { this.setPDOMTransformSourceNode( node ); },
 
@@ -2521,9 +2831,20 @@ const ParallelDOM = {
        * @returns {Node|null}
        */
       getPDOMTransformSourceNode: function() {
-        return this._pdomTransformSourceNode;
+        return this._record._get_( 'pdomTransformSourceNode' );
       },
       get pdomTransformSourceNode() { return this.getPDOMTransformSourceNode(); },
+
+      /**
+       * @protected
+       *
+       * @param {boolean} positionInPDOM
+       */
+      onAfterPositionInPDOM( positionInPDOM ) {
+        for ( let i = 0; i < this._pdomInstances.length; i++ ) {
+          this._pdomInstances[ i ].peer.setPositionInPDOM( positionInPDOM );
+        }
+      },
 
       /**
        * Sets whether the PDOM sibling elements are positioned in the correct place in the viewport. Doing so is a
@@ -2539,11 +2860,7 @@ const ParallelDOM = {
        * @param {boolean} positionInPDOM
        */
       setPositionInPDOM( positionInPDOM ) {
-        this._positionInPDOM = positionInPDOM;
-
-        for ( let i = 0; i < this._pdomInstances.length; i++ ) {
-          this._pdomInstances[ i ].peer.setPositionInPDOM( positionInPDOM );
-        }
+        this._record._set_( 'positionInPDOM', positionInPDOM );
       },
       set positionInPDOM( positionInPDOM ) { this.setPositionInPDOM( positionInPDOM ); },
 
@@ -2554,7 +2871,7 @@ const ParallelDOM = {
        * @returns {boolean}
        */
       getPositionInPDOM() {
-        return this._positionInPDOM;
+        return this._record._get_( 'positionInPDOM' );
       },
       get positionInPDOM() { return this.getPositionInPDOM(); },
 
@@ -2569,8 +2886,13 @@ const ParallelDOM = {
        * See https://github.com/phetsims/a11y-research/issues/156 for more information.
        */
       setExcludeLabelSiblingFromInput: function() {
-        this.excludeLabelSiblingFromInput = true;
+        this._record._set_( 'excludeLabelSiblingFromInput', true );
+
         this.onPDOMContentChange();
+      },
+
+      get excludeLabelSiblingFromInput() {
+        return this._record._get_( 'excludeLabelSiblingFromInput' );
       },
 
       /***********************************************************************************************************/
@@ -2645,7 +2967,10 @@ const ParallelDOM = {
             nestedChildStack.push( item.children );
           }
 
-          const arrayPDOMOrder = node._pdomOrder === null ? [] : node._pdomOrder;
+          let arrayPDOMOrder = node.getInternalPDOMOrder();
+          if ( arrayPDOMOrder === null ) {
+            arrayPDOMOrder = [];
+          }
 
           // push specific focused nodes to the stack
           pruneStack = pruneStack.concat( arrayPDOMOrder );
@@ -2701,7 +3026,7 @@ const ParallelDOM = {
         PDOMTree.pdomContentChange( this );
 
         // recompute the heading level for this node if it is using the pdomHeading API.
-        this._pdomHeading && this.computeHeadingLevel();
+        this.pdomHeading && this.computeHeadingLevel();
 
         this.rendererSummaryRefreshEmitter.emit();
       },
@@ -2715,7 +3040,7 @@ const ParallelDOM = {
        * @returns {boolean}
        */
       get hasPDOMContent() {
-        return !!this._tagName;
+        return !!this.tagName;
       },
 
       /**
@@ -2821,6 +3146,200 @@ const ParallelDOM = {
         this._pdomInstances.splice( index, 1 );
       }
     } );
+
+    return {
+      tagName: {
+        defaultValue: null,
+        validate: proto.validateTagName,
+        onAfter: proto.onPDOMContentChange // TODO: this could be setting PDOM content twice
+      },
+      containerTagName: {
+        defaultValue: null,
+        validate: proto.validateContainerTagName,
+        onAfter: proto.onPDOMContentChange
+      },
+      labelTagName: {
+        defaultValue: null,
+        validate: proto.validateLabelTagName,
+        onAfter: proto.onPDOMContentChange
+      },
+      descriptionTagName: {
+        defaultValue: null,
+        validate: proto.validateDescriptionTagName,
+        onAfter: proto.onPDOMContentChange
+      },
+      inputType: {
+        defaultValue: null,
+        validate: proto.validateInputType,
+        onAfter: proto.onAfterInputType
+      },
+      inputValue: {
+        defaultValue: null,
+        validate: proto.validateInputValue,
+        onBefore: proto.onBeforeInputValue,
+        onAfter: proto.onAfterInputValue
+      },
+      pdomChecked: {
+        defaultValue: false,
+        validate: proto.validatePDOMChecked,
+        onAfter: proto.onAfterPDOMChecked
+      },
+      appendLabel: {
+        defaultValue: false,
+        validate: proto.validateAppendLabel,
+        onAfter: proto.onPDOMContentChange
+      },
+      appendDescription: {
+        defaultValue: false,
+        validate: proto.validateAppendDescription,
+        onAfter: proto.onPDOMContentChange
+      },
+      pdomAttributes: {
+        defaultValue: [],
+        create: () => []
+      },
+      labelContent: {
+        defaultValue: null,
+        validate: proto.validateLabelContent,
+        onAfter: proto.onAfterLabelContent
+      },
+      innerContent: {
+        defaultValue: null,
+        validate: proto.validateInnerContent,
+        onAfter: proto.onAfterInnerContent
+      },
+      descriptionContent: {
+        defaultValue: null,
+        validate: proto.validateDescriptionContent,
+        onAfter: proto.onAfterDescriptionContent
+      },
+      pdomNamespace: {
+        defaultValue: null,
+        validate: proto.validatePDOMNamespace,
+        onAfter: proto.onPDOMContentChange
+      },
+      ariaLabel: {
+        defaultValue: null,
+        validate: proto.validateAriaLabel,
+        onAfter: proto.onAfterAriaLabel
+      },
+      ariaRole: {
+        defaultValue: null,
+        validate: proto.validateAriaRole,
+        onAfter: proto.onAfterAriaRole
+      },
+      containerAriaRole: {
+        defaultValue: null,
+        validate: proto.validateContainerAriaRole,
+        onAfter: proto.onAfterContainerAriaRole
+      },
+      ariaValueText: {
+        defaultValue: null,
+        validate: proto.validateAriaValueText,
+        onAfter: proto.onAfterAriaValueText
+      },
+      ariaLabelledbyAssociations: {
+        defaultValue: [],
+        create: () => []
+      },
+      nodesThatAreAriaLabelledbyThisNode: {
+        defaultValue: [],
+        create: () => []
+      },
+      ariaDescribedbyAssociations: {
+        defaultValue: [],
+        create: () => []
+      },
+      nodesThatAreAriaDescribedbyThisNode: {
+        defaultValue: [],
+        create: () => []
+      },
+      activeDescendantAssociations: {
+        defaultValue: [],
+        create: () => []
+      },
+      nodesThatAreActiveDescendantToThisNode: {
+        defaultValue: [],
+        create: () => []
+      },
+      focusableOverride: {
+        defaultValue: null,
+        validate: proto.validateFocusable,
+        onAfter: proto.onAfterFocusable
+      },
+      focusHighlight: {
+        defaultValue: null,
+        validate: proto.validateFocusHighlight,
+        onAfter: proto.onAfterFocusHighlight
+      },
+      focusHighlightLayerable: {
+        defaultValue: false,
+        validate: proto.validateFocusHighlightLayerable,
+        onAfter: proto.onAfterFocusHighlightLayerable
+      },
+      groupFocusHighlight: {
+        defaultValue: false,
+        validate: proto.validateGroupFocusHighlight
+      },
+      pdomVisible: {
+        defaultValue: true,
+        validate: proto.validatePDOMVisible,
+        onAfter: proto.onAfterPDOMVisible
+      },
+      pdomOrder: {
+        defaultValue: null,
+        validate: proto.validatePDOMOrder,
+        onBefore: proto.onBeforePDOMOrder,
+        onAfter: proto.onAfterPDOMOrder
+      },
+      pdomParent: {
+        defaultValue: null
+      },
+      pdomTransformSourceNode: {
+        defaultValue: null,
+        onAfter: proto.onAfterPDOMTransformSourceNode
+      },
+      positionInPDOM: {
+        defaultValue: false,
+        onAfter: proto.onAfterPositionInPDOM
+      },
+      excludeLabelSiblingFromInput: {
+        defaultValue: false
+      },
+      accessibleName: {
+        defaultValue: null,
+        validate: proto.validateAccessibleName,
+        onAfter: proto.onPDOMContentChange
+      },
+      accessibleNameBehavior: {
+        defaultValue: ParallelDOM.BASIC_ACCESSIBLE_NAME_BEHAVIOR,
+        validate: proto.validateAccessibleNameBehavior,
+        onAfter: proto.onPDOMContentChange
+      },
+      helpText: {
+        defaultValue: null,
+        validate: proto.validateHelpText,
+        onAfter: proto.onPDOMContentChange
+      },
+      helpTextBehavior: {
+        defaultValue: ParallelDOM.HELP_TEXT_AFTER_CONTENT,
+        validate: proto.validateHelpTextBehavior,
+        onAfter: proto.onPDOMContentChange
+      },
+      pdomHeading: {
+        defaultValue: null,
+        validate: proto.validatePDOMHeading,
+        onAfter: proto.onPDOMContentChange
+      },
+      pdomHeadingBehavior: {
+        defaultValue: DEFAULT_PDOM_HEADING_BEHAVIOR,
+        validate: proto.validatePDOMHeadingBehavior,
+        onAfter: proto.onPDOMContentChange
+      },
+      headingLevel: {
+        defaultValue: null
+      }
+    };
   },
 
   /**

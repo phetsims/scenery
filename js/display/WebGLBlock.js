@@ -353,13 +353,15 @@ class WebGLBlock extends FittedBlock {
       this.spriteSheets[ i ].updateTexture();
     }
 
+    const firstDrawableWebGLScale = this.firstDrawable.node.webglScale;
+
     // temporary hack for supporting webglScale
     if ( this.firstDrawable &&
          this.firstDrawable === this.lastDrawable &&
          this.firstDrawable.node &&
-         this.firstDrawable.node._hints.webglScale !== null &&
-         this.backingScale !== this.originalBackingScale * this.firstDrawable.node._hints.webglScale ) {
-      this.backingScale = this.originalBackingScale * this.firstDrawable.node._hints.webglScale;
+         firstDrawableWebGLScale !== null &&
+         this.backingScale !== this.originalBackingScale * firstDrawableWebGLScale ) {
+      this.backingScale = this.originalBackingScale * firstDrawableWebGLScale;
       this.dirtyFit = true;
     }
 

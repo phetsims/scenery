@@ -154,6 +154,7 @@
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import EnabledProperty from '../../../axon/js/EnabledProperty.js';
 import Property from '../../../axon/js/Property.js';
+import Record from '../../../axon/js/Record.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
@@ -276,7 +277,8 @@ const DEFAULT_OPTIONS = {
   cssTransform: false,
   excludeInvisible: false,
   webglScale: null,
-  preventFit: false
+  preventFit: false,
+  layoutOptions: null
 };
 
 class Node extends PhetioObject {
@@ -370,19 +372,9 @@ class Node extends PhetioObject {
     // NOTE: This is fired synchronously when the clipArea of the Node is toggled
     this.clipAreaProperty = new TinyProperty( DEFAULT_OPTIONS.clipArea );
 
-    // @private - Areas for hit intersection. If set on a Node, no descendants can handle events.
-    this._mouseArea = DEFAULT_OPTIONS.mouseArea; // {Shape|Bounds2} for mouse position in the local coordinate frame
-    this._touchArea = DEFAULT_OPTIONS.touchArea; // {Shape|Bounds2} for touch and pen position in the local coordinate frame
-
-    // @private {string|null} - The CSS cursor to be displayed over this Node. null should be the default (inherit) value.
-    this._cursor = DEFAULT_OPTIONS.cursor;
-
     // @public (scenery-internal) - Not for public use, but used directly internally for performance.
     this._children = []; // {Array.<Node>} - Ordered array of child Nodes.
     this._parents = []; // {Array.<Node>} - Unordered array of parent Nodes.
-
-    // @private {boolean} - Whether we will do more accurate (and tight) bounds computations for rotations and shears.
-    this._transformBounds = DEFAULT_OPTIONS.transformBounds;
 
     /*
      * Set up the transform reference. we add a listener so that the transform itself can be modified directly
@@ -463,9 +455,6 @@ class Node extends PhetioObject {
     // @private {boolean} - [mutable] Whether invisible children will be excluded from this Node's bounds
     this._excludeInvisibleChildrenFromBounds = false;
 
-    // @private {Object|null} - Options that can be provided to layout managers to adjust positioning for this node.
-    this._layoutOptions = null;
-
     this._boundsDirty = true; // @private {boolean} - Whether bounds needs to be recomputed to be valid.
     this._localBoundsDirty = true; // @private {boolean} - Whether localBounds needs to be recomputed to be valid.
     this._selfBoundsDirty = true; // @private {boolean} - Whether selfBounds needs to be recomputed to be valid.
@@ -478,43 +467,6 @@ class Node extends PhetioObject {
       this._originalSelfBounds = this.selfBoundsProperty._value;
       this._originalChildBounds = this.childBoundsProperty._value;
     }
-
-    // @public (scenery-internal) {Array.<Filter>}
-    this._filters = [];
-
-    // @public (scenery-internal) {Object} - Where rendering-specific settings are stored. They are generally modified
-    // internally, so there is no ES5 setter for hints.
-    this._hints = {
-      // {number} - What type of renderer should be forced for this Node. Uses the internal bitmask structure declared
-      //            in scenery.js and Renderer.js.
-      renderer: DEFAULT_OPTIONS.renderer === null ? 0 : Renderer.fromName( DEFAULT_OPTIONS.renderer ),
-
-      // {boolean} - Whether it is anticipated that opacity will be switched on. If so, having this set to true will
-      //             make switching back-and-forth between opacity:1 and other opacities much faster.
-      usesOpacity: DEFAULT_OPTIONS.usesOpacity,
-
-      // {boolean} - Whether layers should be split before and after this Node.
-      layerSplit: DEFAULT_OPTIONS.layerSplit,
-
-      // {boolean} - Whether this Node and its subtree should handle transforms by using a CSS transform of a div.
-      cssTransform: DEFAULT_OPTIONS.cssTransform,
-
-      // {boolean} - When rendered as Canvas, whether we should use full (device) resolution on retina-like devices.
-      //             TODO: ensure that this is working? 0.2 may have caused a regression.
-      fullResolution: false,
-
-      // {boolean} - Whether SVG (or other) content should be excluded from the DOM tree when invisible
-      //             (instead of just being hidden)
-      excludeInvisible: DEFAULT_OPTIONS.excludeInvisible,
-
-      // {number|null} - If non-null, a multiplier to the detected pixel-to-pixel scaling of the WebGL Canvas
-      webglScale: DEFAULT_OPTIONS.webglScale,
-
-      // {boolean} - If true, Scenery will not fit any blocks that contain drawables attached to Nodes underneath this
-      //             Node's subtree. This will typically prevent Scenery from triggering bounds computation for this
-      //             sub-tree, and movement of this Node or its descendants will never trigger the refitting of a block.
-      preventFit: DEFAULT_OPTIONS.preventFit
-    };
 
     // @public {TinyEmitter} - This is fired only once for any single operation that may change the children of a Node.
     // For example, if a Node's children are [ a, b ] and setChildren( [ a, x, y, z ] ) is called on it, the
@@ -1301,7 +1253,7 @@ class Node extends PhetioObject {
       const oldBounds = scratchBounds2.set( ourBounds ); // store old value in a temporary Bounds2
 
       // no need to do the more expensive bounds transformation if we are still axis-aligned
-      if ( this._transformBounds && !this._transform.getMatrix().isAxisAligned() ) {
+      if ( this.transformBounds && !this._transform.getMatrix().isAxisAligned() ) {
         // mutates the matrix and bounds during recursion
 
         const matrix = scratchMatrix3.set( this.getMatrix() ); // calls below mutate this matrix
@@ -1378,7 +1330,7 @@ class Node extends PhetioObject {
           `Child bounds mismatch after validateBounds: ${
             this.childBoundsProperty._value.toString()}, expected: ${childBounds.toString()}` );
         assertSlow && assertSlow( this._localBoundsOverridden ||
-                                  this._transformBounds ||
+                                  this.transformBounds ||
                                   this.boundsProperty._value.equalsEpsilon( fullBounds, epsilon ),
           `Bounds mismatch after validateBounds: ${this.boundsProperty._value.toString()
           }, expected: ${fullBounds.toString()}. This could have happened if a bounds instance owned by a Node` +
@@ -1804,6 +1756,15 @@ class Node extends PhetioObject {
   }
 
   /**
+   * @protected
+   *
+   * @param {Bounds2} transformBounds
+   */
+  validateTransformBounds( transformBounds ) {
+    assert && assert( typeof transformBounds === 'boolean', 'transformBounds should be boolean' );
+  }
+
+  /**
    * Sets the flag that determines whether we will require more accurate (and expensive) bounds computation for this
    * node's transform.
    * @public
@@ -1818,14 +1779,7 @@ class Node extends PhetioObject {
    * @returns {Node} - Returns 'this' reference, for chaining
    */
   setTransformBounds( transformBounds ) {
-    assert && assert( typeof transformBounds === 'boolean', 'transformBounds should be boolean' );
-
-    if ( this._transformBounds !== transformBounds ) {
-      this._transformBounds = transformBounds;
-
-      this.invalidateBounds();
-    }
-
+    this._record._set_( 'transformBounds', transformBounds );
     return this; // allow chaining
   }
 
@@ -1846,7 +1800,7 @@ class Node extends PhetioObject {
    * @returns {boolean}
    */
   getTransformBounds() {
-    return this._transformBounds;
+    return this._record._get_( 'transformBounds' );
   }
 
   /**
@@ -4030,9 +3984,11 @@ class Node extends PhetioObject {
     assert && assert( Array.isArray( filters ), 'filters should be an array' );
     assert && assert( _.every( filters, filter => filter instanceof Filter ), 'filters should consist of Filter objects only' );
 
+    const ourFilters = this._record._get_mutable_( 'filters' );
+
     // We re-use the same array internally, so we don't reference a potentially-mutable array from outside.
-    this._filters.length = 0;
-    this._filters.push( ...filters );
+    ourFilters.length = 0;
+    ourFilters.push( ...filters );
 
     this.invalidateHint();
     this.filterChangeEmitter.emit();
@@ -4055,7 +4011,17 @@ class Node extends PhetioObject {
    * @returns {Array.<Filter>}
    */
   getFilters() {
-    return this._filters.slice();
+    return this.getInternalFilters().slice();
+  }
+
+  /**
+   * Returns the non-opacity filters for this Node, with a direct reference.
+   * @public (scenery-internal)
+   *
+   * @returns {Array.<Filter>}
+   */
+  getInternalFilters() {
+    return this._record._get_( 'filters' );
   }
 
   /**
@@ -4583,24 +4549,39 @@ class Node extends PhetioObject {
   }
 
   /**
+   * @protected
+   *
+   * @param {string|null} cursor
+   */
+  validateCursor( cursor ) {
+    assert && assert( typeof cursor === 'string' || cursor === null );
+  }
+
+  /**
+   * @protected
+   *
+   * @param {string|null} cursor
+   * @returns {string|null}
+   */
+  onBeforeCursor( cursor ) {
+    return cursor === 'auto' ? null : cursor;
+  }
+
+  /**
    * Sets the CSS cursor string that should be used when the mouse is over this node. null is the default, and
    * indicates that ancestor nodes (or the browser default) should be used.
    * @public
    *
+   * TODO: consider a mapping of types to set reasonable defaults
+   *
+   * auto default none inherit help pointer progress wait crosshair text vertical-text alias copy move no-drop not-allowed
+   * e-resize n-resize w-resize s-resize nw-resize ne-resize se-resize sw-resize ew-resize ns-resize nesw-resize nwse-resize
+   * context-menu cell col-resize row-resize all-scroll url( ... ) --> does it support data URLs?
+   *
    * @param {string|null} cursor - A CSS cursor string, like 'pointer', or 'none'
    */
   setCursor( cursor ) {
-    assert && assert( typeof cursor === 'string' || cursor === null );
-
-    // TODO: consider a mapping of types to set reasonable defaults
-    /*
-     auto default none inherit help pointer progress wait crosshair text vertical-text alias copy move no-drop not-allowed
-     e-resize n-resize w-resize s-resize nw-resize ne-resize se-resize sw-resize ew-resize ns-resize nesw-resize nwse-resize
-     context-menu cell col-resize row-resize all-scroll url( ... ) --> does it support data URLs?
-     */
-
-    // allow the 'auto' cursor type to let the ancestors or scene pick the cursor type
-    this._cursor = cursor === 'auto' ? null : cursor;
+    this._record._set_( 'cursor', cursor );
   }
 
   /**
@@ -4620,7 +4601,7 @@ class Node extends PhetioObject {
    * @returns {string|null}
    */
   getCursor() {
-    return this._cursor;
+    return this._record._get_( 'cursor' );
   }
 
   /**
@@ -4634,6 +4615,27 @@ class Node extends PhetioObject {
   }
 
   /**
+   * @protected
+   *
+   * @param {Bounds2|Shape|null} mouseArea
+   */
+  validateMouseArea( mouseArea ) {
+    assert && assert( mouseArea === null || mouseArea instanceof Shape || mouseArea instanceof Bounds2,
+      'mouseArea needs to be a kite.Shape, dot.Bounds2, or null' );
+  }
+
+  /**
+   * @protected
+   *
+   * @param {Bounds2|Shape|null} area
+   * @param {Bounds2|Shape|null} oldArea
+   */
+  onAfterMouseArea( area, oldArea ) {
+    this._picker.onMouseAreaChange();
+    if ( assertSlow ) { this._picker.audit(); }
+  }
+
+  /**
    * Sets the hit-tested mouse area for this Node (see constructor for more advanced documentation). Use null for the
    * default behavior.
    * @public
@@ -4641,14 +4643,7 @@ class Node extends PhetioObject {
    * @param {Bounds2|Shape|null} area
    */
   setMouseArea( area ) {
-    assert && assert( area === null || area instanceof Shape || area instanceof Bounds2, 'mouseArea needs to be a kite.Shape, dot.Bounds2, or null' );
-
-    if ( this._mouseArea !== area ) {
-      this._mouseArea = area; // TODO: could change what is under the mouse, invalidate!
-
-      this._picker.onMouseAreaChange();
-      if ( assertSlow ) { this._picker.audit(); }
-    }
+    this._record._set_( 'mouseArea', area );
   }
 
   /**
@@ -4668,7 +4663,7 @@ class Node extends PhetioObject {
    * @returns {Bounds2|Shape|null}
    */
   getMouseArea() {
-    return this._mouseArea;
+    return this._record._get_( 'mouseArea' );
   }
 
   /**
@@ -4682,6 +4677,27 @@ class Node extends PhetioObject {
   }
 
   /**
+   * @protected
+   *
+   * @param {Bounds2|Shape|null} touchArea
+   */
+  validateTouchArea( touchArea ) {
+    assert && assert( touchArea === null || touchArea instanceof Shape || touchArea instanceof Bounds2,
+      'mouseArea needs to be a kite.Shape, dot.Bounds2, or null' );
+  }
+
+  /**
+   * @protected
+   *
+   * @param {Bounds2|Shape|null} area
+   * @param {Bounds2|Shape|null} oldArea
+   */
+  onAfterTouchArea( area, oldArea ) {
+    this._picker.onTouchAreaChange();
+    if ( assertSlow ) { this._picker.audit(); }
+  }
+
+  /**
    * Sets the hit-tested touch area for this Node (see constructor for more advanced documentation). Use null for the
    * default behavior.
    * @public
@@ -4689,14 +4705,7 @@ class Node extends PhetioObject {
    * @param {Bounds2|Shape|null} area
    */
   setTouchArea( area ) {
-    assert && assert( area === null || area instanceof Shape || area instanceof Bounds2, 'touchArea needs to be a kite.Shape, dot.Bounds2, or null' );
-
-    if ( this._touchArea !== area ) {
-      this._touchArea = area; // TODO: could change what is under the touch, invalidate!
-
-      this._picker.onTouchAreaChange();
-      if ( assertSlow ) { this._picker.audit(); }
-    }
+    this._record._set_( 'touchArea', area );
   }
 
   /**
@@ -4716,7 +4725,7 @@ class Node extends PhetioObject {
    * @returns {Bounds2|Shape|null}
    */
   getTouchArea() {
-    return this._touchArea;
+    return this._record._get_( 'touchArea' );
   }
 
   /**
@@ -4830,21 +4839,21 @@ class Node extends PhetioObject {
   }
 
   /**
-   * Sets a preferred renderer for this Node and its sub-tree. Scenery will attempt to use this renderer under here
-   * unless it isn't supported, OR another preferred renderer is set as a closer ancestor. Acceptable values are:
-   * - null (default, no preference)
-   * - 'canvas'
-   * - 'svg'
-   * - 'dom'
-   * - 'webgl'
-   * @public
+   * @protected
    *
    * @param {string|null} renderer
    */
-  setRenderer( renderer ) {
+  validateRenderer( renderer ) {
     assert && assert( renderer === null || renderer === 'canvas' || renderer === 'svg' || renderer === 'dom' || renderer === 'webgl',
       'Renderer input should be null, or one of: "canvas", "svg", "dom" or "webgl".' );
+  }
 
+  /**
+   * @protected
+   *
+   * @param {string|null} renderer
+   */
+  onBeforeRenderer( renderer ) {
     let newRenderer = 0;
     if ( renderer === 'canvas' ) {
       newRenderer = Renderer.bitmaskCanvas;
@@ -4858,14 +4867,27 @@ class Node extends PhetioObject {
     else if ( renderer === 'webgl' ) {
       newRenderer = Renderer.bitmaskWebGL;
     }
+
     assert && assert( ( renderer === null ) === ( newRenderer === 0 ),
       'We should only end up with no actual renderer if renderer is null' );
 
-    if ( this._hints.renderer !== newRenderer ) {
-      this._hints.renderer = newRenderer;
+    return newRenderer;
+  }
 
-      this.invalidateHint();
-    }
+  /**
+   * Sets a preferred renderer for this Node and its sub-tree. Scenery will attempt to use this renderer under here
+   * unless it isn't supported, OR another preferred renderer is set as a closer ancestor. Acceptable values are:
+   * - null (default, no preference)
+   * - 'canvas'
+   * - 'svg'
+   * - 'dom'
+   * - 'webgl'
+   * @public
+   *
+   * @param {string|null} renderer
+   */
+  setRenderer( renderer ) {
+    this._record._set_( 'renderer', renderer );
   }
 
   /**
@@ -4885,23 +4907,25 @@ class Node extends PhetioObject {
    * @returns {string|null}
    */
   getRenderer() {
-    if ( this._hints.renderer === 0 ) {
+    const renderer = this.getInternalRenderer();
+
+    if ( renderer === 0 ) {
       return null;
     }
-    else if ( this._hints.renderer === Renderer.bitmaskCanvas ) {
+    else if ( renderer === Renderer.bitmaskCanvas ) {
       return 'canvas';
     }
-    else if ( this._hints.renderer === Renderer.bitmaskSVG ) {
+    else if ( renderer === Renderer.bitmaskSVG ) {
       return 'svg';
     }
-    else if ( this._hints.renderer === Renderer.bitmaskDOM ) {
+    else if ( renderer === Renderer.bitmaskDOM ) {
       return 'dom';
     }
-    else if ( this._hints.renderer === Renderer.bitmaskWebGL ) {
+    else if ( renderer === Renderer.bitmaskWebGL ) {
       return 'webgl';
     }
     assert && assert( false, 'Seems to be an invalid renderer?' );
-    return this._hints.renderer;
+    return renderer;
   }
 
   /**
@@ -4915,20 +4939,32 @@ class Node extends PhetioObject {
   }
 
   /**
+   * @public (scenery-internal)
+   *
+   * @returns {number}
+   */
+  getInternalRenderer() {
+    return this._record._get_with_default_mapped( 'renderer' );
+  }
+
+  /**
+   * @protected
+   *
+   * @param {boolean} layerSplit
+   */
+  validateLayerSplit( layerSplit ) {
+    assert && assert( typeof layerSplit === 'boolean' );
+  }
+
+  /**
    * Sets whether or not Scenery will try to put this Node (and its descendants) into a separate SVG/Canvas/WebGL/etc.
    * layer, different from other siblings or other nodes. Can be used for performance purposes.
    * @public
    *
-   * @param {boolean} split
+   * @param {boolean} layerSplit
    */
-  setLayerSplit( split ) {
-    assert && assert( typeof split === 'boolean' );
-
-    if ( split !== this._hints.layerSplit ) {
-      this._hints.layerSplit = split;
-
-      this.invalidateHint();
-    }
+  setLayerSplit( layerSplit ) {
+    this._record._set_( 'layerSplit', layerSplit );
   }
 
   /**
@@ -4948,7 +4984,7 @@ class Node extends PhetioObject {
    * @returns {boolean}
    */
   isLayerSplit() {
-    return this._hints.layerSplit;
+    return this._record._get_( 'layerSplit' );
   }
 
   /**
@@ -4962,20 +4998,26 @@ class Node extends PhetioObject {
   }
 
   /**
+   * @protected
+   *
+   * @param {boolean} usesOpacity
+   */
+  validateUsesOpacity( usesOpacity ) {
+    assert && assert( typeof usesOpacity === 'boolean' );
+  }
+
+  /**
    * Sets whether or not Scenery will take into account that this Node plans to use opacity. Can have performance
    * gains if there need to be multiple layers for this node's descendants.
    * @public
    *
+   * Whether it is anticipated that opacity will be switched on. If so, having this set to true will make switching
+   * back-and-forth between opacity:1 and other opacities much faster.
+   *
    * @param {boolean} usesOpacity
    */
   setUsesOpacity( usesOpacity ) {
-    assert && assert( typeof usesOpacity === 'boolean' );
-
-    if ( usesOpacity !== this._hints.usesOpacity ) {
-      this._hints.usesOpacity = usesOpacity;
-
-      this.invalidateHint();
-    }
+    this._record._set_( 'usesOpacity', usesOpacity );
   }
 
   /**
@@ -4995,7 +5037,7 @@ class Node extends PhetioObject {
    * @returns {boolean}
    */
   getUsesOpacity() {
-    return this._hints.usesOpacity;
+    return this._record._get_( 'usesOpacity' );
   }
 
   /**
@@ -5009,6 +5051,15 @@ class Node extends PhetioObject {
   }
 
   /**
+   * @protected
+   *
+   * @param {boolean} cssTransform
+   */
+  validateCSSTransform( cssTransform ) {
+    assert && assert( typeof cssTransform === 'boolean' );
+  }
+
+  /**
    * Sets a flag for whether whether the contents of this Node and its children should be displayed in a separate
    * DOM element that is transformed with CSS transforms. It can have potential speedups, since the browser may not
    * have to rerasterize contents when it is animated.
@@ -5017,13 +5068,7 @@ class Node extends PhetioObject {
    * @param {boolean} cssTransform
    */
   setCSSTransform( cssTransform ) {
-    assert && assert( typeof cssTransform === 'boolean' );
-
-    if ( cssTransform !== this._hints.cssTransform ) {
-      this._hints.cssTransform = cssTransform;
-
-      this.invalidateHint();
-    }
+    this._record._set_( 'cssTransform', cssTransform );
   }
 
   /**
@@ -5043,7 +5088,7 @@ class Node extends PhetioObject {
    * @returns {boolean}
    */
   isCSSTransformed() {
-    return this._hints.cssTransform;
+    return this._record._get_( 'cssTransform' );
   }
 
   /**
@@ -5057,6 +5102,15 @@ class Node extends PhetioObject {
   }
 
   /**
+   * @protected
+   *
+   * @param {boolean} excludeInvisible
+   */
+  validateExcludeInvisible( excludeInvisible ) {
+    assert && assert( typeof excludeInvisible === 'boolean' );
+  }
+
+  /**
    * Sets a performance flag for whether layers/DOM elements should be excluded (or included) when things are
    * invisible. The default is false, and invisible content is in the DOM, but hidden.
    * @public
@@ -5064,13 +5118,7 @@ class Node extends PhetioObject {
    * @param {boolean} excludeInvisible
    */
   setExcludeInvisible( excludeInvisible ) {
-    assert && assert( typeof excludeInvisible === 'boolean' );
-
-    if ( excludeInvisible !== this._hints.excludeInvisible ) {
-      this._hints.excludeInvisible = excludeInvisible;
-
-      this.invalidateHint();
-    }
+    this._record._set_( 'excludeInvisible', excludeInvisible );
   }
 
   /**
@@ -5090,7 +5138,7 @@ class Node extends PhetioObject {
    * @returns {boolean}
    */
   isExcludeInvisible() {
-    return this._hints.excludeInvisible;
+    return this._record._get_( 'excludeInvisible' );
   }
 
   /**
@@ -5154,20 +5202,30 @@ class Node extends PhetioObject {
   }
 
   /**
+   * @protected
+   *
+   * @param {Object|null} layoutOptions
+   */
+  validateLayoutOptions( layoutOptions ) {
+    assert && assert( layoutOptions === null || ( typeof layoutOptions === 'object' && Object.getPrototypeOf( layoutOptions ) === Object.prototype ),
+      'layoutOptions should be null or an plain options-style object' );
+  }
+
+  /**
+   * @protected
+   */
+  onAfterLayoutOptions() {
+    this.layoutOptionsChangedEmitter.emit();
+  }
+
+  /**
    * Sets options that are provided to layout managers in order to customize positioning of this node.
    * @public
    *
    * @param {Object|null} layoutOptions
    */
   setLayoutOptions( layoutOptions ) {
-    assert && assert( layoutOptions === null || ( typeof layoutOptions === 'object' && Object.getPrototypeOf( layoutOptions ) === Object.prototype ),
-      'layoutOptions should be null or an plain options-style object' );
-
-    if ( layoutOptions !== this._layoutOptions ) {
-      this._layoutOptions = layoutOptions;
-
-      this.layoutOptionsChangedEmitter.emit();
-    }
+    this._record._set_( 'layoutOptions', layoutOptions );
   }
 
   /**
@@ -5194,7 +5252,7 @@ class Node extends PhetioObject {
    * @returns {Object|null}
    */
   get layoutOptions() {
-    return this.getLayoutOptions();
+    return this._record._get_( 'layoutOptions' );
   }
 
   /**
@@ -5207,19 +5265,26 @@ class Node extends PhetioObject {
   }
 
   /**
+   * @protected
+   *
+   * @param {boolean} preventFit
+   */
+  validatePreventFit( preventFit ) {
+    assert && assert( typeof preventFit === 'boolean' );
+  }
+
+  /**
    * Sets the preventFit performance flag.
    * @public
+   *
+   * If true, Scenery will not fit any blocks that contain drawables attached to Nodes underneath this
+   * Node's subtree. This will typically prevent Scenery from triggering bounds computation for this
+   * sub-tree, and movement of this Node or its descendants will never trigger the refitting of a block.
    *
    * @param {boolean} preventFit
    */
   setPreventFit( preventFit ) {
-    assert && assert( typeof preventFit === 'boolean' );
-
-    if ( preventFit !== this._hints.preventFit ) {
-      this._hints.preventFit = preventFit;
-
-      this.invalidateHint();
-    }
+    this._record._set_( 'preventFit', preventFit );
   }
 
   /**
@@ -5239,7 +5304,7 @@ class Node extends PhetioObject {
    * @returns {boolean}
    */
   isPreventFit() {
-    return this._hints.preventFit;
+    return this._record._get_( 'preventFit' );
   }
 
   /**
@@ -5253,19 +5318,22 @@ class Node extends PhetioObject {
   }
 
   /**
+   * @protected
+   *
+   * @param {boolean} webglScale
+   */
+  validateWebGLScale( webglScale ) {
+    assert && assert( webglScale === null || ( typeof webglScale === 'number' && isFinite( webglScale ) ) );
+  }
+
+  /**
    * Sets whether there is a custom WebGL scale applied to the Canvas, and if so what scale.
    * @public
    *
    * @param {number|null} webglScale
    */
   setWebGLScale( webglScale ) {
-    assert && assert( webglScale === null || ( typeof webglScale === 'number' && isFinite( webglScale ) ) );
-
-    if ( webglScale !== this._hints.webglScale ) {
-      this._hints.webglScale = webglScale;
-
-      this.invalidateHint();
-    }
+    this._record._set_( 'webglScale', webglScale );
   }
 
   /**
@@ -5285,7 +5353,7 @@ class Node extends PhetioObject {
    * @returns {number|null}
    */
   getWebGLScale() {
-    return this._hints.webglScale;
+    this._record._get_( 'webglScale' );
   }
 
   /**
@@ -5622,7 +5690,7 @@ class Node extends PhetioObject {
       const child = this._children[ i ];
 
       if ( child.isVisible() ) {
-        const requiresScratchCanvas = child.effectiveOpacity !== 1 || child.clipArea || child._filters.length;
+        const requiresScratchCanvas = child.effectiveOpacity !== 1 || child.clipArea || child.getInternalFilters().length;
 
         wrapper.context.save();
         matrix.multiplyMatrix( child._transform.getMatrix() );
@@ -5648,16 +5716,17 @@ class Node extends PhetioObject {
           wrapper.context.globalAlpha = child.effectiveOpacity;
 
           let setFilter = false;
-          if ( child._filters.length ) {
+          const filters = child.getInternalFilters();
+          if ( filters.length ) {
             // Filters shouldn't be too often, so less concerned about the GC here (and this is so much easier to read).
             // Performance bottleneck for not using this fallback style, so we're allowing it for Chrome even though
             // the visual differences may be present, see https://github.com/phetsims/scenery/issues/1139
-            if ( Features.canvasFilter && _.every( child._filters, filter => filter.isDOMCompatible() ) ) {
-              wrapper.context.filter = child._filters.map( filter => filter.getCSSFilterString() ).join( ' ' );
+            if ( Features.canvasFilter && _.every( filters, filter => filter.isDOMCompatible() ) ) {
+              wrapper.context.filter = filters.map( filter => filter.getCSSFilterString() ).join( ' ' );
               setFilter = true;
             }
             else {
-              child._filters.forEach( filter => filter.applyCanvasFilter( childWrapper ) );
+              filters.forEach( filter => filter.applyCanvasFilter( childWrapper ) );
             }
           }
 
@@ -6884,6 +6953,14 @@ class Node extends PhetioObject {
     }
   }
 
+  /**
+   * @protected
+   *
+   * @returns {Object}
+   */
+  get recordConfig() {
+    return Node.RECORD_CONFIG;
+  }
 
   /**
    * A default for getTrails() searches, returns whether the Node has no parents.
@@ -6943,7 +7020,64 @@ Node.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 scenery.register( 'Node', Node );
 
 // Node is composed with this feature of Interactive Description
-ParallelDOM.compose( Node );
+const parallelDOMRecordConfig = ParallelDOM.compose( Node );
+
+// @protected {Object}
+Node.RECORD_CONFIG = Record.combineConfigs( PhetioObject.RECORD_CONFIG, parallelDOMRecordConfig, Record.configFromDefaults( DEFAULT_OPTIONS ), {
+  mouseArea: {
+    onAfter: Node.prototype.onAfterMouseArea,
+    validate: Node.prototype.validateMouseArea
+  },
+  touchArea: {
+    onAfter: Node.prototype.onAfterTouchArea,
+    validate: Node.prototype.validateTouchArea
+  },
+  usesOpacity: {
+    onAfter: Node.prototype.invalidateHint,
+    validate: Node.prototype.validateUsesOpacity
+  },
+  layerSplit: {
+    onAfter: Node.prototype.invalidateHint,
+    validate: Node.prototype.validateLayerSplit
+  },
+  cssTransform: {
+    onAfter: Node.prototype.invalidateHint,
+    validate: Node.prototype.validateCSSTransform
+  },
+  excludeInvisible: {
+    onAfter: Node.prototype.invalidateHint,
+    validate: Node.prototype.validateExcludeInvisible
+  },
+  webglScale: {
+    onAfter: Node.prototype.invalidateHint,
+    validate: Node.prototype.validateWebGLScale
+  },
+  preventFit: {
+    onAfter: Node.prototype.invalidateHint,
+    validate: Node.prototype.validatePreventFit
+  },
+  renderer: {
+    onAfter: Node.prototype.invalidateHint,
+    validate: Node.prototype.validateRenderer,
+    onBefore: Node.prototype.onBeforeRenderer
+  },
+  cursor: {
+    validate: Node.prototype.validateCursor,
+    onBefore: Node.prototype.onBeforeCursor
+  },
+  filters: {
+    defaultValue: [],
+    create: () => []
+  },
+  transformBounds: {
+    validate: Node.prototype.validateTransformBounds,
+    onAfter: Node.prototype.invalidateBounds
+  },
+  layoutOptions: {
+    validate: Node.prototype.validateLayoutOptions,
+    onAfter: Node.prototype.onAfterLayoutOptions
+  }
+} );
 
 // @public {IOType}
 Node.NodeIO = new IOType( 'NodeIO', {

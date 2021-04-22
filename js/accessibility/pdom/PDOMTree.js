@@ -34,7 +34,7 @@ const PDOMTree = {
 
     const blockedDisplays = PDOMTree.beforeOp( child );
 
-    if ( !child._pdomParent ) {
+    if ( !child.pdomParent ) {
       PDOMTree.addTree( parent, child );
     }
 
@@ -60,7 +60,7 @@ const PDOMTree = {
 
     const blockedDisplays = PDOMTree.beforeOp( child );
 
-    if ( !child._pdomParent ) {
+    if ( !child.pdomParent ) {
       PDOMTree.removeTree( parent, child );
     }
 
@@ -121,11 +121,11 @@ const PDOMTree = {
     // Check some initial conditions
     if ( assert ) {
       for ( i = 0; i < removedItems; i++ ) {
-        assert( removedItems[ i ] === null || removedItems[ i ]._pdomParent === node,
+        assert( removedItems[ i ] === null || removedItems[ i ].pdomParent === node,
           'Node should have had an pdomOrder' );
       }
       for ( i = 0; i < addedItems; i++ ) {
-        assert( addedItems[ i ] === null || addedItems[ i ]._pdomParent === null,
+        assert( addedItems[ i ] === null || addedItems[ i ].pdomParent === null,
           'Node is already specified in an pdomOrder' );
       }
     }
@@ -142,7 +142,7 @@ const PDOMTree = {
       const removedItemToRemove = removedItems[ i ];
       if ( removedItemToRemove ) {
         PDOMTree.removeTree( node, removedItemToRemove, pdomTrails );
-        removedItemToRemove._pdomParent = null;
+        removedItemToRemove.pdomParent = null;
       }
     }
 
@@ -154,7 +154,7 @@ const PDOMTree = {
         for ( j = 0; j < removedParents.length; j++ ) {
           PDOMTree.removeTree( removedParents[ j ], addedItemToRemove );
         }
-        addedItemToRemove._pdomParent = node;
+        addedItemToRemove.pdomParent = node;
       }
     }
 
@@ -197,7 +197,7 @@ const PDOMTree = {
     const blockedDisplays = PDOMTree.beforeOp( node );
 
     let i;
-    const parents = node._pdomParent ? [ node._pdomParent ] : node._parents;
+    const parents = node.pdomParent ? [ node.pdomParent ] : node._parents;
     const pdomTrailsList = []; // pdomTrailsList[ i ] := PDOMTree.findPDOMTrails( parents[ i ] )
 
     // For now, just regenerate the full tree. Could optimize in the future, if we can swap the content for an
@@ -475,7 +475,7 @@ const PDOMTree = {
       }
     }
 
-    const parents = root._pdomParent ? [ root._pdomParent ] : root._parents;
+    const parents = root.pdomParent ? [ root.pdomParent ] : root._parents;
     const parentCount = parents.length;
     for ( i = 0; i < parentCount; i++ ) {
       const parent = parents[ i ];
@@ -564,8 +564,8 @@ const PDOMTree = {
           trail.removeAncestor();
         }
         // Only visit the pdomParent if we didn't already visit it as a parent.
-        if ( root._pdomParent && !root._pdomParent.hasChild( root ) ) {
-          trail.addAncestor( root._pdomParent );
+        if ( root.pdomParent && !root.pdomParent.hasChild( root ) ) {
+          trail.addAncestor( root.pdomParent );
           recursiveSearch();
           trail.removeAncestor();
         }
