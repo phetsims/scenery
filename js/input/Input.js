@@ -567,7 +567,7 @@ define( require => {
           { name: 'id', type: NumberIO },
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: EventType.USER,
+        phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when a pointer is captured (normally at the start of an interaction)',
         phetioHighFrequency: true
       } );
@@ -586,7 +586,7 @@ define( require => {
           { name: 'id', type: NumberIO },
           { name: 'event', type: DOMEventIO }
         ] ),
-        phetioEventType: EventType.USER,
+        phetioEventType: PhetioObject.EventType.USER,
         phetioDocumentation: 'Emits when a pointer loses its capture (normally at the end of an interaction)',
         phetioHighFrequency: true
       } );
