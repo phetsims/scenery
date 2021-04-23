@@ -309,6 +309,10 @@ const Voicing = {
        */
       setVoicingTagName( tagName ) {
         this._voicingTagName = tagName;
+
+        // update focusability and tagName after setting voicingTagName
+        const focusable = this._voicingFocusableProperty ? this._voicingFocusableProperty.value : false;
+        this.onFocusableChange( focusable );
       },
       set voicingTagName( tagName ) { this.setVoicingTagName( tagName ); },
 
