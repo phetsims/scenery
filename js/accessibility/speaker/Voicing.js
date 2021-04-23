@@ -83,6 +83,11 @@ const Voicing = {
         // focusable.
         this._voicingTagName = null;
 
+        // @private {string|null} - The tagName to apply to the Node when voicing is disabled, reference stored
+        // when the voicingTagName is applied.
+        // NOTE: This probably doesn't work very well with more complicated orders of setting tagName and voicingTagName.
+        this._voicingDisabledTagName = null;
+
         // @private {function(event: SceneryEvent):string|null} - Create the content for the Node that will be spoken on
         // down, focus, and click events when the user has selected to hear context responses.
         this._voicingCreateContextResponse = CREATE_EMPTY_RESPONSE_CONTENT;
@@ -359,7 +364,13 @@ const Voicing = {
       onFocusableChange( focusable ) {
         this.focusable = focusable;
         if ( this.voicingTagName ) {
-          this.tagName = focusable ? this.voicingTagName : null;
+          if ( focusable ) {
+            this._voicingDisabledTagName = this.tagName;
+            this.tagName = this._voicingTagName;
+          }
+          else {
+            this.tagName = this._voicingDisabledTagName;
+          }
         }
       },
 
