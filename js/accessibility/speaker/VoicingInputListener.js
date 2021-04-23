@@ -169,8 +169,11 @@ class VoicingInputListener {
       overrideResponse: voicingNode.voicingCreateOverrideResponse( event )
     } );
 
-    const utteranceQueue = voicingNode.utteranceQueue || this.display.voicingUtteranceQueue;
-    utteranceQueue.addToBack( response );
+    // don't send to utteranceQueue if response is empty
+    if ( response ) {
+      const utteranceQueue = voicingNode.utteranceQueue || this.display.voicingUtteranceQueue;
+      utteranceQueue.addToBack( response );
+    }
   }
 
   /**
