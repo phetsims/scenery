@@ -376,10 +376,14 @@ class Display {
       // of highlights that will surround Nodes that are interactive
       this.interactiveHighlightsVisibleProperty = new BooleanProperty( false );
 
+      // @public {BooleanProperty} - whether "reading block" highlights are visible, and will be shown
+      this.readingBlockHighlightsVisibleProperty = new BooleanProperty( false );
+
       // @private {HighlightOverlay}
       this._focusOverlay = new HighlightOverlay( this, this._focusRootNode, {
         focusHighlightsVisibleProperty: this.focusHighlightsVisibleProperty,
-        voicingHighlightsVisibleProperty: this.interactiveHighlightsVisibleProperty
+        interactiveHighlightsVisibleProperty: this.interactiveHighlightsVisibleProperty,
+        readingBlockHighlightsVisibleProperty: this.readingBlockHighlightsVisibleProperty
       } );
       this.addOverlay( this._focusOverlay );
 

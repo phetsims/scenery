@@ -26,6 +26,12 @@ class VoicingManager {
 
     // @public {BooleanProperty} - whether or not "Hints" are read to the user
     this.hintsProperty = new BooleanProperty( false );
+
+    // @public {BooleanProperty} - controls whether Voicing is enabled in a "main window" area of the application.
+    // This is different from whether voicing is enabled in general. This way it is possible to disable voicing
+    // for the main content of the application while still allowing it to come through for surrounding application
+    // controls.
+    this.mainWindowVoicingEnabledProperty = new BooleanProperty( true );
   }
 
   /**

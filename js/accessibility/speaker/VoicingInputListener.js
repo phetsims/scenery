@@ -12,7 +12,7 @@
 
 import scenery from '../../scenery.js';
 import Focus from '../Focus.js';
-import Voicing from './Voicing.js';
+import ReadingBlock from './ReadingBlock.js';
 import voicingManager from './voicingManager.js';
 
 class VoicingInputListener {
@@ -76,11 +76,11 @@ class VoicingInputListener {
     let hitNode = null;
 
     // only search for VoicingHitShapes if voicing is enabled
-    if ( this.voicingEnabledProperty.value ) {
-      Voicing.VoicingHitShapes.forEach( ( voicingHitShape, voicingNode ) => {
+    if ( this.voicingEnabledProperty.value && this.display.readingBlockHighlightsVisibleProperty.value ) {
+      ReadingBlock.ReadingBlockHitShapes.forEach( ( readingBlockHitShape, voicingNode ) => {
         const localToGlobalMatrix = voicingNode.getLocalToGlobalMatrix();
 
-        const transformedHitShape = voicingHitShape.transformed( localToGlobalMatrix );
+        const transformedHitShape = readingBlockHitShape.transformed( localToGlobalMatrix );
         if ( transformedHitShape.containsPoint( event.pointer.point ) ) {
 
           // now to a hit test on the Node itself to determine if it is would be hittable
@@ -91,18 +91,18 @@ class VoicingInputListener {
           }
         }
       } );
+    }
 
-      // if we haven't found a hit yet, search for Nodes that compose Voicing that don't use a hit shape - these
-      // will be interactive
-      if ( !hitNode ) {
+    // if we haven't found a hit yet, search for Nodes that compose Voicing that don't use a hit shape - these
+    // will be interactive
+    if ( !hitNode ) {
 
-        // check for interactive Nodes that compose voicing
-        for ( let i = event.trail.nodes.length - 1; i >= 0; i-- ) {
-          const node = event.trail.nodes[ i ];
-          if ( node.voicing && !node.voicingHighlight ) {
-            hitNode = node;
-            break;
-          }
+      // check for interactive Nodes that compose voicing
+      for ( let i = event.trail.nodes.length - 1; i >= 0; i-- ) {
+        const node = event.trail.nodes[ i ];
+        if ( node.voicing ) {
+          hitNode = node;
+          break;
         }
       }
     }
