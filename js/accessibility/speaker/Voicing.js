@@ -320,13 +320,17 @@ const Voicing = {
        */
       onFocusableChange( focusable ) {
         this.focusable = focusable;
-        if ( this.voicingTagName ) {
+
+        if ( this.voicingTagName !== this.tagName ) {
           if ( focusable ) {
             this._voicingDisabledTagName = this.tagName;
             this.tagName = this._voicingTagName;
           }
           else {
-            this.tagName = this._voicingDisabledTagName;
+
+            // possible for onFocusableChange to be called before Voicing has been fully initialized (in which case
+            // voicingDisabledTagName will be undefined
+            this.tagName = this._voicingDisabledTagName || null;
           }
         }
       },
