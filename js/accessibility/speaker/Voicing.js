@@ -8,9 +8,9 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
+import extend from '../../../../phet-core/js/extend.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import Node from '../../nodes/Node.js';
-import extend from '../../../../phet-core/js/extend.js';
 import scenery from '../../scenery.js';
 
 const CREATE_EMPTY_RESPONSE_CONTENT = event => null;
@@ -47,9 +47,10 @@ const Voicing = {
 
       /**
        * Initialize in the type being composed with Voicing. Call this in the constructor.
+       * @param {Object} [options] - NOTE: much of the time, the Node this composes into will call mutate for you, be careful not to double call.
        * @public
        */
-      initializeVoicing() {
+      initializeVoicing( options ) {
 
         // @public (read-only)
         this.voicing = true;
@@ -98,6 +99,10 @@ const Voicing = {
 
         // @private - reference kept so this listener can be added/removed when the voicingFocusableProperty changes
         this.focusableChangeListener = this.onFocusableChange.bind( this );
+
+        if ( options ) {
+          this.mutate( options );
+        }
       },
 
       /**
