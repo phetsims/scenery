@@ -148,7 +148,7 @@ class VoicingInputListener {
     const activeTrail = this.activePointerTrail || this.activeFocusTrail;
     if ( activeTrail ) {
       const voicingNode = activeTrail.lastNode();
-      if ( voicingNode ) {
+      if ( voicingNode && voicingNode.voicing ) {
         this.speakVoicingContent( voicingNode, event );
       }
     }
