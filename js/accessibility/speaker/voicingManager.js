@@ -11,9 +11,9 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
+import BooleanProperty from '../../../../axon/js/BooleanProperty.js';
 import merge from '../../../../phet-core/js/merge.js';
 import scenery from '../../scenery.js';
-import BooleanProperty from '../../../../axon/js/BooleanProperty.js';
 
 class VoicingManager {
   constructor() {
@@ -58,7 +58,11 @@ class VoicingManager {
 
       // {string|null} - If this is provided, it is the ONLY spoken string, and it is always spoken regardless of
       // speech output levels selected by the user as long as speech is enabled.
-      overrideResponse: null
+      overrideResponse: null,
+
+      // {boolean} When true and context changes are emitting, then ignore the objectResponse provided (because it is
+      // covered by the context response). This is a common case while developing voicing strings.
+      contextIncludesObjectResponse: false
     }, options );
 
     const objectChanges = this.objectChangesProperty.get();
@@ -87,7 +91,7 @@ class VoicingManager {
       outputString = options.overrideResponse;
     }
     else {
-      if ( usedObjectString ) {
+      if ( usedObjectString && !( options.contextIncludesObjectResponse && contextChanges ) ) {
         outputString += usedObjectString;
       }
       if ( usedContextString ) {
