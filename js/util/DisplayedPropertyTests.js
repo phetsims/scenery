@@ -45,6 +45,7 @@ QUnit.test( 'basics', assert => {
   assert.ok( aDisplayedProperty.value === true, 'back to visible, displayed' );
 
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 } );
 
 
@@ -84,4 +85,5 @@ QUnit.test( 'pdom visibility', assert => {
   // swap pdom order and make sure DisplayedProperty updates
 
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 } );

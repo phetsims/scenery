@@ -115,7 +115,7 @@ class PDOMPeer {
     // @private {boolean} - Indicates that this peer will position sibling elements so that
     // they are in the right location in the viewport, which is a requirement for touch based
     // screen readers. See setPositionInPDOM.
-    this.positionInPDOM = true;
+    this.positionInPDOM = false;
 
     // @private {MutationObserver} - An observer that will call back any time a property of the primary
     // sibling changes. Used to reposition the sibling elements if the bounding box resizes. No need to loop over
@@ -857,7 +857,7 @@ class PDOMPeer {
    * @private
    */
   invalidateCSSPositioning() {
-    if ( !this.positionDirty && this.focusable ) {
+    if ( !this.positionDirty ) {
       this.positionDirty = true;
 
       // mark all ancestors of this peer so that we can quickly find this dirty peer when we traverse
@@ -904,62 +904,60 @@ class PDOMPeer {
    *
    * @private
    */
-  positionElements() {
+  positionElements( positionInPDOM ) {
     assert && assert( this._primarySibling, 'a primary sibling required to receive CSS positioning' );
     assert && assert( this.positionDirty, 'elements should only be repositioned if dirty' );
 
     // CSS transformation only needs to be applied if the node is focusable - otherwise the element will be found
     // by gesture navigation with the virtual cursor. Bounds for non-focusable elements in the ViewPort don't
     // need to be accurate because the AT doesn't need to send events to them.
-    if ( this.node.focusable ) {
-      if ( this.positionInPDOM ) {
-        const transformSourceNode = this.node.pdomTransformSourceNode || this.node;
+    if ( positionInPDOM ) {
+      const transformSourceNode = this.node.pdomTransformSourceNode || this.node;
 
-        scratchGlobalBounds.set( transformSourceNode.localBounds );
-        if ( scratchGlobalBounds.isFinite() ) {
-          scratchGlobalBounds.transform( this.pdomInstance.transformTracker.getMatrix() );
+      scratchGlobalBounds.set( transformSourceNode.localBounds );
+      if ( scratchGlobalBounds.isFinite() ) {
+        scratchGlobalBounds.transform( this.pdomInstance.transformTracker.getMatrix() );
 
-          // no need to position if the node is fully outside of the Display bounds (out of view)
-          const displayBounds = this.display.bounds;
-          if ( displayBounds.intersectsBounds( scratchGlobalBounds ) ) {
+        // no need to position if the node is fully outside of the Display bounds (out of view)
+        const displayBounds = this.display.bounds;
+        if ( displayBounds.intersectsBounds( scratchGlobalBounds ) ) {
 
-            // Constrain the global bounds to Display bounds so that center of the sibling element
-            // is always in the Display. We may miss input if the center of the Node is outside
-            // the Display, where VoiceOver would otherwise send pointer events.
-            scratchGlobalBounds.constrainBounds( displayBounds );
+          // Constrain the global bounds to Display bounds so that center of the sibling element
+          // is always in the Display. We may miss input if the center of the Node is outside
+          // the Display, where VoiceOver would otherwise send pointer events.
+          scratchGlobalBounds.constrainBounds( displayBounds );
 
-            let clientDimensions = getClientDimensions( this._primarySibling );
-            let clientWidth = clientDimensions.width;
-            let clientHeight = clientDimensions.height;
+          let clientDimensions = getClientDimensions( this._primarySibling );
+          let clientWidth = clientDimensions.width;
+          let clientHeight = clientDimensions.height;
 
-            if ( clientWidth > 0 && clientHeight > 0 ) {
+          if ( clientWidth > 0 && clientHeight > 0 ) {
+            scratchSiblingBounds.setMinMax( 0, 0, clientWidth, clientHeight );
+            scratchSiblingBounds.transform( getCSSMatrix( clientWidth, clientHeight, scratchGlobalBounds ) );
+            setClientBounds( this._primarySibling, scratchSiblingBounds );
+          }
+
+          if ( this.labelSibling ) {
+            clientDimensions = getClientDimensions( this._labelSibling );
+            clientWidth = clientDimensions.width;
+            clientHeight = clientDimensions.height;
+
+            if ( clientHeight > 0 && clientWidth > 0 ) {
               scratchSiblingBounds.setMinMax( 0, 0, clientWidth, clientHeight );
               scratchSiblingBounds.transform( getCSSMatrix( clientWidth, clientHeight, scratchGlobalBounds ) );
-              setClientBounds( this._primarySibling, scratchSiblingBounds );
-            }
-
-            if ( this.labelSibling ) {
-              clientDimensions = getClientDimensions( this._labelSibling );
-              clientWidth = clientDimensions.width;
-              clientHeight = clientDimensions.height;
-
-              if ( clientHeight > 0 && clientWidth > 0 ) {
-                scratchSiblingBounds.setMinMax( 0, 0, clientWidth, clientHeight );
-                scratchSiblingBounds.transform( getCSSMatrix( clientWidth, clientHeight, scratchGlobalBounds ) );
-                setClientBounds( this._labelSibling, scratchSiblingBounds );
-              }
+              setClientBounds( this._labelSibling, scratchSiblingBounds );
             }
           }
         }
       }
-      else {
+    }
+    else {
 
-        // not positioning, just move off screen
-        scratchSiblingBounds.set( PDOMPeer.OFFSCREEN_SIBLING_BOUNDS );
-        setClientBounds( this._primarySibling, scratchSiblingBounds );
-        if ( this._labelSibling ) {
-          setClientBounds( this._labelSibling, scratchSiblingBounds );
-        }
+      // not positioning, just move off screen
+      scratchSiblingBounds.set( PDOMPeer.OFFSCREEN_SIBLING_BOUNDS );
+      setClientBounds( this._primarySibling, scratchSiblingBounds );
+      if ( this._labelSibling ) {
+        setClientBounds( this._labelSibling, scratchSiblingBounds );
       }
     }
 
@@ -972,17 +970,19 @@ class PDOMPeer {
    *
    * @public (scenery-internal)
    */
-  updateSubtreePositioning() {
+  updateSubtreePositioning( parentPositionInPDOM = false ) {
     this.childPositionDirty = false;
 
+    const positionInPDOM = this.positionInPDOM || parentPositionInPDOM;
+
     if ( this.positionDirty ) {
-      this.positionElements();
+      this.positionElements( positionInPDOM );
     }
 
     for ( let i = 0; i < this.pdomInstance.children.length; i++ ) {
       const childPeer = this.pdomInstance.children[ i ].peer;
       if ( childPeer.positionDirty || childPeer.childPositionDirty ) {
-        this.pdomInstance.children[ i ].peer.updateSubtreePositioning();
+        this.pdomInstance.children[ i ].peer.updateSubtreePositioning( positionInPDOM );
       }
     }
   }

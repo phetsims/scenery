@@ -45,8 +45,12 @@ class HighlightOverlay {
       // {BooleanProperty} - controls whether highlights are shown in response to focus events
       focusHighlightsVisibleProperty: new BooleanProperty( true ),
 
-      // {BooleanProperty} - controls whether highlights related to the Voicing feature are shown
-      voicingHighlightsVisibleProperty: new BooleanProperty( false )
+      // {BooleanProperty} - controls whether interactive highlights are visible
+      interactiveHighlightsVisibleProperty: new BooleanProperty( false ),
+
+      // {BooleanProperty - controls whether highlights associated with ReadingBlocks (of the Voicing feature set)
+      // are shown when display.pointerFocusProperty changes
+      readingBlockHighlightsVisibleProperty: new BooleanProperty( false )
     }, options );
 
     this.display = display; // @private {Display}
@@ -92,7 +96,8 @@ class HighlightOverlay {
 
     // @public - control if highlights are visible on this overlay
     this.focusHighlightsVisibleProperty = options.focusHighlightsVisibleProperty;
-    this.voicingHighlightsVisibleProperty = options.voicingHighlightsVisibleProperty;
+    this.interactiveHighlightsVisibleProperty = options.interactiveHighlightsVisibleProperty;
+    this.readingBlockHighlightsVisibleProperty = options.readingBlockHighlightsVisibleProperty;
 
     // @private {Display} - display that manages all focus highlights
     this.focusDisplay = new Display( this.focusRootNode, {
@@ -159,7 +164,7 @@ class HighlightOverlay {
     display.pointerFocusProperty.link( this.pointerFocusListener );
 
     this.focusHighlightsVisibleProperty.link( this.focusHighlightsVisibleListener );
-    this.voicingHighlightsVisibleProperty.link( this.voicingHighlightsVisibleListener );
+    this.interactiveHighlightsVisibleProperty.link( this.voicingHighlightsVisibleListener );
 
     webSpeaker.startSpeakingEmitter.addListener( this.startSpeakingListener );
     webSpeaker.endSpeakingEmitter.addListener( this.endSpeakingListener );
@@ -176,7 +181,7 @@ class HighlightOverlay {
 
     Display.focusProperty.unlink( this.focusListener );
     this.focusHighlightsVisibleProperty.unlink( this.focusHighlightsVisibleListener );
-    this.voicingHighlightsVisibleProperty.unlink( this.voicingHighlightsVisibleListener );
+    this.interactiveHighlightsVisibleProperty.unlink( this.voicingHighlightsVisibleListener );
 
     this.display.pointerFocusProperty.unlink( this.pointerFocusListener );
 
@@ -288,7 +293,7 @@ class HighlightOverlay {
    * @private
    */
   activateSpeakingHighlight() {
-    if ( this.activeHighlight && this.node.voicingHighlight ) {
+    if ( this.activeHighlight && this.node.readingBlock ) {
       const speakingHighlightShape = Shape.bounds( this.activeHighlight.bounds );
       this.speakingHighlightPath.shape = speakingHighlightShape;
       this.speakingHighlightPath.visible = true;
@@ -499,7 +504,7 @@ class HighlightOverlay {
       const node = newTrail.lastNode();
       this.activateHighlight( newTrail, node, node.focusHighlight, node.focusHighlightLayerable, node.focusHighlightChangedEmitter );
     }
-    else if ( this.display.pointerFocusProperty.value && this.voicingHighlightsVisibleProperty.value ) {
+    else if ( this.display.pointerFocusProperty.value && this.interactiveHighlightsVisibleProperty.value ) {
       this.onPointerFocusChange( this.display.pointerFocusProperty.value );
     }
   }
@@ -519,13 +524,19 @@ class HighlightOverlay {
       this.deactivateHighlight();
     }
 
-    if ( newTrail && this.voicingHighlightsVisibleProperty.value ) {
+    let activated = false;
+    if ( newTrail ) {
       const node = newTrail.lastNode();
 
-      const highlight = node.voicingHighlight || node.focusHighlight;
-      this.activateHighlight( newTrail, node, highlight, false, node.focusHighlightChangedEmitter );
+      if ( ( node.readingBlock && this.readingBlockHighlightsVisibleProperty.value ) || ( !node.readingBlock && this.interactiveHighlightsVisibleProperty.value ) ) {
+        const highlight = node.voicingHighlight || node.focusHighlight;
+        this.activateHighlight( newTrail, node, highlight, false, node.focusHighlightChangedEmitter );
+
+        activated = true;
+      }
     }
-    else if ( Display.focus && this.focusHighlightsVisibleProperty.value ) {
+
+    if ( !activated && Display.focus && this.focusHighlightsVisibleProperty.value ) {
       this.onFocusChange( Display.focus );
     }
   }

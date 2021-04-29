@@ -213,7 +213,11 @@ class WebSpeaker {
    */
   speak( utterance, withCancel = true ) {
     if ( this.initialized && this._canSpeakProperty.value && !this.onHold ) {
-      withCancel && this.synth.cancel();
+
+      // only cancel the previous alert if there is something new to speak
+      if ( withCancel && utterance.alert ) {
+        this.synth.cancel();
+      }
 
       // since the "end" event doesn't come through all the time after cancel() on
       // safari, we broadcast this right away to indicate that any previous speaking

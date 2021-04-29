@@ -8,14 +8,10 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
+import extend from '../../../../phet-core/js/extend.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import Node from '../../nodes/Node.js';
-import extend from '../../../../phet-core/js/extend.js';
 import scenery from '../../scenery.js';
-
-// The collection of Shapes that define the hit areas for Voicing. Used by VoicingInputListener to determine
-// when the pointer is over a Node that is composed with Voicing.
-const VoicingHitShapes = new Map();
 
 const CREATE_EMPTY_RESPONSE_CONTENT = event => null;
 
@@ -25,7 +21,6 @@ const VOICING_OPTION_KEYS = [
   'voicingCreateContextResponse',
   'voicingCreateHintResponse',
   'voicingCreateOverrideResponse',
-  'voicingHitShape',
   'voicingHighlight',
   'voicingFocusableProperty',
   'voicingTagName',
@@ -52,9 +47,10 @@ const Voicing = {
 
       /**
        * Initialize in the type being composed with Voicing. Call this in the constructor.
+       * @param {Object} [options] - NOTE: much of the time, the Node this composes into will call mutate for you, be careful not to double call.
        * @public
        */
-      initializeVoicing() {
+      initializeVoicing( options ) {
 
         // @public (read-only)
         this.voicing = true;
@@ -62,11 +58,6 @@ const Voicing = {
         // @private {function(event: SceneryEvent):string|null} - Create the content for the Node that will be spoken on
         // down, focus, and click events when the user has selected to hear object responses.
         this._voicingCreateObjectResponse = CREATE_EMPTY_RESPONSE_CONTENT;
-
-        // @private {Shape|null} The shape used to determine if a pointer is over this Node for the purposes of voicing and
-        // highlights. In the local coordinate frame of the Node. Depending on which features are enabled, a highlight
-        // may appear over this Node when a Pointer hits this Shape. Used by SpeakerHighlighter.
-        this._voicingHitShape = null;
 
         // @private {VoicingHighlight|null} - Sets the highlight that will surround this Node when a Pointer is over the
         // voicingHitShape when voicing is enabled. Typically used with Nodes that are not otherwise interactive
@@ -82,6 +73,11 @@ const Voicing = {
         // @private {string|null} - The tagName (of ParallelDOM.js) that will be applied to this Node when this Node is
         // focusable.
         this._voicingTagName = null;
+
+        // @private {string|null} - The tagName to apply to the Node when voicing is disabled, reference stored
+        // when the voicingTagName is applied.
+        // NOTE: This probably doesn't work very well with more complicated orders of setting tagName and voicingTagName.
+        this._voicingDisabledTagName = null;
 
         // @private {function(event: SceneryEvent):string|null} - Create the content for the Node that will be spoken on
         // down, focus, and click events when the user has selected to hear context responses.
@@ -103,6 +99,10 @@ const Voicing = {
 
         // @private - reference kept so this listener can be added/removed when the voicingFocusableProperty changes
         this.focusableChangeListener = this.onFocusableChange.bind( this );
+
+        if ( options ) {
+          this.mutate( options );
+        }
       },
 
       /**
@@ -201,44 +201,6 @@ const Voicing = {
       get voicingCreateOverrideResponse() { return this.getVoicingCreateOverrideResponse(); },
 
       /**
-       * Sets the hit shape used to determine if a Pointer is over this Node for the purposes of voicing. If the
-       * Pointer is over this shape a voicing highlight may appear over the Node. If a down event occurs within
-       * this shape, we may speak the voicingActivationResponse if the feature is enabled.
-       *
-       * NOTE: Setting a voicingHitShape will make this node pickable and set its mouseArea! This is important because
-       * in addition to detecting a hit on the Shape we need to do a hit test to make sure that the Node is hittable
-       * (visible, not obscured by other Nodes, doesn't have an ancestor that is not pickable).
-       *
-       * @public
-       *
-       * @param {Shape} shape - in the local coordinate frame
-       */
-      setVoicingHitShape( shape ) {
-        if ( shape !== this._voicingHitShape ) {
-          this._voicingHitShape = shape;
-
-          VoicingHitShapes.set( this, shape );
-
-          if ( shape ) {
-            this.pickable = true;
-            this.mouseArea = shape;
-          }
-        }
-      },
-      set voicingHitShape( shape ) { this.setVoicingHitShape( shape ); },
-
-      /**
-       * Gets the Shape that is used to determine if a Pointer is over this Node for the purposes of Voicing.
-       * @public
-       *
-       * @returns {null|Shape}
-       */
-      getVoicingHitShape() {
-        return this._voicingHitShape;
-      },
-      get voicingHitShape() { return this.getVoicingHitShape(); },
-
-      /**
        * Sets the highlight that is displayed when this Node has focus or a Pointer is over the voicingHitShape. This
        * will also set the focus highlight
        *
@@ -309,6 +271,10 @@ const Voicing = {
        */
       setVoicingTagName( tagName ) {
         this._voicingTagName = tagName;
+
+        // update focusability and tagName after setting voicingTagName
+        const focusable = this._voicingFocusableProperty ? this._voicingFocusableProperty.value : false;
+        this.onFocusableChange( focusable );
       },
       set voicingTagName( tagName ) { this.setVoicingTagName( tagName ); },
 
@@ -354,8 +320,18 @@ const Voicing = {
        */
       onFocusableChange( focusable ) {
         this.focusable = focusable;
-        if ( this.voicingTagName ) {
-          this.tagName = focusable ? this.voicingTagName : null;
+
+        if ( this.voicingTagName !== this.tagName ) {
+          if ( focusable ) {
+            this._voicingDisabledTagName = this.tagName;
+            this.tagName = this._voicingTagName;
+          }
+          else {
+
+            // possible for onFocusableChange to be called before Voicing has been fully initialized (in which case
+            // voicingDisabledTagName will be undefined
+            this.tagName = this._voicingDisabledTagName || null;
+          }
         }
       },
 
@@ -370,8 +346,6 @@ const Voicing = {
     } );
   }
 };
-
-Voicing.VoicingHitShapes = VoicingHitShapes;
 
 scenery.register( 'Voicing', Voicing );
 export default Voicing;

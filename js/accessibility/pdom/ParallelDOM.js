@@ -2359,6 +2359,9 @@ const ParallelDOM = {
       /**
        * Remove a particular attribute, removing the associated semantic information from the DOM element.
        *
+       * It is HIGHLY recommended that you never call this function from an attribute set with `asProperty:true`, see
+       * setPDOMAttribute for the option details.
+       *
        * @param {string} attribute - name of the attribute to remove
        * @param {Object} [options]
        * @public

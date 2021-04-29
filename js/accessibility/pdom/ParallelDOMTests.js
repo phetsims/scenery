@@ -145,6 +145,7 @@ QUnit.test( 'tagName/innerContent options', assert => {
   }, /.*/, 'error thrown after setting tagName to input on Node with innerContent.' );
 
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 } );
 
 
@@ -174,6 +175,7 @@ QUnit.test( 'containerTagName option', assert => {
 
   assert.ok( !a.pdomInstances[ 0 ].peer.containerParent, 'container parent is cleared if specified' );
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 } );
 
 QUnit.test( 'labelTagName/labelContent option', assert => {
@@ -237,6 +239,7 @@ QUnit.test( 'labelTagName/labelContent option', assert => {
   const cLabelElement = document.getElementById( c.pdomInstances[ 0 ].peer.labelSibling.id );
   assert.ok( cLabelElement.getAttribute( 'for' ) !== null, 'order should not matter' );
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 
 } );
 
@@ -334,6 +337,7 @@ QUnit.test( 'container element not needed for multiple siblings', assert => {
   assert.ok( bElement.children[ 0 ].tagName === 'DIV', 'DIV first' );
   assert.ok( bElement.children[ 0 ] === dPeer.containerParent, 'd container first' );
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 
 } );
 
@@ -378,6 +382,7 @@ QUnit.test( 'descriptionTagName/descriptionContent option', assert => {
   a.descriptionTagName = 'p';
   assert.ok( a.descriptionTagName === 'p', 'expect descriptionTagName setter to work.' );
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 
 } );
 
@@ -472,6 +477,7 @@ QUnit.test( 'ParallelDOM options', assert => {
   buttonElement = getPrimarySiblingElementByNode( buttonNode );
   assert.ok( buttonElement.getAttribute( 'type' ) === null, 'input type cleared' );
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 
 } );
 
@@ -720,6 +726,7 @@ function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
   testK();
 
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 }
 
 function testAssociationAttributeBySetters( assert, attribute ) { // eslint-disable-line
@@ -798,6 +805,7 @@ function testAssociationAttributeBySetters( assert, attribute ) { // eslint-disa
   assert.ok( m[ associationsArrayName ].length === 0, 'cleared when disposed' );
 
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 }
 
 QUnit.test( 'aria-labelledby', assert => {
@@ -883,6 +891,7 @@ QUnit.test( 'ParallelDOM invalidation', assert => {
   assert.ok( elementInDom.getAttribute( 'aria-label' ) === TEST_LABEL, 'aria-label set' );
 
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 } );
 
 QUnit.test( 'ParallelDOM setters/getters', assert => {
@@ -920,6 +929,7 @@ QUnit.test( 'ParallelDOM setters/getters', assert => {
   pdomAuditRootNode( a1 );
 
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 } );
 
 QUnit.test( 'Next/Previous focusable', assert => {
@@ -989,6 +999,7 @@ QUnit.test( 'Next/Previous focusable', assert => {
 
   pdomAuditRootNode( rootNode );
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 
 } );
 
@@ -1018,6 +1029,7 @@ QUnit.test( 'Remove accessibility subtree', assert => {
   assert.ok( rootDOMElement.children.length === 5, 'children added back' );
   assert.ok( dDOMElement.children.length === 1, 'descendant child added back' );
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 
 } );
 
@@ -1060,6 +1072,7 @@ QUnit.test( 'accessible-dag', assert => {
   assert.ok( document.getElementById( instances[ 1 ].peer.primarySibling.id ), 'peer primarySibling 1 should be in the DOM' );
   assert.ok( document.getElementById( instances[ 2 ].peer.primarySibling.id ), 'peer primarySibling 2 should be in the DOM' );
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 
 } );
 
@@ -1143,6 +1156,7 @@ QUnit.test( 'replaceChild', assert => {
   assert.ok( !testNode.focused, 'testNode does not have focus after replacing node d (testNode is not focusable)' );
 
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 
 } );
 
@@ -1233,6 +1247,7 @@ QUnit.test( 'pdomVisible', assert => {
   assert.ok( buttonG2.hidden === true, 'buttonG2 should be hidden after ancestor node c (no accessible content) is made invisible to screen readers' );
   assert.ok( !divA.hidden, 'div A should not have been hidden by making descendant c invisible to screen readers' );
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 
 } );
 
@@ -1256,6 +1271,7 @@ QUnit.test( 'inputValue', assert => {
   aElement = a.pdomInstances[ 1 ].peer.primarySibling;
   assert.ok( aElement.getAttribute( 'value' ) === differentValue, 'should have the same different value' );
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 
 } );
 
@@ -1288,6 +1304,7 @@ QUnit.test( 'ariaValueText', assert => {
   assert.ok( aElement.getAttribute( 'aria-valuetext' ) === differentValue, 'value text as div' );
   assert.ok( a.ariaValueText === differentValue, 'value text as div, getter' );
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 
 } );
 
@@ -1352,6 +1369,7 @@ QUnit.test( 'setPDOMAttribute', assert => {
   assert.ok( testAttributes.length === 1, 'asProperty change should alter the attribute, not add a new one.' );
 
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 } );
 
 QUnit.test( 'pdomChecked', assert => {
@@ -1375,6 +1393,7 @@ QUnit.test( 'pdomChecked', assert => {
   }, /.*/, 'should fail if inputType range' );
 
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 
 } );
 
@@ -1442,6 +1461,7 @@ QUnit.test( 'swapVisibility', assert => {
   assert.ok( c.focused === false, 'c should not have focus after visibility is swapped because it is not focusable' );
 
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 
 } );
 
@@ -1473,6 +1493,7 @@ QUnit.test( 'Aria Label Setter', assert => {
 
   pdomAuditRootNode( rootNode );
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 
 } );
 
@@ -1526,6 +1547,7 @@ QUnit.test( 'focusable option', assert => {
   assert.ok( !d.focused, 'default div should lose focus after node restored to null focusable' );
 
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 
 } );
 
@@ -1610,6 +1632,7 @@ QUnit.test( 'append siblings/appendLabel/appendDescription setters', assert => {
 
   pdomAuditRootNode( rootNode );
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 
 } );
 
@@ -1638,6 +1661,7 @@ QUnit.test( 'containerAriaRole option', assert => {
 
   pdomAuditRootNode( rootNode );
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 
 } );
 
@@ -1666,6 +1690,7 @@ QUnit.test( 'ariaRole option', assert => {
 
   pdomAuditRootNode( rootNode );
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 
 } );
 
@@ -1724,6 +1749,7 @@ QUnit.test( 'accessibleName option', assert => {
 
   pdomAuditRootNode( rootNode );
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 
 } );
 
@@ -1746,6 +1772,7 @@ QUnit.test( 'pdomHeading option', assert => {
   assert.ok( aLabelSibling.textContent === TEST_LABEL, 'pdomHeading setter on div' );
   assert.ok( aLabelSibling.tagName === 'H1', 'pdomHeading setter should be h1' );
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 
 } );
 
@@ -1806,6 +1833,7 @@ QUnit.test( 'helpText option', assert => {
 
   pdomAuditRootNode( rootNode );
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 } );
 
 QUnit.test( 'move to front/move to back', assert => {
@@ -1836,6 +1864,7 @@ QUnit.test( 'move to front/move to back', assert => {
   }
 
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 
 } );
 
@@ -1860,6 +1889,7 @@ QUnit.test( 'Node.enabledProperty with PDOM', assert => {
   assert.ok( pdomNode.pdomInstances[ 0 ].peer.primarySibling.getAttribute( 'aria-disabled' ) === 'true', 'should be enabled' );
   pdomNode.dispose;
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 } );
 
 // these fuzzers take time, so it is nice when they are last
@@ -2042,6 +2072,7 @@ QUnit.test( 'Display.interactive toggling in the PDOM', assert => {
   testDisabled( pdomButtonChild, DEFAULT_DISABLED_WHEN_SUPPORTED, 'pdomButtonChild default not disabled after interactive again with dag.', 1 );
 
   display.dispose();
+  display.domElement.parentElement.removeChild( display.domElement );
 } );
 
 // these fuzzers take time, so it is nice when they are last
