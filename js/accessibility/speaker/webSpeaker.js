@@ -55,7 +55,7 @@ class WebSpeaker {
     this.initialized = false;
 
     // whether or ot the webSpeaker is enabled - if false, there will be no speech
-    this.enabledProperty = new BooleanProperty( true );
+    this.enabledProperty = new BooleanProperty( false );
 
     // @private {DerivedProperty} - Controls whether or not speech is allowed with synthesis.
     // This controlling Property can be set with setCanSpeakProperty.
