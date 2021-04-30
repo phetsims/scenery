@@ -199,7 +199,7 @@ const ACCESSIBILITY_OPTION_KEYS = [
 
   'labelTagName', // {string|null} - Sets the tag name for the DOM element sibling labeling this node
   'labelContent', // {string|null} - Sets the label content for the node
-  'appendLabel', // {string|null} - Sets the label sibling to come after the primary sibling in the PDOM
+  'appendLabel', // {boolean} - Sets the label sibling to come after the primary sibling in the PDOM
 
   'descriptionTagName', // {string|null} - Sets the tag name for the DOM element sibling describing this node
   'descriptionContent', // {string|null} - Sets the description content for the node
