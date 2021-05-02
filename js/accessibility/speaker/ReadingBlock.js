@@ -2,7 +2,7 @@
 
 /**
  * A trait that extends Voicing, adding support for "Reading Blocks" of the voicing feature. "Reading Blocks" are
- * UI components in the application that have unique functionality with respect to the Voicing feature.
+ * UI components in the application that have unique functionality with respect to Voicing.
  *  - Reading Blocks are generally around graphical objects that are not otherwise interactive (like Text).
  *  - They have a unique focus highlight to indicate they can be clicked on to hear voiced content.
  *  - When activated with press or click the web synth will speak about the selected component.
@@ -22,12 +22,8 @@ import Voicing from './Voicing.js';
 import voicingManager from './voicingManager.js';
 import webSpeaker from './webSpeaker.js';
 
-// The collection of Shapes that define the hit areas for Voicing. Used by VoicingInputListener to determine
-// when the pointer is over a Node that is composed with Voicing.
-const ReadingBlockHitShapes = new Map();
-
 const READING_BLOCK_OPTION_KEYS = [
-  'readingBlockHitShape'
+  'readingBlockTagName'
 ];
 
 const ReadingBlock = {
@@ -59,61 +55,97 @@ const ReadingBlock = {
         // @public (scenery-internal) - a flag to indicate that this Node has ReadingBlock behavior
         this.readingBlock = true;
 
-        // @private {Shape|null} The shape used to determine if a pointer is over this Node for the purposes of voicing and
-        // highlights. In the local coordinate frame of the Node. Depending on which features are enabled, a highlight
-        // may appear over this Node when a Pointer hits this Shape. Used by SpeakerHighlighter.
-        this._readingBlockHitShape = null;
+        // @private {string|null} - The tagName used for the ReadingBlock when "Voicing" is enabled, default
+        // of button so that it is added to the focus order.
+        this._readingBlockTagName = 'button';
 
-        // setter for the voicingFocusableProperty,
-        this.voicingFocusableProperty = new DerivedProperty( [ webSpeaker.enabledProperty, voicingManager.mainWindowVoicingEnabledProperty ], ( enabled, mainWindowEnabled ) => {
+        // @private {string|null} - The tagName to apply to the Node when voicing is disabled, reference stored
+        // when the readingBlockTagName is applied.
+        // NOTE: This wouldn't work very well with more complicated orders of setting tagName and readingBlockTagName.
+        this._readingBlockDisabledTagName = null;
+
+        this.localBoundsChangedListener = this.onLocalBoundsChanged.bind( this );
+        this.localBoundsProperty.link( this.localBoundsChangedListener );
+
+        // @private {DerivedProperty.<boolean>} - controls whether or not Reading Blocks should be focusable from
+        // user settings
+        this.readingBlockFocusableProperty = new DerivedProperty( [
+          webSpeaker.enabledProperty,
+          voicingManager.mainWindowVoicingEnabledProperty ], ( enabled, mainWindowEnabled ) => {
           return enabled && mainWindowEnabled;
         } );
 
-        this.voicingTagName = 'button';
+        // @private - reference kept so this listener can be added/removed when the readingBlockFocusable changes
+        this.readingBlockFocusableChangeListener = this.onReadingBlockFocusableChanged.bind( this );
+        this.readingBlockFocusableProperty.link( this.readingBlockFocusableChangeListener );
       },
 
       /**
-       * Sets the hit shape used to determine if a Pointer is over this Node for the purposes of voicing. If the
-       * Pointer is over this shape a voicing highlight may appear over the Node. If a down event occurs within
-       * this shape, we may speak the voicingActivationResponse if the feature is enabled.
-       *
-       * NOTE: Setting a readingBlockHitShape will make this node pickable and set its mouseArea! This is important because
-       * in addition to detecting a hit on the Shape we need to do a hit test to make sure that the Node is hittable
-       * (visible, not obscured by other Nodes, doesn't have an ancestor that is not pickable).
-       *
+       * Set the tagName for the ReadingBlockNode. This is the tagName (of ParallelDOM) that will be applied
+       * to this Node when Reading Blocks are enabled.
        * @public
        *
-       * @param {Shape} shape - in the local coordinate frame
+       * @param {string|null} tagName
        */
-      setReadingBlockHitShape( shape ) {
-        if ( shape !== this._readingBlockHitShape ) {
-          this._readingBlockHitShape = shape;
+      setReadingBlockTagName( tagName ) {
+        this._readingBlockTagName = tagName;
+      },
+      set readingBlockTagName( tagName ) { this.setReadingBlockTagName( tagName ); },
 
-          ReadingBlockHitShapes.set( this, shape );
+      /**
+       * Get the tagName for this Node (of ParallelDOM) when Reading Blocks are enabled.
+       * @public
+       *
+       * @returns {string|null}
+       */
+      getReadingBlockTagName() {
+        return this._readingBlockTagName;
+      },
+      get readingBlockTagName() { return this.getReadingBlockTagName(); },
 
-          if ( shape ) {
-            this.pickable = true;
-            this.mouseArea = shape;
+      /**
+       * When this Node becomes focusable (because Reading Blocks have just been enabled or disabled), either
+       * apply or remove the readingBlockTagName.
+       * @private
+       *
+       * @param {boolean} focusable
+       */
+      onReadingBlockFocusableChanged( focusable ) {
+        this.focusable = focusable;
+
+        if ( this.readingBlockTagName !== this.tagName ) {
+          if ( focusable ) {
+            this._readingBlockDisabledTagName = this.tagName;
+            this.tagName = this._readingBlockTagName;
+          }
+          else {
+
+            // possible for onReadingBlockFocusableChanged to be called before Voicing has been fully initialized
+            this.tagName = this._readingBlockDisabledTagName || null;
           }
         }
       },
-      set readingBlockHitShape( shape ) { this.setReadingBlockHitShape( shape ); },
 
       /**
-       * Gets the Shape that is used to determine if a Pointer is over this Node for the purposes of Voicing.
-       * @public
-       *
-       * @returns {null|Shape}
+       * @private
+       * @param localBounds
        */
-      getReadingBlockShape() {
-        return this._readingBlockHitShape;
+      onLocalBoundsChanged( localBounds ) {
+        this.mouseArea = localBounds;
+        this.touchArea = localBounds;
       },
-      get readingBlockHitShape() { return this.getReadingBlockShape(); }
+
+      /**
+       * @public
+       */
+      disposeReadingBlock() {
+        this.readingBlockFocusableProperty.unlink( this.readingBlockFocusableChangeListener );
+        this.localBoundsProperty.unlink( this.localBoundsChangedListener );
+        this.disposeVoicing();
+      }
     } );
   }
 };
-
-ReadingBlock.ReadingBlockHitShapes = ReadingBlockHitShapes;
 
 scenery.register( 'ReadingBlock', ReadingBlock );
 export default ReadingBlock;

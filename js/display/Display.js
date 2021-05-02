@@ -70,7 +70,6 @@ import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import PDOMInstance from '../accessibility/pdom/PDOMInstance.js';
 import PDOMTree from '../accessibility/pdom/PDOMTree.js';
 import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
-import VoicingInputListener from '../accessibility/speaker/VoicingInputListener.js';
 import webSpeaker from '../accessibility/speaker/webSpeaker.js';
 import Input from '../input/Input.js';
 import Node from '../nodes/Node.js';
@@ -358,10 +357,6 @@ class Display {
       // could be a singleton shared among Displays but the screen reader utteranceQueue needs to be
       // one per display so doing the same for voicingUtteranceQueue to match.
       this.voicingUtteranceQueue = new UtteranceQueue( webSpeaker );
-
-      // @private {VoicingInputListener} - reference kept for disposal
-      this.voicingInputListener = new VoicingInputListener( this, webSpeaker.enabledProperty );
-      this.addInputListener( this.voicingInputListener );
     }
 
     if ( this._accessible ) {
@@ -2128,7 +2123,6 @@ class Display {
 
     if ( this._voicing ) {
       this.voicingUtteranceQueue.dispose();
-      this.removeInputListener( this.voicingInputListener );
     }
   }
 

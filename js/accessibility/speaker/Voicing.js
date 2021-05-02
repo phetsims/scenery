@@ -12,6 +12,8 @@ import extend from '../../../../phet-core/js/extend.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
+import MouseHighlighting from './MouseHighlighting.js';
+import voicingManager from './voicingManager.js';
 
 const CREATE_EMPTY_RESPONSE_CONTENT = event => null;
 
@@ -21,10 +23,7 @@ const VOICING_OPTION_KEYS = [
   'voicingCreateContextResponse',
   'voicingCreateHintResponse',
   'voicingCreateOverrideResponse',
-  'voicingHighlight',
-  'voicingFocusableProperty',
-  'voicingTagName',
-  'utteranceQueue'
+  'voicingUtteranceQueue'
 ];
 
 const Voicing = {
@@ -32,6 +31,9 @@ const Voicing = {
     assert && assert( _.includes( inheritance( type ), Node ), 'Only Node subtypes should compose Voicing' );
 
     const proto = type.prototype;
+
+    // compose with mouse highlighting
+    MouseHighlighting.compose( type );
 
     extend( proto, {
 
@@ -52,32 +54,15 @@ const Voicing = {
        */
       initializeVoicing( options ) {
 
-        // @public (read-only)
+        // initialize "super" Trait to support highlights on mouse input
+        this.initializeMouseHighlighting();
+
+        // @public (read-only) - flag indicating that this Node is composed with Voicing functionality
         this.voicing = true;
 
         // @private {function(event: SceneryEvent):string|null} - Create the content for the Node that will be spoken on
         // down, focus, and click events when the user has selected to hear object responses.
         this._voicingCreateObjectResponse = CREATE_EMPTY_RESPONSE_CONTENT;
-
-        // @private {VoicingHighlight|null} - Sets the highlight that will surround this Node when a Pointer is over the
-        // voicingHitShape when voicing is enabled. Typically used with Nodes that are not otherwise interactive
-        // but have become clickable for the purposes of Voicing. VoicingHighlight is styled differently from
-        // other focus highlights to distinguish this. Null value means that NO voicingHighlight will be used,
-        // there are no default voicing highlights.
-        this._voicingHighlight = null;
-
-        // @private {null|BooleanProperty} - Controls whether this voicingNode is focusable. Generally useful for Nodes
-        // that would not otherwise be focusable when the voicing feature is disabled.
-        this._voicingFocusableProperty = null;
-
-        // @private {string|null} - The tagName (of ParallelDOM.js) that will be applied to this Node when this Node is
-        // focusable.
-        this._voicingTagName = null;
-
-        // @private {string|null} - The tagName to apply to the Node when voicing is disabled, reference stored
-        // when the voicingTagName is applied.
-        // NOTE: This probably doesn't work very well with more complicated orders of setting tagName and voicingTagName.
-        this._voicingDisabledTagName = null;
 
         // @private {function(event: SceneryEvent):string|null} - Create the content for the Node that will be spoken on
         // down, focus, and click events when the user has selected to hear context responses.
@@ -88,20 +73,57 @@ const Voicing = {
         this._voicingCreateHintResponse = CREATE_EMPTY_RESPONSE_CONTENT;
 
         // @private {function(event: SceneryEvent):string|null} - Create the content for the Node that will be spoken
-        // on down, focus, and click events regardless of what ouptut the user has selected as long as voicing is
+        // on down, focus, and click events regardless of what output the user has selected as long as voicing is
         // enabled.
         this._voicingCreateOverrideResponse = CREATE_EMPTY_RESPONSE_CONTENT;
 
         // @private {UtteranceQueue} - The utteranceQueue that content for this VoicingNode will be spoken through.
-        // By default, it will go through the Display's VoicingUtteranceQueue, but you may need separate
+        // By default, it will go through the Display's voicingUtteranceQueue, but you may need separate
         // UtteranceQueues for different areas of content in your application to manage complex alerts.
         this._voicingUtteranceQueue = null;
 
-        // @private - reference kept so this listener can be added/removed when the voicingFocusableProperty changes
-        this.focusableChangeListener = this.onFocusableChange.bind( this );
+        // @public (scenery-internal, read-only) {boolean} - Whether this Node is currently being spoken about from
+        // an "activation" like input from the following listener. HighlightOverlay uses this check to make sure that
+        // this is the correct Node to highlight for its "speaking" highlight.
+        this.speakingFromActivation = false;
+
+        // @private {Object} - Input listener that implements voicing of content on various activation events
+        this.speakContentInputListener = {
+          down: event => { this.speakVoicingContent( event ); },
+          click: event => { this.speakVoicingContent( event ); },
+          focus: event => { this.speakVoicingContent( event ); },
+          exit: event => { this.speakingFromActivation = false; },
+          blur: event => { this.speakingFromActivation = false; }
+        };
+        this.addInputListener( this.speakContentInputListener );
 
         if ( options ) {
           this.mutate( options );
+        }
+      },
+
+      /**
+       * Speak the content from the VoicingNod in response to input.
+       * @private
+       *
+       * @param {SceneryEvent} event
+       */
+      speakVoicingContent( event ) {
+        const response = voicingManager.collectResponses( {
+          objectResponse: this.voicingCreateObjectResponse( event ),
+          interactionHint: this.voicingCreateHintResponse( event ),
+          contextResponse: this.voicingCreateContextResponse( event ),
+          overrideResponse: this.voicingCreateOverrideResponse( event )
+        } );
+
+        // don't send to utteranceQueue if response is empty
+        if ( response ) {
+          this._displays.forEach( display => {
+            const utteranceQueue = this.utteranceQueue || display.voicingUtteranceQueue;
+            utteranceQueue.addToBack( response );
+          } );
+
+          this.speakingFromActivation = true;
         }
       },
 
@@ -201,56 +223,6 @@ const Voicing = {
       get voicingCreateOverrideResponse() { return this.getVoicingCreateOverrideResponse(); },
 
       /**
-       * Sets the highlight that is displayed when this Node has focus or a Pointer is over the voicingHitShape. This
-       * will also set the focus highlight
-       *
-       * @public
-       *
-       * @param {Node|Shape|null} voicingHighlight
-       */
-      setVoicingHighlight( voicingHighlight ) {
-        this._voicingHighlight = voicingHighlight;
-      },
-      set voicingHighlight( voicingHighlight ) { this.setVoicingHighlight( voicingHighlight ); },
-
-      /**
-       * Gets the highlight that is shown when this Node has focus or a Pointer is over the voicingHitShape.
-       * @public
-       *
-       * @returns {null}
-       */
-      getVoicingHighlight() {
-        return this._voicingHighlight;
-      },
-      get voicingHighlight() { return this.getVoicingHighlight(); },
-
-      /**
-       * Set the Property that will control whether this Node is focusable for the purposes of Voicing. Many Nodes
-       * with Voicing are already focusable and so this is not necessary. But others are only focusable when
-       * the VoicingFeature is enabled, and this allows you to control that.
-       *
-       * @public
-       * @param {BooleanProperty} voicingFocusableProperty
-       */
-      setVoicingFocusableProperty( voicingFocusableProperty ) {
-
-        if ( voicingFocusableProperty !== this._voicingFocusableProperty ) {
-
-          // remove previous listener to prevent memory leak
-          if ( this._voicingFocusableProperty && this._voicingFocusableProperty.hasListener( this.focusableChangeListener ) ) {
-            this._voicingFocusableProperty.unlink( this.focusableChangeListener );
-          }
-
-          this._voicingFocusableProperty = voicingFocusableProperty;
-
-          if ( voicingFocusableProperty ) {
-            this._voicingFocusableProperty.link( this.focusableChangeListener );
-          }
-        }
-      },
-      set voicingFocusableProperty( voicingFocusableProperty ) { this.setVoicingFocusableProperty( voicingFocusableProperty ); },
-
-      /**
        * Gets the Property that controls whether this Node is focusable for the purposes of Voicing.
        * @public
        *
@@ -261,33 +233,6 @@ const Voicing = {
         return this._voicingFocusableProperty;
       },
       get voicingFocusableProperty() { return this.getVoicingFocusableProperty(); },
-
-
-      /**
-       * Set the tagName for the VoicingNode. By defining a voicingTagName, the tagName (of ParallelDOM.js) will
-       * be set whenever the voicingFocusableProperty changes.
-       *
-       * @param {string} tagName
-       */
-      setVoicingTagName( tagName ) {
-        this._voicingTagName = tagName;
-
-        // update focusability and tagName after setting voicingTagName
-        const focusable = this._voicingFocusableProperty ? this._voicingFocusableProperty.value : false;
-        this.onFocusableChange( focusable );
-      },
-      set voicingTagName( tagName ) { this.setVoicingTagName( tagName ); },
-
-      /**
-       * Get the tagName that will be set on this Node whenever voicingFocusableProperty is true.
-       * @public
-       *
-       * @returns {null|string}
-       */
-      getVoicingTagName() {
-        return this._voicingTagName;
-      },
-      get voicingTagName() { return this.getVoicingTagName(); },
 
       /**
        * Sets the utteranceQueue through which voicing associated with this Node will be spoken. By default,
@@ -314,34 +259,10 @@ const Voicing = {
       get utteranceQueue() { return this.getUtteranceQueue(); },
 
       /**
-       * When the voicingFocusableProperty changes, updates ParallelDOM properties that make this Node focusable.
-       * @private
-       * @param focusable
-       */
-      onFocusableChange( focusable ) {
-        this.focusable = focusable;
-
-        if ( this.voicingTagName !== this.tagName ) {
-          if ( focusable ) {
-            this._voicingDisabledTagName = this.tagName;
-            this.tagName = this._voicingTagName;
-          }
-          else {
-
-            // possible for onFocusableChange to be called before Voicing has been fully initialized (in which case
-            // voicingDisabledTagName will be undefined
-            this.tagName = this._voicingDisabledTagName || null;
-          }
-        }
-      },
-
-      /**
        * @public
        */
       disposeVoicing() {
-        if ( this._voicingFocusableProperty && this._voicingFocusableProperty.hasListener( this.focusableChangeListener ) ) {
-          this._voicingFocusableProperty.unlink( this.focusableChangeListener );
-        }
+        this.disposeMouseHighlighting();
       }
     } );
   }
