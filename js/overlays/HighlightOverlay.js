@@ -293,7 +293,7 @@ class HighlightOverlay {
    * @private
    */
   activateSpeakingHighlight() {
-    if ( this.activeHighlight && this.node.readingBlock ) {
+    if ( this.activeHighlight && this.node.readingBlock && this.node.speakingFromActivation ) {
       const speakingHighlightShape = Shape.bounds( this.activeHighlight.bounds );
       this.speakingHighlightPath.shape = speakingHighlightShape;
       this.speakingHighlightPath.visible = true;
@@ -529,7 +529,7 @@ class HighlightOverlay {
       const node = newTrail.lastNode();
 
       if ( ( node.readingBlock && this.readingBlockHighlightsVisibleProperty.value ) || ( !node.readingBlock && this.interactiveHighlightsVisibleProperty.value ) ) {
-        const highlight = node.voicingHighlight || node.focusHighlight;
+        const highlight = node.focusHighlight;
         this.activateHighlight( newTrail, node, highlight, false, node.focusHighlightChangedEmitter );
 
         activated = true;
