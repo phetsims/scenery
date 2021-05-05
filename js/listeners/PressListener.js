@@ -27,7 +27,7 @@ import createObservableArray from '../../../axon/js/createObservableArray.js';
 import DerivedProperty from '../../../axon/js/DerivedProperty.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
 import merge from '../../../phet-core/js/merge.js';
-import EnabledComponent from '../../../sun/js/EnabledComponent.js';
+import EnabledComponent from '../../../axon/js/EnabledComponent.js';
 import EventType from '../../../tandem/js/EventType.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
