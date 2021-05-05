@@ -322,6 +322,8 @@ class PressListener extends EnabledComponent {
     // update isHighlightedProperty (not a DerivedProperty because we need to hook to passed-in properties)
     this.isHoveringProperty.link( this._isHighlightedListener );
     this.isPressedProperty.link( this._isHighlightedListener );
+
+    this.enabledProperty.lazyLink( this.onEnabledPropertyChange.bind( this ) );
   }
 
   /**
@@ -596,6 +598,15 @@ class PressListener extends EnabledComponent {
    */
   invalidateHighlighted() {
     this.isHighlightedProperty.value = this.isHoveringProperty.value || this.isPressedProperty.value;
+  }
+
+  /**
+   * Fired when the enabledProperty changes
+   * @param {boolean} enabled
+   * @protected
+   */
+  onEnabledPropertyChange( enabled ) {
+    !enabled && this.interrupt();
   }
 
   /**
@@ -974,6 +985,8 @@ class PressListener extends EnabledComponent {
       this.display.focusHighlightsVisibleProperty.unlink( this.boundInvalidateOverListener );
       this.display = null;
     }
+
+    super.dispose();
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
   }
