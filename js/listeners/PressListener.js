@@ -27,6 +27,7 @@ import createObservableArray from '../../../axon/js/createObservableArray.js';
 import DerivedProperty from '../../../axon/js/DerivedProperty.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
 import merge from '../../../phet-core/js/merge.js';
+import EnabledComponent from '../../../sun/js/EnabledComponent.js';
 import EventType from '../../../tandem/js/EventType.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
@@ -42,7 +43,7 @@ let globalID = 0;
 // Factor out to reduce memory footprint, see https://github.com/phetsims/tandem/issues/71
 const truePredicate = _.constant( true );
 
-class PressListener {
+class PressListener extends EnabledComponent {
   /**
    * @param {Object} [options] - See the constructor body (below) for documented options.
    */
@@ -111,6 +112,11 @@ class PressListener {
       // most once per frame (any more, and it would be a waste).
       collapseDragEvents: false,
 
+      // EnabledComponent
+      // By default, PressListener does not have an instrumented enabledProperty, but you can opt in with this option.
+      phetioEnabledPropertyInstrumented: false,
+
+      // phet-io
       // {Tandem} - For PhET-iO instrumentation. If only using the PressListener for hover behavior, there is no need to
       // instrument because events are only added to the data stream for press/release and not for hover events. Please pass
       // Tandem.OPT_OUT as the tandem option to not instrument an instance.
@@ -137,6 +143,8 @@ class PressListener {
     assert && assert( typeof options.attach === 'boolean', 'attach should be a boolean' );
     assert && assert( typeof options.a11yLooksPressedInterval === 'number',
       'a11yLooksPressedInterval should be a number' );
+
+    super( options );
 
     // @private {number} - Unique global ID for this listener
     this._id = globalID++;
@@ -350,7 +358,7 @@ class PressListener {
    * @returns {boolean}
    */
   canPress( event ) {
-    return !this.isPressed && this._canStartPress( event, this ) &&
+    return this.enabledProperty.value && !this.isPressed && this._canStartPress( event, this ) &&
            // Only let presses be started with the correct mouse button.
            ( !( event.pointer instanceof Mouse ) || event.domEvent.button === this._mouseButton ) &&
            // We can't attach to a pointer that is already attached.
@@ -367,7 +375,7 @@ class PressListener {
   canClick() {
     // If this listener is already involved in pressing something (or our options predicate returns false) we can't
     // press something.
-    return !this.isPressed && this._canStartPress( null, this );
+    return this.enabledProperty.value && !this.isPressed && this._canStartPress( null, this );
   }
 
   /**
