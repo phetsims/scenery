@@ -90,7 +90,8 @@ class PressListener extends EnabledComponent {
       // over).
       pressCursor: 'pointer',
 
-      // {boolean} -
+      // {boolean} - When true, any node this listener is added to will use this listener's cursor (see options.pressCursor)
+      // as the cursor for that node. This only applies if the node's cursor is null, see Node.getEffectiveCursor().
       useInputListenerCursor: false,
 
       // {function} - Checks this when trying to start a press. If this function returns false, a press will not be
