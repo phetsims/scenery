@@ -2105,6 +2105,12 @@ class Node extends PhetioObject {
    *
    * See Input.js documentation for information about how event listeners are used.
    *
+   * Additionally, the following fields are supported on a listener:
+   *
+   * - interrupt {function()}: When a pointer is interrupted, it will attempt to call this method on the input listener
+   * - cursor {string|null}: If node.cursor is null, any non-null cursor of an input listener will effectively
+   *                         "override" it. NOTE: this can be implemented as an es5 getter, if the cursor can change
+   *
    * @param {Object} listener
    * @returns {Node} - Returns 'this' reference, for chaining
    */
@@ -4621,6 +4627,29 @@ class Node extends PhetioObject {
    */
   getCursor() {
     return this._cursor;
+  }
+
+  /**
+   * Returns the CSS cursor that could be applied either by this Node itself, or from any of its input listeners'
+   * preferences.
+   * @public (scenery-internal)
+   *
+   * @returns {string|null}
+   */
+  getEffectiveCursor() {
+    if ( this._cursor ) {
+      return this._cursor;
+    }
+
+    for ( let i = 0; i < this._inputListeners.length; i++ ) {
+      const inputListener = this._inputListeners[ i ];
+
+      if ( inputListener.cursor ) {
+        return inputListener.cursor;
+      }
+    }
+
+    return null;
   }
 
   /**

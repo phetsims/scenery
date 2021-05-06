@@ -23,11 +23,11 @@
 
 import Action from '../../../axon/js/Action.js';
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
-import createObservableArray from '../../../axon/js/createObservableArray.js';
 import DerivedProperty from '../../../axon/js/DerivedProperty.js';
+import EnabledComponent from '../../../axon/js/EnabledComponent.js';
+import createObservableArray from '../../../axon/js/createObservableArray.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
 import merge from '../../../phet-core/js/merge.js';
-import EnabledComponent from '../../../axon/js/EnabledComponent.js';
 import EventType from '../../../tandem/js/EventType.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
@@ -87,14 +87,11 @@ class PressListener extends EnabledComponent {
       // {string|null} - If the targetNode/currentTarget don't have a custom cursor, this will set the pointer cursor to
       // this value when this listener is "pressed". This means that even when the mouse moves out of the node after
       // pressing down, it will still have this cursor (overriding the cursor of whatever nodes the pointer may be
-      // over). Additionally, if preferTargetCursor:false is set, then this value will ALWAYS be used as the pointer
-      // cursor, regardless of the value of the targetNode/currentTarget's cursor value.
+      // over).
       pressCursor: 'pointer',
 
-      // {boolean} - By default, the targetNode or currentTarget's cursor will be used (if it is non-null), falling back
-      // to the pressCursor option. If this option is set to false, then the pressCursor option will override any set
-      // cursor on the targetNode/currentTarget. See https://github.com/phetsims/scenery/issues/1013 for more info.
-      preferTargetCursor: true,
+      // {boolean} -
+      useInputListenerCursor: false,
 
       // {function} - Checks this when trying to start a press. If this function returns false, a press will not be
       // started. Called as canStartPress( event: {SceneryEvent|null}, listener: {PressListener} ), since sometimes the
@@ -170,7 +167,6 @@ class PressListener extends EnabledComponent {
     // @private {boolean}
     this._attach = options.attach;
     this._collapseDragEvents = options.collapseDragEvents;
-    this._preferTargetCursor = options.preferTargetCursor;
 
     // @public {ObservableArrayDef.<Pointer>} - Contains all pointers that are over our button. Tracked by adding with
     // 'enter' events and removing with 'exit' events.
@@ -200,6 +196,17 @@ class PressListener extends EnabledComponent {
 
     // @public {Property.<boolean>} (read-only) - Whether the listener has focus (should appear to be over)
     this.isFocusedProperty = new BooleanProperty( false );
+
+    // @private {Property.<string|null>}
+    this.cursorProperty = new DerivedProperty( [ this.enabledProperty ], enabled => {
+      if ( options.useInputListenerCursor && enabled && this._attach ) {
+        return this._pressCursor;
+      }
+      else {
+        return null;
+      }
+    } );
+
 
     // @public {Pointer|null} (read-only) - The current pointer, or null when not pressed. There can be short periods of
     // time when this has a value when isPressedProperty.value is false, such as during the processing of a pointer
@@ -334,6 +341,15 @@ class PressListener extends EnabledComponent {
    */
   get isPressed() {
     return this.isPressedProperty.value;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {string|null}
+   */
+  get cursor() {
+    return this.cursorProperty.value;
   }
 
   /**
@@ -630,9 +646,7 @@ class PressListener extends EnabledComponent {
     this.pointer.addInputListener( this._pointerListener, this._attach );
     this._listeningToPointer = true;
 
-    // Use the targetNode/currentTarget cursor if it's non-null and preferTargetCursor is set, see
-    // https://github.com/phetsims/scenery/issues/1013
-    this.pointer.cursor = ( this._preferTargetCursor && this.pressedTrail.lastNode().cursor ) || this._pressCursor;
+    this.pointer.cursor = this.pressedTrail.lastNode().getEffectiveCursor() || this._pressCursor;
 
     this.isPressedProperty.value = true;
 

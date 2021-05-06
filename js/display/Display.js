@@ -1060,7 +1060,7 @@ class Display {
       if ( mouseTrail ) {
         for ( let i = mouseTrail.getCursorCheckIndex(); i >= 0; i-- ) {
           const node = mouseTrail.nodes[ i ];
-          const cursor = node.getCursor();
+          const cursor = node.getEffectiveCursor();
 
           if ( cursor ) {
             sceneryLog && sceneryLog.Cursor && sceneryLog.Cursor( `${cursor} on ${node.constructor.name}#${node.id}` );
@@ -1679,6 +1679,9 @@ class Display {
       }
       if ( instance.trail.isPickable() ) {
         addQualifier( '<span style="color: #808">hits</span>' );
+      }
+      if ( node.getEffectiveCursor() ) {
+        addQualifier( `effectiveCursor:${node.getEffectiveCursor()}` );
       }
       if ( node.clipArea ) {
         addQualifier( 'clipArea' );
