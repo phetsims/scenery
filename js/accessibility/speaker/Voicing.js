@@ -10,19 +10,18 @@
 
 import extend from '../../../../phet-core/js/extend.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
+import merge from '../../../../phet-core/js/merge.js';
 import Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import MouseHighlighting from './MouseHighlighting.js';
 import voicingManager from './voicingManager.js';
-
-const CREATE_EMPTY_RESPONSE_CONTENT = event => null;
+import voicingUtteranceQueue from './voicingUtteranceQueue.js';
 
 // options that are supported by Voicing.js. Added to mutator keys so that Voicing properties can be set with mutate.
 const VOICING_OPTION_KEYS = [
-  'voicingCreateObjectResponse',
-  'voicingCreateContextResponse',
-  'voicingCreateHintResponse',
-  'voicingCreateOverrideResponse',
+  'voicingObjectResponse',
+  'voicingContextResponse',
+  'voicingHintResponse',
   'voicingUtteranceQueue'
 ];
 
@@ -60,42 +59,43 @@ const Voicing = {
         // @public (read-only) - flag indicating that this Node is composed with Voicing functionality
         this.voicing = true;
 
-        // @private {function(event: SceneryEvent):string|null} - Create the content for the Node that will be spoken on
-        // down, focus, and click events when the user has selected to hear object responses.
-        this._voicingCreateObjectResponse = CREATE_EMPTY_RESPONSE_CONTENT;
+        // @private {string|null} - The response to be spoken for this node when speaking object changes. This is
+        // usually the accessible name of the Node, usually spoken on focus and labelling what the object is.
+        this._voicingObjectResponse = null;
 
-        // @private {function(event: SceneryEvent):string|null} - Create the content for the Node that will be spoken on
-        // down, focus, and click events when the user has selected to hear context responses.
-        this._voicingCreateContextResponse = CREATE_EMPTY_RESPONSE_CONTENT;
+        // @private {string|null} - The response to be spoken for this node when speaking about context changes.
+        // This is usually a response that describes the contextual changes that have occurred after interacting
+        // with the object.
+        this._voicingContextResponse = null;
 
-        // @private {function(event: SceneryEvent):string|null} - Create the content for the Node that will be spoken on
-        // down, focus, and click events when the user has selected to hear hints.
-        this._voicingCreateHintResponse = CREATE_EMPTY_RESPONSE_CONTENT;
+        // @private {string|null} - The response to be spoken when speaking hints. This is usually the response
+        // that guides the user toward further interaction with this object if it is important to do so to use
+        // the application.
+        this._voicingHintResponse = null;
 
-        // @private {function(event: SceneryEvent):string|null} - Create the content for the Node that will be spoken
-        // on down, focus, and click events regardless of what output the user has selected as long as voicing is
-        // enabled.
-        this._voicingCreateOverrideResponse = CREATE_EMPTY_RESPONSE_CONTENT;
+        // @private {boolean} - Controls whether or not object, context, and hint responses are controlled
+        // by voicingManager Properties. If true, all responses will be spoken when requested, regardless
+        // of these Properties. This is often useful for surrounding UI components where it is important
+        // that information be heard even when certain responses have been disabled.
+        this._voicingIgnoreVoicingManagerProperties = false;
 
-        // @private {UtteranceQueue} - The utteranceQueue that content for this VoicingNode will be spoken through.
-        // By default, it will go through the Display's voicingUtteranceQueue, but you may need separate
-        // UtteranceQueues for different areas of content in your application to manage complex alerts.
+        // @private {UtteranceQueue} - The utteranceQueue that responses for this Node will be spoken through.
+        // By default, it will go through the singleton voicingUtteranceQueue, but you may need separate
+        // UtteranceQueues for different areas of content in your application.
         this._voicingUtteranceQueue = null;
 
-        // @public (scenery-internal, read-only) {boolean} - Whether this Node is currently being spoken about from
-        // an "activation" like input from the following listener. HighlightOverlay uses this check to make sure that
-        // this is the correct Node to highlight for its "speaking" highlight.
-        this.speakingFromActivation = false;
+        // @private {Object} - Input listener that speaks content on focus, all Nodes that mix Voicing
+        // speak the object and hint responses on focus.
+        this.speakContentOnFocusListener = {
+          focus: event => {
+            this.voicingSpeakResponse( {
 
-        // @private {Object} - Input listener that implements voicing of content on various activation events
-        this.speakContentInputListener = {
-          down: event => { this.speakVoicingContent( event ); },
-          click: event => { this.speakVoicingContent( event ); },
-          focus: event => { this.speakVoicingContent( event ); },
-          exit: event => { this.speakingFromActivation = false; },
-          blur: event => { this.speakingFromActivation = false; }
+              // no contextual changes on focus
+              contextResponse: null
+            } );
+          }
         };
-        this.addInputListener( this.speakContentInputListener );
+        this.addInputListener( this.speakContentOnFocusListener );
 
         if ( options ) {
           this.mutate( options );
@@ -103,136 +103,167 @@ const Voicing = {
       },
 
       /**
-       * Speak the content from the VoicingNod in response to input.
-       * @private
+       * Speak all responses assigned to this Node. Options allow you to override a response for the particular case,
+       * or assign an Utterance to control the flow of this response.
+       * @public
        *
-       * @param {SceneryEvent} event
+       * @param {Object} [options]
        */
-      speakVoicingContent( event ) {
-        const response = voicingManager.collectResponses( {
-          objectResponse: this.voicingCreateObjectResponse( event ),
-          interactionHint: this.voicingCreateHintResponse( event ),
-          contextResponse: this.voicingCreateContextResponse( event ),
-          overrideResponse: this.voicingCreateOverrideResponse( event )
-        } );
+      voicingSpeakResponse( options ) {
+        options = merge( {
+          objectResponse: this._voicingObjectResponse,
+          contextResponse: this._voicingContextResponse,
+          interactionHint: this._voicingHintResponse,
+          ignoreProperties: this._ignoreVoicingManagerProperties,
+          utterance: null
+        }, options );
 
-        // don't send to utteranceQueue if response is empty
-        if ( response ) {
-          this._displays.forEach( display => {
-            const utteranceQueue = this.utteranceQueue || display.voicingUtteranceQueue;
-            utteranceQueue.addToBack( response );
-          } );
+        this.speakContent( voicingManager.collectResponses( options ) );
+      },
 
-          this.speakingFromActivation = true;
+      /**
+       * Speak only the object response assigned to this Node.
+       * @public
+       *
+       * @param {Object} [options]
+       */
+      voicingSpeakObjectResponse( options ) {
+        options = merge( {
+          objectResponse: this._voicingObjectResponse,
+          utterance: null
+        }, options );
+
+        const objectResponse = voicingManager.collectResponses( options );
+
+        if ( options.utterance ) {
+          options.utterance.alert = objectResponse;
+          this.speakContent( options.utterance );
+        }
+        else {
+          this.speakContent( objectResponse );
         }
       },
 
       /**
-       * Set the function that will create an object response for the Node, and is spoken if the user has selected hear
-       * object responses.
+       * Speak only the context response assigned to this Node.
        * @public
        *
-       * @param {function(event: SceneryEvent):(string|null)} createResponse
+       * @param {Object} [options]
        */
-      setVoicingCreateObjectResponse( createResponse ) {
-        this._voicingCreateObjectResponse = createResponse;
+      voicingSpeakContextResponse( options ) {
+        options = merge( {
+          contextResponse: this._voicingContextResponse,
+          utterance: null
+        }, options );
+
+        const contextResponse = voicingManager.collectResponses( options );
+
+        if ( options.utterance ) {
+          options.utterance.alert = contextResponse;
+          this.speakContent( options.utterance );
+        }
+        else {
+          this.speakContent( contextResponse );
+        }
       },
-      set voicingCreateObjectResponse( createResponse ) { this.setVoicingCreateObjectResponse( createResponse ); },
+
 
       /**
-       * Gets the function that will create an object response for the Node in response to user input, spoken when
-       * the user has selected to hear object responses.
+       * Speak only the hint response assigned to this Node.
        * @public
        *
-       * @returns {function(event: SceneryEvent):(string|null)}
+       * @param {Object} [options]
        */
-      getVoicingCreateObjectResponse() {
-        return this._voicingCreateObjectResponse;
+      voicingSpeakHintResponse( options ) {
+        this.speakContent( voicingManager.collectResponses( {
+          interractionHint: this._voicingHintResponse
+        } ) );
       },
-      get voicingCreateObjectResponse() { return this.getVoicingCreateObjectResponse(); },
 
       /**
-       * Sets the function that will create an object response for the Node after user input.
+       * Set the object response for this Node.
        * @public
        *
-       * @param {function(event: SceneryEvent):(string|null)} createResponse
+       * @param {string|null} response
        */
-      setVoicingCreateContextResponse( createResponse ) {
-        this._voicingCreateContextResponse = createResponse;
+      setVoicingObjectResponse( response ) {
+        this._voicingObjectResponse = response;
       },
-      set voicingCreateContextResponse( createResponse ) { this.setVoicingCreateContextResponse( createResponse ); },
+      set voicingObjectResponse( response ) { this.setVoicingObjectResponse( response ); },
 
       /**
-       * Get the function that will create a context response for the Node. Content returned by this function will only
-       * be spoken if the user has selected to hear context responses.
+       * Gets the object response for this Node.
        * @public
        *
-       * @returns {function(event: SceneryEvent):(string|null)}
+       * @returns {string}
        */
-      getVoicingCreateContextResponse() {
-        return this._voicingCreateContextResponse;
+      getVoicingObjectResponse() {
+        return this._voicingObjectResponse;
       },
-      get voicingCreateContextResponse() { return this.getVoicingCreateContextResponse(); },
+      get voicingObjectResponse() { return this.getVoicingObjectResponse(); },
 
       /**
-       * Set the function that wll create hint response for the Voicing Node. Content returned by the createResponse
-       * function will only be spoken if the user has selected to hear hints.
+       * Set the context response for this Node.
        * @public
        *
-       * @param {function(event: SceneryEvent):(string|null)} createResponse
+       * @param {string|null} response
        */
-      setVoicingCreateHintResponse( createResponse ) {
-        this._voicingCreateHintResponse = createResponse;
+      setVoicingContextResponse( response ) {
+        this._voicingContextResponse = response;
       },
-      set voicingCreateHintResponse( createResponse ) { this.setVoicingCreateHintResponse( createResponse ); },
+      set voicingContextResponse( response ) { this.setVoicingContextResponse( response ); },
 
       /**
-       * Get the function that will create a hint response for the Voicing Node. This content is only spoken
-       * when user has selected to hear hints.
+       * Gets the context response for this Node.
        * @public
        *
-       * @returns {function(event: SceneryEvent):(string|null)}
+       * @returns {string|null}
        */
-      getVoicingCreateHintResponse() {
-        return this._voicingCreateHintResponse;
+      getVoicingContextResponse() {
+        return this._voicingContextResponse;
       },
-      get voicingCreateHintResponse() { return this.getVoicingCreateHintResponse(); },
+      get voicingContextResponse() { return this.getVoicingContextResponse(); },
 
       /**
-       * Set the function that will create the override response for the VoicingNode. This response will always be
-       * spoken, regardless of user selection.
+       * Sets the hint response for this Node.
        * @public
        *
-       * @param {function(event: SceneryEvent):(string|null)} createResponse
+       * @param {string|null} response
        */
-      setVoicingCreateOverrideResponse( createResponse ) {
-        this._voicingCreateOverrideResponse = createResponse;
+      setVoicingHintResponse( response ) {
+        this._voicingHintResponse = response;
       },
-      set voicingCreateOverrideResponse( createResponse ) { this.setVoicingCreateOverrideResponse( createResponse ); },
+      set voicingHintResponse( response ) { this.setVoicingHintResponse( response ); },
 
       /**
-       * Get the function that will create the override response for the VoicingNode. This response will always be
-       * spoken, regardless of what speech output levels the user has selected.
+       * Gets the hint response for this Node.
        * @public
        *
-       * @returns {function(event: SceneryEvent):(string|null)}
+       * @returns {string|null}
        */
-      getVoicingCreateOverrideResponse() {
-        return this._voicingCreateOverrideResponse;
+      getVoicingHintResponse() {
+        return this._voicingHintResponse;
       },
-      get voicingCreateOverrideResponse() { return this.getVoicingCreateOverrideResponse(); },
+      get voicingHintResponse() { return this.getVoicingHintResponse(); },
 
       /**
-       * Gets the Property that controls whether this Node is focusable for the purposes of Voicing.
+       * Set whether or not all responses for this Node will ignore the Properties of voicingManager. If false,
+       * all responses will be spoken regardless of voicingManager Properties, which are generally set in user
+       * preferences.
        * @public
-       *
-       * @param {BooleanProperty} voicingFocusableProperty
-       * @returns {null|BooleanProperty}
        */
-      getVoicingFocusableProperty( voicingFocusableProperty ) {
-        return this._voicingFocusableProperty;
+      setVoicingIgnoreVoicingManagerProperties( ignoreProperties ) {
+        this._voicingIgnoreVoicingManagerProperties = ignoreProperties;
       },
-      get voicingFocusableProperty() { return this.getVoicingFocusableProperty(); },
+      set voicingIgnoreVoicingManagerProperties( ignoreProperties ) { this.setVoicingIgnoreVoicingManagerProperties( ignoreProperties ); },
+
+      /**
+       * Get whether or not responses are ignoring voicingManager Properties.
+       */
+      getVoicingIgnoreVoicingManagerProperties() {
+        return this._voicingIgnoreVoicingManagerProperties;
+      },
+      get voicingIgnoreVoicingManagerProperties() { return this.getVoicingIgnoreVoicingManagerProperties(); },
 
       /**
        * Sets the utteranceQueue through which voicing associated with this Node will be spoken. By default,
@@ -259,10 +290,29 @@ const Voicing = {
       get utteranceQueue() { return this.getUtteranceQueue(); },
 
       /**
+       * Detaches references that ensure this components of this Trait are eligible for garbage collection.
        * @public
        */
       disposeVoicing() {
+        this.removeInputListener( this.speakContentOnFocusListener );
         this.disposeMouseHighlighting();
+      },
+
+      /**
+       * Use the provided function to create content to speak in response to Input. The content then added to the
+       * back of the voicing utterance queue.
+       * @protected
+       *
+       * @param {null|AlertableDef} content
+       */
+      speakContent( content ) {
+        console.log( content );
+
+        // don't send to utteranceQueue if response is empty
+        if ( content ) {
+          const utteranceQueue = this.utteranceQueue || voicingUtteranceQueue;
+          utteranceQueue.addToBack( content );
+        }
       }
     } );
   }
