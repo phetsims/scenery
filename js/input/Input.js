@@ -1463,7 +1463,7 @@ define( function( require ) {
     invokeInputEvent: function( command, config ) {
       // TODO: A switch command would work better here?
       if ( command === 'mouseMove' ) { this.mouseMove( Vector2.fromStateObject( config.point ), config.event ); }
-      else if ( command === 'mouseDown' ) { this.mouseDown( Vector2.fromStateObject( config.point ), config.event ); }
+      else if ( command === 'mouseDown' ) { this.mouseDown( null, Vector2.fromStateObject( config.point ), config.event ); }
       else if ( command === 'mouseUp' ) { this.mouseUp( Vector2.fromStateObject( config.point ), config.event ); }
       else if ( command === 'mouseOver' ) { this.mouseOver( Vector2.fromStateObject( config.point ), config.event ); }
       else if ( command === 'mouseOut' ) { this.mouseOut( Vector2.fromStateObject( config.point ), config.event ); }
