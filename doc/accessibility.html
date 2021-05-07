@@ -177,6 +177,7 @@
     <div class="sublink"><a href="#focus">pdomVisible</a></div>
     <div class="sublink"><a href="#focus">focus()</a></div>
     <div class="sublink"><a href="#focus">blur()</a></div>
+    <div class="sublink"><a href="#interactive-content">Interactive Content</a></div>
 
     <div class="navlink"><a href="#manipulating-pdom">PDOM Manipulation</a></div>
     <div class="sublink"><a href="#manipulating-pdom">es5 getters and setters</a></div>
@@ -294,18 +295,12 @@
 
     <h3 id="ex-all-siblings">Multiple DOM Elements per Node</h3>
 
-    <p>Up to this point there has been a one to one correlation of Nodes to HTML elements in the PDOM,
-      but the Parallel DOM API supports a richer architecture to represent a <code>Node</code> to AT: each
-      <code>Node</code> can have multiple DOM Elements. A <code>Node</code>'s HTML Elements, or the
-      <code>Node</code>'s peer, can be thought of
-      as collectively equating to the <code>Node</code>. (Note: a "peer" is of type <code>PDOMPeer</code>).
-      Although a <code>Node</code> has a primary HTML element (the <code>HTMLElement</code> that is created with the
-      <code>tagName</code> option), this is only a single element of the peer. Other HTML Elements can
-      provide supplemental information to be conveyed
-      to assistive technology. Label and description elements can be added, as well as a parent element
-      to contain all HTML Element "siblings" for a Node's peer. In total a peer can have up to
-      four HTML Elements: the primary sibling, label sibling, description sibling, and the container parent of these
-      siblings.
+    <p>
+      The basic example shows one DOM element representing a Node in the PDOM, but ParallelDOM.js supports a richer HTML
+      structure. Each Node can have multiple DOM elements. To be represented in the PDOM, the Node must have a primary
+      element specified with tagName. It can optionally also have a label element specified with labelTagName, a
+      descriptions element specified with descriptionTagName and a structural container element specified with
+      containerTagName.
     </p>
 
     <h4>Terminology</h4>
@@ -480,8 +475,8 @@
       a div, and then add listeners manually to control that div like a button. As a "div", an AT will not be able to
       tell the user what the element is. In general try to pick semantic html elements that will assist in conveying
       as much meaning as possible to the user. Although it is possible to use the ARIA spec to improve accessible
-      experience, it should be used as little as possible because it has minimal support.
-      Addressing semantics any further goes beyond the scope of this document.
+      experience, it should be used as little. Remember that the first rule of ARIA is to not use ARIA! Instead favor
+      semantic HTML. Addressing semantics any further goes beyond the scope of this document.
     </p>
 
     <h4 id="input">Input types</h4>
@@ -536,13 +531,8 @@
       When an element in the PDOM is focused, a focus highlight is automatically rendered in the display to support
       keyboard navigation. This occurs when you specify a tagName that is inherently focusable in the DOM (like <code>button</code>).
       For more complex interactions, type <code>input</code>, or other native and focusable
-      elements, may not work. Other tag names can be focused with the <code>focusable</code> option. The ARIA attribute
-      <code>role</code> can help inform the user to the custom interaction (use the <code>ariaRole</code> option). For
-      example using the ARIA "application" role has worked well for freely moving, draggable objects.
-      This will add a tab index of 0 to the element. It also will tell screen readers to pass all input events through
-      to the browser, like "keyup" and "keydown" which aren't provided for buttons when using many AT (only "click").
-      Focusable elements can be manually focussed and blurred using the
-      <code>Node.focus()</code> and <code>Node.blur()</code> functions. If a specific focus highlight is desired, a
+      elements, may not work. Other tag names can be focused with the <code>focusable</code> option. If a specific
+      focus highlight is desired, a
       <code>Node</code> or <code>Shape</code> can be passed into the <code>focusHighlight</code> option.
     </p>
 
@@ -550,6 +540,30 @@
       Visibility in the PDOM and the focus order is directly effected by <code>Node.visible</code>, but can
       also be toggled independently with the option <code>Node.pdomVisible</code>. When set to true this
       will hide content from screen readers and remove the element from focus order.
+    </p>
+
+    <h4 id="interactive-content">Interactive Content</h4>
+
+    <p>
+      The PDOM makes available the same input ability as is granted by HTML. Thus, a knowledge of HTML interaction can
+      be quite helpful when designing an interaction in the PDOM. A precursor to any Node with interactive content via
+      the PDOM is the <code>focusable</code> option. Setting that option to true will allow keyboard (or AT) input from
+      the PDOM to the Node. From this point, the events that the primary sibling receives depends entirely its
+      accessible
+      name and role. See below for a dedicated section about setting the Accessible Name of a Node. The ARIA attribute
+      <code>role</code> can help inform the user to the custom interaction
+      (use the <code>ariaRole</code> option). For example using the ARIA "application" role has worked well for freely
+      moving, draggable objects. This will tell screen readers to pass all input events through
+      to the DOM element in the PDOM, like "keyup" and "keydown" which aren't provided for buttons when using many AT
+      (only "click"). Focusable elements can be manually focussed and blurred using the
+      <code>Node.focus()</code> and <code>Node.blur()</code> functions.
+    </p>
+
+    <p>
+      Once the PDOM structure is as desired, and you know what events are expected from interacting with that Node,
+      use <code>Node.addInputListener()</code> to add event listeners to the PDOM events. See <a href="https://github.com/phetsims/scenery/blob/master/js/input/Input.js">Input.js</a>
+      and its documentation for up-to-date notes on the events that are supported from PDOM elements. Among these are
+      keydown, keyup, click, input, change, focus, and blur.
     </p>
 
 
