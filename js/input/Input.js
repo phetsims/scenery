@@ -138,7 +138,7 @@ define( function( require ) {
   // constants
   var NORMAL_FREQUENCY = { highFrequency: false };
   var HIGH_FREQUENCY = { highFrequency: true };
-  
+
   // Object literal makes it easy to check for the existence of an attribute (compared to [].indexOf()>=0)
   var domEventPropertiesToSerialize = {
     button: true, keyCode: true,
@@ -986,7 +986,7 @@ define( function( require ) {
     // @public (phet-io)
     invokeInputEvent: function( command, options ) {
       if ( command === 'mouseMove' ) {this.mouseMove( Vector2.fromStateObject( options.point ), options.event );}
-      else if ( command === 'mouseDown' ) {this.mouseDown( Vector2.fromStateObject( options.point ), options.event );}
+      else if ( command === 'mouseDown' ) {this.mouseDown( null, Vector2.fromStateObject( options.point ), options.event );}
       else if ( command === 'mouseUp' ) {this.mouseUp( Vector2.fromStateObject( options.point ), options.event );}
       else if ( command === 'mouseOver' ) {this.mouseOver( Vector2.fromStateObject( options.point ), options.event );}
       else if ( command === 'mouseOut' ) {this.mouseOut( Vector2.fromStateObject( options.point ), options.event );}
