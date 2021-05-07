@@ -56,6 +56,10 @@ class VoicingManager {
       // {string|null} - spoken when interaction hints are enabled
       interactionHint: null,
 
+      // {boolean} - if true, the objectResponse, contextResponse, and interactionHint will all be spoken
+      // regardless of the values of the Properties of voicingManager
+      ignoreProperties: false,
+
       // {string|null} - If this is provided, it is the ONLY spoken string, and it is always spoken regardless of
       // speech output levels selected by the user as long as speech is enabled.
       overrideResponse: null,
@@ -65,9 +69,9 @@ class VoicingManager {
       contextIncludesObjectResponse: false
     }, options );
 
-    const objectChanges = this.objectChangesProperty.get();
-    const contextChanges = this.contextChangesProperty.get();
-    const interactionHints = this.hintsProperty.get();
+    const objectChanges = this.objectChangesProperty.get() || options.ignoreProperties;
+    const contextChanges = this.contextChangesProperty.get() || options.ignoreProperties;
+    const interactionHints = this.hintsProperty.get() || options.ignoreProperties;
 
     let usedObjectString = '';
     let usedContextString = '';

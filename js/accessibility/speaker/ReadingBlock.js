@@ -23,7 +23,8 @@ import voicingManager from './voicingManager.js';
 import webSpeaker from './webSpeaker.js';
 
 const READING_BLOCK_OPTION_KEYS = [
-  'readingBlockTagName'
+  'readingBlockTagName',
+  'readingBlockContent'
 ];
 
 const ReadingBlock = {
@@ -59,6 +60,9 @@ const ReadingBlock = {
         // of button so that it is added to the focus order.
         this._readingBlockTagName = 'button';
 
+        // @private {string|null}
+        this._readingBlockContent = null;
+
         // @private {string|null} - The tagName to apply to the Node when voicing is disabled, reference stored
         // when the readingBlockTagName is applied.
         // NOTE: This wouldn't work very well with more complicated orders of setting tagName and readingBlockTagName.
@@ -74,6 +78,15 @@ const ReadingBlock = {
           voicingManager.mainWindowVoicingEnabledProperty ], ( enabled, mainWindowEnabled ) => {
           return enabled && mainWindowEnabled;
         } );
+
+        // by default, ReadingBlocks don't use Voicing "responses" because they should always be readable as long
+        // as voicing is enabled. ReadingBlock content should always be spoken in response to these events.
+        this.readingBlockInputListener = {
+          focus: () => this.speakContent( this._readingBlockContent ),
+          down: () => this.speakContent( this._readingBlockContent ),
+          click: () => this.speakContent( this._readingBlockContent )
+        };
+        this.addInputListener( this.readingBlockInputListener );
 
         // @private - reference kept so this listener can be added/removed when the readingBlockFocusable changes
         this.readingBlockFocusableChangeListener = this.onReadingBlockFocusableChanged.bind( this );
@@ -102,6 +115,26 @@ const ReadingBlock = {
         return this._readingBlockTagName;
       },
       get readingBlockTagName() { return this.getReadingBlockTagName(); },
+
+      /**
+       * Sets the content that should be read whenever the ReadingBlock receives input that initiates speech.
+       * @public
+       *
+       * @param {string|null}
+       */
+      setReadingBlockContent( content ) {
+        this._readingBlockContent = content;
+      },
+      set readingBlockContent( content ) { this.setReadingBlockContent( content ); },
+
+      /**
+       * Gets the content that is spoken whenever the ReadingBLock receives input that would initiate speech.
+       * @returns {string|null}
+       */
+      getReadingBlockContent() {
+        return this._readingBlockContent;
+      },
+      get readingBlockContent() { return this.getReadingBlockContent(); },
 
       /**
        * When this Node becomes focusable (because Reading Blocks have just been enabled or disabled), either
@@ -141,6 +174,7 @@ const ReadingBlock = {
       disposeReadingBlock() {
         this.readingBlockFocusableProperty.unlink( this.readingBlockFocusableChangeListener );
         this.localBoundsProperty.unlink( this.localBoundsChangedListener );
+        this.removeInputListener( this.readingBlockInputListener );
         this.disposeVoicing();
       }
     } );
