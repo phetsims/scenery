@@ -201,22 +201,27 @@
     </p>
 
     <ul>
-      <li><a href="https://developer.mozilla.org/en-US/docs/Learn/Accessibility/HTML">Accessible HTML</a> &ndash; a
-        general overview
+      <li><a href="https://developer.mozilla.org/en-US/docs/Learn/Accessibility/HTML">Accessible HTML</a> &ndash; This
+        is an introduction to accessible, semantic HTML. This is important because much of scenery's accessibility
+        support is only as good as the accessible HTML you tell it to create.
       </li>
       <li><a
           href="https://developers.google.com/web/fundamentals/accessibility/semantics-builtin/the-accessibility-tree">The
-        Accessibility Tree</a> &ndash; in the browser
+        Accessibility Tree</a> &ndash; It is good to understand how the browser interprets HTML into a rich
+        data structure called the "Accessibility Tree." Most important is the notion of an "accessible name" and "role"
+        that each element needs, at the very least, to be accessible.
       </li>
       <li><a id="accessible-name-link"
              href="https://developer.paciellogroup.com/blog/2017/04/what-is-an-accessible-name/">Accessible Name</a>
-        &ndash; element identification
+        &ndash; Identifying the multiple ways to provide an accessible name to an element is vital to web accessibility.
+        Having multiple strategies allows for flexibility in code that you write.
       </li>
-      <li><a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA">ARIA</a> &ndash; Accessible Rich
-        Internet Applications
+      <li><a href="https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA">ARIA</a> &ndash; "Accessible Rich
+        Internet Applications" is a way to supplement semantic HTML in order to provide further accessibility to
+        elements and interactions. Much of the scenery accessibility API for the Parallel DOM uses ARIA features.
+        Remember that the first rule of ARIA is to not use ARIA!
       </li>
     </ul>
-    <p>Please note that some of the information in this document is specific to PhET Interactive Simulations.</p>
 
     <h2>Scenery's Accessibility Features</h2>
 
