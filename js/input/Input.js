@@ -318,7 +318,7 @@ define( function( require ) {
       sceneryLog && sceneryLog.Input && sceneryLog.Input( 'mouseDown(' + Input.debugText( point, event ) + ');' );
       sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-      if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'mouseDown(' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+      if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'mouseDown(' + id + ',' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
       if ( !this.mouse ) { this.initMouse(); }
 
       this.mouse.id = id;
