@@ -840,10 +840,16 @@ define( function( require ) {
           // go backwards, so the most desired cursor sticks
           for ( var i = customCursors.length - 1; i >= 0; i-- ) {
             this._domElement.style.cursor = customCursors[ i ];
+            if ( this._assumeFullWindow !== false ) {
+              document.body.style.cursor = customCursors[ i ];
+            }
           }
         }
         else {
           this._domElement.style.cursor = cursor;
+          if ( this._assumeFullWindow !== false ) {
+            document.body.style.cursor = cursor;
+          }
         }
       }
     },
