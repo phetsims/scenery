@@ -19,6 +19,7 @@ import voicingUtteranceQueue from './voicingUtteranceQueue.js';
 
 // options that are supported by Voicing.js. Added to mutator keys so that Voicing properties can be set with mutate.
 const VOICING_OPTION_KEYS = [
+  'voicingNameResponse',
   'voicingObjectResponse',
   'voicingContextResponse',
   'voicingHintResponse',
@@ -53,14 +54,20 @@ const Voicing = {
        */
       initializeVoicing( options ) {
 
+        assert && assert( this.voicing === undefined, 'Voicing has already been initialized for this Node' );
+
         // initialize "super" Trait to support highlights on mouse input
         this.initializeMouseHighlighting();
 
         // @public (read-only) - flag indicating that this Node is composed with Voicing functionality
         this.voicing = true;
 
+        // @private {string|null} - The response to be spoken for this Node when speaking names. This is usually
+        // the accessible name for the Node, typically spoken on focus and on interaction, labelling what the object is.
+        this._voicingNameResponse = null;
+
         // @private {string|null} - The response to be spoken for this node when speaking object changes. This is
-        // usually the accessible name of the Node, usually spoken on focus and labelling what the object is.
+        // usually the response describing what changes about an object in response to interaction.
         this._voicingObjectResponse = null;
 
         // @private {string|null} - The response to be spoken for this node when speaking about context changes.
@@ -84,13 +91,12 @@ const Voicing = {
         // UtteranceQueues for different areas of content in your application.
         this._voicingUtteranceQueue = null;
 
-        // @private {Object} - Input listener that speaks content on focus, all Nodes that mix Voicing
-        // speak the object and hint responses on focus.
+        // @private {Object} - Input listener that speaks content on focus. This is the only input listener added
+        // by Voicing, but it is the one that is consistent for all Voicing nodes. On focus, speak the name, object
+        // response, and interaction hint.
         this.speakContentOnFocusListener = {
           focus: event => {
             this.voicingSpeakResponse( {
-
-              // no contextual changes on focus
               contextResponse: null
             } );
           }
@@ -111,6 +117,7 @@ const Voicing = {
        */
       voicingSpeakResponse( options ) {
         options = merge( {
+          nameResponse: this._voicingNameResponse,
           objectResponse: this._voicingObjectResponse,
           contextResponse: this._voicingContextResponse,
           interactionHint: this._voicingHintResponse,
@@ -179,6 +186,29 @@ const Voicing = {
           interractionHint: this._voicingHintResponse
         } ) );
       },
+
+      /**
+       * Sets the voicingNameResponse for this Node. This is usually the label of the element and is spoken
+       * when the object receives input.
+       * @public
+       *
+       * @param {string|null} response
+       */
+      setVoicingNameResponse( response ) {
+        this._voicingNameResponse = response;
+      },
+      set voicingNameResponse( response ) { this.setVoicingNameResponse( response ); },
+
+      /**
+       * Get the voicingNameResponse for this Node.
+       * @public
+       *
+       * @returns {string|null}
+       */
+      getVoicingNameResponse() {
+        return this._voicingNameResponse;
+      },
+      get voicingNameResponse() { return this.getVoicingNameResponse(); },
 
       /**
        * Set the object response for this Node.
