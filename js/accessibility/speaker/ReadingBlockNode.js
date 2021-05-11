@@ -26,22 +26,12 @@ class ReadingBlockNode extends Node {
 
     options = merge( {
 
-      // voicing
-      // {string|null} - if provided, this text will be spoken in response to an activation event
-      // on this Node
-      voicingText: null,
-
       // pdom
       tagName: 'p' // typical "reading block" is just a readable paragraph in the PDOM
     }, options );
 
     super();
     this.initializeReadingBlock();
-
-    assert && assert( options.voicingCreateOverrideResponse === undefined, 'ReadingBlockNodes sets voicingCreateOverrideResponse' );
-    options.voicingCreateOverrideResponse = event => {
-      return options.voicingText;
-    };
 
     // default highlight for a ReadingBlock is styled to indicate that the Node is different
     // from other interactive things, but is still clickable

@@ -18,6 +18,9 @@ import scenery from '../../scenery.js';
 class VoicingManager {
   constructor() {
 
+    // @public {BooleanProperty} - whether or not object names are read as input lands on various components
+    this.namesProperty = new BooleanProperty( true );
+
     // @public {BooleanProperty} - whether or not "Object Responses" are read as interactive components change
     this.objectChangesProperty = new BooleanProperty( true );
 
@@ -47,6 +50,9 @@ class VoicingManager {
 
     options = merge( {
 
+      // {string|null} - spoken when name responses are enabled
+      nameResponse: null,
+
       // {string|null} - spoken when object responses are enabled
       objectResponse: null,
 
@@ -55,6 +61,10 @@ class VoicingManager {
 
       // {string|null} - spoken when interaction hints are enabled
       interactionHint: null,
+
+      // {boolean} - if true, the objectResponse, contextResponse, and interactionHint will all be spoken
+      // regardless of the values of the Properties of voicingManager
+      ignoreProperties: false,
 
       // {string|null} - If this is provided, it is the ONLY spoken string, and it is always spoken regardless of
       // speech output levels selected by the user as long as speech is enabled.
@@ -65,14 +75,19 @@ class VoicingManager {
       contextIncludesObjectResponse: false
     }, options );
 
-    const objectChanges = this.objectChangesProperty.get();
-    const contextChanges = this.contextChangesProperty.get();
-    const interactionHints = this.hintsProperty.get();
+    const names = this.namesProperty.get() || options.ignoreProperties;
+    const objectChanges = this.objectChangesProperty.get() || options.ignoreProperties;
+    const contextChanges = this.contextChangesProperty.get() || options.ignoreProperties;
+    const interactionHints = this.hintsProperty.get() || options.ignoreProperties;
 
+    let usedNameString = '';
     let usedObjectString = '';
     let usedContextString = '';
     let usedInteractionHint = '';
 
+    if ( names && options.nameResponse ) {
+      usedNameString = options.nameResponse;
+    }
     if ( objectChanges && options.objectResponse ) {
       usedObjectString = options.objectResponse;
     }
@@ -91,7 +106,13 @@ class VoicingManager {
       outputString = options.overrideResponse;
     }
     else {
+      if ( usedNameString ) {
+        outputString += usedNameString;
+      }
       if ( usedObjectString && !( options.contextIncludesObjectResponse && contextChanges ) ) {
+        if ( outputString.length > 0 ) {
+          outputString += ', ';
+        }
         outputString += usedObjectString;
       }
       if ( usedContextString ) {

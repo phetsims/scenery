@@ -2105,6 +2105,12 @@ class Node extends PhetioObject {
    *
    * See Input.js documentation for information about how event listeners are used.
    *
+   * Additionally, the following fields are supported on a listener:
+   *
+   * - interrupt {function()}: When a pointer is interrupted, it will attempt to call this method on the input listener
+   * - cursor {string|null}: If node.cursor is null, any non-null cursor of an input listener will effectively
+   *                         "override" it. NOTE: this can be implemented as an es5 getter, if the cursor can change
+   *
    * @param {Object} listener
    * @returns {Node} - Returns 'this' reference, for chaining
    */
@@ -4624,6 +4630,29 @@ class Node extends PhetioObject {
   }
 
   /**
+   * Returns the CSS cursor that could be applied either by this Node itself, or from any of its input listeners'
+   * preferences.
+   * @public (scenery-internal)
+   *
+   * @returns {string|null}
+   */
+  getEffectiveCursor() {
+    if ( this._cursor ) {
+      return this._cursor;
+    }
+
+    for ( let i = 0; i < this._inputListeners.length; i++ ) {
+      const inputListener = this._inputListeners[ i ];
+
+      if ( inputListener.cursor ) {
+        return inputListener.cursor;
+      }
+    }
+
+    return null;
+  }
+
+  /**
    * See getCursor() for more information
    * @public
    *
@@ -6753,7 +6782,7 @@ class Node extends PhetioObject {
 
           // by default, use the value from the Node
           phetioReadOnly: this.phetioReadOnly,
-          phetioDocumentation: 'Sets whether the node is enabled. This will set whether input is enabled for this Node and' +
+          phetioDocumentation: 'Sets whether the node is enabled. This will set whether input is enabled for this Node and ' +
                                'most often children as well. It will also control and toggle the "disabled look" of the node.',
           tandem: this.tandem.createTandem( ENABLED_PROPERTY_TANDEM_NAME )
         }, config.enabledPropertyOptions ) )

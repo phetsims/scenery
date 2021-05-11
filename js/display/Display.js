@@ -70,8 +70,6 @@ import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import PDOMInstance from '../accessibility/pdom/PDOMInstance.js';
 import PDOMTree from '../accessibility/pdom/PDOMTree.js';
 import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
-import VoicingInputListener from '../accessibility/speaker/VoicingInputListener.js';
-import webSpeaker from '../accessibility/speaker/webSpeaker.js';
 import Input from '../input/Input.js';
 import Node from '../nodes/Node.js';
 import CanvasNodeBoundsOverlay from '../overlays/CanvasNodeBoundsOverlay.js';
@@ -145,10 +143,6 @@ class Display {
       // {boolean} - Enables accessibility features
       accessibility: true,
 
-      // {boolean} - Enables "Voicing" features, using SpeechSynthesis to support speaking about
-      // Nodes in the Display
-      voicing: false,
-
       // {boolean} - Whether mouse/touch/keyboard inputs are enabled (if input has been added).
       interactive: true,
 
@@ -198,9 +192,6 @@ class Display {
 
     // @public (scenery-internal) {boolean} - Whether accessibility is enabled for this particular display.
     this._accessible = options.accessibility;
-
-    // @private {boolean} - Whether the Display supports Voucing with SpeechSynthesis
-    this._voicing = options.voicing;
 
     // @public (scenery-internal) {boolean}
     this._preserveDrawingBuffer = options.preserveDrawingBuffer;
@@ -350,19 +341,6 @@ class Display {
     // feature. Nodes that compose Voicing can receive this Focus and a highlight may appear or speech may be
     // made depending on which features are enabled.
     this.pointerFocusProperty = new Property( null );
-
-    if ( this._voicing ) {
-      webSpeaker.initialize();
-
-      // The Display supports Voicing, create an UtteranceQueue to manage SpeechSynthesisUtterances. This
-      // could be a singleton shared among Displays but the screen reader utteranceQueue needs to be
-      // one per display so doing the same for voicingUtteranceQueue to match.
-      this.voicingUtteranceQueue = new UtteranceQueue( webSpeaker );
-
-      // @private {VoicingInputListener} - reference kept for disposal
-      this.voicingInputListener = new VoicingInputListener( this, webSpeaker.enabledProperty );
-      this.addInputListener( this.voicingInputListener );
-    }
 
     if ( this._accessible ) {
 
@@ -1065,7 +1043,7 @@ class Display {
       if ( mouseTrail ) {
         for ( let i = mouseTrail.getCursorCheckIndex(); i >= 0; i-- ) {
           const node = mouseTrail.nodes[ i ];
-          const cursor = node.getCursor();
+          const cursor = node.getEffectiveCursor();
 
           if ( cursor ) {
             sceneryLog && sceneryLog.Cursor && sceneryLog.Cursor( `${cursor} on ${node.constructor.name}#${node.id}` );
@@ -1685,6 +1663,9 @@ class Display {
       if ( instance.trail.isPickable() ) {
         addQualifier( '<span style="color: #808">hits</span>' );
       }
+      if ( node.getEffectiveCursor() ) {
+        addQualifier( `effectiveCursor:${node.getEffectiveCursor()}` );
+      }
       if ( node.clipArea ) {
         addQualifier( 'clipArea' );
       }
@@ -2125,11 +2106,6 @@ class Display {
     this._baseInstance && this._baseInstance.dispose();
 
     this.utteranceQueue && this.utteranceQueue.dispose();
-
-    if ( this._voicing ) {
-      this.voicingUtteranceQueue.dispose();
-      this.removeInputListener( this.voicingInputListener );
-    }
   }
 
   /**

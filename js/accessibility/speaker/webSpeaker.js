@@ -237,12 +237,13 @@ class WebSpeaker {
       // doesn't dispose of it before firing, see #215
       this.utterances.push( speechSynthUtterance );
 
+      // Keep this out of the start listener so that it can be synchrounous to the UtteranceQueue draining/announcing, see bug in https://github.com/phetsims/sun/issues/699#issuecomment-831529485
+      this.previousUtterance = utterance;
+
       const startListener = () => {
         this.startSpeakingEmitter.emit( utterance );
         this.speakingProperty.set( true );
         speechSynthUtterance.removeEventListener( 'start', startListener );
-
-        this.previousUtterance = utterance;
       };
 
       const endListener = () => {
@@ -286,6 +287,9 @@ class WebSpeaker {
       utterance.voice = this.voiceProperty.value;
       utterance.pitch = this.voicePitchProperty.value;
       utterance.rate = this.voiceRateProperty.value;
+
+      // Keep this synchrounous as it pertains to the UtteranceQueue draining/announcing, see bug in https://github.com/phetsims/sun/issues/699#issuecomment-831529485
+      this.previousUtterance = utterance;
 
       this.synth.speak( utterance );
     }
