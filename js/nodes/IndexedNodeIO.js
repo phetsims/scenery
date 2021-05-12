@@ -27,12 +27,14 @@ const IndexedNodeIO = new IOType( 'IndexedNodeIO', {
   toStateObject: node => {
     const stateObject = {};
     if ( node.parents[ 0 ] ) {
+      assert && assert( node.parents.length === 1, 'IndexedNodeIO only supports nodes with a single parent' );
       stateObject.index = node.parents[ 0 ].indexOfChild( node );
     }
     return stateObject;
   },
   applyState: ( node, fromStateObject ) => {
     if ( node.parents[ 0 ] ) {
+      assert && assert( node.parents.length === 1, 'IndexedNodeIO only supports nodes with a single parent' );
       node.parents[ 0 ].moveChildToIndex( node, fromStateObject.index );
     }
   },
@@ -47,10 +49,12 @@ const IndexedNodeIO = new IOType( 'IndexedNodeIO', {
 
         // The callback which signifies the current index
         const callback = () => {
+          assert && assert( this.parents.length === 1, 'IndexedNodeIO only supports nodes with a single parent' );
           const index = this.parents[ 0 ].indexOfChild( this );
           listener( index );
         };
 
+        assert && assert( this.parents.length === 1, 'IndexedNodeIO only supports nodes with a single parent' );
         this.parents[ 0 ].childrenChangedEmitter.addListener( callback );
         callback();
 
@@ -66,6 +70,7 @@ const IndexedNodeIO = new IOType( 'IndexedNodeIO', {
       documentation: 'Unlink a listener that has been added using linkIndex, by its numerical ID (like setTimeout/clearTimeout)',
       implementation: function( index ) {
         const method = map[ index ];
+        assert && assert( this.parents.length === 1, 'IndexedNodeIO only supports nodes with a single parent' );
         this.parents[ 0 ].childrenChangedEmitter.removeListener( method );
         delete map[ index ];
       }
