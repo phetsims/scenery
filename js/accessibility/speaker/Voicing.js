@@ -117,14 +117,12 @@ const Voicing = {
        * Speak all responses assigned to this Node. Options allow you to override a response for the particular case,
        * or assign an Utterance to control the flow of this response.
        *
-       * TODO: Rename to voicingSpeakFullResponse - this default will speak everything defined on the Node.
-       * TODO: Add another function called voicingSpeakResponse - this will by default speak NOTHING, you have
        * to tap into the responses you want heard.
        * @public
        *
        * @param {Object} [options]
        */
-      voicingSpeakResponse( options ) {
+      voicingSpeakFullResponse( options ) {
         options = merge( {
           nameResponse: this._voicingNameResponse,
           objectResponse: this._voicingObjectResponse,
@@ -136,6 +134,46 @@ const Voicing = {
         }, options );
 
         this.speakContent( voicingManager.collectResponses( options ) );
+      },
+
+      /**
+       * Speak the provided responses that you pass in with options. Note that this will NOT speak the name, object,
+       * context, or hint responses assigned to this node by default. If you want to speak the responses assigned
+       * to this Node, use voicingSpeakFullResponse.
+       * @public
+       *
+       * @param {Object} [options]
+       */
+      voicingSpeakResponse( options ) {
+        options = merge( {
+          ignoreProperties: this._ignoreVoicingManagerProperties,
+          responsePatterns: this._voicingResponsePatterns,
+          utterance: null
+        }, options );
+
+        this.speakContent( voicingManager.collectResponses( options ) );
+      },
+
+      /**
+       * Speak only the name response assigned to this Node.
+       * @param options
+       */
+      voicingSpeakNameResponse( options ) {
+        options = merge( {
+          nameResponse: this._voicingNameResponse,
+          responsePatterns: this._voicingResponsePatterns,
+          utterance: null
+        }, options );
+
+        const nameResponse = voicingManager.collectResponses( options );
+
+        if ( options.utterance ) {
+          options.utterance.alert = nameResponse;
+          this.speakContent( options.utterance );
+        }
+        else {
+          this.speakContent( nameResponse );
+        }
       },
 
       /**
