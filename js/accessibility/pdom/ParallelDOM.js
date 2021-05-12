@@ -2576,6 +2576,22 @@ const ParallelDOM = {
         this.onPDOMContentChange();
       },
 
+      /**
+       * Alert on all interactive description utteranceQueues located on each connected Display (see Node.getConnectedDisplays)
+       * @param {AlertableDef} utterance
+       */
+      alertDescriptionUtterance: function( utterance ) {
+
+        const connectedDisplays = this.getConnectedDisplays();
+
+        for ( let i = 0; i < connectedDisplays.length; i++ ) {
+          const display = connectedDisplays[ i ];
+          if ( display.utteranceQueue ) {
+            display.utteranceQueue.addToBack( utterance );
+          }
+        }
+      },
+
       /***********************************************************************************************************/
       // SCENERY-INTERNAL AND PRIVATE METHODS
       /***********************************************************************************************************/

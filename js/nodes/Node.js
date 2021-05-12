@@ -6294,6 +6294,32 @@ class Node extends PhetioObject {
     this._pdomDisplaysInfo.onRemovedRootedDisplay( display );
   }
 
+  /**
+   * @private
+   * @returns {Display[]}
+   */
+  getRecursiveConnectedDisplays( displays ) {
+    if ( this.rootedDisplays.length ) {
+      displays.push( ...this.rootedDisplays );
+    }
+
+    for ( let i = 0; i < this._parents.length; i++ ) {
+      displays.push( ...this._parents[ i ].getRecursiveConnectedDisplays( displays ) );
+    }
+
+    return displays;
+  }
+
+  /**
+   * Get a list of the displays that are connected to this Node. Gathered by looking up the scene graph ancestors and
+   * collected all rooted Displays along the way.
+   * @public
+   * @returns {Display[]}
+   */
+  getConnectedDisplays() {
+    return _.uniq( this.getRecursiveConnectedDisplays( [] ) );
+  }
+
   /*---------------------------------------------------------------------------*
    * Coordinate transform methods
    *----------------------------------------------------------------------------*/
