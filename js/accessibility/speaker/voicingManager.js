@@ -13,7 +13,9 @@
 
 import BooleanProperty from '../../../../axon/js/BooleanProperty.js';
 import merge from '../../../../phet-core/js/merge.js';
+import StringUtils from '../../../../phetcommon/js/util/StringUtils.js';
 import scenery from '../../scenery.js';
+import VoicingResponsePatterns from './VoicingResponsePatterns.js';
 
 class VoicingManager {
   constructor() {
@@ -66,6 +68,11 @@ class VoicingManager {
       // regardless of the values of the Properties of voicingManager
       ignoreProperties: false,
 
+      // {Object} - The collection of string patterns to use when assembling responses based on which
+      // responses are provided and which voicingManager Properties are true. See VoicingResponsePatterns
+      // if you do not want to use the default.
+      responsePatterns: VoicingResponsePatterns.DEFAULT_RESPONSE_PATTERNS,
+
       // {string|null} - If this is provided, it is the ONLY spoken string, and it is always spoken regardless of
       // speech output levels selected by the user as long as speech is enabled.
       overrideResponse: null,
@@ -75,64 +82,34 @@ class VoicingManager {
       contextIncludesObjectResponse: false
     }, options );
 
-    const names = this.namesProperty.get() || options.ignoreProperties;
-    const objectChanges = this.objectChangesProperty.get() || options.ignoreProperties;
-    const contextChanges = this.contextChangesProperty.get() || options.ignoreProperties;
-    const interactionHints = this.hintsProperty.get() || options.ignoreProperties;
+    VoicingResponsePatterns.validatePatternKeys( options.responsePatterns );
 
-    let usedNameString = '';
-    let usedObjectString = '';
-    let usedContextString = '';
-    let usedInteractionHint = '';
+    const usesNames = options.nameResponse && ( this.namesProperty.get() || options.ignoreProperties );
+    const usesObjectChanges = options.objectResponse && ( this.objectChangesProperty.get() || options.ignoreProperties );
+    const usesContextChanges = options.contextResponse && ( this.contextChangesProperty.get() || options.ignoreProperties );
+    const usesInteractionHints = options.hintResponse && ( this.hintsProperty.get() || options.ignoreProperties );
 
-    if ( names && options.nameResponse ) {
-      usedNameString = options.nameResponse;
-    }
-    if ( objectChanges && options.objectResponse ) {
-      usedObjectString = options.objectResponse;
-    }
-    if ( contextChanges && options.contextResponse ) {
-      usedContextString = options.contextResponse;
-    }
-    if ( interactionHints && options.interactionHint ) {
-      usedInteractionHint = options.interactionHint;
-    }
+    // generate the key to find the string pattern to use from options.responsePatterns
+    let responses = '';
+    if ( usesNames ) { responses = responses.concat( 'NAME'.concat( '_' ) ); }
+    if ( usesObjectChanges ) { responses = responses.concat( 'OBJECT'.concat( '_' ) ); }
+    if ( usesContextChanges ) { responses = responses.concat( 'CONTEXT'.concat( '_' ) ); }
+    if ( usesInteractionHints ) { responses = responses.concat( 'HINT'.concat( '_' ) ); }
+    const responseKey = _.camelCase( responses );
 
-    // used to combine with string literal, but we need to conditionally include punctuation so that
-    // it isn't always read - it would be more clear if we had a number of string patterns and assembled
-    // that way
-    let outputString = '';
-    if ( options.overrideResponse ) {
-      outputString = options.overrideResponse;
-    }
-    else {
-      if ( usedNameString ) {
-        outputString += usedNameString;
-      }
-      if ( usedObjectString && !( options.contextIncludesObjectResponse && contextChanges ) ) {
-        if ( outputString.length > 0 ) {
-          outputString += ', ';
-        }
-        outputString += usedObjectString;
-      }
-      if ( usedContextString ) {
-        if ( outputString.length > 0 ) {
-          outputString += ', ';
-        }
-        outputString = outputString + usedContextString;
-      }
-      if ( usedInteractionHint ) {
-        if ( outputString.length > 0 ) {
-          outputString += ', ';
-        }
-        outputString = outputString + usedInteractionHint;
-      }
-    }
+    const patternString = options.responsePatterns[ responseKey ];
+    assert && assert( patternString, `no pattern string found for key ${responseKey}` );
 
-    return outputString;
+    return StringUtils.fillIn( patternString, {
+      NAME: options.nameResponse,
+      OBJECT: options.objectResponse,
+      CONTEXT: options.contextResponse,
+      HINT: options.hintResponse
+    } );
   }
 }
 
 const voicingManager = new VoicingManager();
+
 scenery.register( 'voicingManager', voicingManager );
 export default voicingManager;

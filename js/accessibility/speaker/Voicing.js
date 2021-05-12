@@ -15,6 +15,7 @@ import Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import MouseHighlighting from './MouseHighlighting.js';
 import voicingManager from './voicingManager.js';
+import VoicingResponsePatterns from './VoicingResponsePatterns.js';
 import voicingUtteranceQueue from './voicingUtteranceQueue.js';
 
 // options that are supported by Voicing.js. Added to mutator keys so that Voicing properties can be set with mutate.
@@ -91,6 +92,10 @@ const Voicing = {
         // UtteranceQueues for different areas of content in your application.
         this._voicingUtteranceQueue = null;
 
+        // {Object} - A collection of response patterns that are used to collect the responses of this Voicing Node
+        // with voicingManager. See VoicingResponsePatterns for more details.
+        this._voicingResponsePatterns = VoicingResponsePatterns.DEFAULT_RESPONSE_PATTERNS;
+
         // @private {Object} - Input listener that speaks content on focus. This is the only input listener added
         // by Voicing, but it is the one that is consistent for all Voicing nodes. On focus, speak the name, object
         // response, and interaction hint.
@@ -111,6 +116,10 @@ const Voicing = {
       /**
        * Speak all responses assigned to this Node. Options allow you to override a response for the particular case,
        * or assign an Utterance to control the flow of this response.
+       *
+       * TODO: Rename to voicingSpeakFullResponse - this default will speak everything defined on the Node.
+       * TODO: Add another function called voicingSpeakResponse - this will by default speak NOTHING, you have
+       * to tap into the responses you want heard.
        * @public
        *
        * @param {Object} [options]
@@ -122,6 +131,7 @@ const Voicing = {
           contextResponse: this._voicingContextResponse,
           interactionHint: this._voicingHintResponse,
           ignoreProperties: this._ignoreVoicingManagerProperties,
+          responsePatterns: this._voicingResponsePatterns,
           utterance: null
         }, options );
 
@@ -294,6 +304,30 @@ const Voicing = {
         return this._voicingIgnoreVoicingManagerProperties;
       },
       get voicingIgnoreVoicingManagerProperties() { return this.getVoicingIgnoreVoicingManagerProperties(); },
+
+      /**
+       * Sets the collection of patterns to use for voicing responses, controlling the order, punctuation, and
+       * additional content for each combination of response. See VoicingResponsePatterns.js if you wish to use
+       * a collection of string patterns that are not the default.
+       * @public
+       *
+       * @param {Object} patterns - see VoicingResponsePatterns
+       */
+      setVoicingResponsePatterns( patterns ) {
+        this._voicingResponsePatterns = patterns;
+      },
+      set voicingResponsePatterns( patterns ) { this.setVoicingResponsePatterns( patterns ); },
+
+      /**
+       * Get the VoicingResponsePatterns object that this Voicing Node is using to collect responses.
+       * @public
+       *
+       * @returns {Object}
+       */
+      getVoicingResponsePatterns() {
+        return this._voicingResponsePatterns;
+      },
+      get voicingResponsePatterns() { return this.getVoicingResponsePatterns(); },
 
       /**
        * Sets the utteranceQueue through which voicing associated with this Node will be spoken. By default,
