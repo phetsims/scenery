@@ -101,7 +101,7 @@ const Voicing = {
         // response, and interaction hint.
         this.speakContentOnFocusListener = {
           focus: event => {
-            this.voicingSpeakResponse( {
+            this.voicingSpeakFullResponse( {
               contextResponse: null
             } );
           }
@@ -127,13 +127,10 @@ const Voicing = {
           nameResponse: this._voicingNameResponse,
           objectResponse: this._voicingObjectResponse,
           contextResponse: this._voicingContextResponse,
-          interactionHint: this._voicingHintResponse,
-          ignoreProperties: this._ignoreVoicingManagerProperties,
-          responsePatterns: this._voicingResponsePatterns,
-          utterance: null
+          interactionHint: this._voicingHintResponse
         }, options );
 
-        this.speakContent( voicingManager.collectResponses( options ) );
+        this.collectAndSpeakResponse( options );
       },
 
       /**
@@ -145,13 +142,7 @@ const Voicing = {
        * @param {Object} [options]
        */
       voicingSpeakResponse( options ) {
-        options = merge( {
-          ignoreProperties: this._ignoreVoicingManagerProperties,
-          responsePatterns: this._voicingResponsePatterns,
-          utterance: null
-        }, options );
-
-        this.speakContent( voicingManager.collectResponses( options ) );
+        this.collectAndSpeakResponse( options );
       },
 
       /**
@@ -160,20 +151,10 @@ const Voicing = {
        */
       voicingSpeakNameResponse( options ) {
         options = merge( {
-          nameResponse: this._voicingNameResponse,
-          responsePatterns: this._voicingResponsePatterns,
-          utterance: null
+          nameResponse: this._voicingNameResponse
         }, options );
 
-        const nameResponse = voicingManager.collectResponses( options );
-
-        if ( options.utterance ) {
-          options.utterance.alert = nameResponse;
-          this.speakContent( options.utterance );
-        }
-        else {
-          this.speakContent( nameResponse );
-        }
+        this.collectAndSpeakResponse( options );
       },
 
       /**
@@ -184,19 +165,10 @@ const Voicing = {
        */
       voicingSpeakObjectResponse( options ) {
         options = merge( {
-          objectResponse: this._voicingObjectResponse,
-          utterance: null
+          objectResponse: this._voicingObjectResponse
         }, options );
 
-        const objectResponse = voicingManager.collectResponses( options );
-
-        if ( options.utterance ) {
-          options.utterance.alert = objectResponse;
-          this.speakContent( options.utterance );
-        }
-        else {
-          this.speakContent( objectResponse );
-        }
+        this.collectAndSpeakResponse( options );
       },
 
       /**
@@ -207,19 +179,10 @@ const Voicing = {
        */
       voicingSpeakContextResponse( options ) {
         options = merge( {
-          contextResponse: this._voicingContextResponse,
-          utterance: null
+          contextResponse: this._voicingContextResponse
         }, options );
 
-        const contextResponse = voicingManager.collectResponses( options );
-
-        if ( options.utterance ) {
-          options.utterance.alert = contextResponse;
-          this.speakContent( options.utterance );
-        }
-        else {
-          this.speakContent( contextResponse );
-        }
+        this.collectAndSpeakResponse( options );
       },
 
 
@@ -230,9 +193,41 @@ const Voicing = {
        * @param {Object} [options]
        */
       voicingSpeakHintResponse( options ) {
-        this.speakContent( voicingManager.collectResponses( {
-          interractionHint: this._voicingHintResponse
-        } ) );
+        options = merge( {
+          hintResponse: this._voicingHintResponse
+        }, options );
+
+        this.collectAndSpeakResponse( options );
+      },
+
+      /**
+       * Collect responses with the voicingManager and speak the output with an UtteranceQueue.
+       * @param options
+       */
+      collectAndSpeakResponse( options ) {
+        options = merge( {
+
+          // {boolean} - whether or not this response should ignore the Properties of voicingManager
+          ignoreProperties: this._ignoreVoicingManagerProperties,
+
+          // {Object} - collection of string patterns to use with voicingManager.collectResponses, see
+          // VoicingResponsePatterns for more information.
+          responsePatterns: this._voicingResponsePatterns,
+
+          // {Utterance|null} - The utterance to use if you want this response to be more controlled in the
+          // UtteranceQueue.
+          utterance: null
+        }, options );
+
+        const response = voicingManager.collectResponses( options );
+
+        if ( options.utterance ) {
+          options.utterance.alert = response;
+          this.speakContent( options.utterance );
+        }
+        else {
+          this.speakContent( response );
+        }
       },
 
       /**
