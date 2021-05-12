@@ -167,7 +167,7 @@ define( require => {
           sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener background interrupt' );
           sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-          this.removeBackgroundPress( this.findBackgroundPress( event.pointer ) );
+          this.interrupt();
 
           sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
         }
@@ -353,6 +353,10 @@ define( require => {
 
       while ( this._presses.length ) {
         this.removePress( this._presses[ this._presses.length - 1 ] );
+      }
+
+      while ( this._backgroundPresses.length ) {
+        this.removeBackgroundPress( this._backgroundPresses[ this._backgroundPresses.length - 1 ] );
       }
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
