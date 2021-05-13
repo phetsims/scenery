@@ -63,6 +63,10 @@ define( function( require ) {
         }
       },
 
+      interrupt: function() {
+        self.interrupt();
+      },
+
       // touch cancel
       cancel: function( event ) {
         sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'DownUpListener (pointer) cancel for ' + self.downTrail.toString() );
