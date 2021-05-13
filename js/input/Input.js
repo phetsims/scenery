@@ -265,7 +265,7 @@ define( require => {
         tandem: options.tandem.createTandem( 'mouseDownEmitter' ),
 
         // TODO: use of both of these is redundant, and should get fixed with https://github.com/phetsims/axon/issues/194
-        argumentTypes: [ { valueType: Vector2 }, { valueType: window.Event } ],
+        argumentTypes: [ { isValidValue: v => v === null || typeof v === 'number' }, { valueType: Vector2 }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'id', type: NullableIO( NumberIO ) },
           { name: 'point', type: Vector2IO },
@@ -558,6 +558,7 @@ define( require => {
       this.gotPointerCaptureEmitter = new Emitter( {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'gotPointerCaptureEmitter' ),
+        argumentTypes: [ { isValidValue: v => v === null || typeof v === 'number' }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'id', type: NumberIO },
           { name: 'event', type: DOMEventIO }
@@ -577,6 +578,7 @@ define( require => {
       this.lostPointerCaptureEmitter = new Emitter( {
         phetioPlayback: true,
         tandem: options.tandem.createTandem( 'lostPointerCaptureEmitter' ),
+        argumentTypes: [ { isValidValue: v => v === null || typeof v === 'number' }, { valueType: window.Event } ],
         phetioType: EmitterIO( [
           { name: 'id', type: NumberIO },
           { name: 'event', type: DOMEventIO }
