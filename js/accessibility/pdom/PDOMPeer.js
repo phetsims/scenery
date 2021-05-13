@@ -275,10 +275,10 @@ class PDOMPeer {
   /**
    * Handle the internal ordering of the elements in the peer, this involves setting the proper value of
    * this.topLevelElements
-   * @param {Object} [options] - the computed mixin options to be applied to the peer.
+   * @param {Object} config - the computed mixin options to be applied to the peer. (select ParallelDOM mutator keys)
    * @private
    */
-  orderElements( options ) {
+  orderElements( config ) {
     if ( this._containerParent ) {
       // The first child of the container parent element should be the peer dom element
       // if undefined, the insertBefore method will insert the this._primarySibling as the first child
@@ -293,8 +293,8 @@ class PDOMPeer {
 
     // insert the label and description elements in the correct location if they exist
     // NOTE: Important for arrangeContentElement to be called on the label sibling first for correct order
-    this._labelSibling && this.arrangeContentElement( this._labelSibling, options.appendLabel );
-    this._descriptionSibling && this.arrangeContentElement( this._descriptionSibling, options.appendDescription );
+    this._labelSibling && this.arrangeContentElement( this._labelSibling, config.appendLabel );
+    this._descriptionSibling && this.arrangeContentElement( this._descriptionSibling, config.appendDescription );
 
   }
 
