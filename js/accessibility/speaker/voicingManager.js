@@ -97,15 +97,23 @@ class VoicingManager {
     if ( usesInteractionHints ) { responses = responses.concat( 'HINT'.concat( '_' ) ); }
     const responseKey = _.camelCase( responses );
 
-    const patternString = options.responsePatterns[ responseKey ];
-    assert && assert( patternString, `no pattern string found for key ${responseKey}` );
+    let finalResponse = '';
+    if ( responseKey ) {
 
-    return StringUtils.fillIn( patternString, {
-      NAME: options.nameResponse,
-      OBJECT: options.objectResponse,
-      CONTEXT: options.contextResponse,
-      HINT: options.hintResponse
-    } );
+      // graceful if the responseKey is empty, but if we formed some key, it should
+      // be defined in responsePatterns
+      const patternString = options.responsePatterns[ responseKey ];
+      assert && assert( patternString, `no pattern string found for key ${responseKey}` );
+
+      finalResponse = StringUtils.fillIn( patternString, {
+        NAME: options.nameResponse,
+        OBJECT: options.objectResponse,
+        CONTEXT: options.contextResponse,
+        HINT: options.hintResponse
+      } );
+    }
+
+    return finalResponse;
   }
 }
 
