@@ -403,7 +403,6 @@ const Voicing = {
        * @param {null|AlertableDef} content
        */
       speakContent( content ) {
-        console.log( content );
 
         // don't send to utteranceQueue if response is empty
         if ( content ) {

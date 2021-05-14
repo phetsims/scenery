@@ -18,6 +18,7 @@ import extend from '../../../../phet-core/js/extend.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import scenery from '../../scenery.js';
 import Node from '../../nodes/Node.js';
+import Focus from '../Focus.js';
 import Voicing from './Voicing.js';
 import voicingManager from './voicingManager.js';
 import webSpeaker from './webSpeaker.js';
@@ -82,9 +83,9 @@ const ReadingBlock = {
         // by default, ReadingBlocks don't use Voicing "responses" because they should always be readable as long
         // as voicing is enabled. ReadingBlock content should always be spoken in response to these events.
         this.readingBlockInputListener = {
-          focus: () => this.speakContent( this._readingBlockContent ),
-          down: () => this.speakContent( this._readingBlockContent ),
-          click: () => this.speakContent( this._readingBlockContent )
+          focus: event => this.speakReadingBlockContent( event ),
+          down: event => this.speakReadingBlockContent( event ),
+          click: event => this.speakReadingBlockContent( event )
         };
         this.addInputListener( this.readingBlockInputListener );
 
@@ -169,12 +170,30 @@ const ReadingBlock = {
       },
 
       /**
+       * Speak the content associated with the ReadingBlock. Sets the readingBlockFocusProperties on
+       * the displays so that HighlightOverlays know to activate a highlight while the webSpeaker
+       * is reading about this Node.
+       * @public
+       *
+       * @param {SceneryEvent} event
+       */
+      speakReadingBlockContent( event ) {
+        this.speakContent( this._readingBlockContent );
+
+        for ( let i = 0; i < this._displays.length; i++ ) {
+          const subtrailToThis = event.trail.subtrailTo( this );
+          this._displays[ i ].readingBlockFocusProperty.set( new Focus( this._displays[ i ], subtrailToThis ) );
+        }
+      },
+
+      /**
        * @public
        */
       disposeReadingBlock() {
         this.readingBlockFocusableProperty.unlink( this.readingBlockFocusableChangeListener );
         this.localBoundsProperty.unlink( this.localBoundsChangedListener );
         this.removeInputListener( this.readingBlockInputListener );
+        webSpeaker.endSpeakingEmitter.removeListener( this.endSpeakingListener );
         this.disposeVoicing();
       }
     } );

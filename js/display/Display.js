@@ -337,10 +337,14 @@ class Display {
       tandem: options.tandem.createTandem( 'utteranceQueue' )
     } );
 
-    // @public {Property.<Focus>} - The Property that indicates where Focus is under the Pointer for the Voicing
+    // @public {Property.<Focus|null>} - The Property that indicates where Focus is under the Pointer for the Voicing
     // feature. Nodes that compose Voicing can receive this Focus and a highlight may appear or speech may be
     // made depending on which features are enabled.
     this.pointerFocusProperty = new Property( null );
+
+    // @public {Property.<Focus|null> - The Property that indicates which Node that uses ReadingBlock is currently
+    // active. Used by the HighlightOverlay to highlight Nodes that are being spoken.
+    this.readingBlockFocusProperty = new Property( null );
 
     if ( this._accessible ) {
 
