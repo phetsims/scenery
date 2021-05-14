@@ -16,8 +16,8 @@
 import DerivedProperty from '../../../../axon/js/DerivedProperty.js';
 import extend from '../../../../phet-core/js/extend.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
-import scenery from '../../scenery.js';
 import Node from '../../nodes/Node.js';
+import scenery from '../../scenery.js';
 import Focus from '../Focus.js';
 import Voicing from './Voicing.js';
 import voicingManager from './voicingManager.js';
@@ -64,10 +64,8 @@ const ReadingBlock = {
         // @private {string|null}
         this._readingBlockContent = null;
 
-        // @private {string|null} - The tagName to apply to the Node when voicing is disabled, reference stored
-        // when the readingBlockTagName is applied.
-        // NOTE: This wouldn't work very well with more complicated orders of setting tagName and readingBlockTagName.
-        this._readingBlockDisabledTagName = null;
+        // @private {string} - The tagName to apply to the Node when voicing is disabled.
+        this._readingBlockDisabledTagName = 'p';
 
         this.localBoundsChangedListener = this.onLocalBoundsChanged.bind( this );
         this.localBoundsProperty.link( this.localBoundsChangedListener );
@@ -142,21 +140,18 @@ const ReadingBlock = {
        * apply or remove the readingBlockTagName.
        * @private
        *
-       * @param {boolean} focusable
+       * @param {boolean} focusable - whether or not ReadingBlocks should be focusable
        */
       onReadingBlockFocusableChanged( focusable ) {
         this.focusable = focusable;
 
-        if ( this.readingBlockTagName !== this.tagName ) {
-          if ( focusable ) {
-            this._readingBlockDisabledTagName = this.tagName;
-            this.tagName = this._readingBlockTagName;
-          }
-          else {
+        if ( focusable ) {
+          this.tagName = this._readingBlockTagName;
+        }
+        else {
 
-            // possible for onReadingBlockFocusableChanged to be called before Voicing has been fully initialized
-            this.tagName = this._readingBlockDisabledTagName || null;
-          }
+          // possible for onReadingBlockFocusableChanged to be called before Voicing has been fully initialized
+          this.tagName = this._readingBlockDisabledTagName;
         }
       },
 
