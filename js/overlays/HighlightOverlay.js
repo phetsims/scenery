@@ -14,7 +14,7 @@ import Shape from '../../../kite/js/Shape.js';
 import merge from '../../../phet-core/js/merge.js';
 import FocusHighlightFromNode from '../accessibility/FocusHighlightFromNode.js';
 import FocusHighlightPath from '../accessibility/FocusHighlightPath.js';
-import webSpeaker from '../accessibility/speaker/webSpeaker.js';
+import webSpeaker from '../accessibility/voicing/webSpeaker.js';
 import Display from '../display/Display.js';
 import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
