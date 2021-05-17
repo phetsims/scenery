@@ -49,10 +49,10 @@ const ReadingBlock = {
        */
       _mutatorKeys: READING_BLOCK_OPTION_KEYS.concat( proto._mutatorKeys ),
 
-      initializeReadingBlock() {
+      initializeReadingBlock( options ) {
 
         // initialize the parent trait
-        this.initializeVoicing();
+        this.initializeVoicing( options );
 
         // @public (scenery-internal) - a flag to indicate that this Node has ReadingBlock behavior
         this.readingBlock = true;
@@ -90,6 +90,10 @@ const ReadingBlock = {
         // @private - reference kept so this listener can be added/removed when the readingBlockFocusable changes
         this.readingBlockFocusableChangeListener = this.onReadingBlockFocusableChanged.bind( this );
         this.readingBlockFocusableProperty.link( this.readingBlockFocusableChangeListener );
+
+        if ( options ) {
+          this.mutate( _.pick( options, READING_BLOCK_OPTION_KEYS ) );
+        }
       },
 
       /**
