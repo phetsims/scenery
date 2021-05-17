@@ -62,7 +62,7 @@ class VoicingManager {
       contextResponse: null,
 
       // {string|null} - spoken when interaction hints are enabled
-      interactionHint: null,
+      hintResponse: null,
 
       // {boolean} - if true, the objectResponse, contextResponse, and interactionHint will all be spoken
       // regardless of the values of the Properties of voicingManager

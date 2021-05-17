@@ -127,7 +127,7 @@ const Voicing = {
           nameResponse: this._voicingNameResponse,
           objectResponse: this._voicingObjectResponse,
           contextResponse: this._voicingContextResponse,
-          interactionHint: this._voicingHintResponse
+          hintResponse: this._voicingHintResponse
         }, options );
 
         this.collectAndSpeakResponse( options );
@@ -220,6 +220,7 @@ const Voicing = {
         }, options );
 
         const response = voicingManager.collectResponses( options );
+        console.log( response );
 
         if ( options.utterance ) {
           options.utterance.alert = response;
