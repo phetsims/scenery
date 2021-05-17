@@ -109,7 +109,7 @@ const Voicing = {
         this.addInputListener( this.speakContentOnFocusListener );
 
         if ( options ) {
-          this.mutate( options );
+          this.mutate( _.pick( options, VOICING_OPTION_KEYS ) );
         }
       },
 
