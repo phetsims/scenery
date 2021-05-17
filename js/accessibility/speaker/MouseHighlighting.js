@@ -70,12 +70,12 @@ const MouseHighlighting = {
        * @param {boolean} added - Was an instance added or removed?
        */
       onInstancesChanged( instance, added ) {
-        const includesDisplay = _.includes( this._displays, instance.display );
-        if ( added && !includesDisplay ) {
+        const indexOfDisplay = this._displays.indexOf( instance.display );
+        if ( added && indexOfDisplay < 0 ) {
           this._displays.push( instance.display );
         }
-        else if ( !added && includesDisplay ) {
-          this._displays.splice( this._displays.indexOf( instance.display, 1 ) );
+        else if ( !added && indexOfDisplay >= 0 ) {
+          this._displays.splice( indexOfDisplay, 1 );
         }
       },
 
