@@ -17,16 +17,16 @@ import VoicingResponsePatterns from './VoicingResponsePatterns.js';
 class VoicingManager {
   constructor() {
 
-    // @public {BooleanProperty} - whether or not object names are read as input lands on various components
+    // @public {BooleanProperty} - whether or not component names are read as input lands on various components
     this.nameResponsesEnabledProperty = new BooleanProperty( true );
 
     // @public {BooleanProperty} - whether or not "Object Responses" are read as interactive components change
     this.objectResponsesEnabledProperty = new BooleanProperty( true );
 
-    // @public {BooleanProperty} - whether or not "Context Responses" are read as simulation objects change
+    // @public {BooleanProperty} - whether or not "Context Responses" are read as inputs receive interaction
     this.contextResponsesEnabledProperty = new BooleanProperty( true );
 
-    // @public {BooleanProperty} - whether or not "Hints" are read to the user
+    // @public {BooleanProperty} - whether or not "Hints" are read to the user in response to certain input
     this.hintResponsesEnabledProperty = new BooleanProperty( false );
 
     // @public {BooleanProperty} - Controls whether Voicing is enabled in a "main window" area of the application.
