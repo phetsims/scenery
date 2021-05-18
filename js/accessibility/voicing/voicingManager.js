@@ -71,11 +71,7 @@ class VoicingManager {
       // {Object} - The collection of string patterns to use when assembling responses based on which
       // responses are provided and which voicingManager Properties are true. See VoicingResponsePatterns
       // if you do not want to use the default.
-      responsePatterns: VoicingResponsePatterns.DEFAULT_RESPONSE_PATTERNS,
-
-      // {string|null} - If this is provided, it is the ONLY spoken string, and it is always spoken regardless of
-      // speech output levels selected by the user as long as speech is enabled.
-      overrideResponse: null
+      responsePatterns: VoicingResponsePatterns.DEFAULT_RESPONSE_PATTERNS
     }, options );
 
     VoicingResponsePatterns.validatePatternKeys( options.responsePatterns );
