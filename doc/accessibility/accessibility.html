@@ -5,33 +5,33 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Accessible Content in Scenery</title>
+  <title>Accessibility with Scenery</title>
 
-  <link rel="stylesheet" href="../../sherpa/lib/bootstrap-2.2.2.css">
-  <link rel="stylesheet" href="../../sherpa/lib/bootstrap-responsive-2.2.2.css">
-  <link rel="stylesheet" href="../../sherpa/lib/syntaxhighlighter-3.0.83/shCore.css">
-  <link rel="stylesheet" href="../../sherpa/lib/syntaxhighlighter-3.0.83/shThemeDefault.css">
-  <link rel="stylesheet" href="../assets/scenery.css">
+  <link rel="stylesheet" href="../../../sherpa/lib/bootstrap-2.2.2.css">
+  <link rel="stylesheet" href="../../../sherpa/lib/bootstrap-responsive-2.2.2.css">
+  <link rel="stylesheet" href="../../../sherpa/lib/syntaxhighlighter-3.0.83/shCore.css">
+  <link rel="stylesheet" href="../../../sherpa/lib/syntaxhighlighter-3.0.83/shThemeDefault.css">
+  <link rel="stylesheet" href="../../assets/scenery.css">
 
   <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
-  <script src="../../aqua/js/pageload-connector.js"></script>
+  <script src="../../../aqua/js/pageload-connector.js"></script>
 
   <!-- jQuery and LoDash are dependencies -->
-  <script src="../../sherpa/lib/jquery-2.1.0.min.js"></script>
-  <script src="../../sherpa/lib/lodash-4.17.4.min.js"></script>
+  <script src="../../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <script src="../../../sherpa/lib/lodash-4.17.4.min.js"></script>
 
   <!-- For the styling -->
-  <script src="../../sherpa/lib/bootstrap-2.2.2.js"></script>
+  <script src="../../../sherpa/lib/bootstrap-2.2.2.js"></script>
 
-  <script src="../../sherpa/lib/syntaxhighlighter-3.0.83/shCore.js"></script>
-  <script src="../../sherpa/lib/syntaxhighlighter-3.0.83/shBrushJScript.js"></script>
-  <script src="../../sherpa/lib/syntaxhighlighter-3.0.83/shBrushXml.js"></script>
+  <script src="../../../sherpa/lib/syntaxhighlighter-3.0.83/shCore.js"></script>
+  <script src="../../../sherpa/lib/syntaxhighlighter-3.0.83/shBrushJScript.js"></script>
+  <script src="../../../sherpa/lib/syntaxhighlighter-3.0.83/shBrushXml.js"></script>
 
   <script type="text/javascript"
           src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
-  <script src="../build/scenery.min.js"></script>
+  <script src="../../build/scenery.min.js"></script>
 
 
   <script type="text/javascript">
@@ -126,10 +126,10 @@
   <div class="navbar-inner">
     <a class="brand" href="/scenery">Scenery</a>
     <ul class="nav">
-      <li><a href="../">Home</a></li>
-      <li class="active"><a href="../doc">Documentation</a></li>
-      <li><a href="../examples">Examples</a></li>
-      <li><a href="../tests">Tests</a></li>
+      <li><a href="../../">Home</a></li>
+      <li class="active"><a href="../../doc">Documentation</a></li>
+      <li><a href="../../examples">Examples</a></li>
+      <li><a href="../../tests">Tests</a></li>
     </ul>
   </div>
 </div>
@@ -138,7 +138,7 @@
   <div class="span3"></div>
   <div class="span6">
     <div class="page-header" style="text-align: center;">
-      <h1>Accessible Content in Scenery</h1>
+      <h1>Accessibility with Scenery</h1>
       <div class="span3"></div>
 
     </div>
@@ -192,6 +192,25 @@
   </div>
   <div class="span6">
 
+    <h2>Scenery's Accessibility Features</h2>
+
+    <p>
+      Scenery has a variety of accessibility features available to use. This document describes how to use the
+      Parallel DOM to support screen reader accessibility. But the following lists the other features and their
+      with more in depth documentation if available.
+
+    <ul>
+      <li>Parallel DOM - a parallel DOM tree that renders the Scenery scene graph into HTML for ingestion by a screen
+        reader.
+      </li>
+      <li>Pan and Zoom - zooming and panning within a scenery Display, with a variety of input modalities for controling
+        it.
+      </li>
+      <li><a href="voicing.html">Voicing - Speech made directly by the application using SpeechSynthesis.</a></li>
+    </ul>
+
+    </p>
+
     <h2>Background Information</h2>
 
     <p>
@@ -222,26 +241,6 @@
         Remember that the first rule of ARIA is to not use ARIA!
       </li>
     </ul>
-
-    <h2>Scenery's Accessibility Features</h2>
-
-    <p>
-      Scenery has a variety of accessibility features available to use. The primary method of adding additional
-      accessible
-      content is through the Parallel DOM. The rest of this document describes this feature in depth. Here is brief
-      explanation of features supported by scenery.
-
-    <ul>
-      <li>Paralle DOM - a parallel DOM tree that renders the Scenery scene graph into HTML for ingestion by a screen
-        reader.
-      </li>
-      <li>Pan and Zoom - zooming and panning within a scenery Display, with a variety of input modalities for controling
-        it.
-      </li>
-      <li>Voicing - self read description content using Web Audio</li>
-    </ul>
-
-    </p>
 
     <h2 id="PDOM">The Parallel DOM</h2>
 

@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Voicing with Scenery</title>
+
+  <link rel="stylesheet" href="../../../sherpa/lib/bootstrap-2.2.2.css">
+  <link rel="stylesheet" href="../../../sherpa/lib/bootstrap-responsive-2.2.2.css">
+  <link rel="stylesheet" href="../../../sherpa/lib/syntaxhighlighter-3.0.83/shCore.css">
+  <link rel="stylesheet" href="../../../sherpa/lib/syntaxhighlighter-3.0.83/shThemeDefault.css">
+  <link rel="stylesheet" href="../../assets/scenery.css">
+
+  <!-- Before loading other things (that might error), create hooks to report errors/loads for continuous testing -->
+  <script src="../../../aqua/js/pageload-connector.js"></script>
+
+  <!-- jQuery and LoDash are dependencies -->
+  <script src="../../../sherpa/lib/jquery-2.1.0.min.js"></script>
+  <script src="../../../sherpa/lib/lodash-4.17.4.min.js"></script>
+
+  <!-- For the styling -->
+  <script src="../../../sherpa/lib/bootstrap-2.2.2.js"></script>
+
+  <script src="../../../sherpa/lib/syntaxhighlighter-3.0.83/shCore.js"></script>
+  <script src="../../../sherpa/lib/syntaxhighlighter-3.0.83/shBrushJScript.js"></script>
+  <script src="../../../sherpa/lib/syntaxhighlighter-3.0.83/shBrushXml.js"></script>
+
+  <script type="text/javascript"
+          src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  <!-- Our code, in either the concatenated 'with comments' version or the minified version -->
+  <script src="../../build/scenery.min.js"></script>
+
+
+  <script type="text/javascript">
+    scenery.Utils.polyfillRequestAnimationFrame();
+
+    function docExample( id, draw ) {
+
+      var $container = $( '#' + id );
+      var scene = new scenery.Node();
+      var display = new scenery.Display( scene, {
+        width: $container.width(),
+        height: $container.height(),
+
+        // input should not be attached to window so input for documentation is not interrupted
+        listenToOnlyElement: true
+      } );
+      $container[ 0 ].appendChild( display.domElement );
+      draw( scene, display );
+      display.updateDisplay();
+      var $code = $( '<pre class="brush: js"></pre>' );
+      $code.text( draw.toString().match( /\/\*START\*\/((.|\n)*)\/\*END\*\// )[ 1 ] );
+      $container.after( $code );
+    }
+  </script>
+
+  <style type="text/css">
+
+    .exampleScene {
+      margin: 15px auto;
+      border: 1px solid black;
+      position: relative;
+      left: 0;
+      top: 0;
+    }
+
+    #sidebar {
+      background-color: #eee;
+      position: fixed;
+      z-index: 10;
+      top: 41px;
+      left: 0;
+      bottom: 0;
+      width: 200px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      padding: 15px 0 30px 30px;
+      border-right: 1px solid #bbb;
+      box-shadow: 0 0 20px #ccc;
+      -webkit-box-shadow: 0 0 20px #ccc;
+      -moz-box-shadow: 0 0 20px #ccc;
+    }
+
+    #apiList {
+      background-color: #eee;
+      position: relative;
+      border: 1px solid #bbb;
+      border-left: none;
+      padding: 10px;
+    }
+
+    .ph2 {
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .navlink {
+      font-weight: bold;
+    }
+
+    .sublink {
+      padding-left: 1em;
+    }
+
+    .args {
+      font-weight: normal;
+      font-size: 80%;
+    }
+
+    footer {
+      maring-left: 2em;
+      background-color: #191919;
+    }
+  </style>
+
+</head>
+
+<body>
+<div class="navbar navbar-inverse navbar-static-top">
+  <div class="navbar-inner">
+    <a class="brand" href="/scenery">Scenery</a>
+    <ul class="nav">
+      <li><a href="../../">Home</a></li>
+      <li class="active"><a href="../../doc">Documentation</a></li>
+      <li><a href="../../examples">Examples</a></li>
+      <li><a href="../../tests">Tests</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="row-fluid">
+  <div class="span3"></div>
+  <div class="span6">
+    <div class="page-header" style="text-align: center;">
+      <h1>Voicing with Scenery</h1>
+      <div class="span3"></div>
+
+    </div>
+
+  </div>
+</div>
+<div class="row-fluid">
+  <div class="span3" id="apiList">
+    <div class="ph2"><a href="#voicing-introduction-heading">Introduction</a></div>
+
+    <div class="navlink"><a href="#voicing-responses-heading">Responses</a></div>
+
+    <div class="navlink"><a href="#voicing-api-heading">Voicing.js API</a></div>
+    <div class="sublink"><a href="#voicing-api-name-response">voicingNameResponse</a></div>
+    <div class="sublink"><a href="#voicing-api-object-response">voicingObjectResponse</a></div>
+    <div class="sublink"><a href="#voicing-api-context-response">voicingContextResponse</a></div>
+    <div class="sublink"><a href="#voicing-api-hint-response">voicingHintResponse</a></div>
+    <div class="sublink"><a href="#voicing-api-utterance-queue">voicingUtteranceQueue</a></div>
+
+    <div class="sublink"><a href="#voicing-api-utterance-queue">voicingUtteranceQueue</a></div>
+    <div class="sublink"><a href="#voicing-api-speak-full-response">voicingSpeakFullResponse</a></div>
+    <div class="sublink"><a href="#voicing-api-speak-response">voicingSpeakResponse</a></div>
+    <div class="sublink"><a href="#voicing-api-speak-name-response">voicingSpeakNameResponse</a></div>
+    <div class="sublink"><a href="#voicing-api-speak-object-response">voicingSpeakNameResponse</a></div>
+    <div class="sublink"><a href="#voicing-api-speak-context-response">voicingSpeakContextResponse</a></div>
+    <div class="sublink"><a href="#voicing-api-speak-hint-response">voicingSpeakHintResponse</a></div>
+    <div class="sublink"><a
+        href="#voicing-api-ignore-voicing-manager-properties">voicingIgnoreVoicingManagerProperties</a></div>
+    <div class="sublink"><a href="#voicing-api-response-patterns">voicingResponsePatterns</a></div>
+
+    <div class="navlink"><a href="#code-examples">Code Examples</a></div>
+  </div>
+  <div class="span6">
+
+    <h2 id="voicing-heading">Voicing</h2>
+
+    <h3 id="voicing-introduction-heading">Introduction</h3>
+
+    <p>
+      "Voicing" is an accessibility feature developed by PhET. The feature produces speech that
+      comes directly from the browser instead of using third party screen reading software. Speech is generated
+      using <a href="https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis">Speech Synthesis</a>. It is
+      intended to be useful for people that may benefit from described content that may not use or have access to other
+      screen reading software. But there could certainly be other applications as well.
+    </p>
+
+    <p>
+      Speech is generally spoken in response to user input, and the API is designed with this
+      in mind. The API allows you to define Voicing content on a node-by-node basis so that
+      interactive components in the scenery application can create speech.
+    </p>
+
+    <h3 id="responses-heading">Responses</h3>
+    <p>
+      Voicing content is broken up into the following categories called "Responses", which heavily influence the
+      API.
+    </p>
+    <ul>
+      <li>
+        <b>Name Response:</b> The name that labels the component using Voicing. Similar to the "Accessible Name"
+        of digital accessibility.
+      </li>
+      <li><b>Object Response:</b> The state information related to the component using Voicing. This is generally a
+        a description that directly describes the object that receives input.
+      </li>
+      <li><b>Context Response:</b> The contextual response that describes the result of interaction with an object. For
+        example, if an input element changes the properties of the application state that it not directly related to
+        the input element it would be considered a context change.
+      </li>
+      <li><b>Hint Response:</b> A response that guides the user toward interaction with the component using Voicing.
+      </li>
+    </ul>
+
+    <h4>Responses implemented with Voicing.js</h4>
+    <p>Voicing is implemented with a trait called <code>Voicing.js</code> which can be composed with scenery's
+      <code>Node</code>. It provides the ability to set the various responses on the Node and then make a request to
+      speak one or more of them. The API of Voicing.js is described in more detail later in this document.</p>
+
+    <h4>Responses collected with voicingManager.js</h4>
+    <p>
+      The flow of responses is further controlled by a singleton called <code>voicingManager.js</code>. Responses
+      of a certain type can be globally enabled or disabled. This supports (for example) the ability to add user
+      preferences to the application that enable or disable certain responses if they are found to be too verbose
+      or unhelpful. <code>voicingManager.js</code> has Properties that control the enabled states for responses,
+      and contains utility functions for assembling final Voicing content depending on the state of these Properties.
+    </p>
+
+    <h3 id="voicing-api-heading">Voicing.js API</h3>
+    <p>The following enumerates the Voicing.js API.</p>
+
+    <h4 id="voicing-api-name-response">voicingNameResponse</h4>
+    <p>A getter/setter for the <code>{string|null}</code> name response for the Node.</p>
+
+    <h4 id="voicing-api-object-response">voicingObjectResponse</h4>
+    <p>A getter/setter for the <code>{string|null}</code> object response for the Node.</p>
+
+    <h4 id="voicing-api-context-response">voicingContextResponse</h4>
+    <p>A getter/setter for the <code>{string|null}</code> context response for the Node.</p>
+
+    <h4 id="voicing-api-hint-response">voicingHintResponse</h4>
+    <p>A getter/setter for the <code>{string|null}</code> hint response for the Node.</p>
+
+    <h4 id="voicing-api-utterance-queue">voicingUtteranceQueue</h4>
+    <p>
+      A getter/setter for the <code>{UtteranceQueue|null}</code> UtteranceQueue used to speak Voicing content.
+      By default, a global singleton called <code>voicingUtteranceQueue.js</code> is used to speak content. But
+      you may wish to use a different or multiple UtteranceQueues if you need more control over the output of
+      speech.
+    </p>
+
+    <h4 id="voicing-api-speak-full-response">voicingSpeakFullResponse</h4>
+    <p>
+      A function that requests speech of all responses for the Node. Only the responses that are enabled
+      by <code>voicingManager.js</code> will be spoken. This is generally called in response to some input
+      or change in the application.
+    </p>
+
+    <h4 id="voicing-api-speak-response">voicingSpeakResponse</h4>
+    <p>
+      A function that speaks only the provided responses, specified through options. Only the responses that are
+      enabled by <code>voicingManager.js</code> will be spoken. This is generally called in response to some input
+      or change in the application.
+    </p>
+
+    <h4 id="voicing-api-speak-name-response">voicingSpeakNameResponse</h4>
+    <p>
+      A function that speaks only the name response. Only the responses that are enabled by
+      <code>voicingManager.js</code> will be spoken. This is generally called in response to some input or change in
+      the application.
+    </p>
+
+    <h4 id="voicing-api-speak-object-response">voicingSpeakObjectResponse</h4>
+    <p>
+      A function that speaks only the object response. Only the responses that are enabled by
+      <code>voicingManager.js</code> will be spoken. This is generally called in response to some input or change in
+      the application.
+    </p>
+
+    <h4 id="voicing-api-speak-context-response">voicingSpeakContextResponse</h4>
+    <p>
+      A function that speaks only the context response. Only the responses that are enabled by
+      <code>voicingManager.js</code> will be spoken. This is generally called in response to some input or change in
+      the application.
+    </p>
+
+    <h4 id="voicing-api-speak-hint-response">voicingSpeakHintResponse</h4>
+    <p>
+      A function that speaks only the name response. Only the responses that are enabled by
+      <code>voicingManager.js</code> will be spoken. This is generally called in response to some input or change in
+      the application.
+    </p>
+
+    <h4 id="voicing-api-ignore-voicing-manager-properties">voicingIgnoreVoicingManagerProperties</h4>
+    <p>
+      A <code>{boolean}</code> getter/setter that lets you ignore the Properties of voicingManager when you make
+      requests to
+      speak. If false, all responses will be spoken regardless of voicingManager Properties.
+    </p>
+
+    <h4 id="voicing-api-response-patterns">voicingResponsePatterns</h4>
+    <p>
+      Sets the collection of patterns to use for voicingManager.collectResponses. This lets you control the
+      order of Voicing.js responses, as well as customize punctuation and other formatting of the content.
+      See <code>VoicingResponsePatterns.js</code> for more information and how to create your own collection
+      of patterns.
+    </p>
+
+    <h2>Mouse Highlighting</h2>
+    <p>Describe Mouse Highlighting</p>
+
+    <h2>Reading Blocks</h2>
+    <p>Describe reading blocks</p>
+
+    <p>List out the API associated of ReadingBlock</p>
+    <ul></ul>
+
+    <h2 id="code-examples">Code examples</h2>
+    <h3>Simple Example</h3>
+    <p>The following illustrates a basic example of using Voicing.js with a Node. Click the Rectangle
+      to hear speech.</p>
+    <div id="example-voicing" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
+    <script type="text/javascript">
+      docExample( 'example-voicing', function( scene, display ) {
+        /*START*/
+
+        // create a class that is compsed with Voicing
+        class VoicingRectangle extends scenery.Rectangle {
+          constructor() {
+
+            // super constructor for a blue rectangle
+            super( 0, 0, 64, 64, { fill: 'blue' } );
+
+            // initialize Voicing features
+            this.initializeVoicing();
+
+            // setters for the various responses
+            this.voicingNameResponse = 'Rectangle';
+            this.voicingObjectResponse = 'blue';
+
+            // add a listener that updates the color of the rectangle and requests speech on release
+            this.addInputListener( new scenery.PressListener( {
+              release: () => {
+
+                // change the Rectangle fill color
+                const newFill = this.fill === 'blue' ? 'red' : 'blue';
+                this.fill = newFill;
+
+                // update the object response (describing the new state of the rectangle)
+                this.voicingObjectResponse = newFill;
+
+                // speak all responses
+                this.voicingSpeakFullResponse();
+              }
+            } ) );
+          }
+        }
+
+        scenery.Voicing.compose( VoicingRectangle );
+
+        // create and add our VoicingRectangle to the scene
+        scene.addChild( new VoicingRectangle() );
+
+        // set up the Display and initialize the webSpeaker
+        display.updateOnRequestAnimationFrame();
+        display.initializeEvents();
+        scenery.webSpeaker.initialize();
+        scenery.webSpeaker.enabledProperty.value = true;
+        /*END*/
+      } );
+    </script>
+
+    <h3>Controlled Responses</h3>
+    <p>The following is a more complicated example that demonstrates more direct control over speaking responses.
+      In this example, you can drag the rectangle in the bounds. On pickup, the name response is spoken and on release,
+      the
+      horizontal position (object response) is spoken. This also demonstrates enabling/disabling the object response
+      globally with the following checkbox.
+    </p>
+
+    <div>
+      <input type="checkbox" id="object-responses" name="object-responses"
+             checked>
+      <label for="object-responses">Object Responses</label>
+    </div>
+
+    <div id="controlled-responses" class="exampleScene" style="width: 128px; height: 128px; margin: 0 auto;"></div>
+    <script type="text/javascript">
+
+      docExample( 'controlled-responses', function( scene, display ) {
+        /*START*/
+
+        // create a class that is compsed with Voicing
+        class VoicingRectangle extends scenery.Rectangle {
+          constructor() {
+
+            // super constructor for a blue rectangle
+            super( 0, 0, 32, 32, { fill: 'blue' } );
+
+            // initialize Voicing features
+            this.initializeVoicing();
+
+            // setters for the various responses
+            this.voicingNameResponse = 'Rectangle';
+
+            // add a listener that updates the color of the rectangle and requests speech on release
+            this.addInputListener( new scenery.DragListener( {
+              translateNode: true,
+              dragBoundsProperty: new axon.Property( new dot.Bounds2( 0, 0, 128 - 32, 128 - 32 ) ),
+              press: () => {
+
+                // on press, speak the voicingNameResponse
+                this.voicingSpeakNameResponse();
+              },
+              release: () => {
+
+                // on release, speak the new position of the rectangle (object response)
+                this.voicingObjectResponse = this.center.x > 64 ? 'right side' : 'left side';
+
+                // speak all responses
+                this.voicingSpeakObjectResponse();
+              }
+            } ) );
+          }
+        }
+
+        scenery.Voicing.compose( VoicingRectangle );
+
+        // create and add our VoicingRectangle to the scene
+        scene.addChild( new VoicingRectangle() );
+
+        // set up the Display and initialize the webSpeaker
+        display.updateOnRequestAnimationFrame();
+        display.initializeEvents();
+        scenery.webSpeaker.initialize();
+        scenery.webSpeaker.enabledProperty.value = true;
+
+        // globally enable/disable object responses
+        document.getElementById( 'object-responses' ).addEventListener( 'change', () => {
+          scenery.voicingManager.objectResponsesEnabledProperty.toggle();
+        } );
+        /*END*/
+      } );
+    </script>
+  </div>
+</div>
+
+<footer style="background-color: #191919;">
+  <a class="brand" href="/scenery">Scenery</a>
+</footer>
+
+<script type="text/javascript">
+  SyntaxHighlighter.all();
+</script>
+</body>
+</html>
