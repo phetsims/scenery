@@ -106,13 +106,12 @@ class WebSpeaker {
 
     // On chrome, synth.getVoices() returns an empty array until the onvoiceschanged event, so we have to
     // wait to populate
-    const populateVoicesListener = () => {
+    this.synth.onvoiceschanged = () => {
       this.populateVoices();
 
       // remove the listener after they have been populated once from this event
       this.synth.onvoiceschanged = null;
     };
-    this.synth.onvoiceschanged = populateVoicesListener;
 
     // otherwise, try to populate voices immediately
     this.populateVoices();
@@ -149,6 +148,8 @@ class WebSpeaker {
   /**
    * Get a reference to the DerivedProperty controlling whether speech is allowed.
    * @public
+   *
+   * REVIEW: Seems like a superfluous getter to me. Why would anyone want access to this? https://github.com/phetsims/scenery/issues/1223
    *
    * @returns {DerivedProperty}
    */
@@ -276,6 +277,9 @@ class WebSpeaker {
    *   2) There are rare cases where we need to speak even when when canSpeakProperty is false (like speaking
    *   that voicing has been successfully turned off).
    * @public
+   *
+   * // REVIEW: missing type doc, https://github.com/phetsims/scenery/issues/1223
+   * // Instead of this function on the announcer, I'd rather build this functionality into the UtteranceQueue. Like a synchronous bypass around previously queued items. https://github.com/phetsims/scenery/issues/1223
    *
    * @param utterThis
    */

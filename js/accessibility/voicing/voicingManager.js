@@ -61,6 +61,7 @@ class VoicingManager {
       // {string|null} - spoken when interaction hints are enabled
       hintResponse: null,
 
+      // REVIEW: add in nameRespones if applicable, https://github.com/phetsims/scenery/issues/1223
       // {boolean} - if true, the objectResponse, contextResponse, and interactionHint will all be spoken
       // regardless of the values of the Properties of voicingManager
       ignoreProperties: false,
@@ -79,11 +80,14 @@ class VoicingManager {
     const usesInteractionHints = options.hintResponse && ( this.hintResponsesEnabledProperty.get() || options.ignoreProperties );
 
     // generate the key to find the string pattern to use from options.responsePatterns
+    // REVIEW: Instead of hard coded strings, I think that constants in VoicingResponsePatterns.js makes more sense. Or maybe even a factored out function like VoicingResponsePatterns.combine() instead of a manual `concat` call.
     let responses = '';
     if ( usesNames ) { responses = responses.concat( 'NAME'.concat( '_' ) ); }
     if ( usesObjectChanges ) { responses = responses.concat( 'OBJECT'.concat( '_' ) ); }
     if ( usesContextChanges ) { responses = responses.concat( 'CONTEXT'.concat( '_' ) ); }
     if ( usesInteractionHints ) { responses = responses.concat( 'HINT'.concat( '_' ) ); }
+
+    // Will get rid of the trailing underscore
     const responseKey = _.camelCase( responses );
 
     let finalResponse = '';

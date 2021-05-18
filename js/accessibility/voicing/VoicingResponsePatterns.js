@@ -40,6 +40,7 @@ const VoicingResponsePatterns = {
   },
 
   // Like the default response patterns, but the name follows the object response when both are present.
+  // REVIEW: We should get rid of this if we don't use it soon, and perhaps we should try to create another example that IS used asap, https://github.com/phetsims/scenery/issues/1223
   OBJECT_NAME_CONTEXT_HINT_PATTERNS: {
     nameObjectContextHint: '{{OBJECT}}, {{NAME}}, {{CONTEXT}} {{HINT}}',
     nameObjectContext: '{{OBJECT}}, {{NAME}}, {{CONTEXT}}',
@@ -69,7 +70,7 @@ const VoicingResponsePatterns = {
    * @returns {Object}
    */
   createResponsePatterns( source, options ) {
-    const newPatterns = merge( VoicingResponsePatterns.DEFAULT_RESPONSE_PATTERNS, options );
+    const newPatterns = merge( {}, VoicingResponsePatterns.DEFAULT_RESPONSE_PATTERNS, options );
     VoicingResponsePatterns.validatePatternKeys( newPatterns );
 
     return newPatterns;

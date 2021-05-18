@@ -94,14 +94,15 @@ const Voicing = {
         // the application.
         this._voicingHintResponse = null;
 
+        // REVIEW: Update doc to apply to NAME if applicable, or state that Name is not part of this explicitly, https://github.com/phetsims/scenery/issues/1223
         // @private {boolean} - Controls whether or not object, context, and hint responses are controlled
         // by voicingManager Properties. If true, all responses will be spoken when requested, regardless
         // of these Properties. This is often useful for surrounding UI components where it is important
         // that information be heard even when certain responses have been disabled.
         this._voicingIgnoreVoicingManagerProperties = false;
 
-        // @private {UtteranceQueue} - The utteranceQueue that responses for this Node will be spoken through.
-        // By default, it will go through the singleton voicingUtteranceQueue, but you may need separate
+        // @private {UtteranceQueue|null} - The utteranceQueue that responses for this Node will be spoken through.
+        // By default (null), it will go through the singleton voicingUtteranceQueue, but you may need separate
         // UtteranceQueues for different areas of content in your application. For example, Voicing and
         // the default voicingUtteranceQueue may be disabled, but you could still want some speech to come through
         // while user is changing preferences or other settings.
