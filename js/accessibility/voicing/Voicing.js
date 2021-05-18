@@ -1,9 +1,21 @@
 // Copyright 2021, University of Colorado Boulder
 
 /**
- * A trait for the Voicing feature that can be composed with a Node. Allows you to specify callbacks that generate
- * responses that are spoken with the speech synthesis, highlights that are only displayed when voicing is enabled,
- * and other attributes of the feature at the Node level.
+ * A trait for Node that supports the Voicing feature, under accessibility. Allows you to define responses for the Node
+ * and make requests to speak that content using HTML5 SpeechSynthesis and the UtteranceQueue. Voicing content is
+ * organized into four categories which are responsible for describing different things and whose output of content
+ * can be controlled by the voicingManager. These include the
+ *
+ * - "Name" response: The name of the object that uses Voicing. Similar to the "Accessible Name" of PDOM.
+ * - "Object" response: The state information about the object that uses Voicing.
+ * - "Context" response: The contextual changes that result from interaction with the Node that uses Voicing.
+ * - "Hint" response: A supporting hint that guides the user toward a desired interaction.
+ *
+ * See the property and setter documentation for each of these responses for more information.
+ *
+ * Once this content is set, you can make a request to speak it using an UtteranceQueue with one of the provided
+ * functions of Voicing. It is up to you to call one of these functions when you wish for speech to be made. The only
+ * exception is on the 'focus', which consistently speaks content for all Nodes that are composed with Voicing.
  *
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
@@ -60,19 +72,19 @@ const Voicing = {
         // initialize "super" Trait to support highlights on mouse input
         this.initializeMouseHighlighting();
 
-        // @public (read-only) - flag indicating that this Node is composed with Voicing functionality
+        // @public (read-only, scenery-internal) - flag indicating that this Node is composed with Voicing functionality
         this.voicing = true;
 
         // @private {string|null} - The response to be spoken for this Node when speaking names. This is usually
         // the accessible name for the Node, typically spoken on focus and on interaction, labelling what the object is.
         this._voicingNameResponse = null;
 
-        // @private {string|null} - The response to be spoken for this node when speaking object changes. This is
-        // usually the response describing what changes about an object in response to interaction.
+        // @private {string|null} - The response to be spoken for this node when speaking about object changes. This
+        // is usually the state information directly associated with this Node, such as its current input value.
         this._voicingObjectResponse = null;
 
         // @private {string|null} - The response to be spoken for this node when speaking about context changes.
-        // This is usually a response that describes the contextual changes that have occurred after interacting
+        // This is usually a response that describes the surrounding changes that have occurred after interacting
         // with the object.
         this._voicingContextResponse = null;
 
@@ -89,11 +101,14 @@ const Voicing = {
 
         // @private {UtteranceQueue} - The utteranceQueue that responses for this Node will be spoken through.
         // By default, it will go through the singleton voicingUtteranceQueue, but you may need separate
-        // UtteranceQueues for different areas of content in your application.
+        // UtteranceQueues for different areas of content in your application. For example, Voicing and
+        // the default voicingUtteranceQueue may be disabled, but you could still want some speech to come through
+        // while user is changing preferences or other settings.
         this._voicingUtteranceQueue = null;
 
         // {Object} - A collection of response patterns that are used to collect the responses of this Voicing Node
-        // with voicingManager. See VoicingResponsePatterns for more details.
+        // with voicingManager. Controls the order of the Voicing responses and even punctuation used when responses
+        // are assembled into final content for the UtteranceQueue. See VoicingResponsePatterns for more details.
         this._voicingResponsePatterns = VoicingResponsePatterns.DEFAULT_RESPONSE_PATTERNS;
 
         // @private {Object} - Input listener that speaks content on focus. This is the only input listener added
@@ -108,21 +123,23 @@ const Voicing = {
         };
         this.addInputListener( this.speakContentOnFocusListener );
 
+        // support passing options through directly on initialize
         if ( options ) {
           this.mutate( _.pick( options, VOICING_OPTION_KEYS ) );
         }
       },
 
       /**
-       * Speak all responses assigned to this Node. Options allow you to override a response for the particular case,
-       * or assign an Utterance to control the flow of this response.
-       *
-       * to tap into the responses you want heard.
+       * Speak all responses assigned to this Node. Options allow you to override a responses for this particular
+       * speech request. Each response is only spoken if the associated Property of voicingManager is true. If
+       * all are Properties are false, nothing will be spoken.
        * @public
        *
        * @param {Object} [options]
        */
       voicingSpeakFullResponse( options ) {
+
+        // options are passed along to collectAndSpeakResponse, see that function for additional options
         options = merge( {
           nameResponse: this._voicingNameResponse,
           objectResponse: this._voicingObjectResponse,
@@ -134,14 +151,27 @@ const Voicing = {
       },
 
       /**
-       * Speak the provided responses that you pass in with options. Note that this will NOT speak the name, object,
-       * context, or hint responses assigned to this node by default. If you want to speak the responses assigned
-       * to this Node, use voicingSpeakFullResponse.
+       * Speak ONLY the provided responses that you pass in with options. This will NOT speak the name, object,
+       * context, or hint responses assigned to this node by default. But it allows for clarity at usages so it is
+       * clear that you are only requesting certain responses. If you want to speak all of the responses assigned
+       * to this Node, use voicingSpeakFullResponse().
+       *
+       * Each response will only be spoken if the Properties of voicingManager are true. If all of those are false,
+       * nothing will be spoken.
        * @public
        *
        * @param {Object} [options]
        */
       voicingSpeakResponse( options ) {
+
+        // options are passed along to collectAndSpeakResponse, see that function for additional options
+        options = merge( {
+          nameResponse: null,
+          objectResponse: null,
+          contextResponse: null,
+          hintResponse: null
+        }, options );
+
         this.collectAndSpeakResponse( options );
       },
 
@@ -150,6 +180,8 @@ const Voicing = {
        * @param options
        */
       voicingSpeakNameResponse( options ) {
+
+        // options are passed along to collectAndSpeakResponse, see that function for additional options
         options = merge( {
           nameResponse: this._voicingNameResponse
         }, options );
@@ -164,6 +196,8 @@ const Voicing = {
        * @param {Object} [options]
        */
       voicingSpeakObjectResponse( options ) {
+
+        // options are passed along to collectAndSpeakResponse, see that function for additional options
         options = merge( {
           objectResponse: this._voicingObjectResponse
         }, options );
@@ -178,6 +212,8 @@ const Voicing = {
        * @param {Object} [options]
        */
       voicingSpeakContextResponse( options ) {
+
+        // options are passed along to collectAndSpeakResponse, see that function for additional options
         options = merge( {
           contextResponse: this._voicingContextResponse
         }, options );
@@ -193,6 +229,8 @@ const Voicing = {
        * @param {Object} [options]
        */
       voicingSpeakHintResponse( options ) {
+
+        // options are passed along to collectAndSpeakResponse, see that function for additional options
         options = merge( {
           hintResponse: this._voicingHintResponse
         }, options );
@@ -202,7 +240,9 @@ const Voicing = {
 
       /**
        * Collect responses with the voicingManager and speak the output with an UtteranceQueue.
-       * @param options
+       * @protected
+       *
+       * @param {Object} [options]
        */
       collectAndSpeakResponse( options ) {
         options = merge( {
@@ -220,7 +260,6 @@ const Voicing = {
         }, options );
 
         const response = voicingManager.collectResponses( options );
-        console.log( response );
 
         if ( options.utterance ) {
           options.utterance.alert = response;
@@ -232,8 +271,26 @@ const Voicing = {
       },
 
       /**
+       * Use the provided function to create content to speak in response to Input. The content then added to the
+       * back of the voicing utterance queue.
+       * @protected
+       *
+       * @param {null|AlertableDef} content
+       */
+      speakContent( content ) {
+
+        // don't send to utteranceQueue if response is empty
+        if ( content ) {
+          const utteranceQueue = this.utteranceQueue || voicingUtteranceQueue;
+          utteranceQueue.addToBack( content );
+        }
+      },
+
+      /**
        * Sets the voicingNameResponse for this Node. This is usually the label of the element and is spoken
-       * when the object receives input.
+       * when the object receives input. When requesting speech, this will only be spoken if
+       * voicingManager.namesProperty is set to true.
+       *
        * @public
        *
        * @param {string|null} response
@@ -255,7 +312,9 @@ const Voicing = {
       get voicingNameResponse() { return this.getVoicingNameResponse(); },
 
       /**
-       * Set the object response for this Node.
+       * Set the object response for this Node. This is usually the state information associated with this Node, such
+       * as its current input value. When requesting speech, this will only be heard when
+       * voicingManager.objectChangesProperty is set to true.
        * @public
        *
        * @param {string|null} response
@@ -277,7 +336,9 @@ const Voicing = {
       get voicingObjectResponse() { return this.getVoicingObjectResponse(); },
 
       /**
-       * Set the context response for this Node.
+       * Set the context response for this Node. This is usually the content that describes what has happened in
+       * the surrounding application in response to interaction with this Node. When requesting speech, this will
+       * only be heard if voicingManager.contextChangesProperty is set to true.
        * @public
        *
        * @param {string|null} response
@@ -299,7 +360,8 @@ const Voicing = {
       get voicingContextResponse() { return this.getVoicingContextResponse(); },
 
       /**
-       * Sets the hint response for this Node.
+       * Sets the hint response for this Node. This is usually a response that describes how to interact with this Node.
+       * When requesting speech, this will only be spoken when voicingManager.hintsProperty is set to true.
        * @public
        *
        * @param {string|null} response
@@ -394,22 +456,6 @@ const Voicing = {
       disposeVoicing() {
         this.removeInputListener( this.speakContentOnFocusListener );
         this.disposeMouseHighlighting();
-      },
-
-      /**
-       * Use the provided function to create content to speak in response to Input. The content then added to the
-       * back of the voicing utterance queue.
-       * @protected
-       *
-       * @param {null|AlertableDef} content
-       */
-      speakContent( content ) {
-
-        // don't send to utteranceQueue if response is empty
-        if ( content ) {
-          const utteranceQueue = this.utteranceQueue || voicingUtteranceQueue;
-          utteranceQueue.addToBack( content );
-        }
       }
     } );
   }
