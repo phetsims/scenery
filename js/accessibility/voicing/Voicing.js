@@ -290,7 +290,7 @@ const Voicing = {
       /**
        * Sets the voicingNameResponse for this Node. This is usually the label of the element and is spoken
        * when the object receives input. When requesting speech, this will only be spoken if
-       * voicingManager.namesProperty is set to true.
+       * voicingManager.nameResponsesEnabledProperty is set to true.
        *
        * @public
        *
@@ -315,7 +315,7 @@ const Voicing = {
       /**
        * Set the object response for this Node. This is usually the state information associated with this Node, such
        * as its current input value. When requesting speech, this will only be heard when
-       * voicingManager.objectChangesProperty is set to true.
+       * voicingManager.objectResponsesEnabledProperty is set to true.
        * @public
        *
        * @param {string|null} response
@@ -339,7 +339,7 @@ const Voicing = {
       /**
        * Set the context response for this Node. This is usually the content that describes what has happened in
        * the surrounding application in response to interaction with this Node. When requesting speech, this will
-       * only be heard if voicingManager.contextChangesProperty is set to true.
+       * only be heard if voicingManager.contextResponsesEnabledProperty is set to true.
        * @public
        *
        * @param {string|null} response
@@ -362,7 +362,8 @@ const Voicing = {
 
       /**
        * Sets the hint response for this Node. This is usually a response that describes how to interact with this Node.
-       * When requesting speech, this will only be spoken when voicingManager.hintsProperty is set to true.
+       * When requesting speech, this will only be spoken when voicingManager.hintResponsesEnabledProperty is set to
+       * true.
        * @public
        *
        * @param {string|null} response
