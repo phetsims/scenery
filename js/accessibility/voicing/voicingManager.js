@@ -75,11 +75,7 @@ class VoicingManager {
 
       // {string|null} - If this is provided, it is the ONLY spoken string, and it is always spoken regardless of
       // speech output levels selected by the user as long as speech is enabled.
-      overrideResponse: null,
-
-      // {boolean} When true and context changes are emitting, then ignore the objectResponse provided (because it is
-      // covered by the context response). This is a common case while developing voicing strings.
-      contextIncludesObjectResponse: false
+      overrideResponse: null
     }, options );
 
     VoicingResponsePatterns.validatePatternKeys( options.responsePatterns );
