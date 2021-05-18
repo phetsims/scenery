@@ -168,6 +168,9 @@
     <div class="sublink"><a href="#voicing-api-response-patterns">voicingResponsePatterns</a></div>
 
     <div class="navlink"><a href="#code-examples">Code Examples</a></div>
+
+    <div class="navlink"><a href="#reading-blocks-heading">Reading Blocks</a></div>
+    <div class="navlink"><a href="#mouse-highlighting-heading">Mouse Highlighting</a></div>
   </div>
   <div class="span6">
 
@@ -304,12 +307,6 @@
       of patterns.
     </p>
 
-    <h2>Mouse Highlighting</h2>
-    <p>Describe Mouse Highlighting</p>
-
-    <h2>Reading Blocks</h2>
-    <p>Describe reading blocks</p>
-
     <p>List out the API associated of ReadingBlock</p>
     <ul></ul>
 
@@ -440,6 +437,40 @@
         /*END*/
       } );
     </script>
+
+    <h2 id="reading-blocks-heading">Reading Blocks</h2>
+    <p>
+      "Reading Blocks" are Nodes that use Voicing, but have special behavior and a common set
+      of Voicing options. Reading Blocks are generally used for graphical objects that are not
+      otherwise interactive, but have some Voicing content (like Text, for example). Reading Blocks
+      also have the following characteristics.
+    </p>
+    <ul>
+      <li>Reading Blocks have a unique focus highlight to indicate they can be clicked to hear content.</li>
+      <li>Reading Blocks are added to the focus order when Voicing is enabled.</li>
+      <li>While Reading Block content is being spoken, a special highlight will appear around the content.</li>
+    </ul>
+
+    <p>
+      Reading Blocks are implemented with a Trait called <code>ReadingBlock.js</code>, which extends
+      <code>Voicing.js</code>, and so it can be used with scenery <code>Node</code>s.
+    </p>
+
+    <h2 id="mouse-highlighting-heading">Mouse Highlighting</h2>
+    <p>
+      The Voicing feature supports highlights that appear on mouse hover. This highlight generally
+      indicates to the user that a component can receive input of some kind. This could include either
+      components that are naturally interactive or it could include components that have become
+      interactive purely to support Voicing content, like Reading Blocks.
+    </p>
+
+    <p>
+      Mouse Highlighting is implemented with a trait called <code>MouseHighlighting.js</code> which
+      scenery <code>Node</code>s can be composed with. <code>MouseHighlighting.js</code> will add
+      an input listener to the Node to activate the Display's FocusOverlay when it is time to show
+      a highlight. <code>MouseHighlighting.js</code> is extended by <code>Voicing.js</code>, so
+      all Nodes that use Voicing support Mouse Highlighting.
+    </p>
   </div>
 </div>
 
