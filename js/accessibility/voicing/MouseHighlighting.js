@@ -34,8 +34,8 @@ const MouseHighlighting = {
        */
       initializeMouseHighlighting() {
 
-        // @private {Display[]} - List of Displays that this Node is attached to. Mouse input will
-        // activate the HighlightOverlay for each Display.
+        // @private {Display[]} - List of Displays that this Node is attached to. Input listeners on this Node
+        // may activate the highlights of HighlightOverlay to show a highlight around this Node.
         this._displays = [];
 
         // @private {function} - listener that updates the list of Displays when a new Instance for this Node is
@@ -43,9 +43,9 @@ const MouseHighlighting = {
         this.changedInstanceListener = this.onInstancesChanged.bind( this );
         this.changedInstanceEmitter.addListener( this.changedInstanceListener );
 
-        // @private - input listener to update activation of HighlightOverlay upon pointer mouse input, using exit
-        // and enter because the target of the event is this MouseHighlighting Node and we don't want to respond
-        // to bubbled events
+        // @private - Input listener to activate the HighlightOverlay upon pointer mouse input. Uses exit
+        // and enter instead of over and out because we do not want this to fire from bubbling. The highlight
+        // should be around this Node when it receives input.
         this.enterExitListener = {
           enter: this.onPointerEntered.bind( this ),
           exit: this.onPointerExited.bind( this )
@@ -70,12 +70,12 @@ const MouseHighlighting = {
        * @param {boolean} added - Was an instance added or removed?
        */
       onInstancesChanged( instance, added ) {
-        const includesDisplay = _.includes( this._displays, instance.display );
-        if ( added && !includesDisplay ) {
+        const indexOfDisplay = this._displays.indexOf( instance.display );
+        if ( added && indexOfDisplay < 0 ) {
           this._displays.push( instance.display );
         }
-        else if ( !added && includesDisplay ) {
-          this._displays.splice( this._displays.indexOf( instance.display, 1 ) );
+        else if ( !added && indexOfDisplay >= 0 ) {
+          this._displays.splice( indexOfDisplay, 1 );
         }
       },
 
@@ -90,11 +90,8 @@ const MouseHighlighting = {
         for ( let i = 0; i < this._displays.length; i++ ) {
           const display = this._displays[ i ];
 
-          const highlightingNode = findMouseHighlightingNode( event.trail );
-          const highlightTrail = event.trail.subtrailTo( highlightingNode );
-
-          if ( display.pointerFocusProperty.value === null || !highlightTrail.equals( display.pointerFocusProperty.value.trail ) ) {
-            display.pointerFocusProperty.set( new Focus( display, highlightTrail ) );
+          if ( display.pointerFocusProperty.value === null || !event.trail.equals( display.pointerFocusProperty.value.trail ) ) {
+            display.pointerFocusProperty.set( new Focus( display, event.trail ) );
           }
         }
       },
@@ -114,25 +111,6 @@ const MouseHighlighting = {
       }
     } );
   }
-};
-
-/**
- * Helper function to find the Node that mixes MouseHighlighting from the provided Trail. We search backwards
- * up the trail so that the leaf-most Node of the event receives the highlighting.
- *
- * @param {Trail} trail
- * @returns {null|Trail}
- */
-const findMouseHighlightingNode = trail => {
-  let highlightingNode = null;
-  for ( let i = trail.length - 1; i > 0; i-- ) {
-    if ( trail.nodes[ i ].voicing ) {
-      highlightingNode = trail.nodes[ i ];
-      break;
-    }
-  }
-
-  return highlightingNode;
 };
 
 scenery.register( 'MouseHighlighting', MouseHighlighting );

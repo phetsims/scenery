@@ -12,6 +12,7 @@ import IOType from '../../../tandem/js/types/IOType.js';
 import scenery from '../scenery.js';
 
 class Focus {
+
   /**
    * @param {Display} display - Display containing the focused node
    * @param {Trail} trail - Trail to the focused node

@@ -1,12 +1,9 @@
 // Copyright 2021, University of Colorado Boulder
 
 /**
- * Manages "voicing" content as it is read with speech synthesis. Output is categorized into
- *    "Object Responses" - Speech describing the object as it receives interaction
- *    "Context Responses" - Speech describing surrounding contextual changes in response to user interaction
- *    "Hints" - General hint content to guide a particular user interaction
- *
- * Output from each of these categories can be separately enabled and disabled.
+ * Manages output of responses for the Voicing feature. First, see Voicing.js for a description of what that includes.
+ * This singleton is responsible for controlling when responses of each category are spoken when speech is
+ * requested for a Node composed with Voicing.
  *
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
@@ -20,22 +17,22 @@ import VoicingResponsePatterns from './VoicingResponsePatterns.js';
 class VoicingManager {
   constructor() {
 
-    // @public {BooleanProperty} - whether or not object names are read as input lands on various components
-    this.namesProperty = new BooleanProperty( true );
+    // @public {BooleanProperty} - whether or not component names are read as input lands on various components
+    this.nameResponsesEnabledProperty = new BooleanProperty( true );
 
     // @public {BooleanProperty} - whether or not "Object Responses" are read as interactive components change
-    this.objectChangesProperty = new BooleanProperty( true );
+    this.objectResponsesEnabledProperty = new BooleanProperty( true );
 
-    // @public {BooleanProperty} - whether or not "Context Responses" are read as simulation objects change
-    this.contextChangesProperty = new BooleanProperty( true );
+    // @public {BooleanProperty} - whether or not "Context Responses" are read as inputs receive interaction
+    this.contextResponsesEnabledProperty = new BooleanProperty( true );
 
-    // @public {BooleanProperty} - whether or not "Hints" are read to the user
-    this.hintsProperty = new BooleanProperty( false );
+    // @public {BooleanProperty} - whether or not "Hints" are read to the user in response to certain input
+    this.hintResponsesEnabledProperty = new BooleanProperty( false );
 
-    // @public {BooleanProperty} - controls whether Voicing is enabled in a "main window" area of the application.
-    // This is different from whether voicing is enabled in general. This way it is possible to disable voicing
-    // for the main content of the application while still allowing it to come through for surrounding application
-    // controls.
+    // @public {BooleanProperty} - Controls whether Voicing is enabled in a "main window" area of the application.
+    // This supports the ability to disable Voicing for the important screen content of your simulation while keeping
+    // Voicing for surrounding UI components enabled. At the time of this writing, all "Reading Blocks" are disabled
+    // when Voicing for the "main window" is disabled. See ReadingBlock.js for more information.
     this.mainWindowVoicingEnabledProperty = new BooleanProperty( true );
   }
 
@@ -62,7 +59,7 @@ class VoicingManager {
       contextResponse: null,
 
       // {string|null} - spoken when interaction hints are enabled
-      interactionHint: null,
+      hintResponse: null,
 
       // {boolean} - if true, the objectResponse, contextResponse, and interactionHint will all be spoken
       // regardless of the values of the Properties of voicingManager
@@ -71,23 +68,15 @@ class VoicingManager {
       // {Object} - The collection of string patterns to use when assembling responses based on which
       // responses are provided and which voicingManager Properties are true. See VoicingResponsePatterns
       // if you do not want to use the default.
-      responsePatterns: VoicingResponsePatterns.DEFAULT_RESPONSE_PATTERNS,
-
-      // {string|null} - If this is provided, it is the ONLY spoken string, and it is always spoken regardless of
-      // speech output levels selected by the user as long as speech is enabled.
-      overrideResponse: null,
-
-      // {boolean} When true and context changes are emitting, then ignore the objectResponse provided (because it is
-      // covered by the context response). This is a common case while developing voicing strings.
-      contextIncludesObjectResponse: false
+      responsePatterns: VoicingResponsePatterns.DEFAULT_RESPONSE_PATTERNS
     }, options );
 
     VoicingResponsePatterns.validatePatternKeys( options.responsePatterns );
 
-    const usesNames = options.nameResponse && ( this.namesProperty.get() || options.ignoreProperties );
-    const usesObjectChanges = options.objectResponse && ( this.objectChangesProperty.get() || options.ignoreProperties );
-    const usesContextChanges = options.contextResponse && ( this.contextChangesProperty.get() || options.ignoreProperties );
-    const usesInteractionHints = options.hintResponse && ( this.hintsProperty.get() || options.ignoreProperties );
+    const usesNames = options.nameResponse && ( this.nameResponsesEnabledProperty.get() || options.ignoreProperties );
+    const usesObjectChanges = options.objectResponse && ( this.objectResponsesEnabledProperty.get() || options.ignoreProperties );
+    const usesContextChanges = options.contextResponse && ( this.contextResponsesEnabledProperty.get() || options.ignoreProperties );
+    const usesInteractionHints = options.hintResponse && ( this.hintResponsesEnabledProperty.get() || options.ignoreProperties );
 
     // generate the key to find the string pattern to use from options.responsePatterns
     let responses = '';
