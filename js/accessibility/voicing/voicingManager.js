@@ -32,10 +32,10 @@ class VoicingManager {
     // @public {BooleanProperty} - whether or not "Hints" are read to the user
     this.hintsProperty = new BooleanProperty( false );
 
-    // @public {BooleanProperty} - controls whether Voicing is enabled in a "main window" area of the application.
-    // This is different from whether voicing is enabled in general. This way it is possible to disable voicing
-    // for the main content of the application while still allowing it to come through for surrounding application
-    // controls.
+    // @public {BooleanProperty} - Controls whether Voicing is enabled in a "main window" area of the application.
+    // This supports the ability to disable Voicing for the important screen content of your simulation while keeping
+    // Voicing for surrounding UI components enabled. At the time of this writing, all "Reading Blocks" are disabled
+    // when Voicing for the "main window" is disabled. See ReadingBlock.js for more information.
     this.mainWindowVoicingEnabledProperty = new BooleanProperty( true );
   }
 

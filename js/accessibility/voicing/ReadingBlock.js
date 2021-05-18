@@ -3,13 +3,14 @@
 /**
  * A trait that extends Voicing, adding support for "Reading Blocks" of the voicing feature. "Reading Blocks" are
  * UI components in the application that have unique functionality with respect to Voicing.
+ *
  *  - Reading Blocks are generally around graphical objects that are not otherwise interactive (like Text).
  *  - They have a unique focus highlight to indicate they can be clicked on to hear voiced content.
- *  - When activated with press or click the web synth will speak about the selected component.
+ *  - When activated with press or click ReadingBlock content is spoken.
+ *  - ReadingBlock content is always spoken if the webSpeaker is enabled, ignoring Properties of voicingManager.
  *  - While speaking, a yellow highlight will appear over the Node composed with ReadingBlock.
  *  - While voicing is enabled, reading blocks will be added to the focus order.
  *
- *  NOTE: This feature is in active development and is not ready for production.
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
@@ -61,25 +62,30 @@ const ReadingBlock = {
         // of button so that it is added to the focus order.
         this._readingBlockTagName = 'button';
 
-        // @private {string|null}
+        // @private {string|null} - The content for this ReadingBlock that will be spoken by SpeechSynthesis when
+        // the ReadingBlock receives input. ReadingBlocks don't use the categories of Voicing content provided by
+        // Voicing.js because ReadingBlocks are always spoken regardless of the Properties of voicingManager.
         this._readingBlockContent = null;
 
         // @private {string} - The tagName to apply to the Node when voicing is disabled.
         this._readingBlockDisabledTagName = 'p';
 
+        // @private {function} - Updates the hit bounds of this Node when the local bounds change.
         this.localBoundsChangedListener = this.onLocalBoundsChanged.bind( this );
         this.localBoundsProperty.link( this.localBoundsChangedListener );
 
-        // @private {DerivedProperty.<boolean>} - controls whether or not Reading Blocks should be focusable from
-        // user settings
+        // @private {DerivedProperty.<boolean>} - Controls whether or not the ReadingBlock should be focusable. At
+        // the time of this writing, that is true when the webSpeaker is enabled and when Voicing is enabled for the
+        // "main content" of the application. See voicingManager for a description of
+        // voicingManager.mainWindowVoicingEnabledProperty.
         this.readingBlockFocusableProperty = new DerivedProperty( [
           webSpeaker.enabledProperty,
-          voicingManager.mainWindowVoicingEnabledProperty ], ( enabled, mainWindowEnabled ) => {
+          voicingManager.mainWindowVoicingEnabledProperty
+        ], ( enabled, mainWindowEnabled ) => {
           return enabled && mainWindowEnabled;
         } );
 
-        // by default, ReadingBlocks don't use Voicing "responses" because they should always be readable as long
-        // as voicing is enabled. ReadingBlock content should always be spoken in response to these events.
+        // @private {Object} - Triggers activation of the ReadingBlock, requesting speech of its content.
         this.readingBlockInputListener = {
           focus: event => this.speakReadingBlockContent( event ),
           down: event => this.speakReadingBlockContent( event ),
@@ -91,6 +97,7 @@ const ReadingBlock = {
         this.readingBlockFocusableChangeListener = this.onReadingBlockFocusableChanged.bind( this );
         this.readingBlockFocusableProperty.link( this.readingBlockFocusableChangeListener );
 
+        // support passing options through initialize
         if ( options ) {
           this.mutate( _.pick( options, READING_BLOCK_OPTION_KEYS ) );
         }
@@ -105,6 +112,12 @@ const ReadingBlock = {
        */
       setReadingBlockTagName( tagName ) {
         this._readingBlockTagName = tagName;
+
+        // update the tagName for the ReadingBlock if we have been initialized, it is easy to pass options
+        // to a supertype before initializeReadingBlock is called
+        if ( this.readingBlockFocusableProperty ) {
+          this.onReadingBlockFocusableChanged( this.readingBlockFocusableProperty.value );
+        }
       },
       set readingBlockTagName( tagName ) { this.setReadingBlockTagName( tagName ); },
 
@@ -123,7 +136,7 @@ const ReadingBlock = {
        * Sets the content that should be read whenever the ReadingBlock receives input that initiates speech.
        * @public
        *
-       * @param {string|null}
+       * @param {string|null} content
        */
       setReadingBlockContent( content ) {
         this._readingBlockContent = content;
@@ -132,6 +145,8 @@ const ReadingBlock = {
 
       /**
        * Gets the content that is spoken whenever the ReadingBLock receives input that would initiate speech.
+       * @public
+       *
        * @returns {string|null}
        */
       getReadingBlockContent() {
@@ -160,7 +175,9 @@ const ReadingBlock = {
       },
 
       /**
+       * Update the hit areas for this Node whenever the bounds change.
        * @private
+       *
        * @param localBounds
        */
       onLocalBoundsChanged( localBounds ) {
