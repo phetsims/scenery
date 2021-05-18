@@ -1,12 +1,9 @@
 // Copyright 2021, University of Colorado Boulder
 
 /**
- * Manages "voicing" content as it is read with speech synthesis. Output is categorized into
- *    "Object Responses" - Speech describing the object as it receives interaction
- *    "Context Responses" - Speech describing surrounding contextual changes in response to user interaction
- *    "Hints" - General hint content to guide a particular user interaction
- *
- * Output from each of these categories can be separately enabled and disabled.
+ * Manages output of responses for the Voicing feature. First, see Voicing.js for a description of what that includes.
+ * This singleton is responsible for controlling when responses of each category are spoken when speech is
+ * requested for a Node composed with Voicing.
  *
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
