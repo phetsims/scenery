@@ -6296,6 +6296,7 @@ class Node extends PhetioObject {
 
   /**
    * @private
+   * @param {Display[]} displays
    * @returns {Display[]}
    */
   getRecursiveConnectedDisplays( displays ) {
