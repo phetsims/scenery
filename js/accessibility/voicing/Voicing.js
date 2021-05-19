@@ -94,8 +94,7 @@ const Voicing = {
         // the application.
         this._voicingHintResponse = null;
 
-        // REVIEW: Update doc to apply to NAME if applicable, or state that Name is not part of this explicitly, https://github.com/phetsims/scenery/issues/1223
-        // @private {boolean} - Controls whether or not object, context, and hint responses are controlled
+        // @private {boolean} - Controls whether or not name, object, context, and hint responses are controlled
         // by voicingManager Properties. If true, all responses will be spoken when requested, regardless
         // of these Properties. This is often useful for surrounding UI components where it is important
         // that information be heard even when certain responses have been disabled.
