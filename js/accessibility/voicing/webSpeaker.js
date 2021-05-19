@@ -146,20 +146,6 @@ class WebSpeaker {
   }
 
   /**
-   * Get a reference to the DerivedProperty controlling whether speech is allowed.
-   * @public
-   *
-   * REVIEW: Seems like a superfluous getter to me. Why would anyone want access to this? https://github.com/phetsims/scenery/issues/1223
-   *
-   * @returns {DerivedProperty}
-   */
-  getCanSpeakProperty() {
-    return this._canSpeakProperty;
-  }
-
-  get canSpeakProperty() { return this.getCanSpeakProperty(); }
-
-  /**
    * When we can no longer speak, cancel all speech to silence everything.
    * @private
    *
