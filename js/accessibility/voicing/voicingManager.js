@@ -61,8 +61,7 @@ class VoicingManager {
       // {string|null} - spoken when interaction hints are enabled
       hintResponse: null,
 
-      // REVIEW: add in nameRespones if applicable, https://github.com/phetsims/scenery/issues/1223
-      // {boolean} - if true, the objectResponse, contextResponse, and interactionHint will all be spoken
+      // {boolean} - if true, the nameResponse, objectResponse, contextResponse, and interactionHint will all be spoken
       // regardless of the values of the Properties of voicingManager
       ignoreProperties: false,
 
