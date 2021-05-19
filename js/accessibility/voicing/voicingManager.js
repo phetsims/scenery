@@ -77,17 +77,7 @@ class VoicingManager {
     const usesObjectChanges = options.objectResponse && ( this.objectResponsesEnabledProperty.get() || options.ignoreProperties );
     const usesContextChanges = options.contextResponse && ( this.contextResponsesEnabledProperty.get() || options.ignoreProperties );
     const usesInteractionHints = options.hintResponse && ( this.hintResponsesEnabledProperty.get() || options.ignoreProperties );
-
-    // generate the key to find the string pattern to use from options.responsePatterns
-    // REVIEW: Instead of hard coded strings, I think that constants in VoicingResponsePatterns.js makes more sense. Or maybe even a factored out function like VoicingResponsePatterns.combine() instead of a manual `concat` call.
-    let responses = '';
-    if ( usesNames ) { responses = responses.concat( 'NAME'.concat( '_' ) ); }
-    if ( usesObjectChanges ) { responses = responses.concat( 'OBJECT'.concat( '_' ) ); }
-    if ( usesContextChanges ) { responses = responses.concat( 'CONTEXT'.concat( '_' ) ); }
-    if ( usesInteractionHints ) { responses = responses.concat( 'HINT'.concat( '_' ) ); }
-
-    // Will get rid of the trailing underscore
-    const responseKey = _.camelCase( responses );
+    const responseKey = VoicingResponsePatterns.createPatternKey( usesNames, usesObjectChanges, usesContextChanges, usesInteractionHints );
 
     let finalResponse = '';
     if ( responseKey ) {

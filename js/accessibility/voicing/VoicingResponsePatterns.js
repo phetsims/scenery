@@ -18,6 +18,12 @@
 import merge from '../../../../phet-core/js/merge.js';
 import scenery from '../../scenery.js';
 
+// constants
+const NAME_KEY = 'NAME';
+const OBJECT_KEY = 'OBJECT';
+const CONTEXT_KEY = 'CONTEXT';
+const HINT_KEY = 'HINT';
+
 const VoicingResponsePatterns = {
 
   // Default order and punctuation for Voicing responses.
@@ -65,6 +71,28 @@ const VoicingResponsePatterns = {
   validatePatternKeys( object ) {
     assert && assert( _.difference( Object.keys( object ), Object.keys( VoicingResponsePatterns.DEFAULT_RESPONSE_PATTERNS ) ).length === 0,
       'keys for the created patterns will not work, they must match DEFAULT_RESPONSE_PATTERNS exactly.' );
+  },
+
+  /**
+   * Create a key to be used to get a string pattern for a Voicing response. Assumes keys
+   * are like those listed in DEFAULT_RESPONSE_PATTERNS.
+   * @public
+   *
+   * @param {boolean} includeName
+   * @param {boolean} includeObject
+   * @param {boolean} includeContext
+   * @param {boolean} includeHint
+   * @returns {string} - string key, could be empty
+   */
+  createPatternKey( includeName, includeObject, includeContext, includeHint ) {
+    let key = '';
+    if ( includeName ) { key = key.concat( NAME_KEY.concat( '_' ) ); }
+    if ( includeObject ) { key = key.concat( OBJECT_KEY.concat( '_' ) ); }
+    if ( includeContext ) { key = key.concat( CONTEXT_KEY.concat( '_' ) ); }
+    if ( includeHint ) { key = key.concat( HINT_KEY.concat( '_' ) ); }
+
+    // convert to camel case and trim any underscores at the end of the string
+    return _.camelCase( key );
   }
 };
 
