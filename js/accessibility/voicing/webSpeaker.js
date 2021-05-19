@@ -264,8 +264,6 @@ class WebSpeaker {
    *   that voicing has been successfully turned off).
    * @public
    *
-   * // Instead of this function on the announcer, I'd rather build this functionality into the UtteranceQueue. Like a synchronous bypass around previously queued items. https://github.com/phetsims/scenery/issues/1223
-   *
    * @param {string} utterThis
    */
   speakImmediately( utterThis ) {
