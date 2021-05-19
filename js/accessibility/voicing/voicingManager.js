@@ -5,6 +5,10 @@
  * This singleton is responsible for controlling when responses of each category are spoken when speech is
  * requested for a Node composed with Voicing.
  *
+ * // REVIEW: I'm unsure if this type really needs to be here. Does it belong in scenery? Does it need to be a singleton?
+ * // Why can't it be combined in another location like webSpeaker or something else. I guess my feelings are that it
+ * // doesn't do that much, but that may not be a good enough reason to try to change or refactor it. Thoughts? https://github.com/phetsims/scenery/issues/1223
+ *
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
