@@ -44,6 +44,7 @@ class VoicingManager {
    * @public
    *
    * @param {Object} [options]
+   * REVIEW: Missing return doc, https://github.com/phetsims/scenery/issues/1223
    */
   collectResponses( options ) {
 

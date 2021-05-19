@@ -18,6 +18,13 @@
  * exception is on the 'focus' event. Every Node that composes Voicing will speak its responses by when it
  * receives focus.
  *
+ * // REVIEW: I'm not yet sure how Voicing is going to be used just yet, but to me it feels pretty strange that the
+ * responses are just strings. I'm trying to think about how we could ever have AccessibleValueHandler.a11yCreateAriaValueText
+ * be a string instead of a function that returns a string. Have you thought about expanding the API so that you can provide
+ * a function instead of just a string? I worry that if they are just strings, then no one will ever use those values, and
+ * will instead just always provide their own strings via override `options` to "collect and speak" functions.
+ * https://github.com/phetsims/scenery/issues/1223
+ *
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
@@ -116,7 +123,7 @@ const Voicing = {
         // by Voicing, but it is the one that is consistent for all Voicing nodes. On focus, speak the name, object
         // response, and interaction hint.
         this.speakContentOnFocusListener = {
-          focus: event => {
+          focus: () => {
             this.voicingSpeakFullResponse( {
               contextResponse: null
             } );
@@ -187,6 +194,12 @@ const Voicing = {
           nameResponse: this._voicingNameResponse
         }, options );
 
+        // REVIEW: Is this dumb to add to each of these methods? What is more buggy, to use voicingSpeakNameResponse() with non-name responses, or to be overly strict for no real reason? https://github.com/phetsims/scenery/issues/1223
+        // REVIEW: Another way to handle this is to update the doc to something like, "BY DEFAULT speak only the name response." That way the flexibility seems more like it is built into the function from the beginning.
+        // assert && assert( !options.objectResponse, 'only name response should be provided here.' );
+        // assert && assert( !options.contextResponse, 'only name response should be provided here.' );
+        // assert && assert( !options.hintResponse, 'only name response should be provided here.' );
+
         this.collectAndSpeakResponse( options );
       },
 
@@ -222,7 +235,6 @@ const Voicing = {
         this.collectAndSpeakResponse( options );
       },
 
-
       /**
        * Speak only the hint response assigned to this Node.
        * @public
@@ -241,7 +253,7 @@ const Voicing = {
 
       /**
        * Collect responses with the voicingManager and speak the output with an UtteranceQueue.
-       * @protected
+       * @protected // REVIEW: Would you expect subtype implementations of the Voicing trait to override this? I didn't see any usages of this, https://github.com/phetsims/scenery/issues/1223
        *
        * @param {Object} [options]
        */
@@ -249,7 +261,7 @@ const Voicing = {
         options = merge( {
 
           // {boolean} - whether or not this response should ignore the Properties of voicingManager
-          ignoreProperties: this._ignoreVoicingManagerProperties,
+          ignoreProperties: this._ignoreVoicingManagerProperties, // REVIEW: Wrong var name I believe: https://github.com/phetsims/scenery/issues/1223
 
           // {Object} - collection of string patterns to use with voicingManager.collectResponses, see
           // VoicingResponsePatterns for more information.
@@ -260,20 +272,19 @@ const Voicing = {
           utterance: null
         }, options );
 
-        const response = voicingManager.collectResponses( options );
+        let response = voicingManager.collectResponses( options );
 
+        // REVIEW: I rewrote this conditional, do you like it? https://github.com/phetsims/scenery/issues/1223
         if ( options.utterance ) {
           options.utterance.alert = response;
-          this.speakContent( options.utterance );
+          response = options.utterance;
         }
-        else {
-          this.speakContent( response );
-        }
+        this.speakContent( response );
       },
 
       /**
-       * Use the provided function to create content to speak in response to Input. The content then added to the
-       * back of the voicing utterance queue.
+       * Use the provided function to create content to speak in response to input. The content is then added to the
+       * back of the voicing UtteranceQueue.
        * @protected
        *
        * @param {null|AlertableDef} content
@@ -329,7 +340,7 @@ const Voicing = {
        * Gets the object response for this Node.
        * @public
        *
-       * @returns {string}
+       * @returns {string} // REVIEW: Or null right? https://github.com/phetsims/scenery/issues/1223
        */
       getVoicingObjectResponse() {
         return this._voicingObjectResponse;
@@ -438,6 +449,8 @@ const Voicing = {
       setVoicingUtteranceQueue( utteranceQueue ) {
         this._voicingUtteranceQueue = utteranceQueue;
       },
+
+      // REVIEW: This setter and the getter should be should be voicingUtteranceQueue, as there are potentially multiple utteranceQueues that a single Node could have reference to or use of. https://github.com/phetsims/scenery/issues/1223
       set utteranceQueue( utteranceQueue ) { this.setVoicingUtteranceQueue( utteranceQueue ); },
 
       /**
