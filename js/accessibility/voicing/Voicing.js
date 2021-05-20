@@ -256,7 +256,7 @@ const Voicing = {
         options = merge( {
 
           // {boolean} - whether or not this response should ignore the Properties of voicingManager
-          ignoreProperties: this._ignoreVoicingManagerProperties, // REVIEW: Wrong var name I believe: https://github.com/phetsims/scenery/issues/1223
+          ignoreProperties: this._voicingIgnoreVoicingManagerProperties,
 
           // {Object} - collection of string patterns to use with voicingManager.collectResponses, see
           // VoicingResponsePatterns for more information.
