@@ -248,7 +248,7 @@ const Voicing = {
 
       /**
        * Collect responses with the voicingManager and speak the output with an UtteranceQueue.
-       * @protected // REVIEW: Would you expect subtype implementations of the Voicing trait to override this? I didn't see any usages of this, https://github.com/phetsims/scenery/issues/1223
+       * @protected
        *
        * @param {Object} [options]
        */
