@@ -18,13 +18,6 @@
  * exception is on the 'focus' event. Every Node that composes Voicing will speak its responses by when it
  * receives focus.
  *
- * // REVIEW: I'm not yet sure how Voicing is going to be used just yet, but to me it feels pretty strange that the
- * responses are just strings. I'm trying to think about how we could ever have AccessibleValueHandler.a11yCreateAriaValueText
- * be a string instead of a function that returns a string. Have you thought about expanding the API so that you can provide
- * a function instead of just a string? I worry that if they are just strings, then no one will ever use those values, and
- * will instead just always provide their own strings via override `options` to "collect and speak" functions.
- * https://github.com/phetsims/scenery/issues/1223
- *
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
