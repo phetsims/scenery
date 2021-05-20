@@ -177,8 +177,11 @@ const Voicing = {
       },
 
       /**
-       * Speak only the name response assigned to this Node.
-       * @param options
+       * By default, speak the name response. But accepts all other responses through options. Respects voicingManager
+       * Properties, so the name response may not be spoken if voicingManager.nameResponseEnabledProperty is false.
+       * @public
+       *
+       * @param {Object} [options]
        */
       voicingSpeakNameResponse( options ) {
 
@@ -187,17 +190,12 @@ const Voicing = {
           nameResponse: this._voicingNameResponse
         }, options );
 
-        // REVIEW: Is this dumb to add to each of these methods? What is more buggy, to use voicingSpeakNameResponse() with non-name responses, or to be overly strict for no real reason? https://github.com/phetsims/scenery/issues/1223
-        // REVIEW: Another way to handle this is to update the doc to something like, "BY DEFAULT speak only the name response." That way the flexibility seems more like it is built into the function from the beginning.
-        // assert && assert( !options.objectResponse, 'only name response should be provided here.' );
-        // assert && assert( !options.contextResponse, 'only name response should be provided here.' );
-        // assert && assert( !options.hintResponse, 'only name response should be provided here.' );
-
         this.collectAndSpeakResponse( options );
       },
 
       /**
-       * Speak only the object response assigned to this Node.
+       * By default, speak the object response. But accepts all other responses through options. Respects voicingManager
+       * Properties, so the name response may not be spoken if voicingManager.objectResponseEnabledProperty is false.
        * @public
        *
        * @param {Object} [options]
@@ -213,7 +211,9 @@ const Voicing = {
       },
 
       /**
-       * Speak only the context response assigned to this Node.
+       * By default, speak the context response. But accepts all other responses through options. Respects
+       * voicingManager Properties, so the name response may not be spoken if
+       * voicingManager.contextResponseEnabledProperty is false.
        * @public
        *
        * @param {Object} [options]
@@ -229,7 +229,9 @@ const Voicing = {
       },
 
       /**
-       * Speak only the hint response assigned to this Node.
+       * By default, speak the hint response. But accepts all other responses through options. Respects
+       * voicingManager Properties, so the hint response may not be spoken if
+       * voicingManager.hintResponseEnabledProperty is false.
        * @public
        *
        * @param {Object} [options]
