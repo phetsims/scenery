@@ -334,7 +334,7 @@ const Voicing = {
        * Gets the object response for this Node.
        * @public
        *
-       * @returns {string} // REVIEW: Or null right? https://github.com/phetsims/scenery/issues/1223
+       * @returns {string|null}
        */
       getVoicingObjectResponse() {
         return this._voicingObjectResponse;
@@ -444,8 +444,7 @@ const Voicing = {
         this._voicingUtteranceQueue = utteranceQueue;
       },
 
-      // REVIEW: This setter and the getter should be should be voicingUtteranceQueue, as there are potentially multiple utteranceQueues that a single Node could have reference to or use of. https://github.com/phetsims/scenery/issues/1223
-      set utteranceQueue( utteranceQueue ) { this.setVoicingUtteranceQueue( utteranceQueue ); },
+      set voicingUtteranceQueue( utteranceQueue ) { this.setVoicingUtteranceQueue( utteranceQueue ); },
 
       /**
        * Gets the utteranceQueue through which voicing associated with this Node will be spoken.
