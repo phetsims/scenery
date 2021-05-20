@@ -269,7 +269,6 @@ const Voicing = {
 
         let response = voicingManager.collectResponses( options );
 
-        // REVIEW: I rewrote this conditional, do you like it? https://github.com/phetsims/scenery/issues/1223
         if ( options.utterance ) {
           options.utterance.alert = response;
           response = options.utterance;
