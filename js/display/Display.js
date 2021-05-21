@@ -337,6 +337,8 @@ class Display {
       tandem: options.tandem.createTandem( 'utteranceQueue' )
     } );
 
+    // REVIEW: I'm a bit overloaded on my ability to fully understand how highlights for reading blocks and mouse works, but do we really need both of these directly on each Display? Why is that? https://github.com/phetsims/scenery/issues/1223
+
     // @public {Property.<Focus|null>} - The Property that indicates where Focus is under the Pointer for the Voicing
     // feature. Nodes that compose Voicing can receive this Focus and a highlight may appear or speech may be
     // made depending on which features are enabled.

@@ -1,7 +1,7 @@
 // Copyright 2021, University of Colorado Boulder
 
 /**
- * A trait for Node that mixes functionality to support highlights that appear on hover with a mouse.
+ * A trait for Node that mixes functionality to support visual highlights that appear on hover with a mouse.
  *
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
@@ -12,6 +12,7 @@ import Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import Focus from '../Focus.js';
 
+// REVIEW: Would we want to name this like the designed feature, i.e. "InteractiveHighlights" ? https://github.com/phetsims/scenery/issues/1223
 const MouseHighlighting = {
 
   /**
@@ -30,12 +31,14 @@ const MouseHighlighting = {
     extend( proto, {
 
       /**
+       * @public
        * This should be called in the constructor to initialize MouseHighlighting.
        */
       initializeMouseHighlighting() {
 
         // @private {Display[]} - List of Displays that this Node is attached to. Input listeners on this Node
         // may activate the highlights of HighlightOverlay to show a highlight around this Node.
+        // REVIEW: Can we get this from the Node? Like with the new getConnectedDisplays(). If not please explain why we need our own list here.
         this._displays = [];
 
         // @private {function} - listener that updates the list of Displays when a new Instance for this Node is
@@ -68,6 +71,7 @@ const MouseHighlighting = {
        *
        * @param {Instance} instance
        * @param {boolean} added - Was an instance added or removed?
+       * // REVIEW: Likely rename this to singular "Instance" https://github.com/phetsims/scenery/issues/1223
        */
       onInstancesChanged( instance, added ) {
         const indexOfDisplay = this._displays.indexOf( instance.display );

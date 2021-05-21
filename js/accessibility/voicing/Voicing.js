@@ -41,6 +41,14 @@ const VOICING_OPTION_KEYS = [
 ];
 
 const Voicing = {
+
+  /**
+   * // REVIEW: I updated doc for this compose function, I think it is complete, can you do the same for other types? https://github.com/phetsims/scenery/issues/1223
+   * @public
+   * @trait {Node}
+   * @mixes {MouseHighlighting}
+   * @param {function(new:Node)} type - The type (constructor) whose prototype that is modified. Should be a Node class.
+   */
   compose( type ) {
     assert && assert( _.includes( inheritance( type ), Node ), 'Only Node subtypes should compose Voicing' );
 

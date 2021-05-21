@@ -139,6 +139,7 @@ class HighlightOverlay {
     } );
     this.focusRootNode.addChild( this.groupFocusHighlightParent );
 
+    // REVIEW: If you rename webSpeaker, hit this usage too https://github.com/phetsims/scenery/issues/1223
     // @private {Node} - The highlight shown around certain Nodes while the webSpeaker is speaking. For
     // Voicing Nodes that specify a voicingHighlight, this FocusHighlightPath will take the shape of the
     // activeHighlight to show that the webSpeaker is speaking and indicate what is being spoken about.
@@ -298,6 +299,8 @@ class HighlightOverlay {
    * @param {Trail} trail
    */
   activateSpeakingHighlight( trail ) {
+
+    // REVIEW: Is there a case where we will need this to be a Node that is a parent to the last node? https://github.com/phetsims/scenery/issues/1223
     this.speakingHighlightPath.setShapeFromNode( trail.lastNode() );
     this.speakingHighlightPath.visible = true;
   }
@@ -502,6 +505,8 @@ class HighlightOverlay {
 
     if ( newTrail && this.focusHighlightsVisibleProperty.value ) {
       const node = newTrail.lastNode();
+
+      // REVIEW: This seems like a great place to simplify the number of parameters and just pass in the Node, eh? https://github.com/phetsims/scenery/issues/1223
       this.activateHighlight( newTrail, node, node.focusHighlight, node.focusHighlightLayerable, node.focusHighlightChangedEmitter );
     }
     else if ( this.display.pointerFocusProperty.value && this.interactiveHighlightsVisibleProperty.value ) {
@@ -516,6 +521,7 @@ class HighlightOverlay {
    * @private
    *
    * @param {Focus} focus
+   * // REVIEW: I think that "focus" in terms of non HTML DOM focus is very confusing, can we talk about this more? https://github.com/phetsims/scenery/issues/1223
    */
   onPointerFocusChange( focus ) {
     const newTrail = ( focus && focus.display === this.display ) ? focus.trail : null;
