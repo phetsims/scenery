@@ -30,12 +30,15 @@ const IndexedNodeIO = new IOType( 'IndexedNodeIO', {
       assert && assert( node.parents.length === 1, 'IndexedNodeIO only supports nodes with a single parent' );
       stateObject.index = node.parents[ 0 ].indexOfChild( node );
     }
+    else {
+      stateObject.index = null;
+    }
     return stateObject;
   },
-  applyState: ( node, fromStateObject ) => {
-    if ( node.parents[ 0 ] ) {
+  applyState: ( node, stateObject ) => {
+    if ( node.parents[ 0 ] && stateObject.index ) {
       assert && assert( node.parents.length === 1, 'IndexedNodeIO only supports nodes with a single parent' );
-      node.parents[ 0 ].moveChildToIndex( node, fromStateObject.index );
+      node.parents[ 0 ].moveChildToIndex( node, stateObject.index );
     }
   },
   methods: {

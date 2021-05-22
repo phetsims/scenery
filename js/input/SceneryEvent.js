@@ -133,12 +133,8 @@ SceneryEvent.SceneryEventIO = new IOType( 'SceneryEventIO', {
       type: event.type
     };
 
-    if ( event.domEvent ) {
-      eventObject.domEventType = event.domEvent.type;
-    }
-    if ( event.pointer && event.pointer.point ) {
-      eventObject.point = Vector2.Vector2IO.toStateObject( event.pointer.point );
-    }
+    eventObject.domEventType = event.domEvent ? event.domEvent.type : null;
+    eventObject.point = ( event.pointer && event.pointer.point ) ? Vector2.Vector2IO.toStateObject( event.pointer.point ) : null;
 
     // Note: If changing the contents of this object, please document it in the public documentation string.
     return eventObject;
