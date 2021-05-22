@@ -11,6 +11,10 @@ export type NodeOptions = {
   rotation: number;
 } & PhetioObjectOptions;
 
+interface RendererSummary {
+  hasNoPDOM():boolean
+}
+
 export default class Node {
   constructor( options?: Partial<NodeOptions> );
 
@@ -28,4 +32,8 @@ export default class Node {
   get height(): number;
 
   get width(): number;
+
+  get visible():boolean;
+
+  rendererSummary:RendererSummary;
 }
