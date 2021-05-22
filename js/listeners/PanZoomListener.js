@@ -63,7 +63,10 @@ class PanZoomListener extends MultiListener {
     // so if the destination bounds are different due to a differently sized iframe or window,
     // this can be used to determine a correction for the destination targetNode transform.
     // This could be removed by work recommended in
-    this.sourceFramePanBoundsProperty = new Property( this._panBounds, {
+
+    // When generating a PhET-iO API, the specific bounds of the window should be excluded from the initial state
+    // so that the initial state part of the API doesn't depend on the window size.
+    this.sourceFramePanBoundsProperty = new Property( Tandem.API_GENERATION ? new Bounds2( 0, 0, 0, 0 ) : this._panBounds, {
       tandem: options.tandem.createTandem( 'sourceFramePanBoundsProperty' ),
       phetioType: Property.PropertyIO( Bounds2.Bounds2IO )
     } );
@@ -164,7 +167,12 @@ class PanZoomListener extends MultiListener {
    */
   setPanBounds( panBounds ) {
     this._panBounds = panBounds;
-    this.sourceFramePanBoundsProperty.set( this._panBounds );
+
+    // When generating a PhET-iO API, the specific bounds of the window should be excluded from the initial state
+    // so that the initial state part of the API doesn't depend on the window size.
+    if ( !Tandem.API_GENERATION ) {
+      this.sourceFramePanBoundsProperty.set( this._panBounds );
+    }
     this.correctReposition();
   }
 

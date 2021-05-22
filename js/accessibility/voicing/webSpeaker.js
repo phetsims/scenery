@@ -106,13 +106,12 @@ class WebSpeaker {
 
     // On chrome, synth.getVoices() returns an empty array until the onvoiceschanged event, so we have to
     // wait to populate
-    const populateVoicesListener = () => {
+    this.synth.onvoiceschanged = () => {
       this.populateVoices();
 
       // remove the listener after they have been populated once from this event
       this.synth.onvoiceschanged = null;
     };
-    this.synth.onvoiceschanged = populateVoicesListener;
 
     // otherwise, try to populate voices immediately
     this.populateVoices();
@@ -145,18 +144,6 @@ class WebSpeaker {
 
     this._canSpeakProperty.link( this.boundHandleCanSpeakChange );
   }
-
-  /**
-   * Get a reference to the DerivedProperty controlling whether speech is allowed.
-   * @public
-   *
-   * @returns {DerivedProperty}
-   */
-  getCanSpeakProperty() {
-    return this._canSpeakProperty;
-  }
-
-  get canSpeakProperty() { return this.getCanSpeakProperty(); }
 
   /**
    * When we can no longer speak, cancel all speech to silence everything.
@@ -277,7 +264,7 @@ class WebSpeaker {
    *   that voicing has been successfully turned off).
    * @public
    *
-   * @param utterThis
+   * @param {string} utterThis
    */
   speakImmediately( utterThis ) {
     if ( this.initialized ) {
