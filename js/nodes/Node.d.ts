@@ -12,7 +12,7 @@ export type NodeOptions = {
 } & PhetioObjectOptions;
 
 interface RendererSummary {
-  hasNoPDOM():boolean
+  hasNoPDOM(): boolean
 }
 
 export default class Node {
@@ -33,7 +33,9 @@ export default class Node {
 
   get width(): number;
 
-  get visible():boolean;
+  get visible(): boolean;
 
-  rendererSummary:RendererSummary;
+  rendererSummary: RendererSummary;
+
+  mutate( options?: Partial<NodeOptions> ): void;
 }
