@@ -467,7 +467,6 @@ const Voicing = {
 
       /**
        * Detaches references that ensure this components of this Trait are eligible for garbage collection.
-       * // REVIEW: This should be called wherever this trait is composed (like in Slider).
        * @public
        */
       disposeVoicing() {
