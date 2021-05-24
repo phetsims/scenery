@@ -603,9 +603,9 @@ class HighlightOverlay {
   }
 
   /**
-   * When voicing highlight visibility changes, deactivate highlights ore reactivate the highlight around the Node
+   * When voicing highlight visibility changes, deactivate highlights or reactivate the highlight around the Node
    * with focus. Note that when voicing is disabled we will never set the display.pointerFocusProperty to prevent
-   * extra work in VoicingInputListener, so this function shouldn't do much. But it is here to complete the API.
+   * extra work, so this function shouldn't do much. But it is here to complete the API.
    * @private
    */
   onVoicingHighlightsVisibleChange() {
