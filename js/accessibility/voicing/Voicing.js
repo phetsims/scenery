@@ -76,14 +76,13 @@ const Voicing = {
        */
       initializeVoicing( options ) {
 
-        assert && assert( this.voicing === undefined, 'Voicing has already been initialized for this Node' );
+        assert && assert( this.isVoicing === undefined, 'Voicing has already been initialized for this Node' );
 
         // initialize "super" Trait to support highlights on mouse input
         this.initializeMouseHighlighting();
 
         // @public (read-only, scenery-internal) - flag indicating that this Node is composed with Voicing functionality
-        // REVIEW: I like naming this like a boolean, perhaps isVoicing = true, https://github.com/phetsims/scenery/issues/1223
-        this.voicing = true;
+        this.isVoicing = true;
 
         // @private {string|null} - The response to be spoken for this Node when speaking names. This is usually
         // the accessible name for the Node, typically spoken on focus and on interaction, labelling what the object is.
@@ -468,7 +467,6 @@ const Voicing = {
 
       /**
        * Detaches references that ensure this components of this Trait are eligible for garbage collection.
-       * // REVIEW: This should be called wherever this trait is composed (like in Slider).
        * @public
        */
       disposeVoicing() {
