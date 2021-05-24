@@ -475,6 +475,7 @@ define( function( require ) {
 
       if ( this.emitter.hasListeners() ) {
         this.emitter.emit3( 'mouseDown', {
+          id: id,
           point: { x: point.x, y: point.y },
           event: Input.serializeDomEvent( event )
         }, NORMAL_FREQUENCY );
@@ -999,6 +1000,15 @@ define( function( require ) {
     gotPointerCapture( id, type, point, event ) {
       const pointer = this.findPointerById( id );
 
+      if ( this.emitter.hasListeners() ) {
+        this.emitter.emit3( 'gotPointerCapture', {
+          id: id,
+          type: type,
+          point: point.toStateObject(),
+          event: Input.serializeDomEvent( event )
+        }, NORMAL_FREQUENCY );
+      }
+
       if ( pointer ) {
         pointer.onGotPointerCapture();
       }
@@ -1015,6 +1025,15 @@ define( function( require ) {
      */
     lostPointerCapture( id, type, point, event ) {
       const pointer = this.findPointerById( id );
+
+      if ( this.emitter.hasListeners() ) {
+        this.emitter.emit3( 'lostPointerCapture', {
+          id: id,
+          type: type,
+          point: point.toStateObject(),
+          event: Input.serializeDomEvent( event )
+        }, NORMAL_FREQUENCY );
+      }
 
       if ( pointer ) {
         pointer.onLostPointerCapture();
@@ -1436,7 +1455,7 @@ define( function( require ) {
     invokeInputEvent: function( command, config ) {
       // TODO: A switch command would work better here?
       if ( command === 'mouseMove' ) { this.mouseMove( Vector2.fromStateObject( config.point ), config.event ); }
-      else if ( command === 'mouseDown' ) { this.mouseDown( null, Vector2.fromStateObject( config.point ), config.event ); }
+      else if ( command === 'mouseDown' ) { this.mouseDown( config.id, Vector2.fromStateObject( config.point ), config.event ); }
       else if ( command === 'mouseUp' ) { this.mouseUp( Vector2.fromStateObject( config.point ), config.event ); }
       else if ( command === 'mouseOver' ) { this.mouseOver( Vector2.fromStateObject( config.point ), config.event ); }
       else if ( command === 'mouseOut' ) { this.mouseOut( Vector2.fromStateObject( config.point ), config.event ); }
@@ -1449,6 +1468,8 @@ define( function( require ) {
       else if ( command === 'penEnd' ) { this.penEnd( config.id, Vector2.fromStateObject( config.point ), config.event ); }
       else if ( command === 'penMove' ) { this.penMove( config.id, Vector2.fromStateObject( config.point ), config.event ); }
       else if ( command === 'penCancel' ) { this.penCancel( config.id, Vector2.fromStateObject( config.point ), config.event ); }
+      else if ( command === 'gotPointerCapture' ) { this.gotPointerCapture( config.id, config.type, Vector2.fromStateObject( config.point ), config.event ); }
+      else if ( command === 'lostPointerCapture' ) { this.lostPointerCapture( config.id, config.type, Vector2.fromStateObject( config.point ), config.event ); }
     }
   }, {
     /**
