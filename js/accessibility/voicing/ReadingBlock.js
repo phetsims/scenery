@@ -101,7 +101,6 @@ const ReadingBlock = {
           down: event => this.speakReadingBlockContent( event ),
           click: event => this.speakReadingBlockContent( event )
         };
-        this.addInputListener( this.readingBlockInputListener );
 
         // @private - reference kept so this listener can be added/removed when the readingBlockFocusable changes
         this.readingBlockFocusableChangeListener = this.onReadingBlockFocusableChanged.bind( this );
@@ -176,11 +175,18 @@ const ReadingBlock = {
 
         if ( focusable ) {
           this.tagName = this._readingBlockTagName;
+
+          // don't add the input listener if we are already active, we may just be updating the tagName in this case
+          if ( !this.hasInputListener( this.readingBlockInputListener ) ) {
+            this.addInputListener( this.readingBlockInputListener );
+          }
         }
         else {
-
-          // possible for onReadingBlockFocusableChanged to be called before Voicing has been fully initialized
           this.tagName = this._readingBlockDisabledTagName;
+          if ( this.hasInputListener( this.readingBlockInputListener ) ) {
+            this.removeInputListener( this.readingBlockInputListener );
+
+          }
         }
       },
 
@@ -218,7 +224,13 @@ const ReadingBlock = {
       disposeReadingBlock() {
         this.readingBlockFocusableProperty.unlink( this.readingBlockFocusableChangeListener );
         this.localBoundsProperty.unlink( this.localBoundsChangedListener );
-        this.removeInputListener( this.readingBlockInputListener );
+
+        // remove the input listener that activates the ReadingBlock, only do this if the listener is attached while
+        // the ReadingBlock is enabled
+        if ( this.hasInputListener( this.readingBlockInputListener ) ) {
+          this.removeInputListener( this.readingBlockInputListener );
+        }
+
         webSpeaker.endSpeakingEmitter.removeListener( this.endSpeakingListener );
         this.disposeVoicing();
       }
