@@ -59,8 +59,7 @@ const ReadingBlock = {
         this.initializeVoicing( options );
 
         // @public (scenery-internal) - a flag to indicate that this Node has ReadingBlock behavior
-        // REVIEW: I like naming this like a boolean, perhaps isReadingBlock = true, https://github.com/phetsims/scenery/issues/1223
-        this.readingBlock = true;
+        this.isReadingBlock = true;
 
         // @private {string|null} - The tagName used for the ReadingBlock when "Voicing" is enabled, default
         // of button so that it is added to the focus order and can receive 'click' events. You may wish to set this

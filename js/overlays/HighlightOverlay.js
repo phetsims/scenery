@@ -534,7 +534,7 @@ class HighlightOverlay {
     if ( newTrail ) {
       const node = newTrail.lastNode();
 
-      if ( ( node.readingBlock && this.readingBlockHighlightsVisibleProperty.value ) || ( !node.readingBlock && this.interactiveHighlightsVisibleProperty.value ) ) {
+      if ( ( node.isReadingBlock && this.readingBlockHighlightsVisibleProperty.value ) || ( !node.isReadingBlock && this.interactiveHighlightsVisibleProperty.value ) ) {
         const highlight = node.focusHighlight;
         this.activateHighlight( newTrail, node, highlight, false, node.focusHighlightChangedEmitter );
 
