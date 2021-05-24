@@ -624,6 +624,8 @@ define( function( require ) {
     gotPointerCapture( id, type, point, event ) {
       const pointer = this.findPointerById( id );
 
+      if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'gotPointerCapture(' + id + ',"' + type + '",' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
+
       if ( pointer ) {
         pointer.onGotPointerCapture();
       }
@@ -640,6 +642,8 @@ define( function( require ) {
      */
     lostPointerCapture( id, type, point, event ) {
       const pointer = this.findPointerById( id );
+
+      if ( this.emitter.hasListeners() ) { this.emitter.emit1( 'lostPointerCapture(' + id + ',"' + type + '",' + Input.serializeVector2( point ) + ',' + Input.serializeDomEvent( event ) + ');' ); }
 
       if ( pointer ) {
         pointer.onLostPointerCapture();
