@@ -17,7 +17,6 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import DerivedProperty from '../../../../axon/js/DerivedProperty.js';
 import extend from '../../../../phet-core/js/extend.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import Node from '../../nodes/Node.js';
@@ -79,32 +78,19 @@ const ReadingBlock = {
         this.localBoundsChangedListener = this.onLocalBoundsChanged.bind( this );
         this.localBoundsProperty.link( this.localBoundsChangedListener );
 
-        // @private {DerivedProperty.<boolean>} - Controls whether or not the ReadingBlock should be focusable. At
-        // the time of this writing, that is true when the webSpeaker is enabled and when Voicing is enabled for the
-        // "main content" of the application. See voicingManager for a description of
-        // voicingManager.mainWindowVoicingEnabledProperty.
-        // REVIEW: This should also control down too, https://github.com/phetsims/scenery/issues/1223
-        // REVIEW: Rename to readingBlockEnabledProperty since it will control down too. OR!!! Better yet, can we run this off of Node.enabledProperty, with a multilink to set enabled, and then a listener off of enabledProperty to change the tagName? https://github.com/phetsims/scenery/issues/1223
-        this.readingBlockFocusableProperty = new DerivedProperty( [
-
-          // REVIEW: I see these two used together as dependencies for a couple of things, perhaps an "AND" boolean DerivedProperty in VoicingManager that can be used here, in Sim, and AudioPreferencesTabPanel. https://github.com/phetsims/scenery/issues/1223
-          webSpeaker.enabledProperty,
-          voicingManager.mainWindowVoicingEnabledProperty
-        ], ( enabled, mainWindowEnabled ) => {
-          return enabled && mainWindowEnabled;
-        } );
-
         // @private {Object} - Triggers activation of the ReadingBlock, requesting speech of its content.
-        // REVIEW: let's add/remove this based on the value of readingBlockFocusableProperty, https://github.com/phetsims/scenery/issues/1223
         this.readingBlockInputListener = {
           focus: event => this.speakReadingBlockContent( event ),
           down: event => this.speakReadingBlockContent( event ),
           click: event => this.speakReadingBlockContent( event )
         };
 
-        // @private - reference kept so this listener can be added/removed when the readingBlockFocusable changes
+        // @private - Controls whether or not the ReadingBlock should be interactive for Voicing and
+        // focusable. At the time of this writing, that is true for all ReadingBlocks when the
+        // voicingManager indicates that voicing is fully enabled, see the Property in voicingManager
+        // for more information.
         this.readingBlockFocusableChangeListener = this.onReadingBlockFocusableChanged.bind( this );
-        this.readingBlockFocusableProperty.link( this.readingBlockFocusableChangeListener );
+        voicingManager.voicingFullyEnabledProperty.link( this.readingBlockFocusableChangeListener );
 
         // support passing options through initialize
         if ( options ) {
@@ -121,12 +107,7 @@ const ReadingBlock = {
        */
       setReadingBlockTagName( tagName ) {
         this._readingBlockTagName = tagName;
-
-        // update the tagName for the ReadingBlock if we have been initialized, it is easy to pass options
-        // to a supertype before initializeReadingBlock is called
-        if ( this.readingBlockFocusableProperty ) {
-          this.onReadingBlockFocusableChanged( this.readingBlockFocusableProperty.value );
-        }
+        this.onReadingBlockFocusableChanged( voicingManager.voicingFullyEnabledProperty.value );
       },
       set readingBlockTagName( tagName ) { this.setReadingBlockTagName( tagName ); },
 
@@ -171,6 +152,13 @@ const ReadingBlock = {
        * @param {boolean} focusable - whether or not ReadingBlocks should be focusable
        */
       onReadingBlockFocusableChanged( focusable ) {
+
+        // wait until we have been initialized, it is possible to call setters from mutate before properties of
+        // ReadingBlock are defined
+        if ( !this.isReadingBlock ) {
+          return;
+        }
+
         this.focusable = focusable;
 
         if ( focusable ) {
@@ -222,7 +210,7 @@ const ReadingBlock = {
        * @public
        */
       disposeReadingBlock() {
-        this.readingBlockFocusableProperty.unlink( this.readingBlockFocusableChangeListener );
+        voicingManager.voicingFullyEnabledProperty.unlink( this.readingBlockFocusableChangeListener );
         this.localBoundsProperty.unlink( this.localBoundsChangedListener );
 
         // remove the input listener that activates the ReadingBlock, only do this if the listener is attached while
