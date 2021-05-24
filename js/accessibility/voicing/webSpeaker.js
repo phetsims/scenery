@@ -16,6 +16,7 @@ import NumberProperty from '../../../../axon/js/NumberProperty.js';
 import Property from '../../../../axon/js/Property.js';
 import stepTimer from '../../../../axon/js/stepTimer.js';
 import Range from '../../../../dot/js/Range.js';
+import merge from '../../../../phet-core/js/merge.js';
 import platform from '../../../../phet-core/js/platform.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
 import Utterance from '../../../../utterance-queue/js/Utterance.js';
@@ -57,13 +58,13 @@ class WebSpeaker {
     // whether or ot the webSpeaker is enabled - if false, there will be no speech
     this.enabledProperty = new BooleanProperty( false );
 
-    // @private {DerivedProperty} - Controls whether or not speech is allowed with synthesis.
-    // This controlling Property can be set with setCanSpeakProperty.
-    this._canSpeakProperty = new DerivedProperty( [ this.enabledProperty ], value => value );
+    // @private {Property|DerivedProperty|null} - Controls whether or not speech is allowed with synthesis.
+    // Null until initialized, and can be set by options to initialize().
+    this._canSpeakProperty = null;
 
-    // @private {function} - bound so we can link and unlink to canSpeakProperty if a new canSpeakProperty is set
+    // @private {function} - bound so we can link and unlink to this.canSpeakProperty when the webSpeaker becomes
+    // initialized.
     this.boundHandleCanSpeakChange = this.handleCanSpeakChange.bind( this );
-    this._canSpeakProperty.link( this.boundHandleCanSpeakChange );
 
     // @private {Utterance} - A reference to the last utterance spoken, so we can determine
     // cancelling behavior when it is time to speak the next utterance. See VoicingUtterance options.
@@ -97,12 +98,22 @@ class WebSpeaker {
    * listeners that control speech.
    * @public
    */
-  initialize() {
+  initialize( options ) {
     assert && assert( this.initialized === false, 'can only be initialized once' );
-    this.initialized = true;
+
+    options = merge( {
+
+      // {BooleanProperty|DerivedProperty.<boolean>} - Controls whether speech is allowed with speech synthesis.
+      // Combined into another DerivedProperty with this.enabledProperty so you don't have to use that as one
+      // of the Properties that derive speechAllowedProperty, if you are passing in a DerivedProperty.
+      speechAllowedProperty: new BooleanProperty( true )
+    }, options );
 
     this.synth = window.speechSynthesis;
     assert && assert( this.synth, 'SpeechSynthesis not supported on your platform.' );
+
+    this._canSpeakProperty = DerivedProperty.and( [ options.speechAllowedProperty, this.enabledProperty ] );
+    this._canSpeakProperty.link( this.boundHandleCanSpeakChange );
 
     // On chrome, synth.getVoices() returns an empty array until the onvoiceschanged event, so we have to
     // wait to populate
@@ -123,26 +134,8 @@ class WebSpeaker {
         this.cancel();
       }
     } );
-  }
 
-  /**
-   * Sets the DerivedProperty controlling whether speech will be made with speech synthesis. The enabledProperty
-   * is pushed onto provided Properties in this function, do not include it.
-   * @public
-   *
-   * @param {Property[]} properties - list of Properties for the canSpeakProperty DerivedProperty
-   * @param {function} derivation - derivation for the canSpeakProperty from properties array
-   */
-  setCanSpeakProperty( properties, derivation ) {
-    this._canSpeakProperty.unlink( this.boundHandleCanSpeakChange );
-    this._canSpeakProperty.dispose();
-
-    properties.push( this.enabledProperty );
-    this._canSpeakProperty = new DerivedProperty( properties, ( ...args ) => {
-      return derivation( ...args ) && this.enabledProperty.value;
-    } );
-
-    this._canSpeakProperty.link( this.boundHandleCanSpeakChange );
+    this.initialized = true;
   }
 
   /**
