@@ -6,13 +6,13 @@
  *
  *  - Reading Blocks are generally around graphical objects that are not otherwise interactive (like Text).
  *  - They have a unique focus highlight to indicate they can be clicked on to hear voiced content.
- *  - When activated with press or click ReadingBlock content is spoken. // REVIEW: This may read a bit easier as readingBlockContent, to match the option name. If you agree then perhaps on the next line of doc too, https://github.com/phetsims/scenery/issues/1223
+ *  - When activated with press or click readingBlockContent is spoken.
  *  - ReadingBlock content is always spoken if the webSpeaker is enabled, ignoring Properties of voicingManager.
  *  - While speaking, a yellow highlight will appear over the Node composed with ReadingBlock.
  *  - While voicing is enabled, reading blocks will be added to the focus order.
  *
- *
- * // REVIEW: In addition to the excellent documentation above, I would frame this mixin as building directly off of the PDOM implementation it seems to run on (when applicable). For example the sentence "While voicing is enabled, reading blocks will be added to the focus order." is kinda burying the lead. Yes that is true, but it is mainly that the reading block becomes part of the PDOM and uses PDOM events to become interactive. https://github.com/phetsims/scenery/issues/1223
+ * This trait is to be composed with Nodes and assumes that the Node is composed with ParallelDOM.  It uses Node to
+ * support mouse/touch input and ParallelDOM to support being added to the focus order and alternative input.
  *
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
@@ -28,7 +28,7 @@ import voicingManager from './voicingManager.js';
 import webSpeaker from './webSpeaker.js';
 
 const READING_BLOCK_OPTION_KEYS = [
-  'readingBlockTagName', // REVIEW: my understanding is that this is needed because the tagName is added and removed as
+  'readingBlockTagName',
   'readingBlockContent'
 ];
 
@@ -63,7 +63,9 @@ const ReadingBlock = {
         this.readingBlock = true;
 
         // @private {string|null} - The tagName used for the ReadingBlock when "Voicing" is enabled, default
-        // of button so that it is added to the focus order.
+        // of button so that it is added to the focus order and can receive 'click' events. You may wish to set this
+        // to some other tagName or set to null to remove the ReadingBlock from the focus order. If this is changed,
+        // be be sure that the ReadingBlock will still respond to `click` events when enabled.
         this._readingBlockTagName = 'button';
 
         // @private {string|null} - The content for this ReadingBlock that will be spoken by SpeechSynthesis when
@@ -98,7 +100,7 @@ const ReadingBlock = {
         this.readingBlockInputListener = {
           focus: event => this.speakReadingBlockContent( event ),
           down: event => this.speakReadingBlockContent( event ),
-          click: event => this.speakReadingBlockContent( event ) // REVIEW: I'm not sure what the purpose of having a settable `readingBlockTagName` when this listener event is hard coded, https://github.com/phetsims/scenery/issues/1223
+          click: event => this.speakReadingBlockContent( event )
         };
         this.addInputListener( this.readingBlockInputListener );
 
@@ -145,7 +147,6 @@ const ReadingBlock = {
        * Sets the content that should be read whenever the ReadingBlock receives input that initiates speech.
        * @public
        *
-       * // REVIEW: Voicing.speak() accepts any AlertableDef, but we only accept string here? https://github.com/phetsims/scenery/issues/1223
        * @param {string|null} content
        */
       setReadingBlockContent( content ) {
@@ -157,7 +158,6 @@ const ReadingBlock = {
        * Gets the content that is spoken whenever the ReadingBLock receives input that would initiate speech.
        * @public
        *
-       * // REVIEW: Voicing.speak() accepts any AlertableDef, but we only accept string here? https://github.com/phetsims/scenery/issues/1223
        * @returns {string|null}
        */
       getReadingBlockContent() {
@@ -200,17 +200,11 @@ const ReadingBlock = {
        * Speak the content associated with the ReadingBlock. Sets the readingBlockFocusProperties on
        * the displays so that HighlightOverlays know to activate a highlight while the webSpeaker
        * is reading about this Node.
-       * @public
+       * @private
        *
        * @param {SceneryEvent} event
        */
       speakReadingBlockContent( event ) {
-
-        // REVIEW: perhaps control down something like this? https://github.com/phetsims/scenery/issues/1223
-        // if( !this.readingBlockFocusableProperty.value){
-        //   return;
-        // }
-        //
         this.speakContent( this._readingBlockContent );
 
         for ( let i = 0; i < this._displays.length; i++ ) {
@@ -220,7 +214,6 @@ const ReadingBlock = {
       },
 
       /**
-       * // REVIEW: THis isn't called anywhere, even though there are spots where this type is composed and initialized. https://github.com/phetsims/scenery/issues/1223
        * @public
        */
       disposeReadingBlock() {
