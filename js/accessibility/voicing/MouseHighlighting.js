@@ -17,8 +17,9 @@ const MouseHighlighting = {
 
   /**
    * Given the constructor for Node, add MouseHighlighting functions to the prototype.
-   *
-   * @param {function} type - the constructor for Node
+   * @public
+   * @trait {Node}
+   * @param {function(new:Node)} type - the constructor for Node
    */
   compose( type ) {
     assert && assert( _.includes( inheritance( type ), Node ), 'Only Node subtypes should compose MouseHighlighting' );

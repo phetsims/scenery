@@ -32,6 +32,13 @@ const READING_BLOCK_OPTION_KEYS = [
 ];
 
 const ReadingBlock = {
+
+  /**
+   * @public
+   * @trait {Node}
+   * @mixes {Voicing}
+   * @param {function(new:Node)} type - The constructor for Node
+   */
   compose( type ) {
     assert && assert( _.includes( inheritance( type ), Node ) );
 
