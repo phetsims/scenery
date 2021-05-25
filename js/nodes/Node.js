@@ -6308,7 +6308,8 @@ class Node extends PhetioObject {
       displays.push( ...this._parents[ i ].getRecursiveConnectedDisplays( displays ) );
     }
 
-    return displays;
+    // do not allow duplicate Displays to get collected infinitely
+    return _.uniq( displays );
   }
 
   /**
