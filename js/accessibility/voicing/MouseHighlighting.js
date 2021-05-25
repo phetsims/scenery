@@ -12,7 +12,6 @@ import Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import Focus from '../Focus.js';
 
-// REVIEW: Would we want to name this like the designed feature, i.e. "InteractiveHighlights" ? https://github.com/phetsims/scenery/issues/1223
 const MouseHighlighting = {
 
   /**
