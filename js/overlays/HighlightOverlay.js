@@ -205,13 +205,12 @@ class HighlightOverlay {
    *
    * @param {Trail} trail - The focused trail to highlight. It assumes that this trail is in this display.
    * @param {Node} node - Node receiving the highlight
-   * @param {Node|Shape|string|null} highlight
-   * @param {boolean} layerable - whether or not the highlight is layerable in the scene graph
-   * @param {TinyEmitter} changedEmitter - Emitter that indicates that the active highlight has changed
    */
-  activateHighlight( trail, node, highlight, layerable, changedEmitter ) {
+  activateHighlight( trail, node ) {
     this.trail = trail;
     this.node = node;
+
+    const highlight = node.focusHighlight;
     this.activeHighlight = highlight;
 
     // we may or may not track this trail depending on whether the focus highlight surrounds the trail's leaf node or
@@ -244,7 +243,7 @@ class HighlightOverlay {
       assert && assert( this.nodeFocusHighlight.shape !== null,
         'The shape of the Node highlight should be set by now. Does it have bounds?' );
 
-      if ( layerable ) {
+      if ( node.focusHighlightLayerable ) {
 
         // the focusHighlight is just a node in the scene graph, so set it visible - visibility of other highlights
         // controlled by visibility of parent Nodes but that cannot be done in this case because the highlight
@@ -271,7 +270,7 @@ class HighlightOverlay {
     }
 
     // handle any changes to the focus highlight while the node has focus
-    changedEmitter.addListener( this.focusHighlightListener );
+    node.focusHighlightChangedEmitter.addListener( this.focusHighlightListener );
 
     this.transformTracker = new TransformTracker( trailToTrack, {
       isStatic: true
@@ -505,8 +504,7 @@ class HighlightOverlay {
     if ( newTrail && this.focusHighlightsVisibleProperty.value ) {
       const node = newTrail.lastNode();
 
-      // REVIEW: This seems like a great place to simplify the number of parameters and just pass in the Node, eh? https://github.com/phetsims/scenery/issues/1223
-      this.activateHighlight( newTrail, node, node.focusHighlight, node.focusHighlightLayerable, node.focusHighlightChangedEmitter );
+      this.activateHighlight( newTrail, node );
     }
     else if ( this.display.pointerFocusProperty.value && this.interactiveHighlightsVisibleProperty.value ) {
       this.onPointerFocusChange( this.display.pointerFocusProperty.value );
@@ -533,8 +531,7 @@ class HighlightOverlay {
       const node = newTrail.lastNode();
 
       if ( ( node.isReadingBlock && this.readingBlockHighlightsVisibleProperty.value ) || ( !node.isReadingBlock && this.interactiveHighlightsVisibleProperty.value ) ) {
-        const highlight = node.focusHighlight;
-        this.activateHighlight( newTrail, node, highlight, false, node.focusHighlightChangedEmitter );
+        this.activateHighlight( newTrail, node );
 
         activated = true;
       }
