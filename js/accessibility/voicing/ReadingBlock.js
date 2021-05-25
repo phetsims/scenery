@@ -207,9 +207,10 @@ const ReadingBlock = {
       speakReadingBlockContent( event ) {
         this.speakContent( this._readingBlockContent );
 
-        for ( let i = 0; i < this._displays.length; i++ ) {
+        const displays = this.getConnectedDisplays();
+        for ( let i = 0; i < displays.length; i++ ) {
           const subtrailToThis = event.trail.subtrailTo( this );
-          this._displays[ i ].readingBlockFocusProperty.set( new Focus( this._displays[ i ], subtrailToThis ) );
+          displays[ i ].readingBlockFocusProperty.set( new Focus( displays[ i ], subtrailToThis ) );
         }
       },
 
