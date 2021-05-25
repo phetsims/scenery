@@ -292,13 +292,15 @@ class HighlightOverlay {
    * Activate the "speaking" highlights. This highlight is separate from others in the overlay and will always
    * take the shape of the active highlight. It is shown in response to certain input on Nodes with Voicing while
    * the webSpeaker is speaking.
+   *
+   * Note that customizations for this highlight are not supported at this time, that could be added in the future if
+   * we need.
    * @private
    *
    * @param {Trail} trail
    */
   activateSpeakingHighlight( trail ) {
 
-    // REVIEW: Is there a case where we will need this to be a Node that is a parent to the last node? https://github.com/phetsims/scenery/issues/1223
     this.speakingHighlightPath.setShapeFromNode( trail.lastNode() );
     this.speakingHighlightPath.visible = true;
   }
