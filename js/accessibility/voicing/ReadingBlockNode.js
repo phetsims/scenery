@@ -15,7 +15,7 @@
  */
 
 import merge from '../../../../phet-core/js/merge.js';
-import VoicingHighlight from './VoicingHighlight.js';
+import ReadingBlockHighlight from './ReadingBlockHighlight.js';
 import Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import ReadingBlock from './ReadingBlock.js';
@@ -38,7 +38,7 @@ class ReadingBlockNode extends Node {
 
     // default highlight for a ReadingBlock is styled to indicate that the Node is different
     // from other interactive things, but is still clickable
-    this.focusHighlight = options.focusHighlight || new VoicingHighlight( this );
+    this.focusHighlight = options.focusHighlight || new ReadingBlockHighlight( this );
 
     // mutate after initialize so that we can pass through ReadingBlock options
     this.mutate( options );

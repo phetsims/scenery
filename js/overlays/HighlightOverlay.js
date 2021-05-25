@@ -140,9 +140,7 @@ class HighlightOverlay {
     this.focusRootNode.addChild( this.groupFocusHighlightParent );
 
     // REVIEW: If you rename webSpeaker, hit this usage too https://github.com/phetsims/scenery/issues/1223
-    // @private {Node} - The highlight shown around certain Nodes while the webSpeaker is speaking. For
-    // Voicing Nodes that specify a voicingHighlight, this FocusHighlightPath will take the shape of the
-    // activeHighlight to show that the webSpeaker is speaking and indicate what is being spoken about.
+    // @private {Node} - The highlight shown around certain Nodes while the webSpeaker is speaking.
     this.speakingHighlightPath = new FocusHighlightFromNode( null, {
       innerStroke: null,
       outerStroke: null,

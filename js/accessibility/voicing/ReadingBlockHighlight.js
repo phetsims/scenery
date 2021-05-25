@@ -11,9 +11,9 @@
 
 import merge from '../../../../phet-core/js/merge.js';
 import FocusHighlightFromNode from '../FocusHighlightFromNode.js';
-import sceneryPhet from '../../../../scenery-phet/js/sceneryPhet.js';
+import scenery from '../../scenery.js';
 
-class VoicingHighlight extends FocusHighlightFromNode {
+class ReadingBlockHighlight extends FocusHighlightFromNode {
   constructor( node, options ) {
 
     options = merge( {
@@ -25,5 +25,5 @@ class VoicingHighlight extends FocusHighlightFromNode {
   }
 }
 
-sceneryPhet.register( 'VoicingHighlight', VoicingHighlight );
-export default VoicingHighlight;
+scenery.register( 'ReadingBlockHighlight', ReadingBlockHighlight );
+export default ReadingBlockHighlight;
