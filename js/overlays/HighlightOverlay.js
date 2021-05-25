@@ -519,7 +519,6 @@ class HighlightOverlay {
    * @private
    *
    * @param {Focus} focus
-   * // REVIEW: I think that "focus" in terms of non HTML DOM focus is very confusing, can we talk about this more? https://github.com/phetsims/scenery/issues/1223
    */
   onPointerFocusChange( focus ) {
     const newTrail = ( focus && focus.display === this.display ) ? focus.trail : null;
