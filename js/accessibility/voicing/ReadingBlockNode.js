@@ -15,7 +15,7 @@
  */
 
 import merge from '../../../../phet-core/js/merge.js';
-import VoicingHighlight from '../../../../scenery-phet/js/accessibility/speaker/VoicingHighlight.js';
+import VoicingHighlight from './VoicingHighlight.js';
 import Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import ReadingBlock from './ReadingBlock.js';
