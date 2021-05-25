@@ -1,4 +1,4 @@
-// Copyright 2012-2020, University of Colorado Boulder
+// Copyright 2012-2021, University of Colorado Boulder
 
 /**
  * A color with RGBA values, assuming the sRGB color space is used.

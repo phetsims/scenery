@@ -1,4 +1,4 @@
-// Copyright 2014-2020, University of Colorado Boulder
+// Copyright 2014-2021, University of Colorado Boulder
 
 /**
  * Poolable wrapper for SVG <group> elements. We store state and add listeners directly to the corresponding Node,

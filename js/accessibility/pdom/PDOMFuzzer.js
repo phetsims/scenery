@@ -1,4 +1,4 @@
-// Copyright 2018-2020, University of Colorado Boulder
+// Copyright 2018-2021, University of Colorado Boulder
 
 /**
  * Runs PDOM-tree-related scenery operations randomly (with assertions) to try to find any bugs.

@@ -1,4 +1,4 @@
-// Copyright 2018-2020, University of Colorado Boulder
+// Copyright 2018-2021, University of Colorado Boulder
 
 /**
  * "definition" type for generalized type of accessibility option. A "behavior function" takes in options, and mutates

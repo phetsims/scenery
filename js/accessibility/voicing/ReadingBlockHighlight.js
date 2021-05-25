@@ -1,4 +1,4 @@
-// Copyright 2020, University of Colorado Boulder
+// Copyright 2021, University of Colorado Boulder
 
 /**
  * A focus highlight for the voicing prototype. Has a unique color to indicate that focus is not around something
