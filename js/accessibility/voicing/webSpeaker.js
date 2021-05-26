@@ -42,6 +42,9 @@ class WebSpeaker {
     this.startSpeakingEmitter = new Emitter( { parameters: [ { valueType: Utterance } ] } );
     this.endSpeakingEmitter = new Emitter( { parameters: [ { valueType: Utterance } ] } );
 
+    // @public {Emitter} - emits whenever the voices change for SpeechSynthesis
+    this.voicesChangedEmitter = new Emitter();
+
     // @public - whether or not the synth is speaking - perhaps this should
     // replace the emitters above?
     this.speakingProperty = new BooleanProperty( false );
@@ -115,16 +118,14 @@ class WebSpeaker {
     this._canSpeakProperty = DerivedProperty.and( [ options.speechAllowedProperty, this.enabledProperty ] );
     this._canSpeakProperty.link( this.boundHandleCanSpeakChange );
 
-    // On chrome, synth.getVoices() returns an empty array until the onvoiceschanged event, so we have to
-    // wait to populate
+    // browsers tend to generate the list of voices lazily, so the list of voices may be empty until speech is
+    // first requested
     this.synth.onvoiceschanged = () => {
       this.populateVoices();
-
-      // remove the listener after they have been populated once from this event
-      this.synth.onvoiceschanged = null;
     };
 
-    // otherwise, try to populate voices immediately
+    // try to populate voices immediately in case the browser populates them eagerly and we never get an
+    // onvoiceschanged event
     this.populateVoices();
 
     // The control key will stop the synth from speaking if there is an active utterance. This key was decided because
@@ -149,17 +150,12 @@ class WebSpeaker {
   }
 
   /**
-   * Get the available voices for the synth, and set to default.
+   * Update the list of voices available to the synth, and notify that the list has changed.
    * @private
    */
   populateVoices() {
-
-    // for now, only include the english voice
-    this.voices = _.filter( this.synth.getVoices(), voice => {
-      return voice.lang === 'en-US';
-    } );
-
-    this.voiceProperty.set( this.voices[ 0 ] );
+    this.voices = this.synth.getVoices();
+    this.voicesChangedEmitter.emit();
   }
 
   /**
