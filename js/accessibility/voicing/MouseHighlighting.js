@@ -50,7 +50,6 @@ const MouseHighlighting = {
        * @public
        */
       disposeMouseHighlighting() {
-        this.changedInstanceEmitter.removeListener( this.changedInstanceListener );
         this.removeInputListener( this.enterExitListener );
       },
 
