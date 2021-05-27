@@ -502,7 +502,7 @@ const ParallelDOM = {
 
         // By returning false, we prevent the component from toggling native HTML element attributes that convey state.
         // For example,this will prevent a checkbox from changing `checked` property while it is disabled. This way
-        // we can keep the component in tab order and don't need to add the `disabled` attribute. See
+        // we can keep the component in traversal order and don't need to add the `disabled` attribute. See
         // https://github.com/phetsims/sun/issues/519 and https://github.com/phetsims/sun/issues/640
         // This solution was found at https://stackoverflow.com/a/12267350/3408502
         this.setPDOMAttribute( 'onclick', enabled ? '' : 'return false' );
@@ -2649,7 +2649,7 @@ const ParallelDOM = {
 
           // If overridePruning is set, we ignore one reference to our node in the prune stack. If there are two copies,
           // however, it means a node was specified in a pdomOrder that already needs to be pruned (so we skip it instead
-          // of creating duplicate references in the tab order).
+          // of creating duplicate references in the traversal order).
           if ( pruneCount > 1 || ( pruneCount === 1 && !overridePruning ) ) {
             return;
           }
