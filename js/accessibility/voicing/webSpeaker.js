@@ -49,8 +49,8 @@ class WebSpeaker {
     // replace the emitters above?
     this.speakingProperty = new BooleanProperty( false );
 
-    // {SpeechSynthesis|null} - synth from Web Speech API that drives speech
-    this.synth = null;
+    // @private {SpeechSynthesis|null} - synth from Web Speech API that drives speech, defined on initialize
+    this._synth = null;
 
     // @public {SpeechSynthesisVoice[]} - possible voices for Web Speech synthesis
     this.voices = [];
@@ -103,6 +103,7 @@ class WebSpeaker {
    */
   initialize( options ) {
     assert && assert( this.initialized === false, 'can only be initialized once' );
+    assert && assert( this.isSpeechSynthesisSupported(), 'trying to initialize speech, but speech is not supported on this platform.' );
 
     options = merge( {
 
@@ -112,15 +113,14 @@ class WebSpeaker {
       speechAllowedProperty: new BooleanProperty( true )
     }, options );
 
-    this.synth = window.speechSynthesis;
-    assert && assert( this.synth, 'SpeechSynthesis not supported on your platform.' );
+    this._synth = window.speechSynthesis;
 
     this._canSpeakProperty = DerivedProperty.and( [ options.speechAllowedProperty, this.enabledProperty ] );
     this._canSpeakProperty.link( this.boundHandleCanSpeakChange );
 
     // browsers tend to generate the list of voices lazily, so the list of voices may be empty until speech is
     // first requested
-    this.synth.onvoiceschanged = () => {
+    this.getSynth().onvoiceschanged = () => {
       this.populateVoices();
     };
 
@@ -154,7 +154,7 @@ class WebSpeaker {
    * @private
    */
   populateVoices() {
-    this.voices = this.synth.getVoices();
+    this.voices = this.getSynth().getVoices();
     this.voicesChangedEmitter.emit();
   }
 
@@ -175,7 +175,7 @@ class WebSpeaker {
       }
     }
 
-    webSpeaker.speak( utterance, withCancel );
+    this.speak( utterance, withCancel );
   }
 
   /**
@@ -189,10 +189,11 @@ class WebSpeaker {
    */
   speak( utterance, withCancel = true ) {
     if ( this.initialized && this._canSpeakProperty.value && !this.onHold ) {
+      assert && assert( this.isSpeechSynthesisSupported(), 'trying to speak with speechSynthesis, but it is not supported on this platform' );
 
       // only cancel the previous alert if there is something new to speak
       if ( withCancel && utterance.alert ) {
-        this.synth.cancel();
+        this.cancel();
       }
 
       // since the "end" event doesn't come through all the time after cancel() on
@@ -235,11 +236,11 @@ class WebSpeaker {
       // SpeechSynthesisUtterance event come through much more consistently
       if ( platform.safari ) {
         stepTimer.setTimeout( () => {
-          this.synth.speak( speechSynthUtterance );
+          this.getSynth().speak( speechSynthUtterance );
         }, 500 );
       }
       else {
-        this.synth.speak( speechSynthUtterance );
+        this.getSynth().speak( speechSynthUtterance );
       }
     }
   }
@@ -257,6 +258,7 @@ class WebSpeaker {
    */
   speakImmediately( utterThis ) {
     if ( this.initialized ) {
+      assert && assert( this.isSpeechSynthesisSupported(), 'Trying to speak, but speech synthesis is not supported on this platform' );
 
       // embidding marks (for i18n) impact the output, strip before speaking
       const utterance = new SpeechSynthesisUtterance( stripEmbeddingMarks( utterThis ) );
@@ -267,17 +269,44 @@ class WebSpeaker {
       // Keep this synchrounous as it pertains to the UtteranceQueue draining/announcing, see bug in https://github.com/phetsims/sun/issues/699#issuecomment-831529485
       this.previousUtterance = utterance;
 
-      this.synth.speak( utterance );
+      this.getSynth().speak( utterance );
     }
   }
 
   /**
-   * Stops all current speech as well and removes all utterances in the queue.
+   * Returns true if SpeechSynthesis is available on the window. This check is sufficient for all of
+   * webSpeaker. On platforms where speechSynthesis is available, all features of it are available, with the
+   * exception of the onvoiceschanged event in a couple of platforms. However, the listener can still be set
+   * without issue on those platforms so we don't need to check for its existence. On those platforms, voices
+   * are provided right on load.
+   * @public
+   *
+   * @returns {boolean}
+   */
+  isSpeechSynthesisSupported() {
+    return !!window.speechSynthesis && !!window.SpeechSynthesisUtterance;
+  }
+
+  /**
+   * Returns a references to the SpeechSynthesis of the webSpeaker that is used to request speech with the Web
+   * Speech API. Every references has a check to ensure that the synth is available.
+   * @private
+   *
+   * @returns {null|SpeechSynthesis}
+   */
+  getSynth() {
+    assert && assert( this.isSpeechSynthesisSupported(), 'Trying to use SpeechSynthesis, but it is not supported on this platform.' );
+    return this._synth;
+  }
+
+  /**
+   * Stops any current speech and removes all utterances in the queue internal to the SpeechSynthesis
+   * (not the UtteranceQueue).
    * @public
    */
   cancel() {
     if ( this.initialized ) {
-      this.synth.cancel();
+      this.getSynth().cancel();
     }
   }
 }
