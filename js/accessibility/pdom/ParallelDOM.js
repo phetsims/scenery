@@ -568,7 +568,7 @@ const ParallelDOM = {
       /**
        * Called when assertions are enabled and once the Node has been completely constructed. This is the time to
        * make sure that options are set up the way they are expected to be. For example. you don't want accessibleName
-       * and labelContent declared
+       * and labelContent declared.
        * @public (only called by Screen.js)
        */
       pdomAudit: function() {
