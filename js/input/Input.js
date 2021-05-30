@@ -183,7 +183,8 @@ import Pointer from './Pointer.js';
 import SceneryEvent from './SceneryEvent.js';
 import Touch from './Touch.js';
 
-// Object literal makes it easy to check for the existence of an attribute (compared to [].indexOf()>=0)
+// Object literal makes it easy to check for the existence of an attribute (compared to [].indexOf()>=0). Helpful for
+// serialization. NOTE: Do not add or change this without consulting the PhET-iO IOType schema for this in EventIO.js
 const domEventPropertiesToSerialize = {
   type: true,
   button: true, keyCode: true, key: true,

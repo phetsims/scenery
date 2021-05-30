@@ -8,7 +8,9 @@
  * @author Jesse Greenberg
  */
 
+import ArrayIO from '../../../tandem/js/types/ArrayIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
+import StringIO from '../../../tandem/js/types/StringIO.js';
 import scenery from '../scenery.js';
 
 class Focus {
@@ -43,6 +45,9 @@ Focus.FocusIO = new IOType( 'FocusIO', {
     return {
       focusedPhetioElement: phetioIDs
     };
+  },
+  stateSchema: {
+    focusedPhetioElement: ArrayIO( StringIO )
   }
 } );
 

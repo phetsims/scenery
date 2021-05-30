@@ -14,6 +14,7 @@
 
 import Vector2 from '../../../dot/js/Vector2.js';
 import IOType from '../../../tandem/js/types/IOType.js';
+import StringIO from '../../../tandem/js/types/StringIO.js';
 import scenery from '../scenery.js';
 import Trail from '../util/Trail.js';
 import Mouse from './Mouse.js';
@@ -138,6 +139,11 @@ SceneryEvent.SceneryEventIO = new IOType( 'SceneryEventIO', {
 
     // Note: If changing the contents of this object, please document it in the public documentation string.
     return eventObject;
+  },
+  stateSchema: {
+    type: StringIO,
+    domEventType: StringIO,
+    point: Vector2.Vector2IO
   }
 } );
 

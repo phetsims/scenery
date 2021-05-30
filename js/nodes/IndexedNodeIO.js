@@ -41,6 +41,9 @@ const IndexedNodeIO = new IOType( 'IndexedNodeIO', {
       node.parents[ 0 ].moveChildToIndex( node, stateObject.index );
     }
   },
+  stateSchema: {
+    index: NumberIO
+  },
   methods: {
     linkIndex: {
       returnType: NumberIO,

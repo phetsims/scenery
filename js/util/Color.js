@@ -14,6 +14,7 @@ import Property from '../../../axon/js/Property.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import Utils from '../../../dot/js/Utils.js';
 import IOType from '../../../tandem/js/types/IOType.js';
+import NumberIO from '../../../tandem/js/types/NumberIO.js';
 import scenery from '../scenery.js';
 
 // constants
@@ -1150,7 +1151,13 @@ Color.ColorIO = new IOType( 'ColorIO', {
   valueType: Color,
   documentation: 'A color, with rgba',
   toStateObject: color => color.toStateObject(),
-  fromStateObject: stateObject => new Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a )
+  fromStateObject: stateObject => new Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a ),
+  stateSchema: {
+    r: NumberIO,
+    g: NumberIO,
+    b: NumberIO,
+    a: NumberIO
+  }
 } );
 
 export default Color;
