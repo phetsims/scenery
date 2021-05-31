@@ -13,6 +13,7 @@ import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
+import ObjectLiteralIO from '../../../tandem/js/types/ObjectLiteralIO.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
 import scenery from '../scenery.js';
 
@@ -34,12 +35,12 @@ const EventIO = new IOType( 'EventIO', {
     altKey: NullableIO( BooleanIO ),
     metaKey: NullableIO( BooleanIO ),
     button: NullableIO( NumberIO ),
-    relatedTarget: NullableIO( EventIO ),
+    relatedTarget: NullableIO( ObjectLiteralIO ),  // TODO https://github.com/phetsims/phet-io/issues/1774 We thought this was supposed to be EventIO, but it was coming up as {data-trail-id: "380-381-466-473-468-693-760-759-734"}
     pageX: NullableIO( NumberIO ),
     pageY: NullableIO( NumberIO ),
     which: NullableIO( NumberIO ),
     type: NullableIO( StringIO ),
-    target: NullableIO( EventIO ),
+    target: NullableIO( ObjectLiteralIO ), // TODO https://github.com/phetsims/phet-io/issues/1774 We thought this was supposed to be EventIO, but it was coming up as an empty object
     keyCode: NullableIO( NumberIO ),
     key: NullableIO( StringIO ),
     deltaX: NullableIO( NumberIO ),
