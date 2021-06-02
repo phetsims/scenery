@@ -1,4 +1,4 @@
-// Copyright 2012-2020, University of Colorado Boulder
+// Copyright 2012-2021, University of Colorado Boulder
 
 /**
  * A Node for the Scenery scene graph. Supports general directed acyclic graphics (DAGs).
@@ -6308,7 +6308,8 @@ class Node extends PhetioObject {
       displays.push( ...this._parents[ i ].getRecursiveConnectedDisplays( displays ) );
     }
 
-    return displays;
+    // do not allow duplicate Displays to get collected infinitely
+    return _.uniq( displays );
   }
 
   /**

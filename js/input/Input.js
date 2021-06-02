@@ -1,4 +1,4 @@
-// Copyright 2013-2020, University of Colorado Boulder
+// Copyright 2013-2021, University of Colorado Boulder
 
 /**
  * Main handler for user-input events in Scenery.
@@ -183,7 +183,8 @@ import Pointer from './Pointer.js';
 import SceneryEvent from './SceneryEvent.js';
 import Touch from './Touch.js';
 
-// Object literal makes it easy to check for the existence of an attribute (compared to [].indexOf()>=0)
+// Object literal makes it easy to check for the existence of an attribute (compared to [].indexOf()>=0). Helpful for
+// serialization. NOTE: Do not add or change this without consulting the PhET-iO IOType schema for this in EventIO.js
 const domEventPropertiesToSerialize = {
   type: true,
   button: true, keyCode: true, key: true,
@@ -1940,7 +1941,10 @@ class Input {
   }
 
   /**
-   * Saves the main information we care about from a DOM `Event` into a JSON-like structure.
+   * Saves the main information we care about from a DOM `Event` into a JSON-like structure. To support
+   * polymorphism, all supported DOM event keys that scenery uses will always be included in this serialization. If
+   * the particular Event interface for the instance being serialized doesn't have a certain property, then it will be
+   * set as `null`. See domEventPropertiesToSerialize for the full list of supported Event properties.
    * @public
    *
    * @param {Event} domEvent
@@ -1949,9 +1953,10 @@ class Input {
   static serializeDomEvent( domEvent ) {
     const entries = {};
 
-    for ( const property in domEvent ) {
+    for ( const property in domEventPropertiesToSerialize ) {
+
       // we shouldn't check if domEvent.hasOwnProperty because some properties come from supertypes
-      if ( domEventPropertiesToSerialize[ property ] ) {
+      if ( domEvent[ property ] ) {
 
         const domEventProperty = domEvent[ property ];
 
@@ -1989,6 +1994,9 @@ class Input {
         else {
           entries[ property ] = ( ( typeof domEventProperty === 'object' ) && ( domEventProperty !== null ) ? {} : JSON.parse( JSON.stringify( domEventProperty ) ) ); // TODO: is parse/stringify necessary?
         }
+      }
+      else {
+        entries[ property ] = null;
       }
     }
     return entries;

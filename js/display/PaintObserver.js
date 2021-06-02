@@ -1,4 +1,4 @@
-// Copyright 2016-2020, University of Colorado Boulder
+// Copyright 2016-2021, University of Colorado Boulder
 
 /**
  * Hooks up listeners to a paint (fill or stroke) to determine when its represented value has changed.

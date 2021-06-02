@@ -1,4 +1,4 @@
-// Copyright 2015-2020, University of Colorado Boulder
+// Copyright 2015-2021, University of Colorado Boulder
 
 /**
  * An overlay that implements highlights for a Display. This is responsible for drawing the highlights and
@@ -139,10 +139,7 @@ class HighlightOverlay {
     } );
     this.focusRootNode.addChild( this.groupFocusHighlightParent );
 
-    // REVIEW: If you rename webSpeaker, hit this usage too https://github.com/phetsims/scenery/issues/1223
-    // @private {Node} - The highlight shown around certain Nodes while the webSpeaker is speaking. For
-    // Voicing Nodes that specify a voicingHighlight, this FocusHighlightPath will take the shape of the
-    // activeHighlight to show that the webSpeaker is speaking and indicate what is being spoken about.
+    // @private {Node} - The highlight shown around certain Nodes while the webSpeaker is speaking.
     this.speakingHighlightPath = new FocusHighlightFromNode( null, {
       innerStroke: null,
       outerStroke: null,
@@ -208,13 +205,12 @@ class HighlightOverlay {
    *
    * @param {Trail} trail - The focused trail to highlight. It assumes that this trail is in this display.
    * @param {Node} node - Node receiving the highlight
-   * @param {Node|Shape|string|null} highlight
-   * @param {boolean} layerable - whether or not the highlight is layerable in the scene graph
-   * @param {TinyEmitter} changedEmitter - Emitter that indicates that the active highlight has changed
    */
-  activateHighlight( trail, node, highlight, layerable, changedEmitter ) {
+  activateHighlight( trail, node ) {
     this.trail = trail;
     this.node = node;
+
+    const highlight = node.focusHighlight;
     this.activeHighlight = highlight;
 
     // we may or may not track this trail depending on whether the focus highlight surrounds the trail's leaf node or
@@ -247,7 +243,7 @@ class HighlightOverlay {
       assert && assert( this.nodeFocusHighlight.shape !== null,
         'The shape of the Node highlight should be set by now. Does it have bounds?' );
 
-      if ( layerable ) {
+      if ( node.focusHighlightLayerable ) {
 
         // the focusHighlight is just a node in the scene graph, so set it visible - visibility of other highlights
         // controlled by visibility of parent Nodes but that cannot be done in this case because the highlight
@@ -274,7 +270,7 @@ class HighlightOverlay {
     }
 
     // handle any changes to the focus highlight while the node has focus
-    changedEmitter.addListener( this.focusHighlightListener );
+    node.focusHighlightChangedEmitter.addListener( this.focusHighlightListener );
 
     this.transformTracker = new TransformTracker( trailToTrack, {
       isStatic: true
@@ -294,13 +290,15 @@ class HighlightOverlay {
    * Activate the "speaking" highlights. This highlight is separate from others in the overlay and will always
    * take the shape of the active highlight. It is shown in response to certain input on Nodes with Voicing while
    * the webSpeaker is speaking.
+   *
+   * Note that customizations for this highlight are not supported at this time, that could be added in the future if
+   * we need.
    * @private
    *
    * @param {Trail} trail
    */
   activateSpeakingHighlight( trail ) {
 
-    // REVIEW: Is there a case where we will need this to be a Node that is a parent to the last node? https://github.com/phetsims/scenery/issues/1223
     this.speakingHighlightPath.setShapeFromNode( trail.lastNode() );
     this.speakingHighlightPath.visible = true;
   }
@@ -506,8 +504,7 @@ class HighlightOverlay {
     if ( newTrail && this.focusHighlightsVisibleProperty.value ) {
       const node = newTrail.lastNode();
 
-      // REVIEW: This seems like a great place to simplify the number of parameters and just pass in the Node, eh? https://github.com/phetsims/scenery/issues/1223
-      this.activateHighlight( newTrail, node, node.focusHighlight, node.focusHighlightLayerable, node.focusHighlightChangedEmitter );
+      this.activateHighlight( newTrail, node );
     }
     else if ( this.display.pointerFocusProperty.value && this.interactiveHighlightsVisibleProperty.value ) {
       this.onPointerFocusChange( this.display.pointerFocusProperty.value );
@@ -521,7 +518,6 @@ class HighlightOverlay {
    * @private
    *
    * @param {Focus} focus
-   * // REVIEW: I think that "focus" in terms of non HTML DOM focus is very confusing, can we talk about this more? https://github.com/phetsims/scenery/issues/1223
    */
   onPointerFocusChange( focus ) {
     const newTrail = ( focus && focus.display === this.display ) ? focus.trail : null;
@@ -534,9 +530,8 @@ class HighlightOverlay {
     if ( newTrail ) {
       const node = newTrail.lastNode();
 
-      if ( ( node.readingBlock && this.readingBlockHighlightsVisibleProperty.value ) || ( !node.readingBlock && this.interactiveHighlightsVisibleProperty.value ) ) {
-        const highlight = node.focusHighlight;
-        this.activateHighlight( newTrail, node, highlight, false, node.focusHighlightChangedEmitter );
+      if ( ( node.isReadingBlock && this.readingBlockHighlightsVisibleProperty.value ) || ( !node.isReadingBlock && this.interactiveHighlightsVisibleProperty.value ) ) {
+        this.activateHighlight( newTrail, node );
 
         activated = true;
       }
@@ -603,9 +598,9 @@ class HighlightOverlay {
   }
 
   /**
-   * When voicing highlight visibility changes, deactivate highlights ore reactivate the highlight around the Node
+   * When voicing highlight visibility changes, deactivate highlights or reactivate the highlight around the Node
    * with focus. Note that when voicing is disabled we will never set the display.pointerFocusProperty to prevent
-   * extra work in VoicingInputListener, so this function shouldn't do much. But it is here to complete the API.
+   * extra work, so this function shouldn't do much. But it is here to complete the API.
    * @private
    */
   onVoicingHighlightsVisibleChange() {

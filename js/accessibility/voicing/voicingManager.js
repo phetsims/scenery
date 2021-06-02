@@ -9,10 +9,12 @@
  */
 
 import BooleanProperty from '../../../../axon/js/BooleanProperty.js';
+import DerivedProperty from '../../../../axon/js/DerivedProperty.js';
 import merge from '../../../../phet-core/js/merge.js';
 import StringUtils from '../../../../phetcommon/js/util/StringUtils.js';
 import scenery from '../../scenery.js';
 import VoicingResponsePatterns from './VoicingResponsePatterns.js';
+import webSpeaker from './webSpeaker.js';
 
 class VoicingManager {
   constructor() {
@@ -34,6 +36,10 @@ class VoicingManager {
     // Voicing for surrounding UI components enabled. At the time of this writing, all "Reading Blocks" are disabled
     // when Voicing for the "main window" is disabled. See ReadingBlock.js for more information.
     this.mainWindowVoicingEnabledProperty = new BooleanProperty( true );
+
+    // @public {DerivedProperty.<Boolean>} - Property that indicates that the Voicing feature is enabled for all areas
+    // of the application.
+    this.voicingFullyEnabledProperty = DerivedProperty.and( [ webSpeaker.enabledProperty, this.mainWindowVoicingEnabledProperty ] );
   }
 
   /**

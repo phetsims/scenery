@@ -1,4 +1,4 @@
-// Copyright 2020, University of Colorado Boulder
+// Copyright 2020-2021, University of Colorado Boulder
 
 /**
  * IO Type for Nodes that can save their own index (if phetioState: true).  Can be used to customize z-order
@@ -30,13 +30,19 @@ const IndexedNodeIO = new IOType( 'IndexedNodeIO', {
       assert && assert( node.parents.length === 1, 'IndexedNodeIO only supports nodes with a single parent' );
       stateObject.index = node.parents[ 0 ].indexOfChild( node );
     }
+    else {
+      stateObject.index = null;
+    }
     return stateObject;
   },
-  applyState: ( node, fromStateObject ) => {
-    if ( node.parents[ 0 ] ) {
+  applyState: ( node, stateObject ) => {
+    if ( node.parents[ 0 ] && stateObject.index ) {
       assert && assert( node.parents.length === 1, 'IndexedNodeIO only supports nodes with a single parent' );
-      node.parents[ 0 ].moveChildToIndex( node, fromStateObject.index );
+      node.parents[ 0 ].moveChildToIndex( node, stateObject.index );
     }
+  },
+  stateSchema: {
+    index: NumberIO
   },
   methods: {
     linkIndex: {

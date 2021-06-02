@@ -1,4 +1,4 @@
-// Copyright 2017-2020, University of Colorado Boulder
+// Copyright 2017-2021, University of Colorado Boulder
 
 /**
  * A trait that is meant to be composed with Node, adding accessibility by defining content for the Parallel DOM.
@@ -502,7 +502,7 @@ const ParallelDOM = {
 
         // By returning false, we prevent the component from toggling native HTML element attributes that convey state.
         // For example,this will prevent a checkbox from changing `checked` property while it is disabled. This way
-        // we can keep the component in tab order and don't need to add the `disabled` attribute. See
+        // we can keep the component in traversal order and don't need to add the `disabled` attribute. See
         // https://github.com/phetsims/sun/issues/519 and https://github.com/phetsims/sun/issues/640
         // This solution was found at https://stackoverflow.com/a/12267350/3408502
         this.setPDOMAttribute( 'onclick', enabled ? '' : 'return false' );
@@ -567,8 +567,8 @@ const ParallelDOM = {
 
       /**
        * Called when assertions are enabled and once the Node has been completely constructed. This is the time to
-       * make sure that options are saet up the way they are expected to be. For example. you don't want accessibleName
-       * and labelContent declared
+       * make sure that options are set up the way they are expected to be. For example. you don't want accessibleName
+       * and labelContent declared.
        * @public (only called by Screen.js)
        */
       pdomAudit: function() {
@@ -2649,7 +2649,7 @@ const ParallelDOM = {
 
           // If overridePruning is set, we ignore one reference to our node in the prune stack. If there are two copies,
           // however, it means a node was specified in a pdomOrder that already needs to be pruned (so we skip it instead
-          // of creating duplicate references in the tab order).
+          // of creating duplicate references in the traversal order).
           if ( pruneCount > 1 || ( pruneCount === 1 && !overridePruning ) ) {
             return;
           }

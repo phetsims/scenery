@@ -1,4 +1,4 @@
-// Copyright 2015-2020, University of Colorado Boulder
+// Copyright 2015-2021, University of Colorado Boulder
 
 /**
  * A single Canvas/texture with multiple different images (sprites) drawn internally. During rendering, this texture

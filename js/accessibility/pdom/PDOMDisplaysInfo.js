@@ -1,4 +1,4 @@
-// Copyright 2018-2020, University of Colorado Boulder
+// Copyright 2018-2021, University of Colorado Boulder
 
 /**
  * Per-node information required to track what PDOM Displays our Node is visible under. A PDOM display is a Display that

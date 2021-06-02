@@ -1,4 +1,4 @@
-// Copyright 2013-2020, University of Colorado Boulder
+// Copyright 2013-2021, University of Colorado Boulder
 
 /**
  * A rectangular node that inherits Path, and allows for optimized drawing and improved rectangle handling.
