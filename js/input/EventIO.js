@@ -1,7 +1,8 @@
 // Copyright 2018-2021, University of Colorado Boulder
 
 /**
- * IOType for a window.Event
+ * IOType for a window.Event. Since this needs to support any data from any subtype of window.Event, we supply NullableIO
+ * attributes for the union of different supported subtypes.  The subtypes are listed at https://developer.mozilla.org/en-US/docs/Web/API/Event
  *
  * @author Michael Kauzmann (PhET Interactive Simulations)
  * @author Chris Klusendorf (PhET Interactive Simulations)
