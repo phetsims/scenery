@@ -210,8 +210,7 @@ class WebSpeaker {
       speechSynthUtterance.pitch = this.voicePitchProperty.value;
       speechSynthUtterance.rate = this.voiceRateProperty.value;
 
-      // keep a reference to teh WebSpeechUtterance or Safari, so the browser
-      // doesn't dispose of it before firing, see #215
+      // keep a reference to WebSpeechUtterances in Safari, so the browser doesn't dispose of it before firing, see #215
       this.utterances.push( speechSynthUtterance );
 
       // Keep this out of the start listener so that it can be synchrounous to the UtteranceQueue draining/announcing, see bug in https://github.com/phetsims/sun/issues/699#issuecomment-831529485
@@ -224,6 +223,13 @@ class WebSpeaker {
       };
 
       const endListener = () => {
+
+        // remove the reference to the SpeechSynthesisUtterance so we don't leak memory
+        const indexOfUtterance = this.utterances.indexOf( speechSynthUtterance );
+        if ( indexOfUtterance > -1 ) {
+          this.utterances.splice( indexOfUtterance, 1 );
+        }
+
         this.endSpeakingEmitter.emit( utterance );
         this.speakingProperty.set( false );
         speechSynthUtterance.removeEventListener( 'end', endListener );
