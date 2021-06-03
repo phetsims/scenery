@@ -123,8 +123,8 @@ function isElementHidden( domElement ) {
 }
 
 /**
- * Get the next or previous focusable element in the parallel DOM, relative to the parent element passed in and
- * depending on the direction. Useful if you need to set focus dynamically or need to prevent default behavior
+ * Get the next or previous focusable element in the parallel DOM under the parent element and relative to the currently
+ * focused element. Useful if you need to set focus dynamically or need to prevent default behavior
  * when focus changes. If no next or previous focusable is found, it returns the currently focused element.
  * This function should not be used directly, use getNextFocusable() or getPreviousFocusable() instead.
  *
@@ -185,9 +185,9 @@ function tagNameSupportsContent( tagName ) {
 const PDOMUtils = {
 
   /**
-   * Get the next focusable element. This should very rarely be used.  The next focusable element can almost
-   * always be focused automatically with 'Tab'.  However, if the 'Tab' key needs to be emulated this can be
-   * helpful. If no next focusable can be found, it will return the currently focused element.
+   * Get the next focusable element relative to the currently focused element and under the parentElement.
+   * Can be useful if you want to emulate the 'Tab' key behavior or just transition focus to the next element
+   * in the document. If no next focusable can be found, it will return the currently focused element.
    * @public
    *
    * @param{HTMLElement} [parentElement] - optional, search will be limited to elements under this element
@@ -198,9 +198,9 @@ const PDOMUtils = {
   },
 
   /**
-   * Get the previous focusable element. This should very rarely be used.  The previous focusable element can almost
-   * always be found automatically with default 'Shift+Tab' behavior.  However, if the 'Tab' key needs to be emulated
-   * this can be helpful.  If no next focusable can be found, it will return the currently focused element.
+   * Get the previous focusable element relative to the currently focused element under the parentElement. Can be
+   * useful if you want to emulate 'Shift+Tab' behavior. If no next focusable can be found, it will return the
+   * currently focused element.
    * @public
    *
    * @param {HTMLElement} [parentElement] - optional, search will be limited to elements under this parent
@@ -208,6 +208,34 @@ const PDOMUtils = {
    */
   getPreviousFocusable( parentElement ) {
     return getNextPreviousFocusable( PREVIOUS, parentElement );
+  },
+
+  /**
+   * Get the first focusable element under the parentElement. If no element is available, the document.body is
+   * returned.
+   *
+   * @param {HTMLElement} parentElement - optionally restrict the search to elements under this parent
+   * @returns {HTMLElement}
+   */
+  getFirstFocusable( parentElement ) {
+    const parent = parentElement || document.body;
+    const linearDOM = getLinearDOMElements( parent );
+
+    // return the document.body if no element is found
+    let firstFocusable = document.body;
+
+    let nextIndex = 0;
+    while ( nextIndex < linearDOM.length ) {
+      const nextElement = linearDOM[ nextIndex ];
+      nextIndex++;
+
+      if ( PDOMUtils.isElementFocusable( nextElement ) ) {
+        firstFocusable = nextElement;
+        break;
+      }
+    }
+
+    return firstFocusable;
   },
 
   /**
