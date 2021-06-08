@@ -235,7 +235,8 @@ class FocusHighlightPath extends Path {
    * @returns {Trail}
    */
   getUniqueHighlightTrail() {
-    assert && assert( this.transformSourceNode.instances.length <= 1, 'transformSourceNode cannot use DAG, must have single trail.' );
+    assert && assert( this.transformSourceNode.instances.length <= 1,
+      `transformSourceNode cannot use DAG, must have single trail. transformSourceNode=${this.transformSourceNode}` );
     return this.transformSourceNode.getUniqueTrail();
   }
 
