@@ -190,7 +190,7 @@ const PDOMUtils = {
    * in the document. If no next focusable can be found, it will return the currently focused element.
    * @public
    *
-   * @param{HTMLElement} [parentElement] - optional, search will be limited to elements under this element
+   * @param {HTMLElement} [parentElement] - optional, search will be limited to elements under this element
    * @returns {HTMLElement}
    */
   getNextFocusable( parentElement ) {
