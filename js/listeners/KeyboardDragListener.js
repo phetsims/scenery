@@ -40,7 +40,8 @@ class KeyboardDragListener {
       dragVelocity: 600,
 
       // {number|null} - If shift key down while pressing direction key, this will be the 1D delta for movement in view
-      // coordinates every second.
+      // coordinates every second. Must be less than or equal to dragVelocity, and it is intended to provide user with
+      // more fine-grained control of motion.
       shiftDragVelocity: 300,
 
       // {Property.<Vector2>|null} - if provided, it will be synchronized with the drag position in the model
@@ -80,6 +81,7 @@ class KeyboardDragListener {
       // {number} - time interval at which holding down a hotkey group will trigger an associated listener, in ms
       hotkeyHoldInterval: 800
     }, options );
+    assert && assert( options.shiftDragVelocity <= options.dragVelocity, 'shiftDragVelocity should be less than or equal to shiftDragVelocity, it is intended to provide more fine-grained control' );
 
     // @private, mutable attributes declared from options, see options for info, as well as getters and setters
     this._start = options.start;
