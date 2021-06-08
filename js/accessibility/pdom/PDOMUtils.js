@@ -214,7 +214,7 @@ const PDOMUtils = {
    * Get the first focusable element under the parentElement. If no element is available, the document.body is
    * returned.
    *
-   * @param {HTMLElement} parentElement - optionally restrict the search to elements under this parent
+   * @param {HTMLElement} [parentElement] - optionally restrict the search to elements under this parent
    * @returns {HTMLElement}
    */
   getFirstFocusable( parentElement ) {
