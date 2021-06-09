@@ -503,7 +503,11 @@ extend( scenery, {
 
       if ( scenery.DOM && node instanceof scenery.DOM ) {
         serialization.type = 'DOM';
-        setup.element = new window.XMLSerializer().serializeToString( node.element );
+        serialization.element = new window.XMLSerializer().serializeToString( node.element );
+        if ( node.element instanceof window.HTMLCanvasElement ) {
+          serialization.dataURL = node.element.toDataURL();
+        }
+        options.preventTransform = node.preventTransform;
       }
 
       // Paintable
@@ -692,6 +696,16 @@ extend( scenery, {
         div.innerHTML = value.element;
         const element = div.childNodes[ 0 ];
         div.removeChild( element );
+
+        if ( value.dataURL ) {
+          const img = new window.Image();
+          img.onload = () => {
+            const context = element.getContext( '2d' );
+            context.drawImage( img, 0, 0 );
+          };
+          img.src = value.dataURL;
+        }
+
         node = new scenery.DOM( element );
       }
 
