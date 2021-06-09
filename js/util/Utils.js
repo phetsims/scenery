@@ -146,7 +146,7 @@ const Utils = {
   },
 
   /**
-   * Whether the native Canvas HTML5 api supports the 'filter' attribute (similar to the CSS/SVG filter attribute).
+   * Whether the native Canvas HTML5 API supports the 'filter' attribute (similar to the CSS/SVG filter attribute).
    * @public
    *
    * @returns {boolean}

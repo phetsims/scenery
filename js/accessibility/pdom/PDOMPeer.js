@@ -145,7 +145,7 @@ class PDOMPeer {
 
     // @private {*} - To support setting the Display.interactive=false (which sets disabled on all primarySiblings,
     // we need to set disabled on a separate channel from this.setAttributeToElement. That way we cover the case where
-    // `disabled` was set through the ParallelDOM api when we need to toggle it specifically for Display.interactive.
+    // `disabled` was set through the ParallelDOM API when we need to toggle it specifically for Display.interactive.
     // This way we can conserve the previous `disabled` attribute/property value through toggling Display.interactive.
     this._preservedDisabledValue = null;
 

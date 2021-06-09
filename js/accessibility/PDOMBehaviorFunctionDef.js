@@ -5,7 +5,7 @@
  * them to achieve the correct accessible behavior for that node in the PDOM.
  *
  * This type also holds many constant behavior functions for achieving certain structures in the PDOM using the "higher
- * level" api.
+ * level" API.
  *
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */

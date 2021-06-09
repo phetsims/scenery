@@ -439,7 +439,7 @@ class PDOMInstance {
           primarySibling.insertBefore( element, primarySibling.childNodes[ i + 1 ] );
         }
 
-        // Decrement so that it is easier to place elements using the browser's Node.insertBefore api
+        // Decrement so that it is easier to place elements using the browser's Node.insertBefore API
         i--;
       }
     }

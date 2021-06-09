@@ -95,7 +95,7 @@ QUnit.test( 'sibling positioning', assert => {
   display.updateDisplay();
   assert.ok( siblingBoundsCorrect( buttonElement ), 'button element descendant correclty positioned after inner content changed' );
 
-  // remove the display element so it doesn't interfere with qunit api
+  // remove the display element so it doesn't interfere with qunit API
   document.body.removeChild( display.domElement );
   display.dispose();
 
@@ -143,7 +143,7 @@ QUnit.test( 'PDOM transform source Node', assert => {
   assert.ok( siblingBoundsCorrect( buttonNode ), 'sibling bounds correct after source node repositioned' );
   assert.ok( !siblingBoundsBeforeSourceReposition.equals( getSiblingBounds( buttonNode ) ), 'transform source didnt change, primary sibling should not reposition' );
 
-  // remove the display element so it doesn't interfere with qunit api
+  // remove the display element so it doesn't interfere with qunit API
   document.body.removeChild( display.domElement );
   display.dispose();
 
@@ -168,7 +168,7 @@ QUnit.test( 'setPositionElements test', assert => {
   display.updateDisplay();
   assert.ok( siblingBoundsCorrect( buttonNode ), 'sibling bounds repositioned after positionInPDOM true' );
 
-  // remove the display element so it doesn't interfere with qunit api
+  // remove the display element so it doesn't interfere with qunit API
   document.body.removeChild( display.domElement );
   display.dispose();
 } );
