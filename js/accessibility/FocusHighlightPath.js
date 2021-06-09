@@ -232,12 +232,35 @@ class FocusHighlightPath extends Path {
    * transforms applied to the source node so that the focus highlight can update accordingly.
    *
    * @public (scenery-internal)
+   * @param {Trail} focusedTrail - Trail to focused Node, to help search unique Trail to the transformSourceNode
    * @returns {Trail}
    */
-  getUniqueHighlightTrail() {
-    assert && assert( this.transformSourceNode.instances.length <= 1,
-      `transformSourceNode cannot use DAG, must have single trail. transformSourceNode=${this.transformSourceNode}` );
-    return this.transformSourceNode.getUniqueTrail();
+  getUniqueHighlightTrail( focusedTrail ) {
+    let uniqueTrail = null;
+
+    // if there is only one instance of transformSourceNoe we can just grab its unique Trail
+    if ( this.transformSourceNode.instances.length === 1 ) {
+      uniqueTrail = this.transformSourceNode.getUniqueTrail();
+    }
+    else {
+
+      // there are multiple Trails to the focused Node, try to use the one that goes through both the focused trail
+      // and the transformSourceNode (a common case).
+      const extendedTrails = this.transformSourceNode.getTrails().filter( trail => trail.isExtensionOf( focusedTrail, true ) );
+
+      // If the trail to the transformSourceNode is not unique, does not go through the focused Node, or has
+      // multiple Trails that go through the focused Node it is impossible to determine the Trail to use for the
+      // highlight. Either avoid DAG for the transformSourceNode or use a FocusHighlightPath without
+      // transformSourceNode.
+      assert && assert( extendedTrails.length === 1,
+        'No unique trail to highlight, either avoid DAG for transformSourceNode or don\'t use transformSourceNode with FocusHighlightPath'
+      );
+
+      uniqueTrail = extendedTrails[ 0 ];
+    }
+
+    assert && assert( uniqueTrail, 'no unique Trail found for getUniqueHighlightTrail' );
+    return uniqueTrail;
   }
 
 

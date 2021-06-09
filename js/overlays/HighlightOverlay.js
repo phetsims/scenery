@@ -234,7 +234,7 @@ class HighlightOverlay {
 
       // if using a focus highlight from another node, we will track that node's transform instead of the focused node
       if ( highlight.transformSourceNode ) {
-        trailToTrack = highlight.getUniqueHighlightTrail();
+        trailToTrack = highlight.getUniqueHighlightTrail( this.trail );
       }
 
       // store the focus highlight so that it can be removed later
