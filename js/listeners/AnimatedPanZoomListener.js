@@ -746,13 +746,19 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
   /**
    * If the Node is outside of panBounds (the bounds that should always be filled with content) pan to the Node so that
-   * it remains in view.
+   * it remains in view. If the Node has multiple Instances there is not a unique transform to use so we cannot
+   * pan to it.
    * @public
    *
    * @param {Node} node
    */
   keepNodeInView( node ) {
-    if ( this._panBounds.isFinite() && node.bounds.isFinite() && !this._panBounds.containsBounds( node.globalBounds ) ) {
+    if (
+      this._panBounds.isFinite() &&
+      node.bounds.isFinite() &&
+      node.instances.length === 0 && // TODO: Support DAG? Perhaps keepTrailInView would be more appropriate
+      !this._panBounds.containsBounds( node.globalBounds )
+    ) {
       this.panToNode( node );
     }
   }
@@ -1031,9 +1037,11 @@ class KeyPress {
 
     // zoom into the focused Node if it has defined bounds, it may not if it is for controlling the
     // virtual cursor and has an invisible focus highlight
-    const focusedNode = Display.focusedNode;
-    if ( focusedNode && focusedNode.bounds.isFinite() ) {
-      scratchScaleTargetVector.set( focusedNode.parentToGlobalPoint( focusedNode.center ) );
+    const focus = Display.focusProperty.value;
+    const focusTrail = Display.focusProperty.value.trail;
+    const focusedNode = focusTrail.lastNode();
+    if ( focus && focusedNode.bounds.isFinite() ) {
+      scratchScaleTargetVector.set( focusTrail.parentToGlobalPoint( focusedNode.center ) );
     }
     else {
 

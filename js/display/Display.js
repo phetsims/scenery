@@ -2175,7 +2175,9 @@ class Display {
 
     // if set to null, make sure that the active element is no longer focused
     if ( previousFocus && !value ) {
-      previousFocus.blur();
+
+      // blur the document.activeElement instead of going through the Node, Node.blur() won't work in cases of DAG
+      document.activeElement.blur();
     }
   }
 

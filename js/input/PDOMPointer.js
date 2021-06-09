@@ -57,7 +57,7 @@ class PDOMPointer extends Pointer {
         // NOTE: The "root" peer can't be focused (so it doesn't matter if it doesn't have a node).
         if ( lastNode.focusable ) {
           Display.focus = new Focus( this.display, PDOMInstance.guessVisualTrail( this.trail, this.display.rootNode ) );
-          this.point = lastNode.parentToGlobalPoint( lastNode.center );
+          this.point = this.trail.parentToGlobalPoint( lastNode.center );
         }
       },
       blur: event => {
