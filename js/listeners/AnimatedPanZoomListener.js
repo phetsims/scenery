@@ -1038,10 +1038,12 @@ class KeyPress {
     // zoom into the focused Node if it has defined bounds, it may not if it is for controlling the
     // virtual cursor and has an invisible focus highlight
     const focus = Display.focusProperty.value;
-    const focusTrail = Display.focusProperty.value.trail;
-    const focusedNode = focusTrail.lastNode();
-    if ( focus && focusedNode.bounds.isFinite() ) {
-      scratchScaleTargetVector.set( focusTrail.parentToGlobalPoint( focusedNode.center ) );
+    if ( focus ) {
+      const focusTrail = Display.focusProperty.value.trail;
+      const focusedNode = focusTrail.lastNode();
+      if ( focusedNode.bounds.isFinite() ) {
+        scratchScaleTargetVector.set( focusTrail.parentToGlobalPoint( focusedNode.center ) );
+      }
     }
     else {
 
