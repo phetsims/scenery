@@ -238,8 +238,8 @@ class FocusHighlightPath extends Path {
   getUniqueHighlightTrail( focusedTrail ) {
     let uniqueTrail = null;
 
-    // if there is only one instance of transformSourceNoe we can just grab its unique Trail
-    if ( this.transformSourceNode.instances.length === 1 ) {
+    // if there is only one instance of transformSourceNode we can just grab its unique Trail
+    if ( this.transformSourceNode.instances.length <= 1 ) {
       uniqueTrail = this.transformSourceNode.getUniqueTrail();
     }
     else {
