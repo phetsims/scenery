@@ -342,6 +342,13 @@ class Display {
     // made depending on which features are enabled.
     this.pointerFocusProperty = new Property( null );
 
+    // @public {BooleanProperty} - A Property that controls whether the highlight for the pointerFocusProperty
+    // is locked so that the HighlightOverlay will wait to update the highlight for the pointerFocusProperty. This
+    // is useful when the pointer has begun to interact with a Node that uses MouseHighlighting, but the mouse
+    // has moved over another during interaction. The highlight should remain on the Node receiving interaction
+    // and wait to update until interaction completes.
+    this.pointerFocusLockedProperty = new Property( false );
+
     // @public {Property.<Focus|null> - The Property that indicates which Node that uses ReadingBlock is currently
     // active. Used by the HighlightOverlay to highlight Nodes that are being spoken.
     this.readingBlockFocusProperty = new Property( null );

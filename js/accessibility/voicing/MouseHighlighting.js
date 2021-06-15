@@ -39,18 +39,29 @@ const MouseHighlighting = {
         // @private - Input listener to activate the HighlightOverlay upon pointer mouse input. Uses exit
         // and enter instead of over and out because we do not want this to fire from bubbling. The highlight
         // should be around this Node when it receives input.
-        this.enterExitListener = {
+        this.activationListener = {
           enter: this.onPointerEntered.bind( this ),
-          exit: this.onPointerExited.bind( this )
+          exit: this.onPointerExited.bind( this ),
+          down: this.onPointerDown.bind( this )
         };
-        this.addInputListener( this.enterExitListener );
+        this.addInputListener( this.activationListener );
+
+        const boundPointerReleaseListener = this.onPointerUp.bind( this );
+
+        // @private - Input listener that locks the HighlightOverlay so that there are no updates to the highlight
+        // while the pointer is down over something that uses MouseHighlighting.
+        this.pointerListener = {
+          up: boundPointerReleaseListener,
+          cancel: boundPointerReleaseListener,
+          interrupt: boundPointerReleaseListener
+        };
       },
 
       /**
        * @public
        */
       disposeMouseHighlighting() {
-        this.removeInputListener( this.enterExitListener );
+        this.removeInputListener( this.activationListener );
       },
 
       /**
@@ -83,6 +94,41 @@ const MouseHighlighting = {
         for ( let i = 0; i < displays.length; i++ ) {
           const display = displays[ i ];
           display.pointerFocusProperty.set( null );
+        }
+      },
+
+      /**
+       * When a pointer goes down on this Node, signal to the Displays that the pointerFocus is locked
+       * @private
+       *
+       * @param {SceneryEvent} event
+       */
+      onPointerDown( event ) {
+        const displays = this.getConnectedDisplays();
+        for ( let i = 0; i < displays.length; i++ ) {
+          const display = displays[ i ];
+          display.pointerFocusLockedProperty.set( true );
+
+          event.pointer.addInputListener( this.pointerListener );
+        }
+      },
+
+      /**
+       * When a Pointer goes up after going down on this Node, signal to the Displays that the pointerFocusProperty no
+       * longer needs to be locked.
+       * @private
+       *
+       * @param {SceneryEvent} event
+       */
+      onPointerUp( event ) {
+        const displays = this.getConnectedDisplays();
+        for ( let i = 0; i < displays.length; i++ ) {
+          const display = displays[ i ];
+          display.pointerFocusLockedProperty.set( false );
+
+          if ( event.pointer.listeners.includes( this.pointerListener ) ) {
+            event.pointer.removeInputListener( this.pointerListener );
+          }
         }
       }
     } );

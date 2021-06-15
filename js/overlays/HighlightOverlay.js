@@ -155,6 +155,7 @@ class HighlightOverlay {
     this.focusHighlightsVisibleListener = this.onFocusHighlightsVisibleChange.bind( this );
     this.voicingHighlightsVisibleListener = this.onVoicingHighlightsVisibleChange.bind( this );
     this.pointerFocusListener = this.onPointerFocusChange.bind( this );
+    this.pointerFocusLockedListener = this.onPointerFocusLockedChange.bind( this );
     this.startSpeakingListener = this.onSpeakingStart.bind( this );
     this.endSpeakingListener = this.onSpeakingEnd.bind( this );
     this.readingBlockFocusListener = this.onReadingBlockFocusChange.bind( this );
@@ -162,6 +163,8 @@ class HighlightOverlay {
     Display.focusProperty.link( this.focusListener );
     display.pointerFocusProperty.link( this.pointerFocusListener );
     display.readingBlockFocusProperty.link( this.readingBlockFocusListener );
+
+    display.pointerFocusLockedProperty.link( this.pointerFocusLockedListener );
 
     this.focusHighlightsVisibleProperty.link( this.focusHighlightsVisibleListener );
     this.interactiveHighlightsVisibleProperty.link( this.voicingHighlightsVisibleListener );
@@ -520,26 +523,38 @@ class HighlightOverlay {
    * @param {Focus} focus
    */
   onPointerFocusChange( focus ) {
-    const newTrail = ( focus && focus.display === this.display ) ? focus.trail : null;
+    if ( !this.display.pointerFocusLockedProperty.value ) {
+      const newTrail = ( focus && focus.display === this.display ) ? focus.trail : null;
 
-    if ( this.hasHighlight() ) {
-      this.deactivateHighlight();
-    }
+      if ( this.hasHighlight() ) {
+        this.deactivateHighlight();
+      }
 
-    let activated = false;
-    if ( newTrail ) {
-      const node = newTrail.lastNode();
+      let activated = false;
+      if ( newTrail ) {
+        const node = newTrail.lastNode();
 
-      if ( ( node.isReadingBlock && this.readingBlockHighlightsVisibleProperty.value ) || ( !node.isReadingBlock && this.interactiveHighlightsVisibleProperty.value ) ) {
-        this.activateHighlight( newTrail, node );
+        if ( ( node.isReadingBlock && this.readingBlockHighlightsVisibleProperty.value ) || ( !node.isReadingBlock && this.interactiveHighlightsVisibleProperty.value ) ) {
+          this.activateHighlight( newTrail, node );
 
-        activated = true;
+          activated = true;
+        }
+      }
+
+      if ( !activated && Display.focus && this.focusHighlightsVisibleProperty.value ) {
+        this.onFocusChange( Display.focus );
       }
     }
+  }
 
-    if ( !activated && Display.focus && this.focusHighlightsVisibleProperty.value ) {
-      this.onFocusChange( Display.focus );
-    }
+  /**
+   * Called whenever the pointerFocusLockedProperty changes.
+   * @private
+   *
+   * @param {boolean} locked
+   */
+  onPointerFocusLockedChange( locked ) {
+    this.onPointerFocusChange( this.display.pointerFocusProperty.value );
   }
 
   /**
