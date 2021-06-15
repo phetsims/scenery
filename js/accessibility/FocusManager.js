@@ -9,7 +9,7 @@
  *  - DOM Focus - The Focus Trail points to the Node whose element has DOM focus in the Parallel DOM.
  *                Only one element can have focus at a time (DOM limitation) so this is managed by a static on
  *                FocusManager.
- *  - Pointer focus - The Focus trail points to a Node that supports Highlighting with pointer events.
+ *  - Pointer Focus - The Focus trail points to a Node that supports Highlighting with pointer events.
  *  - Reading Block Focus - The Focus Trail points to a Node that supports ReadingBlocks, and is active
  *                          while the ReadingBlock content is being spoken for Voicing. See ReadingBlock.js
  *
