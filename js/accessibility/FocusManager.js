@@ -114,8 +114,8 @@ class FocusManager {
 // phetioValueType, PhET-iO is able to interoperate (save, restore, control, observe what is currently focused).
 // See FocusManager.pdomFocus for setting the focus. Don't set the value of this Property directly.
 FocusManager.pdomFocusProperty = new Property( null, {
-  tandem: Tandem.GENERAL_MODEL.createTandem( 'domFocusProperty' ),
-  phetioDocumentation: 'Stores the current focus in the simulation, null if there is nothing focused. This is not updated ' +
+  tandem: Tandem.GENERAL_MODEL.createTandem( 'pdomFocusProperty' ),
+  phetioDocumentation: 'Stores the current focus in the Parallel DOM, null if nothing has focus. This is not updated ' +
                        'based on mouse or touch input, only keyboard and other alternative inputs. Note that this only ' +
                        'applies to simulations that support alternative input.',
   phetioType: Property.PropertyIO( NullableIO( Focus.FocusIO ) ),
