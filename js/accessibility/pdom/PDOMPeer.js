@@ -707,7 +707,7 @@ class PDOMPeer {
    */
   isFocused() {
     const visualFocusTrail = scenery.PDOMInstance.guessVisualTrail( this.trail, this.display.rootNode );
-    return scenery.Display.focusProperty.value && scenery.Display.focusProperty.value.trail.equals( visualFocusTrail );
+    return scenery.FocusManager.pdomFocusProperty.value && scenery.FocusManager.pdomFocusProperty.value.trail.equals( visualFocusTrail );
   }
 
   /**

@@ -19,8 +19,8 @@
  */
 
 import stepTimer from '../../../axon/js/stepTimer.js';
+import FocusManager from '../accessibility/FocusManager.js';
 import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
-import Display from '../display/Display.js';
 import Pointer from '../input/Pointer.js';
 import scenery from '../scenery.js';
 
@@ -145,7 +145,7 @@ class SwipeListener {
 
             // for upcoming interviews, lets limit the focus to be within the simulation,
             // don't allow it to go into the (uninstrumented) navigation bar
-            if ( Display.focusedNode && Display.focusedNode.innerContent === 'Reset All' ) {
+            if ( FocusManager.pdomFocusedNode && FocusManager.pdomFocusedNode.innerContent === 'Reset All' ) {
               return;
             }
             PDOMUtils.getNextFocusable( document.body ).focus();
@@ -266,7 +266,7 @@ class SwipeListener {
 
           // user has pressed down for long enough to forward a drag event to the
           // focused node
-          const focusedNode = Display.focusedNode;
+          const focusedNode = FocusManager.pdomFocusedNode;
           if ( focusedNode ) {
 
             // remove the listener looking for gestures

@@ -396,7 +396,7 @@ const PDOMTree = {
    */
   beforeOp( node ) {
     // paranoia about initialization order (should be safe)
-    focusedNode = scenery.Display && scenery.Display.focusedNode;
+    focusedNode = scenery.Display && scenery.FocusManager.pdomFocusedNode;
 
     // list of displays to stop blocking focus callbacks in afterOp
     const displays = [];

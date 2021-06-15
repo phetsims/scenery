@@ -308,7 +308,7 @@ class PressListener extends EnabledComponent {
 
     // {Display|null} To support looksOverProperty being true based on focus, we need to monitor the display from which
     // the event has come from to see if that display is showing its focusHighlights, see
-    // Display.prototype.focusHighlightsVisibleProperty for details.
+    // Display.prototype.focusManager.FocusManager.pdomFocusHighlightsVisibleProperty for details.
     this.display = null;
 
     // @private - we need the same exact function to add and remove as a listener
@@ -591,7 +591,7 @@ class PressListener extends EnabledComponent {
     // display is showing focus highlights)
     this.isOverProperty.value = ( this.overPointers.length > 0 && !pointerAttachedToOther );
     this.looksOverProperty.value = this.isOverProperty.value ||
-                                   ( this.isFocusedProperty.value && !!this.display && this.display.focusHighlightsVisibleProperty.value );
+                                   ( this.isFocusedProperty.value && !!this.display && this.display.focusManager.pdomFocusHighlightsVisibleProperty.value );
   }
 
   /**
@@ -937,8 +937,8 @@ class PressListener extends EnabledComponent {
       'cannot focus node with zero or multiple accessible displays attached' );
     //
     this.display = accessibleDisplays[ 0 ];
-    if ( !this.display.focusHighlightsVisibleProperty.hasListener( this.boundInvalidateOverListener ) ) {
-      this.display.focusHighlightsVisibleProperty.link( this.boundInvalidateOverListener );
+    if ( !this.display.focusManager.pdomFocusHighlightsVisibleProperty.hasListener( this.boundInvalidateOverListener ) ) {
+      this.display.focusManager.pdomFocusHighlightsVisibleProperty.link( this.boundInvalidateOverListener );
     }
 
     // On focus, button should look 'over'.
@@ -952,8 +952,8 @@ class PressListener extends EnabledComponent {
    */
   blur() {
     if ( this.display ) {
-      if ( this.display.focusHighlightsVisibleProperty.hasListener( this.boundInvalidateOverListener ) ) {
-        this.display.focusHighlightsVisibleProperty.unlink( this.boundInvalidateOverListener );
+      if ( this.display.focusManager.pdomFocusHighlightsVisibleProperty.hasListener( this.boundInvalidateOverListener ) ) {
+        this.display.focusManager.pdomFocusHighlightsVisibleProperty.unlink( this.boundInvalidateOverListener );
       }
       this.display = null;
     }
@@ -997,7 +997,7 @@ class PressListener extends EnabledComponent {
 
     // Remove references to the stored display, if we have any.
     if ( this.display ) {
-      this.display.focusHighlightsVisibleProperty.unlink( this.boundInvalidateOverListener );
+      this.display.focusManager.pdomFocusHighlightsVisibleProperty.unlink( this.boundInvalidateOverListener );
       this.display = null;
     }
 

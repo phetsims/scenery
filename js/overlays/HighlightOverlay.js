@@ -14,6 +14,7 @@ import Shape from '../../../kite/js/Shape.js';
 import merge from '../../../phet-core/js/merge.js';
 import FocusHighlightFromNode from '../accessibility/FocusHighlightFromNode.js';
 import FocusHighlightPath from '../accessibility/FocusHighlightPath.js';
+import FocusManager from '../accessibility/FocusManager.js';
 import webSpeaker from '../accessibility/voicing/webSpeaker.js';
 import Display from '../display/Display.js';
 import Node from '../nodes/Node.js';
@@ -42,14 +43,14 @@ class HighlightOverlay {
 
     options = merge( {
 
-      // {BooleanProperty} - controls whether highlights are shown in response to focus events
-      focusHighlightsVisibleProperty: new BooleanProperty( true ),
+      // {BooleanProperty} - controls whether highlights related to DOM focus are visible
+      pdomFocusHighlightsVisibleProperty: new BooleanProperty( true ),
 
-      // {BooleanProperty} - controls whether interactive highlights are visible
+      // {BooleanProperty} - controls whether highlights related to Interactive Highlights are visible
       interactiveHighlightsVisibleProperty: new BooleanProperty( false ),
 
       // {BooleanProperty - controls whether highlights associated with ReadingBlocks (of the Voicing feature set)
-      // are shown when display.pointerFocusProperty changes
+      // are shown when pointerFocusProperty changes
       readingBlockHighlightsVisibleProperty: new BooleanProperty( false )
     }, options );
 
@@ -95,7 +96,7 @@ class HighlightOverlay {
     this.focusRootNode.addChild( this.highlightNode );
 
     // @public - control if highlights are visible on this overlay
-    this.focusHighlightsVisibleProperty = options.focusHighlightsVisibleProperty;
+    this.pdomFocusHighlightsVisibleProperty = options.pdomFocusHighlightsVisibleProperty;
     this.interactiveHighlightsVisibleProperty = options.interactiveHighlightsVisibleProperty;
     this.readingBlockHighlightsVisibleProperty = options.readingBlockHighlightsVisibleProperty;
 
@@ -150,7 +151,7 @@ class HighlightOverlay {
     // @private - Listeners bound once, so we can access them for removal.
     this.boundsListener = this.onBoundsChange.bind( this );
     this.transformListener = this.onTransformChange.bind( this );
-    this.focusListener = this.onFocusChange.bind( this );
+    this.domFocusListener = this.onFocusChange.bind( this );
     this.focusHighlightListener = this.onFocusHighlightChange.bind( this );
     this.focusHighlightsVisibleListener = this.onFocusHighlightsVisibleChange.bind( this );
     this.voicingHighlightsVisibleListener = this.onVoicingHighlightsVisibleChange.bind( this );
@@ -160,13 +161,13 @@ class HighlightOverlay {
     this.endSpeakingListener = this.onSpeakingEnd.bind( this );
     this.readingBlockFocusListener = this.onReadingBlockFocusChange.bind( this );
 
-    Display.focusProperty.link( this.focusListener );
-    display.pointerFocusProperty.link( this.pointerFocusListener );
-    display.readingBlockFocusProperty.link( this.readingBlockFocusListener );
+    FocusManager.pdomFocusProperty.link( this.domFocusListener );
+    display.focusManager.pointerFocusProperty.link( this.pointerFocusListener );
+    display.focusManager.readingBlockFocusProperty.link( this.readingBlockFocusListener );
 
-    display.pointerFocusLockedProperty.link( this.pointerFocusLockedListener );
+    display.focusManager.pointerFocusLockedProperty.link( this.pointerFocusLockedListener );
 
-    this.focusHighlightsVisibleProperty.link( this.focusHighlightsVisibleListener );
+    this.pdomFocusHighlightsVisibleProperty.link( this.focusHighlightsVisibleListener );
     this.interactiveHighlightsVisibleProperty.link( this.voicingHighlightsVisibleListener );
 
     webSpeaker.startSpeakingEmitter.addListener( this.startSpeakingListener );
@@ -182,12 +183,12 @@ class HighlightOverlay {
       this.deactivateHighlight();
     }
 
-    Display.focusProperty.unlink( this.focusListener );
-    this.focusHighlightsVisibleProperty.unlink( this.focusHighlightsVisibleListener );
+    FocusManager.pdomFocusProperty.unlink( this.domFocusListener );
+    this.pdomFocusHighlightsVisibleProperty.unlink( this.focusHighlightsVisibleListener );
     this.interactiveHighlightsVisibleProperty.unlink( this.voicingHighlightsVisibleListener );
 
-    this.display.pointerFocusProperty.unlink( this.pointerFocusListener );
-    this.display.readingBlockFocusProperty.unlink( this.readingBlockFocusListener );
+    this.display.focusManager.pointerFocusProperty.unlink( this.pointerFocusListener );
+    this.display.focusManager.readingBlockFocusProperty.unlink( this.readingBlockFocusListener );
 
     webSpeaker.startSpeakingEmitter.removeListener( this.startSpeakingListener );
     webSpeaker.endSpeakingEmitter.removeListener( this.endSpeakingListener );
@@ -251,7 +252,7 @@ class HighlightOverlay {
         // the focusHighlight is just a node in the scene graph, so set it visible - visibility of other highlights
         // controlled by visibility of parent Nodes but that cannot be done in this case because the highlight
         // can be anywhere in the scene graph, so have to check highlightsVisibleProperty
-        this.nodeFocusHighlight.visible = this.focusHighlightsVisibleProperty.get();
+        this.nodeFocusHighlight.visible = this.pdomFocusHighlightsVisibleProperty.get();
       }
       else {
         this.nodeFocusHighlight.visible = true;
@@ -321,7 +322,7 @@ class HighlightOverlay {
   deactivateHighlight() {
 
     // deactivate the readingBlock whenever a highlight is deactivated
-    this.display.readingBlockFocusProperty.value = null;
+    this.display.focusManager.readingBlockFocusProperty.value = null;
 
     if ( this.mode === 'shape' ) {
       this.shapeFocusHighlightPath.visible = false;
@@ -504,13 +505,13 @@ class HighlightOverlay {
       this.deactivateHighlight();
     }
 
-    if ( newTrail && this.focusHighlightsVisibleProperty.value ) {
+    if ( newTrail && this.pdomFocusHighlightsVisibleProperty.value ) {
       const node = newTrail.lastNode();
 
       this.activateHighlight( newTrail, node );
     }
-    else if ( this.display.pointerFocusProperty.value && this.interactiveHighlightsVisibleProperty.value ) {
-      this.onPointerFocusChange( this.display.pointerFocusProperty.value );
+    else if ( this.display.focusManager.pointerFocusProperty.value && this.interactiveHighlightsVisibleProperty.value ) {
+      this.onPointerFocusChange( this.display.focusManager.pointerFocusProperty.value );
     }
   }
 
@@ -523,7 +524,7 @@ class HighlightOverlay {
    * @param {Focus} focus
    */
   onPointerFocusChange( focus ) {
-    if ( !this.display.pointerFocusLockedProperty.value ) {
+    if ( !this.display.focusManager.pointerFocusLockedProperty.value ) {
       const newTrail = ( focus && focus.display === this.display ) ? focus.trail : null;
 
       if ( this.hasHighlight() ) {
@@ -541,8 +542,8 @@ class HighlightOverlay {
         }
       }
 
-      if ( !activated && Display.focus && this.focusHighlightsVisibleProperty.value ) {
-        this.onFocusChange( Display.focus );
+      if ( !activated && FocusManager.pdomFocus && this.pdomFocusHighlightsVisibleProperty.value ) {
+        this.onFocusChange( FocusManager.pdomFocus );
       }
     }
   }
@@ -554,11 +555,11 @@ class HighlightOverlay {
    * @param {boolean} locked
    */
   onPointerFocusLockedChange( locked ) {
-    this.onPointerFocusChange( this.display.pointerFocusProperty.value );
+    this.onPointerFocusChange( this.display.focusManager.pointerFocusProperty.value );
   }
 
   /**
-   * Responsible for deactivating the Reading Block highlight when the display.readingBlockFocusProperty changes.
+   * Responsible for deactivating the Reading Block highlight when the display.focusManager.readingBlockFocusProperty changes.
    * The Reading Block waits to activate until the webSpeaker starts speaking because there is often a stop speaking
    * event that comes right after the speaker starts to interrupt the previous utterance.
    * @private
@@ -578,8 +579,8 @@ class HighlightOverlay {
    * @private
    */
   onSpeakingStart() {
-    if ( this.display.readingBlockFocusProperty.value ) {
-      this.activateSpeakingHighlight( this.display.readingBlockFocusProperty.value.trail );
+    if ( this.display.focusManager.readingBlockFocusProperty.value ) {
+      this.activateSpeakingHighlight( this.display.focusManager.readingBlockFocusProperty.value.trail );
     }
   }
 
@@ -600,7 +601,7 @@ class HighlightOverlay {
    */
   onFocusHighlightChange() {
     assert && assert( this.node.focused, 'update should only be necessary if node already has focus' );
-    this.onFocusChange( Display.focus );
+    this.onFocusChange( FocusManager.pdomFocus );
   }
 
   /**
@@ -609,17 +610,17 @@ class HighlightOverlay {
    * @private
    */
   onFocusHighlightsVisibleChange() {
-    this.onFocusChange( Display.focus );
+    this.onFocusChange( FocusManager.pdomFocus );
   }
 
   /**
    * When voicing highlight visibility changes, deactivate highlights or reactivate the highlight around the Node
-   * with focus. Note that when voicing is disabled we will never set the display.pointerFocusProperty to prevent
+   * with focus. Note that when voicing is disabled we will never set the pointerFocusProperty to prevent
    * extra work, so this function shouldn't do much. But it is here to complete the API.
    * @private
    */
   onVoicingHighlightsVisibleChange() {
-    this.onPointerFocusChange( this.display.pointerFocusProperty.value );
+    this.onPointerFocusChange( this.display.focusManager.pointerFocusProperty.value );
   }
 
   /**

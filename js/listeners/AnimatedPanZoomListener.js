@@ -17,11 +17,11 @@ import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
 import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
+import FocusManager from '../accessibility/FocusManager.js';
 import globalKeyStateTracker from '../accessibility/globalKeyStateTracker.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import KeyboardZoomUtils from '../accessibility/KeyboardZoomUtils.js';
 import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
-import Display from '../display/Display.js';
 import EventIO from '../input/EventIO.js';
 import Pointer from '../input/Pointer.js';
 import scenery from '../scenery.js';
@@ -169,7 +169,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
         this.keepNodeInView( focus.trail.lastNode() );
       }
     };
-    Display.focusProperty.link( displayFocusListener );
+    FocusManager.pdomFocusProperty.link( displayFocusListener );
 
     // set source and destination positions and scales after setting from state
     // to initialize values for animation with AnimatedPanZoomListener
@@ -190,7 +190,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
       boundGestureStartListener && window.removeEventListener( 'gesturestart', boundGestureStartListener );
       boundGestureChangeListener && window.removeEventListener( 'gestureChange', boundGestureChangeListener );
 
-      Display.focusProperty.unlink( displayFocusListener );
+      FocusManager.pdomFocusProperty.unlink( displayFocusListener );
     };
   }
 
@@ -1037,9 +1037,9 @@ class KeyPress {
 
     // zoom into the focused Node if it has defined bounds, it may not if it is for controlling the
     // virtual cursor and has an invisible focus highlight
-    const focus = Display.focusProperty.value;
+    const focus = FocusManager.pdomFocusProperty.value;
     if ( focus ) {
-      const focusTrail = Display.focusProperty.value.trail;
+      const focusTrail = FocusManager.pdomFocusProperty.value.trail;
       const focusedNode = focusTrail.lastNode();
       if ( focusedNode.bounds.isFinite() ) {
         scratchScaleTargetVector.set( focusTrail.parentToGlobalPoint( focusedNode.center ) );

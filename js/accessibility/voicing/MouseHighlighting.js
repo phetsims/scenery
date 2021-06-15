@@ -76,8 +76,8 @@ const MouseHighlighting = {
         for ( let i = 0; i < displays.length; i++ ) {
           const display = displays[ i ];
 
-          if ( display.pointerFocusProperty.value === null || !event.trail.equals( display.pointerFocusProperty.value.trail ) ) {
-            display.pointerFocusProperty.set( new Focus( display, event.trail ) );
+          if ( display.focusManager.pointerFocusProperty.value === null || !event.trail.equals( display.focusManager.pointerFocusProperty.value.trail ) ) {
+            display.focusManager.pointerFocusProperty.set( new Focus( display, event.trail ) );
           }
         }
       },
@@ -93,7 +93,7 @@ const MouseHighlighting = {
         const displays = this.getConnectedDisplays();
         for ( let i = 0; i < displays.length; i++ ) {
           const display = displays[ i ];
-          display.pointerFocusProperty.set( null );
+          display.focusManager.pointerFocusProperty.set( null );
         }
       },
 
@@ -107,7 +107,7 @@ const MouseHighlighting = {
         const displays = this.getConnectedDisplays();
         for ( let i = 0; i < displays.length; i++ ) {
           const display = displays[ i ];
-          display.pointerFocusLockedProperty.set( true );
+          display.focusManager.pointerFocusLockedProperty.set( true );
 
           event.pointer.addInputListener( this.pointerListener );
         }
@@ -124,7 +124,7 @@ const MouseHighlighting = {
         const displays = this.getConnectedDisplays();
         for ( let i = 0; i < displays.length; i++ ) {
           const display = displays[ i ];
-          display.pointerFocusLockedProperty.set( false );
+          display.focusManager.pointerFocusLockedProperty.set( false );
 
           if ( event.pointer.listeners.includes( this.pointerListener ) ) {
             event.pointer.removeInputListener( this.pointerListener );

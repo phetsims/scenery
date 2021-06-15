@@ -50,9 +50,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import Emitter from '../../../axon/js/Emitter.js';
-import Property from '../../../axon/js/Property.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import Dimension2 from '../../../dot/js/Dimension2.js';
@@ -61,10 +59,9 @@ import escapeHTML from '../../../phet-core/js/escapeHTML.js';
 import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import AriaHerald from '../../../utterance-queue/js/AriaHerald.js';
 import UtteranceQueue from '../../../utterance-queue/js/UtteranceQueue.js';
-import Focus from '../accessibility/Focus.js';
+import FocusManager from '../accessibility/FocusManager.js';
 import globalKeyStateTracker from '../accessibility/globalKeyStateTracker.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import PDOMInstance from '../accessibility/pdom/PDOMInstance.js';
@@ -337,42 +334,20 @@ class Display {
       tandem: options.tandem.createTandem( 'utteranceQueue' )
     } );
 
-    // @public {Property.<Focus|null>} - The Property that indicates where Focus is under the Pointer for the Voicing
-    // feature. Nodes that compose Voicing can receive this Focus and a highlight may appear or speech may be
-    // made depending on which features are enabled.
-    this.pointerFocusProperty = new Property( null );
-
-    // @public {BooleanProperty} - A Property that controls whether the highlight for the pointerFocusProperty
-    // is locked so that the HighlightOverlay will wait to update the highlight for the pointerFocusProperty. This
-    // is useful when the pointer has begun to interact with a Node that uses MouseHighlighting, but the mouse
-    // has moved over another during interaction. The highlight should remain on the Node receiving interaction
-    // and wait to update until interaction completes.
-    this.pointerFocusLockedProperty = new Property( false );
-
-    // @public {Property.<Focus|null> - The Property that indicates which Node that uses ReadingBlock is currently
-    // active. Used by the HighlightOverlay to highlight Nodes that are being spoken.
-    this.readingBlockFocusProperty = new Property( null );
+    // @public - Manages the various types of Focus that can go through the Display, as well as Properties
+    // controlling which forms of focus should be displayed in the HighlightOverlay.
+    this.focusManager = new FocusManager();
 
     if ( this._accessible ) {
 
       // @private {Node}
       this._focusRootNode = new Node();
 
-      // @public - to control if the focusHighlights is visible on this accessible Display.
-      this.focusHighlightsVisibleProperty = new BooleanProperty( true );
-
-      // @public {BooleanProperty} - whether "interactive highlights" are enabled, controlling the visibility
-      // of highlights that will surround Nodes that are interactive
-      this.interactiveHighlightsVisibleProperty = new BooleanProperty( false );
-
-      // @public {BooleanProperty} - whether "reading block" highlights are visible, and will be shown
-      this.readingBlockHighlightsVisibleProperty = new BooleanProperty( false );
-
       // @private {HighlightOverlay}
       this._focusOverlay = new HighlightOverlay( this, this._focusRootNode, {
-        focusHighlightsVisibleProperty: this.focusHighlightsVisibleProperty,
-        interactiveHighlightsVisibleProperty: this.interactiveHighlightsVisibleProperty,
-        readingBlockHighlightsVisibleProperty: this.readingBlockHighlightsVisibleProperty
+        pdomFocusHighlightsVisibleProperty: this.focusManager.pdomFocusHighlightsVisibleProperty,
+        interactiveHighlightsVisibleProperty: this.focusManager.interactiveHighlightsVisibleProperty,
+        readingBlockHighlightsVisibleProperty: this.focusManager.readingBlockHighlightsVisibleProperty
       } );
       this.addOverlay( this._focusOverlay );
 
@@ -2167,56 +2142,6 @@ class Display {
   }
 
   /**
-   * Set the focus for Display.  Can set to null to clear focus from Display.
-   * @public
-   *
-   * @param {Focus|null} value
-   */
-  static set focus( value ) {
-    let previousFocus;
-    if ( this.focusProperty.value ) {
-      previousFocus = this.focusedNode;
-    }
-
-    this.focusProperty.value = value;
-
-    // if set to null, make sure that the active element is no longer focused
-    if ( previousFocus && !value ) {
-
-      // blur the document.activeElement instead of going through the Node, Node.blur() won't work in cases of DAG
-      document.activeElement.blur();
-    }
-  }
-
-  /**
-   * Get the focus for Display. Null if nothing under a Display has focus.
-   * @public
-   *
-   * @returns {Focus|null}
-   */
-  static get focus() { // eslint-disable-line bad-sim-text
-    return this.focusProperty.value;
-  }
-
-  /**
-   * Get the currently focused Node, the leaf-most Node of the focusProperty value's Trail. Null if no
-   * Node has focus.
-   * @public
-   *
-   * @returns {Node|null}
-   */
-  static getFocusedNode() {
-    let focusedNode = null;
-    const focus = this.focusProperty.get();
-    if ( focus ) {
-      focusedNode = focus.trail.lastNode();
-    }
-    return focusedNode;
-  }
-
-  static get focusedNode() { return this.getFocusedNode(); } // eslint-disable-line bad-sim-text
-
-  /**
    * Returns true when NO nodes in the subtree are disposed.
    * @private
    *
@@ -2282,21 +2207,6 @@ Display.customCursors = {
   'scenery-grab-pointer': [ 'grab', '-moz-grab', '-webkit-grab', 'pointer' ],
   'scenery-grabbing-pointer': [ 'grabbing', '-moz-grabbing', '-webkit-grabbing', 'pointer' ]
 };
-
-// @public (a11y, read-only, scenery-internal settable) {Property.<Focus|null>} - Display has an axon Property to
-// indicate which component is focused (or null if no scenery Node has focus). By passing the tandem and
-// phetioValueType, PhET-iO is able to interoperate (save, restore, control, observe what is currently focused).
-// See Display.focus for setting the Display's focus. Don't set the value of this Property directly.
-Display.focusProperty = new Property( null, {
-  tandem: Tandem.GENERAL_MODEL.createTandem( 'focusProperty' ),
-  phetioDocumentation: 'Stores the current focus in the simulation, null if there is nothing focused. This is not updated ' +
-                       'based on mouse or touch input, only keyboard and other alternative inputs. Note that this only ' +
-                       'applies to simulations that support alternative input.',
-  phetioType: Property.PropertyIO( NullableIO( Focus.FocusIO ) ),
-  phetioState: false,
-  phetioFeatured: true,
-  phetioReadOnly: true
-} );
 
 // @public {Emitter} - Fires when we detect an input event that would be considered a "user gesture" by Chrome, so
 // that we can trigger browser actions that are only allowed as a result.

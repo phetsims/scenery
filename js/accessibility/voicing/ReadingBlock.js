@@ -210,7 +210,7 @@ const ReadingBlock = {
         const displays = this.getConnectedDisplays();
         for ( let i = 0; i < displays.length; i++ ) {
           const subtrailToThis = event.trail.subtrailTo( this );
-          displays[ i ].readingBlockFocusProperty.set( new Focus( displays[ i ], subtrailToThis ) );
+          displays[ i ].focusManager.readingBlockFocusProperty.set( new Focus( displays[ i ], subtrailToThis ) );
         }
       },
 

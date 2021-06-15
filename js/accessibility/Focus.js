@@ -1,9 +1,9 @@
 // Copyright 2017-2021, University of Colorado Boulder
 
 /**
- * A scenery-internal type for tracking what currently has focus in Display.  This is the value for
- * the static Display.focusProperty.  If a focused node is shared between two Displays, only one
- * instance will have focus.
+ * A scenery-internal type for tracking what currently has focus in Display. If a focused Node is shared between
+ * two Displays, it is possible that only one Node may have focus between the two displays. This is especially
+ * true for DOM focus since only one element can have DOM focus at a time.
  *
  * @author Jesse Greenberg
  */
