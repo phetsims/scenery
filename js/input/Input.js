@@ -185,15 +185,16 @@ import Touch from './Touch.js';
 
 // Object literal makes it easy to check for the existence of an attribute (compared to [].indexOf()>=0). Helpful for
 // serialization. NOTE: Do not add or change this without consulting the PhET-iO IOType schema for this in EventIO.js
-const domEventPropertiesToSerialize = {
-  type: true,
-  button: true, keyCode: true, key: true,
-  deltaX: true, deltaY: true, deltaZ: true, deltaMode: true, pointerId: true,
-  pointerType: true, charCode: true, which: true, clientX: true, clientY: true, pageX: true, pageY: true, changedTouches: true,
-  scale: true,
-  target: true, relatedTarget: true,
-  ctrlKey: true, shiftKey: true, altKey: true, metaKey: true
-};
+
+const domEventPropertiesToSerialize = [
+  'type',
+  'button', 'keyCode', 'key',
+  'deltaX', 'deltaY', 'deltaZ', 'deltaMode', 'pointerId',
+  'pointerType', 'charCode', 'which', 'clientX', 'clientY', 'pageX', 'pageY', 'changedTouches',
+  'scale',
+  'target', 'relatedTarget',
+  'ctrlKey', 'shiftKey', 'altKey', 'metaKey'
+];
 
 // A list of keys on events that need to be serialized into HTMLElements
 const EVENT_KEY_VALUES_AS_ELEMENTS = [ 'target', 'relatedTarget' ];
@@ -1953,15 +1954,22 @@ class Input {
   static serializeDomEvent( domEvent ) {
     const entries = {};
 
-    for ( const property in domEventPropertiesToSerialize ) {
+    domEventPropertiesToSerialize.forEach( property => {
 
-      // we shouldn't check if domEvent.hasOwnProperty because some properties come from supertypes
-      if ( domEvent[ property ] ) {
-
+        // we shouldn't check if domEvent.hasOwnProperty because some properties come from supertypes
+        // TODO: The previous sentence doesn't seem accurate.
+        // TODO: Since class X{constructor(){this.m='hello';}}
+        // TODO: class Y extends X{constructor(){super();}}
+        // TODO: const y = new Y();
+        // TODO: y.hasOwnProperty('m');//returns true
         const domEventProperty = domEvent[ property ];
 
+        if ( domEventProperty === undefined || domEventProperty === null ) {
+          entries[ property ] = null;
+        }
+
         // stringifying dom event object properties can cause circular references, so we avoid that completely
-        if ( property === 'touches' || property === 'targetTouches' || property === 'changedTouches' ) {
+        else if ( property === 'touches' || property === 'targetTouches' || property === 'changedTouches' ) {
 
           const touchArray = [];
           for ( let i = 0; i < domEventProperty.length; i++ ) {
@@ -1978,10 +1986,7 @@ class Input {
           entries[ property ] = touchArray;
         }
 
-        else if ( EVENT_KEY_VALUES_AS_ELEMENTS.includes( property ) && domEventProperty !== null &&
-
-                  // Some event targets like HTMLDocument may not have this method, see https://github.com/phetsims/scenery/issues/979
-                  typeof domEventProperty.getAttribute === 'function' &&
+        else if ( EVENT_KEY_VALUES_AS_ELEMENTS.includes( property ) && typeof domEventProperty.getAttribute === 'function' &&
 
                   // If false, then this target isn't a PDOM element, so we can skip this serialization
                   domEventProperty.hasAttribute( PDOMUtils.DATA_TRAIL_ID ) ) {
@@ -1992,13 +1997,10 @@ class Input {
           entries[ property ][ PDOMUtils.DATA_TRAIL_ID ] = domEventProperty.getAttribute( PDOMUtils.DATA_TRAIL_ID );
         }
         else {
-          entries[ property ] = ( ( typeof domEventProperty === 'object' ) && ( domEventProperty !== null ) ? {} : JSON.parse( JSON.stringify( domEventProperty ) ) ); // TODO: is parse/stringify necessary?
+          entries[ property ] = ( ( typeof domEventProperty === 'object' ) ? {} : JSON.parse( JSON.stringify( domEventProperty ) ) ); // TODO: is parse/stringify necessary?
         }
       }
-      else {
-        entries[ property ] = null;
-      }
-    }
+    );
     return entries;
   }
 
