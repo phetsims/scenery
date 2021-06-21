@@ -281,7 +281,7 @@ class PDOMDisplaysInfo {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
     assert && assert( Array.isArray( displays ) );
-    assert && assert( this.pdomDisplays.length >= displays.length );
+    assert && assert( this.pdomDisplays.length >= displays.length, 'there should be at least as many PDOMDisplays as Displays' );
 
     // Simplifies things if we can stop no-ops here.
     if ( displays.length !== 0 ) {
