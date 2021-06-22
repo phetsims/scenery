@@ -14,10 +14,8 @@ import DerivedProperty from '../../../../axon/js/DerivedProperty.js';
 import Emitter from '../../../../axon/js/Emitter.js';
 import NumberProperty from '../../../../axon/js/NumberProperty.js';
 import Property from '../../../../axon/js/Property.js';
-import stepTimer from '../../../../axon/js/stepTimer.js';
 import Range from '../../../../dot/js/Range.js';
 import merge from '../../../../phet-core/js/merge.js';
-import platform from '../../../../phet-core/js/platform.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
 import Utterance from '../../../../utterance-queue/js/Utterance.js';
 import VoicingUtterance from '../../../../utterance-queue/js/VoicingUtterance.js';
@@ -196,14 +194,6 @@ class WebSpeaker {
         this.cancel();
       }
 
-      // since the "end" event doesn't come through all the time after cancel() on
-      // safari, we broadcast this right away to indicate that any previous speaking
-      // is done
-      if ( this.speakingProperty.get() && this.previousUtterance && withCancel ) {
-        this.endSpeakingEmitter.emit( this.previousUtterance );
-        this.speakingProperty.value = false;
-      }
-
       // embeddding marks (for i18n) impact the output, strip before speaking
       const speechSynthUtterance = new SpeechSynthesisUtterance( stripEmbeddingMarks( utterance.getTextToAlert() ) );
       speechSynthUtterance.voice = this.voiceProperty.value;
@@ -224,30 +214,25 @@ class WebSpeaker {
 
       const endListener = () => {
 
+        this.endSpeakingEmitter.emit( utterance );
+        this.speakingProperty.set( false );
+        speechSynthUtterance.removeEventListener( 'end', endListener );
+
         // remove the reference to the SpeechSynthesisUtterance so we don't leak memory
         const indexOfUtterance = this.utterances.indexOf( speechSynthUtterance );
         if ( indexOfUtterance > -1 ) {
           this.utterances.splice( indexOfUtterance, 1 );
         }
-
-        this.endSpeakingEmitter.emit( utterance );
-        this.speakingProperty.set( false );
-        speechSynthUtterance.removeEventListener( 'end', endListener );
       };
 
       speechSynthUtterance.addEventListener( 'start', startListener );
       speechSynthUtterance.addEventListener( 'end', endListener );
 
-      // on safari, giving a bit of a delay to the speak request makes the `end`
-      // SpeechSynthesisUtterance event come through much more consistently
-      if ( platform.safari ) {
-        stepTimer.setTimeout( () => {
-          this.getSynth().speak( speechSynthUtterance );
-        }, 500 );
-      }
-      else {
-        this.getSynth().speak( speechSynthUtterance );
-      }
+      // In Safari the `end` listener does not fire consistently, (especially after cancel)
+      // but the error event does. In this case signify that speaking has ended.
+      speechSynthUtterance.addEventListener( 'error', endListener );
+
+      this.getSynth().speak( speechSynthUtterance );
     }
   }
 
@@ -313,6 +298,10 @@ class WebSpeaker {
   cancel() {
     if ( this.initialized ) {
       this.getSynth().cancel();
+
+      // cancel clears all utterances from the internal SpeechSynthsis queue so we should
+      // clear all of our references as well
+      this.utterances = [];
     }
   }
 }

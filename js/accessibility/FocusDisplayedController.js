@@ -76,7 +76,7 @@ class FocusDisplayedController {
    * @private
    */
   handleTrailVisibilityChange() {
-    if ( this.visibilityTracker && !!this.visibilityTracker.trailVisibleProperty.value ) {
+    if ( this.visibilityTracker && !this.visibilityTracker.trailVisibleProperty.value ) {
       this.focusProperty.value = null;
       this.onRemoveFocus();
     }
