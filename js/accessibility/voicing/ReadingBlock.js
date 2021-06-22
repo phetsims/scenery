@@ -22,6 +22,7 @@ import inheritance from '../../../../phet-core/js/inheritance.js';
 import Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import Focus from '../Focus.js';
+import ReadingBlockUtterance from './ReadingBlockUtterance.js';
 import Voicing from './Voicing.js';
 import voicingManager from './voicingManager.js';
 import webSpeaker from './webSpeaker.js';
@@ -88,7 +89,7 @@ const ReadingBlock = {
         // @private {Object} - Triggers activation of the ReadingBlock, requesting speech of its content.
         this.readingBlockInputListener = {
           focus: event => this.speakReadingBlockContent( event ),
-          down: event => this.speakReadingBlockContent( event ),
+          up: event => this.speakReadingBlockContent( event ),
           click: event => this.speakReadingBlockContent( event )
         };
 
@@ -205,12 +206,21 @@ const ReadingBlock = {
        * @param {SceneryEvent} event
        */
       speakReadingBlockContent( event ) {
-        this.speakContent( this._readingBlockContent );
-
         const displays = this.getConnectedDisplays();
         for ( let i = 0; i < displays.length; i++ ) {
+
+          // the SceneryEvent might have gone through a descendant of this Node
           const subtrailToThis = event.trail.subtrailTo( this );
-          displays[ i ].focusManager.readingBlockFocusProperty.set( new Focus( displays[ i ], subtrailToThis ) );
+
+          // the trail to a Node may be discontinuous for PDOM events due to pdomOrder,
+          // this finds the actual visual trail to use
+          const visualTrail = scenery.PDOMInstance.guessVisualTrail( subtrailToThis, displays[ i ].rootNode );
+
+          const focus = new Focus( displays[ i ], visualTrail );
+          const readingBlockUtterance = new ReadingBlockUtterance( focus, {
+            alert: this._readingBlockContent
+          } );
+          this.speakContent( readingBlockUtterance );
         }
       },
 

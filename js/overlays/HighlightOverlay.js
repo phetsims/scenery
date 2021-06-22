@@ -15,7 +15,6 @@ import merge from '../../../phet-core/js/merge.js';
 import FocusHighlightFromNode from '../accessibility/FocusHighlightFromNode.js';
 import FocusHighlightPath from '../accessibility/FocusHighlightPath.js';
 import FocusManager from '../accessibility/FocusManager.js';
-import webSpeaker from '../accessibility/voicing/webSpeaker.js';
 import Display from '../display/Display.js';
 import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
@@ -30,7 +29,7 @@ let innerGroupHighlightColor = FocusHighlightPath.INNER_LIGHT_GROUP_FOCUS_COLOR;
 let outerGroupHighlightColor = FocusHighlightPath.OUTER_LIGHT_GROUP_FOCUS_COLOR;
 
 // color for the 'speaking' highlight, shown for certain Nodes with Voicing when while the webSpeaker is speaking
-let speakingHighlightColor = 'rgba(255,255,0,0.5)';
+let readingBlockHighlightColor = 'rgba(255,255,0,0.5)';
 
 class HighlightOverlay {
 
@@ -95,6 +94,23 @@ class HighlightOverlay {
     this.highlightNode = new Node();
     this.focusRootNode.addChild( this.highlightNode );
 
+    // @private {Node} - The main Node for the ReadingBlock highlight, while ReadingBlock content
+    // is being spoken by speech synthesis.
+    this.readingBlockHighlightNode = new Node();
+    this.focusRootNode.addChild( this.readingBlockHighlightNode );
+
+    // @private {Trail} - Trail to the ReadingBlock Node with an active highlight around it
+    // while the webSpeaker is speaking its content.
+    this.readingBlockTrail = null;
+
+    // @private {boolean} - Whether or not the transform applied to the readinBlockHighlightNode
+    // is out of date.
+    this.readingBlockTransformDirty = true;
+
+    // @private {TransformTracker} - The TransformTracker used to observe changes to the transform of the Node with
+    // Reading Block focus, so that the highlight can match the ReadingBlock.
+    this.readingBlockTransformTracker = null;
+
     // @public - control if highlights are visible on this overlay
     this.pdomFocusHighlightsVisibleProperty = options.pdomFocusHighlightsVisibleProperty;
     this.interactiveHighlightsVisibleProperty = options.interactiveHighlightsVisibleProperty;
@@ -140,25 +156,24 @@ class HighlightOverlay {
     } );
     this.focusRootNode.addChild( this.groupFocusHighlightParent );
 
-    // @private {Node} - The highlight shown around certain Nodes while the webSpeaker is speaking.
-    this.speakingHighlightPath = new FocusHighlightFromNode( null, {
+    // @private {Node} - The highlight shown around ReadingBlock Nodes while the webSpeaker is speaking.
+    this.readingBlockHighlightPath = new FocusHighlightFromNode( null, {
       innerStroke: null,
       outerStroke: null,
-      fill: speakingHighlightColor
+      fill: readingBlockHighlightColor
     } );
-    this.highlightNode.addChild( this.speakingHighlightPath );
+    this.readingBlockHighlightNode.addChild( this.readingBlockHighlightPath );
 
     // @private - Listeners bound once, so we can access them for removal.
     this.boundsListener = this.onBoundsChange.bind( this );
     this.transformListener = this.onTransformChange.bind( this );
     this.domFocusListener = this.onFocusChange.bind( this );
+    this.readingBlockTransformListener = this.onReadingBlockTransformChange.bind( this );
     this.focusHighlightListener = this.onFocusHighlightChange.bind( this );
     this.focusHighlightsVisibleListener = this.onFocusHighlightsVisibleChange.bind( this );
     this.voicingHighlightsVisibleListener = this.onVoicingHighlightsVisibleChange.bind( this );
     this.pointerFocusListener = this.onPointerFocusChange.bind( this );
     this.pointerFocusLockedListener = this.onPointerFocusLockedChange.bind( this );
-    this.startSpeakingListener = this.onSpeakingStart.bind( this );
-    this.endSpeakingListener = this.onSpeakingEnd.bind( this );
     this.readingBlockFocusListener = this.onReadingBlockFocusChange.bind( this );
 
     FocusManager.pdomFocusProperty.link( this.domFocusListener );
@@ -169,9 +184,6 @@ class HighlightOverlay {
 
     this.pdomFocusHighlightsVisibleProperty.link( this.focusHighlightsVisibleListener );
     this.interactiveHighlightsVisibleProperty.link( this.voicingHighlightsVisibleListener );
-
-    webSpeaker.startSpeakingEmitter.addListener( this.startSpeakingListener );
-    webSpeaker.endSpeakingEmitter.addListener( this.endSpeakingListener );
   }
 
   /**
@@ -189,9 +201,6 @@ class HighlightOverlay {
 
     this.display.focusManager.pointerFocusProperty.unlink( this.pointerFocusListener );
     this.display.focusManager.readingBlockFocusProperty.unlink( this.readingBlockFocusListener );
-
-    webSpeaker.startSpeakingEmitter.removeListener( this.startSpeakingListener );
-    webSpeaker.endSpeakingEmitter.removeListener( this.endSpeakingListener );
   }
 
   /**
@@ -201,6 +210,17 @@ class HighlightOverlay {
    */
   hasHighlight() {
     return !!this.trail;
+  }
+
+  /**
+   * Returns true if there is an active highlight around a ReadingBlock while the
+   * webSpeaker is speaking its Voicing content.
+   * @public
+   *
+   * @returns {boolean}
+   */
+  hasReadingBlockHighlight() {
+    return !!this.readingBlockTrail;
   }
 
   /**
@@ -291,8 +311,8 @@ class HighlightOverlay {
   }
 
   /**
-   * Activate the "speaking" highlights. This highlight is separate from others in the overlay and will always
-   * take the shape of the active highlight. It is shown in response to certain input on Nodes with Voicing while
+   * Activate the Reading Block highlight. This highlight is separate from others in the overlay and will always
+   * surround the Bounds of the focused Node. It is shown in response to certain input on Nodes with Voicing while
    * the webSpeaker is speaking.
    *
    * Note that customizations for this highlight are not supported at this time, that could be added in the future if
@@ -301,18 +321,32 @@ class HighlightOverlay {
    *
    * @param {Trail} trail
    */
-  activateSpeakingHighlight( trail ) {
+  activateReadingBlockHighlight( trail ) {
+    this.readingBlockTrail = trail;
 
-    this.speakingHighlightPath.setShapeFromNode( trail.lastNode() );
-    this.speakingHighlightPath.visible = true;
+    this.readingBlockTransformTracker = new TransformTracker( this.readingBlockTrail, {
+      isStatic: true
+    } );
+    this.readingBlockTransformTracker.addListener( this.readingBlockTransformListener );
+
+    this.readingBlockHighlightPath.setShapeFromNode( trail.lastNode() );
+    this.readingBlockHighlightPath.visible = true;
+
+    this.readingBlockTransformDirty = true;
   }
 
   /**
    * Deactivate the speaking highlight by making it invisible.
    * @private
    */
-  deactivateSpeakingHighlight() {
-    this.speakingHighlightPath.visible = false;
+  deactivateReadingBlockHighlight() {
+    this.readingBlockHighlightPath.visible = false;
+
+    this.readingBlockTransformTracker.removeListener( this.readingBlockTransformListener );
+    this.readingBlockTransformTracker.dispose();
+    this.readingBlockTransformTracker = null;
+
+    this.readingBlockTrail = null;
   }
 
   /**
@@ -320,9 +354,6 @@ class HighlightOverlay {
    * @private
    */
   deactivateHighlight() {
-
-    // deactivate the readingBlock whenever a highlight is deactivated
-    this.display.focusManager.readingBlockFocusProperty.value = null;
 
     if ( this.mode === 'shape' ) {
       this.shapeFocusHighlightPath.visible = false;
@@ -484,6 +515,15 @@ class HighlightOverlay {
   }
 
   /**
+   * Mark that the transform for the ReadingBlock highlight is out of date and needs
+   * to be recalculated next update.
+   * @private
+   */
+  onReadingBlockTransformChange() {
+    this.readingBlockTransformDirty = true;
+  }
+
+  /**
    * Called when bounds change on our node when we are in "Bounds" mode
    * @private
    */
@@ -567,29 +607,14 @@ class HighlightOverlay {
    * @param {Focus|null} focus
    */
   onReadingBlockFocusChange( focus ) {
+    if ( this.hasReadingBlockHighlight() ) {
+      this.deactivateReadingBlockHighlight();
+    }
+
     const newTrail = ( focus && focus.display === this.display ) ? focus.trail : null;
-
-    if ( !newTrail ) {
-      this.deactivateSpeakingHighlight();
+    if ( newTrail ) {
+      this.activateReadingBlockHighlight( newTrail );
     }
-  }
-
-  /**
-   * Bound to this and called when the webSpeaker starts speaking.
-   * @private
-   */
-  onSpeakingStart() {
-    if ( this.display.focusManager.readingBlockFocusProperty.value ) {
-      this.activateSpeakingHighlight( this.display.focusManager.readingBlockFocusProperty.value.trail );
-    }
-  }
-
-  /**
-   * Bound to this and called when the webSpeaker stops speaking.
-   * @private
-   */
-  onSpeakingEnd() {
-    this.deactivateSpeakingHighlight();
   }
 
   /**
@@ -635,6 +660,10 @@ class HighlightOverlay {
       this.groupHighlightNode && this.groupHighlightNode.setMatrix( this.groupTransformTracker.matrix );
 
       this.afterTransform();
+    }
+    if ( this.hasReadingBlockHighlight() && this.readingBlockTransformDirty ) {
+      this.readingBlockTransformDirty = false;
+      this.readingBlockHighlightNode.setMatrix( this.readingBlockTransformTracker.matrix );
     }
 
     if ( !this.display.size.equals( this.focusDisplay.size ) ) {
@@ -745,8 +774,8 @@ class HighlightOverlay {
    *
    * @param {PaintDef} color
    */
-  static setSpeakingHighlightColor( color ) {
-    speakingHighlightColor = color;
+  static setReadingBlockHighlightColor( color ) {
+    readingBlockHighlightColor = color;
   }
 }
 

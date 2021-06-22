@@ -15,6 +15,11 @@
  *
  * There may be other forms of Focus in the future.
  *
+ * This class also controls setting and clearing of several (but not all) of these Properties. It does not set the
+ * pdomFocusProperty because that Property is set only when the browser's focus changes. Some of the focus
+ * Properties are set in feature traits, such as pointerFocusProperty which is set by MouseHighlighting because it is
+ * set through listeners on each individual Node.
+ *
  * This class also has a few Properties that control the behavior of the Display's HighlightOverlay.
  *
  * @author Jesse Greenberg (PhET Interactive Simulations)
@@ -26,6 +31,8 @@ import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import scenery from '../scenery.js';
 import Focus from './Focus.js';
+import FocusDisplayedController from './FocusDisplayedController.js';
+import webSpeaker from './voicing/webSpeaker.js';
 
 class FocusManager {
   constructor() {
@@ -55,6 +62,61 @@ class FocusManager {
     // @public {BooleanProperty} - Controls whether "Reading Block" highlights will be visible around Nodes
     // that use ReadingBlock.
     this.readingBlockHighlightsVisibleProperty = new BooleanProperty( false );
+
+    //-----------------------------------------------------------------------------------------------------------------
+    // The following section manages control of ReadingBlockFocusProperty. It takes a value whenever the
+    // webSpeaker starts speaking and the value is cleared when it stops speaking. Focus is also cleared
+    // by the FocusDisplayedController.
+
+    // @public {FocusDisplayedController} - Whenever the readingBlockFocusProperty's Focused Node is removed from
+    // the scene graph or its Trail becomes invisible this removes focus.
+    this.readingBlockFocusController = new FocusDisplayedController( this.readingBlockFocusProperty );
+
+    // If the webSpeaker starts speaking an Utterance for a ReadingBLock, set the readingBlockFocusProperty and
+    // add listeners to clear it when the Node is removed or becomes invisible
+    webSpeaker.startSpeakingEmitter.addListener( utterance => {
+      if ( utterance.readingBlockFocus ) {
+        this.readingBlockFocusProperty.value = utterance.readingBlockFocus;
+      }
+      else {
+        this.readingBlockFocusProperty.value = null;
+      }
+    } );
+
+    // Whenever the webSpeaker stops speaking an utterance for the ReadingBlock that has focus, clear it
+    webSpeaker.endSpeakingEmitter.addListener( utterance => {
+      if ( utterance.readingBlockFocus && this.readingBlockFocusProperty.value ) {
+
+        // only clear the readingBlockFocusProperty if the ReadingBlockUtterance has a Focus that matches the
+        // current value for readingBlockFocusProperty so that the highlight doesn't disappear every time
+        // the speaker stops talking
+        if ( utterance.readingBlockFocus.trail.equals( this.readingBlockFocusProperty.value.trail ) ) {
+          this.readingBlockFocusProperty.value = null;
+        }
+      }
+    } );
+
+    //-----------------------------------------------------------------------------------------------------------------
+    // The following section manages control of pointerFocusProperty - pointerFocusProperty is set with a Focus
+    // by MouseHighlighting from listeners on Nodes that use that Trait. But it uses a FocusDisplayedController
+    // to remove the focus at the right time.
+
+    this.pointerFocusDisplayedController = new FocusDisplayedController( this.pointerFocusProperty, {
+
+      // whenever focus is removed because the last Node of the Focus Trail is no
+      // longer displayed, the highlight for Pointer Focus should no longer be locked
+      onRemoveFocus: () => {
+        this.pointerFocusLockedProperty.value = false;
+      }
+    } );
+  }
+
+  /**
+   * @public
+   */
+  dispose() {
+    this.readingBlockFocusController.dispose();
+    this.pointerFocusDisplayedController.dispose();
   }
 
   /**

@@ -46,14 +46,20 @@ const MouseHighlighting = {
         };
         this.addInputListener( this.activationListener );
 
-        const boundPointerReleaseListener = this.onPointerUp.bind( this );
+        const boundPointerReleaseListener = this.onPointerRelease.bind( this );
+        const boundPointerCancel = this.onPointerCancel.bind( this );
+
+        // @private - A reference to the Pointer so that we can add and remove listeners from it when necessary.
+        // Since this is on the trait, only one pointer can have a listener for this Node that uses MouseHighlighting
+        // at one time.
+        this.pointer = null;
 
         // @private - Input listener that locks the HighlightOverlay so that there are no updates to the highlight
         // while the pointer is down over something that uses MouseHighlighting.
         this.pointerListener = {
           up: boundPointerReleaseListener,
-          cancel: boundPointerReleaseListener,
-          interrupt: boundPointerReleaseListener
+          cancel: boundPointerCancel,
+          interrupt: boundPointerCancel
         };
       },
 
@@ -104,12 +110,15 @@ const MouseHighlighting = {
        * @param {SceneryEvent} event
        */
       onPointerDown( event ) {
-        const displays = this.getConnectedDisplays();
-        for ( let i = 0; i < displays.length; i++ ) {
-          const display = displays[ i ];
-          display.focusManager.pointerFocusLockedProperty.set( true );
+        if ( this.pointer === null ) {
+          const displays = this.getConnectedDisplays();
+          for ( let i = 0; i < displays.length; i++ ) {
+            const display = displays[ i ];
+            display.focusManager.pointerFocusLockedProperty.set( true );
+          }
 
-          event.pointer.addInputListener( this.pointerListener );
+          this.pointer = event.pointer;
+          this.pointer.addInputListener( this.pointerListener );
         }
       },
 
@@ -118,18 +127,36 @@ const MouseHighlighting = {
        * longer needs to be locked.
        * @private
        *
-       * @param {SceneryEvent} event
+       * @param {SceneryEvent} [event] - may be called during interrupt or cancel, in which case there is no event
        */
-      onPointerUp( event ) {
+      onPointerRelease( event ) {
         const displays = this.getConnectedDisplays();
         for ( let i = 0; i < displays.length; i++ ) {
           const display = displays[ i ];
           display.focusManager.pointerFocusLockedProperty.set( false );
-
-          if ( event.pointer.listeners.includes( this.pointerListener ) ) {
-            event.pointer.removeInputListener( this.pointerListener );
-          }
         }
+
+        if ( this.pointer && this.pointer.listeners.includes( this.pointerListener ) ) {
+          this.pointer.removeInputListener( this.pointerListener );
+          this.pointer = null;
+        }
+      },
+
+      /**
+       * If the pointer listener is cancelled or interrupted, clear focus and remove input listeners.
+       * @private
+       *
+       * @param event
+       */
+      onPointerCancel( event ) {
+        const displays = this.getConnectedDisplays();
+        for ( let i = 0; i < displays.length; i++ ) {
+          const display = displays[ i ];
+          display.focusManager.pointerFocusProperty.set( null );
+        }
+
+        // unlock and remove pointer listeners
+        this.onPointerRelease( event );
       }
     } );
   }
