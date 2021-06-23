@@ -98,17 +98,17 @@ class KeyboardDragListener {
     this._moveOnHoldInterval = options.moveOnHoldInterval;
     this._hotkeyHoldInterval = options.hotkeyHoldInterval;
 
-    // @private {Array.<{isDown:boolean, timeDown:number, key:{KeyDef}>} - tracks the state of the keyboard. JavaScript doesn't
+    // @private {Array.<{isDown:boolean, timeDown:number, key:{string}>} - tracks the state of the keyboard. JavaScript doesn't
     // handle multiple key presses, so we track which keys are currently down and update based on state of this
     // collection of objects. "timeDown" is in milliseconds
     // TODO: Consider a global state object for this, see https://github.com/phetsims/scenery/issues/1054
     this.keyState = [];
 
-    // @private {Array.<{keys:<Array.KeyDef>, callback:function}>} - A list of hotkeys, each of which haing some
+    // @private {Array.<{keys:<Array.string>, callback:function}>} - A list of hotkeys, each of which haing some
     // behavior when each individual key of the hotkey is  pressed in order. See this.addHotkey() for more information.
     this.hotkeys = [];
 
-    // @private {{keys: <Array.KeyDef>, callback: <Function>}|null} - the hotkey that is currently down
+    // @private {{keys: <Array.string>, callback: <Function>}|null} - the hotkey that is currently down
     this.currentHotkey = null;
 
     // @private {boolean} - when a hotkey group is pressed down, dragging will be disabled until
@@ -258,7 +258,7 @@ class KeyboardDragListener {
    */
   keydown( event ) {
     const domEvent = event.domEvent;
-    const key = KeyboardUtils.getKeyDef( domEvent );
+    const key = KeyboardUtils.getEventCode( domEvent );
 
     // If the meta key is down (command key/windows key) prevent movement and do not preventDefault.
     // Meta key + arrow key is a command to go back a page, and we need to allow that. But also, macOS
@@ -326,7 +326,7 @@ class KeyboardDragListener {
    */
   keyup( event ) {
     const domEvent = event.domEvent;
-    const key = KeyboardUtils.getKeyDef( domEvent );
+    const key = KeyboardUtils.getEventCode( domEvent );
 
     const moveKeysDown = this.movementKeysDown;
 
@@ -338,7 +338,7 @@ class KeyboardDragListener {
         // add 'shift' to the keystate until it is released again
         this.keyState.push( {
           keyDown: true,
-          key: KeyboardUtils.KEY_SHIFT,
+          key: KeyboardUtils.KEY_SHIFT_LEFT,
           timeDown: 0 // in ms
         } );
       }
@@ -541,7 +541,7 @@ class KeyboardDragListener {
   /**
    * Returns true if any of the keys in the list are currently down.
    *
-   * @param  {Array.<KeyDef>} keys
+   * @param  {Array.<string>} keys
    * @returns {boolean}
    * @public
    */
@@ -568,7 +568,7 @@ class KeyboardDragListener {
   /**
    * Return true if all keys in the list are currently held down.
    *
-   * @param {Array.<KeyDef>} keys
+   * @param {Array.<string>} keys
    * @returns {boolean}
    * @public
    */
@@ -661,14 +661,14 @@ class KeyboardDragListener {
    * @public
    */
   shiftKeyDown() {
-    return this.keyInListDown( [ KeyboardUtils.KEY_SHIFT ] );
+    return this.keyInListDown( [ KeyboardUtils.KEY_SHIFT_LEFT, KeyboardUtils.KEY_SHIFT_RIGHT ] );
   }
 
   /**
    * Add a hotkey that behaves such that the desired callback will be called when
    * all keys listed in the array are pressed down in order.
    *
-   * @param {{keys: Array.<KeyDef>, callback:function}} hotkey
+   * @param {{keys: Array.<string>, callback:function}} hotkey
    * @public
    */
   addHotkey( hotkey ) {
@@ -682,7 +682,7 @@ class KeyboardDragListener {
    *
    * For the purposes of this class, a "hotkey" is an ordered list of keys.
    *
-   * @param {Array.<{keys: Array.<KeyDef>, callback:function}>} hotkeys
+   * @param {Array.<{keys: Array.<string>, callback:function}>} hotkeys
    * @public
    */
   addHotkeys( hotkeys ) {
@@ -735,7 +735,7 @@ class KeyboardDragListener {
    * Returns true if the key corresponds to a key that should move the object to the left.
    *
    * @public
-   * @param {KeyDef} key
+   * @param {string} key
    * @returns {boolean}
    */
   static isLeftMovementKey( key ) {
@@ -746,7 +746,7 @@ class KeyboardDragListener {
    * Returns true if the key corresponds to a key that should move the object to the right.
    *
    * @public
-   * @param {KeyDef} key
+   * @param {string} key
    * @returns {boolean}
    */
   static isRightMovementKey( key ) {
@@ -757,7 +757,7 @@ class KeyboardDragListener {
    * Returns true if the key corresponds to a key that should move the object up.
    *
    * @public
-   * @param {KeyDef} key
+   * @param {string} key
    * @returns {boolean}
    */
   static isUpMovementKey( key ) {
@@ -768,7 +768,7 @@ class KeyboardDragListener {
    * Returns true if the key corresponds to a key that should move the object down.
    *
    * @public
-   * @param {KeyDef} key
+   * @param {string} key
    * @returns {boolean}
    */
   static isDownMovementKey( key ) {

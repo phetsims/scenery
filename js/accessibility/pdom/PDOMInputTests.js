@@ -64,7 +64,7 @@ const triggerDOMEvent = ( event, element, key, options ) => {
     eventObj.initEvent( event, true, true );
   }
 
-  eventObj.key = key;
+  eventObj.code = key;
   eventObj.relatedTarget = options.relatedTarget;
 
   element.dispatchEvent ? element.dispatchEvent( eventObj ) : element.fireEvent( `on${event}`, eventObj );

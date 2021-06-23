@@ -104,7 +104,7 @@ class KeyboardFuzzer {
    * @private
    *
    * @param {HTMLElement} element
-   * @param {KeyDef} key
+   * @param {string} key
    */
   triggerKeyDownUpEvents( element, key ) {
 
@@ -205,7 +205,7 @@ class KeyboardFuzzer {
    * Taken from example in http://output.jsbin.com/awenaq/3,
    * @param {string} event
    * @param {HTMLElement} element
-   * @param {KeyDef} key
+   * @param {string} key
    * @private
    */
   triggerDOMEvent( event, element, key ) {

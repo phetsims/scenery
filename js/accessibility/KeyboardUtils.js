@@ -11,82 +11,103 @@
 import validate from '../../../axon/js/validate.js';
 import scenery from '../scenery.js';
 
-const KEY_RIGHT_ARROW = 'arrowright';
-const KEY_LEFT_ARROW = 'arrowleft';
-const KEY_UP_ARROW = 'arrowup';
-const KEY_DOWN_ARROW = 'arrowdown';
-const KEY_SHIFT = 'shift';
-const KEY_CTRL = 'control';
-const KEY_ALT = 'alt';
-const KEY_W = 'w';
-const KEY_A = 'a';
-const KEY_S = 's';
-const KEY_D = 'd';
+const KEY_RIGHT_ARROW = 'ArrowRight';
+const KEY_LEFT_ARROW = 'ArrowLeft';
+const KEY_UP_ARROW = 'ArrowUp';
+const KEY_DOWN_ARROW = 'ArrowDown';
+const KEY_SHIFT_RIGHT = 'ShiftRight';
+const KEY_SHIFT_LEFT = 'ShiftLeft';
+const KEY_CONTROL_LEFT = 'ControlLeft';
+const KEY_CONTROL_RIGHT = 'ControlRight';
+const KEY_ALT_LEFT = 'AltLeft';
+const KEY_ALT_RIGHT = 'AltRight';
+const KEY_W = 'KeyW';
+const KEY_A = 'KeyA';
+const KEY_S = 'KeyS';
+const KEY_D = 'KeyD';
+const KEY_0 = 'Digit0';
+const KEY_1 = 'Digit1';
+const KEY_2 = 'Digit2';
+const KEY_3 = 'Digit3';
+const KEY_4 = 'Digit4';
+const KEY_5 = 'Digit5';
+const KEY_6 = 'Digit6';
+const KEY_7 = 'Digit7';
+const KEY_8 = 'Digit8';
+const KEY_9 = 'Digit9';
 
 const ARROW_KEYS = [ KEY_RIGHT_ARROW, KEY_LEFT_ARROW, KEY_UP_ARROW, KEY_DOWN_ARROW ];
 const WASD_KEYS = [ KEY_W, KEY_S, KEY_A, KEY_D ];
+const NUMBER_KEYS = [ KEY_0, KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9 ];
+const SHIFT_KEYS = [ KEY_SHIFT_LEFT, KEY_SHIFT_RIGHT ];
+const CONTROL_KEYS = [ KEY_CONTROL_LEFT, KEY_CONTROL_RIGHT ];
+const ALT_KEYS = [ KEY_ALT_LEFT, KEY_ALT_RIGHT ];
 
 const DOM_EVENT_VALIDATOR = { valueType: Event };
 
 // constants
 const KeyboardUtils = {
-  KEY_SPACE: ' ',
-  KEY_ENTER: 'enter',
-  KEY_TAB: 'tab',
+  KEY_SPACE: 'Space',
+  KEY_ENTER: 'Enter',
+  KEY_TAB: 'Tab',
   KEY_RIGHT_ARROW: KEY_RIGHT_ARROW,
   KEY_LEFT_ARROW: KEY_LEFT_ARROW,
   KEY_UP_ARROW: KEY_UP_ARROW,
   KEY_DOWN_ARROW: KEY_DOWN_ARROW,
-  KEY_SHIFT: KEY_SHIFT,
-  KEY_CTRL: KEY_CTRL,
-  KEY_ALT: KEY_ALT,
-  KEY_ESCAPE: 'escape',
-  KEY_DELETE: 'delete',
-  KEY_BACKSPACE: 'backspace',
-  KEY_PAGE_UP: 'pageup',
-  KEY_PAGE_DOWN: 'pagedown',
-  KEY_END: 'end',
-  KEY_HOME: 'home',
-  KEY_0: '0',
-  KEY_1: '1',
-  KEY_2: '2',
-  KEY_3: '3',
-  KEY_4: '4',
-  KEY_5: '5',
-  KEY_6: '6',
-  KEY_7: '7',
-  KEY_8: '8',
-  KEY_9: '9',
-  KEY_A: 'a',
-  KEY_B: 'b',
-  KEY_C: 'c',
-  KEY_D: 'd',
-  KEY_E: 'e',
-  KEY_F: 'f',
-  KEY_G: 'g',
-  KEY_H: 'h',
-  KEY_I: 'I',
-  KEY_J: 'j',
-  KEY_K: 'k',
-  KEY_L: 'l',
-  KEY_M: 'm',
-  KEY_N: 'n',
-  KEY_O: 'o',
-  KEY_P: 'p',
-  KEY_Q: 'q',
-  KEY_R: 'r',
-  KEY_S: 's',
-  KEY_T: 't',
-  KEY_U: 'u',
-  KEY_V: 'v',
-  KEY_W: 'w',
-  KEY_X: 'x',
-  KEY_Y: 'y',
-  KEY_Z: 'z',
+  KEY_SHIFT_LEFT: KEY_SHIFT_LEFT,
+  KEY_SHIFT_RIGHT: KEY_SHIFT_RIGHT,
+  KEY_ALT_LEFT: KEY_ALT_LEFT,
+  KEY_ALT_RIGHT: KEY_ALT_RIGHT,
+  KEY_CONTROL_LEFT: KEY_CONTROL_LEFT,
+  KEY_CONTROL_RIGHT: KEY_CONTROL_RIGHT,
+  KEY_ESCAPE: 'Escape',
+  KEY_DELETE: 'Delete',
+  KEY_BACKSPACE: 'Backspace',
+  KEY_PAGE_UP: 'PageUp',
+  KEY_PAGE_DOWN: 'PageDown',
+  KEY_END: 'Home',
+  KEY_HOME: 'End',
+  KEY_0: KEY_0,
+  KEY_1: KEY_1,
+  KEY_2: KEY_2,
+  KEY_3: KEY_3,
+  KEY_4: KEY_4,
+  KEY_5: KEY_5,
+  KEY_6: KEY_6,
+  KEY_7: KEY_7,
+  KEY_8: KEY_8,
+  KEY_9: KEY_9,
+  KEY_A: 'KeyA',
+  KEY_B: 'KeyB',
+  KEY_C: 'KeyC',
+  KEY_D: 'KeyD',
+  KEY_E: 'KeyE',
+  KEY_F: 'KeyF',
+  KEY_G: 'KeyG',
+  KEY_H: 'KeyH',
+  KEY_I: 'KeyI',
+  KEY_J: 'KeyJ',
+  KEY_K: 'KeyK',
+  KEY_L: 'KeyL',
+  KEY_M: 'KeyM',
+  KEY_N: 'KeyN',
+  KEY_O: 'KeyO',
+  KEY_P: 'KeyP',
+  KEY_Q: 'KeyQ',
+  KEY_R: 'KeyR',
+  KEY_S: 'KeyS',
+  KEY_T: 'KeyT',
+  KEY_U: 'KeyU',
+  KEY_V: 'KeyV',
+  KEY_W: 'KeyW',
+  KEY_X: 'KeyX',
+  KEY_Y: 'KeyY',
+  KEY_Z: 'KeyZ',
 
-  KEY_EQUALS: '=',
-  KEY_PLUS: '+',
-  KEY_MINUS: '-',
+  // "Equals" and "Plus" share the same event.code, check for distinction with shift modifier key
+  KEY_EQUALS: 'Equal',
+  KEY_PLUS: 'Equal',
+  KEY_MINUS: 'Minus',
 
   ARROW_KEYS: ARROW_KEYS,
   WASD_KEYS: WASD_KEYS,
@@ -128,7 +149,43 @@ const KeyboardUtils = {
    * @returns {boolean}
    */
   isNumberKey( domEvent ) {
-    return !isNaN( parseInt( KeyboardUtils.getKeyDef( domEvent ), 10 ) );
+    return KeyboardUtils.isAnyKeyEvent( domEvent, NUMBER_KEYS );
+  },
+
+  /**
+   * Event.code distinguishes between left and right shift keys. If all you care about is the presence
+   * of a shift key you can use this.
+   * @public
+   *
+   * @param domEvent
+   * @returns {*}
+   */
+  isShiftKey( domEvent ) {
+    return KeyboardUtils.isAnyKeyEvent( domEvent, SHIFT_KEYS );
+  },
+
+  /**
+   * Event.code distinguishes between left and right alt keys. If all you care about is the presence
+   * of the alt key you can use this.
+   * @public
+   *
+   * @param domEvent
+   * @returns {*}
+   */
+  isAltKey( domEvent ) {
+    return KeyboardUtils.isAnyKeyEvent( domEvent, ALT_KEYS );
+  },
+
+  /**
+   * Event.code distinguishes between left and right control keys. If all you care about is the presence
+   * of a control key you can use this.
+   * @public
+   *
+   * @param domEvent
+   * @returns {*}
+   */
+  isControlKey( domEvent ) {
+    return KeyboardUtils.isAnyKeyEvent( domEvent, CONTROL_KEYS );
   },
 
   /**
@@ -158,53 +215,42 @@ const KeyboardUtils = {
    * @public
    *
    * @param {Event} domEvent
-   * @param {KeyDef[]} keyboardUtilsKeys
+   * @param {string[]} keyboardUtilsKeys
    * @returns {*}
    */
   isAnyKeyEvent( domEvent, keyboardUtilsKeys ) {
     validate( domEvent, DOM_EVENT_VALIDATOR );
-    return keyboardUtilsKeys.includes( KeyboardUtils.getKeyDef( domEvent ) );
+    return keyboardUtilsKeys.includes( KeyboardUtils.getEventCode( domEvent ) );
   },
 
   /**
-   * Whether or not the event was of the provided KeyboardUtils KeyDef.
+   * Whether or not the event was of the provided KeyboardUtils string.
    * @public
    *
    * @param {Event} domEvent
-   * @param {KeyDef} keyboardUtilsKey
+   * @param {string} keyboardUtilsKey
    * @returns {boolean}
    */
   isKeyEvent( domEvent, keyboardUtilsKey ) {
-    return KeyboardUtils.getKeyDef( domEvent ) === keyboardUtilsKey;
+    return KeyboardUtils.getEventCode( domEvent ) === keyboardUtilsKey;
   },
 
   /**
-   * Returns a KeyDef that can be used to determine the keyboard keys of a KeyboardEvent object. An example
-   * usage might look like
+   * Returns a string with the event.code that can be used to determine the keyboard keys of a KeyboardEvent object.
+   * Otherwise, returns null if there is no code on the event. An example usage might look like
    *
-   *  const key = KeyboardUtils.getKeyDef( domEvent );
+   *  const key = KeyboardUtils.getEventCode( domEvent );
    *  if ( key === KeyboardUtils.KEY_A ) {
    *    // You pressed the A key!
    *  }
    *
    * @public
    * @param {Event} domEvent
-   * @returns {KeyDef|null} - null if there is no `key` property on the provided Event.
+   * @returns {string|null} - null if there is no `key` property on the provided Event.
    */
-  getKeyDef( domEvent ) {
+  getEventCode( domEvent ) {
     validate( domEvent, DOM_EVENT_VALIDATOR );
-    return domEvent.key ? domEvent.key.toLowerCase() : null;
-  },
-
-  /**
-   * Return true if the param is of type KeyDef.
-   * @public
-   *
-   * @param {*} key
-   * @returns {boolean}
-   */
-  isKeyDef( key ) {
-    return typeof key === 'string' && key.toLowerCase() === key;
+    return domEvent.code ? domEvent.code : null;
   }
 };
 
@@ -219,18 +265,6 @@ for ( const keyKey in KeyboardUtils ) {
 
 // @public - Not really all of them, but all that are in the above list. If you see one you wish was in here, then add it!
 KeyboardUtils.ALL_KEYS = ALL_KEYS;
-
-/**
- * @typedef KeyDef
- * @extends {String}
- * @public
- *
- * The value of KeyboardEvent.key, but lower case for easy comparison independent of modifier keys,
- * see https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key
- *
- * In general, it is best to use globalKeyStateTracker or a similar KeyStateTracker to determine if modifier keys are
- * down.
- */
 
 scenery.register( 'KeyboardUtils', KeyboardUtils );
 

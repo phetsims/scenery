@@ -32,8 +32,8 @@ class KeyStateTracker {
       tandem: Tandem.OPTIONAL
     }, options );
 
-    // @private {Object.<KeyDef,{ key: {KeyDef}, isDown: {boolean}, timeDown: [boolean] }>} - where the Object
-    // keys are the KeyDef (as defined by KeyboardUtils). JavaScript doesn't handle multiple key presses, so we track
+    // @private {Object.<string,{ key: {string}, isDown: {boolean}, timeDown: [boolean] }>} - where the Object
+    // keys are the event.code string. JavaScript doesn't handle multiple key presses, so we track
     // which keys are currently down and update based on state of this collection of objects. Cleared when disabled.
     this.keyState = {};
 
@@ -61,22 +61,22 @@ class KeyStateTracker {
       // This is likely to happen when pressing browser key commands like "ctrl + tab" to switch tabs.
       this.correctModifierKeys( domEvent );
 
-      const key = KeyboardUtils.getKeyDef( domEvent );
+      const key = KeyboardUtils.getEventCode( domEvent );
 
-      if ( assert && key !== KeyboardUtils.KEY_SHIFT ) {
+      if ( assert && !KeyboardUtils.isShiftKey( domEvent ) ) {
         assert( !!domEvent.shiftKey === !!this.shiftKeyDown, 'shift key inconsistency between event and keyState.' );
       }
-      if ( assert && key !== KeyboardUtils.KEY_ALT ) {
+      if ( assert && !KeyboardUtils.isAltKey( domEvent ) ) {
         assert( !!domEvent.altKey === !!this.altKeyDown, 'alt key inconsistency between event and keyState.' );
       }
-      if ( assert && key !== KeyboardUtils.KEY_CTRL ) {
+      if ( assert && !KeyboardUtils.isControlKey( domEvent ) ) {
         assert( !!domEvent.ctrlKey === !!this.ctrlKeyDown, 'ctrl key inconsistency between event and keyState.' );
       }
 
       // if the key is already down, don't do anything else (we don't want to create a new keyState object
       // for a key that is already being tracked and down)
       if ( !this.isKeyDown( key ) ) {
-        const key = KeyboardUtils.getKeyDef( domEvent );
+        const key = KeyboardUtils.getEventCode( domEvent );
         this.keyState[ key ] = {
           keyDown: true,
           key: key,
@@ -98,7 +98,7 @@ class KeyStateTracker {
     // is wrapped in an Action so that state is captured for PhET-iO
     this.keyupUpdateAction = new Action( domEvent => {
 
-      const key = KeyboardUtils.getKeyDef( domEvent );
+      const key = KeyboardUtils.getEventCode( domEvent );
 
       // correct keyState in case browser didn't receive keydown/keyup events for a modifier key
       this.correctModifierKeys( domEvent );
@@ -157,25 +157,25 @@ class KeyStateTracker {
    */
   correctModifierKeys( domEvent ) {
 
-    const key = KeyboardUtils.getKeyDef( domEvent );
+    const key = KeyboardUtils.getEventCode( domEvent );
 
     // add modifier keys if they aren't down
     if ( domEvent.shiftKey && !this.shiftKeyDown ) {
-      this.keyState[ KeyboardUtils.KEY_SHIFT ] = {
+      this.keyState[ KeyboardUtils.KEY_SHIFT_LEFT ] = {
         keyDown: true,
         key: key,
         timeDown: 0 // in ms
       };
     }
     if ( domEvent.altKey && !this.altKeyDown ) {
-      this.keyState[ KeyboardUtils.KEY_ALT ] = {
+      this.keyState[ KeyboardUtils.KEY_ALT_LEFT ] = {
         keyDown: true,
         key: key,
         timeDown: 0 // in ms
       };
     }
     if ( domEvent.ctrlKey && !this.ctrlKeyDown ) {
-      this.keyState[ KeyboardUtils.KEY_CTRL ] = {
+      this.keyState[ KeyboardUtils.KEY_CONTROL_LEFT ] = {
         keyDown: true,
         key: key,
         timeDown: 0 // in ms
@@ -184,13 +184,13 @@ class KeyStateTracker {
 
     // delete modifier keys if we think they are down
     if ( !domEvent.shiftKey && this.shiftKeyDown ) {
-      delete this.keyState[ KeyboardUtils.KEY_SHIFT ];
+      delete this.keyState[ KeyboardUtils.KEY_SHIFT_LEFT ];
     }
     if ( !domEvent.altKey && this.altKeyDown ) {
-      delete this.keyState[ KeyboardUtils.KEY_ALT ];
+      delete this.keyState[ KeyboardUtils.KEY_ALT_LEFT ];
     }
     if ( !domEvent.ctrlKey && this.ctrlKeyDown ) {
-      delete this.keyState[ KeyboardUtils.KEY_CTRL ];
+      delete this.keyState[ KeyboardUtils.KEY_CONTROL_LEFT ];
     }
   }
 
@@ -223,7 +223,7 @@ class KeyStateTracker {
    * Returns true if a key with the Event.key is currently down.
    *
    * @public
-   * @param  {KeyDef} key
+   * @param  {string} key
    * @returns {boolean}
    */
   isKeyDown( key ) {
@@ -239,7 +239,7 @@ class KeyStateTracker {
   /**
    * Returns true if any of the keys in the list are currently down.
    *
-   * @param  {Array.<KeyDef>} keyList - array of KeyDef key states
+   * @param  {Array.<string>} keyList - array of string key states
    * @returns {boolean}
    * @public
    */
@@ -256,7 +256,7 @@ class KeyStateTracker {
   /**
    * Returns true if and only if all of the keys in the list are currently down.
    *
-   * @param  {Array.<KeyDef>} keyList - array of KeyDef key states
+   * @param  {Array.<string>} keyList - array of string key states
    * @returns {boolean}
    * @public
    */
@@ -292,7 +292,7 @@ class KeyStateTracker {
    * @public
    */
   get shiftKeyDown() {
-    return this.isKeyDown( KeyboardUtils.KEY_SHIFT );
+    return this.isAnyKeyInListDown( [ KeyboardUtils.KEY_SHIFT_LEFT, KeyboardUtils.KEY_SHIFT_RIGHT ] );
   }
 
   /**
@@ -300,7 +300,7 @@ class KeyStateTracker {
    * @public
    */
   get altKeyDown() {
-    return this.isKeyDown( KeyboardUtils.KEY_ALT );
+    return this.isAnyKeyInListDown( [ KeyboardUtils.KEY_ALT_LEFT, KeyboardUtils.KEY_ALT_RIGHT ] );
   }
 
   /**
@@ -308,12 +308,12 @@ class KeyStateTracker {
    * @public
    */
   get ctrlKeyDown() {
-    return this.isKeyDown( KeyboardUtils.KEY_CTRL );
+    return this.isAnyKeyInListDown( [ KeyboardUtils.KEY_CONTROL_LEFT, KeyboardUtils.KEY_CONTROL_RIGHT ] );
   }
 
   /**
    * Will assert if the key isn't currently pressed down
-   * @param {KeyDef} key
+   * @param {string} key
    * @returns {number} how long the key has been down
    * @public
    */

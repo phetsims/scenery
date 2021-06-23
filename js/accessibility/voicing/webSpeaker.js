@@ -129,7 +129,7 @@ class WebSpeaker {
     // The control key will stop the synth from speaking if there is an active utterance. This key was decided because
     // most major screen readers will stop speech when this key is pressed
     globalKeyStateTracker.keyupEmitter.addListener( domEvent => {
-      if ( KeyboardUtils.isKeyEvent( domEvent, KeyboardUtils.KEY_CTRL ) ) {
+      if ( KeyboardUtils.isControlKey( domEvent ) ) {
         this.cancel();
       }
     } );
