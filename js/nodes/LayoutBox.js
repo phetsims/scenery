@@ -13,8 +13,8 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import merge from '../../../phet-core/js/merge.js';
-import SunConstants from '../../../sun/js/SunConstants.js';
 import scenery from '../scenery.js';
+import SceneryConstants from '../SceneryConstants.js';
 import Node from './Node.js';
 
 // constants
@@ -69,7 +69,7 @@ class LayoutBox extends Node {
       // Allow dynamic layout by default, see https://github.com/phetsims/joist/issues/608
       excludeInvisibleChildrenFromBounds: true,
 
-      disabledOpacity: SunConstants.DISABLED_OPACITY
+      disabledOpacity: SceneryConstants.DISABLED_OPACITY
     }, options );
 
     super();
