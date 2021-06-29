@@ -42,9 +42,9 @@ function stringLogFunction( message ) {
 }
 
 // @private - Scenery internal log function to be used to log to the console.
-function consoleLogFunction() {
+function consoleLogFunction( ...args ) {
   // allow for the console to not exist
-  window.console && window.console.log && window.console.log.apply( window.console, Array.prototype.slice.call( arguments, 0 ) );
+  window.console && window.console.log && window.console.log.apply( window.console, Array.prototype.slice.call( args, 0 ) );
 }
 
 // @private - List of Scenery's loggers, with their display name and (if using console) the display style.
@@ -107,9 +107,9 @@ extend( scenery, {
   logString: '',
 
   // @private - Scenery internal log function (switchable implementation, the main reference)
-  logFunction: function() {
+  logFunction: function( ...args ) {
     // allow for the console to not exist
-    window.console && window.console.log && window.console.log.apply( window.console, Array.prototype.slice.call( arguments, 0 ) );
+    window.console && window.console.log && window.console.log.apply( window.console, Array.prototype.slice.call( args, 0 ) );
   },
 
   // @public - Switches Scenery's logging to print to the developer console.
