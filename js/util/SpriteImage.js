@@ -80,7 +80,7 @@ class SpriteImage extends Imageable( Object ) {
    *
    * @returns {Shape}
    */
-  getShape() {
+  getShape() { // eslint-disable-line consistent-return
     if ( !this.pickable ) {
       return new Shape();
     }

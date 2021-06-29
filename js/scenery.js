@@ -565,7 +565,7 @@ extend( scenery, {
   },
 
   // @public
-  deserialize: function( value ) {
+  deserialize: function( value ) { // eslint-disable-line consistent-return
     const nodeTypes = [
       'Node', 'Path', 'Circle', 'Line', 'Rectangle', 'Text', 'Image', 'CanvasNode', 'WebGLNode', 'DOM'
     ];

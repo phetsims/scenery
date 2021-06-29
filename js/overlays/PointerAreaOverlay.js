@@ -25,7 +25,7 @@ class PointerAreaOverlay extends ShapeBasedOverlay {
    * @override
    */
   addShapes() {
-    new Trail( this.rootNode ).eachTrailUnder( trail => {
+    new Trail( this.rootNode ).eachTrailUnder( trail => { // eslint-disable-line consistent-return
       const node = trail.lastNode();
       if ( !node.isVisible() ) {
         // skip this subtree if the node is invisible

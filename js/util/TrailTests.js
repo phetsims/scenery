@@ -229,7 +229,7 @@ QUnit.test( 'depthFirstUntil depthFirstUntil with subtree skipping', assert => {
   const node = createTestNodeTree();
   node.children[ 0 ].children[ 2 ].visible = false;
   node.children[ 0 ].children[ 3 ].visible = false;
-  new TrailPointer( new Trail( node ), true ).depthFirstUntil( new TrailPointer( new Trail( node ), false ), pointer => {
+  new TrailPointer( new Trail( node ), true ).depthFirstUntil( new TrailPointer( new Trail( node ), false ), pointer => { // eslint-disable-line consistent-return
     if ( !pointer.trail.lastNode().isVisible() ) {
       // should skip
       return true;
@@ -242,7 +242,7 @@ QUnit.test( 'Trail eachTrailUnder with subtree skipping', assert => {
   const node = createTestNodeTree();
   node.children[ 0 ].children[ 2 ].visible = false;
   node.children[ 0 ].children[ 3 ].visible = false;
-  new Trail( node ).eachTrailUnder( trail => {
+  new Trail( node ).eachTrailUnder( trail => { // eslint-disable-line consistent-return
     if ( !trail.lastNode().isVisible() ) {
       // should skip
       return true;

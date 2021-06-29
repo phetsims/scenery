@@ -1598,7 +1598,7 @@ class Display {
       }
       depth -= 1;
 
-      return div;
+      return div;// eslint-disable-line consistent-return
     }
 
     if ( this._rootBackbone ) {

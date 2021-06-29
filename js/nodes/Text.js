@@ -851,7 +851,7 @@ class Text extends Node {
       collapseNesting( node );
       collapseAdjacent( node );
 
-      return node;
+      return node; // eslint-disable-line consistent-return
     }
 
     // Turns a tree into a string
