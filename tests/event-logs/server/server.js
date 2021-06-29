@@ -14,7 +14,7 @@ const ip = 'localhost'; // hardcoded for now, maybe 'localhost' will work?
 const port = 8083;
 
 http.createServer( ( req, res ) => {
-  'use strict';
+  
 
   // see http://nodejs.org/api/http.html#http_request_method for docs
 
