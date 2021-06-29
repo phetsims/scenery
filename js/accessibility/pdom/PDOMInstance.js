@@ -371,7 +371,7 @@ class PDOMInstance {
     if ( node.hasPDOMContent && node !== this.node ) {
       const potentialInstances = node.pdomInstances;
 
-      instanceLoop:
+      instanceLoop: // eslint-disable-line no-labels
         for ( i = 0; i < potentialInstances.length; i++ ) {
           const potentialInstance = potentialInstances[ i ];
           if ( potentialInstance.parent !== this ) {
@@ -380,7 +380,7 @@ class PDOMInstance {
 
           for ( let j = 0; j < trail.length; j++ ) {
             if ( trail.nodes[ j ] !== potentialInstance.trail.nodes[ j + potentialInstance.trail.length - trail.length ] ) {
-              continue instanceLoop;
+              continue instanceLoop; // eslint-disable-line no-labels
             }
           }
 
