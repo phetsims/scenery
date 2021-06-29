@@ -462,7 +462,7 @@ class PDOMPeer {
       return this._containerParent;
     }
 
-    assert && assert( false, `invalid elementName name: ${elementName}` );
+    throw new Error( `invalid elementName name: ${elementName}` );
   }
 
   /**
