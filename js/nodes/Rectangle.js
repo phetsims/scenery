@@ -263,7 +263,7 @@ class Rectangle extends Path {
          this._rectHeight === height &&
          ( !hasXRadius || this._cornerXRadius === cornerXRadius ) &&
          ( !hasYRadius || this._cornerYRadius === cornerYRadius ) ) {
-      return;
+      return this;
     }
 
     this._rectX = x;

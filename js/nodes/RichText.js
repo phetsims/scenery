@@ -1689,7 +1689,7 @@ class RichTextElement extends RichTextCleanable( Node ) {
     // If there is nothing, than no spacing should be handled
     if ( !hadChild && !hasElement ) {
       sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'No child or element, ignoring' );
-      return;
+      return false;
     }
     else if ( !hadChild ) {
       sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `First child, ltr:${this.isLTR}, spacing: ${this.isLTR ? rightElementSpacing : leftElementSpacing}` );
