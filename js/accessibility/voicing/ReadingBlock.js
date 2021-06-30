@@ -19,9 +19,11 @@
 
 import extend from '../../../../phet-core/js/extend.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
+import StringUtils from '../../../../phetcommon/js/util/StringUtils.js';
 import Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import Focus from '../Focus.js';
+import ReadingBlockHighlight from './ReadingBlockHighlight.js';
 import ReadingBlockUtterance from './ReadingBlockUtterance.js';
 import Voicing from './Voicing.js';
 import voicingManager from './voicingManager.js';
@@ -29,8 +31,11 @@ import webSpeaker from './webSpeaker.js';
 
 const READING_BLOCK_OPTION_KEYS = [
   'readingBlockTagName',
-  'readingBlockContent'
+  'readingBlockContent',
+  'readingBlockHintResponse'
 ];
+
+const CONTENT_HINT_PATTERN = '{{readingBlockContent}}. {{hintResponse}}';
 
 const ReadingBlock = {
 
@@ -79,6 +84,10 @@ const ReadingBlock = {
         // Voicing.js because ReadingBlocks are always spoken regardless of the Properties of voicingManager.
         this._readingBlockContent = null;
 
+        // @private {string|null} - The help content that is read when this ReadingBlock is activated by input,
+        // but only when "Helpful Hints" is enabled by the user.
+        this._readingBlockHintResponse = null;
+
         // @private {string} - The tagName to apply to the Node when voicing is disabled.
         this._readingBlockDisabledTagName = 'p';
 
@@ -104,6 +113,10 @@ const ReadingBlock = {
         if ( options ) {
           this.mutate( _.pick( options, READING_BLOCK_OPTION_KEYS ) );
         }
+
+        // All ReadingBlocks have a ReadingBlockHighlight, a focus highlight that is black to indicate it has
+        // a different behavior.
+        this.focusHighlight = new ReadingBlockHighlight( this );
       },
 
       /**
@@ -151,6 +164,29 @@ const ReadingBlock = {
         return this._readingBlockContent;
       },
       get readingBlockContent() { return this.getReadingBlockContent(); },
+
+      /**
+       * Sets the hint response for this ReadingBlock. This is only spoken if "Helpful Hints" are enabled by the user.
+       * @public
+       *
+       * @param {string|null} content
+       */
+      setReadingBlockHintResponse( content ) {
+        this._readingBlockHintResponse = content;
+      },
+      set readingBlockHintResponse( content ) { this.setReadingBlockHintResponse( content ); },
+
+      /**
+       * Get the hint response for this ReadingBlock. This is additional content that is only read if "Helpful Hints"
+       * are enabled.
+       * @public
+       *
+       * @returns {string|null}
+       */
+      getReadingBlockHintResponse() {
+        return this._readingBlockHintResponse;
+      },
+      get readingBlockHintResponse() { return this.getReadingBlockHintResponse(); },
 
       /**
        * When this Node becomes focusable (because Reading Blocks have just been enabled or disabled), either
@@ -207,21 +243,48 @@ const ReadingBlock = {
        */
       speakReadingBlockContent( event ) {
         const displays = this.getConnectedDisplays();
-        for ( let i = 0; i < displays.length; i++ ) {
 
-          // the SceneryEvent might have gone through a descendant of this Node
-          const subtrailToThis = event.trail.subtrailTo( this );
+        const content = this.collectReadingBlockResponses();
+        if ( content ) {
+          for ( let i = 0; i < displays.length; i++ ) {
 
-          // the trail to a Node may be discontinuous for PDOM events due to pdomOrder,
-          // this finds the actual visual trail to use
-          const visualTrail = scenery.PDOMInstance.guessVisualTrail( subtrailToThis, displays[ i ].rootNode );
+            // the SceneryEvent might have gone through a descendant of this Node
+            const subtrailToThis = event.trail.subtrailTo( this );
 
-          const focus = new Focus( displays[ i ], visualTrail );
-          const readingBlockUtterance = new ReadingBlockUtterance( focus, {
-            alert: this._readingBlockContent
-          } );
-          this.speakContent( readingBlockUtterance );
+            // the trail to a Node may be discontinuous for PDOM events due to pdomOrder,
+            // this finds the actual visual trail to use
+            const visualTrail = scenery.PDOMInstance.guessVisualTrail( subtrailToThis, displays[ i ].rootNode );
+
+            const focus = new Focus( displays[ i ], visualTrail );
+            const readingBlockUtterance = new ReadingBlockUtterance( focus, {
+              alert: content
+            } );
+            this.speakContent( readingBlockUtterance );
+          }
         }
+      },
+
+      /**
+       * Collect responses for the ReadingBlock, putting together the content and the hint response. The hint response
+       * is only read if it exists and hints are enabled by the user. Otherwise, only the readingBlock content will
+       * be spoken.
+       * @returns {string}
+       */
+      collectReadingBlockResponses() {
+        const usesHelpContent = this._readingBlockHintResponse && voicingManager.hintResponsesEnabledProperty.value;
+
+        let response = null;
+        if ( usesHelpContent ) {
+          response = StringUtils.fillIn( CONTENT_HINT_PATTERN, {
+            readingBlockContent: this._readingBlockContent,
+            hintResponse: this._readingBlockHintResponse
+          } );
+        }
+        else {
+          response = this._readingBlockContent;
+        }
+
+        return response;
       },
 
       /**
