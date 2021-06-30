@@ -36,11 +36,15 @@ const MouseHighlighting = {
        */
       initializeMouseHighlighting() {
 
+        // @public {boolean} (read-only)
+        this.isMouseHighlighting = true;
+
         // @private - Input listener to activate the HighlightOverlay upon pointer mouse input. Uses exit
         // and enter instead of over and out because we do not want this to fire from bubbling. The highlight
         // should be around this Node when it receives input.
         this.activationListener = {
           enter: this.onPointerEntered.bind( this ),
+          move: this.onPointerMove.bind( this ),
           exit: this.onPointerExited.bind( this ),
           down: this.onPointerDown.bind( this )
         };
@@ -113,6 +117,25 @@ const MouseHighlighting = {
 
           if ( display.focusManager.pointerFocusProperty.value === null || !event.trail.equals( display.focusManager.pointerFocusProperty.value.trail ) ) {
             display.focusManager.pointerFocusProperty.set( new Focus( display, event.trail ) );
+          }
+        }
+      },
+
+      onPointerMove( event ) {
+
+        const displays = Object.values( this._displays );
+        for ( let i = 0; i < displays.length; i++ ) {
+          const display = displays[ i ];
+
+          // the SceneryEvent might have gone through a descendant of this Node
+          const rootToSelf = event.trail.subtrailTo( this );
+
+          // only do more work on move if the event indicates that pointer focus might have changed
+          if ( display.focusManager.pointerFocusProperty.value === null || !rootToSelf.equals( display.focusManager.pointerFocusProperty.value.trail ) ) {
+
+            if ( !this.getDescendantsUseHighlighting( event.trail ) ) {
+              display.focusManager.pointerFocusProperty.set( new Focus( display, rootToSelf ) );
+            }
           }
         }
       },
@@ -232,6 +255,35 @@ const MouseHighlighting = {
 
           delete this._displays[ instance.trail.uniqueId ];
         }
+      },
+
+      /**
+       * Returns true if any nodes from this Node to the leaf of the Trail use Voicing features in some way. In
+       * general, we do not want to activate voicing features in this case because the leaf-most Nodes in the Trail
+       * should be activated instead.
+       * @protected
+       *
+       * @param trail
+       * @returns {boolean}
+       */
+      getDescendantsUseHighlighting( trail ) {
+        const indexOfSelf = trail.nodes.indexOf( this );
+
+        // all the way to length, end not included in slice - and if start value is greater than index range
+        // an empty array is returned
+        const childToLeafNodes = trail.nodes.slice( indexOfSelf + 1, trail.nodes.length );
+
+        // if any of the nodes from leaf to self use MouseHighlighting, they should receive input, and we shouldn't
+        // speak the content for this Node
+        let descendantsUseVoicing = false;
+        for ( let i = 0; i < childToLeafNodes.length; i++ ) {
+          if ( childToLeafNodes[ i ].isMouseHighlighting ) {
+            descendantsUseVoicing = true;
+            break;
+          }
+        }
+
+        return descendantsUseVoicing;
       }
     } );
   }

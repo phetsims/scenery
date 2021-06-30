@@ -247,19 +247,21 @@ const ReadingBlock = {
         const content = this.collectReadingBlockResponses();
         if ( content ) {
           for ( let i = 0; i < displays.length; i++ ) {
+            if ( !this.getDescendantsUseHighlighting( event.trail ) ) {
 
-            // the SceneryEvent might have gone through a descendant of this Node
-            const subtrailToThis = event.trail.subtrailTo( this );
+              // the SceneryEvent might have gone through a descendant of this Node
+              const rootToSelf = event.trail.subtrailTo( this );
 
-            // the trail to a Node may be discontinuous for PDOM events due to pdomOrder,
-            // this finds the actual visual trail to use
-            const visualTrail = scenery.PDOMInstance.guessVisualTrail( subtrailToThis, displays[ i ].rootNode );
+              // the trail to a Node may be discontinuous for PDOM events due to pdomOrder,
+              // this finds the actual visual trail to use
+              const visualTrail = scenery.PDOMInstance.guessVisualTrail( rootToSelf, displays[ i ].rootNode );
 
-            const focus = new Focus( displays[ i ], visualTrail );
-            const readingBlockUtterance = new ReadingBlockUtterance( focus, {
-              alert: content
-            } );
-            this.speakContent( readingBlockUtterance );
+              const focus = new Focus( displays[ i ], visualTrail );
+              const readingBlockUtterance = new ReadingBlockUtterance( focus, {
+                alert: content
+              } );
+              this.speakContent( readingBlockUtterance );
+            }
           }
         }
       },
