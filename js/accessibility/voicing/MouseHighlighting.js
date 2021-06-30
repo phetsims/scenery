@@ -208,22 +208,28 @@ const MouseHighlighting = {
       /**
        * Add the Display to the collection when this Node is added to a scene graph. Also adds listeners to the
        * Display that turns on highlighting when the feature is enabled.
+       *
        * @param {Instance} instance
        * @param {boolean} added - whether the instance is added or removed from the Instance tree
        */
       onChangedInstance( instance, added ) {
         if ( added ) {
-
-          // a reference to the Display for this instance so we can remove listners later
           this._displays[ instance.trail.uniqueId ] = instance.display;
-          instance.display.focusManager.pointerHighlightsVisibleProperty.link( this.mouseHighlightingEnabledListener );
 
+          // Listener may already by on the display in cases of DAG, only add if this is the first instance of this Node
+          if ( !instance.display.focusManager.pointerHighlightsVisibleProperty.hasListener( this.mouseHighlightingEnabledListener ) ) {
+            instance.display.focusManager.pointerHighlightsVisibleProperty.link( this.mouseHighlightingEnabledListener );
+          }
         }
         else {
           const display = this._displays[ instance.trail.uniqueId ];
           assert && assert( display, 'about to remove listeners from Display Properties, but could not find Display' );
 
-          display.focusManager.pointerHighlightsVisibleProperty.unlink( this.mouseHighlightingEnabledListener );
+          // only unlink if there are no more instances of this Node
+          if ( instance.node.instances.length === 0 ) {
+            display.focusManager.pointerHighlightsVisibleProperty.unlink( this.mouseHighlightingEnabledListener );
+          }
+
           delete this._displays[ instance.trail.uniqueId ];
         }
       }
