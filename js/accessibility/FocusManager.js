@@ -26,6 +26,7 @@
  */
 
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
+import DerivedProperty from '../../../axon/js/DerivedProperty.js';
 import Property from '../../../axon/js/Property.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
@@ -62,6 +63,14 @@ class FocusManager {
     // @public {BooleanProperty} - Controls whether "Reading Block" highlights will be visible around Nodes
     // that use ReadingBlock.
     this.readingBlockHighlightsVisibleProperty = new BooleanProperty( false );
+
+    // @public {DerivedProperty.<boolean>} - Indicates whether any highlights should appear from pointer
+    // input (mouse/touch). If false, we will try to avoid doing expensive work in PointerHighlighting.js.
+    this.pointerHighlightsVisibleProperty = new DerivedProperty(
+      [ this.interactiveHighlightsVisibleProperty, webSpeaker.enabledProperty ],
+      ( interactiveHighlightsVisible, voicingEnabled ) => {
+        return interactiveHighlightsVisible || voicingEnabled;
+      } );
 
     //-----------------------------------------------------------------------------------------------------------------
     // The following section manages control of ReadingBlockFocusProperty. It takes a value whenever the

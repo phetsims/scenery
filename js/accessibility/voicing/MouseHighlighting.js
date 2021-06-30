@@ -44,15 +44,30 @@ const MouseHighlighting = {
           exit: this.onPointerExited.bind( this ),
           down: this.onPointerDown.bind( this )
         };
-        this.addInputListener( this.activationListener );
-
-        const boundPointerReleaseListener = this.onPointerRelease.bind( this );
-        const boundPointerCancel = this.onPointerCancel.bind( this );
 
         // @private - A reference to the Pointer so that we can add and remove listeners from it when necessary.
         // Since this is on the trait, only one pointer can have a listener for this Node that uses MouseHighlighting
         // at one time.
         this.pointer = null;
+
+        // @protected {Object} - A map that collects all of the Displays that this MouseHighlighting Node is
+        // attached to, mapping the unique ID of the Instance Trail to the Display. We need a reference to the
+        // Displays to activate the Focus Property associated with highlighting, and to add/remove listeners when
+        // features that require highlighting are enabled/disabled. Note that this is updated asynchronously
+        // (with updateDisplay) since Instances are added asynchronously.
+        this._displays = {};
+
+        // @private {function} - When new instances of this Node are created, adds an entry to the map of Displays.
+        this.changedInstanceListener = this.onChangedInstance.bind( this );
+        this.changedInstanceEmitter.addListener( this.changedInstanceListener );
+
+        // @private {function} - Listener that adds/removes other listeners that activate highlights when
+        // the feature becomes enabled/disabled so that we don't do extra work related to highlighting unless
+        // it is necessary.
+        this.mouseHighlightingEnabledListener = this.onMouseHighlightingEnabledChange.bind( this );
+
+        const boundPointerReleaseListener = this.onPointerRelease.bind( this );
+        const boundPointerCancel = this.onPointerCancel.bind( this );
 
         // @private - Input listener that locks the HighlightOverlay so that there are no updates to the highlight
         // while the pointer is down over something that uses MouseHighlighting.
@@ -67,7 +82,21 @@ const MouseHighlighting = {
        * @public
        */
       disposeMouseHighlighting() {
-        this.removeInputListener( this.activationListener );
+        this.changedInstanceEmitter.removeListener( this.changedInstanceListener );
+
+        // remove the activation listener if it is currently attached
+        if ( this.hasInputListener( this.activationListener ) ) {
+          this.removeInputListener( this.activationListener );
+        }
+
+        // remove listeners on displays and remove Displays from the map
+        const trailIds = Object.keys( this._displays );
+        for ( let i = 0; i < trailIds.length; i++ ) {
+          const display = this._displays[ trailIds[ i ] ];
+
+          display.focusManager.pointerHighlightsVisibleProperty.unlink( this.mouseHighlightingEnabledListener );
+          delete this._displays[ trailIds[ i ] ];
+        }
       },
 
       /**
@@ -78,7 +107,7 @@ const MouseHighlighting = {
        * @param {SceneryEvent} event
        */
       onPointerEntered( event ) {
-        const displays = this.getConnectedDisplays();
+        const displays = Object.values( this._displays );
         for ( let i = 0; i < displays.length; i++ ) {
           const display = displays[ i ];
 
@@ -96,7 +125,7 @@ const MouseHighlighting = {
        * @param {SceneryEvent} event
        */
       onPointerExited( event ) {
-        const displays = this.getConnectedDisplays();
+        const displays = Object.values( this._displays );
         for ( let i = 0; i < displays.length; i++ ) {
           const display = displays[ i ];
           display.focusManager.pointerFocusProperty.set( null );
@@ -111,7 +140,7 @@ const MouseHighlighting = {
        */
       onPointerDown( event ) {
         if ( this.pointer === null ) {
-          const displays = this.getConnectedDisplays();
+          const displays = Object.values( this._displays );
           for ( let i = 0; i < displays.length; i++ ) {
             const display = displays[ i ];
             display.focusManager.pointerFocusLockedProperty.set( true );
@@ -130,7 +159,7 @@ const MouseHighlighting = {
        * @param {SceneryEvent} [event] - may be called during interrupt or cancel, in which case there is no event
        */
       onPointerRelease( event ) {
-        const displays = this.getConnectedDisplays();
+        const displays = Object.values( this._displays );
         for ( let i = 0; i < displays.length; i++ ) {
           const display = displays[ i ];
           display.focusManager.pointerFocusLockedProperty.set( false );
@@ -149,7 +178,7 @@ const MouseHighlighting = {
        * @param event
        */
       onPointerCancel( event ) {
-        const displays = this.getConnectedDisplays();
+        const displays = Object.values( this._displays );
         for ( let i = 0; i < displays.length; i++ ) {
           const display = displays[ i ];
           display.focusManager.pointerFocusProperty.set( null );
@@ -157,6 +186,46 @@ const MouseHighlighting = {
 
         // unlock and remove pointer listeners
         this.onPointerRelease( event );
+      },
+
+      /**
+       * Add or remove listeners related to activating mouse highlighting when the feature becomes enabled. This way
+       * we prevent doing work related to mouse highlighting unless the feature is enabled.
+       * @private
+       *
+       * @param {boolean} enabled
+       */
+      onMouseHighlightingEnabledChange( enabled ) {
+        const hasActivationListener = this.hasInputListener( this.activationListener );
+        if ( enabled && !hasActivationListener ) {
+          this.addInputListener( this.activationListener );
+        }
+        else if ( !enabled && hasActivationListener ) {
+          this.removeInputListener( this.activationListener );
+        }
+      },
+
+      /**
+       * Add the Display to the collection when this Node is added to a scene graph. Also adds listeners to the
+       * Display that turns on highlighting when the feature is enabled.
+       * @param {Instance} instance
+       * @param {boolean} added - whether the instance is added or removed from the Instance tree
+       */
+      onChangedInstance( instance, added ) {
+        if ( added ) {
+
+          // a reference to the Display for this instance so we can remove listners later
+          this._displays[ instance.trail.uniqueId ] = instance.display;
+          instance.display.focusManager.pointerHighlightsVisibleProperty.link( this.mouseHighlightingEnabledListener );
+
+        }
+        else {
+          const display = this._displays[ instance.trail.uniqueId ];
+          assert && assert( display, 'about to remove listeners from Display Properties, but could not find Display' );
+
+          display.focusManager.pointerHighlightsVisibleProperty.unlink( this.mouseHighlightingEnabledListener );
+          delete this._displays[ instance.trail.uniqueId ];
+        }
       }
     } );
   }
