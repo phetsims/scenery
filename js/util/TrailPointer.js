@@ -291,10 +291,11 @@ class TrailPointer {
       callback( this.trail );
     }
 
-    this.depthFirstUntil( other, pointer => { // eslint-disable-line consistent-return
+    this.depthFirstUntil( other, pointer => {
       if ( pointer.isBefore ) {
         return callback( pointer.trail );
       }
+      return false;
     }, true ); // exclude the endpoints so we can ignore the ending 'before' case
   }
 

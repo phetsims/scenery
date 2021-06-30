@@ -839,19 +839,17 @@ class Text extends Node {
 
     // Simplifies the tree using the above functions
     function simplify( node ) {
-      if ( typeof node === 'string' ) {
-        return;
+      if ( typeof node !== 'string' ) {
+        for ( let i = 0; i < node.children.length; i++ ) {
+          simplify( node.children[ i ] );
+        }
+
+        collapseUnnecessary( node );
+        collapseNesting( node );
+        collapseAdjacent( node );
       }
 
-      for ( let i = 0; i < node.children.length; i++ ) {
-        simplify( node.children[ i ] );
-      }
-
-      collapseUnnecessary( node );
-      collapseNesting( node );
-      collapseAdjacent( node );
-
-      return node; // eslint-disable-line consistent-return
+      return node;
     }
 
     // Turns a tree into a string

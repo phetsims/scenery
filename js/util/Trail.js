@@ -1040,10 +1040,11 @@ class Trail {
    * @param {Node} rootNode
    */
   static eachPaintedTrailBetween( a, b, callback, excludeEndTrails, rootNode ) {
-    Trail.eachTrailBetween( a, b, trail => { // eslint-disable-line consistent-return
+    Trail.eachTrailBetween( a, b, trail => {
       if ( trail && trail.isPainted() ) {
         return callback( trail );
       }
+      return false;
     }, excludeEndTrails, rootNode );
   }
 
@@ -1072,10 +1073,11 @@ class Trail {
       }
     }
 
-    aPointer.depthFirstUntil( bPointer, pointer => { // eslint-disable-line consistent-return
+    aPointer.depthFirstUntil( bPointer, pointer => {
       if ( pointer.isBefore ) {
         return callback( pointer.trail );
       }
+      return false;
     }, false );
   }
 

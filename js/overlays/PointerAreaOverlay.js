@@ -25,7 +25,7 @@ class PointerAreaOverlay extends ShapeBasedOverlay {
    * @override
    */
   addShapes() {
-    new Trail( this.rootNode ).eachTrailUnder( trail => { // eslint-disable-line consistent-return
+    new Trail( this.rootNode ).eachTrailUnder( trail => {
       const node = trail.lastNode();
       if ( !node.isVisible() ) {
         // skip this subtree if the node is invisible
@@ -41,6 +41,7 @@ class PointerAreaOverlay extends ShapeBasedOverlay {
           this.addShape( transform.transformShape( node.touchArea.isBounds ? Shape.bounds( node.touchArea ) : node.touchArea ), 'rgba(255,0,0,0.8)', false );
         }
       }
+      return false;
     } );
   }
 }

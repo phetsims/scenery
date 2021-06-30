@@ -1576,7 +1576,7 @@ class Display {
     function blockSummary( block ) {
       // ensure we are a block
       if ( !block.firstDrawable || !block.lastDrawable ) {
-        return;
+        return '';
       }
 
       const hasBackbone = block.domDrawable && block.domDrawable.blocks;
@@ -1598,7 +1598,7 @@ class Display {
       }
       depth -= 1;
 
-      return div;// eslint-disable-line consistent-return
+      return div;
     }
 
     if ( this._rootBackbone ) {

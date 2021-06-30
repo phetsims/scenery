@@ -565,7 +565,7 @@ extend( scenery, {
   },
 
   // @public
-  deserialize: function( value ) { // eslint-disable-line consistent-return
+  deserialize: function( value ) {
     const nodeTypes = [
       'Node', 'Path', 'Circle', 'Line', 'Rectangle', 'Text', 'Image', 'CanvasNode', 'WebGLNode', 'DOM'
     ];
@@ -763,6 +763,9 @@ extend( scenery, {
     }
     else if ( value.type === 'value' ) {
       return value.value;
+    }
+    else {
+      return null;
     }
   },
 

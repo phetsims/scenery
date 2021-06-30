@@ -26,7 +26,7 @@ class HitAreaOverlay extends ShapeBasedOverlay {
    * @override
    */
   addShapes() {
-    new Trail( this.rootNode ).eachTrailUnder( trail => { // eslint-disable-line consistent-return
+    new Trail( this.rootNode ).eachTrailUnder( trail => {
       const node = trail.lastNode();
 
       if ( !node.isVisible() || node.pickable === false ) {
@@ -46,6 +46,8 @@ class HitAreaOverlay extends ShapeBasedOverlay {
           this.addShape( touchShape.transformed( matrix ), 'rgba(255,0,0,0.8)', false );
         }
       }
+
+      return false;
     } );
   }
 

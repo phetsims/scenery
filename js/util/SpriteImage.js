@@ -80,7 +80,7 @@ class SpriteImage extends Imageable( Object ) {
    *
    * @returns {Shape}
    */
-  getShape() { // eslint-disable-line consistent-return
+  getShape() {
     if ( !this.pickable ) {
       return new Shape();
     }
@@ -107,6 +107,8 @@ class SpriteImage extends Imageable( Object ) {
       // Apply our offset
       this.shape = this.shape.transformed( Matrix3.translation( -this.offset.x, -this.offset.y ) );
     }
+
+    return this.shape;
   }
 
   /**

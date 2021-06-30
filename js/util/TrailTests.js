@@ -229,12 +229,13 @@ QUnit.test( 'depthFirstUntil depthFirstUntil with subtree skipping', assert => {
   const node = createTestNodeTree();
   node.children[ 0 ].children[ 2 ].visible = false;
   node.children[ 0 ].children[ 3 ].visible = false;
-  new TrailPointer( new Trail( node ), true ).depthFirstUntil( new TrailPointer( new Trail( node ), false ), pointer => { // eslint-disable-line consistent-return
+  new TrailPointer( new Trail( node ), true ).depthFirstUntil( new TrailPointer( new Trail( node ), false ), pointer => {
     if ( !pointer.trail.lastNode().isVisible() ) {
       // should skip
       return true;
     }
     assert.ok( pointer.trail.isVisible(), `Trail visibility for ${pointer.trail.toString()}` );
+    return false;
   }, false );
 } );
 
@@ -242,12 +243,13 @@ QUnit.test( 'Trail eachTrailUnder with subtree skipping', assert => {
   const node = createTestNodeTree();
   node.children[ 0 ].children[ 2 ].visible = false;
   node.children[ 0 ].children[ 3 ].visible = false;
-  new Trail( node ).eachTrailUnder( trail => { // eslint-disable-line consistent-return
+  new Trail( node ).eachTrailUnder( trail => {
     if ( !trail.lastNode().isVisible() ) {
       // should skip
       return true;
     }
     assert.ok( trail.isVisible(), `Trail visibility for ${trail.toString()}` );
+    return false;
   } );
 } );
 
