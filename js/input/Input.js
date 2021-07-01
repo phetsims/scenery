@@ -1957,7 +1957,7 @@ class Input {
     domEventPropertiesToSerialize.forEach( property => {
 
         // we shouldn't check if domEvent.hasOwnProperty because some properties come from supertypes
-        // TODO: The previous sentence doesn't seem accurate.
+        // TODO: The previous sentence doesn't seem accurate. https://github.com/phetsims/phet-io/issues/1791
         // TODO: Since class X{constructor(){this.m='hello';}}
         // TODO: class Y extends X{constructor(){super();}}
         // TODO: const y = new Y();
