@@ -57,7 +57,7 @@ class WebSpeaker {
     this.initialized = false;
 
     // whether or ot the webSpeaker is enabled - if false, there will be no voicing at all
-    this.enabledProperty = new BooleanProperty( phet.chipper.queryParameters.voicingInitiallyEnabled );
+    this.enabledProperty = new BooleanProperty( false );
 
     // @private {Property|DerivedProperty|null} - Controls whether or not speech is allowed with synthesis.
     // Null until initialized, and can be set by options to initialize().
