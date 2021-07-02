@@ -1503,7 +1503,7 @@ class RichText extends Node {
     if ( assert && options.hasOwnProperty( 'text' ) && options.hasOwnProperty( 'textProperty' ) ) {
       assert && assert( options.textProperty.value === options.text, 'If both text and textProperty are provided, then values should match' );
     }
-    super.mutate( options );
+    return super.mutate( options );
   }
 
   /**
