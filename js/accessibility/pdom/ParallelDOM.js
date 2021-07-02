@@ -1476,7 +1476,7 @@ const ParallelDOM = {
        * Get the focus highlight for this node.
        * @public
        *
-       * @returns {Node|Shape|string<'invisible'>}
+       * @returns {Node|Shape|string.<'invisible'>}
        */
       getFocusHighlight: function() {
         return this._focusHighlight;
