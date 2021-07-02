@@ -56,8 +56,8 @@ class WebSpeaker {
     // @public {boolean} - is the WebSpeaker initialized for use? This is prototypal so it isn't always initialized
     this.initialized = false;
 
-    // whether or ot the webSpeaker is enabled - if false, there will be no speech
-    this.enabledProperty = new BooleanProperty( false );
+    // whether or ot the webSpeaker is enabled - if false, there will be no voicing at all
+    this.enabledProperty = new BooleanProperty( phet.chipper.queryParameters.voicingInitiallyEnabled );
 
     // @private {Property|DerivedProperty|null} - Controls whether or not speech is allowed with synthesis.
     // Null until initialized, and can be set by options to initialize().
