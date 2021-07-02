@@ -96,6 +96,17 @@ class Text extends Node {
     this.invalidateSupportedRenderers(); // takes care of setting up supported renderers
   }
 
+  /**
+   * @public
+   * @override
+   * @param {Object} [options]
+   */
+  mutate( options ) {
+    if ( assert && options.hasOwnProperty( 'text' ) && options.hasOwnProperty( 'textProperty' ) ) {
+      assert && assert( options.textProperty.value === options.text, 'If both text and textProperty are provided, then values should match' );
+    }
+    super.mutate( options );
+  }
 
   /**
    * Sets the text displayed by our node.

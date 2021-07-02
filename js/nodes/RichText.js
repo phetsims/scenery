@@ -1495,6 +1495,18 @@ class RichText extends Node {
   get lineWrap() { return this.getLineWrap(); }
 
   /**
+   * @public
+   * @override
+   * @param {Object} [options]
+   */
+  mutate( options ) {
+    if ( assert && options.hasOwnProperty( 'text' ) && options.hasOwnProperty( 'textProperty' ) ) {
+      assert && assert( options.textProperty.value === options.text, 'If both text and textProperty are provided, then values should match' );
+    }
+    super.mutate( options );
+  }
+
+  /**
    * Returns a wrapped version of the string with a font specifier that uses the given font object.
    * @public
    *

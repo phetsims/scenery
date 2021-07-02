@@ -157,6 +157,42 @@ QUnit.test( 'Trail and Node transform equivalence', assert => {
   assert.ok( trailMatrix.equalsEpsilon( nodeMatrix, epsilon ), 'Trail and Node transform equivalence' );
 } );
 
+QUnit.test( 'Mutually exclusive options', assert => {
+
+  const visibleProperty = new BooleanProperty( true );
+  window.assert && assert.throws( () => {
+    return new Node( {
+      visible: false,
+      visibleProperty: visibleProperty
+    } );
+  }, 'visible and visibleProperty values do not match' );
+
+  const pickableProperty = new BooleanProperty( true );
+  window.assert && assert.throws( () => {
+    return new Node( {
+      pickable: false,
+      pickableProperty: pickableProperty
+    } );
+  }, 'pickable and pickableProperty values do not match' );
+
+  const enabledProperty = new BooleanProperty( true );
+  window.assert && assert.throws( () => {
+    return new Node( {
+      enabled: false,
+      enabledProperty: enabledProperty
+    } );
+  }, 'enabled and enabledProperty values do not match' );
+
+  const inputEnabledProperty = new BooleanProperty( true );
+  window.assert && assert.throws( () => {
+    return new Node( {
+      inputEnabled: false,
+      inputEnabledProperty: inputEnabledProperty
+    } );
+  }, 'inputEnabled and inputEnabledProperty values do not match' );
+
+} );
+
 if ( Tandem.PHET_IO_ENABLED ) {
 
   QUnit.test( 'Node instrumented visibleProperty', assert => testInstrumentedNodeProperty( assert, 'visible',

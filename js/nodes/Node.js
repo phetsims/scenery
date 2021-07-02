@@ -6746,6 +6746,19 @@ class Node extends PhetioObject {
     assert && assert( _.filter( [ 'translation', 'y', 'top', 'bottom', 'centerY', 'centerTop', 'rightTop', 'leftCenter', 'center', 'rightCenter', 'leftBottom', 'centerBottom', 'rightBottom' ], key => options[ key ] !== undefined ).length <= 1,
       `More than one mutation on this Node set the y component, check ${Object.keys( options ).join( ',' )}` );
 
+    if ( assert && options.hasOwnProperty( 'enabled' ) && options.hasOwnProperty( 'enabledProperty' ) ) {
+      assert && assert( options.enabledProperty.value === options.enabled, 'If both enabled and enabledProperty are provided, then values should match' );
+    }
+    if ( assert && options.hasOwnProperty( 'inputEnabled' ) && options.hasOwnProperty( 'inputEnabledProperty' ) ) {
+      assert && assert( options.inputEnabledProperty.value === options.inputEnabled, 'If both inputEnabled and inputEnabledProperty are provided, then values should match' );
+    }
+    if ( assert && options.hasOwnProperty( 'visible' ) && options.hasOwnProperty( 'visibleProperty' ) ) {
+      assert && assert( options.visibleProperty.value === options.visible, 'If both visible and visibleProperty are provided, then values should match' );
+    }
+    if ( assert && options.hasOwnProperty( 'pickable' ) && options.hasOwnProperty( 'pickableProperty' ) ) {
+      assert && assert( options.pickableProperty.value === options.pickable, 'If both pickable and pickableProperty are provided, then values should match' );
+    }
+
     _.each( this._mutatorKeys, key => {
 
       // See https://github.com/phetsims/scenery/issues/580 for more about passing undefined.
