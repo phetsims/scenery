@@ -826,14 +826,10 @@ class Trail {
     assertSlow && assertSlow( this.areIndicesValid(), `Trail.compare this.areIndicesValid() failed on ${this.toString()}` );
     assertSlow && assertSlow( other.areIndicesValid(), `Trail.compare other.areIndicesValid() failed on ${other.toString()}` );
 
-    // TODO: separate from main issue questions, but isn't this needed!?!? https://github.com/phetsims/scenery/issues/1116
-    this.reindex();
-    other.reindex();
-
-    const minNodeIndex = Math.min( this.indices.length, other.indices.length );
+    const minNodeIndex = Math.min( this.nodes.length, other.nodes.length );
     for ( let i = 0; i < minNodeIndex; i++ ) {
-      if ( this.indices[ i ] !== other.indices[ i ] ) {
-        if ( this.indices[ i ] < other.indices[ i ] ) {
+      if ( this.nodes[ i ] !== other.nodes[ i ] ) {
+        if ( this.nodes[ i - 1 ].children.indexOf( this.nodes[ i ] ) < other.nodes[ i - 1 ].children.indexOf( other.nodes[ i ] ) ) {
           return -1;
         }
         else {

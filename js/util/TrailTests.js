@@ -29,13 +29,28 @@ import Utils from './Utils.js';
 
 QUnit.module( 'Trail' );
 
-/* eslint-disable no-undef */
-
-function equalsApprox( assert, a, b, message ) { // eslint-disable-line no-unused-vars
+function equalsApprox( assert, a, b, message ) {
   assert.ok( Math.abs( a - b ) < 0.0000001, `${( message ? `${message}: ` : '' ) + a} =? ${b}` );
 }
 
-function createTestNodeTree() { // eslint-disable-line no-unused-vars
+
+/*
+The test tree:
+n
+  n
+    n
+    n
+      n
+    n
+    n
+      n
+        n
+      n
+    n
+  n
+  n
+ */
+function createTestNodeTree() {
   const node = new Node();
   node.addChild( new Node() );
   node.addChild( new Node() );
