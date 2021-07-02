@@ -6017,7 +6017,11 @@ class Node extends PhetioObject {
       // {boolean} - If true, it will directly use the <canvas> element (only works with canvas/webgl renderers)
       // instead of converting this into a form that can be used with any renderer. May have slightly better
       // performance if svg/dom renderers do not need to be used.
-      useCanvas: false
+      useCanvas: false,
+
+      // To be passed to the Image node created from the rasterization. See below for options that will override
+      // what is passed in.
+      imageOptions: {}
     }, options );
 
     const resolution = options.resolution;
@@ -6064,7 +6068,7 @@ class Node extends PhetioObject {
     function callback( canvas, x, y, width, height ) {
       const imageSource = options.useCanvas ? canvas : canvas.toDataURL();
 
-      image = new scenery.Image( imageSource, merge( options, {
+      image = new scenery.Image( imageSource, merge( options.imageOptions, {
         x: -x,
         y: -y,
         initialWidth: width,
