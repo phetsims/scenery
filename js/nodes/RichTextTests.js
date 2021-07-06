@@ -13,6 +13,8 @@ QUnit.module( 'RichText' );
 
 QUnit.test( 'Mutually exclusive options', assert => {
 
+  assert.ok( true, 'always true, even when assertions are not on.' );
+
   const textProperty = new StringProperty( 'um, hoss?' );
   window.assert && assert.throws( () => {
     return new RichText( {

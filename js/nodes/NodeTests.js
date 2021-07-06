@@ -159,6 +159,8 @@ QUnit.test( 'Trail and Node transform equivalence', assert => {
 
 QUnit.test( 'Mutually exclusive options', assert => {
 
+  assert.ok( true, 'always true, even when assertions are not on.' );
+
   const visibleProperty = new BooleanProperty( true );
   window.assert && assert.throws( () => {
     return new Node( {
