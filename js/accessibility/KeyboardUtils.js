@@ -246,7 +246,7 @@ const KeyboardUtils = {
    *
    * @public
    * @param {Event} domEvent
-   * @returns {string|null} - null if there is no `key` property on the provided Event.
+   * @returns {string|null} - null if there is no `code` property on the provided Event.
    */
   getEventCode( domEvent ) {
     validate( domEvent, DOM_EVENT_VALIDATOR );
