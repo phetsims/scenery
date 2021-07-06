@@ -220,7 +220,7 @@ class KeyStateTracker {
   }
 
   /**
-   * Returns true if a key with the Event.key is currently down.
+   * Returns true if a key with the Event.code is currently down.
    *
    * @public
    * @param  {string} key

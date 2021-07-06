@@ -1,7 +1,7 @@
 // Copyright 2017-2021, University of Colorado Boulder
 
 /**
- * Collection of utility constants and functions for managing keyboard input. Constants are values of Event.key, as
+ * Collection of utility constants and functions for managing keyboard input. Constants are values of Event.code, as
  * well as helper functions and collections.
  *
  * @author Jesse Greenberg
