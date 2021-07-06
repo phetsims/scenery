@@ -1882,11 +1882,11 @@ QUnit.test( 'Node.enabledProperty with PDOM', assert => {
   assert.ok( pdomNode.pdomInstances.length === 1, 'should have an instance when attached to display' );
   assert.ok( !!pdomNode.pdomInstances[ 0 ].peer, 'should have a peer' );
 
-  assert.ok( pdomNode.pdomInstances[ 0 ].peer.primarySibling.getAttribute( 'aria-disabled' ) !== 'true', 'should be enabled' );
+  assert.ok( pdomNode.pdomInstances[ 0 ].peer.primarySibling.getAttribute( 'aria-disabled' ) !== 'true', 'should be not enabled' );
   pdomNode.enabled = false;
   assert.ok( pdomNode.pdomInstances[ 0 ].peer.primarySibling.getAttribute( 'aria-disabled' ) === 'true', 'should be enabled' );
   pdomNode.enabled = true;
-  assert.ok( pdomNode.pdomInstances[ 0 ].peer.primarySibling.getAttribute( 'aria-disabled' ) === 'false', 'should be enabled' );
+  assert.ok( pdomNode.pdomInstances[ 0 ].peer.primarySibling.getAttribute( 'aria-disabled' ) === 'false', 'should be not enabled' );
   pdomNode.dispose;
   display.dispose();
   display.domElement.parentElement.removeChild( display.domElement );
