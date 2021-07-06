@@ -153,6 +153,18 @@ const KeyboardUtils = {
   },
 
   /**
+   * For number keys, return the number of the key, or null if not a number
+   * @param {Event} domEvent
+   * @returns {null|number}
+   */
+  getNumberFromCode( domEvent ) {
+    if ( KeyboardUtils.isNumberKey( domEvent ) ) {
+      return Number( domEvent.code.replace( 'Digit', '' ) );
+    }
+    return null;
+  },
+
+  /**
    * Event.code distinguishes between left and right shift keys. If all you care about is the presence
    * of a shift key you can use this.
    * @public
@@ -216,7 +228,7 @@ const KeyboardUtils = {
    *
    * @param {Event} domEvent
    * @param {string[]} keyboardUtilsKeys
-   * @returns {*}
+   * @returns {boolean}
    */
   isAnyKeyEvent( domEvent, keyboardUtilsKeys ) {
     validate( domEvent, DOM_EVENT_VALIDATOR );
@@ -246,7 +258,7 @@ const KeyboardUtils = {
    *
    * @public
    * @param {Event} domEvent
-   * @returns {string|null} - null if there is no `key` property on the provided Event.
+   * @returns {string|null} - null if there is no `code` property on the provided Event.
    */
   getEventCode( domEvent ) {
     validate( domEvent, DOM_EVENT_VALIDATOR );
