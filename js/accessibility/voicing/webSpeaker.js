@@ -12,6 +12,7 @@
 import BooleanProperty from '../../../../axon/js/BooleanProperty.js';
 import DerivedProperty from '../../../../axon/js/DerivedProperty.js';
 import Emitter from '../../../../axon/js/Emitter.js';
+import EnabledComponent from '../../../../axon/js/EnabledComponent.js';
 import NumberProperty from '../../../../axon/js/NumberProperty.js';
 import Property from '../../../../axon/js/Property.js';
 import Range from '../../../../dot/js/Range.js';
@@ -23,8 +24,17 @@ import scenery from '../../scenery.js';
 import globalKeyStateTracker from '../globalKeyStateTracker.js';
 import KeyboardUtils from '../KeyboardUtils.js';
 
-class WebSpeaker {
+class WebSpeaker extends EnabledComponent {
   constructor() {
+
+    super( {
+
+      // initial value for the enabledProperty, false because speech should not happen until requested by user
+      enabled: false,
+
+      // phet-io
+      phetioEnabledPropertyInstrumented: false
+    } );
 
     // @public {null|SpeechSynthesisVoice}
     this.voiceProperty = new Property( null );
@@ -56,9 +66,6 @@ class WebSpeaker {
     // @public {boolean} - is the WebSpeaker initialized for use? This is prototypal so it isn't always initialized
     this.initialized = false;
 
-    // whether or ot the webSpeaker is enabled - if false, there will be no voicing at all
-    this.enabledProperty = new BooleanProperty( false );
-
     // @private {Property|DerivedProperty|null} - Controls whether or not speech is allowed with synthesis.
     // Null until initialized, and can be set by options to initialize().
     this._canSpeakProperty = null;
@@ -88,10 +95,6 @@ class WebSpeaker {
     // clearing this, though it is a bit tricky since we don't have a way to know
     // when we are done with an utterance - see #215
     this.utterances = [];
-  }
-
-  get enabled() {
-    return this.enabledProperty.get();
   }
 
   /**
