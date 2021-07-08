@@ -19,11 +19,11 @@
 
   <!--For the styling-->
   <link rel='stylesheet' href='../assets/scenery.css'>
-  <link rel='stylesheet' href='../../sherpa/lib/prism-1.17.1/prism-1.17.1.css'>
+  <link rel='stylesheet' href='../../sherpa/lib/prism-okaidia-1.23.0.css'>
 
   <!--Syntax highlighting & styling-->
   <script src='../../sherpa/lib/bootstrap-2.2.2.js'></script>
-  <script src='../../sherpa/lib/prism-1.17.1/prism-1.17.1.min.js'></script>
+  <script src='../../sherpa/lib/prism-1.23.0.js'></script>
 
   <!--Scenery-->
   <script src='../build/scenery.min.js'></script>
@@ -133,15 +133,6 @@
       .replace( new RegExp( '</p>', 'g' ), '\t</p>' ); //formatting for closing paragraph tag
 
     //syntax highlighting
-    const pw = Prism.plugins.NormalizeWhitespace;
-    pw.setDefaults( {
-      'remove-trailing': false,
-      'remove-indent': false,
-      'left-trim': false,
-      'right-trim': false,
-      'break-lines': 120
-    } );
-    pw.normalize( formattedPDOM );
     var $PDOMcode = ( $( '<code class="language-html"></code>' ).text( formattedPDOM ) );
     $( '#PDOM-pre' ).html( $PDOMcode );
     Prism.highlightAll();
