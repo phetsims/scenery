@@ -58,7 +58,9 @@ class KeyboardDragListener {
       // {Function|null} - Called as start( event: {SceneryEvent} ) when keyboard drag is started
       start: null,
 
-      // {Function|null} - Called as drag( viewDelta: {Vector2} ) during drag
+      // {Function|null} - Called as drag( viewDelta: {Vector2} ) during drag. Note that this does not provide the
+      // SceneryEvent. Dragging happens during animation (as long as keys are down), so there is no event
+      // associated with the drag.
       drag: null,
 
       // {Function|null} - Called as end( event: {SceneryEvent} ) when keyboard drag ends
