@@ -17,6 +17,10 @@ import Tandem from '../../../tandem/js/Tandem.js';
 import scenery from '../scenery.js';
 import MultiListener from './MultiListener.js';
 
+// constants
+// Reusable Matrix3 instance to avoid creating lots of them
+const SCRATCH_MATRIX = new Matrix3();
+
 class PanZoomListener extends MultiListener {
 
   /**
@@ -98,6 +102,9 @@ class PanZoomListener extends MultiListener {
    */
   correctReposition() {
 
+    // Save values of the current matrix, so that we only do certain work when the matrix actually changes
+    SCRATCH_MATRIX.set( this._targetNode.matrix );
+
     // the targetBounds transformed by the targetNode's transform, to determine if targetBounds are out of panBounds
     const transformedBounds = this._targetBounds.transformed( this._targetNode.getMatrix() );
 
@@ -115,10 +122,12 @@ class PanZoomListener extends MultiListener {
       this._targetNode.bottom = this._panBounds.bottom + ( this._targetNode.bottom - transformedBounds.bottom );
     }
 
-    // update Property with matrix once position has been corrected, using notifyListenersStatic
-    // to avoid creating a new Matrix3 instance
-    this.matrixProperty.set( this._targetNode.matrix );
-    this.matrixProperty.notifyListenersStatic();
+    // Update Property with matrix once position has been corrected, using notifyListenersStatic
+    // to avoid creating a new Matrix3 instance. But only notify when there has been an actual change.
+    if ( !SCRATCH_MATRIX.equals( this._targetNode.matrix ) ) {
+      this.matrixProperty.set( this._targetNode.matrix );
+      this.matrixProperty.notifyListenersStatic();
+    }
   }
 
   /**
