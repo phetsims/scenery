@@ -35,6 +35,7 @@ Unlike all the other tests, this test runs in unbuilt mode, and uses ES6 modules
 <script type="module">
 
   import Node from '../js/nodes/Node.js';
+  import Path from '../js/nodes/Path.js';
   import HBox from '../js/nodes/HBox.js';
   import VBox from '../js/nodes/VBox.js';
   import Display from '../js/display/Display.js';
@@ -48,7 +49,7 @@ Unlike all the other tests, this test runs in unbuilt mode, and uses ES6 modules
   } );
 
   const iconAlignGroup = new AlignGroup();
-  const icons = iconList.map( Icon => new Icon( {
+  const icons = iconList.map( shape => new Path( shape, {
     maxWidth: 75, maxHeight: 75,
     fill: 'black'
   } ) ).filter( n => n !== null ).map( node => iconAlignGroup.createBox( node, {} ) );
