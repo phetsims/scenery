@@ -1248,9 +1248,13 @@ class Node extends PhetioObject {
       if ( !ourChildBounds.equals( oldChildBounds ) ) {
         // notifies only on an actual change
         if ( !ourChildBounds.equalsEpsilon( oldChildBounds, notificationThreshold ) ) {
-          this.childBoundsProperty.notifyListeners( oldChildBounds );
+          this.childBoundsProperty.notifyListeners( oldChildBounds ); // RE-ENTRANT CALL HERE, it will validateBounds()
         }
       }
+
+      // WARNING: Think twice before adding code here below the listener notification. The notifyListeners() call can
+      // trigger re-entrancy, so this function needs to work when that happens. DO NOT set things based on local
+      // variables here.
     }
 
     if ( this._localBoundsDirty && !this._localBoundsOverridden ) {
@@ -1283,9 +1287,13 @@ class Node extends PhetioObject {
         this._boundsDirty = true;
 
         if ( !ourLocalBounds.equalsEpsilon( oldLocalBounds, notificationThreshold ) ) {
-          this.localBoundsProperty.notifyListeners( oldLocalBounds );
+          this.localBoundsProperty.notifyListeners( oldLocalBounds ); // RE-ENTRANT CALL HERE, it will validateBounds()
         }
       }
+
+      // WARNING: Think twice before adding code here below the listener notification. The notifyListeners() call can
+      // trigger re-entrancy, so this function needs to work when that happens. DO NOT set things based on local
+      // variables here.
     }
 
     // TODO: layout here?
@@ -1332,9 +1340,13 @@ class Node extends PhetioObject {
 
         // TODO: consider changing to parameter object (that may be a problem for the GC overhead)
         if ( !ourBounds.equalsEpsilon( oldBounds, notificationThreshold ) ) {
-          this.boundsProperty.notifyListeners( oldBounds );
+          this.boundsProperty.notifyListeners( oldBounds ); // RE-ENTRANT CALL HERE, it will validateBounds()
         }
       }
+
+      // WARNING: Think twice before adding code here below the listener notification. The notifyListeners() call can
+      // trigger re-entrancy, so this function needs to work when that happens. DO NOT set things based on local
+      // variables here.
     }
 
     // if there were side-effects, run the validation again until we are clean
@@ -1343,7 +1355,7 @@ class Node extends PhetioObject {
 
       // TODO: if there are side-effects in listeners, this could overflow the stack. we should report an error
       // instead of locking up
-      this.validateBounds();
+      this.validateBounds(); // RE-ENTRANT CALL HERE, it will validateBounds()
     }
 
     if ( assert ) {
