@@ -1272,6 +1272,11 @@ class Node extends PhetioObject {
 
       sceneryLog && sceneryLog.bounds && sceneryLog.bounds( `localBounds: ${ourLocalBounds}` );
 
+      // adjust our transform to match maximum bounds if necessary on a local bounds change
+      if ( this._maxWidth !== null || this._maxHeight !== null ) {
+        this.updateMaxDimension( ourLocalBounds );
+      }
+
       if ( !ourLocalBounds.equals( oldLocalBounds ) ) {
         // sanity check, see https://github.com/phetsims/scenery/issues/1071, we're running this before the localBounds
         // listeners are notified, to support limited re-entrance.
@@ -1280,11 +1285,6 @@ class Node extends PhetioObject {
         if ( !ourLocalBounds.equalsEpsilon( oldLocalBounds, notificationThreshold ) ) {
           this.localBoundsProperty.notifyListeners( oldLocalBounds );
         }
-      }
-
-      // adjust our transform to match maximum bounds if necessary on a local bounds change
-      if ( this._maxWidth !== null || this._maxHeight !== null ) {
-        this.updateMaxDimension( ourLocalBounds );
       }
     }
 
@@ -2768,9 +2768,10 @@ class Node extends PhetioObject {
 
     const scaleAdjustment = idealScale / currentScale;
     if ( scaleAdjustment !== 1 ) {
-      this.scale( scaleAdjustment );
-
+      // Set this first, for supporting re-entrancy if our content changes based on the scale
       this._appliedScaleFactor = idealScale;
+
+      this.scale( scaleAdjustment );
     }
   }
 
