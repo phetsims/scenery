@@ -1278,6 +1278,9 @@ class Node extends PhetioObject {
 
       // adjust our transform to match maximum bounds if necessary on a local bounds change
       if ( this._maxWidth !== null || this._maxHeight !== null ) {
+        // needs to run before notifications below, otherwise reentrancy that hits this codepath will have its
+        // updateMaxDimension overridden by the eventual original function call, with the now-incorrect local bounds.
+        // See https://github.com/phetsims/joist/issues/725
         this.updateMaxDimension( ourLocalBounds );
       }
 
