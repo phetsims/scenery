@@ -1956,16 +1956,14 @@ class Input {
 
     domEventPropertiesToSerialize.forEach( property => {
 
-        // we shouldn't check if domEvent.hasOwnProperty because some properties come from supertypes
-        // TODO: The previous sentence doesn't seem accurate. https://github.com/phetsims/phet-io/issues/1791
-        // TODO: Since class X{constructor(){this.m='hello';}}
-        // TODO: class Y extends X{constructor(){super();}}
-        // TODO: const y = new Y();
-        // TODO: y.hasOwnProperty('m');//returns true
         const domEventProperty = domEvent[ property ];
 
-        if ( domEventProperty === undefined || domEventProperty === null ) {
+        // we shouldn't check if domEvent.hasOwnProperty because some properties come from supertypes
+        if ( !( property in domEvent ) ) {
           entries[ property ] = null;
+        }
+        else if ( !domEventProperty ) {
+          entries[ property ] = domEventProperty;
         }
 
         // stringifying dom event object properties can cause circular references, so we avoid that completely
@@ -1997,7 +1995,9 @@ class Input {
           entries[ property ][ PDOMUtils.DATA_TRAIL_ID ] = domEventProperty.getAttribute( PDOMUtils.DATA_TRAIL_ID );
         }
         else {
-          entries[ property ] = ( ( typeof domEventProperty === 'object' ) ? {} : JSON.parse( JSON.stringify( domEventProperty ) ) ); // TODO: is parse/stringify necessary?
+
+          // Parse to get rid of functions and circular references.
+          entries[ property ] = ( ( typeof domEventProperty === 'object' ) ? {} : JSON.parse( JSON.stringify( domEventProperty ) ) );
         }
       }
     );
