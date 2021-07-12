@@ -122,11 +122,10 @@ class PanZoomListener extends MultiListener {
       this._targetNode.bottom = this._panBounds.bottom + ( this._targetNode.bottom - transformedBounds.bottom );
     }
 
-    // Update Property with matrix once position has been corrected, using notifyListenersStatic
-    // to avoid creating a new Matrix3 instance. But only notify when there has been an actual change.
+    // Update Property with matrix once position has been corrected to notify listeners and set PhET-iO state, but
+    // only notify when there has been an actual change.
     if ( !SCRATCH_MATRIX.equals( this._targetNode.matrix ) ) {
-      this.matrixProperty.set( this._targetNode.matrix );
-      this.matrixProperty.notifyListenersStatic();
+      this.matrixProperty.set( this._targetNode.matrix.copy() );
     }
   }
 

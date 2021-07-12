@@ -187,7 +187,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
     // @private - called by dispose
     this.disposeAnimatedPanZoomListener = () => {
-      boundGestureStartListener && window.removeEventListener( 'gesturestart', boundGestureStartListener );
+    boundGestureStartListener && window.removeEventListener( 'gesturestart', boundGestureStartListener );
       boundGestureChangeListener && window.removeEventListener( 'gestureChange', boundGestureChangeListener );
 
       FocusManager.pdomFocusProperty.unlink( displayFocusListener );
@@ -506,7 +506,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // we first translate from target point, then apply scale, then translate back to target point ()
     // so that it appears as though we are zooming into that point
     const scaleMatrix = toTargetPoint.timesMatrix( Matrix3.scaling( nextScale ) ).timesMatrix( fromLocalPoint );
-    this._targetNode.matrix = scaleMatrix;
+    this.matrixProperty.set( scaleMatrix );
 
     // make sure that we are still within PanZoomListener constraints
     this.correctReposition();
@@ -532,7 +532,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // we first translate from target point, then apply scale, then translate back to target point ()
     // so that it appears as though we are zooming into that point
     const scaleMatrix = toTargetPoint.timesMatrix( Matrix3.scaling( nextScale ) ).timesMatrix( fromLocalPoint );
-    this._targetNode.matrix = scaleMatrix;
+    this.matrixProperty.set( scaleMatrix );
 
     // make sure that we are still within PanZoomListener constraints
     this.correctReposition();
@@ -563,7 +563,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
     const singleInitialPoint = this._targetNode.globalToParentPoint( initialPoint );
     const singleTargetPoint = this._targetNode.globalToParentPoint( targetPoint );
     const delta = singleTargetPoint.minus( singleInitialPoint );
-    this._targetNode.matrix = Matrix3.translationFromVector( delta ).timesMatrix( this._targetNode.getMatrix() );
+    this.matrixProperty.set( Matrix3.translationFromVector( delta ).timesMatrix( this._targetNode.getMatrix() ) );
 
     this.correctReposition();
   }
