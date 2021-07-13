@@ -1962,9 +1962,6 @@ class Input {
         if ( !( property in domEvent ) ) {
           entries[ property ] = null;
         }
-        else if ( !domEventProperty ) {
-          entries[ property ] = domEventProperty;
-        }
 
         // stringifying dom event object properties can cause circular references, so we avoid that completely
         else if ( property === 'touches' || property === 'targetTouches' || property === 'changedTouches' ) {
@@ -1984,7 +1981,7 @@ class Input {
           entries[ property ] = touchArray;
         }
 
-        else if ( EVENT_KEY_VALUES_AS_ELEMENTS.includes( property ) && typeof domEventProperty.getAttribute === 'function' &&
+        else if ( EVENT_KEY_VALUES_AS_ELEMENTS.includes( property ) && domEventProperty && typeof domEventProperty.getAttribute === 'function' &&
 
                   // If false, then this target isn't a PDOM element, so we can skip this serialization
                   domEventProperty.hasAttribute( PDOMUtils.DATA_TRAIL_ID ) ) {
