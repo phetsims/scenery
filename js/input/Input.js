@@ -1958,8 +1958,8 @@ class Input {
 
         const domEventProperty = domEvent[ property ];
 
-        // we shouldn't check if domEvent.hasOwnProperty because some properties come from supertypes
-        if ( !( property in domEvent ) ) {
+        // We serialize many Event APIs into a single object, so be graceful if properties don't exist.
+        if ( domEventProperty === undefined || domEventProperty === null ) {
           entries[ property ] = null;
         }
 
@@ -1981,7 +1981,7 @@ class Input {
           entries[ property ] = touchArray;
         }
 
-        else if ( EVENT_KEY_VALUES_AS_ELEMENTS.includes( property ) && domEventProperty && typeof domEventProperty.getAttribute === 'function' &&
+        else if ( EVENT_KEY_VALUES_AS_ELEMENTS.includes( property ) && typeof domEventProperty.getAttribute === 'function' &&
 
                   // If false, then this target isn't a PDOM element, so we can skip this serialization
                   domEventProperty.hasAttribute( PDOMUtils.DATA_TRAIL_ID ) ) {
