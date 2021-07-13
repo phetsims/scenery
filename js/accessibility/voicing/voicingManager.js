@@ -23,10 +23,10 @@ class VoicingManager {
     this.nameResponsesEnabledProperty = new BooleanProperty( true );
 
     // @public {BooleanProperty} - whether or not "Object Responses" are read as interactive components change
-    this.objectResponsesEnabledProperty = new BooleanProperty( true );
+    this.objectResponsesEnabledProperty = new BooleanProperty( false );
 
     // @public {BooleanProperty} - whether or not "Context Responses" are read as inputs receive interaction
-    this.contextResponsesEnabledProperty = new BooleanProperty( true );
+    this.contextResponsesEnabledProperty = new BooleanProperty( false );
 
     // @public {BooleanProperty} - whether or not "Hints" are read to the user in response to certain input
     this.hintResponsesEnabledProperty = new BooleanProperty( false );
