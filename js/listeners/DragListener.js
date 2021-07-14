@@ -661,7 +661,7 @@ class DragListener extends PressListener {
     this._modelDelta.set( this._modelPoint ).negate();
 
     // Compute the modelPoint from the parentPoint
-    this._modelPoint = this.mapModelPoint( this.parentToModelPoint( scratchVector2A.set( this._parentPoint ) ) );
+    this._modelPoint.set( this.mapModelPoint( this.parentToModelPoint( scratchVector2A.set( this._parentPoint ) ) ) );
 
     // Complete the delta computation
     this._modelDelta.add( this._modelPoint );
