@@ -185,12 +185,15 @@ class KeyStateTracker {
     // delete modifier keys if we think they are down
     if ( !domEvent.shiftKey && this.shiftKeyDown ) {
       delete this.keyState[ KeyboardUtils.KEY_SHIFT_LEFT ];
+      delete this.keyState[ KeyboardUtils.KEY_SHIFT_RIGHT ];
     }
     if ( !domEvent.altKey && this.altKeyDown ) {
       delete this.keyState[ KeyboardUtils.KEY_ALT_LEFT ];
+      delete this.keyState[ KeyboardUtils.KEY_ALT_RIGHT ];
     }
     if ( !domEvent.ctrlKey && this.ctrlKeyDown ) {
       delete this.keyState[ KeyboardUtils.KEY_CONTROL_LEFT ];
+      delete this.keyState[ KeyboardUtils.KEY_CONTROL_RIGHT ];
     }
   }
 
