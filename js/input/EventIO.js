@@ -36,12 +36,12 @@ const EventIO = new IOType( 'EventIO', {
     altKey: NullableIO( BooleanIO ),
     metaKey: NullableIO( BooleanIO ),
     button: NullableIO( NumberIO ),
-    relatedTarget: NullableIO( ObjectLiteralIO ),  // TODO https://github.com/phetsims/scenery/issues/1232 We thought this was supposed to be EventIO, but it was coming up as {data-trail-id: "380-381-466-473-468-693-760-759-734"}
+    relatedTarget: NullableIO( ObjectLiteralIO ),
     pageX: NullableIO( NumberIO ),
     pageY: NullableIO( NumberIO ),
     which: NullableIO( NumberIO ),
     type: NullableIO( StringIO ),
-    target: NullableIO( ObjectLiteralIO ), // TODO https://github.com/phetsims/scenery/issues/1232 We thought this was supposed to be EventIO, but it was coming up as an empty object
+    target: NullableIO( ObjectLiteralIO ),
     keyCode: NullableIO( NumberIO ),
     key: NullableIO( StringIO ),
     deltaX: NullableIO( NumberIO ),
