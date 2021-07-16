@@ -8,10 +8,10 @@
  * @author Jesse Greenberg
  */
 
-import VoicingUtterance from '../../../../utterance-queue/js/VoicingUtterance.js';
+import Utterance from '../../../../utterance-queue/js/Utterance.js';
 import scenery from '../../scenery.js';
 
-class ReadingBlockUtterance extends VoicingUtterance {
+class ReadingBlockUtterance extends Utterance {
 
   /**
    * @param {Focus} focus
