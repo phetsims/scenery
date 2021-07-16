@@ -16,7 +16,7 @@ import scenery from '../../scenery.js';
 import VoicingResponsePatterns from './VoicingResponsePatterns.js';
 import webSpeaker from './webSpeaker.js';
 
-class VoicingManager {
+class ResponseCollector {
   constructor() {
 
     // @public {BooleanProperty} - whether or not component names are read as input lands on various components
@@ -69,11 +69,11 @@ class VoicingManager {
       hintResponse: null,
 
       // {boolean} - if true, the nameResponse, objectResponse, contextResponse, and interactionHint will all be spoken
-      // regardless of the values of the Properties of voicingManager
+      // regardless of the values of the Properties of responseCollector
       ignoreProperties: false,
 
       // {Object} - The collection of string patterns to use when assembling responses based on which
-      // responses are provided and which voicingManager Properties are true. See VoicingResponsePatterns
+      // responses are provided and which responseCollector Properties are true. See VoicingResponsePatterns
       // if you do not want to use the default.
       responsePatterns: VoicingResponsePatterns.DEFAULT_RESPONSE_PATTERNS
     }, options );
@@ -106,7 +106,7 @@ class VoicingManager {
   }
 }
 
-const voicingManager = new VoicingManager();
+const responseCollector = new ResponseCollector();
 
-scenery.register( 'voicingManager', voicingManager );
-export default voicingManager;
+scenery.register( 'responseCollector', responseCollector );
+export default responseCollector;

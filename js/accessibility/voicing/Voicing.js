@@ -4,7 +4,7 @@
  * A trait for Node that supports the Voicing feature, under accessibility. Allows you to define responses for the Node
  * and make requests to speak that content using HTML5 SpeechSynthesis and the UtteranceQueue. Voicing content is
  * organized into four categories which are responsible for describing different things. Output of this content
- * can be controlled by the voicingManager. These include the
+ * can be controlled by the responseCollector. These include the
  *
  * - "Name" response: The name of the object that uses Voicing. Similar to the "Accessible Name" in web accessibility.
  * - "Object" response: The state information about the object that uses Voicing.
@@ -27,7 +27,7 @@ import merge from '../../../../phet-core/js/merge.js';
 import Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import MouseHighlighting from './MouseHighlighting.js';
-import voicingManager from './voicingManager.js';
+import responseCollector from './responseCollector.js';
 import VoicingResponsePatterns from './VoicingResponsePatterns.js';
 import voicingUtteranceQueue from './voicingUtteranceQueue.js';
 
@@ -103,7 +103,7 @@ const Voicing = {
         this._voicingHintResponse = null;
 
         // @private {boolean} - Controls whether or not name, object, context, and hint responses are controlled
-        // by voicingManager Properties. If true, all responses will be spoken when requested, regardless
+        // by responseCollector Properties. If true, all responses will be spoken when requested, regardless
         // of these Properties. This is often useful for surrounding UI components where it is important
         // that information be heard even when certain responses have been disabled.
         this._voicingIgnoreVoicingManagerProperties = false;
@@ -116,7 +116,7 @@ const Voicing = {
         this._voicingUtteranceQueue = null;
 
         // {Object} - A collection of response patterns that are used to collect the responses of this Voicing Node
-        // with voicingManager. Controls the order of the Voicing responses and even punctuation used when responses
+        // with responseCollector. Controls the order of the Voicing responses and even punctuation used when responses
         // are assembled into final content for the UtteranceQueue. See VoicingResponsePatterns for more details.
         this._voicingResponsePatterns = VoicingResponsePatterns.DEFAULT_RESPONSE_PATTERNS;
 
@@ -140,7 +140,7 @@ const Voicing = {
 
       /**
        * Speak all responses assigned to this Node. Options allow you to override a responses for this particular
-       * speech request. Each response is only spoken if the associated Property of voicingManager is true. If
+       * speech request. Each response is only spoken if the associated Property of responseCollector is true. If
        * all are Properties are false, nothing will be spoken.
        * @public
        *
@@ -165,7 +165,7 @@ const Voicing = {
        * clear that you are only requesting certain responses. If you want to speak all of the responses assigned
        * to this Node, use voicingSpeakFullResponse().
        *
-       * Each response will only be spoken if the Properties of voicingManager are true. If all of those are false,
+       * Each response will only be spoken if the Properties of responseCollector are true. If all of those are false,
        * nothing will be spoken.
        * @public
        *
@@ -185,8 +185,8 @@ const Voicing = {
       },
 
       /**
-       * By default, speak the name response. But accepts all other responses through options. Respects voicingManager
-       * Properties, so the name response may not be spoken if voicingManager.nameResponseEnabledProperty is false.
+       * By default, speak the name response. But accepts all other responses through options. Respects responseCollector
+       * Properties, so the name response may not be spoken if responseCollector.nameResponseEnabledProperty is false.
        * @public
        *
        * @param {Object} [options]
@@ -202,8 +202,8 @@ const Voicing = {
       },
 
       /**
-       * By default, speak the object response. But accepts all other responses through options. Respects voicingManager
-       * Properties, so the name response may not be spoken if voicingManager.objectResponseEnabledProperty is false.
+       * By default, speak the object response. But accepts all other responses through options. Respects responseCollector
+       * Properties, so the name response may not be spoken if responseCollector.objectResponseEnabledProperty is false.
        * @public
        *
        * @param {Object} [options]
@@ -220,8 +220,8 @@ const Voicing = {
 
       /**
        * By default, speak the context response. But accepts all other responses through options. Respects
-       * voicingManager Properties, so the name response may not be spoken if
-       * voicingManager.contextResponseEnabledProperty is false.
+       * responseCollector Properties, so the name response may not be spoken if
+       * responseCollector.contextResponseEnabledProperty is false.
        * @public
        *
        * @param {Object} [options]
@@ -238,8 +238,8 @@ const Voicing = {
 
       /**
        * By default, speak the hint response. But accepts all other responses through options. Respects
-       * voicingManager Properties, so the hint response may not be spoken if
-       * voicingManager.hintResponseEnabledProperty is false.
+       * responseCollector Properties, so the hint response may not be spoken if
+       * responseCollector.hintResponseEnabledProperty is false.
        * @public
        *
        * @param {Object} [options]
@@ -255,7 +255,7 @@ const Voicing = {
       },
 
       /**
-       * Collect responses with the voicingManager and speak the output with an UtteranceQueue.
+       * Collect responses with the responseCollector and speak the output with an UtteranceQueue.
        * @protected
        *
        * @param {Object} [options]
@@ -263,10 +263,10 @@ const Voicing = {
       collectAndSpeakResponse( options ) {
         options = merge( {
 
-          // {boolean} - whether or not this response should ignore the Properties of voicingManager
+          // {boolean} - whether or not this response should ignore the Properties of responseCollector
           ignoreProperties: this._voicingIgnoreVoicingManagerProperties,
 
-          // {Object} - collection of string patterns to use with voicingManager.collectResponses, see
+          // {Object} - collection of string patterns to use with responseCollector.collectResponses, see
           // VoicingResponsePatterns for more information.
           responsePatterns: this._voicingResponsePatterns,
 
@@ -275,7 +275,7 @@ const Voicing = {
           utterance: null
         }, options );
 
-        let response = voicingManager.collectResponses( options );
+        let response = responseCollector.collectResponses( options );
 
         if ( options.utterance ) {
           options.utterance.alert = response;
@@ -303,7 +303,7 @@ const Voicing = {
       /**
        * Sets the voicingNameResponse for this Node. This is usually the label of the element and is spoken
        * when the object receives input. When requesting speech, this will only be spoken if
-       * voicingManager.nameResponsesEnabledProperty is set to true.
+       * responseCollector.nameResponsesEnabledProperty is set to true.
        *
        * @public
        *
@@ -328,7 +328,7 @@ const Voicing = {
       /**
        * Set the object response for this Node. This is usually the state information associated with this Node, such
        * as its current input value. When requesting speech, this will only be heard when
-       * voicingManager.objectResponsesEnabledProperty is set to true.
+       * responseCollector.objectResponsesEnabledProperty is set to true.
        * @public
        *
        * @param {string|null} response
@@ -352,7 +352,7 @@ const Voicing = {
       /**
        * Set the context response for this Node. This is usually the content that describes what has happened in
        * the surrounding application in response to interaction with this Node. When requesting speech, this will
-       * only be heard if voicingManager.contextResponsesEnabledProperty is set to true.
+       * only be heard if responseCollector.contextResponsesEnabledProperty is set to true.
        * @public
        *
        * @param {string|null} response
@@ -375,7 +375,7 @@ const Voicing = {
 
       /**
        * Sets the hint response for this Node. This is usually a response that describes how to interact with this Node.
-       * When requesting speech, this will only be spoken when voicingManager.hintResponsesEnabledProperty is set to
+       * When requesting speech, this will only be spoken when responseCollector.hintResponsesEnabledProperty is set to
        * true.
        * @public
        *
@@ -398,8 +398,8 @@ const Voicing = {
       get voicingHintResponse() { return this.getVoicingHintResponse(); },
 
       /**
-       * Set whether or not all responses for this Node will ignore the Properties of voicingManager. If false,
-       * all responses will be spoken regardless of voicingManager Properties, which are generally set in user
+       * Set whether or not all responses for this Node will ignore the Properties of responseCollector. If false,
+       * all responses will be spoken regardless of responseCollector Properties, which are generally set in user
        * preferences.
        * @public
        */
@@ -409,7 +409,7 @@ const Voicing = {
       set voicingIgnoreVoicingManagerProperties( ignoreProperties ) { this.setVoicingIgnoreVoicingManagerProperties( ignoreProperties ); },
 
       /**
-       * Get whether or not responses are ignoring voicingManager Properties.
+       * Get whether or not responses are ignoring responseCollector Properties.
        */
       getVoicingIgnoreVoicingManagerProperties() {
         return this._voicingIgnoreVoicingManagerProperties;

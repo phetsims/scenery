@@ -218,12 +218,12 @@
       <code>Node</code>. It provides the ability to set the various responses on the Node and then make a request to
       speak one or more of them. The API of Voicing.js is described in more detail later in this document.</p>
 
-    <h4>Responses collected with voicingManager.js</h4>
+    <h4>Responses collected with responseCollector.js</h4>
     <p>
-      The flow of responses is further controlled by a singleton called <code>voicingManager.js</code>. Responses
+      The flow of responses is further controlled by a singleton called <code>responseCollector.js</code>. Responses
       of a certain type can be globally enabled or disabled. This supports (for example) the ability to add user
       preferences to the application that enable or disable certain responses if they are found to be too verbose
-      or unhelpful. <code>voicingManager.js</code> has Properties that control the enabled states for responses,
+      or unhelpful. <code>responseCollector.js</code> has Properties that control the enabled states for responses,
       and contains utility functions for assembling final Voicing content depending on the state of these Properties.
     </p>
 
@@ -253,42 +253,42 @@
     <h4 id="voicing-api-speak-full-response">voicingSpeakFullResponse</h4>
     <p>
       A function that requests speech of all responses for the Node. Only the responses that are enabled
-      by <code>voicingManager.js</code> will be spoken. This is generally called in response to some input
+      by <code>responseCollector.js</code> will be spoken. This is generally called in response to some input
       or change in the application.
     </p>
 
     <h4 id="voicing-api-speak-response">voicingSpeakResponse</h4>
     <p>
       A function that speaks only the provided responses, specified through options. Only the responses that are
-      enabled by <code>voicingManager.js</code> will be spoken. This is generally called in response to some input
+      enabled by <code>responseCollector.js</code> will be spoken. This is generally called in response to some input
       or change in the application.
     </p>
 
     <h4 id="voicing-api-speak-name-response">voicingSpeakNameResponse</h4>
     <p>
       A function that speaks only the name response. Only the responses that are enabled by
-      <code>voicingManager.js</code> will be spoken. This is generally called in response to some input or change in
+      <code>responseCollector.js</code> will be spoken. This is generally called in response to some input or change in
       the application.
     </p>
 
     <h4 id="voicing-api-speak-object-response">voicingSpeakObjectResponse</h4>
     <p>
       A function that speaks only the object response. Only the responses that are enabled by
-      <code>voicingManager.js</code> will be spoken. This is generally called in response to some input or change in
+      <code>responseCollector.js</code> will be spoken. This is generally called in response to some input or change in
       the application.
     </p>
 
     <h4 id="voicing-api-speak-context-response">voicingSpeakContextResponse</h4>
     <p>
       A function that speaks only the context response. Only the responses that are enabled by
-      <code>voicingManager.js</code> will be spoken. This is generally called in response to some input or change in
+      <code>responseCollector.js</code> will be spoken. This is generally called in response to some input or change in
       the application.
     </p>
 
     <h4 id="voicing-api-speak-hint-response">voicingSpeakHintResponse</h4>
     <p>
       A function that speaks only the name response. Only the responses that are enabled by
-      <code>voicingManager.js</code> will be spoken. This is generally called in response to some input or change in
+      <code>responseCollector.js</code> will be spoken. This is generally called in response to some input or change in
       the application.
     </p>
 

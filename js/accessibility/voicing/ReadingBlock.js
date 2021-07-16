@@ -7,7 +7,7 @@
  *  - Reading Blocks are generally around graphical objects that are not otherwise interactive (like Text).
  *  - They have a unique focus highlight to indicate they can be clicked on to hear voiced content.
  *  - When activated with press or click readingBlockContent is spoken.
- *  - ReadingBlock content is always spoken if the webSpeaker is enabled, ignoring Properties of voicingManager.
+ *  - ReadingBlock content is always spoken if the webSpeaker is enabled, ignoring Properties of responseCollector.
  *  - While speaking, a yellow highlight will appear over the Node composed with ReadingBlock.
  *  - While voicing is enabled, reading blocks will be added to the focus order.
  *
@@ -26,7 +26,7 @@ import Focus from '../Focus.js';
 import ReadingBlockHighlight from './ReadingBlockHighlight.js';
 import ReadingBlockUtterance from './ReadingBlockUtterance.js';
 import Voicing from './Voicing.js';
-import voicingManager from './voicingManager.js';
+import responseCollector from './responseCollector.js';
 import webSpeaker from './webSpeaker.js';
 
 const READING_BLOCK_OPTION_KEYS = [
@@ -81,7 +81,7 @@ const ReadingBlock = {
 
         // @private {string|null} - The content for this ReadingBlock that will be spoken by SpeechSynthesis when
         // the ReadingBlock receives input. ReadingBlocks don't use the categories of Voicing content provided by
-        // Voicing.js because ReadingBlocks are always spoken regardless of the Properties of voicingManager.
+        // Voicing.js because ReadingBlocks are always spoken regardless of the Properties of responseCollector.
         this._readingBlockContent = null;
 
         // @private {string|null} - The help content that is read when this ReadingBlock is activated by input,
@@ -104,10 +104,10 @@ const ReadingBlock = {
 
         // @private - Controls whether or not the ReadingBlock should be interactive for Voicing and
         // focusable. At the time of this writing, that is true for all ReadingBlocks when the
-        // voicingManager indicates that voicing is fully enabled, see the Property in voicingManager
+        // responseCollector indicates that voicing is fully enabled, see the Property in responseCollector
         // for more information.
         this.readingBlockFocusableChangeListener = this.onReadingBlockFocusableChanged.bind( this );
-        voicingManager.voicingFullyEnabledProperty.link( this.readingBlockFocusableChangeListener );
+        responseCollector.voicingFullyEnabledProperty.link( this.readingBlockFocusableChangeListener );
 
         // support passing options through initialize
         if ( options ) {
@@ -128,7 +128,7 @@ const ReadingBlock = {
        */
       setReadingBlockTagName( tagName ) {
         this._readingBlockTagName = tagName;
-        this.onReadingBlockFocusableChanged( voicingManager.voicingFullyEnabledProperty.value );
+        this.onReadingBlockFocusableChanged( responseCollector.voicingFullyEnabledProperty.value );
       },
       set readingBlockTagName( tagName ) { this.setReadingBlockTagName( tagName ); },
 
@@ -273,7 +273,7 @@ const ReadingBlock = {
        * @returns {string}
        */
       collectReadingBlockResponses() {
-        const usesHelpContent = this._readingBlockHintResponse && voicingManager.hintResponsesEnabledProperty.value;
+        const usesHelpContent = this._readingBlockHintResponse && responseCollector.hintResponsesEnabledProperty.value;
 
         let response = null;
         if ( usesHelpContent ) {
@@ -293,7 +293,7 @@ const ReadingBlock = {
        * @public
        */
       disposeReadingBlock() {
-        voicingManager.voicingFullyEnabledProperty.unlink( this.readingBlockFocusableChangeListener );
+        responseCollector.voicingFullyEnabledProperty.unlink( this.readingBlockFocusableChangeListener );
         this.localBoundsProperty.unlink( this.localBoundsChangedListener );
 
         // remove the input listener that activates the ReadingBlock, only do this if the listener is attached while
