@@ -19,7 +19,6 @@ import Range from '../../../../dot/js/Range.js';
 import merge from '../../../../phet-core/js/merge.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
 import Utterance from '../../../../utterance-queue/js/Utterance.js';
-import VoicingUtterance from '../../../../utterance-queue/js/VoicingUtterance.js';
 import scenery from '../../scenery.js';
 import globalKeyStateTracker from '../globalKeyStateTracker.js';
 import KeyboardUtils from '../KeyboardUtils.js';
@@ -164,16 +163,28 @@ class WebSpeaker extends EnabledComponent {
    * @public
    *
    * @param {Utterance} utterance
+   * @param {Object} [options]
    */
-  announce( utterance ) {
-    let withCancel = true;
-    if ( utterance instanceof VoicingUtterance ) {
-      if ( this.previousUtterance && this.previousUtterance === utterance ) {
-        withCancel = utterance.cancelSelf;
-      }
-      else {
-        withCancel = utterance.cancelOther;
-      }
+  announce( utterance, options ) {
+
+    options = merge( {
+
+      // {boolean} - If true and this Utterance is currently being spoken by the speech synth, announcing it
+      // to the queue again will immediately cancel the synth and new content will be
+      // spoken. Otherwise, new content for this utterance will be spoken whenever the old
+      // content has finished speaking
+      cancelSelf: true,
+
+      // {boolean} - If true and another Utterance is currently being spoken by the speech synth,
+      // announcing this Utterance will immediately cancel the other content being spoken by the synth.
+      // Otherwise, content for the new utterance will be spoken as soon as the browser finishes speaking
+      // the old content
+      cancelOther: true
+    }, options );
+
+    let withCancel = options.cancelOther;
+    if ( this.previousUtterance && this.previousUtterance === utterance ) {
+      withCancel = options.cancelSelf;
     }
 
     this.speak( utterance, withCancel );
