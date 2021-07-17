@@ -5,7 +5,6 @@
  * @author Sam Reid
  */
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
-import merge from '../../../phet-core/js/merge.js';
 import scenery from '../scenery.js';
 import Color from '../util/Color.js';
 import ColorProperty from '../util/ColorProperty.js';
@@ -18,16 +17,13 @@ const instances = [];
 class ColorProfileProperty extends ColorProperty {
 
   /**
+   * @param {string} name - name that appears in the HTML color editor
    * @param {Object|ColorDef} colorProfileMap - object literal that maps keys (profile names) to ColorDef, or just a default colorDef
    * @param {Object} [options]
    */
-  constructor( colorProfileMap, options ) {
+  constructor( name, colorProfileMap, options ) {
 
-    options = merge( {
-
-      // The name to show in the color editor
-      name: null
-    }, options );
+    assert && assert( name, 'ColorProfileProperty.options.name is required' );
 
     // All values are eagerly coerced to Color instances for efficiency (so it only has to be done once) and simplicity
     // (so the types are uniform)
@@ -43,8 +39,8 @@ class ColorProfileProperty extends ColorProperty {
       this.value = this.colorProfileMap[ colorProfileName ];
     } );
 
-    // TODO: https://github.com/phetsims/scenery-phet/issues/515 let's require name for now?
-    this.name = options.name || options.tandem.phetioID;
+    // @public (read-only)
+    this.name = name;
 
     this.link( color => {
       if ( window.parent !== window ) {
