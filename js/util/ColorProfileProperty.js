@@ -52,6 +52,12 @@ class ColorProfileProperty extends ColorProperty {
       }
     } );
 
+    // assert that names are unique
+    if ( assert ) {
+      const matches = instances.filter( e => e.name === name );
+      assert && assert( matches.length === 0, 'cannot use the same name for two different ColorProfileProperty instances: ' + name );
+    }
+
     // Register with the static list for the HTML color editor
     instances.push( this );
   }
