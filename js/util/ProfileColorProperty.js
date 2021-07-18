@@ -13,7 +13,6 @@ import colorProfileProperty from './colorProfileProperty.js';
 // static instances are tracked for iframe communication with the HTML color editor
 const instances = [];
 
-// TODO https://github.com/phetsims/scenery-phet/issues/515 rename to ProfileColorProperty
 class ProfileColorProperty extends ColorProperty {
 
   /**
