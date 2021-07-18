@@ -28,7 +28,9 @@ class ProfileColorProperty extends ColorProperty {
     // All values are eagerly coerced to Color instances for efficiency (so it only has to be done once) and simplicity
     // (so the types are uniform)
     colorProfileMap = _.mapValues( colorProfileMap, Color.toColor );
-    super( colorProfileMap[ colorProfileProperty.value ], options );
+
+    // fallback to default if a color not supplied
+    super( colorProfileMap[ colorProfileProperty.value ] || colorProfileMap.default, options );
 
     // @protected - used elsewhere in this file but outside of this class.
     // values are mutated by the color wrapper.
@@ -36,7 +38,9 @@ class ProfileColorProperty extends ColorProperty {
 
     // When the color profile name changes, select the corresponding color.
     colorProfileProperty.link( colorProfileName => {
-      this.value = this.colorProfileMap[ colorProfileName ];
+
+      // fallback to default if a color not supplied
+      this.value = this.colorProfileMap[ colorProfileName ] || this.colorProfileMap.default;
     } );
 
     // @public (read-only)
