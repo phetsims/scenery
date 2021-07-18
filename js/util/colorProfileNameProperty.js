@@ -5,6 +5,7 @@
  *
  * The color profile names available to a simulation are specified in package.json under phet.colorProfiles.  The first listed
  * color profile is the default.
+ * @author Sam Reid (PhET Interactive Simulations)
  */
 import StringProperty from '../../../axon/js/StringProperty.js';
 import Tandem from '../../../tandem/js/Tandem.js';
