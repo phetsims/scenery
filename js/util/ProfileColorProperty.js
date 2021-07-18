@@ -14,7 +14,7 @@ import colorProfileNameProperty from './colorProfileNameProperty.js';
 const instances = [];
 
 // TODO https://github.com/phetsims/scenery-phet/issues/515 rename to ProfileColorProperty
-class ColorProfileProperty extends ColorProperty {
+class ProfileColorProperty extends ColorProperty {
 
   /**
    * @param {string} name - name that appears in the HTML color editor
@@ -23,7 +23,7 @@ class ColorProfileProperty extends ColorProperty {
    */
   constructor( name, colorProfileMap, options ) {
 
-    assert && assert( name, 'ColorProfileProperty.options.name is required' );
+    assert && assert( name, 'ProfileColorProperty.options.name is required' );
 
     // All values are eagerly coerced to Color instances for efficiency (so it only has to be done once) and simplicity
     // (so the types are uniform)
@@ -55,7 +55,7 @@ class ColorProfileProperty extends ColorProperty {
     // assert that names are unique
     if ( assert ) {
       const matches = instances.filter( e => e.name === name );
-      assert && assert( matches.length === 0, 'cannot use the same name for two different ColorProfileProperty instances: ' + name );
+      assert && assert( matches.length === 0, 'cannot use the same name for two different ProfileColorProperty instances: ' + name );
     }
 
     // Register with the static list for the HTML color editor
@@ -91,6 +91,6 @@ window.addEventListener( 'message', event => {
   }
 } );
 
-scenery.register( 'ColorProfileProperty', ColorProfileProperty );
+scenery.register( 'ProfileColorProperty', ProfileColorProperty );
 
-export default ColorProfileProperty;
+export default ProfileColorProperty;
