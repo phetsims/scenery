@@ -4,7 +4,7 @@
  * WebGL drawable for WebGLNode.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
- * @author Sam Reid
+ * @author Sam Reid (PhET Interactive Simulations)
  */
 
 import Poolable from '../../../../phet-core/js/Poolable.js';

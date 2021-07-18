@@ -3,7 +3,7 @@
 /**
  * HBox is a convenience specialization of LayoutBox with horizontal orientation.
  *
- * @author Sam Reid
+ * @author Sam Reid (PhET Interactive Simulations)
  */
 
 import scenery from '../scenery.js';

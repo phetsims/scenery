@@ -4,7 +4,7 @@
  * Supertype for WebGL drawables that display a specific Node.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
- * @author Sam Reid
+ * @author Sam Reid (PhET Interactive Simulations)
  */
 
 import scenery from '../scenery.js';

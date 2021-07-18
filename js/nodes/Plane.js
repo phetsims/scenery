@@ -7,7 +7,7 @@
  * Note: This is currently implemented using large numbers, it should be rewritten to work in any coordinate frame, possibly using kite.Shape.plane()
  * TODO: Implement using infinite geometry
  *
- * @author Sam Reid
+ * @author Sam Reid (PhET Interactive Simulations)
  */
 
 import scenery from '../scenery.js';

@@ -5,7 +5,7 @@
  * VBox and HBox are convenience subtypes that specify the orientation.
  * See https://github.com/phetsims/scenery/issues/281
  *
- * @author Sam Reid
+ * @author Sam Reid (PhET Interactive Simulations)
  * @author Aaron Davis
  * @author Chris Malley (PixelZoom, Inc.)
  * @author Jonathan Olson <jonathan.olson@colorado.edu>

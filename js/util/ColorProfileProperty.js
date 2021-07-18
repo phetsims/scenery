@@ -2,7 +2,7 @@
 
 /**
  * Color property that takes an object literal where the keys are profile names and the values are ColorDef.
- * @author Sam Reid
+ * @author Sam Reid (PhET Interactive Simulations)
  */
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import scenery from '../scenery.js';

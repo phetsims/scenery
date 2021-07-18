@@ -8,7 +8,7 @@
  * constructor, or later with node.canvasBounds = bounds or setCanvasBounds( bounds ).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
- * @author Sam Reid
+ * @author Sam Reid (PhET Interactive Simulations)
  */
 
 import Matrix3 from '../../../dot/js/Matrix3.js';

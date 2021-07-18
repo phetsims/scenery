@@ -3,7 +3,7 @@
 /**
  * VBox is a convenience specialization of LayoutBox with vertical orientation.
  *
- * @author Sam Reid
+ * @author Sam Reid (PhET Interactive Simulations)
  */
 
 import scenery from '../scenery.js';
