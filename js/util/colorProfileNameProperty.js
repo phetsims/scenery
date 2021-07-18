@@ -3,8 +3,10 @@
 /**
  * Singleton Property<string> which chooses between the available color profiles of a simulation, such as 'default', 'project', 'basics', etc.
  *
- * The color profile names available to a simulation are specified in package.json under phet.colorProfiles.  The first listed
- * color profile is the default.
+ * The color profile names available to a simulation are specified in package.json under phet.colorProfiles (or, if not
+ * specified, defaults to [ "default" ].  The first listed color profile is one that appears in the sim
+ * on startup, unless overridden by the sim or a query parameter.
+ *
  * @author Sam Reid (PhET Interactive Simulations)
  */
 import StringProperty from '../../../axon/js/StringProperty.js';
