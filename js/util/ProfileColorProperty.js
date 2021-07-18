@@ -1,7 +1,8 @@
 // Copyright 2021, University of Colorado Boulder
 
 /**
- * Color property that takes an object literal where the keys are profile names and the values are ColorDef.
+ * ColorProperty that makes it easy to select a different Color based on the value of the colorProfileProperty.
+ *
  * @author Sam Reid (PhET Interactive Simulations)
  */
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
@@ -17,12 +18,12 @@ class ProfileColorProperty extends ColorProperty {
 
   /**
    * @param {string} name - name that appears in the HTML color editor
-   * @param {Object|ColorDef} colorProfileMap - object literal that maps keys (profile names) to ColorDef, or just a default colorDef
+   * @param {Object} colorProfileMap - object literal that maps keys (profile names) to ColorDef
    * @param {Object} [options]
    */
   constructor( name, colorProfileMap, options ) {
 
-    assert && assert( name, 'ProfileColorProperty.options.name is required' );
+    assert && assert( !!name, 'ProfileColorProperty.options.name is required' );
 
     // All values are eagerly coerced to Color instances for efficiency (so it only has to be done once) and simplicity
     // (so the types are uniform)
