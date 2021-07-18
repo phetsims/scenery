@@ -1,15 +1,22 @@
 // Copyright 2021, University of Colorado Boulder
 
+/**
+ * Singleton Property<string> which chooses between the available color profiles of a simulation, such as 'default', 'project', 'basics', etc.
+ *
+ * The color profile names available to a simulation are specified in package.json under phet.colorProfiles.  The first listed
+ * color profile is the default.
+ */
 import StringProperty from '../../../axon/js/StringProperty.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import scenery from '../scenery.js';
 
-// TODO: https://github.com/phetsims/scenery-phet/issues/515 Documentation
+// Use the color profile specified in query parameters, or default to 'default'
 const initialProfileName = _.hasIn( window, 'phet.chipper.queryParameters.colorProfile' ) ?
                            phet.chipper.queryParameters.colorProfile :
                            'default';
-const colorProfiles = _.hasIn( window, 'phet.chipper.colorProfiles' ) ?
-                      phet.chipper.colorProfiles : [ 'default' ];
+
+// List of all supported colorProfiles for this simulation
+const colorProfiles = _.hasIn( window, 'phet.chipper.colorProfiles' ) ? phet.chipper.colorProfiles : [ 'default' ];
 
 // @public {Property.<string>}
 // The current profile name. Change this Property's value to change which profile is currently active.
