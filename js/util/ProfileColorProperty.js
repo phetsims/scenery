@@ -8,7 +8,7 @@ import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import scenery from '../scenery.js';
 import Color from '../util/Color.js';
 import ColorProperty from '../util/ColorProperty.js';
-import colorProfileNameProperty from './colorProfileNameProperty.js';
+import colorProfileProperty from './colorProfileProperty.js';
 
 // static instances are tracked for iframe communication with the HTML color editor
 const instances = [];
@@ -28,14 +28,14 @@ class ProfileColorProperty extends ColorProperty {
     // All values are eagerly coerced to Color instances for efficiency (so it only has to be done once) and simplicity
     // (so the types are uniform)
     colorProfileMap = _.mapValues( colorProfileMap, Color.toColor );
-    super( colorProfileMap[ colorProfileNameProperty.value ], options );
+    super( colorProfileMap[ colorProfileProperty.value ], options );
 
     // @protected - used elsewhere in this file but outside of this class.
     // values are mutated by the color wrapper.
     this.colorProfileMap = colorProfileMap;
 
     // When the color profile name changes, select the corresponding color.
-    colorProfileNameProperty.link( colorProfileName => {
+    colorProfileProperty.link( colorProfileName => {
       this.value = this.colorProfileMap[ colorProfileName ];
     } );
 
@@ -84,8 +84,8 @@ window.addEventListener( 'message', event => {
     for ( let i = 0; i < instances.length; i++ ) {
       const instance = instances[ i ];
       if ( instance.name === data.name ) {
-        instance.colorProfileMap[ colorProfileNameProperty.value ] = new Color( data.value );
-        instance.value = instance.colorProfileMap[ colorProfileNameProperty.value ];
+        instance.colorProfileMap[ colorProfileProperty.value ] = new Color( data.value );
+        instance.value = instance.colorProfileMap[ colorProfileProperty.value ];
       }
     }
   }
