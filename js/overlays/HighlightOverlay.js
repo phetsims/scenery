@@ -28,7 +28,7 @@ let innerHighlightColor = FocusHighlightPath.INNER_FOCUS_COLOR;
 let innerGroupHighlightColor = FocusHighlightPath.INNER_LIGHT_GROUP_FOCUS_COLOR;
 let outerGroupHighlightColor = FocusHighlightPath.OUTER_LIGHT_GROUP_FOCUS_COLOR;
 
-// color for the 'speaking' highlight, shown for certain Nodes with Voicing when while the webSpeaker is speaking
+// color for the 'speaking' highlight, shown for certain Nodes with Voicing when while the voicingManager is speaking
 let readingBlockHighlightColor = 'rgba(255,255,0,0.5)';
 
 class HighlightOverlay {
@@ -100,7 +100,7 @@ class HighlightOverlay {
     this.focusRootNode.addChild( this.readingBlockHighlightNode );
 
     // @private {Trail} - Trail to the ReadingBlock Node with an active highlight around it
-    // while the webSpeaker is speaking its content.
+    // while the voicingManager is speaking its content.
     this.readingBlockTrail = null;
 
     // @private {boolean} - Whether or not the transform applied to the readinBlockHighlightNode
@@ -156,7 +156,7 @@ class HighlightOverlay {
     } );
     this.focusRootNode.addChild( this.groupFocusHighlightParent );
 
-    // @private {Node} - The highlight shown around ReadingBlock Nodes while the webSpeaker is speaking.
+    // @private {Node} - The highlight shown around ReadingBlock Nodes while the voicingManager is speaking.
     this.readingBlockHighlightPath = new FocusHighlightFromNode( null, {
       innerStroke: null,
       outerStroke: null,
@@ -214,7 +214,7 @@ class HighlightOverlay {
 
   /**
    * Returns true if there is an active highlight around a ReadingBlock while the
-   * webSpeaker is speaking its Voicing content.
+   * voicingManager is speaking its Voicing content.
    * @public
    *
    * @returns {boolean}
@@ -313,7 +313,7 @@ class HighlightOverlay {
   /**
    * Activate the Reading Block highlight. This highlight is separate from others in the overlay and will always
    * surround the Bounds of the focused Node. It is shown in response to certain input on Nodes with Voicing while
-   * the webSpeaker is speaking.
+   * the voicingManager is speaking.
    *
    * Note that customizations for this highlight are not supported at this time, that could be added in the future if
    * we need.
@@ -600,7 +600,7 @@ class HighlightOverlay {
 
   /**
    * Responsible for deactivating the Reading Block highlight when the display.focusManager.readingBlockFocusProperty changes.
-   * The Reading Block waits to activate until the webSpeaker starts speaking because there is often a stop speaking
+   * The Reading Block waits to activate until the voicingManager starts speaking because there is often a stop speaking
    * event that comes right after the speaker starts to interrupt the previous utterance.
    * @private
    *
@@ -769,7 +769,7 @@ class HighlightOverlay {
   static get outerGroupHighlightColor() { return this.getOuterGroupHighlightColor(); } // eslint-disable-line bad-sim-text
 
   /**
-   * Set the color of 'speaking' highlights, shown for certain Nodes with Voicing while the webSpeaker is speaking.
+   * Set the color of 'speaking' highlights, shown for certain Nodes with Voicing while the voicingManager is speaking.
    * @public
    *
    * @param {PaintDef} color

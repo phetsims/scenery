@@ -7,7 +7,7 @@
  *  - Reading Blocks are generally around graphical objects that are not otherwise interactive (like Text).
  *  - They have a unique focus highlight to indicate they can be clicked on to hear voiced content.
  *  - When activated with press or click readingBlockContent is spoken.
- *  - ReadingBlock content is always spoken if the webSpeaker is enabled, ignoring Properties of responseCollector.
+ *  - ReadingBlock content is always spoken if the voicingManager is enabled, ignoring Properties of responseCollector.
  *  - While speaking, a yellow highlight will appear over the Node composed with ReadingBlock.
  *  - While voicing is enabled, reading blocks will be added to the focus order.
  *
@@ -27,7 +27,7 @@ import ReadingBlockHighlight from './ReadingBlockHighlight.js';
 import ReadingBlockUtterance from './ReadingBlockUtterance.js';
 import Voicing from './Voicing.js';
 import responseCollector from './responseCollector.js';
-import webSpeaker from './webSpeaker.js';
+import voicingManager from './voicingManager.js';
 
 const READING_BLOCK_OPTION_KEYS = [
   'readingBlockTagName',
@@ -107,7 +107,7 @@ const ReadingBlock = {
         // responseCollector indicates that voicing is fully enabled, see the Property in responseCollector
         // for more information.
         this.readingBlockFocusableChangeListener = this.onReadingBlockFocusableChanged.bind( this );
-        responseCollector.voicingFullyEnabledProperty.link( this.readingBlockFocusableChangeListener );
+        voicingManager.voicingFullyEnabledProperty.link( this.readingBlockFocusableChangeListener );
 
         // support passing options through initialize
         if ( options ) {
@@ -128,7 +128,7 @@ const ReadingBlock = {
        */
       setReadingBlockTagName( tagName ) {
         this._readingBlockTagName = tagName;
-        this.onReadingBlockFocusableChanged( responseCollector.voicingFullyEnabledProperty.value );
+        this.onReadingBlockFocusableChanged( voicingManager.voicingFullyEnabledProperty.value );
       },
       set readingBlockTagName( tagName ) { this.setReadingBlockTagName( tagName ); },
 
@@ -235,7 +235,7 @@ const ReadingBlock = {
 
       /**
        * Speak the content associated with the ReadingBlock. Sets the readingBlockFocusProperties on
-       * the displays so that HighlightOverlays know to activate a highlight while the webSpeaker
+       * the displays so that HighlightOverlays know to activate a highlight while the voicingManager
        * is reading about this Node.
        * @private
        *
@@ -293,7 +293,7 @@ const ReadingBlock = {
        * @public
        */
       disposeReadingBlock() {
-        responseCollector.voicingFullyEnabledProperty.unlink( this.readingBlockFocusableChangeListener );
+        voicingManager.voicingFullyEnabledProperty.unlink( this.readingBlockFocusableChangeListener );
         this.localBoundsProperty.unlink( this.localBoundsChangedListener );
 
         // remove the input listener that activates the ReadingBlock, only do this if the listener is attached while
@@ -302,7 +302,7 @@ const ReadingBlock = {
           this.removeInputListener( this.readingBlockInputListener );
         }
 
-        webSpeaker.endSpeakingEmitter.removeListener( this.endSpeakingListener );
+        voicingManager.endSpeakingEmitter.removeListener( this.endSpeakingListener );
         this.disposeVoicing();
       }
     } );

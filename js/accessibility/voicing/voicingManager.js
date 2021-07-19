@@ -2,8 +2,8 @@
 
 /**
  * Uses the Web Speech API to produce speech from the browser. This is a prototype, DO NOT USE IN PRODUCTION CODE.
- * There is no speech output until the webSpeaker has been initialized. Supported voices will depend on platform.
- * For each voice, you can customize the rate and pitch. Only one webSpeaker should be active at a time and so this
+ * There is no speech output until the voicingManager has been initialized. Supported voices will depend on platform.
+ * For each voice, you can customize the rate and pitch. Only one voicingManager should be active at a time and so this
  * type is a singleton.
  *
  * @author Jesse Greenberg
@@ -23,7 +23,7 @@ import scenery from '../../scenery.js';
 import globalKeyStateTracker from '../globalKeyStateTracker.js';
 import KeyboardUtils from '../KeyboardUtils.js';
 
-class WebSpeaker extends EnabledComponent {
+class VoicingManager extends EnabledComponent {
   constructor() {
 
     super( {
@@ -56,20 +56,30 @@ class WebSpeaker extends EnabledComponent {
     // replace the emitters above?
     this.speakingProperty = new BooleanProperty( false );
 
+    // @public {BooleanProperty} - Controls whether Voicing is enabled in a "main window" area of the application.
+    // This supports the ability to disable Voicing for the important screen content of your simulation while keeping
+    // Voicing for surrounding UI components enabled. At the time of this writing, all "Reading Blocks" are disabled
+    // when Voicing for the "main window" is disabled. See ReadingBlock.js for more information.
+    this.mainWindowVoicingEnabledProperty = new BooleanProperty( true );
+
+    // @public {DerivedProperty.<Boolean>} - Property that indicates that the Voicing feature is enabled for all areas
+    // of the application.
+    this.voicingFullyEnabledProperty = DerivedProperty.and( [ this.enabledProperty, this.mainWindowVoicingEnabledProperty ] );
+
     // @private {SpeechSynthesis|null} - synth from Web Speech API that drives speech, defined on initialize
     this._synth = null;
 
     // @public {SpeechSynthesisVoice[]} - possible voices for Web Speech synthesis
     this.voices = [];
 
-    // @public {boolean} - is the WebSpeaker initialized for use? This is prototypal so it isn't always initialized
+    // @public {boolean} - is the VoicingManager initialized for use? This is prototypal so it isn't always initialized
     this.initialized = false;
 
     // @private {Property|DerivedProperty|null} - Controls whether or not speech is allowed with synthesis.
     // Null until initialized, and can be set by options to initialize().
     this._canSpeakProperty = null;
 
-    // @private {function} - bound so we can link and unlink to this.canSpeakProperty when the webSpeaker becomes
+    // @private {function} - bound so we can link and unlink to this.canSpeakProperty when the voicingManager becomes
     // initialized.
     this.boundHandleCanSpeakChange = this.handleCanSpeakChange.bind( this );
 
@@ -97,7 +107,7 @@ class WebSpeaker extends EnabledComponent {
   }
 
   /**
-   * Indicate that the webSpeaker is ready for use, and attempt to populate voices (if they are ready yet). Adds
+   * Indicate that the voicingManager is ready for use, and attempt to populate voices (if they are ready yet). Adds
    * listeners that control speech.
    * @public
    */
@@ -159,7 +169,7 @@ class WebSpeaker extends EnabledComponent {
   }
 
   /**
-   * Implements announce so the webSpeaker can be a source of output for utteranceQueue.
+   * Implements announce so the voicingManager can be a source of output for utteranceQueue.
    * @public
    *
    * @param {Utterance} utterance
@@ -191,7 +201,7 @@ class WebSpeaker extends EnabledComponent {
   }
 
   /**
-   * Use speech synthesis to speak an utterance. No-op unless webSpeaker is initialized.
+   * Use speech synthesis to speak an utterance. No-op unless voicingManager is initialized.
    * @public
    *
    * @param {Utterance} utterance
@@ -280,7 +290,7 @@ class WebSpeaker extends EnabledComponent {
 
   /**
    * Returns true if SpeechSynthesis is available on the window. This check is sufficient for all of
-   * webSpeaker. On platforms where speechSynthesis is available, all features of it are available, with the
+   * voicingManager. On platforms where speechSynthesis is available, all features of it are available, with the
    * exception of the onvoiceschanged event in a couple of platforms. However, the listener can still be set
    * without issue on those platforms so we don't need to check for its existence. On those platforms, voices
    * are provided right on load.
@@ -293,7 +303,7 @@ class WebSpeaker extends EnabledComponent {
   }
 
   /**
-   * Returns a references to the SpeechSynthesis of the webSpeaker that is used to request speech with the Web
+   * Returns a references to the SpeechSynthesis of the voicingManager that is used to request speech with the Web
    * Speech API. Every references has a check to ensure that the synth is available.
    * @private
    *
@@ -320,7 +330,7 @@ class WebSpeaker extends EnabledComponent {
   }
 }
 
-const webSpeaker = new WebSpeaker();
+const voicingManager = new VoicingManager();
 
-scenery.register( 'webSpeaker', webSpeaker );
-export default webSpeaker;
+scenery.register( 'voicingManager', voicingManager );
+export default voicingManager;
