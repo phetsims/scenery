@@ -1,11 +1,12 @@
 // Copyright 2021, University of Colorado Boulder
 
 /**
- * Singleton Property<string> which chooses between the available color profiles of a simulation, such as 'default', 'project', 'basics', etc.
+ * Singleton Property<string> which chooses between the available color profiles of a simulation, such as 'default',
+ * 'project', 'basics', etc.
  *
  * The color profile names available to a simulation are specified in package.json under phet.colorProfiles (or, if not
- * specified, defaults to [ "default" ].  The first listed color profile is one that appears in the sim
- * on startup, unless overridden by the sim or a query parameter.
+ * specified, defaults to [ "default" ].  The first color profile that is listed will appear in the sim on startup,
+ * unless overridden by the sim or the colorProfile query parameter.
  *
  * @author Sam Reid (PhET Interactive Simulations)
  */
