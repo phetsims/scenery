@@ -1,7 +1,7 @@
 // Copyright 2021, University of Colorado Boulder
 
 /**
- * ColorProperty that makes it easy to select a different Color based on the value of the colorProfileProperty.
+ * ProfileColorProperty is a ColorProperty that changes its value based on the value of colorProfileProperty.
  *
  * @author Sam Reid (PhET Interactive Simulations)
  */
@@ -29,7 +29,7 @@ class ProfileColorProperty extends ColorProperty {
     // (so the types are uniform)
     colorProfileMap = _.mapValues( colorProfileMap, Color.toColor );
 
-    // fallback to default if a color not supplied
+    // Fallback to default if a color was not supplied.
     super( colorProfileMap[ colorProfileProperty.value ] || colorProfileMap.default, options );
 
     // @protected - used elsewhere in this file but outside of this class.
