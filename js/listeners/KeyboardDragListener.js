@@ -663,7 +663,7 @@ class KeyboardDragListener {
    * @public
    */
   shiftKeyDown() {
-    return this.keyInListDown( [ KeyboardUtils.KEY_SHIFT_LEFT, KeyboardUtils.KEY_SHIFT_RIGHT ] );
+    return this.keyInListDown( KeyboardUtils.SHIFT_KEYS );
   }
 
   /**
