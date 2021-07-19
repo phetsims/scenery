@@ -1,7 +1,7 @@
 // Copyright 2021, University of Colorado Boulder
 
 /**
- * A singleton UtteranceQueue that is used for Voicing. It uses the webSpeaker to announce Utterances,
+ * A singleton UtteranceQueue that is used for Voicing. It uses the voicingManager to announce Utterances,
  * which uses HTML5 SpeechSynthesis. This UtteranceQueue can take special VoicingUtterances, which
  * have some extra functionality for controlling flow of alerts.
  *
@@ -10,9 +10,9 @@
 
 import UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
 import scenery from '../../scenery.js';
-import webSpeaker from './webSpeaker.js';
+import voicingManager from './voicingManager.js';
 
-const voicingUtteranceQueue = new UtteranceQueue( webSpeaker );
+const voicingUtteranceQueue = new UtteranceQueue( voicingManager );
 
 scenery.register( 'voicingUtteranceQueue', voicingUtteranceQueue );
 export default voicingUtteranceQueue;

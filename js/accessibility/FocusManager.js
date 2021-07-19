@@ -33,7 +33,7 @@ import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import scenery from '../scenery.js';
 import Focus from './Focus.js';
 import FocusDisplayedController from './FocusDisplayedController.js';
-import webSpeaker from './voicing/webSpeaker.js';
+import voicingManager from './voicing/voicingManager.js';
 
 class FocusManager {
   constructor() {
@@ -67,23 +67,23 @@ class FocusManager {
     // @public {DerivedProperty.<boolean>} - Indicates whether any highlights should appear from pointer
     // input (mouse/touch). If false, we will try to avoid doing expensive work in PointerHighlighting.js.
     this.pointerHighlightsVisibleProperty = new DerivedProperty(
-      [ this.interactiveHighlightsVisibleProperty, webSpeaker.enabledProperty ],
+      [ this.interactiveHighlightsVisibleProperty, voicingManager.enabledProperty ],
       ( interactiveHighlightsVisible, voicingEnabled ) => {
         return interactiveHighlightsVisible || voicingEnabled;
       } );
 
     //-----------------------------------------------------------------------------------------------------------------
     // The following section manages control of ReadingBlockFocusProperty. It takes a value whenever the
-    // webSpeaker starts speaking and the value is cleared when it stops speaking. Focus is also cleared
+    // voicingManager starts speaking and the value is cleared when it stops speaking. Focus is also cleared
     // by the FocusDisplayedController.
 
     // @public {FocusDisplayedController} - Whenever the readingBlockFocusProperty's Focused Node is removed from
     // the scene graph or its Trail becomes invisible this removes focus.
     this.readingBlockFocusController = new FocusDisplayedController( this.readingBlockFocusProperty );
 
-    // If the webSpeaker starts speaking an Utterance for a ReadingBLock, set the readingBlockFocusProperty and
+    // If the voicingManager starts speaking an Utterance for a ReadingBLock, set the readingBlockFocusProperty and
     // add listeners to clear it when the Node is removed or becomes invisible
-    webSpeaker.startSpeakingEmitter.addListener( utterance => {
+    voicingManager.startSpeakingEmitter.addListener( utterance => {
       if ( utterance.readingBlockFocus ) {
         this.readingBlockFocusProperty.value = utterance.readingBlockFocus;
       }
@@ -92,8 +92,8 @@ class FocusManager {
       }
     } );
 
-    // Whenever the webSpeaker stops speaking an utterance for the ReadingBlock that has focus, clear it
-    webSpeaker.endSpeakingEmitter.addListener( utterance => {
+    // Whenever the voicingManager stops speaking an utterance for the ReadingBlock that has focus, clear it
+    voicingManager.endSpeakingEmitter.addListener( utterance => {
       if ( utterance.readingBlockFocus && this.readingBlockFocusProperty.value ) {
 
         // only clear the readingBlockFocusProperty if the ReadingBlockUtterance has a Focus that matches the
