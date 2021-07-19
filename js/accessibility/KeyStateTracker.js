@@ -295,7 +295,7 @@ class KeyStateTracker {
    * @public
    */
   get shiftKeyDown() {
-    return this.isAnyKeyInListDown( [ KeyboardUtils.KEY_SHIFT_LEFT, KeyboardUtils.KEY_SHIFT_RIGHT ] );
+    return this.isAnyKeyInListDown( KeyboardUtils.SHIFT_KEYS );
   }
 
   /**
@@ -303,7 +303,7 @@ class KeyStateTracker {
    * @public
    */
   get altKeyDown() {
-    return this.isAnyKeyInListDown( [ KeyboardUtils.KEY_ALT_LEFT, KeyboardUtils.KEY_ALT_RIGHT ] );
+    return this.isAnyKeyInListDown( KeyboardUtils.ALT_KEYS );
   }
 
   /**
@@ -311,7 +311,7 @@ class KeyStateTracker {
    * @public
    */
   get ctrlKeyDown() {
-    return this.isAnyKeyInListDown( [ KeyboardUtils.KEY_CONTROL_LEFT, KeyboardUtils.KEY_CONTROL_RIGHT ] );
+    return this.isAnyKeyInListDown( KeyboardUtils.CONTROL_KEYS );
   }
 
   /**

@@ -112,6 +112,9 @@ const KeyboardUtils = {
   ARROW_KEYS: ARROW_KEYS,
   WASD_KEYS: WASD_KEYS,
   MOVEMENT_KEYS: ARROW_KEYS.concat( WASD_KEYS ),
+  SHIFT_KEYS: SHIFT_KEYS,
+  CONTROL_KEYS: CONTROL_KEYS,
+  ALT_KEYS: ALT_KEYS,
 
   /**
    * Returns whether or not the key corresponds to pressing an arrow key
