@@ -107,7 +107,7 @@ const ReadingBlock = {
         // responseCollector indicates that voicing is fully enabled, see the Property in responseCollector
         // for more information.
         this.readingBlockFocusableChangeListener = this.onReadingBlockFocusableChanged.bind( this );
-        responseCollector.voicingFullyEnabledProperty.link( this.readingBlockFocusableChangeListener );
+        webSpeaker.voicingFullyEnabledProperty.link( this.readingBlockFocusableChangeListener );
 
         // support passing options through initialize
         if ( options ) {
@@ -128,7 +128,7 @@ const ReadingBlock = {
        */
       setReadingBlockTagName( tagName ) {
         this._readingBlockTagName = tagName;
-        this.onReadingBlockFocusableChanged( responseCollector.voicingFullyEnabledProperty.value );
+        this.onReadingBlockFocusableChanged( webSpeaker.voicingFullyEnabledProperty.value );
       },
       set readingBlockTagName( tagName ) { this.setReadingBlockTagName( tagName ); },
 
@@ -293,7 +293,7 @@ const ReadingBlock = {
        * @public
        */
       disposeReadingBlock() {
-        responseCollector.voicingFullyEnabledProperty.unlink( this.readingBlockFocusableChangeListener );
+        webSpeaker.voicingFullyEnabledProperty.unlink( this.readingBlockFocusableChangeListener );
         this.localBoundsProperty.unlink( this.localBoundsChangedListener );
 
         // remove the input listener that activates the ReadingBlock, only do this if the listener is attached while
