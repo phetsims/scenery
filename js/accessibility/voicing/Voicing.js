@@ -76,13 +76,13 @@ const Voicing = {
        */
       initializeVoicing( options ) {
 
-        assert && assert( this.isVoicing === undefined, 'Voicing has already been initialized for this Node' );
+        assert && assert( this.voicingInitialized === undefined, 'Voicing has already been initialized for this Node' );
 
         // initialize "super" Trait to support highlights on mouse input
         this.initializeMouseHighlighting();
 
-        // @public (read-only, scenery-internal) - flag indicating that this Node is composed with Voicing functionality
-        this.isVoicing = true;
+        // @private {boolean} - to make sure that initializeVoicing is called before trying to use the mixin.
+        this.voicingInitialized = true;
 
         // @private {string|null} - The response to be spoken for this Node when speaking names. This is usually
         // the accessible name for the Node, typically spoken on focus and on interaction, labelling what the object is.
@@ -147,6 +147,7 @@ const Voicing = {
        * @param {Object} [options]
        */
       voicingSpeakFullResponse( options ) {
+        assert && assert( this.voicingInitialized, 'voicing must be initialized to speak' );
 
         // options are passed along to collectAndSpeakResponse, see that function for additional options
         options = merge( {
@@ -172,6 +173,7 @@ const Voicing = {
        * @param {Object} [options]
        */
       voicingSpeakResponse( options ) {
+        assert && assert( this.voicingInitialized, 'voicing must be initialized to speak' );
 
         // options are passed along to collectAndSpeakResponse, see that function for additional options
         options = merge( {
@@ -192,6 +194,7 @@ const Voicing = {
        * @param {Object} [options]
        */
       voicingSpeakNameResponse( options ) {
+        assert && assert( this.voicingInitialized, 'voicing must be initialized to speak' );
 
         // options are passed along to collectAndSpeakResponse, see that function for additional options
         options = merge( {
@@ -209,6 +212,7 @@ const Voicing = {
        * @param {Object} [options]
        */
       voicingSpeakObjectResponse( options ) {
+        assert && assert( this.voicingInitialized, 'voicing must be initialized to speak' );
 
         // options are passed along to collectAndSpeakResponse, see that function for additional options
         options = merge( {
@@ -227,6 +231,7 @@ const Voicing = {
        * @param {Object} [options]
        */
       voicingSpeakContextResponse( options ) {
+        assert && assert( this.voicingInitialized, 'voicing must be initialized to speak' );
 
         // options are passed along to collectAndSpeakResponse, see that function for additional options
         options = merge( {
@@ -245,6 +250,7 @@ const Voicing = {
        * @param {Object} [options]
        */
       voicingSpeakHintResponse( options ) {
+        assert && assert( this.voicingInitialized, 'voicing must be initialized to speak' );
 
         // options are passed along to collectAndSpeakResponse, see that function for additional options
         options = merge( {
@@ -466,10 +472,20 @@ const Voicing = {
       get utteranceQueue() { return this.getUtteranceQueue(); },
 
       /**
+       * Whether or not a Node composes this trait
+       * @public
+       * @returns {boolean}
+       */
+      get isVoicing() {
+        return true;
+      },
+
+      /**
        * Detaches references that ensure this components of this Trait are eligible for garbage collection.
        * @public
        */
       disposeVoicing() {
+        this.voicingInitialized = false;
         this.removeInputListener( this.speakContentOnFocusListener );
         this.disposeMouseHighlighting();
       }
