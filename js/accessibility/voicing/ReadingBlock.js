@@ -70,8 +70,8 @@ const ReadingBlock = {
         // initialize the parent trait
         this.initializeVoicing( options );
 
-        // @public (scenery-internal) - a flag to indicate that this Node has ReadingBlock behavior
-        this.isReadingBlock = true;
+        // @private {boolean} - to make sure that initializeReadingBlock is called before trying to use trait features
+        this.readingBlockInitialized = true;
 
         // @private {string|null} - The tagName used for the ReadingBlock when "Voicing" is enabled, default
         // of button so that it is added to the focus order and can receive 'click' events. You may wish to set this
@@ -117,6 +117,14 @@ const ReadingBlock = {
         // All ReadingBlocks have a ReadingBlockHighlight, a focus highlight that is black to indicate it has
         // a different behavior.
         this.focusHighlight = new ReadingBlockHighlight( this );
+      },
+
+      /**
+       * Whether or not a Node composes
+       * @returns {boolean}
+       */
+      get isReadingBlock() {
+        return true;
       },
 
       /**
@@ -199,7 +207,7 @@ const ReadingBlock = {
 
         // wait until we have been initialized, it is possible to call setters from mutate before properties of
         // ReadingBlock are defined
-        if ( !this.isReadingBlock ) {
+        if ( !this.readingBlockInitialized ) {
           return;
         }
 
@@ -242,6 +250,8 @@ const ReadingBlock = {
        * @param {SceneryEvent} event
        */
       speakReadingBlockContent( event ) {
+        assert && assert( this.readingBlockInitialized, 'ReadingBlock must be initialized before speaking' );
+
         const displays = this.getConnectedDisplays();
 
         const content = this.collectReadingBlockResponses();
@@ -273,6 +283,8 @@ const ReadingBlock = {
        * @returns {string}
        */
       collectReadingBlockResponses() {
+        assert && assert( this.readingBlockInitialized, 'ReadingBlock must be initialized before collecting responses' );
+
         const usesHelpContent = this._readingBlockHintResponse && responseCollector.hintResponsesEnabledProperty.value;
 
         let response = null;
@@ -293,6 +305,7 @@ const ReadingBlock = {
        * @public
        */
       disposeReadingBlock() {
+        this.readingBlockInitialized = false;
         voicingManager.voicingFullyEnabledProperty.unlink( this.readingBlockFocusableChangeListener );
         this.localBoundsProperty.unlink( this.localBoundsChangedListener );
 

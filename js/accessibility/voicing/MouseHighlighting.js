@@ -96,6 +96,7 @@ const MouseHighlighting = {
        * @public
        */
       disposeMouseHighlighting() {
+        this.mouseHighlightingInitialized = false;
         this.changedInstanceEmitter.removeListener( this.changedInstanceListener );
 
         // remove the activation listener if it is currently attached
