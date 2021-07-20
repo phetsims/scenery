@@ -36,8 +36,9 @@ const MouseHighlighting = {
        */
       initializeMouseHighlighting() {
 
-        // @public {boolean} (read-only)
-        this.isMouseHighlighting = true;
+        // @private {boolean} - Indicates that the Trait was initialized, to make sure that initializeMouseHighlighting
+        // is called before using the Trait.
+        this.mouseHighlightingInitialized = true;
 
         // @private - Input listener to activate the HighlightOverlay upon pointer mouse input. Uses exit
         // and enter instead of over and out because we do not want this to fire from bubbling. The highlight
@@ -83,6 +84,15 @@ const MouseHighlighting = {
       },
 
       /**
+       * Whether or not a Node composes this Trait.
+       * @public
+       * @returns {boolean}
+       */
+      get isMouseHighlighting() {
+        return true;
+      },
+
+      /**
        * @public
        */
       disposeMouseHighlighting() {
@@ -111,6 +121,8 @@ const MouseHighlighting = {
        * @param {SceneryEvent} event
        */
       onPointerEntered( event ) {
+        assert && assert( this.mouseHighlightingInitialized, 'MouseHighlighting should be initialized before using onPointerEntered' );
+
         const displays = Object.values( this._displays );
         for ( let i = 0; i < displays.length; i++ ) {
           const display = displays[ i ];
@@ -122,6 +134,7 @@ const MouseHighlighting = {
       },
 
       onPointerMove( event ) {
+        assert && assert( this.mouseHighlightingInitialized, 'MouseHighlighting should be initialized before using onPointerMove' );
 
         const displays = Object.values( this._displays );
         for ( let i = 0; i < displays.length; i++ ) {
@@ -148,6 +161,8 @@ const MouseHighlighting = {
        * @param {SceneryEvent} event
        */
       onPointerExited( event ) {
+        assert && assert( this.mouseHighlightingInitialized, 'MouseHighlighting should be initialized before using onPointerExited' );
+
         const displays = Object.values( this._displays );
         for ( let i = 0; i < displays.length; i++ ) {
           const display = displays[ i ];
@@ -162,6 +177,8 @@ const MouseHighlighting = {
        * @param {SceneryEvent} event
        */
       onPointerDown( event ) {
+        assert && assert( this.mouseHighlightingInitialized, 'MouseHighlighting should be initialized before using onPointerDown' );
+
         if ( this.pointer === null ) {
           const displays = Object.values( this._displays );
           for ( let i = 0; i < displays.length; i++ ) {
@@ -182,6 +199,8 @@ const MouseHighlighting = {
        * @param {SceneryEvent} [event] - may be called during interrupt or cancel, in which case there is no event
        */
       onPointerRelease( event ) {
+        assert && assert( this.mouseHighlightingInitialized, 'MouseHighlighting should be initialized before using onPointerRelease' );
+
         const displays = Object.values( this._displays );
         for ( let i = 0; i < displays.length; i++ ) {
           const display = displays[ i ];
@@ -201,6 +220,8 @@ const MouseHighlighting = {
        * @param event
        */
       onPointerCancel( event ) {
+        assert && assert( this.mouseHighlightingInitialized, 'MouseHighlighting should be initialized before using onPointerCancel' );
+
         const displays = Object.values( this._displays );
         for ( let i = 0; i < displays.length; i++ ) {
           const display = displays[ i ];
@@ -236,6 +257,8 @@ const MouseHighlighting = {
        * @param {boolean} added - whether the instance is added or removed from the Instance tree
        */
       onChangedInstance( instance, added ) {
+        assert && assert( this.mouseHighlightingInitialized, 'MouseHighlighting should be initialized before the onChangedInstance lister is called' );
+
         if ( added ) {
           this._displays[ instance.trail.uniqueId ] = instance.display;
 
