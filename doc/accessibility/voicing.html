@@ -359,8 +359,8 @@
         // set up the Display and initialize the webSpeaker
         display.updateOnRequestAnimationFrame();
         display.initializeEvents();
-        scenery.webSpeaker.initialize();
-        scenery.webSpeaker.enabledProperty.value = true;
+        scenery.voicingManager.initialize();
+        scenery.voicingManager.enabledProperty.value = true;
         /*END*/
       } );
     </script>
@@ -427,8 +427,8 @@
         // set up the Display and initialize the webSpeaker
         display.updateOnRequestAnimationFrame();
         display.initializeEvents();
-        scenery.webSpeaker.initialize();
-        scenery.webSpeaker.enabledProperty.value = true;
+        scenery.voicingManager.initialize();
+        scenery.voicingManager.enabledProperty.value = true;
 
         // globally enable/disable object responses
         document.getElementById( 'object-responses' ).addEventListener( 'change', () => {
