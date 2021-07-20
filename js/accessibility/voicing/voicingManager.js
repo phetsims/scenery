@@ -57,9 +57,8 @@ class VoicingManager extends EnabledComponent {
     this.speakingProperty = new BooleanProperty( false );
 
     // @public {BooleanProperty} - Controls whether Voicing is enabled in a "main window" area of the application.
-    // This supports the ability to disable Voicing for the important screen content of your simulation while keeping
-    // Voicing for surrounding UI components enabled. At the time of this writing, all "Reading Blocks" are disabled
-    // when Voicing for the "main window" is disabled. See ReadingBlock.js for more information.
+    // This supports the ability to disable Voicing for the important screen content of your application while keeping
+    // Voicing for surrounding UI components enabled (for example).
     this.mainWindowVoicingEnabledProperty = new BooleanProperty( true );
 
     // @public {DerivedProperty.<Boolean>} - Property that indicates that the Voicing feature is enabled for all areas
