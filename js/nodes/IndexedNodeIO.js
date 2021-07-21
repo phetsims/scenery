@@ -9,6 +9,7 @@
 
 import FunctionIO from '../../../tandem/js/types/FunctionIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
+import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
 import VoidIO from '../../../tandem/js/types/VoidIO.js';
 import scenery from '../scenery.js';
@@ -36,13 +37,24 @@ const IndexedNodeIO = new IOType( 'IndexedNodeIO', {
     return stateObject;
   },
   applyState: ( node, stateObject ) => {
-    if ( node.parents[ 0 ] && stateObject.index ) {
+    const nodeParent = node.parents[ 0 ];
+
+    if ( nodeParent && stateObject.index ) {
       assert && assert( node.parents.length === 1, 'IndexedNodeIO only supports nodes with a single parent' );
-      node.parents[ 0 ].moveChildToIndex( node, stateObject.index );
+
+      // Swap the child at the destination index with current position of this Node, that way the operation is atomic.
+      // This implementation assumes that all children are instrumented IndexedNodeIO instances and can have state set
+      // on them to "fix them" after this operation. Without this implementation, using Node.moveChildToIndex could blow
+      // awap another IndexedNode state set. See https://github.com/phetsims/ph-scale/issues/227
+      const children = nodeParent.children;
+      const currentIndex = nodeParent.indexOfChild( node );
+      children[ currentIndex ] = children[ stateObject.index ];
+      children[ stateObject.index ] = node;
+      nodeParent.setChildren( children );
     }
   },
   stateSchema: {
-    index: NumberIO
+    index: NullableIO( NumberIO )
   },
   methods: {
     linkIndex: {
