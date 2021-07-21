@@ -120,7 +120,7 @@ const ReadingBlock = {
       },
 
       /**
-       * Whether or not a Node composes
+       * Whether or not a Node composes ReadingBlock.
        * @returns {boolean}
        */
       get isReadingBlock() {

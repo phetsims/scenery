@@ -84,7 +84,7 @@ const MouseHighlighting = {
       },
 
       /**
-       * Whether or not a Node composes this Trait.
+       * Whether or not a Node composes MouseHighlighting.
        * @public
        * @returns {boolean}
        */

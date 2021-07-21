@@ -472,7 +472,7 @@ const Voicing = {
       get utteranceQueue() { return this.getUtteranceQueue(); },
 
       /**
-       * Whether or not a Node composes this trait
+       * Whether or not a Node composes Voicing.
        * @public
        * @returns {boolean}
        */
