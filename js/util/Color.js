@@ -889,8 +889,7 @@ Color.formatParsers = [
     apply: ( color, matches ) => {
       color.setRGBA( 0, 0, 0, 0 );
     }
-  },
-  {
+  }, {
     // short hex form, a la '#fff'
     regexp: /^#(\w{1})(\w{1})(\w{1})$/,
     apply: ( color, matches ) => {
@@ -900,8 +899,7 @@ Color.formatParsers = [
         parseInt( matches[ 3 ] + matches[ 3 ], 16 ),
         1 );
     }
-  },
-  {
+  }, {
     // long hex form, a la '#ffffff'
     regexp: /^#(\w{2})(\w{2})(\w{2})$/,
     apply: ( color, matches ) => {
@@ -911,8 +909,17 @@ Color.formatParsers = [
         parseInt( matches[ 3 ], 16 ),
         1 );
     }
-  },
-  {
+  }, {
+    // long hex form with alpha, a la '#ffffffff'
+    regexp: /^#(\w{2})(\w{2})(\w{2})(\w{2})$/,
+    apply: ( color, matches ) => {
+      color.setRGBA(
+        parseInt( matches[ 1 ], 16 ),
+        parseInt( matches[ 2 ], 16 ),
+        parseInt( matches[ 3 ], 16 ),
+        parseInt( matches[ 4 ], 16 ) );
+    }
+  }, {
     // rgb(...)
     regexp: new RegExp( `^rgb\\(${rgbNumber},${rgbNumber},${rgbNumber}\\)$` ),
     apply: ( color, matches ) => {
@@ -922,8 +929,7 @@ Color.formatParsers = [
         parseRGBNumber( matches[ 3 ] ),
         1 );
     }
-  },
-  {
+  }, {
     // rgba(...)
     regexp: new RegExp( `^rgba\\(${rgbNumber},${rgbNumber},${rgbNumber},${aNumber}\\)$` ),
     apply: ( color, matches ) => {
@@ -933,8 +939,7 @@ Color.formatParsers = [
         parseRGBNumber( matches[ 3 ] ),
         parseFloat( matches[ 4 ] ) );
     }
-  },
-  {
+  }, {
     // hsl(...)
     regexp: new RegExp( `^hsl\\(${rawNumber},${rawNumber}%,${rawNumber}%\\)$` ),
     apply: ( color, matches ) => {
@@ -944,8 +949,7 @@ Color.formatParsers = [
         parseInt( matches[ 3 ], 10 ),
         1 );
     }
-  },
-  {
+  }, {
     // hsla(...)
     regexp: new RegExp( `^hsla\\(${rawNumber},${rawNumber}%,${rawNumber}%,${aNumber}\\)$` ),
     apply: ( color, matches ) => {
