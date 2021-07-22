@@ -38,7 +38,8 @@ const VOICING_OPTION_KEYS = [
   'voicingContextResponse',
   'voicingHintResponse',
   'voicingUtteranceQueue',
-  'voicingResponsePatterns'
+  'voicingResponsePatterns',
+  'voicingIgnoreVoicingManagerProperties'
 ];
 
 const Voicing = {
