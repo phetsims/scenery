@@ -65,6 +65,12 @@ class VoicingManager extends EnabledComponent {
     // of the application.
     this.voicingFullyEnabledProperty = DerivedProperty.and( [ this.enabledProperty, this.mainWindowVoicingEnabledProperty ] );
 
+    // @public {BooleanProperty} - Indicates whether speech is fully enabled AND speech is allowed, as specified
+    // by the Property provided in initialize(). See speechAllowedProperty of initialize(). In order for this Property
+    // to be true, speechAllowedProperty, enabledProperty, and mainWindowVoicingEnabledProperty must all be true.
+    // Initialized in the constructor because we don't have access to all the dependency Properties until initialize.
+    this.speechAllowedAndFullyEnabledProperty = new BooleanProperty( true );
+
     // @private {SpeechSynthesis|null} - synth from Web Speech API that drives speech, defined on initialize
     this._synth = null;
 
@@ -124,8 +130,16 @@ class VoicingManager extends EnabledComponent {
 
     this._synth = window.speechSynthesis;
 
+    // whether the optional Property indicating speech is allowed and the voicingManager is enabled
     this._canSpeakProperty = DerivedProperty.and( [ options.speechAllowedProperty, this.enabledProperty ] );
     this._canSpeakProperty.link( this.boundHandleCanSpeakChange );
+
+    // Set the speechAllowedAndFullyEnabledProperty when dependency Properties update
+    Property.multilink(
+      [ options.speechAllowedProperty, this.voicingFullyEnabledProperty ],
+      ( speechAllowed, voicingFullyEnabled ) => {
+        this.speechAllowedAndFullyEnabledProperty.value = speechAllowed && voicingFullyEnabled;
+      } );
 
     // browsers tend to generate the list of voices lazily, so the list of voices may be empty until speech is
     // first requested

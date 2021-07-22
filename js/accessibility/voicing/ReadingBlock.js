@@ -102,12 +102,11 @@ const ReadingBlock = {
           click: event => this.speakReadingBlockContent( event )
         };
 
-        // @private - Controls whether or not the ReadingBlock should be interactive for Voicing and
-        // focusable. At the time of this writing, that is true for all ReadingBlocks when the
-        // responseCollector indicates that voicing is fully enabled, see the Property in responseCollector
-        // for more information.
+        // @private - Controls whether or not the ReadingBlock should be interactiveand focusable.
+        // At the time of this writing, that is true for all ReadingBlocks when the voicingManager is
+        // fully enabled and can speak.
         this.readingBlockFocusableChangeListener = this.onReadingBlockFocusableChanged.bind( this );
-        voicingManager.voicingFullyEnabledProperty.link( this.readingBlockFocusableChangeListener );
+        voicingManager.speechAllowedAndFullyEnabledProperty.link( this.readingBlockFocusableChangeListener );
 
         // support passing options through initialize
         if ( options ) {
