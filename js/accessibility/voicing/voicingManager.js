@@ -46,8 +46,8 @@ class VoicingManager extends EnabledComponent {
 
     // @public {Emitter} - emits events when the speaker starts/stops speaking, with the Utterance that is
     // either starting or stopping
-    this.startSpeakingEmitter = new Emitter( { parameters: [ { valueType: Utterance } ] } );
-    this.endSpeakingEmitter = new Emitter( { parameters: [ { valueType: Utterance } ] } );
+    this.startSpeakingEmitter = new Emitter( { parameters: [ { valueType: Utterance }, { valueType: 'string' } ] } );
+    this.endSpeakingEmitter = new Emitter( { parameters: [ { valueType: Utterance }, { valueType: 'string' } ] } );
 
     // @public {Emitter} - emits whenever the voices change for SpeechSynthesis
     this.voicesChangedEmitter = new Emitter();
@@ -232,7 +232,8 @@ class VoicingManager extends EnabledComponent {
       }
 
       // embeddding marks (for i18n) impact the output, strip before speaking
-      const speechSynthUtterance = new SpeechSynthesisUtterance( stripEmbeddingMarks( utterance.getTextToAlert() ) );
+      const stringToSpeak = stripEmbeddingMarks( utterance.getTextToAlert() );
+      const speechSynthUtterance = new SpeechSynthesisUtterance( stringToSpeak );
       speechSynthUtterance.voice = this.voiceProperty.value;
       speechSynthUtterance.pitch = this.voicePitchProperty.value;
       speechSynthUtterance.rate = this.voiceRateProperty.value;
@@ -244,14 +245,14 @@ class VoicingManager extends EnabledComponent {
       this.previousUtterance = utterance;
 
       const startListener = () => {
-        this.startSpeakingEmitter.emit( utterance );
+        this.startSpeakingEmitter.emit( utterance, stringToSpeak );
         this.speakingProperty.set( true );
         speechSynthUtterance.removeEventListener( 'start', startListener );
       };
 
       const endListener = () => {
 
-        this.endSpeakingEmitter.emit( utterance );
+        this.endSpeakingEmitter.emit( utterance, stringToSpeak );
         this.speakingProperty.set( false );
         speechSynthUtterance.removeEventListener( 'end', endListener );
 
