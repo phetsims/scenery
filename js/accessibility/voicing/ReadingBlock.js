@@ -314,7 +314,6 @@ const ReadingBlock = {
           this.removeInputListener( this.readingBlockInputListener );
         }
 
-        voicingManager.endSpeakingEmitter.removeListener( this.endSpeakingListener );
         this.disposeVoicing();
       }
     } );

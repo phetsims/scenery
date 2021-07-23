@@ -46,8 +46,8 @@ class VoicingManager extends EnabledComponent {
 
     // @public {Emitter} - emits events when the speaker starts/stops speaking, with the Utterance that is
     // either starting or stopping
-    this.startSpeakingEmitter = new Emitter( { parameters: [ { valueType: Utterance }, { valueType: 'string' } ] } );
-    this.endSpeakingEmitter = new Emitter( { parameters: [ { valueType: Utterance }, { valueType: 'string' } ] } );
+    this.startSpeakingEmitter = new Emitter( { parameters: [ { valueType: 'string' }, { valueType: Utterance } ] } );
+    this.endSpeakingEmitter = new Emitter( { parameters: [ { valueType: 'string' }, { valueType: Utterance } ] } );
 
     // @public {Emitter} - emits whenever the voices change for SpeechSynthesis
     this.voicesChangedEmitter = new Emitter();
@@ -245,14 +245,14 @@ class VoicingManager extends EnabledComponent {
       this.previousUtterance = utterance;
 
       const startListener = () => {
-        this.startSpeakingEmitter.emit( utterance, stringToSpeak );
+        this.startSpeakingEmitter.emit( stringToSpeak, utterance );
         this.speakingProperty.set( true );
         speechSynthUtterance.removeEventListener( 'start', startListener );
       };
 
       const endListener = () => {
 
-        this.endSpeakingEmitter.emit( utterance, stringToSpeak );
+        this.endSpeakingEmitter.emit( stringToSpeak, utterance );
         this.speakingProperty.set( false );
         speechSynthUtterance.removeEventListener( 'end', endListener );
 
