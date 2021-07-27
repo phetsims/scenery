@@ -53,7 +53,8 @@ class ProfileColorProperty extends ColorProperty {
         window.parent.postMessage( JSON.stringify( {
           type: 'reportColor',
           name: this.name,
-          value: color.toHexString()
+          value: color.toHexString(),
+          alpha: color.getAlpha()
         } ), '*' );
       }
     } );
@@ -90,7 +91,7 @@ window.addEventListener( 'message', event => {
     for ( let i = 0; i < instances.length; i++ ) {
       const instance = instances[ i ];
       if ( instance.name === data.name ) {
-        instance.colorProfileMap[ colorProfileProperty.value ] = new Color( data.value );
+        instance.colorProfileMap[ colorProfileProperty.value ] = new Color( data.value ).withAlpha( data.alpha );
         instance.value = instance.colorProfileMap[ colorProfileProperty.value ];
       }
     }
