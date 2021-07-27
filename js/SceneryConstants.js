@@ -21,7 +21,7 @@ const SceneryConstants = {
   DEFAULT_COLOR_PROFILE: 'default',
 
   // The name of the color profile used for projector mode
-  PROJECTOR_COLOR_PROFILE_NAME: 'projector'
+  PROJECTOR_COLOR_PROFILE: 'projector'
 };
 
 scenery.register( 'SceneryConstants', SceneryConstants );
