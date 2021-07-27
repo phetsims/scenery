@@ -69,7 +69,7 @@ class VoicingManager extends EnabledComponent {
     // by the Property provided in initialize(). See speechAllowedProperty of initialize(). In order for this Property
     // to be true, speechAllowedProperty, enabledProperty, and mainWindowVoicingEnabledProperty must all be true.
     // Initialized in the constructor because we don't have access to all the dependency Properties until initialize.
-    this.speechAllowedAndFullyEnabledProperty = new BooleanProperty( true );
+    this.speechAllowedAndFullyEnabledProperty = new BooleanProperty( false );
 
     // @private {SpeechSynthesis|null} - synth from Web Speech API that drives speech, defined on initialize
     this._synth = null;

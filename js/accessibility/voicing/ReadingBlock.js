@@ -135,7 +135,7 @@ const ReadingBlock = {
        */
       setReadingBlockTagName( tagName ) {
         this._readingBlockTagName = tagName;
-        this.onReadingBlockFocusableChanged( voicingManager.voicingFullyEnabledProperty.value );
+        this.onReadingBlockFocusableChanged( voicingManager.speechAllowedAndFullyEnabledProperty.value );
       },
       set readingBlockTagName( tagName ) { this.setReadingBlockTagName( tagName ); },
 
