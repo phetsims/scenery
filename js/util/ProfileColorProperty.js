@@ -33,8 +33,7 @@ class ProfileColorProperty extends ColorProperty {
     // Fallback to default if a color was not supplied.
     super( colorProfileMap[ colorProfileProperty.value ] || colorProfileMap[ SceneryConstants.DEFAULT_COLOR_PROFILE ], options );
 
-    // @protected - used elsewhere in this file but outside of this class.
-    // values are mutated by the color wrapper.
+    // @public (ProfileColorProperty.js) - values are mutated by the HTML color wrapper.
     this.colorProfileMap = colorProfileMap;
 
     // When the color profile name changes, select the corresponding color.
