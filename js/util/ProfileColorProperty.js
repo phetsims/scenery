@@ -75,7 +75,7 @@ class ProfileColorProperty extends ColorProperty {
   }
 }
 
-// receives iframe communication to set a color
+// Listen for messages from the HTML color editor wrapper with new color values.
 window.addEventListener( 'message', event => {
   let data;
   try {
