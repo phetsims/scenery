@@ -33,6 +33,7 @@ import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import scenery from '../scenery.js';
 import Focus from './Focus.js';
 import FocusDisplayedController from './FocusDisplayedController.js';
+import ReadingBlockUtterance from './voicing/ReadingBlockUtterance.js';
 import voicingManager from './voicing/voicingManager.js';
 
 class FocusManager {
@@ -83,18 +84,13 @@ class FocusManager {
 
     // If the voicingManager starts speaking an Utterance for a ReadingBLock, set the readingBlockFocusProperty and
     // add listeners to clear it when the Node is removed or becomes invisible
-    voicingManager.startSpeakingEmitter.addListener( utterance => {
-      if ( utterance.readingBlockFocus ) {
-        this.readingBlockFocusProperty.value = utterance.readingBlockFocus;
-      }
-      else {
-        this.readingBlockFocusProperty.value = null;
-      }
+    voicingManager.startSpeakingEmitter.addListener( ( text, utterance ) => {
+      this.readingBlockFocusProperty.value = utterance instanceof ReadingBlockUtterance ? utterance.readingBlockFocus : null;
     } );
 
     // Whenever the voicingManager stops speaking an utterance for the ReadingBlock that has focus, clear it
-    voicingManager.endSpeakingEmitter.addListener( utterance => {
-      if ( utterance.readingBlockFocus && this.readingBlockFocusProperty.value ) {
+    voicingManager.endSpeakingEmitter.addListener( ( text, utterance ) => {
+      if ( utterance instanceof ReadingBlockUtterance && this.readingBlockFocusProperty.value ) {
 
         // only clear the readingBlockFocusProperty if the ReadingBlockUtterance has a Focus that matches the
         // current value for readingBlockFocusProperty so that the highlight doesn't disappear every time
