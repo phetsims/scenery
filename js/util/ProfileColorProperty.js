@@ -46,6 +46,8 @@ class ProfileColorProperty extends ColorProperty {
     // @public (read-only)
     this.name = name;
 
+    // On initialization and when the color changes, send a message to the parent frame identifying the color value.
+    // The HTML color editor wrapper listens for these messages and displays the color values.
     this.link( color => {
       if ( window.parent !== window ) {
         window.parent.postMessage( JSON.stringify( {
