@@ -7,6 +7,7 @@
  */
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import scenery from '../scenery.js';
+import SceneryConstants from '../SceneryConstants.js';
 import Color from '../util/Color.js';
 import ColorProperty from '../util/ColorProperty.js';
 import colorProfileProperty from './colorProfileProperty.js';
@@ -30,7 +31,7 @@ class ProfileColorProperty extends ColorProperty {
     colorProfileMap = _.mapValues( colorProfileMap, Color.toColor );
 
     // Fallback to default if a color was not supplied.
-    super( colorProfileMap[ colorProfileProperty.value ] || colorProfileMap.default, options );
+    super( colorProfileMap[ colorProfileProperty.value ] || colorProfileMap[ SceneryConstants.DEFAULT_COLOR_PROFILE ], options );
 
     // @protected - used elsewhere in this file but outside of this class.
     // values are mutated by the color wrapper.
@@ -40,7 +41,7 @@ class ProfileColorProperty extends ColorProperty {
     colorProfileProperty.link( colorProfileName => {
 
       // fallback to default if a color not supplied
-      this.value = this.colorProfileMap[ colorProfileName ] || this.colorProfileMap.default;
+      this.value = this.colorProfileMap[ colorProfileName ] || this.colorProfileMap[ SceneryConstants.DEFAULT_COLOR_PROFILE ];
     } );
 
     // @public (read-only)

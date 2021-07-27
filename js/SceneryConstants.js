@@ -15,6 +15,11 @@ const SceneryConstants = {
   // See https://github.com/phetsims/scenery/issues/1153
   DISABLED_OPACITY: 0.45,
 
+  // The name of the color profile used by default.
+  // NOTE: Duplicated in initialize-globals.js.  Duplicated because scenery doesn't include initialize-globals in its
+  // standalone build.
+  DEFAULT_COLOR_PROFILE: 'default',
+
   // The name of the color profile used for projector mode
   PROJECTOR_COLOR_PROFILE_NAME: 'projector'
 };

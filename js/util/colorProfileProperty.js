@@ -13,14 +13,15 @@
 import StringProperty from '../../../axon/js/StringProperty.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import scenery from '../scenery.js';
+import SceneryConstants from '../SceneryConstants.js';
 
 // Use the color profile specified in query parameters, or default to 'default'
 const initialProfileName = _.hasIn( window, 'phet.chipper.queryParameters.colorProfile' ) ?
                            phet.chipper.queryParameters.colorProfile :
-                           'default';
+                           SceneryConstants.DEFAULT_COLOR_PROFILE;
 
 // List of all supported colorProfiles for this simulation
-const colorProfiles = _.hasIn( window, 'phet.chipper.colorProfiles' ) ? phet.chipper.colorProfiles : [ 'default' ];
+const colorProfiles = _.hasIn( window, 'phet.chipper.colorProfiles' ) ? phet.chipper.colorProfiles : [ SceneryConstants.DEFAULT_COLOR_PROFILE ];
 
 // @public {Property.<string>}
 // The current profile name. Change this Property's value to change which profile is currently active.
