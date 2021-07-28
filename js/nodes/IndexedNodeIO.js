@@ -4,6 +4,11 @@
  * IO Type for Nodes that can save their own index (if phetioState: true).  Can be used to customize z-order
  * or layout order.
  *
+ * This IOType supports PhET-iO state, but only when every child within a Node's children array is an IndexedNodeIO
+ * and is stateful (`phetioState: true`). This applyState algorithm uses Node "swaps" instead of index-based inserts
+ * to ensure that by the end of state setting, all Nodes are in the correct order.
+ * ee https://github.com/phetsims/scenery/issues/1252#issuecomment-888014859 for more information.
+ *
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
