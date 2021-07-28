@@ -6,6 +6,8 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
+import merge from '../../../phet-core/js/merge.js';
+import Tandem from '../../../tandem/js/Tandem.js';
 import scenery from '../scenery.js';
 import SceneryConstants from '../SceneryConstants.js';
 import Color from '../util/Color.js';
@@ -24,6 +26,10 @@ class ProfileColorProperty extends ColorProperty {
    */
   constructor( name, colorProfileMap, options ) {
 
+    options = merge( {
+      tandem: Tandem.OPTIONAL
+    }, options );
+
     assert && assert( !!name, 'ProfileColorProperty.options.name is required' );
 
     // All values are eagerly coerced to Color instances for efficiency (so it only has to be done once) and simplicity
@@ -32,6 +38,11 @@ class ProfileColorProperty extends ColorProperty {
 
     // Fallback to default if a color was not supplied.
     super( colorProfileMap[ colorProfileProperty.value ] || colorProfileMap[ SceneryConstants.DEFAULT_COLOR_PROFILE ], options );
+
+    assert && assert( !this.isPhetioInstrumented() ||
+                      options.tandem.name.endsWith( 'ColorProperty' ) ||
+                      options.tandem.name === 'colorProperty',
+      `Property tandem.name must end with ColorProperty: ${options.tandem.phetioID}` );
 
     // @public (ProfileColorProperty.js) - values are mutated by the HTML color wrapper.
     this.colorProfileMap = colorProfileMap;
