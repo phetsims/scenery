@@ -26,9 +26,7 @@ const colorProfiles = _.hasIn( window, 'phet.chipper.colorProfiles' ) ? phet.chi
 // @public {Property.<string>}
 // The current profile name. Change this Property's value to change which profile is currently active.
 const colorProfileProperty = new StringProperty( initialProfileName, {
-
-  // TODO: Should we move global.view.colorProfile.profileNameProperty  to global.view.colorProfileProperty ? https://github.com/phetsims/scenery-phet/issues/515
-  tandem: Tandem.GLOBAL_VIEW.createTandem( 'colorProfile' ).createTandem( 'profileNameProperty' ),
+  tandem: Tandem.GLOBAL_VIEW.createTandem( 'colorProfileProperty' ),
   validValues: colorProfiles
 } );
 
