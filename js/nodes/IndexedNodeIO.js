@@ -45,7 +45,7 @@ const IndexedNodeIO = new IOType( 'IndexedNodeIO', {
       // Swap the child at the destination index with current position of this Node, that way the operation is atomic.
       // This implementation assumes that all children are instrumented IndexedNodeIO instances and can have state set
       // on them to "fix them" after this operation. Without this implementation, using Node.moveChildToIndex could blow
-      // awap another IndexedNode state set. See https://github.com/phetsims/ph-scale/issues/227
+      // away another IndexedNode state set. See https://github.com/phetsims/ph-scale/issues/227
       const children = nodeParent.children;
       const currentIndex = nodeParent.indexOfChild( node );
       children[ currentIndex ] = children[ stateObject.index ];
