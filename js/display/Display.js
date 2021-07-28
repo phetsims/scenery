@@ -2092,6 +2092,8 @@ class Display {
     this._baseInstance && this._baseInstance.dispose();
 
     this.utteranceQueue && this.utteranceQueue.dispose();
+
+    this.focusManager && this.focusManager.dispose();
   }
 
   /**

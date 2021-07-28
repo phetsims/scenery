@@ -84,12 +84,15 @@ class FocusManager {
 
     // If the voicingManager starts speaking an Utterance for a ReadingBLock, set the readingBlockFocusProperty and
     // add listeners to clear it when the Node is removed or becomes invisible
-    voicingManager.startSpeakingEmitter.addListener( ( text, utterance ) => {
+    // @private
+    this.startSpeakingListener = ( text, utterance ) => {
       this.readingBlockFocusProperty.value = utterance instanceof ReadingBlockUtterance ? utterance.readingBlockFocus : null;
-    } );
+    };
+    voicingManager.startSpeakingEmitter.addListener( this.startSpeakingListener );
 
     // Whenever the voicingManager stops speaking an utterance for the ReadingBlock that has focus, clear it
-    voicingManager.endSpeakingEmitter.addListener( ( text, utterance ) => {
+    // @private
+    this.endSpeakingListener = ( text, utterance ) => {
       if ( utterance instanceof ReadingBlockUtterance && this.readingBlockFocusProperty.value ) {
 
         // only clear the readingBlockFocusProperty if the ReadingBlockUtterance has a Focus that matches the
@@ -99,7 +102,8 @@ class FocusManager {
           this.readingBlockFocusProperty.value = null;
         }
       }
-    } );
+    };
+    voicingManager.endSpeakingEmitter.addListener( this.endSpeakingListener );
 
     //-----------------------------------------------------------------------------------------------------------------
     // The following section manages control of pointerFocusProperty - pointerFocusProperty is set with a Focus
@@ -122,6 +126,9 @@ class FocusManager {
   dispose() {
     this.readingBlockFocusController.dispose();
     this.pointerFocusDisplayedController.dispose();
+    this.pointerHighlightsVisibleProperty.dispose();
+    voicingManager.startSpeakingEmitter.removeListener( this.startSpeakingListener );
+    voicingManager.endSpeakingEmitter.removeListener( this.endSpeakingListener );
   }
 
   /**

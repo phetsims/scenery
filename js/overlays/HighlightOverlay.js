@@ -201,6 +201,8 @@ class HighlightOverlay {
 
     this.display.focusManager.pointerFocusProperty.unlink( this.pointerFocusListener );
     this.display.focusManager.readingBlockFocusProperty.unlink( this.readingBlockFocusListener );
+
+    this.focusDisplay.dispose();
   }
 
   /**
