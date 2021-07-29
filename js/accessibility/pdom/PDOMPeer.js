@@ -573,6 +573,8 @@ class PDOMPeer {
   }
 
   /**
+   * Add the provided className to the element's classList.
+   *
    * @public
    * @param {string} className
    * @param {Object} [options]
@@ -590,7 +592,9 @@ class PDOMPeer {
   }
 
   /**
+   * Remove the specified className from the element.
    * @public
+   *
    * @param {string} className
    * @param {Object} [options]
    */

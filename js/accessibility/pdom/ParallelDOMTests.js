@@ -23,6 +23,8 @@ const TEST_LABEL_HTML = '<strong>I ROCK as a LABEL</strong>';
 const TEST_LABEL_HTML_2 = '<strong>I ROCK as a LABEL 2</strong>';
 const TEST_DESCRIPTION_HTML = '<strong>I ROCK as a DESCRIPTION</strong>';
 const TEST_DESCRIPTION_HTML_2 = '<strong>I ROCK as a DESCRIPTION 2</strong>';
+const TEST_CLASS_ONE = 'test-class-one';
+const TEST_CLASS_TWO = 'test-class-two';
 
 // These should manually match the defaults in the ParallelDOM.js trait
 const DEFAULT_LABEL_TAG_NAME = PDOMUtils.DEFAULT_LABEL_TAG_NAME;
@@ -925,6 +927,31 @@ QUnit.test( 'ParallelDOM setters/getters', assert => {
   a1Element = getPrimarySiblingElementByNode( a1 );
   assert.ok( a1Element.hidden, true, 'hidden set as Property' );
   assert.ok( a1Element.getAttribute( 'hidden' ) === '', 'hidden should not be set as attribute' );
+
+
+  // test setting and removing PDOM classes
+  a1.setPDOMClass( TEST_CLASS_ONE );
+  assert.ok( getPrimarySiblingElementByNode( a1 ).classList.contains( TEST_CLASS_ONE ), 'TEST_CLASS_ONE missing from classList' );
+
+  // two classes
+  a1.setPDOMClass( TEST_CLASS_TWO );
+  a1Element = getPrimarySiblingElementByNode( a1 );
+  assert.ok( a1Element.classList.contains( TEST_CLASS_ONE ) && a1Element.classList.contains( TEST_CLASS_ONE ), 'One of the classes missing from classList' );
+
+  // modify the Node in a way that would cause a full redraw, make sure classes still exist
+  a1.tagName = 'button';
+  a1Element = getPrimarySiblingElementByNode( a1 );
+  assert.ok( a1Element.classList.contains( TEST_CLASS_ONE ) && a1Element.classList.contains( TEST_CLASS_ONE ), 'One of the classes missing from classList after changing tagName' );
+
+  // remove them one at a time
+  a1.removePDOMClass( TEST_CLASS_ONE );
+  a1Element = getPrimarySiblingElementByNode( a1 );
+  assert.ok( !a1Element.classList.contains( TEST_CLASS_ONE ), 'TEST_CLASS_ONE should be removed from classList' );
+  assert.ok( a1Element.classList.contains( TEST_CLASS_TWO ), 'TEST_CLASS_TWO should still be in classList' );
+
+  a1.removePDOMClass( TEST_CLASS_TWO );
+  a1Element = getPrimarySiblingElementByNode( a1 );
+  assert.ok( !a1Element.classList.contains( TEST_CLASS_ONE ) && !a1Element.classList.contains( TEST_CLASS_ONE ), 'classList should not contain any added classes' );
 
   pdomAuditRootNode( a1 );
 
