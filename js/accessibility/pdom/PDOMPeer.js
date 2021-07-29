@@ -259,6 +259,9 @@ class PDOMPeer {
     // update all attributes for the peer, should cover aria-label, role, and others
     this.onAttributeChange( options );
 
+    // update all classes for the peer
+    this.onClassChange( options );
+
     // update input value attribute for the peer
     this.onInputValueChange();
 
@@ -421,6 +424,19 @@ class PDOMPeer {
   }
 
   /**
+   * Set all classes onto the peer elements from the model's stored data objects
+   * @private
+   *
+   * @param {Object} [pdomOptions]
+   */
+  onClassChange( pdomOptions ) {
+    for ( let i = 0; i < this.node.pdomClasses.length; i++ ) {
+      const dataObject = this.node.pdomClasses[ i ];
+      this.setClassToElement( dataObject.className, dataObject.options );
+    }
+  }
+
+  /**
    * Set the input value on the peer's primary sibling element. The value attribute must be set as a Property to be
    * registered correctly by an assistive device. If null, the attribute is removed so that we don't clutter the DOM
    * with value="null" attributes.
@@ -554,6 +570,40 @@ class PDOMPeer {
     this._labelSibling && this._labelSibling.removeAttribute( attribute );
     this._descriptionSibling && this._descriptionSibling.removeAttribute( attribute );
     this._containerParent && this._containerParent.removeAttribute( attribute );
+  }
+
+  /**
+   * @public
+   * @param {string} className
+   * @param {Object} [options]
+   */
+  setClassToElement( className, options ) {
+    assert && assert( typeof className === 'string' );
+
+    options = merge( {
+
+      // Name of the element who we are adding the class to, see this.getElementName() for valid values
+      elementName: PRIMARY_SIBLING
+    }, options );
+
+    this.getElementByName( options.elementName ).classList.add( className );
+  }
+
+  /**
+   * @public
+   * @param {string} className
+   * @param {Object} [options]
+   */
+  removeClassFromElement( className, options ) {
+    assert && assert( typeof className === 'string' );
+
+    options = merge( {
+
+      // Name of the element who we are removing the class from, see this.getElementName() for valid values
+      elementName: PRIMARY_SIBLING
+    }, options );
+
+    this.getElementByName( options.elementName ).classList.remove( className );
   }
 
   /**

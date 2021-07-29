@@ -302,6 +302,10 @@ const ParallelDOM = {
         // form { attribute:{string}, value:{*}, namespace:{string|null} }
         this._pdomAttributes = [];
 
+        // @private {Array.<Object>} - Collection of class attributes that are applied to the node's DOM element.
+        // Objects have the form { className:{string}, options:{*} }
+        this._pdomClasses = [];
+
         // @private {string|null} - the label content for this node's DOM element.  There are multiple ways that a label
         // can be associated with a node's dom element, see setLabelContent() for more documentation
         this._labelContent = null;
@@ -2457,6 +2461,72 @@ const ParallelDOM = {
         return attributeFound;
       },
 
+      /**
+       * Set the PDOM class for
+       * @param className
+       * @param options
+       */
+      setPDOMClass( className, options ) {
+        assert && assert( typeof className === 'string' );
+
+        options = merge( {
+          elementName: PDOMPeer.PRIMARY_SIBLING
+        }, options );
+
+        // if we already have the provided className set to the sibling, do nothing
+        for ( let i = 0; i < this._pdomClasses.length; i++ ) {
+          const currentClass = this._pdomClasses[ i ];
+          if ( currentClass.className === className && currentClass.options.elementName === options.elementName ) {
+            return;
+          }
+        }
+
+        this._pdomClasses.push( { className: className, options: options } );
+
+        for ( let j = 0; j < this._pdomInstances.length; j++ ) {
+          const peer = this._pdomInstances[ j ].peer;
+          peer.setClassToElement( className, options );
+        }
+      },
+
+      /**
+       * Remove a class from the classList of one of the elements for this Node.
+       * @param {string} className
+       * @param {Object} [options]
+       */
+      removePDOMClass( className, options ) {
+        assert && assert( typeof className === 'string' );
+
+        options = merge( {
+          elementName: PDOMPeer.PRIMARY_SIBLING // see PDOMPeer.getElementName() for valid values, default to the primary sibling
+        } );
+
+        let classRemoved = false;
+        for ( let i = 0; i < this._pdomClasses.length; i++ ) {
+          if ( this._pdomClasses[ i ].className === className &&
+               this._pdomClasses[ i ].options.elementName === options.elementName ) {
+            this._pdomClasses.splice( i, 1 );
+            classRemoved = true;
+          }
+        }
+        assert && assert( classRemoved, `Node does not have pdom attribute ${className}` );
+
+        for ( let j = 0; j < this._pdomClasses.length; j++ ) {
+          const peer = this.pdomClasses[ j ].peer;
+          peer.removeClassFromElement( className, options );
+        }
+      },
+
+      /**
+       * Get the list of classes assigned to PDOM elements for this Node.
+       * @public
+       *
+       * @returns {Array.<Object>} - the list of class objects, see definition of this._pdomClasses
+       */
+      getPDOMClasses() {
+        return this._pdomClasses.slice( 0 ); // defensive copy
+      },
+      get pdomClasses() { return this.getPDOMClasses(); },
 
       /**
        * Make the DOM element explicitly focusable with a tab index. Native HTML form elements will generally be in

@@ -17,6 +17,7 @@ import SceneryStyle from '../../util/SceneryStyle.js';
 // constants
 const SIBLING_CLASS_NAME = 'a11y-pdom-element';
 const ROOT_CLASS_NAME = 'a11y-pdom-root';
+const LIST_ITEM_CLASS_NAME = 'a11y-pdom-list-item';
 
 // All elements that use PDOMUtils.createElement should have this style. The only exception is the root of
 // the PDOM, which should use root class attributes instead.
@@ -81,9 +82,19 @@ SceneryStyle.addRule( `.${ROOT_CLASS_NAME
                       '}'
 );
 
+SceneryStyle.addRule( `.${LIST_ITEM_CLASS_NAME
+                      }{` +
+
+                      // removing list styling prevents a VoiceOver behavior where 'bullet' is read in a confusing way.
+                      // Add the LIST_ITEM_CLASS_NAME class with setPDOMClass() to Nodes represented with 'li'
+                      // siblings to prevent this. See https://github.com/phetsims/a11y-research/issues/158.
+                      'list-style: none;'
+);
+
 const PDOMSiblingStyle = {
   SIBLING_CLASS_NAME: SIBLING_CLASS_NAME,
-  ROOT_CLASS_NAME: ROOT_CLASS_NAME
+  ROOT_CLASS_NAME: ROOT_CLASS_NAME,
+  LIST_ITEM_CLASS_NAME: LIST_ITEM_CLASS_NAME
 };
 
 scenery.register( 'PDOMSiblingStyle', PDOMSiblingStyle );
