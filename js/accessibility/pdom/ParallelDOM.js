@@ -2462,9 +2462,13 @@ const ParallelDOM = {
       },
 
       /**
-       * Set the PDOM class for
-       * @param className
-       * @param options
+       * Add the class to the PDOM element's classList. The PDOM is generally invisible,
+       * but some styling ocasionally has an impact on semantics so it is necessary to set styles.
+       * Add a class with this function and define the style in stylesheets (likely SceneryStyle).
+       * @public
+       *
+       * @param {string} className
+       * @param {Object} [options]
        */
       setPDOMClass( className, options ) {
         assert && assert( typeof className === 'string' );
@@ -2491,6 +2495,8 @@ const ParallelDOM = {
 
       /**
        * Remove a class from the classList of one of the elements for this Node.
+       * @public
+       *
        * @param {string} className
        * @param {Object} [options]
        */
@@ -2499,12 +2505,12 @@ const ParallelDOM = {
 
         options = merge( {
           elementName: PDOMPeer.PRIMARY_SIBLING // see PDOMPeer.getElementName() for valid values, default to the primary sibling
-        } );
+        }, options );
 
         let classRemoved = false;
         for ( let i = 0; i < this._pdomClasses.length; i++ ) {
           if ( this._pdomClasses[ i ].className === className &&
-               this._pdomClasses[ i ].options.elementName === options.elementName ) {
+             this._pdomClasses[ i ].options.elementName === options.elementName ) {
             this._pdomClasses.splice( i, 1 );
             classRemoved = true;
           }
@@ -2512,7 +2518,7 @@ const ParallelDOM = {
         assert && assert( classRemoved, `Node does not have pdom attribute ${className}` );
 
         for ( let j = 0; j < this._pdomClasses.length; j++ ) {
-          const peer = this.pdomClasses[ j ].peer;
+          const peer = this.pdomInstances[ j ].peer;
           peer.removeClassFromElement( className, options );
         }
       },
