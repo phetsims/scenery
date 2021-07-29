@@ -2463,7 +2463,7 @@ const ParallelDOM = {
 
       /**
        * Add the class to the PDOM element's classList. The PDOM is generally invisible,
-       * but some styling ocasionally has an impact on semantics so it is necessary to set styles.
+       * but some styling occasionally has an impact on semantics so it is necessary to set styles.
        * Add a class with this function and define the style in stylesheets (likely SceneryStyle).
        * @public
        *

@@ -260,7 +260,7 @@ class PDOMPeer {
     this.onAttributeChange( options );
 
     // update all classes for the peer
-    this.onClassChange( options );
+    this.onClassChange();
 
     // update input value attribute for the peer
     this.onInputValueChange();
@@ -426,10 +426,8 @@ class PDOMPeer {
   /**
    * Set all classes onto the peer elements from the model's stored data objects
    * @private
-   *
-   * @param {Object} [pdomOptions]
    */
-  onClassChange( pdomOptions ) {
+  onClassChange() {
     for ( let i = 0; i < this.node.pdomClasses.length; i++ ) {
       const dataObject = this.node.pdomClasses[ i ];
       this.setClassToElement( dataObject.className, dataObject.options );
