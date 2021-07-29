@@ -159,7 +159,7 @@ class PDOMPeer {
       // @private {HTMLElement} - The main element associated with this peer. If focusable, this is the element that gets
       // the focus. It also will contain any children.
       this._primarySibling = options.primarySibling;
-      this._primarySibling.className = PDOMSiblingStyle.ROOT_CLASS_NAME;
+      this._primarySibling.classList.add( PDOMSiblingStyle.ROOT_CLASS_NAME );
     }
 
     return this;

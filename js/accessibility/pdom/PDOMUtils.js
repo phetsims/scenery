@@ -520,7 +520,7 @@ const PDOMUtils = {
     PDOMUtils.overrideFocusWithTabIndex( domElement, focusable );
 
     // gives this element styling from SceneryStyle
-    domElement.className = PDOMSiblingStyle.SIBLING_CLASS_NAME;
+    domElement.classList.add( PDOMSiblingStyle.SIBLING_CLASS_NAME );
 
     return domElement;
   },
