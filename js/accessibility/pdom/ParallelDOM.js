@@ -2510,7 +2510,7 @@ const ParallelDOM = {
         let classRemoved = false;
         for ( let i = 0; i < this._pdomClasses.length; i++ ) {
           if ( this._pdomClasses[ i ].className === className &&
-             this._pdomClasses[ i ].options.elementName === options.elementName ) {
+               this._pdomClasses[ i ].options.elementName === options.elementName ) {
             this._pdomClasses.splice( i, 1 );
             classRemoved = true;
           }
@@ -2674,7 +2674,7 @@ const ParallelDOM = {
 
         for ( let i = 0; i < connectedDisplays.length; i++ ) {
           const display = connectedDisplays[ i ];
-          if ( display.utteranceQueue ) {
+          if ( display.isAccessible() ) {
             display.utteranceQueue.addToBack( utterance );
           }
         }
