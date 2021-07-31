@@ -2554,9 +2554,9 @@ class Node extends PhetioObject {
    * setTranslation( x, y )
    * setTranslation( vector )
    *
-   * @param {number} x - X translation
-   * @param {number} y - Y translation
-   * @param {Vector2} vector - Vector with x/y translation in components
+   * @param {number|Vector2} a - X translation
+   * @param {number} [b] - Y translation
+   * @param {Vector2} - Vector with x/y translation in components
    * @returns {Node} - Returns 'this' reference, for chaining
    */
   setTranslation( a, b ) {
