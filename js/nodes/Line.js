@@ -394,10 +394,10 @@ class Line extends Path {
    * @private
    */
   invalidateLine() {
-    assert && assert( isFinite( this._x1 ), `A rectangle needs to have a finite x1 (${this._x1})` );
-    assert && assert( isFinite( this._y1 ), `A rectangle needs to have a finite y1 (${this._y1})` );
-    assert && assert( isFinite( this._x2 ), `A rectangle needs to have a finite x2 (${this._x2})` );
-    assert && assert( isFinite( this._y2 ), `A rectangle needs to have a finite y2 (${this._y2})` );
+    assert && assert( isFinite( this._x1 ), `A line needs to have a finite x1 (${this._x1})` );
+    assert && assert( isFinite( this._y1 ), `A line needs to have a finite y1 (${this._y1})` );
+    assert && assert( isFinite( this._x2 ), `A line needs to have a finite x2 (${this._x2})` );
+    assert && assert( isFinite( this._y2 ), `A line needs to have a finite y2 (${this._y2})` );
 
     // sets our 'cache' to null, so we don't always have to recompute our shape
     this._shape = null;
