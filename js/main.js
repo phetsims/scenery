@@ -91,6 +91,7 @@ import './input/Pointer.js';
 import './input/SceneryEvent.js';
 import './input/SimpleDragHandler.js';
 import './input/Touch.js';
+import './layout/AlignPropertyBox.js';
 import './layout/Divider.js';
 import './layout/FlowBox.js';
 import './layout/FlowCell.js';
