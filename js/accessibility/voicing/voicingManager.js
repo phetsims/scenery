@@ -15,6 +15,7 @@ import Emitter from '../../../../axon/js/Emitter.js';
 import EnabledComponent from '../../../../axon/js/EnabledComponent.js';
 import NumberProperty from '../../../../axon/js/NumberProperty.js';
 import Property from '../../../../axon/js/Property.js';
+import stepTimer from '../../../../axon/js/stepTimer.js';
 import Range from '../../../../dot/js/Range.js';
 import merge from '../../../../phet-core/js/merge.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
@@ -109,6 +110,13 @@ class VoicingManager extends EnabledComponent {
     // clearing this, though it is a bit tricky since we don't have a way to know
     // when we are done with an utterance - see #215
     this.utterances = [];
+
+    // @private {function[]} - Array of functions that are added to the stepTimer to request speech with
+    // SpeechSynthesis. It was discovered that requesting speech behind a short delay greatly improves the behavior
+    // of SpeechSynthesis in Safari. But when all utterances are cleared with cancel we need a reference
+    // to added listeners so they can be removed from the stepTimer.
+    // See https://github.com/phetsims/john-travoltage/issues/435.
+    this.stepTimerListeners = [];
   }
 
   /**
@@ -269,7 +277,19 @@ class VoicingManager extends EnabledComponent {
       // but the error event does. In this case signify that speaking has ended.
       speechSynthUtterance.addEventListener( 'error', endListener );
 
-      this.getSynth().speak( speechSynthUtterance );
+      // In Safari, the `start` and `end` listener does not fire consistently, especially after interruption with
+      // cancel. But speaking behind a timeout improves the behavior significantly. A reference to the listener
+      // is saved so that it can be removed if we cancel speech. timeout of 250 ms was determined with testing
+      // to be a good value to use. Values less than 250 broke the workaround, while larger values feel too
+      // sluggish. See https://github.com/phetsims/john-travoltage/issues/435
+      const stepTimerListener = stepTimer.setTimeout( () => {
+        this.getSynth().speak( speechSynthUtterance );
+
+        // remove from list after speaking
+        const index = this.stepTimerListeners.indexOf( stepTimerListener );
+        this.stepTimerListeners.splice( index, 1 );
+      }, 250 );
+      this.stepTimerListeners.push( stepTimerListener );
     }
   }
 
@@ -335,6 +355,12 @@ class VoicingManager extends EnabledComponent {
   cancel() {
     if ( this.initialized ) {
       this.getSynth().cancel();
+
+      // iterate over a copy of the stepTimerListeners because we will remove elements as we go through
+      this.stepTimerListeners.slice().forEach( ( listener, index ) => {
+        stepTimer.clearTimeout( listener );
+        this.stepTimerListeners.splice( index, 1 );
+      } );
 
       // cancel clears all utterances from the internal SpeechSynthsis queue so we should
       // clear all of our references as well
