@@ -19,7 +19,7 @@ class Divider extends Line {
       layoutOptions: {
         align: 'stretch'
       },
-      stroke: 'rgb(150,150,150)'
+      stroke: 'rgb(100,100,100)'
     }, options );
 
     super( options );
