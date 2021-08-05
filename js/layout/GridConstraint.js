@@ -17,6 +17,7 @@ import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
 import GridCell from './GridCell.js';
 import GridConfigurable from './GridConfigurable.js';
+import GridLine from './GridLine.js';
 import LayoutConstraint from './LayoutConstraint.js';
 
 const GRID_CONSTRAINT_OPTION_KEYS = [
@@ -48,6 +49,12 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
     // @private {Set.<GridCell>}
     this.cells = new Set();
 
+    // @private {Array.<GridCell>}
+    this.displayedCells = [];
+
+    // @private {OrientationPair.<Map.<number,GridCell>>} - Looked up by index
+    this.displayedLines = new OrientationPair( new Map(), new Map() );
+
     // @private {boolean}
     this._excludeInvisible = true;
 
@@ -56,7 +63,9 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
 
     // @public {Property.<Bounds2>} - Reports out the used layout bounds (may be larger than actual bounds, since it
     // will include margins, etc.)
-    this.layoutBoundsProperty = new Property( Bounds2.NOTHING );
+    this.layoutBoundsProperty = new Property( Bounds2.NOTHING, {
+      useDeepEquality: true
+    } );
 
     this.preferredWidthProperty = options.preferredWidthProperty;
     this.preferredHeightProperty = options.preferredHeightProperty;
@@ -87,9 +96,13 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
       // TODO: Also don't lay out disconnected nodes!!!!
       return cell.node.bounds.isValid() && ( !this._excludeInvisible || cell.node.visible );
     } );
+    this.displayedCells = cells;
 
     if ( !cells.length ) {
       this.layoutBoundsProperty.value = Bounds2.NOTHING;
+
+      // Synchronize our displayedLines, if it's used for display
+      this.displayedLines.forEach( map => map.clear() );
       return;
     }
 
@@ -103,21 +116,19 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
       const minField = `min${capLetter}`;
       const maxField = `max${capLetter}`;
 
+      // {Map.<index:number,GridLine>
+      const lineMap = this.displayedLines.get( orientation );
+
+      // Clear out the lineMap
+      lineMap.forEach( line => line.freeToPool() );
+      lineMap.clear();
+
       const lineIndices = _.sortedUniq( _.sortBy( _.flatten( cells.map( cell => cell.getIndices( orientation ) ) ) ) );
-      const lineMap = new Map(); // index => line
       const lines = lineIndices.map( index => {
         const subCells = _.filter( cells, cell => cell.containsIndex( orientation, index ) );
 
-        // TODO: poolable type?
-        const line = {
-          index: index,
-          cells: subCells,
-          grow: _.max( subCells.map( cell => cell.withDefault( orientation === Orientation.HORIZONTAL ? 'xGrow' : 'yGrow', this ) ) ),
-          min: 0,
-          max: Number.POSITIVE_INFINITY,
-          size: 0,
-          position: 0
-        };
+        const grow = _.max( subCells.map( cell => cell.withDefault( orientation === Orientation.HORIZONTAL ? 'xGrow' : 'yGrow', this ) ) );
+        const line = GridLine.createFromPool( index, subCells, grow );
         lineMap.set( index, line );
 
         return line;

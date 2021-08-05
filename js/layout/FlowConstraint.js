@@ -66,7 +66,9 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
 
     // @public {Property.<Bounds2>} - Reports out the used layout bounds (may be larger than actual bounds, since it
     // will include margins, etc.)
-    this.layoutBoundsProperty = new Property( Bounds2.NOTHING );
+    this.layoutBoundsProperty = new Property( Bounds2.NOTHING, {
+      useDeepEquality: true
+    } );
 
     this.preferredWidthProperty = options.preferredWidthProperty;
     this.preferredHeightProperty = options.preferredHeightProperty;
