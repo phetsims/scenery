@@ -26,6 +26,14 @@ const GRID_CONSTRAINT_OPTION_KEYS = [
   'xSpacing',
   'ySpacing'
 ].concat( GridConfigurable.GRID_CONFIGURABLE_OPTION_KEYS );
+const boundsMinMap = {
+  [ Orientation.HORIZONTAL ]: 'minX',
+  [ Orientation.VERTICAL ]: 'minY'
+};
+const boundsMaxMap = {
+  [ Orientation.HORIZONTAL ]: 'maxX',
+  [ Orientation.VERTICAL ]: 'maxY'
+};
 
 // TODO: Have LayoutBox use this when we're ready
 class GridConstraint extends GridConfigurable( LayoutConstraint ) {
@@ -172,19 +180,19 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
       const size = Math.max( minSizeAndSpacing, preferredSizes.get( orientation ) || 0 );
       let sizeRemaining = size - minSizeAndSpacing;
       let growableLines;
-      while ( sizeRemaining > 1e-7 && ( growableLines = lines.filter( column => {
-        return column.grow > 0 && column.size < column.max - 1e-7;
+      while ( sizeRemaining > 1e-7 && ( growableLines = lines.filter( line => {
+        return line.grow > 0 && line.size < line.max - 1e-7;
       } ) ).length ) {
-        const totalGrow = _.sum( growableLines.map( column => column.grow ) );
+        const totalGrow = _.sum( growableLines.map( line => line.grow ) );
         const amountToGrow = Math.min(
-          _.min( growableLines.map( column => ( column.max - column.size ) / column.grow ) ),
+          _.min( growableLines.map( line => ( line.max - line.size ) / line.grow ) ),
           sizeRemaining / totalGrow
         );
 
         assert && assert( amountToGrow > 1e-11 );
 
-        growableLines.forEach( column => {
-          column.size += amountToGrow * column.grow;
+        growableLines.forEach( line => {
+          line.size += amountToGrow * line.grow;
         } );
         sizeRemaining -= amountToGrow * totalGrow;
       }
@@ -192,8 +200,8 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
       // Layout
       layoutBounds[ minField ] = 0;
       layoutBounds[ maxField ] = size;
-      lines.forEach( ( column, arrayIndex ) => {
-        column.position = _.sum( lines.slice( 0, arrayIndex ).map( column => column.size ) ) + _.sum( lineSpacings.slice( 0, column.index ) );
+      lines.forEach( ( line, arrayIndex ) => {
+        line.position = _.sum( lines.slice( 0, arrayIndex ).map( line => line.size ) ) + _.sum( lineSpacings.slice( 0, line.index ) );
       } );
       cells.forEach( cell => {
         const cellIndexPosition = cell.position.get( orientation );
@@ -218,6 +226,10 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
         const cellBounds = cell.getCellBounds( this );
         assert && assert( cellBounds.isFinite() );
 
+        cell.lastAvailableBounds[ boundsMinMap[ orientation ] ] = cellPosition;
+        cell.lastAvailableBounds[ boundsMaxMap[ orientation ] ] = cellPosition + cellAvailableSize;
+        cell.lastUsedBounds.set( cellBounds );
+
         layoutBounds[ minField ] = Math.min( layoutBounds[ minField ], cellBounds[ minField ] );
         layoutBounds[ maxField ] = Math.max( layoutBounds[ maxField ], cellBounds[ maxField ] );
       } );
@@ -225,6 +237,8 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
 
     // We're taking up these layout bounds (nodes could use them for localBounds)
     this.layoutBoundsProperty.value = layoutBounds;
+
+    this.finishedLayoutEmitter.emit();
   }
 
   /**

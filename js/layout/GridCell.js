@@ -6,6 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import Bounds2 from '../../../dot/js/Bounds2.js';
 import Utils from '../../../dot/js/Utils.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../phet-core/js/OrientationPair.js';
@@ -52,6 +53,12 @@ class GridCell extends GridConfigurable( Object ) {
     // @public {OrientationPair.<number>} - These are only set initially, and ignored for the future
     this.position = new OrientationPair( options.x, options.y );
     this.size = new OrientationPair( options.width, options.height );
+
+    // @public {Bounds2} - Set to be the bounds available for the cell
+    this.lastAvailableBounds = Bounds2.NOTHING.copy();
+
+    // @public {Bounds2} - Set to be the bounds used by the cell
+    this.lastUsedBounds = Bounds2.NOTHING.copy();
 
     // @private {Node}
     this._node = node;
@@ -162,8 +169,10 @@ class GridCell extends GridConfigurable( Object ) {
       }
     }
     else {
-      const extraSpace = availableSize - this.node[ orientation.size ];
-      value += this.getMinMargin( orientation, defaultConfig ) + extraSpace * padRatioMap[ align ];
+      const minMargin = this.getMinMargin( orientation, defaultConfig );
+      const maxMargin = this.getMaxMargin( orientation, defaultConfig );
+      const extraSpace = availableSize - this.node[ orientation.size ] - minMargin - maxMargin;
+      value += minMargin + extraSpace * padRatioMap[ align ];
 
       if ( Math.abs( this.node[ orientation.minSide ] - value ) > CHANGE_POSITION_THRESHOLD ) {
         // TODO: coordinate transform handling, to our ancestorNode!!!!!

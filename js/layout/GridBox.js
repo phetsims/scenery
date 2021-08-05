@@ -482,6 +482,16 @@ class GridBox extends WidthSizable( HeightSizable( Node ) ) {
   set maxContentHeight( value ) {
     this._constraint.maxContentHeight = value;
   }
+
+  /**
+   * Manual access to the constraint
+   * @public
+   *
+   * @returns {GridConstraint}
+   */
+  get constraint() {
+    return this._constraint;
+  }
 }
 
 /**

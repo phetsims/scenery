@@ -6,6 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
 import LayoutProxy from './LayoutProxy.js';
@@ -31,6 +32,9 @@ class LayoutConstraint {
 
     // @private {Set.<Node>}
     this._listenedNodes = new Set();
+
+    // @public {TinyEmitter}
+    this.finishedLayoutEmitter = new TinyEmitter();
   }
 
   /**

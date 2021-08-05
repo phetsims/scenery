@@ -60,6 +60,8 @@ class ManualConstraint extends LayoutConstraint {
     for ( let i = 0; i < proxies.length; i++ ) {
       proxies[ i ].dispose();
     }
+
+    this.finishedLayoutEmitter.emit();
   }
 
   /**

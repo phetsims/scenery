@@ -333,6 +333,8 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
       maxOppositeCoordinate,
       maxCoordinate
     );
+
+    this.finishedLayoutEmitter.emit();
   }
 
   /**
