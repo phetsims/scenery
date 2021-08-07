@@ -2667,6 +2667,7 @@ const ParallelDOM = {
       /**
        * Alert on all interactive description utteranceQueues located on each connected Display (see Node.getConnectedDisplays)
        * @param {AlertableDef} utterance
+       * @public
        */
       alertDescriptionUtterance: function( utterance ) {
 
@@ -2675,7 +2676,26 @@ const ParallelDOM = {
         for ( let i = 0; i < connectedDisplays.length; i++ ) {
           const display = connectedDisplays[ i ];
           if ( display.isAccessible() ) {
+
+            // Don't use `forEachUtterance` to prevent creating a closure for each usage of this function
             display.utteranceQueue.addToBack( utterance );
+          }
+        }
+      },
+
+      /**
+       * Apply a callback on each utteranceQueue that this Node has a connection to (via Display). Note that only
+       * accessible Displays have utteranceQueues that this funciton will interface with.
+       * @param {function(UtteranceQueue):} callback
+       * @public
+       */
+      forEachUtteranceQueue: function( callback ) {
+        const connectedDisplays = this.getConnectedDisplays();
+
+        for ( let i = 0; i < connectedDisplays.length; i++ ) {
+          const display = connectedDisplays[ i ];
+          if ( display.isAccessible() ) {
+            callback( display.utteranceQueue );
           }
         }
       },
