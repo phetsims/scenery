@@ -65,6 +65,7 @@ import FocusManager from '../accessibility/FocusManager.js';
 import globalKeyStateTracker from '../accessibility/globalKeyStateTracker.js';
 import KeyboardUtils from '../accessibility/KeyboardUtils.js';
 import PDOMInstance from '../accessibility/pdom/PDOMInstance.js';
+import PDOMSiblingStyle from '../accessibility/pdom/PDOMSiblingStyle.js';
 import PDOMTree from '../accessibility/pdom/PDOMTree.js';
 import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
 import Input from '../input/Input.js';
@@ -1971,6 +1972,9 @@ class Display {
     const doc = document.implementation.createHTMLDocument( '' );
     doc.documentElement.innerHTML = this.domElement.outerHTML;
     doc.documentElement.setAttribute( 'xmlns', doc.documentElement.namespaceURI );
+
+    // Hide the PDOM
+    doc.documentElement.appendChild( document.createElement( 'style' ) ).innerHTML = `.${PDOMSiblingStyle.ROOT_CLASS_NAME} { display:none; } `;
 
     // Replace each <canvas> with an <img> that has src=canvas.toDataURL() and the same style
     let displayCanvases = doc.documentElement.getElementsByTagName( 'canvas' );
