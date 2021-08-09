@@ -160,6 +160,14 @@ class PDOMPeer {
       // the focus. It also will contain any children.
       this._primarySibling = options.primarySibling;
       this._primarySibling.classList.add( PDOMSiblingStyle.ROOT_CLASS_NAME );
+
+      // Stop blocked events from bubbling past the root of the PDOM so that scenery does
+      // not dispatch them in Input.js.
+      PDOMUtils.BLOCKED_DOM_EVENTS.forEach( eventType => {
+        this._primarySibling.addEventListener( eventType, event => {
+          event.stopPropagation();
+        } );
+      } );
     }
 
     return this;

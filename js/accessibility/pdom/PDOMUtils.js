@@ -65,6 +65,36 @@ const ELEMENTS_WITHOUT_CLOSING_TAG = [ INPUT_TAG ];
 // see Input.PDOM_EVENT_TYPES
 const DOM_EVENTS = [ 'focusin', 'focusout', 'input', 'change', 'click', 'keydown', 'keyup' ];
 
+// A collection of DOM events which should be blocked from reaching the scenery Display div
+// if they are targeted at an ancestor of the PDOM. Some screen readers try to send fake
+// mouse/touch/pointer events to elements but for the purposes of Accessibility we only
+// want to respond to DOM_EVENTS.
+const BLOCKED_DOM_EVENTS = [
+
+  // touch
+  'touchstart',
+  'touchend',
+  'touchmove',
+  'touchcancel',
+
+  // mouse
+  'mousedown',
+  'mouseup',
+  'mousemove',
+  'mouseover',
+  'mouseout',
+
+  // pointer
+  'pointerdown',
+  'pointerup',
+  'pointermove',
+  'pointerover',
+  'pointerout',
+  'pointercancel',
+  'gotpointercapture',
+  'lostpointercapture'
+];
+
 const ARIA_LABELLEDBY = 'aria-labelledby';
 const ARIA_DESCRIBEDBY = 'aria-describedby';
 const ARIA_ACTIVE_DESCENDANT = 'aria-activedescendant';
@@ -589,6 +619,7 @@ const PDOMUtils = {
   INPUT_TYPES_THAT_SUPPORT_CHECKED: [ 'RADIO', 'CHECKBOX' ],
 
   DOM_EVENTS: DOM_EVENTS,
+  BLOCKED_DOM_EVENTS: BLOCKED_DOM_EVENTS,
 
   DATA_TRAIL_ID: DATA_TRAIL_ID,
 
