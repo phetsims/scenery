@@ -20,6 +20,9 @@ class Block extends Drawable {
    * @param {number} renderer
    */
   initialize( display, renderer ) {
+    assert && assert( !display._isDisposing, 'Should not create a block for a Display that is being disposed of' );
+    assert && assert( !display._isDisposed, 'Should not create a block for a disposed Display' );
+
     super.initialize( renderer );
 
     // @public {Display}

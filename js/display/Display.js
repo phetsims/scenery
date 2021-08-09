@@ -322,6 +322,10 @@ class Display {
     if ( assert ) {
       // @private @assertion-only {boolean} - Whether we are running the paint phase of updateDisplay() for this Display.
       this._isPainting = false;
+
+      // @public @assertion-only {boolean}
+      this._isDisposing = false; // Whether disposal has started (but not finished)
+      this._isDisposed = false; // Whether disposal has finished
     }
 
     this.applyCSSHacks();
@@ -2076,6 +2080,12 @@ class Display {
    * TODO: this dispose function is not complete.
    */
   dispose() {
+    if ( assert ) {
+      assert( !this._isDisposing );
+      assert( !this._isDisposed );
+
+      this._isDisposing = true;
+    }
 
     if ( this._input ) {
       this.detachEvents();
@@ -2098,6 +2108,11 @@ class Display {
     this.utteranceQueue && this.utteranceQueue.dispose();
 
     this.focusManager && this.focusManager.dispose();
+
+    if ( assert ) {
+      this._isDisposing = false;
+      this._isDisposed = true;
+    }
   }
 
   /**
