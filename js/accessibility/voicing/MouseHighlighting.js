@@ -184,7 +184,12 @@ const MouseHighlighting = {
           const displays = Object.values( this._displays );
           for ( let i = 0; i < displays.length; i++ ) {
             const display = displays[ i ];
-            display.focusManager.pointerFocusLockedProperty.set( true );
+
+            // pointer focus highlights are only shown if there are no PDOM highlights,
+            // so only lock in that case too
+            if ( !display.focusManager.pdomFocusHighlightsVisibleProperty.value ) {
+              display.focusManager.pointerFocusLockedProperty.set( true );
+            }
           }
 
           this.pointer = event.pointer;

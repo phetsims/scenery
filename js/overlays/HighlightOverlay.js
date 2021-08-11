@@ -561,12 +561,19 @@ class HighlightOverlay {
    * Called when the pointerFocusProperty changes. pointerFocusProperty will have the Trail to the
    * Node that composes Voicing and is under the Pointer. A highlight will appear around this Node if
    * voicing highlights are visible.
+   *
+   * As of 8/11/21 we also decided that Interactive Highlights should also never be shown while
+   * PDOM highlights are visible, to avoid confusing cases where the Interactive Highlight
+   * can appear while the DOM focus highlight is active and conveying information. In the future
+   * we might make it so that both can be visible at the same time, but that will require
+   * changing the look of one of the highlights so it is clear they are distinct.
    * @private
    *
    * @param {Focus} focus
    */
   onPointerFocusChange( focus ) {
-    if ( !this.display.focusManager.pointerFocusLockedProperty.value ) {
+    if ( !this.display.focusManager.pointerFocusLockedProperty.value &&
+         !this.display.focusManager.pdomFocusHighlightsVisibleProperty.value ) {
       const newTrail = ( focus && focus.display === this.display ) ? focus.trail : null;
 
       if ( this.hasHighlight() ) {

@@ -141,7 +141,7 @@ class FocusManager {
   static set pdomFocus( value ) {
     let previousFocus;
     if ( FocusManager.pdomFocusProperty.value ) {
-      previousFocus = FocusManager.focusedNode;
+      previousFocus = FocusManager.pdomFocusedNode;
     }
 
     FocusManager.pdomFocusProperty.value = value;
