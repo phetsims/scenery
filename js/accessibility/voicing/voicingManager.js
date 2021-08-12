@@ -19,22 +19,15 @@ import stepTimer from '../../../../axon/js/stepTimer.js';
 import Range from '../../../../dot/js/Range.js';
 import merge from '../../../../phet-core/js/merge.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
+import Announcer from '../../../../utterance-queue/js/Announcer.js';
 import Utterance from '../../../../utterance-queue/js/Utterance.js';
 import scenery from '../../scenery.js';
 import globalKeyStateTracker from '../globalKeyStateTracker.js';
 import KeyboardUtils from '../KeyboardUtils.js';
 
-class VoicingManager extends EnabledComponent {
+class VoicingManager extends Announcer {
   constructor() {
-
-    super( {
-
-      // initial value for the enabledProperty, false because speech should not happen until requested by user
-      enabled: false,
-
-      // phet-io
-      phetioEnabledPropertyInstrumented: false
-    } );
+    super();
 
     // @public {null|SpeechSynthesisVoice}
     this.voiceProperty = new Property( null );
@@ -56,6 +49,20 @@ class VoicingManager extends EnabledComponent {
     // @public - whether or not the synth is speaking - perhaps this should
     // replace the emitters above?
     this.speakingProperty = new BooleanProperty( false );
+
+    // @private - To get around multiple inheritance issues, create enabledProperty via composition instead, then create
+    // a reference on this component for the enabledProperty
+    this.enabledComponentImplementation = new EnabledComponent( {
+
+      // initial value for the enabledProperty, false because speech should not happen until requested by user
+      enabled: false,
+
+      // phet-io
+      phetioEnabledPropertyInstrumented: false
+    } );
+
+    // @public
+    this.enabledProperty = this.enabledComponentImplementation.enabledProperty;
 
     // @public {BooleanProperty} - Controls whether Voicing is enabled in a "main window" area of the application.
     // This supports the ability to disable Voicing for the important screen content of your application while keeping
@@ -192,6 +199,7 @@ class VoicingManager extends EnabledComponent {
   /**
    * Implements announce so the voicingManager can be a source of output for utteranceQueue.
    * @public
+   * @override
    *
    * @param {Utterance} utterance
    * @param {Object} [options]
