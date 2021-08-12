@@ -100,14 +100,6 @@ class VoicingManager extends Announcer {
     // cancelling behavior when it is time to speak the next utterance. See VoicingUtterance options.
     this.previousUtterance = null;
 
-    // @public {boolean} - a more interal way to disable speaking - the enabledProperty
-    // can be set by the user and is publicly observable for other things - but if
-    // you need to temporarily shut down speaking without changing that observable
-    // you can set onHold to true to prevent all speaking. Useful in cases like
-    // the ResetAllButton where you want to describe the reset without
-    // any of the other changing Properties in that interaction
-    this.onHold = false;
-
     // fixes a bug on Safari where the `start` and `end` Utterances don't fire! The
     // issue is (apparently) that Safari internally clears the reference to the
     // Utterance on speak which prevents it from firing these events at the right
@@ -239,7 +231,7 @@ class VoicingManager extends Announcer {
    *                               need to implement our own queing system.
    */
   speak( utterance, withCancel = true ) {
-    if ( this.initialized && this._canSpeakProperty.value && !this.onHold ) {
+    if ( this.initialized && this._canSpeakProperty.value ) {
       assert && assert( this.isSpeechSynthesisSupported(), 'trying to speak with speechSynthesis, but it is not supported on this platform' );
 
       // only cancel the previous alert if there is something new to speak
