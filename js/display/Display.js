@@ -2005,7 +2005,7 @@ class Display {
     };
 
     // Convert each <image>'s xlink:href so that it's a data URL with the relevant data, e.g.
-    // <image ... xlink:href="http://localhost:8080/scenery-phet/images/battery-D-cell.png?bust=1476308407988"/>
+    // <image ... xlink:href="http://localhost:8080/scenery-phet/images/batteryDCell.png?bust=1476308407988"/>
     // gets replaced with a data URL.
     // See https://github.com/phetsims/scenery/issues/573
     let replacedImages = 0; // Count how many images get replaced. We'll decrement with each finished image.
