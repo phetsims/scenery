@@ -2673,6 +2673,11 @@ const ParallelDOM = {
 
         const connectedDisplays = this.getConnectedDisplays();
 
+        // If you run into this assertion, talk to @jessegreenberg and @zepumph, because it is quite possible we would
+        // remove this assertion for your case.
+        assert && assert( connectedDisplays.length > 0,
+          'must be connected to a display to use UtteranceQueue features' );
+
         for ( let i = 0; i < connectedDisplays.length; i++ ) {
           const display = connectedDisplays[ i ];
           if ( display.isAccessible() ) {
@@ -2685,12 +2690,17 @@ const ParallelDOM = {
 
       /**
        * Apply a callback on each utteranceQueue that this Node has a connection to (via Display). Note that only
-       * accessible Displays have utteranceQueues that this funciton will interface with.
+       * accessible Displays have utteranceQueues that this function will interface with.
        * @param {function(UtteranceQueue):} callback
        * @public
        */
       forEachUtteranceQueue: function( callback ) {
         const connectedDisplays = this.getConnectedDisplays();
+
+        // If you run into this assertion, talk to @jessegreenberg and @zepumph, because it is quite possible we would
+        // remove this assertion for your case.
+        assert && assert( connectedDisplays.length > 0,
+          'must be connected to a display to use UtteranceQueue features' );
 
         for ( let i = 0; i < connectedDisplays.length; i++ ) {
           const display = connectedDisplays[ i ];
