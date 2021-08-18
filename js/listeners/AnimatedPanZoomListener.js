@@ -187,7 +187,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
     // @private - called by dispose
     this.disposeAnimatedPanZoomListener = () => {
-    boundGestureStartListener && window.removeEventListener( 'gesturestart', boundGestureStartListener );
+      boundGestureStartListener && window.removeEventListener( 'gesturestart', boundGestureStartListener );
       boundGestureChangeListener && window.removeEventListener( 'gestureChange', boundGestureChangeListener );
 
       FocusManager.pdomFocusProperty.unlink( displayFocusListener );
@@ -225,7 +225,9 @@ class AnimatedPanZoomListener extends PanZoomListener {
   down( event ) {
     PanZoomListener.prototype.down.call( this, event );
 
-    if ( this._dragBounds !== null ) {
+    // If the Pointer signifies the input is intended for dragging save a reference to the trail so we can support
+    // keeping the event target in view during the drag operation.
+    if ( this._dragBounds !== null && event.pointer.hasIntent( Pointer.Intent.DRAG ) ) {
       this._downTrail = event.trail;
       this._downInDragBounds = this._dragBounds.containsPoint( event.pointer.point );
     }
