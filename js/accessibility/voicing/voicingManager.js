@@ -38,6 +38,12 @@ class VoicingManager extends Announcer {
     // {NumberProperty} - controls the pitch of the synth
     this.voicePitchProperty = new NumberProperty( 1.0, { range: new Range( 0.5, 2 ) } );
 
+    // @private {boolean} - Indicates whether or not speech using SpeechSynthesis has been requested at least once.
+    // The first time speech is requested it must be done synchronously from user input with absolutely no delay.
+    // requestSpeech() uses a timeout to workaround browser bugs, but those cannot be used until after the first
+    // request for speech.
+    this.hasSpoken = false;
+
     // @public {Emitter} - emits events when the speaker starts/stops speaking, with the Utterance that is
     // either starting or stopping
     this.startSpeakingEmitter = new Emitter( { parameters: [ { valueType: 'string' }, { valueType: Utterance } ] } );
@@ -219,7 +225,8 @@ class VoicingManager extends Announcer {
   }
 
   /**
-   * Use speech synthesis to speak an utterance. No-op unless voicingManager is initialized.
+   * Use speech synthesis to speak an utterance. No-op unless voicingManager is initialized and enabled and
+   * other output controlling Properties are true (see speechAllowedProperty in initialize()).
    * @public
    *
    * @param {Utterance} utterance
@@ -229,84 +236,94 @@ class VoicingManager extends Announcer {
    */
   speak( utterance, withCancel = true ) {
     if ( this.initialized && this._canSpeakProperty.value ) {
-      assert && assert( this.isSpeechSynthesisSupported(), 'trying to speak with speechSynthesis, but it is not supported on this platform' );
+      this.requestSpeech( utterance, withCancel );
+    }
+  }
 
-      // only cancel the previous alert if there is something new to speak
-      if ( withCancel && utterance.alert ) {
-        this.cancel();
+  /**
+   * Use speech synthesis to speak an utterance. No-op unless voicingManager is initialized and other output
+   * controlling Properties are true (see speechAllowedProperty in initialize()). This explicitly ignores
+   * this.enabledProperty, allowing speech even when voicingManager is disabled. This is useful in rare cases, for
+   * example when the voicingManager recently becomes disabled by the user and we need to announce confirmation of
+   * that decision ("Voicing off" or "All audio off").
+   * @public
+   *
+   * @param {Utterance} utterance
+   * @param {boolean} [withCancel] - if true, any utterances before this one will be cancelled and never spoken
+   */
+  speakIgnoringEnabled( utterance, withCancel = true ) {
+    if ( this.initialized ) {
+      this.requestSpeech( utterance, withCancel );
+    }
+  }
+
+  /**
+   * Request speech with SpeechSynthesis.
+   * @private
+   *
+   * @param {Utterance} utterance
+   * @param {boolean} [withCancel]
+   */
+  requestSpeech( utterance, withCancel ) {
+    assert && assert( this.isSpeechSynthesisSupported(), 'trying to speak with speechSynthesis, but it is not supported on this platform' );
+
+    // only cancel the previous alert if there is something new to speak
+    if ( withCancel && utterance.alert ) {
+      this.cancel();
+    }
+
+    // embeddding marks (for i18n) impact the output, strip before speaking
+    const stringToSpeak = stripEmbeddingMarks( utterance.getTextToAlert() );
+    const speechSynthUtterance = new SpeechSynthesisUtterance( stringToSpeak );
+    speechSynthUtterance.voice = this.voiceProperty.value;
+    speechSynthUtterance.pitch = this.voicePitchProperty.value;
+    speechSynthUtterance.rate = this.voiceRateProperty.value;
+
+    // keep a reference to WebSpeechUtterances in Safari, so the browser doesn't dispose of it before firing, see #215
+    this.utterances.push( speechSynthUtterance );
+
+    // Keep this out of the start listener so that it can be synchrounous to the UtteranceQueue draining/announcing, see bug in https://github.com/phetsims/sun/issues/699#issuecomment-831529485
+    this.previousUtterance = utterance;
+
+    const startListener = () => {
+      this.startSpeakingEmitter.emit( stringToSpeak, utterance );
+      this.speakingProperty.set( true );
+      speechSynthUtterance.removeEventListener( 'start', startListener );
+    };
+
+    const endListener = () => {
+
+      this.endSpeakingEmitter.emit( stringToSpeak, utterance );
+      this.speakingProperty.set( false );
+      speechSynthUtterance.removeEventListener( 'end', endListener );
+
+      // remove the reference to the SpeechSynthesisUtterance so we don't leak memory
+      const indexOfUtterance = this.utterances.indexOf( speechSynthUtterance );
+      if ( indexOfUtterance > -1 ) {
+        this.utterances.splice( indexOfUtterance, 1 );
       }
+    };
 
-      // embeddding marks (for i18n) impact the output, strip before speaking
-      const stringToSpeak = stripEmbeddingMarks( utterance.getTextToAlert() );
-      const speechSynthUtterance = new SpeechSynthesisUtterance( stringToSpeak );
-      speechSynthUtterance.voice = this.voiceProperty.value;
-      speechSynthUtterance.pitch = this.voicePitchProperty.value;
-      speechSynthUtterance.rate = this.voiceRateProperty.value;
+    speechSynthUtterance.addEventListener( 'start', startListener );
+    speechSynthUtterance.addEventListener( 'end', endListener );
 
-      // keep a reference to WebSpeechUtterances in Safari, so the browser doesn't dispose of it before firing, see #215
-      this.utterances.push( speechSynthUtterance );
+    // In Safari the `end` listener does not fire consistently, (especially after cancel)
+    // but the error event does. In this case signify that speaking has ended.
+    speechSynthUtterance.addEventListener( 'error', endListener );
 
-      // Keep this out of the start listener so that it can be synchrounous to the UtteranceQueue draining/announcing, see bug in https://github.com/phetsims/sun/issues/699#issuecomment-831529485
-      this.previousUtterance = utterance;
+    if ( !this.hasSpoken ) {
 
-      const startListener = () => {
-        this.startSpeakingEmitter.emit( stringToSpeak, utterance );
-        this.speakingProperty.set( true );
-        speechSynthUtterance.removeEventListener( 'start', startListener );
-      };
+      // for the first time speaking it must be synchronous and we cannot use TimeoutCallbackObject workarounds yet
+      this.getSynth().speak( speechSynthUtterance );
+      this.hasSpoken = true;
 
-      const endListener = () => {
-
-        this.endSpeakingEmitter.emit( stringToSpeak, utterance );
-        this.speakingProperty.set( false );
-        speechSynthUtterance.removeEventListener( 'end', endListener );
-
-        // remove the reference to the SpeechSynthesisUtterance so we don't leak memory
-        const indexOfUtterance = this.utterances.indexOf( speechSynthUtterance );
-        if ( indexOfUtterance > -1 ) {
-          this.utterances.splice( indexOfUtterance, 1 );
-        }
-      };
-
-      speechSynthUtterance.addEventListener( 'start', startListener );
-      speechSynthUtterance.addEventListener( 'end', endListener );
-
-      // In Safari the `end` listener does not fire consistently, (especially after cancel)
-      // but the error event does. In this case signify that speaking has ended.
-      speechSynthUtterance.addEventListener( 'error', endListener );
+    }
+    else {
 
       // Create and add the callback object which will request speech from SpeechSynthesis behind a small delay
       // (as a workaround for Safari), and also track when the timeout callback is being fired so that listeners
       // can be safely removed. See TimeoutCallbackObject for more information.
       this.timeoutCallbackObjects.push( new TimeoutCallbackObject( speechSynthUtterance ) );
-    }
-  }
-
-  /**
-   * Speak something initially and synchronously after some user interaction. This is helpful for a couple of cases:
-   *   1) Browsers require that speech happen in response to some user interaction, with absolutely no delay.
-   *   announce() is used with the utteranceQueue, which does not speak things instantly. Use this when speech is
-   *   enabled, then use speak for all other usages.
-   *   2) There are rare cases where we need to speak even when when canSpeakProperty is false (like speaking
-   *   that voicing has been successfully turned off).
-   * @public
-   *
-   * @param {string} utterThis
-   */
-  speakImmediately( utterThis ) {
-    if ( this.initialized ) {
-      assert && assert( this.isSpeechSynthesisSupported(), 'Trying to speak, but speech synthesis is not supported on this platform' );
-
-      // embidding marks (for i18n) impact the output, strip before speaking
-      const utterance = new SpeechSynthesisUtterance( stripEmbeddingMarks( utterThis ) );
-      utterance.voice = this.voiceProperty.value;
-      utterance.pitch = this.voicePitchProperty.value;
-      utterance.rate = this.voiceRateProperty.value;
-
-      // Keep this synchrounous as it pertains to the UtteranceQueue draining/announcing, see bug in https://github.com/phetsims/sun/issues/699#issuecomment-831529485
-      this.previousUtterance = utterance;
-
-      this.getSynth().speak( utterance );
     }
   }
 
