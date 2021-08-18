@@ -200,28 +200,30 @@ class VoicingManager extends Announcer {
    * @param {Object} [options]
    */
   announce( utterance, options ) {
+    if ( this.initialized ) {
 
-    options = merge( {
+      options = merge( {
 
-      // {boolean} - If true and this Utterance is currently being spoken by the speech synth, announcing it
-      // to the queue again will immediately cancel the synth and new content will be
-      // spoken. Otherwise, new content for this utterance will be spoken whenever the old
-      // content has finished speaking
-      cancelSelf: true,
+        // {boolean} - If true and this Utterance is currently being spoken by the speech synth, announcing it
+        // to the queue again will immediately cancel the synth and new content will be
+        // spoken. Otherwise, new content for this utterance will be spoken whenever the old
+        // content has finished speaking
+        cancelSelf: true,
 
-      // {boolean} - If true and another Utterance is currently being spoken by the speech synth,
-      // announcing this Utterance will immediately cancel the other content being spoken by the synth.
-      // Otherwise, content for the new utterance will be spoken as soon as the browser finishes speaking
-      // the old content
-      cancelOther: true
-    }, options );
+        // {boolean} - If true and another Utterance is currently being spoken by the speech synth,
+        // announcing this Utterance will immediately cancel the other content being spoken by the synth.
+        // Otherwise, content for the new utterance will be spoken as soon as the browser finishes speaking
+        // the old content
+        cancelOther: true
+      }, options );
 
-    let withCancel = options.cancelOther;
-    if ( this.previousUtterance && this.previousUtterance === utterance ) {
-      withCancel = options.cancelSelf;
+      let withCancel = options.cancelOther;
+      if ( this.previousUtterance && this.previousUtterance === utterance ) {
+        withCancel = options.cancelSelf;
+      }
+
+      this.speak( utterance, withCancel );
     }
-
-    this.speak( utterance, withCancel );
   }
 
   /**
