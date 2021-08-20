@@ -7,6 +7,7 @@
  */
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import merge from '../../../phet-core/js/merge.js';
+import Namespace from '../../../phet-core/js/Namespace.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import scenery from '../scenery.js';
 import SceneryConstants from '../SceneryConstants.js';
@@ -14,23 +15,28 @@ import Color from '../util/Color.js';
 import ColorProperty from '../util/ColorProperty.js';
 import colorProfileProperty from './colorProfileProperty.js';
 
+// constant
+const NAME_SEPARATOR = '.';
+
 // static instances are tracked for iframe communication with the HTML color editor
 const instances = [];
 
 class ProfileColorProperty extends ColorProperty {
 
   /**
-   * @param {string} name - name that appears in the HTML color editor
+   * @param {Namespace} namespace - namespace that this color belongs to
+   * @param {string} colorName - name of the color, unique within namespace
    * @param {Object} colorProfileMap - object literal that maps keys (profile names) to ColorDef
    * @param {Object} [options]
    */
-  constructor( name, colorProfileMap, options ) {
+  constructor( namespace, colorName, colorProfileMap, options ) {
+
+    assert && assert( namespace instanceof Namespace );
+    assert && assert( typeof colorName === 'string' );
 
     options = merge( {
       tandem: Tandem.OPTIONAL
     }, options );
-
-    assert && assert( !!name, 'ProfileColorProperty.options.name is required' );
 
     // All values are eagerly coerced to Color instances for efficiency (so it only has to be done once) and simplicity
     // (so the types are uniform)
@@ -54,8 +60,8 @@ class ProfileColorProperty extends ColorProperty {
       this.value = this.colorProfileMap[ colorProfileName ] || this.colorProfileMap[ SceneryConstants.DEFAULT_COLOR_PROFILE ];
     } );
 
-    // @public (read-only)
-    this.name = name;
+    // @private to this file (read-only)
+    this.name = `${namespace.name}${NAME_SEPARATOR}${colorName}`;
 
     // On initialization and when the color changes, send a message to the parent frame identifying the color value.
     // The HTML color editor wrapper listens for these messages and displays the color values.
