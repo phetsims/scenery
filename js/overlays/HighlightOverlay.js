@@ -611,8 +611,6 @@ class HighlightOverlay {
       this.activateFocusHighlight( newTrail, node );
     }
     else if ( this.display.focusManager.pointerFocusProperty.value && this.interactiveHighlightsVisibleProperty.value ) {
-      // debugger;
-      // this.onPointerFocusChange( this.display.focusManager.pointerFocusProperty.value );
       this.updateMouseHighlight( this.display.focusManager.pointerFocusProperty.value );
     }
   }
