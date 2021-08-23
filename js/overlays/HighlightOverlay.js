@@ -85,7 +85,11 @@ class HighlightOverlay {
 
     // @private {Node|null} - If a node is using a custom focus highlight, a reference is kept so that it can be
     // removed from the overlay when node focus changes.
-    this.nodeFocusHighlight = null;
+    this.nodeModeHighlight = null;
+
+    // @private {boolean} - If true, the active highlight is in "node" mode and is layered in the scene graph. This
+    // field lets us deactivate the highlight appropriately when it is in that state.
+    this.nodeModeHighlightLayered = false;
 
     // @private {boolean} - if true, the next update() will trigger an update to the highlight's transform
     this.transformDirty = true;
@@ -170,17 +174,18 @@ class HighlightOverlay {
     this.domFocusListener = this.onFocusChange.bind( this );
     this.readingBlockTransformListener = this.onReadingBlockTransformChange.bind( this );
     this.focusHighlightListener = this.onFocusHighlightChange.bind( this );
+    this.mouseHighlightListener = this.onMouseHighlightChange.bind( this );
     this.focusHighlightsVisibleListener = this.onFocusHighlightsVisibleChange.bind( this );
     this.voicingHighlightsVisibleListener = this.onVoicingHighlightsVisibleChange.bind( this );
     this.pointerFocusListener = this.onPointerFocusChange.bind( this );
-    this.pointerFocusLockedListener = this.onPointerFocusLockedChange.bind( this );
+    this.lockedPointerFocusListener = this.onLockedPointerFocusChange.bind( this );
     this.readingBlockFocusListener = this.onReadingBlockFocusChange.bind( this );
 
     FocusManager.pdomFocusProperty.link( this.domFocusListener );
     display.focusManager.pointerFocusProperty.link( this.pointerFocusListener );
     display.focusManager.readingBlockFocusProperty.link( this.readingBlockFocusListener );
 
-    display.focusManager.pointerFocusLockedProperty.link( this.pointerFocusLockedListener );
+    display.focusManager.lockedPointerFocusProperty.link( this.lockedPointerFocusListener );
 
     this.pdomFocusHighlightsVisibleProperty.link( this.focusHighlightsVisibleListener );
     this.interactiveHighlightsVisibleProperty.link( this.voicingHighlightsVisibleListener );
@@ -231,12 +236,15 @@ class HighlightOverlay {
    *
    * @param {Trail} trail - The focused trail to highlight. It assumes that this trail is in this display.
    * @param {Node} node - Node receiving the highlight
+   * @param {Node|Shape|null} nodeHighlight - the highlight to use
+   * @param {boolean} layerable - Is the highlight layerable in the scene graph?
+   * @param {BooleanProperty} visibleProperty - Property controlling the visibility for the provided highlight
    */
-  activateHighlight( trail, node ) {
+  activateHighlight( trail, node, nodeHighlight, layerable, visibleProperty ) {
     this.trail = trail;
     this.node = node;
 
-    const highlight = node.focusHighlight;
+    const highlight = nodeHighlight;
     this.activeHighlight = highlight;
 
     // we may or may not track this trail depending on whether the focus highlight surrounds the trail's leaf node or
@@ -264,23 +272,32 @@ class HighlightOverlay {
       }
 
       // store the focus highlight so that it can be removed later
-      this.nodeFocusHighlight = highlight;
+      this.nodeModeHighlight = highlight;
 
-      assert && assert( this.nodeFocusHighlight.shape !== null,
+      assert && assert( this.nodeModeHighlight.shape !== null,
         'The shape of the Node highlight should be set by now. Does it have bounds?' );
 
-      if ( node.focusHighlightLayerable ) {
+      if ( layerable ) {
+
+        // flag so that we know how to deactivate in this case
+        this.nodeModeHighlightLayered = true;
 
         // the focusHighlight is just a node in the scene graph, so set it visible - visibility of other highlights
         // controlled by visibility of parent Nodes but that cannot be done in this case because the highlight
-        // can be anywhere in the scene graph, so have to check highlightsVisibleProperty
-        this.nodeFocusHighlight.visible = this.pdomFocusHighlightsVisibleProperty.get();
+        // can be anywhere in the scene graph, so have to check pdomFocusHighlightsVisibleProperty
+        this.nodeModeHighlight.visible = visibleProperty.get();
       }
       else {
-        this.nodeFocusHighlight.visible = true;
+
+        // the node is already in the scene graph, so this will set visibility
+        // for all instances.
+        this.nodeModeHighlight.visible = true;
 
         // Use the node itself as the highlight
-        this.highlightNode.addChild( this.nodeFocusHighlight );
+        // DAG happens here now because the layered highlight is already in the
+        // scene graph. IF one is layerable and the other isn't we will update
+        // visibility
+        this.highlightNode.addChild( this.nodeModeHighlight );
       }
     }
     // Bounds mode
@@ -294,11 +311,8 @@ class HighlightOverlay {
 
       this.onBoundsChange();
     }
-
-    // handle any changes to the focus highlight while the node has focus
-    node.focusHighlightChangedEmitter.addListener( this.focusHighlightListener );
-
     this.transformTracker = new TransformTracker( trailToTrack, {
+
       isStatic: true
     } );
     this.transformTracker.addListener( this.transformListener );
@@ -310,6 +324,47 @@ class HighlightOverlay {
     this.updateHighlightColors();
 
     this.transformDirty = true;
+  }
+
+  /**
+   * Activate a focus highlight, activating the highlight and adding a listener that will update the highlight whenever
+   * the Node's focusHighlight changes
+   * @private
+   *
+   * @param {Trail} trail
+   * @param {Node} node
+   */
+  activateFocusHighlight( trail, node ) {
+    this.activateHighlight( trail, node, node.focusHighlight, node.focusHighlightLayerable, this.pdomFocusHighlightsVisibleProperty );
+
+    // handle any changes to the focus highlight while the node has focus
+    node.focusHighlightChangedEmitter.addListener( this.focusHighlightListener );
+  }
+
+  /**
+   * Activate a mouse highlight, activating the highlight and adding a listener that will update the highlight changes
+   * while it is active.
+   * @private
+   *
+   * @param {Trail} trail
+   * @param {Node} node
+   */
+  activateMouseHighlight( trail, node ) {
+
+    // if mouseHighlightLayerable is not set, default to focusHighlightLayerable
+    const layerable = node.mouseHighlightLayerable === null ? node.focusHighlightLayerable :
+                      node.mouseHighlightLayerable;
+
+    this.activateHighlight(
+      trail,
+      node,
+      node.mouseHighlight || node.focusHighlight,
+      layerable,
+      this.interactiveHighlightsVisibleProperty
+    );
+
+    // handle changes to the highlight while it is active
+    node.mouseHighlightChangedEmitter.addListener( this.mouseHighlightListener );
   }
 
   /**
@@ -352,7 +407,7 @@ class HighlightOverlay {
   }
 
   /**
-   * Deactivates the current highlight, disposing and removing listeners as necessary.
+   * Deactivates the all active highlights, disposing and removing listeners as necessary.
    * @private
    */
   deactivateHighlight() {
@@ -362,24 +417,28 @@ class HighlightOverlay {
     }
     else if ( this.mode === 'node' ) {
 
-      // If focusHighlightLayerable, then the focusHighlight is just a node in the scene graph, so set it invisible
-      if ( this.node.focusHighlightLayerable ) {
-        this.node.focusHighlight.visible = false;
-      }
-      else {
-        this.highlightNode.removeChild( this.nodeFocusHighlight );
+      // If layered, client has put the Node where they want in the scene graph and we cannot remove it
+      if ( this.nodeModeHighlightLayered ) {
+        this.nodeModeHighlightLayered = false;
+        this.highlightNode.removeChild( this.nodeModeHighlight );
       }
 
       // node focus highlight can be cleared now that it has been removed
-      this.nodeFocusHighlight = null;
+      this.nodeModeHighlight.visible = false;
+      this.nodeModeHighlight = null;
     }
     else if ( this.mode === 'bounds' ) {
       this.boundsFocusHighlightPath.visible = false;
       this.node.localBoundsProperty.unlink( this.boundsListener );
     }
 
-    // remove listener that updated focus highlight while this node had focus
-    this.node.focusHighlightChangedEmitter.removeListener( this.focusHighlightListener );
+    // remove listeners that redraw the highlight if a type of highlight changes on the Node
+    if ( this.node.focusHighlightChangedEmitter.hasListener( this.focusHighlightListener ) ) {
+      this.node.focusHighlightChangedEmitter.removeListener( this.focusHighlightListener );
+    }
+    if ( this.node.isMouseHighlighting && this.node.mouseHighlightChangedEmitter.hasListener( this.mouseHighlightListener ) ) {
+      this.node.mouseHighlightChangedEmitter.removeListener( this.mouseHighlightListener );
+    }
 
     // remove all 'group' focus highlights
     this.deactivateGroupHighlights();
@@ -550,10 +609,12 @@ class HighlightOverlay {
     if ( newTrail && this.pdomFocusHighlightsVisibleProperty.value ) {
       const node = newTrail.lastNode();
 
-      this.activateHighlight( newTrail, node );
+      this.activateFocusHighlight( newTrail, node );
     }
     else if ( this.display.focusManager.pointerFocusProperty.value && this.interactiveHighlightsVisibleProperty.value ) {
-      this.onPointerFocusChange( this.display.focusManager.pointerFocusProperty.value );
+      // debugger;
+      // this.onPointerFocusChange( this.display.focusManager.pointerFocusProperty.value );
+      this.updateMouseHighlight( this.display.focusManager.pointerFocusProperty.value );
     }
   }
 
@@ -572,39 +633,49 @@ class HighlightOverlay {
    * @param {Focus} focus
    */
   onPointerFocusChange( focus ) {
-    if ( !this.display.focusManager.pointerFocusLockedProperty.value &&
+    if ( !this.display.focusManager.lockedPointerFocusProperty.value &&
          !this.display.focusManager.pdomFocusHighlightsVisibleProperty.value ) {
-      const newTrail = ( focus && focus.display === this.display ) ? focus.trail : null;
-
-      if ( this.hasHighlight() ) {
-        this.deactivateHighlight();
-      }
-
-      let activated = false;
-      if ( newTrail ) {
-        const node = newTrail.lastNode();
-
-        if ( ( node.isReadingBlock && this.readingBlockHighlightsVisibleProperty.value ) || ( !node.isReadingBlock && this.interactiveHighlightsVisibleProperty.value ) ) {
-          this.activateHighlight( newTrail, node );
-
-          activated = true;
-        }
-      }
-
-      if ( !activated && FocusManager.pdomFocus && this.pdomFocusHighlightsVisibleProperty.value ) {
-        this.onFocusChange( FocusManager.pdomFocus );
-      }
+      this.updateMouseHighlight( focus );
     }
   }
 
   /**
-   * Called whenever the pointerFocusLockedProperty changes.
+   * Redraws the mouse highlight. There are cases where we want to do this regardless of whether the pointer focus
+   * is locked, such as when the mouse highlight changes changes for a Node that is activated for mouse highlighting.
    * @private
    *
-   * @param {boolean} locked
+   * @param {Focus} focus
    */
-  onPointerFocusLockedChange( locked ) {
-    this.onPointerFocusChange( this.display.focusManager.pointerFocusProperty.value );
+  updateMouseHighlight( focus ) {
+    const newTrail = ( focus && focus.display === this.display ) ? focus.trail : null;
+    if ( this.hasHighlight() ) {
+      this.deactivateHighlight();
+    }
+
+    let activated = false;
+    if ( newTrail ) {
+      const node = newTrail.lastNode();
+
+      if ( ( node.isReadingBlock && this.readingBlockHighlightsVisibleProperty.value ) || ( !node.isReadingBlock && this.interactiveHighlightsVisibleProperty.value ) ) {
+        this.activateMouseHighlight( newTrail, node );
+        activated = true;
+      }
+    }
+
+    if ( !activated && FocusManager.pdomFocus && this.pdomFocusHighlightsVisibleProperty.value ) {
+      this.onFocusChange( FocusManager.pdomFocus );
+    }
+  }
+
+  /**
+   * Called whenever the lockedPointerFocusProperty changes. If the lockedPointerFocusProperty changes we probably
+   * have to update the highlight because interaction with a Node that uses MouseHighlighting just ended.
+   * @private
+   *
+   * @param {Focus|null} focus
+   */
+  onLockedPointerFocusChange( focus ) {
+    this.updateMouseHighlight( focus || this.display.focusManager.pointerFocusProperty.value );
   }
 
   /**
@@ -636,6 +707,22 @@ class HighlightOverlay {
   onFocusHighlightChange() {
     assert && assert( this.node.focused, 'update should only be necessary if node already has focus' );
     this.onFocusChange( FocusManager.pdomFocus );
+  }
+
+  /**
+   * If the Node has pointer focus and the mouse highlight changes, we must do all of the work to reapply the
+   * highlight as if the value of the focusProperty changed.
+   * @private
+   */
+  onMouseHighlightChange() {
+
+    if ( assert ) {
+      const lockedPointerFocus = this.display.focusManager.lockedPointerFocusProperty.value;
+      assert( this.node.mouseActivated || ( lockedPointerFocus && lockedPointerFocus.trail.lastNode() === this.node ),
+        'Update should only be necessary if Node is activated with a Pointer or pointer focus is locked during interaction' );
+    }
+
+    this.updateMouseHighlight( this.display.focusManager.lockedPointerFocusProperty.value );
   }
 
   /**

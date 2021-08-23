@@ -80,7 +80,7 @@ const Voicing = {
         assert && assert( this.voicingInitialized === undefined, 'Voicing has already been initialized for this Node' );
 
         // initialize "super" Trait to support highlights on mouse input
-        this.initializeMouseHighlighting();
+        this.initializeMouseHighlighting( options );
 
         // @private {boolean} - to make sure that initializeVoicing is called before trying to use the mixin.
         this.voicingInitialized = true;

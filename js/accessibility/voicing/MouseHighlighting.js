@@ -6,11 +6,20 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
+import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
+import Shape from '../../../../kite/js/Shape.js';
 import extend from '../../../../phet-core/js/extend.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import Focus from '../Focus.js';
+
+// constants
+// option keys for MouseHighlighting, each of these will have a setter and getter and values are applied with mutate()
+const MOUSE_HIGHLIGHTING_OPTION_KEYS = [
+  'mouseHighlight',
+  'mouseHighlightLayerable'
+];
 
 const MouseHighlighting = {
 
@@ -31,10 +40,22 @@ const MouseHighlighting = {
     extend( proto, {
 
       /**
-       * @public
-       * This should be called in the constructor to initialize MouseHighlighting.
+       * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in
+       * the order they will be evaluated.
+       * @protected
+       *
+       * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
+       *       cases that may apply.
        */
-      initializeMouseHighlighting() {
+      _mutatorKeys: MOUSE_HIGHLIGHTING_OPTION_KEYS.concat( proto._mutatorKeys ),
+
+      /**
+       * This should be called in the constructor to initialize MouseHighlighting.
+       * @public
+       *
+       * @param {Object} [options]
+       */
+      initializeMouseHighlighting( options ) {
 
         // @private {boolean} - Indicates that the Trait was initialized, to make sure that initializeMouseHighlighting
         // is called before using the Trait.
@@ -62,6 +83,20 @@ const MouseHighlighting = {
         // (with updateDisplay) since Instances are added asynchronously.
         this._displays = {};
 
+        // @private {Shape|Node|null} - The highlight that will surround this Node when it is activated and a Pointer
+        // is currently over it. When null, the focus highlight will be used (as defined in ParallelDOM.js).
+        this._mouseHighlight = null;
+
+        // @private {boolean|null} - If true, the highlight will be layerable in the scene graph instead of drawn
+        // above everything in the HighlightOverlay. If true, you are responsible for adding the mouseHighlight
+        // in the location you want in the scene graph. The mouseHighlight will become visible when this.mouseActivated
+        // is true. When null, this highlight will fall back to the behavior of focusHighlightLayerable in
+        // ParallelDOM.js.
+        this._mouseHighlightLayerable = null;
+
+        // @private {TinyEmitter} - emits an event when the mouse highlight changes for this Node
+        this.mouseHighlightChangedEmitter = new TinyEmitter();
+
         // @private {function} - When new instances of this Node are created, adds an entry to the map of Displays.
         this.changedInstanceListener = this.onChangedInstance.bind( this );
         this.changedInstanceEmitter.addListener( this.changedInstanceListener );
@@ -81,6 +116,11 @@ const MouseHighlighting = {
           cancel: boundPointerCancel,
           interrupt: boundPointerCancel
         };
+
+        // support passing options through initialize
+        if ( options ) {
+          this.mutate( _.pick( options, MOUSE_HIGHLIGHTING_OPTION_KEYS ) );
+        }
       },
 
       /**
@@ -91,6 +131,103 @@ const MouseHighlighting = {
       get isMouseHighlighting() {
         return true;
       },
+
+      /**
+       * Set the mouse highlight for this node. By default, the highlight will be a pink rectangle that surrounds
+       * the node's local bounds.
+       * @public
+       *
+       * @param {Node|Shape|null} mouseHighlight
+       */
+      setMouseHighlight( mouseHighlight ) {
+        assert && assert( mouseHighlight === null ||
+                          mouseHighlight instanceof Node ||
+                          mouseHighlight instanceof Shape );
+
+        if ( this._mouseHighlight !== mouseHighlight ) {
+          this._mouseHighlight = mouseHighlight;
+
+          if ( this._mouseHighlightLayerable ) {
+
+            // if focus highlight is layerable, it must be a node for the scene graph
+            assert && assert( mouseHighlight instanceof Node );
+            mouseHighlight.visible = this.mouseActivated;
+          }
+
+          // cannot emit until initialize complete
+          if ( this.mouseHighlightingInitialized ) {
+            this.mouseHighlightChangedEmitter.emit();
+          }
+        }
+      },
+      set mouseHighlight( mouseHighlight ) { this.setMouseHighlight( mouseHighlight ); },
+
+      /**
+       * Returns the mouse highlight for this Node.
+       * @public
+       *
+       * @returns {null|Node|Shape}
+       */
+      getMouseHighlight() {
+        return this._mouseHighlight;
+      },
+      get mouseHighlight() { return this.getMouseHighlight(); },
+
+      /**
+       * Sets whether the highlight is layerable in the scene graph instead of above everyting in the
+       * highlight overlay. If layerable, you must provide a custom highlight and it must be a Node. The highlight
+       * Node will always be invisible unless this Node is activated with a mouse.
+       * @public
+       *
+       * @param {boolean} mouseHighlightLayerable
+       */
+      setMouseHighlightLayerable( mouseHighlightLayerable ) {
+        if ( this._mouseHighlightLayerable !== mouseHighlightLayerable ) {
+          this._mouseHighlightLayerable = mouseHighlightLayerable;
+
+          if ( this._mouseHighlight ) {
+
+            if ( this._mouseHighlight ) {
+              assert && assert( this._mouseHighlight instanceof Node );
+              this._mouseHighlight.visible = this.mouseActivated;
+            }
+          }
+        }
+      },
+      set mouseHighlightLayerable( mouseHighlightLayerable ) { this.setMouseHighlightLayerable( mouseHighlightLayerable ); },
+
+      /**
+       * Get whether or not the mouse highlight is layerable in the scene graph.
+       * @public
+       *
+       * @returns {null|boolean}
+       */
+      getMouseHighlightLayerable() {
+        return this._mouseHighlightLayerable;
+      },
+      get mouseHighlightLayerable() { return this.getMouseHighlightLayerable(); },
+
+      /**
+       * Returns true if this Node is "activated" by a mouse, indicating that a Pointer is over it
+       * and this Node mixes MouseHighlighting so an interactive highlight should surround it.
+       * @public
+       *
+       * @returns {boolean}
+       */
+      isMouseActivated() {
+        let activated = false;
+
+        const trailIds = Object.keys( this._displays );
+        for ( let i = 0; i < trailIds.length; i++ ) {
+          const pointerFocus = this._displays[ trailIds[ i ] ].focusManager.pointerFocusProperty.value;
+          if ( pointerFocus && pointerFocus.trail.lastNode() === this ) {
+            activated = true;
+            break;
+          }
+        }
+        return activated;
+      },
+      get mouseActivated() { return this.isMouseActivated(); },
 
       /**
        * @public
@@ -184,11 +321,15 @@ const MouseHighlighting = {
           const displays = Object.values( this._displays );
           for ( let i = 0; i < displays.length; i++ ) {
             const display = displays[ i ];
+            const focus = display.focusManager.pointerFocusProperty.value;
 
-            // pointer focus highlights are only shown if there are no PDOM highlights,
-            // so only lock in that case too
-            if ( !display.focusManager.pdomFocusHighlightsVisibleProperty.value ) {
-              display.focusManager.pointerFocusLockedProperty.set( true );
+            // focus should generally be defined when pointer enters the Node, but it may be null in cases of
+            // cancel or interrupt
+            if ( focus ) {
+
+              // Set the lockedPointerFocusProperty with a copy of the Focus (as deep as possible) because we want
+              // to keep a reference to the old Trail while pointerFocusProperty changes.
+              display.focusManager.lockedPointerFocusProperty.set( new Focus( focus.display, focus.trail.copy() ) );
             }
           }
 
@@ -210,7 +351,7 @@ const MouseHighlighting = {
         const displays = Object.values( this._displays );
         for ( let i = 0; i < displays.length; i++ ) {
           const display = displays[ i ];
-          display.focusManager.pointerFocusLockedProperty.set( false );
+          display.focusManager.lockedPointerFocusProperty.value = null;
         }
 
         if ( this.pointer && this.pointer.listeners.includes( this.pointerListener ) ) {

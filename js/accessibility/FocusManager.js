@@ -48,12 +48,12 @@ class FocusManager {
     // active. Used by the HighlightOverlay to highlight ReadingBlock Nodes whose content is being spoken.
     this.readingBlockFocusProperty = new Property( null );
 
-    // @public {BooleanProperty} - A Property that controls whether the highlight for the pointerFocusProperty
-    // is locked so that the HighlightOverlay will wait to update the highlight for the pointerFocusProperty. This
-    // is useful when the pointer has begun to interact with a Node that uses MouseHighlighting, but the mouse
-    // has moved over another during interaction. The highlight should remain on the Node receiving interaction
-    // and wait to update until interaction completes.
-    this.pointerFocusLockedProperty = new Property( false );
+    // @public {Property.<Focus|null>} - A Property whose value is either null or a Focus with Trail and Display equal
+    // to the pointerFocusProperty. When this Property has a value, the HighlightOverlay will wait to update the
+    // highlight for the pointerFocusProperty. This is useful when the pointer has begun to interact with a Node
+    // that uses MouseHighlighting, but the mouse has moved out of it or over another during interaction. Thehighlight
+    // should remain on the Node receiving interaction and wait to update until interaction completes.
+    this.lockedPointerFocusProperty = new Property( null );
 
     // @public - Controls whether or not highlights related to PDOM focus are visible.
     this.pdomFocusHighlightsVisibleProperty = new BooleanProperty( true );
@@ -115,7 +115,7 @@ class FocusManager {
       // whenever focus is removed because the last Node of the Focus Trail is no
       // longer displayed, the highlight for Pointer Focus should no longer be locked
       onRemoveFocus: () => {
-        this.pointerFocusLockedProperty.value = false;
+        this.lockedPointerFocusProperty.value = null;
       }
     } );
   }
