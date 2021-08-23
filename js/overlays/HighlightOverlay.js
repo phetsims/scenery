@@ -294,9 +294,6 @@ class HighlightOverlay {
         this.nodeModeHighlight.visible = true;
 
         // Use the node itself as the highlight
-        // DAG happens here now because the layered highlight is already in the
-        // scene graph. IF one is layerable and the other isn't we will update
-        // visibility
         this.highlightNode.addChild( this.nodeModeHighlight );
       }
     }
@@ -311,8 +308,8 @@ class HighlightOverlay {
 
       this.onBoundsChange();
     }
-    this.transformTracker = new TransformTracker( trailToTrack, {
 
+    this.transformTracker = new TransformTracker( trailToTrack, {
       isStatic: true
     } );
     this.transformTracker.addListener( this.transformListener );
@@ -420,6 +417,8 @@ class HighlightOverlay {
       // If layered, client has put the Node where they want in the scene graph and we cannot remove it
       if ( this.nodeModeHighlightLayered ) {
         this.nodeModeHighlightLayered = false;
+      }
+      else {
         this.highlightNode.removeChild( this.nodeModeHighlight );
       }
 
