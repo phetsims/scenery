@@ -27,7 +27,11 @@ import KeyboardUtils from '../KeyboardUtils.js';
 
 class VoicingManager extends Announcer {
   constructor() {
-    super();
+    super( {
+
+      // All VoicingManager instances should respect responseCollector's current state.
+      respectResponseCollectorProperties: true
+    } );
 
     // @public {null|SpeechSynthesisVoice}
     this.voiceProperty = new Property( null );
@@ -275,7 +279,7 @@ class VoicingManager extends Announcer {
     }
 
     // embeddding marks (for i18n) impact the output, strip before speaking
-    const stringToSpeak = stripEmbeddingMarks( utterance.getTextToAlert() );
+    const stringToSpeak = stripEmbeddingMarks( utterance.getTextToAlert( this.respectResponseCollectorProperties ) );
     const speechSynthUtterance = new SpeechSynthesisUtterance( stringToSpeak );
     speechSynthUtterance.voice = this.voiceProperty.value;
     speechSynthUtterance.pitch = this.voicePitchProperty.value;
