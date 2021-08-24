@@ -28,7 +28,7 @@ import Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import MouseHighlighting from './MouseHighlighting.js';
 import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
-import VoicingResponsePatterns from '../../../../utterance-queue/js/VoicingResponsePatterns.js';
+import ResponsePatterns from '../../../../utterance-queue/js/ResponsePatterns.js';
 import voicingUtteranceQueue from './voicingUtteranceQueue.js';
 
 // options that are supported by Voicing.js. Added to mutator keys so that Voicing properties can be set with mutate.
@@ -118,8 +118,8 @@ const Voicing = {
 
         // {Object} - A collection of response patterns that are used to collect the responses of this Voicing Node
         // with responseCollector. Controls the order of the Voicing responses and even punctuation used when responses
-        // are assembled into final content for the UtteranceQueue. See VoicingResponsePatterns for more details.
-        this._voicingResponsePatterns = VoicingResponsePatterns.DEFAULT_RESPONSE_PATTERNS;
+        // are assembled into final content for the UtteranceQueue. See ResponsePatterns for more details.
+        this._voicingResponsePatterns = ResponsePatterns.DEFAULT_RESPONSE_PATTERNS;
 
         // @private {Object} - Input listener that speaks content on focus. This is the only input listener added
         // by Voicing, but it is the one that is consistent for all Voicing nodes. On focus, speak the name, object
@@ -274,7 +274,7 @@ const Voicing = {
           ignoreProperties: this._voicingIgnoreVoicingManagerProperties,
 
           // {Object} - collection of string patterns to use with responseCollector.collectResponses, see
-          // VoicingResponsePatterns for more information.
+          // ResponsePatterns for more information.
           responsePatterns: this._voicingResponsePatterns,
 
           // {Utterance|null} - The utterance to use if you want this response to be more controlled in the
@@ -425,11 +425,11 @@ const Voicing = {
 
       /**
        * Sets the collection of patterns to use for voicing responses, controlling the order, punctuation, and
-       * additional content for each combination of response. See VoicingResponsePatterns.js if you wish to use
+       * additional content for each combination of response. See ResponsePatterns.js if you wish to use
        * a collection of string patterns that are not the default.
        * @public
        *
-       * @param {Object} patterns - see VoicingResponsePatterns
+       * @param {Object} patterns - see ResponsePatterns.js
        */
       setVoicingResponsePatterns( patterns ) {
         this._voicingResponsePatterns = patterns;
@@ -437,7 +437,7 @@ const Voicing = {
       set voicingResponsePatterns( patterns ) { this.setVoicingResponsePatterns( patterns ); },
 
       /**
-       * Get the VoicingResponsePatterns object that this Voicing Node is using to collect responses.
+       * Get the ResponsePatterns object that this Voicing Node is using to collect responses.
        * @public
        *
        * @returns {Object}
