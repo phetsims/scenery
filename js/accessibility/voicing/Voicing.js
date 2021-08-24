@@ -24,11 +24,11 @@
 import extend from '../../../../phet-core/js/extend.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import merge from '../../../../phet-core/js/merge.js';
+import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
+import ResponsePatterns from '../../../../utterance-queue/js/ResponsePatterns.js';
 import Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import MouseHighlighting from './MouseHighlighting.js';
-import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
-import ResponsePatterns from '../../../../utterance-queue/js/ResponsePatterns.js';
 import voicingUtteranceQueue from './voicingUtteranceQueue.js';
 
 // options that are supported by Voicing.js. Added to mutator keys so that Voicing properties can be set with mutate.
@@ -116,7 +116,7 @@ const Voicing = {
         // while user is changing preferences or other settings.
         this._voicingUtteranceQueue = null;
 
-        // {Object} - A collection of response patterns that are used to collect the responses of this Voicing Node
+        // {ResponsePatterns} - A collection of response patterns that are used to collect the responses of this Voicing Node
         // with responseCollector. Controls the order of the Voicing responses and even punctuation used when responses
         // are assembled into final content for the UtteranceQueue. See ResponsePatterns for more details.
         this._voicingResponsePatterns = ResponsePatterns.DEFAULT_RESPONSE_PATTERNS;
@@ -429,9 +429,10 @@ const Voicing = {
        * a collection of string patterns that are not the default.
        * @public
        *
-       * @param {Object} patterns - see ResponsePatterns.js
+       * @param {ResponsePatterns} patterns - see ResponsePatterns
        */
       setVoicingResponsePatterns( patterns ) {
+        assert && assert( patterns instanceof ResponsePatterns );
         this._voicingResponsePatterns = patterns;
       },
       set voicingResponsePatterns( patterns ) { this.setVoicingResponsePatterns( patterns ); },
@@ -440,7 +441,7 @@ const Voicing = {
        * Get the ResponsePatterns object that this Voicing Node is using to collect responses.
        * @public
        *
-       * @returns {Object}
+       * @returns {ResponsePatterns}
        */
       getVoicingResponsePatterns() {
         return this._voicingResponsePatterns;
