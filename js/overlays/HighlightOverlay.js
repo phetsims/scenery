@@ -103,6 +103,15 @@ class HighlightOverlay {
     this.readingBlockHighlightNode = new Node();
     this.focusRootNode.addChild( this.readingBlockHighlightNode );
 
+    // @private {null|Node|Shape} - A reference to the Node that is added when a custom node is specified as the
+    // active highlight for the ReadingBlock. Stored so that we can remove it when deactivating reading
+    // block highlights.
+    this.addedReadingBlockHighlight = null;
+
+    // @private {null|Node} - A reference to the Node that is a ReadingBlock which the Voicing framework
+    // is currently speaking about.
+    this.activeReadingBlockNode = null;
+
     // @private {Trail} - Trail to the ReadingBlock Node with an active highlight around it
     // while the voicingManager is speaking its content.
     this.readingBlockTrail = null;
@@ -180,6 +189,7 @@ class HighlightOverlay {
     this.pointerFocusListener = this.onPointerFocusChange.bind( this );
     this.lockedPointerFocusListener = this.onLockedPointerFocusChange.bind( this );
     this.readingBlockFocusListener = this.onReadingBlockFocusChange.bind( this );
+    this.readingBlockHighlightChangeListener = this.onReadingBlockHighlightChange.bind( this );
 
     FocusManager.pdomFocusProperty.link( this.domFocusListener );
     display.focusManager.pointerFocusProperty.link( this.pointerFocusListener );
@@ -378,13 +388,38 @@ class HighlightOverlay {
   activateReadingBlockHighlight( trail ) {
     this.readingBlockTrail = trail;
 
+    this.activeReadingBlockNode = trail.lastNode();
+    assert && assert( this.activeReadingBlockNode.isReadingBlock,
+      'should not activate a reading block highlight for a Node that is not a ReadingBlock' );
+
+    const readingBlockHighlight = this.activeReadingBlockNode.readingBlockActiveHighlight;
+
+    this.addedReadingBlockHighlight = readingBlockHighlight;
+
+    if ( readingBlockHighlight instanceof Shape ) {
+      this.readingBlockHighlightPath.setShapeFromNode( readingBlockHighlight );
+      this.readingBlockHighlightPath.visible = true;
+    }
+    else if ( readingBlockHighlight instanceof Node ) {
+
+      // node mode
+      this.readingBlockHighlightNode.addChild( readingBlockHighlight );
+    }
+    else {
+
+      // bounds mode
+      this.readingBlockHighlightPath.setShapeFromNode( this.activeReadingBlockNode );
+      this.readingBlockHighlightPath.visible = true;
+    }
+
+    // update the highlight if the transform for the Node ever changes
     this.readingBlockTransformTracker = new TransformTracker( this.readingBlockTrail, {
       isStatic: true
     } );
     this.readingBlockTransformTracker.addListener( this.readingBlockTransformListener );
 
-    this.readingBlockHighlightPath.setShapeFromNode( trail.lastNode() );
-    this.readingBlockHighlightPath.visible = true;
+    // update the highlight if it is changed on the Node while active
+    this.activeReadingBlockNode.readingBlockActiveHighlightChangedEmitter.addListener( this.readingBlockHighlightChangeListener );
 
     this.readingBlockTransformDirty = true;
   }
@@ -396,11 +431,19 @@ class HighlightOverlay {
   deactivateReadingBlockHighlight() {
     this.readingBlockHighlightPath.visible = false;
 
+    if ( this.addedReadingBlockHighlight instanceof Node ) {
+      this.readingBlockHighlightNode.removeChild( this.addedReadingBlockHighlight );
+    }
+
     this.readingBlockTransformTracker.removeListener( this.readingBlockTransformListener );
     this.readingBlockTransformTracker.dispose();
     this.readingBlockTransformTracker = null;
 
+    this.activeReadingBlockNode.readingBlockActiveHighlightChangedEmitter.removeListener( this.readingBlockHighlightChangeListener );
+
+    this.activeReadingBlockNode = null;
     this.readingBlockTrail = null;
+    this.addedReadingBlockHighlight = null;
   }
 
   /**
@@ -720,6 +763,17 @@ class HighlightOverlay {
     }
 
     this.updateMouseHighlight( this.display.focusManager.lockedPointerFocusProperty.value );
+  }
+
+  /**
+   * Redraw the highlight for the ReadingBlock if it changes while the reading block highlight is already
+   * active for a Node.
+   * @private
+   */
+  onReadingBlockHighlightChange() {
+    assert && assert( this.activeReadingBlockNode, 'Update should only be necessary when there is an active ReadingBlock Node' );
+    assert && assert( this.activeReadingBlockNode.readingBlockActivated, 'Update should only be necessary while the ReadingBlock is activated' );
+    this.onReadingBlockFocusChange( this.display.focusManager.readingBlockFocusProperty.value );
   }
 
   /**

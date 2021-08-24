@@ -17,6 +17,8 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
+import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
+import Shape from '../../../../kite/js/Shape.js';
 import extend from '../../../../phet-core/js/extend.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import StringUtils from '../../../../phetcommon/js/util/StringUtils.js';
@@ -25,14 +27,15 @@ import scenery from '../../scenery.js';
 import Focus from '../Focus.js';
 import ReadingBlockHighlight from './ReadingBlockHighlight.js';
 import ReadingBlockUtterance from './ReadingBlockUtterance.js';
-import Voicing from './Voicing.js';
 import responseCollector from './responseCollector.js';
+import Voicing from './Voicing.js';
 import voicingManager from './voicingManager.js';
 
 const READING_BLOCK_OPTION_KEYS = [
   'readingBlockTagName',
   'readingBlockContent',
-  'readingBlockHintResponse'
+  'readingBlockHintResponse',
+  'readingBlockActiveHighlight'
 ];
 
 const CONTENT_HINT_PATTERN = '{{readingBlockContent}}. {{hintResponse}}';
@@ -90,6 +93,15 @@ const ReadingBlock = {
 
         // @private {string} - The tagName to apply to the Node when voicing is disabled.
         this._readingBlockDisabledTagName = 'p';
+
+        // @private {null|Shape|Node} - The highlight that surrounds this ReadingBlock when it is "active" and
+        // the Voicing framework is speaking the content associated with this Node. By default, a semi-transparent
+        // yellow highlight surrounds this Node's bounds.
+        this._readingBlockActiveHighlight = null;
+
+        // @public (scenery-internal) {TinyEmitter} - Sends a message when the highlight for the ReadingBlock changes. Used
+        // by the HighlightOverlay to redraw it if it changes while the highlight is active.
+        this.readingBlockActiveHighlightChangedEmitter = new TinyEmitter();
 
         // @private {function} - Updates the hit bounds of this Node when the local bounds change.
         this.localBoundsChangedListener = this.onLocalBoundsChanged.bind( this );
@@ -196,6 +208,60 @@ const ReadingBlock = {
       get readingBlockHintResponse() { return this.getReadingBlockHintResponse(); },
 
       /**
+       * Sets the highlight used to surround this Node while the Voicing framework is speaking this content.
+       * Do not add this Node to the scene graph, it is added and made visible by the HighlightOverlay.
+       * @public
+       *
+       * @param readingBlockActiveHighlight
+       */
+      setReadingBlockActiveHighlight( readingBlockActiveHighlight ) {
+        assert && assert( readingBlockActiveHighlight === null ||
+                          readingBlockActiveHighlight instanceof Node ||
+                          readingBlockActiveHighlight instanceof Shape );
+
+        if ( this._readingBlockActiveHighlight !== readingBlockActiveHighlight ) {
+          this._readingBlockActiveHighlight = readingBlockActiveHighlight;
+
+          if ( this.readingBlockInitialized ) {
+            this.readingBlockActiveHighlightChangedEmitter.emit();
+          }
+        }
+      },
+      set readingBlockActiveHighlight( readingBlockActiveHighlight ) { this.setReadingBlockActiveHighlight( readingBlockActiveHighlight ); },
+
+      /**
+       * Returns the highlight used to surround this Node when the Voicing framework is reading its
+       * content.
+       * @returns {null|Shape|Node}
+       */
+      getReadingBlockActiveHighlight() {
+        return this._readingBlockActiveHighlight;
+      },
+      get readingBlockActiveHighlight() { return this._readingBlockActiveHighlight; },
+
+      /**
+       * Returns true if this ReadingBlock is "activated", indicating that it has received interaction
+       * and the Voicing framework is speaking its content.
+       * @public
+       *
+       * @returns {boolean}
+       */
+      isReadingBlockActivated() {
+        let activated = false;
+
+        const trailIds = Object.keys( this._displays );
+        for ( let i = 0; i < trailIds.length; i++ ) {
+          const pointerFocus = this._displays[ trailIds[ i ] ].focusManager.readingBlockFocusProperty.value;
+          if ( pointerFocus && pointerFocus.trail.lastNode() === this ) {
+            activated = true;
+            break;
+          }
+        }
+        return activated;
+      },
+      get readingBlockActivated() { return this.isReadingBlockActivated(); },
+
+      /**
        * When this Node becomes focusable (because Reading Blocks have just been enabled or disabled), either
        * apply or remove the readingBlockTagName.
        * @private
@@ -224,7 +290,6 @@ const ReadingBlock = {
           this.tagName = this._readingBlockDisabledTagName;
           if ( this.hasInputListener( this.readingBlockInputListener ) ) {
             this.removeInputListener( this.readingBlockInputListener );
-
           }
         }
       },
