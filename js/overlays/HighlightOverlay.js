@@ -15,6 +15,7 @@ import merge from '../../../phet-core/js/merge.js';
 import FocusHighlightFromNode from '../accessibility/FocusHighlightFromNode.js';
 import FocusHighlightPath from '../accessibility/FocusHighlightPath.js';
 import FocusManager from '../accessibility/FocusManager.js';
+import ActivatedReadingBlockHighlight from '../accessibility/voicing/ActivatedReadingBlockHighlight.js';
 import Display from '../display/Display.js';
 import Node from '../nodes/Node.js';
 import scenery from '../scenery.js';
@@ -27,9 +28,6 @@ let innerHighlightColor = FocusHighlightPath.INNER_FOCUS_COLOR;
 
 let innerGroupHighlightColor = FocusHighlightPath.INNER_LIGHT_GROUP_FOCUS_COLOR;
 let outerGroupHighlightColor = FocusHighlightPath.OUTER_LIGHT_GROUP_FOCUS_COLOR;
-
-// color for the 'speaking' highlight, shown for certain Nodes with Voicing when while the voicingManager is speaking
-let readingBlockHighlightColor = 'rgba(255,255,0,0.5)';
 
 class HighlightOverlay {
 
@@ -170,11 +168,7 @@ class HighlightOverlay {
     this.focusRootNode.addChild( this.groupFocusHighlightParent );
 
     // @private {Node} - The highlight shown around ReadingBlock Nodes while the voicingManager is speaking.
-    this.readingBlockHighlightPath = new FocusHighlightFromNode( null, {
-      innerStroke: null,
-      outerStroke: null,
-      fill: readingBlockHighlightColor
-    } );
+    this.readingBlockHighlightPath = new ActivatedReadingBlockHighlight( null );
     this.readingBlockHighlightNode.addChild( this.readingBlockHighlightPath );
 
     // @private - Listeners bound once, so we can access them for removal.
@@ -914,16 +908,6 @@ class HighlightOverlay {
   }
 
   static get outerGroupHighlightColor() { return this.getOuterGroupHighlightColor(); } // eslint-disable-line bad-sim-text
-
-  /**
-   * Set the color of 'speaking' highlights, shown for certain Nodes with Voicing while the voicingManager is speaking.
-   * @public
-   *
-   * @param {PaintDef} color
-   */
-  static setReadingBlockHighlightColor( color ) {
-    readingBlockHighlightColor = color;
-  }
 }
 
 scenery.register( 'HighlightOverlay', HighlightOverlay );
