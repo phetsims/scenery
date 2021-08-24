@@ -27,7 +27,7 @@ import scenery from '../../scenery.js';
 import Focus from '../Focus.js';
 import ReadingBlockHighlight from './ReadingBlockHighlight.js';
 import ReadingBlockUtterance from './ReadingBlockUtterance.js';
-import responseCollector from './responseCollector.js';
+import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
 import Voicing from './Voicing.js';
 import voicingManager from './voicingManager.js';
 

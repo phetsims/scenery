@@ -16,7 +16,7 @@ import './accessibility/pdom/PDOMPeer.js';
 import './accessibility/pdom/PDOMTree.js';
 import './accessibility/pdom/PDOMUtils.js';
 import './accessibility/voicing/Voicing.js';
-import './accessibility/voicing/responseCollector.js';
+import '../../utterance-queue/js/responseCollector.js';
 import './accessibility/voicing/voicingManager.js';
 import './accessibility/reader/Cursor.js';
 import './accessibility/reader/Reader.js';

@@ -27,8 +27,8 @@ import merge from '../../../../phet-core/js/merge.js';
 import Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import MouseHighlighting from './MouseHighlighting.js';
-import responseCollector from './responseCollector.js';
-import VoicingResponsePatterns from './VoicingResponsePatterns.js';
+import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
+import VoicingResponsePatterns from '../../../../utterance-queue/js/VoicingResponsePatterns.js';
 import voicingUtteranceQueue from './voicingUtteranceQueue.js';
 
 // options that are supported by Voicing.js. Added to mutator keys so that Voicing properties can be set with mutate.
