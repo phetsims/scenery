@@ -1468,7 +1468,9 @@ const ParallelDOM = {
 
             // if focus highlight is layerable, it must be a node in the scene graph
             assert && assert( focusHighlight instanceof Node );
-            focusHighlight.visible = this.focused;
+
+            // the highlight starts off invisible, HighlightOverlay will make it visible when this Node has DOM focus
+            focusHighlight.visible = false;
           }
 
           this.focusHighlightChangedEmitter.emit();
