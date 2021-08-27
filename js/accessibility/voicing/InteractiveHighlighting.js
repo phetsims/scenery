@@ -1,7 +1,7 @@
 // Copyright 2021, University of Colorado Boulder
 
 /**
- * A trait for Node that mixes functionality to support visual highlights that appear on hover with a mouse.
+ * A trait for Node that mixes functionality to support visual highlights that appear on hover with a pointer.
  *
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
@@ -15,22 +15,22 @@ import scenery from '../../scenery.js';
 import Focus from '../Focus.js';
 
 // constants
-// option keys for MouseHighlighting, each of these will have a setter and getter and values are applied with mutate()
-const MOUSE_HIGHLIGHTING_OPTION_KEYS = [
-  'mouseHighlight',
-  'mouseHighlightLayerable'
+// option keys for InteractiveHighlighting, each of these will have a setter and getter and values are applied with mutate()
+const INTERACTIVE_HIGHLIGHTING_OPTIONS = [
+  'interactiveHighlight',
+  'interactiveHighlightLayerable'
 ];
 
-const MouseHighlighting = {
+const InteractiveHighlighting = {
 
   /**
-   * Given the constructor for Node, add MouseHighlighting functions to the prototype.
+   * Given the constructor for Node, add InteractiveHighlighting functions to the prototype.
    * @public
    * @trait {Node}
    * @param {function(new:Node)} type - the constructor for Node
    */
   compose( type ) {
-    assert && assert( _.includes( inheritance( type ), Node ), 'Only Node subtypes should compose MouseHighlighting' );
+    assert && assert( _.includes( inheritance( type ), Node ), 'Only Node subtypes should compose InteractiveHighlighting' );
 
     const proto = type.prototype;
 
@@ -47,21 +47,21 @@ const MouseHighlighting = {
        * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
        *       cases that may apply.
        */
-      _mutatorKeys: MOUSE_HIGHLIGHTING_OPTION_KEYS.concat( proto._mutatorKeys ),
+      _mutatorKeys: INTERACTIVE_HIGHLIGHTING_OPTIONS.concat( proto._mutatorKeys ),
 
       /**
-       * This should be called in the constructor to initialize MouseHighlighting.
+       * This should be called in the constructor to initialize InteractiveHighlighting.
        * @public
        *
        * @param {Object} [options]
        */
-      initializeMouseHighlighting( options ) {
+      initializeInteractiveHighlighting( options ) {
 
-        // @private {boolean} - Indicates that the Trait was initialized, to make sure that initializeMouseHighlighting
+        // @private {boolean} - Indicates that the Trait was initialized, to make sure that initializeInteractiveHighlighting
         // is called before using the Trait.
-        this.mouseHighlightingInitialized = true;
+        this.interactiveHighlightingInitialized = true;
 
-        // @private - Input listener to activate the HighlightOverlay upon pointer mouse input. Uses exit
+        // @private - Input listener to activate the HighlightOverlay upon pointer pointer input. Uses exit
         // and enter instead of over and out because we do not want this to fire from bubbling. The highlight
         // should be around this Node when it receives input.
         this.activationListener = {
@@ -72,11 +72,11 @@ const MouseHighlighting = {
         };
 
         // @private - A reference to the Pointer so that we can add and remove listeners from it when necessary.
-        // Since this is on the trait, only one pointer can have a listener for this Node that uses MouseHighlighting
+        // Since this is on the trait, only one pointer can have a listener for this Node that uses InteractiveHighlighting
         // at one time.
         this.pointer = null;
 
-        // @protected {Object} - A map that collects all of the Displays that this MouseHighlighting Node is
+        // @protected {Object} - A map that collects all of the Displays that this InteractiveHighlighting Node is
         // attached to, mapping the unique ID of the Instance Trail to the Display. We need a reference to the
         // Displays to activate the Focus Property associated with highlighting, and to add/remove listeners when
         // features that require highlighting are enabled/disabled. Note that this is updated asynchronously
@@ -85,16 +85,16 @@ const MouseHighlighting = {
 
         // @private {Shape|Node|null} - The highlight that will surround this Node when it is activated and a Pointer
         // is currently over it. When null, the focus highlight will be used (as defined in ParallelDOM.js).
-        this._mouseHighlight = null;
+        this._interactiveHighlight = null;
 
         // @private {boolean} - If true, the highlight will be layerable in the scene graph instead of drawn
-        // above everything in the HighlightOverlay. If true, you are responsible for adding the mouseHighlight
-        // in the location you want in the scene graph. The mouseHighlight will become visible when this.mouseActivated
-        // is true.
-        this._mouseHighlightLayerable = null;
+        // above everything in the HighlightOverlay. If true, you are responsible for adding the interactiveHighlight
+        // in the location you want in the scene graph. The interactiveHighlight will become visible when
+        // this.interactiveHighlightActivated is true.
+        this._interactiveHighlightLayerable = null;
 
-        // @private {TinyEmitter} - emits an event when the mouse highlight changes for this Node
-        this.mouseHighlightChangedEmitter = new TinyEmitter();
+        // @private {TinyEmitter} - emits an event when the interactive highlight changes for this Node
+        this.interactiveHighlightChangedEmitter = new TinyEmitter();
 
         // @private {function} - When new instances of this Node are created, adds an entry to the map of Displays.
         this.changedInstanceListener = this.onChangedInstance.bind( this );
@@ -103,13 +103,13 @@ const MouseHighlighting = {
         // @private {function} - Listener that adds/removes other listeners that activate highlights when
         // the feature becomes enabled/disabled so that we don't do extra work related to highlighting unless
         // it is necessary.
-        this.mouseHighlightingEnabledListener = this.onMouseHighlightingEnabledChange.bind( this );
+        this.interactiveHighlightingEnabledListener = this.onInteractiveHighlightingEnabledChange.bind( this );
 
         const boundPointerReleaseListener = this.onPointerRelease.bind( this );
         const boundPointerCancel = this.onPointerCancel.bind( this );
 
         // @private - Input listener that locks the HighlightOverlay so that there are no updates to the highlight
-        // while the pointer is down over something that uses MouseHighlighting.
+        // while the pointer is down over something that uses InteractiveHighlighting.
         this.pointerListener = {
           up: boundPointerReleaseListener,
           cancel: boundPointerCancel,
@@ -118,102 +118,102 @@ const MouseHighlighting = {
 
         // support passing options through initialize
         if ( options ) {
-          this.mutate( _.pick( options, MOUSE_HIGHLIGHTING_OPTION_KEYS ) );
+          this.mutate( _.pick( options, INTERACTIVE_HIGHLIGHTING_OPTIONS ) );
         }
       },
 
       /**
-       * Whether or not a Node composes MouseHighlighting.
+       * Whether or not a Node composes InteractiveHighlighting.
        * @public
        * @returns {boolean}
        */
-      get isMouseHighlighting() {
+      get isInteractiveHighlighting() {
         return true;
       },
 
       /**
-       * Set the mouse highlight for this node. By default, the highlight will be a pink rectangle that surrounds
+       * Set the interactive highlight for this node. By default, the highlight will be a pink rectangle that surrounds
        * the node's local bounds.
        * @public
        *
-       * @param {Node|Shape|null} mouseHighlight
+       * @param {Node|Shape|null} interactiveHighlight
        */
-      setMouseHighlight( mouseHighlight ) {
-        assert && assert( mouseHighlight === null ||
-                          mouseHighlight instanceof Node ||
-                          mouseHighlight instanceof Shape );
+      setInteractiveHighlight( interactiveHighlight ) {
+        assert && assert( interactiveHighlight === null ||
+                          interactiveHighlight instanceof Node ||
+                          interactiveHighlight instanceof Shape );
 
-        if ( this._mouseHighlight !== mouseHighlight ) {
-          this._mouseHighlight = mouseHighlight;
+        if ( this._interactiveHighlight !== interactiveHighlight ) {
+          this._interactiveHighlight = interactiveHighlight;
 
-          if ( this._mouseHighlightLayerable ) {
+          if ( this._interactiveHighlightLayerable ) {
 
             // if focus highlight is layerable, it must be a node for the scene graph
-            assert && assert( mouseHighlight instanceof Node );
-            mouseHighlight.visible = this.mouseActivated;
+            assert && assert( interactiveHighlight instanceof Node );
+            interactiveHighlight.visible = this.interactiveHighlightActivated;
           }
 
           // cannot emit until initialize complete
-          if ( this.mouseHighlightingInitialized ) {
-            this.mouseHighlightChangedEmitter.emit();
+          if ( this.interactiveHighlightingInitialized ) {
+            this.interactiveHighlightChangedEmitter.emit();
           }
         }
       },
-      set mouseHighlight( mouseHighlight ) { this.setMouseHighlight( mouseHighlight ); },
+      set interactiveHighlight( interactiveHighlight ) { this.setInteractiveHighlight( interactiveHighlight ); },
 
       /**
-       * Returns the mouse highlight for this Node.
+       * Returns the interactive highlight for this Node.
        * @public
        *
        * @returns {null|Node|Shape}
        */
-      getMouseHighlight() {
-        return this._mouseHighlight;
+      getInteractiveHighlight() {
+        return this._interactiveHighlight;
       },
-      get mouseHighlight() { return this.getMouseHighlight(); },
+      get interactiveHighlight() { return this.getInteractiveHighlight(); },
 
       /**
        * Sets whether the highlight is layerable in the scene graph instead of above everyting in the
        * highlight overlay. If layerable, you must provide a custom highlight and it must be a Node. The highlight
-       * Node will always be invisible unless this Node is activated with a mouse.
+       * Node will always be invisible unless this Node is activated with a pointer.
        * @public
        *
-       * @param {boolean} mouseHighlightLayerable
+       * @param {boolean} interactiveHighlightLayerable
        */
-      setMouseHighlightLayerable( mouseHighlightLayerable ) {
-        if ( this._mouseHighlightLayerable !== mouseHighlightLayerable ) {
-          this._mouseHighlightLayerable = mouseHighlightLayerable;
+      setInteractiveHighlightLayerable( interactiveHighlightLayerable ) {
+        if ( this._interactiveHighlightLayerable !== interactiveHighlightLayerable ) {
+          this._interactiveHighlightLayerable = interactiveHighlightLayerable;
 
-          if ( this._mouseHighlight ) {
+          if ( this._interactiveHighlight ) {
 
-            if ( this._mouseHighlight ) {
-              assert && assert( this._mouseHighlight instanceof Node );
-              this._mouseHighlight.visible = this.mouseActivated;
+            if ( this._interactiveHighlight ) {
+              assert && assert( this._interactiveHighlight instanceof Node );
+              this._interactiveHighlight.visible = this.interactiveHighlightActivated;
             }
           }
         }
       },
-      set mouseHighlightLayerable( mouseHighlightLayerable ) { this.setMouseHighlightLayerable( mouseHighlightLayerable ); },
+      set interactiveHighlightLayerable( interactiveHighlightLayerable ) { this.setInteractiveHighlightLayerable( interactiveHighlightLayerable ); },
 
       /**
-       * Get whether or not the mouse highlight is layerable in the scene graph.
+       * Get whether or not the interactive highlight is layerable in the scene graph.
        * @public
        *
        * @returns {null|boolean}
        */
-      getMouseHighlightLayerable() {
-        return this._mouseHighlightLayerable;
+      getInteractiveHighlightLayerable() {
+        return this._interactiveHighlightLayerable;
       },
-      get mouseHighlightLayerable() { return this.getMouseHighlightLayerable(); },
+      get interactiveHighlightLayerable() { return this.getInteractiveHighlightLayerable(); },
 
       /**
-       * Returns true if this Node is "activated" by a mouse, indicating that a Pointer is over it
-       * and this Node mixes MouseHighlighting so an interactive highlight should surround it.
+       * Returns true if this Node is "activated" by a pointer, indicating that a Pointer is over it
+       * and this Node mixes InteractiveHighlighting so an interactive highlight should surround it.
        * @public
        *
        * @returns {boolean}
        */
-      isMouseActivated() {
+      isInteractiveHighlightActivated() {
         let activated = false;
 
         const trailIds = Object.keys( this._displays );
@@ -226,13 +226,13 @@ const MouseHighlighting = {
         }
         return activated;
       },
-      get mouseActivated() { return this.isMouseActivated(); },
+      get interactiveHighlightActivated() { return this.isInteractiveHighlightActivated(); },
 
       /**
        * @public
        */
-      disposeMouseHighlighting() {
-        this.mouseHighlightingInitialized = false;
+      disposeInteractiveHighlighting() {
+        this.interactiveHighlightingInitialized = false;
         this.changedInstanceEmitter.removeListener( this.changedInstanceListener );
 
         // remove the activation listener if it is currently attached
@@ -245,7 +245,7 @@ const MouseHighlighting = {
         for ( let i = 0; i < trailIds.length; i++ ) {
           const display = this._displays[ trailIds[ i ] ];
 
-          display.focusManager.pointerHighlightsVisibleProperty.unlink( this.mouseHighlightingEnabledListener );
+          display.focusManager.pointerHighlightsVisibleProperty.unlink( this.interactiveHighlightingEnabledListener );
           delete this._displays[ trailIds[ i ] ];
         }
       },
@@ -258,7 +258,7 @@ const MouseHighlighting = {
        * @param {SceneryEvent} event
        */
       onPointerEntered( event ) {
-        assert && assert( this.mouseHighlightingInitialized, 'MouseHighlighting should be initialized before using onPointerEntered' );
+        assert && assert( this.interactiveHighlightingInitialized, 'InteractiveHighlighting should be initialized before using onPointerEntered' );
 
         const displays = Object.values( this._displays );
         for ( let i = 0; i < displays.length; i++ ) {
@@ -271,7 +271,7 @@ const MouseHighlighting = {
       },
 
       onPointerMove( event ) {
-        assert && assert( this.mouseHighlightingInitialized, 'MouseHighlighting should be initialized before using onPointerMove' );
+        assert && assert( this.interactiveHighlightingInitialized, 'InteractiveHighlighting should be initialized before using onPointerMove' );
 
         const displays = Object.values( this._displays );
         for ( let i = 0; i < displays.length; i++ ) {
@@ -298,7 +298,7 @@ const MouseHighlighting = {
        * @param {SceneryEvent} event
        */
       onPointerExited( event ) {
-        assert && assert( this.mouseHighlightingInitialized, 'MouseHighlighting should be initialized before using onPointerExited' );
+        assert && assert( this.interactiveHighlightingInitialized, 'InteractiveHighlighting should be initialized before using onPointerExited' );
 
         const displays = Object.values( this._displays );
         for ( let i = 0; i < displays.length; i++ ) {
@@ -314,7 +314,7 @@ const MouseHighlighting = {
        * @param {SceneryEvent} event
        */
       onPointerDown( event ) {
-        assert && assert( this.mouseHighlightingInitialized, 'MouseHighlighting should be initialized before using onPointerDown' );
+        assert && assert( this.interactiveHighlightingInitialized, 'InteractiveHighlighting should be initialized before using onPointerDown' );
 
         if ( this.pointer === null ) {
           const displays = Object.values( this._displays );
@@ -345,7 +345,7 @@ const MouseHighlighting = {
        * @param {SceneryEvent} [event] - may be called during interrupt or cancel, in which case there is no event
        */
       onPointerRelease( event ) {
-        assert && assert( this.mouseHighlightingInitialized, 'MouseHighlighting should be initialized before using onPointerRelease' );
+        assert && assert( this.interactiveHighlightingInitialized, 'InteractiveHighlighting should be initialized before using onPointerRelease' );
 
         const displays = Object.values( this._displays );
         for ( let i = 0; i < displays.length; i++ ) {
@@ -366,7 +366,7 @@ const MouseHighlighting = {
        * @param event
        */
       onPointerCancel( event ) {
-        assert && assert( this.mouseHighlightingInitialized, 'MouseHighlighting should be initialized before using onPointerCancel' );
+        assert && assert( this.interactiveHighlightingInitialized, 'InteractiveHighlighting should be initialized before using onPointerCancel' );
 
         const displays = Object.values( this._displays );
         for ( let i = 0; i < displays.length; i++ ) {
@@ -379,13 +379,13 @@ const MouseHighlighting = {
       },
 
       /**
-       * Add or remove listeners related to activating mouse highlighting when the feature becomes enabled. This way
-       * we prevent doing work related to mouse highlighting unless the feature is enabled.
+       * Add or remove listeners related to activating interactive highlighting when the feature becomes enabled.
+       * This way we prevent doing work related to interactive highlighting unless the feature is enabled.
        * @private
        *
        * @param {boolean} enabled
        */
-      onMouseHighlightingEnabledChange( enabled ) {
+      onInteractiveHighlightingEnabledChange( enabled ) {
         const hasActivationListener = this.hasInputListener( this.activationListener );
         if ( enabled && !hasActivationListener ) {
           this.addInputListener( this.activationListener );
@@ -403,14 +403,14 @@ const MouseHighlighting = {
        * @param {boolean} added - whether the instance is added or removed from the Instance tree
        */
       onChangedInstance( instance, added ) {
-        assert && assert( this.mouseHighlightingInitialized, 'MouseHighlighting should be initialized before the onChangedInstance lister is called' );
+        assert && assert( this.interactiveHighlightingInitialized, 'InteractiveHighlighting should be initialized before the onChangedInstance lister is called' );
 
         if ( added ) {
           this._displays[ instance.trail.uniqueId ] = instance.display;
 
           // Listener may already by on the display in cases of DAG, only add if this is the first instance of this Node
-          if ( !instance.display.focusManager.pointerHighlightsVisibleProperty.hasListener( this.mouseHighlightingEnabledListener ) ) {
-            instance.display.focusManager.pointerHighlightsVisibleProperty.link( this.mouseHighlightingEnabledListener );
+          if ( !instance.display.focusManager.pointerHighlightsVisibleProperty.hasListener( this.interactiveHighlightingEnabledListener ) ) {
+            instance.display.focusManager.pointerHighlightsVisibleProperty.link( this.interactiveHighlightingEnabledListener );
           }
         }
         else {
@@ -419,7 +419,7 @@ const MouseHighlighting = {
 
           // only unlink if there are no more instances of this Node
           if ( instance.node.instances.length === 0 ) {
-            display.focusManager.pointerHighlightsVisibleProperty.unlink( this.mouseHighlightingEnabledListener );
+            display.focusManager.pointerHighlightsVisibleProperty.unlink( this.interactiveHighlightingEnabledListener );
           }
 
           delete this._displays[ instance.trail.uniqueId ];
@@ -442,11 +442,11 @@ const MouseHighlighting = {
         // an empty array is returned
         const childToLeafNodes = trail.nodes.slice( indexOfSelf + 1, trail.nodes.length );
 
-        // if any of the nodes from leaf to self use MouseHighlighting, they should receive input, and we shouldn't
+        // if any of the nodes from leaf to self use InteractiveHighlighting, they should receive input, and we shouldn't
         // speak the content for this Node
         let descendantsUseVoicing = false;
         for ( let i = 0; i < childToLeafNodes.length; i++ ) {
-          if ( childToLeafNodes[ i ].isMouseHighlighting ) {
+          if ( childToLeafNodes[ i ].isInteractiveHighlighting ) {
             descendantsUseVoicing = true;
             break;
           }
@@ -458,5 +458,5 @@ const MouseHighlighting = {
   }
 };
 
-scenery.register( 'MouseHighlighting', MouseHighlighting );
-export default MouseHighlighting;
+scenery.register( 'InteractiveHighlighting', InteractiveHighlighting );
+export default InteractiveHighlighting;

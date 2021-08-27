@@ -17,7 +17,7 @@
  *
  * This class also controls setting and clearing of several (but not all) of these Properties. It does not set the
  * pdomFocusProperty because that Property is set only when the browser's focus changes. Some of the focus
- * Properties are set in feature traits, such as pointerFocusProperty which is set by MouseHighlighting because it is
+ * Properties are set in feature traits, such as pointerFocusProperty which is set by InteractiveHighlighting because it is
  * set through listeners on each individual Node.
  *
  * This class also has a few Properties that control the behavior of the Display's HighlightOverlay.
@@ -40,7 +40,7 @@ class FocusManager {
   constructor() {
 
     // @public {Property.<Focus|null>} - This Property whose Focus Trail points to the Node under the pointer to
-    // support features of Voicing and Interactive Highlights. Nodes that compose MouseHighlighting can
+    // support features of Voicing and Interactive Highlights. Nodes that compose InteractiveHighlighting can
     // receive this Focus and a highlight may appear around it.
     this.pointerFocusProperty = new Property( null );
 
@@ -51,7 +51,7 @@ class FocusManager {
     // @public {Property.<Focus|null>} - A Property whose value is either null or a Focus with Trail and Display equal
     // to the pointerFocusProperty. When this Property has a value, the HighlightOverlay will wait to update the
     // highlight for the pointerFocusProperty. This is useful when the pointer has begun to interact with a Node
-    // that uses MouseHighlighting, but the mouse has moved out of it or over another during interaction. Thehighlight
+    // that uses InteractiveHighlighting, but the mouse has moved out of it or over another during interaction. Thehighlight
     // should remain on the Node receiving interaction and wait to update until interaction completes.
     this.lockedPointerFocusProperty = new Property( null );
 
@@ -107,7 +107,7 @@ class FocusManager {
 
     //-----------------------------------------------------------------------------------------------------------------
     // The following section manages control of pointerFocusProperty - pointerFocusProperty is set with a Focus
-    // by MouseHighlighting from listeners on Nodes that use that Trait. But it uses a FocusDisplayedController
+    // by InteractiveHighlighting from listeners on Nodes that use that Trait. But it uses a FocusDisplayedController
     // to remove the focus at the right time.
 
     this.pointerFocusDisplayedController = new FocusDisplayedController( this.pointerFocusProperty, {

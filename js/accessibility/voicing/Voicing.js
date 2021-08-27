@@ -28,7 +28,7 @@ import responseCollector from '../../../../utterance-queue/js/responseCollector.
 import ResponsePatterns from '../../../../utterance-queue/js/ResponsePatterns.js';
 import Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
-import MouseHighlighting from './MouseHighlighting.js';
+import InteractiveHighlighting from './InteractiveHighlighting.js';
 import voicingUtteranceQueue from './voicingUtteranceQueue.js';
 
 // options that are supported by Voicing.js. Added to mutator keys so that Voicing properties can be set with mutate.
@@ -47,7 +47,7 @@ const Voicing = {
   /**
    * @public
    * @trait {Node}
-   * @mixes {MouseHighlighting}
+   * @mixes {InteractiveHighlighting}
    * @param {function(new:Node)} type - The type (constructor) whose prototype that is modified. Should be a Node class.
    */
   compose( type ) {
@@ -55,8 +55,8 @@ const Voicing = {
 
     const proto = type.prototype;
 
-    // compose with mouse highlighting
-    MouseHighlighting.compose( type );
+    // compose with Interactive Highlights, all Nodes with Voicing features highlight as they are interactive
+    InteractiveHighlighting.compose( type );
 
     extend( proto, {
 
@@ -80,7 +80,7 @@ const Voicing = {
         assert && assert( this.voicingInitialized === undefined, 'Voicing has already been initialized for this Node' );
 
         // initialize "super" Trait to support highlights on mouse input
-        this.initializeMouseHighlighting( options );
+        this.initializeInteractiveHighlighting( options );
 
         // @private {boolean} - to make sure that initializeVoicing is called before trying to use the mixin.
         this.voicingInitialized = true;
@@ -489,7 +489,7 @@ const Voicing = {
       disposeVoicing() {
         this.voicingInitialized = false;
         this.removeInputListener( this.speakContentOnFocusListener );
-        this.disposeMouseHighlighting();
+        this.disposeInteractiveHighlighting();
       }
     } );
   }

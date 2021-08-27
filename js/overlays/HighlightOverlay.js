@@ -177,7 +177,7 @@ class HighlightOverlay {
     this.domFocusListener = this.onFocusChange.bind( this );
     this.readingBlockTransformListener = this.onReadingBlockTransformChange.bind( this );
     this.focusHighlightListener = this.onFocusHighlightChange.bind( this );
-    this.mouseHighlightListener = this.onMouseHighlightChange.bind( this );
+    this.interactiveHighlightListener = this.onInteractiveHighlightChange.bind( this );
     this.focusHighlightsVisibleListener = this.onFocusHighlightsVisibleChange.bind( this );
     this.voicingHighlightsVisibleListener = this.onVoicingHighlightsVisibleChange.bind( this );
     this.pointerFocusListener = this.onPointerFocusChange.bind( this );
@@ -343,24 +343,24 @@ class HighlightOverlay {
   }
 
   /**
-   * Activate a mouse highlight, activating the highlight and adding a listener that will update the highlight changes
-   * while it is active.
+   * Activate an interactive highlight, activating the highlight and adding a listener that will update the highlight
+   * changes while it is active.
    * @private
    *
    * @param {Trail} trail
    * @param {Node} node
    */
-  activateMouseHighlight( trail, node ) {
+  activateInteractiveHighlight( trail, node ) {
     this.activateHighlight(
       trail,
       node,
-      node.mouseHighlight || node.focusHighlight,
-      node.mouseHighlightLayerable,
+      node.interactiveHighlight || node.focusHighlight,
+      node.interactiveHighlightLayerable,
       this.interactiveHighlightsVisibleProperty
     );
 
     // handle changes to the highlight while it is active
-    node.mouseHighlightChangedEmitter.addListener( this.mouseHighlightListener );
+    node.interactiveHighlightChangedEmitter.addListener( this.interactiveHighlightListener );
   }
 
   /**
@@ -467,8 +467,8 @@ class HighlightOverlay {
     if ( this.node.focusHighlightChangedEmitter.hasListener( this.focusHighlightListener ) ) {
       this.node.focusHighlightChangedEmitter.removeListener( this.focusHighlightListener );
     }
-    if ( this.node.isMouseHighlighting && this.node.mouseHighlightChangedEmitter.hasListener( this.mouseHighlightListener ) ) {
-      this.node.mouseHighlightChangedEmitter.removeListener( this.mouseHighlightListener );
+    if ( this.node.isInteractiveHighlighting && this.node.interactiveHighlightChangedEmitter.hasListener( this.interactiveHighlightListener ) ) {
+      this.node.interactiveHighlightChangedEmitter.removeListener( this.interactiveHighlightListener );
     }
 
     // remove all 'group' focus highlights
@@ -643,7 +643,7 @@ class HighlightOverlay {
       this.activateFocusHighlight( newTrail, node );
     }
     else if ( this.display.focusManager.pointerFocusProperty.value && this.interactiveHighlightsVisibleProperty.value ) {
-      this.updateMouseHighlight( this.display.focusManager.pointerFocusProperty.value );
+      this.updateInteractiveHighlight( this.display.focusManager.pointerFocusProperty.value );
     }
   }
 
@@ -664,18 +664,18 @@ class HighlightOverlay {
   onPointerFocusChange( focus ) {
     if ( !this.display.focusManager.lockedPointerFocusProperty.value &&
          !this.display.focusManager.pdomFocusHighlightsVisibleProperty.value ) {
-      this.updateMouseHighlight( focus );
+      this.updateInteractiveHighlight( focus );
     }
   }
 
   /**
-   * Redraws the mouse highlight. There are cases where we want to do this regardless of whether the pointer focus
-   * is locked, such as when the mouse highlight changes changes for a Node that is activated for mouse highlighting.
+   * Redraws the highlight. There are cases where we want to do this regardless of whether the pointer focus
+   * is locked, such as when the highlight changes changes for a Node that is activated for highlighting.
    * @private
    *
    * @param {Focus} focus
    */
-  updateMouseHighlight( focus ) {
+  updateInteractiveHighlight( focus ) {
     const newTrail = ( focus && focus.display === this.display ) ? focus.trail : null;
     if ( this.hasHighlight() ) {
       this.deactivateHighlight();
@@ -686,7 +686,7 @@ class HighlightOverlay {
       const node = newTrail.lastNode();
 
       if ( ( node.isReadingBlock && this.readingBlockHighlightsVisibleProperty.value ) || ( !node.isReadingBlock && this.interactiveHighlightsVisibleProperty.value ) ) {
-        this.activateMouseHighlight( newTrail, node );
+        this.activateInteractiveHighlight( newTrail, node );
         activated = true;
       }
     }
@@ -698,13 +698,13 @@ class HighlightOverlay {
 
   /**
    * Called whenever the lockedPointerFocusProperty changes. If the lockedPointerFocusProperty changes we probably
-   * have to update the highlight because interaction with a Node that uses MouseHighlighting just ended.
+   * have to update the highlight because interaction with a Node that uses InteractiveHighlighting just ended.
    * @private
    *
    * @param {Focus|null} focus
    */
   onLockedPointerFocusChange( focus ) {
-    this.updateMouseHighlight( focus || this.display.focusManager.pointerFocusProperty.value );
+    this.updateInteractiveHighlight( focus || this.display.focusManager.pointerFocusProperty.value );
   }
 
   /**
@@ -739,11 +739,11 @@ class HighlightOverlay {
   }
 
   /**
-   * If the Node has pointer focus and the mouse highlight changes, we must do all of the work to reapply the
+   * If the Node has pointer focus and the interacive highlight changes, we must do all of the work to reapply the
    * highlight as if the value of the focusProperty changed.
    * @private
    */
-  onMouseHighlightChange() {
+  onInteractiveHighlightChange() {
 
     if ( assert ) {
       const lockedPointerFocus = this.display.focusManager.lockedPointerFocusProperty.value;
@@ -751,7 +751,7 @@ class HighlightOverlay {
         'Update should only be necessary if Node is activated with a Pointer or pointer focus is locked during interaction' );
     }
 
-    this.updateMouseHighlight( this.display.focusManager.lockedPointerFocusProperty.value );
+    this.updateInteractiveHighlight( this.display.focusManager.lockedPointerFocusProperty.value );
   }
 
   /**
