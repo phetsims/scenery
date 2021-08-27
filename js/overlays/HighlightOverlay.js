@@ -747,7 +747,7 @@ class HighlightOverlay {
 
     if ( assert ) {
       const lockedPointerFocus = this.display.focusManager.lockedPointerFocusProperty.value;
-      assert( this.node.mouseActivated || ( lockedPointerFocus && lockedPointerFocus.trail.lastNode() === this.node ),
+      assert( this.node.interactiveHighlightActivated || ( lockedPointerFocus && lockedPointerFocus.trail.lastNode() === this.node ),
         'Update should only be necessary if Node is activated with a Pointer or pointer focus is locked during interaction' );
     }
 
