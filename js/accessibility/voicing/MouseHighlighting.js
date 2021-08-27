@@ -87,11 +87,10 @@ const MouseHighlighting = {
         // is currently over it. When null, the focus highlight will be used (as defined in ParallelDOM.js).
         this._mouseHighlight = null;
 
-        // @private {boolean|null} - If true, the highlight will be layerable in the scene graph instead of drawn
+        // @private {boolean} - If true, the highlight will be layerable in the scene graph instead of drawn
         // above everything in the HighlightOverlay. If true, you are responsible for adding the mouseHighlight
         // in the location you want in the scene graph. The mouseHighlight will become visible when this.mouseActivated
-        // is true. When null, this highlight will fall back to the behavior of focusHighlightLayerable in
-        // ParallelDOM.js.
+        // is true.
         this._mouseHighlightLayerable = null;
 
         // @private {TinyEmitter} - emits an event when the mouse highlight changes for this Node

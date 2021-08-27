@@ -351,16 +351,11 @@ class HighlightOverlay {
    * @param {Node} node
    */
   activateMouseHighlight( trail, node ) {
-
-    // if mouseHighlightLayerable is not set, default to focusHighlightLayerable
-    const layerable = node.mouseHighlightLayerable === null ? node.focusHighlightLayerable :
-                      node.mouseHighlightLayerable;
-
     this.activateHighlight(
       trail,
       node,
       node.mouseHighlight || node.focusHighlight,
-      layerable,
+      node.mouseHighlightLayerable,
       this.interactiveHighlightsVisibleProperty
     );
 
