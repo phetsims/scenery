@@ -63,7 +63,7 @@ class ImageSVGDrawable extends ImageStatefulDrawable( SVGSelfDrawable ) {
     if ( this.dirtyImage ) {
       sceneryLog && sceneryLog.ImageSVGDrawable && sceneryLog.ImageSVGDrawable( `${this.id} Updating dirty image` );
       if ( this.node._image ) {
-        // like <image xlink:href='http://phet.colorado.edu/images/phet-logo-yellow.png' x='0' y='0' height='127px' width='242px'/>
+        // like <image xlink:href='https://phet.colorado.edu/images/phet-logo-yellow.png' x='0' y='0' height='127px' width='242px'/>
         this.updateURL( image, true );
       }
       else {
