@@ -4,7 +4,7 @@ scenery
 Scenery is an HTML5 scene graph.
 
 By PhET Interactive Simulations
-http://phet.colorado.edu/
+https://phet.colorado.edu/
 
 ### Documentation
 
