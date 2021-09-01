@@ -25,7 +25,7 @@ import extend from '../../../../phet-core/js/extend.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import merge from '../../../../phet-core/js/merge.js';
 import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
-import ResponsePatterns from '../../../../utterance-queue/js/ResponsePatterns.js';
+import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
 import Node from '../../nodes/Node.js';
 import scenery from '../../scenery.js';
 import InteractiveHighlighting from './InteractiveHighlighting.js';
@@ -38,7 +38,7 @@ const VOICING_OPTION_KEYS = [
   'voicingContextResponse',
   'voicingHintResponse',
   'voicingUtteranceQueue',
-  'voicingResponsePatterns',
+  'voicingResponsePatternCollection',
   'voicingIgnoreVoicingManagerProperties'
 ];
 
@@ -116,10 +116,10 @@ const Voicing = {
         // while user is changing preferences or other settings.
         this._voicingUtteranceQueue = null;
 
-        // {ResponsePatterns} - A collection of response patterns that are used to collect the responses of this Voicing Node
+        // {ResponsePatternCollection} - A collection of response patterns that are used to collect the responses of this Voicing Node
         // with responseCollector. Controls the order of the Voicing responses and even punctuation used when responses
-        // are assembled into final content for the UtteranceQueue. See ResponsePatterns for more details.
-        this._voicingResponsePatterns = ResponsePatterns.DEFAULT_RESPONSE_PATTERNS;
+        // are assembled into final content for the UtteranceQueue. See ResponsePatternCollection for more details.
+        this._voicingResponsePatternCollection = ResponsePatternCollection.DEFAULT_RESPONSE_PATTERNS;
 
         // @private {Object} - Input listener that speaks content on focus. This is the only input listener added
         // by Voicing, but it is the one that is consistent for all Voicing nodes. On focus, speak the name, object
@@ -274,8 +274,8 @@ const Voicing = {
           ignoreProperties: this._voicingIgnoreVoicingManagerProperties,
 
           // {Object} - collection of string patterns to use with responseCollector.collectResponses, see
-          // ResponsePatterns for more information.
-          responsePatterns: this._voicingResponsePatterns,
+          // ResponsePatternCollection for more information.
+          responsePatternCollection: this._voicingResponsePatternCollection,
 
           // {Utterance|null} - The utterance to use if you want this response to be more controlled in the
           // UtteranceQueue.
@@ -425,28 +425,28 @@ const Voicing = {
 
       /**
        * Sets the collection of patterns to use for voicing responses, controlling the order, punctuation, and
-       * additional content for each combination of response. See ResponsePatterns.js if you wish to use
+       * additional content for each combination of response. See ResponsePatternCollection.js if you wish to use
        * a collection of string patterns that are not the default.
        * @public
        *
-       * @param {ResponsePatterns} patterns - see ResponsePatterns
+       * @param {ResponsePatternCollection} patterns - see ResponsePatternCollection
        */
-      setVoicingResponsePatterns( patterns ) {
-        assert && assert( patterns instanceof ResponsePatterns );
-        this._voicingResponsePatterns = patterns;
+      setVoicingResponsePatternCollection( patterns ) {
+        assert && assert( patterns instanceof ResponsePatternCollection );
+        this._voicingResponsePatternCollection = patterns;
       },
-      set voicingResponsePatterns( patterns ) { this.setVoicingResponsePatterns( patterns ); },
+      set voicingResponsePatternCollection( patterns ) { this.setVoicingResponsePatternCollection( patterns ); },
 
       /**
-       * Get the ResponsePatterns object that this Voicing Node is using to collect responses.
+       * Get the ResponsePatternCollection object that this Voicing Node is using to collect responses.
        * @public
        *
-       * @returns {ResponsePatterns}
+       * @returns {ResponsePatternCollection}
        */
-      getVoicingResponsePatterns() {
-        return this._voicingResponsePatterns;
+      getVoicingResponsePatternCollection() {
+        return this._voicingResponsePatternCollection;
       },
-      get voicingResponsePatterns() { return this.getVoicingResponsePatterns(); },
+      get voicingResponsePatternCollection() { return this.getVoicingResponsePatternCollection(); },
 
       /**
        * Sets the utteranceQueue through which voicing associated with this Node will be spoken. By default,
