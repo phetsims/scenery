@@ -2685,7 +2685,7 @@ const ParallelDOM = {
           if ( display.isAccessible() ) {
 
             // Don't use `forEachUtterance` to prevent creating a closure for each usage of this function
-            display.utteranceQueue.addToBack( utterance );
+            display.descriptionUtteranceQueue.addToBack( utterance );
           }
         }
       },
@@ -2707,7 +2707,7 @@ const ParallelDOM = {
         for ( let i = 0; i < connectedDisplays.length; i++ ) {
           const display = connectedDisplays[ i ];
           if ( display.isAccessible() ) {
-            callback( display.utteranceQueue );
+            callback( display.descriptionUtteranceQueue );
           }
         }
       },
