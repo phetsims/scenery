@@ -334,9 +334,9 @@ class Display {
 
     // @public {UtteranceQueue} - data structure for managing aria-live alerts the this Display instance
     const ariaHerald = new AriaHerald();
-    this.utteranceQueue = new UtteranceQueue( ariaHerald, {
+    this.descriptionUtteranceQueue = new UtteranceQueue( ariaHerald, {
       implementAsSkeleton: !this._accessible,
-      tandem: options.tandem.createTandem( 'utteranceQueue' )
+      tandem: options.tandem.createTandem( 'descriptionUtteranceQueue' )
     } );
 
     // @public - Manages the various types of Focus that can go through the Display, as well as Properties
@@ -2105,7 +2105,7 @@ class Display {
     // rootBackbone.
     this._baseInstance && this._baseInstance.dispose();
 
-    this.utteranceQueue && this.utteranceQueue.dispose();
+    this.descriptionUtteranceQueue && this.descriptionUtteranceQueue.dispose();
 
     this.focusManager && this.focusManager.dispose();
 
