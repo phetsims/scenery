@@ -16,6 +16,7 @@
   ],
   "exclude": [
     "js/**/*test*",
+    "js/**/*Test*",
     "../utterance-queue/js/**/*test*"
   ]
 }
