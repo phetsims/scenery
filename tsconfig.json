@@ -1,0 +1,21 @@
+{
+  "extends": "../chipper/tsconfig-core.json",
+  "references": [
+    {
+      "path": "../kite"
+    }
+  ],
+  "include": [
+    "js/**/*",
+    "../utterance-queue/js/**/*",
+    "../sun/js/SunConstants.js",
+    "../sun/js/sun.js",
+    "../phetcommon/js/util/StringUtils.js",
+    "../phetcommon/js/view/ModelViewTransform2.js",
+    "../phetcommon/js/phetcommon.js"
+  ],
+  "exclude": [
+    "js/**/*test*",
+    "../utterance-queue/js/**/*test*"
+  ]
+}
