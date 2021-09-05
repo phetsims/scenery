@@ -766,7 +766,7 @@ class DragListener extends PressListener {
    * Sets the drag transform of the listener.
    * @public
    *
-   * @param {Bounds2} transform
+   * @param {Transform3} transform
    */
   setTransform( transform ) {
     assert && assert( transform instanceof Transform3 );
