@@ -1506,7 +1506,10 @@ const ParallelDOM = {
           // of the associated node
           if ( this._focusHighlight ) {
             assert && assert( this._focusHighlight instanceof Node );
-            this._focusHighlight.visible = this.focused;
+            this._focusHighlight.visible = false;
+
+            // emit that the highlight has changed and we may need to update its visual representation
+            this.focusHighlightChangedEmitter.emit();
           }
         }
       },
