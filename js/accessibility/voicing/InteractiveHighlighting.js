@@ -150,7 +150,9 @@ const InteractiveHighlighting = {
 
             // if focus highlight is layerable, it must be a node for the scene graph
             assert && assert( interactiveHighlight instanceof Node );
-            interactiveHighlight.visible = this.interactiveHighlightActivated;
+
+            // make sure the highlight is invisible, the HighlightOverlay will manage visibility
+            interactiveHighlight.visible = false;
           }
 
           // cannot emit until initialize complete
@@ -185,10 +187,11 @@ const InteractiveHighlighting = {
           this._interactiveHighlightLayerable = interactiveHighlightLayerable;
 
           if ( this._interactiveHighlight ) {
+            assert && assert( this._interactiveHighlight instanceof Node );
+            this._interactiveHighlight.visible = false;
 
-            if ( this._interactiveHighlight ) {
-              assert && assert( this._interactiveHighlight instanceof Node );
-              this._interactiveHighlight.visible = this.interactiveHighlightActivated;
+            if ( this.interactiveHighlightingInitialized ) {
+              this.interactiveHighlightChangedEmitter.emit();
             }
           }
         }

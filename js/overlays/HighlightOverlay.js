@@ -651,17 +651,14 @@ class HighlightOverlay {
    * Called when the pointerFocusProperty changes. pointerFocusProperty will have the Trail to the
    * Node that composes Voicing and is under the Pointer. A highlight will appear around this Node if
    * voicing highlights are visible.
-   *
-   * As of 8/11/21 we also decided that Interactive Highlights should also never be shown while
-   * PDOM highlights are visible, to avoid confusing cases where the Interactive Highlight
-   * can appear while the DOM focus highlight is active and conveying information. In the future
-   * we might make it so that both can be visible at the same time, but that will require
-   * changing the look of one of the highlights so it is clear they are distinct.
    * @private
    *
-   * @param {Focus} focus
+   * @param {Focus|null} focus
    */
   onPointerFocusChange( focus ) {
+
+    // updateInteractiveHighlight will only activate the highlight if pdomFocusHighlightsVisibleProperty is false,
+    // but check here as well so that we don't do work to deactivate highlights only to immediately reactivate them
     if ( !this.display.focusManager.lockedPointerFocusProperty.value &&
          !this.display.focusManager.pdomFocusHighlightsVisibleProperty.value ) {
       this.updateInteractiveHighlight( focus );
@@ -671,18 +668,27 @@ class HighlightOverlay {
   /**
    * Redraws the highlight. There are cases where we want to do this regardless of whether the pointer focus
    * is locked, such as when the highlight changes changes for a Node that is activated for highlighting.
+   *
+   * As of 8/11/21 we also decided that Interactive Highlights should also never be shown while
+   * PDOM highlights are visible, to avoid confusing cases where the Interactive Highlight
+   * can appear while the DOM focus highlight is active and conveying information. In the future
+   * we might make it so that both can be visible at the same time, but that will require
+   * changing the look of one of the highlights so it is clear they are distinct.
    * @private
    *
-   * @param {Focus} focus
+   * @param {Focus|null} focus
    */
   updateInteractiveHighlight( focus ) {
     const newTrail = ( focus && focus.display === this.display ) ? focus.trail : null;
+
+    // always clear the highlight if it is being removed
     if ( this.hasHighlight() ) {
       this.deactivateHighlight();
     }
 
+    // only activate a new highlight if PDOM focus highlights are not displayed, see JSDoc
     let activated = false;
-    if ( newTrail ) {
+    if ( newTrail && !this.display.focusManager.pdomFocusHighlightsVisibleProperty.value ) {
       const node = newTrail.lastNode();
 
       if ( ( node.isReadingBlock && this.readingBlockHighlightsVisibleProperty.value ) || ( !node.isReadingBlock && this.interactiveHighlightsVisibleProperty.value ) ) {
