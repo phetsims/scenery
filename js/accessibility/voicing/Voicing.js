@@ -39,7 +39,8 @@ const VOICING_OPTION_KEYS = [
   'voicingHintResponse',
   'voicingUtteranceQueue',
   'voicingResponsePatternCollection',
-  'voicingIgnoreVoicingManagerProperties'
+  'voicingIgnoreVoicingManagerProperties',
+  'voicingFocusListener'
 ];
 
 const Voicing = {
@@ -121,14 +122,15 @@ const Voicing = {
         // are assembled into final content for the UtteranceQueue. See ResponsePatternCollection for more details.
         this._voicingResponsePatternCollection = ResponsePatternCollection.DEFAULT_RESPONSE_PATTERNS;
 
+        // @private {Function(event):} - called when this node is focused.
+        this._voicingFocusListener = this.defaultFocusListener;
+
         // @private {Object} - Input listener that speaks content on focus. This is the only input listener added
         // by Voicing, but it is the one that is consistent for all Voicing nodes. On focus, speak the name, object
         // response, and interaction hint.
         this.speakContentOnFocusListener = {
-          focus: () => {
-            this.voicingSpeakFullResponse( {
-              contextResponse: null
-            } );
+          focus: event => {
+            this._voicingFocusListener( event );
           }
         };
         this.addInputListener( this.speakContentOnFocusListener );
@@ -472,6 +474,40 @@ const Voicing = {
         return this._voicingUtteranceQueue;
       },
       get utteranceQueue() { return this.getUtteranceQueue(); },
+
+      /**
+       * Called whenever this Node is focused.
+       * @public
+       *
+       * @param {function(SceneryEvent):} focusListener
+       */
+      setVoicingFocusListener( focusListener ) {
+        this._voicingFocusListener = focusListener;
+      },
+
+      set voicingFocusListener( utteranceQueue ) { this.setVoicingFocusListener( utteranceQueue ); },
+
+      /**
+       * Gets the utteranceQueue through which voicing associated with this Node will be spoken.
+       * @public
+       *
+       * @returns {UtteranceQueue}
+       */
+      getVoicingFocusListener() {
+        return this._voicingFocusListener;
+      },
+      get voicingFocusListener() { return this.getVoicingFocusListener(); },
+
+
+      /**
+       * The default focus listener attached to this Node during initialization.
+       * @public
+       */
+      defaultFocusListener() {
+        this.voicingSpeakFullResponse( {
+          contextResponse: null
+        } );
+      },
 
       /**
        * Whether or not a Node composes Voicing.
