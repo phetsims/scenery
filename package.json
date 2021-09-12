@@ -26,7 +26,8 @@
     "finalizeJS": "scenery.Utils.polyfillRequestAnimationFrame();",
     "preload": [
       "../sherpa/lib/himalaya-0.2.7.js"
-    ]
+    ],
+    "supportsOutputJS": true
   },
   "eslintConfig": {
     "extends": "../chipper/eslint/sim_eslintrc.js",
