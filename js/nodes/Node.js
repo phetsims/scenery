@@ -198,6 +198,7 @@ const NODE_OPTION_KEYS = [
   'children', // {Array.<Node>}- List of children to add (in order), see setChildren for more documentation
   'cursor', // {string|null} - CSS cursor to display when over this Node, see setCursor() for more documentation
 
+  'phetioVisiblePropertyInstrumented', // {boolean} - When true, create an instrumented visibleProperty when this Node is instrumented, see setPhetioVisiblePropertyInstrumented() for more documentation
   'visibleProperty', // {Property.<boolean>|null} - Sets forwarding of the visibleProperty, see setVisibleProperty() for more documentation
   'visible', // {boolean} - Whether the Node is visible, see setVisible() for more documentation
 
@@ -255,6 +256,7 @@ const NODE_OPTION_KEYS = [
 ];
 
 const DEFAULT_OPTIONS = {
+  phetioVisiblePropertyInstrumented: true,
   visible: true,
   opacity: 1,
   disabledOpacity: 1,
@@ -338,7 +340,7 @@ class Node extends PhetioObject {
     // @private {TinyForwardingProperty.<boolean>} - Whether this Node (and its children) will be visible when the scene is updated.
     // Visible Nodes by default will not be pickable either.
     // NOTE: This is fired synchronously when the visibility of the Node is toggled
-    this._visibleProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.visible, true,
+    this._visibleProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.visible, DEFAULT_OPTIONS.phetioVisiblePropertyInstrumented,
       this.onVisiblePropertyChange.bind( this ) );
 
     // @public {TinyProperty.<number>} - Opacity, in the range from 0 (fully transparent) to 1 (fully opaque).
@@ -3858,6 +3860,44 @@ class Node extends PhetioObject {
    */
   get visible() {
     return this.isVisible();
+  }
+
+  /**
+   * Use this to automatically create a forwarded, PhET-iO instrumented visibleProperty internal to Node.
+   * @public
+   * @param {boolean} phetioVisiblePropertyInstrumented
+   * @returns {Node} - for chaining
+   */
+  setPhetioVisiblePropertyInstrumented( phetioVisiblePropertyInstrumented ) {
+    return this._visibleProperty.setTargetPropertyInstrumented( phetioVisiblePropertyInstrumented, this );
+  }
+
+  /**
+   * See setPhetioVisiblePropertyInstrumented() for more information
+   * @public
+   *
+   * @param {boolean} value
+   */
+  set phetioVisiblePropertyInstrumented( value ) {
+    this.setPhetioVisiblePropertyInstrumented( value );
+  }
+
+  /**
+   * @public
+   * @returns {boolean}
+   */
+  getPhetioVisiblePropertyInstrumented() {
+    return this._visibleProperty.getTargetPropertyInstrumented();
+  }
+
+  /**
+   * See getPhetioVisiblePropertyInstrumented() for more information
+   * @public
+   *
+   * @returns {boolean}
+   */
+  get phetioVisiblePropertyInstrumented() {
+    return this.getPhetioVisiblePropertyInstrumented();
   }
 
   /**
