@@ -13,6 +13,7 @@ import Matrix3 from '../../../../dot/js/Matrix3.js';
 import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
 import merge from '../../../../phet-core/js/merge.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
+import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
 import scenery from '../../scenery.js';
 import PDOMSiblingStyle from './PDOMSiblingStyle.js';
 import PDOMUtils from './PDOMUtils.js';
@@ -513,20 +514,26 @@ class PDOMPeer {
 
     const element = options.element || this.getElementByName( options.elementName );
 
+    // remove directional formatting that may surround strings if they are translatable
+    let attributeValueWithoutMarks = attributeValue;
+    if ( typeof attributeValue === 'string' ) {
+      attributeValueWithoutMarks = stripEmbeddingMarks( attributeValue );
+    }
+
     if ( attribute === DISABLED_ATTRIBUTE_NAME && !this.display.interactive ) {
 
       // The presence of the `disabled` attribute means it is always disabled.
-      this._preservedDisabledValue = options.asProperty ? attributeValue : true;
+      this._preservedDisabledValue = options.asProperty ? attributeValueWithoutMarks : true;
     }
 
     if ( options.namespace ) {
-      element.setAttributeNS( options.namespace, attribute, attributeValue );
+      element.setAttributeNS( options.namespace, attribute, attributeValueWithoutMarks );
     }
     else if ( options.asProperty ) {
-      element[ attribute ] = attributeValue;
+      element[ attribute ] = attributeValueWithoutMarks;
     }
     else {
-      element.setAttribute( attribute, attributeValue );
+      element.setAttribute( attribute, attributeValueWithoutMarks );
     }
   }
 
