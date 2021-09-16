@@ -193,7 +193,7 @@ const domEventPropertiesToSerialize = [
   'pointerType', 'charCode', 'which', 'clientX', 'clientY', 'pageX', 'pageY', 'changedTouches',
   'scale',
   'target', 'relatedTarget',
-  'ctrlKey', 'shiftKey', 'altKey', 'metaKey'
+  'ctrlKey', 'shiftKey', 'altKey', 'metaKey', 'code'
 ];
 
 // A list of keys on events that need to be serialized into HTMLElements
