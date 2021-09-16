@@ -199,6 +199,9 @@ class VoicingManager extends Announcer {
    * Returns an array of voices where "Google" voices are prioritized. Google voices generally sound the best so they
    * can be promoted if desired. Returns an array of SpeechSynthesisVoices where "Google" voices are at the top of the
    * list.
+   *
+   * As of 9/16/21 I am not sure if we want to prioritize voices for Voicing feature, but something like this
+   * gets us started. See https://github.com/phetsims/scenery/issues/1282/
    * @public
    */
   getVoicesWithGooglePrioritized() {
