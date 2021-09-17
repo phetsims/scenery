@@ -168,6 +168,8 @@ function getNextPreviousFocusable( direction, parentElement ) {
   const parent = parentElement || document.body;
   const linearDOM = getLinearDOMElements( parent );
 
+  // TODO: PhET-iO concerns around using activeElement, for playback, see https://github.com/phetsims/scenery/issues/1284
+  // TODO: why is FocusManager.pdomFocusedNode null here? Perhaps just make activeElement document.body if that is the case, https://github.com/phetsims/scenery/issues/1284
   const activeElement = document.activeElement;
   const activeIndex = linearDOM.indexOf( activeElement );
   const delta = direction === NEXT ? +1 : -1;

@@ -139,18 +139,21 @@ class FocusManager {
    * @param {Focus|null} value
    */
   static set pdomFocus( value ) {
-    let previousFocus;
-    if ( FocusManager.pdomFocusProperty.value ) {
-      previousFocus = FocusManager.pdomFocusedNode;
-    }
+    if ( FocusManager.pdomFocusProperty.value !== value ) {
 
-    FocusManager.pdomFocusProperty.value = value;
+      let previousFocus;
+      if ( FocusManager.pdomFocusProperty.value ) {
+        previousFocus = FocusManager.pdomFocusedNode;
+      }
 
-    // if set to null, make sure that the active element is no longer focused
-    if ( previousFocus && !value ) {
+      FocusManager.pdomFocusProperty.value = value;
 
-      // blur the document.activeElement instead of going through the Node, Node.blur() won't work in cases of DAG
-      document.activeElement.blur();
+      // if set to null, make sure that the active element is no longer focused
+      if ( previousFocus && !value ) {
+
+        // TODO: Won't this be buggy if document.activeElement is not focused, because then PDOMPointer won't actually get the blur listener, https://github.com/phetsims/scenery/issues/1284
+        previousFocus.blur();
+      }
     }
   }
 

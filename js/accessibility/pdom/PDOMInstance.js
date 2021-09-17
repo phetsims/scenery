@@ -315,9 +315,12 @@ class PDOMInstance {
     this.peer.setVisible( this.invisibleCount <= 0 );
 
     // if we hid a parent element, blur focus if active element was an ancestor
-    if ( !this.peer.isVisible() ) {
-      if ( this.peer.primarySibling.contains( document.activeElement ) ) { // still true if activeElement is this primary sibling
-        // NOTE: We don't seem to be able to import normally here
+    if ( !this.peer.isVisible() && scenery.FocusManager.pdomFocusedNode ) {
+      assert && assert( scenery.FocusManager.pdomFocusedNode.pdomInstances.length === 1,
+        'focusable Nodes do not support DAG, and should be connected with an instance if focused.' );
+
+      // NOTE: We don't seem to be able to import normally here
+      if ( scenery.FocusManager.pdomFocusedNode.pdomInstances[ 0 ].trail.containsNode( this.node ) ) {
         scenery.FocusManager.pdomFocus = null;
       }
     }

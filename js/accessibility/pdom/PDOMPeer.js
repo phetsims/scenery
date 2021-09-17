@@ -793,10 +793,8 @@ class PDOMPeer {
   blur() {
     assert && assert( this._primarySibling, 'must have a primary sibling to blur' );
 
-    // no op if primary sibling does not have focus
-    if ( document.activeElement === this._primarySibling ) {
-      this._primarySibling.blur();
-    }
+    // no op by the browser if primary sibling does not have focus
+    this._primarySibling.blur();
   }
 
   /**

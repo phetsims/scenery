@@ -168,6 +168,7 @@ import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
+import FocusManger from '../accessibility/FocusManager.js';
 import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
 import Display from '../display/Display.js';
 import scenery from '../scenery.js';
@@ -653,7 +654,7 @@ class Input {
         // Focus is set with DOM API to avoid the performance hit of looking up the Node from trail id.
         if ( relatedTarget ) {
 
-          const focusMovedInCallbacks = this.isTargetUnderPDOM( document.activeElement );
+          const focusMovedInCallbacks = FocusManger.pdomFocusedNode && FocusManger.pdomFocusedNode.getConnectedDisplays().includes( this.display );
           const targetFocusable = PDOMUtils.isElementFocusable( relatedTarget );
           if ( targetFocusable && !focusMovedInCallbacks ) {
             relatedTarget.focus();
