@@ -304,7 +304,7 @@ const Voicing = {
 
         // don't send to utteranceQueue if response is empty
         if ( content ) {
-          const utteranceQueue = this.utteranceQueue || voicingUtteranceQueue;
+          const utteranceQueue = this.voicingUtteranceQueue || voicingUtteranceQueue;
           utteranceQueue.addToBack( content );
         }
       },
@@ -470,10 +470,10 @@ const Voicing = {
        *
        * @returns {UtteranceQueue}
        */
-      getUtteranceQueue() {
+      getVoicingUtteranceQueue() {
         return this._voicingUtteranceQueue;
       },
-      get utteranceQueue() { return this.getUtteranceQueue(); },
+      get voicingUtteranceQueue() { return this.getVoicingUtteranceQueue(); },
 
       /**
        * Called whenever this Node is focused.
