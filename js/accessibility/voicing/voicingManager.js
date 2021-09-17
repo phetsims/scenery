@@ -298,56 +298,60 @@ class VoicingManager extends Announcer {
 
     // embeddding marks (for i18n) impact the output, strip before speaking
     const stringToSpeak = stripEmbeddingMarks( utterance.getTextToAlert( this.respectResponseCollectorProperties ) );
-    const speechSynthUtterance = new SpeechSynthesisUtterance( stringToSpeak );
-    speechSynthUtterance.voice = this.voiceProperty.value;
-    speechSynthUtterance.pitch = this.voicePitchProperty.value;
-    speechSynthUtterance.rate = this.voiceRateProperty.value;
 
-    // keep a reference to WebSpeechUtterances in Safari, so the browser doesn't dispose of it before firing, see #215
-    this.utterances.push( speechSynthUtterance );
+    // don't do any of the final speech work or emit speech events if the content is empty
+    if ( stringToSpeak !== '' ) {
+      const speechSynthUtterance = new SpeechSynthesisUtterance( stringToSpeak );
+      speechSynthUtterance.voice = this.voiceProperty.value;
+      speechSynthUtterance.pitch = this.voicePitchProperty.value;
+      speechSynthUtterance.rate = this.voiceRateProperty.value;
 
-    // Keep this out of the start listener so that it can be synchrounous to the UtteranceQueue draining/announcing, see bug in https://github.com/phetsims/sun/issues/699#issuecomment-831529485
-    this.previousUtterance = utterance;
+      // keep a reference to WebSpeechUtterances in Safari, so the browser doesn't dispose of it before firing, see #215
+      this.utterances.push( speechSynthUtterance );
 
-    const startListener = () => {
-      this.startSpeakingEmitter.emit( stringToSpeak, utterance );
-      this.speakingProperty.set( true );
-      speechSynthUtterance.removeEventListener( 'start', startListener );
-    };
+      // Keep this out of the start listener so that it can be synchrounous to the UtteranceQueue draining/announcing, see bug in https://github.com/phetsims/sun/issues/699#issuecomment-831529485
+      this.previousUtterance = utterance;
 
-    const endListener = () => {
+      const startListener = () => {
+        this.startSpeakingEmitter.emit( stringToSpeak, utterance );
+        this.speakingProperty.set( true );
+        speechSynthUtterance.removeEventListener( 'start', startListener );
+      };
 
-      this.endSpeakingEmitter.emit( stringToSpeak, utterance );
-      this.speakingProperty.set( false );
-      speechSynthUtterance.removeEventListener( 'end', endListener );
+      const endListener = () => {
 
-      // remove the reference to the SpeechSynthesisUtterance so we don't leak memory
-      const indexOfUtterance = this.utterances.indexOf( speechSynthUtterance );
-      if ( indexOfUtterance > -1 ) {
-        this.utterances.splice( indexOfUtterance, 1 );
+        this.endSpeakingEmitter.emit( stringToSpeak, utterance );
+        this.speakingProperty.set( false );
+        speechSynthUtterance.removeEventListener( 'end', endListener );
+
+        // remove the reference to the SpeechSynthesisUtterance so we don't leak memory
+        const indexOfUtterance = this.utterances.indexOf( speechSynthUtterance );
+        if ( indexOfUtterance > -1 ) {
+          this.utterances.splice( indexOfUtterance, 1 );
+        }
+      };
+
+      speechSynthUtterance.addEventListener( 'start', startListener );
+      speechSynthUtterance.addEventListener( 'end', endListener );
+
+      // In Safari the `end` listener does not fire consistently, (especially after cancel)
+      // but the error event does. In this case signify that speaking has ended.
+      speechSynthUtterance.addEventListener( 'error', endListener );
+
+      if ( !this.hasSpoken ) {
+
+        // for the first time speaking it must be synchronous and we cannot use TimeoutCallbackObject workarounds yet
+        this.getSynth().speak( speechSynthUtterance );
+        this.hasSpoken = true;
+
       }
-    };
+      else {
 
-    speechSynthUtterance.addEventListener( 'start', startListener );
-    speechSynthUtterance.addEventListener( 'end', endListener );
-
-    // In Safari the `end` listener does not fire consistently, (especially after cancel)
-    // but the error event does. In this case signify that speaking has ended.
-    speechSynthUtterance.addEventListener( 'error', endListener );
-
-    if ( !this.hasSpoken ) {
-
-      // for the first time speaking it must be synchronous and we cannot use TimeoutCallbackObject workarounds yet
-      this.getSynth().speak( speechSynthUtterance );
-      this.hasSpoken = true;
-
-    }
-    else {
-
-      // Create and add the callback object which will request speech from SpeechSynthesis behind a small delay
-      // (as a workaround for Safari), and also track when the timeout callback is being fired so that listeners
-      // can be safely removed. See TimeoutCallbackObject for more information.
-      this.timeoutCallbackObjects.push( new TimeoutCallbackObject( speechSynthUtterance ) );
+        // Create and add the callback object which will request speech from SpeechSynthesis behind a small delay
+        // (as a workaround for Safari), and also track when the timeout callback is being fired so that listeners
+        // can be safely removed. See TimeoutCallbackObject for more information.
+        this.timeoutCallbackObjects.push( new TimeoutCallbackObject( speechSynthUtterance ) );
+      }
     }
   }
 
