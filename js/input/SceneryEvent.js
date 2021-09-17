@@ -14,6 +14,7 @@
 
 import Vector2 from '../../../dot/js/Vector2.js';
 import IOType from '../../../tandem/js/types/IOType.js';
+import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
 import scenery from '../scenery.js';
 import Trail from '../util/Trail.js';
@@ -142,8 +143,8 @@ SceneryEvent.SceneryEventIO = new IOType( 'SceneryEventIO', {
   },
   stateSchema: {
     type: StringIO,
-    domEventType: StringIO,
-    point: Vector2.Vector2IO
+    domEventType: NullableIO( StringIO ),
+    point: NullableIO( Vector2.Vector2IO )
   }
 } );
 
