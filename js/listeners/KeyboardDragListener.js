@@ -369,6 +369,16 @@ class KeyboardDragListener {
     this.resetPressAndHold();
   }
 
+  /**
+   * Interrupts and resets the listener on blur so that listener state is reset and keys are removed from the keyState
+   * array. Public because this is called with the scenery listener API.
+   * @public
+   *
+   * @param {SceneryEvent} event
+   */
+  blur( event ) {
+    this.interrupt();
+  }
 
   /**
    * Step function for the drag handler. JavaScript does not natively handle multiple keydown events at once,
