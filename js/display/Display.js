@@ -59,7 +59,7 @@ import escapeHTML from '../../../phet-core/js/escapeHTML.js';
 import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import AriaHerald from '../../../utterance-queue/js/AriaHerald.js';
+import AriaLiveAnnouncer from '../../../utterance-queue/js/AriaLiveAnnouncer.js';
 import UtteranceQueue from '../../../utterance-queue/js/UtteranceQueue.js';
 import FocusManager from '../accessibility/FocusManager.js';
 import globalKeyStateTracker from '../accessibility/globalKeyStateTracker.js';
@@ -333,8 +333,8 @@ class Display {
     this.setBackgroundColor( options.backgroundColor );
 
     // @public {UtteranceQueue} - data structure for managing aria-live alerts the this Display instance
-    const ariaHerald = new AriaHerald();
-    this.descriptionUtteranceQueue = new UtteranceQueue( ariaHerald, {
+    const ariaLiveAnnouncer = new AriaLiveAnnouncer();
+    this.descriptionUtteranceQueue = new UtteranceQueue( ariaLiveAnnouncer, {
       implementAsSkeleton: !this._accessible,
       tandem: options.tandem.createTandem( 'descriptionUtteranceQueue' )
     } );
@@ -370,7 +370,7 @@ class Display {
       // add the accessible DOM as a child of this DOM element
       this._domElement.appendChild( this._rootPDOMInstance.peer.primarySibling );
 
-      const ariaLiveContainer = ariaHerald.ariaLiveContainer;
+      const ariaLiveContainer = ariaLiveAnnouncer.ariaLiveContainer;
 
       // add aria-live elements to the display
       this._domElement.appendChild( ariaLiveContainer );
