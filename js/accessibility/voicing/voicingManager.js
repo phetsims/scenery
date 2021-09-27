@@ -208,7 +208,6 @@ class VoicingManager extends Announcer {
     assert && assert( this.initialized, 'No voices available until the voicingManager is initialized' );
     assert && assert( this.voices.length > 0, 'No voices available to provided a prioritized list.' );
 
-    // return this.voices;
     return this.voices.slice().sort( ( a, b ) => {
       return a.name.includes( 'Google' ) ? -1 : 0;
     } );
