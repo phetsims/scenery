@@ -191,25 +191,37 @@ class VoicingManager extends Announcer {
    * @private
    */
   populateVoices() {
-    this.voices = this.getSynth().getVoices();
+
+    // the browser sometimes provides duplicate voices, prune those out of the list
+    this.voices = _.uniqBy( this.getSynth().getVoices(), voice => voice.name );
     this.voicesChangedEmitter.emit();
   }
 
   /**
-   * Returns an array of voices where "Google" voices are prioritized. Google voices generally sound the best so they
-   * can be promoted if desired. Returns an array of SpeechSynthesisVoices where "Google" voices are at the top of the
-   * list.
-   *
-   * As of 9/16/21 I am not sure if we want to prioritize voices for Voicing feature, but something like this
-   * gets us started. See https://github.com/phetsims/scenery/issues/1282/
+   * Returns an array of SpeechSynthesisVoices that are sorted such that the best sounding voices come first.
+   * As of 9/27/21, we find that the "Google" voices sound best while Apple's "Fred" sounds the worst so the list
+   * will be ordered to reflect that. This way "Google" voices will be selected by default when available and "Fred"
+   * will almost never be the default Voice since it is last in the list. See
+   * https://github.com/phetsims/scenery/issues/1282/ for discussion and this decision.
    * @public
+   *
+   * @returns {SpeechSynthesisVoice[]}
    */
-  getVoicesWithGooglePrioritized() {
+  getPrioritizedVoices() {
     assert && assert( this.initialized, 'No voices available until the voicingManager is initialized' );
     assert && assert( this.voices.length > 0, 'No voices available to provided a prioritized list.' );
 
     return this.voices.slice().sort( ( a, b ) => {
-      return a.name.includes( 'Google' ) ? -1 : 0;
+      if ( a.name.includes( 'Fred' ) ) {
+
+        // if a includes 'Fred' then but b before a so 'Fred' is at the bottom
+        return 1;
+      }
+      else {
+
+        // a before b so 'Google' voices are at the top, otherwise voices are considered equal
+        return a.name.includes( 'Google' ) ? -1 : 0;
+      }
     } );
   }
 
