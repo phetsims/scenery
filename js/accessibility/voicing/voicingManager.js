@@ -213,7 +213,7 @@ class VoicingManager extends Announcer {
 
     return this.voices.slice().sort( ( a, b ) => {
       return a.name.includes( 'Fred' ) ? 1 : // a includes 'Fred', put b before a so 'Fred' is at the bottom
-             b.name.includes( 'Fred' ) ? -1 : // b includes 'Fred', but a before b so 'Fred' is at the bottom
+             b.name.includes( 'Fred' ) ? -1 : // b includes 'Fred', put a before b so 'Fred' is at the bottom
              a.name.includes( 'Google' ) ? -1 : // a includes 'Google', put a before b so 'Google' is at the top
              b.name.includes( 'Google' ) ? 1 : // b includes 'Google, 'put b before a so 'Google' is at the top
              0; // otherwise all voices are considered equal
