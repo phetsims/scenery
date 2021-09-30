@@ -173,28 +173,32 @@ const FlowConfigurable = memoize( type => {
     /**
      * @public
      *
-     * @returns {FlowConfigurable.Align|null}
+     * Horizontal flow values: 'top', 'bottom', 'center', 'origin', 'stretch', null
+     * Vertical flow values: 'left', 'right', 'center', 'origin', 'stretch', null
+     *
+     * @returns {string|null}
      */
     get align() {
-      return this._align;
+      const result = alignInverseMapping[ this._orientation ][ this._align ];
+
+      assert && assert( result === null || typeof result === 'string' );
+
+      return result;
     }
 
     /**
      * @public
      *
-     * @param {FlowConfigurable.Align|string|null} value
+     * @param {string|null} value
      */
     set align( value ) {
-      const initialValue = value;
+      assert && assert( alignAllowedValuesMapping[ this._orientation ].includes( value ),
+        `align ${value} not supported, with the orientation ${this._orientation}, the valid values are ${alignAllowedValuesMapping[ this._orientation ]}` );
 
       // remapping align values to an independent set, so they aren't orientation-dependent
-      // TODO: consider if this is wise
-      if ( typeof value === 'string' ) {
-        value = alignMapping[ this._orientation ][ value ];
-      }
+      value = alignMapping[ this._orientation ][ value ];
 
-      assert && assert( value === null || FlowConfigurable.Align.includes( value ),
-        `align:${initialValue} not compatible, with orientation:${this._orientation} the allowed values are null or one of ${Object.keys( alignMapping[ this._orientation ] )}` );
+      assert && assert( value === null || FlowConfigurable.Align.includes( value ) );
 
       if ( this._align !== value ) {
         this._align = value;
@@ -515,15 +519,40 @@ const alignMapping = {
     bottom: FlowConfigurable.Align.END,
     center: FlowConfigurable.Align.CENTER,
     origin: FlowConfigurable.Align.ORIGIN,
-    stretch: FlowConfigurable.Align.STRETCH
+    stretch: FlowConfigurable.Align.STRETCH,
+    null: null
   },
   [ Orientation.VERTICAL ]: {
     left: FlowConfigurable.Align.START,
     right: FlowConfigurable.Align.END,
     center: FlowConfigurable.Align.CENTER,
     origin: FlowConfigurable.Align.ORIGIN,
-    stretch: FlowConfigurable.Align.STRETCH
+    stretch: FlowConfigurable.Align.STRETCH,
+    null: null
+  },
+  null: null
+};
+const alignInverseMapping = {
+  [ Orientation.HORIZONTAL ]: {
+    [ FlowConfigurable.Align.START ]: 'top',
+    [ FlowConfigurable.Align.END ]: 'bottom',
+    [ FlowConfigurable.Align.CENTER ]: 'center',
+    [ FlowConfigurable.Align.ORIGIN ]: 'origin',
+    [ FlowConfigurable.Align.STRETCH ]: 'stretch',
+    null: null
+  },
+  [ Orientation.VERTICAL ]: {
+    [ FlowConfigurable.Align.START ]: 'left',
+    [ FlowConfigurable.Align.END ]: 'right',
+    [ FlowConfigurable.Align.CENTER ]: 'center',
+    [ FlowConfigurable.Align.ORIGIN ]: 'origin',
+    [ FlowConfigurable.Align.STRETCH ]: 'stretch',
+    null: null
   }
+};
+const alignAllowedValuesMapping = {
+  [ Orientation.HORIZONTAL ]: [ 'top', 'bottom', 'center', 'origin', 'stretch', null ],
+  [ Orientation.VERTICAL ]: [ 'left', 'right', 'center', 'origin', 'stretch', null ]
 };
 
 // @public {Object}

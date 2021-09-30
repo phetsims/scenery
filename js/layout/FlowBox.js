@@ -290,7 +290,10 @@ class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
   /**
    * @public
    *
-   * @returns {FlowConfigurable.Align|null}
+   * Horizontal flow values: 'top', 'bottom', 'center', 'origin', 'stretch', null
+   * Vertical flow values: 'left', 'right', 'center', 'origin', 'stretch', null
+   *
+   * @returns {string|null}
    */
   get align() {
     return this._constraint.align;
@@ -299,9 +302,14 @@ class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
   /**
    * @public
    *
-   * @param {FlowConfigurable.Align|string|null} value
+   * Horizontal flow values: 'top', 'bottom', 'center', 'origin', 'stretch', null
+   * Vertical flow values: 'left', 'right', 'center', 'origin', 'stretch', null
+   *
+   * @param {string|null} value
    */
   set align( value ) {
+    assert && assert( value === null || typeof value === 'string' );
+
     this._constraint.align = value;
   }
 

@@ -279,7 +279,7 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
       const maximumSize = _.max( line.map( cell => cell.getMinimumSize( oppositeOrientation, this ) ) );
 
       line.forEach( cell => {
-        const align = cell.withDefault( 'align', this );
+        const align = cell.withDefault( '_align', this );
         const size = cell.getMinimumSize( oppositeOrientation, this );
 
         if ( align === FlowConfigurable.Align.STRETCH ) {
