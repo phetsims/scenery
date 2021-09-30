@@ -147,7 +147,7 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
     const preferredOppositeSize = orientation === Orientation.HORIZONTAL ? this.preferredHeightProperty.value : this.preferredWidthProperty.value;
 
     // What is the largest of the minimum sizes of cells (e.g. if we're wrapping, this would be our minimum size)
-    const maxMinimumCellSize = _.max( cells.map( cell => cell.getMinimumSize( orientation, this ) ) );
+    const maxMinimumCellSize = _.max( cells.map( cell => cell.getMinimumSize( orientation ) ) );
 
     assert && assert( maxMinimumCellSize <= preferredSize || Number.POSITIVE_INFINITY, 'Will not be able to fit in this preferred size' );
 
@@ -159,7 +159,7 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
 
       while ( cells.length ) {
         const cell = cells.shift();
-        const cellSpace = cell.getMinimumSize( orientation, this );
+        const cellSpace = cell.getMinimumSize( orientation );
 
         if ( currentLine.length === 0 ) {
           currentLine.push( cell );
@@ -188,10 +188,10 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
 
     // {number} - Given our wrapped lines, what is our minimum size we could take up?
     const minimumCurrentSize = _.max( lines.map( line => {
-      return ( line.length - 1 ) * this.spacing + _.sum( line.map( cell => cell.getMinimumSize( orientation, this ) ) );
+      return ( line.length - 1 ) * this.spacing + _.sum( line.map( cell => cell.getMinimumSize( orientation ) ) );
     } ) );
     const minimumCurrentOppositeSize = _.sum( lines.map( line => {
-      return _.max( line.map( cell => cell.getMinimumSize( oppositeOrientation, this ) ) );
+      return _.max( line.map( cell => cell.getMinimumSize( oppositeOrientation ) ) );
     } ) ) + ( lines.length - 1 ) * this.lineSpacing;
 
     // Used for determining our "minimum" size for preferred sizes... if wrapping is enabled, we can be smaller than
@@ -213,13 +213,13 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
 
     // Primary-direction layout
     lines.forEach( line => {
-      const minimumContent = _.sum( line.map( cell => cell.getMinimumSize( orientation, this ) ) );
+      const minimumContent = _.sum( line.map( cell => cell.getMinimumSize( orientation ) ) );
       const spacingAmount = this.spacing * ( line.length - 1 );
       let spaceRemaining = size - minimumContent - spacingAmount;
 
       // Initial pending sizes
       line.forEach( cell => {
-        cell._pendingSize = cell.getMinimumSize( orientation, this );
+        cell._pendingSize = cell.getMinimumSize( orientation );
       } );
 
       // Grow potential sizes if possible
@@ -230,11 +230,11 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
         if ( grow === 0 ) {
           return false;
         }
-        return cell._pendingSize < cell.getMaximumSize( orientation, this ) - 1e-7;
+        return cell._pendingSize < cell.getMaximumSize( orientation ) - 1e-7;
       } ) ).length ) {
         const totalGrow = _.sum( growableCells.map( cell => cell.grow ) );
         const amountToGrow = Math.min(
-          _.min( growableCells.map( cell => ( cell.getMaximumSize( orientation, this ) - cell._pendingSize ) / cell.grow ) ),
+          _.min( growableCells.map( cell => ( cell.getMaximumSize( orientation ) - cell._pendingSize ) / cell.grow ) ),
           spaceRemaining / totalGrow
         );
 
@@ -247,7 +247,7 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
       }
 
       // Update preferred dimension based on the pending size
-      line.forEach( cell => cell.attemptPreferredSize( orientation, this, cell._pendingSize ) );
+      line.forEach( cell => cell.attemptPreferredSize( orientation, cell._pendingSize ) );
 
       // TODO: optimize, OMG, but is this generally a good idea?
       // TODO: Only I would write this code in this mental state?
@@ -268,7 +268,7 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
           position += this.spacing;
         }
         // TODO: handle coordinate transforms properly
-        cell.positionStart( orientation, this, position );
+        cell.positionStart( orientation, position );
         position += cell._pendingSize;
       } );
     } );
@@ -276,22 +276,22 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
     // Secondary-direction layout
     let secondaryPosition = 0;
     lines.forEach( line => {
-      const maximumSize = _.max( line.map( cell => cell.getMinimumSize( oppositeOrientation, this ) ) );
+      const maximumSize = _.max( line.map( cell => cell.getMinimumSize( oppositeOrientation ) ) );
 
       line.forEach( cell => {
         const align = cell.effectiveAlign;
-        const size = cell.getMinimumSize( oppositeOrientation, this );
+        const size = cell.getMinimumSize( oppositeOrientation );
 
         if ( align === FlowConfigurable.Align.STRETCH ) {
-          cell.attemptPreferredSize( oppositeOrientation, this, maximumSize );
-          cell.positionStart( oppositeOrientation, this, secondaryPosition );
+          cell.attemptPreferredSize( oppositeOrientation, maximumSize );
+          cell.positionStart( oppositeOrientation, secondaryPosition );
         }
         else {
-          cell.attemptPreferredSize( oppositeOrientation, this, size );
+          cell.attemptPreferredSize( oppositeOrientation, size );
 
           if ( align === FlowConfigurable.Align.ORIGIN ) {
             // TODO: handle layout bounds
-            cell.positionOrigin( oppositeOrientation, this, secondaryPosition );
+            cell.positionOrigin( oppositeOrientation, secondaryPosition );
           }
           else {
             // TODO: optimize
@@ -300,11 +300,11 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
               [ FlowConfigurable.Align.CENTER ]: 0.5,
               [ FlowConfigurable.Align.END ]: 1
             }[ align ];
-            cell.positionStart( oppositeOrientation, this, secondaryPosition + ( maximumSize - size ) * padRatio );
+            cell.positionStart( oppositeOrientation, secondaryPosition + ( maximumSize - size ) * padRatio );
           }
         }
 
-        const cellBounds = cell.getCellBounds( this );
+        const cellBounds = cell.getCellBounds();
         assert && assert( cellBounds.isFinite() );
 
         minOppositeCoordinate = Math.min( minOppositeCoordinate, oppositeOrientation === Orientation.HORIZONTAL ? cellBounds.minX : cellBounds.minY );

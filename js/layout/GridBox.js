@@ -110,7 +110,7 @@ class GridBox extends WidthSizable( HeightSizable( Node ) ) {
       this._nextX++;
     }
 
-    const cell = new GridCell( node, layoutOptions );
+    const cell = new GridCell( this._constraint, node, layoutOptions );
     this._cellMap.set( node, cell );
 
     this._constraint.addCell( cell );

@@ -157,10 +157,9 @@ class FlowCell extends FlowConfigurable( Object ) {
    * @public
    *
    * @param {Orientation} orientation
-   * @param {FlowConfigurable} defaultConfig
    * @returns {number}
    */
-  getMinimumSize( orientation, defaultConfig ) {
+  getMinimumSize( orientation ) {
     const isSizable = !!( orientation === Orientation.HORIZONTAL ? this.node.widthSizable : this.node.heightSizable );
 
     if ( orientation === Orientation.HORIZONTAL ) {
@@ -179,10 +178,9 @@ class FlowCell extends FlowConfigurable( Object ) {
    * @public
    *
    * @param {Orientation} orientation
-   * @param {FlowConfigurable} defaultConfig
    * @returns {number}
    */
-  getMaximumSize( orientation, defaultConfig ) {
+  getMaximumSize( orientation ) {
     const isSizable = !!( orientation === Orientation.HORIZONTAL ? this.node.widthSizable : this.node.heightSizable );
 
     if ( orientation === Orientation.HORIZONTAL ) {
@@ -201,13 +199,12 @@ class FlowCell extends FlowConfigurable( Object ) {
    * @public
    *
    * @param {Orientation} orientation
-   * @param {FlowConfigurable} defaultConfig
    * @param {number} value
    */
-  attemptPreferredSize( orientation, defaultConfig, value ) {
+  attemptPreferredSize( orientation, value ) {
     if ( orientation === Orientation.HORIZONTAL ? this.node.widthSizable : this.node.heightSizable ) {
-      const minimumSize = this.getMinimumSize( orientation, defaultConfig );
-      const maximumSize = this.getMaximumSize( orientation, defaultConfig );
+      const minimumSize = this.getMinimumSize( orientation );
+      const maximumSize = this.getMaximumSize( orientation );
 
       assert && assert( isFinite( minimumSize ) );
       assert && assert( maximumSize >= minimumSize );
@@ -228,10 +225,9 @@ class FlowCell extends FlowConfigurable( Object ) {
    * @public
    *
    * @param {Orientation} orientation
-   * @param {FlowConfigurable} defaultConfig
    * @param {number} value
    */
-  positionStart( orientation, defaultConfig, value ) {
+  positionStart( orientation, value ) {
     // TODO: coordinate transform handling, to our ancestorNode!!!!!
     if ( orientation === Orientation.HORIZONTAL ) {
       const left = this.effectiveLeftMargin + value;
@@ -253,10 +249,9 @@ class FlowCell extends FlowConfigurable( Object ) {
    * @public
    *
    * @param {Orientation} orientation
-   * @param {FlowConfigurable} defaultConfig
    * @param {number} value
    */
-  positionOrigin( orientation, defaultConfig, value ) {
+  positionOrigin( orientation, value ) {
     if ( orientation === Orientation.HORIZONTAL ) {
       if ( Math.abs( this.node.x - value ) > 1e-9 ) {
         this.node.x = value;
@@ -272,10 +267,9 @@ class FlowCell extends FlowConfigurable( Object ) {
   /**
    * @public
    *
-   * @param {FlowConfigurable} defaultConfig
    * @returns {Bounds2}
    */
-  getCellBounds( defaultConfig ) {
+  getCellBounds() {
     return this.node.bounds.withOffsets(
       this.effectiveLeftMargin,
       this.effectiveTopMargin,
