@@ -1,7 +1,8 @@
 // Copyright 2021, University of Colorado Boulder
 
 /**
- * TODO: doc
+ * Base type for a line-divider (when put in a layout container, it will be hidden if it is before/after all visible
+ * components, or if it's after another a divider in the visible order).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

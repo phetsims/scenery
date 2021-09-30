@@ -15,6 +15,7 @@ import './accessibility/pdom/PDOMSiblingTests.js';
 import './accessibility/pdom/PDOMUtilsTests.js';
 import './display/DisplayTests.js';
 import './display/FuzzTests.js';
+import './layout/ManualConstraintTests.js';
 import './listeners/DragListenerTests.js';
 import './listeners/FireListenerTests.js';
 import './listeners/PressListenerTests.js';
