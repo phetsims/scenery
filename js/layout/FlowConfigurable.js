@@ -35,13 +35,13 @@ const FlowConfigurable = memoize( type => {
     constructor( ...args ) {
       super( ...args );
 
-      // @private {Orientation}
+      // @protected {Orientation}
       this._orientation = Orientation.HORIZONTAL;
 
-      // @private {FlowConfigurable.Align|null} - Null value inherits from a base config
+      // @protected {FlowConfigurable.Align|null} - Null value inherits from a base config
       this._align = null;
 
-      // @private {number|null} - Null value inherits from a base config
+      // @protected {number|null} - Null value inherits from a base config
       this._leftMargin = null;
       this._rightMargin = null;
       this._topMargin = null;
@@ -101,40 +101,6 @@ const FlowConfigurable = memoize( type => {
       this._maxContentHeight = null;
 
       this.changedEmitter.emit();
-    }
-
-    /**
-     * @public
-     *
-     * @param {string} propertyName
-     * @param {FlowConfigurable} defaultConfig
-     * @returns {*}
-     */
-    withDefault( propertyName, defaultConfig ) {
-      return this[ propertyName ] !== null ? this[ propertyName ] : defaultConfig[ propertyName ];
-    }
-
-    /**
-     * @public
-     *
-     * @param {FlowConfigurable} defaultConfig
-     * @returns {FlowConfigurable}
-     */
-    withDefaults( defaultConfig ) {
-      const configurable = new FlowConfigurableObject();
-
-      configurable._align = this._align !== null ? this._align : defaultConfig._align;
-      configurable._leftMargin = this._leftMargin !== null ? this._leftMargin : defaultConfig._leftMargin;
-      configurable._rightMargin = this._rightMargin !== null ? this._rightMargin : defaultConfig._rightMargin;
-      configurable._topMargin = this._topMargin !== null ? this._topMargin : defaultConfig._topMargin;
-      configurable._bottomMargin = this._bottomMargin !== null ? this._bottomMargin : defaultConfig._bottomMargin;
-      configurable._grow = this._grow !== null ? this._grow : defaultConfig._grow;
-      configurable._minContentWidth = this._minContentWidth !== null ? this._minContentWidth : defaultConfig._minContentWidth;
-      configurable._minContentHeight = this._minContentHeight !== null ? this._minContentHeight : defaultConfig._minContentHeight;
-      configurable._maxContentWidth = this._maxContentWidth !== null ? this._maxContentWidth : defaultConfig._maxContentWidth;
-      configurable._maxContentHeight = this._maxContentHeight !== null ? this._maxContentHeight : defaultConfig._maxContentHeight;
-
-      return configurable;
     }
 
     /**
@@ -557,8 +523,6 @@ const alignAllowedValuesMapping = {
 
 // @public {Object}
 FlowConfigurable.FLOW_CONFIGURABLE_OPTION_KEYS = FLOW_CONFIGURABLE_OPTION_KEYS;
-
-const FlowConfigurableObject = FlowConfigurable( Object );
 
 scenery.register( 'FlowConfigurable', FlowConfigurable );
 export default FlowConfigurable;

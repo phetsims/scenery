@@ -13,11 +13,15 @@ import FlowConfigurable from './FlowConfigurable.js';
 
 class FlowCell extends FlowConfigurable( Object ) {
   /**
+   * @param {FlowConstraint} constraint
    * @param {Node} node
    * @param {Object} [options]
    */
-  constructor( node, options ) {
+  constructor( constraint, node, options ) {
     super();
+
+    // @private {FlowConstraint}
+    this._constraint = constraint;
 
     // @private {Node}
     this._node = node;
@@ -31,6 +35,96 @@ class FlowCell extends FlowConfigurable( Object ) {
     this.layoutOptionsListener = this.onLayoutOptionsChange.bind( this );
 
     this.node.layoutOptionsChangedEmitter.addListener( this.layoutOptionsListener );
+  }
+
+  /**
+   * @public
+   *
+   * @returns {FlowConfigurable.Align}
+   */
+  get effectiveAlign() {
+    return this._align !== null ? this._align : this._constraint._align;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number}
+   */
+  get effectiveLeftMargin() {
+    return this._leftMargin !== null ? this._leftMargin : this._constraint._leftMargin;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number}
+   */
+  get effectiveRightMargin() {
+    return this._rightMargin !== null ? this._rightMargin : this._constraint._rightMargin;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number}
+   */
+  get effectiveTopMargin() {
+    return this._topMargin !== null ? this._topMargin : this._constraint._topMargin;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number}
+   */
+  get effectiveBottomMargin() {
+    return this._bottomMargin !== null ? this._bottomMargin : this._constraint._bottomMargin;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number}
+   */
+  get effectiveGrow() {
+    return this._grow !== null ? this._grow : this._constraint._grow;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number}
+   */
+  get effectiveMinContentWidth() {
+    return this._minContentWidth !== null ? this._minContentWidth : this._constraint._minContentWidth;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number}
+   */
+  get effectiveMinContentHeight() {
+    return this._minContentHeight !== null ? this._minContentHeight : this._constraint._minContentHeight;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number}
+   */
+  get effectiveMaxContentWidth() {
+    return this._maxContentWidth !== null ? this._maxContentWidth : this._constraint._maxContentWidth;
+  }
+
+  /**
+   * @public
+   *
+   * @returns {number}
+   */
+  get effectiveMaxContentHeight() {
+    return this._maxContentHeight !== null ? this._maxContentHeight : this._constraint._maxContentHeight;
   }
 
   /**
@@ -70,20 +164,14 @@ class FlowCell extends FlowConfigurable( Object ) {
     const isSizable = !!( orientation === Orientation.HORIZONTAL ? this.node.widthSizable : this.node.heightSizable );
 
     if ( orientation === Orientation.HORIZONTAL ) {
-      return this.withDefault( 'leftMargin', defaultConfig ) +
-             Math.max(
-               isSizable ? this.node.minimumWidth : this.node.width,
-               this.withDefault( 'minContentWidth', defaultConfig ) || 0
-             ) +
-             this.withDefault( 'rightMargin', defaultConfig );
+      return this.effectiveLeftMargin +
+             Math.max( isSizable ? this.node.minimumWidth : this.node.width, this.effectiveMinContentWidth || 0 ) +
+             this.effectiveRightMargin;
     }
     else {
-      return this.withDefault( 'topMargin', defaultConfig ) +
-             Math.max(
-               isSizable ? this.node.minimumHeight : this.node.height,
-               this.withDefault( 'minContentHeight', defaultConfig ) || 0
-             ) +
-             this.withDefault( 'bottomMargin', defaultConfig );
+      return this.effectiveTopMargin +
+             Math.max( isSizable ? this.node.minimumHeight : this.node.height, this.effectiveMinContentHeight || 0 ) +
+             this.effectiveBottomMargin;
     }
   }
 
@@ -98,20 +186,14 @@ class FlowCell extends FlowConfigurable( Object ) {
     const isSizable = !!( orientation === Orientation.HORIZONTAL ? this.node.widthSizable : this.node.heightSizable );
 
     if ( orientation === Orientation.HORIZONTAL ) {
-      return this.withDefault( 'leftMargin', defaultConfig ) +
-             Math.min(
-               isSizable ? Number.POSITIVE_INFINITY : this.node.width,
-               this.withDefault( 'maxContentWidth', defaultConfig ) || Number.POSITIVE_INFINITY
-             ) +
-             this.withDefault( 'rightMargin', defaultConfig );
+      return this.effectiveLeftMargin +
+             Math.min( isSizable ? Number.POSITIVE_INFINITY : this.node.width, this.effectiveMaxContentWidth || Number.POSITIVE_INFINITY ) +
+             this.effectiveRightMargin;
     }
     else {
-      return this.withDefault( 'topMargin', defaultConfig ) +
-             Math.min(
-               isSizable ? Number.POSITIVE_INFINITY : this.node.height,
-               this.withDefault( 'maxContentHeight', defaultConfig ) || Number.POSITIVE_INFINITY
-             ) +
-             this.withDefault( 'bottomMargin', defaultConfig );
+      return this.effectiveTopMargin +
+             Math.min( isSizable ? Number.POSITIVE_INFINITY : this.node.height, this.effectiveMaxContentHeight || Number.POSITIVE_INFINITY ) +
+             this.effectiveBottomMargin;
     }
   }
 
@@ -133,10 +215,10 @@ class FlowCell extends FlowConfigurable( Object ) {
       value = Utils.clamp( value, minimumSize, maximumSize );
 
       if ( orientation === Orientation.HORIZONTAL ) {
-        this.node.preferredWidth = value - this.withDefault( 'leftMargin', defaultConfig ) - this.withDefault( 'rightMargin', defaultConfig );
+        this.node.preferredWidth = value - this.effectiveLeftMargin - this.effectiveRightMargin;
       }
       else {
-        this.node.preferredHeight = value - this.withDefault( 'topMargin', defaultConfig ) - this.withDefault( 'bottomMargin', defaultConfig );
+        this.node.preferredHeight = value - this.effectiveTopMargin - this.effectiveBottomMargin;
       }
       // TODO: warnings if those preferred sizes weren't reached?
     }
@@ -152,14 +234,14 @@ class FlowCell extends FlowConfigurable( Object ) {
   positionStart( orientation, defaultConfig, value ) {
     // TODO: coordinate transform handling, to our ancestorNode!!!!!
     if ( orientation === Orientation.HORIZONTAL ) {
-      const left = this.withDefault( 'leftMargin', defaultConfig ) + value;
+      const left = this.effectiveLeftMargin + value;
 
       if ( Math.abs( this.node.left - left ) > 1e-9 ) {
         this.node.left = left;
       }
     }
     else {
-      const top = this.withDefault( 'topMargin', defaultConfig ) + value;
+      const top = this.effectiveTopMargin + value;
 
       if ( Math.abs( this.node.top - top ) > 1e-9 ) {
         this.node.top = top;
@@ -194,12 +276,12 @@ class FlowCell extends FlowConfigurable( Object ) {
    * @returns {Bounds2}
    */
   getCellBounds( defaultConfig ) {
-    const leftMargin = this.withDefault( 'leftMargin', defaultConfig );
-    const rightMargin = this.withDefault( 'rightMargin', defaultConfig );
-    const topMargin = this.withDefault( 'topMargin', defaultConfig );
-    const bottomMargin = this.withDefault( 'bottomMargin', defaultConfig );
-
-    return this.node.bounds.withOffsets( leftMargin, topMargin, rightMargin, bottomMargin );
+    return this.node.bounds.withOffsets(
+      this.effectiveLeftMargin,
+      this.effectiveTopMargin,
+      this.effectiveRightMargin,
+      this.effectiveBottomMargin
+     );
   }
 
   /**

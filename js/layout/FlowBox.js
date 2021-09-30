@@ -90,7 +90,7 @@ class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
    * @param {number} index
    */
   onFlowBoxChildInserted( node, index ) {
-    const cell = new FlowCell( node, node.layoutOptions );
+    const cell = new FlowCell( this._constraint, node, node.layoutOptions );
     this._cellMap.set( node, cell );
 
     this._constraint.insertCell( index, cell );

@@ -226,7 +226,7 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
       // TODO: This looks unfun to read... check this with a fresh mind
       let growableCells;
       while ( spaceRemaining > 1e-7 && ( growableCells = line.filter( cell => {
-        const grow = cell.withDefault( 'grow', this );
+        const grow = cell.effectiveGrow;
         if ( grow === 0 ) {
           return false;
         }
@@ -279,7 +279,7 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
       const maximumSize = _.max( line.map( cell => cell.getMinimumSize( oppositeOrientation, this ) ) );
 
       line.forEach( cell => {
-        const align = cell.withDefault( '_align', this );
+        const align = cell.effectiveAlign;
         const size = cell.getMinimumSize( oppositeOrientation, this );
 
         if ( align === FlowConfigurable.Align.STRETCH ) {
