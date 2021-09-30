@@ -90,7 +90,7 @@ class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
    * @param {number} index
    */
   onFlowBoxChildInserted( node, index ) {
-    const cell = new FlowCell( node, node.layoutOptions );
+    const cell = new FlowCell( this._constraint, node, node.layoutOptions );
     this._cellMap.set( node, cell );
 
     this._constraint.insertCell( index, cell );
@@ -254,7 +254,7 @@ class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
   /**
    * @public
    *
-   * @returns {FlowConstraint.Justify}
+   * @returns {string}
    */
   get justify() {
     return this._constraint.justify;
@@ -263,7 +263,7 @@ class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
   /**
    * @public
    *
-   * @param {FlowConstraint.Justify|string} value
+   * @param {string} value
    */
   set justify( value ) {
     this._constraint.justify = value;
@@ -290,18 +290,28 @@ class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
   /**
    * @public
    *
-   * @returns {FlowConfigurable.Align|null}
+   * Horizontal flow values: 'top', 'bottom', 'center', 'origin', 'stretch'
+   * Vertical flow values: 'left', 'right', 'center', 'origin', 'stretch'
+   *
+   * @returns {string}
    */
   get align() {
+    assert && assert( typeof this._constraint.align === 'string' );
+
     return this._constraint.align;
   }
 
   /**
    * @public
    *
-   * @param {FlowConfigurable.Align|string|null} value
+   * Horizontal flow values: 'top', 'bottom', 'center', 'origin', 'stretch'
+   * Vertical flow values: 'left', 'right', 'center', 'origin', 'stretch'
+   *
+   * @param {string} value
    */
   set align( value ) {
+    assert && assert( typeof value === 'string', 'FlowBox align should be a string' );
+
     this._constraint.align = value;
   }
 

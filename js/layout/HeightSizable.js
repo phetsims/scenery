@@ -1,7 +1,9 @@
 // Copyright 2021, University of Colorado Boulder
 
 /**
- * TODO: doc
+ * Provides a minimum and preferred height. The minimum height is set by the component, so that layout containers could
+ * know how "small" the component can be made. The preferred height is set by the layout container, and the component
+ * should adjust its size so that it takes up that height.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -43,7 +45,8 @@ const HeightSizable = memoize( type => {
      * @param {number|null} value
      */
     set preferredHeight( value ) {
-      assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
+      assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) && value >= 0 ),
+        'preferredHeight should be null or a non-negative finite number' );
 
       this.preferredHeightProperty.value = value;
     }

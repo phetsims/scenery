@@ -1,7 +1,7 @@
 // Copyright 2021, University of Colorado Boulder
 
 /**
- * TODO: doc
+ * A vertical line for separating items in a horizontal layout container.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

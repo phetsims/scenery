@@ -135,7 +135,7 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
       const lines = lineIndices.map( index => {
         const subCells = _.filter( cells, cell => cell.containsIndex( orientation, index ) );
 
-        const grow = _.max( subCells.map( cell => cell.withDefault( orientation === Orientation.HORIZONTAL ? 'xGrow' : 'yGrow', this ) ) );
+        const grow = _.max( subCells.map( cell => cell.getEffectiveGrow( orientation ) ) );
         const line = GridLine.createFromPool( index, subCells, grow );
         lineMap.set( index, line );
 
@@ -150,8 +150,8 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
       cells.forEach( cell => {
         if ( cell.size.get( orientation ) === 1 ) {
           const line = lineMap.get( cell.position.get( orientation ) );
-          line.min = Math.max( line.min, cell.getMinimumSize( orientation, this ) );
-          line.max = Math.min( line.max, cell.getMaximumSize( orientation, this ) );
+          line.min = Math.max( line.min, cell.getMinimumSize( orientation ) );
+          line.max = Math.min( line.max, cell.getMaximumSize( orientation ) );
         }
       } );
 
@@ -162,7 +162,7 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
           // TODO: also handle maxes
           const lines = cell.getIndices( orientation ).map( index => lineMap.get( index ) );
           const currentMin = _.sum( lines.map( line => line.min ) );
-          const neededMin = cell.getMinimumSize( orientation, this );
+          const neededMin = cell.getMinimumSize( orientation );
           if ( neededMin > currentMin ) {
             const lineDelta = ( neededMin - currentMin ) / lines.length;
             lines.forEach( line => {
@@ -210,20 +210,20 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
         const firstColumn = lineMap.get( cellIndexPosition );
         const cellSpacings = lineSpacings.slice( cellIndexPosition, cellIndexPosition + cellSize - 1 );
         const cellAvailableSize = _.sum( cellLines.map( line => line.size ) ) + _.sum( cellSpacings );
-        const cellMinimumSize = cell.getMinimumSize( orientation, this );
+        const cellMinimumSize = cell.getMinimumSize( orientation );
         const cellPosition = firstColumn.position;
 
-        const align = cell.withDefault( orientation === Orientation.HORIZONTAL ? 'xAlign' : 'yAlign', this );
+        const align = cell.getEffectiveAlign( orientation );
 
         if ( align === GridConfigurable.Align.STRETCH ) {
-          cell.attemptPreferredSize( orientation, this, cellAvailableSize );
+          cell.attemptPreferredSize( orientation, cellAvailableSize );
         }
         else {
-          cell.attemptPreferredSize( orientation, this, cellMinimumSize );
+          cell.attemptPreferredSize( orientation, cellMinimumSize );
         }
-        cell.attemptPosition( orientation, align, this, cellPosition, cellAvailableSize );
+        cell.attemptPosition( orientation, align, cellPosition, cellAvailableSize );
 
-        const cellBounds = cell.getCellBounds( this );
+        const cellBounds = cell.getCellBounds();
         assert && assert( cellBounds.isFinite() );
 
         cell.lastAvailableBounds[ boundsMinMap[ orientation ] ] = cellPosition;

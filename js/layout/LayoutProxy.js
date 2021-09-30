@@ -1,7 +1,8 @@
 // Copyright 2021, University of Colorado Boulder
 
 /**
- * TODO: doc
+ * A stand-in for the layout-based fields of a Node, but where everything is done in the coordinate frame of the
+ * "root" of the Trail.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -13,10 +14,10 @@ class LayoutProxy {
   /**
    * @mixes Poolable
    *
-   * @param {Trail} trail
+   * @param {Trail} trail - The wrapped Node is the leaf-most node, but coordinates will be handled in the global frame
+   * of the trail itself.
    */
   constructor( trail ) {
-
     this.initialize( trail );
   }
 
@@ -26,7 +27,6 @@ class LayoutProxy {
    * @param {Trail} trail
    */
   initialize( trail ) {
-
     // @public {Trail|null} - Nulled out when disposed
     this.trail = trail;
   }

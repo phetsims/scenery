@@ -36,11 +36,11 @@ const GridConfigurable = memoize( type => {
     constructor( ...args ) {
       super( ...args );
 
-      // @private {GridConfigurable.Align|null} - Null value inherits from a base config
+      // @protected {GridConfigurable.Align|null} - Null value inherits from a base config
       this._xAlign = null;
       this._yAlign = null;
 
-      // @private {number|null} - Null value inherits from a base config
+      // @protected {number|null} - Null value inherits from a base config
       this._leftMargin = null;
       this._rightMargin = null;
       this._topMargin = null;
@@ -109,59 +109,27 @@ const GridConfigurable = memoize( type => {
     /**
      * @public
      *
-     * @param {string} propertyName
-     * @param {GridConfigurable} defaultConfig
-     * @returns {*}
-     */
-    withDefault( propertyName, defaultConfig ) {
-      return this[ propertyName ] !== null ? this[ propertyName ] : defaultConfig[ propertyName ];
-    }
-
-    /**
-     * @public
-     *
-     * @param {GridConfigurable} defaultConfig
-     * @returns {GridConfigurable}
-     */
-    withDefaults( defaultConfig ) {
-      const configurable = new GridConfigurableObject();
-
-      configurable._xAlign = this._xAlign !== null ? this._xAlign : defaultConfig._xAlign;
-      configurable._yAlign = this._yAlign !== null ? this._yAlign : defaultConfig._yAlign;
-      configurable._leftMargin = this._leftMargin !== null ? this._leftMargin : defaultConfig._leftMargin;
-      configurable._rightMargin = this._rightMargin !== null ? this._rightMargin : defaultConfig._rightMargin;
-      configurable._topMargin = this._topMargin !== null ? this._topMargin : defaultConfig._topMargin;
-      configurable._bottomMargin = this._bottomMargin !== null ? this._bottomMargin : defaultConfig._bottomMargin;
-      configurable._xGrow = this._xGrow !== null ? this._xGrow : defaultConfig._xGrow;
-      configurable._yGrow = this._yGrow !== null ? this._yGrow : defaultConfig._yGrow;
-      configurable._minContentWidth = this._minContentWidth !== null ? this._minContentWidth : defaultConfig._minContentWidth;
-      configurable._minContentHeight = this._minContentHeight !== null ? this._minContentHeight : defaultConfig._minContentHeight;
-      configurable._maxContentWidth = this._maxContentWidth !== null ? this._maxContentWidth : defaultConfig._maxContentWidth;
-      configurable._maxContentHeight = this._maxContentHeight !== null ? this._maxContentHeight : defaultConfig._maxContentHeight;
-
-      return configurable;
-    }
-
-    /**
-     * @public
-     *
-     * @returns {GridConfigurable.Align|null}
+     * @returns {string|null}
      */
     get xAlign() {
-      return this._xAlign;
+      const result = xAlignInverseMap[ this._xAlign ];
+
+      assert && assert( result === null || typeof result === 'string' );
+
+      return result;
     }
 
     /**
      * @public
      *
-     * @param {GridConfigurable.Align|string|null} value
+     * @param {string|null} value
      */
     set xAlign( value ) {
-      // remapping xAlign values to an independent set, so they aren't orientation-dependent
-      // TODO: consider if this is wise
-      if ( typeof value === 'string' ) {
-        value = xAlignMapping[ value ];
-      }
+      assert && assert( xAlignAllowedValuesMap.includes( value ),
+        `align ${value} not supported, the valid values are ${xAlignAllowedValuesMap}` );
+
+      // remapping align values to an independent set, so they aren't orientation-dependent
+      value = xAlignMap[ value ];
 
       assert && assert( value === null || GridConfigurable.Align.includes( value ) );
 
@@ -175,23 +143,27 @@ const GridConfigurable = memoize( type => {
     /**
      * @public
      *
-     * @returns {GridConfigurable.Align|null}
+     * @returns {string|null}
      */
     get yAlign() {
-      return this._yAlign;
+      const result = yAlignInverseMap[ this._yAlign ];
+
+      assert && assert( result === null || typeof result === 'string' );
+
+      return result;
     }
 
     /**
      * @public
      *
-     * @param {GridConfigurable.Align|string|null} value
+     * @param {string|null} value
      */
     set yAlign( value ) {
-      // remapping yAlign values to an independent set, so they aren't orientation-dependent
-      // TODO: consider if this is wise
-      if ( typeof value === 'string' ) {
-        value = yAlignMapping[ value ];
-      }
+      assert && assert( yAlignAllowedValuesMap.includes( value ),
+        `align ${value} not supported, the valid values are ${yAlignAllowedValuesMap}` );
+
+      // remapping align values to an independent set, so they aren't orientation-dependent
+      value = yAlignMap[ value ];
 
       assert && assert( value === null || GridConfigurable.Align.includes( value ) );
 
@@ -559,26 +531,44 @@ GridConfigurable.Align = Enumeration.byKeys( [
   'STRETCH'
 ] );
 
-const xAlignMapping = {
+const xAlignMap = {
   left: GridConfigurable.Align.START,
   right: GridConfigurable.Align.END,
   center: GridConfigurable.Align.CENTER,
   origin: GridConfigurable.Align.ORIGIN,
-  stretch: GridConfigurable.Align.STRETCH
+  stretch: GridConfigurable.Align.STRETCH,
+  null: null
 };
+const xAlignInverseMap = {
+  [ GridConfigurable.Align.START ]: 'left',
+  [ GridConfigurable.Align.END ]: 'right',
+  [ GridConfigurable.Align.CENTER ]: 'center',
+  [ GridConfigurable.Align.ORIGIN ]: 'origin',
+  [ GridConfigurable.Align.STRETCH ]: 'stretch',
+  null: null
+};
+const xAlignAllowedValuesMap = [ 'left', 'right', 'center', 'origin', 'stretch', null ];
 
-const yAlignMapping = {
+const yAlignMap = {
   top: GridConfigurable.Align.START,
   bottom: GridConfigurable.Align.END,
   center: GridConfigurable.Align.CENTER,
   origin: GridConfigurable.Align.ORIGIN,
-  stretch: GridConfigurable.Align.STRETCH
+  stretch: GridConfigurable.Align.STRETCH,
+  null: null
 };
+const yAlignInverseMap = {
+  [ GridConfigurable.Align.START ]: 'top',
+  [ GridConfigurable.Align.END ]: 'bottom',
+  [ GridConfigurable.Align.CENTER ]: 'center',
+  [ GridConfigurable.Align.ORIGIN ]: 'origin',
+  [ GridConfigurable.Align.STRETCH ]: 'stretch',
+  null: null
+};
+const yAlignAllowedValuesMap = [ 'top', 'bottom', 'center', 'origin', 'stretch', null ];
 
 // @public {Object}
 GridConfigurable.GRID_CONFIGURABLE_OPTION_KEYS = GRID_CONFIGURABLE_OPTION_KEYS;
-
-const GridConfigurableObject = GridConfigurable( Object );
 
 scenery.register( 'GridConfigurable', GridConfigurable );
 export default GridConfigurable;
