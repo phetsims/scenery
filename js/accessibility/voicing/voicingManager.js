@@ -248,23 +248,26 @@ class VoicingManager extends Announcer {
    */
   stepQueue( dt ) {
 
-    // increase the time each element has spent in queue
-    for ( let i = 0; i < this.voicingQueue.length; i++ ) {
-      const voicingQueueElement = this.voicingQueue[ i ];
-      voicingQueueElement.timeInQueue += dt * 1000;
-    }
+    if ( this.initialized ) {
 
-    // This manages the case where the 'end' event came from an utterance, but there was no next utterance ready to be
-    // spoken. Make sure that we support anytime that utterances are ready but there is no "end" callback that would
-    // trigger `alertNow()`.
-    if ( !this.getSynth().speaking && this.voicingQueue.length > 0 ) {
-      this.alertNow();
-    }
+      // increase the time each element has spent in queue
+      for ( let i = 0; i < this.voicingQueue.length; i++ ) {
+        const voicingQueueElement = this.voicingQueue[ i ];
+        voicingQueueElement.timeInQueue += dt * 1000;
+      }
 
-    // If our queue is empty and the synth isn't speaking, then clear safariWorkaroundUtterances to prevent memory leak.
-    // This handles any uncertain cases where the "end" callback on SpeechSynthUtterance isn't called.
-    if ( !this.getSynth().speaking && this.voicingQueue.length === 0 && this.safariWorkaroundUtterances.length > 0 ) {
-      this.safariWorkaroundUtterances = [];
+      // This manages the case where the 'end' event came from an utterance, but there was no next utterance ready to be
+      // spoken. Make sure that we support anytime that utterances are ready but there is no "end" callback that would
+      // trigger `alertNow()`.
+      if ( !this.getSynth().speaking && this.voicingQueue.length > 0 ) {
+        this.alertNow();
+      }
+
+      // If our queue is empty and the synth isn't speaking, then clear safariWorkaroundUtterances to prevent memory leak.
+      // This handles any uncertain cases where the "end" callback on SpeechSynthUtterance isn't called.
+      if ( !this.getSynth().speaking && this.voicingQueue.length === 0 && this.safariWorkaroundUtterances.length > 0 ) {
+        this.safariWorkaroundUtterances = [];
+      }
     }
   }
 
