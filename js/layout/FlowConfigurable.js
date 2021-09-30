@@ -145,7 +145,7 @@ const FlowConfigurable = memoize( type => {
      * @returns {string|null}
      */
     get align() {
-      const result = alignInverseMapping[ this._orientation ][ this._align ];
+      const result = alignInverseMap[ this._orientation ][ this._align ];
 
       assert && assert( result === null || typeof result === 'string' );
 
@@ -158,11 +158,11 @@ const FlowConfigurable = memoize( type => {
      * @param {string|null} value
      */
     set align( value ) {
-      assert && assert( alignAllowedValuesMapping[ this._orientation ].includes( value ),
-        `align ${value} not supported, with the orientation ${this._orientation}, the valid values are ${alignAllowedValuesMapping[ this._orientation ]}` );
+      assert && assert( alignAllowedValuesMap[ this._orientation ].includes( value ),
+        `align ${value} not supported, with the orientation ${this._orientation}, the valid values are ${alignAllowedValuesMap[ this._orientation ]}` );
 
       // remapping align values to an independent set, so they aren't orientation-dependent
-      value = alignMapping[ this._orientation ][ value ];
+      value = alignMap[ this._orientation ][ value ];
 
       assert && assert( value === null || FlowConfigurable.Align.includes( value ) );
 
@@ -479,7 +479,7 @@ FlowConfigurable.Align = Enumeration.byKeys( [
   'STRETCH'
 ] );
 
-const alignMapping = {
+const alignMap = {
   [ Orientation.HORIZONTAL ]: {
     top: FlowConfigurable.Align.START,
     bottom: FlowConfigurable.Align.END,
@@ -495,10 +495,9 @@ const alignMapping = {
     origin: FlowConfigurable.Align.ORIGIN,
     stretch: FlowConfigurable.Align.STRETCH,
     null: null
-  },
-  null: null
+  }
 };
-const alignInverseMapping = {
+const alignInverseMap = {
   [ Orientation.HORIZONTAL ]: {
     [ FlowConfigurable.Align.START ]: 'top',
     [ FlowConfigurable.Align.END ]: 'bottom',
@@ -516,7 +515,7 @@ const alignInverseMapping = {
     null: null
   }
 };
-const alignAllowedValuesMapping = {
+const alignAllowedValuesMap = {
   [ Orientation.HORIZONTAL ]: [ 'top', 'bottom', 'center', 'origin', 'stretch', null ],
   [ Orientation.VERTICAL ]: [ 'left', 'right', 'center', 'origin', 'stretch', null ]
 };

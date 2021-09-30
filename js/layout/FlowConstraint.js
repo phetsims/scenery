@@ -340,10 +340,14 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
   /**
    * @public
    *
-   * @returns {FlowConstraint.Justify}
+   * @returns {string}
    */
   get justify() {
-    return this._justify;
+    const result = justifyInverseMap[ this.orientation ][ this._justify ];
+
+    assert && assert( justifyAllowedValuesMap[ this.orientation ].includes( result ) );
+
+    return result;
   }
 
   /**
@@ -352,9 +356,11 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
    * @param {FlowConstraint.Justify|string} value
    */
   set justify( value ) {
-    if ( typeof value === 'string' ) {
-      value = justifyMap[ value ];
-    }
+    assert && assert( justifyAllowedValuesMap[ this._orientation ].includes( value ),
+      `justify ${value} not supported, with the orientation ${this._orientation}, the valid values are ${justifyAllowedValuesMap[ this._orientation ]}` );
+
+    // remapping align values to an independent set, so they aren't orientation-dependent
+    value = justifyMap[ this._orientation ][ value ];
 
     assert && assert( FlowConstraint.Justify.includes( value ) );
 
@@ -550,18 +556,44 @@ FlowConstraint.Justify = Enumeration.byKeys( [
   'SPACE_EVENLY'
 ] );
 const justifyMap = {
-  start: FlowConstraint.Justify.START,
-  top: FlowConstraint.Justify.START,
-  left: FlowConstraint.Justify.START,
-
-  end: FlowConstraint.Justify.END,
-  bottom: FlowConstraint.Justify.END,
-  right: FlowConstraint.Justify.END,
-
-  center: FlowConstraint.Justify.CENTER,
-  spaceBetween: FlowConstraint.Justify.SPACE_BETWEEN,
-  spaceAround: FlowConstraint.Justify.SPACE_AROUND,
-  spaceEvenly: FlowConstraint.Justify.SPACE_EVENLY
+  [ Orientation.HORIZONTAL ]: {
+    left: FlowConstraint.Justify.START,
+    right: FlowConstraint.Justify.END,
+    center: FlowConstraint.Justify.CENTER,
+    spaceBetween: FlowConstraint.Justify.SPACE_BETWEEN,
+    spaceAround: FlowConstraint.Justify.SPACE_AROUND,
+    spaceEvenly: FlowConstraint.Justify.SPACE_EVENLY
+  },
+  [ Orientation.VERTICAL ]: {
+    top: FlowConstraint.Justify.START,
+    bottom: FlowConstraint.Justify.END,
+    center: FlowConstraint.Justify.CENTER,
+    spaceBetween: FlowConstraint.Justify.SPACE_BETWEEN,
+    spaceAround: FlowConstraint.Justify.SPACE_AROUND,
+    spaceEvenly: FlowConstraint.Justify.SPACE_EVENLY
+  }
+};
+const justifyInverseMap = {
+  [ Orientation.HORIZONTAL ]: {
+    [ FlowConstraint.Justify.START ]: 'left',
+    [ FlowConstraint.Justify.END ]: 'right',
+    [ FlowConstraint.Justify.CENTER ]: 'center',
+    [ FlowConstraint.Justify.SPACE_BETWEEN ]: 'spaceBetween',
+    [ FlowConstraint.Justify.SPACE_AROUND ]: 'spaceAround',
+    [ FlowConstraint.Justify.SPACE_EVENLY ]: 'spaceEvenly'
+  },
+  [ Orientation.VERTICAL ]: {
+    [ FlowConstraint.Justify.START ]: 'top',
+    [ FlowConstraint.Justify.END ]: 'bottom',
+    [ FlowConstraint.Justify.CENTER ]: 'center',
+    [ FlowConstraint.Justify.SPACE_BETWEEN ]: 'spaceBetween',
+    [ FlowConstraint.Justify.SPACE_AROUND ]: 'spaceAround',
+    [ FlowConstraint.Justify.SPACE_EVENLY ]: 'spaceEvenly'
+  }
+};
+const justifyAllowedValuesMap = {
+  [ Orientation.HORIZONTAL ]: [ 'left', 'right', 'center', 'spaceBetween', 'spaceAround', 'spaceEvenly' ],
+  [ Orientation.VERTICAL ]: [ 'top', 'bottom', 'center', 'spaceBetween', 'spaceAround', 'spaceEvenly' ]
 };
 
 // @public {Array.<string>}

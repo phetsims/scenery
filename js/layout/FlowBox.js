@@ -254,7 +254,7 @@ class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
   /**
    * @public
    *
-   * @returns {FlowConstraint.Justify}
+   * @returns {string}
    */
   get justify() {
     return this._constraint.justify;
@@ -263,7 +263,7 @@ class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
   /**
    * @public
    *
-   * @param {FlowConstraint.Justify|string} value
+   * @param {string} value
    */
   set justify( value ) {
     this._constraint.justify = value;
@@ -290,25 +290,27 @@ class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
   /**
    * @public
    *
-   * Horizontal flow values: 'top', 'bottom', 'center', 'origin', 'stretch', null
-   * Vertical flow values: 'left', 'right', 'center', 'origin', 'stretch', null
+   * Horizontal flow values: 'top', 'bottom', 'center', 'origin', 'stretch'
+   * Vertical flow values: 'left', 'right', 'center', 'origin', 'stretch'
    *
-   * @returns {string|null}
+   * @returns {string}
    */
   get align() {
+    assert && assert( typeof this._constraint.align === 'string' );
+
     return this._constraint.align;
   }
 
   /**
    * @public
    *
-   * Horizontal flow values: 'top', 'bottom', 'center', 'origin', 'stretch', null
-   * Vertical flow values: 'left', 'right', 'center', 'origin', 'stretch', null
+   * Horizontal flow values: 'top', 'bottom', 'center', 'origin', 'stretch'
+   * Vertical flow values: 'left', 'right', 'center', 'origin', 'stretch'
    *
-   * @param {string|null} value
+   * @param {string} value
    */
   set align( value ) {
-    assert && assert( value === null || typeof value === 'string' );
+    assert && assert( typeof value === 'string', 'FlowBox align should be a string' );
 
     this._constraint.align = value;
   }
