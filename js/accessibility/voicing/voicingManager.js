@@ -33,11 +33,17 @@ const UTTERANCE_OPTION_DEFAULTS = {
   // content has finished speaking
   cancelSelf: true,
 
-  // {boolean} - If true and another Utterance is currently being spoken by the speech synth,
-  // announcing this Utterance will immediately cancel the other content being spoken by the synth.
-  // Otherwise, content for the new utterance will be spoken as soon as the browser finishes speaking
-  // the old content
-  cancelOther: true
+  // {boolean} - Only applies to two Utterances with the same priority. If true and another Utterance is currently
+  // being spoken by the speech synth (or queued by voicingManager), announcing this Utterance will immediately cancel
+  // the other content being spoken by the synth. Otherwise, content for the new utterance will be spoken as soon as
+  // the browser finishes speaking the utterances in front of it in line.
+  cancelOther: true,
+
+  // {number} - Used to determine which utterance might interrupt another utterance. Any utterance (1) with a higher priority
+  // than another utterance (2) will behave as such:
+  // - (1) will interrupt (2) when (2) is currently being spoken, and (1) is announced by the voicingManager. In this case, (2) is interrupted, and never finished.
+  // - (1) will continue speaking if (1) was speaking, and (2) is announced by the voicingManager. In this case (2) will be spoken (1) is done.
+  priority: 1
 };
 
 
@@ -493,11 +499,17 @@ class VoicingManager extends Announcer {
     assert && assert( potentialToCancelUtterance instanceof Utterance );
 
     const myUtteranceOptions = merge( {}, UTTERANCE_OPTION_DEFAULTS, myUtterance.announcerOptions );
-    // const potentialToCancelUtteranceOptions = merge( UTTERANCE_OPTION_DEFAULTS, potentialToCancelUtterance.announcerOptions );
+    const potentialToCancelUtteranceOptions = merge( {}, UTTERANCE_OPTION_DEFAULTS, potentialToCancelUtterance.announcerOptions );
 
-    let shouldCancel = myUtteranceOptions.cancelOther;
-    if ( potentialToCancelUtterance && potentialToCancelUtterance === myUtterance ) {
-      shouldCancel = myUtteranceOptions.cancelSelf;
+    let shouldCancel;
+    if ( potentialToCancelUtteranceOptions.priority !== myUtteranceOptions.priority ) {
+      shouldCancel = potentialToCancelUtteranceOptions.priority < myUtteranceOptions.priority;
+    }
+    else {
+      shouldCancel = myUtteranceOptions.cancelOther;
+      if ( potentialToCancelUtterance && potentialToCancelUtterance === myUtterance ) {
+        shouldCancel = myUtteranceOptions.cancelSelf;
+      }
     }
 
     return shouldCancel;
