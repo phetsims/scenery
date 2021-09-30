@@ -140,9 +140,6 @@ class VoicingManager extends Announcer {
 
     // Blown away regularly, don't keep a reference to it.
     this.voicingQueue = [];
-
-    // No dispose, as this singleton exists for the lifetime of the runtime.
-    stepTimer.addListener( this.stepQueue.bind( this ) );
   }
 
   /**
@@ -192,6 +189,9 @@ class VoicingManager extends Announcer {
         this.cancel();
       }
     } );
+
+    // No dispose, as this singleton exists for the lifetime of the runtime.
+    stepTimer.addListener( this.stepQueue.bind( this ) );
 
     this.initialized = true;
   }
