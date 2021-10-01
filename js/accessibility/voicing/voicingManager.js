@@ -230,10 +230,13 @@ class VoicingManager extends Announcer {
         // if minTimeInQueue is zero, it should be alerted synchronously by calling alertNow
         if ( voicingQueueElement.timeInQueue >= voicingQueueElement.minTimeInQueue ) {
 
+          // Remove from the queue before we speak it. If speech is not allowed by the browser yet an `end` event
+          // will immediately be triggered by the speak method, so we need to eagerly remove voicingQueueElement
+          // to prevent an infinite loop.
+          this.removeFromVoicingQueue( voicingQueueElement );
+
           synth.speak( voicingQueueElement.speechSynthUtterance );
 
-          // remove from voicingManager list after speaking
-          this.removeFromVoicingQueue( voicingQueueElement );
           break;
         }
       }
@@ -399,25 +402,20 @@ class VoicingManager extends Announcer {
     };
 
     const endListener = () => {
+      this.endSpeakingEmitter.emit( stringToSpeak, utterance );
+      this.speakingProperty.set( false );
+      speechSynthUtterance.removeEventListener( 'end', endListener );
 
-      // End is immediately called if no use input has occurred in a webpage
-      if ( this.hasSpoken ) {
-
-        this.endSpeakingEmitter.emit( stringToSpeak, utterance );
-        this.speakingProperty.set( false );
-        speechSynthUtterance.removeEventListener( 'end', endListener );
-
-        // remove the reference to the SpeechSynthesisUtterance so we don't leak memory
-        const indexOfUtterance = this.safariWorkaroundUtterances.indexOf( speechSynthUtterance );
-        if ( indexOfUtterance > -1 ) {
-          this.safariWorkaroundUtterances.splice( indexOfUtterance, 1 );
-        }
-
-        this.currentlySpeakingUtterance = null;
-
-        // kick off the next element now that this one is done.
-        this.onSpeechSynthesisUtteranceEnd();
+      // remove the reference to the SpeechSynthesisUtterance so we don't leak memory
+      const indexOfUtterance = this.safariWorkaroundUtterances.indexOf( speechSynthUtterance );
+      if ( indexOfUtterance > -1 ) {
+        this.safariWorkaroundUtterances.splice( indexOfUtterance, 1 );
       }
+
+      this.currentlySpeakingUtterance = null;
+
+      // kick off the next element now that this one is done.
+      this.onSpeechSynthesisUtteranceEnd();
     };
 
     speechSynthUtterance.addEventListener( 'start', startListener );
