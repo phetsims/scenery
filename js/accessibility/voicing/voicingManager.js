@@ -25,6 +25,8 @@ import scenery from '../../scenery.js';
 import globalKeyStateTracker from '../globalKeyStateTracker.js';
 import KeyboardUtils from '../KeyboardUtils.js';
 
+const DEFAULT_PRIORITY = 1;
+
 const UTTERANCE_OPTION_DEFAULTS = {
 
   // {boolean} - If true and this Utterance is currently being spoken by the speech synth, announcing it
@@ -43,7 +45,7 @@ const UTTERANCE_OPTION_DEFAULTS = {
   // than another utterance (2) will behave as such:
   // - (1) will interrupt (2) when (2) is currently being spoken, and (1) is announced by the voicingManager. In this case, (2) is interrupted, and never finished.
   // - (1) will continue speaking if (1) was speaking, and (2) is announced by the voicingManager. In this case (2) will be spoken (1) is done.
-  priority: 1
+  priority: DEFAULT_PRIORITY
 };
 
 
@@ -577,6 +579,13 @@ class VoicingQueueElement {
 
 
 const voicingManager = new VoicingManager();
+
+// @public - Priority levels that can be used by Utterances providing the `announcerOptions.priority` option.
+voicingManager.TOP_PRIORITY = 10;
+voicingManager.HIGH_PRIORITY = 5;
+voicingManager.MEDIUM_PRIORITY = 2;
+voicingManager.DEFAULT_PRIORITY = DEFAULT_PRIORITY;
+voicingManager.LOW_PRIORITY = 0;
 
 scenery.register( 'voicingManager', voicingManager );
 export default voicingManager;
