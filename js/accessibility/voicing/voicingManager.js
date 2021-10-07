@@ -237,7 +237,9 @@ class VoicingManager extends Announcer {
           // to prevent an infinite loop.
           this.removeFromVoicingQueue( voicingQueueElement );
 
-          synth.speak( voicingQueueElement.speechSynthUtterance );
+          if ( voicingQueueElement.utterance.predicate() ) {
+            synth.speak( voicingQueueElement.speechSynthUtterance );
+          }
 
           break;
         }
