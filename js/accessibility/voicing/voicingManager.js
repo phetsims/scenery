@@ -224,6 +224,8 @@ class VoicingManager extends Announcer {
    * @private
    */
   alertNow() {
+    this.assertSpeakingPropertyInSync();
+
     const synth = voicingManager.getSynth();
     if ( synth ) {
       for ( let i = 0; i < this.voicingQueue.length; i++ ) {
@@ -238,14 +240,28 @@ class VoicingManager extends Announcer {
           this.removeFromVoicingQueue( voicingQueueElement );
 
           if ( voicingQueueElement.utterance.predicate() ) {
+
+            // Set the speakingProperty true immediately instead of in the `start` event because the `start` event is
+            // not triggered synchronously. If speak immediately calls an `end` event we want to set the
+            // speakingProperty true first.
+            this.speakingProperty.set( true );
             synth.speak( voicingQueueElement.speechSynthUtterance );
+
+            this.assertSpeakingPropertyInSync();
           }
 
           break;
         }
       }
-
     }
+  }
+
+  /**
+   * Our speakingProperty better match the synth state.
+   * @private
+   */
+  assertSpeakingPropertyInSync() {
+    assert && assert( this.speakingProperty.value === this.getSynth().speaking, 'isSpeaking discrepancy' );
   }
 
   /**
@@ -379,9 +395,7 @@ class VoicingManager extends Announcer {
    */
   requestSpeech( utterance ) {
     assert && assert( this.isSpeechSynthesisSupported(), 'trying to speak with speechSynthesis, but it is not supported on this platform' );
-
-    // TODO: likely this will need to go, but it is nice to think about the potential for these to be aligned. Perhaps there is another place this could go after the async part of queue stepping, https://github.com/phetsims/scenery/issues/1288
-    // assert && assert( this.speakingProperty.value === this.getSynth().speaking, 'isSpeaking discrepancy' );
+    this.assertSpeakingPropertyInSync();
 
     // only cancel the previous alert if there is something new to speak
     if ( utterance.alert ) {
@@ -401,13 +415,13 @@ class VoicingManager extends Announcer {
     const startListener = () => {
       this.startSpeakingEmitter.emit( stringToSpeak, utterance );
       this.currentlySpeakingUtterance = utterance;
-      this.speakingProperty.set( true );
+      this.speakingProperty.set( this.getSynth().speaking );
       speechSynthUtterance.removeEventListener( 'start', startListener );
     };
 
     const endListener = () => {
       this.endSpeakingEmitter.emit( stringToSpeak, utterance );
-      this.speakingProperty.set( false );
+      this.speakingProperty.set( this.getSynth().speaking );
       speechSynthUtterance.removeEventListener( 'end', endListener );
 
       // remove the reference to the SpeechSynthesisUtterance so we don't leak memory
@@ -478,7 +492,7 @@ class VoicingManager extends Announcer {
     if ( this.initialized ) {
 
       // Cancel anything that is being spoken currently.
-      this.getSynth().cancel();
+      this.cancelSynth();
 
       // clear everything queued to be voiced.
       this.voicingQueue = [];
@@ -539,13 +553,22 @@ class VoicingManager extends Announcer {
         }
       }
 
+      // test against what is currently being spoken by the synth (currentlySpeakingUtterance)
       if ( this.currentlySpeakingUtterance && this.cancelThisOneQuestionMark( utteranceThatMayCancelOthers, this.currentlySpeakingUtterance ) ) {
-
-        // test against what is currently being spoken by the synth (currentlySpeakingUtterance)
-        // TODO: does this call the `error` or 'end' callback. If so, won't this trigger another utterance to speak even though the current call to requestSpeech hasn't even been added to the queue yet!?!?! https://github.com/phetsims/scenery/issues/1288
-        this.getSynth().cancel();
+        this.cancelSynth();
       }
     }
+  }
+
+  /**
+   * Cancel the synth and immediately update the speakingProperty. The `end` event for the Utterance that is being
+   * spoken may not happen synchronously so we want the speakingProperty to be set eagerly to stay in sync.
+   * @private
+   */
+  cancelSynth() {
+    assert && assert( this.initialized, 'must be initialized to use synth' );
+    this.getSynth().cancel();
+    this.speakingProperty.set( this.getSynth().speaking );
   }
 }
 
