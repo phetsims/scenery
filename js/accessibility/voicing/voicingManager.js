@@ -399,7 +399,7 @@ class VoicingManager extends Announcer {
 
     // only cancel the previous alert if there is something new to speak
     if ( utterance.alert ) {
-      this.cleanUpAndPotentiallyCancelOthers( utterance );
+      this.prioritizeUtterances( utterance );
     }
 
     // embedding marks (for i18n) impact the output, strip before speaking
@@ -505,45 +505,49 @@ class VoicingManager extends Announcer {
 
   /**
    * Given one utterance, should it cancel another provided utterance?
-   * @param {Utterance} myUtterance
-   * @param {Utterance} potentialToCancelUtterance
+   * @param {Utterance} utterance
+   * @param {Utterance} utteranceToCancel
    * @returns {boolean}
    * @private
    */
-  cancelThisOneQuestionMark( myUtterance, potentialToCancelUtterance ) {
-    assert && assert( myUtterance instanceof Utterance );
-    assert && assert( potentialToCancelUtterance instanceof Utterance );
+  shouldCancel( utterance, utteranceToCancel ) {
+    assert && assert( utterance instanceof Utterance );
+    assert && assert( utteranceToCancel instanceof Utterance );
 
-    const myUtteranceOptions = merge( {}, UTTERANCE_OPTION_DEFAULTS, myUtterance.announcerOptions );
-    const potentialToCancelUtteranceOptions = merge( {}, UTTERANCE_OPTION_DEFAULTS, potentialToCancelUtterance.announcerOptions );
+    const utteranceOptions = merge( {}, UTTERANCE_OPTION_DEFAULTS, utterance.announcerOptions );
+    const utteranceToCancelOptions = merge( {}, UTTERANCE_OPTION_DEFAULTS, utteranceToCancel.announcerOptions );
 
     let shouldCancel;
-    if ( potentialToCancelUtteranceOptions.priority !== myUtteranceOptions.priority ) {
-      shouldCancel = potentialToCancelUtteranceOptions.priority < myUtteranceOptions.priority;
+    if ( utteranceToCancelOptions.priority !== utteranceOptions.priority ) {
+      shouldCancel = utteranceToCancelOptions.priority < utteranceOptions.priority;
     }
     else {
-      shouldCancel = myUtteranceOptions.cancelOther;
-      if ( potentialToCancelUtterance && potentialToCancelUtterance === myUtterance ) {
-        shouldCancel = myUtteranceOptions.cancelSelf;
+      shouldCancel = utteranceOptions.cancelOther;
+      if ( utteranceToCancel && utteranceToCancel === utterance ) {
+        shouldCancel = utteranceOptions.cancelSelf;
       }
     }
 
     return shouldCancel;
   }
 
-  // @private
-  cleanUpAndPotentiallyCancelOthers( utteranceThatMayCancelOthers ) {
+  /**
+   * Remove earlier voicingQueueElements from the queue if the Utterance is important enough. This will also interrupt
+   * the utterance that is currently being spoken.
+   * @private
+   *
+   * @param {Utterance} newUtterance
+   */
+  prioritizeUtterances( newUtterance ) {
 
     if ( this.initialized ) {
-
 
       // Update our voicingQueue before canceling the browser queue, since that will most likely trigger the end
       // callback (and therefore the next utterance to be spoken).
       for ( let i = this.voicingQueue.length - 1; i >= 0; i-- ) {
         const voicingQueueElement = this.voicingQueue[ i ];
 
-        if ( this.cancelThisOneQuestionMark( utteranceThatMayCancelOthers, voicingQueueElement.utterance ) ) {
-
+        if ( this.shouldCancel( newUtterance, voicingQueueElement.utterance ) ) {
 
           this.removeFromVoicingQueue( voicingQueueElement );
 
@@ -554,7 +558,7 @@ class VoicingManager extends Announcer {
       }
 
       // test against what is currently being spoken by the synth (currentlySpeakingUtterance)
-      if ( this.currentlySpeakingUtterance && this.cancelThisOneQuestionMark( utteranceThatMayCancelOthers, this.currentlySpeakingUtterance ) ) {
+      if ( this.currentlySpeakingUtterance && this.shouldCancel( newUtterance, this.currentlySpeakingUtterance ) ) {
         this.cancelSynth();
       }
     }
