@@ -41,19 +41,20 @@ const UTTERANCE_OPTION_DEFAULTS = {
   // the browser finishes speaking the utterances in front of it in line.
   cancelOther: true,
 
-  // {number} - Used to determine which utterance might interrupt another utterance. Any utterance (1) with a higher priority
-  // than another utterance (2) will behave as such:
-  // - (1) will interrupt (2) when (2) is currently being spoken, and (1) is announced by the voicingManager. In this case, (2) is interrupted, and never finished.
-  // - (1) will continue speaking if (1) was speaking, and (2) is announced by the voicingManager. In this case (2) will be spoken (1) is done.
+  // {number} - Used to determine which utterance might interrupt another utterance. Any utterance (1) with a higher
+  // priority than another utterance (2) will behave as such:
+  // - (1) will interrupt (2) when (2) is currently being spoken, and (1) is announced by the voicingManager. In this
+  //       case, (2) is interrupted, and never finished.
+  // - (1) will continue speaking if (1) was speaking, and (2) is announced by the voicingManager. In this case (2)
+  //       will be spoken when (1) is done.
   priority: DEFAULT_PRIORITY
 };
-
 
 class VoicingManager extends Announcer {
   constructor() {
     super( {
 
-      // All VoicingManager instances should respect responseCollector's current state.
+      // {boolean} - All VoicingManager instances should respect responseCollector's current state.
       respectResponseCollectorProperties: true
     } );
 
