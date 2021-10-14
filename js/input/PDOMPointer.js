@@ -71,6 +71,9 @@ class PDOMPointer extends Pointer {
           FocusManager.pdomFocus = new Focus( this.display, PDOMInstance.guessVisualTrail( relatedTargetTrail, this.display.rootNode ) );
         }
         else {
+
+          // Don't set this before the related target case because we want to support Node.blur listeners overwriting
+          // the relatedTarget behavior.
           FocusManager.pdomFocus = null;
         }
 

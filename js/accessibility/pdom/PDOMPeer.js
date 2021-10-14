@@ -15,6 +15,7 @@ import merge from '../../../../phet-core/js/merge.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
 import scenery from '../../scenery.js';
+import FocusManager from '../FocusManager.js';
 import PDOMSiblingStyle from './PDOMSiblingStyle.js';
 import PDOMUtils from './PDOMUtils.js';
 
@@ -774,7 +775,8 @@ class PDOMPeer {
    */
   isFocused() {
     const visualFocusTrail = scenery.PDOMInstance.guessVisualTrail( this.trail, this.display.rootNode );
-    return scenery.FocusManager.pdomFocusProperty.value && scenery.FocusManager.pdomFocusProperty.value.trail.equals( visualFocusTrail );
+
+    return FocusManager.pdomFocusProperty.value && FocusManager.pdomFocusProperty.value.trail.equals( visualFocusTrail );
   }
 
   /**
@@ -795,6 +797,13 @@ class PDOMPeer {
 
     // no op by the browser if primary sibling does not have focus
     this._primarySibling.blur();
+
+    // TODO: Is this too much of a workaround? It seems problematic to have this occur, https://github.com/phetsims/scenery/issues/1296
+    if ( FocusManager.pdomFocus && FocusManager.pdomFocus.trail.equals( scenery.PDOMInstance.guessVisualTrail( this.trail, this.display.rootNode ) ) ) {
+
+      // In the case where document.activeElement and FocusManager.pdomFocus are not aligned, make sure they stay in sync manually.
+      FocusManager.pdomFocus = null;
+    }
   }
 
   /**

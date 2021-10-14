@@ -212,8 +212,17 @@ QUnit.test( 'tab focusin/focusout', assert => {
     relatedTarget: bPrimarySibling
   } );
 
+
   // the blur listener on buttonA should have made the default element unfocusable
   assert.ok( !buttonB.focused, 'buttonB cannot receive focus due to blur listener on buttonA' );
+  assert.ok( document.activeElement !== bPrimarySibling, 'element buttonB cannot receive focus due to blur listener on buttonA' );
+  assert.ok( !buttonA.focused, 'buttonA cannot keep focus when tabbing away, even if buttonB is not focusable' );
+  //
+  // buttonB.focusable = true;
+  // buttonA.focus();
+  // assert.ok( buttonA.focused, 'why would this ever change this!!!!' );
+  // buttonB.blur();
+  // assert.ok( buttonA.focused, 'why would this ever change this!!!!' );
 
   afterTest( display );
 } );
