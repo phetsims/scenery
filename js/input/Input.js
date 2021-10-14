@@ -2037,7 +2037,7 @@ class Input {
 
         // Special case for target since we can't set that read-only property. Instead use a substitute key.
         if ( key === 'target' ) {
-          domEvent[ TARGET_SUBSTITUTE_KEY ] = _.clone( eventObject[ key ] );
+          domEvent[ TARGET_SUBSTITUTE_KEY ] = _.clone( eventObject[ key ] ) || {};
 
           // TODO: only needed until https://github.com/phetsims/scenery/issues/1296 is complete, double check on getTrailIdImplementation() too
           domEvent[ TARGET_SUBSTITUTE_KEY ].getAttribute = function( key ) {
