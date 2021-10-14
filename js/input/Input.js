@@ -1048,11 +1048,11 @@ class Input {
   }
 
   /**
-   * From an HTMLElement, get its relatedTarget and map that to the scenery Node. Will return null if relatedTarget
+   * From a DOM Event, get its relatedTarget and map that to the scenery Node. Will return null if relatedTarget
    * is not provided, or if relatedTarget is not under PDOM, or there is no associated Node with trail id on the
    * relatedTarget element.
    * @private - bound passed to PDOMPointer
-   * @param {HTMLElement} domEvent
+   * @param {Event} domEvent - DOM Event, not a SceneryEvent!
    */
   getRelatedTargetTrail( domEvent ) {
     const relatedTargetElement = domEvent.relatedTarget || domEvent[ RELATED_TARGET_SUBSTITUTE_KEY ];
