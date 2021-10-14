@@ -217,7 +217,9 @@ QUnit.test( 'tab focusin/focusout', assert => {
   assert.ok( !buttonB.focused, 'buttonB cannot receive focus due to blur listener on buttonA' );
   assert.ok( document.activeElement !== bPrimarySibling, 'element buttonB cannot receive focus due to blur listener on buttonA' );
   assert.ok( !buttonA.focused, 'buttonA cannot keep focus when tabbing away, even if buttonB is not focusable' );
-  //
+
+
+  // TODO: these should work, https://github.com/phetsims/scenery/issues/1296
   // buttonB.focusable = true;
   // buttonA.focus();
   // assert.ok( buttonA.focused, 'why would this ever change this!!!!' );
