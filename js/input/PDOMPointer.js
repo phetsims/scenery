@@ -19,12 +19,14 @@ class PDOMPointer extends Pointer {
 
   /**
    * @param {Display} display
+   * @param {function(Event):Node|null} boundGetRelatedTargetTrail
    */
-  constructor( display ) {
+  constructor( display, boundGetRelatedTargetTrail ) {
     super( null, false, 'pdom' );
 
     // @private
     this.display = display;
+    this.boundGetRelatedTargetTrail = boundGetRelatedTargetTrail;
 
     this.initializeListeners();
 
@@ -61,7 +63,17 @@ class PDOMPointer extends Pointer {
         }
       },
       blur: event => {
-        FocusManager.pdomFocus = null;
+
+        // Null if it is not in the PDOM, or if it is undefined
+        const relatedTargetTrail = this.boundGetRelatedTargetTrail( event.domEvent );
+
+        if ( relatedTargetTrail && relatedTargetTrail.lastNode().focusable ) {
+          FocusManager.pdomFocus = new Focus( this.display, PDOMInstance.guessVisualTrail( relatedTargetTrail, this.display.rootNode ) );
+        }
+        else {
+          FocusManager.pdomFocus = null;
+        }
+
         this.keydownTargetNode = null;
       },
       keydown: event => {

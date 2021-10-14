@@ -168,7 +168,6 @@ import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
-import FocusManger from '../accessibility/FocusManager.js';
 import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
 import Display from '../display/Display.js';
 import scenery from '../scenery.js';
@@ -642,25 +641,6 @@ class Input {
         // focusing event.relatedTarget below so that trail isn't cleared after focus
         this.pdomPointer.trail = null;
 
-        const relatedTarget = event[ RELATED_TARGET_SUBSTITUTE_KEY ] || event.relatedTarget;
-
-        // If there exists an event.relatedTarget, user is moving to the next item with "tab" like navigation and
-        // event.relatedTarget is the element focus is moving to. If the relatedTarget element is removed from the
-        // document then added back in during focusout callbacks (which is done in AccessibilityTree operations),
-        // some browsers (IE11 and Safari) will fail to focus the element. So we manually focus the relatedTarget
-        // so that focus isn't lost. Skipped if focusout callbacks sent focus to an element other than the
-        // in the PDOM (like on removal), or if callbacks made relatedTarget unfocusable.
-        //
-        // Focus is set with DOM API to avoid the performance hit of looking up the Node from trail id.
-        if ( relatedTarget ) {
-
-          const focusMovedInCallbacks = FocusManger.pdomFocusedNode && FocusManger.pdomFocusedNode.getConnectedDisplays().includes( this.display );
-          const targetFocusable = PDOMUtils.isElementFocusable( relatedTarget );
-          if ( targetFocusable && !focusMovedInCallbacks ) {
-            relatedTarget.focus();
-          }
-        }
-
         sceneryLog && sceneryLog.Input && sceneryLog.pop();
       }, {
         phetioPlayback: true,
@@ -1035,7 +1015,7 @@ class Input {
    * @private
    */
   initPDOMPointer() {
-    this.pdomPointer = new PDOMPointer( this.display );
+    this.pdomPointer = new PDOMPointer( this.display, this.getRelatedTargetTrail.bind( this ) );
 
     this.addPointer( this.pdomPointer );
   }
@@ -1068,6 +1048,34 @@ class Input {
   }
 
   /**
+   * From an HTMLElement, get its relatedTarget and map that to the scenery Node. Will return null if relatedTarget
+   * is not provided, or if relatedTarget is not under PDOM, or there is no associated Node with trail id on the
+   * relatedTarget element.
+   * @private - bound passed to PDOMPointer
+   * @param {HTMLElement} domEvent
+   */
+  getRelatedTargetTrail( domEvent ) {
+    const relatedTargetElement = domEvent.relatedTarget || domEvent[ RELATED_TARGET_SUBSTITUTE_KEY ];
+
+    if ( relatedTargetElement && this.isTargetUnderPDOM( relatedTargetElement ) ) {
+      const relatedTargetId = this.getRelatedTargetTrailId( domEvent );
+      return relatedTargetId ? Trail.fromUniqueId( this.display.rootNode, relatedTargetId ) : null;
+    }
+    return null;
+  }
+
+  /**
+   * Get the related target trail ID of the node represented by a DOM element in the accessible PDOM.
+   * @private
+   *
+   * @param {Event} domEvent
+   * @returns {string}
+   */
+  getRelatedTargetTrailId( domEvent ) {
+    return this.getTrailIdImplementation( domEvent, 'relatedTarget', RELATED_TARGET_SUBSTITUTE_KEY );
+  }
+
+  /**
    * Update the PDOMPointer with a new trail from a DOMEvent and return it. For multiple dispatches from a single
    * DOMEvent, this ensures that all will dispatch to the same Trail.
    * @private
@@ -1088,17 +1096,28 @@ class Input {
    * @returns {string}
    */
   getTrailId( domEvent ) {
+    return this.getTrailIdImplementation( domEvent, 'target', TARGET_SUBSTITUTE_KEY );
+  }
+
+
+  /**
+   * @private
+   * @param {Event} domEvent
+   * @param {string} targetKeyName
+   * @param {string} targetSubstitudeKeyName
+   */
+  getTrailIdImplementation( domEvent, targetKeyName, targetSubstitudeKeyName ) {
     assert && assert( this.display._accessible, 'Display must be accessible to get trail IDs from PDOMPeers' );
-    assert && assert( domEvent.target || domEvent[ TARGET_SUBSTITUTE_KEY ], 'need a way to get the target' );
+    assert && assert( domEvent[ targetKeyName ] || domEvent[ targetSubstitudeKeyName ], 'need a way to get the target' );
 
     // could be serialized event for phet-io playbacks, see Input.serializeDOMEvent()
-    if ( domEvent[ TARGET_SUBSTITUTE_KEY ] ) {
-      assert && assert( domEvent[ TARGET_SUBSTITUTE_KEY ] instanceof Object );
-      return domEvent[ TARGET_SUBSTITUTE_KEY ][ PDOMUtils.DATA_TRAIL_ID ];
+    if ( domEvent[ targetSubstitudeKeyName ] ) {
+      assert && assert( domEvent[ targetSubstitudeKeyName ] instanceof Object );
+      return domEvent[ targetSubstitudeKeyName ].getAttribute( PDOMUtils.DATA_TRAIL_ID );
     }
     else {
-      assert && assert( domEvent.target instanceof window.Element );
-      return domEvent.target.getAttribute( PDOMUtils.DATA_TRAIL_ID );
+      assert && assert( domEvent[ targetKeyName ] instanceof window.Element );
+      return domEvent[ targetKeyName ].getAttribute( PDOMUtils.DATA_TRAIL_ID );
     }
   }
 
@@ -2018,7 +2037,12 @@ class Input {
 
         // Special case for target since we can't set that read-only property. Instead use a substitute key.
         if ( key === 'target' ) {
-          domEvent[ TARGET_SUBSTITUTE_KEY ] = eventObject[ key ];
+          domEvent[ TARGET_SUBSTITUTE_KEY ] = _.clone( eventObject[ key ] );
+
+          // TODO: only needed until https://github.com/phetsims/scenery/issues/1296 is complete, double check on getTrailIdImplementation() too
+          domEvent[ TARGET_SUBSTITUTE_KEY ].getAttribute = function( key ) {
+            return this[ key ];
+          };
         }
         else if ( key === 'relatedTarget' ) {
           if ( eventObject[ key ] ) {
