@@ -1035,7 +1035,7 @@ class Input {
    * @private
    */
   initPDOMPointer() {
-    this.pdomPointer = new PDOMPointer( this.display, this.getRelatedTargetTrail.bind( this ) );
+    this.pdomPointer = new PDOMPointer( this.display );
 
     this.addPointer( this.pdomPointer );
   }
