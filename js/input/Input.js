@@ -747,17 +747,21 @@ class Input {
         phetioDocumentation: 'Emits when the PDOM root gets the keyup DOM event.'
       } );
 
-      // same event options for all DOM listeners
-      const accessibleEventOptions = Features.passive ? { useCapture: false, passive: false } : false;
+      // @private {*} - same event options for all DOM listeners, used when we connect listeners
+      this.accessibleEventOptions = Features.passive ? { useCapture: false, passive: false } : false;
 
-      // Add a listener to the root accessible DOM element for each event we want to monitor.
+      // @private {Map} - Maps events that are added to the root PDOM element to the listener that will
+      // fire one of the above Actions and finally dispatch a corresponding SceneryEvent to scenery targets.
+      // Event listeners are not added until initializeEvents, and are stored in this Map so they can be removed
+      // again in detachEvents.
+      this.pdomEventListenerMap = new Map();
+
       PDOMUtils.DOM_EVENTS.forEach( eventName => {
 
         const actionName = `${eventName}Action`;
         assert && assert( this[ actionName ], `action not defined on Input: ${actionName}` );
 
-        // These exist for the lifetime of the display, and need not be disposed.
-        this.display.pdomRootElement.addEventListener( eventName, event => {
+        this.pdomEventListenerMap.set( eventName, event => {
 
           sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `Input.${eventName}FromBrowser` );
           sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
@@ -779,7 +783,7 @@ class Input {
           }
 
           sceneryLog && sceneryLog.InputEvent && sceneryLog.pop();
-        }, accessibleEventOptions );
+        } );
       } );
     }
   }
@@ -911,6 +915,14 @@ class Input {
    */
   connectListeners() {
     BrowserEvents.addDisplay( this.display, this.attachToWindow, this.passiveEvents );
+
+    if ( this.display._accessible ) {
+
+      // Add a listener to the root accessible DOM element for each event we want to monitor.
+      this.pdomEventListenerMap.forEach( ( listener, eventName ) => {
+        this.display.pdomRootElement.addEventListener( eventName, listener, this.accessibleEventOptions );
+      } );
+    }
   }
 
   /**
@@ -919,6 +931,14 @@ class Input {
    */
   disconnectListeners() {
     BrowserEvents.removeDisplay( this.display, this.attachToWindow, this.passiveEvents );
+
+    if ( this.display._accessible ) {
+
+      // Remove listeners from the root accessible DOM element for each event we want to monitor.
+      this.pdomEventListenerMap.forEach( ( listener, eventName ) => {
+        this.display.pdomRootElement.removeEventListener( eventName, listener, this.accessibleEventOptions );
+      } );
+    }
   }
 
   /**
