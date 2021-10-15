@@ -1051,8 +1051,10 @@ class Input {
    * From a DOM Event, get its relatedTarget and map that to the scenery Node. Will return null if relatedTarget
    * is not provided, or if relatedTarget is not under PDOM, or there is no associated Node with trail id on the
    * relatedTarget element.
-   * @private - bound passed to PDOMPointer
+   * @public (scenery-internal)
+   *
    * @param {Event} domEvent - DOM Event, not a SceneryEvent!
+   * @returns {Trail|null}
    */
   getRelatedTargetTrail( domEvent ) {
     const relatedTargetElement = domEvent.relatedTarget || domEvent[ RELATED_TARGET_SUBSTITUTE_KEY ];
@@ -1089,7 +1091,7 @@ class Input {
   }
 
   /**
-   * Get the trail ID of the node represented by a DOM element in the accessible PDOM.
+   * Get the trail ID of the node represented by a DOM element who is the target of a DOM Event in the accessible PDOM.
    * @private
    *
    * @param {Event} domEvent
@@ -1098,7 +1100,6 @@ class Input {
   getTrailId( domEvent ) {
     return this.getTrailIdImplementation( domEvent, 'target', TARGET_SUBSTITUTE_KEY );
   }
-
 
   /**
    * @private
