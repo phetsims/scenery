@@ -208,23 +208,22 @@ QUnit.test( 'tab focusin/focusout', assert => {
     }
   };
   buttonA.addInputListener( makeUnfocusableListener );
-  triggerDOMEvent( 'focusout', aPrimarySibling, KeyboardUtils.KEY_TAB, {
-    relatedTarget: bPrimarySibling
-  } );
 
+  // mimic a tab press by moving focus to buttonB - this will automatically have the correct `relatedTarget` for
+  // the `blur` event on buttonA because focus is moving from buttonA to buttonB.
+  buttonB.focus();
 
   // the blur listener on buttonA should have made the default element unfocusable
   assert.ok( !buttonB.focused, 'buttonB cannot receive focus due to blur listener on buttonA' );
   assert.ok( document.activeElement !== bPrimarySibling, 'element buttonB cannot receive focus due to blur listener on buttonA' );
   assert.ok( !buttonA.focused, 'buttonA cannot keep focus when tabbing away, even if buttonB is not focusable' );
 
-
-  // TODO: these should work, https://github.com/phetsims/scenery/issues/1296
-  // buttonB.focusable = true;
-  // buttonA.focus();
-  // assert.ok( buttonA.focused, 'why would this ever change this!!!!' );
-  // buttonB.blur();
-  // assert.ok( buttonA.focused, 'why would this ever change this!!!!' );
+  // sanity checks manipulating focus, and added because we were seeing very strange things while working on
+  // https://github.com/phetsims/scenery/issues/1296, but these should definitely pass
+  buttonA.focus();
+  assert.ok( buttonA.focused, 'buttonA does not have focus after a basic focus call?' );
+  buttonB.blur();
+  assert.ok( buttonA.focused, 'Blurring a non-focussed element should not remove focus from a non-focused element' );
 
   afterTest( display );
 } );
