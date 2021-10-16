@@ -19,14 +19,12 @@ class PDOMPointer extends Pointer {
 
   /**
    * @param {Display} display
-   * @param {function(Event):Node|null} boundGetRelatedTargetTrail
    */
-  constructor( display, boundGetRelatedTargetTrail ) {
+  constructor( display ) {
     super( null, false, 'pdom' );
 
     // @private
     this.display = display;
-    this.boundGetRelatedTargetTrail = boundGetRelatedTargetTrail;
 
     this.initializeListeners();
 
@@ -51,7 +49,7 @@ class PDOMPointer extends Pointer {
   initializeListeners() {
 
     this.addInputListener( {
-      focus: () => {
+      focus: event => {
         assert && assert( this.trail, 'trail should have been calculated for the focused node' );
 
         const lastNode = this.trail.lastNode();
@@ -61,11 +59,23 @@ class PDOMPointer extends Pointer {
           FocusManager.pdomFocus = new Focus( this.display, PDOMInstance.guessVisualTrail( this.trail, this.display.rootNode ) );
           this.point = this.trail.parentToGlobalPoint( lastNode.center );
         }
+        else {
+
+          // It is possible that `blur` or `focusout` listeners have removed the element from the traversal order
+          // before we receive the `focus` event. In that case, the browser will still try to put focus on the element
+          // even though the PDOM element and Node are not in the traversal order. It is more consistent to remove
+          // focus in this case.
+          event.target.blur();
+
+          // do not allow any more focus listeners to dispatch, this Node should never have been focused in the
+          // first place, but the browser did it anyway
+          event.abort();
+        }
       },
       blur: event => {
 
         // Null if it is not in the PDOM, or if it is undefined
-        const relatedTargetTrail = this.boundGetRelatedTargetTrail( event.domEvent );
+        const relatedTargetTrail = this.display._input.getRelatedTargetTrail( event.domEvent );
 
         if ( relatedTargetTrail && relatedTargetTrail.lastNode().focusable ) {
           FocusManager.pdomFocus = new Focus( this.display, PDOMInstance.guessVisualTrail( relatedTargetTrail, this.display.rootNode ) );
