@@ -8,6 +8,9 @@
  */
 
 import Property from '../../../axon/js/Property.js';
+
+// The following line facilitates TypeScript types in simulation code
+import Node from '../nodes/Node.js';// eslint-disable-line
 import scenery from '../scenery.js';
 
 class NodeProperty extends Property {
