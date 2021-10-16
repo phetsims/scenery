@@ -2459,10 +2459,8 @@ class Node extends PhetioObject {
    * setScaleMagnitude( sx, sy )
    * setScaleMagnitude( vector )
    *
-   * @param {number} s - Scale for both axes
-   * @param {number} sx - Scale for the X axis
-   * @param {number} sy - Scale for the Y axis
-   * @param {Vector2} vector - Scale for the x/y axes in the vector's components.
+   * @param {number|Vector2} a - Scale for both axes, or scale for x-axis if using the 2-parameter call
+   * @param {number} [b] - Scale for the Y axis (only for the 2-parameter call)
    * @returns {Node} - Returns 'this' reference, for chaining
    */
   setScaleMagnitude( a, b ) {
