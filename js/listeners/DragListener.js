@@ -78,6 +78,9 @@ import EventType from '../../../tandem/js/EventType.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import SceneryEvent from '../input/SceneryEvent.js';
+
+// For TypeScript support
+import Node from '../nodes/Node.js'; // eslint-disable-line
 import scenery from '../scenery.js';
 import TransformTracker from '../util/TransformTracker.js';
 import PressListener from './PressListener.js';
