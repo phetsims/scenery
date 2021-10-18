@@ -681,8 +681,9 @@ class HighlightOverlay {
       this.deactivateHighlight();
     }
 
+    // only activate a new highlight if PDOM focus highlights are not displayed
     let activated = false;
-    if ( newTrail ) {
+    if ( newTrail && !this.display.focusManager.pdomFocusHighlightsVisibleProperty.value ) {
       const node = newTrail.lastNode();
 
       if ( ( node.isReadingBlock && this.readingBlockHighlightsVisibleProperty.value ) || ( !node.isReadingBlock && this.interactiveHighlightsVisibleProperty.value ) ) {
