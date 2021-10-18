@@ -758,7 +758,11 @@ class AnimatedPanZoomListener extends PanZoomListener {
     if (
       this._panBounds.isFinite() &&
       node.bounds.isFinite() &&
-      node.instances.length === 0 && // TODO: Support DAG? Perhaps keepTrailInView would be more appropriate
+
+      // There may be zero or 1 instances in cases where focus is updated synchronously and instances are updated
+      // asynchronously (it has just been added to the scene graph)
+      // TODO: Support DAG? Perhaps keepTrailInView would be more appropriate
+      node.instances.length <= 1 &&
       !this._panBounds.containsBounds( node.globalBounds )
     ) {
       this.panToNode( node );
