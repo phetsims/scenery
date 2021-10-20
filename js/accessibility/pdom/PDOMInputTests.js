@@ -218,6 +218,29 @@ QUnit.test( 'tab focusin/focusout', assert => {
   assert.ok( document.activeElement !== bPrimarySibling, 'element buttonB cannot receive focus due to blur listener on buttonA' );
   assert.ok( !buttonA.focused, 'buttonA cannot keep focus when tabbing away, even if buttonB is not focusable' );
 
+  // cleanup for the next test
+  buttonA.removeInputListener( makeUnfocusableListener );
+  buttonB.focusable = true;
+
+  buttonA.focus();
+  const causeRedrawListener = {
+    blur: event => {
+      buttonB.focusable = true;
+      buttonB.tagName = 'p';
+    }
+  };
+  buttonA.addInputListener( causeRedrawListener );
+
+  buttonB.focus();
+
+  // the blur listener on buttonA will cause a full redraw of buttonB in the PDOM, but buttonB should receive focus
+  assert.ok( buttonB.focused, 'buttonB should still have focus after a full redraw due to a blur listener' );
+
+  // cleanup
+  buttonA.removeInputListener( causeRedrawListener );
+  buttonA.focusable = true;
+  buttonB.tagName = 'button';
+
   // sanity checks manipulating focus, and added because we were seeing very strange things while working on
   // https://github.com/phetsims/scenery/issues/1296, but these should definitely pass
   buttonA.focus();
