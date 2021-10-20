@@ -65,6 +65,10 @@ const ELEMENTS_WITHOUT_CLOSING_TAG = [ INPUT_TAG ];
 // see Input.PDOM_EVENT_TYPES
 const DOM_EVENTS = [ 'focusin', 'focusout', 'input', 'change', 'click', 'keydown', 'keyup' ];
 
+// DOM events that must have been triggered from user input of some kind, and will trigger the
+// Display.userGestureEmitter. focus and blur events will trigger from scripting so they must be excluded.
+const USER_GESTURE_EVENTS = [ 'input', 'change', 'click', 'keydown', 'keyup' ];
+
 // A collection of DOM events which should be blocked from reaching the scenery Display div
 // if they are targeted at an ancestor of the PDOM. Some screen readers try to send fake
 // mouse/touch/pointer events to elements but for the purposes of Accessibility we only
@@ -621,6 +625,7 @@ const PDOMUtils = {
   INPUT_TYPES_THAT_SUPPORT_CHECKED: [ 'RADIO', 'CHECKBOX' ],
 
   DOM_EVENTS: DOM_EVENTS,
+  USER_GESTURE_EVENTS: USER_GESTURE_EVENTS,
   BLOCKED_DOM_EVENTS: BLOCKED_DOM_EVENTS,
 
   DATA_TRAIL_ID: DATA_TRAIL_ID,

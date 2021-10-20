@@ -1051,7 +1051,12 @@ class Input {
    * @param {boolean} bubbles
    */
   dispatchPDOMEvent( trail, eventType, domEvent, bubbles ) {
-    Display.userGestureEmitter.emit();
+
+    // exclude focus and blur events because they can happen with scripting without user input, other events
+    // will have an isTrusted flag to indicate whether they came from scripting or user input
+    if ( PDOMUtils.USER_GESTURE_EVENTS.includes( eventType ) && domEvent.isTrusted ) {
+      Display.userGestureEmitter.emit();
+    }
 
     // This workaround hopefully won't be here forever, see ParallelDOM.setExcludeLabelSiblingFromInput() and https://github.com/phetsims/a11y-research/issues/156
     if ( !( domEvent.target && domEvent.target.hasAttribute( PDOMUtils.DATA_EXCLUDE_FROM_INPUT ) ) ) {
