@@ -163,18 +163,20 @@ class Line extends Path {
    * - setPoint1( x1, y1 )
    * - setPoint1( p1 )
    *
-   * @param {number} x1 - the start x coordinate
-   * @param {number} y1 - the start y coordinate
+   * @param {number|Vector2} x1 - the start x coordinate or a Vector2
+   * @param {number} [y1] - the start y coordinate (if the first parameter is not a point)
    * @returns {Line} - For chaining
    */
   setPoint1( x1, y1 ) {
     if ( typeof x1 === 'number' ) {
+
       // setPoint1( x1, y1 );
       assert && assert( x1 !== undefined && y1 !== undefined, 'parameters need to be defined' );
       this._x1 = x1;
       this._y1 = y1;
     }
     else {
+
       // setPoint1( Vector2 )
       assert && assert( x1.x !== undefined && x1.y !== undefined, 'parameters need to be defined' );
       this._x1 = x1.x;
@@ -207,8 +209,8 @@ class Line extends Path {
    * - setPoint2( x2, y2 )
    * - setPoint2( p2 )
    *
-   * @param {number} x2 - the start x coordinate
-   * @param {number} y2 - the start y coordinate
+   * @param {number|Vector2} x2 - the start x coordinate or a Vector2
+   * @param {number} [y2] - the start y coordinate (if the first parameter is not a point)
    * @returns {Line} - For chaining
    */
   setPoint2( x2, y2 ) {
