@@ -26,12 +26,12 @@ const PAINTABLE_OPTION_KEYS = [
   'fillPickable', // {boolean} - Sets whether the filled area of the Node will be treated as 'inside'. See setFillPickable()
   'stroke', // {PaintDef} - Sets the stroke of this Node, see setStroke() for documentation.
   'strokePickable', // {boolean} - Sets whether the stroked area of the Node will be treated as 'inside'. See setStrokePickable()
-  'lineWidth', // {number} Sets the width of the stroked area, see setLineWidth for documentation.
+  'lineWidth', // {number} - Sets the width of the stroked area, see setLineWidth for documentation.
   'lineCap', // {string} - Sets the shape of the stroked area at the start/end of the path, see setLineCap() for documentation.
   'lineJoin', // {string} - Sets the shape of the stroked area at joints, see setLineJoin() for documentation.
   'miterLimit', // {number} - Sets when lineJoin will switch from miter to bevel, see setMiterLimit() for documentation.
   'lineDash', // {Array.<number>} - Sets a line-dash pattern for the stroke, see setLineDash() for documentation
-  'lineDashOffset', // {number} Sets the offset of the line-dash from the start of the stroke, see setLineDashOffset()
+  'lineDashOffset', // {number} - Sets the offset of the line-dash from the start of the stroke, see setLineDashOffset()
   'cachedPaints' // {Array.<PaintDef>} - Sets which paints should be cached, even if not displayed. See setCachedPaints()
 ];
 
