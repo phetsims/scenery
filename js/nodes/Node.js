@@ -7039,7 +7039,7 @@ class Node extends PhetioObject {
 /**
  * {Array.<string>} - This is an array of property (setter) names for Node.mutate(), which are also used when creating
  * Nodes with parameter objects.
- * @protected
+ * @public
  *
  * E.g. new scenery.Node( { x: 5, rotation: 20 } ) will create a Path, and apply setters in the order below
  * (node.x = 5; node.rotation = 20)
