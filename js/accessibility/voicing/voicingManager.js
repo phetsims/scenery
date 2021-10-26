@@ -27,6 +27,11 @@ import KeyboardUtils from '../KeyboardUtils.js';
 
 const DEFAULT_PRIORITY = 1;
 
+// In seconds, how frequently we will use SpeechSynthesis to keep the feature active. After long intervals without
+// using SpeechSynthesis Chromebooks will take a long time to produce the next speech. Presumably it is disabling
+// the feature as an optimization. But this workaround gets around it and keeps speech fast.
+const ENGINE_WAKE_INTERVAL = 10;
+
 const UTTERANCE_OPTION_DEFAULTS = {
 
   // {boolean} - If true and this Utterance is currently being spoken by the speech synth, announcing it
@@ -72,6 +77,10 @@ class VoicingManager extends Announcer {
     // requestSpeech() generally uses a timeout to workaround browser bugs, but those cannot be used until after the
     // first request for speech.
     this.hasSpoken = false;
+
+    // @private {number} - In seconds, how long to go before "waking the SpeechSynthesis" engine to keep speech
+    // fast on Chromebooks, see documentation around ENGINE_WAKE_INTERVAL.
+    this.timeSinceWakingEngine = 0;
 
     // @public {Emitter} - emits events when the speaker starts/stops speaking, with the Utterance that is
     // either starting or stopping
@@ -248,6 +257,9 @@ class VoicingManager extends Announcer {
             this.speakingProperty.set( true );
             synth.speak( voicingQueueElement.speechSynthUtterance );
 
+            // We have just used speech synthesis, wait until ENGINE_WAKE_INTERVAL to apply the workaround again
+            this.timeSinceWakingEngine = 0;
+
             this.assertSpeakingPropertyInSync();
           }
 
@@ -297,6 +309,17 @@ class VoicingManager extends Announcer {
       // This handles any uncertain cases where the "end" callback on SpeechSynthUtterance isn't called.
       if ( !this.getSynth().speaking && this.voicingQueue.length === 0 && this.safariWorkaroundUtterances.length > 0 ) {
         this.safariWorkaroundUtterances = [];
+      }
+
+      // A workaround to keep SpeechSynthesis responsive on Chromebooks. If there is a long enough interval between
+      // speech requests, the next time SpeechSynthesis is used it is very slow on Chromebook. We think the browser
+      // turns "off" the synthesis engine for performance. If it has been long enough since using speech synthesis and
+      // there is nothing to speak in the queue, requesting speech with empty content keeps the engine active.
+      // See https://github.com/phetsims/gravity-force-lab-basics/issues/303.
+      this.timeSinceWakingEngine += dt;
+      if ( !this.speakingProperty.value && this.voicingQueue.length === 0 && this.timeSinceWakingEngine > ENGINE_WAKE_INTERVAL ) {
+        this.timeSinceWakingEngine = 0;
+        this.getSynth().speak( new SpeechSynthesisUtterance( '' ) );
       }
     }
   }
