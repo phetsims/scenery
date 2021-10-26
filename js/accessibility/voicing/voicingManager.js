@@ -319,6 +319,10 @@ class VoicingManager extends Announcer {
       this.timeSinceWakingEngine += dt;
       if ( !this.speakingProperty.value && this.voicingQueue.length === 0 && this.timeSinceWakingEngine > ENGINE_WAKE_INTERVAL ) {
         this.timeSinceWakingEngine = 0;
+
+        // the speakingProperty needs to be set to true before requesting speech even for this workaround so that
+        // the speakingProperty and synth.isSpeaking are in sync
+        this.speakingProperty.set( true );
         this.getSynth().speak( new SpeechSynthesisUtterance( '' ) );
 
         // cancel immediately to keep the speakingProperty up to date even with this workaround
