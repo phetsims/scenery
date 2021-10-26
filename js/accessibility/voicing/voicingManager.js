@@ -320,6 +320,9 @@ class VoicingManager extends Announcer {
       if ( !this.speakingProperty.value && this.voicingQueue.length === 0 && this.timeSinceWakingEngine > ENGINE_WAKE_INTERVAL ) {
         this.timeSinceWakingEngine = 0;
         this.getSynth().speak( new SpeechSynthesisUtterance( '' ) );
+
+        // cancel immediately to keep the speakingProperty up to date even with this workaround
+        this.cancelSynth();
       }
     }
   }
