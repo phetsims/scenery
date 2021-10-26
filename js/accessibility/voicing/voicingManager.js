@@ -211,6 +211,17 @@ class VoicingManager extends Announcer {
     // No dispose, as this singleton exists for the lifetime of the runtime.
     stepTimer.addListener( this.stepQueue.bind( this ) );
 
+    // To get Voicing to happen quickly on Chromebooks we set the counter to a value that will trigger the "engine
+    // wake" interval on the next animation frame the first time we get a user gesture. See ENGINE_WAKE_INTERVAL
+    // for more information about this workaround.
+    const startEngineListener = () => {
+      this.timeSinceWakingEngine = ENGINE_WAKE_INTERVAL;
+
+      // Display is on the namespace but cannot be imported due to circular dependencies
+      scenery.Display.userGestureEmitter.removeListener( startEngineListener );
+    };
+    scenery.Display.userGestureEmitter.addListener( startEngineListener );
+
     this.initialized = true;
   }
 
