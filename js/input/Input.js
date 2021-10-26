@@ -1051,9 +1051,8 @@ class Input {
    */
   dispatchPDOMEvent( trail, eventType, domEvent, bubbles ) {
 
-    // exclude focus and blur events because they can happen with scripting without user input, other events
-    // will have an isTrusted flag to indicate whether they came from scripting or user input
-    if ( PDOMUtils.USER_GESTURE_EVENTS.includes( eventType ) && domEvent.isTrusted ) {
+    // exclude focus and blur events because they can happen with scripting without user input
+    if ( PDOMUtils.USER_GESTURE_EVENTS.includes( eventType ) ) {
       Display.userGestureEmitter.emit();
     }
 
