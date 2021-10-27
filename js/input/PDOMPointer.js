@@ -56,8 +56,10 @@ class PDOMPointer extends Pointer {
 
         // NOTE: The "root" peer can't be focused (so it doesn't matter if it doesn't have a node).
         if ( lastNode.focusable ) {
-          FocusManager.pdomFocus = new Focus( this.display, PDOMInstance.guessVisualTrail( this.trail, this.display.rootNode ) );
-          this.point = this.trail.parentToGlobalPoint( lastNode.center );
+          const visualTrail = PDOMInstance.guessVisualTrail( this.trail, this.display.rootNode );
+
+          FocusManager.pdomFocus = new Focus( this.display, visualTrail );
+          this.point = visualTrail.parentToGlobalPoint( lastNode.center );
         }
         else {
 
