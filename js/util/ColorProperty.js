@@ -12,6 +12,10 @@ import Color from './Color.js';
  */
 class ColorProperty extends Property {
 
+  /**
+   * @param {ColorDef} color
+   * @param {Object} [options]
+   */
   constructor( color, options ) {
 
     // client cannot specify superclass options that are controlled by this type
