@@ -90,10 +90,6 @@ class VoicingManager extends Announcer {
     // @public {Emitter} - emits whenever the voices change for SpeechSynthesis
     this.voicesChangedEmitter = new Emitter();
 
-    // @public - whether or not the synth is speaking - perhaps this should
-    // replace the emitters above?
-    this.speakingProperty = new BooleanProperty( false );
-
     // @private - To get around multiple inheritance issues, create enabledProperty via composition instead, then create
     // a reference on this component for the enabledProperty
     this.enabledComponentImplementation = new EnabledComponent( {
@@ -245,7 +241,6 @@ class VoicingManager extends Announcer {
    * @private
    */
   alertNow() {
-    this.assertSpeakingPropertyInSync();
 
     const synth = voicingManager.getSynth();
     if ( synth ) {
@@ -261,31 +256,16 @@ class VoicingManager extends Announcer {
           this.removeFromVoicingQueue( voicingQueueElement );
 
           if ( voicingQueueElement.utterance.predicate() ) {
-
-            // Set the speakingProperty true immediately instead of in the `start` event because the `start` event is
-            // not triggered synchronously. If speak immediately calls an `end` event we want to set the
-            // speakingProperty true first.
-            this.speakingProperty.set( true );
             synth.speak( voicingQueueElement.speechSynthUtterance );
 
             // We have just used speech synthesis, wait until ENGINE_WAKE_INTERVAL to apply the workaround again
             this.timeSinceWakingEngine = 0;
-
-            this.assertSpeakingPropertyInSync();
           }
 
           break;
         }
       }
     }
-  }
-
-  /**
-   * Our speakingProperty better match the synth state.
-   * @private
-   */
-  assertSpeakingPropertyInSync() {
-    assert && assert( this.speakingProperty.value === this.getSynth().speaking, 'isSpeaking discrepancy' );
   }
 
   /**
@@ -328,16 +308,9 @@ class VoicingManager extends Announcer {
       // there is nothing to speak in the queue, requesting speech with empty content keeps the engine active.
       // See https://github.com/phetsims/gravity-force-lab-basics/issues/303.
       this.timeSinceWakingEngine += dt;
-      if ( !this.speakingProperty.value && this.voicingQueue.length === 0 && this.timeSinceWakingEngine > ENGINE_WAKE_INTERVAL ) {
+      if ( !this.getSynth().speaking && this.voicingQueue.length === 0 && this.timeSinceWakingEngine > ENGINE_WAKE_INTERVAL ) {
         this.timeSinceWakingEngine = 0;
-
-        // the speakingProperty needs to be set to true before requesting speech even for this workaround so that
-        // the speakingProperty and synth.isSpeaking are in sync
-        this.speakingProperty.set( true );
         this.getSynth().speak( new SpeechSynthesisUtterance( '' ) );
-
-        // cancel immediately to keep the speakingProperty up to date even with this workaround
-        this.cancelSynth();
       }
     }
   }
@@ -437,7 +410,6 @@ class VoicingManager extends Announcer {
    */
   requestSpeech( utterance ) {
     assert && assert( this.isSpeechSynthesisSupported(), 'trying to speak with speechSynthesis, but it is not supported on this platform' );
-    this.assertSpeakingPropertyInSync();
 
     // only cancel the previous alert if there is something new to speak
     if ( utterance.alert ) {
@@ -457,13 +429,11 @@ class VoicingManager extends Announcer {
     const startListener = () => {
       this.startSpeakingEmitter.emit( stringToSpeak, utterance );
       this.currentlySpeakingUtterance = utterance;
-      this.speakingProperty.set( this.getSynth().speaking );
       speechSynthUtterance.removeEventListener( 'start', startListener );
     };
 
     const endListener = () => {
       this.endSpeakingEmitter.emit( stringToSpeak, utterance );
-      this.speakingProperty.set( this.getSynth().speaking );
       speechSynthUtterance.removeEventListener( 'end', endListener );
 
       // remove the reference to the SpeechSynthesisUtterance so we don't leak memory
@@ -607,14 +577,12 @@ class VoicingManager extends Announcer {
   }
 
   /**
-   * Cancel the synth and immediately update the speakingProperty. The `end` event for the Utterance that is being
-   * spoken may not happen synchronously so we want the speakingProperty to be set eagerly to stay in sync.
+   * Cancel the synth. This will silence speech. This will silence any speech and cancel the
    * @private
    */
   cancelSynth() {
     assert && assert( this.initialized, 'must be initialized to use synth' );
     this.getSynth().cancel();
-    this.speakingProperty.set( this.getSynth().speaking );
   }
 }
 
