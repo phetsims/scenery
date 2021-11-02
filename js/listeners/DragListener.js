@@ -80,7 +80,7 @@ import Tandem from '../../../tandem/js/Tandem.js';
 import SceneryEvent from '../input/SceneryEvent.js';
 
 // For TypeScript support
-import Node from '../nodes/Node.js'; // eslint-disable-line
+import Node from '../nodes/Node.js'; // eslint-disable-line no-unused-vars
 import scenery from '../scenery.js';
 import TransformTracker from '../util/TransformTracker.js';
 import PressListener from './PressListener.js';
