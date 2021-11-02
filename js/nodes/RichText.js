@@ -60,11 +60,11 @@
 import StringProperty from '../../../axon/js/StringProperty.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import Poolable from '../../../phet-core/js/Poolable.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import merge from '../../../phet-core/js/merge.js';
 import openPopup from '../../../phet-core/js/openPopup.js';
+import Poolable from '../../../phet-core/js/Poolable.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import FireListener from '../listeners/FireListener.js';
@@ -129,18 +129,53 @@ const LineBreakState = {
   NONE: 'NONE'
 };
 
+/**
+ * Get the attribute value from an element. Return null if that attribute isn't on the element.
+ * @param {string} attribute
+ * @param {Object} element - see himalaya for documentation
+ * @returns {*|null}
+ */
+const himalayaGetAttribute = ( attribute, element ) => {
+  if ( !element ) {
+    return null;
+  }
+  const attributeObject = _.find( element.attributes, x => x.key === attribute );
+  if ( !attributeObject ) {
+    return null;
+  }
+  return attributeObject.value;
+};
+
+/**
+ * Turn a string of style like "font-sie:6; font-weight:6; favorite-number:6" into a may of style key/values (trimmed of whitespace)
+ * @param {string} styleString
+ * @returns {Object<string,string>}
+ */
+const himalayaStyleStringToMap = styleString => {
+  const styleElements = styleString.split( ';' );
+  const styleMap = {};
+  styleElements.forEach( styleKeyValue => {
+    if ( styleKeyValue.length > 0 ) {
+      const keyValueTuple = styleKeyValue.split( ':' );
+      assert && assert( keyValueTuple.length === 2, 'too many colons' );
+      styleMap[ keyValueTuple[ 0 ].trim() ] = keyValueTuple[ 1 ].trim();
+    }
+  } );
+  return styleMap;
+};
+
 // We need to do some font-size tests, so we have a Text for that.
 const scratchText = new Text( '' );
 
 // himalaya converts dash separated CSS to camel case - use CSS compatible style with dashes, see above for examples
 const FONT_STYLE_MAP = {
-  fontFamily: 'family',
-  fontSize: 'size',
-  fontStretch: 'stretch',
-  fontStyle: 'style',
-  fontVariant: 'variant',
-  fontWeight: 'weight',
-  lineHeight: 'lineHeight'
+  'font-family': 'family',
+  'font-size': 'size',
+  'font-stretch': 'stretch',
+  'font-style': 'style',
+  'font-variant': 'variant',
+  'font-weight': 'weight',
+  'line-height': 'lineHeight'
 };
 
 const FONT_STYLE_KEYS = Object.keys( FONT_STYLE_MAP );
@@ -523,7 +558,7 @@ class RichText extends Node {
     let node;
 
     // If we're a leaf
-    if ( element.type === 'Text' ) {
+    if ( element.type.toLowerCase() === 'text' ) {
       sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `appending leaf: ${element.content}` );
       sceneryLog && sceneryLog.RichText && sceneryLog.push();
 
@@ -581,7 +616,7 @@ class RichText extends Node {
       sceneryLog && sceneryLog.RichText && sceneryLog.pop();
     }
     // Otherwise presumably an element with content
-    else if ( element.type === 'Element' ) {
+    else if ( element.type.toLowerCase() === 'element' ) {
       // Bail out quickly for a line break
       if ( element.tagName === 'br' ) {
         sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'manual line break' );
@@ -589,10 +624,12 @@ class RichText extends Node {
       }
       // Span (dir attribute) -- we need the LTR/RTL knowledge before most other operations
       else if ( element.tagName === 'span' ) {
-        if ( element.attributes.dir ) {
-          assert && assert( element.attributes.dir === 'ltr' || element.attributes.dir === 'rtl',
+        const dirAttributeString = himalayaGetAttribute( 'dir', element );
+
+        if ( dirAttributeString ) {
+          assert && assert( dirAttributeString === 'ltr' || dirAttributeString === 'rtl',
             'Span dir attributes should be ltr or rtl.' );
-          isLTR = element.attributes.dir === 'ltr';
+          isLTR = dirAttributeString === 'ltr';
         }
       }
 
@@ -601,8 +638,10 @@ class RichText extends Node {
       sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'appending element' );
       sceneryLog && sceneryLog.RichText && sceneryLog.push();
 
-      if ( element.attributes.style ) {
-        const css = element.attributes.style;
+      const styleAttributeString = himalayaGetAttribute( 'style', element );
+
+      if ( styleAttributeString ) {
+        const css = himalayaStyleStringToMap( styleAttributeString );
         assert && Object.keys( css ).forEach( key => {
           assert( _.includes( STYLE_KEYS, key ), 'See supported style CSS keys' );
         } );
@@ -625,7 +664,7 @@ class RichText extends Node {
 
       // Achor (link)
       if ( element.tagName === 'a' ) {
-        let href = element.attributes.href;
+        let href = himalayaGetAttribute( 'href', element );
 
         // Try extracting the href from the links object
         if ( this._links !== true ) {
@@ -1539,12 +1578,14 @@ class RichText extends Node {
    * @returns {string}
    */
   static himalayaElementToString( element, isLTR ) {
-    if ( element.type === 'Text' ) {
+    if ( element.type.toLowerCase() === 'text' ) {
       return RichText.contentToString( element.content, isLTR );
     }
-    else if ( element.type === 'Element' ) {
-      if ( element.tagName === 'span' && element.attributes.dir ) {
-        isLTR = element.attributes.dir === 'ltr';
+    else if ( element.type.toLowerCase() === 'element' ) {
+      const dirAttributeString = himalayaGetAttribute( 'dir', element );
+
+      if ( element.tagName === 'span' && dirAttributeString ) {
+        isLTR = dirAttributeString === 'ltr';
       }
 
       // Process children
@@ -1565,12 +1606,14 @@ class RichText extends Node {
    * @returns {string}
    */
   static himalayaElementToAccessibleString( element, isLTR ) {
-    if ( element.type === 'Text' ) {
+    if ( element.type.toLowerCase() === 'text' ) {
       return RichText.contentToString( element.content, isLTR );
     }
-    else if ( element.type === 'Element' ) {
-      if ( element.tagName === 'span' && element.attributes.dir ) {
-        isLTR = element.attributes.dir === 'ltr';
+    else if ( element.type.toLowerCase() === 'element' ) {
+      const dirAttribute = himalayaGetAttribute( 'dir', element );
+
+      if ( element.tagName === 'span' && dirAttribute ) {
+        isLTR = dirAttribute === 'ltr';
       }
 
       // Process children
