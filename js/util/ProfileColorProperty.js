@@ -42,6 +42,9 @@ class ProfileColorProperty extends ColorProperty {
     // (so the types are uniform)
     colorProfileMap = _.mapValues( colorProfileMap, Color.toColor );
 
+    assert && assert( colorProfileMap.hasOwnProperty( SceneryConstants.DEFAULT_COLOR_PROFILE ), 'default color profile must be provided' );
+    assert && assert( !!colorProfileMap[ SceneryConstants.DEFAULT_COLOR_PROFILE ], 'default color profile must be truthy' );
+
     // Fallback to default if a color was not supplied.
     super( colorProfileMap[ colorProfileProperty.value ] || colorProfileMap[ SceneryConstants.DEFAULT_COLOR_PROFILE ], options );
 
