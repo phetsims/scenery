@@ -417,7 +417,7 @@ class VoicingManager extends Announcer {
     }
 
     // embedding marks (for i18n) impact the output, strip before speaking
-    const stringToSpeak = stripEmbeddingMarks( utterance.getTextToAlert( this.respectResponseCollectorProperties ) );
+    const stringToSpeak = removeBrTags( stripEmbeddingMarks( utterance.getTextToAlert( this.respectResponseCollectorProperties ) ) );
     const speechSynthUtterance = new SpeechSynthesisUtterance( stringToSpeak );
     speechSynthUtterance.voice = this.voiceProperty.value;
     speechSynthUtterance.pitch = this.voicePitchProperty.value;
@@ -616,6 +616,22 @@ class VoicingQueueElement {
   }
 }
 
+
+/**
+ * @param {Object} element - returned from himalaya parser, see documentation for details.
+ * @returns {boolean}
+ */
+const isNotBrTag = element => !( element.type.toLowerCase() === 'element' && element.tagName.toLowerCase() === 'br' );
+
+/**
+ * Remove <br> or <br/> tags from a string
+ * @param {string} string - plain text or html string
+ * @returns {string}
+ */
+function removeBrTags( string ) {
+  const parsedAndFiltered = himalaya.parse( string ).filter( isNotBrTag );
+  return himalaya.stringify( parsedAndFiltered );
+}
 
 const voicingManager = new VoicingManager();
 
