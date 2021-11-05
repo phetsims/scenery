@@ -12,7 +12,10 @@
     "../sun/js/sun.js",
     "../phetcommon/js/util/StringUtils.js",
     "../phetcommon/js/view/ModelViewTransform2.js",
-    "../phetcommon/js/phetcommon.js"
+    "../phetcommon/js/phetcommon.js",
+    "../chipper/phet-types.d.ts",
+    "../chipper/node_modules/@types/lodash/index.d.ts",
+    "../chipper/node_modules/@types/qunit/index.d.ts"
   ],
   "exclude": [
     "js/**/*test*",
