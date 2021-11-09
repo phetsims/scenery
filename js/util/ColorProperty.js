@@ -10,6 +10,10 @@ import Color from './Color.js';
  *
  * @author Sam Reid (PhET Interactive Simulations)
  */
+
+/**
+ * @extends Property<Color>
+ */
 class ColorProperty extends Property {
 
   /**
