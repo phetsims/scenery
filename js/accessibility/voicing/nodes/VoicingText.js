@@ -1,7 +1,8 @@
 // Copyright 2021, University of Colorado Boulder
 
 /**
- * Text that mixes ReadingBLock, supporting features of Voicing and adding listeners that speak upon user activation.
+ * Text that mixes ReadingBlock, supporting features of Voicing and adding listeners that speak the text string
+ * upon user input.
  *
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
