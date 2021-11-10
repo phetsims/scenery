@@ -1,7 +1,7 @@
 // Copyright 2021, University of Colorado Boulder
 
 /**
- * TODO: doc
+ * Abstract supertype for layout constraints.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -27,6 +27,9 @@ class LayoutConstraint {
     // @private {number} - Prevents layout() from running while true. Generally will be unlocked and laid out.
     this._layoutLockCount = 0;
 
+    // @private {number} - The number of times layout attempts happened during the lock
+    this._layoutAttemptsDuringLock = 0;
+
     // @protected {function}
     this._updateLayoutListener = this.updateLayoutAutomatically.bind( this );
 
@@ -50,6 +53,12 @@ class LayoutConstraint {
     // TODO: listen to things in-between!!
     node.boundsProperty.lazyLink( this._updateLayoutListener );
     node.visibleProperty.lazyLink( this._updateLayoutListener );
+    if ( node.widthSizable ) {
+      node.minimumWidthProperty.lazyLink( this._updateLayoutListener );
+    }
+    if ( node.heightSizable ) {
+      node.minimumHeightProperty.lazyLink( this._updateLayoutListener );
+    }
 
     this._listenedNodes.add( node );
   }
@@ -65,6 +74,12 @@ class LayoutConstraint {
 
     node.boundsProperty.unlink( this._updateLayoutListener );
     node.visibleProperty.unlink( this._updateLayoutListener );
+    if ( node.widthSizable ) {
+      node.minimumWidthProperty.unlink( this._updateLayoutListener );
+    }
+    if ( node.heightSizable ) {
+      node.minimumHeightProperty.unlink( this._updateLayoutListener );
+    }
 
     this._listenedNodes.delete( node );
   }
@@ -100,15 +115,26 @@ class LayoutConstraint {
   }
 
   /**
-   * Updates the layout of this LayoutBox. Called automatically during initialization, when children change (if
+   * Updates the layout of this constraint. Called automatically during initialization, when children change (if
    * resize is true), or when client wants to call this public method for any reason.
    * @public
    */
   updateLayout() {
-    if ( !this.isLocked ) {
+    let count = 0;
+
+    if ( this.isLocked ) {
+      assert && assert( ++count < 500, 'Likely infinite loop detected, are we triggering layout within the layout?' );
+      this._layoutAttemptsDuringLock++;
+    }
+    else {
       this.lock();
 
-      this.layout();
+      do {
+        this._layoutAttemptsDuringLock = 0;
+        this.layout();
+      }
+      // If we got any layout attempts during the lock, we'll want to rerun the layout
+      while ( this._layoutAttemptsDuringLock );
 
       this.unlock();
     }
