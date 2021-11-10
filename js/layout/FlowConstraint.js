@@ -108,10 +108,23 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
 
     assert && assert( _.every( this.cells, cell => !cell.node.isDisposed ) );
 
+    // Determine the first index of a visible non-divider (we need to NOT temporarily change visibility of dividers
+    // back and forth, since this would trigger recursive layouts). We'll hide dividers until this.
+    let firstVisibleNonDividerIndex = 0;
+    for ( ; firstVisibleNonDividerIndex < this.cells.length; firstVisibleNonDividerIndex++ ) {
+      const cell = this.cells[ firstVisibleNonDividerIndex ];
+      if ( cell.node instanceof Divider ) {
+        cell.node.visible = false;
+      }
+      else if ( cell.node.visible ) {
+        break;
+      }
+    }
+
     // Scan for dividers, toggling visibility as desired. Leave the "last" divider visible, as if they are marking
     // sections "after" themselves.
     let hasVisibleNonDivider = false;
-    for ( let i = this.cells.length - 1; i >= 0; i-- ) {
+    for ( let i = this.cells.length - 1; i > firstVisibleNonDividerIndex; i-- ) {
       const cell = this.cells[ i ];
       if ( cell.node instanceof Divider ) {
         cell.node.visible = hasVisibleNonDivider;
@@ -119,16 +132,6 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
       }
       else if ( cell.node.visible ) {
         hasVisibleNonDivider = true;
-      }
-    }
-    // Then scan from the front, until we hit the first visible non-divider
-    for ( let i = 0; i < this.cells.length; i++ ) {
-      const cell = this.cells[ i ];
-      if ( cell.node instanceof Divider ) {
-        cell.node.visible = false;
-      }
-      else if ( cell.node.visible ) {
-        break;
       }
     }
 
@@ -197,10 +200,6 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
     // Used for determining our "minimum" size for preferred sizes... if wrapping is enabled, we can be smaller than
     // current minimums
     const minimumAllowableSize = this.wrap ? maxMinimumCellSize : minimumCurrentSize;
-
-    // Tell others about our new "minimum" sizes
-    this.minimumWidthProperty.value = orientation === Orientation.HORIZONTAL ? minimumAllowableSize : minimumCurrentOppositeSize;
-    this.minimumHeightProperty.value = orientation === Orientation.HORIZONTAL ? minimumCurrentOppositeSize : minimumAllowableSize;
 
     // {number} - Increase things if our preferred size is larger than our minimums (we'll figure out how to compensate
     // for the extra space below).
@@ -333,6 +332,10 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
       maxOppositeCoordinate,
       maxCoordinate
     );
+
+    // Tell others about our new "minimum" sizes
+    this.minimumWidthProperty.value = orientation === Orientation.HORIZONTAL ? minimumAllowableSize : minimumCurrentOppositeSize;
+    this.minimumHeightProperty.value = orientation === Orientation.HORIZONTAL ? minimumCurrentOppositeSize : minimumAllowableSize;
 
     this.finishedLayoutEmitter.emit();
   }

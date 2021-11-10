@@ -67,6 +67,7 @@ import openPopup from '../../../phet-core/js/openPopup.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
+import Voicing from '../accessibility/voicing/Voicing.js';
 import FireListener from '../listeners/FireListener.js';
 import scenery from '../scenery.js';
 import Color from '../util/Color.js';
@@ -1901,6 +1902,7 @@ class RichTextLink extends RichTextCleanable( Node ) {
   /**
    * A link node
    *
+   * @mixes Voicing
    * @param {string} innerContent
    * @param {function|string} href
    */
@@ -1931,6 +1933,11 @@ class RichTextLink extends RichTextCleanable( Node ) {
     // pdom - open the link in the new tab when activated with a keyboard.
     // also see https://github.com/phetsims/joist/issues/430
     this.innerContent = innerContent;
+
+    // voicing - Mix Voicing into the RichTextLink so that the link content is read with SpeechSynthesis
+    // when the Voicing feature is enabled.
+    this.initializeVoicing();
+    this.voicingNameResponse = innerContent;
 
     // If our href is a function, it should be called when the user clicks on the link
     if ( typeof href === 'function' ) {
@@ -1988,6 +1995,7 @@ class RichTextLink extends RichTextCleanable( Node ) {
   }
 }
 
+Voicing.compose( RichTextLink );
 Poolable.mixInto( RichTextLink );
 
 RichText.RichTextIO = new IOType( 'RichTextIO', {
