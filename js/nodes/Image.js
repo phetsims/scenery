@@ -37,6 +37,9 @@ const IMAGE_OPTION_KEYS = [
   'hitTestPixels' // {boolean} - Whether non-transparent pixels will control contained points, see setHitTestPixels() for documentation
 ];
 
+/**
+ * @extends Node
+ */
 class Image extends Imageable( Node ) {
   /**
    * Constructs an Image node from a particular source.
@@ -63,6 +66,28 @@ class Image extends Imageable( Node ) {
     this.mutate( options );
 
     this.invalidateSupportedRenderers();
+  }
+
+  /**
+   * Adapter that calls into Imageable, for TypeScript support
+   * @param {string|HTMLImageElement|HTMLCanvasElement|Array} image - See documentation above
+   */
+  set image( image ) {
+
+    // @ts-ignore - to remind us to visit this once we have TypeScript common code support
+    super.image = image;
+  }
+
+  /**
+   * Adapter that calls into Imageable, for TypeScript support
+   * @param {string|HTMLImageElement|HTMLCanvasElement|Array} image - See documentation above
+   * @returns {Image} - Self reference for chaining
+   * @public
+   */
+  setImage( image ) {
+
+    // @ts-ignore - to remind us to visit this once we have TypeScript common code support
+    return super.setImage( image );
   }
 
   /**
@@ -96,7 +121,7 @@ class Image extends Imageable( Node ) {
 
   /**
    * Recomputes what renderers are supported, given the current image information.
-   * @private
+   * @protected
    */
   invalidateSupportedRenderers() {
 
