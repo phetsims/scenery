@@ -75,7 +75,13 @@ class Image extends Imageable( Node ) {
   set image( image ) {
 
     // @ts-ignore - to remind us to visit this once we have TypeScript common code support
-    super.image = image;
+    this.setImage( image );
+  }
+
+  get image() {
+
+    // @ts-ignore - to remind us to visit this once we have TypeScript common code support
+    return this.getImage();
   }
 
   /**
