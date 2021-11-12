@@ -1986,6 +1986,8 @@ class RichTextLink extends RichTextCleanable( Node ) {
   clean() {
     super.clean();
 
+    this.disposeVoicing();
+
     this.removeInputListener( this.fireListener );
     this.fireListener = null;
     if ( this.accessibleInputListener ) {
