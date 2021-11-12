@@ -240,27 +240,6 @@ class VoicingManager extends Announcer {
   }
 
   /**
-   * Ask the synth to speak an utterance now (synchronously).
-   * @private
-   *
-   * @param {SpeechSynthesisUtterance} speechSynthesisUtterance
-   */
-  alertNow( speechSynthesisUtterance ) {
-    const synth = voicingManager.getSynth();
-    if ( synth ) {
-
-      // Signify to the utterance-queue that we cannot speak yet until this utterance has finished
-      this.readyToSpeak = false;
-
-      synth.speak( speechSynthesisUtterance );
-
-      if ( !this.hasSpoken ) {
-        this.hasSpoken = true;
-      }
-    }
-  }
-
-  /**
    * @override
    * @private
    * @param {number} dt - in milliseconds (not seconds)!
@@ -434,7 +413,14 @@ class VoicingManager extends Announcer {
     // but the error event does. In this case signify that speaking has ended.
     speechSynthUtterance.addEventListener( 'error', endListener );
 
-    this.alertNow( speechSynthUtterance );
+    // Signify to the utterance-queue that we cannot speak yet until this utterance has finished
+    this.readyToSpeak = false;
+
+    this.getSynth().speak( speechSynthUtterance );
+
+    if ( !this.hasSpoken ) {
+      this.hasSpoken = true;
+    }
   }
 
   /**
