@@ -15,7 +15,6 @@ import Emitter from '../../../../axon/js/Emitter.js';
 import EnabledComponent from '../../../../axon/js/EnabledComponent.js';
 import NumberProperty from '../../../../axon/js/NumberProperty.js';
 import Property from '../../../../axon/js/Property.js';
-import stepTimer from '../../../../axon/js/stepTimer.js';
 import Range from '../../../../dot/js/Range.js';
 import merge from '../../../../phet-core/js/merge.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
@@ -27,10 +26,16 @@ import KeyboardUtils from '../KeyboardUtils.js';
 
 const DEFAULT_PRIORITY = 1;
 
-// In seconds, how frequently we will use SpeechSynthesis to keep the feature active. After long intervals without
+// In ms, how frequently we will use SpeechSynthesis to keep the feature active. After long intervals without
 // using SpeechSynthesis Chromebooks will take a long time to produce the next speech. Presumably it is disabling
 // the feature as an optimization. But this workaround gets around it and keeps speech fast.
-const ENGINE_WAKE_INTERVAL = 10;
+const ENGINE_WAKE_INTERVAL = 10000;
+
+// In ms. In Safari, the `start` and `end` listener do not fire consistently, especially after interruption
+// with cancel. But speaking behind a timeout/delay improves the behavior significantly. Timeout of 250 ms was
+// determined with testing to be a good value to use. Values less than 250 broke the workaround, while larger
+// values feel too sluggish. See https://github.com/phetsims/john-travoltage/issues/435
+const VOICING_UTTERANCE_INTERVAL = 250;
 
 const UTTERANCE_OPTION_DEFAULTS = {
 
@@ -78,9 +83,13 @@ class VoicingManager extends Announcer {
     // first request for speech.
     this.hasSpoken = false;
 
-    // @private {number} - In seconds, how long to go before "waking the SpeechSynthesis" engine to keep speech
+    // @private {number} - In ms, how long to go before "waking the SpeechSynthesis" engine to keep speech
     // fast on Chromebooks, see documentation around ENGINE_WAKE_INTERVAL.
     this.timeSinceWakingEngine = 0;
+
+    // @private {number} - Amount of time in ms to wait between speaking SpeechSynthesisUtterances, see
+    // VOICING_UTTERANCE_INTERVAL for details about why this is necessary.
+    this.timeSinceUtteranceEnd = 0;
 
     // @public {Emitter} - emits events when the speaker starts/stops speaking, with the Utterance that is
     // either starting or stopping
@@ -150,10 +159,7 @@ class VoicingManager extends Announcer {
     // clearing this, though it is a bit tricky since we don't have a way to know
     // when we are done with an utterance - see #215
     // Blown away regularly, don't keep a reference to it.
-    this.safariWorkaroundUtterances = [];
-
-    // Blown away regularly, don't keep a reference to it.
-    this.voicingQueue = [];
+    this.safariWorkaroundUtterancePairs = [];
   }
 
   /**
@@ -204,9 +210,6 @@ class VoicingManager extends Announcer {
       }
     } );
 
-    // No dispose, as this singleton exists for the lifetime of the runtime.
-    stepTimer.addListener( this.stepQueue.bind( this ) );
-
     // To get Voicing to happen quickly on Chromebooks we set the counter to a value that will trigger the "engine
     // wake" interval on the next animation frame the first time we get a user gesture. See ENGINE_WAKE_INTERVAL
     // for more information about this workaround.
@@ -222,84 +225,67 @@ class VoicingManager extends Announcer {
   }
 
   /**
-   * Remove an element from the voicingQueue
+   * Remove an element from the utterance queue.
    * @private
-   * @param {VoicingQueueElement} voicingQueueElement
+   *
+   * @param {UtteranceWrapper} utteranceWrapper
+   * @param {UtteranceWrapper[]} queue - modified by this function!
    */
-  removeFromVoicingQueue( voicingQueueElement ) {
+  removeFromQueue( utteranceWrapper, queue ) {
 
     // remove from voicingManager list after speaking
-    const index = voicingManager.voicingQueue.indexOf( voicingQueueElement );
-    assert && assert( index >= 0, 'trying to remove a voicingQueueElement that doesn\'t exist' );
-    voicingManager.voicingQueue.splice( index, 1 );
+    const index = queue.indexOf( utteranceWrapper );
+    assert && assert( index >= 0, 'trying to remove a utteranceWrapper that doesn\'t exist' );
+    queue.splice( index, 1 );
   }
 
-
   /**
-   * IF there is an element in the queue that has been in long enough to support the safari workaround, then alert the first
-   * one.
+   * Ask the synth to speak an utterance now (synchronously).
    * @private
+   *
+   * @param {SpeechSynthesisUtterance} speechSynthesisUtterance
    */
-  alertNow() {
-
+  alertNow( speechSynthesisUtterance ) {
     const synth = voicingManager.getSynth();
     if ( synth ) {
-      for ( let i = 0; i < this.voicingQueue.length; i++ ) {
-        const voicingQueueElement = this.voicingQueue[ i ];
 
-        // if minTimeInQueue is zero, it should be alerted synchronously by calling alertNow
-        if ( voicingQueueElement.timeInQueue >= voicingQueueElement.minTimeInQueue ) {
+      // Signify to the utterance-queue that we cannot speak yet until this utterance has finished
+      this.readyToSpeak = false;
 
-          // Remove from the queue before we speak it. If speech is not allowed by the browser yet an `end` event
-          // will immediately be triggered by the speak method, so we need to eagerly remove voicingQueueElement
-          // to prevent an infinite loop.
-          this.removeFromVoicingQueue( voicingQueueElement );
+      synth.speak( speechSynthesisUtterance );
 
-          if ( voicingQueueElement.utterance.predicate() ) {
-            synth.speak( voicingQueueElement.speechSynthUtterance );
-
-            // We have just used speech synthesis, wait until ENGINE_WAKE_INTERVAL to apply the workaround again
-            this.timeSinceWakingEngine = 0;
-          }
-
-          break;
-        }
+      if ( !this.hasSpoken ) {
+        this.hasSpoken = true;
       }
     }
   }
 
   /**
+   * @override
    * @private
+   * @param {number} dt - in milliseconds (not seconds)!
+   * @param {UtteranceWrapper[]} queue
    */
-  onSpeechSynthesisUtteranceEnd() {
-    this.alertNow();
-  }
-
-  /**
-   * @private
-   * @param {number} dt
-   */
-  stepQueue( dt ) {
+  step( dt, queue ) {
 
     if ( this.initialized ) {
 
-      // increase the time each element has spent in queue
-      for ( let i = 0; i < this.voicingQueue.length; i++ ) {
-        const voicingQueueElement = this.voicingQueue[ i ];
-        voicingQueueElement.timeInQueue += dt * 1000;
+      // Increment the amount of time since the synth has stopped speaking the previous utterance, but don't
+      // start counting up until the synth has finished speaking its current utterance.
+      this.timeSinceUtteranceEnd = this.getSynth().speaking ? 0 : this.timeSinceUtteranceEnd + dt;
+
+      // Wait until VOICING_UTTERANCE_INTERVAL to speak again for more consistent behavior on certain platforms,
+      // see documentation for the constant for more information. By setting readyToSpeak in the step function
+      // we also don't have to rely at all on the SpeechSynthesisUtterance 'end' event, which is inconsistent on
+      // certain platforms.
+      if ( this.timeSinceUtteranceEnd > VOICING_UTTERANCE_INTERVAL ) {
+        this.readyToSpeak = true;
       }
 
-      // This manages the case where the 'end' event came from an utterance, but there was no next utterance ready to be
-      // spoken. Make sure that we support anytime that utterances are ready but there is no "end" callback that would
-      // trigger `alertNow()`.
-      if ( !this.getSynth().speaking && this.voicingQueue.length > 0 ) {
-        this.alertNow();
-      }
-
-      // If our queue is empty and the synth isn't speaking, then clear safariWorkaroundUtterances to prevent memory leak.
+      // If our queue is empty and the synth isn't speaking, then clear safariWorkaroundUtterancePairs to prevent memory leak.
       // This handles any uncertain cases where the "end" callback on SpeechSynthUtterance isn't called.
-      if ( !this.getSynth().speaking && this.voicingQueue.length === 0 && this.safariWorkaroundUtterances.length > 0 ) {
-        this.safariWorkaroundUtterances = [];
+      if ( !this.getSynth().speaking && queue.length === 0 && this.safariWorkaroundUtterancePairs.length > 0 ) {
+        this.safariWorkaroundUtterancePairs = [];
       }
 
       // A workaround to keep SpeechSynthesis responsive on Chromebooks. If there is a long enough interval between
@@ -308,7 +294,7 @@ class VoicingManager extends Announcer {
       // there is nothing to speak in the queue, requesting speech with empty content keeps the engine active.
       // See https://github.com/phetsims/gravity-force-lab-basics/issues/303.
       this.timeSinceWakingEngine += dt;
-      if ( !this.getSynth().speaking && this.voicingQueue.length === 0 && this.timeSinceWakingEngine > ENGINE_WAKE_INTERVAL ) {
+      if ( !this.getSynth().speaking && queue.length === 0 && this.timeSinceWakingEngine > ENGINE_WAKE_INTERVAL ) {
         this.timeSinceWakingEngine = 0;
         this.getSynth().speak( new SpeechSynthesisUtterance( '' ) );
       }
@@ -411,11 +397,6 @@ class VoicingManager extends Announcer {
   requestSpeech( utterance ) {
     assert && assert( this.isSpeechSynthesisSupported(), 'trying to speak with speechSynthesis, but it is not supported on this platform' );
 
-    // only cancel the previous alert if there is something new to speak
-    if ( utterance.alert ) {
-      this.prioritizeUtterances( utterance );
-    }
-
     // embedding marks (for i18n) impact the output, strip before speaking
     const stringToSpeak = removeBrTags( stripEmbeddingMarks( utterance.getTextToAlert( this.respectResponseCollectorProperties ) ) );
     const speechSynthUtterance = new SpeechSynthesisUtterance( stringToSpeak );
@@ -424,7 +405,8 @@ class VoicingManager extends Announcer {
     speechSynthUtterance.rate = this.voiceRateProperty.value;
 
     // keep a reference to WebSpeechUtterances in Safari, so the browser doesn't dispose of it before firing, see #215
-    this.safariWorkaroundUtterances.push( speechSynthUtterance );
+    const utterancePair = new UtterancePair( utterance, speechSynthUtterance );
+    this.safariWorkaroundUtterancePairs.push( utterancePair );
 
     const startListener = () => {
       this.startSpeakingEmitter.emit( stringToSpeak, utterance );
@@ -437,15 +419,12 @@ class VoicingManager extends Announcer {
       speechSynthUtterance.removeEventListener( 'end', endListener );
 
       // remove the reference to the SpeechSynthesisUtterance so we don't leak memory
-      const indexOfUtterance = this.safariWorkaroundUtterances.indexOf( speechSynthUtterance );
-      if ( indexOfUtterance > -1 ) {
-        this.safariWorkaroundUtterances.splice( indexOfUtterance, 1 );
+      const indexOfPair = this.safariWorkaroundUtterancePairs.indexOf( utterancePair );
+      if ( indexOfPair > -1 ) {
+        this.safariWorkaroundUtterancePairs.splice( indexOfPair, 1 );
       }
 
       this.currentlySpeakingUtterance = null;
-
-      // kick off the next element now that this one is done.
-      this.onSpeechSynthesisUtteranceEnd();
     };
 
     speechSynthUtterance.addEventListener( 'start', startListener );
@@ -455,18 +434,7 @@ class VoicingManager extends Announcer {
     // but the error event does. In this case signify that speaking has ended.
     speechSynthUtterance.addEventListener( 'error', endListener );
 
-    const options = this.hasSpoken ? null : { minTimeInQueue: 0 };
-
-    // Create and add the utterance to a queue which will request speech from SpeechSynthesis behind a small delay
-    // (as a workaround for Safari), see VoicingQueueElement.minTimeInQueue for details.
-    const voicingQueueElement = new VoicingQueueElement( utterance, speechSynthUtterance, options );
-    this.voicingQueue.push( voicingQueueElement );
-
-    if ( !this.hasSpoken ) {
-      this.alertNow();
-
-      this.hasSpoken = true;
-    }
+    this.alertNow( speechSynthUtterance );
   }
 
   /**
@@ -496,8 +464,7 @@ class VoicingManager extends Announcer {
   }
 
   /**
-   * Stops any current speech and removes all utterances in the queue internal to the SpeechSynthesis
-   * (not the UtteranceQueue).
+   * Stops any current speech and removes all utterances that may be queued.
    * @public
    */
   cancel() {
@@ -506,12 +473,12 @@ class VoicingManager extends Announcer {
       // Cancel anything that is being spoken currently.
       this.cancelSynth();
 
-      // clear everything queued to be voiced.
-      this.voicingQueue = [];
+      // indicate to utteranceQueues that we expect everything queued for voicing to be removed
+      this.clearEmitter.emit();
 
-      // cancel clears all utterances from the internal SpeechSynthsis queue so we should
-      // clear all of our references as well
-      this.safariWorkaroundUtterances = [];
+      // cancel clears all utterances from the utteranceQueue, so we should clear all of the safari workaround
+      // references as well
+      this.safariWorkaroundUtterancePairs = [];
     }
   }
 
@@ -544,35 +511,37 @@ class VoicingManager extends Announcer {
   }
 
   /**
-   * Remove earlier voicingQueueElements from the queue if the Utterance is important enough. This will also interrupt
+   * Remove earlier Utterances from the queue if the Utterance is important enough. This will also interrupt
    * the utterance that is currently being spoken.
-   * @private
+   * @public
+   * @override
    *
-   * @param {Utterance} newUtterance
+   * @param newUtterance {Utterance}
+   * @param {UtteranceWrapper[]} queue - The queue of the utteranceQueue. Will be modified as we prioritize!
    */
-  prioritizeUtterances( newUtterance ) {
+  prioritizeUtterances( newUtterance, queue ) {
 
-    if ( this.initialized ) {
+    // Update the queue before canceling the browser queue, since that will most likely trigger the end
+    // callback (and therefore the next utterance to be spoken).
+    for ( let i = queue.length - 1; i >= 0; i-- ) {
 
-      // Update our voicingQueue before canceling the browser queue, since that will most likely trigger the end
-      // callback (and therefore the next utterance to be spoken).
-      for ( let i = this.voicingQueue.length - 1; i >= 0; i-- ) {
-        const voicingQueueElement = this.voicingQueue[ i ];
+      // {UtteranceWrapper} of UtteranceQueue
+      const utteranceWrapper = queue[ i ];
 
-        if ( this.shouldCancel( newUtterance, voicingQueueElement.utterance ) ) {
+      if ( this.shouldCancel( newUtterance, utteranceWrapper.utterance ) ) {
+        this.removeFromQueue( utteranceWrapper, queue );
 
-          this.removeFromVoicingQueue( voicingQueueElement );
-
-          // remove from safari workaround list to avoid memory leaks, if available
-          const index = this.safariWorkaroundUtterances.indexOf( voicingQueueElement.speechSynthUtterance );
-          this.safariWorkaroundUtterances.splice( index, 1 );
+        // remove from safari workaround list to avoid memory leaks, if available
+        const index = _.findIndex( this.safariWorkaroundUtterancePairs, utterancePair => utterancePair.utterance === utteranceWrapper.utterance );
+        if ( index > -1 ) {
+          this.safariWorkaroundUtterancePairs.splice( index, 1 );
         }
       }
+    }
 
-      // test against what is currently being spoken by the synth (currentlySpeakingUtterance)
-      if ( this.currentlySpeakingUtterance && this.shouldCancel( newUtterance, this.currentlySpeakingUtterance ) ) {
-        this.cancelSynth();
-      }
+    // test against what is currently being spoken by the synth (currentlySpeakingUtterance)
+    if ( this.currentlySpeakingUtterance && this.shouldCancel( newUtterance, this.currentlySpeakingUtterance ) ) {
+      this.cancelSynth();
     }
   }
 
@@ -587,35 +556,21 @@ class VoicingManager extends Announcer {
 }
 
 /**
- * An inner class that is responsible for handling data associated with VoicingManager's internal voicingQueue.
- * Mostly this keeps timing data about how long it has been in a queue to workaround browser issues about speaking items
- * too soon.
+ * An inner class that pairs a SpeechSynthesisUtterance with an Utterance. Useful for the Safari workaround
  */
-class VoicingQueueElement {
+class UtterancePair {
 
   /**
    * @param {Utterance} utterance
-   * @param {SpeechSynthesisUtterance} speechSynthUtterance
-   * @param {Object} [options]
+   * @param {SpeechSynthesisUtterance} speechSynthesisUtterance
    */
-  constructor( utterance, speechSynthUtterance, options ) {
+  constructor( utterance, speechSynthesisUtterance ) {
 
-    options = merge( {
-
-      // In Safari, the `start` and `end` listener does not fire consistently, especially after interruption with
-      // cancel. But speaking behind a timeout/delay improves the behavior significantly. Timeout of 250 ms was
-      // determined with testing to be a good value to use. Values less than 250 broke the workaround, while larger
-      // values feel too sluggish. See https://github.com/phetsims/john-travoltage/issues/435
-      minTimeInQueue: 250
-    }, options );
-
+    // @public (read-only)
     this.utterance = utterance;
-    this.speechSynthUtterance = speechSynthUtterance;
-    this.timeInQueue = 0;
-    this.minTimeInQueue = options.minTimeInQueue;
+    this.speechSynthesisUtterance = speechSynthesisUtterance;
   }
 }
-
 
 /**
  * @param {Object} element - returned from himalaya parser, see documentation for details.
