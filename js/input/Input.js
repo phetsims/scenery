@@ -637,10 +637,6 @@ class Input {
         this.dispatchPDOMEvent( trail, 'blur', event, false );
         this.dispatchPDOMEvent( trail, 'focusout', event, true );
 
-        // clear the trail to make sure that our assertions aren't testing a stale trail, do this before
-        // focusing event.relatedTarget below so that trail isn't cleared after focus
-        this.pdomPointer.trail = null;
-
         sceneryLog && sceneryLog.Input && sceneryLog.pop();
       }, {
         phetioPlayback: true,

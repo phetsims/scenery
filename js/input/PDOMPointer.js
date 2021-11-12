@@ -79,6 +79,8 @@ class PDOMPointer extends Pointer {
         // Null if it is not in the PDOM, or if it is undefined
         const relatedTargetTrail = this.display._input.getRelatedTargetTrail( event.domEvent );
 
+        this.trail = null;
+
         if ( relatedTargetTrail && relatedTargetTrail.lastNode().focusable ) {
           FocusManager.pdomFocus = new Focus( this.display, PDOMInstance.guessVisualTrail( relatedTargetTrail, this.display.rootNode ) );
         }
