@@ -150,8 +150,6 @@ class FocusManager {
 
       // if set to null, make sure that the active element is no longer focused
       if ( previousFocus && !value ) {
-
-        // TODO: Won't this be buggy if document.activeElement is not focused, because then PDOMPointer won't actually get the blur listener, https://github.com/phetsims/scenery/issues/1284
         previousFocus.blur();
       }
     }
