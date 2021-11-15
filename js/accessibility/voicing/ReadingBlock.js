@@ -370,7 +370,7 @@ const ReadingBlock = {
        */
       disposeReadingBlock() {
         this.readingBlockInitialized = false;
-        voicingManager.voicingFullyEnabledProperty.unlink( this.readingBlockFocusableChangeListener );
+        voicingManager.speechAllowedAndFullyEnabledProperty.unlink( this.readingBlockFocusableChangeListener );
         this.localBoundsProperty.unlink( this.localBoundsChangedListener );
 
         // remove the input listener that activates the ReadingBlock, only do this if the listener is attached while

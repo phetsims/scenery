@@ -418,10 +418,11 @@ const InteractiveHighlighting = {
         }
         else {
           const display = this._displays[ instance.trail.uniqueId ];
-          assert && assert( display, 'about to remove listeners from Display Properties, but could not find Display' );
 
-          // only unlink if there are no more instances of this Node
-          if ( instance.node.instances.length === 0 ) {
+          // If the node was disposed, this display reference has already been cleaned up, but instances are updated
+          // (disposed) on the next frame after the node was disposed. Only unlink if there are no more instances of
+          // this node;
+          if ( display && instance.node.instances.length === 0 ) {
             display.focusManager.pointerHighlightsVisibleProperty.unlink( this.interactiveHighlightingEnabledListener );
           }
 

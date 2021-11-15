@@ -78,7 +78,8 @@ const Voicing = {
        */
       initializeVoicing( options ) {
 
-        assert && assert( this.voicingInitialized === undefined, 'Voicing has already been initialized for this Node' );
+        // undefined OR support poolable with the value set by dispose
+        assert && assert( this.voicingInitialized === undefined || this.voicingInitialized === false, 'Voicing has already been initialized for this Node' );
 
         // initialize "super" Trait to support highlights on mouse input
         this.initializeInteractiveHighlighting( options );
