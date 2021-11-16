@@ -27,8 +27,8 @@ class LayoutConstraint {
     // @private {number} - Prevents layout() from running while true. Generally will be unlocked and laid out.
     this._layoutLockCount = 0;
 
-    // @private {number} - The number of times layout attempts happened during the lock
-    this._layoutAttemptsDuringLock = 0;
+    // @private {boolean} - Whether there was a layout attempt during the lock
+    this._layoutAttemptDuringLock = false;
 
     // @protected {function}
     this._updateLayoutListener = this.updateLayoutAutomatically.bind( this );
@@ -124,17 +124,17 @@ class LayoutConstraint {
 
     if ( this.isLocked ) {
       assert && assert( ++count < 500, 'Likely infinite loop detected, are we triggering layout within the layout?' );
-      this._layoutAttemptsDuringLock++;
+      this._layoutAttemptDuringLock = true;
     }
     else {
       this.lock();
 
       do {
-        this._layoutAttemptsDuringLock = 0;
+        this._layoutAttemptDuringLock = false;
         this.layout();
       }
       // If we got any layout attempts during the lock, we'll want to rerun the layout
-      while ( this._layoutAttemptsDuringLock );
+      while ( this._layoutAttemptDuringLock );
 
       this.unlock();
     }
@@ -157,6 +157,8 @@ class LayoutConstraint {
    * @returns {LayoutProxy}
    */
   createLayoutProxy( node ) {
+    assert && assert( node instanceof Node );
+
     // TODO: How to handle the case where there is no trail?
 
     return LayoutProxy.createFromPool( node.getUniqueTrailTo( this.ancestorNode ).removeAncestor() );
@@ -177,6 +179,8 @@ class LayoutConstraint {
    * @param {boolean} value
    */
   set enabled( value ) {
+    assert && assert( typeof value === 'boolean' );
+
     if ( this._enabled !== value ) {
       this._enabled = value;
 
