@@ -2,7 +2,7 @@
   "extends": "../chipper/tsconfig-core.json",
   "references": [
     {
-      "path": "../kite"
+      "path": "../kite/tsconfig-module.json"
     }
   ],
   "include": [
