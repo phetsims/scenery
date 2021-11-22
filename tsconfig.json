@@ -1,0 +1,14 @@
+{
+  "extends": "../chipper/tsconfig-core.json",
+  "references": [
+    {
+      "path": "../joist/tsconfig-module.json"
+    }
+  ],
+  "include": [
+    "js/**/*test*",
+    "js/tests/**/*",
+    "js/**/*Test*",
+    "../utterance-queue/js/**/*test*"
+  ]
+}
