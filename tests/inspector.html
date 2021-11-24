@@ -205,7 +205,7 @@
       } );
       expandButton.addInputListener( new scenery.FireListener( {
         fire: function() {
-          self.expandedProperty.toggle();
+          self.expandedProperty.value = !self.expandedProperty.value;
         }
       } ) );
       selfNode.addChild( expandButton );
@@ -370,6 +370,7 @@
   scene.addChild( infoBackground );
   var infoMarginX = 8;
   var infoMarginY = 5;
+
   function constrainInfo() {
     if ( infoBox.bottom < infoBackground.selfBounds.bottom - infoMarginY ) {
       infoBox.bottom = infoBackground.selfBounds.bottom - infoMarginY;
@@ -384,6 +385,7 @@
       infoBox.left = infoBackground.selfBounds.left + infoMarginX;
     }
   }
+
   function updateInfo() {
     if ( previewTreeNodeProperty.value ) {
       infoBox.children = [];
@@ -404,6 +406,7 @@
           ]
         } ) );
       }
+
       function addSimple( key, value ) {
         if ( value !== undefined ) {
           var valueNode;
@@ -413,6 +416,7 @@
           addRaw( key, valueNode );
         }
       }
+
       function colorSwatch( serial ) {
         var color = new scenery.Color( serial.red, serial.green, serial.blue, serial.alpha );
         var hex = color.toNumber().toString( 16 );
@@ -428,6 +432,7 @@
           ]
         } );
       }
+
       function addColor( key, serialization ) {
         if ( serialization ) {
           if ( serialization.type === 'value' ) {
@@ -449,6 +454,7 @@
           }
         }
       }
+
       function addSerial( key, serialization ) {
         if ( serialization ) {
           var value = scenery.deserialize( serialization );
@@ -497,6 +503,7 @@
           }
         }
       }
+
       addColor( 'fill', serialization.setup.fill );
       addColor( 'stroke', serialization.setup.stroke );
       addSerial( 'lineDash', serialization.setup.lineDash );
@@ -530,9 +537,11 @@
 
       infoBox.addChild( new scenery.Spacer( 5, 5 ) );
       infoBox.addChild( new scenery.Text( 'Bounds', { font: new scenery.Font( { size: 14, weight: 'bold' } ) } ) );
+
       function boxString( bounds ) {
         return bounds.minX + ', ' + bounds.minY + ', ' + bounds.maxX + ', ' + bounds.maxY + ' (' + bounds.width + ' x ' + bounds.height + ')';
       }
+
       addSimple( 'local', boxString( treeNode.displayNode.localBounds ) );
       addSimple( 'parent', boxString( treeNode.displayNode.bounds ) );
 
@@ -605,6 +614,7 @@
       infoBox.children = [];
     }
   }
+
   previewTreeNodeProperty.lazyLink( updateInfo );
 
   var treeMarginX = 8;
@@ -649,6 +659,7 @@
     ]
   } );
   scene.addChild( treeContainer );
+
   function constrainTree() {
     if ( rootTreeNode.bottom < treeBackground.bottom - treeMarginY ) {
       rootTreeNode.bottom = treeBackground.bottom - treeMarginY;
@@ -663,6 +674,7 @@
       rootTreeNode.left = treeBackground.left + treeMarginX;
     }
   }
+
   treeContainer.addInputListener( {
     wheel: function( event ) {
       var deltaX = event.domEvent.deltaX;
@@ -680,9 +692,11 @@
     rootTreeNode.y -= deltaY;
     constrainTree();
   }
+
   function focusActive() {
     focusTreeNode( activeTreeNodeProperty.value );
   }
+
   function focusSelected() {
     if ( selectedTreeNodeProperty.value === null ) { return; }
 
@@ -732,6 +746,7 @@
     pickable: false
   } );
   scene.addChild( previewBackground );
+
   function updatePreview() {
     if ( previewTreeNodeProperty.value ) {
       var node = previewTreeNodeProperty.value.displayNode;
@@ -750,6 +765,7 @@
       previewContainer.visible = false;
     }
   }
+
   previewTreeNodeProperty.link( function( treeNode ) {
     updatePreview();
   } );
@@ -835,6 +851,7 @@
     display.setWidthHeight( width, height );
     mainBoundsProperty.value = new dot.Bounds2( 0, 0, width, height );
   }
+
   window.addEventListener( 'resize', onResize );
   onResize();
 
