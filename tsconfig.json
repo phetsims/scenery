@@ -9,6 +9,7 @@
     "js/**/*test*",
     "js/tests/**/*",
     "js/**/*Test*",
-    "../utterance-queue/js/**/*test*"
+    "../utterance-queue/js/**/*test*",
+    "../utterance-queue/js/**/*Test*"
   ]
 }
