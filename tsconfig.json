@@ -7,8 +7,8 @@
   ],
   "include": [
     "js/**/*test*",
-    "js/tests/**/*",
     "js/**/*Test*",
+    "js/tests/**/*",
     "../utterance-queue/js/**/*test*",
     "../utterance-queue/js/**/*Test*"
   ]
