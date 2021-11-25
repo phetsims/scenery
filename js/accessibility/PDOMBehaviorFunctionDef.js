@@ -10,7 +10,7 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
-import scenery from '../scenery.js';
+import { scenery } from '../imports.js';
 
 /**
  * @name pdomBehaviorFunction

@@ -17,15 +17,7 @@ import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
 import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import FocusManager from '../accessibility/FocusManager.js';
-import globalKeyStateTracker from '../accessibility/globalKeyStateTracker.js';
-import KeyboardUtils from '../accessibility/KeyboardUtils.js';
-import KeyboardZoomUtils from '../accessibility/KeyboardZoomUtils.js';
-import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
-import EventIO from '../input/EventIO.js';
-import Pointer from '../input/Pointer.js';
-import scenery from '../scenery.js';
-import PanZoomListener from './PanZoomListener.js';
+import { scenery, Pointer, EventIO, PDOMUtils, KeyboardUtils, KeyboardZoomUtils, globalKeyStateTracker, FocusManager, PanZoomListener } from '../imports.js';
 
 // constants
 const MOVE_CURSOR = 'all-scroll';

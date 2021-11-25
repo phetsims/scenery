@@ -7,8 +7,7 @@
  */
 
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
-import scenery from '../scenery.js';
-import ColorMatrixFilter from './ColorMatrixFilter.js';
+import { scenery, ColorMatrixFilter } from '../imports.js';
 
 class Brightness extends ColorMatrixFilter {
   /**

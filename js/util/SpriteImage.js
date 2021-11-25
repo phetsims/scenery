@@ -11,8 +11,7 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Shape from '../../../kite/js/Shape.js';
 import merge from '../../../phet-core/js/merge.js';
-import Imageable from '../nodes/Imageable.js';
-import scenery from '../scenery.js';
+import { scenery, Imageable } from '../imports.js';
 
 let globalIdCounter = 1;
 const scratchVector = new Vector2( 0, 0 );

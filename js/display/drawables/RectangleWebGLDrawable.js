@@ -9,11 +9,7 @@
 import Property from '../../../../axon/js/Property.js';
 import Vector2 from '../../../../dot/js/Vector2.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import scenery from '../../scenery.js';
-import Color from '../../util/Color.js';
-import Renderer from '../Renderer.js';
-import WebGLSelfDrawable from '../WebGLSelfDrawable.js';
-import RectangleStatefulDrawable from './RectangleStatefulDrawable.js';
+import { scenery, Color, Renderer, WebGLSelfDrawable, RectangleStatefulDrawable } from '../../imports.js';
 
 const scratchColor = new Color( 'transparent' );
 

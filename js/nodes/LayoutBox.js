@@ -13,9 +13,7 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import merge from '../../../phet-core/js/merge.js';
-import scenery from '../scenery.js';
-import SceneryConstants from '../SceneryConstants.js';
-import Node from './Node.js';
+import { scenery, SceneryConstants, Node } from '../imports.js';
 
 // constants
 const DEFAULT_SPACING = 0;

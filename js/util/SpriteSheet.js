@@ -17,7 +17,7 @@
 import BinPacker from '../../../dot/js/BinPacker.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Dimension2 from '../../../dot/js/Dimension2.js';
-import scenery from '../scenery.js';
+import { scenery } from '../imports.js';
 
 // constants
 // The max SpriteSheet size was selected to minimize memory overhead while still accommodating many large images

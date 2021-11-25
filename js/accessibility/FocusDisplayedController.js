@@ -11,8 +11,7 @@
  */
 
 import merge from '../../../phet-core/js/merge.js';
-import scenery from '../scenery.js';
-import TrailVisibilityTracker from '../util/TrailVisibilityTracker.js';
+import { scenery, TrailVisibilityTracker } from '../imports.js';
 
 class FocusDisplayedController {
 

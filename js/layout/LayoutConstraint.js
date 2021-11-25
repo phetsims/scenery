@@ -8,8 +8,7 @@
 
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import Node from '../nodes/Node.js';
-import scenery from '../scenery.js';
-import LayoutProxy from './LayoutProxy.js';
+import { scenery, LayoutProxy } from '../imports.js';
 
 class LayoutConstraint {
   /**

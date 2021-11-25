@@ -8,10 +8,7 @@
  */
 
 import merge from '../../../../../phet-core/js/merge.js';
-import RichText from '../../../nodes/RichText.js';
-import scenery from '../../../scenery.js';
-import ReadingBlock from '../ReadingBlock.js';
-import ReadingBlockHighlight from '../ReadingBlockHighlight.js';
+import { scenery, RichText, ReadingBlock, ReadingBlockHighlight } from '../../../imports.js';
 
 class VoicingRichText extends RichText {
 

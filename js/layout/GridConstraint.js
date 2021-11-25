@@ -13,12 +13,7 @@ import Orientation from '../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../phet-core/js/OrientationPair.js';
 import merge from '../../../phet-core/js/merge.js';
 import mutate from '../../../phet-core/js/mutate.js';
-import Node from '../nodes/Node.js';
-import scenery from '../scenery.js';
-import GridCell from './GridCell.js';
-import GridConfigurable from './GridConfigurable.js';
-import GridLine from './GridLine.js';
-import LayoutConstraint from './LayoutConstraint.js';
+import { scenery, Node, GridCell, GridConfigurable, GridLine, LayoutConstraint } from '../imports.js';
 
 const GRID_CONSTRAINT_OPTION_KEYS = [
   'excludeInvisible',

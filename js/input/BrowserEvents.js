@@ -8,10 +8,7 @@
 
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import platform from '../../../phet-core/js/platform.js';
-import Display from '../display/Display.js';
-import scenery from '../scenery.js';
-import Features from '../util/Features.js';
-import BatchedDOMEvent from './BatchedDOMEvent.js';
+import { scenery, Display, Features, BatchedDOMEvent } from '../imports.js';
 
 // Sometimes we need to add a listener that does absolutely nothing
 const noop = () => {};

@@ -7,9 +7,7 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import scenery from '../scenery.js';
-import Leaf from './Leaf.js';
-import Node from './Node.js';
+import { scenery, Leaf, Node } from '../imports.js';
 
 class Spacer extends Node {
   /**

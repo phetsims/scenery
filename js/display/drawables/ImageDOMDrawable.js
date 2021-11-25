@@ -7,10 +7,7 @@
  */
 
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import scenery from '../../scenery.js';
-import Utils from '../../util/Utils.js';
-import DOMSelfDrawable from '../DOMSelfDrawable.js';
-import ImageStatefulDrawable from './ImageStatefulDrawable.js';
+import { scenery, Utils, DOMSelfDrawable, ImageStatefulDrawable } from '../../imports.js';
 
 // TODO: change this based on memory and performance characteristics of the platform
 const keepDOMImageElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory

@@ -9,9 +9,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import SVGPattern from '../display/SVGPattern.js';
-import scenery from '../scenery.js';
-import Paint from './Paint.js';
+import { scenery, Paint, SVGPattern } from '../imports.js';
 
 class Pattern extends Paint {
   /**

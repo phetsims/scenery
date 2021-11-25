@@ -7,12 +7,7 @@
  */
 
 import merge from '../../../phet-core/js/merge.js';
-import Node from '../nodes/Node.js';
-import scenery from '../scenery.js';
-import FlowCell from './FlowCell.js';
-import FlowConstraint from './FlowConstraint.js';
-import WidthSizable from './WidthSizable.js';
-import HeightSizable from './HeightSizable.js';
+import { scenery, Node, FlowCell, FlowConstraint, WidthSizable, HeightSizable } from '../imports.js';
 
 // FlowBox-specific options that can be passed in the constructor or mutate() call.
 const FLOWBOX_OPTION_KEYS = [

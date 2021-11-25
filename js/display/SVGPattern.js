@@ -7,9 +7,7 @@
  */
 
 import Poolable from '../../../phet-core/js/Poolable.js';
-import scenery from '../scenery.js';
-import svgns from '../util/svgns.js';
-import xlinkns from '../util/xlinkns.js';
+import { scenery, svgns, xlinkns } from '../imports.js';
 
 class SVGPattern {
   /**

@@ -1,9 +1,8 @@
 // Copyright 2020-2021, University of Colorado Boulder
 
-import Property from '../../../axon/js/Property.js';
+import Property, { PropertyOptions } from '../../../axon/js/Property.js';
 import merge from '../../../phet-core/js/merge.js';
-import scenery from '../scenery.js';
-import Color from './Color.js';
+import { scenery, Color } from '../imports.js';
 
 /**
  * Convenience type for creating Property.<Color>
@@ -14,13 +13,8 @@ import Color from './Color.js';
 /**
  * @extends Property<Color>
  */
-class ColorProperty extends Property {
-
-  /**
-   * @param {ColorDef} color
-   * @param {Object} [options]
-   */
-  constructor( color, options ) {
+class ColorProperty extends Property<Color> {
+  constructor( color: Color, options?: PropertyOptions<Color> ) {
 
     // client cannot specify superclass options that are controlled by this type
     if ( options ) {

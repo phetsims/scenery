@@ -8,10 +8,8 @@
  */
 
 import Property from '../../../axon/js/Property.js';
-
 // For TypeScript support
-import Node from '../nodes/Node.js'; // eslint-disable-line no-unused-vars
-import scenery from '../scenery.js';
+import { scenery, Node } from '../imports.js';  // eslint-disable-line no-unused-vars
 
 class NodeProperty extends Property {
 

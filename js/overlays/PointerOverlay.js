@@ -10,10 +10,7 @@
  */
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import PDOMPointer from '../input/PDOMPointer.js';
-import scenery from '../scenery.js';
-import svgns from '../util/svgns.js';
-import Utils from '../util/Utils.js';
+import { scenery, PDOMPointer, svgns, Utils } from '../imports.js';
 
 class PointerOverlay {
   /**

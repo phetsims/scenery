@@ -8,12 +8,7 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import Focus from '../accessibility/Focus.js';
-import FocusManager from '../accessibility/FocusManager.js';
-import PDOMInstance from '../accessibility/pdom/PDOMInstance.js';
-import scenery from '../scenery.js';
-import Trail from '../util/Trail.js';
-import Pointer from './Pointer.js'; // inherits from Pointer
+import { scenery, Trail, Pointer, Focus, FocusManager, PDOMInstance } from '../imports.js';
 
 class PDOMPointer extends Pointer {
 

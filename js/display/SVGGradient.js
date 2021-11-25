@@ -7,8 +7,7 @@
  */
 
 import cleanArray from '../../../phet-core/js/cleanArray.js';
-import scenery from '../scenery.js';
-import SVGGradientStop from './SVGGradientStop.js';
+import { scenery, SVGGradientStop } from '../imports.js';
 
 class SVGGradient {
   /**

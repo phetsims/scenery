@@ -8,9 +8,7 @@
 
 import Property from '../../../axon/js/Property.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
-import scenery from '../scenery.js';
-import Color from './Color.js';
-import Paint from './Paint.js';
+import { scenery, Color, Paint } from '../imports.js';
 
 class Gradient extends Paint {
   /**

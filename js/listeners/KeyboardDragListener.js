@@ -24,8 +24,7 @@ import stepTimer from '../../../axon/js/stepTimer.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
-import KeyboardUtils from '../accessibility/KeyboardUtils.js';
-import scenery from '../scenery.js';
+import { scenery, KeyboardUtils } from '../imports.js';
 
 class KeyboardDragListener {
   /**

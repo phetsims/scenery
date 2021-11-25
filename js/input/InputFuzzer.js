@@ -8,7 +8,7 @@
 
 import Random from '../../../dot/js/Random.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import scenery from '../scenery.js';
+import { scenery } from '../imports.js';
 
 class InputFuzzer {
   /**

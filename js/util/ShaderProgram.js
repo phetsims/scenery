@@ -7,8 +7,7 @@
  */
 
 import merge from '../../../phet-core/js/merge.js';
-import scenery from '../scenery.js';
-import Utils from './Utils.js';
+import { scenery, Utils } from '../imports.js';
 
 class ShaderProgram {
   /**

@@ -1,6 +1,5 @@
 // Copyright 2013-2021, University of Colorado Boulder
 
-
 /**
  * Feature detection
  *
@@ -8,7 +7,7 @@
  */
 
 import detectPrefix from '../../../phet-core/js/detectPrefix.js';
-import scenery from '../scenery.js';
+import { scenery } from '../imports.js';
 
 const Features = {};
 scenery.register( 'Features', Features );

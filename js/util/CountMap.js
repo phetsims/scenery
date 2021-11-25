@@ -7,7 +7,7 @@
  */
 
 import Poolable from '../../../phet-core/js/Poolable.js';
-import scenery from '../scenery.js';
+import { scenery } from '../imports.js';
 
 class CountMap {
   /**

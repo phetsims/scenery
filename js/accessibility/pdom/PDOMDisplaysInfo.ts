@@ -9,40 +9,38 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Renderer from '../../display/Renderer.js';
-import scenery from '../../scenery.js';
+import { scenery, Node, Display, Renderer } from '../../imports.js';
 
 class PDOMDisplaysInfo {
+
+  node: Node;
+
+  // (duplicates allowed) - There is one copy of each pdom
+  // Display for each trail (from its root node to this node) that is fully visible (assuming this subtree has
+  // pdom content).
+  // Thus, the value of this is:
+  // - If this node is invisible OR the subtree has no pdomContent/pdomOrder: []
+  // - Otherwise, it is the concatenation of our parents' pdomDisplays (AND any pdom displays rooted
+  //   at this node).
+  // This value is synchronously updated, and supports pdomInstances by letting them know when certain
+  // nodes are visible on the display.
+  pdomDisplays: Display[];
+
   /**
    * Tracks pdom display information for our given node.
    * @public (scenery-internal)
    *
    * @param {Node} node
    */
-  constructor( node ) {
-
-    // @public {Node}
+  constructor( node: Node ) {
     this.node = node;
-
-    // @public (scenery-internal) {Array.<Display>} - (duplicates allowed) - There is one copy of each pdom
-    // Display for each trail (from its root node to this node) that is fully visible (assuming this subtree has
-    // pdom content).
-    // Thus, the value of this is:
-    // - If this node is invisible OR the subtree has no pdomContent/pdomOrder: []
-    // - Otherwise, it is the concatenation of our parents' pdomDisplays (AND any pdom displays rooted
-    //   at this node).
-    // This value is synchronously updated, and supports pdomInstances by letting them know when certain
-    // nodes are visible on the display.
     this.pdomDisplays = [];
   }
 
   /**
-   * Called when the node is added as a child to this node AND the node's subtree contains pdom content.
-   * @public (scenery-internal)
-   *
-   * @param {Node} node
+   * Called when the node is added as a child to this node AND the node's subtree contains pdom content. (scenery-internal)
    */
-  onAddChild( node ) {
+  onAddChild( node: Node ) {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( `onAddChild n#${node.id} (parent:n#${this.node.id})` );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
@@ -54,12 +52,9 @@ class PDOMDisplaysInfo {
   }
 
   /**
-   * Called when the node is removed as a child from this node AND the node's subtree contains pdom content.
-   * @public (scenery-internal)
-   *
-   * @param {Node} node
+   * Called when the node is removed as a child from this node AND the node's subtree contains pdom content. (scenery-internal)
    */
-  onRemoveChild( node ) {
+  onRemoveChild( node: Node ) {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( `onRemoveChild n#${node.id} (parent:n#${this.node.id})` );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
@@ -71,13 +66,9 @@ class PDOMDisplaysInfo {
   }
 
   /**
-   * Called when our summary bitmask changes
-   * @public (scenery-internal)
-   *
-   * @param {number} oldBitmask
-   * @param {number} newBitmask
+   * Called when our summary bitmask changes (scenery-internal)
    */
-  onSummaryChange( oldBitmask, newBitmask ) {
+  onSummaryChange( oldBitmask: number, newBitmask: number ) {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( `onSummaryChange n#${this.node.id} wasPDOM:${!( Renderer.bitmaskNoPDOM & oldBitmask )}, isPDOM:${!( Renderer.bitmaskNoPDOM & newBitmask )}` );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
@@ -101,12 +92,9 @@ class PDOMDisplaysInfo {
   }
 
   /**
-   * Called when our visibility changes.
-   * @public (scenery-internal)
-   *
-   * @param {boolean} visible
+   * Called when our visibility changes. (scenery-internal)
    */
-  onVisibilityChange( visible ) {
+  onVisibilityChange( visible: boolean ) {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( `onVisibilityChange n#${this.node.id} visible:${visible}` );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
@@ -124,12 +112,9 @@ class PDOMDisplaysInfo {
   }
 
   /**
-   * Called when our pdomVisibility changes.
-   * @public (scenery-internal)
-   *
-   * @param {boolean} visible
+   * Called when our pdomVisibility changes. (scenery-internal)
    */
-  onPDOMVisibilityChange( visible ) {
+  onPDOMVisibilityChange( visible: boolean ) {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( `onPDOMVisibilityChange n#${this.node.id} pdomVisible:${visible}` );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
@@ -147,12 +132,9 @@ class PDOMDisplaysInfo {
   }
 
   /**
-   * Called when we have a rooted display added to this node.
-   * @public (scenery-internal)
-   *
-   * @param {Display} display
+   * Called when we have a rooted display added to this node. (scenery-internal)
    */
-  onAddedRootedDisplay( display ) {
+  onAddedRootedDisplay( display: Display ) {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( `onAddedRootedDisplay n#${this.node.id}` );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
@@ -164,12 +146,9 @@ class PDOMDisplaysInfo {
   }
 
   /**
-   * Called when we have a rooted display removed from this node.
-   * @public (scenery-internal)
-   *
-   * @param {Display} display
+   * Called when we have a rooted display removed from this node. (scenery-internal)
    */
-  onRemovedRootedDisplay( display ) {
+  onRemovedRootedDisplay( display: Display ) {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( `onRemovedRootedDisplay n#${this.node.id}` );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
@@ -181,20 +160,16 @@ class PDOMDisplaysInfo {
   }
 
   /**
-   * Returns whether we can have pdomDisplays specified in our array.
-   * @public (scenery-internal)
-   *
-   * @returns {boolean}
+   * Returns whether we can have pdomDisplays specified in our array. (scenery-internal)
    */
-  canHavePDOMDisplays() {
+  canHavePDOMDisplays(): boolean {
     return this.node.visible && this.node.pdomVisible && !this.node._rendererSummary.hasNoPDOM();
   }
 
   /**
    * Adds all of our pdom displays to our array (and propagates).
-   * @private
    */
-  addAllPDOMDisplays() {
+  private addAllPDOMDisplays() {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( `addAllPDOMDisplays n#${this.node.id}` );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
@@ -202,7 +177,7 @@ class PDOMDisplaysInfo {
     assert && assert( this.canHavePDOMDisplays(), 'Should happen when we can store pdomDisplays' );
 
     let i;
-    const displays = [];
+    const displays: Display[] = [];
 
     // Concatenation of our parents' pdomDisplays
     for ( i = 0; i < this.node._parents.length; i++ ) {
@@ -224,9 +199,8 @@ class PDOMDisplaysInfo {
 
   /**
    * Removes all of our pdom displays from our array (and propagates).
-   * @private
    */
-  removeAllPDOMDisplays() {
+  private removeAllPDOMDisplays() {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( `removeAllPDOMDisplays n#${this.node.id}` );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
@@ -242,11 +216,8 @@ class PDOMDisplaysInfo {
 
   /**
    * Adds a list of pdom displays to our internal list. See pdomDisplays documentation.
-   * @private
-   *
-   * @param {Array.<Display>} displays
    */
-  addPDOMDisplays( displays ) {
+  private addPDOMDisplays( displays: Display[] ) {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( `addPDOMDisplays n#${this.node.id} numDisplays:${displays.length}` );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 
@@ -272,11 +243,8 @@ class PDOMDisplaysInfo {
 
   /**
    * Removes a list of pdom displays from our internal list. See pdomDisplays documentation.
-   * @private
-   *
-   * @param {Array.<Display>} displays
    */
-  removePDOMDisplays( displays ) {
+  private removePDOMDisplays( displays: Display[] ) {
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.PDOMDisplaysInfo( `removePDOMDisplays n#${this.node.id} numDisplays:${displays.length}` );
     sceneryLog && sceneryLog.PDOMDisplaysInfo && sceneryLog.push();
 

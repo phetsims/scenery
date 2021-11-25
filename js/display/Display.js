@@ -61,34 +61,7 @@ import platform from '../../../phet-core/js/platform.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import AriaLiveAnnouncer from '../../../utterance-queue/js/AriaLiveAnnouncer.js';
 import UtteranceQueue from '../../../utterance-queue/js/UtteranceQueue.js';
-import FocusManager from '../accessibility/FocusManager.js';
-import globalKeyStateTracker from '../accessibility/globalKeyStateTracker.js';
-import KeyboardUtils from '../accessibility/KeyboardUtils.js';
-import PDOMInstance from '../accessibility/pdom/PDOMInstance.js';
-import PDOMSiblingStyle from '../accessibility/pdom/PDOMSiblingStyle.js';
-import PDOMTree from '../accessibility/pdom/PDOMTree.js';
-import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
-import Input from '../input/Input.js';
-import Node from '../nodes/Node.js';
-import CanvasNodeBoundsOverlay from '../overlays/CanvasNodeBoundsOverlay.js';
-import FittedBlockBoundsOverlay from '../overlays/FittedBlockBoundsOverlay.js';
-import HighlightOverlay from '../overlays/HighlightOverlay.js';
-import HitAreaOverlay from '../overlays/HitAreaOverlay.js';
-import PointerAreaOverlay from '../overlays/PointerAreaOverlay.js';
-import PointerOverlay from '../overlays/PointerOverlay.js';
-import scenery from '../scenery.js';
-import Color from '../util/Color.js';
-import Features from '../util/Features.js';
-import FullScreen from '../util/FullScreen.js';
-import Trail from '../util/Trail.js';
-import Utils from '../util/Utils.js';
-import BackboneDrawable from './BackboneDrawable.js';
-import ChangeInterval from './ChangeInterval.js';
-import DOMBlock from './DOMBlock.js';
-import Drawable from './Drawable.js';
-import DOMDrawable from './drawables/DOMDrawable.js';
-import Instance from './Instance.js';
-import Renderer from './Renderer.js';
+import { scenery, Color, Features, FullScreen, Trail, Utils, BackboneDrawable, ChangeInterval, DOMBlock, Drawable, DOMDrawable, Instance, Renderer, Node, PDOMInstance, PDOMSiblingStyle, PDOMUtils, globalKeyStateTracker, FocusManager, KeyboardUtils, PDOMTree, Input, CanvasNodeBoundsOverlay, FittedBlockBoundsOverlay, HighlightOverlay, HitAreaOverlay, PointerAreaOverlay, PointerOverlay } from '../imports.js';
 
 class Display {
   /**

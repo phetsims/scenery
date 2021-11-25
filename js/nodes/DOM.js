@@ -8,10 +8,7 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
-import DOMDrawable from '../display/drawables/DOMDrawable.js';
-import Renderer from '../display/Renderer.js';
-import scenery from '../scenery.js';
-import Node from './Node.js';
+import { scenery, Node, Renderer, DOMDrawable } from '../imports.js';
 
 const DOM_OPTION_KEYS = [
   'element', // {HTMLElement} - Sets the element, see setElement() for more documentation

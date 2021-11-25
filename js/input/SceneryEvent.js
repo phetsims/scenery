@@ -16,11 +16,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
-import scenery from '../scenery.js';
-import Trail from '../util/Trail.js';
-import Mouse from './Mouse.js';
-import PDOMPointer from './PDOMPointer.js';
-import Pointer from './Pointer.js';
+import { scenery, Trail, Mouse, PDOMPointer, Pointer } from '../imports.js';
 
 class SceneryEvent {
 

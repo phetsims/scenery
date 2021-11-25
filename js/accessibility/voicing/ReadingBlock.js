@@ -22,14 +22,8 @@ import Shape from '../../../../kite/js/Shape.js';
 import extend from '../../../../phet-core/js/extend.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import StringUtils from '../../../../phetcommon/js/util/StringUtils.js';
-import Node from '../../nodes/Node.js';
-import scenery from '../../scenery.js';
-import Focus from '../Focus.js';
-import ReadingBlockHighlight from './ReadingBlockHighlight.js';
-import ReadingBlockUtterance from './ReadingBlockUtterance.js';
 import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
-import Voicing from './Voicing.js';
-import voicingManager from './voicingManager.js';
+import { scenery, Node, Focus, ReadingBlockHighlight, ReadingBlockUtterance, Voicing, voicingManager } from '../../imports.js';
 
 const READING_BLOCK_OPTION_KEYS = [
   'readingBlockTagName',

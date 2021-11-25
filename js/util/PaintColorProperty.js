@@ -37,9 +37,7 @@
 
 import Property from '../../../axon/js/Property.js';
 import merge from '../../../phet-core/js/merge.js';
-import PaintObserver from '../display/PaintObserver.js';
-import scenery from '../scenery.js';
-import PaintDef from './PaintDef.js';
+import { scenery, PaintDef, PaintObserver } from '../imports.js';
 
 class PaintColorProperty extends Property {
 

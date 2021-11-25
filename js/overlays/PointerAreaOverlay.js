@@ -7,9 +7,7 @@
  */
 
 import Shape from '../../../kite/js/Shape.js';
-import scenery from '../scenery.js';
-import Trail from '../util/Trail.js';
-import ShapeBasedOverlay from './ShapeBasedOverlay.js';
+import { scenery, Trail, ShapeBasedOverlay } from '../imports.js';
 
 class PointerAreaOverlay extends ShapeBasedOverlay {
   /**

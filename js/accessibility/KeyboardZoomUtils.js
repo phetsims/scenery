@@ -6,8 +6,7 @@
  * @author Jesse Greenberg
  */
 
-import scenery from '../scenery.js';
-import KeyboardUtils from './KeyboardUtils.js';
+import { scenery, KeyboardUtils } from '../imports.js';
 
 const KeyboardZoomUtils = {
 

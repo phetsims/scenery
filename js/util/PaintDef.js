@@ -7,10 +7,7 @@
  */
 
 import Property from '../../../axon/js/Property.js';
-import scenery from '../scenery.js';
-import Color from './Color.js';
-import Gradient from './Gradient.js';
-import Paint from './Paint.js';
+import { scenery, Color, Gradient, Paint } from '../imports.js';
 
 const PaintDef = {
   /**

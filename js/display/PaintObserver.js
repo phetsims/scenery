@@ -7,9 +7,7 @@
  */
 
 import Property from '../../../axon/js/Property.js';
-import scenery from '../scenery.js';
-import Color from '../util/Color.js';
-import Gradient from '../util/Gradient.js';
+import { scenery, Color, Gradient } from '../imports.js';
 
 class PaintObserver {
   /**

@@ -11,7 +11,7 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import merge from '../../../phet-core/js/merge.js';
-import scenery from '../scenery.js';
+import { scenery } from '../imports.js';
 
 class TransformTracker {
   /**

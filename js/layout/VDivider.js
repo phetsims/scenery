@@ -6,9 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import scenery from '../scenery.js';
-import Divider from './Divider.js';
-import WidthSizable from './WidthSizable.js';
+import { scenery, Divider, WidthSizable } from '../imports.js';
 
 class VDivider extends WidthSizable( Divider ) {
   /**

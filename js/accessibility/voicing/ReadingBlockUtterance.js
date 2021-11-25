@@ -9,7 +9,7 @@
  */
 
 import Utterance from '../../../../utterance-queue/js/Utterance.js';
-import scenery from '../../scenery.js';
+import { scenery } from '../../imports.js';
 
 class ReadingBlockUtterance extends Utterance {
 

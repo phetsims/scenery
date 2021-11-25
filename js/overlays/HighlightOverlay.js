@@ -12,14 +12,7 @@
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import Shape from '../../../kite/js/Shape.js';
 import merge from '../../../phet-core/js/merge.js';
-import FocusHighlightFromNode from '../accessibility/FocusHighlightFromNode.js';
-import FocusHighlightPath from '../accessibility/FocusHighlightPath.js';
-import FocusManager from '../accessibility/FocusManager.js';
-import ActivatedReadingBlockHighlight from '../accessibility/voicing/ActivatedReadingBlockHighlight.js';
-import Display from '../display/Display.js';
-import Node from '../nodes/Node.js';
-import scenery from '../scenery.js';
-import TransformTracker from '../util/TransformTracker.js';
+import { scenery, TransformTracker, Node, Display, ActivatedReadingBlockHighlight, FocusManager, FocusHighlightPath, FocusHighlightFromNode } from '../imports.js';
 
 // colors for the focus highlights, can be changed for different application backgrounds or color profiles, see
 // the setters and getters below for these values.

@@ -23,8 +23,7 @@ import merge from '../../../phet-core/js/merge.js';
 import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
-import scenery from '../scenery.js';
-import DownUpListener from './DownUpListener.js';
+import { scenery, DownUpListener } from '../imports.js';
 
 class ButtonListener extends DownUpListener {
   /**

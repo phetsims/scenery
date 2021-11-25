@@ -10,12 +10,9 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Shape from '../../../kite/js/Shape.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
 import merge from '../../../phet-core/js/merge.js';
-import PathCanvasDrawable from '../display/drawables/PathCanvasDrawable.js';
-import PathSVGDrawable from '../display/drawables/PathSVGDrawable.js';
-import Renderer from '../display/Renderer.js';
-import scenery from '../scenery.js';
-import Node from './Node.js';
-import Paintable from './Paintable.js';
+import Matrix3 from '../../../dot/js/Matrix3.js';
+import Vector2 from '../../../dot/js/Vector2.js';
+import { scenery, Renderer, Node, NodeOptions, IPathDrawable, PathSVGDrawable, Paintable, PAINTABLE_OPTION_KEYS, PAINTABLE_DRAWABLE_MARK_FLAGS, PaintableOptions, PathCanvasDrawable, CanvasContextWrapper, Instance, CanvasSelfDrawable, SVGSelfDrawable, Paint } from '../imports.js';
 
 const PATH_OPTION_KEYS = [
   'boundsMethod', // {string} - Sets how bounds are determined, see setBoundsMethod() for more documentation.
@@ -24,54 +21,60 @@ const PATH_OPTION_KEYS = [
 
 const DEFAULT_OPTIONS = {
   shape: null,
-  boundsMethod: 'accurate'
+  boundsMethod: <BoundsMethod>'accurate'
 };
 
-class Path extends Node {
+type BoundsMethod = 'accurate' | 'unstroked' | 'tightPadding' | 'safePadding' | 'none';
+type PathOptions = {
+  shape?: Shape | string | null,
+  boundsMethod?: BoundsMethod
+} & PaintableOptions & NodeOptions;
+
+class Path extends Paintable( Node ) {
+
+  // The Shape used for displaying this Path.
+  // NOTE: _shape can be lazily constructed in subtypes (may be null) if hasShape() is overridden to return true,
+  //       like in Rectangle. This is because usually the actual Shape is already implied by other parameters,
+  //       so it is best to not have to compute it on changes.
+  // NOTE: Please use hasShape() to determine if we are actually drawing things, as it is subtype-safe.
+  _shape: Shape | null;
+
+  // This stores a stroked copy of the Shape which is lazily computed. This can be required for computing bounds
+  // of a Shape with a stroke.
+  _strokedShape: Shape | null;
+
+  _boundsMethod: BoundsMethod;
+
+  // Used as a listener to Shapes for when they are invalidated. The listeners are not added if the Shape is
+  // immutable, and if the Shape becomes immutable, then the listeners are removed.
+  _invalidShapeListener: () => void;
+
+  // // @private {boolean} Whether our shape listener is attached to a shape.
+  _invalidShapeListenerAttached: boolean;
+
   /**
    * Creates a Path with a given shape specifier (a Shape, a string in the SVG path format, or null to indicate no
    * shape).
-   * @public
-   * @mixes Paintable
    *
    * Path has two additional options (above what Node provides):
    * - shape: The actual Shape (or a string representing an SVG path, or null).
    * - boundsMethod: Determines how the bounds of a shape are determined.
    *
-   * @param {Shape|string|null} shape - The initial Shape to display. See setShape() for more details and documentation.
-   * @param {Object} [options] - Path-specific options are documented in PATH_OPTION_KEYS above, and can be provided
+   * @param shape - The initial Shape to display. See setShape() for more details and documentation.
+   * @param [options] - Path-specific options are documented in PATH_OPTION_KEYS above, and can be provided
    *                             along-side options for Node
    */
-  constructor( shape, options ) {
+  constructor( shape: Shape | string | null, options?: PathOptions ) {
     assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
       'Extra prototype on Node options object is a code smell' );
 
     super();
 
-    // @private {Shape|null} - The Shape used for displaying this Path.
-    // NOTE: _shape can be lazily constructed in subtypes (may be null) if hasShape() is overridden to retun true,
-    //       like in Rectangle. This is because usually the actual Shape is already implied by other parameters,
-    //       so it is best to not have to compute it on changes.
-    // NOTE: Please use hasShape() to determine if we are actually drawing things, as it is subtype-safe.
     this._shape = DEFAULT_OPTIONS.shape;
-
-    // @private {Shape|null}
-    // This stores a stroked copy of the Shape which is lazily computed. This can be required for computing bounds
-    // of a Shape with a stroke.
     this._strokedShape = null;
-
-    // @private {string}, one of 'accurate', 'unstroked', 'tightPadding', 'safePadding', 'none', see setBoundsMethod()
     this._boundsMethod = DEFAULT_OPTIONS.boundsMethod;
-
-    // @private {Function}, called with no arguments, return value not checked.
-    // Used as a listener to Shapes for when they are invalidated. The listeners are not added if the Shape is
-    // immutable, and if the Shape becomes immutable, then the listeners are removed.
     this._invalidShapeListener = this.invalidateShape.bind( this );
-
-    // @private {boolean} Whether our shape listener is attached to a shape.
     this._invalidShapeListenerAttached = false;
-
-    this.initializePaintable();
 
     this.invalidateSupportedRenderers();
 
@@ -86,7 +89,6 @@ class Path extends Node {
   /**
    * This sets the shape of the Path, which determines the shape of its appearance. It should generally not be called
    * on Path subtypes like Line, Rectangle, etc.
-   * @public
    *
    * NOTE: When you create a Path with a shape in the constructor, this function will be called.
    *
@@ -102,11 +104,8 @@ class Path extends Node {
    *       added, keeping a reference to the Shape will also keep a reference to the Path object (and thus whatever
    *       Nodes are connected to the Path). For now, set path.shape = null if you need to release the reference
    *       that the Shape would have, or call dispose() on the Path if it is not needed anymore.
-   *
-   * @param {Shape|string|null} shape
-   * @returns {Path} - Returns 'this' reference, for chaining
    */
-  setShape( shape ) {
+  setShape( shape: Shape | string | null ): this {
     assert && assert( shape === null || typeof shape === 'string' || shape instanceof Shape,
       'A path\'s shape should either be null, a string, or a Shape' );
 
@@ -131,40 +130,34 @@ class Path extends Node {
     return this;
   }
 
-  set shape( value ) { this.setShape( value ); }
+  set shape( value: Shape | string | null ) { this.setShape( value ); }
 
   /**
    * Returns the shape that was set for this Path (or for subtypes like Line and Rectangle, will return an immutable
    * Shape that is equivalent in appearance).
-   * @public
    *
    * It is best to generally assume modifications to the Shape returned is not supported. If there is no shape
    * currently, null will be returned.
-   *
-   * @returns {Shape|null}
    */
-  getShape() {
+  getShape(): Shape | null {
     return this._shape;
   }
 
-  get shape() { return this.getShape(); }
+  get shape(): Shape | null { return this.getShape(); }
 
   /**
    * Returns a lazily-created Shape that has the appearance of the Path's shape but stroked using the current
    * stroke style of the Path.
-   * @public
    *
    * NOTE: It is invalid to call this on a Path that does not currently have a Shape (usually a Path where
    *       the shape is set to null).
-   *
-   * @returns {Shape}
    */
-  getStrokedShape() {
+  getStrokedShape(): Shape {
     assert && assert( this.hasShape(), 'We cannot stroke a non-existing shape' );
 
     // Lazily compute the stroked shape. It should be set to null when we need to recompute it
     if ( !this._strokedShape ) {
-      this._strokedShape = this.getShape().getStrokedShape( this._lineDrawingStyles );
+      this._strokedShape = this.getShape()!.getStrokedShape( this._lineDrawingStyles );
     }
 
     return this._strokedShape;
@@ -172,14 +165,13 @@ class Path extends Node {
 
   /**
    * Returns a bitmask representing the supported renderers for the current configuration of the Path or subtype.
-   * @protected
    *
    * Should be overridden by subtypes to either extend or restrict renderers, depending on what renderers are
    * supported.
    *
-   * @returns {number} - A bitmask that includes supported renderers, see Renderer for details.
+   * @returns - A bitmask that includes supported renderers, see Renderer for details.
    */
-  getPathRendererBitmask() {
+  protected getPathRendererBitmask(): number {
     // By default, Canvas and SVG are accepted.
     return Renderer.bitmaskCanvas | Renderer.bitmaskSVG;
   }
@@ -188,7 +180,6 @@ class Path extends Node {
    * Triggers a check and update for what renderers the current configuration of this Path or subtype supports.
    * This should be called whenever something that could potentially change supported renderers happen (which can
    * be the shape, properties of the strokes or fills, etc.)
-   * @public
    */
   invalidateSupportedRenderers() {
     this.setRendererBitmask( this.getFillRendererBitmask() & this.getStrokeRendererBitmask() & this.getPathRendererBitmask() );
@@ -197,16 +188,15 @@ class Path extends Node {
   /**
    * Notifies the Path that the Shape has changed (either the Shape itself has be mutated, a new Shape has been
    * provided).
-   * @private
    *
    * NOTE: This should not be called on subtypes of Path after they have been constructed, like Line, Rectangle, etc.
    */
-  invalidateShape() {
+  private invalidateShape() {
     this.invalidatePath();
 
     const stateLen = this._drawables.length;
     for ( let i = 0; i < stateLen; i++ ) {
-      this._drawables[ i ].markDirtyShape(); // subtypes of Path may not have this, but it's called during construction
+      ( this._drawables[ i ] as unknown as IPathDrawable ).markDirtyShape(); // subtypes of Path may not have this, but it's called during construction
     }
 
     // Disconnect our Shape listener if our Shape has become immutable.
@@ -218,11 +208,10 @@ class Path extends Node {
 
   /**
    * Invalidates the node's self-bounds and any other recorded metadata about the outline or bounds of the Shape.
-   * @protected
    *
    * This is meant to be used for all Path subtypes (unlike invalidateShape).
    */
-  invalidatePath() {
+  protected invalidatePath() {
     this._strokedShape = null;
 
     this.invalidateSelf(); // We don't immediately compute the bounds
@@ -230,37 +219,33 @@ class Path extends Node {
 
   /**
    * Attaches a listener to our Shape that will be called whenever the Shape changes.
-   * @private
    */
-  attachShapeListener() {
+  private attachShapeListener() {
     assert && assert( !this._invalidShapeListenerAttached, 'We do not want to have two listeners attached!' );
 
     // Do not attach shape listeners if we are disposed
     if ( !this.isDisposed ) {
-      this._shape.invalidatedEmitter.addListener( this._invalidShapeListener );
+      this._shape!.invalidatedEmitter.addListener( this._invalidShapeListener );
       this._invalidShapeListenerAttached = true;
     }
   }
 
   /**
    * Detaches a previously-attached listener added to our Shape (see attachShapeListener).
-   * @private
    */
-  detachShapeListener() {
+  private detachShapeListener() {
     assert && assert( this._invalidShapeListenerAttached, 'We cannot detach an unattached listener' );
 
-    this._shape.invalidatedEmitter.removeListener( this._invalidShapeListener );
+    this._shape!.invalidatedEmitter.removeListener( this._invalidShapeListener );
     this._invalidShapeListenerAttached = false;
   }
 
   /**
    * Computes a more efficient selfBounds for our Path.
-   * @protected
-   * @override
    *
-   * @returns {boolean} - Whether the self bounds changed.
+   * @returns - Whether the self bounds changed.
    */
-  updateSelfBounds() {
+  protected updateSelfBounds(): boolean {
     const selfBounds = this.hasShape() ? this.computeShapeBounds() : Bounds2.NOTHING;
     const changed = !selfBounds.equals( this.selfBoundsProperty._value );
     if ( changed ) {
@@ -272,7 +257,6 @@ class Path extends Node {
   /**
    * Sets the bounds method for the Path. This determines how our (self) bounds are computed, and can particularly
    * determine how expensive to compute our bounds are if we have a stroke.
-   * @public
    *
    * There are the following options:
    * - 'accurate' - Always uses the most accurate way of getting bounds. Computes the exact stroked bounds.
@@ -282,11 +266,8 @@ class Path extends Node {
    *                     If there is a stroke, the bounds wil be marked as inaccurate.
    * - 'safePadding' - Pads the filled bounds by enough to cover all line joins/caps.
    * - 'none' - Returns Bounds2.NOTHING. The bounds will be marked as inaccurate.
-   *
-   * @param {string} boundsMethod - one of 'accurate', 'unstroked', 'tightPadding', 'safePadding' or 'none'
-   * @returns {Path} - Returns 'this' reference, for chaining
    */
-  setBoundsMethod( boundsMethod ) {
+  setBoundsMethod( boundsMethod: BoundsMethod ): this {
     assert && assert( boundsMethod === 'accurate' ||
                       boundsMethod === 'unstroked' ||
                       boundsMethod === 'tightPadding' ||
@@ -301,42 +282,37 @@ class Path extends Node {
     return this;
   }
 
-  set boundsMethod( value ) { this.setBoundsMethod( value ); }
+  set boundsMethod( value: BoundsMethod ) { this.setBoundsMethod( value ); }
 
   /**
-   * Returns the curent bounds method. See setBoundsMethod for details.
-   * @public
-   *
-   * @returns {string}
+   * Returns the current bounds method. See setBoundsMethod for details.
    */
-  getBoundsMethod() {
+  getBoundsMethod(): BoundsMethod {
     return this._boundsMethod;
   }
 
-  get boundsMethod() { return this.getBoundsMethod(); }
+  get boundsMethod(): BoundsMethod { return this.getBoundsMethod(); }
 
   /**
    * Computes the bounds of the Path (or subtype when overridden). Meant to be overridden in subtypes for more
    * efficient bounds computations (but this will work as a fallback). Includes the stroked region if there is a
    * stroke applied to the Path.
-   * @public
-   *
-   * @returns {Bounds2}
    */
-  computeShapeBounds() {
+  computeShapeBounds(): Bounds2 {
+    const shape = this.getShape();
     // boundsMethod: 'none' will return no bounds
-    if ( this._boundsMethod === 'none' ) {
+    if ( this._boundsMethod === 'none' || !shape ) {
       return Bounds2.NOTHING;
     }
     else {
       // boundsMethod: 'unstroked', or anything without a stroke will then just use the normal shape bounds
       if ( !this.hasPaintableStroke() || this._boundsMethod === 'unstroked' ) {
-        return this.getShape().bounds;
+        return shape.bounds;
       }
       else {
         // 'accurate' will always require computing the full stroked shape, and taking its bounds
         if ( this._boundsMethod === 'accurate' ) {
-          return this.getShape().getStrokedBounds( this.getLineStyles() );
+          return shape.getStrokedBounds( this.getLineStyles() );
         }
           // Otherwise we compute bounds based on 'tightPadding' and 'safePadding', the one difference being that
           // 'safePadding' will include whatever bounds necessary to include miters. Square line-cap requires a
@@ -354,7 +330,7 @@ class Path extends Node {
           else {
             factor = 1;
           }
-          return this.getShape().bounds.dilated( factor * this.getLineWidth() / 2 );
+          return shape.bounds.dilated( factor * this.getLineWidth() / 2 );
         }
       }
     }
@@ -363,14 +339,10 @@ class Path extends Node {
   /**
    * Whether this Node's selfBounds are considered to be valid (always containing the displayed self content
    * of this node). Meant to be overridden in subtypes when this can change (e.g. Text).
-   * @public
-   * @override
    *
    * If this value would potentially change, please trigger the event 'selfBoundsValid'.
-   *
-   * @returns {boolean}
    */
-  areSelfBoundsValid() {
+  areSelfBoundsValid(): boolean {
     if ( this._boundsMethod === 'accurate' || this._boundsMethod === 'safePadding' ) {
       return true;
     }
@@ -384,45 +356,36 @@ class Path extends Node {
 
   /**
    * Returns our self bounds when our rendered self is transformed by the matrix.
-   * @public
-   * @override
-   *
-   * @param {Matrix3} matrix
-   * @returns {Bounds2}
    */
-  getTransformedSelfBounds( matrix ) {
-    return ( this._stroke ? this.getStrokedShape() : this.getShape() ).getBoundsWithTransform( matrix );
+  getTransformedSelfBounds( matrix: Matrix3 ): Bounds2 {
+    assert && assert( this.hasShape() );
+
+    return ( this._stroke ? this.getStrokedShape() : this.getShape() )!.getBoundsWithTransform( matrix );
   }
 
   /**
    * Returns our safe self bounds when our rendered self is transformed by the matrix.
-   * @public
-   *
-   * @param {Matrix3} matrix
-   * @returns {Bounds2}
    */
-  getTransformedSafeSelfBounds( matrix ) {
+  getTransformedSafeSelfBounds( matrix: Matrix3 ): Bounds2 {
     return this.getTransformedSelfBounds( matrix );
   }
 
   /**
    * Called from (and overridden in) the Paintable trait, invalidates our current stroke, triggering recomputation of
-   * anything that depended on the old stroke's value.
-   * @protected (scenery-internal)
+   * anything that depended on the old stroke's value. (scenery-internal)
    */
   invalidateStroke() {
     this.invalidatePath();
 
     this.rendererSummaryRefreshEmitter.emit(); // Stroke changing could have changed our self-bounds-validitity (unstroked/etc)
+
+    super.invalidateStroke();
   }
 
   /**
    * Returns whether this Path has an associated Shape (instead of no shape, represented by null)
-   * @public
-   *
-   * @returns {boolean}
    */
-  hasShape() {
+  hasShape(): boolean {
     return !!this._shape;
   }
 
@@ -435,58 +398,47 @@ class Path extends Node {
    * @param {CanvasContextWrapper} wrapper
    * @param {Matrix3} matrix - The transformation matrix already applied to the context.
    */
-  canvasPaintSelf( wrapper, matrix ) {
+  canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
     //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily.
     PathCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
   }
 
   /**
-   * Creates a SVG drawable for this Path.
-   * @public (scenery-internal)
-   * @override
+   * Creates a SVG drawable for this Path. (scenery-internal)
    *
-   * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
-   * @param {Instance} instance - Instance object that will be associated with the drawable
-   * @returns {SVGSelfDrawable}
+   * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+   * @param instance - Instance object that will be associated with the drawable
    */
-  createSVGDrawable( renderer, instance ) {
+  createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
+    // @ts-ignore
     return PathSVGDrawable.createFromPool( renderer, instance );
   }
 
   /**
-   * Creates a Canvas drawable for this Path.
-   * @public (scenery-internal)
-   * @override
+   * Creates a Canvas drawable for this Path. (scenery-internal)
    *
-   * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
-   * @param {Instance} instance - Instance object that will be associated with the drawable
-   * @returns {CanvasSelfDrawable}
+   * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+   * @param instance - Instance object that will be associated with the drawable
    */
-  createCanvasDrawable( renderer, instance ) {
+  createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
+    // @ts-ignore
     return PathCanvasDrawable.createFromPool( renderer, instance );
   }
 
   /**
    * Whether this Node itself is painted (displays something itself).
-   * @public
-   * @override
-   *
-   * @returns {boolean}
    */
-  isPainted() {
+  isPainted(): boolean {
     // Always true for Path nodes
     return true;
   }
 
   /**
    * Computes whether the provided point is "inside" (contained) in this Path's self content, or "outside".
-   * @protected
-   * @override
    *
-   * @param {Vector2} point - Considered to be in the local coordinate frame
-   * @returns {boolean}
+   * @param point - Considered to be in the local coordinate frame
    */
-  containsPointSelf( point ) {
+  containsPointSelf( point: Vector2 ): boolean {
     let result = false;
     if ( !this.hasShape() ) {
       return result;
@@ -494,7 +446,7 @@ class Path extends Node {
 
     // if this node is fillPickable, we will return true if the point is inside our fill area
     if ( this._fillPickable ) {
-      result = this.getShape().containsPoint( point );
+      result = this.getShape()!.containsPoint( point );
     }
 
     // also include the stroked region in the hit area if strokePickable
@@ -506,39 +458,30 @@ class Path extends Node {
 
   /**
    * Returns a Shape that represents the area covered by containsPointSelf.
-   * @public
-   * @override
-   *
-   * @returns {Shape}
    */
-  getSelfShape() {
+  getSelfShape(): Shape {
     return Shape.union( [
-      ...( ( this.hasShape() && this._fillPickable ) ? [ this.getShape() ] : [] ),
+      ...( ( this.hasShape() && this._fillPickable ) ? [ this.getShape()! ] : [] ),
       ...( ( this.hasShape() && this._strokePickable ) ? [ this.getStrokedShape() ] : [] )
     ] );
   }
 
   /**
    * Returns whether this Path's selfBounds is intersected by the specified bounds.
-   * @public
    *
-   * @param {Bounds2} bounds - Bounds to test, assumed to be in the local coordinate frame.
-   * @returns {boolean}
+   * @param bounds - Bounds to test, assumed to be in the local coordinate frame.
    */
-  intersectsBoundsSelf( bounds ) {
+  intersectsBoundsSelf( bounds: Bounds2 ): boolean {
     // TODO: should a shape's stroke be included?
-    return this.hasShape() ? this._shape.intersectsBounds( bounds ) : false;
+    return this._shape ? this._shape.intersectsBounds( bounds ) : false;
   }
 
   /**
    * Returns whether we need to apply a transform workaround for https://github.com/phetsims/scenery/issues/196, which
    * only applies when we have a pattern or gradient (e.g. subtypes of Paint).
-   * @private
-   *
-   * @returns {boolean}
    */
-  requiresSVGBoundsWorkaround() {
-    if ( !this._stroke || !this._stroke.isPaint || !this.hasShape() ) {
+  private requiresSVGBoundsWorkaround(): boolean {
+    if ( !this._stroke || !( this._stroke instanceof Paint ) || !this.hasShape() ) {
       return false;
     }
 
@@ -547,20 +490,14 @@ class Path extends Node {
   }
 
   /**
-   * Override for extra information in the debugging output (from Display.getDebugHTML()).
-   * @protected (scenery-internal)
-   * @override
-   *
-   * @returns {string}
+   * Override for extra information in the debugging output (from Display.getDebugHTML()). (scenery-internal)
    */
-  getDebugHTMLExtras() {
+  protected getDebugHTMLExtras(): string {
     return this._shape ? ` (<span style="color: #88f" onclick="window.open( 'data:text/plain;charset=utf-8,' + encodeURIComponent( '${this._shape.getSVGPath()}' ) );">path</span>)` : '';
   }
 
   /**
    * Disposes the path, releasing shape listeners if needed (and preventing new listeners from being added).
-   * @public
-   * @override
    */
   dispose() {
     if ( this._invalidShapeListenerAttached ) {
@@ -579,7 +516,7 @@ class Path extends Node {
  * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
  *       cases that may apply.
  */
-Path.prototype._mutatorKeys = PATH_OPTION_KEYS.concat( Node.prototype._mutatorKeys );
+Path.prototype._mutatorKeys = [ ...PAINTABLE_OPTION_KEYS, ...PATH_OPTION_KEYS, ...Node.prototype._mutatorKeys ];
 
 /**
  * {Array.<String>} - List of all dirty flags that should be available on drawables created from this node (or
@@ -588,14 +525,11 @@ Path.prototype._mutatorKeys = PATH_OPTION_KEYS.concat( Node.prototype._mutatorKe
  * @public (scenery-internal)
  * @override
  */
-Path.prototype.drawableMarkFlags = Node.prototype.drawableMarkFlags.concat( [ 'shape' ] );
+Path.prototype.drawableMarkFlags = [ ...Node.prototype.drawableMarkFlags, ...PAINTABLE_DRAWABLE_MARK_FLAGS, 'shape' ];
 
 scenery.register( 'Path', Path );
 
 // @public {Object} - Initial values for most Node mutator options
 Path.DEFAULT_OPTIONS = merge( {}, Node.DEFAULT_OPTIONS, DEFAULT_OPTIONS );
 
-// mix in support for fills and strokes
-Paintable.mixInto( Path );
-
-export default Path;
+export { Path as default, PathOptions };

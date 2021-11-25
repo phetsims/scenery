@@ -9,13 +9,7 @@
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Shape from '../../../kite/js/Shape.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
-import CircleCanvasDrawable from '../display/drawables/CircleCanvasDrawable.js';
-import CircleDOMDrawable from '../display/drawables/CircleDOMDrawable.js';
-import CircleSVGDrawable from '../display/drawables/CircleSVGDrawable.js';
-import Renderer from '../display/Renderer.js';
-import scenery from '../scenery.js';
-import Features from '../util/Features.js';
-import Path from './Path.js';
+import { scenery, Renderer, Path, Features, CircleCanvasDrawable, CircleDOMDrawable, CircleSVGDrawable } from '../imports.js';
 
 const CIRCLE_OPTION_KEYS = [
   'radius' // {number} - see setRadius() for more documentation
@@ -256,8 +250,7 @@ class Circle extends Path {
 
   /**
    * Computes whether the provided point is "inside" (contained) in this Circle's self content, or "outside".
-   * @protected
-   * @override
+   * @public
    *
    * Exists to optimize hit detection, as it's quick to compute for circles.
    *

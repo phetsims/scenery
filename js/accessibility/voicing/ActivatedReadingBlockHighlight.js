@@ -8,8 +8,7 @@
  */
 
 import merge from '../../../../phet-core/js/merge.js';
-import scenery from '../../scenery.js';
-import FocusHighlightFromNode from '../FocusHighlightFromNode.js';
+import { scenery, FocusHighlightFromNode } from '../../imports.js';
 
 // constants
 const ACTIVATED_HIGHLIGHT_COLOR = 'rgba(255,255,0,0.5)';

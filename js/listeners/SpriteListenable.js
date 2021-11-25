@@ -8,9 +8,7 @@
  */
 
 import inheritance from '../../../phet-core/js/inheritance.js';
-import Sprites from '../nodes/Sprites.js';
-import scenery from '../scenery.js';
-import PressListener from './PressListener.js';
+import { scenery, Sprites, PressListener } from '../imports.js';
 
 /**
  * @param {constructor} type - Should be a PressListener-based type

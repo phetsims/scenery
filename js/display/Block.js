@@ -9,8 +9,7 @@
  */
 
 import cleanArray from '../../../phet-core/js/cleanArray.js';
-import scenery from '../scenery.js';
-import Drawable from './Drawable.js';
+import { scenery, Drawable } from '../imports.js';
 
 class Block extends Drawable {
   /**

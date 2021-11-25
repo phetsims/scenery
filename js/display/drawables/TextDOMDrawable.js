@@ -8,10 +8,7 @@
 
 import Matrix3 from '../../../../dot/js/Matrix3.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import scenery from '../../scenery.js';
-import Utils from '../../util/Utils.js';
-import DOMSelfDrawable from '../DOMSelfDrawable.js';
-import TextStatefulDrawable from './TextStatefulDrawable.js';
+import { scenery, Utils, DOMSelfDrawable, TextStatefulDrawable } from '../../imports.js';
 
 // TODO: change this based on memory and performance characteristics of the platform
 const keepDOMTextElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory

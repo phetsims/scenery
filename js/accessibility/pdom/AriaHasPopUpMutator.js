@@ -10,7 +10,7 @@
  *
  * @author Jesse Greenberg
  */
-import scenery from '../../scenery.js';
+import { scenery } from '../../imports.js';
 
 const AriaHasPopUpMutator = {
 

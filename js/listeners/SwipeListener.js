@@ -19,10 +19,7 @@
  */
 
 import stepTimer from '../../../axon/js/stepTimer.js';
-import FocusManager from '../accessibility/FocusManager.js';
-import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
-import Pointer from '../input/Pointer.js';
-import scenery from '../scenery.js';
+import { scenery, Pointer, PDOMUtils, FocusManager } from '../imports.js';
 
 // constants
 // in seconds, amount of time to initiate a press and hold gesture - note, it must be at least this long

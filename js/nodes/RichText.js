@@ -67,15 +67,7 @@ import openPopup from '../../../phet-core/js/openPopup.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
-import Voicing from '../accessibility/voicing/Voicing.js';
-import FireListener from '../listeners/FireListener.js';
-import scenery from '../scenery.js';
-import Color from '../util/Color.js';
-import Font from '../util/Font.js';
-import Line from './Line.js';
-import Node from './Node.js';
-import Text from './Text.js';
-import VStrut from './VStrut.js';
+import { scenery, Color, Font, Line, Node, Text, VStrut, FireListener, Voicing } from '../imports.js';
 
 // Options that can be used in the constructor, with mutate(), or directly as setters/getters
 // each of these options has an associated setter, see setter methods for more documentation

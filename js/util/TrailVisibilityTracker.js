@@ -9,7 +9,7 @@
 
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import merge from '../../../phet-core/js/merge.js';
-import scenery from '../scenery.js';
+import { scenery } from '../imports.js';
 
 class TrailVisibilityTracker {
 

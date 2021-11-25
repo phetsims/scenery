@@ -16,9 +16,7 @@ import stepTimer from '../../../axon/js/stepTimer.js';
 import merge from '../../../phet-core/js/merge.js';
 import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import EventIO from '../input/EventIO.js';
-import scenery from '../scenery.js';
-import KeyboardUtils from './KeyboardUtils.js';
+import { scenery, KeyboardUtils, EventIO } from '../imports.js';
 
 class KeyStateTracker {
 

@@ -8,11 +8,7 @@
 
 import Matrix3 from '../../../../dot/js/Matrix3.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import scenery from '../../scenery.js';
-import Features from '../../util/Features.js';
-import Utils from '../../util/Utils.js';
-import DOMSelfDrawable from '../DOMSelfDrawable.js';
-import RectangleStatefulDrawable from './RectangleStatefulDrawable.js';
+import { scenery, Features, Utils, DOMSelfDrawable, RectangleStatefulDrawable } from '../../imports.js';
 
 // TODO: change this based on memory and performance characteristics of the platform
 const keepDOMRectangleElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory

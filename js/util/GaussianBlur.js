@@ -11,9 +11,7 @@
  */
 
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
-import scenery from '../scenery.js';
-import Filter from './Filter.js';
-import svgns from './svgns.js';
+import { scenery, Filter, svgns } from '../imports.js';
 
 class GaussianBlur extends Filter {
   /**

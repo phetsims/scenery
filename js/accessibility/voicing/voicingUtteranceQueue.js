@@ -9,8 +9,7 @@
  */
 
 import UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
-import scenery from '../../scenery.js';
-import voicingManager from './voicingManager.js';
+import { scenery, voicingManager } from '../../imports.js';
 
 const voicingUtteranceQueue = new UtteranceQueue( voicingManager );
 

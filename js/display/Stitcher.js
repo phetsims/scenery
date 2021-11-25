@@ -98,13 +98,7 @@
  */
 
 import cleanArray from '../../../phet-core/js/cleanArray.js';
-import scenery from '../scenery.js';
-import CanvasBlock from './CanvasBlock.js';
-import DOMBlock from './DOMBlock.js';
-import Drawable from './Drawable.js';
-import Renderer from './Renderer.js';
-import SVGBlock from './SVGBlock.js';
-import WebGLBlock from './WebGLBlock.js';
+import { scenery, CanvasBlock, DOMBlock, Drawable, Renderer, SVGBlock, WebGLBlock } from '../imports.js';
 
 class Stitcher {
   /**

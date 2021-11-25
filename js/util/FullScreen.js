@@ -11,7 +11,7 @@ import Property from '../../../axon/js/Property.js';
 import detectPrefix from '../../../phet-core/js/detectPrefix.js';
 import detectPrefixEvent from '../../../phet-core/js/detectPrefixEvent.js';
 import platform from '../../../phet-core/js/platform.js';
-import scenery from '../scenery.js';
+import { scenery } from '../imports.js';
 
 // get prefixed (and properly capitalized) property names
 const exitFullscreenPropertyName = detectPrefix( document, 'exitFullscreen' ) ||

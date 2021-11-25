@@ -32,10 +32,7 @@ import EventType from '../../../tandem/js/EventType.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
-import Mouse from '../input/Mouse.js';
-import SceneryEvent from '../input/SceneryEvent.js';
-import Node from '../nodes/Node.js';
-import scenery from '../scenery.js';
+import { scenery, Node, Mouse, SceneryEvent } from '../imports.js';
 
 // global
 let globalID = 0;

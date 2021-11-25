@@ -11,8 +11,7 @@
 
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import memoize from '../../../../phet-core/js/memoize.js';
-import scenery from '../../scenery.js';
-import SelfDrawable from '../SelfDrawable.js';
+import { scenery, SelfDrawable } from '../../imports.js';
 
 const ImageStatefulDrawable = memoize( type => {
   assert && assert( _.includes( inheritance( type ), SelfDrawable ) );

@@ -10,8 +10,7 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
-import scenery from '../scenery.js';
-import Rectangle from './Rectangle.js';
+import { scenery, Rectangle } from '../imports.js';
 
 class Plane extends Rectangle {
   /**

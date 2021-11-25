@@ -6,7 +6,7 @@
  * @author Chris Malley (PixelZoom, Inc.)
  */
 
-import scenery from './scenery.js';
+import { scenery } from './imports.js';
 
 const SceneryConstants = {
 

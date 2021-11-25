@@ -13,8 +13,7 @@ import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import OrIO from '../../../tandem/js/types/OrIO.js';
 import ReferenceIO from '../../../tandem/js/types/ReferenceIO.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
-import scenery from '../scenery.js';
-import Color from './Color.js';
+import { scenery, Color } from '../imports.js';
 
 const ColorDef = {
   /**

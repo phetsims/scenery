@@ -17,8 +17,7 @@ import IOType from '../../../tandem/js/types/IOType.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
 import VoidIO from '../../../tandem/js/types/VoidIO.js';
-import scenery from '../scenery.js';
-import Node from './Node.js';
+import { scenery, Node } from '../imports.js';
 
 // In order to support unlinking from listening to the index property, keep an indexed map to callback functions
 const map = {};

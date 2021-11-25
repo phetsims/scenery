@@ -10,12 +10,7 @@
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
-import scenery from '../scenery.js';
-import Utils from '../util/Utils.js';
-import Drawable from './Drawable.js';
-import GreedyStitcher from './GreedyStitcher.js';
-import RebuildStitcher from './RebuildStitcher.js';
-import Stitcher from './Stitcher.js';
+import { scenery, Utils, Drawable, GreedyStitcher, RebuildStitcher, Stitcher } from '../imports.js';
 
 // constants
 const useGreedyStitcher = true;

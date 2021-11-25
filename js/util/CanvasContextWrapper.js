@@ -11,7 +11,7 @@
  */
 
 import Property from '../../../axon/js/Property.js';
-import scenery from '../scenery.js';
+import { scenery } from '../imports.js';
 
 class CanvasContextWrapper {
   /**

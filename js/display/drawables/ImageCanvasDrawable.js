@@ -7,9 +7,7 @@
  */
 
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import Imageable from '../../nodes/Imageable.js';
-import scenery from '../../scenery.js';
-import CanvasSelfDrawable from '../CanvasSelfDrawable.js';
+import { scenery, Imageable, CanvasSelfDrawable } from '../../imports.js';
 
 class ImageCanvasDrawable extends CanvasSelfDrawable {
   /**
@@ -22,7 +20,7 @@ class ImageCanvasDrawable extends CanvasSelfDrawable {
    * This is part of the CanvasSelfDrawable API required to be implemented for subtypes.
    *
    * @param {CanvasContextWrapper} wrapper - Contains the Canvas and its drawing context
-   * @param {Node} node - Our node that is being drawn
+   * @param {scenery.Node} node - Our node that is being drawn
    * @param {Matrix3} matrix - The transformation matrix applied for this node's coordinate system.
    */
   paintCanvas( wrapper, node, matrix ) {

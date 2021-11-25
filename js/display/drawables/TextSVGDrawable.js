@@ -8,11 +8,7 @@
 
 import platform from '../../../../phet-core/js/platform.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import scenery from '../../scenery.js';
-import svgns from '../../util/svgns.js';
-import Utils from '../../util/Utils.js';
-import SVGSelfDrawable from '../SVGSelfDrawable.js';
-import TextStatefulDrawable from './TextStatefulDrawable.js';
+import { scenery, svgns, Utils, SVGSelfDrawable, TextStatefulDrawable } from '../../imports.js';
 
 // TODO: change this based on memory and performance characteristics of the platform
 const keepSVGTextElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory

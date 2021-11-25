@@ -16,7 +16,7 @@
  */
 
 import Property from '../../../../axon/js/Property.js';
-import scenery from '../../scenery.js';
+import { scenery } from '../../imports.js';
 
 // constants
 const SPACE = ' '; // space to insert between words of text content

@@ -15,10 +15,7 @@
  */
 
 import merge from '../../../../phet-core/js/merge.js';
-import ReadingBlockHighlight from './ReadingBlockHighlight.js';
-import Node from '../../nodes/Node.js';
-import scenery from '../../scenery.js';
-import ReadingBlock from './ReadingBlock.js';
+import { scenery, Node, ReadingBlock, ReadingBlockHighlight } from '../../imports.js';
 
 class ReadingBlockNode extends Node {
 

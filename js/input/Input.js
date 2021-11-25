@@ -168,20 +168,7 @@ import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
-import PDOMUtils from '../accessibility/pdom/PDOMUtils.js';
-import Display from '../display/Display.js';
-import scenery from '../scenery.js';
-import Features from '../util/Features.js';
-import Trail from '../util/Trail.js';
-import BatchedDOMEvent from './BatchedDOMEvent.js';
-import BrowserEvents from './BrowserEvents.js';
-import EventIO from './EventIO.js';
-import Mouse from './Mouse.js';
-import PDOMPointer from './PDOMPointer.js';
-import Pen from './Pen.js';
-import Pointer from './Pointer.js';
-import SceneryEvent from './SceneryEvent.js';
-import Touch from './Touch.js';
+import { scenery, Display, Features, Trail, EventIO, Mouse, PDOMPointer, Pen, Pointer, SceneryEvent, Touch, PDOMUtils, BatchedDOMEvent, BrowserEvents } from '../imports.js';
 
 // Object literal makes it easy to check for the existence of an attribute (compared to [].indexOf()>=0). Helpful for
 // serialization. NOTE: Do not add or change this without consulting the PhET-iO IOType schema for this in EventIO.js

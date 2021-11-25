@@ -10,9 +10,7 @@
 
 import Vector2 from '../../../dot/js/Vector2.js';
 import platform from '../../../phet-core/js/platform.js';
-import SVGRadialGradient from '../display/SVGRadialGradient.js';
-import scenery from '../scenery.js';
-import Gradient from './Gradient.js';
+import { scenery, Gradient, SVGRadialGradient } from '../imports.js';
 
 class RadialGradient extends Gradient {
   /**

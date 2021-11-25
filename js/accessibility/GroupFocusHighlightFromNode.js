@@ -8,9 +8,7 @@
  */
 
 import merge from '../../../phet-core/js/merge.js';
-import scenery from '../scenery.js';
-import FocusHighlightFromNode from './FocusHighlightFromNode.js';
-import FocusHighlightPath from './FocusHighlightPath.js';
+import { scenery, FocusHighlightFromNode, FocusHighlightPath } from '../imports.js';
 
 class GroupFocusHighlightFromNode extends FocusHighlightFromNode {
   /**

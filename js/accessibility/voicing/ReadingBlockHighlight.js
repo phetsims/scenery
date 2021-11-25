@@ -10,8 +10,7 @@
  */
 
 import merge from '../../../../phet-core/js/merge.js';
-import FocusHighlightFromNode from '../FocusHighlightFromNode.js';
-import scenery from '../../scenery.js';
+import { scenery, FocusHighlightFromNode } from '../../imports.js';
 
 class ReadingBlockHighlight extends FocusHighlightFromNode {
   constructor( node, options ) {

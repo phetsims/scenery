@@ -11,83 +11,89 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import scenery from '../scenery.js';
-import Trail from './Trail.js';
+import { scenery, Node, Trail } from '../imports.js';
+import Shape from '../../../kite/js/Shape.js';
 
 class Picker {
-  /**
-   * @param {Node} node - Our node.
-   */
-  constructor( node ) {
-    // @private {Node} - Our node reference (does not change)
+
+  // Our node
+  private readonly node: Node;
+
+  // Whether our last-known state would have us be pruned by hit-test searches. Should be equal to
+  // node.pickable === false || node.isVisible() === false. Updated synchronously.
+  private selfPruned: boolean;
+
+  // Whether our last-known state would have us not prune descendant subtrees for the lack of listener equivalents
+  // (whether we have a listener equivalent). Should be equal to
+  // node.pickable === true || node._inputListeners.length > 0. Updated synchronously.
+  private selfInclusive: boolean;
+
+  // Whether our subtree can be pruned IF no ancestor (or us) has selfInclusive as true. Equivalent to:
+  // node.pickable === false || !node.isVisible() || ( node.pickable !== true && subtreePickableCount === 0 )
+  private subtreePrunable: boolean;
+
+  // Count designed to be non-zero when there is a listener equivalent in this node's subtree. Effectively the sum of
+  // #inputListeners + (1?isPickable:true) + #childrenWithNonZeroCount. Notably, it ignores children who are guaranteed
+  // to be pruned (selfPruned:true).
+  private subtreePickableCount: number;
+
+  // NOTE: We need "inclusive" and "exclusive" bounds to ideally be separate, so that they can be cached
+  // independently. It's possible for one trail to have an ancestor with pickable:true (inclusive) while another
+  // trail has no ancestors that make the search inclusive. This would introduce "thrashing" in the older version,
+  // where it would continuously compute one or the other. Here, both versions can be stored.
+
+  // Bounds to be used for pruning mouse hit tests when an ancestor has a listener equivalent. Updated lazily, while
+  // the dirty flag is updated synchronously.
+  private mouseInclusiveBounds: Bounds2;
+
+  // Bounds to be used for pruning mouse hit tests when ancestors have NO listener equivalent. Updated lazily, while
+  // the dirty flag is updated synchronously.
+  private mouseExclusiveBounds: Bounds2;
+
+  // Bounds to be used for pruning touch hit tests when an ancestor has a listener equivalent. Updated lazily, while
+  // the dirty flag is updated synchronously.
+  private touchInclusiveBounds: Bounds2;
+
+  // Bounds to be used for pruning touch hit tests when ancestors have NO listener equivalent. Updated lazily, while
+  // the dirty flag is updated synchronously.
+  private touchExclusiveBounds: Bounds2;
+
+  // Dirty flags, one for each Bounds.
+  private mouseInclusiveDirty: boolean;
+  private mouseExclusiveDirty: boolean;
+  private touchInclusiveDirty: boolean;
+  private touchExclusiveDirty: boolean;
+
+  // Used to minimize garbage created in the hit-testing process
+  private scratchVector: Vector2;
+
+  constructor( node: Node ) {
     this.node = node;
-
-    // @private {boolean} - Whether our last-known state would have us be pruned by hit-test searches.
-    //                      Should be equal to node.pickable === false || node.isVisible() === false.
-    //                      Updated synchronously.
     this.selfPruned = false;
-
-    // @private {boolean} - Whether our last-known state would have us not prune descendant subtrees for the lack of
-    //                      listener equivalents (whether we have a listener equivalent).
-    //                      Should be equal to node.pickable === true || node._inputListeners.length > 0.
-    //                      Updated synchronously.
     this.selfInclusive = false;
-
-    // @private {boolean} - Whether our subtree can be pruned IF no ancestor (or us) has selfInclusive as true.
-    //                      Equivalent to:
-    //                        node.pickable === false ||
-    //                        !node.isVisible() ||
-    //                        ( node.pickable !== true && subtreePickableCount === 0 )
     this.subtreePrunable = true;
-
-    // @private {number} - Count designed to be non-zero when there is a listener equivalent in this node's subtree.
-    //                     Effectively the sum of #inputListeners + (1?isPickable:true) + #childrenWithNonZeroCount.
-    //                     Notably, it ignores children who are guaranteed to be pruned (selfPruned:true).
     this.subtreePickableCount = 0;
-
-    // NOTE: We need "inclusive" and "exclusive" bounds to ideally be separate, so that they can be cached
-    // independently. It's possible for one trail to have an ancestor with pickable:true (inclusive) while another
-    // trail has no ancestors that make the search inclusive. This would introduce "thrashing" in the older version,
-    // where it would continuously compute one or the other. Here, both versions can be stored.
-
-    // @private {Bounds2} - Bounds to be used for pruning mouse hit tests when an ancestor has a listener equivalent.
-    //                      Updated lazily, while the dirty flag is updated synchronously.
     this.mouseInclusiveBounds = Bounds2.NOTHING.copy();
-
-    // @private {Bounds2} - Bounds to be used for pruning mouse hit tests when ancestors have NO listener equivalent.
-    //                      Updated lazily, while the dirty flag is updated synchronously.
     this.mouseExclusiveBounds = Bounds2.NOTHING.copy();
-
-    // @private {Bounds2} - Bounds to be used for pruning touch hit tests when an ancestor has a listener equivalent.
-    //                      Updated lazily, while the dirty flag is updated synchronously.
     this.touchInclusiveBounds = Bounds2.NOTHING.copy();
-
-    // @private {Bounds2} - Bounds to be used for pruning touch hit tests when ancestors have NO listener equivalent.
-    //                      Updated lazily, while the dirty flag is updated synchronously.
     this.touchExclusiveBounds = Bounds2.NOTHING.copy();
-
-    // @private {boolean} - Dirty flags, one for each Bounds.
     this.mouseInclusiveDirty = true;
     this.mouseExclusiveDirty = true;
     this.touchInclusiveDirty = true;
     this.touchExclusiveDirty = true;
-
-    // @private {Vector2} - Used to minimize garbage created in the hit-testing process
     this.scratchVector = new Vector2( 0, 0 );
   }
-
 
   /*
    * Return a trail to the top node (if any, otherwise null) whose self-rendered area contains the
    * point (in parent coordinates).
-   * @public
    *
-   * @param {Vector2} point
-   * @param {boolean} useMouse - Whether mouse-specific customizations (and acceleration) applies
-   * @param {boolean} useTouch - Whether touch-specific customizations (and acceleration) applies
+   * @param point
+   * @param useMouse - Whether mouse-specific customizations (and acceleration) applies
+   * @param useTouch - Whether touch-specific customizations (and acceleration) applies
    * @returns {Trail|null}
    */
-  hitTest( point, useMouse, useTouch ) {
+  hitTest( point: Vector2, useMouse: boolean, useTouch: boolean ): Trail | null {
     assert && assert( point, 'trailUnderPointer requires a point' );
 
     sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( `-------------- ${this.node.constructor.name}#${this.node.id}` );
@@ -121,15 +127,12 @@ class Picker {
   }
 
   /**
-   * @private
-   *
-   * @param {Vector2} point
-   * @param {boolean} useMouse
-   * @param {boolean} useTouch
-   * @param {boolean} isInclusive - Essentially true if there is an ancestor or self with an input listener
-   * @returns {Trail|null}
+   * @param point
+   * @param useMouse
+   * @param useTouch
+   * @param isInclusive - Essentially true if there is an ancestor or self with an input listener
    */
-  recursiveHitTest( point, useMouse, useTouch, isInclusive ) {
+  private recursiveHitTest( point: Vector2, useMouse: boolean, useTouch: boolean, isInclusive: boolean ): Trail | null {
     isInclusive = isInclusive || this.selfInclusive;
 
     // If we are selfPruned, ignore this node and its subtree (invisible or pickable:false).
@@ -165,7 +168,8 @@ class Picker {
     const localPoint = this.node._transform.getInverse().multiplyVector2( this.scratchVector.set( point ) );
 
     // If our point is outside of the local-coordinate clipping area, there should be no hit.
-    if ( this.node.hasClipArea() && !this.node.clipArea.containsPoint( localPoint ) ) {
+    const clipArea = this.node.clipArea;
+    if ( clipArea !== null && !clipArea.containsPoint( localPoint ) ) {
       sceneryLog && sceneryLog.hitTest && sceneryLog.hitTest( `${this.node.constructor.name}#${this.node.id} out of clip area` );
       return null;
     }
@@ -215,12 +219,11 @@ class Picker {
   /**
    * Recursively sets dirty flags to true. If the andExclusive parameter is false, only the "inclusive" flags
    * are set to dirty.
-   * @private
    *
-   * @param {boolean} andExclusive
-   * @param {boolean} [ignoreSelfDirty] - If true, will invalidate parents even if we were dirty.
+   * @param andExclusive
+   * @param [ignoreSelfDirty] - If true, will invalidate parents even if we were dirty.
    */
-  invalidate( andExclusive, ignoreSelfDirty ) {
+  private invalidate( andExclusive: boolean, ignoreSelfDirty?: boolean ) {
     assert && assert( typeof andExclusive === 'boolean' );
 
     // Track whether a 'dirty' flag was changed from false=>true (or if ignoreSelfDirty is passed).
@@ -248,13 +251,12 @@ class Picker {
   /**
    * Computes the mouseInclusiveBounds for this picker (if dirty), and recursively validates it for all non-pruned
    * children.
-   * @private
    *
    * NOTE: For the future, consider sharing more code with related functions. I tried this, and it made things look
    * more complicated (and probably slower), so I've kept some duplication. If a change is made to this function,
    * please check the other validate* methods to see if they also need a change.
    */
-  validateMouseInclusive() {
+  private validateMouseInclusive() {
     if ( !this.mouseInclusiveDirty ) {
       return;
     }
@@ -283,7 +285,6 @@ class Picker {
   /**
    * Computes the mouseExclusiveBounds for this picker (if dirty), and recursively validates the mouse-related bounds
    * for all non-pruned children.
-   * @private
    *
    * Notably, if a picker is selfInclusive, we will switch to validating mouseInclusiveBounds for its subtree, as this
    * is what the hit-testing will use.
@@ -292,7 +293,7 @@ class Picker {
    * more complicated (and probably slower), so I've kept some duplication. If a change is made to this function,
    * please check the other validate* methods to see if they also need a change.
    */
-  validateMouseExclusive() {
+  private validateMouseExclusive() {
     if ( !this.mouseExclusiveDirty ) {
       return;
     }
@@ -328,13 +329,12 @@ class Picker {
   /**
    * Computes the touchInclusiveBounds for this picker (if dirty), and recursively validates it for all non-pruned
    * children.
-   * @private
    *
    * NOTE: For the future, consider sharing more code with related functions. I tried this, and it made things look
    * more complicated (and probably slower), so I've kept some duplication. If a change is made to this function,
    * please check the other validate* methods to see if they also need a change.
    */
-  validateTouchInclusive() {
+  private validateTouchInclusive() {
     if ( !this.touchInclusiveDirty ) {
       return;
     }
@@ -363,7 +363,6 @@ class Picker {
   /**
    * Computes the touchExclusiveBounds for this picker (if dirty), and recursively validates the touch-related bounds
    * for all non-pruned children.
-   * @private
    *
    * Notably, if a picker is selfInclusive, we will switch to validating touchInclusiveBounds for its subtree, as this
    * is what the hit-testing will use.
@@ -372,7 +371,7 @@ class Picker {
    * more complicated (and probably slower), so I've kept some duplication. If a change is made to this function,
    * please check the other validate* methods to see if they also need a change.
    */
-  validateTouchExclusive() {
+  private validateTouchExclusive() {
     if ( !this.touchExclusiveDirty ) {
       return;
     }
@@ -408,22 +407,22 @@ class Picker {
   /**
    * Include pointer areas (if applicable), exclude bounds outside the clip area (if applicable), and transform
    * into the parent coordinate frame. Mutates the bounds provided.
-   * @private
    *
    * Meant to be called by the validation methods, as this part is the same for every validation that is done.
    *
-   * @param {Bounds2} mutableBounds - The bounds to be mutated (e.g. mouseExclusiveBounds).
-   * @param {Bounds2|Shape|null} pointerArea - A mouseArea/touchArea that should be included in the search.
+   * @param mutableBounds - The bounds to be mutated (e.g. mouseExclusiveBounds).
+   * @param pointerArea - A mouseArea/touchArea that should be included in the search.
    */
-  applyAreasAndTransform( mutableBounds, pointerArea ) {
+  private applyAreasAndTransform( mutableBounds: Bounds2, pointerArea: Shape | Bounds2 | null ) {
     // do this before the transformation to the parent coordinate frame (the mouseArea is in the local coordinate frame)
     if ( pointerArea ) {
       // we accept either Bounds2, or a Shape (in which case, we take the Shape's bounds)
-      mutableBounds.includeBounds( pointerArea.isBounds ? pointerArea : pointerArea.bounds );
+      mutableBounds.includeBounds( pointerArea instanceof Bounds2 ? pointerArea : pointerArea.bounds );
     }
 
-    if ( this.node.hasClipArea() ) {
-      const clipBounds = this.node.clipArea.bounds;
+    const clipArea = this.node.clipArea;
+    if ( clipArea ) {
+      const clipBounds = clipArea.bounds;
       // exclude areas outside of the clipping area's bounds (for efficiency)
       // Uses Bounds2.constrainBounds, but inlined to prevent https://github.com/phetsims/projectile-motion/issues/155
       mutableBounds.minX = Math.max( mutableBounds.minX, clipBounds.minX );
@@ -437,15 +436,14 @@ class Picker {
   }
 
   /**
-   * Called from Node when a child is inserted.
-   * @public (scenery-internal)
+   * Called from Node when a child is inserted. (scenery-internal)
    *
    * NOTE: The child may not be fully added when this is called. Don't audit, or assume that calls to the Node would
    * indicate the parent-child relationship.
    *
-   * @param {Node} childNode - Our picker node's new child node.
+   * @param childNode - Our picker node's new child node.
    */
-  onInsertChild( childNode ) {
+  onInsertChild( childNode: Node ) {
     // If the child is selfPruned, we don't have to update any metadata.
     if ( !childNode._picker.selfPruned ) {
       const hasPickable = childNode._picker.subtreePickableCount > 0;
@@ -462,15 +460,14 @@ class Picker {
   }
 
   /**
-   * Called from Node when a child is removed.
-   * @public (scenery-internal)
+   * Called from Node when a child is removed. (scenery-internal)
    *
    * NOTE: The child may not be fully removed when this is called. Don't audit, or assume that calls to the Node would
    * indicate the parent-child relationship.
    *
-   * @param {Node} childNode - Our picker node's child that will be removed.
+   * @param childNode - Our picker node's child that will be removed.
    */
-  onRemoveChild( childNode ) {
+  onRemoveChild( childNode: Node ) {
     // If the child is selfPruned, we don't have to update any metadata.
     if ( !childNode._picker.selfPruned ) {
       const hasPickable = childNode._picker.subtreePickableCount > 0;
@@ -487,8 +484,7 @@ class Picker {
   }
 
   /**
-   * Called from Node when an input listener is added to our node.
-   * @public (scenery-internal)
+   * Called from Node when an input listener is added to our node. (scenery-internal)
    */
   onAddInputListener() {
     // Update flags that depend on listener count
@@ -502,8 +498,7 @@ class Picker {
   }
 
   /**
-   * Called from Node when an input listener is removed from our node.
-   * @public (scenery-internal)
+   * Called from Node when an input listener is removed from our node. (scenery-internal)
    */
   onRemoveInputListener() {
     // Update flags that depend on listener count
@@ -517,13 +512,9 @@ class Picker {
   }
 
   /**
-   * Called when the 'pickable' value of our Node is changed.
-   * @public (scenery-internal)
-   *
-   * @param {boolean|null} oldPickable - Old value
-   * @param {boolean|null} pickable - New value
+   * Called when the 'pickable' value of our Node is changed. (scenery-internal)
    */
-  onPickableChange( oldPickable, pickable ) {
+  onPickableChange( oldPickable: boolean | null, pickable: boolean | null ) {
     // Update flags that depend on our pickable setting.
     this.checkSelfPruned();
     this.checkSelfInclusive();
@@ -540,8 +531,7 @@ class Picker {
   }
 
   /**
-   * Called when the visibility of our Node is changed.
-   * @public (scenery-internal)
+   * Called when the visibility of our Node is changed. (scenery-internal)
    */
   onVisibilityChange() {
     // Update flags that depend on our visibility.
@@ -550,8 +540,7 @@ class Picker {
   }
 
   /**
-   * Called when the mouseArea of the Node is changed.
-   * @public (scenery-internal)
+   * Called when the mouseArea of the Node is changed. (scenery-internal)
    */
   onMouseAreaChange() {
     // Bounds can depend on the mouseArea, so we'll invalidate those.
@@ -560,8 +549,7 @@ class Picker {
   }
 
   /**
-   * Called when the mouseArea of the Node is changed.
-   * @public (scenery-internal)
+   * Called when the mouseArea of the Node is changed. (scenery-internal)
    */
   onTouchAreaChange() {
     // Bounds can depend on the touchArea, so we'll invalidate those.
@@ -570,8 +558,7 @@ class Picker {
   }
 
   /**
-   * Called when the transform of the Node is changed.
-   * @public (scenery-internal)
+   * Called when the transform of the Node is changed. (scenery-internal)
    */
   onTransformChange() {
     // Can affect our bounds
@@ -579,8 +566,7 @@ class Picker {
   }
 
   /**
-   * Called when the transform of the Node is changed.
-   * @public (scenery-internal)
+   * Called when the transform of the Node is changed. (scenery-internal)
    */
   onSelfBoundsDirty() {
     // Can affect our bounds
@@ -588,8 +574,7 @@ class Picker {
   }
 
   /**
-   * Called when the transform of the Node is changed.
-   * @public (scenery-internal)
+   * Called when the transform of the Node is changed. (scenery-internal)
    */
   onClipAreaChange() {
     // Can affect our bounds.
@@ -598,12 +583,11 @@ class Picker {
 
   /**
    * Check to see if we are 'selfPruned', and update the value. If it changed, we'll need to notify our parents.
-   * @private
    *
    * Note that the prunability "pickable:false" or "invisible" won't affect our computed bounds, so we don't
    * invalidate ourself.
    */
-  checkSelfPruned() {
+  private checkSelfPruned() {
     const selfPruned = this.node.pickableProperty.value === false || !this.node.isVisible();
     if ( this.selfPruned !== selfPruned ) {
       this.selfPruned = selfPruned;
@@ -630,9 +614,8 @@ class Picker {
 
   /**
    * Check to see if we are 'selfInclusive', and update the value. If it changed, we'll need to invalidate ourself.
-   * @private
    */
-  checkSelfInclusive() {
+  private checkSelfInclusive() {
     const selfInclusive = this.node.pickableProperty.value === true || this.node._inputListeners.length > 0;
     if ( this.selfInclusive !== selfInclusive ) {
       this.selfInclusive = selfInclusive;
@@ -644,9 +627,8 @@ class Picker {
 
   /**
    * Update our 'subtreePrunable' flag.
-   * @private
    */
-  checkSubtreePrunable() {
+  private checkSubtreePrunable() {
     const subtreePrunable = this.node.pickableProperty.value === false ||
                             !this.node.isVisible() ||
                             ( this.node.pickableProperty.value !== true && this.subtreePickableCount === 0 );
@@ -661,11 +643,10 @@ class Picker {
 
   /**
    * Propagate the pickable count change down to our ancestors.
-   * @private
    *
-   * @param {number} n - The delta of how many pickable counts have been added/removed
+   * @param n - The delta of how many pickable counts have been added/removed
    */
-  changePickableCount( n ) {
+  private changePickableCount( n: number ) {
     if ( n === 0 ) {
       return;
     }
@@ -691,14 +672,15 @@ class Picker {
 
   /**
    * Runs a number of consistency tests when assertSlow is enabled. Verifies most conditions, and helps to catch
-   * bugs earlier when they are initially triggered.
-   * @public (scenery-internal)
+   * bugs earlier when they are initially triggered. (scenery-internal)
    */
   audit() {
     if ( assertSlow ) {
-      _.each( this.node._children, node => {
+      this.node._children.forEach( node => {
         node._picker.audit();
       } );
+
+      const localAssertSlow = assertSlow!;
 
       const expectedSelfPruned = this.node.pickable === false || !this.node.isVisible();
       const expectedSelfInclusive = this.node.pickable === true || this.node._inputListeners.length > 0;
@@ -714,33 +696,33 @@ class Picker {
       assertSlow( this.subtreePrunable === expectedSubtreePrunable, 'subtreePrunable mismatch' );
       assertSlow( this.subtreePickableCount === expectedSubtreePickableCount, 'subtreePickableCount mismatch' );
 
-      _.each( this.node._parents, parent => {
+      this.node._parents.forEach( parent => {
         const parentPicker = parent._picker;
         const childPicker = this; // eslint-disable-line consistent-this
 
         if ( !parentPicker.mouseInclusiveDirty ) {
-          assertSlow( childPicker.selfPruned || !childPicker.mouseInclusiveDirty );
+          localAssertSlow( childPicker.selfPruned || !childPicker.mouseInclusiveDirty );
         }
 
         if ( !parentPicker.mouseExclusiveDirty ) {
           if ( childPicker.selfInclusive ) {
-            assertSlow( childPicker.selfPruned || !childPicker.mouseInclusiveDirty );
+            localAssertSlow( childPicker.selfPruned || !childPicker.mouseInclusiveDirty );
           }
           else {
-            assertSlow( childPicker.selfPruned || childPicker.subtreePrunable || !childPicker.mouseExclusiveDirty );
+            localAssertSlow( childPicker.selfPruned || childPicker.subtreePrunable || !childPicker.mouseExclusiveDirty );
           }
         }
 
         if ( !parentPicker.touchInclusiveDirty ) {
-          assertSlow( childPicker.selfPruned || !childPicker.touchInclusiveDirty );
+          localAssertSlow( childPicker.selfPruned || !childPicker.touchInclusiveDirty );
         }
 
         if ( !parentPicker.touchExclusiveDirty ) {
           if ( childPicker.selfInclusive ) {
-            assertSlow( childPicker.selfPruned || !childPicker.touchInclusiveDirty );
+            localAssertSlow( childPicker.selfPruned || !childPicker.touchInclusiveDirty );
           }
           else {
-            assertSlow( childPicker.selfPruned || childPicker.subtreePrunable || !childPicker.touchExclusiveDirty );
+            localAssertSlow( childPicker.selfPruned || childPicker.subtreePrunable || !childPicker.touchExclusiveDirty );
           }
         }
       } );

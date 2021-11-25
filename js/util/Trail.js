@@ -17,16 +17,14 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Transform3 from '../../../dot/js/Transform3.js';
-import Node from '../nodes/Node.js';
-import scenery from '../scenery.js';
-import TrailPointer from './TrailPointer.js';
+import { scenery, Node, TrailPointer } from '../imports.js';
 
 // constants
 const ID_SEPARATOR = '-';
 
 class Trail {
   /**
-   * @param {Trail|Array.<Node>} [nodes]
+   * @param {Trail|Array.<Node>|Node} [nodes]
    */
   constructor( nodes ) {
     /*
@@ -319,7 +317,7 @@ class Trail {
    * @public
    *
    * @param {Node} node
-   * @param {number} index
+   * @param {number} [index]
    * @returns {Trail} - For chaining
    */
   addAncestor( node, index ) {
@@ -1114,7 +1112,7 @@ class Trail {
    *
    * @param {Array.<Trail>} trailResults - Will be muted by appending matching trails
    * @param {Trail} trail
-   * @param {function(Trail):boolean} predicate
+   * @param {function(Node):boolean} predicate
    */
   static appendAncestorTrailsWithPredicate( trailResults, trail, predicate ) {
     const root = trail.rootNode();
@@ -1138,7 +1136,7 @@ class Trail {
    *
    * @param {Array.<Trail>} trailResults - Will be muted by appending matching trails
    * @param {Trail} trail
-   * @param {function(Trail):boolean} predicate
+   * @param {function(Node):boolean} predicate
    */
   static appendDescendantTrailsWithPredicate( trailResults, trail, predicate ) {
     const lastNode = trail.lastNode();

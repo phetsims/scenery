@@ -18,15 +18,10 @@ import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
 import VoidIO from '../../../tandem/js/types/VoidIO.js';
-import TextCanvasDrawable from '../display/drawables/TextCanvasDrawable.js';
-import TextDOMDrawable from '../display/drawables/TextDOMDrawable.js';
-import TextSVGDrawable from '../display/drawables/TextSVGDrawable.js';
-import Renderer from '../display/Renderer.js';
-import scenery from '../scenery.js';
-import Font from '../util/Font.js';
-import TextBounds from '../util/TextBounds.js';
-import Node from './Node.js';
-import Paintable from './Paintable.js';
+import IProperty from '../../../axon/js/IProperty.js';
+import Matrix3 from '../../../dot/js/Matrix3.js';
+import Bounds2 from '../../../dot/js/Bounds2.js';
+import { scenery, Font, FontStyle, FontWeight, FontStretch, ITextDrawable, CanvasContextWrapper, Instance, TextBounds, DOMSelfDrawable, SVGSelfDrawable, CanvasSelfDrawable, Renderer, TextCanvasDrawable, TextDOMDrawable, TextSVGDrawable, Node, NodeOptions, Paintable, PAINTABLE_OPTION_KEYS, PAINTABLE_DRAWABLE_MARK_FLAGS, PaintableOptions } from '../imports.js';
 
 // constants
 const TEXT_OPTION_KEYS = [
@@ -50,59 +45,76 @@ const TEXT_PROPERTY_TANDEM_NAME = 'textProperty';
 const useDOMAsFastBounds = window.navigator.userAgent.indexOf( 'like Gecko) Version/5' ) !== -1 &&
                            window.navigator.userAgent.indexOf( 'Safari/' ) !== -1;
 
-class Text extends Node {
+type BoundsMethod = 'fast' | 'fastCanvas' | 'accurate' | 'hybrid';
+type TextDefinedOptions = {
+  boundsMethod?: BoundsMethod,
+  textProperty?: IProperty<string> | null,
+  text?: string | number,
+  font?: Font | string,
+  fontWeight?: string | number,
+  fontFamily?: string,
+  fontStretch?: string,
+  fontStyle?: string,
+  fontSize?: string | number
+};
+type TextOptions = TextDefinedOptions & PaintableOptions & NodeOptions;
+
+class Text extends Paintable( Node ) {
+
+  // The text to display
+  _textProperty: TinyForwardingProperty<string>;
+
+  // The font with which to display the text.
+  _font: Font;
+
+  _boundsMethod: BoundsMethod;
+
+  // Whether the text is rendered as HTML or not. if defined (in a subtype constructor), use that value instead
+  _isHTML: boolean;
+
+  // The actual string displayed (can have non-breaking spaces and embedding marks rewritten).
+  // When this is null, its value needs to be recomputed
+  _cachedRenderedText: string | null;
+
+  // (phet-io) - property name avoids namespace of the Node setter
+  private textTandem: Tandem;
+
   /**
-   * @public
-   *
-   * @param {string|number} text - See setText() for more documentation
-   * @param {Object} [options] - Text-specific options are documented in TEXT_OPTION_KEYS above, and can be provided
+   * @param text - See setText() for more documentation
+   * @param [options] - Text-specific options are documented in TEXT_OPTION_KEYS above, and can be provided
    *                             along-side options for Node
    */
-  constructor( text, options ) {
+  constructor( text: string | number, options?: TextOptions ) {
     assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
       'Extra prototype on Node options object is a code smell' );
 
     super();
 
-    // @public {TinyProperty.<string>} - The text to display. We'll initialize this by mutating.
+    // We'll initialize this by mutating.
     this._textProperty = new TinyForwardingProperty( '', true, this.onTextPropertyChange.bind( this ) );
-
-    // @private {Font} - The font with which to display the text.
     this._font = Font.DEFAULT;
-
-    // @private {string}
     this._boundsMethod = 'hybrid';
-
-    // @private {boolean} - Whether the text is rendered as HTML or not. if defined (in a subtype constructor), use that value instead
-    this._isHTML = this._isHTML === undefined ? false : this._isHTML;
-
-    // {null|string} - The actual string displayed (can have non-breaking spaces and embedding marks rewritten).
-    // When this is null, its value needs to be recomputed
+    this._isHTML = false; // TODO: clean this up
     this._cachedRenderedText = null;
 
-    options = extendDefined( {
+    const definedOptions = extendDefined( {
       fill: '#000000', // Default to black filled text
       text: text,
       tandem: Tandem.OPTIONAL,
       phetioType: Text.TextIO
     }, options );
 
-    this.textTandem = options.tandem; // @private (phet-io) - property name avoids namespace of the Node setter
+    this.textTandem = definedOptions.tandem;
 
-    this.initializePaintable();
-
-    this.mutate( options );
+    this.mutate( definedOptions );
 
     this.invalidateSupportedRenderers(); // takes care of setting up supported renderers
   }
 
-  /**
-   * @public
-   * @override
-   * @param {Object} [options]
-   */
-  mutate( options ) {
+  mutate( options?: TextOptions ) {
+    // @ts-ignore
     if ( assert && options.hasOwnProperty( 'text' ) && options.hasOwnProperty( 'textProperty' ) ) {
+      // @ts-ignore
       assert && assert( options.textProperty.value === options.text, 'If both text and textProperty are provided, then values should match' );
     }
     return super.mutate( options );
@@ -110,12 +122,10 @@ class Text extends Node {
 
   /**
    * Sets the text displayed by our node.
-   * @public
    *
-   * @param {string|number} text - The text to display. If it's a number, it will be cast to a string
-   * @returns {Text} - For chaining
+   * @param text - The text to display. If it's a number, it will be cast to a string
    */
-  setText( text ) {
+  setText( text: string | number ): this {
     assert && assert( text !== null && text !== undefined, 'Text should be defined and non-null. Use the empty string if needed.' );
     assert && assert( typeof text === 'number' || typeof text === 'string', 'text should be a string or number' );
 
@@ -127,7 +137,7 @@ class Text extends Node {
     return this;
   }
 
-  set text( value ) { this.setText( value ); }
+  set text( value: string | number ) { this.setText( value ); }
 
   /**
    * Returns the text displayed by our node.
@@ -137,20 +147,17 @@ class Text extends Node {
    *
    * @returns {string}
    */
-  getText() {
+  getText(): string {
     return this._textProperty.value;
   }
 
-  get text() { return this.getText(); }
+  get text(): string { return this.getText(); }
 
   /**
    * Returns a potentially modified version of this.text, where spaces are replaced with non-breaking spaces,
    * and embedding marks are potentially simplified.
-   * @public
-   *
-   * @returns {string}
    */
-  getRenderedText() {
+  getRenderedText(): string {
     if ( this._cachedRenderedText === null ) {
       // Using the non-breaking space (&nbsp;) encoded as 0x00A0 in UTF-8
       this._cachedRenderedText = this.text.replace( ' ', '\xA0' );
@@ -161,21 +168,20 @@ class Text extends Node {
       }
     }
 
-    return this._cachedRenderedText;
+    return this._cachedRenderedText!;
   }
 
-  get renderedText() { return this.getRenderedText(); }
+  get renderedText(): string { return this.getRenderedText(); }
 
   /**
    * Called when our text Property changes values.
-   * @private
    */
-  onTextPropertyChange() {
+  private onTextPropertyChange() {
     this._cachedRenderedText = null;
 
     const stateLen = this._drawables.length;
     for ( let i = 0; i < stateLen; i++ ) {
-      this._drawables[ i ].markDirtyText();
+      ( this._drawables[ i ] as unknown as ITextDrawable ).markDirtyText();
     }
 
     this.invalidateText();
@@ -183,30 +189,22 @@ class Text extends Node {
 
   /**
    * See documentation for Node.setVisibleProperty, except this is for the text string.
-   *
-   * @public
-   *
-   * @param {TinyProperty.<string>|Property.<string>|null} newTarget
-   * @returns {Text} for chaining
    */
-  setTextProperty( newTarget ) {
+  setTextProperty( newTarget: IProperty<string> | null ): this {
     return this._textProperty.setTargetProperty( this, TEXT_PROPERTY_TANDEM_NAME, newTarget );
   }
 
-  set textProperty( property ) { this.setTextProperty( property ); }
+  set textProperty( property: IProperty<string> | null ) { this.setTextProperty( property ); }
 
   /**
    * Like Node.getVisibleProperty(), but for the text string. Note this is not the same as the Property provided in
    * setTextProperty. Thus is the nature of TinyForwardingProperty.
-   *
-   * @returns {TinyForwardingProperty}
-   * @public
    */
-  getTextProperty() {
+  getTextProperty(): IProperty<string> {
     return this._textProperty;
   }
 
-  get textProperty() { return this.getTextProperty(); }
+  get textProperty(): IProperty<string> { return this.getTextProperty(); }
 
   /**
    * See documentation and comments in Node.initializePhetioObject
@@ -215,7 +213,7 @@ class Text extends Node {
    * @override
    * @protected
    */
-  initializePhetioObject( baseOptions, config ) {
+  initializePhetioObject( baseOptions: any, config: TextOptions ) {
 
     config = merge( {
       textPropertyOptions: null
@@ -233,6 +231,7 @@ class Text extends Node {
           phetioReadOnly: this.phetioReadOnly,
           tandem: this.tandem.createTandem( TEXT_PROPERTY_TANDEM_NAME ),
           phetioDocumentation: 'Property for the displayed text'
+        // @ts-ignore --- how to handle this?
         }, config.textPropertyOptions ) )
       );
     }
@@ -240,7 +239,6 @@ class Text extends Node {
 
   /**
    * Sets the method that is used to determine bounds from the text.
-   * @public
    *
    * Possible values:
    * - 'fast' - Measures using SVG, can be inaccurate. Can't be rendered in Canvas.
@@ -256,11 +254,8 @@ class Text extends Node {
    *       for the height, as certain stacked accent marks or descenders can go outside of the prescribed range,
    *       and fast/canvasCanvas/hybrid will always return the same vertical bounds (top and bottom) for a given font
    *       when the text isn't the empty string.
-   *
-   * @param {string} method - One of the above methods
-   * @returns {Text} - For chaining.
    */
-  setBoundsMethod( method ) {
+  setBoundsMethod( method: BoundsMethod ): this {
     assert && assert( method === 'fast' || method === 'fastCanvas' || method === 'accurate' || method === 'hybrid', 'Unknown Text boundsMethod' );
     if ( method !== this._boundsMethod ) {
       this._boundsMethod = method;
@@ -268,7 +263,7 @@ class Text extends Node {
 
       const stateLen = this._drawables.length;
       for ( let i = 0; i < stateLen; i++ ) {
-        this._drawables[ i ].markDirtyBounds();
+        ( this._drawables[ i ] as unknown as ITextDrawable ).markDirtyBounds();
       }
 
       this.invalidateText();
@@ -278,27 +273,23 @@ class Text extends Node {
     return this;
   }
 
-  set boundsMethod( value ) { this.setBoundsMethod( value ); }
+  set boundsMethod( value: BoundsMethod ) { this.setBoundsMethod( value ); }
 
   /**
    * Returns the current method to estimate the bounds of the text. See setBoundsMethod() for more information.
-   * @public
-   *
-   * @returns {string}
    */
-  getBoundsMethod() {
+  getBoundsMethod(): BoundsMethod {
     return this._boundsMethod;
   }
 
-  get boundsMethod() { return this.getBoundsMethod(); }
+  get boundsMethod(): BoundsMethod { return this.getBoundsMethod(); }
 
   /**
    * Returns a bitmask representing the supported renderers for the current configuration of the Text node.
-   * @protected
    *
-   * @returns {number} - A bitmask that includes supported renderers, see Renderer for details.
+   * @returns - A bitmask that includes supported renderers, see Renderer for details.
    */
-  getTextRendererBitmask() {
+  protected getTextRendererBitmask(): number {
     let bitmask = 0;
 
     // canvas support (fast bounds may leak out of dirty rectangles)
@@ -319,7 +310,6 @@ class Text extends Node {
    * Triggers a check and update for what renderers the current configuration supports.
    * This should be called whenever something that could potentially change supported renderers happen (which can
    * be isHTML, boundsMethod, etc.)
-   * @public
    */
   invalidateSupportedRenderers() {
     this.setRendererBitmask( this.getFillRendererBitmask() & this.getStrokeRendererBitmask() & this.getTextRendererBitmask() );
@@ -328,15 +318,14 @@ class Text extends Node {
   /**
    * Notifies that something about the text's potential bounds have changed (different text, different stroke or font,
    * etc.)
-   * @private
    */
-  invalidateText() {
+  private invalidateText() {
     this.invalidateSelf();
 
     // TODO: consider replacing this with a general dirty flag notification, and have DOM update bounds every frame?
     const stateLen = this._drawables.length;
     for ( let i = 0; i < stateLen; i++ ) {
-      this._drawables[ i ].markDirtyBounds();
+      ( this._drawables[ i ] as unknown as ITextDrawable ).markDirtyBounds();
     }
 
     // we may have changed renderers if parameters were changed!
@@ -345,12 +334,10 @@ class Text extends Node {
 
   /**
    * Computes a more efficient selfBounds for our Text.
-   * @protected
-   * @override
    *
-   * @returns {boolean} - Whether the self bounds changed.
+   * @returns - Whether the self bounds changed.
    */
-  updateSelfBounds() {
+  protected updateSelfBounds(): boolean {
     // TODO: don't create another Bounds2 object just for this!
     let selfBounds;
 
@@ -383,86 +370,77 @@ class Text extends Node {
 
   /**
    * Called from (and overridden in) the Paintable trait, invalidates our current stroke, triggering recomputation of
-   * anything that depended on the old stroke's value.
-   * @protected (scenery-internal)
+   * anything that depended on the old stroke's value. (scenery-internal)
    */
   invalidateStroke() {
     // stroke can change both the bounds and renderer
     this.invalidateText();
+
+    super.invalidateStroke();
   }
 
   /**
    * Called from (and overridden in) the Paintable trait, invalidates our current fill, triggering recomputation of
-   * anything that depended on the old fill's value.
-   * @protected (scenery-internal)
+   * anything that depended on the old fill's value. (scenery-internal)
    */
   invalidateFill() {
     // fill type can change the renderer (gradient/fill not supported by DOM)
     this.invalidateText();
+
+    super.invalidateFill();
   }
 
   /**
    * Draws the current Node's self representation, assuming the wrapper's Canvas context is already in the local
    * coordinate frame of this node.
-   * @protected
-   * @override
    *
-   * @param {CanvasContextWrapper} wrapper
-   * @param {Matrix3} matrix - The transformation matrix already applied to the context.
+   * @param wrapper
+   * @param matrix - The transformation matrix already applied to the context.
    */
-  canvasPaintSelf( wrapper, matrix ) {
+  canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
     //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily.
     TextCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
   }
 
   /**
-   * Creates a DOM drawable for this Text.
-   * @public (scenery-internal)
-   * @override
+   * Creates a DOM drawable for this Text. (scenery-internal)
    *
-   * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
-   * @param {Instance} instance - Instance object that will be associated with the drawable
-   * @returns {DOMSelfDrawable}
+   * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+   * @param instance - Instance object that will be associated with the drawable
    */
-  createDOMDrawable( renderer, instance ) {
+  createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
+    // @ts-ignore
     return TextDOMDrawable.createFromPool( renderer, instance );
   }
 
   /**
-   * Creates a SVG drawable for this Text.
-   * @public (scenery-internal)
-   * @override
+   * Creates a SVG drawable for this Text. (scenery-internal)
    *
-   * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
-   * @param {Instance} instance - Instance object that will be associated with the drawable
-   * @returns {SVGSelfDrawable}
+   * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+   * @param instance - Instance object that will be associated with the drawable
    */
-  createSVGDrawable( renderer, instance ) {
+  createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
+    // @ts-ignore
     return TextSVGDrawable.createFromPool( renderer, instance );
   }
 
   /**
-   * Creates a Canvas drawable for this Text.
-   * @public (scenery-internal)
-   * @override
+   * Creates a Canvas drawable for this Text. (scenery-internal)
    *
-   * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
-   * @param {Instance} instance - Instance object that will be associated with the drawable
-   * @returns {CanvasSelfDrawable}
+   * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+   * @param instance - Instance object that will be associated with the drawable
    */
-  createCanvasDrawable( renderer, instance ) {
+  createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
+    // @ts-ignore
     return TextCanvasDrawable.createFromPool( renderer, instance );
   }
 
   /**
-   * Returns a DOM element that contains the specified text.
-   * @public (scenery-internal)
+   * Returns a DOM element that contains the specified text. (scenery-internal)
    *
    * This is needed since we have to handle HTML text differently.
-   *
-   * @returns {Element}
    */
-  getDOMTextNode() {
+  getDOMTextNode(): any {
     if ( this._isHTML ) {
       const span = document.createElement( 'span' );
       span.innerHTML = this.text;
@@ -476,15 +454,11 @@ class Text extends Node {
   /**
    * Returns a bounding box that should contain all self content in the local coordinate frame (our normal self bounds
    * aren't guaranteed this for Text)
-   * @public
-   * @override
    *
    * We need to add additional padding around the text when the text is in a container that could clip things badly
    * if the text is larger than the normal bounds computation.
-   *
-   * @returns {Bounds2}
    */
-  getSafeSelfBounds() {
+  getSafeSelfBounds(): Bounds2 {
     const expansionFactor = 1; // we use a new bounding box with a new size of size * ( 1 + 2 * expansionFactor )
 
     const selfBounds = this.getSelfBounds();
@@ -495,16 +469,12 @@ class Text extends Node {
 
   /**
    * Sets the font of the Text node.
-   * @public
    *
    * This can either be a Scenery Font object, or a string. The string format is described by Font's constructor, and
    * is basically the CSS3 font shortcut format. If a string is provided, it will be wrapped with a new (immutable)
    * Scenery Font object.
-   *
-   * @param {Font|string} font
-   * @returns {Node} - For chaining.
    */
-  setFont( font ) {
+  setFont( font: Font | string ): this {
     assert && assert( font instanceof Font || typeof font === 'string',
       'Fonts provided to setFont should be a Font object or a string in the CSS3 font shortcut format' );
 
@@ -517,7 +487,7 @@ class Text extends Node {
 
       const stateLen = this._drawables.length;
       for ( let i = 0; i < stateLen; i++ ) {
-        this._drawables[ i ].markDirtyFont();
+        ( this._drawables[ i ] as unknown as ITextDrawable ).markDirtyFont();
       }
 
       this.invalidateText();
@@ -525,190 +495,150 @@ class Text extends Node {
     return this;
   }
 
-  set font( value ) { this.setFont( value ); }
+  set font( value: Font | string ) { this.setFont( value ); }
 
   /**
    * Returns a string representation of the current Font.
-   * @public
    *
    * This returns the CSS3 font shortcut that is a possible input to setFont(). See Font's constructor for detailed
    * information on the ordering of information.
    *
    * NOTE: If a Font object was provided to setFont(), this will not currently return it.
    * TODO: Can we refactor so we can have access to (a) the Font object, and possibly (b) the initially provided value.
-   *
-   * @returns {string}
    */
-  getFont() {
+  getFont(): string {
     return this._font.getFont();
   }
 
-  get font() { return this.getFont(); }
+  get font(): string { return this.getFont(); }
 
   /**
    * Sets the weight of this node's font.
-   * @public
    *
    * The font weight supports the following options:
    *   'normal', 'bold', 'bolder', 'lighter', '100', '200', '300', '400', '500', '600', '700', '800', '900',
    *   or a number that when cast to a string will be one of the strings above.
-   *
-   * @param {string|number} weight - See above
-   * @returns {Text} - For chaining.
    */
-  setFontWeight( weight ) {
+  setFontWeight( weight: FontWeight | number ): this {
     return this.setFont( this._font.copy( {
       weight: weight
     } ) );
   }
 
-  set fontWeight( value ) { this.setFontWeight( value ); }
+  set fontWeight( value: FontWeight | number ) { this.setFontWeight( value ); }
 
   /**
    * Returns the weight of this node's font, see setFontWeight() for details.
-   * @public
    *
    * NOTE: If a numeric weight was passed in, it has been cast to a string, and a string will be returned here.
-   *
-   * @returns {string}
    */
-  getFontWeight() {
+  getFontWeight(): FontWeight {
     return this._font.getWeight();
   }
 
-  get fontWeight() { return this.getFontWeight(); }
+  get fontWeight(): FontWeight { return this.getFontWeight(); }
 
   /**
    * Sets the family of this node's font.
-   * @public
    *
-   * @param {string} family - A comma-separated list of families, which can include generic families (preferably at
-   *                          the end) such as 'serif', 'sans-serif', 'cursive', 'fantasy' and 'monospace'. If there
-   *                          is any question about escaping (such as spaces in a font name), the family should be
-   *                          surrounded by double quotes.
-   * @returns {Text} - For chaining.
+   * @param family - A comma-separated list of families, which can include generic families (preferably at
+   *                 the end) such as 'serif', 'sans-serif', 'cursive', 'fantasy' and 'monospace'. If there
+   *                 is any question about escaping (such as spaces in a font name), the family should be
+   *                 surrounded by double quotes.
    */
-  setFontFamily( family ) {
+  setFontFamily( family: string ): this {
     return this.setFont( this._font.copy( {
       family: family
     } ) );
   }
 
-  set fontFamily( value ) { this.setFontFamily( value ); }
+  set fontFamily( value: string ) { this.setFontFamily( value ); }
 
   /**
    * Returns the family of this node's font, see setFontFamily() for details.
-   * @public
-   *
-   * @returns {string}
    */
-  getFontFamily() {
+  getFontFamily(): string {
     return this._font.getFamily();
   }
 
-  get fontFamily() { return this.getFontFamily(); }
+  get fontFamily(): string { return this.getFontFamily(); }
 
   /**
    * Sets the stretch of this node's font.
-   * @public
    *
    * The font stretch supports the following options:
    *   'normal', 'ultra-condensed', 'extra-condensed', 'condensed', 'semi-condensed',
    *   'semi-expanded', 'expanded', 'extra-expanded' or 'ultra-expanded'
-   *
-   * @param {string} stretch - See above
-   * @returns {Text} - For chaining.
    */
-  setFontStretch( stretch ) {
+  setFontStretch( stretch: FontStretch ): this {
     return this.setFont( this._font.copy( {
       stretch: stretch
     } ) );
   }
 
-  set fontStretch( value ) { this.setFontStretch( value ); }
+  set fontStretch( value: FontStretch ) { this.setFontStretch( value ); }
 
   /**
    * Returns the stretch of this node's font, see setFontStretch() for details.
-   * @public
-   *
-   * @returns {string}
    */
-  getFontStretch() {
+  getFontStretch(): FontStretch {
     return this._font.getStretch();
   }
 
-  get fontStretch() { return this.getFontStretch(); }
+  get fontStretch(): FontStretch { return this.getFontStretch(); }
 
   /**
    * Sets the style of this node's font.
-   * @public
    *
    * The font style supports the following options: 'normal', 'italic' or 'oblique'
-   *
-   * @param {string} style - See above
-   * @returns {Text} - For chaining.
    */
-  setFontStyle( style ) {
+  setFontStyle( style: FontStyle ): this {
     return this.setFont( this._font.copy( {
       style: style
     } ) );
   }
 
-  set fontStyle( value ) { this.setFontStyle( value ); }
+  set fontStyle( value: FontStyle ) { this.setFontStyle( value ); }
 
   /**
    * Returns the style of this node's font, see setFontStyle() for details.
-   * @public
-   *
-   * @returns {string}
    */
-  getFontStyle() {
+  getFontStyle(): FontStyle {
     return this._font.getStyle();
   }
 
-  get fontStyle() { return this.getFontStyle(); }
+  get fontStyle(): FontStyle { return this.getFontStyle(); }
 
   /**
    * Sets the size of this node's font.
-   * @public
    *
    * The size can either be a number (created as a quantity of 'px'), or any general CSS font-size string (for
    * example, '30pt', '5em', etc.)
-   *
-   * @param {string|number} size - See above
-   * @returns {Text} - For chaining.
    */
-  setFontSize( size ) {
+  setFontSize( size: string | number ): this {
     return this.setFont( this._font.copy( {
       size: size
     } ) );
   }
 
-  set fontSize( value ) { this.setFontSize( value ); }
+  set fontSize( value: string | number ) { this.setFontSize( value ); }
 
   /**
    * Returns the size of this node's font, see setFontSize() for details.
-   * @public
    *
    * NOTE: If a numeric size was passed in, it has been converted to a string with 'px', and a string will be
    * returned here.
-   *
-   * @returns {string}
    */
-  getFontSize() {
+  getFontSize(): string {
     return this._font.getSize();
   }
 
-  get fontSize() { return this.getFontSize(); }
+  get fontSize(): string { return this.getFontSize(); }
 
   /**
    * Whether this Node itself is painted (displays something itself).
-   * @public
-   * @override
-   *
-   * @returns {boolean}
    */
-  isPainted() {
+  isPainted(): boolean {
     // Always true for Text nodes
     return true;
   }
@@ -716,29 +646,20 @@ class Text extends Node {
   /**
    * Whether this Node's selfBounds are considered to be valid (always containing the displayed self content
    * of this node). Meant to be overridden in subtypes when this can change (e.g. Text).
-   * @public
-   * @override
    *
    * If this value would potentially change, please trigger the event 'selfBoundsValid'.
-   *
-   * @returns {boolean}
    */
-  areSelfBoundsValid() {
+  areSelfBoundsValid(): boolean {
     return this._boundsMethod === 'accurate';
   }
 
   /**
-   * Override for extra information in the debugging output (from Display.getDebugHTML()).
-   * @protected (scenery-internal)
-   * @override
-   *
-   * @returns {string}
+   * Override for extra information in the debugging output (from Display.getDebugHTML()). (scenery-internal)
    */
-  getDebugHTMLExtras() {
+  getDebugHTMLExtras(): string {
     return ` "${escapeHTML( this.renderedText )}"${this._isHTML ? ' (html)' : ''}`;
   }
 
-  // @public
   dispose() {
     super.dispose();
 
@@ -747,18 +668,15 @@ class Text extends Node {
 
   /**
    * Replaces embedding mark characters with visible strings. Useful for debugging for strings with embedding marks.
-   * @public
    *
-   * @param {string} string
-   * @returns {string} - With embedding marks replaced.
+   * @returns - With embedding marks replaced.
    */
-  static embeddedDebugString( string ) {
+  static embeddedDebugString( string: string ): string {
     return string.replace( /\u202a/g, '[LTR]' ).replace( /\u202b/g, '[RTL]' ).replace( /\u202c/g, '[POP]' );
   }
 
   /**
    * Returns a (potentially) modified string where embedding marks have been simplified.
-   * @public
    *
    * This simplification wouldn't usually be necessary, but we need to prevent cases like
    * https://github.com/phetsims/scenery/issues/520 where Edge decides to turn [POP][LTR] (after another [LTR]) into
@@ -774,28 +692,31 @@ class Text extends Node {
    * as in the general case, we'll want to preserve the break there between embeddings.
    *
    * TODO: A stack-based implementation that doesn't create a bunch of objects/closures would be nice for performance.
-   *
-   * @param {string} string
-   * @returns {string}
    */
-  static simplifyEmbeddingMarks( string ) {
+  static simplifyEmbeddingMarks( string: string ): string {
     // First, we'll convert the string into a tree form, where each node is either a string object OR an object of the
     // node type { dir: {LTR||RTL}, children: {Array.<node>}, parent: {null|node} }. Thus each LTR...POP and RTL...POP
     // become a node with their interiors becoming children.
 
+    type EmbedNode = {
+      dir: null | '\u202a' | '\u202b',
+      children: ( EmbedNode | string )[],
+      parent: EmbedNode | null
+    };
+
     // Root node (no direction, so we preserve root LTR/RTLs)
-    const root = {
+    const root = <EmbedNode>{
       dir: null,
       children: [],
       parent: null
     };
-    let current = root;
+    let current: EmbedNode = root;
     for ( let i = 0; i < string.length; i++ ) {
       const chr = string.charAt( i );
 
       // Push a direction
       if ( chr === LTR || chr === RTL ) {
-        const node = {
+        const node = <EmbedNode>{
           dir: chr,
           children: [],
           parent: current
@@ -806,7 +727,7 @@ class Text extends Node {
       // Pop a direction
       else if ( chr === POP ) {
         assert && assert( current.parent, `Bad nesting of embedding marks: ${Text.embeddedDebugString( string )}` );
-        current = current.parent;
+        current = current.parent!;
       }
       // Append characters to the current direction
       else {
@@ -816,29 +737,29 @@ class Text extends Node {
     assert && assert( current === root, `Bad nesting of embedding marks: ${Text.embeddedDebugString( string )}` );
 
     // Remove redundant nesting (e.g. [LTR][LTR]...[POP][POP])
-    function collapseNesting( node ) {
+    function collapseNesting( node: EmbedNode ) {
       for ( let i = node.children.length - 1; i >= 0; i-- ) {
         const child = node.children[ i ];
-        if ( node.dir === child.dir ) {
-          Array.prototype.splice.apply( node.children, [ i, 1 ].concat( child.children ) );
+        if ( typeof child !== 'string' && node.dir === child.dir ) {
+          node.children.splice( i, 1, ...child.children );
         }
       }
     }
 
     // Remove overridden nesting (e.g. [LTR][RTL]...[POP][POP]), since the outer one is not needed
-    function collapseUnnecessary( node ) {
-      if ( node.children.length === 1 && node.children[ 0 ].dir ) {
+    function collapseUnnecessary( node: EmbedNode ) {
+      if ( node.children.length === 1 && typeof node.children[ 0 ] !== 'string' && node.children[ 0 ].dir ) {
         node.dir = node.children[ 0 ].dir;
         node.children = node.children[ 0 ].children;
       }
     }
 
     // Collapse adjacent matching dirs, e.g. [LTR]...[POP][LTR]...[POP]
-    function collapseAdjacent( node ) {
+    function collapseAdjacent( node: EmbedNode ) {
       for ( let i = node.children.length - 1; i >= 1; i-- ) {
         const previousChild = node.children[ i - 1 ];
         const child = node.children[ i ];
-        if ( child.dir && previousChild.dir === child.dir ) {
+        if ( typeof child !== 'string' && typeof previousChild !== 'string' && child.dir && previousChild.dir === child.dir ) {
           previousChild.children = previousChild.children.concat( child.children );
           node.children.splice( i, 1 );
 
@@ -849,7 +770,7 @@ class Text extends Node {
     }
 
     // Simplifies the tree using the above functions
-    function simplify( node ) {
+    function simplify( node: EmbedNode | string ) {
       if ( typeof node !== 'string' ) {
         for ( let i = 0; i < node.children.length; i++ ) {
           simplify( node.children[ i ] );
@@ -864,7 +785,7 @@ class Text extends Node {
     }
 
     // Turns a tree into a string
-    function stringify( node ) {
+    function stringify( node: EmbedNode | string ): string {
       if ( typeof node === 'string' ) {
         return node;
       }
@@ -879,6 +800,8 @@ class Text extends Node {
 
     return stringify( simplify( root ) );
   }
+
+  static TextIO: IOType;
 }
 
 /**
@@ -889,7 +812,7 @@ class Text extends Node {
  * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
  *       cases that may apply.
  */
-Text.prototype._mutatorKeys = TEXT_OPTION_KEYS.concat( Node.prototype._mutatorKeys );
+Text.prototype._mutatorKeys = [ ...PAINTABLE_OPTION_KEYS, ...TEXT_OPTION_KEYS, ...Node.prototype._mutatorKeys ];
 
 /**
  * {Array.<String>} - List of all dirty flags that should be available on drawables created from this node (or
@@ -898,12 +821,9 @@ Text.prototype._mutatorKeys = TEXT_OPTION_KEYS.concat( Node.prototype._mutatorKe
  * @public (scenery-internal)
  * @override
  */
-Text.prototype.drawableMarkFlags = Node.prototype.drawableMarkFlags.concat( [ 'text', 'font', 'bounds' ] );
+Text.prototype.drawableMarkFlags = [ ...Node.prototype.drawableMarkFlags, ...PAINTABLE_DRAWABLE_MARK_FLAGS, 'text', 'font', 'bounds' ];
 
 scenery.register( 'Text', Text );
-
-// mix in support for fills and strokes
-Paintable.mixInto( Text );
 
 // Unicode embedding marks that we can combine to work around the Edge issue.
 // See https://github.com/phetsims/scenery/issues/520
@@ -923,7 +843,7 @@ Text.TextIO = new IOType( 'TextIO', {
     setFontOptions: {
       returnType: VoidIO,
       parameterTypes: [ Font.FontIO ],
-      implementation: function( font ) {
+      implementation: function( this: Text, font: Font ) {
         this.setFont( font );
       },
       documentation: 'Sets font options for this TextIO instance, e.g. {size: 16, weight: bold}. If increasing the font ' +
@@ -934,7 +854,7 @@ Text.TextIO = new IOType( 'TextIO', {
     getFontOptions: {
       returnType: Font.FontIO,
       parameterTypes: [],
-      implementation: function() {
+      implementation: function( this: Text ) {
         return this.getFont();
       },
       documentation: 'Gets font options for this TextIO instance as an object'
@@ -943,7 +863,7 @@ Text.TextIO = new IOType( 'TextIO', {
     setMaxWidth: {
       returnType: VoidIO,
       parameterTypes: [ NumberIO ],
-      implementation: function( maxWidth ) {
+      implementation: function( this: Text, maxWidth: number ) {
         this.setMaxWidth( maxWidth );
       },
       documentation: 'Sets the maximum width of text box. ' +
@@ -954,7 +874,7 @@ Text.TextIO = new IOType( 'TextIO', {
     getMaxWidth: {
       returnType: NumberIO,
       parameterTypes: [],
-      implementation: function() {
+      implementation: function( this: Text ) {
         return this.maxWidth;
       },
       documentation: 'Gets the maximum width of text box'
@@ -962,4 +882,4 @@ Text.TextIO = new IOType( 'TextIO', {
   }
 } );
 
-export default Text;
+export { Text as default, TextOptions };

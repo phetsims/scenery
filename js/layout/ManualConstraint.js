@@ -7,9 +7,7 @@
  */
 
 import merge from '../../../phet-core/js/merge.js';
-import Node from '../nodes/Node.js';
-import scenery from '../scenery.js';
-import LayoutConstraint from './LayoutConstraint.js';
+import { scenery, Node, LayoutConstraint } from '../imports.js';
 
 class ManualConstraint extends LayoutConstraint {
   /**

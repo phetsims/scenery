@@ -9,9 +9,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import scenery from '../scenery.js';
-import Renderer from './Renderer.js';
-import Stitcher from './Stitcher.js';
+import { scenery, Renderer, Stitcher } from '../imports.js';
 
 class RebuildStitcher extends Stitcher {
   /**

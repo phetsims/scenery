@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import scenery from '../scenery.js';
+import { scenery } from '../imports.js';
 
 let globalId = 1;
 
@@ -58,7 +58,7 @@ class Paint {
   }
 }
 
-// @public {boolean}
+// @public {boolean} TODO: can we remove this in favor of type checks?
 Paint.prototype.isPaint = true;
 
 scenery.register( 'Paint', Paint );

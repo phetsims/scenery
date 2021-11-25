@@ -14,8 +14,7 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import merge from '../../../phet-core/js/merge.js';
 import ModelViewTransform2 from '../../../phetcommon/js/view/ModelViewTransform2.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import scenery from '../scenery.js';
-import MultiListener from './MultiListener.js';
+import { scenery, MultiListener } from '../imports.js';
 
 // constants
 // Reusable Matrix3 instance to avoid creating lots of them

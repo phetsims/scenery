@@ -7,8 +7,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import scenery from '../scenery.js';
-import Spacer from './Spacer.js';
+import { scenery, Spacer } from '../imports.js';
 
 class VStrut extends Spacer {
   /**

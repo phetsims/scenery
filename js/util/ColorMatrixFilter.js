@@ -8,10 +8,7 @@
 
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import platform from '../../../phet-core/js/platform.js';
-import scenery from '../scenery.js';
-import CanvasContextWrapper from './CanvasContextWrapper.js';
-import Filter from './Filter.js';
-import Utils from './Utils.js';
+import { scenery, Filter, Utils, CanvasContextWrapper } from '../imports.js';
 
 const isImageDataSupported = Utils.supportsImageDataCanvasFilter();
 const useFakeGamma = platform.chromium;

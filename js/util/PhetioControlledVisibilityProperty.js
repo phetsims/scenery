@@ -11,6 +11,7 @@ import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import DerivedProperty from '../../../axon/js/DerivedProperty.js';
 import merge from '../../../phet-core/js/merge.js';
 import Tandem from '../../../tandem/js/Tandem.js';
+import { scenery } from '../imports.js';
 
 class PhetioControlledVisibilityProperty extends DerivedProperty {
   /**
@@ -34,4 +35,5 @@ class PhetioControlledVisibilityProperty extends DerivedProperty {
   }
 }
 
+scenery.register( 'PhetioControlledVisibilityProperty', PhetioControlledVisibilityProperty );
 export default PhetioControlledVisibilityProperty;

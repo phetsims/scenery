@@ -10,9 +10,7 @@ import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import Shape from '../../../../kite/js/Shape.js';
 import extend from '../../../../phet-core/js/extend.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
-import Node from '../../nodes/Node.js';
-import scenery from '../../scenery.js';
-import Focus from '../Focus.js';
+import { scenery, Node, Focus } from '../../imports.js';
 
 // constants
 // option keys for InteractiveHighlighting, each of these will have a setter and getter and values are applied with mutate()

@@ -7,8 +7,7 @@
  */
 
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
-import scenery from '../scenery.js';
-import Filter from './Filter.js';
+import { scenery, Filter } from '../imports.js';
 
 class Opacity extends Filter {
   /**

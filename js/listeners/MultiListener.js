@@ -29,9 +29,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import merge from '../../../phet-core/js/merge.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import Mouse from '../input/Mouse.js';
-import Pointer from '../input/Pointer.js';
-import scenery from '../scenery.js';
+import { scenery, Mouse, Pointer } from '../imports.js';
 
 // constants
 // pointer must move this much to initiate a move interruption for panning, in the global coordinate frame

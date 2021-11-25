@@ -9,27 +9,34 @@ import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import merge from '../../../phet-core/js/merge.js';
 import Namespace from '../../../phet-core/js/Namespace.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import scenery from '../scenery.js';
-import SceneryConstants from '../SceneryConstants.js';
-import Color from '../util/Color.js';
-import ColorProperty from '../util/ColorProperty.js';
-import colorProfileProperty from './colorProfileProperty.js';
+import { PropertyOptions } from '../../../axon/js/Property.js';
+import { scenery, SceneryConstants, Color, ColorProperty, colorProfileProperty } from '../imports.js';
 
 // constant
 const NAME_SEPARATOR = '.';
 
 // static instances are tracked for iframe communication with the HTML color editor
-const instances = [];
+const instances: ProfileColorProperty[] = [];
+
+type ColorProfileMap = {
+  [ key: string ]: Color | string
+};
 
 class ProfileColorProperty extends ColorProperty {
 
+  // values are mutated by the HTML color wrapper.
+  colorProfileMap: ColorProfileMap;
+
+  // Treat as private
+  name: string;
+
   /**
-   * @param {Namespace} namespace - namespace that this color belongs to
-   * @param {string} colorName - name of the color, unique within namespace
-   * @param {Object} colorProfileMap - object literal that maps keys (profile names) to ColorDef
-   * @param {Object} [options]
+   * @param namespace - namespace that this color belongs to
+   * @param colorName - name of the color, unique within namespace
+   * @param colorProfileMap - object literal that maps keys (profile names) to ColorDef
+   * @param [options]
    */
-  constructor( namespace, colorName, colorProfileMap, options ) {
+  constructor( namespace: Namespace, colorName: string, colorProfileMap: ColorProfileMap, options?: PropertyOptions<Color> ) {
 
     assert && assert( namespace instanceof Namespace );
     assert && assert( typeof colorName === 'string' );
@@ -37,6 +44,8 @@ class ProfileColorProperty extends ColorProperty {
     options = merge( {
       tandem: Tandem.OPTIONAL
     }, options );
+
+    const tandem = options.tandem!;
 
     // All values are eagerly coerced to Color instances for efficiency (so it only has to be done once) and simplicity
     // (so the types are uniform)
@@ -46,21 +55,20 @@ class ProfileColorProperty extends ColorProperty {
     assert && assert( !!colorProfileMap[ SceneryConstants.DEFAULT_COLOR_PROFILE ], 'default color profile must be truthy' );
 
     // Fallback to default if a color was not supplied.
-    super( colorProfileMap[ colorProfileProperty.value ] || colorProfileMap[ SceneryConstants.DEFAULT_COLOR_PROFILE ], options );
+    super( Color.toColor( colorProfileMap[ colorProfileProperty.value ] || colorProfileMap[ SceneryConstants.DEFAULT_COLOR_PROFILE ] ), options );
 
     assert && assert( !this.isPhetioInstrumented() ||
-                      options.tandem.name.endsWith( 'ColorProperty' ) ||
-                      options.tandem.name === 'colorProperty',
-      `Property tandem.name must end with ColorProperty: ${options.tandem.phetioID}` );
+                      tandem.name.endsWith( 'ColorProperty' ) ||
+                      tandem.name === 'colorProperty',
+      `Property tandem.name must end with ColorProperty: ${tandem.phetioID}` );
 
-    // @public (ProfileColorProperty.js) - values are mutated by the HTML color wrapper.
     this.colorProfileMap = colorProfileMap;
 
     // When the color profile name changes, select the corresponding color.
     colorProfileProperty.link( colorProfileName => {
 
       // fallback to default if a color not supplied
-      this.value = this.colorProfileMap[ colorProfileName ] || this.colorProfileMap[ SceneryConstants.DEFAULT_COLOR_PROFILE ];
+      this.value = Color.toColor( this.colorProfileMap[ colorProfileName ] || this.colorProfileMap[ SceneryConstants.DEFAULT_COLOR_PROFILE ] );
     } );
 
     // @private to this file (read-only)
@@ -81,7 +89,7 @@ class ProfileColorProperty extends ColorProperty {
 
     // assert that names are unique
     if ( assert ) {
-      const matches = instances.filter( e => e.name === name );
+      const matches = instances.filter( e => e.name === this.name );
       assert && assert( matches.length === 0, 'cannot use the same name for two different ProfileColorProperty instances: ' + name );
     }
 
@@ -112,7 +120,7 @@ window.addEventListener( 'message', event => {
       const instance = instances[ i ];
       if ( instance.name === data.name ) {
         instance.colorProfileMap[ colorProfileProperty.value ] = new Color( data.value ).withAlpha( data.alpha );
-        instance.value = instance.colorProfileMap[ colorProfileProperty.value ];
+        instance.value = Color.toColor( instance.colorProfileMap[ colorProfileProperty.value ] );
       }
     }
   }

@@ -7,8 +7,7 @@
  */
 
 import inheritance from '../../../phet-core/js/inheritance.js';
-import scenery from '../scenery.js';
-import Node from './Node.js';
+import { scenery, Node } from '../imports.js';
 
 const Leaf = {
   /**

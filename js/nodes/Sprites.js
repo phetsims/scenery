@@ -9,11 +9,7 @@
 
 import Shape from '../../../kite/js/Shape.js';
 import merge from '../../../phet-core/js/merge.js';
-import SpritesCanvasDrawable from '../display/drawables/SpritesCanvasDrawable.js';
-import SpritesWebGLDrawable from '../display/drawables/SpritesWebGLDrawable.js';
-import Renderer from '../display/Renderer.js';
-import scenery from '../scenery.js';
-import Node from './Node.js';
+import { scenery, Node, Renderer, SpritesCanvasDrawable, SpritesWebGLDrawable } from '../imports.js';
 
 class Sprites extends Node {
   /**
@@ -124,8 +120,7 @@ class Sprites extends Node {
 
   /**
    * Computes whether the provided point is "inside" (contained) in this Node's self content, or "outside".
-   * @protected
-   * @override
+   * @public
    *
    * @param {Vector2} point - Considered to be in the local coordinate frame
    * @returns {boolean}

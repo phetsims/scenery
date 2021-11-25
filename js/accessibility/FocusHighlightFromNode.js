@@ -12,9 +12,7 @@
 
 import Shape from '../../../kite/js/Shape.js';
 import merge from '../../../phet-core/js/merge.js';
-import Node from '../nodes/Node.js';
-import scenery from '../scenery.js';
-import FocusHighlightPath from './FocusHighlightPath.js';
+import { scenery, Node, FocusHighlightPath } from '../imports.js';
 
 class FocusHighlightFromNode extends FocusHighlightPath {
   /**

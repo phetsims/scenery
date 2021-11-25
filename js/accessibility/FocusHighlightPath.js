@@ -12,11 +12,9 @@
 
 import Emitter from '../../../axon/js/Emitter.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import LineStyles from '../../../kite/js/util/LineStyles.js';
+import { DEFAULT_OPTIONS as LINE_STYLES_DEFAULT_OPTIONS } from '../../../kite/js/util/LineStyles.js';
 import merge from '../../../phet-core/js/merge.js';
-import Path from '../nodes/Path.js';
-import scenery from '../scenery.js';
-import Color from '../util/Color.js';
+import { scenery, Color, Path } from '../imports.js';
 
 // constants
 // default inner and outer strokes for the focus highlight
@@ -63,10 +61,10 @@ class FocusHighlightPath extends Path {
       // TODO: this could use nested options
       // remaining paintable options applied to both highlights
       lineDash: [],
-      lineCap: LineStyles.DEFAULT_OPTIONS.lineCap,
-      lineJoin: LineStyles.DEFAULT_OPTIONS.lineJoin,
-      miterLimit: LineStyles.DEFAULT_OPTIONS.miterLimit,
-      lineDashOffset: LineStyles.DEFAULT_OPTIONS.lineDashOffset
+      lineCap: LINE_STYLES_DEFAULT_OPTIONS.lineCap,
+      lineJoin: LINE_STYLES_DEFAULT_OPTIONS.lineJoin,
+      miterLimit: LINE_STYLES_DEFAULT_OPTIONS.miterLimit,
+      lineDashOffset: LINE_STYLES_DEFAULT_OPTIONS.lineDashOffset
     }, options );
 
     super( shape );

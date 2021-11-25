@@ -23,9 +23,7 @@ import NumberProperty from '../../../axon/js/NumberProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import merge from '../../../phet-core/js/merge.js';
-import scenery from '../scenery.js';
-import AlignBox from './AlignBox.js';
-import Node from './Node.js';
+import { scenery, Node, AlignBox } from '../imports.js';
 
 let globalId = 1;
 

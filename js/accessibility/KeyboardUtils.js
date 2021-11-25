@@ -9,7 +9,7 @@
  */
 
 import validate from '../../../axon/js/validate.js';
-import scenery from '../scenery.js';
+import { scenery } from '../imports.js';
 
 const KEY_RIGHT_ARROW = 'ArrowRight';
 const KEY_LEFT_ARROW = 'ArrowLeft';

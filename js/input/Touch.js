@@ -8,8 +8,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import scenery from '../scenery.js';
-import Pointer from './Pointer.js'; // extends Pointer
+import { scenery, Pointer } from '../imports.js';
 
 class Touch extends Pointer {
   /**

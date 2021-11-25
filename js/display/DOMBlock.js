@@ -8,8 +8,7 @@
  */
 
 import Poolable from '../../../phet-core/js/Poolable.js';
-import scenery from '../scenery.js';
-import Block from './Block.js';
+import { scenery, Block } from '../imports.js';
 
 class DOMBlock extends Block {
   /**

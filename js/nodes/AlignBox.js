@@ -21,9 +21,7 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import merge from '../../../phet-core/js/merge.js';
-import scenery from '../scenery.js';
-import AlignGroup from './AlignGroup.js';
-import Node from './Node.js';
+import { scenery, Node, AlignGroup } from '../imports.js';
 
 const ALIGNMENT_CONTAINER_OPTION_KEYS = [
   'alignBounds', // {Bounds2|null} - See setAlignBounds() for more documentation

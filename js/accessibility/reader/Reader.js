@@ -13,7 +13,7 @@
  */
 
 import Emitter from '../../../../axon/js/Emitter.js';
-import scenery from '../../scenery.js';
+import { scenery } from '../../imports.js';
 
 class Reader {
   /**

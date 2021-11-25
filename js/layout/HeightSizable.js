@@ -10,7 +10,7 @@
 
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import memoize from '../../../phet-core/js/memoize.js';
-import scenery from '../scenery.js';
+import { scenery } from '../imports.js';
 
 const HEIGHT_SIZABLE_OPTION_KEYS = [
   'preferredHeight',

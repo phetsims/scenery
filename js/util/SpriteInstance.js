@@ -14,7 +14,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import Shape from '../../../kite/js/Shape.js';
 import Enumeration from '../../../phet-core/js/Enumeration.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
-import scenery from '../scenery.js';
+import { scenery } from '../imports.js';
 
 const scratchVector = new Vector2( 0, 0 );
 const scratchMatrix = Matrix3.IDENTITY.copy();

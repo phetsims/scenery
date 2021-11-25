@@ -10,8 +10,7 @@
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
-import scenery from '../scenery.js';
-import svgns from '../util/svgns.js';
+import { scenery, svgns } from '../imports.js';
 
 let globalId = 1;
 

@@ -7,8 +7,7 @@
  */
 
 import Vector3 from '../../../dot/js/Vector3.js';
-import scenery from '../scenery.js';
-import Pointer from './Pointer.js';
+import { scenery, Pointer } from '../imports.js';
 
 class Mouse extends Pointer {
   constructor() {

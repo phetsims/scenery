@@ -6,8 +6,7 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
-import scenery from '../scenery.js';
-import LayoutBox from './LayoutBox.js';
+import { scenery, LayoutBox } from '../imports.js';
 
 class HBox extends LayoutBox {
   /**

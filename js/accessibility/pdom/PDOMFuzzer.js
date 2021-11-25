@@ -9,10 +9,7 @@
 import Permutation from '../../../../dot/js/Permutation.js';
 import Random from '../../../../dot/js/Random.js';
 import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
-import Display from '../../display/Display.js';
-import Node from '../../nodes/Node.js';
-import scenery from '../../scenery.js';
-import PDOMTree from './PDOMTree.js';
+import { scenery, Node, Display, PDOMTree } from '../../imports.js';
 
 class PDOMFuzzer {
   /**

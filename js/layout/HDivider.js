@@ -6,9 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import scenery from '../scenery.js';
-import Divider from './Divider.js';
-import HeightSizable from './HeightSizable.js';
+import { scenery, Divider, HeightSizable } from '../imports.js';
 
 class HDivider extends HeightSizable( Divider ) {
   /**

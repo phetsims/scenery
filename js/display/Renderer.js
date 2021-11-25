@@ -10,7 +10,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import scenery from '../scenery.js';
+import { scenery } from '../imports.js';
 
 // now it's a namespace
 const Renderer = {};

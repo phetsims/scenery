@@ -14,10 +14,7 @@ import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
 import merge from '../../../../phet-core/js/merge.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
-import scenery from '../../scenery.js';
-import FocusManager from '../FocusManager.js';
-import PDOMSiblingStyle from './PDOMSiblingStyle.js';
-import PDOMUtils from './PDOMUtils.js';
+import { scenery, FocusManager, PDOMSiblingStyle, PDOMUtils } from '../../imports.js';
 
 // constants
 const PRIMARY_SIBLING = 'PRIMARY_SIBLING';

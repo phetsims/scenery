@@ -10,7 +10,7 @@ import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import Enumeration from '../../../phet-core/js/Enumeration.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import mutate from '../../../phet-core/js/mutate.js';
-import scenery from '../scenery.js';
+import { scenery } from '../imports.js';
 
 const GRID_CONFIGURABLE_OPTION_KEYS = [
   'xAlign',

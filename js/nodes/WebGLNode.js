@@ -13,11 +13,7 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Shape from '../../../kite/js/Shape.js';
-import WebGLNodeDrawable from '../display/drawables/WebGLNodeDrawable.js';
-import Renderer from '../display/Renderer.js';
-import scenery from '../scenery.js';
-import Utils from '../util/Utils.js';
-import Node from './Node.js';
+import { scenery, Utils, Node, Renderer, WebGLNodeDrawable } from '../imports.js';
 
 const WEBGL_NODE_OPTION_KEYS = [
   'canvasBounds' // {Bounds2} - Sets the available Canvas bounds that content will show up in. See setCanvasBounds()
@@ -122,8 +118,7 @@ class WebGLNode extends Node {
 
   /**
    * Computes whether the provided point is "inside" (contained) in this Node's self content, or "outside".
-   * @protected
-   * @override
+   * @public
    *
    * If WebGLNode subtypes want to support being picked or hit-tested, it should override this function.
    *

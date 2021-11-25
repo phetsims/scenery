@@ -8,8 +8,7 @@
  */
 
 import Poolable from '../../../phet-core/js/Poolable.js';
-import scenery from '../scenery.js';
-import Input from './Input.js';
+import { scenery, Input } from '../imports.js';
 
 class BatchedDOMEvent {
   /**

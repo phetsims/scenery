@@ -8,8 +8,7 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Shape from '../../../kite/js/Shape.js';
-import scenery from '../scenery.js';
-import ShapeBasedOverlay from './ShapeBasedOverlay.js';
+import { scenery, ShapeBasedOverlay } from '../imports.js';
 
 class FittedBlockBoundsOverlay extends ShapeBasedOverlay {
   /**

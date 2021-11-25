@@ -13,15 +13,10 @@ import merge from '../../../phet-core/js/merge.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
 import VoidIO from '../../../tandem/js/types/VoidIO.js';
-import ImageCanvasDrawable from '../display/drawables/ImageCanvasDrawable.js';
-import ImageDOMDrawable from '../display/drawables/ImageDOMDrawable.js';
-import ImageSVGDrawable from '../display/drawables/ImageSVGDrawable.js';
-import ImageWebGLDrawable from '../display/drawables/ImageWebGLDrawable.js';
-import Renderer from '../display/Renderer.js';
-import scenery from '../scenery.js';
-import SpriteSheet from '../util/SpriteSheet.js';
-import Imageable from './Imageable.js';
-import Node from './Node.js';
+import Matrix3 from '../../../dot/js/Matrix3.js';
+import Vector2 from '../../../dot/js/Vector2.js';
+import Shape from '../../../kite/js/Shape.js';
+import { scenery, SpriteSheet, Imageable, Renderer, Node, NodeOptions, CanvasContextWrapper, ImageCanvasDrawable, ImageDOMDrawable, ImageSVGDrawable, ImageWebGLDrawable, Instance, DOMSelfDrawable, SVGSelfDrawable, CanvasSelfDrawable, WebGLSelfDrawable, IImageDrawable } from '../imports.js';
 
 // Image-specific options that can be passed in the constructor or mutate() call.
 const IMAGE_OPTION_KEYS = [
@@ -37,20 +32,37 @@ const IMAGE_OPTION_KEYS = [
   'hitTestPixels' // {boolean} - Whether non-transparent pixels will control contained points, see setHitTestPixels() for documentation
 ];
 
+type Mipmap = {
+  width: number,
+  height: number,
+  url: string,
+  canvas?: HTMLCanvasElement,
+  img?: HTMLImageElement,
+  updateCanvas?: () => void
+}[];
+
+type ImageOptions = {
+  image?: string | HTMLImageElement | HTMLCanvasElement | Mipmap,
+  imageOpacity?: number,
+  imageBounds?: Bounds2 | null,
+  initialWidth?: number,
+  initialHeight?: number,
+  mipmap?: boolean,
+  mipmapBias?: number,
+  mipmapInitialLevel?: number,
+  mipmapMaxLevel?: number,
+  hitTestPixels?: boolean
+} & NodeOptions;
+
 /**
  * @extends Node
  */
 class Image extends Imageable( Node ) {
-  /**
-   * Constructs an Image node from a particular source.
-   *
-   * IMAGE_OPTION_KEYS (above) describes the available options keys that can be provided, on top of Node's options.
-   *
-   * @param {string|HTMLImageElement|HTMLCanvasElement|Array} image - See setImage() for details.
-   * @param {Object} [options] - Image-specific options are documented in IMAGE_OPTION_KEYS above, and can be provided
-   *                             along-side options for Node
-   */
-  constructor( image, options ) {
+
+  // If non-null, determines what is considered "inside" the image for containment and hit-testing.
+  _imageBounds: Bounds2 | null;
+
+  constructor( image: string | HTMLImageElement | HTMLCanvasElement | Mipmap, options?: ImageOptions ) {
 
     super();
 
@@ -59,8 +71,6 @@ class Image extends Imageable( Node ) {
       image: image
     }, options );
 
-    // @private {Bounds2|null} - If non-null, determines what is considered "inside" the image for containment and
-    // hit-testing.
     this._imageBounds = null;
 
     this.mutate( options );
@@ -69,37 +79,7 @@ class Image extends Imageable( Node ) {
   }
 
   /**
-   * Adapter that calls into Imageable, for TypeScript support
-   * @param {string|HTMLImageElement|HTMLCanvasElement|Array} image - See documentation above
-   */
-  set image( image ) {
-
-    // @ts-ignore - to remind us to visit this once we have TypeScript common code support
-    this.setImage( image );
-  }
-
-  get image() {
-
-    // @ts-ignore - to remind us to visit this once we have TypeScript common code support
-    return this.getImage();
-  }
-
-  /**
-   * Adapter that calls into Imageable, for TypeScript support
-   * @param {string|HTMLImageElement|HTMLCanvasElement|Array} image - See documentation above
-   * @returns {Image} - Self reference for chaining
-   * @public
-   */
-  setImage( image ) {
-
-    // @ts-ignore - to remind us to visit this once we have TypeScript common code support
-    return super.setImage( image );
-  }
-
-  /**
    * Triggers recomputation of the image's bounds and refreshes any displays output of the image.
-   * @public
-   * @override
    *
    * Generally this can trigger recomputation of mipmaps, will mark any drawables as needing repaints, and will
    * cause a spritesheet change for WebGL.
@@ -117,7 +97,7 @@ class Image extends Imageable( Node ) {
 
     const stateLen = this._drawables.length;
     for ( let i = 0; i < stateLen; i++ ) {
-      this._drawables[ i ].markDirtyImage();
+      ( this._drawables[ i ] as unknown as IImageDrawable ).markDirtyImage();
     }
 
     super.invalidateImage();
@@ -127,7 +107,6 @@ class Image extends Imageable( Node ) {
 
   /**
    * Recomputes what renderers are supported, given the current image information.
-   * @protected
    */
   invalidateSupportedRenderers() {
 
@@ -155,16 +134,13 @@ class Image extends Imageable( Node ) {
 
   /**
    * Sets an opacity that is applied only to this image (will not affect children or the rest of the node's subtree).
-   * @public
-   * @override
    *
    * This should generally be preferred over Node's opacity if it has the same result, as modifying this will be much
    * faster, and will not force additional Canvases or intermediate steps in display.
    *
-   * @param {number} imageOpacity - Should be a number between 0 (transparent) and 1 (opaque), just like normal
-   *                                opacity.
+   * @param imageOpacity - Should be a number between 0 (transparent) and 1 (opaque), just like normal opacity.
    */
-  setImageOpacity( imageOpacity ) {
+  setImageOpacity( imageOpacity: number ) {
     const changed = this._imageOpacity !== imageOpacity;
 
     super.setImageOpacity( imageOpacity );
@@ -172,7 +148,7 @@ class Image extends Imageable( Node ) {
     if ( changed ) {
       const stateLen = this._drawables.length;
       for ( let i = 0; i < stateLen; i++ ) {
-        this._drawables[ i ].markDirtyImageOpacity();
+        ( this._drawables[ i ] as unknown as IImageDrawable ).markDirtyImageOpacity();
       }
     }
   }
@@ -180,14 +156,11 @@ class Image extends Imageable( Node ) {
   /**
    * Sets the imageBounds value for the Image. If non-null, determines what is considered "inside" the image for
    * containment and hit-testing.
-   * @public
    *
    * NOTE: This is accomplished by using any provided imageBounds as the node's own selfBounds. This will affect layout,
    * hit-testing, and anything else using the bounds of this node.
-   *
-   * @param {Bounds2|null} imageBounds
    */
-  setImageBounds( imageBounds ) {
+  setImageBounds( imageBounds: Bounds2 | null ) {
     if ( this._imageBounds !== imageBounds ) {
       this._imageBounds = imageBounds;
 
@@ -195,26 +168,19 @@ class Image extends Imageable( Node ) {
     }
   }
 
-  set imageBounds( value ) { this.setImageBounds( value ); }
+  set imageBounds( value: Bounds2 | null ) { this.setImageBounds( value ); }
 
   /**
    * Returns the imageBounds, see setImageBounds for details.
-   * @public
-   *
-   * @returns {Bounds2|null}
    */
-  getImageBounds() {
+  getImageBounds(): Bounds2 | null {
     return this._imageBounds;
   }
 
-  get imageBounds() { return this._imageBounds; }
+  get imageBounds(): Bounds2 | null { return this._imageBounds; }
 
   /**
    * Whether this Node itself is painted (displays something itself).
-   * @public
-   * @override
-   *
-   * @returns {boolean}
    */
   isPainted() {
     // Always true for Image nodes
@@ -224,78 +190,67 @@ class Image extends Imageable( Node ) {
   /**
    * Draws the current Node's self representation, assuming the wrapper's Canvas context is already in the local
    * coordinate frame of this node.
-   * @protected
-   * @override
    *
-   * @param {CanvasContextWrapper} wrapper
-   * @param {Matrix3} matrix - The transformation matrix already applied to the context.
+   * @param wrapper
+   * @param matrix - The transformation matrix already applied to the context.
    */
-  canvasPaintSelf( wrapper, matrix ) {
+  protected canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
     //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily.
     ImageCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
   }
 
   /**
-   * Creates a DOM drawable for this Image.
-   * @public (scenery-internal)
-   * @override
+   * Creates a DOM drawable for this Image. (scenery-internal)
    *
-   * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
-   * @param {Instance} instance - Instance object that will be associated with the drawable
-   * @returns {DOMSelfDrawable}
+   * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+   * @param instance - Instance object that will be associated with the drawable
    */
-  createDOMDrawable( renderer, instance ) {
+  createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
+    // @ts-ignore - Poolable
     return ImageDOMDrawable.createFromPool( renderer, instance );
   }
 
   /**
-   * Creates a SVG drawable for this Image.
-   * @public (scenery-internal)
-   * @override
+   * Creates a SVG drawable for this Image. (scenery-internal)
    *
-   * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
-   * @param {Instance} instance - Instance object that will be associated with the drawable
-   * @returns {SVGSelfDrawable}
+   * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+   * @param instance - Instance object that will be associated with the drawable
    */
-  createSVGDrawable( renderer, instance ) {
+  createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
+    // @ts-ignore - Poolable
     return ImageSVGDrawable.createFromPool( renderer, instance );
   }
 
   /**
-   * Creates a Canvas drawable for this Image.
-   * @public (scenery-internal)
-   * @override
+   * Creates a Canvas drawable for this Image. (scenery-internal)
    *
-   * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
-   * @param {Instance} instance - Instance object that will be associated with the drawable
+   * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+   * @param instance - Instance object that will be associated with the drawable
    * @returns {CanvasSelfDrawable}
    */
-  createCanvasDrawable( renderer, instance ) {
+  createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
+    // @ts-ignore - Poolable
     return ImageCanvasDrawable.createFromPool( renderer, instance );
   }
 
   /**
-   * Creates a WebGL drawable for this Image.
-   * @public (scenery-internal)
-   * @override
+   * Creates a WebGL drawable for this Image. (scenery-internal)
    *
-   * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
-   * @param {Instance} instance - Instance object that will be associated with the drawable
+   * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+   * @param instance - Instance object that will be associated with the drawable
    * @returns {WebGLSelfDrawable}
    */
-  createWebGLDrawable( renderer, instance ) {
+  createWebGLDrawable( renderer: number, instance: Instance ): WebGLSelfDrawable {
+    // @ts-ignore - Poolable
     return ImageWebGLDrawable.createFromPool( renderer, instance );
   }
 
   /**
    * Override this for computation of whether a point is inside our self content (defaults to selfBounds check).
-   * @protected
-   * @override
    *
-   * @param {Vector2} point - Considered to be in the local coordinate frame
-   * @returns {boolean}
+   * @param point - Considered to be in the local coordinate frame
    */
-  containsPointSelf( point ) {
+  containsPointSelf( point: Vector2 ): boolean {
     const inBounds = Node.prototype.containsPointSelf.call( this, point );
 
     if ( !inBounds || !this._hitTestPixels || !this._hitTestImageData ) {
@@ -307,12 +262,9 @@ class Image extends Imageable( Node ) {
 
   /**
    * Returns a Shape that represents the area covered by containsPointSelf.
-   * @public
-   *
-   * @returns {Shape}
    */
-  getSelfShape() {
-    if ( this._hitTestPixels ) {
+  getSelfShape(): Shape {
+    if ( this._hitTestPixels && this._hitTestImageData ) {
       // If we're hit-testing pixels, return that shape included.
       return Imageable.hitTestDataToShape( this._hitTestImageData, this.imageWidth, this.imageHeight );
     }
@@ -324,8 +276,6 @@ class Image extends Imageable( Node ) {
 
   /**
    * Triggers recomputation of mipmaps (as long as mipmapping is enabled)
-   * @protected
-   * @override
    */
   invalidateMipmaps() {
     const markDirty = this._image && this._mipmap && !this._mipmapData;
@@ -335,10 +285,12 @@ class Image extends Imageable( Node ) {
     if ( markDirty ) {
       const stateLen = this._drawables.length;
       for ( let i = 0; i < stateLen; i++ ) {
-        this._drawables[ i ].markDirtyMipmap();
+        ( this._drawables[ i ] as unknown as IImageDrawable ).markDirtyMipmap();
       }
     }
   }
+
+  static ImageIO: IOType;
 }
 
 /**
@@ -349,7 +301,7 @@ class Image extends Imageable( Node ) {
  * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
  *       cases that may apply.
  */
-Image.prototype._mutatorKeys = IMAGE_OPTION_KEYS.concat( Node.prototype._mutatorKeys );
+Image.prototype._mutatorKeys = [ ...IMAGE_OPTION_KEYS, ...Node.prototype._mutatorKeys ];
 
 /**
  * {Array.<String>} - List of all dirty flags that should be available on drawables created from this node (or
@@ -358,13 +310,13 @@ Image.prototype._mutatorKeys = IMAGE_OPTION_KEYS.concat( Node.prototype._mutator
  * @public (scenery-internal)
  * @override
  */
-Image.prototype.drawableMarkFlags = Node.prototype.drawableMarkFlags.concat( [ 'image', 'imageOpacity', 'mipmap' ] );
+Image.prototype.drawableMarkFlags = [ ...Node.prototype.drawableMarkFlags, 'image', 'imageOpacity', 'mipmap' ];
 
 // @public {Object} - Initial values for most Node mutator options
 Image.DEFAULT_OPTIONS = merge( {}, Node.DEFAULT_OPTIONS, Imageable.DEFAULT_OPTIONS );
 
 // NOTE: Not currently in use
-Image.IOType = new IOType( 'ImageIO', {
+Image.ImageIO = new IOType( 'ImageIO', {
   valueType: Image,
   supertype: Node.NodeIO,
   events: [ 'changed' ],
@@ -372,9 +324,10 @@ Image.IOType = new IOType( 'ImageIO', {
     setImage: {
       returnType: VoidIO,
       parameterTypes: [ StringIO ],
-      implementation: function( base64Text ) {
+      implementation: function( base64Text: string ) {
         const im = new window.Image();
         im.src = base64Text;
+        // @ts-ignore TODO: how would this even work?
         this.image = im;
       },
       documentation: 'Set the image from a base64 string',
@@ -384,4 +337,4 @@ Image.IOType = new IOType( 'ImageIO', {
 } );
 
 scenery.register( 'Image', Image );
-export default Image;
+export { Image as default, ImageOptions, Mipmap };

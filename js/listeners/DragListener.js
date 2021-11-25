@@ -77,13 +77,8 @@ import merge from '../../../phet-core/js/merge.js';
 import EventType from '../../../tandem/js/EventType.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import SceneryEvent from '../input/SceneryEvent.js';
-
 // For TypeScript support
-import Node from '../nodes/Node.js'; // eslint-disable-line no-unused-vars
-import scenery from '../scenery.js';
-import TransformTracker from '../util/TransformTracker.js';
-import PressListener from './PressListener.js';
+import { scenery, Node, TransformTracker, PressListener, SceneryEvent } from '../imports.js'; // eslint-disable-line no-unused-vars
 
 // Scratch vectors used to prevent allocations
 const scratchVector2A = new Vector2( 0, 0 );
@@ -363,7 +358,7 @@ class DragListener extends PressListener {
    * @public (scenery-internal) (part of the scenery listener API)
    *
    * @param {SceneryEvent} event
-   * @param {function} callback
+   * @param {function} [callback]
    * @returns {boolean}
    */
   click( event, callback ) {

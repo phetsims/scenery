@@ -20,9 +20,7 @@ import merge from '../../../../phet-core/js/merge.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
 import Announcer from '../../../../utterance-queue/js/Announcer.js';
 import Utterance from '../../../../utterance-queue/js/Utterance.js';
-import scenery from '../../scenery.js';
-import globalKeyStateTracker from '../globalKeyStateTracker.js';
-import KeyboardUtils from '../KeyboardUtils.js';
+import { scenery, globalKeyStateTracker, KeyboardUtils } from '../../imports.js';
 
 const DEFAULT_PRIORITY = 1;
 

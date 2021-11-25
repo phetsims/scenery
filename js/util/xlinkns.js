@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import scenery from '../scenery.js';
+import { scenery } from '../imports.js';
 
 const xlinkns = 'http://www.w3.org/1999/xlink';
 

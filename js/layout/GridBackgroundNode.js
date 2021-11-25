@@ -7,10 +7,7 @@
  */
 
 import merge from '../../../phet-core/js/merge.js';
-import Node from '../nodes/Node.js';
-import Rectangle from '../nodes/Rectangle.js';
-import scenery from '../scenery.js';
-import GridConstraint from './GridConstraint.js';
+import { scenery, Node, Rectangle, GridConstraint } from '../imports.js';
 
 class GridBackgroundNode extends Node {
   /**

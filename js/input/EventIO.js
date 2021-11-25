@@ -16,7 +16,7 @@ import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
 import ObjectLiteralIO from '../../../tandem/js/types/ObjectLiteralIO.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
-import scenery from '../scenery.js';
+import { scenery } from '../imports.js';
 
 const EventIO = new IOType( 'EventIO', {
   valueType: window.Event,

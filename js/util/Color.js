@@ -15,7 +15,7 @@ import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import Utils from '../../../dot/js/Utils.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
-import scenery from '../scenery.js';
+import { scenery } from '../imports.js';
 
 // constants
 const clamp = Utils.clamp;

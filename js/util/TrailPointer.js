@@ -12,8 +12,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import scenery from '../scenery.js';
-import Trail from './Trail.js';
+import { scenery, Trail } from '../imports.js';
 
 class TrailPointer {
   /**

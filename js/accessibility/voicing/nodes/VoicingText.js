@@ -8,10 +8,7 @@
  */
 
 import merge from '../../../../../phet-core/js/merge.js';
-import Text from '../../../nodes/Text.js';
-import scenery from '../../../scenery.js';
-import ReadingBlock from '../ReadingBlock.js';
-import ReadingBlockHighlight from '../ReadingBlockHighlight.js';
+import { scenery, Text, ReadingBlock, ReadingBlockHighlight } from '../../../imports.js';
 
 class VoicingText extends Text {
 

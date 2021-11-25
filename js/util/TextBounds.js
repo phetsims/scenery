@@ -7,11 +7,7 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import scenery from '../scenery.js';
-import CanvasContextWrapper from './CanvasContextWrapper.js';
-import Font from './Font.js';
-import svgns from './svgns.js';
-import Utils from './Utils.js';
+import { scenery, CanvasContextWrapper, Font, svgns, Utils } from '../imports.js';
 
 // @private {string} - ID for a container for our SVG test element (determined to find the size of text elements with SVG)
 const TEXT_SIZE_CONTAINER_ID = 'sceneryTextSizeContainer';
@@ -96,7 +92,7 @@ const TextBounds = {
    *
    * NOTE: Calling code relies on the new Bounds2 instance, as they mutate it.
    *
-   * @param {Text} text - The Text node
+   * @param {scenery.Text} text - The Text node
    * @returns {Bounds2}
    */
   accurateCanvasBounds( text ) {

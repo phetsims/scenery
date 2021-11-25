@@ -11,11 +11,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import KiteLine from '../../../kite/js/segments/Line.js'; // eslint-disable-line require-statement-match
 import Shape from '../../../kite/js/Shape.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
-import LineCanvasDrawable from '../display/drawables/LineCanvasDrawable.js';
-import LineSVGDrawable from '../display/drawables/LineSVGDrawable.js';
-import Renderer from '../display/Renderer.js';
-import scenery from '../scenery.js';
-import Path from './Path.js';
+import { scenery, Path, Renderer, LineCanvasDrawable, LineSVGDrawable } from '../imports.js';
 
 const LINE_OPTION_KEYS = [
   'p1', // {Vector2} - Start position
@@ -410,8 +406,7 @@ class Line extends Path {
 
   /**
    * Computes whether the provided point is "inside" (contained) in this Line's self content, or "outside".
-   * @protected
-   * @override
+   * @public
    *
    * Since an unstroked Line contains no area, we can quickly shortcut this operation.
    *

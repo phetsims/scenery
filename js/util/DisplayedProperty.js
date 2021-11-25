@@ -15,7 +15,7 @@
 
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import merge from '../../../phet-core/js/merge.js';
-import scenery from '../scenery.js';
+import { scenery } from '../imports.js';
 
 class DisplayedProperty extends BooleanProperty {
   /**

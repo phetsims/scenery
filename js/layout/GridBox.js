@@ -7,12 +7,7 @@
  */
 
 import merge from '../../../phet-core/js/merge.js';
-import WidthSizable from './WidthSizable.js';
-import HeightSizable from './HeightSizable.js';
-import Node from '../nodes/Node.js';
-import scenery from '../scenery.js';
-import GridCell from './GridCell.js';
-import GridConstraint from './GridConstraint.js';
+import { scenery, Node, GridCell, GridConstraint, WidthSizable, HeightSizable } from '../imports.js';
 
 // GridBox-specific options that can be passed in the constructor or mutate() call.
 const GRIDBOX_OPTION_KEYS = [

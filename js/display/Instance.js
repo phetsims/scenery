@@ -24,18 +24,7 @@ import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
-import scenery from '../scenery.js';
-import Trail from '../util/Trail.js';
-import Utils from '../util/Utils.js';
-import BackboneDrawable from './BackboneDrawable.js';
-import CanvasBlock from './CanvasBlock.js';
-import ChangeInterval from './ChangeInterval.js';
-import Drawable from './Drawable.js';
-import Fittability from './Fittability.js';
-import InlineCanvasCacheDrawable from './InlineCanvasCacheDrawable.js';
-import RelativeTransform from './RelativeTransform.js';
-import Renderer from './Renderer.js';
-import SharedCanvasCacheDrawable from './SharedCanvasCacheDrawable.js';
+import { scenery, Trail, Utils, Renderer, RelativeTransform, Drawable, ChangeInterval, Fittability, BackboneDrawable, CanvasBlock, InlineCanvasCacheDrawable, SharedCanvasCacheDrawable } from '../imports.js';
 
 let globalIdCounter = 1;
 

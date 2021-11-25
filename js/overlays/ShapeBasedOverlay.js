@@ -6,8 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import scenery from '../scenery.js';
-import svgns from '../util/svgns.js';
+import { scenery, svgns } from '../imports.js';
 
 class ShapeBasedOverlay {
   /**

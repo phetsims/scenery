@@ -14,12 +14,7 @@ import Orientation from '../../../phet-core/js/Orientation.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import merge from '../../../phet-core/js/merge.js';
 import mutate from '../../../phet-core/js/mutate.js';
-import Node from '../nodes/Node.js';
-import scenery from '../scenery.js';
-import Divider from './Divider.js';
-import FlowCell from './FlowCell.js';
-import FlowConfigurable from './FlowConfigurable.js';
-import LayoutConstraint from './LayoutConstraint.js';
+import { scenery, Node, Divider, FlowCell, FlowConfigurable, LayoutConstraint } from '../imports.js';
 
 const FLOW_CONSTRAINT_OPTION_KEYS = [
   'spacing',

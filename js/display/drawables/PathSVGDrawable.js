@@ -7,10 +7,7 @@
  */
 
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import scenery from '../../scenery.js';
-import svgns from '../../util/svgns.js';
-import SVGSelfDrawable from '../SVGSelfDrawable.js';
-import PathStatefulDrawable from './PathStatefulDrawable.js';
+import { scenery, svgns, SVGSelfDrawable, PathStatefulDrawable } from '../../imports.js';
 
 // TODO: change this based on memory and performance characteristics of the platform
 const keepSVGPathElements = true; // whether we should pool SVG elements for the SVG rendering states, or whether we should free them when possible for memory

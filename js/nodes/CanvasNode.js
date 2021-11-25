@@ -11,10 +11,7 @@
  */
 
 import Shape from '../../../kite/js/Shape.js';
-import CanvasNodeDrawable from '../display/drawables/CanvasNodeDrawable.js';
-import Renderer from '../display/Renderer.js';
-import scenery from '../scenery.js';
-import Node from './Node.js';
+import { scenery, Node, Renderer, CanvasNodeDrawable } from '../imports.js';
 
 class CanvasNode extends Node {
   /**
@@ -113,8 +110,7 @@ class CanvasNode extends Node {
 
   /**
    * Computes whether the provided point is "inside" (contained) in this Node's self content, or "outside".
-   * @protected
-   * @override
+   * @public
    *
    * If CanvasNode subtypes want to support being picked or hit-tested, it should override this function.
    *

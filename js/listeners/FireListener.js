@@ -16,9 +16,7 @@ import EventType from '../../../tandem/js/EventType.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
-import SceneryEvent from '../input/SceneryEvent.js';
-import scenery from '../scenery.js';
-import PressListener from './PressListener.js';
+import { scenery, SceneryEvent, PressListener } from '../imports.js';
 
 class FireListener extends PressListener {
   /**

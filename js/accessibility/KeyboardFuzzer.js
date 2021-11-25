@@ -9,10 +9,7 @@
 
 import stepTimer from '../../../axon/js/stepTimer.js';
 import Random from '../../../dot/js/Random.js';
-import scenery from '../scenery.js';
-import globalKeyStateTracker from './globalKeyStateTracker.js';
-import KeyboardUtils from './KeyboardUtils.js';
-import PDOMUtils from './pdom/PDOMUtils.js';
+import { scenery, globalKeyStateTracker, KeyboardUtils, PDOMUtils } from '../imports.js';
 
 // uppercase matters
 const keyboardTestingSchema = {

@@ -11,8 +11,7 @@ import Utils from '../../../dot/js/Utils.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../phet-core/js/OrientationPair.js';
 import merge from '../../../phet-core/js/merge.js';
-import scenery from '../scenery.js';
-import GridConfigurable from './GridConfigurable.js';
+import { scenery, GridConfigurable } from '../imports.js';
 
 // {Object.<GridConfigurable.Align,number>}
 const padRatioMap = {

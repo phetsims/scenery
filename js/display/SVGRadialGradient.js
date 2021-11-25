@@ -9,9 +9,7 @@
  */
 
 import Poolable from '../../../phet-core/js/Poolable.js';
-import scenery from '../scenery.js';
-import svgns from '../util/svgns.js';
-import SVGGradient from './SVGGradient.js';
+import { scenery, svgns, SVGGradient } from '../imports.js';
 
 class SVGRadialGradient extends SVGGradient {
   /**

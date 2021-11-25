@@ -30,11 +30,7 @@ import DerivedProperty from '../../../axon/js/DerivedProperty.js';
 import Property from '../../../axon/js/Property.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
-import scenery from '../scenery.js';
-import Focus from './Focus.js';
-import FocusDisplayedController from './FocusDisplayedController.js';
-import ReadingBlockUtterance from './voicing/ReadingBlockUtterance.js';
-import voicingManager from './voicing/voicingManager.js';
+import { scenery, Focus, FocusDisplayedController, ReadingBlockUtterance, voicingManager } from '../imports.js';
 
 class FocusManager {
   constructor() {

@@ -27,9 +27,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import scenery from '../scenery.js';
-import Features from './Features.js';
-import svgns from './svgns.js';
+import { scenery, Features, svgns } from '../imports.js';
 
 let globalId = 1;
 

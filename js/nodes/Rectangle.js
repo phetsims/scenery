@@ -10,14 +10,7 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Dimension2 from '../../../dot/js/Dimension2.js';
 import Shape from '../../../kite/js/Shape.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
-import RectangleCanvasDrawable from '../display/drawables/RectangleCanvasDrawable.js';
-import RectangleDOMDrawable from '../display/drawables/RectangleDOMDrawable.js';
-import RectangleSVGDrawable from '../display/drawables/RectangleSVGDrawable.js';
-import RectangleWebGLDrawable from '../display/drawables/RectangleWebGLDrawable.js';
-import Renderer from '../display/Renderer.js';
-import scenery from '../scenery.js';
-import Features from '../util/Features.js';
-import Path from './Path.js';
+import { scenery, Renderer, Features, Path, RectangleCanvasDrawable, RectangleDOMDrawable, RectangleSVGDrawable, RectangleWebGLDrawable } from '../imports.js';
 
 const RECTANGLE_OPTION_KEYS = [
   'rectBounds', // {Bounds2} - Sets x/y/width/height based on bounds. See setRectBounds() for more documentation.
@@ -689,8 +682,7 @@ class Rectangle extends Path {
 
   /**
    * Computes whether the provided point is "inside" (contained) in this Rectangle's self content, or "outside".
-   * @protected
-   * @override
+   * @public
    *
    * Handles axis-aligned optionally-rounded rectangles, although can only do optimized computation if it isn't
    * rounded. If it IS rounded, we check if a corner computation is needed (usually isn't), and only need to check

@@ -7,8 +7,7 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
-import scenery from '../scenery.js';
-import SelfDrawable from './SelfDrawable.js';
+import { scenery, SelfDrawable } from '../imports.js';
 
 class WebGLSelfDrawable extends SelfDrawable {
   /**

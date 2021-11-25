@@ -7,8 +7,7 @@
  */
 
 import Property from '../../../axon/js/Property.js';
-import scenery from '../scenery.js';
-import SpriteImage from './SpriteImage.js';
+import { scenery, SpriteImage } from '../imports.js';
 
 class Sprite {
   /**
