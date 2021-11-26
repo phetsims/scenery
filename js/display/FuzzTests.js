@@ -8,13 +8,7 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Shape from '../../../kite/js/Shape.js';
-import Node from '../nodes/Node.js';
-import Path from '../nodes/Path.js';
-import Text from '../nodes/Text.js';
-import Color from '../util/Color.js';
-import LinearGradient from '../util/LinearGradient.js';
-import RadialGradient from '../util/RadialGradient.js';
-import Display from './Display.js';
+import { Display, LinearGradient, RadialGradient, Color, Text, Path, Node } from '../imports.js';
 
 QUnit.module( 'Fuzz' );
 

@@ -183,6 +183,7 @@ export { default as SpriteListenable } from './listeners/SpriteListenable.js';
 export { default as SwipeListener } from './listeners/SwipeListener.js';
 
 export { default as ILayoutOptions } from './layout/ILayoutOptions.js';
+export { default as AlignPropertyBox } from './layout/AlignPropertyBox.js';
 export { default as WidthSizable } from './layout/WidthSizable.js';
 export { default as HeightSizable } from './layout/HeightSizable.js';
 export { default as Divider } from './layout/Divider.js';
@@ -292,3 +293,4 @@ export { default as Instance } from './display/Instance.js';
 export { default as Display } from './display/Display.js';
 
 export { default as IndexedNodeIO } from './nodes/IndexedNodeIO.js';
+export { default as PhetioControlledVisibilityProperty } from './util/PhetioControlledVisibilityProperty.js';

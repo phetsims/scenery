@@ -6,7 +6,7 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
-import Color from './Color.js';
+import { Color } from '../imports.js';
 
 QUnit.module( 'Color' );
 

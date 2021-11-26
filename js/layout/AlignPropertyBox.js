@@ -7,8 +7,7 @@
  */
 
 import merge from '../../../phet-core/js/merge.js';
-import AlignBox from '../nodes/AlignBox.js';
-import scenery from '../scenery.js';
+import { scenery, AlignBox } from '../imports.js';
 
 class AlignPropertyBox extends AlignBox {
   /**

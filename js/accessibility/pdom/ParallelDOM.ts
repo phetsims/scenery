@@ -2158,7 +2158,7 @@ class ParallelDOM extends PhetioObject {
    * Set the value of an input element.  Element must be a form element to support the value attribute. The input
    * value is converted to string since input values are generally string for HTML.
    */
-  setInputValue( value: string | number ) {
+  setInputValue( value: string | number | null ) {
     assert && assert( value === null || typeof value === 'string' || typeof value === 'number' );
     assert && this._tagName && assert( _.includes( FORM_ELEMENTS, this._tagName.toUpperCase() ), 'dom element must be a form element to support value' );
 
@@ -2175,18 +2175,16 @@ class ParallelDOM extends PhetioObject {
     }
   }
 
-  set inputValue( value: string | number ) { this.setInputValue( value ); }
+  set inputValue( value: string | number | null ) { this.setInputValue( value ); }
 
   /**
    * Get the value of the element. Element must be a form element to support the value attribute.
    */
-  getInputValue(): string | number {
-    assert && assert( this._inputValue !== null );
-
-    return this._inputValue!;
+  getInputValue(): string | number | null {
+    return this._inputValue;
   }
 
-  get inputValue(): string | number { return this.getInputValue(); }
+  get inputValue(): string | number | null { return this.getInputValue(); }
 
   /**
    * Set whether or not the checked attribute appears on the dom elements associated with this Node's
