@@ -93,7 +93,7 @@ export { default as CanvasNode } from './nodes/CanvasNode.js';
 export { default as Circle } from './nodes/Circle.js';
 export { default as DOM } from './nodes/DOM.js';
 export { default as Line } from './nodes/Line.js';
-export { default as Rectangle } from './nodes/Rectangle.js';
+export { default as Rectangle, RectangleOptions } from './nodes/Rectangle.js';
 export { default as Sprites } from './nodes/Sprites.js';
 export { default as WebGLNode } from './nodes/WebGLNode.js';
 
@@ -234,6 +234,7 @@ export { default as IImageDrawable } from './display/drawables/IImageDrawable.js
 export { default as IPaintableDrawable } from './display/drawables/IPaintableDrawable.js';
 export { default as IPathDrawable } from './display/drawables/IPathDrawable.js';
 export { default as ITextDrawable } from './display/drawables/ITextDrawable.js';
+export { default as IRectangleDrawable } from './display/drawables/IRectangleDrawable.js';
 
 // Concrete drawables
 export { default as CanvasNodeDrawable } from './display/drawables/CanvasNodeDrawable.js';

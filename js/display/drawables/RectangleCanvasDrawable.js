@@ -36,7 +36,7 @@ class RectangleCanvasDrawable extends PaintableStatelessDrawable( CanvasSelfDraw
    * This is part of the CanvasSelfDrawable API required to be implemented for subtypes.
    *
    * @param {CanvasContextWrapper} wrapper - Contains the Canvas and its drawing context
-   * @param {Node} node - Our node that is being drawn
+   * @param {scenery.Node} node - Our node that is being drawn
    * @param {Matrix3} matrix - The transformation matrix applied for this node's coordinate system.
    */
   paintCanvas( wrapper, node, matrix ) {

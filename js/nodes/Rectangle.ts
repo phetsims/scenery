@@ -10,7 +10,9 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Dimension2 from '../../../dot/js/Dimension2.js';
 import Shape from '../../../kite/js/Shape.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
-import { scenery, Renderer, Features, Path, RectangleCanvasDrawable, RectangleDOMDrawable, RectangleSVGDrawable, RectangleWebGLDrawable } from '../imports.js';
+import Vector2 from '../../../dot/js/Vector2.js';
+import { scenery, Renderer, Features, Gradient, Pattern, Path, Instance, PathOptions, IRectangleDrawable, CanvasSelfDrawable, DOMSelfDrawable, SVGSelfDrawable, WebGLSelfDrawable, RectangleCanvasDrawable, RectangleDOMDrawable, RectangleSVGDrawable, RectangleWebGLDrawable, CanvasContextWrapper } from '../imports.js';
+import Matrix3 from '../../../dot/js/Matrix3.js';
 
 const RECTANGLE_OPTION_KEYS = [
   'rectBounds', // {Bounds2} - Sets x/y/width/height based on bounds. See setRectBounds() for more documentation.
@@ -24,7 +26,37 @@ const RECTANGLE_OPTION_KEYS = [
   'cornerYRadius' // {number} - Sets vertical corner radius. See setCornerYRadius() for more documentation.
 ];
 
+type RectangleOptions = {
+  rectBounds?: Bounds2,
+  rectSize?: Dimension2,
+  rectX?: number,
+  rectY?: number,
+  rectWidth?: number,
+  rectHeight?: number,
+  cornerRadius?: number,
+  cornerXRadius?: number,
+  cornerYRadius?: number
+} & PathOptions;
+
 class Rectangle extends Path {
+  // X value of the left side of the rectangle
+  _rectX: number;
+
+  // Y value of the top side of the rectangle
+  _rectY: number;
+
+  // Width of the rectangle
+  _rectWidth: number;
+
+  // Height of the rectangle
+  _rectHeight: number;
+
+  // X radius of rounded corners
+  _cornerXRadius: number;
+
+  // Y radius of rounded corners
+  _cornerYRadius: number;
+
   /**
    * @public
    *
@@ -48,34 +80,28 @@ class Rectangle extends Path {
    * same non-zero value, circular rounded corners will be used.
    *
    * Available parameters to the various constructor options:
-   * @param {number|Bounds2|Object} x - x-position of the upper-left corner (left bound)
-   * @param {number|Object} [y] - y-position of the upper-left corner (top bound)
-   * @param {number} [width] - width of the rectangle to the right of the upper-left corner, required to be >= 0
-   * @param {number|Object} [height] - height of the rectangle below the upper-left corner, required to be >= 0
-   * @param {number|Object} [cornerXRadius] - positive vertical radius (width) of the rounded corner, or 0 to indicate the corner should be sharp
-   * @param {number} [cornerYRadius] - positive horizontal radius (height) of the rounded corner, or 0 to indicate the corner should be sharp
-   * @param {Object} [options] - Rectangle-specific options are documented in RECTANGLE_OPTION_KEYS above, and can be provided
+   * @param x - x-position of the upper-left corner (left bound)
+   * @param [y] - y-position of the upper-left corner (top bound)
+   * @param [width] - width of the rectangle to the right of the upper-left corner, required to be >= 0
+   * @param [height] - height of the rectangle below the upper-left corner, required to be >= 0
+   * @param [cornerXRadius] - positive vertical radius (width) of the rounded corner, or 0 to indicate the corner should be sharp
+   * @param [cornerYRadius] - positive horizontal radius (height) of the rounded corner, or 0 to indicate the corner should be sharp
+   * @param [options] - Rectangle-specific options are documented in RECTANGLE_OPTION_KEYS above, and can be provided
    *                             along-side options for Node
    */
-  constructor( x, y, width, height, cornerXRadius, cornerYRadius, options ) {
+  constructor( options?: RectangleOptions );
+  constructor( bounds: Bounds2, options?: RectangleOptions );
+  constructor( bounds: Bounds2, cornerRadiusX: number, cornerRadiusY: number, options?: RectangleOptions );
+  constructor( x: number, y: number, width: number, height: number, options?: RectangleOptions );
+  constructor( x: number, y: number, width: number, height: number, cornerXRadius: number, cornerYRadius: number, options?: RectangleOptions );
+  constructor( x?: number | Bounds2 | RectangleOptions, y?: number | RectangleOptions, width?: number, height?: number | RectangleOptions, cornerXRadius?: number | RectangleOptions, cornerYRadius?: number, options?: RectangleOptions ) {
     super( null );
 
-    // @private {number} - X value of the left side of the rectangle
     this._rectX = 0;
-
-    // @private {number} - Y value of the top side of the rectangle
     this._rectY = 0;
-
-    // @private {number} - Width of the rectangle
     this._rectWidth = 0;
-
-    // @private {number} - Height of the rectangle
     this._rectHeight = 0;
-
-    // @private {number} - X radius of rounded corners
     this._cornerXRadius = 0;
-
-    // @private {number} - Y radius of rounded corners
     this._cornerYRadius = 0;
 
     if ( typeof x === 'object' ) {
@@ -155,34 +181,30 @@ class Rectangle extends Path {
 
 
   /**
-   * Determines the maximum arc size that can be accomodated by the current width and height.
-   * @private
+   * Determines the maximum arc size that can be accommodated by the current width and height.
    *
    * If the corner radii are the same as the maximum arc size on a square, it will appear to be a circle (the arcs
    * take up all of the room, and leave no straight segments). In the case of a non-square, one direction of edges
    * will exist (e.g. top/bottom or left/right), while the other edges would be fully rounded.
-   *
-   * @returns {number}
    */
-  getMaximumArcSize() {
+  private getMaximumArcSize(): number {
     return Math.min( this._rectWidth / 2, this._rectHeight / 2 );
   }
 
   /**
    * Determines the default allowed renderers (returned via the Renderer bitmask) that are allowed, given the
-   * current stroke options.
-   * @public (scenery-internal)
-   * @override
+   * current stroke options. (scenery-internal)
    *
    * We can support the DOM renderer if there is a solid-styled stroke with non-bevel line joins
    * (which otherwise wouldn't be supported).
    *
-   * @returns {number} - Renderer bitmask, see Renderer for details
+   * @returns - Renderer bitmask, see Renderer for details
    */
-  getStrokeRendererBitmask() {
+  getStrokeRendererBitmask(): number {
     let bitmask = super.getStrokeRendererBitmask();
+    const stroke = this.getStroke();
     // DOM stroke handling doesn't YET support gradients, patterns, or dashes (with the current implementation, it shouldn't be too hard)
-    if ( this.hasStroke() && !this.getStroke().isGradient && !this.getStroke().isPattern && !this.hasLineDash() ) {
+    if ( stroke && !( stroke instanceof Gradient ) && !( stroke instanceof Pattern ) && !this.hasLineDash() ) {
       // we can't support the bevel line-join with our current DOM rectangle display
       if ( this.getLineJoin() === 'miter' || ( this.getLineJoin() === 'round' && Features.borderRadius ) ) {
         bitmask |= Renderer.bitmaskDOM;
@@ -197,13 +219,11 @@ class Rectangle extends Path {
   }
 
   /**
-   * Determines the allowed renderers that are allowed (or excluded) based on the current Path.
-   * @public (scenery-internal)
-   * @override
+   * Determines the allowed renderers that are allowed (or excluded) based on the current Path. (scenery-internal)
    *
-   * @returns {number} - Renderer bitmask, see Renderer for details
+   * @returns - Renderer bitmask, see Renderer for details
    */
-  getPathRendererBitmask() {
+  getPathRendererBitmask(): number {
     let bitmask = Renderer.bitmaskCanvas | Renderer.bitmaskSVG;
 
     const maximumArcSize = this.getMaximumArcSize();
@@ -227,17 +247,15 @@ class Rectangle extends Path {
 
   /**
    * Sets all of the shape-determining parameters for the rectangle.
-   * @public
    *
-   * @param {number} x - The x-position of the left side of the rectangle.
-   * @param {number} y - The y-position of the top side of the rectangle.
-   * @param {number} width - The width of the rectangle.
-   * @param {number} height - The height of the rectangle.
-   * @param {number} [cornerXRadius] - The horizontal radius of curved corners (0 for sharp corners)
-   * @param {number} [cornerYRadius] - The vertical radius of curved corners (0 for sharp corners)
-   * @returns {Rectangle} - For chaining
+   * @param x - The x-position of the left side of the rectangle.
+   * @param y - The y-position of the top side of the rectangle.
+   * @param width - The width of the rectangle.
+   * @param height - The height of the rectangle.
+   * @param [cornerXRadius] - The horizontal radius of curved corners (0 for sharp corners)
+   * @param [cornerYRadius] - The vertical radius of curved corners (0 for sharp corners)
    */
-  setRect( x, y, width, height, cornerXRadius, cornerYRadius ) {
+  setRect( x: number, y: number, width: number, height: number, cornerXRadius?: number, cornerYRadius?: number ): this {
     const hasXRadius = cornerXRadius !== undefined;
     const hasYRadius = cornerYRadius !== undefined;
 
@@ -268,7 +286,7 @@ class Rectangle extends Path {
 
     const stateLen = this._drawables.length;
     for ( let i = 0; i < stateLen; i++ ) {
-      this._drawables[ i ].markDirtyRectangle();
+      ( this._drawables[ i ] as unknown as IRectangleDrawable ).markDirtyRectangle();
     }
     this.invalidateRectangle();
 
@@ -277,11 +295,8 @@ class Rectangle extends Path {
 
   /**
    * Sets the x coordinate of the left side of this rectangle (in the local coordinate frame).
-   * @public
-   *
-   * @param {number} x
    */
-  setRectX( x ) {
+  setRectX( x: number ): this {
     assert && assert( typeof x === 'number' && isFinite( x ), 'rectX should be a finite number' );
 
     if ( this._rectX !== x ) {
@@ -289,7 +304,7 @@ class Rectangle extends Path {
 
       const stateLen = this._drawables.length;
       for ( let i = 0; i < stateLen; i++ ) {
-        this._drawables[ i ].markDirtyX();
+        ( this._drawables[ i ] as unknown as IRectangleDrawable ).markDirtyX();
       }
 
       this.invalidateRectangle();
@@ -297,27 +312,21 @@ class Rectangle extends Path {
     return this;
   }
 
-  set rectX( value ) { this.setRectX( value ); }
+  set rectX( value: number ) { this.setRectX( value ); }
 
   /**
    * Returns the x coordinate of the left side of this rectangle (in the local coordinate frame).
-   * @public
-   *
-   * @returns {number}
    */
-  getRectX() {
+  getRectX(): number {
     return this._rectX;
   }
 
-  get rectX() { return this.getRectX(); }
+  get rectX(): number { return this.getRectX(); }
 
   /**
    * Sets the y coordinate of the top side of this rectangle (in the local coordinate frame).
-   * @public
-   *
-   * @param {number} y
    */
-  setRectY( y ) {
+  setRectY( y: number ): this {
     assert && assert( typeof y === 'number' && isFinite( y ), 'rectY should be a finite number' );
 
     if ( this._rectY !== y ) {
@@ -325,7 +334,7 @@ class Rectangle extends Path {
 
       const stateLen = this._drawables.length;
       for ( let i = 0; i < stateLen; i++ ) {
-        this._drawables[ i ].markDirtyY();
+        ( this._drawables[ i ] as unknown as IRectangleDrawable ).markDirtyY();
       }
 
       this.invalidateRectangle();
@@ -333,27 +342,21 @@ class Rectangle extends Path {
     return this;
   }
 
-  set rectY( value ) { this.setRectY( value ); }
+  set rectY( value: number ) { this.setRectY( value ); }
 
   /**
    * Returns the y coordinate of the top side of this rectangle (in the local coordinate frame).
-   * @public
-   *
-   * @returns {number}
    */
-  getRectY() {
+  getRectY(): number {
     return this._rectY;
   }
 
-  get rectY() { return this.getRectY(); }
+  get rectY(): number { return this.getRectY(); }
 
   /**
    * Sets the width of the rectangle (in the local coordinate frame).
-   * @public
-   *
-   * @param {number} width
    */
-  setRectWidth( width ) {
+  setRectWidth( width: number ): this {
     assert && assert( typeof width === 'number' && isFinite( width ), 'rectWidth should be a finite number' );
 
     if ( this._rectWidth !== width ) {
@@ -361,7 +364,7 @@ class Rectangle extends Path {
 
       const stateLen = this._drawables.length;
       for ( let i = 0; i < stateLen; i++ ) {
-        this._drawables[ i ].markDirtyWidth();
+        ( this._drawables[ i ] as unknown as IRectangleDrawable ).markDirtyWidth();
       }
 
       this.invalidateRectangle();
@@ -369,27 +372,21 @@ class Rectangle extends Path {
     return this;
   }
 
-  set rectWidth( value ) { this.setRectWidth( value ); }
+  set rectWidth( value: number ) { this.setRectWidth( value ); }
 
   /**
    * Returns the width of the rectangle (in the local coordinate frame).
-   * @public
-   *
-   * @returns {number}
    */
-  getRectWidth() {
+  getRectWidth(): number {
     return this._rectWidth;
   }
 
-  get rectWidth() { return this.getRectWidth(); }
+  get rectWidth(): number { return this.getRectWidth(); }
 
   /**
    * Sets the height of the rectangle (in the local coordinate frame).
-   * @public
-   *
-   * @param {number} height
    */
-  setRectHeight( height ) {
+  setRectHeight( height: number ): this {
     assert && assert( typeof height === 'number' && isFinite( height ), 'rectHeight should be a finite number' );
 
     if ( this._rectHeight !== height ) {
@@ -397,7 +394,7 @@ class Rectangle extends Path {
 
       const stateLen = this._drawables.length;
       for ( let i = 0; i < stateLen; i++ ) {
-        this._drawables[ i ].markDirtyHeight();
+        ( this._drawables[ i ] as unknown as IRectangleDrawable ).markDirtyHeight();
       }
 
       this.invalidateRectangle();
@@ -405,33 +402,27 @@ class Rectangle extends Path {
     return this;
   }
 
-  set rectHeight( value ) { this.setRectHeight( value ); }
+  set rectHeight( value: number ) { this.setRectHeight( value ); }
 
   /**
    * Returns the height of the rectangle (in the local coordinate frame).
-   * @public
-   *
-   * @returns {number}
    */
-  getRectHeight() {
+  getRectHeight(): number {
     return this._rectHeight;
   }
 
-  get rectHeight() { return this.getRectHeight(); }
+  get rectHeight(): number { return this.getRectHeight(); }
 
   /**
    * Sets the horizontal corner radius of the rectangle (in the local coordinate frame).
-   * @public
    *
    * If the cornerXRadius and cornerYRadius are the same, the corners will be rounded circular arcs with that radius
    * (or a smaller radius if the rectangle is too small).
    *
    * If the cornerXRadius and cornerYRadius are different, the corners will be elliptical arcs, and the horizontal
    * radius will be equal to cornerXRadius (or a smaller radius if the rectangle is too small).
-   *
-   * @param {number} radius
    */
-  setCornerXRadius( radius ) {
+  setCornerXRadius( radius: number ): this {
     assert && assert( typeof radius === 'number' && isFinite( radius ), 'cornerXRadius should be a finite number' );
 
     if ( this._cornerXRadius !== radius ) {
@@ -439,7 +430,7 @@ class Rectangle extends Path {
 
       const stateLen = this._drawables.length;
       for ( let i = 0; i < stateLen; i++ ) {
-        this._drawables[ i ].markDirtyCornerXRadius();
+        ( this._drawables[ i ] as unknown as IRectangleDrawable ).markDirtyCornerXRadius();
       }
 
       this.invalidateRectangle();
@@ -447,33 +438,27 @@ class Rectangle extends Path {
     return this;
   }
 
-  set cornerXRadius( value ) { this.setCornerXRadius( value ); }
+  set cornerXRadius( value: number ) { this.setCornerXRadius( value ); }
 
   /**
    * Returns the horizontal corner radius of the rectangle (in the local coordinate frame).
-   * @public
-   *
-   * @returns {number}
    */
-  getCornerXRadius() {
+  getCornerXRadius(): number {
     return this._cornerXRadius;
   }
 
-  get cornerXRadius() { return this.getCornerXRadius(); }
+  get cornerXRadius(): number { return this.getCornerXRadius(); }
 
   /**
    * Sets the vertical corner radius of the rectangle (in the local coordinate frame).
-   * @public
    *
    * If the cornerXRadius and cornerYRadius are the same, the corners will be rounded circular arcs with that radius
    * (or a smaller radius if the rectangle is too small).
    *
    * If the cornerXRadius and cornerYRadius are different, the corners will be elliptical arcs, and the vertical
    * radius will be equal to cornerYRadius (or a smaller radius if the rectangle is too small).
-   *
-   * @param {number} radius
    */
-  setCornerYRadius( radius ) {
+  setCornerYRadius( radius: number ): this {
     assert && assert( typeof radius === 'number' && isFinite( radius ), 'cornerYRadius should be a finite number' );
 
     if ( this._cornerYRadius !== radius ) {
@@ -481,7 +466,7 @@ class Rectangle extends Path {
 
       const stateLen = this._drawables.length;
       for ( let i = 0; i < stateLen; i++ ) {
-        this._drawables[ i ].markDirtyCornerYRadius();
+        ( this._drawables[ i ] as unknown as IRectangleDrawable ).markDirtyCornerYRadius();
       }
 
       this.invalidateRectangle();
@@ -489,28 +474,21 @@ class Rectangle extends Path {
     return this;
   }
 
-  set cornerYRadius( value ) { this.setCornerYRadius( value ); }
+  set cornerYRadius( value: number ) { this.setCornerYRadius( value ); }
 
   /**
    * Returns the vertical corner radius of the rectangle (in the local coordinate frame).
-   * @public
-   *
-   * @returns {number}
    */
-  getCornerYRadius() {
+  getCornerYRadius(): number {
     return this._cornerYRadius;
   }
 
-  get cornerYRadius() { return this.getCornerYRadius(); }
+  get cornerYRadius(): number { return this.getCornerYRadius(); }
 
   /**
    * Sets the Rectangle's x/y/width/height from the Bounds2 passed in.
-   * @public
-   *
-   * @param {Bounds2} bounds
-   * @returns {Rectangle} - For chaining
    */
-  setRectBounds( bounds ) {
+  setRectBounds( bounds: Bounds2 ): this {
     assert && assert( bounds instanceof Bounds2 );
 
     this.setRect( bounds.x, bounds.y, bounds.width, bounds.height );
@@ -518,28 +496,21 @@ class Rectangle extends Path {
     return this;
   }
 
-  set rectBounds( value ) { this.setRectBounds( value ); }
+  set rectBounds( value: Bounds2 ) { this.setRectBounds( value ); }
 
   /**
    * Returns a new Bounds2 generated from this Rectangle's x/y/width/height.
-   * @public
-   *
-   * @returns {Bounds2}
    */
-  getRectBounds() {
+  getRectBounds(): Bounds2 {
     return Bounds2.rect( this._rectX, this._rectY, this._rectWidth, this._rectHeight );
   }
 
-  get rectBounds() { return this.getRectBounds(); }
+  get rectBounds(): Bounds2 { return this.getRectBounds(); }
 
   /**
    * Sets the Rectangle's width/height from the Dimension2 size passed in.
-   * @public
-   *
-   * @param {Dimension2} size
-   * @returns {Rectangle} - For chaining
    */
-  setRectSize( size ) {
+  setRectSize( size: Dimension2 ): this {
     assert && assert( size instanceof Dimension2 );
 
     this.setRectWidth( size.width );
@@ -548,28 +519,21 @@ class Rectangle extends Path {
     return this;
   }
 
-  set rectSize( value ) { this.setRectSize( value ); }
+  set rectSize( value: Dimension2 ) { this.setRectSize( value ); }
 
   /**
    * Returns a new Dimension2 generated from this Rectangle's width/height.
-   * @public
-   *
-   * @returns {Dimension2}
    */
-  getRectSize() {
+  getRectSize(): Dimension2 {
     return new Dimension2( this._rectWidth, this._rectHeight );
   }
 
-  get rectSize() { return this.getRectSize(); }
+  get rectSize(): Dimension2 { return this.getRectSize(); }
 
   /**
    * Sets the width of the rectangle while keeping its right edge (x + width) in the same position
-   * @public
-   *
-   * @param {number} width - New width for the rectangle
-   * @returns {Rectangle} - For chaining
    */
-  setRectWidthFromRight( width ) {
+  setRectWidthFromRight( width: number ): this {
     assert && assert( typeof width === 'number' );
 
     if ( this._rectWidth !== width ) {
@@ -581,18 +545,14 @@ class Rectangle extends Path {
     return this;
   }
 
-  set rectWidthFromRight( value ) { this.setRectWidthFromRight( value ); }
+  set rectWidthFromRight( value: number ) { this.setRectWidthFromRight( value ); }
 
-  get rectWidthFromRight() { return this.getRectWidth(); } // because JSHint complains
+  get rectWidthFromRight(): number { return this.getRectWidth(); } // because JSHint complains
 
   /**
    * Sets the height of the rectangle while keeping its bottom edge (y + height) in the same position
-   * @public
-   *
-   * @param {number} height - New height for the rectangle
-   * @returns {Rectangle} - For chaining
    */
-  setRectHeightFromBottom( height ) {
+  setRectHeightFromBottom( height: number ): this {
     assert && assert( typeof height === 'number' );
 
     if ( this._rectHeight !== height ) {
@@ -604,29 +564,22 @@ class Rectangle extends Path {
     return this;
   }
 
-  set rectHeightFromBottom( value ) { this.setRectHeightFromBottom( value ); }
+  set rectHeightFromBottom( value: number ) { this.setRectHeightFromBottom( value ); }
 
-  get rectHeightFromBottom() { return this.getRectHeight(); } // because JSHint complains
+  get rectHeightFromBottom(): number { return this.getRectHeight(); } // because JSHint complains
 
   /**
    * Returns whether this rectangle has any rounding applied at its corners. If either the x or y corner radius is 0,
    * then there is no rounding applied.
-   * @public
-   *
-   * @returns {boolean}
    */
-  isRounded() {
+  isRounded(): boolean {
     return this._cornerXRadius !== 0 && this._cornerYRadius !== 0;
   }
 
   /**
    * Computes the bounds of the Rectangle, including any applied stroke. Overridden for efficiency.
-   * @public
-   * @override
-   *
-   * @returns {Bounds2}
    */
-  computeShapeBounds() {
+  computeShapeBounds(): Bounds2 {
     let bounds = new Bounds2( this._rectX, this._rectY, this._rectX + this._rectWidth, this._rectY + this._rectHeight );
     if ( this._stroke ) {
       // since we are axis-aligned, any stroke will expand our bounds by a guaranteed set amount
@@ -638,11 +591,8 @@ class Rectangle extends Path {
   /**
    * Returns a Shape that is equivalent to our rendered display. Generally used to lazily create a Shape instance
    * when one is needed, without having to do so beforehand.
-   * @private
-   *
-   * @returns {Shape}
    */
-  createRectangleShape() {
+  private createRectangleShape(): Shape {
     if ( this.isRounded() ) {
       // copy border-radius CSS behavior in Chrome, where the arcs won't intersect, in cases where the arc segments at full size would intersect each other
       const maximumArcSize = Math.min( this._rectWidth / 2, this._rectHeight / 2 );
@@ -656,9 +606,8 @@ class Rectangle extends Path {
 
   /**
    * Notifies that the rectangle has changed, and invalidates path information and our cached shape.
-   * @protected
    */
-  invalidateRectangle() {
+  protected invalidateRectangle() {
     assert && assert( isFinite( this._rectX ), `A rectangle needs to have a finite x (${this._rectX})` );
     assert && assert( isFinite( this._rectY ), `A rectangle needs to have a finite y (${this._rectY})` );
     assert && assert( this._rectWidth >= 0 && isFinite( this._rectWidth ),
@@ -682,16 +631,14 @@ class Rectangle extends Path {
 
   /**
    * Computes whether the provided point is "inside" (contained) in this Rectangle's self content, or "outside".
-   * @public
    *
    * Handles axis-aligned optionally-rounded rectangles, although can only do optimized computation if it isn't
    * rounded. If it IS rounded, we check if a corner computation is needed (usually isn't), and only need to check
    * one corner for that test.
    *
-   * @param {Vector2} point - Considered to be in the local coordinate frame
-   * @returns {boolean}
+   * @param point - Considered to be in the local coordinate frame
    */
-  containsPointSelf( point ) {
+  containsPointSelf( point: Vector2 ): boolean {
     const x = this._rectX;
     const y = this._rectY;
     const width = this._rectWidth;
@@ -736,78 +683,66 @@ class Rectangle extends Path {
 
   /**
    * Returns whether this Rectangle's selfBounds is intersected by the specified bounds.
-   * @public
    *
-   * @param {Bounds2} bounds - Bounds to test, assumed to be in the local coordinate frame.
-   * @returns {boolean}
+   * @param bounds - Bounds to test, assumed to be in the local coordinate frame.
    */
-  intersectsBoundsSelf( bounds ) {
+  intersectsBoundsSelf( bounds: Bounds2 ): boolean {
     return !this.computeShapeBounds().intersection( bounds ).isEmpty();
   }
 
   /**
    * Draws the current Node's self representation, assuming the wrapper's Canvas context is already in the local
    * coordinate frame of this node.
-   * @protected
-   * @override
    *
-   * @param {CanvasContextWrapper} wrapper
-   * @param {Matrix3} matrix - The transformation matrix already applied to the context.
+   * @param wrapper
+   * @param matrix - The transformation matrix already applied to the context.
    */
-  canvasPaintSelf( wrapper, matrix ) {
+  canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
     //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily.
     RectangleCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
   }
 
   /**
-   * Creates a DOM drawable for this Rectangle.
-   * @public (scenery-internal)
-   * @override
+   * Creates a DOM drawable for this Rectangle. (scenery-internal)
    *
-   * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
-   * @param {Instance} instance - Instance object that will be associated with the drawable
-   * @returns {DOMSelfDrawable}
+   * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+   * @param instance - Instance object that will be associated with the drawable
    */
-  createDOMDrawable( renderer, instance ) {
+  createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
+    // @ts-ignore
     return RectangleDOMDrawable.createFromPool( renderer, instance );
   }
 
   /**
-   * Creates a SVG drawable for this Rectangle.
-   * @public (scenery-internal)
-   * @override
+   * Creates a SVG drawable for this Rectangle. (scenery-internal)
    *
-   * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
-   * @param {Instance} instance - Instance object that will be associated with the drawable
-   * @returns {SVGSelfDrawable}
+   * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+   * @param instance - Instance object that will be associated with the drawable
    */
-  createSVGDrawable( renderer, instance ) {
+  createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
+    // @ts-ignore
     return RectangleSVGDrawable.createFromPool( renderer, instance );
   }
 
   /**
-   * Creates a Canvas drawable for this Rectangle.
-   * @public (scenery-internal)
-   * @override
+   * Creates a Canvas drawable for this Rectangle. (scenery-internal)
    *
-   * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
-   * @param {Instance} instance - Instance object that will be associated with the drawable
-   * @returns {CanvasSelfDrawable}
+   * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+   * @param instance - Instance object that will be associated with the drawable
    */
-  createCanvasDrawable( renderer, instance ) {
+  createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
+    // @ts-ignore
     return RectangleCanvasDrawable.createFromPool( renderer, instance );
   }
 
   /**
-   * Creates a WebGL drawable for this Rectangle.
-   * @public (scenery-internal)
-   * @override
+   * Creates a WebGL drawable for this Rectangle. (scenery-internal)
    *
-   * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
-   * @param {Instance} instance - Instance object that will be associated with the drawable
-   * @returns {WebGLSelfDrawable}
+   * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+   * @param instance - Instance object that will be associated with the drawable
    */
-  createWebGLDrawable( renderer, instance ) {
+  createWebGLDrawable( renderer: number, instance: Instance ): WebGLSelfDrawable {
+    // @ts-ignore
     return RectangleWebGLDrawable.createFromPool( renderer, instance );
   }
 
@@ -818,12 +753,10 @@ class Rectangle extends Path {
   /**
    * It is impossible to set another shape on this Path subtype, as its effective shape is determined by other
    * parameters.
-   * @public
-   * @override
    *
-   * @param {Shape|null} shape - Throws an error if it is not null.
+   * @param shape - Throws an error if it is not null.
    */
-  setShape( shape ) {
+  setShape( shape: Shape | string | null ): this {
     if ( shape !== null ) {
       throw new Error( 'Cannot set the shape of a Rectangle to something non-null' );
     }
@@ -831,18 +764,15 @@ class Rectangle extends Path {
       // probably called from the Path constructor
       this.invalidatePath();
     }
+    return this;
   }
 
   /**
    * Returns an immutable copy of this Path subtype's representation.
-   * @public
-   * @override
    *
    * NOTE: This is created lazily, so don't call it if you don't have to!
-   *
-   * @returns {Shape}
    */
-  getShape() {
+  getShape(): Shape {
     if ( !this._shape ) {
       this._shape = this.createRectangleShape();
     }
@@ -851,61 +781,48 @@ class Rectangle extends Path {
 
   /**
    * Returns whether this Path has an associated Shape (instead of no shape, represented by null)
-   * @public
-   * @override
-   *
-   * @returns {boolean}
    */
-  hasShape() {
+  hasShape(): boolean {
     return true;
   }
 
   /**
    * Sets both of the corner radii to the same value, so that the rounded corners will be circular arcs.
-   * @public
-   *
-   * @param {number} cornerRadius - The radius of the corners
-   * @returns {Rectangle} - For chaining
    */
-  setCornerRadius( cornerRadius ) {
+  setCornerRadius( cornerRadius: number ): this {
     this.setCornerXRadius( cornerRadius );
     this.setCornerYRadius( cornerRadius );
     return this;
   }
 
-  set cornerRadius( value ) { this.setCornerRadius( value ); }
+  set cornerRadius( value: number ) { this.setCornerRadius( value ); }
 
   /**
    * Returns the corner radius if both the horizontal and vertical corner radii are the same.
-   * @public
    *
    * NOTE: If there are different horizontal and vertical corner radii, this will fail an assertion and return the horizontal radius.
-   *
-   * @returns {number}
    */
-  getCornerRadius() {
+  getCornerRadius(): number {
     assert && assert( this._cornerXRadius === this._cornerYRadius,
       'getCornerRadius() invalid if x/y radii are different' );
 
     return this._cornerXRadius;
   }
 
-  get cornerRadius() { return this.getCornerRadius(); }
+  get cornerRadius(): number { return this.getCornerRadius(); }
 
   /**
    * Returns whether a point is within a rounded rectangle.
-   * @public
    *
-   * @param {number} x - X value of the left side of the rectangle
-   * @param {number} y - Y value of the top side of the rectangle
-   * @param {number} width - Width of the rectangle
-   * @param {number} height - Height of the rectangle
-   * @param {number} arcWidth - Horizontal corner radius of the rectangle
-   * @param {number} arcHeight - Vertical corner radius of the rectangle
-   * @param {Vector2} point - The point that may or may not be in the rounded rectangle
-   * @returns {boolean}
+   * @param x - X value of the left side of the rectangle
+   * @param y - Y value of the top side of the rectangle
+   * @param width - Width of the rectangle
+   * @param height - Height of the rectangle
+   * @param arcWidth - Horizontal corner radius of the rectangle
+   * @param arcHeight - Vertical corner radius of the rectangle
+   * @param point - The point that may or may not be in the rounded rectangle
    */
-  static intersects( x, y, width, height, arcWidth, arcHeight, point ) {
+  static intersects( x: number, y: number, width: number, height: number, arcWidth: number, arcHeight: number, point: Vector2 ): boolean {
     const result = point.x >= x &&
                    point.x <= x + width &&
                    point.y >= y &&
@@ -967,82 +884,47 @@ class Rectangle extends Path {
 
   /**
    * Creates a rectangle with the specified x/y/width/height.
-   * @public
    *
    * See Rectangle's constructor for detailed parameter information.
-   *
-   * @param {number} x
-   * @param {number} y
-   * @param {number} width
-   * @param {number} height
-   * @param {Object} [options]
-   * @returns {Rectangle}
    */
-  static rect( x, y, width, height, options ) {
+  static rect( x: number, y: number, width: number, height: number, options?: RectangleOptions ): Rectangle {
     return new Rectangle( x, y, width, height, 0, 0, options );
   }
 
   /**
    * Creates a rounded rectangle with the specified x/y/width/height/cornerXRadius/cornerYRadius.
-   * @public
    *
    * See Rectangle's constructor for detailed parameter information.
-   *
-   * @param {number} x
-   * @param {number} y
-   * @param {number} width
-   * @param {number} height
-   * @param {number} cornerXRadius
-   * @param {number} cornerYRadius
-   * @param {Object} [options]
-   * @returns {Rectangle}
    */
-  static roundedRect( x, y, width, height, cornerXRadius, cornerYRadius, options ) {
+  static roundedRect( x: number, y: number, width: number, height: number, cornerXRadius: number, cornerYRadius: number, options?: RectangleOptions ): Rectangle {
     return new Rectangle( x, y, width, height, cornerXRadius, cornerYRadius, options );
   }
 
   /**
    * Creates a rectangle x/y/width/height matching the specified bounds.
-   * @public
    *
    * See Rectangle's constructor for detailed parameter information.
-   *
-   * @param {Bounds2} bounds
-   * @param {Object} [options]
-   * @returns {Rectangle}
    */
-  static bounds( bounds, options ) {
+  static bounds( bounds: Bounds2, options?: RectangleOptions ): Rectangle {
     return new Rectangle( bounds.minX, bounds.minY, bounds.width, bounds.height, options );
   }
 
   /**
    * Creates a rounded rectangle x/y/width/height matching the specified bounds (Rectangle.bounds, but with additional
    * cornerXRadius and cornerYRadius).
-   * @public
    *
    * See Rectangle's constructor for detailed parameter information.
-   *
-   * @param {Bounds2} bounds
-   * @param {number} cornerXRadius
-   * @param {number} cornerYRadius
-   * @param {Object} [options]
-   * @returns {Rectangle}
    */
-  static roundedBounds( bounds, cornerXRadius, cornerYRadius, options ) {
+  static roundedBounds( bounds: Bounds2, cornerXRadius: number, cornerYRadius: number, options?: RectangleOptions ): Rectangle {
     return new Rectangle( bounds.minX, bounds.minY, bounds.width, bounds.height, cornerXRadius, cornerYRadius, options );
   }
 
   /**
    * Creates a rectangle with top/left of (0,0) with the specified {Dimension2}'s width and height.
-   * @public
    *
    * See Rectangle's constructor for detailed parameter information.
-   *
-   * @param {Dimension2} dimension
-   * @param {Object} [options]
-   * @returns {Rectangle}
    */
-  static dimension( dimension, options ) {
+  static dimension( dimension: Dimension2, options?: RectangleOptions ): Rectangle {
     return new Rectangle( 0, 0, dimension.width, dimension.height, 0, 0, options );
   }
 }
@@ -1050,12 +932,11 @@ class Rectangle extends Path {
 /**
  * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
  * order they will be evaluated in.
- * @public
  *
  * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
  *       cases that may apply.
  */
-Rectangle.prototype._mutatorKeys = RECTANGLE_OPTION_KEYS.concat( Path.prototype._mutatorKeys );
+Rectangle.prototype._mutatorKeys = [ ...RECTANGLE_OPTION_KEYS, ...Path.prototype._mutatorKeys ];
 
 /**
  * {Array.<String>} - List of all dirty flags that should be available on drawables created from this node (or
@@ -1068,4 +949,4 @@ Rectangle.prototype.drawableMarkFlags = Path.prototype.drawableMarkFlags.concat(
 
 scenery.register( 'Rectangle', Rectangle );
 
-export default Rectangle;
+export { Rectangle as default, RectangleOptions };
