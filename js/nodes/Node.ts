@@ -2152,7 +2152,9 @@ class Node extends ParallelDOM {
    * @param y - The y coordinate
    * @param [prependInstead] - Whether the transform should be prepended (defaults to false)
    */
-  translate( x: number | Vector2, y?: number | boolean, prependInstead?: boolean ) {
+  translate( v: Vector2, prependInstead?: boolean ): void;
+  translate( x: number, y: number, prependInstead?: boolean ): void; // eslint-disable-line
+  translate( x: number | Vector2, y?: number | boolean, prependInstead?: boolean ) { // eslint-disable-line
     if ( typeof x === 'number' ) {
       // translate( x, y, prependInstead )
       assert && assert( typeof x === 'number' && isFinite( x ), 'x should be a finite number' );
@@ -2195,7 +2197,10 @@ class Node extends ParallelDOM {
    *            - (x,y invocation): {number} y - scale for the y-dimension
    * @param [prependInstead] - (x,y invocation) Whether the transform should be prepended (defaults to false)
    */
-  scale( x: number | Vector2, y?: number | boolean, prependInstead?: boolean ) {
+  scale( s: number, prependInstead?: boolean ): void;
+  scale( s: Vector2, prependInstead?: boolean ): void; // eslint-disable-line
+  scale( x: number, y: number, prependInstead?: boolean ): void; // eslint-disable-line
+  scale( x: number | Vector2, y?: number | boolean, prependInstead?: boolean ) { // eslint-disable-line
     if ( typeof x === 'number' ) {
       assert && assert( isFinite( x ), 'scales should be finite' );
       if ( y === undefined || typeof y === 'boolean' ) {
@@ -2344,7 +2349,10 @@ class Node extends ParallelDOM {
    * @param a - Scale for both axes, or scale for x-axis if using the 2-parameter call
    * @param [b] - Scale for the Y axis (only for the 2-parameter call)
    */
-  setScaleMagnitude( a: number | Vector2, b?: number ): this {
+  setScaleMagnitude( s: number ): this;
+  setScaleMagnitude( v: Vector2 ): this; // eslint-disable-line
+  setScaleMagnitude( sx: number, sy: number ): this; // eslint-disable-line
+  setScaleMagnitude( a: number | Vector2, b?: number ): this { // eslint-disable-line
     const currentScale = this.getScaleVector();
 
     if ( typeof a === 'number' ) {
@@ -2423,7 +2431,9 @@ class Node extends ParallelDOM {
    * @param a - X translation - or Vector with x/y translation in components
    * @param [b] - Y translation
    */
-  setTranslation( a: number | Vector2, b?: number ): this {
+  setTranslation( x: number, y: number ): this;
+  setTranslation( v: Vector2 ): this; // eslint-disable-line
+  setTranslation( a: number | Vector2, b?: number ): this { // eslint-disable-line
     const m = this._transform.getMatrix();
     const tx = m.m02();
     const ty = m.m12();
