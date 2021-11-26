@@ -1,4 +1,4 @@
-// Copyright 2020, University of Colorado Boulder
+// Copyright 2020-2021, University of Colorado Boulder
 
 /**
  * A global object that tracks the state of the keyboard for the Window. Use this

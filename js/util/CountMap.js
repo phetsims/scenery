@@ -1,4 +1,4 @@
-// Copyright 2020, University of Colorado Boulder
+// Copyright 2020-2021, University of Colorado Boulder
 
 /**
  * Data structure that handles creating/destroying related objects that need to exist when something's count is >=1
