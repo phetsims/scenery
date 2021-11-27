@@ -6088,4 +6088,5 @@ Node.NodeIO = new IOType( 'NodeIO', {
   }
 } );
 
-export { Node as default, NodeOptions };
+export { Node as default };
+export type { NodeOptions };

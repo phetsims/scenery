@@ -337,4 +337,5 @@ Image.ImageIO = new IOType( 'ImageIO', {
 } );
 
 scenery.register( 'Image', Image );
-export { Image as default, ImageOptions, Mipmap };
+export { Image as default };
+export type { ImageOptions, Mipmap };

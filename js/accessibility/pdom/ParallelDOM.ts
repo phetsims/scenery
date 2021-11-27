@@ -2861,4 +2861,5 @@ class ParallelDOM extends PhetioObject {
 }
 
 scenery.register( 'ParallelDOM', ParallelDOM );
-export { ParallelDOM as default, ACCESSIBILITY_OPTION_KEYS, ParallelDOMOptions };
+export { ParallelDOM as default, ACCESSIBILITY_OPTION_KEYS };
+export type { ParallelDOMOptions };

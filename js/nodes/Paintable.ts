@@ -814,4 +814,11 @@ scenery.register( 'Paintable', Paintable );
 // @ts-ignore
 Paintable.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
-export { Paintable as default, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS, PaintableOptions, DEFAULT_OPTIONS, DEFAULT_OPTIONS as PAINTABLE_DEFAULT_OPTIONS };
+export {
+  Paintable as default,
+  PAINTABLE_DRAWABLE_MARK_FLAGS,
+  PAINTABLE_OPTION_KEYS,
+  DEFAULT_OPTIONS,
+  DEFAULT_OPTIONS as PAINTABLE_DEFAULT_OPTIONS
+};
+export type { PaintableOptions };

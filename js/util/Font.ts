@@ -45,8 +45,30 @@ const VALID_STRETCHES = [ 'normal', 'ultra-condensed', 'extra-condensed', 'conde
 
 type FontStyle = 'normal' | 'italic' | 'oblique';
 type FontVariant = 'normal' | 'small-caps';
-type FontWeight = 'normal' | 'bold' | 'bolder' | 'lighter' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900';
-type FontStretch = 'normal' | 'ultra-condensed' | 'extra-condensed' | 'condensed' | 'semi-condensed' | 'semi-expanded' | 'expanded' | 'extra-expanded' | 'ultra-expanded';
+type FontWeight =
+  'normal'
+  | 'bold'
+  | 'bolder'
+  | 'lighter'
+  | '100'
+  | '200'
+  | '300'
+  | '400'
+  | '500'
+  | '600'
+  | '700'
+  | '800'
+  | '900';
+type FontStretch =
+  'normal'
+  | 'ultra-condensed'
+  | 'extra-condensed'
+  | 'condensed'
+  | 'semi-condensed'
+  | 'semi-expanded'
+  | 'expanded'
+  | 'extra-expanded'
+  | 'ultra-expanded';
 
 type FontDefinedOptions = {
   style?: FontStyle,
@@ -422,4 +444,5 @@ Font.FontIO = new IOType( 'FontIO', {
 // @public {Font} - Default Font object (since they are immutable).
 Font.DEFAULT = new Font();
 
-export { Font as default, FontStyle, FontVariant, FontWeight, FontStretch };
+export { Font as default };
+export type { FontStyle, FontVariant, FontWeight, FontStretch };

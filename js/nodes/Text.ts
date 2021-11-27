@@ -882,4 +882,5 @@ Text.TextIO = new IOType( 'TextIO', {
   }
 } );
 
-export { Text as default, TextOptions };
+export { Text as default };
+export type { TextOptions };

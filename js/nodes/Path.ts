@@ -532,4 +532,5 @@ scenery.register( 'Path', Path );
 // @public {Object} - Initial values for most Node mutator options
 Path.DEFAULT_OPTIONS = merge( {}, Node.DEFAULT_OPTIONS, DEFAULT_OPTIONS );
 
-export { Path as default, PathOptions };
+export { Path as default };
+export type { PathOptions };

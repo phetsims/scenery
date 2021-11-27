@@ -15,7 +15,8 @@ export { default as scenery } from './scenery.js';
 export { default as SceneryConstants } from './SceneryConstants.js';
 export { default as Color } from './util/Color.js';
 export { default as Features } from './util/Features.js';
-export { default as Font, FontStyle, FontWeight, FontStretch } from './util/Font.js';
+export { default as Font } from './util/Font.js';
+export type { FontStyle, FontWeight, FontStretch } from './util/Font.js';
 export { default as Renderer } from './display/Renderer.js';
 export { default as svgns } from './util/svgns.js';
 export { default as xlinkns } from './util/xlinkns.js';
@@ -54,8 +55,8 @@ export { default as Filter } from './util/Filter.js';
 
 export { default as ColorDef } from './util/ColorDef.js';
 export { default as PaintDef } from './util/PaintDef.js';
-export { default as IColor } from './util/IColor.js';
-export { default as IPaint } from './util/IPaint.js';
+export type { default as IColor } from './util/IColor.js';
+export type { default as IPaint } from './util/IPaint.js';
 
 // Filters
 export { default as ColorMatrixFilter } from './util/ColorMatrixFilter.js';
@@ -70,8 +71,10 @@ export { default as Opacity } from './util/Opacity.js';
 export { default as Saturate } from './util/Saturate.js';
 export { default as Sepia } from './util/Sepia.js';
 
-export { default as ParallelDOM, ParallelDOMOptions, ACCESSIBILITY_OPTION_KEYS } from './accessibility/pdom/ParallelDOM.js';
-export { default as Node, NodeOptions } from './nodes/Node.js';
+export { default as ParallelDOM, ACCESSIBILITY_OPTION_KEYS } from './accessibility/pdom/ParallelDOM.js';
+export type { ParallelDOMOptions } from './accessibility/pdom/ParallelDOM.js';
+export { default as Node } from './nodes/Node.js';
+export type { NodeOptions } from './nodes/Node.js';
 export { default as Picker } from './util/Picker.js';
 export { default as RendererSummary } from './util/RendererSummary.js';
 export { default as NodeProperty } from './util/NodeProperty.js';
@@ -80,12 +83,18 @@ export { default as PDOMDisplaysInfo } from './accessibility/pdom/PDOMDisplaysIn
 export { default as Trail } from './util/Trail.js';
 export { default as TrailPointer } from './util/TrailPointer.js';
 
-export { default as Paintable, PaintableOptions, PAINTABLE_OPTION_KEYS, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_DEFAULT_OPTIONS } from './nodes/Paintable.js';
+export {
+  default as Paintable, PAINTABLE_OPTION_KEYS, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_DEFAULT_OPTIONS
+} from './nodes/Paintable.js';
+export type { PaintableOptions } from './nodes/Paintable.js';
 export { default as Imageable } from './nodes/Imageable.js';
 
-export { default as Image, ImageOptions, Mipmap } from './nodes/Image.js';
-export { default as Path, PathOptions } from './nodes/Path.js';
-export { default as Text, TextOptions } from './nodes/Text.js';
+export { default as Image } from './nodes/Image.js';
+export type { ImageOptions, Mipmap } from './nodes/Image.js';
+export { default as Path } from './nodes/Path.js';
+export type { PathOptions } from './nodes/Path.js';
+export { default as Text } from './nodes/Text.js';
+export type { TextOptions } from './nodes/Text.js';
 
 export { default as AlignBox } from './nodes/AlignBox.js';
 export { default as AlignGroup } from './nodes/AlignGroup.js';
@@ -93,7 +102,8 @@ export { default as CanvasNode } from './nodes/CanvasNode.js';
 export { default as Circle } from './nodes/Circle.js';
 export { default as DOM } from './nodes/DOM.js';
 export { default as Line } from './nodes/Line.js';
-export { default as Rectangle, RectangleOptions } from './nodes/Rectangle.js';
+export { default as Rectangle } from './nodes/Rectangle.js';
+export type { RectangleOptions } from './nodes/Rectangle.js';
 export { default as Sprites } from './nodes/Sprites.js';
 export { default as WebGLNode } from './nodes/WebGLNode.js';
 
@@ -151,7 +161,7 @@ export { default as PDOMInstance } from './accessibility/pdom/PDOMInstance.js';
 export { default as PDOMTree } from './accessibility/pdom/PDOMTree.js';
 export { default as PDOMFuzzer } from './accessibility/pdom/PDOMFuzzer.js';
 
-export { default as IInputListener } from './input/IInputListener.js';
+export type { default as IInputListener } from './input/IInputListener.js';
 export { default as Pointer } from './input/Pointer.js';
 export { default as Mouse } from './input/Mouse.js';
 export { default as Touch } from './input/Touch.js';
@@ -182,7 +192,7 @@ export { default as KeyboardDragListener } from './listeners/KeyboardDragListene
 export { default as SpriteListenable } from './listeners/SpriteListenable.js';
 export { default as SwipeListener } from './listeners/SwipeListener.js';
 
-export { default as ILayoutOptions } from './layout/ILayoutOptions.js';
+export type { default as ILayoutOptions } from './layout/ILayoutOptions.js';
 export { default as AlignPropertyBox } from './layout/AlignPropertyBox.js';
 export { default as WidthSizable } from './layout/WidthSizable.js';
 export { default as HeightSizable } from './layout/HeightSizable.js';
@@ -230,11 +240,11 @@ export { default as RectangleStatefulDrawable } from './display/drawables/Rectan
 export { default as TextStatefulDrawable } from './display/drawables/TextStatefulDrawable.js';
 
 // Interfaces
-export { default as IImageDrawable } from './display/drawables/IImageDrawable.js';
-export { default as IPaintableDrawable } from './display/drawables/IPaintableDrawable.js';
-export { default as IPathDrawable } from './display/drawables/IPathDrawable.js';
-export { default as ITextDrawable } from './display/drawables/ITextDrawable.js';
-export { default as IRectangleDrawable } from './display/drawables/IRectangleDrawable.js';
+export type { default as IImageDrawable } from './display/drawables/IImageDrawable.js';
+export type { default as IPaintableDrawable } from './display/drawables/IPaintableDrawable.js';
+export type { default as IPathDrawable } from './display/drawables/IPathDrawable.js';
+export type { default as ITextDrawable } from './display/drawables/ITextDrawable.js';
+export type { default as IRectangleDrawable } from './display/drawables/IRectangleDrawable.js';
 
 // Concrete drawables
 export { default as CanvasNodeDrawable } from './display/drawables/CanvasNodeDrawable.js';

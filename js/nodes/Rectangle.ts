@@ -949,4 +949,5 @@ Rectangle.prototype.drawableMarkFlags = Path.prototype.drawableMarkFlags.concat(
 
 scenery.register( 'Rectangle', Rectangle );
 
-export { Rectangle as default, RectangleOptions };
+export { Rectangle as default };
+export type { RectangleOptions };
