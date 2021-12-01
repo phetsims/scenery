@@ -171,7 +171,7 @@ import Tandem from '../../../tandem/js/Tandem.js';
 import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import IProperty from '../../../axon/js/IProperty.js';
-import { scenery, ParallelDOM, Trail, Pointer, Mouse, RendererSummary, IInputListener, ILayoutOptions, Display, Instance, CanvasContextWrapper, Filter, Renderer, Picker, ACCESSIBILITY_OPTION_KEYS, ParallelDOMOptions, Features, Drawable, DOMSelfDrawable, SVGSelfDrawable, CanvasSelfDrawable, WebGLSelfDrawable, Image, ImageOptions, serializeConnectedNodes } from '../imports.js';
+import { ACCESSIBILITY_OPTION_KEYS, CanvasContextWrapper, CanvasSelfDrawable, Display, DOMSelfDrawable, Drawable, Features, Filter, IInputListener, ILayoutOptions, Image, ImageOptions, Instance, Mouse, ParallelDOM, ParallelDOMOptions, Picker, Pointer, Renderer, RendererSummary, scenery, serializeConnectedNodes, SVGSelfDrawable, Trail, WebGLSelfDrawable } from '../imports.js';
 
 let globalIdCounter = 1;
 
@@ -347,7 +347,7 @@ class Node extends ParallelDOM {
 
   // All displays where this Node is the root.
   _rootedDisplays: Display[];
-  
+
   // Drawable states that need to be updated on mutations. Generally added by SVG and
   // DOM elements that need to closely track state (possibly by Canvas to maintain dirty state).
   _drawables: Drawable[];
@@ -368,7 +368,7 @@ class Node extends ParallelDOM {
 
   // See setPickable() and setPickableProperty()
   // NOTE: This is fired synchronously when the pickability of the Node is toggled
-  _pickableProperty: TinyForwardingProperty<boolean|null>;
+  _pickableProperty: TinyForwardingProperty<boolean | null>;
 
   // See setEnabled() and setEnabledProperty()
   _enabledProperty: TinyForwardingProperty<boolean>;
@@ -381,7 +381,7 @@ class Node extends ParallelDOM {
   // This Node and all children will be clipped by this shape (in addition to any
   // other clipping shapes). The shape should be in the local coordinate frame.
   // NOTE: This is fired synchronously when the clipArea of the Node is toggled
-  clipAreaProperty: TinyProperty<Shape|null>;
+  clipAreaProperty: TinyProperty<Shape | null>;
 
   // Areas for hit intersection. If set on a Node, no descendants can handle events.
   _mouseArea: Shape | Bounds2 | null; // for mouse position in the local coordinate frame
@@ -424,7 +424,7 @@ class Node extends ParallelDOM {
   _maxWidth: number | null;
   _maxHeight: number | null;
 
-   // Scale applied due to the maximum dimension constraints.
+  // Scale applied due to the maximum dimension constraints.
   _appliedScaleFactor: number;
 
   // For user input handling (mouse/touch).
@@ -573,7 +573,7 @@ class Node extends ParallelDOM {
 
   // Subcomponent dedicated to hit testing
   _picker: Picker;
-  
+
   // There are certain specific cases (in this case due to a11y) where we need
   // to know that a Node is getting removed from its parent BUT that process has not completed yet. It would be ideal
   // to not need this.
@@ -623,7 +623,7 @@ class Node extends ParallelDOM {
       this.onVisiblePropertyChange.bind( this ) );
     this.opacityProperty = new TinyProperty( DEFAULT_OPTIONS.opacity, this.onOpacityPropertyChange.bind( this ) );
     this.disabledOpacityProperty = new TinyProperty( DEFAULT_OPTIONS.disabledOpacity, this.onDisabledOpacityPropertyChange.bind( this ) );
-    this._pickableProperty = new TinyForwardingProperty<boolean|null>( DEFAULT_OPTIONS.pickable,
+    this._pickableProperty = new TinyForwardingProperty<boolean | null>( DEFAULT_OPTIONS.pickable,
       false, this.onPickablePropertyChange.bind( this ) );
     this._enabledProperty = new TinyForwardingProperty<boolean>( DEFAULT_OPTIONS.enabled,
       DEFAULT_OPTIONS.phetioEnabledPropertyInstrumented, this.onEnabledPropertyChange.bind( this ) );
@@ -632,7 +632,7 @@ class Node extends ParallelDOM {
 
     this._inputEnabledProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.inputEnabled,
       DEFAULT_OPTIONS.phetioInputEnabledPropertyInstrumented );
-    this.clipAreaProperty = new TinyProperty<Shape|null>( DEFAULT_OPTIONS.clipArea );
+    this.clipAreaProperty = new TinyProperty<Shape | null>( DEFAULT_OPTIONS.clipArea );
     this._mouseArea = DEFAULT_OPTIONS.mouseArea;
     this._touchArea = DEFAULT_OPTIONS.touchArea;
     this._cursor = DEFAULT_OPTIONS.cursor;
@@ -3436,7 +3436,7 @@ class Node extends ParallelDOM {
   /**
    * Use this to automatically create a forwarded, PhET-iO instrumented visibleProperty internal to Node.
    */
-  setPhetioVisiblePropertyInstrumented( phetioVisiblePropertyInstrumented: boolean ) : this {
+  setPhetioVisiblePropertyInstrumented( phetioVisiblePropertyInstrumented: boolean ): this {
     return this._visibleProperty.setTargetPropertyInstrumented( phetioVisiblePropertyInstrumented, this );
   }
 
@@ -3647,14 +3647,14 @@ class Node extends ParallelDOM {
    *
    * PhET-iO Instrumented Nodes do not by default create their own instrumented pickableProperty, even though Node.visibleProperty does.
    */
-  setPickableProperty( newTarget: IProperty<boolean|null> | null ): this {
+  setPickableProperty( newTarget: IProperty<boolean | null> | null ): this {
     return this._pickableProperty.setTargetProperty( this, null, newTarget );
   }
 
   /**
    * See setPickableProperty() for more information
    */
-  set pickableProperty( property: IProperty<boolean|null> | null ) {
+  set pickableProperty( property: IProperty<boolean | null> | null ) {
     this.setPickableProperty( property );
   }
 
@@ -3669,14 +3669,14 @@ class Node extends ParallelDOM {
    *
    * Please use this with caution. See setPickableProperty() for more information.
    */
-  getPickableProperty(): IProperty<boolean|null> {
+  getPickableProperty(): IProperty<boolean | null> {
     return this._pickableProperty;
   }
 
   /**
    * See getPickableProperty() for more information
    */
-  get pickableProperty(): IProperty<boolean|null> {
+  get pickableProperty(): IProperty<boolean | null> {
     return this.getPickableProperty();
   }
 
@@ -6037,21 +6037,21 @@ class Node extends ParallelDOM {
 
 // Interface extension to support things on the prototype
 interface Node { // eslint-disable-line
-  // This is an array of property (setter) names for Node.mutate(), which are also used when creating
-  // Nodes with parameter objects.
-  //
-  // E.g. new scenery.Node( { x: 5, rotation: 20 } ) will create a Path, and apply setters in the order below
-  // (node.x = 5; node.rotation = 20)
-  //
-  // Some special cases exist (for function names). new scenery.Node( { scale: 2 } ) will actually call
-  // node.scale( 2 ).
-  //
-  // The order below is important! Don't change this without knowing the implications.
-  //
-  // NOTE: Translation-based mutators come before rotation/scale, since typically we think of their operations
-  //       occurring "after" the rotation / scaling
-  // NOTE: left/right/top/bottom/centerX/centerY are at the end, since they rely potentially on rotation / scaling
-  //       changes of bounds that may happen beforehand
+                 // This is an array of property (setter) names for Node.mutate(), which are also used when creating
+                 // Nodes with parameter objects.
+                 //
+                 // E.g. new scenery.Node( { x: 5, rotation: 20 } ) will create a Path, and apply setters in the order below
+                 // (node.x = 5; node.rotation = 20)
+                 //
+                 // Some special cases exist (for function names). new scenery.Node( { scale: 2 } ) will actually call
+                 // node.scale( 2 ).
+                 //
+                 // The order below is important! Don't change this without knowing the implications.
+                 //
+                 // NOTE: Translation-based mutators come before rotation/scale, since typically we think of their operations
+                 //       occurring "after" the rotation / scaling
+                 // NOTE: left/right/top/bottom/centerX/centerY are at the end, since they rely potentially on rotation / scaling
+                 //       changes of bounds that may happen beforehand
   _mutatorKeys: string[],
 
   // List of all dirty flags that should be available on drawables created from this Node (or
