@@ -26,7 +26,7 @@ import inheritance from '../../../../phet-core/js/inheritance.js';
 import merge from '../../../../phet-core/js/merge.js';
 import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
-import { scenery, Node, InteractiveHighlighting, voicingUtteranceQueue } from '../../imports.js';
+import { InteractiveHighlighting, Node, scenery, voicingUtteranceQueue } from '../../imports.js';
 
 // options that are supported by Voicing.js. Added to mutator keys so that Voicing properties can be set with mutate.
 const VOICING_OPTION_KEYS = [
