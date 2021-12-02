@@ -185,6 +185,7 @@ import './util/Trail.js';
 import './util/TrailPointer.js';
 import './util/TransformTracker.js';
 import './util/Utils.js';
+import './imports.js';
 
 // note: we don't need any of the other parts, we just need to specify them as dependencies so they fill in the scenery namespace
 export default scenery;

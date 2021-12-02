@@ -440,7 +440,7 @@
               addSimple( key, null );
             }
             else {
-              addRaw( key, colorSwatch( scenery.serialize( new scenery.Color( serialization.value ) ) ) );
+              addRaw( key, colorSwatch( scenery.scenerySerialize( new scenery.Color( serialization.value ) ) ) );
             }
           }
           else if ( serialization.type === 'Color' ) {
@@ -450,7 +450,7 @@
             addRaw( key, colorSwatch( serialization.value ) );
           }
           else if ( serialization.type === 'Property' && serialization.value.type === 'value' ) {
-            addRaw( key, colorSwatch( scenery.serialize( new scenery.Color( serialization.value.value ) ) ) );
+            addRaw( key, colorSwatch( scenery.scenerySerialize( new scenery.Color( serialization.value.value ) ) ) );
           }
         }
       }
@@ -573,7 +573,7 @@
       if ( !hasPickableFalseEquivalent && hasPickableTrueEquivalent ) {
         infoBox.addChild( new scenery.Text( 'Hit Tested', { fontSize: 12, fill: '#f00' } ) );
       }
-      addSerial( 'matrix', scenery.serialize( treeNode.trail.getMatrix() ) );
+      addSerial( 'matrix', scenery.scenerySerialize( treeNode.trail.getMatrix() ) );
 
       /*---------------------------------------------------------------------------*
       * Buttons
