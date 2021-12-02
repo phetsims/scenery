@@ -61,7 +61,7 @@ import platform from '../../../phet-core/js/platform.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import AriaLiveAnnouncer from '../../../utterance-queue/js/AriaLiveAnnouncer.js';
 import UtteranceQueue from '../../../utterance-queue/js/UtteranceQueue.js';
-import { scenery, Color, Features, FullScreen, Trail, Utils, BackboneDrawable, ChangeInterval, DOMBlock, Drawable, DOMDrawable, Instance, Renderer, Node, PDOMInstance, PDOMSiblingStyle, PDOMUtils, globalKeyStateTracker, FocusManager, KeyboardUtils, PDOMTree, Input, CanvasNodeBoundsOverlay, FittedBlockBoundsOverlay, HighlightOverlay, HitAreaOverlay, PointerAreaOverlay, PointerOverlay } from '../imports.js';
+import { scenery, Color, Features, FullScreen, Trail, Utils, scenerySerialize, BackboneDrawable, ChangeInterval, DOMBlock, Drawable, DOMDrawable, Instance, Renderer, Node, PDOMInstance, PDOMSiblingStyle, PDOMUtils, globalKeyStateTracker, FocusManager, KeyboardUtils, PDOMTree, Input, CanvasNodeBoundsOverlay, FittedBlockBoundsOverlay, HighlightOverlay, HitAreaOverlay, PointerAreaOverlay, PointerOverlay } from '../imports.js';
 
 class Display {
   /**
@@ -1450,7 +1450,7 @@ class Display {
    * @public
    */
   inspect() {
-    localStorage.scenerySnapshot = JSON.stringify( scenery.serialize( this ) );
+    localStorage.scenerySnapshot = JSON.stringify( scenerySerialize( this ) );
   }
 
   /**

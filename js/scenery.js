@@ -216,7 +216,7 @@ extend( scenery, {
 
   // @public
   copy: function( value ) {
-    return scenery.deserialize( scenery.serialize( value ) );
+    return scenery.deserialize( scenery.scenerySerialize( value ) );
   },
 
   // @public
