@@ -89,7 +89,7 @@ an UI and Display made for visual testing and debugging.
 </div>
 
 <script type="module">
-  import scenery from '../../chipper/dist/scenery/js/main.js';
+  import scenery from '../../chipper/dist/scenery/js/main.js'; // eslint-disable-line bad-sim-text
   import phetCore from '../../chipper/dist/phet-core/js/main.js';
   import axon from '../../chipper/dist/axon/js/main.js';
   import dot from '../../chipper/dist/dot/js/main.js';
@@ -270,12 +270,12 @@ an UI and Display made for visual testing and debugging.
       children: [
         new scenery.Rectangle( 0, 0, 512, 256, {
           fill: new scenery.LinearGradient( 0, 0, 0, 256 )
-            .addColorStop( 0, 'rgba(255,0,0,1)' )
-            .addColorStop( 0.3, 'rgba(255,0,0,0)' )
-            .addColorStop( 0.4, 'rgba(255,255,255,0)' )
-            .addColorStop( 0.6, 'rgba(255,255,0,1)' )
-            .addColorStop( 0.8, 'rgba(0,0,0,1)' )
-            .addColorStop( 1, 'rgba(128,128,128,0.5)' )
+              .addColorStop( 0, 'rgba(255,0,0,1)' )
+              .addColorStop( 0.3, 'rgba(255,0,0,0)' )
+              .addColorStop( 0.4, 'rgba(255,255,255,0)' )
+              .addColorStop( 0.6, 'rgba(255,255,0,1)' )
+              .addColorStop( 0.8, 'rgba(0,0,0,1)' )
+              .addColorStop( 1, 'rgba(128,128,128,0.5)' )
         } ),
         bars
       ]
