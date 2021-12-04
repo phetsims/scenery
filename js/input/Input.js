@@ -159,6 +159,8 @@
  */
 
 import Action from '../../../axon/js/Action.js';
+import Emitter from '../../../axon/js/Emitter.js';
+import StringIO from '../../../tandem/js/types/StringIO.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
@@ -275,6 +277,14 @@ class Input {
       phetioPlayback: true,
       tandem: options.tandem.createTandem( 'validatePointersAction' ),
       phetioHighFrequency: true
+    } );
+
+    // @private {Emitter} - Emits when a pointer enters a PhET-iO Element
+    this.elementEnteredEmitter = new Emitter( {
+      parameters: [ { name: 'phetioID', phetioType: StringIO } ],
+      tandem: options.tandem.createTandem( 'elementEnteredEmitter' ),
+      phetioHighFrequency: true,
+      phetioDocumentation: 'Emits when a pointer enters a PhET-iO Element'
     } );
 
     // @private {Action} - Emits to the PhET-iO data stream.
@@ -1804,6 +1814,17 @@ class Input {
 
     for ( let i = branchIndex; i < trail.length; i++ ) {
       this.dispatchEvent( trail.slice( 0, i + 1 ), 'enter', pointer, event, false );
+    }
+
+    // Avoid work unless there are listeners.  Studio listeners for entry events to allow selection of elements.
+    if ( this.elementEnteredEmitter.hasListeners() ) {
+      for ( let i = trail.length - 1; i >= branchIndex; i-- ) {
+        const lastNode = trail.get( i );
+        if ( lastNode.isPhetioInstrumented() ) {
+          this.elementEnteredEmitter.emit( lastNode.tandem.phetioID );
+          break;
+        }
+      }
     }
   }
 
