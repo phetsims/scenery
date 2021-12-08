@@ -1,7 +1,7 @@
 // Copyright 2021, University of Colorado Boulder
 
-import IProperty from '../../../axon/js/IProperty.js';
-import { Paint, Color } from '../imports.js';
+import IReadOnlyProperty from '../../../axon/js/IReadOnlyProperty.js';
+import { Color, Paint } from '../imports.js';
 
 /**
  * Type representing a PaintDef
@@ -9,6 +9,6 @@ import { Paint, Color } from '../imports.js';
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-type IPaint = Paint | IProperty<Color | string | null> | IProperty<Color | string> | IProperty<Color> | Color | string | null;
+type IPaint = Paint | IReadOnlyProperty<Color | string | null> | IReadOnlyProperty<Color | string> | IReadOnlyProperty<Color> | Color | string | null;
 
 export default IPaint;

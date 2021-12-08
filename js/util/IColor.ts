@@ -1,6 +1,6 @@
 // Copyright 2021, University of Colorado Boulder
 
-import IProperty from '../../../axon/js/IProperty.js';
+import IReadOnlyProperty from '../../../axon/js/IReadOnlyProperty.js';
 import { Color } from '../imports.js';
 
 /**
@@ -9,6 +9,6 @@ import { Color } from '../imports.js';
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-type IColor = IProperty<Color | string | null> | IProperty<Color | string> | IProperty<Color> | Color | string | null;
+type IColor = IReadOnlyProperty<Color | string | null> | IReadOnlyProperty<Color | string> | IReadOnlyProperty<Color> | Color | string | null;
 
 export default IColor;
