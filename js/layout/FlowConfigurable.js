@@ -126,7 +126,7 @@ const FlowConfigurable = memoize( type => {
         value = Orientation.VERTICAL;
       }
 
-      assert && assert( Orientation.includes( value ) );
+      assert && assert( value instanceof Orientation );
 
       if ( this._orientation !== value ) {
         this._orientation = value;
