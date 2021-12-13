@@ -10,8 +10,8 @@
  * @author Jesse Greenberg
  */
 
-import ValidatorDef from '../../../../axon/js/ValidatorDef.js';
 import validate from '../../../../axon/js/validate.js';
+import ValidatorDef from '../../../../axon/js/ValidatorDef.js';
 import merge from '../../../../phet-core/js/merge.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
 import scenery from '../../scenery.js';
@@ -308,8 +308,12 @@ const PDOMUtils = {
     assert && assert( domElement instanceof Element ); // parent to HTMLElement, to support other namespaces
     assert && assert( typeof textContent === 'string' );
 
+    // XHTML requires <br/> instead of <br>, but <br/> is still valid in HTML. See
+    // https://github.com/phetsims/scenery/issues/1309
+    const textWithoutBreaks = textContent.replaceAll( '<br>', '<br/>' );
+
     // TODO: this line must be removed to support i18n Interactive Descriptions, see https://github.com/phetsims/chipper/issues/798
-    const textWithoutEmbeddingMarks = stripEmbeddingMarks( textContent );
+    const textWithoutEmbeddingMarks = stripEmbeddingMarks( textWithoutBreaks );
 
     // Disallow any unfilled template variables to be set in the PDOM.
     validate( textWithoutEmbeddingMarks, ValidatorDef.STRING_WITHOUT_TEMPLATE_VARS_VALIDATOR );
