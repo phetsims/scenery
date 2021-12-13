@@ -529,5 +529,8 @@ const Voicing = {
   }
 };
 
+// @pulic
+Voicing.VOICING_OPTION_KEYS = VOICING_OPTION_KEYS;
+
 scenery.register( 'Voicing', Voicing );
 export default Voicing;
