@@ -8,7 +8,7 @@
  */
 
 import merge from '../../../../../phet-core/js/merge.js';
-import { scenery, Text, ReadingBlock, ReadingBlockHighlight } from '../../../imports.js';
+import { ReadingBlock, ReadingBlockHighlight, scenery, Text } from '../../../imports.js';
 
 class VoicingText extends Text {
 
@@ -28,15 +28,19 @@ class VoicingText extends Text {
       innerContent: text
     }, options );
 
-    super( text, options );
+    // Options that use other options
+    options = merge( options, {
+      readingBlockContent: options.readingBlockContent || text
+    } );
+
+    super( text );
 
     // unique highlight for non-interactive components
     this.focusHighlight = new ReadingBlockHighlight( this );
 
     // voicing
-    this.initializeReadingBlock( {
-      readingBlockContent: options.readingBlockContent || text
-    } );
+    this.initializeReadingBlock();
+    this.mutate( options );
   }
 
   /**

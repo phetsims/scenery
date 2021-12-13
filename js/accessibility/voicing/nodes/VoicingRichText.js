@@ -8,7 +8,7 @@
  */
 
 import merge from '../../../../../phet-core/js/merge.js';
-import { scenery, RichText, ReadingBlock, ReadingBlockHighlight } from '../../../imports.js';
+import { ReadingBlock, ReadingBlockHighlight, RichText, scenery } from '../../../imports.js';
 
 class VoicingRichText extends RichText {
 
@@ -32,14 +32,18 @@ class VoicingRichText extends RichText {
       readingBlockTagName: 'button'
     }, options );
 
-    super( text, options );
+    // Options that use other options
+    options = merge( options, {
+      readingBlockContent: options.readingBlockContent || text
+    } );
+
+    super( text );
 
     this.focusHighlight = new ReadingBlockHighlight( this );
 
-    this.initializeReadingBlock( {
-      readingBlockContent: options.readingBlockContent || text,
-      readingBlockTagName: options.readingBlockTagName
-    } );
+    this.initializeReadingBlock();
+
+    this.mutate( options );
   }
 
   /**

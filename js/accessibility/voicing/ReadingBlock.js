@@ -23,7 +23,7 @@ import extend from '../../../../phet-core/js/extend.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import StringUtils from '../../../../phetcommon/js/util/StringUtils.js';
 import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
-import { scenery, Node, Focus, ReadingBlockHighlight, ReadingBlockUtterance, Voicing, voicingManager } from '../../imports.js';
+import { Focus, Node, ReadingBlockHighlight, ReadingBlockUtterance, scenery, Voicing, voicingManager } from '../../imports.js';
 
 const READING_BLOCK_OPTION_KEYS = [
   'readingBlockTagName',
@@ -62,10 +62,15 @@ const ReadingBlock = {
        */
       _mutatorKeys: READING_BLOCK_OPTION_KEYS.concat( proto._mutatorKeys ),
 
-      initializeReadingBlock( options ) {
+      /**
+       * This should be called in the constructor to initialize ReadingBlock. Note, this must be called before
+       * options are mutated, so most often you must call options via `mutate()` instead of passing directly to
+       * `super()`.
+       */
+      initializeReadingBlock() {
 
         // initialize the parent trait
-        this.initializeVoicing( options );
+        this.initializeVoicing();
 
         // @private {boolean} - to make sure that initializeReadingBlock is called before trying to use trait features
         this.readingBlockInitialized = true;
@@ -113,11 +118,6 @@ const ReadingBlock = {
         // fully enabled and can speak.
         this.readingBlockFocusableChangeListener = this.onReadingBlockFocusableChanged.bind( this );
         voicingManager.speechAllowedAndFullyEnabledProperty.link( this.readingBlockFocusableChangeListener );
-
-        // support passing options through initialize
-        if ( options ) {
-          this.mutate( _.pick( options, READING_BLOCK_OPTION_KEYS ) );
-        }
 
         // All ReadingBlocks have a ReadingBlockHighlight, a focus highlight that is black to indicate it has
         // a different behavior.

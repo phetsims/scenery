@@ -10,7 +10,7 @@ import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import Shape from '../../../../kite/js/Shape.js';
 import extend from '../../../../phet-core/js/extend.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
-import { scenery, Node, Focus } from '../../imports.js';
+import { Focus, Node, scenery } from '../../imports.js';
 
 // constants
 // option keys for InteractiveHighlighting, each of these will have a setter and getter and values are applied with mutate()
@@ -48,12 +48,11 @@ const InteractiveHighlighting = {
       _mutatorKeys: INTERACTIVE_HIGHLIGHTING_OPTIONS.concat( proto._mutatorKeys ),
 
       /**
-       * This should be called in the constructor to initialize InteractiveHighlighting.
+       * This should be called in the constructor to initialize InteractiveHighlighting. Note, this must be called before
+       * options are mutated, so most often you must call options via `mutate()` instead of passing directly to `super()`.
        * @public
-       *
-       * @param {Object} [options]
        */
-      initializeInteractiveHighlighting( options ) {
+      initializeInteractiveHighlighting() {
 
         // @private {boolean} - Indicates that the Trait was initialized, to make sure that initializeInteractiveHighlighting
         // is called before using the Trait.
@@ -113,11 +112,6 @@ const InteractiveHighlighting = {
           cancel: boundPointerCancel,
           interrupt: boundPointerCancel
         };
-
-        // support passing options through initialize
-        if ( options ) {
-          this.mutate( _.pick( options, INTERACTIVE_HIGHLIGHTING_OPTIONS ) );
-        }
       },
 
       /**

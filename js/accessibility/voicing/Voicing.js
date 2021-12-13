@@ -72,17 +72,17 @@ const Voicing = {
       _mutatorKeys: VOICING_OPTION_KEYS.concat( proto._mutatorKeys ),
 
       /**
-       * Initialize in the type being composed with Voicing. Call this in the constructor.
-       * @param {Object} [options] - NOTE: much of the time, the Node this composes into will call mutate for you, be careful not to double call.
+       * Initialize in the type being composed with Voicing. Call this in the constructor. Note, this must be called before
+       * options are mutated, so most often you must call options via `mutate()` instead of passing directly to `super()`.
        * @public
        */
-      initializeVoicing( options ) {
+      initializeVoicing() {
 
         // undefined OR support poolable with the value set by dispose
         assert && assert( this.voicingInitialized === undefined || this.voicingInitialized === false, 'Voicing has already been initialized for this Node' );
 
         // initialize "super" Trait to support highlights on mouse input
-        this.initializeInteractiveHighlighting( options );
+        this.initializeInteractiveHighlighting();
 
         // @private {boolean} - to make sure that initializeVoicing is called before trying to use the mixin.
         this.voicingInitialized = true;
@@ -110,10 +110,7 @@ const Voicing = {
         };
         this.addInputListener( this.speakContentOnFocusListener );
 
-        // support passing options through directly on initialize
-        if ( options ) {
-          this.mutate( _.pick( options, VOICING_OPTION_KEYS ) );
-        }
+
       },
 
       /**
