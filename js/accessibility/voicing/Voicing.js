@@ -3,15 +3,17 @@
 /**
  * A trait for Node that supports the Voicing feature, under accessibility. Allows you to define responses for the Node
  * and make requests to speak that content using HTML5 SpeechSynthesis and the UtteranceQueue. Voicing content is
- * organized into four categories which are responsible for describing different things. Output of this content
- * can be controlled by the responseCollector. These include the
+ * organized into four categories which are responsible for describing different things. Responses are stored on the
+ * composed type: "ResponsePacket." See that file for details about what responses it stores. Output of this content
+ * can be controlled by the responseCollector. Responses are defined as the following. . .
  *
  * - "Name" response: The name of the object that uses Voicing. Similar to the "Accessible Name" in web accessibility.
  * - "Object" response: The state information about the object that uses Voicing.
  * - "Context" response: The contextual changes that result from interaction with the Node that uses Voicing.
  * - "Hint" response: A supporting hint that guides the user toward a desired interaction with this Node.
  *
- * See the property and setter documentation for each of these responses for more information.
+ * See ResponsePacket, as well as the property and setter documentation for each of these responses for more
+ * information.
  *
  * Once this content is set, you can make a request to speak it using an UtteranceQueue with one of the provided
  * functions in this Trait. It is up to you to call one of these functions when you wish for speech to be made. The only
@@ -25,6 +27,7 @@ import extend from '../../../../phet-core/js/extend.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import merge from '../../../../phet-core/js/merge.js';
 import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
+import ResponsePacket from '../../../../utterance-queue/js/ResponsePacket.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
 import { InteractiveHighlighting, Node, scenery, voicingUtteranceQueue } from '../../imports.js';
 
@@ -84,29 +87,8 @@ const Voicing = {
         // @private {boolean} - to make sure that initializeVoicing is called before trying to use the mixin.
         this.voicingInitialized = true;
 
-        // @private {string|null} - The response to be spoken for this Node when speaking names. This is usually
-        // the accessible name for the Node, typically spoken on focus and on interaction, labelling what the object is.
-        this._voicingNameResponse = null;
-
-        // @private {string|null} - The response to be spoken for this node when speaking about object changes. This
-        // is usually the state information directly associated with this Node, such as its current input value.
-        this._voicingObjectResponse = null;
-
-        // @private {string|null} - The response to be spoken for this node when speaking about context changes.
-        // This is usually a response that describes the surrounding changes that have occurred after interacting
-        // with the object.
-        this._voicingContextResponse = null;
-
-        // @private {string|null} - The response to be spoken when speaking hints. This is usually the response
-        // that guides the user toward further interaction with this object if it is important to do so to use
-        // the application.
-        this._voicingHintResponse = null;
-
-        // @private {boolean} - Controls whether or not name, object, context, and hint responses are controlled
-        // by responseCollector Properties. If true, all responses will be spoken when requested, regardless
-        // of these Properties. This is often useful for surrounding UI components where it is important
-        // that information be heard even when certain responses have been disabled.
-        this._voicingIgnoreVoicingManagerProperties = false;
+        // @public {ResponsePacket} - ResponsePacket that holds all the supported responses to be Voiced
+        this.voicingResponsePacket = new ResponsePacket();
 
         // @private {UtteranceQueue|null} - The utteranceQueue that responses for this Node will be spoken through.
         // By default (null), it will go through the singleton voicingUtteranceQueue, but you may need separate
@@ -114,11 +96,6 @@ const Voicing = {
         // the default voicingUtteranceQueue may be disabled, but you could still want some speech to come through
         // while user is changing preferences or other settings.
         this._voicingUtteranceQueue = null;
-
-        // {ResponsePatternCollection} - A collection of response patterns that are used to collect the responses of this Voicing Node
-        // with responseCollector. Controls the order of the Voicing responses and even punctuation used when responses
-        // are assembled into final content for the UtteranceQueue. See ResponsePatternCollection for more details.
-        this._voicingResponsePatternCollection = ResponsePatternCollection.DEFAULT_RESPONSE_PATTERNS;
 
         // @private {Function(event):} - called when this node is focused.
         this._voicingFocusListener = this.defaultFocusListener;
@@ -152,10 +129,10 @@ const Voicing = {
 
         // options are passed along to collectAndSpeakResponse, see that function for additional options
         options = merge( {
-          nameResponse: this._voicingNameResponse,
-          objectResponse: this._voicingObjectResponse,
-          contextResponse: this._voicingContextResponse,
-          hintResponse: this._voicingHintResponse
+          nameResponse: this.voicingResponsePacket.nameResponse,
+          objectResponse: this.voicingResponsePacket.objectResponse,
+          contextResponse: this.voicingResponsePacket.contextResponse,
+          hintResponse: this.voicingResponsePacket.hintResponse
         }, options );
 
         this.collectAndSpeakResponse( options );
@@ -199,7 +176,7 @@ const Voicing = {
 
         // options are passed along to collectAndSpeakResponse, see that function for additional options
         options = merge( {
-          nameResponse: this._voicingNameResponse
+          nameResponse: this.voicingResponsePacket.nameResponse
         }, options );
 
         this.collectAndSpeakResponse( options );
@@ -217,7 +194,7 @@ const Voicing = {
 
         // options are passed along to collectAndSpeakResponse, see that function for additional options
         options = merge( {
-          objectResponse: this._voicingObjectResponse
+          objectResponse: this.voicingResponsePacket.objectResponse
         }, options );
 
         this.collectAndSpeakResponse( options );
@@ -236,7 +213,7 @@ const Voicing = {
 
         // options are passed along to collectAndSpeakResponse, see that function for additional options
         options = merge( {
-          contextResponse: this._voicingContextResponse
+          contextResponse: this.voicingResponsePacket.contextResponse
         }, options );
 
         this.collectAndSpeakResponse( options );
@@ -255,7 +232,7 @@ const Voicing = {
 
         // options are passed along to collectAndSpeakResponse, see that function for additional options
         options = merge( {
-          hintResponse: this._voicingHintResponse
+          hintResponse: this.voicingResponsePacket.hintResponse
         }, options );
 
         this.collectAndSpeakResponse( options );
@@ -271,11 +248,11 @@ const Voicing = {
         options = merge( {
 
           // {boolean} - whether or not this response should ignore the Properties of responseCollector
-          ignoreProperties: this._voicingIgnoreVoicingManagerProperties,
+          ignoreProperties: this.voicingResponsePacket.ignoreProperties,
 
           // {Object} - collection of string patterns to use with responseCollector.collectResponses, see
           // ResponsePatternCollection for more information.
-          responsePatternCollection: this._voicingResponsePatternCollection,
+          responsePatternCollection: this.voicingResponsePacket.responsePatternCollection,
 
           // {Utterance|null} - The utterance to use if you want this response to be more controlled in the
           // UtteranceQueue.
@@ -317,7 +294,7 @@ const Voicing = {
        * @param {string|null} response
        */
       setVoicingNameResponse( response ) {
-        this._voicingNameResponse = response;
+        this.voicingResponsePacket.nameResponse = response;
       },
       set voicingNameResponse( response ) { this.setVoicingNameResponse( response ); },
 
@@ -328,7 +305,7 @@ const Voicing = {
        * @returns {string|null}
        */
       getVoicingNameResponse() {
-        return this._voicingNameResponse;
+        return this.voicingResponsePacket.nameResponse;
       },
       get voicingNameResponse() { return this.getVoicingNameResponse(); },
 
@@ -341,7 +318,7 @@ const Voicing = {
        * @param {string|null} response
        */
       setVoicingObjectResponse( response ) {
-        this._voicingObjectResponse = response;
+        this.voicingResponsePacket.objectResponse = response;
       },
       set voicingObjectResponse( response ) { this.setVoicingObjectResponse( response ); },
 
@@ -352,7 +329,7 @@ const Voicing = {
        * @returns {string|null}
        */
       getVoicingObjectResponse() {
-        return this._voicingObjectResponse;
+        return this.voicingResponsePacket.objectResponse;
       },
       get voicingObjectResponse() { return this.getVoicingObjectResponse(); },
 
@@ -365,7 +342,7 @@ const Voicing = {
        * @param {string|null} response
        */
       setVoicingContextResponse( response ) {
-        this._voicingContextResponse = response;
+        this.voicingResponsePacket.contextResponse = response;
       },
       set voicingContextResponse( response ) { this.setVoicingContextResponse( response ); },
 
@@ -376,7 +353,7 @@ const Voicing = {
        * @returns {string|null}
        */
       getVoicingContextResponse() {
-        return this._voicingContextResponse;
+        return this.voicingResponsePacket.contextResponse;
       },
       get voicingContextResponse() { return this.getVoicingContextResponse(); },
 
@@ -389,7 +366,7 @@ const Voicing = {
        * @param {string|null} response
        */
       setVoicingHintResponse( response ) {
-        this._voicingHintResponse = response;
+        this.voicingResponsePacket.hintResponse = response;
       },
       set voicingHintResponse( response ) { this.setVoicingHintResponse( response ); },
 
@@ -400,7 +377,7 @@ const Voicing = {
        * @returns {string|null}
        */
       getVoicingHintResponse() {
-        return this._voicingHintResponse;
+        return this.voicingResponsePacket.hintResponse;
       },
       get voicingHintResponse() { return this.getVoicingHintResponse(); },
 
@@ -411,7 +388,7 @@ const Voicing = {
        * @public
        */
       setVoicingIgnoreVoicingManagerProperties( ignoreProperties ) {
-        this._voicingIgnoreVoicingManagerProperties = ignoreProperties;
+        this.voicingResponsePacket.ignoreProperties = ignoreProperties;
       },
       set voicingIgnoreVoicingManagerProperties( ignoreProperties ) { this.setVoicingIgnoreVoicingManagerProperties( ignoreProperties ); },
 
@@ -419,7 +396,7 @@ const Voicing = {
        * Get whether or not responses are ignoring responseCollector Properties.
        */
       getVoicingIgnoreVoicingManagerProperties() {
-        return this._voicingIgnoreVoicingManagerProperties;
+        return this.voicingResponsePacket.ignoreProperties;
       },
       get voicingIgnoreVoicingManagerProperties() { return this.getVoicingIgnoreVoicingManagerProperties(); },
 
@@ -433,7 +410,7 @@ const Voicing = {
        */
       setVoicingResponsePatternCollection( patterns ) {
         assert && assert( patterns instanceof ResponsePatternCollection );
-        this._voicingResponsePatternCollection = patterns;
+        this.voicingResponsePacket.responsePatternCollection = patterns;
       },
       set voicingResponsePatternCollection( patterns ) { this.setVoicingResponsePatternCollection( patterns ); },
 
@@ -444,7 +421,7 @@ const Voicing = {
        * @returns {ResponsePatternCollection}
        */
       getVoicingResponsePatternCollection() {
-        return this._voicingResponsePatternCollection;
+        return this.voicingResponsePacket.responsePatternCollection;
       },
       get voicingResponsePatternCollection() { return this.getVoicingResponsePatternCollection(); },
 
