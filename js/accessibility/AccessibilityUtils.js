@@ -315,12 +315,16 @@ define( require => {
 
       if ( tagNameSupportsContent( domElement.tagName ) ) {
 
+        // XHTML requires <br/> instead of <br>, but <br/> is still valid in HTML. See
+        // https://github.com/phetsims/scenery/issues/1309
+        const textWithoutBreaks = textContent.replaceAll( '<br>', '<br/>' );
+
         // only returns true if content contains listed formatting tags
-        if ( AccessibilityUtils.containsFormattingTags( textContent ) ) {
-          domElement.innerHTML = textContent;
+        if ( AccessibilityUtils.containsFormattingTags( textWithoutBreaks ) ) {
+          domElement.innerHTML = textWithoutBreaks;
         }
         else {
-          domElement.textContent = textContent;
+          domElement.textContent = textWithoutBreaks;
         }
       }
     },
