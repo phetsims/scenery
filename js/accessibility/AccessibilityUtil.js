@@ -317,7 +317,11 @@ define( function( require ) {
 
         // returns true if there are no brackets at all
         if ( AccessibilityUtil.usesExclusivelyFormattingTags( textContent ) ) {
-          domElement.innerHTML = textContent;
+
+          // XHTML requires <br/> instead of <br>, but <br/> is still valid in HTML. See
+          // https://github.com/phetsims/scenery/issues/1309
+          const textWithoutBreaks = textContent.replaceAll( '<br>', '<br/>' );
+          domElement.innerHTML = textWithoutBreaks;
         }
         else {
           domElement.textContent = textContent;
