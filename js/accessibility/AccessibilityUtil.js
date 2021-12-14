@@ -286,6 +286,11 @@ define( function( require ) {
         }
       }
 
+      // malformed tags or no tags at all, return false immediately
+      if ( openIndices.length !== closeIndices.length || openIndices.length === 0 ) {
+        return false;
+      }
+
       // check the name in between the open and close brackets - if anything other than formatting tags, return false
       var onlyFormatting = true;
       var upperCaseContent = textContent.toUpperCase();
