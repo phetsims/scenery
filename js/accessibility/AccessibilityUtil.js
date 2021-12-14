@@ -321,7 +321,11 @@ define( require => {
 
         // only returns true if content contains listed formatting tags
         if ( AccessibilityUtil.containsFormattingTags( textContent ) ) {
-          domElement.innerHTML = textWithoutEmbeddingMarks;
+
+          // XHTML requires <br/> instead of <br>, but <br/> is still valid in HTML. See
+          // https://github.com/phetsims/scenery/issues/1309
+          const textWithoutBreaks = textWithoutEmbeddingMarks.replaceAll( '<br>', '<br/>' );
+          domElement.innerHTML = textWithoutBreaks;
         }
         else {
           domElement.textContent = textWithoutEmbeddingMarks;
