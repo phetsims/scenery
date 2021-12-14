@@ -323,12 +323,16 @@ define( function( require ) {
       assert && assert( typeof textContent === 'string' );
       if ( tagNameSupportsContent( domElement.tagName ) ) {
 
+        // XHTML requires <br/> instead of <br>, but <br/> is still valid in HTML. See
+        // https://github.com/phetsims/scenery/issues/1309
+        const textWithoutBreaks = textContent.replaceAll( '<br>', '<br/>' );
+
         // returns true if there are no brackets at all
-        if ( AccessibilityUtil.usesExclusivelyFormattingTags( textContent ) ) {
-          domElement.innerHTML = textContent;
+        if ( AccessibilityUtil.usesExclusivelyFormattingTags( textWithoutBreaks ) ) {
+          domElement.innerHTML = textWithoutBreaks;
         }
         else {
-          domElement.textContent = textContent;
+          domElement.textContent = textWithoutBreaks;
         }
       }
     },
@@ -493,8 +497,8 @@ define( function( require ) {
      * If default behavior and focusable align, the tabindex attribute is removed so that can't interfere with a
      * screen reader.
      * @public (scenery-internal)
-     * 
-     * @param {HTMLElement} element   
+     *
+     * @param {HTMLElement} element
      * @param {boolean} focusable
      */
     overrideFocusWithTabIndex: function( element, focusable ) {
