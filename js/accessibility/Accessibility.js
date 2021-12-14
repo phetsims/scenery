@@ -1260,7 +1260,11 @@ define( function( require ) {
        */
       function setTextContent( domElement, textContent ) {
         if ( textContent && AccessibilityUtil.usesFormattingTagsExclusive( textContent ) ) {
-          domElement.innerHTML = textContent;
+
+          // XHTML requires <br/> instead of <br>, but <br/> is still valid in HTML. See
+          // https://github.com/phetsims/scenery/issues/1309
+          var textWithoutBreaks = textContent.replaceAll( '<br>', '<br/>' );
+          domElement.innerHTML = textWithoutBreaks;
         }
         else {
           domElement.textContent = textContent;
