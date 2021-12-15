@@ -109,8 +109,6 @@ const Voicing = {
           }
         };
         this.addInputListener( this.speakContentOnFocusListener );
-
-
       },
 
       /**
