@@ -20,11 +20,13 @@
  */
 
 import Emitter from '../../../axon/js/Emitter.js';
+import Property from '../../../axon/js/Property.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
+import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
-import { scenery, KeyboardUtils } from '../imports.js';
+import { KeyboardUtils, scenery } from '../imports.js';
 
 class KeyboardDragListener {
   /**
@@ -51,8 +53,8 @@ class KeyboardDragListener {
       // Usually most useful when paired with the positionProperty
       transform: null,
 
-      // {Bounds2|null} - if provided, the model position will be constrained to be inside these bounds
-      dragBounds: null,
+      // {Property.<Bounds2|null>|null} - if provided, the model position will be constrained to be inside these bounds
+      dragBoundsProperty: null,
 
       // {Function|null} - Called as start( event: {SceneryEvent} ) when keyboard drag is started
       start: null,
@@ -82,13 +84,15 @@ class KeyboardDragListener {
       // {number} - time interval at which holding down a hotkey group will trigger an associated listener, in ms
       hotkeyHoldInterval: 800
     }, options );
+
     assert && assert( options.shiftDragVelocity <= options.dragVelocity, 'shiftDragVelocity should be less than or equal to shiftDragVelocity, it is intended to provide more fine-grained control' );
+    assert && assert( options.dragBoundsProperty === null || options.dragBoundsProperty instanceof Property, 'dragBoundsProperty, if provided, should be a Property' );
 
     // @private, mutable attributes declared from options, see options for info, as well as getters and setters
     this._start = options.start;
     this._drag = options.drag;
     this._end = options.end;
-    this._dragBounds = options.dragBounds;
+    this._dragBoundsProperty = ( options.dragBoundsProperty || new Property( null ) );
     this._transform = options.transform;
     this._positionProperty = options.positionProperty;
     this._dragVelocity = options.dragVelocity;
@@ -143,22 +147,30 @@ class KeyboardDragListener {
   }
 
   /**
-   * Getter for the dragBounds property, see options.dragBounds for more info.
-   * @returns {Bounds2|null}
+   * Sets the drag bounds of the listener.
+   * @public
+   *
+   * @param {Bounds2} bounds
    */
-  get dragBounds() { return this._dragBounds; }
+  setDragBounds( bounds ) {
+    assert && assert( bounds instanceof Bounds2 );
+
+    this._dragBoundsProperty.value = bounds;
+  }
+
+  set dragBounds( value ) { this.setDragBounds( value ); }
 
   /**
-   * Setter for the dragBounds property, see options.dragBounds for more info.
-   * @param {Bounds2|null} dragBounds
+   * Returns the drag bounds of the listener.
+   * @public
+   *
+   * @returns {Bounds2}
    */
-  set dragBounds( dragBounds ) { this._dragBounds = dragBounds; }
+  getDragBounds() {
+    return this._dragBoundsProperty.value;
+  }
 
-  /**
-   * Getter for the transform property, see options.transform for more info.
-   * @returns {Transform3|null}
-   */
-  get transform() { return this._transform; }
+  get dragBounds() { return this.getDragBounds(); }
 
   /**
    * Setter for the transform property, see options.transform for more info.
@@ -527,9 +539,11 @@ class KeyboardDragListener {
         if ( this._positionProperty ) {
           let newPosition = this._positionProperty.get().plus( vectorDelta );
 
+          const dragBounds = this._dragBoundsProperty.value;
+
           // constrain to bounds in model coordinates
-          if ( this._dragBounds ) {
-            newPosition = this._dragBounds.closestPointTo( newPosition );
+          if ( dragBounds ) {
+            newPosition = dragBounds.closestPointTo( newPosition );
           }
 
           // update the position if it is different
