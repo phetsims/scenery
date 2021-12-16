@@ -150,10 +150,10 @@ class KeyboardDragListener {
    * Sets the drag bounds of the listener.
    * @public
    *
-   * @param {Bounds2} bounds
+   * @param {Bounds2|null} bounds - null to clear
    */
   setDragBounds( bounds ) {
-    assert && assert( bounds instanceof Bounds2 );
+    assert && assert( bounds instanceof Bounds2 || bounds === null );
 
     this._dragBoundsProperty.value = bounds;
   }
@@ -164,7 +164,7 @@ class KeyboardDragListener {
    * Returns the drag bounds of the listener.
    * @public
    *
-   * @returns {Bounds2}
+   * @returns {Bounds2|null}
    */
   getDragBounds() {
     return this._dragBoundsProperty.value;
