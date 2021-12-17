@@ -455,9 +455,11 @@ class KeyboardDragListener {
         }
       }
 
+      // If there is only a single hotkey, it is already in order
+      let keysInOrder = hotkeysDownList.length === 1;
+
       // the hotkeysDownList array order should match the order of the key group, so now we just need to make
       // sure that the key down times are in the right order
-      let keysInOrder = false;
       for ( let m = 0; m < hotkeysDownList.length - 1; m++ ) {
         if ( hotkeysDownList[ m + 1 ] && hotkeysDownList[ m ].timeDown > hotkeysDownList[ m + 1 ].timeDown ) {
           keysInOrder = true;
