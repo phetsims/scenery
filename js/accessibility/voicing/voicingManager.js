@@ -20,7 +20,7 @@ import merge from '../../../../phet-core/js/merge.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
 import Announcer from '../../../../utterance-queue/js/Announcer.js';
 import Utterance from '../../../../utterance-queue/js/Utterance.js';
-import { scenery, globalKeyStateTracker, KeyboardUtils } from '../../imports.js';
+import { globalKeyStateTracker, KeyboardUtils, scenery } from '../../imports.js';
 
 // In ms, how frequently we will use SpeechSynthesis to keep the feature active. After long intervals without
 // using SpeechSynthesis Chromebooks will take a long time to produce the next speech. Presumably it is disabling
@@ -463,7 +463,7 @@ class VoicingManager extends Announcer {
    * @returns {boolean}
    * @private
    */
-  shouldCancel( utterance, utteranceToCancel ) {
+  shouldUtteranceCancelOther( utterance, utteranceToCancel ) {
     assert && assert( utterance instanceof Utterance );
     assert && assert( utteranceToCancel instanceof Utterance );
 
@@ -484,36 +484,16 @@ class VoicingManager extends Announcer {
   }
 
   /**
-   * Remove earlier Utterances from the queue if the Utterance is important enough. This will also interrupt
-   * the utterance that is currently being spoken.
+   * When the priority for a new utterance changes or if a new utterance is added to the queue, determine whether
+   * we should cancel the synth immediately.
    * @public
-   * @override
    *
-   * @param newUtterance {Utterance}
-   * @param {UtteranceWrapper[]} queue - The queue of the utteranceQueue. Will be modified as we prioritize!
+   * @param {Utterance} newUtterance
    */
-  prioritizeUtterances( newUtterance, queue ) {
-
-    // Update the queue before canceling the browser queue, since that will most likely trigger the end
-    // callback (and therefore the next utterance to be spoken).
-    for ( let i = queue.length - 1; i >= 0; i-- ) {
-
-      // {UtteranceWrapper} of UtteranceQueue
-      const utteranceWrapper = queue[ i ];
-
-      if ( this.shouldCancel( newUtterance, utteranceWrapper.utterance ) ) {
-        this.removeFromQueue( utteranceWrapper, queue );
-
-        // remove from safari workaround list to avoid memory leaks, if available
-        const index = _.findIndex( this.safariWorkaroundUtterancePairs, utterancePair => utterancePair.utterance === utteranceWrapper.utterance );
-        if ( index > -1 ) {
-          this.safariWorkaroundUtterancePairs.splice( index, 1 );
-        }
-      }
-    }
+  onUtterancePriorityChange( newUtterance ) {
 
     // test against what is currently being spoken by the synth (currentlySpeakingUtterance)
-    if ( this.currentlySpeakingUtterance && this.shouldCancel( newUtterance, this.currentlySpeakingUtterance ) ) {
+    if ( this.currentlySpeakingUtterance && this.shouldUtteranceCancelOther( newUtterance, this.currentlySpeakingUtterance ) ) {
       this.cancelSynth();
     }
   }
