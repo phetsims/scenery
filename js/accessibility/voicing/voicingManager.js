@@ -22,8 +22,6 @@ import Announcer from '../../../../utterance-queue/js/Announcer.js';
 import Utterance from '../../../../utterance-queue/js/Utterance.js';
 import { scenery, globalKeyStateTracker, KeyboardUtils } from '../../imports.js';
 
-const DEFAULT_PRIORITY = 1;
-
 // In ms, how frequently we will use SpeechSynthesis to keep the feature active. After long intervals without
 // using SpeechSynthesis Chromebooks will take a long time to produce the next speech. Presumably it is disabling
 // the feature as an optimization. But this workaround gets around it and keeps speech fast.
@@ -47,15 +45,7 @@ const UTTERANCE_OPTION_DEFAULTS = {
   // being spoken by the speech synth (or queued by voicingManager), announcing this Utterance will immediately cancel
   // the other content being spoken by the synth. Otherwise, content for the new utterance will be spoken as soon as
   // the browser finishes speaking the utterances in front of it in line.
-  cancelOther: true,
-
-  // {number} - Used to determine which utterance might interrupt another utterance. Any utterance (1) with a higher
-  // priority than another utterance (2) will behave as such:
-  // - (1) will interrupt (2) when (2) is currently being spoken, and (1) is announced by the voicingManager. In this
-  //       case, (2) is interrupted, and never finished.
-  // - (1) will continue speaking if (1) was speaking, and (2) is announced by the voicingManager. In this case (2)
-  //       will be spoken when (1) is done.
-  priority: DEFAULT_PRIORITY
+  cancelOther: true
 };
 
 class VoicingManager extends Announcer {
@@ -478,11 +468,10 @@ class VoicingManager extends Announcer {
     assert && assert( utteranceToCancel instanceof Utterance );
 
     const utteranceOptions = merge( {}, UTTERANCE_OPTION_DEFAULTS, utterance.announcerOptions );
-    const utteranceToCancelOptions = merge( {}, UTTERANCE_OPTION_DEFAULTS, utteranceToCancel.announcerOptions );
 
     let shouldCancel;
-    if ( utteranceToCancelOptions.priority !== utteranceOptions.priority ) {
-      shouldCancel = utteranceToCancelOptions.priority < utteranceOptions.priority;
+    if ( utteranceToCancel.priority !== utterance.priority ) {
+      shouldCancel = utteranceToCancel.priority < utterance.priority;
     }
     else {
       shouldCancel = utteranceOptions.cancelOther;
@@ -573,13 +562,6 @@ function removeBrTags( string ) {
 }
 
 const voicingManager = new VoicingManager();
-
-// @public - Priority levels that can be used by Utterances providing the `announcerOptions.priority` option.
-voicingManager.TOP_PRIORITY = 10;
-voicingManager.HIGH_PRIORITY = 5;
-voicingManager.MEDIUM_PRIORITY = 2;
-voicingManager.DEFAULT_PRIORITY = DEFAULT_PRIORITY;
-voicingManager.LOW_PRIORITY = 0;
 
 scenery.register( 'voicingManager', voicingManager );
 export default voicingManager;
