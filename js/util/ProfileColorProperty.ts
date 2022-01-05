@@ -42,7 +42,11 @@ class ProfileColorProperty extends ColorProperty {
     assert && assert( typeof colorName === 'string' );
 
     options = merge( {
-      tandem: Tandem.OPTIONAL
+      tandem: Tandem.OPTIONAL,
+
+      // So that notifications won't occur when we change from different objects representing the same color.
+      // We should never be mutating the Color objects used for ProfileColorProperty.
+      useDeepEquality: true
     }, options );
 
     const tandem = options.tandem!;
