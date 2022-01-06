@@ -33,7 +33,7 @@ class ProfileColorProperty extends ColorProperty {
   /**
    * @param namespace - namespace that this color belongs to
    * @param colorName - name of the color, unique within namespace
-   * @param colorProfileMap - object literal that maps keys (profile names) to ColorDef
+   * @param colorProfileMap - object literal that maps keys (profile names) to ColorDef (that should be immutable)
    * @param [options]
    */
   constructor( namespace: Namespace, colorName: string, colorProfileMap: ColorProfileMap, options?: PropertyOptions<Color> ) {
@@ -53,7 +53,10 @@ class ProfileColorProperty extends ColorProperty {
 
     // All values are eagerly coerced to Color instances for efficiency (so it only has to be done once) and simplicity
     // (so the types are uniform)
-    colorProfileMap = _.mapValues( colorProfileMap, Color.toColor );
+    colorProfileMap = _.mapValues( colorProfileMap, color => {
+      // Force Color values to be immutable.
+      return Color.toColor( color ).setImmutable();
+    } );
 
     assert && assert( colorProfileMap.hasOwnProperty( SceneryConstants.DEFAULT_COLOR_PROFILE ), 'default color profile must be provided' );
     assert && assert( !!colorProfileMap[ SceneryConstants.DEFAULT_COLOR_PROFILE ], 'default color profile must be truthy' );
