@@ -9,7 +9,7 @@
 import Property from '../../../axon/js/Property.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import Enumeration from '../../../phet-core/js/Enumeration.js';
+import EnumerationDeprecated from '../../../phet-core/js/EnumerationDeprecated.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import merge from '../../../phet-core/js/merge.js';
@@ -545,7 +545,7 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
   }
 }
 
-FlowConstraint.Justify = Enumeration.byKeys( [
+FlowConstraint.Justify = EnumerationDeprecated.byKeys( [
   'START',
   'END',
   'CENTER',

@@ -24,12 +24,12 @@
 
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import Enumeration from '../../../phet-core/js/Enumeration.js';
+import EnumerationDeprecated from '../../../phet-core/js/EnumerationDeprecated.js';
 import { scenery } from '../imports.js';
 
 // constants
 // entries when signifying Intent of the pointer, see addIntent
-const Intent = Enumeration.byKeys( [
+const Intent = EnumerationDeprecated.byKeys( [
   'DRAG', // listener attached to the pointer will be used for dragging
   'KEYBOARD_DRAG' // listener attached to pointer is for dragging with a keyboard
 ] );

@@ -7,7 +7,7 @@
  */
 
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
-import Enumeration from '../../../phet-core/js/Enumeration.js';
+import EnumerationDeprecated from '../../../phet-core/js/EnumerationDeprecated.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import mutate from '../../../phet-core/js/mutate.js';
 import { scenery } from '../imports.js';
@@ -522,8 +522,8 @@ const GridConfigurable = memoize( type => {
   };
 } );
 
-// @public {Enumeration}
-GridConfigurable.Align = Enumeration.byKeys( [
+// @public {EnumerationDeprecated}
+GridConfigurable.Align = EnumerationDeprecated.byKeys( [
   'START',
   'END',
   'CENTER',

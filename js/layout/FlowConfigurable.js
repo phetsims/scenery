@@ -7,7 +7,7 @@
  */
 
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
-import Enumeration from '../../../phet-core/js/Enumeration.js';
+import EnumerationDeprecated from '../../../phet-core/js/EnumerationDeprecated.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import mutate from '../../../phet-core/js/mutate.js';
@@ -470,8 +470,8 @@ const FlowConfigurable = memoize( type => {
   };
 } );
 
-// @public {Enumeration}
-FlowConfigurable.Align = Enumeration.byKeys( [
+// @public {EnumerationDeprecated}
+FlowConfigurable.Align = EnumerationDeprecated.byKeys( [
   'START',
   'END',
   'CENTER',

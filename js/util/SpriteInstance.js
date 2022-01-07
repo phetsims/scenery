@@ -12,14 +12,14 @@
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Shape from '../../../kite/js/Shape.js';
-import Enumeration from '../../../phet-core/js/Enumeration.js';
+import EnumerationDeprecated from '../../../phet-core/js/EnumerationDeprecated.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
 import { scenery } from '../imports.js';
 
 const scratchVector = new Vector2( 0, 0 );
 const scratchMatrix = Matrix3.IDENTITY.copy();
 
-const TransformType = Enumeration.byKeys( [
+const TransformType = EnumerationDeprecated.byKeys( [
   'TRANSLATION',
   'TRANSLATION_AND_SCALE',
   'TRANSLATION_AND_ROTATION',
@@ -102,7 +102,7 @@ class SpriteInstance {
   }
 }
 
-// @public {Enumeration}
+// @public {EnumerationDeprecated}
 SpriteInstance.TransformType = TransformType;
 
 Poolable.mixInto( SpriteInstance, {
