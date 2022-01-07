@@ -13,5 +13,8 @@ import { scenery, voicingManager } from '../../imports.js';
 
 const voicingUtteranceQueue = new UtteranceQueue( voicingManager );
 
+// voicingUtteranceQueue should be disabled until requested
+voicingUtteranceQueue.enabled = false;
+
 scenery.register( 'voicingUtteranceQueue', voicingUtteranceQueue );
 export default voicingUtteranceQueue;

@@ -213,21 +213,6 @@ class VoicingManager extends Announcer {
   }
 
   /**
-   * Remove an element from the utterance queue.
-   * @private
-   *
-   * @param {UtteranceWrapper} utteranceWrapper
-   * @param {UtteranceWrapper[]} queue - modified by this function!
-   */
-  removeFromQueue( utteranceWrapper, queue ) {
-
-    // remove from voicingManager list after speaking
-    const index = queue.indexOf( utteranceWrapper );
-    assert && assert( index >= 0, 'trying to remove a utteranceWrapper that doesn\'t exist' );
-    queue.splice( index, 1 );
-  }
-
-  /**
    * @override
    * @private
    * @param {number} dt - in milliseconds (not seconds)!
@@ -391,6 +376,8 @@ class VoicingManager extends Announcer {
         this.safariWorkaroundUtterancePairs.splice( indexOfPair, 1 );
       }
 
+      this.announcementCompleteEmitter.emit( utterance );
+
       this.currentlySpeakingUtterance = null;
     };
 
@@ -470,8 +457,8 @@ class VoicingManager extends Announcer {
     const utteranceOptions = merge( {}, UTTERANCE_OPTION_DEFAULTS, utterance.announcerOptions );
 
     let shouldCancel;
-    if ( utteranceToCancel.priority !== utterance.priority ) {
-      shouldCancel = utteranceToCancel.priority < utterance.priority;
+    if ( utteranceToCancel.priorityProperty.value !== utterance.priorityProperty.value ) {
+      shouldCancel = utteranceToCancel.priorityProperty.value < utterance.priorityProperty.value;
     }
     else {
       shouldCancel = utteranceOptions.cancelOther;
@@ -488,12 +475,12 @@ class VoicingManager extends Announcer {
    * we should cancel the synth immediately.
    * @public
    *
-   * @param {Utterance} newUtterance
+   * @param {Utterance} nextAvailableUtterance
    */
-  onUtterancePriorityChange( newUtterance ) {
+  onUtterancePriorityChange( nextAvailableUtterance ) {
 
     // test against what is currently being spoken by the synth (currentlySpeakingUtterance)
-    if ( this.currentlySpeakingUtterance && this.shouldUtteranceCancelOther( newUtterance, this.currentlySpeakingUtterance ) ) {
+    if ( this.currentlySpeakingUtterance && this.shouldUtteranceCancelOther( nextAvailableUtterance, this.currentlySpeakingUtterance ) ) {
       this.cancelSynth();
     }
   }
