@@ -31,6 +31,7 @@ const ENGINE_WAKE_INTERVAL = 10000;
 // with cancel. But speaking behind a timeout/delay improves the behavior significantly. Timeout of 250 ms was
 // determined with testing to be a good value to use. Values less than 250 broke the workaround, while larger
 // values feel too sluggish. See https://github.com/phetsims/john-travoltage/issues/435
+// Beware that UtteranceQueueTests use this value too. Don't change without checking those tests.
 const VOICING_UTTERANCE_INTERVAL = 250;
 
 const UTTERANCE_OPTION_DEFAULTS = {
@@ -62,8 +63,11 @@ class VoicingManager extends Announcer {
     // @public {NumberProperty} - controls the speaking rate of Web Speech
     this.voiceRateProperty = new NumberProperty( 1.0, { range: new Range( 0.75, 2 ) } );
 
-    // {NumberProperty} - controls the pitch of the synth
+    // @public {NumberProperty} - controls the pitch of the synth
     this.voicePitchProperty = new NumberProperty( 1.0, { range: new Range( 0.5, 2 ) } );
+
+    // @public {NumberProperty} - Controls volume of the synth. Intended for use with unit tests only!!
+    this.voiceVolumeProperty = new NumberProperty( 1.0, { range: new Range( 0, 1 ) } );
 
     // @private {boolean} - Indicates whether or not speech using SpeechSynthesis has been requested at least once.
     // The first time speech is requested, it must be done synchronously from user input with absolutely no delay.
@@ -133,9 +137,9 @@ class VoicingManager extends Announcer {
     // initialized.
     this.boundHandleCanSpeakChange = this.handleCanSpeakChange.bind( this );
 
-    // @private {Utterance|null} - A reference to the utterance currently in the synth being spoken by the browser, so
-    // we can determine cancelling behavior when it is time to speak the next utterance. See voicing's supported
-    // announcerOptions for details.
+    // @public {Utterance|null} - Only public for unit tests! A reference to the utterance currently in the synth
+    // being spoken by the browser, so we can determine cancelling behavior when it is time to speak the next utterance.
+    // See voicing's supported announcerOptions for details.
     this.currentlySpeakingUtterance = null;
 
     // fixes a bug on Safari where the `start` and `end` Utterances don't fire! The
@@ -330,6 +334,7 @@ class VoicingManager extends Announcer {
    * this.enabledProperty, allowing speech even when voicingManager is disabled. This is useful in rare cases, for
    * example when the voicingManager recently becomes disabled by the user and we need to announce confirmation of
    * that decision ("Voicing off" or "All audio off").
+   *
    * @public
    *
    * @param {Utterance} utterance
@@ -355,6 +360,7 @@ class VoicingManager extends Announcer {
     speechSynthUtterance.voice = this.voiceProperty.value;
     speechSynthUtterance.pitch = this.voicePitchProperty.value;
     speechSynthUtterance.rate = this.voiceRateProperty.value;
+    speechSynthUtterance.volume = this.voiceVolumeProperty.value;
 
     // keep a reference to WebSpeechUtterances in Safari, so the browser doesn't dispose of it before firing, see #215
     const utterancePair = new UtterancePair( utterance, speechSynthUtterance );
