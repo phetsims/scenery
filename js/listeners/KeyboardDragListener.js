@@ -22,6 +22,7 @@
 import Emitter from '../../../axon/js/Emitter.js';
 import Property from '../../../axon/js/Property.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
+import Transform3 from '../../../dot/js/Transform3.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import merge from '../../../phet-core/js/merge.js';
@@ -29,6 +30,7 @@ import platform from '../../../phet-core/js/platform.js';
 import { KeyboardUtils, scenery } from '../imports.js';
 
 class KeyboardDragListener {
+
   /**
    * @param {Object} [options]
    */
@@ -173,10 +175,30 @@ class KeyboardDragListener {
   get dragBounds() { return this.getDragBounds(); }
 
   /**
-   * Setter for the transform property, see options.transform for more info.
-   * @param {Transform3|null}transform
+   * Sets the drag transform of the listener.
+   * @public
+   *
+   * @param {Transform3} transform
    */
-  set transform( transform ) { this._transform = transform; }
+  setTransform( transform ) {
+    assert && assert( transform instanceof Transform3 );
+
+    this._transform = transform;
+  }
+
+  set transform( transform ) { this.setTransform( transform ); }
+
+  /**
+   * Returns the transform of the listener.
+   * @public
+   *
+   * @returns {Transform3}
+   */
+  getTransform() {
+    return this._transform;
+  }
+
+  get transform() { return this.getTransform(); }
 
   /**
    * Getter for the dragVelocity property, see options.dragVelocity for more info.
