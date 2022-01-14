@@ -1996,18 +1996,16 @@ class Node extends ParallelDOM {
     return this.selfBounds.intersectsBounds( bounds );
   }
 
-  // Used in Studio Autoselect.  Returns an instrumented PhET-iO Element Node if possible.
-  // Adapted from Picker.recursiveHitTest
-  getPhetioMouseHit( point: Vector2 ): Node | null {
+  isPhetioMouseHittable( point: Vector2 ): boolean {
 
     // invisible things cannot be autoselected
     if ( !this.visible ) {
-      return null;
+      return false;
     }
 
     // unpickable things cannot be autoselected
     if ( this.pickable === false ) {
-      return null;
+      return false;
     }
 
     // Transform the point in the local coordinate frame, so we can test it with the clipArea/children
@@ -2015,8 +2013,22 @@ class Node extends ParallelDOM {
 
     // If our point is outside of the local-coordinate clipping area, there should be no hit.
     if ( this.clipArea !== null && !this.clipArea.containsPoint( localPoint ) ) {
+      return false;
+    }
+    return true;
+  }
+
+  // Used in Studio Autoselect.  Returns an instrumented PhET-iO Element Node if possible.
+  // Adapted from Picker.recursiveHitTest
+  // @returns {PhetioObject} -- may not be a Node.  For instance, ThreeIsometricNode hits Mass instances
+  getPhetioMouseHit( point: Vector2 ): PhetioObject | null {
+
+    if ( !this.isPhetioMouseHittable( point ) ) {
       return null;
     }
+
+    // Transform the point in the local coordinate frame, so we can test it with the clipArea/children
+    const localPoint = this._transform.getInverse().timesVector2( point );
 
     // Check children before our "self", since the children are rendered on top.
     // Manual iteration here so we can return directly, and so we can iterate backwards (last node is in front).
