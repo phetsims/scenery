@@ -1996,6 +1996,58 @@ class Node extends ParallelDOM {
     return this.selfBounds.intersectsBounds( bounds );
   }
 
+  // Used in Studio Autoselect.  Returns an instrumented PhET-iO Element Node if possible.
+  // Adapted from Picker.recursiveHitTest
+  getPhetioMouseHit( point: Vector2 ): Node | null {
+
+    // invisible things cannot be autoselected
+    if ( !this.visible ) {
+      return null;
+    }
+
+    // unpickable things cannot be autoselected
+    if ( this.pickable === false ) {
+      return null;
+    }
+
+    // Transform the point in the local coordinate frame, so we can test it with the clipArea/children
+    const localPoint = this._transform.getInverse().timesVector2( point );
+
+    // If our point is outside of the local-coordinate clipping area, there should be no hit.
+    if ( this.clipArea !== null && !this.clipArea.containsPoint( localPoint ) ) {
+      return null;
+    }
+
+    // Check children before our "self", since the children are rendered on top.
+    // Manual iteration here so we can return directly, and so we can iterate backwards (last node is in front).
+    for ( let i = this._children.length - 1; i >= 0; i-- ) {
+      const child = this._children[ i ];
+      const childHit = child.getPhetioMouseHit( localPoint );
+
+      // If there was a hit, immediately add our node to the start of the Trail (will recursively build the Trail).
+      if ( childHit ) {
+        return childHit.isPhetioInstrumented() ? childHit : this;
+      }
+    }
+
+    // Tests for mouse and touch hit areas before testing containsPointSelf
+    if ( this._mouseArea ) {
+      // NOTE: both Bounds2 and Shape have containsPoint! We use both here!
+      return this._mouseArea.containsPoint( localPoint ) ? this : null;
+    }
+
+    // Didn't hit our children, so check ourself as a last resort. Check our selfBounds first, so we can potentially
+    // avoid hit-testing the actual object (which may be more expensive).
+    if ( this.selfBounds.containsPoint( localPoint ) ) {
+      if ( this.containsPointSelf( localPoint ) ) {
+        return this;
+      }
+    }
+
+    // No hit
+    return null;
+  }
+
   /**
    * Whether this Node itself is painted (displays something itself). Meant to be overridden.
    */

@@ -561,6 +561,12 @@ class Display {
     sceneryLog && sceneryLog.Display && sceneryLog.pop();
   }
 
+  // @public - Used for Studio Autoselect to determine the leafiest PhET-iO Element under the mouse
+  getPhetioElementAt( point ) {
+    const node = this._rootNode.getPhetioMouseHit( point );
+    return node && node.isPhetioInstrumented() ? node : null;
+  }
+
   /**
    * @private
    */
