@@ -397,6 +397,12 @@ class VoicingManager extends Announcer {
     // Signify to the utterance-queue that we cannot speak yet until this utterance has finished
     this.readyToSpeak = false;
 
+    // This is generally set in the step function when the synth is not speaking, but there is a Firefox issue where
+    // the SpeechSynthesis.speaking is set to `true` asynchronously. So we eagerly reset this timing variable to
+    // signify that we need to wait VOICING_UTTERANCE_INTERVAL until we are allowed to speak again.
+    // See https://github.com/phetsims/utterance-queue/issues/40
+    this.timeSinceUtteranceEnd = 0;
+
     this.getSynth().speak( speechSynthUtterance );
 
     if ( !this.hasSpoken ) {
