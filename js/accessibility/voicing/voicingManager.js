@@ -80,8 +80,9 @@ class VoicingManager extends Announcer {
     this.timeSinceWakingEngine = 0;
 
     // @private {number} - Amount of time in ms to wait between speaking SpeechSynthesisUtterances, see
-    // VOICING_UTTERANCE_INTERVAL for details about why this is necessary.
-    this.timeSinceUtteranceEnd = 0;
+    // VOICING_UTTERANCE_INTERVAL for details about why this is necessary. Initialized to the interval value
+    // so that we can speak instantly the first time.
+    this.timeSinceUtteranceEnd = VOICING_UTTERANCE_INTERVAL;
 
     // @public {Emitter} - emits events when the speaker starts/stops speaking, with the Utterance that is
     // either starting or stopping
