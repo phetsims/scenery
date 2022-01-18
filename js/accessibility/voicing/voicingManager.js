@@ -127,7 +127,8 @@ class VoicingManager extends Announcer {
     // @public {SpeechSynthesisVoice[]} - possible voices for Web Speech synthesis
     this.voices = [];
 
-    // Need the Utterance, startListener, endListener, and SpeechSynthesisUtterance
+    // Maps an Utterance to a VoicingUtteranceWrapper, so that we can keep a reference to the
+    // SpeechSynthesisUtterance and its event listeners to dispose of them.
     this.utteranceToVoicingUtteranceWrapperMap = new Map();
 
     // @public {boolean} - is the VoicingManager initialized for use? This is prototypal so it isn't always initialized
