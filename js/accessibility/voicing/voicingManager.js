@@ -127,6 +127,9 @@ class VoicingManager extends Announcer {
     // @public {SpeechSynthesisVoice[]} - possible voices for Web Speech synthesis
     this.voices = [];
 
+    // Need the Utterance, startListener, endListener, and SpeechSynthesisUtterance
+    this.utteranceToVoicingUtteranceWrapperMap = new Map();
+
     // @public {boolean} - is the VoicingManager initialized for use? This is prototypal so it isn't always initialized
     this.initialized = false;
 
@@ -370,22 +373,21 @@ class VoicingManager extends Announcer {
     const startListener = () => {
       this.startSpeakingEmitter.emit( stringToSpeak, utterance );
       this.currentlySpeakingUtterance = utterance;
+
+      assert && assert( !this.utteranceToVoicingUtteranceWrapperMap.has( utterance ), 'Map should not have the Utterance already' );
+      this.utteranceToVoicingUtteranceWrapperMap.set( utterance, new VoicingUtteranceWrapper( utterance, speechSynthUtterance, endListener ) );
+
       speechSynthUtterance.removeEventListener( 'start', startListener );
     };
 
     const endListener = () => {
-      this.endSpeakingEmitter.emit( stringToSpeak, utterance );
-      speechSynthUtterance.removeEventListener( 'end', endListener );
+      this.handleSpeechSynthesisEnd( stringToSpeak, utterance, speechSynthUtterance, endListener );
 
       // remove the reference to the SpeechSynthesisUtterance so we don't leak memory
       const indexOfPair = this.safariWorkaroundUtterancePairs.indexOf( utterancePair );
       if ( indexOfPair > -1 ) {
         this.safariWorkaroundUtterancePairs.splice( indexOfPair, 1 );
       }
-
-      this.announcementCompleteEmitter.emit( utterance );
-
-      this.currentlySpeakingUtterance = null;
     };
 
     speechSynthUtterance.addEventListener( 'start', startListener );
@@ -409,6 +411,26 @@ class VoicingManager extends Announcer {
     if ( !this.hasSpoken ) {
       this.hasSpoken = true;
     }
+  }
+
+  /**
+   * All the work necessary when we are finished with an utterance, intended for end or cancel.
+   * Emits events signifying that we are done with speech and does some disposal.
+   * @private
+   *
+   * @param {string} stringToSpeak
+   * @param {Utterance} utterance
+   * @param {SpeechSynthesisUtterance} speechSynthesisUtterance
+   * @param {function} endListener
+   */
+  handleSpeechSynthesisEnd( stringToSpeak, utterance, speechSynthesisUtterance, endListener ) {
+    this.endSpeakingEmitter.emit( stringToSpeak, utterance );
+    this.announcementCompleteEmitter.emit( utterance );
+
+    speechSynthesisUtterance.removeEventListener( 'end', endListener );
+
+    this.utteranceToVoicingUtteranceWrapperMap.delete( utterance );
+    this.currentlySpeakingUtterance = null;
   }
 
   /**
@@ -444,8 +466,9 @@ class VoicingManager extends Announcer {
   cancel() {
     if ( this.initialized ) {
 
-      // Cancel anything that is being spoken currently.
-      this.cancelSynth();
+      if ( this.currentlySpeakingUtterance ) {
+        this.cancelUtterance( this.currentlySpeakingUtterance );
+      }
 
       // indicate to utteranceQueues that we expect everything queued for voicing to be removed
       this.clearEmitter.emit();
@@ -453,6 +476,29 @@ class VoicingManager extends Announcer {
       // cancel clears all utterances from the utteranceQueue, so we should clear all of the safari workaround
       // references as well
       this.safariWorkaroundUtterancePairs = [];
+    }
+  }
+
+  /**
+   * Cancel the provided Utterance, if it is currently being spoken by this Announcer. Does not cancel
+   * any other utterances that may be in the UtteranceQueue.
+   * @public
+   *
+   * @param {Utterance} utterance
+   */
+  cancelUtterance( utterance ) {
+    if ( this.currentlySpeakingUtterance === utterance ) {
+
+      // eagerly remove the end event, the browser can emit this asynchronously and we do not want to get
+      // the end event after we have finished speaking and it has been removed from the queue
+      const wrapper = this.utteranceToVoicingUtteranceWrapperMap.get( utterance );
+      if ( wrapper ) {
+        this.handleSpeechSynthesisEnd( utterance.getAlertText(), utterance, wrapper.speechSynthesisUtterance, wrapper.endListener );
+      }
+
+      // silence all speech - after handleSpeechSynthesisEnd so we don't do that work twice in case the end
+      // event is synchronous on this browser
+      this.cancelSynth();
     }
   }
 
@@ -494,7 +540,7 @@ class VoicingManager extends Announcer {
 
     // test against what is currently being spoken by the synth (currentlySpeakingUtterance)
     if ( this.currentlySpeakingUtterance && this.shouldUtteranceCancelOther( nextAvailableUtterance, this.currentlySpeakingUtterance ) ) {
-      this.cancelSynth();
+      this.cancelUtterance( this.currentlySpeakingUtterance );
     }
   }
 
@@ -522,6 +568,18 @@ class UtterancePair {
     // @public (read-only)
     this.utterance = utterance;
     this.speechSynthesisUtterance = speechSynthesisUtterance;
+  }
+}
+
+/**
+ * An inner class that combines some objects that are necessary to keep track of to dispose
+ * SpeechSynthesisUtterances when it is time.
+ */
+class VoicingUtteranceWrapper {
+  constructor( utterance, speechSynthesisUtterance, endListener ) {
+    this.utterance = utterance;
+    this.speechSynthesisUtterance = speechSynthesisUtterance;
+    this.endListener = endListener;
   }
 }
 
