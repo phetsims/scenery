@@ -236,11 +236,11 @@ class VoicingManager extends Announcer {
       this.timeSinceUtteranceEnd = this.getSynth().speaking ? 0 : this.timeSinceUtteranceEnd + dt;
 
       // Wait until VOICING_UTTERANCE_INTERVAL to speak again for more consistent behavior on certain platforms,
-      // see documentation for the constant for more information. By setting readyToSpeak in the step function
+      // see documentation for the constant for more information. By setting readyToAnnounce in the step function
       // we also don't have to rely at all on the SpeechSynthesisUtterance 'end' event, which is inconsistent on
       // certain platforms.
       if ( this.timeSinceUtteranceEnd > VOICING_UTTERANCE_INTERVAL ) {
-        this.readyToSpeak = true;
+        this.readyToAnnounce = true;
       }
 
       // If our queue is empty and the synth isn't speaking, then clear safariWorkaroundUtterancePairs to prevent memory leak.
@@ -399,7 +399,7 @@ class VoicingManager extends Announcer {
     speechSynthUtterance.addEventListener( 'error', endListener );
 
     // Signify to the utterance-queue that we cannot speak yet until this utterance has finished
-    this.readyToSpeak = false;
+    this.readyToAnnounce = false;
 
     // This is generally set in the step function when the synth is not speaking, but there is a Firefox issue where
     // the SpeechSynthesis.speaking is set to `true` asynchronously. So we eagerly reset this timing variable to
