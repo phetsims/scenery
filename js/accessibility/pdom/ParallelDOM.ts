@@ -285,8 +285,7 @@ type Association = {
   thisElementName: string
 };
 
-// TODO: not sure about this
-type PDOMBehaviorFunction = ( node: Node, options: any, value: string, callbacksForOtherNodes?: ( ( n: Node ) => void )[] ) => any;
+type PDOMBehaviorFunction = ( node: Node, options: any, value: string, callbacksForOtherNodes?: ( () => void )[] ) => ParallelDOMOptions;
 
 class ParallelDOM extends PhetioObject {
 
@@ -2804,6 +2803,7 @@ class ParallelDOM extends PhetioObject {
   }
 
   /*---------------------------------------------------------------------------*/
+  //
   // PDOM Instance handling
 
   /**

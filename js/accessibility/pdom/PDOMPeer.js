@@ -181,20 +181,20 @@ class PDOMPeer {
 
     let options = this.node.getBaseOptions();
 
-    const otherNodeCallbacks = [];
+    const callbacksForOtherNodes = [];
 
     if ( this.node.accessibleName !== null ) {
-      options = this.node.accessibleNameBehavior( this.node, options, this.node.accessibleName, otherNodeCallbacks );
+      options = this.node.accessibleNameBehavior( this.node, options, this.node.accessibleName, callbacksForOtherNodes );
       assert && assert( typeof options === 'object', 'should return an object' );
     }
 
     if ( this.node.pdomHeading !== null ) {
-      options = this.node.pdomHeadingBehavior( this.node, options, this.node.pdomHeading, otherNodeCallbacks );
+      options = this.node.pdomHeadingBehavior( this.node, options, this.node.pdomHeading, callbacksForOtherNodes );
       assert && assert( typeof options === 'object', 'should return an object' );
     }
 
     if ( this.node.helpText !== null ) {
-      options = this.node.helpTextBehavior( this.node, options, this.node.helpText, otherNodeCallbacks );
+      options = this.node.helpTextBehavior( this.node, options, this.node.helpText, callbacksForOtherNodes );
       assert && assert( typeof options === 'object', 'should return an object' );
     }
 
@@ -276,7 +276,7 @@ class PDOMPeer {
     this.node.updateOtherNodesAriaDescribedby();
     this.node.updateOtherNodesActiveDescendant();
 
-    otherNodeCallbacks.forEach( callback => {
+    callbacksForOtherNodes.forEach( callback => {
       assert && assert( typeof callback === 'function' );
       callback();
     } );
