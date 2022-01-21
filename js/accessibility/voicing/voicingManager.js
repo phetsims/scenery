@@ -127,9 +127,9 @@ class VoicingManager extends Announcer {
     // @public {SpeechSynthesisVoice[]} - possible voices for Web Speech synthesis
     this.voices = [];
 
-    // Maps an Utterance to a VoicingUtteranceWrapper, so that we can keep a reference to the
+    // @private {Map<Utterance,SpeechSynthesisUtteranceWrapper>} - So that we can keep a reference to the
     // SpeechSynthesisUtterance and its event listeners to dispose of them.
-    this.utteranceToVoicingUtteranceWrapperMap = new Map();
+    this.utteranceToSpeechSynthesisUtteranceWrapper = new Map();
 
     // @public {boolean} - is the VoicingManager initialized for use? This is prototypal so it isn't always initialized
     this.initialized = false;
@@ -375,8 +375,8 @@ class VoicingManager extends Announcer {
       this.startSpeakingEmitter.emit( stringToSpeak, utterance );
       this.currentlySpeakingUtterance = utterance;
 
-      assert && assert( !this.utteranceToVoicingUtteranceWrapperMap.has( utterance ), 'Map should not have the Utterance already' );
-      this.utteranceToVoicingUtteranceWrapperMap.set( utterance, new VoicingUtteranceWrapper( utterance, speechSynthUtterance, endListener ) );
+      assert && assert( !this.utteranceToSpeechSynthesisUtteranceWrapper.has( utterance ), 'Map should not have the Utterance already' );
+      this.utteranceToSpeechSynthesisUtteranceWrapper.set( utterance, new SpeechSynthesisUtteranceWrapper( utterance, speechSynthUtterance, endListener ) );
 
       speechSynthUtterance.removeEventListener( 'start', startListener );
     };
@@ -430,7 +430,7 @@ class VoicingManager extends Announcer {
 
     speechSynthesisUtterance.removeEventListener( 'end', endListener );
 
-    this.utteranceToVoicingUtteranceWrapperMap.delete( utterance );
+    this.utteranceToSpeechSynthesisUtteranceWrapper.delete( utterance );
     this.currentlySpeakingUtterance = null;
   }
 
@@ -492,7 +492,7 @@ class VoicingManager extends Announcer {
 
       // eagerly remove the end event, the browser can emit this asynchronously and we do not want to get
       // the end event after we have finished speaking and it has been removed from the queue
-      const wrapper = this.utteranceToVoicingUtteranceWrapperMap.get( utterance );
+      const wrapper = this.utteranceToSpeechSynthesisUtteranceWrapper.get( utterance );
       if ( wrapper ) {
         this.handleSpeechSynthesisEnd( utterance.getAlertText(), utterance, wrapper.speechSynthesisUtterance, wrapper.endListener );
       }
@@ -576,7 +576,7 @@ class UtterancePair {
  * An inner class that combines some objects that are necessary to keep track of to dispose
  * SpeechSynthesisUtterances when it is time.
  */
-class VoicingUtteranceWrapper {
+class SpeechSynthesisUtteranceWrapper {
   constructor( utterance, speechSynthesisUtterance, endListener ) {
     this.utterance = utterance;
     this.speechSynthesisUtterance = speechSynthesisUtterance;
