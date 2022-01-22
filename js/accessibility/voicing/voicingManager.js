@@ -378,13 +378,7 @@ class VoicingManager extends Announcer {
     };
 
     const endListener = () => {
-      this.handleSpeechSynthesisEnd( stringToSpeak, utterance, speechSynthUtterance, endListener );
-
-      // remove the reference to the SpeechSynthesisUtterance so we don't leak memory
-      const indexOfPair = this.safariWorkaroundUtterancePairs.indexOf( speechSynthesisUtteranceWrapper );
-      if ( indexOfPair > -1 ) {
-        this.safariWorkaroundUtterancePairs.splice( indexOfPair, 1 );
-      }
+      this.handleSpeechSynthesisEnd( stringToSpeak, speechSynthesisUtteranceWrapper );
     };
 
     speechSynthUtterance.addEventListener( 'start', startListener );
@@ -420,15 +414,19 @@ class VoicingManager extends Announcer {
    * @private
    *
    * @param {string} stringToSpeak
-   * @param {Utterance} utterance
-   * @param {SpeechSynthesisUtterance} speechSynthesisUtterance
-   * @param {function} endListener
+   * @param {SpeechSynthesisUtteranceWrapper} speechSynthesisUtteranceWrapper
    */
-  handleSpeechSynthesisEnd( stringToSpeak, utterance, speechSynthesisUtterance, endListener ) {
-    this.endSpeakingEmitter.emit( stringToSpeak, utterance );
-    this.announcementCompleteEmitter.emit( utterance );
+  handleSpeechSynthesisEnd( stringToSpeak, speechSynthesisUtteranceWrapper ) {
+    this.endSpeakingEmitter.emit( stringToSpeak, speechSynthesisUtteranceWrapper.utterance );
+    this.announcementCompleteEmitter.emit( speechSynthesisUtteranceWrapper.utterance );
 
-    speechSynthesisUtterance.removeEventListener( 'end', endListener );
+    speechSynthesisUtteranceWrapper.speechSynthesisUtterance.removeEventListener( 'end', speechSynthesisUtteranceWrapper.endListener );
+
+    // remove the reference to the SpeechSynthesisUtterance so we don't leak memory
+    const indexOfPair = this.safariWorkaroundUtterancePairs.indexOf( speechSynthesisUtteranceWrapper );
+    if ( indexOfPair > -1 ) {
+      this.safariWorkaroundUtterancePairs.splice( indexOfPair, 1 );
+    }
 
     this.speakingSpeechSynthesisUtteranceWrapper = null;
     this.currentlySpeakingUtterance = null;
@@ -493,7 +491,7 @@ class VoicingManager extends Announcer {
       // eagerly remove the end event, the browser can emit this asynchronously and we do not want to get
       // the end event after we have finished speaking and it has been removed from the queue
       if ( this.speakingSpeechSynthesisUtteranceWrapper ) {
-        this.handleSpeechSynthesisEnd( utterance.getAlertText(), utterance, this.speakingSpeechSynthesisUtteranceWrapper.speechSynthesisUtterance, this.speakingSpeechSynthesisUtteranceWrapper.endListener );
+        this.handleSpeechSynthesisEnd( utterance.getAlertText(), this.speakingSpeechSynthesisUtteranceWrapper );
       }
 
       // silence all speech - after handleSpeechSynthesisEnd so we don't do that work twice in case the end
