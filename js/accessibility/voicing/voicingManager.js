@@ -147,14 +147,10 @@ class VoicingManager extends Announcer {
     // See voicing's supported announcerOptions for details.
     this.currentlySpeakingUtterance = null;
 
-    // fixes a bug on Safari where the `start` and `end` Utterances don't fire! The
-    // issue is (apparently) that Safari internally clears the reference to the
-    // Utterance on speak which prevents it from firing these events at the right
-    // time - fix borrowed from
+    // @private {SpeechSynthesisUtteranceWrapper[]} - Fixes a bug on Safari where the `start` and `end` Utterances
+    // don't fire! The issue is (apparently) that Safari internally clears the reference to the Utterance on speak
+    // which prevents it from firing these events at the right time - fix borrowed from
     // https://stackoverflow.com/questions/23483990/speechsynthesis-api-onend-callback-not-working
-    // Unfortunately, this also introduces a memory leak, we should be smarter about
-    // clearing this, though it is a bit tricky since we don't have a way to know
-    // when we are done with an utterance - see #215
     // Blown away regularly, don't keep a reference to it.
     this.safariWorkaroundUtterancePairs = [];
   }
