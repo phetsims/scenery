@@ -367,16 +367,12 @@ class VoicingManager extends Announcer {
     speechSynthUtterance.rate = this.voiceRateProperty.value;
     speechSynthUtterance.volume = this.voiceVolumeProperty.value;
 
-    // keep a reference to WebSpeechUtterances in Safari, so the browser doesn't dispose of it before firing, see #215
-    const utterancePair = new UtterancePair( utterance, speechSynthUtterance );
-    this.safariWorkaroundUtterancePairs.push( utterancePair );
-
     const startListener = () => {
       this.startSpeakingEmitter.emit( stringToSpeak, utterance );
       this.currentlySpeakingUtterance = utterance;
 
       assert && assert( !this.utteranceToSpeechSynthesisUtteranceWrapper.has( utterance ), 'Map should not have the Utterance already' );
-      this.utteranceToSpeechSynthesisUtteranceWrapper.set( utterance, new SpeechSynthesisUtteranceWrapper( utterance, speechSynthUtterance, endListener ) );
+      this.utteranceToSpeechSynthesisUtteranceWrapper.set( utterance, speechSynthesisUtteranceWrapper );
 
       speechSynthUtterance.removeEventListener( 'start', startListener );
     };
@@ -385,7 +381,7 @@ class VoicingManager extends Announcer {
       this.handleSpeechSynthesisEnd( stringToSpeak, utterance, speechSynthUtterance, endListener );
 
       // remove the reference to the SpeechSynthesisUtterance so we don't leak memory
-      const indexOfPair = this.safariWorkaroundUtterancePairs.indexOf( utterancePair );
+      const indexOfPair = this.safariWorkaroundUtterancePairs.indexOf( speechSynthesisUtteranceWrapper );
       if ( indexOfPair > -1 ) {
         this.safariWorkaroundUtterancePairs.splice( indexOfPair, 1 );
       }
@@ -393,6 +389,10 @@ class VoicingManager extends Announcer {
 
     speechSynthUtterance.addEventListener( 'start', startListener );
     speechSynthUtterance.addEventListener( 'end', endListener );
+
+    // keep a reference to WebSpeechUtterances in Safari, so the browser doesn't dispose of it before firing, see #215
+    const speechSynthesisUtteranceWrapper = new SpeechSynthesisUtteranceWrapper( utterance, speechSynthUtterance, endListener );
+    this.safariWorkaroundUtterancePairs.push( speechSynthesisUtteranceWrapper );
 
     // In Safari the `end` listener does not fire consistently, (especially after cancel)
     // but the error event does. In this case signify that speaking has ended.
@@ -556,25 +556,9 @@ class VoicingManager extends Announcer {
 }
 
 /**
- * An inner class that pairs a SpeechSynthesisUtterance with an Utterance. Useful for the Safari workaround
- */
-class UtterancePair {
-
-  /**
-   * @param {Utterance} utterance
-   * @param {SpeechSynthesisUtterance} speechSynthesisUtterance
-   */
-  constructor( utterance, speechSynthesisUtterance ) {
-
-    // @public (read-only)
-    this.utterance = utterance;
-    this.speechSynthesisUtterance = speechSynthesisUtterance;
-  }
-}
-
-/**
  * An inner class that combines some objects that are necessary to keep track of to dispose
- * SpeechSynthesisUtterances when it is time.
+ * SpeechSynthesisUtterances when it is time. It is also used for the "Safari Workaround" to keep a reference
+ * of the SpeechSynthesisUtterance in memory long enough for the 'end' event to be emitted.
  */
 class SpeechSynthesisUtteranceWrapper {
   constructor( utterance, speechSynthesisUtterance, endListener ) {
