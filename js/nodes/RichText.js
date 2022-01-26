@@ -1890,7 +1890,7 @@ class RichTextLeaf extends RichTextCleanable( Text ) {
 
 Poolable.mixInto( RichTextLeaf );
 
-class RichTextLink extends RichTextCleanable( Node ) {
+class RichTextLink extends Voicing( RichTextCleanable( Node ) ) {
   /**
    * A link node
    *
@@ -1926,9 +1926,6 @@ class RichTextLink extends RichTextCleanable( Node ) {
     // also see https://github.com/phetsims/joist/issues/430
     this.innerContent = innerContent;
 
-    // voicing - Mix Voicing into the RichTextLink so that the link content is read with SpeechSynthesis
-    // when the Voicing feature is enabled.
-    this.initializeVoicing();
     this.voicingNameResponse = innerContent;
 
     // If our href is a function, it should be called when the user clicks on the link
@@ -1989,7 +1986,6 @@ class RichTextLink extends RichTextCleanable( Node ) {
   }
 }
 
-Voicing.compose( RichTextLink );
 Poolable.mixInto( RichTextLink );
 
 RichText.RichTextIO = new IOType( 'RichTextIO', {

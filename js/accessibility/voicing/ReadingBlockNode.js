@@ -17,7 +17,7 @@
 import merge from '../../../../phet-core/js/merge.js';
 import { scenery, Node, ReadingBlock, ReadingBlockHighlight } from '../../imports.js';
 
-class ReadingBlockNode extends Node {
+class ReadingBlockNode extends ReadingBlock( Node ) {
 
   /**
    * @param {Object} [options]
@@ -31,7 +31,6 @@ class ReadingBlockNode extends Node {
     }, options );
 
     super();
-    this.initializeReadingBlock();
 
     // default highlight for a ReadingBlock is styled to indicate that the Node is different
     // from other interactive things, but is still clickable
@@ -41,8 +40,6 @@ class ReadingBlockNode extends Node {
     this.mutate( options );
   }
 }
-
-ReadingBlock.compose( ReadingBlockNode );
 
 scenery.register( 'ReadingBlockNode', ReadingBlockNode );
 export default ReadingBlockNode;

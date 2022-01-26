@@ -10,7 +10,7 @@
 import merge from '../../../../../phet-core/js/merge.js';
 import { ReadingBlock, ReadingBlockHighlight, RichText, scenery } from '../../../imports.js';
 
-class VoicingRichText extends RichText {
+class VoicingRichText extends ReadingBlock( RichText ) {
 
   /**
    * @param {string} text
@@ -41,8 +41,6 @@ class VoicingRichText extends RichText {
 
     this.focusHighlight = new ReadingBlockHighlight( this );
 
-    this.initializeReadingBlock();
-
     this.mutate( options );
   }
 
@@ -54,8 +52,6 @@ class VoicingRichText extends RichText {
     super.dispose();
   }
 }
-
-ReadingBlock.compose( VoicingRichText );
 
 scenery.register( 'VoicingRichText', VoicingRichText );
 export default VoicingRichText;

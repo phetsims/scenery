@@ -149,7 +149,7 @@
 
     <div class="navlink"><a href="#voicing-responses-heading">Responses</a></div>
 
-    <div class="navlink"><a href="#voicing-api-heading">Voicing.js API</a></div>
+    <div class="navlink"><a href="#voicing-api-heading">Voicing.ts API</a></div>
     <div class="sublink"><a href="#voicing-api-name-response">voicingNameResponse</a></div>
     <div class="sublink"><a href="#voicing-api-object-response">voicingObjectResponse</a></div>
     <div class="sublink"><a href="#voicing-api-context-response">voicingContextResponse</a></div>
@@ -213,10 +213,10 @@
       </li>
     </ul>
 
-    <h4>Responses implemented with Voicing.js</h4>
-    <p>Voicing is implemented with a trait called <code>Voicing.js</code> which can be composed with scenery's
+    <h4>Responses implemented with Voicing.ts</h4>
+    <p>Voicing is implemented with a trait called <code>Voicing.ts</code> which can be composed with scenery's
       <code>Node</code>. It provides the ability to set the various responses on the Node and then make a request to
-      speak one or more of them. The API of Voicing.js is described in more detail later in this document.</p>
+      speak one or more of them. The API of Voicing.ts is described in more detail later in this document.</p>
 
     <h4>Responses collected with responseCollector.js</h4>
     <p>
@@ -227,8 +227,8 @@
       and contains utility functions for assembling final Voicing content depending on the state of these Properties.
     </p>
 
-    <h3 id="voicing-api-heading">Voicing.js API</h3>
-    <p>The following enumerates the Voicing.js API.</p>
+    <h3 id="voicing-api-heading">Voicing.ts API</h3>
+    <p>The following enumerates the Voicing.ts API.</p>
 
     <h4 id="voicing-api-name-response">voicingNameResponse</h4>
     <p>A getter/setter for the <code>{string|null}</code> name response for the Node.</p>
@@ -302,7 +302,7 @@
     <h4 id="voicing-api-response-pattern-collection">voicingResponsePatternCollection</h4>
     <p>
       Sets the collection of patterns to use for voicingManager.collectResponses. This lets you control the
-      order of Voicing.js responses, as well as customize punctuation and other formatting of the content.
+      order of Voicing.ts responses, as well as customize punctuation and other formatting of the content.
       See <code>ResponsePatternCollection.js</code> for more information and how to create your own collection
       of patterns.
     </p>
@@ -312,7 +312,7 @@
 
     <h2 id="code-examples">Code examples</h2>
     <h3>Simple Example</h3>
-    <p>The following illustrates a basic example of using Voicing.js with a Node. Click the Rectangle
+    <p>The following illustrates a basic example of using Voicing.ts with a Node. Click the Rectangle
       to hear speech.</p>
     <div id="example-voicing" class="exampleScene" style="width: 64px; height: 64px; margin: 0 auto;"></div>
     <script type="text/javascript">
@@ -320,14 +320,11 @@
         /*START*/
 
         // create a class that is compsed with Voicing
-        class VoicingRectangle extends scenery.Rectangle {
+        class VoicingRectangle extends Voicing( scenery.Rectangle ) {
           constructor() {
 
             // super constructor for a blue rectangle
             super( 0, 0, 64, 64, { fill: 'blue' } );
-
-            // initialize Voicing features
-            this.initializeVoicing();
 
             // setters for the various responses
             this.voicingNameResponse = 'Rectangle';
@@ -350,8 +347,6 @@
             } ) );
           }
         }
-
-        scenery.Voicing.compose( VoicingRectangle );
 
         // create and add our VoicingRectangle to the scene
         scene.addChild( new VoicingRectangle() );
@@ -386,14 +381,11 @@
         /*START*/
 
         // create a class that is compsed with Voicing
-        class VoicingRectangle extends scenery.Rectangle {
+        class VoicingRectangle extends Voicing( scenery.Rectangle ) {
           constructor() {
 
             // super constructor for a blue rectangle
             super( 0, 0, 32, 32, { fill: 'blue' } );
-
-            // initialize Voicing features
-            this.initializeVoicing();
 
             // setters for the various responses
             this.voicingNameResponse = 'Rectangle';
@@ -418,8 +410,6 @@
             } ) );
           }
         }
-
-        scenery.Voicing.compose( VoicingRectangle );
 
         // create and add our VoicingRectangle to the scene
         scene.addChild( new VoicingRectangle() );
@@ -453,7 +443,7 @@
 
     <p>
       Reading Blocks are implemented with a Trait called <code>ReadingBlock.js</code>, which extends
-      <code>Voicing.js</code>, and so it can be used with scenery <code>Node</code>s.
+      <code>Voicing.ts</code>, and so it can be used with scenery <code>Node</code>s.
     </p>
 
     <h2 id="mouse-highlighting-heading">Mouse Highlighting</h2>
@@ -468,7 +458,7 @@
       Mouse Highlighting is implemented with a trait called <code>InteractiveHighlighting.js</code> which
       scenery <code>Node</code>s can be composed with. <code>InteractiveHighlighting.js</code> will add
       an input listener to the Node to activate the Display's FocusOverlay when it is time to show
-      a highlight. <code>InteractiveHighlighting.js</code> is extended by <code>Voicing.js</code>, so
+      a highlight. <code>InteractiveHighlighting.js</code> is extended by <code>Voicing.ts</code>, so
       all Nodes that use Voicing support Mouse Highlighting.
     </p>
   </div>

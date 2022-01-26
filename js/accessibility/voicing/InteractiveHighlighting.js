@@ -25,7 +25,7 @@ const InteractiveHighlighting = {
    * Given the constructor for Node, add InteractiveHighlighting functions to the prototype.
    * @public
    * @trait {Node}
-   * @param {function(new:Node)} type - the constructor for Node
+   * @param {*} type - the constructor for Node
    */
   compose( type ) {
     assert && assert( _.includes( inheritance( type ), Node ), 'Only Node subtypes should compose InteractiveHighlighting' );
