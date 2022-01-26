@@ -932,13 +932,35 @@ Imageable.hitTestDataToShape = ( imageData: ImageData, width: number, height: nu
 
   const shape = new Shape();
 
-  for ( let x = 0; x < imageData.width; x++ ) {
-    for ( let y = 0; y < imageData.height; y++ ) {
+  // Create rows at a time, so that if we have 50 adjacent pixels "on", then we'll just make a rectangle 50-wide.
+  // This lets us do the CAG faster.
+  let active = false;
+  let min = 0;
+
+  // NOTE: Rows are more helpful for CAG, even though columns would have better cache behavior when accessing the
+  // imageData.
+
+  for ( let y = 0; y < imageData.height; y++ ) {
+    for ( let x = 0; x < imageData.width; x++ ) {
       const index = 4 * ( x + y * imageData.width ) + 3;
 
       if ( imageData.data[ index ] !== 0 ) {
-        shape.rect( x * widthScale, y * widthScale, widthScale, heightScale );
+        // If our last pixel was empty, and now we're "on", start our rectangle
+        if ( !active ) {
+          active = true;
+          min = x;
+        }
       }
+      else if ( active ) {
+        // Finish a rectangle once we reach an "off" pixel
+        active = false;
+        shape.rect( min * widthScale, y * widthScale, widthScale * ( x - min ), heightScale );
+      }
+    }
+    if ( active ) {
+      // We'll need to finish rectangles at the end of each row anyway.
+      active = false;
+      shape.rect( min * widthScale, y * widthScale, widthScale * ( imageData.width - min ), heightScale );
     }
   }
 
