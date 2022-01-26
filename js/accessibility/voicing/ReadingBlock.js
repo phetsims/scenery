@@ -1,4 +1,4 @@
-// Copyright 2021, University of Colorado Boulder
+// Copyright 2021-2022, University of Colorado Boulder
 
 /**
  * A trait that extends Voicing, adding support for "Reading Blocks" of the voicing feature. "Reading Blocks" are
