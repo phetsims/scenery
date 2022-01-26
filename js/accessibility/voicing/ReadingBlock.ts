@@ -272,7 +272,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType ) => {
      * Update the hit areas for this Node whenever the bounds change.
      * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1340
      */
-    onLocalBoundsChanged( localBounds: Bounds2 ) {
+    onLocalBoundsChanged( localBounds: Bounds2 ): void {
       const thisNode = this as unknown as Node;
       thisNode.mouseArea = localBounds;
       thisNode.touchArea = localBounds;

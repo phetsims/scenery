@@ -62,8 +62,10 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType ) => {
 
   assert && assert( _.includes( inheritance( Type ), Node ), 'Only Node subtypes should compose Voicing' );
 
+  const InteractiveHighlightingClass = InteractiveHighlighting( Type );
+
   // Unfortunately, nothing can be private or protected in this class, see https://github.com/phetsims/scenery/issues/1340#issuecomment-1020692592
-  const X = class extends Type {
+  const VoicingClass = class extends InteractiveHighlightingClass {
     public voicingResponsePacket: ResponsePacket; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1340
     public _voicingUtteranceQueue: UtteranceQueue | null;
     public _voicingFocusListener: SceneryListenerFunction;
@@ -71,11 +73,6 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType ) => {
 
     constructor( ...args: any[] ) {
       super( ...args );
-
-      // initialize "super" Trait to support highlights on mouse input
-      // TODO: Fix this, https://github.com/phetsims/scenery/issues/1340
-      // @ts-ignore
-      this.initializeInteractiveHighlighting();
 
       // @public {ResponsePacket} - ResponsePacket that holds all the supported responses to be Voiced
       this.voicingResponsePacket = new ResponsePacket();
@@ -436,9 +433,6 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType ) => {
     }
   };
 
-  // compose with Interactive Highlights, all Nodes with Voicing features highlight as they are interactive
-  InteractiveHighlighting.compose( X );
-
   /**
    * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in
    * the order they will be evaluated.
@@ -449,8 +443,8 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType ) => {
    * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
    *       cases that may apply.
    */
-  X.prototype._mutatorKeys = _.uniq( ( X.prototype._mutatorKeys ? X.prototype._mutatorKeys : [] ).concat( VOICING_OPTION_KEYS ) );
-  return X;
+  VoicingClass.prototype._mutatorKeys = _.uniq( ( VoicingClass.prototype._mutatorKeys ? VoicingClass.prototype._mutatorKeys : [] ).concat( VOICING_OPTION_KEYS ) );
+  return VoicingClass;
 };
 
 // @public
