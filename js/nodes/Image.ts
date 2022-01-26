@@ -54,9 +54,6 @@ type ImageOptions = {
   hitTestPixels?: boolean
 } & NodeOptions;
 
-/**
- * @extends Node
- */
 class Image extends Imageable( Node ) {
 
   // If non-null, determines what is considered "inside" the image for containment and hit-testing.

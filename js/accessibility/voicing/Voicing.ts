@@ -52,7 +52,7 @@ type ResponseOptions = {
   utterance?: Utterance | null;
 } & ResponsePacketOptions;
 
-type SceneryListener = ( event: SceneryEvent ) => void;
+type SceneryListenerFunction = ( event: SceneryEvent ) => void;
 
 type Constructor<T = {}> = new ( ...args: any[] ) => T;
 
@@ -66,8 +66,8 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType ) => {
   const X = class extends Type {
     public voicingResponsePacket: ResponsePacket; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1340
     public _voicingUtteranceQueue: UtteranceQueue | null;
-    public _voicingFocusListener: SceneryListener;
-    public speakContentOnFocusListener: { focus: SceneryListener }; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1340
+    public _voicingFocusListener: SceneryListenerFunction;
+    public speakContentOnFocusListener: { focus: SceneryListenerFunction }; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1340
 
     constructor( ...args: any[] ) {
       super( ...args );
@@ -392,16 +392,16 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType ) => {
     /**
      * Called whenever this Node is focused.
      */
-    setVoicingFocusListener( focusListener: SceneryListener ) {
+    setVoicingFocusListener( focusListener: SceneryListenerFunction ) {
       this._voicingFocusListener = focusListener;
     }
 
-    set voicingFocusListener( focusListener: SceneryListener ) { this.setVoicingFocusListener( focusListener ); }
+    set voicingFocusListener( focusListener: SceneryListenerFunction ) { this.setVoicingFocusListener( focusListener ); }
 
     /**
      * Gets the utteranceQueue through which voicing associated with this Node will be spoken.
      */
-    getVoicingFocusListener(): SceneryListener {
+    getVoicingFocusListener(): SceneryListenerFunction {
       return this._voicingFocusListener;
     }
 
@@ -450,7 +450,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType ) => {
    *       cases that may apply.
    */
   X.prototype._mutatorKeys = _.uniq( ( X.prototype._mutatorKeys ? X.prototype._mutatorKeys : [] ).concat( VOICING_OPTION_KEYS ) );
-  return X as ( typeof X & Node ); // TODO: I'm worried about this type cast, https://github.com/phetsims/scenery/issues/1340
+  return X;
 };
 
 // @public

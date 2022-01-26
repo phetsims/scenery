@@ -11,7 +11,7 @@
  *                FocusManager.
  *  - Pointer Focus - The Focus trail points to a Node that supports Highlighting with pointer events.
  *  - Reading Block Focus - The Focus Trail points to a Node that supports ReadingBlocks, and is active
- *                          while the ReadingBlock content is being spoken for Voicing. See ReadingBlock.js
+ *                          while the ReadingBlock content is being spoken for Voicing. See ReadingBlock.ts
  *
  * There may be other forms of Focus in the future.
  *
