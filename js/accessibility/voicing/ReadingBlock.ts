@@ -342,7 +342,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType ) => {
 
     /**
      */
-    disposeReadingBlock() {
+    dispose() {
       this.readingBlockInitialized = false;
       const thisNode = ( this as unknown as Node );
       voicingManager.speechAllowedAndFullyEnabledProperty.unlink( this.readingBlockFocusableChangeListener );
@@ -354,7 +354,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType ) => {
         thisNode.removeInputListener( this.readingBlockInputListener );
       }
 
-      this.disposeVoicing();
+      super.dispose();
     }
   };
 

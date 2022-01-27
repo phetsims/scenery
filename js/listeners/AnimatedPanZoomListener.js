@@ -18,6 +18,7 @@ import platform from '../../../phet-core/js/platform.js';
 import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import { scenery, Pointer, EventIO, PDOMUtils, KeyboardUtils, KeyboardZoomUtils, globalKeyStateTracker, FocusManager, PanZoomListener } from '../imports.js';
+import { Node } from '../../../scenery/js/imports.js'; // eslint-disable-line
 
 // constants
 const MOVE_CURSOR = 'all-scroll';

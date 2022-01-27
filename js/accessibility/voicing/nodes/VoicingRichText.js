@@ -43,14 +43,6 @@ class VoicingRichText extends ReadingBlock( RichText ) {
 
     this.mutate( options );
   }
-
-  /**
-   * @public
-   */
-  dispose() {
-    this.disposeReadingBlock();
-    super.dispose();
-  }
 }
 
 scenery.register( 'VoicingRichText', VoicingRichText );

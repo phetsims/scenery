@@ -40,14 +40,6 @@ class VoicingText extends ReadingBlock( Text ) {
 
     this.mutate( options );
   }
-
-  /**
-   * @public
-   */
-  dispose() {
-    this.disposeReadingBlock();
-    super.dispose();
-  }
 }
 
 scenery.register( 'VoicingText', VoicingText );

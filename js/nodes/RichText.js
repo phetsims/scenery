@@ -1975,7 +1975,7 @@ class RichTextLink extends Voicing( RichTextCleanable( Node ) ) {
   clean() {
     super.clean();
 
-    this.disposeVoicing();
+    // TODO: how to reverse voicing in this poolable case? https://github.com/phetsims/scenery/issues/1340
 
     this.removeInputListener( this.fireListener );
     this.fireListener = null;

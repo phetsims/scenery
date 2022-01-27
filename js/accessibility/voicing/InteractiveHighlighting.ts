@@ -200,10 +200,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
 
     get interactiveHighlightActivated() { return this.isInteractiveHighlightActivated(); }
 
-    /**
-     * @public
-     */
-    disposeInteractiveHighlighting() {
+    dispose() {
       const thisNode = this as unknown as Node;
       thisNode.changedInstanceEmitter.removeListener( this.changedInstanceListener );
 
@@ -221,6 +218,9 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
         display.focusManager.pointerHighlightsVisibleProperty.unlink( this.interactiveHighlightingEnabledListener );
         delete this._displays[ trailIds[ i ] ];
       }
+
+      // @ts-ignore
+      super.dispose && super.dispose();
     }
 
     /**

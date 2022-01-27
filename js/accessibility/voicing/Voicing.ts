@@ -425,11 +425,10 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType ) => {
      * Detaches references that ensure this components of this Trait are eligible for garbage collection.
      * @public
      */
-    disposeVoicing() {
+    dispose() {
       ( this as unknown as Node ).removeInputListener( this.speakContentOnFocusListener );
 
-      // @ts-ignore
-      this.disposeInteractiveHighlighting();
+      super.dispose();
     }
   };
 
