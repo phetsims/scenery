@@ -17,6 +17,12 @@ const INTERACTIVE_HIGHLIGHTING_OPTIONS = [
   'interactiveHighlight',
   'interactiveHighlightLayerable'
 ];
+
+type InteractiveHighlightingOptions = {
+  interactiveHighlight?: Node | Shape | null,
+  interactiveHighlightLayerable?: boolean
+};
+
 type Constructor<T = {}> = new ( ...args: any[] ) => T;
 
 // This pattern follows Paintable, and has the downside that typescript doesn't know that Type is a Node, but we can't
@@ -36,6 +42,11 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     pointerListener: IInputListener; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1340
 
     constructor( ...args: any[] ) {
+
+      const providedOptions = ( args[ 0 ] || {} ) as InteractiveHighlightingOptions;
+
+      const interactiveHighlightingOptions = _.pick( providedOptions, INTERACTIVE_HIGHLIGHTING_OPTIONS );
+      args[ 0 ] = _.omit( providedOptions, INTERACTIVE_HIGHLIGHTING_OPTIONS );
 
       super( ...args );
 
@@ -93,6 +104,9 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
         cancel: boundPointerCancel,
         interrupt: boundPointerCancel
       };
+
+      // @ts-ignore
+      ( this as unknown as Node ).mutate( interactiveHighlightingOptions );
     }
 
     /**

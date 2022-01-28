@@ -47,6 +47,16 @@ const VOICING_OPTION_KEYS = [
   'voicingFocusListener'
 ];
 
+type VoicingOptions = {
+  voicingNameResponse?: string | null,
+  voicingObjectResponse?: string | null,
+  voicingContextResponse?: string | null,
+  voicingHintResponse?: string | null,
+  voicingUtteranceQueue?: UtteranceQueue,
+  voicingResponsePatternCollection?: ResponsePatternCollection,
+  voicingIgnoreVoicingManagerProperties?: boolean,
+  voicingFocusListener?: SceneryListenerFunction
+}
 
 type ResponseOptions = {
   utterance?: Utterance | null;
@@ -72,6 +82,12 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType ) => {
     public speakContentOnFocusListener: { focus: SceneryListenerFunction }; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1340
 
     constructor( ...args: any[] ) {
+
+      const providedOptions = ( args[ 0 ] || {} ) as VoicingOptions;
+
+      const voicingOptions = _.pick( providedOptions, VOICING_OPTION_KEYS );
+      args[ 0 ] = _.omit( providedOptions, VOICING_OPTION_KEYS );
+
       super( ...args );
 
       // @public {ResponsePacket} - ResponsePacket that holds all the supported responses to be Voiced
@@ -96,6 +112,9 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType ) => {
         }
       };
       ( this as unknown as Node ).addInputListener( this.speakContentOnFocusListener );
+
+      // @ts-ignore
+      ( this as unknown as Node ).mutate( voicingOptions );
     }
 
     /**
