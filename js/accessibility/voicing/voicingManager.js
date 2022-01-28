@@ -368,6 +368,7 @@ class VoicingManager extends Announcer {
     speechSynthUtterance.addEventListener( 'end', endListener );
 
     // Keep a reference to the SpeechSynthesisUtterance and the endListener so that we can remove the listener later.
+    // Notice this is used in the function scopes above.
     // IMPORTANT NOTE: Also, this acts as a workaround for a Safari bug where the `end` event does not fire
     // consistently. If the SpeechSynthesisUtterance is not in memory when it is time for the `end` event, Safari
     // will fail to emit that event. See
