@@ -146,13 +146,6 @@ class VoicingManager extends Announcer {
     // being spoken by the browser, so we can determine cancelling behavior when it is time to speak the next utterance.
     // See voicing's supported announcerOptions for details.
     this.currentlySpeakingUtterance = null;
-
-    // @private {SpeechSynthesisUtteranceWrapper[]} - Fixes a bug on Safari where the `start` and `end` Utterances
-    // don't fire! The issue is (apparently) that Safari internally clears the reference to the Utterance on speak
-    // which prevents it from firing these events at the right time - fix borrowed from
-    // https://stackoverflow.com/questions/23483990/speechsynthesis-api-onend-callback-not-working
-    // Blown away regularly, don't keep a reference to it.
-    this.safariWorkaroundUtteranceWrappers = [];
   }
 
   /**
@@ -237,12 +230,6 @@ class VoicingManager extends Announcer {
       // certain platforms.
       if ( this.timeSinceUtteranceEnd > VOICING_UTTERANCE_INTERVAL ) {
         this.readyToAnnounce = true;
-      }
-
-      // If our queue is empty and the synth isn't speaking, then clear safariWorkaroundUtteranceWrappers to prevent memory leak.
-      // This handles any uncertain cases where the "end" callback on SpeechSynthUtterance isn't called.
-      if ( !this.getSynth().speaking && queue.length === 0 && this.safariWorkaroundUtteranceWrappers.length > 0 ) {
-        this.safariWorkaroundUtteranceWrappers = [];
       }
 
       // A workaround to keep SpeechSynthesis responsive on Chromebooks. If there is a long enough interval between
@@ -380,9 +367,13 @@ class VoicingManager extends Announcer {
     speechSynthUtterance.addEventListener( 'start', startListener );
     speechSynthUtterance.addEventListener( 'end', endListener );
 
-    // keep a reference to WebSpeechUtterances in Safari, so the browser doesn't dispose of it before firing, see #215
+    // Keep a reference to the SpeechSynthesisUtterance and the endListener so that we can remove the listener later.
+    // IMPORTANT NOTE: Also, this acts as a workaround for a Safari bug where the `end` event does not fire
+    // consistently. If the SpeechSynthesisUtterance is not in memory when it is time for the `end` event, Safari
+    // will fail to emit that event. See
+    // https://stackoverflow.com/questions/23483990/speechsynthesis-api-onend-callback-not-working and
+    // https://github.com/phetsims/john-travoltage/issues/435 and https://github.com/phetsims/utterance-queue/issues/52
     const speechSynthesisUtteranceWrapper = new SpeechSynthesisUtteranceWrapper( utterance, speechSynthUtterance, endListener );
-    this.safariWorkaroundUtteranceWrappers.push( speechSynthesisUtteranceWrapper );
 
     // In Safari the `end` listener does not fire consistently, (especially after cancel)
     // but the error event does. In this case signify that speaking has ended.
@@ -417,12 +408,6 @@ class VoicingManager extends Announcer {
     this.announcementCompleteEmitter.emit( speechSynthesisUtteranceWrapper.utterance );
 
     speechSynthesisUtteranceWrapper.speechSynthesisUtterance.removeEventListener( 'end', speechSynthesisUtteranceWrapper.endListener );
-
-    // remove the reference to the SpeechSynthesisUtterance so we don't leak memory
-    const indexOfPair = this.safariWorkaroundUtteranceWrappers.indexOf( speechSynthesisUtteranceWrapper );
-    if ( indexOfPair > -1 ) {
-      this.safariWorkaroundUtteranceWrappers.splice( indexOfPair, 1 );
-    }
 
     this.speakingSpeechSynthesisUtteranceWrapper = null;
     this.currentlySpeakingUtterance = null;
@@ -467,10 +452,6 @@ class VoicingManager extends Announcer {
 
       // indicate to utteranceQueues that we expect everything queued for voicing to be removed
       this.clearEmitter.emit();
-
-      // cancel clears all utterances from the utteranceQueue, so we should clear all of the safari workaround
-      // references as well
-      this.safariWorkaroundUtteranceWrappers = [];
     }
   }
 
