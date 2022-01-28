@@ -1890,7 +1890,7 @@ class RichTextLeaf extends RichTextCleanable( Text ) {
 
 Poolable.mixInto( RichTextLeaf );
 
-class RichTextLink extends Voicing( RichTextCleanable( Node ) ) {
+class RichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
   /**
    * A link node
    *

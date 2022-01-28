@@ -33,17 +33,26 @@ const READING_BLOCK_OPTION_KEYS = [
   'readingBlockActiveHighlight'
 ];
 
+type ReadingBlockOptions = {
+  readingBlockTagName: string | null;
+  readingBlockContent: string | null;
+  readingBlockHintResponse: string | null;
+  readingBlockActiveHighlight: null | Shape | Node;
+};
+
 const CONTENT_HINT_PATTERN = '{{readingBlockContent}}. {{hintResponse}}';
 
 type Constructor<T = {}> = new ( ...args: any[] ) => T;
 
-// This pattern follows Paintable, and has the downside that typescript doesn't know that Type is a Node, but we can't
-// get that type safety because anonymous classes can't have private or protected members. See https://github.com/phetsims/scenery/issues/1340#issuecomment-1020692592
-const ReadingBlock = <SuperType extends Constructor>( Type: SuperType ) => {
+/**
+ * @param Type
+ * @param optionsArgPosition - zero-indexed number that the options argument is provided at
+ */
+const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsArgPosition: number ) => {
 
   assert && assert( _.includes( inheritance( Type ), Node ), 'Only Node subtypes should compose Voicing' );
 
-  const VoicingClass = Voicing( Type );
+  const VoicingClass = Voicing( Type, optionsArgPosition );
 
   const ReadingBlockClass = class extends VoicingClass {
     public readingBlockInitialized: boolean; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1340
@@ -57,12 +66,12 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType ) => {
     public readingBlockInputListener: IInputListener; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1340
     public readingBlockFocusableChangeListener: OmitThisParameter<( focusable: boolean ) => void>; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1340
 
-    /**
-     * This should be called in the constructor to initialize ReadingBlock. Note, this must be called before
-     * options are mutated, so most often you must call options via `mutate()` instead of passing directly to
-     * `super()`.
-     */
     constructor( ...args: any[] ) {
+
+      const providedOptions = ( args[ optionsArgPosition ] || {} ) as ReadingBlockOptions;
+
+      const readingBlockOptions = _.pick( providedOptions, READING_BLOCK_OPTION_KEYS );
+      args[ optionsArgPosition ] = _.omit( providedOptions, READING_BLOCK_OPTION_KEYS );
 
       super( ...args );
 
@@ -117,6 +126,9 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType ) => {
       // All ReadingBlocks have a ReadingBlockHighlight, a focus highlight that is black to indicate it has
       // a different behavior.
       ( this as unknown as Node ).focusHighlight = new ReadingBlockHighlight( this );
+
+      // @ts-ignore
+      ( this as unknown as Node ).mutate( readingBlockOptions );
     }
 
     /**
@@ -130,6 +142,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType ) => {
     /**
      * Set the tagName for the ReadingBlockNode. This is the tagName (of ParallelDOM) that will be applied
      * to this Node when Reading Blocks are enabled.
+     * TODO: JG! Can this be null? Note the option parameter too https://github.com/phetsims/scenery/issues/1340
      */
     setReadingBlockTagName( tagName: string | null ) {
       this._readingBlockTagName = tagName;

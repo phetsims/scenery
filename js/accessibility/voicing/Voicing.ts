@@ -66,13 +66,15 @@ type SceneryListenerFunction = ( event: SceneryEvent ) => void;
 
 type Constructor<T = {}> = new ( ...args: any[] ) => T;
 
-// This pattern follows Paintable, and has the downside that typescript doesn't know that Type is a Node, but we can't
-// get that type safety because anonymous classes can't have private or protected members. See https://github.com/phetsims/scenery/issues/1340#issuecomment-1020692592
-const Voicing = <SuperType extends Constructor>( Type: SuperType ) => {
+/**
+ * @param Type
+ * @param optionsArgPosition - zero-indexed number that the options argument is provided at
+ */
+const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosition: number ) => {
 
   assert && assert( _.includes( inheritance( Type ), Node ), 'Only Node subtypes should compose Voicing' );
 
-  const InteractiveHighlightingClass = InteractiveHighlighting( Type );
+  const InteractiveHighlightingClass = InteractiveHighlighting( Type, optionsArgPosition );
 
   // Unfortunately, nothing can be private or protected in this class, see https://github.com/phetsims/scenery/issues/1340#issuecomment-1020692592
   const VoicingClass = class extends InteractiveHighlightingClass {
@@ -83,10 +85,10 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType ) => {
 
     constructor( ...args: any[] ) {
 
-      const providedOptions = ( args[ 0 ] || {} ) as VoicingOptions;
+      const providedOptions = ( args[ optionsArgPosition ] || {} ) as VoicingOptions;
 
       const voicingOptions = _.pick( providedOptions, VOICING_OPTION_KEYS );
-      args[ 0 ] = _.omit( providedOptions, VOICING_OPTION_KEYS );
+      args[ optionsArgPosition ] = _.omit( providedOptions, VOICING_OPTION_KEYS );
 
       super( ...args );
 
