@@ -61,10 +61,15 @@ class FocusManager {
     // that use ReadingBlock.
     this.readingBlockHighlightsVisibleProperty = new BooleanProperty( false );
 
+    // TODO: perhaps remove once reading blocks are set up to listen instead to Node.canSpeakProperty (voicingVisible), https://github.com/phetsims/scenery/issues/1343
+    voicingManager.voicingFullyEnabledProperty.link( enabled => {
+      this.readingBlockHighlightsVisibleProperty.value = enabled;
+    } );
+
     // @public {DerivedProperty.<boolean>} - Indicates whether any highlights should appear from pointer
     // input (mouse/touch). If false, we will try to avoid doing expensive work in PointerHighlighting.js.
     this.pointerHighlightsVisibleProperty = new DerivedProperty(
-      [ this.interactiveHighlightsVisibleProperty, voicingManager.enabledProperty ],
+      [ this.interactiveHighlightsVisibleProperty, this.readingBlockHighlightsVisibleProperty ],
       ( interactiveHighlightsVisible, voicingEnabled ) => {
         return interactiveHighlightsVisible || voicingEnabled;
       } );
