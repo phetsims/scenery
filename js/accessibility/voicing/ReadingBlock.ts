@@ -21,8 +21,8 @@ import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import Shape from '../../../../kite/js/Shape.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
-import StringUtils from '../../../../phetcommon/js/util/StringUtils.js';
 import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
+import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
 import { Focus, Node, ReadingBlockHighlight, ReadingBlockUtterance, scenery, SceneryEvent, Voicing, voicingManager } from '../../imports.js';
 import IInputListener from '../../input/IInputListener.js';
 
@@ -40,7 +40,7 @@ type ReadingBlockOptions = {
   readingBlockActiveHighlight: null | Shape | Node;
 };
 
-const CONTENT_HINT_PATTERN = '{{readingBlockContent}}. {{hintResponse}}';
+const CONTENT_HINT_PATTERN = '{{OBJECT}}. {{HINT}}';
 
 type Constructor<T = {}> = new ( ...args: any[] ) => T;
 
@@ -142,7 +142,6 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
     /**
      * Set the tagName for the ReadingBlockNode. This is the tagName (of ParallelDOM) that will be applied
      * to this Node when Reading Blocks are enabled.
-     * TODO: JG! Can this be null? Note the option parameter too https://github.com/phetsims/scenery/issues/1340
      */
     setReadingBlockTagName( tagName: string | null ) {
       this._readingBlockTagName = tagName;
@@ -332,18 +331,22 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
      * is only read if it exists and hints are enabled by the user. Otherwise, only the readingBlock content will
      * be spoken.
      *
-     * TODO: JG! This can be null right?https://github.com/phetsims/scenery/issues/1340
      */
     collectReadingBlockResponses(): string | null {
       assert && assert( this.readingBlockInitialized, 'ReadingBlock must be initialized before collecting responses' );
 
-      const usesHelpContent = this._readingBlockHintResponse && responseCollector.hintResponsesEnabledProperty.value;
+      const usesHint = this._readingBlockHintResponse && responseCollector.hintResponsesEnabledProperty.value;
 
       let response = null;
-      if ( usesHelpContent ) {
-        response = StringUtils.fillIn( CONTENT_HINT_PATTERN, {
-          readingBlockContent: this._readingBlockContent,
-          hintResponse: this._readingBlockHintResponse
+      if ( usesHint ) {
+
+        response = responseCollector.collectResponses( {
+          ignoreProperties: true,
+          objectResponse: this._readingBlockContent,
+          hintResponse: this._readingBlockHintResponse,
+          responsePatternCollection: new ResponsePatternCollection( {
+            objectHint: CONTENT_HINT_PATTERN
+          } )
         } );
       }
       else {

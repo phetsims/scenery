@@ -82,7 +82,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
       // above everything in the HighlightOverlay. If true, you are responsible for adding the interactiveHighlight
       // in the location you want in the scene graph. The interactiveHighlight will become visible when
       // this.interactiveHighlightActivated is true.
-      this._interactiveHighlightLayerable = false; // TODO: JG! Is this alright to default as false, and never be null? https://github.com/phetsims/scenery/issues/1340
+      this._interactiveHighlightLayerable = false;
 
       // @private {TinyEmitter} - emits an event when the interactive highlight changes for this Node
       this.interactiveHighlightChangedEmitter = new TinyEmitter();

@@ -6127,6 +6127,7 @@ interface Node { // eslint-disable-line
   drawableMarkFlags: string[]
 }
 
+// TODO: I think tandem needs to go last, how do we account for mixins/suptypes that add mutator keys, should they go at the end but then move tandem to the end again? https://github.com/phetsims/scenery/issues/1340
 Node.prototype._mutatorKeys = ACCESSIBILITY_OPTION_KEYS.concat( NODE_OPTION_KEYS );
 
 /**
