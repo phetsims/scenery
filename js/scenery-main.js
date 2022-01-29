@@ -1,4 +1,4 @@
-// Copyright 2016-2019, University of Colorado Boulder
+// Copyright 2016-2022, University of Colorado Boulder
 
 import axon from '../../axon/js/main.js'; // eslint-disable-line default-import-match-filename
 import dot from '../../dot/js/main.js'; // eslint-disable-line default-import-match-filename
