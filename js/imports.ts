@@ -100,6 +100,7 @@ export { default as CanvasNode } from './nodes/CanvasNode.js';
 export { default as Circle } from './nodes/Circle.js';
 export { default as DOM } from './nodes/DOM.js';
 export { default as Line } from './nodes/Line.js';
+export type { LineOptions } from './nodes/Line.js';
 export { default as Rectangle } from './nodes/Rectangle.js';
 export type { RectangleOptions } from './nodes/Rectangle.js';
 export { default as Sprites } from './nodes/Sprites.js';
@@ -196,8 +197,11 @@ export { default as AlignPropertyBox } from './layout/AlignPropertyBox.js';
 export { default as WidthSizable } from './layout/WidthSizable.js';
 export { default as HeightSizable } from './layout/HeightSizable.js';
 export { default as Divider } from './layout/Divider.js';
+export type { DividerOptions } from './layout/Divider.js';
 export { default as HDivider } from './layout/HDivider.js';
+export type { HDividerOptions } from './layout/HDivider.js';
 export { default as VDivider } from './layout/VDivider.js';
+export type { VDividerOptions } from './layout/VDivider.js';
 export { default as LayoutProxy } from './layout/LayoutProxy.js';
 export { default as LayoutConstraint } from './layout/LayoutConstraint.js';
 export { default as FlowConfigurable } from './layout/FlowConfigurable.js';
@@ -244,6 +248,7 @@ export type { default as IPaintableDrawable } from './display/drawables/IPaintab
 export type { default as IPathDrawable } from './display/drawables/IPathDrawable.js';
 export type { default as ITextDrawable } from './display/drawables/ITextDrawable.js';
 export type { default as IRectangleDrawable } from './display/drawables/IRectangleDrawable.js';
+export type { default as ILineDrawable } from './display/drawables/ILineDrawable.js';
 
 // Concrete drawables
 export { default as CanvasNodeDrawable } from './display/drawables/CanvasNodeDrawable.js';

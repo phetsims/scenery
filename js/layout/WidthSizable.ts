@@ -11,61 +11,46 @@
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import { scenery } from '../imports.js';
+import Constructor from '../../../phet-core/js/Constructor.js';
 
 const WIDTH_SIZABLE_OPTION_KEYS = [
   'preferredWidth',
   'minimumWidth'
 ];
 
-const WidthSizable = memoize( type => {
+const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   const clazz = class extends type {
-    constructor( ...args ) {
+
+    preferredWidthProperty: TinyProperty<number | null>;
+    minimumWidthProperty: TinyProperty<number | null>;
+
+    // Flag for detection of the feature
+    widthSizable: boolean;
+
+    constructor( ...args: any[] ) {
       super( ...args );
 
-      // @public {Property.<number|null>}
-      this.preferredWidthProperty = new TinyProperty( null );
-      this.minimumWidthProperty = new TinyProperty( null );
-
-      // @public {boolean} - Flag for detection of the feature
+      this.preferredWidthProperty = new TinyProperty<number | null>( null );
+      this.minimumWidthProperty = new TinyProperty<number | null>( null );
       this.widthSizable = true;
     }
 
-    /**
-     * @public
-     *
-     * @returns {number|null}
-     */
-    get preferredWidth() {
+    get preferredWidth(): number | null {
       return this.preferredWidthProperty.value;
     }
 
-    /**
-     * @public
-     *
-     * @param {number|null} value
-     */
-    set preferredWidth( value ) {
+    set preferredWidth( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) && value >= 0 ),
         'preferredWidth should be null or a non-negative finite number' );
 
       this.preferredWidthProperty.value = value;
     }
 
-    /**
-     * @public
-     *
-     * @returns {number|null}
-     */
-    get minimumWidth() {
+    get minimumWidth(): number | null {
       return this.minimumWidthProperty.value;
     }
 
-    /**
-     * @public
-     *
-     * @param {number|null} value
-     */
-    set minimumWidth( value ) {
+    set minimumWidth( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
 
       this.minimumWidthProperty.value = value;

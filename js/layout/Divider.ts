@@ -8,13 +8,12 @@
  */
 
 import merge from '../../../phet-core/js/merge.js';
-import { scenery, Line } from '../imports.js';
+import { scenery, Line, LineOptions } from '../imports.js';
+
+type DividerOptions = LineOptions;
 
 class Divider extends Line {
-  /**
-   * @param {Object} [options]
-   */
-  constructor( options ) {
+  constructor( options?: LineOptions ) {
     options = merge( {
       layoutOptions: {
         align: 'stretch'
@@ -28,3 +27,4 @@ class Divider extends Line {
 
 scenery.register( 'Divider', Divider );
 export default Divider;
+export type { DividerOptions };

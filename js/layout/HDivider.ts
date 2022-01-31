@@ -6,20 +6,22 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { scenery, Divider, HeightSizable } from '../imports.js';
+import { scenery, Divider, HeightSizable, DividerOptions } from '../imports.js';
+
+type HDividerOptions = DividerOptions;
 
 class HDivider extends HeightSizable( Divider ) {
-  /**
-   * @param {Object} [options]
-   */
-  constructor( options ) {
+  constructor( options: HDividerOptions ) {
     super( options );
 
     this.preferredHeightProperty.link( height => {
-      this.y2 = height;
+      if ( height !== null ) {
+        this.y2 = height;
+      }
     } );
   }
 }
 
 scenery.register( 'HDivider', HDivider );
 export default HDivider;
+export type { HDividerOptions };

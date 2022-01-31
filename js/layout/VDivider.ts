@@ -6,20 +6,22 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { scenery, Divider, WidthSizable } from '../imports.js';
+import { scenery, Divider, WidthSizable, DividerOptions } from '../imports.js';
+
+type VDividerOptions = DividerOptions;
 
 class VDivider extends WidthSizable( Divider ) {
-  /**
-   * @param {Object} [options]
-   */
-  constructor( options ) {
+  constructor( options: VDividerOptions ) {
     super( options );
 
     this.preferredWidthProperty.link( width => {
-      this.x2 = width;
+      if ( width !== null ) {
+        this.x2 = width;
+      }
     } );
   }
 }
 
 scenery.register( 'VDivider', VDivider );
 export default VDivider;
+export type { VDividerOptions };

@@ -11,61 +11,46 @@
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import { scenery } from '../imports.js';
+import Constructor from '../../../phet-core/js/Constructor.js';
 
 const HEIGHT_SIZABLE_OPTION_KEYS = [
   'preferredHeight',
   'minimumHeight'
 ];
 
-const HeightSizable = memoize( type => {
+const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   const clazz = class extends type {
-    constructor( ...args ) {
+
+    preferredHeightProperty: TinyProperty<number | null>;
+    minimumHeightProperty: TinyProperty<number | null>;
+
+    // Flag for detection of the feature
+    heightSizable: boolean;
+
+    constructor( ...args: any[] ) {
       super( ...args );
 
-      // @public {Property.<number|null>}
-      this.preferredHeightProperty = new TinyProperty( null );
-      this.minimumHeightProperty = new TinyProperty( null );
-
-      // @public {boolean} - Flag for detection of the feature
+      this.preferredHeightProperty = new TinyProperty<number | null>( null );
+      this.minimumHeightProperty = new TinyProperty<number | null >( null );
       this.heightSizable = true;
     }
 
-    /**
-     * @public
-     *
-     * @returns {number|null}
-     */
-    get preferredHeight() {
+    get preferredHeight(): number | null {
       return this.preferredHeightProperty.value;
     }
 
-    /**
-     * @public
-     *
-     * @param {number|null} value
-     */
-    set preferredHeight( value ) {
+    set preferredHeight( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) && value >= 0 ),
         'preferredHeight should be null or a non-negative finite number' );
 
       this.preferredHeightProperty.value = value;
     }
 
-    /**
-     * @public
-     *
-     * @returns {number|null}
-     */
-    get minimumHeight() {
+    get minimumHeight(): number | null {
       return this.minimumHeightProperty.value;
     }
 
-    /**
-     * @public
-     *
-     * @param {number|null} value
-     */
-    set minimumHeight( value ) {
+    set minimumHeight( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
 
       this.minimumHeightProperty.value = value;
