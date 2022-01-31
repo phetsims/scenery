@@ -236,7 +236,6 @@ const NODE_OPTION_KEYS = [
   'localBounds', // {Bounds2|null} - bounds of subtree in local coordinate frame, see setLocalBounds() for more documentation
   'maxWidth', // {number|null} - Constrains width of this Node, see setMaxWidth() for more documentation
   'maxHeight', // {number|null} - Constrains height of this Node, see setMaxHeight() for more documentation
-  ...REQUIRES_BOUNDS_OPTION_KEYS,
   'renderer', // {string|null} - The preferred renderer for this subtree, see setRenderer() for more documentation
   'layerSplit', // {boolean} - Forces this subtree into a layer of its own, see setLayerSplit() for more documentation
   'usesOpacity', // {boolean} - Hint that opacity will be changed, see setUsesOpacity() for more documentation
@@ -247,7 +246,8 @@ const NODE_OPTION_KEYS = [
   'mouseArea', // {Bounds2|Shape|null} - Changes the area the mouse can interact with, see setMouseArea() for more documentation
   'touchArea', // {Bounds2|Shape|null} - Changes the area touches can interact with, see setTouchArea() for more documentation
   'clipArea', // {Shape|null} - Makes things outside of a shape invisible, see setClipArea() for more documentation
-  'transformBounds' // {boolean} - Flag that makes bounds tighter, see setTransformBounds() for more documentation
+  'transformBounds', // {boolean} - Flag that makes bounds tighter, see setTransformBounds() for more documentation
+  ...REQUIRES_BOUNDS_OPTION_KEYS
 ];
 
 const DEFAULT_OPTIONS = {
