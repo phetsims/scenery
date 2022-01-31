@@ -184,6 +184,24 @@ const INPUT_ENABLED_PROPERTY_TANDEM_NAME = 'inputEnabledProperty';
 
 const PHET_IO_STATE_DEFAULT = false;
 
+const REQUIRES_BOUNDS_OPTION_KEYS = [
+  'leftTop', // {Vector2} - The upper-left corner of this Node's bounds, see setLeftTop() for more documentation
+  'centerTop', // {Vector2} - The top-center of this Node's bounds, see setCenterTop() for more documentation
+  'rightTop', // {Vector2} - The upper-right corner of this Node's bounds, see setRightTop() for more documentation
+  'leftCenter', // {Vector2} - The left-center of this Node's bounds, see setLeftCenter() for more documentation
+  'center', // {Vector2} - The center of this Node's bounds, see setCenter() for more documentation
+  'rightCenter', // {Vector2} - The center-right of this Node's bounds, see setRightCenter() for more documentation
+  'leftBottom', // {Vector2} - The bottom-left of this Node's bounds, see setLeftBottom() for more documentation
+  'centerBottom', // {Vector2} - The middle center of this Node's bounds, see setCenterBottom() for more documentation
+  'rightBottom', // {Vector2} - The bottom right of this Node's bounds, see setRightBottom() for more documentation
+  'left', // {number} - The left side of this Node's bounds, see setLeft() for more documentation
+  'right', // {number} - The right side of this Node's bounds, see setRight() for more documentation
+  'top', // {number} - The top side of this Node's bounds, see setTop() for more documentation
+  'bottom', // {number} - The bottom side of this Node's bounds, see setBottom() for more documentation
+  'centerX', // {number} - The x-center of this Node's bounds, see setCenterX() for more documentation
+  'centerY' // {number} - The y-center of this Node's bounds, see setCenterY() for more documentation
+];
+
 // Node options, in the order they are executed in the constructor/mutate()
 const NODE_OPTION_KEYS = [
   'children', // {Array.<Node>}- List of children to add (in order), see setChildren for more documentation
@@ -218,21 +236,7 @@ const NODE_OPTION_KEYS = [
   'localBounds', // {Bounds2|null} - bounds of subtree in local coordinate frame, see setLocalBounds() for more documentation
   'maxWidth', // {number|null} - Constrains width of this Node, see setMaxWidth() for more documentation
   'maxHeight', // {number|null} - Constrains height of this Node, see setMaxHeight() for more documentation
-  'leftTop', // {Vector2} - The upper-left corner of this Node's bounds, see setLeftTop() for more documentation
-  'centerTop', // {Vector2} - The top-center of this Node's bounds, see setCenterTop() for more documentation
-  'rightTop', // {Vector2} - The upper-right corner of this Node's bounds, see setRightTop() for more documentation
-  'leftCenter', // {Vector2} - The left-center of this Node's bounds, see setLeftCenter() for more documentation
-  'center', // {Vector2} - The center of this Node's bounds, see setCenter() for more documentation
-  'rightCenter', // {Vector2} - The center-right of this Node's bounds, see setRightCenter() for more documentation
-  'leftBottom', // {Vector2} - The bottom-left of this Node's bounds, see setLeftBottom() for more documentation
-  'centerBottom', // {Vector2} - The middle center of this Node's bounds, see setCenterBottom() for more documentation
-  'rightBottom', // {Vector2} - The bottom right of this Node's bounds, see setRightBottom() for more documentation
-  'left', // {number} - The left side of this Node's bounds, see setLeft() for more documentation
-  'right', // {number} - The right side of this Node's bounds, see setRight() for more documentation
-  'top', // {number} - The top side of this Node's bounds, see setTop() for more documentation
-  'bottom', // {number} - The bottom side of this Node's bounds, see setBottom() for more documentation
-  'centerX', // {number} - The x-center of this Node's bounds, see setCenterX() for more documentation
-  'centerY', // {number} - The y-center of this Node's bounds, see setCenterY() for more documentation
+  ...REQUIRES_BOUNDS_OPTION_KEYS,
   'renderer', // {string|null} - The preferred renderer for this subtree, see setRenderer() for more documentation
   'layerSplit', // {boolean} - Forces this subtree into a layer of its own, see setLayerSplit() for more documentation
   'usesOpacity', // {boolean} - Hint that opacity will be changed, see setUsesOpacity() for more documentation
@@ -578,6 +582,8 @@ class Node extends ParallelDOM {
   // to know that a Node is getting removed from its parent BUT that process has not completed yet. It would be ideal
   // to not need this.
   _isGettingRemovedFromParent: boolean;
+
+  static REQUIRES_BOUNDS_OPTION_KEYS: string[];
 
   /**
    * Creates a Node with options.
@@ -6101,21 +6107,21 @@ class Node extends ParallelDOM {
 
 // Interface extension to support things on the prototype
 interface Node { // eslint-disable-line
-                 // This is an array of property (setter) names for Node.mutate(), which are also used when creating
-                 // Nodes with parameter objects.
-                 //
-                 // E.g. new scenery.Node( { x: 5, rotation: 20 } ) will create a Path, and apply setters in the order below
-                 // (node.x = 5; node.rotation = 20)
-                 //
-                 // Some special cases exist (for function names). new scenery.Node( { scale: 2 } ) will actually call
-                 // node.scale( 2 ).
-                 //
-                 // The order below is important! Don't change this without knowing the implications.
-                 //
-                 // NOTE: Translation-based mutators come before rotation/scale, since typically we think of their operations
-                 //       occurring "after" the rotation / scaling
-                 // NOTE: left/right/top/bottom/centerX/centerY are at the end, since they rely potentially on rotation / scaling
-                 //       changes of bounds that may happen beforehand
+  // This is an array of property (setter) names for Node.mutate(), which are also used when creating
+  // Nodes with parameter objects.
+  //
+  // E.g. new scenery.Node( { x: 5, rotation: 20 } ) will create a Path, and apply setters in the order below
+  // (node.x = 5; node.rotation = 20)
+  //
+  // Some special cases exist (for function names). new scenery.Node( { scale: 2 } ) will actually call
+  // node.scale( 2 ).
+  //
+  // The order below is important! Don't change this without knowing the implications.
+  //
+  // NOTE: Translation-based mutators come before rotation/scale, since typically we think of their operations
+  //       occurring "after" the rotation / scaling
+  // NOTE: left/right/top/bottom/centerX/centerY are at the end, since they rely potentially on rotation / scaling
+  //       changes of bounds that may happen beforehand
   _mutatorKeys: string[],
 
   // List of all dirty flags that should be available on drawables created from this Node (or
@@ -6141,6 +6147,9 @@ Node.prototype._mutatorKeys = ACCESSIBILITY_OPTION_KEYS.concat( NODE_OPTION_KEYS
 Node.prototype.drawableMarkFlags = [];
 // @public {Object} - A mapping of all of the default options provided to Node
 Node.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
+
+// @public {Object} - A mapping of all of options that require Bounds to be applied properly. Most often these should be set through `mutate` in the end of the construcor instead of being passed through `super()`
+Node.REQUIRES_BOUNDS_OPTION_KEYS = REQUIRES_BOUNDS_OPTION_KEYS;
 
 scenery.register( 'Node', Node );
 
