@@ -1,73 +1,76 @@
 // Copyright 2021, University of Colorado Boulder
 
-import { SceneryEvent } from '../imports.js';
-
 /**
  * The main type interface for input listeners
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import { SceneryEvent } from '../imports.js';
+
+type SceneryListenerFunction = ( event: SceneryEvent ) => void;
+
 interface IInputListener {
   interrupt?: () => void;
   cursor?: string | null;
 
-  focus?: ( event: SceneryEvent ) => void;
-  blur?: ( event: SceneryEvent ) => void;
-  focusin?: ( event: SceneryEvent ) => void;
-  focusout?: ( event: SceneryEvent ) => void;
+  focus?: SceneryListenerFunction;
+  blur?: SceneryListenerFunction;
+  focusin?: SceneryListenerFunction;
+  focusout?: SceneryListenerFunction;
 
-  keydown?: ( event: SceneryEvent ) => void;
-  keyup?: ( event: SceneryEvent ) => void;
+  keydown?: SceneryListenerFunction;
+  keyup?: SceneryListenerFunction;
 
-  click?: ( event: SceneryEvent ) => void;
-  input?: ( event: SceneryEvent ) => void;
-  change?: ( event: SceneryEvent ) => void;
+  click?: SceneryListenerFunction;
+  input?: SceneryListenerFunction;
+  change?: SceneryListenerFunction;
 
-  down?: ( event: SceneryEvent ) => void;
-  mousedown?: ( event: SceneryEvent ) => void;
-  touchdown?: ( event: SceneryEvent ) => void;
-  pendown?: ( event: SceneryEvent ) => void;
+  down?: SceneryListenerFunction;
+  mousedown?: SceneryListenerFunction;
+  touchdown?: SceneryListenerFunction;
+  pendown?: SceneryListenerFunction;
 
-  up?: ( event: SceneryEvent ) => void;
-  mouseup?: ( event: SceneryEvent ) => void;
-  touchup?: ( event: SceneryEvent ) => void;
-  penup?: ( event: SceneryEvent ) => void;
+  up?: SceneryListenerFunction;
+  mouseup?: SceneryListenerFunction;
+  touchup?: SceneryListenerFunction;
+  penup?: SceneryListenerFunction;
 
-  cancel?: ( event: SceneryEvent ) => void;
-  mousecancel?: ( event: SceneryEvent ) => void;
-  touchcancel?: ( event: SceneryEvent ) => void;
-  pencancel?: ( event: SceneryEvent ) => void;
+  cancel?: SceneryListenerFunction;
+  mousecancel?: SceneryListenerFunction;
+  touchcancel?: SceneryListenerFunction;
+  pencancel?: SceneryListenerFunction;
 
-  move?: ( event: SceneryEvent ) => void;
-  mousemove?: ( event: SceneryEvent ) => void;
-  touchmove?: ( event: SceneryEvent ) => void;
-  penmove?: ( event: SceneryEvent ) => void;
+  move?: SceneryListenerFunction;
+  mousemove?: SceneryListenerFunction;
+  touchmove?: SceneryListenerFunction;
+  penmove?: SceneryListenerFunction;
 
-  wheel?: ( event: SceneryEvent ) => void;
-  mousewheel?: ( event: SceneryEvent ) => void;
-  touchwheel?: ( event: SceneryEvent ) => void;
-  penwheel?: ( event: SceneryEvent ) => void;
+  wheel?: SceneryListenerFunction;
+  mousewheel?: SceneryListenerFunction;
+  touchwheel?: SceneryListenerFunction;
+  penwheel?: SceneryListenerFunction;
 
-  enter?: ( event: SceneryEvent ) => void;
-  mouseenter?: ( event: SceneryEvent ) => void;
-  touchenter?: ( event: SceneryEvent ) => void;
-  penenter?: ( event: SceneryEvent ) => void;
+  enter?: SceneryListenerFunction;
+  mouseenter?: SceneryListenerFunction;
+  touchenter?: SceneryListenerFunction;
+  penenter?: SceneryListenerFunction;
 
-  exit?: ( event: SceneryEvent ) => void;
-  mouseexit?: ( event: SceneryEvent ) => void;
-  touchexit?: ( event: SceneryEvent ) => void;
-  penexit?: ( event: SceneryEvent ) => void;
+  exit?: SceneryListenerFunction;
+  mouseexit?: SceneryListenerFunction;
+  touchexit?: SceneryListenerFunction;
+  penexit?: SceneryListenerFunction;
 
-  over?: ( event: SceneryEvent ) => void;
-  mouseover?: ( event: SceneryEvent ) => void;
-  touchover?: ( event: SceneryEvent ) => void;
-  penover?: ( event: SceneryEvent ) => void;
+  over?: SceneryListenerFunction;
+  mouseover?: SceneryListenerFunction;
+  touchover?: SceneryListenerFunction;
+  penover?: SceneryListenerFunction;
 
-  out?: ( event: SceneryEvent ) => void;
-  mouseout?: ( event: SceneryEvent ) => void;
-  touchout?: ( event: SceneryEvent ) => void;
-  penout?: ( event: SceneryEvent ) => void;
+  out?: SceneryListenerFunction;
+  mouseout?: SceneryListenerFunction;
+  touchout?: SceneryListenerFunction;
+  penout?: SceneryListenerFunction;
 }
 
 export default IInputListener;
+export type { SceneryListenerFunction };

@@ -20,6 +20,7 @@
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import Bounds2 from '../../../../dot/js/Bounds2.js';
 import Shape from '../../../../kite/js/Shape.js';
+import Constructor from '../../../../phet-core/js/Constructor.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
@@ -41,8 +42,6 @@ type ReadingBlockOptions = {
 };
 
 const CONTENT_HINT_PATTERN = '{{OBJECT}}. {{HINT}}';
-
-type Constructor<T = {}> = new ( ...args: any[] ) => T;
 
 /**
  * @param Type
@@ -222,14 +221,12 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
     isReadingBlockActivated(): boolean {
       let activated = false;
 
-      // @ts-ignore - TODO: How to access _displays here, it is from InteractiveHighlighting, https://github.com/phetsims/scenery/issues/1340
       const trailIds = Object.keys( this._displays );
       for ( let i = 0; i < trailIds.length; i++ ) {
 
-        // @ts-ignore - TODO: How to access _displays here, it is from InteractiveHighlighting, https://github.com/phetsims/scenery/issues/1340
         const pointerFocus = this._displays[ trailIds[ i ] ].focusManager.readingBlockFocusProperty.value;
 
-        // @ts-ignore - TODO: How to access _displays here, it is from InteractiveHighlighting, https://github.com/phetsims/scenery/issues/1340
+        // @ts-ignore // TODO: fixed once FocusManager is converted to typescript https://github.com/phetsims/scenery/issues/1340
         if ( pointerFocus && pointerFocus.trail.lastNode() === this ) {
           activated = true;
           break;
@@ -293,8 +290,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
       if ( content ) {
         for ( let i = 0; i < displays.length; i++ ) {
 
-          // @ts-ignore - TODO: How to access getDescendantsUseHighlighting here, it is from InteractiveHighlighting, https://github.com/phetsims/scenery/issues/1340
-          if ( !( this as unknown as typeof VoicingClass ).getDescendantsUseHighlighting( event.trail ) ) {
+          if ( !this.getDescendantsUseHighlighting( event.trail ) ) {
 
             // the SceneryEvent might have gone through a descendant of this Node
             const rootToSelf = event.trail.subtrailTo( ( this as unknown as Node ) );
@@ -363,15 +359,15 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
   /**
    * {Array.<string>} - String keys for all of the allowed options that will be set by Node.mutate( options ), in
    * the order they will be evaluated.
-   *
-   * TODO: we want this to be @protected, https://github.com/phetsims/scenery/issues/1340
-   * @public
+   * @protected
    *
    * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
    *       cases that may apply.
    */
-  ReadingBlockClass.prototype._mutatorKeys = _.uniq( ( ReadingBlockClass.prototype._mutatorKeys ?
-                                                       ReadingBlockClass.prototype._mutatorKeys : [] ).concat( READING_BLOCK_OPTION_KEYS ) );
+  ReadingBlockClass.prototype._mutatorKeys = READING_BLOCK_OPTION_KEYS.concat( ReadingBlockClass.prototype._mutatorKeys );
+  assert && assert( ReadingBlockClass.prototype._mutatorKeys.length === _.uniq( ReadingBlockClass.prototype._mutatorKeys ).length,
+    'duplicate mutator keys in Voicing' );
+
   return ReadingBlockClass;
 };
 

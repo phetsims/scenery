@@ -32,8 +32,9 @@ import ResponsePacket, { ResponsePacketOptions } from '../../../../utterance-que
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
 import Utterance from '../../../../utterance-queue/js/Utterance.js';
 import UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
-import { InteractiveHighlighting, Node, scenery, SceneryEvent, voicingUtteranceQueue } from '../../imports.js';
+import { InteractiveHighlighting, Node, scenery, SceneryListenerFunction, voicingUtteranceQueue } from '../../imports.js';
 import optionize from '../../../../phet-core/js/optionize.js';
+import Constructor from '../../../../phet-core/js/Constructor.js';
 
 // options that are supported by Voicing.js. Added to mutator keys so that Voicing properties can be set with mutate.
 const VOICING_OPTION_KEYS = [
@@ -61,10 +62,6 @@ type VoicingOptions = {
 type ResponseOptions = {
   utterance?: Utterance | null;
 } & ResponsePacketOptions;
-
-type SceneryListenerFunction = ( event: SceneryEvent ) => void;
-
-type Constructor<T = {}> = new ( ...args: any[] ) => T;
 
 /**
  * @param Type
@@ -220,8 +217,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     /**
      * Collect responses with the responseCollector and speak the output with an UtteranceQueue.
      *
-     * TODO: we want this to be @protected, https://github.com/phetsims/scenery/issues/1340
-     * @public
+     * @protected
      */
     collectAndSpeakResponse( providedOptions?: ResponseOptions ): void {
       const options = optionize<ResponseOptions, {}, ResponseOptions>( {
@@ -454,16 +450,16 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
   };
 
   /**
-   * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in
+   * {Array.<string>} - String keys for all of the allowed options that will be set by Node.mutate( options ), in
    * the order they will be evaluated.
-   *
-   * TODO: we want this to be @protected, https://github.com/phetsims/scenery/issues/1340
-   * @public
+   * @protected
    *
    * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
    *       cases that may apply.
    */
-  VoicingClass.prototype._mutatorKeys = _.uniq( ( VoicingClass.prototype._mutatorKeys ? VoicingClass.prototype._mutatorKeys : [] ).concat( VOICING_OPTION_KEYS ) );
+  VoicingClass.prototype._mutatorKeys = VOICING_OPTION_KEYS.concat( VoicingClass.prototype._mutatorKeys );
+  assert && assert( VoicingClass.prototype._mutatorKeys.length === _.uniq( VoicingClass.prototype._mutatorKeys ).length, 'duplicate mutator keys in Voicing' );
+
   return VoicingClass;
 };
 

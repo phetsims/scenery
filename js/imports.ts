@@ -160,6 +160,7 @@ export { default as PDOMTree } from './accessibility/pdom/PDOMTree.js';
 export { default as PDOMFuzzer } from './accessibility/pdom/PDOMFuzzer.js';
 
 export type { default as IInputListener } from './input/IInputListener.js';
+export type { SceneryListenerFunction } from './input/IInputListener.js';
 export { default as Pointer } from './input/Pointer.js';
 export { default as Mouse } from './input/Mouse.js';
 export { default as Touch } from './input/Touch.js';
