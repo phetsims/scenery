@@ -55,7 +55,6 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
   const VoicingClass = Voicing( Type, optionsArgPosition );
 
   const ReadingBlockClass = class extends VoicingClass {
-    public readingBlockInitialized: boolean; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1340
     public _readingBlockTagName: string | null;
     public _readingBlockContent: string | null;
     public _readingBlockHintResponse: string | null;
@@ -74,10 +73,6 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
       args[ optionsArgPosition ] = _.omit( providedOptions, READING_BLOCK_OPTION_KEYS );
 
       super( ...args );
-
-      // TODO: delete, https://github.com/phetsims/scenery/issues/1340
-      // To make sure that initializeReadingBlock is called before trying to use trait features
-      this.readingBlockInitialized = true;
 
       // The tagName used for the ReadingBlock when "Voicing" is enabled, default
       // of button so that it is added to the focus order and can receive 'click' events. You may wish to set this
@@ -204,9 +199,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
       if ( this._readingBlockActiveHighlight !== readingBlockActiveHighlight ) {
         this._readingBlockActiveHighlight = readingBlockActiveHighlight;
 
-        if ( this.readingBlockInitialized ) {
-          this.readingBlockActiveHighlightChangedEmitter.emit();
-        }
+        this.readingBlockActiveHighlightChangedEmitter.emit();
       }
     }
 
@@ -254,12 +247,6 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
      */
     onReadingBlockFocusableChanged( focusable: boolean ) {
 
-      // wait until we have been initialized, it is possible to call setters from mutate before properties of
-      // ReadingBlock are defined
-      if ( !this.readingBlockInitialized ) {
-        return;
-      }
-
       const thisNode = this as unknown as Node;
 
       thisNode.focusable = focusable;
@@ -297,7 +284,6 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
      * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1340
      */
     speakReadingBlockContent( event: SceneryEvent ) {
-      assert && assert( this.readingBlockInitialized, 'ReadingBlock must be initialized before speaking' );
 
       const displays = ( this as unknown as Node ).getConnectedDisplays();
 
@@ -333,7 +319,6 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
      *
      */
     collectReadingBlockResponses(): string | null {
-      assert && assert( this.readingBlockInitialized, 'ReadingBlock must be initialized before collecting responses' );
 
       const usesHint = this._readingBlockHintResponse && responseCollector.hintResponsesEnabledProperty.value;
 
@@ -359,7 +344,6 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
     /**
      */
     dispose() {
-      this.readingBlockInitialized = false;
       const thisNode = ( this as unknown as Node );
       voicingManager.speechAllowedAndFullyEnabledProperty.unlink( this.readingBlockFocusableChangeListener );
       thisNode.localBoundsProperty.unlink( this.localBoundsChangedListener );
