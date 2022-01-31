@@ -11,7 +11,7 @@ import { scenery, Divider, HeightSizable, DividerOptions } from '../imports.js';
 type HDividerOptions = DividerOptions;
 
 class HDivider extends HeightSizable( Divider ) {
-  constructor( options: HDividerOptions ) {
+  constructor( options?: HDividerOptions ) {
     super( options );
 
     this.preferredHeightProperty.link( height => {

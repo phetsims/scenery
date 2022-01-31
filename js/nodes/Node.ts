@@ -4583,6 +4583,10 @@ class Node extends ParallelDOM {
     return this.getLayoutOptions();
   }
 
+  // Defaults indicating that we don't mix in WidthSizable/HeightSizable
+  get widthSizable(): boolean { return false; }
+  get heightSizable(): boolean { return false; }
+
   mutateLayoutOptions( layoutOptions?: ILayoutOptions ) {
     this.layoutOptions = merge( {}, this.layoutOptions, layoutOptions );
   }

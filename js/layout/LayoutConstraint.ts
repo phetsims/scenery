@@ -7,44 +7,40 @@
  */
 
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
-import Node from '../nodes/Node.js';
-import { scenery, LayoutProxy } from '../imports.js';
+import { scenery, LayoutProxy, Node, isWidthSizable, isHeightSizable } from '../imports.js';
 
-class LayoutConstraint {
-  /**
-   * @param {Node} ancestorNode
-   */
-  constructor( ancestorNode ) {
+abstract class LayoutConstraint {
+
+  // The Node in whose local coordinate frame our layout computations are done.
+  private ancestorNode: Node;
+
+  // Prevents layout() from running while true. Generally will be unlocked and laid out.
+  private _layoutLockCount: number;
+
+  // Whether there was a layout attempt during the lock
+  private _layoutAttemptDuringLock: boolean;
+
+  private _enabled: boolean;
+
+  protected _updateLayoutListener: () => void;
+
+  private _listenedNodes: Set<Node>;
+
+  private finishedLayoutEmitter: TinyEmitter<[]>;
+
+  constructor( ancestorNode: Node ) {
     assert && assert( ancestorNode instanceof Node );
 
-    // @private {Node}
     this.ancestorNode = ancestorNode;
-
-    // @private {boolean}
     this._enabled = true;
-
-    // @private {number} - Prevents layout() from running while true. Generally will be unlocked and laid out.
     this._layoutLockCount = 0;
-
-    // @private {boolean} - Whether there was a layout attempt during the lock
     this._layoutAttemptDuringLock = false;
-
-    // @protected {function}
     this._updateLayoutListener = this.updateLayoutAutomatically.bind( this );
-
-    // @private {Set.<Node>}
     this._listenedNodes = new Set();
-
-    // @public {TinyEmitter}
     this.finishedLayoutEmitter = new TinyEmitter();
   }
 
-  /**
-   * @public
-   *
-   * @param {Node} node
-   */
-  addNode( node ) {
+  addNode( node: Node ) {
     assert && assert( node instanceof Node );
     assert && assert( !this._listenedNodes.has( node ) );
 
@@ -52,63 +48,44 @@ class LayoutConstraint {
     // TODO: listen to things in-between!!
     node.boundsProperty.lazyLink( this._updateLayoutListener );
     node.visibleProperty.lazyLink( this._updateLayoutListener );
-    if ( node.widthSizable ) {
+    if ( isWidthSizable( node ) ) {
       node.minimumWidthProperty.lazyLink( this._updateLayoutListener );
     }
-    if ( node.heightSizable ) {
+    if ( isHeightSizable( node ) ) {
       node.minimumHeightProperty.lazyLink( this._updateLayoutListener );
     }
 
     this._listenedNodes.add( node );
   }
 
-  /**
-   * @public
-   *
-   * @param {Node} node
-   */
-  removeNode( node ) {
+  removeNode( node: Node ) {
     assert && assert( node instanceof Node );
     assert && assert( this._listenedNodes.has( node ) );
 
     node.boundsProperty.unlink( this._updateLayoutListener );
     node.visibleProperty.unlink( this._updateLayoutListener );
-    if ( node.widthSizable ) {
+    if ( isWidthSizable( node ) ) {
       node.minimumWidthProperty.unlink( this._updateLayoutListener );
     }
-    if ( node.heightSizable ) {
+    if ( isHeightSizable( node ) ) {
       node.minimumHeightProperty.unlink( this._updateLayoutListener );
     }
 
     this._listenedNodes.delete( node );
   }
 
-  /**
-   * @protected
-   */
-  layout() {
+  layout(): void {
 
   }
 
-  /**
-   * @public
-   *
-   * @returns {boolean}
-   */
-  get isLocked() {
+  get isLocked(): boolean {
     return this._layoutLockCount > 0;
   }
 
-  /**
-   * @public
-   */
   lock() {
     this._layoutLockCount++;
   }
 
-  /**
-   * @public
-   */
   unlock() {
     this._layoutLockCount--;
   }
@@ -116,7 +93,6 @@ class LayoutConstraint {
   /**
    * Updates the layout of this constraint. Called automatically during initialization, when children change (if
    * resize is true), or when client wants to call this public method for any reason.
-   * @public
    */
   updateLayout() {
     let count = 0;
@@ -141,43 +117,27 @@ class LayoutConstraint {
 
   /**
    * Called when we attempt to automatically layout components.
-   * @protected
    */
-  updateLayoutAutomatically() {
+  protected updateLayoutAutomatically() {
     if ( this._enabled ) {
       this.updateLayout();
     }
   }
 
-  /**
-   * @public
-   *
-   * @param {Node} node
-   * @returns {LayoutProxy}
-   */
-  createLayoutProxy( node ) {
+  createLayoutProxy( node: Node ): LayoutProxy {
     assert && assert( node instanceof Node );
 
     // TODO: How to handle the case where there is no trail?
 
+    // @ts-ignore
     return LayoutProxy.createFromPool( node.getUniqueTrailTo( this.ancestorNode ).removeAncestor() );
   }
 
-  /**
-   * @public
-   *
-   * @returns {boolean}
-   */
-  get enabled() {
+  get enabled(): boolean {
     return this._enabled;
   }
 
-  /**
-   * @public
-   *
-   * @param {boolean} value
-   */
-  set enabled( value ) {
+  set enabled( value: boolean ) {
     assert && assert( typeof value === 'boolean' );
 
     if ( this._enabled !== value ) {
@@ -189,11 +149,10 @@ class LayoutConstraint {
 
   /**
    * Releases references
-   * @public
    */
   dispose() {
     // Clean up listeners to any listened nodes
-    const listenedNodes = this._listenedNodes.keys();
+    const listenedNodes = [ ...this._listenedNodes.keys() ];
     for ( let i = 0; i < listenedNodes.length; i++ ) {
       this.removeNode( listenedNodes[ i ] );
     }

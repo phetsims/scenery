@@ -10,7 +10,7 @@
 
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import memoize from '../../../phet-core/js/memoize.js';
-import { scenery } from '../imports.js';
+import { scenery, Node } from '../imports.js';
 import Constructor from '../../../phet-core/js/Constructor.js';
 
 const WIDTH_SIZABLE_OPTION_KEYS = [
@@ -24,15 +24,11 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
     preferredWidthProperty: TinyProperty<number | null>;
     minimumWidthProperty: TinyProperty<number | null>;
 
-    // Flag for detection of the feature
-    widthSizable: boolean;
-
     constructor( ...args: any[] ) {
       super( ...args );
 
       this.preferredWidthProperty = new TinyProperty<number | null>( null );
       this.minimumWidthProperty = new TinyProperty<number | null>( null );
-      this.widthSizable = true;
     }
 
     get preferredWidth(): number | null {
@@ -55,6 +51,9 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
 
       this.minimumWidthProperty.value = value;
     }
+
+    // Detection flag for this trait
+    get widthSizable(): boolean { return false; }
   };
 
   // If we're extending into a Node type, include option keys
@@ -66,5 +65,12 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
   return clazz;
 } );
 
+// Some typescript gymnastics to provide a user-defined type guard that treats something as widthSizable
+const wrapper = () => WidthSizable( Node );
+const isWidthSizable = ( node: Node ): node is InstanceType<ReturnType<typeof wrapper>> => {
+  return node.widthSizable;
+};
+
 scenery.register( 'WidthSizable', WidthSizable );
 export default WidthSizable;
+export { isWidthSizable };

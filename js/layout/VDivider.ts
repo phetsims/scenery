@@ -11,7 +11,7 @@ import { scenery, Divider, WidthSizable, DividerOptions } from '../imports.js';
 type VDividerOptions = DividerOptions;
 
 class VDivider extends WidthSizable( Divider ) {
-  constructor( options: VDividerOptions ) {
+  constructor( options?: VDividerOptions ) {
     super( options );
 
     this.preferredWidthProperty.link( width => {

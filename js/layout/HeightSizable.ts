@@ -10,7 +10,7 @@
 
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import memoize from '../../../phet-core/js/memoize.js';
-import { scenery } from '../imports.js';
+import { scenery, Node } from '../imports.js';
 import Constructor from '../../../phet-core/js/Constructor.js';
 
 const HEIGHT_SIZABLE_OPTION_KEYS = [
@@ -24,15 +24,11 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
     preferredHeightProperty: TinyProperty<number | null>;
     minimumHeightProperty: TinyProperty<number | null>;
 
-    // Flag for detection of the feature
-    heightSizable: boolean;
-
     constructor( ...args: any[] ) {
       super( ...args );
 
       this.preferredHeightProperty = new TinyProperty<number | null>( null );
       this.minimumHeightProperty = new TinyProperty<number | null >( null );
-      this.heightSizable = true;
     }
 
     get preferredHeight(): number | null {
@@ -55,6 +51,9 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
 
       this.minimumHeightProperty.value = value;
     }
+
+    // Detection flag for this trait
+    get heightSizable(): boolean { return false; }
   };
 
   // If we're extending into a Node type, include option keys
@@ -66,5 +65,12 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
   return clazz;
 } );
 
+// Some typescript gymnastics to provide a user-defined type guard that treats something as HeightSizable
+const wrapper = () => HeightSizable( Node );
+const isHeightSizable = ( node: Node ): node is InstanceType<ReturnType<typeof wrapper>> => {
+  return node.heightSizable;
+};
+
 scenery.register( 'HeightSizable', HeightSizable );
 export default HeightSizable;
+export { isHeightSizable };
