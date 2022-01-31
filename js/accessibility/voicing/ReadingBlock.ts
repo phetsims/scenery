@@ -23,7 +23,7 @@ import Shape from '../../../../kite/js/Shape.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
-import { Focus, Node, ReadingBlockHighlight, ReadingBlockUtterance, scenery, SceneryEvent, Voicing, voicingManager } from '../../imports.js';
+import { Focus, Node, ReadingBlockHighlight, ReadingBlockUtterance, scenery, SceneryEvent, Voicing, PDOMInstance, voicingManager } from '../../imports.js';
 import IInputListener from '../../input/IInputListener.js';
 
 const READING_BLOCK_OPTION_KEYS = [
@@ -301,8 +301,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 
             // the trail to a Node may be discontinuous for PDOM events due to pdomOrder,
             // this finds the actual visual trail to use
-            // @ts-ignore TODO: how to handle global namespace access? https://github.com/phetsims/scenery/issues/1340
-            const visualTrail = scenery.PDOMInstance.guessVisualTrail( rootToSelf, displays[ i ].rootNode );
+            const visualTrail = PDOMInstance.guessVisualTrail( rootToSelf, displays[ i ].rootNode );
 
             const focus = new Focus( displays[ i ], visualTrail );
             const readingBlockUtterance = new ReadingBlockUtterance( focus, {

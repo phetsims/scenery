@@ -31,6 +31,7 @@ import cleanArray from '../../../../phet-core/js/cleanArray.js';
 import platform from '../../../../phet-core/js/platform.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import { scenery, TransformTracker, PDOMPeer, PDOMUtils } from '../../imports.js';
+import { Node } from '../../imports.js'; // eslint-disable-line no-unused-vars
 
 let globalId = 1;
 
