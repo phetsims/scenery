@@ -75,10 +75,10 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
   // Unfortunately, nothing can be private or protected in this class, see https://github.com/phetsims/scenery/issues/1340#issuecomment-1020692592
   const VoicingClass = class extends InteractiveHighlightingClass {
-    public voicingResponsePacket: ResponsePacket; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1340
-    public _voicingUtteranceQueue: UtteranceQueue | null;
-    public _voicingFocusListener: SceneryListenerFunction;
-    public speakContentOnFocusListener: { focus: SceneryListenerFunction }; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1340
+    public voicingResponsePacket!: ResponsePacket; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1340
+    public _voicingUtteranceQueue!: UtteranceQueue | null;
+    public _voicingFocusListener!: SceneryListenerFunction;
+    public speakContentOnFocusListener!: { focus: SceneryListenerFunction }; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1340
 
     constructor( ...args: any[] ) {
 
@@ -88,6 +88,19 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
       args[ optionsArgPosition ] = _.omit( providedOptions, VOICING_OPTION_KEYS );
 
       super( ...args );
+
+      // We only want to call this method, not any subtype implementation
+      VoicingClass.prototype.initialize.call( this );
+
+      // @ts-ignore
+      ( this as unknown as Node ).mutate( voicingOptions );
+    }
+
+    // Separate from the constructor to support cases where Voicing is used in Poolable Nodes.
+    initialize(): this {
+
+      // @ts-ignore
+      super.initialize && super.initialize();
 
       // @public {ResponsePacket} - ResponsePacket that holds all the supported responses to be Voiced
       this.voicingResponsePacket = new ResponsePacket();
@@ -112,8 +125,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
       };
       ( this as unknown as Node ).addInputListener( this.speakContentOnFocusListener );
 
-      // @ts-ignore
-      ( this as unknown as Node ).mutate( voicingOptions );
+      return this;
     }
 
     /**
@@ -446,6 +458,13 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
       ( this as unknown as Node ).removeInputListener( this.speakContentOnFocusListener );
 
       super.dispose();
+    }
+
+    clean() {
+      ( this as unknown as Node ).removeInputListener( this.speakContentOnFocusListener );
+
+      // @ts-ignore
+      super.clean && super.clean();
     }
   };
 

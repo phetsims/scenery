@@ -1899,10 +1899,7 @@ class RichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
    * @param {function|string} href
    */
   constructor( innerContent, href ) {
-    super( {
-      cursor: 'pointer',
-      tagName: 'a'
-    } );
+    super();
 
     // @private {FireListener|null}
     this.fireListener = null;
@@ -1911,6 +1908,12 @@ class RichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
     this.accessibleInputListener = null;
 
     this.initialize( innerContent, href );
+
+    // Mutate to make sure initialize doesn't clear this away
+    this.mutate( {
+      cursor: 'pointer',
+      tagName: 'a'
+    } );
   }
 
   /**
@@ -1922,6 +1925,9 @@ class RichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
    * @returns {RichTextLink} - Self reference
    */
   initialize( innerContent, href ) {
+
+    super.initialize();
+
     // pdom - open the link in the new tab when activated with a keyboard.
     // also see https://github.com/phetsims/joist/issues/430
     this.innerContent = innerContent;
@@ -1974,8 +1980,6 @@ class RichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
    */
   clean() {
     super.clean();
-
-    // TODO: how to reverse voicing in this poolable case? https://github.com/phetsims/scenery/issues/1340
 
     this.removeInputListener( this.fireListener );
     this.fireListener = null;
