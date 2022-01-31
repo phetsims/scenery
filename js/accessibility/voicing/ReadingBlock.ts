@@ -222,12 +222,14 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
     isReadingBlockActivated(): boolean {
       let activated = false;
 
-      // @ts-ignore - TODO: I believe this should be removed and all will work once InteractieHighlighting is typescript, https://github.com/phetsims/scenery/issues/1340
-      const trailIds = Object.keys( ( this as unknown as typeof VoicingClass )._displays );
+      // @ts-ignore - TODO: How to access _displays here, it is from InteractiveHighlighting, https://github.com/phetsims/scenery/issues/1340
+      const trailIds = Object.keys( this._displays );
       for ( let i = 0; i < trailIds.length; i++ ) {
 
-        // @ts-ignore - TODO: I believe this should be removed and all will work once InteractieHighlighting is typescript, https://github.com/phetsims/scenery/issues/1340
-        const pointerFocus = ( this as unknown as typeof VoicingClass )._displays[ trailIds[ i ] ].focusManager.readingBlockFocusProperty.value;
+        // @ts-ignore - TODO: How to access _displays here, it is from InteractiveHighlighting, https://github.com/phetsims/scenery/issues/1340
+        const pointerFocus = this._displays[ trailIds[ i ] ].focusManager.readingBlockFocusProperty.value;
+
+        // @ts-ignore - TODO: How to access _displays here, it is from InteractiveHighlighting, https://github.com/phetsims/scenery/issues/1340
         if ( pointerFocus && pointerFocus.trail.lastNode() === this ) {
           activated = true;
           break;
@@ -291,7 +293,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
       if ( content ) {
         for ( let i = 0; i < displays.length; i++ ) {
 
-          // @ts-ignore - TODO: I believe this should be removed and all will work once InteractieHighlighting is typescript, https://github.com/phetsims/scenery/issues/1340
+          // @ts-ignore - TODO: How to access getDescendantsUseHighlighting here, it is from InteractiveHighlighting, https://github.com/phetsims/scenery/issues/1340
           if ( !( this as unknown as typeof VoicingClass ).getDescendantsUseHighlighting( event.trail ) ) {
 
             // the SceneryEvent might have gone through a descendant of this Node
