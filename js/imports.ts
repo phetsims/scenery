@@ -196,6 +196,7 @@ export { default as SwipeListener } from './listeners/SwipeListener.js';
 
 export type { default as ILayoutOptions } from './layout/ILayoutOptions.js';
 export { default as AlignPropertyBox } from './layout/AlignPropertyBox.js';
+export type { AlignPropertyBoxOptions } from './layout/AlignPropertyBox.js';
 export { default as WidthSizable } from './layout/WidthSizable.js';
 export { isWidthSizable } from './layout/WidthSizable.js';
 export { default as HeightSizable } from './layout/HeightSizable.js';
