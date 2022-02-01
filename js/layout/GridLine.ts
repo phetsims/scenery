@@ -7,26 +7,23 @@
  */
 
 import Poolable from '../../../phet-core/js/Poolable.js';
-import { scenery } from '../imports.js';
+import { GridCell, scenery } from '../imports.js';
 
 class GridLine {
-  /**
-   * @param {number} index
-   * @param {Array.<GridCell>} cells
-   * @param {number} grow
-   */
-  constructor( index, cells, grow ) {
+
+  index!: number;
+  cells!: GridCell[];
+  grow!: number;
+  min!: number;
+  max!: number;
+  size!: number;
+  position!: number;
+
+  constructor( index: number, cells: GridCell[], grow: number ) {
     this.initialize( index, cells, grow );
   }
 
-  /**
-   * @public
-   *
-   * @param {number} index
-   * @param {Array.<GridCell>} cells
-   * @param {number} grow
-   */
-  initialize( index, cells, grow ) {
+  initialize( index: number, cells: GridCell[], grow: number ) {
     // @public {number}
     this.index = index;
 

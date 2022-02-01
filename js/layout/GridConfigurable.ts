@@ -7,7 +7,9 @@
  */
 
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
-import EnumerationDeprecated from '../../../phet-core/js/EnumerationDeprecated.js';
+import Constructor from '../../../phet-core/js/Constructor.js';
+import Enumeration from '../../../phet-core/js/Enumeration.js';
+import EnumerationValue from '../../../phet-core/js/EnumerationValue.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import mutate from '../../../phet-core/js/mutate.js';
 import { scenery } from '../imports.js';
@@ -31,16 +33,111 @@ const GRID_CONFIGURABLE_OPTION_KEYS = [
   'maxContentHeight'
 ];
 
-const GridConfigurable = memoize( type => {
+const gridHorizontalAligns = [ 'left', 'right', 'center', 'origin', 'stretch' ] as const;
+const gridVerticalAligns = [ 'top', 'bottom', 'center', 'origin', 'stretch' ] as const;
+
+type GridHorizontalAlign = typeof gridHorizontalAligns[number];
+type GridVerticalAlign = typeof gridVerticalAligns[number];
+
+class GridConfigurableAlign extends EnumerationValue {
+  static START = new GridConfigurableAlign( 'left', 'top', 0 );
+  static END = new GridConfigurableAlign( 'right', 'bottom', 1 );
+  static CENTER = new GridConfigurableAlign( 'center', 'center', 0.5 );
+  static ORIGIN = new GridConfigurableAlign( 'origin', 'origin' );
+  static STRETCH = new GridConfigurableAlign( 'stretch', 'stretch', 0 );
+
+  horizontal: GridHorizontalAlign;
+  vertical: GridVerticalAlign;
+  padRatio: number;
+
+  constructor( horizontal: GridHorizontalAlign, vertical: GridVerticalAlign, padRatio: number = Number.POSITIVE_INFINITY ) {
+    super();
+
+    this.horizontal = horizontal;
+    this.vertical = vertical;
+    this.padRatio = padRatio;
+  }
+
+  static enumeration = new Enumeration( GridConfigurableAlign, {
+    phetioDocumentation: 'Align for GridConfigurable'
+  } );
+}
+
+type GridConfigurableOptions = {
+  xAlign?: GridHorizontalAlign | null;
+  yAlign?: GridVerticalAlign | null;
+  grow?: number | null;
+  xGrow?: number | null;
+  yGrow?: number | null;
+  margin?: number | null;
+  xMargin?: number | null;
+  yMargin?: number | null;
+  leftMargin?: number | null;
+  rightMargin?: number | null;
+  topMargin?: number | null;
+  bottomMargin?: number | null;
+  minContentWidth?: number | null;
+  minContentHeight?: number | null;
+  maxContentWidth?: number | null;
+  maxContentHeight?: number | null;
+};
+
+const horizontalAlignMap = {
+  left: GridConfigurableAlign.START,
+  right: GridConfigurableAlign.END,
+  center: GridConfigurableAlign.CENTER,
+  origin: GridConfigurableAlign.ORIGIN,
+  stretch: GridConfigurableAlign.STRETCH
+};
+const verticalAlignMap = {
+  top: GridConfigurableAlign.START,
+  bottom: GridConfigurableAlign.END,
+  center: GridConfigurableAlign.CENTER,
+  origin: GridConfigurableAlign.ORIGIN,
+  stretch: GridConfigurableAlign.STRETCH
+};
+const horizontalAlignToInternal = ( key: GridHorizontalAlign | null ): GridConfigurableAlign | null => {
+  if ( key === null ) {
+    return null;
+  }
+
+  assert && assert( horizontalAlignMap[ key as 'left' | 'right' | 'center' | 'origin' | 'stretch' ] );
+
+  return horizontalAlignMap[ key as 'left' | 'right' | 'center' | 'origin' | 'stretch' ];
+};
+const verticalAlignToInternal = ( key: GridVerticalAlign | null ): GridConfigurableAlign | null => {
+  if ( key === null ) {
+    return null;
+  }
+
+  assert && assert( verticalAlignMap[ key as 'top' | 'bottom' | 'center' | 'origin' | 'stretch' ] );
+
+  return verticalAlignMap[ key as 'top' | 'bottom' | 'center' | 'origin' | 'stretch' ];
+};
+
+const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   return class extends type {
-    constructor( ...args ) {
+
+    _xAlign: GridConfigurableAlign | null;
+    _yAlign: GridConfigurableAlign | null;
+    _leftMargin: number | null;
+    _rightMargin: number | null;
+    _topMargin: number | null;
+    _bottomMargin: number | null;
+    _xGrow: number | null;
+    _yGrow: number | null;
+    _minContentWidth: number | null;
+    _minContentHeight: number | null;
+    _maxContentWidth: number | null;
+    _maxContentHeight: number | null;
+
+    changedEmitter: TinyEmitter;
+
+    constructor( ...args: any[] ) {
       super( ...args );
 
-      // @protected {GridConfigurable.Align|null} - Null value inherits from a base config
       this._xAlign = null;
       this._yAlign = null;
-
-      // @protected {number|null} - Null value inherits from a base config
       this._leftMargin = null;
       this._rightMargin = null;
       this._topMargin = null;
@@ -52,25 +149,16 @@ const GridConfigurable = memoize( type => {
       this._maxContentWidth = null;
       this._maxContentHeight = null;
 
-      // @public {TinyEmitter}
       this.changedEmitter = new TinyEmitter();
     }
 
-    /**
-     * @public
-     *
-     * @param {Object} [options]
-     */
-    mutateConfigurable( options ) {
+    mutateConfigurable( options?: GridConfigurableOptions ) {
       mutate( this, GRID_CONFIGURABLE_OPTION_KEYS, options );
     }
 
-    /**
-     * @public
-     */
     setConfigToBaseDefault() {
-      this._xAlign = GridConfigurable.Align.CENTER;
-      this._yAlign = GridConfigurable.Align.CENTER;
+      this._xAlign = GridConfigurableAlign.CENTER;
+      this._yAlign = GridConfigurableAlign.CENTER;
       this._leftMargin = 0;
       this._rightMargin = 0;
       this._topMargin = 0;
@@ -87,7 +175,6 @@ const GridConfigurable = memoize( type => {
 
     /**
      * Resets values to their original state
-     * @public
      */
     setConfigToInherit() {
       this._xAlign = null;
@@ -106,89 +193,59 @@ const GridConfigurable = memoize( type => {
       this.changedEmitter.emit();
     }
 
-    /**
-     * @public
-     *
-     * @returns {string|null}
-     */
-    get xAlign() {
-      const result = xAlignInverseMap[ this._xAlign ];
+    get xAlign(): GridHorizontalAlign | null {
+      const result = this._xAlign === null ? null : this._xAlign.horizontal;
 
       assert && assert( result === null || typeof result === 'string' );
 
       return result;
     }
 
-    /**
-     * @public
-     *
-     * @param {string|null} value
-     */
-    set xAlign( value ) {
-      assert && assert( xAlignAllowedValuesMap.includes( value ),
-        `align ${value} not supported, the valid values are ${xAlignAllowedValuesMap}` );
+    set xAlign( value: GridHorizontalAlign | null ) {
+      assert && assert( value === null || gridHorizontalAligns.includes( value ),
+        `align ${value} not supported, the valid values are ${gridHorizontalAligns} or null` );
 
       // remapping align values to an independent set, so they aren't orientation-dependent
-      value = xAlignMap[ value ];
+      const mappedValue = horizontalAlignToInternal( value );
 
-      assert && assert( value === null || GridConfigurable.Align.includes( value ) );
+      assert && assert( mappedValue === null || mappedValue instanceof GridConfigurableAlign );
 
-      if ( this._xAlign !== value ) {
-        this._xAlign = value;
+      if ( this._xAlign !== mappedValue ) {
+        this._xAlign = mappedValue;
 
         this.changedEmitter.emit();
       }
     }
 
-    /**
-     * @public
-     *
-     * @returns {string|null}
-     */
-    get yAlign() {
-      const result = yAlignInverseMap[ this._yAlign ];
+    get yAlign(): GridVerticalAlign | null {
+      const result = this._yAlign === null ? null : this._yAlign.vertical;
 
       assert && assert( result === null || typeof result === 'string' );
 
       return result;
     }
 
-    /**
-     * @public
-     *
-     * @param {string|null} value
-     */
-    set yAlign( value ) {
-      assert && assert( yAlignAllowedValuesMap.includes( value ),
-        `align ${value} not supported, the valid values are ${yAlignAllowedValuesMap}` );
+    set yAlign( value: GridVerticalAlign | null ) {
+      assert && assert( value === null || gridVerticalAligns.includes( value ),
+        `align ${value} not supported, the valid values are ${gridVerticalAligns} or null` );
 
       // remapping align values to an independent set, so they aren't orientation-dependent
-      value = yAlignMap[ value ];
+      const mappedValue = verticalAlignToInternal( value );
 
-      assert && assert( value === null || GridConfigurable.Align.includes( value ) );
+      assert && assert( mappedValue === null || mappedValue instanceof GridConfigurableAlign );
 
-      if ( this._yAlign !== value ) {
-        this._yAlign = value;
+      if ( this._yAlign !== mappedValue ) {
+        this._yAlign = mappedValue;
 
         this.changedEmitter.emit();
       }
     }
 
-    /**
-     * @public
-     *
-     * @returns {number|null}
-     */
-    get leftMargin() {
+    get leftMargin(): number | null {
       return this._leftMargin;
     }
 
-    /**
-     * @public
-     *
-     * @param {number|null} value
-     */
-    set leftMargin( value ) {
+    set leftMargin( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
 
       if ( this._leftMargin !== value ) {
@@ -198,21 +255,11 @@ const GridConfigurable = memoize( type => {
       }
     }
 
-    /**
-     * @public
-     *
-     * @returns {number|null}
-     */
-    get rightMargin() {
+    get rightMargin(): number | null {
       return this._rightMargin;
     }
 
-    /**
-     * @public
-     *
-     * @param {number|null} value
-     */
-    set rightMargin( value ) {
+    set rightMargin( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
 
       if ( this._rightMargin !== value ) {
@@ -222,21 +269,11 @@ const GridConfigurable = memoize( type => {
       }
     }
 
-    /**
-     * @public
-     *
-     * @returns {number|null}
-     */
-    get topMargin() {
+    get topMargin(): number | null {
       return this._topMargin;
     }
 
-    /**
-     * @public
-     *
-     * @param {number|null} value
-     */
-    set topMargin( value ) {
+    set topMargin( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
 
       if ( this._topMargin !== value ) {
@@ -246,21 +283,11 @@ const GridConfigurable = memoize( type => {
       }
     }
 
-    /**
-     * @public
-     *
-     * @returns {number|null}
-     */
-    get bottomMargin() {
+    get bottomMargin(): number | null {
       return this._bottomMargin;
     }
 
-    /**
-     * @public
-     *
-     * @param {number|null} value
-     */
-    set bottomMargin( value ) {
+    set bottomMargin( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
 
       if ( this._bottomMargin !== value ) {
@@ -270,23 +297,13 @@ const GridConfigurable = memoize( type => {
       }
     }
 
-    /**
-     * @public
-     *
-     * @returns {number|null}
-     */
-    get grow() {
+    get grow(): number | null {
       assert && assert( this._xGrow === this._yGrow );
 
       return this._xGrow;
     }
 
-    /**
-     * @public
-     *
-     * @param {number|null} value
-     */
-    set grow( value ) {
+    set grow( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) && value >= 0 ) );
 
       if ( this._xGrow !== value || this._yGrow !== value ) {
@@ -297,21 +314,11 @@ const GridConfigurable = memoize( type => {
       }
     }
 
-    /**
-     * @public
-     *
-     * @returns {number|null}
-     */
-    get xGrow() {
+    get xGrow(): number | null {
       return this._xGrow;
     }
 
-    /**
-     * @public
-     *
-     * @param {number|null} value
-     */
-    set xGrow( value ) {
+    set xGrow( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) && value >= 0 ) );
 
       if ( this._xGrow !== value ) {
@@ -321,21 +328,11 @@ const GridConfigurable = memoize( type => {
       }
     }
 
-    /**
-     * @public
-     *
-     * @returns {number|null}
-     */
-    get yGrow() {
+    get yGrow(): number | null {
       return this._yGrow;
     }
 
-    /**
-     * @public
-     *
-     * @param {number|null} value
-     */
-    set yGrow( value ) {
+    set yGrow( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) && value >= 0 ) );
 
       if ( this._yGrow !== value ) {
@@ -345,23 +342,13 @@ const GridConfigurable = memoize( type => {
       }
     }
 
-    /**
-     * @public
-     *
-     * @returns {number|null}
-     */
-    get xMargin() {
+    get xMargin(): number | null {
       assert && assert( this._leftMargin === this._rightMargin );
 
       return this._leftMargin;
     }
 
-    /**
-     * @public
-     *
-     * @param {number|null} value
-     */
-    set xMargin( value ) {
+    set xMargin( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
 
       if ( this._leftMargin !== value || this._rightMargin !== value ) {
@@ -372,23 +359,13 @@ const GridConfigurable = memoize( type => {
       }
     }
 
-    /**
-     * @public
-     *
-     * @returns {number|null}
-     */
-    get yMargin() {
+    get yMargin(): number | null {
       assert && assert( this._topMargin === this._bottomMargin );
 
       return this._topMargin;
     }
 
-    /**
-     * @public
-     *
-     * @param {number|null} value
-     */
-    set yMargin( value ) {
+    set yMargin( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
 
       if ( this._topMargin !== value || this._bottomMargin !== value ) {
@@ -399,12 +376,7 @@ const GridConfigurable = memoize( type => {
       }
     }
 
-    /**
-     * @public
-     *
-     * @returns {number|null}
-     */
-    get margin() {
+    get margin(): number | null {
       assert && assert(
       this._leftMargin === this._rightMargin &&
       this._leftMargin === this._topMargin &&
@@ -414,12 +386,7 @@ const GridConfigurable = memoize( type => {
       return this._topMargin;
     }
 
-    /**
-     * @public
-     *
-     * @param {number|null} value
-     */
-    set margin( value ) {
+    set margin( value: number | null ) {
       assert && assert( value === null || ( typeof value === 'number' && isFinite( value ) ) );
 
       if ( this._leftMargin !== value || this._rightMargin !== value || this._topMargin !== value || this._bottomMargin !== value ) {
@@ -432,21 +399,11 @@ const GridConfigurable = memoize( type => {
       }
     }
 
-    /**
-     * @public
-     *
-     * @returns {number|null}
-     */
-    get minContentWidth() {
+    get minContentWidth(): number | null {
       return this._minContentWidth;
     }
 
-    /**
-     * @public
-     *
-     * @param {number|null} value
-     */
-    set minContentWidth( value ) {
+    set minContentWidth( value: number | null ) {
       if ( this._minContentWidth !== value ) {
         this._minContentWidth = value;
 
@@ -454,21 +411,11 @@ const GridConfigurable = memoize( type => {
       }
     }
 
-    /**
-     * @public
-     *
-     * @returns {number|null}
-     */
-    get minContentHeight() {
+    get minContentHeight(): number | null {
       return this._minContentHeight;
     }
 
-    /**
-     * @public
-     *
-     * @param {number|null} value
-     */
-    set minContentHeight( value ) {
+    set minContentHeight( value: number | null ) {
       if ( this._minContentHeight !== value ) {
         this._minContentHeight = value;
 
@@ -476,21 +423,11 @@ const GridConfigurable = memoize( type => {
       }
     }
 
-    /**
-     * @public
-     *
-     * @returns {number|null}
-     */
-    get maxContentWidth() {
+    get maxContentWidth(): number | null {
       return this._maxContentWidth;
     }
 
-    /**
-     * @public
-     *
-     * @param {number|null} value
-     */
-    set maxContentWidth( value ) {
+    set maxContentWidth( value: number | null ) {
       if ( this._maxContentWidth !== value ) {
         this._maxContentWidth = value;
 
@@ -498,21 +435,11 @@ const GridConfigurable = memoize( type => {
       }
     }
 
-    /**
-     * @public
-     *
-     * @returns {number|null}
-     */
-    get maxContentHeight() {
+    get maxContentHeight(): number | null {
       return this._maxContentHeight;
     }
 
-    /**
-     * @public
-     *
-     * @param {number|null} value
-     */
-    set maxContentHeight( value ) {
+    set maxContentHeight( value: number | null ) {
       if ( this._maxContentHeight !== value ) {
         this._maxContentHeight = value;
 
@@ -522,53 +449,7 @@ const GridConfigurable = memoize( type => {
   };
 } );
 
-// @public {EnumerationDeprecated}
-GridConfigurable.Align = EnumerationDeprecated.byKeys( [
-  'START',
-  'END',
-  'CENTER',
-  'ORIGIN',
-  'STRETCH'
-] );
-
-const xAlignMap = {
-  left: GridConfigurable.Align.START,
-  right: GridConfigurable.Align.END,
-  center: GridConfigurable.Align.CENTER,
-  origin: GridConfigurable.Align.ORIGIN,
-  stretch: GridConfigurable.Align.STRETCH,
-  null: null
-};
-const xAlignInverseMap = {
-  [ GridConfigurable.Align.START ]: 'left',
-  [ GridConfigurable.Align.END ]: 'right',
-  [ GridConfigurable.Align.CENTER ]: 'center',
-  [ GridConfigurable.Align.ORIGIN ]: 'origin',
-  [ GridConfigurable.Align.STRETCH ]: 'stretch',
-  null: null
-};
-const xAlignAllowedValuesMap = [ 'left', 'right', 'center', 'origin', 'stretch', null ];
-
-const yAlignMap = {
-  top: GridConfigurable.Align.START,
-  bottom: GridConfigurable.Align.END,
-  center: GridConfigurable.Align.CENTER,
-  origin: GridConfigurable.Align.ORIGIN,
-  stretch: GridConfigurable.Align.STRETCH,
-  null: null
-};
-const yAlignInverseMap = {
-  [ GridConfigurable.Align.START ]: 'top',
-  [ GridConfigurable.Align.END ]: 'bottom',
-  [ GridConfigurable.Align.CENTER ]: 'center',
-  [ GridConfigurable.Align.ORIGIN ]: 'origin',
-  [ GridConfigurable.Align.STRETCH ]: 'stretch',
-  null: null
-};
-const yAlignAllowedValuesMap = [ 'top', 'bottom', 'center', 'origin', 'stretch', null ];
-
-// @public {Object}
-GridConfigurable.GRID_CONFIGURABLE_OPTION_KEYS = GRID_CONFIGURABLE_OPTION_KEYS;
-
 scenery.register( 'GridConfigurable', GridConfigurable );
 export default GridConfigurable;
+export { GridConfigurableAlign, GRID_CONFIGURABLE_OPTION_KEYS };
+export type { GridHorizontalAlign, GridVerticalAlign, GridConfigurableOptions };

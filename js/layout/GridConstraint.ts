@@ -13,59 +13,69 @@ import Orientation from '../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../phet-core/js/OrientationPair.js';
 import merge from '../../../phet-core/js/merge.js';
 import mutate from '../../../phet-core/js/mutate.js';
-import { scenery, Node, GridCell, GridConfigurable, GridLine, LayoutConstraint } from '../imports.js';
+import { scenery, Node, GridCell, GridConfigurable, GridLine, LayoutConstraint, GRID_CONFIGURABLE_OPTION_KEYS, GridConfigurableOptions } from '../imports.js';
+import IProperty from '../../../axon/js/IProperty.js';
+import { GridConfigurableAlign } from './GridConfigurable.js';
 
 const GRID_CONSTRAINT_OPTION_KEYS = [
   'excludeInvisible',
   'spacing',
   'xSpacing',
   'ySpacing'
-].concat( GridConfigurable.GRID_CONFIGURABLE_OPTION_KEYS );
-const boundsMinMap = {
-  [ Orientation.HORIZONTAL ]: 'minX',
-  [ Orientation.VERTICAL ]: 'minY'
-};
-const boundsMaxMap = {
-  [ Orientation.HORIZONTAL ]: 'maxX',
-  [ Orientation.VERTICAL ]: 'maxY'
+].concat( GRID_CONFIGURABLE_OPTION_KEYS );
+
+type GridConstraintSelfOptions = {
+  excludeInvisible?: boolean;
+  spacing?: number;
+  xSpacing?: number;
+  ySpacing?: number;
+
+  preferredWidthProperty: IProperty<number | null>;
+  preferredHeightProperty: IProperty<number | null>;
+  minimumWidthProperty: IProperty<number | null>;
+  minimumHeightProperty: IProperty<number | null>;
 };
 
-// TODO: Have LayoutBox use this when we're ready
+type GridConstraintOptions = GridConstraintSelfOptions & GridConfigurableOptions;
+
 class GridConstraint extends GridConfigurable( LayoutConstraint ) {
-  /**
-   * @param {Node} ancestorNode
-   * @param {Object} [options]
-   */
-  constructor( ancestorNode, options ) {
+
+  private cells: Set<GridCell>;
+  private displayedCells: GridCell[];
+
+  // Looked up by index
+  private displayedLines: OrientationPair<Map<number, GridLine>>;
+
+  private _excludeInvisible: boolean;
+  private _spacing: OrientationPair<number | number[]>;
+
+  // Reports out the used layout bounds (may be larger than actual bounds, since it will include margins, etc.)
+  layoutBoundsProperty: IProperty<Bounds2>;
+
+  preferredWidthProperty: IProperty<number | null>;
+  preferredHeightProperty: IProperty<number | null>;
+  minimumWidthProperty: IProperty<number | null>;
+  minimumHeightProperty: IProperty<number | null>;
+
+  constructor( ancestorNode: Node, providedOptions?: GridConstraintOptions ) {
     assert && assert( ancestorNode instanceof Node );
 
-    options = merge( {
+    const options = merge( {
       // As options, so we could hook into a Node's preferred/minimum sizes if desired
-      preferredWidthProperty: new TinyProperty( null ),
-      preferredHeightProperty: new TinyProperty( null ),
-      minimumWidthProperty: new TinyProperty( null ),
-      minimumHeightProperty: new TinyProperty( null )
-    }, options );
+      preferredWidthProperty: new TinyProperty<number | null>( null ),
+      preferredHeightProperty: new TinyProperty<number | null>( null ),
+      minimumWidthProperty: new TinyProperty<number | null>( null ),
+      minimumHeightProperty: new TinyProperty<number | null>( null )
+    }, providedOptions );
 
     super( ancestorNode );
 
-    // @private {Set.<GridCell>}
     this.cells = new Set();
-
-    // @private {Array.<GridCell>}
     this.displayedCells = [];
-
-    // @private {OrientationPair.<Map.<number,GridCell>>} - Looked up by index
     this.displayedLines = new OrientationPair( new Map(), new Map() );
-
-    // @private {boolean}
     this._excludeInvisible = true;
+    this._spacing = new OrientationPair<number | number[]>( 0, 0 );
 
-    // @private {OrientationPair.<number|Array.<number>>}
-    this._spacing = new OrientationPair( 0, 0 );
-
-    // @public {Property.<Bounds2>} - Reports out the used layout bounds (may be larger than actual bounds, since it
-    // will include margins, etc.)
     this.layoutBoundsProperty = new Property( Bounds2.NOTHING, {
       useDeepEquality: true
     } );
@@ -86,11 +96,7 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
     this.preferredHeightProperty.lazyLink( this._updateLayoutListener );
   }
 
-  /**
-   * @protected
-   * @override
-   */
-  layout() {
+  protected layout() {
     super.layout();
 
     assert && assert( _.every( [ ...this.cells ], cell => !cell.node.isDisposed ) );
@@ -115,14 +121,14 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
     // Handle horizontal first, so if we re-wrap we can handle vertical later.
     [ Orientation.HORIZONTAL, Orientation.VERTICAL ].forEach( orientation => {
       const orientedSpacing = this._spacing.get( orientation );
-      const capLetter = orientation === Orientation.HORIZONTAL ? 'X' : 'Y';
-      const minField = `min${capLetter}`;
-      const maxField = `max${capLetter}`;
+      const minField = orientation === Orientation.HORIZONTAL ? 'minX' as const : 'minY' as const;
+      const maxField = orientation === Orientation.HORIZONTAL ? 'maxX' as const : 'maxY' as const;
 
       // {Map.<index:number,GridLine>
       const lineMap = this.displayedLines.get( orientation );
 
       // Clear out the lineMap
+      // @ts-ignore TODO poolable
       lineMap.forEach( line => line.freeToPool() );
       lineMap.clear();
 
@@ -131,6 +137,7 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
         const subCells = _.filter( cells, cell => cell.containsIndex( orientation, index ) );
 
         const grow = _.max( subCells.map( cell => cell.getEffectiveGrow( orientation ) ) );
+        // @ts-ignore TODO poolable
         const line = GridLine.createFromPool( index, subCells, grow );
         lineMap.set( index, line );
 
@@ -144,7 +151,7 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
       // Scan sizes for single-line cells first
       cells.forEach( cell => {
         if ( cell.size.get( orientation ) === 1 ) {
-          const line = lineMap.get( cell.position.get( orientation ) );
+          const line = lineMap.get( cell.position.get( orientation ) )!;
           line.min = Math.max( line.min, cell.getMinimumSize( orientation ) );
           line.max = Math.min( line.max, cell.getMaximumSize( orientation ) );
         }
@@ -155,7 +162,7 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
         if ( cell.size.get( orientation ) > 1 ) {
           // TODO: don't bump mins over maxes here (if lines have maxes, redistribute otherwise)
           // TODO: also handle maxes
-          const lines = cell.getIndices( orientation ).map( index => lineMap.get( index ) );
+          const lines = cell.getIndices( orientation ).map( index => lineMap.get( index )! );
           const currentMin = _.sum( lines.map( line => line.min ) );
           const neededMin = cell.getMinimumSize( orientation );
           if ( neededMin > currentMin ) {
@@ -180,7 +187,7 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
       } ) ).length ) {
         const totalGrow = _.sum( growableLines.map( line => line.grow ) );
         const amountToGrow = Math.min(
-          _.min( growableLines.map( line => ( line.max - line.size ) / line.grow ) ),
+          Math.min( ...growableLines.map( line => ( line.max - line.size ) / line.grow ) ),
           sizeRemaining / totalGrow
         );
 
@@ -201,8 +208,8 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
       cells.forEach( cell => {
         const cellIndexPosition = cell.position.get( orientation );
         const cellSize = cell.size.get( orientation );
-        const cellLines = cell.getIndices( orientation ).map( index => lineMap.get( index ) );
-        const firstColumn = lineMap.get( cellIndexPosition );
+        const cellLines = cell.getIndices( orientation ).map( index => lineMap.get( index )! );
+        const firstColumn = lineMap.get( cellIndexPosition )!;
         const cellSpacings = lineSpacings.slice( cellIndexPosition, cellIndexPosition + cellSize - 1 );
         const cellAvailableSize = _.sum( cellLines.map( line => line.size ) ) + _.sum( cellSpacings );
         const cellMinimumSize = cell.getMinimumSize( orientation );
@@ -210,7 +217,7 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
 
         const align = cell.getEffectiveAlign( orientation );
 
-        if ( align === GridConfigurable.Align.STRETCH ) {
+        if ( align === GridConfigurableAlign.STRETCH ) {
           cell.attemptPreferredSize( orientation, cellAvailableSize );
         }
         else {
@@ -221,8 +228,8 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
         const cellBounds = cell.getCellBounds();
         assert && assert( cellBounds.isFinite() );
 
-        cell.lastAvailableBounds[ boundsMinMap[ orientation ] ] = cellPosition;
-        cell.lastAvailableBounds[ boundsMaxMap[ orientation ] ] = cellPosition + cellAvailableSize;
+        cell.lastAvailableBounds[ orientation.minCoordinate ] = cellPosition;
+        cell.lastAvailableBounds[ orientation.maxCoordinate ] = cellPosition + cellAvailableSize;
         cell.lastUsedBounds.set( cellBounds );
 
         layoutBounds[ minField ] = Math.min( layoutBounds[ minField ], cellBounds[ minField ] );
@@ -236,21 +243,11 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
     this.finishedLayoutEmitter.emit();
   }
 
-  /**
-   * @public
-   *
-   * @returns {string}
-   */
-  get excludeInvisible() {
+  get excludeInvisible(): boolean {
     return this._excludeInvisible;
   }
 
-  /**
-   * @public
-   *
-   * @param {Orientation|string} value
-   */
-  set excludeInvisible( value ) {
+  set excludeInvisible( value: boolean ) {
     assert && assert( typeof value === 'boolean' );
 
     if ( this._excludeInvisible !== value ) {
@@ -260,23 +257,13 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
     }
   }
 
-  /**
-   * @public
-   *
-   * @returns {number|Array.<number>}
-   */
-  get spacing() {
+  get spacing(): number | number[] {
     assert && assert( this.xSpacing === this.ySpacing );
 
     return this.xSpacing;
   }
 
-  /**
-   * @public
-   *
-   * @param {number|Array.<number>} value
-   */
-  set spacing( value ) {
+  set spacing( value: number | number[] ) {
     assert && assert( ( typeof value === 'number' && isFinite( value ) && value >= 0 ) ||
                       ( Array.isArray( value ) && _.every( value, item => ( typeof item === 'number' && isFinite( item ) && item >= 0 ) ) ) );
 
@@ -288,21 +275,11 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
     }
   }
 
-  /**
-   * @public
-   *
-   * @returns {number|Array.<number>}
-   */
-  get xSpacing() {
+  get xSpacing(): number | number[] {
     return this._spacing.get( Orientation.HORIZONTAL );
   }
 
-  /**
-   * @public
-   *
-   * @param {number|Array.<number>} value
-   */
-  set xSpacing( value ) {
+  set xSpacing( value: number | number[] ) {
     assert && assert( ( typeof value === 'number' && isFinite( value ) && value >= 0 ) ||
                       ( Array.isArray( value ) && _.every( value, item => ( typeof item === 'number' && isFinite( item ) && item >= 0 ) ) ) );
 
@@ -313,21 +290,11 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
     }
   }
 
-  /**
-   * @public
-   *
-   * @returns {number|Array.<number>}
-   */
-  get ySpacing() {
+  get ySpacing(): number | number[] {
     return this._spacing.get( Orientation.VERTICAL );
   }
 
-  /**
-   * @public
-   *
-   * @param {number|Array.<number>} value
-   */
-  set ySpacing( value ) {
+  set ySpacing( value: number | number[] ) {
     assert && assert( ( typeof value === 'number' && isFinite( value ) && value >= 0 ) ||
                       ( Array.isArray( value ) && _.every( value, item => ( typeof item === 'number' && isFinite( item ) && item >= 0 ) ) ) );
 
@@ -338,12 +305,7 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
     }
   }
 
-  /**
-   * @public
-   *
-   * @param {GridCell} cell
-   */
-  addCell( cell ) {
+  addCell( cell: GridCell ) {
     assert && assert( cell instanceof GridCell );
     assert && assert( !this.cells.has( cell ) );
 
@@ -354,12 +316,7 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
     this.updateLayoutAutomatically();
   }
 
-  /**
-   * @public
-   *
-   * @param {GridCell} cell
-   */
-  removeCell( cell ) {
+  removeCell( cell: GridCell ) {
     assert && assert( cell instanceof GridCell );
     assert && assert( this.cells.has( cell ) );
 
@@ -372,8 +329,6 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
 
   /**
    * Releases references
-   * @public
-   * @override
    */
   dispose() {
     // In case they're from external sources
@@ -385,14 +340,8 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
     super.dispose();
   }
 
-  /**
-   * @public
-   *
-   * @param {Orientation} orientation
-   * @returns {Array.<number>}
-   */
-  getIndices( orientation ) {
-    const result = [];
+  getIndices( orientation: Orientation ): number[] {
+    const result: number[] = [];
 
     this.cells.forEach( cell => {
       result.push( ...cell.getIndices( orientation ) );
@@ -401,42 +350,21 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
     return _.sortedUniq( _.sortBy( result ) );
   }
 
-  /**
-   * @public
-   *
-   * @param {number} row
-   * @param {number} column
-   * @returns {GridCell|null}
-   */
-  getCell( row, column ) {
+  getCell( row: number, column: number ): GridCell | null {
     // TODO: If we have to do ridiculousness like this, just go back to array?
     return _.find( [ ...this.cells ], cell => cell.containsRow( row ) && cell.containsColumn( column ) ) || null;
   }
 
-  /**
-   * @public
-   *
-   * @param {Orientation} orientation
-   * @param {number} index
-   */
-  getCells( orientation, index ) {
+  getCells( orientation: Orientation, index: number ): GridCell[] {
     return _.filter( [ ...this.cells ], cell => cell.containsIndex( orientation, index ) );
   }
 
-  /**
-   * @public
-   *
-   * @param {Node} ancestorNode
-   * @param {Object} [options]
-   * @returns {GridConstraint}
-   */
-  static create( ancestorNode, options ) {
+  static create( ancestorNode: Node, options?: GridConstraintOptions ): GridConstraint {
     return new GridConstraint( ancestorNode, options );
   }
 }
 
-// @public {Array.<string>}
-GridConstraint.GRID_CONSTRAINT_OPTION_KEYS = GRID_CONSTRAINT_OPTION_KEYS;
-
 scenery.register( 'GridConstraint', GridConstraint );
 export default GridConstraint;
+export { GRID_CONSTRAINT_OPTION_KEYS };
+export type { GridConstraintOptions };

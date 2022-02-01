@@ -216,11 +216,15 @@ export { default as FlowConstraint, FLOW_CONSTRAINT_OPTION_KEYS } from './layout
 export type { FlowHorizontalJustifys, FlowVerticalJustifys, FlowConstraintOptions } from './layout/FlowConstraint.js';
 export { default as FlowBox } from './layout/FlowBox.js';
 export type { FlowBoxOptions } from './layout/FlowBox.js';
-export { default as GridConfigurable } from './layout/GridConfigurable.js';
+export { default as GridConfigurable, GRID_CONFIGURABLE_OPTION_KEYS } from './layout/GridConfigurable.js';
+export type { GridHorizontalAlign, GridVerticalAlign, GridConfigurableOptions } from './layout/GridConfigurable.js';
 export { default as GridCell } from './layout/GridCell.js';
+export type { GridCellOptions } from './layout/GridCell.js';
 export { default as GridLine } from './layout/GridLine.js';
-export { default as GridConstraint } from './layout/GridConstraint.js';
+export { default as GridConstraint, GRID_CONSTRAINT_OPTION_KEYS } from './layout/GridConstraint.js';
+export type { GridConstraintOptions } from './layout/GridConstraint.js';
 export { default as GridBox } from './layout/GridBox.js';
+export type { GridBoxOptions } from './layout/GridBox.js';
 export { default as GridBackgroundNode } from './layout/GridBackgroundNode.js';
 export { default as ManualConstraint } from './layout/ManualConstraint.js';
 

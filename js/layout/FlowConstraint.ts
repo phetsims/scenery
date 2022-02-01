@@ -258,7 +258,7 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
     // What is the largest of the minimum sizes of cells (e.g. if we're wrapping, this would be our minimum size)
     const maxMinimumCellSize: number = Math.max( ...cells.map( cell => cell.getMinimumSize( orientation ) || 0 ) );
 
-    assert && assert( maxMinimumCellSize <= ( preferredSize || Number.POSITIVE_INFINITY ), 'Will not be able to fit in this preferred size' );
+    assert && assert( maxMinimumCellSize - 1e-6 <= ( preferredSize || Number.POSITIVE_INFINITY ), 'Will not be able to fit in this preferred size' );
 
     // Wrapping all of the cells into lines
     const lines = [];
