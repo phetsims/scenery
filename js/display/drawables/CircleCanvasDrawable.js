@@ -7,7 +7,7 @@
  */
 
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import { scenery, CanvasSelfDrawable, PaintableStatelessDrawable } from '../../imports.js';
+import { scenery, CanvasSelfDrawable, PaintableStatelessDrawable, Node } from '../../imports.js'; // eslint-disable-line
 
 class CircleCanvasDrawable extends PaintableStatelessDrawable( CanvasSelfDrawable ) {
   /**
