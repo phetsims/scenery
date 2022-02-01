@@ -218,7 +218,7 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
     }
 
     set orientation( value: FlowOrientation ) {
-      assert && assert( value === 'horizontal' || value !== 'vertical' );
+      assert && assert( value === 'horizontal' || value === 'vertical' );
 
       const enumOrientation = value === 'horizontal' ? Orientation.HORIZONTAL : Orientation.VERTICAL;
 
