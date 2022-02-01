@@ -99,6 +99,7 @@ export type { AlignBoxOptions } from './nodes/AlignBox.js';
 export { default as AlignGroup } from './nodes/AlignGroup.js';
 export type { AlignGroupOptions } from './nodes/AlignGroup.js';
 export { default as CanvasNode } from './nodes/CanvasNode.js';
+export type { CanvasNodeOptions } from './nodes/CanvasNode.js';
 export { default as Circle } from './nodes/Circle.js';
 export type { CircleOptions } from './nodes/Circle.js';
 export { default as DOM } from './nodes/DOM.js';
@@ -108,6 +109,7 @@ export { default as Rectangle } from './nodes/Rectangle.js';
 export type { RectangleOptions } from './nodes/Rectangle.js';
 export { default as Sprites } from './nodes/Sprites.js';
 export { default as WebGLNode } from './nodes/WebGLNode.js';
+export type { WebGLNodeOptions } from './nodes/WebGLNode.js';
 
 export { default as LayoutBox } from './nodes/LayoutBox.js';
 export { default as HBox } from './nodes/HBox.js';

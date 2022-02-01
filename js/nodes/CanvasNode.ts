@@ -10,56 +10,53 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import Bounds2 from '../../../dot/js/Bounds2.js';
+import Matrix3 from '../../../dot/js/Matrix3.js';
+import Vector2 from '../../../dot/js/Vector2.js';
 import Shape from '../../../kite/js/Shape.js';
-import { scenery, Node, Renderer, CanvasNodeDrawable } from '../imports.js';
+import { scenery, Node, Renderer, CanvasNodeDrawable, NodeOptions, CanvasContextWrapper, Instance, CanvasSelfDrawable } from '../imports.js';
 
-class CanvasNode extends Node {
-  /**
-   * @public
-   *
-   * @param {Object} [options] - Can contain Node's options, and/or CanvasNode options (e.g. canvasBounds)
-   */
-  constructor( options ) {
+const CANVAS_NODE_OPTION_KEYS = [
+  'canvasBounds'
+];
+
+type CanvasNodeSelfOptions = {
+  canvasBounds?: Bounds2;
+};
+
+type CanvasNodeOptions = CanvasNodeSelfOptions & NodeOptions;
+
+abstract class CanvasNode extends Node {
+  constructor( options?: CanvasNodeOptions ) {
     super( options );
 
     // This shouldn't change, as we only support one renderer
     this.setRendererBitmask( Renderer.bitmaskCanvas );
   }
 
-
   /**
    * Sets the bounds that are used for layout/repainting.
-   * @public
    *
    * These bounds should always cover at least the area where the CanvasNode will draw in. If this is violated, this
    * node may be partially or completely invisible in Scenery's output.
-   *
-   * @param {Bounds2} selfBounds
    */
-  setCanvasBounds( selfBounds ) {
+  setCanvasBounds( selfBounds: Bounds2 ) {
     this.invalidateSelf( selfBounds );
   }
 
-  set canvasBounds( value ) { this.setCanvasBounds( value ); }
+  set canvasBounds( value: Bounds2 ) { this.setCanvasBounds( value ); }
 
   /**
    * Returns the previously-set canvasBounds, or Bounds2.NOTHING if it has not been set yet.
-   * @public
-   *
-   * @returns {Bounds2}
    */
-  getCanvasBounds() {
+  getCanvasBounds(): Bounds2 {
     return this.getSelfBounds();
   }
 
-  get canvasBounds() { return this.getCanvasBounds(); }
+  get canvasBounds(): Bounds2 { return this.getCanvasBounds(); }
 
   /**
    * Whether this Node itself is painted (displays something itself).
-   * @public
-   * @override
-   *
-   * @returns {boolean}
    */
   isPainted() {
     // Always true for CanvasNode
@@ -68,23 +65,16 @@ class CanvasNode extends Node {
 
   /**
    * Override paintCanvas with a faster version, since fillRect and drawRect don't affect the current default path.
-   * @public
-   * @abstract
    *
    * IMPORTANT NOTE: This function will be run from inside Scenery's Display.updateDisplay(), so it should not modify
    * or mutate any Scenery nodes (particularly anything that would cause something to be marked as needing a repaint).
    * Ideally, this function should have no outside effects other than painting to the Canvas provided.
-   *
-   * @param {CanvasRenderingContext2D} context
    */
-  paintCanvas( context ) {
-    throw new Error( 'CanvasNode needs paintCanvas implemented' );
-  }
+  abstract paintCanvas( context: CanvasRenderingContext2D ): void;
 
   /**
    * Should be called when this node needs to be repainted. When not called, Scenery assumes that this node does
    * NOT need to be repainted (although Scenery may repaint it due to other nodes needing to be repainted).
-   * @public
    *
    * This sets a "dirty" flag, so that it will be repainted the next time it would be displayed.
    */
@@ -98,50 +88,40 @@ class CanvasNode extends Node {
   /**
    * Draws the current Node's self representation, assuming the wrapper's Canvas context is already in the local
    * coordinate frame of this node.
-   * @protected
-   * @override
    *
-   * @param {CanvasContextWrapper} wrapper
-   * @param {Matrix3} matrix - The transformation matrix already applied to the context.
+   * @param wrapper
+   * @param matrix - The transformation matrix already applied to the context.
    */
-  canvasPaintSelf( wrapper, matrix ) {
+  protected canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
     this.paintCanvas( wrapper.context );
   }
 
   /**
    * Computes whether the provided point is "inside" (contained) in this Node's self content, or "outside".
-   * @public
    *
    * If CanvasNode subtypes want to support being picked or hit-tested, it should override this function.
    *
-   * @param {Vector2} point - Considered to be in the local coordinate frame
-   * @returns {boolean}
+   * @param point - Considered to be in the local coordinate frame
    */
-  containsPointSelf( point ) {
+  containsPointSelf( point: Vector2 ): boolean {
     return false;
   }
 
   /**
    * Returns a Shape that represents the area covered by containsPointSelf.
-   * @public
-   * @override
-   *
-   * @returns {Shape}
    */
-  getSelfShape() {
+  getSelfShape(): Shape {
     return new Shape();
   }
 
   /**
-   * Creates a Canvas drawable for this CanvasNode.
-   * @public (scenery-internal)
-   * @override
+   * Creates a Canvas drawable for this CanvasNode. (scenery-internal)
    *
-   * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
-   * @param {Instance} instance - Instance object that will be associated with the drawable
-   * @returns {CanvasSelfDrawable}
+   * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+   * @param instance - Instance object that will be associated with the drawable
    */
-  createCanvasDrawable( renderer, instance ) {
+  createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
+    // @ts-ignore
     return CanvasNodeDrawable.createFromPool( renderer, instance );
   }
 }
@@ -154,8 +134,9 @@ class CanvasNode extends Node {
  * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
  *       cases that may apply.
  */
-CanvasNode.prototype._mutatorKeys = [ 'canvasBounds' ].concat( Node.prototype._mutatorKeys );
+CanvasNode.prototype._mutatorKeys = CANVAS_NODE_OPTION_KEYS.concat( Node.prototype._mutatorKeys );
 
 scenery.register( 'CanvasNode', CanvasNode );
 
 export default CanvasNode;
+export type { CanvasNodeOptions };

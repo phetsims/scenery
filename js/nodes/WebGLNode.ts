@@ -11,15 +11,34 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
+import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
+import Vector2 from '../../../dot/js/Vector2.js';
 import Shape from '../../../kite/js/Shape.js';
-import { scenery, Utils, Node, Renderer, WebGLNodeDrawable } from '../imports.js';
+import { scenery, Utils, Node, Renderer, WebGLNodeDrawable, NodeOptions, CanvasContextWrapper, WebGLSelfDrawable, Instance } from '../imports.js';
 
 const WEBGL_NODE_OPTION_KEYS = [
   'canvasBounds' // {Bounds2} - Sets the available Canvas bounds that content will show up in. See setCanvasBounds()
 ];
 
-class WebGLNode extends Node {
+type WebGLNodeSelfOptions = {
+  canvasBounds?: Bounds2;
+};
+
+type WebGLNodeOptions = WebGLNodeSelfOptions & NodeOptions;
+
+type WebGLNodePainter = {
+  paint: ( modelViewMatrix: Matrix3, projectionMatrix: Matrix3 ) => 0 | 1;
+  dispose: () => void;
+};
+// NOTE: the `node` will be the `this` type, but there doesn't seem to be a good way to annotate that
+type WebGLNodePainterType = new ( gl: WebGLRenderingContext, node: never ) => WebGLNodePainter;
+
+abstract class WebGLNode extends Node {
+
+  // Used to create the painters
+  private painterType: WebGLNodePainterType;
+
   /**
    * @public
    *
@@ -43,11 +62,11 @@ class WebGLNode extends Node {
    * alpha. This means that if you want a color to look like (r,g,b,a), the value passed to gl_FragColor should be
    * (r/a,g/a,b/a,a).
    *
-   * @param {function} painterType - The type (constructor) for the painters that will be used for this node.
-   * @param {Object} [options] - WebGLNode-specific options are documented in LINE_OPTION_KEYS above, and can be
-   *                             provided along-side options for Node
+   * @param painterType - The type (constructor) for the painters that will be used for this node.
+   * @param [options] - WebGLNode-specific options are documented in LINE_OPTION_KEYS above, and can be
+   *                    provided along-side options for Node
    */
-  constructor( painterType, options ) {
+  constructor( painterType: WebGLNodePainterType, options?: WebGLNodeOptions ) {
     super( options );
 
     assert && assert( typeof painterType === 'function', 'Painter type now required by WebGLNode' );
@@ -55,49 +74,36 @@ class WebGLNode extends Node {
     // Only support rendering in WebGL
     this.setRendererBitmask( Renderer.bitmaskWebGL );
 
-    // @private {Function} - Used to create the painters
     this.painterType = painterType;
   }
 
   /**
    * Sets the bounds that are used for layout/repainting.
-   * @public
    *
    * These bounds should always cover at least the area where the WebGLNode will draw in. If this is violated, this
    * node may be partially or completely invisible in Scenery's output.
-   *
-   * @param {Bounds2} selfBounds
-   * @returns {WebGLNode} - For Chaining
    */
-  setCanvasBounds( selfBounds ) {
+  setCanvasBounds( selfBounds: Bounds2 ): this {
     this.invalidateSelf( selfBounds );
 
     return this;
   }
 
-  set canvasBounds( value ) { this.setCanvasBounds( value ); }
+  set canvasBounds( value: Bounds2 ) { this.setCanvasBounds( value ); }
 
   /**
    * Returns the previously-set canvasBounds, or Bounds2.NOTHING if it has not been set yet.
-   * @public
-   *
-   * @returns {Bounds2}
    */
-  getCanvasBounds() {
+  getCanvasBounds(): Bounds2 {
     return this.getSelfBounds();
   }
 
-  get canvasBounds() { return this.getCanvasBounds(); }
-
+  get canvasBounds(): Bounds2 { return this.getCanvasBounds(); }
 
   /**
    * Whether this Node itself is painted (displays something itself).
-   * @public
-   * @override
-   *
-   * @returns {boolean}
    */
-  isPainted() {
+  isPainted(): boolean {
     // Always true for WebGL nodes
     return true;
   }
@@ -105,7 +111,6 @@ class WebGLNode extends Node {
   /**
    * Should be called when this node needs to be repainted. When not called, Scenery assumes that this node does
    * NOT need to be repainted (although Scenery may repaint it due to other nodes needing to be repainted).
-   * @public
    *
    * This sets a "dirty" flag, so that it will be repainted the next time it would be displayed.
    */
@@ -118,51 +123,42 @@ class WebGLNode extends Node {
 
   /**
    * Computes whether the provided point is "inside" (contained) in this Node's self content, or "outside".
-   * @public
    *
    * If WebGLNode subtypes want to support being picked or hit-tested, it should override this function.
    *
-   * @param {Vector2} point - Considered to be in the local coordinate frame
+   * @param point - Considered to be in the local coordinate frame
    * @returns {boolean}
    */
-  containsPointSelf( point ) {
+  containsPointSelf( point: Vector2 ): boolean {
     return false;
   }
 
   /**
    * Returns a Shape that represents the area covered by containsPointSelf.
-   * @public
-   * @override
-   *
-   * @returns {Shape}
    */
-  getSelfShape() {
+  getSelfShape(): Shape {
     return new Shape();
   }
 
   /**
    * Draws the current Node's self representation, assuming the wrapper's Canvas context is already in the local
-   * coordinate frame of this node.
-   * @protected
-   * @override
+   * coordinate frame of this node. (scenery-internal)
    *
-   * @param {CanvasContextWrapper} wrapper
-   * @param {Matrix3} matrix - The transformation matrix already applied to the context.
+   * @param wrapper
+   * @param matrix - The transformation matrix already applied to the context.
    */
-  canvasPaintSelf( wrapper, matrix ) {
+  canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
     // TODO: see https://github.com/phetsims/scenery/issues/308
     assert && assert( 'unimplemented: canvasPaintSelf in WebGLNode' );
   }
 
   /**
    * Renders this Node only (its self) into the Canvas wrapper, in its local coordinate frame.
-   * @public
-   * @override
    *
-   * @param {CanvasContextWrapper} wrapper
-   * @param {Matrix3} matrix - The current transformation matrix associated with the wrapper
+   * @param wrapper
+   * @param matrix - The current transformation matrix associated with the wrapper
    */
-  renderToCanvasSelf( wrapper, matrix ) {
+  renderToCanvasSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
     const width = wrapper.canvas.width;
     const height = wrapper.canvas.height;
 
@@ -174,7 +170,7 @@ class WebGLNode extends Node {
       antialias: true,
       preserveDrawingBuffer: true // so we can get the data and render it to the Canvas
     };
-    const gl = scratchCanvas.getContext( 'webgl', contextOptions ) || scratchCanvas.getContext( 'experimental-webgl', contextOptions );
+    const gl = ( scratchCanvas.getContext( 'webgl', contextOptions ) || scratchCanvas.getContext( 'experimental-webgl', contextOptions ) ) as WebGLRenderingContext;
     Utils.applyWebGLContextDefaults( gl ); // blending, etc.
 
     const projectionMatrix = new Matrix3().rowMajor(
@@ -184,11 +180,12 @@ class WebGLNode extends Node {
     gl.viewport( 0, 0, width, height );
 
     const PainterType = this.painterType;
-    const painter = new PainterType( gl, this );
+    const painter = new PainterType( gl, this as never );
 
     painter.paint( matrix, projectionMatrix );
     painter.dispose();
 
+    // @ts-ignore TODO: pooling
     projectionMatrix.freeToPool();
 
     gl.flush();
@@ -199,21 +196,25 @@ class WebGLNode extends Node {
   }
 
   /**
-   * Creates a WebGL drawable for this WebGLNode.
-   * @public (scenery-internal)
-   * @override
+   * Creates a WebGL drawable for this WebGLNode. (scenery-internal)
    *
-   * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
-   * @param {Instance} instance - Instance object that will be associated with the drawable
-   * @returns {WebGLSelfDrawable}
+   * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+   * @param instance - Instance object that will be associated with the drawable
    */
-  createWebGLDrawable( renderer, instance ) {
+  createWebGLDrawable( renderer: number, instance: Instance ): WebGLSelfDrawable {
+    // @ts-ignore TODO: pooling
     return WebGLNodeDrawable.createFromPool( renderer, instance );
   }
+
+  // Return code from painter.paint() when nothing was painted to the WebGL context.
+  static PAINTED_NOTHING: 0;
+
+  // Return code from painter.paint() when something was painted to the WebGL context.
+  static PAINTED_SOMETHING: 1;
 }
 
 /**
- * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
+ * {Array.<string>} - String keys for all the allowed options that will be set by node.mutate( options ), in the
  * order they will be evaluated in.
  * @public
  *
@@ -221,16 +222,11 @@ class WebGLNode extends Node {
  *       cases that may apply.
  */
 WebGLNode.prototype._mutatorKeys = WEBGL_NODE_OPTION_KEYS.concat( Node.prototype._mutatorKeys );
-/**
- * @public {number} - Return code from painter.paint() when nothing was painted to the WebGL context.
- */
-WebGLNode.PAINTED_NOTHING = 0;
 
-/**
- * @public {number} - Return code from painter.paint() when something was painted to the WebGL context.
- */
+WebGLNode.PAINTED_NOTHING = 0;
 WebGLNode.PAINTED_SOMETHING = 1;
 
 scenery.register( 'WebGLNode', WebGLNode );
 
 export default WebGLNode;
+export type { WebGLNodeOptions };
