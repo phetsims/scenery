@@ -26,7 +26,8 @@ class LayoutConstraint {
 
   private _listenedNodes: Set<Node>;
 
-  protected finishedLayoutEmitter: TinyEmitter<[]>;
+  // scenery-internal
+  finishedLayoutEmitter: TinyEmitter<[]>;
 
   constructor( ancestorNode: Node ) {
     assert && assert( ancestorNode instanceof Node );

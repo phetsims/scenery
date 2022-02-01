@@ -226,6 +226,7 @@ export type { GridConstraintOptions } from './layout/GridConstraint.js';
 export { default as GridBox } from './layout/GridBox.js';
 export type { GridBoxOptions } from './layout/GridBox.js';
 export { default as GridBackgroundNode } from './layout/GridBackgroundNode.js';
+export type { GridBackgroundNodeOptions } from './layout/GridBackgroundNode.js';
 export { default as ManualConstraint } from './layout/ManualConstraint.js';
 
 export { default as RichText } from './nodes/RichText.js';

@@ -41,7 +41,9 @@ type GridConstraintOptions = GridConstraintSelfOptions & GridConfigurableOptions
 class GridConstraint extends GridConfigurable( LayoutConstraint ) {
 
   private cells: Set<GridCell>;
-  private displayedCells: GridCell[];
+
+  // scenery-internal
+  displayedCells: GridCell[];
 
   // Looked up by index
   private displayedLines: OrientationPair<Map<number, GridLine>>;

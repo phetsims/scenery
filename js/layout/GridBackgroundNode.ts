@@ -7,35 +7,38 @@
  */
 
 import merge from '../../../phet-core/js/merge.js';
-import { scenery, Node, Rectangle, GridConstraint } from '../imports.js';
+import { scenery, Node, Rectangle, GridConstraint, GridCell, NodeOptions } from '../imports.js';
+
+type CreateCellBackground = ( gridCell: GridCell ) => Node | null;
+type GridBackgroundNodeSelfOptions = {
+  createCellBackground: CreateCellBackground;
+};
+
+type GridBackgroundNodeOptions = GridBackgroundNodeSelfOptions & NodeOptions;
 
 class GridBackgroundNode extends Node {
-  /**
-   * @param {GridConstraint} constraint
-   * @param {Object} [options]
-   */
-  constructor( constraint, options ) {
+
+  private constraint: GridConstraint;
+  private createCellBackground: CreateCellBackground;
+  private layoutListener: () => void;
+
+  constructor( constraint: GridConstraint, providedOptions?: GridBackgroundNodeOptions ) {
     assert && assert( constraint instanceof GridConstraint );
 
-    options = merge( {
+    const options = merge( {
       // {function(GridCell):Node|null}
-      createCellBackground: cell => {
+      createCellBackground: ( cell: GridCell ) => {
         return Rectangle.bounds( cell.lastAvailableBounds, {
           fill: 'white',
           stroke: 'black'
         } );
       }
-    }, options );
+    }, providedOptions );
 
     super();
 
-    // @private {GridConstraint}
     this.constraint = constraint;
-
-    // @private {function(GridCell):Node|null}
     this.createCellBackground = options.createCellBackground;
-
-    // @private {function}
     this.layoutListener = this.update.bind( this );
     this.constraint.finishedLayoutEmitter.addListener( this.layoutListener );
     this.update();
@@ -43,17 +46,12 @@ class GridBackgroundNode extends Node {
     this.mutate( options );
   }
 
-  /**
-   * @private
-   */
-  update() {
-    this.children = this.constraint.displayedCells.map( this.createCellBackground ).filter( _.identity );
+  private update() {
+    this.children = this.constraint.displayedCells.map( this.createCellBackground ).filter( _.identity ) as Node[];
   }
 
   /**
    * Releases references
-   * @public
-   * @override
    */
   dispose() {
     this.constraint.finishedLayoutEmitter.removeListener( this.layoutListener );
@@ -64,3 +62,4 @@ class GridBackgroundNode extends Node {
 
 scenery.register( 'GridBackgroundNode', GridBackgroundNode );
 export default GridBackgroundNode;
+export type { GridBackgroundNodeOptions };
