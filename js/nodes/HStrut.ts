@@ -7,20 +7,22 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { scenery, Spacer } from '../imports.js';
+import { scenery, Spacer, SpacerOptions } from '../imports.js';
+
+type HStrutOptions = SpacerOptions;
 
 class HStrut extends Spacer {
   /**
    * Creates a strut with x in the range [0,width] and y=0.
-   * @public
    *
-   * @param {number} width - Width of the strut
-   * @param {Object} [options] - Passed to Spacer/Node
+   * @param width - Width of the strut
+   * @param [options] - Passed to Spacer/Node
    */
-  constructor( width, options ) {
+  constructor( width: number, options?: HStrutOptions ) {
     super( width, 0, options );
   }
 }
 
 scenery.register( 'HStrut', HStrut );
 export default HStrut;
+export type { HStrutOptions };

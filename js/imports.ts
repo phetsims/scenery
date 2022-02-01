@@ -34,6 +34,7 @@ export { default as SceneImage } from './util/SceneImage.js';
 export { default as SpriteInstance } from './util/SpriteInstance.js';
 export { default as SpriteSheet } from './util/SpriteSheet.js';
 export { default as ShaderProgram } from './util/ShaderProgram.js';
+export type { ShaderProgramOptions } from './util/ShaderProgram.js';
 
 export { default as ColorProperty } from './util/ColorProperty.js';
 export { default as TextBounds } from './util/TextBounds.js';
@@ -119,8 +120,11 @@ export { default as Plane } from './nodes/Plane.js';
 
 export { default as Leaf } from './nodes/Leaf.js';
 export { default as Spacer } from './nodes/Spacer.js';
+export type { SpacerOptions } from './nodes/Spacer.js';
 export { default as HStrut } from './nodes/HStrut.js';
+export type { HStrutOptions } from './nodes/HStrut.js';
 export { default as VStrut } from './nodes/VStrut.js';
+export type { VStrutOptions } from './nodes/VStrut.js';
 
 export { default as SpriteImage } from './util/SpriteImage.js';
 export { default as Sprite } from './util/Sprite.js';

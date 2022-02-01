@@ -9,20 +9,40 @@
 import merge from '../../../phet-core/js/merge.js';
 import { scenery, Utils } from '../imports.js';
 
-class ShaderProgram {
-  /**
-   * @param {WebGL2RenderingContext} gl
-   * @param {*string} vertexSource
-   * @param {*string} fragmentSource
-   * @param {Object} [options]
-   */
-  constructor( gl, vertexSource, fragmentSource, options ) {
-    options = merge( {
-      attributes: [], // {Array.<string>} (vertex) attribute names in the shader source
-      uniforms: [] // {Array.<string>} uniform names in the shader source
-    }, options );
+type ShaderProgramOptions = {
+  // (vertex) attribute names in the shader source
+  attributes?: string[],
 
-    // @private store parameters so that we can recreate the shader program on context loss
+  // uniform names in the shader source
+  uniforms?: string[]
+};
+
+class ShaderProgram {
+
+  // store parameters so that we can recreate the shader program on context loss
+  private vertexSource: string;
+  private fragmentSource: string;
+  private attributeNames: string[];
+  private uniformNames: string[];
+
+  private gl!: WebGLRenderingContext;
+  private used!: boolean;
+  private program!: WebGLProgram;
+  private vertexShader!: WebGLShader;
+  private fragmentShader!: WebGLShader;
+
+  uniformLocations!: { [ key: string ]: WebGLUniformLocation };
+  attributeLocations!: { [ key: string ]: number };
+  activeAttributes!: { [ key: string ]: boolean }; // whether they are enabled
+
+  private isInitialized!: boolean;
+
+  constructor( gl: WebGLRenderingContext, vertexSource: string, fragmentSource: string, providedOptions?: ShaderProgramOptions ) {
+    const options = merge( {
+      attributes: [],
+      uniforms: []
+    }, providedOptions );
+
     this.vertexSource = vertexSource;
     this.fragmentSource = fragmentSource;
     this.attributeNames = options.attributes;
@@ -33,11 +53,8 @@ class ShaderProgram {
 
   /**
    * Initializes (or reinitializes) the WebGL state and uniform/attribute references.
-   * @public
-   *
-   * @param {WebGL2RenderingContext} gl
    */
-  initialize( gl ) {
+  initialize( gl: WebGLRenderingContext ) {
     // @private {WebGL2RenderingContext}
     this.gl = gl; // TODO: create them with separate contexts
 
@@ -45,7 +62,7 @@ class ShaderProgram {
     this.used = false;
 
     // @private {WebGLProgram}
-    this.program = this.gl.createProgram();
+    this.program = this.gl.createProgram()!;
 
     // @private {WebGLShader}
     this.vertexShader = Utils.createShader( this.gl, this.vertexSource, this.gl.VERTEX_SHADER );
@@ -83,7 +100,7 @@ class ShaderProgram {
       this.activeAttributes[ attributeName ] = true; // default to enabled
     } );
     _.each( this.uniformNames, uniformName => {
-      this.uniformLocations[ uniformName ] = this.gl.getUniformLocation( this.program, uniformName );
+      this.uniformLocations[ uniformName ] = this.gl.getUniformLocation( this.program, uniformName )!;
     } );
 
     // @private {boolean}
@@ -108,12 +125,7 @@ class ShaderProgram {
     } );
   }
 
-  /**
-   * @public
-   *
-   * @param {string} attributeName
-   */
-  activateAttribute( attributeName ) {
+  activateAttribute( attributeName: string ) {
     // guarded so we don't enable twice
     if ( !this.activeAttributes[ attributeName ] ) {
       this.activeAttributes[ attributeName ] = true;
@@ -124,18 +136,10 @@ class ShaderProgram {
     }
   }
 
-  /**
-   * @public
-   *
-   * @param {string} attributeName
-   */
-  enableVertexAttribArray( attributeName ) {
+  enableVertexAttribArray( attributeName: string ) {
     this.gl.enableVertexAttribArray( this.attributeLocations[ attributeName ] );
   }
 
-  /**
-   * @public
-   */
   unuse() {
     if ( !this.used ) { return; }
 
@@ -148,21 +152,11 @@ class ShaderProgram {
     } );
   }
 
-  /**
-   * @public
-   *
-   * @param {string} attributeName
-   */
-  disableVertexAttribArray( attributeName ) {
+  disableVertexAttribArray( attributeName: string ) {
     this.gl.disableVertexAttribArray( this.attributeLocations[ attributeName ] );
   }
 
-  /**
-   * @public
-   *
-   * @param {string} attributeName
-   */
-  deactivateAttribute( attributeName ) {
+  deactivateAttribute( attributeName: string ) {
     // guarded so we don't disable twice
     if ( this.activeAttributes[ attributeName ] ) {
       this.activeAttributes[ attributeName ] = false;
@@ -175,7 +169,6 @@ class ShaderProgram {
 
   /**
    * Releases references
-   * @public
    */
   dispose() {
     this.gl.deleteProgram( this.program );
@@ -184,3 +177,4 @@ class ShaderProgram {
 
 scenery.register( 'ShaderProgram', ShaderProgram );
 export default ShaderProgram;
+export type { ShaderProgramOptions };

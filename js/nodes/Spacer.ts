@@ -7,19 +7,20 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import { scenery, Leaf, Node } from '../imports.js';
+import { scenery, Leaf, Node, NodeOptions } from '../imports.js';
+
+type SpacerOptions = NodeOptions
 
 class Spacer extends Node {
   /**
    * Creates a spacer taking up a rectangular area from x: [0,width] and y: [0,height]. Use x/y in options to control
    * its position.
-   * @public
    *
-   * @param {number} width - The width of the spacer
-   * @param {number} height - The height of the spacer
-   * @param {Object} [options] - Passed to Node
+   * @param width - The width of the spacer
+   * @param height - The height of the spacer
+   * @param [options] - Passed to Node
    */
-  constructor( width, height, options ) {
+  constructor( width: number, height: number, options?: SpacerOptions ) {
     assert && assert( typeof width === 'number' && isFinite( width ), 'width should be a finite number' );
     assert && assert( typeof height === 'number' && isFinite( height ), 'height should be a finite number' );
 
@@ -36,3 +37,4 @@ Leaf.mixInto( Spacer ); // prevent children from being added, since we're overri
 
 scenery.register( 'Spacer', Spacer );
 export default Spacer;
+export type { SpacerOptions };
