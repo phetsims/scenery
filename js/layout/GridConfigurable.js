@@ -1,7 +1,7 @@
 // Copyright 2021-2022, University of Colorado Boulder
 
 /**
- * TODO: doc
+ * Mixin for storing options that can affect each cell.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */

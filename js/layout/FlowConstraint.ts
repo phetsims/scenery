@@ -9,12 +9,14 @@
 import Property from '../../../axon/js/Property.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import EnumerationDeprecated from '../../../phet-core/js/EnumerationDeprecated.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import merge from '../../../phet-core/js/merge.js';
 import mutate from '../../../phet-core/js/mutate.js';
-import { scenery, Node, Divider, FlowCell, FlowConfigurable, LayoutConstraint } from '../imports.js';
+import { scenery, Node, Divider, FlowCell, FlowConfigurable, LayoutConstraint, FLOW_CONFIGURABLE_OPTION_KEYS, FlowConfigurableOptions, FlowConfigurableAlign } from '../imports.js';
+import EnumerationValue from '../../../phet-core/js/EnumerationValue.js';
+import Enumeration from '../../../phet-core/js/Enumeration.js';
+import IProperty from '../../../axon/js/IProperty.js';
 
 const FLOW_CONSTRAINT_OPTION_KEYS = [
   'spacing',
@@ -22,45 +24,158 @@ const FLOW_CONSTRAINT_OPTION_KEYS = [
   'justify',
   'wrap',
   'excludeInvisible'
-].concat( FlowConfigurable.FLOW_CONFIGURABLE_OPTION_KEYS );
+].concat( FLOW_CONFIGURABLE_OPTION_KEYS );
+
+const flowHorizontalJustifys = [ 'left', 'right', 'center', 'spaceBetween', 'spaceAround', 'spaceEvenly' ] as const;
+const flowVerticalJustifys = [ 'top', 'bottom', 'center', 'spaceBetween', 'spaceAround', 'spaceEvenly' ] as const;
+
+type FlowHorizontalJustifys = typeof flowHorizontalJustifys[number];
+type FlowVerticalJustifys = typeof flowVerticalJustifys[number];
+
+const getAllowedJustifys = ( orientation: Orientation ): readonly string[] => {
+  return orientation === Orientation.HORIZONTAL ? flowHorizontalJustifys : flowVerticalJustifys;
+};
+
+type SpaceRemainingFunctionFactory = ( spaceRemaining: number, lineLength: number ) => ( ( index: number ) => number );
+
+class FlowConstraintJustify extends EnumerationValue {
+  static START = new FlowConstraintJustify(
+    () => () => 0,
+    'left', 'top'
+  );
+
+  static END = new FlowConstraintJustify(
+    spaceRemaining => index => index === 0 ? spaceRemaining : 0,
+    'right', 'bottom'
+  );
+
+  static CENTER = new FlowConstraintJustify(
+    spaceRemaining => index => index === 0 ? spaceRemaining / 2 : 0,
+    'center', 'center'
+  );
+
+  static SPACE_BETWEEN = new FlowConstraintJustify(
+    ( spaceRemaining, lineLength ) => index => index !== 0 ? ( spaceRemaining / ( lineLength - 1 ) ) : 0,
+    'spaceBetween', 'spaceBetween'
+  );
+
+  static SPACE_AROUND = new FlowConstraintJustify(
+    ( spaceRemaining, lineLength ) => index => ( index !== 0 ? 2 : 1 ) * spaceRemaining / ( 2 * lineLength ),
+    'spaceAround', 'spaceAround'
+  );
+
+  static SPACE_EVENLY = new FlowConstraintJustify(
+    ( spaceRemaining, lineLength ) => index => spaceRemaining / ( lineLength + 1 ),
+    'spaceEvenly', 'spaceEvenly'
+  );
+
+  horizontal: FlowHorizontalJustifys;
+  vertical: FlowVerticalJustifys;
+  spacingFunctionFactory: SpaceRemainingFunctionFactory;
+
+  constructor( spacingFunctionFactory: SpaceRemainingFunctionFactory, horizontal: FlowHorizontalJustifys, vertical: FlowVerticalJustifys ) {
+    super();
+
+    this.spacingFunctionFactory = spacingFunctionFactory;
+    this.horizontal = horizontal;
+    this.vertical = vertical;
+  }
+
+  static enumeration = new Enumeration( FlowConstraintJustify, {
+    phetioDocumentation: 'Justify for FlowConstraint'
+  } );
+}
+
+const horizontalJustifyMap = {
+  left: FlowConstraintJustify.START,
+  right: FlowConstraintJustify.END,
+  center: FlowConstraintJustify.CENTER,
+  spaceBetween: FlowConstraintJustify.SPACE_BETWEEN,
+  spaceAround: FlowConstraintJustify.SPACE_AROUND,
+  spaceEvenly: FlowConstraintJustify.SPACE_EVENLY
+};
+const verticalJustifyMap = {
+  top: FlowConstraintJustify.START,
+  bottom: FlowConstraintJustify.END,
+  center: FlowConstraintJustify.CENTER,
+  spaceBetween: FlowConstraintJustify.SPACE_BETWEEN,
+  spaceAround: FlowConstraintJustify.SPACE_AROUND,
+  spaceEvenly: FlowConstraintJustify.SPACE_EVENLY
+};
+const justifyToInternal = ( orientation: Orientation, key: FlowHorizontalJustifys | FlowVerticalJustifys ): FlowConstraintJustify => {
+  if ( orientation === Orientation.HORIZONTAL ) {
+    assert && assert( horizontalJustifyMap[ key as 'left' | 'right' | 'center' | 'spaceBetween' | 'spaceAround' | 'spaceEvenly' ] );
+
+    return horizontalJustifyMap[ key as 'left' | 'right' | 'center' | 'spaceBetween' | 'spaceAround' | 'spaceEvenly' ];
+  }
+  else {
+    assert && assert( verticalJustifyMap[ key as 'top' | 'bottom' | 'center' | 'spaceBetween' | 'spaceAround' | 'spaceEvenly' ] );
+
+    return verticalJustifyMap[ key as 'top' | 'bottom' | 'center' | 'spaceBetween' | 'spaceAround' | 'spaceEvenly' ];
+  }
+};
+const internalToJustify = ( orientation: Orientation, justify: FlowConstraintJustify ): FlowHorizontalJustifys | FlowVerticalJustifys => {
+  if ( orientation === Orientation.HORIZONTAL ) {
+    return justify.horizontal;
+  }
+  else {
+    return justify.vertical;
+  }
+};
+
+type FlowConstraintSelfOptions = {
+  spacing?: number;
+  lineSpacing?: number;
+  justify?: FlowHorizontalJustifys | FlowVerticalJustifys;
+  wrap?: boolean;
+  excludeInvisible?: boolean;
+  preferredWidthProperty: IProperty<number | null>;
+  preferredHeightProperty: IProperty<number | null>;
+  minimumWidthProperty: IProperty<number | null>;
+  minimumHeightProperty: IProperty<number | null>;
+};
+
+type FlowConstraintOptions = FlowConstraintSelfOptions & FlowConfigurableOptions;
 
 // TODO: Have LayoutBox use this when we're ready
 class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
-  /**
-   * @param {Node} ancestorNode
-   * @param {Object} [options]
-   */
-  constructor( ancestorNode, options ) {
+
+  private cells: FlowCell[];
+  private _justify: FlowConstraintJustify;
+  private _wrap: boolean;
+  private _spacing: number;
+  private _lineSpacing: number;
+  private _excludeInvisible: boolean;
+
+  preferredWidthProperty: IProperty<number | null>;
+  preferredHeightProperty: IProperty<number | null>;
+  minimumWidthProperty: IProperty<number | null>;
+  minimumHeightProperty: IProperty<number | null>;
+
+  // Reports out the used layout bounds (may be larger than actual bounds, since it
+  // will include margins, etc.)
+  layoutBoundsProperty: IProperty<Bounds2>;
+
+  constructor( ancestorNode: Node, options?: FlowConstraintOptions ) {
     assert && assert( ancestorNode instanceof Node );
 
     options = merge( {
       // As options, so we could hook into a Node's preferred/minimum sizes if desired
-      preferredWidthProperty: new TinyProperty( null ),
-      preferredHeightProperty: new TinyProperty( null ),
-      minimumWidthProperty: new TinyProperty( null ),
-      minimumHeightProperty: new TinyProperty( null )
+      preferredWidthProperty: new TinyProperty<number | null>( null ),
+      preferredHeightProperty: new TinyProperty<number | null>( null ),
+      minimumWidthProperty: new TinyProperty<number | null>( null ),
+      minimumHeightProperty: new TinyProperty<number | null>( null )
     }, options );
 
     super( ancestorNode );
 
-    // @private {Array.<FlowCell>}
     this.cells = [];
-
-    // @private {FlowConstraint.Justify}
-    this._justify = FlowConstraint.Justify.SPACE_BETWEEN; // TODO: decide on a good default here
-
-    // @private {boolean}
+    this._justify = FlowConstraintJustify.SPACE_BETWEEN; // TODO: decide on a good default here
     this._wrap = false;
-
-    // @private {number}
     this._spacing = 0;
     this._lineSpacing = 0;
-
-    // @private {boolean}
     this._excludeInvisible = true;
 
-    // @public {Property.<Bounds2>} - Reports out the used layout bounds (may be larger than actual bounds, since it
-    // will include margins, etc.)
     this.layoutBoundsProperty = new Property( Bounds2.NOTHING, {
       useDeepEquality: true
     } );
@@ -88,18 +203,14 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
     this.preferredHeightProperty.lazyLink( this._updateLayoutListener );
   }
 
-  /**
-   * @protected
-   * @override
-   */
-  layout() {
+  protected layout() {
     super.layout();
 
     // The orientation along the laid-out lines
-    const orientation = this.orientation;
+    const orientation = this._orientation;
 
     // The perpendicular orientation, where alignment is handled
-    const oppositeOrientation = this.orientation.opposite;
+    const oppositeOrientation = this._orientation.opposite;
 
     assert && assert( _.every( this.cells, cell => !cell.node.isDisposed ) );
 
@@ -130,7 +241,7 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
       }
     }
 
-    const cells = this.cells.filter( cell => {
+    const cells: FlowCell[] = this.cells.filter( cell => {
       // TODO: Also don't lay out disconnected nodes!!!!
       return cell.node.bounds.isValid() && ( !this._excludeInvisible || cell.node.visible );
     } );
@@ -145,18 +256,18 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
     const preferredOppositeSize = orientation === Orientation.HORIZONTAL ? this.preferredHeightProperty.value : this.preferredWidthProperty.value;
 
     // What is the largest of the minimum sizes of cells (e.g. if we're wrapping, this would be our minimum size)
-    const maxMinimumCellSize = _.max( cells.map( cell => cell.getMinimumSize( orientation ) ) );
+    const maxMinimumCellSize: number = Math.max( ...cells.map( cell => cell.getMinimumSize( orientation ) || 0 ) );
 
-    assert && assert( maxMinimumCellSize <= preferredSize || Number.POSITIVE_INFINITY, 'Will not be able to fit in this preferred size' );
+    assert && assert( maxMinimumCellSize <= ( preferredSize || Number.POSITIVE_INFINITY ), 'Will not be able to fit in this preferred size' );
 
     // Wrapping all of the cells into lines
     const lines = [];
     if ( this.wrap ) {
-      let currentLine = [];
+      let currentLine: FlowCell[] = [];
       let availableSpace = preferredSize || Number.POSITIVE_INFINITY;
 
       while ( cells.length ) {
-        const cell = cells.shift();
+        const cell = cells.shift()!;
         const cellSpace = cell.getMinimumSize( orientation );
 
         if ( currentLine.length === 0 ) {
@@ -185,7 +296,7 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
     }
 
     // {number} - Given our wrapped lines, what is our minimum size we could take up?
-    const minimumCurrentSize = _.max( lines.map( line => {
+    const minimumCurrentSize = Math.max( ...lines.map( line => {
       return ( line.length - 1 ) * this.spacing + _.sum( line.map( cell => cell.getMinimumSize( orientation ) ) );
     } ) );
     const minimumCurrentOppositeSize = _.sum( lines.map( line => {
@@ -228,14 +339,14 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
       } ) ).length ) {
         const totalGrow = _.sum( growableCells.map( cell => cell.grow ) );
         const amountToGrow = Math.min(
-          _.min( growableCells.map( cell => ( cell.getMaximumSize( orientation ) - cell._pendingSize ) / cell.grow ) ),
+          Math.min( ...growableCells.map( cell => ( cell.getMaximumSize( orientation ) - cell._pendingSize ) / ( cell.grow || 0 ) ) ),
           spaceRemaining / totalGrow
         );
 
         assert && assert( amountToGrow > 1e-11 );
 
         growableCells.forEach( cell => {
-          cell._pendingSize += amountToGrow * cell.grow;
+          cell._pendingSize += amountToGrow * cell.grow!;
         } );
         spaceRemaining -= amountToGrow * totalGrow;
       }
@@ -243,16 +354,7 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
       // Update preferred dimension based on the pending size
       line.forEach( cell => cell.attemptPreferredSize( orientation, cell._pendingSize ) );
 
-      // TODO: optimize, OMG, but is this generally a good idea?
-      // TODO: Only I would write this code in this mental state?
-      const spacingFunction = {
-        [ FlowConstraint.Justify.START ]: index => 0,
-        [ FlowConstraint.Justify.END ]: index => index === 0 ? spaceRemaining : 0,
-        [ FlowConstraint.Justify.CENTER ]: index => index === 0 ? spaceRemaining / 2 : 0,
-        [ FlowConstraint.Justify.SPACE_BETWEEN ]: index => index !== 0 ? ( spaceRemaining / ( line.length - 1 ) ) : 0,
-        [ FlowConstraint.Justify.SPACE_AROUND ]: index => ( index !== 0 ? 2 : 1 ) * spaceRemaining / ( 2 * line.length ),
-        [ FlowConstraint.Justify.SPACE_EVENLY ]: index => spaceRemaining / ( line.length + 1 )
-      }[ this._justify ];
+      const spacingFunction = this._justify.spacingFunctionFactory( spaceRemaining, line.length );
 
       let position = 0;
 
@@ -270,31 +372,25 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
     // Secondary-direction layout
     let secondaryPosition = 0;
     lines.forEach( line => {
-      const maximumSize = _.max( line.map( cell => cell.getMinimumSize( oppositeOrientation ) ) );
+      const maximumSize = Math.max( ...line.map( cell => cell.getMinimumSize( oppositeOrientation ) || 0 ) );
 
       line.forEach( cell => {
         const align = cell.effectiveAlign;
         const size = cell.getMinimumSize( oppositeOrientation );
 
-        if ( align === FlowConfigurable.Align.STRETCH ) {
+        if ( align === FlowConfigurableAlign.STRETCH ) {
           cell.attemptPreferredSize( oppositeOrientation, maximumSize );
           cell.positionStart( oppositeOrientation, secondaryPosition );
         }
         else {
           cell.attemptPreferredSize( oppositeOrientation, size );
 
-          if ( align === FlowConfigurable.Align.ORIGIN ) {
+          if ( align === FlowConfigurableAlign.ORIGIN ) {
             // TODO: handle layout bounds
             cell.positionOrigin( oppositeOrientation, secondaryPosition );
           }
           else {
-            // TODO: optimize
-            const padRatio = {
-              [ FlowConfigurable.Align.START ]: 0,
-              [ FlowConfigurable.Align.CENTER ]: 0.5,
-              [ FlowConfigurable.Align.END ]: 1
-            }[ align ];
-            cell.positionStart( oppositeOrientation, secondaryPosition + ( maximumSize - size ) * padRatio );
+            cell.positionStart( oppositeOrientation, secondaryPosition + ( maximumSize - size ) * align.padRatio );
           }
         }
 
@@ -335,55 +431,35 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
     this.finishedLayoutEmitter.emit();
   }
 
-  /**
-   * @public
-   *
-   * @returns {string}
-   */
-  get justify() {
-    const result = justifyInverseMap[ this.orientation ][ this._justify ];
+  get justify(): FlowHorizontalJustifys | FlowVerticalJustifys {
+    const result = internalToJustify( this._orientation, this._justify );
 
-    assert && assert( justifyAllowedValuesMap[ this.orientation ].includes( result ) );
+    assert && assert( getAllowedJustifys( this._orientation ).includes( result ) );
 
     return result;
   }
 
-  /**
-   * @public
-   *
-   * @param {FlowConstraint.Justify|string} value
-   */
-  set justify( value ) {
-    assert && assert( justifyAllowedValuesMap[ this._orientation ].includes( value ),
-      `justify ${value} not supported, with the orientation ${this._orientation}, the valid values are ${justifyAllowedValuesMap[ this._orientation ]}` );
+  set justify( value: FlowHorizontalJustifys | FlowVerticalJustifys ) {
+    assert && assert( getAllowedJustifys( this._orientation ).includes( value ),
+      `justify ${value} not supported, with the orientation ${this._orientation}, the valid values are ${getAllowedJustifys( this._orientation )}` );
 
     // remapping align values to an independent set, so they aren't orientation-dependent
-    value = justifyMap[ this._orientation ][ value ];
+    const mappedValue = justifyToInternal( this._orientation, value );
 
-    assert && assert( FlowConstraint.Justify.includes( value ) );
+    assert && assert( mappedValue instanceof FlowConstraintJustify );
 
-    if ( this._justify !== value ) {
-      this._justify = value;
+    if ( this._justify !== mappedValue ) {
+      this._justify = mappedValue;
 
       this.updateLayoutAutomatically();
     }
   }
 
-  /**
-   * @public
-   *
-   * @returns {number}
-   */
-  get wrap() {
+  get wrap(): boolean {
     return this._wrap;
   }
 
-  /**
-   * @public
-   *
-   * @param {number} value
-   */
-  set wrap( value ) {
+  set wrap( value: boolean ) {
     assert && assert( typeof value === 'boolean' );
 
     if ( this._wrap !== value ) {
@@ -393,21 +469,11 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
     }
   }
 
-  /**
-   * @public
-   *
-   * @returns {number}
-   */
-  get spacing() {
+  get spacing(): number {
     return this._spacing;
   }
 
-  /**
-   * @public
-   *
-   * @param {number} value
-   */
-  set spacing( value ) {
+  set spacing( value: number ) {
     assert && assert( typeof value === 'number' && isFinite( value ) && value >= 0 );
 
     if ( this._spacing !== value ) {
@@ -417,21 +483,11 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
     }
   }
 
-  /**
-   * @public
-   *
-   * @returns {number}
-   */
-  get lineSpacing() {
+  get lineSpacing(): number {
     return this._lineSpacing;
   }
 
-  /**
-   * @public
-   *
-   * @param {number} value
-   */
-  set lineSpacing( value ) {
+  set lineSpacing( value: number ) {
     assert && assert( typeof value === 'number' && isFinite( value ) && value >= 0 );
 
     if ( this._lineSpacing !== value ) {
@@ -441,21 +497,11 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
     }
   }
 
-  /**
-   * @public
-   *
-   * @returns {string}
-   */
-  get excludeInvisible() {
+  get excludeInvisible(): boolean {
     return this._excludeInvisible;
   }
 
-  /**
-   * @public
-   *
-   * @param {Orientation|string} value
-   */
-  set excludeInvisible( value ) {
+  set excludeInvisible( value: boolean ) {
     assert && assert( typeof value === 'boolean' );
 
     if ( this._excludeInvisible !== value ) {
@@ -465,13 +511,7 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
     }
   }
 
-  /**
-   * @public
-   *
-   * @param {number} index
-   * @param {FlowCell} cell
-   */
-  insertCell( index, cell ) {
+  insertCell( index: number, cell: FlowCell ) {
     assert && assert( typeof index === 'number' );
     assert && assert( index >= 0 );
     assert && assert( index <= this.cells.length );
@@ -487,12 +527,7 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
     this.updateLayoutAutomatically();
   }
 
-  /**
-   * @public
-   *
-   * @param {FlowCell} cell
-   */
-  removeCell( cell ) {
+  removeCell( cell: FlowCell ) {
     assert && assert( cell instanceof FlowCell );
     assert && assert( _.includes( this.cells, cell ) );
 
@@ -503,14 +538,7 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
     this.updateLayoutAutomatically();
   }
 
-  /**
-   * @public
-   *
-   * @param {Array.<FlowCell>} cells
-   * @param {number} minChangeIndex
-   * @param {number} maxChangeIndex
-   */
-  reorderCells( cells, minChangeIndex, maxChangeIndex ) {
+  reorderCells( cells: FlowCell[], minChangeIndex: number, maxChangeIndex: number ) {
     // TODO: assertions for this!!! So many things could go wrong here
 
     this.cells.splice( minChangeIndex, maxChangeIndex - minChangeIndex + 1, ...cells );
@@ -520,8 +548,6 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
 
   /**
    * Releases references
-   * @public
-   * @override
    */
   dispose() {
     // In case they're from external sources
@@ -533,69 +559,12 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
     super.dispose();
   }
 
-  /**
-   * @public
-   *
-   * @param {Node} ancestorNode
-   * @param {Object} [options]
-   * @returns {FlowConstraint}
-   */
-  static create( ancestorNode, options ) {
+  static create( ancestorNode: Node, options?: FlowConstraintOptions ): FlowConstraint {
     return new FlowConstraint( ancestorNode, options );
   }
 }
 
-FlowConstraint.Justify = EnumerationDeprecated.byKeys( [
-  'START',
-  'END',
-  'CENTER',
-  'SPACE_BETWEEN',
-  'SPACE_AROUND',
-  'SPACE_EVENLY'
-] );
-const justifyMap = {
-  [ Orientation.HORIZONTAL ]: {
-    left: FlowConstraint.Justify.START,
-    right: FlowConstraint.Justify.END,
-    center: FlowConstraint.Justify.CENTER,
-    spaceBetween: FlowConstraint.Justify.SPACE_BETWEEN,
-    spaceAround: FlowConstraint.Justify.SPACE_AROUND,
-    spaceEvenly: FlowConstraint.Justify.SPACE_EVENLY
-  },
-  [ Orientation.VERTICAL ]: {
-    top: FlowConstraint.Justify.START,
-    bottom: FlowConstraint.Justify.END,
-    center: FlowConstraint.Justify.CENTER,
-    spaceBetween: FlowConstraint.Justify.SPACE_BETWEEN,
-    spaceAround: FlowConstraint.Justify.SPACE_AROUND,
-    spaceEvenly: FlowConstraint.Justify.SPACE_EVENLY
-  }
-};
-const justifyInverseMap = {
-  [ Orientation.HORIZONTAL ]: {
-    [ FlowConstraint.Justify.START ]: 'left',
-    [ FlowConstraint.Justify.END ]: 'right',
-    [ FlowConstraint.Justify.CENTER ]: 'center',
-    [ FlowConstraint.Justify.SPACE_BETWEEN ]: 'spaceBetween',
-    [ FlowConstraint.Justify.SPACE_AROUND ]: 'spaceAround',
-    [ FlowConstraint.Justify.SPACE_EVENLY ]: 'spaceEvenly'
-  },
-  [ Orientation.VERTICAL ]: {
-    [ FlowConstraint.Justify.START ]: 'top',
-    [ FlowConstraint.Justify.END ]: 'bottom',
-    [ FlowConstraint.Justify.CENTER ]: 'center',
-    [ FlowConstraint.Justify.SPACE_BETWEEN ]: 'spaceBetween',
-    [ FlowConstraint.Justify.SPACE_AROUND ]: 'spaceAround',
-    [ FlowConstraint.Justify.SPACE_EVENLY ]: 'spaceEvenly'
-  }
-};
-const justifyAllowedValuesMap = {
-  [ Orientation.HORIZONTAL ]: [ 'left', 'right', 'center', 'spaceBetween', 'spaceAround', 'spaceEvenly' ],
-  [ Orientation.VERTICAL ]: [ 'top', 'bottom', 'center', 'spaceBetween', 'spaceAround', 'spaceEvenly' ]
-};
-
-// @public {Array.<string>}
-FlowConstraint.FLOW_CONSTRAINT_OPTION_KEYS = FLOW_CONSTRAINT_OPTION_KEYS;
-
 scenery.register( 'FlowConstraint', FlowConstraint );
 export default FlowConstraint;
+export { FLOW_CONSTRAINT_OPTION_KEYS };
+export type { FlowHorizontalJustifys, FlowVerticalJustifys, FlowConstraintOptions };

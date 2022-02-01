@@ -1,40 +1,47 @@
 // Copyright 2021, University of Colorado Boulder
 
 /**
- * TODO: doc
+ * A vertical/horizontal flow-based layout container. TODO: more docs
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
 import merge from '../../../phet-core/js/merge.js';
-import { scenery, Node, FlowCell, FlowConstraint, WidthSizable, HeightSizable } from '../imports.js';
+import { scenery, Node, FlowCell, FlowConstraint, WidthSizable, HeightSizable, FLOW_CONSTRAINT_OPTION_KEYS, NodeOptions, FlowConstraintOptions, WidthSizableSelfOptions, HeightSizableSelfOptions, FlowConfigurableOptions, FlowOrientation, FlowHorizontalJustifys, FlowVerticalJustifys, FlowHorizontalAlign, FlowVerticalAlign } from '../imports.js';
 
 // FlowBox-specific options that can be passed in the constructor or mutate() call.
 const FLOWBOX_OPTION_KEYS = [
   'resize' // {boolean} - Whether we should update the layout when children change, see setResize for documentation
-].concat( FlowConstraint.FLOW_CONSTRAINT_OPTION_KEYS ).filter( key => key !== 'excludeInvisible' );
+].concat( FLOW_CONSTRAINT_OPTION_KEYS ).filter( key => key !== 'excludeInvisible' );
 
 const DEFAULT_OPTIONS = {
   orientation: 'horizontal',
   spacing: 0,
-  align: 'center',
-  resize: true
-};
+  align: 'center'
+} as const;
+
+type FlowBoxSelfOptions = {
+  excludeInvisibleChildrenFromBounds?: boolean,
+  resize?: boolean
+} & Omit<FlowConstraintOptions, 'excludeInvisible'>;
+
+type FlowBoxOptions = FlowBoxSelfOptions & NodeOptions & WidthSizableSelfOptions & HeightSizableSelfOptions;
 
 class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
-  /**
-   * @param {Object} [options] - FlowBox-specific options are documented in FLOWBOX_OPTION_KEYS above, and can be
-   *                             provided along-side options for Node.
-   */
-  constructor( options ) {
-    options = merge( {
+
+  private _constraint: FlowConstraint;
+  private _cellMap: Map<Node, FlowCell>;
+
+  constructor( providedOptions?: FlowBoxOptions ) {
+    // TODO: optionize
+    const options = merge( {
       // Allow dynamic layout by default, see https://github.com/phetsims/joist/issues/608
-      excludeInvisibleChildrenFromBounds: true
-    }, options );
+      excludeInvisibleChildrenFromBounds: true,
+      resize: true
+    }, providedOptions );
 
     super();
 
-    // @private {FlowConstraint}
     this._constraint = new FlowConstraint( this, {
       preferredWidthProperty: this.preferredWidthProperty,
       preferredHeightProperty: this.preferredHeightProperty,
@@ -44,12 +51,10 @@ class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
       orientation: DEFAULT_OPTIONS.orientation,
       spacing: DEFAULT_OPTIONS.spacing,
       align: DEFAULT_OPTIONS.align,
-      resize: DEFAULT_OPTIONS.resize,
       excludeInvisible: false // Should be handled by the options mutate above
     } );
 
-    // @private {Map.<Node,FlowCell>}
-    this._cellMap = new Map();
+    this._cellMap = new Map<Node, FlowCell>();
 
     this.childInsertedEmitter.addListener( this.onFlowBoxChildInserted.bind( this ) );
     this.childRemovedEmitter.addListener( this.onFlowBoxChildRemoved.bind( this ) );
@@ -65,13 +70,7 @@ class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
     } );
   }
 
-  /**
-   * @public
-   * @override
-   *
-   * @param {boolean} excludeInvisibleChildrenFromBounds
-   */
-  setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds ) {
+  setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds: boolean ) {
     super.setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds );
 
     this._constraint.excludeInvisible = excludeInvisibleChildrenFromBounds;
@@ -79,13 +78,9 @@ class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
 
   /**
    * Called when a child is inserted.
-   * @private
-   *
-   * @param {Node} node
-   * @param {number} index
    */
-  onFlowBoxChildInserted( node, index ) {
-    const cell = new FlowCell( this._constraint, node, node.layoutOptions );
+  private onFlowBoxChildInserted( node: Node, index: number ) {
+    const cell = new FlowCell( this._constraint, node, node.layoutOptions as FlowConfigurableOptions );
     this._cellMap.set( node, cell );
 
     this._constraint.insertCell( index, cell );
@@ -93,13 +88,12 @@ class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
 
   /**
    * Called when a child is removed.
-   * @private
-   *
-   * @param {Node} node
    */
-  onFlowBoxChildRemoved( node ) {
+  private onFlowBoxChildRemoved( node: Node ) {
 
-    const cell = this._cellMap.get( node );
+    const cell = this._cellMap.get( node )!;
+    assert && assert( cell );
+
     this._cellMap.delete( node );
 
     this._constraint.removeCell( cell );
@@ -109,14 +103,10 @@ class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
 
   /**
    * Called when children are rearranged
-   * @private
-   *
-   * @param {number} minChangeIndex
-   * @param {number} maxChangeIndex
    */
-  onFlowBoxChildrenReordered( minChangeIndex, maxChangeIndex ) {
+  private onFlowBoxChildrenReordered( minChangeIndex: number, maxChangeIndex: number ) {
     this._constraint.reorderCells(
-      this._children.slice( minChangeIndex, maxChangeIndex + 1 ).map( node => this._cellMap.get( node ) ),
+      this._children.slice( minChangeIndex, maxChangeIndex + 1 ).map( node => this._cellMap.get( node )! ),
       minChangeIndex,
       maxChangeIndex
     );
@@ -124,25 +114,19 @@ class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
 
   /**
    * Called on change of children (child added, removed, order changed, etc.)
-   * @private
    */
-  onFlowBoxChildrenChanged() {
+  private onFlowBoxChildrenChanged() {
     this._constraint.updateLayoutAutomatically();
   }
 
   /**
    * Sets the children of the Node to be equivalent to the passed-in array of Nodes. Does this by removing all current
    * children, and adding in children from the array.
-   * @public
-   * @override
    *
    * Overridden so we can group together setChildren() and only update layout (a) at the end, and (b) if there
    * are changes.
-   *
-   * @param {Array.<Node>} children
-   * @returns {FlowBox} - Returns 'this' reference, for chaining
    */
-  setChildren( children ) {
+  setChildren( children: Node[] ): this {
     // If the layout is already locked, we need to bail and only call Node's setChildren.
     if ( this._constraint.isLocked ) {
       return super.setChildren( children );
@@ -164,365 +148,166 @@ class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
     return this;
   }
 
-  /**
-   * @public
-   *
-   * @param {Node} node
-   * @returns {FlowCell}
-   */
-  getCell( node ) {
-    return this._cellMap.get( node );
+  getCell( node: Node ): FlowCell {
+    const result = this._cellMap.get( node )!;
+    assert && assert( result );
+
+    return result;
   }
 
-  /**
-   * @public
-   *
-   * @returns {boolean}
-   */
-  get resize() {
+  get resize(): boolean {
     return this._constraint.enabled;
   }
 
-  /**
-   * @public
-   *
-   * @param {boolean} value
-   */
-  set resize( value ) {
+  set resize( value: boolean ) {
     this._constraint.enabled = value;
   }
 
-  /**
-   * @public
-   *
-   * @returns {Orientation}
-   */
-  get orientation() {
+  get orientation(): FlowOrientation {
     return this._constraint.orientation;
   }
 
-  /**
-   * @public
-   *
-   * @param {Orientation|string} value
-   */
-  set orientation( value ) {
+  set orientation( value: FlowOrientation ) {
     this._constraint.orientation = value;
   }
 
-  /**
-   * @public
-   *
-   * @returns {number}
-   */
-  get spacing() {
+  get spacing(): number {
     return this._constraint.spacing;
   }
 
-  /**
-   * @public
-   *
-   * @param {number} value
-   */
-  set spacing( value ) {
+  set spacing( value: number ) {
     this._constraint.spacing = value;
   }
 
-  /**
-   * @public
-   *
-   * @returns {number}
-   */
-  get lineSpacing() {
+  get lineSpacing(): number {
     return this._constraint.lineSpacing;
   }
 
-  /**
-   * @public
-   *
-   * @param {number} value
-   */
-  set lineSpacing( value ) {
+  set lineSpacing( value: number ) {
     this._constraint.lineSpacing = value;
   }
 
-  /**
-   * @public
-   *
-   * @returns {string}
-   */
-  get justify() {
+  get justify(): FlowHorizontalJustifys | FlowVerticalJustifys {
     return this._constraint.justify;
   }
 
-  /**
-   * @public
-   *
-   * @param {string} value
-   */
-  set justify( value ) {
+  set justify( value: FlowHorizontalJustifys | FlowVerticalJustifys ) {
     this._constraint.justify = value;
   }
 
-  /**
-   * @public
-   *
-   * @returns {boolean}
-   */
-  get wrap() {
+  get wrap(): boolean {
     return this._constraint.wrap;
   }
 
-  /**
-   * @public
-   *
-   * @param {boolean} value
-   */
-  set wrap( value ) {
+  set wrap( value: boolean ) {
     this._constraint.wrap = value;
   }
 
-  /**
-   * @public
-   *
-   * Horizontal flow values: 'top', 'bottom', 'center', 'origin', 'stretch'
-   * Vertical flow values: 'left', 'right', 'center', 'origin', 'stretch'
-   *
-   * @returns {string}
-   */
-  get align() {
+  get align(): FlowHorizontalAlign | FlowVerticalAlign {
     assert && assert( typeof this._constraint.align === 'string' );
 
-    return this._constraint.align;
+    return this._constraint.align!;
   }
 
-  /**
-   * @public
-   *
-   * Horizontal flow values: 'top', 'bottom', 'center', 'origin', 'stretch'
-   * Vertical flow values: 'left', 'right', 'center', 'origin', 'stretch'
-   *
-   * @param {string} value
-   */
-  set align( value ) {
+  set align( value: FlowHorizontalAlign | FlowVerticalAlign ) {
     assert && assert( typeof value === 'string', 'FlowBox align should be a string' );
 
     this._constraint.align = value;
   }
 
-  /**
-   * @public
-   *
-   * @returns {number|null}
-   */
-  get grow() {
-    return this._constraint.grow;
+  get grow(): number {
+    return this._constraint.grow!;
   }
 
-  /**
-   * @public
-   *
-   * @param {number|null} value
-   */
-  set grow( value ) {
+  set grow( value: number ) {
     this._constraint.grow = value;
   }
 
-  /**
-   * @public
-   *
-   * @returns {number|null}
-   */
-  get margin() {
-    return this._constraint.margin;
+  get margin(): number {
+    return this._constraint.margin!;
   }
 
-  /**
-   * @public
-   *
-   * @param {number|null} value
-   */
-  set margin( value ) {
+  set margin( value: number ) {
     this._constraint.margin = value;
   }
 
-  /**
-   * @public
-   *
-   * @returns {number|null}
-   */
-  get xMargin() {
-    return this._constraint.xMargin;
+  get xMargin(): number {
+    return this._constraint.xMargin!;
   }
 
-  /**
-   * @public
-   *
-   * @param {number|null} value
-   */
-  set xMargin( value ) {
+  set xMargin( value: number ) {
     this._constraint.xMargin = value;
   }
 
-  /**
-   * @public
-   *
-   * @returns {number|null}
-   */
-  get yMargin() {
-    return this._constraint.yMargin;
+  get yMargin(): number {
+    return this._constraint.yMargin!;
   }
 
-  /**
-   * @public
-   *
-   * @param {number|null} value
-   */
-  set yMargin( value ) {
+  set yMargin( value: number ) {
     this._constraint.yMargin = value;
   }
 
-  /**
-   * @public
-   *
-   * @returns {number|null}
-   */
-  get leftMargin() {
-    return this._constraint.leftMargin;
+  get leftMargin(): number {
+    return this._constraint.leftMargin!;
   }
 
-  /**
-   * @public
-   *
-   * @param {number|null} value
-   */
-  set leftMargin( value ) {
+  set leftMargin( value: number ) {
     this._constraint.leftMargin = value;
   }
 
-  /**
-   * @public
-   *
-   * @returns {number|null}
-   */
-  get rightMargin() {
-    return this._constraint.rightMargin;
+  get rightMargin(): number {
+    return this._constraint.rightMargin!;
   }
 
-  /**
-   * @public
-   *
-   * @param {number|null} value
-   */
-  set rightMargin( value ) {
+  set rightMargin( value: number ) {
     this._constraint.rightMargin = value;
   }
 
-  /**
-   * @public
-   *
-   * @returns {number|null}
-   */
-  get topMargin() {
-    return this._constraint.topMargin;
+  get topMargin(): number {
+    return this._constraint.topMargin!;
   }
 
-  /**
-   * @public
-   *
-   * @param {number|null} value
-   */
-  set topMargin( value ) {
+  set topMargin( value: number ) {
     this._constraint.topMargin = value;
   }
 
-  /**
-   * @public
-   *
-   * @returns {number|null}
-   */
-  get bottomMargin() {
-    return this._constraint.bottomMargin;
+  get bottomMargin(): number {
+    return this._constraint.bottomMargin!;
   }
 
-  /**
-   * @public
-   *
-   * @param {number|null} value
-   */
-  set bottomMargin( value ) {
+  set bottomMargin( value: number ) {
     this._constraint.bottomMargin = value;
   }
 
-  /**
-   * @public
-   *
-   * @returns {number|null}
-   */
-  get minContentWidth() {
+  get minContentWidth(): number | null {
     return this._constraint.minContentWidth;
   }
 
-  /**
-   * @public
-   *
-   * @param {number|null} value
-   */
-  set minContentWidth( value ) {
+  set minContentWidth( value: number | null ) {
     this._constraint.minContentWidth = value;
   }
 
-  /**
-   * @public
-   *
-   * @returns {number|null}
-   */
-  get minContentHeight() {
+  get minContentHeight(): number | null {
     return this._constraint.minContentHeight;
   }
 
-  /**
-   * @public
-   *
-   * @param {number|null} value
-   */
-  set minContentHeight( value ) {
+  set minContentHeight( value: number | null ) {
     this._constraint.minContentHeight = value;
   }
 
-  /**
-   * @public
-   *
-   * @returns {number|null}
-   */
-  get maxContentWidth() {
+  get maxContentWidth(): number | null {
     return this._constraint.maxContentWidth;
   }
 
-  /**
-   * @public
-   *
-   * @param {number|null} value
-   */
-  set maxContentWidth( value ) {
+  set maxContentWidth( value: number | null ) {
     this._constraint.maxContentWidth = value;
   }
 
-  /**
-   * @public
-   *
-   * @returns {number|null}
-   */
-  get maxContentHeight() {
+  get maxContentHeight(): number | null {
     return this._constraint.maxContentHeight;
   }
 
-  /**
-   * @public
-   *
-   * @param {number|null} value
-   */
-  set maxContentHeight( value ) {
+  set maxContentHeight( value: number | null ) {
     this._constraint.maxContentHeight = value;
   }
 
@@ -534,9 +319,9 @@ class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
   dispose() {
     this._constraint.dispose();
 
-    this._cellMap.values().forEach( cell => {
+    for ( const cell of this._cellMap.values() ) {
       cell.dispose();
-    } );
+    }
 
     super.dispose();
   }
@@ -557,3 +342,4 @@ FlowBox.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
 scenery.register( 'FlowBox', FlowBox );
 export default FlowBox;
+export type { FlowBoxOptions };

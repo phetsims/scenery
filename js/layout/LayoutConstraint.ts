@@ -9,7 +9,7 @@
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import { scenery, LayoutProxy, Node, isWidthSizable, isHeightSizable } from '../imports.js';
 
-abstract class LayoutConstraint {
+class LayoutConstraint {
 
   // The Node in whose local coordinate frame our layout computations are done.
   private ancestorNode: Node;
@@ -116,9 +116,9 @@ abstract class LayoutConstraint {
   }
 
   /**
-   * Called when we attempt to automatically layout components.
+   * Called when we attempt to automatically layout components. (scenery-internal)
    */
-  protected updateLayoutAutomatically() {
+  updateLayoutAutomatically() {
     if ( this._enabled ) {
       this.updateLayout();
     }

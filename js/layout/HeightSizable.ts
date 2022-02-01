@@ -18,6 +18,11 @@ const HEIGHT_SIZABLE_OPTION_KEYS = [
   'minimumHeight'
 ];
 
+type HeightSizableSelfOptions = {
+  preferredHeight: number | null,
+  minimumHeight: number | null
+};
+
 const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   const clazz = class extends type {
 
@@ -53,7 +58,7 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
     }
 
     // Detection flag for this trait
-    get heightSizable(): boolean { return false; }
+    get heightSizable(): boolean { return true; }
   };
 
   // If we're extending into a Node type, include option keys
@@ -67,10 +72,12 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
 
 // Some typescript gymnastics to provide a user-defined type guard that treats something as HeightSizable
 const wrapper = () => HeightSizable( Node );
-const isHeightSizable = ( node: Node ): node is InstanceType<ReturnType<typeof wrapper>> => {
+type HeightSizableNode = InstanceType<ReturnType<typeof wrapper>>;
+const isHeightSizable = ( node: Node ): node is HeightSizableNode => {
   return node.heightSizable;
 };
 
 scenery.register( 'HeightSizable', HeightSizable );
 export default HeightSizable;
 export { isHeightSizable };
+export type { HeightSizableNode, HeightSizableSelfOptions };

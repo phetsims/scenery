@@ -18,6 +18,11 @@ const WIDTH_SIZABLE_OPTION_KEYS = [
   'minimumWidth'
 ];
 
+type WidthSizableSelfOptions = {
+  preferredWidth: number | null,
+  minimumWidth: number | null
+};
+
 const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   const clazz = class extends type {
 
@@ -53,7 +58,7 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
     }
 
     // Detection flag for this trait
-    get widthSizable(): boolean { return false; }
+    get widthSizable(): boolean { return true; }
   };
 
   // If we're extending into a Node type, include option keys
@@ -67,10 +72,12 @@ const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType )
 
 // Some typescript gymnastics to provide a user-defined type guard that treats something as widthSizable
 const wrapper = () => WidthSizable( Node );
-const isWidthSizable = ( node: Node ): node is InstanceType<ReturnType<typeof wrapper>> => {
+type WidthSizableNode = InstanceType<ReturnType<typeof wrapper>>;
+const isWidthSizable = ( node: Node ): node is WidthSizableNode => {
   return node.widthSizable;
 };
 
 scenery.register( 'WidthSizable', WidthSizable );
 export default WidthSizable;
 export { isWidthSizable };
+export type { WidthSizableNode, WidthSizableSelfOptions };
