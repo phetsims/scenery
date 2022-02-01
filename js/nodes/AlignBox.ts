@@ -21,7 +21,7 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import merge from '../../../phet-core/js/merge.js';
-import { scenery, Node, AlignGroup } from '../imports.js';
+import { scenery, Node, AlignGroup, NodeOptions } from '../imports.js';
 
 const ALIGNMENT_CONTAINER_OPTION_KEYS = [
   'alignBounds', // {Bounds2|null} - See setAlignBounds() for more documentation
@@ -37,45 +37,79 @@ const ALIGNMENT_CONTAINER_OPTION_KEYS = [
   'group' // {AlignGroup|null} - Share bounds with others, see setGroup() for more documentation
 ];
 
+type XAlign = 'left' | 'center' | 'right';
+type YAlign = 'top' | 'center' | 'bottom';
+
+type AlignBoxSelfOptions = {
+  alignBounds?: Bounds2 | null,
+  xAlign?: XAlign,
+  yAlign?: YAlign,
+  margin?: number,
+  xMargin?: number,
+  yMargin?: number,
+  leftMargin?: number,
+  rightMargin?: number,
+  topMargin?: number,
+  bottomMargin?: number,
+  'group'?: AlignGroup | null,
+};
+
+type AlignBoxOptions = AlignBoxSelfOptions & NodeOptions
+
 class AlignBox extends Node {
+
+  // Our actual content
+  private _content: Node;
+
+  // Controls the bounds in which content is aligned.
+  private _alignBounds: Bounds2 | null;
+
+  // How to align the content when the alignBounds are larger than our content with its margins.
+  private _xAlign: XAlign;
+  private _yAlign: YAlign;
+
+  // How much space should be on each side.
+  private _leftMargin: number;
+  private _rightMargin: number;
+  private _topMargin: number;
+  private _bottomMargin: number;
+
+  // If available, an AlignGroup that will control our alignBounds
+  private _group: AlignGroup | null;
+
+  // Callback for when bounds change (takes no arguments)
+  _contentBoundsListener = () => {};
+
+  // Used to prevent loops
+  private _layoutLock: boolean;
+
   /**
    * An individual container for an alignment group. Will maintain its size to match that of the group by overriding
    * its localBounds, and will position its content inside its localBounds by respecting its alignment and margins.
    * @public
    *
-   * @param {Node} content - Content to align inside of the alignBox
-   * @param {Object} [options] - AlignBox-specific options are documented in ALIGNMENT_CONTAINER_OPTION_KEYS
-   *                             above, and can be provided along-side options for Node
+   * @param content - Content to align inside of the alignBox
+   * @param [options] - AlignBox-specific options are documented in ALIGNMENT_CONTAINER_OPTION_KEYS
+   *                    above, and can be provided along-side options for Node
    */
-  constructor( content, options ) {
-    assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
-      'Extra prototype on Node options object is a code smell' );
+  constructor( content: Node, options?: AlignBoxOptions ) {
 
     super();
 
-    // @private {Node} - Our actual content
-    this._content = content;
+    assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
+      'Extra prototype on Node options object is a code smell' );
 
-    // @private {Bounds2|null} - Controls the bounds in which content is aligned.
+    this._content = content;
     this._alignBounds = null;
 
-    // @private {string} - How to align the content when the alignBounds are larger than our content with its margins.
     this._xAlign = 'center';
     this._yAlign = 'center';
-
-    // @private {number} - How much space should be on each side.
     this._leftMargin = 0;
     this._rightMargin = 0;
     this._topMargin = 0;
     this._bottomMargin = 0;
-
-    // @private {AlignGroup|null} - If available, an AlignGroup that will control our alignBounds
     this._group = null;
-
-    // @private {function} - Callback for when bounds change (takes no arguments)
     this._contentBoundsListener = this.invalidateAlignment.bind( this );
-
-    // @private {boolean} - Used to prevent loops
     this._layoutLock = false;
 
     // Will be removed by dispose()
@@ -88,7 +122,6 @@ class AlignBox extends Node {
 
   /**
    * Triggers recomputation of the alignment. Should be called if it needs to be refreshed.
-   * @public
    *
    * NOTE: alignBox.getBounds() will not trigger a bounds validation for our content, and thus WILL NOT trigger
    * layout. content.getBounds() should trigger it, but invalidateAligment() is the preferred method for forcing a
@@ -113,14 +146,10 @@ class AlignBox extends Node {
    * Sets the alignment bounds (the bounds in which our content will be aligned). If null, AlignBox will act
    * as if the alignment bounds have a left-top corner of (0,0) and with a width/height that fits the content and
    * bounds.
-   * @public
    *
    * NOTE: If the group is a valid AlignGroup, it will be responsible for setting the alignBounds.
-   *
-   * @param {Bounds2|null} alignBounds
-   * @returns {AlignBox} - For chaining
    */
-  setAlignBounds( alignBounds ) {
+  setAlignBounds( alignBounds: Bounds2 | null ): this {
     assert && assert( alignBounds === null || ( alignBounds instanceof Bounds2 && !alignBounds.isEmpty() && alignBounds.isFinite() ),
       'alignBounds should be a non-empty finite Bounds2' );
 
@@ -136,28 +165,21 @@ class AlignBox extends Node {
     return this;
   }
 
-  set alignBounds( value ) { this.setAlignBounds( value ); }
+  set alignBounds( value: Bounds2 | null ) { this.setAlignBounds( value ); }
 
   /**
    * Returns the current alignment bounds (if available, see setAlignBounds for details).
-   * @public
-   *
-   * @returns {Bounds2|null}
    */
-  getAlignBounds() {
+  getAlignBounds(): Bounds2 | null {
     return this._alignBounds;
   }
 
-  get alignBounds() { return this.getAlignBounds(); }
+  get alignBounds(): Bounds2 | null { return this.getAlignBounds(); }
 
   /**
    * Sets the attachment to an AlignGroup. When attached, our alignBounds will be controlled by the group.
-   * @public
-   *
-   * @param {AlignGroup|null} group
-   * @returns {AlignBox} - For chaining
    */
-  setGroup( group ) {
+  setGroup( group: AlignGroup | null ): this {
     assert && assert( group === null || group instanceof AlignGroup, 'group should be an AlignGroup' );
 
     if ( this._group !== group ) {
@@ -177,30 +199,21 @@ class AlignBox extends Node {
     return this;
   }
 
-  set group( value ) { this.setGroup( value ); }
+  set group( value: AlignGroup | null ) { this.setGroup( value ); }
 
   /**
    * Returns the attached alignment group (if one exists), or null otherwise.
-   * @public
-   *
-   * @returns {AlignGroup|null}
    */
-  getGroup() {
+  getGroup(): AlignGroup | null {
     return this._group;
   }
 
-  get group() { return this.getGroup(); }
+  get group(): AlignGroup | null { return this.getGroup(); }
 
   /**
    * Sets the horizontal alignment of this box.
-   * @public
-   *
-   * Available values are 'left', 'center', or 'right'.
-   *
-   * @param {string} xAlign
-   * @returns {AlignBox} - For chaining
    */
-  setXAlign( xAlign ) {
+  setXAlign( xAlign: XAlign ): this {
     assert && assert( xAlign === 'left' || xAlign === 'center' || xAlign === 'right',
       'xAlign should be one of: \'left\', \'center\', or \'right\'' );
 
@@ -214,30 +227,21 @@ class AlignBox extends Node {
     return this;
   }
 
-  set xAlign( value ) { this.setXAlign( value ); }
+  set xAlign( value: XAlign ) { this.setXAlign( value ); }
 
   /**
    * Returns the current horizontal alignment of this box.
-   * @public
-   *
-   * @returns {string} - See setXAlign for values.
    */
-  getXAlign() {
+  getXAlign(): XAlign {
     return this._xAlign;
   }
 
-  get xAlign() { return this.getXAlign(); }
+  get xAlign(): XAlign { return this.getXAlign(); }
 
   /**
    * Sets the vertical alignment of this box.
-   * @public
-   *
-   * Available values are 'top', 'center', or 'bottom'.
-   *
-   * @param {string} yAlign
-   * @returns {AlignBox} - For chaining
    */
-  setYAlign( yAlign ) {
+  setYAlign( yAlign: YAlign ): this {
     assert && assert( yAlign === 'top' || yAlign === 'center' || yAlign === 'bottom',
       'yAlign should be one of: \'top\', \'center\', or \'bottom\'' );
 
@@ -251,31 +255,24 @@ class AlignBox extends Node {
     return this;
   }
 
-  set yAlign( value ) { this.setYAlign( value ); }
+  set yAlign( value: YAlign ) { this.setYAlign( value ); }
 
   /**
    * Returns the current vertical alignment of this box.
-   * @public
-   *
-   * @returns {string} - See setYAlign for values.
    */
-  getYAlign() {
+  getYAlign(): YAlign {
     return this._yAlign;
   }
 
-  get yAlign() { return this.getYAlign(); }
+  get yAlign(): YAlign { return this.getYAlign(); }
 
   /**
    * Sets the margin of this box (setting margin values for all sides at once).
-   * @public
    *
    * This margin is the minimum amount of horizontal space that will exist between the content the sides of this
    * box.
-   *
-   * @param {number} margin
-   * @returns {AlignBox} - For chaining
    */
-  setMargin( margin ) {
+  setMargin( margin: number ): this {
     assert && assert( typeof margin === 'number' && isFinite( margin ) && margin >= 0,
       'margin should be a finite non-negative number' );
 
@@ -292,15 +289,12 @@ class AlignBox extends Node {
     return this;
   }
 
-  set margin( value ) { this.setMargin( value ); }
+  set margin( value: number ) { this.setMargin( value ); }
 
   /**
    * Returns the current margin of this box (assuming all margin values are the same).
-   * @public
-   *
-   * @returns {number} - See setMargin for more information.
    */
-  getMargin() {
+  getMargin(): number {
     assert && assert( this._leftMargin === this._rightMargin &&
     this._leftMargin === this._topMargin &&
     this._leftMargin === this._bottomMargin,
@@ -308,19 +302,15 @@ class AlignBox extends Node {
     return this._leftMargin;
   }
 
-  get margin() { return this.getMargin(); }
+  get margin(): number { return this.getMargin(); }
 
   /**
    * Sets the horizontal margin of this box (setting both left and right margins at once).
-   * @public
    *
    * This margin is the minimum amount of horizontal space that will exist between the content and the left and
    * right sides of this box.
-   *
-   * @param {number} xMargin
-   * @returns {AlignBox} - For chaining
    */
-  setXMargin( xMargin ) {
+  setXMargin( xMargin: number ): this {
     assert && assert( typeof xMargin === 'number' && isFinite( xMargin ) && xMargin >= 0,
       'xMargin should be a finite non-negative number' );
 
@@ -334,33 +324,26 @@ class AlignBox extends Node {
     return this;
   }
 
-  set xMargin( value ) { this.setXMargin( value ); }
+  set xMargin( value: number ) { this.setXMargin( value ); }
 
   /**
    * Returns the current horizontal margin of this box (assuming the left and right margins are the same).
-   * @public
-   *
-   * @returns {number} - See setXMargin for more information.
    */
-  getXMargin() {
+  getXMargin(): number {
     assert && assert( this._leftMargin === this._rightMargin,
       'Getting xMargin does not have a unique result if the left and right margins are different' );
     return this._leftMargin;
   }
 
-  get xMargin() { return this.getXMargin(); }
+  get xMargin(): number { return this.getXMargin(); }
 
   /**
    * Sets the vertical margin of this box (setting both top and bottom margins at once).
-   * @public
    *
    * This margin is the minimum amount of vertical space that will exist between the content and the top and
    * bottom sides of this box.
-   *
-   * @param {number} yMargin
-   * @returns {AlignBox} - For chaining
    */
-  setYMargin( yMargin ) {
+  setYMargin( yMargin: number ): this {
     assert && assert( typeof yMargin === 'number' && isFinite( yMargin ) && yMargin >= 0,
       'yMargin should be a finite non-negative number' );
 
@@ -374,33 +357,26 @@ class AlignBox extends Node {
     return this;
   }
 
-  set yMargin( value ) { this.setYMargin( value ); }
+  set yMargin( value: number ) { this.setYMargin( value ); }
 
   /**
    * Returns the current vertical margin of this box (assuming the top and bottom margins are the same).
-   * @public
-   *
-   * @returns {number} - See setYMargin for more information.
    */
-  getYMargin() {
+  getYMargin(): number {
     assert && assert( this._topMargin === this._bottomMargin,
       'Getting yMargin does not have a unique result if the top and bottom margins are different' );
     return this._topMargin;
   }
 
-  get yMargin() { return this.getYMargin(); }
+  get yMargin(): number { return this.getYMargin(); }
 
   /**
    * Sets the left margin of this box.
-   * @public
    *
    * This margin is the minimum amount of horizontal space that will exist between the content and the left side of
    * the box.
-   *
-   * @param {number} leftMargin
-   * @returns {AlignBox} - For chaining
    */
-  setLeftMargin( leftMargin ) {
+  setLeftMargin( leftMargin: number ): this {
     assert && assert( typeof leftMargin === 'number' && isFinite( leftMargin ) && leftMargin >= 0,
       'leftMargin should be a finite non-negative number' );
 
@@ -414,31 +390,24 @@ class AlignBox extends Node {
     return this;
   }
 
-  set leftMargin( value ) { this.setLeftMargin( value ); }
+  set leftMargin( value: number ) { this.setLeftMargin( value ); }
 
   /**
    * Returns the current left margin of this box.
-   * @public
-   *
-   * @returns {number} - See setLeftMargin for more information.
    */
-  getLeftMargin() {
+  getLeftMargin(): number {
     return this._leftMargin;
   }
 
-  get leftMargin() { return this.getLeftMargin(); }
+  get leftMargin(): number { return this.getLeftMargin(); }
 
   /**
    * Sets the right margin of this box.
-   * @public
    *
    * This margin is the minimum amount of horizontal space that will exist between the content and the right side of
    * the container.
-   *
-   * @param {number} rightMargin
-   * @returns {AlignBox} - For chaining
    */
-  setRightMargin( rightMargin ) {
+  setRightMargin( rightMargin: number ): this {
     assert && assert( typeof rightMargin === 'number' && isFinite( rightMargin ) && rightMargin >= 0,
       'rightMargin should be a finite non-negative number' );
 
@@ -452,31 +421,24 @@ class AlignBox extends Node {
     return this;
   }
 
-  set rightMargin( value ) { this.setRightMargin( value ); }
+  set rightMargin( value: number ) { this.setRightMargin( value ); }
 
   /**
    * Returns the current right margin of this box.
-   * @public
-   *
-   * @returns {number} - See setRightMargin for more information.
    */
-  getRightMargin() {
+  getRightMargin(): number {
     return this._rightMargin;
   }
 
-  get rightMargin() { return this.getRightMargin(); }
+  get rightMargin(): number { return this.getRightMargin(); }
 
   /**
    * Sets the top margin of this box.
-   * @public
    *
    * This margin is the minimum amount of vertical space that will exist between the content and the top side of the
    * container.
-   *
-   * @param {number} topMargin
-   * @returns {AlignBox} - For chaining
    */
-  setTopMargin( topMargin ) {
+  setTopMargin( topMargin: number ): this {
     assert && assert( typeof topMargin === 'number' && isFinite( topMargin ) && topMargin >= 0,
       'topMargin should be a finite non-negative number' );
 
@@ -490,31 +452,24 @@ class AlignBox extends Node {
     return this;
   }
 
-  set topMargin( value ) { this.setTopMargin( value ); }
+  set topMargin( value: number ) { this.setTopMargin( value ); }
 
   /**
    * Returns the current top margin of this box.
-   * @public
-   *
-   * @returns {number} - See setTopMargin for more information.
    */
-  getTopMargin() {
+  getTopMargin(): number {
     return this._topMargin;
   }
 
-  get topMargin() { return this.getTopMargin(); }
+  get topMargin(): number { return this.getTopMargin(); }
 
   /**
    * Sets the bottom margin of this box.
-   * @public
    *
    * This margin is the minimum amount of vertical space that will exist between the content and the bottom side of the
    * container.
-   *
-   * @param {number} bottomMargin
-   * @returns {AlignBox} - For chaining
    */
-  setBottomMargin( bottomMargin ) {
+  setBottomMargin( bottomMargin: number ): this {
     assert && assert( typeof bottomMargin === 'number' && isFinite( bottomMargin ) && bottomMargin >= 0,
       'bottomMargin should be a finite non-negative number' );
 
@@ -528,27 +483,21 @@ class AlignBox extends Node {
     return this;
   }
 
-  set bottomMargin( value ) { this.setBottomMargin( value ); }
+  set bottomMargin( value: number ) { this.setBottomMargin( value ); }
 
   /**
    * Returns the current bottom margin of this box.
-   * @public
-   *
-   * @returns {number} - See setBottomMargin for more information.
    */
-  getBottomMargin() {
+  getBottomMargin(): number {
     return this._bottomMargin;
   }
 
-  get bottomMargin() { return this.getBottomMargin(); }
+  get bottomMargin(): number { return this.getBottomMargin(); }
 
   /**
    * Returns the bounding box of this box's content. This will include any margins.
-   * @private
-   *
-   * @returns {Bounds2}
    */
-  getContentBounds() {
+  getContentBounds(): Bounds2 {
     sceneryLog && sceneryLog.AlignBox && sceneryLog.AlignBox( `AlignBox#${this.id} getContentBounds` );
     sceneryLog && sceneryLog.AlignBox && sceneryLog.push();
 
@@ -564,16 +513,15 @@ class AlignBox extends Node {
 
   /**
    * Conditionally updates a certain property of our content's positioning.
-   * @private
    *
    * Essentially does the following (but prevents infinite loops by not applying changes if the numbers are very
    * similar):
    * this._content[ propName ] = this.localBounds[ propName ] + offset;
    *
-   * @param {string} propName - A positional property on both Node and Bounds2, e.g. 'left'
-   * @param {number} offset - Offset to be applied to the localBounds location.
+   * @param propName - A positional property on both Node and Bounds2, e.g. 'left'
+   * @param offset - Offset to be applied to the localBounds location.
    */
-  updateProperty( propName, offset ) {
+  private updateProperty( propName: 'left' | 'right' | 'top' | 'bottom' | 'centerX' | 'centerY', offset: number ) {
     const currentValue = this._content[ propName ];
     const newValue = this.localBounds[ propName ] + offset;
 
@@ -585,9 +533,8 @@ class AlignBox extends Node {
 
   /**
    * Updates the layout of this alignment box.
-   * @private
    */
-  updateLayout() {
+  private updateLayout() {
     if ( this._layoutLock ) { return; }
     this._layoutLock = true;
 
@@ -642,7 +589,6 @@ class AlignBox extends Node {
 
   /**
    * Disposes this box, releasing listeners and any references to an AlignGroup
-   * @public
    */
   dispose() {
     // Remove our listener
@@ -668,3 +614,4 @@ AlignBox.prototype._mutatorKeys = ALIGNMENT_CONTAINER_OPTION_KEYS.concat( Node.p
 scenery.register( 'AlignBox', AlignBox );
 
 export default AlignBox;
+export type { AlignBoxOptions };

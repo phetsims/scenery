@@ -26,7 +26,7 @@ abstract class LayoutConstraint {
 
   private _listenedNodes: Set<Node>;
 
-  private finishedLayoutEmitter: TinyEmitter<[]>;
+  protected finishedLayoutEmitter: TinyEmitter<[]>;
 
   constructor( ancestorNode: Node ) {
     assert && assert( ancestorNode instanceof Node );
@@ -74,7 +74,7 @@ abstract class LayoutConstraint {
     this._listenedNodes.delete( node );
   }
 
-  layout(): void {
+  protected layout(): void {
 
   }
 

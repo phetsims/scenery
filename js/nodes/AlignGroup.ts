@@ -19,34 +19,56 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import IProperty from '../../../axon/js/IProperty.js';
 import NumberProperty from '../../../axon/js/NumberProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import merge from '../../../phet-core/js/merge.js';
+import optionize from '../../../phet-core/js/optionize.js';
 import { scenery, Node, AlignBox } from '../imports.js';
+import { AlignBoxOptions } from './AlignBox.js';
 
 let globalId = 1;
 
+type AlignGroupOptions = {
+  // Whether the boxes should have all matching widths (otherwise it fits to size)
+  matchHorizontal?: boolean,
+
+  // Whether the boxes should have all matching heights (otherwise it fits to size)
+  matchVertical?: boolean
+};
+
+const DEFAULT_OPTIONS = {
+  matchHorizontal: true,
+  matchVertical: true
+};
+
 class AlignGroup {
+
+  private _alignBoxes: AlignBox[];
+  private _matchHorizontal: boolean;
+  private _matchVertical: boolean;
+
+  // Gets locked when certain layout is performed.
+  private _resizeLock: boolean;
+
+  private _maxWidthProperty: NumberProperty;
+  private _maxHeightProperty: NumberProperty;
+  private id: number;
+
   /**
    * Creates an alignment group that can be composed of multiple boxes.
-   * @public
    *
    * Use createBox() to create alignment boxes. You can dispose() individual boxes, or call dispose() on this
    * group to dispose all of them.
    *
    * It is also possible to create AlignBox instances independently and assign their 'group' to this AlignGroup.
-   *
-   * @param {Object} [options]
    */
-  constructor( options ) {
-    assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
+  constructor( providedOptions?: AlignGroupOptions ) {
+    assert && assert( providedOptions === undefined || Object.getPrototypeOf( providedOptions ) === Object.prototype,
       'Extra prototype on options object is a code smell' );
 
-    options = merge( {
-      matchHorizontal: true, // {boolean} - Whether the boxes should have all matching widths (otherwise it fits to size)
-      matchVertical: true  // {boolean} - Whether the boxes should have all matching heights (otherwise it fits to size)
-    }, options );
+    const options = optionize<AlignGroupOptions, AlignGroupOptions>( {}, DEFAULT_OPTIONS, providedOptions );
 
     assert && assert( typeof options.matchHorizontal === 'boolean' );
     assert && assert( typeof options.matchVertical === 'boolean' );
@@ -75,61 +97,44 @@ class AlignGroup {
 
   /**
    * Returns the current maximum width of the grouped content.
-   * @public
-   *
-   * @returns {number} - Non-negative amount of width
    */
-  getMaxWidth() {
+  getMaxWidth(): number {
     return this._maxWidthProperty.value;
   }
 
-  get maxWidth() { return this.getMaxWidth(); }
+  get maxWidth(): number { return this.getMaxWidth(); }
 
   /**
    * Returns the Property holding the current maximum width of the grouped content.
-   * @public
-   *
-   * @returns {Property.<number>} - Property with a non-negative amount of width
    */
-  getMaxWidthProperty() {
+  getMaxWidthProperty(): IProperty<number> {
     return this._maxWidthProperty;
   }
 
-  get maxWidthProperty() { return this.getMaxWidthProperty(); }
+  get maxWidthProperty(): IProperty<number> { return this.getMaxWidthProperty(); }
 
   /**
    * Returns the current maximum height of the grouped content.
-   * @public
-   *
-   * @returns {number} - Non-negative amount of height
    */
-  getMaxHeight() {
+  getMaxHeight(): number {
     return this._maxHeightProperty.value;
   }
 
-  get maxHeight() { return this.getMaxHeight(); }
+  get maxHeight(): number { return this.getMaxHeight(); }
 
   /**
    * Returns the Property holding the current maximum height of the grouped content.
-   * @public
-   *
-   * @returns {Property.<number>} - Property with a non-negative amount of height
    */
-  getMaxHeightProperty() {
+  getMaxHeightProperty(): IProperty<number> {
     return this._maxHeightProperty;
   }
 
-  get maxHeightProperty() { return this.getMaxHeightProperty(); }
+  get maxHeightProperty(): IProperty<number> { return this.getMaxHeightProperty(); }
 
   /**
    * Creates an alignment box with the given content and options.
-   * @public
-   *
-   * @param {Node} content - Note that the content may be repositioned into place.
-   * @param {Object} [options] - See AlignBox's constructor below for specific alignment options (it will be passed
-   *                             through to the constructed AlignBox).
    */
-  createBox( content, options ) {
+  createBox( content: Node, options?: AlignBoxOptions ) {
     assert && assert( content instanceof Node );
 
     // Setting the group should call our addAlignBox()
@@ -141,12 +146,8 @@ class AlignGroup {
   /**
    * Sets whether the widths of the align boxes should all match. If false, each box will use its preferred width
    * (usually equal to the content width + horizontal margins).
-   * @public
-   *
-   * @param {boolean} matchHorizontal
-   * @returns {AlignGroup} - For chaining
    */
-  setMatchHorizontal( matchHorizontal ) {
+  setMatchHorizontal( matchHorizontal: boolean ): this {
     assert && assert( typeof matchHorizontal === 'boolean' );
 
     if ( this._matchHorizontal !== matchHorizontal ) {
@@ -159,29 +160,22 @@ class AlignGroup {
     return this;
   }
 
-  set matchHorizontal( value ) { this.setMatchHorizontal( value ); }
+  set matchHorizontal( value: boolean ) { this.setMatchHorizontal( value ); }
 
   /**
    * Returns whether boxes currently are horizontally matched. See setMatchHorizontal() for details.
-   * @public
-   *
-   * @returns {boolean}
    */
-  getMatchHorizontal() {
+  getMatchHorizontal(): boolean {
     return this._matchHorizontal;
   }
 
-  get matchHorizontal() { return this.getMatchHorizontal(); }
+  get matchHorizontal(): boolean { return this.getMatchHorizontal(); }
 
   /**
    * Sets whether the heights of the align boxes should all match. If false, each box will use its preferred height
    * (usually equal to the content height + vertical margins).
-   * @public
-   *
-   * @param {boolean} matchVertical
-   * @returns {AlignGroup} - For chaining
    */
-  setMatchVertical( matchVertical ) {
+  setMatchVertical( matchVertical: boolean ): this {
     assert && assert( typeof matchVertical === 'boolean' );
 
     if ( this._matchVertical !== matchVertical ) {
@@ -194,23 +188,19 @@ class AlignGroup {
     return this;
   }
 
-  set matchVertical( value ) { this.setMatchVertical( value ); }
+  set matchVertical( value: boolean ) { this.setMatchVertical( value ); }
 
   /**
    * Returns whether boxes currently are vertically matched. See setMatchVertical() for details.
-   * @public
-   *
-   * @returns {boolean}
    */
-  getMatchVertical() {
+  getMatchVertical(): boolean {
     return this._matchVertical;
   }
 
-  get matchVertical() { return this.getMatchVertical(); }
+  get matchVertical(): boolean { return this.getMatchVertical(); }
 
   /**
-   * Dispose all of the boxes.
-   * @public
+   * Dispose all the boxes.
    */
   dispose() {
     for ( let i = this._alignBoxes.length - 1; i >= 0; i-- ) {
@@ -220,7 +210,6 @@ class AlignGroup {
 
   /**
    * Updates the localBounds and alignment for each alignBox.
-   * @public
    *
    * NOTE: Calling this will usually not be necessary outside of Scenery, but this WILL trigger bounds revalidation
    *       for every alignBox, which can force the layout code to run.
@@ -275,13 +264,8 @@ class AlignGroup {
 
   /**
    * Sets a box's bounds based on our maximum dimensions.
-   * @private
-   *
-   * @param {AlignBox} alignBox
-   * @param {number} maxWidth
-   * @param {number} maxHeight
    */
-  setBoxBounds( alignBox, maxWidth, maxHeight ) {
+  private setBoxBounds( alignBox: AlignBox, maxWidth: number, maxHeight: number ) {
     let alignBounds;
 
     // If we match both dimensions, we don't have to inspect the box's preferred size
@@ -309,23 +293,17 @@ class AlignGroup {
   }
 
   /**
-   * Lets the group know that the alignBox has had its content resized. Called by the AlignBox
-   * @public (scenery-internal)
-   *
-   * @param {AlignBox} alignBox
+   * Lets the group know that the alignBox has had its content resized. Called by the AlignBox (scenery-internal)
    */
-  onAlignBoxResized( alignBox ) {
+  onAlignBoxResized( alignBox: AlignBox ) {
     // TODO: in the future, we could only update this specific alignBox if the others don't need updating.
     this.updateLayout();
   }
 
   /**
-   * Adds the AlignBox to the group
-   * @private
-   *
-   * @param {AlignBox} alignBox
+   * Adds the AlignBox to the group -- Used in AlignBox --- do NOT use in public code
    */
-  addAlignBox( alignBox ) {
+  addAlignBox( alignBox: AlignBox ) {
     this._alignBoxes.push( alignBox );
 
     // Trigger an update when a alignBox is added
@@ -333,12 +311,9 @@ class AlignGroup {
   }
 
   /**
-   * Removes the AlignBox from the group
-   * @public (scenery-internal)
-   *
-   * @param {AlignBox} alignBox
+   * Removes the AlignBox from the group (scenery-internal)
    */
-  removeAlignBox( alignBox ) {
+  removeAlignBox( alignBox: AlignBox ) {
     arrayRemove( this._alignBoxes, alignBox );
 
     // Trigger an update when a alignBox is removed
@@ -348,3 +323,4 @@ class AlignGroup {
 
 scenery.register( 'AlignGroup', AlignGroup );
 export default AlignGroup;
+export type { AlignGroupOptions };

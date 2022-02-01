@@ -6,32 +6,32 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import merge from '../../../phet-core/js/merge.js';
-import { scenery, Node, LayoutConstraint } from '../imports.js';
+import { scenery, Node, LayoutConstraint, LayoutProxy } from '../imports.js';
 
-class ManualConstraint extends LayoutConstraint {
-  /**
-   * @param {Node} ancestorNode
-   * @param {Array.<Node>} nodes
-   * @param {function(LayoutProxy+)} layoutCallback
-   * @param {Object} [options]
-   */
-  constructor( ancestorNode, nodes, layoutCallback, options ) {
+// Turns a tuple of things into a tuple of LayoutProxies
+type LayoutProxyMap<T> = {
+  [Property in keyof T]: LayoutProxy // eslint-disable-line
+};
+type LayoutCallback<T extends any[]> = ( ...args: LayoutProxyMap<T> ) => void;
+
+class ManualConstraint<T extends Node[]> extends LayoutConstraint {
+
+  private nodes: T;
+  private layoutCallback: LayoutCallback<T>;
+
+  // Minimizing garbage created
+  private proxyFactory: ( n: Node ) => LayoutProxy;
+
+  constructor( ancestorNode: Node, nodes: T, layoutCallback: LayoutCallback<T> ) {
 
     assert && assert( ancestorNode instanceof Node );
     assert && assert( Array.isArray( nodes ) && _.every( nodes, node => node instanceof Node ) );
     assert && assert( typeof layoutCallback === 'function' );
 
-    options = merge( {}, options );
-
     super( ancestorNode );
 
-    // @private
-    this.ancestorNode = ancestorNode;
     this.nodes = nodes;
     this.layoutCallback = layoutCallback;
-
-    // @private {function} - Minimizing garbage created
     this.proxyFactory = this.createLayoutProxy.bind( this );
 
     // Hook up to listen to these nodes
@@ -41,10 +41,6 @@ class ManualConstraint extends LayoutConstraint {
     this.updateLayout();
   }
 
-  /**
-   * @protected
-   * @override
-   */
   layout() {
     super.layout();
 
@@ -52,7 +48,7 @@ class ManualConstraint extends LayoutConstraint {
 
     const proxies = this.nodes.map( this.proxyFactory );
 
-    this.layoutCallback.apply( null, proxies );
+    this.layoutCallback.apply( null, proxies as LayoutProxyMap<T> );
 
     // Minimizing garbage created
     for ( let i = 0; i < proxies.length; i++ ) {
@@ -62,17 +58,8 @@ class ManualConstraint extends LayoutConstraint {
     this.finishedLayoutEmitter.emit();
   }
 
-  /**
-   * @public
-   *
-   * @param {Node} ancestorNode
-   * @param {Array.<Node>} nodes
-   * @param {function(LayoutProxy+)} layoutCallback
-   * @param {Object} [options]
-   * @returns {ManualConstraint}
-   */
-  static create( ancestorNode, nodes, layoutCallback, options ) {
-    return new ManualConstraint( ancestorNode, nodes, layoutCallback, options );
+  static create<T extends Node[]>( ancestorNode: Node, nodes: T, layoutCallback: LayoutCallback<T> ): ManualConstraint<T> {
+    return new ManualConstraint( ancestorNode, nodes, layoutCallback );
   }
 }
 

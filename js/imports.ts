@@ -95,7 +95,9 @@ export { default as Text } from './nodes/Text.js';
 export type { TextOptions } from './nodes/Text.js';
 
 export { default as AlignBox } from './nodes/AlignBox.js';
+export type { AlignBoxOptions } from './nodes/AlignBox.js';
 export { default as AlignGroup } from './nodes/AlignGroup.js';
+export type { AlignGroupOptions } from './nodes/AlignGroup.js';
 export { default as CanvasNode } from './nodes/CanvasNode.js';
 export { default as Circle } from './nodes/Circle.js';
 export { default as DOM } from './nodes/DOM.js';
