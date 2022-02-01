@@ -1,4 +1,4 @@
-// Copyright 2021, University of Colorado Boulder
+// Copyright 2022, University of Colorado Boulder
 
 /**
  * A stand-in for the layout-based fields of a Node, but where everything is done in the coordinate frame of the

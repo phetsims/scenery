@@ -1,4 +1,4 @@
-// Copyright 2021, University of Colorado Boulder
+// Copyright 2021-2022, University of Colorado Boulder
 
 /**
  * Provides a minimum and preferred width. The minimum width is set by the component, so that layout containers could

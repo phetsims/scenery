@@ -1,4 +1,4 @@
-// Copyright 2021, University of Colorado Boulder
+// Copyright 2022, University of Colorado Boulder
 
 /**
  * An AlignBox that syncs its alignBounds to a specific Bounds2 Property.
