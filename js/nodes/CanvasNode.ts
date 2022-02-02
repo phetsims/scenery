@@ -1,4 +1,4 @@
-// Copyright 2013-2021, University of Colorado Boulder
+// Copyright 2013-2022, University of Colorado Boulder
 
 /**
  * An abstract node (should be subtyped) that is drawn by user-provided custom Canvas code.
