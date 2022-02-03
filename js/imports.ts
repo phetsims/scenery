@@ -105,11 +105,13 @@ export type { CanvasNodeOptions } from './nodes/CanvasNode.js';
 export { default as Circle } from './nodes/Circle.js';
 export type { CircleOptions } from './nodes/Circle.js';
 export { default as DOM } from './nodes/DOM.js';
+export type { DOMOptions } from './nodes/DOM.js';
 export { default as Line } from './nodes/Line.js';
 export type { LineOptions } from './nodes/Line.js';
 export { default as Rectangle } from './nodes/Rectangle.js';
 export type { RectangleOptions } from './nodes/Rectangle.js';
 export { default as Sprites } from './nodes/Sprites.js';
+export type { SpritesOptions } from './nodes/Sprites.js';
 export { default as WebGLNode } from './nodes/WebGLNode.js';
 export type { WebGLNodeOptions } from './nodes/WebGLNode.js';
 
@@ -118,6 +120,7 @@ export { default as HBox } from './nodes/HBox.js';
 export { default as VBox } from './nodes/VBox.js';
 
 export { default as Plane } from './nodes/Plane.js';
+export type { PlaneOptions } from './nodes/Plane.js';
 
 export { default as Leaf } from './nodes/Leaf.js';
 export { default as Spacer } from './nodes/Spacer.js';

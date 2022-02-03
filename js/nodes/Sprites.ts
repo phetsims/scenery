@@ -196,3 +196,4 @@ Sprites.prototype._mutatorKeys = [ 'canvasBounds' ].concat( Node.prototype._muta
 
 scenery.register( 'Sprites', Sprites );
 export default Sprites;
+export type { SpritesOptions };

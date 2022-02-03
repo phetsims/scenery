@@ -172,6 +172,7 @@ import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import IProperty from '../../../axon/js/IProperty.js';
 import { ACCESSIBILITY_OPTION_KEYS, CanvasContextWrapper, CanvasSelfDrawable, Display, DOMSelfDrawable, Drawable, Features, Filter, IInputListener, ILayoutOptions, Image, ImageOptions, Instance, Mouse, ParallelDOM, ParallelDOMOptions, Picker, Pointer, Renderer, RendererSummary, scenery, serializeConnectedNodes, SVGSelfDrawable, Trail, WebGLSelfDrawable } from '../imports.js';
+import optionize from '../../../phet-core/js/optionize.js';
 
 let globalIdCounter = 1;
 
@@ -339,6 +340,15 @@ type NodeOptions = {
   enabledPropertyOptions?: PropertyOptions<boolean>,
   inputEnabledPropertyOptions?: PropertyOptions<boolean>
 } & ParallelDOMOptions;
+
+type RasterizedOptions = {
+  resolution?: number,
+  sourceBounds?: Bounds2 | null,
+  useTargetBounds?: boolean,
+  wrap?: boolean,
+  useCanvas?: boolean,
+  imageOptions?: ImageOptions
+};
 
 class Node extends ParallelDOM {
   // NOTE: All member properties with names starting with '_' are assumed to be @private/protected!
@@ -5264,8 +5274,8 @@ class Node extends ParallelDOM {
    *
    * @param [options] - See below options. This is also passed directly to the created Image object.
    */
-  rasterized( options: { resolution?: number, sourceBounds?: Bounds2 | null, useTargetBounds?: boolean, wrap?: boolean, useCanvas?: boolean, imageOptions?: ImageOptions } ): Node {
-    const mergedOptions = merge( {
+  rasterized( providedOptions?: RasterizedOptions ): Node {
+    const options = optionize<RasterizedOptions, RasterizedOptions>( {
       // {number} - Controls the resolution of the image relative to the local view units. For example, if our Node is
       // ~100 view units across (in the local coordinate frame) but you want the image to actually have a ~200-pixel
       // resolution, provide resolution:2.
@@ -5278,7 +5288,7 @@ class Node extends ParallelDOM {
 
       // {boolean} - If true, the localBounds of the result will be set in a way such that it will precisely match
       // the visible bounds of the original Node (this). Note that antialiased content (with a much lower resolution)
-      // may somewhat spill outside of these bounds if this is set to true. Usually this is fine and should be the
+      // may somewhat spill outside these bounds if this is set to true. Usually this is fine and should be the
       // recommended option. If sourceBounds are provided, they will restrict the used bounds (so it will just
       // represent the bounds of the sliced part of the image).
       useTargetBounds: true,
@@ -5296,10 +5306,10 @@ class Node extends ParallelDOM {
       // To be passed to the Image node created from the rasterization. See below for options that will override
       // what is passed in.
       imageOptions: {}
-    }, options ) as { resolution: number, sourceBounds: Bounds2 | null, useTargetBounds: boolean, wrap: boolean, useCanvas: boolean, imageOptions: ImageOptions };
+    }, providedOptions );
 
-    const resolution = mergedOptions.resolution;
-    const sourceBounds = mergedOptions.sourceBounds;
+    const resolution = options.resolution;
+    const sourceBounds = options.sourceBounds;
 
     if ( assert ) {
       assert( typeof resolution === 'number' && resolution > 0, 'resolution should be a positive number' );
@@ -5340,9 +5350,9 @@ class Node extends ParallelDOM {
 
     // NOTE: This callback is executed SYNCHRONOUSLY
     function callback( canvas: HTMLCanvasElement, x: number, y: number, width: number, height: number ) {
-      const imageSource = mergedOptions.useCanvas ? canvas : canvas.toDataURL();
+      const imageSource = options.useCanvas ? canvas : canvas.toDataURL();
 
-      image = new Image( imageSource, merge( mergedOptions.imageOptions, {
+      image = new Image( imageSource, merge( {}, options.imageOptions, {
         x: -x,
         y: -y,
         initialWidth: width,
@@ -5367,19 +5377,19 @@ class Node extends ParallelDOM {
       finalParentBounds = sourceBounds.intersection( finalParentBounds );
     }
 
-    if ( mergedOptions.useTargetBounds ) {
+    if ( options.useTargetBounds ) {
       image!.imageBounds = image!.parentToLocalBounds( finalParentBounds );
     }
 
-    if ( mergedOptions.wrap ) {
+    if ( options.wrap ) {
       const wrappedNode = new Node( { children: [ image! ] } ); // eslint-disable-line no-html-constructors
-      if ( mergedOptions.useTargetBounds ) {
+      if ( options.useTargetBounds ) {
         wrappedNode.localBounds = finalParentBounds;
       }
       return wrappedNode;
     }
     else {
-      if ( mergedOptions.useTargetBounds ) {
+      if ( options.useTargetBounds ) {
         image!.localBounds = image!.parentToLocalBounds( finalParentBounds );
       }
       return image!;

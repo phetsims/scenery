@@ -8,50 +8,68 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
-import { scenery, Node, Renderer, DOMDrawable } from '../imports.js';
+import { scenery, Node, Renderer, DOMDrawable, NodeOptions, Instance, DOMSelfDrawable } from '../imports.js';
 
 const DOM_OPTION_KEYS = [
   'element', // {HTMLElement} - Sets the element, see setElement() for more documentation
   'preventTransform' // {boolean} - Sets whether Scenery is allowed to transform the element. see setPreventTransform() for docs
 ];
 
+type DOMSelfOptions = {
+  element?: HTMLElement,
+  preventTransform?: boolean;
+};
+
+type DOMOptions = DOMSelfOptions & NodeOptions;
+
+// User-defined type guard
+const isJQueryElement = ( element: Element | JQuery<HTMLElement> ): element is JQuery<HTMLElement> => !!( element && ( element as JQuery<HTMLElement> ).jquery );
+
 class DOM extends Node {
+
+  private _element!: HTMLElement;
+
+  // Container div that will have our main element as a child (so we can position and mutate it).
+  _container: HTMLDivElement; // scenery-internal
+
+  // jQuery selection so that we can properly determine size information
+  private _$container: JQuery<HTMLDivElement>;
+
+  // Flag that indicates whether we are updating/invalidating ourself due to changes to the DOM element. The flag is
+  // needed so that updates to our element that we make in the update/invalidate section doesn't trigger an infinite
+  // loop with another update.
+  private invalidateDOMLock: boolean;
+
+  // Flag that when true won't let Scenery apply a transform directly (the client will take care of that).
+  private _preventTransform: boolean;
+
   /**
-   * @public
-   *
-   * @param {Element|Object} element - The HTML element, or a jQuery selector result.
-   * @param {Object} [options] - DOM-specific options are documented in DOM_OPTION_KEYS above, and can be provided
+   * @param element - The HTML element, or a jQuery selector result.
+   * @param [options] - DOM-specific options are documented in DOM_OPTION_KEYS above, and can be provided
    *                             along-side options for Node
    */
-  constructor( element, options ) {
+  constructor( element: Element | JQuery<HTMLElement>, options?: DOMOptions ) {
     assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
       'Extra prototype on Node options object is a code smell' );
     assert && assert( element instanceof window.Element || element.jquery,
       'DOM nodes need to be passed an HTML/DOM element or a jQuery selection like $( ... )' );
 
     // unwrap from jQuery if that is passed in, for consistency
-    if ( element && element.jquery ) {
+    if ( isJQueryElement( element ) ) {
       element = element[ 0 ];
       assert && assert( element instanceof window.Element );
     }
 
     super();
 
-    // @public (scenery-internal) {HTMLDivElement} - Container div that will have our main element as a child (so we can position and mutate it).
     this._container = document.createElement( 'div' );
 
-    // @private {Object} - jQuery selection so that we can properly determine size information
     this._$container = $( this._container );
     this._$container.css( 'position', 'absolute' );
     this._$container.css( 'left', 0 );
     this._$container.css( 'top', 0 );
 
-    // @private {boolean} - Flag that indicates whether we are updating/invalidating ourself due to changes to the DOM element. The flag is needed so
-    //                      that updates to our element that we make in the update/invalidate section doesn't trigger an infinite loop with another
-    //                      update.
     this.invalidateDOMLock = false;
-
-    // @private {boolean} - Flag that when true won't let Scenery apply a transform directly (the client will take care of that).
     this._preventTransform = false;
 
     // Have mutate() call setElement() in the proper order
@@ -70,22 +88,18 @@ class DOM extends Node {
   /**
    * Computes the bounds of our current DOM element (using jQuery, as replacing this with other things seems a bit
    * bug-prone and has caused issues in the past).
-   * @protected
    *
    * The dom element needs to be attached to the DOM tree in order for this to work.
    *
    * Alternative getBoundingClientRect explored, but did not seem sufficient (possibly due to CSS transforms)?
-   *
-   * @returns {Bounds2}
    */
-  calculateDOMBounds() {
+  protected calculateDOMBounds(): Bounds2 {
     const $element = $( this._element );
-    return new Bounds2( 0, 0, $element.width(), $element.height() );
+    return new Bounds2( 0, 0, $element.width()!, $element.height()! );
   }
 
   /**
    * Triggers recomputation of our DOM element's bounds.
-   * @public
    *
    * This should be called after the DOM element's bounds may have changed, to properly update the bounding box
    * in Scenery.
@@ -131,38 +145,28 @@ class DOM extends Node {
   }
 
   /**
-   * Creates a DOM drawable for this DOM node.
-   * @public (scenery-internal)
-   * @override
+   * Creates a DOM drawable for this DOM node. (scenery-internal)
    *
-   * @param {number} renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
-   * @param {Instance} instance - Instance object that will be associated with the drawable
-   * @returns {DOMSelfDrawable}
+   * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
+   * @param instance - Instance object that will be associated with the drawable
    */
-  createDOMDrawable( renderer, instance ) {
+  createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
+    // @ts-ignore Poolable
     return DOMDrawable.createFromPool( renderer, instance );
   }
 
   /**
    * Whether this Node itself is painted (displays something itself).
-   * @public
-   * @override
-   *
-   * @returns {boolean}
    */
-  isPainted() {
+  isPainted(): boolean {
     // Always true for DOM nodes
     return true;
   }
 
   /**
    * Changes the DOM element of this DOM node to another element.
-   * @public
-   *
-   * @param {HTMLElement} element
-   * @returns {DOM} - For chaining
    */
-  setElement( element ) {
+  setElement( element: HTMLElement ): this {
     assert && assert( !this._element, 'We should only ever attach one DOMElement to a DOM node' );
 
     if ( this._element !== element ) {
@@ -180,31 +184,25 @@ class DOM extends Node {
     return this; // allow chaining
   }
 
-  set element( value ) { this.setElement( value ); }
+  set element( value: HTMLElement ) { this.setElement( value ); }
 
   /**
    * Returns the DOM element being displayed by this DOM node.
-   * @public
-   *
-   * @returns {HTMLElement}
    */
-  getElement() {
+  getElement(): HTMLElement {
     return this._element;
   }
 
-  get element() { return this.getElement(); }
+  get element(): HTMLElement { return this.getElement(); }
 
   /**
    * Sets the value of the preventTransform flag.
-   * @public
    *
    * When the preventTransform flag is set to true, Scenery will not reposition (CSS transform) the DOM element, but
    * instead it will be at the upper-left (0,0) of the Scenery Display. The client will be responsible for sizing or
    * positioning this element instead.
-   *
-   * @param {boolean} preventTransform
    */
-  setPreventTransform( preventTransform ) {
+  setPreventTransform( preventTransform: boolean ) {
     assert && assert( typeof preventTransform === 'boolean' );
 
     if ( this._preventTransform !== preventTransform ) {
@@ -212,21 +210,18 @@ class DOM extends Node {
     }
   }
 
-  set preventTransform( value ) { this.setPreventTransform( value ); }
+  set preventTransform( value: boolean ) { this.setPreventTransform( value ); }
 
   /**
    * Returns the value of the preventTransform flag.
-   * @public
    *
    * See the setPreventTransform documentation for more information on the flag.
-   *
-   * @returns {boolean}
    */
-  isTransformPrevented() {
+  isTransformPrevented(): boolean {
     return this._preventTransform;
   }
 
-  get preventTransform() { return this.isTransformPrevented(); }
+  get preventTransform(): boolean { return this.isTransformPrevented(); }
 }
 
 /**
@@ -242,3 +237,4 @@ DOM.prototype._mutatorKeys = DOM_OPTION_KEYS.concat( Node.prototype._mutatorKeys
 scenery.register( 'DOM', DOM );
 
 export default DOM;
+export type { DOMOptions };
