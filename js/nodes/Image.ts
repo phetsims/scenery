@@ -16,7 +16,7 @@ import VoidIO from '../../../tandem/js/types/VoidIO.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Shape from '../../../kite/js/Shape.js';
-import { scenery, SpriteSheet, Imageable, Renderer, Node, NodeOptions, CanvasContextWrapper, ImageCanvasDrawable, ImageDOMDrawable, ImageSVGDrawable, ImageWebGLDrawable, Instance, DOMSelfDrawable, SVGSelfDrawable, CanvasSelfDrawable, WebGLSelfDrawable, IImageDrawable } from '../imports.js';
+import { scenery, SpriteSheet, Imageable, Renderer, Node, NodeOptions, CanvasContextWrapper, ImageCanvasDrawable, ImageDOMDrawable, ImageSVGDrawable, ImageWebGLDrawable, Instance, DOMSelfDrawable, SVGSelfDrawable, CanvasSelfDrawable, WebGLSelfDrawable, IImageDrawable, ImageableOptions, ImageableImage } from '../imports.js';
 
 // Image-specific options that can be passed in the constructor or mutate() call.
 const IMAGE_OPTION_KEYS = [
@@ -32,34 +32,16 @@ const IMAGE_OPTION_KEYS = [
   'hitTestPixels' // {boolean} - Whether non-transparent pixels will control contained points, see setHitTestPixels() for documentation
 ];
 
-type Mipmap = {
-  width: number,
-  height: number,
-  url: string,
-  canvas?: HTMLCanvasElement,
-  img?: HTMLImageElement,
-  updateCanvas?: () => void
-}[];
-
 type ImageOptions = {
-  image?: string | HTMLImageElement | HTMLCanvasElement | Mipmap,
-  imageOpacity?: number,
-  imageBounds?: Bounds2 | null,
-  initialWidth?: number,
-  initialHeight?: number,
-  mipmap?: boolean,
-  mipmapBias?: number,
-  mipmapInitialLevel?: number,
-  mipmapMaxLevel?: number,
-  hitTestPixels?: boolean
-} & NodeOptions;
+  imageBounds?: Bounds2 | null
+} & NodeOptions & ImageableOptions;
 
 class Image extends Imageable( Node ) {
 
   // If non-null, determines what is considered "inside" the image for containment and hit-testing.
   _imageBounds: Bounds2 | null;
 
-  constructor( image: string | HTMLImageElement | HTMLCanvasElement | Mipmap, options?: ImageOptions ) {
+  constructor( image: ImageableImage, options?: ImageOptions ) {
 
     super();
 
@@ -335,4 +317,4 @@ Image.ImageIO = new IOType( 'ImageIO', {
 
 scenery.register( 'Image', Image );
 export { Image as default };
-export type { ImageOptions, Mipmap };
+export type { ImageOptions };

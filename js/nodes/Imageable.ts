@@ -12,10 +12,10 @@ import Shape from '../../../kite/js/Shape.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { scenery, svgns, xlinkns, Mipmap } from '../imports.js';
+import { scenery, svgns, xlinkns } from '../imports.js';
 
 // Need to poly-fill on some browsers
-const log2 = Math.log2 || function( x ) { return Math.log( x ) / Math.LN2; };
+const log2 = Math.log2 || function( x: number ) { return Math.log( x ) / Math.LN2; };
 
 const DEFAULT_OPTIONS = {
   imageOpacity: 1,
@@ -26,7 +26,7 @@ const DEFAULT_OPTIONS = {
   mipmapInitialLevel: 4,
   mipmapMaxLevel: 5,
   hitTestPixels: false
-};
+} as const;
 
 // Lazy scratch canvas/context (so we don't incur the startup cost of canvas/context creation)
 let scratchCanvas: HTMLCanvasElement | null = null;
@@ -45,6 +45,29 @@ const getScratchContext = () => {
 };
 
 type Constructor<T = {}> = new ( ...args: any[] ) => T;
+
+type Mipmap = {
+  width: number,
+  height: number,
+  url: string,
+  canvas?: HTMLCanvasElement,
+  img?: HTMLImageElement,
+  updateCanvas?: () => void
+}[];
+
+type ImageableImage = string | HTMLImageElement | HTMLCanvasElement | Mipmap;
+
+type ImageableOptions = {
+  image?: ImageableImage,
+  imageOpacity?: number,
+  initialWidth?: number,
+  initialHeight?: number,
+  mipmap?: boolean,
+  mipmapBias?: number,
+  mipmapInitialLevel?: number,
+  mipmapMaxLevel?: number,
+  hitTestPixels?: boolean
+};
 
 const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
   return class extends type {
@@ -180,7 +203,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
      *  Also note that if the underlying image (like Canvas data) has changed, it is recommended to call
      *  invalidateImage() instead of changing the image reference (calling setImage() multiple times)
      */
-    setImage( image: string | HTMLImageElement | HTMLCanvasElement | Mipmap ): this {
+    setImage( image: ImageableImage ): this {
       assert && assert( image, 'image should be available' );
       assert && assert( typeof image === 'string' ||
                         image instanceof HTMLImageElement ||
@@ -246,7 +269,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
       return this;
     }
 
-    set image( value: string | HTMLImageElement | HTMLCanvasElement | Mipmap ) { this.setImage( value ); }
+    set image( value: ImageableImage ) { this.setImage( value ); }
 
     /**
      * Returns the current image's representation as either a Canvas or img element.
@@ -1055,3 +1078,4 @@ Imageable.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
 scenery.register( 'Imageable', Imageable );
 export default Imageable;
+export type { ImageableOptions, Mipmap, ImageableImage };

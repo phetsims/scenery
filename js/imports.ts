@@ -31,7 +31,7 @@ export { default as CountMap } from './util/CountMap.js';
 export { default as DisplayedProperty } from './util/DisplayedProperty.js';
 export { default as SceneImage } from './util/SceneImage.js';
 
-export { default as SpriteInstance } from './util/SpriteInstance.js';
+export { default as SpriteInstance, SpriteInstanceTransformType } from './util/SpriteInstance.js';
 export { default as SpriteSheet } from './util/SpriteSheet.js';
 export { default as ShaderProgram } from './util/ShaderProgram.js';
 export type { ShaderProgramOptions } from './util/ShaderProgram.js';
@@ -75,7 +75,7 @@ export { default as Sepia } from './util/Sepia.js';
 export { default as ParallelDOM, ACCESSIBILITY_OPTION_KEYS } from './accessibility/pdom/ParallelDOM.js';
 export type { ParallelDOMOptions } from './accessibility/pdom/ParallelDOM.js';
 export { default as Node } from './nodes/Node.js';
-export type { NodeOptions } from './nodes/Node.js';
+export type { NodeOptions, RendererType } from './nodes/Node.js';
 export { default as Picker } from './util/Picker.js';
 export { default as RendererSummary } from './util/RendererSummary.js';
 export { default as NodeProperty } from './util/NodeProperty.js';
@@ -87,9 +87,10 @@ export { default as TrailPointer } from './util/TrailPointer.js';
 export { default as Paintable, PAINTABLE_OPTION_KEYS, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_DEFAULT_OPTIONS } from './nodes/Paintable.js';
 export type { PaintableOptions } from './nodes/Paintable.js';
 export { default as Imageable } from './nodes/Imageable.js';
+export type { ImageableOptions, Mipmap, ImageableImage } from './nodes/Imageable.js';
 
 export { default as Image } from './nodes/Image.js';
-export type { ImageOptions, Mipmap } from './nodes/Image.js';
+export type { ImageOptions } from './nodes/Image.js';
 export { default as Path } from './nodes/Path.js';
 export type { PathOptions } from './nodes/Path.js';
 export { default as Text } from './nodes/Text.js';
@@ -127,6 +128,7 @@ export { default as VStrut } from './nodes/VStrut.js';
 export type { VStrutOptions } from './nodes/VStrut.js';
 
 export { default as SpriteImage } from './util/SpriteImage.js';
+export type { SpriteImageOptions } from './util/SpriteImage.js';
 export { default as Sprite } from './util/Sprite.js';
 
 export { default as PaintObserver } from './display/PaintObserver.js';

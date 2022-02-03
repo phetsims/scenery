@@ -7,7 +7,7 @@
  */
 
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import { scenery, Imageable, SpriteInstance, CanvasSelfDrawable } from '../../imports.js';
+import { scenery, Imageable, CanvasSelfDrawable, SpriteInstanceTransformType, Node } from '../../imports.js'; // eslint-disable-line
 
 class SpritesCanvasDrawable extends CanvasSelfDrawable {
   /**
@@ -40,7 +40,7 @@ class SpritesCanvasDrawable extends CanvasSelfDrawable {
       }
 
       // If it's a translation only, we can add the offsets to the drawImage call directly (higher performance)
-      if ( spriteInstance.transformType === SpriteInstance.TransformType.TRANSLATION ) {
+      if ( spriteInstance.transformType === SpriteInstanceTransformType.TRANSLATION ) {
         if ( hasMipmaps ) {
           const level = spriteImage.getMipmapLevelFromScale( baseMipmapScale, Imageable.CANVAS_MIPMAP_BIAS_ADJUSTMENT );
           const canvas = spriteImage.getMipmapCanvas( level );

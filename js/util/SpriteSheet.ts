@@ -14,7 +14,7 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
-import BinPacker from '../../../dot/js/BinPacker.js';
+import BinPacker, { Bin } from '../../../dot/js/BinPacker.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Dimension2 from '../../../dot/js/Dimension2.js';
 import { scenery } from '../imports.js';
@@ -34,59 +34,71 @@ const GUTTER_SIZE = 1;
 const PADDING = 1;
 
 class SpriteSheet {
+
+  private useMipmaps: boolean;
+  private gl: WebGLRenderingContext | null;
+  texture: WebGLTexture | null;
+
+  // The top-level bounding box for texture content. All sprites will have coordinate bounding
+  // boxes that are included in these bounds.
+  private bounds: Bounds2;
+
+  private width: number;
+  private height: number;
+
+  private canvas: HTMLCanvasElement;
+  private context: CanvasRenderingContext2D;
+
+  // Handles how our available area is partitioned into sprites.
+  private binPacker: BinPacker;
+
+  // Whether this spritesheet needs updates.
+  private dirty: boolean;
+
+  private usedSprites: Sprite[];
+
+  // works as a LRU cache for removing items when we need to allocate new space
+  private unusedSprites: Sprite[];
+
   /**
-   * @param {boolean} useMipmaps - Whether built-in WebGL mipmapping should be used. Higher quality, but may be slower
-   *                               to add images (since mipmaps need to be updated).
+   * @param useMipmaps - Whether built-in WebGL mipmapping should be used. Higher quality, but may be slower
+   *                     to add images (since mipmaps need to be updated).
    */
-  constructor( useMipmaps ) {
-    // @private {boolean}
+  constructor( useMipmaps: boolean ) {
     this.useMipmaps = useMipmaps;
 
-    // @private {WebGLRenderingContext|null} - Will be passed in with initializeContext
+    // Will be passed in with initializeContext
     this.gl = null;
 
-    // @public {WebGLTexture|null} - Will be set later, once we have a context
+    // Will be set later, once we have a context
     this.texture = null;
 
-    // @private {Bounds2} - The top-level bounding box for texture content. All sprites will have coordinate bounding
-    // boxes that are included in these bounds.
     // TODO: potentially support larger texture sizes based on reported capabilities (could cause fewer draw calls?)
     this.bounds = new Bounds2( 0, 0, MAX_DIMENSION.width, MAX_DIMENSION.height );
     assert && assert( this.bounds.minX === 0 && this.bounds.minY === 0, 'Assumed constraint later on for transforms' );
 
-    // @private {number}
     this.width = this.bounds.width;
     this.height = this.bounds.height;
 
-    // @private {HTMLCanvasElement}
     this.canvas = document.createElement( 'canvas' );
     this.canvas.width = this.width;
     this.canvas.height = this.height;
+    this.context = this.canvas.getContext( '2d' )!;
 
-    // @private {CanvasRenderingContext2D}
-    this.context = this.canvas.getContext( '2d' );
-
-    // @private {BinPacker} - Handles how our available area is partitioned into sprites.
     this.binPacker = new BinPacker( this.bounds );
-
-    // @private {boolean} - Whether this spritesheet needs updates.
     this.dirty = true;
 
-    // @private {Array.<SpriteSheet.Sprite>}
     this.usedSprites = [];
-    this.unusedSprites = []; // works as a LRU cache for removing items when we need to allocate new space
+    this.unusedSprites = [];
   }
 
   /**
    * Initialize (or reinitialize) ourself with a new GL context. Should be called at least once before updateTexture()
-   * @public
    *
    * NOTE: Should be safe to call with a different context (will recreate a different texture) should this be needed
    *       for things like context loss.
-   *
-   * @param {WebGLRenderingContext} gl
    */
-  initializeContext( gl ) {
+  initializeContext( gl: WebGLRenderingContext ) {
     this.gl = gl;
 
     this.createTexture();
@@ -94,10 +106,10 @@ class SpriteSheet {
 
   /**
    * Allocates and creates a GL texture, configures it, and initializes it with our current Canvas.
-   * @private
    */
-  createTexture() {
-    const gl = this.gl;
+  private createTexture() {
+    const gl = this.gl!;
+    assert && assert( gl );
 
     this.texture = gl.createTexture();
     gl.bindTexture( gl.TEXTURE_2D, this.texture );
@@ -124,7 +136,6 @@ class SpriteSheet {
 
   /**
    * Updates a pre-existing texture with our current Canvas.
-   * @public
    */
   updateTexture() {
     assert && assert( this.gl, 'SpriteSheet needs context to updateTexture()' );
@@ -132,7 +143,8 @@ class SpriteSheet {
     if ( this.dirty ) {
       this.dirty = false;
 
-      const gl = this.gl;
+      const gl = this.gl!;
+      assert && assert( gl );
 
       gl.bindTexture( gl.TEXTURE_2D, this.texture );
       gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.canvas );
@@ -146,14 +158,12 @@ class SpriteSheet {
 
   /**
    * Adds an image (if possible) to our sprite sheet. If successful, will return a {Sprite}, otherwise null.
-   * @public
    *
-   * @param {HTMLCanvasElement|HTMLImageElement} image
-   * @param {number} width - Passed in, since it may not be fully loaded yet?
-   * @param {number} height - Passed in, since it may not be fully loaded yet?
-   * @returns {Sprite|null}
+   * @param image
+   * @param width - Passed in, since it may not be fully loaded yet?
+   * @param height - Passed in, since it may not be fully loaded yet?
    */
-  addImage( image, width, height ) {
+  addImage( image: HTMLCanvasElement | HTMLImageElement, width: number, height: number ): Sprite | null {
     let i;
 
     // check used cache
@@ -183,7 +193,7 @@ class SpriteSheet {
     // Enters 'while' loop only if allocate() returns null and we have unused sprites (i.e. conditions where we will
     // want to deallocate the least recently used (LRU) unused sprite and then check for allocation again).
     while ( !( bin = this.binPacker.allocate( width + 2 * GUTTER_SIZE + PADDING, height + 2 * GUTTER_SIZE + PADDING ) ) && this.unusedSprites.length ) {
-      const ejectedSprite = this.unusedSprites.shift(); // LRU policy by taking first item
+      const ejectedSprite = this.unusedSprites.shift()!; // LRU policy by taking first item
 
       // clear its space in the Canvas
       this.dirty = true;
@@ -219,13 +229,10 @@ class SpriteSheet {
   /**
    * Removes an image from our spritesheet. (Removes one from the amount it is used, and if it is 0, gets actually
    * removed).
-   * @public
-   *
-   * @param {HTMLCanvasElement|HTMLImageElement} image
    */
-  removeImage( image ) {
+  removeImage( image: HTMLCanvasElement | HTMLImageElement ) {
     // find the used sprite (and its index)
-    let usedSprite;
+    let usedSprite: Sprite;
     let i;
     for ( i = 0; i < this.usedSprites.length; i++ ) {
       if ( this.usedSprites[ i ].image === image ) {
@@ -233,12 +240,12 @@ class SpriteSheet {
         break;
       }
     }
-    assert && assert( usedSprite, 'Sprite not found for removeImage' );
+    assert && assert( usedSprite!, 'Sprite not found for removeImage' );
 
     // if we have no more references to the image/sprite
-    if ( --usedSprite.count <= 0 ) {
+    if ( --usedSprite!.count <= 0 ) {
       this.usedSprites.splice( i, 1 ); // remove it from the used list
-      this.unusedSprites.push( usedSprite ); // add it to the unused list
+      this.unusedSprites.push( usedSprite! ); // add it to the unused list
     }
 
     // NOTE: no modification to the Canvas/texture is made, since we can leave it drawn there and unreferenced.
@@ -249,11 +256,8 @@ class SpriteSheet {
   /**
    * Whether the sprite for the specified image is handled by this spritesheet. It can be either used or unused, but
    * addImage() calls with the specified image should be extremely fast (no need to modify the Canvas or texture).
-   * @public
-   *
-   * @returns {boolean}
    */
-  containsImage( image ) {
+  containsImage( image: HTMLCanvasElement | HTMLImageElement ): boolean {
     let i;
 
     // check used cache
@@ -276,15 +280,8 @@ class SpriteSheet {
   /**
    * Copes the image (width x height) centered into a bin (width+2 x height+2) at (binX,binY), where the padding
    * along the edges is filled with the next closest pixel in the actual image.
-   * @private
-   *
-   * @param {HTMLCanvasElement|HTMLImageElement} image
-   * @param {number} width
-   * @param {number} height
-   * @param {number} binX
-   * @param {number} binY
    */
-  copyImageWithGutter( image, width, height, binX, binY ) {
+  private copyImageWithGutter( image: HTMLCanvasElement | HTMLImageElement, width: number, height: number, binX: number, binY: number ) {
     assert && assert( GUTTER_SIZE === 1 );
 
     // Corners, all 1x1
@@ -304,51 +301,51 @@ class SpriteSheet {
 
   /**
    * Helper for drawing gutters.
-   * @private
-   *
-   * @param {HTMLCanvasElement|HTMLImageElement} image
-   * @param {number} width
-   * @param {number} height
-   * @param {number} sourceX
-   * @param {number} sourceY
-   * @param {number} destinationX
-   * @param {number} destinationY
    */
-  copyImageRegion( image, width, height, sourceX, sourceY, destinationX, destinationY ) {
+  private copyImageRegion( image: HTMLCanvasElement | HTMLImageElement, width: number, height: number, sourceX: number, sourceY: number, destinationX: number, destinationY: number ) {
     this.context.drawImage( image, sourceX, sourceY, width, height, destinationX, destinationY, width, height );
   }
+
+  static Sprite: typeof Sprite;
+
+  // the size of a sprite sheet
+  static MAX_DIMENSION: typeof MAX_DIMENSION;
 }
 
 scenery.register( 'SpriteSheet', SpriteSheet );
 
 class Sprite {
+
+  // The containing SpriteSheet
+  readonly spriteSheet: SpriteSheet;
+
+  // Contains the actual image bounds in our Canvas (plus padding), and is used to deallocate (need to clear that area).
+  // (dot-internal)
+  readonly bin: Bin;
+
+  // Normalized bounds between [0,1] for the full texture (for GLSL texture lookups).
+  readonly uvBounds: Bounds2;
+
+  // Image element used. (dot-internal)
+  readonly image: HTMLCanvasElement | HTMLImageElement;
+
+  // Reference count for number of addChild() calls minus removeChild() calls. If the count is 0, it should be in the
+  // 'unusedSprites' array, otherwise it should be in the 'usedSprites' array. (dot-internal)
+  count: number;
+
   /**
    * A reference to a specific part of the texture that can be used.
-   *
    */
-  constructor( spriteSheet, bin, uvBounds, image, initialCount ) {
-    // @public [read-only] {SpriteSheet} - The containing SpriteSheet
+  constructor( spriteSheet: SpriteSheet, bin: Bin, uvBounds: Bounds2, image: HTMLCanvasElement | HTMLImageElement, initialCount: number ) {
     this.spriteSheet = spriteSheet;
-
-    // @private [read-only] {BinPacker.Bin} - Contains the actual image bounds in our Canvas (plus padding), and is
-    //                                        used to deallocate (need to clear that area).
     this.bin = bin;
-
-    // @public [read-only] {Bounds2} - Normalized bounds between [0,1] for the full texture (for GLSL texture lookups).
     this.uvBounds = uvBounds;
-
-    // @private [read-only] {HTMLCanvasElement | HTMLImageElement} - Image element used.
     this.image = image;
-
-    // @private [read-write] {number} - Reference count for number of addChild() calls minus removeChild() calls. If
-    // the count is 0, it should be in the 'unusedSprites' array, otherwise it should be in the 'usedSprites' array.
     this.count = initialCount;
   }
 }
 
 SpriteSheet.Sprite = Sprite;
-
-// @public (read-only) the size of a sprite sheet
 SpriteSheet.MAX_DIMENSION = MAX_DIMENSION;
 
 export default SpriteSheet;

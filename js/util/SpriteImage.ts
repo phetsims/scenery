@@ -11,75 +11,68 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import Shape from '../../../kite/js/Shape.js';
 import merge from '../../../phet-core/js/merge.js';
-import { scenery, Imageable } from '../imports.js';
+import { scenery, Imageable, ImageableOptions, ImageableImage } from '../imports.js';
+import mutate from '../../../phet-core/js/mutate.js';
 
 let globalIdCounter = 1;
 const scratchVector = new Vector2( 0, 0 );
 
+type SpriteImageSelfOptions = {
+  hitTestPixels?: boolean;
+  pickable?: boolean
+};
+
+type SpriteImageOptions = SpriteImageSelfOptions & ImageableOptions;
+
 class SpriteImage extends Imageable( Object ) {
+
+  readonly id: number;
+  readonly offset: Vector2;
+  readonly pickable: boolean;
+  private shape: Shape | null; // lazily-constructed
+  private imageData: ImageData | null;
+
   /**
-   * @param {string|HTMLImageElement|HTMLCanvasElement|Array} image
-   * @param {Vector2} offset - A 2d offset from the upper-left of the image which is considered the "center".
-   * @param {Object} [options]
+   * @param image
+   * @param offset - A 2d offset from the upper-left of the image which is considered the "center".
+   * @param [options]
    */
-  constructor( image, offset, options ) {
+  constructor( image: ImageableImage, offset: Vector2, providedOptions?: SpriteImageOptions ) {
     assert && assert( image instanceof HTMLImageElement || image instanceof HTMLCanvasElement );
     assert && assert( offset instanceof Vector2 );
 
-    options = merge( {
+    const options = merge( {
       hitTestPixels: false,
       pickable: true,
       image: image
-    }, options );
+    }, providedOptions );
 
     super();
 
-    // @public (read-only) {number}
     this.id = globalIdCounter++;
-
-    // @public (read-only) {Vector2}
     this.offset = offset;
-
-    // @public (read-only) {boolean}
     this.pickable = options.pickable;
-
-    // @private {Shape|null} - lazily constructed
     this.shape = null;
+    this.imageData = null;
 
     // Initialize Imageable items (including the image itself)
     this.setImage( image );
-    Object.keys( Imageable.DEFAULT_OPTIONS ).forEach( name => {
-      if ( options[ name ] !== undefined ) {
-        this[ name ] = options[ name ];
-      }
-    } );
+
+    mutate( this, Object.keys( Imageable.DEFAULT_OPTIONS ), options );
   }
 
-  /**
-   * @public
-   *
-   * @returns {number}
-   */
-  get width() {
+  get width(): number {
     return this.imageWidth;
   }
 
-  /**
-   * @public
-   *
-   * @returns {number}
-   */
-  get height() {
+  get height(): number {
     return this.imageHeight;
   }
 
   /**
    * Returns a Shape that represents the hit-testable area of this SpriteImage.
-   * @public
-   *
-   * @returns {Shape}
    */
-  getShape() {
+  getShape(): Shape {
     if ( !this.pickable ) {
       return new Shape();
     }
@@ -112,9 +105,8 @@ class SpriteImage extends Imageable( Object ) {
 
   /**
    * Ensures we have a computed imageData (computes it lazily if necessary).
-   * @private
    */
-  ensureImageData() {
+  private ensureImageData() {
     if ( !this.imageData && this.width && this.height ) {
       this.imageData = Imageable.getHitTestData( this.image, this.width, this.height );
     }
@@ -122,12 +114,8 @@ class SpriteImage extends Imageable( Object ) {
 
   /**
    * Returns whether a given point is considered "inside" the SpriteImage.
-   * @public
-   *
-   * @param {Vector2} point
-   * @returns {boolean}
    */
-  containsPoint( point ) {
+  containsPoint( point: Vector2 ): boolean {
 
     if ( !this.pickable ) {
       return false;
@@ -168,3 +156,4 @@ class SpriteImage extends Imageable( Object ) {
 
 scenery.register( 'SpriteImage', SpriteImage );
 export default SpriteImage;
+export type { SpriteImageOptions };

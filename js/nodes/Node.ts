@@ -6167,4 +6167,4 @@ Node.NodeIO = new IOType( 'NodeIO', {
 } );
 
 export { Node as default };
-export type { NodeOptions };
+export type { NodeOptions, RendererType };

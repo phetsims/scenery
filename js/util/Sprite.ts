@@ -6,38 +6,33 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import IProperty from '../../../axon/js/IProperty.js';
 import Property from '../../../axon/js/Property.js';
+import Vector2 from '../../../dot/js/Vector2.js';
+import Shape from '../../../kite/js/Shape.js';
 import { scenery, SpriteImage } from '../imports.js';
 
 class Sprite {
-  /**
-   * @param {SpriteImage} spriteImage - The initial SpriteImage
-   */
-  constructor( spriteImage ) {
+
+  imageProperty: IProperty<SpriteImage>;
+
+  constructor( spriteImage: SpriteImage ) {
     assert && assert( spriteImage instanceof SpriteImage );
 
-    // @public {Property.<SpriteImage>}
     this.imageProperty = new Property( spriteImage );
   }
 
   /**
    * Returns a Shape that represents the hit-testable area of this Sprite.
-   * @public
-   *
-   * @returns {Shape}
    */
-  getShape() {
+  getShape(): Shape {
     return this.imageProperty.value.getShape();
   }
 
   /**
    * Returns whether a given point is considered "inside" the Sprite
-   * @public
-   *
-   * @param {Vector2} point
-   * @returns {boolean}
    */
-  containsPoint( point ) {
+  containsPoint( point: Vector2 ): boolean {
     return this.imageProperty.value.containsPoint( point );
   }
 }
