@@ -212,7 +212,7 @@ class VoicingManager extends Announcer {
 
   /**
    * @override
-   * @private
+   * @public
    * @param {number} dt - in milliseconds (not seconds)!
    * @param {UtteranceWrapper[]} queue
    */
@@ -483,7 +483,7 @@ class VoicingManager extends Announcer {
    * @param {Utterance} utterance
    * @param {Utterance} utteranceToCancel
    * @returns {boolean}
-   * @private
+   * @public
    */
   shouldUtteranceCancelOther( utterance, utteranceToCancel ) {
     assert && assert( utterance instanceof Utterance );
