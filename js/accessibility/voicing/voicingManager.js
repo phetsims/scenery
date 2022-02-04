@@ -441,7 +441,7 @@ class VoicingManager extends Announcer {
   }
 
   /**
-   * Stops any current speech and removes all utterances that may be queued.
+   * Stops any Utterance that is currently being announced.
    * @public (utterance-queue internal)
    */
   cancel() {
@@ -450,9 +450,6 @@ class VoicingManager extends Announcer {
       if ( this.currentlySpeakingUtterance ) {
         this.cancelUtterance( this.currentlySpeakingUtterance );
       }
-
-      // indicate to utteranceQueues that we expect everything queued for voicing to be removed
-      this.clearEmitter.emit();
     }
   }
 
