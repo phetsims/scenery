@@ -459,7 +459,8 @@ class VoicingManager extends Announcer {
   /**
    * Cancel the provided Utterance, if it is currently being spoken by this Announcer. Does not cancel
    * any other utterances that may be in the UtteranceQueue.
-   * @public
+   * @override
+   * @public (utterance-queue internal)
    *
    * @param {Utterance} utterance
    */
