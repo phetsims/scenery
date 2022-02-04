@@ -75,10 +75,10 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
   // Unfortunately, nothing can be private or protected in this class, see https://github.com/phetsims/scenery/issues/1340#issuecomment-1020692592
   const VoicingClass = class extends InteractiveHighlightingClass {
-    public voicingResponsePacket!: ResponsePacket; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1340
+    public voicingResponsePacket!: ResponsePacket; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1348
     public _voicingUtteranceQueue!: UtteranceQueue | null;
     public _voicingFocusListener!: SceneryListenerFunction;
-    public speakContentOnFocusListener!: { focus: SceneryListenerFunction }; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1340
+    public speakContentOnFocusListener!: { focus: SceneryListenerFunction }; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1348
 
     constructor( ...args: any[] ) {
 
@@ -259,12 +259,9 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     /**
      * Use the provided function to create content to speak in response to input. The content is then added to the
      * back of the voicing UtteranceQueue.
-     *
-     * TODO: we want this to be @protected, https://github.com/phetsims/scenery/issues/1340
-     * @public
-     *
+     * @protected
+     * TODO: remove eslint-diable-line when AlertableDef is in a proper typescript file, https://github.com/phetsims/scenery/issues/1340
      */
-    // TODO: remove eslint-diable-line when AlertableDef is in a proper typescript file, https://github.com/phetsims/scenery/issues/1340
     speakContent( content: AlertableDef | null ): void { // eslint-disable-line no-undef
 
       // don't send to utteranceQueue if response is empty

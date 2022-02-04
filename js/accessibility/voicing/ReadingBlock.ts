@@ -60,9 +60,9 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
     public _readingBlockDisabledTagName: string;
     public _readingBlockActiveHighlight: null | Shape | Node;
     public readingBlockActiveHighlightChangedEmitter: TinyEmitter<[]>; // (scenery-internal)
-    public localBoundsChangedListener: OmitThisParameter<( localBounds: Bounds2 ) => void>; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1340
-    public readingBlockInputListener: IInputListener; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1340
-    public readingBlockFocusableChangeListener: OmitThisParameter<( focusable: boolean ) => void>; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1340
+    public localBoundsChangedListener: OmitThisParameter<( localBounds: Bounds2 ) => void>; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1348
+    public readingBlockInputListener: IInputListener; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1348
+    public readingBlockFocusableChangeListener: OmitThisParameter<( focusable: boolean ) => void>; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1348
 
     constructor( ...args: any[] ) {
 
@@ -240,7 +240,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
     /**
      * When this Node becomes focusable (because Reading Blocks have just been enabled or disabled), either
      * apply or remove the readingBlockTagName.
-     * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1340
+     * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1348
      *
      * @param focusable - whether or not ReadingBlocks should be focusable
      */
@@ -268,7 +268,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 
     /**
      * Update the hit areas for this Node whenever the bounds change.
-     * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1340
+     * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1348
      */
     onLocalBoundsChanged( localBounds: Bounds2 ): void {
       const thisNode = this as unknown as Node;
@@ -280,7 +280,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
      * Speak the content associated with the ReadingBlock. Sets the readingBlockFocusProperties on
      * the displays so that HighlightOverlays know to activate a highlight while the voicingManager
      * is reading about this Node.
-     * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1340
+     * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1348
      */
     speakReadingBlockContent( event: SceneryEvent ) {
 
