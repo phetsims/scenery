@@ -442,7 +442,7 @@ class VoicingManager extends Announcer {
 
   /**
    * Stops any current speech and removes all utterances that may be queued.
-   * @public
+   * @public (utterance-queue internal)
    */
   cancel() {
     if ( this.initialized ) {
