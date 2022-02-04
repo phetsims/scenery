@@ -280,13 +280,15 @@ class VoicingManager extends Announcer {
     assert && assert( this.initialized, 'No voices available until the voicingManager is initialized' );
     assert && assert( this.voices.length > 0, 'No voices available to provided a prioritized list.' );
 
-    return this.voices.slice().sort( ( a, b ) => {
-      return a.name.includes( 'Fred' ) ? 1 : // a includes 'Fred', put b before a so 'Fred' is at the bottom
-             b.name.includes( 'Fred' ) ? -1 : // b includes 'Fred', put a before b so 'Fred' is at the bottom
-             a.name.includes( 'Google' ) ? -1 : // a includes 'Google', put a before b so 'Google' is at the top
-             b.name.includes( 'Google' ) ? 1 : // b includes 'Google, 'put b before a so 'Google' is at the top
-             0; // otherwise all voices are considered equal
-    } );
+    const voices = this.voices.slice();
+
+    const getIndex = voice =>
+      voice.name.includes( 'Google' ) ? -1 : // Google should move toward the front
+      voice.name.includes( 'Fred' ) ? voices.length : // Fred should move toward the back
+      voices.indexOf( voice ); // Otherwise preserve ordering
+
+    return voices.sort( ( a, b ) => getIndex( a ) - getIndex( b ) );
+
   }
 
   /**
