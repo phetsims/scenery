@@ -212,7 +212,7 @@ class VoicingManager extends Announcer {
 
   /**
    * @override
-   * @private
+   * @public
    * @param {number} dt - in milliseconds (not seconds)!
    * @param {UtteranceWrapper[]} queue
    */
@@ -280,13 +280,15 @@ class VoicingManager extends Announcer {
     assert && assert( this.initialized, 'No voices available until the voicingManager is initialized' );
     assert && assert( this.voices.length > 0, 'No voices available to provided a prioritized list.' );
 
-    return this.voices.slice().sort( ( a, b ) => {
-      return a.name.includes( 'Fred' ) ? 1 : // a includes 'Fred', put b before a so 'Fred' is at the bottom
-             b.name.includes( 'Fred' ) ? -1 : // b includes 'Fred', put a before b so 'Fred' is at the bottom
-             a.name.includes( 'Google' ) ? -1 : // a includes 'Google', put a before b so 'Google' is at the top
-             b.name.includes( 'Google' ) ? 1 : // b includes 'Google, 'put b before a so 'Google' is at the top
-             0; // otherwise all voices are considered equal
-    } );
+    const voices = this.voices.slice();
+
+    const getIndex = voice =>
+      voice.name.includes( 'Google' ) ? -1 : // Google should move toward the front
+      voice.name.includes( 'Fred' ) ? voices.length : // Fred should move toward the back
+      voices.indexOf( voice ); // Otherwise preserve ordering
+
+    return voices.sort( ( a, b ) => getIndex( a ) - getIndex( b ) );
+
   }
 
   /**
@@ -441,8 +443,8 @@ class VoicingManager extends Announcer {
   }
 
   /**
-   * Stops any current speech and removes all utterances that may be queued.
-   * @public
+   * Stops any Utterance that is currently being announced.
+   * @public (utterance-queue internal)
    */
   cancel() {
     if ( this.initialized ) {
@@ -450,16 +452,14 @@ class VoicingManager extends Announcer {
       if ( this.currentlySpeakingUtterance ) {
         this.cancelUtterance( this.currentlySpeakingUtterance );
       }
-
-      // indicate to utteranceQueues that we expect everything queued for voicing to be removed
-      this.clearEmitter.emit();
     }
   }
 
   /**
    * Cancel the provided Utterance, if it is currently being spoken by this Announcer. Does not cancel
    * any other utterances that may be in the UtteranceQueue.
-   * @public
+   * @override
+   * @public (utterance-queue internal)
    *
    * @param {Utterance} utterance
    */
@@ -483,7 +483,7 @@ class VoicingManager extends Announcer {
    * @param {Utterance} utterance
    * @param {Utterance} utteranceToCancel
    * @returns {boolean}
-   * @private
+   * @public
    */
   shouldUtteranceCancelOther( utterance, utteranceToCancel ) {
     assert && assert( utterance instanceof Utterance );

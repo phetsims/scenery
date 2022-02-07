@@ -32,15 +32,15 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
   assert && assert( _.includes( inheritance( Type ), Node ), 'Only Node subtypes should compose InteractiveHighlighting' );
 
   const InteractiveHighlightingClass = class extends Type {
-    activationListener: IInputListener; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1340
-    pointer: null | Pointer; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1340
+    activationListener: IInputListener; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1348
+    pointer: null | Pointer; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1348
     _displays: { [ key: string ]: Display }; // TODO: this should be protected, how to conventionize this?. https://github.com/phetsims/scenery/issues/1340
     _interactiveHighlight: Shape | Node | null;
     _interactiveHighlightLayerable: boolean;
-    interactiveHighlightChangedEmitter: TinyEmitter<[]>; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1340
+    interactiveHighlightChangedEmitter: TinyEmitter<[]>; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1348
     changedInstanceListener: ( instance: Instance, added: boolean ) => void;
     interactiveHighlightingEnabledListener: ( enabled: boolean ) => void;
-    pointerListener: IInputListener; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1340
+    pointerListener: IInputListener; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1348
 
     constructor( ...args: any[] ) {
 
@@ -241,7 +241,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     /**
      * When a Pointer enters this Node, signal to the Displays that the pointer is over this Node so that the
      * HighlightOverlay can be activated.
-     * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1340
+     * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1348
      *
      */
     onPointerEntered( event: SceneryEvent ) {
@@ -284,7 +284,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     /**
      * When a pointer exits this Node, signal to the Displays that pointer focus has changed to deactivate
      * the HighlightOverlay.
-     * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1340
+     * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1348
      */
     onPointerExited( event: SceneryEvent ) {
 
@@ -297,7 +297,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
 
     /**
      * When a pointer goes down on this Node, signal to the Displays that the pointerFocus is locked
-     * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1340
+     * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1348
      */
     onPointerDown( event: SceneryEvent ) {
 
@@ -326,7 +326,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     /**
      * When a Pointer goes up after going down on this Node, signal to the Displays that the pointerFocusProperty no
      * longer needs to be locked.
-     * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1340
+     * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1348
      *
      * @param {SceneryEvent} [event] - may be called during interrupt or cancel, in which case there is no event
      */
@@ -346,7 +346,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
 
     /**
      * If the pointer listener is cancelled or interrupted, clear focus and remove input listeners.
-     * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1340
+     * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1348
      *
      * @param event
      */
@@ -365,7 +365,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     /**
      * Add or remove listeners related to activating interactive highlighting when the feature becomes enabled.
      * This way we prevent doing work related to interactive highlighting unless the feature is enabled.
-     * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1340
+     * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1348
      */
     onInteractiveHighlightingEnabledChange( enabled: boolean ) {
       const thisNode = this as unknown as Node;
@@ -415,7 +415,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
      * Returns true if any nodes from this Node to the leaf of the Trail use Voicing features in some way. In
      * general, we do not want to activate voicing features in this case because the leaf-most Nodes in the Trail
      * should be activated instead.
-     * TODO: we want this to be @protected, https://github.com/phetsims/scenery/issues/1340
+     * @protected
      */
     getDescendantsUseHighlighting( trail: Trail ): boolean {
       const indexOfSelf = trail.nodes.indexOf( this );
