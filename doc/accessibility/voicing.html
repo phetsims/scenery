@@ -354,7 +354,7 @@
         // set up the Display and initialize the webSpeaker
         display.updateOnRequestAnimationFrame();
         display.initializeEvents();
-        scenery.voicingManager.initialize();
+        scenery.voicingManager.initialize( scenery.Display.userGestureEmitter );
         scenery.voicingManager.enabledProperty.value = true;
         /*END*/
       } );
@@ -417,7 +417,7 @@
         // set up the Display and initialize the webSpeaker
         display.updateOnRequestAnimationFrame();
         display.initializeEvents();
-        scenery.voicingManager.initialize();
+        scenery.voicingManager.initialize( scenery.Display.userGestureEmitter );
         scenery.voicingManager.enabledProperty.value = true;
 
         // globally enable/disable object responses
