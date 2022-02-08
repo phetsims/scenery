@@ -227,7 +227,6 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 
         const pointerFocus = this.displays[ trailIds[ i ] ].focusManager.readingBlockFocusProperty.value;
 
-        // @ts-ignore // TODO: fixed once FocusManager is converted to typescript https://github.com/phetsims/scenery/issues/1340
         if ( pointerFocus && pointerFocus.trail.lastNode() === this ) {
           activated = true;
           break;

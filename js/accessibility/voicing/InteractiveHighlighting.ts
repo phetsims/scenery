@@ -197,7 +197,6 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
       for ( let i = 0; i < trailIds.length; i++ ) {
         const pointerFocus = this.displays[ trailIds[ i ] ].focusManager.pointerFocusProperty.value;
 
-        // @ts-ignore // TODO: fixed once FocusManager is converted to typescript https://github.com/phetsims/scenery/issues/1340
         if ( pointerFocus && pointerFocus.trail.lastNode() === this ) {
           activated = true;
           break;
@@ -241,10 +240,8 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
       for ( let i = 0; i < displays.length; i++ ) {
         const display = displays[ i ];
 
-        // @ts-ignore // TODO: fixed once FocusManager is converted to typescript https://github.com/phetsims/scenery/issues/1340
         if ( display.focusManager.pointerFocusProperty.value === null || !event.trail.equals( display.focusManager.pointerFocusProperty.value.trail ) ) {
 
-          // @ts-ignore // TODO: fixed once FocusManager is converted to typescript https://github.com/phetsims/scenery/issues/1340
           display.focusManager.pointerFocusProperty.set( new Focus( display, event.trail ) );
         }
       }
@@ -260,12 +257,10 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
         const rootToSelf = event.trail.subtrailTo( this as unknown as Node );
 
         // only do more work on move if the event indicates that pointer focus might have changed
-        // @ts-ignore // TODO: fixed once FocusManager is converted to typescript https://github.com/phetsims/scenery/issues/1340
         if ( display.focusManager.pointerFocusProperty.value === null || !rootToSelf.equals( display.focusManager.pointerFocusProperty.value.trail ) ) {
 
           if ( !this.getDescendantsUseHighlighting( event.trail ) ) {
 
-            // @ts-ignore // TODO: fixed once FocusManager is converted to typescript https://github.com/phetsims/scenery/issues/1340
             display.focusManager.pointerFocusProperty.set( new Focus( display, rootToSelf ) );
           }
         }
@@ -302,7 +297,6 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
 
             // Set the lockedPointerFocusProperty with a copy of the Focus (as deep as possible) because we want
             // to keep a reference to the old Trail while pointerFocusProperty changes.
-            // @ts-ignore // TODO: fixed once FocusManager is converted to typescript https://github.com/phetsims/scenery/issues/1340
             display.focusManager.lockedPointerFocusProperty.set( new Focus( focus.display, focus.trail.copy() ) );
           }
         }
@@ -389,7 +383,6 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
         // this node;
         if ( display && instance.node!.instances.length === 0 ) {
 
-          // @ts-ignore // TODO: fixed once FocusManager is converted to typescript https://github.com/phetsims/scenery/issues/1340
           display.focusManager.pointerHighlightsVisibleProperty.unlink( this._interactiveHighlightingEnabledListener );
         }
 
