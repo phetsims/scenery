@@ -33,6 +33,7 @@ import UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
 import { InteractiveHighlighting, Node, NodeOptions, scenery, SceneryListenerFunction, voicingUtteranceQueue } from '../../imports.js';
 import optionize from '../../../../phet-core/js/optionize.js';
 import Constructor from '../../../../phet-core/js/Constructor.js';
+import { TAlertableDef } from '../../../../utterance-queue/js/AlertableDef.js';
 
 // options that are supported by Voicing.js. Added to mutator keys so that Voicing properties can be set with mutate.
 const VOICING_OPTION_KEYS = [
@@ -238,8 +239,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
         utterance: null
       }, providedOptions );
 
-      // TODO: Why is this causing a lint error? AlertableDef is in phet-types. https://github.com/phetsims/scenery/issues/1340
-      let response: AlertableDef = responseCollector.collectResponses( options ); // eslint-disable-line no-undef
+      let response: TAlertableDef = responseCollector.collectResponses( options ); // eslint-disable-line no-undef
 
       if ( options.utterance ) {
         options.utterance.alert = response;
@@ -252,9 +252,8 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * Use the provided function to create content to speak in response to input. The content is then added to the
      * back of the voicing UtteranceQueue.
      * @protected
-     * TODO: Why is this causing a lint error? AlertableDef is in phet-types. https://github.com/phetsims/scenery/issues/1340
      */
-    speakContent( content: AlertableDef | null ): void { // eslint-disable-line no-undef
+    speakContent( content: TAlertableDef | null ): void { // eslint-disable-line no-undef
 
       // don't send to utteranceQueue if response is empty
       if ( content ) {
