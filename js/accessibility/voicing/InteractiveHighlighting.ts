@@ -221,7 +221,6 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
       for ( let i = 0; i < trailIds.length; i++ ) {
         const display = this.displays[ trailIds[ i ] ];
 
-        // @ts-ignore // TODO: fixed once FocusManager is converted to typescript https://github.com/phetsims/scenery/issues/1340
         display.focusManager.pointerHighlightsVisibleProperty.unlink( this._interactiveHighlightingEnabledListener );
         delete this.displays[ trailIds[ i ] ];
       }
