@@ -10,7 +10,7 @@
 import merge from '../../../../../phet-core/js/merge.js';
 import { ReadingBlock, ReadingBlockHighlight, RichText, scenery } from '../../../imports.js';
 
-class VoicingRichText extends ReadingBlock( RichText ) {
+class VoicingRichText extends ReadingBlock( RichText, 1 ) {
 
   /**
    * @param {string} text

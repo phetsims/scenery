@@ -31,6 +31,7 @@ type InteractiveHighlightingOptions = InteractiveHighlightingSelfOptions & NodeO
  * @param optionsArgPosition - zero-indexed number that the options argument is provided at
  */
 const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType, optionsArgPosition: number ) => {
+  assert && assert( typeof optionsArgPosition === 'number', 'Must provide an index to access options arg from (zero-indexed)' );
   assert && assert( _.includes( inheritance( Type ), Node ), 'Only Node subtypes should compose InteractiveHighlighting' );
 
   const InteractiveHighlightingClass = class extends Type {
