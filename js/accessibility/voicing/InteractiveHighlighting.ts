@@ -35,6 +35,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
   assert && assert( _.includes( inheritance( Type ), Node ), 'Only Node subtypes should compose InteractiveHighlighting' );
 
   const InteractiveHighlightingClass = class extends Type {
+
     // Input listener to activate the HighlightOverlay upon pointer input. Uses exit and enter instead of over and out
     // because we do not want this to fire from bubbling. The highlight should be around this Node when it receives
     // input.
@@ -45,13 +46,12 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     // at one time.
     _pointer: null | Pointer;
 
-    // protected - A map that collects all of the Displays that this InteractiveHighlighting Node is
+    // @protected - A map that collects all of the Displays that this InteractiveHighlighting Node is
     // attached to, mapping the unique ID of the Instance Trail to the Display. We need a reference to the
     // Displays to activate the Focus Property associated with highlighting, and to add/remove listeners when
     // features that require highlighting are enabled/disabled. Note that this is updated asynchronously
     // (with updateDisplay) since Instances are added asynchronously.
-    // TODO: this should be protected, how to conventionize this?. https://github.com/phetsims/scenery/issues/1340
-    _displays: { [ key: string ]: Display };
+    displays: { [ key: string ]: Display };
 
     // The highlight that will surround this Node when it is activated and a Pointer is currently over it. When
     // null, the focus highlight will be used (as defined in ParallelDOM.js).
@@ -63,8 +63,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     // this.interactiveHighlightActivated is true.
     _interactiveHighlightLayerable: boolean;
 
-    // Emits an event when the interactive highlight changes for this Node
-    // TODO: this should be protected, how to conventionize this?. https://github.com/phetsims/scenery/issues/1340
+    // @protected - Emits an event when the interactive highlight changes for this Node
     interactiveHighlightChangedEmitter: TinyEmitter;
 
     // When new instances of this Node are created, adds an entry to the map of Displays.
@@ -96,7 +95,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
       };
 
       this._pointer = null;
-      this._displays = {};
+      this.displays = {};
       this._interactiveHighlight = null;
       this._interactiveHighlightLayerable = false;
       this.interactiveHighlightChangedEmitter = new TinyEmitter();
@@ -194,9 +193,9 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     isInteractiveHighlightActivated(): boolean {
       let activated = false;
 
-      const trailIds = Object.keys( this._displays );
+      const trailIds = Object.keys( this.displays );
       for ( let i = 0; i < trailIds.length; i++ ) {
-        const pointerFocus = this._displays[ trailIds[ i ] ].focusManager.pointerFocusProperty.value;
+        const pointerFocus = this.displays[ trailIds[ i ] ].focusManager.pointerFocusProperty.value;
 
         // @ts-ignore // TODO: fixed once FocusManager is converted to typescript https://github.com/phetsims/scenery/issues/1340
         if ( pointerFocus && pointerFocus.trail.lastNode() === this ) {
@@ -219,13 +218,13 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
       }
 
       // remove listeners on displays and remove Displays from the map
-      const trailIds = Object.keys( this._displays );
+      const trailIds = Object.keys( this.displays );
       for ( let i = 0; i < trailIds.length; i++ ) {
-        const display = this._displays[ trailIds[ i ] ];
+        const display = this.displays[ trailIds[ i ] ];
 
         // @ts-ignore // TODO: fixed once FocusManager is converted to typescript https://github.com/phetsims/scenery/issues/1340
         display.focusManager.pointerHighlightsVisibleProperty.unlink( this._interactiveHighlightingEnabledListener );
-        delete this._displays[ trailIds[ i ] ];
+        delete this.displays[ trailIds[ i ] ];
       }
 
       // @ts-ignore
@@ -238,7 +237,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
      */
     _onPointerEntered( event: SceneryEvent ) {
 
-      const displays = Object.values( this._displays );
+      const displays = Object.values( this.displays );
       for ( let i = 0; i < displays.length; i++ ) {
         const display = displays[ i ];
 
@@ -253,7 +252,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
 
     _onPointerMove( event: SceneryEvent ) {
 
-      const displays = Object.values( this._displays );
+      const displays = Object.values( this.displays );
       for ( let i = 0; i < displays.length; i++ ) {
         const display = displays[ i ];
 
@@ -279,7 +278,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
      */
     _onPointerExited( event: SceneryEvent ) {
 
-      const displays = Object.values( this._displays );
+      const displays = Object.values( this.displays );
       for ( let i = 0; i < displays.length; i++ ) {
         const display = displays[ i ];
         display.focusManager.pointerFocusProperty.set( null );
@@ -292,7 +291,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     _onPointerDown( event: SceneryEvent ) {
 
       if ( this._pointer === null ) {
-        const displays = Object.values( this._displays );
+        const displays = Object.values( this.displays );
         for ( let i = 0; i < displays.length; i++ ) {
           const display = displays[ i ];
           const focus = display.focusManager.pointerFocusProperty.value;
@@ -321,7 +320,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
      */
     _onPointerRelease( event?: SceneryEvent ) {
 
-      const displays = Object.values( this._displays );
+      const displays = Object.values( this.displays );
       for ( let i = 0; i < displays.length; i++ ) {
         const display = displays[ i ];
         display.focusManager.lockedPointerFocusProperty.value = null;
@@ -340,7 +339,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
      */
     _onPointerCancel( event?: SceneryEvent ) {
 
-      const displays = Object.values( this._displays );
+      const displays = Object.values( this.displays );
       for ( let i = 0; i < displays.length; i++ ) {
         const display = displays[ i ];
         display.focusManager.pointerFocusProperty.set( null );
@@ -374,7 +373,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
       assert && assert( instance.trail, 'should have a trail' );
 
       if ( added ) {
-        this._displays[ instance.trail!.uniqueId ] = instance.display;
+        this.displays[ instance.trail!.uniqueId ] = instance.display;
 
         // Listener may already by on the display in cases of DAG, only add if this is the first instance of this Node
         if ( !instance.display.focusManager.pointerHighlightsVisibleProperty.hasListener( this._interactiveHighlightingEnabledListener ) ) {
@@ -383,7 +382,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
       }
       else {
         assert && assert( instance.node, 'should have a node' );
-        const display = this._displays[ instance.trail!.uniqueId ];
+        const display = this.displays[ instance.trail!.uniqueId ];
 
         // If the node was disposed, this display reference has already been cleaned up, but instances are updated
         // (disposed) on the next frame after the node was disposed. Only unlink if there are no more instances of
@@ -394,7 +393,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
           display.focusManager.pointerHighlightsVisibleProperty.unlink( this._interactiveHighlightingEnabledListener );
         }
 
-        delete this._displays[ instance.trail!.uniqueId ];
+        delete this.displays[ instance.trail!.uniqueId ];
       }
     }
 
