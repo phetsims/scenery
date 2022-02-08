@@ -24,7 +24,7 @@ import Constructor from '../../../../phet-core/js/Constructor.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
-import { Focus, Node, ReadingBlockHighlight, ReadingBlockUtterance, scenery, SceneryEvent, Voicing, PDOMInstance, voicingManager } from '../../imports.js';
+import { Focus, Node, ReadingBlockHighlight, ReadingBlockUtterance, scenery, SceneryEvent, Voicing, PDOMInstance, voicingManager, NodeOptions } from '../../imports.js';
 import IInputListener from '../../input/IInputListener.js';
 
 const READING_BLOCK_OPTION_KEYS = [
@@ -34,12 +34,14 @@ const READING_BLOCK_OPTION_KEYS = [
   'readingBlockActiveHighlight'
 ];
 
-type ReadingBlockOptions = {
+type ReadingBlockSelfOptions = {
   readingBlockTagName: string | null;
   readingBlockContent: string | null;
   readingBlockHintResponse: string | null;
   readingBlockActiveHighlight: null | Shape | Node;
 };
+
+type ReadingBlockOptions = ReadingBlockSelfOptions & NodeOptions;
 
 const CONTENT_HINT_PATTERN = '{{OBJECT}}. {{HINT}}';
 
@@ -54,15 +56,42 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
   const VoicingClass = Voicing( Type, optionsArgPosition );
 
   const ReadingBlockClass = class extends VoicingClass {
-    public _readingBlockTagName: string | null;
-    public _readingBlockContent: string | null;
-    public _readingBlockHintResponse: string | null;
-    public _readingBlockDisabledTagName: string;
-    public _readingBlockActiveHighlight: null | Shape | Node;
-    public readingBlockActiveHighlightChangedEmitter: TinyEmitter<[]>; // (scenery-internal)
-    public localBoundsChangedListener: OmitThisParameter<( localBounds: Bounds2 ) => void>; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1348
-    public readingBlockInputListener: IInputListener; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1348
-    public readingBlockFocusableChangeListener: OmitThisParameter<( focusable: boolean ) => void>; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1348
+    // The tagName used for the ReadingBlock when "Voicing" is enabled, default
+    // of button so that it is added to the focus order and can receive 'click' events. You may wish to set this
+    // to some other tagName or set to null to remove the ReadingBlock from the focus order. If this is changed,
+    // be be sure that the ReadingBlock will still respond to `click` events when enabled.
+    _readingBlockTagName: string | null;
+
+    // The content for this ReadingBlock that will be spoken by SpeechSynthesis when
+    // the ReadingBlock receives input. ReadingBlocks don't use the categories of Voicing content provided by
+    // Voicing.ts because ReadingBlocks are always spoken regardless of the Properties of responseCollector.
+    _readingBlockContent: string | null;
+
+    // The help content that is read when this ReadingBlock is activated by input,
+    // but only when "Helpful Hints" is enabled by the user.
+    _readingBlockHintResponse: string | null;
+
+    // The tagName to apply to the Node when voicing is disabled.
+    _readingBlockDisabledTagName: string;
+
+    // The highlight that surrounds this ReadingBlock when it is "active" and
+    // the Voicing framework is speaking the content associated with this Node. By default, a semi-transparent
+    // yellow highlight surrounds this Node's bounds.
+    _readingBlockActiveHighlight: null | Shape | Node;
+
+    // (scenery-internal) - Sends a message when the highlight for the ReadingBlock changes. Used
+    // by the HighlightOverlay to redraw it if it changes while the highlight is active.
+    public readingBlockActiveHighlightChangedEmitter: TinyEmitter;
+
+    // Updates the hit bounds of this Node when the local bounds change.
+    _localBoundsChangedListener: OmitThisParameter<( localBounds: Bounds2 ) => void>;
+
+    // Triggers activation of the ReadingBlock, requesting speech of its content.
+    _readingBlockInputListener: IInputListener;
+
+    // Controls whether the ReadingBlock should be interactive and focusable. At the time of this writing, that is true
+    // for all ReadingBlocks when the voicingManager is fully enabled and can speak.
+    _readingBlockFocusableChangeListener: OmitThisParameter<( focusable: boolean ) => void>;
 
     constructor( ...args: any[] ) {
 
@@ -73,63 +102,36 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 
       super( ...args );
 
-      // The tagName used for the ReadingBlock when "Voicing" is enabled, default
-      // of button so that it is added to the focus order and can receive 'click' events. You may wish to set this
-      // to some other tagName or set to null to remove the ReadingBlock from the focus order. If this is changed,
-      // be be sure that the ReadingBlock will still respond to `click` events when enabled.
       this._readingBlockTagName = 'button';
-
-      // The content for this ReadingBlock that will be spoken by SpeechSynthesis when
-      // the ReadingBlock receives input. ReadingBlocks don't use the categories of Voicing content provided by
-      // Voicing.ts because ReadingBlocks are always spoken regardless of the Properties of responseCollector.
       this._readingBlockContent = null;
-
-      // The help content that is read when this ReadingBlock is activated by input,
-      // but only when "Helpful Hints" is enabled by the user.
       this._readingBlockHintResponse = null;
-
-      // The tagName to apply to the Node when voicing is disabled.
       this._readingBlockDisabledTagName = 'p';
-
-      // The highlight that surrounds this ReadingBlock when it is "active" and
-      // the Voicing framework is speaking the content associated with this Node. By default, a semi-transparent
-      // yellow highlight surrounds this Node's bounds.
       this._readingBlockActiveHighlight = null;
-
-      // (scenery-internal) - Sends a message when the highlight for the ReadingBlock changes. Used
-      // by the HighlightOverlay to redraw it if it changes while the highlight is active.
       this.readingBlockActiveHighlightChangedEmitter = new TinyEmitter();
 
-      // Updates the hit bounds of this Node when the local bounds change.
-      this.localBoundsChangedListener = this.onLocalBoundsChanged.bind( this );
-      ( this as unknown as Node ).localBoundsProperty.link( this.localBoundsChangedListener );
+      this._localBoundsChangedListener = this._onLocalBoundsChanged.bind( this );
+      ( this as unknown as Node ).localBoundsProperty.link( this._localBoundsChangedListener );
 
-      // Triggers activation of the ReadingBlock, requesting speech of its content.
-      this.readingBlockInputListener = {
-        focus: event => this.speakReadingBlockContent( event ),
-        up: event => this.speakReadingBlockContent( event ),
-        click: event => this.speakReadingBlockContent( event )
+      this._readingBlockInputListener = {
+        focus: event => this._speakReadingBlockContent( event ),
+        up: event => this._speakReadingBlockContent( event ),
+        click: event => this._speakReadingBlockContent( event )
       };
 
-      // Controls whether the ReadingBlock should be interactive and focusable.
-      // At the time of this writing, that is true for all ReadingBlocks when the voicingManager is
-      // fully enabled and can speak.
-      this.readingBlockFocusableChangeListener = this.onReadingBlockFocusableChanged.bind( this );
-      voicingManager.speechAllowedAndFullyEnabledProperty.link( this.readingBlockFocusableChangeListener );
+      this._readingBlockFocusableChangeListener = this._onReadingBlockFocusableChanged.bind( this );
+      voicingManager.speechAllowedAndFullyEnabledProperty.link( this._readingBlockFocusableChangeListener );
 
       // All ReadingBlocks have a ReadingBlockHighlight, a focus highlight that is black to indicate it has
       // a different behavior.
       ( this as unknown as Node ).focusHighlight = new ReadingBlockHighlight( this );
 
-      // @ts-ignore
       ( this as unknown as Node ).mutate( readingBlockOptions );
     }
 
     /**
-     * Whether or not a Node composes ReadingBlock.
-     * @returns {boolean}
+     * Whether a Node composes ReadingBlock.
      */
-    get isReadingBlock() {
+    get isReadingBlock(): boolean {
       return true;
     }
 
@@ -139,19 +141,19 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
      */
     setReadingBlockTagName( tagName: string | null ) {
       this._readingBlockTagName = tagName;
-      this.onReadingBlockFocusableChanged( voicingManager.speechAllowedAndFullyEnabledProperty.value );
+      this._onReadingBlockFocusableChanged( voicingManager.speechAllowedAndFullyEnabledProperty.value );
     }
 
-    set readingBlockTagName( tagName ) { this.setReadingBlockTagName( tagName ); }
+    set readingBlockTagName( tagName: string | null ) { this.setReadingBlockTagName( tagName ); }
 
     /**
      * Get the tagName for this Node (of ParallelDOM) when Reading Blocks are enabled.
      */
-    getReadingBlockTagName() {
+    getReadingBlockTagName(): string | null {
       return this._readingBlockTagName;
     }
 
-    get readingBlockTagName() { return this.getReadingBlockTagName(); }
+    get readingBlockTagName(): string | null { return this.getReadingBlockTagName(); }
 
     /**
      * Sets the content that should be read whenever the ReadingBlock receives input that initiates speech.
@@ -160,16 +162,16 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
       this._readingBlockContent = content;
     }
 
-    set readingBlockContent( content ) { this.setReadingBlockContent( content ); }
+    set readingBlockContent( content: string | null ) { this.setReadingBlockContent( content ); }
 
     /**
      * Gets the content that is spoken whenever the ReadingBLock receives input that would initiate speech.
      */
-    getReadingBlockContent() {
+    getReadingBlockContent(): string | null {
       return this._readingBlockContent;
     }
 
-    get readingBlockContent() { return this.getReadingBlockContent(); }
+    get readingBlockContent(): string | null { return this.getReadingBlockContent(); }
 
     /**
      * Sets the hint response for this ReadingBlock. This is only spoken if "Helpful Hints" are enabled by the user.
@@ -178,17 +180,17 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
       this._readingBlockHintResponse = content;
     }
 
-    set readingBlockHintResponse( content ) { this.setReadingBlockHintResponse( content ); }
+    set readingBlockHintResponse( content: string | null ) { this.setReadingBlockHintResponse( content ); }
 
     /**
      * Get the hint response for this ReadingBlock. This is additional content that is only read if "Helpful Hints"
      * are enabled.
      */
-    getReadingBlockHintResponse() {
+    getReadingBlockHintResponse(): string | null {
       return this._readingBlockHintResponse;
     }
 
-    get readingBlockHintResponse() { return this.getReadingBlockHintResponse(); }
+    get readingBlockHintResponse(): string | null { return this.getReadingBlockHintResponse(); }
 
     /**
      * Sets the highlight used to surround this Node while the Voicing framework is speaking this content.
@@ -202,17 +204,17 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
       }
     }
 
-    set readingBlockActiveHighlight( readingBlockActiveHighlight ) { this.setReadingBlockActiveHighlight( readingBlockActiveHighlight ); }
+    set readingBlockActiveHighlight( readingBlockActiveHighlight: Node | Shape | null ) { this.setReadingBlockActiveHighlight( readingBlockActiveHighlight ); }
 
     /**
      * Returns the highlight used to surround this Node when the Voicing framework is reading its
      * content.
      */
-    getReadingBlockActiveHighlight() {
+    getReadingBlockActiveHighlight(): Node | Shape | null {
       return this._readingBlockActiveHighlight;
     }
 
-    get readingBlockActiveHighlight() { return this._readingBlockActiveHighlight; }
+    get readingBlockActiveHighlight(): Node | Shape | null { return this._readingBlockActiveHighlight; }
 
     /**
      * Returns true if this ReadingBlock is "activated", indicating that it has received interaction
@@ -235,16 +237,15 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
       return activated;
     }
 
-    get readingBlockActivated() { return this.isReadingBlockActivated(); }
+    get readingBlockActivated(): boolean { return this.isReadingBlockActivated(); }
 
     /**
      * When this Node becomes focusable (because Reading Blocks have just been enabled or disabled), either
      * apply or remove the readingBlockTagName.
-     * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1348
      *
      * @param focusable - whether or not ReadingBlocks should be focusable
      */
-    onReadingBlockFocusableChanged( focusable: boolean ) {
+    _onReadingBlockFocusableChanged( focusable: boolean ) {
 
       const thisNode = this as unknown as Node;
 
@@ -254,23 +255,22 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
         thisNode.tagName = this._readingBlockTagName;
 
         // don't add the input listener if we are already active, we may just be updating the tagName in this case
-        if ( !thisNode.hasInputListener( this.readingBlockInputListener ) ) {
-          thisNode.addInputListener( this.readingBlockInputListener );
+        if ( !thisNode.hasInputListener( this._readingBlockInputListener ) ) {
+          thisNode.addInputListener( this._readingBlockInputListener );
         }
       }
       else {
         thisNode.tagName = this._readingBlockDisabledTagName;
-        if ( thisNode.hasInputListener( this.readingBlockInputListener ) ) {
-          thisNode.removeInputListener( this.readingBlockInputListener );
+        if ( thisNode.hasInputListener( this._readingBlockInputListener ) ) {
+          thisNode.removeInputListener( this._readingBlockInputListener );
         }
       }
     }
 
     /**
      * Update the hit areas for this Node whenever the bounds change.
-     * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1348
      */
-    onLocalBoundsChanged( localBounds: Bounds2 ): void {
+    _onLocalBoundsChanged( localBounds: Bounds2 ): void {
       const thisNode = this as unknown as Node;
       thisNode.mouseArea = localBounds;
       thisNode.touchArea = localBounds;
@@ -280,9 +280,8 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
      * Speak the content associated with the ReadingBlock. Sets the readingBlockFocusProperties on
      * the displays so that HighlightOverlays know to activate a highlight while the voicingManager
      * is reading about this Node.
-     * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1348
      */
-    speakReadingBlockContent( event: SceneryEvent ) {
+    _speakReadingBlockContent( event: SceneryEvent ) {
 
       const displays = ( this as unknown as Node ).getConnectedDisplays();
 
@@ -313,7 +312,6 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
      * Collect responses for the ReadingBlock, putting together the content and the hint response. The hint response
      * is only read if it exists and hints are enabled by the user. Otherwise, only the readingBlock content will
      * be spoken.
-     *
      */
     collectReadingBlockResponses(): string | null {
 
@@ -338,17 +336,15 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
       return response;
     }
 
-    /**
-     */
     dispose() {
       const thisNode = ( this as unknown as Node );
-      voicingManager.speechAllowedAndFullyEnabledProperty.unlink( this.readingBlockFocusableChangeListener );
-      thisNode.localBoundsProperty.unlink( this.localBoundsChangedListener );
+      voicingManager.speechAllowedAndFullyEnabledProperty.unlink( this._readingBlockFocusableChangeListener );
+      thisNode.localBoundsProperty.unlink( this._localBoundsChangedListener );
 
       // remove the input listener that activates the ReadingBlock, only do this if the listener is attached while
       // the ReadingBlock is enabled
-      if ( thisNode.hasInputListener( this.readingBlockInputListener ) ) {
-        thisNode.removeInputListener( this.readingBlockInputListener );
+      if ( thisNode.hasInputListener( this._readingBlockInputListener ) ) {
+        thisNode.removeInputListener( this._readingBlockInputListener );
       }
 
       super.dispose();

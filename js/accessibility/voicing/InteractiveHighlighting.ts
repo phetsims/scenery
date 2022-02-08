@@ -10,7 +10,7 @@ import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import Shape from '../../../../kite/js/Shape.js';
 import Constructor from '../../../../phet-core/js/Constructor.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
-import { Display, Focus, IInputListener, Instance, Node, Pointer, scenery, SceneryEvent, Trail } from '../../imports.js';
+import { Display, Focus, IInputListener, Instance, Node, NodeOptions, Pointer, scenery, SceneryEvent, Trail } from '../../imports.js';
 
 // constants
 // option keys for InteractiveHighlighting, each of these will have a setter and getter and values are applied with mutate()
@@ -19,10 +19,12 @@ const INTERACTIVE_HIGHLIGHTING_OPTIONS = [
   'interactiveHighlightLayerable'
 ];
 
-type InteractiveHighlightingOptions = {
+type InteractiveHighlightingSelfOptions = {
   interactiveHighlight?: Node | Shape | null,
   interactiveHighlightLayerable?: boolean
 };
+
+type InteractiveHighlightingOptions = InteractiveHighlightingSelfOptions & NodeOptions;
 
 /**
  * @param Type
@@ -32,15 +34,49 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
   assert && assert( _.includes( inheritance( Type ), Node ), 'Only Node subtypes should compose InteractiveHighlighting' );
 
   const InteractiveHighlightingClass = class extends Type {
-    activationListener: IInputListener; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1348
-    pointer: null | Pointer; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1348
-    _displays: { [ key: string ]: Display }; // TODO: this should be protected, how to conventionize this?. https://github.com/phetsims/scenery/issues/1340
+    // Input listener to activate the HighlightOverlay upon pointer input. Uses exit and enter instead of over and out
+    // because we do not want this to fire from bubbling. The highlight should be around this Node when it receives
+    // input.
+    _activationListener: IInputListener;
+
+    // A reference to the Pointer so that we can add and remove listeners from it when necessary.
+    // Since this is on the trait, only one pointer can have a listener for this Node that uses InteractiveHighlighting
+    // at one time.
+    _pointer: null | Pointer;
+
+    // protected - A map that collects all of the Displays that this InteractiveHighlighting Node is
+    // attached to, mapping the unique ID of the Instance Trail to the Display. We need a reference to the
+    // Displays to activate the Focus Property associated with highlighting, and to add/remove listeners when
+    // features that require highlighting are enabled/disabled. Note that this is updated asynchronously
+    // (with updateDisplay) since Instances are added asynchronously.
+    // TODO: this should be protected, how to conventionize this?. https://github.com/phetsims/scenery/issues/1340
+    _displays: { [ key: string ]: Display };
+
+    // The highlight that will surround this Node when it is activated and a Pointer is currently over it. When
+    // null, the focus highlight will be used (as defined in ParallelDOM.js).
     _interactiveHighlight: Shape | Node | null;
+
+    // If true, the highlight will be layerable in the scene graph instead of drawn
+    // above everything in the HighlightOverlay. If true, you are responsible for adding the interactiveHighlight
+    // in the location you want in the scene graph. The interactiveHighlight will become visible when
+    // this.interactiveHighlightActivated is true.
     _interactiveHighlightLayerable: boolean;
-    interactiveHighlightChangedEmitter: TinyEmitter<[]>; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1348
-    changedInstanceListener: ( instance: Instance, added: boolean ) => void;
-    interactiveHighlightingEnabledListener: ( enabled: boolean ) => void;
-    pointerListener: IInputListener; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1348
+
+    // Emits an event when the interactive highlight changes for this Node
+    // TODO: this should be protected, how to conventionize this?. https://github.com/phetsims/scenery/issues/1340
+    interactiveHighlightChangedEmitter: TinyEmitter;
+
+    // When new instances of this Node are created, adds an entry to the map of Displays.
+    _changedInstanceListener: ( instance: Instance, added: boolean ) => void;
+
+    // Listener that adds/removes other listeners that activate highlights when
+    // the feature becomes enabled/disabled so that we don't do extra work related to highlighting unless
+    // it is necessary.
+    _interactiveHighlightingEnabledListener: ( enabled: boolean ) => void;
+
+    // Input listener that locks the HighlightOverlay so that there are no updates to the highlight
+    // while the pointer is down over something that uses InteractiveHighlighting.
+    _pointerListener: IInputListener;
 
     constructor( ...args: any[] ) {
 
@@ -51,80 +87,46 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
 
       super( ...args );
 
-      // @private - Input listener to activate the HighlightOverlay upon pointer pointer input. Uses exit
-      // and enter instead of over and out because we do not want this to fire from bubbling. The highlight
-      // should be around this Node when it receives input.
-      this.activationListener = {
-        enter: this.onPointerEntered.bind( this ),
-        move: this.onPointerMove.bind( this ),
-        exit: this.onPointerExited.bind( this ),
-        down: this.onPointerDown.bind( this )
+      this._activationListener = {
+        enter: this._onPointerEntered.bind( this ),
+        move: this._onPointerMove.bind( this ),
+        exit: this._onPointerExited.bind( this ),
+        down: this._onPointerDown.bind( this )
       };
 
-      // @private - A reference to the Pointer so that we can add and remove listeners from it when necessary.
-      // Since this is on the trait, only one pointer can have a listener for this Node that uses InteractiveHighlighting
-      // at one time.
-      this.pointer = null;
-
-      // @protected - A map that collects all of the Displays that this InteractiveHighlighting Node is
-      // attached to, mapping the unique ID of the Instance Trail to the Display. We need a reference to the
-      // Displays to activate the Focus Property associated with highlighting, and to add/remove listeners when
-      // features that require highlighting are enabled/disabled. Note that this is updated asynchronously
-      // (with updateDisplay) since Instances are added asynchronously.
+      this._pointer = null;
       this._displays = {};
-
-      // @private {Shape|Node|null} - The highlight that will surround this Node when it is activated and a Pointer
-      // is currently over it. When null, the focus highlight will be used (as defined in ParallelDOM.js).
       this._interactiveHighlight = null;
-
-      // @private {boolean} - If true, the highlight will be layerable in the scene graph instead of drawn
-      // above everything in the HighlightOverlay. If true, you are responsible for adding the interactiveHighlight
-      // in the location you want in the scene graph. The interactiveHighlight will become visible when
-      // this.interactiveHighlightActivated is true.
       this._interactiveHighlightLayerable = false;
-
-      // @private {TinyEmitter} - emits an event when the interactive highlight changes for this Node
       this.interactiveHighlightChangedEmitter = new TinyEmitter();
 
-      // @private {function} - When new instances of this Node are created, adds an entry to the map of Displays.
-      this.changedInstanceListener = this.onChangedInstance.bind( this );
-      ( this as unknown as Node ).changedInstanceEmitter.addListener( this.changedInstanceListener );
+      this._changedInstanceListener = this.onChangedInstance.bind( this );
+      ( this as unknown as Node ).changedInstanceEmitter.addListener( this._changedInstanceListener );
 
-      // @private {function} - Listener that adds/removes other listeners that activate highlights when
-      // the feature becomes enabled/disabled so that we don't do extra work related to highlighting unless
-      // it is necessary.
-      this.interactiveHighlightingEnabledListener = this.onInteractiveHighlightingEnabledChange.bind( this );
+      this._interactiveHighlightingEnabledListener = this._onInteractiveHighlightingEnabledChange.bind( this );
 
-      const boundPointerReleaseListener = this.onPointerRelease.bind( this );
-      const boundPointerCancel = this.onPointerCancel.bind( this );
+      const boundPointerReleaseListener = this._onPointerRelease.bind( this );
+      const boundPointerCancel = this._onPointerCancel.bind( this );
 
-      // @private - Input listener that locks the HighlightOverlay so that there are no updates to the highlight
-      // while the pointer is down over something that uses InteractiveHighlighting.
-      this.pointerListener = {
+      this._pointerListener = {
         up: boundPointerReleaseListener,
         cancel: boundPointerCancel,
         interrupt: boundPointerCancel
       };
 
-      // @ts-ignore
       ( this as unknown as Node ).mutate( interactiveHighlightingOptions );
     }
 
     /**
-     * Whether or not a Node composes InteractiveHighlighting.
-     * @public
-     * @returns {boolean}
+     * Whether a Node composes InteractiveHighlighting.
      */
-    get isInteractiveHighlighting() {
+    get isInteractiveHighlighting(): boolean {
       return true;
     }
 
     /**
      * Set the interactive highlight for this node. By default, the highlight will be a pink rectangle that surrounds
      * the node's local bounds.
-     * @public
-     *
-     * @param {Node|Shape|null} interactiveHighlight
      */
     setInteractiveHighlight( interactiveHighlight: Node | Shape | null ) {
 
@@ -144,22 +146,19 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
       }
     }
 
-    set interactiveHighlight( interactiveHighlight ) { this.setInteractiveHighlight( interactiveHighlight ); }
+    set interactiveHighlight( interactiveHighlight: Node | Shape | null ) { this.setInteractiveHighlight( interactiveHighlight ); }
 
     /**
      * Returns the interactive highlight for this Node.
-     * @public
-     *
-     * @returns {null|Node|Shape}
      */
-    getInteractiveHighlight() {
+    getInteractiveHighlight(): Node | Shape | null {
       return this._interactiveHighlight;
     }
 
-    get interactiveHighlight() { return this.getInteractiveHighlight(); }
+    get interactiveHighlight(): Node | Shape | null { return this.getInteractiveHighlight(); }
 
     /**
-     * Sets whether the highlight is layerable in the scene graph instead of above everyting in the
+     * Sets whether the highlight is layerable in the scene graph instead of above everything in the
      * highlight overlay. If layerable, you must provide a custom highlight and it must be a Node. The highlight
      * Node will always be invisible unless this Node is activated with a pointer.
      */
@@ -176,15 +175,12 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
       }
     }
 
-    set interactiveHighlightLayerable( interactiveHighlightLayerable ) { this.setInteractiveHighlightLayerable( interactiveHighlightLayerable ); }
+    set interactiveHighlightLayerable( interactiveHighlightLayerable: boolean ) { this.setInteractiveHighlightLayerable( interactiveHighlightLayerable ); }
 
     /**
-     * Get whether or not the interactive highlight is layerable in the scene graph.
-     * @public
-     *
-     * @returns {null|boolean}
+     * Get whether the interactive highlight is layerable in the scene graph.
      */
-    getInteractiveHighlightLayerable() {
+    getInteractiveHighlightLayerable(): boolean {
       return this._interactiveHighlightLayerable;
     }
 
@@ -193,11 +189,8 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     /**
      * Returns true if this Node is "activated" by a pointer, indicating that a Pointer is over it
      * and this Node mixes InteractiveHighlighting so an interactive highlight should surround it.
-     * @public
-     *
-     * @returns {boolean}
      */
-    isInteractiveHighlightActivated() {
+    isInteractiveHighlightActivated(): boolean {
       let activated = false;
 
       const trailIds = Object.keys( this._displays );
@@ -213,15 +206,15 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
       return activated;
     }
 
-    get interactiveHighlightActivated() { return this.isInteractiveHighlightActivated(); }
+    get interactiveHighlightActivated(): boolean { return this.isInteractiveHighlightActivated(); }
 
     dispose() {
       const thisNode = this as unknown as Node;
-      thisNode.changedInstanceEmitter.removeListener( this.changedInstanceListener );
+      thisNode.changedInstanceEmitter.removeListener( this._changedInstanceListener );
 
       // remove the activation listener if it is currently attached
-      if ( thisNode.hasInputListener( this.activationListener ) ) {
-        thisNode.removeInputListener( this.activationListener );
+      if ( thisNode.hasInputListener( this._activationListener ) ) {
+        thisNode.removeInputListener( this._activationListener );
       }
 
       // remove listeners on displays and remove Displays from the map
@@ -230,7 +223,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
         const display = this._displays[ trailIds[ i ] ];
 
         // @ts-ignore // TODO: fixed once FocusManager is converted to typescript https://github.com/phetsims/scenery/issues/1340
-        display.focusManager.pointerHighlightsVisibleProperty.unlink( this.interactiveHighlightingEnabledListener );
+        display.focusManager.pointerHighlightsVisibleProperty.unlink( this._interactiveHighlightingEnabledListener );
         delete this._displays[ trailIds[ i ] ];
       }
 
@@ -241,10 +234,8 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     /**
      * When a Pointer enters this Node, signal to the Displays that the pointer is over this Node so that the
      * HighlightOverlay can be activated.
-     * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1348
-     *
      */
-    onPointerEntered( event: SceneryEvent ) {
+    _onPointerEntered( event: SceneryEvent ) {
 
       const displays = Object.values( this._displays );
       for ( let i = 0; i < displays.length; i++ ) {
@@ -259,7 +250,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
       }
     }
 
-    onPointerMove( event: SceneryEvent ) {
+    _onPointerMove( event: SceneryEvent ) {
 
       const displays = Object.values( this._displays );
       for ( let i = 0; i < displays.length; i++ ) {
@@ -284,9 +275,8 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     /**
      * When a pointer exits this Node, signal to the Displays that pointer focus has changed to deactivate
      * the HighlightOverlay.
-     * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1348
      */
-    onPointerExited( event: SceneryEvent ) {
+    _onPointerExited( event: SceneryEvent ) {
 
       const displays = Object.values( this._displays );
       for ( let i = 0; i < displays.length; i++ ) {
@@ -297,11 +287,10 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
 
     /**
      * When a pointer goes down on this Node, signal to the Displays that the pointerFocus is locked
-     * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1348
      */
-    onPointerDown( event: SceneryEvent ) {
+    _onPointerDown( event: SceneryEvent ) {
 
-      if ( this.pointer === null ) {
+      if ( this._pointer === null ) {
         const displays = Object.values( this._displays );
         for ( let i = 0; i < displays.length; i++ ) {
           const display = displays[ i ];
@@ -318,19 +307,18 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
           }
         }
 
-        this.pointer = event.pointer;
-        this.pointer.addInputListener( this.pointerListener );
+        this._pointer = event.pointer;
+        this._pointer.addInputListener( this._pointerListener );
       }
     }
 
     /**
      * When a Pointer goes up after going down on this Node, signal to the Displays that the pointerFocusProperty no
      * longer needs to be locked.
-     * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1348
      *
-     * @param {SceneryEvent} [event] - may be called during interrupt or cancel, in which case there is no event
+     * @param [event] - may be called during interrupt or cancel, in which case there is no event
      */
-    onPointerRelease( event?: SceneryEvent ) {
+    _onPointerRelease( event?: SceneryEvent ) {
 
       const displays = Object.values( this._displays );
       for ( let i = 0; i < displays.length; i++ ) {
@@ -338,19 +326,18 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
         display.focusManager.lockedPointerFocusProperty.value = null;
       }
 
-      if ( this.pointer && this.pointer.listeners.includes( this.pointerListener ) ) {
-        this.pointer.removeInputListener( this.pointerListener );
-        this.pointer = null;
+      if ( this._pointer && this._pointer.listeners.includes( this._pointerListener ) ) {
+        this._pointer.removeInputListener( this._pointerListener );
+        this._pointer = null;
       }
     }
 
     /**
      * If the pointer listener is cancelled or interrupted, clear focus and remove input listeners.
-     * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1348
      *
-     * @param event
+     * @param [event]
      */
-    onPointerCancel( event?: SceneryEvent ) {
+    _onPointerCancel( event?: SceneryEvent ) {
 
       const displays = Object.values( this._displays );
       for ( let i = 0; i < displays.length; i++ ) {
@@ -359,23 +346,22 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
       }
 
       // unlock and remove pointer listeners
-      this.onPointerRelease( event );
+      this._onPointerRelease( event );
     }
 
     /**
      * Add or remove listeners related to activating interactive highlighting when the feature becomes enabled.
      * This way we prevent doing work related to interactive highlighting unless the feature is enabled.
-     * TODO: we want this to be @private, https://github.com/phetsims/scenery/issues/1348
      */
-    onInteractiveHighlightingEnabledChange( enabled: boolean ) {
+    _onInteractiveHighlightingEnabledChange( enabled: boolean ) {
       const thisNode = this as unknown as Node;
 
-      const hasActivationListener = thisNode.hasInputListener( this.activationListener );
+      const hasActivationListener = thisNode.hasInputListener( this._activationListener );
       if ( enabled && !hasActivationListener ) {
-        thisNode.addInputListener( this.activationListener );
+        thisNode.addInputListener( this._activationListener );
       }
       else if ( !enabled && hasActivationListener ) {
-        thisNode.removeInputListener( this.activationListener );
+        thisNode.removeInputListener( this._activationListener );
       }
     }
 
@@ -390,8 +376,8 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
         this._displays[ instance.trail!.uniqueId ] = instance.display;
 
         // Listener may already by on the display in cases of DAG, only add if this is the first instance of this Node
-        if ( !instance.display.focusManager.pointerHighlightsVisibleProperty.hasListener( this.interactiveHighlightingEnabledListener ) ) {
-          instance.display.focusManager.pointerHighlightsVisibleProperty.link( this.interactiveHighlightingEnabledListener );
+        if ( !instance.display.focusManager.pointerHighlightsVisibleProperty.hasListener( this._interactiveHighlightingEnabledListener ) ) {
+          instance.display.focusManager.pointerHighlightsVisibleProperty.link( this._interactiveHighlightingEnabledListener );
         }
       }
       else {
@@ -404,7 +390,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
         if ( display && instance.node!.instances.length === 0 ) {
 
           // @ts-ignore // TODO: fixed once FocusManager is converted to typescript https://github.com/phetsims/scenery/issues/1340
-          display.focusManager.pointerHighlightsVisibleProperty.unlink( this.interactiveHighlightingEnabledListener );
+          display.focusManager.pointerHighlightsVisibleProperty.unlink( this._interactiveHighlightingEnabledListener );
         }
 
         delete this._displays[ instance.trail!.uniqueId ];
@@ -439,7 +425,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
   };
 
   /**
-   * {Array.<string>} - String keys for all of the allowed options that will be set by Node.mutate( options ), in
+   * {Array.<string>} - String keys for all the allowed options that will be set by Node.mutate( options ), in
    * the order they will be evaluated.
    * @protected
    *

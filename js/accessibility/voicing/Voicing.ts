@@ -32,7 +32,7 @@ import ResponsePacket, { ResponsePacketOptions } from '../../../../utterance-que
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
 import Utterance from '../../../../utterance-queue/js/Utterance.js';
 import UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
-import { InteractiveHighlighting, Node, scenery, SceneryListenerFunction, voicingUtteranceQueue } from '../../imports.js';
+import { InteractiveHighlighting, Node, NodeOptions, scenery, SceneryListenerFunction, voicingUtteranceQueue } from '../../imports.js';
 import optionize from '../../../../phet-core/js/optionize.js';
 import Constructor from '../../../../phet-core/js/Constructor.js';
 
@@ -48,7 +48,7 @@ const VOICING_OPTION_KEYS = [
   'voicingFocusListener'
 ];
 
-type VoicingOptions = {
+type VoicingSelfOptions = {
   voicingNameResponse?: string | null,
   voicingObjectResponse?: string | null,
   voicingContextResponse?: string | null,
@@ -57,9 +57,12 @@ type VoicingOptions = {
   voicingResponsePatternCollection?: ResponsePatternCollection,
   voicingIgnoreVoicingManagerProperties?: boolean,
   voicingFocusListener?: SceneryListenerFunction
-}
+};
+
+type VoicingOptions = VoicingSelfOptions & NodeOptions;
 
 type ResponseOptions = {
+  // The utterance to use if you want this response to be more controlled in the UtteranceQueue.
   utterance?: Utterance | null;
 } & ResponsePacketOptions;
 
@@ -75,10 +78,24 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
   // Unfortunately, nothing can be private or protected in this class, see https://github.com/phetsims/scenery/issues/1340#issuecomment-1020692592
   const VoicingClass = class extends InteractiveHighlightingClass {
-    public voicingResponsePacket!: ResponsePacket; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1348
-    public _voicingUtteranceQueue!: UtteranceQueue | null;
-    public _voicingFocusListener!: SceneryListenerFunction;
-    public speakContentOnFocusListener!: { focus: SceneryListenerFunction }; // TODO: use underscore so that there is a "private" convention. https://github.com/phetsims/scenery/issues/1348
+
+    // ResponsePacket that holds all the supported responses to be Voiced
+    _voicingResponsePacket!: ResponsePacket;
+
+    // The utteranceQueue that responses for this Node will be spoken through.
+    // By default (null), it will go through the singleton voicingUtteranceQueue, but you may need separate
+    // UtteranceQueues for different areas of content in your application. For example, Voicing and
+    // the default voicingUtteranceQueue may be disabled, but you could still want some speech to come through
+    // while user is changing preferences or other settings.
+    _voicingUtteranceQueue!: UtteranceQueue | null;
+
+    // Called when this node is focused.
+    _voicingFocusListener!: SceneryListenerFunction;
+
+    // Input listener that speaks content on focus. This is the only input listener added
+    // by Voicing, but it is the one that is consistent for all Voicing nodes. On focus, speak the name, object
+    // response, and interaction hint.
+    public _speakContentOnFocusListener!: { focus: SceneryListenerFunction };
 
     constructor( ...args: any[] ) {
 
@@ -92,7 +109,6 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
       // We only want to call this method, not any subtype implementation
       VoicingClass.prototype.initialize.call( this );
 
-      // @ts-ignore
       ( this as unknown as Node ).mutate( voicingOptions );
     }
 
@@ -102,28 +118,16 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
       // @ts-ignore
       super.initialize && super.initialize();
 
-      // @public {ResponsePacket} - ResponsePacket that holds all the supported responses to be Voiced
-      this.voicingResponsePacket = new ResponsePacket();
-
-      // @private {UtteranceQueue|null} - The utteranceQueue that responses for this Node will be spoken through.
-      // By default (null), it will go through the singleton voicingUtteranceQueue, but you may need separate
-      // UtteranceQueues for different areas of content in your application. For example, Voicing and
-      // the default voicingUtteranceQueue may be disabled, but you could still want some speech to come through
-      // while user is changing preferences or other settings.
+      this._voicingResponsePacket = new ResponsePacket();
       this._voicingUtteranceQueue = null;
-
-      // @private {Function(event):} - called when this node is focused.
       this._voicingFocusListener = this.defaultFocusListener;
 
-      // @private {Object} - Input listener that speaks content on focus. This is the only input listener added
-      // by Voicing, but it is the one that is consistent for all Voicing nodes. On focus, speak the name, object
-      // response, and interaction hint.
-      this.speakContentOnFocusListener = {
+      this._speakContentOnFocusListener = {
         focus: event => {
           this._voicingFocusListener( event );
         }
       };
-      ( this as unknown as Node ).addInputListener( this.speakContentOnFocusListener );
+      ( this as unknown as Node ).addInputListener( this._speakContentOnFocusListener );
 
       return this;
     }
@@ -137,10 +141,10 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
       // options are passed along to collectAndSpeakResponse, see that function for additional options
       const options = optionize<ResponseOptions, {}, ResponseOptions>( {
-        nameResponse: this.voicingResponsePacket.nameResponse,
-        objectResponse: this.voicingResponsePacket.objectResponse,
-        contextResponse: this.voicingResponsePacket.contextResponse,
-        hintResponse: this.voicingResponsePacket.hintResponse
+        nameResponse: this._voicingResponsePacket.nameResponse,
+        objectResponse: this._voicingResponsePacket.objectResponse,
+        contextResponse: this._voicingResponsePacket.contextResponse,
+        hintResponse: this._voicingResponsePacket.hintResponse
       }, providedOptions );
 
       this.collectAndSpeakResponse( options );
@@ -176,7 +180,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
       // options are passed along to collectAndSpeakResponse, see that function for additional options
       const options = optionize<ResponseOptions, {}, ResponseOptions>( {
-        nameResponse: this.voicingResponsePacket.nameResponse
+        nameResponse: this._voicingResponsePacket.nameResponse
       }, providedOptions );
 
       this.collectAndSpeakResponse( options );
@@ -190,7 +194,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
       // options are passed along to collectAndSpeakResponse, see that function for additional options
       const options = optionize<ResponseOptions, {}, ResponseOptions>( {
-        objectResponse: this.voicingResponsePacket.objectResponse
+        objectResponse: this._voicingResponsePacket.objectResponse
       }, providedOptions );
 
       this.collectAndSpeakResponse( options );
@@ -205,7 +209,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
       // options are passed along to collectAndSpeakResponse, see that function for additional options
       const options = optionize<ResponseOptions, {}, ResponseOptions>( {
-        contextResponse: this.voicingResponsePacket.contextResponse
+        contextResponse: this._voicingResponsePacket.contextResponse
       }, providedOptions );
 
       this.collectAndSpeakResponse( options );
@@ -220,7 +224,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
       // options are passed along to collectAndSpeakResponse, see that function for additional options
       const options = optionize<ResponseOptions, {}, ResponseOptions>( {
-        hintResponse: this.voicingResponsePacket.hintResponse
+        hintResponse: this._voicingResponsePacket.hintResponse
       }, providedOptions );
 
       this.collectAndSpeakResponse( options );
@@ -233,16 +237,8 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      */
     collectAndSpeakResponse( providedOptions?: ResponseOptions ): void {
       const options = optionize<ResponseOptions, {}, ResponseOptions>( {
-
-        // {boolean} - whether or not this response should ignore the Properties of responseCollector
-        ignoreProperties: this.voicingResponsePacket.ignoreProperties,
-
-        // {Object} - collection of string patterns to use with responseCollector.collectResponses, see
-        // ResponsePatternCollection for more information.
-        responsePatternCollection: this.voicingResponsePacket.responsePatternCollection,
-
-        // {Utterance|null} - The utterance to use if you want this response to be more controlled in the
-        // UtteranceQueue.
+        ignoreProperties: this._voicingResponsePacket.ignoreProperties,
+        responsePatternCollection: this._voicingResponsePacket.responsePatternCollection,
         utterance: null
       }, providedOptions );
 
@@ -277,19 +273,19 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * responseCollector.nameResponsesEnabledProperty is set to true.
      */
     setVoicingNameResponse( response: string | null ): void {
-      this.voicingResponsePacket.nameResponse = response;
+      this._voicingResponsePacket.nameResponse = response;
     }
 
-    set voicingNameResponse( response ) { this.setVoicingNameResponse( response ); }
+    set voicingNameResponse( response: string | null ) { this.setVoicingNameResponse( response ); }
 
     /**
      * Get the voicingNameResponse for this Node.
      */
-    getVoicingNameResponse() {
-      return this.voicingResponsePacket.nameResponse;
+    getVoicingNameResponse(): string | null {
+      return this._voicingResponsePacket.nameResponse;
     }
 
-    get voicingNameResponse() { return this.getVoicingNameResponse(); }
+    get voicingNameResponse(): string | null { return this.getVoicingNameResponse(); }
 
     /**
      * Set the object response for this Node. This is usually the state information associated with this Node, such
@@ -297,19 +293,19 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * responseCollector.objectResponsesEnabledProperty is set to true.
      */
     setVoicingObjectResponse( response: string | null ) {
-      this.voicingResponsePacket.objectResponse = response;
+      this._voicingResponsePacket.objectResponse = response;
     }
 
-    set voicingObjectResponse( response ) { this.setVoicingObjectResponse( response ); }
+    set voicingObjectResponse( response: string | null ) { this.setVoicingObjectResponse( response ); }
 
     /**
      * Gets the object response for this Node.
      */
-    getVoicingObjectResponse() {
-      return this.voicingResponsePacket.objectResponse;
+    getVoicingObjectResponse(): string | null {
+      return this._voicingResponsePacket.objectResponse;
     }
 
-    get voicingObjectResponse() { return this.getVoicingObjectResponse(); }
+    get voicingObjectResponse(): string | null { return this.getVoicingObjectResponse(); }
 
     /**
      * Set the context response for this Node. This is usually the content that describes what has happened in
@@ -317,19 +313,19 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * only be heard if responseCollector.contextResponsesEnabledProperty is set to true.
      */
     setVoicingContextResponse( response: string | null ) {
-      this.voicingResponsePacket.contextResponse = response;
+      this._voicingResponsePacket.contextResponse = response;
     }
 
-    set voicingContextResponse( response ) { this.setVoicingContextResponse( response ); }
+    set voicingContextResponse( response: string | null ) { this.setVoicingContextResponse( response ); }
 
     /**
      * Gets the context response for this Node.
      */
-    getVoicingContextResponse() {
-      return this.voicingResponsePacket.contextResponse;
+    getVoicingContextResponse(): string | null {
+      return this._voicingResponsePacket.contextResponse;
     }
 
-    get voicingContextResponse() { return this.getVoicingContextResponse(); }
+    get voicingContextResponse(): string | null { return this.getVoicingContextResponse(); }
 
     /**
      * Sets the hint response for this Node. This is usually a response that describes how to interact with this Node.
@@ -337,19 +333,19 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * true.
      */
     setVoicingHintResponse( response: string | null ) {
-      this.voicingResponsePacket.hintResponse = response;
+      this._voicingResponsePacket.hintResponse = response;
     }
 
-    set voicingHintResponse( response ) { this.setVoicingHintResponse( response ); }
+    set voicingHintResponse( response: string | null ) { this.setVoicingHintResponse( response ); }
 
     /**
      * Gets the hint response for this Node.
      */
-    getVoicingHintResponse() {
-      return this.voicingResponsePacket.hintResponse;
+    getVoicingHintResponse(): string | null {
+      return this._voicingResponsePacket.hintResponse;
     }
 
-    get voicingHintResponse() { return this.getVoicingHintResponse(); }
+    get voicingHintResponse(): string | null { return this.getVoicingHintResponse(); }
 
     /**
      * Set whether or not all responses for this Node will ignore the Properties of responseCollector. If false,
@@ -357,19 +353,19 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * preferences.
      */
     setVoicingIgnoreVoicingManagerProperties( ignoreProperties: boolean ) {
-      this.voicingResponsePacket.ignoreProperties = ignoreProperties;
+      this._voicingResponsePacket.ignoreProperties = ignoreProperties;
     }
 
-    set voicingIgnoreVoicingManagerProperties( ignoreProperties ) { this.setVoicingIgnoreVoicingManagerProperties( ignoreProperties ); }
+    set voicingIgnoreVoicingManagerProperties( ignoreProperties: boolean ) { this.setVoicingIgnoreVoicingManagerProperties( ignoreProperties ); }
 
     /**
      * Get whether or not responses are ignoring responseCollector Properties.
      */
-    getVoicingIgnoreVoicingManagerProperties() {
-      return this.voicingResponsePacket.ignoreProperties;
+    getVoicingIgnoreVoicingManagerProperties(): boolean {
+      return this._voicingResponsePacket.ignoreProperties;
     }
 
-    get voicingIgnoreVoicingManagerProperties() { return this.getVoicingIgnoreVoicingManagerProperties(); }
+    get voicingIgnoreVoicingManagerProperties(): boolean { return this.getVoicingIgnoreVoicingManagerProperties(); }
 
     /**
      * Sets the collection of patterns to use for voicing responses, controlling the order, punctuation, and
@@ -378,19 +374,20 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      */
     setVoicingResponsePatternCollection( patterns: ResponsePatternCollection ) {
       assert && assert( patterns instanceof ResponsePatternCollection );
-      this.voicingResponsePacket.responsePatternCollection = patterns;
+
+      this._voicingResponsePacket.responsePatternCollection = patterns;
     }
 
-    set voicingResponsePatternCollection( patterns ) { this.setVoicingResponsePatternCollection( patterns ); }
+    set voicingResponsePatternCollection( patterns: ResponsePatternCollection ) { this.setVoicingResponsePatternCollection( patterns ); }
 
     /**
      * Get the ResponsePatternCollection object that this Voicing Node is using to collect responses.
      */
-    getVoicingResponsePatternCollection() {
-      return this.voicingResponsePacket.responsePatternCollection;
+    getVoicingResponsePatternCollection(): ResponsePatternCollection {
+      return this._voicingResponsePacket.responsePatternCollection;
     }
 
-    get voicingResponsePatternCollection() { return this.getVoicingResponsePatternCollection(); }
+    get voicingResponsePatternCollection(): ResponsePatternCollection { return this.getVoicingResponsePatternCollection(); }
 
     /**
      * Sets the utteranceQueue through which voicing associated with this Node will be spoken. By default,
@@ -406,11 +403,11 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     /**
      * Gets the utteranceQueue through which voicing associated with this Node will be spoken.
      */
-    getVoicingUtteranceQueue() {
+    getVoicingUtteranceQueue(): UtteranceQueue | null {
       return this._voicingUtteranceQueue;
     }
 
-    get voicingUtteranceQueue() { return this.getVoicingUtteranceQueue(); }
+    get voicingUtteranceQueue(): UtteranceQueue | null { return this.getVoicingUtteranceQueue(); }
 
     /**
      * Called whenever this Node is focused.
@@ -428,7 +425,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
       return this._voicingFocusListener;
     }
 
-    get voicingFocusListener() { return this.getVoicingFocusListener(); }
+    get voicingFocusListener(): SceneryListenerFunction { return this.getVoicingFocusListener(); }
 
 
     /**
@@ -443,22 +440,21 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     /**
      * Whether or not a Node composes Voicing.
      */
-    get isVoicing() {
+    get isVoicing(): boolean {
       return true;
     }
 
     /**
      * Detaches references that ensure this components of this Trait are eligible for garbage collection.
-     * @public
      */
     dispose() {
-      ( this as unknown as Node ).removeInputListener( this.speakContentOnFocusListener );
+      ( this as unknown as Node ).removeInputListener( this._speakContentOnFocusListener );
 
       super.dispose();
     }
 
     clean() {
-      ( this as unknown as Node ).removeInputListener( this.speakContentOnFocusListener );
+      ( this as unknown as Node ).removeInputListener( this._speakContentOnFocusListener );
 
       // @ts-ignore
       super.clean && super.clean();
