@@ -19,8 +19,8 @@ const scenerySerialize = ( value: unknown ): any => {
   if ( value instanceof Vector2 ) {
     return {
       type: 'Vector2',
-      x: value.x,
-      y: value.y
+      x: ( value as Vector2 ).x,
+      y: ( value as Vector2 ).y
     };
   }
   else if ( value instanceof Matrix3 ) {

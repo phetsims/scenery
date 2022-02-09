@@ -218,7 +218,7 @@ class Trail {
    * TODO: consider renaming to subtrailToExcluding and subtrailToIncluding?
    *
    * @param {Node} node
-   * @param {Node} [excludeNode=false]
+   * @param {boolean} [excludeNode]
    * @returns {Trail}
    */
   subtrailTo( node, excludeNode = false ) {

@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Poolable from '../../../phet-core/js/Poolable.js';
+import Poolable, { PoolableVersion } from '../../../phet-core/js/Poolable.js';
 import { GridCell, scenery } from '../imports.js';
 
 class GridLine {
@@ -39,10 +39,10 @@ class GridLine {
   }
 }
 
-// Sets up pooling on GridLine
-Poolable.mixInto( GridLine, {
+type PoolableGridLine = PoolableVersion<typeof GridLine>;
+const PoolableGridLine = Poolable.mixInto( GridLine, { // eslint-disable-line
   defaultArguments: [ 0, [], 0 ]
 } );
 
 scenery.register( 'GridLine', GridLine );
-export default GridLine;
+export default PoolableGridLine;

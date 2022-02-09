@@ -110,7 +110,9 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     }
 
     // Separate from the constructor to support cases where Voicing is used in Poolable Nodes.
-    initialize(): this {
+    // ...args: any[] because things like RichTextLink need to provide arguments to initialize, and TS complains
+    // otherwise
+    initialize( ...args: any[] ): this {
 
       // @ts-ignore
       super.initialize && super.initialize();

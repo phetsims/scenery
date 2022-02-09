@@ -14,7 +14,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import Shape from '../../../kite/js/Shape.js';
 import Enumeration from '../../../phet-core/js/Enumeration.js';
 import EnumerationValue from '../../../phet-core/js/EnumerationValue.js';
-import Poolable from '../../../phet-core/js/Poolable.js';
+import Poolable, { PoolableVersion } from '../../../phet-core/js/Poolable.js';
 import { scenery, Sprite } from '../imports.js';
 
 const scratchVector = new Vector2( 0, 0 );
@@ -106,10 +106,11 @@ class SpriteInstance {
   }
 }
 
-Poolable.mixInto( SpriteInstance, {
+type PoolableSpriteInstance = PoolableVersion<typeof SpriteInstance>;
+const PoolableSpriteInstance = Poolable.mixInto( SpriteInstance, { // eslint-disable-line
   maxSize: 1000
 } );
 
 scenery.register( 'SpriteInstance', SpriteInstance );
-export default SpriteInstance;
-export { SpriteInstanceTransformType };
+export default PoolableSpriteInstance;
+export { SpriteInstanceTransformType, SpriteInstance as RawSpriteInstance };

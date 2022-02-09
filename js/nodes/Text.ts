@@ -45,9 +45,9 @@ const TEXT_PROPERTY_TANDEM_NAME = 'textProperty';
 const useDOMAsFastBounds = window.navigator.userAgent.indexOf( 'like Gecko) Version/5' ) !== -1 &&
                            window.navigator.userAgent.indexOf( 'Safari/' ) !== -1;
 
-type BoundsMethod = 'fast' | 'fastCanvas' | 'accurate' | 'hybrid';
+type TextBoundsMethod = 'fast' | 'fastCanvas' | 'accurate' | 'hybrid';
 type TextDefinedOptions = {
-  boundsMethod?: BoundsMethod,
+  boundsMethod?: TextBoundsMethod,
   textProperty?: IProperty<string> | null,
   text?: string | number,
   font?: Font | string,
@@ -67,7 +67,7 @@ class Text extends Paintable( Node ) {
   // The font with which to display the text.
   _font: Font;
 
-  _boundsMethod: BoundsMethod;
+  _boundsMethod: TextBoundsMethod;
 
   // Whether the text is rendered as HTML or not. if defined (in a subtype constructor), use that value instead
   _isHTML: boolean;
@@ -255,7 +255,7 @@ class Text extends Paintable( Node ) {
    *       and fast/canvasCanvas/hybrid will always return the same vertical bounds (top and bottom) for a given font
    *       when the text isn't the empty string.
    */
-  setBoundsMethod( method: BoundsMethod ): this {
+  setBoundsMethod( method: TextBoundsMethod ): this {
     assert && assert( method === 'fast' || method === 'fastCanvas' || method === 'accurate' || method === 'hybrid', 'Unknown Text boundsMethod' );
     if ( method !== this._boundsMethod ) {
       this._boundsMethod = method;
@@ -273,16 +273,16 @@ class Text extends Paintable( Node ) {
     return this;
   }
 
-  set boundsMethod( value: BoundsMethod ) { this.setBoundsMethod( value ); }
+  set boundsMethod( value: TextBoundsMethod ) { this.setBoundsMethod( value ); }
 
   /**
    * Returns the current method to estimate the bounds of the text. See setBoundsMethod() for more information.
    */
-  getBoundsMethod(): BoundsMethod {
+  getBoundsMethod(): TextBoundsMethod {
     return this._boundsMethod;
   }
 
-  get boundsMethod(): BoundsMethod { return this.getBoundsMethod(); }
+  get boundsMethod(): TextBoundsMethod { return this.getBoundsMethod(); }
 
   /**
    * Returns a bitmask representing the supported renderers for the current configuration of the Text node.
@@ -883,4 +883,4 @@ Text.TextIO = new IOType( 'TextIO', {
 } );
 
 export { Text as default };
-export type { TextOptions };
+export type { TextOptions, TextBoundsMethod };

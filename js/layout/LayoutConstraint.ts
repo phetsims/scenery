@@ -130,7 +130,6 @@ class LayoutConstraint {
 
     // TODO: How to handle the case where there is no trail?
 
-    // @ts-ignore
     return LayoutProxy.createFromPool( node.getUniqueTrailTo( this.ancestorNode ).removeAncestor() );
   }
 
