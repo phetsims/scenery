@@ -765,6 +765,16 @@ class KeyboardDragListener {
   }
 
   /**
+   * See setHotkeys() for more information.
+   * @public
+   *
+   * @param {Array.<{keys: Array.<string>, callback:function}>} hotkeys
+   */
+  set hotkeys( hotkeys ) {
+    this.setHotkeys( hotkeys );
+  }
+
+  /**
    * Clear all hotkeys from this KeyboardDragListener.
    * @public
    */
