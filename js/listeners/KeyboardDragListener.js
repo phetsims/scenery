@@ -730,6 +730,7 @@ class KeyboardDragListener {
    * but allows you to add multiple groups at one time.
    *
    * For the purposes of this class, a "hotkey" is an ordered list of keys.
+   * @deprecated - TODO: to be removed in https://github.com/phetsims/scenery/issues/1354
    *
    * @param {Array.<{keys: Array.<string>, callback:function}>} hotkeys
    * @public
@@ -754,15 +755,21 @@ class KeyboardDragListener {
   }
 
   /**
-   * Remove multiple hotkeys that have been added with addHotkey or addHotkeys.
+   * Sets the hotkeys of the KeyboardDragListener to passed-in array.
    * @public
    *
    * @param {Array.<{keys: Array.<string>, callback:function}>} hotkeys
    */
-  removeHotkeys( hotkeys ) {
-    for ( let i = 0; i < hotkeys.length; i++ ) {
-      this.removeHotkey( hotkeys[ i ] );
-    }
+  setHotkeys( hotkeys ) {
+    this.hotkeys = hotkeys.slice( 0 ); // shallow copy
+  }
+
+  /**
+   * Clear all hotkeys from this KeyboardDragListener.
+   * @public
+   */
+  removeAllHotkeys() {
+    this.hotkeys = [];
   }
 
   /**
