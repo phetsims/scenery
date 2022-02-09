@@ -113,7 +113,7 @@ class KeyboardDragListener {
 
     // @private {Array.<{keys:<Array.string>, callback:function}>} - A list of hotkeys, each of which has some
     // behavior when each individual key of the hotkey is pressed in order. See this.addHotkey() for more information.
-    this.hotkeys = [];
+    this._hotkeys = [];
 
     // @private {{keys: <Array.string>, callback: <Function>}|null} - the hotkey that is currently down
     this.currentHotkey = null;
@@ -465,9 +465,9 @@ class KeyboardDragListener {
   updateHotkeys() {
 
     // check to see if any hotkey combinations are down
-    for ( let j = 0; j < this.hotkeys.length; j++ ) {
+    for ( let j = 0; j < this._hotkeys.length; j++ ) {
       const hotkeysDownList = [];
-      const keys = this.hotkeys[ j ].keys;
+      const keys = this._hotkeys[ j ].keys;
 
       for ( let k = 0; k < keys.length; k++ ) {
         for ( let l = 0; l < this.keyState.length; l++ ) {
@@ -491,7 +491,7 @@ class KeyboardDragListener {
       // if keys are in order, call the callback associated with the group, and disable dragging until
       // all hotkeys associated with that group are up again
       if ( keysInOrder ) {
-        this.currentHotkey = this.hotkeys[ j ];
+        this.currentHotkey = this._hotkeys[ j ];
         if ( this.hotkeyHoldIntervalCounter >= this._hotkeyHoldInterval ) {
 
           // Set the counter to begin counting the next interval between hotkey activations.
@@ -499,7 +499,7 @@ class KeyboardDragListener {
 
           // call the callback last, after internal state has been updated. This solves a bug caused if this callback
           // then makes this listener interrupt.
-          this.hotkeys[ j ].callback();
+          this._hotkeys[ j ].callback();
         }
       }
     }
@@ -721,7 +721,7 @@ class KeyboardDragListener {
    * @public
    */
   addHotkey( hotkey ) {
-    this.hotkeys.push( hotkey );
+    this._hotkeys.push( hotkey );
   }
 
   /**
@@ -748,10 +748,10 @@ class KeyboardDragListener {
    * @param {{keys: Array.<string>, callback:function}} hotkey
    */
   removeHotkey( hotkey ) {
-    assert && assert( this.hotkeys.includes( hotkey ), 'Trying to remove a hotkey that is not in the list of hotkeys.' );
+    assert && assert( this._hotkeys.includes( hotkey ), 'Trying to remove a hotkey that is not in the list of hotkeys.' );
 
-    const hotkeyIndex = this.hotkeys.indexOf( hotkey );
-    this.hotkeys.splice( hotkeyIndex, 1 );
+    const hotkeyIndex = this._hotkeys.indexOf( hotkey );
+    this._hotkeys.splice( hotkeyIndex, 1 );
   }
 
   /**
@@ -761,7 +761,7 @@ class KeyboardDragListener {
    * @param {Array.<{keys: Array.<string>, callback:function}>} hotkeys
    */
   setHotkeys( hotkeys ) {
-    this.hotkeys = hotkeys.slice( 0 ); // shallow copy
+    this._hotkeys = hotkeys.slice( 0 ); // shallow copy
   }
 
   /**
@@ -769,7 +769,7 @@ class KeyboardDragListener {
    * @public
    */
   removeAllHotkeys() {
-    this.hotkeys = [];
+    this._hotkeys = [];
   }
 
   /**
