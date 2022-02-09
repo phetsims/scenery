@@ -725,23 +725,6 @@ class KeyboardDragListener {
   }
 
   /**
-   * Add mutliple sets of hotkey groups that behave such that the desired callback will be called
-   * when all keys listed in the array are pressed down in order.  Behaves much like addHotkey,
-   * but allows you to add multiple groups at one time.
-   *
-   * For the purposes of this class, a "hotkey" is an ordered list of keys.
-   * @deprecated - TODO: to be removed in https://github.com/phetsims/scenery/issues/1354
-   *
-   * @param {Array.<{keys: Array.<string>, callback:function}>} hotkeys
-   * @public
-   */
-  addHotkeys( hotkeys ) {
-    for ( let i = 0; i < hotkeys.length; i++ ) {
-      this.addHotkey( hotkeys[ i ] );
-    }
-  }
-
-  /**
    * Remove a hotkey that was added with addHotkey.
    * @public
    *
