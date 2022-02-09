@@ -22,8 +22,8 @@
 import Emitter from '../../../axon/js/Emitter.js';
 import Property from '../../../axon/js/Property.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
-import Transform3 from '../../../dot/js/Transform3.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
+import Transform3 from '../../../dot/js/Transform3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
@@ -737,6 +737,31 @@ class KeyboardDragListener {
   addHotkeys( hotkeys ) {
     for ( let i = 0; i < hotkeys.length; i++ ) {
       this.addHotkey( hotkeys[ i ] );
+    }
+  }
+
+  /**
+   * Remove a hotkey that was added with addHotkey.
+   * @public
+   *
+   * @param {{keys: Array.<string>, callback:function}} hotkey
+   */
+  removeHotkey( hotkey ) {
+    assert && assert( this.hotkeys.includes( hotkey ), 'Trying to remove a hotkey that is not in the list of hotkeys.' );
+
+    const hotkeyIndex = this.hotkeys.indexOf( hotkey );
+    this.hotkeys.splice( hotkeyIndex, 1 );
+  }
+
+  /**
+   * Remove multiple hotkeys that have been added with addHotkey or addHotkeys.
+   * @public
+   *
+   * @param {Array.<{keys: Array.<string>, callback:function}>} hotkeys
+   */
+  removeHotkeys( hotkeys ) {
+    for ( let i = 0; i < hotkeys.length; i++ ) {
+      this.removeHotkey( hotkeys[ i ] );
     }
   }
 
