@@ -111,8 +111,8 @@ class KeyboardDragListener {
     // TODO: Consider a global state object for this, see https://github.com/phetsims/scenery/issues/1054
     this.keyState = [];
 
-    // @private {Array.<{keys:<Array.string>, callback:function}>} - A list of hotkeys, each of which haing some
-    // behavior when each individual key of the hotkey is  pressed in order. See this.addHotkey() for more information.
+    // @private {Array.<{keys:<Array.string>, callback:function}>} - A list of hotkeys, each of which has some
+    // behavior when each individual key of the hotkey is pressed in order. See this.addHotkey() for more information.
     this.hotkeys = [];
 
     // @private {{keys: <Array.string>, callback: <Function>}|null} - the hotkey that is currently down
