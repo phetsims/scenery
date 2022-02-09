@@ -130,7 +130,6 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
       const lineMap = this.displayedLines.get( orientation );
 
       // Clear out the lineMap
-      // @ts-ignore TODO poolable
       lineMap.forEach( line => line.freeToPool() );
       lineMap.clear();
 
@@ -138,8 +137,7 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
       const lines = lineIndices.map( index => {
         const subCells = _.filter( cells, cell => cell.containsIndex( orientation, index ) );
 
-        const grow = _.max( subCells.map( cell => cell.getEffectiveGrow( orientation ) ) );
-        // @ts-ignore TODO poolable
+        const grow = Math.max( ...subCells.map( cell => cell.getEffectiveGrow( orientation ) ) );
         const line = GridLine.createFromPool( index, subCells, grow );
         lineMap.set( index, line );
 

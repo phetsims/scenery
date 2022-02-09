@@ -53,9 +53,8 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 
   assert && assert( _.includes( inheritance( Type ), Node ), 'Only Node subtypes should compose Voicing' );
 
-  const VoicingClass = Voicing( Type, optionsArgPosition );
+  const ReadingBlockClass = class extends Voicing( Type, optionsArgPosition ) {
 
-  const ReadingBlockClass = class extends VoicingClass {
     // The tagName used for the ReadingBlock when "Voicing" is enabled, default
     // of button so that it is added to the focus order and can receive 'click' events. You may wish to set this
     // to some other tagName or set to null to remove the ReadingBlock from the focus order. If this is changed,
@@ -223,12 +222,11 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
     isReadingBlockActivated(): boolean {
       let activated = false;
 
-      const trailIds = Object.keys( this._displays );
+      const trailIds = Object.keys( this.displays );
       for ( let i = 0; i < trailIds.length; i++ ) {
 
-        const pointerFocus = this._displays[ trailIds[ i ] ].focusManager.readingBlockFocusProperty.value;
+        const pointerFocus = this.displays[ trailIds[ i ] ].focusManager.readingBlockFocusProperty.value;
 
-        // @ts-ignore // TODO: fixed once FocusManager is converted to typescript https://github.com/phetsims/scenery/issues/1340
         if ( pointerFocus && pointerFocus.trail.lastNode() === this ) {
           activated = true;
           break;

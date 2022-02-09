@@ -20,10 +20,8 @@
  * exception is on the 'focus' event. Every Node that composes Voicing will speak its responses by when it
  * receives focus.
  *
- * NOTE: At this time, you cannot use Voicing options and pass options through super(), instead you must call mutate
- * as a second statement. TODO: can we get rid of this stipulation? https://github.com/phetsims/scenery/issues/1340
- *
  * @author Jesse Greenberg (PhET Interactive Simulations)
+ * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
 import inheritance from '../../../../phet-core/js/inheritance.js';
@@ -35,6 +33,7 @@ import UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
 import { InteractiveHighlighting, Node, NodeOptions, scenery, SceneryListenerFunction, voicingUtteranceQueue } from '../../imports.js';
 import optionize from '../../../../phet-core/js/optionize.js';
 import Constructor from '../../../../phet-core/js/Constructor.js';
+import { TAlertableDef } from '../../../../utterance-queue/js/AlertableDef.js';
 
 // options that are supported by Voicing.js. Added to mutator keys so that Voicing properties can be set with mutate.
 const VOICING_OPTION_KEYS = [
@@ -74,10 +73,8 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
   assert && assert( _.includes( inheritance( Type ), Node ), 'Only Node subtypes should compose Voicing' );
 
-  const InteractiveHighlightingClass = InteractiveHighlighting( Type, optionsArgPosition );
-
   // Unfortunately, nothing can be private or protected in this class, see https://github.com/phetsims/scenery/issues/1340#issuecomment-1020692592
-  const VoicingClass = class extends InteractiveHighlightingClass {
+  const VoicingClass = class extends InteractiveHighlighting( Type, optionsArgPosition ) {
 
     // ResponsePacket that holds all the supported responses to be Voiced
     _voicingResponsePacket!: ResponsePacket;
@@ -113,7 +110,9 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     }
 
     // Separate from the constructor to support cases where Voicing is used in Poolable Nodes.
-    initialize(): this {
+    // ...args: any[] because things like RichTextLink need to provide arguments to initialize, and TS complains
+    // otherwise
+    initialize( ...args: any[] ): this {
 
       // @ts-ignore
       super.initialize && super.initialize();
@@ -242,8 +241,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
         utterance: null
       }, providedOptions );
 
-      // TODO: remove eslint-diable-line when AlertableDef is in a proper typescript file, https://github.com/phetsims/scenery/issues/1340
-      let response: AlertableDef = responseCollector.collectResponses( options ); // eslint-disable-line no-undef
+      let response: TAlertableDef = responseCollector.collectResponses( options ); // eslint-disable-line no-undef
 
       if ( options.utterance ) {
         options.utterance.alert = response;
@@ -256,9 +254,8 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * Use the provided function to create content to speak in response to input. The content is then added to the
      * back of the voicing UtteranceQueue.
      * @protected
-     * TODO: remove eslint-diable-line when AlertableDef is in a proper typescript file, https://github.com/phetsims/scenery/issues/1340
      */
-    speakContent( content: AlertableDef | null ): void { // eslint-disable-line no-undef
+    speakContent( content: TAlertableDef | null ): void { // eslint-disable-line no-undef
 
       // don't send to utteranceQueue if response is empty
       if ( content ) {
@@ -480,3 +477,4 @@ Voicing.VOICING_OPTION_KEYS = VOICING_OPTION_KEYS;
 
 scenery.register( 'Voicing', Voicing );
 export default Voicing;
+export type { VoicingOptions };

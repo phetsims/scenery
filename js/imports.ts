@@ -94,7 +94,7 @@ export type { ImageOptions } from './nodes/Image.js';
 export { default as Path } from './nodes/Path.js';
 export type { PathOptions } from './nodes/Path.js';
 export { default as Text } from './nodes/Text.js';
-export type { TextOptions } from './nodes/Text.js';
+export type { TextOptions, TextBoundsMethod } from './nodes/Text.js';
 
 export { default as AlignBox } from './nodes/AlignBox.js';
 export type { AlignBoxOptions } from './nodes/AlignBox.js';
@@ -155,6 +155,7 @@ export { default as InteractiveHighlighting } from './accessibility/voicing/Inte
 export { default as voicingManager } from './accessibility/voicing/voicingManager.js';
 export { default as voicingUtteranceQueue } from './accessibility/voicing/voicingUtteranceQueue.js';
 export { default as Voicing } from './accessibility/voicing/Voicing.js';
+export type { VoicingOptions } from './accessibility/voicing/Voicing.js';
 export { default as ReadingBlockUtterance } from './accessibility/voicing/ReadingBlockUtterance.js';
 export { default as FocusDisplayedController } from './accessibility/FocusDisplayedController.js';
 export { default as FocusManager } from './accessibility/FocusManager.js';
@@ -194,7 +195,9 @@ export { default as ButtonListener } from './input/ButtonListener.js';
 export { default as SimpleDragHandler } from './input/SimpleDragHandler.js';
 
 export { default as PressListener } from './listeners/PressListener.js';
+export type { PressListenerOptions } from './listeners/PressListener.js';
 export { default as FireListener } from './listeners/FireListener.js';
+export type { FireListenerOptions } from './listeners/FireListener.js';
 export { default as DragListener } from './listeners/DragListener.js';
 
 export { default as MultiListener } from './listeners/MultiListener.js';
@@ -242,6 +245,7 @@ export type { GridBackgroundNodeOptions } from './layout/GridBackgroundNode.js';
 export { default as ManualConstraint } from './layout/ManualConstraint.js';
 
 export { default as RichText } from './nodes/RichText.js';
+export type { RichTextOptions, RichTextAlign, RichTextHref, RichTextLinks } from './nodes/RichText.js';
 
 export { default as VoicingText } from './accessibility/voicing/nodes/VoicingText.js';
 export { default as VoicingRichText } from './accessibility/voicing/nodes/VoicingRichText.js';

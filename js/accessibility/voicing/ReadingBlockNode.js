@@ -17,7 +17,7 @@
 import merge from '../../../../phet-core/js/merge.js';
 import { scenery, Node, ReadingBlock, ReadingBlockHighlight } from '../../imports.js';
 
-class ReadingBlockNode extends ReadingBlock( Node ) {
+class ReadingBlockNode extends ReadingBlock( Node, 0 ) {
 
   /**
    * @param {Object} [options]

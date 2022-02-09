@@ -14,6 +14,7 @@ import inheritance from '../../../phet-core/js/inheritance.js';
 import platform from '../../../phet-core/js/platform.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import { scenery, Renderer, Color, PaintDef, Node, IPaint, Paint, LinearGradient, Pattern, RadialGradient, CanvasContextWrapper, Gradient, IPaintableDrawable } from '../imports.js';
+import Constructor from '../../../phet-core/js/Constructor.js';
 
 const isSafari5 = platform.safari5;
 
@@ -60,8 +61,6 @@ type PaintableOptions = {
 };
 
 const PAINTABLE_DRAWABLE_MARK_FLAGS = [ 'fill', 'stroke', 'lineWidth', 'lineOptions', 'cachedPaints' ];
-
-type Constructor<T = {}> = new ( ...args: any[] ) => T;
 
 const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   assert && assert( _.includes( inheritance( type ), Node ), 'Only Node subtypes should mix Paintable' );

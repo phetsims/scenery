@@ -9,7 +9,7 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import Poolable from '../../../phet-core/js/Poolable.js';
+import Poolable, { PoolableVersion } from '../../../phet-core/js/Poolable.js';
 import { scenery, Trail, Node } from '../imports.js';
 
 class LayoutProxy {
@@ -398,12 +398,15 @@ class LayoutProxy {
     this.trail = null;
 
     // for now
-    // @ts-ignore
-    this.freeToPool();
+    ( this as unknown as PoolableLayoutProxy ).freeToPool();
   }
 }
 
 scenery.register( 'LayoutProxy', LayoutProxy );
-Poolable.mixInto( LayoutProxy );
 
-export default LayoutProxy;
+type PoolableLayoutProxy = PoolableVersion<typeof LayoutProxy>;
+const PoolableLayoutProxy = Poolable.mixInto( LayoutProxy, { // eslint-disable-line
+  maxSize: 1000
+} );
+
+export default PoolableLayoutProxy;

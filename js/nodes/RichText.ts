@@ -57,46 +57,154 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import IProperty from '../../../axon/js/IProperty.js';
+import { PropertyOptions } from '../../../axon/js/Property.js';
 import StringProperty from '../../../axon/js/StringProperty.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
+import Constructor from '../../../phet-core/js/Constructor.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
+import inheritance from '../../../phet-core/js/inheritance.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import merge from '../../../phet-core/js/merge.js';
 import openPopup from '../../../phet-core/js/openPopup.js';
-import Poolable from '../../../phet-core/js/Poolable.js';
+import Poolable, { PoolableVersion } from '../../../phet-core/js/Poolable.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
-import { scenery, Color, Font, Line, Node, Text, VStrut, FireListener, Voicing } from '../imports.js';
+import { scenery, Color, Font, Line, Node, Text, VStrut, FireListener, Voicing, IPaint, NodeOptions, TextBoundsMethod, IInputListener } from '../imports.js';
 
 // Options that can be used in the constructor, with mutate(), or directly as setters/getters
 // each of these options has an associated setter, see setter methods for more documentation
 const RICH_TEXT_OPTION_KEYS = [
-  'boundsMethod', // {string} - Sets how bounds are determined for text
-  'font', // {Font|string} - Sets the font for the text
-  'fill', // {PaintDef} - Sets the fill of the text
-  'stroke', // {PaintDef} - Sets the stroke around the text
-  'lineWidth', // {number} - Sets the lineWidth around the text
-  'subScale', // {number} - Sets the scale of any subscript elements
-  'subXSpacing', // {number} - Sets horizontal spacing before any subscript elements
-  'subYOffset', // {number} - Sets vertical offset for any subscript elements
-  'supScale', // {number} - Sets the scale for any superscript elements
-  'supXSpacing', // {number} - Sets the horizontal offset before any superscript elements
-  'supYOffset', // {number} - Sets the vertical offset for any superscript elements
-  'capHeightScale', // {number} - Sets the expected cap height cap height (baseline to top of capital letters) as a scale
-  'underlineLineWidth', // {number} - Sets the line width for underlines
-  'underlineHeightScale', // {number} - Sets the underline height as a scale relative to text bounds height
-  'strikethroughLineWidth', // {number} - Sets line width for strikethrough
-  'strikethroughHeightScale', // {number} - Sets height of strikethrough as a scale relative to text bounds height
-  'linkFill', // {paint} - Sets the fill for links within the text
-  'linkEventsHandled', // {boolean} - Sets whether link clicks will call event.handle()
-  'links', // {Object|boolean} - Sets the map of href placeholder => actual href/callback used for links
-  'align', // {string} - Sets text alignment if there are multiple lines
-  'leading', // {number} - Sets the spacing between lines if there are multiple lines
-  'lineWrap', // {number|null} - Sets width of text before creating a new line
-  'textProperty', // {Property.<string>|null} - Sets forwarding of the textProperty, see setTextProperty() for more documentation
-  'text' // {string|number} - Sets the text to be displayed by this Node
+  'boundsMethod',
+  'font',
+  'fill',
+  'stroke',
+  'lineWidth',
+  'subScale',
+  'subXSpacing',
+  'subYOffset',
+  'supScale',
+  'supXSpacing',
+  'supYOffset',
+  'capHeightScale',
+  'underlineLineWidth',
+  'underlineHeightScale',
+  'strikethroughLineWidth',
+  'strikethroughHeightScale',
+  'linkFill',
+  'linkEventsHandled',
+  'links',
+  'align',
+  'leading',
+  'lineWrap',
+  'textProperty',
+  'text'
 ];
+
+type RichTextAlign = 'left' | 'center' | 'right';
+type RichTextHref = ( () => void ) | string;
+type RichTextLinksObject = { [ key: string ]: string };
+type RichTextLinks = RichTextLinksObject | boolean;
+
+type RichTextSelfOptions = {
+  // Sets how bounds are determined for text
+  boundsMethod?: TextBoundsMethod;
+
+  // Sets the font for the text
+  font?: Font | string;
+
+  // Sets the fill of the text
+  fill?: IPaint;
+
+  // Sets the stroke around the text
+  stroke?: IPaint;
+
+  // Sets the lineWidth around the text
+  lineWidth?: number;
+
+  // Sets the scale of any subscript elements
+  subScale?: number;
+
+  // Sets horizontal spacing before any subscript elements
+  subXSpacing?: number;
+
+  // Sets vertical offset for any subscript elements
+  subYOffset?: number;
+
+  // Sets the scale for any superscript elements
+  supScale?: number;
+
+  // Sets the horizontal offset before any superscript elements
+  supXSpacing?: number;
+
+  // Sets the vertical offset for any superscript elements
+  supYOffset?: number;
+
+  // Sets the expected cap height cap height (baseline to top of capital letters) as a scale
+  capHeightScale?: number;
+
+  // Sets the line width for underlines
+  underlineLineWidth?: number;
+
+  // Sets the underline height as a scale relative to text bounds height
+  underlineHeightScale?: number;
+
+  // Sets line width for strikethrough
+  strikethroughLineWidth?: number;
+
+  // Sets height of strikethrough as a scale relative to text bounds height
+  strikethroughHeightScale?: number;
+
+  // Sets the fill for links within the text
+  linkFill?: IPaint;
+
+  // Sets whether link clicks will call event.handle()
+  linkEventsHandled?: boolean;
+
+  // Sets the map of href placeholder => actual href/callback used for links
+  links?: RichTextLinks;
+
+  // Sets text alignment if there are multiple lines
+  align?: RichTextAlign;
+
+  // Sets the spacing between lines if there are multiple lines
+  leading?: number;
+
+  // Sets width of text before creating a new line
+  lineWrap?: number|null;
+
+  // Sets forwarding of the textProperty, see setTextProperty() for more documentation
+  textProperty?: IProperty<string> | null;
+
+  textPropertyOptions?: PropertyOptions<string> | null;
+
+  // Sets the text to be displayed by this Node
+  text?: string|number;
+};
+
+type RichTextOptions = RichTextSelfOptions & NodeOptions;
+
+type HimalayaAttribute = {
+  key: string,
+  value?: string
+};
+type HimalayaNode = {
+  type: 'element' | 'comment' | 'text';
+};
+type HimalayaElementNode = {
+  type: 'element';
+  tagName: string;
+  children: HimalayaNode[];
+  attributes: HimalayaAttribute[];
+  innerContent?: string; // Is this in the generated stuff? Do we just override this? Unclear
+} & HimalayaNode;
+const isElementNode = ( node: HimalayaNode ): node is HimalayaElementNode => node.type.toLowerCase() === 'element';
+type HimalayaTextNode = {
+  type: 'text';
+  content: string;
+} & HimalayaNode;
+const isTextNode = ( node: HimalayaNode ): node is HimalayaTextNode => node.type.toLowerCase() === 'text';
 
 const DEFAULT_FONT = new Font( {
   size: 20
@@ -124,11 +232,8 @@ const LineBreakState = {
 
 /**
  * Get the attribute value from an element. Return null if that attribute isn't on the element.
- * @param {string} attribute
- * @param {Object} element - see himalaya for documentation
- * @returns {*|null}
  */
-const himalayaGetAttribute = ( attribute, element ) => {
+const himalayaGetAttribute = ( attribute: string, element: HimalayaElementNode | null ): string | null => {
   if ( !element ) {
     return null;
   }
@@ -136,17 +241,15 @@ const himalayaGetAttribute = ( attribute, element ) => {
   if ( !attributeObject ) {
     return null;
   }
-  return attributeObject.value;
+  return attributeObject.value || null;
 };
 
 /**
  * Turn a string of style like "font-sie:6; font-weight:6; favorite-number:6" into a may of style key/values (trimmed of whitespace)
- * @param {string} styleString
- * @returns {Object<string,string>}
  */
-const himalayaStyleStringToMap = styleString => {
+const himalayaStyleStringToMap = ( styleString: string ): { [ key: string ]: string } => {
   const styleElements = styleString.split( ';' );
-  const styleMap = {};
+  const styleMap: { [ key: string ]: string } = {};
   styleElements.forEach( styleKeyValue => {
     if ( styleKeyValue.length > 0 ) {
       const keyValueTuple = styleKeyValue.split( ':' );
@@ -169,85 +272,88 @@ const FONT_STYLE_MAP = {
   'font-variant': 'variant',
   'font-weight': 'weight',
   'line-height': 'lineHeight'
-};
+} as const;
 
 const FONT_STYLE_KEYS = Object.keys( FONT_STYLE_MAP );
 const STYLE_KEYS = [ 'color' ].concat( FONT_STYLE_KEYS );
 
 class RichText extends Node {
-  /**
-   * @public
-   *
-   * @param {string|number} text
-   * @param {Object} [options] - RichText-specific options are documented in RICH_TEXT_OPTION_KEYS above, and can be
-   *                             provided along-side options for Node.
-   */
-  constructor( text, options ) {
+
+  // The text to display. We'll initialize this by mutating.
+  _textProperty: TinyForwardingProperty<string>;
+
+  private _font: Font | string;
+  private _boundsMethod: TextBoundsMethod;
+  private _fill: IPaint;
+  private _stroke: IPaint;
+  private _lineWidth: number;
+
+  private _subScale: number;
+  private _subXSpacing: number;
+  private _subYOffset: number;
+
+  private _supScale: number;
+  private _supXSpacing: number;
+  private _supYOffset: number;
+
+  private _capHeightScale: number;
+
+  private _underlineLineWidth: number;
+  private _underlineHeightScale: number;
+
+  private _strikethroughLineWidth: number;
+  private _strikethroughHeightScale: number;
+
+  private _linkFill: IPaint;
+
+  private _linkEventsHandled: boolean;
+
+  // If an object, values are either {string} or {function}
+  private _links: { [ key: string ]: string } | boolean;
+
+  private _align: RichTextAlign;
+  private _leading: number;
+  private _lineWrap: number | null;
+
+  // We need to consolidate links (that could be split across multiple lines) under one "link" node, so we track created
+  // link fragments here so they can get pieced together later.
+  private _linkItems: { element: any, node: Node, href: string }[];
+
+  // Whether something has been added to this line yet. We don't want to infinite-loop out if something is longer than
+  // our lineWrap, so we'll place one item on its own on an otherwise empty line.
+  private _hasAddedLeafToLine: boolean;
+
+  // Normal layout container of lines (separate, so we can clear it easily)
+  private lineContainer: Node;
+
+  constructor( text: string | number, options?: RichTextOptions ) {
 
     super();
 
-    // @public {TinyProperty.<string>} - The text to display. We'll initialize this by mutating.
     this._textProperty = new TinyForwardingProperty( '', true, this.onTextPropertyChange.bind( this ) );
-
-    // @private {Font}
     this._font = DEFAULT_FONT;
-
-    // @private {string}
     this._boundsMethod = 'hybrid';
-
-    // @private {PaintDef}
     this._fill = '#000000';
     this._stroke = null;
-
-    // @private {number}
     this._lineWidth = 1;
-
-    // @private {number}
     this._subScale = 0.75;
     this._subXSpacing = 0;
     this._subYOffset = 0;
-
-    // @private {number}
     this._supScale = 0.75;
     this._supXSpacing = 0;
     this._supYOffset = 0;
-
-    // @private {number}
     this._capHeightScale = 0.75;
-
-    // @private {number}
     this._underlineLineWidth = 1;
     this._underlineHeightScale = 0.15;
-
-    // @private {number}
     this._strikethroughLineWidth = 1;
     this._strikethroughHeightScale = 0.3;
-
-    // @private {paint}
     this._linkFill = 'rgb(27,0,241)';
-
-    // @private {boolean}
     this._linkEventsHandled = false;
-
-    // @private {Object|boolean} - If an object, values are either {string} or {function}
     this._links = {};
-
-    // @private {string}
-    this._align = 'left'; // 'left', 'center', or 'right'
-
-    // @private {number}
+    this._align = 'left';
     this._leading = 0;
-
-    // @private {number|null}
     this._lineWrap = null;
-
-    // @private {Array.<{ element: {*}, node: {Node}, href: {string} }>} - We need to consolidate links (that could be
-    // split across multiple lines) under one "link" node, so we track created link fragments here so they can get
-    // pieced together later.
     this._linkItems = [];
-
-    // @private {boolean} - Whether something has been added to this line yet. We don't want to infinite-loop out if
-    // something is longer than our lineWrap, so we'll place one item on its own on an otherwise empty line.
     this._hasAddedLeafToLine = false;
 
     options = extendDefined( {
@@ -257,7 +363,6 @@ class RichText extends Node {
       phetioType: RichText.RichTextIO
     }, options );
 
-    // @private {Node} - Normal layout container of lines (separate, so we can clear it easily)
     this.lineContainer = new Node( {} );
     this.addChild( this.lineContainer );
 
@@ -268,50 +373,36 @@ class RichText extends Node {
     this.mutate( options );
   }
 
-
   /**
    * Called when our text Property changes values.
-   * @private
    */
-  onTextPropertyChange() {
+  private onTextPropertyChange() {
     this.rebuildRichText();
   }
 
   /**
    * See documentation for Node.setVisibleProperty, except this is for the text string.
-   *
-   * @public
-   *
-   * @param {TinyProperty.<string>|Property.<string>|null} newTarget
-   * @returns {Text} for chaining
    */
-  setTextProperty( newTarget ) {
+  setTextProperty( newTarget: IProperty<string> | null ): this {
     return this._textProperty.setTargetProperty( this, TEXT_PROPERTY_TANDEM_NAME, newTarget );
   }
 
-  set textProperty( property ) { this.setTextProperty( property ); }
+  set textProperty( property: IProperty<string> | null ) { this.setTextProperty( property ); }
 
   /**
    * Like Node.getVisibleProperty, but for the text string. Note this is not the same as the Property provided in
    * setTextProperty. Thus is the nature of TinyForwardingProperty.
-   *
-   * @returns {TinyForwardingProperty}
-   * @public
    */
-  getTextProperty() {
+  getTextProperty(): IProperty<string> {
     return this._textProperty;
   }
 
-  get textProperty() { return this.getTextProperty(); }
+  get textProperty(): IProperty<string> { return this.getTextProperty(); }
 
   /**
    * See documentation and comments in Node.initializePhetioObject
-   * @param {Object} baseOptions
-   * @param {Object} config
-   * @override
-   * @protected
    */
-  initializePhetioObject( baseOptions, config ) {
+  initializePhetioObject( baseOptions: any, config: RichTextOptions ) {
 
     config = merge( {
       textPropertyOptions: null
@@ -337,9 +428,8 @@ class RichText extends Node {
 
   /**
    * When called, will rebuild the node structure for this RichText
-   * @private
    */
-  rebuildRichText() {
+  private rebuildRichText() {
     this.freeChildrenToPool();
 
     // Bail early, particularly if we are being constructed.
@@ -357,7 +447,8 @@ class RichText extends Node {
       .replace( /\u202c/g, '</span>' );
 
     // Start appending all top-level elements
-    const rootElements = himalaya.parse( mappedText );
+    // @ts-ignore
+    const rootElements: HimalayaNode[] = himalaya.parse( mappedText );
 
     // Clear out link items, as we'll need to reconstruct them later
     this._linkItems.length = 0;
@@ -460,12 +551,11 @@ class RichText extends Node {
 
   /**
    * Cleans "recursively temporary disposes" the children.
-   * @private
    */
-  freeChildrenToPool() {
+  private freeChildrenToPool() {
     // Clear any existing lines or link fragments (higher performance, and return them to pools also)
     while ( this.lineContainer._children.length ) {
-      const child = this.lineContainer._children[ this.lineContainer._children.length - 1 ];
+      const child = this.lineContainer._children[ this.lineContainer._children.length - 1 ] as RichTextCleanableNode;
       this.lineContainer.removeChild( child );
       child.clean();
     }
@@ -473,8 +563,6 @@ class RichText extends Node {
 
   /**
    * Releases references.
-   * @public
-   * @override
    */
   dispose() {
     this.freeChildrenToPool();
@@ -486,11 +574,8 @@ class RichText extends Node {
 
   /**
    * Appends a finished line, applying any necessary leading.
-   * @private
-   *
-   * @param {RichTextElement} lineNode
    */
-  appendLine( lineNode ) {
+  private appendLine( lineNode: RichTextElement | Node ) {
     // Apply leading
     if ( this.lineContainer.bounds.isValid() ) {
       lineNode.top = this.lineContainer.bottom + this._leading;
@@ -505,9 +590,8 @@ class RichText extends Node {
   /**
    * If we end up with the equivalent of "no" content, toss in a basically empty leaf so that we get valid bounds
    * (0 width, correctly-positioned height). See https://github.com/phetsims/scenery/issues/769.
-   * @private
    */
-  appendEmptyLeaf() {
+  private appendEmptyLeaf() {
     assert && assert( this.lineContainer.getChildrenCount() === 0 );
 
     this.appendLine( RichTextLeaf.createFromPool( '', true, this._font, this._boundsMethod, this._fill, this._stroke, this._lineWidth ) );
@@ -515,9 +599,8 @@ class RichText extends Node {
 
   /**
    * Aligns all lines attached to the lineContainer.
-   * @private
    */
-  alignLines() {
+  private alignLines() {
     // All nodes will either share a 'left', 'centerX' or 'right'.
     const coordinateName = this._align === 'center' ? 'centerX' : this._align;
 
@@ -529,29 +612,28 @@ class RichText extends Node {
 
   /**
    * Main recursive function for constructing the RichText Node tree.
-   * @private
    *
    * We'll add any relevant content to the containerNode. The element will be mutated as things are added, so that
    * whenever content is added to the Node tree it will be removed from the element tree. This means we can pause
    * whenever (e.g. when a line-break is encountered) and the rest will be ready for parsing the next line.
    *
-   * @param {RichTextElement} containerNode - The node where child elements should be placed
-   * @param {*} element - See Himalaya's element specification
+   * @param containerNode - The node where child elements should be placed
+   * @param element - See Himalaya's element specification
    *                      (https://github.com/andrejewski/himalaya/blob/master/text/ast-spec-v0.md)
-   * @param {Font|string} font - The font to apply at this level
-   * @param {PaintDef} fill - Fill to apply
-   * @param {boolean} isLTR - True if LTR, false if RTL (handles RTL text properly)
-   * @param {number} widthAvailable - How much width we have available before forcing a line break (for lineWrap)
-   * @returns {LineBreakState} - Whether a line break was reached
+   * @param font - The font to apply at this level
+   * @param fill - Fill to apply
+   * @param isLTR - True if LTR, false if RTL (handles RTL text properly)
+   * @param widthAvailable - How much width we have available before forcing a line break (for lineWrap)
+   * @returns - Whether a line break was reached
    */
-  appendElement( containerNode, element, font, fill, isLTR, widthAvailable ) {
+  private appendElement( containerNode: RichTextElement, element: HimalayaNode, font: Font | string, fill: IPaint, isLTR: boolean, widthAvailable: number ) {
     let lineBreakState = LineBreakState.NONE;
 
     // {Node|Text} - The main Node for the element that we are adding
-    let node;
+    let node!: Node | Text;
 
     // If we're a leaf
-    if ( element.type.toLowerCase() === 'text' ) {
+    if ( isTextNode( element ) ) {
       sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `appending leaf: ${element.content}` );
       sceneryLog && sceneryLog.RichText && sceneryLog.push();
 
@@ -561,7 +643,7 @@ class RichText extends Node {
       const containerSpacing = isLTR ? containerNode.rightSpacing : containerNode.leftSpacing;
 
       // Handle wrapping if required. Container spacing cuts into our available width
-      if ( !node.fitsIn( widthAvailable - containerSpacing, this._hasAddedLeafToLine, isLTR ) ) {
+      if ( !( node as RichTextLeaf ).fitsIn( widthAvailable - containerSpacing, this._hasAddedLeafToLine, isLTR ) ) {
         // Didn't fit, lets break into words to see what we can fit
         const words = element.content.split( ' ' );
 
@@ -580,7 +662,7 @@ class RichText extends Node {
             node = RichTextLeaf.createFromPool( words.join( ' ' ), isLTR, font, this._boundsMethod, fill, this._stroke, this._lineWidth );
 
             // If we haven't added anything to the line and we are down to the first word, we need to just add it.
-            if ( !node.fitsIn( widthAvailable - containerSpacing, this._hasAddedLeafToLine, isLTR ) &&
+            if ( !( node as RichTextLeaf ).fitsIn( widthAvailable - containerSpacing, this._hasAddedLeafToLine, isLTR ) &&
                  ( this._hasAddedLeafToLine || words.length > 1 ) ) {
               sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `Skipping word ${words[ words.length - 1 ]}` );
               skippedWords.unshift( words.pop() );
@@ -609,7 +691,7 @@ class RichText extends Node {
       sceneryLog && sceneryLog.RichText && sceneryLog.pop();
     }
     // Otherwise presumably an element with content
-    else if ( element.type.toLowerCase() === 'element' ) {
+    else if ( isElementNode( element ) ) {
       // Bail out quickly for a line break
       if ( element.tagName === 'br' ) {
         sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'manual line break' );
@@ -636,7 +718,7 @@ class RichText extends Node {
       if ( styleAttributeString ) {
         const css = himalayaStyleStringToMap( styleAttributeString );
         assert && Object.keys( css ).forEach( key => {
-          assert( _.includes( STYLE_KEYS, key ), 'See supported style CSS keys' );
+          assert!( _.includes( STYLE_KEYS, key ), 'See supported style CSS keys' );
         } );
 
         // Fill
@@ -645,14 +727,15 @@ class RichText extends Node {
         }
 
         // Font
-        const fontOptions = {};
+        const fontOptions: { [ key: string ]: string } = {};
         for ( let i = 0; i < FONT_STYLE_KEYS.length; i++ ) {
           const styleKey = FONT_STYLE_KEYS[ i ];
           if ( css[ styleKey ] ) {
+            // @ts-ignore
             fontOptions[ FONT_STYLE_MAP[ styleKey ] ] = css[ styleKey ];
           }
         }
-        font = font.copy( fontOptions );
+        font = ( typeof font === 'string' ? Font.fromCSS( font ) : font ).copy( fontOptions );
       }
 
       // Achor (link)
@@ -660,8 +743,9 @@ class RichText extends Node {
         let href = himalayaGetAttribute( 'href', element );
 
         // Try extracting the href from the links object
-        if ( this._links !== true ) {
+        if ( href !== null && this._links !== true ) {
           if ( href.indexOf( '{{' ) === 0 && href.indexOf( '}}' ) === href.length - 2 ) {
+            // @ts-ignore TODO
             href = this._links[ href.slice( 2, -2 ) ];
           }
           else {
@@ -689,26 +773,26 @@ class RichText extends Node {
       }
       // Bold
       else if ( element.tagName === 'b' || element.tagName === 'strong' ) {
-        font = font.copy( {
+        font = ( typeof font === 'string' ? Font.fromCSS( font ) : font ).copy( {
           weight: 'bold'
         } );
       }
       // Italic
       else if ( element.tagName === 'i' || element.tagName === 'em' ) {
-        font = font.copy( {
+        font = ( typeof font === 'string' ? Font.fromCSS( font ) : font ).copy( {
           style: 'italic'
         } );
       }
       // Subscript
       else if ( element.tagName === 'sub' ) {
         node.scale( this._subScale );
-        node.addExtraBeforeSpacing( this._subXSpacing );
+        ( node as RichTextElement ).addExtraBeforeSpacing( this._subXSpacing );
         node.y += this._subYOffset;
       }
       // Superscript
       else if ( element.tagName === 'sup' ) {
         node.scale( this._supScale );
-        node.addExtraBeforeSpacing( this._supXSpacing );
+        ( node as RichTextElement ).addExtraBeforeSpacing( this._supXSpacing );
         node.y += this._supYOffset;
       }
 
@@ -720,7 +804,7 @@ class RichText extends Node {
         const widthBefore = node.bounds.isValid() ? node.width : 0;
 
         const childElement = element.children[ 0 ];
-        lineBreakState = this.appendElement( node, childElement, font, fill, isLTR, widthAvailable / scale );
+        lineBreakState = this.appendElement( node as RichTextElement, childElement, font, fill, isLTR, widthAvailable / scale );
 
         // for COMPLETE or NONE, we'll want to remove the childElement from the tree (we fully processed it)
         if ( lineBreakState !== LineBreakState.INCOMPLETE ) {
@@ -773,13 +857,13 @@ class RichText extends Node {
     }
 
     if ( node ) {
-      const wasAdded = containerNode.addElement( node );
+      const wasAdded = containerNode.addElement( node as RichTextElement | RichTextLeaf );
       if ( !wasAdded ) {
         // Remove it from the linkItems if we didn't actually add it.
         this._linkItems = this._linkItems.filter( item => item.node !== node );
 
         // And since we won't dispose it (since it's not a child), clean it here
-        node.clean();
+        ( node as RichTextCleanableNode ).clean();
       }
     }
 
@@ -788,14 +872,12 @@ class RichText extends Node {
 
   /**
    * Sets the text displayed by our node.
-   * @public
    *
    * NOTE: Encoding HTML entities is required, and malformed HTML is not accepted.
    *
-   * @param {string|number} text - The text to display. If it's a number, it will be cast to a string
-   * @returns {RichText} - For chaining
+   * @param text - The text to display. If it's a number, it will be cast to a string
    */
-  setText( text ) {
+  setText( text: string | number ): this {
     assert && assert( text !== null && text !== undefined, 'Text should be defined and non-null. Use the empty string if needed.' );
     assert && assert( typeof text === 'number' || typeof text === 'string', 'text should be a string or number' );
 
@@ -807,28 +889,21 @@ class RichText extends Node {
     return this;
   }
 
-  set text( value ) { this.setText( value ); }
+  set text( value: string | number ) { this.setText( value ); }
 
   /**
    * Returns the text displayed by our node.
-   * @public
-   *
-   * @returns {string}
    */
-  getText() {
+  getText(): string {
     return this._textProperty.value;
   }
 
-  get text() { return this.getText(); }
+  get text(): string { return this.getText(); }
 
   /**
    * Sets the method that is used to determine bounds from the text. See Text.setBoundsMethod for details
-   * @public
-   *
-   * @param {string} method
-   * @returns {RichText} - For chaining.
    */
-  setBoundsMethod( method ) {
+  setBoundsMethod( method: TextBoundsMethod ): this {
     assert && assert( method === 'fast' || method === 'fastCanvas' || method === 'accurate' || method === 'hybrid', 'Unknown Text boundsMethod' );
     if ( method !== this._boundsMethod ) {
       this._boundsMethod = method;
@@ -837,28 +912,21 @@ class RichText extends Node {
     return this;
   }
 
-  set boundsMethod( value ) { this.setBoundsMethod( value ); }
+  set boundsMethod( value: TextBoundsMethod ) { this.setBoundsMethod( value ); }
 
   /**
    * Returns the current method to estimate the bounds of the text. See setBoundsMethod() for more information.
-   * @public
-   *
-   * @returns {string}
    */
-  getBoundsMethod() {
+  getBoundsMethod(): TextBoundsMethod {
     return this._boundsMethod;
   }
 
-  get boundsMethod() { return this.getBoundsMethod(); }
+  get boundsMethod(): TextBoundsMethod { return this.getBoundsMethod(); }
 
   /**
    * Sets the font of our node.
-   * @public
-   *
-   * @param {Font|string} font
-   * @returns {RichText} - For chaining.
    */
-  setFont( font ) {
+  setFont( font: Font | string ): this {
     assert && assert( font instanceof Font || typeof font === 'string',
       'Fonts provided to setFont should be a Font object or a string in the CSS3 font shortcut format' );
 
@@ -869,28 +937,21 @@ class RichText extends Node {
     return this;
   }
 
-  set font( value ) { this.setFont( value ); }
+  set font( value: Font | string ) { this.setFont( value ); }
 
   /**
    * Returns the current Font
-   * @public
-   *
-   * @returns {Font|string}
    */
-  getFont() {
+  getFont(): Font | string {
     return this._font;
   }
 
-  get font() { return this.getFont(); }
+  get font(): Font | string { return this.getFont(); }
 
   /**
    * Sets the fill of our text.
-   * @public
-   *
-   * @param {PaintDef} fill
-   * @returns {RichText} - For chaining.
    */
-  setFill( fill ) {
+  setFill( fill: IPaint ): this {
     if ( this._fill !== fill ) {
       this._fill = fill;
       this.rebuildRichText();
@@ -898,28 +959,21 @@ class RichText extends Node {
     return this;
   }
 
-  set fill( value ) { this.setFill( value ); }
+  set fill( value: IPaint ) { this.setFill( value ); }
 
   /**
    * Returns the current fill.
-   * @public
-   *
-   * @returns {Font|string}
    */
-  getFill() {
+  getFill(): IPaint {
     return this._fill;
   }
 
-  get fill() { return this.getFill(); }
+  get fill(): IPaint { return this.getFill(); }
 
   /**
    * Sets the stroke of our text.
-   * @public
-   *
-   * @param {PaintDef} stroke
-   * @returns {RichText} - For chaining.
    */
-  setStroke( stroke ) {
+  setStroke( stroke: IPaint ): this {
     if ( this._stroke !== stroke ) {
       this._stroke = stroke;
       this.rebuildRichText();
@@ -927,28 +981,21 @@ class RichText extends Node {
     return this;
   }
 
-  set stroke( value ) { this.setStroke( value ); }
+  set stroke( value: IPaint ) { this.setStroke( value ); }
 
   /**
    * Returns the current stroke.
-   * @public
-   *
-   * @returns {Font|string}
    */
-  getStroke() {
+  getStroke(): IPaint {
     return this._stroke;
   }
 
-  get stroke() { return this.getStroke(); }
+  get stroke(): IPaint { return this.getStroke(); }
 
   /**
    * Sets the lineWidth of our text.
-   * @public
-   *
-   * @param {number} lineWidth
-   * @returns {RichText} - For chaining.
    */
-  setLineWidth( lineWidth ) {
+  setLineWidth( lineWidth: number ): this {
     if ( this._lineWidth !== lineWidth ) {
       this._lineWidth = lineWidth;
       this.rebuildRichText();
@@ -956,28 +1003,21 @@ class RichText extends Node {
     return this;
   }
 
-  set lineWidth( value ) { this.setLineWidth( value ); }
+  set lineWidth( value: number ) { this.setLineWidth( value ); }
 
   /**
    * Returns the current lineWidth.
-   * @public
-   *
-   * @returns {number}
    */
-  getLineWidth() {
+  getLineWidth(): number {
     return this._lineWidth;
   }
 
-  get lineWidth() { return this.getLineWidth(); }
+  get lineWidth(): number { return this.getLineWidth(); }
 
   /**
    * Sets the scale (relative to 1) of any text under subscript (<sub>) elements.
-   * @public
-   *
-   * @param {number} subScale
-   * @returs {RichText} - For chaining
    */
-  setSubScale( subScale ) {
+  setSubScale( subScale: number ): this {
     assert && assert( typeof subScale === 'number' && isFinite( subScale ) && subScale > 0 );
 
     if ( this._subScale !== subScale ) {
@@ -987,28 +1027,21 @@ class RichText extends Node {
     return this;
   }
 
-  set subScale( value ) { this.setSubScale( value ); }
+  set subScale( value: number ) { this.setSubScale( value ); }
 
   /**
    * Returns the scale (relative to 1) of any text under subscript (<sub>) elements.
-   * @public
-   *
-   * @returns {number}
    */
-  getSubScale() {
+  getSubScale(): number {
     return this._subScale;
   }
 
-  get subScale() { return this.getSubScale(); }
+  get subScale(): number { return this.getSubScale(); }
 
   /**
    * Sets the horizontal spacing before any subscript (<sub>) elements.
-   * @public
-   *
-   * @param {number} subXSpacing
-   * @returs {RichText} - For chaining
    */
-  setSubXSpacing( subXSpacing ) {
+  setSubXSpacing( subXSpacing: number ): this {
     assert && assert( typeof subXSpacing === 'number' && isFinite( subXSpacing ) );
 
     if ( this._subXSpacing !== subXSpacing ) {
@@ -1018,28 +1051,21 @@ class RichText extends Node {
     return this;
   }
 
-  set subXSpacing( value ) { this.setSubXSpacing( value ); }
+  set subXSpacing( value: number ) { this.setSubXSpacing( value ); }
 
   /**
    * Returns the horizontal spacing before any subscript (<sub>) elements.
-   * @public
-   *
-   * @returns {number}
    */
-  getSubXSpacing() {
+  getSubXSpacing(): number {
     return this._subXSpacing;
   }
 
-  get subXSpacing() { return this.getSubXSpacing(); }
+  get subXSpacing(): number { return this.getSubXSpacing(); }
 
   /**
    * Sets the adjustment offset to the vertical placement of any subscript (<sub>) elements.
-   * @public
-   *
-   * @param {number} subYOffset
-   * @returs {RichText} - For chaining
    */
-  setSubYOffset( subYOffset ) {
+  setSubYOffset( subYOffset: number ): this {
     assert && assert( typeof subYOffset === 'number' && isFinite( subYOffset ) );
 
     if ( this._subYOffset !== subYOffset ) {
@@ -1049,28 +1075,21 @@ class RichText extends Node {
     return this;
   }
 
-  set subYOffset( value ) { this.setSubYOffset( value ); }
+  set subYOffset( value: number ) { this.setSubYOffset( value ); }
 
   /**
    * Returns the adjustment offset to the vertical placement of any subscript (<sub>) elements.
-   * @public
-   *
-   * @returns {number}
    */
-  getSubYOffset() {
+  getSubYOffset(): number {
     return this._subYOffset;
   }
 
-  get subYOffset() { return this.getSubYOffset(); }
+  get subYOffset(): number { return this.getSubYOffset(); }
 
   /**
    * Sets the scale (relative to 1) of any text under superscript (<sup>) elements.
-   * @public
-   *
-   * @param {number} supScale
-   * @returs {RichText} - For chaining
    */
-  setSupScale( supScale ) {
+  setSupScale( supScale: number ): this {
     assert && assert( typeof supScale === 'number' && isFinite( supScale ) && supScale > 0 );
 
     if ( this._supScale !== supScale ) {
@@ -1080,28 +1099,21 @@ class RichText extends Node {
     return this;
   }
 
-  set supScale( value ) { this.setSupScale( value ); }
+  set supScale( value: number ) { this.setSupScale( value ); }
 
   /**
    * Returns the scale (relative to 1) of any text under superscript (<sup>) elements.
-   * @public
-   *
-   * @returns {number}
    */
-  getSupScale() {
+  getSupScale(): number {
     return this._supScale;
   }
 
-  get supScale() { return this.getSupScale(); }
+  get supScale(): number { return this.getSupScale(); }
 
   /**
    * Sets the horizontal spacing before any superscript (<sup>) elements.
-   * @public
-   *
-   * @param {number} supXSpacing
-   * @returs {RichText} - For chaining
    */
-  setSupXSpacing( supXSpacing ) {
+  setSupXSpacing( supXSpacing: number ): this {
     assert && assert( typeof supXSpacing === 'number' && isFinite( supXSpacing ) );
 
     if ( this._supXSpacing !== supXSpacing ) {
@@ -1111,28 +1123,21 @@ class RichText extends Node {
     return this;
   }
 
-  set supXSpacing( value ) { this.setSupXSpacing( value ); }
+  set supXSpacing( value: number ) { this.setSupXSpacing( value ); }
 
   /**
    * Returns the horizontal spacing before any superscript (<sup>) elements.
-   * @public
-   *
-   * @returns {number}
    */
-  getSupXSpacing() {
+  getSupXSpacing(): number {
     return this._supXSpacing;
   }
 
-  get supXSpacing() { return this.getSupXSpacing(); }
+  get supXSpacing(): number { return this.getSupXSpacing(); }
 
   /**
    * Sets the adjustment offset to the vertical placement of any superscript (<sup>) elements.
-   * @public
-   *
-   * @param {number} supYOffset
-   * @returs {RichText} - For chaining
    */
-  setSupYOffset( supYOffset ) {
+  setSupYOffset( supYOffset: number ): this {
     assert && assert( typeof supYOffset === 'number' && isFinite( supYOffset ) );
 
     if ( this._supYOffset !== supYOffset ) {
@@ -1142,29 +1147,22 @@ class RichText extends Node {
     return this;
   }
 
-  set supYOffset( value ) { this.setSupYOffset( value ); }
+  set supYOffset( value: number ) { this.setSupYOffset( value ); }
 
   /**
    * Returns the adjustment offset to the vertical placement of any superscript (<sup>) elements.
-   * @public
-   *
-   * @returns {number}
    */
-  getSupYOffset() {
+  getSupYOffset(): number {
     return this._supYOffset;
   }
 
-  get supYOffset() { return this.getSupYOffset(); }
+  get supYOffset(): number { return this.getSupYOffset(); }
 
   /**
    * Sets the expected cap height (baseline to top of capital letters) as a scale of the detected distance from the
    * baseline to the top of the text bounds.
-   * @public
-   *
-   * @param {number} capHeightScale
-   * @returs {RichText} - For chaining
    */
-  setCapHeightScale( capHeightScale ) {
+  setCapHeightScale( capHeightScale: number ): this {
     assert && assert( typeof capHeightScale === 'number' && isFinite( capHeightScale ) && capHeightScale > 0 );
 
     if ( this._capHeightScale !== capHeightScale ) {
@@ -1174,29 +1172,22 @@ class RichText extends Node {
     return this;
   }
 
-  set capHeightScale( value ) { this.setCapHeightScale( value ); }
+  set capHeightScale( value: number ) { this.setCapHeightScale( value ); }
 
   /**
    * Returns the expected cap height (baseline to top of capital letters) as a scale of the detected distance from the
    * baseline to the top of the text bounds.
-   * @public
-   *
-   * @returns {number}
    */
-  getCapHeightScale() {
+  getCapHeightScale(): number {
     return this._capHeightScale;
   }
 
-  get capHeightScale() { return this.getCapHeightScale(); }
+  get capHeightScale(): number { return this.getCapHeightScale(); }
 
   /**
    * Sets the lineWidth of underline lines.
-   * @public
-   *
-   * @param {number} underlineLineWidth
-   * @returs {RichText} - For chaining
    */
-  setUnderlineLineWidth( underlineLineWidth ) {
+  setUnderlineLineWidth( underlineLineWidth: number ): this {
     assert && assert( typeof underlineLineWidth === 'number' && isFinite( underlineLineWidth ) && underlineLineWidth > 0 );
 
     if ( this._underlineLineWidth !== underlineLineWidth ) {
@@ -1206,29 +1197,22 @@ class RichText extends Node {
     return this;
   }
 
-  set underlineLineWidth( value ) { this.setUnderlineLineWidth( value ); }
+  set underlineLineWidth( value: number ) { this.setUnderlineLineWidth( value ); }
 
   /**
    * Returns the lineWidth of underline lines.
-   * @public
-   *
-   * @returns {number}
    */
-  getUnderlineLineWidth() {
+  getUnderlineLineWidth(): number {
     return this._underlineLineWidth;
   }
 
-  get underlineLineWidth() { return this.getUnderlineLineWidth(); }
+  get underlineLineWidth(): number { return this.getUnderlineLineWidth(); }
 
   /**
    * Sets the underline height adjustment as a proportion of the detected distance from the baseline to the top of the
    * text bounds.
-   * @public
-   *
-   * @param {number} underlineHeightScale
-   * @returs {RichText} - For chaining
    */
-  setUnderlineHeightScale( underlineHeightScale ) {
+  setUnderlineHeightScale( underlineHeightScale: number ): this {
     assert && assert( typeof underlineHeightScale === 'number' && isFinite( underlineHeightScale ) && underlineHeightScale > 0 );
 
     if ( this._underlineHeightScale !== underlineHeightScale ) {
@@ -1238,29 +1222,22 @@ class RichText extends Node {
     return this;
   }
 
-  set underlineHeightScale( value ) { this.setUnderlineHeightScale( value ); }
+  set underlineHeightScale( value: number ) { this.setUnderlineHeightScale( value ); }
 
   /**
    * Returns the underline height adjustment as a proportion of the detected distance from the baseline to the top of the
    * text bounds.
-   * @public
-   *
-   * @returns {number}
    */
-  getUnderlineHeightScale() {
+  getUnderlineHeightScale(): number {
     return this._underlineHeightScale;
   }
 
-  get underlineHeightScale() { return this.getUnderlineHeightScale(); }
+  get underlineHeightScale(): number { return this.getUnderlineHeightScale(); }
 
   /**
    * Sets the lineWidth of strikethrough lines.
-   * @public
-   *
-   * @param {number} strikethroughLineWidth
-   * @returs {RichText} - For chaining
    */
-  setStrikethroughLineWidth( strikethroughLineWidth ) {
+  setStrikethroughLineWidth( strikethroughLineWidth: number ): this {
     assert && assert( typeof strikethroughLineWidth === 'number' && isFinite( strikethroughLineWidth ) && strikethroughLineWidth > 0 );
 
     if ( this._strikethroughLineWidth !== strikethroughLineWidth ) {
@@ -1270,29 +1247,22 @@ class RichText extends Node {
     return this;
   }
 
-  set strikethroughLineWidth( value ) { this.setStrikethroughLineWidth( value ); }
+  set strikethroughLineWidth( value: number ) { this.setStrikethroughLineWidth( value ); }
 
   /**
    * Returns the lineWidth of strikethrough lines.
-   * @public
-   *
-   * @returns {number}
    */
-  getStrikethroughLineWidth() {
+  getStrikethroughLineWidth(): number {
     return this._strikethroughLineWidth;
   }
 
-  get strikethroughLineWidth() { return this.getStrikethroughLineWidth(); }
+  get strikethroughLineWidth(): number { return this.getStrikethroughLineWidth(); }
 
   /**
    * Sets the strikethrough height adjustment as a proportion of the detected distance from the baseline to the top of the
    * text bounds.
-   * @public
-   *
-   * @param {number} strikethroughHeightScale
-   * @returs {RichText} - For chaining
    */
-  setStrikethroughHeightScale( strikethroughHeightScale ) {
+  setStrikethroughHeightScale( strikethroughHeightScale: number ): this {
     assert && assert( typeof strikethroughHeightScale === 'number' && isFinite( strikethroughHeightScale ) && strikethroughHeightScale > 0 );
 
     if ( this._strikethroughHeightScale !== strikethroughHeightScale ) {
@@ -1302,29 +1272,22 @@ class RichText extends Node {
     return this;
   }
 
-  set strikethroughHeightScale( value ) { this.setStrikethroughHeightScale( value ); }
+  set strikethroughHeightScale( value: number ) { this.setStrikethroughHeightScale( value ); }
 
   /**
    * Returns the strikethrough height adjustment as a proportion of the detected distance from the baseline to the top of the
    * text bounds.
-   * @public
-   *
-   * @returns {number}
    */
-  getStrikethroughHeightScale() {
+  getStrikethroughHeightScale(): number {
     return this._strikethroughHeightScale;
   }
 
-  get strikethroughHeightScale() { return this.getStrikethroughHeightScale(); }
+  get strikethroughHeightScale(): number { return this.getStrikethroughHeightScale(); }
 
   /**
    * Sets the color of links. If null, no fill will be overridden.
-   * @public
-   *
-   * @param {paint} linkFill
-   * @returs {RichText} - For chaining
    */
-  setLinkFill( linkFill ) {
+  setLinkFill( linkFill: IPaint ): this {
     if ( this._linkFill !== linkFill ) {
       this._linkFill = linkFill;
       this.rebuildRichText();
@@ -1332,28 +1295,21 @@ class RichText extends Node {
     return this;
   }
 
-  set linkFill( value ) { this.setLinkFill( value ); }
+  set linkFill( value: IPaint ) { this.setLinkFill( value ); }
 
   /**
    * Returns the color of links.
-   * @public
-   *
-   * @returns {paint}
    */
-  getLinkFill() {
+  getLinkFill(): IPaint {
     return this._linkFill;
   }
 
-  get linkFill() { return this.getLinkFill(); }
+  get linkFill(): IPaint { return this.getLinkFill(); }
 
   /**
    * Sets whether link clicks will call event.handle().
-   * @public
-   *
-   * @param {boolean} linkEventsHandled
-   * @returs {RichText} - For chaining
    */
-  setLinkEventsHandled( linkEventsHandled ) {
+  setLinkEventsHandled( linkEventsHandled: boolean ): this {
     assert && assert( typeof linkEventsHandled === 'boolean' );
 
     if ( this._linkEventsHandled !== linkEventsHandled ) {
@@ -1363,24 +1319,20 @@ class RichText extends Node {
     return this;
   }
 
-  set linkEventsHandled( value ) { this.setLinkEventsHandled( value ); }
+  set linkEventsHandled( value: boolean ) { this.setLinkEventsHandled( value ); }
 
   /**
    * Returns whether link events will be handled.
-   * @public
-   *
-   * @returns {boolean}
    */
-  getLinkEventsHandled() {
+  getLinkEventsHandled(): boolean {
     return this._linkEventsHandled;
   }
 
-  get linkEventsHandled() { return this.getLinkEventsHandled(); }
+  get linkEventsHandled(): boolean { return this.getLinkEventsHandled(); }
 
   /**
    * Sets the map of href placeholder => actual href/callback used for links. However if set to true ({boolean}) as a
    * full object, links in the string will not be mapped, but will be directly added.
-   * @public
    *
    * For instance, the default is to map hrefs for security purposes:
    *
@@ -1404,11 +1356,8 @@ class RichText extends Node {
    * } );
    *
    * See https://github.com/phetsims/scenery-phet/issues/316 for more information.
-   *
-   * @param {Object|boolean} links
-   * @returs {RichText} - For chaining
    */
-  setLinks( links ) {
+  setLinks( links: RichTextLinks ): this {
     assert && assert( links !== false || Object.getPrototypeOf( links ) === Object.prototype );
 
     if ( this._links !== links ) {
@@ -1418,28 +1367,21 @@ class RichText extends Node {
     return this;
   }
 
-  set links( value ) { this.setLinks( value ); }
+  set links( value: RichTextLinks ) { this.setLinks( value ); }
 
   /**
    * Returns whether link events will be handled.
-   * @public
-   *
-   * @returns {Object}
    */
-  getLinks() {
+  getLinks(): RichTextLinks {
     return this._links;
   }
 
-  get links() { return this.getLinks(); }
+  get links(): RichTextLinks { return this.getLinks(); }
 
   /**
    * Sets the alignment of text (only relevant if there are multiple lines).
-   * @public
-   *
-   * @param {string} align
-   * @returns {RichText} - For chaining
    */
-  setAlign( align ) {
+  setAlign( align: RichTextAlign ): this {
     assert && assert( align === 'left' || align === 'center' || align === 'right' );
 
     if ( this._align !== align ) {
@@ -1449,28 +1391,21 @@ class RichText extends Node {
     return this;
   }
 
-  set align( value ) { this.setAlign( value ); }
+  set align( value: RichTextAlign ) { this.setAlign( value ); }
 
   /**
    * Returns the current alignment of the text (only relevant if there are multiple lines).
-   * @public
-   *
-   * @returns {string}
    */
-  getAlign() {
+  getAlign(): RichTextAlign {
     return this._align;
   }
 
-  get align() { return this.getAlign(); }
+  get align(): RichTextAlign { return this.getAlign(); }
 
   /**
    * Sets the leading (spacing between lines)
-   * @public
-   *
-   * @param {number} leading
-   * @returns {RichText} - For chaining
    */
-  setLeading( leading ) {
+  setLeading( leading: number ): this {
     assert && assert( typeof leading === 'number' && isFinite( leading ) );
 
     if ( this._leading !== leading ) {
@@ -1480,29 +1415,24 @@ class RichText extends Node {
     return this;
   }
 
-  set leading( value ) { this.setLeading( value ); }
+  set leading( value: number ) { this.setLeading( value ); }
 
   /**
    * Returns the leading (spacing between lines)
-   * @public
-   *
-   * @returns {number}
    */
-  getLeading() {
+  getLeading(): number {
     return this._leading;
   }
 
-  get leading() { return this.getLeading(); }
+  get leading(): number { return this.getLeading(); }
 
   /**
    * Sets the line wrap width for the text (or null if none is desired). Lines longer than this length will wrap
    * automatically to the next line.
-   * @public
    *
-   * @param {number|null} lineWrap - If it's a number, it should be greater than 0.
-   * @returns {RichText} - For chaining
+   * @param lineWrap - If it's a number, it should be greater than 0.
    */
-  setLineWrap( lineWrap ) {
+  setLineWrap( lineWrap: number | null ): this {
     assert && assert( lineWrap === null || ( typeof lineWrap === 'number' && isFinite( lineWrap ) && lineWrap > 0 ) );
 
     if ( this._lineWrap !== lineWrap ) {
@@ -1512,44 +1442,32 @@ class RichText extends Node {
     return this;
   }
 
-  set lineWrap( value ) { this.setLineWrap( value ); }
+  set lineWrap( value: number | null ) { this.setLineWrap( value ); }
 
   /**
    * Returns the line wrap width.
-   * @public
-   *
-   * @returns {number|null}
    */
-  getLineWrap() {
+  getLineWrap(): number | null {
     return this._lineWrap;
   }
 
-  get lineWrap() { return this.getLineWrap(); }
+  get lineWrap(): number | null { return this.getLineWrap(); }
 
-  /**
-   * @public
-   * @override
-   * @param {Object} [options]
-   */
-  mutate( options ) {
-    if ( assert && options.hasOwnProperty( 'text' ) && options.hasOwnProperty( 'textProperty' ) ) {
+  mutate( options?: RichTextOptions ) {
+    if ( assert && options && options.hasOwnProperty( 'text' ) && options.hasOwnProperty( 'textProperty' ) && options.textProperty ) {
       assert && assert( options.textProperty.value === options.text, 'If both text and textProperty are provided, then values should match' );
     }
+
     return super.mutate( options );
   }
 
   /**
    * Returns a wrapped version of the string with a font specifier that uses the given font object.
-   * @public
    *
    * NOTE: Does an approximation of some font values (using <b> or <i>), and cannot force the lack of those if it is
    * included in bold/italic exterior tags.
-   *
-   * @param {string} str
-   * @param {Font} font
-   * @returns {string}
    */
-  static stringWithFont( str, font ) {
+  static stringWithFont( str: string, font: Font ): string {
     // TODO: ES6 string interpolation.
     return `${'<span style=\'' +
            'font-style: '}${font.style};` +
@@ -1564,17 +1482,12 @@ class RichText extends Node {
 
   /**
    * Stringifies an HTML subtree defined by the given element.
-   * @public
-   *
-   * @param {*} element - See himalaya
-   * @param {boolean} isLTR
-   * @returns {string}
    */
-  static himalayaElementToString( element, isLTR ) {
-    if ( element.type.toLowerCase() === 'text' ) {
+  static himalayaElementToString( element: HimalayaNode, isLTR: boolean ): string {
+    if ( isTextNode( element ) ) {
       return RichText.contentToString( element.content, isLTR );
     }
-    else if ( element.type.toLowerCase() === 'element' ) {
+    else if ( isElementNode( element ) ) {
       const dirAttributeString = himalayaGetAttribute( 'dir', element );
 
       if ( element.tagName === 'span' && dirAttributeString ) {
@@ -1592,17 +1505,12 @@ class RichText extends Node {
   /**
    * Stringifies an HTML subtree defined by the given element, but removing certain tags that we don't need for
    * accessibility (like <a>, <span>, etc.), and adding in tags we do want (see ACCESSIBLE_TAGS).
-   * @public
-   *
-   * @param {*} element - See himalaya
-   * @param {boolean} isLTR
-   * @returns {string}
    */
-  static himalayaElementToAccessibleString( element, isLTR ) {
-    if ( element.type.toLowerCase() === 'text' ) {
+  static himalayaElementToAccessibleString( element: HimalayaNode, isLTR: boolean ): string {
+    if ( isTextNode( element ) ) {
       return RichText.contentToString( element.content, isLTR );
     }
-    else if ( element.type.toLowerCase() === 'element' ) {
+    else if ( isElementNode( element ) ) {
       const dirAttribute = himalayaGetAttribute( 'dir', element );
 
       if ( element.tagName === 'span' && dirAttribute ) {
@@ -1626,18 +1534,16 @@ class RichText extends Node {
 
   /**
    * Takes the element.content from himalaya, unescapes HTML entities, and applies the proper directional tags.
-   * @private
    *
    * See https://github.com/phetsims/scenery-phet/issues/315
-   *
-   * @param {string} content
-   * @param {boolean} isLTR
-   * @returns {string}
    */
-  static contentToString( content, isLTR ) {
-    const unescapedContent = he.decode( content );
+  static contentToString( content: string, isLTR: boolean ): string {
+    // @ts-ignore - we should get a string from this
+    const unescapedContent: string = he.decode( content );
     return isLTR ? ( `\u202a${unescapedContent}\u202c` ) : ( `\u202b${unescapedContent}\u202c` );
   }
+
+  static RichTextIO: IOType;
 }
 
 /**
@@ -1652,48 +1558,53 @@ RichText.prototype._mutatorKeys = RICH_TEXT_OPTION_KEYS.concat( Node.prototype._
 
 scenery.register( 'RichText', RichText );
 
-const RichTextCleanable = memoize( type => {
+const RichTextCleanable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
+  assert && assert( _.includes( inheritance( type ), Node ), 'Only Node subtypes should mix Paintable' );
+
   return class extends type {
-    /**
-     * @public
-     *
-     * @returns {boolean}
-     */
-    get isCleanable() {
+    get isCleanable(): boolean {
       return true;
     }
 
     /**
      * Releases references
-     * @public
      */
     clean() {
+      const thisNode = this as unknown as RichTextCleanableNode;
+
       // Remove all children (and recursively clean)
-      for ( let i = this._children.length - 1; i >= 0; i-- ) {
-        const child = this._children[ i ];
+      for ( let i = thisNode._children.length - 1; i >= 0; i-- ) {
+        const child = thisNode._children[ i ] as RichTextCleanableNode;
 
         if ( child.isCleanable ) {
-          this.removeChild( child );
+          thisNode.removeChild( child );
           child.clean();
         }
       }
 
-      this.matrix = Matrix3.IDENTITY;
+      thisNode.matrix = Matrix3.IDENTITY;
 
-      this.freeToPool();
+      thisNode.freeToPool();
     }
   };
 } );
+type RichTextCleanableNode = Node & { clean: () => void, isCleanable: boolean, freeToPool: () => void };
 
-class RichTextElement extends RichTextCleanable( Node ) {
+class RawRichTextElement extends RichTextCleanable( Node ) {
+
+  private isLTR!: boolean;
+
+  // The amount of local-coordinate spacing to apply on each side
+  leftSpacing!: number;
+  rightSpacing!: number;
+
   /**
    * A container of other RichText elements and leaves.
-   * @private
    *
-   * @param {boolean} isLTR - Whether this container will lay out elements in the left-to-right order (if false, will be
+   * @param isLTR - Whether this container will lay out elements in the left-to-right order (if false, will be
    *                          right-to-left).
    */
-  constructor( isLTR ) {
+  constructor( isLTR: boolean ) {
     super();
 
     this.initialize( isLTR );
@@ -1701,16 +1612,9 @@ class RichTextElement extends RichTextCleanable( Node ) {
 
   /**
    * Sets up state
-   * @public
-   *
-   * @param {boolean} isLTR
-   * @returns {RichTextElement} - Self reference
    */
-  initialize( isLTR ) {
-    // @private {boolean}
+  initialize( isLTR: boolean ): this {
     this.isLTR = isLTR;
-
-    // @protected {number} - The amount of local-coordinate spacing to apply on each side
     this.leftSpacing = 0;
     this.rightSpacing = 0;
 
@@ -1719,12 +1623,10 @@ class RichTextElement extends RichTextCleanable( Node ) {
 
   /**
    * Adds a child element.
-   * @private
    *
-   * @param {RichTextElement|RichTextLeaf} element
-   * @returns {boolean} - Whether the item was actually added.
+   * @returns- Whether the item was actually added.
    */
-  addElement( element ) {
+  addElement( element: RichTextElement | RichTextLeaf ): boolean {
 
     const hadChild = this.children.length > 0;
     const hasElement = element.width > 0;
@@ -1782,11 +1684,8 @@ class RichTextElement extends RichTextCleanable( Node ) {
 
   /**
    * Adds an amount of spacing to the "before" side.
-   * @private
-   *
-   * @param {number} amount
    */
-  addExtraBeforeSpacing( amount ) {
+  addExtraBeforeSpacing( amount: number ) {
     if ( this.isLTR ) {
       this.leftSpacing += amount;
     }
@@ -1796,21 +1695,19 @@ class RichTextElement extends RichTextCleanable( Node ) {
   }
 }
 
-Poolable.mixInto( RichTextElement );
 
-class RichTextLeaf extends RichTextCleanable( Text ) {
+type RichTextElement = PoolableVersion<typeof RawRichTextElement>;
+const RichTextElement = Poolable.mixInto( RawRichTextElement ); // eslint-disable-line
+
+class RawRichTextLeaf extends RichTextCleanable( Text ) {
+
+  leftSpacing!: number;
+  rightSpacing!: number;
+
   /**
    * A leaf (text) node.
-   *
-   * @param {string} content
-   * @param {boolean} isLTR
-   * @param {Font|string} font
-   * @param {string} boundsMethod
-   * @param {PaintDef} fill
-   * @param {PaintDef} stroke
-   * @param {number} lineWidth
    */
-  constructor( content, isLTR, font, boundsMethod, fill, stroke, lineWidth ) {
+  constructor( content: string, isLTR: boolean, font: Font | string, boundsMethod: TextBoundsMethod, fill: IPaint, stroke: IPaint, lineWidth: number ) {
     super( '' );
 
     this.initialize( content, isLTR, font, boundsMethod, fill, stroke, lineWidth );
@@ -1818,18 +1715,8 @@ class RichTextLeaf extends RichTextCleanable( Text ) {
 
   /**
    * Set up this text's state
-   * @public
-   *
-   * @param {string} content
-   * @param {boolean} isLTR
-   * @param {Font|string} font
-   * @param {string} boundsMethod
-   * @param {PaintDef} fill
-   * @param {PaintDef} stroke
-   * @param {number} lineWidth
-   * @returns {RichTextLeaf} - Self reference
    */
-  initialize( content, isLTR, font, boundsMethod, fill, stroke, lineWidth ) {
+  initialize( content: string, isLTR: boolean, font: Font | string, boundsMethod: TextBoundsMethod, fill: IPaint, stroke: IPaint, lineWidth: number ): this {
 
     // Grab all spaces at the (logical) start
     let whitespaceBefore = '';
@@ -1856,7 +1743,6 @@ class RichTextLeaf extends RichTextCleanable( Text ) {
     const spacingAfter = whitespaceAfter.length ? scratchText.setText( whitespaceAfter ).setFont( font ).width : 0;
 
     // Turn logical spacing into directional
-    // @protected {number}
     this.leftSpacing = isLTR ? spacingBefore : spacingAfter;
     this.rightSpacing = isLTR ? spacingAfter : spacingBefore;
 
@@ -1865,7 +1751,6 @@ class RichTextLeaf extends RichTextCleanable( Text ) {
 
   /**
    * Cleans references that could cause memory leaks (as those things may contain other references).
-   * @public
    */
   clean() {
     super.clean();
@@ -1877,34 +1762,27 @@ class RichTextLeaf extends RichTextCleanable( Text ) {
   /**
    * Whether this leaf will fit in the specified amount of space (including, if required, the amount of spacing on
    * the side).
-   * @private
-   *
-   * @param {number} widthAvailable
-   * @param {boolean} hasAddedLeafToLine
-   * @param {boolean} isContainerLTR
    */
-  fitsIn( widthAvailable, hasAddedLeafToLine, isContainerLTR ) {
+  fitsIn( widthAvailable: number, hasAddedLeafToLine: boolean, isContainerLTR: boolean ) {
     return this.width + ( hasAddedLeafToLine ? ( isContainerLTR ? this.leftSpacing : this.rightSpacing ) : 0 ) <= widthAvailable;
   }
 }
 
-Poolable.mixInto( RichTextLeaf );
+type RichTextLeaf = PoolableVersion<typeof RawRichTextLeaf>;
+const RichTextLeaf = Poolable.mixInto( RawRichTextLeaf ); // eslint-disable-line
 
-class RichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
+class RawRichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
+
+  private fireListener: FireListener | null;
+  private accessibleInputListener: IInputListener | null;
+
   /**
    * A link node
-   *
-   * @mixes Voicing
-   * @param {string} innerContent
-   * @param {function|string} href
    */
-  constructor( innerContent, href ) {
+  constructor( innerContent: string, href: RichTextHref ) {
     super();
 
-    // @private {FireListener|null}
     this.fireListener = null;
-
-    // @private {function|null}
     this.accessibleInputListener = null;
 
     this.initialize( innerContent, href );
@@ -1918,13 +1796,8 @@ class RichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
 
   /**
    * Set up this state
-   * @public
-   *
-   * @param {string} innerContent
-   * @param {function|string} href
-   * @returns {RichTextLink} - Self reference
    */
-  initialize( innerContent, href ) {
+  initialize( innerContent: string, href: RichTextHref ): this {
 
     super.initialize();
 
@@ -1945,7 +1818,7 @@ class RichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
       this.setPDOMAttribute( 'target', '_self' ); // This is the default (easier than conditionally removing)
       this.accessibleInputListener = {
         click: event => {
-          event.domEvent.preventDefault();
+          event.domEvent && event.domEvent.preventDefault();
 
           href();
         }
@@ -1959,8 +1832,9 @@ class RichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
           if ( event.isFromPDOM() ) {
 
             // prevent default from pdom activation so we don't also open a new tab from native DOM input on a link
-            event.domEvent.preventDefault();
+            event.domEvent!.preventDefault();
           }
+          // @ts-ignore TODO TODO TODO this is a bug! How do we handle this?
           self._linkEventsHandled && event.handle();
           openPopup( href ); // open in a new window/tab
         },
@@ -1976,12 +1850,11 @@ class RichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
 
   /**
    * Cleans references that could cause memory leaks (as those things may contain other references).
-   * @public
    */
   clean() {
     super.clean();
 
-    this.removeInputListener( this.fireListener );
+    this.fireListener && this.removeInputListener( this.fireListener );
     this.fireListener = null;
     if ( this.accessibleInputListener ) {
       this.removeInputListener( this.accessibleInputListener );
@@ -1989,6 +1862,9 @@ class RichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
     }
   }
 }
+
+type RichTextLink = PoolableVersion<typeof RawRichTextLink>;
+const RichTextLink = Poolable.mixInto( RawRichTextLink ); // eslint-disable-line
 
 Poolable.mixInto( RichTextLink );
 
@@ -1999,3 +1875,7 @@ RichText.RichTextIO = new IOType( 'RichTextIO', {
 } );
 
 export default RichText;
+export type { RichTextOptions, RichTextAlign, RichTextHref, RichTextLinks };
+
+// For declaration emit due to Poolable
+export type { RichTextLink, RawRichTextLink };

@@ -11,51 +11,61 @@
 
 import CallbackTimer from '../../../axon/js/CallbackTimer.js';
 import Emitter from '../../../axon/js/Emitter.js';
-import merge from '../../../phet-core/js/merge.js';
+import optionize from '../../../phet-core/js/optionize.js';
 import EventType from '../../../tandem/js/EventType.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
-import { scenery, SceneryEvent, PressListener } from '../imports.js';
+import { scenery, SceneryEvent, PressListener, PressListenerOptions, Node } from '../imports.js';
+
+type FireListenerSelfOptions = {
+  // Called as fire() when the button is fired.
+  fire?: ( event: SceneryEvent ) => void;
+
+  // If true, the button will fire when the button is pressed. If false, the button will fire when the
+  // button is released while the pointer is over the button.
+  fireOnDown?: boolean;
+
+  // fire-on-hold feature, see https://github.com/phetsims/scenery/issues/1004
+  // TODO: these options are not supported with PDOM interaction, see https://github.com/phetsims/scenery/issues/1117
+  fireOnHold?: boolean; // is the fire-on-hold feature enabled?
+  fireOnHoldDelay?: number; // start to fire continuously after pressing for this long (milliseconds)
+  fireOnHoldInterval?: number; // fire continuously at this interval (milliseconds)
+};
+
+type FireListenerOptions = FireListenerSelfOptions & PressListenerOptions;
 
 class FireListener extends PressListener {
-  /**
-   * @param {Object} [options] - See the constructor body (below) and in PressListener for documented options.
-   */
-  constructor( options ) {
-    options = merge( {
 
-      // {Function} - Called as fire() when the button is fired.
+  private _fireOnDown: boolean;
+  private firedEmitter: Emitter<SceneryEvent | null>;
+  private _timer?: CallbackTimer;
+
+  constructor( providedOptions?: FireListenerOptions ) {
+    const options = optionize<FireListenerOptions, FireListenerSelfOptions, PressListenerOptions>( {
       fire: _.noop,
-
-      // {boolean} - If true, the button will fire when the button is pressed. If false, the button will fire when the
-      // button is released while the pointer is over the button.
       fireOnDown: false,
-
-      // fire-on-hold feature, see https://github.com/phetsims/scenery/issues/1004
-      // TODO: these options are not supported with PDOM interaction, see https://github.com/phetsims/scenery/issues/1117
-      fireOnHold: false, // {boolean} - is the fire-on-hold feature enabled?
-      fireOnHoldDelay: 400, // {number} - start to fire continuously after pressing for this long (milliseconds)
-      fireOnHoldInterval: 100, // {number} - fire continuously at this interval (milliseconds)
+      fireOnHold: false,
+      fireOnHoldDelay: 400,
+      fireOnHoldInterval: 100,
 
       // phet-io
       tandem: Tandem.REQUIRED,
 
       // Though FireListener is not instrumented, declare these here to support properly passing this to children
       phetioReadOnly: PhetioObject.DEFAULT_OPTIONS.phetioReadOnly
-    }, options );
+    }, providedOptions );
 
     assert && assert( typeof options.fire === 'function', 'The fire callback should be a function' );
     assert && assert( typeof options.fireOnDown === 'boolean', 'fireOnDown should be a boolean' );
 
     super( options );
 
-    // @private {boolean}
     this._fireOnDown = options.fireOnDown;
 
-    // @private {Emitter}
-    this.firedEmitter = new Emitter( {
-      tandem: options.tandem.createTandem( 'firedEmitter' ),
+    this.firedEmitter = new Emitter<SceneryEvent | null>( {
+      tandem: options.tandem!.createTandem( 'firedEmitter' ),
+      // @ts-ignore TODO EventType
       phetioEventType: EventType.USER,
       phetioReadOnly: options.phetioReadOnly,
       parameters: [ {
@@ -63,12 +73,12 @@ class FireListener extends PressListener {
         phetioType: NullableIO( SceneryEvent.SceneryEventIO )
       } ]
     } );
+    // @ts-ignore TODO Emitter
     this.firedEmitter.addListener( options.fire );
 
     // Create a timer to handle the optional fire-on-hold feature.
     // When that feature is enabled, calling this.fire is delegated to the timer.
     if ( options.fireOnHold ) {
-      // @private {CallbackTimer}
       this._timer = new CallbackTimer( {
         callback: this.fire.bind( this, null ), // Pass null for fire-on-hold events
         delay: options.fireOnHoldDelay,
@@ -79,15 +89,14 @@ class FireListener extends PressListener {
 
   /**
    * Fires any associated button fire callback.
-   * @public
    *
-   * @param {SceneryEvent|null} event
    * NOTE: This is safe to call on the listener externally.
    */
-  fire( event ) {
+  fire( event: SceneryEvent | null ) {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'FireListener fire' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
+    // @ts-ignore TODO Emitter
     this.firedEmitter.emit( event );
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
@@ -95,19 +104,17 @@ class FireListener extends PressListener {
 
   /**
    * Presses the button.
-   * @public
-   * @override
    *
    * NOTE: This is safe to call externally in order to attempt to start a press. fireListener.canPress( event ) can
    * be used to determine whether this will actually start a press.
    *
-   * @param {SceneryEvent} event
-   * @param {Node} [targetNode] - If provided, will take the place of the targetNode for this call. Useful for
+   * @param event
+   * @param [targetNode] - If provided, will take the place of the targetNode for this call. Useful for
    *                              forwarded presses.
-   * @param {function} [callback] - to be run at the end of the function, but only on success
-   * @returns {boolean} success - Returns whether the press was actually started
+   * @param [callback] - to be run at the end of the function, but only on success
+   * @returns success - Returns whether the press was actually started
    */
-  press( event, targetNode, callback ) {
+  press( event: SceneryEvent, targetNode?: Node, callback?: () => void ): boolean {
     return super.press( event, targetNode, () => {
       // This function is only called on success
       if ( this._fireOnDown ) {
@@ -122,17 +129,15 @@ class FireListener extends PressListener {
 
   /**
    * Releases the button.
-   * @public
-   * @override
    *
    * NOTE: This can be safely called externally in order to force a release of this button (no actual 'up' event is
    * needed). If the cancel/interrupt behavior is more preferable (will not fire the button), then call interrupt()
    * on this listener instead.
    *
-   * @param {SceneryEvent} [event] - scenery event if there was one
-   * @param {function} [callback] - called at the end of the release
+   * @param [event] - scenery event if there was one
+   * @param [callback] - called at the end of the release
    */
-  release( event, callback ) {
+  release( event?: SceneryEvent, callback?: () => void ) {
     super.release( event, () => {
       // Notify after the rest of release is called in order to prevent it from triggering interrupt().
       const shouldFire = !this._fireOnDown && this.isHoveringProperty.value && !this.interrupted;
@@ -140,7 +145,7 @@ class FireListener extends PressListener {
         this._timer.stop( shouldFire );
       }
       else if ( shouldFire ) {
-        this.fire( event );
+        this.fire( event || null );
       }
       callback && callback();
     } );
@@ -156,14 +161,12 @@ class FireListener extends PressListener {
    *
    * NOTE: This can be safely called externally in order to click the listener, event is not required.
    * fireListener.canClick() can be used to determine if this will actually trigger a click.
-   * @public
-   * @override
    *
-   * @param {SceneryEvent|null} [event]
-   * @param {function} [callback] - called at the end of the click
+   * @param [event]
+   * @param [callback] - called at the end of the click
    */
-  click( event, callback ) {
-    super.click( event, () => {
+  click( event: SceneryEvent | null, callback?: () => void ): boolean {
+    return super.click( event, () => {
 
       // don't click if listener was interrupted before this callback
       if ( !this.interrupted ) {
@@ -175,8 +178,6 @@ class FireListener extends PressListener {
 
   /**
    * Interrupts the listener, releasing it (canceling behavior).
-   * @public
-   * @override
    *
    * This effectively releases/ends the press, and sets the `interrupted` flag to true while firing these events
    * so that code can determine whether a release/end happened naturally, or was canceled in some way.
@@ -189,10 +190,6 @@ class FireListener extends PressListener {
     this._timer && this._timer.stop( false ); // Stop the timer, don't fire if we haven't already
   }
 
-  /**
-   * @override
-   * @public
-   */
   dispose() {
     this.firedEmitter.dispose();
     this._timer && this._timer.dispose();
@@ -204,3 +201,4 @@ class FireListener extends PressListener {
 scenery.register( 'FireListener', FireListener );
 
 export default FireListener;
+export type { FireListenerOptions };
