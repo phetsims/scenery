@@ -34,6 +34,7 @@ import { InteractiveHighlighting, Node, NodeOptions, scenery, SceneryListenerFun
 import optionize from '../../../../phet-core/js/optionize.js';
 import Constructor from '../../../../phet-core/js/Constructor.js';
 import { TAlertableDef } from '../../../../utterance-queue/js/AlertableDef.js';
+import IntentionalAny from '../../../../phet-core/js/IntentionalAny.js';
 
 // options that are supported by Voicing.js. Added to mutator keys so that Voicing properties can be set with mutate.
 const VOICING_OPTION_KEYS = [
@@ -94,7 +95,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     // response, and interaction hint.
     public _speakContentOnFocusListener!: { focus: SceneryListenerFunction };
 
-    constructor( ...args: any[] ) {
+    constructor( ...args: IntentionalAny[] ) {
 
       const providedOptions = ( args[ optionsArgPosition ] || {} ) as VoicingOptions;
 
@@ -110,9 +111,9 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     }
 
     // Separate from the constructor to support cases where Voicing is used in Poolable Nodes.
-    // ...args: any[] because things like RichTextLink need to provide arguments to initialize, and TS complains
+    // ...args: IntentionalAny[] because things like RichTextLink need to provide arguments to initialize, and TS complains
     // otherwise
-    initialize( ...args: any[] ): this {
+    initialize( ...args: IntentionalAny[] ): this {
 
       // @ts-ignore
       super.initialize && super.initialize();

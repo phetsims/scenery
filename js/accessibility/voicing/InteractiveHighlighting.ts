@@ -9,6 +9,7 @@
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import Shape from '../../../../kite/js/Shape.js';
 import Constructor from '../../../../phet-core/js/Constructor.js';
+import IntentionalAny from '../../../../phet-core/js/IntentionalAny.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import { Display, Focus, IInputListener, Instance, Node, NodeOptions, Pointer, scenery, SceneryEvent, Trail } from '../../imports.js';
 
@@ -78,7 +79,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     // while the pointer is down over something that uses InteractiveHighlighting.
     _pointerListener: IInputListener;
 
-    constructor( ...args: any[] ) {
+    constructor( ...args: IntentionalAny[] ) {
 
       const providedOptions = ( args[ optionsArgPosition ] || {} ) as InteractiveHighlightingOptions;
 
