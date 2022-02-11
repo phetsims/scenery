@@ -66,7 +66,7 @@ type VoicingSelfOptions = {
   voicingUtteranceQueue?: UtteranceQueue,
   voicingResponsePatternCollection?: ResponsePatternCollection,
   voicingIgnoreVoicingManagerProperties?: boolean,
-  voicingFocusListener?: SceneryListenerFunction
+  voicingFocusListener?: SceneryListenerFunction | null
 };
 
 type VoicingOptions = VoicingSelfOptions & NodeOptions;
@@ -118,7 +118,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     _voicingUtteranceQueue!: UtteranceQueue | null;
 
     // Called when this node is focused.
-    _voicingFocusListener!: SceneryListenerFunction;
+    _voicingFocusListener!: SceneryListenerFunction | null;
 
     // Input listener that speaks content on focus. This is the only input listener added
     // by Voicing, but it is the one that is consistent for all Voicing nodes. On focus, speak the name, object
@@ -158,7 +158,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
       this._speakContentOnFocusListener = {
         focus: event => {
-          this._voicingFocusListener( event );
+          this._voicingFocusListener && this._voicingFocusListener( event );
         }
       };
       ( this as unknown as Node ).addInputListener( this._speakContentOnFocusListener );
@@ -569,20 +569,20 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     /**
      * Called whenever this Node is focused.
      */
-    setVoicingFocusListener( focusListener: SceneryListenerFunction ) {
+    setVoicingFocusListener( focusListener: SceneryListenerFunction | null ) {
       this._voicingFocusListener = focusListener;
     }
 
-    set voicingFocusListener( focusListener: SceneryListenerFunction ) { this.setVoicingFocusListener( focusListener ); }
+    set voicingFocusListener( focusListener: SceneryListenerFunction | null ) { this.setVoicingFocusListener( focusListener ); }
 
     /**
      * Gets the utteranceQueue through which voicing associated with this Node will be spoken.
      */
-    getVoicingFocusListener(): SceneryListenerFunction {
+    getVoicingFocusListener(): SceneryListenerFunction | null {
       return this._voicingFocusListener;
     }
 
-    get voicingFocusListener(): SceneryListenerFunction { return this.getVoicingFocusListener(); }
+    get voicingFocusListener(): SceneryListenerFunction | null { return this.getVoicingFocusListener(); }
 
 
     /**
