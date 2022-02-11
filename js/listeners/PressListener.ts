@@ -208,12 +208,12 @@ class PressListener extends EnabledComponent {
   // Executed on press event
   // The main implementation of "press" handling is implemented as a callback to the Action, so things are nested
   // nicely for phet-io.
-  private _pressAction: Action;
+  private _pressAction: Action<[ SceneryEvent, Node | null, ( () => void ) | null ]>;
 
   // Executed on release event
   // The main implementation of "release" handling is implemented as a callback to the Action, so things are nested
   // nicely for phet-io.
-  private _releaseAction: Action;
+  private _releaseAction: Action<[ SceneryEvent | null, ( () => void ) | null ]>;
 
   // To support looksOverProperty being true based on focus, we need to monitor the display from which
   // the event has come from to see if that display is showing its focusHighlights, see
@@ -662,7 +662,7 @@ class PressListener extends EnabledComponent {
    *                              forwarded presses.
    * @param [callback] - to be run at the end of the function, but only on success
    */
-  private onPress( event: SceneryEvent, targetNode?: Node, callback?: () => void ) {
+  private onPress( event: SceneryEvent, targetNode: Node | null, callback: ( () => void ) | null ) {
     const givenTargetNode = targetNode || this._targetNode;
 
     // Set this properties before the property change, so they are visible to listeners.
@@ -690,7 +690,7 @@ class PressListener extends EnabledComponent {
    * @param event - scenery event if there was one
    * @param [callback] - called at the end of the release
    */
-  private onRelease( event: SceneryEvent | null, callback?: () => void ) {
+  private onRelease( event: SceneryEvent | null, callback: ( () => void ) | null ) {
     assert && assert( this.isPressed, 'This listener is not pressed' );
 
     this.pointer!.removeInputListener( this._pointerListener );

@@ -38,7 +38,7 @@ type FireListenerOptions = FireListenerSelfOptions & PressListenerOptions;
 class FireListener extends PressListener {
 
   private _fireOnDown: boolean;
-  private firedEmitter: Emitter<SceneryEvent | null>;
+  private firedEmitter: Emitter<[ SceneryEvent | null ]>;
   private _timer?: CallbackTimer;
 
   constructor( providedOptions?: FireListenerOptions ) {
@@ -63,7 +63,7 @@ class FireListener extends PressListener {
 
     this._fireOnDown = options.fireOnDown;
 
-    this.firedEmitter = new Emitter<SceneryEvent | null>( {
+    this.firedEmitter = new Emitter<[ SceneryEvent | null ]>( {
       tandem: options.tandem!.createTandem( 'firedEmitter' ),
       // @ts-ignore TODO EventType
       phetioEventType: EventType.USER,
