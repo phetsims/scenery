@@ -26,7 +26,7 @@
 
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
-import ResponsePacket, { ResponsePacketOptions } from '../../../../utterance-queue/js/ResponsePacket.js';
+import ResponsePacket, { Response, ResponsePacketOptions } from '../../../../utterance-queue/js/ResponsePacket.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
 import Utterance from '../../../../utterance-queue/js/Utterance.js';
 import UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
@@ -42,27 +42,17 @@ const VOICING_OPTION_KEYS = [
   'voicingObjectResponse',
   'voicingContextResponse',
   'voicingHintResponse',
-  'voicingCreateNameResponse',
-  'voicingCreateObjectResponse',
-  'voicingCreateContextResponse',
-  'voicingCreateHintResponse',
   'voicingUtteranceQueue',
   'voicingResponsePatternCollection',
   'voicingIgnoreVoicingManagerProperties',
   'voicingFocusListener'
 ];
 
-type ResponseCreator = () => string | null;
-
 type VoicingSelfOptions = {
-  voicingNameResponse?: string | null,
-  voicingObjectResponse?: string | null,
-  voicingContextResponse?: string | null,
-  voicingHintResponse?: string | null,
-  voicingCreateNameResponse?: ResponseCreator | null,
-  voicingCreateObjectResponse?: ResponseCreator | null,
-  voicingCreateContextResponse?: ResponseCreator | null,
-  voicingCreateHintResponse?: ResponseCreator | null,
+  voicingNameResponse?: Response,
+  voicingObjectResponse?: Response,
+  voicingContextResponse?: Response,
+  voicingHintResponse?: Response,
   voicingUtteranceQueue?: UtteranceQueue,
   voicingResponsePatternCollection?: ResponsePatternCollection,
   voicingIgnoreVoicingManagerProperties?: boolean,
@@ -71,10 +61,17 @@ type VoicingSelfOptions = {
 
 type VoicingOptions = VoicingSelfOptions & NodeOptions;
 
-type ResponseOptions = {
+type SpeakingOptions = {
   // The utterance to use if you want this response to be more controlled in the UtteranceQueue.
   utterance?: Utterance | null;
-} & ResponsePacketOptions;
+} & {
+
+  // In speaking options, we don't allow a ResponseCreator function, but just a string|null. The `undefined` is to
+  // match on the properties because they are optional (marked with `?`)
+  [PropertyName in keyof ResponsePacketOptions]: ResponsePacketOptions[PropertyName] extends ( Response | undefined ) ?
+                                                 ( string | null ) :
+                                                 ResponsePacketOptions[PropertyName];
+}
 
 /**
  * @param Type
@@ -89,26 +86,6 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
     // ResponsePacket that holds all the supported responses to be Voiced
     _voicingResponsePacket!: ResponsePacket;
-
-    // Instead of setting the name response as a string with voicingNameResponse, you can alternately pass in a
-    // function that will be called to populate the  response for the response being spoken. If provided, this will
-    // overwrite the current value of voicingNameResponse when speaking.
-    _voicingCreateNameResponse!: ResponseCreator | null;
-
-    // Instead of setting the object response as a string with voicingObjectResponse, you can alternately pass in a
-    // function that will be called to populate the  response for the response being spoken. If provided, this will
-    // overwrite the current value of voicingObjectResponse when speaking.
-    _voicingCreateObjectResponse!: ResponseCreator | null;
-
-    // Instead of setting the context response as a string with voicingContextResponse, you can alternately pass in a
-    // function that will be called to populate the  response for the response being spoken. If provided, this will
-    // overwrite the current value of voicingContextResponse when speaking.
-    _voicingCreateContextResponse!: ResponseCreator | null;
-
-    // Instead of setting the hint response as a string with voicingHintResponse, you can alternately pass in a
-    // function that will be called to populate the  response for the response being spoken. If provided, this will
-    // overwrite the current value of voicingHintResponse when speaking.
-    _voicingCreateHintResponse!: ResponseCreator | null;
 
     // The utteranceQueue that responses for this Node will be spoken through.
     // By default (null), it will go through the singleton voicingUtteranceQueue, but you may need separate
@@ -149,11 +126,6 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
       super.initialize && super.initialize();
 
       this._voicingResponsePacket = new ResponsePacket();
-      this._voicingCreateNameResponse = null;
-      this._voicingCreateObjectResponse = null;
-      this._voicingCreateContextResponse = null;
-      this._voicingCreateHintResponse = null;
-      this._voicingUtteranceQueue = null;
       this._voicingFocusListener = this.defaultFocusListener;
 
       this._speakContentOnFocusListener = {
@@ -171,23 +143,23 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * speech request. Each response is only spoken if the associated Property of responseCollector is true. If
      * all are Properties are false, nothing will be spoken.
      */
-    voicingSpeakFullResponse( providedOptions?: ResponseOptions ): void {
+    voicingSpeakFullResponse( providedOptions?: SpeakingOptions ): void {
 
       // options are passed along to collectAndSpeakResponse, see that function for additional options
-      const options = optionize<ResponseOptions, {}, ResponseOptions>( {}, providedOptions );
+      const options = optionize<SpeakingOptions, {}, SpeakingOptions>( {}, providedOptions );
 
       // Lazily formulate strings only as needed
       if ( !options.hasOwnProperty( 'nameResponse' ) ) {
-        options.nameResponse = this._getNameResponseToSpeak();
+        options.nameResponse = this._voicingResponsePacket.nameResponse;
       }
       if ( !options.hasOwnProperty( 'objectResponse' ) ) {
-        options.objectResponse = this._getObjectResponseToSpeak();
+        options.objectResponse = this._voicingResponsePacket.objectResponse;
       }
       if ( !options.hasOwnProperty( 'contextResponse' ) ) {
-        options.contextResponse = this._getContextResponseToSpeak();
+        options.contextResponse = this._voicingResponsePacket.contextResponse;
       }
       if ( !options.hasOwnProperty( 'hintResponse' ) ) {
-        options.hintResponse = this._getHintResponseToSpeak();
+        options.hintResponse = this._voicingResponsePacket.hintResponse;
       }
 
       this.collectAndSpeakResponse( options );
@@ -202,10 +174,10 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * Each response will only be spoken if the Properties of responseCollector are true. If all of those are false,
      * nothing will be spoken.
      */
-    voicingSpeakResponse( providedOptions?: ResponseOptions ): void {
+    voicingSpeakResponse( providedOptions?: SpeakingOptions ): void {
 
       // options are passed along to collectAndSpeakResponse, see that function for additional options
-      const options = optionize<ResponseOptions, {}, ResponseOptions>( {
+      const options = optionize<SpeakingOptions, {}, SpeakingOptions>( {
         nameResponse: null,
         objectResponse: null,
         contextResponse: null,
@@ -219,14 +191,14 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * By default, speak the name response. But accepts all other responses through options. Respects responseCollector
      * Properties, so the name response may not be spoken if responseCollector.nameResponseEnabledProperty is false.
      */
-    voicingSpeakNameResponse( providedOptions?: ResponseOptions ): void {
+    voicingSpeakNameResponse( providedOptions?: SpeakingOptions ): void {
 
       // options are passed along to collectAndSpeakResponse, see that function for additional options
-      const options = optionize<ResponseOptions>( {}, providedOptions );
+      const options = optionize<SpeakingOptions, {}, SpeakingOptions>( {}, providedOptions );
 
       // Lazily formulate strings only as needed
       if ( !options.hasOwnProperty( 'nameResponse' ) ) {
-        options.nameResponse = this._getNameResponseToSpeak();
+        options.nameResponse = this._voicingResponsePacket.nameResponse;
       }
 
       this.collectAndSpeakResponse( options );
@@ -236,14 +208,14 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * By default, speak the object response. But accepts all other responses through options. Respects responseCollector
      * Properties, so the name response may not be spoken if responseCollector.objectResponseEnabledProperty is false.
      */
-    voicingSpeakObjectResponse( providedOptions?: ResponseOptions ): void {
+    voicingSpeakObjectResponse( providedOptions?: SpeakingOptions ): void {
 
       // options are passed along to collectAndSpeakResponse, see that function for additional options
-      const options = optionize<ResponseOptions>( {}, providedOptions );
+      const options = optionize<SpeakingOptions, {}, SpeakingOptions>( {}, providedOptions );
 
       // Lazily formulate strings only as needed
       if ( !options.hasOwnProperty( 'objectResponse' ) ) {
-        options.objectResponse = this._getObjectResponseToSpeak();
+        options.objectResponse = this._voicingResponsePacket.objectResponse;
       }
 
       this.collectAndSpeakResponse( options );
@@ -254,14 +226,14 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * responseCollector Properties, so the name response may not be spoken if
      * responseCollector.contextResponseEnabledProperty is false.
      */
-    voicingSpeakContextResponse( providedOptions?: ResponseOptions ): void {
+    voicingSpeakContextResponse( providedOptions?: SpeakingOptions ): void {
 
       // options are passed along to collectAndSpeakResponse, see that function for additional options
-      const options = optionize<ResponseOptions>( {}, providedOptions );
+      const options = optionize<SpeakingOptions, {}, SpeakingOptions>( {}, providedOptions );
 
       // Lazily formulate strings only as needed
       if ( !options.hasOwnProperty( 'contextResponse' ) ) {
-        options.contextResponse = this._getContextResponseToSpeak();
+        options.contextResponse = this._voicingResponsePacket.contextResponse;
       }
 
       this.collectAndSpeakResponse( options );
@@ -272,14 +244,14 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * responseCollector Properties, so the hint response may not be spoken if
      * responseCollector.hintResponseEnabledProperty is false.
      */
-    voicingSpeakHintResponse( providedOptions?: ResponseOptions ): void {
+    voicingSpeakHintResponse( providedOptions?: SpeakingOptions ): void {
 
       // options are passed along to collectAndSpeakResponse, see that function for additional options
-      const options = optionize<ResponseOptions>( {}, providedOptions );
+      const options = optionize<SpeakingOptions, {}, SpeakingOptions>( {}, providedOptions );
 
       // Lazily formulate strings only as needed
       if ( !options.hasOwnProperty( 'hintResponse' ) ) {
-        options.hintResponse = this._getHintResponseToSpeak();
+        options.hintResponse = this._voicingResponsePacket.hintResponse;
       }
 
       this.collectAndSpeakResponse( options );
@@ -290,8 +262,8 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      *
      * @protected
      */
-    collectAndSpeakResponse( providedOptions?: ResponseOptions ): void {
-      const options = optionize<ResponseOptions>( {
+    collectAndSpeakResponse( providedOptions?: SpeakingOptions ): void {
+      const options = optionize<SpeakingOptions, {}, SpeakingOptions>( {
         ignoreProperties: this._voicingResponsePacket.ignoreProperties,
         responsePatternCollection: this._voicingResponsePacket.responsePatternCollection,
         utterance: null
@@ -320,83 +292,36 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
       }
     }
 
-    _getNameResponseToSpeak(): string | null {
-      if ( this._voicingCreateNameResponse ) {
-        this._voicingResponsePacket.nameResponse = this._voicingCreateNameResponse();
-      }
-      return this._voicingResponsePacket.nameResponse;
-    }
-
-    _getObjectResponseToSpeak(): string | null {
-      if ( this._voicingCreateObjectResponse ) {
-        this._voicingResponsePacket.objectResponse = this._voicingCreateObjectResponse();
-      }
-      return this._voicingResponsePacket.objectResponse;
-    }
-
-    _getContextResponseToSpeak(): string | null {
-      if ( this._voicingCreateContextResponse ) {
-        this._voicingResponsePacket.contextResponse = this._voicingCreateContextResponse();
-      }
-      return this._voicingResponsePacket.contextResponse;
-    }
-
-    _getHintResponseToSpeak(): string | null {
-      if ( this._voicingCreateHintResponse ) {
-        this._voicingResponsePacket.hintResponse = this._voicingCreateHintResponse();
-      }
-      return this._voicingResponsePacket.hintResponse;
-    }
-
     /**
      * Sets the voicingNameResponse for this Node. This is usually the label of the element and is spoken
      * when the object receives input. When requesting speech, this will only be spoken if
      * responseCollector.nameResponsesEnabledProperty is set to true.
      */
-    setVoicingNameResponse( response: string | null ): void {
+    setVoicingNameResponse( response: Response ): void {
       this._voicingResponsePacket.nameResponse = response;
     }
 
-    set voicingNameResponse( response: string | null ) { this.setVoicingNameResponse( response ); }
+    set voicingNameResponse( response: Response ) { this.setVoicingNameResponse( response ); }
 
     /**
      * Get the voicingNameResponse for this Node.
      */
-    getVoicingNameResponse(): string | null {
+    getVoicingNameResponse(): Response {
       return this._voicingResponsePacket.nameResponse;
     }
 
-    get voicingNameResponse(): string | null { return this.getVoicingNameResponse(); }
-
-    /**
-     * Set a function used to create the name response for this Node. Note that if using this setter, it will overwrite
-     * the current value of voicingNameResponse when speaking.
-     */
-    setVoicingCreateNameResponse( responseCreator: ResponseCreator | null ) {
-      this._voicingCreateNameResponse = responseCreator;
-    }
-
-    set voicingCreateNameResponse( responseCreator: ResponseCreator | null ) { this.setVoicingCreateNameResponse( responseCreator ); }
-
-    /**
-     * Gets the name-response creator function for this Node.
-     */
-    getVoicingCreateNameResponse(): ResponseCreator | null {
-      return this._voicingCreateNameResponse;
-    }
-
-    get voicingCreateNameResponse(): ResponseCreator | null { return this.getVoicingCreateNameResponse(); }
+    get voicingNameResponse(): Response { return this.getVoicingNameResponse(); }
 
     /**
      * Set the object response for this Node. This is usually the state information associated with this Node, such
      * as its current input value. When requesting speech, this will only be heard when
      * responseCollector.objectResponsesEnabledProperty is set to true.
      */
-    setVoicingObjectResponse( response: string | null ) {
+    setVoicingObjectResponse( response: Response ) {
       this._voicingResponsePacket.objectResponse = response;
     }
 
-    set voicingObjectResponse( response: string | null ) { this.setVoicingObjectResponse( response ); }
+    set voicingObjectResponse( response: Response ) { this.setVoicingObjectResponse( response ); }
 
     /**
      * Gets the object response for this Node.
@@ -408,34 +333,15 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     get voicingObjectResponse(): string | null { return this.getVoicingObjectResponse(); }
 
     /**
-     * Set a function used to create the object response for this Node. Note that if using this setter, it will overwrite
-     * the current value of voicingObjectResponse when speaking.
-     */
-    setVoicingCreateObjectResponse( responseCreator: ResponseCreator | null ) {
-      this._voicingCreateObjectResponse = responseCreator;
-    }
-
-    set voicingCreateObjectResponse( responseCreator: ResponseCreator | null ) { this.setVoicingCreateObjectResponse( responseCreator ); }
-
-    /**
-     * Gets the object-response creator function for this Node.
-     */
-    getVoicingCreateObjectResponse(): ResponseCreator | null {
-      return this._voicingCreateObjectResponse;
-    }
-
-    get voicingCreateObjectResponse(): ResponseCreator | null { return this.getVoicingCreateObjectResponse(); }
-
-    /**
      * Set the context response for this Node. This is usually the content that describes what has happened in
      * the surrounding application in response to interaction with this Node. When requesting speech, this will
      * only be heard if responseCollector.contextResponsesEnabledProperty is set to true.
      */
-    setVoicingContextResponse( response: string | null ) {
+    setVoicingContextResponse( response: Response ) {
       this._voicingResponsePacket.contextResponse = response;
     }
 
-    set voicingContextResponse( response: string | null ) { this.setVoicingContextResponse( response ); }
+    set voicingContextResponse( response: Response ) { this.setVoicingContextResponse( response ); }
 
     /**
      * Gets the context response for this Node.
@@ -447,34 +353,15 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     get voicingContextResponse(): string | null { return this.getVoicingContextResponse(); }
 
     /**
-     * Set a function used to create the context response for this Node. Note that if using this setter, it will overwrite
-     * the current value of voicingContextResponse when speaking.
-     */
-    setVoicingCreateContextResponse( responseCreator: ResponseCreator | null ) {
-      this._voicingCreateContextResponse = responseCreator;
-    }
-
-    set voicingCreateContextResponse( responseCreator: ResponseCreator | null ) { this.setVoicingCreateContextResponse( responseCreator ); }
-
-    /**
-     * Gets the context-response creator function for this Node.
-     */
-    getVoicingCreateContextResponse(): ResponseCreator | null {
-      return this._voicingCreateContextResponse;
-    }
-
-    get voicingCreateContextResponse(): ResponseCreator | null { return this.getVoicingCreateContextResponse(); }
-
-    /**
      * Sets the hint response for this Node. This is usually a response that describes how to interact with this Node.
      * When requesting speech, this will only be spoken when responseCollector.hintResponsesEnabledProperty is set to
      * true.
      */
-    setVoicingHintResponse( response: string | null ) {
+    setVoicingHintResponse( response: Response ) {
       this._voicingResponsePacket.hintResponse = response;
     }
 
-    set voicingHintResponse( response: string | null ) { this.setVoicingHintResponse( response ); }
+    set voicingHintResponse( response: Response ) { this.setVoicingHintResponse( response ); }
 
     /**
      * Gets the hint response for this Node.
@@ -484,25 +371,6 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     }
 
     get voicingHintResponse(): string | null { return this.getVoicingHintResponse(); }
-
-    /**
-     * Set a function used to create the hint response for this Node. Note that if using this setter, it will overwrite
-     * the current value of voicingHintResponse when speaking.
-     */
-    setVoicingCreateHintResponse( responseCreator: ResponseCreator | null ) {
-      this._voicingCreateHintResponse = responseCreator;
-    }
-
-    set voicingCreateHintResponse( responseCreator: ResponseCreator | null ) { this.setVoicingCreateHintResponse( responseCreator ); }
-
-    /**
-     * Gets the hint-response creator function for this Node.
-     */
-    getVoicingCreateHintResponse(): ResponseCreator | null {
-      return this._voicingCreateHintResponse;
-    }
-
-    get voicingCreateHintResponse(): ResponseCreator | null { return this.getVoicingCreateHintResponse(); }
 
     /**
      * Set whether or not all responses for this Node will ignore the Properties of responseCollector. If false,
