@@ -116,8 +116,11 @@ export { default as WebGLNode } from './nodes/WebGLNode.js';
 export type { WebGLNodeOptions } from './nodes/WebGLNode.js';
 
 export { default as LayoutBox } from './nodes/LayoutBox.js';
+export type { LayoutBoxOptions, LayoutBoxOrientation, LayoutBoxAlign } from './nodes/LayoutBox.js';
 export { default as HBox } from './nodes/HBox.js';
+export type { HBoxOptions } from './nodes/HBox.js';
 export { default as VBox } from './nodes/VBox.js';
+export type { VBoxOptions } from './nodes/VBox.js';
 
 export { default as Plane } from './nodes/Plane.js';
 export type { PlaneOptions } from './nodes/Plane.js';

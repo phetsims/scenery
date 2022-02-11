@@ -846,7 +846,7 @@ class Node extends ParallelDOM {
    * @param indexOfChild - Should satisfy this.children[ indexOfChild ] === node
    * @param [isComposite] - (scenery-internal) If true, the childrenChanged event will not be sent out.
    */
-  private removeChildWithIndex( node: Node, indexOfChild: number, isComposite?: boolean ) {
+  removeChildWithIndex( node: Node, indexOfChild: number, isComposite?: boolean ) {
     assert && assert( node && node instanceof Node, 'Need to call node.removeChildWithIndex() with a Node.' );
     assert && assert( this.hasChild( node ), 'Attempted to removeChild with a node that was not a child.' );
     assert && assert( this._children[ indexOfChild ] === node, 'Incorrect index for removeChildWithIndex' );

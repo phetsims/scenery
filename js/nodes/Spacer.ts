@@ -11,7 +11,7 @@ import { scenery, Leaf, Node, NodeOptions } from '../imports.js';
 
 type SpacerOptions = NodeOptions
 
-class Spacer extends Node {
+class Spacer extends Leaf( Node ) {
   /**
    * Creates a spacer taking up a rectangular area from x: [0,width] and y: [0,height]. Use x/y in options to control
    * its position.
@@ -32,8 +32,6 @@ class Spacer extends Node {
     this.mutate( options );
   }
 }
-
-Leaf.mixInto( Spacer ); // prevent children from being added, since we're overriding local bounds
 
 scenery.register( 'Spacer', Spacer );
 export default Spacer;

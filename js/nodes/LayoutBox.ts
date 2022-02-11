@@ -12,8 +12,8 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import merge from '../../../phet-core/js/merge.js';
-import { scenery, SceneryConstants, Node } from '../imports.js';
+import optionize from '../../../phet-core/js/optionize.js';
+import { Node, NodeOptions, scenery, SceneryConstants } from '../imports.js';
 
 // constants
 const DEFAULT_SPACING = 0;
@@ -30,13 +30,13 @@ const LAYOUT_BOX_OPTION_KEYS = [
 const LAYOUT_POSITION = {
   vertical: 'top',
   horizontal: 'left'
-};
+} as const;
 
 // The size (width/height) property name on the primary axis
 const LAYOUT_DIMENSION = {
   vertical: 'height',
   horizontal: 'width'
-};
+} as const;
 
 // The alignment property name on the secondary axis
 const LAYOUT_ALIGNMENT = {
@@ -52,53 +52,73 @@ const LAYOUT_ALIGNMENT = {
     bottom: 'bottom',
     origin: 'y'
   }
+} as const;
+type VerticalAlignResult = typeof LAYOUT_ALIGNMENT[ 'vertical' ][ keyof typeof LAYOUT_ALIGNMENT[ 'vertical' ] ];
+type HorizontalAlignResult = typeof LAYOUT_ALIGNMENT[ 'horizontal' ][ keyof typeof LAYOUT_ALIGNMENT[ 'horizontal' ] ];
+type AlignResult = VerticalAlignResult | HorizontalAlignResult;
+
+type LayoutBoxOrientation = 'horizontal' | 'vertical';
+type LayoutBoxHorizontalAlign = 'top' | 'center' | 'bottom' | 'origin';
+type LayoutBoxVerticalAlign = 'left' | 'center' | 'right' | 'origin';
+type LayoutBoxAlign = LayoutBoxHorizontalAlign | LayoutBoxVerticalAlign;
+
+type LayoutBoxSelfOptions = {
+  // Either 'vertical' or 'horizontal'. The default chosen by popular vote (with more references). see setOrientation()
+  // for more documentation.
+  orientation?: LayoutBoxOrientation;
+
+  // Spacing between nodes, see setSpacing() for more documentation.
+  spacing?: number;
+
+  // Either 'left', 'center', 'right' or 'origin' for vertical layout, or 'top', 'center', 'bottom' or 'origin' for
+  // horizontal layout, which controls positioning of nodes on the other axis. See setAlign() for more documentation.
+  align?: LayoutBoxAlign;
+
+  // Whether we'll layout after children are added/removed/resized, see #116. See setResize() for more documentation.
+  resize?: boolean;
 };
+type LayoutBoxOptions = LayoutBoxSelfOptions & NodeOptions;
 
 class LayoutBox extends Node {
-  /**
-   * @public
-   *
-   * @param {Object} [options] - LayoutBox-specific options are documented in LAYOUT_BOX_OPTION_KEYS above, and can be
-   *                             provided along-side options for Node.
-   */
-  constructor( options ) {
-    options = merge( {
+
+  private _orientation: LayoutBoxOrientation;
+  private _spacing: number;
+  private _align: LayoutBoxAlign;
+  private _resize: boolean;
+
+  // If resize:true, will be called whenever a child has its bounds change
+  private _updateLayoutListener: () => void;
+
+  // Prevents layout() from running while true. Generally will be unlocked and laid out.
+  private _updateLayoutLocked: boolean;
+
+  // We'll ignore the resize flag while running the initial mutate.
+  private _layoutMutating: boolean;
+
+  constructor( providedOptions?: LayoutBoxOptions ) {
+    // NOTE: We don't need to give defaults for our self options, so that's {}'ed out
+    const options = optionize<LayoutBoxOptions, {}, NodeOptions>( {
 
       // Allow dynamic layout by default, see https://github.com/phetsims/joist/issues/608
       excludeInvisibleChildrenFromBounds: true,
 
       disabledOpacity: SceneryConstants.DISABLED_OPACITY
-    }, options );
+    }, providedOptions );
 
     super();
 
-    // @private {string} - Either 'vertical' or 'horizontal'. The default chosen by popular vote (with more references).
-    //                     see setOrientation() for more documentation.
     this._orientation = 'vertical';
-
-    // @private {number} - Spacing between nodes, see setSpacing() for more documentation.
     this._spacing = DEFAULT_SPACING;
-
-    // @private {string} - Either 'left', 'center', 'right' or 'origin' for vertical layout, or 'top', 'center',
-    //                     'bottom' or 'origin' for horizontal layout, which controls positioning of nodes on the other
-    //                     axis. See setAlign() for more documentation.
     this._align = 'center';
-
-    // @private {boolean} - Whether we'll layout after children are added/removed/resized, see #116. See setResize()
-    //                      for more documentation.
     this._resize = true;
 
-    // @private {function} - If resize:true, will be called whenever a child has its bounds change
     this._updateLayoutListener = this.updateLayoutAutomatically.bind( this );
-
-    // @private {boolean} - Prevents layout() from running while true. Generally will be unlocked and laid out.
     this._updateLayoutLocked = false;
 
     this.childInsertedEmitter.addListener( this.onLayoutBoxChildInserted.bind( this ) );
     this.childRemovedEmitter.addListener( this.onLayoutBoxChildRemoved.bind( this ) );
     this.childrenChangedEmitter.addListener( this.onLayoutBoxChildrenChanged.bind( this ) );
 
-    // @private {boolean} - We'll ignore the resize flag while running the initial mutate.
     this._layoutMutating = true;
 
     this.mutate( options );
@@ -109,13 +129,10 @@ class LayoutBox extends Node {
 
   /**
    * Given the current children, determines what bounds should they be aligned inside of.
-   * @private
    *
    * Triggers bounds validation for all children
-   *
-   * @returns {Bounds2}
    */
-  getAlignmentBounds() {
+  private getAlignmentBounds(): Bounds2 {
     // Construct a Bounds2 at the origin, but with the maximum width/height of the children.
     let maxWidth = Number.NEGATIVE_INFINITY;
     let maxHeight = Number.NEGATIVE_INFINITY;
@@ -133,9 +150,8 @@ class LayoutBox extends Node {
 
   /**
    * The actual layout logic, typically run from the constructor OR updateLayout().
-   * @private
    */
-  layout() {
+  private layout() {
     const children = this._children;
 
     // The position (left/top) property name on the primary axis
@@ -145,7 +161,7 @@ class LayoutBox extends Node {
     const layoutDimension = LAYOUT_DIMENSION[ this._orientation ];
 
     // The alignment (left/right/bottom/top/centerX/centerY) property name on the secondary axis
-    const layoutAlignment = LAYOUT_ALIGNMENT[ this._orientation ][ this._align ];
+    const layoutAlignment = ( LAYOUT_ALIGNMENT[ this._orientation ] as { [ prop in LayoutBoxAlign ]: string } )[ this._align ] as AlignResult; // eslint-disable-line
 
     // The bounds that children will be aligned in (on the secondary axis)
     const alignmentBounds = this.getAlignmentBounds();
@@ -166,7 +182,6 @@ class LayoutBox extends Node {
   /**
    * Updates the layout of this LayoutBox. Called automatically during initialization, when children change (if
    * resize is true), or when client wants to call this public method for any reason.
-   * @public
    */
   updateLayout() {
     // Since we trigger bounds changes in our children during layout, we don't want to trigger layout off of those
@@ -180,9 +195,8 @@ class LayoutBox extends Node {
 
   /**
    * Called when we attempt to automatically layout components.
-   * @private
    */
-  updateLayoutAutomatically() {
+  private updateLayoutAutomatically() {
     if ( this._layoutMutating || this._resize ) {
       this.updateLayout();
     }
@@ -190,11 +204,8 @@ class LayoutBox extends Node {
 
   /**
    * Called when a child is inserted.
-   * @private
-   *
-   * @param {Node} node
    */
-  onLayoutBoxChildInserted( node ) {
+  private onLayoutBoxChildInserted( node: Node ) {
     if ( this._resize ) {
       node.boundsProperty.lazyLink( this._updateLayoutListener );
       node.visibleProperty.lazyLink( this._updateLayoutListener );
@@ -203,11 +214,8 @@ class LayoutBox extends Node {
 
   /**
    * Called when a child is removed.
-   * @private
-   *
-   * @param {Node} node
    */
-  onLayoutBoxChildRemoved( node ) {
+  private onLayoutBoxChildRemoved( node: Node ) {
     if ( this._resize ) {
       node.boundsProperty.unlink( this._updateLayoutListener );
       node.visibleProperty.unlink( this._updateLayoutListener );
@@ -216,9 +224,8 @@ class LayoutBox extends Node {
 
   /**
    * Called on change of children (child added, removed, order changed, etc.)
-   * @private
    */
-  onLayoutBoxChildrenChanged() {
+  private onLayoutBoxChildrenChanged() {
     if ( this._resize ) {
       this.updateLayoutAutomatically();
     }
@@ -227,16 +234,11 @@ class LayoutBox extends Node {
   /**
    * Sets the children of the Node to be equivalent to the passed-in array of Nodes. Does this by removing all current
    * children, and adding in children from the array.
-   * @public
-   * @override
    *
    * Overridden so we can group together setChildren() and only update layout (a) at the end, and (b) if there
    * are changes.
-   *
-   * @param {Array.<Node>} children
-   * @returns {LayoutBox} - Returns 'this' reference, for chaining
    */
-  setChildren( children ) {
+  setChildren( children: Node[] ): this {
     // If the layout is already locked, we need to bail and only call Node's setChildren.
     if ( this._updateLayoutLocked ) {
       return super.setChildren( children );
@@ -260,15 +262,11 @@ class LayoutBox extends Node {
 
   /**
    * If this is set to true, child nodes that are invisible will NOT contribute to the bounds of this node.
-   * @public
-   * @override
    *
    * The default is for child nodes bounds' to be included in this node's bounds, but that would in general be a
    * problem for layout containers or other situations, see https://github.com/phetsims/joist/issues/608.
-   *
-   * @param {boolean} excludeInvisibleChildrenFromBounds
    */
-  setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds ) {
+  setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds: boolean ) {
     super.setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds );
 
     // If we have invisible children, we'll likely need to update our layout,
@@ -280,12 +278,8 @@ class LayoutBox extends Node {
 
   /**
    * Sets the orientation of the LayoutBox (the axis along which nodes will be placed, separated by spacing).
-   * @public
-   *
-   * @param {string} orientation - Should be either 'vertical' or 'horizontal'
-   * @returns {Node} - For chaining
    */
-  setOrientation( orientation ) {
+  setOrientation( orientation: LayoutBoxOrientation ): this {
     assert && assert( this._orientation === 'vertical' || this._orientation === 'horizontal' );
 
     if ( this._orientation !== orientation ) {
@@ -297,30 +291,23 @@ class LayoutBox extends Node {
     return this;
   }
 
-  set orientation( value ) { this.setOrientation( value ); }
+  set orientation( value: LayoutBoxOrientation ) { this.setOrientation( value ); }
 
   /**
    * Returns the current orientation.
-   * @public
    *
    * See setOrientation for more documentation on the orientation.
-   *
-   * @returns {string}
    */
-  getOrientation() {
+  getOrientation(): LayoutBoxOrientation {
     return this._orientation;
   }
 
-  get orientation() { return this.getOrientation(); }
+  get orientation(): LayoutBoxOrientation { return this.getOrientation(); }
 
   /**
    * Sets spacing between items in the LayoutBox.
-   * @public
-   *
-   * @param {number} spacing
-   * @returns {Node} - For chaining
    */
-  setSpacing( spacing ) {
+  setSpacing( spacing: number ): this {
     assert && assert( typeof spacing === 'number' && isFinite( spacing ),
       'spacing must be a finite number' );
 
@@ -333,25 +320,21 @@ class LayoutBox extends Node {
     return this;
   }
 
-  set spacing( value ) { this.setSpacing( value ); }
+  set spacing( value: number ) { this.setSpacing( value ); }
 
   /**
    * Gets the spacing between items in the LayoutBox.
-   * @public
    *
    * See setSpacing() for more documentation on spacing.
-   *
-   * @returns {number}
    */
-  getSpacing() {
+  getSpacing(): number {
     return this._spacing;
   }
 
-  get spacing() { return this.getSpacing(); }
+  get spacing(): number { return this.getSpacing(); }
 
   /**
    * Sets the alignment of the LayoutBox.
-   * @public
    *
    * Determines how children of this LayoutBox will be positioned along the opposite axis from the orientation.
    *
@@ -366,11 +349,8 @@ class LayoutBox extends Node {
    * - center
    * - bottom
    * - origin - The y value of each child will be set to 0.
-   *
-   * @param {string} align
-   * @returns {Node} - For chaining
    */
-  setAlign( align ) {
+  setAlign( align: LayoutBoxAlign ): this {
     if ( assert ) {
       if ( this._orientation === 'vertical' ) {
         assert( this._align === 'left' || this._align === 'center' || this._align === 'right' || this._align === 'origin',
@@ -391,32 +371,25 @@ class LayoutBox extends Node {
     return this;
   }
 
-  set align( value ) { this.setAlign( value ); }
+  set align( value: LayoutBoxAlign ) { this.setAlign( value ); }
 
   /**
    * Returns the current alignment.
-   * @public
    *
    * See setAlign for more documentation on the orientation.
-   *
-   * @returns {string}
    */
-  getAlign() {
+  getAlign(): LayoutBoxAlign {
     return this._align;
   }
 
-  get align() { return this.getAlign(); }
+  get align(): LayoutBoxAlign { return this.getAlign(); }
 
   /**
    * Sets whether this LayoutBox will trigger layout when children are added/removed/resized.
-   * @public
    *
    * Layout will always still be triggered on orientation/align/spacing changes.
-   *
-   * @param {boolean} resize
-   * @returns {Node} - For chaining
    */
-  setResize( resize ) {
+  setResize( resize: boolean ): this {
     assert && assert( typeof resize === 'boolean', 'resize should be a boolean' );
 
     if ( this._resize !== resize ) {
@@ -445,27 +418,23 @@ class LayoutBox extends Node {
     return this;
   }
 
-  set resize( value ) { this.setResize( value ); }
+  set resize( value: boolean ) { this.setResize( value ); }
 
   /**
    * Returns whether this LayoutBox will trigger layout when children are added/removed/resized.
-   * @public
    *
    * See setResize() for more documentation on spacing.
-   *
-   * @returns {boolean}
    */
-  isResize() {
+  isResize(): boolean {
     return this._resize;
   }
 
-  get resize() { return this.isResize(); }
+  get resize(): boolean { return this.isResize(); }
 }
 
 /**
  * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
  * order they will be evaluated in.
- * @public
  *
  * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
  *       cases that may apply.
@@ -475,3 +444,4 @@ LayoutBox.prototype._mutatorKeys = LAYOUT_BOX_OPTION_KEYS.concat( Node.prototype
 scenery.register( 'LayoutBox', LayoutBox );
 
 export default LayoutBox;
+export type { LayoutBoxOptions, LayoutBoxOrientation, LayoutBoxAlign };
