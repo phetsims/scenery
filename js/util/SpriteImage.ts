@@ -35,7 +35,7 @@ class SpriteImage extends Imageable( Object ) {
   /**
    * @param image
    * @param offset - A 2d offset from the upper-left of the image which is considered the "center".
-   * @param [options]
+   * @param [providedOptions]
    */
   constructor( image: ImageableImage, offset: Vector2, providedOptions?: SpriteImageOptions ) {
     assert && assert( image instanceof HTMLImageElement || image instanceof HTMLCanvasElement );
