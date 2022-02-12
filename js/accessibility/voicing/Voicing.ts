@@ -42,6 +42,7 @@ const VOICING_OPTION_KEYS = [
   'voicingObjectResponse',
   'voicingContextResponse',
   'voicingHintResponse',
+  'voicingUtterance',
   'voicingUtteranceQueue',
   'voicingResponsePatternCollection',
   'voicingIgnoreVoicingManagerProperties',
@@ -57,13 +58,16 @@ type VoicingSelfOptions = {
   voicingResponsePatternCollection?: ResponsePatternCollection,
   voicingIgnoreVoicingManagerProperties?: boolean,
   voicingFocusListener?: SceneryListenerFunction | null
+
+  // The utterance to use if you want this response to be more controlled in the UtteranceQueue. This Utterance will be
+  // used by all responses spoken by this class.
+  voicingUtterance?: Utterance;
 };
 
 type VoicingOptions = VoicingSelfOptions & NodeOptions;
 
 type SpeakingOptions = {
-  // The utterance to use if you want this response to be more controlled in the UtteranceQueue.
-  utterance?: Utterance | null;
+  utterance?: VoicingSelfOptions['voicingUtterance']
 } & {
 
   // In speaking options, we don't allow a ResponseCreator function, but just a string|null. The `undefined` is to
@@ -86,6 +90,9 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
     // ResponsePacket that holds all the supported responses to be Voiced
     _voicingResponsePacket!: ResponsePacket;
+
+    // The utterance that all responses are spoken through.
+    _voicingUtterance!: Utterance;
 
     // The utteranceQueue that responses for this Node will be spoken through.
     // By default (null), it will go through the singleton voicingUtteranceQueue, but you may need separate
@@ -123,10 +130,11 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     initialize( ...args: IntentionalAny[] ): this {
 
       // @ts-ignore
-      super.initialize && super.initialize();
+      super.initialize && super.initialize( args );
 
       this._voicingResponsePacket = new ResponsePacket();
       this._voicingFocusListener = this.defaultFocusListener;
+      this._voicingUtterance = new Utterance();
 
       this._speakContentOnFocusListener = {
         focus: event => {
@@ -266,7 +274,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
       const options = optionize<SpeakingOptions, {}, SpeakingOptions>( {
         ignoreProperties: this._voicingResponsePacket.ignoreProperties,
         responsePatternCollection: this._voicingResponsePacket.responsePatternCollection,
-        utterance: null
+        utterance: this.voicingUtterance
       }, providedOptions );
 
       let response: TAlertableDef = responseCollector.collectResponses( options ); // eslint-disable-line no-undef
@@ -413,6 +421,25 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     }
 
     get voicingResponsePatternCollection(): ResponsePatternCollection { return this.getVoicingResponsePatternCollection(); }
+
+    /**
+     * Sets the utterance through which voicing associated with this Node will be spoken. By default on initialize,
+     * one will be created, but a custom one can optionally be provided.
+     */
+    setVoicingUtterance( utterance: Utterance ) {
+      this._voicingUtterance = utterance;
+    }
+
+    set voicingUtterance( utterance: Utterance ) { this.setVoicingUtterance( utterance ); }
+
+    /**
+     * Gets the utterance through which voicing associated with this Node will be spoken.
+     */
+    getVoicingUtterance(): Utterance {
+      return this._voicingUtterance;
+    }
+
+    get voicingUtterance(): Utterance { return this.getVoicingUtterance(); }
 
     /**
      * Sets the utteranceQueue through which voicing associated with this Node will be spoken. By default,
