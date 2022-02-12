@@ -3444,8 +3444,11 @@ class Node extends ParallelDOM {
    * Node's visibility, and vice versa. This does not change this._visibleProperty. See TinyForwardingProperty.setTargetProperty()
    * for more info.
    *
-   * Note that all instrumented Nodes create their own instrumented visibleProperty (if one is not passed in as an option).
-   * Once a Node's visibleProperty has been registered with PhET-iO, it cannot be "swapped out" for another.
+   * NOTE For PhET-iO use:
+   * All PhET-iO instrumented Nodes create their own instrumented visibleProperty (if one is not passed in as
+   * an option). Once a Node's visibleProperty has been registered with PhET-iO, it cannot be "swapped out" for another.
+   * If you need to "delay" setting an instrumented visibleProperty to this node, pass phetioVisiblePropertyInstrumented
+   * to instrumentation call to this Node (where Tandem is provided).
    */
   setVisibleProperty( newTarget: IProperty<boolean> | null ): this {
     return this._visibleProperty.setTargetProperty( this, VISIBLE_PROPERTY_TANDEM_NAME, newTarget );
@@ -3850,7 +3853,12 @@ class Node extends ParallelDOM {
    * Node's enabled, and vice versa. This does not change this._enabledProperty. See TinyForwardingProperty.setTargetProperty()
    * for more info.
    *
-   * PhET-iO Instrumented Nodes do not by default create their own instrumented enabledProperty, even though Node.visibleProperty does.
+   *
+   * NOTE For PhET-iO use:
+   * All PhET-iO instrumented Nodes create their own instrumented enabledProperty (if one is not passed in as
+   * an option). Once a Node's enabledProperty has been registered with PhET-iO, it cannot be "swapped out" for another.
+   * If you need to "delay" setting an instrumented enabledProperty to this node, pass phetioEnabledPropertyInstrumented
+   * to instrumentation call to this Node (where Tandem is provided).
    */
   setEnabledProperty( newTarget: IProperty<boolean> | null ): this {
     return this._enabledProperty.setTargetProperty( this, ENABLED_PROPERTY_TANDEM_NAME, newTarget );
@@ -3960,7 +3968,11 @@ class Node extends ParallelDOM {
    * Node's input is enabled, and vice versa. This does not change this._inputEnabledProperty. See TinyForwardingProperty.setTargetProperty()
    * for more info.
    *
-   * PhET-iO Instrumented Nodes do not by default create their own instrumented inputEnabledProperty, even though Node.visibleProperty does.
+   * NOTE For PhET-iO use:
+   * All PhET-iO instrumented Nodes create their own instrumented inputEnabledProperty (if one is not passed in as
+   * an option). Once a Node's inputEnabledProperty has been registered with PhET-iO, it cannot be "swapped out" for another.
+   * If you need to "delay" setting an instrumented inputEnabledProperty to this node, pass phetioInputEnabledPropertyInstrumented
+   * to instrumentation call to this Node (where Tandem is provided).
    */
   setInputEnabledProperty( newTarget: IProperty<boolean> | null ): this {
     return this._inputEnabledProperty.setTargetProperty( this, INPUT_ENABLED_PROPERTY_TANDEM_NAME, newTarget );

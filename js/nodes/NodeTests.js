@@ -423,6 +423,22 @@ if ( Tandem.PHET_IO_ENABLED ) {
     }, `cannot remove instrumentation from the Node's ${nodeProperty}` );
     apiValidation.enabled = false;
 
+    apiValidation.enabled = true;
+
+    apiValidation.simHasStarted = false;
+
+    // instrumentedNodeOptsOutOfDefault => instrumented Property set later (but before startup)
+    const instrumented6 = new Node( {
+      tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyNode6` ),
+      [ phetioNodePropertyInstrumentedKeyName ]: false // required when passing in an instrumented one later
+    } );
+
+    instrumented6[ nodeProperty ] = new BooleanProperty( false, {
+      tandem: Tandem.ROOT_TEST.createTandem( `${nodeField}MyBooleanProperty` )
+    } );
+    apiValidation.enabled = false;
+
+    instrumented6.dispose();
     instrumented1.dispose();
 
     // These can't be disposed because they were broken while creating (on purpose in an assert.throws()). These elements
