@@ -4595,6 +4595,7 @@ class Node extends ParallelDOM {
 
   // Defaults indicating that we don't mix in WidthSizable/HeightSizable
   get widthSizable(): boolean { return false; }
+
   get heightSizable(): boolean { return false; }
 
   mutateLayoutOptions( layoutOptions?: ILayoutOptions ) {
@@ -6121,6 +6122,7 @@ class Node extends ParallelDOM {
 
 // Interface extension to support things on the prototype
 interface Node { // eslint-disable-line
+
   // This is an array of property (setter) names for Node.mutate(), which are also used when creating
   // Nodes with parameter objects.
   //
