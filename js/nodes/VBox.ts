@@ -1,4 +1,4 @@
-// Copyright 2013-2022, University of Colorado Boulder
+// Copyright 2022, University of Colorado Boulder
 
 /**
  * VBox is a convenience specialization of LayoutBox with vertical orientation.
