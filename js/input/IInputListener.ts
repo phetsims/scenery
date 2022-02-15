@@ -6,6 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import Bounds2 from '../../../dot/js/Bounds2.js';
 import { SceneryEvent } from '../imports.js';
 
 type SceneryListenerFunction = ( event: SceneryEvent ) => void;
@@ -70,6 +71,14 @@ interface IInputListener {
   mouseout?: SceneryListenerFunction;
   touchout?: SceneryListenerFunction;
   penout?: SceneryListenerFunction;
+
+  listener?: unknown;
+
+  // Function that returns the Bounds2 for AnimatedPanZoomListener to keep in view during drag input.
+  // Bounds are in the global coordinate frame.
+  // While dragging, the AnimatedPanZoomListener will try to keep these bounds in view. Intended to be
+  // called from a listener attached to a Pointer so that the API is compatible with multi-touch.
+  getDragPanTargetBounds?: () => Bounds2;
 }
 
 export default IInputListener;

@@ -320,7 +320,8 @@ class PressListener extends EnabledComponent {
       up: this.pointerUp.bind( this ),
       cancel: this.pointerCancel.bind( this ),
       move: this.pointerMove.bind( this ),
-      interrupt: this.pointerInterrupt.bind( this )
+      interrupt: this.pointerInterrupt.bind( this ),
+      listener: this
     };
 
     this._pressAction = new Action( this.onPress.bind( this ), {

@@ -17,7 +17,7 @@ import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
 import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import { scenery, Pointer, EventIO, PDOMUtils, KeyboardUtils, KeyboardZoomUtils, globalKeyStateTracker, FocusManager, PanZoomListener } from '../imports.js';
+import { scenery, Pointer, EventIO, PDOMUtils, KeyboardUtils, KeyboardZoomUtils, globalKeyStateTracker, FocusManager, PanZoomListener, PressListener } from '../imports.js';
 import { Node } from '../../../scenery/js/imports.js'; // eslint-disable-line
 
 // constants
@@ -270,7 +270,9 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * @param {SceneryEvent} event
    */
   move( event ) {
-    if ( this._downTrail ) {
+
+    // No need to do this work if we are zoomed out.
+    if ( this._downTrail && this.getCurrentScale() > 1 ) {
       if ( this._downInDragBounds ) {
         this._repositionDuringDragPoint = null;
 
@@ -278,11 +280,44 @@ class AnimatedPanZoomListener extends PanZoomListener {
         const currentTargetExists = event.currentTarget !== null;
 
         if ( currentTargetExists && hasDragIntent ) {
+          let globalBoundsToView = null;
 
-          const globalTargetBounds = this._downTrail.parentToGlobalBounds( this._downTrail.lastNode().bounds );
-          const targetInBounds = this._panBounds.containsBounds( globalTargetBounds );
-          if ( !targetInBounds ) {
-            this._repositionDuringDragPoint = globalTargetBounds.center;
+          if ( event.pointer.attachedListener ) {
+            const attachedListener = event.pointer.attachedListener;
+
+            if ( attachedListener.getDragPanTargetBounds ) {
+
+              // client has defined the Bounds they want to keep in view for this Pointer (it is assigned to the
+              // Pointer to support multitouch cases
+              globalBoundsToView = event.pointer.attachedListener.getDragPanTargetBounds();
+            }
+            else if ( event.pointer.attachedListener.listener instanceof PressListener ) {
+              const attachedPressListener = event.pointer.attachedListener.listener;
+
+              // this will either be the PressListener's targetNode or the default target of the SceneryEvent on press
+              const target = attachedPressListener.getCurrentTarget();
+
+              // TODO: For now we cannot support DAG. We may be able to use PressListener.pressedTrail instead of
+              // getCurrentTarget, and then we would have a uniquely defined trail. See
+              // https://github.com/phetsims/scenery/issues/1361 and
+              // https://github.com/phetsims/scenery/issues/1356#issuecomment-1039678678
+              if ( target.instances.length === 1 ) {
+                globalBoundsToView = target.globalBounds;
+              }
+            }
+          }
+
+          if ( globalBoundsToView ) {
+            const targetInBounds = this._panBounds.containsBounds( globalBoundsToView );
+
+            if ( !targetInBounds ) {
+              this._repositionDuringDragPoint = globalBoundsToView.center;
+            }
+          }
+          else {
+
+            // We weren't able to automatically determine globalBoundsToView and client didn't provide them.
+            // TODO: How to handle this fallback case? See https://github.com/phetsims/scenery/issues/1356
           }
         }
       }
