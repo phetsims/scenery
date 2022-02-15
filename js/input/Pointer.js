@@ -205,7 +205,7 @@ class Pointer {
 
   /**
    * Returns the listener attached to this pointer with attach(), or null if there isn't one.
-   * @public (scenery-internal)
+   * @public
    *
    * @returns {Object|null}
    */
