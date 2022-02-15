@@ -10,6 +10,8 @@
     "js/**/*Test*",
     "js/tests/**/*",
     "../utterance-queue/js/**/*test*",
-    "../utterance-queue/js/**/*Test*"
+    "../utterance-queue/js/**/*Test*",
+    "../chipper/node_modules/@types/lodash/index.d.ts",
+    "../chipper/node_modules/@types/jquery/index.d.ts"
   ]
 }

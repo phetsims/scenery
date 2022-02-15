@@ -14,7 +14,7 @@ import platform from '../../../phet-core/js/platform.js';
 import { scenery, Features } from '../imports.js';
 
 // convenience function
-function p( x, y ) {
+function p( x: number, y: number ) {
   return new Vector2( x, y );
 }
 
@@ -30,6 +30,8 @@ const transformOriginProperty = Features.transformOrigin || 'transformOrigin'; /
 // see https://github.com/phetsims/scenery/issues/621
 let webglEnabled = true;
 
+let _extensionlessWebGLSupport: boolean | undefined; // lazily computed
+
 const Utils = {
   /*---------------------------------------------------------------------------*
    * Transformation Utilities (TODO: separate file)
@@ -38,23 +40,16 @@ const Utils = {
   /**
    * Prepares a DOM element for use with applyPreparedTransform(). Applies some CSS styles that are required, but
    * that we don't want to set while animating.
-   * @public
-   *
-   * @param {Element} element
    */
-  prepareForTransform( element ) {
+  prepareForTransform( element: HTMLElement ) {
     element.style[ transformOriginProperty ] = 'top left';
   },
 
   /**
    * Applies the CSS transform of the matrix to the element, with optional forcing of acceleration.
    * NOTE: prepareForTransform should be called at least once on the element before this method is used.
-   * @public
-   *
-   * @param {Matrix3} matrix
-   * @param {Element} element
    */
-  applyPreparedTransform( matrix, element ) {
+  applyPreparedTransform( matrix: Matrix3, element: HTMLElement ) {
     // NOTE: not applying translateZ, see http://stackoverflow.com/questions/10014461/why-does-enabling-hardware-acceleration-in-css3-slow-down-performance
     element.style[ transformProperty ] = matrix.getCSSTransform();
   },
@@ -62,12 +57,8 @@ const Utils = {
   /**
    * Applies a CSS transform value string to a DOM element.
    * NOTE: prepareForTransform should be called at least once on the element before this method is used.
-   * @public
-   *
-   * @param {string} transformString
-   * @param {Element} element
    */
-  setTransform( transformString, element ) {
+  setTransform( transformString: string, element: HTMLElement ) {
     assert && assert( typeof transformString === 'string' );
 
     element.style[ transformProperty ] = transformString;
@@ -75,18 +66,14 @@ const Utils = {
 
   /**
    * Removes a CSS transform from a DOM element.
-   * @public
-   *
-   * @param {Element} element
    */
-  unsetTransform( element ) {
+  unsetTransform( element: HTMLElement ) {
     element.style[ transformProperty ] = '';
   },
 
   /**
    * Ensures that window.requestAnimationFrame and window.cancelAnimationFrame use a native implementation if possible,
    * otherwise using a simple setTimeout internally. See https://github.com/phetsims/scenery/issues/426
-   * @public
    */
   polyfillRequestAnimationFrame() {
     if ( !window.requestAnimationFrame || !window.cancelAnimationFrame ) {
@@ -104,7 +91,9 @@ const Utils = {
       }
       // Fill in the non-prefixed names with the prefixed versions
       else {
+        // @ts-ignore
         window.requestAnimationFrame = window[ Features.requestAnimationFrame ];
+        // @ts-ignore
         window.cancelAnimationFrame = window[ Features.cancelAnimationFrame ];
       }
     }
@@ -113,16 +102,19 @@ const Utils = {
   /**
    * Returns the relative size of the context's backing store compared to the actual Canvas. For example, if it's 2,
    * the backing store has 2x2 the amount of pixels (4 times total).
-   * @public
    *
-   * @param {CanvasRenderingContext2D | WebGLRenderingContext} context
-   * @returns {number} The backing store pixel ratio.
+   * @returns The backing store pixel ratio.
    */
-  backingStorePixelRatio( context ) {
+  backingStorePixelRatio( context: CanvasRenderingContext2D | WebGLRenderingContext ): number {
+    // @ts-ignore
     return context.webkitBackingStorePixelRatio ||
+           // @ts-ignore
            context.mozBackingStorePixelRatio ||
+           // @ts-ignore
            context.msBackingStorePixelRatio ||
+           // @ts-ignore
            context.oBackingStorePixelRatio ||
+           // @ts-ignore
            context.backingStorePixelRatio || 1;
   },
 
@@ -130,12 +122,8 @@ const Utils = {
    * Returns the scaling factor that needs to be applied for handling a HiDPI Canvas
    * See see http://developer.apple.com/library/safari/#documentation/AudioVideo/Conceptual/HTML-canvas-guide/SettingUptheCanvas/SettingUptheCanvas.html#//apple_ref/doc/uid/TP40010542-CH2-SW5
    * And it's updated based on http://www.html5rocks.com/en/tutorials/canvas/hidpi/
-   * @public
-   *
-   * @param {CanvasRenderingContext2D | WebGLRenderingContext} context
-   * @returns {number}
    */
-  backingScale( context ) {
+  backingScale( context: CanvasRenderingContext2D | WebGLRenderingContext ): number {
     if ( 'devicePixelRatio' in window ) {
       const backingStoreRatio = Utils.backingStorePixelRatio( context );
 
@@ -146,22 +134,17 @@ const Utils = {
 
   /**
    * Whether the native Canvas HTML5 API supports the 'filter' attribute (similar to the CSS/SVG filter attribute).
-   * @public
-   *
-   * @returns {boolean}
    */
-  supportsNativeCanvasFilter() {
+  supportsNativeCanvasFilter(): boolean {
     return !!Features.canvasFilter;
   },
 
   /**
    * Whether we can handle arbitrary filters in Canvas by manipulating the ImageData returned. If we have a backing
    * store pixel ratio that is non-1, we'll be blurring out things during that operation, which would be unacceptable.
-   * @public
-   *
-   * @returns {boolean}
    */
-  supportsImageDataCanvasFilter() {
+  supportsImageDataCanvasFilter(): boolean {
+    // @ts-ignore TODO: scenery and typing
     return Utils.backingStorePixelRatio( scenery.scratchContext ) === 1;
   },
 
@@ -173,13 +156,8 @@ const Utils = {
    * Given a data snapshot and transform, calculate range on how large / small the bounds can be. It's
    * very conservative, with an effective 1px extra range to allow for differences in anti-aliasing
    * for performance concerns, this does not support skews / rotations / anything but translation and scaling
-   * @public
-   *
-   * @param {ImageData} imageData
-   * @param {number} resolution
-   * @param {Transform3} transform
    */
-  scanBounds( imageData, resolution, transform ) {
+  scanBounds( imageData: ImageData, resolution: number, transform: Transform3 ) {
 
     // entry will be true if any pixel with the given x or y value is non-rgba(0,0,0,0)
     const dirtyX = _.map( _.range( resolution ), () => false );
@@ -221,12 +199,10 @@ const Utils = {
 
   /**
    * Measures accurate bounds of a function that draws things to a Canvas.
-   * @public
    *
-   * @param {function} renderToContext - Called with the Canvas 2D context as a parameter, should draw to it.
    * @param {Object} [options]
    */
-  canvasAccurateBounds( renderToContext, options ) {
+  canvasAccurateBounds( renderToContext: ( context: CanvasRenderingContext2D ) => void, options?: { precision?: number, resolution?: number, initialScale?: number } ): Bounds2 & { minBounds: Bounds2, maxBounds: Bounds2, isConsistent: boolean, precision: number } {
     // how close to the actual bounds do we need to be?
     const precision = ( options && options.precision ) ? options.precision : 0.001;
 
@@ -243,7 +219,7 @@ const Utils = {
     const canvas = document.createElement( 'canvas' );
     canvas.width = resolution;
     canvas.height = resolution;
-    const context = canvas.getContext( '2d' );
+    const context = canvas.getContext( '2d' )!;
 
     if ( debugChromeBoundsScanning ) {
       $( window ).ready( () => {
@@ -254,7 +230,7 @@ const Utils = {
     }
 
     // TODO: Don't use Transform3 unless it is necessary
-    function scan( transform ) {
+    function scan( transform: Transform3 ) {
       // save/restore, in case the render tries to do any funny stuff like clipping, etc.
       context.save();
       transform.matrix.canvasSetTransform( context );
@@ -264,11 +240,11 @@ const Utils = {
       const data = context.getImageData( 0, 0, resolution, resolution );
       const minMaxBounds = Utils.scanBounds( data, resolution, transform );
 
-      function snapshotToCanvas( snapshot ) {
+      function snapshotToCanvas( snapshot: ImageData ) {
         const canvas = document.createElement( 'canvas' );
         canvas.width = resolution;
         canvas.height = resolution;
-        const context = canvas.getContext( '2d' );
+        const context = canvas.getContext( '2d' )!;
         context.putImageData( snapshot, 0, 0 );
         $( canvas ).css( 'border', '1px solid black' );
         $( window ).ready( () => {
@@ -288,7 +264,7 @@ const Utils = {
     }
 
     // attempts to map the bounds specified to the entire testing canvas (minus a fine border), so we can nail down the location quickly
-    function idealTransform( bounds ) {
+    function idealTransform( bounds: Bounds2 ) {
       // so that the bounds-edge doesn't land squarely on the boundary
       const borderSize = 2;
 
@@ -405,7 +381,8 @@ const Utils = {
       console.log( `maxBounds: ${maxBounds}` );
     }
 
-    const result = new Bounds2(
+    // @ts-ignore
+    const result: Bounds2 & { minBounds: Bounds2, maxBounds: Bounds2, isConsistent: boolean, precision: number } = new Bounds2(
       // Do finite checks so we don't return NaN
       ( isFinite( minBounds.minX ) && isFinite( maxBounds.minX ) ) ? ( minBounds.minX + maxBounds.minX ) / 2 : Number.POSITIVE_INFINITY,
       ( isFinite( minBounds.minY ) && isFinite( maxBounds.minY ) ) ? ( minBounds.minY + maxBounds.minY ) / 2 : Number.POSITIVE_INFINITY,
@@ -434,12 +411,10 @@ const Utils = {
 
   /**
    * Finds the smallest power of 2 that is at least as large as n.
-   * @public
    *
-   * @param {number} n
-   * @returns {number} The smallest power of 2 that is greater than or equal n
+   * @returns The smallest power of 2 that is greater than or equal n
    */
-  toPowerOf2( n ) {
+  toPowerOf2( n: number ): number {
     let result = 1;
     while ( result < n ) {
       result *= 2;
@@ -447,17 +422,11 @@ const Utils = {
     return result;
   },
 
-  /*
+  /**
    * Creates and compiles a GLSL Shader object in WebGL.
-   * @public
-   *
-   * @param {WebGLRenderingContext} - WebGL Rendering Context
-   * @param {number} type - Should be: gl.VERTEX_SHADER or gl.FRAGMENT_SHADER
-   * @param {string} source - The shader source code.
-   * @returns {WebGLShader}
    */
-  createShader( gl, source, type ) {
-    const shader = gl.createShader( type );
+  createShader( gl: WebGLRenderingContext, source: string, type: number ): WebGLShader {
+    const shader = gl.createShader( type )!;
     gl.shaderSource( shader, source );
     gl.compileShader( shader );
 
@@ -474,7 +443,7 @@ const Utils = {
     return shader;
   },
 
-  applyWebGLContextDefaults( gl ) {
+  applyWebGLContextDefaults( gl: WebGLRenderingContext ) {
     // What color gets set when we call gl.clear()
     gl.clearColor( 0, 0, 0, 0 );
 
@@ -492,22 +461,17 @@ const Utils = {
 
   /**
    * Set whether webgl should be enabled, see docs for webglEnabled
-   * @public
-   *
-   * @param {boolean} _webglEnabled
    */
-  setWebGLEnabled( _webglEnabled ) {
+  setWebGLEnabled( _webglEnabled: boolean ) {
     webglEnabled = _webglEnabled;
   },
 
   /**
    * Check to see whether webgl is supported, using the same strategy as mrdoob and pixi.js
-   * @public
    *
-   * @param {Array.<string>} [extensions] - A list of WebGL extensions that need to be supported
-   * @returns {boolean}
+   * @param [extensions] - A list of WebGL extensions that need to be supported
    */
-  checkWebGLSupport( extensions ) {
+  checkWebGLSupport( extensions?: string[] ): boolean {
 
     // The webgl check can be shut off, please see docs at webglEnabled declaration site
     if ( webglEnabled === false ) {
@@ -517,7 +481,8 @@ const Utils = {
 
     const args = { failIfMajorPerformanceCaveat: true };
     try {
-      const gl = !!window.WebGLRenderingContext &&
+      // @ts-ignore
+      const gl: WebGLRenderingContext | null = !!window.WebGLRenderingContext &&
                  ( canvas.getContext( 'webgl', args ) || canvas.getContext( 'experimental-webgl', args ) );
 
       if ( !gl ) {
@@ -541,15 +506,13 @@ const Utils = {
 
   /**
    * Check to see whether IE11 has proper clearStencil support (required for three.js to work well).
-   * @public
-   *
-   * @returns {boolean}
    */
-  checkIE11StencilSupport() {
+  checkIE11StencilSupport(): boolean {
     const canvas = document.createElement( 'canvas' );
 
     try {
-      const gl = !!window.WebGLRenderingContext &&
+      // @ts-ignore
+      const gl: WebGLRenderingContext | null = !!window.WebGLRenderingContext &&
                  ( canvas.getContext( 'webgl' ) || canvas.getContext( 'experimental-webgl' ) );
 
       if ( !gl ) {
@@ -567,24 +530,20 @@ const Utils = {
 
   /**
    * Whether WebGL (with decent performance) is supported by the platform
-   * @public {boolean}
    */
-  get isWebGLSupported() {
-    if ( this._extensionlessWebGLSupport === undefined ) {
-      this._extensionlessWebGLSupport = Utils.checkWebGLSupport();
+  get isWebGLSupported(): boolean {
+    if ( _extensionlessWebGLSupport === undefined ) {
+      _extensionlessWebGLSupport = Utils.checkWebGLSupport();
     }
-    return this._extensionlessWebGLSupport;
+    return _extensionlessWebGLSupport;
   },
 
   /**
    * Triggers a loss of a WebGL context, with a delayed restoration.
-   * @public
    *
    * NOTE: Only use this for debugging. Should not be called normally.
-   *
-   * @param {WebGLRenderingContext} gl
    */
-  loseContext( gl ) {
+  loseContext( gl: WebGLRenderingContext ) {
     const extension = gl.getExtension( 'WEBGL_lose_context' );
     if ( extension ) {
       extension.loseContext();
@@ -598,12 +557,8 @@ const Utils = {
 
   /**
    * Creates a string useful for working around https://github.com/phetsims/collision-lab/issues/177.
-   * @public
-   *
-   * @param {string} str
-   * @returns {string}
    */
-  safariEmbeddingMarkWorkaround( str ) {
+  safariEmbeddingMarkWorkaround( str: string ): string {
     if ( platform.safari ) {
       // Add in zero-width spaces for Safari, so it doesn't have adjacent embedding marks ever (which seems to prevent
       // things).
