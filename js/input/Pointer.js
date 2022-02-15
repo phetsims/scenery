@@ -204,6 +204,18 @@ class Pointer {
   }
 
   /**
+   * Returns the listener attached to this pointer with attach(), or null if there isn't one.
+   * @public (scenery-internal)
+   *
+   * @returns {Object|null}
+   */
+  getAttachedListener() {
+    return this._attachedListener;
+  }
+
+  get attachedListener() { return this.getAttachedListener(); }
+
+  /**
    * Returns whether this pointer has an attached (primary) listener.
    * @public
    *
