@@ -308,8 +308,9 @@ class Display {
     // @public {UtteranceQueue} - data structure for managing aria-live alerts the this Display instance
     const ariaLiveAnnouncer = new AriaLiveAnnouncer();
     this.descriptionUtteranceQueue = new UtteranceQueue( ariaLiveAnnouncer, {
-      implementAsSkeleton: !this._accessible,
-      tandem: options.tandem.createTandem( 'descriptionUtteranceQueue' )
+      initialize: this._accessible,
+      tandem: options.tandem.createTandem( 'descriptionUtteranceQueue' ),
+      phetioDocumentation: 'The facility to provide aria-live description to this display within a queue.'
     } );
 
     // @public - Manages the various types of Focus that can go through the Display, as well as Properties
