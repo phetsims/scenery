@@ -169,7 +169,6 @@ export { default as ReadingBlock } from './accessibility/voicing/ReadingBlock.js
 export { default as KeyboardZoomUtils } from './accessibility/KeyboardZoomUtils.js';
 export { default as KeyboardFuzzer } from './accessibility/KeyboardFuzzer.js';
 export { default as GroupFocusHighlightFromNode } from './accessibility/GroupFocusHighlightFromNode.js';
-export { default as ReadingBlockNode } from './accessibility/voicing/ReadingBlockNode.js';
 export { default as ActivatedReadingBlockHighlight } from './accessibility/voicing/ActivatedReadingBlockHighlight.js';
 
 

@@ -136,7 +136,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
     }
 
     /**
-     * Set the tagName for the ReadingBlockNode. This is the tagName (of ParallelDOM) that will be applied
+     * Set the tagName for the node composing ReadingBlock. This is the tagName (of ParallelDOM) that will be applied
      * to this Node when Reading Blocks are enabled.
      */
     setReadingBlockTagName( tagName: string | null ) {
