@@ -154,7 +154,7 @@
     <div class="sublink"><a href="#voicing-api-object-response">voicingObjectResponse</a></div>
     <div class="sublink"><a href="#voicing-api-context-response">voicingContextResponse</a></div>
     <div class="sublink"><a href="#voicing-api-hint-response">voicingHintResponse</a></div>
-    <div class="sublink"><a href="#voicing-api-utterance-queue">voicingUtteranceQueue</a></div>
+    <div class="sublink"><a href="#voicing-api-utterance">voicingUtterance</a></div>
 
     <div class="sublink"><a href="#voicing-api-utterance-queue">voicingUtteranceQueue</a></div>
     <div class="sublink"><a href="#voicing-api-speak-full-response">voicingSpeakFullResponse</a></div>
@@ -163,6 +163,7 @@
     <div class="sublink"><a href="#voicing-api-speak-object-response">voicingSpeakNameResponse</a></div>
     <div class="sublink"><a href="#voicing-api-speak-context-response">voicingSpeakContextResponse</a></div>
     <div class="sublink"><a href="#voicing-api-speak-hint-response">voicingSpeakHintResponse</a></div>
+    <div class="sublink"><a href="#voicing-api-focus-listener">voicingFocusListener</a></div>
     <div class="sublink"><a
         href="#voicing-api-ignore-voicing-manager-properties">voicingIgnoreVoicingManagerProperties</a></div>
     <div class="sublink"><a href="#voicing-api-response-pattern-collection">voicingResponsePatternCollection</a></div>
@@ -213,7 +214,8 @@
       </li>
     </ul>
 
-    <p>For example, lets say that we had a scenery object representing a magnet. We might assign responses to it like</p>
+    <p>For example, lets say that we had a scenery object representing a magnet. We might assign responses to it
+      like</p>
     <ul>
       <li><b>Name Response:</b> Magnet</li>
       <li><b>Object Response:</b> Weak strength.</li>
@@ -222,8 +224,9 @@
     </ul>
 
     <p>As shown in this example, the "Name Response" labels the component, the "Object Response" describes the state
-    of the component, the "Context Response" describes its impact on the surrounding application, and the "Hint Response"
-    provides a guide to interact with the component.</p>
+      of the component, the "Context Response" describes its impact on the surrounding application, and the "Hint
+      Response"
+      provides a guide to interact with the component.</p>
 
     <h4>Responses implemented with Voicing.ts</h4>
     <p>Voicing is implemented with a trait called <code>Voicing.ts</code> which can be composed with scenery's
@@ -253,6 +256,15 @@
 
     <h4 id="voicing-api-hint-response">voicingHintResponse</h4>
     <p>A getter/setter for the <code>{string|null}</code> hint response for the Node.</p>
+
+    <h4 id="voicing-api-utterance">voicingUtterance</h4>
+    <p>
+      A getter/setter for the <code>{Utterance|null}</code> Utterance used to speak Voicing content.
+      By default, a unique Utterance is created and used when you use the Voicing trait. This means that
+      speaking content through a Node with Voicing.ts will leverage the UtteranceQueue features of waiting to
+      announce an Utterance until that Utterance has "stabilized". If you rapdily speak many responses only
+      the last response will be spoken. But you can override this behavior by assigning a unique Utterance.
+    </p>
 
     <h4 id="voicing-api-utterance-queue">voicingUtteranceQueue</h4>
     <p>
@@ -302,6 +314,12 @@
       A function that speaks only the name response. Only the responses that are enabled by
       <code>responseCollector.js</code> will be spoken. This is generally called in response to some input or change in
       the application.
+    </p>
+
+    <h4 id="voicing-api-focus-listener">voicingFocusListener</h4>
+    <p>
+      A function is called whenever the Node that mixes Voicing receives focus. By default every response except the
+      context response is spoken on focus. But this can be overridden if necessary.
     </p>
 
     <h4 id="voicing-api-ignore-voicing-manager-properties">voicingIgnoreVoicingManagerProperties</h4>
