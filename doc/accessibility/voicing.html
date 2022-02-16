@@ -213,6 +213,18 @@
       </li>
     </ul>
 
+    <p>For example, lets say that we had a scenery object representing a magnet. We might assign responses to it like</p>
+    <ul>
+      <li><b>Name Response:</b> Magnet</li>
+      <li><b>Object Response:</b> Weak strength.</li>
+      <li><b>Context Response:</b> Creating a weak magnetic field for other magnetic objects.</li>
+      <li><b>Hint Response:</b> Move me to modify the magnetic field.</li>
+    </ul>
+
+    <p>As shown in this example, the "Name Response" labels the component, the "Object Response" describes the state
+    of the component, the "Context Response" describes its impact on the surrounding application, and the "Hint Response"
+    provides a guide to interact with the component.</p>
+
     <h4>Responses implemented with Voicing.ts</h4>
     <p>Voicing is implemented with a trait called <code>Voicing.ts</code> which can be composed with scenery's
       <code>Node</code>. It provides the ability to set the various responses on the Node and then make a request to
