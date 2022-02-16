@@ -306,11 +306,12 @@ class Display {
     this.setBackgroundColor( options.backgroundColor );
 
     // @public {UtteranceQueue} - data structure for managing aria-live alerts the this Display instance
-    const ariaLiveAnnouncer = new AriaLiveAnnouncer();
+    const ariaLiveAnnouncer = new AriaLiveAnnouncer( {
+      tandem: options.tandem.createTandem( 'ariaLiveAnnouncer' ),
+      phetioDocumentation: 'The Announcer responsible for announcing to aria-live for this Display.'
+    } );
     this.descriptionUtteranceQueue = new UtteranceQueue( ariaLiveAnnouncer, {
-      initialize: this._accessible,
-      tandem: options.tandem.createTandem( 'descriptionUtteranceQueue' ),
-      phetioDocumentation: 'The facility to provide aria-live description to this display within a queue.'
+      initialize: this._accessible
     } );
 
     // @public - Manages the various types of Focus that can go through the Display, as well as Properties

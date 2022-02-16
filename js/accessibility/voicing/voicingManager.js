@@ -10,15 +10,23 @@
  */
 
 import SpeechSynthesisAnnouncer from '../../../../utterance-queue/js/SpeechSynthesisAnnouncer.js';
+import Tandem from '../../../../tandem/js/Tandem.js';
+import merge from '../../../../phet-core/js/merge.js';
 import { globalKeyStateTracker, KeyboardUtils, scenery } from '../../imports.js';
 
 class VoicingManager extends SpeechSynthesisAnnouncer {
-  constructor() {
-    super( {
+  constructor( options ) {
+
+    options = merge( {
 
       // {boolean} - All VoicingManager instances should respect responseCollector's current state.
-      respectResponseCollectorProperties: true
-    } );
+      respectResponseCollectorProperties: true,
+
+      // phet-io
+      tandem: Tandem.OPTIONAL
+    }, options );
+
+    super( options );
   }
 
   /**
@@ -42,7 +50,10 @@ class VoicingManager extends SpeechSynthesisAnnouncer {
   }
 }
 
-const voicingManager = new VoicingManager();
+const voicingManager = new VoicingManager( {
+  tandem: Tandem.GLOBAL_VIEW.createTandem( 'voicingManager' ),
+  phetioDocumentation: 'The Announcer responsible for announcing` to WebSpeech for the "voicing" feature.'
+} );
 
 scenery.register( 'voicingManager', voicingManager );
 export default voicingManager;
