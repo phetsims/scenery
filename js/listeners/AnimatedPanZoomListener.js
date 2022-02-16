@@ -17,7 +17,7 @@ import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
 import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import { scenery, Pointer, EventIO, PDOMUtils, KeyboardUtils, KeyboardZoomUtils, globalKeyStateTracker, FocusManager, PanZoomListener, PressListener } from '../imports.js';
+import { EventIO, FocusManager, globalKeyStateTracker, KeyboardUtils, KeyboardZoomUtils, PanZoomListener, PDOMUtils, Pointer, PressListener, scenery } from '../imports.js';
 import { Node } from '../../../scenery/js/imports.js'; // eslint-disable-line
 
 // constants
@@ -79,18 +79,17 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // we will try to reposition so that the dragged object remains visible
     this._dragBounds = null;
 
+    // @private {boolean} - Whether a Pointer has gone down on a draggable Node. If true, we will try to
+    // do extra work during the drag operation to keep the drag target in view and displayed in the panBounds.
+    this._downOnDraggable = false;
+
     // @private {Bounds2} - The panBounds in the local coordinate frame of the targetNode. Generally, these are the
     // bounds of the targetNode that you can see within the panBounds.
     this._transformedPanBounds = this._panBounds.transformed( this._targetNode.matrix.inverted() );
 
-    // @private {Vector2|null} - A Pointer point during a drag with another listener which declares its intent
-    // for dragging. In the global coordinate frame. We will reposition based on how far this point is out of
-    // this._dragBounds (when defined)
-    this._repositionDuringDragPoint = null;
-
     // @private - whether or not the Pointer went down within the drag bounds - if it went down out of drag bounds
     // then user likely trying to pull an object back into view so we prevent panning during drag
-    this._downInDragBounds = false;
+    this._draggingInDragBounds = false;
 
     // listeners that will be bound to `this` if we are on a (non-touchscreen) safari platform, referenced for
     // removal on dispose
@@ -201,8 +200,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // if dragging an item with a mouse or touch pointer, make sure that it
     // ramains visible in the zoomed in view, panning to it when it approaches
     // edge of the screen
-    if ( this._repositionDuringDragPoint ) {
-      this.repositionDuringDrag( this._repositionDuringDragPoint );
+    if ( this._downOnDraggable ) {
+      this.repositionDuringDrag();
     }
 
     this.animateToTargets( dt );
@@ -221,8 +220,17 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // If the Pointer signifies the input is intended for dragging save a reference to the trail so we can support
     // keeping the event target in view during the drag operation.
     if ( this._dragBounds !== null && event.pointer.hasIntent( Pointer.Intent.DRAG ) ) {
-      this._downTrail = event.trail;
-      this._downInDragBounds = this._dragBounds.containsPoint( event.pointer.point );
+      this._downOnDraggable = true;
+      this._draggingInDragBounds = this._dragBounds.containsPoint( event.pointer.point );
+
+      if ( this._draggingInDragBounds ) {
+
+        // All conditions are met to start watching for bounds to keep in view during a drag interaction. Eagerly
+        // save the attachedListener here so that we don't have to do any work in the move event.
+        if ( event.pointer.attachedListener ) {
+          this.attachedListener = event.pointer.attachedListener;
+        }
+      }
     }
 
     // begin middle press panning if we aren't already in that state
@@ -272,72 +280,99 @@ class AnimatedPanZoomListener extends PanZoomListener {
   move( event ) {
 
     // No need to do this work if we are zoomed out.
-    if ( this._downTrail && this.getCurrentScale() > 1 ) {
-      if ( this._downInDragBounds ) {
-        this._repositionDuringDragPoint = null;
+    if ( this._downOnDraggable && this.getCurrentScale() > 1 ) {
 
+      // Only try to get the attached listener if we didn't successfully get it on the down event. This should only
+      // happen if the drag did not start withing dragBounds (the listener is likely pulling the Node into view) or
+      // if a listener has not been attached yet. Once a listener is attached we can start using it to look for the
+      // bounds to keep in view.
+      if ( this._draggingInDragBounds && !this.attachedListener ) {
         const hasDragIntent = this.hasDragIntent( event.pointer );
         const currentTargetExists = event.currentTarget !== null;
 
         if ( currentTargetExists && hasDragIntent ) {
-          let globalBoundsToView = null;
-
           if ( event.pointer.attachedListener ) {
-            const attachedListener = event.pointer.attachedListener;
-
-            if ( attachedListener.getDragPanTargetBounds ) {
-
-              // client has defined the Bounds they want to keep in view for this Pointer (it is assigned to the
-              // Pointer to support multitouch cases
-              globalBoundsToView = event.pointer.attachedListener.getDragPanTargetBounds();
-            }
-            else if ( event.pointer.attachedListener.listener instanceof PressListener ) {
-              const attachedPressListener = event.pointer.attachedListener.listener;
-
-              // this will either be the PressListener's targetNode or the default target of the SceneryEvent on press
-              const target = attachedPressListener.getCurrentTarget();
-
-              // TODO: For now we cannot support DAG. We may be able to use PressListener.pressedTrail instead of
-              // getCurrentTarget, and then we would have a uniquely defined trail. See
-              // https://github.com/phetsims/scenery/issues/1361 and
-              // https://github.com/phetsims/scenery/issues/1356#issuecomment-1039678678
-              if ( target.instances.length === 1 ) {
-                globalBoundsToView = target.globalBounds;
-              }
-            }
-          }
-
-          if ( globalBoundsToView ) {
-            const targetInBounds = this._panBounds.containsBounds( globalBoundsToView );
-
-            if ( !targetInBounds ) {
-              this._repositionDuringDragPoint = globalBoundsToView.center;
-            }
-          }
-          else {
-
-            // We weren't able to automatically determine globalBoundsToView and client didn't provide them.
-            // TODO: How to handle this fallback case? See https://github.com/phetsims/scenery/issues/1356
+            this.attachedListener = event.pointer.attachedListener;
           }
         }
       }
       else {
-        this._downInDragBounds = this._dragBounds.containsPoint( event.pointer.point );
+        this._draggingInDragBounds = this._dragBounds.containsPoint( event.pointer.point );
       }
     }
+  }
+
+  /**
+   * Gets the Bounds2 in the global coordinate frame that we are going to try to keep in view during a drag
+   * operation.
+   * @private
+   *
+   * @returns {Bounds2|null}
+   */
+  getGlobalBoundsToViewDuringDrag() {
+    let globalBoundsToView = null;
+
+    if ( this.attachedListener ) {
+
+      // We have an attachedListener from a SceneryEvent Pointer, see if it has information we can use to
+      // get the target Bounds for the drag event.
+
+      if ( this.attachedListener.getDragPanTargetBounds ) {
+
+        // client has defined the Bounds they want to keep in view for this Pointer (it is assigned to the
+        // Pointer to support multitouch cases)
+        globalBoundsToView = this.attachedListener.getDragPanTargetBounds();
+      }
+      else if ( this.attachedListener.listener instanceof PressListener ) {
+        const attachedPressListener = this.attachedListener.listener;
+
+        // The PressListener might not be pressed anymore but the Pointer is still down, in which case it
+        // has been interrupted or cancelled.
+        // NOTE: It is possible I need to cancelPanDuringDrag() if it is no longer pressed, but I don't
+        // want to clear the reference to this.attachedListener, and I want to support resuming drag during touch-snag.
+        if ( attachedPressListener.isPressed ) {
+
+          // this will either be the PressListener's targetNode or the default target of the SceneryEvent on press
+          const target = attachedPressListener.getCurrentTarget();
+
+          // TODO: For now we cannot support DAG. We may be able to use PressListener.pressedTrail instead of
+          // getCurrentTarget, and then we would have a uniquely defined trail. See
+          // https://github.com/phetsims/scenery/issues/1361 and
+          // https://github.com/phetsims/scenery/issues/1356#issuecomment-1039678678
+          if ( target.instances.length === 1 ) {
+            globalBoundsToView = target.globalBounds;
+          }
+        }
+      }
+    }
+
+    if ( !globalBoundsToView ) {
+
+      // We weren't able to automatically determine globalBoundsToView and client didn't provide them.
+      // TODO: How to handle this fallback case? See https://github.com/phetsims/scenery/issues/1356
+      // TODO: If mouse pans near edge of screen, consider returning a small Bounds2 that surrounds the Pointer.
+    }
+
+    return globalBoundsToView;
   }
 
   /**
    * During a drag of another Node that is a descendant of this listener's targetNode, reposition if the
    * node is out of dragBounds so that the Node is always within panBounds.
    * @private
-   *
-   * @param {Vector2} pointerPoint - in the global coordinate frame
    */
-  repositionDuringDrag( pointerPoint ) {
-    const closestContainedPoint = this._dragBounds.getClosestPoint( pointerPoint.x, pointerPoint.y );
-    const translationDelta = pointerPoint.minus( closestContainedPoint );
-    this.setDestinationPosition( this.sourcePosition.plus( translationDelta ) );
+  repositionDuringDrag() {
+    const globalBounds = this.getGlobalBoundsToViewDuringDrag();
+    globalBounds && this.keepBoundsInView( globalBounds );
+  }
+
+  /**
+   * Stop panning during drag by clearing variables that are set to indicate and provide information for this work.
+   * @private
+   */
+  cancelPanningDuringDrag() {
+    this._downOnDraggable = false;
+    this.attachedListener = null;
   }
 
   /**
@@ -347,9 +382,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * @param {SceneryEvent} event
    */
   up( event ) {
-    this._targetInBoundsOnDown = false;
-    this._downTrail = null;
-    this._repositionDuringDragPoint = null;
+    this.cancelPanningDuringDrag();
   }
 
   /**
@@ -714,6 +747,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * @public
    */
   interrupt() {
+    this.cancelPanningDuringDrag();
+
     this.cancelMiddlePress();
     super.interrupt();
   }
@@ -772,6 +807,40 @@ class AnimatedPanZoomListener extends PanZoomListener {
     }
 
     this.setDestinationPosition( positionInTargetFrame );
+  }
+
+  /**
+   * Set the destination position to pan such that the provided globalBounds are totally visible within the panBounds.
+   * This will never pan outside panBounds, if the provided globalBounds extend beyond them.
+   * @private
+   *
+   * @param {Bounds2} globalBounds - in global coordinate frame
+   */
+  keepBoundsInView( globalBounds ) {
+    assert && assert( this._panBounds.isFinite(), 'panBounds should be defined when panning.' );
+
+    const boundsInTargetFrame = this._targetNode.globalToLocalBounds( globalBounds );
+
+    const distanceToLeftEdge = this._transformedPanBounds.left - boundsInTargetFrame.left;
+    const distanceToRightEdge = this._transformedPanBounds.right - boundsInTargetFrame.right;
+    const distanceToTopEdge = this._transformedPanBounds.top - boundsInTargetFrame.top;
+    const distanceToBottomEdge = this._transformedPanBounds.bottom - boundsInTargetFrame.bottom;
+
+    const translationDelta = new Vector2( 0, 0 );
+    if ( distanceToBottomEdge < 0 ) {
+      translationDelta.y = -distanceToBottomEdge;
+    }
+    if ( distanceToTopEdge > 0 ) {
+      translationDelta.y = -distanceToTopEdge;
+    }
+    if ( distanceToRightEdge < 0 ) {
+      translationDelta.x = -distanceToRightEdge;
+    }
+    if ( distanceToLeftEdge > 0 ) {
+      translationDelta.x = -distanceToLeftEdge;
+    }
+
+    this.setDestinationPosition( this.sourcePosition.plus( translationDelta ) );
   }
 
   /**
