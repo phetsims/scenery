@@ -38,12 +38,13 @@ const scenerySerialize = ( value: unknown ): any => {
     };
   }
   else if ( value instanceof Bounds2 ) {
+    const bounds = value as Bounds2;
     return {
       type: 'Bounds2',
-      maxX: value.maxX,
-      maxY: value.maxY,
-      minX: value.minX,
-      minY: value.minY
+      maxX: bounds.maxX,
+      maxY: bounds.maxY,
+      minX: bounds.minX,
+      minY: bounds.minY
     };
   }
   else if ( value instanceof Shape ) {
