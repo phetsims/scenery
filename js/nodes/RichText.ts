@@ -1785,7 +1785,9 @@ class RawRichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
     this.fireListener = null;
     this.accessibleInputListener = null;
 
-    this.initialize( innerContent, href );
+    // Voicing was already initialized in the super call, we do not want to initialize super again. But we do want to
+    // initialize the RawRichText portion of the implementation.
+    this.initialize( innerContent, href, false );
 
     // Mutate to make sure initialize doesn't clear this away
     this.mutate( {
@@ -1795,11 +1797,14 @@ class RawRichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
   }
 
   /**
-   * Set up this state
+   * Set up this state. First construction does not need to use super.initialize() because the constructor has done
+   * that for us. But repeated initialization with Poolable will need to initialize super again.
    */
-  initialize( innerContent: string, href: RichTextHref ): this {
+  initialize( innerContent: string, href: RichTextHref, initializeSuper: boolean = true ): this {
 
-    super.initialize();
+    if ( initializeSuper ) {
+      super.initialize();
+    }
 
     // pdom - open the link in the new tab when activated with a keyboard.
     // also see https://github.com/phetsims/joist/issues/430
