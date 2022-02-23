@@ -26,7 +26,7 @@
 
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
-import ResponsePacket, { Response, ResponsePacketOptions } from '../../../../utterance-queue/js/ResponsePacket.js';
+import ResponsePacket, { VoicingResponse, ResponsePacketOptions } from '../../../../utterance-queue/js/ResponsePacket.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
 import Utterance from '../../../../utterance-queue/js/Utterance.js';
 import UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
@@ -50,10 +50,10 @@ const VOICING_OPTION_KEYS = [
 ];
 
 type VoicingSelfOptions = {
-  voicingNameResponse?: Response,
-  voicingObjectResponse?: Response,
-  voicingContextResponse?: Response,
-  voicingHintResponse?: Response,
+  voicingNameResponse?: VoicingResponse,
+  voicingObjectResponse?: VoicingResponse,
+  voicingContextResponse?: VoicingResponse,
+  voicingHintResponse?: VoicingResponse,
   voicingUtteranceQueue?: UtteranceQueue,
   voicingResponsePatternCollection?: ResponsePatternCollection,
   voicingIgnoreVoicingManagerProperties?: boolean,
@@ -72,7 +72,7 @@ type SpeakingOptions = {
 
   // In speaking options, we don't allow a ResponseCreator function, but just a string|null. The `undefined` is to
   // match on the properties because they are optional (marked with `?`)
-  [PropertyName in keyof ResponsePacketOptions]: ResponsePacketOptions[PropertyName] extends ( Response | undefined ) ?
+  [PropertyName in keyof ResponsePacketOptions]: ResponsePacketOptions[PropertyName] extends ( VoicingResponse | undefined ) ?
                                                  ( string | null ) :
                                                  ResponsePacketOptions[PropertyName];
 }
@@ -305,31 +305,31 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * when the object receives input. When requesting speech, this will only be spoken if
      * responseCollector.nameResponsesEnabledProperty is set to true.
      */
-    setVoicingNameResponse( response: Response ): void {
+    setVoicingNameResponse( response: VoicingResponse ): void {
       this._voicingResponsePacket.nameResponse = response;
     }
 
-    set voicingNameResponse( response: Response ) { this.setVoicingNameResponse( response ); }
+    set voicingNameResponse( response: VoicingResponse ) { this.setVoicingNameResponse( response ); }
 
     /**
      * Get the voicingNameResponse for this Node.
      */
-    getVoicingNameResponse(): Response {
+    getVoicingNameResponse(): VoicingResponse {
       return this._voicingResponsePacket.nameResponse;
     }
 
-    get voicingNameResponse(): Response { return this.getVoicingNameResponse(); }
+    get voicingNameResponse(): VoicingResponse { return this.getVoicingNameResponse(); }
 
     /**
      * Set the object response for this Node. This is usually the state information associated with this Node, such
      * as its current input value. When requesting speech, this will only be heard when
      * responseCollector.objectResponsesEnabledProperty is set to true.
      */
-    setVoicingObjectResponse( response: Response ) {
+    setVoicingObjectResponse( response: VoicingResponse ) {
       this._voicingResponsePacket.objectResponse = response;
     }
 
-    set voicingObjectResponse( response: Response ) { this.setVoicingObjectResponse( response ); }
+    set voicingObjectResponse( response: VoicingResponse ) { this.setVoicingObjectResponse( response ); }
 
     /**
      * Gets the object response for this Node.
@@ -345,11 +345,11 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * the surrounding application in response to interaction with this Node. When requesting speech, this will
      * only be heard if responseCollector.contextResponsesEnabledProperty is set to true.
      */
-    setVoicingContextResponse( response: Response ) {
+    setVoicingContextResponse( response: VoicingResponse ) {
       this._voicingResponsePacket.contextResponse = response;
     }
 
-    set voicingContextResponse( response: Response ) { this.setVoicingContextResponse( response ); }
+    set voicingContextResponse( response: VoicingResponse ) { this.setVoicingContextResponse( response ); }
 
     /**
      * Gets the context response for this Node.
@@ -365,11 +365,11 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * When requesting speech, this will only be spoken when responseCollector.hintResponsesEnabledProperty is set to
      * true.
      */
-    setVoicingHintResponse( response: Response ) {
+    setVoicingHintResponse( response: VoicingResponse ) {
       this._voicingResponsePacket.hintResponse = response;
     }
 
-    set voicingHintResponse( response: Response ) { this.setVoicingHintResponse( response ); }
+    set voicingHintResponse( response: VoicingResponse ) { this.setVoicingHintResponse( response ); }
 
     /**
      * Gets the hint response for this Node.
