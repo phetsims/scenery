@@ -14,7 +14,7 @@ import Emitter from '../../../axon/js/Emitter.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { DEFAULT_OPTIONS as LINE_STYLES_DEFAULT_OPTIONS } from '../../../kite/js/util/LineStyles.js';
 import merge from '../../../phet-core/js/merge.js';
-import { scenery, Color, Path } from '../imports.js';
+import { Color, Node, Path, scenery } from '../imports.js';
 
 // constants
 // default inner and outer strokes for the focus highlight
@@ -308,6 +308,7 @@ class FocusHighlightPath extends Path {
    * @returns {number}
    */
   static getDilationCoefficient( node ) {
+    assert && assert( node instanceof Node );
     const widthOfFocusHighlight = FocusHighlightPath.getOuterLineWidthFromNode( node );
 
     // Dilating half of the focus highlight width will make the inner edge of the focus highlight at the bounds
