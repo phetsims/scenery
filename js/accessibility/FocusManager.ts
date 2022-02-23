@@ -71,7 +71,7 @@ class FocusManager {
 
   // Whenever the readingBlockFocusProperty's Focused Node is removed from
   // the scene graph or its Trail becomes invisible this removes focus.
-  readingBlockFocusController: FocusDisplayedController;
+  private readingBlockFocusController: FocusDisplayedController;
 
   // If the voicingManager starts speaking an Utterance for a ReadingBLock, set the readingBlockFocusProperty and
   // add listeners to clear it when the Node is removed or becomes invisible
@@ -79,7 +79,7 @@ class FocusManager {
 
   // Whenever the voicingManager stops speaking an utterance for the ReadingBlock that has focus, clear it
   private endSpeakingListener: SpeakingListener;
-  pointerFocusDisplayedController: FocusDisplayedController;
+  private pointerFocusDisplayedController: FocusDisplayedController;
 
   constructor() {
 
