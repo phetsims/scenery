@@ -361,7 +361,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
    */
   ReadingBlockClass.prototype._mutatorKeys = READING_BLOCK_OPTION_KEYS.concat( ReadingBlockClass.prototype._mutatorKeys );
   assert && assert( ReadingBlockClass.prototype._mutatorKeys.length === _.uniq( ReadingBlockClass.prototype._mutatorKeys ).length,
-    'duplicate mutator keys in Voicing' );
+    'duplicate mutator keys in ReadingBlock' );
 
   return ReadingBlockClass;
 };

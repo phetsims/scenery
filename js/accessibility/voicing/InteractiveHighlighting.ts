@@ -35,6 +35,9 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
   assert && assert( typeof optionsArgPosition === 'number', 'Must provide an index to access options arg from (zero-indexed)' );
   assert && assert( _.includes( inheritance( Type ), Node ), 'Only Node subtypes should compose InteractiveHighlighting' );
 
+  // @ts-ignore
+  assert && assert( !Type._mixesInteractiveHighlighting, 'InteractiveHighlighting is already added to this Type' );
+
   const InteractiveHighlightingClass = class extends Type {
 
     // Input listener to activate the HighlightOverlay upon pointer input. Uses exit and enter instead of over and out
@@ -124,6 +127,8 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     get isInteractiveHighlighting(): boolean {
       return true;
     }
+
+    static get _mixesInteractiveHighlighting(): boolean { return true;}
 
     /**
      * Set the interactive highlight for this node. By default, the highlight will be a pink rectangle that surrounds
@@ -426,7 +431,9 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
    *       cases that may apply.
    */
   InteractiveHighlightingClass.prototype._mutatorKeys = INTERACTIVE_HIGHLIGHTING_OPTIONS.concat( InteractiveHighlightingClass.prototype._mutatorKeys );
-  assert && assert( InteractiveHighlightingClass.prototype._mutatorKeys.length === _.uniq( InteractiveHighlightingClass.prototype._mutatorKeys ).length, 'duplicate mutator keys in Voicing' );
+  assert && assert( InteractiveHighlightingClass.prototype._mutatorKeys.length ===
+                    _.uniq( InteractiveHighlightingClass.prototype._mutatorKeys ).length,
+    'duplicate mutator keys in InteractiveHighlighting' );
 
   return InteractiveHighlightingClass;
 };
