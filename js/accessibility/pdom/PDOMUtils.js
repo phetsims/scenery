@@ -631,7 +631,7 @@ const PDOMUtils = {
 
   DATA_TRAIL_ID: DATA_TRAIL_ID,
 
-  // attribute used for elements which Scenery should not dispatch ScenerEvents when DOM event input is received on
+  // attribute used for elements which Scenery should not dispatch SceneryEvents when DOM event input is received on
   // them, see ParallelDOM.setExcludeLabelSiblingFromInput for more information
   DATA_EXCLUDE_FROM_INPUT: 'data-exclude-from-input'
 };

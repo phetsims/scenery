@@ -41,9 +41,10 @@ let globalID = 0;
 // Factor out to reduce memory footprint, see https://github.com/phetsims/tandem/issues/71
 const truePredicate: ( ( ...args: any[] ) => true ) = _.constant( true );
 
-type PressListenerCallback = ( event: SceneryEvent, listener: PressListener ) => void;
-type PressListenerNullableCallback = ( event: SceneryEvent | null, listener: PressListener ) => void;
-type PressListenerCanStartPressCallback = ( event: SceneryEvent | null, listener: PressListener ) => boolean;
+type PressListenerEvent = SceneryEvent<MouseEvent | TouchEvent | PointerEvent | KeyboardEvent>;
+type PressListenerCallback = ( event: PressListenerEvent, listener: PressListener ) => void;
+type PressListenerNullableCallback = ( event: PressListenerEvent | null, listener: PressListener ) => void;
+type PressListenerCanStartPressCallback = ( event: PressListenerEvent | null, listener: PressListener ) => boolean;
 
 type PressListenerSelfOptions = {
   // Called when this listener is pressed (typically from a down event, but can be triggered by other handlers)
@@ -176,7 +177,7 @@ class PressListener extends EnabledComponent {
 
   // For the collapseDragEvents feature, this will hold the last pending drag event to trigger a call to drag() with,
   // if one has been skipped.
-  private _pendingCollapsedDragEvent: SceneryEvent | null;
+  private _pendingCollapsedDragEvent: PressListenerEvent | null;
 
   // Whether our pointer listener is referenced by the pointer (need to have a flag due to handling disposal properly).
   private _listeningToPointer: boolean;
@@ -208,12 +209,12 @@ class PressListener extends EnabledComponent {
   // Executed on press event
   // The main implementation of "press" handling is implemented as a callback to the Action, so things are nested
   // nicely for phet-io.
-  private _pressAction: Action<[ SceneryEvent, Node | null, ( () => void ) | null ]>;
+  private _pressAction: Action<[ PressListenerEvent, Node | null, ( () => void ) | null ]>;
 
   // Executed on release event
   // The main implementation of "release" handling is implemented as a callback to the Action, so things are nested
   // nicely for phet-io.
-  private _releaseAction: Action<[ SceneryEvent | null, ( () => void ) | null ]>;
+  private _releaseAction: Action<[ PressListenerEvent | null, ( () => void ) | null ]>;
 
   // To support looksOverProperty being true based on focus, we need to monitor the display from which
   // the event has come from to see if that display is showing its focusHighlights, see
@@ -412,12 +413,8 @@ class PressListener extends EnabledComponent {
 
   /**
    * Returns whether a press can be started with a particular event.
-   * @public
-   *
-   * @param {SceneryEvent} event
-   * @returns {boolean}
    */
-  canPress( event: SceneryEvent ): boolean {
+  canPress( event: PressListenerEvent ): boolean {
     return !!this.enabledProperty.value &&
            !this.isPressed &&
            this._canStartPress( event, this ) &&
@@ -454,7 +451,7 @@ class PressListener extends EnabledComponent {
    * @param [callback] - to be run at the end of the function, but only on success
    * @returns success - Returns whether the press was actually started
    */
-  press( event: SceneryEvent, targetNode?: Node, callback?: () => void ) {
+  press( event: PressListenerEvent, targetNode?: Node, callback?: () => void ) {
     assert && assert( event, 'An event is required' );
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} press` );
@@ -487,7 +484,7 @@ class PressListener extends EnabledComponent {
    * @param [event] - scenery event if there was one. We can't guarantee an event, in part to support interrupting.
    * @param [callback] - called at the end of the release
    */
-  release( event?: SceneryEvent, callback?: () => void ) {
+  release( event?: PressListenerEvent, callback?: () => void ) {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} release` );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -504,7 +501,7 @@ class PressListener extends EnabledComponent {
    *
    * This can be overridden (with super-calls) when custom drag behavior is needed for a type.
    */
-  protected drag( event: SceneryEvent ) {
+  protected drag( event: PressListenerEvent ) {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} drag` );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -663,12 +660,12 @@ class PressListener extends EnabledComponent {
    *                              forwarded presses.
    * @param [callback] - to be run at the end of the function, but only on success
    */
-  private onPress( event: SceneryEvent, targetNode: Node | null, callback: ( () => void ) | null ) {
+  private onPress( event: PressListenerEvent, targetNode: Node | null, callback: ( () => void ) | null ) {
     const givenTargetNode = targetNode || this._targetNode;
 
     // Set this properties before the property change, so they are visible to listeners.
     this.pointer = event.pointer;
-    this.pressedTrail = givenTargetNode ? givenTargetNode.getUniqueTrail() : event.trail.subtrailTo( event.currentTarget, false );
+    this.pressedTrail = givenTargetNode ? givenTargetNode.getUniqueTrail() : event.trail.subtrailTo( event.currentTarget!, false );
 
     this.interrupted = false; // clears the flag (don't set to false before here)
 
@@ -691,7 +688,7 @@ class PressListener extends EnabledComponent {
    * @param event - scenery event if there was one
    * @param [callback] - called at the end of the release
    */
-  private onRelease( event: SceneryEvent | null, callback: ( () => void ) | null ) {
+  private onRelease( event: PressListenerEvent | null, callback: ( () => void ) | null ) {
     assert && assert( this.isPressed, 'This listener is not pressed' );
 
     this.pointer!.removeInputListener( this._pointerListener );
@@ -718,7 +715,7 @@ class PressListener extends EnabledComponent {
    *
    * NOTE: Do not call directly. See the press method instead.
    */
-  down( event: SceneryEvent ) {
+  down( event: PressListenerEvent ) {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} down` );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -732,7 +729,7 @@ class PressListener extends EnabledComponent {
    *
    * NOTE: Do not call directly.
    */
-  up( event: SceneryEvent ) {
+  up( event: PressListenerEvent ) {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} up` );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -748,7 +745,7 @@ class PressListener extends EnabledComponent {
    *
    * NOTE: Do not call directly.
    */
-  enter( event: SceneryEvent ) {
+  enter( event: PressListenerEvent ) {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} enter` );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -761,7 +758,7 @@ class PressListener extends EnabledComponent {
    * Called with `move` events (part of the listener API). It is necessary to check for `over` state changes on move
    * in case a pointer listener gets interrupted and resumes movement over a target. (scenery-internal)
    */
-  move( event: SceneryEvent ) {
+  move( event: PressListenerEvent ) {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} move` );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -775,7 +772,7 @@ class PressListener extends EnabledComponent {
    *
    * NOTE: Do not call directly.
    */
-  exit( event: SceneryEvent ) {
+  exit( event: PressListenerEvent ) {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} exit` );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -793,7 +790,7 @@ class PressListener extends EnabledComponent {
    *
    * NOTE: Do not call directly.
    */
-  pointerUp( event: SceneryEvent ) {
+  pointerUp( event: PressListenerEvent ) {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} pointer up` );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -814,7 +811,7 @@ class PressListener extends EnabledComponent {
    *
    * NOTE: Do not call directly.
    */
-  pointerCancel( event: SceneryEvent ) {
+  pointerCancel( event: PressListenerEvent ) {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} pointer cancel` );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -835,7 +832,7 @@ class PressListener extends EnabledComponent {
    *
    * NOTE: Do not call directly.
    */
-  pointerMove( event: SceneryEvent ) {
+  pointerMove( event: PressListenerEvent ) {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} pointer move` );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -885,7 +882,7 @@ class PressListener extends EnabledComponent {
    * @param [callback] optionally called immediately after press, but only on successful click
    * @returns success - Returns whether the press was actually started
    */
-  click( event: SceneryEvent | null, callback?: () => void ): boolean {
+  click( event: PressListenerEvent | null, callback?: () => void ): boolean {
     if ( this.canClick() ) {
       this.interrupted = false; // clears the flag (don't set to false before here)
 
@@ -932,7 +929,7 @@ class PressListener extends EnabledComponent {
    * Focus listener, called when this is treated as an accessible input listener and its target is focused. (scenery-internal)
    * @pdom
    */
-  focus( event: SceneryEvent ) {
+  focus( event: SceneryEvent<FocusEvent> ) {
 
     // Get the Display related to this accessible event.
     const accessibleDisplays = event.trail.rootNode().getRootedDisplays().filter( display => display.isAccessible() );
@@ -1018,4 +1015,4 @@ PressListener.phetioAPI = {
 };
 
 export default PressListener;
-export type { PressListenerOptions };
+export type { PressListenerOptions, PressListenerEvent };

@@ -7,22 +7,13 @@
  */
 
 import Shape from '../../../kite/js/Shape.js';
-import { scenery, Trail, ShapeBasedOverlay } from '../imports.js';
+import { scenery, Trail, ShapeBasedOverlay, Display, Node, IOverlay } from '../imports.js';
 
-class HitAreaOverlay extends ShapeBasedOverlay {
-  /**
-   * @param {Display} display
-   * @param {Node} rootNode
-   */
-  constructor( display, rootNode ) {
+class HitAreaOverlay extends ShapeBasedOverlay implements IOverlay {
+  constructor( display: Display, rootNode: Node ) {
     super( display, rootNode, 'hitAreaOverlay' );
   }
 
-  /**
-   * Adds shapes
-   * @protected
-   * @override
-   */
   addShapes() {
     new Trail( this.rootNode ).eachTrailUnder( trail => {
       const node = trail.lastNode();
@@ -49,44 +40,32 @@ class HitAreaOverlay extends ShapeBasedOverlay {
     } );
   }
 
-  /**
-   * @private
-   *
-   * @param {Node} node
-   * @returns {Shape}
-   */
-  static getLocalMouseShape( node ) {
+  private static getLocalMouseShape( node: Node ): Shape {
     let shape = Shape.union( [
       node.mouseArea ? ( node.mouseArea instanceof Shape ? node.mouseArea : Shape.bounds( node.mouseArea ) ) : node.getSelfShape(),
-      ...node.children.filter( child => {
+      ...node.children.filter( ( child: Node ) => {
         return node.visible && node.pickable !== false;
       } ).map( child => {
         return HitAreaOverlay.getLocalMouseShape( child ).transformed( child.matrix );
       } )
     ] );
     if ( node.hasClipArea() ) {
-      shape = shape.shapeIntersection( node.clipArea );
+      shape = shape.shapeIntersection( node.clipArea! );
     }
     return shape;
   }
 
-  /**
-   * @private
-   *
-   * @param {Node} node
-   * @returns {Shape}
-   */
-  static getLocalTouchShape( node ) {
+  private static getLocalTouchShape( node: Node ): Shape {
     let shape = Shape.union( [
       node.touchArea ? ( node.touchArea instanceof Shape ? node.touchArea : Shape.bounds( node.touchArea ) ) : node.getSelfShape(),
-      ...node.children.filter( child => {
+      ...node.children.filter( ( child: Node ) => {
         return node.visible && node.pickable !== false;
       } ).map( child => {
         return HitAreaOverlay.getLocalTouchShape( child ).transformed( child.matrix );
       } )
     ] );
     if ( node.hasClipArea() ) {
-      shape = shape.shapeIntersection( node.clipArea );
+      shape = shape.shapeIntersection( node.clipArea! );
     }
     return shape;
   }

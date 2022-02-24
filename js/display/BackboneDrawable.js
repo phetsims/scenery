@@ -527,8 +527,8 @@ class BackboneDrawable extends Drawable {
    * Given an external element, we apply the necessary style to make it compatible as a backbone DOM element.
    * @public
    *
-   * @param {Element} element
-   * @returns {Element} - For chaining
+   * @param {HTMLElement} element
+   * @returns {HTMLElement} - For chaining
    */
   static repurposeBackboneContainer( element ) {
     if ( element.style.position !== 'relative' || element.style.position !== 'absolute' ) {

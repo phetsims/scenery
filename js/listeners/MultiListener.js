@@ -29,7 +29,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import merge from '../../../phet-core/js/merge.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import { scenery, Mouse, Pointer } from '../imports.js';
+import { scenery, Mouse, Intent } from '../imports.js';
 
 // constants
 // pointer must move this much to initiate a move interruption for panning, in the global coordinate frame
@@ -313,7 +313,7 @@ class MultiListener {
    * @returns {boolean}
    */
   canMoveFromPointer( pointer ) {
-    return !pointer.hasIntent( Pointer.Intent.DRAG );
+    return !pointer.hasIntent( Intent.DRAG );
   }
 
   /**

@@ -9,68 +9,68 @@
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import { SceneryEvent } from '../imports.js';
 
-type SceneryListenerFunction = ( event: SceneryEvent ) => void;
+type SceneryListenerFunction<T extends Event = Event> = ( event: SceneryEvent<T> ) => void;
 
 interface IInputListener {
   interrupt?: () => void;
   cursor?: string | null;
 
-  focus?: SceneryListenerFunction;
-  blur?: SceneryListenerFunction;
-  focusin?: SceneryListenerFunction;
-  focusout?: SceneryListenerFunction;
+  focus?: SceneryListenerFunction<FocusEvent>;
+  blur?: SceneryListenerFunction<FocusEvent>;
+  focusin?: SceneryListenerFunction<FocusEvent>;
+  focusout?: SceneryListenerFunction<FocusEvent>;
 
-  keydown?: SceneryListenerFunction;
-  keyup?: SceneryListenerFunction;
+  keydown?: SceneryListenerFunction<KeyboardEvent>;
+  keyup?: SceneryListenerFunction<KeyboardEvent>;
 
-  click?: SceneryListenerFunction;
-  input?: SceneryListenerFunction;
-  change?: SceneryListenerFunction;
+  click?: SceneryListenerFunction<MouseEvent>;
+  input?: SceneryListenerFunction<Event | InputEvent>;
+  change?: SceneryListenerFunction<Event>;
 
-  down?: SceneryListenerFunction;
-  mousedown?: SceneryListenerFunction;
-  touchdown?: SceneryListenerFunction;
-  pendown?: SceneryListenerFunction;
+  down?: SceneryListenerFunction<MouseEvent | TouchEvent | PointerEvent>;
+  mousedown?: SceneryListenerFunction<MouseEvent | PointerEvent>;
+  touchdown?: SceneryListenerFunction<TouchEvent | PointerEvent>;
+  pendown?: SceneryListenerFunction<PointerEvent>;
 
-  up?: SceneryListenerFunction;
-  mouseup?: SceneryListenerFunction;
-  touchup?: SceneryListenerFunction;
-  penup?: SceneryListenerFunction;
+  up?: SceneryListenerFunction<MouseEvent | TouchEvent | PointerEvent>;
+  mouseup?: SceneryListenerFunction<MouseEvent | PointerEvent>;
+  touchup?: SceneryListenerFunction<TouchEvent | PointerEvent>;
+  penup?: SceneryListenerFunction<PointerEvent>;
 
-  cancel?: SceneryListenerFunction;
-  mousecancel?: SceneryListenerFunction;
-  touchcancel?: SceneryListenerFunction;
-  pencancel?: SceneryListenerFunction;
+  cancel?: SceneryListenerFunction<TouchEvent | PointerEvent>;
+  mousecancel?: SceneryListenerFunction<PointerEvent>;
+  touchcancel?: SceneryListenerFunction<TouchEvent | PointerEvent>;
+  pencancel?: SceneryListenerFunction<PointerEvent>;
 
-  move?: SceneryListenerFunction;
-  mousemove?: SceneryListenerFunction;
-  touchmove?: SceneryListenerFunction;
-  penmove?: SceneryListenerFunction;
+  move?: SceneryListenerFunction<MouseEvent | TouchEvent | PointerEvent>;
+  mousemove?: SceneryListenerFunction<MouseEvent | PointerEvent>;
+  touchmove?: SceneryListenerFunction<TouchEvent | PointerEvent>;
+  penmove?: SceneryListenerFunction<PointerEvent>;
 
-  wheel?: SceneryListenerFunction;
-  mousewheel?: SceneryListenerFunction;
-  touchwheel?: SceneryListenerFunction;
-  penwheel?: SceneryListenerFunction;
+  wheel?: SceneryListenerFunction<WheelEvent>;
+  mousewheel?: SceneryListenerFunction<WheelEvent>;
+  touchwheel?: SceneryListenerFunction<WheelEvent>;
+  penwheel?: SceneryListenerFunction<WheelEvent>;
 
-  enter?: SceneryListenerFunction;
-  mouseenter?: SceneryListenerFunction;
-  touchenter?: SceneryListenerFunction;
-  penenter?: SceneryListenerFunction;
+  enter?: SceneryListenerFunction<MouseEvent | TouchEvent | PointerEvent>;
+  mouseenter?: SceneryListenerFunction<MouseEvent | PointerEvent>;
+  touchenter?: SceneryListenerFunction<TouchEvent | PointerEvent>;
+  penenter?: SceneryListenerFunction<PointerEvent>;
 
-  exit?: SceneryListenerFunction;
-  mouseexit?: SceneryListenerFunction;
-  touchexit?: SceneryListenerFunction;
-  penexit?: SceneryListenerFunction;
+  exit?: SceneryListenerFunction<MouseEvent | TouchEvent | PointerEvent>;
+  mouseexit?: SceneryListenerFunction<MouseEvent | PointerEvent>;
+  touchexit?: SceneryListenerFunction<TouchEvent | PointerEvent>;
+  penexit?: SceneryListenerFunction<PointerEvent>;
 
-  over?: SceneryListenerFunction;
-  mouseover?: SceneryListenerFunction;
-  touchover?: SceneryListenerFunction;
-  penover?: SceneryListenerFunction;
+  over?: SceneryListenerFunction<MouseEvent | TouchEvent | PointerEvent>;
+  mouseover?: SceneryListenerFunction<MouseEvent | PointerEvent>;
+  touchover?: SceneryListenerFunction<TouchEvent | PointerEvent>;
+  penover?: SceneryListenerFunction<PointerEvent>;
 
-  out?: SceneryListenerFunction;
-  mouseout?: SceneryListenerFunction;
-  touchout?: SceneryListenerFunction;
-  penout?: SceneryListenerFunction;
+  out?: SceneryListenerFunction<MouseEvent | TouchEvent | PointerEvent>;
+  mouseout?: SceneryListenerFunction<MouseEvent | PointerEvent>;
+  touchout?: SceneryListenerFunction<TouchEvent | PointerEvent>;
+  penout?: SceneryListenerFunction<PointerEvent>;
 
   listener?: unknown;
 

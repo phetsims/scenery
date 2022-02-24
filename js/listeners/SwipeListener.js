@@ -19,7 +19,7 @@
  */
 
 import stepTimer from '../../../axon/js/stepTimer.js';
-import { scenery, Pointer, PDOMUtils, FocusManager } from '../imports.js';
+import { scenery, PDOMUtils, FocusManager, Intent } from '../imports.js';
 
 // constants
 // in seconds, amount of time to initiate a press and hold gesture - note, it must be at least this long
@@ -195,13 +195,13 @@ class SwipeListener {
    * @param event
    */
   handleDown( event ) {
-    event.pointer.addIntent( Pointer.Intent.DRAG );
+    event.pointer.addIntent( Intent.DRAG );
     this.downPointers.push( event.pointer );
 
     // allow zoom gestures if there is more than one pointer down
     if ( this.downPointers.length > 1 ) {
-      this.downPointers.forEach( downPointer => downPointer.removeIntent( Pointer.Intent.DRAG ) );
-      event.pointer.removeIntent( Pointer.Intent.DRAG );
+      this.downPointers.forEach( downPointer => downPointer.removeIntent( Intent.DRAG ) );
+      event.pointer.removeIntent( Intent.DRAG );
     }
 
     assert && assert( event.pointer.attachedProperty.get(), 'should be attached to the handle listener' );

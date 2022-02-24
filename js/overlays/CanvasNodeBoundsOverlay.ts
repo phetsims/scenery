@@ -7,21 +7,13 @@
  */
 
 import Shape from '../../../kite/js/Shape.js';
-import { scenery, Trail, CanvasNode, ShapeBasedOverlay } from '../imports.js';
+import { scenery, Trail, CanvasNode, ShapeBasedOverlay, Display, Node, IOverlay } from '../imports.js';
 
-class CanvasNodeBoundsOverlay extends ShapeBasedOverlay {
-  /**
-   * @param {Display} display
-   * @param {Node} rootNode
-   */
-  constructor( display, rootNode ) {
+class CanvasNodeBoundsOverlay extends ShapeBasedOverlay implements IOverlay {
+  constructor( display: Display, rootNode: Node ) {
     super( display, rootNode, 'canvasNodeBoundsOverlay' );
   }
 
-  /**
-   * @public
-   * @override
-   */
   addShapes() {
     new Trail( this.rootNode ).eachTrailUnder( trail => {
       const node = trail.lastNode();

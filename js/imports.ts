@@ -30,6 +30,7 @@ export { default as FullScreen } from './util/FullScreen.js';
 export { default as CountMap } from './util/CountMap.js';
 export { default as DisplayedProperty } from './util/DisplayedProperty.js';
 export { default as SceneImage } from './util/SceneImage.js';
+export type { default as WindowTouch } from './input/WindowTouch.js';
 
 export { default as SpriteInstance, SpriteInstanceTransformType } from './util/SpriteInstance.js';
 export { default as SpriteSheet } from './util/SpriteSheet.js';
@@ -179,7 +180,7 @@ export { default as PDOMFuzzer } from './accessibility/pdom/PDOMFuzzer.js';
 
 export type { default as IInputListener } from './input/IInputListener.js';
 export type { SceneryListenerFunction } from './input/IInputListener.js';
-export { default as Pointer } from './input/Pointer.js';
+export { default as Pointer, Intent } from './input/Pointer.js';
 export { default as Mouse } from './input/Mouse.js';
 export { default as Touch } from './input/Touch.js';
 export { default as Pen } from './input/Pen.js';
@@ -188,7 +189,9 @@ export { default as PDOMPointer } from './input/PDOMPointer.js';
 export { default as SceneryEvent } from './input/SceneryEvent.js';
 
 export { default as Input } from './input/Input.js';
-export { default as BatchedDOMEvent } from './input/BatchedDOMEvent.js';
+export type { InputOptions } from './input/Input.js';
+export { default as BatchedDOMEvent, BatchedDOMEventType } from './input/BatchedDOMEvent.js';
+export type { BatchedDOMEventCallback } from './input/BatchedDOMEvent.js';
 export { default as BrowserEvents } from './input/BrowserEvents.js';
 
 export { default as InputFuzzer } from './input/InputFuzzer.js';
@@ -197,7 +200,7 @@ export { default as ButtonListener } from './input/ButtonListener.js';
 export { default as SimpleDragHandler } from './input/SimpleDragHandler.js';
 
 export { default as PressListener } from './listeners/PressListener.js';
-export type { PressListenerOptions } from './listeners/PressListener.js';
+export type { PressListenerOptions, PressListenerEvent } from './listeners/PressListener.js';
 export { default as FireListener } from './listeners/FireListener.js';
 export type { FireListenerOptions } from './listeners/FireListener.js';
 export { default as DragListener } from './listeners/DragListener.js';
@@ -337,7 +340,9 @@ export { default as PointerAreaOverlay } from './overlays/PointerAreaOverlay.js'
 export { default as PointerOverlay } from './overlays/PointerOverlay.js';
 
 export { default as Instance } from './display/Instance.js';
+export type { default as IOverlay } from './overlays/IOverlay.js';
 export { default as Display } from './display/Display.js';
+export type{ DisplayOptions } from './display/Display.js';
 
 export { default as IndexedNodeIO } from './nodes/IndexedNodeIO.js';
 export { default as PhetioControlledVisibilityProperty } from './util/PhetioControlledVisibilityProperty.js';

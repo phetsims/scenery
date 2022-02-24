@@ -6,47 +6,55 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import Vector2 from '../../../dot/js/Vector2.js';
 import Vector3 from '../../../dot/js/Vector3.js';
 import { scenery, Pointer } from '../imports.js';
 
 class Mouse extends Pointer {
+
+  // Since we need to track the mouse's pointer id occasionally
+  id: number | null;
+
+  // @deprecated, see https://github.com/phetsims/scenery/issues/803
+  leftDown: boolean; // @deprecated
+  middleDown: boolean; // @deprecated
+  rightDown: boolean; // @deprecated
+
+  // Mouse wheel delta for the last event, see https://developer.mozilla.org/en-US/docs/Web/Events/wheel
+  wheelDelta: Vector3;
+
+  // Mouse wheel mode for the last event (0: pixels, 1: lines, 2: pages), see
+  // https://developer.mozilla.org/en-US/docs/Web/Events/wheel
+  wheelDeltaMode: number;
+
   constructor() {
     super( null, false, 'mouse' );
 
-    // @public {number|null} - Since we need to track the mouse's pointer id occasionally
     this.id = null;
-
-    // @public {boolean} @deprecated, see https://github.com/phetsims/scenery/issues/803
     this.leftDown = false;
     this.middleDown = false;
     this.rightDown = false;
-
-    // @public {Vector3} - Mouse wheel delta for the last event, see
-    // https://developer.mozilla.org/en-US/docs/Web/Events/wheel
     this.wheelDelta = new Vector3( 0, 0, 0 );
-
-    // @public {number} - Mouse wheel mode for the last event (0: pixels, 1: lines, 2: pages), see
-    // https://developer.mozilla.org/en-US/docs/Web/Events/wheel
     this.wheelDeltaMode = 0;
 
     sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( `Created ${this.toString()}` );
   }
 
   /**
-   * Sets information in this Mouse for a given mouse down.
-   * @public (scenery-internal)
+   * Sets information in this Mouse for a given mouse down. (scenery-internal)
    *
-   * @param {Vector2} point
-   * @param {Event} event
-   * @returns {boolean} - Whether the point changed
+   * @returns - Whether the point changed
    */
-  down( point, event ) {
+  down( point: Vector2, event: Event ): boolean {
+    assert && assert( event instanceof MouseEvent );
+    const mouseEvent = event as MouseEvent;
+
     const pointChanged = this.hasPointChanged( point );
     point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `mouse down at ${point.toString()}` );
 
     this.point = point;
     this.isDown = true;
-    switch( event.button ) {
+    switch( mouseEvent.button ) {
       case 0:
         this.leftDown = true;
         break;
@@ -63,20 +71,20 @@ class Mouse extends Pointer {
   }
 
   /**
-   * Sets information in this Mouse for a given mouse up.
-   * @public (scenery-internal)
+   * Sets information in this Mouse for a given mouse up. (scenery-internal)
    *
-   * @param {Vector2} point
-   * @param {Event} event
-   * @returns {boolean} - Whether the point changed
+   * @returns - Whether the point changed
    */
-  up( point, event ) {
+  up( point: Vector2, event: Event ): boolean {
+    assert && assert( event instanceof MouseEvent );
+    const mouseEvent = event as MouseEvent;
+
     const pointChanged = this.hasPointChanged( point );
     point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `mouse up at ${point.toString()}` );
 
     this.point = point;
     this.isDown = false;
-    switch( event.button ) {
+    switch( mouseEvent.button ) {
       case 0:
         this.leftDown = false;
         break;
@@ -93,14 +101,11 @@ class Mouse extends Pointer {
   }
 
   /**
-   * Sets information in this Mouse for a given mouse move.
-   * @public (scenery-internal)
+   * Sets information in this Mouse for a given mouse move. (scenery-internal)
    *
-   * @param {Vector2} point
-   * @param {Event} event
-   * @returns {boolean} - Whether the point changed
+   * @returns - Whether the point changed
    */
-  move( point, event ) {
+  move( point: Vector2, event: Event ): boolean {
     const pointChanged = this.hasPointChanged( point );
     point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `mouse move at ${point.toString()}` );
 
@@ -109,14 +114,11 @@ class Mouse extends Pointer {
   }
 
   /**
-   * Sets information in this Mouse for a given mouse over.
-   * @public (scenery-internal)
+   * Sets information in this Mouse for a given mouse over. (scenery-internal)
    *
-   * @param {Vector2} point
-   * @param {Event} event
-   * @returns {boolean} - Whether the point changed
+   * @returns - Whether the point changed
    */
-  over( point, event ) {
+  over( point: Vector2, event: Event ) {
     const pointChanged = this.hasPointChanged( point );
     point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `mouse over at ${point.toString()}` );
 
@@ -125,14 +127,11 @@ class Mouse extends Pointer {
   }
 
   /**
-   * Sets information in this Mouse for a given mouse out.
-   * @public (scenery-internal)
+   * Sets information in this Mouse for a given mouse out. (scenery-internal)
    *
-   * @param {Vector2} point
-   * @param {Event} event
-   * @returns {boolean} - Whether the point changed
+   * @returns - Whether the point changed
    */
-  out( point, event ) {
+  out( point: Vector2, event: Event ) {
     const pointChanged = this.hasPointChanged( point );
     point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `mouse out at ${point.toString()}` );
 
@@ -141,26 +140,21 @@ class Mouse extends Pointer {
     return pointChanged;
   }
 
-
   /**
-   * Sets information in this Mouse for a given mouse wheel.
-   * @public (scenery-internal)
-   *
-   * @param {Event} event
+   * Sets information in this Mouse for a given mouse wheel. (scenery-internal)
    */
-  wheel( event ) {
-    this.wheelDelta.setXYZ( event.deltaX, event.deltaY, event.deltaZ );
-    this.wheelDeltaMode = event.deltaMode;
+  wheel( event: Event ) {
+    assert && assert( event instanceof WheelEvent );
+    const wheelEvent = event as WheelEvent;
+
+    this.wheelDelta.setXYZ( wheelEvent.deltaX, wheelEvent.deltaY, wheelEvent.deltaZ );
+    this.wheelDeltaMode = wheelEvent.deltaMode;
   }
 
   /**
    * Returns an improved string representation of this object.
-   * @public
-   * @override
-   *
-   * @returns {string}
    */
-  toString() {
+  toString(): string {
     return 'Mouse'; // there is only one
   }
 }

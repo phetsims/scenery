@@ -10,22 +10,30 @@
  */
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import { scenery, PDOMPointer, svgns, Utils } from '../imports.js';
+import Vector2 from '../../../dot/js/Vector2.js';
+import { scenery, PDOMPointer, svgns, Utils, Display, Node, Pointer, IOverlay } from '../imports.js';
 
-class PointerOverlay {
-  /**
-   * @param {Display} display
-   * @param {Node} rootNode - the root node of our display
-   */
-  constructor( display, rootNode ) {
+class PointerOverlay implements IOverlay {
+
+  display: Display;
+  rootNode: Node;
+
+  pointerSVGContainer: HTMLDivElement;
+
+  domElement: HTMLDivElement;
+
+  private pointerAdded: ( pointer: Pointer ) => void;
+
+  constructor( display: Display, rootNode: Node ) {
     this.display = display;
     this.rootNode = rootNode;
 
     // add element to show the pointers
     this.pointerSVGContainer = document.createElement( 'div' );
     this.pointerSVGContainer.style.position = 'absolute';
-    this.pointerSVGContainer.style.top = 0;
-    this.pointerSVGContainer.style.left = 0;
+    this.pointerSVGContainer.style.top = '0';
+    this.pointerSVGContainer.style.left = '0';
+    // @ts-ignore
     this.pointerSVGContainer.style[ 'pointer-events' ] = 'none';
 
     const innerRadius = 10;
@@ -35,39 +43,40 @@ class PointerOverlay {
 
     // Resize the parent div when the rootNode is resized
     display.sizeProperty.lazyLink( dimension => {
-      this.pointerSVGContainer.setAttribute( 'width', dimension.width );
-      this.pointerSVGContainer.setAttribute( 'height', dimension.height );
+      this.pointerSVGContainer.setAttribute( 'width', '' + dimension.width );
+      this.pointerSVGContainer.setAttribute( 'height', '' + dimension.height );
       this.pointerSVGContainer.style.clip = `rect(0px,${dimension.width}px,${dimension.height}px,0px)`;
     } );
 
     const scratchMatrix = Matrix3.IDENTITY.copy();
 
     //Display a pointer that was added.  Use a separate SVG layer for each pointer so it can be hardware accelerated, otherwise it is too slow just setting svg internal attributes
-    this.pointerAdded = pointer => {
+    this.pointerAdded = ( pointer: Pointer ) => {
 
       const svg = document.createElementNS( svgns, 'svg' );
       svg.style.position = 'absolute';
-      svg.style.top = 0;
-      svg.style.left = 0;
+      svg.style.top = '0';
+      svg.style.left = '0';
+      // @ts-ignore
       svg.style[ 'pointer-events' ] = 'none';
 
       Utils.prepareForTransform( svg );
 
       //Fit the size to the display
-      svg.setAttribute( 'width', diameter );
-      svg.setAttribute( 'height', diameter );
+      svg.setAttribute( 'width', '' + diameter );
+      svg.setAttribute( 'height', '' + diameter );
 
       const circle = document.createElementNS( svgns, 'circle' );
 
       //use css transform for performance?
-      circle.setAttribute( 'cx', innerRadius + strokeWidth / 2 );
-      circle.setAttribute( 'cy', innerRadius + strokeWidth / 2 );
-      circle.setAttribute( 'r', innerRadius );
+      circle.setAttribute( 'cx', '' + ( innerRadius + strokeWidth / 2 ) );
+      circle.setAttribute( 'cy', '' + ( innerRadius + strokeWidth / 2 ) );
+      circle.setAttribute( 'r', '' + innerRadius );
       circle.setAttribute( 'style', 'fill:black;' );
       circle.setAttribute( 'style', 'stroke:white;' );
       circle.setAttribute( 'opacity', '0.4' );
 
-      const updateToPoint = point => Utils.applyPreparedTransform( scratchMatrix.setToTranslation( point.x - radius, point.y - radius ), svg );
+      const updateToPoint = ( point: Vector2 ) => Utils.applyPreparedTransform( scratchMatrix.setToTranslation( point.x - radius, point.y - radius ), svg );
 
       //Add a move listener to the pointer to update position when it has moved
       const pointerRemoved = () => {
@@ -105,7 +114,7 @@ class PointerOverlay {
       svg.appendChild( circle );
       this.pointerSVGContainer.appendChild( svg );
     };
-    display._input.pointerAddedEmitter.addListener( this.pointerAdded );
+    display._input!.pointerAddedEmitter.addListener( this.pointerAdded );
 
     //if there is already a mouse, add it here
     // TODO: if there already other non-mouse touches, could be added here
@@ -118,10 +127,9 @@ class PointerOverlay {
 
   /**
    * Releases references
-   * @public
    */
   dispose() {
-    this.display._input.pointerAddedEmitter.removeListener( this.pointerAdded );
+    this.display._input!.pointerAddedEmitter.removeListener( this.pointerAdded );
   }
 
   /**

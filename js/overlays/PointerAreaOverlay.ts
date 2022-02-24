@@ -6,22 +6,15 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import Bounds2 from '../../../dot/js/Bounds2.js';
 import Shape from '../../../kite/js/Shape.js';
-import { scenery, Trail, ShapeBasedOverlay } from '../imports.js';
+import { scenery, Trail, ShapeBasedOverlay, Display, Node, IOverlay } from '../imports.js';
 
-class PointerAreaOverlay extends ShapeBasedOverlay {
-  /**
-   * @param {Display} display
-   * @param {Node} rootNode
-   */
-  constructor( display, rootNode ) {
+class PointerAreaOverlay extends ShapeBasedOverlay implements IOverlay {
+  constructor( display: Display, rootNode: Node ) {
     super( display, rootNode, 'mouseTouchAreaOverlay' );
   }
 
-  /**
-   * @public
-   * @override
-   */
   addShapes() {
     new Trail( this.rootNode ).eachTrailUnder( trail => {
       const node = trail.lastNode();
@@ -33,10 +26,10 @@ class PointerAreaOverlay extends ShapeBasedOverlay {
         const transform = trail.getTransform();
 
         if ( node.mouseArea ) {
-          this.addShape( transform.transformShape( node.mouseArea.isBounds ? Shape.bounds( node.mouseArea ) : node.mouseArea ), 'rgba(0,0,255,0.8)', true );
+          this.addShape( transform.transformShape( node.mouseArea instanceof Bounds2 ? Shape.bounds( node.mouseArea as Bounds2 ) : node.mouseArea ), 'rgba(0,0,255,0.8)', true );
         }
         if ( node.touchArea ) {
-          this.addShape( transform.transformShape( node.touchArea.isBounds ? Shape.bounds( node.touchArea ) : node.touchArea ), 'rgba(255,0,0,0.8)', false );
+          this.addShape( transform.transformShape( node.touchArea instanceof Bounds2 ? Shape.bounds( node.touchArea as Bounds2 ) : node.touchArea ), 'rgba(255,0,0,0.8)', false );
         }
       }
       return false;

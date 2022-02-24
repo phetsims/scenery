@@ -8,18 +8,17 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import Vector2 from '../../../dot/js/Vector2.js';
 import { scenery, Pointer } from '../imports.js';
 
 class Touch extends Pointer {
-  /**
-   * @param {number} id
-   * @param {Vector2} point
-   * @param {Event} event
-   */
-  constructor( id, point, event ) {
+
+  // For tracking which touch is which
+  id: number;
+
+  constructor( id: number, point: Vector2, event: Event ) {
     super( point, true, 'touch' ); // true: touches always start in the down state
 
-    // @public {number} - For tracking which touch is which
     this.id = id;
 
     sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( `Created ${this.toString()}` );
@@ -27,14 +26,11 @@ class Touch extends Pointer {
 
 
   /**
-   * Sets information in this Touch for a given touch move.
-   * @public (scenery-internal)
+   * Sets information in this Touch for a given touch move. (scenery-internal)
    *
-   * @param {Vector2} point
-   * @param {Event} event
-   * @returns {boolean} - Whether the point changed
+   * @returns - Whether the point changed
    */
-  move( point, event ) {
+  move( point: Vector2, event: Event ): boolean {
     const pointChanged = this.hasPointChanged( point );
 
     this.point = point;
@@ -42,14 +38,11 @@ class Touch extends Pointer {
   }
 
   /**
-   * Sets information in this Touch for a given touch end.
-   * @public (scenery-internal)
+   * Sets information in this Touch for a given touch end. (scenery-internal)
    *
-   * @param {Vector2} point
-   * @param {Event} event
-   * @returns {boolean} - Whether the point changed
+   * @returns - Whether the point changed
    */
-  end( point, event ) {
+  end( point: Vector2, event: Event ): boolean {
     const pointChanged = this.hasPointChanged( point );
 
     this.point = point;
@@ -58,14 +51,11 @@ class Touch extends Pointer {
   }
 
   /**
-   * Sets information in this Touch for a given touch cancel.
-   * @public (scenery-internal)
+   * Sets information in this Touch for a given touch cancel. (scenery-internal)
    *
-   * @param {Vector2} point
-   * @param {Event} event
-   * @returns {boolean} - Whether the point changed
+   * @returns - Whether the point changed
    */
-  cancel( point, event ) {
+  cancel( point: Vector2, event: Event ): boolean {
     const pointChanged = this.hasPointChanged( point );
 
     this.point = point;
@@ -75,23 +65,12 @@ class Touch extends Pointer {
 
   /**
    * Returns an improved string representation of this object.
-   * @public
-   * @override
-   *
-   * @returns {string}
    */
-  toString() {
+  toString(): string {
     return `Touch#${this.id}`;
   }
 
-
-  /**
-   * @override
-   * @public
-   *
-   * @returns {boolean}
-   */
-  isTouchLike() {
+  isTouchLike(): boolean {
     return true;
   }
 }

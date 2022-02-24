@@ -51,47 +51,259 @@
  */
 
 import Emitter from '../../../axon/js/Emitter.js';
+import IProperty from '../../../axon/js/IProperty.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
+import Bounds2 from '../../../dot/js/Bounds2.js';
 import Dimension2 from '../../../dot/js/Dimension2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
+import Vector2 from '../../../dot/js/Vector2.js';
 import escapeHTML from '../../../phet-core/js/escapeHTML.js';
-import merge from '../../../phet-core/js/merge.js';
+import optionize from '../../../phet-core/js/optionize.js';
 import platform from '../../../phet-core/js/platform.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import AriaLiveAnnouncer from '../../../utterance-queue/js/AriaLiveAnnouncer.js';
 import UtteranceQueue from '../../../utterance-queue/js/UtteranceQueue.js';
-import { scenery, Color, Features, FullScreen, Trail, Utils, scenerySerialize, BackboneDrawable, ChangeInterval, DOMBlock, Drawable, DOMDrawable, Instance, Renderer, Node, PDOMInstance, PDOMSiblingStyle, PDOMUtils, globalKeyStateTracker, FocusManager, KeyboardUtils, PDOMTree, Input, CanvasNodeBoundsOverlay, FittedBlockBoundsOverlay, HighlightOverlay, HitAreaOverlay, PointerAreaOverlay, PointerOverlay } from '../imports.js';
+import { scenery, Color, Features, FullScreen, Trail, Utils, scenerySerialize, BackboneDrawable, ChangeInterval, DOMBlock, Drawable, DOMDrawable, Instance, Renderer, Node, PDOMInstance, PDOMSiblingStyle, PDOMUtils, globalKeyStateTracker, FocusManager, KeyboardUtils, PDOMTree, Input, CanvasNodeBoundsOverlay, FittedBlockBoundsOverlay, HighlightOverlay, HitAreaOverlay, PointerAreaOverlay, PointerOverlay, IInputListener, IOverlay, InputOptions, Block, WebGLBlock, CanvasBlock } from '../imports.js';
+
+type DisplayOptions = {
+  // Initial (or override) display width
+  width?: number;
+
+  // Initial (or override) display height
+  height?: number;
+
+  // Applies CSS styles to the root DOM element that make it amenable to interactive content
+  allowCSSHacks?: boolean;
+
+  // Usually anything displayed outside our dom element is hidden with CSS overflow.
+  allowSceneOverflow?: boolean;
+
+  // What cursor is used when no other cursor is specified
+  defaultCursor?: string;
+
+  // Initial background color
+  backgroundColor?: Color | string | null;
+
+  // Whether WebGL will preserve the drawing buffer
+  // WARNING!: This can significantly reduce performance if set to true.
+  preserveDrawingBuffer?: boolean;
+
+  // Whether WebGL is enabled at all for drawables in this Display
+  // Makes it possible to disable WebGL for ease of testing on non-WebGL platforms, see #289
+  allowWebGL?: boolean;
+
+  // Enables accessibility features
+  accessibility?: boolean;
+
+  // Whether mouse/touch/keyboard inputs are enabled (if input has been added).
+  interactive?: boolean;
+
+  // If true, input event listeners will be attached to the Display's DOM element instead of the window.
+  // Normally, attaching listeners to the window is preferred (it will see mouse moves/ups outside of the browser
+  // window, allowing correct button tracking), however there may be instances where a global listener is not
+  // preferred.
+  listenToOnlyElement?: boolean;
+
+  // Forwarded to Input: If true, most event types will be batched until otherwise triggered.
+  batchDOMEvents?: boolean;
+
+  // If true, the input event location (based on the top-left of the browser tab's viewport, with no
+  // scaling applied) will be used. Usually, this is not a safe assumption, so when false the location of the
+  // display's DOM element will be used to get the correct event location. There is a slight performance hit to
+  // doing so, thus this option is provided if the top-left location can be guaranteed.
+  // NOTE: Rotation of the Display's DOM element (e.g. with a CSS transform) will result in an incorrect event
+  //       mapping, as getBoundingClientRect() can't work with this. getBoxQuads() should fix this when browser
+  //       support is available.
+  assumeFullWindow?: boolean;
+
+  // Whether Scenery will try to aggressively re-create WebGL Canvas/context instead of waiting for
+  // a context restored event. Sometimes context losses can occur without a restoration afterwards, but this can
+  // jump-start the process.
+  // See https://github.com/phetsims/scenery/issues/347.
+  aggressiveContextRecreation?: boolean;
+
+  // Whether the `passive` flag should be set when adding and removing DOM event listeners.
+  // See https://github.com/phetsims/scenery/issues/770 for more details.
+  // If it is true or false, that is the value of the passive flag that will be used. If it is null, the default
+  // behavior of the browser will be used.
+  //
+  // Safari doesn't support touch-action: none, so we NEED to not use passive events (which would not allow
+  // preventDefault to do anything, so drags actually can scroll the sim).
+  // Chrome also did the same "passive by default", but because we have `touch-action: none` in place, it doesn't
+  // affect us, and we can potentially get performance improvements by allowing passive events.
+  // See https://github.com/phetsims/scenery/issues/770 for more information.
+  passiveEvents?: boolean | null;
+
+  // Whether, if no WebGL antialiasing is detected, the backing scale can be increased to provide some
+  // antialiasing benefit. See https://github.com/phetsims/scenery/issues/859.
+  allowBackingScaleAntialiasing?: boolean;
+
+  // An HTMLElement used to contain the contents of the Display
+  container?: HTMLElement;
+
+  // phet-io
+  tandem?: Tandem;
+};
+
+const CUSTOM_CURSORS = {
+  'scenery-grab-pointer': [ 'grab', '-moz-grab', '-webkit-grab', 'pointer' ],
+  'scenery-grabbing-pointer': [ 'grabbing', '-moz-grabbing', '-webkit-grabbing', 'pointer' ]
+} as { [ key: string ]: string[] };
 
 class Display {
+
+  // The (integral, > 0) dimensions of the Display's DOM element (only updates the DOM element on updateDisplay())
+  sizeProperty: IProperty<Dimension2>;
+
+  // data structure for managing aria-live alerts the this Display instance
+  descriptionUtteranceQueue: UtteranceQueue;
+
+  // Manages the various types of Focus that can go through the Display, as well as Properties
+  // controlling which forms of focus should be displayed in the HighlightOverlay.
+  focusManager: FocusManager;
+
+  // (phet-io,scenery) - Will be filled in with a scenery.Input if event handling is enabled
+  _input: Input | null;
+
+  // (scenery-internal) Whether accessibility is enabled for this particular display.
+  _accessible: boolean;
+
+  // (scenery-internal)
+  _preserveDrawingBuffer: boolean;
+
+  // (scenery-internal) map from Node ID to Instance, for fast lookup
+  _sharedCanvasInstances: { [ nodeID: number ]: Instance };
+
+  // (scenery-internal) - We have a monotonically-increasing frame ID, generally for use with a pattern
+  // where we can mark objects with this to note that they are either up-to-date or need refreshing due to this
+  // particular frame (without having to clear that information after use). This is incremented every frame
+  _frameId: number;
+
+  // (scenery-internal)
+  _aggressiveContextRecreation: boolean;
+  _allowBackingScaleAntialiasing: boolean;
+
+  private _allowWebGL: boolean;
+  private _allowCSSHacks: boolean;
+  private _allowSceneOverflow: boolean;
+  private _defaultCursor: string;
+
+  private _rootNode: Node;
+  private _rootBackbone: BackboneDrawable | null; // to be filled in later
+  private _domElement: HTMLElement;
+  private _baseInstance: Instance | null; // will be filled with the root Instance
+
+  // Used to check against new size to see what we need to change
+  private _currentSize: Dimension2;
+
+  private _dirtyTransformRoots: Instance[];
+  private _dirtyTransformRootsWithoutPass: Instance[];
+  private _instanceRootsToDispose: Instance[];
+
+  // At the end of Display.update, reduceReferences will be called on all of these. It's meant to
+  // catch various objects that would usually have update() called, but if they are invisible or otherwise not updated
+  // for performance, they may need to release references another way instead.
+  // See https://github.com/phetsims/energy-forms-and-changes/issues/356
+  private _reduceReferencesNeeded: { reduceReferences: () => void }[];
+
+  private _drawablesToDispose: Drawable[];
+
+  // Block changes are handled by changing the "pending" block/backbone on drawables. We
+  // want to change them all after the main stitch process has completed, so we can guarantee that a single drawable is
+  // removed from its previous block before being added to a new one. This is taken care of in an updateDisplay pass
+  // after syncTree / stitching.
+  private _drawablesToChangeBlock: Drawable[];
+
+  // Drawables have two implicit linked-lists, "current" and "old". syncTree modifies the
+  // "current" linked-list information so it is up-to-date, but needs to use the "old" information also. We move
+  // updating the "current" => "old" linked-list information until after syncTree and stitching is complete, and is
+  // taken care of in an updateDisplay pass.
+  private _drawablesToUpdateLinks: Drawable[]
+
+  // We store information on {ChangeInterval}s that records change interval
+  // information, that may contain references. We don't want to leave those references dangling after we don't need
+  // them, so they are recorded and cleaned in one of updateDisplay's phases.
+  private _changeIntervalsToDispose: ChangeInterval[];
+
+  private _lastCursor: string | null;
+  private _currentBackgroundCSS: string | null;
+
+  private _backgroundColor: Color | string | null;
+
+  // Used for shortcut animation frame functions
+  private _requestAnimationFrameID: number;
+
+  // Listeners that will be called for every event.
+  private _inputListeners: IInputListener[];
+
+  // Whether mouse/touch/keyboard inputs are enabled (if input has been added). Simulation will still step.
+  private _interactive: boolean;
+
+  // Passed through to Input
+  private _listenToOnlyElement: boolean;
+  private _batchDOMEvents: boolean;
+  private _assumeFullWindow: boolean;
+  private _passiveEvents: boolean | null;
+
+  // Overlays currently being displayed.
+  private _overlays: IOverlay[];
+
+  private _pointerOverlay: PointerOverlay | null;
+  private _pointerAreaOverlay: PointerAreaOverlay | null;
+  private _hitAreaOverlay: HitAreaOverlay | null;
+  private _canvasAreaBoundsOverlay: CanvasNodeBoundsOverlay | null;
+  private _fittedBlockBoundsOverlay: FittedBlockBoundsOverlay | null;
+
+  // @assertion-only - Whether we are running the paint phase of updateDisplay() for this Display.
+  private _isPainting?: boolean;
+
+  // @assertion-only
+  _isDisposing?: boolean;
+
+  // @assertion-only Whether disposal has started (but not finished)
+  _isDisposed?: boolean;
+
+  // If accessible
+  private _focusRootNode?: Node;
+  private _focusOverlay?: HighlightOverlay;
+
+  // (if accessible) During DOM operations where HTML elements are removed from and
+  // reinserted into the PDOM, event callbacks related to focus should be blocked as these are internal operations
+  // unrelated to application behavior user input, see https://github.com/phetsims/scenery/issues/925
+  blockFocusCallbacks?: boolean;
+
+  // (scenery-internal, if accessible)
+  _rootPDOMInstance?: PDOMInstance;
+
+  // (if accessible)
+  private _boundHandleFullScreenNavigation?: ( domEvent: KeyboardEvent ) => void;
+
+  // If logging performance
+  private perfSyncTreeCount?: number;
+  private perfStitchCount?: number;
+  private perfIntervalCount?: number;
+  private perfDrawableBlockChangeCount?: number;
+  private perfDrawableOldIntervalCount?: number;
+  private perfDrawableNewIntervalCount?: number;
+
   /**
    * Constructs a Display that will show the rootNode and its subtree in a visual state. Default options provided below
    *
-   * @param {Node} rootNode - Displays this node and all of its descendants
-   * @param {Object} [options] - Valid parameters in the parameter object:
-   * {
-   *   allowSceneOverflow: false,           // Usually anything displayed outside of this $main (DOM/CSS3 transformed SVG) is hidden with CSS overflow
-   *   allowCSSHacks: true,                 // Applies styling that prevents mobile browser graphical issues
-   *   width: <current main width>,         // Override the main container's width
-   *   height: <current main height>,       // Override the main container's height
-   *   preserveDrawingBuffer: false,        // Whether WebGL Canvases should preserve their drawing buffer.
-   *                                        //   WARNING!: This can significantly reduce performance if set to true.
-   *   allowWebGL: true,                    // Boolean flag that indicates whether scenery is allowed to use WebGL for rendering
-   *                                        // Makes it possible to disable WebGL for ease of testing on non-WebGL platforms, see #289
-   *   accessibility: true                  // Whether accessibility enhancements is enabled
-   *   interactive: true                    // Whether mouse/touch/keyboard inputs are enabled (if input has been added). Simulation will still step.
+   * @param rootNode - Displays this node and all of its descendants
+   * @param [providedOptions]
    */
-  constructor( rootNode, options ) {
+  constructor( rootNode: Node, providedOptions?: DisplayOptions ) {
     assert && assert( rootNode, 'rootNode is a required parameter' );
 
     //OHTWO TODO: hybrid batching (option to batch until an event like 'up' that might be needed for security issues)
 
-    options = merge( {
+    const options = optionize<DisplayOptions, Omit<DisplayOptions, 'container'>>( {
       // {number} - Initial display width
-      width: ( options && options.container && options.container.clientWidth ) || 640,
+      width: ( providedOptions && providedOptions.container && providedOptions.container.clientWidth ) || 640,
 
       // {number} - Initial display height
-      height: ( options && options.container && options.container.clientHeight ) || 480,
+      height: ( providedOptions && providedOptions.container && providedOptions.container.clientHeight ) || 480,
 
       // {boolean} - Applies CSS styles to the root DOM element that make it amenable to interactive content
       allowCSSHacks: true,
@@ -159,153 +371,67 @@ class Display {
 
       // phet-io
       tandem: Tandem.OPTIONAL
-    }, options );
+    }, providedOptions );
 
-    // @public (scenery-internal) {boolean} - Whether accessibility is enabled for this particular display.
     this._accessible = options.accessibility;
-
-    // @public (scenery-internal) {boolean}
     this._preserveDrawingBuffer = options.preserveDrawingBuffer;
-
-    // @private {boolean}
     this._allowWebGL = options.allowWebGL;
     this._allowCSSHacks = options.allowCSSHacks;
     this._allowSceneOverflow = options.allowSceneOverflow;
 
-    // @private {string}
     this._defaultCursor = options.defaultCursor;
 
-    // @public {Property.<Dimension2>} The (integral, > 0) dimensions of the Display's DOM element (only updates the DOM
-    // element on updateDisplay())
     this.sizeProperty = new TinyProperty( new Dimension2( options.width, options.height ) );
 
-    // @private {Dimension2} - used to check against new size to see what we need to change
     this._currentSize = new Dimension2( -1, -1 );
-
-    // @private {Node}
     this._rootNode = rootNode;
     this._rootNode.addRootedDisplay( this );
-
-    // @private {BackboneDrawable|null} - to be filled in later
-    this._rootBackbone = null;
-
-    // @private {Element}
+    this._rootBackbone = null; // to be filled in later
     this._domElement = options.container ?
                        BackboneDrawable.repurposeBackboneContainer( options.container ) :
                        BackboneDrawable.createDivBackbone();
 
-    // @public (scenery-internal) {Object.<nodeID:number,Instance>} - map from Node ID to Instance, for fast lookup
     this._sharedCanvasInstances = {};
-
-    // @private {Instance|null} - will be filled with the root Instance
-    this._baseInstance = null;
-
-    // @public (scenery-internal) {number} - We have a monotonically-increasing frame ID, generally for use with a pattern
-    // where we can mark objects with this to note that they are either up-to-date or need refreshing due to this
-    // particular frame (without having to clear that information after use). This is incremented every frame
+    this._baseInstance = null; // will be filled with the root Instance
     this._frameId = 0;
-
-    // @private {Array.<Instance>}
     this._dirtyTransformRoots = [];
     this._dirtyTransformRootsWithoutPass = [];
-
-    // @private {Array.<Instance>}
     this._instanceRootsToDispose = [];
-
-    // @private {Array.<*>} - At the end of Display.update, reduceReferences will be called on all of these. It's meant to
-    // catch various objects that would usually have update() called, but if they are invisible or otherwise not updated
-    // for performance, they may need to release references another way instead.
-    // See https://github.com/phetsims/energy-forms-and-changes/issues/356
     this._reduceReferencesNeeded = [];
-
-    // @private {Array.<Drawable>}
     this._drawablesToDispose = [];
-
-    // @private {Array.<Drawable>} - Block changes are handled by changing the "pending" block/backbone on drawables. We
-    // want to change them all after the main stitch process has completed, so we can guarantee that a single drawable is
-    // removed from its previous block before being added to a new one. This is taken care of in an updateDisplay pass
-    // after syncTree / stitching.
     this._drawablesToChangeBlock = [];
-
-    // @private {Array.<Drawable>} - Drawables have two implicit linked-lists, "current" and "old". syncTree modifies the
-    // "current" linked-list information so it is up-to-date, but needs to use the "old" information also. We move
-    // updating the "current" => "old" linked-list information until after syncTree and stitching is complete, and is
-    // taken care of in an updateDisplay pass.
     this._drawablesToUpdateLinks = [];
-
-    // @private {Array.<ChangeInterval>} - We store information on {ChangeInterval}s that records change interval
-    // information, that may contain references. We don't want to leave those references dangling after we don't need
-    // them, so they are recorded and cleaned in one of updateDisplay's phases.
     this._changeIntervalsToDispose = [];
-
-    // @private {string|null}
     this._lastCursor = null;
     this._currentBackgroundCSS = null;
-
-    // @private {ColorDef}
     this._backgroundColor = null;
-
-    // @private {number} - Used for shortcut animation frame functions
     this._requestAnimationFrameID = 0;
-
-    // @public (phet-io,scenery) - Will be filled in with a scenery.Input if event handling is enabled
     this._input = null;
-
-    // @private {Array.<Object>} - Listeners that will be called for every event.
     this._inputListeners = [];
-
-    // @private {boolean} - Whether mouse/touch/keyboard inputs are enabled (if input has been added). Simulation will still step.
     this._interactive = options.interactive;
-
-    // @private {boolean} - Passed through to Input
     this._listenToOnlyElement = options.listenToOnlyElement;
     this._batchDOMEvents = options.batchDOMEvents;
     this._assumeFullWindow = options.assumeFullWindow;
-
-    // @private {boolean|null}
     this._passiveEvents = options.passiveEvents;
-
-    // @public (scenery-internal) {boolean}
     this._aggressiveContextRecreation = options.aggressiveContextRecreation;
-
-    // @public (scenery-internal) {boolean}
     this._allowBackingScaleAntialiasing = options.allowBackingScaleAntialiasing;
-
-    // @private {Array.<*>} - Overlays currently being displayed.
-    // API expected:
-    //   .domElement
-    //   .update()
     this._overlays = [];
-
-    // @private {PointerOverlay|null}
     this._pointerOverlay = null;
-
-    // @private {PointerAreaOverlay|null}
     this._pointerAreaOverlay = null;
-
-    // @private {HitAreaOverlay|null}
     this._hitAreaOverlay = null;
-
-    // @private {CanvasNodeBoundsOverlay|null}
     this._canvasAreaBoundsOverlay = null;
-
-    // @private {FittedBlockBoundsOverlay|null}
     this._fittedBlockBoundsOverlay = null;
 
     if ( assert ) {
-      // @private @assertion-only {boolean} - Whether we are running the paint phase of updateDisplay() for this Display.
       this._isPainting = false;
-
-      // @public @assertion-only {boolean}
-      this._isDisposing = false; // Whether disposal has started (but not finished)
-      this._isDisposed = false; // Whether disposal has finished
+      this._isDisposing = false;
+      this._isDisposed = false;
     }
 
     this.applyCSSHacks();
 
     this.setBackgroundColor( options.backgroundColor );
 
-    // @public {UtteranceQueue} - data structure for managing aria-live alerts the this Display instance
     const ariaLiveAnnouncer = new AriaLiveAnnouncer( {
       tandem: options.tandem.createTandem( 'ariaLiveAnnouncer' ),
       phetioDocumentation: 'The Announcer responsible for announcing to aria-live for this Display.'
@@ -314,16 +440,10 @@ class Display {
       initialize: this._accessible
     } );
 
-    // @public - Manages the various types of Focus that can go through the Display, as well as Properties
-    // controlling which forms of focus should be displayed in the HighlightOverlay.
     this.focusManager = new FocusManager();
 
     if ( this._accessible ) {
-
-      // @private {Node}
       this._focusRootNode = new Node();
-
-      // @private {HighlightOverlay}
       this._focusOverlay = new HighlightOverlay( this, this._focusRootNode, {
         pdomFocusHighlightsVisibleProperty: this.focusManager.pdomFocusHighlightsVisibleProperty,
         interactiveHighlightsVisibleProperty: this.focusManager.interactiveHighlightsVisibleProperty,
@@ -331,19 +451,17 @@ class Display {
       } );
       this.addOverlay( this._focusOverlay );
 
-      // @public {boolean} (scenery-internal) - During DOM operations where HTML elements are removed from and
-      // reinserted into the PDOM, event callbacks related to focus should be blocked as these are internal operations
-      // unrelated to application behavior user input, see https://github.com/phetsims/scenery/issues/925
       this.blockFocusCallbacks = false;
 
       // @public (scenery-internal) {PDOMInstance}
+      // @ts-ignore TODO: PDOMInstance
       this._rootPDOMInstance = PDOMInstance.createFromPool( null, this, new Trail() );
       sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(
-        `Display root instance: ${this._rootPDOMInstance.toString()}` );
-      PDOMTree.rebuildInstanceTree( this._rootPDOMInstance );
+        `Display root instance: ${this._rootPDOMInstance!.toString()}` );
+      PDOMTree.rebuildInstanceTree( this._rootPDOMInstance! );
 
       // add the accessible DOM as a child of this DOM element
-      this._domElement.appendChild( this._rootPDOMInstance.peer.primarySibling );
+      this._domElement.appendChild( this._rootPDOMInstance!.peer.primarySibling );
 
       const ariaLiveContainer = ariaLiveAnnouncer.ariaLiveContainer;
 
@@ -358,27 +476,22 @@ class Display {
       // because tab navigation may happen before focus is within the PDOM. See handleFullScreenNavigation
       // for more.
       this._boundHandleFullScreenNavigation = this.handleFullScreenNavigation.bind( this );
+      // @ts-ignore TODO KeyStateTracker
       globalKeyStateTracker.keydownEmitter.addListener( this._boundHandleFullScreenNavigation );
     }
   }
 
-  /**
-   * Returns the base DOM element that will be displayed by this Display
-   * @public
-   *
-   * @returns {Element}
-   */
-  getDOMElement() {
+  getDOMElement(): HTMLElement {
     return this._domElement;
   }
 
-  get domElement() { return this.getDOMElement(); }
+  get domElement(): HTMLElement { return this.getDOMElement(); }
 
   /**
    * Updates the display's DOM element with the current visual state of the attached root node and its descendants
-   * @public
    */
   updateDisplay() {
+    // @ts-ignore scenery namespace
     if ( sceneryLog && scenery.isLoggingPerformance() ) {
       this.perfSyncTreeCount = 0;
       this.perfStitchCount = 0;
@@ -407,68 +520,71 @@ class Display {
     if ( this._accessible ) {
 
       // update positioning of focusable peer siblings so they are discoverable on mobile assistive devices
-      this._rootPDOMInstance.peer.updateSubtreePositioning();
+      this._rootPDOMInstance!.peer.updateSubtreePositioning();
     }
 
     // validate bounds for everywhere that could trigger bounds listeners. we want to flush out any changes, so that we can call validateBounds()
     // from code below without triggering side effects (we assume that we are not reentrant).
     this._rootNode.validateWatchedBounds();
 
-    if ( assertSlow ) { this._accessible && this._rootPDOMInstance.auditRoot(); }
+    if ( assertSlow ) { this._accessible && this._rootPDOMInstance!.auditRoot(); }
 
     if ( assertSlow ) { this._rootNode._picker.audit(); }
 
+    // @ts-ignore TODO Instance
     this._baseInstance = this._baseInstance || Instance.createFromPool( this, new Trail( this._rootNode ), true, false );
-    this._baseInstance.baseSyncTree();
+    this._baseInstance!.baseSyncTree();
     if ( firstRun ) {
-      this.markTransformRootDirty( this._baseInstance, this._baseInstance.isTransformed ); // marks the transform root as dirty (since it is)
+      // @ts-ignore TODO instance
+      this.markTransformRootDirty( this._baseInstance!, this._baseInstance!.isTransformed ); // marks the transform root as dirty (since it is)
     }
 
     // update our drawable's linked lists where necessary
     while ( this._drawablesToUpdateLinks.length ) {
-      this._drawablesToUpdateLinks.pop().updateLinks();
+      this._drawablesToUpdateLinks.pop()!.updateLinks();
     }
 
     // clean change-interval information from instances, so we don't leak memory/references
     while ( this._changeIntervalsToDispose.length ) {
-      this._changeIntervalsToDispose.pop().dispose();
+      this._changeIntervalsToDispose.pop()!.dispose();
     }
 
-    this._rootBackbone = this._rootBackbone || this._baseInstance.groupDrawable;
+    this._rootBackbone = this._rootBackbone || this._baseInstance!.groupDrawable;
     assert && assert( this._rootBackbone, 'We are guaranteed a root backbone as the groupDrawable on the base instance' );
-    assert && assert( this._rootBackbone === this._baseInstance.groupDrawable, 'We don\'t want the base instance\'s groupDrawable to change' );
+    assert && assert( this._rootBackbone === this._baseInstance!.groupDrawable, 'We don\'t want the base instance\'s groupDrawable to change' );
 
 
-    if ( assertSlow ) { this._rootBackbone.audit( true, false, true ); } // allow pending blocks / dirty
+    if ( assertSlow ) { this._rootBackbone!.audit( true, false, true ); } // allow pending blocks / dirty
 
     sceneryLog && sceneryLog.Display && sceneryLog.Display( 'drawable block change phase' );
     sceneryLog && sceneryLog.Display && sceneryLog.push();
     while ( this._drawablesToChangeBlock.length ) {
-      const changed = this._drawablesToChangeBlock.pop().updateBlock();
+      const changed = this._drawablesToChangeBlock.pop()!.updateBlock();
+      // @ts-ignore scenery namespace
       if ( sceneryLog && scenery.isLoggingPerformance() && changed ) {
-        this.perfDrawableBlockChangeCount++;
+        this.perfDrawableBlockChangeCount!++;
       }
     }
     sceneryLog && sceneryLog.Display && sceneryLog.pop();
 
-    if ( assertSlow ) { this._rootBackbone.audit( false, false, true ); } // allow only dirty
-    if ( assertSlow ) { this._baseInstance.audit( this._frameId, false ); }
+    if ( assertSlow ) { this._rootBackbone!.audit( false, false, true ); } // allow only dirty
+    if ( assertSlow ) { this._baseInstance!.audit( this._frameId, false ); }
 
     // pre-repaint phase: update relative transform information for listeners (notification) and precomputation where desired
     this.updateDirtyTransformRoots();
     // pre-repaint phase update visibility information on instances
-    this._baseInstance.updateVisibility( true, true, false );
+    this._baseInstance!.updateVisibility( true, true, false );
 
-    if ( assertSlow ) { this._baseInstance.auditVisibility( true ); }
+    if ( assertSlow ) { this._baseInstance!.auditVisibility( true ); }
 
-    if ( assertSlow ) { this._baseInstance.audit( this._frameId, true ); }
+    if ( assertSlow ) { this._baseInstance!.audit( this._frameId, true ); }
 
     sceneryLog && sceneryLog.Display && sceneryLog.Display( 'instance root disposal phase' );
     sceneryLog && sceneryLog.Display && sceneryLog.push();
     // dispose all of our instances. disposing the root will cause all descendants to also be disposed.
     // will also dispose attached drawables (self/group/etc.)
     while ( this._instanceRootsToDispose.length ) {
-      this._instanceRootsToDispose.pop().dispose();
+      this._instanceRootsToDispose.pop()!.dispose();
     }
     sceneryLog && sceneryLog.Display && sceneryLog.pop();
 
@@ -478,11 +594,11 @@ class Display {
     sceneryLog && sceneryLog.Display && sceneryLog.push();
     // dispose all of our other drawables.
     while ( this._drawablesToDispose.length ) {
-      this._drawablesToDispose.pop().dispose();
+      this._drawablesToDispose.pop()!.dispose();
     }
     sceneryLog && sceneryLog.Display && sceneryLog.pop();
 
-    if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
+    if ( assertSlow ) { this._baseInstance!.audit( this._frameId, false ); }
 
     if ( assert ) {
       assert( !this._isPainting, 'Display was already updating paint, may have thrown an error on the last update' );
@@ -493,15 +609,15 @@ class Display {
     //OHTWO TODO: can anything be updated more efficiently by tracking at the Display level? Remember, we have recursive updates so things get updated in the right order!
     sceneryLog && sceneryLog.Display && sceneryLog.Display( 'repaint phase' );
     sceneryLog && sceneryLog.Display && sceneryLog.push();
-    this._rootBackbone.update();
+    this._rootBackbone!.update();
     sceneryLog && sceneryLog.Display && sceneryLog.pop();
 
     if ( assert ) {
       this._isPainting = false;
     }
 
-    if ( assertSlow ) { this._rootBackbone.audit( false, false, false ); } // allow nothing
-    if ( assertSlow ) { this._baseInstance.audit( this._frameId ); }
+    if ( assertSlow ) { this._rootBackbone!.audit( false, false, false ); } // allow nothing
+    if ( assertSlow ) { this._baseInstance!.audit( this._frameId, false ); }
 
     this.updateCursor();
     this.updateBackgroundColor();
@@ -509,11 +625,12 @@ class Display {
     this.updateSize();
 
     if ( this._overlays.length ) {
-      let zIndex = this._rootBackbone.lastZIndex;
+      let zIndex = this._rootBackbone!.lastZIndex!;
+      assert && assert( typeof zIndex === 'number' );
       for ( let i = 0; i < this._overlays.length; i++ ) {
         // layer the overlays properly
         const overlay = this._overlays[ i ];
-        overlay.domElement.style.zIndex = zIndex++;
+        overlay.domElement.style.zIndex = '' + ( zIndex++ );
 
         overlay.update();
       }
@@ -521,39 +638,40 @@ class Display {
 
     // After our update and disposals, we want to eliminate any memory leaks from anything that wasn't updated.
     while ( this._reduceReferencesNeeded.length ) {
-      this._reduceReferencesNeeded.pop().reduceReferences();
+      this._reduceReferencesNeeded.pop()!.reduceReferences();
     }
 
     this._frameId++;
 
+    // @ts-ignore TODO scenery namespace
     if ( sceneryLog && scenery.isLoggingPerformance() ) {
       const syncTreeMessage = `syncTree count: ${this.perfSyncTreeCount}`;
-      if ( this.perfSyncTreeCount > 500 ) {
+      if ( this.perfSyncTreeCount! > 500 ) {
         sceneryLog.PerfCritical && sceneryLog.PerfCritical( syncTreeMessage );
       }
-      else if ( this.perfSyncTreeCount > 100 ) {
+      else if ( this.perfSyncTreeCount! > 100 ) {
         sceneryLog.PerfMajor && sceneryLog.PerfMajor( syncTreeMessage );
       }
-      else if ( this.perfSyncTreeCount > 20 ) {
+      else if ( this.perfSyncTreeCount! > 20 ) {
         sceneryLog.PerfMinor && sceneryLog.PerfMinor( syncTreeMessage );
       }
-      else if ( this.perfSyncTreeCount > 0 ) {
+      else if ( this.perfSyncTreeCount! > 0 ) {
         sceneryLog.PerfVerbose && sceneryLog.PerfVerbose( syncTreeMessage );
       }
 
       const drawableBlockCountMessage = `drawable block changes: ${this.perfDrawableBlockChangeCount} for` +
                                         ` -${this.perfDrawableOldIntervalCount
                                         } +${this.perfDrawableNewIntervalCount}`;
-      if ( this.perfDrawableBlockChangeCount > 200 ) {
+      if ( this.perfDrawableBlockChangeCount! > 200 ) {
         sceneryLog.PerfCritical && sceneryLog.PerfCritical( drawableBlockCountMessage );
       }
-      else if ( this.perfDrawableBlockChangeCount > 60 ) {
+      else if ( this.perfDrawableBlockChangeCount! > 60 ) {
         sceneryLog.PerfMajor && sceneryLog.PerfMajor( drawableBlockCountMessage );
       }
-      else if ( this.perfDrawableBlockChangeCount > 10 ) {
+      else if ( this.perfDrawableBlockChangeCount! > 10 ) {
         sceneryLog.PerfMinor && sceneryLog.PerfMinor( drawableBlockCountMessage );
       }
-      else if ( this.perfDrawableBlockChangeCount > 0 ) {
+      else if ( this.perfDrawableBlockChangeCount! > 0 ) {
         sceneryLog.PerfVerbose && sceneryLog.PerfVerbose( drawableBlockCountMessage );
       }
     }
@@ -563,16 +681,13 @@ class Display {
     sceneryLog && sceneryLog.Display && sceneryLog.pop();
   }
 
-  // @public - Used for Studio Autoselect to determine the leafiest PhET-iO Element under the mouse
-  getPhetioElementAt( point ) {
+  // Used for Studio Autoselect to determine the leafiest PhET-iO Element under the mouse
+  getPhetioElementAt( point: Vector2 ) {
     const node = this._rootNode.getPhetioMouseHit( point );
     return node && node.isPhetioInstrumented() ? node : null;
   }
 
-  /**
-   * @private
-   */
-  updateSize() {
+  private updateSize() {
     let sizeDirty = false;
     //OHTWO TODO: if we aren't clipping or setting background colors, can we get away with having a 0x0 container div and using absolutely-positioned children?
     if ( this.size.width !== this._currentSize.width ) {
@@ -593,67 +708,46 @@ class Display {
   }
 
   /**
-   * @public
-   *
-   * @returns {boolean} - Whether WebGL is allowed to be used in drawables for this Display
+   * Whether WebGL is allowed to be used in drawables for this Display
    */
-  isWebGLAllowed() {
+  isWebGLAllowed(): boolean {
     return this._allowWebGL;
   }
 
-  /**
-   * Returns the Node at the root of the display.
-   * @public
-   *
-   * @returns {Node}
-   */
-  getRootNode() {
+  get webglAllowed(): boolean { return this.isWebGLAllowed(); }
+
+  getRootNode(): Node {
     return this._rootNode;
   }
 
-  get rootNode() { return this.getRootNode(); }
+  get rootNode(): Node { return this.getRootNode(); }
 
-  /**
-   * @public (scenery-internal)
-   *
-   * @returns {BackboneDrawable}
-   */
-  getRootBackbone() {
-    return this._rootBackbone;
+  getRootBackbone(): BackboneDrawable {
+    assert && assert( this._rootBackbone );
+    return this._rootBackbone!;
   }
 
-  get rootBackbone() { return this.getRootBackbone(); }
+  get rootBackbone(): BackboneDrawable { return this.getRootBackbone(); }
 
   /**
    * The dimensions of the Display's DOM element
-   * @public
-   *
-   * @returns {Dimension2}
    */
-  getSize() {
+  getSize(): Dimension2 {
     return this.sizeProperty.value;
   }
 
-  get size() { return this.getSize(); }
+  get size(): Dimension2 { return this.getSize(); }
 
-  /**
-   * @public
-   *
-   * @returns {Bounds2}
-   */
-  getBounds() {
+  getBounds(): Bounds2 {
     return this.size.toBounds();
   }
 
-  get bounds() { return this.getBounds(); }
+  get bounds(): Bounds2 { return this.getBounds(); }
 
   /**
    * Changes the size that the Display's DOM element will be after the next updateDisplay()
-   * @public
-   *
-   * @param {Dimension2} size
    */
-  setSize( size ) {
+  setSize( size: Dimension2 ) {
     assert && assert( size instanceof Dimension2 );
     assert && assert( size.width % 1 === 0, 'Display.width should be an integer' );
     assert && assert( size.width > 0, 'Display.width should be greater than zero' );
@@ -665,111 +759,83 @@ class Display {
 
   /**
    * Changes the size that the Display's DOM element will be after the next updateDisplay()
-   * @public
-   *
-   * @param {number} width
-   * @param {number} height
    */
-  setWidthHeight( width, height ) {
+  setWidthHeight( width: number, height: number ) {
     this.setSize( new Dimension2( width, height ) );
   }
 
   /**
    * The width of the Display's DOM element
-   * @public
-   *
-   * @returns {number}
    */
-  getWidth() {
+  getWidth(): number {
     return this.size.width;
   }
 
-  get width() { return this.getWidth(); }
+  get width(): number { return this.getWidth(); }
 
   /**
    * Sets the width that the Display's DOM element will be after the next updateDisplay(). Should be an integral value.
-   * @public
-   *
-   * @param {number} width
    */
-  setWidth( width ) {
+  setWidth( width: number ): this {
     assert && assert( typeof width === 'number', 'Display.width should be a number' );
 
     if ( this.getWidth() !== width ) {
       this.setSize( new Dimension2( width, this.getHeight() ) );
     }
+
+    return this;
   }
 
-  set width( value ) { this.setWidth( value ); }
+  set width( value: number ) { this.setWidth( value ); }
 
   /**
    * The height of the Display's DOM element
-   * @public
-   *
-   * @returns {number}
    */
-  getHeight() {
+  getHeight(): number {
     return this.size.height;
   }
 
-  get height() { return this.getHeight(); }
+  get height(): number { return this.getHeight(); }
 
   /**
    * Sets the height that the Display's DOM element will be after the next updateDisplay(). Should be an integral value.
-   * @public
-   *
-   * @param {number} height
    */
-  setHeight( height ) {
+  setHeight( height: number ): this {
     assert && assert( typeof height === 'number', 'Display.height should be a number' );
 
     if ( this.getHeight() !== height ) {
       this.setSize( new Dimension2( this.getWidth(), height ) );
     }
+
+    return this;
   }
 
-  set height( value ) { this.setHeight( value ); }
+  set height( value: number ) { this.setHeight( value ); }
 
   /**
    * Will be applied to the root DOM element on updateDisplay(), and no sooner.
-   * @public
-   *
-   * @param {Color|string|null} color
    */
-  setBackgroundColor( color ) {
+  setBackgroundColor( color: Color | string | null ): this {
     assert && assert( color === null || typeof color === 'string' || color instanceof Color );
 
     this._backgroundColor = color;
+
+    return this;
   }
 
-  set backgroundColor( value ) { this.setBackgroundColor( value ); }
+  set backgroundColor( value: Color | string | null ) { this.setBackgroundColor( value ); }
 
-  /**
-   * @public
-   *
-   * @returns {Color|string|null}
-   */
-  getBackgroundColor() {
+  getBackgroundColor(): Color | string | null {
     return this._backgroundColor;
   }
 
-  get backgroundColor() { return this.getBackgroundColor(); }
+  get backgroundColor(): Color | string | null { return this.getBackgroundColor(); }
 
-  /**
-   * @public
-   *
-   * @returns {boolean}
-   */
-  get interactive() { return this._interactive; }
+  get interactive(): boolean { return this._interactive; }
 
-  /**
-   * @public
-   *
-   * @param {boolean} value
-   */
-  set interactive( value ) {
+  set interactive( value: boolean ) {
     if ( this._accessible && value !== this._interactive ) {
-      this._rootPDOMInstance.peer.recursiveDisable( !value );
+      this._rootPDOMInstance!.peer.recursiveDisable( !value );
     }
 
     this._interactive = value;
@@ -785,26 +851,20 @@ class Display {
   /**
    * Adds an overlay to the Display. Each overlay should have a .domElement (the DOM element that will be used for
    * display) and an .update() method.
-   * @public
-   *
-   * @param {*} overlay
    */
-  addOverlay( overlay ) {
+  addOverlay( overlay: IOverlay ) {
     this._overlays.push( overlay );
     this._domElement.appendChild( overlay.domElement );
 
     // ensure that the overlay is hidden from screen readers, all accessible content should be in the dom element
     // of the this._rootPDOMInstance
-    overlay.domElement.setAttribute( 'aria-hidden', true );
+    overlay.domElement.setAttribute( 'aria-hidden', 'true' );
   }
 
   /**
    * Removes an overlay from the display.
-   * @public
-   *
-   * @param {*} overlay
    */
-  removeOverlay( overlay ) {
+  removeOverlay( overlay: IOverlay ) {
     this._domElement.removeChild( overlay.domElement );
     this._overlays.splice( _.indexOf( this._overlays, overlay ), 1 );
   }
@@ -812,22 +872,17 @@ class Display {
   /**
    * Get the root accessible DOM element which represents this display and provides semantics for assistive
    * technology. If this Display is not accessible, returns null.
-   * @public
-   *
-   * @returns {HTMLElement|null}
    */
-  getPDOMRootElement() {
-    return this._accessible ? this._rootPDOMInstance.peer.primarySibling : null;
+  getPDOMRootElement(): HTMLElement | null {
+    return this._accessible ? this._rootPDOMInstance!.peer.primarySibling : null;
   }
 
-  get pdomRootElement() { return this.getPDOMRootElement(); }
+  get pdomRootElement(): HTMLElement | null { return this.getPDOMRootElement(); }
 
   /**
    * Has this Display enabled accessibility features like PDOM creation and support.
-   * @public
-   * @returns {boolean}
    */
-  isAccessible() {
+  isAccessible(): boolean {
     return this._accessible;
   }
 
@@ -835,31 +890,26 @@ class Display {
    * Implements a workaround that prevents DOM focus from leaving the Display in FullScreen mode. There is
    * a bug in some browsers where DOM focus can be permanently lost if tabbing out of the FullScreen element,
    * see https://github.com/phetsims/scenery/issues/883.
-   * @private
-   * @param {Event} domEvent
    */
-  handleFullScreenNavigation( domEvent ) {
+  private handleFullScreenNavigation( domEvent: KeyboardEvent ) {
     assert && assert( this.pdomRootElement, 'There must be a PDOM to support keyboard navigation' );
 
     if ( FullScreen.isFullScreen() && KeyboardUtils.isKeyEvent( domEvent, KeyboardUtils.KEY_TAB ) ) {
       const rootElement = this.pdomRootElement;
-      const nextElement = domEvent.shiftKey ? PDOMUtils.getPreviousFocusable( rootElement ) :
-                          PDOMUtils.getNextFocusable( rootElement );
+      const nextElement = domEvent.shiftKey ? PDOMUtils.getPreviousFocusable( rootElement || undefined ) :
+                          PDOMUtils.getNextFocusable( rootElement || undefined );
       if ( nextElement === domEvent.target ) {
         domEvent.preventDefault();
       }
     }
   }
 
-  /*
+  /**
    * Returns the bitmask union of all renderers (canvas/svg/dom/webgl) that are used for display, excluding
    * BackboneDrawables (which would be DOM).
-   * @public
-   *
-   * @returns {number}
    */
-  getUsedRenderersBitmask() {
-    function renderersUnderBackbone( backbone ) {
+  getUsedRenderersBitmask(): number {
+    function renderersUnderBackbone( backbone: BackboneDrawable ) {
       let bitmask = 0;
       _.each( backbone.blocks, block => {
         if ( block instanceof DOMBlock && block.domDrawable instanceof BackboneDrawable ) {
@@ -873,42 +923,36 @@ class Display {
     }
 
     // only return the renderer-specific portion (no other hints, etc)
-    return renderersUnderBackbone( this._rootBackbone ) & Renderer.bitmaskRendererArea;
-  }
-
-  /*
-   * Called from Instances that will need a transform update (for listeners and precomputation).
-   * @public (scenery-internal)
-   *
-   * @param {Instance} instance
-   * @param {boolean} passTransform - Whether we should pass the first transform root when validating transforms (should
-   * be true if the instance is transformed)
-   */
-  markTransformRootDirty( instance, passTransform ) {
-    passTransform ? this._dirtyTransformRoots.push( instance ) : this._dirtyTransformRootsWithoutPass.push( instance );
+    return renderersUnderBackbone( this._rootBackbone! ) & Renderer.bitmaskRendererArea;
   }
 
   /**
-   * @private
+   * Called from Instances that will need a transform update (for listeners and precomputation). (scenery-internal)
+   *
+   * @param instance
+   * @param passTransform - Whether we should pass the first transform root when validating transforms (should
+   * be true if the instance is transformed)
    */
-  updateDirtyTransformRoots() {
+  markTransformRootDirty( instance: Instance, passTransform: boolean ) {
+    passTransform ? this._dirtyTransformRoots.push( instance ) : this._dirtyTransformRootsWithoutPass.push( instance );
+  }
+
+  private updateDirtyTransformRoots() {
     sceneryLog && sceneryLog.transformSystem && sceneryLog.transformSystem( 'updateDirtyTransformRoots' );
     sceneryLog && sceneryLog.transformSystem && sceneryLog.push();
     while ( this._dirtyTransformRoots.length ) {
-      this._dirtyTransformRoots.pop().relativeTransform.updateTransformListenersAndCompute( false, false, this._frameId, true );
+      this._dirtyTransformRoots.pop()!.relativeTransform.updateTransformListenersAndCompute( false, false, this._frameId, true );
     }
     while ( this._dirtyTransformRootsWithoutPass.length ) {
-      this._dirtyTransformRootsWithoutPass.pop().relativeTransform.updateTransformListenersAndCompute( false, false, this._frameId, false );
+      this._dirtyTransformRootsWithoutPass.pop()!.relativeTransform.updateTransformListenersAndCompute( false, false, this._frameId, false );
     }
     sceneryLog && sceneryLog.transformSystem && sceneryLog.pop();
   }
 
   /**
-   * @public (scenery-internal)
-   *
-   * @param {Drawable} drawable
+   * (scenery-internal)
    */
-  markDrawableChangedBlock( drawable ) {
+  markDrawableChangedBlock( drawable: Drawable ) {
     assert && assert( drawable instanceof Drawable );
 
     sceneryLog && sceneryLog.Display && sceneryLog.Display( `markDrawableChangedBlock: ${drawable.toString()}` );
@@ -917,22 +961,18 @@ class Display {
 
   /**
    * Marks an item for later reduceReferences() calls at the end of Display.update().
-   * @public (scenery-internal)
-   *
-   * @param {*} item
+   * (scenery-internal)
    */
-  markForReducedReferences( item ) {
+  markForReducedReferences( item: { reduceReferences: () => void } ) {
     assert && assert( !!item.reduceReferences );
 
     this._reduceReferencesNeeded.push( item );
   }
 
   /**
-   * @public (scenery-internal)
-   *
-   * @param {Instance} instance
+   * (scenery-internal)
    */
-  markInstanceRootForDisposal( instance ) {
+  markInstanceRootForDisposal( instance: Instance ) {
     assert && assert( instance instanceof Instance, 'How would an instance not be an instance of an instance?!?!?' );
 
     sceneryLog && sceneryLog.Display && sceneryLog.Display( `markInstanceRootForDisposal: ${instance.toString()}` );
@@ -940,11 +980,9 @@ class Display {
   }
 
   /**
-   * @public (scenery-internal)
-   *
-   * @param {Drawable} drawable
+   * (scenery-internal)
    */
-  markDrawableForDisposal( drawable ) {
+  markDrawableForDisposal( drawable: Drawable ) {
     assert && assert( drawable instanceof Drawable );
 
     sceneryLog && sceneryLog.Display && sceneryLog.Display( `markDrawableForDisposal: ${drawable.toString()}` );
@@ -952,11 +990,9 @@ class Display {
   }
 
   /**
-   * @public (scenery-internal)
-   *
-   * @param {Drawable} drawable
+   * (scenery-internal)
    */
-  markDrawableForLinksUpdate( drawable ) {
+  markDrawableForLinksUpdate( drawable: Drawable ) {
     assert && assert( drawable instanceof Drawable );
 
     this._drawablesToUpdateLinks.push( drawable );
@@ -964,29 +1000,24 @@ class Display {
 
   /**
    * Add a {ChangeInterval} for the "remove change interval info" phase (we don't want to leak memory/references)
-   * @public (scenery-internal)
-   *
-   * @param {ChangeInterval} changeInterval
+   * (scenery-internal)
    */
-  markChangeIntervalToDispose( changeInterval ) {
+  markChangeIntervalToDispose( changeInterval: ChangeInterval ) {
     assert && assert( changeInterval instanceof ChangeInterval );
 
     this._changeIntervalsToDispose.push( changeInterval );
   }
 
-  /**
-   * @private
-   */
-  updateBackgroundColor() {
+  private updateBackgroundColor() {
     assert && assert( this._backgroundColor === null ||
                       typeof this._backgroundColor === 'string' ||
                       this._backgroundColor instanceof Color );
 
     const newBackgroundCSS = this._backgroundColor === null ?
                              '' :
-                             ( this._backgroundColor.toCSS ?
-                               this._backgroundColor.toCSS() :
-                               this._backgroundColor );
+                             ( ( this._backgroundColor as Color ).toCSS ?
+                                ( this._backgroundColor as Color ).toCSS() :
+                               this._backgroundColor as string );
     if ( newBackgroundCSS !== this._currentBackgroundCSS ) {
       this._currentBackgroundCSS = newBackgroundCSS;
 
@@ -998,10 +1029,7 @@ class Display {
    * Cursors
    *----------------------------------------------------------------------------*/
 
-  /**
-   * @private
-   */
-  updateCursor() {
+  private updateCursor() {
     if ( this._input && this._input.mouse && this._input.mouse.point ) {
       if ( this._input.mouse.cursor ) {
         sceneryLog && sceneryLog.Cursor && sceneryLog.Cursor( `set on pointer: ${this._input.mouse.cursor}` );
@@ -1034,11 +1062,8 @@ class Display {
 
   /**
    * Sets the cursor to be displayed when over the Display.
-   * @private
-   *
-   * @param {string} cursor
    */
-  setElementCursor( cursor ) {
+  private setElementCursor( cursor: string ) {
     this._domElement.style.cursor = cursor;
 
     // In some cases, Chrome doesn't seem to respect the cursor set on the Display's domElement. If we are using the
@@ -1049,15 +1074,10 @@ class Display {
     }
   }
 
-  /**
-   * @private
-   *
-   * @param {string} cursor
-   */
-  setSceneCursor( cursor ) {
+  private setSceneCursor( cursor: string ) {
     if ( cursor !== this._lastCursor ) {
       this._lastCursor = cursor;
-      const customCursors = Display.customCursors[ cursor ];
+      const customCursors = CUSTOM_CURSORS[ cursor ];
       if ( customCursors ) {
         // go backwards, so the most desired cursor sticks
         for ( let i = customCursors.length - 1; i >= 0; i-- ) {
@@ -1070,10 +1090,7 @@ class Display {
     }
   }
 
-  /**
-   * @private
-   */
-  applyCSSHacks() {
+  private applyCSSHacks() {
     // to use CSS3 transforms for performance, hide anything outside our bounds by default
     if ( !this._allowSceneOverflow ) {
       this._domElement.style.overflow = 'hidden';
@@ -1083,10 +1100,12 @@ class Display {
     document.onselectstart = () => false;
 
     // forward all pointer events
+    // @ts-ignore legacy
     this._domElement.style.msTouchAction = 'none';
 
     // prevent any default zooming behavior from a trackpad on IE11 and Edge, all should be handled by scenery - must
     // be on the body, doesn't prevent behavior if on the display div
+    // @ts-ignore legacy
     document.body.style.msContentZooming = 'none';
 
     // don't allow browser to switch between font smoothing methods for text (see https://github.com/phetsims/scenery/issues/431)
@@ -1103,29 +1122,21 @@ class Display {
     }
   }
 
-  /**
-   * @public
-   *
-   * @param {function(string)} callback
-   */
-  canvasDataURL( callback ) {
-    this.canvasSnapshot( canvas => {
+  canvasDataURL( callback: ( str: string ) => void ) {
+    this.canvasSnapshot( ( canvas: HTMLCanvasElement ) => {
       callback( canvas.toDataURL() );
     } );
   }
 
   /**
    * Renders what it can into a Canvas (so far, Canvas and SVG layers work fine)
-   * @public
-   *
-   * @param {function(HTMLCanvasElement,ImageData)} callback
    */
-  canvasSnapshot( callback ) {
+  canvasSnapshot( callback: ( canvas: HTMLCanvasElement, imageData: ImageData ) => void ) {
     const canvas = document.createElement( 'canvas' );
     canvas.width = this.size.width;
     canvas.height = this.size.height;
 
-    const context = canvas.getContext( '2d' );
+    const context = canvas.getContext( '2d' )!;
 
     //OHTWO TODO: allow actual background color directly, not having to check the style here!!!
     this._rootNode.renderToCanvas( canvas, context, () => {
@@ -1134,125 +1145,105 @@ class Display {
   }
 
   /**
-   * @public
-   *
    * TODO: reduce code duplication for handling overlays
-   *
-   * @param {boolean} visibility
    */
-  setPointerDisplayVisible( visibility ) {
+  setPointerDisplayVisible( visibility: boolean ) {
     assert && assert( typeof visibility === 'boolean' );
 
     const hasOverlay = !!this._pointerOverlay;
 
     if ( visibility !== hasOverlay ) {
       if ( !visibility ) {
-        this.removeOverlay( this._pointerOverlay );
-        this._pointerOverlay.dispose();
+        this.removeOverlay( this._pointerOverlay! );
+        this._pointerOverlay!.dispose();
         this._pointerOverlay = null;
       }
       else {
-        this._pointerOverlay = new PointerOverlay( this, this._rootNode );
+        this._pointerOverlay = new PointerOverlay( this, this._rootNode! );
         this.addOverlay( this._pointerOverlay );
       }
     }
   }
 
   /**
-   * @public
-   *
    * TODO: reduce code duplication for handling overlays
-   *
-   * @param {boolean} visibility
    */
-  setPointerAreaDisplayVisible( visibility ) {
+  setPointerAreaDisplayVisible( visibility: boolean ) {
     assert && assert( typeof visibility === 'boolean' );
 
     const hasOverlay = !!this._pointerAreaOverlay;
 
     if ( visibility !== hasOverlay ) {
       if ( !visibility ) {
-        this.removeOverlay( this._pointerAreaOverlay );
-        this._pointerAreaOverlay.dispose();
+        this.removeOverlay( this._pointerAreaOverlay! );
+        this._pointerAreaOverlay!.dispose();
         this._pointerAreaOverlay = null;
       }
       else {
-        this._pointerAreaOverlay = new PointerAreaOverlay( this, this._rootNode );
+        this._pointerAreaOverlay = new PointerAreaOverlay( this, this._rootNode! );
         this.addOverlay( this._pointerAreaOverlay );
       }
     }
   }
 
   /**
-   * @public
-   *
    * TODO: reduce code duplication for handling overlays
-   *
-   * @param {boolean} visibility
    */
-  setHitAreaDisplayVisible( visibility ) {
+  setHitAreaDisplayVisible( visibility: boolean ) {
     assert && assert( typeof visibility === 'boolean' );
 
     const hasOverlay = !!this._hitAreaOverlay;
 
     if ( visibility !== hasOverlay ) {
       if ( !visibility ) {
-        this.removeOverlay( this._hitAreaOverlay );
-        this._hitAreaOverlay.dispose();
+        this.removeOverlay( this._hitAreaOverlay! );
+        this._hitAreaOverlay!.dispose();
         this._hitAreaOverlay = null;
       }
       else {
-        this._hitAreaOverlay = new HitAreaOverlay( this, this._rootNode );
-        this.addOverlay( this._hitAreaOverlay );
+        this._hitAreaOverlay = new HitAreaOverlay( this, this._rootNode! );
+        this.addOverlay( this._hitAreaOverlay! );
       }
     }
   }
 
   /**
-   * @public
-   *
    * TODO: reduce code duplication for handling overlays
-   *
-   * @param {boolean} visibility
    */
-  setCanvasNodeBoundsVisible( visibility ) {
+  setCanvasNodeBoundsVisible( visibility: boolean ) {
     assert && assert( typeof visibility === 'boolean' );
 
     const hasOverlay = !!this._canvasAreaBoundsOverlay;
 
     if ( visibility !== hasOverlay ) {
       if ( !visibility ) {
-        this.removeOverlay( this._canvasAreaBoundsOverlay );
-        this._canvasAreaBoundsOverlay.dispose();
+        this.removeOverlay( this._canvasAreaBoundsOverlay! );
+        this._canvasAreaBoundsOverlay!.dispose();
         this._canvasAreaBoundsOverlay = null;
       }
       else {
-        this._canvasAreaBoundsOverlay = new CanvasNodeBoundsOverlay( this, this._rootNode );
+        this._canvasAreaBoundsOverlay = new CanvasNodeBoundsOverlay( this, this._rootNode! );
         this.addOverlay( this._canvasAreaBoundsOverlay );
       }
     }
   }
 
   /**
-   * @public
-   *
    * TODO: reduce code duplication for handling overlays
-   *
-   * @param {boolean} visibility
    */
-  setFittedBlockBoundsVisible( visibility ) {
+  setFittedBlockBoundsVisible( visibility: boolean ) {
     assert && assert( typeof visibility === 'boolean' );
 
     const hasOverlay = !!this._fittedBlockBoundsOverlay;
 
     if ( visibility !== hasOverlay ) {
       if ( !visibility ) {
-        this.removeOverlay( this._fittedBlockBoundsOverlay );
-        this._fittedBlockBoundsOverlay.dispose();
+        this.removeOverlay( this._fittedBlockBoundsOverlay! );
+        this._fittedBlockBoundsOverlay!.dispose();
         this._fittedBlockBoundsOverlay = null;
       }
       else {
-        this._fittedBlockBoundsOverlay = new FittedBlockBoundsOverlay( this, this._rootNode );
+        this._fittedBlockBoundsOverlay = new FittedBlockBoundsOverlay( this, this._rootNode! );
         this.addOverlay( this._fittedBlockBoundsOverlay );
       }
     }
@@ -1260,7 +1251,6 @@ class Display {
 
   /**
    * Sets up the Display to resize to whatever the window inner dimensions will be.
-   * @public
    */
   resizeOnWindowResize() {
     const resizer = () => {
@@ -1273,17 +1263,15 @@ class Display {
   /**
    * Updates on every request animation frame. If stepCallback is passed in, it is called before updateDisplay() with
    * stepCallback( timeElapsedInSeconds )
-   * @public
-   *
-   * @param {function(dt:number)} [stepCallback]
    */
-  updateOnRequestAnimationFrame( stepCallback ) {
+  updateOnRequestAnimationFrame( stepCallback?: ( dt: number ) => void ) {
     // keep track of how much time elapsed over the last frame
     let lastTime = 0;
     let timeElapsedInSeconds = 0;
 
     const self = this;
     ( function step() {
+      // @ts-ignore LEGACY --- it would know to update just the DOM element's location if it's the second argument
       self._requestAnimationFrameID = window.requestAnimationFrame( step, self._domElement );
 
       // calculate how much time has elapsed since we rendered the last frame
@@ -1301,21 +1289,16 @@ class Display {
     } )();
   }
 
-  /**
-   * @public
-   */
   cancelUpdateOnRequestAnimationFrame() {
     window.cancelAnimationFrame( this._requestAnimationFrameID );
   }
 
   /**
    * Initializes event handling, and connects the browser's input event handlers to notify this Display of events.
-   * @public
    *
    * NOTE: This can be reversed with detachEvents().
-   * @param {Object} [options] - for PhET-iO
    */
-  initializeEvents( options ) {
+  initializeEvents( options?: InputOptions ) {
     assert && assert( !this._input, 'Events cannot be attached twice to a display (for now)' );
 
     // TODO: refactor here
@@ -1327,24 +1310,19 @@ class Display {
 
   /**
    * Detach already-attached input event handling (from initializeEvents()).
-   * @public
    */
   detachEvents() {
     assert && assert( this._input, 'detachEvents() should be called only when events are attached' );
 
-    this._input.disconnectListeners();
+    this._input!.disconnectListeners();
     this._input = null;
   }
 
 
   /**
    * Adds an input listener.
-   * @public
-   *
-   * @param {Object} listener
-   * @returns {Display} - For chaining
    */
-  addInputListener( listener ) {
+  addInputListener( listener: IInputListener ): this {
     assert && assert( !_.includes( this._inputListeners, listener ), 'Input listener already registered on this Display' );
 
     // don't allow listeners to be added multiple times
@@ -1356,12 +1334,8 @@ class Display {
 
   /**
    * Removes an input listener that was previously added with addInputListener.
-   * @public
-   *
-   * @param {Object} listener
-   * @returns {Display} - For chaining
    */
-  removeInputListener( listener ) {
+  removeInputListener( listener: IInputListener ): this {
     // ensure the listener is in our list
     assert && assert( _.includes( this._inputListeners, listener ) );
 
@@ -1372,14 +1346,10 @@ class Display {
 
   /**
    * Returns whether this input listener is currently listening to this Display.
-   * @public
    *
    * More efficient than checking display.inputListeners, as that includes a defensive copy.
-   *
-   * @param {Object} listener
-   * @returns {boolean}
    */
-  hasInputListener( listener ) {
+  hasInputListener( listener: IInputListener ): boolean {
     for ( let i = 0; i < this._inputListeners.length; i++ ) {
       if ( this._inputListeners[ i ] === listener ) {
         return true;
@@ -1390,23 +1360,17 @@ class Display {
 
   /**
    * Returns a copy of all of our input listeners.
-   * @public
-   *
-   * @returns {Array.<Object>}
    */
-  getInputListeners() {
+  getInputListeners(): IInputListener[] {
     return this._inputListeners.slice( 0 ); // defensive copy
   }
 
-  get inputListeners() { return this.getInputListeners(); }
+  get inputListeners(): IInputListener[] { return this.getInputListeners(); }
 
   /**
    * Interrupts all input listeners that are attached to this Display.
-   * @public
-   *
-   * @returns {Display} - For chaining
    */
-  interruptInput() {
+  interruptInput(): this {
     const listenersCopy = this.inputListeners;
 
     for ( let i = 0; i < listenersCopy.length; i++ ) {
@@ -1419,7 +1383,7 @@ class Display {
   }
 
   /**
-   * @public (scenery-internal)
+   * (scenery-internal)
    */
   ensureNotPainting() {
     assert && assert( !this._isPainting,
@@ -1431,16 +1395,16 @@ class Display {
 
   /**
    * Triggers a loss of context for all WebGL blocks.
-   * @public
    *
    * NOTE: Should generally only be used for debugging.
    */
   loseWebGLContexts() {
-    ( function loseBackbone( backbone ) {
+    ( function loseBackbone( backbone: BackboneDrawable ) {
       if ( backbone.blocks ) {
-        backbone.blocks.forEach( block => {
-          if ( block.gl ) {
-            Utils.loseContext( block.gl );
+        backbone.blocks.forEach( ( block: Block ) => {
+          const gl = ( block as unknown as WebGLBlock ).gl;
+          if ( gl ) {
+            Utils.loseContext( gl );
           }
 
           //TODO: pattern for this iteration
@@ -1450,12 +1414,11 @@ class Display {
           }
         } );
       }
-    } )( this._rootBackbone );
+    } )( this._rootBackbone! );
   }
 
   /**
    * Makes this Display available for inspection.
-   * @public
    */
   inspect() {
     localStorage.scenerySnapshot = JSON.stringify( scenerySerialize( this ) );
@@ -1464,15 +1427,8 @@ class Display {
   /**
    * Returns an HTML fragment that includes a large amount of debugging information, including a view of the
    * instance tree and drawable tree.
-   * @public
-   *
-   * @returns {string}
    */
-  getDebugHTML() {
-    function str( ob ) {
-      return ob ? ob.toString() : `${ob}`;
-    }
-
+  getDebugHTML(): string {
     const headerStyle = 'font-weight: bold; font-size: 120%; margin-top: 5px;';
 
     let depth = 0;
@@ -1482,7 +1438,7 @@ class Display {
     result += `<div style="${headerStyle}">Display Summary</div>`;
     result += `${this.size.toString()} frame:${this._frameId} input:${!!this._input} cursor:${this._lastCursor}<br/>`;
 
-    function nodeCount( node ) {
+    function nodeCount( node: Node ) {
       let count = 1; // for us
       for ( let i = 0; i < node.children.length; i++ ) {
         count += nodeCount( node.children[ i ] );
@@ -1492,7 +1448,7 @@ class Display {
 
     result += `Nodes: ${nodeCount( this._rootNode )}<br/>`;
 
-    function instanceCount( instance ) {
+    function instanceCount( instance: Instance ) {
       let count = 1; // for us
       for ( let i = 0; i < instance.children.length; i++ ) {
         count += instanceCount( instance.children[ i ] );
@@ -1502,29 +1458,30 @@ class Display {
 
     result += this._baseInstance ? ( `Instances: ${instanceCount( this._baseInstance )}<br/>` ) : '';
 
-    function drawableCount( drawable ) {
+    function drawableCount( drawable: Drawable ) {
       let count = 1; // for us
-      if ( drawable.blocks ) {
+      if ( ( drawable as unknown as BackboneDrawable ).blocks ) {
         // we're a backbone
-        _.each( drawable.blocks, childDrawable => {
+        _.each( ( drawable as unknown as BackboneDrawable ).blocks, childDrawable => {
           count += drawableCount( childDrawable );
         } );
       }
-      else if ( drawable.firstDrawable && drawable.lastDrawable ) {
+      else if ( ( drawable as unknown as Block ).firstDrawable && ( drawable as unknown as Block ).lastDrawable ) {
         // we're a block
-        for ( let childDrawable = drawable.firstDrawable; childDrawable !== drawable.lastDrawable; childDrawable = childDrawable.nextDrawable ) {
+        for ( let childDrawable = ( drawable as unknown as Block ).firstDrawable; childDrawable !== ( drawable as unknown as Block ).lastDrawable; childDrawable = childDrawable.nextDrawable ) {
           count += drawableCount( childDrawable );
         }
-        count += drawableCount( drawable.lastDrawable );
+        count += drawableCount( ( drawable as unknown as Block ).lastDrawable! );
       }
       return count;
     }
 
-    result += this._rootBackbone ? ( `Drawables: ${drawableCount( this._rootBackbone )}<br/>` ) : '';
+    // @ts-ignore TODO BackboneDrawable
+    result += this._rootBackbone ? ( `Drawables: ${drawableCount( this._rootBackbone! )}<br/>` ) : '';
 
-    const drawableCountMap = {}; // {string} drawable constructor name => {number} count of seen
+    const drawableCountMap: { [ key: string ]: number } = {}; // {string} drawable constructor name => {number} count of seen
     // increment the count in our map
-    function countRetainedDrawable( drawable ) {
+    function countRetainedDrawable( drawable: Drawable ) {
       const name = drawable.constructor.name;
       if ( drawableCountMap[ name ] ) {
         drawableCountMap[ name ]++;
@@ -1534,7 +1491,7 @@ class Display {
       }
     }
 
-    function retainedDrawableCount( instance ) {
+    function retainedDrawableCount( instance: Instance ) {
       let count = 0;
       if ( instance.selfDrawable ) {
         countRetainedDrawable( instance.selfDrawable );
@@ -1545,6 +1502,7 @@ class Display {
         count++;
       }
       if ( instance.sharedCacheDrawable ) {
+        // @ts-ignore TODO Instance
         countRetainedDrawable( instance.sharedCacheDrawable );
         count++;
       }
@@ -1559,12 +1517,13 @@ class Display {
       result += `&nbsp;&nbsp;&nbsp;&nbsp;${drawableName}: ${drawableCountMap[ drawableName ]}<br/>`;
     }
 
-    function blockSummary( block ) {
+    function blockSummary( block: Block ) {
       // ensure we are a block
       if ( !block.firstDrawable || !block.lastDrawable ) {
         return '';
       }
 
+      // @ts-ignore TODO display stuff
       const hasBackbone = block.domDrawable && block.domDrawable.blocks;
 
       let div = `<div style="margin-left: ${depth * 20}px">`;
@@ -1578,7 +1537,9 @@ class Display {
 
       depth += 1;
       if ( hasBackbone ) {
+        // @ts-ignore TODO display stuff
         for ( let k = 0; k < block.domDrawable.blocks.length; k++ ) {
+          // @ts-ignore TODO display stuff
           div += blockSummary( block.domDrawable.blocks[ k ] );
         }
       }
@@ -1594,14 +1555,14 @@ class Display {
       }
     }
 
-    function instanceSummary( instance ) {
+    function instanceSummary( instance: Instance ) {
       let iSummary = '';
 
-      function addQualifier( text ) {
+      function addQualifier( text: string ) {
         iSummary += ` <span style="color: #008">${text}</span>`;
       }
 
-      const node = instance.node;
+      const node = instance.node!;
 
       iSummary += instance.id;
       iSummary += ` ${node.constructor.name ? node.constructor.name : '?'}`;
@@ -1632,7 +1593,7 @@ class Display {
       if ( node.pickable === false ) {
         addQualifier( 'unpickable' );
       }
-      if ( instance.trail.isPickable() ) {
+      if ( instance.trail!.isPickable() ) {
         addQualifier( '<span style="color: #808">hits</span>' );
       }
       if ( node.getEffectiveCursor() ) {
@@ -1669,18 +1630,23 @@ class Display {
 
       let transformType = '';
       switch( node.transform.getMatrix().type ) {
+        // @ts-ignore TODO Matrix3
         case Matrix3.Types.IDENTITY:
           transformType = '';
           break;
+        // @ts-ignore TODO Matrix3
         case Matrix3.Types.TRANSLATION_2D:
           transformType = 'translated';
           break;
+        // @ts-ignore TODO Matrix3
         case Matrix3.Types.SCALING:
           transformType = 'scale';
           break;
+        // @ts-ignore TODO Matrix3
         case Matrix3.Types.AFFINE:
           transformType = 'affine';
           break;
+        // @ts-ignore TODO Matrix3
         case Matrix3.Types.OTHER:
           transformType = 'other';
           break;
@@ -1691,14 +1657,14 @@ class Display {
         iSummary += ` <span style="color: #88f" title="${node.transform.getMatrix().toString().replace( '\n', '&#10;' )}">${transformType}</span>`;
       }
 
-      iSummary += ` <span style="color: #888">[Trail ${instance.trail.indices.join( '.' )}]</span>`;
-      iSummary += ` <span style="color: #c88">${str( instance.state )}</span>`;
+      iSummary += ` <span style="color: #888">[Trail ${instance.trail!.indices.join( '.' )}]</span>`;
+      // iSummary += ` <span style="color: #c88">${str( instance.state )}</span>`;
       iSummary += ` <span style="color: #8c8">${node._rendererSummary.bitmask.toString( 16 )}${node._rendererBitmask !== Renderer.bitmaskNodeDefault ? ` (${node._rendererBitmask.toString( 16 )})` : ''}</span>`;
 
       return iSummary;
     }
 
-    function drawableSummary( drawable ) {
+    function drawableSummary( drawable: Drawable ) {
       let drawableString = drawable.toString();
       if ( drawable.visible ) {
         drawableString = `<strong>${drawableString}</strong>`;
@@ -1712,10 +1678,10 @@ class Display {
       return drawableString;
     }
 
-    function printInstanceSubtree( instance ) {
+    function printInstanceSubtree( instance: Instance ) {
       let div = `<div style="margin-left: ${depth * 20}px">`;
 
-      function addDrawable( name, drawable ) {
+      function addDrawable( name: string, drawable: Drawable ) {
         div += ` <span style="color: #888">${name}:${drawableSummary( drawable )}</span>`;
       }
 
@@ -1723,6 +1689,7 @@ class Display {
 
       instance.selfDrawable && addDrawable( 'self', instance.selfDrawable );
       instance.groupDrawable && addDrawable( 'group', instance.groupDrawable );
+      // @ts-ignore TODO Instance
       instance.sharedCacheDrawable && addDrawable( 'sharedCache', instance.sharedCacheDrawable );
 
       div += '</div>';
@@ -1745,44 +1712,45 @@ class Display {
       printInstanceSubtree( instance );
     } );
 
-    function printDrawableSubtree( drawable ) {
+    function printDrawableSubtree( drawable: Drawable ) {
       let div = `<div style="margin-left: ${depth * 20}px">`;
 
       div += drawableSummary( drawable );
-      if ( drawable.instance ) {
-        div += ` <span style="color: #0a0;">(${drawable.instance.trail.toPathString()})</span>`;
-        div += `&nbsp;&nbsp;&nbsp;${instanceSummary( drawable.instance )}`;
+      if ( ( drawable as any ).instance ) {
+        div += ` <span style="color: #0a0;">(${( drawable as any ).instance.trail.toPathString()})</span>`;
+        div += `&nbsp;&nbsp;&nbsp;${instanceSummary( ( drawable as any ).instance )}`;
       }
-      else if ( drawable.backboneInstance ) {
-        div += ` <span style="color: #a00;">(${drawable.backboneInstance.trail.toPathString()})</span>`;
-        div += `&nbsp;&nbsp;&nbsp;${instanceSummary( drawable.backboneInstance )}`;
+      else if ( ( drawable as any ).backboneInstance ) {
+        div += ` <span style="color: #a00;">(${( drawable as any ).backboneInstance.trail.toPathString()})</span>`;
+        div += `&nbsp;&nbsp;&nbsp;${instanceSummary( ( drawable as any ).backboneInstance )}`;
       }
 
       div += '</div>';
       result += div;
 
-      if ( drawable.blocks ) {
+      if ( ( drawable as any ).blocks ) {
         // we're a backbone
         depth += 1;
-        _.each( drawable.blocks, childDrawable => {
+        _.each( ( drawable as any ).blocks, childDrawable => {
           printDrawableSubtree( childDrawable );
         } );
         depth -= 1;
       }
-      else if ( drawable.firstDrawable && drawable.lastDrawable ) {
+      else if ( ( drawable as any ).firstDrawable && ( drawable as any ).lastDrawable ) {
         // we're a block
         depth += 1;
-        for ( let childDrawable = drawable.firstDrawable; childDrawable !== drawable.lastDrawable; childDrawable = childDrawable.nextDrawable ) {
+        for ( let childDrawable = ( drawable as any ).firstDrawable; childDrawable !== ( drawable as any ).lastDrawable; childDrawable = childDrawable.nextDrawable ) {
           printDrawableSubtree( childDrawable );
         }
-        printDrawableSubtree( drawable.lastDrawable ); // wasn't hit in our simplified (and safer) loop
+        printDrawableSubtree( ( drawable as any ).lastDrawable ); // wasn't hit in our simplified (and safer) loop
         depth -= 1;
       }
     }
 
     if ( this._rootBackbone ) {
       result += '<div style="font-weight: bold;">Root Drawable Tree</div>';
-      printDrawableSubtree( this._rootBackbone );
+      // @ts-ignore TODO BackboneDrawable
+      printDrawableSubtree( this._rootBackbone! );
     }
 
     //OHTWO TODO: add shared cache drawable trees
@@ -1792,11 +1760,8 @@ class Display {
 
   /**
    * Returns the getDebugHTML() information, but wrapped into a full HTML page included in a data URI.
-   * @public
-   *
-   * @returns {string}
    */
-  getDebugURI() {
+  getDebugURI(): string {
     return `data:text/html;charset=utf-8,${encodeURIComponent(
       `${'<!DOCTYPE html>' +
       '<html lang="en">' +
@@ -1808,7 +1773,6 @@ class Display {
 
   /**
    * Attempts to open a popup with the getDebugHTML() information.
-   * @public
    */
   popupDebug() {
     window.open( this.getDebugURI() );
@@ -1817,23 +1781,22 @@ class Display {
   /**
    * Attempts to open an iframe popup with the getDebugHTML() information in the same window. This is similar to
    * popupDebug(), but should work in browsers that block popups, or prevent that type of data URI being opened.
-   * @public
    */
   iframeDebug() {
     const iframe = document.createElement( 'iframe' );
-    iframe.width = window.innerWidth; // eslint-disable-line bad-sim-text
-    iframe.height = window.innerHeight; // eslint-disable-line bad-sim-text
+    iframe.width = '' + window.innerWidth; // eslint-disable-line bad-sim-text
+    iframe.height = '' + window.innerHeight; // eslint-disable-line bad-sim-text
     iframe.style.position = 'absolute';
     iframe.style.left = '0';
     iframe.style.top = '0';
     iframe.style.zIndex = '10000';
     document.body.appendChild( iframe );
 
-    iframe.contentWindow.document.open();
-    iframe.contentWindow.document.write( this.getDebugHTML() );
-    iframe.contentWindow.document.close();
+    iframe.contentWindow!.document.open();
+    iframe.contentWindow!.document.write( this.getDebugHTML() );
+    iframe.contentWindow!.document.close();
 
-    iframe.contentWindow.document.body.style.background = 'white';
+    iframe.contentWindow!.document.body.style.background = 'white';
 
     const closeButton = document.createElement( 'button' );
     closeButton.style.position = 'absolute';
@@ -1853,12 +1816,7 @@ class Display {
     } );
   }
 
-  /**
-   * @public
-   *
-   * @returns {string}
-   */
-  getPDOMDebugHTML() {
+  getPDOMDebugHTML(): string {
     let result = '';
 
     const headerStyle = 'font-weight: bold; font-size: 120%; margin-top: 5px;';
@@ -1866,18 +1824,18 @@ class Display {
 
     result += `<div style="${headerStyle}">Accessible Instances</div><br>`;
 
-    recurse( this._rootPDOMInstance, '' );
+    recurse( this._rootPDOMInstance!, '' );
 
-    function recurse( instance, indentation ) {
+    function recurse( instance: PDOMInstance, indentation: string ) {
       result += `${indentation + escapeHTML( `${instance.isRootInstance ? '' : instance.node.tagName} ${instance.toString()}` )}<br>`;
-      instance.children.forEach( child => {
+      instance.children.forEach( ( child: PDOMInstance ) => {
         recurse( child, indentation + indent );
       } );
     }
 
     result += `<br><div style="${headerStyle}">Parallel DOM</div><br>`;
 
-    let parallelDOM = this._rootPDOMInstance.peer.primarySibling.outerHTML;
+    let parallelDOM = this._rootPDOMInstance!.peer.primarySibling.outerHTML;
     parallelDOM = parallelDOM.replace( /></g, '>\n<' );
     const lines = parallelDOM.split( '\n' );
 
@@ -1900,42 +1858,41 @@ class Display {
   /**
    * Will attempt to call callback( {string} dataURI ) with the rasterization of the entire Display's DOM structure,
    * used for internal testing. Will call-back null if there was an error
-   * @public
    *
    * Only tested on recent Chrome and Firefox, not recommended for general use. Guaranteed not to work for IE <= 10.
    *
    * See https://github.com/phetsims/scenery/issues/394 for some details.
    */
-  foreignObjectRasterization( callback ) {
+  foreignObjectRasterization( callback: ( url: string | null ) => void ) {
     // Scan our drawable tree for Canvases. We'll rasterize them here (to data URLs) so we can replace them later in
     // the HTML tree (with images) before putting that in the foreignObject. That way, we can actually display
     // things rendered in Canvas in our rasterization.
-    const canvasUrlMap = {};
+    const canvasUrlMap: { [ key: string ]: string } = {};
 
     let unknownIds = 0;
 
-    function addCanvas( canvas ) {
+    function addCanvas( canvas: HTMLCanvasElement ) {
       if ( !canvas.id ) {
         canvas.id = `unknown-canvas-${unknownIds++}`;
       }
       canvasUrlMap[ canvas.id ] = canvas.toDataURL();
     }
 
-    function scanForCanvases( drawable ) {
-      if ( drawable.blocks ) {
+    function scanForCanvases( drawable: Drawable ) {
+      if ( drawable instanceof BackboneDrawable ) {
         // we're a backbone
         _.each( drawable.blocks, childDrawable => {
           scanForCanvases( childDrawable );
         } );
       }
-      else if ( drawable.firstDrawable && drawable.lastDrawable ) {
+      else if ( drawable instanceof Block && drawable.firstDrawable && drawable.lastDrawable ) {
         // we're a block
         for ( let childDrawable = drawable.firstDrawable; childDrawable !== drawable.lastDrawable; childDrawable = childDrawable.nextDrawable ) {
           scanForCanvases( childDrawable );
         }
         scanForCanvases( drawable.lastDrawable ); // wasn't hit in our simplified (and safer) loop
 
-        if ( drawable.canvas && drawable.canvas instanceof window.HTMLCanvasElement ) {
+        if ( ( drawable instanceof CanvasBlock || drawable instanceof WebGLBlock ) && drawable.canvas && drawable.canvas instanceof window.HTMLCanvasElement ) {
           addCanvas( drawable.canvas );
         }
       }
@@ -1950,19 +1907,20 @@ class Display {
       }
     }
 
-    scanForCanvases( this._rootBackbone );
+    // @ts-ignore TODO BackboneDrawable
+    scanForCanvases( this._rootBackbone! );
 
     // Create a new document, so that we can (1) serialize it to XHTML, and (2) manipulate it independently.
     // Inspired by http://cburgmer.github.io/rasterizeHTML.js/
     const doc = document.implementation.createHTMLDocument( '' );
     doc.documentElement.innerHTML = this.domElement.outerHTML;
-    doc.documentElement.setAttribute( 'xmlns', doc.documentElement.namespaceURI );
+    doc.documentElement.setAttribute( 'xmlns', doc.documentElement.namespaceURI! );
 
     // Hide the PDOM
     doc.documentElement.appendChild( document.createElement( 'style' ) ).innerHTML = `.${PDOMSiblingStyle.ROOT_CLASS_NAME} { display:none; } `;
 
     // Replace each <canvas> with an <img> that has src=canvas.toDataURL() and the same style
-    let displayCanvases = doc.documentElement.getElementsByTagName( 'canvas' );
+    let displayCanvases: any[] | HTMLCollection = doc.documentElement.getElementsByTagName( 'canvas' );
     displayCanvases = Array.prototype.slice.call( displayCanvases ); // don't use a live HTMLCollection copy!
     for ( let i = 0; i < displayCanvases.length; i++ ) {
       const displayCanvas = displayCanvases[ i ];
@@ -1976,7 +1934,7 @@ class Display {
       displayImg.src = src;
       displayImg.setAttribute( 'style', cssText );
 
-      displayCanvas.parentNode.replaceChild( displayImg, displayCanvas );
+      displayCanvas.parentNode!.replaceChild( displayImg, displayCanvas );
     }
 
     const displayWidth = this.width;
@@ -2009,7 +1967,7 @@ class Display {
             const refCanvas = document.createElement( 'canvas' );
             refCanvas.width = refImage.width;
             refCanvas.height = refImage.height;
-            const refContext = refCanvas.getContext( '2d' );
+            const refContext = refCanvas.getContext( '2d' )!;
 
             // Draw the (now loaded) image into the Canvas
             refContext.drawImage( refImage, 0, 0 );
@@ -2047,16 +2005,16 @@ class Display {
     }
   }
 
-  /**
-   * @public
-   */
   popupRasterization() {
-    this.foreignObjectRasterization( window.open );
+    this.foreignObjectRasterization( url => {
+      if ( url ) {
+        window.open( url );
+      }
+    } );
   }
 
   /**
    * Releases references.
-   * @public
    *
    * TODO: this dispose function is not complete.
    */
@@ -2074,8 +2032,9 @@ class Display {
     this._rootNode.removeRootedDisplay( this );
 
     if ( this._accessible ) {
+      // @ts-ignore TODO KeyStateTracker
       globalKeyStateTracker.keydownEmitter.removeListener( this._boundHandleFullScreenNavigation );
-      this._rootPDOMInstance.dispose();
+      this._rootPDOMInstance!.dispose();
     }
 
     this._focusOverlay && this._focusOverlay.dispose();
@@ -2099,16 +2058,15 @@ class Display {
   /**
    * Takes a given DOM element, and asynchronously renders it to a string that is a data URL representing an SVG
    * file.
-   * @public
    *
-   * @param {HTMLElement} domElement
-   * @param {number} width - The width of the output SVG
-   * @param {number} height - The height of the output SVG
-   * @param {function} callback - Called as callback( url: {string} ), where the URL will be the encoded SVG file.
+   * @param domElement
+   * @param width - The width of the output SVG
+   * @param height - The height of the output SVG
+   * @param callback - Called as callback( url: {string} ), where the URL will be the encoded SVG file.
    */
-  static elementToSVGDataURL( domElement, width, height, callback ) {
+  static elementToSVGDataURL( domElement: HTMLElement, width: number, height: number, callback: ( url: string | null ) => void ) {
     const canvas = document.createElement( 'canvas' );
-    const context = canvas.getContext( '2d' );
+    const context = canvas.getContext( '2d' )!;
     canvas.width = width;
     canvas.height = height;
 
@@ -2136,7 +2094,9 @@ class Display {
 
     // We can't btoa() arbitrary unicode, so we need another solution,
     // see https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/Base64_encoding_and_decoding#The_.22Unicode_Problem.22
+    // @ts-ignore - Exterior lib
     const uint8array = new window.TextEncoderLite( 'utf-8' ).encode( data );
+    // @ts-ignore - Exterior lib
     const base64 = window.fromByteArray( uint8array );
 
     // turn it to base64 and wrap it in the data URL format
@@ -2145,12 +2105,8 @@ class Display {
 
   /**
    * Returns true when NO nodes in the subtree are disposed.
-   * @private
-   *
-   * @param {Node} node
-   * @returns {boolean}
    */
-  static assertSubtreeDisposed( node ) {
+  private static assertSubtreeDisposed( node: Node ) {
     assert && assert( !node.isDisposed, 'Disposed nodes should not be included in a scene graph to display.' );
 
     if ( assert ) {
@@ -2162,11 +2118,8 @@ class Display {
 
   /**
    * Adds an input listener to be fired for ANY Display
-   * @public
-   *
-   * @param {Object} listener
    */
-  static addInputListener( listener ) {
+  static addInputListener( listener: IInputListener ) {
     assert && assert( !_.includes( Display.inputListeners, listener ), 'Input listener already registered' );
 
     // don't allow listeners to be added multiple times
@@ -2177,11 +2130,8 @@ class Display {
 
   /**
    * Removes an input listener that was previously added with Display.addInputListener.
-   * @public
-   *
-   * @param {Object} listener
    */
-  static removeInputListener( listener ) {
+  static removeInputListener( listener: IInputListener ) {
     // ensure the listener is in our list
     assert && assert( _.includes( Display.inputListeners, listener ) );
 
@@ -2190,7 +2140,6 @@ class Display {
 
   /**
    * Interrupts all input listeners that are attached to all Displays.
-   * @public
    */
   static interruptInput() {
     const listenersCopy = Display.inputListeners.slice( 0 );
@@ -2201,23 +2150,22 @@ class Display {
       listener.interrupt && listener.interrupt();
     }
   }
+
+  // Fires when we detect an input event that would be considered a "user gesture" by Chrome, so
+  // that we can trigger browser actions that are only allowed as a result.
+  // See https://github.com/phetsims/scenery/issues/802 and https://github.com/phetsims/vibe/issues/32 for more
+  // information.
+  static userGestureEmitter: Emitter;
+
+  // Listeners that will be called for every event on ANY Display, see
+  // https://github.com/phetsims/scenery/issues/1149. Do not directly modify this!
+  static inputListeners: IInputListener[];
 }
 
 scenery.register( 'Display', Display );
 
-Display.customCursors = {
-  'scenery-grab-pointer': [ 'grab', '-moz-grab', '-webkit-grab', 'pointer' ],
-  'scenery-grabbing-pointer': [ 'grabbing', '-moz-grabbing', '-webkit-grabbing', 'pointer' ]
-};
-
-// @public {Emitter} - Fires when we detect an input event that would be considered a "user gesture" by Chrome, so
-// that we can trigger browser actions that are only allowed as a result.
-// See https://github.com/phetsims/scenery/issues/802 and https://github.com/phetsims/vibe/issues/32 for more
-// information.
 Display.userGestureEmitter = new Emitter();
-
-// @public {Array.<Object>} - Listeners that will be called for every event on ANY Display, see
-// https://github.com/phetsims/scenery/issues/1149. Do not directly modify this!
 Display.inputListeners = [];
 
 export default Display;
+export type { DisplayOptions };

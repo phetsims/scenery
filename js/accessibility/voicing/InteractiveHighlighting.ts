@@ -239,7 +239,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
      * When a Pointer enters this Node, signal to the Displays that the pointer is over this Node so that the
      * HighlightOverlay can be activated.
      */
-    _onPointerEntered( event: SceneryEvent ) {
+    _onPointerEntered( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ) {
 
       const displays = Object.values( this.displays );
       for ( let i = 0; i < displays.length; i++ ) {
@@ -252,7 +252,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
       }
     }
 
-    _onPointerMove( event: SceneryEvent ) {
+    _onPointerMove( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ) {
 
       const displays = Object.values( this.displays );
       for ( let i = 0; i < displays.length; i++ ) {
@@ -276,7 +276,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
      * When a pointer exits this Node, signal to the Displays that pointer focus has changed to deactivate
      * the HighlightOverlay.
      */
-    _onPointerExited( event: SceneryEvent ) {
+    _onPointerExited( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ) {
 
       const displays = Object.values( this.displays );
       for ( let i = 0; i < displays.length; i++ ) {
@@ -288,7 +288,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     /**
      * When a pointer goes down on this Node, signal to the Displays that the pointerFocus is locked
      */
-    _onPointerDown( event: SceneryEvent ) {
+    _onPointerDown( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ) {
 
       if ( this._pointer === null ) {
         const displays = Object.values( this.displays );
@@ -317,7 +317,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
      *
      * @param [event] - may be called during interrupt or cancel, in which case there is no event
      */
-    _onPointerRelease( event?: SceneryEvent ) {
+    _onPointerRelease( event?: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ) {
 
       const displays = Object.values( this.displays );
       for ( let i = 0; i < displays.length; i++ ) {
@@ -336,7 +336,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
      *
      * @param [event]
      */
-    _onPointerCancel( event?: SceneryEvent ) {
+    _onPointerCancel( event?: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ) {
 
       const displays = Object.values( this.displays );
       for ( let i = 0; i < displays.length; i++ ) {

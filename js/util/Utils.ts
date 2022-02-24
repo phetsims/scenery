@@ -41,7 +41,7 @@ const Utils = {
    * Prepares a DOM element for use with applyPreparedTransform(). Applies some CSS styles that are required, but
    * that we don't want to set while animating.
    */
-  prepareForTransform( element: HTMLElement ) {
+  prepareForTransform( element: HTMLElement | SVGElement ) {
     element.style[ transformOriginProperty ] = 'top left';
   },
 
@@ -49,7 +49,7 @@ const Utils = {
    * Applies the CSS transform of the matrix to the element, with optional forcing of acceleration.
    * NOTE: prepareForTransform should be called at least once on the element before this method is used.
    */
-  applyPreparedTransform( matrix: Matrix3, element: HTMLElement ) {
+  applyPreparedTransform( matrix: Matrix3, element: HTMLElement | SVGElement ) {
     // NOTE: not applying translateZ, see http://stackoverflow.com/questions/10014461/why-does-enabling-hardware-acceleration-in-css3-slow-down-performance
     element.style[ transformProperty ] = matrix.getCSSTransform();
   },
@@ -58,7 +58,7 @@ const Utils = {
    * Applies a CSS transform value string to a DOM element.
    * NOTE: prepareForTransform should be called at least once on the element before this method is used.
    */
-  setTransform( transformString: string, element: HTMLElement ) {
+  setTransform( transformString: string, element: HTMLElement | SVGElement ) {
     assert && assert( typeof transformString === 'string' );
 
     element.style[ transformProperty ] = transformString;
@@ -67,7 +67,7 @@ const Utils = {
   /**
    * Removes a CSS transform from a DOM element.
    */
-  unsetTransform( element: HTMLElement ) {
+  unsetTransform( element: HTMLElement | SVGElement ) {
     element.style[ transformProperty ] = '';
   },
 

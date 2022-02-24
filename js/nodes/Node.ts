@@ -6016,7 +6016,7 @@ class Node extends ParallelDOM {
   /**
    * Override for extra information in the debugging output (from Display.getDebugHTML()). (scenery-internal)
    */
-  protected getDebugHTMLExtras(): string {
+  getDebugHTMLExtras(): string {
     return '';
   }
 
@@ -6043,9 +6043,9 @@ class Node extends ParallelDOM {
 
   /**
    * Performs checks to see if the internal state of Instance references is correct at a certain point in/after the
-   * Display's updateDisplay().
+   * Display's updateDisplay(). (scenery-internal)
    */
-  private auditInstanceSubtreeForDisplay( display: Display ) {
+  auditInstanceSubtreeForDisplay( display: Display ) {
     if ( assertSlow ) {
       const numInstances = this._instances.length;
       for ( let i = 0; i < numInstances; i++ ) {

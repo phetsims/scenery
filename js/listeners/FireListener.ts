@@ -20,7 +20,7 @@ import { scenery, SceneryEvent, PressListener, PressListenerOptions, Node } from
 
 type FireListenerSelfOptions = {
   // Called as fire() when the button is fired.
-  fire?: ( event: SceneryEvent ) => void;
+  fire?: ( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ) => void;
 
   // If true, the button will fire when the button is pressed. If false, the button will fire when the
   // button is released while the pointer is over the button.
@@ -38,7 +38,7 @@ type FireListenerOptions = FireListenerSelfOptions & PressListenerOptions;
 class FireListener extends PressListener {
 
   private _fireOnDown: boolean;
-  private firedEmitter: Emitter<[ SceneryEvent | null ]>;
+  private firedEmitter: Emitter<[ SceneryEvent<MouseEvent | TouchEvent | PointerEvent> | null ]>;
   private _timer?: CallbackTimer;
 
   constructor( providedOptions?: FireListenerOptions ) {
@@ -63,7 +63,7 @@ class FireListener extends PressListener {
 
     this._fireOnDown = options.fireOnDown;
 
-    this.firedEmitter = new Emitter<[ SceneryEvent | null ]>( {
+    this.firedEmitter = new Emitter<[ SceneryEvent<MouseEvent | TouchEvent | PointerEvent> | null ]>( {
       tandem: options.tandem!.createTandem( 'firedEmitter' ),
       // @ts-ignore TODO EventType
       phetioEventType: EventType.USER,
@@ -92,7 +92,7 @@ class FireListener extends PressListener {
    *
    * NOTE: This is safe to call on the listener externally.
    */
-  fire( event: SceneryEvent | null ) {
+  fire( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> | null ) {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'FireListener fire' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -114,7 +114,7 @@ class FireListener extends PressListener {
    * @param [callback] - to be run at the end of the function, but only on success
    * @returns success - Returns whether the press was actually started
    */
-  press( event: SceneryEvent, targetNode?: Node, callback?: () => void ): boolean {
+  press( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent>, targetNode?: Node, callback?: () => void ): boolean {
     return super.press( event, targetNode, () => {
       // This function is only called on success
       if ( this._fireOnDown ) {
@@ -137,7 +137,7 @@ class FireListener extends PressListener {
    * @param [event] - scenery event if there was one
    * @param [callback] - called at the end of the release
    */
-  release( event?: SceneryEvent, callback?: () => void ) {
+  release( event?: SceneryEvent<MouseEvent | TouchEvent | PointerEvent>, callback?: () => void ) {
     super.release( event, () => {
       // Notify after the rest of release is called in order to prevent it from triggering interrupt().
       const shouldFire = !this._fireOnDown && this.isHoveringProperty.value && !this.interrupted;
@@ -165,7 +165,7 @@ class FireListener extends PressListener {
    * @param [event]
    * @param [callback] - called at the end of the click
    */
-  click( event: SceneryEvent | null, callback?: () => void ): boolean {
+  click( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> | null, callback?: () => void ): boolean {
     return super.click( event, () => {
 
       // don't click if listener was interrupted before this callback

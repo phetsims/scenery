@@ -6,32 +6,28 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import Vector2 from '../../../dot/js/Vector2.js';
 import { scenery, Pointer } from '../imports.js';
 
 class Pen extends Pointer {
-  /**
-   * @param {number} id
-   * @param {Vector2} point
-   * @param {Event} event
-   */
-  constructor( id, point, event ) {
+
+  // For tracking which pen is which
+  id: number;
+
+  constructor( id: number, point: Vector2, event: Event ) {
     super( point, true, 'pen' ); // true: pen pointers always start in the down state
 
-    // @public {number} - For tracking which pen is which
     this.id = id;
 
     sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( `Created ${this.toString()}` );
   }
 
   /**
-   * Sets information in this Pen for a given move.
-   * @public (scenery-internal)
+   * Sets information in this Pen for a given move. (scenery-internal)
    *
-   * @param {Vector2} point
-   * @param {Event} event
-   * @returns {boolean} - Whether the point changed
+   * @returns Whether the point changed
    */
-  move( point, event ) {
+  move( point: Vector2, event: Event ): boolean {
     const pointChanged = this.hasPointChanged( point );
 
     this.point = point;
@@ -39,14 +35,11 @@ class Pen extends Pointer {
   }
 
   /**
-   * Sets information in this Pen for a given end.
-   * @public (scenery-internal)
+   * Sets information in this Pen for a given end. (scenery-internal)
    *
-   * @param {Vector2} point
-   * @param {Event} event
-   * @returns {boolean} - Whether the point changed
+   * @returns Whether the point changed
    */
-  end( point, event ) {
+  end( point: Vector2, event: Event ): boolean {
     const pointChanged = this.hasPointChanged( point );
 
     this.point = point;
@@ -55,14 +48,11 @@ class Pen extends Pointer {
   }
 
   /**
-   * Sets information in this Pen for a given cancel.
-   * @public (scenery-internal)
+   * Sets information in this Pen for a given cancel. (scenery-internal)
    *
-   * @param {Vector2} point
-   * @param {Event} event
-   * @returns {boolean} - Whether the point changed
+   * @returns Whether the point changed
    */
-  cancel( point, event ) {
+  cancel( point: Vector2, event: Event ): boolean {
     const pointChanged = this.hasPointChanged( point );
 
     this.point = point;
@@ -72,22 +62,12 @@ class Pen extends Pointer {
 
   /**
    * Returns an improved string representation of this object.
-   * @public
-   * @override
-   *
-   * @returns {string}
    */
-  toString() {
+  toString(): string {
     return `Pen#${this.id}`;
   }
 
-  /**
-   * @override
-   * @public
-   *
-   * @returns {boolean}
-   */
-  isTouchLike() {
+  isTouchLike(): boolean {
     return true;
   }
 }

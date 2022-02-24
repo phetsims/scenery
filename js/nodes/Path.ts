@@ -492,7 +492,7 @@ class Path extends Paintable( Node ) {
   /**
    * Override for extra information in the debugging output (from Display.getDebugHTML()). (scenery-internal)
    */
-  protected getDebugHTMLExtras(): string {
+  getDebugHTMLExtras(): string {
     return this._shape ? ` (<span style="color: #88f" onclick="window.open( 'data:text/plain;charset=utf-8,' + encodeURIComponent( '${this._shape.getSVGPath()}' ) );">path</span>)` : '';
   }
 

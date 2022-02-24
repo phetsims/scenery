@@ -162,13 +162,13 @@ import Action from '../../../axon/js/Action.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
-import merge from '../../../phet-core/js/merge.js';
+import optionize from '../../../phet-core/js/optionize.js';
 import platform from '../../../phet-core/js/platform.js';
 import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
-import { scenery, Display, Features, Trail, EventIO, Mouse, PDOMPointer, Pen, Pointer, SceneryEvent, Touch, PDOMUtils, BatchedDOMEvent, BrowserEvents } from '../imports.js';
+import { scenery, Display, Features, Trail, EventIO, Mouse, PDOMPointer, Pen, Pointer, SceneryEvent, Touch, PDOMUtils, BatchedDOMEvent, BrowserEvents, Node, BatchedDOMEventType, BatchedDOMEventCallback, IInputListener, SceneryListenerFunction, WindowTouch } from '../imports.js';
 
 // Object literal makes it easy to check for the existence of an attribute (compared to [].indexOf()>=0). Helpful for
 // serialization. NOTE: Do not add or change this without consulting the PhET-iO IOType schema for this in EventIO.js
@@ -188,87 +188,138 @@ const EVENT_KEY_VALUES_AS_ELEMENTS = [ 'target', 'relatedTarget' ];
 
 // A list of events that should still fire, even when the Node is not pickable
 const PDOM_UNPICKABLE_EVENTS = [ 'focus', 'blur', 'focusin', 'focusout' ];
-const TARGET_SUBSTITUTE_KEY = 'targetSubstitute';
-const RELATED_TARGET_SUBSTITUTE_KEY = 'relatedTargetSubstitute';
+const TARGET_SUBSTITUTE_KEY = 'targetSubstitute' as const;
+const RELATED_TARGET_SUBSTITUTE_KEY = 'relatedTargetSubstitute' as const;
 
 // A bit more than the maximum amount of time that iOS 14 VoiceOver was observed to delay between
 // sending a mouseup event and a click event.
 const PDOM_CLICK_DELAY = 80;
 
+type InputOptions = {
+  tandem?: Tandem;
+};
+
+type EventListenerOptions = { capture?: boolean, passive?: boolean, once?: boolean } | boolean;
+
 class Input {
+
+  display: Display;
+  rootNode: Node;
+
+  attachToWindow: boolean;
+  batchDOMEvents: boolean;
+  assumeFullWindow: boolean;
+  passiveEvents: boolean | null;
+
+  // Pointer for accessibility, only created lazily on first pdom event.
+  pdomPointer: PDOMPointer | null;
+
+  // Pointer for mouse, only created lazily on first mouse event, so no mouse is allocated on tablets.
+  mouse: Mouse | null;
+
+  // All active pointers.
+  pointers: Pointer[];
+
+  pointerAddedEmitter: TinyEmitter<[Pointer]>;
+
+  // Whether we are currently firing events. We need to track this to handle re-entrant cases
+  // like https://github.com/phetsims/balloons-and-static-electricity/issues/406.
+  currentlyFiringEvents: boolean;
+
+  private batchedEvents: BatchedDOMEvent[];
+
+  // In miliseconds, the DOMEvent timeStamp when we receive a logical up event.
+  // We can compare this to the timeStamp on a click vent to filter out the click events
+  // when some screen readers send both down/up events AND click events to the target
+  // element, see https://github.com/phetsims/scenery/issues/1094
+  private upTimeStamp: number;
+
+  // Emits pointer validation to the input stream for playback
+  // This is a high frequency event that is necessary for reproducible playbacks
+  private validatePointersAction: Action;
+
+  private mouseUpAction: Action<[Vector2, MouseEvent]>;
+  private mouseDownAction: Action<[number, Vector2, MouseEvent]>;
+  private mouseMoveAction: Action<[Vector2, MouseEvent]>;
+  private mouseOverAction: Action<[Vector2, MouseEvent]>;
+  private mouseOutAction: Action<[Vector2, MouseEvent]>;
+  private wheelScrollAction: Action<[WheelEvent]>;
+  private touchStartAction: Action<[number, Vector2, TouchEvent | PointerEvent]>;
+  private touchEndAction: Action<[number, Vector2, TouchEvent | PointerEvent]>;
+  private touchMoveAction: Action<[number, Vector2, TouchEvent | PointerEvent]>;
+  private touchCancelAction: Action<[number, Vector2, TouchEvent | PointerEvent]>;
+  private penStartAction: Action<[number, Vector2, PointerEvent]>;
+  private penEndAction: Action<[number, Vector2, PointerEvent]>;
+  private penMoveAction: Action<[number, Vector2, PointerEvent]>;
+  private penCancelAction: Action<[number, Vector2, PointerEvent]>;
+  private gotPointerCaptureAction: Action<[number, Event]>;
+  private lostPointerCaptureAction: Action<[number, Event]>;
+
+  // If accessible
+  private focusinAction?: Action<[FocusEvent]>;
+  private focusoutAction?: Action<[FocusEvent]>;
+  private clickAction?: Action<[MouseEvent]>;
+  private inputAction?: Action<[Event | InputEvent]>;
+  private changeAction?: Action<[Event]>;
+  private keydownAction?: Action<[KeyboardEvent]>;
+  private keyupAction?: Action<[KeyboardEvent]>;
+
+  // Same event options for all DOM listeners, used when we connect listeners
+  private accessibleEventOptions?: EventListenerOptions;
+
+  // Maps events that are added to the root PDOM element to the listener that will
+  // fire one of the above Actions and finally dispatch a corresponding SceneryEvent to scenery targets.
+  // Event listeners are not added until initializeEvents, and are stored in this Map so they can be removed
+  // again in detachEvents.
+  private pdomEventListenerMap?: Map<string, ( event: Event ) => void>;
+
+
   /**
-   * @param {Display} display
-   * @param {boolean} attachToWindow - Whether to add listeners to the window (instead of the Display's domElement).
-   * @param {boolean} batchDOMEvents - If true, most event types will be batched until otherwise triggered.
-   * @param {boolean} assumeFullWindow - We can optimize certain things like computing points if we know the display
+   * @param display
+   * @param attachToWindow - Whether to add listeners to the window (instead of the Display's domElement).
+   * @param batchDOMEvents - If true, most event types will be batched until otherwise triggered.
+   * @param assumeFullWindow - We can optimize certain things like computing points if we know the display
    *                                     fills the entire window.
-   * @param {boolean|null} passiveEvents - See Display's documentation (controls the presence of the passive flag for
+   * @param passiveEvents - See Display's documentation (controls the presence of the passive flag for
    *                                       events, which has some advanced considerations).
    *
-   * @param {Object} [options]
+   * @param [providedOptions]
    */
-  constructor( display, attachToWindow, batchDOMEvents, assumeFullWindow, passiveEvents, options ) {
+  constructor( display: Display, attachToWindow: boolean, batchDOMEvents: boolean, assumeFullWindow: boolean, passiveEvents: boolean | null, providedOptions?: InputOptions ) {
     assert && assert( display instanceof Display );
     assert && assert( typeof attachToWindow === 'boolean' );
     assert && assert( typeof batchDOMEvents === 'boolean' );
     assert && assert( typeof assumeFullWindow === 'boolean' );
 
-    options = merge( {
+    const options = optionize<InputOptions, InputOptions>( {
       tandem: Tandem.OPTIONAL
-    }, options );
+    }, providedOptions );
 
-    // @public {Display}
     this.display = display;
-
-    // @public {Node}
     this.rootNode = display.rootNode;
 
-    // @public {boolean}
     this.attachToWindow = attachToWindow;
     this.batchDOMEvents = batchDOMEvents;
     this.assumeFullWindow = assumeFullWindow;
-
-    // @public {boolean|null}
     this.passiveEvents = passiveEvents;
-
-    // @private {Array.<BatchedDOMEvent}>
     this.batchedEvents = [];
-
-    // @public {PDOMPointer|null} - Pointer for accessibility, only created lazily on first pdom event.
     this.pdomPointer = null;
-
-    // @public {Mouse|null} - Pointer for mouse, only created lazily on first mouse event, so no mouse is allocated on.
-    // tablets.
     this.mouse = null;
-
-    // @public {Array.<Pointer>} - All active pointers.
     this.pointers = [];
-
-    // @public {TinyEmitter.<Pointer>}
-    this.pointerAddedEmitter = new TinyEmitter();
-
-    // @public {boolean} - Whether we are currently firing events. We need to track this to handle re-entrant cases
-    // like https://github.com/phetsims/balloons-and-static-electricity/issues/406.
+    this.pointerAddedEmitter = new TinyEmitter<[Pointer]>();
     this.currentlyFiringEvents = false;
-
-    // @private {number} - in miliseconds, the DOMEvent timeStamp when we receive a logical up event.
-    // We can compare this to the timeStamp on a click vent to filter out the click events
-    // when some screen readers send both down/up events AND click events to the target
-    // element, see https://github.com/phetsims/scenery/issues/1094
     this.upTimeStamp = 0;
 
     ////////////////////////////////////////////////////
     // Declare the Actions that send scenery input events to the PhET-iO data stream.  Note they use the default value
     // of phetioReadOnly false, in case a client wants to synthesize events.
 
-    // @private {Action} - Emits pointer validation to the input stream for playback
-    // This is a high frequency event that is necessary for reproducible playbacks
     this.validatePointersAction = new Action( () => {
       let i = this.pointers.length;
       while ( i-- ) {
         const pointer = this.pointers[ i ];
         if ( pointer.point && pointer !== this.pdomPointer ) {
-          this.branchChangeEvents( pointer, pointer.lastDOMEvent, false );
+          this.branchChangeEvents<Event>( pointer, pointer.lastDOMEvent, false );
         }
       }
     }, {
@@ -277,12 +328,11 @@ class Input {
       phetioHighFrequency: true
     } );
 
-    // @private {Action} - Emits to the PhET-iO data stream.
-    this.mouseUpAction = new Action( ( point, event ) => {
-      if ( !this.mouse ) { this.initMouse(); }
-      const pointChanged = this.mouse.up( point, event );
-      this.mouse.id = null;
-      this.upEvent( this.mouse, event, pointChanged );
+    this.mouseUpAction = new Action( ( point: Vector2, event: MouseEvent ) => {
+      const mouse = this.ensureMouse();
+      const pointChanged = mouse.up( point, event );
+      mouse.id = null;
+      this.upEvent<MouseEvent>( mouse, event, pointChanged );
     }, {
       phetioPlayback: true,
       tandem: options.tandem.createTandem( 'mouseUpAction' ),
@@ -294,12 +344,11 @@ class Input {
       phetioDocumentation: 'Emits when a mouse button is released.'
     } );
 
-    // @private {Action} - Emits to the PhET-iO data stream.
-    this.mouseDownAction = new Action( ( id, point, event ) => {
-      if ( !this.mouse ) { this.initMouse(); }
-      this.mouse.id = id;
-      const pointChanged = this.mouse.down( point, event );
-      this.downEvent( this.mouse, event, pointChanged );
+    this.mouseDownAction = new Action( ( id: number, point: Vector2, event: MouseEvent ) => {
+      const mouse = this.ensureMouse();
+      mouse.id = id;
+      const pointChanged = mouse.down( point, event );
+      this.downEvent<MouseEvent>( mouse, event, pointChanged );
     }, {
       phetioPlayback: true,
       tandem: options.tandem.createTandem( 'mouseDownAction' ),
@@ -312,11 +361,10 @@ class Input {
       phetioDocumentation: 'Emits when a mouse button is pressed.'
     } );
 
-    // @private {Action} - Emits to the PhET-iO data stream.
-    this.mouseMoveAction = new Action( ( point, event ) => {
-      if ( !this.mouse ) { this.initMouse(); }
-      this.mouse.move( point, event );
-      this.moveEvent( this.mouse, event );
+    this.mouseMoveAction = new Action( ( point: Vector2, event: MouseEvent ) => {
+      const mouse = this.ensureMouse();
+      mouse.move( point, event );
+      this.moveEvent<MouseEvent>( mouse, event );
     }, {
       phetioPlayback: true,
       tandem: options.tandem.createTandem( 'mouseMoveAction' ),
@@ -329,10 +377,9 @@ class Input {
       phetioHighFrequency: true
     } );
 
-    // @private {Action} - Emits to the PhET-iO data stream.
-    this.mouseOverAction = new Action( ( point, event ) => {
-      if ( !this.mouse ) { this.initMouse(); }
-      this.mouse.over( point, event );
+    this.mouseOverAction = new Action( ( point: Vector2, event: MouseEvent ) => {
+      const mouse = this.ensureMouse();
+      mouse.over( point, event );
       // TODO: how to handle mouse-over (and log it)... are we changing the pointer.point without a branch change?
     }, {
       phetioPlayback: true,
@@ -345,10 +392,9 @@ class Input {
       phetioDocumentation: 'Emits when the mouse is moved while on the sim.'
     } );
 
-    // @private {Action} - Emits to the PhET-iO data stream.
-    this.mouseOutAction = new Action( ( point, event ) => {
-      if ( !this.mouse ) { this.initMouse(); }
-      this.mouse.out( point, event );
+    this.mouseOutAction = new Action( ( point: Vector2, event: MouseEvent ) => {
+      const mouse = this.ensureMouse();
+      mouse.out( point, event );
       // TODO: how to handle mouse-out (and log it)... are we changing the pointer.point without a branch change?
     }, {
       phetioPlayback: true,
@@ -361,16 +407,15 @@ class Input {
       phetioDocumentation: 'Emits when the mouse moves out of the display.'
     } );
 
-    // @private {Action} - Emits to the PhET-iO data stream.
-    this.wheelScrollAction = new Action( event => {
-      if ( !this.mouse ) { this.initMouse(); }
-      this.mouse.wheel( event );
+    this.wheelScrollAction = new Action( ( event: WheelEvent ) => {
+      const mouse = this.ensureMouse();
+      mouse.wheel( event );
 
       // don't send mouse-wheel events if we don't yet have a mouse location!
       // TODO: Can we set the mouse location based on the wheel event?
-      if ( this.mouse.point ) {
-        const trail = this.rootNode.trailUnderPointer( this.mouse ) || new Trail( this.rootNode );
-        this.dispatchEvent( trail, 'wheel', this.mouse, event, true );
+      if ( mouse.point ) {
+        const trail = this.rootNode.trailUnderPointer( mouse ) || new Trail( this.rootNode );
+        this.dispatchEvent<WheelEvent>( trail, 'wheel', mouse, event, true );
       }
     }, {
       phetioPlayback: true,
@@ -383,11 +428,10 @@ class Input {
       phetioHighFrequency: true
     } );
 
-    // @private {Action} - Emits to the PhET-iO data stream.
-    this.touchStartAction = new Action( ( id, point, event ) => {
+    this.touchStartAction = new Action( ( id: number, point: Vector2, event: TouchEvent | PointerEvent ) => {
       const touch = new Touch( id, point, event );
       this.addPointer( touch );
-      this.downEvent( touch, event, false );
+      this.downEvent<TouchEvent | PointerEvent>( touch, event, false );
     }, {
       phetioPlayback: true,
       tandem: options.tandem.createTandem( 'touchStartAction' ),
@@ -400,12 +444,12 @@ class Input {
       phetioDocumentation: 'Emits when a touch begins.'
     } );
 
-    // @private {Action} - Emits to the PhET-iO data stream.
-    this.touchEndAction = new Action( ( id, point, event ) => {
-      const touch = this.findPointerById( id );
+    this.touchEndAction = new Action( ( id: number, point: Vector2, event: TouchEvent | PointerEvent ) => {
+      const touch = this.findPointerById( id ) as Touch | null;
       if ( touch ) {
+        assert && assert( touch instanceof Touch ); // eslint-disable-line
         const pointChanged = touch.end( point, event );
-        this.upEvent( touch, event, pointChanged );
+        this.upEvent<TouchEvent | PointerEvent>( touch, event, pointChanged );
         this.removePointer( touch );
       }
     }, {
@@ -420,12 +464,12 @@ class Input {
       phetioDocumentation: 'Emits when a touch ends.'
     } );
 
-    // @private {Action} - Emits to the PhET-iO data stream.
-    this.touchMoveAction = new Action( ( id, point, event ) => {
-      const touch = this.findPointerById( id );
+    this.touchMoveAction = new Action( ( id: number, point: Vector2, event: TouchEvent | PointerEvent ) => {
+      const touch = this.findPointerById( id ) as Touch | null;
       if ( touch ) {
+        assert && assert( touch instanceof Touch ); // eslint-disable-line
         touch.move( point, event );
-        this.moveEvent( touch, event );
+        this.moveEvent<TouchEvent | PointerEvent>( touch, event );
       }
     }, {
       phetioPlayback: true,
@@ -440,12 +484,12 @@ class Input {
       phetioHighFrequency: true
     } );
 
-    // @private {Action} - Emits to the PhET-iO data stream.
-    this.touchCancelAction = new Action( ( id, point, event ) => {
-      const touch = this.findPointerById( id );
+    this.touchCancelAction = new Action( ( id: number, point: Vector2, event: TouchEvent | PointerEvent ) => {
+      const touch = this.findPointerById( id ) as Touch | null;
       if ( touch ) {
+        assert && assert( touch instanceof Touch ); // eslint-disable-line
         const pointChanged = touch.cancel( point, event );
-        this.cancelEvent( touch, event, pointChanged );
+        this.cancelEvent<TouchEvent | PointerEvent>( touch, event, pointChanged );
         this.removePointer( touch );
       }
     }, {
@@ -460,11 +504,10 @@ class Input {
       phetioDocumentation: 'Emits when a touch is canceled.'
     } );
 
-    // @private {Action} - Emits to the PhET-iO data stream.
-    this.penStartAction = new Action( ( id, point, event ) => {
+    this.penStartAction = new Action( ( id: number, point: Vector2, event: PointerEvent ) => {
       const pen = new Pen( id, point, event );
       this.addPointer( pen );
-      this.downEvent( pen, event, false );
+      this.downEvent<PointerEvent>( pen, event, false );
     }, {
       phetioPlayback: true,
       tandem: options.tandem.createTandem( 'penStartAction' ),
@@ -477,12 +520,12 @@ class Input {
       phetioDocumentation: 'Emits when a pen touches the screen.'
     } );
 
-    // @private {Action} - Emits to the PhET-iO data stream.
-    this.penEndAction = new Action( ( id, point, event ) => {
-      const pen = this.findPointerById( id );
+    this.penEndAction = new Action( ( id: number, point: Vector2, event: PointerEvent ) => {
+      const pen = this.findPointerById( id ) as Pen | null;
       if ( pen ) {
+        assert && assert( pen instanceof Pen );
         const pointChanged = pen.end( point, event );
-        this.upEvent( pen, event, pointChanged );
+        this.upEvent<PointerEvent>( pen, event, pointChanged );
         this.removePointer( pen );
       }
     }, {
@@ -497,12 +540,12 @@ class Input {
       phetioDocumentation: 'Emits when a pen is lifted.'
     } );
 
-    // @private {Action} - Emits to the PhET-iO data stream.
-    this.penMoveAction = new Action( ( id, point, event ) => {
-      const pen = this.findPointerById( id );
+    this.penMoveAction = new Action( ( id: number, point: Vector2, event: PointerEvent ) => {
+      const pen = this.findPointerById( id ) as Pen | null;
       if ( pen ) {
+        assert && assert( pen instanceof Pen );
         pen.move( point, event );
-        this.moveEvent( pen, event );
+        this.moveEvent<PointerEvent>( pen, event );
       }
     }, {
       phetioPlayback: true,
@@ -517,12 +560,12 @@ class Input {
       phetioHighFrequency: true
     } );
 
-    // @private {Action} - Emits to the PhET-iO data stream.
-    this.penCancelAction = new Action( ( id, point, event ) => {
-      const pen = this.findPointerById( id );
+    this.penCancelAction = new Action( ( id: number, point: Vector2, event: PointerEvent ) => {
+      const pen = this.findPointerById( id ) as Pen | null;
       if ( pen ) {
+        assert && assert( pen instanceof Pen );
         const pointChanged = pen.cancel( point, event );
-        this.cancelEvent( pen, event, pointChanged );
+        this.cancelEvent<PointerEvent>( pen, event, pointChanged );
         this.removePointer( pen );
       }
     }, {
@@ -537,8 +580,7 @@ class Input {
       phetioDocumentation: 'Emits when a pen is canceled.'
     } );
 
-    // @private {Action} - Emits to the PhET-iO data stream.
-    this.gotPointerCaptureAction = new Action( ( id, event ) => {
+    this.gotPointerCaptureAction = new Action( ( id: number, event: Event ) => {
       const pointer = this.findPointerById( id );
 
       if ( pointer ) {
@@ -556,8 +598,7 @@ class Input {
       phetioHighFrequency: true
     } );
 
-    // @private {Action} - Emits to the PhET-iO data stream.
-    this.lostPointerCaptureAction = new Action( ( id, event ) => {
+    this.lostPointerCaptureAction = new Action( ( id: number, event: Event ) => {
       const pointer = this.findPointerById( id );
 
       if ( pointer ) {
@@ -577,8 +618,7 @@ class Input {
 
     // wire up accessibility listeners on the display's root accessible DOM element.
     if ( this.display._accessible ) {
-      // @private
-      this.focusinAction = new Action( event => {
+      this.focusinAction = new Action( ( event: FocusEvent ) => {
 
         // ignore any focusout callbacks if they are initiated due to implementation details in PDOM manipulation
         if ( this.display.blockFocusCallbacks ) {
@@ -589,8 +629,8 @@ class Input {
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
         const trail = this.updateTrailForPDOMDispatch( event );
-        this.dispatchPDOMEvent( trail, 'focus', event, false );
-        this.dispatchPDOMEvent( trail, 'focusin', event, true );
+        this.dispatchPDOMEvent<FocusEvent>( trail, 'focus', event, false );
+        this.dispatchPDOMEvent<FocusEvent>( trail, 'focusin', event, true );
 
         sceneryLog && sceneryLog.Input && sceneryLog.pop();
       }, {
@@ -603,8 +643,7 @@ class Input {
         phetioDocumentation: 'Emits when the PDOM root gets the focusin DOM event.'
       } );
 
-      // @private
-      this.focusoutAction = new Action( event => {
+      this.focusoutAction = new Action( ( event: FocusEvent ) => {
 
         // ignore any focusout callbacks if they are initiated due to implementation details in PDOM manipulation
         if ( this.display.blockFocusCallbacks ) {
@@ -617,12 +656,12 @@ class Input {
         // recompute the trail on focusout if necessary - since a blur/focusout may have been initiated from a
         // focus/focusin listener, it is possible that focusout was called more than once before focusin is called on the
         // next active element, see https://github.com/phetsims/scenery/issues/898
-        if ( !this.pdomPointer ) { this.initPDOMPointer(); }
-        this.pdomPointer.invalidateTrail( this.getTrailId( event ) );
+        const pdomPointer = this.ensurePDOMPointer();
+        pdomPointer.invalidateTrail( this.getTrailId( event ) );
 
         const trail = this.updateTrailForPDOMDispatch( event );
-        this.dispatchPDOMEvent( trail, 'blur', event, false );
-        this.dispatchPDOMEvent( trail, 'focusout', event, true );
+        this.dispatchPDOMEvent<FocusEvent>( trail, 'blur', event, false );
+        this.dispatchPDOMEvent<FocusEvent>( trail, 'focusout', event, true );
 
         sceneryLog && sceneryLog.Input && sceneryLog.pop();
       }, {
@@ -635,13 +674,14 @@ class Input {
         phetioDocumentation: 'Emits when the PDOM root gets the focusout DOM event.'
       } );
 
-      // @private
-      this.clickAction = new Action( event => {
+      // https://developer.mozilla.org/en-US/docs/Web/API/Element/click_event notes that the click action should result
+      // in a MouseEvent
+      this.clickAction = new Action( ( event: MouseEvent ) => {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( `click(${Input.debugText( null, event )});` );
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
         const trail = this.updateTrailForPDOMDispatch( event );
-        this.dispatchPDOMEvent( trail, 'click', event, true );
+        this.dispatchPDOMEvent<MouseEvent>( trail, 'click', event, true );
 
         sceneryLog && sceneryLog.Input && sceneryLog.pop();
       }, {
@@ -654,13 +694,12 @@ class Input {
         phetioDocumentation: 'Emits when the PDOM root gets the click DOM event.'
       } );
 
-      // @private
-      this.inputAction = new Action( event => {
+      this.inputAction = new Action( ( event: Event | InputEvent ) => {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( `input(${Input.debugText( null, event )});` );
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
         const trail = this.updateTrailForPDOMDispatch( event );
-        this.dispatchPDOMEvent( trail, 'input', event, true );
+        this.dispatchPDOMEvent<Event | InputEvent>( trail, 'input', event, true );
 
         sceneryLog && sceneryLog.Input && sceneryLog.pop();
       }, {
@@ -673,13 +712,12 @@ class Input {
         phetioDocumentation: 'Emits when the PDOM root gets the input DOM event.'
       } );
 
-      // @private
-      this.changeAction = new Action( event => {
+      this.changeAction = new Action( ( event: Event ) => {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( `change(${Input.debugText( null, event )});` );
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
         const trail = this.updateTrailForPDOMDispatch( event );
-        this.dispatchPDOMEvent( trail, 'change', event, true );
+        this.dispatchPDOMEvent<Event>( trail, 'change', event, true );
 
         sceneryLog && sceneryLog.Input && sceneryLog.pop();
       }, {
@@ -692,13 +730,12 @@ class Input {
         phetioDocumentation: 'Emits when the PDOM root gets the change DOM event.'
       } );
 
-      // @private
-      this.keydownAction = new Action( event => {
+      this.keydownAction = new Action( ( event: KeyboardEvent ) => {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( `keydown(${Input.debugText( null, event )});` );
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
         const trail = this.updateTrailForPDOMDispatch( event );
-        this.dispatchPDOMEvent( trail, 'keydown', event, true );
+        this.dispatchPDOMEvent<KeyboardEvent>( trail, 'keydown', event, true );
 
         sceneryLog && sceneryLog.Input && sceneryLog.pop();
       }, {
@@ -711,13 +748,12 @@ class Input {
         phetioDocumentation: 'Emits when the PDOM root gets the keydown DOM event.'
       } );
 
-      // @private
-      this.keyupAction = new Action( event => {
+      this.keyupAction = new Action( ( event: KeyboardEvent ) => {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( `keyup(${Input.debugText( null, event )});` );
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
         const trail = this.updateTrailForPDOMDispatch( event );
-        this.dispatchPDOMEvent( trail, 'keyup', event, true );
+        this.dispatchPDOMEvent<KeyboardEvent>( trail, 'keyup', event, true );
 
         sceneryLog && sceneryLog.Input && sceneryLog.pop();
       }, {
@@ -730,21 +766,15 @@ class Input {
         phetioDocumentation: 'Emits when the PDOM root gets the keyup DOM event.'
       } );
 
-      // @private {*} - same event options for all DOM listeners, used when we connect listeners
-      this.accessibleEventOptions = Features.passive ? { useCapture: false, passive: false } : false;
-
-      // @private {Map} - Maps events that are added to the root PDOM element to the listener that will
-      // fire one of the above Actions and finally dispatch a corresponding SceneryEvent to scenery targets.
-      // Event listeners are not added until initializeEvents, and are stored in this Map so they can be removed
-      // again in detachEvents.
+      this.accessibleEventOptions = Features.passive ? { capture: false, passive: false } : false;
       this.pdomEventListenerMap = new Map();
 
       PDOMUtils.DOM_EVENTS.forEach( eventName => {
 
         const actionName = `${eventName}Action`;
-        assert && assert( this[ actionName ], `action not defined on Input: ${actionName}` );
+        assert && assert( this[ actionName as keyof Input ], `action not defined on Input: ${actionName}` );
 
-        this.pdomEventListenerMap.set( eventName, event => {
+        this.pdomEventListenerMap!.set( eventName, event => {
 
           sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `Input.${eventName}FromBrowser` );
           sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
@@ -761,7 +791,7 @@ class Input {
             // stream.
             if ( trail && !( _.some( trail.nodes, node => node.positionInPDOM ) && eventName === 'click' &&
                  event.timeStamp - this.upTimeStamp <= PDOM_CLICK_DELAY ) ) {
-              this[ actionName ].execute( event );
+              ( this[ actionName as keyof Input ] as unknown as Action<[Event]> ).execute( event );
             }
           }
 
@@ -773,7 +803,6 @@ class Input {
 
   /**
    * Interrupts any input actions that are currently taking place (should stop drags, etc.)
-   * @public
    */
   interruptPointers() {
     _.each( this.pointers, pointer => {
@@ -782,17 +811,16 @@ class Input {
   }
 
   /**
-   * Called to batch a raw DOM event (which may be immediately fired, depending on the settings).
-   * @public (scenery-internal)
+   * Called to batch a raw DOM event (which may be immediately fired, depending on the settings). (scenery-internal)
    *
-   * @param {Event} domEvent
-   * @param {number} batchType - See BatchedDOMEvent's "enumeration" - TODO: use an actual enumeration
-   * @param {function} callback - Parameter types defined by the batchType. See BatchedDOMEvent for details
-   * @param {boolean} triggerImmediate - Certain events can force immediate action, since browsers like Chrome
+   * @param domEvent
+   * @param batchType - See BatchedDOMEvent's "enumeration"
+   * @param callback - Parameter types defined by the batchType. See BatchedDOMEvent for details
+   * @param triggerImmediate - Certain events can force immediate action, since browsers like Chrome
    *                                     only allow certain operations in the callback for a user gesture (e.g. like
    *                                     a mouseup to open a window).
    */
-  batchEvent( domEvent, batchType, callback, triggerImmediate ) {
+  batchEvent( domEvent: Event, batchType: BatchedDOMEventType, callback: BatchedDOMEventCallback, triggerImmediate: boolean ) {
     sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.batchEvent' );
     sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
 
@@ -818,8 +846,7 @@ class Input {
   }
 
   /**
-   * Fires all of our events that were batched into the batchedEvents array.
-   * @public (scenery-internal)
+   * Fires all of our events that were batched into the batchedEvents array. (scenery-internal)
    */
   fireBatchedEvents() {
     sceneryLog && sceneryLog.InputEvent && this.currentlyFiringEvents && sceneryLog.InputEvent(
@@ -851,8 +878,7 @@ class Input {
   }
 
   /**
-   * Clears any batched events that we don't want to process.
-   * @public (scenery-internal)
+   * Clears any batched events that we don't want to process. (scenery-internal)
    *
    * NOTE: It is HIGHLY recommended to interrupt pointers and remove non-Mouse pointers before doing this, as
    * otherwise it can cause incorrect state in certain types of listeners (e.g. ones that count how many pointers
@@ -864,21 +890,20 @@ class Input {
 
   /**
    * Checks all pointers to see whether they are still "over" the same nodes (trail). If not, it will fire the usual
-   * enter/exit events.
-   * @public (scenery-internal)
+   * enter/exit events. (scenery-internal)
    */
   validatePointers() {
     this.validatePointersAction.execute();
   }
 
   /**
-   * Removes all non-Mouse pointers from internal tracking.
-   * @public (scenery-internal)
+   * Removes all non-Mouse pointers from internal tracking. (scenery-internal)
    */
   removeTemporaryPointers() {
+    // TODO: Just null this out, instead of creating a fake event?
     const fakeDomEvent = {
       eek: 'This is a fake DOM event created in removeTemporaryPointers(), called from a Scenery exit event. Our attempt to masquerade seems unsuccessful! :('
-    };
+    } as unknown as Event;
 
     for ( let i = this.pointers.length - 1; i >= 0; i-- ) {
       const pointer = this.pointers[ i ];
@@ -893,8 +918,7 @@ class Input {
   }
 
   /**
-   * Hooks up DOM listeners to whatever type of object we are going to listen to.
-   * @public (scenery-internal)
+   * Hooks up DOM listeners to whatever type of object we are going to listen to. (scenery-internal)
    */
   connectListeners() {
     BrowserEvents.addDisplay( this.display, this.attachToWindow, this.passiveEvents );
@@ -902,15 +926,14 @@ class Input {
     if ( this.display._accessible ) {
 
       // Add a listener to the root accessible DOM element for each event we want to monitor.
-      this.pdomEventListenerMap.forEach( ( listener, eventName ) => {
-        this.display.pdomRootElement.addEventListener( eventName, listener, this.accessibleEventOptions );
+      this.pdomEventListenerMap!.forEach( ( listener, eventName ) => {
+        this.display.pdomRootElement!.addEventListener( eventName, listener, this.accessibleEventOptions );
       } );
     }
   }
 
   /**
-   * Removes DOM listeners from whatever type of object we were listening to.
-   * @public (scenery-internal)
+   * Removes DOM listeners from whatever type of object we were listening to. (scenery-internal)
    */
   disconnectListeners() {
     BrowserEvents.removeDisplay( this.display, this.attachToWindow, this.passiveEvents );
@@ -918,20 +941,16 @@ class Input {
     if ( this.display._accessible ) {
 
       // Remove listeners from the root accessible DOM element for each event we want to monitor.
-      this.pdomEventListenerMap.forEach( ( listener, eventName ) => {
-        this.display.pdomRootElement.removeEventListener( eventName, listener, this.accessibleEventOptions );
+      this.pdomEventListenerMap!.forEach( ( listener, eventName ) => {
+        this.display.pdomRootElement!.removeEventListener( eventName, listener, this.accessibleEventOptions );
       } );
     }
   }
 
   /**
-   * Extract a {Vector2} global coordinate point from an arbitrary DOM event.
-   * @public (scenery-internal)
-   *
-   * @param {Event} domEvent
-   * @returns {Vector2}
+   * Extract a {Vector2} global coordinate point from an arbitrary DOM event. (scenery-internal)
    */
-  pointFromEvent( domEvent ) {
+  pointFromEvent( domEvent: MouseEvent | WindowTouch ): Vector2 {
     const position = Vector2.createFromPool( domEvent.clientX, domEvent.clientY );
     if ( !this.assumeFullWindow ) {
       const domBounds = this.display.domElement.getBoundingClientRect();
@@ -956,11 +975,8 @@ class Input {
 
   /**
    * Adds a pointer to our list.
-   * @private
-   *
-   * @param {Pointer} pointer
    */
-  addPointer( pointer ) {
+  private addPointer( pointer: Pointer ) {
     this.pointers.push( pointer );
 
     this.pointerAddedEmitter.emit( pointer );
@@ -968,11 +984,8 @@ class Input {
 
   /**
    * Removes a pointer from our list. If we get future events for it (based on the ID) it will be ignored.
-   * @private
-   *
-   * @param {Pointer} pointer
    */
-  removePointer( pointer ) {
+  private removePointer( pointer: Pointer ) {
     // sanity check version, will remove all instances
     for ( let i = this.pointers.length - 1; i >= 0; i-- ) {
       if ( this.pointers[ i ] === pointer ) {
@@ -986,17 +999,13 @@ class Input {
   /**
    * Given a pointer's ID (given by the pointer/touch specifications to be unique to a specific pointer/touch),
    * returns the given pointer (if we have one).
-   * @private
    *
    * NOTE: There are some cases where we may have prematurely "removed" a pointer.
-   *
-   * @param {number} id
-   * @returns {Pointer|null}
    */
-  findPointerById( id ) {
+  private findPointerById( id: number ): Mouse | Touch | Pen | null {
     let i = this.pointers.length;
     while ( i-- ) {
-      const pointer = this.pointers[ i ];
+      const pointer = this.pointers[ i ] as Mouse | Touch | Pen;
       if ( pointer.id === id ) {
         return pointer;
       }
@@ -1006,34 +1015,51 @@ class Input {
 
   /**
    * Initializes the Mouse object on the first mouse event (this may never happen on touch devices).
-   * @private
    */
-  initMouse() {
-    this.mouse = new Mouse();
-    this.addPointer( this.mouse );
+  private initMouse(): Mouse {
+    const mouse = new Mouse();
+    this.mouse = mouse;
+    this.addPointer( mouse );
+    return mouse;
+  }
+
+  private ensureMouse(): Mouse {
+    const mouse = this.mouse;
+    if ( mouse ) {
+      return mouse;
+    }
+    else {
+      return this.initMouse();
+    }
   }
 
   /**
    * Initializes the accessible pointer object on the first pdom event.
-   * @private
    */
-  initPDOMPointer() {
-    this.pdomPointer = new PDOMPointer( this.display );
+  private initPDOMPointer(): PDOMPointer {
+    const pdomPointer = new PDOMPointer( this.display );
+    this.pdomPointer = pdomPointer;
 
-    this.addPointer( this.pdomPointer );
+    this.addPointer( pdomPointer );
+
+    return pdomPointer;
+  }
+
+  private ensurePDOMPointer(): PDOMPointer {
+    const pdomPointer = this.pdomPointer;
+    if ( pdomPointer ) {
+      return pdomPointer;
+    }
+    else {
+      return this.initPDOMPointer();
+    }
   }
 
   /**
-   * Steps to dispatch an pdom-related event. Before dispatch, the PDOMPointer is initialized if it
+   * Steps to dispatch a pdom-related event. Before dispatch, the PDOMPointer is initialized if it
    * hasn't been created yet and a userGestureEmitter emits to indicate that a user has begun an interaction.
-   * @private
-   *
-   * @param {Trail} trail
-   * @param {string} eventType
-   * @param {Event} domEvent
-   * @param {boolean} bubbles
    */
-  dispatchPDOMEvent( trail, eventType, domEvent, bubbles ) {
+  private dispatchPDOMEvent<DOMEvent extends Event>( trail: Trail, eventType: string, domEvent: DOMEvent, bubbles: boolean ) {
 
     // exclude focus and blur events because they can happen with scripting without user input
     if ( PDOMUtils.USER_GESTURE_EVENTS.includes( eventType ) ) {
@@ -1041,6 +1067,7 @@ class Input {
     }
 
     // This workaround hopefully won't be here forever, see ParallelDOM.setExcludeLabelSiblingFromInput() and https://github.com/phetsims/a11y-research/issues/156
+    // @ts-ignore TODO ask a11y team on this one
     if ( !( domEvent.target && domEvent.target.hasAttribute( PDOMUtils.DATA_EXCLUDE_FROM_INPUT ) ) ) {
 
       // If the trail is not pickable, don't dispatch PDOM events to those targets - but we still
@@ -1050,20 +1077,21 @@ class Input {
       if ( !canFireListeners ) {
         trail = new Trail( [] );
       }
-      this.dispatchEvent( trail, eventType, this.pdomPointer, domEvent, bubbles );
+      assert && assert( this.pdomPointer );
+      this.dispatchEvent<DOMEvent>( trail, eventType, this.pdomPointer!, domEvent, bubbles );
     }
   }
 
   /**
    * From a DOM Event, get its relatedTarget and map that to the scenery Node. Will return null if relatedTarget
    * is not provided, or if relatedTarget is not under PDOM, or there is no associated Node with trail id on the
-   * relatedTarget element.
-   * @public (scenery-internal)
+   * relatedTarget element. (scenery-internal)
    *
    * @param {Event} domEvent - DOM Event, not a SceneryEvent!
    * @returns {Trail|null}
    */
-  getRelatedTargetTrail( domEvent ) {
+  getRelatedTargetTrail( domEvent: FocusEvent | MouseEvent ): Trail | null {
+    // @ts-ignore TODO what is the related target substitute? Not found on DOM APIs
     const relatedTargetElement = domEvent.relatedTarget || domEvent[ RELATED_TARGET_SUBSTITUTE_KEY ];
 
     if ( relatedTargetElement && this.isTargetUnderPDOM( relatedTargetElement ) ) {
@@ -1075,72 +1103,49 @@ class Input {
 
   /**
    * Get the related target trail ID of the node represented by a DOM element in the accessible PDOM.
-   * @private
-   *
-   * @param {Event} domEvent
-   * @returns {string}
    */
-  getRelatedTargetTrailId( domEvent ) {
+  private getRelatedTargetTrailId( domEvent: Event ): string {
     return this.getTrailIdImplementation( domEvent, 'relatedTarget', RELATED_TARGET_SUBSTITUTE_KEY );
   }
 
   /**
    * Update the PDOMPointer with a new trail from a DOMEvent and return it. For multiple dispatches from a single
    * DOMEvent, this ensures that all will dispatch to the same Trail.
-   * @private
-   *
-   * @param {Event} domEvent
-   * @returns {Trail}
    */
-  updateTrailForPDOMDispatch( domEvent ) {
-    if ( !this.pdomPointer ) { this.initPDOMPointer(); }
-    return this.pdomPointer.updateTrail( this.getTrailId( domEvent ) );
+  private updateTrailForPDOMDispatch( domEvent: Event ): Trail {
+    return this.ensurePDOMPointer().updateTrail( this.getTrailId( domEvent ) );
   }
 
   /**
    * Get the trail ID of the node represented by a DOM element who is the target of a DOM Event in the accessible PDOM.
-   * @private
-   *
-   * @param {Event} domEvent
-   * @returns {string}
    */
-  getTrailId( domEvent ) {
+  private getTrailId( domEvent: Event ): string {
     return this.getTrailIdImplementation( domEvent, 'target', TARGET_SUBSTITUTE_KEY );
   }
 
-  /**
-   * @private
-   * @param {Event} domEvent
-   * @param {string} targetKeyName
-   * @param {string} targetSubstitudeKeyName
-   */
-  getTrailIdImplementation( domEvent, targetKeyName, targetSubstitudeKeyName ) {
+  private getTrailIdImplementation( domEvent: Event, targetKeyName: string, targetSubstitudeKeyName: string ): string {
+    const anyEvent = domEvent as any;
     assert && assert( this.display._accessible, 'Display must be accessible to get trail IDs from PDOMPeers' );
-    assert && assert( domEvent[ targetKeyName ] || domEvent[ targetSubstitudeKeyName ], 'need a way to get the target' );
+    assert && assert( anyEvent[ targetKeyName ] || anyEvent[ targetSubstitudeKeyName ], 'need a way to get the target' );
 
     // could be serialized event for phet-io playbacks, see Input.serializeDOMEvent()
-    if ( domEvent[ targetSubstitudeKeyName ] ) {
-      assert && assert( domEvent[ targetSubstitudeKeyName ] instanceof Object );
-      return domEvent[ targetSubstitudeKeyName ].getAttribute( PDOMUtils.DATA_TRAIL_ID );
+    if ( anyEvent[ targetSubstitudeKeyName ] ) {
+      assert && assert( anyEvent[ targetSubstitudeKeyName ] instanceof Object );
+      return anyEvent[ targetSubstitudeKeyName ].getAttribute( PDOMUtils.DATA_TRAIL_ID );
     }
     else {
-      assert && assert( domEvent[ targetKeyName ] instanceof window.Element );
-      return domEvent[ targetKeyName ].getAttribute( PDOMUtils.DATA_TRAIL_ID );
+      assert && assert( anyEvent[ targetKeyName ] instanceof window.Element );
+      return anyEvent[ targetKeyName ].getAttribute( PDOMUtils.DATA_TRAIL_ID );
     }
   }
 
   /**
-   * Triggers a logical mousedown event.
-   * @public (scenery-internal)
+   * Triggers a logical mousedown event. (scenery-internal)
    *
    * NOTE: This may also be called from the pointer event handler (pointerDown) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
-   *
-   * @param {number|null} id
-   * @param {Vector2} point
-   * @param {Event} event
    */
-  mouseDown( id, point, event ) {
+  mouseDown( id: number, point: Vector2, event: MouseEvent | PointerEvent ) {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `mouseDown('${id}', ${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.mouseDownAction.execute( id, point, event );
@@ -1148,16 +1153,12 @@ class Input {
   }
 
   /**
-   * Triggers a logical mouseup event.
-   * @public (scenery-internal)
+   * Triggers a logical mouseup event. (scenery-internal)
    *
    * NOTE: This may also be called from the pointer event handler (pointerUp) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
-   *
-   * @param {Vector2} point
-   * @param {Event} event
    */
-  mouseUp( point, event ) {
+  mouseUp( point: Vector2, event: MouseEvent | PointerEvent ) {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `mouseUp(${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.mouseUpAction.execute( point, event );
@@ -1165,16 +1166,12 @@ class Input {
   }
 
   /**
-   * Triggers a logical mousemove event.
-   * @public (scenery-internal)
+   * Triggers a logical mousemove event. (scenery-internal)
    *
    * NOTE: This may also be called from the pointer event handler (pointerMove) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
-   *
-   * @param {Vector2} point
-   * @param {Event} event
    */
-  mouseMove( point, event ) {
+  mouseMove( point: Vector2, event: MouseEvent | PointerEvent ) {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `mouseMove(${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.mouseMoveAction.execute( point, event );
@@ -1182,13 +1179,9 @@ class Input {
   }
 
   /**
-   * Triggers a logical mouseover event (this does NOT correspond to the Scenery event, since this is for the display)
-   * @public (scenery-internal)
-   *
-   * @param {Vector2} point
-   * @param {Event} event
+   * Triggers a logical mouseover event (this does NOT correspond to the Scenery event, since this is for the display) (scenery-internal)
    */
-  mouseOver( point, event ) {
+  mouseOver( point: Vector2, event: MouseEvent | PointerEvent ) {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `mouseOver(${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.mouseOverAction.execute( point, event );
@@ -1196,13 +1189,9 @@ class Input {
   }
 
   /**
-   * Triggers a logical mouseout event (this does NOT correspond to the Scenery event, since this is for the display)
-   * @public (scenery-internal)
-   *
-   * @param {Vector2} point
-   * @param {Event} event
+   * Triggers a logical mouseout event (this does NOT correspond to the Scenery event, since this is for the display) (scenery-internal)
    */
-  mouseOut( point, event ) {
+  mouseOut( point: Vector2, event: MouseEvent | PointerEvent ) {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `mouseOut(${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.mouseOutAction.execute( point, event );
@@ -1210,12 +1199,9 @@ class Input {
   }
 
   /**
-   * Triggers a logical mouse-wheel/scroll event.
-   * @public (scenery-internal)
-   *
-   * @param {Event} event
+   * Triggers a logical mouse-wheel/scroll event. (scenery-internal)
    */
-  wheel( event ) {
+  wheel( event: WheelEvent ) {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `wheel(${Input.debugText( null, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.wheelScrollAction.execute( event );
@@ -1223,17 +1209,12 @@ class Input {
   }
 
   /**
-   * Triggers a logical touchstart event. This is called for each touch point in a 'raw' event.
-   * @public (scenery-internal)
+   * Triggers a logical touchstart event. This is called for each touch point in a 'raw' event. (scenery-internal)
    *
    * NOTE: This may also be called from the pointer event handler (pointerDown) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
-   *
-   * @param {number} id
-   * @param {Vector2} point
-   * @param {Event} event
    */
-  touchStart( id, point, event ) {
+  touchStart( id: number, point: Vector2, event: TouchEvent | PointerEvent ) {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `touchStart('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -1243,17 +1224,12 @@ class Input {
   }
 
   /**
-   * Triggers a logical touchend event. This is called for each touch point in a 'raw' event.
-   * @public (scenery-internal)
+   * Triggers a logical touchend event. This is called for each touch point in a 'raw' event. (scenery-internal)
    *
    * NOTE: This may also be called from the pointer event handler (pointerUp) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
-   *
-   * @param {number} id
-   * @param {Vector2} point
-   * @param {Event} event
    */
-  touchEnd( id, point, event ) {
+  touchEnd( id: number, point: Vector2, event: TouchEvent | PointerEvent ) {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `touchEnd('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -1263,17 +1239,12 @@ class Input {
   }
 
   /**
-   * Triggers a logical touchmove event. This is called for each touch point in a 'raw' event.
-   * @public (scenery-internal)
+   * Triggers a logical touchmove event. This is called for each touch point in a 'raw' event. (scenery-internal)
    *
    * NOTE: This may also be called from the pointer event handler (pointerMove) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
-   *
-   * @param {number} id
-   * @param {Vector2} point
-   * @param {Event} event
    */
-  touchMove( id, point, event ) {
+  touchMove( id: number, point: Vector2, event: TouchEvent | PointerEvent ) {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `touchMove('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.touchMoveAction.execute( id, point, event );
@@ -1281,17 +1252,12 @@ class Input {
   }
 
   /**
-   * Triggers a logical touchcancel event. This is called for each touch point in a 'raw' event.
-   * @public (scenery-internal)
+   * Triggers a logical touchcancel event. This is called for each touch point in a 'raw' event. (scenery-internal)
    *
    * NOTE: This may also be called from the pointer event handler (pointerCancel) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
-   *
-   * @param {number} id
-   * @param {Vector2} point
-   * @param {Event} event
    */
-  touchCancel( id, point, event ) {
+  touchCancel( id: number, point: Vector2, event: TouchEvent | PointerEvent ) {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `touchCancel('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.touchCancelAction.execute( id, point, event );
@@ -1299,17 +1265,12 @@ class Input {
   }
 
   /**
-   * Triggers a logical penstart event (e.g. a stylus). This is called for each pen point in a 'raw' event.
-   * @public (scenery-internal)
+   * Triggers a logical penstart event (e.g. a stylus). This is called for each pen point in a 'raw' event. (scenery-internal)
    *
    * NOTE: This may also be called from the pointer event handler (pointerDown) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
-   *
-   * @param {number} id
-   * @param {Vector2} point
-   * @param {Event} event
    */
-  penStart( id, point, event ) {
+  penStart( id: number, point: Vector2, event: PointerEvent ) {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `penStart('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.penStartAction.execute( id, point, event );
@@ -1317,17 +1278,12 @@ class Input {
   }
 
   /**
-   * Triggers a logical penend event (e.g. a stylus). This is called for each pen point in a 'raw' event.
-   * @public (scenery-internal)
+   * Triggers a logical penend event (e.g. a stylus). This is called for each pen point in a 'raw' event. (scenery-internal)
    *
    * NOTE: This may also be called from the pointer event handler (pointerUp) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
-   *
-   * @param {number} id
-   * @param {Vector2} point
-   * @param {Event} event
    */
-  penEnd( id, point, event ) {
+  penEnd( id: number, point: Vector2, event: PointerEvent ) {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `penEnd('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.penEndAction.execute( id, point, event );
@@ -1335,17 +1291,12 @@ class Input {
   }
 
   /**
-   * Triggers a logical penmove event (e.g. a stylus). This is called for each pen point in a 'raw' event.
-   * @public (scenery-internal)
+   * Triggers a logical penmove event (e.g. a stylus). This is called for each pen point in a 'raw' event. (scenery-internal)
    *
    * NOTE: This may also be called from the pointer event handler (pointerMove) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
-   *
-   * @param {number} id
-   * @param {Vector2} point
-   * @param {Event} event
    */
-  penMove( id, point, event ) {
+  penMove( id: number, point: Vector2, event: PointerEvent ) {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `penMove('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.penMoveAction.execute( id, point, event );
@@ -1353,17 +1304,12 @@ class Input {
   }
 
   /**
-   * Triggers a logical pencancel event (e.g. a stylus). This is called for each pen point in a 'raw' event.
-   * @public (scenery-internal)
+   * Triggers a logical pencancel event (e.g. a stylus). This is called for each pen point in a 'raw' event. (scenery-internal)
    *
    * NOTE: This may also be called from the pointer event handler (pointerCancel) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
-   *
-   * @param {number} id
-   * @param {Vector2} point
-   * @param {Event} event
    */
-  penCancel( id, point, event ) {
+  penCancel( id: number, point: Vector2, event: PointerEvent ) {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `penCancel('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.penCancelAction.execute( id, point, event );
@@ -1371,15 +1317,9 @@ class Input {
   }
 
   /**
-   * Handles a pointerdown event, forwarding it to the proper logical event.
-   * @public (scenery-internal)
-   *
-   * @param {number} id
-   * @param {string} type
-   * @param {Vector2} point
-   * @param {Event} event
+   * Handles a pointerdown event, forwarding it to the proper logical event. (scenery-internal)
    */
-  pointerDown( id, type, point, event ) {
+  pointerDown( id: number, type: string, point: Vector2, event: PointerEvent ) {
     // In IE for pointer down events, we want to make sure than the next interactions off the page are sent to
     // this element (it will bubble). See https://github.com/phetsims/scenery/issues/464 and
     // http://news.qooxdoo.org/mouse-capturing.
@@ -1409,15 +1349,9 @@ class Input {
   }
 
   /**
-   * Handles a pointerup event, forwarding it to the proper logical event.
-   * @public (scenery-internal)
-   *
-   * @param {number} id
-   * @param {string} type
-   * @param {Vector2} point
-   * @param {Event} event
+   * Handles a pointerup event, forwarding it to the proper logical event. (scenery-internal)
    */
-  pointerUp( id, type, point, event ) {
+  pointerUp( id: number, type: string, point: Vector2, event: PointerEvent ) {
 
     // update this outside of the Action executions so that PhET-iO event playback does not override it
     this.upTimeStamp = event.timeStamp;
@@ -1441,15 +1375,9 @@ class Input {
   }
 
   /**
-   * Handles a pointercancel event, forwarding it to the proper logical event.
-   * @public (scenery-internal)
-   *
-   * @param {number} id
-   * @param {string} type
-   * @param {Vector2} point
-   * @param {Event} event
+   * Handles a pointercancel event, forwarding it to the proper logical event. (scenery-internal)
    */
-  pointerCancel( id, type, point, event ) {
+  pointerCancel( id: number, type: string, point: Vector2, event: PointerEvent ) {
     type = this.handleUnknownPointerType( type, id );
     switch( type ) {
       case 'mouse':
@@ -1471,15 +1399,9 @@ class Input {
   }
 
   /**
-   * Handles a gotpointercapture event, forwarding it to the proper logical event.
-   * @public (scenery-internal)
-   *
-   * @param {number} id
-   * @param {string} type
-   * @param {Vector2} point
-   * @param {Event} event
+   * Handles a gotpointercapture event, forwarding it to the proper logical event. (scenery-internal)
    */
-  gotPointerCapture( id, type, point, event ) {
+  gotPointerCapture( id: number, type: string, point: Vector2, event: Event ) {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `gotPointerCapture('${id}',${Input.debugText( null, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.gotPointerCaptureAction.execute( id, event );
@@ -1487,15 +1409,9 @@ class Input {
   }
 
   /**
-   * Handles a lostpointercapture event, forwarding it to the proper logical event.
-   * @public (scenery-internal)
-   *
-   * @param {number} id
-   * @param {string} type
-   * @param {Vector2} point
-   * @param {Event} event
+   * Handles a lostpointercapture event, forwarding it to the proper logical event. (scenery-internal)
    */
-  lostPointerCapture( id, type, point, event ) {
+  lostPointerCapture( id: number, type: string, point: Vector2, event: Event ) {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `lostPointerCapture('${id}',${Input.debugText( null, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.lostPointerCaptureAction.execute( id, event );
@@ -1503,15 +1419,9 @@ class Input {
   }
 
   /**
-   * Handles a pointermove event, forwarding it to the proper logical event.
-   * @public (scenery-internal)
-   *
-   * @param {number} id
-   * @param {string} type
-   * @param {Vector2} point
-   * @param {Event} event
+   * Handles a pointermove event, forwarding it to the proper logical event. (scenery-internal)
    */
-  pointerMove( id, type, point, event ) {
+  pointerMove( id: number, type: string, point: Vector2, event: PointerEvent ) {
     type = this.handleUnknownPointerType( type, id );
     switch( type ) {
       case 'mouse':
@@ -1531,57 +1441,33 @@ class Input {
   }
 
   /**
-   * Handles a pointerover event, forwarding it to the proper logical event.
-   * @public (scenery-internal)
-   *
-   * @param {number} id
-   * @param {string} type
-   * @param {Vector2} point
-   * @param {Event} event
+   * Handles a pointerover event, forwarding it to the proper logical event. (scenery-internal)
    */
-  pointerOver( id, type, point, event ) {
+  pointerOver( id: number, type: string, point: Vector2, event: PointerEvent ) {
     // TODO: accumulate mouse/touch info in the object if needed?
     // TODO: do we want to branch change on these types of events?
   }
 
   /**
-   * Handles a pointerout event, forwarding it to the proper logical event.
-   * @public (scenery-internal)
-   *
-   * @param {number} id
-   * @param {string} type
-   * @param {Vector2} point
-   * @param {Event} event
+   * Handles a pointerout event, forwarding it to the proper logical event. (scenery-internal)
    */
-  pointerOut( id, type, point, event ) {
+  pointerOut( id: number, type: string, point: Vector2, event: PointerEvent ) {
     // TODO: accumulate mouse/touch info in the object if needed?
     // TODO: do we want to branch change on these types of events?
   }
 
   /**
-   * Handles a pointerenter event, forwarding it to the proper logical event.
-   * @public (scenery-internal)
-   *
-   * @param {number} id
-   * @param {string} type
-   * @param {Vector2} point
-   * @param {Event} event
+   * Handles a pointerenter event, forwarding it to the proper logical event. (scenery-internal)
    */
-  pointerEnter( id, type, point, event ) {
+  pointerEnter( id: number, type: string, point: Vector2, event: PointerEvent ) {
     // TODO: accumulate mouse/touch info in the object if needed?
     // TODO: do we want to branch change on these types of events?
   }
 
   /**
-   * Handles a pointerleave event, forwarding it to the proper logical event.
-   * @public (scenery-internal)
-   *
-   * @param {number} id
-   * @param {string} type
-   * @param {Vector2} point
-   * @param {Event} event
+   * Handles a pointerleave event, forwarding it to the proper logical event. (scenery-internal)
    */
-  pointerLeave( id, type, point, event ) {
+  pointerLeave( id: number, type: string, point: Vector2, event: PointerEvent ) {
     // TODO: accumulate mouse/touch info in the object if needed?
     // TODO: do we want to branch change on these types of events?
   }
@@ -1591,13 +1477,8 @@ class Input {
    * https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/pointerType), we'll try to guess the pointer type
    * so that we can properly start/end the interaction. NOTE: this can happen for an 'up' where we received a
    * proper type for a 'down', so thus we need the detection.
-   * @private
-   *
-   * @param {string} type
-   * @param {number} id
-   * @returns {string}
    */
-  handleUnknownPointerType( type, id ) {
+  private handleUnknownPointerType( type: string, id: number ): string {
     if ( type !== '' ) {
       return type;
     }
@@ -1606,29 +1487,20 @@ class Input {
 
   /**
    * Given a pointer reference, hit test it and determine the Trail that the pointer is over.
-   * @private
-   *
-   * @param {Pointer} pointer
-   * @returns {Trail}
    */
-  getPointerTrail( pointer ) {
+  private getPointerTrail( pointer: Pointer ): Trail {
     return this.rootNode.trailUnderPointer( pointer ) || new Trail( this.rootNode );
   }
 
   /**
    * Called for each logical "up" event, for any pointer type.
-   * @private
-   *
-   * @param {Pointer} pointer
-   * @param {Event} event
-   * @param {boolean} pointChanged
    */
-  upEvent( pointer, event, pointChanged ) {
+  private upEvent<DOMEvent extends Event>( pointer: Pointer, event: DOMEvent, pointChanged: boolean ) {
 
     // if the event target is within the PDOM the AT is sending a fake pointer event to the document - do not
     // dispatch this since the PDOM should only handle Input.PDOM_EVENT_TYPES, and all other pointer input should
     // go through the Display div. Otherwise, activation will be duplicated when we handle pointer and PDOM events
-    if ( this.isTargetUnderPDOM( event.target ) ) {
+    if ( this.isTargetUnderPDOM( event.target as HTMLElement ) ) {
       return;
     }
 
@@ -1639,13 +1511,13 @@ class Input {
     assert && assert( typeof pointChanged === 'boolean' );
 
     // We'll use this trail for the entire dispatch of this event.
-    const eventTrail = this.branchChangeEvents( pointer, event, pointChanged );
+    const eventTrail = this.branchChangeEvents<DOMEvent>( pointer, event, pointChanged );
 
-    this.dispatchEvent( eventTrail, 'up', pointer, event, true );
+    this.dispatchEvent<DOMEvent>( eventTrail, 'up', pointer, event, true );
 
     // touch pointers are transient, so fire exit/out to the trail afterwards
     if ( pointer.isTouchLike() ) {
-      this.exitEvents( pointer, event, eventTrail, 0, true );
+      this.exitEvents<DOMEvent>( pointer, event, eventTrail, 0, true );
     }
 
     sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -1653,18 +1525,13 @@ class Input {
 
   /**
    * Called for each logical "down" event, for any pointer type.
-   * @private
-   *
-   * @param {Pointer} pointer
-   * @param {Event} event
-   * @param {boolean} pointChanged
    */
-  downEvent( pointer, event, pointChanged ) {
+  private downEvent<DOMEvent extends Event>( pointer: Pointer, event: DOMEvent, pointChanged: boolean ) {
 
     // if the event target is within the PDOM the AT is sending a fake pointer event to the document - do not
     // dispatch this since the PDOM should only handle Input.PDOM_EVENT_TYPES, and all other pointer input should
     // go through the Display div. Otherwise, activation will be duplicated when we handle pointer and PDOM events
-    if ( this.isTargetUnderPDOM( event.target ) ) {
+    if ( this.isTargetUnderPDOM( event.target as HTMLElement ) ) {
       return;
     }
 
@@ -1675,41 +1542,32 @@ class Input {
     assert && assert( typeof pointChanged === 'boolean' );
 
     // We'll use this trail for the entire dispatch of this event.
-    const eventTrail = this.branchChangeEvents( pointer, event, pointChanged );
+    const eventTrail = this.branchChangeEvents<DOMEvent>( pointer, event, pointChanged );
 
-    this.dispatchEvent( eventTrail, 'down', pointer, event, true );
+    this.dispatchEvent<DOMEvent>( eventTrail, 'down', pointer, event, true );
 
     sceneryLog && sceneryLog.Input && sceneryLog.pop();
   }
 
   /**
    * Called for each logical "move" event, for any pointer type.
-   * @private
-   *
-   * @param {Pointer} pointer
-   * @param {Event} event
    */
-  moveEvent( pointer, event ) {
+  private moveEvent<DOMEvent extends Event>( pointer: Pointer, event: DOMEvent ) {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `moveEvent ${pointer.toString()}` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
 
     assert && assert( pointer instanceof Pointer );
 
     // Always treat move events as "point changed"
-    this.branchChangeEvents( pointer, event, true );
+    this.branchChangeEvents<DOMEvent>( pointer, event, true );
 
     sceneryLog && sceneryLog.Input && sceneryLog.pop();
   }
 
   /**
    * Called for each logical "cancel" event, for any pointer type.
-   * @private
-   *
-   * @param {Pointer} pointer
-   * @param {Event} event
-   * @param {boolean} pointChanged
    */
-  cancelEvent( pointer, event, pointChanged ) {
+  private cancelEvent<DOMEvent extends Event>( pointer: Pointer, event: DOMEvent, pointChanged: boolean ) {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `cancelEvent ${pointer.toString()} changed:${pointChanged}` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -1717,13 +1575,13 @@ class Input {
     assert && assert( typeof pointChanged === 'boolean' );
 
     // We'll use this trail for the entire dispatch of this event.
-    const eventTrail = this.branchChangeEvents( pointer, event, pointChanged );
+    const eventTrail = this.branchChangeEvents<DOMEvent>( pointer, event, pointChanged );
 
-    this.dispatchEvent( eventTrail, 'cancel', pointer, event, true );
+    this.dispatchEvent<DOMEvent>( eventTrail, 'cancel', pointer, event, true );
 
     // touch pointers are transient, so fire exit/out to the trail afterwards
     if ( pointer.isTouchLike() ) {
-      this.exitEvents( pointer, event, eventTrail, 0, true );
+      this.exitEvents<DOMEvent>( pointer, event, eventTrail, 0, true );
     }
 
     sceneryLog && sceneryLog.Input && sceneryLog.pop();
@@ -1731,17 +1589,16 @@ class Input {
 
   /**
    * Dispatches any necessary events that would result from the pointer's trail changing.
-   * @private
    *
    * This will send the necessary exit/enter events (on subtrails that have diverged between before/after), the
    * out/over events, and if flagged a move event.
    *
-   * @param {Pointer} pointer
-   * @param {Event|null} event
-   * @param {boolean} sendMove - Whether to send move events
-   * @returns {Trail} - The current trail of the pointer
+   * @param pointer
+   * @param event
+   * @param sendMove - Whether to send move events
+   * @returns - The current trail of the pointer
    */
-  branchChangeEvents( pointer, event, sendMove ) {
+  private branchChangeEvents<DOMEvent extends Event>( pointer: Pointer, event: DOMEvent | null, sendMove: boolean ): Trail {
     sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent(
       `branchChangeEvents: ${pointer.toString()} sendMove:${sendMove}` );
     sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
@@ -1766,12 +1623,12 @@ class Input {
 
     // event order matches http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
     if ( sendMove ) {
-      this.dispatchEvent( trail, 'move', pointer, event, true );
+      this.dispatchEvent<DOMEvent>( trail, 'move', pointer, event, true );
     }
 
     // We want to approximately mimic http://www.w3.org/TR/DOM-Level-3-Events/#events-mouseevent-event-order
-    this.exitEvents( pointer, event, oldInputEnabledTrail, branchInputEnabledIndex, lastInputEnabledNodeChanged );
-    this.enterEvents( pointer, event, inputEnabledTrail, branchInputEnabledIndex, lastInputEnabledNodeChanged );
+    this.exitEvents<DOMEvent>( pointer, event, oldInputEnabledTrail, branchInputEnabledIndex, lastInputEnabledNodeChanged );
+    this.enterEvents<DOMEvent>( pointer, event, inputEnabledTrail, branchInputEnabledIndex, lastInputEnabledNodeChanged );
 
     pointer.trail = trail;
     pointer.inputEnabledTrail = inputEnabledTrail;
@@ -1782,7 +1639,6 @@ class Input {
 
   /**
    * Triggers 'enter' events along a trail change, and an 'over' event on the leaf.
-   * @private
    *
    * For example, if we change from a trail [ a, b, c, d, e ] => [ a, b, x, y ], it will fire:
    *
@@ -1790,26 +1646,25 @@ class Input {
    * - enter y
    * - over y (bubbles)
    *
-   * @param {Pointer} pointer
-   * @param {Event|null} event
-   * @param {Trail} trail - The "new" trail
-   * @param {number} branchIndex - The first index where the old and new trails have a different node. We will notify
+   * @param pointer
+   * @param event
+   * @param trail - The "new" trail
+   * @param branchIndex - The first index where the old and new trails have a different node. We will notify
    *                               for this node and all "descendant" nodes in the relevant trail.
-   * @param {boolean} lastNodeChanged - If the last node didn't change, we won't sent an over event.
+   * @param lastNodeChanged - If the last node didn't change, we won't sent an over event.
    */
-  enterEvents( pointer, event, trail, branchIndex, lastNodeChanged ) {
+  private enterEvents<DOMEvent extends Event>( pointer: Pointer, event: DOMEvent | null, trail: Trail, branchIndex: number, lastNodeChanged: boolean ) {
     if ( lastNodeChanged ) {
-      this.dispatchEvent( trail, 'over', pointer, event, true, true );
+      this.dispatchEvent<DOMEvent>( trail, 'over', pointer, event, true, true );
     }
 
     for ( let i = branchIndex; i < trail.length; i++ ) {
-      this.dispatchEvent( trail.slice( 0, i + 1 ), 'enter', pointer, event, false );
+      this.dispatchEvent<DOMEvent>( trail.slice( 0, i + 1 ), 'enter', pointer, event, false );
     }
   }
 
   /**
    * Triggers 'exit' events along a trail change, and an 'out' event on the leaf.
-   * @private
    *
    * For example, if we change from a trail [ a, b, c, d, e ] => [ a, b, x, y ], it will fire:
    *
@@ -1818,37 +1673,36 @@ class Input {
    * - exit d
    * - exit e
    *
-   * @param {Pointer} pointer
-   * @param {Event|null} event
-   * @param {Trail} trail - The "old" trail
-   * @param {number} branchIndex - The first index where the old and new trails have a different node. We will notify
+   * @param pointer
+   * @param event
+   * @param trail - The "old" trail
+   * @param branchIndex - The first index where the old and new trails have a different node. We will notify
    *                               for this node and all "descendant" nodes in the relevant trail.
-   * @param {boolean} lastNodeChanged - If the last node didn't change, we won't sent an out event.
+   * @param lastNodeChanged - If the last node didn't change, we won't sent an out event.
    */
-  exitEvents( pointer, event, trail, branchIndex, lastNodeChanged ) {
+  private exitEvents<DOMEvent extends Event>( pointer: Pointer, event: DOMEvent | null, trail: Trail, branchIndex: number, lastNodeChanged: boolean ) {
     for ( let i = trail.length - 1; i >= branchIndex; i-- ) {
-      this.dispatchEvent( trail.slice( 0, i + 1 ), 'exit', pointer, event, false, true );
+      this.dispatchEvent<DOMEvent>( trail.slice( 0, i + 1 ), 'exit', pointer, event, false, true );
     }
 
     if ( lastNodeChanged ) {
-      this.dispatchEvent( trail, 'out', pointer, event, true );
+      this.dispatchEvent<DOMEvent>( trail, 'out', pointer, event, true );
     }
   }
 
   /**
    * Dispatch to all nodes in the Trail, optionally bubbling down from the leaf to the root.
-   * @private
    *
-   * @param {Trail} trail
-   * @param {string} type
-   * @param {Pointer} pointer
-   * @param {Event|null} event
-   * @param {boolean} bubbles - If bubbles is false, the event is only dispatched to the leaf node of the trail.
-   * @param {boolean} fireOnInputDisabled - Whether to fire this event even if nodes have inputEnabled:false
+   * @param trail
+   * @param type
+   * @param pointer
+   * @param event
+   * @param bubbles - If bubbles is false, the event is only dispatched to the leaf node of the trail.
+   * @param fireOnInputDisabled - Whether to fire this event even if nodes have inputEnabled:false
    */
-  dispatchEvent( trail, type, pointer, event, bubbles, fireOnInputDisabled = false ) {
+  private dispatchEvent<DOMEvent extends Event>( trail: Trail, type: string, pointer: Pointer, event: DOMEvent | null, bubbles: boolean, fireOnInputDisabled: boolean = false ) {
     sceneryLog && sceneryLog.EventDispatch && sceneryLog.EventDispatch(
-      `${type} trail:${trail.toString()} pointer:${pointer.toString()} at ${pointer.point.toString()}` );
+      `${type} trail:${trail.toString()} pointer:${pointer.toString()} at ${pointer.point ? pointer.point.toString() : 'null'}` );
     sceneryLog && sceneryLog.EventDispatch && sceneryLog.push();
 
     assert && assert( trail, 'Falsy trail for dispatchEvent' );
@@ -1856,21 +1710,21 @@ class Input {
     sceneryLog && sceneryLog.EventPath && sceneryLog.EventPath( `${type} ${trail.toPathString()}` );
 
     // NOTE: event is not immutable, as its currentTarget changes
-    const inputEvent = new SceneryEvent( trail, type, pointer, event );
+    const inputEvent = new SceneryEvent<DOMEvent>( trail, type, pointer, event );
 
     // first run through the pointer's listeners to see if one of them will handle the event
-    this.dispatchToListeners( pointer, pointer.getListeners(), type, inputEvent );
+    this.dispatchToListeners<DOMEvent>( pointer, pointer.getListeners(), type, inputEvent );
 
     // if not yet handled, run through the trail in order to see if one of them will handle the event
     // at the base of the trail should be the scene node, so the scene will be notified last
-    this.dispatchToTargets( trail, type, pointer, inputEvent, bubbles, fireOnInputDisabled );
+    this.dispatchToTargets<DOMEvent>( trail, type, pointer, inputEvent, bubbles, fireOnInputDisabled );
 
     // Notify input listeners on the Display
-    this.dispatchToListeners( pointer, this.display.getInputListeners(), type, inputEvent );
+    this.dispatchToListeners<DOMEvent>( pointer, this.display.getInputListeners(), type, inputEvent );
 
     // Notify input listeners to any Display
     if ( Display.inputListeners.length ) {
-      this.dispatchToListeners( pointer, Display.inputListeners.slice(), type, inputEvent );
+      this.dispatchToListeners<DOMEvent>( pointer, Display.inputListeners.slice(), type, inputEvent );
     }
 
     sceneryLog && sceneryLog.EventDispatch && sceneryLog.pop();
@@ -1878,14 +1732,13 @@ class Input {
 
   /**
    * Notifies an array of listeners with a specific event.
-   * @private
    *
-   * @param {Pointer} pointer
-   * @param {Array.<Object>} listeners - Should be a defensive array copy already.
-   * @param {string} type
-   * @param {SceneryEvent} inputEvent
+   * @param pointer
+   * @param listeners - Should be a defensive array copy already.
+   * @param type
+   * @param inputEvent
    */
-  dispatchToListeners( pointer, listeners, type, inputEvent ) {
+  private dispatchToListeners<DOMEvent extends Event>( pointer: Pointer, listeners: IInputListener[], type: string, inputEvent: SceneryEvent<DOMEvent> ) {
     assert && assert( inputEvent instanceof SceneryEvent );
 
     if ( inputEvent.handled ) {
@@ -1897,20 +1750,20 @@ class Input {
     for ( let i = 0; i < listeners.length; i++ ) {
       const listener = listeners[ i ];
 
-      if ( !inputEvent.aborted && listener[ specificType ] ) {
+      if ( !inputEvent.aborted && listener[ specificType as keyof IInputListener ] ) {
         sceneryLog && sceneryLog.EventDispatch && sceneryLog.EventDispatch( specificType );
         sceneryLog && sceneryLog.EventDispatch && sceneryLog.push();
 
-        listener[ specificType ]( inputEvent );
+        ( listener[ specificType as keyof IInputListener ] as SceneryListenerFunction<DOMEvent> )( inputEvent );
 
         sceneryLog && sceneryLog.EventDispatch && sceneryLog.pop();
       }
 
-      if ( !inputEvent.aborted && listener[ type ] ) {
+      if ( !inputEvent.aborted && listener[ type as keyof IInputListener ] ) {
         sceneryLog && sceneryLog.EventDispatch && sceneryLog.EventDispatch( type );
         sceneryLog && sceneryLog.EventDispatch && sceneryLog.push();
 
-        listener[ type ]( inputEvent );
+        ( listener[ type as keyof IInputListener ] as SceneryListenerFunction<DOMEvent> )( inputEvent );
 
         sceneryLog && sceneryLog.EventDispatch && sceneryLog.pop();
       }
@@ -1919,16 +1772,15 @@ class Input {
 
   /**
    * Dispatch to all nodes in the Trail, optionally bubbling down from the leaf to the root.
-   * @private
    *
-   * @param {Trail} trail
-   * @param {string} type
-   * @param {Pointer} pointer
-   * @param {SceneryEvent} inputEvent
-   * @param {boolean} bubbles - If bubbles is false, the event is only dispatched to the leaf node of the trail.
-   * @param {boolean} [fireOnInputDisabled]
+   * @param trail
+   * @param type
+   * @param pointer
+   * @param inputEvent
+   * @param bubbles - If bubbles is false, the event is only dispatched to the leaf node of the trail.
+   * @param [fireOnInputDisabled]
    */
-  dispatchToTargets( trail, type, pointer, inputEvent, bubbles, fireOnInputDisabled = false ) {
+  private dispatchToTargets<DOMEvent extends Event>( trail: Trail, type: string, pointer: Pointer, inputEvent: SceneryEvent<DOMEvent>, bubbles: boolean, fireOnInputDisabled: boolean = false ) {
     assert && assert( inputEvent instanceof SceneryEvent );
 
     if ( inputEvent.aborted || inputEvent.handled ) {
@@ -1949,7 +1801,7 @@ class Input {
 
       inputEvent.currentTarget = target;
 
-      this.dispatchToListeners( pointer, target.getInputListeners(), type, inputEvent );
+      this.dispatchToListeners<DOMEvent>( pointer, target.getInputListeners(), type, inputEvent );
 
       // if the input event was aborted or handled, don't follow the trail down another level
       if ( inputEvent.aborted || inputEvent.handled ) {
@@ -1960,13 +1812,9 @@ class Input {
 
   /**
    * Returns true if the Display is accessible and the element is a descendant of the Display PDOM.
-   * @private
-   *
-   * @param {HTMLElement} element
-   * @returns {boolean}
    */
-  isTargetUnderPDOM( element ) {
-    return this.display._accessible && this.display.pdomRootElement.contains( element );
+  private isTargetUnderPDOM( element: HTMLElement ): boolean {
+    return this.display._accessible && this.display.pdomRootElement!.contains( element );
   }
 
   /**
@@ -1974,17 +1822,15 @@ class Input {
    * polymorphism, all supported DOM event keys that scenery uses will always be included in this serialization. If
    * the particular Event interface for the instance being serialized doesn't have a certain property, then it will be
    * set as `null`. See domEventPropertiesToSerialize for the full list of supported Event properties.
-   * @public
    *
-   * @param {Event} domEvent
    * @returns {Object} - see domEventPropertiesToSerialize for list keys that are serialized
    */
-  static serializeDomEvent( domEvent ) {
-    const entries = {};
+  static serializeDomEvent( domEvent: Event ): any {
+    const entries = {} as any;
 
     domEventPropertiesToSerialize.forEach( property => {
 
-        const domEventProperty = domEvent[ property ];
+        const domEventProperty = domEvent[ property as keyof Event ] as any;
 
         // We serialize many Event APIs into a single object, so be graceful if properties don't exist.
         if ( domEventProperty === undefined || domEventProperty === null ) {
@@ -2030,14 +1876,10 @@ class Input {
   }
 
   /**
-   * From a serialized dom event, return a recreated window.Event
-   * @public (scenery-internal)
-   *
-   * @param {Object} eventObject
-   * @returns {Event}
+   * From a serialized dom event, return a recreated window.Event (scenery-internal)
    */
-  static deserializeDomEvent( eventObject ) {
-    const domEvent = new window.Event( 'Event' );
+  static deserializeDomEvent( eventObject: any ): Event {
+    const domEvent: Event = new window.Event( 'Event' );
     for ( const key in eventObject ) {
 
       // `type` is readonly, so don't try to set it.
@@ -2045,9 +1887,11 @@ class Input {
 
         // Special case for target since we can't set that read-only property. Instead use a substitute key.
         if ( key === 'target' ) {
+          // @ts-ignore
           domEvent[ TARGET_SUBSTITUTE_KEY ] = _.clone( eventObject[ key ] ) || {};
 
           // TODO: only needed until https://github.com/phetsims/scenery/issues/1296 is complete, double check on getTrailIdImplementation() too
+          // @ts-ignore
           domEvent[ TARGET_SUBSTITUTE_KEY ].getAttribute = function( key ) {
             return this[ key ];
           };
@@ -2057,10 +1901,12 @@ class Input {
 
             const htmlElement = document.getElementById( eventObject[ key ][ PDOMUtils.DATA_TRAIL_ID ] );
             assert && assert( htmlElement, 'cannot deserialize event when related target is not in the DOM.' );
+            // @ts-ignore
             domEvent[ RELATED_TARGET_SUBSTITUTE_KEY ] = htmlElement;
           }
         }
         else {
+          // @ts-ignore
           domEvent[ key ] = eventObject[ key ];
         }
       }
@@ -2070,12 +1916,11 @@ class Input {
 
   /**
    * Convenience function for logging out a point/event combination.
-   * @private
    *
-   * @param {Vector2|null} point - Not logged if null
-   * @param {Event} domEvent
+   * @param point - Not logged if null
+   * @param domEvent
    */
-  static debugText( point, domEvent ) {
+  private static debugText( point: Vector2 | null, domEvent: Event ) {
     let result = `${domEvent.timeStamp} ${domEvent.type}`;
     if ( point !== null ) {
       result = `${point.x},${point.y} ${result}`;
@@ -2084,19 +1929,18 @@ class Input {
   }
 
   /**
-   * Maps the current MS pointer types onto the pointer spec.
-   * @public (scenery-internal)
-   *
-   * @param {Event} event
-   * @returns {string}
+   * Maps the current MS pointer types onto the pointer spec. (scenery-internal)
    */
-  static msPointerType( event ) {
+  static msPointerType( event: PointerEvent ): string {
+    // @ts-ignore -- legacy API
     if ( event.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_TOUCH ) {
       return 'touch';
     }
+    // @ts-ignore -- legacy API
     else if ( event.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_PEN ) {
       return 'pen';
     }
+    // @ts-ignore -- legacy API
     else if ( event.pointerType === window.MSPointerEvent.MSPOINTER_TYPE_MOUSE ) {
       return 'mouse';
     }
@@ -2106,30 +1950,6 @@ class Input {
   }
 }
 
-// @public {Array.<string>} - Basic event listener types that are not pointer-type specific
-Input.BASIC_EVENT_TYPES = () => {
-  return [ 'down', 'up', 'cancel', 'move', 'wheel', 'enter', 'exit', 'over', 'out' ];
-};
-
-// @public {Array.<string>} - Valid accessibility event types, these largely follow the HTML spec for the same names.
-//                            See the doc at the top of this file for more information.
-Input.PDOM_EVENT_TYPES = () => {
-  return [ 'focus', 'blur', 'click', 'input', 'change', 'keydown', 'keyup', 'focusin', 'focusout' ];
-};
-
-// @public {Array.<string>} - Valid prefixes for the basic event types above
-Input.EVENT_PREFIXES = () => {
-  return [ '', 'mouse', 'touch', 'pen' ];
-};
-
-// @public {Array.<string>} - Includes basic and specific types, e.g. both 'up' and 'mouseup'
-Input.ALL_EVENT_TYPES = () => {
-  return Input.EVENT_PREFIXES.map( prefix => {
-    return Input.BASIC_EVENT_TYPES.map( eventName => {
-      return prefix + eventName;
-    } );
-  } ).concat( [ Input.PDOM_EVENT_TYPES ] );
-};
-
 scenery.register( 'Input', Input );
 export default Input;
+export type { InputOptions };

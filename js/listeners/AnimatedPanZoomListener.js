@@ -17,8 +17,7 @@ import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
 import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import { EventIO, FocusManager, globalKeyStateTracker, KeyboardUtils, KeyboardZoomUtils, PanZoomListener, PDOMUtils, Pointer, PressListener, scenery } from '../imports.js';
-import { Node } from '../../../scenery/js/imports.js'; // eslint-disable-line
+import { EventIO, FocusManager, globalKeyStateTracker, Intent, KeyboardUtils, KeyboardZoomUtils, PanZoomListener, PDOMUtils, PressListener, scenery, Node } from '../imports.js'; // eslint-disable-line
 
 // constants
 const MOVE_CURSOR = 'all-scroll';
@@ -219,7 +218,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
     // If the Pointer signifies the input is intended for dragging save a reference to the trail so we can support
     // keeping the event target in view during the drag operation.
-    if ( this._dragBounds !== null && event.pointer.hasIntent( Pointer.Intent.DRAG ) ) {
+    if ( this._dragBounds !== null && event.pointer.hasIntent( Intent.DRAG ) ) {
       this._downOnDraggable = true;
       this._draggingInDragBounds = this._dragBounds.containsPoint( event.pointer.point );
 
@@ -450,7 +449,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
     // handle translation
     if ( KeyboardUtils.isArrowKey( domEvent ) ) {
-      const keyboardDragIntent = event.pointer.hasIntent( Pointer.Intent.KEYBOARD_DRAG );
+      const keyboardDragIntent = event.pointer.hasIntent( Intent.KEYBOARD_DRAG );
 
       if ( !keyboardDragIntent ) {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener handle arrow key down' );
@@ -761,8 +760,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * @returns {boolean}
    */
   hasDragIntent( pointer ) {
-    return pointer.hasIntent( Pointer.Intent.KEYBOARD_DRAG ) ||
-           pointer.hasIntent( Pointer.Intent.DRAG );
+    return pointer.hasIntent( Intent.KEYBOARD_DRAG ) ||
+           pointer.hasIntent( Intent.DRAG );
   }
 
   /**

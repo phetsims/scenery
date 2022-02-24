@@ -6,29 +6,32 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { scenery, svgns } from '../imports.js';
+import { Shape } from '../../../kite/js/imports.js';
+import { Display, scenery, svgns, Node, IOverlay } from '../imports.js';
 
-class ShapeBasedOverlay {
-  /**
-   * @param {Display} display
-   * @param {Node} rootNode
-   * @param {string} name
-   */
-  constructor( display, rootNode, name ) {
+abstract class ShapeBasedOverlay implements IOverlay {
+
+  display: Display;
+  rootNode: Node;
+  svg: SVGElement;
+  domElement: SVGElement;
+
+  protected constructor( display: Display, rootNode: Node, name: string ) {
     this.display = display;
     this.rootNode = rootNode;
 
     const svg = document.createElementNS( svgns, 'svg' );
     svg.style.position = 'absolute';
     svg.setAttribute( 'class', name );
-    svg.style.top = 0;
-    svg.style.left = 0;
+    svg.style.top = '0';
+    svg.style.left = '0';
+    // @ts-ignore
     svg.style[ 'pointer-events' ] = 'none';
     this.svg = svg;
 
-    function resize( width, height ) {
-      svg.setAttribute( 'width', width );
-      svg.setAttribute( 'height', height );
+    function resize( width: number, height: number ) {
+      svg.setAttribute( 'width', '' + width );
+      svg.setAttribute( 'height', '' + height );
       svg.style.clip = `rect(0px,${width}px,${height}px,0px)`;
     }
 
@@ -39,14 +42,7 @@ class ShapeBasedOverlay {
     this.domElement = svg;
   }
 
-  /**
-   * @public
-   *
-   * @param {Shape} shape
-   * @param {string} color
-   * @param {boolean} isOffset
-   */
-  addShape( shape, color, isOffset ) {
+  addShape( shape: Shape, color: string, isOffset: boolean ) {
     const path = document.createElementNS( svgns, 'path' );
     let svgPath = shape.getSVGPath();
 
@@ -67,9 +63,6 @@ class ShapeBasedOverlay {
     this.svg.appendChild( path );
   }
 
-  /**
-   * @public
-   */
   update() {
     while ( this.svg.childNodes.length ) {
       this.svg.removeChild( this.svg.childNodes[ this.svg.childNodes.length - 1 ] );
@@ -78,17 +71,10 @@ class ShapeBasedOverlay {
     this.addShapes();
   }
 
-  /**
-   * @public
-   * @abstract
-   */
-  addShapes() {
-
-  }
+  abstract addShapes(): void;
 
   /**
    * Releases references
-   * @public
    */
   dispose() {
 
