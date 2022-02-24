@@ -1,4 +1,4 @@
-// Copyright 2013-2021, University of Colorado Boulder
+// Copyright 2013-2022, University of Colorado Boulder
 
 /**
  * Displays mouse and touch areas when they are customized. Expensive to display!
