@@ -56,7 +56,7 @@ import stepTimer from '../../../axon/js/stepTimer.js';
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Dimension2 from '../../../dot/js/Dimension2.js';
-import Matrix3 from '../../../dot/js/Matrix3.js';
+import { Matrix3Type } from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import escapeHTML from '../../../phet-core/js/escapeHTML.js';
 import optionize from '../../../phet-core/js/optionize.js';
@@ -1630,24 +1630,19 @@ class Display {
 
       let transformType = '';
       switch( node.transform.getMatrix().type ) {
-        // @ts-ignore TODO Matrix3
-        case Matrix3.Types.IDENTITY:
+        case Matrix3Type.IDENTITY:
           transformType = '';
           break;
-        // @ts-ignore TODO Matrix3
-        case Matrix3.Types.TRANSLATION_2D:
+        case Matrix3Type.TRANSLATION_2D:
           transformType = 'translated';
           break;
-        // @ts-ignore TODO Matrix3
-        case Matrix3.Types.SCALING:
+        case Matrix3Type.SCALING:
           transformType = 'scale';
           break;
-        // @ts-ignore TODO Matrix3
-        case Matrix3.Types.AFFINE:
+        case Matrix3Type.AFFINE:
           transformType = 'affine';
           break;
-        // @ts-ignore TODO Matrix3
-        case Matrix3.Types.OTHER:
+        case Matrix3Type.OTHER:
           transformType = 'other';
           break;
         default:
