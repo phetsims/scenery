@@ -70,6 +70,7 @@
 
 import Action from '../../../axon/js/Action.js';
 import IProperty from '../../../axon/js/IProperty.js';
+import IReadOnlyProperty from '../../../axon/js/IReadOnlyProperty.js';
 import Property from '../../../axon/js/Property.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Transform3 from '../../../dot/js/Transform3.js';
@@ -108,7 +109,7 @@ type SelfOptions<Listener extends DragListener> = {
   transform?: Transform3 | null;
 
   // If provided, the model position will be constrained to be inside these bounds.
-  dragBoundsProperty?: IProperty<Bounds2 | null> | null;
+  dragBoundsProperty?: IReadOnlyProperty<Bounds2 | null> | null;
 
   // If true, unattached touches that move across our node will trigger a press(). This helps sometimes
   // for small draggable objects.
@@ -754,17 +755,6 @@ export default class DragListener extends PressListener implements IInputListene
       this._transformTracker = null;
     }
   }
-
-  /**
-   * Sets the drag bounds of the listener.
-   */
-  setDragBounds( bounds: Bounds2 | null ) {
-    assert && assert( bounds === null || bounds instanceof Bounds2 );
-
-    this._dragBoundsProperty.value = bounds;
-  }
-
-  set dragBounds( value: Bounds2 | null ) { this.setDragBounds( value ); }
 
   /**
    * Returns the drag bounds of the listener.
