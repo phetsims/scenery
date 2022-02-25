@@ -14,7 +14,7 @@ import inheritance from '../../../phet-core/js/inheritance.js';
 import platform from '../../../phet-core/js/platform.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import { scenery, Renderer, Color, PaintDef, Node, IPaint, Paint, LinearGradient, Pattern, RadialGradient, CanvasContextWrapper, Gradient, IPaintableDrawable } from '../imports.js';
-import Constructor from '../../../phet-core/js/Constructor.js';
+import Constructor from '../../../phet-core/js/types/Constructor.js';
 
 const isSafari5 = platform.safari5;
 

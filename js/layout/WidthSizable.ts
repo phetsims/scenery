@@ -11,7 +11,7 @@
 import TinyProperty from '../../../axon/js/TinyProperty.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import { scenery, Node } from '../imports.js';
-import Constructor from '../../../phet-core/js/Constructor.js';
+import Constructor from '../../../phet-core/js/types/Constructor.js';
 
 const WIDTH_SIZABLE_OPTION_KEYS = [
   'preferredWidth',

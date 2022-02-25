@@ -7,7 +7,7 @@
  */
 
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
-import Constructor from '../../../phet-core/js/Constructor.js';
+import Constructor from '../../../phet-core/js/types/Constructor.js';
 import Enumeration from '../../../phet-core/js/Enumeration.js';
 import EnumerationValue from '../../../phet-core/js/EnumerationValue.js';
 import memoize from '../../../phet-core/js/memoize.js';

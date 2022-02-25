@@ -32,7 +32,7 @@ import Utterance from '../../../../utterance-queue/js/Utterance.js';
 import UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
 import { InteractiveHighlighting, Node, NodeOptions, scenery, SceneryListenerFunction, voicingUtteranceQueue } from '../../imports.js';
 import optionize from '../../../../phet-core/js/optionize.js';
-import Constructor from '../../../../phet-core/js/Constructor.js';
+import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import { TAlertableDef } from '../../../../utterance-queue/js/AlertableDef.js';
 import IntentionalAny from '../../../../phet-core/js/IntentionalAny.js';
 

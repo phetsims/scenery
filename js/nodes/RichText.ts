@@ -62,7 +62,7 @@ import { PropertyOptions } from '../../../axon/js/Property.js';
 import StringProperty from '../../../axon/js/StringProperty.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import Constructor from '../../../phet-core/js/Constructor.js';
+import Constructor from '../../../phet-core/js/types/Constructor.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
 import inheritance from '../../../phet-core/js/inheritance.js';
 import memoize from '../../../phet-core/js/memoize.js';

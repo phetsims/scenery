@@ -11,7 +11,7 @@ import Orientation from '../../../phet-core/js/Orientation.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import mutate from '../../../phet-core/js/mutate.js';
 import { scenery } from '../imports.js';
-import Constructor from '../../../phet-core/js/Constructor.js';
+import Constructor from '../../../phet-core/js/types/Constructor.js';
 import EnumerationValue from '../../../phet-core/js/EnumerationValue.js';
 import Enumeration from '../../../phet-core/js/Enumeration.js';
 
