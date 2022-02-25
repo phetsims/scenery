@@ -32,7 +32,7 @@ import EventType from '../../../tandem/js/EventType.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
-import { scenery, Node, Mouse, SceneryEvent, Pointer, Trail, IInputListener, Display } from '../imports.js';
+import { Display, IInputListener, Mouse, Node, Pointer, scenery, SceneryEvent, Trail } from '../imports.js';
 import IProperty from '../../../axon/js/IProperty.js';
 
 // global
@@ -41,22 +41,23 @@ let globalID = 0;
 // Factor out to reduce memory footprint, see https://github.com/phetsims/tandem/issues/71
 const truePredicate: ( ( ...args: any[] ) => true ) = _.constant( true );
 
-type PressListenerEvent = SceneryEvent<MouseEvent | TouchEvent | PointerEvent | KeyboardEvent>;
-type PressListenerCallback = ( event: PressListenerEvent, listener: PressListener ) => void;
-type PressListenerNullableCallback = ( event: PressListenerEvent | null, listener: PressListener ) => void;
-type PressListenerCanStartPressCallback = ( event: PressListenerEvent | null, listener: PressListener ) => boolean;
+export type PressListenerDOMEvent = MouseEvent | TouchEvent | PointerEvent | KeyboardEvent;
+export type PressListenerEvent = SceneryEvent<PressListenerDOMEvent>;
+export type PressListenerCallback<Listener extends PressListener> = ( event: PressListenerEvent, listener: Listener ) => void;
+export type PressListenerNullableCallback<Listener extends PressListener> = ( event: PressListenerEvent | null, listener: Listener ) => void;
+export type PressListenerCanStartPressCallback<Listener extends PressListener> = ( event: PressListenerEvent | null, listener: Listener ) => boolean;
 
-type PressListenerSelfOptions = {
+type SelfOptions<Listener extends PressListener> = {
   // Called when this listener is pressed (typically from a down event, but can be triggered by other handlers)
-  press?: PressListenerCallback;
+  press?: PressListenerCallback<Listener>;
 
   // Called when this listener is released. Note that an SceneryEvent arg cannot be guaranteed from this listener. This
   // is, in part, to support interrupt. (pointer up/cancel or interrupt when pressed/after click from the pdom).
   // NOTE: This will also be called if the press is "released" due to being interrupted or canceled.
-  release?: PressListenerNullableCallback;
+  release?: PressListenerNullableCallback<Listener>;
 
   // Called when this listener is dragged (move events on the pointer while pressed)
-  drag?: PressListenerCallback;
+  drag?: PressListenerCallback<Listener>;
 
   // If provided, the pressedTrail (calculated from the down event) will be replaced with the (sub)trail that ends with
   // the targetNode as the leaf-most Node. This affects the parent coordinate frame computations.
@@ -89,7 +90,7 @@ type PressListenerSelfOptions = {
   useInputListenerCursor?: boolean;
 
   // Checks this when trying to start a press. If this function returns false, a press will not be started
-  canStartPress?: PressListenerCanStartPressCallback;
+  canStartPress?: PressListenerCanStartPressCallback<Listener>;
 
   // (a11y) - How long something should 'look' pressed after an accessible click input event, in ms
   a11yLooksPressedInterval?: number;
@@ -108,9 +109,12 @@ type PressListenerSelfOptions = {
   phetioFeatured?: boolean;
 };
 
-type PressListenerOptions = PressListenerSelfOptions & EnabledComponentOptions;
+export type PressListenerOptions<Listener extends PressListener> = SelfOptions<Listener> & EnabledComponentOptions;
 
-class PressListener extends EnabledComponent {
+export type PressedPressListener = PressListener & { [ key in 'pointer' | 'pressedTrail' ]: NonNullable<PressListener[ key ]> };
+const isPressedListener = ( listener: PressListener ): listener is PressedPressListener => listener.isPressed;
+
+export default class PressListener extends EnabledComponent implements IInputListener {
 
   // Unique global ID for this listener
   private _id: number;
@@ -120,10 +124,10 @@ class PressListener extends EnabledComponent {
 
   private _pressCursor: string | null;
 
-  private _pressListener: PressListenerCallback;
-  private _releaseListener: PressListenerNullableCallback;
-  private _dragListener: PressListenerCallback;
-  private _canStartPress: PressListenerCanStartPressCallback;
+  private _pressListener: PressListenerCallback<PressListener>;
+  private _releaseListener: PressListenerNullableCallback<PressListener>;
+  private _dragListener: PressListenerCallback<PressListener>;
+  private _canStartPress: PressListenerCanStartPressCallback<PressListener>;
 
   private _targetNode: Node | null;
 
@@ -224,8 +228,8 @@ class PressListener extends EnabledComponent {
   // we need the same exact function to add and remove as a listener
   private boundInvalidateOverListener: () => void;
 
-  constructor( providedOptions?: PressListenerOptions ) {
-    const options = optionize<PressListenerOptions, PressListenerSelfOptions, EnabledComponentOptions>( {
+  constructor( providedOptions?: PressListenerOptions<PressListener> ) {
+    const options = optionize<PressListenerOptions<PressListener>, SelfOptions<PressListener>, EnabledComponentOptions, 'tandem'>( {
 
       press: _.noop,
       release: _.noop,
@@ -326,7 +330,7 @@ class PressListener extends EnabledComponent {
     };
 
     this._pressAction = new Action( this.onPress.bind( this ), {
-      tandem: options.tandem!.createTandem( 'pressAction' ),
+      tandem: options.tandem.createTandem( 'pressAction' ),
       phetioDocumentation: 'Executes whenever a press occurs. The first argument when executing can be ' +
                            'used to convey info about the SceneryEvent.',
       phetioReadOnly: true,
@@ -356,7 +360,7 @@ class PressListener extends EnabledComponent {
       } ],
 
       // phet-io
-      tandem: options.tandem!.createTandem( 'releaseAction' ),
+      tandem: options.tandem.createTandem( 'releaseAction' ),
       phetioDocumentation: 'Executes whenever a release occurs.',
       phetioReadOnly: true,
       phetioFeatured: options.phetioFeatured,
@@ -398,13 +402,17 @@ class PressListener extends EnabledComponent {
     return this.cursorProperty.value;
   }
 
+  get attach(): boolean {
+    return this._attach;
+  }
+
   /**
    * The main node that this listener is responsible for dragging.
    */
   getCurrentTarget(): Node {
     assert && assert( this.isPressed, 'We have no currentTarget if we are not pressed' );
 
-    return this.pressedTrail!.lastNode();
+    return ( this as PressedPressListener ).pressedTrail.lastNode();
   }
 
   get currentTarget(): Node {
@@ -500,8 +508,10 @@ class PressListener extends EnabledComponent {
    * Called when move events are fired on the attached pointer listener.
    *
    * This can be overridden (with super-calls) when custom drag behavior is needed for a type.
+   *
+   * (scenery-internal, effectively protected)
    */
-  protected drag( event: PressListenerEvent ) {
+  drag( event: PressListenerEvent ) {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} drag` );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -690,8 +700,9 @@ class PressListener extends EnabledComponent {
    */
   private onRelease( event: PressListenerEvent | null, callback: ( () => void ) | null ) {
     assert && assert( this.isPressed, 'This listener is not pressed' );
+    const pressedListener = this as PressedPressListener;
 
-    this.pointer!.removeInputListener( this._pointerListener );
+    pressedListener.pointer.removeInputListener( this._pointerListener );
     this._listeningToPointer = false;
 
     // Set the pressed state false *before* invoking the callback, otherwise an infinite loop can result in some
@@ -705,7 +716,7 @@ class PressListener extends EnabledComponent {
 
     // These properties are cleared now, at the end of the onRelease, in case they were needed by the callback or in
     // listeners on the pressed Property.
-    this.pointer!.cursor = null;
+    pressedListener.pointer.cursor = null;
     this.pointer = null;
     this.pressedTrail = null;
   }
@@ -971,8 +982,8 @@ class PressListener extends EnabledComponent {
     // We need to release references to any pointers that are over us.
     this.overPointers.clear();
 
-    if ( this._listeningToPointer ) {
-      this.pointer!.removeInputListener( this._pointerListener );
+    if ( this._listeningToPointer && isPressedListener( this ) ) {
+      this.pointer.removeInputListener( this._pointerListener );
     }
 
     // These Properties could have already been disposed, for example in the sun button hierarchy, see https://github.com/phetsims/sun/issues/372
@@ -1013,6 +1024,3 @@ PressListener.phetioAPI = {
   pressAction: { phetioType: Action.ActionIO( [ SceneryEvent.SceneryEventIO ] ) },
   releaseAction: { phetioType: Action.ActionIO( [ NullableIO( SceneryEvent.SceneryEventIO ) ] ) }
 };
-
-export default PressListener;
-export type { PressListenerOptions, PressListenerEvent };

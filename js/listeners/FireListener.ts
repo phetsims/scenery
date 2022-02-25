@@ -16,9 +16,9 @@ import EventType from '../../../tandem/js/EventType.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
-import { scenery, SceneryEvent, PressListener, PressListenerOptions, Node } from '../imports.js';
+import { scenery, SceneryEvent, PressListener, PressListenerOptions, Node, IInputListener } from '../imports.js';
 
-type FireListenerSelfOptions = {
+type SelfOptions = {
   // Called as fire() when the button is fired.
   fire?: ( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ) => void;
 
@@ -33,16 +33,16 @@ type FireListenerSelfOptions = {
   fireOnHoldInterval?: number; // fire continuously at this interval (milliseconds)
 };
 
-type FireListenerOptions = FireListenerSelfOptions & PressListenerOptions;
+export type FireListenerOptions<Listener extends FireListener> = SelfOptions & PressListenerOptions<Listener>;
 
-class FireListener extends PressListener {
+export default class FireListener extends PressListener implements IInputListener {
 
   private _fireOnDown: boolean;
   private firedEmitter: Emitter<[ SceneryEvent<MouseEvent | TouchEvent | PointerEvent> | null ]>;
   private _timer?: CallbackTimer;
 
-  constructor( providedOptions?: FireListenerOptions ) {
-    const options = optionize<FireListenerOptions, FireListenerSelfOptions, PressListenerOptions>( {
+  constructor( providedOptions?: FireListenerOptions<FireListener> ) {
+    const options = optionize<FireListenerOptions<FireListener>, SelfOptions, PressListenerOptions<FireListener>>( {
       fire: _.noop,
       fireOnDown: false,
       fireOnHold: false,
@@ -59,7 +59,7 @@ class FireListener extends PressListener {
     assert && assert( typeof options.fire === 'function', 'The fire callback should be a function' );
     assert && assert( typeof options.fireOnDown === 'boolean', 'fireOnDown should be a boolean' );
 
-    super( options );
+    super( options as PressListenerOptions<PressListener> );
 
     this._fireOnDown = options.fireOnDown;
 
@@ -199,6 +199,3 @@ class FireListener extends PressListener {
 }
 
 scenery.register( 'FireListener', FireListener );
-
-export default FireListener;
-export type { FireListenerOptions };

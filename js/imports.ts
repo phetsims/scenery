@@ -200,10 +200,11 @@ export { default as ButtonListener } from './input/ButtonListener.js';
 export { default as SimpleDragHandler } from './input/SimpleDragHandler.js';
 
 export { default as PressListener } from './listeners/PressListener.js';
-export type { PressListenerOptions, PressListenerEvent } from './listeners/PressListener.js';
+export type { PressListenerOptions, PressListenerDOMEvent, PressListenerEvent, PressedPressListener, PressListenerCallback, PressListenerNullableCallback, PressListenerCanStartPressCallback } from './listeners/PressListener.js';
 export { default as FireListener } from './listeners/FireListener.js';
 export type { FireListenerOptions } from './listeners/FireListener.js';
 export { default as DragListener } from './listeners/DragListener.js';
+export type { DragListenerOptions, PressedDragListener } from './listeners/DragListener.js';
 
 export { default as MultiListener } from './listeners/MultiListener.js';
 export { default as PanZoomListener } from './listeners/PanZoomListener.js';
