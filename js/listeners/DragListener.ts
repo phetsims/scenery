@@ -76,6 +76,7 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Transform3 from '../../../dot/js/Transform3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import optionize from '../../../phet-core/js/optionize.js';
+import RequiredOption from '../../../phet-core/js/types/RequiredOption.js';
 import EventType from '../../../tandem/js/EventType.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
@@ -164,7 +165,6 @@ type CreateForwardingListenerOptions = {
   allowTouchSnag?: boolean
 };
 
-type RequiredOption<SelfOptions extends {}, Name extends keyof SelfOptions> = SelfOptions[ Name ] extends infer Option | undefined ? Option : SelfOptions[ Name ];
 type SelfOptionType<Name extends keyof SelfOptions<DragListener>> = RequiredOption<SelfOptions<DragListener>, Name>;
 
 export type PressedDragListener = DragListener & PressedPressListener;

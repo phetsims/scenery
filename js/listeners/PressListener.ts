@@ -28,6 +28,7 @@ import EnabledComponent, { EnabledComponentOptions } from '../../../axon/js/Enab
 import createObservableArray, { ObservableArray } from '../../../axon/js/createObservableArray.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
 import optionize from '../../../phet-core/js/optionize.js';
+import WithoutNull from '../../../phet-core/js/types/WithoutNull.js';
 import EventType from '../../../tandem/js/EventType.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
@@ -111,7 +112,7 @@ type SelfOptions<Listener extends PressListener> = {
 
 export type PressListenerOptions<Listener extends PressListener> = SelfOptions<Listener> & EnabledComponentOptions;
 
-export type PressedPressListener = PressListener & { [ key in 'pointer' | 'pressedTrail' ]: NonNullable<PressListener[ key ]> };
+export type PressedPressListener = WithoutNull<PressListener, 'pointer' | 'pressedTrail'>;
 const isPressedListener = ( listener: PressListener ): listener is PressedPressListener => listener.isPressed;
 
 export default class PressListener extends EnabledComponent implements IInputListener {
