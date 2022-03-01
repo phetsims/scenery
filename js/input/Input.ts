@@ -1067,8 +1067,7 @@ class Input {
     }
 
     // This workaround hopefully won't be here forever, see ParallelDOM.setExcludeLabelSiblingFromInput() and https://github.com/phetsims/a11y-research/issues/156
-    // @ts-ignore TODO ask a11y team on this one
-    if ( !( domEvent.target && domEvent.target.hasAttribute( PDOMUtils.DATA_EXCLUDE_FROM_INPUT ) ) ) {
+    if ( !( domEvent.target && ( domEvent.target as Element ).hasAttribute( PDOMUtils.DATA_EXCLUDE_FROM_INPUT ) ) ) {
 
       // If the trail is not pickable, don't dispatch PDOM events to those targets - but we still
       // dispatch with an empty trail to call listeners on the Display and Pointer.
