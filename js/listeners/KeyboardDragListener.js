@@ -19,6 +19,7 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
+import Action from '../../../axon/js/Action.js';
 import Emitter from '../../../axon/js/Emitter.js';
 import Property from '../../../axon/js/Property.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
@@ -27,7 +28,9 @@ import Transform3 from '../../../dot/js/Transform3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
-import { KeyboardUtils, scenery } from '../imports.js';
+import EventType from '../../../tandem/js/EventType.js';
+import Tandem from '../../../tandem/js/Tandem.js';
+import { KeyboardUtils, scenery, SceneryEvent } from '../imports.js';
 
 class KeyboardDragListener {
 
@@ -84,7 +87,14 @@ class KeyboardDragListener {
       shiftDownDelta: 0,
 
       // {number} - time interval at which holding down a hotkey group will trigger an associated listener, in ms
-      hotkeyHoldInterval: 800
+      hotkeyHoldInterval: 800,
+
+      // phet-io
+      tandem: Tandem.REQUIRED,
+
+      // Though DragListener is not instrumented, declare these here to support properly passing this to children, see https://github.com/phetsims/tandem/issues/60.
+      // DragListener by default doesn't allow PhET-iO to trigger drag Action events
+      phetioReadOnly: true
     }, options );
 
     assert && assert( options.shiftDragVelocity <= options.dragVelocity, 'shiftDragVelocity should be less than or equal to shiftDragVelocity, it is intended to provide more fine-grained control' );
@@ -135,8 +145,53 @@ class KeyboardDragListener {
     // @private {boolean} - variable to determine when the initial delay is complete
     this.delayComplete = false;
 
+    // @private - fires to conduct the start of a drag, added for PhET-iO interoperability
+    this.dragStartAction = new Action( event => {
+      const key = KeyboardUtils.getEventCode( event.domEvent );
+
+      // update the key state
+      this.keyState.push( {
+        keyDown: true,
+        key: key,
+        timeDown: 0 // in ms
+      } );
+
+      if ( this._start ) {
+        if ( this.movementKeysDown ) {
+          this._start( event );
+        }
+      }
+
+      // move object on first down before a delay
+      const positionDelta = this.shiftKeyDown() ? this._shiftDownDelta : this._downDelta;
+      this.updatePosition( positionDelta );
+    }, {
+      parameters: [ { name: 'event', phetioType: SceneryEvent.SceneryEventIO } ],
+      tandem: options.tandem.createTandem( 'dragStartAction' ),
+      phetioDocumentation: 'Emits whenever a keyboard drag starts.',
+      phetioReadOnly: options.phetioReadOnly,
+      phetioEventType: EventType.USER
+    } );
+
     // @public {Emitter} - Emits an event every drag
-    this.dragEmitter = new Emitter();
+    this.dragEmitter = new Emitter( {
+      tandem: options.tandem.createTandem( 'dragEmitter' ),
+      phetioHighFrequency: true,
+      phetioDocumentation: 'Emits whenever a keyboard drag occurs.',
+      phetioReadOnly: options.phetioReadOnly,
+      phetioEventType: EventType.USER
+    } );
+
+    // @private - fires to conduct the end of a drag, added for PhET-iO interoperability
+    this.dragEndAction = new Action( event => {
+      this._end && this._end( event );
+    }, {
+      parameters: [ { name: 'event', phetioType: SceneryEvent.SceneryEventIO } ],
+      tandem: options.tandem.createTandem( 'dragEndAction' ),
+      phetioDocumentation: 'Emits whenever a keyboard drag ends.',
+      phetioReadOnly: options.phetioReadOnly,
+      phetioEventType: EventType.USER
+    } );
 
     // step the drag listener, must be removed in dispose
     const stepListener = this.step.bind( this );
@@ -331,22 +386,7 @@ class KeyboardDragListener {
       }
     }
 
-    // update the key state
-    this.keyState.push( {
-      keyDown: true,
-      key: key,
-      timeDown: 0 // in ms
-    } );
-
-    if ( this._start ) {
-      if ( this.movementKeysDown ) {
-        this._start( event );
-      }
-    }
-
-    // move object on first down before a delay
-    const positionDelta = this.shiftKeyDown() ? this._shiftDownDelta : this._downDelta;
-    this.updatePosition( positionDelta );
+    this.dragStartAction.execute( event );
   }
 
   /**
@@ -386,12 +426,10 @@ class KeyboardDragListener {
     }
 
     const moveKeysStillDown = this.movementKeysDown;
-    if ( this._end ) {
 
-      // if movement keys are no longer down after keyup, call the optional end drag function
-      if ( !moveKeysStillDown && moveKeysDown !== moveKeysStillDown ) {
-        this._end( event );
-      }
+    // if movement keys are no longer down after keyup, call the optional end drag function
+    if ( !moveKeysStillDown && moveKeysDown !== moveKeysStillDown ) {
+      this.dragEndAction.execute( event );
     }
 
     // if any current hotkey keys are no longer down, clear out the current hotkey and reset.
