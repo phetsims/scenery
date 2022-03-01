@@ -220,7 +220,7 @@ class Input {
   // All active pointers.
   pointers: Pointer[];
 
-  pointerAddedEmitter: TinyEmitter<[Pointer]>;
+  pointerAddedEmitter: TinyEmitter<[ Pointer ]>;
 
   // Whether we are currently firing events. We need to track this to handle re-entrant cases
   // like https://github.com/phetsims/balloons-and-static-electricity/issues/406.
@@ -238,31 +238,31 @@ class Input {
   // This is a high frequency event that is necessary for reproducible playbacks
   private validatePointersAction: Action;
 
-  private mouseUpAction: Action<[Vector2, MouseEvent]>;
-  private mouseDownAction: Action<[number, Vector2, MouseEvent]>;
-  private mouseMoveAction: Action<[Vector2, MouseEvent]>;
-  private mouseOverAction: Action<[Vector2, MouseEvent]>;
-  private mouseOutAction: Action<[Vector2, MouseEvent]>;
-  private wheelScrollAction: Action<[WheelEvent]>;
-  private touchStartAction: Action<[number, Vector2, TouchEvent | PointerEvent]>;
-  private touchEndAction: Action<[number, Vector2, TouchEvent | PointerEvent]>;
-  private touchMoveAction: Action<[number, Vector2, TouchEvent | PointerEvent]>;
-  private touchCancelAction: Action<[number, Vector2, TouchEvent | PointerEvent]>;
-  private penStartAction: Action<[number, Vector2, PointerEvent]>;
-  private penEndAction: Action<[number, Vector2, PointerEvent]>;
-  private penMoveAction: Action<[number, Vector2, PointerEvent]>;
-  private penCancelAction: Action<[number, Vector2, PointerEvent]>;
-  private gotPointerCaptureAction: Action<[number, Event]>;
-  private lostPointerCaptureAction: Action<[number, Event]>;
+  private mouseUpAction: Action<[ Vector2, MouseEvent ]>;
+  private mouseDownAction: Action<[ number, Vector2, MouseEvent ]>;
+  private mouseMoveAction: Action<[ Vector2, MouseEvent ]>;
+  private mouseOverAction: Action<[ Vector2, MouseEvent ]>;
+  private mouseOutAction: Action<[ Vector2, MouseEvent ]>;
+  private wheelScrollAction: Action<[ WheelEvent ]>;
+  private touchStartAction: Action<[ number, Vector2, TouchEvent | PointerEvent ]>;
+  private touchEndAction: Action<[ number, Vector2, TouchEvent | PointerEvent ]>;
+  private touchMoveAction: Action<[ number, Vector2, TouchEvent | PointerEvent ]>;
+  private touchCancelAction: Action<[ number, Vector2, TouchEvent | PointerEvent ]>;
+  private penStartAction: Action<[ number, Vector2, PointerEvent ]>;
+  private penEndAction: Action<[ number, Vector2, PointerEvent ]>;
+  private penMoveAction: Action<[ number, Vector2, PointerEvent ]>;
+  private penCancelAction: Action<[ number, Vector2, PointerEvent ]>;
+  private gotPointerCaptureAction: Action<[ number, Event ]>;
+  private lostPointerCaptureAction: Action<[ number, Event ]>;
 
   // If accessible
-  private focusinAction?: Action<[FocusEvent]>;
-  private focusoutAction?: Action<[FocusEvent]>;
-  private clickAction?: Action<[MouseEvent]>;
-  private inputAction?: Action<[Event | InputEvent]>;
-  private changeAction?: Action<[Event]>;
-  private keydownAction?: Action<[KeyboardEvent]>;
-  private keyupAction?: Action<[KeyboardEvent]>;
+  private focusinAction?: Action<[ FocusEvent ]>;
+  private focusoutAction?: Action<[ FocusEvent ]>;
+  private clickAction?: Action<[ MouseEvent ]>;
+  private inputAction?: Action<[ Event | InputEvent ]>;
+  private changeAction?: Action<[ Event ]>;
+  private keydownAction?: Action<[ KeyboardEvent ]>;
+  private keyupAction?: Action<[ KeyboardEvent ]>;
 
   // Same event options for all DOM listeners, used when we connect listeners
   private accessibleEventOptions?: EventListenerOptions;
@@ -306,7 +306,7 @@ class Input {
     this.pdomPointer = null;
     this.mouse = null;
     this.pointers = [];
-    this.pointerAddedEmitter = new TinyEmitter<[Pointer]>();
+    this.pointerAddedEmitter = new TinyEmitter<[ Pointer ]>();
     this.currentlyFiringEvents = false;
     this.upTimeStamp = 0;
 
@@ -791,7 +791,7 @@ class Input {
             // stream.
             if ( trail && !( _.some( trail.nodes, node => node.positionInPDOM ) && eventName === 'click' &&
                  event.timeStamp - this.upTimeStamp <= PDOM_CLICK_DELAY ) ) {
-              ( this[ actionName as keyof Input ] as unknown as Action<[Event]> ).execute( event );
+              ( this[ actionName as keyof Input ] as unknown as Action<[ Event ]> ).execute( event );
             }
           }
 
