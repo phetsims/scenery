@@ -17,6 +17,7 @@ import IOType from '../../../tandem/js/types/IOType.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
 import { scenery, Trail, Mouse, PDOMPointer, Pointer, Node } from '../imports.js';
+import EventIO from './EventIO.js';
 
 class SceneryEvent<DOMEvent extends Event = Event> {
 
@@ -136,13 +137,13 @@ SceneryEvent.SceneryEventIO = new IOType( 'SceneryEventIO', {
     // Note: If changing the contents of this object, please document it in the public documentation string.
     return {
       type: event.type,
-      domEventType: event.domEvent ? event.domEvent.type : null,
+      domEventType: NullableIO( EventIO ).toStateObject( event.domEvent ),
       point: ( event.pointer && event.pointer.point ) ? Vector2.Vector2IO.toStateObject( event.pointer.point ) : null
     };
   },
   stateSchema: {
     type: StringIO,
-    domEventType: NullableIO( StringIO ),
+    domEventType: NullableIO( EventIO ),
     point: NullableIO( Vector2.Vector2IO )
   }
 } );
