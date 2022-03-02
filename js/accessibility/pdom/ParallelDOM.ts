@@ -132,7 +132,7 @@ import PhetioObject, { PhetioObjectOptions } from '../../../../tandem/js/PhetioO
 import UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
 import ResponsePacket from '../../../../utterance-queue/js/ResponsePacket.js';
 import Utterance from '../../../../utterance-queue/js/Utterance.js';
-import { scenery, Node, Trail, PDOMBehaviorFunctionDef, PDOMInstance, PDOMPeer, PDOMTree, PDOMUtils, PDOMDisplaysInfo } from '../../imports.js';
+import { scenery, Node, Trail, PDOMInstance, PDOMPeer, PDOMTree, PDOMUtils, PDOMDisplaysInfo } from '../../imports.js';
 
 const INPUT_TAG = PDOMUtils.TAGS.INPUT;
 const P_TAG = PDOMUtils.TAGS.P;
@@ -285,7 +285,17 @@ type Association = {
   thisElementName: string
 };
 
-type PDOMBehaviorFunction = ( node: Node, options: any, value: string, callbacksForOtherNodes?: ( () => void )[] ) => ParallelDOMOptions;
+/**
+ *
+ * @param node - the node that the pdom behavior is being applied to
+ * @param options - options to mutate within the function
+ * @param value - the value that you are setting the behavior of, like the accessibleName
+ * @param callbacksForOtherNodes - behavior function also support taking state from a Node and using it to
+ * set the accessible content for another Node. If this is the case, that logic should be set in a closure and added to
+ * this list for execution after this Node is fully created. See discussion in https://github.com/phetsims/sun/issues/503#issuecomment-676541373
+ * @returns the options that have been mutated by the behavior function.
+ */
+type PDOMBehaviorFunction = ( node: Node, options: ParallelDOMOptions, value: string, callbacksForOtherNodes: ( () => void )[] ) => ParallelDOMOptions;
 
 class ParallelDOM extends PhetioObject {
 
@@ -742,7 +752,6 @@ class ParallelDOM extends PhetioObject {
    *                 Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
    */
   setAccessibleNameBehavior( accessibleNameBehavior: PDOMBehaviorFunction ) {
-    assert && PDOMBehaviorFunctionDef.validatePDOMBehaviorFunctionDef( accessibleNameBehavior );
 
     if ( this._accessibleNameBehavior !== accessibleNameBehavior ) {
 
@@ -809,7 +818,6 @@ class ParallelDOM extends PhetioObject {
    *                 Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
    */
   setPDOMHeadingBehavior( pdomHeadingBehavior: PDOMBehaviorFunction ) {
-    assert && PDOMBehaviorFunctionDef.validatePDOMBehaviorFunctionDef( pdomHeadingBehavior );
 
     if ( this._pdomHeadingBehavior !== pdomHeadingBehavior ) {
 
@@ -920,7 +928,6 @@ class ParallelDOM extends PhetioObject {
    *                 Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
    */
   setHelpTextBehavior( helpTextBehavior: PDOMBehaviorFunction ) {
-    assert && PDOMBehaviorFunctionDef.validatePDOMBehaviorFunctionDef( helpTextBehavior );
 
     if ( this._helpTextBehavior !== helpTextBehavior ) {
 
@@ -2864,4 +2871,4 @@ class ParallelDOM extends PhetioObject {
 
 scenery.register( 'ParallelDOM', ParallelDOM );
 export { ParallelDOM as default, ACCESSIBILITY_OPTION_KEYS };
-export type { ParallelDOMOptions };
+export type { ParallelDOMOptions, PDOMBehaviorFunction };

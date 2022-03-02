@@ -40,7 +40,6 @@ export type { ShaderProgramOptions } from './util/ShaderProgram.js';
 export { default as ColorProperty } from './util/ColorProperty.js';
 export { default as TextBounds } from './util/TextBounds.js';
 
-export { default as PDOMBehaviorFunctionDef } from './accessibility/PDOMBehaviorFunctionDef.js';
 export { default as PartialPDOMTrail } from './accessibility/pdom/PartialPDOMTrail.js';
 export { default as PDOMSiblingStyle } from './accessibility/pdom/PDOMSiblingStyle.js';
 export { default as PDOMUtils } from './accessibility/pdom/PDOMUtils.js';
@@ -74,7 +73,7 @@ export { default as Saturate } from './util/Saturate.js';
 export { default as Sepia } from './util/Sepia.js';
 
 export { default as ParallelDOM, ACCESSIBILITY_OPTION_KEYS } from './accessibility/pdom/ParallelDOM.js';
-export type { ParallelDOMOptions } from './accessibility/pdom/ParallelDOM.js';
+export type { ParallelDOMOptions, PDOMBehaviorFunction } from './accessibility/pdom/ParallelDOM.js';
 export { default as Node } from './nodes/Node.js';
 export type { NodeOptions, RendererType } from './nodes/Node.js';
 export { default as Picker } from './util/Picker.js';

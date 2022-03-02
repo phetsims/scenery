@@ -46,7 +46,7 @@ const useDOMAsFastBounds = window.navigator.userAgent.indexOf( 'like Gecko) Vers
                            window.navigator.userAgent.indexOf( 'Safari/' ) !== -1;
 
 type TextBoundsMethod = 'fast' | 'fastCanvas' | 'accurate' | 'hybrid';
-type TextDefinedOptions = {
+type SelfOptions = {
   boundsMethod?: TextBoundsMethod,
   textProperty?: IProperty<string> | null,
   text?: string | number,
@@ -57,7 +57,7 @@ type TextDefinedOptions = {
   fontStyle?: string,
   fontSize?: string | number
 };
-type TextOptions = TextDefinedOptions & PaintableOptions & NodeOptions;
+type TextOptions = SelfOptions & PaintableOptions & NodeOptions;
 
 class Text extends Paintable( Node ) {
 

@@ -24,6 +24,7 @@
  */
 
 import merge from '../../../phet-core/js/merge.js';
+import optionize from '../../../phet-core/js/optionize.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
@@ -70,7 +71,7 @@ type FontStretch =
   | 'extra-expanded'
   | 'ultra-expanded';
 
-type FontDefinedOptions = {
+type SelfOptions = {
   style?: FontStyle,
   variant?: FontVariant,
   weight?: number | FontWeight,
@@ -79,7 +80,7 @@ type FontDefinedOptions = {
   lineHeight?: string,
   family?: string
 };
-type FontOptions = FontDefinedOptions & PhetioObjectOptions;
+type FontOptions = SelfOptions & PhetioObjectOptions;
 
 class Font extends PhetioObject {
 
@@ -111,7 +112,7 @@ class Font extends PhetioObject {
     assert && assert( options === undefined || ( typeof options === 'object' && Object.getPrototypeOf( options ) === Object.prototype ),
       'options, if provided, should be a raw object' );
 
-    const definedOptions = merge( {
+    const definedOptions = optionize<FontOptions, SelfOptions, PhetioObjectOptions>( {
       // {string} - 'normal', 'italic' or 'oblique'
       style: 'normal',
 
@@ -140,7 +141,7 @@ class Font extends PhetioObject {
 
       phetioType: Font.FontIO,
       tandem: Tandem.OPTIONAL
-    }, options ) as ( Required<FontDefinedOptions> & PhetioObjectOptions );
+    }, options );
 
     assert && assert( typeof definedOptions.weight === 'string' || typeof definedOptions.weight === 'number', 'Font weight should be specified as a string or number' );
     assert && assert( typeof definedOptions.size === 'string' || typeof definedOptions.size === 'number', 'Font size should be specified as a string or number' );
@@ -426,7 +427,7 @@ Font.FontIO = new IOType( 'FontIO', {
                  '<li><strong>lineHeight:</strong> normal &mdash; normal | number | length | percentage -- NOTE: Canvas spec forces line-height to normal </li>' +
                  '<li><strong>family:</strong> sans-serif &mdash; comma-separated list of families, including generic families (serif, sans-serif, cursive, fantasy, monospace). ideally escape with double-quotes</li>' +
                  '</ul>',
-  toStateObject: ( font: Font ): Required<FontDefinedOptions> => ( {
+  toStateObject: ( font: Font ): Required<SelfOptions> => ( {
     style: font.getStyle(),
     variant: font.getVariant(),
     weight: font.getWeight(),
@@ -436,7 +437,7 @@ Font.FontIO = new IOType( 'FontIO', {
     family: font.getFamily()
   } ),
 
-  fromStateObject( stateObject: Required<FontDefinedOptions> ) {
+  fromStateObject( stateObject: Required<SelfOptions> ) {
     return new Font( stateObject );
   }
 } );
