@@ -11,10 +11,13 @@ import Utils from '../../../dot/js/Utils.js';
 import { scenery, ColorMatrixFilter } from '../imports.js';
 
 class HueRotate extends ColorMatrixFilter {
+
+  amount: number;
+
   /**
-   * @param {number} amount - In radians, the amount of hue to color-shift
+   * @param amount - In radians, the amount of hue to color-shift
    */
-  constructor( amount ) {
+  constructor( amount: number ) {
     assert && assert( typeof amount === 'number', 'HueRotate amount should be a number' );
     assert && assert( isFinite( amount ), 'HueRotate amount should be finite' );
     assert && assert( amount >= 0, 'HueRotate amount should be non-negative' );
@@ -39,7 +42,6 @@ class HueRotate extends ColorMatrixFilter {
       0, 0, 0, 1, 0
     );
 
-    // @public {number}
     this.amount = amount;
   }
 
@@ -47,21 +49,11 @@ class HueRotate extends ColorMatrixFilter {
    * Returns the CSS-style filter substring specific to this single filter, e.g. `grayscale(1)`. This should be used for
    * both DOM elements (https://developer.mozilla.org/en-US/docs/Web/CSS/filter) and when supported, Canvas
    * (https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter).
-   * @public
-   * @override
-   *
-   * @returns {string}
    */
-  getCSSFilterString() {
+  getCSSFilterString(): string {
     return `hue-rotate(${toSVGNumber( Utils.toDegrees( this.amount ) )}deg)`;
   }
 
-  /**
-   * @public
-   * @override
-   *
-   * @returns {*}
-   */
   isDOMCompatible() {
     return true;
   }

@@ -6,30 +6,25 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Poolable from '../../../phet-core/js/Poolable.js';
-import { scenery, svgns, xlinkns } from '../imports.js';
+import Pool, { IPoolable } from '../../../phet-core/js/Pool.js';
+import { Pattern, scenery, svgns, xlinkns } from '../imports.js';
 
-class SVGPattern {
-  /**
-   * @param {Pattern} pattern
-   */
-  constructor( pattern ) {
+class SVGPattern implements IPoolable {
+
+  // persistent
+  definition!: SVGPatternElement;
+  private imageElement!: SVGImageElement;
+
+  constructor( pattern: Pattern ) {
     this.initialize( pattern );
   }
 
-  /**
-   * Poolable initializer.
-   * @private
-   *
-   * @param {Pattern} pattern
-   */
-  initialize( pattern ) {
+  initialize( pattern: Pattern ) {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGPattern] initialize: ${pattern.id}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
     const hasPreviousDefinition = this.definition !== undefined;
 
-    // @public {SVGPatternElement} - persistent
     this.definition = this.definition || document.createElementNS( svgns, 'pattern' );
 
     if ( !hasPreviousDefinition ) {
@@ -49,10 +44,9 @@ class SVGPattern {
 
     this.definition.setAttribute( 'x', '0' );
     this.definition.setAttribute( 'y', '0' );
-    this.definition.setAttribute( 'width', pattern.image.width );
-    this.definition.setAttribute( 'height', pattern.image.height );
+    this.definition.setAttribute( 'width', '' + pattern.image.width );
+    this.definition.setAttribute( 'height', '' + pattern.image.height );
 
-    // @private {SVGImageElement} - persistent
     this.imageElement = this.imageElement || document.createElementNS( svgns, 'image' );
     this.imageElement.setAttribute( 'x', '0' );
     this.imageElement.setAttribute( 'y', '0' );
@@ -70,7 +64,6 @@ class SVGPattern {
 
   /**
    * Called from SVGBlock, matches other paints.
-   * @public
    */
   update() {
     // Nothing
@@ -78,15 +71,18 @@ class SVGPattern {
 
   /**
    * Disposes, so that it can be reused from the pool.
-   * @public
    */
   dispose() {
     this.freeToPool();
   }
+
+  freeToPool() {
+    SVGPattern.pool.freeToPool( this );
+  }
+
+  static pool = new Pool( SVGPattern );
 }
 
 scenery.register( 'SVGPattern', SVGPattern );
-
-Poolable.mixInto( SVGPattern );
 
 export default SVGPattern;

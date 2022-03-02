@@ -10,10 +10,13 @@ import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import { scenery, ColorMatrixFilter } from '../imports.js';
 
 class Sepia extends ColorMatrixFilter {
+
+  amount: number;
+
   /**
-   * @param {number} [amount] - The amount of the effect, from 0 (none) to 1 (full sepia)
+   * @param [amount] - The amount of the effect, from 0 (none) to 1 (full sepia)
    */
-  constructor( amount = 1 ) {
+  constructor( amount: number = 1 ) {
     assert && assert( typeof amount === 'number', 'Sepia amount should be a number' );
     assert && assert( isFinite( amount ), 'Sepia amount should be finite' );
     assert && assert( amount >= 0, 'Sepia amount should be non-negative' );
@@ -26,7 +29,6 @@ class Sepia extends ColorMatrixFilter {
       0, 0, 0, 1, 0
     );
 
-    // @public {number}
     this.amount = amount;
   }
 
@@ -34,27 +36,18 @@ class Sepia extends ColorMatrixFilter {
    * Returns the CSS-style filter substring specific to this single filter, e.g. `grayscale(1)`. This should be used for
    * both DOM elements (https://developer.mozilla.org/en-US/docs/Web/CSS/filter) and when supported, Canvas
    * (https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter).
-   * @public
-   * @override
-   *
-   * @returns {string}
    */
-  getCSSFilterString() {
+  getCSSFilterString(): string {
     return `sepia(${toSVGNumber( this.amount )})`;
   }
 
-  /**
-   * @public
-   * @override
-   *
-   * @returns {*}
-   */
   isDOMCompatible() {
     return true;
   }
+
+  static FULL: Sepia;
 }
 
-// @public {Sepia}
 Sepia.FULL = new Sepia( 1 );
 
 scenery.register( 'Sepia', Sepia );

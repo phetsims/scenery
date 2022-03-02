@@ -7,13 +7,16 @@
  */
 
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
-import { scenery, Filter } from '../imports.js';
+import { scenery, Filter, CanvasContextWrapper } from '../imports.js';
 
 class Invert extends Filter {
+
+  amount: number;
+
   /**
-   * @param {number} [amount] - The amount of the effect, from 0 (none) to 1 (full)
+   * @param [amount] - The amount of the effect, from 0 (none) to 1 (full)
    */
-  constructor( amount = 1 ) {
+  constructor( amount: number = 1 ) {
     assert && assert( typeof amount === 'number', 'Invert amount should be a number' );
     assert && assert( isFinite( amount ), 'Invert amount should be finite' );
     assert && assert( amount >= 0, 'Invert amount should be non-negative' );
@@ -21,7 +24,6 @@ class Invert extends Filter {
 
     super();
 
-    // @public {number}
     this.amount = amount;
   }
 
@@ -29,27 +31,26 @@ class Invert extends Filter {
    * Returns the CSS-style filter substring specific to this single filter, e.g. `grayscale(1)`. This should be used for
    * both DOM elements (https://developer.mozilla.org/en-US/docs/Web/CSS/filter) and when supported, Canvas
    * (https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter).
-   * @public
-   * @override
-   *
-   * @returns {string}
    */
-  getCSSFilterString() {
+  getCSSFilterString(): string {
     return `invert(${toSVGNumber( this.amount )})`;
   }
 
-  /**
-   * @public
-   * @override
-   *
-   * @returns {*}
-   */
   isDOMCompatible() {
     return true;
   }
+
+  static FULL: Invert;
+
+  applyCanvasFilter( wrapper: CanvasContextWrapper ): void {
+    throw new Error( 'unimplemented' );
+  }
+
+  applySVGFilter( svgFilter: SVGFilterElement, inName: string, resultName?: string ): void {
+    throw new Error( 'unimplemented' );
+  }
 }
 
-// @public {Invert}
 Invert.FULL = new Invert( 1 );
 
 scenery.register( 'Invert', Invert );

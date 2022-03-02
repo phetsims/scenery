@@ -10,10 +10,13 @@ import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import { scenery, ColorMatrixFilter } from '../imports.js';
 
 class Grayscale extends ColorMatrixFilter {
+
+  amount: number;
+
   /**
-   * @param {number} [amount] - The amount of the effect, from 0 (none) to 1 (full)
+   * @param [amount] - The amount of the effect, from 0 (none) to 1 (full)
    */
-  constructor( amount = 1 ) {
+  constructor( amount: number = 1 ) {
     assert && assert( typeof amount === 'number', 'Grayscale amount should be a number' );
     assert && assert( isFinite( amount ), 'Grayscale amount should be finite' );
     assert && assert( amount >= 0, 'Grayscale amount should be non-negative' );
@@ -33,7 +36,6 @@ class Grayscale extends ColorMatrixFilter {
       0, 0, 0, 1, 0
     );
 
-    // @public {number}
     this.amount = amount;
   }
 
@@ -41,27 +43,19 @@ class Grayscale extends ColorMatrixFilter {
    * Returns the CSS-style filter substring specific to this single filter, e.g. `grayscale(1)`. This should be used for
    * both DOM elements (https://developer.mozilla.org/en-US/docs/Web/CSS/filter) and when supported, Canvas
    * (https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter).
-   * @public
-   * @override
-   *
-   * @returns {string}
    */
-  getCSSFilterString() {
+  getCSSFilterString(): string {
     return `grayscale(${toSVGNumber( this.amount )})`;
   }
 
-  /**
-   * @public
-   * @override
-   *
-   * @returns {*}
-   */
   isDOMCompatible() {
     return true;
   }
+
+  // Turns things fully gray-scale (instead of partially)
+  static FULL: Grayscale;
 }
 
-// @public {Grayscale}
 Grayscale.FULL = new Grayscale( 1 );
 
 scenery.register( 'Grayscale', Grayscale );

@@ -10,10 +10,13 @@ import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import { scenery, ColorMatrixFilter } from '../imports.js';
 
 class Saturate extends ColorMatrixFilter {
+
+  amount: number;
+
   /**
-   * @param {number} amount - The amount of the effect, from 0 (no saturation), 1 (normal), or higher to over-saturate
+   * @param amount - The amount of the effect, from 0 (no saturation), 1 (normal), or higher to over-saturate
    */
-  constructor( amount ) {
+  constructor( amount: number ) {
     assert && assert( typeof amount === 'number', 'Saturate amount should be a number' );
     assert && assert( isFinite( amount ), 'Saturate amount should be finite' );
     assert && assert( amount >= 0, 'Saturate amount should be non-negative' );
@@ -26,7 +29,6 @@ class Saturate extends ColorMatrixFilter {
       0, 0, 0, 1, 0
     );
 
-    // @public {number}
     this.amount = amount;
   }
 
@@ -34,21 +36,11 @@ class Saturate extends ColorMatrixFilter {
    * Returns the CSS-style filter substring specific to this single filter, e.g. `grayscale(1)`. This should be used for
    * both DOM elements (https://developer.mozilla.org/en-US/docs/Web/CSS/filter) and when supported, Canvas
    * (https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter).
-   * @public
-   * @override
-   *
-   * @returns {string}
    */
-  getCSSFilterString() {
+  getCSSFilterString(): string {
     return `saturate(${toSVGNumber( this.amount )})`;
   }
 
-  /**
-   * @public
-   * @override
-   *
-   * @returns {*}
-   */
   isDOMCompatible() {
     return true;
   }

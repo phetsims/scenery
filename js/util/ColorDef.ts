@@ -13,17 +13,13 @@ import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import OrIO from '../../../tandem/js/types/OrIO.js';
 import ReferenceIO from '../../../tandem/js/types/ReferenceIO.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
-import { scenery, Color } from '../imports.js';
+import { scenery, Color, IColor } from '../imports.js';
 
 const ColorDef = {
   /**
    * Returns whether the parameter is considered to be a ColorDef.
-   * @public
-   *
-   * @param {*} color
-   * @returns {boolean}
    */
-  isColorDef( color ) {
+  isColorDef( color: any ): color is IColor {
     return color === null ||
            typeof color === 'string' ||
            color instanceof Color ||
@@ -32,10 +28,28 @@ const ColorDef = {
              typeof color.value === 'string' ||
              color.value instanceof Color
            ) );
-  }
+  },
+
+  scenerySerialize( color: IColor ): string {
+    if ( color === null ) {
+      return 'null';
+    }
+    else if ( color instanceof Color ) {
+      return `'${color.toCSS()}'`;
+    }
+    else if ( typeof color === 'string' ) {
+      return `'${color}'`;
+    }
+    else {
+      // Property fallback
+      return ColorDef.scenerySerialize( color.value );
+    }
+  },
+
+  // phet-io IOType for serialization and documentation
+  ColorDefIO: <IOType><unknown>null // Defined below, typed here
 };
 
-// @public - phet-io IOType for serialization and documentation
 ColorDef.ColorDefIO = new IOType( 'ColorDefIO', {
   isValidValue: ColorDef.isColorDef,
   supertype: NullableIO( OrIO( [ StringIO, Color.ColorIO, ReferenceIO( Property.PropertyIO( NullableIO( OrIO( [ StringIO, Color.ColorIO ] ) ) ) ) ] ) )

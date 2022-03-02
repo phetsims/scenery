@@ -7,15 +7,18 @@
  */
 
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
-import { scenery, Filter } from '../imports.js';
+import { scenery, Filter, CanvasContextWrapper } from '../imports.js';
 
 class Opacity extends Filter {
+
+  amount: number;
+
   /**
    * NOTE: Generally prefer setting a Node's opacity, unless this is required for stacking of filters.
    *
-   * @param {number} amount - The amount of opacity, from 0 (invisible) to 1 (fully visible)
+   * @param amount - The amount of opacity, from 0 (invisible) to 1 (fully visible)
    */
-  constructor( amount ) {
+  constructor( amount: number ) {
     assert && assert( typeof amount === 'number', 'Opacity amount should be a number' );
     assert && assert( isFinite( amount ), 'Opacity amount should be finite' );
     assert && assert( amount >= 0, 'Opacity amount should be non-negative' );
@@ -23,7 +26,6 @@ class Opacity extends Filter {
 
     super();
 
-    // @public {number}
     this.amount = amount;
   }
 
@@ -31,23 +33,21 @@ class Opacity extends Filter {
    * Returns the CSS-style filter substring specific to this single filter, e.g. `grayscale(1)`. This should be used for
    * both DOM elements (https://developer.mozilla.org/en-US/docs/Web/CSS/filter) and when supported, Canvas
    * (https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter).
-   * @public
-   * @override
-   *
-   * @returns {string}
    */
-  getCSSFilterString() {
+  getCSSFilterString(): string {
     return `opacity(${toSVGNumber( this.amount )})`;
   }
 
-  /**
-   * @public
-   * @override
-   *
-   * @returns {*}
-   */
   isDOMCompatible() {
     return true;
+  }
+
+  applyCanvasFilter( wrapper: CanvasContextWrapper ): void {
+    throw new Error( 'unimplemented' );
+  }
+
+  applySVGFilter( svgFilter: SVGFilterElement, inName: string, resultName?: string ): void {
+    throw new Error( 'unimplemented' );
   }
 }
 
