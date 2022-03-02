@@ -49,6 +49,7 @@ export { default as ProfileColorProperty } from './util/ProfileColorProperty.js'
 
 export { default as Paint } from './util/Paint.js';
 export { default as Gradient } from './util/Gradient.js';
+export type { GradientStop } from './util/Gradient.js';
 export { default as LinearGradient } from './util/LinearGradient.js';
 export { default as RadialGradient } from './util/RadialGradient.js';
 export { default as Pattern } from './util/Pattern.js';
@@ -142,6 +143,7 @@ export { default as PaintColorProperty } from './util/PaintColorProperty.js';
 export { default as PaintSVGState } from './display/PaintSVGState.js';
 export { default as SVGGradientStop } from './display/SVGGradientStop.js';
 export { default as SVGGradient } from './display/SVGGradient.js';
+export type { ActiveSVGGradient } from './display/SVGGradient.js';
 export { default as SVGLinearGradient } from './display/SVGLinearGradient.js';
 export { default as SVGRadialGradient } from './display/SVGRadialGradient.js';
 export { default as SVGPattern } from './display/SVGPattern.js';

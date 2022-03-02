@@ -6,41 +6,36 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { scenery } from '../imports.js';
+import Matrix3 from '../../../dot/js/Matrix3.js';
+import { scenery, SVGBlock, SVGGradient, SVGPattern } from '../imports.js';
 
 let globalId = 1;
 
-class Paint {
-  constructor() {
-    // @public (scenery-internal) {string}
-    this.id = `paint${globalId++}`;
+abstract class Paint {
 
-    // @protected {Matrix3|null}
+  // (scenery-internal)
+  id: string;
+
+  // (scenery-internal)
+  transformMatrix: Matrix3 | null;
+
+  constructor() {
+    this.id = `paint${globalId++}`;
     this.transformMatrix = null;
   }
 
   /**
    * Returns an object that can be passed to a Canvas context's fillStyle or strokeStyle.
-   * @public
-   *
-   * @returns {*}
    */
-  getCanvasStyle() {
-    throw new Error( 'abstract method' );
-  }
+  abstract getCanvasStyle(): string | CanvasGradient | CanvasPattern;
 
   /**
    * Sets how this paint (pattern/gradient) is transformed, compared with the local coordinate frame of where it is
-   * used.
-   * @public
    *
    * NOTE: This should only be used before the pattern/gradient is ever displayed.
    * TODO: Catch if this is violated?
-   *
-   * @param {Matrix3} transformMatrix
-   * @returns {Paint} - for chaining
    */
-  setTransformMatrix( transformMatrix ) {
+  setTransformMatrix( transformMatrix: Matrix3 ): this {
     if ( this.transformMatrix !== transformMatrix ) {
       this.transformMatrix = transformMatrix;
     }
@@ -48,17 +43,21 @@ class Paint {
   }
 
   /**
-   * Returns a string form of this object
-   * @public
-   *
-   * @returns {string}
+   * Creates an SVG paint object for creating/updating the SVG equivalent definition.
    */
-  toString() {
+  abstract createSVGPaint( svgBlock: SVGBlock ): SVGGradient | SVGPattern;
+
+  /**
+   * Returns a string form of this object
+   */
+  toString(): string {
     return this.id;
   }
+
+  isPaint!: boolean;
 }
 
-// @public {boolean} TODO: can we remove this in favor of type checks?
+// TODO: can we remove this in favor of type checks?
 Paint.prototype.isPaint = true;
 
 scenery.register( 'Paint', Paint );

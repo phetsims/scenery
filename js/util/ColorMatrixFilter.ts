@@ -14,6 +14,28 @@ const isImageDataSupported = Utils.supportsImageDataCanvasFilter();
 const useFakeGamma = platform.chromium;
 
 class ColorMatrixFilter extends Filter {
+
+  m00: number;
+  m01: number;
+  m02: number;
+  m03: number;
+  m04: number;
+  m10: number;
+  m11: number;
+  m12: number;
+  m13: number;
+  m14: number;
+  m20: number;
+  m21: number;
+  m22: number;
+  m23: number;
+  m24: number;
+  m30: number;
+  m31: number;
+  m32: number;
+  m33: number;
+  m34: number;
+
   /**
    * NOTE: It is possible but not generally recommended to create custom ColorMatrixFilter types. They should be
    * compatible with Canvas and SVG, HOWEVER any WebGL/DOM content cannot work with those custom filters, and any
@@ -30,32 +52,11 @@ class ColorMatrixFilter extends Filter {
    * [ m20 m21 m22 m23 m24 ] * [ b ]
    * [ m30 m31 m32 m33 m34 ]   [ a ]
    *                           [ 1 ]
-   *
-   * @param {number} m00
-   * @param {number} m01
-   * @param {number} m02
-   * @param {number} m03
-   * @param {number} m04
-   * @param {number} m10
-   * @param {number} m11
-   * @param {number} m12
-   * @param {number} m13
-   * @param {number} m14
-   * @param {number} m20
-   * @param {number} m21
-   * @param {number} m22
-   * @param {number} m23
-   * @param {number} m24
-   * @param {number} m30
-   * @param {number} m31
-   * @param {number} m32
-   * @param {number} m33
-   * @param {number} m34
    */
-  constructor( m00, m01, m02, m03, m04,
-               m10, m11, m12, m13, m14,
-               m20, m21, m22, m23, m24,
-               m30, m31, m32, m33, m34 ) {
+  constructor( m00: number, m01: number, m02: number, m03: number, m04: number,
+               m10: number, m11: number, m12: number, m13: number, m14: number,
+               m20: number, m21: number, m22: number, m23: number, m24: number,
+               m30: number, m31: number, m32: number, m33: number, m34: number ) {
 
     assert && assert( typeof m00 === 'number' && isFinite( m00 ), 'm00 should be a finite number' );
     assert && assert( typeof m01 === 'number' && isFinite( m01 ), 'm01 should be a finite number' );
@@ -83,7 +84,6 @@ class ColorMatrixFilter extends Filter {
 
     super();
 
-    // @public {number}
     this.m00 = m00;
     this.m01 = m01;
     this.m02 = m02;
@@ -111,14 +111,8 @@ class ColorMatrixFilter extends Filter {
    * and should either output using the resultName (or if not provided, the last element appended should be the output).
    * This effectively mutates the provided filter object, and will be successively called on all Filters to build an
    * SVG filter object.
-   * @public
-   * @override
-   *
-   * @param {SVGFilterElement} svgFilter
-   * @param {string} inName
-   * @param {string} [resultName]
    */
-  applySVGFilter( svgFilter, inName, resultName ) {
+  applySVGFilter( svgFilter: SVGFilterElement, inName: string, resultName?: string ) {
     Filter.applyColorMatrix(
       `${toSVGNumber( this.m00 )} ${toSVGNumber( this.m01 )} ${toSVGNumber( this.m02 )} ${toSVGNumber( this.m03 )} ${toSVGNumber( this.m04 )} ` +
       `${toSVGNumber( this.m10 )} ${toSVGNumber( this.m11 )} ${toSVGNumber( this.m12 )} ${toSVGNumber( this.m13 )} ${toSVGNumber( this.m14 )} ` +
@@ -132,12 +126,8 @@ class ColorMatrixFilter extends Filter {
    * Given a specific canvas/context wrapper, this method should mutate its state so that the canvas now holds the
    * filtered content. Usually this would be by using getImageData/putImageData, however redrawing or other operations
    * are also possible.
-   * @public
-   * @override
-   *
-   * @param {CanvasContextWrapper} wrapper
    */
-  applyCanvasFilter( wrapper, resultWrapper ) {
+  applyCanvasFilter( wrapper: CanvasContextWrapper ) {
     assert && assert( wrapper instanceof CanvasContextWrapper );
 
     const width = wrapper.canvas.width;
@@ -181,23 +171,16 @@ class ColorMatrixFilter extends Filter {
     wrapper.context.putImageData( imageData, 0, 0 );
   }
 
-  /**
-   * @public
-   * @override
-   *
-   * @returns {boolean}
-   */
   isSVGCompatible() {
     return true;
   }
 
-  /**
-   * @public
-   *
-   * @returns {boolean}
-   */
   isCanvasCompatible() {
     return super.isCanvasCompatible() || isImageDataSupported;
+  }
+
+  getCSSFilterString(): string {
+    throw new Error( 'unimplemented' );
   }
 }
 

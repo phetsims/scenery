@@ -9,43 +9,39 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import { scenery, Paint, SVGPattern } from '../imports.js';
+import { scenery, Paint, SVGPattern, SVGBlock } from '../imports.js';
 
 class Pattern extends Paint {
+
+  image: HTMLImageElement;
+  canvasPattern: CanvasPattern;
+
   /**
-   * @param {HTMLImageElement} image - The image to use as a repeated pattern.
+   * @param image - The image to use as a repeated pattern.
    */
-  constructor( image ) {
+  constructor( image: HTMLImageElement ) {
     super();
 
-    // @public {HTMLImageElement}
     this.image = image;
 
-    // @public {CanvasPattern} - use the global scratch canvas instead of creating a new Canvas
+    // Use the global scratch canvas instead of creating a new Canvas
+    // @ts-ignore TODO: scenery namespace
     this.canvasPattern = scenery.scratchContext.createPattern( image, 'repeat' );
   }
 
 
   /**
    * Returns an object that can be passed to a Canvas context's fillStyle or strokeStyle.
-   * @public
-   * @override
-   *
-   * @returns {*}
    */
-  getCanvasStyle() {
+  getCanvasStyle(): CanvasPattern {
     return this.canvasPattern;
   }
 
   /**
    * Creates an SVG paint object for creating/updating the SVG equivalent definition.
-   * @public
-   *
-   * @param {SVGBlock} svgBlock
-   * @returns {SVGGradient|SVGPattern}
    */
-  createSVGPaint( svgBlock ) {
-    return SVGPattern.createFromPool( this );
+  createSVGPaint( svgBlock: SVGBlock ): SVGPattern {
+    return SVGPattern.pool.createFromPool( this );
   }
 
   /**
@@ -57,9 +53,10 @@ class Pattern extends Paint {
   toString() {
     return `new scenery.Pattern( $( '<img src="${this.image.src}"/>' )[0] )`;
   }
+
+  isPattern!: boolean;
 }
 
-// @public {boolean}
 Pattern.prototype.isPattern = true;
 
 scenery.register( 'Pattern', Pattern );

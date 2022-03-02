@@ -10,10 +10,13 @@ import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import { scenery, ColorMatrixFilter } from '../imports.js';
 
 class Contrast extends ColorMatrixFilter {
+
+  amount: number;
+
   /**
-   * @param {number} amount - The amount of the effect, from 0 (gray), 1 (normal), or above for high-contrast
+   * @param amount - The amount of the effect, from 0 (gray), 1 (normal), or above for high-contrast
    */
-  constructor( amount ) {
+  constructor( amount: number ) {
     assert && assert( typeof amount === 'number', 'Contrast amount should be a number' );
     assert && assert( isFinite( amount ), 'Contrast amount should be finite' );
     assert && assert( amount >= 0, 'Contrast amount should be non-negative' );
@@ -25,7 +28,6 @@ class Contrast extends ColorMatrixFilter {
       0, 0, 0, 1, 0
     );
 
-    // @public {number}
     this.amount = amount;
   }
 
@@ -33,27 +35,19 @@ class Contrast extends ColorMatrixFilter {
    * Returns the CSS-style filter substring specific to this single filter, e.g. `grayscale(1)`. This should be used for
    * both DOM elements (https://developer.mozilla.org/en-US/docs/Web/CSS/filter) and when supported, Canvas
    * (https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter).
-   * @public
-   * @override
-   *
-   * @returns {string}
    */
-  getCSSFilterString() {
+  getCSSFilterString(): string {
     return `contrast(${toSVGNumber( this.amount )})`;
   }
 
-  /**
-   * @public
-   * @override
-   *
-   * @returns {*}
-   */
   isDOMCompatible() {
     return true;
   }
+
+  // Turns the content gray
+  static GRAY: Contrast;
 }
 
-// @public {Contrast} - Turns the content gray
 Contrast.GRAY = new Contrast( 0 );
 
 scenery.register( 'Contrast', Contrast );

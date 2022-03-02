@@ -8,29 +8,22 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Poolable from '../../../phet-core/js/Poolable.js';
-import { scenery, svgns, SVGGradient } from '../imports.js';
+import Pool, { IPoolable } from '../../../phet-core/js/Pool.js';
+import { RadialGradient, scenery, SVGBlock, SVGGradient, svgns } from '../imports.js';
 
-class SVGRadialGradient extends SVGGradient {
-  /**
-   * Poolable initializer.
-   * @private
-   *
-   * @param {SVGBlock} svgBlock
-   * @param {RadialGradient} radialGradient
-   */
-  initialize( svgBlock, radialGradient ) {
+class SVGRadialGradient extends SVGGradient implements IPoolable {
+  initialize( svgBlock: SVGBlock, radialGradient: RadialGradient ) {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGRadialGradient] initialize ${radialGradient.id}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
     super.initialize( svgBlock, radialGradient );
 
     // Radial-specific setup
-    this.definition.setAttribute( 'cx', radialGradient.largePoint.x );
-    this.definition.setAttribute( 'cy', radialGradient.largePoint.y );
-    this.definition.setAttribute( 'r', radialGradient.maxRadius );
-    this.definition.setAttribute( 'fx', radialGradient.focalPoint.x );
-    this.definition.setAttribute( 'fy', radialGradient.focalPoint.y );
+    this.definition.setAttribute( 'cx', '' + radialGradient.largePoint.x );
+    this.definition.setAttribute( 'cy', '' + radialGradient.largePoint.y );
+    this.definition.setAttribute( 'r', '' + radialGradient.maxRadius );
+    this.definition.setAttribute( 'fx', '' + radialGradient.focalPoint.x );
+    this.definition.setAttribute( 'fy', '' + radialGradient.focalPoint.y );
 
     sceneryLog && sceneryLog.Paints && sceneryLog.pop();
 
@@ -39,18 +32,18 @@ class SVGRadialGradient extends SVGGradient {
 
   /**
    * Creates the gradient-type-specific definition.
-   * @protected
-   * @override
-   *
-   * @returns {SVGRadialGradientElement}
    */
-  createDefinition() {
+  protected createDefinition(): SVGRadialGradientElement {
     return document.createElementNS( svgns, 'radialGradient' );
   }
+
+  freeToPool() {
+    SVGRadialGradient.pool.freeToPool( this );
+  }
+
+  static pool = new Pool( SVGRadialGradient );
 }
 
 scenery.register( 'SVGRadialGradient', SVGRadialGradient );
-
-Poolable.mixInto( SVGRadialGradient );
 
 export default SVGRadialGradient;

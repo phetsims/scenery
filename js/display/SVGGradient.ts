@@ -7,37 +7,38 @@
  */
 
 import cleanArray from '../../../phet-core/js/cleanArray.js';
-import { scenery, SVGGradientStop } from '../imports.js';
+import WithoutNull from '../../../phet-core/js/types/WithoutNull.js';
+import { Gradient, scenery, SVGBlock, SVGGradientStop } from '../imports.js';
 
-class SVGGradient {
-  /**
-   * @param {SVGBlock} svgBlock
-   * @param {Gradient} gradient
-   */
-  constructor( svgBlock, gradient ) {
+export type ActiveSVGGradient = WithoutNull<SVGGradient, 'svgBlock' | 'gradient'>;
+
+abstract class SVGGradient {
+
+  // transient (scenery-internal)
+  svgBlock!: SVGBlock | null;
+  gradient!: Gradient | null;
+  stops!: SVGGradientStop[];
+
+  // persistent
+  definition!: SVGGradientElement;
+
+  private dirty!: boolean;
+
+  constructor( svgBlock: SVGBlock, gradient: Gradient ) {
     this.initialize( svgBlock, gradient );
   }
 
-  /**
-   * Poolable initializer.
-   * @private
-   *
-   * @param {SVGBlock} svgBlock
-   * @param {Gradient} gradient
-   */
-  initialize( svgBlock, gradient ) {
+  isActiveSVGGradient(): this is ActiveSVGGradient { return !!this.svgBlock; }
+
+  initialize( svgBlock: SVGBlock, gradient: Gradient ) {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradient] initialize ${gradient.id}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
-    // @private {SVGBlock} - transient
     this.svgBlock = svgBlock;
-
-    // @private {Gradient} - transient
     this.gradient = gradient;
 
     const hasPreviousDefinition = this.definition !== undefined;
 
-    // @public {SVGGradientElement} - persistent
     this.definition = this.definition || this.createDefinition();
 
     if ( !hasPreviousDefinition ) {
@@ -55,15 +56,13 @@ class SVGGradient {
     // We need to make a function call, as stops need to be rescaled/reversed in some radial gradient cases.
     const gradientStops = gradient.getSVGStops();
 
-    // @private {Array.<SVGGradientStop>} - transient
     this.stops = cleanArray( this.stops );
     for ( let i = 0; i < gradientStops.length; i++ ) {
-      const stop = new SVGGradientStop( this, gradientStops[ i ].ratio, gradientStops[ i ].color );
+      const stop = new SVGGradientStop( this as ActiveSVGGradient, gradientStops[ i ].ratio, gradientStops[ i ].color );
       this.stops.push( stop );
       this.definition.appendChild( stop.svgElement );
     }
 
-    // @private {boolean}
     this.dirty = false;
 
     sceneryLog && sceneryLog.Paints && sceneryLog.pop();
@@ -71,27 +70,23 @@ class SVGGradient {
 
   /**
    * Creates the gradient-type-specific definition.
-   * @protected
-   * @abstract
-   *
-   * @returns {SVGGradientElement}
    */
-  createDefinition() {
-    throw new Error( 'abstract method' );
-  }
+  protected abstract createDefinition(): SVGGradientElement;
 
   /**
    * Called from SVGGradientStop when a stop needs to change the actual color.
-   * @public
    */
   markDirty() {
     if ( !this.dirty ) {
-      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradient] switched to dirty: ${this.gradient.id}` );
+      assert && assert( this.isActiveSVGGradient() );
+      const activeGradient = this as ActiveSVGGradient;
+
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradient] switched to dirty: ${this.gradient!.id}` );
       sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
       this.dirty = true;
 
-      this.svgBlock.markDirtyGradient( this );
+      activeGradient.svgBlock.markDirtyGradient( this );
 
       sceneryLog && sceneryLog.Paints && sceneryLog.pop();
     }
@@ -99,7 +94,6 @@ class SVGGradient {
 
   /**
    * Called from SVGBlock when we need to update our color stops.
-   * @public
    */
   update() {
     if ( !this.dirty ) {
@@ -107,7 +101,7 @@ class SVGGradient {
     }
     this.dirty = false;
 
-    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradient] update: ${this.gradient.id}` );
+    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradient] update: ${this.gradient!.id}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
     for ( let i = 0; i < this.stops.length; i++ ) {
@@ -119,10 +113,9 @@ class SVGGradient {
 
   /**
    * Disposes, so that it can be reused from the pool.
-   * @public
    */
   dispose() {
-    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradient] dispose ${this.gradient.id}` );
+    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradient] dispose ${this.gradient!.id}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
     // Dispose and clean up stops
@@ -140,6 +133,8 @@ class SVGGradient {
 
     sceneryLog && sceneryLog.Paints && sceneryLog.pop();
   }
+
+  abstract freeToPool(): void;
 }
 
 scenery.register( 'SVGGradient', SVGGradient );

@@ -7,50 +7,46 @@
  */
 
 import Property from '../../../axon/js/Property.js';
-import Poolable from '../../../phet-core/js/Poolable.js';
-import { scenery, Color, svgns } from '../imports.js';
+import Pool, { IPoolable } from '../../../phet-core/js/Pool.js';
+import WithoutNull from '../../../phet-core/js/types/WithoutNull.js';
+import { ActiveSVGGradient, Color, IColor, scenery, svgns } from '../imports.js';
 
 const scratchColor = new Color( 'transparent' );
 
-class SVGGradientStop {
-  /**
-   * @mixes Poolable
-   *
-   * @param {SVGGradient} svgGradient
-   * @param {number} ratio
-   * @param {Color|string|Property.<Color|string|null>|null} color
-   */
-  constructor( svgGradient, ratio, color ) {
+export type ActiveSVGGradientStop = WithoutNull<SVGGradientStop, 'svgGradient'>;
+
+class SVGGradientStop implements IPoolable {
+
+  // persistent
+  svgElement!: SVGStopElement;
+
+  // transient
+  svgGradient!: ActiveSVGGradient | null;
+  color!: IColor;
+
+  ratio!: number;
+  private dirty!: boolean;
+  private propertyListener!: () => void;
+  private colorListener!: () => void;
+
+  constructor( svgGradient: ActiveSVGGradient, ratio: number, color: IColor ) {
     this.initialize( svgGradient, ratio, color );
   }
 
-  /**
-   * Poolable initializer.
-   * @private
-   *
-   * @param {SVGGradient} svgGradient
-   * @param {number} ratio
-   * @param {Color|string|Property.<Color|string|null>|null} color
-   */
-  initialize( svgGradient, ratio, color ) {
+  isActiveSVGGradientStop(): this is ActiveSVGGradientStop { return !!this.svgGradient; }
+
+  initialize( svgGradient: ActiveSVGGradient, ratio: number, color: IColor ) {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] initialize: ${svgGradient.gradient.id} : ${ratio}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
-    // @private {SVGGradient} - transient
     this.svgGradient = svgGradient;
-
-    // @private {Color|string|Property.<Color|string|null>|null} - transient
     this.color = color;
-
-    // @private {number}
     this.ratio = ratio;
 
-    // @public {SVGStopElement} - persistent
     this.svgElement = this.svgElement || document.createElementNS( svgns, 'stop' );
 
-    this.svgElement.setAttribute( 'offset', ratio );
+    this.svgElement.setAttribute( 'offset', '' + ratio );
 
-    // @private {boolean}
     this.dirty = true; // true here so our update() actually properly initializes
 
     this.update();
@@ -79,18 +75,17 @@ class SVGGradientStop {
 
   /**
    * Called when our color is a Property and it changes.
-   * @private
-   *
-   * @param {Color|string|null} newValue
-   * @param {Color|string|null} oldValue
    */
-  onPropertyChange( newValue, oldValue ) {
+  private onPropertyChange( newValue: Color | string | null, oldValue: Color | string | null ) {
+    assert && assert( this.isActiveSVGGradientStop() );
+    const activeSelf = this as ActiveSVGGradientStop;
+
     if ( oldValue instanceof Color ) {
-      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] removing Color listener: ${this.svgGradient.gradient.id} : ${this.ratio}` );
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] removing Color listener: ${activeSelf.svgGradient.gradient.id} : ${this.ratio}` );
       oldValue.changeEmitter.removeListener( this.colorListener );
     }
     if ( newValue instanceof Color ) {
-      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] adding Color listener: ${this.svgGradient.gradient.id} : ${this.ratio}` );
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] adding Color listener: ${activeSelf.svgGradient.gradient.id} : ${this.ratio}` );
       newValue.changeEmitter.addListener( this.colorListener );
     }
 
@@ -99,16 +94,16 @@ class SVGGradientStop {
 
   /**
    * Should be called when the color stop's value may have changed.
-   * @private
    */
-  markDirty() {
+  private markDirty() {
+    assert && assert( this.isActiveSVGGradientStop() );
+
     this.dirty = true;
-    this.svgGradient.markDirty();
+    ( this as ActiveSVGGradientStop ).svgGradient.markDirty();
   }
 
   /**
    * Updates the color stop to whatever the current color should be.
-   * @public
    */
   update() {
     if ( !this.dirty ) {
@@ -116,7 +111,10 @@ class SVGGradientStop {
     }
     this.dirty = false;
 
-    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] update: ${this.svgGradient.gradient.id} : ${this.ratio}` );
+    assert && assert( this.isActiveSVGGradientStop() );
+    const activeSelf = this as ActiveSVGGradientStop;
+
+    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] update: ${activeSelf.svgGradient.gradient.id} : ${this.ratio}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
     // {Color|string|Property.<Color|string|null>|null}
@@ -137,7 +135,7 @@ class SVGGradientStop {
       scratchColor.setCSS( color );
     }
     else {
-      scratchColor.set( color );
+      scratchColor.set( color as Color );
     }
 
     // Since SVG doesn't support parsing scientific notation (e.g. 7e5), we need to output fixed decimal-point strings.
@@ -157,26 +155,28 @@ class SVGGradientStop {
 
   /**
    * Disposes, so that it can be reused from the pool.
-   * @public
    */
   dispose() {
-    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] dispose: ${this.svgGradient.gradient.id} : ${this.ratio}` );
+    assert && assert( this.isActiveSVGGradientStop() );
+    const activeSelf = this as ActiveSVGGradientStop;
+
+    sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] dispose: ${activeSelf.svgGradient.gradient.id} : ${this.ratio}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
     const color = this.color;
 
     if ( color instanceof Property ) {
-      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] removing Property listener: ${this.svgGradient.gradient.id} : ${this.ratio}` );
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] removing Property listener: ${activeSelf.svgGradient.gradient.id} : ${this.ratio}` );
       if ( color.hasListener( this.propertyListener ) ) {
         color.unlink( this.propertyListener );
       }
       if ( color.value instanceof Color ) {
-        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] removing Color listener: ${this.svgGradient.gradient.id} : ${this.ratio}` );
+        sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] removing Color listener: ${activeSelf.svgGradient.gradient.id} : ${this.ratio}` );
         color.value.changeEmitter.removeListener( this.colorListener );
       }
     }
     else if ( color instanceof Color ) {
-      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] removing Color listener: ${this.svgGradient.gradient.id} : ${this.ratio}` );
+      sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] removing Color listener: ${activeSelf.svgGradient.gradient.id} : ${this.ratio}` );
       color.changeEmitter.removeListener( this.colorListener );
     }
 
@@ -187,10 +187,14 @@ class SVGGradientStop {
 
     sceneryLog && sceneryLog.Paints && sceneryLog.pop();
   }
+
+  freeToPool() {
+    SVGGradientStop.pool.freeToPool( this );
+  }
+
+  static pool = new Pool( SVGGradientStop );
 }
 
 scenery.register( 'SVGGradientStop', SVGGradientStop );
-
-Poolable.mixInto( SVGGradientStop );
 
 export default SVGGradientStop;

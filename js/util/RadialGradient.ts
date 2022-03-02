@@ -10,25 +10,39 @@
 
 import Vector2 from '../../../dot/js/Vector2.js';
 import platform from '../../../phet-core/js/platform.js';
-import { scenery, Gradient, SVGRadialGradient } from '../imports.js';
+import { scenery, Gradient, SVGRadialGradient, ColorDef, SVGBlock, GradientStop } from '../imports.js';
 
 class RadialGradient extends Gradient {
+
+  start: Vector2;
+  end: Vector2;
+  startRadius: number;
+  endRadius: number;
+
+  // linear function from radius to point on the line from start to end
+  focalPoint: Vector2;
+
+  startIsLarger: boolean;
+  largePoint: Vector2;
+
+  minRadius: number;
+  maxRadius: number;
+
   /**
    * TODO: add the ability to specify the color-stops inline. possibly [ [0,color1], [0.5,color2], [1,color3] ]
    *
    * TODO: support Vector2s as p0 and p1
    *
-   * @param {number} x0 - X coordinate of the start point (ratio 0) in the local coordinate frame
-   * @param {number} y0 - Y coordinate of the start point (ratio 0) in the local coordinate frame
-   * @param {number} r0 - Radius of the start point (ratio 0) in the local coordinate frame
-   * @param {number} x1 - X coordinate of the end point (ratio 1) in the local coordinate frame
-   * @param {number} y1 - Y coordinate of the end point (ratio 1) in the local coordinate frame
-   * @param {number} r1 - Radius of the end point (ratio 1) in the local coordinate frame
+   * @param x0 - X coordinate of the start point (ratio 0) in the local coordinate frame
+   * @param y0 - Y coordinate of the start point (ratio 0) in the local coordinate frame
+   * @param r0 - Radius of the start point (ratio 0) in the local coordinate frame
+   * @param x1 - X coordinate of the end point (ratio 1) in the local coordinate frame
+   * @param y1 - Y coordinate of the end point (ratio 1) in the local coordinate frame
+   * @param r1 - Radius of the end point (ratio 1) in the local coordinate frame
    */
-  constructor( x0, y0, r0, x1, y1, r1 ) {
+  constructor( x0: number, y0: number, r0: number, x1: number, y1: number, r1: number ) {
     super();
 
-    // @public {Vector2}
     this.start = new Vector2( x0, y0 );
     this.end = new Vector2( x1, y1 );
 
@@ -43,20 +57,14 @@ class RadialGradient extends Gradient {
       this.end.y = y;
     }
 
-    // @public {number}
     this.startRadius = r0;
     this.endRadius = r1;
 
-    // @public {Vector2} - linear function from radius to point on the line from start to end
     this.focalPoint = this.start.plus( this.end.minus( this.start ).times( this.startRadius / ( this.startRadius - this.endRadius ) ) );
 
-    // @public {boolean}
     this.startIsLarger = this.startRadius > this.endRadius;
-
-    // @public {Vector2}
     this.largePoint = this.startIsLarger ? this.start : this.end;
 
-    // @public {number}
     this.maxRadius = Math.max( this.startRadius, this.endRadius );
     this.minRadius = Math.min( this.startRadius, this.endRadius );
 
@@ -72,48 +80,37 @@ class RadialGradient extends Gradient {
 
   /**
    * Returns a fresh gradient given the starting parameters
-   * @protected
-   * @override
-   *
-   * @returns {CanvasGradient}
    */
-  createCanvasGradient() {
+  createCanvasGradient(): CanvasGradient {
     // use the global scratch canvas instead of creating a new Canvas
+    // @ts-ignore TODO scenery namespace
     return scenery.scratchContext.createRadialGradient( this.start.x, this.start.y, this.startRadius, this.end.x, this.end.y, this.endRadius );
   }
 
   /**
    * Creates an SVG paint object for creating/updating the SVG equivalent definition.
-   * @public
-   *
-   * @param {SVGBlock} svgBlock
-   * @returns {SVGGradient|SVGPattern}
    */
-  createSVGPaint( svgBlock ) {
-    return SVGRadialGradient.createFromPool( svgBlock, this );
+  createSVGPaint( svgBlock: SVGBlock ): SVGRadialGradient {
+    return SVGRadialGradient.pool.createFromPool( svgBlock, this );
   }
 
   /**
    * Returns stops suitable for direct SVG use.
-   * @public
-   * @override
    *
    * NOTE: SVG has certain stop requirements, so we need to remap/reverse in some cases.
-   *
-   * @returns {Array.<{ ratio: {number}, stop: {Color|string|Property.<Color|string|null>|null} }>}
    */
-  getSVGStops() {
+  getSVGStops(): GradientStop[] {
     const startIsLarger = this.startIsLarger;
     const maxRadius = this.maxRadius;
     const minRadius = this.minRadius;
 
     //TODO: replace with dot.Utils.linear
     // maps x linearly from [a0,b0] => [a1,b1]
-    function linearMap( a0, b0, a1, b1, x ) {
+    function linearMap( a0: number, b0: number, a1: number, b1: number, x: number ) {
       return a1 + ( x - a0 ) * ( b1 - a1 ) / ( b0 - a0 );
     }
 
-    function mapStop( stop ) {
+    function mapStop( stop: GradientStop ) {
       // flip the stops if the start has a larger radius
       let ratio = startIsLarger ? 1 - stop.ratio : stop.ratio;
 
@@ -141,19 +138,18 @@ class RadialGradient extends Gradient {
 
   /**
    * Returns a string form of this object
-   * @public
-   *
-   * @returns {string}
    */
-  toString() {
+  toString(): string {
     let result = `new scenery.RadialGradient( ${this.start.x}, ${this.start.y}, ${this.startRadius}, ${this.end.x}, ${this.end.y}, ${this.endRadius} )`;
 
     _.each( this.stops, stop => {
-      result += `.addColorStop( ${stop.ratio}, '${stop.color.toString()}' )`;
+      result += `.addColorStop( ${stop.ratio}, ${ColorDef.scenerySerialize( stop.color )} )`;
     } );
 
     return result;
   }
+
+  isRadialGradient!: boolean;
 }
 
 RadialGradient.prototype.isRadialGradient = true;

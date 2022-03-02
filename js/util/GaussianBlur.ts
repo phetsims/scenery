@@ -11,21 +11,23 @@
  */
 
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
-import { scenery, Filter, svgns } from '../imports.js';
+import { scenery, Filter, svgns, CanvasContextWrapper } from '../imports.js';
 
 class GaussianBlur extends Filter {
+
+  standardDeviation: number;
+
   /**
-   * @param {number} standardDeviation
-   * @param {number} [filterRegionPercentage]
+   * @param standardDeviation
+   * @param [filterRegionPercentage]
    */
-  constructor( standardDeviation, filterRegionPercentage = 15 ) {
+  constructor( standardDeviation: number, filterRegionPercentage: number = 15 ) {
     assert && assert( typeof standardDeviation === 'number', 'GaussianBlur standardDeviation should be a number' );
     assert && assert( isFinite( standardDeviation ), 'GaussianBlur standardDeviation should be finite' );
     assert && assert( standardDeviation >= 0, 'GaussianBlur standardDeviation should be non-negative' );
 
     super();
 
-    // @public {number}
     this.standardDeviation = standardDeviation;
 
     this.filterRegionPercentageIncrease = filterRegionPercentage;
@@ -35,12 +37,8 @@ class GaussianBlur extends Filter {
    * Returns the CSS-style filter substring specific to this single filter, e.g. `grayscale(1)`. This should be used for
    * both DOM elements (https://developer.mozilla.org/en-US/docs/Web/CSS/filter) and when supported, Canvas
    * (https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter).
-   * @public
-   * @override
-   *
-   * @returns {string}
    */
-  getCSSFilterString() {
+  getCSSFilterString(): string {
     return `blur(${toSVGNumber( this.standardDeviation )}px)`;
   }
 
@@ -49,14 +47,8 @@ class GaussianBlur extends Filter {
    * and should either output using the resultName (or if not provided, the last element appended should be the output).
    * This effectively mutates the provided filter object, and will be successively called on all Filters to build an
    * SVG filter object.
-   * @public
-   * @override
-   *
-   * @param {SVGFilterElement} svgFilter
-   * @param {string} inName
-   * @param {string} [resultName]
    */
-  applySVGFilter( svgFilter, inName, resultName ) {
+  applySVGFilter( svgFilter: SVGFilterElement, inName: string, resultName?: string ) {
     // e.g. <feGaussianBlur stdDeviation="[radius radius]" edgeMode="[edge mode]" >
     const feGaussianBlur = document.createElementNS( svgns, 'feGaussianBlur' );
     feGaussianBlur.setAttribute( 'stdDeviation', toSVGNumber( this.standardDeviation ) );
@@ -70,24 +62,16 @@ class GaussianBlur extends Filter {
     svgFilter.appendChild( feGaussianBlur );
   }
 
-  /**
-   * @public
-   * @override
-   *
-   * @returns {*}
-   */
   isDOMCompatible() {
     return true;
   }
 
-  /**
-   * @public
-   * @override
-   *
-   * @returns {boolean}
-   */
   isSVGCompatible() {
     return true;
+  }
+
+  applyCanvasFilter( wrapper: CanvasContextWrapper ): void {
+    throw new Error( 'unimplemented' );
   }
 }
 
