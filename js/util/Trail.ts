@@ -15,25 +15,41 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Transform3 from '../../../dot/js/Transform3.js';
+import Vector2 from '../../../dot/js/Vector2.js';
 import { scenery, Node, TrailPointer } from '../imports.js';
 
 // constants
 const ID_SEPARATOR = '-';
 
 class Trail {
+
+  // The main nodes of the trail, in order from root to leaf
+  nodes: Node[];
+
+  // Shortcut for the length of nodes.
+  length: number;
+
+  // A unique identifier that should only be shared by other trails that are identical to this one.
+  uniqueId: string;
+
+  // indices[x] stores the index of nodes[x] in nodes[x-1]'s children, e.g.
+  // nodes[i].children[ indices[i] ] === nodes[i+1]
+  indices: number[];
+
+  // Controls the immutability of the trail.
+  // If set to true, add/remove descendant/ancestor should fail if assertions are enabled
+  // Use setImmutable() or setMutable() to signal a specific type of protection, so it cannot be changed later
+  private immutable?: boolean;
+
   /**
    * @param {Trail|Array.<Node>|Node} [nodes]
    */
-  constructor( nodes ) {
-    /*
-     * Controls the immutability of the trail.
-     * If set to true, add/remove descendant/ancestor should fail if assertions are enabled
-     * Use setImmutable() or setMutable() to signal a specific type of protection, so it cannot be changed later
-     */
+  constructor( nodes?: Trail | Node[] | Node ) {
     if ( assert ) {
-      // @private {boolean|undefined} only do this if assertions are enabled, otherwise we won't access it at all
+      // Only do this if assertions are enabled, otherwise we won't access it at all
       this.immutable = undefined;
     }
 
@@ -48,17 +64,9 @@ class Trail {
       return;
     }
 
-    // @public {Array.<Node>} - The main nodes of the trail, in order from root to leaf
     this.nodes = [];
-
-    // @public {number} - Shortcut for the length of nodes.
     this.length = 0;
-
-    // @public {string} - A unique identifier that should only be shared by other trails that are identical to this one.
     this.uniqueId = '';
-
-    // @public {Array.<number>} - indices[x] stores the index of nodes[x] in nodes[x-1]'s children, e.g.
-    // nodes[i].children[ indices[i] ] === nodes[i+1]
     this.indices = [];
 
     if ( nodes ) {
@@ -80,31 +88,22 @@ class Trail {
 
   /**
    * Returns a copy of this Trail that can be modified independently
-   * @public
-   *
-   * @returns {Trail}
    */
-  copy() {
+  copy(): Trail {
     return new Trail( this );
   }
 
   /**
-   * Whether the leaf-most Node in our trail will render something
-   * @public (scenery-internal)
-   *
-   * @returns {boolean}
+   * Whether the leaf-most Node in our trail will render something (scenery-internal)
    */
-  isPainted() {
+  isPainted(): boolean {
     return this.lastNode().isPainted();
   }
 
   /**
    * Whether all nodes in the trail are still connected from the trail's root to its leaf.
-   * @public
-   *
-   * @returns {boolean}
    */
-  isValid() {
+  isValid(): boolean {
     this.reindex();
 
     const indexLength = this.indices.length;
@@ -119,11 +118,8 @@ class Trail {
 
   /**
    * This trail is visible only if all nodes on it are marked as visible
-   * @public
-   *
-   * @returns {boolean}
    */
-  isVisible() {
+  isVisible(): boolean {
     let i = this.nodes.length;
     while ( i-- ) {
       if ( !this.nodes[ i ].isVisible() ) {
@@ -135,11 +131,8 @@ class Trail {
 
   /**
    * This trail is pdomVisible only if all nodes on it are marked as pdomVisible
-   * @public
-   *
-   * @returns {boolean}
    */
-  isPDOMVisible() {
+  isPDOMVisible(): boolean {
     let i = this.nodes.length;
     while ( i-- ) {
       if ( !this.nodes[ i ].isVisible() || !this.nodes[ i ].isPDOMVisible() ) {
@@ -149,12 +142,7 @@ class Trail {
     return true;
   }
 
-  /**
-   * @public
-   *
-   * @returns {number}
-   */
-  getOpacity() {
+  getOpacity(): number {
     let opacity = 1;
     let i = this.nodes.length;
     while ( i-- ) {
@@ -165,33 +153,19 @@ class Trail {
 
   /**
    * Essentially whether this node is visited in the hit-testing operation
-   * @public
-   *
-   * @returns {boolean}
    */
-  isPickable() {
+  isPickable(): boolean {
     // it won't be if it or any ancestor is pickable: false, or is invisible
     if ( _.some( this.nodes, node => node.pickable === false || node.visible === false ) ) { return false; }
 
     // if there is any listener or pickable: true, it will be pickable
     if ( _.some( this.nodes, node => node._inputListeners.length > 0 || node.pickableProperty.value === true ) ) { return true; }
 
-    // TODO: Is this even necessary?
-    if ( this.lastNode()._picker._subtreePickableCount > 0 ) {
-      return true;
-    }
-
     // no listeners or pickable: true, so it will be pruned
     return false;
   }
 
-  /**
-   * @public
-   *
-   * @param {number} index
-   * @returns {Node}
-   */
-  get( index ) {
+  get( index: number ): Node {
     if ( index >= 0 ) {
       return this.nodes[ index ];
     }
@@ -201,46 +175,25 @@ class Trail {
     }
   }
 
-  /**
-   * @public
-   *
-   * @param {number} startIndex
-   * @param {number} endIndex
-   * @returns {Trail}
-   */
-  slice( startIndex, endIndex ) {
+  slice( startIndex: number, endIndex: number ): Trail {
     return new Trail( this.nodes.slice( startIndex, endIndex ) );
   }
 
   /**
-   * @public
-   *
    * TODO: consider renaming to subtrailToExcluding and subtrailToIncluding?
-   *
-   * @param {Node} node
-   * @param {boolean} [excludeNode]
-   * @returns {Trail}
    */
-  subtrailTo( node, excludeNode = false ) {
+  subtrailTo( node: Node, excludeNode: boolean = false ): Trail {
     return this.slice( 0, _.indexOf( this.nodes, node ) + ( excludeNode ? 0 : 1 ) );
   }
 
-  /**
-   * @public
-   *
-   * @returns {boolean}
-   */
-  isEmpty() {
+  isEmpty(): boolean {
     return this.nodes.length === 0;
   }
 
   /**
    * From local to global
-   * @public
-   *
-   * @returns {Matrix3}
    */
-  getMatrix() {
+  getMatrix(): Matrix3 {
     // TODO: performance: can we cache this ever? would need the rootNode to not really change in between
     // this matrix will be modified in place, so always start fresh
     const matrix = Matrix3.identity();
@@ -256,11 +209,8 @@ class Trail {
 
   /**
    * From local to next-to-global (ignores root node matrix)
-   * @public
-   *
-   * @returns {Matrix3}
    */
-  getAncestorMatrix() {
+  getAncestorMatrix(): Matrix3 {
     // TODO: performance: can we cache this ever? would need the rootNode to not really change in between
     // this matrix will be modified in place, so always start fresh
     const matrix = Matrix3.identity();
@@ -276,11 +226,8 @@ class Trail {
 
   /**
    * From parent to global
-   * @public
-   *
-   * @returns {Matrix3}
    */
-  getParentMatrix() {
+  getParentMatrix(): Matrix3 {
     // this matrix will be modified in place, so always start fresh
     const matrix = Matrix3.identity();
 
@@ -295,32 +242,19 @@ class Trail {
 
   /**
    * From local to global
-   * @public
-   *
-   * @returns {Transform3}
    */
-  getTransform() {
+  getTransform(): Transform3 {
     return new Transform3( this.getMatrix() );
   }
 
   /**
    * From parent to global
-   * @public
-   *
-   * @returns {Transform3}
    */
-  getParentTransform() {
+  getParentTransform(): Transform3 {
     return new Transform3( this.getParentMatrix() );
   }
 
-  /**
-   * @public
-   *
-   * @param {Node} node
-   * @param {number} [index]
-   * @returns {Trail} - For chaining
-   */
-  addAncestor( node, index ) {
+  addAncestor( node: Node, index?: number ): this {
     assert && assert( !this.immutable, 'cannot modify an immutable Trail with addAncestor' );
     assert && assert( node, 'cannot add falsy value to a Trail' );
 
@@ -338,12 +272,7 @@ class Trail {
     return this;
   }
 
-  /**
-   * @public
-   *
-   * @returns {Trail} - For chaining
-   */
-  removeAncestor() {
+  removeAncestor(): this {
     assert && assert( !this.immutable, 'cannot modify an immutable Trail with removeAncestor' );
     assert && assert( this.length > 0, 'cannot remove a Node from an empty trail' );
 
@@ -358,14 +287,7 @@ class Trail {
     return this;
   }
 
-  /**
-   * @public
-   *
-   * @param {Node} node
-   * @param {number} index
-   * @returns {Trail} - For chaining
-   */
-  addDescendant( node, index ) {
+  addDescendant( node: Node, index?: number ): this {
     assert && assert( !this.immutable, 'cannot modify an immutable Trail with addDescendant' );
     assert && assert( node, 'cannot add falsy value to a Trail' );
 
@@ -383,12 +305,7 @@ class Trail {
     return this;
   }
 
-  /**
-   * @public
-   *
-   * @returns {Trail} - For chaining
-   */
-  removeDescendant() {
+  removeDescendant(): this {
     assert && assert( !this.immutable, 'cannot modify an immutable Trail with removeDescendant' );
     assert && assert( this.length > 0, 'cannot remove a Node from an empty trail' );
 
@@ -403,12 +320,7 @@ class Trail {
     return this;
   }
 
-  /**
-   * @public
-   *
-   * @param {Trail} trail
-   */
-  addDescendantTrail( trail ) {
+  addDescendantTrail( trail: Trail ) {
     const length = trail.length;
     if ( length ) {
       this.addDescendant( trail.nodes[ 0 ] );
@@ -418,12 +330,7 @@ class Trail {
     }
   }
 
-  /**
-   * @public
-   *
-   * @param {Trail} trail
-   */
-  removeDescendantTrail( trail ) {
+  removeDescendantTrail( trail: Trail ) {
     const length = trail.length;
     for ( let i = length - 1; i >= 0; i-- ) {
       assert && assert( this.lastNode() === trail.nodes[ i ] );
@@ -434,7 +341,6 @@ class Trail {
 
   /**
    * Refreshes the internal index references (important if any children arrays were modified!)
-   * @public
    */
   reindex() {
     const length = this.length;
@@ -449,12 +355,7 @@ class Trail {
     }
   }
 
-  /**
-   * @public
-   *
-   * @returns {Trail} - For chaining
-   */
-  setImmutable() {
+  setImmutable(): this {
     // if assertions are disabled, we hope this is inlined as a no-op
     if ( assert ) {
       assert( this.immutable !== false, 'A trail cannot be made immutable after being flagged as mutable' );
@@ -466,12 +367,7 @@ class Trail {
     return this; // allow chaining
   }
 
-  /**
-   * @public
-   *
-   * @returns {Trail} - For chaining
-   */
-  setMutable() {
+  setMutable(): this {
     // if assertions are disabled, we hope this is inlined as a no-op
     if ( assert ) {
       assert( this.immutable !== true, 'A trail cannot be made mutable after being flagged as immutable' );
@@ -481,12 +377,7 @@ class Trail {
     return this; // allow chaining
   }
 
-  /**
-   * @public
-   *
-   * @returns {boolean}
-   */
-  areIndicesValid() {
+  areIndicesValid(): boolean {
     for ( let i = 1; i < this.length; i++ ) {
       const currentIndex = this.indices[ i - 1 ];
       if ( this.nodes[ i - 1 ]._children[ currentIndex ] !== this.nodes[ i ] ) {
@@ -496,13 +387,7 @@ class Trail {
     return true;
   }
 
-  /**
-   * @public
-   *
-   * @param {Trail} other
-   * @returns {boolean}
-   */
-  equals( other ) {
+  equals( other: Trail ): boolean {
     if ( this.length !== other.length ) {
       return false;
     }
@@ -518,12 +403,8 @@ class Trail {
 
   /**
    * Returns a new Trail from the root up to the parameter node.
-   * @public
-   *
-   * @param {Node} node
-   * @returns {Trail}
    */
-  upToNode( node ) {
+  upToNode( node: Node ): Trail {
     const nodeIndex = _.indexOf( this.nodes, node );
     assert && assert( nodeIndex >= 0, 'Trail does not contain the node' );
     return this.slice( 0, _.indexOf( this.nodes, node ) + 1 );
@@ -531,13 +412,11 @@ class Trail {
 
   /**
    * Whether this trail contains the complete 'other' trail, but with added descendants afterwards.
-   * @public
    *
-   * @param {Trail} other - is other a subset of this trail?
-   * @param {boolean} allowSameTrail
-   * @returns {boolean}
+   * @param other - is other a subset of this trail?
+   * @param allowSameTrail
    */
-  isExtensionOf( other, allowSameTrail ) {
+  isExtensionOf( other: Trail, allowSameTrail?: boolean ): boolean {
     if ( this.length <= other.length - ( allowSameTrail ? 1 : 0 ) ) {
       return false;
     }
@@ -553,35 +432,23 @@ class Trail {
 
   /**
    * Returns whether a given node is contained in the trail.
-   * @public
-   *
-   * @param {Node} node
-   * @returns {boolean}
    */
-  containsNode( node ) {
+  containsNode( node: Node ): boolean {
     return _.includes( this.nodes, node );
   }
 
   /**
    * A transform from our local coordinate frame to the other trail's local coordinate frame
-   * @public
-   *
-   * @param {Trail} otherTrail
-   * @returns {Transform3}
    */
-  getTransformTo( otherTrail ) {
+  getTransformTo( otherTrail: Trail ): Transform3 {
     return new Transform3( this.getMatrixTo( otherTrail ) );
   }
 
   /**
    * Returns a matrix that transforms a point in our last node's local coordinate frame to the other trail's last node's
    * local coordinate frame
-   * @public
-   *
-   * @param {Trail} otherTrail
-   * @returns {Matrix3}
    */
-  getMatrixTo( otherTrail ) {
+  getMatrixTo( otherTrail: Trail ): Matrix3 {
     this.reindex();
     otherTrail.reindex();
 
@@ -605,14 +472,10 @@ class Trail {
 
   /**
    * Returns the first index that is different between this trail and the other trail.
-   * @public
    *
    * If the trails are identical, the index should be equal to the trail's length.
-   *
-   * @param {Trail} otherTrail
-   * @returns {number}
    */
-  getBranchIndexTo( otherTrail ) {
+  getBranchIndexTo( otherTrail: Trail ): number {
     assert && assert( this.nodes[ 0 ] === otherTrail.nodes[ 0 ], 'To get a branch index, the trails must have the same root' );
 
     let branchIndex;
@@ -629,11 +492,8 @@ class Trail {
 
   /**
    * Returns the last (largest) index into the trail's nodes that has inputEnabled=true.
-   * @public
-   *
-   * @returns {number}
    */
-  getLastInputEnabledIndex() {
+  getLastInputEnabledIndex(): number {
     // Determine how far up the Trail input is determined. The first node with !inputEnabled and after will not have
     // events fired (see https://github.com/phetsims/sun/issues/257)
     let trailStartIndex = -1;
@@ -651,51 +511,30 @@ class Trail {
   /**
    * Returns the leaf-most index, unless there is a Node with inputEnabled=false (in which case, the lowest index
    * for those matching Nodes are returned).
-   * @public
-   *
-   * @returns {number}
    */
-  getCursorCheckIndex() {
+  getCursorCheckIndex(): number {
     return this.getLastInputEnabledIndex();
   }
 
   /**
-   * @public
-   *
    * TODO: phase out in favor of get()
-   *
-   * @param {number} offset
-   * @returns {Node}
    */
-  nodeFromTop( offset ) {
+  nodeFromTop( offset: number ): Node {
     return this.nodes[ this.length - 1 - offset ];
   }
 
-  /**
-   * @public
-   *
-   * @returns {Node}
-   */
-  lastNode() {
+  lastNode(): Node {
     return this.nodeFromTop( 0 );
   }
 
-  /**
-   * @public
-   *
-   * @returns {Node}
-   */
-  rootNode() {
+  rootNode(): Node {
     return this.nodes[ 0 ];
   }
 
   /**
    * Returns the previous graph trail in the order of self-rendering
-   * @public
-   *
-   * @returns {Trail}
    */
-  previous() {
+  previous(): Trail | null {
     if ( this.nodes.length <= 1 ) {
       return null;
     }
@@ -726,11 +565,8 @@ class Trail {
 
   /**
    * Like previous(), but keeps moving back until the trail goes to a node with isPainted() === true
-   * @public
-   *
-   * @returns {Trail}
    */
-  previousPainted() {
+  previousPainted(): Trail | null {
     let result = this.previous();
     while ( result && !result.isPainted() ) {
       result = result.previous();
@@ -740,11 +576,8 @@ class Trail {
 
   /**
    * In the order of self-rendering
-   * @public
-   *
-   * @returns {Trail}
    */
-  next() {
+  next(): Trail | null {
     const arr = this.nodes.slice( 0 );
 
     const top = this.nodeFromTop( 0 );
@@ -781,11 +614,8 @@ class Trail {
 
   /**
    * Like next(), but keeps moving back until the trail goes to a node with isPainted() === true
-   * @public
-   *
-   * @returns {Trail}
    */
-  nextPainted() {
+  nextPainted(): Trail | null {
     let result = this.next();
     while ( result && !result.isPainted() ) {
       result = result.next();
@@ -795,29 +625,22 @@ class Trail {
 
   /**
    * Calls callback( trail ) for this trail, and each descendant trail. If callback returns true, subtree will be skipped
-   * @public
-   *
-   * @param {function(Trail)} callback
    */
-  eachTrailUnder( callback ) {
+  eachTrailUnder( callback: ( trail: Trail ) => void ) {
     // TODO: performance: should be optimized to be much faster, since we don't have to deal with the before/after
     new TrailPointer( this, true ).eachTrailBetween( new TrailPointer( this, false ), callback );
   }
 
-  /*
+  /**
    * Standard Java-style compare. -1 means this trail is before (under) the other trail, 0 means equal, and 1 means this trail is
    * after (on top of) the other trail.
    * A shorter subtrail will compare as -1.
-   * @public
    *
    * Assumes that the Trails are properly indexed. If not, please reindex them!
    *
    * Comparison is for the rendering order, so an ancestor is 'before' a descendant
-   *
-   * @param {Trail} other
-   * @returns {boolean}
    */
-  compare( other ) {
+  compare( other: Trail ): number {
     assert && assert( !this.isEmpty(), 'cannot compare with an empty trail' );
     assert && assert( !other.isEmpty(), 'cannot compare with an empty trail' );
     assert && assert( this.nodes[ 0 ] === other.nodes[ 0 ], 'for Trail comparison, trails must have the same root node' );
@@ -848,112 +671,49 @@ class Trail {
     }
   }
 
-  /**
-   * @public
-   *
-   * @param {Trail} other
-   * @returns {boolean}
-   */
-  isBefore( other ) {
+  isBefore( other: Trail ): boolean {
     return this.compare( other ) === -1;
   }
 
-  /**
-   * @public
-   *
-   * @param {Trail} other
-   * @returns {boolean}
-   */
-  isAfter( other ) {
+  isAfter( other: Trail ): boolean {
     return this.compare( other ) === 1;
   }
 
-  /**
-   * @public
-   *
-   * @param {Vector2} point
-   * @returns {Vector2}
-   */
-  localToGlobalPoint( point ) {
+  localToGlobalPoint( point: Vector2 ): Vector2 {
     // TODO: performance: multiple timesVector2 calls up the chain is probably faster
     return this.getMatrix().timesVector2( point );
   }
 
-  /**
-   * @public
-   *
-   * @param {Bounds2} bounds
-   * @returns {Bounds2}
-   */
-  localToGlobalBounds( bounds ) {
+  localToGlobalBounds( bounds: Bounds2 ): Bounds2 {
     return bounds.transformed( this.getMatrix() );
   }
 
-  /**
-   * @public
-   *
-   * @param {Vector2} point
-   * @returns {Vector2}
-   */
-  globalToLocalPoint( point ) {
+  globalToLocalPoint( point: Vector2 ): Vector2 {
     return this.getTransform().inversePosition2( point );
   }
 
-  /**
-   * @public
-   *
-   * @param {Bounds2} bounds
-   * @returns {Bounds2}
-   */
-  globalToLocalBounds( bounds ) {
+  globalToLocalBounds( bounds: Bounds2 ): Bounds2 {
     return this.getTransform().inverseBounds2( bounds );
   }
 
-  /**
-   * @public
-   *
-   * @param {Vector2} point
-   * @returns {Vector2}
-   */
-  parentToGlobalPoint( point ) {
+  parentToGlobalPoint( point: Vector2 ): Vector2 {
     // TODO: performance: multiple timesVector2 calls up the chain is probably faster
     return this.getParentMatrix().timesVector2( point );
   }
 
-  /**
-   * @public
-   *
-   * @param {Bounds2} bounds
-   * @returns {Bounds2}
-   */
-  parentToGlobalBounds( bounds ) {
+  parentToGlobalBounds( bounds: Bounds2 ): Bounds2 {
     return bounds.transformed( this.getParentMatrix() );
   }
 
-  /**
-   * @public
-   *
-   * @param {Vector2} point
-   * @returns {Vector2}
-   */
-  globalToParentPoint( point ) {
+  globalToParentPoint( point: Vector2 ): Vector2 {
     return this.getParentTransform().inversePosition2( point );
   }
 
-  /**
-   * @public
-   *
-   * @param {Bounds2} bounds
-   * @returns {Bounds2}
-   */
-  globalToParentBounds( bounds ) {
+  globalToParentBounds( bounds: Bounds2 ): Bounds2 {
     return this.getParentTransform().inverseBounds2( bounds );
   }
 
-  /**
-   * @private
-   */
-  updateUniqueId() {
+  private updateUniqueId() {
     // string concatenation is faster, see http://jsperf.com/string-concat-vs-joins
     let result = '';
     const len = this.nodes.length;
@@ -969,11 +729,8 @@ class Trail {
 
   /**
    * Concatenates the unique IDs of nodes in the trail, so that we can do id-based lookups
-   * @public
-   *
-   * @returns {string}
    */
-  getUniqueId() {
+  getUniqueId(): string {
     // sanity checks
     if ( assert ) {
       const oldUniqueId = this.uniqueId;
@@ -985,11 +742,8 @@ class Trail {
 
   /**
    * Returns a string form of this object
-   * @public
-   *
-   * @returns {string}
    */
-  toString() {
+  toString(): string {
     this.reindex();
     if ( !this.length ) {
       return 'Empty Trail';
@@ -999,11 +753,8 @@ class Trail {
 
   /**
    * Cleaner string form which will show class names. Not optimized by any means, meant for debugging.
-   * @public
-   *
-   * @returns {string}
    */
-  toPathString() {
+  toPathString(): string {
     return _.map( this.nodes, n => {
       let string = n.constructor.name;
       if ( string === 'Node' ) {
@@ -1015,27 +766,17 @@ class Trail {
 
   /**
    * Returns a debugging string ideal for logged output.
-   * @public
-   *
-   * @returns {string}
    */
-  toDebugString() {
+  toDebugString(): string {
     return `${this.toString()} ${this.toPathString()}`;
   }
 
   /**
    * Like eachTrailBetween, but only fires for painted trails. If callback returns true, subtree will be skipped
-   * @public
-   *
-   * @param {Trail} a
-   * @param {Trail} b
-   * @param {function(Trail)} callback
-   * @param {boolean} excludeEndTrails
-   * @param {Node} rootNode
    */
-  static eachPaintedTrailBetween( a, b, callback, excludeEndTrails, rootNode ) {
-    Trail.eachTrailBetween( a, b, trail => {
-      if ( trail && trail.isPainted() ) {
+  static eachPaintedTrailBetween( a: Trail, b: Trail, callback: ( trail: Trail ) => void, excludeEndTrails: boolean, rootNode: Node ) {
+    Trail.eachTrailBetween( a, b, ( trail: Trail ) => {
+      if ( trail.isPainted() ) {
         return callback( trail );
       }
       return false;
@@ -1044,15 +785,8 @@ class Trail {
 
   /**
    * Global way of iterating across trails. when callback returns true, subtree will be skipped
-   * @public
-   *
-   * @param {Trail} a
-   * @param {Trail} b
-   * @param {function(Trail)} callback
-   * @param {boolean} excludeEndTrails
-   * @param {Node} rootNode
    */
-  static eachTrailBetween( a, b, callback, excludeEndTrails, rootNode ) {
+  static eachTrailBetween( a: Trail, b: Trail, callback: ( trail: Trail ) => void, excludeEndTrails: boolean, rootNode: Node ) {
     const aPointer = a ? new TrailPointer( a.copy(), true ) : new TrailPointer( new Trail( rootNode ), true );
     const bPointer = b ? new TrailPointer( b.copy(), true ) : new TrailPointer( new Trail( rootNode ), false );
 
@@ -1077,14 +811,10 @@ class Trail {
 
   /**
    * The index at which the two trails diverge. If a.length === b.length === branchIndex, the trails are identical
-   * @public
-   *
-   * @param {Trail} a
-   * @param {Trail} b
-   * @returns {number}
    */
-  static branchIndex( a, b ) {
+  static branchIndex( a: Trail, b: Trail ): number {
     assert && assert( a.nodes[ 0 ] === b.nodes[ 0 ], 'Branch changes require roots to be the same' );
+
     let branchIndex;
     const shortestLength = Math.min( a.length, b.length );
     for ( branchIndex = 0; branchIndex < shortestLength; branchIndex++ ) {
@@ -1097,24 +827,17 @@ class Trail {
 
   /**
    * The subtrail from the root that both trails share
-   * @public
-   *
-   * @param {Trail} a
-   * @param {Trail} b
-   * @returns {Trail}
    */
-  static sharedTrail( a, b ) {
+  static sharedTrail( a: Trail, b: Trail ): Trail {
     return a.slice( 0, Trail.branchIndex( a, b ) );
   }
 
   /**
-   * @public
-   *
-   * @param {Array.<Trail>} trailResults - Will be muted by appending matching trails
-   * @param {Trail} trail
-   * @param {function(Node):boolean} predicate
+   * @param trailResults - Will be muted by appending matching trails
+   * @param trail
+   * @param predicate
    */
-  static appendAncestorTrailsWithPredicate( trailResults, trail, predicate ) {
+  static appendAncestorTrailsWithPredicate( trailResults: Trail[], trail: Trail, predicate: ( node: Node ) => boolean ) {
     const root = trail.rootNode();
 
     if ( predicate( root ) ) {
@@ -1132,13 +855,11 @@ class Trail {
   }
 
   /**
-   * @public
-   *
-   * @param {Array.<Trail>} trailResults - Will be muted by appending matching trails
-   * @param {Trail} trail
-   * @param {function(Node):boolean} predicate
+   * @param trailResults - Will be muted by appending matching trails
+   * @param trail
+   * @param predicate
    */
-  static appendDescendantTrailsWithPredicate( trailResults, trail, predicate ) {
+  static appendDescendantTrailsWithPredicate( trailResults: Trail[], trail: Trail, predicate: ( node: Node ) => boolean ) {
     const lastNode = trail.lastNode();
 
     if ( predicate( lastNode ) ) {
@@ -1188,7 +909,7 @@ class Trail {
    * @param {Trail} a
    * @param {Trail} b
    */
-  static spannedSubtrees( a, b ) {
+  static spannedSubtrees( a: Trail, b: Trail ) {
     // assert && assert( a.nodes[0] === b.nodes[0], 'Spanned subtrees for a and b requires that a and b have the same root' );
 
     // a.reindex();
@@ -1248,13 +969,11 @@ class Trail {
   /**
    * Re-create a trail to a root node from an existing Trail id. The rootNode must have the same Id as the first
    * Node id of uniqueId.
-   * @public
    *
-   * @param {Node} rootNode - the root of the trail being created
-   * @param {string} uniqueId - integers separated by ID_SEPARATOR, see getUniqueId
-   * @returns {Trail}
+   * @param rootNode - the root of the trail being created
+   * @param uniqueId - integers separated by ID_SEPARATOR, see getUniqueId
    */
-  static fromUniqueId( rootNode, uniqueId ) {
+  static fromUniqueId( rootNode: Node, uniqueId: string ): Trail {
     const trailIds = uniqueId.split( ID_SEPARATOR );
     const trailIdNumbers = trailIds.map( id => parseInt( id, 10 ) );
 
@@ -1275,8 +994,8 @@ class Trail {
       for ( let j = 0; j < children.length; j++ ) {
 
         // pdomOrder supports null entries to fill in with default order
-        if ( children[ j ] !== null && children[ j ].id === trailId ) {
-          const childAlongTrail = children[ j ];
+        if ( children[ j ] !== null && children[ j ]!.id === trailId ) {
+          const childAlongTrail = children[ j ]!;
           nodes.push( childAlongTrail );
           currentNode = childAlongTrail;
 
