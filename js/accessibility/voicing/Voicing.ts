@@ -107,7 +107,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     // Input listener that speaks content on focus. This is the only input listener added
     // by Voicing, but it is the one that is consistent for all Voicing nodes. On focus, speak the name, object
     // response, and interaction hint.
-    public _speakContentOnFocusListener!: { focus: SceneryListenerFunction<FocusEvent> };
+    _speakContentOnFocusListener!: { focus: SceneryListenerFunction<FocusEvent> };
 
     constructor( ...args: IntentionalAny[] ) {
 
@@ -527,7 +527,6 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
   return VoicingClass;
 };
 
-// @public
 Voicing.VOICING_OPTION_KEYS = VOICING_OPTION_KEYS;
 
 scenery.register( 'Voicing', Voicing );

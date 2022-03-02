@@ -333,8 +333,6 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
 
     /**
      * If the pointer listener is cancelled or interrupted, clear focus and remove input listeners.
-     *
-     * @param [event]
      */
     _onPointerCancel( event?: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ) {
 

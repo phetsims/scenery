@@ -81,7 +81,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 
     // (scenery-internal) - Sends a message when the highlight for the ReadingBlock changes. Used
     // by the HighlightOverlay to redraw it if it changes while the highlight is active.
-    public readingBlockActiveHighlightChangedEmitter: TinyEmitter;
+    readingBlockActiveHighlightChangedEmitter: TinyEmitter;
 
     // Updates the hit bounds of this Node when the local bounds change.
     _localBoundsChangedListener: OmitThisParameter<( localBounds: Bounds2 ) => void>;
