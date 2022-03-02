@@ -59,7 +59,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
     // The tagName used for the ReadingBlock when "Voicing" is enabled, default
     // of button so that it is added to the focus order and can receive 'click' events. You may wish to set this
     // to some other tagName or set to null to remove the ReadingBlock from the focus order. If this is changed,
-    // be be sure that the ReadingBlock will still respond to `click` events when enabled.
+    // be sure that the ReadingBlock will still respond to `click` events when enabled.
     _readingBlockTagName: string | null;
 
     // The content for this ReadingBlock that will be spoken by SpeechSynthesis when
