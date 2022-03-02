@@ -400,7 +400,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
      * @protected
      */
     getDescendantsUseHighlighting( trail: Trail ): boolean {
-      const indexOfSelf = trail.nodes.indexOf( this );
+      const indexOfSelf = trail.nodes.indexOf( this as unknown as Node );
 
       // all the way to length, end not included in slice - and if start value is greater than index range
       // an empty array is returned
@@ -410,7 +410,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
       // speak the content for this Node
       let descendantsUseVoicing = false;
       for ( let i = 0; i < childToLeafNodes.length; i++ ) {
-        if ( childToLeafNodes[ i ].isInteractiveHighlighting ) {
+        if ( ( childToLeafNodes[ i ] as any ).isInteractiveHighlighting ) {
           descendantsUseVoicing = true;
           break;
         }

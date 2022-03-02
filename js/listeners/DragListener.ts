@@ -535,12 +535,12 @@ export default class DragListener extends PressListener implements IInputListene
     assert && assert( isPressedListener( this ) );
     const pressedListener = this as PressedDragListener;
 
-    let referenceResult;
+    let referenceResult: Vector2 | undefined;
     if ( assert ) {
       referenceResult = pressedListener.pressedTrail.globalToParentPoint( globalPoint );
     }
     pressedListener.pressedTrail.getParentTransform().getInverse().multiplyVector2( globalPoint );
-    assert && assert( globalPoint.equals( referenceResult ) );
+    assert && assert( globalPoint.equals( referenceResult! ) );
     return globalPoint;
   }
 
