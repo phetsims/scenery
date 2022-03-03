@@ -648,8 +648,6 @@ class Node extends ParallelDOM {
     this._enabledProperty = new TinyForwardingProperty<boolean>( DEFAULT_OPTIONS.enabled,
       DEFAULT_OPTIONS.phetioEnabledPropertyInstrumented, this.onEnabledPropertyChange.bind( this ) );
 
-    this.enabledProperty.lazyLink( this.pdomBoundEnabledListener );
-
     this._inputEnabledProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.inputEnabled,
       DEFAULT_OPTIONS.phetioInputEnabledPropertyInstrumented );
     this.clipAreaProperty = new TinyProperty<Shape | null>( DEFAULT_OPTIONS.clipArea );
@@ -666,6 +664,8 @@ class Node extends ParallelDOM {
     this._maxHeight = DEFAULT_OPTIONS.maxHeight;
     this._appliedScaleFactor = 1;
     this._inputListeners = [];
+
+    this.inputEnabledProperty.lazyLink( this.pdomBoundInputEnabledListener );
 
     // Add listener count change notifications into these Properties, since we need to know when their number of listeners
     // changes dynamically.

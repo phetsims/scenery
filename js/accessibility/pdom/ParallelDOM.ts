@@ -504,7 +504,7 @@ class ParallelDOM extends PhetioObject {
   pdomDisplaysEmitter: TinyEmitter<[]>;
 
   // PDOM specific enabled listener
-  protected pdomBoundEnabledListener: ( enabled: boolean ) => void;
+  protected pdomBoundInputEnabledListener: ( enabled: boolean ) => void;
 
   constructor( options?: PhetioObjectOptions ) {
 
@@ -559,7 +559,7 @@ class ParallelDOM extends PhetioObject {
     this._pdomHeadingBehavior = DEFAULT_PDOM_HEADING_BEHAVIOR;
     this.focusHighlightChangedEmitter = new TinyEmitter();
     this.pdomDisplaysEmitter = new TinyEmitter();
-    this.pdomBoundEnabledListener = this.pdomEnabledListener.bind( this );
+    this.pdomBoundInputEnabledListener = this.pdomInputEnabledListener.bind( this );
   }
 
   /***********************************************************************************************************/
@@ -573,7 +573,7 @@ class ParallelDOM extends PhetioObject {
    */
   disposeParallelDOM() {
 
-    ( this as unknown as Node ).enabledProperty.unlink( this.pdomBoundEnabledListener );
+    ( this as unknown as Node ).inputEnabledProperty.unlink( this.pdomBoundInputEnabledListener );
 
     // To prevent memory leaks, we want to clear our order (since otherwise nodes in our order will reference
     // this node).
@@ -588,7 +588,7 @@ class ParallelDOM extends PhetioObject {
     this.setActiveDescendantAssociations( [] );
   }
 
-  private pdomEnabledListener( enabled: boolean ) {
+  private pdomInputEnabledListener( enabled: boolean ) {
 
     // Mark this Node as disabled in the ParallelDOM
     this.setPDOMAttribute( 'aria-disabled', !enabled );
