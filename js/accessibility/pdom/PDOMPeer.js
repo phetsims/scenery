@@ -630,7 +630,6 @@ class PDOMPeer {
   setAssociationAttribute( attribute, associationObject ) {
     assert && assert( PDOMUtils.ASSOCIATION_ATTRIBUTES.indexOf( attribute ) >= 0,
       `unsupported attribute for setting with association object: ${attribute}` );
-    assert && PDOMUtils.validateAssociationObject( associationObject );
 
     const otherNodePDOMInstances = associationObject.otherNode.getPDOMInstances();
 

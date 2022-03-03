@@ -487,33 +487,6 @@ const PDOMUtils = {
   },
 
   /**
-   * Given an associationObject for either aria-labelledby or aria-describedby, make sure it has the right signature.
-   * @public
-   *
-   * @param {Object} associationObject
-   */
-  validateAssociationObject( associationObject ) {
-    assert && assert( typeof associationObject === 'object' );
-
-    const expectedKeys = [ 'thisElementName', 'otherNode', 'otherElementName' ];
-
-    const objectKeys = Object.keys( associationObject );
-
-    assert && assert( objectKeys.length === 3, 'wrong number of keys in associationObject, expected:', expectedKeys, ' got:', objectKeys );
-
-    if ( assert ) {
-      for ( let i = 0; i < objectKeys.length; i++ ) {
-        const objectKey = objectKeys[ i ];
-        assert && assert( expectedKeys.indexOf( objectKey ) >= 0, `unexpected key: ${objectKey}` );
-      }
-    }
-
-    assert && assert( associationObject.otherNode instanceof scenery.Node );
-    assert && assert( typeof associationObject.thisElementName === 'string' );
-    assert && assert( typeof associationObject.otherElementName === 'string' );
-  },
-
-  /**
    * Create an HTML element.  Unless this is a form element or explicitly marked as focusable, add a negative
    * tab index. IE gives all elements a tabIndex of 0 and handles tab navigation internally, so this marks
    * which elements should not be in the focus order.

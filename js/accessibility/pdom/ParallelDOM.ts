@@ -1569,7 +1569,6 @@ class ParallelDOM extends PhetioObject {
       assert( Array.isArray( ariaLabelledbyAssociations ) );
       for ( i = 0; i < ariaLabelledbyAssociations.length; i++ ) {
         associationObject = ariaLabelledbyAssociations[ i ];
-        PDOMUtils.validateAssociationObject( associationObject );
       }
     }
 
@@ -1619,7 +1618,6 @@ class ParallelDOM extends PhetioObject {
    * list of HTML ids, and not just a single id, see https://www.w3.org/WAI/GL/wiki/Using_aria-labelledby_to_concatenate_a_label_from_several_text_nodes
    */
   addAriaLabelledbyAssociation( associationObject: Association ) {
-    assert && PDOMUtils.validateAssociationObject( associationObject );
 
     // TODO: assert if this associationObject is already in the association objects list! https://github.com/phetsims/scenery/issues/832
 
@@ -1696,7 +1694,6 @@ class ParallelDOM extends PhetioObject {
       assert( Array.isArray( ariaDescribedbyAssociations ) );
       for ( let j = 0; j < ariaDescribedbyAssociations.length; j++ ) {
         associationObject = ariaDescribedbyAssociations[ j ];
-        PDOMUtils.validateAssociationObject( associationObject );
       }
     }
 
@@ -1747,7 +1744,6 @@ class ParallelDOM extends PhetioObject {
    * list of HTML ids, and not just a single id, see https://www.w3.org/WAI/GL/wiki/Using_aria-labelledby_to_concatenate_a_label_from_several_text_nodes
    */
   addAriaDescribedbyAssociation( associationObject: Association ) {
-    assert && PDOMUtils.validateAssociationObject( associationObject );
     assert && assert( !_.includes( this._ariaDescribedbyAssociations, associationObject ), 'describedby association already registed' );
 
     this._ariaDescribedbyAssociations.push( associationObject ); // Keep track of this association.
@@ -1833,7 +1829,6 @@ class ParallelDOM extends PhetioObject {
       assert( Array.isArray( activeDescendantAssociations ) );
       for ( let j = 0; j < activeDescendantAssociations.length; j++ ) {
         associationObject = activeDescendantAssociations[ j ];
-        PDOMUtils.validateAssociationObject( associationObject );
       }
     }
 
@@ -1881,7 +1876,6 @@ class ParallelDOM extends PhetioObject {
    * `otherElementName`)."
    */
   addActiveDescendantAssociation( associationObject: Association ) {
-    assert && PDOMUtils.validateAssociationObject( associationObject );
 
     // TODO: assert if this associationObject is already in the association objects list! https://github.com/phetsims/scenery/issues/832
     this._activeDescendantAssociations.push( associationObject ); // Keep track of this association.
