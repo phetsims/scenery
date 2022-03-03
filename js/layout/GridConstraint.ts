@@ -30,10 +30,10 @@ type GridConstraintSelfOptions = {
   xSpacing?: number;
   ySpacing?: number;
 
-  preferredWidthProperty: IProperty<number | null>;
-  preferredHeightProperty: IProperty<number | null>;
-  minimumWidthProperty: IProperty<number | null>;
-  minimumHeightProperty: IProperty<number | null>;
+  preferredWidthProperty?: IProperty<number | null>;
+  preferredHeightProperty?: IProperty<number | null>;
+  minimumWidthProperty?: IProperty<number | null>;
+  minimumHeightProperty?: IProperty<number | null>;
 };
 
 type GridConstraintOptions = GridConstraintSelfOptions & GridConfigurableOptions;

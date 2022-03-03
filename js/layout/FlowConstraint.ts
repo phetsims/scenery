@@ -11,7 +11,7 @@ import TinyProperty from '../../../axon/js/TinyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
-import merge from '../../../phet-core/js/merge.js';
+import optionize from '../../../phet-core/js/optionize.js';
 import mutate from '../../../phet-core/js/mutate.js';
 import { scenery, Node, Divider, FlowCell, FlowConfigurable, LayoutConstraint, FLOW_CONFIGURABLE_OPTION_KEYS, FlowConfigurableOptions, FlowConfigurableAlign } from '../imports.js';
 import EnumerationValue from '../../../phet-core/js/EnumerationValue.js';
@@ -123,19 +123,19 @@ const internalToJustify = ( orientation: Orientation, justify: FlowConstraintJus
   }
 };
 
-type FlowConstraintSelfOptions = {
+type SelfOptions = {
   spacing?: number;
   lineSpacing?: number;
   justify?: FlowHorizontalJustifys | FlowVerticalJustifys;
   wrap?: boolean;
   excludeInvisible?: boolean;
-  preferredWidthProperty: IProperty<number | null>;
-  preferredHeightProperty: IProperty<number | null>;
-  minimumWidthProperty: IProperty<number | null>;
-  minimumHeightProperty: IProperty<number | null>;
+  preferredWidthProperty?: IProperty<number | null>;
+  preferredHeightProperty?: IProperty<number | null>;
+  minimumWidthProperty?: IProperty<number | null>;
+  minimumHeightProperty?: IProperty<number | null>;
 };
 
-type FlowConstraintOptions = FlowConstraintSelfOptions & FlowConfigurableOptions;
+type FlowConstraintOptions = SelfOptions & FlowConfigurableOptions;
 
 // TODO: Have LayoutBox use this when we're ready
 class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
@@ -156,16 +156,16 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
   // will include margins, etc.)
   layoutBoundsProperty: IProperty<Bounds2>;
 
-  constructor( ancestorNode: Node, options?: FlowConstraintOptions ) {
+  constructor( ancestorNode: Node, providedOptions?: FlowConstraintOptions ) {
     assert && assert( ancestorNode instanceof Node );
 
-    options = merge( {
+    const options = optionize<FlowConstraintOptions, Pick<SelfOptions, 'preferredWidthProperty' | 'preferredHeightProperty' | 'minimumWidthProperty' | 'minimumHeightProperty'>>( {
       // As options, so we could hook into a Node's preferred/minimum sizes if desired
       preferredWidthProperty: new TinyProperty<number | null>( null ),
       preferredHeightProperty: new TinyProperty<number | null>( null ),
       minimumWidthProperty: new TinyProperty<number | null>( null ),
       minimumHeightProperty: new TinyProperty<number | null>( null )
-    }, options );
+    }, providedOptions );
 
     super( ancestorNode );
 
