@@ -14,7 +14,7 @@ import arrayRemove from '../../../../phet-core/js/arrayRemove.js';
 import merge from '../../../../phet-core/js/merge.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
-import { scenery, FocusManager, PDOMSiblingStyle, PDOMUtils } from '../../imports.js';
+import { FocusManager, PDOMInstance, PDOMSiblingStyle, PDOMUtils, scenery } from '../../imports.js';
 
 // constants
 const PRIMARY_SIBLING = 'PRIMARY_SIBLING';
@@ -771,7 +771,7 @@ class PDOMPeer {
    * @returns {boolean}
    */
   isFocused() {
-    const visualFocusTrail = scenery.PDOMInstance.guessVisualTrail( this.trail, this.display.rootNode );
+    const visualFocusTrail = PDOMInstance.guessVisualTrail( this.trail, this.display.rootNode );
 
     return FocusManager.pdomFocusProperty.value && FocusManager.pdomFocusProperty.value.trail.equals( visualFocusTrail );
   }

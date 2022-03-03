@@ -54,7 +54,7 @@
  */
 
 import TinyProperty from '../../../axon/js/TinyProperty.js';
-import { scenery, Renderer } from '../imports.js';
+import { Block, Renderer, scenery } from '../imports.js';
 
 let globalId = 1;
 
@@ -213,7 +213,7 @@ class Drawable {
       this.toString()} with ${backboneInstance.toString()}` );
 
     // if this is being called, Block will be guaranteed to be loaded
-    assert && assert( this instanceof scenery.Block );
+    assert && assert( this instanceof Block );
 
     this.parentDrawable = backboneInstance;
     this.backbone = backboneInstance;
@@ -237,7 +237,7 @@ class Drawable {
       backbone ? backbone.toString() : '-'}` );
 
     assert && assert( backbone !== undefined, 'backbone can be either null or a backbone' );
-    assert && assert( block instanceof scenery.Block );
+    assert && assert( block instanceof Block );
 
     this.pendingParentDrawable = block;
     this.pendingBackbone = backbone;
@@ -281,7 +281,7 @@ class Drawable {
     sceneryLog && sceneryLog.Drawable && sceneryLog.Drawable( `[${this.constructor.name}*] notePendingMove ${
       this.toString()} with ${block.toString()}` );
 
-    assert && assert( block instanceof scenery.Block );
+    assert && assert( block instanceof Block );
 
     this.pendingParentDrawable = block;
 

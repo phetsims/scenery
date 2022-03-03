@@ -7,7 +7,7 @@
  */
 
 import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
-import { scenery, Node, Trail, PartialPDOMTrail, PDOMInstance } from '../../imports.js';
+import { scenery, Node, Trail, PartialPDOMTrail, PDOMInstance, FocusManager } from '../../imports.js';
 
 // globals (for restoring focus)
 let focusedNode = null;
@@ -391,8 +391,7 @@ const PDOMTree = {
    * @param {Node} node - root of Node subtree whose PDOMInstance tree is being rearranged.
    */
   beforeOp( node ) {
-    // paranoia about initialization order (should be safe)
-    focusedNode = scenery.Display && scenery.FocusManager.pdomFocusedNode;
+    focusedNode = FocusManager.pdomFocusedNode;
 
     // list of displays to stop blocking focus callbacks in afterOp
     const displays = [];

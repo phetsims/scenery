@@ -1822,7 +1822,7 @@ class Display {
     recurse( this._rootPDOMInstance!, '' );
 
     function recurse( instance: PDOMInstance, indentation: string ) {
-      result += `${indentation + escapeHTML( `${instance.isRootInstance ? '' : instance.node.tagName} ${instance.toString()}` )}<br>`;
+      result += `${indentation + escapeHTML( `${instance.isRootInstance ? '' : instance.node!.tagName} ${instance.toString()}` )}<br>`;
       instance.children.forEach( ( child: PDOMInstance ) => {
         recurse( child, indentation + indent );
       } );

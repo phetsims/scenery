@@ -30,7 +30,7 @@
 import cleanArray from '../../../../phet-core/js/cleanArray.js';
 import platform from '../../../../phet-core/js/platform.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import { scenery, TransformTracker, PDOMPeer, PDOMUtils } from '../../imports.js';
+import { scenery, TransformTracker, PDOMPeer, PDOMUtils, FocusManager, Trail } from '../../imports.js';
 import { Node } from '../../imports.js'; // eslint-disable-line no-unused-vars
 
 let globalId = 1;
@@ -313,13 +313,13 @@ class PDOMInstance {
     this.peer.setVisible( this.invisibleCount <= 0 );
 
     // if we hid a parent element, blur focus if active element was an ancestor
-    if ( !this.peer.isVisible() && scenery.FocusManager.pdomFocusedNode ) {
-      assert && assert( scenery.FocusManager.pdomFocusedNode.pdomInstances.length === 1,
+    if ( !this.peer.isVisible() && FocusManager.pdomFocusedNode ) {
+      assert && assert( FocusManager.pdomFocusedNode.pdomInstances.length === 1,
         'focusable Nodes do not support DAG, and should be connected with an instance if focused.' );
 
       // NOTE: We don't seem to be able to import normally here
-      if ( scenery.FocusManager.pdomFocusedNode.pdomInstances[ 0 ].trail.containsNode( this.node ) ) {
-        scenery.FocusManager.pdomFocus = null;
+      if ( FocusManager.pdomFocusedNode.pdomInstances[ 0 ].trail.containsNode( this.node ) ) {
+        FocusManager.pdomFocus = null;
       }
     }
 
@@ -412,7 +412,7 @@ class PDOMInstance {
   sortChildren() {
     // It's simpler/faster to just grab our order directly with one recursion, rather than specifying a sorting
     // function (since a lot gets re-evaluated in that case).
-    const targetChildren = this.getChildOrdering( new scenery.Trail( this.isRootInstance ? this.display.rootNode : this.node ) );
+    const targetChildren = this.getChildOrdering( new Trail( this.isRootInstance ? this.display.rootNode : this.node ) );
 
     assert && assert( targetChildren.length === this.children.length, 'sorting should not change number of children' );
 
