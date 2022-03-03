@@ -1,4 +1,4 @@
-// Copyright 2013-2021, University of Colorado Boulder
+// Copyright 2022, University of Colorado Boulder
 
 /**
  * A linear gradient that can be passed into the 'fill' or 'stroke' parameters.

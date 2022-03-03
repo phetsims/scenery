@@ -1,4 +1,4 @@
-// Copyright 2013-2021, University of Colorado Boulder
+// Copyright 2013-2022, University of Colorado Boulder
 
 /**
  * The main 'scenery' namespace object for the exported (built) API. Used internally in some places where there are

@@ -1,4 +1,4 @@
-// Copyright 2017-2021, University of Colorado Boulder
+// Copyright 2017-2022, University of Colorado Boulder
 
 /**
  * Base type for controllers that create and keep an SVG gradient element up-to-date with a Scenery gradient.
