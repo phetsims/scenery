@@ -36,7 +36,7 @@ class CircleDOMDrawable extends CircleStatefulDrawable( DOMSelfDrawable ) {
     super.initialize( renderer, instance );
 
     // @protected {Matrix3} - We need to store an independent matrix, as our CSS transform actually depends on the radius.
-    this.matrix = this.matrix || Matrix3.dirtyFromPool();
+    this.matrix = this.matrix || Matrix3.pool.fetch();
 
     // only create elements if we don't already have them (we pool visual states always, and depending on the platform may also pool the actual elements to minimize
     // allocation and performance costs)

@@ -826,7 +826,7 @@ class Input {
 
     // If our display is not interactive, do not respond to any events (but still prevent default)
     if ( this.display.interactive ) {
-      this.batchedEvents.push( BatchedDOMEvent.createFromPool( domEvent, batchType, callback ) );
+      this.batchedEvents.push( BatchedDOMEvent.pool.create( domEvent, batchType, callback ) );
       if ( triggerImmediate || !this.batchDOMEvents ) {
         this.fireBatchedEvents();
       }
@@ -951,7 +951,7 @@ class Input {
    * Extract a {Vector2} global coordinate point from an arbitrary DOM event. (scenery-internal)
    */
   pointFromEvent( domEvent: MouseEvent | WindowTouch ): Vector2 {
-    const position = Vector2.createFromPool( domEvent.clientX, domEvent.clientY );
+    const position = Vector2.pool.create( domEvent.clientX, domEvent.clientY );
     if ( !this.assumeFullWindow ) {
       const domBounds = this.display.domElement.getBoundingClientRect();
 

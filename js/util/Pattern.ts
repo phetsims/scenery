@@ -41,7 +41,7 @@ class Pattern extends Paint {
    * Creates an SVG paint object for creating/updating the SVG equivalent definition.
    */
   createSVGPaint( svgBlock: SVGBlock ): SVGPattern {
-    return SVGPattern.pool.createFromPool( this );
+    return SVGPattern.pool.create( this );
   }
 
   /**

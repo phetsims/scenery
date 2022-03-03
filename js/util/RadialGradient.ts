@@ -91,7 +91,7 @@ class RadialGradient extends Gradient {
    * Creates an SVG paint object for creating/updating the SVG equivalent definition.
    */
   createSVGPaint( svgBlock: SVGBlock ): SVGRadialGradient {
-    return SVGRadialGradient.pool.createFromPool( svgBlock, this );
+    return SVGRadialGradient.pool.create( svgBlock, this );
   }
 
   /**

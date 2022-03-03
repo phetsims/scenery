@@ -14,7 +14,7 @@ import { scenery, Utils, DOMSelfDrawable, TextStatefulDrawable } from '../../imp
 const keepDOMTextElements = true; // whether we should pool DOM elements for the DOM rendering states, or whether we should free them when possible for memory
 
 // scratch matrix used in DOM rendering
-const scratchMatrix = Matrix3.dirtyFromPool();
+const scratchMatrix = Matrix3.pool.fetch();
 
 class TextDOMDrawable extends TextStatefulDrawable( DOMSelfDrawable ) {
   /**

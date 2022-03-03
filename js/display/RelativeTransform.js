@@ -637,7 +637,7 @@ class RelativeTransform {
     // get the relative matrix, computed to be up-to-date, and ignores any flags/counts so we can check whether our
     // state is consistent
     function currentRelativeMatrix( instance ) {
-      const resultMatrix = Matrix3.dirtyFromPool();
+      const resultMatrix = Matrix3.pool.fetch();
       const nodeMatrix = instance.node.getMatrix();
 
       if ( !instance.parent ) {

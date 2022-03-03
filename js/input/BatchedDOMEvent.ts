@@ -9,8 +9,8 @@
 
 import Enumeration from '../../../phet-core/js/Enumeration.js';
 import EnumerationValue from '../../../phet-core/js/EnumerationValue.js';
-import Poolable2 from '../../../phet-core/js/Poolable2.js';
-import { scenery, Input } from '../imports.js';
+import Pool, { IPoolable } from '../../../phet-core/js/Pool.js';
+import { Input, scenery } from '../imports.js';
 
 type BatchedDOMEventCallback = ( ...args: any[] ) => void;
 
@@ -26,15 +26,13 @@ class BatchedDOMEventType extends EnumerationValue {
   } );
 }
 
-class BatchedDOMEvent extends Poolable2<[Event, BatchedDOMEventType, ( ...args: any[] ) => void], BatchedDOMEvent>( Object ) { // eslint-disable-line
+class BatchedDOMEvent implements IPoolable {
 
   domEvent!: Event | null;
   type!: BatchedDOMEventType | null;
   callback!: BatchedDOMEventCallback | null;
 
   constructor( domEvent: Event, type: BatchedDOMEventType, callback: BatchedDOMEventCallback ) {
-    super();
-
     this.initialize( domEvent, type, callback );
   }
 
@@ -103,9 +101,13 @@ class BatchedDOMEvent extends Poolable2<[Event, BatchedDOMEventType, ( ...args: 
     this.callback = null;
     this.freeToPool();
   }
-}
 
-BatchedDOMEvent.initializePool();
+  freeToPool() {
+    BatchedDOMEvent.pool.freeToPool( this );
+  }
+
+  static pool = new Pool( BatchedDOMEvent );
+}
 
 scenery.register( 'BatchedDOMEvent', BatchedDOMEvent );
 

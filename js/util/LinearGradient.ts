@@ -47,7 +47,7 @@ class LinearGradient extends Gradient {
    * Creates an SVG paint object for creating/updating the SVG equivalent definition.
    */
   createSVGPaint( svgBlock: SVGBlock ): SVGLinearGradient {
-    return SVGLinearGradient.pool.createFromPool( svgBlock, this );
+    return SVGLinearGradient.pool.create( svgBlock, this );
   }
 
   /**
