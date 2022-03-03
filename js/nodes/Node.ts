@@ -173,6 +173,7 @@ import IOType from '../../../tandem/js/types/IOType.js';
 import IProperty from '../../../axon/js/IProperty.js';
 import { ACCESSIBILITY_OPTION_KEYS, CanvasContextWrapper, CanvasSelfDrawable, Display, DOMSelfDrawable, Drawable, Features, Filter, IInputListener, ILayoutOptions, Image, ImageOptions, Instance, Mouse, ParallelDOM, ParallelDOMOptions, Picker, Pointer, Renderer, RendererSummary, scenery, serializeConnectedNodes, SVGSelfDrawable, Trail, WebGLSelfDrawable } from '../imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
+import IntentionalAny from '../../../phet-core/js/IntentionalAny.js';
 
 let globalIdCounter = 1;
 
@@ -594,6 +595,9 @@ class Node extends ParallelDOM {
   _isGettingRemovedFromParent: boolean;
 
   static REQUIRES_BOUNDS_OPTION_KEYS: string[];
+
+  // Used by sceneryDeserialize
+  _serialization?: IntentionalAny;
 
   /**
    * Creates a Node with options.

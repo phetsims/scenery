@@ -342,8 +342,8 @@
   var isDisplay = snapshot.type === 'Display';
 
   var subtree = isDisplay ? snapshot.tree : snapshot;
-  var displayTree = scenery.deserialize( subtree );
-  var backgroundColor = isDisplay ? scenery.deserialize( snapshot.backgroundColor ) : '#fff';
+  var displayTree = scenery.sceneryDeserialize( subtree );
+  var backgroundColor = isDisplay ? scenery.sceneryDeserialize( snapshot.backgroundColor ) : '#fff';
   var snapshotBounds = isDisplay ? new dot.Bounds2( 0, 0, snapshot.width, snapshot.height ) : displayTree.bounds.dilatedXY( displayTree.width * 0.05, displayTree.height * 0.05 );
 
   var overlayNode = new scenery.Node();
@@ -457,7 +457,7 @@
 
       function addSerial( key, serialization ) {
         if ( serialization ) {
-          var value = scenery.deserialize( serialization );
+          var value = scenery.sceneryDeserialize( serialization );
           if ( serialization.type === 'value' ) {
             addSimple( key, value );
           }
