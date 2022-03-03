@@ -50,14 +50,31 @@ const VOICING_OPTION_KEYS = [
 ];
 
 type VoicingSelfOptions = {
+
+  // see ResponsePacket.nameResponse
   voicingNameResponse?: VoicingResponse,
+
+  // see ResponsePacket.objectResponse
   voicingObjectResponse?: VoicingResponse,
+
+  // see ResponsePacket.contextResponse
   voicingContextResponse?: VoicingResponse,
+
+  // see ResponsePacket.hintResponse
   voicingHintResponse?: VoicingResponse,
-  voicingUtteranceQueue?: UtteranceQueue,
+
+  // see ResponsePacket.responsePatternCollection
   voicingResponsePatternCollection?: ResponsePatternCollection,
+
+  // see ResponsePacket.ignoreProperties
   voicingIgnoreVoicingManagerProperties?: boolean,
+
+  // Called when this Node is focused to speak voicing responses on focus. See Voicing.defaultFocusListener for default
+  // listener.
   voicingFocusListener?: SceneryListenerFunction<FocusEvent> | null
+
+  // By default use voicingUtteranceQueue to speak responses, but you can also specify another utteranceQueue here.
+  voicingUtteranceQueue?: UtteranceQueue,
 
   // The utterance to use if you want this response to be more controlled in the UtteranceQueue. This Utterance will be
   // used by all responses spoken by this class.
