@@ -438,3 +438,4 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
 
 scenery.register( 'InteractiveHighlighting', InteractiveHighlighting );
 export default InteractiveHighlighting;
+export type { InteractiveHighlightingOptions };

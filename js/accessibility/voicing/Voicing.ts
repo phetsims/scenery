@@ -26,11 +26,11 @@
 
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
-import ResponsePacket, { VoicingResponse, ResponsePacketOptions } from '../../../../utterance-queue/js/ResponsePacket.js';
+import ResponsePacket, { ResponsePacketOptions, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
 import Utterance from '../../../../utterance-queue/js/Utterance.js';
 import UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
-import { InteractiveHighlighting, Node, NodeOptions, scenery, SceneryListenerFunction, voicingUtteranceQueue } from '../../imports.js';
+import { InteractiveHighlighting, InteractiveHighlightingOptions, Node, scenery, SceneryListenerFunction, voicingUtteranceQueue } from '../../imports.js';
 import optionize from '../../../../phet-core/js/optionize.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import { TAlertableDef } from '../../../../utterance-queue/js/AlertableDef.js';
@@ -81,7 +81,7 @@ type VoicingSelfOptions = {
   voicingUtterance?: Utterance;
 };
 
-type VoicingOptions = VoicingSelfOptions & NodeOptions;
+type VoicingOptions = VoicingSelfOptions & InteractiveHighlightingOptions;
 
 type SpeakingOptions = {
   utterance?: VoicingSelfOptions['voicingUtterance']

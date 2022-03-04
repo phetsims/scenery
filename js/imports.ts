@@ -157,6 +157,7 @@ export { default as Reader } from './accessibility/reader/Reader.js';
 export { default as KeyStateTracker } from './accessibility/KeyStateTracker.js';
 export { default as globalKeyStateTracker } from './accessibility/globalKeyStateTracker.js';
 export { default as InteractiveHighlighting } from './accessibility/voicing/InteractiveHighlighting.js';
+export type { InteractiveHighlightingOptions } from './accessibility/voicing/InteractiveHighlighting.js';
 export { default as voicingManager } from './accessibility/voicing/voicingManager.js';
 export { default as voicingUtteranceQueue } from './accessibility/voicing/voicingUtteranceQueue.js';
 export { default as Voicing } from './accessibility/voicing/Voicing.js';
