@@ -7,7 +7,7 @@
  */
 
 import Property from '../../../axon/js/Property.js';
-import LineStyles, { DEFAULT_OPTIONS as LINE_STYLES_DEFAULT_OPTIONS, LineCap, LineJoin } from '../../../kite/js/util/LineStyles.js';
+import { LineStyles, LINE_STYLE_DEFAULT_OPTIONS, LineCap, LineJoin } from '../../../kite/js/imports.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import assertHasProperties from '../../../phet-core/js/assertHasProperties.js';
 import inheritance from '../../../phet-core/js/inheritance.js';
@@ -39,11 +39,11 @@ const DEFAULT_OPTIONS = {
   strokePickable: false,
 
   // Not set initially, but they are the LineStyles defaults
-  lineWidth: LINE_STYLES_DEFAULT_OPTIONS.lineWidth,
-  lineCap: LINE_STYLES_DEFAULT_OPTIONS.lineCap,
-  lineJoin: LINE_STYLES_DEFAULT_OPTIONS.lineJoin,
-  lineDashOffset: LINE_STYLES_DEFAULT_OPTIONS.lineDashOffset,
-  miterLimit: LINE_STYLES_DEFAULT_OPTIONS.miterLimit
+  lineWidth: LINE_STYLE_DEFAULT_OPTIONS.lineWidth,
+  lineCap: LINE_STYLE_DEFAULT_OPTIONS.lineCap,
+  lineJoin: LINE_STYLE_DEFAULT_OPTIONS.lineJoin,
+  lineDashOffset: LINE_STYLE_DEFAULT_OPTIONS.lineDashOffset,
+  miterLimit: LINE_STYLE_DEFAULT_OPTIONS.miterLimit
 };
 
 type PaintableOptions = {

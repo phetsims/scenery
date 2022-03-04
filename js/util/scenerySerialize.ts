@@ -10,7 +10,7 @@
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import Shape from '../../../kite/js/Shape.js';
+import { Shape } from '../../../kite/js/imports.js';
 import Property from '../../../axon/js/Property.js';
 import inheritance from '../../../phet-core/js/inheritance.js';
 import { scenery, DOM, PAINTABLE_DEFAULT_OPTIONS, WebGLNode, CanvasNode, Rectangle, Text, Image, Line, Circle, Path, RadialGradient, CanvasContextWrapper, Pattern, LinearGradient, Gradient, Paint, Color, Node, Display } from '../imports.js';

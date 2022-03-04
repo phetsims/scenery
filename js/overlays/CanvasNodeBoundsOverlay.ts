@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Shape from '../../../kite/js/Shape.js';
+import { Shape } from '../../../kite/js/imports.js';
 import { scenery, Trail, CanvasNode, ShapeBasedOverlay, Display, Node, IOverlay } from '../imports.js';
 
 class CanvasNodeBoundsOverlay extends ShapeBasedOverlay implements IOverlay {

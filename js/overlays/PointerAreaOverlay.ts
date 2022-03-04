@@ -7,7 +7,7 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import Shape from '../../../kite/js/Shape.js';
+import { Shape } from '../../../kite/js/imports.js';
 import { scenery, Trail, ShapeBasedOverlay, Display, Node, IOverlay } from '../imports.js';
 
 class PointerAreaOverlay extends ShapeBasedOverlay implements IOverlay {

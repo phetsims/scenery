@@ -6,7 +6,7 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
-import Shape from '../../../kite/js/Shape.js';
+import { Shape } from '../../../kite/js/imports.js';
 import Circle from '../nodes/Circle.js';
 import DOM from '../nodes/DOM.js';
 import Image from '../nodes/Image.js';

@@ -125,7 +125,7 @@
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import validate from '../../../../axon/js/validate.js';
 import ValidatorDef from '../../../../axon/js/ValidatorDef.js';
-import Shape from '../../../../kite/js/Shape.js';
+import { Shape } from '../../../../kite/js/imports.js';
 import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
 import merge from '../../../../phet-core/js/merge.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../../tandem/js/PhetioObject.js';

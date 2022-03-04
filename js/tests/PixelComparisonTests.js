@@ -9,7 +9,7 @@
 import Property from '../../../axon/js/Property.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import Shape from '../../../kite/js/Shape.js';
+import { Shape } from '../../../kite/js/imports.js';
 import platform from '../../../phet-core/js/platform.js';
 import Display from '../display/Display.js';
 import Circle from '../nodes/Circle.js';

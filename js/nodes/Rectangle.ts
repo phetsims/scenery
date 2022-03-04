@@ -8,7 +8,7 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Dimension2 from '../../../dot/js/Dimension2.js';
-import Shape from '../../../kite/js/Shape.js';
+import { Shape } from '../../../kite/js/imports.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { scenery, Renderer, Features, Gradient, Pattern, Path, Instance, PathOptions, IRectangleDrawable, CanvasSelfDrawable, DOMSelfDrawable, SVGSelfDrawable, WebGLSelfDrawable, RectangleCanvasDrawable, RectangleDOMDrawable, RectangleSVGDrawable, RectangleWebGLDrawable, CanvasContextWrapper } from '../imports.js';

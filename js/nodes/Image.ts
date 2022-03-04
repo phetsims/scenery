@@ -15,7 +15,7 @@ import StringIO from '../../../tandem/js/types/StringIO.js';
 import VoidIO from '../../../tandem/js/types/VoidIO.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import Shape from '../../../kite/js/Shape.js';
+import { Shape } from '../../../kite/js/imports.js';
 import { scenery, SpriteSheet, Imageable, Renderer, Node, NodeOptions, CanvasContextWrapper, ImageCanvasDrawable, ImageDOMDrawable, ImageSVGDrawable, ImageWebGLDrawable, Instance, DOMSelfDrawable, SVGSelfDrawable, CanvasSelfDrawable, WebGLSelfDrawable, IImageDrawable, ImageableOptions, ImageableImage } from '../imports.js';
 
 // Image-specific options that can be passed in the constructor or mutate() call.

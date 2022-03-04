@@ -7,7 +7,7 @@
  */
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
-import Shape from '../../../kite/js/Shape.js';
+import { Shape } from '../../../kite/js/imports.js';
 import { scenery, ShapeBasedOverlay, Display, Node, BackboneDrawable, Block, FittedBlock, Drawable, IOverlay } from '../imports.js';
 
 class FittedBlockBoundsOverlay extends ShapeBasedOverlay implements IOverlay {

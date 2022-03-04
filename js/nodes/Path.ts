@@ -7,7 +7,7 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import Shape from '../../../kite/js/Shape.js';
+import { Shape } from '../../../kite/js/imports.js';
 import extendDefined from '../../../phet-core/js/extendDefined.js';
 import merge from '../../../phet-core/js/merge.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';

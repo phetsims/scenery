@@ -9,7 +9,7 @@
 
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import Shape from '../../../kite/js/Shape.js';
+import { Shape } from '../../../kite/js/imports.js';
 import merge from '../../../phet-core/js/merge.js';
 import { scenery, Imageable, ImageableOptions, ImageableImage } from '../imports.js';
 import mutate from '../../../phet-core/js/mutate.js';
