@@ -20,6 +20,7 @@
  */
 
 import Action from '../../../axon/js/Action.js';
+import EnabledComponent from '../../../axon/js/EnabledComponent.js';
 import Emitter from '../../../axon/js/Emitter.js';
 import Property from '../../../axon/js/Property.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
@@ -32,7 +33,7 @@ import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import { KeyboardUtils, scenery, SceneryEvent } from '../imports.js';
 
-class KeyboardDragListener {
+class KeyboardDragListener extends EnabledComponent {
 
   /**
    * @param {Object} [options]
@@ -89,6 +90,10 @@ class KeyboardDragListener {
       // {number} - time interval at which holding down a hotkey group will trigger an associated listener, in ms
       hotkeyHoldInterval: 800,
 
+      // EnabledComponent
+      // By default, do not instrument the enabledProperty; opt in with this option. See EnabledComponent
+      phetioEnabledPropertyInstrumented: false,
+
       // phet-io
       tandem: Tandem.REQUIRED,
 
@@ -99,6 +104,8 @@ class KeyboardDragListener {
 
     assert && assert( options.shiftDragVelocity <= options.dragVelocity, 'shiftDragVelocity should be less than or equal to shiftDragVelocity, it is intended to provide more fine-grained control' );
     assert && assert( options.dragBoundsProperty === null || options.dragBoundsProperty instanceof Property, 'dragBoundsProperty, if provided, should be a Property' );
+
+    super( options );
 
     // @private, mutable attributes declared from options, see options for info, as well as getters and setters
     this._start = options.start;
@@ -196,6 +203,8 @@ class KeyboardDragListener {
     // step the drag listener, must be removed in dispose
     const stepListener = this.step.bind( this );
     stepTimer.addListener( stepListener );
+
+    this.enabledProperty.lazyLink( this.onEnabledPropertyChange.bind( this ) );
 
     // @private - called in dispose
     this._disposeKeyboardDragListener = () => {
@@ -340,6 +349,14 @@ class KeyboardDragListener {
   set hotkeyHoldInterval( hotkeyHoldInterval ) { this._hotkeyHoldInterval = hotkeyHoldInterval; }
 
   /**
+   * @private
+   * Fired when the enabledProperty changes
+   */
+  onEnabledPropertyChange( enabled ) {
+    !enabled && this.interrupt();
+  }
+
+  /**
    * Implements keyboard dragging when listener is attached to the Node, public so listener is attached
    * with addInputListener()
    *
@@ -386,7 +403,7 @@ class KeyboardDragListener {
       }
     }
 
-    this.dragStartAction.execute( event );
+    this.canDrag() && this.dragStartAction.execute( event );
   }
 
   /**
@@ -494,6 +511,14 @@ class KeyboardDragListener {
         this.updatePosition( positionDelta );
       }
     }
+  }
+
+  /**
+   * @private
+   * @returns {boolean} - can a drag begin
+   */
+  canDrag() {
+    return this.enabledProperty.value;
   }
 
   /**
