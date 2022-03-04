@@ -72,7 +72,9 @@ class Line extends Path {
           y1: x1.y,
           // Second Vector2 is under the y1 name
           x2: ( y1 as Vector2 ).x,
-          y2: ( y1 as Vector2 ).y
+          y2: ( y1 as Vector2 ).y,
+
+          strokePickable: true
         }, x2 ); // Options object (if available) is under the x2 name
       }
       else {
@@ -80,10 +82,12 @@ class Line extends Path {
         assert && assert( y1 === undefined );
 
         // Options object is under the x1 name
-        options = x1;
-
-        assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
+        assert && assert( x1 === undefined || Object.getPrototypeOf( x1 ) === Object.prototype,
           'Extra prototype on Node options object is a code smell' );
+
+        options = extendDefined( {
+          strokePickable: true
+        }, x1 ); // Options object (if available) is under the x1 name
       }
     }
     else {
@@ -99,13 +103,13 @@ class Line extends Path {
         x1: x1,
         y1: y1,
         x2: x2,
-        y2: y2
+        y2: y2,
+        strokePickable: true
       }, options );
     }
 
     this.mutate( options );
   }
-
 
   /**
    * Set all of the line's x and y values.
