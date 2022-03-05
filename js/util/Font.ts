@@ -80,7 +80,7 @@ type SelfOptions = {
   lineHeight?: string,
   family?: string
 };
-type FontOptions = SelfOptions & PhetioObjectOptions;
+export type FontOptions = SelfOptions & PhetioObjectOptions;
 
 class Font extends PhetioObject {
 

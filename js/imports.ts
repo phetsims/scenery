@@ -16,7 +16,7 @@ export { default as SceneryConstants } from './SceneryConstants.js';
 export { default as Color } from './util/Color.js';
 export { default as Features } from './util/Features.js';
 export { default as Font } from './util/Font.js';
-export type { FontStyle, FontWeight, FontStretch } from './util/Font.js';
+export type { FontOptions, FontStyle, FontWeight, FontStretch } from './util/Font.js';
 export { default as Renderer } from './display/Renderer.js';
 export { default as svgns } from './util/svgns.js';
 export { default as xlinkns } from './util/xlinkns.js';
