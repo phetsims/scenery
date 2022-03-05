@@ -165,8 +165,6 @@ type CreateForwardingListenerOptions = {
   allowTouchSnag?: boolean
 };
 
-type SelfOptionType<Name extends keyof SelfOptions<DragListener>> = RequiredOption<SelfOptions<DragListener>, Name>;
-
 export type PressedDragListener = DragListener & PressedPressListener;
 const isPressedListener = ( listener: DragListener ): listener is PressedDragListener => listener.isPressed;
 
@@ -175,19 +173,19 @@ export default class DragListener extends PressListener implements IInputListene
   // Alias for isPressedProperty (as this name makes more sense for dragging)
   isUserControlledProperty: IProperty<boolean>;
 
-  private _allowTouchSnag: SelfOptionType<'allowTouchSnag'>;
-  private _applyOffset: SelfOptionType<'applyOffset'>;
-  private _useParentOffset: SelfOptionType<'useParentOffset'>;
-  private _trackAncestors: SelfOptionType<'trackAncestors'>;
-  private _translateNode: SelfOptionType<'translateNode'>;
-  private _transform: SelfOptionType<'transform'>;
-  private _positionProperty: SelfOptionType<'positionProperty'>;
-  private _mapPosition: SelfOptionType<'mapPosition'>;
-  private _offsetPosition: SelfOptionType<'offsetPosition'>;
-  private _dragBoundsProperty: NonNullable<SelfOptionType<'dragBoundsProperty'>>;
-  private _start: SelfOptionType<'start'>;
-  private _end: SelfOptionType<'end'>;
-  private _allowClick: SelfOptionType<'allowClick'>;
+  private _allowTouchSnag: RequiredOption<SelfOptions<DragListener>, 'allowTouchSnag'>;
+  private _applyOffset: RequiredOption<SelfOptions<DragListener>, 'applyOffset'>;
+  private _useParentOffset: RequiredOption<SelfOptions<DragListener>, 'useParentOffset'>;
+  private _trackAncestors: RequiredOption<SelfOptions<DragListener>, 'trackAncestors'>;
+  private _translateNode: RequiredOption<SelfOptions<DragListener>, 'translateNode'>;
+  private _transform: RequiredOption<SelfOptions<DragListener>, 'transform'>;
+  private _positionProperty: RequiredOption<SelfOptions<DragListener>, 'positionProperty'>;
+  private _mapPosition: RequiredOption<SelfOptions<DragListener>, 'mapPosition'>;
+  private _offsetPosition: RequiredOption<SelfOptions<PressedDragListener>, 'offsetPosition'>;
+  private _dragBoundsProperty: NonNullable<RequiredOption<SelfOptions<DragListener>, 'dragBoundsProperty'>>;
+  private _start: RequiredOption<SelfOptions<PressedDragListener>, 'start'>;
+  private _end: RequiredOption<SelfOptions<PressedDragListener>, 'end'>;
+  private _allowClick: RequiredOption<SelfOptions<DragListener>, 'allowClick'>;
 
   // The point of the drag in the target's global coordinate frame. Updated with mutation.
   private _globalPoint: Vector2;
@@ -224,8 +222,8 @@ export default class DragListener extends PressListener implements IInputListene
   private _dragAction: Action<[ PressListenerEvent ]>;
 
 
-  constructor( providedOptions?: DragListenerOptions<DragListener> ) {
-    const options = optionize<DragListenerOptions<DragListener>, SelfOptions<DragListener>, PressListenerOptions<DragListener>, 'tandem'>( {
+  constructor( providedOptions?: DragListenerOptions<PressedDragListener> ) {
+    const options = optionize<DragListenerOptions<PressedDragListener>, SelfOptions<PressedDragListener>, PressListenerOptions<PressedDragListener>, 'tandem'>( {
       positionProperty: null,
       start: null,
       end: null,
@@ -363,7 +361,7 @@ export default class DragListener extends PressListener implements IInputListene
       this.reposition( point );
 
       // Notify after positioning and other changes
-      this._start && this._start( event, this );
+      this._start && this._start( event, pressedListener );
 
       callback && callback();
 
@@ -392,7 +390,7 @@ export default class DragListener extends PressListener implements IInputListene
       this.detachTransformTracker();
 
       // Notify after the rest of release is called in order to prevent it from triggering interrupt().
-      this._end && this._end( this );
+      this._end && this._end( this as PressedDragListener );
 
       callback && callback();
     } );
@@ -425,12 +423,12 @@ export default class DragListener extends PressListener implements IInputListene
       sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
       // notify that we have started a change
-      this._start && this._start( event, this );
+      this._start && this._start( event, this as PressedDragListener );
 
       callback && callback();
 
       // notify that we have finished a 'drag' activation through click
-      this._end && this._end( this );
+      this._end && this._end( this as PressedDragListener );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     } );
@@ -642,7 +640,7 @@ export default class DragListener extends PressListener implements IInputListene
    */
   protected applyParentOffset( parentPoint: Vector2 ) {
     if ( this._offsetPosition ) {
-      parentPoint.add( this._offsetPosition( parentPoint, this ) );
+      parentPoint.add( this._offsetPosition( parentPoint, this as PressedDragListener ) );
     }
 
     // Don't apply any offset if applyOffset is false

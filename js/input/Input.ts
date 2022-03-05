@@ -329,7 +329,7 @@ class Input {
     } );
 
     this.mouseUpAction = new Action( ( point: Vector2, event: MouseEvent ) => {
-      const mouse = this.ensureMouse();
+      const mouse = this.ensureMouse( point );
       const pointChanged = mouse.up( point, event );
       mouse.id = null;
       this.upEvent<MouseEvent>( mouse, event, pointChanged );
@@ -345,7 +345,7 @@ class Input {
     } );
 
     this.mouseDownAction = new Action( ( id: number, point: Vector2, event: MouseEvent ) => {
-      const mouse = this.ensureMouse();
+      const mouse = this.ensureMouse( point );
       mouse.id = id;
       const pointChanged = mouse.down( point, event );
       this.downEvent<MouseEvent>( mouse, event, pointChanged );
@@ -362,7 +362,7 @@ class Input {
     } );
 
     this.mouseMoveAction = new Action( ( point: Vector2, event: MouseEvent ) => {
-      const mouse = this.ensureMouse();
+      const mouse = this.ensureMouse( point );
       mouse.move( point, event );
       this.moveEvent<MouseEvent>( mouse, event );
     }, {
@@ -378,7 +378,7 @@ class Input {
     } );
 
     this.mouseOverAction = new Action( ( point: Vector2, event: MouseEvent ) => {
-      const mouse = this.ensureMouse();
+      const mouse = this.ensureMouse( point );
       mouse.over( point, event );
       // TODO: how to handle mouse-over (and log it)... are we changing the pointer.point without a branch change?
     }, {
@@ -393,7 +393,7 @@ class Input {
     } );
 
     this.mouseOutAction = new Action( ( point: Vector2, event: MouseEvent ) => {
-      const mouse = this.ensureMouse();
+      const mouse = this.ensureMouse( point );
       mouse.out( point, event );
       // TODO: how to handle mouse-out (and log it)... are we changing the pointer.point without a branch change?
     }, {
@@ -408,7 +408,7 @@ class Input {
     } );
 
     this.wheelScrollAction = new Action( ( event: WheelEvent ) => {
-      const mouse = this.ensureMouse();
+      const mouse = this.ensureMouse( this.pointFromEvent( event ) );
       mouse.wheel( event );
 
       // don't send mouse-wheel events if we don't yet have a mouse location!
@@ -1016,20 +1016,20 @@ class Input {
   /**
    * Initializes the Mouse object on the first mouse event (this may never happen on touch devices).
    */
-  private initMouse(): Mouse {
-    const mouse = new Mouse();
+  private initMouse( point: Vector2 ): Mouse {
+    const mouse = new Mouse( point );
     this.mouse = mouse;
     this.addPointer( mouse );
     return mouse;
   }
 
-  private ensureMouse(): Mouse {
+  private ensureMouse( point: Vector2 ): Mouse {
     const mouse = this.mouse;
     if ( mouse ) {
       return mouse;
     }
     else {
-      return this.initMouse();
+      return this.initMouse( point );
     }
   }
 

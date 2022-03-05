@@ -13,7 +13,7 @@ import assertHasProperties from '../../../phet-core/js/assertHasProperties.js';
 import inheritance from '../../../phet-core/js/inheritance.js';
 import platform from '../../../phet-core/js/platform.js';
 import memoize from '../../../phet-core/js/memoize.js';
-import { scenery, Renderer, Color, PaintDef, Node, IPaint, Paint, LinearGradient, Pattern, RadialGradient, CanvasContextWrapper, Gradient, IPaintableDrawable } from '../imports.js';
+import { scenery, Renderer, Color, PaintDef, Node, IPaint, Paint, LinearGradient, Pattern, RadialGradient, CanvasContextWrapper, Gradient, IPaintableDrawable, Path, Text } from '../imports.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
 
 const isSafari5 = platform.safari5;
@@ -59,6 +59,9 @@ type PaintableOptions = {
   lineDashOffset?: number,
   cachedPaints?: IPaint[]
 };
+
+// Workaround type since we can't detect mixins in the type system well
+export type PaintableNode = Path | Text;
 
 const PAINTABLE_DRAWABLE_MARK_FLAGS = [ 'fill', 'stroke', 'lineWidth', 'lineOptions', 'cachedPaints' ];
 

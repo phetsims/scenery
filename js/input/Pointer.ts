@@ -42,10 +42,14 @@ class Intent extends EnumerationValue {
   } );
 }
 
+export interface ActivePointer extends Pointer {
+  point: Vector2;
+}
+
 abstract class Pointer {
 
-  // The location of the pointer in the global coordinate system. If there has no location recorded yet, it may be null.
-  point: Vector2 | null;
+  // The location of the pointer in the global coordinate system.
+  point: Vector2;
 
   // Each Pointer subtype should implement a "type" field that can be checked against for scenery input.
   readonly type: string;
@@ -96,11 +100,11 @@ abstract class Pointer {
   private _listenerForKeyboardDragReserve: IInputListener | null;
 
   /**
-   * @param {Vector2|null} initialPoint
-   * @param {boolean} initialDownState
-   * @param {string} type - the type of the pointer; can different for each subtype
+   * @param initialPoint
+   * @param initialDownState
+   * @param type - the type of the pointer; can different for each subtype
    */
-  protected constructor( initialPoint: Vector2 | null, initialDownState: boolean, type: string ) {
+  protected constructor( initialPoint: Vector2, initialDownState: boolean, type: string ) {
     assert && assert( initialPoint === null || initialPoint instanceof Vector2 );
     assert && assert( typeof initialDownState === 'boolean' );
 

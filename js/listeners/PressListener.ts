@@ -110,7 +110,7 @@ type SelfOptions<Listener extends PressListener> = {
   phetioFeatured?: boolean;
 };
 
-export type PressListenerOptions<Listener extends PressListener> = SelfOptions<Listener> & EnabledComponentOptions;
+export type PressListenerOptions<Listener extends PressListener = PressListener> = SelfOptions<Listener> & EnabledComponentOptions;
 
 export type PressedPressListener = WithoutNull<PressListener, 'pointer' | 'pressedTrail'>;
 const isPressedListener = ( listener: PressListener ): listener is PressedPressListener => listener.isPressed;

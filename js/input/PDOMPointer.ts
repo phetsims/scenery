@@ -8,29 +8,33 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
-import { scenery, Trail, Pointer, Focus, FocusManager, PDOMInstance } from '../imports.js';
+import Vector2 from '../../../dot/js/Vector2.js';
+import { scenery, Trail, Pointer, Focus, FocusManager, PDOMInstance, Display, Node } from '../imports.js';
 
 class PDOMPointer extends Pointer {
 
-  /**
-   * @param {Display} display
-   */
-  constructor( display ) {
-    super( null, false, 'pdom' );
+  // (scenery-internal) - Prevent any "trusted" events from being dispatched to the KeyStateTracker. When
+  // true, only scripted events are passed to the keyStateTracker. Otherwise, the modeled keyboard state when using
+  // fuzzBoard will appear broken as both user and KeyboardFuzzer interact with display.
+  blockTrustedEvents: boolean;
 
-    // @private
+  private display: Display;
+
+  // target of a user event, if focus changes in response to keydown listeners, listeners
+  // on keyup are prevented because the key press was not intended for the newly focused node.
+  // TODO: Can we do this for more than keydown/keyup? See https://github.com/phetsims/scenery/issues/942
+  private keydownTargetNode: Node | null;
+
+  constructor( display: Display ) {
+    // We'll start with a defined Vector2, so that pointers always have points
+    super( Vector2.ZERO, false, 'pdom' );
+
     this.display = display;
 
     this.initializeListeners();
 
-    // @public (scenery-internal) - Prevent any "trusted" events from being dispatched to the KeyStateTracker. When
-    // true, only scripted events are passed to the keyStateTracker. Otherwise, the modeled keyboard state when using
-    // fuzzBoard will appear broken as both user and KeyboardFuzzer interact with display.
     this.blockTrustedEvents = false;
 
-    // @private {Node|null} - target of a user event, if focus changes in response to keydown listeners, listeners
-    // on keyup are prevented because the key press was not intended for the newly focused node.
-    // TODO: Can we do this for more than keydown/keyup? See https://github.com/phetsims/scenery/issues/942
     this.keydownTargetNode = null;
 
     sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( `Created ${this.toString()}` );
@@ -39,19 +43,18 @@ class PDOMPointer extends Pointer {
   /**
    * Set up listeners, attaching blur and focus listeners to the pointer once this PDOMPointer has been attached
    * to a display.
-   * @private
    */
-  initializeListeners() {
+  private initializeListeners() {
 
     this.addInputListener( {
       focus: event => {
         assert && assert( this.trail, 'trail should have been calculated for the focused node' );
 
-        const lastNode = this.trail.lastNode();
+        const lastNode = this.trail!.lastNode();
 
         // NOTE: The "root" peer can't be focused (so it doesn't matter if it doesn't have a node).
         if ( lastNode.focusable ) {
-          const visualTrail = PDOMInstance.guessVisualTrail( this.trail, this.display.rootNode );
+          const visualTrail = PDOMInstance.guessVisualTrail( this.trail!, this.display.rootNode );
 
           FocusManager.pdomFocus = new Focus( this.display, visualTrail );
           this.point = visualTrail.parentToGlobalPoint( lastNode.center );
@@ -70,9 +73,10 @@ class PDOMPointer extends Pointer {
         }
       },
       blur: event => {
+        assert && assert( event.domEvent );
 
         // Null if it is not in the PDOM, or if it is undefined
-        const relatedTargetTrail = this.display._input.getRelatedTargetTrail( event.domEvent );
+        const relatedTargetTrail = this.display._input!.getRelatedTargetTrail( event.domEvent! );
 
         this.trail = null;
 
@@ -89,7 +93,7 @@ class PDOMPointer extends Pointer {
         this.keydownTargetNode = null;
       },
       keydown: event => {
-        if ( this.blockTrustedEvents && event.domEvent.isTrusted ) {
+        if ( this.blockTrustedEvents && event.domEvent!.isTrusted ) {
           return;
         }
 
@@ -97,7 +101,7 @@ class PDOMPointer extends Pointer {
         this.keydownTargetNode = event.target;
       },
       keyup: event => {
-        if ( this.blockTrustedEvents && event.domEvent.isTrusted ) {
+        if ( this.blockTrustedEvents && event.domEvent!.isTrusted ) {
           return;
         }
 
@@ -112,11 +116,9 @@ class PDOMPointer extends Pointer {
   }
 
   /**
-   * @param {string} trailId
-   * @public
-   * @returns {Trail} - updated trail
+   * @returns - updated trail
    */
-  updateTrail( trailId ) {
+  updateTrail( trailId: string ): Trail {
     if ( this.trail && this.trail.getUniqueId() === trailId ) {
       return this.trail;
     }
@@ -130,11 +132,9 @@ class PDOMPointer extends Pointer {
    * it is recomputed on focus. But there are times where pdom events can be called out of order with focus/blur
    * and the trail will either be null or stale. This might happen more often when scripting fake browser events
    * with a timeout (like in fuzzBoard).
-   *
-   * @public (scenery-internal)
-   * @param {string} trailString
+   * (scenery-internal)
    */
-  invalidateTrail( trailString ) {
+  invalidateTrail( trailString: string ) {
     if ( this.trail === null || this.trail.uniqueId !== trailString ) {
       this.trail = Trail.fromUniqueId( this.display.rootNode, trailString );
     }

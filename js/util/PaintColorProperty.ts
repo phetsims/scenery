@@ -35,42 +35,45 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Property from '../../../axon/js/Property.js';
-import merge from '../../../phet-core/js/merge.js';
-import { scenery, PaintDef, PaintObserver } from '../imports.js';
+import Property, { PropertyOptions } from '../../../axon/js/Property.js';
+import optionize from '../../../phet-core/js/optionize.js';
+import { scenery, PaintDef, PaintObserver, Color, IPaint } from '../imports.js';
 
-class PaintColorProperty extends Property {
+type SelfOptions = {
+  // 0 applies no change. Positive numbers brighten the color up to 1 (white). Negative numbers darken
+  // the color up to -1 (black). See setLuminanceFactor() for more information.
+  luminanceFactor?: number;
+};
 
-  /**
-   * @extends {Property.<Color>}
-   *
-   * @param {PaintDef} paint
-   * @param {Object} [options]
-   */
-  constructor( paint, options ) {
+export type PaintColorPropertyOptions = SelfOptions & PropertyOptions<Color>;
+
+class PaintColorProperty extends Property<Color> {
+
+  private _paint: IPaint;
+
+  // See setLuminanceFactor() for more information.
+  private _luminanceFactor: number;
+
+  // Our "paint changed" listener, will update the value of this Property.
+  private _changeListener: () => void;
+
+  private _paintObserver: PaintObserver;
+
+  constructor( paint: IPaint, providedOptions?: PaintColorPropertyOptions ) {
     const initialColor = PaintDef.toColor( paint );
 
-    options = merge( {
-      // {number} - 0 applies no change. Positive numbers brighten the color up to 1 (white). Negative numbers darken
-      // the color up to -1 (black). See setLuminanceFactor() for more information.
+    const options = optionize<PaintColorPropertyOptions, SelfOptions, PropertyOptions<Color>>( {
       luminanceFactor: 0,
 
       // Property options
       useDeepEquality: true // We don't need to renotify for equivalent colors
-    }, options );
+    }, providedOptions );
 
     super( initialColor, options );
 
-    // @private {PaintDef}
     this._paint = null;
-
-    // @private {number} - See setLuminanceFactor() for more information.
     this._luminanceFactor = options.luminanceFactor;
-
-    // @private {function} - Our "paint changed" listener, will update the value of this Property.
     this._changeListener = this.invalidatePaint.bind( this );
-
-    // @private {PaintObserver}
     this._paintObserver = new PaintObserver( this._changeListener );
 
     this.setPaint( paint );
@@ -78,11 +81,8 @@ class PaintColorProperty extends Property {
 
   /**
    * Sets the current paint of the PaintColorProperty.
-   * @public
-   *
-   * @param {PaintDef} paint
    */
-  setPaint( paint ) {
+  setPaint( paint: IPaint ) {
     assert && assert( PaintDef.isPaintDef( paint ) );
 
     this._paint = paint;
@@ -93,19 +93,15 @@ class PaintColorProperty extends Property {
 
   /**
    * Returns the current paint.
-   * @public
-   *
-   * @returns {PaintDef}
    */
-  getPaint() {
+  getPaint(): IPaint {
     return this._paint;
   }
 
-  get paint() { return this.getPaint(); }
+  get paint(): IPaint { return this.getPaint(); }
 
   /**
    * Sets the current value used for adjusting the brightness or darkness (luminance) of the color.
-   * @public
    *
    * If this factor is a non-zero value, the value of this Property will be either a brightened or darkened version of
    * the paint (depending on the value of the factor). 0 applies no change. Positive numbers brighten the color up to
@@ -121,10 +117,8 @@ class PaintColorProperty extends Property {
    *
    * With intermediate values basically "interpolated". This uses the `Color` colorUtilsBrightness method to adjust
    * the paint.
-   *
-   * @param {number} luminanceFactor
    */
-  setLuminanceFactor( luminanceFactor ) {
+  setLuminanceFactor( luminanceFactor: number ) {
     assert && assert( typeof luminanceFactor === 'number' && luminanceFactor >= -1 && luminanceFactor <= 1 );
 
     if ( this.luminanceFactor !== luminanceFactor ) {
@@ -134,34 +128,28 @@ class PaintColorProperty extends Property {
     }
   }
 
-  set luminanceFactor( value ) { this.setLuminanceFactor( value ); }
+  set luminanceFactor( value: number ) { this.setLuminanceFactor( value ); }
 
   /**
    * Returns the current value used for adjusting the brightness or darkness (luminance) of the color.
-   * @public
    *
    * See setLuminanceFactor() for more information.
-   *
-   * @returns {number}
    */
-  getLuminanceFactor() {
+  getLuminanceFactor(): number {
     return this._luminanceFactor;
   }
 
-  get luminanceFactor() { return this.getLuminanceFactor(); }
+  get luminanceFactor(): number { return this.getLuminanceFactor(); }
 
   /**
    * Updates the value of this Property.
-   * @private
    */
-  invalidatePaint() {
+  private invalidatePaint() {
     this.value = PaintDef.toColor( this._paint ).colorUtilsBrightness( this._luminanceFactor );
   }
 
   /**
    * Releases references.
-   * @public
-   * @override
    */
   dispose() {
     this.paint = null;

@@ -27,8 +27,8 @@ class Mouse extends Pointer {
   // https://developer.mozilla.org/en-US/docs/Web/Events/wheel
   wheelDeltaMode: number;
 
-  constructor() {
-    super( null, false, 'mouse' );
+  constructor( point: Vector2 ) {
+    super( point, false, 'mouse' );
 
     this.id = null;
     this.leftDown = false;
@@ -135,8 +135,6 @@ class Mouse extends Pointer {
     const pointChanged = this.hasPointChanged( point );
     point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `mouse out at ${point.toString()}` );
 
-    // TODO: how to handle the mouse out-of-bounds
-    this.point = null;
     return pointChanged;
   }
 
