@@ -10,16 +10,15 @@
  *
  * @author Jesse Greenberg
  */
-import { scenery } from '../../imports.js';
+import { scenery, Node } from '../../imports.js';
 
 const AriaHasPopUpMutator = {
 
   /**
-   * @public
-   * @param {Node} node - Node whose ParallelDOM.js fields will change
-   * @param {boolean|string} value - Valid value for aria-haspopup attribute, or false to remove the attribute
+   * @param node - Node whose ParallelDOM.js fields will change
+   * @param value - Valid value for aria-haspopup attribute, or false to remove the attribute
    */
-  mutateNode( node, value ) {
+  mutateNode( node: Node, value: boolean | string ) {
     if ( value ) {
       node.setPDOMAttribute( 'aria-haspopup', value );
     }

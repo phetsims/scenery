@@ -161,7 +161,7 @@ export type { InteractiveHighlightingOptions } from './accessibility/voicing/Int
 export { default as voicingManager } from './accessibility/voicing/voicingManager.js';
 export { default as voicingUtteranceQueue } from './accessibility/voicing/voicingUtteranceQueue.js';
 export { default as Voicing } from './accessibility/voicing/Voicing.js';
-export type { VoicingOptions } from './accessibility/voicing/Voicing.js';
+export type { VoicingOptions, SpeakingOptions } from './accessibility/voicing/Voicing.js';
 export { default as ReadingBlockUtterance } from './accessibility/voicing/ReadingBlockUtterance.js';
 export { default as FocusDisplayedController } from './accessibility/FocusDisplayedController.js';
 export { default as FocusManager } from './accessibility/FocusManager.js';

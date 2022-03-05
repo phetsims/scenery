@@ -83,7 +83,7 @@ type VoicingSelfOptions = {
 
 type VoicingOptions = VoicingSelfOptions & InteractiveHighlightingOptions;
 
-type SpeakingOptions = {
+export type SpeakingOptions = {
   utterance?: VoicingSelfOptions['voicingUtterance']
 } & {
 
