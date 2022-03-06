@@ -1,4 +1,4 @@
-// Copyright 2018-2021, University of Colorado Boulder
+// Copyright 2018-2022, University of Colorado Boulder
 
 /**
  * Pointer type for managing accessibility, in particular the focus in the display.
