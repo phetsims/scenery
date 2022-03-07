@@ -9,6 +9,6 @@ import { Color } from '../imports.js';
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-type IColor = IReadOnlyProperty<Color | string | null> | IReadOnlyProperty<Color | string> | IReadOnlyProperty<Color> | Color | string | null;
+type IColor = IReadOnlyProperty<Color | string | null> | IReadOnlyProperty<Color | string> | IReadOnlyProperty<Color> | IReadOnlyProperty<string> | Color | string | null;
 
 export default IColor;
