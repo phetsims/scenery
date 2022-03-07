@@ -107,7 +107,7 @@
           translateNode: true,
 
           // Dispose if dropped back in the toolbox.
-          end: event => {
+          end: () => {
             if ( toolbox.bounds.containsPoint( this.center ) ) {
               modelElement.dispose()
             }

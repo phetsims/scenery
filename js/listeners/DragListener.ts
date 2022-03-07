@@ -80,12 +80,11 @@ import RequiredOption from '../../../phet-core/js/types/RequiredOption.js';
 import EventType from '../../../tandem/js/EventType.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import { IInputListener, Node, Pointer, PressedPressListener, PressListener, PressListenerCallback, PressListenerEvent, PressListenerOptions, scenery, SceneryEvent, TransformTracker } from '../imports.js';
+import { IInputListener, Node, Pointer, PressedPressListener, PressListener, PressListenerCallback, PressListenerEvent, PressListenerNullableCallback, PressListenerOptions, scenery, SceneryEvent, TransformTracker } from '../imports.js';
 
 // Scratch vectors used to prevent allocations
 const scratchVector2A = new Vector2( 0, 0 );
 
-type EndCallback<Listener extends DragListener> = ( listener: Listener ) => void;
 type MapPosition = ( point: Vector2 ) => Vector2;
 type OffsetPosition<Listener extends DragListener> = ( point: Vector2, listener: Listener ) => Vector2;
 
@@ -103,7 +102,7 @@ type SelfOptions<Listener extends DragListener> = {
   // Called as end( listener: {DragListener} ) when the drag is ended. This is preferred over
   // passing release(), as the drag start hasn't been fully processed at that point.
   // NOTE: This will also be called if the drag is ended due to being interrupted or canceled.
-  end?: EndCallback<Listener> | null;
+  end?: PressListenerNullableCallback<Listener> | null;
 
   // If provided, this will be the conversion between the parent (view) and model coordinate
   // frames. Usually most useful when paired with the positionProperty.
@@ -382,7 +381,7 @@ export default class DragListener extends PressListener implements IInputListene
    * @param [event] - scenery event if there was one
    * @param [callback] - called at the end of the release
    */
-  release( event: PressListenerEvent, callback: () => void ) {
+  release( event?: PressListenerEvent, callback?: () => void ) {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener release' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -390,7 +389,7 @@ export default class DragListener extends PressListener implements IInputListene
       this.detachTransformTracker();
 
       // Notify after the rest of release is called in order to prevent it from triggering interrupt().
-      this._end && this._end( this as PressedDragListener );
+      this._end && this._end( event || null, this as PressedDragListener );
 
       callback && callback();
     } );
@@ -428,7 +427,7 @@ export default class DragListener extends PressListener implements IInputListene
       callback && callback();
 
       // notify that we have finished a 'drag' activation through click
-      this._end && this._end( this as PressedDragListener );
+      this._end && this._end( event, this as PressedDragListener );
 
       sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
     } );
