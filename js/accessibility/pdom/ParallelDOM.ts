@@ -250,7 +250,7 @@ type ParallelDOMOptions = {
 
   descriptionTagName?: string | null,
   descriptionContent?: string | null,
-  appendDescription?: string | null,
+  appendDescription?: boolean,
 
   focusHighlight?: Node | Shape | 'invisible' | null,
   focusHighlightLayerable?: boolean,
