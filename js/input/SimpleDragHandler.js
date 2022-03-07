@@ -7,7 +7,7 @@
  * @deprecated - please use DragListener for new code
  */
 
-import Action from '../../../axon/js/Action.js';
+import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import deprecationWarning from '../../../phet-core/js/deprecationWarning.js';
@@ -105,7 +105,7 @@ class SimpleDragHandler extends PhetioObject {
     this._attach = options.attach;
 
     // @private {Action}
-    this.dragStartAction = new Action( ( point, event ) => {
+    this.dragStartAction = new PhetioAction( ( point, event ) => {
 
       if ( this.dragging ) { return; }
 
@@ -155,7 +155,7 @@ class SimpleDragHandler extends PhetioObject {
     } );
 
     // @private {Action}
-    this.dragAction = new Action( ( point, event ) => {
+    this.dragAction = new PhetioAction( ( point, event ) => {
 
       if ( !this.dragging || this.isDisposed ) { return; }
 
@@ -211,7 +211,7 @@ class SimpleDragHandler extends PhetioObject {
     } );
 
     // @private {Action}
-    this.dragEndAction = new Action( ( point, event ) => {
+    this.dragEndAction = new PhetioAction( ( point, event ) => {
 
       if ( !this.dragging ) { return; }
 

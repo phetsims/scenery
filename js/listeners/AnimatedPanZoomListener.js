@@ -8,7 +8,7 @@
  * @author Jesse Greenberg
  */
 
-import Action from '../../../axon/js/Action.js';
+import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Utils from '../../../dot/js/Utils.js';
@@ -97,7 +97,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
     // @private {Action} - Action wrapping work to be done when a gesture starts on a macOS trackpad (specific
     // to that platform!). Wrapped in an action so that state is captured for PhET-iO
-    this.gestureStartAction = new Action( domEvent => {
+    this.gestureStartAction = new PhetioAction( domEvent => {
       assert && assert( domEvent instanceof window.Event );
       assert && assert( domEvent.pageX, 'pageX required on DOMEvent' );
       assert && assert( domEvent.pageY, 'pageY required on DOMEvent' );
@@ -118,7 +118,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
     // @private {Action} - Action wrapping work to be done when gesture changes on a macOS trackpad (specfic to that
     // platform!). Wrapped in an action so state is captured for PhET-iO
-    this.gestureChangeAction = new Action( domEvent => {
+    this.gestureChangeAction = new PhetioAction( domEvent => {
       assert && assert( domEvent instanceof window.Event );
       assert && assert( domEvent.scale, 'scale required on DOMEvent' );
 

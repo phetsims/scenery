@@ -10,7 +10,7 @@
  * @author Michael Barlow
  */
 
-import Action from '../../../axon/js/Action.js';
+import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import Emitter from '../../../axon/js/Emitter.js';
 import stepTimer from '../../../axon/js/stepTimer.js';
 import merge from '../../../phet-core/js/merge.js';
@@ -53,7 +53,7 @@ class KeyStateTracker {
 
     // @private {Action} - Action which updates the KeyStateTracker, when it is time to do so - the update
     // is wrapped by an Action so that the KeyStateTracker state is captured for PhET-iO
-    this.keydownUpdateAction = new Action( domEvent => {
+    this.keydownUpdateAction = new PhetioAction( domEvent => {
 
       // The dom event might have a modifier key that we weren't able to catch, if that is the case update the keyState.
       // This is likely to happen when pressing browser key commands like "ctrl + tab" to switch tabs.
@@ -94,7 +94,7 @@ class KeyStateTracker {
 
     // @private {Action} - Action which updates the state of the KeyStateTracker on key release. This
     // is wrapped in an Action so that state is captured for PhET-iO
-    this.keyupUpdateAction = new Action( domEvent => {
+    this.keyupUpdateAction = new PhetioAction( domEvent => {
 
       const key = KeyboardUtils.getEventCode( domEvent );
 

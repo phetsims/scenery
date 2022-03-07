@@ -68,6 +68,7 @@ export default class FireListener extends PressListener implements IInputListene
       // @ts-ignore TODO EventType
       phetioEventType: EventType.USER,
       phetioReadOnly: options.phetioReadOnly,
+      phetioDocumentation: 'Emits at the time that the listener fires',
       parameters: [ {
         name: 'event',
         phetioType: NullableIO( SceneryEvent.SceneryEventIO )
@@ -96,7 +97,6 @@ export default class FireListener extends PressListener implements IInputListene
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'FireListener fire' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
-    // @ts-ignore TODO Emitter
     this.firedEmitter.emit( event );
 
     sceneryLog && sceneryLog.InputListener && sceneryLog.pop();

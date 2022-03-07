@@ -158,7 +158,7 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
-import Action from '../../../axon/js/Action.js';
+import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
@@ -236,33 +236,33 @@ class Input {
 
   // Emits pointer validation to the input stream for playback
   // This is a high frequency event that is necessary for reproducible playbacks
-  private validatePointersAction: Action;
+  private validatePointersAction: PhetioAction;
 
-  private mouseUpAction: Action<[ Vector2, MouseEvent ]>;
-  private mouseDownAction: Action<[ number, Vector2, MouseEvent ]>;
-  private mouseMoveAction: Action<[ Vector2, MouseEvent ]>;
-  private mouseOverAction: Action<[ Vector2, MouseEvent ]>;
-  private mouseOutAction: Action<[ Vector2, MouseEvent ]>;
-  private wheelScrollAction: Action<[ WheelEvent ]>;
-  private touchStartAction: Action<[ number, Vector2, TouchEvent | PointerEvent ]>;
-  private touchEndAction: Action<[ number, Vector2, TouchEvent | PointerEvent ]>;
-  private touchMoveAction: Action<[ number, Vector2, TouchEvent | PointerEvent ]>;
-  private touchCancelAction: Action<[ number, Vector2, TouchEvent | PointerEvent ]>;
-  private penStartAction: Action<[ number, Vector2, PointerEvent ]>;
-  private penEndAction: Action<[ number, Vector2, PointerEvent ]>;
-  private penMoveAction: Action<[ number, Vector2, PointerEvent ]>;
-  private penCancelAction: Action<[ number, Vector2, PointerEvent ]>;
-  private gotPointerCaptureAction: Action<[ number, Event ]>;
-  private lostPointerCaptureAction: Action<[ number, Event ]>;
+  private mouseUpAction: PhetioAction<[ Vector2, MouseEvent ]>;
+  private mouseDownAction: PhetioAction<[ number, Vector2, MouseEvent ]>;
+  private mouseMoveAction: PhetioAction<[ Vector2, MouseEvent ]>;
+  private mouseOverAction: PhetioAction<[ Vector2, MouseEvent ]>;
+  private mouseOutAction: PhetioAction<[ Vector2, MouseEvent ]>;
+  private wheelScrollAction: PhetioAction<[ WheelEvent ]>;
+  private touchStartAction: PhetioAction<[ number, Vector2, TouchEvent | PointerEvent ]>;
+  private touchEndAction: PhetioAction<[ number, Vector2, TouchEvent | PointerEvent ]>;
+  private touchMoveAction: PhetioAction<[ number, Vector2, TouchEvent | PointerEvent ]>;
+  private touchCancelAction: PhetioAction<[ number, Vector2, TouchEvent | PointerEvent ]>;
+  private penStartAction: PhetioAction<[ number, Vector2, PointerEvent ]>;
+  private penEndAction: PhetioAction<[ number, Vector2, PointerEvent ]>;
+  private penMoveAction: PhetioAction<[ number, Vector2, PointerEvent ]>;
+  private penCancelAction: PhetioAction<[ number, Vector2, PointerEvent ]>;
+  private gotPointerCaptureAction: PhetioAction<[ number, Event ]>;
+  private lostPointerCaptureAction: PhetioAction<[ number, Event ]>;
 
   // If accessible
-  private focusinAction?: Action<[ FocusEvent ]>;
-  private focusoutAction?: Action<[ FocusEvent ]>;
-  private clickAction?: Action<[ MouseEvent ]>;
-  private inputAction?: Action<[ Event | InputEvent ]>;
-  private changeAction?: Action<[ Event ]>;
-  private keydownAction?: Action<[ KeyboardEvent ]>;
-  private keyupAction?: Action<[ KeyboardEvent ]>;
+  private focusinAction?: PhetioAction<[ FocusEvent ]>;
+  private focusoutAction?: PhetioAction<[ FocusEvent ]>;
+  private clickAction?: PhetioAction<[ MouseEvent ]>;
+  private inputAction?: PhetioAction<[ Event | InputEvent ]>;
+  private changeAction?: PhetioAction<[ Event ]>;
+  private keydownAction?: PhetioAction<[ KeyboardEvent ]>;
+  private keyupAction?: PhetioAction<[ KeyboardEvent ]>;
 
   // Same event options for all DOM listeners, used when we connect listeners
   private accessibleEventOptions?: EventListenerOptions;
@@ -314,7 +314,7 @@ class Input {
     // Declare the Actions that send scenery input events to the PhET-iO data stream.  Note they use the default value
     // of phetioReadOnly false, in case a client wants to synthesize events.
 
-    this.validatePointersAction = new Action( () => {
+    this.validatePointersAction = new PhetioAction( () => {
       let i = this.pointers.length;
       while ( i-- ) {
         const pointer = this.pointers[ i ];
@@ -328,7 +328,7 @@ class Input {
       phetioHighFrequency: true
     } );
 
-    this.mouseUpAction = new Action( ( point: Vector2, event: MouseEvent ) => {
+    this.mouseUpAction = new PhetioAction( ( point: Vector2, event: MouseEvent ) => {
       const mouse = this.ensureMouse( point );
       const pointChanged = mouse.up( point, event );
       mouse.id = null;
@@ -344,7 +344,7 @@ class Input {
       phetioDocumentation: 'Emits when a mouse button is released.'
     } );
 
-    this.mouseDownAction = new Action( ( id: number, point: Vector2, event: MouseEvent ) => {
+    this.mouseDownAction = new PhetioAction( ( id: number, point: Vector2, event: MouseEvent ) => {
       const mouse = this.ensureMouse( point );
       mouse.id = id;
       const pointChanged = mouse.down( point, event );
@@ -361,7 +361,7 @@ class Input {
       phetioDocumentation: 'Emits when a mouse button is pressed.'
     } );
 
-    this.mouseMoveAction = new Action( ( point: Vector2, event: MouseEvent ) => {
+    this.mouseMoveAction = new PhetioAction( ( point: Vector2, event: MouseEvent ) => {
       const mouse = this.ensureMouse( point );
       mouse.move( point, event );
       this.moveEvent<MouseEvent>( mouse, event );
@@ -377,7 +377,7 @@ class Input {
       phetioHighFrequency: true
     } );
 
-    this.mouseOverAction = new Action( ( point: Vector2, event: MouseEvent ) => {
+    this.mouseOverAction = new PhetioAction( ( point: Vector2, event: MouseEvent ) => {
       const mouse = this.ensureMouse( point );
       mouse.over( point, event );
       // TODO: how to handle mouse-over (and log it)... are we changing the pointer.point without a branch change?
@@ -392,7 +392,7 @@ class Input {
       phetioDocumentation: 'Emits when the mouse is moved while on the sim.'
     } );
 
-    this.mouseOutAction = new Action( ( point: Vector2, event: MouseEvent ) => {
+    this.mouseOutAction = new PhetioAction( ( point: Vector2, event: MouseEvent ) => {
       const mouse = this.ensureMouse( point );
       mouse.out( point, event );
       // TODO: how to handle mouse-out (and log it)... are we changing the pointer.point without a branch change?
@@ -407,7 +407,7 @@ class Input {
       phetioDocumentation: 'Emits when the mouse moves out of the display.'
     } );
 
-    this.wheelScrollAction = new Action( ( event: WheelEvent ) => {
+    this.wheelScrollAction = new PhetioAction( ( event: WheelEvent ) => {
       const mouse = this.ensureMouse( this.pointFromEvent( event ) );
       mouse.wheel( event );
 
@@ -428,7 +428,7 @@ class Input {
       phetioHighFrequency: true
     } );
 
-    this.touchStartAction = new Action( ( id: number, point: Vector2, event: TouchEvent | PointerEvent ) => {
+    this.touchStartAction = new PhetioAction( ( id: number, point: Vector2, event: TouchEvent | PointerEvent ) => {
       const touch = new Touch( id, point, event );
       this.addPointer( touch );
       this.downEvent<TouchEvent | PointerEvent>( touch, event, false );
@@ -444,7 +444,7 @@ class Input {
       phetioDocumentation: 'Emits when a touch begins.'
     } );
 
-    this.touchEndAction = new Action( ( id: number, point: Vector2, event: TouchEvent | PointerEvent ) => {
+    this.touchEndAction = new PhetioAction( ( id: number, point: Vector2, event: TouchEvent | PointerEvent ) => {
       const touch = this.findPointerById( id ) as Touch | null;
       if ( touch ) {
         assert && assert( touch instanceof Touch ); // eslint-disable-line
@@ -464,7 +464,7 @@ class Input {
       phetioDocumentation: 'Emits when a touch ends.'
     } );
 
-    this.touchMoveAction = new Action( ( id: number, point: Vector2, event: TouchEvent | PointerEvent ) => {
+    this.touchMoveAction = new PhetioAction( ( id: number, point: Vector2, event: TouchEvent | PointerEvent ) => {
       const touch = this.findPointerById( id ) as Touch | null;
       if ( touch ) {
         assert && assert( touch instanceof Touch ); // eslint-disable-line
@@ -484,7 +484,7 @@ class Input {
       phetioHighFrequency: true
     } );
 
-    this.touchCancelAction = new Action( ( id: number, point: Vector2, event: TouchEvent | PointerEvent ) => {
+    this.touchCancelAction = new PhetioAction( ( id: number, point: Vector2, event: TouchEvent | PointerEvent ) => {
       const touch = this.findPointerById( id ) as Touch | null;
       if ( touch ) {
         assert && assert( touch instanceof Touch ); // eslint-disable-line
@@ -504,7 +504,7 @@ class Input {
       phetioDocumentation: 'Emits when a touch is canceled.'
     } );
 
-    this.penStartAction = new Action( ( id: number, point: Vector2, event: PointerEvent ) => {
+    this.penStartAction = new PhetioAction( ( id: number, point: Vector2, event: PointerEvent ) => {
       const pen = new Pen( id, point, event );
       this.addPointer( pen );
       this.downEvent<PointerEvent>( pen, event, false );
@@ -520,7 +520,7 @@ class Input {
       phetioDocumentation: 'Emits when a pen touches the screen.'
     } );
 
-    this.penEndAction = new Action( ( id: number, point: Vector2, event: PointerEvent ) => {
+    this.penEndAction = new PhetioAction( ( id: number, point: Vector2, event: PointerEvent ) => {
       const pen = this.findPointerById( id ) as Pen | null;
       if ( pen ) {
         assert && assert( pen instanceof Pen );
@@ -540,7 +540,7 @@ class Input {
       phetioDocumentation: 'Emits when a pen is lifted.'
     } );
 
-    this.penMoveAction = new Action( ( id: number, point: Vector2, event: PointerEvent ) => {
+    this.penMoveAction = new PhetioAction( ( id: number, point: Vector2, event: PointerEvent ) => {
       const pen = this.findPointerById( id ) as Pen | null;
       if ( pen ) {
         assert && assert( pen instanceof Pen );
@@ -560,7 +560,7 @@ class Input {
       phetioHighFrequency: true
     } );
 
-    this.penCancelAction = new Action( ( id: number, point: Vector2, event: PointerEvent ) => {
+    this.penCancelAction = new PhetioAction( ( id: number, point: Vector2, event: PointerEvent ) => {
       const pen = this.findPointerById( id ) as Pen | null;
       if ( pen ) {
         assert && assert( pen instanceof Pen );
@@ -580,7 +580,7 @@ class Input {
       phetioDocumentation: 'Emits when a pen is canceled.'
     } );
 
-    this.gotPointerCaptureAction = new Action( ( id: number, event: Event ) => {
+    this.gotPointerCaptureAction = new PhetioAction( ( id: number, event: Event ) => {
       const pointer = this.findPointerById( id );
 
       if ( pointer ) {
@@ -598,7 +598,7 @@ class Input {
       phetioHighFrequency: true
     } );
 
-    this.lostPointerCaptureAction = new Action( ( id: number, event: Event ) => {
+    this.lostPointerCaptureAction = new PhetioAction( ( id: number, event: Event ) => {
       const pointer = this.findPointerById( id );
 
       if ( pointer ) {
@@ -618,7 +618,7 @@ class Input {
 
     // wire up accessibility listeners on the display's root accessible DOM element.
     if ( this.display._accessible ) {
-      this.focusinAction = new Action( ( event: FocusEvent ) => {
+      this.focusinAction = new PhetioAction( ( event: FocusEvent ) => {
 
         // ignore any focusout callbacks if they are initiated due to implementation details in PDOM manipulation
         if ( this.display.blockFocusCallbacks ) {
@@ -643,7 +643,7 @@ class Input {
         phetioDocumentation: 'Emits when the PDOM root gets the focusin DOM event.'
       } );
 
-      this.focusoutAction = new Action( ( event: FocusEvent ) => {
+      this.focusoutAction = new PhetioAction( ( event: FocusEvent ) => {
 
         // ignore any focusout callbacks if they are initiated due to implementation details in PDOM manipulation
         if ( this.display.blockFocusCallbacks ) {
@@ -676,7 +676,7 @@ class Input {
 
       // https://developer.mozilla.org/en-US/docs/Web/API/Element/click_event notes that the click action should result
       // in a MouseEvent
-      this.clickAction = new Action( ( event: MouseEvent ) => {
+      this.clickAction = new PhetioAction( ( event: MouseEvent ) => {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( `click(${Input.debugText( null, event )});` );
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -694,7 +694,7 @@ class Input {
         phetioDocumentation: 'Emits when the PDOM root gets the click DOM event.'
       } );
 
-      this.inputAction = new Action( ( event: Event | InputEvent ) => {
+      this.inputAction = new PhetioAction( ( event: Event | InputEvent ) => {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( `input(${Input.debugText( null, event )});` );
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -712,7 +712,7 @@ class Input {
         phetioDocumentation: 'Emits when the PDOM root gets the input DOM event.'
       } );
 
-      this.changeAction = new Action( ( event: Event ) => {
+      this.changeAction = new PhetioAction( ( event: Event ) => {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( `change(${Input.debugText( null, event )});` );
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -730,7 +730,7 @@ class Input {
         phetioDocumentation: 'Emits when the PDOM root gets the change DOM event.'
       } );
 
-      this.keydownAction = new Action( ( event: KeyboardEvent ) => {
+      this.keydownAction = new PhetioAction( ( event: KeyboardEvent ) => {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( `keydown(${Input.debugText( null, event )});` );
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -748,7 +748,7 @@ class Input {
         phetioDocumentation: 'Emits when the PDOM root gets the keydown DOM event.'
       } );
 
-      this.keyupAction = new Action( ( event: KeyboardEvent ) => {
+      this.keyupAction = new PhetioAction( ( event: KeyboardEvent ) => {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( `keyup(${Input.debugText( null, event )});` );
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -791,7 +791,7 @@ class Input {
             // stream.
             if ( trail && !( _.some( trail.nodes, node => node.positionInPDOM ) && eventName === 'click' &&
                  event.timeStamp - this.upTimeStamp <= PDOM_CLICK_DELAY ) ) {
-              ( this[ actionName as keyof Input ] as unknown as Action<[ Event ]> ).execute( event );
+              ( this[ actionName as keyof Input ] as unknown as PhetioAction<[ Event ]> ).execute( event );
             }
           }
 

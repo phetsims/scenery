@@ -19,7 +19,7 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
-import Action from '../../../axon/js/Action.js';
+import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import EnabledComponent from '../../../axon/js/EnabledComponent.js';
 import Emitter from '../../../axon/js/Emitter.js';
 import Property from '../../../axon/js/Property.js';
@@ -153,7 +153,7 @@ class KeyboardDragListener extends EnabledComponent {
     this.delayComplete = false;
 
     // @private - fires to conduct the start of a drag, added for PhET-iO interoperability
-    this.dragStartAction = new Action( event => {
+    this.dragStartAction = new PhetioAction( event => {
       const key = KeyboardUtils.getEventCode( event.domEvent );
 
       // update the key state
@@ -190,7 +190,7 @@ class KeyboardDragListener extends EnabledComponent {
     } );
 
     // @private - fires to conduct the end of a drag, added for PhET-iO interoperability
-    this.dragEndAction = new Action( event => {
+    this.dragEndAction = new PhetioAction( event => {
       this._end && this._end( event );
     }, {
       parameters: [ { name: 'event', phetioType: SceneryEvent.SceneryEventIO } ],

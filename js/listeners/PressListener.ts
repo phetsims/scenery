@@ -21,7 +21,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Action from '../../../axon/js/Action.js';
+import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import DerivedProperty from '../../../axon/js/DerivedProperty.js';
 import EnabledComponent, { EnabledComponentOptions } from '../../../axon/js/EnabledComponent.js';
@@ -212,14 +212,14 @@ export default class PressListener extends EnabledComponent implements IInputLis
   private _pointerListener: IInputListener;
 
   // Executed on press event
-  // The main implementation of "press" handling is implemented as a callback to the Action, so things are nested
+  // The main implementation of "press" handling is implemented as a callback to the PhetioAction, so things are nested
   // nicely for phet-io.
-  private _pressAction: Action<[ PressListenerEvent, Node | null, ( () => void ) | null ]>;
+  private _pressAction: PhetioAction<[ PressListenerEvent, Node | null, ( () => void ) | null ]>;
 
   // Executed on release event
-  // The main implementation of "release" handling is implemented as a callback to the Action, so things are nested
+  // The main implementation of "release" handling is implemented as a callback to the PhetioAction, so things are nested
   // nicely for phet-io.
-  private _releaseAction: Action<[ PressListenerEvent | null, ( () => void ) | null ]>;
+  private _releaseAction: PhetioAction<[ PressListenerEvent | null, ( () => void ) | null ]>;
 
   // To support looksOverProperty being true based on focus, we need to monitor the display from which
   // the event has come from to see if that display is showing its focusHighlights, see
@@ -330,7 +330,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
       listener: this
     };
 
-    this._pressAction = new Action( this.onPress.bind( this ), {
+    this._pressAction = new PhetioAction( this.onPress.bind( this ), {
       tandem: options.tandem.createTandem( 'pressAction' ),
       phetioDocumentation: 'Executes whenever a press occurs. The first argument when executing can be ' +
                            'used to convey info about the SceneryEvent.',
@@ -351,7 +351,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
       ]
     } );
 
-    this._releaseAction = new Action( this.onRelease.bind( this ), {
+    this._releaseAction = new PhetioAction( this.onRelease.bind( this ), {
       parameters: [ {
         name: 'event',
         phetioType: NullableIO( SceneryEvent.SceneryEventIO )
@@ -1022,6 +1022,6 @@ export default class PressListener extends EnabledComponent implements IInputLis
 scenery.register( 'PressListener', PressListener );
 
 PressListener.phetioAPI = {
-  pressAction: { phetioType: Action.ActionIO( [ SceneryEvent.SceneryEventIO ] ) },
-  releaseAction: { phetioType: Action.ActionIO( [ NullableIO( SceneryEvent.SceneryEventIO ) ] ) }
+  pressAction: { phetioType: PhetioAction.PhetioActionIO( [ SceneryEvent.SceneryEventIO ] ) },
+  releaseAction: { phetioType: PhetioAction.PhetioActionIO( [ NullableIO( SceneryEvent.SceneryEventIO ) ] ) }
 };

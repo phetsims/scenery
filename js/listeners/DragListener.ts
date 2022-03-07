@@ -68,7 +68,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Action from '../../../axon/js/Action.js';
+import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import IProperty from '../../../axon/js/IProperty.js';
 import IReadOnlyProperty from '../../../axon/js/IReadOnlyProperty.js';
 import Property from '../../../axon/js/Property.js';
@@ -218,7 +218,7 @@ export default class DragListener extends PressListener implements IInputListene
   private _lastInterruptedTouchLikePointer: Pointer | null;
 
   // Emitted on drag. Used for triggering phet-io events to the data stream, see https://github.com/phetsims/scenery/issues/842
-  private _dragAction: Action<[ PressListenerEvent ]>;
+  private _dragAction: PhetioAction<[ PressListenerEvent ]>;
 
 
   constructor( providedOptions?: DragListenerOptions<PressedDragListener> ) {
@@ -291,7 +291,7 @@ export default class DragListener extends PressListener implements IInputListene
     this._transformTrackerListener = this.ancestorTransformed.bind( this );
     this._lastInterruptedTouchLikePointer = null;
 
-    this._dragAction = new Action( event => {
+    this._dragAction = new PhetioAction( event => {
       assert && assert( isPressedListener( this ) );
       const pressedListener = this as PressedDragListener;
 
