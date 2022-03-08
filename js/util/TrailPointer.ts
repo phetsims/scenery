@@ -110,7 +110,7 @@ class TrailPointer {
 
     assert && assert( this.isActive() && other.isActive() );
     const activeSelf = this as ActiveTrailPointer;
-    const activeOther = this as ActiveTrailPointer;
+    const activeOther = other as ActiveTrailPointer;
 
     const comparison = activeSelf.trail.compare( activeOther.trail );
 
@@ -164,9 +164,10 @@ class TrailPointer {
     const activeSelf = this as ActiveTrailPointer;
 
     if ( this.isBefore ) {
-      if ( activeSelf.trail.lastNode()._children.length > 0 ) {
+      const children = activeSelf.trail.lastNode()._children;
+      if ( children.length > 0 ) {
         // stay as before, just walk to the first child
-        activeSelf.trail.addDescendant( activeSelf.trail.lastNode()._children[ 0 ], 0 );
+        activeSelf.trail.addDescendant( children[ 0 ], 0 );
       }
       else {
         // stay on the same node, but switch to after
@@ -184,9 +185,10 @@ class TrailPointer {
         const index = activeSelf.trail.indices[ activeSelf.trail.indices.length - 1 ];
         activeSelf.trail.removeDescendant();
 
-        if ( activeSelf.trail.lastNode()._children.length > index + 1 ) {
+        const children = activeSelf.trail.lastNode()._children;
+        if ( children.length > index + 1 ) {
           // more siblings, switch to the beginning of the next one
-          activeSelf.trail.addDescendant( activeSelf.trail.lastNode()._children[ index + 1 ], index + 1 );
+          activeSelf.trail.addDescendant( children[ index + 1 ], index + 1 );
           this.setBefore( true );
         }
         else {
@@ -251,7 +253,7 @@ class TrailPointer {
    * Treats the pointer as render-ordered (includes the start pointer 'before' if applicable, excludes the end pointer
    * 'before' if applicable
    */
-  eachTrailBetween( other: TrailPointer, callback: ( node: Trail ) => void ) {
+  eachTrailBetween( other: TrailPointer, callback: ( node: Trail ) => boolean | void ) {
     // this should trigger on all pointers that have the 'before' flag, except a pointer equal to 'other'.
 
     // since we exclude endpoints in the depthFirstUntil call, we need to fire this off first
@@ -279,7 +281,7 @@ class TrailPointer {
   depthFirstUntil( other: TrailPointer, callback: ( trailPointer: ActiveTrailPointer ) => boolean | void, excludeEndpoints: boolean ) {
     assert && assert( this.isActive() && other.isActive() );
     const activeSelf = this as ActiveTrailPointer;
-    const activeOther = this as ActiveTrailPointer;
+    const activeOther = other as ActiveTrailPointer;
 
     // make sure this pointer is before the other, but allow start === end if we are not excluding endpoints
     assert && assert( this.compareNested( other ) <= ( excludeEndpoints ? -1 : 0 ), 'TrailPointer.depthFirstUntil pointers out of order, possibly in both meanings of the phrase!' );

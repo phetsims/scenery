@@ -626,7 +626,7 @@ class Trail {
   /**
    * Calls callback( trail ) for this trail, and each descendant trail. If callback returns true, subtree will be skipped
    */
-  eachTrailUnder( callback: ( trail: Trail ) => void ) {
+  eachTrailUnder( callback: ( trail: Trail ) => boolean | void ) {
     // TODO: performance: should be optimized to be much faster, since we don't have to deal with the before/after
     new TrailPointer( this, true ).eachTrailBetween( new TrailPointer( this, false ), callback );
   }
