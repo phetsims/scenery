@@ -170,26 +170,80 @@ import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
 import { scenery, Display, Features, Trail, EventIO, Mouse, PDOMPointer, Pen, Pointer, SceneryEvent, Touch, PDOMUtils, BatchedDOMEvent, BrowserEvents, Node, BatchedDOMEventType, BatchedDOMEventCallback, IInputListener, SceneryListenerFunction, WindowTouch } from '../imports.js';
 
-// Object literal makes it easy to check for the existence of an attribute (compared to [].indexOf()>=0). Helpful for
-// serialization. NOTE: Do not add or change this without consulting the PhET-iO IOType schema for this in EventIO.js
-
+// This is the list of keys that get serialized AND deserialized. NOTE: Do not add or change this without
+// consulting the PhET-iO IOType schema for this in EventIO
 const domEventPropertiesToSerialize = [
-  'type',
-  'button', 'keyCode', 'key',
-  'deltaX', 'deltaY', 'deltaZ', 'deltaMode', 'pointerId',
-  'pointerType', 'charCode', 'which', 'clientX', 'clientY', 'pageX', 'pageY', 'changedTouches',
+  'altKey',
+  'button',
+  'charCode',
+  'clientX',
+  'clientY',
+  'code',
+  'ctrlKey',
+  'deltaMode',
+  'deltaX',
+  'deltaY',
+  'deltaZ',
+  'key',
+  'keyCode',
+  'metaKey',
+  'pageX',
+  'pageY',
+  'pointerId',
+  'pointerType',
   'scale',
-  'target', 'relatedTarget',
-  'ctrlKey', 'shiftKey', 'altKey', 'metaKey', 'code'
+  'shiftKey',
+  'target',
+  'type',
+  'relatedTarget',
+  'which'
+] as const;
+
+// The list of serialized properties needed for deserialization
+type SerializedPropertiesForDeserialization = typeof domEventPropertiesToSerialize[number];
+
+// Cannot be set after construction, and should be provided in the init config to the constructor(), see Input.deserializeDOMEvent
+const domEventPropertiesSetInConstructor: SerializedPropertiesForDeserialization[] = [
+  'deltaMode',
+  'deltaX',
+  'deltaY',
+  'deltaZ',
+  'altKey',
+  'button',
+  'charCode',
+  'clientX',
+  'clientY',
+  'code',
+  'ctrlKey',
+  'key',
+  'keyCode',
+  'metaKey',
+  'pageX',
+  'pageY',
+  'pointerId',
+  'pointerType',
+  'shiftKey',
+  'type',
+  'relatedTarget',
+  'which'
 ];
 
+type SerializedDOMEvent = {
+  constructorName: string; // used to get the constructor from the window object, see Input.deserializeDOMEvent
+} & {
+  [key in SerializedPropertiesForDeserialization]?: any; // eslint-disable-line no-unused-vars
+}
+
 // A list of keys on events that need to be serialized into HTMLElements
-const EVENT_KEY_VALUES_AS_ELEMENTS = [ 'target', 'relatedTarget' ];
+const EVENT_KEY_VALUES_AS_ELEMENTS: SerializedPropertiesForDeserialization[] = [ 'target', 'relatedTarget' ];
 
 // A list of events that should still fire, even when the Node is not pickable
 const PDOM_UNPICKABLE_EVENTS = [ 'focus', 'blur', 'focusin', 'focusout' ];
 const TARGET_SUBSTITUTE_KEY = 'targetSubstitute' as const;
-const RELATED_TARGET_SUBSTITUTE_KEY = 'relatedTargetSubstitute' as const;
+type TargetSubstitudeAugmentedEvent = Event & {
+  [ TARGET_SUBSTITUTE_KEY ]?: Element
+};
+
 
 // A bit more than the maximum amount of time that iOS 14 VoiceOver was observed to delay between
 // sending a mouseup event and a click event.
@@ -1090,11 +1144,10 @@ class Input {
    * @returns {Trail|null}
    */
   getRelatedTargetTrail( domEvent: FocusEvent | MouseEvent ): Trail | null {
-    // @ts-ignore TODO what is the related target substitute? Not found on DOM APIs
-    const relatedTargetElement = domEvent.relatedTarget || domEvent[ RELATED_TARGET_SUBSTITUTE_KEY ];
+    const relatedTargetElement = domEvent.relatedTarget;
 
-    if ( relatedTargetElement && this.isTargetUnderPDOM( relatedTargetElement ) ) {
-      const relatedTargetId = this.getRelatedTargetTrailId( domEvent );
+    if ( relatedTargetElement && this.isTargetUnderPDOM( relatedTargetElement as HTMLElement ) ) {
+      const relatedTargetId = Input.getRelatedTargetTrailId( domEvent );
       return relatedTargetId ? Trail.fromUniqueId( this.display.rootNode, relatedTargetId ) : null;
     }
     return null;
@@ -1103,8 +1156,12 @@ class Input {
   /**
    * Get the related target trail ID of the node represented by a DOM element in the accessible PDOM.
    */
-  private getRelatedTargetTrailId( domEvent: Event ): string {
-    return this.getTrailIdImplementation( domEvent, 'relatedTarget', RELATED_TARGET_SUBSTITUTE_KEY );
+  private static getRelatedTargetTrailId( domEvent: FocusEvent | MouseEvent ): string {
+    const relatedTarget = ( domEvent.relatedTarget as unknown as Element );
+    assert && assert( relatedTarget instanceof window.Element );
+    const trailID = relatedTarget.getAttribute( PDOMUtils.DATA_TRAIL_ID );
+    assert && assert( trailID, 'should not be null' );
+    return trailID!;
   }
 
   /**
@@ -1112,29 +1169,29 @@ class Input {
    * DOMEvent, this ensures that all will dispatch to the same Trail.
    */
   private updateTrailForPDOMDispatch( domEvent: Event ): Trail {
-    return this.ensurePDOMPointer().updateTrail( this.getTrailId( domEvent ) );
+
+    const trailID = this.getTrailId( domEvent );
+    assert && assert( trailID, 'trailID should not be null' );
+    return this.ensurePDOMPointer().updateTrail( trailID );
   }
 
   /**
    * Get the trail ID of the node represented by a DOM element who is the target of a DOM Event in the accessible PDOM.
    */
-  private getTrailId( domEvent: Event ): string {
-    return this.getTrailIdImplementation( domEvent, 'target', TARGET_SUBSTITUTE_KEY );
-  }
-
-  private getTrailIdImplementation( domEvent: Event, targetKeyName: string, targetSubstitudeKeyName: string ): string {
-    const anyEvent = domEvent as any;
+  private getTrailId( domEvent: TargetSubstitudeAugmentedEvent ): string {
     assert && assert( this.display._accessible, 'Display must be accessible to get trail IDs from PDOMPeers' );
-    assert && assert( anyEvent[ targetKeyName ] || anyEvent[ targetSubstitudeKeyName ], 'need a way to get the target' );
+    assert && assert( domEvent.target || domEvent[ TARGET_SUBSTITUTE_KEY ], 'need a way to get the target' );
 
     // could be serialized event for phet-io playbacks, see Input.serializeDOMEvent()
-    if ( anyEvent[ targetSubstitudeKeyName ] ) {
-      assert && assert( anyEvent[ targetSubstitudeKeyName ] instanceof Object );
-      return anyEvent[ targetSubstitudeKeyName ].getAttribute( PDOMUtils.DATA_TRAIL_ID );
+    if ( domEvent[ TARGET_SUBSTITUTE_KEY ] ) {
+      return domEvent[ TARGET_SUBSTITUTE_KEY ]!.getAttribute( PDOMUtils.DATA_TRAIL_ID )!;
     }
     else {
-      assert && assert( anyEvent[ targetKeyName ] instanceof window.Element );
-      return anyEvent[ targetKeyName ].getAttribute( PDOMUtils.DATA_TRAIL_ID );
+      const target = ( domEvent.target as unknown as Element );
+      assert && assert( target instanceof window.Element );
+      const trailID = target.getAttribute( PDOMUtils.DATA_TRAIL_ID );
+      assert && assert( trailID, 'should not be null' );
+      return trailID!;
     }
   }
 
@@ -1825,67 +1882,65 @@ class Input {
    * @returns {Object} - see domEventPropertiesToSerialize for list keys that are serialized
    */
   static serializeDomEvent( domEvent: Event ): any {
-    const entries = {} as any;
+    const entries: SerializedDOMEvent = {
+      constructorName: domEvent.constructor.name
+    };
 
     domEventPropertiesToSerialize.forEach( property => {
 
-        const domEventProperty = domEvent[ property as keyof Event ] as any;
+      const domEventProperty = domEvent[ property as keyof Event ] as any;
 
-        // We serialize many Event APIs into a single object, so be graceful if properties don't exist.
-        if ( domEventProperty === undefined || domEventProperty === null ) {
-          entries[ property ] = null;
-        }
-
-        // stringifying dom event object properties can cause circular references, so we avoid that completely
-        else if ( property === 'touches' || property === 'targetTouches' || property === 'changedTouches' ) {
-
-          const touchArray = [];
-          for ( let i = 0; i < domEventProperty.length; i++ ) {
-
-            // According to spec (http://www.w3.org/TR/touch-events/), this is not an Array, but a TouchList. In practice
-            // the phet-io team found that chrome and safari, along with downstream "playback" phet-io sims, use an Array.
-            // So we need to support both APIs.
-            const touch = ( domEventProperty.item && typeof domEventProperty.item === 'function' ) ?
-                          domEventProperty.item( i ) :
-                          domEventProperty[ i ];
-
-            touchArray.push( Input.serializeDomEvent( touch ) );
-          }
-          entries[ property ] = touchArray;
-        }
-
-        else if ( EVENT_KEY_VALUES_AS_ELEMENTS.includes( property ) && typeof domEventProperty.getAttribute === 'function' &&
-
-                  // If false, then this target isn't a PDOM element, so we can skip this serialization
-                  domEventProperty.hasAttribute( PDOMUtils.DATA_TRAIL_ID ) ) {
-
-          // If the target came from the accessibility PDOM, then we want to store the Node trail id of where it came from.
-
-          entries[ property ] = {};
-          entries[ property ][ PDOMUtils.DATA_TRAIL_ID ] = domEventProperty.getAttribute( PDOMUtils.DATA_TRAIL_ID );
-        }
-        else {
-
-          // Parse to get rid of functions and circular references.
-          entries[ property ] = ( ( typeof domEventProperty === 'object' ) ? {} : JSON.parse( JSON.stringify( domEventProperty ) ) );
-        }
+      // We serialize many Event APIs into a single object, so be graceful if properties don't exist.
+      if ( domEventProperty === undefined || domEventProperty === null ) {
+        entries[ property ] = null;
       }
-    );
+
+      else if ( EVENT_KEY_VALUES_AS_ELEMENTS.includes( property ) && typeof domEventProperty.getAttribute === 'function' &&
+
+                // If false, then this target isn't a PDOM element, so we can skip this serialization
+                domEventProperty.hasAttribute( PDOMUtils.DATA_TRAIL_ID ) ) {
+
+        // If the target came from the accessibility PDOM, then we want to store the Node trail id of where it came from.
+
+        entries[ property ] = {};
+        entries[ property ][ PDOMUtils.DATA_TRAIL_ID ] = domEventProperty.getAttribute( PDOMUtils.DATA_TRAIL_ID );
+      }
+      else {
+
+        // Parse to get rid of functions and circular references.
+        entries[ property ] = ( ( typeof domEventProperty === 'object' ) ? {} : JSON.parse( JSON.stringify( domEventProperty ) ) );
+      }
+    } );
+
     return entries;
   }
 
   /**
    * From a serialized dom event, return a recreated window.Event (scenery-internal)
    */
-  static deserializeDomEvent( eventObject: any ): Event {
-    const domEvent: Event = new window.Event( 'Event' );
+  static deserializeDomEvent( eventObject: SerializedDOMEvent ): Event {
+    const constructorName = eventObject.constructorName || 'Event';
+
+    const configForConstructor = _.pick( eventObject, domEventPropertiesSetInConstructor );
+    // serialize the relatedTarget back into an event Object, so that it can be passed to the init config in the Event
+    // constructor
+    if ( configForConstructor.relatedTarget ) {
+      const htmlElement = document.getElementById( configForConstructor.relatedTarget[ PDOMUtils.DATA_TRAIL_ID ] );
+      assert && assert( htmlElement, 'cannot deserialize event when related target is not in the DOM.' );
+      configForConstructor.relatedTarget = htmlElement;
+    }
+
+    // @ts-ignore
+    const domEvent: Event = new window[ constructorName ]( constructorName, configForConstructor );
+
     for ( const key in eventObject ) {
 
       // `type` is readonly, so don't try to set it.
-      if ( eventObject.hasOwnProperty( key ) && key !== 'type' ) {
+      if ( eventObject.hasOwnProperty( key ) && !( domEventPropertiesSetInConstructor as string[] ).includes( key ) ) {
 
         // Special case for target since we can't set that read-only property. Instead use a substitute key.
         if ( key === 'target' ) {
+
           // @ts-ignore
           domEvent[ TARGET_SUBSTITUTE_KEY ] = _.clone( eventObject[ key ] ) || {};
 
@@ -1895,16 +1950,8 @@ class Input {
             return this[ key ];
           };
         }
-        else if ( key === 'relatedTarget' ) {
-          if ( eventObject[ key ] ) {
-
-            const htmlElement = document.getElementById( eventObject[ key ][ PDOMUtils.DATA_TRAIL_ID ] );
-            assert && assert( htmlElement, 'cannot deserialize event when related target is not in the DOM.' );
-            // @ts-ignore
-            domEvent[ RELATED_TARGET_SUBSTITUTE_KEY ] = htmlElement;
-          }
-        }
         else {
+
           // @ts-ignore
           domEvent[ key ] = eventObject[ key ];
         }

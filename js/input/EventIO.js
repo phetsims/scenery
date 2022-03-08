@@ -9,7 +9,6 @@
  * @author Sam Reid (PhET Interactive Simulations)
  */
 
-import ArrayIO from '../../../tandem/js/types/ArrayIO.js';
 import BooleanIO from '../../../tandem/js/types/BooleanIO.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
@@ -26,7 +25,7 @@ const EventIO = new IOType( 'EventIO', {
 
   // This should remain the same as Input.domEventPropertiesToSerialize (local var). Each key can be null depending on
   // what Event interface is being serialized (which depends on what DOM Event the instance is).
-  stateSchema: EventIO => ( {
+  stateSchema: () => ( {
     pointerId: NullableIO( NumberIO ),
     pointerType: NullableIO( StringIO ),
     clientX: NullableIO( NumberIO ),
@@ -49,7 +48,6 @@ const EventIO = new IOType( 'EventIO', {
     deltaZ: NullableIO( NumberIO ),
     deltaMode: NullableIO( NumberIO ),
     charCode: NullableIO( NumberIO ),
-    changedTouches: NullableIO( ArrayIO( EventIO ) ),
     scale: NullableIO( NumberIO )
   } )
 } );
