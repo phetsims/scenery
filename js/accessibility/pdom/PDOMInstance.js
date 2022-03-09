@@ -179,6 +179,14 @@ class PDOMInstance {
       this.sortChildren();
     }
 
+    if ( assert && this.node ) {
+
+      // If you hit this when mutating both children and innerContent at the same time, it is an issue with scenery,
+      // remove once in a single step and the add the other in the next step.
+      this.children.length > 0 && assert( !this.node.innerContent,
+        `${this.children.length} child PDOMInstances present but this node has innerContent: ${this.node.innerContent}` );
+    }
+
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.pop();
   }
 
