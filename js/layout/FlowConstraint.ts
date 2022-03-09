@@ -252,13 +252,15 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
     }
 
     // {number|null} Determine our preferred sizes (they can be null, in which case)
-    const preferredSize = orientation === Orientation.HORIZONTAL ? this.preferredWidthProperty.value : this.preferredHeightProperty.value;
+    let preferredSize = orientation === Orientation.HORIZONTAL ? this.preferredWidthProperty.value : this.preferredHeightProperty.value;
     const preferredOppositeSize = orientation === Orientation.HORIZONTAL ? this.preferredHeightProperty.value : this.preferredWidthProperty.value;
 
     // What is the largest of the minimum sizes of cells (e.g. if we're wrapping, this would be our minimum size)
     const maxMinimumCellSize: number = Math.max( ...cells.map( cell => cell.getMinimumSize( orientation ) || 0 ) );
 
-    assert && assert( maxMinimumCellSize - 1e-6 <= ( preferredSize || Number.POSITIVE_INFINITY ), 'Will not be able to fit in this preferred size' );
+    if ( maxMinimumCellSize > ( preferredSize || Number.POSITIVE_INFINITY ) ) {
+      preferredSize = maxMinimumCellSize;
+    }
 
     // Wrapping all of the cells into lines
     const lines = [];
