@@ -34,7 +34,7 @@ import { InteractiveHighlighting, InteractiveHighlightingOptions, Node, scenery,
 import optionize from '../../../../phet-core/js/optionize.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import { TAlertableDef } from '../../../../utterance-queue/js/AlertableDef.js';
-import IntentionalAny from '../../../../phet-core/js/IntentionalAny.js';
+import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 
 // options that are supported by Voicing.js. Added to mutator keys so that Voicing properties can be set with mutate.
 const VOICING_OPTION_KEYS = [
