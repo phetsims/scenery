@@ -407,6 +407,10 @@ export default class PressListener extends EnabledComponent implements IInputLis
     return this._attach;
   }
 
+  get targetNode(): Node | null {
+    return this._targetNode;
+  }
+
   /**
    * The main node that this listener is responsible for dragging.
    */
