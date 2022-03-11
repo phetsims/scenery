@@ -1720,6 +1720,10 @@ class Node extends ParallelDOM {
     return this.getLocalBounds();
   }
 
+  get localBoundsOverridden(): boolean {
+    return this._localBoundsOverridden;
+  }
+
   /**
    * Allows overriding the value of localBounds (and thus changing things like 'bounds' that depend on localBounds).
    * If it's set to a non-null value, that value will always be used for localBounds until this function is called

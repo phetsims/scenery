@@ -21,7 +21,7 @@ const PATH_OPTION_KEYS = [
 
 const DEFAULT_OPTIONS = {
   shape: null,
-  boundsMethod: <BoundsMethod>'accurate'
+  boundsMethod: 'accurate' as const
 };
 
 type BoundsMethod = 'accurate' | 'unstroked' | 'tightPadding' | 'safePadding' | 'none';
