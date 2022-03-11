@@ -53,6 +53,7 @@ export type { GradientStop } from './util/Gradient.js';
 export { default as LinearGradient } from './util/LinearGradient.js';
 export { default as RadialGradient } from './util/RadialGradient.js';
 export { default as Pattern } from './util/Pattern.js';
+export { default as NodePattern } from './util/NodePattern.js';
 export { default as Filter } from './util/Filter.js';
 
 export { default as ColorDef } from './util/ColorDef.js';

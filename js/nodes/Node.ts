@@ -174,6 +174,7 @@ import IProperty from '../../../axon/js/IProperty.js';
 import { ACCESSIBILITY_OPTION_KEYS, CanvasContextWrapper, CanvasSelfDrawable, Display, DOMSelfDrawable, Drawable, Features, Filter, IInputListener, ILayoutOptions, Image, ImageOptions, Instance, Mouse, ParallelDOM, ParallelDOMOptions, Picker, Pointer, Renderer, RendererSummary, scenery, serializeConnectedNodes, SVGSelfDrawable, Trail, WebGLSelfDrawable } from '../imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
+import Utils from '../../../dot/js/Utils.js';
 
 let globalIdCounter = 1;
 
@@ -2249,7 +2250,7 @@ class Node extends ParallelDOM {
       assert && assert( typeof y === 'number' && isFinite( y ), 'y should be a finite number' );
       assert && assert( prependInstead === undefined || typeof prependInstead === 'boolean', 'If provided, prependInstead should be boolean' );
 
-      if ( !x && !y ) { return; } // bail out if both are zero
+      if ( Math.abs( x ) < 1e-12 && Math.abs( y as number ) < 1e-12 ) { return; } // bail out if both are zero
       if ( prependInstead ) {
         this.prependTranslation( x, y as number );
       }
@@ -5384,7 +5385,8 @@ class Node extends ParallelDOM {
       image.scale( 1 / resolution, 1 / resolution, true );
     }
 
-    wrapperNode.toCanvas( callback, -transformedBounds.minX, -transformedBounds.minY, transformedBounds.width, transformedBounds.height );
+    // NOTE: Rounding necessary due to floating point arithmetic in the width/height computation of the bounds
+    wrapperNode.toCanvas( callback, -transformedBounds.minX, -transformedBounds.minY, Utils.roundSymmetric( transformedBounds.width ), Utils.roundSymmetric( transformedBounds.height ) );
 
     assert && assert( image, 'The toCanvas should have executed synchronously' );
 
