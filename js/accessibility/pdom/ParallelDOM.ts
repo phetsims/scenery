@@ -130,8 +130,7 @@ import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
 import merge from '../../../../phet-core/js/merge.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../../tandem/js/PhetioObject.js';
 import UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
-import ResponsePacket from '../../../../utterance-queue/js/ResponsePacket.js';
-import Utterance from '../../../../utterance-queue/js/Utterance.js';
+import { IAlertable } from '../../../../utterance-queue/js/Utterance.js';
 import { scenery, Node, Trail, PDOMInstance, PDOMPeer, PDOMTree, PDOMUtils, PDOMDisplaysInfo } from '../../imports.js';
 
 const INPUT_TAG = PDOMUtils.TAGS.INPUT;
@@ -2567,7 +2566,7 @@ class ParallelDOM extends PhetioObject {
   /**
    * Alert on all interactive description utteranceQueues located on each connected Display (see Node.getConnectedDisplays)
    */
-  alertDescriptionUtterance( utterance: ( string | number | ResponsePacket | Utterance )[] | string | number | ResponsePacket | Utterance ) {
+  alertDescriptionUtterance( utterance: IAlertable ) {
 
     const connectedDisplays = ( this as unknown as Node ).getConnectedDisplays();
 

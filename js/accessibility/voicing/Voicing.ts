@@ -26,14 +26,14 @@
 
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
-import ResponsePacket, { ResponsePacketOptions, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
+import ResponsePacket, { ResolvedResponse, ResponsePacketOptions, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
 import Utterance from '../../../../utterance-queue/js/Utterance.js';
 import UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
 import { InteractiveHighlighting, InteractiveHighlightingOptions, Node, scenery, SceneryListenerFunction, voicingUtteranceQueue } from '../../imports.js';
 import optionize from '../../../../phet-core/js/optionize.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
-import { TAlertableDef } from '../../../../utterance-queue/js/AlertableDef.js';
+import { IAlertable } from '../../../../utterance-queue/js/Utterance.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 
 // options that are supported by Voicing.js. Added to mutator keys so that Voicing properties can be set with mutate.
@@ -90,7 +90,7 @@ export type SpeakingOptions = {
   // In speaking options, we don't allow a ResponseCreator function, but just a string|null. The `undefined` is to
   // match on the properties because they are optional (marked with `?`)
   [PropertyName in keyof ResponsePacketOptions]: ResponsePacketOptions[PropertyName] extends ( VoicingResponse | undefined ) ?
-                                                 ( string | null ) :
+                                                 ResolvedResponse :
                                                  ResponsePacketOptions[PropertyName];
 }
 
@@ -294,7 +294,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
         utterance: this.voicingUtterance
       }, providedOptions );
 
-      let response: TAlertableDef = responseCollector.collectResponses( options ); // eslint-disable-line no-undef
+      let response: IAlertable = responseCollector.collectResponses( options ); // eslint-disable-line no-undef
 
       if ( options.utterance ) {
         options.utterance.alert = response;
@@ -308,7 +308,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * back of the voicing UtteranceQueue.
      * @protected
      */
-    speakContent( content: TAlertableDef | null ): void { // eslint-disable-line no-undef
+    speakContent( content: IAlertable | null ): void { // eslint-disable-line no-undef
 
       // don't send to utteranceQueue if response is empty
       if ( content ) {
@@ -351,11 +351,11 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     /**
      * Gets the object response for this Node.
      */
-    getVoicingObjectResponse(): string | null {
+    getVoicingObjectResponse(): ResolvedResponse {
       return this._voicingResponsePacket.objectResponse;
     }
 
-    get voicingObjectResponse(): string | null { return this.getVoicingObjectResponse(); }
+    get voicingObjectResponse(): ResolvedResponse { return this.getVoicingObjectResponse(); }
 
     /**
      * Set the context response for this Node. This is usually the content that describes what has happened in
@@ -371,11 +371,11 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     /**
      * Gets the context response for this Node.
      */
-    getVoicingContextResponse(): string | null {
+    getVoicingContextResponse(): ResolvedResponse {
       return this._voicingResponsePacket.contextResponse;
     }
 
-    get voicingContextResponse(): string | null { return this.getVoicingContextResponse(); }
+    get voicingContextResponse(): ResolvedResponse { return this.getVoicingContextResponse(); }
 
     /**
      * Sets the hint response for this Node. This is usually a response that describes how to interact with this Node.
@@ -391,11 +391,11 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     /**
      * Gets the hint response for this Node.
      */
-    getVoicingHintResponse(): string | null {
+    getVoicingHintResponse(): ResolvedResponse {
       return this._voicingResponsePacket.hintResponse;
     }
 
-    get voicingHintResponse(): string | null { return this.getVoicingHintResponse(); }
+    get voicingHintResponse(): ResolvedResponse { return this.getVoicingHintResponse(); }
 
     /**
      * Set whether or not all responses for this Node will ignore the Properties of responseCollector. If false,
