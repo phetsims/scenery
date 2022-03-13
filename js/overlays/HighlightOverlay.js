@@ -233,7 +233,7 @@ class HighlightOverlay {
    *
    * @param {Trail} trail - The focused trail to highlight. It assumes that this trail is in this display.
    * @param {Node} node - Node receiving the highlight
-   * @param {Node|Shape|null} nodeHighlight - the highlight to use
+   * @param {Node|Shape|null|'invisible'} nodeHighlight - the highlight to use
    * @param {boolean} layerable - Is the highlight layerable in the scene graph?
    * @param {BooleanProperty} visibleProperty - Property controlling the visibility for the provided highlight
    */

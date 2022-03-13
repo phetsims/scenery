@@ -21,7 +21,7 @@ const INTERACTIVE_HIGHLIGHTING_OPTIONS = [
 ];
 
 type InteractiveHighlightingSelfOptions = {
-  interactiveHighlight?: Node | Shape | null,
+  interactiveHighlight?: Node | Shape | null | 'invisible',
   interactiveHighlightLayerable?: boolean
 };
 
@@ -59,7 +59,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
 
     // The highlight that will surround this Node when it is activated and a Pointer is currently over it. When
     // null, the focus highlight will be used (as defined in ParallelDOM.js).
-    _interactiveHighlight: Shape | Node | null;
+    _interactiveHighlight: Shape | Node | null | 'invisible';
 
     // If true, the highlight will be layerable in the scene graph instead of drawn
     // above everything in the HighlightOverlay. If true, you are responsible for adding the interactiveHighlight
@@ -134,7 +134,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
      * Set the interactive highlight for this node. By default, the highlight will be a pink rectangle that surrounds
      * the node's local bounds.
      */
-    setInteractiveHighlight( interactiveHighlight: Node | Shape | null ) {
+    setInteractiveHighlight( interactiveHighlight: Node | Shape | null | 'invisible' ) {
 
       if ( this._interactiveHighlight !== interactiveHighlight ) {
         this._interactiveHighlight = interactiveHighlight;
@@ -152,16 +152,16 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
       }
     }
 
-    set interactiveHighlight( interactiveHighlight: Node | Shape | null ) { this.setInteractiveHighlight( interactiveHighlight ); }
+    set interactiveHighlight( interactiveHighlight: Node | Shape | null | 'invisible' ) { this.setInteractiveHighlight( interactiveHighlight ); }
 
     /**
      * Returns the interactive highlight for this Node.
      */
-    getInteractiveHighlight(): Node | Shape | null {
+    getInteractiveHighlight(): Node | Shape | null | 'invisible' {
       return this._interactiveHighlight;
     }
 
-    get interactiveHighlight(): Node | Shape | null { return this.getInteractiveHighlight(); }
+    get interactiveHighlight(): Node | Shape | null | 'invisible' { return this.getInteractiveHighlight(); }
 
     /**
      * Sets whether the highlight is layerable in the scene graph instead of above everything in the
