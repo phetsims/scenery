@@ -437,7 +437,10 @@ class HighlightOverlay implements IOverlay {
 
     this.addedReadingBlockHighlight = readingBlockHighlight;
 
-    if ( readingBlockHighlight instanceof Shape ) {
+    if ( readingBlockHighlight === 'invisible' ) {
+      // nothing to draw
+    }
+    else if ( readingBlockHighlight instanceof Shape ) {
       this.readingBlockHighlightPath.setShape( readingBlockHighlight );
       this.readingBlockHighlightPath.visible = true;
     }

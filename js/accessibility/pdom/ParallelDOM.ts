@@ -131,7 +131,8 @@ import merge from '../../../../phet-core/js/merge.js';
 import PhetioObject, { PhetioObjectOptions } from '../../../../tandem/js/PhetioObject.js';
 import UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
 import { IAlertable } from '../../../../utterance-queue/js/Utterance.js';
-import { scenery, Node, Trail, PDOMInstance, PDOMPeer, PDOMTree, PDOMUtils, PDOMDisplaysInfo } from '../../imports.js';
+import { Node, PDOMDisplaysInfo, PDOMInstance, PDOMPeer, PDOMTree, PDOMUtils, scenery, Trail } from '../../imports.js';
+import { Highlight } from '../../overlays/HighlightOverlay.js';
 
 const INPUT_TAG = PDOMUtils.TAGS.INPUT;
 const P_TAG = PDOMUtils.TAGS.P;
@@ -251,7 +252,7 @@ type ParallelDOMOptions = {
   descriptionContent?: string | null,
   appendDescription?: boolean,
 
-  focusHighlight?: Node | Shape | 'invisible' | null,
+  focusHighlight?: Highlight,
   focusHighlightLayerable?: boolean,
   groupFocusHighlight?: Node | boolean,
   pdomVisible?: boolean,
@@ -1463,12 +1464,7 @@ class ParallelDOM extends PhetioObject {
    * surrounds the node's local bounds.  If focus highlight is set to 'invisible', the node will not have
    * any highlighting when it receives focus.
    */
-  setFocusHighlight( focusHighlight: Node | Shape | 'invisible' | null ) {
-    assert && assert( focusHighlight === null ||
-                      focusHighlight instanceof Node ||
-                      focusHighlight instanceof Shape ||
-                      focusHighlight === 'invisible' );
-
+  setFocusHighlight( focusHighlight: Highlight ) {
     if ( this._focusHighlight !== focusHighlight ) {
       this._focusHighlight = focusHighlight;
 
@@ -1487,16 +1483,16 @@ class ParallelDOM extends PhetioObject {
     }
   }
 
-  set focusHighlight( focusHighlight: Node | Shape | 'invisible' | null ) { this.setFocusHighlight( focusHighlight ); }
+  set focusHighlight( focusHighlight: Highlight ) { this.setFocusHighlight( focusHighlight ); }
 
   /**
    * Get the focus highlight for this node.
    */
-  getFocusHighlight(): Node | Shape | 'invisible' | null {
+  getFocusHighlight(): Highlight {
     return this._focusHighlight;
   }
 
-  get focusHighlight(): Node | Shape | 'invisible' | null { return this.getFocusHighlight(); }
+  get focusHighlight(): Highlight { return this.getFocusHighlight(); }
 
   /**
    * Setting a flag to break default and allow the focus highlight to be (z) layered into the scene graph.

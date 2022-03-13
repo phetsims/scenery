@@ -113,7 +113,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
     // The highlight that surrounds this ReadingBlock when it is "active" and
     // the Voicing framework is speaking the content associated with this Node. By default, a semi-transparent
     // yellow highlight surrounds this Node's bounds.
-    _readingBlockActiveHighlight: null | Shape | Node;
+    _readingBlockActiveHighlight: Highlight;
 
     // (scenery-internal) - Sends a message when the highlight for the ReadingBlock changes. Used
     // by the HighlightOverlay to redraw it if it changes while the highlight is active.
@@ -232,7 +232,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
      * Sets the highlight used to surround this Node while the Voicing framework is speaking this content.
      * Do not add this Node to the scene graph, it is added and made visible by the HighlightOverlay.
      */
-    setReadingBlockActiveHighlight( readingBlockActiveHighlight: Node | Shape | null ) {
+    setReadingBlockActiveHighlight( readingBlockActiveHighlight: Highlight ) {
       if ( this._readingBlockActiveHighlight !== readingBlockActiveHighlight ) {
         this._readingBlockActiveHighlight = readingBlockActiveHighlight;
 
@@ -240,17 +240,17 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
       }
     }
 
-    set readingBlockActiveHighlight( readingBlockActiveHighlight: Node | Shape | null ) { this.setReadingBlockActiveHighlight( readingBlockActiveHighlight ); }
+    set readingBlockActiveHighlight( readingBlockActiveHighlight: Highlight ) { this.setReadingBlockActiveHighlight( readingBlockActiveHighlight ); }
 
     /**
      * Returns the highlight used to surround this Node when the Voicing framework is reading its
      * content.
      */
-    getReadingBlockActiveHighlight(): Node | Shape | null {
+    getReadingBlockActiveHighlight(): Highlight {
       return this._readingBlockActiveHighlight;
     }
 
-    get readingBlockActiveHighlight(): Node | Shape | null { return this._readingBlockActiveHighlight; }
+    get readingBlockActiveHighlight(): Highlight { return this._readingBlockActiveHighlight; }
 
     /**
      * Returns true if this ReadingBlock is "activated", indicating that it has received interaction
