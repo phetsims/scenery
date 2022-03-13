@@ -11,130 +11,203 @@
 
 import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import { Shape } from '../../../kite/js/imports.js';
-import merge from '../../../phet-core/js/merge.js';
-import { scenery, TransformTracker, Node, Display, ActivatedReadingBlockHighlight, FocusManager, FocusHighlightPath, FocusHighlightFromNode } from '../imports.js';
+import optionize from '../../../phet-core/js/optionize.js';
+import { ActivatedReadingBlockHighlight, Display, Focus, FocusHighlightFromNode, FocusHighlightPath, FocusManager, IOverlay, IPaint, Node, scenery, Trail, TransformTracker } from '../imports.js';
+import { InteractiveHighlightingVersion } from '../accessibility/voicing/InteractiveHighlighting.js';
+import { ReadingBlockVersion } from '../accessibility/voicing/ReadingBlock.js';
+import IProperty from '../../../axon/js/IProperty.js';
 
 // colors for the focus highlights, can be changed for different application backgrounds or color profiles, see
 // the setters and getters below for these values.
-let outerHighlightColor = FocusHighlightPath.OUTER_FOCUS_COLOR;
-let innerHighlightColor = FocusHighlightPath.INNER_FOCUS_COLOR;
+let outerHighlightColor: IPaint = FocusHighlightPath.OUTER_FOCUS_COLOR;
+let innerHighlightColor: IPaint = FocusHighlightPath.INNER_FOCUS_COLOR;
 
-let innerGroupHighlightColor = FocusHighlightPath.INNER_LIGHT_GROUP_FOCUS_COLOR;
-let outerGroupHighlightColor = FocusHighlightPath.OUTER_LIGHT_GROUP_FOCUS_COLOR;
+let innerGroupHighlightColor: IPaint = FocusHighlightPath.INNER_LIGHT_GROUP_FOCUS_COLOR;
+let outerGroupHighlightColor: IPaint = FocusHighlightPath.OUTER_LIGHT_GROUP_FOCUS_COLOR;
 
-class HighlightOverlay {
+type Highlight = Node | Shape | null | 'invisible';
 
-  /**
-   * @param {Display} display
-   * @param {Node} focusRootNode - the root node of our display
-   * @param {Object} [options]
-   */
-  constructor( display, focusRootNode, options ) {
+type HighlightOverlayOptions = {
 
-    options = merge( {
+  // {BooleanProperty} - controls whether highlights related to DOM focus are visible
+  pdomFocusHighlightsVisibleProperty?: IProperty<boolean>;
 
-      // {BooleanProperty} - controls whether highlights related to DOM focus are visible
+  // {BooleanProperty} - controls whether highlights related to Interactive Highlights are visible
+  interactiveHighlightsVisibleProperty?: IProperty<boolean>;
+
+  // {BooleanProperty - controls whether highlights associated with ReadingBlocks (of the Voicing feature set)
+  // are shown when pointerFocusProperty changes
+  readingBlockHighlightsVisibleProperty?: IProperty<boolean>;
+}
+
+type InteractiveHighlightingNode = InteractiveHighlightingVersion<typeof Node>;
+type ReadingBlockNode = ReadingBlockVersion<typeof Node>;
+
+class HighlightOverlay implements IOverlay {
+
+  private display: Display;
+
+  // The root Node of our child display
+  private focusRootNode: Node;
+
+  // Trail to the node with focus, modified when focus changes
+  private trail: Trail | null;
+
+  // Node with focus, modified when focus changes
+  private node: Node | null;
+
+  // A references to the highlight from the Node that is highlighted.
+  private activeHighlight: Highlight;
+
+  // Signifies method of representing focus, 'bounds'|'node'|'shape'|'invisible', modified
+  // when focus changes
+  private mode: null | string;
+
+  // Signifies method off representing group focus, 'bounds'|'node', modified when
+  // focus changes
+  private groupMode: null | string;
+
+  // The group highlight node around an ancestor of this.node when focus changes, see ParallelDOM.setGroupFocusHighlight
+  // for more information on the group focus highlight, modified when focus changes
+  private groupHighlightNode: Node | null;
+
+  // Tracks transformations to the focused node and the node with a group focus highlight, modified when focus changes
+  private transformTracker: TransformTracker | null;
+  private groupTransformTracker: TransformTracker | null;
+
+  // If a node is using a custom focus highlight, a reference is kept so that it can be removed from the overlay when
+  // node focus changes.
+  private nodeModeHighlight: Node | null;
+
+  // If true, the active highlight is in "node" mode and is layered in the scene graph. This field lets us deactivate
+  // the highlight appropriately when it is in that state.
+  private nodeModeHighlightLayered: boolean;
+
+  // If true, the next update() will trigger an update to the highlight's transform
+  private transformDirty: boolean;
+
+  // The main node for the highlight. It will be transformed.
+  private highlightNode: Node;
+
+  // The main Node for the ReadingBlock highlight, while ReadingBlock content is being spoken by speech synthesis.
+  private readonly readingBlockHighlightNode = new Node();
+
+  // A reference to the Node that is added when a custom node is specified as the active highlight for the
+  // ReadingBlock. Stored so that we can remove it when deactivating reading block highlights.
+  private addedReadingBlockHighlight: Highlight;
+
+  // A reference to the Node that is a ReadingBlock which the Voicing framework is currently speaking about.
+  private activeReadingBlockNode: null | ReadingBlockNode;
+
+  // Trail to the ReadingBlock Node with an active highlight around it while the voicingManager is speaking its content.
+  private readingBlockTrail: null | Trail;
+
+  // Whether or not the transform applied to the readinBlockHighlightNode is out of date.
+  private readingBlockTransformDirty: boolean;
+
+  // The TransformTracker used to observe changes to the transform of the Node with Reading Block focus, so that
+  // the highlight can match the ReadingBlock.
+  private readingBlockTransformTracker: null | TransformTracker;
+
+  // Controls whether highlights related to DOM focus are visible.
+  private readonly pdomFocusHighlightsVisibleProperty: IProperty<boolean>;
+
+  // Controls whether highlights related to Interactive Highlights are visible.
+  private readonly interactiveHighlightsVisibleProperty: IProperty<boolean>;
+
+  // Controls whether highlights associated with ReadingBlocks (of the Voicing feature set) are shown when
+  // pointerFocusProperty changes
+  private readonly readingBlockHighlightsVisibleProperty: IProperty<boolean>;
+
+  // Display that manages all highlights
+  private focusDisplay: Display;
+
+  // HTML element of the display
+  domElement: HTMLElement;
+
+  // Used as the focus highlight when the overlay is passed a shape
+  private readonly shapeFocusHighlightPath: FocusHighlightPath;
+
+  // Used as the default case for the highlight when the highlight value is null
+  private readonly boundsFocusHighlightPath: FocusHighlightFromNode;
+
+  // Focus highlight for 'groups' of Nodes. When descendant node has focus, ancestor with groupFocusHighlight flag will
+  // have this extra focus highlight surround its local bounds
+  private readonly groupFocusHighlightPath: FocusHighlightFromNode;
+
+  // A parent Node for group focus highlights so visibility of all group highlights can easily be controlled
+  private readonly groupFocusHighlightParent: Node;
+
+  // The highlight shown around ReadingBlock Nodes while the voicingManager is speaking.
+  private readonly readingBlockHighlightPath: ActivatedReadingBlockHighlight;
+
+  private readonly boundsListener: () => void;
+  private readonly transformListener: () => void;
+  private readonly domFocusListener: ( focus: Focus | null ) => void;
+  private readonly readingBlockTransformListener: () => void;
+  private readonly focusHighlightListener: () => void;
+  private readonly interactiveHighlightListener: () => void;
+  private readonly focusHighlightsVisibleListener: () => void;
+  private readonly voicingHighlightsVisibleListener: () => void;
+  private readonly pointerFocusListener: ( focus: Focus | null ) => void;
+  private readonly lockedPointerFocusListener: ( focus: Focus | null ) => void;
+  private readonly readingBlockFocusListener: ( focus: Focus | null ) => void;
+  private readonly readingBlockHighlightChangeListener: () => void;
+
+  constructor( display: Display, focusRootNode: Node, providedOptions?: HighlightOverlayOptions ) {
+
+    const options = optionize<HighlightOverlayOptions>( {
+
+      // Controls whether highlights related to DOM focus are visible
       pdomFocusHighlightsVisibleProperty: new BooleanProperty( true ),
 
-      // {BooleanProperty} - controls whether highlights related to Interactive Highlights are visible
+      // Controls whether highlights related to Interactive Highlights are visible
       interactiveHighlightsVisibleProperty: new BooleanProperty( false ),
 
-      // {BooleanProperty - controls whether highlights associated with ReadingBlocks (of the Voicing feature set)
-      // are shown when pointerFocusProperty changes
+      // Controls whether highlights associated with ReadingBlocks (of the Voicing feature set) are shown when
+      // pointerFocusProperty changes
       readingBlockHighlightsVisibleProperty: new BooleanProperty( false )
-    }, options );
+    }, providedOptions );
 
-    this.display = display; // @private {Display}
-    this.focusRootNode = focusRootNode; // @private {Node} - The root Node of our child display
-
-    // @private {Trail|null} - trail to the node with focus, modified when focus changes
+    this.display = display;
+    this.focusRootNode = focusRootNode;
     this.trail = null;
-
-    // @private {Node|null} - node with focus, modified when focus changes
     this.node = null;
-
-    // @private {Node|Shape|string|null} - A references to the highlight from the Node that is highlighted.
     this.activeHighlight = null;
-
-    // @private {string|null} - signifies method of representing focus, 'bounds'|'node'|'shape'|'invisible', modified
-    // when focus changes
     this.mode = null;
-
-    // @private {string|null} - signifies method off representing group focus, 'bounds'|'node', modified when
-    // focus changes
     this.groupMode = null;
-
-    // @private {Node|null} - the group highlight node around an ancestor of this.node when focus changes,
-    // see ParallelDOM.setGroupFocusHighlight for more information on the group focus highlight, modified when
-    // focus changes
     this.groupHighlightNode = null;
-
-    // @private {TransformTracker|null} - tracks transformations to the focused node and the node with a group
-    // focus highlight, modified when focus changes
     this.transformTracker = null;
     this.groupTransformTracker = null;
-
-    // @private {Node|null} - If a node is using a custom focus highlight, a reference is kept so that it can be
-    // removed from the overlay when node focus changes.
     this.nodeModeHighlight = null;
-
-    // @private {boolean} - If true, the active highlight is in "node" mode and is layered in the scene graph. This
-    // field lets us deactivate the highlight appropriately when it is in that state.
     this.nodeModeHighlightLayered = false;
-
-    // @private {boolean} - if true, the next update() will trigger an update to the highlight's transform
     this.transformDirty = true;
 
-    // @private {Node} - The main node for the highlight. It will be transformed.
     this.highlightNode = new Node();
     this.focusRootNode.addChild( this.highlightNode );
 
-    // @private {Node} - The main Node for the ReadingBlock highlight, while ReadingBlock content
-    // is being spoken by speech synthesis.
     this.readingBlockHighlightNode = new Node();
     this.focusRootNode.addChild( this.readingBlockHighlightNode );
 
-    // @private {null|Node|Shape} - A reference to the Node that is added when a custom node is specified as the
-    // active highlight for the ReadingBlock. Stored so that we can remove it when deactivating reading
-    // block highlights.
     this.addedReadingBlockHighlight = null;
-
-    // @private {null|Node} - A reference to the Node that is a ReadingBlock which the Voicing framework
-    // is currently speaking about.
     this.activeReadingBlockNode = null;
-
-    // @private {Trail} - Trail to the ReadingBlock Node with an active highlight around it
-    // while the voicingManager is speaking its content.
     this.readingBlockTrail = null;
-
-    // @private {boolean} - Whether or not the transform applied to the readinBlockHighlightNode
-    // is out of date.
     this.readingBlockTransformDirty = true;
-
-    // @private {TransformTracker} - The TransformTracker used to observe changes to the transform of the Node with
-    // Reading Block focus, so that the highlight can match the ReadingBlock.
     this.readingBlockTransformTracker = null;
-
-    // @public - control if highlights are visible on this overlay
     this.pdomFocusHighlightsVisibleProperty = options.pdomFocusHighlightsVisibleProperty;
     this.interactiveHighlightsVisibleProperty = options.interactiveHighlightsVisibleProperty;
     this.readingBlockHighlightsVisibleProperty = options.readingBlockHighlightsVisibleProperty;
 
-    // @private {Display} - display that manages all focus highlights
     this.focusDisplay = new Display( this.focusRootNode, {
-      width: this.width,
-      height: this.height,
       allowWebGL: display.isWebGLAllowed(),
       allowCSSHacks: false,
       accessibility: false,
       interactive: false
     } );
 
-    // @private {HTMLElement}
     this.domElement = this.focusDisplay.domElement;
     this.domElement.style.pointerEvents = 'none';
 
-    // Used as the focus highlight when the overlay is passed a shape
     this.shapeFocusHighlightPath = new FocusHighlightPath( null );
     this.boundsFocusHighlightPath = new FocusHighlightFromNode( null, {
       useLocalBounds: true
@@ -143,28 +216,23 @@ class HighlightOverlay {
     this.highlightNode.addChild( this.shapeFocusHighlightPath );
     this.highlightNode.addChild( this.boundsFocusHighlightPath );
 
-    // @private {FocusHighlightPath} - Focus highlight for 'groups' of Nodes. When descendant node has focus, ancestor
-    // with groupFocusHighlight flag will have this extra focus highlight surround its local bounds
     this.groupFocusHighlightPath = new FocusHighlightFromNode( null, {
       useLocalBounds: true,
       useGroupDilation: true,
       outerLineWidth: FocusHighlightPath.GROUP_OUTER_LINE_WIDTH,
       innerLineWidth: FocusHighlightPath.GROUP_INNER_LINE_WIDTH,
-      innerStroke: FocusHighlightPath.FOCUS_COLOR
+      innerStroke: FocusHighlightPath.OUTER_FOCUS_COLOR
     } );
 
-    // @private {Node} - a parent Node for group focus highlights so visibility of all group highlights can easily
-    // becontrolled
     this.groupFocusHighlightParent = new Node( {
       children: [ this.groupFocusHighlightPath ]
     } );
     this.focusRootNode.addChild( this.groupFocusHighlightParent );
 
-    // @private {Node} - The highlight shown around ReadingBlock Nodes while the voicingManager is speaking.
     this.readingBlockHighlightPath = new ActivatedReadingBlockHighlight( null );
     this.readingBlockHighlightNode.addChild( this.readingBlockHighlightPath );
 
-    // @private - Listeners bound once, so we can access them for removal.
+    // Listeners bound once, so we can access them for removal.
     this.boundsListener = this.onBoundsChange.bind( this );
     this.transformListener = this.onTransformChange.bind( this );
     this.domFocusListener = this.onFocusChange.bind( this );
@@ -190,9 +258,8 @@ class HighlightOverlay {
 
   /**
    * Releases references
-   * @public
    */
-  dispose() {
+  dispose(): void {
     if ( this.hasHighlight() ) {
       this.deactivateHighlight();
     }
@@ -208,36 +275,30 @@ class HighlightOverlay {
   }
 
   /**
-   * @public
-   *
-   * @returns {boolean}
+   * Returns whether or not this HighlightOverlay is displaying some highlight.
    */
-  hasHighlight() {
+  hasHighlight(): boolean {
     return !!this.trail;
   }
 
   /**
-   * Returns true if there is an active highlight around a ReadingBlock while the
-   * voicingManager is speaking its Voicing content.
-   * @public
-   *
-   * @returns {boolean}
+   * Returns true if there is an active highlight around a ReadingBlock while the voicingManager is speaking its
+   * Voicing content.
    */
-  hasReadingBlockHighlight() {
+  hasReadingBlockHighlight(): boolean {
     return !!this.readingBlockTrail;
   }
 
   /**
    * Activates the highlight, choosing a mode for whether the highlight will be a shape, node, or bounds.
-   * @private
    *
-   * @param {Trail} trail - The focused trail to highlight. It assumes that this trail is in this display.
-   * @param {Node} node - Node receiving the highlight
-   * @param {Node|Shape|null|'invisible'} nodeHighlight - the highlight to use
-   * @param {boolean} layerable - Is the highlight layerable in the scene graph?
-   * @param {BooleanProperty} visibleProperty - Property controlling the visibility for the provided highlight
+   * @param trail - The focused trail to highlight. It assumes that this trail is in this display.
+   * @param node - Node receiving the highlight
+   * @param nodeHighlight - the highlight to use
+   * @param layerable - Is the highlight layerable in the scene graph?
+   * @param visibleProperty - Property controlling the visibility for the provided highlight
    */
-  activateHighlight( trail, node, nodeHighlight, layerable, visibleProperty ) {
+  private activateHighlight( trail: Trail, node: Node, nodeHighlight: Highlight, layerable: boolean, visibleProperty: IProperty<boolean> ): void {
     this.trail = trail;
     this.node = node;
 
@@ -264,15 +325,17 @@ class HighlightOverlay {
       this.mode = 'node';
 
       // if using a focus highlight from another node, we will track that node's transform instead of the focused node
-      if ( highlight.transformSourceNode ) {
-        trailToTrack = highlight.getUniqueHighlightTrail( this.trail );
+      if ( highlight instanceof FocusHighlightPath ) {
+        const highlightPath = highlight as FocusHighlightPath;
+        assert && assert( highlight.shape !== null, 'The shape of the Node highlight should be set by now. Does it have bounds?' );
+
+        if ( highlightPath.transformSourceNode ) {
+          trailToTrack = highlight.getUniqueHighlightTrail( this.trail );
+        }
       }
 
       // store the focus highlight so that it can be removed later
       this.nodeModeHighlight = highlight;
-
-      assert && assert( this.nodeModeHighlight.shape !== null,
-        'The shape of the Node highlight should be set by now. Does it have bounds?' );
 
       if ( layerable ) {
 
@@ -323,12 +386,8 @@ class HighlightOverlay {
   /**
    * Activate a focus highlight, activating the highlight and adding a listener that will update the highlight whenever
    * the Node's focusHighlight changes
-   * @private
-   *
-   * @param {Trail} trail
-   * @param {Node} node
    */
-  activateFocusHighlight( trail, node ) {
+  private activateFocusHighlight( trail: Trail, node: Node ) {
     this.activateHighlight( trail, node, node.focusHighlight, node.focusHighlightLayerable, this.pdomFocusHighlightsVisibleProperty );
 
     // handle any changes to the focus highlight while the node has focus
@@ -338,12 +397,9 @@ class HighlightOverlay {
   /**
    * Activate an interactive highlight, activating the highlight and adding a listener that will update the highlight
    * changes while it is active.
-   * @private
-   *
-   * @param {Trail} trail
-   * @param {Node} node
    */
-  activateInteractiveHighlight( trail, node ) {
+  private activateInteractiveHighlight( trail: Trail, node: InteractiveHighlightingNode ): void {
+
     this.activateHighlight(
       trail,
       node,
@@ -363,23 +419,21 @@ class HighlightOverlay {
    *
    * Note that customizations for this highlight are not supported at this time, that could be added in the future if
    * we need.
-   * @private
-   *
-   * @param {Trail} trail
    */
-  activateReadingBlockHighlight( trail ) {
+  private activateReadingBlockHighlight( trail: Trail ): void {
     this.readingBlockTrail = trail;
 
-    this.activeReadingBlockNode = trail.lastNode();
-    assert && assert( this.activeReadingBlockNode.isReadingBlock,
+    const readingBlockNode = trail.lastNode() as ReadingBlockNode;
+    assert && assert( readingBlockNode.isReadingBlock,
       'should not activate a reading block highlight for a Node that is not a ReadingBlock' );
+    this.activeReadingBlockNode = readingBlockNode;
 
     const readingBlockHighlight = this.activeReadingBlockNode.readingBlockActiveHighlight;
 
     this.addedReadingBlockHighlight = readingBlockHighlight;
 
     if ( readingBlockHighlight instanceof Shape ) {
-      this.readingBlockHighlightPath.setShapeFromNode( readingBlockHighlight );
+      this.readingBlockHighlightPath.setShape( readingBlockHighlight );
       this.readingBlockHighlightPath.visible = true;
     }
     else if ( readingBlockHighlight instanceof Node ) {
@@ -408,20 +462,22 @@ class HighlightOverlay {
 
   /**
    * Deactivate the speaking highlight by making it invisible.
-   * @private
    */
-  deactivateReadingBlockHighlight() {
+  private deactivateReadingBlockHighlight() {
     this.readingBlockHighlightPath.visible = false;
 
     if ( this.addedReadingBlockHighlight instanceof Node ) {
       this.readingBlockHighlightNode.removeChild( this.addedReadingBlockHighlight );
     }
 
-    this.readingBlockTransformTracker.removeListener( this.readingBlockTransformListener );
-    this.readingBlockTransformTracker.dispose();
+    assert && assert( this.readingBlockTransformTracker, 'How can we deactivate the TransformTracker if it wasnt assigned.' );
+    const transformTracker = this.readingBlockTransformTracker!;
+    transformTracker.removeListener( this.readingBlockTransformListener );
+    transformTracker.dispose();
     this.readingBlockTransformTracker = null;
 
-    this.activeReadingBlockNode.readingBlockActiveHighlightChangedEmitter.removeListener( this.readingBlockHighlightChangeListener );
+    assert && assert( this.activeReadingBlockNode, 'How can we deactivate the activeReadingBlockNode if it wasnt assigned.' );
+    this.activeReadingBlockNode!.readingBlockActiveHighlightChangedEmitter.removeListener( this.readingBlockHighlightChangeListener );
 
     this.activeReadingBlockNode = null;
     this.readingBlockTrail = null;
@@ -430,38 +486,43 @@ class HighlightOverlay {
 
   /**
    * Deactivates the all active highlights, disposing and removing listeners as necessary.
-   * @private
    */
-  deactivateHighlight() {
+  private deactivateHighlight(): void {
+    assert && assert( this.node, 'Need an active Node to deactivate highlights' );
+    const activeNode = this.node!;
 
     if ( this.mode === 'shape' ) {
       this.shapeFocusHighlightPath.visible = false;
     }
     else if ( this.mode === 'node' ) {
+      assert && assert( this.nodeModeHighlight, 'How can we deactivate if nodeModeHighlight is not assigned' );
+      const nodeModeHighlight = this.nodeModeHighlight!;
 
       // If layered, client has put the Node where they want in the scene graph and we cannot remove it
       if ( this.nodeModeHighlightLayered ) {
         this.nodeModeHighlightLayered = false;
       }
       else {
-        this.highlightNode.removeChild( this.nodeModeHighlight );
+        this.highlightNode.removeChild( nodeModeHighlight );
       }
 
       // node focus highlight can be cleared now that it has been removed
-      this.nodeModeHighlight.visible = false;
+      nodeModeHighlight.visible = false;
       this.nodeModeHighlight = null;
     }
     else if ( this.mode === 'bounds' ) {
       this.boundsFocusHighlightPath.visible = false;
-      this.node.localBoundsProperty.unlink( this.boundsListener );
+      activeNode.localBoundsProperty.unlink( this.boundsListener );
     }
 
     // remove listeners that redraw the highlight if a type of highlight changes on the Node
-    if ( this.node.focusHighlightChangedEmitter.hasListener( this.focusHighlightListener ) ) {
-      this.node.focusHighlightChangedEmitter.removeListener( this.focusHighlightListener );
+    if ( activeNode.focusHighlightChangedEmitter.hasListener( this.focusHighlightListener ) ) {
+      activeNode.focusHighlightChangedEmitter.removeListener( this.focusHighlightListener );
     }
-    if ( this.node.isInteractiveHighlighting && this.node.interactiveHighlightChangedEmitter.hasListener( this.interactiveHighlightListener ) ) {
-      this.node.interactiveHighlightChangedEmitter.removeListener( this.interactiveHighlightListener );
+
+    const activeInteractiveHighlightingNode = activeNode as InteractiveHighlightingNode;
+    if ( activeInteractiveHighlightingNode.isInteractiveHighlighting && activeInteractiveHighlightingNode.interactiveHighlightChangedEmitter.hasListener( this.interactiveHighlightListener ) ) {
+      activeInteractiveHighlightingNode.interactiveHighlightChangedEmitter.removeListener( this.interactiveHighlightListener );
     }
 
     // remove all 'group' focus highlights
@@ -471,19 +532,19 @@ class HighlightOverlay {
     this.node = null;
     this.mode = null;
     this.activeHighlight = null;
-    this.transformTracker.removeListener( this.transformListener );
-    this.transformTracker.dispose();
+    this.transformTracker!.removeListener( this.transformListener );
+    this.transformTracker!.dispose();
   }
 
   /**
    * Activate all 'group' focus highlights by searching for ancestor nodes from the node that has focus
    * and adding a rectangle around it if it has a "groupFocusHighlight". A group highlight will only appear around
    * the closest ancestor that has a one.
-   * @private
    */
-  activateGroupHighlights() {
+  private activateGroupHighlights(): void {
 
-    const trail = this.trail;
+    assert && assert( this.trail, 'must have an active trail to activate group highlights' );
+    const trail = this.trail!;
     for ( let i = 0; i < trail.length; i++ ) {
       const node = trail.nodes[ i ];
       const highlight = node.groupFocusHighlight;
@@ -519,11 +580,10 @@ class HighlightOverlay {
   /**
    * Update focus highlight colors. This is a no-op if we are in 'node' mode, or if none of the highlight colors
    * have changed.
-   * @private
    *
    * TODO: Support updating focus highlight strokes in 'node' mode as well?
    */
-  updateHighlightColors() {
+  private updateHighlightColors(): void {
 
     if ( this.mode === 'shape' ) {
       if ( this.shapeFocusHighlightPath.innerHighlightColor !== HighlightOverlay.innerHighlightColor ) {
@@ -556,74 +616,72 @@ class HighlightOverlay {
   /**
    * Remove all group focus highlights by making them invisible, or removing them from the root of this overlay,
    * depending on mode.
-   * @private
    */
-  deactivateGroupHighlights() {
+  private deactivateGroupHighlights(): void {
     if ( this.groupMode ) {
       if ( this.groupMode === 'bounds' ) {
         this.groupFocusHighlightPath.visible = false;
       }
       else if ( this.groupMode === 'node' ) {
-        this.groupFocusHighlightParent.removeChild( this.groupHighlightNode );
+        assert && assert( this.groupHighlightNode, 'Need a groupHighlightNode to deactivate this mode' );
+        this.groupFocusHighlightParent.removeChild( this.groupHighlightNode! );
       }
 
       this.groupMode = null;
       this.groupHighlightNode = null;
-      this.groupTransformTracker.removeListener( this.transformListener );
-      this.groupTransformTracker.dispose();
+
+      assert && assert( this.groupTransformTracker, 'Need a groupTransformTracker to dispose' );
+      this.groupTransformTracker!.removeListener( this.transformListener );
+      this.groupTransformTracker!.dispose();
     }
   }
 
   /**
    * Called from HighlightOverlay after transforming the highlight. Only called when the transform changes.
-   * @private
    */
-  afterTransform() {
+  private afterTransform(): void {
     if ( this.mode === 'shape' ) {
       this.shapeFocusHighlightPath.updateLineWidth();
     }
     else if ( this.mode === 'bounds' ) {
       this.boundsFocusHighlightPath.updateLineWidth();
     }
-    else if ( this.mode === 'node' && this.activeHighlight.updateLineWidth ) {
+    else if ( this.mode === 'node' && this.activeHighlight instanceof FocusHighlightPath && this.activeHighlight.updateLineWidth ) {
 
       // Update the transform based on the transform of the node that the focusHighlight is highlighting.
-      this.activeHighlight.updateLineWidth( this.node );
+      assert && assert( 'Need an active Node to update line width' );
+      this.activeHighlight.updateLineWidth( this.node! );
     }
   }
 
   /**
-   * @private
+   * Every time the transform changes on the target Node signify that updates are necessary, see the usage of the
+   * TransformTrackers.
    */
-  onTransformChange() {
+  private onTransformChange(): void {
     this.transformDirty = true;
   }
 
   /**
-   * Mark that the transform for the ReadingBlock highlight is out of date and needs
-   * to be recalculated next update.
-   * @private
+   * Mark that the transform for the ReadingBlock highlight is out of date and needs to be recalculated next update.
    */
-  onReadingBlockTransformChange() {
+  private onReadingBlockTransformChange(): void {
     this.readingBlockTransformDirty = true;
   }
 
   /**
    * Called when bounds change on our node when we are in "Bounds" mode
-   * @private
    */
-  onBoundsChange() {
-    this.boundsFocusHighlightPath.setShapeFromNode( this.node );
+  private onBoundsChange(): void {
+    assert && assert( 'Must have an active node when bounds are changing' );
+    this.boundsFocusHighlightPath.setShapeFromNode( this.node! );
   }
 
   /**
    * Called when the main Scenery focus pair (Display,Trail) changes. The Trail points to the Node that has
    * focus and a highlight will appear around this Node if focus highlights are visible.
-   * @private
-   *
-   * @param {Focus} focus
    */
-  onFocusChange( focus ) {
+  private onFocusChange( focus: Focus | null ): void {
     const newTrail = ( focus && focus.display === this.display ) ? focus.trail : null;
 
     if ( this.hasHighlight() ) {
@@ -644,11 +702,8 @@ class HighlightOverlay {
    * Called when the pointerFocusProperty changes. pointerFocusProperty will have the Trail to the
    * Node that composes Voicing and is under the Pointer. A highlight will appear around this Node if
    * voicing highlights are visible.
-   * @private
-   *
-   * @param {Focus|null} focus
    */
-  onPointerFocusChange( focus ) {
+  private onPointerFocusChange( focus: Focus | null ): void {
 
     // updateInteractiveHighlight will only activate the highlight if pdomFocusHighlightsVisibleProperty is false,
     // but check here as well so that we don't do work to deactivate highlights only to immediately reactivate them
@@ -667,11 +722,8 @@ class HighlightOverlay {
    * can appear while the DOM focus highlight is active and conveying information. In the future
    * we might make it so that both can be visible at the same time, but that will require
    * changing the look of one of the highlights so it is clear they are distinct.
-   * @private
-   *
-   * @param {Focus|null} focus
    */
-  updateInteractiveHighlight( focus ) {
+  private updateInteractiveHighlight( focus: Focus | null ): void {
     const newTrail = ( focus && focus.display === this.display ) ? focus.trail : null;
 
     // always clear the highlight if it is being removed
@@ -698,11 +750,8 @@ class HighlightOverlay {
   /**
    * Called whenever the lockedPointerFocusProperty changes. If the lockedPointerFocusProperty changes we probably
    * have to update the highlight because interaction with a Node that uses InteractiveHighlighting just ended.
-   * @private
-   *
-   * @param {Focus|null} focus
    */
-  onLockedPointerFocusChange( focus ) {
+  private onLockedPointerFocusChange( focus: Focus | null ) {
     this.updateInteractiveHighlight( focus || this.display.focusManager.pointerFocusProperty.value );
   }
 
@@ -710,11 +759,8 @@ class HighlightOverlay {
    * Responsible for deactivating the Reading Block highlight when the display.focusManager.readingBlockFocusProperty changes.
    * The Reading Block waits to activate until the voicingManager starts speaking because there is often a stop speaking
    * event that comes right after the speaker starts to interrupt the previous utterance.
-   * @private
-   *
-   * @param {Focus|null} focus
    */
-  onReadingBlockFocusChange( focus ) {
+  private onReadingBlockFocusChange( focus: Focus | null ) {
     if ( this.hasReadingBlockHighlight() ) {
       this.deactivateReadingBlockHighlight();
     }
@@ -730,23 +776,22 @@ class HighlightOverlay {
    * as if the application focus changed. If focus highlight mode changed, we need to add/remove static listeners,
    * add/remove highlight children, and so on. Called when focus highlight changes, but should only ever be
    * necessary when the node has focus.
-   * @private
    */
-  onFocusHighlightChange() {
-    assert && assert( this.node.focused, 'update should only be necessary if node already has focus' );
+  private onFocusHighlightChange(): void {
+    assert && assert( this.node && this.node.focused, 'update should only be necessary if node already has focus' );
     this.onFocusChange( FocusManager.pdomFocus );
   }
 
   /**
    * If the Node has pointer focus and the interacive highlight changes, we must do all of the work to reapply the
    * highlight as if the value of the focusProperty changed.
-   * @private
    */
-  onInteractiveHighlightChange() {
+  private onInteractiveHighlightChange(): void {
 
     if ( assert ) {
+      const interactiveHighlightNode = this.node as InteractiveHighlightingNode;
       const lockedPointerFocus = this.display.focusManager.lockedPointerFocusProperty.value;
-      assert( this.node.interactiveHighlightActivated || ( lockedPointerFocus && lockedPointerFocus.trail.lastNode() === this.node ),
+      assert( interactiveHighlightNode || ( lockedPointerFocus && lockedPointerFocus.trail.lastNode() === this.node ),
         'Update should only be necessary if Node is activated with a Pointer or pointer focus is locked during interaction' );
     }
 
@@ -756,20 +801,18 @@ class HighlightOverlay {
   /**
    * Redraw the highlight for the ReadingBlock if it changes while the reading block highlight is already
    * active for a Node.
-   * @private
    */
-  onReadingBlockHighlightChange() {
+  private onReadingBlockHighlightChange(): void {
     assert && assert( this.activeReadingBlockNode, 'Update should only be necessary when there is an active ReadingBlock Node' );
-    assert && assert( this.activeReadingBlockNode.readingBlockActivated, 'Update should only be necessary while the ReadingBlock is activated' );
+    assert && assert( this.activeReadingBlockNode!.readingBlockActivated, 'Update should only be necessary while the ReadingBlock is activated' );
     this.onReadingBlockFocusChange( this.display.focusManager.readingBlockFocusProperty.value );
   }
 
   /**
    * When focus highlight visibility changes, deactivate highlights or reactivate the highlight around the Node
    * with focus.
-   * @private
    */
-  onFocusHighlightsVisibleChange() {
+  private onFocusHighlightsVisibleChange(): void {
     this.onFocusChange( FocusManager.pdomFocus );
   }
 
@@ -777,28 +820,32 @@ class HighlightOverlay {
    * When voicing highlight visibility changes, deactivate highlights or reactivate the highlight around the Node
    * with focus. Note that when voicing is disabled we will never set the pointerFocusProperty to prevent
    * extra work, so this function shouldn't do much. But it is here to complete the API.
-   * @private
    */
-  onVoicingHighlightsVisibleChange() {
+  private onVoicingHighlightsVisibleChange(): void {
     this.onPointerFocusChange( this.display.focusManager.pointerFocusProperty.value );
   }
 
-  /**
-   * @public
-   */
-  update() {
+  update(): void {
+
     // Transform the highlight to match the position of the node
     if ( this.hasHighlight() && this.transformDirty ) {
       this.transformDirty = false;
 
-      this.highlightNode.setMatrix( this.transformTracker.matrix );
-      this.groupHighlightNode && this.groupHighlightNode.setMatrix( this.groupTransformTracker.matrix );
+      assert && assert( this.transformTracker, 'The transformTracker must be available on update if transform is dirty' );
+      this.highlightNode.setMatrix( this.transformTracker!.matrix );
+
+      if ( this.groupHighlightNode ) {
+        assert && assert( this.groupTransformTracker, 'The groupTransformTracker must be available on update if transform is dirty' );
+        this.groupHighlightNode.setMatrix( this.groupTransformTracker!.matrix );
+      }
 
       this.afterTransform();
     }
     if ( this.hasReadingBlockHighlight() && this.readingBlockTransformDirty ) {
       this.readingBlockTransformDirty = false;
-      this.readingBlockHighlightNode.setMatrix( this.readingBlockTransformTracker.matrix );
+
+      assert && assert( this.readingBlockTransformTracker, 'The groupTransformTracker must be available on update if transform is dirty' );
+      this.readingBlockHighlightNode.setMatrix( this.readingBlockTransformTracker!.matrix );
     }
 
     if ( !this.display.size.equals( this.focusDisplay.size ) ) {
@@ -809,11 +856,8 @@ class HighlightOverlay {
 
   /**
    * Set the inner color of all focus highlights.
-   * @public
-   *
-   * @param {PaintDef} color
    */
-  static setInnerHighlightColor( color ) {
+  static setInnerHighlightColor( color: IPaint ) {
     innerHighlightColor = color;
   }
 
@@ -821,11 +865,8 @@ class HighlightOverlay {
 
   /**
    * Get the inner color of all focus highlights.
-   * @public
-   *
-   * @returns {PaintDef}
    */
-  static getInnerHighlightColor() {
+  static getInnerHighlightColor(): IPaint {
     return innerHighlightColor;
   }
 
@@ -833,11 +874,8 @@ class HighlightOverlay {
 
   /**
    * Set the outer color of all focus highlights.
-   * @public
-   *
-   * @param {PaintDef} color
    */
-  static setOuterHilightColor( color ) {
+  static setOuterHilightColor( color: IPaint ): void {
     outerHighlightColor = color;
   }
 
@@ -845,11 +883,8 @@ class HighlightOverlay {
 
   /**
    * Get the outer color of all focus highlights.
-   * @public
-   *
-   * @returns {PaintDef} color
    */
-  static getOuterHighlightColor() {
+  static getOuterHighlightColor(): IPaint {
     return outerHighlightColor;
   }
 
@@ -857,11 +892,8 @@ class HighlightOverlay {
 
   /**
    * Set the inner color of all group focus highlights.
-   * @public
-   *
-   * @param {PaintDef} color
    */
-  static setInnerGroupHighlightColor( color ) {
+  static setInnerGroupHighlightColor( color: IPaint ): void {
     innerGroupHighlightColor = color;
   }
 
@@ -869,11 +901,8 @@ class HighlightOverlay {
 
   /**
    * Get the inner color of all group focus highlights
-   * @public
-   *
-   * @returns {PaintDef} color
    */
-  static getInnerGroupHighlightColor() {
+  static getInnerGroupHighlightColor(): IPaint {
     return innerGroupHighlightColor;
   }
 
@@ -881,11 +910,8 @@ class HighlightOverlay {
 
   /**
    * Set the outer color of all group focus highlight.
-   * @public
-   *
-   * @param {PaintDef} color
    */
-  static setOuterGroupHighlightColor( color ) {
+  static setOuterGroupHighlightColor( color: IPaint ) {
     outerGroupHighlightColor = color;
   }
 
@@ -893,11 +919,8 @@ class HighlightOverlay {
 
   /**
    * Get the outer color of all group focus highlights.
-   * @public
-   *
-   * @returns {PaintDef} color
    */
-  static getOuterGroupHighlightColor() {
+  static getOuterGroupHighlightColor(): IPaint {
     return outerGroupHighlightColor;
   }
 
@@ -906,3 +929,4 @@ class HighlightOverlay {
 
 scenery.register( 'HighlightOverlay', HighlightOverlay );
 export default HighlightOverlay;
+export type { Highlight };

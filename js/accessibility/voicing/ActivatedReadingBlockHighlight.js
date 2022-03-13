@@ -16,7 +16,7 @@ const ACTIVATED_HIGHLIGHT_COLOR = 'rgba(255,255,0,0.5)';
 class ActivatedReadingBlockHighlight extends FocusHighlightFromNode {
 
   /**
-   * @param {Node} node
+   * @param {Node|null} node
    * @param {Object} [options]
    */
   constructor( node, options ) {

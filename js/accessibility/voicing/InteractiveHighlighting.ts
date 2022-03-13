@@ -12,6 +12,7 @@ import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import { Display, Focus, IInputListener, Instance, Node, NodeOptions, Pointer, scenery, SceneryEvent, Trail } from '../../imports.js';
+import { Highlight } from '../../overlays/HighlightOverlay.js';
 
 // constants
 // option keys for InteractiveHighlighting, each of these will have a setter and getter and values are applied with mutate()
@@ -26,6 +27,29 @@ type InteractiveHighlightingSelfOptions = {
 };
 
 type InteractiveHighlightingOptions = InteractiveHighlightingSelfOptions & NodeOptions;
+
+interface InteractiveHighlightingInterface {
+  interactiveHighlightChangedEmitter: TinyEmitter;
+  readonly interactiveHighlightLayerable: boolean;
+  readonly interactiveHighlightActivated: boolean;
+  readonly isInteractiveHighlighting: boolean;
+  interactiveHighlight: Highlight;
+
+  setInteractiveHighlight( highlight: Highlight ): void;
+
+  getInteractiveHighlight(): Highlight;
+
+  setInteractiveHighlightLayerable( layerable: boolean ): void
+
+  getInteractiveHighlightLayerable(): boolean
+
+  isInteractiveHighlightActivated(): boolean;
+
+  dispose(): boolean;
+}
+
+// For type checking when you need to verify that a Type is composed with InteractiveHighlighting
+type InteractiveHighlightingVersion<Type extends Constructor> = InstanceType<Type> & InteractiveHighlightingInterface;
 
 /**
  * @param Type
@@ -438,4 +462,4 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
 
 scenery.register( 'InteractiveHighlighting', InteractiveHighlighting );
 export default InteractiveHighlighting;
-export type { InteractiveHighlightingOptions };
+export type { InteractiveHighlightingOptions, InteractiveHighlightingVersion };

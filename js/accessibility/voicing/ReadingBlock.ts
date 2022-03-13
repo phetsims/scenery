@@ -25,8 +25,9 @@ import inheritance from '../../../../phet-core/js/inheritance.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
-import { Focus, Node, ReadingBlockHighlight, ReadingBlockUtterance, scenery, SceneryEvent, Voicing, PDOMInstance, voicingManager, NodeOptions } from '../../imports.js';
+import { Focus, Node, NodeOptions, PDOMInstance, ReadingBlockHighlight, ReadingBlockUtterance, scenery, SceneryEvent, Voicing, voicingManager } from '../../imports.js';
 import IInputListener from '../../input/IInputListener.js';
+import { Highlight } from '../../overlays/HighlightOverlay.js';
 
 const READING_BLOCK_OPTION_KEYS = [
   'readingBlockTagName',
@@ -45,6 +46,41 @@ type ReadingBlockSelfOptions = {
 type ReadingBlockOptions = ReadingBlockSelfOptions & NodeOptions;
 
 const CONTENT_HINT_PATTERN = '{{OBJECT}}. {{HINT}}';
+
+interface ReadingBlockInterface {
+  readonly isReadingBlock: boolean,
+  readingBlockActiveHighlight: Highlight,
+  readingBlockActiveHighlightChangedEmitter: TinyEmitter,
+  readonly readingBlockActivated: boolean,
+  readingBlockTagName: string | null;
+  readingBlockContent: string | null;
+
+  setReadingBlockTagName( tagName: string | null ): void;
+
+  getReadingBlockTagName(): string | null;
+
+  setReadingBlockContent( content: string | null ): void
+
+  getReadingBlockContent(): string | null;
+
+  setReadingBlockHintResponse( response: string | null ): void;
+
+  getReadingBlockHintResponse(): string | null;
+
+  setReadingBlockActiveHighlight( highlight: Highlight ): void;
+
+  getReadingBlockActiveHighlight(): Highlight;
+
+  isReadingBlockActivated(): boolean;
+
+  collectReadingBlockResponses(): string | null;
+
+  dispose(): void
+
+}
+
+// For type checking when you need to verify that a Type composes ReadingBlock
+type ReadingBlockVersion<Type extends Constructor> = InstanceType<Type> & ReadingBlockInterface;
 
 /**
  * @param Type
@@ -369,3 +405,4 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 
 scenery.register( 'ReadingBlock', ReadingBlock );
 export default ReadingBlock;
+export type { ReadingBlockVersion };
