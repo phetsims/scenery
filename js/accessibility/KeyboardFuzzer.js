@@ -101,20 +101,20 @@ class KeyboardFuzzer {
    * @private
    *
    * @param {HTMLElement} element
-   * @param {string} key
+   * @param {string} code
    */
-  triggerKeyDownUpEvents( element, key ) {
+  triggerKeyDownUpEvents( element, code ) {
 
-    sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( `trigger keydown/up: ${key}` );
+    sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( `trigger keydown/up: ${code}` );
     sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.push();
 
     // TODO: screen readers normally take our keydown events, but may not here, is the discrepancy ok?
-    this.triggerDOMEvent( KEY_DOWN, element, key );
+    this.triggerDOMEvent( KEY_DOWN, element, code );
 
     const randomTimeForKeypress = this.random.nextInt( MAX_MS_KEY_HOLD_DOWN );
 
     const keyupListener = () => {
-      this.triggerDOMEvent( KEY_UP, element, key );
+      this.triggerDOMEvent( KEY_UP, element, code );
       if ( this.keyupListeners.includes( keyupListener ) ) {
         this.keyupListeners.splice( this.keyupListeners.indexOf( keyupListener ), 1 );
       }
@@ -127,18 +127,18 @@ class KeyboardFuzzer {
   }
 
   /**
-   * Trigger a keydown/keyup pair with a random key
+   * Trigger a keydown/keyup pair with a random KeyboardEvent.code.
    * @private
    * @param {HTMLElement} element
    */
   triggerRandomKeyDownUpEvents( element ) {
 
-    const randomKey = ALL_KEYS[ Math.floor( this.random.nextDouble() * ( ALL_KEYS.length - 1 ) ) ];
+    const randomCode = ALL_KEYS[ Math.floor( this.random.nextDouble() * ( ALL_KEYS.length - 1 ) ) ];
 
-    sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( `trigger random keydown/up: ${randomKey}` );
+    sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.KeyboardFuzzer( `trigger random keydown/up: ${randomCode}` );
     sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.push();
 
-    this.triggerKeyDownUpEvents( element, randomKey );
+    this.triggerKeyDownUpEvents( element, randomCode );
 
     sceneryLog && sceneryLog.KeyboardFuzzer && sceneryLog.pop();
   }
@@ -176,9 +176,9 @@ class KeyboardFuzzer {
 
           const randomNumber = this.random.nextDouble();
           if ( randomNumber < DO_KNOWN_KEYS_THRESHOLD ) {
-            const keyValues = keyboardTestingSchema[ elementWithFocus.tagName ];
-            const key = this.random.sample( keyValues );
-            this.triggerKeyDownUpEvents( elementWithFocus, key );
+            const codeValues = keyboardTestingSchema[ elementWithFocus.tagName ];
+            const code = this.random.sample( codeValues );
+            this.triggerKeyDownUpEvents( elementWithFocus, code );
           }
           else if ( randomNumber < CLICK_EVENT_THRESHOLD ) {
             this.triggerClickEvent( elementWithFocus );
@@ -202,13 +202,13 @@ class KeyboardFuzzer {
    * Taken from example in http://output.jsbin.com/awenaq/3,
    * @param {string} event
    * @param {HTMLElement} element
-   * @param {string} key
+   * @param {string} code
    * @private
    */
-  triggerDOMEvent( event, element, key ) {
+  triggerDOMEvent( event, element, code ) {
     const eventObj = new KeyboardEvent( event, {
       bubbles: true,
-      key: key,
+      code: code,
       shiftKey: globalKeyStateTracker.shiftKeyDown,
       altKey: globalKeyStateTracker.altKeyDown,
       ctrlKey: globalKeyStateTracker.ctrlKeyDown
