@@ -358,7 +358,7 @@ abstract class Pointer {
       const listener = {
         up: ( event: SceneryEvent<TouchEvent | MouseEvent | PointerEvent> ) => {
           this.removeIntent( Intent.DRAG );
-          this.removeInputListener( this._listenerForDragReserve! );
+          this._listenerForDragReserve && this.removeInputListener( this._listenerForDragReserve! );
           this._listenerForDragReserve = null;
         }
       };
