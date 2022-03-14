@@ -8,9 +8,9 @@
 
 import { scenery, Divider, WidthSizable, DividerOptions } from '../imports.js';
 
-type VDividerOptions = DividerOptions;
+export type VDividerOptions = DividerOptions;
 
-class VDivider extends WidthSizable( Divider ) {
+export default class VDivider extends WidthSizable( Divider ) {
   constructor( options?: VDividerOptions ) {
     super( options );
 
@@ -23,5 +23,3 @@ class VDivider extends WidthSizable( Divider ) {
 }
 
 scenery.register( 'VDivider', VDivider );
-export default VDivider;
-export type { VDividerOptions };

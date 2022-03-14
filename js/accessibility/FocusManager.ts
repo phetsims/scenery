@@ -37,7 +37,7 @@ import { Focus, FocusDisplayedController, Node, ReadingBlockUtterance, scenery, 
 
 type SpeakingListener = ( text: string, utterance: Utterance ) => void;
 
-class FocusManager {
+export default class FocusManager {
 
   // This Property whose Focus Trail points to the Node under the pointer to
   // support features of Voicing and Interactive Highlights. Nodes that compose InteractiveHighlighting can
@@ -223,4 +223,3 @@ class FocusManager {
 }
 
 scenery.register( 'FocusManager', FocusManager );
-export default FocusManager;

@@ -9,7 +9,7 @@
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import { scenery, ColorMatrixFilter } from '../imports.js';
 
-class Sepia extends ColorMatrixFilter {
+export default class Sepia extends ColorMatrixFilter {
 
   amount: number;
 
@@ -51,4 +51,3 @@ class Sepia extends ColorMatrixFilter {
 Sepia.FULL = new Sepia( 1 );
 
 scenery.register( 'Sepia', Sepia );
-export default Sepia;

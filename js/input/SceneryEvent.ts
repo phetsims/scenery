@@ -19,7 +19,7 @@ import StringIO from '../../../tandem/js/types/StringIO.js';
 import { scenery, Trail, Mouse, PDOMPointer, Pointer, Node } from '../imports.js';
 import EventIO from './EventIO.js';
 
-class SceneryEvent<DOMEvent extends Event = Event> {
+export default class SceneryEvent<DOMEvent extends Event = Event> {
 
   // Whether this SceneryEvent has been 'handled'. If so, it will not bubble further.
   handled: boolean;
@@ -149,4 +149,3 @@ SceneryEvent.SceneryEventIO = new IOType( 'SceneryEventIO', {
 } );
 
 scenery.register( 'SceneryEvent', SceneryEvent );
-export default SceneryEvent;

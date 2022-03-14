@@ -11,7 +11,7 @@
 import Vector2 from '../../../dot/js/Vector2.js';
 import { scenery, Gradient, SVGLinearGradient, SVGBlock, ColorDef } from '../imports.js';
 
-class LinearGradient extends Gradient {
+export default class LinearGradient extends Gradient {
 
   start: Vector2;
   end: Vector2;
@@ -69,4 +69,3 @@ class LinearGradient extends Gradient {
 LinearGradient.prototype.isLinearGradient = true;
 
 scenery.register( 'LinearGradient', LinearGradient );
-export default LinearGradient;

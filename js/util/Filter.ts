@@ -31,7 +31,7 @@ import { scenery, Features, svgns, CanvasContextWrapper } from '../imports.js';
 
 let globalId = 1;
 
-abstract class Filter {
+export default abstract class Filter {
 
   // (scenery-internal)
   id: string;
@@ -114,4 +114,3 @@ abstract class Filter {
 }
 
 scenery.register( 'Filter', Filter );
-export default Filter;

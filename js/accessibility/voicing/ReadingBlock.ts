@@ -36,14 +36,14 @@ const READING_BLOCK_OPTION_KEYS = [
   'readingBlockActiveHighlight'
 ];
 
-type ReadingBlockSelfOptions = {
+type SelfOptions = {
   readingBlockTagName: string | null;
   readingBlockContent: string | null;
   readingBlockHintResponse: string | null;
   readingBlockActiveHighlight: null | Shape | Node;
 };
 
-type ReadingBlockOptions = ReadingBlockSelfOptions & NodeOptions;
+type ReadingBlockOptions = SelfOptions & NodeOptions;
 
 const CONTENT_HINT_PATTERN = '{{OBJECT}}. {{HINT}}';
 
@@ -80,7 +80,7 @@ interface ReadingBlockInterface {
 }
 
 // For type checking when you need to verify that a Type composes ReadingBlock
-type ReadingBlockVersion<Type extends Constructor> = InstanceType<Type> & ReadingBlockInterface;
+export type ReadingBlockVersion<Type extends Constructor> = InstanceType<Type> & ReadingBlockInterface;
 
 /**
  * @param Type
@@ -405,4 +405,3 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 
 scenery.register( 'ReadingBlock', ReadingBlock );
 export default ReadingBlock;
-export type { ReadingBlockVersion };

@@ -12,7 +12,7 @@ import { Gradient, scenery, SVGBlock, SVGGradientStop } from '../imports.js';
 
 export type ActiveSVGGradient = WithoutNull<SVGGradient, 'svgBlock' | 'gradient'>;
 
-abstract class SVGGradient {
+export default abstract class SVGGradient {
 
   // transient (scenery-internal)
   svgBlock!: SVGBlock | null;
@@ -138,5 +138,3 @@ abstract class SVGGradient {
 }
 
 scenery.register( 'SVGGradient', SVGGradient );
-
-export default SVGGradient;

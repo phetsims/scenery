@@ -14,7 +14,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import { scenery, Node, Trail } from '../imports.js';
 import { Shape } from '../../../kite/js/imports.js';
 
-class Picker {
+export default class Picker {
 
   // Our node
   private readonly node: Node;
@@ -731,4 +731,3 @@ class Picker {
 }
 
 scenery.register( 'Picker', Picker );
-export default Picker;

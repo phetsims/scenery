@@ -11,7 +11,7 @@ import { scenery, SVGBlock, SVGGradient, SVGPattern } from '../imports.js';
 
 let globalId = 1;
 
-abstract class Paint {
+export default abstract class Paint {
 
   // (scenery-internal)
   id: string;
@@ -61,4 +61,3 @@ abstract class Paint {
 Paint.prototype.isPaint = true;
 
 scenery.register( 'Paint', Paint );
-export default Paint;

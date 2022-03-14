@@ -46,7 +46,7 @@ const DEFAULT_OPTIONS = {
   miterLimit: LINE_STYLE_DEFAULT_OPTIONS.miterLimit
 };
 
-type PaintableOptions = {
+export type PaintableOptions = {
   fill?: IPaint,
   fillPickable?: boolean,
   stroke?: IPaint,
@@ -823,4 +823,3 @@ export {
   DEFAULT_OPTIONS,
   DEFAULT_OPTIONS as PAINTABLE_DEFAULT_OPTIONS
 };
-export type { PaintableOptions };

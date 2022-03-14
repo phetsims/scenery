@@ -11,7 +11,7 @@
 
 import { scenery, Node, Display, Renderer } from '../../imports.js';
 
-class PDOMDisplaysInfo {
+export default class PDOMDisplaysInfo {
 
   node: Node;
 
@@ -280,4 +280,3 @@ class PDOMDisplaysInfo {
 }
 
 scenery.register( 'PDOMDisplaysInfo', PDOMDisplaysInfo );
-export default PDOMDisplaysInfo;

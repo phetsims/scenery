@@ -29,8 +29,8 @@ const FLOW_CONSTRAINT_OPTION_KEYS = [
 const flowHorizontalJustifys = [ 'left', 'right', 'center', 'spaceBetween', 'spaceAround', 'spaceEvenly' ] as const;
 const flowVerticalJustifys = [ 'top', 'bottom', 'center', 'spaceBetween', 'spaceAround', 'spaceEvenly' ] as const;
 
-type FlowHorizontalJustifys = typeof flowHorizontalJustifys[number];
-type FlowVerticalJustifys = typeof flowVerticalJustifys[number];
+export type FlowHorizontalJustifys = typeof flowHorizontalJustifys[number];
+export type FlowVerticalJustifys = typeof flowVerticalJustifys[number];
 
 const getAllowedJustifys = ( orientation: Orientation ): readonly string[] => {
   return orientation === Orientation.HORIZONTAL ? flowHorizontalJustifys : flowVerticalJustifys;
@@ -135,10 +135,10 @@ type SelfOptions = {
   minimumHeightProperty?: IProperty<number | null>;
 };
 
-type FlowConstraintOptions = SelfOptions & FlowConfigurableOptions;
+export type FlowConstraintOptions = SelfOptions & FlowConfigurableOptions;
 
 // TODO: Have LayoutBox use this when we're ready
-class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
+export default class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
 
   private cells: FlowCell[];
   private _justify: FlowConstraintJustify;
@@ -567,6 +567,4 @@ class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
 }
 
 scenery.register( 'FlowConstraint', FlowConstraint );
-export default FlowConstraint;
 export { FLOW_CONSTRAINT_OPTION_KEYS };
-export type { FlowHorizontalJustifys, FlowVerticalJustifys, FlowConstraintOptions };

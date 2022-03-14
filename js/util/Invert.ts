@@ -9,7 +9,7 @@
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import { scenery, Filter, CanvasContextWrapper } from '../imports.js';
 
-class Invert extends Filter {
+export default class Invert extends Filter {
 
   amount: number;
 
@@ -54,4 +54,3 @@ class Invert extends Filter {
 Invert.FULL = new Invert( 1 );
 
 scenery.register( 'Invert', Invert );
-export default Invert;

@@ -9,7 +9,7 @@
 import Pool, { IPoolable } from '../../../phet-core/js/Pool.js';
 import { Pattern, scenery, svgns, xlinkns } from '../imports.js';
 
-class SVGPattern implements IPoolable {
+export default class SVGPattern implements IPoolable {
 
   // persistent
   definition!: SVGPatternElement;
@@ -84,5 +84,3 @@ class SVGPattern implements IPoolable {
 }
 
 scenery.register( 'SVGPattern', SVGPattern );
-
-export default SVGPattern;

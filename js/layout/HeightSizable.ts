@@ -18,7 +18,7 @@ const HEIGHT_SIZABLE_OPTION_KEYS = [
   'minimumHeight'
 ];
 
-type HeightSizableSelfOptions = {
+export type HeightSizableSelfOptions = {
   preferredHeight?: number | null,
   minimumHeight?: number | null
 };
@@ -72,7 +72,7 @@ const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType 
 
 // Some typescript gymnastics to provide a user-defined type guard that treats something as HeightSizable
 const wrapper = () => HeightSizable( Node );
-type HeightSizableNode = InstanceType<ReturnType<typeof wrapper>>;
+export type HeightSizableNode = InstanceType<ReturnType<typeof wrapper>>;
 const isHeightSizable = ( node: Node ): node is HeightSizableNode => {
   return node.heightSizable;
 };
@@ -80,4 +80,3 @@ const isHeightSizable = ( node: Node ): node is HeightSizableNode => {
 scenery.register( 'HeightSizable', HeightSizable );
 export default HeightSizable;
 export { isHeightSizable };
-export type { HeightSizableNode, HeightSizableSelfOptions };

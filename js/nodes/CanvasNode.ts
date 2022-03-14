@@ -20,13 +20,13 @@ const CANVAS_NODE_OPTION_KEYS = [
   'canvasBounds'
 ];
 
-type CanvasNodeSelfOptions = {
+type SelfOptions = {
   canvasBounds?: Bounds2;
 };
 
-type CanvasNodeOptions = CanvasNodeSelfOptions & NodeOptions;
+export type CanvasNodeOptions = SelfOptions & NodeOptions;
 
-abstract class CanvasNode extends Node {
+export default abstract class CanvasNode extends Node {
   constructor( options?: CanvasNodeOptions ) {
     super( options );
 
@@ -137,6 +137,3 @@ abstract class CanvasNode extends Node {
 CanvasNode.prototype._mutatorKeys = CANVAS_NODE_OPTION_KEYS.concat( Node.prototype._mutatorKeys );
 
 scenery.register( 'CanvasNode', CanvasNode );
-
-export default CanvasNode;
-export type { CanvasNodeOptions };

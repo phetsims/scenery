@@ -40,7 +40,7 @@ const ALIGNMENT_CONTAINER_OPTION_KEYS = [
 type XAlign = 'left' | 'center' | 'right';
 type YAlign = 'top' | 'center' | 'bottom';
 
-type AlignBoxSelfOptions = {
+type SelfOptions = {
   alignBounds?: Bounds2 | null,
   xAlign?: XAlign,
   yAlign?: YAlign,
@@ -54,9 +54,9 @@ type AlignBoxSelfOptions = {
   'group'?: AlignGroup | null,
 };
 
-type AlignBoxOptions = AlignBoxSelfOptions & NodeOptions
+export type AlignBoxOptions = SelfOptions & NodeOptions
 
-class AlignBox extends Node {
+export default class AlignBox extends Node {
 
   // Our actual content
   private _content: Node;
@@ -612,6 +612,3 @@ class AlignBox extends Node {
 AlignBox.prototype._mutatorKeys = ALIGNMENT_CONTAINER_OPTION_KEYS.concat( Node.prototype._mutatorKeys );
 
 scenery.register( 'AlignBox', AlignBox );
-
-export default AlignBox;
-export type { AlignBoxOptions };

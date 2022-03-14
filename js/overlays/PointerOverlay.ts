@@ -13,7 +13,7 @@ import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { scenery, PDOMPointer, svgns, Utils, Display, Node, Pointer, IOverlay } from '../imports.js';
 
-class PointerOverlay implements IOverlay {
+export default class PointerOverlay implements IOverlay {
 
   display: Display;
   rootNode: Node;
@@ -140,4 +140,3 @@ class PointerOverlay implements IOverlay {
 }
 
 scenery.register( 'PointerOverlay', PointerOverlay );
-export default PointerOverlay;

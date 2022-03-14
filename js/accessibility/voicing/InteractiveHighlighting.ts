@@ -20,12 +20,12 @@ const INTERACTIVE_HIGHLIGHTING_OPTIONS = [
   'interactiveHighlightLayerable'
 ];
 
-type InteractiveHighlightingSelfOptions = {
+type SelfOptions = {
   interactiveHighlight?: Highlight,
   interactiveHighlightLayerable?: boolean
 };
 
-type InteractiveHighlightingOptions = InteractiveHighlightingSelfOptions & NodeOptions;
+export type InteractiveHighlightingOptions = SelfOptions & NodeOptions;
 
 interface InteractiveHighlightingInterface {
   interactiveHighlightChangedEmitter: TinyEmitter;
@@ -48,7 +48,7 @@ interface InteractiveHighlightingInterface {
 }
 
 // For type checking when you need to verify that a Type is composed with InteractiveHighlighting
-type InteractiveHighlightingVersion<Type extends Constructor> = InstanceType<Type> & InteractiveHighlightingInterface;
+export type InteractiveHighlightingVersion<Type extends Constructor> = InstanceType<Type> & InteractiveHighlightingInterface;
 
 /**
  * @param Type
@@ -461,4 +461,3 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
 
 scenery.register( 'InteractiveHighlighting', InteractiveHighlighting );
 export default InteractiveHighlighting;
-export type { InteractiveHighlightingOptions, InteractiveHighlightingVersion };

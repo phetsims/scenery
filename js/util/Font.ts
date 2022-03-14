@@ -44,9 +44,9 @@ const VALID_WEIGHTS = [ 'normal', 'bold', 'bolder', 'lighter',
 const VALID_STRETCHES = [ 'normal', 'ultra-condensed', 'extra-condensed', 'condensed', 'semi-condensed',
   'semi-expanded', 'expanded', 'extra-expanded', 'ultra-expanded' ];
 
-type FontStyle = 'normal' | 'italic' | 'oblique';
-type FontVariant = 'normal' | 'small-caps';
-type FontWeight =
+export type FontStyle = 'normal' | 'italic' | 'oblique';
+export type FontVariant = 'normal' | 'small-caps';
+export type FontWeight =
   'normal'
   | 'bold'
   | 'bolder'
@@ -60,7 +60,7 @@ type FontWeight =
   | '700'
   | '800'
   | '900';
-type FontStretch =
+export type FontStretch =
   'normal'
   | 'ultra-condensed'
   | 'extra-condensed'
@@ -82,7 +82,7 @@ type SelfOptions = {
 };
 export type FontOptions = SelfOptions & PhetioObjectOptions;
 
-class Font extends PhetioObject {
+export default class Font extends PhetioObject {
 
   // See https://www.w3.org/TR/css-fonts-3/#propdef-font-style
   _style: FontStyle;
@@ -444,6 +444,3 @@ Font.FontIO = new IOType( 'FontIO', {
 
 // @public {Font} - Default Font object (since they are immutable).
 Font.DEFAULT = new Font();
-
-export { Font as default };
-export type { FontStyle, FontVariant, FontWeight, FontStretch };

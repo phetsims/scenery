@@ -9,9 +9,9 @@
 import optionize from '../../../phet-core/js/optionize.js';
 import { scenery, LayoutBox, LayoutBoxOptions } from '../imports.js';
 
-type HBoxOptions = Omit<LayoutBoxOptions, 'orientation'>;
+export type HBoxOptions = Omit<LayoutBoxOptions, 'orientation'>;
 
-class HBox extends LayoutBox {
+export default class HBox extends LayoutBox {
   constructor( providedOptions?: HBoxOptions ) {
     assert && assert( !providedOptions || !( providedOptions as LayoutBoxOptions ).orientation, 'HBox sets orientation' );
 
@@ -22,6 +22,3 @@ class HBox extends LayoutBox {
 }
 
 scenery.register( 'HBox', HBox );
-
-export default HBox;
-export type { HBoxOptions };

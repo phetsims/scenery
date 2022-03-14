@@ -9,9 +9,9 @@
 
 import { scenery, Spacer, SpacerOptions } from '../imports.js';
 
-type HStrutOptions = SpacerOptions;
+export type HStrutOptions = SpacerOptions;
 
-class HStrut extends Spacer {
+export default class HStrut extends Spacer {
   /**
    * Creates a strut with x in the range [0,width] and y=0.
    *
@@ -24,5 +24,3 @@ class HStrut extends Spacer {
 }
 
 scenery.register( 'HStrut', HStrut );
-export default HStrut;
-export type { HStrutOptions };

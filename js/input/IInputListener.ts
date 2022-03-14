@@ -9,9 +9,9 @@
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import { SceneryEvent } from '../imports.js';
 
-type SceneryListenerFunction<T extends Event = Event> = ( event: SceneryEvent<T> ) => void;
+export type SceneryListenerFunction<T extends Event = Event> = ( event: SceneryEvent<T> ) => void;
 
-interface IInputListener {
+export default interface IInputListener {
   interrupt?: () => void;
   cursor?: string | null;
 
@@ -79,7 +79,4 @@ interface IInputListener {
   // While dragging, the AnimatedPanZoomListener will try to keep these bounds in view. Intended to be
   // called from a listener attached to a Pointer so that the API is compatible with multi-touch.
   getDragPanTargetBounds?: () => Bounds2;
-}
-
-export default IInputListener;
-export type { SceneryListenerFunction };
+} // eslint-disable-line

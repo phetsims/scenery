@@ -57,12 +57,12 @@ type VerticalAlignResult = typeof LAYOUT_ALIGNMENT[ 'vertical' ][ keyof typeof L
 type HorizontalAlignResult = typeof LAYOUT_ALIGNMENT[ 'horizontal' ][ keyof typeof LAYOUT_ALIGNMENT[ 'horizontal' ] ];
 type AlignResult = VerticalAlignResult | HorizontalAlignResult;
 
-type LayoutBoxOrientation = 'horizontal' | 'vertical';
+export type LayoutBoxOrientation = 'horizontal' | 'vertical';
 type LayoutBoxHorizontalAlign = 'top' | 'center' | 'bottom' | 'origin';
 type LayoutBoxVerticalAlign = 'left' | 'center' | 'right' | 'origin';
-type LayoutBoxAlign = LayoutBoxHorizontalAlign | LayoutBoxVerticalAlign;
+export type LayoutBoxAlign = LayoutBoxHorizontalAlign | LayoutBoxVerticalAlign;
 
-type LayoutBoxSelfOptions = {
+type SelfOptions = {
   // Either 'vertical' or 'horizontal'. The default chosen by popular vote (with more references). see setOrientation()
   // for more documentation.
   orientation?: LayoutBoxOrientation;
@@ -77,9 +77,9 @@ type LayoutBoxSelfOptions = {
   // Whether we'll layout after children are added/removed/resized, see #116. See setResize() for more documentation.
   resize?: boolean;
 };
-type LayoutBoxOptions = LayoutBoxSelfOptions & NodeOptions;
+export type LayoutBoxOptions = SelfOptions & NodeOptions;
 
-class LayoutBox extends Node {
+export default class LayoutBox extends Node {
 
   private _orientation: LayoutBoxOrientation;
   private _spacing: number;
@@ -442,6 +442,3 @@ class LayoutBox extends Node {
 LayoutBox.prototype._mutatorKeys = LAYOUT_BOX_OPTION_KEYS.concat( Node.prototype._mutatorKeys );
 
 scenery.register( 'LayoutBox', LayoutBox );
-
-export default LayoutBox;
-export type { LayoutBoxOptions, LayoutBoxOrientation, LayoutBoxAlign };

@@ -21,11 +21,11 @@ const WEBGL_NODE_OPTION_KEYS = [
   'canvasBounds' // {Bounds2} - Sets the available Canvas bounds that content will show up in. See setCanvasBounds()
 ];
 
-type WebGLNodeSelfOptions = {
+type SelfOptions = {
   canvasBounds?: Bounds2;
 };
 
-type WebGLNodeOptions = WebGLNodeSelfOptions & NodeOptions;
+export type WebGLNodeOptions = SelfOptions & NodeOptions;
 
 type WebGLNodePainter = {
   paint: ( modelViewMatrix: Matrix3, projectionMatrix: Matrix3 ) => 0 | 1;
@@ -34,7 +34,7 @@ type WebGLNodePainter = {
 // NOTE: the `node` will be the `this` type, but there doesn't seem to be a good way to annotate that
 type WebGLNodePainterType = new ( gl: WebGLRenderingContext, node: never ) => WebGLNodePainter;
 
-abstract class WebGLNode extends Node {
+export default abstract class WebGLNode extends Node {
 
   // Used to create the painters
   private painterType: WebGLNodePainterType;
@@ -227,6 +227,3 @@ WebGLNode.PAINTED_NOTHING = 0;
 WebGLNode.PAINTED_SOMETHING = 1;
 
 scenery.register( 'WebGLNode', WebGLNode );
-
-export default WebGLNode;
-export type { WebGLNodeOptions };

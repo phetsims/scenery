@@ -66,7 +66,7 @@ import AriaLiveAnnouncer from '../../../utterance-queue/js/AriaLiveAnnouncer.js'
 import UtteranceQueue from '../../../utterance-queue/js/UtteranceQueue.js';
 import { scenery, Color, Features, FullScreen, Trail, Utils, scenerySerialize, BackboneDrawable, ChangeInterval, DOMBlock, Drawable, DOMDrawable, Instance, Renderer, Node, PDOMInstance, PDOMSiblingStyle, PDOMUtils, globalKeyStateTracker, FocusManager, KeyboardUtils, PDOMTree, Input, CanvasNodeBoundsOverlay, FittedBlockBoundsOverlay, HighlightOverlay, HitAreaOverlay, PointerAreaOverlay, PointerOverlay, IInputListener, IOverlay, InputOptions, Block, WebGLBlock, CanvasBlock } from '../imports.js';
 
-type DisplayOptions = {
+export type DisplayOptions = {
   // Initial (or override) display width
   width?: number;
 
@@ -151,7 +151,7 @@ const CUSTOM_CURSORS = {
   'scenery-grabbing-pointer': [ 'grabbing', '-moz-grabbing', '-webkit-grabbing', 'pointer' ]
 } as { [ key: string ]: string[] };
 
-class Display {
+export default class Display {
 
   // The (integral, > 0) dimensions of the Display's DOM element (only updates the DOM element on updateDisplay())
   sizeProperty: IProperty<Dimension2>;
@@ -2161,6 +2161,3 @@ scenery.register( 'Display', Display );
 
 Display.userGestureEmitter = new Emitter();
 Display.inputListeners = [];
-
-export default Display;
-export type { DisplayOptions };

@@ -14,13 +14,13 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import Enumeration from '../../../phet-core/js/Enumeration.js';
 import EnumerationValue from '../../../phet-core/js/EnumerationValue.js';
-import Poolable, { PoolableVersion } from '../../../phet-core/js/Poolable.js';
+import Pool from '../../../phet-core/js/Pool.js';
 import { scenery, Sprite } from '../imports.js';
 
 const scratchVector = new Vector2( 0, 0 );
 const scratchMatrix = Matrix3.IDENTITY.copy();
 
-class SpriteInstanceTransformType extends EnumerationValue {
+export class SpriteInstanceTransformType extends EnumerationValue {
   static TRANSLATION = new SpriteInstanceTransformType();
   static TRANSLATION_AND_SCALE = new SpriteInstanceTransformType();
   static TRANSLATION_AND_ROTATION = new SpriteInstanceTransformType();
@@ -31,7 +31,7 @@ class SpriteInstanceTransformType extends EnumerationValue {
   } );
 }
 
-class SpriteInstance {
+export default class SpriteInstance {
 
   // This should be set to a `Sprite` object which is the sprite that should be displayed.
   // This field is expected to be set by the client whenever it needs to change.
@@ -104,13 +104,14 @@ class SpriteInstance {
 
     return this.sprite.containsPoint( position );
   }
+
+  freeToPool() {
+    SpriteInstance.pool.freeToPool( this );
+  }
+
+  static pool = new Pool( SpriteInstance, {
+    maxSize: 1000
+  } );
 }
 
-type PoolableSpriteInstance = PoolableVersion<typeof SpriteInstance>;
-const PoolableSpriteInstance = Poolable.mixInto( SpriteInstance, { // eslint-disable-line
-  maxSize: 1000
-} );
-
 scenery.register( 'SpriteInstance', SpriteInstance );
-export default PoolableSpriteInstance;
-export { SpriteInstanceTransformType, SpriteInstance as RawSpriteInstance };

@@ -9,7 +9,7 @@
 import { Shape } from '../../../kite/js/imports.js';
 import { Display, scenery, svgns, Node, IOverlay } from '../imports.js';
 
-abstract class ShapeBasedOverlay implements IOverlay {
+export default abstract class ShapeBasedOverlay implements IOverlay {
 
   display: Display;
   rootNode: Node;
@@ -82,4 +82,3 @@ abstract class ShapeBasedOverlay implements IOverlay {
 }
 
 scenery.register( 'ShapeBasedOverlay', ShapeBasedOverlay );
-export default ShapeBasedOverlay;

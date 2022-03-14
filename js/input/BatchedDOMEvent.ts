@@ -12,9 +12,9 @@ import EnumerationValue from '../../../phet-core/js/EnumerationValue.js';
 import Pool, { IPoolable } from '../../../phet-core/js/Pool.js';
 import { Input, scenery } from '../imports.js';
 
-type BatchedDOMEventCallback = ( ...args: any[] ) => void;
+export type BatchedDOMEventCallback = ( ...args: any[] ) => void;
 
-class BatchedDOMEventType extends EnumerationValue {
+export class BatchedDOMEventType extends EnumerationValue {
   static POINTER_TYPE = new BatchedDOMEventType();
   static MS_POINTER_TYPE = new BatchedDOMEventType();
   static TOUCH_TYPE = new BatchedDOMEventType();
@@ -26,7 +26,7 @@ class BatchedDOMEventType extends EnumerationValue {
   } );
 }
 
-class BatchedDOMEvent implements IPoolable {
+export default class BatchedDOMEvent implements IPoolable {
 
   domEvent!: Event | null;
   type!: BatchedDOMEventType | null;
@@ -110,7 +110,3 @@ class BatchedDOMEvent implements IPoolable {
 }
 
 scenery.register( 'BatchedDOMEvent', BatchedDOMEvent );
-
-export default BatchedDOMEvent;
-export { BatchedDOMEventType };
-export type { BatchedDOMEventCallback };

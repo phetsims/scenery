@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-interface ILayoutOptions {
+export default interface ILayoutOptions {
   orientation?: string;
   align?: string;
   xAlign?: string;
@@ -30,6 +30,4 @@ interface ILayoutOptions {
   y?: number;
   width?: number;
   height?: number;
-}
-
-export default ILayoutOptions;
+} // eslint-disable-line

@@ -22,7 +22,7 @@ type ColorProfileMap = {
   [ key: string ]: Color | string
 };
 
-class ProfileColorProperty extends ColorProperty {
+export default class ProfileColorProperty extends ColorProperty {
 
   // values are mutated by the HTML color wrapper.
   colorProfileMap: ColorProfileMap;
@@ -134,5 +134,3 @@ window.addEventListener( 'message', event => {
 } );
 
 scenery.register( 'ProfileColorProperty', ProfileColorProperty );
-
-export default ProfileColorProperty;

@@ -141,6 +141,7 @@ export { default as Sprite } from './util/Sprite.js';
 
 export { default as PaintObserver } from './display/PaintObserver.js';
 export { default as PaintColorProperty } from './util/PaintColorProperty.js';
+export type { PaintColorPropertyOptions } from './util/PaintColorProperty.js';
 export { default as PaintSVGState } from './display/PaintSVGState.js';
 export { default as SVGGradientStop } from './display/SVGGradientStop.js';
 export { default as SVGGradient } from './display/SVGGradient.js';
@@ -342,6 +343,7 @@ export { default as ShapeBasedOverlay } from './overlays/ShapeBasedOverlay.js';
 export { default as CanvasNodeBoundsOverlay } from './overlays/CanvasNodeBoundsOverlay.js';
 export { default as FittedBlockBoundsOverlay } from './overlays/FittedBlockBoundsOverlay.js';
 export { default as HighlightOverlay } from './overlays/HighlightOverlay.js';
+export type { Highlight, HighlightOverlayOptions } from './overlays/HighlightOverlay.js';
 export { default as HitAreaOverlay } from './overlays/HitAreaOverlay.js';
 export { default as PointerAreaOverlay } from './overlays/PointerAreaOverlay.js';
 export { default as PointerOverlay } from './overlays/PointerOverlay.js';

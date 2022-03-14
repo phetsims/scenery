@@ -13,7 +13,7 @@ import { scenery, Color } from '../imports.js';
 /**
  * @extends Property<Color>
  */
-class ColorProperty extends Property<Color> {
+export default class ColorProperty extends Property<Color> {
   constructor( color: Color, options?: PropertyOptions<Color> ) {
 
     // client cannot specify superclass options that are controlled by this type
@@ -31,4 +31,3 @@ class ColorProperty extends Property<Color> {
 }
 
 scenery.register( 'ColorProperty', ColorProperty );
-export default ColorProperty;

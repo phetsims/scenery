@@ -13,7 +13,7 @@ import { scenery, Filter, Utils, CanvasContextWrapper } from '../imports.js';
 const isImageDataSupported = Utils.supportsImageDataCanvasFilter();
 const useFakeGamma = platform.chromium;
 
-class ColorMatrixFilter extends Filter {
+export default class ColorMatrixFilter extends Filter {
 
   m00: number;
   m01: number;
@@ -185,4 +185,3 @@ class ColorMatrixFilter extends Filter {
 }
 
 scenery.register( 'ColorMatrixFilter', ColorMatrixFilter );
-export default ColorMatrixFilter;

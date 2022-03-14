@@ -10,7 +10,7 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import { scenery, Trail, ShapeBasedOverlay, Display, Node, IOverlay } from '../imports.js';
 
-class PointerAreaOverlay extends ShapeBasedOverlay implements IOverlay {
+export default class PointerAreaOverlay extends ShapeBasedOverlay implements IOverlay {
   constructor( display: Display, rootNode: Node ) {
     super( display, rootNode, 'mouseTouchAreaOverlay' );
   }
@@ -38,4 +38,3 @@ class PointerAreaOverlay extends ShapeBasedOverlay implements IOverlay {
 }
 
 scenery.register( 'PointerAreaOverlay', PointerAreaOverlay );
-export default PointerAreaOverlay;

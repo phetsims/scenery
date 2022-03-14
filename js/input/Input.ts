@@ -249,13 +249,13 @@ type TargetSubstitudeAugmentedEvent = Event & {
 // sending a mouseup event and a click event.
 const PDOM_CLICK_DELAY = 80;
 
-type InputOptions = {
+export type InputOptions = {
   tandem?: Tandem;
 };
 
 type EventListenerOptions = { capture?: boolean, passive?: boolean, once?: boolean } | boolean;
 
-class Input {
+export default class Input {
 
   display: Display;
   rootNode: Node;
@@ -1997,5 +1997,3 @@ class Input {
 }
 
 scenery.register( 'Input', Input );
-export default Input;
-export type { InputOptions };

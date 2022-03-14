@@ -14,7 +14,7 @@ import { Shape } from '../../../kite/js/imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import { scenery, Node, Renderer, SpritesCanvasDrawable, SpritesWebGLDrawable, Sprite, SpriteInstance, NodeOptions, CanvasContextWrapper, Instance, CanvasSelfDrawable, WebGLSelfDrawable } from '../imports.js';
 
-type SpritesSelfOptions = {
+type SelfOptions = {
   // Provide a fixed set of Sprite objects that will be used for this node. Currently, it cannot be modified after
   // construction for simplicity of the implementation.
   sprites?: Sprite[];
@@ -32,11 +32,11 @@ type SpritesSelfOptions = {
 };
 
 // We don't specify a default for canvasBounds on purpose, so we'll omit this from the optionize type parameter.
-type SpecifiedSpritesSelfOptions = Omit<SpritesSelfOptions, 'canvasBounds'>;
+type SpecifiedSelfOptions = Omit<SelfOptions, 'canvasBounds'>;
 
-type SpritesOptions = SpritesSelfOptions & NodeOptions;
+export type SpritesOptions = SelfOptions & NodeOptions;
 
-class Sprites extends Node {
+export default class Sprites extends Node {
 
   private _sprites: Sprite[];
   private _spriteInstances: SpriteInstance[];
@@ -44,7 +44,7 @@ class Sprites extends Node {
 
   constructor( providedOptions?: SpritesOptions ) {
 
-    const options = optionize<SpritesOptions, SpecifiedSpritesSelfOptions, NodeOptions>( {
+    const options = optionize<SpritesOptions, SpecifiedSelfOptions, NodeOptions>( {
       sprites: [],
       spriteInstances: [],
       hitTestSprites: false,
@@ -195,5 +195,3 @@ class Sprites extends Node {
 Sprites.prototype._mutatorKeys = [ 'canvasBounds' ].concat( Node.prototype._mutatorKeys );
 
 scenery.register( 'Sprites', Sprites );
-export default Sprites;
-export type { SpritesOptions };

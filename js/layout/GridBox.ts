@@ -18,14 +18,14 @@ const DEFAULT_OPTIONS = {
   resize: true // TODO: how is resize working
 } as const;
 
-type GridBoxSelfOptions = {
+type SelfOptions = {
   excludeInvisibleChildrenFromBounds?: boolean,
   resize?: boolean
 } & Omit<GridConstraintOptions, 'excludeInvisible'>;
 
-type GridBoxOptions = GridBoxSelfOptions & NodeOptions & WidthSizableSelfOptions & HeightSizableSelfOptions;
+export type GridBoxOptions = SelfOptions & NodeOptions & WidthSizableSelfOptions & HeightSizableSelfOptions;
 
-class GridBox extends WidthSizable( HeightSizable( Node ) ) {
+export default class GridBox extends WidthSizable( HeightSizable( Node ) ) {
 
   private _cellMap: Map<Node, GridCell>;
   private _constraint: GridConstraint;
@@ -300,5 +300,3 @@ GridBox.prototype._mutatorKeys = WidthSizable( Node ).prototype._mutatorKeys.con
 GridBox.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
 scenery.register( 'GridBox', GridBox );
-export default GridBox;
-export type { GridBoxOptions };

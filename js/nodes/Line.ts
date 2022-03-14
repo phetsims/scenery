@@ -22,7 +22,7 @@ const LINE_OPTION_KEYS = [
   'y2' // {number} - End y position
 ];
 
-type LineSelfOptions = {
+type SelfOptions = {
   p1?: Vector2,
   p2?: Vector2,
   x1?: number,
@@ -30,9 +30,9 @@ type LineSelfOptions = {
   x2?: number,
   y2?: number
 };
-type LineOptions = LineSelfOptions & PathOptions
+export type LineOptions = SelfOptions & PathOptions
 
-class Line extends Path {
+export default class Line extends Path {
 
   // The x coordinate of the start point (point 1)
   _x1: number;
@@ -516,6 +516,3 @@ Line.prototype._mutatorKeys = LINE_OPTION_KEYS.concat( Path.prototype._mutatorKe
 Line.prototype.drawableMarkFlags = Path.prototype.drawableMarkFlags.concat( [ 'line', 'p1', 'p2', 'x1', 'x2', 'y1', 'y2' ] ).filter( flag => flag !== 'shape' );
 
 scenery.register( 'Line', Line );
-
-export default Line;
-export type { LineOptions };

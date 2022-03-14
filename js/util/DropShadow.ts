@@ -14,7 +14,7 @@ import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { scenery, ColorDef, Filter, PaintDef, IColor, CanvasContextWrapper } from '../imports.js';
 
-class DropShadow extends Filter {
+export default class DropShadow extends Filter {
 
   offset: Vector2;
   blurRadius: number;
@@ -70,4 +70,3 @@ class DropShadow extends Filter {
 }
 
 scenery.register( 'DropShadow', DropShadow );
-export default DropShadow;

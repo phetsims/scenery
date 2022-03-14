@@ -8,9 +8,7 @@
 
 import { IInputListener } from '../imports.js';
 
-interface IAttachableInputListener extends IInputListener {
+export default interface IAttachableInputListener extends IInputListener {
   // Has to be interruptable
   interrupt: () => void;
-}
-
-export default IAttachableInputListener;
+} // eslint-disable-line

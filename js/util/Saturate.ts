@@ -9,7 +9,7 @@
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import { scenery, ColorMatrixFilter } from '../imports.js';
 
-class Saturate extends ColorMatrixFilter {
+export default class Saturate extends ColorMatrixFilter {
 
   amount: number;
 
@@ -47,4 +47,3 @@ class Saturate extends ColorMatrixFilter {
 }
 
 scenery.register( 'Saturate', Saturate );
-export default Saturate;

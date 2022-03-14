@@ -30,7 +30,7 @@ import EnumerationValue from '../../../phet-core/js/EnumerationValue.js';
 import { IInputListener, scenery, SceneryEvent, Trail } from '../imports.js';
 import IAttachableInputListener from './IAttachableInputListener.js';
 
-class Intent extends EnumerationValue {
+export class Intent extends EnumerationValue {
   // listener attached to the pointer will be used for dragging
   static DRAG = new Intent();
 
@@ -46,7 +46,7 @@ export interface ActivePointer extends Pointer {
   point: Vector2;
 }
 
-abstract class Pointer {
+export default abstract class Pointer {
 
   // The location of the pointer in the global coordinate system.
   point: Vector2;
@@ -441,5 +441,3 @@ abstract class Pointer {
 }
 
 scenery.register( 'Pointer', Pointer );
-export default Pointer;
-export { Intent };

@@ -21,16 +21,16 @@ const preferredSizePair = new OrientationPair( 'preferredWidth' as const, 'prefe
 // {number} - Position changes smaller than this will be ignored
 const CHANGE_POSITION_THRESHOLD = 1e-9;
 
-type GridCellSelfOptions = {
+type SelfOptions = {
   x?: number;
   y?: number;
   width?: number;
   height?: number;
 };
 
-type GridCellOptions = GridCellSelfOptions & GridConfigurableOptions;
+export type GridCellOptions = SelfOptions & GridConfigurableOptions;
 
-class GridCell extends GridConfigurable( Object ) {
+export default class GridCell extends GridConfigurable( Object ) {
 
   private _constraint: GridConstraint;
   private _node: Node;
@@ -253,5 +253,3 @@ class GridCell extends GridConfigurable( Object ) {
 }
 
 scenery.register( 'GridCell', GridCell );
-export default GridCell;
-export type { GridCellOptions };

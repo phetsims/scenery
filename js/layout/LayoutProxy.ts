@@ -9,10 +9,10 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import Poolable, { PoolableVersion } from '../../../phet-core/js/Poolable.js';
-import { scenery, Trail, Node } from '../imports.js';
+import Pool from '../../../phet-core/js/Pool.js';
+import { Node, scenery, Trail } from '../imports.js';
 
-class LayoutProxy {
+export default class LayoutProxy {
 
   // Nulled out when disposed
   trail!: Trail | null;
@@ -392,21 +392,20 @@ class LayoutProxy {
 
   /**
    * Releases references, and frees it to the pool.
-   * @public
    */
   dispose() {
     this.trail = null;
 
-    // for now
-    ( this as unknown as PoolableLayoutProxy ).freeToPool();
+    this.freeToPool();
   }
+
+  freeToPool() {
+    LayoutProxy.pool.freeToPool( this );
+  }
+
+  static pool = new Pool( LayoutProxy, {
+    maxSize: 1000
+  } );
 }
 
 scenery.register( 'LayoutProxy', LayoutProxy );
-
-type PoolableLayoutProxy = PoolableVersion<typeof LayoutProxy>;
-const PoolableLayoutProxy = Poolable.mixInto( LayoutProxy, { // eslint-disable-line
-  maxSize: 1000
-} );
-
-export default PoolableLayoutProxy;

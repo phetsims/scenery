@@ -36,11 +36,11 @@ const flowHorizontalAligns = [ 'top', 'bottom', 'center', 'origin', 'stretch' ] 
 const flowVerticalAligns = [ 'left', 'right', 'center', 'origin', 'stretch' ] as const;
 const flowOrientations = [ 'horizontal', 'vertical' ] as const;
 
-type FlowHorizontalAlign = typeof flowHorizontalAligns[number];
-type FlowVerticalAlign = typeof flowVerticalAligns[number];
-type FlowOrientation = typeof flowOrientations[number];
+export type FlowHorizontalAlign = typeof flowHorizontalAligns[number];
+export type FlowVerticalAlign = typeof flowVerticalAligns[number];
+export type FlowOrientation = typeof flowOrientations[number];
 
-type FlowConfigurableOptions = {
+export type FlowConfigurableOptions = {
   orientation?: FlowOrientation | null;
   align?: FlowHorizontalAlign | FlowVerticalAlign | null;
   grow?: number | null;
@@ -63,7 +63,7 @@ const getAllowedAligns = ( orientation: Orientation ): readonly ( string | null 
   return [ ...( orientation === Orientation.HORIZONTAL ? flowHorizontalAligns : flowVerticalAligns ), null ];
 };
 
-class FlowConfigurableAlign extends EnumerationValue {
+export class FlowConfigurableAlign extends EnumerationValue {
   static START = new FlowConfigurableAlign( 'top', 'left', 0 );
   static END = new FlowConfigurableAlign( 'bottom', 'right', 1 );
   static CENTER = new FlowConfigurableAlign( 'center', 'center', 0.5 );
@@ -433,5 +433,4 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
 
 scenery.register( 'FlowConfigurable', FlowConfigurable );
 export default FlowConfigurable;
-export { FlowConfigurableAlign, FLOW_CONFIGURABLE_OPTION_KEYS };
-export type { FlowHorizontalAlign, FlowVerticalAlign, FlowOrientation, FlowConfigurableOptions };
+export { FLOW_CONFIGURABLE_OPTION_KEYS };

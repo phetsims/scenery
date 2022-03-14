@@ -9,9 +9,9 @@
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import { scenery, Leaf, Node, NodeOptions } from '../imports.js';
 
-type SpacerOptions = NodeOptions
+export type SpacerOptions = NodeOptions
 
-class Spacer extends Leaf( Node ) {
+export default class Spacer extends Leaf( Node ) {
   /**
    * Creates a spacer taking up a rectangular area from x: [0,width] and y: [0,height]. Use x/y in options to control
    * its position.
@@ -34,5 +34,3 @@ class Spacer extends Leaf( Node ) {
 }
 
 scenery.register( 'Spacer', Spacer );
-export default Spacer;
-export type { SpacerOptions };

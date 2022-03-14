@@ -13,7 +13,7 @@
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import { scenery, Filter, svgns, CanvasContextWrapper } from '../imports.js';
 
-class GaussianBlur extends Filter {
+export default class GaussianBlur extends Filter {
 
   standardDeviation: number;
 
@@ -76,4 +76,3 @@ class GaussianBlur extends Filter {
 }
 
 scenery.register( 'GaussianBlur', GaussianBlur );
-export default GaussianBlur;

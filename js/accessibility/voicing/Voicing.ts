@@ -49,7 +49,7 @@ const VOICING_OPTION_KEYS = [
   'voicingFocusListener'
 ];
 
-type VoicingSelfOptions = {
+type SelfOptions = {
 
   // see ResponsePacket.nameResponse
   voicingNameResponse?: VoicingResponse,
@@ -81,10 +81,10 @@ type VoicingSelfOptions = {
   voicingUtterance?: Utterance;
 };
 
-type VoicingOptions = VoicingSelfOptions & InteractiveHighlightingOptions;
+export type VoicingOptions = SelfOptions & InteractiveHighlightingOptions;
 
 export type SpeakingOptions = {
-  utterance?: VoicingSelfOptions['voicingUtterance']
+  utterance?: SelfOptions['voicingUtterance']
 } & {
 
   // In speaking options, we don't allow a ResponseCreator function, but just a string|null. The `undefined` is to
@@ -548,4 +548,3 @@ Voicing.VOICING_OPTION_KEYS = VOICING_OPTION_KEYS;
 
 scenery.register( 'Voicing', Voicing );
 export default Voicing;
-export type { VoicingOptions };

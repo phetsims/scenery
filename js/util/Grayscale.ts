@@ -9,7 +9,7 @@
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import { scenery, ColorMatrixFilter } from '../imports.js';
 
-class Grayscale extends ColorMatrixFilter {
+export default class Grayscale extends ColorMatrixFilter {
 
   amount: number;
 
@@ -59,4 +59,3 @@ class Grayscale extends ColorMatrixFilter {
 Grayscale.FULL = new Grayscale( 1 );
 
 scenery.register( 'Grayscale', Grayscale );
-export default Grayscale;

@@ -9,7 +9,7 @@
 import toSVGNumber from '../../../dot/js/toSVGNumber.js';
 import { scenery, Filter, CanvasContextWrapper } from '../imports.js';
 
-class Opacity extends Filter {
+export default class Opacity extends Filter {
 
   amount: number;
 
@@ -52,4 +52,3 @@ class Opacity extends Filter {
 }
 
 scenery.register( 'Opacity', Opacity );
-export default Opacity;

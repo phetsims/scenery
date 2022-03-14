@@ -11,7 +11,7 @@ import Utils from '../../../dot/js/Utils.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
 import { scenery, FlowConfigurable, FlowConstraint, Node, FlowConfigurableOptions, FlowConfigurableAlign, isWidthSizable, isHeightSizable, WidthSizableNode, HeightSizableNode } from '../imports.js';
 
-class FlowCell extends FlowConfigurable( Object ) {
+export default class FlowCell extends FlowConfigurable( Object ) {
 
   private _constraint: FlowConstraint;
   private _node: Node;
@@ -187,4 +187,3 @@ class FlowCell extends FlowConfigurable( Object ) {
 }
 
 scenery.register( 'FlowCell', FlowCell );
-export default FlowCell;

@@ -32,11 +32,11 @@ const IMAGE_OPTION_KEYS = [
   'hitTestPixels' // {boolean} - Whether non-transparent pixels will control contained points, see setHitTestPixels() for documentation
 ];
 
-type ImageOptions = {
+export type ImageOptions = {
   imageBounds?: Bounds2 | null
 } & NodeOptions & ImageableOptions;
 
-class Image extends Imageable( Node ) {
+export default class Image extends Imageable( Node ) {
 
   // If non-null, determines what is considered "inside" the image for containment and hit-testing.
   _imageBounds: Bounds2 | null;
@@ -316,5 +316,3 @@ Image.ImageIO = new IOType( 'ImageIO', {
 } );
 
 scenery.register( 'Image', Image );
-export { Image as default };
-export type { ImageOptions };

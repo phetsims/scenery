@@ -12,7 +12,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import { scenery, SpriteImage } from '../imports.js';
 
-class Sprite {
+export default class Sprite {
 
   imageProperty: IProperty<SpriteImage>;
 
@@ -38,4 +38,3 @@ class Sprite {
 }
 
 scenery.register( 'Sprite', Sprite );
-export default Sprite;

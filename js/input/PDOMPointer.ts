@@ -11,7 +11,7 @@
 import Vector2 from '../../../dot/js/Vector2.js';
 import { scenery, Trail, Pointer, Focus, FocusManager, PDOMInstance, Display, Node } from '../imports.js';
 
-class PDOMPointer extends Pointer {
+export default class PDOMPointer extends Pointer {
 
   // (scenery-internal) - Prevent any "trusted" events from being dispatched to the KeyStateTracker. When
   // true, only scripted events are passed to the keyStateTracker. Otherwise, the modeled keyboard state when using
@@ -142,4 +142,3 @@ class PDOMPointer extends Pointer {
 }
 
 scenery.register( 'PDOMPointer', PDOMPointer );
-export default PDOMPointer;

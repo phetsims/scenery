@@ -15,17 +15,17 @@ const DOM_OPTION_KEYS = [
   'preventTransform' // {boolean} - Sets whether Scenery is allowed to transform the element. see setPreventTransform() for docs
 ];
 
-type DOMSelfOptions = {
+type SelfOptions = {
   element?: HTMLElement,
   preventTransform?: boolean;
 };
 
-type DOMOptions = DOMSelfOptions & NodeOptions;
+export type DOMOptions = SelfOptions & NodeOptions;
 
 // User-defined type guard
 const isJQueryElement = ( element: Element | JQuery<HTMLElement> ): element is JQuery<HTMLElement> => !!( element && ( element as JQuery<HTMLElement> ).jquery );
 
-class DOM extends Node {
+export default class DOM extends Node {
 
   private _element!: HTMLElement;
 
@@ -235,6 +235,3 @@ class DOM extends Node {
 DOM.prototype._mutatorKeys = DOM_OPTION_KEYS.concat( Node.prototype._mutatorKeys );
 
 scenery.register( 'DOM', DOM );
-
-export default DOM;
-export type { DOMOptions };

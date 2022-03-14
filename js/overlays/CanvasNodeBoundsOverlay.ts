@@ -9,7 +9,7 @@
 import { Shape } from '../../../kite/js/imports.js';
 import { scenery, Trail, CanvasNode, ShapeBasedOverlay, Display, Node, IOverlay } from '../imports.js';
 
-class CanvasNodeBoundsOverlay extends ShapeBasedOverlay implements IOverlay {
+export default class CanvasNodeBoundsOverlay extends ShapeBasedOverlay implements IOverlay {
   constructor( display: Display, rootNode: Node ) {
     super( display, rootNode, 'canvasNodeBoundsOverlay' );
   }
@@ -32,4 +32,3 @@ class CanvasNodeBoundsOverlay extends ShapeBasedOverlay implements IOverlay {
 }
 
 scenery.register( 'CanvasNodeBoundsOverlay', CanvasNodeBoundsOverlay );
-export default CanvasNodeBoundsOverlay;

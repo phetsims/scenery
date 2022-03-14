@@ -12,15 +12,12 @@
 
 import { scenery, Rectangle, RectangleOptions } from '../imports.js';
 
-type PlaneOptions = RectangleOptions;
+export type PlaneOptions = RectangleOptions;
 
-class Plane extends Rectangle {
+export default class Plane extends Rectangle {
   constructor( options?: PlaneOptions ) {
     super( -2000, -2000, 6000, 6000, options );
   }
 }
 
 scenery.register( 'Plane', Plane );
-
-export default Plane;
-export type { PlaneOptions };

@@ -6,10 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Poolable, { PoolableVersion } from '../../../phet-core/js/Poolable.js';
+import Pool from '../../../phet-core/js/Pool.js';
 import { GridCell, scenery } from '../imports.js';
 
-class GridLine {
+export default class GridLine {
 
   index!: number;
   cells!: GridCell[];
@@ -37,12 +37,14 @@ class GridLine {
     this.size = 0;
     this.position = 0;
   }
+
+  freeToPool() {
+    GridLine.pool.freeToPool( this );
+  }
+
+  static pool = new Pool<typeof GridLine, [number, GridCell[], number]>( GridLine, {
+    defaultArguments: [ 0, [], 0 ]
+  } );
 }
 
-type PoolableGridLine = PoolableVersion<typeof GridLine>;
-const PoolableGridLine = Poolable.mixInto( GridLine, { // eslint-disable-line
-  defaultArguments: [ 0, [], 0 ]
-} );
-
 scenery.register( 'GridLine', GridLine );
-export default PoolableGridLine;

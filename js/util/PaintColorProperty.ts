@@ -47,7 +47,7 @@ type SelfOptions = {
 
 export type PaintColorPropertyOptions = SelfOptions & PropertyOptions<Color>;
 
-class PaintColorProperty extends Property<Color> {
+export default class PaintColorProperty extends Property<Color> {
 
   private _paint: IPaint;
 
@@ -159,4 +159,3 @@ class PaintColorProperty extends Property<Color> {
 }
 
 scenery.register( 'PaintColorProperty', PaintColorProperty );
-export default PaintColorProperty;

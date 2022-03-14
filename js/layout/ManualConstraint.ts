@@ -14,7 +14,7 @@ type LayoutProxyMap<T> = {
 };
 type LayoutCallback<T extends any[]> = ( ...args: LayoutProxyMap<T> ) => void;
 
-class ManualConstraint<T extends Node[]> extends LayoutConstraint {
+export default class ManualConstraint<T extends Node[]> extends LayoutConstraint {
 
   private nodes: T;
   private layoutCallback: LayoutCallback<T>;
@@ -64,5 +64,3 @@ class ManualConstraint<T extends Node[]> extends LayoutConstraint {
 }
 
 scenery.register( 'ManualConstraint', ManualConstraint );
-
-export default ManualConstraint;

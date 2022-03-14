@@ -36,10 +36,10 @@ const GRID_CONFIGURABLE_OPTION_KEYS = [
 const gridHorizontalAligns = [ 'left', 'right', 'center', 'origin', 'stretch' ] as const;
 const gridVerticalAligns = [ 'top', 'bottom', 'center', 'origin', 'stretch' ] as const;
 
-type GridHorizontalAlign = typeof gridHorizontalAligns[number];
-type GridVerticalAlign = typeof gridVerticalAligns[number];
+export type GridHorizontalAlign = typeof gridHorizontalAligns[number];
+export type GridVerticalAlign = typeof gridVerticalAligns[number];
 
-class GridConfigurableAlign extends EnumerationValue {
+export class GridConfigurableAlign extends EnumerationValue {
   static START = new GridConfigurableAlign( 'left', 'top', 0 );
   static END = new GridConfigurableAlign( 'right', 'bottom', 1 );
   static CENTER = new GridConfigurableAlign( 'center', 'center', 0.5 );
@@ -63,7 +63,7 @@ class GridConfigurableAlign extends EnumerationValue {
   } );
 }
 
-type GridConfigurableOptions = {
+export type GridConfigurableOptions = {
   xAlign?: GridHorizontalAlign | null;
   yAlign?: GridVerticalAlign | null;
   grow?: number | null;
@@ -451,5 +451,4 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
 
 scenery.register( 'GridConfigurable', GridConfigurable );
 export default GridConfigurable;
-export { GridConfigurableAlign, GRID_CONFIGURABLE_OPTION_KEYS };
-export type { GridHorizontalAlign, GridVerticalAlign, GridConfigurableOptions };
+export { GRID_CONFIGURABLE_OPTION_KEYS };

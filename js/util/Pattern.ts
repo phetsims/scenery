@@ -11,7 +11,7 @@
 
 import { scenery, Paint, SVGPattern, SVGBlock } from '../imports.js';
 
-class Pattern extends Paint {
+export default class Pattern extends Paint {
 
   image: HTMLImageElement;
   canvasPattern: CanvasPattern;
@@ -60,4 +60,3 @@ class Pattern extends Paint {
 Pattern.prototype.isPattern = true;
 
 scenery.register( 'Pattern', Pattern );
-export default Pattern;

@@ -10,7 +10,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import Vector3 from '../../../dot/js/Vector3.js';
 import { scenery, Pointer } from '../imports.js';
 
-class Mouse extends Pointer {
+export default class Mouse extends Pointer {
 
   // Since we need to track the mouse's pointer id occasionally
   id: number | null;
@@ -158,4 +158,3 @@ class Mouse extends Pointer {
 }
 
 scenery.register( 'Mouse', Mouse );
-export default Mouse;

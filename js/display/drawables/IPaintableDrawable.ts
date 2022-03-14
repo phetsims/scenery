@@ -6,12 +6,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-interface IPaintableDrawable {
+export default interface IPaintableDrawable {
   markDirtyFill(): void;
   markDirtyStroke(): void;
   markDirtyLineWidth(): void;
   markDirtyLineOptions(): void;
   markDirtyCachedPaints(): void;
-}
-
-export default IPaintableDrawable;
+} // eslint-disable-line

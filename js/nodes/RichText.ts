@@ -68,10 +68,10 @@ import inheritance from '../../../phet-core/js/inheritance.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import merge from '../../../phet-core/js/merge.js';
 import openPopup from '../../../phet-core/js/openPopup.js';
-import Poolable, { PoolableVersion } from '../../../phet-core/js/Poolable.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
-import { scenery, Color, Font, Line, Node, Text, VStrut, FireListener, Voicing, IPaint, NodeOptions, TextBoundsMethod, IInputListener } from '../imports.js';
+import { Color, FireListener, Font, IInputListener, IPaint, Line, Node, NodeOptions, scenery, Text, TextBoundsMethod, Voicing, VStrut } from '../imports.js';
+import Pool from '../../../phet-core/js/Pool.js';
 
 // Options that can be used in the constructor, with mutate(), or directly as setters/getters
 // each of these options has an associated setter, see setter methods for more documentation
@@ -102,12 +102,12 @@ const RICH_TEXT_OPTION_KEYS = [
   'text'
 ];
 
-type RichTextAlign = 'left' | 'center' | 'right';
-type RichTextHref = ( () => void ) | string;
+export type RichTextAlign = 'left' | 'center' | 'right';
+export type RichTextHref = ( () => void ) | string;
 type RichTextLinksObject = { [ key: string ]: string };
-type RichTextLinks = RichTextLinksObject | boolean;
+export type RichTextLinks = RichTextLinksObject | boolean;
 
-type RichTextSelfOptions = {
+type SelfOptions = {
   // Sets how bounds are determined for text
   boundsMethod?: TextBoundsMethod;
 
@@ -183,7 +183,7 @@ type RichTextSelfOptions = {
   text?: string|number;
 };
 
-type RichTextOptions = RichTextSelfOptions & NodeOptions;
+export type RichTextOptions = SelfOptions & NodeOptions;
 
 type HimalayaAttribute = {
   key: string,
@@ -277,7 +277,7 @@ const FONT_STYLE_MAP = {
 const FONT_STYLE_KEYS = Object.keys( FONT_STYLE_MAP );
 const STYLE_KEYS = [ 'color' ].concat( FONT_STYLE_KEYS );
 
-class RichText extends Node {
+export default class RichText extends Node {
 
   // The text to display. We'll initialize this by mutating.
   _textProperty: TinyForwardingProperty<string>;
@@ -456,7 +456,7 @@ class RichText extends Node {
     const widthAvailable = this._lineWrap === null ? Number.POSITIVE_INFINITY : this._lineWrap;
     const isRootLTR = true;
 
-    let currentLine = RichTextElement.createFromPool( isRootLTR );
+    let currentLine = RichTextElement.pool.create( isRootLTR );
     this._hasAddedLeafToLine = false; // notify that if nothing has been added, the first leaf always gets added.
 
     // Himalaya can give us multiple top-level items, so we need to iterate over those
@@ -483,7 +483,7 @@ class RichText extends Node {
         }
 
         // Set up a new line
-        currentLine = RichTextElement.createFromPool( isRootLTR );
+        currentLine = RichTextElement.pool.create( isRootLTR );
         this._hasAddedLeafToLine = false;
       }
 
@@ -528,7 +528,7 @@ class RichText extends Node {
           }
         }
 
-        const linkRootNode = RichTextLink.createFromPool( linkElement.innerContent, href );
+        const linkRootNode = RichTextLink.pool.create( linkElement.innerContent, href );
         this.lineContainer.addChild( linkRootNode );
 
         // Detach the node from its location, adjust its transform, and reattach under the link. This should keep each
@@ -594,7 +594,7 @@ class RichText extends Node {
   private appendEmptyLeaf() {
     assert && assert( this.lineContainer.getChildrenCount() === 0 );
 
-    this.appendLine( RichTextLeaf.createFromPool( '', true, this._font, this._boundsMethod, this._fill, this._stroke, this._lineWidth ) );
+    this.appendLine( RichTextLeaf.pool.create( '', true, this._font, this._boundsMethod, this._fill, this._stroke, this._lineWidth ) );
   }
 
   /**
@@ -637,7 +637,7 @@ class RichText extends Node {
       sceneryLog && sceneryLog.RichText && sceneryLog.RichText( `appending leaf: ${element.content}` );
       sceneryLog && sceneryLog.RichText && sceneryLog.push();
 
-      node = RichTextLeaf.createFromPool( element.content, isLTR, font, this._boundsMethod, fill, this._stroke, this._lineWidth );
+      node = RichTextLeaf.pool.create( element.content, isLTR, font, this._boundsMethod, fill, this._stroke, this._lineWidth );
 
       // If this content gets added, it will need to be pushed over by this amount
       const containerSpacing = isLTR ? containerNode.rightSpacing : containerNode.leftSpacing;
@@ -659,7 +659,7 @@ class RichText extends Node {
 
           // Keep shortening by removing words until it fits (or if we NEED to fit it) or it doesn't fit.
           while ( words.length ) {
-            node = RichTextLeaf.createFromPool( words.join( ' ' ), isLTR, font, this._boundsMethod, fill, this._stroke, this._lineWidth );
+            node = RichTextLeaf.pool.create( words.join( ' ' ), isLTR, font, this._boundsMethod, fill, this._stroke, this._lineWidth );
 
             // If we haven't added anything to the line and we are down to the first word, we need to just add it.
             if ( !( node as RichTextLeaf ).fitsIn( widthAvailable - containerSpacing, this._hasAddedLeafToLine, isLTR ) &&
@@ -708,7 +708,7 @@ class RichText extends Node {
         }
       }
 
-      node = RichTextElement.createFromPool( isLTR );
+      node = RichTextElement.pool.create( isLTR );
 
       sceneryLog && sceneryLog.RichText && sceneryLog.RichText( 'appending element' );
       sceneryLog && sceneryLog.RichText && sceneryLog.push();
@@ -1590,7 +1590,7 @@ const RichTextCleanable = memoize( <SuperType extends Constructor>( type: SuperT
 } );
 type RichTextCleanableNode = Node & { clean: () => void, isCleanable: boolean, freeToPool: () => void };
 
-class RawRichTextElement extends RichTextCleanable( Node ) {
+class RichTextElement extends RichTextCleanable( Node ) {
 
   private isLTR!: boolean;
 
@@ -1693,13 +1693,16 @@ class RawRichTextElement extends RichTextCleanable( Node ) {
       this.rightSpacing += amount;
     }
   }
+
+  freeToPool() {
+    RichTextElement.pool.freeToPool( this );
+  }
+
+  static pool = new Pool( RichTextElement );
+
 }
 
-
-type RichTextElement = PoolableVersion<typeof RawRichTextElement>;
-const RichTextElement = Poolable.mixInto( RawRichTextElement ); // eslint-disable-line
-
-class RawRichTextLeaf extends RichTextCleanable( Text ) {
+class RichTextLeaf extends RichTextCleanable( Text ) {
 
   leftSpacing!: number;
   rightSpacing!: number;
@@ -1766,12 +1769,15 @@ class RawRichTextLeaf extends RichTextCleanable( Text ) {
   fitsIn( widthAvailable: number, hasAddedLeafToLine: boolean, isContainerLTR: boolean ) {
     return this.width + ( hasAddedLeafToLine ? ( isContainerLTR ? this.leftSpacing : this.rightSpacing ) : 0 ) <= widthAvailable;
   }
+
+  freeToPool() {
+    RichTextLeaf.pool.freeToPool( this );
+  }
+
+  static pool = new Pool( RichTextLeaf );
 }
 
-type RichTextLeaf = PoolableVersion<typeof RawRichTextLeaf>;
-const RichTextLeaf = Poolable.mixInto( RawRichTextLeaf ); // eslint-disable-line
-
-class RawRichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
+class RichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
 
   private fireListener: FireListener | null;
   private accessibleInputListener: IInputListener | null;
@@ -1786,7 +1792,7 @@ class RawRichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
     this.accessibleInputListener = null;
 
     // Voicing was already initialized in the super call, we do not want to initialize super again. But we do want to
-    // initialize the RawRichText portion of the implementation.
+    // initialize the RichText portion of the implementation.
     this.initialize( innerContent, href, false );
 
     // Mutate to make sure initialize doesn't clear this away
@@ -1866,21 +1872,16 @@ class RawRichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
       this.accessibleInputListener = null;
     }
   }
+
+  freeToPool() {
+    RichTextLink.pool.freeToPool( this );
+  }
+
+  static pool = new Pool( RichTextLink );
 }
-
-type RichTextLink = PoolableVersion<typeof RawRichTextLink>;
-const RichTextLink = Poolable.mixInto( RawRichTextLink ); // eslint-disable-line
-
-Poolable.mixInto( RichTextLink );
 
 RichText.RichTextIO = new IOType( 'RichTextIO', {
   valueType: RichText,
   supertype: Node.NodeIO,
   documentation: 'The tandem IO Type for the scenery RichText node'
 } );
-
-export default RichText;
-export type { RichTextOptions, RichTextAlign, RichTextHref, RichTextLinks };
-
-// For declaration emit due to Poolable
-export type { RichTextLink, RawRichTextLink };

@@ -17,14 +17,14 @@ import mutate from '../../../phet-core/js/mutate.js';
 let globalIdCounter = 1;
 const scratchVector = new Vector2( 0, 0 );
 
-type SpriteImageSelfOptions = {
+type SelfOptions = {
   hitTestPixels?: boolean;
   pickable?: boolean
 };
 
-type SpriteImageOptions = SpriteImageSelfOptions & ImageableOptions;
+export type SpriteImageOptions = SelfOptions & ImageableOptions;
 
-class SpriteImage extends Imageable( Object ) {
+export default class SpriteImage extends Imageable( Object ) {
 
   readonly id: number;
   readonly offset: Vector2;
@@ -155,5 +155,3 @@ class SpriteImage extends Imageable( Object ) {
 }
 
 scenery.register( 'SpriteImage', SpriteImage );
-export default SpriteImage;
-export type { SpriteImageOptions };

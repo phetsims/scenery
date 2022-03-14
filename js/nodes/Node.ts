@@ -279,9 +279,9 @@ const DEFAULT_OPTIONS = {
   preventFit: false
 };
 
-type RendererType = 'svg' | 'canvas' | 'webgl' | 'dom' | null;
+export type RendererType = 'svg' | 'canvas' | 'webgl' | 'dom' | null;
 
-type NodeOptions = {
+export type NodeOptions = {
   children?: Node[],
   cursor?: string | null,
   phetioVisiblePropertyInstrumented?: boolean,
@@ -6199,5 +6199,5 @@ Node.NodeIO = new IOType( 'NodeIO', {
   }
 } );
 
-export { Node as default };
-export type { NodeOptions, RendererType };
+// We use interface extension, so we can't export Node at its declaration location
+export default Node;

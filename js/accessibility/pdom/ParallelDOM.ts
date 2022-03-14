@@ -215,7 +215,7 @@ const ACCESSIBILITY_OPTION_KEYS = [
   'pdomTransformSourceNode' // {Node|null} - sets the node that controls primary sibling element positioning in the display, see setPDOMTransformSourceNode()
 ];
 
-type ParallelDOMOptions = {
+export type ParallelDOMOptions = {
   focusable?: boolean | null,
   tagName?: string | null,
 
@@ -295,9 +295,9 @@ type Association = {
  * this list for execution after this Node is fully created. See discussion in https://github.com/phetsims/sun/issues/503#issuecomment-676541373
  * @returns the options that have been mutated by the behavior function.
  */
-type PDOMBehaviorFunction = ( node: Node, options: ParallelDOMOptions, value: string, callbacksForOtherNodes: ( () => void )[] ) => ParallelDOMOptions;
+export type PDOMBehaviorFunction = ( node: Node, options: ParallelDOMOptions, value: string, callbacksForOtherNodes: ( () => void )[] ) => ParallelDOMOptions;
 
-class ParallelDOM extends PhetioObject {
+export default class ParallelDOM extends PhetioObject {
 
   // The HTML tag name of the element representing this node in the DOM
   _tagName: string | null;
@@ -2859,5 +2859,4 @@ class ParallelDOM extends PhetioObject {
 }
 
 scenery.register( 'ParallelDOM', ParallelDOM );
-export { ParallelDOM as default, ACCESSIBILITY_OPTION_KEYS };
-export type { ParallelDOMOptions, PDOMBehaviorFunction };
+export { ACCESSIBILITY_OPTION_KEYS };

@@ -11,9 +11,9 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import merge from '../../../phet-core/js/merge.js';
 import { scenery, AlignBox, AlignBoxOptions, Node } from '../imports.js';
 
-type AlignPropertyBoxOptions = AlignBoxOptions;
+export type AlignPropertyBoxOptions = AlignBoxOptions;
 
-class AlignPropertyBox extends AlignBox {
+export default class AlignPropertyBox extends AlignBox {
 
   private alignBoundsProperty: IReadOnlyProperty<Bounds2>;
   private _alignBoundsPropertyListener: ( b: Bounds2 ) => void;
@@ -46,5 +46,3 @@ class AlignPropertyBox extends AlignBox {
 }
 
 scenery.register( 'AlignPropertyBox', AlignPropertyBox );
-export default AlignPropertyBox;
-export type { AlignPropertyBoxOptions };

@@ -9,7 +9,7 @@
 import Vector2 from '../../../dot/js/Vector2.js';
 import { scenery, Pointer } from '../imports.js';
 
-class Pen extends Pointer {
+export default class Pen extends Pointer {
 
   // For tracking which pen is which
   id: number;
@@ -73,5 +73,3 @@ class Pen extends Pointer {
 }
 
 scenery.register( 'Pen', Pen );
-
-export default Pen;

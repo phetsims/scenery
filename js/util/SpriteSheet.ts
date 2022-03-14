@@ -33,7 +33,7 @@ const GUTTER_SIZE = 1;
 // See https://github.com/phetsims/scenery/issues/637.
 const PADDING = 1;
 
-class SpriteSheet {
+export default class SpriteSheet {
 
   private useMipmaps: boolean;
   private gl: WebGLRenderingContext | null;
@@ -347,5 +347,3 @@ class Sprite {
 
 SpriteSheet.Sprite = Sprite;
 SpriteSheet.MAX_DIMENSION = MAX_DIMENSION;
-
-export default SpriteSheet;

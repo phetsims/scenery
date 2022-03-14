@@ -9,9 +9,9 @@
 
 import { scenery, Spacer, SpacerOptions } from '../imports.js';
 
-type VStrutOptions = SpacerOptions;
+export type VStrutOptions = SpacerOptions;
 
-class VStrut extends Spacer {
+export default class VStrut extends Spacer {
   /**
    * Creates a strut with x=0 and y in the range [0,height].
    *
@@ -24,5 +24,3 @@ class VStrut extends Spacer {
 }
 
 scenery.register( 'VStrut', VStrut );
-export default VStrut;
-export type { VStrutOptions };

@@ -9,7 +9,7 @@
 import merge from '../../../phet-core/js/merge.js';
 import { scenery, Utils } from '../imports.js';
 
-type ShaderProgramOptions = {
+export type ShaderProgramOptions = {
   // (vertex) attribute names in the shader source
   attributes?: string[],
 
@@ -17,7 +17,7 @@ type ShaderProgramOptions = {
   uniforms?: string[]
 };
 
-class ShaderProgram {
+export default class ShaderProgram {
 
   // store parameters so that we can recreate the shader program on context loss
   private vertexSource: string;
@@ -176,5 +176,3 @@ class ShaderProgram {
 }
 
 scenery.register( 'ShaderProgram', ShaderProgram );
-export default ShaderProgram;
-export type { ShaderProgramOptions };

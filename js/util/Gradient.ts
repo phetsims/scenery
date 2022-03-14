@@ -15,7 +15,7 @@ export type GradientStop = {
   color: IColor;
 };
 
-abstract class Gradient extends Paint {
+export default abstract class Gradient extends Paint {
 
   stops: GradientStop[]; // (scenery-internal)
   private lastStopRatio: number;
@@ -185,4 +185,3 @@ abstract class Gradient extends Paint {
 Gradient.prototype.isGradient = true;
 
 scenery.register( 'Gradient', Gradient );
-export default Gradient;

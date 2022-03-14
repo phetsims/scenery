@@ -11,7 +11,7 @@
 import Vector2 from '../../../dot/js/Vector2.js';
 import { scenery, Pointer } from '../imports.js';
 
-class Touch extends Pointer {
+export default class Touch extends Pointer {
 
   // For tracking which touch is which
   id: number;
@@ -76,4 +76,3 @@ class Touch extends Pointer {
 }
 
 scenery.register( 'Touch', Touch );
-export default Touch;

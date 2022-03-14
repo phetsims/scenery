@@ -17,7 +17,7 @@ import { scenery, Trail, Node } from '../imports.js';
 
 export type ActiveTrailPointer = WithoutNull<TrailPointer, 'trail'>;
 
-class TrailPointer {
+export default class TrailPointer {
 
   trail: Trail | null;
   isBefore!: boolean;
@@ -373,4 +373,3 @@ class TrailPointer {
 }
 
 scenery.register( 'TrailPointer', TrailPointer );
-export default TrailPointer;

@@ -44,7 +44,7 @@ function parseRGBNumber( str: string ): number {
   return Utils.roundSymmetric( parseInt( str, 10 ) * multiplier );
 }
 
-class Color {
+export default class Color {
   // RGBA values
   r!: number;
   g!: number;
@@ -1063,5 +1063,3 @@ Color.ColorIO = new IOType( 'ColorIO', {
     a: NumberIO
   }
 } );
-
-export default Color;

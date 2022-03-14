@@ -9,7 +9,7 @@
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import { scenery, LayoutProxy, Node, isWidthSizable, isHeightSizable } from '../imports.js';
 
-class LayoutConstraint {
+export default class LayoutConstraint {
 
   // The Node in whose local coordinate frame our layout computations are done.
   private ancestorNode: Node;
@@ -130,7 +130,7 @@ class LayoutConstraint {
 
     // TODO: How to handle the case where there is no trail?
 
-    return LayoutProxy.createFromPool( node.getUniqueTrailTo( this.ancestorNode ).removeAncestor() );
+    return LayoutProxy.pool.create( node.getUniqueTrailTo( this.ancestorNode ).removeAncestor() );
   }
 
   get enabled(): boolean {
@@ -160,4 +160,3 @@ class LayoutConstraint {
 }
 
 scenery.register( 'LayoutConstraint', LayoutConstraint );
-export default LayoutConstraint;

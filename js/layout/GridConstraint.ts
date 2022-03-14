@@ -24,7 +24,7 @@ const GRID_CONSTRAINT_OPTION_KEYS = [
   'ySpacing'
 ].concat( GRID_CONFIGURABLE_OPTION_KEYS );
 
-type GridConstraintSelfOptions = {
+type SelfOptions = {
   excludeInvisible?: boolean;
   spacing?: number;
   xSpacing?: number;
@@ -36,9 +36,9 @@ type GridConstraintSelfOptions = {
   minimumHeightProperty?: IProperty<number | null>;
 };
 
-type GridConstraintOptions = GridConstraintSelfOptions & GridConfigurableOptions;
+export type GridConstraintOptions = SelfOptions & GridConfigurableOptions;
 
-class GridConstraint extends GridConfigurable( LayoutConstraint ) {
+export default class GridConstraint extends GridConfigurable( LayoutConstraint ) {
 
   private cells: Set<GridCell>;
 
@@ -138,7 +138,7 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
         const subCells = _.filter( cells, cell => cell.containsIndex( orientation, index ) );
 
         const grow = Math.max( ...subCells.map( cell => cell.getEffectiveGrow( orientation ) ) );
-        const line = GridLine.createFromPool( index, subCells, grow );
+        const line = GridLine.pool.create( index, subCells, grow );
         lineMap.set( index, line );
 
         return line;
@@ -365,6 +365,4 @@ class GridConstraint extends GridConfigurable( LayoutConstraint ) {
 }
 
 scenery.register( 'GridConstraint', GridConstraint );
-export default GridConstraint;
 export { GRID_CONSTRAINT_OPTION_KEYS };
-export type { GridConstraintOptions };

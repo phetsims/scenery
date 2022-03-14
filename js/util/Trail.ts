@@ -24,7 +24,7 @@ import { scenery, Node, TrailPointer } from '../imports.js';
 // constants
 const ID_SEPARATOR = '-';
 
-class Trail {
+export default class Trail {
 
   // The main nodes of the trail, in order from root to leaf
   nodes: Node[];
@@ -1011,4 +1011,3 @@ class Trail {
 }
 
 scenery.register( 'Trail', Trail );
-export default Trail;

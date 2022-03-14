@@ -17,13 +17,13 @@ const CIRCLE_OPTION_KEYS = [
   'radius' // {number} - see setRadius() for more documentation
 ];
 
-type CircleSelfOptions = {
+type SelfOptions = {
   radius?: number;
 };
 
-type CircleOptions = CircleSelfOptions & PathOptions;
+export type CircleOptions = SelfOptions & PathOptions;
 
-class Circle extends Path {
+export default class Circle extends Path {
 
   // The radius of the circle
   private _radius: number;
@@ -321,6 +321,3 @@ Circle.prototype._mutatorKeys = CIRCLE_OPTION_KEYS.concat( Path.prototype._mutat
 Circle.prototype.drawableMarkFlags = Path.prototype.drawableMarkFlags.concat( [ 'radius' ] ).filter( flag => flag !== 'shape' );
 
 scenery.register( 'Circle', Circle );
-
-export default Circle;
-export type { CircleOptions };

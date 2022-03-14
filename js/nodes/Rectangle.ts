@@ -26,7 +26,7 @@ const RECTANGLE_OPTION_KEYS = [
   'cornerYRadius' // {number} - Sets vertical corner radius. See setCornerYRadius() for more documentation.
 ];
 
-type RectangleOptions = {
+export type RectangleOptions = {
   rectBounds?: Bounds2,
   rectSize?: Dimension2,
   rectX?: number,
@@ -38,7 +38,7 @@ type RectangleOptions = {
   cornerYRadius?: number
 } & PathOptions;
 
-class Rectangle extends Path {
+export default class Rectangle extends Path {
   // X value of the left side of the rectangle
   _rectX: number;
 
@@ -948,6 +948,3 @@ Rectangle.prototype._mutatorKeys = [ ...RECTANGLE_OPTION_KEYS, ...Path.prototype
 Rectangle.prototype.drawableMarkFlags = Path.prototype.drawableMarkFlags.concat( [ 'x', 'y', 'width', 'height', 'cornerXRadius', 'cornerYRadius' ] ).filter( flag => flag !== 'shape' );
 
 scenery.register( 'Rectangle', Rectangle );
-
-export { Rectangle as default };
-export type { RectangleOptions };

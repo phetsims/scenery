@@ -30,7 +30,7 @@ import { AlignBoxOptions } from './AlignBox.js';
 
 let globalId = 1;
 
-type AlignGroupOptions = {
+export type AlignGroupOptions = {
   // Whether the boxes should have all matching widths (otherwise it fits to size)
   matchHorizontal?: boolean,
 
@@ -43,7 +43,7 @@ const DEFAULT_OPTIONS = {
   matchVertical: true
 };
 
-class AlignGroup {
+export default class AlignGroup {
 
   private _alignBoxes: AlignBox[];
   private _matchHorizontal: boolean;
@@ -322,5 +322,3 @@ class AlignGroup {
 }
 
 scenery.register( 'AlignGroup', AlignGroup );
-export default AlignGroup;
-export type { AlignGroupOptions };

@@ -30,9 +30,9 @@ let outerGroupHighlightColor: IPaint = FocusHighlightPath.OUTER_LIGHT_GROUP_FOCU
 // - If value is a Shape the Shape is set to a FocusHighlightPath with default stylings in the global coordinate frame.
 // - If you provide a Node it is your responsibility to position it in the global coordinate frame.
 // - If the value is 'invisible' no highlight will be displayed at all.
-type Highlight = Node | Shape | null | 'invisible';
+export type Highlight = Node | Shape | null | 'invisible';
 
-type HighlightOverlayOptions = {
+export type HighlightOverlayOptions = {
 
   // {BooleanProperty} - controls whether highlights related to DOM focus are visible
   pdomFocusHighlightsVisibleProperty?: IProperty<boolean>;
@@ -48,7 +48,7 @@ type HighlightOverlayOptions = {
 type InteractiveHighlightingNode = InteractiveHighlightingVersion<typeof Node>;
 type ReadingBlockNode = ReadingBlockVersion<typeof Node>;
 
-class HighlightOverlay implements IOverlay {
+export default class HighlightOverlay implements IOverlay {
 
   private display: Display;
 
@@ -936,5 +936,3 @@ class HighlightOverlay implements IOverlay {
 }
 
 scenery.register( 'HighlightOverlay', HighlightOverlay );
-export default HighlightOverlay;
-export type { Highlight };

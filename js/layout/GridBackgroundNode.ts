@@ -10,13 +10,13 @@ import merge from '../../../phet-core/js/merge.js';
 import { scenery, Node, Rectangle, GridConstraint, GridCell, NodeOptions } from '../imports.js';
 
 type CreateCellBackground = ( gridCell: GridCell ) => Node | null;
-type GridBackgroundNodeSelfOptions = {
+type SelfOptions = {
   createCellBackground: CreateCellBackground;
 };
 
-type GridBackgroundNodeOptions = GridBackgroundNodeSelfOptions & NodeOptions;
+export type GridBackgroundNodeOptions = SelfOptions & NodeOptions;
 
-class GridBackgroundNode extends Node {
+export default class GridBackgroundNode extends Node {
 
   private constraint: GridConstraint;
   private createCellBackground: CreateCellBackground;
@@ -61,5 +61,3 @@ class GridBackgroundNode extends Node {
 }
 
 scenery.register( 'GridBackgroundNode', GridBackgroundNode );
-export default GridBackgroundNode;
-export type { GridBackgroundNodeOptions };

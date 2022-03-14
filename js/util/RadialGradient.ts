@@ -12,7 +12,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import platform from '../../../phet-core/js/platform.js';
 import { scenery, Gradient, SVGRadialGradient, ColorDef, SVGBlock, GradientStop } from '../imports.js';
 
-class RadialGradient extends Gradient {
+export default class RadialGradient extends Gradient {
 
   start: Vector2;
   end: Vector2;
@@ -155,4 +155,3 @@ class RadialGradient extends Gradient {
 RadialGradient.prototype.isRadialGradient = true;
 
 scenery.register( 'RadialGradient', RadialGradient );
-export default RadialGradient;

@@ -25,12 +25,12 @@ const DEFAULT_OPTIONS = {
 };
 
 type BoundsMethod = 'accurate' | 'unstroked' | 'tightPadding' | 'safePadding' | 'none';
-type PathOptions = {
+export type PathOptions = {
   shape?: Shape | string | null,
   boundsMethod?: BoundsMethod
 } & PaintableOptions & NodeOptions;
 
-class Path extends Paintable( Node ) {
+export default class Path extends Paintable( Node ) {
 
   // The Shape used for displaying this Path.
   // NOTE: _shape can be lazily constructed in subtypes (may be null) if hasShape() is overridden to return true,
@@ -531,6 +531,3 @@ scenery.register( 'Path', Path );
 
 // @public {Object} - Initial values for most Node mutator options
 Path.DEFAULT_OPTIONS = merge( {}, Node.DEFAULT_OPTIONS, DEFAULT_OPTIONS );
-
-export { Path as default };
-export type { PathOptions };

@@ -45,7 +45,7 @@ const TEXT_PROPERTY_TANDEM_NAME = 'textProperty';
 const useDOMAsFastBounds = window.navigator.userAgent.indexOf( 'like Gecko) Version/5' ) !== -1 &&
                            window.navigator.userAgent.indexOf( 'Safari/' ) !== -1;
 
-type TextBoundsMethod = 'fast' | 'fastCanvas' | 'accurate' | 'hybrid';
+export type TextBoundsMethod = 'fast' | 'fastCanvas' | 'accurate' | 'hybrid';
 type SelfOptions = {
   boundsMethod?: TextBoundsMethod,
   textProperty?: IProperty<string> | null,
@@ -57,9 +57,9 @@ type SelfOptions = {
   fontStyle?: string,
   fontSize?: string | number
 };
-type TextOptions = SelfOptions & PaintableOptions & NodeOptions;
+export type TextOptions = SelfOptions & PaintableOptions & NodeOptions;
 
-class Text extends Paintable( Node ) {
+export default class Text extends Paintable( Node ) {
 
   // The text to display
   _textProperty: TinyForwardingProperty<string>;
@@ -881,6 +881,3 @@ Text.TextIO = new IOType( 'TextIO', {
     }
   }
 } );
-
-export { Text as default };
-export type { TextOptions, TextBoundsMethod };

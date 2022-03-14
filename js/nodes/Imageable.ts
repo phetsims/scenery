@@ -46,7 +46,7 @@ const getScratchContext = () => {
 
 type Constructor<T = {}> = new ( ...args: any[] ) => T;
 
-type Mipmap = {
+export type Mipmap = {
   width: number,
   height: number,
   url: string,
@@ -55,9 +55,9 @@ type Mipmap = {
   updateCanvas?: () => void
 }[];
 
-type ImageableImage = string | HTMLImageElement | HTMLCanvasElement | Mipmap;
+export type ImageableImage = string | HTMLImageElement | HTMLCanvasElement | Mipmap;
 
-type ImageableOptions = {
+export type ImageableOptions = {
   image?: ImageableImage,
   imageOpacity?: number,
   initialWidth?: number,
@@ -1078,4 +1078,3 @@ Imageable.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
 scenery.register( 'Imageable', Imageable );
 export default Imageable;
-export type { ImageableOptions, Mipmap, ImageableImage };

@@ -20,14 +20,14 @@ const DEFAULT_OPTIONS = {
   align: 'center'
 } as const;
 
-type FlowBoxSelfOptions = {
+type SelfOptions = {
   excludeInvisibleChildrenFromBounds?: boolean,
   resize?: boolean
 } & Omit<FlowConstraintOptions, 'excludeInvisible'>;
 
-type FlowBoxOptions = FlowBoxSelfOptions & NodeOptions & WidthSizableSelfOptions & HeightSizableSelfOptions;
+export type FlowBoxOptions = SelfOptions & NodeOptions & WidthSizableSelfOptions & HeightSizableSelfOptions;
 
-class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
+export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
 
   private _constraint: FlowConstraint;
   private _cellMap: Map<Node, FlowCell>;
@@ -341,5 +341,3 @@ FlowBox.prototype._mutatorKeys = WidthSizable( Node ).prototype._mutatorKeys.con
 FlowBox.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
 scenery.register( 'FlowBox', FlowBox );
-export default FlowBox;
-export type { FlowBoxOptions };

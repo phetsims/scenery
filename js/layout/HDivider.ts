@@ -8,9 +8,9 @@
 
 import { scenery, Divider, HeightSizable, DividerOptions } from '../imports.js';
 
-type HDividerOptions = DividerOptions;
+export type HDividerOptions = DividerOptions;
 
-class HDivider extends HeightSizable( Divider ) {
+export default class HDivider extends HeightSizable( Divider ) {
   constructor( options?: HDividerOptions ) {
     super( options );
 
@@ -23,5 +23,3 @@ class HDivider extends HeightSizable( Divider ) {
 }
 
 scenery.register( 'HDivider', HDivider );
-export default HDivider;
-export type { HDividerOptions };
