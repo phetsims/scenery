@@ -205,6 +205,12 @@ class FocusManager {
   // control, observe what is currently focused). See FocusManager.pdomFocus for setting the focus. Don't set the value
   // of this Property dir`ectly.
   static readonly pdomFocusProperty = new Property<Focus | null>( null, {
+
+    // A focus change here can trigger another focus/blur synchronously and this Property will need to stay up-to-date
+    // throughout, see https://github.com/phetsims/scenery/issues/1377.
+    reentrant: true,
+
+    // phet-io
     tandem: Tandem.GENERAL_MODEL.createTandem( 'pdomFocusProperty' ),
     phetioDocumentation: 'Stores the current focus in the Parallel DOM, null if nothing has focus. This is not updated ' +
                          'based on mouse or touch input, only keyboard and other alternative inputs. Note that this only ' +
