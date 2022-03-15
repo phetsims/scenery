@@ -1,4 +1,4 @@
-// Copyright 2020-2021, University of Colorado Boulder
+// Copyright 2020-2022, University of Colorado Boulder
 
 import Property, { PropertyOptions } from '../../../axon/js/Property.js';
 import merge from '../../../phet-core/js/merge.js';
