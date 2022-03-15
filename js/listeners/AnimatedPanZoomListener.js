@@ -8,7 +8,6 @@
  * @author Jesse Greenberg
  */
 
-import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Utils from '../../../dot/js/Utils.js';
@@ -16,8 +15,9 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import merge from '../../../phet-core/js/merge.js';
 import platform from '../../../phet-core/js/platform.js';
 import EventType from '../../../tandem/js/EventType.js';
+import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import { EventIO, FocusManager, globalKeyStateTracker, Intent, KeyboardUtils, KeyboardZoomUtils, PanZoomListener, PDOMUtils, PressListener, scenery, Node } from '../imports.js'; // eslint-disable-line
+import { EventIO, FocusManager, globalKeyStateTracker, Intent, KeyboardUtils, KeyboardZoomUtils, Node, PanZoomListener, PDOMUtils, PressListener, scenery } from '../imports.js'; // eslint-disable-line
 
 // constants
 const MOVE_CURSOR = 'all-scroll';
@@ -36,6 +36,9 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * @param {Object} [options]
    */
   constructor( targetNode, options ) {
+
+    // While this is still JavaScript, this relatively useless assertion lets us import Node for other TypeScript
+    assert && assert( targetNode instanceof Node );
 
     options = merge( {
       tandem: Tandem.REQUIRED
@@ -78,10 +81,6 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // we will try to reposition so that the dragged object remains visible
     this._dragBounds = null;
 
-    // @private {boolean} - Whether a Pointer has gone down on a draggable Node. If true, we will try to
-    // do extra work during the drag operation to keep the drag target in view and displayed in the panBounds.
-    this._downOnDraggable = false;
-
     // @private {Bounds2} - The panBounds in the local coordinate frame of the targetNode. Generally, these are the
     // bounds of the targetNode that you can see within the panBounds.
     this._transformedPanBounds = this._panBounds.transformed( this._targetNode.matrix.inverted() );
@@ -89,6 +88,11 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // @private - whether or not the Pointer went down within the drag bounds - if it went down out of drag bounds
     // then user likely trying to pull an object back into view so we prevent panning during drag
     this._draggingInDragBounds = false;
+
+    // @private {IInputListener[]} - A collection of listeners Pointers with attached listeners that are down. Used
+    // primarily to determine if the attached listener defines any unique behavior that should happen during a drag,
+    // such as panning to keep custom Bounds in view. See IInputListener.createPanTargetBounds.
+    this._attachedPointers = [];
 
     // listeners that will be bound to `this` if we are on a (non-touchscreen) safari platform, referenced for
     // removal on dispose
@@ -196,11 +200,25 @@ class AnimatedPanZoomListener extends PanZoomListener {
       this.handleMiddlePress( dt );
     }
 
-    // if dragging an item with a mouse or touch pointer, make sure that it
-    // ramains visible in the zoomed in view, panning to it when it approaches
-    // edge of the screen
-    if ( this._downOnDraggable ) {
-      this.repositionDuringDrag();
+    // if dragging an item with a mouse or touch pointer, make sure that it ramains visible in the zoomed in view,
+    // panning to it when it approaches edge of the screen
+    if ( this._attachedPointers.length > 0 ) {
+
+      // only need to do this work if we are zoomed in
+      if ( this.getCurrentScale() > 1 ) {
+        if ( this._attachedPointers.length > 0 ) {
+
+          // Filter out any pointers that no longer have an attached listener due to interruption from things like opening
+          // the context menu with a right click.
+          this._attachedPointers = this._attachedPointers.filter( pointer => pointer.attachedListener );
+          assert && assert( this._attachedPointers.length <= 10, 'Not clearing attachedPointers, there is probably a memory leak' );
+        }
+
+        // Only reposition if one of the attached pointers is down and dragging within the drag bounds area
+        if ( this._draggingInDragBounds ) {
+          this.repositionDuringDrag();
+        }
+      }
     }
 
     this.animateToTargets( dt );
@@ -219,15 +237,17 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // If the Pointer signifies the input is intended for dragging save a reference to the trail so we can support
     // keeping the event target in view during the drag operation.
     if ( this._dragBounds !== null && event.pointer.hasIntent( Intent.DRAG ) ) {
-      this._downOnDraggable = true;
-      this._draggingInDragBounds = this._dragBounds.containsPoint( event.pointer.point );
 
-      if ( this._draggingInDragBounds ) {
+      // if this is our only down pointer, see if we should start panning during drag
+      if ( this._attachedPointers.length === 0 ) {
+        this._draggingInDragBounds = this._dragBounds.containsPoint( event.pointer.point );
+      }
 
-        // All conditions are met to start watching for bounds to keep in view during a drag interaction. Eagerly
-        // save the attachedListener here so that we don't have to do any work in the move event.
-        if ( event.pointer.attachedListener ) {
-          this.attachedListener = event.pointer.attachedListener;
+      // All conditions are met to start watching for bounds to keep in view during a drag interaction. Eagerly
+      // save the attachedListener here so that we don't have to do any work in the move event.
+      if ( event.pointer.attachedListener ) {
+        if ( !this._attachedPointers.includes( event.pointer ) ) {
+          this._attachedPointers.push( event.pointer );
         }
       }
     }
@@ -279,19 +299,21 @@ class AnimatedPanZoomListener extends PanZoomListener {
   move( event ) {
 
     // No need to do this work if we are zoomed out.
-    if ( this._downOnDraggable && this.getCurrentScale() > 1 ) {
+    if ( this._attachedPointers.length > 0 && this.getCurrentScale() > 1 ) {
 
       // Only try to get the attached listener if we didn't successfully get it on the down event. This should only
       // happen if the drag did not start withing dragBounds (the listener is likely pulling the Node into view) or
       // if a listener has not been attached yet. Once a listener is attached we can start using it to look for the
       // bounds to keep in view.
-      if ( this._draggingInDragBounds && !this.attachedListener ) {
-        const hasDragIntent = this.hasDragIntent( event.pointer );
-        const currentTargetExists = event.currentTarget !== null;
+      if ( this._draggingInDragBounds ) {
+        if ( !this._attachedPointers.includes( event.pointer ) ) {
+          const hasDragIntent = this.hasDragIntent( event.pointer );
+          const currentTargetExists = event.currentTarget !== null;
 
-        if ( currentTargetExists && hasDragIntent ) {
-          if ( event.pointer.attachedListener ) {
-            this.attachedListener = event.pointer.attachedListener;
+          if ( currentTargetExists && hasDragIntent ) {
+            if ( event.pointer.attachedListener ) {
+              this._attachedPointers.push( event.pointer );
+            }
           }
         }
       }
@@ -311,24 +333,27 @@ class AnimatedPanZoomListener extends PanZoomListener {
   getGlobalBoundsToViewDuringDrag() {
     let globalBoundsToView = null;
 
-    if ( this.attachedListener ) {
+    if ( this._attachedPointers.length > 0 ) {
 
       // We have an attachedListener from a SceneryEvent Pointer, see if it has information we can use to
       // get the target Bounds for the drag event.
 
-      if ( this.attachedListener.createPanTargetBounds ) {
+      // Only use the first one so that unique dragging behaviors don't "fight" if multiple pointers are down.
+      const activeListener = this._attachedPointers[ 0 ].attachedListener;
+
+      if ( activeListener.createPanTargetBounds ) {
 
         // client has defined the Bounds they want to keep in view for this Pointer (it is assigned to the
         // Pointer to support multitouch cases)
-        globalBoundsToView = this.attachedListener.createPanTargetBounds();
+        globalBoundsToView = activeListener.createPanTargetBounds();
       }
-      else if ( this.attachedListener.listener instanceof PressListener ) {
-        const attachedPressListener = this.attachedListener.listener;
+      else if ( activeListener.listener instanceof PressListener ) {
+        const attachedPressListener = activeListener.listener;
 
         // The PressListener might not be pressed anymore but the Pointer is still down, in which case it
         // has been interrupted or cancelled.
         // NOTE: It is possible I need to cancelPanDuringDrag() if it is no longer pressed, but I don't
-        // want to clear the reference to this.attachedListener, and I want to support resuming drag during touch-snag.
+        // want to clear the reference to the attachedListener, and I want to support resuming drag during touch-snag.
         if ( attachedPressListener.isPressed ) {
 
           // this will either be the PressListener's targetNode or the default target of the SceneryEvent on press
@@ -367,21 +392,37 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
   /**
    * Stop panning during drag by clearing variables that are set to indicate and provide information for this work.
+   * @param {SceneryEvent} [event] - if not provided all are panning is cancelled and we assume interruption
    * @private
    */
-  cancelPanningDuringDrag() {
-    this._downOnDraggable = false;
-    this.attachedListener = null;
+  cancelPanningDuringDrag( event ) {
+
+    if ( event ) {
+
+      // remove the attachedPointer associated with the event
+      const index = this._attachedPointers.indexOf( event.pointer );
+      if ( index > -1 ) {
+        this._attachedPointers.splice( index, 1 );
+      }
+    }
+    else {
+
+      // There is no SceneryEvent, we must be interrupting - clear all attachedPointers
+      this._attachedPointers = [];
+    }
+
+    // Clear flag indicating we are "dragging in bounds" next move
+    this._draggingInDragBounds = false;
   }
 
   /**
-   * Scenery listener API. Clear cursor and middlePress.
+   * Scenery listener API. Cancel any drag and pan behavior for the Pointer on the event.
    * @public (scenery-internal)
    *
    * @param {SceneryEvent} event
    */
   up( event ) {
-    this.cancelPanningDuringDrag();
+    this.cancelPanningDuringDrag( event );
   }
 
   /**
