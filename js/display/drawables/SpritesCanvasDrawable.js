@@ -7,7 +7,7 @@
  */
 
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import { scenery, Imageable, CanvasSelfDrawable, SpriteInstanceTransformType, Node } from '../../imports.js'; // eslint-disable-line
+import { CanvasSelfDrawable, Imageable, Node, scenery, SpriteInstanceTransformType } from '../../imports.js';
 
 class SpritesCanvasDrawable extends CanvasSelfDrawable {
   /**
@@ -24,6 +24,8 @@ class SpritesCanvasDrawable extends CanvasSelfDrawable {
    * @param {Matrix3} matrix - The transformation matrix applied for this node's coordinate system.
    */
   paintCanvas( wrapper, node, matrix ) {
+    assert && assert( node instanceof Node );
+
     const baseMipmapScale = Imageable.getApproximateMatrixScale( matrix ) * ( window.devicePixelRatio || 1 );
 
     const numInstances = node._spriteInstances.length;

@@ -7,7 +7,7 @@
  */
 
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import { scenery, CanvasSelfDrawable, PaintableStatelessDrawable, Node } from '../../imports.js'; // eslint-disable-line
+import { CanvasSelfDrawable, Node, PaintableStatelessDrawable, scenery } from '../../imports.js';
 
 class CircleCanvasDrawable extends PaintableStatelessDrawable( CanvasSelfDrawable ) {
   /**
@@ -24,6 +24,7 @@ class CircleCanvasDrawable extends PaintableStatelessDrawable( CanvasSelfDrawabl
    * @param {Matrix3} matrix - The transformation matrix applied for this node's coordinate system.
    */
   paintCanvas( wrapper, node, matrix ) {
+    assert && assert( node instanceof Node );
     const context = wrapper.context;
 
     context.beginPath();
