@@ -35,6 +35,7 @@ import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import { Display, IInputListener, Mouse, Node, Pointer, scenery, SceneryEvent, Trail } from '../imports.js';
 import IProperty from '../../../axon/js/IProperty.js';
+import Bounds2 from '../../../dot/js/Bounds2.js';
 
 // global
 let globalID = 0;
@@ -234,8 +235,8 @@ export default class PressListener extends EnabledComponent implements IInputLis
 
       press: _.noop,
       release: _.noop,
-      drag: _.noop,
       targetNode: null,
+      drag: _.noop,
       attach: true,
       mouseButton: 0,
       pressCursor: 'pointer',
@@ -599,6 +600,35 @@ export default class PressListener extends EnabledComponent implements IInputLis
   step() {
     this.flushCollapsedDrag();
   }
+
+  /**
+   * Set the callback that will create a Bounds2 in the global coordinate frame for the AnimatedPanZoomListener to
+   * keep in view during a drag operation. During drag input the AnimatedPanZoomListener will pan the screen to
+   * try and keep the returned Bounds2 visible. By default, the AnimatedPanZoomListener will try to keep the target of
+   * the drag in view but that may not always work if the target is not associated with the translated Node, the target
+   * is not defined, or the target has bounds that do not accurately surround the graphic you want to keep in view.
+   */
+  public setCreatePanTargetBounds( createDragPanTargetBounds: ( () => Bounds2 ) | null ): void {
+
+    // Forwarded to the pointerListener so that the AnimatedPanZoomListener can get this callback from the attached
+    // listener
+    this._pointerListener.createPanTargetBounds = createDragPanTargetBounds;
+  }
+
+  set createPanTargetBounds( createDragPanTargetBounds: ( () => Bounds2 ) | null ) { this.setCreatePanTargetBounds( createDragPanTargetBounds ); }
+
+  /**
+   * A convenient way to create and set the callback that will return a Bounds2 in the global coordinate frame for the
+   * AnimatedPanZoomListener to keep in view during a drag operation. The AnimatedPanZoomListener will try to keep the
+   * bounds of the last Node of the provided trail visible by panning the screen during a drag operation. See
+   * setCreatePanTargetBounds() for more documentation.
+   */
+  public setCreatePanTargetBoundsFromTrail( trail: Trail ): void {
+    assert && assert( trail.length > 0, 'trail has no Nodes to provide localBounds' );
+    this.setCreatePanTargetBounds( () => trail.localToGlobalBounds( trail.lastNode().localBounds ) );
+  }
+
+  set createPanTargetBoundsFromTrail( trail: Trail ) { this.setCreatePanTargetBoundsFromTrail( trail ); }
 
   /**
    * If there is a pending collapsed drag waiting, we'll fire that drag (usually before other events or during a step)

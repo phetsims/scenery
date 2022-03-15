@@ -316,11 +316,11 @@ class AnimatedPanZoomListener extends PanZoomListener {
       // We have an attachedListener from a SceneryEvent Pointer, see if it has information we can use to
       // get the target Bounds for the drag event.
 
-      if ( this.attachedListener.getDragPanTargetBounds ) {
+      if ( this.attachedListener.createPanTargetBounds ) {
 
         // client has defined the Bounds they want to keep in view for this Pointer (it is assigned to the
         // Pointer to support multitouch cases)
-        globalBoundsToView = this.attachedListener.getDragPanTargetBounds();
+        globalBoundsToView = this.attachedListener.createPanTargetBounds();
       }
       else if ( this.attachedListener.listener instanceof PressListener ) {
         const attachedPressListener = this.attachedListener.listener;

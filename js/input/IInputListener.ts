@@ -78,5 +78,5 @@ export default interface IInputListener {
   // Bounds are in the global coordinate frame.
   // While dragging, the AnimatedPanZoomListener will try to keep these bounds in view. Intended to be
   // called from a listener attached to a Pointer so that the API is compatible with multi-touch.
-  getDragPanTargetBounds?: () => Bounds2;
+  createPanTargetBounds?: ( () => Bounds2 ) | null;
 } // eslint-disable-line
