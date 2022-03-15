@@ -27,11 +27,27 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import dotRandom from '../../../../dot/js/dotRandom.js';
 import cleanArray from '../../../../phet-core/js/cleanArray.js';
+import Enumeration from '../../../../phet-core/js/Enumeration.js';
+import EnumerationValue from '../../../../phet-core/js/EnumerationValue.js';
 import platform from '../../../../phet-core/js/platform.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
-import { scenery, TransformTracker, PDOMPeer, PDOMUtils, FocusManager, Trail } from '../../imports.js';
-import { Node } from '../../imports.js'; // eslint-disable-line no-unused-vars
+import { FocusManager, Node, PDOMPeer, PDOMUtils, scenery, Trail, TransformTracker } from '../../imports.js';
+
+// PDOMInstances support two different styles of unique IDs, each with their own tradeoffs, https://github.com/phetsims/phet-io/issues/1851
+class PDOMUniqueIdStrategy extends EnumerationValue {
+  static INDICES = new PDOMUniqueIdStrategy();
+  static TRAIL_ID = new PDOMUniqueIdStrategy();
+
+  static enumeration = new Enumeration( PDOMUniqueIdStrategy );
+}
+
+// This constant is set up to allow us to change our unique id strategy. Both strategies have trade-offs that are
+// described in https://github.com/phetsims/phet-io/issues/1847#issuecomment-1068377336. TRAIL_ID is our path forward
+// currently, but will break PhET-iO playback if any Nodes are created in the recorded sim OR playback sim but not
+// both. Further information in the above issue and https://github.com/phetsims/phet-io/issues/1851.
+const UNIQUE_ID_STRATEGY = PDOMUniqueIdStrategy.TRAIL_ID;
 
 let globalId = 1;
 
@@ -124,6 +140,11 @@ class PDOMInstance {
       // The peer is not fully constructed until this update function is called, see https://github.com/phetsims/scenery/issues/832
       this.peer.update();
 
+      // Trail Ids will never change, so update them eagerly, a single time during construction.
+      if ( UNIQUE_ID_STRATEGY === PDOMUniqueIdStrategy.TRAIL_ID ) {
+        this.peer.updateIndicesStringAndElementIds();
+      }
+
       assert && assert( this.peer.primarySibling, 'accessible peer must have a primarySibling upon completion of construction' );
 
       // Scan over all of the nodes in our trail (that are NOT in our parent's trail) to check for pdomDisplays
@@ -180,11 +201,18 @@ class PDOMInstance {
     }
 
     if ( assert && this.node ) {
+      assert && assert( this.node instanceof Node );
 
       // If you hit this when mutating both children and innerContent at the same time, it is an issue with scenery,
       // remove once in a single step and the add the other in the next step.
       this.children.length > 0 && assert( !this.node.innerContent,
         `${this.children.length} child PDOMInstances present but this node has innerContent: ${this.node.innerContent}` );
+    }
+
+    if ( UNIQUE_ID_STRATEGY === PDOMUniqueIdStrategy.INDICES ) {
+
+      // This kills performance if there are enough PDOMInstances
+      this.updateDescendantPeerIds( pdomInstances );
     }
 
     sceneryLog && sceneryLog.PDOMInstance && sceneryLog.pop();
@@ -452,6 +480,12 @@ class PDOMInstance {
         i--;
       }
     }
+
+    if ( UNIQUE_ID_STRATEGY === PDOMUniqueIdStrategy.INDICES ) {
+
+      // This kills performance if there are enough PDOMInstances
+      this.updateDescendantPeerIds( this.children );
+    }
   }
 
   /**
@@ -474,6 +508,68 @@ class PDOMInstance {
     }
 
     this.transformTracker = new TransformTracker( trackedTrail );
+  }
+
+  /**
+   * Depending on what the unique ID strategy is, formulate the correct id for this PDOM instance.
+   * @public
+   * @returns {string}
+   */
+  getPDOMInstanceUniqueId() {
+
+    if ( UNIQUE_ID_STRATEGY === PDOMUniqueIdStrategy.INDICES ) {
+
+      const indicesString = [];
+
+      let pdomInstance = this; // eslint-disable-line consistent-this
+
+      while ( pdomInstance.parent ) {
+        const indexOf = pdomInstance.parent.children.indexOf( pdomInstance );
+        if ( indexOf === -1 ) {
+          return 'STILL_BEING_CREATED' + dotRandom.nextDouble();
+        }
+        indicesString.unshift( indexOf );
+        pdomInstance = pdomInstance.parent;
+      }
+      return indicesString.join( PDOMUtils.PDOM_UNIQUE_ID_SEPARATOR );
+    }
+    else {
+      assert && assert( UNIQUE_ID_STRATEGY === PDOMUniqueIdStrategy.TRAIL_ID );
+
+      return this.trail.getUniqueId();
+    }
+  }
+
+  /**
+   * Using indices requires updating whenever the PDOMInstance tree changes, so recursively update all descendant
+   * ids from such a change. Update peer ids for provided instances and all descendants of provided instances.
+   * @param {PDOMInstance[]} pdomInstances
+   * @private
+   */
+  updateDescendantPeerIds( pdomInstances ) {
+    assert && assert( UNIQUE_ID_STRATEGY === PDOMUniqueIdStrategy.INDICES, 'method should not be used with uniqueId comes from TRAIL_ID' );
+    const toUpdate = [].concat( pdomInstances );
+    while ( toUpdate.length > 0 ) {
+      const pdomInstance = toUpdate.shift();
+      pdomInstance.peer.updateIndicesStringAndElementIds();
+      toUpdate.push( ...pdomInstance.children );
+    }
+  }
+
+  /**
+   * @public
+   * @param display
+   * @param uniqueId - value returned from PDOMInstance.getPDOMInstanceUniqueId()
+   * @returns {Trail|null} - null if there is no path to the unique id provided.
+   */
+  static uniqueIdToTrail( display, uniqueId ) {
+    if ( UNIQUE_ID_STRATEGY === PDOMUniqueIdStrategy.INDICES ) {
+      return display.getTrailFromPDOMIndicesString( uniqueId );
+    }
+    else {
+      assert && assert( UNIQUE_ID_STRATEGY === PDOMUniqueIdStrategy.TRAIL_ID );
+      return Trail.fromUniqueId( display.rootNode, uniqueId );
+    }
   }
 
   /**

@@ -8,8 +8,7 @@
  */
 
 import Property from '../../../axon/js/Property.js';
-// For TypeScript support
-import { scenery, Node } from '../imports.js';  // eslint-disable-line no-unused-vars
+import { Node, scenery } from '../imports.js';
 
 class NodeProperty extends Property {
 
@@ -21,6 +20,7 @@ class NodeProperty extends Property {
    */
   constructor( node, property, attribute, options ) {
     assert && assert( typeof attribute === 'string', 'wrong type for getLocation' );
+    assert && assert( node instanceof Node );
 
     // Read-only Property that describes a part relative to the bounds of the node.
     super( node[ attribute ], options );

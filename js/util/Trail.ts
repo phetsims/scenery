@@ -19,10 +19,10 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Transform3 from '../../../dot/js/Transform3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { scenery, Node, TrailPointer } from '../imports.js';
+import { scenery, Node, TrailPointer, PDOMUtils } from '../imports.js';
 
 // constants
-const ID_SEPARATOR = '-';
+const ID_SEPARATOR = PDOMUtils.PDOM_UNIQUE_ID_SEPARATOR;
 
 export default class Trail {
 

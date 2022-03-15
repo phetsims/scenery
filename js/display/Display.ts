@@ -151,7 +151,12 @@ const CUSTOM_CURSORS = {
   'scenery-grabbing-pointer': [ 'grabbing', '-moz-grabbing', '-webkit-grabbing', 'pointer' ]
 } as { [ key: string ]: string[] };
 
+let globalIdCounter = 1;
+
 export default class Display {
+
+  // unique ID for the display instance, (scenery-internal), and useful for debugging with multiple displays.
+  id: number;
 
   // The (integral, > 0) dimensions of the Display's DOM element (only updates the DOM element on updateDisplay())
   sizeProperty: IProperty<Dimension2>;
@@ -372,6 +377,8 @@ export default class Display {
       // phet-io
       tandem: Tandem.OPTIONAL
     }, providedOptions );
+
+    this.id = globalIdCounter++;
 
     this._accessible = options.accessibility;
     this._preserveDrawingBuffer = options.preserveDrawingBuffer;
@@ -1016,7 +1023,7 @@ export default class Display {
     const newBackgroundCSS = this._backgroundColor === null ?
                              '' :
                              ( ( this._backgroundColor as Color ).toCSS ?
-                                ( this._backgroundColor as Color ).toCSS() :
+                               ( this._backgroundColor as Color ).toCSS() :
                                this._backgroundColor as string );
     if ( newBackgroundCSS !== this._currentBackgroundCSS ) {
       this._currentBackgroundCSS = newBackgroundCSS;
@@ -1435,7 +1442,7 @@ export default class Display {
 
     let result = '';
 
-    result += `<div style="${headerStyle}">Display Summary</div>`;
+    result += `<div style="${headerStyle}">Display (${this.id}) Summary</div>`;
     result += `${this.size.toString()} frame:${this._frameId} input:${!!this._input} cursor:${this._lastCursor}<br/>`;
 
     function nodeCount( node: Node ) {
@@ -2006,6 +2013,29 @@ export default class Display {
         window.open( url );
       }
     } );
+  }
+
+  /**
+   * Will return null if the string of indices isn't part of the PDOMInstance tree
+   */
+  getTrailFromPDOMIndicesString( indicesString: string ): Trail | null {
+
+    // No PDOMInstance tree if the display isn't accessible
+    if ( !this._rootPDOMInstance ) {
+      return null;
+    }
+
+    let instance = this._rootPDOMInstance;
+    const indexStrings = indicesString.split( PDOMUtils.PDOM_UNIQUE_ID_SEPARATOR );
+    for ( let i = 0; i < indexStrings.length; i++ ) {
+      const digit = parseInt( indexStrings[ i ], 10 );
+      instance = instance.children[ digit ];
+      if ( !instance ) {
+        return null;
+      }
+    }
+
+    return ( instance && instance.trail ) ? instance.trail : null;
   }
 
   /**

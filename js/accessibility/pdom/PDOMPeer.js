@@ -177,8 +177,6 @@ class PDOMPeer {
    * @public (scenery-internal)
    */
   update() {
-    const uniqueId = this.pdomInstance.trail.getUniqueId();
-
     let options = this.node.getBaseOptions();
 
     const callbacksForOtherNodes = [];
@@ -200,30 +198,25 @@ class PDOMPeer {
 
     // create the base DOM element representing this accessible instance
     // TODO: why not just options.focusable?
-    this._primarySibling = createElement( options.tagName, this.node.focusable, uniqueId, {
+    this._primarySibling = createElement( options.tagName, this.node.focusable, {
       namespace: options.pdomNamespace
     } );
 
     // create the container parent for the dom siblings
     if ( options.containerTagName ) {
-      this._containerParent = createElement( options.containerTagName, false, uniqueId, {
-        siblingName: 'container'
-      } );
+      this._containerParent = createElement( options.containerTagName, false );
     }
 
     // create the label DOM element representing this instance
     if ( options.labelTagName ) {
-      this._labelSibling = createElement( options.labelTagName, false, uniqueId, {
-        siblingName: 'label',
+      this._labelSibling = createElement( options.labelTagName, false, {
         excludeFromInput: this.node.excludeLabelSiblingFromInput
       } );
     }
 
     // create the description DOM element representing this instance
     if ( options.descriptionTagName ) {
-      this._descriptionSibling = createElement( options.descriptionTagName, false, uniqueId, {
-        siblingName: 'description'
-      } );
+      this._descriptionSibling = createElement( options.descriptionTagName, false );
     }
 
     this.orderElements( options );
@@ -913,6 +906,41 @@ class PDOMPeer {
     this.invalidateCSSPositioning();
   }
 
+  // @private
+  getElementId( siblingName, stringId ) {
+    return `display${this.display.id}-${siblingName}-${stringId}`;
+  }
+
+  // @public
+  updateIndicesStringAndElementIds() {
+    const indices = this.pdomInstance.getPDOMInstanceUniqueId();
+
+    if ( this._primarySibling ) {
+
+      // NOTE: dataset isn't supported by all namespaces (like MathML) so we need to use setAttribute
+      this._primarySibling.setAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID, indices );
+      this._primarySibling.id = this.getElementId( 'primary', indices );
+    }
+    if ( this._labelSibling ) {
+
+      // NOTE: dataset isn't supported by all namespaces (like MathML) so we need to use setAttribute
+      this._labelSibling.setAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID, indices );
+      this._labelSibling.id = this.getElementId( 'label', indices );
+    }
+    if ( this._descriptionSibling ) {
+
+      // NOTE: dataset isn't supported by all namespaces (like MathML) so we need to use setAttribute
+      this._descriptionSibling.setAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID, indices );
+      this._descriptionSibling.id = this.getElementId( 'description', indices );
+    }
+    if ( this._containerParent ) {
+
+      // NOTE: dataset isn't supported by all namespaces (like MathML) so we need to use setAttribute
+      this._containerParent.setAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID, indices );
+      this._containerParent.id = this.getElementId( 'container', indices );
+    }
+  }
+
   /**
    * Mark that the siblings of this PDOMPeer need to be updated in the next Display update. Possibly from a
    * change of accessible content or node transformation. Does nothing if already marked dirty.
@@ -1126,14 +1154,13 @@ Poolable.mixInto( PDOMPeer, {
 
 /**
  * Create a sibling element for the PDOMPeer.
- *
+ * TODO: this should be inlined with the PDOMUtils method
  * @param {string} tagName
  * @param {boolean} focusable
- * @param {string} trailId - unique id that points to the instance of the node
  * @param {Object} [options] - passed along to PDOMUtils.createElement
  * @returns {HTMLElement}
  */
-function createElement( tagName, focusable, trailId, options ) {
+function createElement( tagName, focusable, options ) {
   options = merge( {
 
     // {string|null} - addition to the trailId, separated by a hyphen to identify the different siblings within
@@ -1144,12 +1171,6 @@ function createElement( tagName, focusable, trailId, options ) {
     // see ParallelDOM.setExcludeLabelSiblingFromInput for more information
     excludeFromInput: false
   }, options );
-
-  // add sibling name to unique ID generated from the trail to make the non-primary siblings unique in the DOM
-  assert && assert( options.id === undefined, 'createElement will set optional id' );
-  options.id = options.siblingName ? `${options.siblingName}-${trailId}` : trailId;
-
-  options.trailId = trailId;
 
   const newElement = PDOMUtils.createElement( tagName, focusable, options );
 

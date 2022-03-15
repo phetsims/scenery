@@ -14,7 +14,7 @@ import validate from '../../../../axon/js/validate.js';
 import ValidatorDef from '../../../../axon/js/ValidatorDef.js';
 import merge from '../../../../phet-core/js/merge.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
-import { scenery, PDOMSiblingStyle } from '../../imports.js';
+import { PDOMSiblingStyle, scenery } from '../../imports.js';
 
 // constants
 const NEXT = 'NEXT';
@@ -107,8 +107,8 @@ const ARIA_ACTIVE_DESCENDANT = 'aria-activedescendant';
 const DATA_FOCUSABLE = 'data-focusable';
 
 // data attribute which contains the unique ID of a Trail that allows us to find the PDOMPeer associated
-// with a particular DOM element. This is used in several places in scenery accessibility, mostly PDOMPeer.
-const DATA_TRAIL_ID = 'data-trail-id';
+// with a particular DOM element. This is used in several places in scenery accessibility, mostly PDOMPeer and Input.
+const DATA_PDOM_UNIQUE_ID = 'data-unique-id';
 
 // {Array.<String>} attributes that put an ID of another attribute as the value, see https://github.com/phetsims/scenery/issues/819
 const ASSOCIATION_ATTRIBUTES = [ ARIA_LABELLEDBY, ARIA_DESCRIBEDBY, ARIA_ACTIVE_DESCENDANT ];
@@ -504,24 +504,13 @@ const PDOMUtils = {
 
       // {string|null} - A string id that uniquely represents this element in the DOM, must be completely
       // unique in the DOM.
-      id: null,
-
-      // {string|null} - A string id from Trail.getUnqiqueId pointing to the node that is being
-      // represented by this element in the PDOM. Will by used to dispatch events received by this
-      // DOM element to the scenery Node being represented. Should be unique to the PDOMInstance
-      // but each sibling for an PDOMPeer should have the same trailId.
-      trailId: null
+      id: null
     }, options );
 
     const domElement = options.namespace
                        ? document.createElementNS( options.namespace, tagName )
                        : document.createElement( tagName );
 
-    if ( options.trailId ) {
-
-      // NOTE: dataset isn't supported by all namespaces (like MathML) so we need to use setAttribute
-      domElement.setAttribute( PDOMUtils.DATA_TRAIL_ID, options.trailId );
-    }
     if ( options.id ) {
       domElement.id = options.id;
     }
@@ -602,7 +591,8 @@ const PDOMUtils = {
   USER_GESTURE_EVENTS: USER_GESTURE_EVENTS,
   BLOCKED_DOM_EVENTS: BLOCKED_DOM_EVENTS,
 
-  DATA_TRAIL_ID: DATA_TRAIL_ID,
+  DATA_PDOM_UNIQUE_ID: DATA_PDOM_UNIQUE_ID,
+  PDOM_UNIQUE_ID_SEPARATOR: '-',
 
   // attribute used for elements which Scenery should not dispatch SceneryEvents when DOM event input is received on
   // them, see ParallelDOM.setExcludeLabelSiblingFromInput for more information

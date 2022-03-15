@@ -9,7 +9,7 @@
  */
 
 import Vector2 from '../../../dot/js/Vector2.js';
-import { scenery, Trail, Pointer, Focus, FocusManager, PDOMInstance, Display, Node } from '../imports.js';
+import { Display, Focus, FocusManager, Node, PDOMInstance, Pointer, scenery, Trail } from '../imports.js';
 
 export default class PDOMPointer extends Pointer {
 
@@ -58,6 +58,12 @@ export default class PDOMPointer extends Pointer {
 
           FocusManager.pdomFocus = new Focus( this.display, visualTrail );
           this.point = visualTrail.parentToGlobalPoint( lastNode.center );
+
+          // TODO: it would be better if we could use this assertion instead, but guessVisualTrail seems to not be working here, https://github.com/phetsims/phet-io/issues/1847
+          if ( isNaN( this.point.x ) ) {
+            this.point.setXY( 0, 0 );
+            // assert && assert( !isNaN( this.point.x ), 'Guess visual trail should be able to get the right point' );
+          }
         }
         else {
 
@@ -115,29 +121,13 @@ export default class PDOMPointer extends Pointer {
     } );
   }
 
-  /**
-   * @returns - updated trail
-   */
-  updateTrail( trailId: string ): Trail {
-    if ( this.trail && this.trail.getUniqueId() === trailId ) {
-      return this.trail;
-    }
-    const trail = Trail.fromUniqueId( this.display.rootNode, trailId );
-    this.trail = trail;
-    return trail;
-  }
+  updateTrail( trail: Trail ): Trail {
 
-  /**
-   * Recompute the trail to the node under this PDOMPointer. Updating the trail here is generally not necessary since
-   * it is recomputed on focus. But there are times where pdom events can be called out of order with focus/blur
-   * and the trail will either be null or stale. This might happen more often when scripting fake browser events
-   * with a timeout (like in fuzzBoard).
-   * (scenery-internal)
-   */
-  invalidateTrail( trailString: string ) {
-    if ( this.trail === null || this.trail.uniqueId !== trailString ) {
-      this.trail = Trail.fromUniqueId( this.display.rootNode, trailString );
+    // overwrite this.trail if we don't have a trail yet, or if the new trail doesn't equal the old one.
+    if ( !( this.trail && this.trail.equals( trail ) ) ) {
+      this.trail = trail;
     }
+    return this.trail;
   }
 }
 

@@ -168,7 +168,7 @@ import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import NumberIO from '../../../tandem/js/types/NumberIO.js';
-import { scenery, Display, Features, Trail, EventIO, Mouse, PDOMPointer, Pen, Pointer, SceneryEvent, Touch, PDOMUtils, BatchedDOMEvent, BrowserEvents, Node, BatchedDOMEventType, BatchedDOMEventCallback, IInputListener, SceneryListenerFunction, WindowTouch } from '../imports.js';
+import { BatchedDOMEvent, BatchedDOMEventCallback, BatchedDOMEventType, BrowserEvents, Display, EventIO, Features, IInputListener, Mouse, Node, PDOMInstance, PDOMPointer, PDOMUtils, Pen, Pointer, scenery, SceneryEvent, SceneryListenerFunction, Touch, Trail, WindowTouch } from '../imports.js';
 
 // This is the list of keys that get serialized AND deserialized. NOTE: Do not add or change this without
 // consulting the PhET-iO IOType schema for this in EventIO
@@ -707,12 +707,6 @@ export default class Input {
         sceneryLog && sceneryLog.Input && sceneryLog.Input( `focusOut(${Input.debugText( null, event )});` );
         sceneryLog && sceneryLog.Input && sceneryLog.push();
 
-        // recompute the trail on focusout if necessary - since a blur/focusout may have been initiated from a
-        // focus/focusin listener, it is possible that focusout was called more than once before focusin is called on the
-        // next active element, see https://github.com/phetsims/scenery/issues/898
-        const pdomPointer = this.ensurePDOMPointer();
-        pdomPointer.invalidateTrail( this.getTrailId( event ) );
-
         const trail = this.updateTrailForPDOMDispatch( event );
         this.dispatchPDOMEvent<FocusEvent>( trail, 'blur', event, false );
         this.dispatchPDOMEvent<FocusEvent>( trail, 'focusout', event, true );
@@ -835,16 +829,19 @@ export default class Input {
 
           if ( this.display.interactive ) {
 
-            const trailId = this.getTrailId( event );
-            const trail = trailId ? Trail.fromUniqueId( this.display.rootNode, trailId ) : null;
+            const trail = this.getTrailFromPDOMEvent( event );
 
             // Only dispatch the event if the click did not happen rapidly after an up event. It is
             // likely that the screen reader dispatched both pointer AND click events in this case, and
             // we only want to respond to one or the other. See https://github.com/phetsims/scenery/issues/1094.
             // This is outside of the clickAction execution so that blocked clicks are not part of the PhET-iO data
             // stream.
-            if ( trail && !( _.some( trail.nodes, node => node.positionInPDOM ) && eventName === 'click' &&
-                 event.timeStamp - this.upTimeStamp <= PDOM_CLICK_DELAY ) ) {
+            const notBlockingSubsequentClicksOccurringTooQuickly = trail && !( eventName === 'click' &&
+                                                                   _.some( trail.nodes, node => node.positionInPDOM ) &&
+                                                                   event.timeStamp - this.upTimeStamp <= PDOM_CLICK_DELAY );
+
+
+            if ( trail && notBlockingSubsequentClicksOccurringTooQuickly ) {
               ( this[ actionName as keyof Input ] as unknown as PhetioAction<[ Event ]> ).execute( event );
             }
           }
@@ -1147,21 +1144,15 @@ export default class Input {
     const relatedTargetElement = domEvent.relatedTarget;
 
     if ( relatedTargetElement && this.isTargetUnderPDOM( relatedTargetElement as HTMLElement ) ) {
-      const relatedTargetId = Input.getRelatedTargetTrailId( domEvent );
-      return relatedTargetId ? Trail.fromUniqueId( this.display.rootNode, relatedTargetId ) : null;
+
+      const relatedTarget = ( domEvent.relatedTarget as unknown as Element );
+      assert && assert( relatedTarget instanceof window.Element );
+      const trailIndices = relatedTarget.getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID );
+      assert && assert( trailIndices, 'should not be null' );
+
+      return PDOMInstance.uniqueIdToTrail( this.display, trailIndices! );
     }
     return null;
-  }
-
-  /**
-   * Get the related target trail ID of the node represented by a DOM element in the accessible PDOM.
-   */
-  private static getRelatedTargetTrailId( domEvent: FocusEvent | MouseEvent ): string {
-    const relatedTarget = ( domEvent.relatedTarget as unknown as Element );
-    assert && assert( relatedTarget instanceof window.Element );
-    const trailID = relatedTarget.getAttribute( PDOMUtils.DATA_TRAIL_ID );
-    assert && assert( trailID, 'should not be null' );
-    return trailID!;
   }
 
   /**
@@ -1170,29 +1161,34 @@ export default class Input {
    */
   private updateTrailForPDOMDispatch( domEvent: Event ): Trail {
 
-    const trailID = this.getTrailId( domEvent );
-    assert && assert( trailID, 'trailID should not be null' );
-    return this.ensurePDOMPointer().updateTrail( trailID );
+    const trail = this.getTrailFromPDOMEvent( domEvent );
+    assert && assert( trail, 'trail should not be null because domEvent is from the PDOM' );
+    return this.ensurePDOMPointer().updateTrail( trail! );
   }
 
   /**
    * Get the trail ID of the node represented by a DOM element who is the target of a DOM Event in the accessible PDOM.
+   * This is a bit of a misnomer, because the domEvent doesn't have to be under the PDOM. Returns null if not in the PDOM.
    */
-  private getTrailId( domEvent: TargetSubstitudeAugmentedEvent ): string {
+  private getTrailFromPDOMEvent( domEvent: TargetSubstitudeAugmentedEvent ): Trail | null {
     assert && assert( this.display._accessible, 'Display must be accessible to get trail IDs from PDOMPeers' );
     assert && assert( domEvent.target || domEvent[ TARGET_SUBSTITUTE_KEY ], 'need a way to get the target' );
 
     // could be serialized event for phet-io playbacks, see Input.serializeDOMEvent()
     if ( domEvent[ TARGET_SUBSTITUTE_KEY ] ) {
-      return domEvent[ TARGET_SUBSTITUTE_KEY ]!.getAttribute( PDOMUtils.DATA_TRAIL_ID )!;
+      const trailIndices = domEvent[ TARGET_SUBSTITUTE_KEY ]!.getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID );
+      return PDOMInstance.uniqueIdToTrail( this.display, trailIndices! );
     }
     else {
       const target = ( domEvent.target as unknown as Element );
       assert && assert( target instanceof window.Element );
-      const trailID = target.getAttribute( PDOMUtils.DATA_TRAIL_ID );
-      assert && assert( trailID, 'should not be null' );
-      return trailID!;
+      if ( target && this.isTargetUnderPDOM( target as HTMLElement ) ) {
+        const trailIndices = target.getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID );
+        assert && assert( trailIndices, 'should not be null' );
+        return PDOMInstance.uniqueIdToTrail( this.display, trailIndices! );
+      }
     }
+    return null;
   }
 
   /**
@@ -1898,12 +1894,15 @@ export default class Input {
       else if ( EVENT_KEY_VALUES_AS_ELEMENTS.includes( property ) && typeof domEventProperty.getAttribute === 'function' &&
 
                 // If false, then this target isn't a PDOM element, so we can skip this serialization
-                domEventProperty.hasAttribute( PDOMUtils.DATA_TRAIL_ID ) ) {
+                domEventProperty.hasAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID ) ) {
 
         // If the target came from the accessibility PDOM, then we want to store the Node trail id of where it came from.
 
         entries[ property ] = {};
-        entries[ property ][ PDOMUtils.DATA_TRAIL_ID ] = domEventProperty.getAttribute( PDOMUtils.DATA_TRAIL_ID );
+        entries[ property ][ PDOMUtils.DATA_PDOM_UNIQUE_ID ] = domEventProperty.getAttribute( PDOMUtils.DATA_PDOM_UNIQUE_ID );
+
+        // Have the ID also
+        entries[ property ].id = domEventProperty.getAttribute( 'id' );
       }
       else {
 
@@ -1925,7 +1924,7 @@ export default class Input {
     // serialize the relatedTarget back into an event Object, so that it can be passed to the init config in the Event
     // constructor
     if ( configForConstructor.relatedTarget ) {
-      const htmlElement = document.getElementById( configForConstructor.relatedTarget[ PDOMUtils.DATA_TRAIL_ID ] );
+      const htmlElement = document.getElementById( configForConstructor.relatedTarget.id );
       assert && assert( htmlElement, 'cannot deserialize event when related target is not in the DOM.' );
       configForConstructor.relatedTarget = htmlElement;
     }
@@ -1941,10 +1940,13 @@ export default class Input {
         // Special case for target since we can't set that read-only property. Instead use a substitute key.
         if ( key === 'target' ) {
 
+          assert && eventObject.target && eventObject.target.id &&
+          assert( document.getElementById( eventObject.target.id ), 'target should exist in the PDOM to support playback.' );
+
           // @ts-ignore
           domEvent[ TARGET_SUBSTITUTE_KEY ] = _.clone( eventObject[ key ] ) || {};
 
-          // TODO: only needed until https://github.com/phetsims/scenery/issues/1296 is complete, double check on getTrailIdImplementation() too
+          // TODO: only needed until https://github.com/phetsims/scenery/issues/1296 is complete, double check on getTrailFromPDOMEvent() too
           // @ts-ignore
           domEvent[ TARGET_SUBSTITUTE_KEY ].getAttribute = function( key ) {
             return this[ key ];

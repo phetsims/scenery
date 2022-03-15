@@ -1158,7 +1158,8 @@ class KeyPress {
         assert && assert( document.body.contains( firstFocusable ), 'focusable should be attached to the body' );
 
         // assumes that focusable DOM elements are correctly positioned, which should be the case - an alternative
-        // could be to use Trail.fromUniqueId, but that function requires information that is not available here
+        // could be to use Displat.getTrailFromPDOMIndicesString(), but that function requires information that is not
+        // available here.
         const centerX = firstFocusable.offsetLeft + firstFocusable.offsetWidth / 2;
         const centerY = firstFocusable.offsetTop + firstFocusable.offsetHeight / 2;
         scratchScaleTargetVector.setXY( centerX, centerY );
