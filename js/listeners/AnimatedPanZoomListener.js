@@ -851,7 +851,9 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
   /**
    * Set the destination position to pan such that the provided globalBounds are totally visible within the panBounds.
-   * This will never pan outside panBounds, if the provided globalBounds extend beyond them.
+   * This will never pan outside panBounds, if the provided globalBounds extend beyond them. If the globalBounds is
+   * larger than the screen size this function does nothing. It doesn't make sense to pan to keep an object in view
+   * if the screen is larger than the object.
    * @private
    *
    * @param {Bounds2} globalBounds - in global coordinate frame
@@ -861,23 +863,29 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
     const boundsInTargetFrame = this._targetNode.globalToLocalBounds( globalBounds );
 
-    const distanceToLeftEdge = this._transformedPanBounds.left - boundsInTargetFrame.left;
-    const distanceToRightEdge = this._transformedPanBounds.right - boundsInTargetFrame.right;
-    const distanceToTopEdge = this._transformedPanBounds.top - boundsInTargetFrame.top;
-    const distanceToBottomEdge = this._transformedPanBounds.bottom - boundsInTargetFrame.bottom;
-
     const translationDelta = new Vector2( 0, 0 );
-    if ( distanceToBottomEdge < 0 ) {
-      translationDelta.y = -distanceToBottomEdge;
-    }
-    if ( distanceToTopEdge > 0 ) {
-      translationDelta.y = -distanceToTopEdge;
-    }
-    if ( distanceToRightEdge < 0 ) {
-      translationDelta.x = -distanceToRightEdge;
-    }
-    if ( distanceToLeftEdge > 0 ) {
-      translationDelta.x = -distanceToLeftEdge;
+
+    // If the provided bounds are wider than the available pan bounds we shouldn't try to shift it, it will awkwardly
+    // try to slide the screen to one of the sides of the bounds. This operation only makes sense if the screen can
+    // totally contain the object being dragged.
+    if ( boundsInTargetFrame.width < this._transformedPanBounds.width && boundsInTargetFrame.height < this._transformedPanBounds.height ) {
+      const distanceToLeftEdge = this._transformedPanBounds.left - boundsInTargetFrame.left;
+      const distanceToRightEdge = this._transformedPanBounds.right - boundsInTargetFrame.right;
+      const distanceToTopEdge = this._transformedPanBounds.top - boundsInTargetFrame.top;
+      const distanceToBottomEdge = this._transformedPanBounds.bottom - boundsInTargetFrame.bottom;
+
+      if ( distanceToBottomEdge < 0 ) {
+        translationDelta.y = -distanceToBottomEdge;
+      }
+      if ( distanceToTopEdge > 0 ) {
+        translationDelta.y = -distanceToTopEdge;
+      }
+      if ( distanceToRightEdge < 0 ) {
+        translationDelta.x = -distanceToRightEdge;
+      }
+      if ( distanceToLeftEdge > 0 ) {
+        translationDelta.x = -distanceToLeftEdge;
+      }
     }
 
     this.setDestinationPosition( this.sourcePosition.plus( translationDelta ) );
