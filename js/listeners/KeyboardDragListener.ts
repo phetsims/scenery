@@ -30,7 +30,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import platform from '../../../phet-core/js/platform.js';
 import EventType from '../../../tandem/js/EventType.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import { IInputListener, KeyboardUtils, scenery, SceneryEvent } from '../imports.js';
+import { IInputListener, KeyboardUtils, Node, PDOMPointer, scenery, SceneryEvent } from '../imports.js';
 import IProperty from '../../../axon/js/IProperty.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import IReadOnlyProperty from '../../../axon/js/IReadOnlyProperty.js';
@@ -172,6 +172,13 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
   // Implements disposal
   private readonly _disposeKeyboardDragListener: () => void;
 
+  // A listener added to the pointer when dragging starts so that we can attach a listener and provide a channel of
+  // communication to the AnimatedPanZoomListener to define custom behavior for screen panning during a drag operation.
+  private readonly _pointerListener: IInputListener;
+
+  // A reference to the Pointer during a drag operation so that we can add/remove the _pointerListener.
+  private _pointer: PDOMPointer | null;
+
   constructor( providedOptions?: KeyboardDragListenerOptions ) {
 
     const options = optionize<KeyboardDragListenerOptions, SelfOptions, EnabledComponentOptions>( {
@@ -232,6 +239,14 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
       const key = KeyboardUtils.getEventCode( event.domEvent );
       assert && assert( key, 'How can we have a null key for KeyboardDragListener?' );
 
+      // If there are no movement keys down, attach a listener to the Pointer that will tell the AnimatedPanZoomListener
+      // to keep this Node in view
+      if ( !this.movementKeysDown && KeyboardUtils.isMovementKey( event.domEvent ) ) {
+        assert && assert( this._pointer === null, 'We should have cleared the Pointer reference by now.' );
+        this._pointer = event.pointer as PDOMPointer;
+        event.pointer.addInputListener( this._pointerListener, true );
+      }
+
       // update the key state
       this.keyState.push( {
         keyDown: true,
@@ -267,6 +282,15 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
     } );
 
     this.dragEndAction = new PhetioAction( event => {
+
+      // If there are no movement keys down, attach a listener to the Pointer that will tell the AnimatedPanZoomListener
+      // to keep this Node in view
+      if ( !this.movementKeysDown ) {
+        assert && assert( event.pointer === this._pointer, 'How could the event Pointer be anything other than this PDOMPointer?' );
+        this._pointer!.removeInputListener( this._pointerListener );
+        this._pointer = null;
+      }
+
       this._end && this._end( event );
     }, {
       parameters: [ { name: 'event', phetioType: SceneryEvent.SceneryEventIO } ],
@@ -281,6 +305,13 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
     stepTimer.addListener( stepListener );
 
     this.enabledProperty.lazyLink( this.onEnabledPropertyChange.bind( this ) );
+
+    this._pointerListener = {
+      listener: this,
+      interrupt: this.interrupt.bind( this )
+    };
+
+    this._pointer = null;
 
     // called in dispose
     this._disposeKeyboardDragListener = () => {
@@ -385,6 +416,19 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
    * Setter for the hotkeyHoldInterval property, see options.hotkeyHoldInterval for more info.
    */
   set hotkeyHoldInterval( hotkeyHoldInterval: number ) { this._hotkeyHoldInterval = hotkeyHoldInterval; }
+
+  get isPressed(): boolean {
+    return !!this._pointer;
+  }
+
+  /**
+   * Get the current target Node of the drag.
+   */
+  public getCurrentTarget(): Node {
+    assert && assert( this.isPressed, 'We have no currentTarget if we are not pressed' );
+    assert && assert( this._pointer && this._pointer.trail, 'Must have a Pointer with an active trail if we are pressed' );
+    return this._pointer!.trail!.lastNode();
+  }
 
   /**
    * Fired when the enabledProperty changes
@@ -838,15 +882,21 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
     this.keyState = [];
     this.resetHotkeyState();
     this.resetPressAndHold();
+
+    if ( this._pointer ) {
+      assert && assert( 'A reference to the Pointer means it should have the pointerListener' );
+      this._pointer!.removeInputListener( this._pointerListener );
+      this._pointer = null;
+    }
   }
 
   /**
    * Make eligible for garbage collection.
    */
   public dispose() {
+    this.interrupt();
     this._disposeKeyboardDragListener();
   }
-
 
   /**
    * Returns true if the key corresponds to a key that should move the object to the left.

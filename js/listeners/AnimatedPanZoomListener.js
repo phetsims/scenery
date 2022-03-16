@@ -17,7 +17,7 @@ import platform from '../../../phet-core/js/platform.js';
 import EventType from '../../../tandem/js/EventType.js';
 import PhetioAction from '../../../tandem/js/PhetioAction.js';
 import Tandem from '../../../tandem/js/Tandem.js';
-import { EventIO, FocusManager, globalKeyStateTracker, Intent, KeyboardUtils, KeyboardZoomUtils, Node, PanZoomListener, PDOMUtils, PressListener, scenery } from '../imports.js'; // eslint-disable-line
+import { EventIO, FocusManager, globalKeyStateTracker, Intent, KeyboardDragListener, KeyboardUtils, KeyboardZoomUtils, Node, PanZoomListener, PDOMPointer, PDOMUtils, PressListener, scenery } from '../imports.js'; // eslint-disable-line
 
 // constants
 const MOVE_CURSOR = 'all-scroll';
@@ -214,8 +214,10 @@ class AnimatedPanZoomListener extends PanZoomListener {
           assert && assert( this._attachedPointers.length <= 10, 'Not clearing attachedPointers, there is probably a memory leak' );
         }
 
-        // Only reposition if one of the attached pointers is down and dragging within the drag bounds area
-        if ( this._draggingInDragBounds ) {
+        // Only reposition if one of the attached pointers is down and dragging within the drag bounds area, or if one
+        // of the attached pointers is a PDOMPointer, which indicates that we are dragging with alternative input
+        // (in which case draggingInDragBounds does not apply)
+        if ( this._draggingInDragBounds || this._attachedPointers.some( pointer => pointer instanceof PDOMPointer ) ) {
           this.repositionDuringDrag();
         }
       }
@@ -347,7 +349,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
         // Pointer to support multitouch cases)
         globalBoundsToView = activeListener.createPanTargetBounds();
       }
-      else if ( activeListener.listener instanceof PressListener ) {
+      else if ( activeListener.listener instanceof PressListener ||
+                activeListener.listener instanceof KeyboardDragListener ) {
         const attachedPressListener = activeListener.listener;
 
         // The PressListener might not be pressed anymore but the Pointer is still down, in which case it
@@ -488,9 +491,10 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // handle zoom
     this.handleZoomCommands( domEvent );
 
+    const keyboardDragIntent = event.pointer.hasIntent( Intent.KEYBOARD_DRAG );
+
     // handle translation
     if ( KeyboardUtils.isArrowKey( domEvent ) ) {
-      const keyboardDragIntent = event.pointer.hasIntent( Intent.KEYBOARD_DRAG );
 
       if ( !keyboardDragIntent ) {
         sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'MultiListener handle arrow key down' );
@@ -500,6 +504,19 @@ class AnimatedPanZoomListener extends PanZoomListener {
         this.repositionFromKeys( keyPress );
 
         sceneryLog && sceneryLog.InputListener && sceneryLog.pop();
+      }
+    }
+
+    if ( KeyboardUtils.isMovementKey( domEvent ) ) {
+      if ( keyboardDragIntent ) {
+
+        // Look for any attached pointers if we are dragging with a keyboard and add them to the list. When dragging
+        // stops the Pointer listener is detached and the pointer is removed from the list in `step()`.
+        if ( event.pointer.isAttached() ) {
+          if ( !this._attachedPointers.includes( event.pointer ) ) {
+            this._attachedPointers.push( event.pointer );
+          }
+        }
       }
     }
   }
