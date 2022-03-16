@@ -390,7 +390,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
    */
   repositionDuringDrag() {
     const globalBounds = this.getGlobalBoundsToViewDuringDrag();
-    globalBounds && this.keepBoundsInView( globalBounds );
+    globalBounds && this.keepBoundsInView( globalBounds, this._attachedPointers.some( pointer => pointer instanceof PDOMPointer ) );
   }
 
   /**
@@ -831,78 +831,65 @@ class AnimatedPanZoomListener extends PanZoomListener {
    */
   panToNode( node ) {
     assert && assert( this._panBounds.isFinite(), 'panBounds should be defined when panning.' );
-
-    const globalPosition = node.globalBounds.center;
-
-    // the center of the Node in the local coordinate frame of the target node
-    const positionInTargetFrame = this._targetNode.globalToLocalPoint( globalPosition );
-
-    // distances from destination node in the targetNode local coordinate frame to the edges of the targetBounds
-    const distanceToLeftEdge = Math.abs( this._targetBounds.left - positionInTargetFrame.x );
-    const distanceToRightEdge = Math.abs( this._targetBounds.right - positionInTargetFrame.x );
-    const distanceToTopEdge = Math.abs( this._targetBounds.top - positionInTargetFrame.y );
-    const distanceToBottomEdge = Math.abs( this._targetBounds.bottom - positionInTargetFrame.y );
-
-    // if distances to edges are less than half width of transformedPanBounds, it will be impossible to translate
-    // targetNode so that the provided node is in the center of the transformedPanBounds, so determine the correct
-    // desintation position that will get the node close to the center without moving the targetNode out of panBounds
-    if ( distanceToRightEdge < this._transformedPanBounds.width / 2 ) {
-      const correction = this._transformedPanBounds.width / 2 - distanceToRightEdge;
-      positionInTargetFrame.x = positionInTargetFrame.x - correction;
-    }
-    if ( distanceToLeftEdge < this._transformedPanBounds.width / 2 ) {
-      const correction = this._transformedPanBounds.width / 2 - distanceToLeftEdge;
-      positionInTargetFrame.x = positionInTargetFrame.x + correction;
-    }
-    if ( distanceToTopEdge < this._transformedPanBounds.height / 2 ) {
-      const correction = this._transformedPanBounds.height / 2 - distanceToTopEdge;
-      positionInTargetFrame.y = positionInTargetFrame.y + correction;
-    }
-    if ( distanceToBottomEdge < this._transformedPanBounds.height / 2 ) {
-      const correction = this._transformedPanBounds.height / 2 - distanceToBottomEdge;
-      positionInTargetFrame.y = positionInTargetFrame.y - correction;
-    }
-
-    this.setDestinationPosition( positionInTargetFrame );
+    this.keepBoundsInView( node.globalBounds, true );
   }
 
   /**
    * Set the destination position to pan such that the provided globalBounds are totally visible within the panBounds.
-   * This will never pan outside panBounds, if the provided globalBounds extend beyond them. If the globalBounds is
-   * larger than the screen size this function does nothing. It doesn't make sense to pan to keep an object in view
-   * if the screen is larger than the object.
+   * This will never pan outside panBounds, if the provided globalBounds extend beyond them.
+   *
+   * If we are not using panToCenter and the globalBounds is larger than the screen size this function does nothing.
+   * It doesn't make sense to try to keep the provided bounds entirely in view if they are larger than the availalable
+   * view space.
    * @private
    *
    * @param {Bounds2} globalBounds - in global coordinate frame
+   * @param {boolean} panToCenter - if true, we will pan to the center of the provided bounds, otherwise we will pan
+   *                                until all edges are on screen
    */
-  keepBoundsInView( globalBounds ) {
+  keepBoundsInView( globalBounds, panToCenter = false ) {
     assert && assert( this._panBounds.isFinite(), 'panBounds should be defined when panning.' );
 
     const boundsInTargetFrame = this._targetNode.globalToLocalBounds( globalBounds );
-
     const translationDelta = new Vector2( 0, 0 );
 
-    // If the provided bounds are wider than the available pan bounds we shouldn't try to shift it, it will awkwardly
-    // try to slide the screen to one of the sides of the bounds. This operation only makes sense if the screen can
-    // totally contain the object being dragged.
-    if ( boundsInTargetFrame.width < this._transformedPanBounds.width && boundsInTargetFrame.height < this._transformedPanBounds.height ) {
-      const distanceToLeftEdge = this._transformedPanBounds.left - boundsInTargetFrame.left;
-      const distanceToRightEdge = this._transformedPanBounds.right - boundsInTargetFrame.right;
-      const distanceToTopEdge = this._transformedPanBounds.top - boundsInTargetFrame.top;
-      const distanceToBottomEdge = this._transformedPanBounds.bottom - boundsInTargetFrame.bottom;
+    let distanceToLeftEdge = 0;
+    let distanceToRightEdge = 0;
+    let distanceToTopEdge = 0;
+    let distanceToBottomEdge = 0;
 
-      if ( distanceToBottomEdge < 0 ) {
-        translationDelta.y = -distanceToBottomEdge;
-      }
-      if ( distanceToTopEdge > 0 ) {
-        translationDelta.y = -distanceToTopEdge;
-      }
-      if ( distanceToRightEdge < 0 ) {
-        translationDelta.x = -distanceToRightEdge;
-      }
-      if ( distanceToLeftEdge > 0 ) {
-        translationDelta.x = -distanceToLeftEdge;
-      }
+    if ( panToCenter ) {
+
+      // If panning to center, the amount to pan is the distance between the center of the screen to the center of the
+      // provided bounds. In this case
+      distanceToLeftEdge = this._transformedPanBounds.centerX - boundsInTargetFrame.centerX;
+      distanceToRightEdge = this._transformedPanBounds.centerX - boundsInTargetFrame.centerX;
+      distanceToTopEdge = this._transformedPanBounds.centerY - boundsInTargetFrame.centerY;
+      distanceToBottomEdge = this._transformedPanBounds.centerY - boundsInTargetFrame.centerY;
+    }
+    else if ( boundsInTargetFrame.width < this._transformedPanBounds.width && boundsInTargetFrame.height < this._transformedPanBounds.height ) {
+
+      // If the provided bounds are wider than the available pan bounds we shouldn't try to shift it, it will awkwardly
+      // try to slide the screen to one of the sides of the bounds. This operation only makes sense if the screen can
+      // totally contain the object being dragged.
+
+      distanceToLeftEdge = this._transformedPanBounds.left - boundsInTargetFrame.left;
+      distanceToRightEdge = this._transformedPanBounds.right - boundsInTargetFrame.right;
+      distanceToTopEdge = this._transformedPanBounds.top - boundsInTargetFrame.top;
+      distanceToBottomEdge = this._transformedPanBounds.bottom - boundsInTargetFrame.bottom;
+    }
+
+    if ( distanceToBottomEdge < 0 ) {
+      translationDelta.y = -distanceToBottomEdge;
+    }
+    if ( distanceToTopEdge > 0 ) {
+      translationDelta.y = -distanceToTopEdge;
+    }
+    if ( distanceToRightEdge < 0 ) {
+      translationDelta.x = -distanceToRightEdge;
+    }
+    if ( distanceToLeftEdge > 0 ) {
+      translationDelta.x = -distanceToLeftEdge;
     }
 
     this.setDestinationPosition( this.sourcePosition.plus( translationDelta ) );
