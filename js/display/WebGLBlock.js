@@ -8,7 +8,7 @@
  * @author Sharfudeen Ashraf (For Ghent University)
  */
 
-import Emitter from '../../../axon/js/Emitter.js';
+import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
@@ -81,7 +81,7 @@ class WebGLBlock extends FittedBlock {
     this.texturedTrianglesProcessor = this.texturedTrianglesProcessor || new TexturedTrianglesProcessor( this.projectionMatrixArray );
 
     // @public {Emitter} - Called when the WebGL context changes to a new context.
-    this.glChangedEmitter = new Emitter();
+    this.glChangedEmitter = new TinyEmitter();
 
     // @private {boolean}
     this.isContextLost = false;
