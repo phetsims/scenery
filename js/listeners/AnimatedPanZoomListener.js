@@ -955,6 +955,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
           translationDelta.set( translationDifference );
         }
 
+        assert && assert( translationDelta.isFinite(), 'Trying to translate with a non-finite Vector2' );
         this.translateDelta( translationDelta );
       }
 
