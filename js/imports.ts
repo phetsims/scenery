@@ -171,6 +171,7 @@ export { default as FocusHighlightPath } from './accessibility/FocusHighlightPat
 export { default as FocusHighlightFromNode } from './accessibility/FocusHighlightFromNode.js';
 export { default as ReadingBlockHighlight } from './accessibility/voicing/ReadingBlockHighlight.js';
 export { default as ReadingBlock } from './accessibility/voicing/ReadingBlock.js';
+export type { ReadingBlockOptions } from './accessibility/voicing/ReadingBlock.js';
 export { default as KeyboardZoomUtils } from './accessibility/KeyboardZoomUtils.js';
 export { default as KeyboardFuzzer } from './accessibility/KeyboardFuzzer.js';
 export { default as GroupFocusHighlightFromNode } from './accessibility/GroupFocusHighlightFromNode.js';

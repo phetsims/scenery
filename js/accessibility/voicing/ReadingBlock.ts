@@ -6,7 +6,7 @@
  *
  *  - Reading Blocks are generally around graphical objects that are not otherwise interactive (like Text).
  *  - They have a unique focus highlight to indicate they can be clicked on to hear voiced content.
- *  - When activated with press or click readingBlockContent is spoken.
+ *  - When activated with press or click readingBlockNameResponse is spoken.
  *  - ReadingBlock content is always spoken if the voicingManager is enabled, ignoring Properties of responseCollector.
  *  - While speaking, a yellow highlight will appear over the Node composed with ReadingBlock.
  *  - While voicing is enabled, reading blocks will be added to the focus order.
@@ -25,27 +25,34 @@ import inheritance from '../../../../phet-core/js/inheritance.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
-import { Focus, Node, NodeOptions, PDOMInstance, ReadingBlockHighlight, ReadingBlockUtterance, scenery, SceneryEvent, Voicing, voicingManager } from '../../imports.js';
+import { Focus, Highlight, Node, PDOMInstance, ReadingBlockHighlight, ReadingBlockUtterance, scenery, SceneryEvent, Voicing, voicingManager, VoicingOptions } from '../../imports.js';
 import IInputListener from '../../input/IInputListener.js';
-import { Highlight } from '../../overlays/HighlightOverlay.js';
+import { ResolvedResponse, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
 
 const READING_BLOCK_OPTION_KEYS = [
   'readingBlockTagName',
-  'readingBlockContent',
+  'readingBlockNameResponse',
   'readingBlockHintResponse',
   'readingBlockActiveHighlight'
 ];
 
 type SelfOptions = {
-  readingBlockTagName: string | null;
-  readingBlockContent: string | null;
-  readingBlockHintResponse: string | null;
-  readingBlockActiveHighlight: null | Shape | Node;
+  readingBlockTagName?: string | null;
+  readingBlockNameResponse?: VoicingResponse;
+  readingBlockHintResponse?: VoicingResponse;
+  readingBlockActiveHighlight?: null | Shape | Node;
 };
 
-type ReadingBlockOptions = SelfOptions & NodeOptions;
+type UnsupportedVoicingOptions =
+  'voicingNameResponse' |
+  'voicingObjectResponse' |
+  'voicingContextResponse' |
+  'voicingHintResponse';
 
-const CONTENT_HINT_PATTERN = '{{OBJECT}}. {{HINT}}';
+export type ReadingBlockOptions = SelfOptions &
+  Omit<VoicingOptions, UnsupportedVoicingOptions>;
+
+const CONTENT_HINT_PATTERN = '{{NAME}}. {{HINT}}';
 
 interface ReadingBlockInterface {
   readonly isReadingBlock: boolean,
@@ -53,27 +60,24 @@ interface ReadingBlockInterface {
   readingBlockActiveHighlightChangedEmitter: TinyEmitter,
   readonly readingBlockActivated: boolean,
   readingBlockTagName: string | null;
-  readingBlockContent: string | null;
 
   setReadingBlockTagName( tagName: string | null ): void;
 
   getReadingBlockTagName(): string | null;
 
-  setReadingBlockContent( content: string | null ): void
+  setReadingBlockNameResponse( response: VoicingResponse ): void
 
-  getReadingBlockContent(): string | null;
+  getReadingBlockNameResponse(): ResolvedResponse;
 
-  setReadingBlockHintResponse( response: string | null ): void;
+  setReadingBlockHintResponse( response: VoicingResponse ): void;
 
-  getReadingBlockHintResponse(): string | null;
+  getReadingBlockHintResponse(): ResolvedResponse;
 
   setReadingBlockActiveHighlight( highlight: Highlight ): void;
 
   getReadingBlockActiveHighlight(): Highlight;
 
   isReadingBlockActivated(): boolean;
-
-  collectReadingBlockResponses(): string | null;
 
   dispose(): void
 
@@ -97,15 +101,6 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
     // to some other tagName or set to null to remove the ReadingBlock from the focus order. If this is changed,
     // be sure that the ReadingBlock will still respond to `click` events when enabled.
     _readingBlockTagName: string | null;
-
-    // The content for this ReadingBlock that will be spoken by SpeechSynthesis when
-    // the ReadingBlock receives input. ReadingBlocks don't use the categories of Voicing content provided by
-    // Voicing.ts because ReadingBlocks are always spoken regardless of the Properties of responseCollector.
-    _readingBlockContent: string | null;
-
-    // The help content that is read when this ReadingBlock is activated by input,
-    // but only when "Helpful Hints" is enabled by the user.
-    _readingBlockHintResponse: string | null;
 
     // The tagName to apply to the Node when voicing is disabled.
     _readingBlockDisabledTagName: string;
@@ -139,8 +134,6 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
       super( ...args );
 
       this._readingBlockTagName = 'button';
-      this._readingBlockContent = null;
-      this._readingBlockHintResponse = null;
       this._readingBlockDisabledTagName = 'p';
       this._readingBlockActiveHighlight = null;
       this.readingBlockActiveHighlightChangedEmitter = new TinyEmitter();
@@ -149,9 +142,9 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
       ( this as unknown as Node ).localBoundsProperty.link( this._localBoundsChangedListener );
 
       this._readingBlockInputListener = {
-        focus: event => this._speakReadingBlockContent( event ),
-        up: event => this._speakReadingBlockContent( event ),
-        click: event => this._speakReadingBlockContent( event )
+        focus: event => this._speakReadingBlockContentListener( event ),
+        up: event => this._speakReadingBlockContentListener( event ),
+        click: event => this._speakReadingBlockContentListener( event )
       };
 
       this._readingBlockFocusableChangeListener = this._onReadingBlockFocusableChanged.bind( this );
@@ -194,43 +187,60 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
     /**
      * Sets the content that should be read whenever the ReadingBlock receives input that initiates speech.
      */
-    setReadingBlockContent( content: string | null ) {
-      this._readingBlockContent = content;
+    setReadingBlockNameResponse( content: VoicingResponse ) {
+      this._voicingResponsePacket.nameResponse = content;
     }
 
-    set readingBlockContent( content: string | null ) { this.setReadingBlockContent( content ); }
+    set readingBlockNameResponse( content: VoicingResponse ) { this.setReadingBlockNameResponse( content ); }
 
     /**
      * Gets the content that is spoken whenever the ReadingBLock receives input that would initiate speech.
      */
-    getReadingBlockContent(): string | null {
-      return this._readingBlockContent;
+    getReadingBlockNameResponse(): ResolvedResponse {
+      return this._voicingResponsePacket.nameResponse;
     }
 
-    get readingBlockContent(): string | null { return this.getReadingBlockContent(); }
+    get readingBlockNameResponse(): ResolvedResponse { return this.getReadingBlockNameResponse(); }
 
     /**
      * Sets the hint response for this ReadingBlock. This is only spoken if "Helpful Hints" are enabled by the user.
      */
-    setReadingBlockHintResponse( content: string | null ) {
-      this._readingBlockHintResponse = content;
+    setReadingBlockHintResponse( content: VoicingResponse ) {
+      this._voicingResponsePacket.hintResponse = content;
     }
 
-    set readingBlockHintResponse( content: string | null ) { this.setReadingBlockHintResponse( content ); }
+    set readingBlockHintResponse( content: VoicingResponse ) { this.setReadingBlockHintResponse( content ); }
 
     /**
      * Get the hint response for this ReadingBlock. This is additional content that is only read if "Helpful Hints"
      * are enabled.
      */
-    getReadingBlockHintResponse(): string | null {
-      return this._readingBlockHintResponse;
+    getReadingBlockHintResponse(): ResolvedResponse {
+      return this._voicingResponsePacket.hintResponse;
     }
 
-    get readingBlockHintResponse(): string | null { return this.getReadingBlockHintResponse(); }
+    get readingBlockHintResponse(): ResolvedResponse { return this.getReadingBlockHintResponse(); }
+
+
+    override setVoicingNameResponse(): void { assert && assert( false, 'ReadingBlocks only support setting the name response via readingBlockNameResponse' ); }
+
+    override getVoicingNameResponse(): any { assert && assert( false, 'ReadingBlocks only support getting the name response via readingBlockNameResponse' ); }
+
+    override setVoicingObjectResponse(): void { assert && assert( false, 'ReadingBlocks do not support setting object response' ); }
+
+    override getVoicingObjectResponse(): any { assert && assert( false, 'ReadingBlocks do not support setting object response' ); }
+
+    override setVoicingContextResponse(): void { assert && assert( false, 'ReadingBlocks do not support setting context response' ); }
+
+    override getVoicingContextResponse(): any { assert && assert( false, 'ReadingBlocks do not support setting context response' ); }
+
+    override setVoicingHintResponse(): void { assert && assert( false, 'ReadingBlocks only support setting the hint response via readingBlockHintResponse.' ); }
+
+    override getVoicingHintResponse(): any { assert && assert( false, 'ReadingBlocks only support getting the hint response via readingBlockHintResponse.' ); }
 
     /**
      * Sets the highlight used to surround this Node while the Voicing framework is speaking this content.
-     * Do not add this Node to the scene graph, it is added and made visible by the HighlightOverlay.
+     * If a Node is provided, do not add this Node to the scene graph, it is added and made visible by the HighlightOverlay.
      */
     setReadingBlockActiveHighlight( readingBlockActiveHighlight: Highlight ) {
       if ( this._readingBlockActiveHighlight !== readingBlockActiveHighlight ) {
@@ -278,7 +288,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
      * When this Node becomes focusable (because Reading Blocks have just been enabled or disabled), either
      * apply or remove the readingBlockTagName.
      *
-     * @param focusable - whether or not ReadingBlocks should be focusable
+     * @param focusable - whether ReadingBlocks should be focusable
      */
     _onReadingBlockFocusableChanged( focusable: boolean ) {
 
@@ -316,7 +326,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
      * the displays so that HighlightOverlays know to activate a highlight while the voicingManager
      * is reading about this Node.
      */
-    _speakReadingBlockContent( event: SceneryEvent<Event> ) {
+    _speakReadingBlockContentListener( event: SceneryEvent<Event> ) {
 
       const displays = ( this as unknown as Node ).getConnectedDisplays();
 
@@ -348,24 +358,22 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
      * is only read if it exists and hints are enabled by the user. Otherwise, only the readingBlock content will
      * be spoken.
      */
-    collectReadingBlockResponses(): string | null {
-
-      const usesHint = this._readingBlockHintResponse && responseCollector.hintResponsesEnabledProperty.value;
+    collectReadingBlockResponses(): ResolvedResponse {
 
       let response = null;
-      if ( usesHint ) {
+      if ( responseCollector.hintResponsesEnabledProperty.value ) {
 
         response = responseCollector.collectResponses( {
           ignoreProperties: true,
-          objectResponse: this._readingBlockContent,
-          hintResponse: this._readingBlockHintResponse,
+          nameResponse: this.getReadingBlockNameResponse(),
+          hintResponse: this.getReadingBlockHintResponse(),
           responsePatternCollection: new ResponsePatternCollection( {
-            objectHint: CONTENT_HINT_PATTERN
+            nameHint: CONTENT_HINT_PATTERN
           } )
         } );
       }
       else {
-        response = this._readingBlockContent;
+        response = this.getReadingBlockNameResponse();
       }
 
       return response;

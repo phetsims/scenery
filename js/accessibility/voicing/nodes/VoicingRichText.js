@@ -21,7 +21,7 @@ class VoicingRichText extends ReadingBlock( RichText, 1 ) {
 
       // {string|null} - if provided, alternative text that will be read that is different from the
       // visually displayed text
-      readingBlockContent: null,
+      readingBlockNameResponse: null,
 
       // pdom
       innerContent: text,
@@ -34,7 +34,7 @@ class VoicingRichText extends ReadingBlock( RichText, 1 ) {
 
     // Options that use other options
     options = merge( options, {
-      readingBlockContent: options.readingBlockContent || text
+      readingBlockNameResponse: options.readingBlockNameResponse || text
     } );
 
     super( text );

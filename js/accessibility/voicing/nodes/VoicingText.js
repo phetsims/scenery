@@ -21,7 +21,7 @@ class VoicingText extends ReadingBlock( Text, 1 ) {
 
       // {string|null} - if provided, alternative text that will be spoken that is different from the
       // visually displayed text
-      readingBlockContent: null,
+      readingBlockNameResponse: null,
 
       // pdom
       tagName: 'p',
@@ -30,7 +30,7 @@ class VoicingText extends ReadingBlock( Text, 1 ) {
 
     // Options that use other options
     options = merge( options, {
-      readingBlockContent: options.readingBlockContent || text
+      readingBlockNameResponse: options.readingBlockNameResponse || text
     } );
 
     super( text );
