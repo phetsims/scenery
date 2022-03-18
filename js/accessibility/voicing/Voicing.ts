@@ -25,7 +25,6 @@
  */
 
 import inheritance from '../../../../phet-core/js/inheritance.js';
-import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
 import ResponsePacket, { ResolvedResponse, ResponsePacketOptions, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
 import Utterance, { IAlertable } from '../../../../utterance-queue/js/Utterance.js';
@@ -34,6 +33,7 @@ import { InteractiveHighlighting, InteractiveHighlightingOptions, Node, scenery,
 import optionize from '../../../../phet-core/js/optionize.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
+import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
 
 // options that are supported by Voicing.js. Added to mutator keys so that Voicing properties can be set with mutate.
 const VOICING_OPTION_KEYS = [
@@ -76,8 +76,8 @@ type SelfOptions = {
   voicingUtteranceQueue?: UtteranceQueue,
 
   // The utterance to use if you want this response to be more controlled in the UtteranceQueue. This Utterance will be
-  // used by all responses spoken by this class.
-  voicingUtterance?: Utterance;
+  // used by all responses spoken by this class. Null to not use an Utterance.
+  voicingUtterance?: Utterance | null;
 };
 
 export type VoicingOptions = SelfOptions & InteractiveHighlightingOptions;
@@ -169,7 +169,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      */
     voicingSpeakFullResponse( providedOptions?: SpeakingOptions ): void {
 
-      // options are passed along to collectAndSpeakResponse, see that function for additional options
+      // options are passed along to _collectAndSpeakResponse, see that function for additional options
       const options = optionize<SpeakingOptions, {}, SpeakingOptions>( {}, providedOptions );
 
       // Lazily formulate strings only as needed
@@ -186,7 +186,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
         options.hintResponse = this._voicingResponsePacket.hintResponse;
       }
 
-      this.collectAndSpeakResponse( options );
+      this._collectAndSpeakResponse( options );
     }
 
     /**
@@ -200,7 +200,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      */
     voicingSpeakResponse( providedOptions?: SpeakingOptions ): void {
 
-      // options are passed along to collectAndSpeakResponse, see that function for additional options
+      // options are passed along to _collectAndSpeakResponse, see that function for additional options
       const options = optionize<SpeakingOptions, {}, SpeakingOptions>( {
         nameResponse: null,
         objectResponse: null,
@@ -208,7 +208,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
         hintResponse: null
       }, providedOptions );
 
-      this.collectAndSpeakResponse( options );
+      this._collectAndSpeakResponse( options );
     }
 
     /**
@@ -217,7 +217,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      */
     voicingSpeakNameResponse( providedOptions?: SpeakingOptions ): void {
 
-      // options are passed along to collectAndSpeakResponse, see that function for additional options
+      // options are passed along to _collectAndSpeakResponse, see that function for additional options
       const options = optionize<SpeakingOptions, {}, SpeakingOptions>( {}, providedOptions );
 
       // Lazily formulate strings only as needed
@@ -225,7 +225,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
         options.nameResponse = this._voicingResponsePacket.nameResponse;
       }
 
-      this.collectAndSpeakResponse( options );
+      this._collectAndSpeakResponse( options );
     }
 
     /**
@@ -234,7 +234,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      */
     voicingSpeakObjectResponse( providedOptions?: SpeakingOptions ): void {
 
-      // options are passed along to collectAndSpeakResponse, see that function for additional options
+      // options are passed along to _collectAndSpeakResponse, see that function for additional options
       const options = optionize<SpeakingOptions, {}, SpeakingOptions>( {}, providedOptions );
 
       // Lazily formulate strings only as needed
@@ -242,7 +242,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
         options.objectResponse = this._voicingResponsePacket.objectResponse;
       }
 
-      this.collectAndSpeakResponse( options );
+      this._collectAndSpeakResponse( options );
     }
 
     /**
@@ -252,7 +252,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      */
     voicingSpeakContextResponse( providedOptions?: SpeakingOptions ): void {
 
-      // options are passed along to collectAndSpeakResponse, see that function for additional options
+      // options are passed along to _collectAndSpeakResponse, see that function for additional options
       const options = optionize<SpeakingOptions, {}, SpeakingOptions>( {}, providedOptions );
 
       // Lazily formulate strings only as needed
@@ -260,7 +260,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
         options.contextResponse = this._voicingResponsePacket.contextResponse;
       }
 
-      this.collectAndSpeakResponse( options );
+      this._collectAndSpeakResponse( options );
     }
 
     /**
@@ -270,7 +270,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      */
     voicingSpeakHintResponse( providedOptions?: SpeakingOptions ): void {
 
-      // options are passed along to collectAndSpeakResponse, see that function for additional options
+      // options are passed along to _collectAndSpeakResponse, see that function for additional options
       const options = optionize<SpeakingOptions, {}, SpeakingOptions>( {}, providedOptions );
 
       // Lazily formulate strings only as needed
@@ -278,15 +278,23 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
         options.hintResponse = this._voicingResponsePacket.hintResponse;
       }
 
-      this.collectAndSpeakResponse( options );
+      this._collectAndSpeakResponse( options );
     }
 
     /**
      * Collect responses with the responseCollector and speak the output with an UtteranceQueue.
+     */
+    _collectAndSpeakResponse( providedOptions?: SpeakingOptions ): void {
+      this.speakContent( this.collectResponse( providedOptions ) );
+    }
+
+    /**
+     * Combine all types of response into a single alertable, potentially depending on the current state of
+     * responseCollector Properties (filtering what kind of responses to present in the resolved response).
      *
      * @protected
      */
-    collectAndSpeakResponse( providedOptions?: SpeakingOptions ): void {
+    collectResponse( providedOptions?: SpeakingOptions ): IAlertable {
       const options = optionize<SpeakingOptions, {}, SpeakingOptions>( {
         ignoreProperties: this._voicingResponsePacket.ignoreProperties,
         responsePatternCollection: this._voicingResponsePacket.responsePatternCollection,
@@ -299,7 +307,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
         options.utterance.alert = response;
         response = options.utterance;
       }
-      this.speakContent( response );
+      return response;
     }
 
     /**
@@ -307,7 +315,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * back of the voicing UtteranceQueue.
      * @protected
      */
-    speakContent( content: IAlertable | null ): void { // eslint-disable-line no-undef
+    speakContent( content: IAlertable ): void { // eslint-disable-line no-undef
 
       // don't send to utteranceQueue if response is empty
       if ( content ) {
@@ -422,7 +430,6 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * a collection of string patterns that are not the default.
      */
     setVoicingResponsePatternCollection( patterns: ResponsePatternCollection ) {
-      assert && assert( patterns instanceof ResponsePatternCollection );
 
       this._voicingResponsePacket.responsePatternCollection = patterns;
     }

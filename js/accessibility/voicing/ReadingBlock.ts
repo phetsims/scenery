@@ -23,7 +23,6 @@ import { Shape } from '../../../../kite/js/imports.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
-import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
 import { Focus, Highlight, Node, PDOMInstance, ReadingBlockHighlight, ReadingBlockUtterance, scenery, SceneryEvent, Voicing, voicingManager, VoicingOptions } from '../../imports.js';
 import IInputListener from '../../input/IInputListener.js';
@@ -33,6 +32,7 @@ const READING_BLOCK_OPTION_KEYS = [
   'readingBlockTagName',
   'readingBlockNameResponse',
   'readingBlockHintResponse',
+  'readingBlockResponsePatternCollection',
   'readingBlockActiveHighlight'
 ];
 
@@ -40,6 +40,7 @@ type SelfOptions = {
   readingBlockTagName?: string | null;
   readingBlockNameResponse?: VoicingResponse;
   readingBlockHintResponse?: VoicingResponse;
+  readingBlockResponsePatternCollection?: ResponsePatternCollection;
   readingBlockActiveHighlight?: null | Shape | Node;
 };
 
@@ -47,12 +48,16 @@ type UnsupportedVoicingOptions =
   'voicingNameResponse' |
   'voicingObjectResponse' |
   'voicingContextResponse' |
-  'voicingHintResponse';
+  'voicingHintResponse' |
+  'voicingResponsePatternCollection';
 
 export type ReadingBlockOptions = SelfOptions &
   Omit<VoicingOptions, UnsupportedVoicingOptions>;
 
-const CONTENT_HINT_PATTERN = '{{NAME}}. {{HINT}}';
+
+const DEFAULT_CONTENT_HINT_PATTERN = new ResponsePatternCollection( {
+  nameHint: '{{NAME}}. {{HINT}}'
+} );
 
 interface ReadingBlockInterface {
   readonly isReadingBlock: boolean,
@@ -137,6 +142,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
       this._readingBlockDisabledTagName = 'p';
       this._readingBlockActiveHighlight = null;
       this.readingBlockActiveHighlightChangedEmitter = new TinyEmitter();
+      this.readingBlockResponsePatternCollection = DEFAULT_CONTENT_HINT_PATTERN;
 
       this._localBoundsChangedListener = this._onLocalBoundsChanged.bind( this );
       ( this as unknown as Node ).localBoundsProperty.link( this._localBoundsChangedListener );
@@ -168,7 +174,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
      * Set the tagName for the node composing ReadingBlock. This is the tagName (of ParallelDOM) that will be applied
      * to this Node when Reading Blocks are enabled.
      */
-    setReadingBlockTagName( tagName: string | null ) {
+    setReadingBlockTagName( tagName: string | null ): void {
       this._readingBlockTagName = tagName;
       this._onReadingBlockFocusableChanged( voicingManager.speechAllowedAndFullyEnabledProperty.value );
     }
@@ -221,6 +227,27 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 
     get readingBlockHintResponse(): ResolvedResponse { return this.getReadingBlockHintResponse(); }
 
+    /**
+     * Sets the collection of patterns to use for voicing responses, controlling the order, punctuation, and
+     * additional content for each combination of response. See ResponsePatternCollection.js if you wish to use
+     * a collection of string patterns that are not the default.
+     */
+    setReadingBlockResponsePatternCollection( patterns: ResponsePatternCollection ) {
+
+      this._voicingResponsePacket.responsePatternCollection = patterns;
+    }
+
+    set readingBlockResponsePatternCollection( patterns: ResponsePatternCollection ) { this.setReadingBlockResponsePatternCollection( patterns ); }
+
+    /**
+     * Get the ResponsePatternCollection object that this ReadingBlock Node is using to collect responses.
+     */
+    getReadingBlockResponsePatternCollection(): ResponsePatternCollection {
+      return this._voicingResponsePacket.responsePatternCollection;
+    }
+
+    get readingBlockResponsePatternCollection(): ResponsePatternCollection { return this.getReadingBlockResponsePatternCollection(); }
+
 
     override setVoicingNameResponse(): void { assert && assert( false, 'ReadingBlocks only support setting the name response via readingBlockNameResponse' ); }
 
@@ -237,6 +264,10 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
     override setVoicingHintResponse(): void { assert && assert( false, 'ReadingBlocks only support setting the hint response via readingBlockHintResponse.' ); }
 
     override getVoicingHintResponse(): any { assert && assert( false, 'ReadingBlocks only support getting the hint response via readingBlockHintResponse.' ); }
+
+    override setVoicingResponsePatternCollection(): void { assert && assert( false, 'ReadingBlocks only support setting the response patterns via readingBlockResponsePatternCollection.' ); }
+
+    override getVoicingResponsePatternCollection(): any { assert && assert( false, 'ReadingBlocks only support getting the response patterns via readingBlockResponsePatternCollection.' ); }
 
     /**
      * Sets the highlight used to surround this Node while the Voicing framework is speaking this content.
@@ -330,7 +361,13 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 
       const displays = ( this as unknown as Node ).getConnectedDisplays();
 
-      const content = this.collectReadingBlockResponses();
+      const content = this.collectResponse( {
+        nameResponse: this.getReadingBlockNameResponse(),
+        hintResponse: this.getReadingBlockHintResponse(),
+        ignoreProperties: this.voicingIgnoreVoicingManagerProperties,
+        responsePatternCollection: this._voicingResponsePacket.responsePatternCollection,
+        utterance: null // we use a ReadingBlockUtterance below.
+      } );
       if ( content ) {
         for ( let i = 0; i < displays.length; i++ ) {
 
@@ -351,32 +388,6 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
           }
         }
       }
-    }
-
-    /**
-     * Collect responses for the ReadingBlock, putting together the content and the hint response. The hint response
-     * is only read if it exists and hints are enabled by the user. Otherwise, only the readingBlock content will
-     * be spoken.
-     */
-    collectReadingBlockResponses(): ResolvedResponse {
-
-      let response = null;
-      if ( responseCollector.hintResponsesEnabledProperty.value ) {
-
-        response = responseCollector.collectResponses( {
-          ignoreProperties: true,
-          nameResponse: this.getReadingBlockNameResponse(),
-          hintResponse: this.getReadingBlockHintResponse(),
-          responsePatternCollection: new ResponsePatternCollection( {
-            nameHint: CONTENT_HINT_PATTERN
-          } )
-        } );
-      }
-      else {
-        response = this.getReadingBlockNameResponse();
-      }
-
-      return response;
     }
 
     dispose() {
