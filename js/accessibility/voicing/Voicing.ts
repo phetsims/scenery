@@ -28,12 +28,11 @@ import inheritance from '../../../../phet-core/js/inheritance.js';
 import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
 import ResponsePacket, { ResolvedResponse, ResponsePacketOptions, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
-import Utterance from '../../../../utterance-queue/js/Utterance.js';
+import Utterance, { IAlertable } from '../../../../utterance-queue/js/Utterance.js';
 import UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
 import { InteractiveHighlighting, InteractiveHighlightingOptions, Node, scenery, SceneryListenerFunction, voicingUtteranceQueue } from '../../imports.js';
 import optionize from '../../../../phet-core/js/optionize.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
-import { IAlertable } from '../../../../utterance-queue/js/Utterance.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 
 // options that are supported by Voicing.js. Added to mutator keys so that Voicing properties can be set with mutate.
@@ -331,11 +330,11 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     /**
      * Get the voicingNameResponse for this Node.
      */
-    getVoicingNameResponse(): VoicingResponse {
+    getVoicingNameResponse(): ResolvedResponse {
       return this._voicingResponsePacket.nameResponse;
     }
 
-    get voicingNameResponse(): VoicingResponse { return this.getVoicingNameResponse(); }
+    get voicingNameResponse(): ResolvedResponse { return this.getVoicingNameResponse(); }
 
     /**
      * Set the object response for this Node. This is usually the state information associated with this Node, such
