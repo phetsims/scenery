@@ -1907,10 +1907,7 @@ class Node extends ParallelDOM {
 
     let i = this._children.length;
     while ( i-- ) {
-      const child = this._children[ i ];
-      if ( child.isVisible() ) {
-        bounds.includeBounds( child.getVisibleBounds() );
-      }
+      bounds.includeBounds( this._children[ i ].getVisibleBounds() );
     }
 
     assert && assert( bounds.isFinite() || bounds.isEmpty(), 'Visible bounds should not be infinite' );
@@ -1928,7 +1925,12 @@ class Node extends ParallelDOM {
    * Like getBounds() in the "parent" coordinate frame, but includes only visible nodes
    */
   getVisibleBounds(): Bounds2 {
-    return this.getVisibleLocalBounds().transform( this.getMatrix() );
+    if ( this.isVisible() ) {
+      return this.getVisibleLocalBounds().transform( this.getMatrix() );
+    }
+    else {
+      return Bounds2.NOTHING;
+    }
   }
 
   /**
