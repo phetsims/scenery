@@ -19,8 +19,8 @@ const DEFAULT_OPTIONS = {
 } as const;
 
 type SelfOptions = {
-  excludeInvisibleChildrenFromBounds?: boolean,
-  resize?: boolean
+  excludeInvisibleChildrenFromBounds?: boolean;
+  resize?: boolean;
 } & Omit<GridConstraintOptions, 'excludeInvisible'>;
 
 export type GridBoxOptions = SelfOptions & NodeOptions & WidthSizableSelfOptions & HeightSizableSelfOptions;

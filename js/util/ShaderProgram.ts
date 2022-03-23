@@ -11,10 +11,10 @@ import { scenery, Utils } from '../imports.js';
 
 export type ShaderProgramOptions = {
   // (vertex) attribute names in the shader source
-  attributes?: string[],
+  attributes?: string[];
 
   // uniform names in the shader source
-  uniforms?: string[]
+  uniforms?: string[];
 };
 
 export default class ShaderProgram {

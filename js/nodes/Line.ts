@@ -23,12 +23,12 @@ const LINE_OPTION_KEYS = [
 ];
 
 type SelfOptions = {
-  p1?: Vector2,
-  p2?: Vector2,
-  x1?: number,
-  y1?: number,
-  x2?: number,
-  y2?: number
+  p1?: Vector2;
+  p2?: Vector2;
+  x1?: number;
+  y1?: number;
+  x2?: number;
+  y2?: number;
 };
 export type LineOptions = SelfOptions & PathOptions
 

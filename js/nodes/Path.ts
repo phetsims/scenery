@@ -26,8 +26,8 @@ const DEFAULT_OPTIONS = {
 
 type BoundsMethod = 'accurate' | 'unstroked' | 'tightPadding' | 'safePadding' | 'none';
 export type PathOptions = {
-  shape?: Shape | string | null,
-  boundsMethod?: BoundsMethod
+  shape?: Shape | string | null;
+  boundsMethod?: BoundsMethod;
 } & PaintableOptions & NodeOptions;
 
 export default class Path extends Paintable( Node ) {

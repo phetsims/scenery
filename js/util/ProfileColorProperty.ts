@@ -19,7 +19,7 @@ const NAME_SEPARATOR = '.';
 const instances: ProfileColorProperty[] = [];
 
 type ColorProfileMap = {
-  [ key: string ]: Color | string
+  [ key: string ]: Color | string;
 };
 
 export default class ProfileColorProperty extends ColorProperty {

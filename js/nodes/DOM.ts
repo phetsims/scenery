@@ -16,7 +16,7 @@ const DOM_OPTION_KEYS = [
 ];
 
 type SelfOptions = {
-  element?: HTMLElement,
+  element?: HTMLElement;
   preventTransform?: boolean;
 };
 

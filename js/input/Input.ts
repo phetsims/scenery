@@ -241,7 +241,7 @@ const EVENT_KEY_VALUES_AS_ELEMENTS: SerializedPropertiesForDeserialization[] = [
 const PDOM_UNPICKABLE_EVENTS = [ 'focus', 'blur', 'focusin', 'focusout' ];
 const TARGET_SUBSTITUTE_KEY = 'targetSubstitute' as const;
 type TargetSubstitudeAugmentedEvent = Event & {
-  [ TARGET_SUBSTITUTE_KEY ]?: Element
+  [ TARGET_SUBSTITUTE_KEY ]?: Element;
 };
 
 
@@ -253,7 +253,7 @@ export type InputOptions = {
   tandem?: Tandem;
 };
 
-type EventListenerOptions = { capture?: boolean, passive?: boolean, once?: boolean } | boolean;
+type EventListenerOptions = { capture?: boolean; passive?: boolean; once?: boolean } | boolean;
 
 export default class Input {
 

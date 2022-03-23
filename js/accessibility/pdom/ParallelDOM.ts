@@ -216,73 +216,73 @@ const ACCESSIBILITY_OPTION_KEYS = [
 ];
 
 export type ParallelDOMOptions = {
-  focusable?: boolean | null,
-  tagName?: string | null,
+  focusable?: boolean | null;
+  tagName?: string | null;
 
   /*
    * Higher Level API Functions
    */
-  accessibleName?: string | null,
-  accessibleNameBehavior?: PDOMBehaviorFunction,
-  helpText?: string | null,
-  helpTextBehavior?: PDOMBehaviorFunction,
-  pdomHeading?: string | null,
-  pdomHeadingBehavior?: PDOMBehaviorFunction,
+  accessibleName?: string | null;
+  accessibleNameBehavior?: PDOMBehaviorFunction;
+  helpText?: string | null;
+  helpTextBehavior?: PDOMBehaviorFunction;
+  pdomHeading?: string | null;
+  pdomHeadingBehavior?: PDOMBehaviorFunction;
 
   /*
    * Lower Level API Functions
    */
-  containerTagName?: string | null,
-  containerAriaRole?: string | null,
+  containerTagName?: string | null;
+  containerAriaRole?: string | null;
 
-  innerContent?: string | null,
-  inputType?: string | null,
-  inputValue?: string | null | number,
-  pdomChecked?: boolean,
-  pdomNamespace?: string | null,
-  ariaLabel?: string | null,
-  ariaRole?: string | null,
-  ariaValueText?: string | null,
+  innerContent?: string | null;
+  inputType?: string | null;
+  inputValue?: string | null | number;
+  pdomChecked?: boolean;
+  pdomNamespace?: string | null;
+  ariaLabel?: string | null;
+  ariaRole?: string | null;
+  ariaValueText?: string | null;
 
-  labelTagName?: string | null,
-  labelContent?: string | null,
-  appendLabel?: boolean,
+  labelTagName?: string | null;
+  labelContent?: string | null;
+  appendLabel?: boolean;
 
-  descriptionTagName?: string | null,
-  descriptionContent?: string | null,
-  appendDescription?: boolean,
+  descriptionTagName?: string | null;
+  descriptionContent?: string | null;
+  appendDescription?: boolean;
 
-  focusHighlight?: Highlight,
-  focusHighlightLayerable?: boolean,
-  groupFocusHighlight?: Node | boolean,
-  pdomVisible?: boolean,
-  pdomOrder?: ( Node | null )[] | null,
+  focusHighlight?: Highlight;
+  focusHighlightLayerable?: boolean;
+  groupFocusHighlight?: Node | boolean;
+  pdomVisible?: boolean;
+  pdomOrder?: ( Node | null )[] | null;
 
-  ariaLabelledbyAssociations?: Association[],
-  ariaDescribedbyAssociations?: Association[],
-  activeDescendantAssociations?: Association[],
+  ariaLabelledbyAssociations?: Association[];
+  ariaDescribedbyAssociations?: Association[];
+  activeDescendantAssociations?: Association[];
 
-  positionInPDOM?: boolean,
+  positionInPDOM?: boolean;
 
-  pdomTransformSourceNode?: Node | null
+  pdomTransformSourceNode?: Node | null;
 } & PhetioObjectOptions;
 
 type PDOMAttribute = {
-  attribute: string,
-  value: any,
-  namespace: string | null,
-  options?: any
+  attribute: string;
+  value: any;
+  namespace: string | null;
+  options?: any;
 };
 
 type PDOMClass = {
-  className: string,
-  options: any // TODO: type
+  className: string;
+  options: any; // TODO: type
 };
 
 type Association = {
-  otherNode: Node,
-  otherElementName: string,
-  thisElementName: string
+  otherNode: Node;
+  otherElementName: string;
+  thisElementName: string;
 };
 
 /**
@@ -2235,7 +2235,7 @@ export default class ParallelDOM extends PhetioObject {
    * @param value - the value for the attribute, if boolean, then it will be set as a javascript property on the HTMLElement rather than an attribute
    * @param [options]
    */
-  setPDOMAttribute( attribute: string, value: string | boolean | number, options?: { namespace?: string | null, asProperty?: boolean, elementName?: string } ) {
+  setPDOMAttribute( attribute: string, value: string | boolean | number, options?: { namespace?: string | null; asProperty?: boolean; elementName?: string } ) {
     assert && assert( typeof attribute === 'string' );
     assert && assert( typeof value === 'string' || typeof value === 'boolean' || typeof value === 'number' );
     assert && options && assert( Object.getPrototypeOf( options ) === Object.prototype,
@@ -2297,7 +2297,7 @@ export default class ParallelDOM extends PhetioObject {
    * @param attribute - name of the attribute to remove
    * @param [options]
    */
-  removePDOMAttribute( attribute: string, options?: { namespace?: string | null, elementName?: string } ) {
+  removePDOMAttribute( attribute: string, options?: { namespace?: string | null; elementName?: string } ) {
     assert && assert( typeof attribute === 'string' );
     assert && options && assert( Object.getPrototypeOf( options ) === Object.prototype,
       'Extra prototype on pdomAttribute options object is a code smell' );
@@ -2348,7 +2348,7 @@ export default class ParallelDOM extends PhetioObject {
    * @param attribute - name of the attribute to remove
    * @param [options]
    */
-  hasPDOMAttribute( attribute: string, options?: { namespace?: string | null, elementName?: string } ): boolean {
+  hasPDOMAttribute( attribute: string, options?: { namespace?: string | null; elementName?: string } ): boolean {
     assert && assert( typeof attribute === 'string' );
     assert && options && assert( Object.getPrototypeOf( options ) === Object.prototype,
       'Extra prototype on pdomAttribute options object is a code smell' );
@@ -2630,13 +2630,13 @@ export default class ParallelDOM extends PhetioObject {
    * subtree. Each "Item" will have the type { trail: {Trail}, children: {Array.<Item>} }, forming a tree-like
    * structure. (scenery-internal)
    */
-  getNestedPDOMOrder(): { trail: Trail, children: Node[] }[] {
+  getNestedPDOMOrder(): { trail: Trail; children: Node[] }[] {
     const currentTrail = new Trail( this as unknown as Node );
     let pruneStack: Node[] = []; // A list of nodes to prune
 
     // {Array.<Item>} - The main result we will be returning. It is the top-level array where child items will be
     // inserted.
-    const result: { trail: Trail, children: Node[] }[] = [];
+    const result: { trail: Trail; children: Node[] }[] = [];
 
     // {Array.<Array.<Item>>} A stack of children arrays, where we should be inserting items into the top array.
     // We will start out with the result, and as nested levels are added, the children arrays of those items will be

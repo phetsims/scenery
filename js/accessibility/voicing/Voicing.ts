@@ -51,29 +51,29 @@ const VOICING_OPTION_KEYS = [
 type SelfOptions = {
 
   // see ResponsePacket.nameResponse
-  voicingNameResponse?: VoicingResponse,
+  voicingNameResponse?: VoicingResponse;
 
   // see ResponsePacket.objectResponse
-  voicingObjectResponse?: VoicingResponse,
+  voicingObjectResponse?: VoicingResponse;
 
   // see ResponsePacket.contextResponse
-  voicingContextResponse?: VoicingResponse,
+  voicingContextResponse?: VoicingResponse;
 
   // see ResponsePacket.hintResponse
-  voicingHintResponse?: VoicingResponse,
+  voicingHintResponse?: VoicingResponse;
 
   // see ResponsePacket.responsePatternCollection
-  voicingResponsePatternCollection?: ResponsePatternCollection,
+  voicingResponsePatternCollection?: ResponsePatternCollection;
 
   // see ResponsePacket.ignoreProperties
-  voicingIgnoreVoicingManagerProperties?: boolean,
+  voicingIgnoreVoicingManagerProperties?: boolean;
 
   // Called when this Node is focused to speak voicing responses on focus. See Voicing.defaultFocusListener for default
   // listener.
-  voicingFocusListener?: SceneryListenerFunction<FocusEvent> | null
+  voicingFocusListener?: SceneryListenerFunction<FocusEvent> | null;
 
   // By default use voicingUtteranceQueue to speak responses, but you can also specify another utteranceQueue here.
-  voicingUtteranceQueue?: UtteranceQueue,
+  voicingUtteranceQueue?: UtteranceQueue;
 
   // The utterance to use if you want this response to be more controlled in the UtteranceQueue. This Utterance will be
   // used by all responses spoken by this class. Null to not use an Utterance.
@@ -83,7 +83,7 @@ type SelfOptions = {
 export type VoicingOptions = SelfOptions & InteractiveHighlightingOptions;
 
 export type SpeakingOptions = {
-  utterance?: SelfOptions['voicingUtterance']
+  utterance?: SelfOptions['voicingUtterance'];
 } & {
 
   // In speaking options, we don't allow a ResponseCreator function, but just a string|null. The `undefined` is to

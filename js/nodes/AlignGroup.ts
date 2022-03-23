@@ -32,10 +32,10 @@ let globalId = 1;
 
 export type AlignGroupOptions = {
   // Whether the boxes should have all matching widths (otherwise it fits to size)
-  matchHorizontal?: boolean,
+  matchHorizontal?: boolean;
 
   // Whether the boxes should have all matching heights (otherwise it fits to size)
-  matchVertical?: boolean
+  matchVertical?: boolean;
 };
 
 const DEFAULT_OPTIONS = {

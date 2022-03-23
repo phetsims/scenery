@@ -38,83 +38,83 @@ import IReadOnlyProperty from '../../../axon/js/IReadOnlyProperty.js';
 type PressedKeyTiming = {
 
   // Is the key currently down?
-  keyDown: boolean,
+  keyDown: boolean;
 
   // How long has the key been pressed in milliseconds
-  timeDown: number,
+  timeDown: number;
 
   // KeyboardEvent.key string
-  key: string
+  key: string;
 };
 
 type Hotkey = {
 
   // Keys to be pressed in order to trigger the callback of the Hotkey
-  keys: string[],
+  keys: string[];
 
   // Called when keys are pressed in order
-  callback: () => void
+  callback: () => void;
 };
 
 type SelfOptions = {
 
   // While direction key is down, this will be the 1D velocity for movement. The position will
   // change this much in view coordinates every second.
-  dragVelocity?: number,
+  dragVelocity?: number;
 
   // If shift key down while pressing direction key, this will be the 1D delta for movement in view
   // coordinates every second. Must be less than or equal to dragVelocity, and it is intended to provide user with
   // more fine-grained control of motion.
-  shiftDragVelocity?: number,
+  shiftDragVelocity?: number;
 
   // If provided, it will be synchronized with the drag position in the model frame, applying provided transforms as
   // needed. Most useful when used with transform option
-  positionProperty?: IProperty<Vector2> | null,
+  positionProperty?: IProperty<Vector2> | null;
 
   // If provided, this will be the conversion between the view and model coordinate frames. Usually most useful when
   // paired with the positionProperty.
-  transform?: Transform3 | null,
+  transform?: Transform3 | null;
 
   // If provided, the model position will be constrained to be inside these bounds, in model coordinates
-  dragBoundsProperty?: IReadOnlyProperty<Bounds2 | null> | null,
+  dragBoundsProperty?: IReadOnlyProperty<Bounds2 | null> | null;
 
   // Called when keyboard drag is started (on initial press).
-  start?: ( ( event: SceneryEvent ) => void ) | null,
+  start?: ( ( event: SceneryEvent ) => void ) | null;
 
   // Called during drag. Note that this does not provide the SceneryEvent. Dragging happens during animation
   // (as long as keys are down), so there is no event associated with the drag.
-  drag?: ( ( viewDelta: Vector2 ) => void ) | null,
+  drag?: ( ( viewDelta: Vector2 ) => void ) | null;
 
   // Called when keyboard dragging ends.
-  end?: ( ( event: SceneryEvent ) => void ) | null,
+  end?: ( ( event: SceneryEvent ) => void ) | null;
 
   // Arrow keys must be pressed this long to begin movement set on moveOnHoldInterval, in ms
-  moveOnHoldDelay?: number,
+  moveOnHoldDelay?: number;
 
   // Time interval at which the object will change position while the arrow key is held down, in ms
-  moveOnHoldInterval?: number,
+  moveOnHoldInterval?: number;
 
   // On initial key press, how much the position Property will change in view coordinates, generally only needed when
   // there is a moveOnHoldDelay or moveOnHoldInterval. In ms.
-  downDelta?: number,
+  downDelta?: number;
 
   // The amount PositionProperty changes in view coordinates, generally only needed when there is a moveOnHoldDelay or
   // moveOnHoldInterval. In ms.
-  shiftDownDelta?: number,
+  shiftDownDelta?: number;
 
   // Time interval at which holding down a hotkey group will trigger an associated listener, in ms
-  hotkeyHoldInterval?: number,
+  hotkeyHoldInterval?: number;
 
   // EnabledComponent
   // By default, do not instrument the enabledProperty; opt in with this option. See EnabledComponent
-  phetioEnabledPropertyInstrumented?: boolean,
+  phetioEnabledPropertyInstrumented?: boolean;
 
   // phet-io
-  tandem?: Tandem,
+  tandem?: Tandem;
 
   // Though DragListener is not instrumented, declare these here to support properly passing this to children, see
   // https://github.com/phetsims/tandem/issues/60.
-  phetioReadOnly?: boolean
+  phetioReadOnly?: boolean;
 };
 
 export type KeyboardDragListenerOptions = SelfOptions & EnabledComponentOptions;

@@ -47,17 +47,17 @@ const DEFAULT_OPTIONS = {
 };
 
 export type PaintableOptions = {
-  fill?: IPaint,
-  fillPickable?: boolean,
-  stroke?: IPaint,
-  strokePickable?: boolean,
-  lineWidth?: number,
-  lineCap?: LineCap,
-  lineJoin?: LineJoin,
-  miterLimit?: number,
-  lineDash?: number[],
-  lineDashOffset?: number,
-  cachedPaints?: IPaint[]
+  fill?: IPaint;
+  fillPickable?: boolean;
+  stroke?: IPaint;
+  strokePickable?: boolean;
+  lineWidth?: number;
+  lineCap?: LineCap;
+  lineJoin?: LineJoin;
+  miterLimit?: number;
+  lineDash?: number[];
+  lineDashOffset?: number;
+  cachedPaints?: IPaint[];
 };
 
 // Workaround type since we can't detect mixins in the type system well

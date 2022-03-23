@@ -22,7 +22,7 @@ const clamp = Utils.clamp;
 const linear = Utils.linear;
 
 type FormatParser = {
-  regexp: RegExp,
+  regexp: RegExp;
   apply: ( color: Color, matches: RegExpExecArray ) => void;
 };
 
@@ -631,7 +631,7 @@ export default class Color {
     );
   }
 
-  static fromStateObject( stateObject: { r: number, g: number, b: number, a: number } ): Color {
+  static fromStateObject( stateObject: { r: number; g: number; b: number; a: number } ): Color {
     return new Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a );
   }
 
@@ -1055,7 +1055,7 @@ Color.ColorIO = new IOType( 'ColorIO', {
   valueType: Color,
   documentation: 'A color, with rgba',
   toStateObject: ( color: Color ) => color.toStateObject(),
-  fromStateObject: ( stateObject: { r: number, g: number; b: number, a: number } ) => new Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a ),
+  fromStateObject: ( stateObject: { r: number; g: number; b: number; a: number } ) => new Color( stateObject.r, stateObject.g, stateObject.b, stateObject.a ),
   stateSchema: {
     r: NumberIO,
     g: NumberIO,

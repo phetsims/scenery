@@ -27,15 +27,15 @@ const RECTANGLE_OPTION_KEYS = [
 ];
 
 export type RectangleOptions = {
-  rectBounds?: Bounds2,
-  rectSize?: Dimension2,
-  rectX?: number,
-  rectY?: number,
-  rectWidth?: number,
-  rectHeight?: number,
-  cornerRadius?: number,
-  cornerXRadius?: number,
-  cornerYRadius?: number
+  rectBounds?: Bounds2;
+  rectSize?: Dimension2;
+  rectX?: number;
+  rectY?: number;
+  rectWidth?: number;
+  rectHeight?: number;
+  cornerRadius?: number;
+  cornerXRadius?: number;
+  cornerYRadius?: number;
 } & PathOptions;
 
 export default class Rectangle extends Path {

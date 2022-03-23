@@ -21,8 +21,8 @@ const DEFAULT_OPTIONS = {
 } as const;
 
 type SelfOptions = {
-  excludeInvisibleChildrenFromBounds?: boolean,
-  resize?: boolean
+  excludeInvisibleChildrenFromBounds?: boolean;
+  resize?: boolean;
 } & Omit<FlowConstraintOptions, 'excludeInvisible'>;
 
 export type FlowBoxOptions = SelfOptions & NodeOptions & WidthSizableSelfOptions & HeightSizableSelfOptions;

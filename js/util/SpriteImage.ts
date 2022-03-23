@@ -19,7 +19,7 @@ const scratchVector = new Vector2( 0, 0 );
 
 type SelfOptions = {
   hitTestPixels?: boolean;
-  pickable?: boolean
+  pickable?: boolean;
 };
 
 export type SpriteImageOptions = SelfOptions & ImageableOptions;

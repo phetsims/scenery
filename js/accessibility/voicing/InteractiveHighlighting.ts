@@ -21,8 +21,8 @@ const INTERACTIVE_HIGHLIGHTING_OPTIONS = [
 ];
 
 type SelfOptions = {
-  interactiveHighlight?: Highlight,
-  interactiveHighlightLayerable?: boolean
+  interactiveHighlight?: Highlight;
+  interactiveHighlightLayerable?: boolean;
 };
 
 export type InteractiveHighlightingOptions = SelfOptions & NodeOptions;
@@ -38,9 +38,9 @@ interface InteractiveHighlightingInterface {
 
   getInteractiveHighlight(): Highlight;
 
-  setInteractiveHighlightLayerable( layerable: boolean ): void
+  setInteractiveHighlightLayerable( layerable: boolean ): void;
 
-  getInteractiveHighlightLayerable(): boolean
+  getInteractiveHighlightLayerable(): boolean;
 
   isInteractiveHighlightActivated(): boolean;
 

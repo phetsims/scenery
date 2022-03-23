@@ -47,15 +47,15 @@ const useDOMAsFastBounds = window.navigator.userAgent.indexOf( 'like Gecko) Vers
 
 export type TextBoundsMethod = 'fast' | 'fastCanvas' | 'accurate' | 'hybrid';
 type SelfOptions = {
-  boundsMethod?: TextBoundsMethod,
-  textProperty?: IProperty<string> | null,
-  text?: string | number,
-  font?: Font | string,
-  fontWeight?: string | number,
-  fontFamily?: string,
-  fontStretch?: string,
-  fontStyle?: string,
-  fontSize?: string | number
+  boundsMethod?: TextBoundsMethod;
+  textProperty?: IProperty<string> | null;
+  text?: string | number;
+  font?: Font | string;
+  fontWeight?: string | number;
+  fontFamily?: string;
+  fontStretch?: string;
+  fontStyle?: string;
+  fontSize?: string | number;
 };
 export type TextOptions = SelfOptions & PaintableOptions & NodeOptions;
 
@@ -699,9 +699,9 @@ export default class Text extends Paintable( Node ) {
     // become a node with their interiors becoming children.
 
     type EmbedNode = {
-      dir: null | '\u202a' | '\u202b',
-      children: ( EmbedNode | string )[],
-      parent: EmbedNode | null
+      dir: null | '\u202a' | '\u202b';
+      children: ( EmbedNode | string )[];
+      parent: EmbedNode | null;
     };
 
     // Root node (no direction, so we preserve root LTR/RTLs)

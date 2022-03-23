@@ -282,74 +282,74 @@ const DEFAULT_OPTIONS = {
 export type RendererType = 'svg' | 'canvas' | 'webgl' | 'dom' | null;
 
 export type NodeOptions = {
-  children?: Node[],
-  cursor?: string | null,
-  phetioVisiblePropertyInstrumented?: boolean,
-  visibleProperty?: IProperty<boolean> | null,
-  visible?: boolean,
-  pickableProperty?: IProperty<boolean | null> | null,
-  pickable?: boolean | null,
-  phetioEnabledPropertyInstrumented?: boolean,
-  enabledProperty?: IProperty<boolean> | null,
-  enabled?: boolean,
-  phetioInputEnabledPropertyInstrumented?: boolean,
-  inputEnabledProperty?: IProperty<boolean> | null,
-  inputEnabled?: boolean,
-  inputListeners?: IInputListener[],
-  opacity?: number,
-  disabledOpacity?: number,
-  filters?: Filter[],
-  matrix?: Matrix3,
-  translation?: Vector2,
-  x?: number,
-  y?: number,
-  rotation?: number,
-  scale?: number | Vector2,
-  excludeInvisibleChildrenFromBounds?: boolean,
-  layoutOptions?: ILayoutOptions | null,
-  localBounds?: Bounds2 | null,
-  maxWidth?: number | null,
-  maxHeight?: number | null,
-  leftTop?: Vector2,
-  centerTop?: Vector2,
-  rightTop?: Vector2,
-  leftCenter?: Vector2,
-  center?: Vector2,
-  rightCenter?: Vector2,
-  leftBottom?: Vector2,
-  centerBottom?: Vector2,
-  rightBottom?: Vector2,
-  left?: number,
-  right?: number,
-  top?: number,
-  bottom?: number,
-  centerX?: number,
-  centerY?: number,
-  renderer?: RendererType,
-  layerSplit?: boolean,
-  usesOpacity?: boolean,
-  cssTransform?: boolean,
-  excludeInvisible?: boolean,
-  webglScale?: number | null,
-  preventFit?: boolean,
-  mouseArea?: Shape | Bounds2 | null,
-  touchArea?: Shape | Bounds2 | null,
-  clipArea?: Shape | null,
-  transformBounds?: boolean,
+  children?: Node[];
+  cursor?: string | null;
+  phetioVisiblePropertyInstrumented?: boolean;
+  visibleProperty?: IProperty<boolean> | null;
+  visible?: boolean;
+  pickableProperty?: IProperty<boolean | null> | null;
+  pickable?: boolean | null;
+  phetioEnabledPropertyInstrumented?: boolean;
+  enabledProperty?: IProperty<boolean> | null;
+  enabled?: boolean;
+  phetioInputEnabledPropertyInstrumented?: boolean;
+  inputEnabledProperty?: IProperty<boolean> | null;
+  inputEnabled?: boolean;
+  inputListeners?: IInputListener[];
+  opacity?: number;
+  disabledOpacity?: number;
+  filters?: Filter[];
+  matrix?: Matrix3;
+  translation?: Vector2;
+  x?: number;
+  y?: number;
+  rotation?: number;
+  scale?: number | Vector2;
+  excludeInvisibleChildrenFromBounds?: boolean;
+  layoutOptions?: ILayoutOptions | null;
+  localBounds?: Bounds2 | null;
+  maxWidth?: number | null;
+  maxHeight?: number | null;
+  leftTop?: Vector2;
+  centerTop?: Vector2;
+  rightTop?: Vector2;
+  leftCenter?: Vector2;
+  center?: Vector2;
+  rightCenter?: Vector2;
+  leftBottom?: Vector2;
+  centerBottom?: Vector2;
+  rightBottom?: Vector2;
+  left?: number;
+  right?: number;
+  top?: number;
+  bottom?: number;
+  centerX?: number;
+  centerY?: number;
+  renderer?: RendererType;
+  layerSplit?: boolean;
+  usesOpacity?: boolean;
+  cssTransform?: boolean;
+  excludeInvisible?: boolean;
+  webglScale?: number | null;
+  preventFit?: boolean;
+  mouseArea?: Shape | Bounds2 | null;
+  touchArea?: Shape | Bounds2 | null;
+  clipArea?: Shape | null;
+  transformBounds?: boolean;
 
   // Implicitly defined not through mutate
-  visiblePropertyOptions?: PropertyOptions<boolean>,
-  enabledPropertyOptions?: PropertyOptions<boolean>,
-  inputEnabledPropertyOptions?: PropertyOptions<boolean>
+  visiblePropertyOptions?: PropertyOptions<boolean>;
+  enabledPropertyOptions?: PropertyOptions<boolean>;
+  inputEnabledPropertyOptions?: PropertyOptions<boolean>;
 } & ParallelDOMOptions;
 
 type RasterizedOptions = {
-  resolution?: number,
-  sourceBounds?: Bounds2 | null,
-  useTargetBounds?: boolean,
-  wrap?: boolean,
-  useCanvas?: boolean,
-  imageOptions?: ImageOptions
+  resolution?: number;
+  sourceBounds?: Bounds2 | null;
+  useTargetBounds?: boolean;
+  wrap?: boolean;
+  useCanvas?: boolean;
+  imageOptions?: ImageOptions;
 };
 
 class Node extends ParallelDOM {
@@ -504,32 +504,32 @@ class Node extends ParallelDOM {
   _hints: {
     // What type of renderer should be forced for this Node. Uses the internal bitmask structure declared in
     // scenery.js and Renderer.js.
-    renderer: number,
+    renderer: number;
 
     // Whether it is anticipated that opacity will be switched on. If so, having this set to true will make switching
     // back-and-forth between opacity:1 and other opacities much faster.
-    usesOpacity: boolean,
+    usesOpacity: boolean;
 
     // Whether layers should be split before and after this Node.
-    layerSplit: boolean,
+    layerSplit: boolean;
 
     // Whether this Node and its subtree should handle transforms by using a CSS transform of a div.
-    cssTransform: boolean,
+    cssTransform: boolean;
 
     // When rendered as Canvas, whether we should use full (device) resolution on retina-like devices.
     // TODO: ensure that this is working? 0.2 may have caused a regression.
-    fullResolution: boolean,
+    fullResolution: boolean;
 
     // Whether SVG (or other) content should be excluded from the DOM tree when invisible (instead of just being hidden)
-    excludeInvisible: boolean,
+    excludeInvisible: boolean;
 
     // If non-null, a multiplier to the detected pixel-to-pixel scaling of the WebGL Canvas
-    webglScale: number | null,
+    webglScale: number | null;
 
     // If true, Scenery will not fit any blocks that contain drawables attached to Nodes underneath this Node's subtree.
     // This will typically prevent Scenery from triggering bounds computation for this sub-tree, and movement of this
     // Node or its descendants will never trigger the refitting of a block.
-    preventFit: boolean
+    preventFit: boolean;
   };
 
   // This is fired only once for any single operation that may change the children of a Node.
@@ -6162,7 +6162,7 @@ interface Node { // eslint-disable-line
   //       occurring "after" the rotation / scaling
   // NOTE: left/right/top/bottom/centerX/centerY are at the end, since they rely potentially on rotation / scaling
   //       changes of bounds that may happen beforehand
-  _mutatorKeys: string[],
+  _mutatorKeys: string[];
 
   // List of all dirty flags that should be available on drawables created from this Node (or
   // subtype). Given a flag (e.g. radius), it indicates the existence of a function
@@ -6170,7 +6170,7 @@ interface Node { // eslint-disable-line
   // (scenery-internal)
   //
   // Should be overridden by subtypes.
-  drawableMarkFlags: string[]
+  drawableMarkFlags: string[];
 }
 
 Node.prototype._mutatorKeys = ACCESSIBILITY_OPTION_KEYS.concat( NODE_OPTION_KEYS );

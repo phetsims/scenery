@@ -72,13 +72,13 @@ export type FontStretch =
   | 'ultra-expanded';
 
 type SelfOptions = {
-  style?: FontStyle,
-  variant?: FontVariant,
-  weight?: number | FontWeight,
-  stretch?: FontStretch,
-  size?: number | string,
-  lineHeight?: string,
-  family?: string
+  style?: FontStyle;
+  variant?: FontVariant;
+  weight?: number | FontWeight;
+  stretch?: FontStretch;
+  size?: number | string;
+  lineHeight?: string;
+  family?: string;
 };
 export type FontOptions = SelfOptions & PhetioObjectOptions;
 

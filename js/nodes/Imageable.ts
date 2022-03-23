@@ -47,26 +47,26 @@ const getScratchContext = () => {
 type Constructor<T = {}> = new ( ...args: any[] ) => T;
 
 export type Mipmap = {
-  width: number,
-  height: number,
-  url: string,
-  canvas?: HTMLCanvasElement,
-  img?: HTMLImageElement,
-  updateCanvas?: () => void
+  width: number;
+  height: number;
+  url: string;
+  canvas?: HTMLCanvasElement;
+  img?: HTMLImageElement;
+  updateCanvas?: () => void;
 }[];
 
 export type ImageableImage = string | HTMLImageElement | HTMLCanvasElement | Mipmap;
 
 export type ImageableOptions = {
-  image?: ImageableImage,
-  imageOpacity?: number,
-  initialWidth?: number,
-  initialHeight?: number,
-  mipmap?: boolean,
-  mipmapBias?: number,
-  mipmapInitialLevel?: number,
-  mipmapMaxLevel?: number,
-  hitTestPixels?: boolean
+  image?: ImageableImage;
+  imageOpacity?: number;
+  initialWidth?: number;
+  initialHeight?: number;
+  mipmap?: boolean;
+  mipmapBias?: number;
+  mipmapInitialLevel?: number;
+  mipmapMaxLevel?: number;
+  hitTestPixels?: boolean;
 };
 
 const Imageable = <SuperType extends Constructor>( type: SuperType ) => {

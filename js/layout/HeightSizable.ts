@@ -19,8 +19,8 @@ const HEIGHT_SIZABLE_OPTION_KEYS = [
 ];
 
 export type HeightSizableSelfOptions = {
-  preferredHeight?: number | null,
-  minimumHeight?: number | null
+  preferredHeight?: number | null;
+  minimumHeight?: number | null;
 };
 
 const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {

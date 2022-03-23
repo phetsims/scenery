@@ -60,17 +60,17 @@ const DEFAULT_CONTENT_HINT_PATTERN = new ResponsePatternCollection( {
 } );
 
 interface ReadingBlockInterface {
-  readonly isReadingBlock: boolean,
-  readingBlockActiveHighlight: Highlight,
-  readingBlockActiveHighlightChangedEmitter: TinyEmitter,
-  readonly readingBlockActivated: boolean,
+  readonly isReadingBlock: boolean;
+  readingBlockActiveHighlight: Highlight;
+  readingBlockActiveHighlightChangedEmitter: TinyEmitter;
+  readonly readingBlockActivated: boolean;
   readingBlockTagName: string | null;
 
   setReadingBlockTagName( tagName: string | null ): void;
 
   getReadingBlockTagName(): string | null;
 
-  setReadingBlockNameResponse( response: VoicingResponse ): void
+  setReadingBlockNameResponse( response: VoicingResponse ): void;
 
   getReadingBlockNameResponse(): ResolvedResponse;
 
@@ -84,7 +84,7 @@ interface ReadingBlockInterface {
 
   isReadingBlockActivated(): boolean;
 
-  dispose(): void
+  dispose(): void;
 
 }
 

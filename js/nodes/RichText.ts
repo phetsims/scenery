@@ -186,8 +186,8 @@ type SelfOptions = {
 export type RichTextOptions = SelfOptions & NodeOptions;
 
 type HimalayaAttribute = {
-  key: string,
-  value?: string
+  key: string;
+  value?: string;
 };
 type HimalayaNode = {
   type: 'element' | 'comment' | 'text';
@@ -317,7 +317,7 @@ export default class RichText extends Node {
 
   // We need to consolidate links (that could be split across multiple lines) under one "link" node, so we track created
   // link fragments here so they can get pieced together later.
-  private _linkItems: { element: any, node: Node, href: string }[];
+  private _linkItems: { element: any; node: Node; href: string }[];
 
   // Whether something has been added to this line yet. We don't want to infinite-loop out if something is longer than
   // our lineWrap, so we'll place one item on its own on an otherwise empty line.
@@ -1588,7 +1588,7 @@ const RichTextCleanable = memoize( <SuperType extends Constructor>( type: SuperT
     }
   };
 } );
-type RichTextCleanableNode = Node & { clean: () => void, isCleanable: boolean, freeToPool: () => void };
+type RichTextCleanableNode = Node & { clean: () => void; isCleanable: boolean; freeToPool: () => void };
 
 class RichTextElement extends RichTextCleanable( Node ) {
 

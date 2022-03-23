@@ -202,7 +202,7 @@ const Utils = {
    *
    * @param {Object} [options]
    */
-  canvasAccurateBounds( renderToContext: ( context: CanvasRenderingContext2D ) => void, options?: { precision?: number, resolution?: number, initialScale?: number } ): Bounds2 & { minBounds: Bounds2, maxBounds: Bounds2, isConsistent: boolean, precision: number } {
+  canvasAccurateBounds( renderToContext: ( context: CanvasRenderingContext2D ) => void, options?: { precision?: number; resolution?: number; initialScale?: number } ): Bounds2 & { minBounds: Bounds2; maxBounds: Bounds2; isConsistent: boolean; precision: number } {
     // how close to the actual bounds do we need to be?
     const precision = ( options && options.precision ) ? options.precision : 0.001;
 
@@ -382,7 +382,7 @@ const Utils = {
     }
 
     // @ts-ignore
-    const result: Bounds2 & { minBounds: Bounds2, maxBounds: Bounds2, isConsistent: boolean, precision: number } = new Bounds2(
+    const result: Bounds2 & { minBounds: Bounds2; maxBounds: Bounds2; isConsistent: boolean; precision: number } = new Bounds2(
       // Do finite checks so we don't return NaN
       ( isFinite( minBounds.minX ) && isFinite( maxBounds.minX ) ) ? ( minBounds.minX + maxBounds.minX ) / 2 : Number.POSITIVE_INFINITY,
       ( isFinite( minBounds.minY ) && isFinite( maxBounds.minY ) ) ? ( minBounds.minY + maxBounds.minY ) / 2 : Number.POSITIVE_INFINITY,

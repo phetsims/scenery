@@ -41,17 +41,17 @@ type XAlign = 'left' | 'center' | 'right';
 type YAlign = 'top' | 'center' | 'bottom';
 
 type SelfOptions = {
-  alignBounds?: Bounds2 | null,
-  xAlign?: XAlign,
-  yAlign?: YAlign,
-  margin?: number,
-  xMargin?: number,
-  yMargin?: number,
-  leftMargin?: number,
-  rightMargin?: number,
-  topMargin?: number,
-  bottomMargin?: number,
-  'group'?: AlignGroup | null,
+  alignBounds?: Bounds2 | null;
+  xAlign?: XAlign;
+  yAlign?: YAlign;
+  margin?: number;
+  xMargin?: number;
+  yMargin?: number;
+  leftMargin?: number;
+  rightMargin?: number;
+  topMargin?: number;
+  bottomMargin?: number;
+  'group'?: AlignGroup | null;
 };
 
 export type AlignBoxOptions = SelfOptions & NodeOptions

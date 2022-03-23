@@ -33,7 +33,7 @@ const IMAGE_OPTION_KEYS = [
 ];
 
 export type ImageOptions = {
-  imageBounds?: Bounds2 | null
+  imageBounds?: Bounds2 | null;
 } & NodeOptions & ImageableOptions;
 
 export default class Image extends Imageable( Node ) {

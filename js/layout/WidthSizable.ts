@@ -19,8 +19,8 @@ const WIDTH_SIZABLE_OPTION_KEYS = [
 ];
 
 export type WidthSizableSelfOptions = {
-  preferredWidth?: number | null,
-  minimumWidth?: number | null
+  preferredWidth?: number | null;
+  minimumWidth?: number | null;
 };
 
 const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {

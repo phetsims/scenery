@@ -14,7 +14,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import { Color, Gradient, LinearGradient, Paint, Pattern, RadialGradient, scenery, Image, Text, Node, Path, Circle, Line, Rectangle, DOM, Mipmap } from '../imports.js';
 
-const sceneryDeserialize = ( value: { type: string, [ key: string ]: any } ): any => {
+const sceneryDeserialize = ( value: { type: string; [ key: string ]: any } ): any => {
   const nodeTypes = [
     'Node', 'Path', 'Circle', 'Line', 'Rectangle', 'Text', 'Image', 'CanvasNode', 'WebGLNode', 'DOM'
   ];
