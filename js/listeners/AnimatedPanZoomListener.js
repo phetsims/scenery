@@ -800,7 +800,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
   }
 
   /**
-   * Interrupt the listener.
+   * Interrupt the listener. Cancels any active input and clears references upon interaction end.
    * @public
    */
   interrupt() {
@@ -808,6 +808,14 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
     this.cancelMiddlePress();
     super.interrupt();
+  }
+
+  /**
+   * "Cancel" the listener, when input stops abnormally. Part of the scenery Input API.
+   * @public
+   */
+  cancel() {
+    this.interrupt();
   }
 
   /**
