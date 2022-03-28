@@ -748,21 +748,20 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
    * Return true if all keys in the list are currently held down.
    */
   public allKeysInListDown( keys: string[] ): boolean {
-    let allKeysDown = true;
-    for ( let i = 0; i < keys.length; i++ ) {
-      for ( let j = 0; j < this.keyState.length; j++ ) {
-        if ( this.keyState[ j ].keyDown ) {
-          if ( keys[ j ] !== this.keyState[ j ].key ) {
+    assert && assert( keys.length > 0, 'You are testing to see if an empty list of keys is down?' );
 
-            // not all keys are down, return false right away
-            allKeysDown = false;
-            return allKeysDown;
-          }
-        }
+    let allKeysDown = true;
+
+    for ( let i = 0; i < keys.length; i++ ) {
+      const foundKey = _.find( this.keyState, pressedKeyTiming => pressedKeyTiming.key === keys[ i ] );
+      if ( !foundKey || !foundKey.keyDown ) {
+
+        // key is not in the keystate or is not currently pressed down, all provided keys are not down
+        allKeysDown = false;
+        break;
       }
     }
 
-    // all keys must be down
     return allKeysDown;
   }
 
