@@ -94,6 +94,9 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // such as panning to keep custom Bounds in view. See IInputListener.createPanTargetBounds.
     this._attachedPointers = [];
 
+    // @private {boolean} - Certain calculations can only be done once available pan bounds are finite.
+    this.boundsFinite = false;
+
     // listeners that will be bound to `this` if we are on a (non-touchscreen) safari platform, referenced for
     // removal on dispose
     let boundGestureStartListener = null;
@@ -758,12 +761,15 @@ class AnimatedPanZoomListener extends PanZoomListener {
   correctReposition() {
     super.correctReposition();
 
-    // the pan bounds in the local coordinate frame of the target Node (generally, bounds of the targetNode
-    // that are visible in the global panBounds)
-    this._transformedPanBounds = this._panBounds.transformed( this._targetNode.matrix.inverted() );
+    if ( this._panBounds.isFinite() ) {
 
-    this.sourcePosition = this._transformedPanBounds.center;
-    this.sourceScale = this.getCurrentScale();
+      // the pan bounds in the local coordinate frame of the target Node (generally, bounds of the targetNode
+      // that are visible in the global panBounds)
+      this._transformedPanBounds = this._panBounds.transformed( this._targetNode.matrix.inverted() );
+
+      this.sourcePosition = this._transformedPanBounds.center;
+      this.sourceScale = this.getCurrentScale();
+    }
   }
 
   /**
@@ -931,8 +937,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * @param {number} dt - in seconds
    */
   animateToTargets( dt ) {
-    assert && assert( this.destinationPosition !== null, 'initializePositions must be called at least once before animating' );
-    assert && assert( this.sourcePosition !== null, 'initializePositions must be called at least once before animating' );
+    assert && assert( this.boundsFinite, 'initializePositions must be called at least once before animating' );
 
     // only animate to targets if within this precision so that we don't animate forever, since animation speed
     // is dependent on the difference betwen source and destination positions
@@ -998,8 +1003,10 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * @private
    */
   stopInProgressAnimation() {
-    this.setDestinationScale( this.sourceScale );
-    this.setDestinationPosition( this.sourcePosition );
+    if ( this.boundsFinite ) {
+      this.setDestinationScale( this.sourceScale );
+      this.setDestinationPosition( this.sourcePosition );
+    }
   }
 
   /**
@@ -1009,8 +1016,17 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * @private
    */
   initializePositions() {
-    this.sourcePosition = this._transformedPanBounds.center;
-    this.setDestinationPosition( this.sourcePosition );
+    this.boundsFinite = this._transformedPanBounds.isFinite();
+
+    if ( this.boundsFinite ) {
+
+      this.sourcePosition = this._transformedPanBounds.center;
+      this.setDestinationPosition( this.sourcePosition );
+    }
+    else {
+      this.sourcePosition = null;
+      this.destinationPosition = null;
+    }
   }
 
   /**
@@ -1048,7 +1064,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * @param {Vector2} destination
    */
   setDestinationPosition( destination ) {
-    assert && assert( this.sourcePosition !== null, 'initializePositions must be called at least once before animating' );
+    assert && assert( this.boundsFinite, 'bounds must be finite before setting destination positions' );
 
     // limit destination position to be within the available bounds pan bounds
     scratchBounds.setMinMax(
@@ -1059,6 +1075,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
     );
 
     this.destinationPosition = scratchBounds.closestPointTo( destination );
+    assert && assert( this.destinationPosition.isFinite(), 'New destination position is not defined.' );
   }
 
   /**
