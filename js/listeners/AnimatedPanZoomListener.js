@@ -163,8 +163,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
     globalKeyStateTracker.keydownEmitter.addListener( this.windowKeydown.bind( this ) );
 
     const displayFocusListener = focus => {
-      if ( focus ) {
-        this.keepNodeInView( focus.trail.lastNode() );
+      if ( focus && this.getCurrentScale() > 1 ) {
+        this.keepTrailInView( focus.trail );
       }
     };
     FocusManager.pdomFocusProperty.link( displayFocusListener );
@@ -910,25 +910,16 @@ class AnimatedPanZoomListener extends PanZoomListener {
   }
 
   /**
-   * If the Node is outside of panBounds (the bounds that should always be filled with content) pan to the Node so that
-   * it remains in view. If the Node has multiple Instances there is not a unique transform to use so we cannot
-   * pan to it.
-   * @public
-   *
-   * @param {Node} node
+   * Keep a trail in view by panning to it if it has bounds that are outside of the global panBounds.
+   * @private
+   * @param {Trail} trail
    */
-  keepNodeInView( node ) {
-    if (
-      this._panBounds.isFinite() &&
-      node.bounds.isFinite() &&
-
-      // There may be zero or 1 instances in cases where focus is updated synchronously and instances are updated
-      // asynchronously (it has just been added to the scene graph)
-      // TODO: Support DAG? Perhaps keepTrailInView would be more appropriate
-      node.instances.length <= 1 &&
-      !this._panBounds.containsBounds( node.globalBounds )
-    ) {
-      this.panToNode( node );
+  keepTrailInView( trail ) {
+    if ( this._panBounds.isFinite() && trail.lastNode().bounds.isFinite() ) {
+      const globalBounds = trail.localToGlobalBounds( trail.lastNode().localBounds );
+      if ( !this._panBounds.containsBounds( globalBounds ) ) {
+        this.keepBoundsInView( globalBounds, true );
+      }
     }
   }
 
