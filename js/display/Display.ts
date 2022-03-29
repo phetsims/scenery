@@ -2070,7 +2070,7 @@ export default class Display {
     // rootBackbone.
     this._baseInstance && this._baseInstance.dispose();
 
-    this.descriptionUtteranceQueue && this.descriptionUtteranceQueue.dispose();
+    this.descriptionUtteranceQueue.dispose();
 
     this.focusManager && this.focusManager.dispose();
 

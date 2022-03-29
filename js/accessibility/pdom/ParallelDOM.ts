@@ -2564,6 +2564,12 @@ export default class ParallelDOM extends PhetioObject {
    */
   alertDescriptionUtterance( utterance: IAlertable ) {
 
+    // No description should be alerted if setting PhET-iO state, see https://github.com/phetsims/scenery/issues/1397
+    if ( _.hasIn( window, 'phet.phetio.phetioEngine.phetioStateEngine' ) &&
+         phet.phetio.phetioEngine.phetioStateEngine.isSettingStateProperty.value ) {
+      return;
+    }
+
     const connectedDisplays = ( this as unknown as Node ).getConnectedDisplays();
 
     // If you run into this assertion, talk to @jessegreenberg and @zepumph, because it is quite possible we would
