@@ -363,7 +363,7 @@ const PDOMUtils = {
    * @public
    *
    * @param {Element} domElement
-   * @param {string|null} textContent - domElement is cleared of content if null, could have acceptable HTML
+   * @param {string|number|null} textContent - domElement is cleared of content if null, could have acceptable HTML
    *                                    "formatting" tags in it
    */
   setTextContent( domElement, textContent ) {
