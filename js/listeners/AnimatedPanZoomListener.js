@@ -929,6 +929,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
    */
   animateToTargets( dt ) {
     assert && assert( this.boundsFinite, 'initializePositions must be called at least once before animating' );
+    assert && assert( this.sourcePosition.isFinite(), 'How can the source position not be a finite Vector2?' );
+    assert && assert( this.destinationPosition.isFinite(), 'How can the destination position not be a finite Vector2?' );
 
     // only animate to targets if within this precision so that we don't animate forever, since animation speed
     // is dependent on the difference betwen source and destination positions
@@ -1086,6 +1088,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * @private
    *
    * @param {number} translationDistance
+   * @returns {number}
    */
   getTranslationSpeed( translationDistance ) {
 
@@ -1098,7 +1101,10 @@ class AnimatedPanZoomListener extends PanZoomListener {
     const maxScaleFactor = 5;
 
     // speed falls away exponentially as we get closer to our destination so that the draft doesn't go for too long
-    return scaleDistance * ( 1 / ( Math.pow( scaleDistance, 2 ) - Math.pow( maxScaleFactor, 2 ) ) + maxScaleFactor );
+    const speed = scaleDistance * ( 1 / ( Math.pow( scaleDistance, 2 ) - Math.pow( maxScaleFactor, 2 ) ) + maxScaleFactor );
+
+    assert && assert( speed >= 0, 'translation speed should be greater than zero' );
+    return speed;
   }
 
   /**
