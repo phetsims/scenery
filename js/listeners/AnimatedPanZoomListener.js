@@ -1091,6 +1091,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
    * @returns {number}
    */
   getTranslationSpeed( translationDistance ) {
+    assert && assert( translationDistance >= 0, 'distance for getTranslationSpeed should be a non-negative number' );
 
     // The larger the scale, that faster we want to translate because the distances between source and destination
     // are smaller when zoomed in. Otherwise, speeds will be slower while zoomed in.
@@ -1100,11 +1101,9 @@ class AnimatedPanZoomListener extends PanZoomListener {
     // inspection but could be modified
     const maxScaleFactor = 5;
 
-    // speed falls away exponentially as we get closer to our destination so that the draft doesn't go for too long
-    const speed = scaleDistance * ( 1 / ( Math.pow( scaleDistance, 2 ) - Math.pow( maxScaleFactor, 2 ) ) + maxScaleFactor );
-
-    assert && assert( speed >= 0, 'translation speed should be greater than zero' );
-    return speed;
+    // speed falls away exponentially as we get closer to our destination so that the draft doesn't go for too long,
+    // do not allow negative speeds made possible by the scale factor
+    return Math.max( scaleDistance * ( 1 / ( Math.pow( scaleDistance, 2 ) - Math.pow( maxScaleFactor, 2 ) ) + maxScaleFactor ), 0 );
   }
 
   /**
