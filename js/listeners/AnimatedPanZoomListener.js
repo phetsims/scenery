@@ -954,6 +954,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
         // finally determine the final panning translation and apply
         const componentMagnitude = scratchVelocityVector.multiplyScalar( dt );
+        assert && assert( componentMagnitude.isFinite(), 'translationDelta component magnitude will not be finite' );
         const translationDelta = translationDirection.componentTimes( componentMagnitude );
 
         // in case of large dt, don't overshoot the destination
@@ -961,7 +962,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
           translationDelta.set( translationDifference );
         }
 
-        assert && assert( translationDelta.isFinite(), 'Trying to translate with a non-finite Vector2' );
+        assert && assert( translationDelta.isFinite(), `Trying to translate with a non-finite Vector2. translationSpeed: ${translationSpeed}, dt: ${dt}` );
         this.translateDelta( translationDelta );
       }
 
