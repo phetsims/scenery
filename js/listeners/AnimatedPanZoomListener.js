@@ -951,10 +951,11 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
         const translationSpeed = this.getTranslationSpeed( translationDifference.magnitude );
         scratchVelocityVector.setXY( translationSpeed, translationSpeed );
+        assert && assert( scratchVelocityVector.isFinite(), `velocity vector will not be finite, ${scratchVelocityVector.toString()}, ${dt}, ${translationDifference.magnitude}` );
 
         // finally determine the final panning translation and apply
         const componentMagnitude = scratchVelocityVector.multiplyScalar( dt );
-        assert && assert( componentMagnitude.isFinite(), 'translationDelta component magnitude will not be finite' );
+        assert && assert( componentMagnitude.isFinite(), `translationDelta component magnitude will not be finite, ${componentMagnitude.toString}, ${dt}` );
         const translationDelta = translationDirection.componentTimes( componentMagnitude );
 
         // in case of large dt, don't overshoot the destination
