@@ -23,6 +23,11 @@ import { EventIO, FocusManager, globalKeyStateTracker, Intent, KeyboardDragListe
 const MOVE_CURSOR = 'all-scroll';
 const MAX_SCROLL_VELOCITY = 150; // max global view coords per second while scrolling with middle mouse button drag
 
+// The max speed of translation when animating from source position to destination position in the coordinate frame
+// of the parent of the targetNode of this listener. Increase the value of this to animate faster to the destination
+// position when panning to targets.
+const MAX_TRANSLATION_SPEED = 1000;
+
 // scratch variables to reduce garbage
 const scratchTranslationVector = new Vector2( 0, 0 );
 const scratchScaleTargetVector = new Vector2( 0, 0 );
@@ -950,6 +955,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
         }
 
         const translationSpeed = this.getTranslationSpeed( translationDifference.magnitude );
+        assert && assert( isFinite( translationSpeed ), `translationSpeed is not finite, animation will fail: ${translationSpeed}` );
+
         scratchVelocityVector.setXY( translationSpeed, translationSpeed );
         assert && assert( scratchVelocityVector.isFinite(), `velocity vector will not be finite, ${scratchVelocityVector.toString()}, ${dt}, ${translationDifference.magnitude}` );
 
@@ -1086,7 +1093,8 @@ class AnimatedPanZoomListener extends PanZoomListener {
 
   /**
    * Calculate the translation speed to animate from our sourcePosition to our targetPosition. Speed goes to zero
-   * as the translationDistance gets smaller for smooth animation as we reach our destination position.
+   * as the translationDistance gets smaller for smooth animation as we reach our destination position. This returns
+   * a speed in the coordinate frame of the parent of this listener's target Node.
    * @private
    *
    * @param {number} translationDistance
@@ -1100,12 +1108,20 @@ class AnimatedPanZoomListener extends PanZoomListener {
     const scaleDistance = translationDistance * this.getCurrentScale();
 
     // A maximum translation factor applied to distance to determine a reasonable speed, determined by
-    // inspection but could be modified
+    // inspection but could be modified. This impacts how long the "tail" of translation is as we animate.
+    // While we animate to the destination position we move quickly far away from the destination and slow down
+    // as we get closer to the target. Reduce this value to exaggerate that effect and move more slowly as we
+    // get closer to the destination position.
     const maxScaleFactor = 5;
 
-    // speed falls away exponentially as we get closer to our destination so that the draft doesn't go for too long,
-    // do not allow negative speeds made possible by the scale factor
-    return Math.max( scaleDistance * ( 1 / ( Math.pow( scaleDistance, 2 ) - Math.pow( maxScaleFactor, 2 ) ) + maxScaleFactor ), 0 );
+    // speed falls away exponentially as we get closer to our destination so that we appear to "slide" to our
+    // destination which looks nice, but also prevents us from animating for too long
+    const translationSpeed = scaleDistance * ( 1 / ( Math.pow( scaleDistance, 2 ) - Math.pow( maxScaleFactor, 2 ) ) + maxScaleFactor );
+
+    // translationSpeed could be negative or go to infinity due to the behavior of the exponential calculation above.
+    // Make sure that the speed is constrained and greater than zero.
+    const limitedTranslationSpeed = Math.min( Math.abs( translationSpeed ), MAX_TRANSLATION_SPEED * this.getCurrentScale() );
+    return limitedTranslationSpeed;
   }
 
   /**
