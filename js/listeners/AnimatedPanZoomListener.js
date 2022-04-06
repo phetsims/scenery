@@ -375,7 +375,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
           // https://github.com/phetsims/scenery/issues/1361 and
           // https://github.com/phetsims/scenery/issues/1356#issuecomment-1039678678
           if ( target.instances.length === 1 ) {
-            globalBoundsToView = target.globalBounds;
+            globalBoundsToView = target.instances[ 0 ].trail.parentToGlobalBounds( target.visibleBounds );
           }
         }
       }
