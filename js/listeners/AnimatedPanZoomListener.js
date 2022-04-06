@@ -955,14 +955,10 @@ class AnimatedPanZoomListener extends PanZoomListener {
         }
 
         const translationSpeed = this.getTranslationSpeed( translationDifference.magnitude );
-        assert && assert( isFinite( translationSpeed ), `translationSpeed is not finite, animation will fail: ${translationSpeed}` );
-
         scratchVelocityVector.setXY( translationSpeed, translationSpeed );
-        assert && assert( scratchVelocityVector.isFinite(), `velocity vector will not be finite, ${scratchVelocityVector.toString()}, ${dt}, ${translationDifference.magnitude}` );
 
         // finally determine the final panning translation and apply
         const componentMagnitude = scratchVelocityVector.multiplyScalar( dt );
-        assert && assert( componentMagnitude.isFinite(), `translationDelta component magnitude will not be finite, ${componentMagnitude.toString}, ${dt}` );
         const translationDelta = translationDirection.componentTimes( componentMagnitude );
 
         // in case of large dt, don't overshoot the destination
@@ -970,7 +966,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
           translationDelta.set( translationDifference );
         }
 
-        assert && assert( translationDelta.isFinite(), `Trying to translate with a non-finite Vector2. translationSpeed: ${translationSpeed}, dt: ${dt}` );
+        assert && assert( translationDelta.isFinite(), 'Trying to translate with a non-finite Vector2' );
         this.translateDelta( translationDelta );
       }
 
@@ -1067,6 +1063,7 @@ class AnimatedPanZoomListener extends PanZoomListener {
    */
   setDestinationPosition( destination ) {
     assert && assert( this.boundsFinite, 'bounds must be finite before setting destination positions' );
+    assert && assert( destination.isFinite(), 'provided destination position is not defined' );
 
     // limit destination position to be within the available bounds pan bounds
     scratchBounds.setMinMax(
@@ -1077,7 +1074,6 @@ class AnimatedPanZoomListener extends PanZoomListener {
     );
 
     this.destinationPosition = scratchBounds.closestPointTo( destination );
-    assert && assert( this.destinationPosition.isFinite(), 'New destination position is not defined.' );
   }
 
   /**
