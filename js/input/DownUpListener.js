@@ -3,7 +3,6 @@
 /**
  * Basic down/up pointer handling for a Node, so that it's easy to handle buttons
  *
- * @deprecated - use PressListener instead
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -12,6 +11,9 @@ import merge from '../../../phet-core/js/merge.js';
 import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import { scenery, Trail, Mouse, SceneryEvent } from '../imports.js';
 
+/**
+ * @deprecated - use PressListener instead
+ */
 class DownUpListener extends PhetioObject {
   /**
    * The 'trail' parameter passed to down/upInside/upOutside will end with the node to which this DownUpListener has

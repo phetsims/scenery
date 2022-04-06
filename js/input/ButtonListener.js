@@ -12,9 +12,6 @@
  * TODO: offscreen handling
  * TODO: fix enter/exit edge cases for moving nodes or add/remove child, and when touches are created
  *
- * @deprecated - please use FireListener for new code (set up for the `fire` callback to be easy, and has Properties
- * that can be checked for the other states or complicated cases)
- *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
@@ -25,6 +22,10 @@ import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import { scenery, DownUpListener } from '../imports.js';
 
+/**
+ * @deprecated - please use FireListener for new code (set up for the `fire` callback to be easy, and has Properties
+ * that can be checked for the other states or complicated cases)
+ */
 class ButtonListener extends DownUpListener {
   /**
    * Options for the ButtonListener:

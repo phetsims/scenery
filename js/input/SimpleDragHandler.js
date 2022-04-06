@@ -4,7 +4,6 @@
  * Basic dragging for a node.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
- * @deprecated - please use DragListener for new code
  */
 
 import PhetioAction from '../../../tandem/js/PhetioAction.js';
@@ -17,6 +16,9 @@ import PhetioObject from '../../../tandem/js/PhetioObject.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import { scenery, Mouse, SceneryEvent } from '../imports.js';
 
+/**
+ * @deprecated - please use DragListener for new code
+ */
 class SimpleDragHandler extends PhetioObject {
   /**
    * @param {Object} [options]
