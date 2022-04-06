@@ -59,38 +59,6 @@ const DEFAULT_CONTENT_HINT_PATTERN = new ResponsePatternCollection( {
   nameHint: '{{NAME}}. {{HINT}}'
 } );
 
-interface ReadingBlockInterface {
-  readonly isReadingBlock: boolean;
-  readingBlockActiveHighlight: Highlight;
-  readingBlockActiveHighlightChangedEmitter: TinyEmitter;
-  readonly readingBlockActivated: boolean;
-  readingBlockTagName: string | null;
-
-  setReadingBlockTagName( tagName: string | null ): void;
-
-  getReadingBlockTagName(): string | null;
-
-  setReadingBlockNameResponse( response: VoicingResponse ): void;
-
-  getReadingBlockNameResponse(): ResolvedResponse;
-
-  setReadingBlockHintResponse( response: VoicingResponse ): void;
-
-  getReadingBlockHintResponse(): ResolvedResponse;
-
-  setReadingBlockActiveHighlight( highlight: Highlight ): void;
-
-  getReadingBlockActiveHighlight(): Highlight;
-
-  isReadingBlockActivated(): boolean;
-
-  dispose(): void;
-
-}
-
-// For type checking when you need to verify that a Type composes ReadingBlock
-export type ReadingBlockVersion<Type extends Constructor> = InstanceType<Type> & ReadingBlockInterface;
-
 /**
  * @param Type
  * @param optionsArgPosition - zero-indexed number that the options argument is provided at
@@ -421,6 +389,9 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
   return ReadingBlockClass;
 };
 
+// Export a type that lets you check if your Node is composed with ReadingBlock
+const wrapper = () => ReadingBlock( Node, 1 );
+export type ReadingBlockNode = InstanceType<ReturnType<typeof wrapper>>;
 
 scenery.register( 'ReadingBlock', ReadingBlock );
 export default ReadingBlock;
