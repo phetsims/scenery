@@ -111,7 +111,7 @@ export default class Text extends Paintable( Node ) {
     this.invalidateSupportedRenderers(); // takes care of setting up supported renderers
   }
 
-  mutate( options?: TextOptions ) {
+  override mutate( options?: TextOptions ) {
     // @ts-ignore
     if ( assert && options.hasOwnProperty( 'text' ) && options.hasOwnProperty( 'textProperty' ) ) {
       // @ts-ignore
@@ -210,10 +210,9 @@ export default class Text extends Paintable( Node ) {
    * See documentation and comments in Node.initializePhetioObject
    * @param {Object} baseOptions
    * @param {Object} config
-   * @override
    * @protected
    */
-  initializePhetioObject( baseOptions: any, config: TextOptions ) {
+  override initializePhetioObject( baseOptions: any, config: TextOptions ) {
 
     config = merge( {
       textPropertyOptions: null
@@ -311,7 +310,7 @@ export default class Text extends Paintable( Node ) {
    * This should be called whenever something that could potentially change supported renderers happen (which can
    * be isHTML, boundsMethod, etc.)
    */
-  invalidateSupportedRenderers() {
+  override invalidateSupportedRenderers() {
     this.setRendererBitmask( this.getFillRendererBitmask() & this.getStrokeRendererBitmask() & this.getTextRendererBitmask() );
   }
 
@@ -337,7 +336,7 @@ export default class Text extends Paintable( Node ) {
    *
    * @returns - Whether the self bounds changed.
    */
-  protected updateSelfBounds(): boolean {
+  protected override updateSelfBounds(): boolean {
     // TODO: don't create another Bounds2 object just for this!
     let selfBounds;
 
@@ -372,7 +371,7 @@ export default class Text extends Paintable( Node ) {
    * Called from (and overridden in) the Paintable trait, invalidates our current stroke, triggering recomputation of
    * anything that depended on the old stroke's value. (scenery-internal)
    */
-  invalidateStroke() {
+  override invalidateStroke() {
     // stroke can change both the bounds and renderer
     this.invalidateText();
 
@@ -383,7 +382,7 @@ export default class Text extends Paintable( Node ) {
    * Called from (and overridden in) the Paintable trait, invalidates our current fill, triggering recomputation of
    * anything that depended on the old fill's value. (scenery-internal)
    */
-  invalidateFill() {
+  override invalidateFill() {
     // fill type can change the renderer (gradient/fill not supported by DOM)
     this.invalidateText();
 
@@ -397,7 +396,7 @@ export default class Text extends Paintable( Node ) {
    * @param wrapper
    * @param matrix - The transformation matrix already applied to the context.
    */
-  canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
+  override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
     //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily.
     TextCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
   }
@@ -408,7 +407,7 @@ export default class Text extends Paintable( Node ) {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
+  override createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
     // @ts-ignore
     return TextDOMDrawable.createFromPool( renderer, instance );
   }
@@ -419,7 +418,7 @@ export default class Text extends Paintable( Node ) {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
+  override createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
     // @ts-ignore
     return TextSVGDrawable.createFromPool( renderer, instance );
   }
@@ -430,7 +429,7 @@ export default class Text extends Paintable( Node ) {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
+  override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
     // @ts-ignore
     return TextCanvasDrawable.createFromPool( renderer, instance );
   }
@@ -458,7 +457,7 @@ export default class Text extends Paintable( Node ) {
    * We need to add additional padding around the text when the text is in a container that could clip things badly
    * if the text is larger than the normal bounds computation.
    */
-  getSafeSelfBounds(): Bounds2 {
+  override getSafeSelfBounds(): Bounds2 {
     const expansionFactor = 1; // we use a new bounding box with a new size of size * ( 1 + 2 * expansionFactor )
 
     const selfBounds = this.getSelfBounds();
@@ -638,7 +637,7 @@ export default class Text extends Paintable( Node ) {
   /**
    * Whether this Node itself is painted (displays something itself).
    */
-  isPainted(): boolean {
+  override isPainted(): boolean {
     // Always true for Text nodes
     return true;
   }
@@ -649,18 +648,18 @@ export default class Text extends Paintable( Node ) {
    *
    * If this value would potentially change, please trigger the event 'selfBoundsValid'.
    */
-  areSelfBoundsValid(): boolean {
+  override areSelfBoundsValid(): boolean {
     return this._boundsMethod === 'accurate';
   }
 
   /**
    * Override for extra information in the debugging output (from Display.getDebugHTML()). (scenery-internal)
    */
-  getDebugHTMLExtras(): string {
+  override getDebugHTMLExtras(): string {
     return ` "${escapeHTML( this.renderedText )}"${this._isHTML ? ' (html)' : ''}`;
   }
 
-  dispose() {
+  override dispose() {
     super.dispose();
 
     this._textProperty.dispose();

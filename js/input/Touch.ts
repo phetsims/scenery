@@ -66,11 +66,11 @@ export default class Touch extends Pointer {
   /**
    * Returns an improved string representation of this object.
    */
-  toString(): string {
+  override toString(): string {
     return `Touch#${this.id}`;
   }
 
-  isTouchLike(): boolean {
+  override isTouchLike(): boolean {
     return true;
   }
 }

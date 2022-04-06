@@ -114,7 +114,7 @@ export default class FireListener extends PressListener implements IInputListene
    * @param [callback] - to be run at the end of the function, but only on success
    * @returns success - Returns whether the press was actually started
    */
-  press( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent>, targetNode?: Node, callback?: () => void ): boolean {
+  override press( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent>, targetNode?: Node, callback?: () => void ): boolean {
     return super.press( event, targetNode, () => {
       // This function is only called on success
       if ( this._fireOnDown ) {
@@ -137,7 +137,7 @@ export default class FireListener extends PressListener implements IInputListene
    * @param [event] - scenery event if there was one
    * @param [callback] - called at the end of the release
    */
-  release( event?: SceneryEvent<MouseEvent | TouchEvent | PointerEvent>, callback?: () => void ) {
+  override release( event?: SceneryEvent<MouseEvent | TouchEvent | PointerEvent>, callback?: () => void ) {
     super.release( event, () => {
       // Notify after the rest of release is called in order to prevent it from triggering interrupt().
       const shouldFire = !this._fireOnDown && this.isHoveringProperty.value && !this.interrupted;
@@ -165,7 +165,7 @@ export default class FireListener extends PressListener implements IInputListene
    * @param [event]
    * @param [callback] - called at the end of the click
    */
-  click( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> | null, callback?: () => void ): boolean {
+  override click( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> | null, callback?: () => void ): boolean {
     return super.click( event, () => {
 
       // don't click if listener was interrupted before this callback
@@ -184,13 +184,13 @@ export default class FireListener extends PressListener implements IInputListene
    *
    * This can be called manually, but can also be called through node.interruptSubtreeInput().
    */
-  interrupt() {
+  override interrupt() {
     super.interrupt();
 
     this._timer && this._timer.stop( false ); // Stop the timer, don't fire if we haven't already
   }
 
-  dispose() {
+  override dispose() {
     this.firedEmitter.dispose();
     this._timer && this._timer.dispose();
 

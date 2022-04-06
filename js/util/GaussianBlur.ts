@@ -62,11 +62,11 @@ export default class GaussianBlur extends Filter {
     svgFilter.appendChild( feGaussianBlur );
   }
 
-  isDOMCompatible() {
+  override isDOMCompatible() {
     return true;
   }
 
-  isSVGCompatible() {
+  override isSVGCompatible() {
     return true;
   }
 

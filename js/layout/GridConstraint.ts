@@ -98,7 +98,7 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
     this.preferredHeightProperty.lazyLink( this._updateLayoutListener );
   }
 
-  protected layout() {
+  protected override layout() {
     super.layout();
 
     assert && assert( _.every( [ ...this.cells ], cell => !cell.node.isDisposed ) );
@@ -330,7 +330,7 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
   /**
    * Releases references
    */
-  dispose() {
+  override dispose() {
     // In case they're from external sources
     this.preferredWidthProperty.unlink( this._updateLayoutListener );
     this.preferredHeightProperty.unlink( this._updateLayoutListener );

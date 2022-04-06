@@ -203,7 +203,7 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
     this.preferredHeightProperty.lazyLink( this._updateLayoutListener );
   }
 
-  protected layout() {
+  protected override layout() {
     super.layout();
 
     // The orientation along the laid-out lines
@@ -551,7 +551,7 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
   /**
    * Releases references
    */
-  dispose() {
+  override dispose() {
     // In case they're from external sources
     this.preferredWidthProperty.unlink( this._updateLayoutListener );
     this.preferredHeightProperty.unlink( this._updateLayoutListener );

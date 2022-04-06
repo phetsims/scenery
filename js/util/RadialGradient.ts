@@ -99,7 +99,7 @@ export default class RadialGradient extends Gradient {
    *
    * NOTE: SVG has certain stop requirements, so we need to remap/reverse in some cases.
    */
-  getSVGStops(): GradientStop[] {
+  override getSVGStops(): GradientStop[] {
     const startIsLarger = this.startIsLarger;
     const maxRadius = this.maxRadius;
     const minRadius = this.minRadius;
@@ -139,7 +139,7 @@ export default class RadialGradient extends Gradient {
   /**
    * Returns a string form of this object
    */
-  toString(): string {
+  override toString(): string {
     let result = `new scenery.RadialGradient( ${this.start.x}, ${this.start.y}, ${this.startRadius}, ${this.end.x}, ${this.end.y}, ${this.endRadius} )`;
 
     _.each( this.stops, stop => {

@@ -66,7 +66,7 @@ export default class Image extends Imageable( Node ) {
    * This should be done when the underlying image has changed appearance (usually the case with a Canvas changing,
    * but this is also triggered by our actual image reference changing).
    */
-  invalidateImage() {
+  override invalidateImage() {
     if ( this._image ) {
       this.invalidateSelf( this._imageBounds || new Bounds2( 0, 0, this.getImageWidth(), this.getImageHeight() ) );
     }
@@ -87,7 +87,7 @@ export default class Image extends Imageable( Node ) {
   /**
    * Recomputes what renderers are supported, given the current image information.
    */
-  invalidateSupportedRenderers() {
+  override invalidateSupportedRenderers() {
 
     // Canvas is always permitted
     let r = Renderer.bitmaskCanvas;
@@ -119,7 +119,7 @@ export default class Image extends Imageable( Node ) {
    *
    * @param imageOpacity - Should be a number between 0 (transparent) and 1 (opaque), just like normal opacity.
    */
-  setImageOpacity( imageOpacity: number ) {
+  override setImageOpacity( imageOpacity: number ) {
     const changed = this._imageOpacity !== imageOpacity;
 
     super.setImageOpacity( imageOpacity );
@@ -161,7 +161,7 @@ export default class Image extends Imageable( Node ) {
   /**
    * Whether this Node itself is painted (displays something itself).
    */
-  isPainted() {
+  override isPainted() {
     // Always true for Image nodes
     return true;
   }
@@ -173,7 +173,7 @@ export default class Image extends Imageable( Node ) {
    * @param wrapper
    * @param matrix - The transformation matrix already applied to the context.
    */
-  protected canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
+  protected override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
     //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily.
     ImageCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
   }
@@ -184,7 +184,7 @@ export default class Image extends Imageable( Node ) {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
+  override createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
     // @ts-ignore - Poolable
     return ImageDOMDrawable.createFromPool( renderer, instance );
   }
@@ -195,7 +195,7 @@ export default class Image extends Imageable( Node ) {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
+  override createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
     // @ts-ignore - Poolable
     return ImageSVGDrawable.createFromPool( renderer, instance );
   }
@@ -207,7 +207,7 @@ export default class Image extends Imageable( Node ) {
    * @param instance - Instance object that will be associated with the drawable
    * @returns {CanvasSelfDrawable}
    */
-  createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
+  override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
     // @ts-ignore - Poolable
     return ImageCanvasDrawable.createFromPool( renderer, instance );
   }
@@ -219,7 +219,7 @@ export default class Image extends Imageable( Node ) {
    * @param instance - Instance object that will be associated with the drawable
    * @returns {WebGLSelfDrawable}
    */
-  createWebGLDrawable( renderer: number, instance: Instance ): WebGLSelfDrawable {
+  override createWebGLDrawable( renderer: number, instance: Instance ): WebGLSelfDrawable {
     // @ts-ignore - Poolable
     return ImageWebGLDrawable.createFromPool( renderer, instance );
   }
@@ -229,7 +229,7 @@ export default class Image extends Imageable( Node ) {
    *
    * @param point - Considered to be in the local coordinate frame
    */
-  containsPointSelf( point: Vector2 ): boolean {
+  override containsPointSelf( point: Vector2 ): boolean {
     const inBounds = Node.prototype.containsPointSelf.call( this, point );
 
     if ( !inBounds || !this._hitTestPixels || !this._hitTestImageData ) {
@@ -242,7 +242,7 @@ export default class Image extends Imageable( Node ) {
   /**
    * Returns a Shape that represents the area covered by containsPointSelf.
    */
-  getSelfShape(): Shape {
+  override getSelfShape(): Shape {
     if ( this._hitTestPixels && this._hitTestImageData ) {
       // If we're hit-testing pixels, return that shape included.
       return Imageable.hitTestDataToShape( this._hitTestImageData, this.imageWidth, this.imageHeight );
@@ -256,7 +256,7 @@ export default class Image extends Imageable( Node ) {
   /**
    * Triggers recomputation of mipmaps (as long as mipmapping is enabled)
    */
-  invalidateMipmaps() {
+  override invalidateMipmaps() {
     const markDirty = this._image && this._mipmap && !this._mipmapData;
 
     super.invalidateMipmaps();

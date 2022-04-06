@@ -390,7 +390,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
       }
     }
 
-    dispose() {
+    override dispose() {
       const thisNode = ( this as unknown as Node );
       voicingManager.speechAllowedAndFullyEnabledProperty.unlink( this._readingBlockFocusableChangeListener );
       thisNode.localBoundsProperty.unlink( this._localBoundsChangedListener );

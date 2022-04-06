@@ -181,7 +181,7 @@ export default class Path extends Paintable( Node ) {
    * This should be called whenever something that could potentially change supported renderers happen (which can
    * be the shape, properties of the strokes or fills, etc.)
    */
-  invalidateSupportedRenderers() {
+  override invalidateSupportedRenderers() {
     this.setRendererBitmask( this.getFillRendererBitmask() & this.getStrokeRendererBitmask() & this.getPathRendererBitmask() );
   }
 
@@ -245,7 +245,7 @@ export default class Path extends Paintable( Node ) {
    *
    * @returns - Whether the self bounds changed.
    */
-  protected updateSelfBounds(): boolean {
+  protected override updateSelfBounds(): boolean {
     const selfBounds = this.hasShape() ? this.computeShapeBounds() : Bounds2.NOTHING;
     const changed = !selfBounds.equals( this.selfBoundsProperty._value );
     if ( changed ) {
@@ -342,7 +342,7 @@ export default class Path extends Paintable( Node ) {
    *
    * If this value would potentially change, please trigger the event 'selfBoundsValid'.
    */
-  areSelfBoundsValid(): boolean {
+  override areSelfBoundsValid(): boolean {
     if ( this._boundsMethod === 'accurate' || this._boundsMethod === 'safePadding' ) {
       return true;
     }
@@ -357,7 +357,7 @@ export default class Path extends Paintable( Node ) {
   /**
    * Returns our self bounds when our rendered self is transformed by the matrix.
    */
-  getTransformedSelfBounds( matrix: Matrix3 ): Bounds2 {
+  override getTransformedSelfBounds( matrix: Matrix3 ): Bounds2 {
     assert && assert( this.hasShape() );
 
     return ( this._stroke ? this.getStrokedShape() : this.getShape() )!.getBoundsWithTransform( matrix );
@@ -366,7 +366,7 @@ export default class Path extends Paintable( Node ) {
   /**
    * Returns our safe self bounds when our rendered self is transformed by the matrix.
    */
-  getTransformedSafeSelfBounds( matrix: Matrix3 ): Bounds2 {
+  override getTransformedSafeSelfBounds( matrix: Matrix3 ): Bounds2 {
     return this.getTransformedSelfBounds( matrix );
   }
 
@@ -374,7 +374,7 @@ export default class Path extends Paintable( Node ) {
    * Called from (and overridden in) the Paintable trait, invalidates our current stroke, triggering recomputation of
    * anything that depended on the old stroke's value. (scenery-internal)
    */
-  invalidateStroke() {
+  override invalidateStroke() {
     this.invalidatePath();
 
     this.rendererSummaryRefreshEmitter.emit(); // Stroke changing could have changed our self-bounds-validitity (unstroked/etc)
@@ -393,12 +393,11 @@ export default class Path extends Paintable( Node ) {
    * Draws the current Node's self representation, assuming the wrapper's Canvas context is already in the local
    * coordinate frame of this node.
    * @protected
-   * @override
    *
    * @param {CanvasContextWrapper} wrapper
    * @param {Matrix3} matrix - The transformation matrix already applied to the context.
    */
-  canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
+  override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
     //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily.
     PathCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
   }
@@ -409,7 +408,7 @@ export default class Path extends Paintable( Node ) {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
+  override createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
     // @ts-ignore
     return PathSVGDrawable.createFromPool( renderer, instance );
   }
@@ -420,7 +419,7 @@ export default class Path extends Paintable( Node ) {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
+  override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
     // @ts-ignore
     return PathCanvasDrawable.createFromPool( renderer, instance );
   }
@@ -428,7 +427,7 @@ export default class Path extends Paintable( Node ) {
   /**
    * Whether this Node itself is painted (displays something itself).
    */
-  isPainted(): boolean {
+  override isPainted(): boolean {
     // Always true for Path nodes
     return true;
   }
@@ -438,7 +437,7 @@ export default class Path extends Paintable( Node ) {
    *
    * @param point - Considered to be in the local coordinate frame
    */
-  containsPointSelf( point: Vector2 ): boolean {
+  override containsPointSelf( point: Vector2 ): boolean {
     let result = false;
     if ( !this.hasShape() ) {
       return result;
@@ -459,7 +458,7 @@ export default class Path extends Paintable( Node ) {
   /**
    * Returns a Shape that represents the area covered by containsPointSelf.
    */
-  getSelfShape(): Shape {
+  override getSelfShape(): Shape {
     return Shape.union( [
       ...( ( this.hasShape() && this._fillPickable ) ? [ this.getShape()! ] : [] ),
       ...( ( this.hasShape() && this._strokePickable ) ? [ this.getStrokedShape() ] : [] )
@@ -471,7 +470,7 @@ export default class Path extends Paintable( Node ) {
    *
    * @param bounds - Bounds to test, assumed to be in the local coordinate frame.
    */
-  intersectsBoundsSelf( bounds: Bounds2 ): boolean {
+  override intersectsBoundsSelf( bounds: Bounds2 ): boolean {
     // TODO: should a shape's stroke be included?
     return this._shape ? this._shape.intersectsBounds( bounds ) : false;
   }
@@ -492,14 +491,14 @@ export default class Path extends Paintable( Node ) {
   /**
    * Override for extra information in the debugging output (from Display.getDebugHTML()). (scenery-internal)
    */
-  getDebugHTMLExtras(): string {
+  override getDebugHTMLExtras(): string {
     return this._shape ? ` (<span style="color: #88f" onclick="window.open( 'data:text/plain;charset=utf-8,' + encodeURIComponent( '${this._shape.getSVGPath()}' ) );">path</span>)` : '';
   }
 
   /**
    * Disposes the path, releasing shape listeners if needed (and preventing new listeners from being added).
    */
-  dispose() {
+  override dispose() {
     if ( this._invalidShapeListenerAttached ) {
       this.detachShapeListener();
     }

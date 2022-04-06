@@ -590,7 +590,7 @@ export default class AlignBox extends Node {
   /**
    * Disposes this box, releasing listeners and any references to an AlignGroup
    */
-  dispose() {
+  override dispose() {
     // Remove our listener
     this._content.boundsProperty.unlink( this._contentBoundsListener );
 

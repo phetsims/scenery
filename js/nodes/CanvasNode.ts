@@ -58,7 +58,7 @@ export default abstract class CanvasNode extends Node {
   /**
    * Whether this Node itself is painted (displays something itself).
    */
-  isPainted() {
+  override isPainted() {
     // Always true for CanvasNode
     return true;
   }
@@ -92,7 +92,7 @@ export default abstract class CanvasNode extends Node {
    * @param wrapper
    * @param matrix - The transformation matrix already applied to the context.
    */
-  protected canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
+  protected override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
     this.paintCanvas( wrapper.context );
   }
 
@@ -103,14 +103,14 @@ export default abstract class CanvasNode extends Node {
    *
    * @param point - Considered to be in the local coordinate frame
    */
-  containsPointSelf( point: Vector2 ): boolean {
+  override containsPointSelf( point: Vector2 ): boolean {
     return false;
   }
 
   /**
    * Returns a Shape that represents the area covered by containsPointSelf.
    */
-  getSelfShape(): Shape {
+  override getSelfShape(): Shape {
     return new Shape();
   }
 
@@ -120,7 +120,7 @@ export default abstract class CanvasNode extends Node {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
+  override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
     // @ts-ignore
     return CanvasNodeDrawable.createFromPool( renderer, instance );
   }

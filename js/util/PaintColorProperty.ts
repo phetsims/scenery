@@ -151,7 +151,7 @@ export default class PaintColorProperty extends Property<Color> {
   /**
    * Releases references.
    */
-  dispose() {
+  override dispose() {
     this.paint = null;
 
     super.dispose();

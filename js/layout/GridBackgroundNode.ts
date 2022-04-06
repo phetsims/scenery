@@ -53,7 +53,7 @@ export default class GridBackgroundNode extends Node {
   /**
    * Releases references
    */
-  dispose() {
+  override dispose() {
     this.constraint.finishedLayoutEmitter.removeListener( this.layoutListener );
 
     super.dispose();

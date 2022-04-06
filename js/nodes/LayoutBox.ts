@@ -238,7 +238,7 @@ export default class LayoutBox extends Node {
    * Overridden so we can group together setChildren() and only update layout (a) at the end, and (b) if there
    * are changes.
    */
-  setChildren( children: Node[] ): this {
+  override setChildren( children: Node[] ): this {
     // If the layout is already locked, we need to bail and only call Node's setChildren.
     if ( this._updateLayoutLocked ) {
       return super.setChildren( children );
@@ -266,7 +266,7 @@ export default class LayoutBox extends Node {
    * The default is for child nodes bounds' to be included in this node's bounds, but that would in general be a
    * problem for layout containers or other situations, see https://github.com/phetsims/joist/issues/608.
    */
-  setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds: boolean ) {
+  override setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds: boolean ) {
     super.setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds );
 
     // If we have invisible children, we'll likely need to update our layout,

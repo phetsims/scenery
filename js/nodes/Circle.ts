@@ -71,7 +71,7 @@ export default class Circle extends Path {
    *
    * We can support the DOM renderer if there is a solid-styled stroke (which otherwise wouldn't be supported).
    */
-  getStrokeRendererBitmask(): number {
+  override getStrokeRendererBitmask(): number {
     let bitmask = super.getStrokeRendererBitmask();
     // @ts-ignore TODO isGradient/isPattern better handling
     if ( this.hasStroke() && !this.getStroke()!.isGradient && !this.getStroke()!.isPattern && this.getLineWidth() <= this.getRadius() ) {
@@ -83,7 +83,7 @@ export default class Circle extends Path {
   /**
    * Determines the allowed renderers that are allowed (or excluded) based on the current Path. (scenery-internal)
    */
-  getPathRendererBitmask(): number {
+  override getPathRendererBitmask(): number {
     // If we can use CSS borderRadius, we can support the DOM renderer.
     return Renderer.bitmaskCanvas | Renderer.bitmaskSVG | ( Features.borderRadius ? Renderer.bitmaskDOM : 0 );
   }
@@ -115,7 +115,7 @@ export default class Circle extends Path {
    *
    * @param bounds - Bounds to test, assumed to be in the local coordinate frame.
    */
-  intersectsBoundsSelf( bounds: Bounds2 ): boolean {
+  override intersectsBoundsSelf( bounds: Bounds2 ): boolean {
     // TODO: handle intersection with somewhat-infinite bounds!
     let x = Math.abs( bounds.centerX );
     let y = Math.abs( bounds.centerY );
@@ -145,7 +145,7 @@ export default class Circle extends Path {
    * @param wrapper
    * @param matrix - The transformation matrix already applied to the context.
    */
-  canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
+  override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
     //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily.
     CircleCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
   }
@@ -156,7 +156,7 @@ export default class Circle extends Path {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
+  override createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
     // @ts-ignore TODO: pooling
     return CircleDOMDrawable.createFromPool( renderer, instance );
   }
@@ -167,7 +167,7 @@ export default class Circle extends Path {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
+  override createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
     // @ts-ignore TODO: pooling
     return CircleSVGDrawable.createFromPool( renderer, instance );
   }
@@ -178,7 +178,7 @@ export default class Circle extends Path {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
+  override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
     // @ts-ignore TODO: pooling
     return CircleCanvasDrawable.createFromPool( renderer, instance );
   }
@@ -217,7 +217,7 @@ export default class Circle extends Path {
   /**
    * Computes the bounds of the Circle, including any applied stroke. Overridden for efficiency.
    */
-  computeShapeBounds(): Bounds2 {
+  override computeShapeBounds(): Bounds2 {
     let bounds = new Bounds2( -this._radius, -this._radius, this._radius, this._radius );
     if ( this._stroke ) {
       // since we are axis-aligned, any stroke will expand our bounds by a guaranteed set amount
@@ -233,7 +233,7 @@ export default class Circle extends Path {
    *
    * @param point - Considered to be in the local coordinate frame
    */
-  containsPointSelf( point: Vector2 ): boolean {
+  override containsPointSelf( point: Vector2 ): boolean {
     const magSq = point.x * point.x + point.y * point.y;
     let result = true;
     let iRadius;
@@ -268,7 +268,7 @@ export default class Circle extends Path {
    *
    * @param shape - Throws an error if it is not null.
    */
-  setShape( shape: Shape | null ): this {
+  override setShape( shape: Shape | null ): this {
     if ( shape !== null ) {
       throw new Error( 'Cannot set the shape of a Circle to something non-null' );
     }
@@ -285,7 +285,7 @@ export default class Circle extends Path {
    *
    * NOTE: This is created lazily, so don't call it if you don't have to!
    */
-  getShape(): Shape {
+  override getShape(): Shape {
     if ( !this._shape ) {
       this._shape = this.createCircleShape();
     }
@@ -295,7 +295,7 @@ export default class Circle extends Path {
   /**
    * Returns whether this Path has an associated Shape (instead of no shape, represented by null)
    */
-  hasShape(): boolean {
+  override hasShape(): boolean {
     // Always true for this Path subtype
     return true;
   }

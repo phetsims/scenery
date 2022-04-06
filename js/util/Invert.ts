@@ -36,7 +36,7 @@ export default class Invert extends Filter {
     return `invert(${toSVGNumber( this.amount )})`;
   }
 
-  isDOMCompatible() {
+  override isDOMCompatible() {
     return true;
   }
 

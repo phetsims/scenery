@@ -38,7 +38,7 @@ export default class Opacity extends Filter {
     return `opacity(${toSVGNumber( this.amount )})`;
   }
 
-  isDOMCompatible() {
+  override isDOMCompatible() {
     return true;
   }
 

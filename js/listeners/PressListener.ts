@@ -1010,7 +1010,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
   /**
    * Disposes the listener, releasing references. It should not be used after this.
    */
-  dispose() {
+  override dispose() {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( `PressListener#${this._id} dispose` );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 

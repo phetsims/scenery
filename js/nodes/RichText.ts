@@ -402,7 +402,7 @@ export default class RichText extends Node {
   /**
    * See documentation and comments in Node.initializePhetioObject
    */
-  initializePhetioObject( baseOptions: any, config: RichTextOptions ) {
+  override initializePhetioObject( baseOptions: any, config: RichTextOptions ) {
 
     config = merge( {
       textPropertyOptions: null
@@ -564,7 +564,7 @@ export default class RichText extends Node {
   /**
    * Releases references.
    */
-  dispose() {
+  override dispose() {
     this.freeChildrenToPool();
 
     super.dispose();
@@ -1453,7 +1453,7 @@ export default class RichText extends Node {
 
   get lineWrap(): number | null { return this.getLineWrap(); }
 
-  mutate( options?: RichTextOptions ) {
+  override mutate( options?: RichTextOptions ) {
     if ( assert && options && options.hasOwnProperty( 'text' ) && options.hasOwnProperty( 'textProperty' ) && options.textProperty ) {
       assert && assert( options.textProperty.value === options.text, 'If both text and textProperty are provided, then values should match' );
     }
@@ -1755,7 +1755,7 @@ class RichTextLeaf extends RichTextCleanable( Text ) {
   /**
    * Cleans references that could cause memory leaks (as those things may contain other references).
    */
-  clean() {
+  override clean() {
     super.clean();
 
     this.fill = null;
@@ -1806,7 +1806,7 @@ class RichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
    * Set up this state. First construction does not need to use super.initialize() because the constructor has done
    * that for us. But repeated initialization with Poolable will need to initialize super again.
    */
-  initialize( innerContent: string, href: RichTextHref, initializeSuper: boolean = true ): this {
+  override initialize( innerContent: string, href: RichTextHref, initializeSuper: boolean = true ): this {
 
     if ( initializeSuper ) {
       super.initialize();
@@ -1862,7 +1862,7 @@ class RichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
   /**
    * Cleans references that could cause memory leaks (as those things may contain other references).
    */
-  clean() {
+  override clean() {
     super.clean();
 
     this.fireListener && this.removeInputListener( this.fireListener );

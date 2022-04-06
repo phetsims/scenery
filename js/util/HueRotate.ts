@@ -50,11 +50,11 @@ export default class HueRotate extends ColorMatrixFilter {
    * both DOM elements (https://developer.mozilla.org/en-US/docs/Web/CSS/filter) and when supported, Canvas
    * (https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/filter).
    */
-  getCSSFilterString(): string {
+  override getCSSFilterString(): string {
     return `hue-rotate(${toSVGNumber( Utils.toDegrees( this.amount ) )}deg)`;
   }
 
-  isDOMCompatible() {
+  override isDOMCompatible() {
     return true;
   }
 }

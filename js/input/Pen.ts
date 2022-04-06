@@ -63,11 +63,11 @@ export default class Pen extends Pointer {
   /**
    * Returns an improved string representation of this object.
    */
-  toString(): string {
+  override toString(): string {
     return `Pen#${this.id}`;
   }
 
-  isTouchLike(): boolean {
+  override isTouchLike(): boolean {
     return true;
   }
 }

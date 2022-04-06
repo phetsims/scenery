@@ -200,7 +200,7 @@ export default class Rectangle extends Path {
    *
    * @returns - Renderer bitmask, see Renderer for details
    */
-  getStrokeRendererBitmask(): number {
+  override getStrokeRendererBitmask(): number {
     let bitmask = super.getStrokeRendererBitmask();
     const stroke = this.getStroke();
     // DOM stroke handling doesn't YET support gradients, patterns, or dashes (with the current implementation, it shouldn't be too hard)
@@ -223,7 +223,7 @@ export default class Rectangle extends Path {
    *
    * @returns - Renderer bitmask, see Renderer for details
    */
-  getPathRendererBitmask(): number {
+  override getPathRendererBitmask(): number {
     let bitmask = Renderer.bitmaskCanvas | Renderer.bitmaskSVG;
 
     const maximumArcSize = this.getMaximumArcSize();
@@ -579,7 +579,7 @@ export default class Rectangle extends Path {
   /**
    * Computes the bounds of the Rectangle, including any applied stroke. Overridden for efficiency.
    */
-  computeShapeBounds(): Bounds2 {
+  override computeShapeBounds(): Bounds2 {
     let bounds = new Bounds2( this._rectX, this._rectY, this._rectX + this._rectWidth, this._rectY + this._rectHeight );
     if ( this._stroke ) {
       // since we are axis-aligned, any stroke will expand our bounds by a guaranteed set amount
@@ -638,7 +638,7 @@ export default class Rectangle extends Path {
    *
    * @param point - Considered to be in the local coordinate frame
    */
-  containsPointSelf( point: Vector2 ): boolean {
+  override containsPointSelf( point: Vector2 ): boolean {
     const x = this._rectX;
     const y = this._rectY;
     const width = this._rectWidth;
@@ -686,7 +686,7 @@ export default class Rectangle extends Path {
    *
    * @param bounds - Bounds to test, assumed to be in the local coordinate frame.
    */
-  intersectsBoundsSelf( bounds: Bounds2 ): boolean {
+  override intersectsBoundsSelf( bounds: Bounds2 ): boolean {
     return !this.computeShapeBounds().intersection( bounds ).isEmpty();
   }
 
@@ -697,7 +697,7 @@ export default class Rectangle extends Path {
    * @param wrapper
    * @param matrix - The transformation matrix already applied to the context.
    */
-  canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
+  override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
     //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily.
     RectangleCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
   }
@@ -708,7 +708,7 @@ export default class Rectangle extends Path {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
+  override createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
     // @ts-ignore
     return RectangleDOMDrawable.createFromPool( renderer, instance );
   }
@@ -719,7 +719,7 @@ export default class Rectangle extends Path {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
+  override createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
     // @ts-ignore
     return RectangleSVGDrawable.createFromPool( renderer, instance );
   }
@@ -730,7 +730,7 @@ export default class Rectangle extends Path {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
+  override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
     // @ts-ignore
     return RectangleCanvasDrawable.createFromPool( renderer, instance );
   }
@@ -741,7 +741,7 @@ export default class Rectangle extends Path {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  createWebGLDrawable( renderer: number, instance: Instance ): WebGLSelfDrawable {
+  override createWebGLDrawable( renderer: number, instance: Instance ): WebGLSelfDrawable {
     // @ts-ignore
     return RectangleWebGLDrawable.createFromPool( renderer, instance );
   }
@@ -756,7 +756,7 @@ export default class Rectangle extends Path {
    *
    * @param shape - Throws an error if it is not null.
    */
-  setShape( shape: Shape | string | null ): this {
+  override setShape( shape: Shape | string | null ): this {
     if ( shape !== null ) {
       throw new Error( 'Cannot set the shape of a Rectangle to something non-null' );
     }
@@ -772,7 +772,7 @@ export default class Rectangle extends Path {
    *
    * NOTE: This is created lazily, so don't call it if you don't have to!
    */
-  getShape(): Shape {
+  override getShape(): Shape {
     if ( !this._shape ) {
       this._shape = this.createRectangleShape();
     }
@@ -782,7 +782,7 @@ export default class Rectangle extends Path {
   /**
    * Returns whether this Path has an associated Shape (instead of no shape, represented by null)
    */
-  hasShape(): boolean {
+  override hasShape(): boolean {
     return true;
   }
 

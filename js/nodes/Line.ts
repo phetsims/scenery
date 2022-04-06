@@ -348,7 +348,7 @@ export default class Line extends Path {
    *
    * @param point - Considered to be in the local coordinate frame
    */
-  containsPointSelf( point: Vector2 ): boolean {
+  override containsPointSelf( point: Vector2 ): boolean {
     if ( this._strokePickable ) {
       return super.containsPointSelf( point );
     }
@@ -364,7 +364,7 @@ export default class Line extends Path {
    * @param wrapper
    * @param matrix - The transformation matrix already applied to the context.
    */
-  canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
+  override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
     //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily.
     LineCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
   }
@@ -372,7 +372,7 @@ export default class Line extends Path {
   /**
    * Computes the bounds of the Line, including any applied stroke. Overridden for efficiency.
    */
-  computeShapeBounds(): Bounds2 {
+  override computeShapeBounds(): Bounds2 {
     // optimized form for a single line segment (no joins, just two caps)
     if ( this._stroke ) {
       const lineCap = this.getLineCap();
@@ -431,7 +431,7 @@ export default class Line extends Path {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
+  override createSVGDrawable( renderer: number, instance: Instance ): SVGSelfDrawable {
     // @ts-ignore
     return LineSVGDrawable.createFromPool( renderer, instance );
   }
@@ -442,7 +442,7 @@ export default class Line extends Path {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
+  override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
     // @ts-ignore
     return LineCanvasDrawable.createFromPool( renderer, instance );
   }
@@ -453,7 +453,7 @@ export default class Line extends Path {
    *
    * Throws an error if it is not null.
    */
-  setShape( shape: Shape | null ): this {
+  override setShape( shape: Shape | null ): this {
     if ( shape !== null ) {
       throw new Error( 'Cannot set the shape of a Line to something non-null' );
     }
@@ -470,7 +470,7 @@ export default class Line extends Path {
    *
    * NOTE: This is created lazily, so don't call it if you don't have to!
    */
-  getShape(): Shape {
+  override getShape(): Shape {
     if ( !this._shape ) {
       this._shape = this.createLineShape();
     }
@@ -480,7 +480,7 @@ export default class Line extends Path {
   /**
    * Returns whether this Path has an associated Shape (instead of no shape, represented by null)
    */
-  hasShape(): boolean {
+  override hasShape(): boolean {
     return true;
   }
 
@@ -491,7 +491,7 @@ export default class Line extends Path {
    *
    * See Renderer for more information on the bitmasks
    */
-  getFillRendererBitmask(): number {
+  override getFillRendererBitmask(): number {
     return Renderer.bitmaskCanvas | Renderer.bitmaskSVG | Renderer.bitmaskDOM | Renderer.bitmaskWebGL;
   }
 }

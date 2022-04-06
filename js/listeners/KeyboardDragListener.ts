@@ -892,7 +892,7 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
   /**
    * Make eligible for garbage collection.
    */
-  public dispose() {
+  public override dispose() {
     this.interrupt();
     this._disposeKeyboardDragListener();
   }

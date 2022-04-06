@@ -38,7 +38,7 @@ export default class AlignPropertyBox extends AlignBox {
   /**
    * Releases references
    */
-  dispose() {
+  override dispose() {
     this.alignBoundsProperty.unlink( this._alignBoundsPropertyListener );
 
     super.dispose();

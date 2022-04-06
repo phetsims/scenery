@@ -70,7 +70,7 @@ export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
     } );
   }
 
-  setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds: boolean ) {
+  override setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds: boolean ) {
     super.setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds );
 
     this._constraint.excludeInvisible = excludeInvisibleChildrenFromBounds;
@@ -126,7 +126,7 @@ export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
    * Overridden so we can group together setChildren() and only update layout (a) at the end, and (b) if there
    * are changes.
    */
-  setChildren( children: Node[] ): this {
+  override setChildren( children: Node[] ): this {
     // If the layout is already locked, we need to bail and only call Node's setChildren.
     if ( this._constraint.isLocked ) {
       return super.setChildren( children );
@@ -314,9 +314,8 @@ export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
   /**
    * Releases references
    * @public
-   * @override
    */
-  dispose() {
+  override dispose() {
     this._constraint.dispose();
 
     for ( const cell of this._cellMap.values() ) {

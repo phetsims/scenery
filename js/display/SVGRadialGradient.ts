@@ -12,7 +12,7 @@ import Pool, { IPoolable } from '../../../phet-core/js/Pool.js';
 import { RadialGradient, scenery, SVGBlock, SVGGradient, svgns } from '../imports.js';
 
 export default class SVGRadialGradient extends SVGGradient implements IPoolable {
-  initialize( svgBlock: SVGBlock, radialGradient: RadialGradient ) {
+  override initialize( svgBlock: SVGBlock, radialGradient: RadialGradient ) {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGRadialGradient] initialize ${radialGradient.id}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 

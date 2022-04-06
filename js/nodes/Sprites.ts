@@ -93,7 +93,7 @@ export default class Sprites extends Node {
    * @param wrapper
    * @param matrix - The transformation matrix already applied to the context.
    */
-  protected canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
+  protected override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
     SpritesCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
   }
 
@@ -103,7 +103,7 @@ export default class Sprites extends Node {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
+  override createCanvasDrawable( renderer: number, instance: Instance ): CanvasSelfDrawable {
     // @ts-ignore Pooling
     return SpritesCanvasDrawable.createFromPool( renderer, instance );
   }
@@ -114,7 +114,7 @@ export default class Sprites extends Node {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  createWebGLDrawable( renderer: number, instance: Instance ): WebGLSelfDrawable {
+  override createWebGLDrawable( renderer: number, instance: Instance ): WebGLSelfDrawable {
     // @ts-ignore Pooling
     return SpritesWebGLDrawable.createFromPool( renderer, instance );
   }
@@ -124,7 +124,7 @@ export default class Sprites extends Node {
    *
    * @param point - Considered to be in the local coordinate frame
    */
-  containsPointSelf( point: Vector2 ): boolean {
+  override containsPointSelf( point: Vector2 ): boolean {
     const inBounds = super.containsPointSelf( point );
     if ( !inBounds ) {
       return false;
@@ -153,7 +153,7 @@ export default class Sprites extends Node {
   /**
    * Returns a Shape that represents the area covered by containsPointSelf.
    */
-  getSelfShape(): Shape {
+  override getSelfShape(): Shape {
     if ( this._hitTestSprites ) {
       return Shape.union( this._spriteInstances.map( instance => instance.getShape() ) );
     }
@@ -165,7 +165,7 @@ export default class Sprites extends Node {
   /**
    * Whether this Node itself is painted (displays something itself).
    */
-  isPainted(): boolean {
+  override isPainted(): boolean {
     // Always true for Sprites nodes
     return true;
   }

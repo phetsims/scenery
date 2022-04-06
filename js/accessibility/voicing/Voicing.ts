@@ -522,7 +522,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     /**
      * Detaches references that ensure this components of this Trait are eligible for garbage collection.
      */
-    dispose() {
+    override dispose() {
       ( this as unknown as Node ).removeInputListener( this._speakContentOnFocusListener );
 
       super.dispose();

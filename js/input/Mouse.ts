@@ -152,7 +152,7 @@ export default class Mouse extends Pointer {
   /**
    * Returns an improved string representation of this object.
    */
-  toString(): string {
+  override toString(): string {
     return 'Mouse'; // there is only one
   }
 }

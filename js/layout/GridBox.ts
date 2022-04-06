@@ -67,7 +67,7 @@ export default class GridBox extends WidthSizable( HeightSizable( Node ) ) {
     } );
   }
 
-  setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds: boolean ) {
+  override setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds: boolean ) {
     super.setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds );
 
     this._constraint.excludeInvisible = excludeInvisibleChildrenFromBounds;

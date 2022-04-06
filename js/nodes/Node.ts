@@ -5967,7 +5967,7 @@ class Node extends ParallelDOM {
     return this; // allow chaining
   }
 
-  protected initializePhetioObject( baseOptions: any, config: NodeOptions ) {
+  protected override initializePhetioObject( baseOptions: any, config: NodeOptions ) {
 
     config = merge( {
 
@@ -6049,7 +6049,7 @@ class Node extends ParallelDOM {
    * @param spaces - Whitespace to add
    * @param [includeChildren]
    */
-  toString( spaces: string, includeChildren?: boolean ): string {
+  override toString( spaces: string, includeChildren?: boolean ): string {
     return `${this.constructor.name}#${this.id}`;
   }
 
@@ -6088,7 +6088,7 @@ class Node extends ParallelDOM {
   /**
    * Disposes the node, releasing all references that it maintained.
    */
-  dispose() {
+  override dispose() {
 
     // remove all PDOM input listeners
     this.disposeParallelDOM();

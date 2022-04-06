@@ -171,11 +171,11 @@ export default class ColorMatrixFilter extends Filter {
     wrapper.context.putImageData( imageData, 0, 0 );
   }
 
-  isSVGCompatible() {
+  override isSVGCompatible() {
     return true;
   }
 
-  isCanvasCompatible() {
+  override isCanvasCompatible() {
     return super.isCanvasCompatible() || isImageDataSupported;
   }
 

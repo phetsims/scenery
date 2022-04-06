@@ -327,7 +327,7 @@ export default class DragListener extends PressListener implements IInputListene
    * @param [callback] - to be run at the end of the function, but only on success
    * @returns success - Returns whether the press was actually started
    */
-  press( event: PressListenerEvent, targetNode?: Node, callback?: () => void ) {
+  override press( event: PressListenerEvent, targetNode?: Node, callback?: () => void ) {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener press' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -381,7 +381,7 @@ export default class DragListener extends PressListener implements IInputListene
    * @param [event] - scenery event if there was one
    * @param [callback] - called at the end of the release
    */
-  release( event?: PressListenerEvent, callback?: () => void ) {
+  override release( event?: PressListenerEvent, callback?: () => void ) {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener release' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -402,7 +402,7 @@ export default class DragListener extends PressListener implements IInputListene
    * input would pick up the component then immediately release it. But occasionally that is desirable and can be
    * controlled with the allowClick option.
    */
-  canClick(): boolean {
+  override canClick(): boolean {
     return super.canClick() && this._allowClick;
   }
 
@@ -413,7 +413,7 @@ export default class DragListener extends PressListener implements IInputListene
    * components that have drag functionality but can still be activated with a single click event.
    * (scenery-internal) (part of the scenery listener API)
    */
-  click( event: PressListenerEvent, callback?: () => void ): boolean {
+  override click( event: PressListenerEvent, callback?: () => void ): boolean {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener click' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -440,7 +440,7 @@ export default class DragListener extends PressListener implements IInputListene
   /**
    * Called when move events are fired on the attached pointer listener during a drag.
    */
-  drag( event: PressListenerEvent ) {
+  override drag( event: PressListenerEvent ) {
     assert && assert( isPressedListener( this ) );
     const pressedListener = this as PressedDragListener;
 
@@ -790,7 +790,7 @@ export default class DragListener extends PressListener implements IInputListene
    *
    * This can be called manually, but can also be called through node.interruptSubtreeInput().
    */
-  interrupt() {
+  override interrupt() {
     if ( this.pointer && this.pointer.isTouchLike() ) {
       this._lastInterruptedTouchLikePointer = this.pointer;
     }
@@ -801,7 +801,7 @@ export default class DragListener extends PressListener implements IInputListene
   /**
    * Returns whether a press can be started with a particular event.
    */
-  canPress( event: PressListenerEvent ): boolean {
+  override canPress( event: PressListenerEvent ): boolean {
     if ( event.pointer === this._lastInterruptedTouchLikePointer ) {
       return false;
     }
@@ -812,7 +812,7 @@ export default class DragListener extends PressListener implements IInputListene
   /**
    * Disposes the listener, releasing references. It should not be used after this.
    */
-  dispose() {
+  override dispose() {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener dispose' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 

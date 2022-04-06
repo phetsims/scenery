@@ -150,7 +150,7 @@ export default class DOM extends Node {
    * @param renderer - In the bitmask format specified by Renderer, which may contain additional bit flags.
    * @param instance - Instance object that will be associated with the drawable
    */
-  createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
+  override createDOMDrawable( renderer: number, instance: Instance ): DOMSelfDrawable {
     // @ts-ignore Poolable
     return DOMDrawable.createFromPool( renderer, instance );
   }
@@ -158,7 +158,7 @@ export default class DOM extends Node {
   /**
    * Whether this Node itself is painted (displays something itself).
    */
-  isPainted(): boolean {
+  override isPainted(): boolean {
     // Always true for DOM nodes
     return true;
   }
