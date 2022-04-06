@@ -117,6 +117,7 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
       return;
     }
 
+    const minimumSizes = new OrientationPair( 0, 0 );
     const preferredSizes = new OrientationPair( this.preferredWidthProperty.value, this.preferredHeightProperty.value );
     const layoutBounds = new Bounds2( 0, 0, 0, 0 ); // TODO: Bounds2.NOTHING.copy() once we have both dimensions handled
 
@@ -179,6 +180,7 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
         line.size = line.min;
       } );
       const minSizeAndSpacing = _.sum( lines.map( line => line.min ) ) + _.sum( lineSpacings );
+      minimumSizes.set( orientation, minSizeAndSpacing );
       const size = Math.max( minSizeAndSpacing, preferredSizes.get( orientation ) || 0 );
       let sizeRemaining = size - minSizeAndSpacing;
       let growableLines;
@@ -239,6 +241,9 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
 
     // We're taking up these layout bounds (nodes could use them for localBounds)
     this.layoutBoundsProperty.value = layoutBounds;
+
+    this.minimumWidthProperty.value = minimumSizes.horizontal;
+    this.minimumHeightProperty.value = minimumSizes.vertical;
 
     this.finishedLayoutEmitter.emit();
   }
