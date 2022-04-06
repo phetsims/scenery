@@ -13,7 +13,7 @@ import BooleanProperty from '../../../axon/js/BooleanProperty.js';
 import { Shape } from '../../../kite/js/imports.js';
 import optionize from '../../../phet-core/js/optionize.js';
 import { ActivatedReadingBlockHighlight, Display, Focus, FocusHighlightFromNode, FocusHighlightPath, FocusManager, IOverlay, IPaint, Node, scenery, Trail, TransformTracker } from '../imports.js';
-import { InteractiveHighlightingVersion } from '../accessibility/voicing/InteractiveHighlighting.js';
+import { InteractiveHighlightingNode } from '../accessibility/voicing/InteractiveHighlighting.js';
 import { ReadingBlockVersion } from '../accessibility/voicing/ReadingBlock.js';
 import IProperty from '../../../axon/js/IProperty.js';
 
@@ -45,7 +45,6 @@ export type HighlightOverlayOptions = {
   readingBlockHighlightsVisibleProperty?: IProperty<boolean>;
 }
 
-type InteractiveHighlightingNode = InteractiveHighlightingVersion<typeof Node>;
 type ReadingBlockNode = ReadingBlockVersion<typeof Node>;
 
 export default class HighlightOverlay implements IOverlay {

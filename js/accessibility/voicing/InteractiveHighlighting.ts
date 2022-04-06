@@ -27,29 +27,6 @@ type SelfOptions = {
 
 export type InteractiveHighlightingOptions = SelfOptions & NodeOptions;
 
-interface InteractiveHighlightingInterface {
-  interactiveHighlightChangedEmitter: TinyEmitter;
-  readonly interactiveHighlightLayerable: boolean;
-  readonly interactiveHighlightActivated: boolean;
-  readonly isInteractiveHighlighting: boolean;
-  interactiveHighlight: Highlight;
-
-  setInteractiveHighlight( highlight: Highlight ): void;
-
-  getInteractiveHighlight(): Highlight;
-
-  setInteractiveHighlightLayerable( layerable: boolean ): void;
-
-  getInteractiveHighlightLayerable(): boolean;
-
-  isInteractiveHighlightActivated(): boolean;
-
-  dispose(): boolean;
-}
-
-// For type checking when you need to verify that a Type is composed with InteractiveHighlighting
-export type InteractiveHighlightingVersion<Type extends Constructor> = InstanceType<Type> & InteractiveHighlightingInterface;
-
 /**
  * @param Type
  * @param optionsArgPosition - zero-indexed number that the options argument is provided at
@@ -458,6 +435,10 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
 
   return InteractiveHighlightingClass;
 };
+
+// Provides a way to determine if a Node is composed with InteractiveHighlighting by type
+const wrapper = () => InteractiveHighlighting( Node, 1 );
+export type InteractiveHighlightingNode = InstanceType<ReturnType<typeof wrapper>>;
 
 scenery.register( 'InteractiveHighlighting', InteractiveHighlighting );
 export default InteractiveHighlighting;
