@@ -178,7 +178,6 @@ class KeyStateTracker {
    * Implements keyboard dragging when listener is attached to the Node, public so listener is attached
    * with addInputListener(). Only updated when enabled.
    *
-   *
    * Note that this event is assigned in the constructor, and not to the prototype. As of writing this,
    * `Node.addInputListener` only supports type properties as event listeners, and not the event keys as
    * prototype methods. Please see https://github.com/phetsims/scenery/issues/851 for more information.
@@ -247,11 +246,8 @@ class KeyStateTracker {
 
   /**
    * Returns true if any of the movement keys are down (arrow keys or WASD keys).
-   *
-   * @returns {boolean}
-   * @public
    */
-  get movementKeysDown() {
+  get movementKeysDown(): boolean {
     return this.isAnyKeyInListDown( KeyboardUtils.MOVEMENT_KEYS );
   }
 
@@ -335,7 +331,7 @@ class KeyStateTracker {
    * Returns the amount of time that the provided key has been held down. Error if the key is not currently down.
    * @param key - KeyboardEvent.code for the key you are inspecting.
    */
-  public timeDownForKey( key: string ) {
+  public timeDownForKey( key: string ): number {
     assert && assert( this.isKeyDown( key ), 'cannot get timeDown on a key that is not pressed down' );
     return this.keyState[ key ].timeDown;
   }
@@ -422,25 +418,16 @@ class KeyStateTracker {
     }
   }
 
-  // @public
   set enabled( enabled ) { this.setEnabled( enabled ); }
 
-  /**
-   * @public
-   * @returns {boolean}
-   */
-  isEnabled() { return this._enabled; }
+  public isEnabled(): boolean { return this._enabled; }
 
-  // @public
-  get enabled() { return this.isEnabled(); }
-
+  get enabled(): boolean { return this.isEnabled(); }
 
   /**
    * Detach listeners from the document that would update the state of this KeyStateTracker on key presses.
-   *
-   * @public
    */
-  detachFromDocument() {
+  public detachFromDocument(): void {
     assert && assert( this.attachedToDocument, 'KeyStateTracker is not attached to window.' );
     assert && assert( this.documentKeyupListener, 'keyup listener was not created or attached to window' );
     assert && assert( this.documentKeydownListener, 'keydown listener was not created or attached to window.' );
@@ -454,9 +441,6 @@ class KeyStateTracker {
     this.attachedToDocument = false;
   }
 
-  /**
-   * Make eligible for garbage collection.
-   */
   public dispose(): void {
     this._disposeKeyStateTracker();
   }
