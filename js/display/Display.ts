@@ -483,7 +483,6 @@ export default class Display {
       // because tab navigation may happen before focus is within the PDOM. See handleFullScreenNavigation
       // for more.
       this._boundHandleFullScreenNavigation = this.handleFullScreenNavigation.bind( this );
-      // @ts-ignore TODO KeyStateTracker
       globalKeyStateTracker.keydownEmitter.addListener( this._boundHandleFullScreenNavigation );
     }
   }
