@@ -42,6 +42,8 @@ export class Intent extends EnumerationValue {
   } );
 }
 
+type PointerType = 'pdom' | 'touch' | 'mouse' | 'pen';
+
 export interface ActivePointer extends Pointer {
   point: Vector2;
 }
@@ -52,13 +54,12 @@ export default abstract class Pointer {
   point: Vector2;
 
   // Each Pointer subtype should implement a "type" field that can be checked against for scenery input.
-  readonly type: string;
+  readonly type: PointerType;
 
   // The trail that the pointer is currently over (if it has yet been registered). If the pointer has not yet registered
   // a trail, it may be null. If the pointer wasn't over any specific trail, then a trail with only the display's
   // rootNode will be set.
   trail: Trail | null;
-
 
   // The subset of Pointer.trail that is Node.inputEnabled. See Trail.getLastInputEnabledIndex() for details. This is
   // kept separately so that it can be detected when inputEnabled changes.
@@ -104,7 +105,7 @@ export default abstract class Pointer {
    * @param initialDownState
    * @param type - the type of the pointer; can different for each subtype
    */
-  protected constructor( initialPoint: Vector2, initialDownState: boolean, type: string ) {
+  protected constructor( initialPoint: Vector2, initialDownState: boolean, type: PointerType ) {
     assert && assert( initialPoint === null || initialPoint instanceof Vector2 );
     assert && assert( typeof initialDownState === 'boolean' );
 
