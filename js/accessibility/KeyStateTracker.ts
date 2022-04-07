@@ -84,15 +84,15 @@ class KeyStateTracker {
     this.documentKeyupListener = null;
     this.documentKeydownListener = null;
 
-    // @private - if the key state tracker is enabled. If disabled, the keyState will be cleared, and listeners will noop.
+    // if the key state tracker is enabled. If disabled, the keyState will be cleared, and listeners will noop.
     this._enabled = true;
 
-    // @public - Emits events when keyup/keydown updates are received. These will emit after any updates to the
+    // Emits events when keyup/keydown updates are received. These will emit after any updates to the
     // keyState so that keyState is up to date in time for listeners.
-    this.keydownEmitter = new Emitter( { parameters: [ { valueType: Event } ] } ); // valueType is a native DOM event
-    this.keyupEmitter = new Emitter( { parameters: [ { valueType: Event } ] } );
+    this.keydownEmitter = new Emitter( { parameters: [ { valueType: KeyboardEvent } ] } );
+    this.keyupEmitter = new Emitter( { parameters: [ { valueType: KeyboardEvent } ] } );
 
-    // @private {Action} - Action which updates the KeyStateTracker, when it is time to do so - the update
+    // Action which updates the KeyStateTracker, when it is time to do so - the update
     // is wrapped by an Action so that the KeyStateTracker state is captured for PhET-iO
     this.keydownUpdateAction = new PhetioAction( domEvent => {
 
@@ -135,8 +135,8 @@ class KeyStateTracker {
       phetioDocumentation: 'Action that executes whenever a keydown occurs from the input listeners this keyStateTracker adds (most likely to the document).'
     } );
 
-    // @private {Action} - Action which updates the state of the KeyStateTracker on key release. This
-    // is wrapped in an Action so that state is captured for PhET-iO
+    // Action which updates the state of the KeyStateTracker on key release. This is wrapped in an Action so that state
+    // is captured for PhET-iO
     this.keyupUpdateAction = new PhetioAction( domEvent => {
 
       const key = KeyboardUtils.getEventCode( domEvent )!;
