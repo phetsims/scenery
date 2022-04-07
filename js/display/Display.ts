@@ -2056,8 +2056,8 @@ export default class Display {
     this._rootNode.removeRootedDisplay( this );
 
     if ( this._accessible ) {
-      // @ts-ignore TODO KeyStateTracker
-      globalKeyStateTracker.keydownEmitter.removeListener( this._boundHandleFullScreenNavigation );
+      assert && assert( this._boundHandleFullScreenNavigation, '_boundHandleFullScreenNavigation was not added to the keyStateTracker' );
+      globalKeyStateTracker.keydownEmitter.removeListener( this._boundHandleFullScreenNavigation! );
       this._rootPDOMInstance!.dispose();
     }
 
