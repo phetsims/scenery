@@ -215,6 +215,8 @@ const ACCESSIBILITY_OPTION_KEYS = [
   'pdomTransformSourceNode' // {Node|null} - sets the node that controls primary sibling element positioning in the display, see setPDOMTransformSourceNode()
 ];
 
+// Most options use null for their default behavior, see the setters for each option for a description of how null
+// behaves as a default.
 export type ParallelDOMOptions = {
   focusable?: boolean | null;
   tagName?: string | null;
