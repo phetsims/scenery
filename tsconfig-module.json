@@ -8,7 +8,6 @@
   "include": [
     "js/**/*",
     "../utterance-queue/js/**/*",
-    "../sun/js/SunConstants.js",
     "../sun/js/sun.js",
     "../phetcommon/js/util/StringUtils.js",
     "../phetcommon/js/view/ModelViewTransform2.js",
