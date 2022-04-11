@@ -8,7 +8,7 @@
   "include": [
     "js/**/*",
     "../utterance-queue/js/**/*",
-    "../sun/js/sun.js",
+    "../sun/js/sun.ts",
     "../phetcommon/js/util/StringUtils.js",
     "../phetcommon/js/view/ModelViewTransform2.js",
     "../phetcommon/js/phetcommon.js",
