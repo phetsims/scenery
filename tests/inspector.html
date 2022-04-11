@@ -504,6 +504,7 @@
         }
       }
 
+      addSimple( 'id', serialization.id );
       addColor( 'fill', serialization.setup.fill );
       addColor( 'stroke', serialization.setup.stroke );
       addSerial( 'lineDash', serialization.setup.lineDash );
@@ -520,6 +521,10 @@
       addSimple( 'excludeInvisible', serialization.options.excludeInvisible );
       addSimple( 'webglScale', serialization.options.webglScale );
       addSimple( 'preventFit', serialization.options.preventFit );
+      addSimple( 'tagName', serialization.options.tagName );
+      addSimple( 'accessibleName', serialization.options.accessibleName );
+      addSimple( 'innerContent', serialization.options.innerContent );
+      addSimple( 'helpText', serialization.options.helpText );
       addSerial( 'matrix', serialization.setup.matrix );
       addSerial( 'maxWidth', serialization.setup.maxWidth );
       addSerial( 'maxHeight', serialization.setup.maxHeight );

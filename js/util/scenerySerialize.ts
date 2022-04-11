@@ -13,7 +13,7 @@ import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
 import Property from '../../../axon/js/Property.js';
 import inheritance from '../../../phet-core/js/inheritance.js';
-import { scenery, DOM, PAINTABLE_DEFAULT_OPTIONS, WebGLNode, CanvasNode, Rectangle, Text, Image, Line, Circle, Path, RadialGradient, CanvasContextWrapper, Pattern, LinearGradient, Gradient, Paint, Color, Node, Display } from '../imports.js';
+import { CanvasContextWrapper, CanvasNode, Circle, Color, Display, DOM, Gradient, Image, Line, LinearGradient, Node, Paint, PAINTABLE_DEFAULT_OPTIONS, Path, Pattern, RadialGradient, Rectangle, scenery, Text, WebGLNode } from '../imports.js';
 
 const scenerySerialize = ( value: unknown ): any => {
   if ( value instanceof Vector2 ) {
@@ -144,6 +144,23 @@ const scenerySerialize = ( value: unknown ): any => {
     ].forEach( simpleKey => {
       // @ts-ignore
       if ( node[ simpleKey ] !== Node.DEFAULT_OPTIONS[ simpleKey ] ) {
+        // @ts-ignore
+        options[ simpleKey ] = node[ simpleKey ];
+      }
+    } );
+
+
+    // From ParallelDOM
+    [
+      'tagName',
+      'innerContent',
+      'accessibleName',
+      'helpText'
+    ].forEach( simpleKey => {
+
+      // All default to null
+      // @ts-ignore
+      if ( node[ simpleKey ] !== null ) {
         // @ts-ignore
         options[ simpleKey ] = node[ simpleKey ];
       }
