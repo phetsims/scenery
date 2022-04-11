@@ -174,9 +174,10 @@ class PDOMPeer {
 
   /**
    * Update the content of the peer. This must be called after the AccessibePeer is constructed from pool.
+   * @param {boolean} updateIndicesStringAndElementIds - if this function should be called upon initial "construction" (in update), allows for the option to do this lazily, see https://github.com/phetsims/phet-io/issues/1847
    * @public (scenery-internal)
    */
-  update() {
+  update( updateIndicesStringAndElementIds ) {
     let options = this.node.getBaseOptions();
 
     const callbacksForOtherNodes = [];
@@ -218,6 +219,8 @@ class PDOMPeer {
     if ( options.descriptionTagName ) {
       this._descriptionSibling = createElement( options.descriptionTagName, false );
     }
+
+    updateIndicesStringAndElementIds && this.updateIndicesStringAndElementIds();
 
     this.orderElements( options );
 

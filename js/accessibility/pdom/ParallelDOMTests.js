@@ -572,10 +572,10 @@ function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
   //         \
   //          h
   // we want to make sure
-  const e = new Node( { tagName: 'div', innerContent: TEST_LABEL } );
-  const f = new Node( { tagName: 'div', innerContent: TEST_LABEL } );
-  const g = new Node( { tagName: 'div', innerContent: TEST_LABEL } );
-  const h = new Node( { tagName: 'div', innerContent: TEST_LABEL } );
+  const e = new Node( { tagName: 'div' } );
+  const f = new Node( { tagName: 'div' } );
+  const g = new Node( { tagName: 'div' } );
+  const h = new Node( { tagName: 'div' } );
   e.addChild( f );
   f.addChild( g );
   g.addChild( h );
@@ -663,13 +663,15 @@ function testAssociationAttribute( assert, attribute ) { // eslint-disable-line
     const instance = node._pdomInstances[ 0 ];
     const nodePrimaryElement = instance.peer.primarySibling;
     const nodeParent = nodePrimaryElement.parentElement;
-    const nodeLabelElement = nodeParent.childNodes[ DEFAULT_LABEL_SIBLING_INDEX ];
-    const nodeDescriptionElement = nodeParent.childNodes[ DEFAULT_DESCRIPTION_SIBLING_INDEX ];
 
-    assert.ok( nodePrimaryElement.getAttribute( attribute ).indexOf( nodeLabelElement.id ) >= 0, `${attribute} your own label element.` );
-    assert.ok( nodeParent.getAttribute( attribute ).indexOf( nodeDescriptionElement.id ) >= 0, `parent ${attribute} your own description.` );
+    const getUniqueIdStringForSibling = siblingString => {
+      return instance.peer.getElementId( siblingString, instance.getPDOMInstanceUniqueId() );
+    };
 
-    assert.ok( nodeParent.getAttribute( attribute ).indexOf( nodeLabelElement.id ) >= 0, `parent ${attribute} your own label.` );
+    assert.ok( nodePrimaryElement.getAttribute( attribute ).indexOf( getUniqueIdStringForSibling( 'label' ) ) >= 0, `${attribute} your own label element.` );
+    assert.ok( nodeParent.getAttribute( attribute ).indexOf( getUniqueIdStringForSibling( 'description' ) ) >= 0, `parent ${attribute} your own description element.` );
+
+    assert.ok( nodeParent.getAttribute( attribute ).indexOf( getUniqueIdStringForSibling( 'label' ) ) >= 0, `parent ${attribute} your own label element.` );
 
   };
 
@@ -767,9 +769,9 @@ function testAssociationAttributeBySetters( assert, attribute ) { // eslint-disa
   const o = new Node( options );
   rootNode.addChild( o );
 
-  const nElement = getPrimarySiblingElementByNode( n );
+  const nPeer = getPDOMPeerByNode( n );
   const oElement = getPrimarySiblingElementByNode( o );
-  assert.ok( oElement.getAttribute( attribute ).indexOf( nElement.id ) >= 0, `${attribute} for two nodes with setter.` );
+  assert.ok( oElement.getAttribute( attribute ).indexOf( nPeer.getElementId( 'label', nPeer.pdomInstance.getPDOMInstanceUniqueId() ) ) >= 0, `${attribute} for two nodes with setter (label).` );
 
   // make a list of associations to test as a setter
   const randomAssociationObject = {

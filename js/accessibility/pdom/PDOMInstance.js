@@ -138,12 +138,8 @@ class PDOMInstance {
       this.peer = PDOMPeer.createFromPool( this );
 
       // The peer is not fully constructed until this update function is called, see https://github.com/phetsims/scenery/issues/832
-      this.peer.update();
-
       // Trail Ids will never change, so update them eagerly, a single time during construction.
-      if ( UNIQUE_ID_STRATEGY === PDOMUniqueIdStrategy.TRAIL_ID ) {
-        this.peer.updateIndicesStringAndElementIds();
-      }
+      this.peer.update( UNIQUE_ID_STRATEGY === PDOMUniqueIdStrategy.TRAIL_ID );
 
       assert && assert( this.peer.primarySibling, 'accessible peer must have a primarySibling upon completion of construction' );
 
