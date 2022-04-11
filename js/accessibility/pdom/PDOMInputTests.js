@@ -43,7 +43,7 @@ const dispatchEvent = ( domElement, event ) => {
   const Constructor = event.startsWith( 'key' ) ? window.KeyboardEvent : window.Event;
   domElement.dispatchEvent( new Constructor( event, {
     bubbles: true, // that is vital to all that scenery events hold near and dear to their hearts.
-    key: KeyboardUtils.KEY_TAB
+    code: KeyboardUtils.KEY_TAB
   } ) );
 };
 
