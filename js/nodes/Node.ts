@@ -399,6 +399,13 @@ class Node extends ParallelDOM {
   // NOTE: This is fired synchronously when the clipArea of the Node is toggled
   clipAreaProperty: TinyProperty<Shape | null>;
 
+  // Whether this Node and its subtree can announce content with Voicing and SpeechSynthesis. Though
+  // related to Voicing it exists in Node because it is useful to set voicingVisible on a subtree where the
+  // root does not compose Voicing. This is not ideal but the entirety of Voicing cannot be composed into every
+  // Node because it would produce incorrect behaviors and have a massive memory footprint. See setVoicingVisible()
+  // and Voicing.ts for more information about Voicing.
+  voicingVisibleProperty: TinyProperty<boolean>;
+
   // Areas for hit intersection. If set on a Node, no descendants can handle events.
   _mouseArea: Shape | Bounds2 | null; // for mouse position in the local coordinate frame
   _touchArea: Shape | Bounds2 | null; // for touch and pen position in the local coordinate frame
@@ -652,6 +659,7 @@ class Node extends ParallelDOM {
     this._inputEnabledProperty = new TinyForwardingProperty( DEFAULT_OPTIONS.inputEnabled,
       DEFAULT_OPTIONS.phetioInputEnabledPropertyInstrumented );
     this.clipAreaProperty = new TinyProperty<Shape | null>( DEFAULT_OPTIONS.clipArea );
+    this.voicingVisibleProperty = new TinyProperty<boolean>( true );
     this._mouseArea = DEFAULT_OPTIONS.mouseArea;
     this._touchArea = DEFAULT_OPTIONS.touchArea;
     this._cursor = DEFAULT_OPTIONS.cursor;
@@ -6024,6 +6032,32 @@ class Node extends ParallelDOM {
       );
     }
   }
+
+  /**
+   * Set the visibility of this Node with respect to the Voicing feature. Totally separate from graphical display.
+   * When visible, this Node and all of its ancestors will be able to speak with Voicing. When voicingVisible
+   * is false, all Voicing under this Node will be muted. `voicingVisible` properties exist in Node.ts because
+   * it is useful to set `voicingVisible` on a root that is composed with Voicing.ts. We cannot put all of the
+   * Voicing.ts implementation in Node because that would have a massive memory impact. See Voicing.ts for more
+   * information.
+   */
+  public setVoicingVisible( visible: boolean ): void {
+    if ( this.voicingVisibleProperty.value !== visible ) {
+      this.voicingVisibleProperty.value = visible;
+    }
+  }
+
+  set voicingVisible( visible ) { this.setVoicingVisible( visible ); }
+
+  /**
+   * Returns whether this Node is voicingVisible. When true Utterances for this Node can be announced with the
+   * Voicing feature, see Voicing.ts for more information.
+   */
+  public isVoicingVisible(): boolean {
+    return this.voicingVisibleProperty.value;
+  }
+
+  get voicingVisible() { return this.isVoicingVisible(); }
 
   /**
    * Override for extra information in the debugging output (from Display.getDebugHTML()). (scenery-internal)

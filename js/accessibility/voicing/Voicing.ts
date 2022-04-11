@@ -29,11 +29,12 @@ import ResponsePacket, { ResolvedResponse, ResponsePacketOptions, VoicingRespons
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
 import Utterance, { IAlertable } from '../../../../utterance-queue/js/Utterance.js';
 import UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
-import { InteractiveHighlighting, InteractiveHighlightingOptions, Node, scenery, SceneryListenerFunction, voicingUtteranceQueue } from '../../imports.js';
+import { Instance, InteractiveHighlighting, InteractiveHighlightingOptions, Node, scenery, SceneryListenerFunction, voicingUtteranceQueue } from '../../imports.js';
 import optionize from '../../../../phet-core/js/optionize.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
+import TinyProperty from '../../../../axon/js/TinyProperty.js';
 
 // options that are supported by Voicing.js. Added to mutator keys so that Voicing properties can be set with mutate.
 const VOICING_OPTION_KEYS = [
@@ -93,6 +94,8 @@ export type SpeakingOptions = {
                                                  ResponsePacketOptions[PropertyName];
 }
 
+type InstanceListener = ( instance: Instance ) => void;
+
 /**
  * @param Type
  * @param optionsArgPosition - zero-indexed number that the options argument is provided at
@@ -119,6 +122,22 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
     // Called when this node is focused.
     _voicingFocusListener!: SceneryListenerFunction<FocusEvent> | null;
+
+    // Indicates whether this Node can speak. A Node can speak if self and all of its ancestors are visible and
+    // voicingVisible.
+    _voicingCanSpeakProperty!: TinyProperty<boolean>;
+
+    // A counter that keeps track of visible and voicingVisible Instances of this Node.
+    // As long as this value is greater than zero, this Node can speak. See onInstanceVisibilityChange
+    // and onInstanceVoicingVisibilityChange for more implementation details.
+    _voicingCanSpeakCount!: number;
+
+    // Called when `visible` or `voicingVisible` change for an Instance.
+    _boundInstanceVisibilityChangeListener!: InstanceListener;
+    _boundInstanceVoicingVisibilityChangeListener!: InstanceListener;
+
+    // Called when instances of this Node change.
+    _boundInstancesChangedListener!: ( instance: Instance, added: boolean ) => void;
 
     // Input listener that speaks content on focus. This is the only input listener added
     // by Voicing, but it is the one that is consistent for all Voicing nodes. On focus, speak the name, object
@@ -148,9 +167,28 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
       // @ts-ignore
       super.initialize && super.initialize( args );
 
+      // Indicates whether this Node can speak. A Node can speak if self and all of its ancestors are visible and
+      // voicingVisible.
+      this._voicingCanSpeakProperty = new TinyProperty<boolean>( true );
+
       this._voicingResponsePacket = new ResponsePacket();
       this._voicingFocusListener = this.defaultFocusListener;
-      this._voicingUtterance = new Utterance();
+
+      // Sets the default voicingUtterance and makes this.canSpeakProperty a dependency on its ability to announce.
+      this.setVoicingUtterance( new Utterance() );
+
+      // A counter that keeps track of visible and voicingVisible Instances of this Node. As long as this value is
+      // greater than zero, this Node can speak. See onInstanceVisibilityChange and onInstanceVoicingVisibilityChange
+      // for more details.
+      this._voicingCanSpeakCount = 0;
+
+      this._boundInstanceVisibilityChangeListener = this.onInstanceVisibilityChange.bind( this );
+      this._boundInstanceVoicingVisibilityChangeListener = this.onInstanceVoicingVisibilityChange.bind( this );
+
+      // Whenever an Instance of this Node is added or removed, add/remove listeners that will update the
+      // canSpeakProperty.
+      this._boundInstancesChangedListener = this.addOrRemoveInstanceListeners.bind( this );
+      ( this as unknown as Node ).changedInstanceEmitter.addListener( this._boundInstancesChangedListener );
 
       this._speakContentOnFocusListener = {
         focus: event => {
@@ -449,8 +487,20 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * Sets the utterance through which voicing associated with this Node will be spoken. By default on initialize,
      * one will be created, but a custom one can optionally be provided.
      */
-    setVoicingUtterance( utterance: Utterance ) {
-      this._voicingUtterance = utterance;
+    public setVoicingUtterance( utterance: Utterance ) {
+      if ( this._voicingUtterance !== utterance ) {
+
+        // First remove the _voicingCanSpeakProperty from the old Utterance since this Node's visible and voicingVisible
+        // no longer dictate whether the Utterance can be announced.
+        if ( this._voicingUtterance ) {
+          this._voicingUtterance.canAnnounceProperties = _.without( this._voicingUtterance.canAnnounceProperties, this._voicingCanSpeakProperty );
+        }
+
+        const previousCanAnnounceProperties = utterance.canAnnounceProperties;
+        utterance.canAnnounceProperties = [ this._voicingCanSpeakProperty, ...previousCanAnnounceProperties ];
+
+        this._voicingUtterance = utterance;
+      }
     }
 
     set voicingUtterance( utterance: Utterance ) { this.setVoicingUtterance( utterance ); }
@@ -483,6 +533,16 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     }
 
     get voicingUtteranceQueue(): UtteranceQueue | null { return this.getVoicingUtteranceQueue(); }
+
+    /**
+     * Get the Property indicating that this Voicing Node can speak. True when this Voicing Node and all of its
+     * ancestors are visible and voicingVisible.
+     */
+    getVoicingCanSpeakProperty() {
+      return this._voicingCanSpeakProperty;
+    }
+
+    get voicingCanSpeakProperty() { return this.getVoicingCanSpeakProperty(); }
 
     /**
      * Called whenever this Node is focused.
@@ -524,15 +584,119 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      */
     override dispose() {
       ( this as unknown as Node ).removeInputListener( this._speakContentOnFocusListener );
+      ( this as unknown as Node ).changedInstanceEmitter.removeListener( this._boundInstancesChangedListener );
 
       super.dispose();
     }
 
     clean() {
       ( this as unknown as Node ).removeInputListener( this._speakContentOnFocusListener );
+      ( this as unknown as Node ).changedInstanceEmitter.removeListener( this._boundInstancesChangedListener );
 
       // @ts-ignore
       super.clean && super.clean();
+    }
+
+    /***********************************************************************************************************/
+    // PRIVATE METHODS
+    /***********************************************************************************************************/
+
+    /**
+     * When visibility changes on an Instance update the canSpeakProperty. A counting variable keeps track
+     * of the instances attached to the display that are both globally visible and voicingVisible. If any
+     * Instance is voicingVisible and visible, this Node can speak.
+     *
+     * @private
+     */
+    onInstanceVisibilityChange( instance: Instance ) {
+
+      // Since this is called on the change and `visible` is a boolean wasVisible is the not of the current value.
+      // From the change we can determine if the count should be incremented or decremented.
+      const wasVisible = !instance.visible && instance.voicingVisible;
+      const isVisible = instance.visible && instance.voicingVisible;
+
+      if ( wasVisible && !isVisible ) {
+        this._voicingCanSpeakCount--;
+      }
+      else if ( !wasVisible && isVisible ) {
+        this._voicingCanSpeakCount++;
+      }
+
+      this._voicingCanSpeakProperty.value = this._voicingCanSpeakCount > 0;
+    }
+
+    /**
+     * When voicingVisible changes on an Instance, update the canSpeakProperty. A counting variable keeps track of
+     * the instances attached to the display that are both globally visible and voicingVisible. If any Instance
+     * is voicingVisible and visible this Node can speak.
+     *
+     * @private
+     */
+    onInstanceVoicingVisibilityChange( instance: Instance ) {
+
+      // Since this is called on the change and `visible` is a boolean wasVisible is the not of the current value.
+      // From the change we can determine if the count should be incremented or decremented.
+      const wasVoicingVisible = !instance.voicingVisible && instance.visible;
+      const isVoicingVisible = instance.voicingVisible && instance.visible;
+
+      if ( wasVoicingVisible && !isVoicingVisible ) {
+        this._voicingCanSpeakCount--;
+      }
+      else if ( !wasVoicingVisible && isVoicingVisible ) {
+        this._voicingCanSpeakCount++;
+      }
+
+      this._voicingCanSpeakProperty.value = this._voicingCanSpeakCount > 0;
+    }
+
+    /**
+     * Update the canSpeakProperty and counting variable in response to an Instance of this Node being added or
+     * removed.
+     *
+     * @private
+     */
+    handleInstancesChanged( instance: Instance, added: boolean ) {
+      const isVisible = instance.visible && instance.voicingVisible;
+      if ( isVisible ) {
+
+        // If the added Instance was visible and voicingVisible it should increment the counter. If the removed
+        // instance is NOT visible/voicingVisible it would not have contributed to the counter so we should not
+        // decrement in that case.
+        this._voicingCanSpeakCount = added ? this._voicingCanSpeakCount + 1 : this._voicingCanSpeakCount - 1;
+      }
+
+      this._voicingCanSpeakProperty.value = this._voicingCanSpeakCount > 0;
+    }
+
+    /**
+     * Add or remove listeners on an Instance watching for changes to visible or voicingVisible that will modify
+     * the voicingCanSpeakCount. See documentation for voicingCanSpeakCount for details about how this controls the
+     * voicingCanSpeakProperty.
+     *
+     * @private
+     */
+    addOrRemoveInstanceListeners( instance: Instance, added: boolean ) {
+      assert && assert( instance.voicingVisibleEmitter, 'Instance must be initialized.' );
+      assert && assert( instance.visibleEmitter, 'Instance must be initialized.' );
+
+      if ( added ) {
+
+        // @ts-ignore - Emitters in Instance need typing
+        instance.voicingVisibleEmitter!.addListener( this._boundInstanceVoicingVisibilityChangeListener );
+
+        // @ts-ignore - Emitters in Instance need typing
+        instance.visibleEmitter!.addListener( this._boundInstanceVisibilityChangeListener );
+      }
+      else {
+        // @ts-ignore - Emitters in Instance need typing
+        instance.voicingVisibleEmitter!.removeListener( this._boundInstanceVoicingVisibilityChangeListener );
+
+        // @ts-ignore - Emitters in Instance need typing
+        instance.visibleEmitter!.removeListener( this._boundInstanceVisibilityChangeListener );
+      }
+
+      // eagerly update the canSpeakProperty and counting variables in addition to adding change listeners
+      this.handleInstancesChanged( instance, added );
     }
   };
 

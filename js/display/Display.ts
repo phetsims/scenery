@@ -579,8 +579,7 @@ export default class Display {
     // pre-repaint phase: update relative transform information for listeners (notification) and precomputation where desired
     this.updateDirtyTransformRoots();
     // pre-repaint phase update visibility information on instances
-    this._baseInstance!.updateVisibility( true, true, false );
-
+    this._baseInstance!.updateVisibility( true, true, true, false );
     if ( assertSlow ) { this._baseInstance!.auditVisibility( true ); }
 
     if ( assertSlow ) { this._baseInstance!.audit( this._frameId, true ); }

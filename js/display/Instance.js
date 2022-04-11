@@ -24,7 +24,7 @@ import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import cleanArray from '../../../phet-core/js/cleanArray.js';
 import Poolable from '../../../phet-core/js/Poolable.js';
-import { scenery, Trail, Utils, Renderer, RelativeTransform, Drawable, ChangeInterval, Fittability, BackboneDrawable, CanvasBlock, InlineCanvasCacheDrawable, SharedCanvasCacheDrawable } from '../imports.js';
+import { BackboneDrawable, CanvasBlock, ChangeInterval, Drawable, Fittability, InlineCanvasCacheDrawable, RelativeTransform, Renderer, scenery, SharedCanvasCacheDrawable, Trail, Utils } from '../imports.js';
 
 let globalIdCounter = 1;
 
@@ -92,6 +92,7 @@ class Instance {
     this.selfVisible = true; // like relative visibility, but is always true if we are a visibility root
     this.visibilityDirty = true; // entire subtree of visibility will need to be updated
     this.childVisibilityDirty = true; // an ancestor needs its visibility updated
+    this.voicingVisible = true; // whether this instance is "visible" for Voicing and allows speech with that feature
 
     // @private {Object.<instanceId:number,number>} - Maps another instance's `instance.id` {number} => branch index
     // {number} (first index where the two trails are different). This effectively operates as a cache (since it's more
@@ -138,6 +139,7 @@ class Instance {
     this.visibleEmitter = new TinyEmitter();
     this.relativeVisibleEmitter = new TinyEmitter();
     this.selfVisibleEmitter = new TinyEmitter();
+    this.voicingVisibleEmitter = new TinyEmitter();
 
     this.cleanInstance( display, trail );
 
@@ -1515,10 +1517,11 @@ class Instance {
    * @public
    *
    * @param {boolean} parentGloballyVisible - Whether our parent (if any) is globally visible
+   * @param {boolean} parentGloballyVoicingVisible - Whether our parent (if any) is globally voicingVisible.
    * @param {boolean} parentRelativelyVisible - Whether our parent (if any) is relatively visible
    * @param {boolean} updateFullSubtree - If true, we will visit the entire subtree to ensure visibility is correct.
    */
-  updateVisibility( parentGloballyVisible, parentRelativelyVisible, updateFullSubtree ) {
+  updateVisibility( parentGloballyVisible, parentGloballyVoicingVisible, parentRelativelyVisible, updateFullSubtree ) {
     // If our visibility flag for ourself is dirty, we need to update our entire subtree
     if ( this.visibilityDirty ) {
       updateFullSubtree = true;
@@ -1529,7 +1532,10 @@ class Instance {
     const wasVisible = this.visible;
     const wasRelativeVisible = this.relativeVisible;
     const wasSelfVisible = this.selfVisible;
+    const nodeVoicingVisible = this.node.voicingVisibleProperty.value;
+    const wasVoicingVisible = this.voicingVisible;
     this.visible = parentGloballyVisible && nodeVisible;
+    this.voicingVisible = parentGloballyVoicingVisible && nodeVoicingVisible;
     this.relativeVisible = parentRelativelyVisible && nodeVisible;
     this.selfVisible = this.isVisibilityApplied ? true : this.relativeVisible;
 
@@ -1539,7 +1545,7 @@ class Instance {
 
       if ( updateFullSubtree || child.visibilityDirty || child.childVisibilityDirty ) {
         // if we are a visibility root (isVisibilityApplied===true), disregard ancestor visibility
-        child.updateVisibility( this.visible, this.isVisibilityApplied ? true : this.relativeVisible, updateFullSubtree );
+        child.updateVisibility( this.visible, this.voicingVisible, this.isVisibilityApplied ? true : this.relativeVisible, updateFullSubtree );
       }
     }
 
@@ -1548,13 +1554,16 @@ class Instance {
 
     // trigger changes after we do the full visibility update
     if ( this.visible !== wasVisible ) {
-      this.visibleEmitter.emit();
+      this.visibleEmitter.emit( this );
     }
     if ( this.relativeVisible !== wasRelativeVisible ) {
-      this.relativeVisibleEmitter.emit();
+      this.relativeVisibleEmitter.emit( this );
     }
     if ( this.selfVisible !== wasSelfVisible ) {
-      this.selfVisibleEmitter.emit();
+      this.selfVisibleEmitter.emit( this );
+    }
+    if ( this.voicingVisible !== wasVoicingVisible ) {
+      this.voicingVisibleEmitter.emit( this );
     }
   }
 
@@ -1670,6 +1679,9 @@ class Instance {
       this.node.childrenReorderedEmitter.addListener( this.childrenReorderedListener );
       this.node.visibleProperty.lazyLink( this.visibilityListener );
 
+      // Marks all visibility dirty when voicingVisible changes to cause necessary updates for voicingVisible
+      this.node.voicingVisibleProperty.lazyLink( this.visibilityListener );
+
       this.node.filterChangeEmitter.addListener( this.markRenderStateDirtyListener );
       this.node.clipAreaProperty.lazyLink( this.markRenderStateDirtyListener );
       this.node.instanceRefreshEmitter.addListener( this.markRenderStateDirtyListener );
@@ -1687,6 +1699,7 @@ class Instance {
       this.node.childRemovedEmitter.removeListener( this.childRemovedListener );
       this.node.childrenReorderedEmitter.removeListener( this.childrenReorderedListener );
       this.node.visibleProperty.unlink( this.visibilityListener );
+      this.node.voicingVisibleProperty.unlink( this.visibilityListener );
 
       this.node.filterChangeEmitter.removeListener( this.markRenderStateDirtyListener );
       this.node.clipAreaProperty.unlink( this.markRenderStateDirtyListener );
@@ -1802,6 +1815,7 @@ class Instance {
     this.visibleEmitter.removeAllListeners();
     this.relativeVisibleEmitter.removeAllListeners();
     this.selfVisibleEmitter.removeAllListeners();
+    this.voicingVisibleEmitter.removeAllListeners();
 
     this.freeToPool();
 
@@ -1866,6 +1880,9 @@ class Instance {
       const trailVisible = this.trail.isVisible();
       assertSlow( visible === trailVisible, 'Trail visibility failure' );
       assertSlow( visible === this.visible, 'Visible flag failure' );
+
+      assertSlow( this.voicingVisible === _.reduce( this.trail.nodes, ( value, node ) => value && node.voicingVisibleProperty.value, true ),
+        'When this Instance is voicingVisible: true, all Trail Nodes must also be voicingVisible: true' );
 
       // validate the subtree
       for ( let i = 0; i < this.children.length; i++ ) {
