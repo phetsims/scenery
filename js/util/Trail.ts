@@ -175,7 +175,7 @@ export default class Trail {
     }
   }
 
-  slice( startIndex: number, endIndex: number ): Trail {
+  slice( startIndex: number, endIndex?: number ): Trail {
     return new Trail( this.nodes.slice( startIndex, endIndex ) );
   }
 
