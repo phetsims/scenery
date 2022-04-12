@@ -54,20 +54,23 @@ const triggerDOMEvent = ( event, element, key, options ) => {
   options = merge( {
 
     // secondary target for the event, behavior depends on event type
-    relatedTarget: null
+    relatedTarget: null,
+
+    // Does the event bubble? Almost all scenery PDOM events should.
+    bubbles: true,
+
+    // Is the event cancelable? Most are, this should generally be true.
+    cancelable: true,
+
+    // Optional code for the event, most relevant if the eventType is window.KeyboardEvent.
+    code: key,
+
+    // {function} Constructor for the event.
+    eventConstructor: window.Event
   }, options );
 
-  const eventObj = document.createEventObject ?
-                   document.createEventObject() : document.createEvent( 'Events' );
-
-  if ( eventObj.initEvent ) {
-    eventObj.initEvent( event, true, true );
-  }
-
-  eventObj.code = key;
-  eventObj.relatedTarget = options.relatedTarget;
-
-  element.dispatchEvent ? element.dispatchEvent( eventObj ) : element.fireEvent( `on${event}`, eventObj );
+  const eventToDispatch = new options.eventConstructor( event, options );
+  element.dispatchEvent ? element.dispatchEvent( eventToDispatch ) : element.fireEvent( `on${eventToDispatch}`, eventToDispatch );
 };
 
 QUnit.test( 'focusin/focusout (focus/blur)', assert => {
@@ -602,7 +605,9 @@ QUnit.test( 'Global KeyStateTracker tests', assert => {
   rootNode.addChild( a );
 
   const dPrimarySibling = d.pdomInstances[ 0 ].peer.primarySibling;
-  triggerDOMEvent( 'keydown', dPrimarySibling, KeyboardUtils.KEY_RIGHT_ARROW );
+  triggerDOMEvent( 'keydown', dPrimarySibling, KeyboardUtils.KEY_RIGHT_ARROW, {
+    eventConstructor: window.KeyboardEvent
+  } );
 
   assert.ok( globalKeyStateTracker.isKeyDown( KeyboardUtils.KEY_RIGHT_ARROW ), 'global keyStateTracker should be updated with right arrow key down' );
 
