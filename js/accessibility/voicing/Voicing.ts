@@ -28,7 +28,6 @@ import inheritance from '../../../../phet-core/js/inheritance.js';
 import ResponsePacket, { ResolvedResponse, ResponsePacketOptions, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
 import Utterance, { IAlertable } from '../../../../utterance-queue/js/Utterance.js';
-import UtteranceQueue from '../../../../utterance-queue/js/UtteranceQueue.js';
 import { Instance, InteractiveHighlighting, InteractiveHighlightingOptions, Node, scenery, SceneryListenerFunction, voicingUtteranceQueue } from '../../imports.js';
 import optionize from '../../../../phet-core/js/optionize.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
@@ -43,7 +42,6 @@ const VOICING_OPTION_KEYS = [
   'voicingContextResponse',
   'voicingHintResponse',
   'voicingUtterance',
-  'voicingUtteranceQueue',
   'voicingResponsePatternCollection',
   'voicingIgnoreVoicingManagerProperties',
   'voicingFocusListener'
@@ -72,9 +70,6 @@ type SelfOptions = {
   // Called when this Node is focused to speak voicing responses on focus. See Voicing.defaultFocusListener for default
   // listener.
   voicingFocusListener?: SceneryListenerFunction<FocusEvent> | null;
-
-  // By default use voicingUtteranceQueue to speak responses, but you can also specify another utteranceQueue here.
-  voicingUtteranceQueue?: UtteranceQueue;
 
   // The utterance to use if you want this response to be more controlled in the UtteranceQueue. This Utterance will be
   // used by all responses spoken by this class. Null to not use an Utterance.
@@ -112,13 +107,6 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
     // The utterance that all responses are spoken through.
     _voicingUtterance!: Utterance;
-
-    // The utteranceQueue that responses for this Node will be spoken through.
-    // By default (null), it will go through the singleton voicingUtteranceQueue, but you may need separate
-    // UtteranceQueues for different areas of content in your application. For example, Voicing and
-    // the default voicingUtteranceQueue may be disabled, but you could still want some speech to come through
-    // while user is changing preferences or other settings.
-    _voicingUtteranceQueue!: UtteranceQueue | null;
 
     // Called when this node is focused.
     _voicingFocusListener!: SceneryListenerFunction<FocusEvent> | null;
@@ -357,8 +345,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
       // don't send to utteranceQueue if response is empty
       if ( content ) {
-        const utteranceQueue = this.voicingUtteranceQueue || voicingUtteranceQueue;
-        utteranceQueue.addToBack( content );
+        voicingUtteranceQueue.addToBack( content );
       }
     }
 
@@ -513,26 +500,6 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     }
 
     get voicingUtterance(): Utterance { return this.getVoicingUtterance(); }
-
-    /**
-     * Sets the utteranceQueue through which voicing associated with this Node will be spoken. By default,
-     * the Display's voicingUtteranceQueue is used. But you can specify a different one if more complicated
-     * management of voicing is necessary.
-     */
-    setVoicingUtteranceQueue( utteranceQueue: UtteranceQueue | null ) {
-      this._voicingUtteranceQueue = utteranceQueue;
-    }
-
-    set voicingUtteranceQueue( utteranceQueue: UtteranceQueue | null ) { this.setVoicingUtteranceQueue( utteranceQueue ); }
-
-    /**
-     * Gets the utteranceQueue through which voicing associated with this Node will be spoken.
-     */
-    getVoicingUtteranceQueue(): UtteranceQueue | null {
-      return this._voicingUtteranceQueue;
-    }
-
-    get voicingUtteranceQueue(): UtteranceQueue | null { return this.getVoicingUtteranceQueue(); }
 
     /**
      * Get the Property indicating that this Voicing Node can speak. True when this Voicing Node and all of its
