@@ -14,13 +14,13 @@ import { scenery } from '../../imports.js';
 class ReadingBlockUtterance extends Utterance {
 
   /**
-   * @param {Focus} focus
+   * @param {Focus|null} focus
    * @param {Object} [options]
    */
   constructor( focus, options ) {
     super( options );
 
-    // @public (read-only)
+    // @public {Focus|null} - Can be set and change to support reusing this ReadingBlockUtterance.
     this.readingBlockFocus = focus;
   }
 }

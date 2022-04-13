@@ -49,6 +49,7 @@ type UnsupportedVoicingOptions =
   'voicingObjectResponse' |
   'voicingContextResponse' |
   'voicingHintResponse' |
+  'voicingUtterance' |
   'voicingResponsePatternCollection';
 
 export type ReadingBlockOptions = SelfOptions &
@@ -127,6 +128,10 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
       // All ReadingBlocks have a ReadingBlockHighlight, a focus highlight that is black to indicate it has
       // a different behavior.
       ( this as unknown as Node ).focusHighlight = new ReadingBlockHighlight( this );
+
+      // All ReadingBlocks use a ReadingBlockUtterance with Focus and Trail data to this Node so that it can be
+      // highlighted in the FocusOverlay when this Utterance is being announced.
+      this.voicingUtterance = new ReadingBlockUtterance( null );
 
       ( this as unknown as Node ).mutate( readingBlockOptions );
     }
@@ -329,12 +334,14 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 
       const displays = ( this as unknown as Node ).getConnectedDisplays();
 
+      const readingBlockUtterance = this.voicingUtterance as ReadingBlockUtterance;
+
       const content = this.collectResponse( {
         nameResponse: this.getReadingBlockNameResponse(),
         hintResponse: this.getReadingBlockHintResponse(),
         ignoreProperties: this.voicingIgnoreVoicingManagerProperties,
         responsePatternCollection: this._voicingResponsePacket.responsePatternCollection,
-        utterance: null // we use a ReadingBlockUtterance below.
+        utterance: readingBlockUtterance
       } );
       if ( content ) {
         for ( let i = 0; i < displays.length; i++ ) {
@@ -349,10 +356,8 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
             const visualTrail = PDOMInstance.guessVisualTrail( rootToSelf, displays[ i ].rootNode );
 
             const focus = new Focus( displays[ i ], visualTrail );
-            const readingBlockUtterance = new ReadingBlockUtterance( focus, {
-              alert: content
-            } );
-            this.speakContent( readingBlockUtterance );
+            readingBlockUtterance.readingBlockFocus = focus;
+            this.speakContent( content );
           }
         }
       }
