@@ -54,7 +54,7 @@ type SelfOptions = {
 };
 
 // The stroke and linewidth of this path are set with outerLineWidth and outerStroke.
-type FocusHighlightPathOptions = SelfOptions & Omit<PathOptions, 'stroke' | 'lineWidth'>;
+export type FocusHighlightPathOptions = SelfOptions & Omit<PathOptions, 'stroke' | 'lineWidth'>;
 
 class FocusHighlightPath extends Path {
 
@@ -72,7 +72,7 @@ class FocusHighlightPath extends Path {
 
   // The 'inner' focus highlight, the (by default) slightly darker and more opaque path that is on the inside of the
   // outer path to give the focus highlight a 'fade-out' appearance
-  private readonly innerHighlightPath: Path;
+  protected readonly innerHighlightPath: Path;
 
   public static OUTER_FOCUS_COLOR = OUTER_FOCUS_COLOR;
   public static INNER_FOCUS_COLOR = INNER_FOCUS_COLOR;

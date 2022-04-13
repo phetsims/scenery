@@ -10,52 +10,60 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
+import IProperty from '../../../axon/js/IProperty.js';
+import Bounds2 from '../../../dot/js/Bounds2.js';
 import { Shape } from '../../../kite/js/imports.js';
-import merge from '../../../phet-core/js/merge.js';
-import { scenery, Node, FocusHighlightPath } from '../imports.js';
+import optionize from '../../../phet-core/js/optionize.js';
+import { FocusHighlightPath, Node, scenery } from '../imports.js';
+import { FocusHighlightPathOptions } from './FocusHighlightPath.js';
+
+type SelfOptions = {
+
+  // if true, highlight will surround local bounds instead of parent bounds
+  useLocalBounds?: boolean;
+
+  // default value is function of node transform (minus translation), but can be set explicitly.
+  // see FocusHighlightPath.getDilationCoefficient(). A number here refers to the amount in global coordinates to
+  // dilate the focus highlight.
+  dilationCoefficient?: number | null;
+
+  // if true, dilation for bounds around node will increase, see setShapeFromNode()
+  useGroupDilation?: boolean;
+};
+
+// The transformSourceNode for this highlight will be the provided Node.
+type FocusHighlightFromNodeOptions = SelfOptions & Omit<FocusHighlightPathOptions, 'transformSourceNode'>;
 
 class FocusHighlightFromNode extends FocusHighlightPath {
-  /**
-   * @param {Node|null} node
-   * @param {Object} [options]
-   */
-  constructor( node, options ) {
 
-    options = merge( {
+  // See options for documentation.
+  private readonly useLocalBounds: boolean;
+  private readonly useGroupDilation: boolean;
+  private readonly dilationCoefficient: number | null;
 
-      // {boolean} - if true, highlight will surround local bounds
+  // Property for a Node's bounds which are currently being observed with the boundsListener. Referenced so that
+  // we can remove the listener later.
+  private observedBoundsProperty: null | IProperty<Bounds2>;
+
+  // Listener that sets the shape of this highlight when the Node bounds change. Referenced so it can be removed later.
+  private boundsListener: null | ( ( bounds: Bounds2 ) => void );
+
+  constructor( node: Node | null, providedOptions?: FocusHighlightFromNodeOptions ) {
+
+    const options = optionize<FocusHighlightFromNodeOptions, SelfOptions, FocusHighlightPathOptions>( {
       useLocalBounds: true,
-
-      // {Node|null} - see FocusHighlightPath for more documentation
-      transformSourceNode: node,
-
-      // line width options, one for each highlight, will be calculated based on transform of this path unless provided
-      outerLineWidth: null,
-      innerLineWidth: null,
-
-      // {null|number] - default value is function of node transform (minus translation), but can be set explicitly
-      // see FocusHighlightPath.getDilationCoefficient(). A number here refers to the amount in pixels to dilate the
-      // focus highlight by
       dilationCoefficient: null,
-
-      // {boolean} - if true, dilation for bounds around node will increase, see setShapeFromNode()
       useGroupDilation: false
-    }, options );
+    }, providedOptions );
+
+    options.transformSourceNode = node;
 
     super( null, options );
 
-    this.useLocalBounds = options.useLocalBounds; // @private
-    this.useGroupDilation = options.useGroupDilation; // @private
-    this.dilationCoefficient = options.dilationCoefficient; // @private
-
-    // @private - from options, will override line width calculations based on the node's size
-    this.outerLineWidth = options.outerLineWidth;
-    this.innerLineWidth = options.innerLineWidth;
-
-    // @private {Property.<Bounds2>} - keep track to remove listener
+    this.useLocalBounds = options.useLocalBounds;
+    this.useGroupDilation = options.useGroupDilation;
+    this.dilationCoefficient = options.dilationCoefficient;
     this.observedBoundsProperty = null;
-
-    // @private {function} - keep track of the listener so that it can be removed
     this.boundsListener = null;
 
     if ( node ) {
@@ -69,17 +77,14 @@ class FocusHighlightFromNode extends FocusHighlightPath {
    * FocusHighlightFromNode, the shape will surround the node's bounds or its local bounds, dilated by an amount
    * that is dependent on whether or not this highlight is for group content or for the node itself. See
    * ParallelDOM.setGroupFocusHighlight() for more information on group highlights.
-   * @public
-   *
-   * @param {Node} node
    */
-  setShapeFromNode( node ) {
+  public setShapeFromNode( node: Node ): void {
     assert && assert( node instanceof Node );
 
     // cleanup the previous listener
     if ( this.observedBoundsProperty ) {
       assert && assert( this.boundsListener, 'should be a listener if there is a previous focusHighlightNode' );
-      this.observedBoundsProperty.unlink( this.boundsListener );
+      this.observedBoundsProperty.unlink( this.boundsListener! );
     }
 
     this.observedBoundsProperty = this.useLocalBounds ? node.localBoundsProperty : node.boundsProperty;
@@ -99,7 +104,7 @@ class FocusHighlightFromNode extends FocusHighlightPath {
         dilationCoefficient = ( this.useGroupDilation ? FocusHighlightPath.getGroupDilationCoefficient( node ) :
                                 FocusHighlightPath.getDilationCoefficient( node ) );
       }
-      const dilatedBounds = bounds.dilated( dilationCoefficient );
+      const dilatedBounds = bounds.dilated( dilationCoefficient! );
 
       // Update the line width of the focus highlight based on the transform of the node
       this.updateLineWidthFromNode( node );
@@ -109,15 +114,13 @@ class FocusHighlightFromNode extends FocusHighlightPath {
   }
 
   /**
-   * @private
-   * Update the line width of both Paths based on transform.
-   * @param node
+   * Update the line width of both inner and outer highlights based on transform of the Node.
    */
-  updateLineWidthFromNode( node ) {
+  private updateLineWidthFromNode( node: Node ): void {
 
-    // Default options can override
-    this.lineWidth = this.outerLineWidth || FocusHighlightPath.getOuterLineWidthFromNode( node );
-    this.innerHighlightPath.lineWidth = this.innerLineWidth || FocusHighlightPath.getInnerLineWidthFromNode( node );
+    // Note that lineWidths provided by options can override width determined from Node transform.
+    this.lineWidth = this.getOuterLineWidth( node );
+    this.innerHighlightPath.lineWidth = this.getInnerLineWidth( node );
   }
 }
 
