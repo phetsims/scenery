@@ -381,13 +381,6 @@ class AnimatedPanZoomListener extends PanZoomListener {
       }
     }
 
-    if ( !globalBoundsToView ) {
-
-      // We weren't able to automatically determine globalBoundsToView and client didn't provide them.
-      // TODO: How to handle this fallback case? See https://github.com/phetsims/scenery/issues/1356
-      // TODO: If mouse pans near edge of screen, consider returning a small Bounds2 that surrounds the Pointer.
-    }
-
     return globalBoundsToView;
   }
 
