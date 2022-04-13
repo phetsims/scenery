@@ -10,7 +10,7 @@
     "../utterance-queue/js/**/*",
     "../sun/js/sun.ts",
     "../phetcommon/js/util/StringUtils.js",
-    "../phetcommon/js/view/ModelViewTransform2.js",
+    "../phetcommon/js/view/ModelViewTransform2.ts",
     "../phetcommon/js/phetcommon.js",
     "../chipper/phet-types.d.ts",
     "../chipper/node_modules/@types/lodash/index.d.ts",
