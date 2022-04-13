@@ -221,6 +221,16 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 
     get readingBlockResponsePatternCollection(): ResponsePatternCollection { return this.getReadingBlockResponsePatternCollection(); }
 
+    /**
+     * ReadingBlock must take a ReadingBlockUtterance for its voicingUtterance. You generally shouldn't be using this.
+     * But if you must, you are responsible for setting the ReadingBlockUtterance.readingBlockFocus when this
+     * ReadingBlock is activated so that it gets highlighted correctly. See how the default readingBlockFocus is set.
+     */
+    public override setVoicingUtterance( utterance: ReadingBlockUtterance ) {
+      super.setVoicingUtterance( utterance );
+    }
+
+    public override set voicingUtterance( utterance: ReadingBlockUtterance ) { this.setVoicingUtterance( utterance ); }
 
     override setVoicingNameResponse(): void { assert && assert( false, 'ReadingBlocks only support setting the name response via readingBlockNameResponse' ); }
 
