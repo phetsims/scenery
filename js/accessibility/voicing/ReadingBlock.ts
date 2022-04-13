@@ -238,6 +238,8 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 
     override getVoicingHintResponse(): any { assert && assert( false, 'ReadingBlocks only support getting the hint response via readingBlockHintResponse.' ); }
 
+    override setVoicingUtterance(): void { assert && assert( false, 'ReadingBlocks create and use their own Utterance.' ); }
+
     override setVoicingResponsePatternCollection(): void { assert && assert( false, 'ReadingBlocks only support setting the response patterns via readingBlockResponsePatternCollection.' ); }
 
     override getVoicingResponsePatternCollection(): any { assert && assert( false, 'ReadingBlocks only support getting the response patterns via readingBlockResponsePatternCollection.' ); }
