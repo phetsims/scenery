@@ -719,6 +719,43 @@ Voicing.unregisterUtteranceToVoicingNode = ( utterance: Utterance, voicingNode: 
   utterance.canAnnounceProperties = existingCanAnnounceProperties.splice( index, 1 );
 };
 
+/**
+ * Assign the Node's voicingVisibleProperty and visibleProperty to the Utterance so that the Utterance can only be
+ * announced if the Node is visible and voicingVisible. This is LOCAL visibility and does not care about ancestors.
+ * This should rarely be used, in general you should be registering an Utterance to a VoicingNode and its
+ * voicingCanSpeakProperty.
+ * @public
+ * @static
+ */
+Voicing.registerUtteranceToNode = ( utterance: Utterance, node: Node ) => {
+  const existingCanAnnounceProperties = utterance.canAnnounceProperties;
+  if ( !existingCanAnnounceProperties.includes( node.visibleProperty ) ) {
+    utterance.canAnnounceProperties = utterance.canAnnounceProperties.concat( [ node.visibleProperty ] );
+  }
+  if ( !existingCanAnnounceProperties.includes( node.voicingVisibleProperty ) ) {
+    utterance.canAnnounceProperties = utterance.canAnnounceProperties.concat( [ node.voicingVisibleProperty ] );
+  }
+};
+
+/**
+ * Remove a Node's voicingVisibleProperty and visibleProperty from the canAnnounceProperties of the Utterance.
+ * @public
+ * @static
+ */
+Voicing.unregisterUtteranceToNode = ( utterance: Utterance, node: Node ) => {
+  const existingCanAnnounceProperties = utterance.canAnnounceProperties;
+  assert && assert( existingCanAnnounceProperties.includes( node.visibleProperty ) && existingCanAnnounceProperties.includes( node.voicingVisibleProperty ),
+    'visibleProperty and voicingVisibleProperty were not on the Utterance, was it not registered to the node?' );
+
+  const visiblePropertyIndex = existingCanAnnounceProperties.indexOf( node.visibleProperty );
+  const withoutVisibleProperty = existingCanAnnounceProperties.splice( visiblePropertyIndex, 1 );
+
+  const voicingVisiblePropertyIndex = withoutVisibleProperty.indexOf( node.voicingVisibleProperty );
+  const withoutBothProperties = existingCanAnnounceProperties.splice( voicingVisiblePropertyIndex, 1 );
+
+  utterance.canAnnounceProperties = withoutBothProperties;
+};
+
 // Export a type that lets you check if your Node is composed with Voicing.
 const wrapper = () => Voicing( Node, 0 );
 export type VoicingNode = InstanceType<ReturnType<typeof wrapper>>;
