@@ -96,37 +96,40 @@ class KeyStateTracker {
     // is wrapped by an Action so that the KeyStateTracker state is captured for PhET-iO
     this.keydownUpdateAction = new PhetioAction( domEvent => {
 
-      // The dom event might have a modifier key that we weren't able to catch, if that is the case update the keyState.
-      // This is likely to happen when pressing browser key commands like "ctrl + tab" to switch tabs.
-      this.correctModifierKeys( domEvent );
+      // Not all keys have a code for the browser to use, we need to be graceful and do nothing if there isn't one.
+      const key = KeyboardUtils.getEventCode( domEvent );
+      if ( key ) {
 
-      const key = KeyboardUtils.getEventCode( domEvent )!;
-      assert && assert( key, 'key not found from domEvent' );
+        // The dom event might have a modifier key that we weren't able to catch, if that is the case update the keyState.
+        // This is likely to happen when pressing browser key commands like "ctrl + tab" to switch tabs.
+        this.correctModifierKeys( domEvent );
 
-      if ( assert && !KeyboardUtils.isShiftKey( domEvent ) ) {
-        assert( !!domEvent.shiftKey === !!this.shiftKeyDown, 'shift key inconsistency between event and keyState.' );
-      }
-      if ( assert && !KeyboardUtils.isAltKey( domEvent ) ) {
-        assert( !!domEvent.altKey === !!this.altKeyDown, 'alt key inconsistency between event and keyState.' );
-      }
-      if ( assert && !KeyboardUtils.isControlKey( domEvent ) ) {
-        assert( !!domEvent.ctrlKey === !!this.ctrlKeyDown, 'ctrl key inconsistency between event and keyState.' );
+        if ( assert && !KeyboardUtils.isShiftKey( domEvent ) ) {
+          assert( !!domEvent.shiftKey === !!this.shiftKeyDown, 'shift key inconsistency between event and keyState.' );
+        }
+        if ( assert && !KeyboardUtils.isAltKey( domEvent ) ) {
+          assert( !!domEvent.altKey === !!this.altKeyDown, 'alt key inconsistency between event and keyState.' );
+        }
+        if ( assert && !KeyboardUtils.isControlKey( domEvent ) ) {
+          assert( !!domEvent.ctrlKey === !!this.ctrlKeyDown, 'ctrl key inconsistency between event and keyState.' );
+        }
+
+        // if the key is already down, don't do anything else (we don't want to create a new keyState object
+        // for a key that is already being tracked and down)
+        if ( !this.isKeyDown( key ) ) {
+          const key = KeyboardUtils.getEventCode( domEvent )!;
+          assert && assert( key, 'Could not find key from domEvent' );
+          this.keyState[ key ] = {
+            keyDown: true,
+            key: key,
+            timeDown: 0 // in ms
+          };
+        }
+
+        // keydown update received, notify listeners
+        this.keydownEmitter.emit( domEvent );
       }
 
-      // if the key is already down, don't do anything else (we don't want to create a new keyState object
-      // for a key that is already being tracked and down)
-      if ( !this.isKeyDown( key ) ) {
-        const key = KeyboardUtils.getEventCode( domEvent )!;
-        assert && assert( key, 'Could not find key from domEvent' );
-        this.keyState[ key ] = {
-          keyDown: true,
-          key: key,
-          timeDown: 0 // in ms
-        };
-      }
-
-      // keydown update received, notify listeners
-      this.keydownEmitter.emit( domEvent );
     }, {
       phetioPlayback: true,
       tandem: options.tandem.createTandem( 'keydownUpdateAction' ),
@@ -139,21 +142,23 @@ class KeyStateTracker {
     // is captured for PhET-iO
     this.keyupUpdateAction = new PhetioAction( domEvent => {
 
-      const key = KeyboardUtils.getEventCode( domEvent )!;
-      assert && assert( key, 'Could not find key for domEvent' );
+      // Not all keys have a code for the browser to use, we need to be graceful and do nothing if there isn't one.
+      const key = KeyboardUtils.getEventCode( domEvent );
+      if ( key ) {
 
-      // correct keyState in case browser didn't receive keydown/keyup events for a modifier key
-      this.correctModifierKeys( domEvent );
+        // correct keyState in case browser didn't receive keydown/keyup events for a modifier key
+        this.correctModifierKeys( domEvent );
 
-      // Remove this key data from the state - There are many cases where we might receive a keyup before keydown like
-      // on first tab into scenery Display or when using specific operating system keys with the browser or PrtScn so
-      // an assertion for this is too strict. See https://github.com/phetsims/scenery/issues/918
-      if ( this.isKeyDown( key ) ) {
-        delete this.keyState[ key ];
+        // Remove this key data from the state - There are many cases where we might receive a keyup before keydown like
+        // on first tab into scenery Display or when using specific operating system keys with the browser or PrtScn so
+        // an assertion for this is too strict. See https://github.com/phetsims/scenery/issues/918
+        if ( this.isKeyDown( key ) ) {
+          delete this.keyState[ key ];
+        }
+
+        // keyup event received, notify listeners
+        this.keyupEmitter.emit( domEvent );
       }
-
-      // keyup event received, notify listeners
-      this.keyupEmitter.emit( domEvent );
     }, {
       phetioPlayback: true,
       tandem: options.tandem.createTandem( 'keyupUpdateAction' ),
