@@ -27,6 +27,7 @@ import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePa
 import { Focus, Highlight, Node, PDOMInstance, ReadingBlockHighlight, ReadingBlockUtterance, scenery, SceneryEvent, Voicing, voicingManager, VoicingOptions } from '../../imports.js';
 import IInputListener from '../../input/IInputListener.js';
 import { ResolvedResponse, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
+import Utterance from '../../../../utterance-queue/js/Utterance.js';
 
 const READING_BLOCK_OPTION_KEYS = [
   'readingBlockTagName',
@@ -55,6 +56,12 @@ type UnsupportedVoicingOptions =
 export type ReadingBlockOptions = SelfOptions &
   Omit<VoicingOptions, UnsupportedVoicingOptions>;
 
+// Use an asertion signature to narrow the type to ReadingBlockUtterance
+function assertReadingBlockUtterance( utterance: Utterance ): asserts utterance is ReadingBlockUtterance {
+  if ( !( utterance instanceof ReadingBlockUtterance ) ) {
+    throw new Error( 'utterance is not a ReadinBlockUtterance' );
+  }
+}
 
 const DEFAULT_CONTENT_HINT_PATTERN = new ResponsePatternCollection( {
   nameHint: '{{NAME}}. {{HINT}}'
@@ -228,6 +235,18 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
      */
     public override setVoicingUtterance( utterance: ReadingBlockUtterance ) {
       super.setVoicingUtterance( utterance );
+    }
+
+    public override set voicingUtterance( utterance: ReadingBlockUtterance ) { super.voicingUtterance = utterance; }
+
+    public override getVoicingUtterance(): ReadingBlockUtterance {
+      const utterance = super.getVoicingUtterance();
+      assertReadingBlockUtterance( utterance );
+      return utterance;
+    }
+
+    public override get voicingUtterance(): ReadingBlockUtterance {
+      return this.getVoicingUtterance();
     }
 
     override setVoicingNameResponse(): void { assert && assert( false, 'ReadingBlocks only support setting the name response via readingBlockNameResponse' ); }
