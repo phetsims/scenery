@@ -683,5 +683,46 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
 Voicing.VOICING_OPTION_KEYS = VOICING_OPTION_KEYS;
 
+/**
+ * Alert an Utterance to the voicingUtteranceQueue. The Utterance must have canAnnounceProperties and hopefully
+ * at least one of the Properties is a VoicingNode's canAnnounceProperty so that this Utterance is only announced
+ * when the VoicingNode is globally visible and voicingVisible.
+ * @public
+ * @static
+ */
+Voicing.alertUtterance = ( utterance: Utterance ) => {
+  assert && assert( utterance.canAnnounceProperties.length > 0, 'canAnnounceProperties required, this Utterance might not be connected to Node in the scene graph.' );
+  voicingUtteranceQueue.addToBack( utterance );
+};
+
+/**
+ * Assign the voicingNode's voicingCanSpeakProperty to the Utterance so that the Utterance can only be announced
+ * if the voicingNode is globally visible and voicingVisible in the display.
+ * @public
+ * @static
+ */
+Voicing.registerUtteranceToVoicingNode = ( utterance: Utterance, voicingNode: VoicingNode ) => {
+  const existingCanAnnounceProperties = utterance.canAnnounceProperties;
+  if ( !existingCanAnnounceProperties.includes( voicingNode.voicingCanSpeakProperty ) ) {
+    utterance.canAnnounceProperties = existingCanAnnounceProperties.concat( [ voicingNode.voicingCanSpeakProperty ] );
+  }
+};
+
+/**
+ * Remove a voicingNode's voicingCanSpeakProperty from the Utterance.
+ * @public
+ * @static
+ */
+Voicing.unregisterUtteranceToVoicingNode = ( utterance: Utterance, voicingNode: VoicingNode ) => {
+  const existingCanAnnounceProperties = utterance.canAnnounceProperties;
+  const index = existingCanAnnounceProperties.indexOf( voicingNode.voicingCanSpeakProperty );
+  assert && assert( index > -1, 'voicingNode.voicingCanSpeakProperty is not on the Utterance, was it not registered?' );
+  utterance.canAnnounceProperties = existingCanAnnounceProperties.splice( index, 1 );
+};
+
+// Export a type that lets you check if your Node is composed with Voicing.
+const wrapper = () => Voicing( Node, 0 );
+export type VoicingNode = InstanceType<ReturnType<typeof wrapper>>;
+
 scenery.register( 'Voicing', Voicing );
 export default Voicing;
