@@ -230,8 +230,6 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
       super.setVoicingUtterance( utterance );
     }
 
-    public override set voicingUtterance( utterance: ReadingBlockUtterance ) { this.setVoicingUtterance( utterance ); }
-
     override setVoicingNameResponse(): void { assert && assert( false, 'ReadingBlocks only support setting the name response via readingBlockNameResponse' ); }
 
     override getVoicingNameResponse(): any { assert && assert( false, 'ReadingBlocks only support getting the name response via readingBlockNameResponse' ); }
