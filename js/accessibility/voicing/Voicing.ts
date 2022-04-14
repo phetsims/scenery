@@ -477,15 +477,14 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     public setVoicingUtterance( utterance: Utterance ) {
       if ( this._voicingUtterance !== utterance ) {
 
-        // First remove the _voicingCanSpeakProperty from the old Utterance since this Node's visible and voicingVisible
-        // no longer dictate whether the Utterance can be announced.
+        // `this` is not recognized as a VoicingNode, but it is because this trait can only be used with Node subtypes
+        const thisVoicingNode = this as unknown as VoicingNode;
+
         if ( this._voicingUtterance ) {
-          this._voicingUtterance.canAnnounceProperties = _.without( this._voicingUtterance.canAnnounceProperties, this._voicingCanSpeakProperty );
+          Voicing.unregisterUtteranceToVoicingNode( this._voicingUtterance, thisVoicingNode );
         }
 
-        const previousCanAnnounceProperties = utterance.canAnnounceProperties;
-        utterance.canAnnounceProperties = [ this._voicingCanSpeakProperty, ...previousCanAnnounceProperties ];
-
+        Voicing.registerUtteranceToVoicingNode( utterance, thisVoicingNode );
         this._voicingUtterance = utterance;
       }
     }
