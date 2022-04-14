@@ -460,7 +460,6 @@ export default class Display {
 
       this.blockFocusCallbacks = false;
 
-      // @public (scenery-internal) {PDOMInstance}
       // @ts-ignore TODO: PDOMInstance
       this._rootPDOMInstance = PDOMInstance.createFromPool( null, this, new Trail() );
       sceneryLog && sceneryLog.PDOMInstance && sceneryLog.PDOMInstance(

@@ -206,7 +206,7 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
 
     super( options );
 
-    // @private, mutable attributes declared from options, see options for info, as well as getters and setters
+    // mutable attributes declared from options, see options for info, as well as getters and setters
     this._start = options.start;
     this._drag = options.drag;
     this._end = options.end;
