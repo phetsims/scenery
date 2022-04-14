@@ -403,7 +403,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 };
 
 // Export a type that lets you check if your Node is composed with ReadingBlock
-const wrapper = () => ReadingBlock( Node, 1 );
+const wrapper = () => ReadingBlock( Node, 0 );
 export type ReadingBlockNode = InstanceType<ReturnType<typeof wrapper>>;
 
 scenery.register( 'ReadingBlock', ReadingBlock );

@@ -437,7 +437,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
 };
 
 // Provides a way to determine if a Node is composed with InteractiveHighlighting by type
-const wrapper = () => InteractiveHighlighting( Node, 1 );
+const wrapper = () => InteractiveHighlighting( Node, 0 );
 export type InteractiveHighlightingNode = InstanceType<ReturnType<typeof wrapper>>;
 
 scenery.register( 'InteractiveHighlighting', InteractiveHighlighting );
