@@ -1554,7 +1554,7 @@ class Instance {
 
     // trigger changes after we do the full visibility update
     if ( this.visible !== wasVisible ) {
-      this.visibleEmitter.emit( this );
+      this.visibleEmitter.emit( this, wasVisible, wasVoicingVisible );
     }
     if ( this.relativeVisible !== wasRelativeVisible ) {
       this.relativeVisibleEmitter.emit( this );
@@ -1563,7 +1563,7 @@ class Instance {
       this.selfVisibleEmitter.emit( this );
     }
     if ( this.voicingVisible !== wasVoicingVisible ) {
-      this.voicingVisibleEmitter.emit( this );
+      this.voicingVisibleEmitter.emit( this, wasVisible, wasVoicingVisible );
     }
   }
 

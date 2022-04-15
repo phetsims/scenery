@@ -89,7 +89,7 @@ export type SpeakingOptions = {
                                                  ResponsePacketOptions[PropertyName];
 }
 
-type InstanceListener = ( instance: Instance ) => void;
+type InstanceVisibilityListener = ( instance: Instance, wasVisible: boolean, wasVoicingVisible: boolean ) => void;
 
 /**
  * @param Type
@@ -121,8 +121,8 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     _voicingCanSpeakCount!: number;
 
     // Called when `visible` or `voicingVisible` change for an Instance.
-    _boundInstanceVisibilityChangeListener!: InstanceListener;
-    _boundInstanceVoicingVisibilityChangeListener!: InstanceListener;
+    _boundInstanceVisibilityChangeListener!: InstanceVisibilityListener;
+    _boundInstanceVoicingVisibilityChangeListener!: InstanceVisibilityListener;
 
     // Called when instances of this Node change.
     _boundInstancesChangedListener!: ( instance: Instance, added: boolean ) => void;
@@ -574,19 +574,20 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      *
      * @private
      */
-    onInstanceVisibilityChange( instance: Instance ) {
+    onInstanceVisibilityChange( instance: Instance, wasVisible: boolean, wasVoicingVisible: boolean ) {
+      const couldSpeak = wasVisible && wasVoicingVisible;
+      const canSpeak = instance.visible && instance.voicingVisible;
 
-      // Since this is called on the change and `visible` is a boolean wasVisible is the not of the current value.
-      // From the change we can determine if the count should be incremented or decremented.
-      const wasVisible = !instance.visible && instance.voicingVisible;
-      const isVisible = instance.visible && instance.voicingVisible;
-
-      if ( wasVisible && !isVisible ) {
+      if ( couldSpeak && !canSpeak ) {
         this._voicingCanSpeakCount--;
       }
-      else if ( !wasVisible && isVisible ) {
+      else if ( !couldSpeak && canSpeak ) {
         this._voicingCanSpeakCount++;
       }
+
+      assert && assert( this._voicingCanSpeakCount >= 0, 'the voicingCanSpeakCount should not go below zero' );
+      assert && assert( this._voicingCanSpeakCount <= ( this as unknown as Node ).instances.length,
+        'The voicingCanSpeakCount cannot be greater than the number of Instances.' );
 
       this._voicingCanSpeakProperty.value = this._voicingCanSpeakCount > 0;
     }
@@ -598,19 +599,39 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      *
      * @private
      */
-    onInstanceVoicingVisibilityChange( instance: Instance ) {
+    onInstanceVoicingVisibilityChange( instance: Instance, wasVisible: boolean, wasVoicingVisible: boolean ) {
+
+      // This is tricky. If voicingVisibility and visibility both changed at the same time, Instance.visibleEmitter
+      // and Instance.voicingVisibleEmitter will both emit in updateVisibility() since these updates are batched
+      // in Display.updateDisplay(). The `onInstanceVisibilityChange()` will modify the voicingCanSpeakCount
+      // because the visibilityEmitter emits first in Instance.updateVisibility. This prevents changing the value twice.
+      // This equality logic catches this case because this listener is called when Instance.voicingVisible changes.
+      // Instance.voicingVisible cannot be equal to wasVoicingVisible in this case so if voicingVisible is equal
+      // to visible both before and after, both must have changed at the same time.
+      //
+      // A clearer alternative solution would be to put a `voicingCanSpeakEmitter` on Instance so that we only update
+      // voicingCanSpeakCount when this state changes directly on the instance. But that requires putting more data on
+      // Instance.
+      // See https://github.com/phetsims/scenery/issues/1300#issuecomment-1099736046
+      if ( instance.voicingVisible === instance.visible && wasVoicingVisible === wasVisible ) {
+        return;
+      }
 
       // Since this is called on the change and `visible` is a boolean wasVisible is the not of the current value.
       // From the change we can determine if the count should be incremented or decremented.
-      const wasVoicingVisible = !instance.voicingVisible && instance.visible;
-      const isVoicingVisible = instance.voicingVisible && instance.visible;
+      const couldSpeak = wasVoicingVisible && wasVisible;
+      const canSpeak = instance.voicingVisible && instance.visible;
 
-      if ( wasVoicingVisible && !isVoicingVisible ) {
+      if ( couldSpeak && !canSpeak ) {
         this._voicingCanSpeakCount--;
       }
-      else if ( !wasVoicingVisible && isVoicingVisible ) {
+      else if ( !couldSpeak && canSpeak ) {
         this._voicingCanSpeakCount++;
       }
+
+      assert && assert( this._voicingCanSpeakCount >= 0, 'the voicingCanSpeakCount should never go below zero' );
+      assert && assert( this._voicingCanSpeakCount <= ( this as unknown as Node ).instances.length,
+        'The voicingCanSpeakCount can never be greater than the number of Instances.' );
 
       this._voicingCanSpeakProperty.value = this._voicingCanSpeakCount > 0;
     }
