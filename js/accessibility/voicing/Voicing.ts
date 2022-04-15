@@ -96,8 +96,6 @@ export type SpeakingOptions = {
                                                  ResponsePacketOptions[PropertyName];
 }
 
-type InstanceVisibilityListener = ( instance: Instance, wasVisible: boolean, wasVoicingVisible: boolean ) => void;
-
 /**
  * @param Type
  * @param optionsArgPosition - zero-indexed number that the options argument is provided at
@@ -127,9 +125,8 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     // and onInstanceVoicingVisibilityChange for more implementation details.
     _voicingCanSpeakCount!: number;
 
-    // Called when `visible` or `voicingVisible` change for an Instance.
-    _boundInstanceVisibilityChangeListener!: InstanceVisibilityListener;
-    _boundInstanceVoicingVisibilityChangeListener!: InstanceVisibilityListener;
+    // Called when `canVoiceEmitter` emits for an Instance.
+    _boundInstanceCanVoiceChangeListener: ( canSpeak: boolean ) => void;
 
     // Called when instances of this Node change.
     _boundInstancesChangedListener!: ( instance: Instance, added: boolean ) => void;
@@ -151,8 +148,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
       // Bind the listeners on construction to be added to observables on initialize and removed on clean/dispose.
       // Instances are updated asynchronously in updateDisplay. The bind creates a new function and we need the
       // reference to persist through the completion of initialize and disposal.
-      this._boundInstanceVisibilityChangeListener = this.onInstanceVisibilityChange.bind( this );
-      this._boundInstanceVoicingVisibilityChangeListener = this.onInstanceVoicingVisibilityChange.bind( this );
+      this._boundInstanceCanVoiceChangeListener = this._onInstanceCanVoiceChange.bind( this );
 
       this._voicingUtterance = null;
 
@@ -187,7 +183,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
       // Whenever an Instance of this Node is added or removed, add/remove listeners that will update the
       // canSpeakProperty.
-      this._boundInstancesChangedListener = this.addOrRemoveInstanceListeners.bind( this );
+      this._boundInstancesChangedListener = this._addOrRemoveInstanceListeners.bind( this );
       ( this as unknown as Node ).changedInstanceEmitter.addListener( this._boundInstancesChangedListener );
 
       this._speakContentOnFocusListener = {
@@ -593,21 +589,17 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     /***********************************************************************************************************/
 
     /**
-     * When visibility changes on an Instance update the canSpeakProperty. A counting variable keeps track
-     * of the instances attached to the display that are both globally visible and voicingVisible. If any
-     * Instance is voicingVisible and visible, this Node can speak.
-     *
-     * @private
+     * When visibility and voicingVisibility change such that the Instance can now speak, update the counting
+     * variable that tracks how many Instances of this VoicingNode can speak. To speak the Instance must be globally\
+     * visible and voicingVisible.
      */
-    onInstanceVisibilityChange( instance: Instance, wasVisible: boolean, wasVoicingVisible: boolean ) {
-      const couldSpeak = wasVisible && wasVoicingVisible;
-      const canSpeak = instance.visible && instance.voicingVisible;
+    _onInstanceCanVoiceChange( canSpeak: boolean ): void {
 
-      if ( couldSpeak && !canSpeak ) {
-        this._voicingCanSpeakCount--;
-      }
-      else if ( !couldSpeak && canSpeak ) {
+      if ( canSpeak ) {
         this._voicingCanSpeakCount++;
+      }
+      else {
+        this._voicingCanSpeakCount--;
       }
 
       assert && assert( this._voicingCanSpeakCount >= 0, 'the voicingCanSpeakCount should not go below zero' );
@@ -618,56 +610,10 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     }
 
     /**
-     * When voicingVisible changes on an Instance, update the canSpeakProperty. A counting variable keeps track of
-     * the instances attached to the display that are both globally visible and voicingVisible. If any Instance
-     * is voicingVisible and visible this Node can speak.
-     *
-     * @private
-     */
-    onInstanceVoicingVisibilityChange( instance: Instance, wasVisible: boolean, wasVoicingVisible: boolean ) {
-
-      // This is tricky. If voicingVisibility and visibility both changed at the same time, Instance.visibleEmitter
-      // and Instance.voicingVisibleEmitter will both emit in updateVisibility() since these updates are batched
-      // in Display.updateDisplay(). The `onInstanceVisibilityChange()` will modify the voicingCanSpeakCount
-      // because the visibilityEmitter emits first in Instance.updateVisibility. This prevents changing the value twice.
-      // This equality logic catches this case because this listener is called when Instance.voicingVisible changes.
-      // Instance.voicingVisible cannot be equal to wasVoicingVisible in this case so if voicingVisible is equal
-      // to visible both before and after, both must have changed at the same time.
-      //
-      // A clearer alternative solution would be to put a `voicingCanSpeakEmitter` on Instance so that we only update
-      // voicingCanSpeakCount when this state changes directly on the instance. But that requires putting more data on
-      // Instance.
-      // See https://github.com/phetsims/scenery/issues/1300#issuecomment-1099736046
-      if ( instance.voicingVisible === instance.visible && wasVoicingVisible === wasVisible ) {
-        return;
-      }
-
-      // Since this is called on the change and `visible` is a boolean wasVisible is the not of the current value.
-      // From the change we can determine if the count should be incremented or decremented.
-      const couldSpeak = wasVoicingVisible && wasVisible;
-      const canSpeak = instance.voicingVisible && instance.visible;
-
-      if ( couldSpeak && !canSpeak ) {
-        this._voicingCanSpeakCount--;
-      }
-      else if ( !couldSpeak && canSpeak ) {
-        this._voicingCanSpeakCount++;
-      }
-
-      assert && assert( this._voicingCanSpeakCount >= 0, 'the voicingCanSpeakCount should never go below zero' );
-      assert && assert( this._voicingCanSpeakCount <= ( this as unknown as Node ).instances.length,
-        'The voicingCanSpeakCount can never be greater than the number of Instances.' );
-
-      this._voicingCanSpeakProperty.value = this._voicingCanSpeakCount > 0;
-    }
-
-    /**
      * Update the canSpeakProperty and counting variable in response to an Instance of this Node being added or
      * removed.
-     *
-     * @private
      */
-    handleInstancesChanged( instance: Instance, added: boolean ) {
+    _handleInstancesChanged( instance: Instance, added: boolean ) {
       const isVisible = instance.visible && instance.voicingVisible;
       if ( isVisible ) {
 
@@ -684,31 +630,22 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * Add or remove listeners on an Instance watching for changes to visible or voicingVisible that will modify
      * the voicingCanSpeakCount. See documentation for voicingCanSpeakCount for details about how this controls the
      * voicingCanSpeakProperty.
-     *
-     * @private
      */
-    addOrRemoveInstanceListeners( instance: Instance, added: boolean ) {
+    _addOrRemoveInstanceListeners( instance: Instance, added: boolean ) {
       assert && assert( instance.voicingVisibleEmitter, 'Instance must be initialized.' );
       assert && assert( instance.visibleEmitter, 'Instance must be initialized.' );
 
       if ( added ) {
-
         // @ts-ignore - Emitters in Instance need typing
-        instance.voicingVisibleEmitter!.addListener( this._boundInstanceVoicingVisibilityChangeListener );
-
-        // @ts-ignore - Emitters in Instance need typing
-        instance.visibleEmitter!.addListener( this._boundInstanceVisibilityChangeListener );
+        instance.canVoiceEmitter!.addListener( this._boundInstanceCanVoiceChangeListener );
       }
       else {
         // @ts-ignore - Emitters in Instance need typing
-        instance.voicingVisibleEmitter!.removeListener( this._boundInstanceVoicingVisibilityChangeListener );
-
-        // @ts-ignore - Emitters in Instance need typing
-        instance.visibleEmitter!.removeListener( this._boundInstanceVisibilityChangeListener );
+        instance.canVoiceEmitter!.removeListener( this._boundInstanceCanVoiceChangeListener );
       }
 
       // eagerly update the canSpeakProperty and counting variables in addition to adding change listeners
-      this.handleInstancesChanged( instance, added );
+      this._handleInstancesChanged( instance, added );
     }
   };
 

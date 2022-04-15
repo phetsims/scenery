@@ -140,6 +140,7 @@ class Instance {
     this.relativeVisibleEmitter = new TinyEmitter();
     this.selfVisibleEmitter = new TinyEmitter();
     this.voicingVisibleEmitter = new TinyEmitter();
+    this.canVoiceEmitter = new TinyEmitter();
 
     this.cleanInstance( display, trail );
 
@@ -1534,6 +1535,7 @@ class Instance {
     const wasSelfVisible = this.selfVisible;
     const nodeVoicingVisible = this.node.voicingVisibleProperty.value;
     const wasVoicingVisible = this.voicingVisible;
+    const couldVoice = wasVisible && wasVoicingVisible;
     this.visible = parentGloballyVisible && nodeVisible;
     this.voicingVisible = parentGloballyVoicingVisible && nodeVoicingVisible;
     this.relativeVisible = parentRelativelyVisible && nodeVisible;
@@ -1554,16 +1556,23 @@ class Instance {
 
     // trigger changes after we do the full visibility update
     if ( this.visible !== wasVisible ) {
-      this.visibleEmitter.emit( this, wasVisible, wasVoicingVisible );
+      this.visibleEmitter.emit();
     }
     if ( this.relativeVisible !== wasRelativeVisible ) {
-      this.relativeVisibleEmitter.emit( this );
+      this.relativeVisibleEmitter.emit();
     }
     if ( this.selfVisible !== wasSelfVisible ) {
-      this.selfVisibleEmitter.emit( this );
+      this.selfVisibleEmitter.emit();
     }
     if ( this.voicingVisible !== wasVoicingVisible ) {
-      this.voicingVisibleEmitter.emit( this, wasVisible, wasVoicingVisible );
+      this.voicingVisibleEmitter.emit();
+    }
+
+    // An Instance can voice when it is globally visible and voicingVisible. Notify when this state has changed
+    // based on these dependencies.
+    const canVoice = this.voicingVisible && this.visible;
+    if ( canVoice !== couldVoice ) {
+      this.canVoiceEmitter.emit( canVoice );
     }
   }
 
