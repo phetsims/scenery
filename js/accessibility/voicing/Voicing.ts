@@ -660,8 +660,8 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * Clean this._voicingUtterance, disposing if we own it or unregistering it if we do not.
      */
     _cleanVoicingUtterance() {
+      assert && assert( this._voicingUtterance, 'A voicingUtterance must be available to clean.' );
       if ( this._voicingUtterance instanceof VoicingUtterance ) {
-        assert && assert( this._voicingUtterance, 'A voicingUtterance must be available to clean.' );
         this._voicingUtterance.dispose();
       }
       else {

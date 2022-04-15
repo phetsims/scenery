@@ -27,7 +27,7 @@ import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePa
 import { Focus, Highlight, Node, PDOMInstance, ReadingBlockHighlight, ReadingBlockUtterance, scenery, SceneryEvent, Voicing, voicingManager, VoicingOptions } from '../../imports.js';
 import IInputListener from '../../input/IInputListener.js';
 import { ResolvedResponse, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
-import Utterance from '../../../../utterance-queue/js/Utterance.js';
+import Utterance, { UtteranceOptions } from '../../../../utterance-queue/js/Utterance.js';
 
 const READING_BLOCK_OPTION_KEYS = [
   'readingBlockTagName',
@@ -62,6 +62,15 @@ function assertReadingBlockUtterance( utterance: Utterance ): asserts utterance 
     throw new Error( 'utterance is not a ReadinBlockUtterance' );
   }
 }
+
+// An implementation class for ReadingBlock.ts, only used in this class so that we know if we own the Utterance and can
+// therefore dispose it.
+class OwnedReadingBlockUtterance extends ReadingBlockUtterance {
+  constructor( focus: Focus | null, providedOptions?: UtteranceOptions ) {
+    super( focus, providedOptions );
+  }
+}
+
 
 const DEFAULT_CONTENT_HINT_PATTERN = new ResponsePatternCollection( {
   nameHint: '{{NAME}}. {{HINT}}'
@@ -138,7 +147,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
 
       // All ReadingBlocks use a ReadingBlockUtterance with Focus and Trail data to this Node so that it can be
       // highlighted in the FocusOverlay when this Utterance is being announced.
-      this.voicingUtterance = new ReadingBlockUtterance( null );
+      this.voicingUtterance = new OwnedReadingBlockUtterance( null );
 
       ( this as unknown as Node ).mutate( readingBlockOptions );
     }
@@ -387,6 +396,18 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
             this.speakContent( content );
           }
         }
+      }
+    }
+
+    /**
+     * If we created and own the voicingUtterance we can fully dispose of it.
+     */
+    override _cleanVoicingUtterance() {
+      if ( this._voicingUtterance instanceof ReadingBlockUtterance ) {
+        this._voicingUtterance.dispose();
+      }
+      else {
+        super._cleanVoicingUtterance();
       }
     }
 
