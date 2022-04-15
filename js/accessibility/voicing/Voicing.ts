@@ -27,7 +27,7 @@
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import ResponsePacket, { ResolvedResponse, ResponsePacketOptions, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
-import Utterance, { IAlertable } from '../../../../utterance-queue/js/Utterance.js';
+import Utterance, { IAlertable, UtteranceOptions } from '../../../../utterance-queue/js/Utterance.js';
 import { Instance, InteractiveHighlighting, InteractiveHighlightingOptions, Node, scenery, SceneryListenerFunction, voicingUtteranceQueue } from '../../imports.js';
 import optionize from '../../../../phet-core/js/optionize.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
@@ -39,6 +39,14 @@ import TinyProperty from '../../../../axon/js/TinyProperty.js';
 function assertUtterance( utterance: Utterance | null ): asserts utterance is Utterance {
   if ( !( utterance instanceof Utterance ) ) {
     throw new Error( 'utterance is not an Utterance' );
+  }
+}
+
+// An implementation class for Voicing.ts, only used in this class so that we know if we own the Utterance and can
+// therefore dispose it.
+class VoicingUtterance extends Utterance {
+  constructor( providedOptions?: UtteranceOptions ) {
+    super( providedOptions );
   }
 }
 
@@ -174,7 +182,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
       this._voicingFocusListener = this.defaultFocusListener;
 
       // Sets the default voicingUtterance and makes this.canSpeakProperty a dependency on its ability to announce.
-      this.setVoicingUtterance( new Utterance() );
+      this.setVoicingUtterance( new VoicingUtterance() );
 
       // A counter that keeps track of visible and voicingVisible Instances of this Node. As long as this value is
       // greater than zero, this Node can speak. See onInstanceVisibilityChange and onInstanceVoicingVisibilityChange
@@ -489,7 +497,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
         const thisVoicingNode = this as unknown as VoicingNode;
 
         if ( this._voicingUtterance ) {
-          Voicing.unregisterUtteranceToVoicingNode( this._voicingUtterance, thisVoicingNode );
+          this._cleanVoicingUtterance();
         }
 
         Voicing.registerUtteranceToVoicingNode( utterance, thisVoicingNode );
@@ -563,7 +571,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
       thisVoicingNode.changedInstanceEmitter.removeListener( this._boundInstancesChangedListener );
 
       if ( this._voicingUtterance ) {
-        Voicing.unregisterUtteranceToVoicingNode( this._voicingUtterance, thisVoicingNode );
+        this._cleanVoicingUtterance();
         this._voicingUtterance = null;
       }
 
@@ -576,7 +584,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
       thisVoicingNode.changedInstanceEmitter.removeListener( this._boundInstancesChangedListener );
 
       if ( this._voicingUtterance ) {
-        Voicing.unregisterUtteranceToVoicingNode( this._voicingUtterance, thisVoicingNode );
+        this._cleanVoicingUtterance();
         this._voicingUtterance = null;
       }
 
@@ -646,6 +654,19 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
       // eagerly update the canSpeakProperty and counting variables in addition to adding change listeners
       this._handleInstancesChanged( instance, added );
+    }
+
+    /**
+     * Clean this._voicingUtterance, disposing if we own it or unregistering it if we do not.
+     */
+    _cleanVoicingUtterance() {
+      if ( this._voicingUtterance instanceof VoicingUtterance ) {
+        assert && assert( this._voicingUtterance, 'A voicingUtterance must be available to clean.' );
+        this._voicingUtterance.dispose();
+      }
+      else {
+        Voicing.unregisterUtteranceToVoicingNode( this._voicingUtterance!, this as unknown as VoicingNode );
+      }
     }
   };
 
