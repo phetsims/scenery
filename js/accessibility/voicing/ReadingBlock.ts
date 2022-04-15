@@ -56,7 +56,7 @@ type UnsupportedVoicingOptions =
 export type ReadingBlockOptions = SelfOptions &
   Omit<VoicingOptions, UnsupportedVoicingOptions>;
 
-// Use an asertion signature to narrow the type to ReadingBlockUtterance
+// Use an assertion signature to narrow the type to ReadingBlockUtterance
 function assertReadingBlockUtterance( utterance: Utterance ): asserts utterance is ReadingBlockUtterance {
   if ( !( utterance instanceof ReadingBlockUtterance ) ) {
     throw new Error( 'utterance is not a ReadinBlockUtterance' );

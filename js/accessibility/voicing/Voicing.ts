@@ -35,6 +35,13 @@ import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
 import responseCollector from '../../../../utterance-queue/js/responseCollector.js';
 import TinyProperty from '../../../../axon/js/TinyProperty.js';
 
+// Helps enforce that the utterance is defined.
+function assertUtterance( utterance: Utterance | null ): asserts utterance is Utterance {
+  if ( !( utterance instanceof Utterance ) ) {
+    throw new Error( 'utterance is not an Utterance' );
+  }
+}
+
 // options that are supported by Voicing.js. Added to mutator keys so that Voicing properties can be set with mutate.
 const VOICING_OPTION_KEYS = [
   'voicingNameResponse',
@@ -106,7 +113,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     _voicingResponsePacket!: ResponsePacket;
 
     // The utterance that all responses are spoken through.
-    _voicingUtterance!: Utterance;
+    _voicingUtterance: Utterance | null;
 
     // Called when this node is focused.
     _voicingFocusListener!: SceneryListenerFunction<FocusEvent> | null;
@@ -141,6 +148,14 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
 
       super( ...args );
 
+      // Bind the listeners on construction to be added to observables on initialize and removed on clean/dispose.
+      // Instances are updated asynchronously in updateDisplay. The bind creates a new function and we need the
+      // reference to persist through the completion of initialize and disposal.
+      this._boundInstanceVisibilityChangeListener = this.onInstanceVisibilityChange.bind( this );
+      this._boundInstanceVoicingVisibilityChangeListener = this.onInstanceVoicingVisibilityChange.bind( this );
+
+      this._voicingUtterance = null;
+
       // We only want to call this method, not any subtype implementation
       VoicingClass.prototype.initialize.call( this );
 
@@ -169,9 +184,6 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
       // greater than zero, this Node can speak. See onInstanceVisibilityChange and onInstanceVoicingVisibilityChange
       // for more details.
       this._voicingCanSpeakCount = 0;
-
-      this._boundInstanceVisibilityChangeListener = this.onInstanceVisibilityChange.bind( this );
-      this._boundInstanceVoicingVisibilityChangeListener = this.onInstanceVoicingVisibilityChange.bind( this );
 
       // Whenever an Instance of this Node is added or removed, add/remove listeners that will update the
       // canSpeakProperty.
@@ -495,6 +507,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * Gets the utterance through which voicing associated with this Node will be spoken.
      */
     getVoicingUtterance(): Utterance {
+      assertUtterance( this._voicingUtterance );
       return this._voicingUtterance;
     }
 
@@ -549,15 +562,27 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * Detaches references that ensure this components of this Trait are eligible for garbage collection.
      */
     override dispose() {
-      ( this as unknown as Node ).removeInputListener( this._speakContentOnFocusListener );
-      ( this as unknown as Node ).changedInstanceEmitter.removeListener( this._boundInstancesChangedListener );
+      const thisVoicingNode = ( this as unknown as VoicingNode );
+      thisVoicingNode.removeInputListener( this._speakContentOnFocusListener );
+      thisVoicingNode.changedInstanceEmitter.removeListener( this._boundInstancesChangedListener );
+
+      if ( this._voicingUtterance ) {
+        Voicing.unregisterUtteranceToVoicingNode( this._voicingUtterance, thisVoicingNode );
+        this._voicingUtterance = null;
+      }
 
       super.dispose();
     }
 
     clean() {
-      ( this as unknown as Node ).removeInputListener( this._speakContentOnFocusListener );
-      ( this as unknown as Node ).changedInstanceEmitter.removeListener( this._boundInstancesChangedListener );
+      const thisVoicingNode = ( this as unknown as VoicingNode );
+      thisVoicingNode.removeInputListener( this._speakContentOnFocusListener );
+      thisVoicingNode.changedInstanceEmitter.removeListener( this._boundInstancesChangedListener );
+
+      if ( this._voicingUtterance ) {
+        Voicing.unregisterUtteranceToVoicingNode( this._voicingUtterance, thisVoicingNode );
+        this._voicingUtterance = null;
+      }
 
       // @ts-ignore
       super.clean && super.clean();
