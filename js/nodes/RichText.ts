@@ -1806,7 +1806,7 @@ class RichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
    * Set up this state. First construction does not need to use super.initialize() because the constructor has done
    * that for us. But repeated initialization with Poolable will need to initialize super again.
    */
-  override initialize( innerContent: string, href: RichTextHref, initializeSuper: boolean = true ): this {
+  override initialize( innerContent: string, href: RichTextHref, initializeSuper = true ): this {
 
     if ( initializeSuper ) {
       super.initialize();

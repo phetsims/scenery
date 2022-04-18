@@ -16,7 +16,7 @@ export default class Invert extends Filter {
   /**
    * @param [amount] - The amount of the effect, from 0 (none) to 1 (full)
    */
-  constructor( amount: number = 1 ) {
+  constructor( amount = 1 ) {
     assert && assert( typeof amount === 'number', 'Invert amount should be a number' );
     assert && assert( isFinite( amount ), 'Invert amount should be finite' );
     assert && assert( amount >= 0, 'Invert amount should be non-negative' );

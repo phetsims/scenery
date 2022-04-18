@@ -16,7 +16,7 @@ export default class Sepia extends ColorMatrixFilter {
   /**
    * @param [amount] - The amount of the effect, from 0 (none) to 1 (full sepia)
    */
-  constructor( amount: number = 1 ) {
+  constructor( amount = 1 ) {
     assert && assert( typeof amount === 'number', 'Sepia amount should be a number' );
     assert && assert( isFinite( amount ), 'Sepia amount should be finite' );
     assert && assert( amount >= 0, 'Sepia amount should be non-negative' );

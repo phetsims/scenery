@@ -690,7 +690,7 @@ export default class Color {
    * @param color - colors with luminance < this value are dark, range [0,255], default 186
    * @param luminanceThreshold - colors with luminance < this value are dark, range [0,255], default 186
    */
-  static isDarkColor( color: Color | string, luminanceThreshold: number = 186 ): boolean {
+  static isDarkColor( color: Color | string, luminanceThreshold = 186 ): boolean {
     assert && assert( typeof luminanceThreshold === 'number' && luminanceThreshold >= 0 && luminanceThreshold <= 255,
       'invalid luminanceThreshold' );
     return ( Color.getLuminance( color ) < luminanceThreshold );

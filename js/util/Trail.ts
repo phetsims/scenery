@@ -182,7 +182,7 @@ export default class Trail {
   /**
    * TODO: consider renaming to subtrailToExcluding and subtrailToIncluding?
    */
-  subtrailTo( node: Node, excludeNode: boolean = false ): Trail {
+  subtrailTo( node: Node, excludeNode = false ): Trail {
     return this.slice( 0, _.indexOf( this.nodes, node ) + ( excludeNode ? 0 : 1 ) );
   }
 

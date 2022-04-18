@@ -1752,7 +1752,7 @@ export default class Input {
    * @param bubbles - If bubbles is false, the event is only dispatched to the leaf node of the trail.
    * @param fireOnInputDisabled - Whether to fire this event even if nodes have inputEnabled:false
    */
-  private dispatchEvent<DOMEvent extends Event>( trail: Trail, type: string, pointer: Pointer, event: DOMEvent | null, bubbles: boolean, fireOnInputDisabled: boolean = false ) {
+  private dispatchEvent<DOMEvent extends Event>( trail: Trail, type: string, pointer: Pointer, event: DOMEvent | null, bubbles: boolean, fireOnInputDisabled = false ) {
     sceneryLog && sceneryLog.EventDispatch && sceneryLog.EventDispatch(
       `${type} trail:${trail.toString()} pointer:${pointer.toString()} at ${pointer.point ? pointer.point.toString() : 'null'}` );
     sceneryLog && sceneryLog.EventDispatch && sceneryLog.push();
@@ -1832,7 +1832,7 @@ export default class Input {
    * @param bubbles - If bubbles is false, the event is only dispatched to the leaf node of the trail.
    * @param [fireOnInputDisabled]
    */
-  private dispatchToTargets<DOMEvent extends Event>( trail: Trail, type: string, pointer: Pointer, inputEvent: SceneryEvent<DOMEvent>, bubbles: boolean, fireOnInputDisabled: boolean = false ) {
+  private dispatchToTargets<DOMEvent extends Event>( trail: Trail, type: string, pointer: Pointer, inputEvent: SceneryEvent<DOMEvent>, bubbles: boolean, fireOnInputDisabled = false ) {
     assert && assert( inputEvent instanceof SceneryEvent );
 
     if ( inputEvent.aborted || inputEvent.handled ) {

@@ -695,7 +695,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
      * @param matrix - The relative transformation matrix of the node.
      * @param [additionalBias] - Can be provided to get per-call bias (we want some of this for Canvas output)
      */
-    getMipmapLevel( matrix: Matrix3, additionalBias: number = 0 ) {
+    getMipmapLevel( matrix: Matrix3, additionalBias = 0 ) {
       assert && assert( this._mipmap, 'Assumes mipmaps can be used' );
 
       // Handle high-dpi devices like retina with correct mipmap levels.
@@ -707,7 +707,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
     /**
      * Returns the desired mipmap level (0-indexed) that should be used for the particular scale
      */
-    getMipmapLevelFromScale( scale: number, additionalBias: number = 0 ): number {
+    getMipmapLevelFromScale( scale: number, additionalBias = 0 ): number {
       assert && assert( typeof scale === 'number' && scale > 0, 'scale should be a positive number' );
 
       // If we are shown larger than scale, ALWAYS choose the highest resolution

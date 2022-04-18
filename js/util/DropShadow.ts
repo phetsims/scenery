@@ -27,7 +27,7 @@ export default class DropShadow extends Filter {
    * @param color
    * @param [filterRegionPercentage]
    */
-  constructor( offset: Vector2, blurRadius: number, color: IColor, filterRegionPercentage: number = 15 ) {
+  constructor( offset: Vector2, blurRadius: number, color: IColor, filterRegionPercentage = 15 ) {
     assert && assert( offset instanceof Vector2, 'DropShadow offset should be a Vector2' );
     assert && assert( offset.isFinite(), 'DropShadow offset should be finite' );
     assert && assert( typeof blurRadius === 'number', 'DropShadow blurRadius should be a number' );

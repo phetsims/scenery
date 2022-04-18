@@ -21,7 +21,7 @@ export default class GaussianBlur extends Filter {
    * @param standardDeviation
    * @param [filterRegionPercentage]
    */
-  constructor( standardDeviation: number, filterRegionPercentage: number = 15 ) {
+  constructor( standardDeviation: number, filterRegionPercentage = 15 ) {
     assert && assert( typeof standardDeviation === 'number', 'GaussianBlur standardDeviation should be a number' );
     assert && assert( isFinite( standardDeviation ), 'GaussianBlur standardDeviation should be finite' );
     assert && assert( standardDeviation >= 0, 'GaussianBlur standardDeviation should be non-negative' );
