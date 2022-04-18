@@ -59,7 +59,7 @@ export type ReadingBlockOptions = SelfOptions &
 // Use an assertion signature to narrow the type to ReadingBlockUtterance
 function assertReadingBlockUtterance( utterance: Utterance ): asserts utterance is ReadingBlockUtterance {
   if ( !( utterance instanceof ReadingBlockUtterance ) ) {
-    throw new Error( 'utterance is not a ReadinBlockUtterance' );
+    assert && assert( false, 'utterance is not a ReadinBlockUtterance' );
   }
 }
 
