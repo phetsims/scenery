@@ -97,7 +97,7 @@ export default class LayoutBox extends Node {
 
   constructor( providedOptions?: LayoutBoxOptions ) {
     // NOTE: We don't need to give defaults for our self options, so that's {}'ed out
-    const options = optionize<LayoutBoxOptions, {}, NodeOptions>( {
+    const options = optionize<LayoutBoxOptions, {}, NodeOptions>()( {
 
       // Allow dynamic layout by default, see https://github.com/phetsims/joist/issues/608
       excludeInvisibleChildrenFromBounds: true,

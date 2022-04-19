@@ -44,7 +44,7 @@ export default class Sprites extends Node {
 
   constructor( providedOptions?: SpritesOptions ) {
 
-    const options = optionize<SpritesOptions, SpecifiedSelfOptions, NodeOptions>( {
+    const options = optionize<SpritesOptions, SpecifiedSelfOptions, NodeOptions>()( {
       sprites: [],
       spriteInstances: [],
       hitTestSprites: false,

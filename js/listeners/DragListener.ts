@@ -222,7 +222,7 @@ export default class DragListener extends PressListener implements IInputListene
 
 
   constructor( providedOptions?: DragListenerOptions<PressedDragListener> ) {
-    const options = optionize<DragListenerOptions<PressedDragListener>, SelfOptions<PressedDragListener>, PressListenerOptions<PressedDragListener>, 'tandem'>( {
+    const options = optionize<DragListenerOptions<PressedDragListener>, SelfOptions<PressedDragListener>, PressListenerOptions<PressedDragListener>>()( {
       positionProperty: null,
       start: null,
       end: null,
@@ -265,7 +265,8 @@ export default class DragListener extends PressListener implements IInputListene
       'Only one of mapPosition and dragBoundsProperty can be provided, as they handle mapping of the drag point'
     );
 
-    super( options as PressListenerOptions<PressListener> );
+    // @ts-ignore TODO: See https://github.com/phetsims/chipper/issues/1128
+    super( options );
 
     this._allowTouchSnag = options.allowTouchSnag;
     this._applyOffset = options.applyOffset;
@@ -833,7 +834,7 @@ export default class DragListener extends PressListener implements IInputListene
    */
   static createForwardingListener( down: ( event: PressListenerEvent ) => void, providedOptions?: CreateForwardingListenerOptions ): IInputListener {
 
-    const options = optionize<CreateForwardingListenerOptions, CreateForwardingListenerOptions>( {
+    const options = optionize<CreateForwardingListenerOptions, CreateForwardingListenerOptions>()( {
       allowTouchSnag: true // see https://github.com/phetsims/scenery/issues/999
     }, providedOptions );
 

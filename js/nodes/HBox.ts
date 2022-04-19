@@ -15,7 +15,7 @@ export default class HBox extends LayoutBox {
   constructor( providedOptions?: HBoxOptions ) {
     assert && assert( !providedOptions || !( providedOptions as LayoutBoxOptions ).orientation, 'HBox sets orientation' );
 
-    super( optionize<HBoxOptions, {}, LayoutBoxOptions>( {
+    super( optionize<HBoxOptions, {}, LayoutBoxOptions>()( {
       orientation: 'horizontal'
     }, providedOptions ) );
   }

@@ -212,7 +212,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     voicingSpeakFullResponse( providedOptions?: SpeakingOptions ): void {
 
       // options are passed along to _collectAndSpeakResponse, see that function for additional options
-      const options = optionize<SpeakingOptions, {}, SpeakingOptions>( {}, providedOptions );
+      const options = optionize<SpeakingOptions, {}, SpeakingOptions>()( {}, providedOptions );
 
       // Lazily formulate strings only as needed
       if ( !options.hasOwnProperty( 'nameResponse' ) ) {
@@ -243,7 +243,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     voicingSpeakResponse( providedOptions?: SpeakingOptions ): void {
 
       // options are passed along to _collectAndSpeakResponse, see that function for additional options
-      const options = optionize<SpeakingOptions, {}, SpeakingOptions>( {
+      const options = optionize<SpeakingOptions, {}, SpeakingOptions>()( {
         nameResponse: null,
         objectResponse: null,
         contextResponse: null,
@@ -260,7 +260,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     voicingSpeakNameResponse( providedOptions?: SpeakingOptions ): void {
 
       // options are passed along to _collectAndSpeakResponse, see that function for additional options
-      const options = optionize<SpeakingOptions, {}, SpeakingOptions>( {}, providedOptions );
+      const options = optionize<SpeakingOptions, {}, SpeakingOptions>()( {}, providedOptions );
 
       // Lazily formulate strings only as needed
       if ( !options.hasOwnProperty( 'nameResponse' ) ) {
@@ -277,7 +277,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     voicingSpeakObjectResponse( providedOptions?: SpeakingOptions ): void {
 
       // options are passed along to _collectAndSpeakResponse, see that function for additional options
-      const options = optionize<SpeakingOptions, {}, SpeakingOptions>( {}, providedOptions );
+      const options = optionize<SpeakingOptions, {}, SpeakingOptions>()( {}, providedOptions );
 
       // Lazily formulate strings only as needed
       if ( !options.hasOwnProperty( 'objectResponse' ) ) {
@@ -295,7 +295,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     voicingSpeakContextResponse( providedOptions?: SpeakingOptions ): void {
 
       // options are passed along to _collectAndSpeakResponse, see that function for additional options
-      const options = optionize<SpeakingOptions, {}, SpeakingOptions>( {}, providedOptions );
+      const options = optionize<SpeakingOptions, {}, SpeakingOptions>()( {}, providedOptions );
 
       // Lazily formulate strings only as needed
       if ( !options.hasOwnProperty( 'contextResponse' ) ) {
@@ -313,7 +313,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     voicingSpeakHintResponse( providedOptions?: SpeakingOptions ): void {
 
       // options are passed along to _collectAndSpeakResponse, see that function for additional options
-      const options = optionize<SpeakingOptions, {}, SpeakingOptions>( {}, providedOptions );
+      const options = optionize<SpeakingOptions, {}, SpeakingOptions>()( {}, providedOptions );
 
       // Lazily formulate strings only as needed
       if ( !options.hasOwnProperty( 'hintResponse' ) ) {
@@ -337,7 +337,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * @protected
      */
     collectResponse( providedOptions?: SpeakingOptions ): IAlertable {
-      const options = optionize<SpeakingOptions, {}, SpeakingOptions>( {
+      const options = optionize<SpeakingOptions, {}, SpeakingOptions>()( {
         ignoreProperties: this._voicingResponsePacket.ignoreProperties,
         responsePatternCollection: this._voicingResponsePacket.responsePatternCollection,
         utterance: this.voicingUtterance

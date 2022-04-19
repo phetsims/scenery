@@ -345,7 +345,7 @@ export default class Input {
     assert && assert( typeof batchDOMEvents === 'boolean' );
     assert && assert( typeof assumeFullWindow === 'boolean' );
 
-    const options = optionize<InputOptions, InputOptions>( {
+    const options = optionize<InputOptions, InputOptions>()( {
       tandem: Tandem.OPTIONAL
     }, providedOptions );
 

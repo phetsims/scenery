@@ -5307,7 +5307,7 @@ class Node extends ParallelDOM {
    * @param [options] - See below options. This is also passed directly to the created Image object.
    */
   rasterized( providedOptions?: RasterizedOptions ): Node {
-    const options = optionize<RasterizedOptions, RasterizedOptions>( {
+    const options = optionize<RasterizedOptions, RasterizedOptions>()( {
       // {number} - Controls the resolution of the image relative to the local view units. For example, if our Node is
       // ~100 view units across (in the local coordinate frame) but you want the image to actually have a ~200-pixel
       // resolution, provide resolution:2.

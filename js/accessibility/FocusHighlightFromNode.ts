@@ -50,7 +50,7 @@ class FocusHighlightFromNode extends FocusHighlightPath {
 
   constructor( node: Node | null, providedOptions?: FocusHighlightFromNodeOptions ) {
 
-    const options = optionize<FocusHighlightFromNodeOptions, SelfOptions, FocusHighlightPathOptions>( {
+    const options = optionize<FocusHighlightFromNodeOptions, SelfOptions, FocusHighlightPathOptions>()( {
       useLocalBounds: true,
       dilationCoefficient: null,
       useGroupDilation: false

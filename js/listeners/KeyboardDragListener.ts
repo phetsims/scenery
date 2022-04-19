@@ -181,7 +181,7 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
 
   constructor( providedOptions?: KeyboardDragListenerOptions ) {
 
-    const options = optionize<KeyboardDragListenerOptions, SelfOptions, EnabledComponentOptions>( {
+    const options = optionize<KeyboardDragListenerOptions, SelfOptions, EnabledComponentOptions>()( {
       dragVelocity: 600,
       shiftDragVelocity: 300,
       positionProperty: null,

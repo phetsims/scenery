@@ -92,7 +92,7 @@ class FocusHighlightPath extends Path {
    */
   constructor( shape: Shape | string | null, providedOptions?: FocusHighlightPathOptions ) {
 
-    const options = optionize<FocusHighlightPathOptions, SelfOptions, PathOptions>( {
+    const options = optionize<FocusHighlightPathOptions, SelfOptions, PathOptions>()( {
       outerStroke: OUTER_FOCUS_COLOR,
       innerStroke: INNER_FOCUS_COLOR,
       outerLineWidth: null,

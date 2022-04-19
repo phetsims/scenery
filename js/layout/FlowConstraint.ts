@@ -159,7 +159,7 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
   constructor( ancestorNode: Node, providedOptions?: FlowConstraintOptions ) {
     assert && assert( ancestorNode instanceof Node );
 
-    const options = optionize<FlowConstraintOptions, Pick<SelfOptions, 'preferredWidthProperty' | 'preferredHeightProperty' | 'minimumWidthProperty' | 'minimumHeightProperty'>>( {
+    const options = optionize<FlowConstraintOptions, Pick<SelfOptions, 'preferredWidthProperty' | 'preferredHeightProperty' | 'minimumWidthProperty' | 'minimumHeightProperty'>>()( {
       // As options, so we could hook into a Node's preferred/minimum sizes if desired
       preferredWidthProperty: new TinyProperty<number | null>( null ),
       preferredHeightProperty: new TinyProperty<number | null>( null ),

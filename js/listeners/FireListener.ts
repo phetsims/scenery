@@ -42,7 +42,7 @@ export default class FireListener extends PressListener implements IInputListene
   private _timer?: CallbackTimer;
 
   constructor( providedOptions?: FireListenerOptions<FireListener> ) {
-    const options = optionize<FireListenerOptions<FireListener>, SelfOptions, PressListenerOptions<FireListener>>( {
+    const options = optionize<FireListenerOptions<FireListener>, SelfOptions, PressListenerOptions<FireListener>>()( {
       fire: _.noop,
       fireOnDown: false,
       fireOnHold: false,
@@ -59,7 +59,8 @@ export default class FireListener extends PressListener implements IInputListene
     assert && assert( typeof options.fire === 'function', 'The fire callback should be a function' );
     assert && assert( typeof options.fireOnDown === 'boolean', 'fireOnDown should be a boolean' );
 
-    super( options as PressListenerOptions<PressListener> );
+    // @ts-ignore TODO see https://github.com/phetsims/chipper/issues/1128
+    super( options );
 
     this._fireOnDown = options.fireOnDown;
 

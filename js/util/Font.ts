@@ -112,7 +112,7 @@ export default class Font extends PhetioObject {
     assert && assert( options === undefined || ( typeof options === 'object' && Object.getPrototypeOf( options ) === Object.prototype ),
       'options, if provided, should be a raw object' );
 
-    const definedOptions = optionize<FontOptions, SelfOptions, PhetioObjectOptions>( {
+    const definedOptions = optionize<FontOptions, SelfOptions, PhetioObjectOptions>()( {
       // {string} - 'normal', 'italic' or 'oblique'
       style: 'normal',
 

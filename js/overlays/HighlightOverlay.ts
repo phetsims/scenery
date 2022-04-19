@@ -158,7 +158,7 @@ export default class HighlightOverlay implements IOverlay {
 
   constructor( display: Display, focusRootNode: Node, providedOptions?: HighlightOverlayOptions ) {
 
-    const options = optionize<HighlightOverlayOptions>( {
+    const options = optionize<HighlightOverlayOptions>()( {
 
       // Controls whether highlights related to DOM focus are visible
       pdomFocusHighlightsVisibleProperty: new BooleanProperty( true ),

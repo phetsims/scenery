@@ -15,7 +15,7 @@ export default class VBox extends LayoutBox {
   constructor( providedOptions?: VBoxOptions ) {
     assert && assert( !providedOptions || !( providedOptions as LayoutBoxOptions ).orientation, 'VBox sets orientation' );
 
-    super( optionize<VBoxOptions, {}, LayoutBoxOptions>( {
+    super( optionize<VBoxOptions, {}, LayoutBoxOptions>()( {
       orientation: 'vertical'
     }, providedOptions ) );
   }

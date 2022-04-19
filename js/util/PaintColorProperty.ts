@@ -62,7 +62,7 @@ export default class PaintColorProperty extends Property<Color> {
   constructor( paint: IPaint, providedOptions?: PaintColorPropertyOptions ) {
     const initialColor = PaintDef.toColor( paint );
 
-    const options = optionize<PaintColorPropertyOptions, SelfOptions, PropertyOptions<Color>>( {
+    const options = optionize<PaintColorPropertyOptions, SelfOptions, PropertyOptions<Color>>()( {
       luminanceFactor: 0,
 
       // Property options

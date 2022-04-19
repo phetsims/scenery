@@ -24,7 +24,7 @@ import NumberProperty from '../../../axon/js/NumberProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import arrayRemove from '../../../phet-core/js/arrayRemove.js';
 import merge from '../../../phet-core/js/merge.js';
-import optionize from '../../../phet-core/js/optionize.js';
+import { optionize3 } from '../../../phet-core/js/optionize.js';
 import { scenery, Node, AlignBox } from '../imports.js';
 import { AlignBoxOptions } from './AlignBox.js';
 
@@ -68,7 +68,7 @@ export default class AlignGroup {
     assert && assert( providedOptions === undefined || Object.getPrototypeOf( providedOptions ) === Object.prototype,
       'Extra prototype on options object is a code smell' );
 
-    const options = optionize<AlignGroupOptions, AlignGroupOptions>( {}, DEFAULT_OPTIONS, providedOptions );
+    const options = optionize3<AlignGroupOptions, AlignGroupOptions>()( {}, DEFAULT_OPTIONS, providedOptions );
 
     assert && assert( typeof options.matchHorizontal === 'boolean' );
     assert && assert( typeof options.matchVertical === 'boolean' );

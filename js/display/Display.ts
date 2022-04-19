@@ -303,7 +303,7 @@ export default class Display {
 
     //OHTWO TODO: hybrid batching (option to batch until an event like 'up' that might be needed for security issues)
 
-    const options = optionize<DisplayOptions, Omit<DisplayOptions, 'container'>>( {
+    const options = optionize<DisplayOptions, Omit<DisplayOptions, 'container'>>()( {
       // {number} - Initial display width
       width: ( providedOptions && providedOptions.container && providedOptions.container.clientWidth ) || 640,
 
