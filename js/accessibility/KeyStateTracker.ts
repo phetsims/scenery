@@ -44,22 +44,22 @@ class KeyStateTracker {
 
   // Contains info about which keys are currently pressed for how long. JavaScript doesn't handle multiple key presses,
   // with events so we have to update this object ourselves.
-  private keyState: KeyState;
+  private keyState: KeyState = {};
 
   // Whether this KeyStateTracker is attached to the document and listening for events.
-  private attachedToDocument: boolean;
+  private attachedToDocument = false;
 
   // Listeners potentially attached to the document to update the state of this KeyStateTracker, see attachToWindow()
-  private documentKeyupListener: null | ( ( event: KeyboardEvent ) => void );
-  private documentKeydownListener: null | ( ( event: KeyboardEvent ) => void );
+  private documentKeyupListener: null | ( ( event: KeyboardEvent ) => void ) = null;
+  private documentKeydownListener: null | ( ( event: KeyboardEvent ) => void ) = null;
 
   // If the KeyStateTracker is enabled. If disabled, keyState is cleared and listeners noop.
   private _enabled = true;
 
   // Emits events when keyup/keydown updates are received. These will emit after any updates to the
   // keyState so that keyState is correct in time for listeners. Note the valueType is a native KeyboardEvent event.
-  public readonly keydownEmitter: Emitter<[ KeyboardEvent ]>;
-  public readonly keyupEmitter: Emitter<[ KeyboardEvent ]>;
+  public readonly keydownEmitter: Emitter<[ KeyboardEvent ]> = new Emitter( { parameters: [ { valueType: KeyboardEvent } ] } );
+  public readonly keyupEmitter: Emitter<[ KeyboardEvent ]> = new Emitter( { parameters: [ { valueType: KeyboardEvent } ] } );
 
   // Action which updates the KeyStateTracker, when it is time to do so - the update is wrapped by an Action so that
   // the KeyStateTracker state is captured for PhET-iO.
@@ -79,21 +79,6 @@ class KeyStateTracker {
       tandem: Tandem.OPTIONAL
     }, providedOptions );
 
-    this.keyState = {};
-    this.attachedToDocument = false;
-    this.documentKeyupListener = null;
-    this.documentKeydownListener = null;
-
-    // if the key state tracker is enabled. If disabled, the keyState will be cleared, and listeners will noop.
-    this._enabled = true;
-
-    // Emits events when keyup/keydown updates are received. These will emit after any updates to the
-    // keyState so that keyState is up to date in time for listeners.
-    this.keydownEmitter = new Emitter( { parameters: [ { valueType: KeyboardEvent } ] } );
-    this.keyupEmitter = new Emitter( { parameters: [ { valueType: KeyboardEvent } ] } );
-
-    // Action which updates the KeyStateTracker, when it is time to do so - the update
-    // is wrapped by an Action so that the KeyStateTracker state is captured for PhET-iO
     this.keydownUpdateAction = new PhetioAction( domEvent => {
 
       // Not all keys have a code for the browser to use, we need to be graceful and do nothing if there isn't one.
@@ -138,8 +123,6 @@ class KeyStateTracker {
       phetioDocumentation: 'Action that executes whenever a keydown occurs from the input listeners this keyStateTracker adds (most likely to the document).'
     } );
 
-    // Action which updates the state of the KeyStateTracker on key release. This is wrapped in an Action so that state
-    // is captured for PhET-iO
     this.keyupUpdateAction = new PhetioAction( domEvent => {
 
       // Not all keys have a code for the browser to use, we need to be graceful and do nothing if there isn't one.
