@@ -591,29 +591,29 @@ export default class HighlightOverlay implements IOverlay {
   private updateHighlightColors(): void {
 
     if ( this.mode === 'shape' ) {
-      if ( this.shapeFocusHighlightPath.innerHighlightColor !== HighlightOverlay.innerHighlightColor ) {
-        this.shapeFocusHighlightPath.setInnerHighlightColor( HighlightOverlay.innerHighlightColor );
+      if ( this.shapeFocusHighlightPath.innerHighlightColor !== HighlightOverlay.getInnerHighlightColor() ) {
+        this.shapeFocusHighlightPath.setInnerHighlightColor( HighlightOverlay.getInnerHighlightColor() );
       }
-      if ( this.shapeFocusHighlightPath.outerHighlightColor !== HighlightOverlay.outerHighlightColor ) {
-        this.shapeFocusHighlightPath.setOuterHighlightColor( HighlightOverlay.outerHighlightColor );
+      if ( this.shapeFocusHighlightPath.outerHighlightColor !== HighlightOverlay.getOuterHighlightColor() ) {
+        this.shapeFocusHighlightPath.setOuterHighlightColor( HighlightOverlay.getOuterHighlightColor() );
       }
     }
     else if ( this.mode === 'bounds' ) {
-      if ( this.boundsFocusHighlightPath.innerHighlightColor !== HighlightOverlay.innerHighlightColor ) {
-        this.boundsFocusHighlightPath.setInnerHighlightColor( HighlightOverlay.innerHighlightColor );
+      if ( this.boundsFocusHighlightPath.innerHighlightColor !== HighlightOverlay.getInnerHighlightColor() ) {
+        this.boundsFocusHighlightPath.setInnerHighlightColor( HighlightOverlay.getInnerHighlightColor() );
       }
-      if ( this.boundsFocusHighlightPath.outerHighlightColor !== HighlightOverlay.outerHighlightColor ) {
-        this.boundsFocusHighlightPath.setOuterHighlightColor( HighlightOverlay.outerHighlightColor );
+      if ( this.boundsFocusHighlightPath.outerHighlightColor !== HighlightOverlay.getOuterHighlightColor() ) {
+        this.boundsFocusHighlightPath.setOuterHighlightColor( HighlightOverlay.getOuterHighlightColor() );
       }
     }
 
     // if a group focus highlight is active, update strokes
     if ( this.groupMode ) {
-      if ( this.groupFocusHighlightPath.innerHighlightColor !== HighlightOverlay.innerGroupHighlightColor ) {
-        this.groupFocusHighlightPath.setInnerHighlightColor( HighlightOverlay.innerGroupHighlightColor );
+      if ( this.groupFocusHighlightPath.innerHighlightColor !== HighlightOverlay.getInnerGroupHighlightColor() ) {
+        this.groupFocusHighlightPath.setInnerHighlightColor( HighlightOverlay.getInnerGroupHighlightColor() );
       }
-      if ( this.groupFocusHighlightPath.outerHighlightColor !== HighlightOverlay.outerGroupHighlightColor ) {
-        this.groupFocusHighlightPath.setOuterHighlightColor( HighlightOverlay.outerGroupHighlightColor );
+      if ( this.groupFocusHighlightPath.outerHighlightColor !== HighlightOverlay.getOuterGroupHighlightColor() ) {
+        this.groupFocusHighlightPath.setOuterHighlightColor( HighlightOverlay.getOuterGroupHighlightColor() );
       }
     }
   }
@@ -866,16 +866,12 @@ export default class HighlightOverlay implements IOverlay {
     innerHighlightColor = color;
   }
 
-  static set innerHighlightColor( color ) { this.setInnerHighlightColor( color ); }
-
   /**
    * Get the inner color of all focus highlights.
    */
   static getInnerHighlightColor(): IPaint {
     return innerHighlightColor;
   }
-
-  static get innerHighlightColor() { return this.getInnerHighlightColor(); }
 
   /**
    * Set the outer color of all focus highlights.
@@ -884,16 +880,12 @@ export default class HighlightOverlay implements IOverlay {
     outerHighlightColor = color;
   }
 
-  static set outerHighlightColor( color ) { this.setOuterHilightColor( color ); }
-
   /**
    * Get the outer color of all focus highlights.
    */
   static getOuterHighlightColor(): IPaint {
     return outerHighlightColor;
   }
-
-  static get outerHighlightColor() { return this.getOuterHighlightColor(); }
 
   /**
    * Set the inner color of all group focus highlights.
@@ -902,16 +894,12 @@ export default class HighlightOverlay implements IOverlay {
     innerGroupHighlightColor = color;
   }
 
-  static set innerGroupHighlightColor( color ) { this.setInnerGroupHighlightColor( color ); }
-
   /**
    * Get the inner color of all group focus highlights
    */
   static getInnerGroupHighlightColor(): IPaint {
     return innerGroupHighlightColor;
   }
-
-  static get innerGroupHighlightColor() { return this.getInnerGroupHighlightColor(); }
 
   /**
    * Set the outer color of all group focus highlight.
@@ -920,16 +908,12 @@ export default class HighlightOverlay implements IOverlay {
     outerGroupHighlightColor = color;
   }
 
-  static set outerGroupHighlightColor( color ) { this.setOuterGroupHighlightColor( color ); }
-
   /**
    * Get the outer color of all group focus highlights.
    */
   static getOuterGroupHighlightColor(): IPaint {
     return outerGroupHighlightColor;
   }
-
-  static get outerGroupHighlightColor() { return this.getOuterGroupHighlightColor(); }
 }
 
 scenery.register( 'HighlightOverlay', HighlightOverlay );
