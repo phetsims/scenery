@@ -389,7 +389,7 @@ export default class HighlightOverlay implements IOverlay {
    * Activate a focus highlight, activating the highlight and adding a listener that will update the highlight whenever
    * the Node's focusHighlight changes
    */
-  private activateFocusHighlight( trail: Trail, node: Node ) {
+  private activateFocusHighlight( trail: Trail, node: Node ): void {
     this.activateHighlight( trail, node, node.focusHighlight, node.focusHighlightLayerable, this.pdomFocusHighlightsVisibleProperty );
 
     // handle any changes to the focus highlight while the node has focus
@@ -468,7 +468,7 @@ export default class HighlightOverlay implements IOverlay {
   /**
    * Deactivate the speaking highlight by making it invisible.
    */
-  private deactivateReadingBlockHighlight() {
+  private deactivateReadingBlockHighlight(): void {
     this.readingBlockHighlightPath.visible = false;
 
     if ( this.addedReadingBlockHighlight instanceof Node ) {
@@ -756,7 +756,7 @@ export default class HighlightOverlay implements IOverlay {
    * Called whenever the lockedPointerFocusProperty changes. If the lockedPointerFocusProperty changes we probably
    * have to update the highlight because interaction with a Node that uses InteractiveHighlighting just ended.
    */
-  private onLockedPointerFocusChange( focus: Focus | null ) {
+  private onLockedPointerFocusChange( focus: Focus | null ): void {
     this.updateInteractiveHighlight( focus || this.display.focusManager.pointerFocusProperty.value );
   }
 
@@ -765,7 +765,7 @@ export default class HighlightOverlay implements IOverlay {
    * The Reading Block waits to activate until the voicingManager starts speaking because there is often a stop speaking
    * event that comes right after the speaker starts to interrupt the previous utterance.
    */
-  private onReadingBlockFocusChange( focus: Focus | null ) {
+  private onReadingBlockFocusChange( focus: Focus | null ): void {
     if ( this.hasReadingBlockHighlight() ) {
       this.deactivateReadingBlockHighlight();
     }
@@ -862,7 +862,7 @@ export default class HighlightOverlay implements IOverlay {
   /**
    * Set the inner color of all focus highlights.
    */
-  static setInnerHighlightColor( color: IPaint ) {
+  static setInnerHighlightColor( color: IPaint ): void {
     innerHighlightColor = color;
   }
 
@@ -916,7 +916,7 @@ export default class HighlightOverlay implements IOverlay {
   /**
    * Set the outer color of all group focus highlight.
    */
-  static setOuterGroupHighlightColor( color: IPaint ) {
+  static setOuterGroupHighlightColor( color: IPaint ): void {
     outerGroupHighlightColor = color;
   }
 
