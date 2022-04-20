@@ -654,7 +654,7 @@ export default class HighlightOverlay implements IOverlay {
     else if ( this.mode === 'node' && this.activeHighlight instanceof FocusHighlightPath && this.activeHighlight.updateLineWidth ) {
 
       // Update the transform based on the transform of the node that the focusHighlight is highlighting.
-      assert && assert( 'Need an active Node to update line width' );
+      assert && assert( this.node, 'Need an active Node to update line width' );
       this.activeHighlight.updateLineWidth( this.node! );
     }
   }
@@ -678,7 +678,7 @@ export default class HighlightOverlay implements IOverlay {
    * Called when bounds change on our node when we are in "Bounds" mode
    */
   private onBoundsChange(): void {
-    assert && assert( 'Must have an active node when bounds are changing' );
+    assert && assert( this.node, 'Must have an active node when bounds are changing' );
     this.boundsFocusHighlightPath.setShapeFromNode( this.node! );
   }
 

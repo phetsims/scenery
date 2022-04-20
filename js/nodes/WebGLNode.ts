@@ -149,7 +149,7 @@ export default abstract class WebGLNode extends Node {
    */
   override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
     // TODO: see https://github.com/phetsims/scenery/issues/308
-    assert && assert( 'unimplemented: canvasPaintSelf in WebGLNode' );
+    assert && assert( false, 'unimplemented: canvasPaintSelf in WebGLNode' );
   }
 
   /**

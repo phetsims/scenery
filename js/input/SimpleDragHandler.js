@@ -340,7 +340,7 @@ class SimpleDragHandler extends PhetioObject {
   }
 
   set dragging( d ) {
-    assert && assert( 'illegal call to set dragging on SimpleDragHandler' );
+    assert && assert( false, 'illegal call to set dragging on SimpleDragHandler' );
   }
 
   /**
