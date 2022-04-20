@@ -111,14 +111,13 @@ export default class HighlightOverlay implements IOverlay {
   // the highlight can match the ReadingBlock.
   private readingBlockTransformTracker: null | TransformTracker;
 
-  // Controls whether highlights related to DOM focus are visible.
+  // See HighlightOverlayOptions for documentation.
   private readonly pdomFocusHighlightsVisibleProperty: IProperty<boolean>;
 
-  // Controls whether highlights related to Interactive Highlights are visible.
+  // See HighlightOverlayOptions for documentation.
   private readonly interactiveHighlightsVisibleProperty: IProperty<boolean>;
 
-  // Controls whether highlights associated with ReadingBlocks (of the Voicing feature set) are shown when
-  // pointerFocusProperty changes
+  // See HighlightOverlayOptions for documentation.
   private readonly readingBlockHighlightsVisibleProperty: IProperty<boolean>;
 
   // Display that manages all highlights
