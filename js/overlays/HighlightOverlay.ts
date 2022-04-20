@@ -25,6 +25,9 @@ let innerHighlightColor: IPaint = FocusHighlightPath.INNER_FOCUS_COLOR;
 let innerGroupHighlightColor: IPaint = FocusHighlightPath.INNER_LIGHT_GROUP_FOCUS_COLOR;
 let outerGroupHighlightColor: IPaint = FocusHighlightPath.OUTER_LIGHT_GROUP_FOCUS_COLOR;
 
+// Type for the "mode" of a particular highlight, signifying behavior for handling the active highlight.
+type HighlightMode = null | 'bounds' | 'node' | 'shape' | 'invisible';
+
 // Highlights displayed by the overlay support these types. Highlight behavior works like the following:
 // - If value is null, the highlight will use default stylings of FocusHighlightPath and surround the Node with focus.
 // - If value is a Shape the Shape is set to a FocusHighlightPath with default stylings in the global coordinate frame.
@@ -63,11 +66,11 @@ export default class HighlightOverlay implements IOverlay {
 
   // Signifies method of representing focus, 'bounds'|'node'|'shape'|'invisible', modified
   // when focus changes
-  private mode: null | string = null;
+  private mode: HighlightMode = null;
 
   // Signifies method off representing group focus, 'bounds'|'node', modified when
   // focus changes
-  private groupMode: null | string = null;
+  private groupMode: HighlightMode = null;
 
   // The group highlight node around an ancestor of this.node when focus changes, see ParallelDOM.setGroupFocusHighlight
   // for more information on the group focus highlight, modified when focus changes
