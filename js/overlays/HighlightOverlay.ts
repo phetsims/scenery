@@ -47,10 +47,10 @@ export type HighlightOverlayOptions = {
 
 export default class HighlightOverlay implements IOverlay {
 
-  private display: Display;
+  private readonly display: Display;
 
   // The root Node of our child display
-  private focusRootNode: Node;
+  private readonly focusRootNode: Node;
 
   // Trail to the node with focus, modified when focus changes
   private trail: Trail | null;
@@ -89,7 +89,7 @@ export default class HighlightOverlay implements IOverlay {
   private transformDirty: boolean;
 
   // The main node for the highlight. It will be transformed.
-  private highlightNode: Node;
+  private readonly highlightNode: Node;
 
   // The main Node for the ReadingBlock highlight, while ReadingBlock content is being spoken by speech synthesis.
   private readonly readingBlockHighlightNode = new Node();
@@ -122,10 +122,10 @@ export default class HighlightOverlay implements IOverlay {
   private readonly readingBlockHighlightsVisibleProperty: IProperty<boolean>;
 
   // Display that manages all highlights
-  private focusDisplay: Display;
+  private readonly focusDisplay: Display;
 
   // HTML element of the display
-  domElement: HTMLElement;
+  public readonly domElement: HTMLElement;
 
   // Used as the focus highlight when the overlay is passed a shape
   private readonly shapeFocusHighlightPath: FocusHighlightPath;
