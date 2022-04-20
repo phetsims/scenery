@@ -53,63 +53,63 @@ export default class HighlightOverlay implements IOverlay {
   private readonly focusRootNode: Node;
 
   // Trail to the node with focus, modified when focus changes
-  private trail: Trail | null;
+  private trail: Trail | null = null;
 
   // Node with focus, modified when focus changes
-  private node: Node | null;
+  private node: Node | null = null;
 
   // A references to the highlight from the Node that is highlighted.
-  private activeHighlight: Highlight;
+  private activeHighlight: Highlight = null;
 
   // Signifies method of representing focus, 'bounds'|'node'|'shape'|'invisible', modified
   // when focus changes
-  private mode: null | string;
+  private mode: null | string = null;
 
   // Signifies method off representing group focus, 'bounds'|'node', modified when
   // focus changes
-  private groupMode: null | string;
+  private groupMode: null | string = null;
 
   // The group highlight node around an ancestor of this.node when focus changes, see ParallelDOM.setGroupFocusHighlight
   // for more information on the group focus highlight, modified when focus changes
-  private groupHighlightNode: Node | null;
+  private groupHighlightNode: Node | null = null;
 
   // Tracks transformations to the focused node and the node with a group focus highlight, modified when focus changes
-  private transformTracker: TransformTracker | null;
-  private groupTransformTracker: TransformTracker | null;
+  private transformTracker: TransformTracker | null = null;
+  private groupTransformTracker: TransformTracker | null = null;
 
   // If a node is using a custom focus highlight, a reference is kept so that it can be removed from the overlay when
   // node focus changes.
-  private nodeModeHighlight: Node | null;
+  private nodeModeHighlight: Node | null = null;
 
   // If true, the active highlight is in "node" mode and is layered in the scene graph. This field lets us deactivate
   // the highlight appropriately when it is in that state.
-  private nodeModeHighlightLayered: boolean;
+  private nodeModeHighlightLayered = false;
 
   // If true, the next update() will trigger an update to the highlight's transform
-  private transformDirty: boolean;
+  private transformDirty = true;
 
   // The main node for the highlight. It will be transformed.
-  private readonly highlightNode: Node;
+  private readonly highlightNode = new Node();
 
   // The main Node for the ReadingBlock highlight, while ReadingBlock content is being spoken by speech synthesis.
   private readonly readingBlockHighlightNode = new Node();
 
   // A reference to the Node that is added when a custom node is specified as the active highlight for the
   // ReadingBlock. Stored so that we can remove it when deactivating reading block highlights.
-  private addedReadingBlockHighlight: Highlight;
+  private addedReadingBlockHighlight: Highlight = null;
 
   // A reference to the Node that is a ReadingBlock which the Voicing framework is currently speaking about.
-  private activeReadingBlockNode: null | ReadingBlockNode;
+  private activeReadingBlockNode: null | ReadingBlockNode = null;
 
   // Trail to the ReadingBlock Node with an active highlight around it while the voicingManager is speaking its content.
-  private readingBlockTrail: null | Trail;
+  private readingBlockTrail: null | Trail = null;
 
   // Whether or not the transform applied to the readinBlockHighlightNode is out of date.
-  private readingBlockTransformDirty: boolean;
+  private readingBlockTransformDirty = true;
 
   // The TransformTracker used to observe changes to the transform of the Node with Reading Block focus, so that
   // the highlight can match the ReadingBlock.
-  private readingBlockTransformTracker: null | TransformTracker;
+  private readingBlockTransformTracker: null | TransformTracker = null;
 
   // See HighlightOverlayOptions for documentation.
   private readonly pdomFocusHighlightsVisibleProperty: IProperty<boolean>;
@@ -172,29 +172,10 @@ export default class HighlightOverlay implements IOverlay {
 
     this.display = display;
     this.focusRootNode = focusRootNode;
-    this.trail = null;
-    this.node = null;
-    this.activeHighlight = null;
-    this.mode = null;
-    this.groupMode = null;
-    this.groupHighlightNode = null;
-    this.transformTracker = null;
-    this.groupTransformTracker = null;
-    this.nodeModeHighlight = null;
-    this.nodeModeHighlightLayered = false;
-    this.transformDirty = true;
 
-    this.highlightNode = new Node();
     this.focusRootNode.addChild( this.highlightNode );
-
-    this.readingBlockHighlightNode = new Node();
     this.focusRootNode.addChild( this.readingBlockHighlightNode );
 
-    this.addedReadingBlockHighlight = null;
-    this.activeReadingBlockNode = null;
-    this.readingBlockTrail = null;
-    this.readingBlockTransformDirty = true;
-    this.readingBlockTransformTracker = null;
     this.pdomFocusHighlightsVisibleProperty = options.pdomFocusHighlightsVisibleProperty;
     this.interactiveHighlightsVisibleProperty = options.interactiveHighlightsVisibleProperty;
     this.readingBlockHighlightsVisibleProperty = options.readingBlockHighlightsVisibleProperty;
