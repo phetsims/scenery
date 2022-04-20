@@ -882,6 +882,7 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
     this.resetHotkeyState();
     this.resetPressAndHold();
 
+    // If we enter this block, there's a problem. If assertions are enabled, fail. Otherwise, try to clean up.
     if ( this._pointer ) {
       assert && assert( false, 'A reference to the Pointer means it should have the pointerListener' );
       this._pointer!.removeInputListener( this._pointerListener );
