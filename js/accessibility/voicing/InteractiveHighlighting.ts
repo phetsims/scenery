@@ -202,8 +202,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
       const trailIds = Object.keys( this.displays );
       for ( let i = 0; i < trailIds.length; i++ ) {
         const pointerFocus = this.displays[ trailIds[ i ] ].focusManager.pointerFocusProperty.value;
-
-        if ( pointerFocus && pointerFocus.trail.lastNode() === this ) {
+        if ( pointerFocus && pointerFocus.trail.lastNode() === this as unknown as Node ) {
           activated = true;
           break;
         }

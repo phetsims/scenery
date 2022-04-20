@@ -313,8 +313,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
       for ( let i = 0; i < trailIds.length; i++ ) {
 
         const pointerFocus = this.displays[ trailIds[ i ] ].focusManager.readingBlockFocusProperty.value;
-
-        if ( pointerFocus && pointerFocus.trail.lastNode() === this ) {
+        if ( pointerFocus && pointerFocus.trail.lastNode() === this as unknown as Node ) {
           activated = true;
           break;
         }
