@@ -875,7 +875,7 @@ export default class HighlightOverlay implements IOverlay {
     return innerHighlightColor;
   }
 
-  static get innerHighlightColor() { return this.getInnerHighlightColor(); } // eslint-disable-line bad-sim-text
+  static get innerHighlightColor() { return this.getInnerHighlightColor(); }
 
   /**
    * Set the outer color of all focus highlights.
@@ -893,7 +893,7 @@ export default class HighlightOverlay implements IOverlay {
     return outerHighlightColor;
   }
 
-  static get outerHighlightColor() { return this.getOuterHighlightColor(); } // eslint-disable-line bad-sim-text
+  static get outerHighlightColor() { return this.getOuterHighlightColor(); }
 
   /**
    * Set the inner color of all group focus highlights.
@@ -911,7 +911,7 @@ export default class HighlightOverlay implements IOverlay {
     return innerGroupHighlightColor;
   }
 
-  static get innerGroupHighlightColor() { return this.getInnerGroupHighlightColor(); } // eslint-disable-line bad-sim-text
+  static get innerGroupHighlightColor() { return this.getInnerGroupHighlightColor(); }
 
   /**
    * Set the outer color of all group focus highlight.
@@ -929,7 +929,7 @@ export default class HighlightOverlay implements IOverlay {
     return outerGroupHighlightColor;
   }
 
-  static get outerGroupHighlightColor() { return this.getOuterGroupHighlightColor(); } // eslint-disable-line bad-sim-text
+  static get outerGroupHighlightColor() { return this.getOuterGroupHighlightColor(); }
 }
 
 scenery.register( 'HighlightOverlay', HighlightOverlay );
