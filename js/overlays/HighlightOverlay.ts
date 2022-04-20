@@ -539,6 +539,7 @@ export default class HighlightOverlay implements IOverlay {
     this.activeHighlight = null;
     this.transformTracker!.removeListener( this.transformListener );
     this.transformTracker!.dispose();
+    this.transformTracker = null;
   }
 
   /**
@@ -638,6 +639,7 @@ export default class HighlightOverlay implements IOverlay {
       assert && assert( this.groupTransformTracker, 'Need a groupTransformTracker to dispose' );
       this.groupTransformTracker!.removeListener( this.transformListener );
       this.groupTransformTracker!.dispose();
+      this.groupTransformTracker = null;
     }
   }
 
