@@ -74,8 +74,6 @@ class KeyStateTracker {
   constructor( providedOptions?: KeyStateTrackerOptions ) {
 
     const options = optionize<KeyStateTrackerOptions>()( {
-
-      // {Tandem}
       tandem: Tandem.OPTIONAL
     }, providedOptions );
 
