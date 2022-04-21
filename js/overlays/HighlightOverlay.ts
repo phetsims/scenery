@@ -37,13 +37,13 @@ export type Highlight = Node | Shape | null | 'invisible';
 
 export type HighlightOverlayOptions = {
 
-  // {BooleanProperty} - controls whether highlights related to DOM focus are visible
+  // Controls whether highlights related to DOM focus are visible
   pdomFocusHighlightsVisibleProperty?: IProperty<boolean>;
 
-  // {BooleanProperty} - controls whether highlights related to Interactive Highlights are visible
+  // Controls whether highlights related to Interactive Highlights are visible
   interactiveHighlightsVisibleProperty?: IProperty<boolean>;
 
-  // {BooleanProperty - controls whether highlights associated with ReadingBlocks (of the Voicing feature set)
+  // Controls whether highlights associated with ReadingBlocks (of the Voicing feature set)
   // are shown when pointerFocusProperty changes
   readingBlockHighlightsVisibleProperty?: IProperty<boolean>;
 }
