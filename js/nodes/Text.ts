@@ -141,7 +141,6 @@ export default class Text extends Paintable( Node ) {
 
   /**
    * Returns the text displayed by our node.
-   * @public
    *
    * NOTE: If a number was provided to setText(), it will not be returned as a number here.
    *
@@ -806,7 +805,6 @@ export default class Text extends Paintable( Node ) {
 /**
  * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
  * order they will be evaluated in.
- * @public
  *
  * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
  *       cases that may apply.
@@ -817,7 +815,7 @@ Text.prototype._mutatorKeys = [ ...PAINTABLE_OPTION_KEYS, ...TEXT_OPTION_KEYS, .
  * {Array.<String>} - List of all dirty flags that should be available on drawables created from this node (or
  *                    subtype). Given a flag (e.g. radius), it indicates the existence of a function
  *                    drawable.markDirtyRadius() that will indicate to the drawable that the radius has changed.
- * @public (scenery-internal)
+ * (scenery-internal)
  * @override
  */
 Text.prototype.drawableMarkFlags = [ ...Node.prototype.drawableMarkFlags, ...PAINTABLE_DRAWABLE_MARK_FLAGS, 'text', 'font', 'bounds' ];

@@ -28,7 +28,7 @@ export default class PDOMDisplaysInfo {
 
   /**
    * Tracks pdom display information for our given node.
-   * @public (scenery-internal)
+   * (scenery-internal)
    *
    * @param {Node} node
    */

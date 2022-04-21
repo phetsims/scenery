@@ -880,7 +880,6 @@ export default class Trail {
    * Fires subtree(trail) or self(trail) on the callbacks to create disjoint subtrees (trails) that cover exactly the nodes
    * inclusively between a and b in rendering order.
    * We try to consolidate these as much as possible.
-   * @public
    *
    * "a" and "b" are treated like self painted trails in the rendering order
    *

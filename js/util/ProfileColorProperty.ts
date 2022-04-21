@@ -10,7 +10,7 @@ import merge from '../../../phet-core/js/merge.js';
 import Namespace from '../../../phet-core/js/Namespace.js';
 import Tandem from '../../../tandem/js/Tandem.js';
 import { PropertyOptions } from '../../../axon/js/Property.js';
-import { scenery, SceneryConstants, Color, ColorProperty, colorProfileProperty } from '../imports.js';
+import { Color, colorProfileProperty, ColorProperty, scenery, SceneryConstants } from '../imports.js';
 
 // constant
 const NAME_SEPARATOR = '.';
@@ -104,7 +104,6 @@ export default class ProfileColorProperty extends ColorProperty {
     instances.push( this );
   }
 
-  // @public
   override dispose() {
     arrayRemove( instances, this );
     super.dispose();

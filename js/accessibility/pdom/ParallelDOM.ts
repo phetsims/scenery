@@ -799,7 +799,6 @@ export default class ParallelDOM extends PhetioObject {
 
   /**
    * Get the value of this Node's heading. Use null to clear the heading
-   * @public
    *
    * @experimental - NOTE: use with caution, a11y team reserves the right to change API (though unlikely).
    *                 Not yet fully implemented, see https://github.com/phetsims/scenery/issues/867
@@ -2466,7 +2465,6 @@ export default class ParallelDOM extends PhetioObject {
   /**
    * Get whether or not the node is focusable. Use the focusOverride, and then default to browser defined
    * focusable elements.
-   * @public
    *
    * @returns {boolean}
    */

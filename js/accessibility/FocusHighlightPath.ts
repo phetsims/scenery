@@ -105,7 +105,7 @@ class FocusHighlightPath extends Path {
     this._innerHighlightColor = options.innerStroke;
     this._outerHighlightColor = options.outerStroke;
 
-    // @public - emitted whenever this highlight changes
+    // emitted whenever this highlight changes
     this.highlightChangedEmitter = new Emitter();
 
     const pathOptions = _.pick( options, Path.DEFAULT_OPTIONS ) as PathOptions;
@@ -114,7 +114,7 @@ class FocusHighlightPath extends Path {
     this.innerLineWidth = options.innerLineWidth;
     this.outerLineWidth = options.outerLineWidth;
 
-    // @public {Node|null} - see options for documentation
+    // {Node|null} - see options for documentation
     this.transformSourceNode = options.transformSourceNode;
 
     // Assign the 'outer' specific options, and mutate the whole path for pr
@@ -142,7 +142,6 @@ class FocusHighlightPath extends Path {
 
   /**
    * Mutate both inner and outer Paths to make the stroke dashed by using `lineDash`.
-   * @public
    */
   public makeDashed(): void {
     this.mutateWithInnerHighlight( {
@@ -229,7 +228,6 @@ class FocusHighlightPath extends Path {
 
   /**
    * Get the color of the outer highlight for this FocusHighlightPath
-   * @public
    *
    * @returns {PaintDef}
    */
@@ -242,7 +240,7 @@ class FocusHighlightPath extends Path {
   /**
    * Return the trail to the transform source node being used for this focus highlight. So that we can observe
    * transforms applied to the source node so that the focus highlight can update accordingly.
-   * @public (scenery-internal)
+   * (scenery-internal)
    *
    * @param {Trail} focusedTrail - Trail to focused Node, to help search unique Trail to the transformSourceNode
    */

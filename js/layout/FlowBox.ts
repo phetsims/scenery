@@ -313,7 +313,6 @@ export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
 
   /**
    * Releases references
-   * @public
    */
   override dispose() {
     this._constraint.dispose();
@@ -329,14 +328,13 @@ export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
 /**
  * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
  * order they will be evaluated in.
- * @public
  *
  * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
  *       cases that may apply.
  */
 FlowBox.prototype._mutatorKeys = WidthSizable( Node ).prototype._mutatorKeys.concat( HeightSizable( Node ).prototype._mutatorKeys ).concat( FLOWBOX_OPTION_KEYS );
 
-// @public {Object}
+// {Object}
 FlowBox.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
 scenery.register( 'FlowBox', FlowBox );

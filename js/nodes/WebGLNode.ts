@@ -40,7 +40,6 @@ export default abstract class WebGLNode extends Node {
   private painterType: WebGLNodePainterType;
 
   /**
-   * @public
    *
    * It is required to pass a canvasBounds option and/or keep canvasBounds such that it will cover the entirety of the
    * Node. This will also set its self bounds.
@@ -216,7 +215,6 @@ export default abstract class WebGLNode extends Node {
 /**
  * {Array.<string>} - String keys for all the allowed options that will be set by node.mutate( options ), in the
  * order they will be evaluated in.
- * @public
  *
  * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
  *       cases that may apply.

@@ -275,7 +275,6 @@ export default class Image extends Imageable( Node ) {
 /**
  * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
  * order they will be evaluated in.
- * @public
  *
  * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
  *       cases that may apply.
@@ -286,12 +285,12 @@ Image.prototype._mutatorKeys = [ ...IMAGE_OPTION_KEYS, ...Node.prototype._mutato
  * {Array.<String>} - List of all dirty flags that should be available on drawables created from this node (or
  *                    subtype). Given a flag (e.g. radius), it indicates the existence of a function
  *                    drawable.markDirtyRadius() that will indicate to the drawable that the radius has changed.
- * @public (scenery-internal)
+ * (scenery-internal)
  * @override
  */
 Image.prototype.drawableMarkFlags = [ ...Node.prototype.drawableMarkFlags, 'image', 'imageOpacity', 'mipmap' ];
 
-// @public {Object} - Initial values for most Node mutator options
+// {Object} - Initial values for most Node mutator options
 Image.DEFAULT_OPTIONS = merge( {}, Node.DEFAULT_OPTIONS, Imageable.DEFAULT_OPTIONS );
 
 // NOTE: Not currently in use

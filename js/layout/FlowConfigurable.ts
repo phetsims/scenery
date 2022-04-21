@@ -147,7 +147,7 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
     _maxContentWidth: number | null;
     _maxContentHeight: number | null;
 
-    // @public {TinyEmitter}
+    // {TinyEmitter}
     changedEmitter: TinyEmitter;
     orientationChangedEmitter: TinyEmitter;
 
@@ -171,7 +171,7 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       this._maxContentWidth = null;
       this._maxContentHeight = null;
 
-      // @public {TinyEmitter}
+      // {TinyEmitter}
       this.changedEmitter = new TinyEmitter();
       this.orientationChangedEmitter = new TinyEmitter();
     }

@@ -273,8 +273,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
 
     /**
      * Returns the current image's representation as either a Canvas or img element.
-     * @public
-     *
+       *
      * NOTE: If a URL or mipmap data was provided, this currently doesn't return the original input to setImage(), but
      *       instead provides the mapped result (or first mipmap level's image).
      *       TODO: return the original result instead.
@@ -1070,10 +1069,10 @@ Imageable.getApproximateMatrixScale = ( matrix: Matrix3 ): number => {
            Math.sqrt( matrix.m01() * matrix.m01() + matrix.m11() * matrix.m11() ) ) / 2;
 };
 
-// @public {number} - We include this for additional smoothing that seems to be needed for Canvas image quality
+// {number} - We include this for additional smoothing that seems to be needed for Canvas image quality
 Imageable.CANVAS_MIPMAP_BIAS_ADJUSTMENT = 0.5;
 
-// @public {Object} - Initial values for most Node mutator options
+// {Object} - Initial values for most Node mutator options
 Imageable.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
 scenery.register( 'Imageable', Imageable );

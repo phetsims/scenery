@@ -46,7 +46,6 @@ export default class Pattern extends Paint {
 
   /**
    * Returns a string form of this object
-   * @public
    *
    * @returns {string}
    */

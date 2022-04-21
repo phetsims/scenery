@@ -289,14 +289,13 @@ export default class GridBox extends WidthSizable( HeightSizable( Node ) ) {
 /**
  * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
  * order they will be evaluated in.
- * @public
  *
  * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
  *       cases that may apply.
  */
 GridBox.prototype._mutatorKeys = WidthSizable( Node ).prototype._mutatorKeys.concat( HeightSizable( Node ).prototype._mutatorKeys ).concat( GRIDBOX_OPTION_KEYS );
 
-// @public {Object}
+// {Object}
 GridBox.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
 scenery.register( 'GridBox', GridBox );

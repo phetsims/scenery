@@ -690,7 +690,6 @@ Voicing.VOICING_OPTION_KEYS = VOICING_OPTION_KEYS;
  * Alert an Utterance to the voicingUtteranceQueue. The Utterance must have canAnnounceProperties and hopefully
  * at least one of the Properties is a VoicingNode's canAnnounceProperty so that this Utterance is only announced
  * when the VoicingNode is globally visible and voicingVisible.
- * @public
  * @static
  */
 Voicing.alertUtterance = ( utterance: Utterance ) => {
@@ -701,7 +700,6 @@ Voicing.alertUtterance = ( utterance: Utterance ) => {
 /**
  * Assign the voicingNode's voicingCanSpeakProperty to the Utterance so that the Utterance can only be announced
  * if the voicingNode is globally visible and voicingVisible in the display.
- * @public
  * @static
  */
 Voicing.registerUtteranceToVoicingNode = ( utterance: Utterance, voicingNode: VoicingNode ) => {
@@ -713,7 +711,6 @@ Voicing.registerUtteranceToVoicingNode = ( utterance: Utterance, voicingNode: Vo
 
 /**
  * Remove a voicingNode's voicingCanSpeakProperty from the Utterance.
- * @public
  * @static
  */
 Voicing.unregisterUtteranceToVoicingNode = ( utterance: Utterance, voicingNode: VoicingNode ) => {
@@ -728,7 +725,6 @@ Voicing.unregisterUtteranceToVoicingNode = ( utterance: Utterance, voicingNode: 
  * announced if the Node is visible and voicingVisible. This is LOCAL visibility and does not care about ancestors.
  * This should rarely be used, in general you should be registering an Utterance to a VoicingNode and its
  * voicingCanSpeakProperty.
- * @public
  * @static
  */
 Voicing.registerUtteranceToNode = ( utterance: Utterance, node: Node ) => {
@@ -743,7 +739,6 @@ Voicing.registerUtteranceToNode = ( utterance: Utterance, node: Node ) => {
 
 /**
  * Remove a Node's voicingVisibleProperty and visibleProperty from the canAnnounceProperties of the Utterance.
- * @public
  * @static
  */
 Voicing.unregisterUtteranceToNode = ( utterance: Utterance, node: Node ) => {

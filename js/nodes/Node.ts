@@ -6218,15 +6218,15 @@ Node.prototype._mutatorKeys = ACCESSIBILITY_OPTION_KEYS.concat( NODE_OPTION_KEYS
  * Should be overridden by subtypes.
  */
 Node.prototype.drawableMarkFlags = [];
-// @public {Object} - A mapping of all of the default options provided to Node
+// {Object} - A mapping of all of the default options provided to Node
 Node.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
-// @public {Object} - A mapping of all of options that require Bounds to be applied properly. Most often these should be set through `mutate` in the end of the construcor instead of being passed through `super()`
+// {Object} - A mapping of all of options that require Bounds to be applied properly. Most often these should be set through `mutate` in the end of the construcor instead of being passed through `super()`
 Node.REQUIRES_BOUNDS_OPTION_KEYS = REQUIRES_BOUNDS_OPTION_KEYS;
 
 scenery.register( 'Node', Node );
 
-// @public {IOType}
+// {IOType}
 Node.NodeIO = new IOType( 'NodeIO', {
   valueType: Node,
   documentation: 'The base type for graphical and potentially interactive objects.',

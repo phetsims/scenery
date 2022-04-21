@@ -90,7 +90,7 @@ export default class ShaderProgram {
     this.gl.deleteShader( this.vertexShader );
     this.gl.deleteShader( this.fragmentShader );
 
-    // @public {Object}
+    // {Object}
     this.uniformLocations = {}; // map name => uniform location for program
     this.attributeLocations = {}; // map name => attribute location for program
     this.activeAttributes = {}; // map name => boolean (enabled)
@@ -108,7 +108,6 @@ export default class ShaderProgram {
   }
 
   /**
-   * @public
    */
   use() {
     if ( this.used ) { return; }

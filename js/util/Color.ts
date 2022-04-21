@@ -86,7 +86,7 @@ export default class Color {
   constructor( transparent: null );
   constructor( r: number | Color | string | null, g?: number, b?: number, a?: number ) {
 
-    // @public {Emitter}
+    // {Emitter}
     this.changeEmitter = new TinyEmitter();
 
     this.set( r, g, b, a );
@@ -101,7 +101,6 @@ export default class Color {
 
   /**
    * Sets the values of this Color. Supported styles:
-   * @public
    *
    * - set( color ) is a copy constructor
    * - set( string ) will parse the string assuming it's a CSS-compatible color, e.g. set( 'red' )

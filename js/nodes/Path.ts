@@ -510,7 +510,6 @@ export default class Path extends Paintable( Node ) {
 /**
  * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
  * order they will be evaluated in.
- * @public
  *
  * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
  *       cases that may apply.
@@ -521,12 +520,12 @@ Path.prototype._mutatorKeys = [ ...PAINTABLE_OPTION_KEYS, ...PATH_OPTION_KEYS, .
  * {Array.<String>} - List of all dirty flags that should be available on drawables created from this node (or
  *                    subtype). Given a flag (e.g. radius), it indicates the existence of a function
  *                    drawable.markDirtyRadius() that will indicate to the drawable that the radius has changed.
- * @public (scenery-internal)
+ * (scenery-internal)
  * @override
  */
 Path.prototype.drawableMarkFlags = [ ...Node.prototype.drawableMarkFlags, ...PAINTABLE_DRAWABLE_MARK_FLAGS, 'shape' ];
 
 scenery.register( 'Path', Path );
 
-// @public {Object} - Initial values for most Node mutator options
+// {Object} - Initial values for most Node mutator options
 Path.DEFAULT_OPTIONS = merge( {}, Node.DEFAULT_OPTIONS, DEFAULT_OPTIONS );

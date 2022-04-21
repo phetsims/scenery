@@ -133,7 +133,6 @@ export default class PointerOverlay implements IOverlay {
   }
 
   /**
-   * @public
    */
   update() {
   }

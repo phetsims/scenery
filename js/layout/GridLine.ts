@@ -24,13 +24,13 @@ export default class GridLine {
   }
 
   initialize( index: number, cells: GridCell[], grow: number ) {
-    // @public {number}
+    // {number}
     this.index = index;
 
-    // @public {Array.<GridCell>}
+    // {Array.<GridCell>}
     this.cells = cells;
 
-    // @public {number}
+    // {number}
     this.grow = grow;
     this.min = 0;
     this.max = Number.POSITIVE_INFINITY;

@@ -58,7 +58,6 @@ export default class Rectangle extends Path {
   _cornerYRadius: number;
 
   /**
-   * @public
    *
    * Possible constructor signatures
    * new Rectangle( x, y, width, height, cornerXRadius, cornerYRadius, [options] )
@@ -942,7 +941,7 @@ Rectangle.prototype._mutatorKeys = [ ...RECTANGLE_OPTION_KEYS, ...Path.prototype
  * {Array.<String>} - List of all dirty flags that should be available on drawables created from this node (or
  *                    subtype). Given a flag (e.g. radius), it indicates the existence of a function
  *                    drawable.markDirtyRadius() that will indicate to the drawable that the radius has changed.
- * @public (scenery-internal)
+ * (scenery-internal)
  * @override
  */
 Rectangle.prototype.drawableMarkFlags = Path.prototype.drawableMarkFlags.concat( [ 'x', 'y', 'width', 'height', 'cornerXRadius', 'cornerYRadius' ] ).filter( flag => flag !== 'shape' );

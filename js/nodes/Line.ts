@@ -499,7 +499,6 @@ export default class Line extends Path {
 /**
  * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
  * order they will be evaluated in.
- * @public
  *
  * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
  *       cases that may apply.
@@ -510,7 +509,7 @@ Line.prototype._mutatorKeys = LINE_OPTION_KEYS.concat( Path.prototype._mutatorKe
  * {Array.<String>} - List of all dirty flags that should be available on drawables created from this node (or
  *                    subtype). Given a flag (e.g. radius), it indicates the existence of a function
  *                    drawable.markDirtyRadius() that will indicate to the drawable that the radius has changed.
- * @public (scenery-internal)
+ * (scenery-internal)
  * @override
  */
 Line.prototype.drawableMarkFlags = Path.prototype.drawableMarkFlags.concat( [ 'line', 'p1', 'p2', 'x1', 'x2', 'y1', 'y2' ] ).filter( flag => flag !== 'shape' );

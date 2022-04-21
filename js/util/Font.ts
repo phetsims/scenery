@@ -442,5 +442,5 @@ Font.FontIO = new IOType( 'FontIO', {
   }
 } );
 
-// @public {Font} - Default Font object (since they are immutable).
+// {Font} - Default Font object (since they are immutable).
 Font.DEFAULT = new Font();

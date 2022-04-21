@@ -86,7 +86,6 @@ export default class AlignBox extends Node {
   /**
    * An individual container for an alignment group. Will maintain its size to match that of the group by overriding
    * its localBounds, and will position its content inside its localBounds by respecting its alignment and margins.
-   * @public
    *
    * @param content - Content to align inside of the alignBox
    * @param [options] - AlignBox-specific options are documented in ALIGNMENT_CONTAINER_OPTION_KEYS
@@ -604,7 +603,6 @@ export default class AlignBox extends Node {
 /**
  * {Array.<string>} - String keys for all of the allowed options that will be set by node.mutate( options ), in the
  * order they will be evaluated in.
- * @public
  *
  * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
  *       cases that may apply.
