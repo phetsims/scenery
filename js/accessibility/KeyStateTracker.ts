@@ -63,11 +63,11 @@ class KeyStateTracker {
 
   // Action which updates the KeyStateTracker, when it is time to do so - the update is wrapped by an Action so that
   // the KeyStateTracker state is captured for PhET-iO.
-  public keydownUpdateAction: PhetioAction<[ KeyboardEvent ]>;
+  public readonly keydownUpdateAction: PhetioAction<[ KeyboardEvent ]>;
 
   // Action which updates the state of the KeyStateTracker on key release. This is wrapped in an Action so that state
   // is captured for PhET-iO.
-  public keyupUpdateAction: PhetioAction<[ KeyboardEvent ]>;
+  public readonly keyupUpdateAction: PhetioAction<[ KeyboardEvent ]>;
 
   private readonly _disposeKeyStateTracker: () => void;
 
