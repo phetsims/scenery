@@ -244,7 +244,7 @@ export default class HighlightOverlay implements IOverlay {
   /**
    * Releases references
    */
-  dispose(): void {
+  public dispose(): void {
     if ( this.hasHighlight() ) {
       this.deactivateHighlight();
     }
@@ -262,7 +262,7 @@ export default class HighlightOverlay implements IOverlay {
   /**
    * Returns whether or not this HighlightOverlay is displaying some highlight.
    */
-  hasHighlight(): boolean {
+  public hasHighlight(): boolean {
     return !!this.trail;
   }
 
@@ -270,7 +270,7 @@ export default class HighlightOverlay implements IOverlay {
    * Returns true if there is an active highlight around a ReadingBlock while the voicingManager is speaking its
    * Voicing content.
    */
-  hasReadingBlockHighlight(): boolean {
+  public hasReadingBlockHighlight(): boolean {
     return !!this.readingBlockTrail;
   }
 
@@ -815,7 +815,10 @@ export default class HighlightOverlay implements IOverlay {
     this.onPointerFocusChange( this.display.focusManager.pointerFocusProperty.value );
   }
 
-  update(): void {
+  /**
+   * Called by Display, updates this overlay in the Display.updateDisplay call.
+   */
+  public update(): void {
 
     // Transform the highlight to match the position of the node
     if ( this.hasHighlight() && this.transformDirty ) {
@@ -847,56 +850,56 @@ export default class HighlightOverlay implements IOverlay {
   /**
    * Set the inner color of all focus highlights.
    */
-  static setInnerHighlightColor( color: IPaint ): void {
+  public static setInnerHighlightColor( color: IPaint ): void {
     innerHighlightColor = color;
   }
 
   /**
    * Get the inner color of all focus highlights.
    */
-  static getInnerHighlightColor(): IPaint {
+  public static getInnerHighlightColor(): IPaint {
     return innerHighlightColor;
   }
 
   /**
    * Set the outer color of all focus highlights.
    */
-  static setOuterHilightColor( color: IPaint ): void {
+  public static setOuterHilightColor( color: IPaint ): void {
     outerHighlightColor = color;
   }
 
   /**
    * Get the outer color of all focus highlights.
    */
-  static getOuterHighlightColor(): IPaint {
+  public static getOuterHighlightColor(): IPaint {
     return outerHighlightColor;
   }
 
   /**
    * Set the inner color of all group focus highlights.
    */
-  static setInnerGroupHighlightColor( color: IPaint ): void {
+  public static setInnerGroupHighlightColor( color: IPaint ): void {
     innerGroupHighlightColor = color;
   }
 
   /**
    * Get the inner color of all group focus highlights
    */
-  static getInnerGroupHighlightColor(): IPaint {
+  public static getInnerGroupHighlightColor(): IPaint {
     return innerGroupHighlightColor;
   }
 
   /**
    * Set the outer color of all group focus highlight.
    */
-  static setOuterGroupHighlightColor( color: IPaint ): void {
+  public static setOuterGroupHighlightColor( color: IPaint ): void {
     outerGroupHighlightColor = color;
   }
 
   /**
    * Get the outer color of all group focus highlights.
    */
-  static getOuterGroupHighlightColor(): IPaint {
+  public static getOuterGroupHighlightColor(): IPaint {
     return outerGroupHighlightColor;
   }
 }
