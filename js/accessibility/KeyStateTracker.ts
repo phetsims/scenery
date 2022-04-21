@@ -69,7 +69,7 @@ class KeyStateTracker {
   // is captured for PhET-iO.
   public readonly keyupUpdateAction: PhetioAction<[ KeyboardEvent ]>;
 
-  private readonly _disposeKeyStateTracker: () => void;
+  private readonly disposeKeyStateTracker: () => void;
 
   constructor( providedOptions?: KeyStateTrackerOptions ) {
 
@@ -151,7 +151,7 @@ class KeyStateTracker {
     const stepListener = this.step.bind( this );
     stepTimer.addListener( stepListener );
 
-    this._disposeKeyStateTracker = () => {
+    this.disposeKeyStateTracker = () => {
       stepTimer.removeListener( stepListener );
 
       if ( this.attachedToDocument ) {
@@ -428,7 +428,7 @@ class KeyStateTracker {
   }
 
   public dispose(): void {
-    this._disposeKeyStateTracker();
+    this.disposeKeyStateTracker();
   }
 }
 
