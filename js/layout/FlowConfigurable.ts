@@ -6,6 +6,9 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+// Disable for the whole file
+/* eslint-disable no-protected-jsdoc */
+
 import TinyEmitter from '../../../axon/js/TinyEmitter.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
 import memoize from '../../../phet-core/js/memoize.js';
@@ -154,13 +157,15 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
     constructor( ...args: any[] ) {
       super( ...args );
 
-      // @protected {Orientation}
+      // @protected
       this._orientation = Orientation.HORIZONTAL;
 
-      // @protected {FlowConfigurableAlign|null} - Null value inherits from a base config
+      // @protected
+      // Null value inherits from a base config
       this._align = null;
 
-      // @protected {number|null} - Null value inherits from a base config
+      // @protected
+      // Null value inherits from a base config
       this._leftMargin = null;
       this._rightMargin = null;
       this._topMargin = null;

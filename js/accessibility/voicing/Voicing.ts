@@ -24,6 +24,9 @@
  * @author Michael Kauzmann (PhET Interactive Simulations)
  */
 
+// Disable for the whole file
+/* eslint-disable no-protected-jsdoc */
+
 import inheritance from '../../../../phet-core/js/inheritance.js';
 import ResponsePacket, { ResolvedResponse, ResponsePacketOptions, VoicingResponse } from '../../../../utterance-queue/js/ResponsePacket.js';
 import ResponsePatternCollection from '../../../../utterance-queue/js/ResponsePatternCollection.js';
@@ -334,7 +337,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * Combine all types of response into a single alertable, potentially depending on the current state of
      * responseCollector Properties (filtering what kind of responses to present in the resolved response).
      *
-     * @protected
+     * @protected // eslint-disable-line bad-typescript-text
      */
     collectResponse( providedOptions?: SpeakingOptions ): IAlertable {
       const options = optionize<SpeakingOptions, {}, SpeakingOptions>()( {
@@ -355,7 +358,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     /**
      * Use the provided function to create content to speak in response to input. The content is then added to the
      * back of the voicing UtteranceQueue.
-     * @protected
+     * @protected // eslint-disable-line bad-typescript-text
      */
     speakContent( content: IAlertable ): void { // eslint-disable-line no-undef
 
@@ -673,7 +676,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
   /**
    * {Array.<string>} - String keys for all of the allowed options that will be set by Node.mutate( options ), in
    * the order they will be evaluated.
-   * @protected
+   * @protected // eslint-disable-line bad-typescript-text
    *
    * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
    *       cases that may apply.

@@ -6,6 +6,9 @@
  * @author Jesse Greenberg (PhET Interactive Simulations)
  */
 
+// Disable for the whole file
+/* eslint-disable no-protected-jsdoc */
+
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import Constructor from '../../../../phet-core/js/types/Constructor.js';
 import IntentionalAny from '../../../../phet-core/js/types/IntentionalAny.js';
@@ -50,7 +53,8 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     // at one time.
     _pointer: null | Pointer;
 
-    // @protected - A map that collects all of the Displays that this InteractiveHighlighting Node is
+    // @protected
+    // A map that collects all of the Displays that this InteractiveHighlighting Node is
     // attached to, mapping the unique ID of the Instance Trail to the Display. We need a reference to the
     // Displays to activate the Focus Property associated with highlighting, and to add/remove listeners when
     // features that require highlighting are enabled/disabled. Note that this is updated asynchronously
@@ -67,7 +71,8 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     // this.interactiveHighlightActivated is true.
     _interactiveHighlightLayerable: boolean;
 
-    // @protected - Emits an event when the interactive highlight changes for this Node
+    // @protected
+    // Emits an event when the interactive highlight changes for this Node
     interactiveHighlightChangedEmitter: TinyEmitter;
 
     // When new instances of this Node are created, adds an entry to the map of Displays.

@@ -12,7 +12,7 @@ import extendDefined from '../../../phet-core/js/extendDefined.js';
 import merge from '../../../phet-core/js/merge.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
-import { scenery, Renderer, Node, NodeOptions, IPathDrawable, PathSVGDrawable, Paintable, PAINTABLE_OPTION_KEYS, PAINTABLE_DRAWABLE_MARK_FLAGS, PaintableOptions, PathCanvasDrawable, CanvasContextWrapper, Instance, CanvasSelfDrawable, SVGSelfDrawable, Paint } from '../imports.js';
+import { CanvasContextWrapper, CanvasSelfDrawable, Instance, IPathDrawable, Node, NodeOptions, Paint, Paintable, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS, PaintableOptions, PathCanvasDrawable, PathSVGDrawable, Renderer, scenery, SVGSelfDrawable } from '../imports.js';
 
 const PATH_OPTION_KEYS = [
   'boundsMethod', // {string} - Sets how bounds are determined, see setBoundsMethod() for more documentation.
@@ -392,12 +392,11 @@ export default class Path extends Paintable( Node ) {
   /**
    * Draws the current Node's self representation, assuming the wrapper's Canvas context is already in the local
    * coordinate frame of this node.
-   * @protected
    *
-   * @param {CanvasContextWrapper} wrapper
-   * @param {Matrix3} matrix - The transformation matrix already applied to the context.
+   * @param wrapper
+   * @param matrix - The transformation matrix already applied to the context.
    */
-  override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
+  protected override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
     //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily.
     PathCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
   }

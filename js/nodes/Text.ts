@@ -21,7 +21,7 @@ import VoidIO from '../../../tandem/js/types/VoidIO.js';
 import IProperty from '../../../axon/js/IProperty.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import { scenery, Font, FontStyle, FontWeight, FontStretch, ITextDrawable, CanvasContextWrapper, Instance, TextBounds, DOMSelfDrawable, SVGSelfDrawable, CanvasSelfDrawable, Renderer, TextCanvasDrawable, TextDOMDrawable, TextSVGDrawable, Node, NodeOptions, Paintable, PAINTABLE_OPTION_KEYS, PAINTABLE_DRAWABLE_MARK_FLAGS, PaintableOptions } from '../imports.js';
+import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, Font, FontStretch, FontStyle, FontWeight, Instance, ITextDrawable, Node, NodeOptions, Paintable, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS, PaintableOptions, Renderer, scenery, SVGSelfDrawable, TextBounds, TextCanvasDrawable, TextDOMDrawable, TextSVGDrawable } from '../imports.js';
 
 // constants
 const TEXT_OPTION_KEYS = [
@@ -209,9 +209,8 @@ export default class Text extends Paintable( Node ) {
    * See documentation and comments in Node.initializePhetioObject
    * @param {Object} baseOptions
    * @param {Object} config
-   * @protected
    */
-  override initializePhetioObject( baseOptions: any, config: TextOptions ) {
+  protected override initializePhetioObject( baseOptions: any, config: TextOptions ) {
 
     config = merge( {
       textPropertyOptions: null
@@ -229,7 +228,7 @@ export default class Text extends Paintable( Node ) {
           phetioReadOnly: this.phetioReadOnly,
           tandem: this.tandem.createTandem( TEXT_PROPERTY_TANDEM_NAME ),
           phetioDocumentation: 'Property for the displayed text'
-        // @ts-ignore --- how to handle this?
+          // @ts-ignore --- how to handle this?
         }, config.textPropertyOptions ) )
       );
     }
