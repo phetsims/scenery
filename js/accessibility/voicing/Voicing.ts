@@ -393,7 +393,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * as its current input value. When requesting speech, this will only be heard when
      * responseCollector.objectResponsesEnabledProperty is set to true.
      */
-    setVoicingObjectResponse( response: VoicingResponse ) {
+    setVoicingObjectResponse( response: VoicingResponse ): void {
       this._voicingResponsePacket.objectResponse = response;
     }
 
@@ -413,7 +413,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * the surrounding application in response to interaction with this Node. When requesting speech, this will
      * only be heard if responseCollector.contextResponsesEnabledProperty is set to true.
      */
-    setVoicingContextResponse( response: VoicingResponse ) {
+    setVoicingContextResponse( response: VoicingResponse ): void {
       this._voicingResponsePacket.contextResponse = response;
     }
 
@@ -433,7 +433,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * When requesting speech, this will only be spoken when responseCollector.hintResponsesEnabledProperty is set to
      * true.
      */
-    setVoicingHintResponse( response: VoicingResponse ) {
+    setVoicingHintResponse( response: VoicingResponse ): void {
       this._voicingResponsePacket.hintResponse = response;
     }
 
@@ -453,7 +453,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * all responses will be spoken regardless of responseCollector Properties, which are generally set in user
      * preferences.
      */
-    setVoicingIgnoreVoicingManagerProperties( ignoreProperties: boolean ) {
+    setVoicingIgnoreVoicingManagerProperties( ignoreProperties: boolean ): void {
       this._voicingResponsePacket.ignoreProperties = ignoreProperties;
     }
 
@@ -473,7 +473,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * additional content for each combination of response. See ResponsePatternCollection.js if you wish to use
      * a collection of string patterns that are not the default.
      */
-    setVoicingResponsePatternCollection( patterns: ResponsePatternCollection ) {
+    setVoicingResponsePatternCollection( patterns: ResponsePatternCollection ): void {
 
       this._voicingResponsePacket.responsePatternCollection = patterns;
     }
@@ -493,7 +493,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * Sets the utterance through which voicing associated with this Node will be spoken. By default on initialize,
      * one will be created, but a custom one can optionally be provided.
      */
-    public setVoicingUtterance( utterance: Utterance ) {
+    public setVoicingUtterance( utterance: Utterance ): void {
       if ( this._voicingUtterance !== utterance ) {
 
         // `this` is not recognized as a VoicingNode, but it is because this trait can only be used with Node subtypes
@@ -524,7 +524,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * Get the Property indicating that this Voicing Node can speak. True when this Voicing Node and all of its
      * ancestors are visible and voicingVisible.
      */
-    getVoicingCanSpeakProperty() {
+    getVoicingCanSpeakProperty(): TinyProperty<boolean> {
       return this._voicingCanSpeakProperty;
     }
 
@@ -533,7 +533,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     /**
      * Called whenever this Node is focused.
      */
-    setVoicingFocusListener( focusListener: SceneryListenerFunction<FocusEvent> | null ) {
+    setVoicingFocusListener( focusListener: SceneryListenerFunction<FocusEvent> | null ): void {
       this._voicingFocusListener = focusListener;
     }
 
@@ -568,7 +568,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     /**
      * Detaches references that ensure this components of this Trait are eligible for garbage collection.
      */
-    override dispose() {
+    override dispose(): void {
       const thisVoicingNode = ( this as unknown as VoicingNode );
       thisVoicingNode.removeInputListener( this._speakContentOnFocusListener );
       thisVoicingNode.changedInstanceEmitter.removeListener( this._boundInstancesChangedListener );
@@ -581,7 +581,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
       super.dispose();
     }
 
-    clean() {
+    clean(): void {
       const thisVoicingNode = ( this as unknown as VoicingNode );
       thisVoicingNode.removeInputListener( this._speakContentOnFocusListener );
       thisVoicingNode.changedInstanceEmitter.removeListener( this._boundInstancesChangedListener );
@@ -624,7 +624,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * Update the canSpeakProperty and counting variable in response to an Instance of this Node being added or
      * removed.
      */
-    _handleInstancesChanged( instance: Instance, added: boolean ) {
+    _handleInstancesChanged( instance: Instance, added: boolean ): void {
       const isVisible = instance.visible && instance.voicingVisible;
       if ( isVisible ) {
 
@@ -642,7 +642,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
      * the voicingCanSpeakCount. See documentation for voicingCanSpeakCount for details about how this controls the
      * voicingCanSpeakProperty.
      */
-    _addOrRemoveInstanceListeners( instance: Instance, added: boolean ) {
+    _addOrRemoveInstanceListeners( instance: Instance, added: boolean ): void {
       assert && assert( instance.voicingVisibleEmitter, 'Instance must be initialized.' );
       assert && assert( instance.visibleEmitter, 'Instance must be initialized.' );
 
@@ -662,7 +662,7 @@ const Voicing = <SuperType extends Constructor>( Type: SuperType, optionsArgPosi
     /**
      * Clean this._voicingUtterance, disposing if we own it or unregistering it if we do not.
      */
-    _cleanVoicingUtterance() {
+    _cleanVoicingUtterance(): void {
       assert && assert( this._voicingUtterance, 'A voicingUtterance must be available to clean.' );
       if ( this._voicingUtterance instanceof VoicingUtterance ) {
         this._voicingUtterance.dispose();

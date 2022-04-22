@@ -145,7 +145,7 @@ export default class FocusManager {
     } );
   }
 
-  dispose() {
+  dispose(): void {
     this.readingBlockFocusController.dispose();
     this.pointerFocusDisplayedController.dispose();
     this.pointerHighlightsVisibleProperty.dispose();

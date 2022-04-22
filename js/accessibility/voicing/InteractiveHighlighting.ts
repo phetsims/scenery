@@ -139,7 +139,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
      * Set the interactive highlight for this node. By default, the highlight will be a pink rectangle that surrounds
      * the node's local bounds.
      */
-    setInteractiveHighlight( interactiveHighlight: Highlight ) {
+    setInteractiveHighlight( interactiveHighlight: Highlight ): void {
 
       if ( this._interactiveHighlight !== interactiveHighlight ) {
         this._interactiveHighlight = interactiveHighlight;
@@ -173,7 +173,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
      * highlight overlay. If layerable, you must provide a custom highlight and it must be a Node. The highlight
      * Node will always be invisible unless this Node is activated with a pointer.
      */
-    setInteractiveHighlightLayerable( interactiveHighlightLayerable: boolean ) {
+    setInteractiveHighlightLayerable( interactiveHighlightLayerable: boolean ): void {
       if ( this._interactiveHighlightLayerable !== interactiveHighlightLayerable ) {
         this._interactiveHighlightLayerable = interactiveHighlightLayerable;
 
@@ -217,7 +217,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
 
     get interactiveHighlightActivated(): boolean { return this.isInteractiveHighlightActivated(); }
 
-    dispose() {
+    dispose(): void {
       const thisNode = this as unknown as Node;
       thisNode.changedInstanceEmitter.removeListener( this._changedInstanceListener );
 
@@ -243,7 +243,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
      * When a Pointer enters this Node, signal to the Displays that the pointer is over this Node so that the
      * HighlightOverlay can be activated.
      */
-    _onPointerEntered( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ) {
+    _onPointerEntered( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
 
       const displays = Object.values( this.displays );
       for ( let i = 0; i < displays.length; i++ ) {
@@ -256,7 +256,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
       }
     }
 
-    _onPointerMove( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ) {
+    _onPointerMove( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
 
       const displays = Object.values( this.displays );
       for ( let i = 0; i < displays.length; i++ ) {
@@ -280,7 +280,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
      * When a pointer exits this Node, signal to the Displays that pointer focus has changed to deactivate
      * the HighlightOverlay.
      */
-    _onPointerExited( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ) {
+    _onPointerExited( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
 
       const displays = Object.values( this.displays );
       for ( let i = 0; i < displays.length; i++ ) {
@@ -292,7 +292,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     /**
      * When a pointer goes down on this Node, signal to the Displays that the pointerFocus is locked
      */
-    _onPointerDown( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ) {
+    _onPointerDown( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
 
       if ( this._pointer === null ) {
         const displays = Object.values( this.displays );
@@ -321,7 +321,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
      *
      * @param [event] - may be called during interrupt or cancel, in which case there is no event
      */
-    _onPointerRelease( event?: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ) {
+    _onPointerRelease( event?: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
 
       const displays = Object.values( this.displays );
       for ( let i = 0; i < displays.length; i++ ) {
@@ -338,7 +338,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
     /**
      * If the pointer listener is cancelled or interrupted, clear focus and remove input listeners.
      */
-    _onPointerCancel( event?: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ) {
+    _onPointerCancel( event?: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> ): void {
 
       const displays = Object.values( this.displays );
       for ( let i = 0; i < displays.length; i++ ) {
@@ -354,7 +354,7 @@ const InteractiveHighlighting = <SuperType extends Constructor>( Type: SuperType
      * Add or remove listeners related to activating interactive highlighting when the feature becomes enabled.
      * This way we prevent doing work related to interactive highlighting unless the feature is enabled.
      */
-    _onInteractiveHighlightingEnabledChange( enabled: boolean ) {
+    _onInteractiveHighlightingEnabledChange( enabled: boolean ): void {
       const thisNode = this as unknown as Node;
 
       const hasActivationListener = thisNode.hasInputListener( this._activationListener );

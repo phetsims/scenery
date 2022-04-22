@@ -433,7 +433,7 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
   /**
    * Fired when the enabledProperty changes
    */
-  private onEnabledPropertyChange( enabled: boolean ) {
+  private onEnabledPropertyChange( enabled: boolean ): void {
     !enabled && this.interrupt();
   }
 
@@ -441,7 +441,7 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
    * Implements keyboard dragging when listener is attached to the Node, public because this is called as part of
    * the Scenery Input API, but clients should not call this directly.
    */
-  public keydown( event: SceneryEvent ) {
+  public keydown( event: SceneryEvent ): void {
     const domEvent = event.domEvent as KeyboardEvent;
     const key = KeyboardUtils.getEventCode( domEvent );
     assert && assert( key, 'How can we have a null key from a keydown in KeyboardDragListener?' );
@@ -494,7 +494,7 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
    *
    * @param {SceneryEvent} event
    */
-  public keyup( event: SceneryEvent ) {
+  public keyup( event: SceneryEvent ): void {
     const domEvent = event.domEvent as KeyboardEvent;
     const key = KeyboardUtils.getEventCode( domEvent );
 
@@ -539,7 +539,7 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
    * Interrupts and resets the listener on blur so that listener state is reset and keys are removed from the keyState
    * array. Public because this is called with the scenery listener API. Clients should not call this directly.
    */
-  public blur( event: SceneryEvent ) {
+  public blur( event: SceneryEvent ): void {
     this.interrupt();
   }
 
@@ -550,7 +550,7 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
    *
    * @param dt - in seconds
    */
-  private step( dt: number ) {
+  private step( dt: number ): void {
     const ms = dt * 1000;
 
     // no-op unless a key is down
@@ -660,7 +660,7 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
    *
    * @param delta - potential change in position in x and y for the position Property
    */
-  private updatePosition( delta: number ) {
+  private updatePosition( delta: number ): void {
 
     // hotkeys may disable dragging, so do this first
     this.updateHotkeys();
@@ -877,7 +877,7 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
   /**
    * Reset the keystate Object tracking which keys are currently pressed down.
    */
-  public interrupt() {
+  public interrupt(): void {
     this.keyState = [];
     this.resetHotkeyState();
     this.resetPressAndHold();
@@ -893,7 +893,7 @@ class KeyboardDragListener extends EnabledComponent implements IInputListener {
   /**
    * Make eligible for garbage collection.
    */
-  public override dispose() {
+  public override dispose(): void {
     this.interrupt();
     this._disposeKeyboardDragListener();
   }

@@ -218,7 +218,7 @@ class FocusHighlightPath extends Path {
   /**
    * Set the outer color of this focus highlight.
    */
-  public setOuterHighlightColor( color: IPaint ) {
+  public setOuterHighlightColor( color: IPaint ): void {
     this._outerHighlightColor = color;
     this.setStroke( color );
     this.highlightChangedEmitter.emit();
@@ -231,7 +231,7 @@ class FocusHighlightPath extends Path {
    *
    * @returns {PaintDef}
    */
-  getOuterHighlightColor() {
+  getOuterHighlightColor(): IPaint {
     return this._outerHighlightColor;
   }
 

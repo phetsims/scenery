@@ -185,7 +185,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
     /**
      * Sets the content that should be read whenever the ReadingBlock receives input that initiates speech.
      */
-    setReadingBlockNameResponse( content: VoicingResponse ) {
+    setReadingBlockNameResponse( content: VoicingResponse ): void {
       this._voicingResponsePacket.nameResponse = content;
     }
 
@@ -203,7 +203,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
     /**
      * Sets the hint response for this ReadingBlock. This is only spoken if "Helpful Hints" are enabled by the user.
      */
-    setReadingBlockHintResponse( content: VoicingResponse ) {
+    setReadingBlockHintResponse( content: VoicingResponse ): void {
       this._voicingResponsePacket.hintResponse = content;
     }
 
@@ -224,7 +224,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
      * additional content for each combination of response. See ResponsePatternCollection.js if you wish to use
      * a collection of string patterns that are not the default.
      */
-    setReadingBlockResponsePatternCollection( patterns: ResponsePatternCollection ) {
+    setReadingBlockResponsePatternCollection( patterns: ResponsePatternCollection ): void {
 
       this._voicingResponsePacket.responsePatternCollection = patterns;
     }
@@ -245,7 +245,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
      * But if you must, you are responsible for setting the ReadingBlockUtterance.readingBlockFocus when this
      * ReadingBlock is activated so that it gets highlighted correctly. See how the default readingBlockFocus is set.
      */
-    public override setVoicingUtterance( utterance: ReadingBlockUtterance ) {
+    public override setVoicingUtterance( utterance: ReadingBlockUtterance ): void {
       super.setVoicingUtterance( utterance );
     }
 
@@ -285,7 +285,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
      * Sets the highlight used to surround this Node while the Voicing framework is speaking this content.
      * If a Node is provided, do not add this Node to the scene graph, it is added and made visible by the HighlightOverlay.
      */
-    setReadingBlockActiveHighlight( readingBlockActiveHighlight: Highlight ) {
+    setReadingBlockActiveHighlight( readingBlockActiveHighlight: Highlight ): void {
       if ( this._readingBlockActiveHighlight !== readingBlockActiveHighlight ) {
         this._readingBlockActiveHighlight = readingBlockActiveHighlight;
 
@@ -332,7 +332,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
      *
      * @param focusable - whether ReadingBlocks should be focusable
      */
-    _onReadingBlockFocusableChanged( focusable: boolean ) {
+    _onReadingBlockFocusableChanged( focusable: boolean ): void {
 
       const thisNode = this as unknown as Node;
 
@@ -368,7 +368,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
      * the displays so that HighlightOverlays know to activate a highlight while the voicingManager
      * is reading about this Node.
      */
-    _speakReadingBlockContentListener( event: SceneryEvent<Event> ) {
+    _speakReadingBlockContentListener( event: SceneryEvent<Event> ): void {
 
       const displays = ( this as unknown as Node ).getConnectedDisplays();
 
@@ -404,7 +404,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
     /**
      * If we created and own the voicingUtterance we can fully dispose of it.
      */
-    override _cleanVoicingUtterance() {
+    override _cleanVoicingUtterance(): void {
       if ( this._voicingUtterance instanceof ReadingBlockUtterance ) {
         this._voicingUtterance.dispose();
       }
@@ -413,7 +413,7 @@ const ReadingBlock = <SuperType extends Constructor>( Type: SuperType, optionsAr
       }
     }
 
-    override dispose() {
+    override dispose(): void {
       const thisNode = ( this as unknown as Node );
       voicingManager.speechAllowedAndFullyEnabledProperty.unlink( this._readingBlockFocusableChangeListener );
       thisNode.localBoundsProperty.unlink( this._localBoundsChangedListener );

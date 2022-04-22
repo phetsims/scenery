@@ -44,7 +44,7 @@ export default class PDOMPointer extends Pointer {
    * Set up listeners, attaching blur and focus listeners to the pointer once this PDOMPointer has been attached
    * to a display.
    */
-  private initializeListeners() {
+  private initializeListeners(): void {
 
     this.addInputListener( {
       focus: event => {
