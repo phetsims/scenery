@@ -36,6 +36,7 @@ import NullableIO from '../../../tandem/js/types/NullableIO.js';
 import { Display, IInputListener, Mouse, Node, Pointer, scenery, SceneryEvent, Trail } from '../imports.js';
 import IProperty from '../../../axon/js/IProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
+import IReadOnlyProperty from '../../../axon/js/IReadOnlyProperty.js';
 
 // global
 let globalID = 0;
@@ -201,7 +202,7 @@ export default class PressListener extends EnabledComponent implements IInputLis
   // or not the button should "look" down. This will be true if downProperty is true or if a pdom click is in
   // progress. For a click event from the pdom, the listeners are fired right away but the button will look down for
   // as long as a11yLooksPressedInterval. See PressListener.click() for more details.
-  looksPressedProperty: IProperty<boolean>;
+  looksPressedProperty: IReadOnlyProperty<boolean>;
 
   // When pdom clicking begins, this will be added to a timeout so that the
   // pdomClickingProperty is updated after some delay. This is required since an assistive device (like a switch) may

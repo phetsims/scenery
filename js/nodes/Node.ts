@@ -175,6 +175,7 @@ import { ACCESSIBILITY_OPTION_KEYS, CanvasContextWrapper, CanvasSelfDrawable, Di
 import optionize from '../../../phet-core/js/optionize.js';
 import IntentionalAny from '../../../phet-core/js/types/IntentionalAny.js';
 import Utils from '../../../dot/js/Utils.js';
+import IReadOnlyProperty from '../../../axon/js/IReadOnlyProperty.js';
 
 let globalIdCounter = 1;
 
@@ -285,9 +286,9 @@ export type NodeOptions = {
   children?: Node[];
   cursor?: string | null;
   phetioVisiblePropertyInstrumented?: boolean;
-  visibleProperty?: IProperty<boolean> | null;
+  visibleProperty?: IReadOnlyProperty<boolean> | null;
   visible?: boolean;
-  pickableProperty?: IProperty<boolean | null> | null;
+  pickableProperty?: IReadOnlyProperty<boolean | null> | null;
   pickable?: boolean | null;
   phetioEnabledPropertyInstrumented?: boolean;
   enabledProperty?: IProperty<boolean> | null;
