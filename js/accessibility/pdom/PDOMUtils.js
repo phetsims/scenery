@@ -11,7 +11,7 @@
  */
 
 import validate from '../../../../axon/js/validate.js';
-import ValidatorDef from '../../../../axon/js/ValidatorDef.js';
+import Validation from '../../../../axon/js/Validation.js';
 import merge from '../../../../phet-core/js/merge.js';
 import stripEmbeddingMarks from '../../../../phet-core/js/stripEmbeddingMarks.js';
 import { PDOMSiblingStyle, scenery } from '../../imports.js';
@@ -383,7 +383,7 @@ const PDOMUtils = {
       const textWithoutEmbeddingMarks = stripEmbeddingMarks( textWithoutBreaks );
 
       // Disallow any unfilled template variables to be set in the PDOM.
-      validate( textWithoutEmbeddingMarks, ValidatorDef.STRING_WITHOUT_TEMPLATE_VARS_VALIDATOR );
+      validate( textWithoutEmbeddingMarks, Validation.STRING_WITHOUT_TEMPLATE_VARS_VALIDATOR );
 
       if ( tagNameSupportsContent( domElement.tagName ) ) {
 

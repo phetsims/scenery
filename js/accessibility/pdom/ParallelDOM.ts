@@ -124,7 +124,7 @@
 
 import TinyEmitter from '../../../../axon/js/TinyEmitter.js';
 import validate from '../../../../axon/js/validate.js';
-import ValidatorDef from '../../../../axon/js/ValidatorDef.js';
+import Validation from '../../../../axon/js/Validation.js';
 import { Shape } from '../../../../kite/js/imports.js';
 import arrayDifference from '../../../../phet-core/js/arrayDifference.js';
 import merge from '../../../../phet-core/js/merge.js';
@@ -2241,8 +2241,7 @@ export default class ParallelDOM extends PhetioObject {
     assert && assert( typeof value === 'string' || typeof value === 'boolean' || typeof value === 'number' );
     assert && options && assert( Object.getPrototypeOf( options ) === Object.prototype,
       'Extra prototype on pdomAttribute options object is a code smell' );
-    // @ts-ignore
-    assert && typeof value === 'string' && validate( value, ValidatorDef.STRING_WITHOUT_TEMPLATE_VARS_VALIDATOR );
+    assert && typeof value === 'string' && validate( value, Validation.STRING_WITHOUT_TEMPLATE_VARS_VALIDATOR );
 
     options = merge( {
 
