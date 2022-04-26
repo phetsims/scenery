@@ -696,7 +696,7 @@ export default class Rectangle extends Path {
    * @param wrapper
    * @param matrix - The transformation matrix already applied to the context.
    */
-  override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
+  protected override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
     //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily.
     RectangleCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
   }

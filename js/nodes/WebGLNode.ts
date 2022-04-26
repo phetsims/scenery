@@ -15,7 +15,7 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
-import { scenery, Utils, Node, Renderer, WebGLNodeDrawable, NodeOptions, CanvasContextWrapper, WebGLSelfDrawable, Instance } from '../imports.js';
+import { CanvasContextWrapper, Instance, Node, NodeOptions, Renderer, scenery, Utils, WebGLNodeDrawable, WebGLSelfDrawable } from '../imports.js';
 
 const WEBGL_NODE_OPTION_KEYS = [
   'canvasBounds' // {Bounds2} - Sets the available Canvas bounds that content will show up in. See setCanvasBounds()
@@ -146,7 +146,7 @@ export default abstract class WebGLNode extends Node {
    * @param wrapper
    * @param matrix - The transformation matrix already applied to the context.
    */
-  override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
+  protected override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
     // TODO: see https://github.com/phetsims/scenery/issues/308
     assert && assert( false, 'unimplemented: canvasPaintSelf in WebGLNode' );
   }
