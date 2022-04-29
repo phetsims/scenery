@@ -31,7 +31,6 @@ import dotRandom from '../../../../dot/js/dotRandom.js';
 import cleanArray from '../../../../phet-core/js/cleanArray.js';
 import Enumeration from '../../../../phet-core/js/Enumeration.js';
 import EnumerationValue from '../../../../phet-core/js/EnumerationValue.js';
-import platform from '../../../../phet-core/js/platform.js';
 import Poolable from '../../../../phet-core/js/Poolable.js';
 import { FocusManager, Node, PDOMPeer, PDOMUtils, scenery, Trail, TransformTracker } from '../../imports.js';
 
@@ -353,15 +352,6 @@ class PDOMInstance {
       if ( FocusManager.pdomFocusedNode.pdomInstances[ 0 ].trail.containsNode( this.node ) ) {
         FocusManager.pdomFocus = null;
       }
-    }
-
-    // Edge has a bug where removing the hidden attribute on an ancestor doesn't add elements back to the navigation
-    // order. As a workaround, forcing the browser to redraw the PDOM seems to fix the issue. Forced redraw method
-    // recommended by https://stackoverflow.com/questions/8840580/force-dom-redraw-refresh-on-chrome-mac, also see
-    // https://github.com/phetsims/a11y-research/issues/30
-    if ( platform.edge ) {
-      this.display.getPDOMRootElement().style.display = 'none';
-      this.display.getPDOMRootElement().style.display = 'block';
     }
   }
 
