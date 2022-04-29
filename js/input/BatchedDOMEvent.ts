@@ -36,7 +36,7 @@ export default class BatchedDOMEvent implements IPoolable {
     this.initialize( domEvent, type, callback );
   }
 
-  initialize( domEvent: Event, type: BatchedDOMEventType, callback: BatchedDOMEventCallback ) {
+  initialize( domEvent: Event, type: BatchedDOMEventType, callback: BatchedDOMEventCallback ): void {
     // called multiple times due to pooling, this should be re-entrant
     assert && assert( domEvent, 'for some reason, there is no DOM event?' );
 
@@ -45,7 +45,7 @@ export default class BatchedDOMEvent implements IPoolable {
     this.callback = callback;
   }
 
-  run( input: Input ) {
+  run( input: Input ): void {
     sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Running batched event' );
     sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
 
@@ -95,14 +95,14 @@ export default class BatchedDOMEvent implements IPoolable {
   /**
    * Releases references
    */
-  dispose() {
+  dispose(): void {
     // clear our references
     this.domEvent = null;
     this.callback = null;
     this.freeToPool();
   }
 
-  freeToPool() {
+  freeToPool(): void {
     BatchedDOMEvent.pool.freeToPool( this );
   }
 

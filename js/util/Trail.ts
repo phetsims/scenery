@@ -320,7 +320,7 @@ export default class Trail {
     return this;
   }
 
-  addDescendantTrail( trail: Trail ) {
+  addDescendantTrail( trail: Trail ): void {
     const length = trail.length;
     if ( length ) {
       this.addDescendant( trail.nodes[ 0 ] );
@@ -330,7 +330,7 @@ export default class Trail {
     }
   }
 
-  removeDescendantTrail( trail: Trail ) {
+  removeDescendantTrail( trail: Trail ): void {
     const length = trail.length;
     for ( let i = length - 1; i >= 0; i-- ) {
       assert && assert( this.lastNode() === trail.nodes[ i ] );
@@ -342,7 +342,7 @@ export default class Trail {
   /**
    * Refreshes the internal index references (important if any children arrays were modified!)
    */
-  reindex() {
+  reindex(): void {
     const length = this.length;
     for ( let i = 1; i < length; i++ ) {
       // only replace indices where they have changed (this was a performance hotspot)
@@ -626,7 +626,7 @@ export default class Trail {
   /**
    * Calls callback( trail ) for this trail, and each descendant trail. If callback returns true, subtree will be skipped
    */
-  eachTrailUnder( callback: ( trail: Trail ) => boolean | void ) {
+  eachTrailUnder( callback: ( trail: Trail ) => boolean | void ): void {
     // TODO: performance: should be optimized to be much faster, since we don't have to deal with the before/after
     new TrailPointer( this, true ).eachTrailBetween( new TrailPointer( this, false ), callback );
   }
@@ -713,7 +713,7 @@ export default class Trail {
     return this.getParentTransform().inverseBounds2( bounds );
   }
 
-  private updateUniqueId() {
+  private updateUniqueId(): void {
     // string concatenation is faster, see http://jsperf.com/string-concat-vs-joins
     let result = '';
     const len = this.nodes.length;
@@ -774,7 +774,7 @@ export default class Trail {
   /**
    * Like eachTrailBetween, but only fires for painted trails. If callback returns true, subtree will be skipped
    */
-  static eachPaintedTrailBetween( a: Trail, b: Trail, callback: ( trail: Trail ) => void, excludeEndTrails: boolean, rootNode: Node ) {
+  static eachPaintedTrailBetween( a: Trail, b: Trail, callback: ( trail: Trail ) => void, excludeEndTrails: boolean, rootNode: Node ): void {
     Trail.eachTrailBetween( a, b, ( trail: Trail ) => {
       if ( trail.isPainted() ) {
         return callback( trail );
@@ -786,7 +786,7 @@ export default class Trail {
   /**
    * Global way of iterating across trails. when callback returns true, subtree will be skipped
    */
-  static eachTrailBetween( a: Trail, b: Trail, callback: ( trail: Trail ) => void, excludeEndTrails: boolean, rootNode: Node ) {
+  static eachTrailBetween( a: Trail, b: Trail, callback: ( trail: Trail ) => void, excludeEndTrails: boolean, rootNode: Node ): void {
     const aPointer = a ? new TrailPointer( a.copy(), true ) : new TrailPointer( new Trail( rootNode ), true );
     const bPointer = b ? new TrailPointer( b.copy(), true ) : new TrailPointer( new Trail( rootNode ), false );
 
@@ -837,7 +837,7 @@ export default class Trail {
    * @param trail
    * @param predicate
    */
-  static appendAncestorTrailsWithPredicate( trailResults: Trail[], trail: Trail, predicate: ( node: Node ) => boolean ) {
+  static appendAncestorTrailsWithPredicate( trailResults: Trail[], trail: Trail, predicate: ( node: Node ) => boolean ): void {
     const root = trail.rootNode();
 
     if ( predicate( root ) ) {
@@ -859,7 +859,7 @@ export default class Trail {
    * @param trail
    * @param predicate
    */
-  static appendDescendantTrailsWithPredicate( trailResults: Trail[], trail: Trail, predicate: ( node: Node ) => boolean ) {
+  static appendDescendantTrailsWithPredicate( trailResults: Trail[], trail: Trail, predicate: ( node: Node ) => boolean ): void {
     const lastNode = trail.lastNode();
 
     if ( predicate( lastNode ) ) {
@@ -908,7 +908,7 @@ export default class Trail {
    * @param {Trail} a
    * @param {Trail} b
    */
-  static spannedSubtrees( a: Trail, b: Trail ) {
+  static spannedSubtrees( a: Trail, b: Trail ): void {
     // assert && assert( a.nodes[0] === b.nodes[0], 'Spanned subtrees for a and b requires that a and b have the same root' );
 
     // a.reindex();

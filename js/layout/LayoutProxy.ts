@@ -25,7 +25,7 @@ export default class LayoutProxy {
     this.initialize( trail );
   }
 
-  initialize( trail: Trail ) {
+  initialize( trail: Trail ): void {
     this.trail = trail;
   }
 
@@ -393,13 +393,13 @@ export default class LayoutProxy {
   /**
    * Releases references, and frees it to the pool.
    */
-  dispose() {
+  dispose(): void {
     this.trail = null;
 
     this.freeToPool();
   }
 
-  freeToPool() {
+  freeToPool(): void {
     LayoutProxy.pool.freeToPool( this );
   }
 

@@ -168,7 +168,7 @@ export default abstract class Pointer {
    * Adds an input listener to this pointer. If the attach flag is true, then it will be set as the "attached"
    * listener.
    */
-  addInputListener( listener: IInputListener, attach?: boolean ) {
+  addInputListener( listener: IInputListener, attach?: boolean ): void {
     sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( `addInputListener to ${this.toString()} attach:${attach}` );
     sceneryLog && sceneryLog.Pointer && sceneryLog.push();
 
@@ -192,7 +192,7 @@ export default abstract class Pointer {
   /**
    * Removes an input listener from this pointer.
    */
-  removeInputListener( listener: IInputListener ) {
+  removeInputListener( listener: IInputListener ): void {
     sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( `removeInputListener to ${this.toString()}` );
     sceneryLog && sceneryLog.Pointer && sceneryLog.push();
 
@@ -260,7 +260,7 @@ export default abstract class Pointer {
    *
    * After this executes, this pointer should not be attached.
    */
-  interruptAttached() {
+  interruptAttached(): void {
     if ( this.isAttached() ) {
       this._attachedListener!.interrupt(); // Any listener that uses the 'attach' API should have interrupt()
     }
@@ -269,7 +269,7 @@ export default abstract class Pointer {
   /**
    * Interrupts all listeners on this pointer.
    */
-  interruptAll() {
+  interruptAll(): void {
     const listeners = this._listeners.slice();
     for ( let i = 0; i < listeners.length; i++ ) {
       const listener = listeners[ i ];
@@ -280,7 +280,7 @@ export default abstract class Pointer {
   /**
    * Marks the pointer as attached to this listener.
    */
-  private attach( listener: IAttachableInputListener ) {
+  private attach( listener: IAttachableInputListener ): void {
     sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( `Attaching to ${this.toString()}` );
 
     assert && assert( !this.isAttached(), 'Attempted to attach to an already attached pointer' );
@@ -292,7 +292,7 @@ export default abstract class Pointer {
   /**
    * Marks the pointer as detached from a previously attached listener.
    */
-  private detach( listener: IAttachableInputListener ) {
+  private detach( listener: IAttachableInputListener ): void {
     sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( `Detaching from ${this.toString()}` );
 
     assert && assert( this.isAttached(), 'Cannot detach a listener if one is not attached' );
@@ -314,7 +314,7 @@ export default abstract class Pointer {
    * Note that the Intent can be changed by listeners up the dispatch phase or on the next press. See Intent enum
    * for valid entries.
    */
-  addIntent( intent: Intent ) {
+  addIntent( intent: Intent ): void {
     assert && assert( Intent.enumeration.includes( intent ), 'trying to set unsupported intent for Pointer' );
 
     if ( !this._intents.includes( intent ) ) {
@@ -327,7 +327,7 @@ export default abstract class Pointer {
   /**
    * Remove an Intent from the Pointer. See addIntent for more information.
    */
-  removeIntent( intent: Intent ) {
+  removeIntent( intent: Intent ): void {
     assert && assert( Intent.enumeration.includes( intent ), 'trying to set unsupported intent for Pointer' );
 
     if ( this._intents.includes( intent ) ) {
@@ -349,7 +349,7 @@ export default abstract class Pointer {
    * self removal) that clears the intent when the pointer receives an "up" event. Should generally be called on
    * the Pointer in response to a down event.
    */
-  reserveForDrag() {
+  reserveForDrag(): void {
 
     // if the Pointer hasn't already been reserved for drag in Input event dispatch, in which
     // case it already has Intent and listener to remove Intent
@@ -376,7 +376,7 @@ export default abstract class Pointer {
    * removal) that clears the intent when the pointer receives a "keyup" or "blur" event. Should generally be called
    * on the Pointer in response to a keydown event.
    */
-  reserveForKeyboardDrag() {
+  reserveForKeyboardDrag(): void {
 
     if ( !this._intents.includes( Intent.KEYBOARD_DRAG ) ) {
       this.addIntent( Intent.KEYBOARD_DRAG );
@@ -404,7 +404,7 @@ export default abstract class Pointer {
    * This is called when a capture starts on this pointer. We request it on pointerstart, and if received, we should
    * generally receive events outside the window.
    */
-  onGotPointerCapture() {
+  onGotPointerCapture(): void {
     this._pointerCaptured = true;
   }
 
@@ -415,7 +415,7 @@ export default abstract class Pointer {
    * See https://github.com/phetsims/scenery/issues/1186 for more information. We'll want to interrupt the pointer
    * on this case regardless,
    */
-  onLostPointerCapture() {
+  onLostPointerCapture(): void {
     if ( this._pointerCaptured ) {
       this.interruptAll();
     }
@@ -425,7 +425,7 @@ export default abstract class Pointer {
   /**
    * Releases references so it can be garbage collected.
    */
-  dispose() {
+  dispose(): void {
     sceneryLog && sceneryLog.Pointer && sceneryLog.Pointer( `Disposing ${this.toString()}` );
 
     // remove listeners that would clear intent on disposal

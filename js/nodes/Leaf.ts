@@ -19,11 +19,11 @@ const Leaf = memoize( <SuperType extends Constructor>( type: SuperType ) => {
       super( ...args );
     }
 
-    insertChild( index: number, node: Node ) {
+    insertChild( index: number, node: Node ): void {
       throw new Error( 'Attempt to insert child into Leaf' );
     }
 
-    removeChildWithIndex( node: Node, indexOfChild: number ) {
+    removeChildWithIndex( node: Node, indexOfChild: number ): void {
       throw new Error( 'Attempt to remove child from Leaf' );
     }
   };

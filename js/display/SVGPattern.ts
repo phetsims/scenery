@@ -19,7 +19,7 @@ export default class SVGPattern implements IPoolable {
     this.initialize( pattern );
   }
 
-  initialize( pattern: Pattern ) {
+  initialize( pattern: Pattern ): this {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGPattern] initialize: ${pattern.id}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
@@ -65,18 +65,18 @@ export default class SVGPattern implements IPoolable {
   /**
    * Called from SVGBlock, matches other paints.
    */
-  update() {
+  update(): void {
     // Nothing
   }
 
   /**
    * Disposes, so that it can be reused from the pool.
    */
-  dispose() {
+  dispose(): void {
     this.freeToPool();
   }
 
-  freeToPool() {
+  freeToPool(): void {
     SVGPattern.pool.freeToPool( this );
   }
 

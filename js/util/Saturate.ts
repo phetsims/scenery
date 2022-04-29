@@ -41,7 +41,7 @@ export default class Saturate extends ColorMatrixFilter {
     return `saturate(${toSVGNumber( this.amount )})`;
   }
 
-  override isDOMCompatible() {
+  override isDOMCompatible(): boolean {
     return true;
   }
 }

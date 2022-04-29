@@ -341,7 +341,7 @@ export default class Color {
   /**
    * Called to update the internally cached CSS value
    */
-  private updateColor() {
+  private updateColor(): void {
     assert && assert( !this.immutable,
       'Cannot modify an immutable color. Likely caused by trying to mutate a color after it was used for a node fill/stroke' );
 
@@ -528,7 +528,7 @@ export default class Color {
     return `#${hexString}`;
   }
 
-  toStateObject() {
+  toStateObject(): { r: number; g: number; b: number; a: number } {
     return {
       r: this.r,
       g: this.g,
@@ -638,7 +638,7 @@ export default class Color {
     return new Color( 0, 0, 0, 1 ).setHSLA( hue, saturation, lightness, alpha );
   }
 
-  static checkPaintString( cssString: string ) {
+  static checkPaintString( cssString: string ): void {
     if ( assert ) {
       try {
         scratchColor.setCSS( cssString );
@@ -652,7 +652,7 @@ export default class Color {
   /**
    * A Paint of the type that Paintable accepts as fills or strokes
    */
-  static checkPaint( paint: IPaint ) {
+  static checkPaint( paint: IPaint ): void {
     if ( typeof paint === 'string' ) {
       Color.checkPaintString( paint );
     }

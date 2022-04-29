@@ -35,7 +35,7 @@ class SVGGradientStop implements IPoolable {
 
   isActiveSVGGradientStop(): this is ActiveSVGGradientStop { return !!this.svgGradient; }
 
-  initialize( svgGradient: ActiveSVGGradient, ratio: number, color: IColor ) {
+  initialize( svgGradient: ActiveSVGGradient, ratio: number, color: IColor ): this {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradientStop] initialize: ${svgGradient.gradient.id} : ${ratio}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
@@ -76,7 +76,7 @@ class SVGGradientStop implements IPoolable {
   /**
    * Called when our color is a Property and it changes.
    */
-  private onPropertyChange( newValue: Color | string | null, oldValue: Color | string | null ) {
+  private onPropertyChange( newValue: Color | string | null, oldValue: Color | string | null ): void {
     assert && assert( this.isActiveSVGGradientStop() );
     const activeSelf = this as ActiveSVGGradientStop;
 
@@ -95,7 +95,7 @@ class SVGGradientStop implements IPoolable {
   /**
    * Should be called when the color stop's value may have changed.
    */
-  private markDirty() {
+  private markDirty(): void {
     assert && assert( this.isActiveSVGGradientStop() );
 
     this.dirty = true;
@@ -105,7 +105,7 @@ class SVGGradientStop implements IPoolable {
   /**
    * Updates the color stop to whatever the current color should be.
    */
-  update() {
+  update(): void {
     if ( !this.dirty ) {
       return;
     }
@@ -156,7 +156,7 @@ class SVGGradientStop implements IPoolable {
   /**
    * Disposes, so that it can be reused from the pool.
    */
-  dispose() {
+  dispose(): void {
     assert && assert( this.isActiveSVGGradientStop() );
     const activeSelf = this as ActiveSVGGradientStop;
 
@@ -188,7 +188,7 @@ class SVGGradientStop implements IPoolable {
     sceneryLog && sceneryLog.Paints && sceneryLog.pop();
   }
 
-  freeToPool() {
+  freeToPool(): void {
     SVGGradientStop.pool.freeToPool( this );
   }
 

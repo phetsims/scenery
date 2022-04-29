@@ -70,7 +70,7 @@ export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
     } );
   }
 
-  override setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds: boolean ) {
+  override setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds: boolean ): void {
     super.setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds );
 
     this._constraint.excludeInvisible = excludeInvisibleChildrenFromBounds;
@@ -79,7 +79,7 @@ export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
   /**
    * Called when a child is inserted.
    */
-  private onFlowBoxChildInserted( node: Node, index: number ) {
+  private onFlowBoxChildInserted( node: Node, index: number ): void {
     const cell = new FlowCell( this._constraint, node, node.layoutOptions as FlowConfigurableOptions );
     this._cellMap.set( node, cell );
 
@@ -89,7 +89,7 @@ export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
   /**
    * Called when a child is removed.
    */
-  private onFlowBoxChildRemoved( node: Node ) {
+  private onFlowBoxChildRemoved( node: Node ): void {
 
     const cell = this._cellMap.get( node )!;
     assert && assert( cell );
@@ -104,7 +104,7 @@ export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
   /**
    * Called when children are rearranged
    */
-  private onFlowBoxChildrenReordered( minChangeIndex: number, maxChangeIndex: number ) {
+  private onFlowBoxChildrenReordered( minChangeIndex: number, maxChangeIndex: number ): void {
     this._constraint.reorderCells(
       this._children.slice( minChangeIndex, maxChangeIndex + 1 ).map( node => this._cellMap.get( node )! ),
       minChangeIndex,
@@ -115,7 +115,7 @@ export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
   /**
    * Called on change of children (child added, removed, order changed, etc.)
    */
-  private onFlowBoxChildrenChanged() {
+  private onFlowBoxChildrenChanged(): void {
     this._constraint.updateLayoutAutomatically();
   }
 
@@ -314,7 +314,7 @@ export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
   /**
    * Releases references
    */
-  override dispose() {
+  override dispose(): void {
     this._constraint.dispose();
 
     for ( const cell of this._cellMap.values() ) {

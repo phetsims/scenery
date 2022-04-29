@@ -112,7 +112,7 @@ export default class ColorMatrixFilter extends Filter {
    * This effectively mutates the provided filter object, and will be successively called on all Filters to build an
    * SVG filter object.
    */
-  applySVGFilter( svgFilter: SVGFilterElement, inName: string, resultName?: string ) {
+  applySVGFilter( svgFilter: SVGFilterElement, inName: string, resultName?: string ): void {
     Filter.applyColorMatrix(
       `${toSVGNumber( this.m00 )} ${toSVGNumber( this.m01 )} ${toSVGNumber( this.m02 )} ${toSVGNumber( this.m03 )} ${toSVGNumber( this.m04 )} ` +
       `${toSVGNumber( this.m10 )} ${toSVGNumber( this.m11 )} ${toSVGNumber( this.m12 )} ${toSVGNumber( this.m13 )} ${toSVGNumber( this.m14 )} ` +
@@ -127,7 +127,7 @@ export default class ColorMatrixFilter extends Filter {
    * filtered content. Usually this would be by using getImageData/putImageData, however redrawing or other operations
    * are also possible.
    */
-  applyCanvasFilter( wrapper: CanvasContextWrapper ) {
+  applyCanvasFilter( wrapper: CanvasContextWrapper ): void {
     assert && assert( wrapper instanceof CanvasContextWrapper );
 
     const width = wrapper.canvas.width;
@@ -171,11 +171,11 @@ export default class ColorMatrixFilter extends Filter {
     wrapper.context.putImageData( imageData, 0, 0 );
   }
 
-  override isSVGCompatible() {
+  override isSVGCompatible(): boolean {
     return true;
   }
 
-  override isCanvasCompatible() {
+  override isCanvasCompatible(): boolean {
     return super.isCanvasCompatible() || isImageDataSupported;
   }
 

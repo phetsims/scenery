@@ -59,7 +59,7 @@ export default class SpriteInstance {
   /**
    * For pooling. Please use SpriteInstance.dirtyFromPool() to grab a copy
    */
-  private initialize() {
+  private initialize(): void {
     // We need an empty initialization method here, so that we can grab dirty versions and use them for higher
     // performance.
   }
@@ -105,7 +105,7 @@ export default class SpriteInstance {
     return this.sprite.containsPoint( position );
   }
 
-  freeToPool() {
+  freeToPool(): void {
     SpriteInstance.pool.freeToPool( this );
   }
 

@@ -41,7 +41,7 @@ export default class ManualConstraint<T extends Node[]> extends LayoutConstraint
     this.updateLayout();
   }
 
-  override layout() {
+  override layout(): void {
     super.layout();
 
     assert && assert( _.every( this.nodes, node => !node.isDisposed ) );

@@ -855,7 +855,7 @@ export default class Input {
   /**
    * Interrupts any input actions that are currently taking place (should stop drags, etc.)
    */
-  interruptPointers() {
+  interruptPointers(): void {
     _.each( this.pointers, pointer => {
       pointer.interruptAll();
     } );
@@ -871,7 +871,7 @@ export default class Input {
    *                                     only allow certain operations in the callback for a user gesture (e.g. like
    *                                     a mouseup to open a window).
    */
-  batchEvent( domEvent: Event, batchType: BatchedDOMEventType, callback: BatchedDOMEventCallback, triggerImmediate: boolean ) {
+  batchEvent( domEvent: Event, batchType: BatchedDOMEventType, callback: BatchedDOMEventCallback, triggerImmediate: boolean ): void {
     sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'Input.batchEvent' );
     sceneryLog && sceneryLog.InputEvent && sceneryLog.push();
 
@@ -899,7 +899,7 @@ export default class Input {
   /**
    * Fires all of our events that were batched into the batchedEvents array. (scenery-internal)
    */
-  fireBatchedEvents() {
+  fireBatchedEvents(): void {
     sceneryLog && sceneryLog.InputEvent && this.currentlyFiringEvents && sceneryLog.InputEvent(
       'REENTRANCE DETECTED' );
     // Don't re-entrantly enter our loop, see https://github.com/phetsims/balloons-and-static-electricity/issues/406
@@ -935,7 +935,7 @@ export default class Input {
    * otherwise it can cause incorrect state in certain types of listeners (e.g. ones that count how many pointers
    * are over them).
    */
-  clearBatchedEvents() {
+  clearBatchedEvents(): void {
     this.batchedEvents.length = 0;
   }
 
@@ -943,14 +943,14 @@ export default class Input {
    * Checks all pointers to see whether they are still "over" the same nodes (trail). If not, it will fire the usual
    * enter/exit events. (scenery-internal)
    */
-  validatePointers() {
+  validatePointers(): void {
     this.validatePointersAction.execute();
   }
 
   /**
    * Removes all non-Mouse pointers from internal tracking. (scenery-internal)
    */
-  removeTemporaryPointers() {
+  removeTemporaryPointers(): void {
     // TODO: Just null this out, instead of creating a fake event?
     const fakeDomEvent = {
       eek: 'This is a fake DOM event created in removeTemporaryPointers(), called from a Scenery exit event. Our attempt to masquerade seems unsuccessful! :('
@@ -971,7 +971,7 @@ export default class Input {
   /**
    * Hooks up DOM listeners to whatever type of object we are going to listen to. (scenery-internal)
    */
-  connectListeners() {
+  connectListeners(): void {
     BrowserEvents.addDisplay( this.display, this.attachToWindow, this.passiveEvents );
 
     if ( this.display._accessible ) {
@@ -986,7 +986,7 @@ export default class Input {
   /**
    * Removes DOM listeners from whatever type of object we were listening to. (scenery-internal)
    */
-  disconnectListeners() {
+  disconnectListeners(): void {
     BrowserEvents.removeDisplay( this.display, this.attachToWindow, this.passiveEvents );
 
     if ( this.display._accessible ) {
@@ -1027,7 +1027,7 @@ export default class Input {
   /**
    * Adds a pointer to our list.
    */
-  private addPointer( pointer: Pointer ) {
+  private addPointer( pointer: Pointer ): void {
     this.pointers.push( pointer );
 
     this.pointerAddedEmitter.emit( pointer );
@@ -1036,7 +1036,7 @@ export default class Input {
   /**
    * Removes a pointer from our list. If we get future events for it (based on the ID) it will be ignored.
    */
-  private removePointer( pointer: Pointer ) {
+  private removePointer( pointer: Pointer ): void {
     // sanity check version, will remove all instances
     for ( let i = this.pointers.length - 1; i >= 0; i-- ) {
       if ( this.pointers[ i ] === pointer ) {
@@ -1110,7 +1110,7 @@ export default class Input {
    * Steps to dispatch a pdom-related event. Before dispatch, the PDOMPointer is initialized if it
    * hasn't been created yet and a userGestureEmitter emits to indicate that a user has begun an interaction.
    */
-  private dispatchPDOMEvent<DOMEvent extends Event>( trail: Trail, eventType: string, domEvent: DOMEvent, bubbles: boolean ) {
+  private dispatchPDOMEvent<DOMEvent extends Event>( trail: Trail, eventType: string, domEvent: DOMEvent, bubbles: boolean ): void {
 
     // exclude focus and blur events because they can happen with scripting without user input
     if ( PDOMUtils.USER_GESTURE_EVENTS.includes( eventType ) ) {
@@ -1197,7 +1197,7 @@ export default class Input {
    * NOTE: This may also be called from the pointer event handler (pointerDown) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
    */
-  mouseDown( id: number, point: Vector2, event: MouseEvent | PointerEvent ) {
+  mouseDown( id: number, point: Vector2, event: MouseEvent | PointerEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `mouseDown('${id}', ${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.mouseDownAction.execute( id, point, event );
@@ -1210,7 +1210,7 @@ export default class Input {
    * NOTE: This may also be called from the pointer event handler (pointerUp) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
    */
-  mouseUp( point: Vector2, event: MouseEvent | PointerEvent ) {
+  mouseUp( point: Vector2, event: MouseEvent | PointerEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `mouseUp(${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.mouseUpAction.execute( point, event );
@@ -1223,7 +1223,7 @@ export default class Input {
    * NOTE: This may also be called from the pointer event handler (pointerMove) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
    */
-  mouseMove( point: Vector2, event: MouseEvent | PointerEvent ) {
+  mouseMove( point: Vector2, event: MouseEvent | PointerEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `mouseMove(${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.mouseMoveAction.execute( point, event );
@@ -1233,7 +1233,7 @@ export default class Input {
   /**
    * Triggers a logical mouseover event (this does NOT correspond to the Scenery event, since this is for the display) (scenery-internal)
    */
-  mouseOver( point: Vector2, event: MouseEvent | PointerEvent ) {
+  mouseOver( point: Vector2, event: MouseEvent | PointerEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `mouseOver(${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.mouseOverAction.execute( point, event );
@@ -1243,7 +1243,7 @@ export default class Input {
   /**
    * Triggers a logical mouseout event (this does NOT correspond to the Scenery event, since this is for the display) (scenery-internal)
    */
-  mouseOut( point: Vector2, event: MouseEvent | PointerEvent ) {
+  mouseOut( point: Vector2, event: MouseEvent | PointerEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `mouseOut(${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.mouseOutAction.execute( point, event );
@@ -1253,7 +1253,7 @@ export default class Input {
   /**
    * Triggers a logical mouse-wheel/scroll event. (scenery-internal)
    */
-  wheel( event: WheelEvent ) {
+  wheel( event: WheelEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `wheel(${Input.debugText( null, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.wheelScrollAction.execute( event );
@@ -1266,7 +1266,7 @@ export default class Input {
    * NOTE: This may also be called from the pointer event handler (pointerDown) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
    */
-  touchStart( id: number, point: Vector2, event: TouchEvent | PointerEvent ) {
+  touchStart( id: number, point: Vector2, event: TouchEvent | PointerEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `touchStart('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -1281,7 +1281,7 @@ export default class Input {
    * NOTE: This may also be called from the pointer event handler (pointerUp) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
    */
-  touchEnd( id: number, point: Vector2, event: TouchEvent | PointerEvent ) {
+  touchEnd( id: number, point: Vector2, event: TouchEvent | PointerEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `touchEnd('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -1296,7 +1296,7 @@ export default class Input {
    * NOTE: This may also be called from the pointer event handler (pointerMove) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
    */
-  touchMove( id: number, point: Vector2, event: TouchEvent | PointerEvent ) {
+  touchMove( id: number, point: Vector2, event: TouchEvent | PointerEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `touchMove('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.touchMoveAction.execute( id, point, event );
@@ -1309,7 +1309,7 @@ export default class Input {
    * NOTE: This may also be called from the pointer event handler (pointerCancel) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
    */
-  touchCancel( id: number, point: Vector2, event: TouchEvent | PointerEvent ) {
+  touchCancel( id: number, point: Vector2, event: TouchEvent | PointerEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `touchCancel('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.touchCancelAction.execute( id, point, event );
@@ -1322,7 +1322,7 @@ export default class Input {
    * NOTE: This may also be called from the pointer event handler (pointerDown) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
    */
-  penStart( id: number, point: Vector2, event: PointerEvent ) {
+  penStart( id: number, point: Vector2, event: PointerEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `penStart('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.penStartAction.execute( id, point, event );
@@ -1335,7 +1335,7 @@ export default class Input {
    * NOTE: This may also be called from the pointer event handler (pointerUp) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
    */
-  penEnd( id: number, point: Vector2, event: PointerEvent ) {
+  penEnd( id: number, point: Vector2, event: PointerEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `penEnd('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.penEndAction.execute( id, point, event );
@@ -1348,7 +1348,7 @@ export default class Input {
    * NOTE: This may also be called from the pointer event handler (pointerMove) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
    */
-  penMove( id: number, point: Vector2, event: PointerEvent ) {
+  penMove( id: number, point: Vector2, event: PointerEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `penMove('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.penMoveAction.execute( id, point, event );
@@ -1361,7 +1361,7 @@ export default class Input {
    * NOTE: This may also be called from the pointer event handler (pointerCancel) or from things like fuzzing or
    * playback. The event may be "faked" for certain purposes.
    */
-  penCancel( id: number, point: Vector2, event: PointerEvent ) {
+  penCancel( id: number, point: Vector2, event: PointerEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `penCancel('${id}',${Input.debugText( point, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.penCancelAction.execute( id, point, event );
@@ -1371,7 +1371,7 @@ export default class Input {
   /**
    * Handles a pointerdown event, forwarding it to the proper logical event. (scenery-internal)
    */
-  pointerDown( id: number, type: string, point: Vector2, event: PointerEvent ) {
+  pointerDown( id: number, type: string, point: Vector2, event: PointerEvent ): void {
     // In IE for pointer down events, we want to make sure than the next interactions off the page are sent to
     // this element (it will bubble). See https://github.com/phetsims/scenery/issues/464 and
     // http://news.qooxdoo.org/mouse-capturing.
@@ -1403,7 +1403,7 @@ export default class Input {
   /**
    * Handles a pointerup event, forwarding it to the proper logical event. (scenery-internal)
    */
-  pointerUp( id: number, type: string, point: Vector2, event: PointerEvent ) {
+  pointerUp( id: number, type: string, point: Vector2, event: PointerEvent ): void {
 
     // update this outside of the Action executions so that PhET-iO event playback does not override it
     this.upTimeStamp = event.timeStamp;
@@ -1429,7 +1429,7 @@ export default class Input {
   /**
    * Handles a pointercancel event, forwarding it to the proper logical event. (scenery-internal)
    */
-  pointerCancel( id: number, type: string, point: Vector2, event: PointerEvent ) {
+  pointerCancel( id: number, type: string, point: Vector2, event: PointerEvent ): void {
     type = this.handleUnknownPointerType( type, id );
     switch( type ) {
       case 'mouse':
@@ -1453,7 +1453,7 @@ export default class Input {
   /**
    * Handles a gotpointercapture event, forwarding it to the proper logical event. (scenery-internal)
    */
-  gotPointerCapture( id: number, type: string, point: Vector2, event: Event ) {
+  gotPointerCapture( id: number, type: string, point: Vector2, event: Event ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `gotPointerCapture('${id}',${Input.debugText( null, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.gotPointerCaptureAction.execute( id, event );
@@ -1463,7 +1463,7 @@ export default class Input {
   /**
    * Handles a lostpointercapture event, forwarding it to the proper logical event. (scenery-internal)
    */
-  lostPointerCapture( id: number, type: string, point: Vector2, event: Event ) {
+  lostPointerCapture( id: number, type: string, point: Vector2, event: Event ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `lostPointerCapture('${id}',${Input.debugText( null, event )});` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
     this.lostPointerCaptureAction.execute( id, event );
@@ -1473,7 +1473,7 @@ export default class Input {
   /**
    * Handles a pointermove event, forwarding it to the proper logical event. (scenery-internal)
    */
-  pointerMove( id: number, type: string, point: Vector2, event: PointerEvent ) {
+  pointerMove( id: number, type: string, point: Vector2, event: PointerEvent ): void {
     type = this.handleUnknownPointerType( type, id );
     switch( type ) {
       case 'mouse':
@@ -1495,7 +1495,7 @@ export default class Input {
   /**
    * Handles a pointerover event, forwarding it to the proper logical event. (scenery-internal)
    */
-  pointerOver( id: number, type: string, point: Vector2, event: PointerEvent ) {
+  pointerOver( id: number, type: string, point: Vector2, event: PointerEvent ): void {
     // TODO: accumulate mouse/touch info in the object if needed?
     // TODO: do we want to branch change on these types of events?
   }
@@ -1503,7 +1503,7 @@ export default class Input {
   /**
    * Handles a pointerout event, forwarding it to the proper logical event. (scenery-internal)
    */
-  pointerOut( id: number, type: string, point: Vector2, event: PointerEvent ) {
+  pointerOut( id: number, type: string, point: Vector2, event: PointerEvent ): void {
     // TODO: accumulate mouse/touch info in the object if needed?
     // TODO: do we want to branch change on these types of events?
   }
@@ -1511,7 +1511,7 @@ export default class Input {
   /**
    * Handles a pointerenter event, forwarding it to the proper logical event. (scenery-internal)
    */
-  pointerEnter( id: number, type: string, point: Vector2, event: PointerEvent ) {
+  pointerEnter( id: number, type: string, point: Vector2, event: PointerEvent ): void {
     // TODO: accumulate mouse/touch info in the object if needed?
     // TODO: do we want to branch change on these types of events?
   }
@@ -1519,7 +1519,7 @@ export default class Input {
   /**
    * Handles a pointerleave event, forwarding it to the proper logical event. (scenery-internal)
    */
-  pointerLeave( id: number, type: string, point: Vector2, event: PointerEvent ) {
+  pointerLeave( id: number, type: string, point: Vector2, event: PointerEvent ): void {
     // TODO: accumulate mouse/touch info in the object if needed?
     // TODO: do we want to branch change on these types of events?
   }
@@ -1547,7 +1547,7 @@ export default class Input {
   /**
    * Called for each logical "up" event, for any pointer type.
    */
-  private upEvent<DOMEvent extends Event>( pointer: Pointer, event: DOMEvent, pointChanged: boolean ) {
+  private upEvent<DOMEvent extends Event>( pointer: Pointer, event: DOMEvent, pointChanged: boolean ): void {
 
     // if the event target is within the PDOM the AT is sending a fake pointer event to the document - do not
     // dispatch this since the PDOM should only handle Input.PDOM_EVENT_TYPES, and all other pointer input should
@@ -1578,7 +1578,7 @@ export default class Input {
   /**
    * Called for each logical "down" event, for any pointer type.
    */
-  private downEvent<DOMEvent extends Event>( pointer: Pointer, event: DOMEvent, pointChanged: boolean ) {
+  private downEvent<DOMEvent extends Event>( pointer: Pointer, event: DOMEvent, pointChanged: boolean ): void {
 
     // if the event target is within the PDOM the AT is sending a fake pointer event to the document - do not
     // dispatch this since the PDOM should only handle Input.PDOM_EVENT_TYPES, and all other pointer input should
@@ -1604,7 +1604,7 @@ export default class Input {
   /**
    * Called for each logical "move" event, for any pointer type.
    */
-  private moveEvent<DOMEvent extends Event>( pointer: Pointer, event: DOMEvent ) {
+  private moveEvent<DOMEvent extends Event>( pointer: Pointer, event: DOMEvent ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `moveEvent ${pointer.toString()}` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -1619,7 +1619,7 @@ export default class Input {
   /**
    * Called for each logical "cancel" event, for any pointer type.
    */
-  private cancelEvent<DOMEvent extends Event>( pointer: Pointer, event: DOMEvent, pointChanged: boolean ) {
+  private cancelEvent<DOMEvent extends Event>( pointer: Pointer, event: DOMEvent, pointChanged: boolean ): void {
     sceneryLog && sceneryLog.Input && sceneryLog.Input( `cancelEvent ${pointer.toString()} changed:${pointChanged}` );
     sceneryLog && sceneryLog.Input && sceneryLog.push();
 
@@ -1705,7 +1705,7 @@ export default class Input {
    *                               for this node and all "descendant" nodes in the relevant trail.
    * @param lastNodeChanged - If the last node didn't change, we won't sent an over event.
    */
-  private enterEvents<DOMEvent extends Event>( pointer: Pointer, event: DOMEvent | null, trail: Trail, branchIndex: number, lastNodeChanged: boolean ) {
+  private enterEvents<DOMEvent extends Event>( pointer: Pointer, event: DOMEvent | null, trail: Trail, branchIndex: number, lastNodeChanged: boolean ): void {
     if ( lastNodeChanged ) {
       this.dispatchEvent<DOMEvent>( trail, 'over', pointer, event, true, true );
     }
@@ -1732,7 +1732,7 @@ export default class Input {
    *                               for this node and all "descendant" nodes in the relevant trail.
    * @param lastNodeChanged - If the last node didn't change, we won't sent an out event.
    */
-  private exitEvents<DOMEvent extends Event>( pointer: Pointer, event: DOMEvent | null, trail: Trail, branchIndex: number, lastNodeChanged: boolean ) {
+  private exitEvents<DOMEvent extends Event>( pointer: Pointer, event: DOMEvent | null, trail: Trail, branchIndex: number, lastNodeChanged: boolean ): void {
     for ( let i = trail.length - 1; i >= branchIndex; i-- ) {
       this.dispatchEvent<DOMEvent>( trail.slice( 0, i + 1 ), 'exit', pointer, event, false, true );
     }
@@ -1752,7 +1752,7 @@ export default class Input {
    * @param bubbles - If bubbles is false, the event is only dispatched to the leaf node of the trail.
    * @param fireOnInputDisabled - Whether to fire this event even if nodes have inputEnabled:false
    */
-  private dispatchEvent<DOMEvent extends Event>( trail: Trail, type: string, pointer: Pointer, event: DOMEvent | null, bubbles: boolean, fireOnInputDisabled = false ) {
+  private dispatchEvent<DOMEvent extends Event>( trail: Trail, type: string, pointer: Pointer, event: DOMEvent | null, bubbles: boolean, fireOnInputDisabled = false ): void {
     sceneryLog && sceneryLog.EventDispatch && sceneryLog.EventDispatch(
       `${type} trail:${trail.toString()} pointer:${pointer.toString()} at ${pointer.point ? pointer.point.toString() : 'null'}` );
     sceneryLog && sceneryLog.EventDispatch && sceneryLog.push();
@@ -1790,7 +1790,7 @@ export default class Input {
    * @param type
    * @param inputEvent
    */
-  private dispatchToListeners<DOMEvent extends Event>( pointer: Pointer, listeners: IInputListener[], type: string, inputEvent: SceneryEvent<DOMEvent> ) {
+  private dispatchToListeners<DOMEvent extends Event>( pointer: Pointer, listeners: IInputListener[], type: string, inputEvent: SceneryEvent<DOMEvent> ): void {
     assert && assert( inputEvent instanceof SceneryEvent );
 
     if ( inputEvent.handled ) {
@@ -1832,7 +1832,7 @@ export default class Input {
    * @param bubbles - If bubbles is false, the event is only dispatched to the leaf node of the trail.
    * @param [fireOnInputDisabled]
    */
-  private dispatchToTargets<DOMEvent extends Event>( trail: Trail, type: string, pointer: Pointer, inputEvent: SceneryEvent<DOMEvent>, bubbles: boolean, fireOnInputDisabled = false ) {
+  private dispatchToTargets<DOMEvent extends Event>( trail: Trail, type: string, pointer: Pointer, inputEvent: SceneryEvent<DOMEvent>, bubbles: boolean, fireOnInputDisabled = false ): void {
     assert && assert( inputEvent instanceof SceneryEvent );
 
     if ( inputEvent.aborted || inputEvent.handled ) {
@@ -1968,7 +1968,7 @@ export default class Input {
    * @param point - Not logged if null
    * @param domEvent
    */
-  private static debugText( point: Vector2 | null, domEvent: Event ) {
+  private static debugText( point: Vector2 | null, domEvent: Event ): string {
     let result = `${domEvent.timeStamp} ${domEvent.type}`;
     if ( point !== null ) {
       result = `${point.x},${point.y} ${result}`;

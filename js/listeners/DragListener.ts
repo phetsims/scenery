@@ -328,7 +328,7 @@ export default class DragListener extends PressListener implements IInputListene
    * @param [callback] - to be run at the end of the function, but only on success
    * @returns success - Returns whether the press was actually started
    */
-  override press( event: PressListenerEvent, targetNode?: Node, callback?: () => void ) {
+  override press( event: PressListenerEvent, targetNode?: Node, callback?: () => void ): boolean {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener press' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -382,7 +382,7 @@ export default class DragListener extends PressListener implements IInputListene
    * @param [event] - scenery event if there was one
    * @param [callback] - called at the end of the release
    */
-  override release( event?: PressListenerEvent, callback?: () => void ) {
+  override release( event?: PressListenerEvent, callback?: () => void ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener release' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -441,7 +441,7 @@ export default class DragListener extends PressListener implements IInputListene
   /**
    * Called when move events are fired on the attached pointer listener during a drag.
    */
-  override drag( event: PressListenerEvent ) {
+  override drag( event: PressListenerEvent ): void {
     assert && assert( isPressedListener( this ) );
     const pressedListener = this as PressedDragListener;
 
@@ -466,7 +466,7 @@ export default class DragListener extends PressListener implements IInputListene
    *
    * Should be safe to be called externally with an event.
    */
-  tryTouchSnag( event: PressListenerEvent ) {
+  tryTouchSnag( event: PressListenerEvent ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener tryTouchSnag' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -638,7 +638,7 @@ export default class DragListener extends PressListener implements IInputListene
   /**
    * Mutates the parentPoint given to account for the initial pointer's offset from the drag target's origin.
    */
-  protected applyParentOffset( parentPoint: Vector2 ) {
+  protected applyParentOffset( parentPoint: Vector2 ): void {
     if ( this._offsetPosition ) {
       parentPoint.add( this._offsetPosition( parentPoint, this as PressedDragListener ) );
     }
@@ -663,7 +663,7 @@ export default class DragListener extends PressListener implements IInputListene
    * Should be called when something that changes the output positions of the drag occurs (most often, a drag event
    * itself).
    */
-  reposition( globalPoint: Vector2 ) {
+  reposition( globalPoint: Vector2 ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener reposition' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -703,7 +703,7 @@ export default class DragListener extends PressListener implements IInputListene
    *
    * NOTE: Do not call directly. See the press method instead.
    */
-  touchenter( event: PressListenerEvent ) {
+  touchenter( event: PressListenerEvent ): void {
     this.tryTouchSnag( event );
   }
 
@@ -712,14 +712,14 @@ export default class DragListener extends PressListener implements IInputListene
    *
    * NOTE: Do not call directly. See the press method instead.
    */
-  touchmove( event: PressListenerEvent ) {
+  touchmove( event: PressListenerEvent ): void {
     this.tryTouchSnag( event );
   }
 
   /**
    * Called when an ancestor's transform has changed (when trackAncestors is true).
    */
-  private ancestorTransformed() {
+  private ancestorTransformed(): void {
     assert && assert( isPressedListener( this ) );
     const pressedListener = this as PressedDragListener;
     const point = pressedListener.pointer.point;
@@ -733,7 +733,7 @@ export default class DragListener extends PressListener implements IInputListene
   /**
    * Attaches our transform tracker (begins listening to the ancestor transforms)
    */
-  private attachTransformTracker() {
+  private attachTransformTracker(): void {
     assert && assert( isPressedListener( this ) );
     const pressedListener = this as PressedDragListener;
 
@@ -746,7 +746,7 @@ export default class DragListener extends PressListener implements IInputListene
   /**
    * Detaches our transform tracker (stops listening to the ancestor transforms)
    */
-  private detachTransformTracker() {
+  private detachTransformTracker(): void {
     if ( this._transformTracker ) {
       this._transformTracker.removeListener( this._transformTrackerListener );
       this._transformTracker.dispose();
@@ -766,7 +766,7 @@ export default class DragListener extends PressListener implements IInputListene
   /**
    * Sets the drag transform of the listener.
    */
-  setTransform( transform: Transform3 | null ) {
+  setTransform( transform: Transform3 | null ): void {
     assert && assert( transform === null || transform instanceof Transform3 );
 
     this._transform = transform;
@@ -791,7 +791,7 @@ export default class DragListener extends PressListener implements IInputListene
    *
    * This can be called manually, but can also be called through node.interruptSubtreeInput().
    */
-  override interrupt() {
+  override interrupt(): void {
     if ( this.pointer && this.pointer.isTouchLike() ) {
       this._lastInterruptedTouchLikePointer = this.pointer;
     }
@@ -813,7 +813,7 @@ export default class DragListener extends PressListener implements IInputListene
   /**
    * Disposes the listener, releasing references. It should not be used after this.
    */
-  override dispose() {
+  override dispose(): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'DragListener dispose' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 

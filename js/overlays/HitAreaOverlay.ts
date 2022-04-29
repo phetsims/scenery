@@ -14,7 +14,7 @@ export default class HitAreaOverlay extends ShapeBasedOverlay implements IOverla
     super( display, rootNode, 'hitAreaOverlay' );
   }
 
-  addShapes() {
+  addShapes(): void {
     new Trail( this.rootNode ).eachTrailUnder( trail => {
       const node = trail.lastNode();
 

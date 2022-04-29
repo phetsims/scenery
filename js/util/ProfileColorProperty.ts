@@ -104,7 +104,7 @@ export default class ProfileColorProperty extends ColorProperty {
     instances.push( this );
   }
 
-  override dispose() {
+  override dispose(): void {
     arrayRemove( instances, this );
     super.dispose();
   }

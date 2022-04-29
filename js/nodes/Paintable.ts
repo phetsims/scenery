@@ -529,7 +529,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
      *
      * Also note that duplicate paints are acceptable, and don't need to be filtered out before-hand.
      */
-    addCachedPaint( paint: IPaint ) {
+    addCachedPaint( paint: IPaint ): void {
       if ( paint instanceof Paint ) {
         this._cachedPaints.push( paint );
 
@@ -549,7 +549,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
      * <defs> element, so that we can switch quickly to use the given paint (instead of having to create it on the
      * SVG-side whenever the switch is made).
      */
-    removeCachedPaint( paint: IPaint ) {
+    removeCachedPaint( paint: IPaint ): void {
       if ( paint instanceof Paint ) {
         assert && assert( _.includes( this._cachedPaints, paint ) );
 
@@ -565,7 +565,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
     /**
      * Applies the fill to a Canvas context wrapper, before filling. (scenery-internal)
      */
-    beforeCanvasFill( wrapper: CanvasContextWrapper ) {
+    beforeCanvasFill( wrapper: CanvasContextWrapper ): void {
       assert && assert( this.getFillValue() !== null );
 
       const fillValue = this.getFillValue()!;
@@ -582,7 +582,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
     /**
      * Un-applies the fill to a Canvas context wrapper, after filling. (scenery-internal)
      */
-    afterCanvasFill( wrapper: CanvasContextWrapper ) {
+    afterCanvasFill( wrapper: CanvasContextWrapper ): void {
       const fillValue = this.getFillValue();
 
       // @ts-ignore
@@ -594,7 +594,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
     /**
      * Applies the stroke to a Canvas context wrapper, before stroking. (scenery-internal)
      */
-    beforeCanvasStroke( wrapper: CanvasContextWrapper ) {
+    beforeCanvasStroke( wrapper: CanvasContextWrapper ): void {
       const strokeValue = this.getStrokeValue();
 
       // TODO: is there a better way of not calling so many things on each stroke?
@@ -617,7 +617,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
     /**
      * Un-applies the stroke to a Canvas context wrapper, after stroking. (scenery-internal)
      */
-    afterCanvasStroke( wrapper: CanvasContextWrapper ) {
+    afterCanvasStroke( wrapper: CanvasContextWrapper ): void {
       const strokeValue = this.getStrokeValue();
 
       // @ts-ignore - for performance
@@ -784,7 +784,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
     /**
      * Invalidates our current fill, triggering recomputation of anything that depended on the old fill's value
      */
-    invalidateFill() {
+    invalidateFill(): void {
       const thisNode = this as unknown as Node;
 
       thisNode.invalidateSupportedRenderers();
@@ -798,7 +798,7 @@ const Paintable = memoize( <SuperType extends Constructor>( type: SuperType ) =>
     /**
      * Invalidates our current stroke, triggering recomputation of anything that depended on the old stroke's value
      */
-    invalidateStroke() {
+    invalidateStroke(): void {
       const thisNode = this as unknown as Node;
 
       thisNode.invalidateSupportedRenderers();

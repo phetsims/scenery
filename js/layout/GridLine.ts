@@ -23,7 +23,7 @@ export default class GridLine {
     this.initialize( index, cells, grow );
   }
 
-  initialize( index: number, cells: GridCell[], grow: number ) {
+  initialize( index: number, cells: GridCell[], grow: number ): void {
     // {number}
     this.index = index;
 
@@ -38,7 +38,7 @@ export default class GridLine {
     this.position = 0;
   }
 
-  freeToPool() {
+  freeToPool(): void {
     GridLine.pool.freeToPool( this );
   }
 

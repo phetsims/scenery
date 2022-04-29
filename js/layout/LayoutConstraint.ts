@@ -41,7 +41,7 @@ export default class LayoutConstraint {
     this.finishedLayoutEmitter = new TinyEmitter();
   }
 
-  addNode( node: Node ) {
+  addNode( node: Node ): void {
     assert && assert( node instanceof Node );
     assert && assert( !this._listenedNodes.has( node ) );
 
@@ -59,7 +59,7 @@ export default class LayoutConstraint {
     this._listenedNodes.add( node );
   }
 
-  removeNode( node: Node ) {
+  removeNode( node: Node ): void {
     assert && assert( node instanceof Node );
     assert && assert( this._listenedNodes.has( node ) );
 
@@ -83,11 +83,11 @@ export default class LayoutConstraint {
     return this._layoutLockCount > 0;
   }
 
-  lock() {
+  lock(): void {
     this._layoutLockCount++;
   }
 
-  unlock() {
+  unlock(): void {
     this._layoutLockCount--;
   }
 
@@ -95,7 +95,7 @@ export default class LayoutConstraint {
    * Updates the layout of this constraint. Called automatically during initialization, when children change (if
    * resize is true), or when client wants to call this public method for any reason.
    */
-  updateLayout() {
+  updateLayout(): void {
     let count = 0;
 
     if ( this.isLocked ) {
@@ -119,7 +119,7 @@ export default class LayoutConstraint {
   /**
    * Called when we attempt to automatically layout components. (scenery-internal)
    */
-  updateLayoutAutomatically() {
+  updateLayoutAutomatically(): void {
     if ( this._enabled ) {
       this.updateLayout();
     }
@@ -150,7 +150,7 @@ export default class LayoutConstraint {
   /**
    * Releases references
    */
-  dispose() {
+  dispose(): void {
     // Clean up listeners to any listened nodes
     const listenedNodes = [ ...this._listenedNodes.keys() ];
     for ( let i = 0; i < listenedNodes.length; i++ ) {

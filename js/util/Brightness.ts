@@ -40,7 +40,7 @@ export default class Brightness extends ColorMatrixFilter {
     return `brightness(${toSVGNumber( this.amount )})`;
   }
 
-  override isDOMCompatible() {
+  override isDOMCompatible(): boolean {
     return true;
   }
 

@@ -92,7 +92,7 @@ export default class Circle extends Path {
    * Notifies that the circle has changed (probably the radius), and invalidates path information and our cached
    * shape.
    */
-  private invalidateCircle() {
+  private invalidateCircle(): void {
     assert && assert( this._radius >= 0, 'A circle needs a non-negative radius' );
 
     // sets our 'cache' to null, so we don't always have to recompute our shape
@@ -145,7 +145,7 @@ export default class Circle extends Path {
    * @param wrapper
    * @param matrix - The transformation matrix already applied to the context.
    */
-  protected override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
+  protected override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ): void {
     //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily.
     CircleCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
   }

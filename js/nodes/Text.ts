@@ -111,7 +111,7 @@ export default class Text extends Paintable( Node ) {
     this.invalidateSupportedRenderers(); // takes care of setting up supported renderers
   }
 
-  override mutate( options?: TextOptions ) {
+  override mutate( options?: TextOptions ): this {
     // @ts-ignore
     if ( assert && options.hasOwnProperty( 'text' ) && options.hasOwnProperty( 'textProperty' ) ) {
       // @ts-ignore
@@ -175,7 +175,7 @@ export default class Text extends Paintable( Node ) {
   /**
    * Called when our text Property changes values.
    */
-  private onTextPropertyChange() {
+  private onTextPropertyChange(): void {
     this._cachedRenderedText = null;
 
     const stateLen = this._drawables.length;
@@ -210,7 +210,7 @@ export default class Text extends Paintable( Node ) {
    * @param {Object} baseOptions
    * @param {Object} config
    */
-  protected override initializePhetioObject( baseOptions: any, config: TextOptions ) {
+  protected override initializePhetioObject( baseOptions: any, config: TextOptions ): void {
 
     config = merge( {
       textPropertyOptions: null
@@ -308,7 +308,7 @@ export default class Text extends Paintable( Node ) {
    * This should be called whenever something that could potentially change supported renderers happen (which can
    * be isHTML, boundsMethod, etc.)
    */
-  override invalidateSupportedRenderers() {
+  override invalidateSupportedRenderers(): void {
     this.setRendererBitmask( this.getFillRendererBitmask() & this.getStrokeRendererBitmask() & this.getTextRendererBitmask() );
   }
 
@@ -316,7 +316,7 @@ export default class Text extends Paintable( Node ) {
    * Notifies that something about the text's potential bounds have changed (different text, different stroke or font,
    * etc.)
    */
-  private invalidateText() {
+  private invalidateText(): void {
     this.invalidateSelf();
 
     // TODO: consider replacing this with a general dirty flag notification, and have DOM update bounds every frame?
@@ -369,7 +369,7 @@ export default class Text extends Paintable( Node ) {
    * Called from (and overridden in) the Paintable trait, invalidates our current stroke, triggering recomputation of
    * anything that depended on the old stroke's value. (scenery-internal)
    */
-  override invalidateStroke() {
+  override invalidateStroke(): void {
     // stroke can change both the bounds and renderer
     this.invalidateText();
 
@@ -380,7 +380,7 @@ export default class Text extends Paintable( Node ) {
    * Called from (and overridden in) the Paintable trait, invalidates our current fill, triggering recomputation of
    * anything that depended on the old fill's value. (scenery-internal)
    */
-  override invalidateFill() {
+  override invalidateFill(): void {
     // fill type can change the renderer (gradient/fill not supported by DOM)
     this.invalidateText();
 
@@ -394,7 +394,7 @@ export default class Text extends Paintable( Node ) {
    * @param wrapper
    * @param matrix - The transformation matrix already applied to the context.
    */
-  protected override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
+  protected override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ): void {
     //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily.
     TextCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
   }
@@ -657,7 +657,7 @@ export default class Text extends Paintable( Node ) {
     return ` "${escapeHTML( this.renderedText )}"${this._isHTML ? ' (html)' : ''}`;
   }
 
-  override dispose() {
+  override dispose(): void {
     super.dispose();
 
     this._textProperty.dispose();

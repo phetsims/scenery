@@ -82,7 +82,7 @@ export default class PaintColorProperty extends Property<Color> {
   /**
    * Sets the current paint of the PaintColorProperty.
    */
-  setPaint( paint: IPaint ) {
+  setPaint( paint: IPaint ): void {
     assert && assert( PaintDef.isPaintDef( paint ) );
 
     this._paint = paint;
@@ -118,7 +118,7 @@ export default class PaintColorProperty extends Property<Color> {
    * With intermediate values basically "interpolated". This uses the `Color` colorUtilsBrightness method to adjust
    * the paint.
    */
-  setLuminanceFactor( luminanceFactor: number ) {
+  setLuminanceFactor( luminanceFactor: number ): void {
     assert && assert( typeof luminanceFactor === 'number' && luminanceFactor >= -1 && luminanceFactor <= 1 );
 
     if ( this.luminanceFactor !== luminanceFactor ) {
@@ -144,14 +144,14 @@ export default class PaintColorProperty extends Property<Color> {
   /**
    * Updates the value of this Property.
    */
-  private invalidatePaint() {
+  private invalidatePaint(): void {
     this.value = PaintDef.toColor( this._paint ).colorUtilsBrightness( this._luminanceFactor );
   }
 
   /**
    * Releases references.
    */
-  override dispose() {
+  override dispose(): void {
     this.paint = null;
 
     super.dispose();

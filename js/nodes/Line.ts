@@ -328,7 +328,7 @@ export default class Line extends Path {
   /**
    * Notifies that the line has changed and invalidates path information and our cached shape.
    */
-  private invalidateLine() {
+  private invalidateLine(): void {
     assert && assert( isFinite( this._x1 ), `A line needs to have a finite x1 (${this._x1})` );
     assert && assert( isFinite( this._y1 ), `A line needs to have a finite y1 (${this._y1})` );
     assert && assert( isFinite( this._x2 ), `A line needs to have a finite x2 (${this._x2})` );
@@ -364,7 +364,7 @@ export default class Line extends Path {
    * @param wrapper
    * @param matrix - The transformation matrix already applied to the context.
    */
-  protected override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
+  protected override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ): void {
     //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily.
     LineCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
   }

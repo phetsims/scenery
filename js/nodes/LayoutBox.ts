@@ -151,7 +151,7 @@ export default class LayoutBox extends Node {
   /**
    * The actual layout logic, typically run from the constructor OR updateLayout().
    */
-  private layout() {
+  private layout(): void {
     const children = this._children;
 
     // The position (left/top) property name on the primary axis
@@ -183,7 +183,7 @@ export default class LayoutBox extends Node {
    * Updates the layout of this LayoutBox. Called automatically during initialization, when children change (if
    * resize is true), or when client wants to call this public method for any reason.
    */
-  updateLayout() {
+  updateLayout(): void {
     // Since we trigger bounds changes in our children during layout, we don't want to trigger layout off of those
     // changes, causing a stack overflow.
     if ( !this._updateLayoutLocked ) {
@@ -196,7 +196,7 @@ export default class LayoutBox extends Node {
   /**
    * Called when we attempt to automatically layout components.
    */
-  private updateLayoutAutomatically() {
+  private updateLayoutAutomatically(): void {
     if ( this._layoutMutating || this._resize ) {
       this.updateLayout();
     }
@@ -205,7 +205,7 @@ export default class LayoutBox extends Node {
   /**
    * Called when a child is inserted.
    */
-  private onLayoutBoxChildInserted( node: Node ) {
+  private onLayoutBoxChildInserted( node: Node ): void {
     if ( this._resize ) {
       node.boundsProperty.lazyLink( this._updateLayoutListener );
       node.visibleProperty.lazyLink( this._updateLayoutListener );
@@ -215,7 +215,7 @@ export default class LayoutBox extends Node {
   /**
    * Called when a child is removed.
    */
-  private onLayoutBoxChildRemoved( node: Node ) {
+  private onLayoutBoxChildRemoved( node: Node ): void {
     if ( this._resize ) {
       node.boundsProperty.unlink( this._updateLayoutListener );
       node.visibleProperty.unlink( this._updateLayoutListener );
@@ -225,7 +225,7 @@ export default class LayoutBox extends Node {
   /**
    * Called on change of children (child added, removed, order changed, etc.)
    */
-  private onLayoutBoxChildrenChanged() {
+  private onLayoutBoxChildrenChanged(): void {
     if ( this._resize ) {
       this.updateLayoutAutomatically();
     }
@@ -266,7 +266,7 @@ export default class LayoutBox extends Node {
    * The default is for child nodes bounds' to be included in this node's bounds, but that would in general be a
    * problem for layout containers or other situations, see https://github.com/phetsims/joist/issues/608.
    */
-  override setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds: boolean ) {
+  override setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds: boolean ): void {
     super.setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds );
 
     // If we have invisible children, we'll likely need to update our layout,

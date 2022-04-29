@@ -46,14 +46,14 @@ export default class GridBackgroundNode extends Node {
     this.mutate( options );
   }
 
-  private update() {
+  private update(): void {
     this.children = this.constraint.displayedCells.map( this.createCellBackground ).filter( _.identity ) as Node[];
   }
 
   /**
    * Releases references
    */
-  override dispose() {
+  override dispose(): void {
     this.constraint.finishedLayoutEmitter.removeListener( this.layoutListener );
 
     super.dispose();

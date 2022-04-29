@@ -376,7 +376,7 @@ export default class RichText extends Node {
   /**
    * Called when our text Property changes values.
    */
-  private onTextPropertyChange() {
+  private onTextPropertyChange(): void {
     this.rebuildRichText();
   }
 
@@ -402,7 +402,7 @@ export default class RichText extends Node {
   /**
    * See documentation and comments in Node.initializePhetioObject
    */
-  override initializePhetioObject( baseOptions: any, config: RichTextOptions ) {
+  override initializePhetioObject( baseOptions: any, config: RichTextOptions ): void {
 
     config = merge( {
       textPropertyOptions: null
@@ -429,7 +429,7 @@ export default class RichText extends Node {
   /**
    * When called, will rebuild the node structure for this RichText
    */
-  private rebuildRichText() {
+  private rebuildRichText(): void {
     this.freeChildrenToPool();
 
     // Bail early, particularly if we are being constructed.
@@ -552,7 +552,7 @@ export default class RichText extends Node {
   /**
    * Cleans "recursively temporary disposes" the children.
    */
-  private freeChildrenToPool() {
+  private freeChildrenToPool(): void {
     // Clear any existing lines or link fragments (higher performance, and return them to pools also)
     while ( this.lineContainer._children.length ) {
       const child = this.lineContainer._children[ this.lineContainer._children.length - 1 ] as RichTextCleanableNode;
@@ -564,7 +564,7 @@ export default class RichText extends Node {
   /**
    * Releases references.
    */
-  override dispose() {
+  override dispose(): void {
     this.freeChildrenToPool();
 
     super.dispose();
@@ -575,7 +575,7 @@ export default class RichText extends Node {
   /**
    * Appends a finished line, applying any necessary leading.
    */
-  private appendLine( lineNode: RichTextElement | Node ) {
+  private appendLine( lineNode: RichTextElement | Node ): void {
     // Apply leading
     if ( this.lineContainer.bounds.isValid() ) {
       lineNode.top = this.lineContainer.bottom + this._leading;
@@ -591,7 +591,7 @@ export default class RichText extends Node {
    * If we end up with the equivalent of "no" content, toss in a basically empty leaf so that we get valid bounds
    * (0 width, correctly-positioned height). See https://github.com/phetsims/scenery/issues/769.
    */
-  private appendEmptyLeaf() {
+  private appendEmptyLeaf(): void {
     assert && assert( this.lineContainer.getChildrenCount() === 0 );
 
     this.appendLine( RichTextLeaf.pool.create( '', true, this._font, this._boundsMethod, this._fill, this._stroke, this._lineWidth ) );
@@ -600,7 +600,7 @@ export default class RichText extends Node {
   /**
    * Aligns all lines attached to the lineContainer.
    */
-  private alignLines() {
+  private alignLines(): void {
     // All nodes will either share a 'left', 'centerX' or 'right'.
     const coordinateName = this._align === 'center' ? 'centerX' : this._align;
 
@@ -626,7 +626,7 @@ export default class RichText extends Node {
    * @param widthAvailable - How much width we have available before forcing a line break (for lineWrap)
    * @returns - Whether a line break was reached
    */
-  private appendElement( containerNode: RichTextElement, element: HimalayaNode, font: Font | string, fill: IPaint, isLTR: boolean, widthAvailable: number ) {
+  private appendElement( containerNode: RichTextElement, element: HimalayaNode, font: Font | string, fill: IPaint, isLTR: boolean, widthAvailable: number ): string {
     let lineBreakState = LineBreakState.NONE;
 
     // {Node|Text} - The main Node for the element that we are adding
@@ -1453,7 +1453,7 @@ export default class RichText extends Node {
 
   get lineWrap(): number | null { return this.getLineWrap(); }
 
-  override mutate( options?: RichTextOptions ) {
+  override mutate( options?: RichTextOptions ): this {
     if ( assert && options && options.hasOwnProperty( 'text' ) && options.hasOwnProperty( 'textProperty' ) && options.textProperty ) {
       assert && assert( options.textProperty.value === options.text, 'If both text and textProperty are provided, then values should match' );
     }
@@ -1568,7 +1568,7 @@ const RichTextCleanable = memoize( <SuperType extends Constructor>( type: SuperT
     /**
      * Releases references
      */
-    clean() {
+    clean(): void {
       const thisNode = this as unknown as RichTextCleanableNode;
 
       // Remove all children (and recursively clean)
@@ -1684,7 +1684,7 @@ class RichTextElement extends RichTextCleanable( Node ) {
   /**
    * Adds an amount of spacing to the "before" side.
    */
-  addExtraBeforeSpacing( amount: number ) {
+  addExtraBeforeSpacing( amount: number ): void {
     if ( this.isLTR ) {
       this.leftSpacing += amount;
     }
@@ -1693,7 +1693,7 @@ class RichTextElement extends RichTextCleanable( Node ) {
     }
   }
 
-  freeToPool() {
+  freeToPool(): void {
     RichTextElement.pool.freeToPool( this );
   }
 
@@ -1754,7 +1754,7 @@ class RichTextLeaf extends RichTextCleanable( Text ) {
   /**
    * Cleans references that could cause memory leaks (as those things may contain other references).
    */
-  override clean() {
+  override clean(): void {
     super.clean();
 
     this.fill = null;
@@ -1765,11 +1765,11 @@ class RichTextLeaf extends RichTextCleanable( Text ) {
    * Whether this leaf will fit in the specified amount of space (including, if required, the amount of spacing on
    * the side).
    */
-  fitsIn( widthAvailable: number, hasAddedLeafToLine: boolean, isContainerLTR: boolean ) {
+  fitsIn( widthAvailable: number, hasAddedLeafToLine: boolean, isContainerLTR: boolean ): boolean {
     return this.width + ( hasAddedLeafToLine ? ( isContainerLTR ? this.leftSpacing : this.rightSpacing ) : 0 ) <= widthAvailable;
   }
 
-  freeToPool() {
+  freeToPool(): void {
     RichTextLeaf.pool.freeToPool( this );
   }
 
@@ -1861,7 +1861,7 @@ class RichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
   /**
    * Cleans references that could cause memory leaks (as those things may contain other references).
    */
-  override clean() {
+  override clean(): void {
     super.clean();
 
     this.fireListener && this.removeInputListener( this.fireListener );
@@ -1872,7 +1872,7 @@ class RichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
     }
   }
 
-  freeToPool() {
+  freeToPool(): void {
     RichTextLink.pool.freeToPool( this );
   }
 

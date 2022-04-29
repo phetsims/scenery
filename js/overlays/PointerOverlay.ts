@@ -128,13 +128,13 @@ export default class PointerOverlay implements IOverlay {
   /**
    * Releases references
    */
-  dispose() {
+  dispose(): void {
     this.display._input!.pointerAddedEmitter.removeListener( this.pointerAdded );
   }
 
   /**
    */
-  update() {
+  update(): void {
   }
 }
 

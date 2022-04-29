@@ -30,7 +30,7 @@ export default abstract class SVGGradient {
 
   isActiveSVGGradient(): this is ActiveSVGGradient { return !!this.svgBlock; }
 
-  initialize( svgBlock: SVGBlock, gradient: Gradient ) {
+  initialize( svgBlock: SVGBlock, gradient: Gradient ): void {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradient] initialize ${gradient.id}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 
@@ -76,7 +76,7 @@ export default abstract class SVGGradient {
   /**
    * Called from SVGGradientStop when a stop needs to change the actual color.
    */
-  markDirty() {
+  markDirty(): void {
     if ( !this.dirty ) {
       assert && assert( this.isActiveSVGGradient() );
       const activeGradient = this as ActiveSVGGradient;
@@ -95,7 +95,7 @@ export default abstract class SVGGradient {
   /**
    * Called from SVGBlock when we need to update our color stops.
    */
-  update() {
+  update(): void {
     if ( !this.dirty ) {
       return;
     }
@@ -114,7 +114,7 @@ export default abstract class SVGGradient {
   /**
    * Disposes, so that it can be reused from the pool.
    */
-  dispose() {
+  dispose(): void {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `[SVGGradient] dispose ${this.gradient!.id}` );
     sceneryLog && sceneryLog.Paints && sceneryLog.push();
 

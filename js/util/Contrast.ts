@@ -40,7 +40,7 @@ export default class Contrast extends ColorMatrixFilter {
     return `contrast(${toSVGNumber( this.amount )})`;
   }
 
-  override isDOMCompatible() {
+  override isDOMCompatible(): boolean {
     return true;
   }
 

@@ -94,7 +94,7 @@ export default class FireListener extends PressListener implements IInputListene
    *
    * NOTE: This is safe to call on the listener externally.
    */
-  fire( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> | null ) {
+  fire( event: SceneryEvent<MouseEvent | TouchEvent | PointerEvent> | null ): void {
     sceneryLog && sceneryLog.InputListener && sceneryLog.InputListener( 'FireListener fire' );
     sceneryLog && sceneryLog.InputListener && sceneryLog.push();
 
@@ -138,7 +138,7 @@ export default class FireListener extends PressListener implements IInputListene
    * @param [event] - scenery event if there was one
    * @param [callback] - called at the end of the release
    */
-  override release( event?: SceneryEvent<MouseEvent | TouchEvent | PointerEvent>, callback?: () => void ) {
+  override release( event?: SceneryEvent<MouseEvent | TouchEvent | PointerEvent>, callback?: () => void ): void {
     super.release( event, () => {
       // Notify after the rest of release is called in order to prevent it from triggering interrupt().
       const shouldFire = !this._fireOnDown && this.isHoveringProperty.value && !this.interrupted;
@@ -185,13 +185,13 @@ export default class FireListener extends PressListener implements IInputListene
    *
    * This can be called manually, but can also be called through node.interruptSubtreeInput().
    */
-  override interrupt() {
+  override interrupt(): void {
     super.interrupt();
 
     this._timer && this._timer.stop( false ); // Stop the timer, don't fire if we haven't already
   }
 
-  override dispose() {
+  override dispose(): void {
     this.firedEmitter.dispose();
     this._timer && this._timer.dispose();
 

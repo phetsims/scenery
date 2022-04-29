@@ -181,7 +181,7 @@ export default class Path extends Paintable( Node ) {
    * This should be called whenever something that could potentially change supported renderers happen (which can
    * be the shape, properties of the strokes or fills, etc.)
    */
-  override invalidateSupportedRenderers() {
+  override invalidateSupportedRenderers(): void {
     this.setRendererBitmask( this.getFillRendererBitmask() & this.getStrokeRendererBitmask() & this.getPathRendererBitmask() );
   }
 
@@ -191,7 +191,7 @@ export default class Path extends Paintable( Node ) {
    *
    * NOTE: This should not be called on subtypes of Path after they have been constructed, like Line, Rectangle, etc.
    */
-  private invalidateShape() {
+  private invalidateShape(): void {
     this.invalidatePath();
 
     const stateLen = this._drawables.length;
@@ -211,7 +211,7 @@ export default class Path extends Paintable( Node ) {
    *
    * This is meant to be used for all Path subtypes (unlike invalidateShape).
    */
-  protected invalidatePath() {
+  protected invalidatePath(): void {
     this._strokedShape = null;
 
     this.invalidateSelf(); // We don't immediately compute the bounds
@@ -220,7 +220,7 @@ export default class Path extends Paintable( Node ) {
   /**
    * Attaches a listener to our Shape that will be called whenever the Shape changes.
    */
-  private attachShapeListener() {
+  private attachShapeListener(): void {
     assert && assert( !this._invalidShapeListenerAttached, 'We do not want to have two listeners attached!' );
 
     // Do not attach shape listeners if we are disposed
@@ -233,7 +233,7 @@ export default class Path extends Paintable( Node ) {
   /**
    * Detaches a previously-attached listener added to our Shape (see attachShapeListener).
    */
-  private detachShapeListener() {
+  private detachShapeListener(): void {
     assert && assert( this._invalidShapeListenerAttached, 'We cannot detach an unattached listener' );
 
     this._shape!.invalidatedEmitter.removeListener( this._invalidShapeListener );
@@ -374,7 +374,7 @@ export default class Path extends Paintable( Node ) {
    * Called from (and overridden in) the Paintable trait, invalidates our current stroke, triggering recomputation of
    * anything that depended on the old stroke's value. (scenery-internal)
    */
-  override invalidateStroke() {
+  override invalidateStroke(): void {
     this.invalidatePath();
 
     this.rendererSummaryRefreshEmitter.emit(); // Stroke changing could have changed our self-bounds-validitity (unstroked/etc)
@@ -396,7 +396,7 @@ export default class Path extends Paintable( Node ) {
    * @param wrapper
    * @param matrix - The transformation matrix already applied to the context.
    */
-  protected override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
+  protected override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ): void {
     //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily.
     PathCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
   }
@@ -497,7 +497,7 @@ export default class Path extends Paintable( Node ) {
   /**
    * Disposes the path, releasing shape listeners if needed (and preventing new listeners from being added).
    */
-  override dispose() {
+  override dispose(): void {
     if ( this._invalidShapeListenerAttached ) {
       this.detachShapeListener();
     }

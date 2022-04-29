@@ -41,7 +41,7 @@ export default class Sepia extends ColorMatrixFilter {
     return `sepia(${toSVGNumber( this.amount )})`;
   }
 
-  override isDOMCompatible() {
+  override isDOMCompatible(): boolean {
     return true;
   }
 

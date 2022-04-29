@@ -98,7 +98,7 @@ export default class SpriteSheet {
    * NOTE: Should be safe to call with a different context (will recreate a different texture) should this be needed
    *       for things like context loss.
    */
-  initializeContext( gl: WebGLRenderingContext ) {
+  initializeContext( gl: WebGLRenderingContext ): void {
     this.gl = gl;
 
     this.createTexture();
@@ -107,7 +107,7 @@ export default class SpriteSheet {
   /**
    * Allocates and creates a GL texture, configures it, and initializes it with our current Canvas.
    */
-  private createTexture() {
+  private createTexture(): void {
     const gl = this.gl!;
     assert && assert( gl );
 
@@ -137,7 +137,7 @@ export default class SpriteSheet {
   /**
    * Updates a pre-existing texture with our current Canvas.
    */
-  updateTexture() {
+  updateTexture(): void {
     assert && assert( this.gl, 'SpriteSheet needs context to updateTexture()' );
 
     if ( this.dirty ) {
@@ -230,7 +230,7 @@ export default class SpriteSheet {
    * Removes an image from our spritesheet. (Removes one from the amount it is used, and if it is 0, gets actually
    * removed).
    */
-  removeImage( image: HTMLCanvasElement | HTMLImageElement ) {
+  removeImage( image: HTMLCanvasElement | HTMLImageElement ): void {
     // find the used sprite (and its index)
     let usedSprite: Sprite;
     let i;
@@ -281,7 +281,7 @@ export default class SpriteSheet {
    * Copes the image (width x height) centered into a bin (width+2 x height+2) at (binX,binY), where the padding
    * along the edges is filled with the next closest pixel in the actual image.
    */
-  private copyImageWithGutter( image: HTMLCanvasElement | HTMLImageElement, width: number, height: number, binX: number, binY: number ) {
+  private copyImageWithGutter( image: HTMLCanvasElement | HTMLImageElement, width: number, height: number, binX: number, binY: number ): void {
     assert && assert( GUTTER_SIZE === 1 );
 
     // Corners, all 1x1
@@ -302,7 +302,7 @@ export default class SpriteSheet {
   /**
    * Helper for drawing gutters.
    */
-  private copyImageRegion( image: HTMLCanvasElement | HTMLImageElement, width: number, height: number, sourceX: number, sourceY: number, destinationX: number, destinationY: number ) {
+  private copyImageRegion( image: HTMLCanvasElement | HTMLImageElement, width: number, height: number, sourceX: number, sourceY: number, destinationX: number, destinationY: number ): void {
     this.context.drawImage( image, sourceX, sourceY, width, height, destinationX, destinationY, width, height );
   }
 

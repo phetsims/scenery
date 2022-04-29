@@ -106,7 +106,7 @@ export default class SpriteImage extends Imageable( Object ) {
   /**
    * Ensures we have a computed imageData (computes it lazily if necessary).
    */
-  private ensureImageData() {
+  private ensureImageData(): void {
     if ( !this.imageData && this.width && this.height ) {
       this.imageData = Imageable.getHitTestData( this.image, this.width, this.height );
     }

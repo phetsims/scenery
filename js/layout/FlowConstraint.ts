@@ -203,7 +203,7 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
     this.preferredHeightProperty.lazyLink( this._updateLayoutListener );
   }
 
-  protected override layout() {
+  protected override layout(): void {
     super.layout();
 
     // The orientation along the laid-out lines
@@ -513,7 +513,7 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
     }
   }
 
-  insertCell( index: number, cell: FlowCell ) {
+  insertCell( index: number, cell: FlowCell ): void {
     assert && assert( typeof index === 'number' );
     assert && assert( index >= 0 );
     assert && assert( index <= this.cells.length );
@@ -529,7 +529,7 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
     this.updateLayoutAutomatically();
   }
 
-  removeCell( cell: FlowCell ) {
+  removeCell( cell: FlowCell ): void {
     assert && assert( cell instanceof FlowCell );
     assert && assert( _.includes( this.cells, cell ) );
 
@@ -540,7 +540,7 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
     this.updateLayoutAutomatically();
   }
 
-  reorderCells( cells: FlowCell[], minChangeIndex: number, maxChangeIndex: number ) {
+  reorderCells( cells: FlowCell[], minChangeIndex: number, maxChangeIndex: number ): void {
     // TODO: assertions for this!!! So many things could go wrong here
 
     this.cells.splice( minChangeIndex, maxChangeIndex - minChangeIndex + 1, ...cells );
@@ -551,7 +551,7 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
   /**
    * Releases references
    */
-  override dispose() {
+  override dispose(): void {
     // In case they're from external sources
     this.preferredWidthProperty.unlink( this._updateLayoutListener );
     this.preferredHeightProperty.unlink( this._updateLayoutListener );

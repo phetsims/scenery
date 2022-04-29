@@ -15,7 +15,7 @@ export default class FittedBlockBoundsOverlay extends ShapeBasedOverlay implemen
     super( display, rootNode, 'canvasNodeBoundsOverlay' );
   }
 
-  addShapes() {
+  addShapes(): void {
     const self = this;
 
     function processBackbone( backbone: BackboneDrawable, matrix: Matrix3 ) {

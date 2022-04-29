@@ -48,7 +48,7 @@ export default class Grayscale extends ColorMatrixFilter {
     return `grayscale(${toSVGNumber( this.amount )})`;
   }
 
-  override isDOMCompatible() {
+  override isDOMCompatible(): boolean {
     return true;
   }
 

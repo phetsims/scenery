@@ -181,11 +181,11 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       this.orientationChangedEmitter = new TinyEmitter();
     }
 
-    mutateConfigurable( options?: FlowConfigurableOptions ) {
+    mutateConfigurable( options?: FlowConfigurableOptions ): void {
       mutate( this, FLOW_CONFIGURABLE_OPTION_KEYS, options );
     }
 
-    setConfigToBaseDefault() {
+    setConfigToBaseDefault(): void {
       this._align = FlowConfigurableAlign.CENTER;
       this._leftMargin = 0;
       this._rightMargin = 0;
@@ -203,7 +203,7 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
     /**
      * Resets values to their original state
      */
-    setConfigToInherit() {
+    setConfigToInherit(): void {
       this._align = null;
       this._leftMargin = null;
       this._rightMargin = null;

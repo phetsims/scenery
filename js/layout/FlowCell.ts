@@ -75,13 +75,13 @@ export default class FlowCell extends FlowConfigurable( Object ) {
     return this._maxContentHeight !== null ? this._maxContentHeight : this._constraint._maxContentHeight;
   }
 
-  private onLayoutOptionsChange() {
+  private onLayoutOptionsChange(): void {
     if ( this.node.layoutOptions ) {
       this.setOptions( this.node.layoutOptions as FlowConfigurableOptions );
     }
   }
 
-  private setOptions( options?: FlowConfigurableOptions ) {
+  private setOptions( options?: FlowConfigurableOptions ): void {
     this.setConfigToInherit();
     this.mutateConfigurable( options );
   }
@@ -118,7 +118,7 @@ export default class FlowCell extends FlowConfigurable( Object ) {
     }
   }
 
-  attemptPreferredSize( orientation: Orientation, value: number ) {
+  attemptPreferredSize( orientation: Orientation, value: number ): void {
     if ( orientation === Orientation.HORIZONTAL ? isWidthSizable( this.node ) : isHeightSizable( this.node ) ) {
       const minimumSize = this.getMinimumSize( orientation );
       const maximumSize = this.getMaximumSize( orientation );
@@ -138,7 +138,7 @@ export default class FlowCell extends FlowConfigurable( Object ) {
     }
   }
 
-  positionStart( orientation: Orientation, value: number ) {
+  positionStart( orientation: Orientation, value: number ): void {
     // TODO: coordinate transform handling, to our ancestorNode!!!!!
     if ( orientation === Orientation.HORIZONTAL ) {
       const left = this.effectiveLeftMargin + value;
@@ -156,7 +156,7 @@ export default class FlowCell extends FlowConfigurable( Object ) {
     }
   }
 
-  positionOrigin( orientation: Orientation, value: number ) {
+  positionOrigin( orientation: Orientation, value: number ): void {
     if ( orientation === Orientation.HORIZONTAL ) {
       if ( Math.abs( this.node.x - value ) > 1e-9 ) {
         this.node.x = value;
@@ -181,7 +181,7 @@ export default class FlowCell extends FlowConfigurable( Object ) {
   /**
    * Releases references
    */
-  dispose() {
+  dispose(): void {
     this.node.layoutOptionsChangedEmitter.removeListener( this.layoutOptionsListener );
   }
 }

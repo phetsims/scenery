@@ -15,7 +15,7 @@ export default class PointerAreaOverlay extends ShapeBasedOverlay implements IOv
     super( display, rootNode, 'mouseTouchAreaOverlay' );
   }
 
-  addShapes() {
+  addShapes(): void {
     new Trail( this.rootNode ).eachTrailUnder( trail => {
       const node = trail.lastNode();
       if ( !node.isVisible() ) {

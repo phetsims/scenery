@@ -48,7 +48,7 @@ export default class GaussianBlur extends Filter {
    * This effectively mutates the provided filter object, and will be successively called on all Filters to build an
    * SVG filter object.
    */
-  applySVGFilter( svgFilter: SVGFilterElement, inName: string, resultName?: string ) {
+  applySVGFilter( svgFilter: SVGFilterElement, inName: string, resultName?: string ): void {
     // e.g. <feGaussianBlur stdDeviation="[radius radius]" edgeMode="[edge mode]" >
     const feGaussianBlur = document.createElementNS( svgns, 'feGaussianBlur' );
     feGaussianBlur.setAttribute( 'stdDeviation', toSVGNumber( this.standardDeviation ) );
@@ -62,11 +62,11 @@ export default class GaussianBlur extends Filter {
     svgFilter.appendChild( feGaussianBlur );
   }
 
-  override isDOMCompatible() {
+  override isDOMCompatible(): boolean {
     return true;
   }
 
-  override isSVGCompatible() {
+  override isSVGCompatible(): boolean {
     return true;
   }
 

@@ -104,7 +104,7 @@ export default class DOM extends Node {
    * This should be called after the DOM element's bounds may have changed, to properly update the bounding box
    * in Scenery.
    */
-  invalidateDOM() {
+  invalidateDOM(): void {
     // prevent this from being executed as a side-effect from inside one of its own calls
     if ( this.invalidateDOMLock ) {
       return;
@@ -202,7 +202,7 @@ export default class DOM extends Node {
    * instead it will be at the upper-left (0,0) of the Scenery Display. The client will be responsible for sizing or
    * positioning this element instead.
    */
-  setPreventTransform( preventTransform: boolean ) {
+  setPreventTransform( preventTransform: boolean ): void {
     assert && assert( typeof preventTransform === 'boolean' );
 
     if ( this._preventTransform !== preventTransform ) {

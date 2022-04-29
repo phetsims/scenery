@@ -134,7 +134,7 @@ export default class AlignGroup {
   /**
    * Creates an alignment box with the given content and options.
    */
-  createBox( content: Node, options?: AlignBoxOptions ) {
+  createBox( content: Node, options?: AlignBoxOptions ): AlignBox {
     assert && assert( content instanceof Node );
 
     // Setting the group should call our addAlignBox()
@@ -202,7 +202,7 @@ export default class AlignGroup {
   /**
    * Dispose all the boxes.
    */
-  dispose() {
+  dispose(): void {
     for ( let i = this._alignBoxes.length - 1; i >= 0; i-- ) {
       this._alignBoxes[ i ].dispose();
     }
@@ -214,7 +214,7 @@ export default class AlignGroup {
    * NOTE: Calling this will usually not be necessary outside of Scenery, but this WILL trigger bounds revalidation
    *       for every alignBox, which can force the layout code to run.
    */
-  updateLayout() {
+  updateLayout(): void {
     if ( this._resizeLock ) { return; }
     this._resizeLock = true;
 
@@ -265,7 +265,7 @@ export default class AlignGroup {
   /**
    * Sets a box's bounds based on our maximum dimensions.
    */
-  private setBoxBounds( alignBox: AlignBox, maxWidth: number, maxHeight: number ) {
+  private setBoxBounds( alignBox: AlignBox, maxWidth: number, maxHeight: number ): void {
     let alignBounds;
 
     // If we match both dimensions, we don't have to inspect the box's preferred size
@@ -295,7 +295,7 @@ export default class AlignGroup {
   /**
    * Lets the group know that the alignBox has had its content resized. Called by the AlignBox (scenery-internal)
    */
-  onAlignBoxResized( alignBox: AlignBox ) {
+  onAlignBoxResized( alignBox: AlignBox ): void {
     // TODO: in the future, we could only update this specific alignBox if the others don't need updating.
     this.updateLayout();
   }
@@ -303,7 +303,7 @@ export default class AlignGroup {
   /**
    * Adds the AlignBox to the group -- Used in AlignBox --- do NOT use in public code
    */
-  addAlignBox( alignBox: AlignBox ) {
+  addAlignBox( alignBox: AlignBox ): void {
     this._alignBoxes.push( alignBox );
 
     // Trigger an update when a alignBox is added
@@ -313,7 +313,7 @@ export default class AlignGroup {
   /**
    * Removes the AlignBox from the group (scenery-internal)
    */
-  removeAlignBox( alignBox: AlignBox ) {
+  removeAlignBox( alignBox: AlignBox ): void {
     arrayRemove( this._alignBoxes, alignBox );
 
     // Trigger an update when a alignBox is removed

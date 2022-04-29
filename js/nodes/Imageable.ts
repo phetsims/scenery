@@ -297,7 +297,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
      * This should be done when the underlying image has changed appearance (usually the case with a Canvas changing,
      * but this is also triggered by our actual image reference changing).
      */
-    invalidateImage() {
+    invalidateImage(): void {
       this.invalidateMipmaps();
       this._invalidateHitTestData();
     }
@@ -336,7 +336,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
      * @param imageOpacity - Should be a number between 0 (transparent) and 1 (opaque), just like normal
      *                                opacity.
      */
-    setImageOpacity( imageOpacity: number ) {
+    setImageOpacity( imageOpacity: number ): void {
       assert && assert( typeof imageOpacity === 'number', 'imageOpacity was not a number' );
       assert && assert( isFinite( imageOpacity ) && imageOpacity >= 0 && imageOpacity <= 1,
         `imageOpacity out of range: ${imageOpacity}` );
@@ -621,7 +621,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
     /**
      * Constructs the next available (uncomputed) mipmap level, as long as the previous level was larger than 1x1.
      */
-    _constructNextMipmap() {
+    _constructNextMipmap(): void {
       const level = this._mipmapCanvases.length;
       const biggerCanvas = this._mipmapCanvases[ level - 1 ];
 
@@ -647,7 +647,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
     /**
      * Triggers recomputation of mipmaps (as long as mipmapping is enabled)
      */
-    invalidateMipmaps() {
+    invalidateMipmaps(): void {
       // Clean output arrays
       cleanArray( this._mipmapCanvases );
       cleanArray( this._mipmapURLs );
@@ -694,7 +694,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
      * @param matrix - The relative transformation matrix of the node.
      * @param [additionalBias] - Can be provided to get per-call bias (we want some of this for Canvas output)
      */
-    getMipmapLevel( matrix: Matrix3, additionalBias = 0 ) {
+    getMipmapLevel( matrix: Matrix3, additionalBias = 0 ): number {
       assert && assert( this._mipmap, 'Assumes mipmaps can be used' );
 
       // Handle high-dpi devices like retina with correct mipmap levels.
@@ -788,7 +788,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
     /**
      * Triggers recomputation of hit test data
      */
-    _invalidateHitTestData() {
+    _invalidateHitTestData(): void {
       // Only compute this if we are hit-testing pixels
       if ( !this._hitTestPixels ) {
         return;
@@ -857,7 +857,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
     /**
      * Attaches our on-load listener to our current image.
      */
-    _attachImageLoadListener() {
+    _attachImageLoadListener(): void {
       assert && assert( !this._imageLoadListenerAttached, 'Should only be attached to one thing at a time' );
 
       if ( !this.isDisposed ) {
@@ -869,7 +869,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
     /**
      * Detaches our on-load listener from our current image.
      */
-    _detachImageLoadListener() {
+    _detachImageLoadListener(): void {
       assert && assert( this._imageLoadListenerAttached, 'Needs to be attached first to be detached.' );
 
       ( this._image as HTMLImageElement ).removeEventListener( 'load', this._imageLoadListener );
@@ -879,7 +879,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
     /**
      * Called when our image has loaded (it was not yet loaded with then listener was added)
      */
-    _onImageLoad() {
+    _onImageLoad(): void {
       assert && assert( this._imageLoadListenerAttached, 'If _onImageLoad is firing, it should be attached' );
 
       this.invalidateImage();
@@ -889,7 +889,7 @@ const Imageable = <SuperType extends Constructor>( type: SuperType ) => {
     /**
      * Disposes the path, releasing image listeners if needed (and preventing new listeners from being added).
      */
-    dispose() {
+    dispose(): void {
       if ( this._image && this._imageLoadListenerAttached ) {
         this._detachImageLoadListener();
       }

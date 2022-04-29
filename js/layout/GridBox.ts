@@ -67,7 +67,7 @@ export default class GridBox extends WidthSizable( HeightSizable( Node ) ) {
     } );
   }
 
-  override setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds: boolean ) {
+  override setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds: boolean ): void {
     super.setExcludeInvisibleChildrenFromBounds( excludeInvisibleChildrenFromBounds );
 
     this._constraint.excludeInvisible = excludeInvisibleChildrenFromBounds;
@@ -76,7 +76,7 @@ export default class GridBox extends WidthSizable( HeightSizable( Node ) ) {
   /**
    * Called when a child is inserted.
    */
-  private onGridBoxChildInserted( node: Node, index: number ) {
+  private onGridBoxChildInserted( node: Node, index: number ): void {
     let layoutOptions = node.layoutOptions;
 
     if ( !layoutOptions || ( typeof layoutOptions.x !== 'number' && typeof layoutOptions.y !== 'number' ) ) {
@@ -110,7 +110,7 @@ export default class GridBox extends WidthSizable( HeightSizable( Node ) ) {
   /**
    * Called when a child is removed.
    */
-  private onGridBoxChildRemoved( node: Node ) {
+  private onGridBoxChildRemoved( node: Node ): void {
 
     const cell = this._cellMap.get( node )!;
     assert && assert( cell );

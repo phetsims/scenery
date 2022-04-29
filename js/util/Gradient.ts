@@ -103,7 +103,7 @@ export default abstract class Gradient extends Paint {
    * Forces a re-check of whether colors have changed, so that the Canvas gradient can be regenerated if
    * necessary.
    */
-  invalidateCanvasGradient() {
+  invalidateCanvasGradient(): void {
     sceneryLog && sceneryLog.Paints && sceneryLog.Paints( `Invalidated Canvas Gradient for #${this.id}` );
     this.colorStopsDirty = true;
   }

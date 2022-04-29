@@ -73,15 +73,15 @@ export default abstract class Filter {
     return false;
   }
 
-  isSVGCompatible() {
+  isSVGCompatible(): boolean {
     return false;
   }
 
-  isCanvasCompatible() {
+  isCanvasCompatible(): boolean {
     return Features.canvasFilter ? this.isDOMCompatible() : false;
   }
 
-  isWebGLCompatible() {
+  isWebGLCompatible(): boolean {
     return false;
   }
 
@@ -95,7 +95,7 @@ export default abstract class Filter {
   /**
    * Applies a color matrix effect into an existing SVG filter.
    */
-  static applyColorMatrix( matrixValues: string, svgFilter: SVGFilterElement, inName: string, resultName?: string ) {
+  static applyColorMatrix( matrixValues: string, svgFilter: SVGFilterElement, inName: string, resultName?: string ): void {
     const feColorMatrix = document.createElementNS( svgns, 'feColorMatrix' );
 
     feColorMatrix.setAttribute( 'type', 'matrix' );

@@ -126,7 +126,7 @@ export default class AlignBox extends Node {
    * layout. content.getBounds() should trigger it, but invalidateAligment() is the preferred method for forcing a
    * re-check.
    */
-  invalidateAlignment() {
+  invalidateAlignment(): void {
     sceneryLog && sceneryLog.AlignBox && sceneryLog.AlignBox( `AlignBox#${this.id} invalidateAlignment` );
     sceneryLog && sceneryLog.AlignBox && sceneryLog.push();
 
@@ -520,7 +520,7 @@ export default class AlignBox extends Node {
    * @param propName - A positional property on both Node and Bounds2, e.g. 'left'
    * @param offset - Offset to be applied to the localBounds location.
    */
-  private updateProperty( propName: 'left' | 'right' | 'top' | 'bottom' | 'centerX' | 'centerY', offset: number ) {
+  private updateProperty( propName: 'left' | 'right' | 'top' | 'bottom' | 'centerX' | 'centerY', offset: number ): void {
     const currentValue = this._content[ propName ];
     const newValue = this.localBounds[ propName ] + offset;
 
@@ -533,7 +533,7 @@ export default class AlignBox extends Node {
   /**
    * Updates the layout of this alignment box.
    */
-  private updateLayout() {
+  private updateLayout(): void {
     if ( this._layoutLock ) { return; }
     this._layoutLock = true;
 
@@ -589,7 +589,7 @@ export default class AlignBox extends Node {
   /**
    * Disposes this box, releasing listeners and any references to an AlignGroup
    */
-  override dispose() {
+  override dispose(): void {
     // Remove our listener
     this._content.boundsProperty.unlink( this._contentBoundsListener );
 

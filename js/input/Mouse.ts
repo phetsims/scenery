@@ -118,7 +118,7 @@ export default class Mouse extends Pointer {
    *
    * @returns - Whether the point changed
    */
-  over( point: Vector2, event: Event ) {
+  over( point: Vector2, event: Event ): boolean {
     const pointChanged = this.hasPointChanged( point );
     point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `mouse over at ${point.toString()}` );
 
@@ -131,7 +131,7 @@ export default class Mouse extends Pointer {
    *
    * @returns - Whether the point changed
    */
-  out( point: Vector2, event: Event ) {
+  out( point: Vector2, event: Event ): boolean {
     const pointChanged = this.hasPointChanged( point );
     point && sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( `mouse out at ${point.toString()}` );
 
@@ -141,7 +141,7 @@ export default class Mouse extends Pointer {
   /**
    * Sets information in this Mouse for a given mouse wheel. (scenery-internal)
    */
-  wheel( event: Event ) {
+  wheel( event: Event ): void {
     assert && assert( event instanceof WheelEvent );
     const wheelEvent = event as WheelEvent;
 

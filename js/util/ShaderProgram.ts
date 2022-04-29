@@ -54,7 +54,7 @@ export default class ShaderProgram {
   /**
    * Initializes (or reinitializes) the WebGL state and uniform/attribute references.
    */
-  initialize( gl: WebGLRenderingContext ) {
+  initialize( gl: WebGLRenderingContext ): void {
     // @private {WebGL2RenderingContext}
     this.gl = gl; // TODO: create them with separate contexts
 
@@ -109,7 +109,7 @@ export default class ShaderProgram {
 
   /**
    */
-  use() {
+  use(): void {
     if ( this.used ) { return; }
 
     this.used = true;
@@ -124,7 +124,7 @@ export default class ShaderProgram {
     } );
   }
 
-  activateAttribute( attributeName: string ) {
+  activateAttribute( attributeName: string ): void {
     // guarded so we don't enable twice
     if ( !this.activeAttributes[ attributeName ] ) {
       this.activeAttributes[ attributeName ] = true;
@@ -135,11 +135,11 @@ export default class ShaderProgram {
     }
   }
 
-  enableVertexAttribArray( attributeName: string ) {
+  enableVertexAttribArray( attributeName: string ): void {
     this.gl.enableVertexAttribArray( this.attributeLocations[ attributeName ] );
   }
 
-  unuse() {
+  unuse(): void {
     if ( !this.used ) { return; }
 
     this.used = false;
@@ -151,11 +151,11 @@ export default class ShaderProgram {
     } );
   }
 
-  disableVertexAttribArray( attributeName: string ) {
+  disableVertexAttribArray( attributeName: string ): void {
     this.gl.disableVertexAttribArray( this.attributeLocations[ attributeName ] );
   }
 
-  deactivateAttribute( attributeName: string ) {
+  deactivateAttribute( attributeName: string ): void {
     // guarded so we don't disable twice
     if ( this.activeAttributes[ attributeName ] ) {
       this.activeAttributes[ attributeName ] = false;
@@ -169,7 +169,7 @@ export default class ShaderProgram {
   /**
    * Releases references
    */
-  dispose() {
+  dispose(): void {
     this.gl.deleteProgram( this.program );
   }
 }

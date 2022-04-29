@@ -152,11 +152,11 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       this.changedEmitter = new TinyEmitter();
     }
 
-    mutateConfigurable( options?: GridConfigurableOptions ) {
+    mutateConfigurable( options?: GridConfigurableOptions ): void {
       mutate( this, GRID_CONFIGURABLE_OPTION_KEYS, options );
     }
 
-    setConfigToBaseDefault() {
+    setConfigToBaseDefault(): void {
       this._xAlign = GridConfigurableAlign.CENTER;
       this._yAlign = GridConfigurableAlign.CENTER;
       this._leftMargin = 0;
@@ -176,7 +176,7 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
     /**
      * Resets values to their original state
      */
-    setConfigToInherit() {
+    setConfigToInherit(): void {
       this._xAlign = null;
       this._yAlign = null;
       this._leftMargin = null;

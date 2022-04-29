@@ -42,7 +42,7 @@ export default abstract class ShapeBasedOverlay implements IOverlay {
     this.domElement = svg;
   }
 
-  addShape( shape: Shape, color: string, isOffset: boolean ) {
+  addShape( shape: Shape, color: string, isOffset: boolean ): void {
     const path = document.createElementNS( svgns, 'path' );
     let svgPath = shape.getSVGPath();
 
@@ -63,7 +63,7 @@ export default abstract class ShapeBasedOverlay implements IOverlay {
     this.svg.appendChild( path );
   }
 
-  update() {
+  update(): void {
     while ( this.svg.childNodes.length ) {
       this.svg.removeChild( this.svg.childNodes[ this.svg.childNodes.length - 1 ] );
     }
@@ -76,7 +76,7 @@ export default abstract class ShapeBasedOverlay implements IOverlay {
   /**
    * Releases references
    */
-  dispose() {
+  dispose(): void {
 
   }
 }

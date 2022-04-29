@@ -82,7 +82,7 @@ export default class SceneryEvent<DOMEvent extends Event = Event> {
   /**
    * like DOM SceneryEvent.stopPropagation(), but named differently to indicate it doesn't fire that behavior on the underlying DOM event
    */
-  handle() {
+  handle(): void {
     sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'handled event' );
     this.handled = true;
   }
@@ -90,7 +90,7 @@ export default class SceneryEvent<DOMEvent extends Event = Event> {
   /**
    * like DOM SceneryEvent.stopImmediatePropagation(), but named differently to indicate it doesn't fire that behavior on the underlying DOM event
    */
-  abort() {
+  abort(): void {
     sceneryLog && sceneryLog.InputEvent && sceneryLog.InputEvent( 'aborted event' );
     this.aborted = true;
   }

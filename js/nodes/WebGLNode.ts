@@ -113,7 +113,7 @@ export default abstract class WebGLNode extends Node {
    *
    * This sets a "dirty" flag, so that it will be repainted the next time it would be displayed.
    */
-  invalidatePaint() {
+  invalidatePaint(): void {
     const stateLen = this._drawables.length;
     for ( let i = 0; i < stateLen; i++ ) {
       this._drawables[ i ].markDirty();
@@ -146,7 +146,7 @@ export default abstract class WebGLNode extends Node {
    * @param wrapper
    * @param matrix - The transformation matrix already applied to the context.
    */
-  protected override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
+  protected override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ): void {
     // TODO: see https://github.com/phetsims/scenery/issues/308
     assert && assert( false, 'unimplemented: canvasPaintSelf in WebGLNode' );
   }
@@ -157,7 +157,7 @@ export default abstract class WebGLNode extends Node {
    * @param wrapper
    * @param matrix - The current transformation matrix associated with the wrapper
    */
-  override renderToCanvasSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
+  override renderToCanvasSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ): void {
     const width = wrapper.canvas.width;
     const height = wrapper.canvas.height;
 

@@ -148,11 +148,11 @@ export default class GridCell extends GridConfigurable( Object ) {
     return orientation === Orientation.HORIZONTAL ? this.effectiveMaxContentWidth : this.effectiveMaxContentHeight;
   }
 
-  private onLayoutOptionsChange() {
+  private onLayoutOptionsChange(): void {
     this.setOptions( this.node.layoutOptions as GridConfigurableOptions );
   }
 
-  private setOptions( options?: GridConfigurableOptions ) {
+  private setOptions( options?: GridConfigurableOptions ): void {
     this.setConfigToInherit();
     this.mutateConfigurable( options );
   }
@@ -179,7 +179,7 @@ export default class GridCell extends GridConfigurable( Object ) {
            this.getEffectiveMaxMargin( orientation );
   }
 
-  attemptPreferredSize( orientation: Orientation, value: number ) {
+  attemptPreferredSize( orientation: Orientation, value: number ): void {
     if ( this.node[ sizableFlagPair.get( orientation ) ] ) {
       const minimumSize = this.getMinimumSize( orientation );
       const maximumSize = this.getMaximumSize( orientation );
@@ -193,7 +193,7 @@ export default class GridCell extends GridConfigurable( Object ) {
     }
   }
 
-  attemptPosition( orientation: Orientation, align: GridConfigurableAlign, value: number, availableSize: number ) {
+  attemptPosition( orientation: Orientation, align: GridConfigurableAlign, value: number, availableSize: number ): void {
     if ( align === GridConfigurableAlign.ORIGIN ) {
       // TODO: handle layout bounds
       // TODO: OMG this is horribly broken right? We would need to align stuff first
@@ -247,7 +247,7 @@ export default class GridCell extends GridConfigurable( Object ) {
   /**
    * Releases references
    */
-  dispose() {
+  dispose(): void {
     this.node.layoutOptionsChangedEmitter.removeListener( this.layoutOptionsListener );
   }
 }

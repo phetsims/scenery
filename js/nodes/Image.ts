@@ -66,7 +66,7 @@ export default class Image extends Imageable( Node ) {
    * This should be done when the underlying image has changed appearance (usually the case with a Canvas changing,
    * but this is also triggered by our actual image reference changing).
    */
-  override invalidateImage() {
+  override invalidateImage(): void {
     if ( this._image ) {
       this.invalidateSelf( this._imageBounds || new Bounds2( 0, 0, this.getImageWidth(), this.getImageHeight() ) );
     }
@@ -87,7 +87,7 @@ export default class Image extends Imageable( Node ) {
   /**
    * Recomputes what renderers are supported, given the current image information.
    */
-  override invalidateSupportedRenderers() {
+  override invalidateSupportedRenderers(): void {
 
     // Canvas is always permitted
     let r = Renderer.bitmaskCanvas;
@@ -119,7 +119,7 @@ export default class Image extends Imageable( Node ) {
    *
    * @param imageOpacity - Should be a number between 0 (transparent) and 1 (opaque), just like normal opacity.
    */
-  override setImageOpacity( imageOpacity: number ) {
+  override setImageOpacity( imageOpacity: number ): void {
     const changed = this._imageOpacity !== imageOpacity;
 
     super.setImageOpacity( imageOpacity );
@@ -139,7 +139,7 @@ export default class Image extends Imageable( Node ) {
    * NOTE: This is accomplished by using any provided imageBounds as the node's own selfBounds. This will affect layout,
    * hit-testing, and anything else using the bounds of this node.
    */
-  setImageBounds( imageBounds: Bounds2 | null ) {
+  setImageBounds( imageBounds: Bounds2 | null ): void {
     if ( this._imageBounds !== imageBounds ) {
       this._imageBounds = imageBounds;
 
@@ -161,7 +161,7 @@ export default class Image extends Imageable( Node ) {
   /**
    * Whether this Node itself is painted (displays something itself).
    */
-  override isPainted() {
+  override isPainted(): boolean {
     // Always true for Image nodes
     return true;
   }
@@ -173,7 +173,7 @@ export default class Image extends Imageable( Node ) {
    * @param wrapper
    * @param matrix - The transformation matrix already applied to the context.
    */
-  protected override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
+  protected override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ): void {
     //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily.
     ImageCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
   }
@@ -256,7 +256,7 @@ export default class Image extends Imageable( Node ) {
   /**
    * Triggers recomputation of mipmaps (as long as mipmapping is enabled)
    */
-  override invalidateMipmaps() {
+  override invalidateMipmaps(): void {
     const markDirty = this._image && this._mipmap && !this._mipmapData;
 
     super.invalidateMipmaps();

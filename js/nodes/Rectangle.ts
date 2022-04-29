@@ -606,7 +606,7 @@ export default class Rectangle extends Path {
   /**
    * Notifies that the rectangle has changed, and invalidates path information and our cached shape.
    */
-  protected invalidateRectangle() {
+  protected invalidateRectangle(): void {
     assert && assert( isFinite( this._rectX ), `A rectangle needs to have a finite x (${this._rectX})` );
     assert && assert( isFinite( this._rectY ), `A rectangle needs to have a finite y (${this._rectY})` );
     assert && assert( this._rectWidth >= 0 && isFinite( this._rectWidth ),
@@ -696,7 +696,7 @@ export default class Rectangle extends Path {
    * @param wrapper
    * @param matrix - The transformation matrix already applied to the context.
    */
-  protected override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
+  protected override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ): void {
     //TODO: Have a separate method for this, instead of touching the prototype. Can make 'this' references too easily.
     RectangleCanvasDrawable.prototype.paintCanvas( wrapper, this, matrix );
   }

@@ -54,7 +54,7 @@ export default class HueRotate extends ColorMatrixFilter {
     return `hue-rotate(${toSVGNumber( Utils.toDegrees( this.amount ) )}deg)`;
   }
 
-  override isDOMCompatible() {
+  override isDOMCompatible(): boolean {
     return true;
   }
 }

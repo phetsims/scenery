@@ -40,7 +40,7 @@ export default abstract class CanvasNode extends Node {
    * These bounds should always cover at least the area where the CanvasNode will draw in. If this is violated, this
    * node may be partially or completely invisible in Scenery's output.
    */
-  setCanvasBounds( selfBounds: Bounds2 ) {
+  setCanvasBounds( selfBounds: Bounds2 ): void {
     this.invalidateSelf( selfBounds );
   }
 
@@ -58,7 +58,7 @@ export default abstract class CanvasNode extends Node {
   /**
    * Whether this Node itself is painted (displays something itself).
    */
-  override isPainted() {
+  override isPainted(): boolean {
     // Always true for CanvasNode
     return true;
   }
@@ -78,7 +78,7 @@ export default abstract class CanvasNode extends Node {
    *
    * This sets a "dirty" flag, so that it will be repainted the next time it would be displayed.
    */
-  invalidatePaint() {
+  invalidatePaint(): void {
     const stateLen = this._drawables.length;
     for ( let i = 0; i < stateLen; i++ ) {
       this._drawables[ i ].markDirty();
@@ -92,7 +92,7 @@ export default abstract class CanvasNode extends Node {
    * @param wrapper
    * @param matrix - The transformation matrix already applied to the context.
    */
-  protected override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ) {
+  protected override canvasPaintSelf( wrapper: CanvasContextWrapper, matrix: Matrix3 ): void {
     this.paintCanvas( wrapper.context );
   }
 

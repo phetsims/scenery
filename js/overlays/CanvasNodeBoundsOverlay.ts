@@ -14,7 +14,7 @@ export default class CanvasNodeBoundsOverlay extends ShapeBasedOverlay implement
     super( display, rootNode, 'canvasNodeBoundsOverlay' );
   }
 
-  addShapes() {
+  addShapes(): void {
     new Trail( this.rootNode ).eachTrailUnder( trail => {
       const node = trail.lastNode();
       if ( !node.isVisible() ) {

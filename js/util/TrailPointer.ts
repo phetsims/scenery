@@ -43,7 +43,7 @@ export default class TrailPointer {
     return new TrailPointer( ( this as ActiveTrailPointer ).trail.copy(), this.isBefore );
   }
 
-  setBefore( isBefore: boolean ) {
+  setBefore( isBefore: boolean ): void {
     this.isBefore = isBefore;
     this.isAfter = !isBefore;
   }
@@ -245,7 +245,7 @@ export default class TrailPointer {
    * Treats the pointer as render-ordered (includes the start pointer 'before' if applicable, excludes the end pointer
    * 'before' if applicable
    */
-  eachNodeBetween( other: TrailPointer, callback: ( node: Node ) => void ) {
+  eachNodeBetween( other: TrailPointer, callback: ( node: Node ) => void ): void {
     this.eachTrailBetween( other, ( trail: Trail ) => callback( trail.lastNode() ) );
   }
 
@@ -253,7 +253,7 @@ export default class TrailPointer {
    * Treats the pointer as render-ordered (includes the start pointer 'before' if applicable, excludes the end pointer
    * 'before' if applicable
    */
-  eachTrailBetween( other: TrailPointer, callback: ( node: Trail ) => boolean | void ) {
+  eachTrailBetween( other: TrailPointer, callback: ( node: Trail ) => boolean | void ): void {
     // this should trigger on all pointers that have the 'before' flag, except a pointer equal to 'other'.
 
     // since we exclude endpoints in the depthFirstUntil call, we need to fire this off first
@@ -278,7 +278,7 @@ export default class TrailPointer {
    * If the callback returns a truthy value, the subtree for the current pointer will be skipped
    * (applies only to before-pointers)
    */
-  depthFirstUntil( other: TrailPointer, callback: ( trailPointer: ActiveTrailPointer ) => boolean | void, excludeEndpoints: boolean ) {
+  depthFirstUntil( other: TrailPointer, callback: ( trailPointer: ActiveTrailPointer ) => boolean | void, excludeEndpoints: boolean ): void {
     assert && assert( this.isActive() && other.isActive() );
     const activeSelf = this as ActiveTrailPointer;
     const activeOther = other as ActiveTrailPointer;
