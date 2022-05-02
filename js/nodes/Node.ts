@@ -282,6 +282,41 @@ const DEFAULT_OPTIONS = {
 
 export type RendererType = 'svg' | 'canvas' | 'webgl' | 'dom' | null;
 
+// Isolated so that we can delay options that are based on bounds of the Node to after construction.
+// See https://github.com/phetsims/scenery/issues/1332
+export type NodeBoundsBasedTranslationOptions = {
+  leftTop?: Vector2;
+  centerTop?: Vector2;
+  rightTop?: Vector2;
+  leftCenter?: Vector2;
+  center?: Vector2;
+  rightCenter?: Vector2;
+  leftBottom?: Vector2;
+  centerBottom?: Vector2;
+  rightBottom?: Vector2;
+  left?: number;
+  right?: number;
+  top?: number;
+  bottom?: number;
+  centerX?: number;
+  centerY?: number;
+};
+
+// All translation options (includes those based on bounds and those that are not)
+export type NodeTranslationOptions = {
+  translation?: Vector2;
+  x?: number;
+  y?: number;
+} & NodeBoundsBasedTranslationOptions;
+
+// All transform options (includes translation options)
+export type NodeTransformOptions = {
+  matrix?: Matrix3;
+  rotation?: number;
+  scale?: number | Vector2;
+} & NodeTranslationOptions;
+
+// All base Node options
 export type NodeOptions = {
   children?: Node[];
   cursor?: string | null;
@@ -300,32 +335,11 @@ export type NodeOptions = {
   opacity?: number;
   disabledOpacity?: number;
   filters?: Filter[];
-  matrix?: Matrix3;
-  translation?: Vector2;
-  x?: number;
-  y?: number;
-  rotation?: number;
-  scale?: number | Vector2;
   excludeInvisibleChildrenFromBounds?: boolean;
   layoutOptions?: ILayoutOptions | null;
   localBounds?: Bounds2 | null;
   maxWidth?: number | null;
   maxHeight?: number | null;
-  leftTop?: Vector2;
-  centerTop?: Vector2;
-  rightTop?: Vector2;
-  leftCenter?: Vector2;
-  center?: Vector2;
-  rightCenter?: Vector2;
-  leftBottom?: Vector2;
-  centerBottom?: Vector2;
-  rightBottom?: Vector2;
-  left?: number;
-  right?: number;
-  top?: number;
-  bottom?: number;
-  centerX?: number;
-  centerY?: number;
   renderer?: RendererType;
   layerSplit?: boolean;
   usesOpacity?: boolean;
@@ -342,7 +356,7 @@ export type NodeOptions = {
   visiblePropertyOptions?: PropertyOptions<boolean>;
   enabledPropertyOptions?: PropertyOptions<boolean>;
   inputEnabledPropertyOptions?: PropertyOptions<boolean>;
-} & ParallelDOMOptions;
+} & ParallelDOMOptions & NodeTransformOptions;
 
 type RasterizedOptions = {
   resolution?: number;
