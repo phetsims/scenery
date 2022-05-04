@@ -1,7 +1,7 @@
 // Copyright 2021-2022, University of Colorado Boulder
 
 /**
- * TODO: doc
+ * A configurable cell containing a Node used for FlowConstraint layout
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -9,23 +9,25 @@
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Utils from '../../../dot/js/Utils.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
-import { scenery, FlowConfigurable, FlowConstraint, Node, FlowConfigurableOptions, FlowConfigurableAlign, isWidthSizable, isHeightSizable, WidthSizableNode, HeightSizableNode } from '../imports.js';
+import { FlowConfigurable, FlowConfigurableAlign, FlowConfigurableOptions, FlowConstraint, LayoutProxy, scenery, Node } from '../imports.js';
 
 export default class FlowCell extends FlowConfigurable( Object ) {
 
   private _constraint: FlowConstraint;
   private _node: Node;
+  private _proxy: LayoutProxy;
   public _pendingSize: number; // scenery-internal
   private layoutOptionsListener: () => void;
 
-  constructor( constraint: FlowConstraint, node: Node, options?: FlowConfigurableOptions ) {
+  constructor( constraint: FlowConstraint, node: Node ) {
     super();
 
     this._constraint = constraint;
     this._node = node;
+    this._proxy = constraint.createLayoutProxy( node );
     this._pendingSize = 0;
 
-    this.setOptions( options );
+    this.onLayoutOptionsChange();
 
     this.layoutOptionsListener = this.onLayoutOptionsChange.bind( this );
     this.node.layoutOptionsChangedEmitter.addListener( this.layoutOptionsListener );
@@ -90,36 +92,40 @@ export default class FlowCell extends FlowConfigurable( Object ) {
     return this._node;
   }
 
+  get proxy(): LayoutProxy {
+    return this._proxy;
+  }
+
   getMinimumSize( orientation: Orientation ): number {
     if ( orientation === Orientation.HORIZONTAL ) {
       return this.effectiveLeftMargin +
-             Math.max( isWidthSizable( this.node ) ? this.node.minimumWidth || 0 : this.node.width, this.effectiveMinContentWidth || 0 ) +
+             Math.max( this.proxy.minimumWidth, this.effectiveMinContentWidth || 0 ) +
              this.effectiveRightMargin;
     }
     else {
       return this.effectiveTopMargin +
-             Math.max( isHeightSizable( this.node ) ? this.node.minimumHeight || 0 : this.node.height, this.effectiveMinContentHeight || 0 ) +
+             Math.max( this.proxy.minimumHeight, this.effectiveMinContentHeight || 0 ) +
              this.effectiveBottomMargin;
     }
   }
 
   getMaximumSize( orientation: Orientation ): number {
-    const isSizable = orientation === Orientation.HORIZONTAL ? isWidthSizable( this.node ) : isHeightSizable( this.node );
+    const isSizable = orientation === Orientation.HORIZONTAL ? this.proxy.widthSizable : this.proxy.heightSizable;
 
     if ( orientation === Orientation.HORIZONTAL ) {
       return this.effectiveLeftMargin +
-             Math.min( isSizable ? Number.POSITIVE_INFINITY : this.node.width, this.effectiveMaxContentWidth || Number.POSITIVE_INFINITY ) +
+             Math.min( isSizable ? Number.POSITIVE_INFINITY : this.proxy.width, this.effectiveMaxContentWidth || Number.POSITIVE_INFINITY ) +
              this.effectiveRightMargin;
     }
     else {
       return this.effectiveTopMargin +
-             Math.min( isSizable ? Number.POSITIVE_INFINITY : this.node.height, this.effectiveMaxContentHeight || Number.POSITIVE_INFINITY ) +
+             Math.min( isSizable ? Number.POSITIVE_INFINITY : this.proxy.height, this.effectiveMaxContentHeight || Number.POSITIVE_INFINITY ) +
              this.effectiveBottomMargin;
     }
   }
 
   attemptPreferredSize( orientation: Orientation, value: number ): void {
-    if ( orientation === Orientation.HORIZONTAL ? isWidthSizable( this.node ) : isHeightSizable( this.node ) ) {
+    if ( orientation === Orientation.HORIZONTAL ? this.proxy.widthSizable : this.proxy.heightSizable ) {
       const minimumSize = this.getMinimumSize( orientation );
       const maximumSize = this.getMaximumSize( orientation );
 
@@ -129,48 +135,47 @@ export default class FlowCell extends FlowConfigurable( Object ) {
       value = Utils.clamp( value, minimumSize, maximumSize );
 
       if ( orientation === Orientation.HORIZONTAL ) {
-        ( this.node as WidthSizableNode ).preferredWidth = value - this.effectiveLeftMargin - this.effectiveRightMargin;
+        this.proxy.preferredWidth = value - this.effectiveLeftMargin - this.effectiveRightMargin;
       }
       else {
-        ( this.node as HeightSizableNode ).preferredHeight = value - this.effectiveTopMargin - this.effectiveBottomMargin;
+        this.proxy.preferredHeight = value - this.effectiveTopMargin - this.effectiveBottomMargin;
       }
       // TODO: warnings if those preferred sizes weren't reached?
     }
   }
 
   positionStart( orientation: Orientation, value: number ): void {
-    // TODO: coordinate transform handling, to our ancestorNode!!!!!
     if ( orientation === Orientation.HORIZONTAL ) {
       const left = this.effectiveLeftMargin + value;
 
-      if ( Math.abs( this.node.left - left ) > 1e-9 ) {
-        this.node.left = left;
+      if ( Math.abs( this.proxy.left - left ) > 1e-9 ) {
+        this.proxy.left = left;
       }
     }
     else {
       const top = this.effectiveTopMargin + value;
 
-      if ( Math.abs( this.node.top - top ) > 1e-9 ) {
-        this.node.top = top;
+      if ( Math.abs( this.proxy.top - top ) > 1e-9 ) {
+        this.proxy.top = top;
       }
     }
   }
 
   positionOrigin( orientation: Orientation, value: number ): void {
     if ( orientation === Orientation.HORIZONTAL ) {
-      if ( Math.abs( this.node.x - value ) > 1e-9 ) {
-        this.node.x = value;
+      if ( Math.abs( this.proxy.x - value ) > 1e-9 ) {
+        this.proxy.x = value;
       }
     }
     else {
-      if ( Math.abs( this.node.y - value ) > 1e-9 ) {
-        this.node.y = value;
+      if ( Math.abs( this.proxy.y - value ) > 1e-9 ) {
+        this.proxy.y = value;
       }
     }
   }
 
   getCellBounds(): Bounds2 {
-    return this.node.bounds.withOffsets(
+    return this.proxy.bounds.withOffsets(
       this.effectiveLeftMargin,
       this.effectiveTopMargin,
       this.effectiveRightMargin,

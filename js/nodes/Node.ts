@@ -557,7 +557,7 @@ class Node extends ParallelDOM {
   // This is fired only once for any single operation that may change the children of a Node.
   // For example, if a Node's children are [ a, b ] and setChildren( [ a, x, y, z ] ) is called on it, the
   // childrenChanged event will only be fired once after the entire operation of changing the children is completed.
-  childrenChangedEmitter: TinyEmitter<[]>;
+  childrenChangedEmitter: TinyEmitter;
 
   // For every single added child Node, emits with {Node} Node, {number} indexOfChild
   childInsertedEmitter: TinyEmitter<[ node: Node, indexOfChild: number ]>;
@@ -570,24 +570,24 @@ class Node extends ParallelDOM {
 
   // Fired synchronously when the transform (transformation matrix) of a Node is changed. Any
   // change to a Node's translation/rotation/scale/etc. will trigger this event.
-  transformEmitter: TinyEmitter<[]>;
+  transformEmitter: TinyEmitter;
 
   // Should be emitted when we need to check full metadata updates directly on Instances,
   // to see if we need to change drawable types, etc.
-  instanceRefreshEmitter: TinyEmitter<[]>;
+  instanceRefreshEmitter: TinyEmitter;
 
   // Emitted to when we need to potentially recompute our renderer summary (bitmask flags, or
   // things that could affect descendants)
-  rendererSummaryRefreshEmitter: TinyEmitter<[]>;
+  rendererSummaryRefreshEmitter: TinyEmitter;
 
   // Emitted to when we change filters (either opacity or generalized filters)
-  filterChangeEmitter: TinyEmitter<[]>;
+  filterChangeEmitter: TinyEmitter;
 
   // Fired when an instance is changed (added/removed)
   changedInstanceEmitter: TinyEmitter<[ instance: Instance, added: boolean ]>;
 
   // Fired when layoutOptions changes
-  layoutOptionsChangedEmitter: TinyEmitter<[]>;
+  layoutOptionsChangedEmitter: TinyEmitter;
 
   // A bitmask which specifies which renderers this Node (and only this Node, not its subtree) supports.
   _rendererBitmask: number;
@@ -4641,7 +4641,6 @@ class Node extends ParallelDOM {
 
   // Defaults indicating that we don't mix in WidthSizable/HeightSizable
   get widthSizable(): boolean { return false; }
-
   get heightSizable(): boolean { return false; }
 
   mutateLayoutOptions( layoutOptions?: ILayoutOptions ): void {

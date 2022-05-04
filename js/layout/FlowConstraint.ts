@@ -1,7 +1,8 @@
 // Copyright 2021-2022, University of Colorado Boulder
 
 /**
- * TODO: doc
+ * Main flow-layout logic. Usually used indirectly through FlowBox, but can also be used directly (say, if nodes don't
+ * have the same parent, or a FlowBox can't be used).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -243,7 +244,7 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
 
     const cells: FlowCell[] = this.cells.filter( cell => {
       // TODO: Also don't lay out disconnected nodes!!!!
-      return cell.node.bounds.isValid() && ( !this._excludeInvisible || cell.node.visible );
+      return cell.proxy.bounds.isValid() && ( !this._excludeInvisible || cell.node.visible );
     } );
 
     if ( !cells.length ) {
@@ -251,8 +252,8 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
       return;
     }
 
-    // {number|null} Determine our preferred sizes (they can be null, in which case)
-    let preferredSize = orientation === Orientation.HORIZONTAL ? this.preferredWidthProperty.value : this.preferredHeightProperty.value;
+    // Determine our preferred sizes (they can be null, in which case)
+    let preferredSize: number | null = orientation === Orientation.HORIZONTAL ? this.preferredWidthProperty.value : this.preferredHeightProperty.value;
     const preferredOppositeSize = orientation === Orientation.HORIZONTAL ? this.preferredHeightProperty.value : this.preferredWidthProperty.value;
 
     // What is the largest of the minimum sizes of cells (e.g. if we're wrapping, this would be our minimum size)
@@ -297,8 +298,8 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
       lines.push( cells );
     }
 
-    // {number} - Given our wrapped lines, what is our minimum size we could take up?
-    const minimumCurrentSize = Math.max( ...lines.map( line => {
+    // Given our wrapped lines, what is our minimum size we could take up?
+    const minimumCurrentSize: number = Math.max( ...lines.map( line => {
       return ( line.length - 1 ) * this.spacing + _.sum( line.map( cell => cell.getMinimumSize( orientation ) ) );
     } ) );
     const minimumCurrentOppositeSize = _.sum( lines.map( line => {
@@ -309,9 +310,9 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
     // current minimums
     const minimumAllowableSize = this.wrap ? maxMinimumCellSize : minimumCurrentSize;
 
-    // {number} - Increase things if our preferred size is larger than our minimums (we'll figure out how to compensate
+    // Increase things if our preferred size is larger than our minimums (we'll figure out how to compensate
     // for the extra space below).
-    const size = Math.max( minimumCurrentSize, preferredSize || 0 );
+    const size: number = Math.max( minimumCurrentSize, preferredSize || 0 );
 
     const minCoordinate = 0;
     const maxCoordinate = size;

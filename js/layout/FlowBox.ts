@@ -7,7 +7,7 @@
  */
 
 import merge from '../../../phet-core/js/merge.js';
-import { scenery, Node, FlowCell, FlowConstraint, WidthSizable, HeightSizable, FLOW_CONSTRAINT_OPTION_KEYS, NodeOptions, FlowConstraintOptions, WidthSizableSelfOptions, HeightSizableSelfOptions, FlowConfigurableOptions, FlowOrientation, FlowHorizontalJustifys, FlowVerticalJustifys, FlowHorizontalAlign, FlowVerticalAlign } from '../imports.js';
+import { FLOW_CONSTRAINT_OPTION_KEYS, FlowCell, FlowConstraint, FlowConstraintOptions, FlowHorizontalAlign, FlowHorizontalJustifys, FlowOrientation, FlowVerticalAlign, FlowVerticalJustifys, HeightSizable, HeightSizableSelfOptions, Node, NodeOptions, scenery, WidthSizable, WidthSizableSelfOptions } from '../imports.js';
 
 // FlowBox-specific options that can be passed in the constructor or mutate() call.
 const FLOWBOX_OPTION_KEYS = [
@@ -80,7 +80,7 @@ export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
    * Called when a child is inserted.
    */
   private onFlowBoxChildInserted( node: Node, index: number ): void {
-    const cell = new FlowCell( this._constraint, node, node.layoutOptions as FlowConfigurableOptions );
+    const cell = new FlowCell( this._constraint, node );
     this._cellMap.set( node, cell );
 
     this._constraint.insertCell( index, cell );
