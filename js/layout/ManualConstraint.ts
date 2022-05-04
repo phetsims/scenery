@@ -1,7 +1,21 @@
 // Copyright 2021-2022, University of Colorado Boulder
 
 /**
- * TODO: doc
+ * ManualConstraint exists for cases where imperative-based positioning code (e.g. `node.left = otherNode.right + 5`)
+ * is best for a case, and should be rerun whenever one of the nodes changes bounds.
+ *
+ * ManualConstraint also can handle cases where the nodes do not live in the same coordinate frame (but instead with
+ * some common ancestor).
+ *
+ * For example:
+ *
+ * new ManualConstraint( [ firstNode, secondNode ], ( firstProxy, secondProxy ) => {
+ *   firstProxy.left = secondProxy.right + 5;
+ *   secondProxy.centerY = firstProxy.centerY;
+ * } );
+ *
+ * Notably in the callback, it uses LayoutProxy (which has the positional getters/setters of an object, and handles
+ * coordinate transforms).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
