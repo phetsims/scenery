@@ -1,7 +1,7 @@
 // Copyright 2021-2022, University of Colorado Boulder
 
 /**
- * TODO: doc
+ * A configurable cell containing a Node used for GridConstraint layout
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -10,9 +10,9 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Utils from '../../../dot/js/Utils.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../phet-core/js/OrientationPair.js';
-import merge from '../../../phet-core/js/merge.js';
-import { scenery, GridConfigurable, GridConstraint, Node, GridConfigurableOptions, WidthSizableNode, HeightSizableNode } from '../imports.js';
+import { GridConfigurable, GridConfigurableOptions, GridConstraint, LayoutProxy, Node, scenery } from '../imports.js';
 import { GridConfigurableAlign } from './GridConfigurable.js';
+import optionize from '../../../phet-core/js/optionize.js';
 
 const sizableFlagPair = new OrientationPair( 'widthSizable' as const, 'heightSizable' as const );
 const minimumSizePair = new OrientationPair( 'minimumWidth' as const, 'minimumHeight' as const );
@@ -34,6 +34,7 @@ export default class GridCell extends GridConfigurable( Object ) {
 
   private _constraint: GridConstraint;
   private _node: Node;
+  private _proxy: LayoutProxy;
   private layoutOptionsListener: () => void;
 
   // These are only set initially, and ignored for the future
@@ -46,14 +47,14 @@ export default class GridCell extends GridConfigurable( Object ) {
   // Set to be the bounds used by the cell
   lastUsedBounds: Bounds2;
 
-  constructor( constraint: GridConstraint, node: Node, providedOptions?: GridCellOptions ) {
+  constructor( constraint: GridConstraint, node: Node ) {
 
-    const options = merge( {
+    const options = optionize<GridCellOptions, SelfOptions, GridConfigurableOptions>()( {
       x: 0,
       y: 0,
       width: 1,
       height: 1
-    }, providedOptions );
+    }, node.layoutOptions as GridConfigurableOptions );
 
     assert && assert( typeof options.x === 'number' && Number.isInteger( options.x ) && isFinite( options.x ) && options.x >= 0 );
     assert && assert( typeof options.y === 'number' && Number.isInteger( options.y ) && isFinite( options.y ) && options.y >= 0 );
@@ -64,12 +65,14 @@ export default class GridCell extends GridConfigurable( Object ) {
 
     this._constraint = constraint;
     this._node = node;
+    this._proxy = constraint.createLayoutProxy( node );
     this.position = new OrientationPair( options.x, options.y );
     this.size = new OrientationPair( options.width, options.height );
     this.lastAvailableBounds = Bounds2.NOTHING.copy();
     this.lastUsedBounds = Bounds2.NOTHING.copy();
 
     this.setOptions( options );
+    this.onLayoutOptionsChange();
 
     this.layoutOptionsListener = this.onLayoutOptionsChange.bind( this );
     this.node.layoutOptionsChangedEmitter.addListener( this.layoutOptionsListener );
@@ -161,11 +164,14 @@ export default class GridCell extends GridConfigurable( Object ) {
     return this._node;
   }
 
+  get proxy(): LayoutProxy {
+    return this._proxy;
+  }
+
   getMinimumSize( orientation: Orientation ): number {
-    const sizableNode = this.node as WidthSizableNode & HeightSizableNode;
     return this.getEffectiveMinMargin( orientation ) +
            Math.max(
-             this.node[ sizableFlagPair.get( orientation ) ] ? sizableNode[ minimumSizePair.get( orientation ) ] || 0 : this.node[ orientation.size ],
+             this.proxy[ sizableFlagPair.get( orientation ) ] ? this.proxy[ minimumSizePair.get( orientation ) ] || 0 : this.proxy[ orientation.size ],
              this.getEffectiveMinContent( orientation ) || 0
            ) +
            this.getEffectiveMaxMargin( orientation );
@@ -180,7 +186,7 @@ export default class GridCell extends GridConfigurable( Object ) {
   }
 
   attemptPreferredSize( orientation: Orientation, value: number ): void {
-    if ( this.node[ sizableFlagPair.get( orientation ) ] ) {
+    if ( this.proxy[ sizableFlagPair.get( orientation ) ] ) {
       const minimumSize = this.getMinimumSize( orientation );
       const maximumSize = this.getMaximumSize( orientation );
 
@@ -189,7 +195,7 @@ export default class GridCell extends GridConfigurable( Object ) {
 
       value = Utils.clamp( value, minimumSize, maximumSize );
 
-      ( this.node as WidthSizableNode & HeightSizableNode )[ preferredSizePair.get( orientation ) ] = value - this.getEffectiveMinMargin( orientation ) - this.getEffectiveMaxMargin( orientation );
+      this.proxy[ preferredSizePair.get( orientation ) ] = value - this.getEffectiveMinMargin( orientation ) - this.getEffectiveMaxMargin( orientation );
     }
   }
 
@@ -198,26 +204,24 @@ export default class GridCell extends GridConfigurable( Object ) {
       // TODO: handle layout bounds
       // TODO: OMG this is horribly broken right? We would need to align stuff first
       // TODO: Do a pass to handle origin cells first (and in FLOW too)
-      if ( Math.abs( this.node[ orientation.coordinate ] - value ) > CHANGE_POSITION_THRESHOLD ) {
-        // TODO: coordinate transform handling, to our ancestorNode!!!!!
-        this.node[ orientation.coordinate ] = value;
+      if ( Math.abs( this.proxy[ orientation.coordinate ] - value ) > CHANGE_POSITION_THRESHOLD ) {
+        this.proxy[ orientation.coordinate ] = value;
       }
     }
     else {
       const minMargin = this.getEffectiveMinMargin( orientation );
       const maxMargin = this.getEffectiveMaxMargin( orientation );
-      const extraSpace = availableSize - this.node[ orientation.size ] - minMargin - maxMargin;
+      const extraSpace = availableSize - this.proxy[ orientation.size ] - minMargin - maxMargin;
       value += minMargin + extraSpace * align.padRatio;
 
-      if ( Math.abs( this.node[ orientation.minSide ] - value ) > CHANGE_POSITION_THRESHOLD ) {
-        // TODO: coordinate transform handling, to our ancestorNode!!!!!
-        this.node[ orientation.minSide ] = value;
+      if ( Math.abs( this.proxy[ orientation.minSide ] - value ) > CHANGE_POSITION_THRESHOLD ) {
+        this.proxy[ orientation.minSide ] = value;
       }
     }
   }
 
   getCellBounds(): Bounds2 {
-    return this.node.bounds.withOffsets(
+    return this.proxy.bounds.withOffsets(
       this.effectiveLeftMargin,
       this.effectiveTopMargin,
       this.effectiveRightMargin,

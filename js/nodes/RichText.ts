@@ -63,7 +63,6 @@ import StringProperty from '../../../axon/js/StringProperty.js';
 import TinyForwardingProperty from '../../../axon/js/TinyForwardingProperty.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
-import extendDefined from '../../../phet-core/js/extendDefined.js';
 import inheritance from '../../../phet-core/js/inheritance.js';
 import memoize from '../../../phet-core/js/memoize.js';
 import merge from '../../../phet-core/js/merge.js';
@@ -72,6 +71,7 @@ import Tandem from '../../../tandem/js/Tandem.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import { Color, FireListener, Font, IInputListener, IPaint, Line, Node, NodeOptions, scenery, Text, TextBoundsMethod, Voicing, VStrut } from '../imports.js';
 import Pool from '../../../phet-core/js/Pool.js';
+import optionize from '../../../phet-core/js/optionize.js';
 
 // Options that can be used in the constructor, with mutate(), or directly as setters/getters
 // each of these options has an associated setter, see setter methods for more documentation
@@ -326,7 +326,15 @@ export default class RichText extends Node {
   // Normal layout container of lines (separate, so we can clear it easily)
   private lineContainer: Node;
 
-  constructor( text: string | number, options?: RichTextOptions ) {
+  constructor( text: string | number, providedOptions?: RichTextOptions ) {
+
+    // We only fill in some defaults, since the other defaults are defined below (and mutate is relied on)
+    const options = optionize<RichTextOptions, Pick<SelfOptions, 'fill' | 'text'>, NodeOptions>()( {
+      fill: '#000000',
+      text: text,
+      tandem: Tandem.OPTIONAL,
+      phetioType: RichText.RichTextIO
+    }, providedOptions );
 
     super();
 
@@ -355,13 +363,6 @@ export default class RichText extends Node {
     this._lineWrap = null;
     this._linkItems = [];
     this._hasAddedLeafToLine = false;
-
-    options = extendDefined( {
-      fill: '#000000',
-      text: text,
-      tandem: Tandem.OPTIONAL,
-      phetioType: RichText.RichTextIO
-    }, options );
 
     this.lineContainer = new Node( {} );
     this.addChild( this.lineContainer );

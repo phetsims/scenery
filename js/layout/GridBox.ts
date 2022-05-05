@@ -6,8 +6,8 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import merge from '../../../phet-core/js/merge.js';
-import { scenery, Node, GridCell, GridConstraint, WidthSizable, HeightSizable, GRID_CONSTRAINT_OPTION_KEYS, GridConstraintOptions, NodeOptions, WidthSizableSelfOptions, HeightSizableSelfOptions, GridHorizontalAlign, GridVerticalAlign, GridCellOptions } from '../imports.js';
+import optionize from '../../../phet-core/js/optionize.js';
+import { GRID_CONSTRAINT_OPTION_KEYS, GridCell, GridConstraint, GridConstraintOptions, GridHorizontalAlign, GridVerticalAlign, HeightSizable, HeightSizableSelfOptions, ILayoutOptions, Node, NodeOptions, scenery, WidthSizable, WidthSizableSelfOptions } from '../imports.js';
 
 // GridBox-specific options that can be passed in the constructor or mutate() call.
 const GRIDBOX_OPTION_KEYS = [
@@ -23,7 +23,9 @@ type SelfOptions = {
   resize?: boolean;
 } & Omit<GridConstraintOptions, 'excludeInvisible'>;
 
-export type GridBoxOptions = SelfOptions & NodeOptions & WidthSizableSelfOptions & HeightSizableSelfOptions;
+type SuperType = NodeOptions & WidthSizableSelfOptions & HeightSizableSelfOptions;
+
+export type GridBoxOptions = SelfOptions & SuperType;
 
 export default class GridBox extends WidthSizable( HeightSizable( Node ) ) {
 
@@ -34,11 +36,13 @@ export default class GridBox extends WidthSizable( HeightSizable( Node ) ) {
   private _nextX: number;
   private _nextY: number;
 
-  constructor( options?: GridBoxOptions ) {
-    options = merge( {
+  constructor( providedOptions?: GridBoxOptions ) {
+    const options = optionize<GridBoxOptions, Omit<SelfOptions, keyof GridConstraintOptions>, SuperType>()( {
       // Allow dynamic layout by default, see https://github.com/phetsims/joist/issues/608
-      excludeInvisibleChildrenFromBounds: true
-    }, options );
+      excludeInvisibleChildrenFromBounds: true,
+
+      resize: true
+    }, providedOptions );
 
     super();
 
@@ -80,10 +84,10 @@ export default class GridBox extends WidthSizable( HeightSizable( Node ) ) {
     let layoutOptions = node.layoutOptions;
 
     if ( !layoutOptions || ( typeof layoutOptions.x !== 'number' && typeof layoutOptions.y !== 'number' ) ) {
-      layoutOptions = merge( {
+      layoutOptions = optionize<ILayoutOptions, {}, ILayoutOptions>()( {
         x: this._nextX,
         y: this._nextY
-      }, layoutOptions );
+      }, layoutOptions || undefined );
     }
 
     if ( layoutOptions!.wrap ) {
@@ -101,7 +105,7 @@ export default class GridBox extends WidthSizable( HeightSizable( Node ) ) {
       this._nextX++;
     }
 
-    const cell = new GridCell( this._constraint, node, layoutOptions as GridCellOptions );
+    const cell = new GridCell( this._constraint, node );
     this._cellMap.set( node, cell );
 
     this._constraint.addCell( cell );
@@ -124,6 +128,10 @@ export default class GridBox extends WidthSizable( HeightSizable( Node ) ) {
 
   get resize(): boolean {
     return this._constraint.enabled;
+  }
+
+  set resize( value: boolean ) {
+    this._constraint.enabled = value;
   }
 
   get spacing(): number | number[] {

@@ -7,21 +7,19 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import merge from '../../../phet-core/js/merge.js';
-import { scenery, Line, LineOptions } from '../imports.js';
+import optionize from '../../../phet-core/js/optionize.js';
+import { Line, LineOptions, scenery } from '../imports.js';
 
 export type DividerOptions = LineOptions;
 
 export default class Divider extends Line {
-  constructor( options?: LineOptions ) {
-    options = merge( {
+  constructor( providedOptions?: LineOptions ) {
+    super( optionize<LineOptions, {}, LineOptions>()( {
       layoutOptions: {
         align: 'stretch'
       },
       stroke: 'rgb(100,100,100)'
-    }, options );
-
-    super( options );
+    }, providedOptions ) );
   }
 }
 

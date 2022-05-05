@@ -6,7 +6,7 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import merge from '../../../phet-core/js/merge.js';
+import optionize from '../../../phet-core/js/optionize.js';
 import { FLOW_CONSTRAINT_OPTION_KEYS, FlowCell, FlowConstraint, FlowConstraintOptions, FlowHorizontalAlign, FlowHorizontalJustifys, FlowOrientation, FlowVerticalAlign, FlowVerticalJustifys, HeightSizable, HeightSizableSelfOptions, Node, NodeOptions, scenery, WidthSizable, WidthSizableSelfOptions } from '../imports.js';
 
 // FlowBox-specific options that can be passed in the constructor or mutate() call.
@@ -33,8 +33,7 @@ export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
   private _cellMap: Map<Node, FlowCell>;
 
   constructor( providedOptions?: FlowBoxOptions ) {
-    // TODO: optionize
-    const options = merge( {
+    const options = optionize<FlowBoxOptions, Omit<SelfOptions, keyof FlowConstraintOptions>, NodeOptions>()( {
       // Allow dynamic layout by default, see https://github.com/phetsims/joist/issues/608
       excludeInvisibleChildrenFromBounds: true,
       resize: true

@@ -366,7 +366,6 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
         if ( index > 0 ) {
           position += this.spacing;
         }
-        // TODO: handle coordinate transforms properly
         cell.positionStart( orientation, position );
         position += cell._pendingSize;
       } );

@@ -20,8 +20,8 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import merge from '../../../phet-core/js/merge.js';
-import { scenery, Node, AlignGroup, NodeOptions } from '../imports.js';
+import optionize from '../../../phet-core/js/optionize.js';
+import { AlignGroup, Node, NodeOptions, scenery } from '../imports.js';
 
 const ALIGNMENT_CONTAINER_OPTION_KEYS = [
   'alignBounds', // {Bounds2|null} - See setAlignBounds() for more documentation
@@ -54,7 +54,7 @@ type SelfOptions = {
   'group'?: AlignGroup | null;
 };
 
-export type AlignBoxOptions = SelfOptions & NodeOptions
+export type AlignBoxOptions = SelfOptions & Omit<NodeOptions, 'children'>;
 
 export default class AlignBox extends Node {
 
@@ -88,10 +88,14 @@ export default class AlignBox extends Node {
    * its localBounds, and will position its content inside its localBounds by respecting its alignment and margins.
    *
    * @param content - Content to align inside of the alignBox
-   * @param [options] - AlignBox-specific options are documented in ALIGNMENT_CONTAINER_OPTION_KEYS
+   * @param [providedOptions] - AlignBox-specific options are documented in ALIGNMENT_CONTAINER_OPTION_KEYS
    *                    above, and can be provided along-side options for Node
    */
-  constructor( content: Node, options?: AlignBoxOptions ) {
+  constructor( content: Node, providedOptions?: AlignBoxOptions ) {
+
+    const options = optionize<AlignBoxOptions, {}, NodeOptions>()( {
+      children: [ content ]
+    }, providedOptions );
 
     super();
 
@@ -114,9 +118,7 @@ export default class AlignBox extends Node {
     // Will be removed by dispose()
     this._content.boundsProperty.lazyLink( this._contentBoundsListener );
 
-    this.mutate( merge( {}, options, {
-      children: [ this._content ]
-    } ) );
+    this.mutate( options );
   }
 
   /**

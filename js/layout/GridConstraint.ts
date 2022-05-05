@@ -1,7 +1,8 @@
 // Copyright 2021-2022, University of Colorado Boulder
 
 /**
- * TODO: doc
+ * Main grid-layout logic. Usually used indirectly through GridBox, but can also be used directly (say, if nodes don't
+ * have the same parent, or a GridBox can't be used).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -11,11 +12,11 @@ import TinyProperty from '../../../axon/js/TinyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../phet-core/js/OrientationPair.js';
-import merge from '../../../phet-core/js/merge.js';
 import mutate from '../../../phet-core/js/mutate.js';
-import { scenery, Node, GridCell, GridConfigurable, GridLine, LayoutConstraint, GRID_CONFIGURABLE_OPTION_KEYS, GridConfigurableOptions } from '../imports.js';
+import { GRID_CONFIGURABLE_OPTION_KEYS, GridCell, GridConfigurable, GridConfigurableOptions, GridLine, LayoutConstraint, Node, scenery } from '../imports.js';
 import IProperty from '../../../axon/js/IProperty.js';
 import { GridConfigurableAlign } from './GridConfigurable.js';
+import optionize from '../../../phet-core/js/optionize.js';
 
 const GRID_CONSTRAINT_OPTION_KEYS = [
   'excludeInvisible',
@@ -62,7 +63,8 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
   constructor( ancestorNode: Node, providedOptions?: GridConstraintOptions ) {
     assert && assert( ancestorNode instanceof Node );
 
-    const options = merge( {
+    // The omitted options are set to proper defaults below
+    const options = optionize<GridConstraintOptions, Omit<SelfOptions, 'excludeInvisible' | 'spacing' | 'xSpacing' | 'ySpacing'>, GridConfigurableOptions>()( {
       // As options, so we could hook into a Node's preferred/minimum sizes if desired
       preferredWidthProperty: new TinyProperty<number | null>( null ),
       preferredHeightProperty: new TinyProperty<number | null>( null ),
@@ -105,7 +107,7 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
 
     const cells = [ ...this.cells ].filter( cell => {
       // TODO: Also don't lay out disconnected nodes!!!!
-      return cell.node.bounds.isValid() && ( !this._excludeInvisible || cell.node.visible );
+      return cell.proxy.bounds.isValid() && ( !this._excludeInvisible || cell.node.visible );
     } );
     this.displayedCells = cells;
 

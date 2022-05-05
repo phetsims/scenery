@@ -26,7 +26,7 @@ const RECTANGLE_OPTION_KEYS = [
   'cornerYRadius' // {number} - Sets vertical corner radius. See setCornerYRadius() for more documentation.
 ];
 
-export type RectangleOptions = {
+type SelfOptions = {
   rectBounds?: Bounds2;
   rectSize?: Dimension2;
   rectX?: number;
@@ -36,7 +36,9 @@ export type RectangleOptions = {
   cornerRadius?: number;
   cornerXRadius?: number;
   cornerYRadius?: number;
-} & PathOptions;
+};
+
+export type RectangleOptions = SelfOptions & Omit<PathOptions, 'shape'>;
 
 export default class Rectangle extends Path {
   // X value of the left side of the rectangle

@@ -6,12 +6,12 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import merge from '../../../phet-core/js/merge.js';
-import { scenery, Node, Rectangle, GridConstraint, GridCell, NodeOptions } from '../imports.js';
+import optionize from '../../../phet-core/js/optionize.js';
+import { GridCell, GridConstraint, Node, NodeOptions, Rectangle, scenery } from '../imports.js';
 
 type CreateCellBackground = ( gridCell: GridCell ) => Node | null;
 type SelfOptions = {
-  createCellBackground: CreateCellBackground;
+  createCellBackground?: CreateCellBackground;
 };
 
 export type GridBackgroundNodeOptions = SelfOptions & NodeOptions;
@@ -25,8 +25,7 @@ export default class GridBackgroundNode extends Node {
   constructor( constraint: GridConstraint, providedOptions?: GridBackgroundNodeOptions ) {
     assert && assert( constraint instanceof GridConstraint );
 
-    const options = merge( {
-      // {function(GridCell):Node|null}
+    const options = optionize<GridBackgroundNodeOptions, SelfOptions, NodeOptions>()( {
       createCellBackground: ( cell: GridCell ) => {
         return Rectangle.bounds( cell.lastAvailableBounds, {
           fill: 'white',

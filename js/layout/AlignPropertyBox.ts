@@ -8,8 +8,8 @@
 
 import IReadOnlyProperty from '../../../axon/js/IReadOnlyProperty.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import merge from '../../../phet-core/js/merge.js';
-import { scenery, AlignBox, AlignBoxOptions, Node } from '../imports.js';
+import optionize from '../../../phet-core/js/optionize.js';
+import { AlignBox, AlignBoxOptions, Node, scenery } from '../imports.js';
 
 export type AlignPropertyBoxOptions = AlignBoxOptions;
 
@@ -24,7 +24,7 @@ export default class AlignPropertyBox extends AlignBox {
    * @param [options]
    */
   constructor( content: Node, alignBoundsProperty: IReadOnlyProperty<Bounds2>, providedOptions?: AlignPropertyBoxOptions ) {
-    const options = merge( {
+    const options = optionize<AlignPropertyBoxOptions, {}, AlignBoxOptions>()( {
       alignBounds: alignBoundsProperty.value
     }, providedOptions );
 

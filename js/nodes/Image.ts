@@ -8,7 +8,6 @@
  */
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
-import extendDefined from '../../../phet-core/js/extendDefined.js';
 import merge from '../../../phet-core/js/merge.js';
 import IOType from '../../../tandem/js/types/IOType.js';
 import StringIO from '../../../tandem/js/types/StringIO.js';
@@ -16,7 +15,8 @@ import VoidIO from '../../../tandem/js/types/VoidIO.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { Shape } from '../../../kite/js/imports.js';
-import { scenery, SpriteSheet, Imageable, Renderer, Node, NodeOptions, CanvasContextWrapper, ImageCanvasDrawable, ImageDOMDrawable, ImageSVGDrawable, ImageWebGLDrawable, Instance, DOMSelfDrawable, SVGSelfDrawable, CanvasSelfDrawable, WebGLSelfDrawable, IImageDrawable, ImageableOptions, ImageableImage } from '../imports.js';
+import { CanvasContextWrapper, CanvasSelfDrawable, DOMSelfDrawable, IImageDrawable, Imageable, ImageableImage, ImageableOptions, ImageCanvasDrawable, ImageDOMDrawable, ImageSVGDrawable, ImageWebGLDrawable, Instance, Node, NodeOptions, Renderer, scenery, SpriteSheet, SVGSelfDrawable, WebGLSelfDrawable } from '../imports.js';
+import optionize from '../../../phet-core/js/optionize.js';
 
 // Image-specific options that can be passed in the constructor or mutate() call.
 const IMAGE_OPTION_KEYS = [
@@ -32,23 +32,27 @@ const IMAGE_OPTION_KEYS = [
   'hitTestPixels' // {boolean} - Whether non-transparent pixels will control contained points, see setHitTestPixels() for documentation
 ];
 
-export type ImageOptions = {
+type SelfOptions = {
   imageBounds?: Bounds2 | null;
-} & NodeOptions & ImageableOptions;
+};
+
+type SuperOptions = NodeOptions & ImageableOptions;
+
+export type ImageOptions = SelfOptions & SuperOptions;
 
 export default class Image extends Imageable( Node ) {
 
   // If non-null, determines what is considered "inside" the image for containment and hit-testing.
   _imageBounds: Bounds2 | null;
 
-  constructor( image: ImageableImage, options?: ImageOptions ) {
-
-    super();
+  constructor( image: ImageableImage, providedOptions?: ImageOptions ) {
 
     // rely on the setImage call from the super constructor to do the setup
-    options = extendDefined( {
+    const options = optionize<ImageOptions, {}, SuperOptions>()( {
       image: image
-    }, options );
+    }, providedOptions );
+
+    super();
 
     this._imageBounds = null;
 

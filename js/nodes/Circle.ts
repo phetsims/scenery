@@ -21,7 +21,7 @@ type SelfOptions = {
   radius?: number;
 };
 
-export type CircleOptions = SelfOptions & PathOptions;
+export type CircleOptions = SelfOptions & Omit<PathOptions, 'shape'>;
 
 export default class Circle extends Path {
 

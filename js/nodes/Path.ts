@@ -8,11 +8,11 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import { Shape } from '../../../kite/js/imports.js';
-import extendDefined from '../../../phet-core/js/extendDefined.js';
 import merge from '../../../phet-core/js/merge.js';
 import Matrix3 from '../../../dot/js/Matrix3.js';
 import Vector2 from '../../../dot/js/Vector2.js';
 import { CanvasContextWrapper, CanvasSelfDrawable, Instance, IPathDrawable, Node, NodeOptions, Paint, Paintable, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_OPTION_KEYS, PaintableOptions, PathCanvasDrawable, PathSVGDrawable, Renderer, scenery, SVGSelfDrawable } from '../imports.js';
+import optionize from '../../../phet-core/js/optionize.js';
 
 const PATH_OPTION_KEYS = [
   'boundsMethod', // {string} - Sets how bounds are determined, see setBoundsMethod() for more documentation.
@@ -64,9 +64,13 @@ export default class Path extends Paintable( Node ) {
    * @param [options] - Path-specific options are documented in PATH_OPTION_KEYS above, and can be provided
    *                             along-side options for Node
    */
-  constructor( shape: Shape | string | null, options?: PathOptions ) {
-    assert && assert( options === undefined || Object.getPrototypeOf( options ) === Object.prototype,
+  constructor( shape: Shape | string | null, providedOptions?: PathOptions ) {
+    assert && assert( providedOptions === undefined || Object.getPrototypeOf( providedOptions ) === Object.prototype,
       'Extra prototype on Node options object is a code smell' );
+
+    const options = optionize<PathOptions, {}, PathOptions>()( {
+      shape: shape
+    }, providedOptions );
 
     super();
 
@@ -77,10 +81,6 @@ export default class Path extends Paintable( Node ) {
     this._invalidShapeListenerAttached = false;
 
     this.invalidateSupportedRenderers();
-
-    options = extendDefined( {
-      shape: shape
-    }, options );
 
     this.mutate( options );
   }

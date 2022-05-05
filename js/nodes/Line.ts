@@ -30,7 +30,7 @@ type SelfOptions = {
   x2?: number;
   y2?: number;
 };
-export type LineOptions = SelfOptions & PathOptions
+export type LineOptions = SelfOptions & Omit<PathOptions, 'shape'>;
 
 export default class Line extends Path {
 
