@@ -77,7 +77,7 @@ export { default as Sepia } from './util/Sepia.js';
 export { default as ParallelDOM, ACCESSIBILITY_OPTION_KEYS } from './accessibility/pdom/ParallelDOM.js';
 export type { ParallelDOMOptions, PDOMBehaviorFunction } from './accessibility/pdom/ParallelDOM.js';
 export { default as Node } from './nodes/Node.js';
-export type { NodeOptions, RendererType } from './nodes/Node.js';
+export type { NodeOptions, NodeBoundsBasedTranslationOptions, NodeTranslationOptions, NodeTransformOptions, RendererType } from './nodes/Node.js';
 export { default as Picker } from './util/Picker.js';
 export { default as RendererSummary } from './util/RendererSummary.js';
 export { default as NodeProperty } from './util/NodeProperty.js';
