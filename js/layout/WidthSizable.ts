@@ -26,8 +26,8 @@ export type WidthSizableSelfOptions = {
 const WidthSizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   const clazz = class extends type {
 
-    preferredWidthProperty: TinyProperty<number | null>;
-    minimumWidthProperty: TinyProperty<number | null>;
+    readonly preferredWidthProperty: TinyProperty<number | null>;
+    readonly minimumWidthProperty: TinyProperty<number | null>;
 
     constructor( ...args: any[] ) {
       super( ...args );

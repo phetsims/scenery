@@ -21,12 +21,12 @@ const scratchVector = new Vector2( 0, 0 );
 const scratchMatrix = Matrix3.IDENTITY.copy();
 
 export class SpriteInstanceTransformType extends EnumerationValue {
-  static TRANSLATION = new SpriteInstanceTransformType();
-  static TRANSLATION_AND_SCALE = new SpriteInstanceTransformType();
-  static TRANSLATION_AND_ROTATION = new SpriteInstanceTransformType();
-  static AFFINE = new SpriteInstanceTransformType();
+  static readonly TRANSLATION = new SpriteInstanceTransformType();
+  static readonly TRANSLATION_AND_SCALE = new SpriteInstanceTransformType();
+  static readonly TRANSLATION_AND_ROTATION = new SpriteInstanceTransformType();
+  static readonly AFFINE = new SpriteInstanceTransformType();
 
-  static enumeration = new Enumeration( SpriteInstanceTransformType, {
+  static readonly enumeration = new Enumeration( SpriteInstanceTransformType, {
     phetioDocumentation: 'Defines the available transform type for a SpriteInstance'
   } );
 }

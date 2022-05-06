@@ -40,15 +40,15 @@ export type GridHorizontalAlign = typeof gridHorizontalAligns[number];
 export type GridVerticalAlign = typeof gridVerticalAligns[number];
 
 export class GridConfigurableAlign extends EnumerationValue {
-  static START = new GridConfigurableAlign( 'left', 'top', 0 );
-  static END = new GridConfigurableAlign( 'right', 'bottom', 1 );
-  static CENTER = new GridConfigurableAlign( 'center', 'center', 0.5 );
-  static ORIGIN = new GridConfigurableAlign( 'origin', 'origin' );
-  static STRETCH = new GridConfigurableAlign( 'stretch', 'stretch', 0 );
+  static readonly START = new GridConfigurableAlign( 'left', 'top', 0 );
+  static readonly END = new GridConfigurableAlign( 'right', 'bottom', 1 );
+  static readonly CENTER = new GridConfigurableAlign( 'center', 'center', 0.5 );
+  static readonly ORIGIN = new GridConfigurableAlign( 'origin', 'origin' );
+  static readonly STRETCH = new GridConfigurableAlign( 'stretch', 'stretch', 0 );
 
-  horizontal: GridHorizontalAlign;
-  vertical: GridVerticalAlign;
-  padRatio: number;
+  readonly horizontal: GridHorizontalAlign;
+  readonly vertical: GridVerticalAlign;
+  readonly padRatio: number;
 
   constructor( horizontal: GridHorizontalAlign, vertical: GridVerticalAlign, padRatio: number = Number.POSITIVE_INFINITY ) {
     super();
@@ -58,7 +58,7 @@ export class GridConfigurableAlign extends EnumerationValue {
     this.padRatio = padRatio;
   }
 
-  static enumeration = new Enumeration( GridConfigurableAlign, {
+  static readonly enumeration = new Enumeration( GridConfigurableAlign, {
     phetioDocumentation: 'Align for GridConfigurable'
   } );
 }
@@ -131,7 +131,7 @@ const GridConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
     _maxContentWidth: number | null;
     _maxContentHeight: number | null;
 
-    changedEmitter: TinyEmitter;
+    readonly changedEmitter: TinyEmitter;
 
     constructor( ...args: any[] ) {
       super( ...args );

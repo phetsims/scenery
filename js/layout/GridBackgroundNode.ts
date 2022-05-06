@@ -18,9 +18,9 @@ export type GridBackgroundNodeOptions = SelfOptions & NodeOptions;
 
 export default class GridBackgroundNode extends Node {
 
-  private constraint: GridConstraint;
-  private createCellBackground: CreateCellBackground;
-  private layoutListener: () => void;
+  private readonly constraint: GridConstraint;
+  private readonly createCellBackground: CreateCellBackground;
+  private readonly layoutListener: () => void;
 
   constructor( constraint: GridConstraint, providedOptions?: GridBackgroundNodeOptions ) {
     assert && assert( constraint instanceof GridConstraint );

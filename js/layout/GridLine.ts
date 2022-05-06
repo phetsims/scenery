@@ -39,7 +39,7 @@ export default class GridLine {
     GridLine.pool.freeToPool( this );
   }
 
-  static pool = new Pool<typeof GridLine, [number, GridCell[], number]>( GridLine, {
+  static readonly pool = new Pool<typeof GridLine, [number, GridCell[], number]>( GridLine, {
     defaultArguments: [ 0, [], 0 ]
   } );
 }

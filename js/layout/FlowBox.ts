@@ -29,8 +29,8 @@ export type FlowBoxOptions = SelfOptions & NodeOptions & WidthSizableSelfOptions
 
 export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
 
-  private _constraint: FlowConstraint;
-  private _cellMap: Map<Node, FlowCell>;
+  private readonly _constraint: FlowConstraint;
+  private readonly _cellMap: Map<Node, FlowCell>;
 
   constructor( providedOptions?: FlowBoxOptions ) {
     const options = optionize<FlowBoxOptions, Omit<SelfOptions, keyof FlowConstraintOptions>, NodeOptions>()( {

@@ -26,8 +26,8 @@ export type HeightSizableSelfOptions = {
 const HeightSizable = memoize( <SuperType extends Constructor>( type: SuperType ) => {
   const clazz = class extends type {
 
-    preferredHeightProperty: TinyProperty<number | null>;
-    minimumHeightProperty: TinyProperty<number | null>;
+    readonly preferredHeightProperty: TinyProperty<number | null>;
+    readonly minimumHeightProperty: TinyProperty<number | null>;
 
     constructor( ...args: any[] ) {
       super( ...args );

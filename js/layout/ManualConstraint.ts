@@ -30,11 +30,11 @@ type LayoutCallback<T extends any[]> = ( ...args: LayoutProxyMap<T> ) => void;
 
 export default class ManualConstraint<T extends Node[]> extends LayoutConstraint {
 
-  private nodes: T;
-  private layoutCallback: LayoutCallback<T>;
+  private readonly nodes: T;
+  private readonly layoutCallback: LayoutCallback<T>;
 
   // Minimizing garbage created
-  private proxyFactory: ( n: Node ) => LayoutProxy;
+  private readonly proxyFactory: ( n: Node ) => LayoutProxy;
 
   constructor( ancestorNode: Node, nodes: T, layoutCallback: LayoutCallback<T> ) {
 

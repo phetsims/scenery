@@ -41,7 +41,7 @@ export type GridConstraintOptions = SelfOptions & GridConfigurableOptions;
 
 export default class GridConstraint extends GridConfigurable( LayoutConstraint ) {
 
-  private cells: Set<GridCell>;
+  private readonly cells: Set<GridCell>;
 
   // scenery-internal
   displayedCells: GridCell[];
@@ -53,12 +53,12 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
   private _spacing: OrientationPair<number | number[]>;
 
   // Reports out the used layout bounds (may be larger than actual bounds, since it will include margins, etc.)
-  layoutBoundsProperty: IProperty<Bounds2>;
+  readonly layoutBoundsProperty: IProperty<Bounds2>;
 
-  preferredWidthProperty: IProperty<number | null>;
-  preferredHeightProperty: IProperty<number | null>;
-  minimumWidthProperty: IProperty<number | null>;
-  minimumHeightProperty: IProperty<number | null>;
+  readonly preferredWidthProperty: IProperty<number | null>;
+  readonly preferredHeightProperty: IProperty<number | null>;
+  readonly minimumWidthProperty: IProperty<number | null>;
+  readonly minimumHeightProperty: IProperty<number | null>;
 
   constructor( ancestorNode: Node, providedOptions?: GridConstraintOptions ) {
     assert && assert( ancestorNode instanceof Node );

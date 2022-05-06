@@ -50,6 +50,6 @@ export default class SVGLinearGradient extends SVGGradient implements IPoolable 
     SVGLinearGradient.pool.freeToPool( this );
   }
 
-  static pool = new Pool( SVGLinearGradient );
+  static readonly pool = new Pool( SVGLinearGradient );
 }
 scenery.register( 'SVGLinearGradient', SVGLinearGradient );

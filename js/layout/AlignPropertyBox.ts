@@ -15,8 +15,8 @@ export type AlignPropertyBoxOptions = AlignBoxOptions;
 
 export default class AlignPropertyBox extends AlignBox {
 
-  private alignBoundsProperty: IReadOnlyProperty<Bounds2>;
-  private _alignBoundsPropertyListener: ( b: Bounds2 ) => void;
+  private readonly alignBoundsProperty: IReadOnlyProperty<Bounds2>;
+  private readonly _alignBoundsPropertyListener: ( b: Bounds2 ) => void;
 
   /**
    * @param content - Content to align inside the alignBox

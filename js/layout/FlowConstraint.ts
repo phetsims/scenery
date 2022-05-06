@@ -40,39 +40,39 @@ const getAllowedJustifys = ( orientation: Orientation ): readonly string[] => {
 type SpaceRemainingFunctionFactory = ( spaceRemaining: number, lineLength: number ) => ( ( index: number ) => number );
 
 class FlowConstraintJustify extends EnumerationValue {
-  static START = new FlowConstraintJustify(
+  static readonly START = new FlowConstraintJustify(
     () => () => 0,
     'left', 'top'
   );
 
-  static END = new FlowConstraintJustify(
+  static readonly END = new FlowConstraintJustify(
     spaceRemaining => index => index === 0 ? spaceRemaining : 0,
     'right', 'bottom'
   );
 
-  static CENTER = new FlowConstraintJustify(
+  static readonly CENTER = new FlowConstraintJustify(
     spaceRemaining => index => index === 0 ? spaceRemaining / 2 : 0,
     'center', 'center'
   );
 
-  static SPACE_BETWEEN = new FlowConstraintJustify(
+  static readonly SPACE_BETWEEN = new FlowConstraintJustify(
     ( spaceRemaining, lineLength ) => index => index !== 0 ? ( spaceRemaining / ( lineLength - 1 ) ) : 0,
     'spaceBetween', 'spaceBetween'
   );
 
-  static SPACE_AROUND = new FlowConstraintJustify(
+  static readonly SPACE_AROUND = new FlowConstraintJustify(
     ( spaceRemaining, lineLength ) => index => ( index !== 0 ? 2 : 1 ) * spaceRemaining / ( 2 * lineLength ),
     'spaceAround', 'spaceAround'
   );
 
-  static SPACE_EVENLY = new FlowConstraintJustify(
+  static readonly SPACE_EVENLY = new FlowConstraintJustify(
     ( spaceRemaining, lineLength ) => index => spaceRemaining / ( lineLength + 1 ),
     'spaceEvenly', 'spaceEvenly'
   );
 
-  horizontal: FlowHorizontalJustifys;
-  vertical: FlowVerticalJustifys;
-  spacingFunctionFactory: SpaceRemainingFunctionFactory;
+  readonly horizontal: FlowHorizontalJustifys;
+  readonly vertical: FlowVerticalJustifys;
+  readonly spacingFunctionFactory: SpaceRemainingFunctionFactory;
 
   constructor( spacingFunctionFactory: SpaceRemainingFunctionFactory, horizontal: FlowHorizontalJustifys, vertical: FlowVerticalJustifys ) {
     super();
@@ -82,7 +82,7 @@ class FlowConstraintJustify extends EnumerationValue {
     this.vertical = vertical;
   }
 
-  static enumeration = new Enumeration( FlowConstraintJustify, {
+  static readonly enumeration = new Enumeration( FlowConstraintJustify, {
     phetioDocumentation: 'Justify for FlowConstraint'
   } );
 }
@@ -141,21 +141,21 @@ export type FlowConstraintOptions = SelfOptions & FlowConfigurableOptions;
 // TODO: Have LayoutBox use this when we're ready
 export default class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
 
-  private cells: FlowCell[];
+  private readonly cells: FlowCell[];
   private _justify: FlowConstraintJustify;
   private _wrap: boolean;
   private _spacing: number;
   private _lineSpacing: number;
   private _excludeInvisible: boolean;
 
-  preferredWidthProperty: IProperty<number | null>;
-  preferredHeightProperty: IProperty<number | null>;
-  minimumWidthProperty: IProperty<number | null>;
-  minimumHeightProperty: IProperty<number | null>;
+  readonly preferredWidthProperty: IProperty<number | null>;
+  readonly preferredHeightProperty: IProperty<number | null>;
+  readonly minimumWidthProperty: IProperty<number | null>;
+  readonly minimumHeightProperty: IProperty<number | null>;
 
   // Reports out the used layout bounds (may be larger than actual bounds, since it
   // will include margins, etc.)
-  layoutBoundsProperty: IProperty<Bounds2>;
+  readonly layoutBoundsProperty: IProperty<Bounds2>;
 
   constructor( ancestorNode: Node, providedOptions?: FlowConstraintOptions ) {
     assert && assert( ancestorNode instanceof Node );

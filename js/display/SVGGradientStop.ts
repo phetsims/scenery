@@ -192,7 +192,7 @@ class SVGGradientStop implements IPoolable {
     SVGGradientStop.pool.freeToPool( this );
   }
 
-  static pool = new Pool( SVGGradientStop );
+  static readonly pool = new Pool( SVGGradientStop );
 }
 
 scenery.register( 'SVGGradientStop', SVGGradientStop );

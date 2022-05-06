@@ -80,7 +80,7 @@ export default class SVGPattern implements IPoolable {
     SVGPattern.pool.freeToPool( this );
   }
 
-  static pool = new Pool( SVGPattern );
+  static readonly pool = new Pool( SVGPattern );
 }
 
 scenery.register( 'SVGPattern', SVGPattern );

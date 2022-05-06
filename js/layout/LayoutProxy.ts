@@ -464,7 +464,7 @@ export default class LayoutProxy {
     LayoutProxy.pool.freeToPool( this );
   }
 
-  static pool = new Pool( LayoutProxy, {
+  static readonly pool = new Pool( LayoutProxy, {
     maxSize: 1000
   } );
 }

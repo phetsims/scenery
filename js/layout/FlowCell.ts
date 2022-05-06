@@ -13,11 +13,11 @@ import { FlowConfigurable, FlowConfigurableAlign, FlowConfigurableOptions, FlowC
 
 export default class FlowCell extends FlowConfigurable( Object ) {
 
-  private _constraint: FlowConstraint;
-  private _node: Node;
-  private _proxy: LayoutProxy;
+  private readonly _constraint: FlowConstraint;
+  private readonly _node: Node;
+  private readonly _proxy: LayoutProxy;
   public _pendingSize: number; // scenery-internal
-  private layoutOptionsListener: () => void;
+  private readonly layoutOptionsListener: () => void;
 
   constructor( constraint: FlowConstraint, node: Node ) {
     super();

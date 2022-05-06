@@ -29,8 +29,8 @@ export type GridBoxOptions = SelfOptions & SuperType;
 
 export default class GridBox extends WidthSizable( HeightSizable( Node ) ) {
 
-  private _cellMap: Map<Node, GridCell>;
-  private _constraint: GridConstraint;
+  private readonly _cellMap: Map<Node, GridCell>;
+  private readonly _constraint: GridConstraint;
 
   // For handling the shortcut-style API
   private _nextX: number;

@@ -67,15 +67,15 @@ const getAllowedAligns = ( orientation: Orientation ): readonly ( string | null 
 };
 
 export class FlowConfigurableAlign extends EnumerationValue {
-  static START = new FlowConfigurableAlign( 'top', 'left', 0 );
-  static END = new FlowConfigurableAlign( 'bottom', 'right', 1 );
-  static CENTER = new FlowConfigurableAlign( 'center', 'center', 0.5 );
-  static ORIGIN = new FlowConfigurableAlign( 'origin', 'origin' );
-  static STRETCH = new FlowConfigurableAlign( 'stretch', 'stretch' );
+  static readonly START = new FlowConfigurableAlign( 'top', 'left', 0 );
+  static readonly END = new FlowConfigurableAlign( 'bottom', 'right', 1 );
+  static readonly CENTER = new FlowConfigurableAlign( 'center', 'center', 0.5 );
+  static readonly ORIGIN = new FlowConfigurableAlign( 'origin', 'origin' );
+  static readonly STRETCH = new FlowConfigurableAlign( 'stretch', 'stretch' );
 
-  horizontal: FlowHorizontalAlign;
-  vertical: FlowVerticalAlign;
-  padRatio: number;
+  readonly horizontal: FlowHorizontalAlign;
+  readonly vertical: FlowVerticalAlign;
+  readonly padRatio: number;
 
   constructor( horizontal: FlowHorizontalAlign, vertical: FlowVerticalAlign, padRatio: number = Number.POSITIVE_INFINITY ) {
     super();
@@ -85,7 +85,7 @@ export class FlowConfigurableAlign extends EnumerationValue {
     this.padRatio = padRatio;
   }
 
-  static enumeration = new Enumeration( FlowConfigurableAlign, {
+  static readonly enumeration = new Enumeration( FlowConfigurableAlign, {
     phetioDocumentation: 'Align for FlowConfigurable'
   } );
 }
@@ -151,8 +151,8 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
     _maxContentHeight: number | null;
 
     // {TinyEmitter}
-    changedEmitter: TinyEmitter;
-    orientationChangedEmitter: TinyEmitter;
+    readonly changedEmitter: TinyEmitter;
+    readonly orientationChangedEmitter: TinyEmitter;
 
     constructor( ...args: any[] ) {
       super( ...args );

@@ -41,7 +41,7 @@ export default class SVGRadialGradient extends SVGGradient implements IPoolable 
     SVGRadialGradient.pool.freeToPool( this );
   }
 
-  static pool = new Pool( SVGRadialGradient );
+  static readonly pool = new Pool( SVGRadialGradient );
 }
 
 scenery.register( 'SVGRadialGradient', SVGRadialGradient );

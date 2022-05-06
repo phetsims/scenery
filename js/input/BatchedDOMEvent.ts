@@ -15,13 +15,13 @@ import { Input, scenery } from '../imports.js';
 export type BatchedDOMEventCallback = ( ...args: any[] ) => void;
 
 export class BatchedDOMEventType extends EnumerationValue {
-  static POINTER_TYPE = new BatchedDOMEventType();
-  static MS_POINTER_TYPE = new BatchedDOMEventType();
-  static TOUCH_TYPE = new BatchedDOMEventType();
-  static MOUSE_TYPE = new BatchedDOMEventType();
-  static WHEEL_TYPE = new BatchedDOMEventType();
+  static readonly POINTER_TYPE = new BatchedDOMEventType();
+  static readonly MS_POINTER_TYPE = new BatchedDOMEventType();
+  static readonly TOUCH_TYPE = new BatchedDOMEventType();
+  static readonly MOUSE_TYPE = new BatchedDOMEventType();
+  static readonly WHEEL_TYPE = new BatchedDOMEventType();
 
-  static enumeration = new Enumeration( BatchedDOMEventType, {
+  static readonly enumeration = new Enumeration( BatchedDOMEventType, {
     phetioDocumentation: 'The type of batched event'
   } );
 }
@@ -106,7 +106,7 @@ export default class BatchedDOMEvent implements IPoolable {
     BatchedDOMEvent.pool.freeToPool( this );
   }
 
-  static pool = new Pool( BatchedDOMEvent );
+  static readonly pool = new Pool( BatchedDOMEvent );
 }
 
 scenery.register( 'BatchedDOMEvent', BatchedDOMEvent );

@@ -32,12 +32,12 @@ import IAttachableInputListener from './IAttachableInputListener.js';
 
 export class Intent extends EnumerationValue {
   // listener attached to the pointer will be used for dragging
-  static DRAG = new Intent();
+  static readonly DRAG = new Intent();
 
   // listener attached to pointer is for dragging with a keyboard
-  static KEYBOARD_DRAG = new Intent();
+  static readonly KEYBOARD_DRAG = new Intent();
 
-  static enumeration = new Enumeration( Intent, {
+  static readonly enumeration = new Enumeration( Intent, {
     phetioDocumentation: 'entries when signifying Intent of the pointer'
   } );
 }

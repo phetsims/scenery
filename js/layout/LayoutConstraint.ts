@@ -12,7 +12,7 @@ import { scenery, LayoutProxy, Node, isWidthSizable, isHeightSizable } from '../
 export default class LayoutConstraint {
 
   // The Node in whose local coordinate frame our layout computations are done.
-  private ancestorNode: Node;
+  private readonly ancestorNode: Node;
 
   // Prevents layout() from running while true. Generally will be unlocked and laid out.
   private _layoutLockCount: number;
@@ -22,12 +22,12 @@ export default class LayoutConstraint {
 
   private _enabled: boolean;
 
-  protected _updateLayoutListener: () => void;
+  protected readonly _updateLayoutListener: () => void;
 
-  private _listenedNodes: Set<Node>;
+  private readonly _listenedNodes: Set<Node>;
 
   // scenery-internal
-  finishedLayoutEmitter: TinyEmitter<[]>;
+  readonly finishedLayoutEmitter: TinyEmitter<[]>;
 
   constructor( ancestorNode: Node ) {
     assert && assert( ancestorNode instanceof Node );

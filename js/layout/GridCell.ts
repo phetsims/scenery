@@ -32,10 +32,10 @@ export type GridCellOptions = SelfOptions & GridConfigurableOptions;
 
 export default class GridCell extends GridConfigurable( Object ) {
 
-  private _constraint: GridConstraint;
-  private _node: Node;
-  private _proxy: LayoutProxy;
-  private layoutOptionsListener: () => void;
+  private readonly _constraint: GridConstraint;
+  private readonly _node: Node;
+  private readonly _proxy: LayoutProxy;
+  private readonly layoutOptionsListener: () => void;
 
   // These are only set initially, and ignored for the future
   position: OrientationPair<number>;

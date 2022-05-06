@@ -1698,7 +1698,7 @@ class RichTextElement extends RichTextCleanable( Node ) {
     RichTextElement.pool.freeToPool( this );
   }
 
-  static pool = new Pool( RichTextElement );
+  static readonly pool = new Pool( RichTextElement );
 
 }
 
@@ -1774,7 +1774,7 @@ class RichTextLeaf extends RichTextCleanable( Text ) {
     RichTextLeaf.pool.freeToPool( this );
   }
 
-  static pool = new Pool( RichTextLeaf );
+  static readonly pool = new Pool( RichTextLeaf );
 }
 
 class RichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
@@ -1877,7 +1877,7 @@ class RichTextLink extends Voicing( RichTextCleanable( Node ), 0 ) {
     RichTextLink.pool.freeToPool( this );
   }
 
-  static pool = new Pool( RichTextLink );
+  static readonly pool = new Pool( RichTextLink );
 }
 
 RichText.RichTextIO = new IOType( 'RichTextIO', {
