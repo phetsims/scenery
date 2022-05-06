@@ -374,7 +374,7 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
     // Secondary-direction layout
     let secondaryPosition = 0;
     lines.forEach( line => {
-      const maximumSize = Math.max( ...line.map( cell => cell.getMinimumSize( oppositeOrientation ) || 0 ) );
+      const maximumSize = Math.max( preferredOppositeSize || 0, ...line.map( cell => cell.getMinimumSize( oppositeOrientation ) || 0 ) );
 
       line.forEach( cell => {
         const align = cell.effectiveAlign;
