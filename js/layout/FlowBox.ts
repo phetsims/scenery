@@ -7,7 +7,7 @@
  */
 
 import optionize from '../../../phet-core/js/optionize.js';
-import { FLOW_CONSTRAINT_OPTION_KEYS, FlowCell, FlowConstraint, FlowConstraintOptions, FlowHorizontalAlign, FlowHorizontalJustifys, FlowOrientation, FlowVerticalAlign, FlowVerticalJustifys, HeightSizable, HeightSizableSelfOptions, Node, NodeOptions, scenery, WidthSizable, WidthSizableSelfOptions } from '../imports.js';
+import { FLOW_CONSTRAINT_OPTION_KEYS, FlowCell, FlowConstraint, FlowConstraintOptions, FlowHorizontalAlign, FlowHorizontalJustifys, FlowOrientation, FlowVerticalAlign, FlowVerticalJustifys, HeightSizable, HeightSizableSelfOptions, Node, NodeOptions, scenery, WidthSizable, WidthSizableSelfOptions, WIDTH_SIZABLE_OPTION_KEYS, HEIGHT_SIZABLE_OPTION_KEYS } from '../imports.js';
 
 // FlowBox-specific options that can be passed in the constructor or mutate() call.
 const FLOWBOX_OPTION_KEYS = [
@@ -331,7 +331,7 @@ export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
  * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
  *       cases that may apply.
  */
-FlowBox.prototype._mutatorKeys = WidthSizable( Node ).prototype._mutatorKeys.concat( HeightSizable( Node ).prototype._mutatorKeys ).concat( FLOWBOX_OPTION_KEYS );
+FlowBox.prototype._mutatorKeys = [ ...WIDTH_SIZABLE_OPTION_KEYS, ...HEIGHT_SIZABLE_OPTION_KEYS, ...FLOWBOX_OPTION_KEYS, ...Node.prototype._mutatorKeys ];
 
 // {Object}
 FlowBox.DEFAULT_OPTIONS = DEFAULT_OPTIONS;

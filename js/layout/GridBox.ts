@@ -7,7 +7,7 @@
  */
 
 import optionize from '../../../phet-core/js/optionize.js';
-import { GRID_CONSTRAINT_OPTION_KEYS, GridCell, GridConstraint, GridConstraintOptions, GridHorizontalAlign, GridVerticalAlign, HeightSizable, HeightSizableSelfOptions, ILayoutOptions, Node, NodeOptions, scenery, WidthSizable, WidthSizableSelfOptions } from '../imports.js';
+import { GRID_CONSTRAINT_OPTION_KEYS, GridCell, GridConstraint, GridConstraintOptions, GridHorizontalAlign, GridVerticalAlign, HeightSizable, HeightSizableSelfOptions, ILayoutOptions, Node, NodeOptions, scenery, WidthSizable, WidthSizableSelfOptions, WIDTH_SIZABLE_OPTION_KEYS, HEIGHT_SIZABLE_OPTION_KEYS } from '../imports.js';
 
 // GridBox-specific options that can be passed in the constructor or mutate() call.
 const GRIDBOX_OPTION_KEYS = [
@@ -301,7 +301,7 @@ export default class GridBox extends WidthSizable( HeightSizable( Node ) ) {
  * NOTE: See Node's _mutatorKeys documentation for more information on how this operates, and potential special
  *       cases that may apply.
  */
-GridBox.prototype._mutatorKeys = WidthSizable( Node ).prototype._mutatorKeys.concat( HeightSizable( Node ).prototype._mutatorKeys ).concat( GRIDBOX_OPTION_KEYS );
+GridBox.prototype._mutatorKeys = [ ...WIDTH_SIZABLE_OPTION_KEYS, ...HEIGHT_SIZABLE_OPTION_KEYS, ...GRIDBOX_OPTION_KEYS, ...Node.prototype._mutatorKeys ];
 
 // {Object}
 GridBox.DEFAULT_OPTIONS = DEFAULT_OPTIONS;

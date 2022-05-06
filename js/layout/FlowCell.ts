@@ -27,6 +27,7 @@ export default class FlowCell extends FlowConfigurable( Object ) {
     this._proxy = constraint.createLayoutProxy( node );
     this._pendingSize = 0;
 
+    this.orientation = constraint.orientation;
     this.onLayoutOptionsChange();
 
     this.layoutOptionsListener = this.onLayoutOptionsChange.bind( this );

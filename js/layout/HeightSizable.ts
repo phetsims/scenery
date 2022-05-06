@@ -13,7 +13,7 @@ import memoize from '../../../phet-core/js/memoize.js';
 import { scenery, Node } from '../imports.js';
 import Constructor from '../../../phet-core/js/types/Constructor.js';
 
-const HEIGHT_SIZABLE_OPTION_KEYS = [
+export const HEIGHT_SIZABLE_OPTION_KEYS = [
   'preferredHeight',
   'minimumHeight'
 ];

@@ -171,7 +171,7 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
     super( ancestorNode );
 
     this.cells = [];
-    this._justify = FlowConstraintJustify.SPACE_BETWEEN; // TODO: decide on a good default here
+    this._justify = FlowConstraintJustify.SPACE_BETWEEN;
     this._wrap = false;
     this._spacing = 0;
     this._lineSpacing = 0;
