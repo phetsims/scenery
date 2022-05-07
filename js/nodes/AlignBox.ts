@@ -5,7 +5,12 @@
  *
  * If a custom alignBounds is provided, content will be aligned within that bounding box. Otherwise, it will be aligned
  * within a bounding box with the left-top corner of (0,0) of the necessary size to include both the content and
- * all of the margins.
+ * all the margins.
+ *
+ * Preferred sizes will set the alignBounds (to a minimum x/y of 0, and a maximum x/y of preferredWidth/preferredHeight)
+ *
+ * If alignBounds or a specific preferred size have not been set yet, the AlignBox will not adjust things on that
+ * dimension.
  *
  * There are four margins: left, right, top, bottom. They can be set independently, or multiple can be set at the
  * same time (xMargin, yMargin and margin).
@@ -19,14 +24,15 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
+import Property from '../../../axon/js/Property.js';
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import optionize from '../../../phet-core/js/optionize.js';
-import { AlignGroup, Node, NodeOptions, scenery } from '../imports.js';
+import { AlignGroup, HeightSizable, HeightSizableNode, HeightSizableSelfOptions, isHeightSizable, isWidthSizable, LayoutConstraint, Node, NodeOptions, scenery, WidthSizable, WidthSizableNode, WidthSizableSelfOptions } from '../imports.js';
 
 const ALIGNMENT_CONTAINER_OPTION_KEYS = [
   'alignBounds', // {Bounds2|null} - See setAlignBounds() for more documentation
-  'xAlign', // {string} - 'left', 'center', or 'right', see setXAlign() for more documentation
-  'yAlign', // {string} - 'top', 'center', or 'bottom', see setYAlign() for more documentation
+  'xAlign', // {string} - 'left', 'center', 'right' or 'stretch', see setXAlign() for more documentation
+  'yAlign', // {string} - 'top', 'center', 'bottom' or 'stretch', see setYAlign() for more documentation
   'margin', // {number} - Sets all margins, see setMargin() for more documentation
   'xMargin', // {number} - Sets horizontal margins, see setXMargin() for more documentation
   'yMargin', // {number} - Sets vertical margins, see setYMargin() for more documentation
@@ -37,8 +43,11 @@ const ALIGNMENT_CONTAINER_OPTION_KEYS = [
   'group' // {AlignGroup|null} - Share bounds with others, see setGroup() for more documentation
 ];
 
-type XAlign = 'left' | 'center' | 'right';
-type YAlign = 'top' | 'center' | 'bottom';
+export const XAlignValues = [ 'left', 'center', 'right', 'stretch' ] as const;
+export type XAlign = ( typeof XAlignValues )[number];
+
+export const YAlignValues = [ 'top', 'center', 'bottom', 'stretch' ] as const;
+export type YAlign = ( typeof YAlignValues )[number];
 
 type SelfOptions = {
   alignBounds?: Bounds2 | null;
@@ -51,18 +60,23 @@ type SelfOptions = {
   rightMargin?: number;
   topMargin?: number;
   bottomMargin?: number;
-  'group'?: AlignGroup | null;
+  group?: AlignGroup | null;
+  canShrink?: boolean;
 };
 
-export type AlignBoxOptions = SelfOptions & Omit<NodeOptions, 'children'>;
+export type AlignBoxOptions = SelfOptions & Omit<NodeOptions, 'children'> & WidthSizableSelfOptions & HeightSizableSelfOptions;
 
-export default class AlignBox extends Node {
+export default class AlignBox extends WidthSizable( HeightSizable( Node ) ) {
 
   // Our actual content
   private _content: Node;
 
   // Controls the bounds in which content is aligned.
   private _alignBounds: Bounds2 | null;
+
+  // Whether x/y has been set
+  private _xSet = false;
+  private _ySet = false;
 
   // How to align the content when the alignBounds are larger than our content with its margins.
   private _xAlign: XAlign;
@@ -77,11 +91,10 @@ export default class AlignBox extends Node {
   // If available, an AlignGroup that will control our alignBounds
   private _group: AlignGroup | null;
 
+  private readonly constraint: AlignBoxConstraint;
+
   // Callback for when bounds change (takes no arguments)
   _contentBoundsListener = () => {};
-
-  // Used to prevent loops
-  private _layoutLock: boolean;
 
   /**
    * An individual container for an alignment group. Will maintain its size to match that of the group by overriding
@@ -93,8 +106,9 @@ export default class AlignBox extends Node {
    */
   constructor( content: Node, providedOptions?: AlignBoxOptions ) {
 
-    const options = optionize<AlignBoxOptions, {}, NodeOptions>()( {
-      children: [ content ]
+    const options = optionize<AlignBoxOptions, Pick<SelfOptions, 'canShrink'>, NodeOptions>()( {
+      children: [ content ],
+      canShrink: false
     }, providedOptions );
 
     super();
@@ -113,12 +127,38 @@ export default class AlignBox extends Node {
     this._bottomMargin = 0;
     this._group = null;
     this._contentBoundsListener = this.invalidateAlignment.bind( this );
-    this._layoutLock = false;
+
+    this.localBounds = new Bounds2( 0, 0, 0, 0 );
+
+    this.constraint = new AlignBoxConstraint( this, content, options.canShrink );
 
     // Will be removed by dispose()
-    this._content.boundsProperty.lazyLink( this._contentBoundsListener );
+    this._content.boundsProperty.link( this._contentBoundsListener );
 
     this.mutate( options );
+
+    // Update alignBounds based on preferred sizes
+    Property.multilink( [ this.preferredWidthProperty, this.preferredHeightProperty ], ( preferredWidth: number | null, preferredHeight: number | null ) => {
+      if ( preferredWidth !== null || preferredHeight !== null ) {
+        const bounds = this._alignBounds || new Bounds2( 0, 0, 0, 0 );
+
+        // Overwrite bounds with any preferred setting, with the left/top at 0
+        if ( preferredWidth ) {
+          bounds.minX = 0;
+          bounds.maxX = preferredWidth;
+          this._xSet = true;
+        }
+        if ( preferredHeight ) {
+          bounds.minY = 0;
+          bounds.maxY = preferredHeight;
+          this._ySet = true;
+        }
+
+        // Manual update and layout
+        this._alignBounds = bounds;
+        this.constraint.updateLayout();
+      }
+    } );
   }
 
   /**
@@ -138,7 +178,7 @@ export default class AlignBox extends Node {
     }
 
     // If the alignBounds didn't change, we'll still need to update our own layout
-    this.updateLayout();
+    this.constraint.updateLayout();
 
     sceneryLog && sceneryLog.AlignBox && sceneryLog.pop();
   }
@@ -154,6 +194,9 @@ export default class AlignBox extends Node {
     assert && assert( alignBounds === null || ( alignBounds instanceof Bounds2 && !alignBounds.isEmpty() && alignBounds.isFinite() ),
       'alignBounds should be a non-empty finite Bounds2' );
 
+    this._xSet = true;
+    this._ySet = true;
+
     // See if the bounds have changed. If both are Bounds2 with the same value, we won't update it.
     if ( this._alignBounds !== alignBounds &&
          ( !alignBounds ||
@@ -161,8 +204,9 @@ export default class AlignBox extends Node {
            !alignBounds.equals( this._alignBounds ) ) ) {
       this._alignBounds = alignBounds;
 
-      this.updateLayout();
+      this.constraint.updateLayout();
     }
+
     return this;
   }
 
@@ -215,8 +259,7 @@ export default class AlignBox extends Node {
    * Sets the horizontal alignment of this box.
    */
   setXAlign( xAlign: XAlign ): this {
-    assert && assert( xAlign === 'left' || xAlign === 'center' || xAlign === 'right',
-      'xAlign should be one of: \'left\', \'center\', or \'right\'' );
+    assert && assert( XAlignValues.includes( xAlign ), `xAlign should be one of: ${XAlignValues}` );
 
     if ( this._xAlign !== xAlign ) {
       this._xAlign = xAlign;
@@ -243,8 +286,7 @@ export default class AlignBox extends Node {
    * Sets the vertical alignment of this box.
    */
   setYAlign( yAlign: YAlign ): this {
-    assert && assert( yAlign === 'top' || yAlign === 'center' || yAlign === 'bottom',
-      'yAlign should be one of: \'top\', \'center\', or \'bottom\'' );
+    assert && assert( YAlignValues.includes( yAlign ), `xAlign should be one of: ${YAlignValues}` );
 
     if ( this._yAlign !== yAlign ) {
       this._yAlign = yAlign;
@@ -512,80 +554,24 @@ export default class AlignBox extends Node {
       bounds.bottom + this._bottomMargin );
   }
 
-  /**
-   * Conditionally updates a certain property of our content's positioning.
-   *
-   * Essentially does the following (but prevents infinite loops by not applying changes if the numbers are very
-   * similar):
-   * this._content[ propName ] = this.localBounds[ propName ] + offset;
-   *
-   * @param propName - A positional property on both Node and Bounds2, e.g. 'left'
-   * @param offset - Offset to be applied to the localBounds location.
-   */
-  private updateProperty( propName: 'left' | 'right' | 'top' | 'bottom' | 'centerX' | 'centerY', offset: number ): void {
-    const currentValue = this._content[ propName ];
-    const newValue = this.localBounds[ propName ] + offset;
-
-    // Prevent infinite loops or stack overflows by ignoring tiny changes
-    if ( Math.abs( currentValue - newValue ) > 1e-5 ) {
-      this._content[ propName ] = newValue;
+  // scenery-internal, designed so that we can ignore adjusting certain dimensions
+  setAdjustedLocalBounds( bounds: Bounds2 ): void {
+    if ( this._xSet && this._ySet ) {
+      this.localBounds = bounds;
     }
-  }
+    else if ( this._xSet ) {
+      const contentBounds = this.getContentBounds();
 
-  /**
-   * Updates the layout of this alignment box.
-   */
-  private updateLayout(): void {
-    if ( this._layoutLock ) { return; }
-    this._layoutLock = true;
-
-    sceneryLog && sceneryLog.AlignBox && sceneryLog.AlignBox( `AlignBox#${this.id} updateLayout` );
-    sceneryLog && sceneryLog.AlignBox && sceneryLog.push();
-
-    // If we have alignBounds, use that.
-    if ( this._alignBounds !== null ) {
-      this.localBounds = this._alignBounds;
+      this.localBounds = new Bounds2( bounds.minX, contentBounds.minY, bounds.maxX, contentBounds.maxY );
     }
-    // Otherwise, we'll grab a Bounds2 anchored at the upper-left with our required dimensions.
+    else if ( this._ySet ) {
+      const contentBounds = this.getContentBounds();
+
+      this.localBounds = new Bounds2( contentBounds.minX, bounds.minY, contentBounds.maxX, bounds.maxY );
+    }
     else {
-      const widthWithMargin = this._leftMargin + this._content.width + this._rightMargin;
-      const heightWithMargin = this._topMargin + this._content.height + this._bottomMargin;
-      this.localBounds = new Bounds2( 0, 0, widthWithMargin, heightWithMargin );
+      this.localBounds = this.getContentBounds();
     }
-
-    // Don't try to lay out empty bounds
-    if ( !this._content.localBounds.isEmpty() ) {
-
-      if ( this._xAlign === 'center' ) {
-        this.updateProperty( 'centerX', ( this.leftMargin - this.rightMargin ) / 2 );
-      }
-      else if ( this._xAlign === 'left' ) {
-        this.updateProperty( 'left', this._leftMargin );
-      }
-      else if ( this._xAlign === 'right' ) {
-        this.updateProperty( 'right', -this._rightMargin );
-      }
-      else {
-        assert && assert( `Bad xAlign: ${this._xAlign}` );
-      }
-
-      if ( this._yAlign === 'center' ) {
-        this.updateProperty( 'centerY', ( this.topMargin - this.bottomMargin ) / 2 );
-      }
-      else if ( this._yAlign === 'top' ) {
-        this.updateProperty( 'top', this._topMargin );
-      }
-      else if ( this._yAlign === 'bottom' ) {
-        this.updateProperty( 'bottom', -this._bottomMargin );
-      }
-      else {
-        assert && assert( `Bad yAlign: ${this._yAlign}` );
-      }
-    }
-
-    sceneryLog && sceneryLog.AlignBox && sceneryLog.pop();
-
-    this._layoutLock = false;
   }
 
   /**
@@ -598,7 +584,122 @@ export default class AlignBox extends Node {
     // Disconnects from the group
     this.group = null;
 
+    this.constraint.dispose();
+
     super.dispose();
+  }
+}
+
+// Layout logic for AlignBox
+class AlignBoxConstraint extends LayoutConstraint {
+
+  private readonly alignBox: AlignBox;
+  private readonly content: Node;
+  private readonly canShrink: boolean;
+
+  constructor( alignBox: AlignBox, content: Node, canShrink: boolean ) {
+    super( alignBox );
+
+    this.alignBox = alignBox;
+    this.content = content;
+    this.canShrink = canShrink;
+
+    this.addNode( content );
+  }
+
+  /**
+   * Conditionally updates a certain property of our content's positioning.
+   *
+   * Essentially does the following (but prevents infinite loops by not applying changes if the numbers are very
+   * similar):
+   * this._content[ propName ] = this.localBounds[ propName ] + offset;
+   *
+   * @param propName - A positional property on both Node and Bounds2, e.g. 'left'
+   * @param offset - Offset to be applied to the localBounds location.
+   */
+  private updateProperty( propName: 'left' | 'right' | 'top' | 'bottom' | 'centerX' | 'centerY', offset: number ): void {
+    const currentValue = this.content[ propName ];
+    const newValue = this.alignBox.localBounds[ propName ] + offset;
+
+    // Prevent infinite loops or stack overflows by ignoring tiny changes
+    if ( Math.abs( currentValue - newValue ) > 1e-5 ) {
+      this.content[ propName ] = newValue;
+    }
+  }
+
+  protected override layout(): void {
+    super.layout();
+
+    const box = this.alignBox;
+    const content = this.content;
+
+    sceneryLog && sceneryLog.AlignBox && sceneryLog.AlignBox( `AlignBoxConstraint#${this.alignBox.id} layout` );
+    sceneryLog && sceneryLog.AlignBox && sceneryLog.push();
+
+    if ( !content.bounds.isValid() ) {
+      return;
+    }
+
+    // If we have alignBounds, use that.
+    if ( box.alignBounds !== null ) {
+      box.setAdjustedLocalBounds( box.alignBounds );
+    }
+    // Otherwise, we'll grab a Bounds2 anchored at the upper-left with our required dimensions.
+    else {
+      const widthWithMargin = box.leftMargin + content.width + box.rightMargin;
+      const heightWithMargin = box.topMargin + content.height + box.bottomMargin;
+      box.setAdjustedLocalBounds( new Bounds2( 0, 0, widthWithMargin, heightWithMargin ) );
+    }
+
+    const minimumWidth = isFinite( content.width ) ? ( isWidthSizable( content ) ? content.minimumWidth || 0 : content.width ) : null;
+    const minimumHeight = isFinite( content.height ) ? ( isHeightSizable( content ) ? content.minimumHeight || 0 : content.height ) : null;
+
+    // Don't try to lay out empty bounds
+    if ( !content.localBounds.isEmpty() ) {
+
+      if ( box.xAlign === 'center' ) {
+        this.updateProperty( 'centerX', ( box.leftMargin - box.rightMargin ) / 2 );
+      }
+      else if ( box.xAlign === 'left' ) {
+        this.updateProperty( 'left', box.leftMargin );
+      }
+      else if ( box.xAlign === 'right' ) {
+        this.updateProperty( 'right', -box.rightMargin );
+      }
+      else if ( box.xAlign === 'stretch' ) {
+        assert && assert( isWidthSizable( content ), 'xAlign:stretch can only be used if WidthSizable is mixed into the content' );
+        ( content as WidthSizableNode ).preferredWidth = box.localBounds.width - box.leftMargin - box.rightMargin;
+        this.updateProperty( 'left', box.leftMargin );
+      }
+      else {
+        assert && assert( `Bad xAlign: ${box.xAlign}` );
+      }
+
+      if ( box.yAlign === 'center' ) {
+        this.updateProperty( 'centerY', ( box.topMargin - box.bottomMargin ) / 2 );
+      }
+      else if ( box.yAlign === 'top' ) {
+        this.updateProperty( 'top', box.topMargin );
+      }
+      else if ( box.yAlign === 'bottom' ) {
+        this.updateProperty( 'bottom', -box.bottomMargin );
+      }
+      else if ( box.yAlign === 'stretch' ) {
+        assert && assert( isHeightSizable( content ), 'yAlign:stretch can only be used if HeightSizable is mixed into the content' );
+        ( content as HeightSizableNode ).preferredHeight = box.localBounds.height - box.topMargin - box.bottomMargin;
+        this.updateProperty( 'top', box.topMargin );
+      }
+      else {
+        assert && assert( `Bad yAlign: ${box.yAlign}` );
+      }
+    }
+
+    sceneryLog && sceneryLog.AlignBox && sceneryLog.pop();
+
+    // After the layout lock on purpose (we want these to be reentrant, especially if they change) - however only apply
+    // this concept if we're capable of shrinking (we want the default to continue to block off the layoutBounds)
+    box.minimumWidth = this.canShrink ? minimumWidth : box.localBounds.width;
+    box.minimumHeight = this.canShrink ? minimumHeight : box.localBounds.height;
   }
 }
 

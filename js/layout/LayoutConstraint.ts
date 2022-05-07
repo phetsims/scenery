@@ -1,7 +1,8 @@
 // Copyright 2021-2022, University of Colorado Boulder
 
 /**
- * Abstract supertype for layout constraints.
+ * Abstract supertype for layout constraints. Provides a lot of assistance to layout handling, including adding/removing
+ * listeners, and reentrancy detection/loop prevention.
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -41,10 +42,18 @@ export default class LayoutConstraint {
     this.finishedLayoutEmitter = new TinyEmitter();
   }
 
-  addNode( node: Node ): void {
+  /**
+   * Adds listeners to a Node, so that our layout updates will happen if this Node's properties
+   * (bounds/visibility/minimum size) change. Will be cleared on disposal of this type.
+   */
+  addNode( node: Node, addLock = true ): void {
     assert && assert( node instanceof Node );
     assert && assert( !this._listenedNodes.has( node ) );
+    assert && assert( !addLock || !node._activeParentLayoutConstraint, 'This node is already managed by a layout container - make sure to wrap it in a Node if DAG, removing it from an old layout container, etc.' );
 
+    if ( addLock ) {
+      node._activeParentLayoutConstraint = this;
+    }
     // TODO: listen or un-listen based on whether we are enabled?
     // TODO: listen to things in-between!!
     node.boundsProperty.lazyLink( this._updateLayoutListener );
@@ -62,6 +71,11 @@ export default class LayoutConstraint {
   removeNode( node: Node ): void {
     assert && assert( node instanceof Node );
     assert && assert( this._listenedNodes.has( node ) );
+
+    // Optional, since we might not have added the "lock" in addNode
+    if ( node._activeParentLayoutConstraint === this ) {
+      node._activeParentLayoutConstraint = null;
+    }
 
     node.boundsProperty.unlink( this._updateLayoutListener );
     node.visibleProperty.unlink( this._updateLayoutListener );
@@ -99,6 +113,7 @@ export default class LayoutConstraint {
     let count = 0;
 
     if ( this.isLocked ) {
+      assert && count++;
       assert && assert( ++count < 500, 'Likely infinite loop detected, are we triggering layout within the layout?' );
       this._layoutAttemptDuringLock = true;
     }

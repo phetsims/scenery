@@ -49,7 +49,7 @@ export default class ManualConstraint<T extends Node[]> extends LayoutConstraint
     this.proxyFactory = this.createLayoutProxy.bind( this );
 
     // Hook up to listen to these nodes
-    this.nodes.forEach( node => this.addNode( node ) );
+    this.nodes.forEach( node => this.addNode( node, false ) );
 
     // Run the layout manually at the start
     this.updateLayout();

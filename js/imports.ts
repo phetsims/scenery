@@ -98,10 +98,6 @@ export type { PathOptions } from './nodes/Path.js';
 export { default as Text } from './nodes/Text.js';
 export type { TextOptions, TextBoundsMethod } from './nodes/Text.js';
 
-export { default as AlignBox } from './nodes/AlignBox.js';
-export type { AlignBoxOptions } from './nodes/AlignBox.js';
-export { default as AlignGroup } from './nodes/AlignGroup.js';
-export type { AlignGroupOptions } from './nodes/AlignGroup.js';
 export { default as CanvasNode } from './nodes/CanvasNode.js';
 export type { CanvasNodeOptions } from './nodes/CanvasNode.js';
 export { default as Circle } from './nodes/Circle.js';
@@ -222,8 +218,6 @@ export { default as SpriteListenable } from './listeners/SpriteListenable.js';
 export { default as SwipeListener } from './listeners/SwipeListener.js';
 
 export type { default as ILayoutOptions } from './layout/ILayoutOptions.js';
-export { default as AlignPropertyBox } from './layout/AlignPropertyBox.js';
-export type { AlignPropertyBoxOptions } from './layout/AlignPropertyBox.js';
 export { default as WidthSizable, isWidthSizable, WIDTH_SIZABLE_OPTION_KEYS } from './layout/WidthSizable.js';
 export type { WidthSizableNode, WidthSizableSelfOptions } from './layout/WidthSizable.js';
 export { default as HeightSizable, isHeightSizable, HEIGHT_SIZABLE_OPTION_KEYS } from './layout/HeightSizable.js';
@@ -255,6 +249,12 @@ export type { GridBoxOptions } from './layout/GridBox.js';
 export { default as GridBackgroundNode } from './layout/GridBackgroundNode.js';
 export type { GridBackgroundNodeOptions } from './layout/GridBackgroundNode.js';
 export { default as ManualConstraint } from './layout/ManualConstraint.js';
+export { default as AlignBox } from './nodes/AlignBox.js';
+export type { AlignBoxOptions } from './nodes/AlignBox.js';
+export { default as AlignGroup } from './nodes/AlignGroup.js';
+export type { AlignGroupOptions } from './nodes/AlignGroup.js';
+export { default as AlignPropertyBox } from './layout/AlignPropertyBox.js';
+export type { AlignPropertyBoxOptions } from './layout/AlignPropertyBox.js';
 
 export { default as RichText } from './nodes/RichText.js';
 export type { RichTextOptions, RichTextAlign, RichTextHref, RichTextLinks } from './nodes/RichText.js';
