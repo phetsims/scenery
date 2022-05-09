@@ -113,12 +113,12 @@ export type { SpritesOptions } from './nodes/Sprites.js';
 export { default as WebGLNode } from './nodes/WebGLNode.js';
 export type { WebGLNodeOptions } from './nodes/WebGLNode.js';
 
-export { default as LayoutBox } from './nodes/LayoutBox.js';
-export type { LayoutBoxOptions, LayoutBoxOrientation, LayoutBoxAlign } from './nodes/LayoutBox.js';
-export { default as HBox } from './nodes/HBox.js';
-export type { HBoxOptions } from './nodes/HBox.js';
-export { default as VBox } from './nodes/VBox.js';
-export type { VBoxOptions } from './nodes/VBox.js';
+export { default as LayoutBox } from './layout/LayoutBox.js';
+export type { LayoutBoxOptions, LayoutBoxOrientation, LayoutBoxAlign } from './layout/LayoutBox.js';
+export { default as HBox } from './layout/HBox.js';
+export type { HBoxOptions } from './layout/HBox.js';
+export { default as VBox } from './layout/VBox.js';
+export type { VBoxOptions } from './layout/VBox.js';
 
 export { default as Plane } from './nodes/Plane.js';
 export type { PlaneOptions } from './nodes/Plane.js';
@@ -249,10 +249,10 @@ export type { GridBoxOptions } from './layout/GridBox.js';
 export { default as GridBackgroundNode } from './layout/GridBackgroundNode.js';
 export type { GridBackgroundNodeOptions } from './layout/GridBackgroundNode.js';
 export { default as ManualConstraint } from './layout/ManualConstraint.js';
-export { default as AlignBox } from './nodes/AlignBox.js';
-export type { AlignBoxOptions } from './nodes/AlignBox.js';
-export { default as AlignGroup } from './nodes/AlignGroup.js';
-export type { AlignGroupOptions } from './nodes/AlignGroup.js';
+export { default as AlignBox } from './layout/AlignBox.js';
+export type { AlignBoxOptions } from './layout/AlignBox.js';
+export { default as AlignGroup } from './layout/AlignGroup.js';
+export type { AlignGroupOptions } from './layout/AlignGroup.js';
 export { default as AlignPropertyBox } from './layout/AlignPropertyBox.js';
 export type { AlignPropertyBoxOptions } from './layout/AlignPropertyBox.js';
 

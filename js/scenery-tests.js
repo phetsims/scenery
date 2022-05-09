@@ -19,7 +19,7 @@ import './layout/ManualConstraintTests.js';
 import './listeners/DragListenerTests.js';
 import './listeners/FireListenerTests.js';
 import './listeners/PressListenerTests.js';
-import './nodes/AlignBoxTests.js';
+import './layout/AlignBoxTests.js';
 import './nodes/NodeTests.js';
 import './nodes/RichTextTests.js';
 import './nodes/ShapeTests.js';

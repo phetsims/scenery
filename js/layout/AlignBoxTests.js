@@ -8,8 +8,8 @@
 
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import AlignGroup from './AlignGroup.js';
-import Circle from './Circle.js';
-import Rectangle from './Rectangle.js';
+import Circle from '../nodes/Circle.js';
+import Rectangle from '../nodes/Rectangle.js';
 
 QUnit.module( 'AlignBox' );
 
