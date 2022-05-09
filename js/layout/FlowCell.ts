@@ -38,6 +38,10 @@ export default class FlowCell extends FlowConfigurable( Object ) {
     return this._align !== null ? this._align : this._constraint._align!;
   }
 
+  get effectiveStretch(): boolean {
+    return this._stretch !== null ? this._stretch : this._constraint._stretch!;
+  }
+
   get effectiveLeftMargin(): number {
     return this._leftMargin !== null ? this._leftMargin : this._constraint._leftMargin!;
   }
@@ -125,8 +129,12 @@ export default class FlowCell extends FlowConfigurable( Object ) {
     }
   }
 
+  isSizable( orientation: Orientation ): boolean {
+    return orientation === Orientation.HORIZONTAL ? this.proxy.widthSizable : this.proxy.heightSizable;
+  }
+
   attemptPreferredSize( orientation: Orientation, value: number ): void {
-    if ( orientation === Orientation.HORIZONTAL ? this.proxy.widthSizable : this.proxy.heightSizable ) {
+    if ( this.isSizable( orientation ) ) {
       const minimumSize = this.getMinimumSize( orientation );
       const maximumSize = this.getMaximumSize( orientation );
 

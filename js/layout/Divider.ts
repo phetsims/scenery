@@ -16,7 +16,7 @@ export default class Divider extends Line {
   constructor( providedOptions?: LineOptions ) {
     super( optionize<LineOptions, {}, LineOptions>()( {
       layoutOptions: {
-        align: 'stretch'
+        stretch: true
       },
       stroke: 'rgb(100,100,100)'
     }, providedOptions ) );

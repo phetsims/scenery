@@ -21,6 +21,7 @@ import Enumeration from '../../../phet-core/js/Enumeration.js';
 const FLOW_CONFIGURABLE_OPTION_KEYS = [
   'orientation',
   'align',
+  'stretch',
   'grow',
   'margin',
   'xMargin',
@@ -35,8 +36,8 @@ const FLOW_CONFIGURABLE_OPTION_KEYS = [
   'maxContentHeight'
 ];
 
-const flowHorizontalAligns = [ 'top', 'bottom', 'center', 'origin', 'stretch' ] as const;
-const flowVerticalAligns = [ 'left', 'right', 'center', 'origin', 'stretch' ] as const;
+const flowHorizontalAligns = [ 'top', 'bottom', 'center', 'origin' ] as const;
+const flowVerticalAligns = [ 'left', 'right', 'center', 'origin' ] as const;
 const flowOrientations = [ 'horizontal', 'vertical' ] as const;
 
 export type FlowHorizontalAlign = typeof flowHorizontalAligns[number];
@@ -44,9 +45,25 @@ export type FlowVerticalAlign = typeof flowVerticalAligns[number];
 export type FlowOrientation = typeof flowOrientations[number];
 
 export type FlowConfigurableOptions = {
+  // The main orientation of the layout that takes place. Items will be spaced out in this orientation (e.g. if it's
+  // 'vertical', the y-values of the components will be adjusted to space them out); this is known as the "primary"
+  // dimension. Items will be aligned/stretched in the opposite orientation (e.g. if it's 'vertical', the x-values of
+  // the components will be adjusted by align and stretch); this is known as the "secondary" or "opposite" dimension.
   orientation?: FlowOrientation | null;
+
+  // Adjusts the position of elements in the "opposite" dimension, either to a specific side, the center, or so that all
+  // of the origins of items are aligned (similar to x=0 for a 'vertical' orientation).
   align?: FlowHorizontalAlign | FlowVerticalAlign | null;
+
+  // Controls whether elements will attempt to expand in the "opposite" dimension to take up the full size of the
+  // largest layout element.
+  stretch?: boolean;
+
+  // TODO: doc
   grow?: number | null;
+
+  // Adds extra space for each cell in the layout (margin controls all 4 sides, xMargin controls left/right, yMargin
+  // controls top/bottom).
   margin?: number | null;
   xMargin?: number | null;
   yMargin?: number | null;
@@ -55,7 +72,8 @@ export type FlowConfigurableOptions = {
   topMargin?: number | null;
   bottomMargin?: number | null;
 
-  // For these, the nullable portion is actually part of the possible "value"
+  // Forces size minimums and maximums on the cells (which includes the margins).
+  // NOTE: For these, the nullable portion is actually part of the possible "value"
   minContentWidth?: number | null;
   minContentHeight?: number | null;
   maxContentWidth?: number | null;
@@ -71,7 +89,6 @@ export class FlowConfigurableAlign extends EnumerationValue {
   static readonly END = new FlowConfigurableAlign( 'bottom', 'right', 1 );
   static readonly CENTER = new FlowConfigurableAlign( 'center', 'center', 0.5 );
   static readonly ORIGIN = new FlowConfigurableAlign( 'origin', 'origin' );
-  static readonly STRETCH = new FlowConfigurableAlign( 'stretch', 'stretch' );
 
   readonly horizontal: FlowHorizontalAlign;
   readonly vertical: FlowVerticalAlign;
@@ -94,29 +111,27 @@ const horizontalAlignMap = {
   top: FlowConfigurableAlign.START,
   bottom: FlowConfigurableAlign.END,
   center: FlowConfigurableAlign.CENTER,
-  origin: FlowConfigurableAlign.ORIGIN,
-  stretch: FlowConfigurableAlign.STRETCH
+  origin: FlowConfigurableAlign.ORIGIN
 };
 const verticalAlignMap = {
   left: FlowConfigurableAlign.START,
   right: FlowConfigurableAlign.END,
   center: FlowConfigurableAlign.CENTER,
-  origin: FlowConfigurableAlign.ORIGIN,
-  stretch: FlowConfigurableAlign.STRETCH
+  origin: FlowConfigurableAlign.ORIGIN
 };
 const alignToInternal = ( orientation: Orientation, key: FlowHorizontalAlign | FlowVerticalAlign | null ): FlowConfigurableAlign | null => {
   if ( key === null ) {
     return null;
   }
   else if ( orientation === Orientation.HORIZONTAL ) {
-    assert && assert( horizontalAlignMap[ key as 'top' | 'bottom' | 'center' | 'origin' | 'stretch' ] );
+    assert && assert( horizontalAlignMap[ key as 'top' | 'bottom' | 'center' | 'origin' ] );
 
-    return horizontalAlignMap[ key as 'top' | 'bottom' | 'center' | 'origin' | 'stretch' ];
+    return horizontalAlignMap[ key as 'top' | 'bottom' | 'center' | 'origin' ];
   }
   else {
-    assert && assert( verticalAlignMap[ key as 'left' | 'right' | 'center' | 'origin' | 'stretch' ] );
+    assert && assert( verticalAlignMap[ key as 'left' | 'right' | 'center' | 'origin' ] );
 
-    return verticalAlignMap[ key as 'left' | 'right' | 'center' | 'origin' | 'stretch' ];
+    return verticalAlignMap[ key as 'left' | 'right' | 'center' | 'origin' ];
   }
 };
 const internalToAlign = ( orientation: Orientation, align: FlowConfigurableAlign | null ): FlowHorizontalAlign | FlowVerticalAlign | null => {
@@ -136,10 +151,8 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
 
     _orientation: Orientation;
 
-    // Null value inherits from a base config
     _align: FlowConfigurableAlign | null;
-
-    // Null value inherits from a base config
+    _stretch: boolean | null;
     _leftMargin: number | null;
     _rightMargin: number | null;
     _topMargin: number | null;
@@ -150,22 +163,16 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
     _maxContentWidth: number | null;
     _maxContentHeight: number | null;
 
-    // {TinyEmitter}
     readonly changedEmitter: TinyEmitter;
     readonly orientationChangedEmitter: TinyEmitter;
 
     constructor( ...args: any[] ) {
       super( ...args );
 
-      // @protected
       this._orientation = Orientation.HORIZONTAL;
 
-      // @protected
-      // Null value inherits from a base config
       this._align = null;
-
-      // @protected
-      // Null value inherits from a base config
+      this._stretch = null;
       this._leftMargin = null;
       this._rightMargin = null;
       this._topMargin = null;
@@ -176,7 +183,6 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
       this._maxContentWidth = null;
       this._maxContentHeight = null;
 
-      // {TinyEmitter}
       this.changedEmitter = new TinyEmitter();
       this.orientationChangedEmitter = new TinyEmitter();
     }
@@ -187,6 +193,7 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
 
     setConfigToBaseDefault(): void {
       this._align = FlowConfigurableAlign.CENTER;
+      this._stretch = false;
       this._leftMargin = 0;
       this._rightMargin = 0;
       this._topMargin = 0;
@@ -205,6 +212,7 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
      */
     setConfigToInherit(): void {
       this._align = null;
+      this._stretch = null;
       this._leftMargin = null;
       this._rightMargin = null;
       this._topMargin = null;
@@ -254,6 +262,18 @@ const FlowConfigurable = memoize( <SuperType extends Constructor>( type: SuperTy
 
       if ( this._align !== mappedValue ) {
         this._align = mappedValue;
+
+        this.changedEmitter.emit();
+      }
+    }
+
+    get stretch(): boolean | null {
+      return this._stretch;
+    }
+
+    set stretch( value: boolean | null ) {
+      if ( this._stretch !== value ) {
+        this._stretch = value;
 
         this.changedEmitter.emit();
       }

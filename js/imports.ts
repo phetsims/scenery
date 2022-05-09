@@ -234,7 +234,7 @@ export { default as FlowConfigurable, FLOW_CONFIGURABLE_OPTION_KEYS, FlowConfigu
 export type { FlowHorizontalAlign, FlowVerticalAlign, FlowOrientation, FlowConfigurableOptions } from './layout/FlowConfigurable.js';
 export { default as FlowCell } from './layout/FlowCell.js';
 export { default as FlowConstraint, FLOW_CONSTRAINT_OPTION_KEYS } from './layout/FlowConstraint.js';
-export type { FlowHorizontalJustifys, FlowVerticalJustifys, FlowConstraintOptions } from './layout/FlowConstraint.js';
+export type { FlowHorizontalJustification, FlowVerticalJustification, FlowConstraintOptions } from './layout/FlowConstraint.js';
 export { default as FlowBox } from './layout/FlowBox.js';
 export type { FlowBoxOptions } from './layout/FlowBox.js';
 export { default as GridConfigurable, GRID_CONFIGURABLE_OPTION_KEYS } from './layout/GridConfigurable.js';

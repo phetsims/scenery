@@ -7,7 +7,7 @@
  */
 
 import optionize from '../../../phet-core/js/optionize.js';
-import { FLOW_CONSTRAINT_OPTION_KEYS, FlowCell, FlowConstraint, FlowConstraintOptions, FlowHorizontalAlign, FlowHorizontalJustifys, FlowOrientation, FlowVerticalAlign, FlowVerticalJustifys, HeightSizable, HeightSizableSelfOptions, Node, NodeOptions, scenery, WidthSizable, WidthSizableSelfOptions, WIDTH_SIZABLE_OPTION_KEYS, HEIGHT_SIZABLE_OPTION_KEYS } from '../imports.js';
+import { FLOW_CONSTRAINT_OPTION_KEYS, FlowCell, FlowConstraint, FlowConstraintOptions, FlowHorizontalAlign, FlowHorizontalJustification, FlowOrientation, FlowVerticalAlign, FlowVerticalJustification, HeightSizable, HeightSizableSelfOptions, Node, NodeOptions, scenery, WidthSizable, WidthSizableSelfOptions, WIDTH_SIZABLE_OPTION_KEYS, HEIGHT_SIZABLE_OPTION_KEYS } from '../imports.js';
 
 // FlowBox-specific options that can be passed in the constructor or mutate() call.
 const FLOWBOX_OPTION_KEYS = [
@@ -17,7 +17,8 @@ const FLOWBOX_OPTION_KEYS = [
 const DEFAULT_OPTIONS = {
   orientation: 'horizontal',
   spacing: 0,
-  align: 'center'
+  align: 'center',
+  stretch: false
 } as const;
 
 type SelfOptions = {
@@ -50,6 +51,7 @@ export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
       orientation: DEFAULT_OPTIONS.orientation,
       spacing: DEFAULT_OPTIONS.spacing,
       align: DEFAULT_OPTIONS.align,
+      stretch: DEFAULT_OPTIONS.stretch,
       excludeInvisible: false // Should be handled by the options mutate above
     } );
 
@@ -186,11 +188,11 @@ export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
     this._constraint.lineSpacing = value;
   }
 
-  get justify(): FlowHorizontalJustifys | FlowVerticalJustifys {
+  get justify(): FlowHorizontalJustification | FlowVerticalJustification {
     return this._constraint.justify;
   }
 
-  set justify( value: FlowHorizontalJustifys | FlowVerticalJustifys ) {
+  set justify( value: FlowHorizontalJustification | FlowVerticalJustification ) {
     this._constraint.justify = value;
   }
 
@@ -212,6 +214,16 @@ export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
     assert && assert( typeof value === 'string', 'FlowBox align should be a string' );
 
     this._constraint.align = value;
+  }
+
+  get stretch(): boolean {
+    assert && assert( typeof this._constraint.stretch === 'boolean' );
+
+    return this._constraint.stretch!;
+  }
+
+  set stretch( value: boolean ) {
+    this._constraint.stretch = value;
   }
 
   get grow(): number {

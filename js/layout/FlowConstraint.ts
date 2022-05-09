@@ -27,14 +27,14 @@ const FLOW_CONSTRAINT_OPTION_KEYS = [
   'excludeInvisible'
 ].concat( FLOW_CONFIGURABLE_OPTION_KEYS );
 
-const flowHorizontalJustifys = [ 'left', 'right', 'center', 'spaceBetween', 'spaceAround', 'spaceEvenly' ] as const;
-const flowVerticalJustifys = [ 'top', 'bottom', 'center', 'spaceBetween', 'spaceAround', 'spaceEvenly' ] as const;
+const flowHorizontalJustificationValues = [ 'left', 'right', 'center', 'spaceBetween', 'spaceAround', 'spaceEvenly' ] as const;
+const flowVerticalJustificationValues = [ 'top', 'bottom', 'center', 'spaceBetween', 'spaceAround', 'spaceEvenly' ] as const;
 
-export type FlowHorizontalJustifys = typeof flowHorizontalJustifys[number];
-export type FlowVerticalJustifys = typeof flowVerticalJustifys[number];
+export type FlowHorizontalJustification = typeof flowHorizontalJustificationValues[number];
+export type FlowVerticalJustification = typeof flowVerticalJustificationValues[number];
 
-const getAllowedJustifys = ( orientation: Orientation ): readonly string[] => {
-  return orientation === Orientation.HORIZONTAL ? flowHorizontalJustifys : flowVerticalJustifys;
+const getAllowedJustificationValues = ( orientation: Orientation ): readonly string[] => {
+  return orientation === Orientation.HORIZONTAL ? flowHorizontalJustificationValues : flowVerticalJustificationValues;
 };
 
 type SpaceRemainingFunctionFactory = ( spaceRemaining: number, lineLength: number ) => ( ( index: number ) => number );
@@ -70,11 +70,11 @@ class FlowConstraintJustify extends EnumerationValue {
     'spaceEvenly', 'spaceEvenly'
   );
 
-  readonly horizontal: FlowHorizontalJustifys;
-  readonly vertical: FlowVerticalJustifys;
+  readonly horizontal: FlowHorizontalJustification;
+  readonly vertical: FlowVerticalJustification;
   readonly spacingFunctionFactory: SpaceRemainingFunctionFactory;
 
-  constructor( spacingFunctionFactory: SpaceRemainingFunctionFactory, horizontal: FlowHorizontalJustifys, vertical: FlowVerticalJustifys ) {
+  constructor( spacingFunctionFactory: SpaceRemainingFunctionFactory, horizontal: FlowHorizontalJustification, vertical: FlowVerticalJustification ) {
     super();
 
     this.spacingFunctionFactory = spacingFunctionFactory;
@@ -103,7 +103,7 @@ const verticalJustifyMap = {
   spaceAround: FlowConstraintJustify.SPACE_AROUND,
   spaceEvenly: FlowConstraintJustify.SPACE_EVENLY
 };
-const justifyToInternal = ( orientation: Orientation, key: FlowHorizontalJustifys | FlowVerticalJustifys ): FlowConstraintJustify => {
+const justifyToInternal = ( orientation: Orientation, key: FlowHorizontalJustification | FlowVerticalJustification ): FlowConstraintJustify => {
   if ( orientation === Orientation.HORIZONTAL ) {
     assert && assert( horizontalJustifyMap[ key as 'left' | 'right' | 'center' | 'spaceBetween' | 'spaceAround' | 'spaceEvenly' ] );
 
@@ -115,7 +115,7 @@ const justifyToInternal = ( orientation: Orientation, key: FlowHorizontalJustify
     return verticalJustifyMap[ key as 'top' | 'bottom' | 'center' | 'spaceBetween' | 'spaceAround' | 'spaceEvenly' ];
   }
 };
-const internalToJustify = ( orientation: Orientation, justify: FlowConstraintJustify ): FlowHorizontalJustifys | FlowVerticalJustifys => {
+const internalToJustify = ( orientation: Orientation, justify: FlowConstraintJustify ): FlowHorizontalJustification | FlowVerticalJustification => {
   if ( orientation === Orientation.HORIZONTAL ) {
     return justify.horizontal;
   }
@@ -127,7 +127,7 @@ const internalToJustify = ( orientation: Orientation, justify: FlowConstraintJus
 type SelfOptions = {
   spacing?: number;
   lineSpacing?: number;
-  justify?: FlowHorizontalJustifys | FlowVerticalJustifys;
+  justify?: FlowHorizontalJustification | FlowVerticalJustification;
   wrap?: boolean;
   excludeInvisible?: boolean;
   preferredWidthProperty?: IProperty<number | null>;
@@ -378,22 +378,18 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
 
       line.forEach( cell => {
         const align = cell.effectiveAlign;
-        const size = cell.getMinimumSize( oppositeOrientation );
 
-        if ( align === FlowConfigurableAlign.STRETCH ) {
-          cell.attemptPreferredSize( oppositeOrientation, maximumSize );
-          cell.positionStart( oppositeOrientation, secondaryPosition );
+        // If stretching, we'll expand to the maximumSize (otherwise will use the minimum size available)
+        const preferredSize = ( cell.effectiveStretch && cell.isSizable( oppositeOrientation ) ) ? maximumSize : cell.getMinimumSize( oppositeOrientation );
+
+        cell.attemptPreferredSize( oppositeOrientation, preferredSize );
+
+        if ( align === FlowConfigurableAlign.ORIGIN ) {
+          // TODO: handle layout bounds
+          cell.positionOrigin( oppositeOrientation, secondaryPosition );
         }
         else {
-          cell.attemptPreferredSize( oppositeOrientation, size );
-
-          if ( align === FlowConfigurableAlign.ORIGIN ) {
-            // TODO: handle layout bounds
-            cell.positionOrigin( oppositeOrientation, secondaryPosition );
-          }
-          else {
-            cell.positionStart( oppositeOrientation, secondaryPosition + ( maximumSize - size ) * align.padRatio );
-          }
+          cell.positionStart( oppositeOrientation, secondaryPosition + ( maximumSize - preferredSize ) * align.padRatio );
         }
 
         const cellBounds = cell.getCellBounds();
@@ -433,17 +429,17 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
     this.finishedLayoutEmitter.emit();
   }
 
-  get justify(): FlowHorizontalJustifys | FlowVerticalJustifys {
+  get justify(): FlowHorizontalJustification | FlowVerticalJustification {
     const result = internalToJustify( this._orientation, this._justify );
 
-    assert && assert( getAllowedJustifys( this._orientation ).includes( result ) );
+    assert && assert( getAllowedJustificationValues( this._orientation ).includes( result ) );
 
     return result;
   }
 
-  set justify( value: FlowHorizontalJustifys | FlowVerticalJustifys ) {
-    assert && assert( getAllowedJustifys( this._orientation ).includes( value ),
-      `justify ${value} not supported, with the orientation ${this._orientation}, the valid values are ${getAllowedJustifys( this._orientation )}` );
+  set justify( value: FlowHorizontalJustification | FlowVerticalJustification ) {
+    assert && assert( getAllowedJustificationValues( this._orientation ).includes( value ),
+      `justify ${value} not supported, with the orientation ${this._orientation}, the valid values are ${getAllowedJustificationValues( this._orientation )}` );
 
     // remapping align values to an independent set, so they aren't orientation-dependent
     const mappedValue = justifyToInternal( this._orientation, value );
