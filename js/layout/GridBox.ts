@@ -105,7 +105,7 @@ export default class GridBox extends WidthSizable( HeightSizable( Node ) ) {
       this._nextX++;
     }
 
-    const cell = new GridCell( this._constraint, node );
+    const cell = new GridCell( this._constraint, node, this._constraint.createLayoutProxy( node ) );
     this._cellMap.set( node, cell );
 
     this._constraint.addCell( cell );

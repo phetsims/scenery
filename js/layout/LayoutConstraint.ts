@@ -13,7 +13,7 @@ import { scenery, LayoutProxy, Node, isWidthSizable, isHeightSizable } from '../
 export default class LayoutConstraint {
 
   // The Node in whose local coordinate frame our layout computations are done.
-  private readonly ancestorNode: Node;
+  readonly ancestorNode: Node;
 
   // Prevents layout() from running while true. Generally will be unlocked and laid out.
   private _layoutLockCount: number;

@@ -8,6 +8,7 @@
  */
 
 import Property from '../../../axon/js/Property.js';
+import Tandem from '../../../tandem/js/Tandem.js';
 import { scenery, Trail, Node } from '../imports.js';
 
 export default class TrailsBetweenProperty extends Property<Trail[]> {
@@ -18,7 +19,9 @@ export default class TrailsBetweenProperty extends Property<Trail[]> {
   private readonly _trailUpdateListener: () => void;
 
   constructor( rootNode: Node, leafNode: Node ) {
-    super( [] );
+    super( [], {
+      tandem: Tandem.OPT_OUT
+    } );
 
     this.rootNode = rootNode;
     this.leafNode = leafNode;
@@ -71,7 +74,21 @@ export default class TrailsBetweenProperty extends Property<Trail[]> {
       }
     } );
 
-    this.value = trails;
+    // Guard in a way that deepEquality on the Property wouldn't (because of the Array wrapper)
+    const currentTrails = this.value;
+    let trailsEqual = currentTrails.length === trails.length;
+    if ( trailsEqual ) {
+      for ( let i = 0; i < trails.length; i++ ) {
+        if ( !currentTrails[ i ].equals( trails[ i ] ) ) {
+          trailsEqual = false;
+          break;
+        }
+      }
+    }
+
+    if ( !trailsEqual ) {
+      this.value = trails;
+    }
   }
 
   private addNodeListener( node: Node ): void {

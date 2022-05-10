@@ -9,18 +9,42 @@
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Utils from '../../../dot/js/Utils.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
-import { FlowConfigurable, FlowConfigurableAlign, FlowConfigurableOptions, FlowConstraint, LayoutProxy, scenery, Node } from '../imports.js';
+import { FlowConfigurable, FlowConfigurableAlign, FlowConfigurableOptions, FlowConstraint, LayoutProxy, scenery, Node, LayoutProxyProperty, TransformTracker } from '../imports.js';
 
 export default class FlowCell extends FlowConfigurable( Object ) {
 
   private readonly _constraint: FlowConstraint;
   private readonly _node: Node;
-  private readonly _proxy: LayoutProxy;
-  public _pendingSize: number; // scenery-internal
+  private _proxy: LayoutProxy | null;
+  _pendingSize: number; // scenery-internal
   private readonly layoutOptionsListener: () => void;
+  private readonly layoutProxyProperty: LayoutProxyProperty | null;
+  private transformTracker: TransformTracker | null;
 
-  constructor( constraint: FlowConstraint, node: Node ) {
+  constructor( constraint: FlowConstraint, node: Node, proxy: LayoutProxy | null ) {
     super();
+
+    this.transformTracker = null;
+
+    if ( proxy ) {
+      this.layoutProxyProperty = null;
+    }
+    else {
+      // If a LayoutProxy is not provided, we'll listen to (a) all the trails between our ancestor and this node,
+      // (b) construct layout proxies for it (and assign here), and (c) listen to ancestor transforms to refresh
+      // the layout when needed.
+      this.layoutProxyProperty = new LayoutProxyProperty( constraint.ancestorNode, node );
+      this.layoutProxyProperty.link( proxy => {
+        this._proxy = proxy;
+        if ( this.transformTracker ) {
+          this.transformTracker.dispose();
+        }
+        if ( proxy ) {
+          this.transformTracker = new TransformTracker( proxy.trail!.copy().addAncestor( constraint.ancestorNode ) );
+          this.transformTracker.addListener( () => constraint.updateLayoutAutomatically() );
+        }
+      } );
+    }
 
     this._constraint = constraint;
     this._node = node;
@@ -97,8 +121,14 @@ export default class FlowCell extends FlowConfigurable( Object ) {
     return this._node;
   }
 
+  isConnected(): boolean {
+    return this._proxy !== null;
+  }
+
   get proxy(): LayoutProxy {
-    return this._proxy;
+    assert && assert( this._proxy );
+
+    return this._proxy!;
   }
 
   getMinimumSize( orientation: Orientation ): number {
@@ -196,6 +226,9 @@ export default class FlowCell extends FlowConfigurable( Object ) {
    * Releases references
    */
   dispose(): void {
+    this.layoutProxyProperty && this.layoutProxyProperty.dispose();
+    this.transformTracker && this.transformTracker.dispose();
+
     this.node.layoutOptionsChangedEmitter.removeListener( this.layoutOptionsListener );
   }
 }

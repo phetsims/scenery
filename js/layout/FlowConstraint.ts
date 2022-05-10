@@ -243,8 +243,7 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
     }
 
     const cells: FlowCell[] = this.cells.filter( cell => {
-      // TODO: Also don't lay out disconnected nodes!!!!
-      return cell.proxy.bounds.isValid() && ( !this._excludeInvisible || cell.node.visible );
+      return cell.isConnected() && cell.proxy.bounds.isValid() && ( !this._excludeInvisible || cell.node.visible );
     } );
 
     if ( !cells.length ) {

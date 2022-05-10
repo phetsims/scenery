@@ -107,6 +107,7 @@ import './layout/HDivider.js';
 import './layout/WidthSizable.js';
 import './layout/LayoutConstraint.js';
 import './layout/LayoutProxy.js';
+import './layout/LayoutProxyProperty.js';
 import './layout/ManualConstraint.js';
 import './layout/VDivider.js';
 import './layout/HeightSizable.js';

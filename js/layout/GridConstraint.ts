@@ -106,8 +106,7 @@ export default class GridConstraint extends GridConfigurable( LayoutConstraint )
     assert && assert( _.every( [ ...this.cells ], cell => !cell.node.isDisposed ) );
 
     const cells = [ ...this.cells ].filter( cell => {
-      // TODO: Also don't lay out disconnected nodes!!!!
-      return cell.proxy.bounds.isValid() && ( !this._excludeInvisible || cell.node.visible );
+      return cell.isConnected() && cell.proxy.bounds.isValid() && ( !this._excludeInvisible || cell.node.visible );
     } );
     this.displayedCells = cells;
 

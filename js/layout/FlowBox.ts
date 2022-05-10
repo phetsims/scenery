@@ -81,7 +81,7 @@ export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
    * Called when a child is inserted.
    */
   private onFlowBoxChildInserted( node: Node, index: number ): void {
-    const cell = new FlowCell( this._constraint, node );
+    const cell = new FlowCell( this._constraint, node, this._constraint.createLayoutProxy( node ) );
     this._cellMap.set( node, cell );
 
     this._constraint.insertCell( index, cell );
