@@ -138,7 +138,7 @@ export default class AlignBox extends WidthSizable( HeightSizable( Node ) ) {
     this.mutate( options );
 
     // Update alignBounds based on preferred sizes
-    Property.multilink( [ this.preferredWidthProperty, this.preferredHeightProperty ], ( preferredWidth: number | null, preferredHeight: number | null ) => {
+    Property.multilink( [ this.localPreferredWidthProperty, this.localPreferredHeightProperty ], ( preferredWidth: number | null, preferredHeight: number | null ) => {
       if ( preferredWidth !== null || preferredHeight !== null ) {
         const bounds = this._alignBounds || new Bounds2( 0, 0, 0, 0 );
 
@@ -698,8 +698,8 @@ class AlignBoxConstraint extends LayoutConstraint {
 
     // After the layout lock on purpose (we want these to be reentrant, especially if they change) - however only apply
     // this concept if we're capable of shrinking (we want the default to continue to block off the layoutBounds)
-    box.minimumWidth = this.canShrink ? minimumWidth : box.localBounds.width;
-    box.minimumHeight = this.canShrink ? minimumHeight : box.localBounds.height;
+    box.localMinimumWidth = this.canShrink ? minimumWidth : box.localBounds.width;
+    box.localMinimumHeight = this.canShrink ? minimumHeight : box.localBounds.height;
   }
 }
 

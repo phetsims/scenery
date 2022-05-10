@@ -14,7 +14,7 @@ export default class VDivider extends WidthSizable( Divider ) {
   constructor( options?: VDividerOptions ) {
     super( options );
 
-    this.preferredWidthProperty.link( width => {
+    this.localPreferredWidthProperty.link( width => {
       if ( width !== null ) {
         this.x2 = width;
       }

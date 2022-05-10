@@ -7,11 +7,10 @@
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
 
-import Property from '../../../axon/js/Property.js';
-import Tandem from '../../../tandem/js/Tandem.js';
-import { scenery, Trail, Node } from '../imports.js';
+import TinyProperty from '../../../axon/js/TinyProperty.js';
+import { Node, scenery, Trail } from '../imports.js';
 
-export default class TrailsBetweenProperty extends Property<Trail[]> {
+export default class TrailsBetweenProperty extends TinyProperty<Trail[]> {
 
   readonly rootNode: Node;
   readonly leafNode: Node;
@@ -19,9 +18,7 @@ export default class TrailsBetweenProperty extends Property<Trail[]> {
   private readonly _trailUpdateListener: () => void;
 
   constructor( rootNode: Node, leafNode: Node ) {
-    super( [], {
-      tandem: Tandem.OPT_OUT
-    } );
+    super( [] );
 
     this.rootNode = rootNode;
     this.leafNode = leafNode;

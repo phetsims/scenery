@@ -43,10 +43,10 @@ export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
     super();
 
     this._constraint = new FlowConstraint( this, {
-      preferredWidthProperty: this.preferredWidthProperty,
-      preferredHeightProperty: this.preferredHeightProperty,
-      minimumWidthProperty: this.minimumWidthProperty,
-      minimumHeightProperty: this.minimumHeightProperty,
+      preferredWidthProperty: this.localPreferredWidthProperty,
+      preferredHeightProperty: this.localPreferredHeightProperty,
+      minimumWidthProperty: this.localMinimumWidthProperty,
+      minimumHeightProperty: this.localMinimumHeightProperty,
 
       orientation: DEFAULT_OPTIONS.orientation,
       spacing: DEFAULT_OPTIONS.spacing,

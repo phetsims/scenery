@@ -14,7 +14,7 @@ export default class HDivider extends HeightSizable( Divider ) {
   constructor( options?: HDividerOptions ) {
     super( options );
 
-    this.preferredHeightProperty.link( height => {
+    this.localPreferredHeightProperty.link( height => {
       if ( height !== null ) {
         this.y2 = height;
       }

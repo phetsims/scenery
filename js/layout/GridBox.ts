@@ -48,10 +48,10 @@ export default class GridBox extends WidthSizable( HeightSizable( Node ) ) {
 
     this._cellMap = new Map();
     this._constraint = new GridConstraint( this, {
-      preferredWidthProperty: this.preferredWidthProperty,
-      preferredHeightProperty: this.preferredHeightProperty,
-      minimumWidthProperty: this.minimumWidthProperty,
-      minimumHeightProperty: this.minimumHeightProperty,
+      preferredWidthProperty: this.localPreferredWidthProperty,
+      preferredHeightProperty: this.localPreferredHeightProperty,
+      minimumWidthProperty: this.localMinimumWidthProperty,
+      minimumHeightProperty: this.localMinimumHeightProperty,
 
       excludeInvisible: false // Should be handled by the options mutate above
     } );

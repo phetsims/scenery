@@ -97,17 +97,17 @@
       constructor( ...args ) {
         super( ...args );
 
-        this.minimumWidth = 50;
-        this.minimumHeight = 50;
+        this.localMinimumWidth = 50;
+        this.localMinimumHeight = 50;
 
-        this.preferredWidthProperty.lazyLink( width => {
+        this.localPreferredWidthProperty.lazyLink( width => {
           if ( width ) {
-            this.rectWidth = Math.max( this.minimumWidth, width );
+            this.rectWidth = Math.max( this.localMinimumWidth, width );
           }
         } );
-        this.preferredHeightProperty.lazyLink( height => {
+        this.localPreferredHeightProperty.lazyLink( height => {
           if ( height ) {
-            this.rectHeight = Math.max( this.minimumHeight, height );
+            this.rectHeight = Math.max( this.localMinimumHeight, height );
           }
         } );
       }
