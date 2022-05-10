@@ -54,7 +54,6 @@ export default class LayoutConstraint {
     if ( addLock ) {
       node._activeParentLayoutConstraint = this;
     }
-    // TODO: listen or un-listen based on whether we are enabled?
     // TODO: listen to things in-between!!
     node.boundsProperty.lazyLink( this._updateLayoutListener );
     node.visibleProperty.lazyLink( this._updateLayoutListener );
@@ -140,12 +139,18 @@ export default class LayoutConstraint {
     }
   }
 
-  createLayoutProxy( node: Node ): LayoutProxy {
+  createLayoutProxy( node: Node ): LayoutProxy | null {
     assert && assert( node instanceof Node );
 
-    // TODO: How to handle the case where there is no trail?
+    // TODO: performance, don't create these closures
+    const trails = node.getTrails( n => n === this.ancestorNode );
 
-    return LayoutProxy.pool.create( node.getUniqueTrailTo( this.ancestorNode ).removeAncestor() );
+    if ( trails.length === 1 ) {
+      return LayoutProxy.pool.create( trails[ 0 ].removeAncestor() );
+    }
+    else {
+      return null;
+    }
   }
 
   get enabled(): boolean {

@@ -147,6 +147,7 @@ export { default as SVGRadialGradient } from './display/SVGRadialGradient.js';
 export { default as SVGPattern } from './display/SVGPattern.js';
 
 export { default as TransformTracker } from './util/TransformTracker.js';
+export type { TransformTrackerOptions } from './util/TransformTracker.js';
 export { default as TrailVisibilityTracker } from './util/TrailVisibilityTracker.js';
 
 export { default as AriaHasPopUpMutator } from './accessibility/pdom/AriaHasPopUpMutator.js';

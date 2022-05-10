@@ -34,7 +34,7 @@ export default class ManualConstraint<T extends Node[]> extends LayoutConstraint
   private readonly layoutCallback: LayoutCallback<T>;
 
   // Minimizing garbage created
-  private readonly proxyFactory: ( n: Node ) => LayoutProxy;
+  private readonly proxyFactory: ( n: Node ) => LayoutProxy | null;
 
   constructor( ancestorNode: Node, nodes: T, layoutCallback: LayoutCallback<T> ) {
 
@@ -62,14 +62,21 @@ export default class ManualConstraint<T extends Node[]> extends LayoutConstraint
 
     const proxies = this.nodes.map( this.proxyFactory );
 
-    this.layoutCallback.apply( null, proxies as LayoutProxyMap<T> );
+    const hasNoNullProxy = _.every( proxies, proxy => proxy !== null );
+
+    if ( hasNoNullProxy ) {
+      this.layoutCallback.apply( null, proxies as LayoutProxyMap<T> );
+    }
 
     // Minimizing garbage created
     for ( let i = 0; i < proxies.length; i++ ) {
-      proxies[ i ].dispose();
+      const proxy = proxies[ i ];
+      proxy && proxy.dispose();
     }
 
-    this.finishedLayoutEmitter.emit();
+    if ( hasNoNullProxy ) {
+      this.finishedLayoutEmitter.emit();
+    }
   }
 
   static create<T extends Node[]>( ancestorNode: Node, nodes: T, layoutCallback: LayoutCallback<T> ): ManualConstraint<T> {
