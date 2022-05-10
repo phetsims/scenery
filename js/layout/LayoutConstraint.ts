@@ -15,7 +15,7 @@ export default class LayoutConstraint {
   // The Node in whose local coordinate frame our layout computations are done.
   readonly ancestorNode: Node;
 
-  // Prevents layout() from running while true. Generally will be unlocked and laid out.
+  // Prevents layout() from running while greater than zero. Generally will be unlocked and laid out.
   private _layoutLockCount: number;
 
   // Whether there was a layout attempt during the lock
@@ -88,6 +88,11 @@ export default class LayoutConstraint {
     this._listenedNodes.delete( node );
   }
 
+  /**
+   * NOTE: DO NOT call from places other than super.layout() in overridden layout() OR from the existing call in
+   *       updateLayout(). Doing so would break the lock mechanism.
+   * NOTE: Cannot be marked as abstract due to how mixins work
+   */
   protected layout(): void {
 
   }
