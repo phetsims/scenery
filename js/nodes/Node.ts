@@ -568,6 +568,12 @@ class Node extends ParallelDOM {
   // Provides a given range that may be affected by the reordering
   childrenReorderedEmitter: TinyEmitter<[ minChangedIndex: number, maxChangedIndex: number ]>;
 
+  // Fired whenever a parent is added
+  parentAddedEmitter: TinyEmitter<[ node: Node ]> = new TinyEmitter();
+
+  // Fired whenever a parent is removed
+  parentRemovedEmitter: TinyEmitter<[ node: Node ]> = new TinyEmitter();
+
   // Fired synchronously when the transform (transformation matrix) of a Node is changed. Any
   // change to a Node's translation/rotation/scale/etc. will trigger this event.
   transformEmitter: TinyEmitter;
@@ -811,6 +817,7 @@ class Node extends ParallelDOM {
     this._boundsDirty = true;
 
     this.childInsertedEmitter.emit( node, index );
+    node.parentAddedEmitter.emit( this );
 
     !isComposite && this.childrenChangedEmitter.emit();
 
@@ -907,6 +914,7 @@ class Node extends ParallelDOM {
     this._childBoundsDirty = true; // force recomputation of child bounds after removing a child
 
     this.childRemovedEmitter.emit( node, indexOfChild );
+    node.parentRemovedEmitter.emit( this );
 
     !isComposite && this.childrenChangedEmitter.emit();
 

@@ -85,6 +85,7 @@ export { default as PDOMDisplaysInfo } from './accessibility/pdom/PDOMDisplaysIn
 
 export { default as Trail } from './util/Trail.js';
 export { default as TrailPointer } from './util/TrailPointer.js';
+export { default as TrailsBetweenProperty } from './util/TrailsBetweenProperty.js';
 
 export { default as Paintable, PAINTABLE_OPTION_KEYS, PAINTABLE_DRAWABLE_MARK_FLAGS, PAINTABLE_DEFAULT_OPTIONS } from './nodes/Paintable.js';
 export type { PaintableOptions, PaintableNode } from './nodes/Paintable.js';

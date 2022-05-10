@@ -186,6 +186,7 @@ import './util/SpriteSheet.js';
 import './util/TextBounds.js';
 import './util/Trail.js';
 import './util/TrailPointer.js';
+import './util/TrailsBetweenProperty.js';
 import './util/TransformTracker.js';
 import './util/Utils.js';
 import './imports.js';
