@@ -7,7 +7,7 @@
  */
 
 import optionize from '../../../phet-core/js/optionize.js';
-import { FLOW_CONSTRAINT_OPTION_KEYS, FlowCell, FlowConstraint, FlowConstraintOptions, FlowHorizontalAlign, FlowHorizontalJustification, FlowOrientation, FlowVerticalAlign, FlowVerticalJustification, HeightSizable, HeightSizableSelfOptions, Node, NodeOptions, scenery, WidthSizable, WidthSizableSelfOptions, WIDTH_SIZABLE_OPTION_KEYS, HEIGHT_SIZABLE_OPTION_KEYS } from '../imports.js';
+import { FLOW_CONSTRAINT_OPTION_KEYS, FlowCell, FlowConstraint, FlowConstraintOptions, FlowHorizontalAlign, FlowHorizontalJustification, FlowOrientation, FlowVerticalAlign, FlowVerticalJustification, HeightSizable, HeightSizableSelfOptions, Node, NodeOptions, scenery, WidthSizable, WidthSizableSelfOptions, WIDTH_SIZABLE_OPTION_KEYS, HEIGHT_SIZABLE_OPTION_KEYS, SceneryConstants } from '../imports.js';
 
 // FlowBox-specific options that can be passed in the constructor or mutate() call.
 const FLOWBOX_OPTION_KEYS = [
@@ -37,7 +37,10 @@ export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
     const options = optionize<FlowBoxOptions, Omit<SelfOptions, keyof FlowConstraintOptions>, NodeOptions>()( {
       // Allow dynamic layout by default, see https://github.com/phetsims/joist/issues/608
       excludeInvisibleChildrenFromBounds: true,
-      resize: true
+      resize: true,
+
+      // For LayoutBox compatibility
+      disabledOpacity: SceneryConstants.DISABLED_OPACITY
     }, providedOptions );
 
     super();
