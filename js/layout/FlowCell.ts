@@ -9,116 +9,83 @@
 import Bounds2 from '../../../dot/js/Bounds2.js';
 import Utils from '../../../dot/js/Utils.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
-import { FlowConfigurable, FlowConfigurableAlign, FlowConfigurableOptions, FlowConstraint, LayoutProxy, Node, scenery, TrackingLayoutProxyProperty } from '../imports.js';
+import { FlowConfigurable, FlowConfigurableAlign, FlowConfigurableOptions, FlowConstraint, LayoutProxy, Node, scenery } from '../imports.js';
+import LayoutCell from './LayoutCell.js';
 
-export default class FlowCell extends FlowConfigurable( Object ) {
+export default class FlowCell extends FlowConfigurable( LayoutCell ) {
 
-  private readonly _constraint: FlowConstraint;
-  private readonly _node: Node;
-  private _proxy: LayoutProxy | null;
   _pendingSize: number; // scenery-internal
-  private readonly layoutOptionsListener: () => void;
-  private readonly layoutProxyProperty: TrackingLayoutProxyProperty | null;
+  private _flowConstraint: FlowConstraint;
 
   constructor( constraint: FlowConstraint, node: Node, proxy: LayoutProxy | null ) {
-    super();
+    super( constraint, node, proxy );
 
-    if ( proxy ) {
-      this.layoutProxyProperty = null;
-    }
-    else {
-      // If a LayoutProxy is not provided, we'll listen to (a) all the trails between our ancestor and this node,
-      // (b) construct layout proxies for it (and assign here), and (c) listen to ancestor transforms to refresh
-      // the layout when needed.
-      this.layoutProxyProperty = new TrackingLayoutProxyProperty( constraint.ancestorNode, node, () => constraint.updateLayoutAutomatically() );
-      this.layoutProxyProperty.link( proxy => {
-        this._proxy = proxy;
-      } );
-    }
-
-    this._constraint = constraint;
-    this._node = node;
-    this._proxy = proxy;
+    this._flowConstraint = constraint;
     this._pendingSize = 0;
 
     this.orientation = constraint.orientation;
     this.onLayoutOptionsChange();
-
-    this.layoutOptionsListener = this.onLayoutOptionsChange.bind( this );
-    this.node.layoutOptionsChangedEmitter.addListener( this.layoutOptionsListener );
   }
 
   get effectiveAlign(): FlowConfigurableAlign {
-    return this._align !== null ? this._align : this._constraint._align!;
+    return this._align !== null ? this._align : this._flowConstraint._align!;
   }
 
   get effectiveStretch(): boolean {
-    return this._stretch !== null ? this._stretch : this._constraint._stretch!;
+    return this._stretch !== null ? this._stretch : this._flowConstraint._stretch!;
   }
 
   get effectiveLeftMargin(): number {
-    return this._leftMargin !== null ? this._leftMargin : this._constraint._leftMargin!;
+    return this._leftMargin !== null ? this._leftMargin : this._flowConstraint._leftMargin!;
   }
 
 
   get effectiveRightMargin(): number {
-    return this._rightMargin !== null ? this._rightMargin : this._constraint._rightMargin!;
+    return this._rightMargin !== null ? this._rightMargin : this._flowConstraint._rightMargin!;
   }
 
 
   get effectiveTopMargin(): number {
-    return this._topMargin !== null ? this._topMargin : this._constraint._topMargin!;
+    return this._topMargin !== null ? this._topMargin : this._flowConstraint._topMargin!;
   }
 
 
   get effectiveBottomMargin(): number {
-    return this._bottomMargin !== null ? this._bottomMargin : this._constraint._bottomMargin!;
+    return this._bottomMargin !== null ? this._bottomMargin : this._flowConstraint._bottomMargin!;
   }
 
 
   get effectiveGrow(): number {
-    return this._grow !== null ? this._grow : this._constraint._grow!;
+    return this._grow !== null ? this._grow : this._flowConstraint._grow!;
   }
 
   get effectiveMinContentWidth(): number | null {
-    return this._minContentWidth !== null ? this._minContentWidth : this._constraint._minContentWidth;
+    return this._minContentWidth !== null ? this._minContentWidth : this._flowConstraint._minContentWidth;
   }
 
   get effectiveMinContentHeight(): number | null {
-    return this._minContentHeight !== null ? this._minContentHeight : this._constraint._minContentHeight;
+    return this._minContentHeight !== null ? this._minContentHeight : this._flowConstraint._minContentHeight;
   }
 
   get effectiveMaxContentWidth(): number | null {
-    return this._maxContentWidth !== null ? this._maxContentWidth : this._constraint._maxContentWidth;
+    return this._maxContentWidth !== null ? this._maxContentWidth : this._flowConstraint._maxContentWidth;
   }
 
   get effectiveMaxContentHeight(): number | null {
-    return this._maxContentHeight !== null ? this._maxContentHeight : this._constraint._maxContentHeight;
+    return this._maxContentHeight !== null ? this._maxContentHeight : this._flowConstraint._maxContentHeight;
   }
 
-  private onLayoutOptionsChange(): void {
+  protected override onLayoutOptionsChange(): void {
     if ( this.node.layoutOptions ) {
       this.setOptions( this.node.layoutOptions as FlowConfigurableOptions );
     }
+
+    super.onLayoutOptionsChange();
   }
 
   private setOptions( options?: FlowConfigurableOptions ): void {
     this.setConfigToInherit();
     this.mutateConfigurable( options );
-  }
-
-  get node(): Node {
-    return this._node;
-  }
-
-  isConnected(): boolean {
-    return this._proxy !== null;
-  }
-
-  get proxy(): LayoutProxy {
-    assert && assert( this._proxy );
-
-    return this._proxy!;
   }
 
   getMinimumSize( orientation: Orientation ): number {
@@ -147,10 +114,6 @@ export default class FlowCell extends FlowConfigurable( Object ) {
              Math.min( isSizable ? Number.POSITIVE_INFINITY : this.proxy.height, this.effectiveMaxContentHeight || Number.POSITIVE_INFINITY ) +
              this.effectiveBottomMargin;
     }
-  }
-
-  isSizable( orientation: Orientation ): boolean {
-    return orientation === Orientation.HORIZONTAL ? this.proxy.widthSizable : this.proxy.heightSizable;
   }
 
   attemptPreferredSize( orientation: Orientation, value: number ): void {
@@ -210,15 +173,6 @@ export default class FlowCell extends FlowConfigurable( Object ) {
       this.effectiveRightMargin,
       this.effectiveBottomMargin
      );
-  }
-
-  /**
-   * Releases references
-   */
-  dispose(): void {
-    this.layoutProxyProperty && this.layoutProxyProperty.dispose();
-
-    this.node.layoutOptionsChangedEmitter.removeListener( this.layoutOptionsListener );
   }
 }
 

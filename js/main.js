@@ -105,6 +105,7 @@ import './layout/GridConstraint.js';
 import './layout/GridLine.js';
 import './layout/HDivider.js';
 import './layout/WidthSizable.js';
+import './layout/LayoutCell.js';
 import './layout/LayoutConstraint.js';
 import './layout/LayoutProxy.js';
 import './layout/LayoutProxyProperty.js';

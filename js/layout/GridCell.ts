@@ -10,9 +10,10 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Utils from '../../../dot/js/Utils.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../phet-core/js/OrientationPair.js';
-import { GridConfigurable, GridConfigurableOptions, GridConstraint, LayoutProxy, Node, scenery, TrackingLayoutProxyProperty } from '../imports.js';
+import { GridConfigurable, GridConfigurableOptions, GridConstraint, LayoutProxy, Node, scenery } from '../imports.js';
 import { GridConfigurableAlign } from './GridConfigurable.js';
 import optionize from '../../../phet-core/js/optionize.js';
+import LayoutCell from './LayoutCell.js';
 
 const sizableFlagPair = new OrientationPair( 'widthSizable' as const, 'heightSizable' as const );
 const minimumSizePair = new OrientationPair( 'minimumWidth' as const, 'minimumHeight' as const );
@@ -30,13 +31,7 @@ type SelfOptions = {
 
 export type GridCellOptions = SelfOptions & GridConfigurableOptions;
 
-export default class GridCell extends GridConfigurable( Object ) {
-
-  private readonly _constraint: GridConstraint;
-  private readonly _node: Node;
-  private _proxy: LayoutProxy | null;
-  private readonly layoutOptionsListener: () => void;
-  private readonly layoutProxyProperty: TrackingLayoutProxyProperty | null;
+export default class GridCell extends GridConfigurable( LayoutCell ) {
 
   // These are only set initially, and ignored for the future
   position: OrientationPair<number>;
@@ -47,6 +42,8 @@ export default class GridCell extends GridConfigurable( Object ) {
 
   // Set to be the bounds used by the cell
   lastUsedBounds: Bounds2;
+
+  private _gridConstraint: GridConstraint;
 
   constructor( constraint: GridConstraint, node: Node, proxy: LayoutProxy | null ) {
 
@@ -62,24 +59,10 @@ export default class GridCell extends GridConfigurable( Object ) {
     assert && assert( typeof options.width === 'number' && Number.isInteger( options.width ) && isFinite( options.width ) && options.width >= 1 );
     assert && assert( typeof options.height === 'number' && Number.isInteger( options.height ) && isFinite( options.height ) && options.height >= 1 );
 
-    super();
+    super( constraint, node, proxy );
 
-    if ( proxy ) {
-      this.layoutProxyProperty = null;
-    }
-    else {
-      // If a LayoutProxy is not provided, we'll listen to (a) all the trails between our ancestor and this node,
-      // (b) construct layout proxies for it (and assign here), and (c) listen to ancestor transforms to refresh
-      // the layout when needed.
-      this.layoutProxyProperty = new TrackingLayoutProxyProperty( constraint.ancestorNode, node, () => constraint.updateLayoutAutomatically() );
-      this.layoutProxyProperty.link( proxy => {
-        this._proxy = proxy;
-      } );
-    }
+    this._gridConstraint = constraint;
 
-    this._constraint = constraint;
-    this._node = node;
-    this._proxy = proxy;
     this.position = new OrientationPair( options.x, options.y );
     this.size = new OrientationPair( options.width, options.height );
     this.lastAvailableBounds = Bounds2.NOTHING.copy();
@@ -87,17 +70,14 @@ export default class GridCell extends GridConfigurable( Object ) {
 
     this.setOptions( options );
     this.onLayoutOptionsChange();
-
-    this.layoutOptionsListener = this.onLayoutOptionsChange.bind( this );
-    this.node.layoutOptionsChangedEmitter.addListener( this.layoutOptionsListener );
   }
 
   get effectiveXAlign(): GridConfigurableAlign {
-    return this._xAlign !== null ? this._xAlign : this._constraint._xAlign!;
+    return this._xAlign !== null ? this._xAlign : this._gridConstraint._xAlign!;
   }
 
   get effectiveYAlign(): GridConfigurableAlign {
-    return this._yAlign !== null ? this._yAlign : this._constraint._yAlign!;
+    return this._yAlign !== null ? this._yAlign : this._gridConstraint._yAlign!;
   }
 
   getEffectiveAlign( orientation: Orientation ): GridConfigurableAlign {
@@ -105,19 +85,19 @@ export default class GridCell extends GridConfigurable( Object ) {
   }
 
   get effectiveLeftMargin(): number {
-    return this._leftMargin !== null ? this._leftMargin : this._constraint._leftMargin!;
+    return this._leftMargin !== null ? this._leftMargin : this._gridConstraint._leftMargin!;
   }
 
   get effectiveRightMargin(): number {
-    return this._rightMargin !== null ? this._rightMargin : this._constraint._rightMargin!;
+    return this._rightMargin !== null ? this._rightMargin : this._gridConstraint._rightMargin!;
   }
 
   get effectiveTopMargin(): number {
-    return this._topMargin !== null ? this._topMargin : this._constraint._topMargin!;
+    return this._topMargin !== null ? this._topMargin : this._gridConstraint._topMargin!;
   }
 
   get effectiveBottomMargin(): number {
-    return this._bottomMargin !== null ? this._bottomMargin : this._constraint._bottomMargin!;
+    return this._bottomMargin !== null ? this._bottomMargin : this._gridConstraint._bottomMargin!;
   }
 
   getEffectiveMinMargin( orientation: Orientation ): number {
@@ -129,11 +109,11 @@ export default class GridCell extends GridConfigurable( Object ) {
   }
 
   get effectiveXGrow(): number {
-    return this._xGrow !== null ? this._xGrow : this._constraint._xGrow!;
+    return this._xGrow !== null ? this._xGrow : this._gridConstraint._xGrow!;
   }
 
   get effectiveYGrow(): number {
-    return this._yGrow !== null ? this._yGrow : this._constraint._yGrow!;
+    return this._yGrow !== null ? this._yGrow : this._gridConstraint._yGrow!;
   }
 
   getEffectiveGrow( orientation: Orientation ): number {
@@ -141,11 +121,11 @@ export default class GridCell extends GridConfigurable( Object ) {
   }
 
   get effectiveMinContentWidth(): number | null {
-    return this._minContentWidth !== null ? this._minContentWidth : this._constraint._minContentWidth;
+    return this._minContentWidth !== null ? this._minContentWidth : this._gridConstraint._minContentWidth;
   }
 
   get effectiveMinContentHeight(): number | null {
-    return this._minContentHeight !== null ? this._minContentHeight : this._constraint._minContentHeight;
+    return this._minContentHeight !== null ? this._minContentHeight : this._gridConstraint._minContentHeight;
   }
 
   getEffectiveMinContent( orientation: Orientation ): number | null {
@@ -154,38 +134,26 @@ export default class GridCell extends GridConfigurable( Object ) {
 
 
   get effectiveMaxContentWidth(): number | null {
-    return this._maxContentWidth !== null ? this._maxContentWidth : this._constraint._maxContentWidth;
+    return this._maxContentWidth !== null ? this._maxContentWidth : this._gridConstraint._maxContentWidth;
   }
 
   get effectiveMaxContentHeight(): number | null {
-    return this._maxContentHeight !== null ? this._maxContentHeight : this._constraint._maxContentHeight;
+    return this._maxContentHeight !== null ? this._maxContentHeight : this._gridConstraint._maxContentHeight;
   }
 
   getEffectiveMaxContent( orientation: Orientation ): number | null {
     return orientation === Orientation.HORIZONTAL ? this.effectiveMaxContentWidth : this.effectiveMaxContentHeight;
   }
 
-  private onLayoutOptionsChange(): void {
+  protected override onLayoutOptionsChange(): void {
     this.setOptions( this.node.layoutOptions as GridConfigurableOptions );
+
+    super.onLayoutOptionsChange();
   }
 
   private setOptions( options?: GridConfigurableOptions ): void {
     this.setConfigToInherit();
     this.mutateConfigurable( options );
-  }
-
-  get node(): Node {
-    return this._node;
-  }
-
-  isConnected(): boolean {
-    return this._proxy !== null;
-  }
-
-  get proxy(): LayoutProxy {
-    assert && assert( this._proxy );
-
-    return this._proxy!;
   }
 
   getMinimumSize( orientation: Orientation ): number {
@@ -266,15 +234,6 @@ export default class GridCell extends GridConfigurable( Object ) {
     const position = this.position.get( orientation );
     const size = this.size.get( orientation );
     return _.range( position, position + size );
-  }
-
-  /**
-   * Releases references
-   */
-  dispose(): void {
-    this.layoutProxyProperty && this.layoutProxyProperty.dispose();
-
-    this.node.layoutOptionsChangedEmitter.removeListener( this.layoutOptionsListener );
   }
 }
 
