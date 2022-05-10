@@ -232,6 +232,7 @@ export { default as VDivider } from './layout/VDivider.js';
 export type { VDividerOptions } from './layout/VDivider.js';
 export { default as LayoutProxy } from './layout/LayoutProxy.js';
 export { default as LayoutProxyProperty } from './layout/LayoutProxyProperty.js';
+export { default as TrackingLayoutProxyProperty } from './layout/TrackingLayoutProxyProperty.js';
 export { default as LayoutConstraint } from './layout/LayoutConstraint.js';
 export { default as FlowConfigurable, FLOW_CONFIGURABLE_OPTION_KEYS, FlowConfigurableAlign } from './layout/FlowConfigurable.js';
 export type { FlowHorizontalAlign, FlowVerticalAlign, FlowOrientation, FlowConfigurableOptions } from './layout/FlowConfigurable.js';

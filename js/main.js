@@ -111,6 +111,7 @@ import './layout/LayoutProxyProperty.js';
 import './layout/ManualConstraint.js';
 import './layout/VDivider.js';
 import './layout/HeightSizable.js';
+import './layout/TrackingLayoutProxyProperty.js';
 import './listeners/DragListener.js';
 import './listeners/FireListener.js';
 import './listeners/HandleDownListener.js';

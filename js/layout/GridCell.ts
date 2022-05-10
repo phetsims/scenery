@@ -10,7 +10,7 @@ import Bounds2 from '../../../dot/js/Bounds2.js';
 import Utils from '../../../dot/js/Utils.js';
 import Orientation from '../../../phet-core/js/Orientation.js';
 import OrientationPair from '../../../phet-core/js/OrientationPair.js';
-import { GridConfigurable, GridConfigurableOptions, GridConstraint, LayoutProxy, LayoutProxyProperty, Node, scenery, TransformTracker } from '../imports.js';
+import { GridConfigurable, GridConfigurableOptions, GridConstraint, LayoutProxy, Node, scenery, TrackingLayoutProxyProperty } from '../imports.js';
 import { GridConfigurableAlign } from './GridConfigurable.js';
 import optionize from '../../../phet-core/js/optionize.js';
 
@@ -36,8 +36,7 @@ export default class GridCell extends GridConfigurable( Object ) {
   private readonly _node: Node;
   private _proxy: LayoutProxy | null;
   private readonly layoutOptionsListener: () => void;
-  private readonly layoutProxyProperty: LayoutProxyProperty | null;
-  private transformTracker: TransformTracker | null;
+  private readonly layoutProxyProperty: TrackingLayoutProxyProperty | null;
 
   // These are only set initially, and ignored for the future
   position: OrientationPair<number>;
@@ -65,9 +64,6 @@ export default class GridCell extends GridConfigurable( Object ) {
 
     super();
 
-    // TODO: factor this code out between Cell types! Instead of inheriting Object
-    this.transformTracker = null;
-
     if ( proxy ) {
       this.layoutProxyProperty = null;
     }
@@ -75,16 +71,9 @@ export default class GridCell extends GridConfigurable( Object ) {
       // If a LayoutProxy is not provided, we'll listen to (a) all the trails between our ancestor and this node,
       // (b) construct layout proxies for it (and assign here), and (c) listen to ancestor transforms to refresh
       // the layout when needed.
-      this.layoutProxyProperty = new LayoutProxyProperty( constraint.ancestorNode, node );
+      this.layoutProxyProperty = new TrackingLayoutProxyProperty( constraint.ancestorNode, node, () => constraint.updateLayoutAutomatically() );
       this.layoutProxyProperty.link( proxy => {
         this._proxy = proxy;
-        if ( this.transformTracker ) {
-          this.transformTracker.dispose();
-        }
-        if ( proxy ) {
-          this.transformTracker = new TransformTracker( proxy.trail!.copy().addAncestor( constraint.ancestorNode ) );
-          this.transformTracker.addListener( () => constraint.updateLayoutAutomatically() );
-        }
       } );
     }
 
@@ -284,7 +273,6 @@ export default class GridCell extends GridConfigurable( Object ) {
    */
   dispose(): void {
     this.layoutProxyProperty && this.layoutProxyProperty.dispose();
-    this.transformTracker && this.transformTracker.dispose();
 
     this.node.layoutOptionsChangedEmitter.removeListener( this.layoutOptionsListener );
   }

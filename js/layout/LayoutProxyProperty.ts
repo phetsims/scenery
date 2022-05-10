@@ -1,7 +1,9 @@
 // Copyright 2022, University of Colorado Boulder
 
 /**
- * A Property that takes the value of
+ * A Property that takes the value of:
+ * - a LayoutProxy with the single connected Trail (if it exists)
+ * - null if there are zero or 2+ connected Trails between the two Nodes
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
