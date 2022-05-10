@@ -38,7 +38,7 @@ export default class FlowCell extends FlowConfigurable( Object ) {
 
     this._constraint = constraint;
     this._node = node;
-    this._proxy = constraint.createLayoutProxy( node )!; // TODO: handle disconnected, and listen for if we disconnect
+    this._proxy = proxy;
     this._pendingSize = 0;
 
     this.orientation = constraint.orientation;

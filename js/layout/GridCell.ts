@@ -79,7 +79,7 @@ export default class GridCell extends GridConfigurable( Object ) {
 
     this._constraint = constraint;
     this._node = node;
-    this._proxy = constraint.createLayoutProxy( node )!; // TODO: handle disconnected, and listen for if we disconnect
+    this._proxy = proxy;
     this.position = new OrientationPair( options.x, options.y );
     this.size = new OrientationPair( options.width, options.height );
     this.lastAvailableBounds = Bounds2.NOTHING.copy();
