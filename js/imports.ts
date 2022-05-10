@@ -54,7 +54,7 @@ export { default as LinearGradient } from './util/LinearGradient.js';
 export { default as RadialGradient } from './util/RadialGradient.js';
 export { default as Pattern } from './util/Pattern.js';
 export { default as NodePattern } from './util/NodePattern.js';
-export { default as Filter } from './util/Filter.js';
+export { default as Filter } from './filters/Filter.js';
 
 export { default as ColorDef } from './util/ColorDef.js';
 export { default as PaintDef } from './util/PaintDef.js';
@@ -62,17 +62,17 @@ export type { default as IColor } from './util/IColor.js';
 export type { default as IPaint } from './util/IPaint.js';
 
 // Filters
-export { default as ColorMatrixFilter } from './util/ColorMatrixFilter.js';
-export { default as Brightness } from './util/Brightness.js';
-export { default as Contrast } from './util/Contrast.js';
-export { default as DropShadow } from './util/DropShadow.js';
-export { default as GaussianBlur } from './util/GaussianBlur.js';
-export { default as Grayscale } from './util/Grayscale.js';
-export { default as HueRotate } from './util/HueRotate.js';
-export { default as Invert } from './util/Invert.js';
-export { default as Opacity } from './util/Opacity.js';
-export { default as Saturate } from './util/Saturate.js';
-export { default as Sepia } from './util/Sepia.js';
+export { default as ColorMatrixFilter } from './filters/ColorMatrixFilter.js';
+export { default as Brightness } from './filters/Brightness.js';
+export { default as Contrast } from './filters/Contrast.js';
+export { default as DropShadow } from './filters/DropShadow.js';
+export { default as GaussianBlur } from './filters/GaussianBlur.js';
+export { default as Grayscale } from './filters/Grayscale.js';
+export { default as HueRotate } from './filters/HueRotate.js';
+export { default as Invert } from './filters/Invert.js';
+export { default as Opacity } from './filters/Opacity.js';
+export { default as Saturate } from './filters/Saturate.js';
+export { default as Sepia } from './filters/Sepia.js';
 
 export { default as ParallelDOM, ACCESSIBILITY_OPTION_KEYS } from './accessibility/pdom/ParallelDOM.js';
 export type { ParallelDOMOptions, PDOMBehaviorFunction } from './accessibility/pdom/ParallelDOM.js';
