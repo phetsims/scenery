@@ -52,14 +52,15 @@ export type FlowConfigurableOptions = {
   orientation?: FlowOrientation | null;
 
   // Adjusts the position of elements in the "opposite" dimension, either to a specific side, the center, or so that all
-  // of the origins of items are aligned (similar to x=0 for a 'vertical' orientation).
+  // the origins of items are aligned (similar to x=0 for a 'vertical' orientation).
   align?: FlowHorizontalAlign | FlowVerticalAlign | null;
 
   // Controls whether elements will attempt to expand in the "opposite" dimension to take up the full size of the
   // largest layout element.
   stretch?: boolean;
 
-  // TODO: doc
+  // Controls whether elements will attempt to expand in the "primary" dimension. Elements will expand proportionally
+  // based on the total grow sum (and will not expand at all if the grow is zero).
   grow?: number | null;
 
   // Adds extra space for each cell in the layout (margin controls all 4 sides, xMargin controls left/right, yMargin

@@ -125,13 +125,27 @@ const internalToJustify = ( orientation: Orientation, justify: FlowConstraintJus
 };
 
 type SelfOptions = {
+  // The default spacing in-between elements in the primary direction. If additional (or less) spacing is desired for
+  // certain elements, per-element margins (even negative) can be set in the layoutOptions of nodes contained.
   spacing?: number;
+
+  // The default spacing in-between lines in the secondary direction.
   lineSpacing?: number;
+
+  // How extra space in the primary direction is allocated. The default is spaceBetween.
   justify?: FlowHorizontalJustification | FlowVerticalJustification;
+
+  // Whether line-wrapping is enabled. If so, the primary preferred dimension will determine where things are wrapped.
   wrap?: boolean;
+
+  // Whether invisible Nodes are excluded from the layout.
   excludeInvisible?: boolean;
+
+  // The preferred width/height (ideally from a container's localPreferredWidth/localPreferredHeight.
   preferredWidthProperty?: IProperty<number | null>;
   preferredHeightProperty?: IProperty<number | null>;
+
+  // The minimum width/height (ideally from a container's localMinimumWidth/localMinimumHeight.
   minimumWidthProperty?: IProperty<number | null>;
   minimumHeightProperty?: IProperty<number | null>;
 };
@@ -565,8 +579,6 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
   }
 
   reorderCells( cells: FlowCell[], minChangeIndex: number, maxChangeIndex: number ): void {
-    // TODO: assertions for this!!! So many things could go wrong here
-
     this.cells.splice( minChangeIndex, maxChangeIndex - minChangeIndex + 1, ...cells );
 
     this.updateLayoutAutomatically();

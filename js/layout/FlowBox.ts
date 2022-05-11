@@ -1,7 +1,8 @@
 // Copyright 2021-2022, University of Colorado Boulder
 
 /**
- * A vertical/horizontal flow-based layout container. TODO: more docs
+ * A vertical/horizontal flow-based layout container. See scenery/docs/layout.html for details (preferably after
+ * building scenery).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -22,9 +23,11 @@ const DEFAULT_OPTIONS = {
 } as const;
 
 type SelfOptions = {
-  excludeInvisibleChildrenFromBounds?: boolean;
+  // Controls whether the FlowBox will retrigger layout automatically after the "first" layout during construction.
+  // The FlowBox will layout once after processing the options object, but if resize:false, then after that manual
+  // layout calls will need to be done (with updateLayout())
   resize?: boolean;
-} & Omit<FlowConstraintOptions, 'excludeInvisible'>;
+} & Omit<FlowConstraintOptions, 'excludeInvisible' | 'preferredWidthProperty' | 'preferredHeightProperty' | 'minimumWidthProperty' | 'minimumHeightProperty'>;
 
 export type FlowBoxOptions = SelfOptions & NodeOptions & WidthSizableSelfOptions & HeightSizableSelfOptions;
 
@@ -150,6 +153,13 @@ export default class FlowBox extends WidthSizable( HeightSizable( Node ) ) {
     }
 
     return this;
+  }
+
+  /**
+   * Manually run the layout (for instance, if resize:false is currently set, or if there is other hackery going on).
+   */
+  updateLayout(): void {
+    this._constraint.updateLayout();
   }
 
   getCell( node: Node ): FlowCell {

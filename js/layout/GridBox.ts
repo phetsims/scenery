@@ -1,7 +1,7 @@
 // Copyright 2022, University of Colorado Boulder
 
 /**
- * TODO: doc
+ * A grid-based layout container. See scenery/docs/layout.html for details (preferably after building scenery).
  *
  * @author Jonathan Olson <jonathan.olson@colorado.edu>
  */
@@ -19,9 +19,11 @@ const DEFAULT_OPTIONS = {
 } as const;
 
 type SelfOptions = {
-  excludeInvisibleChildrenFromBounds?: boolean;
+  // Controls whether the GridBox will retrigger layout automatically after the "first" layout during construction.
+  // The GridBox will layout once after processing the options object, but if resize:false, then after that manual
+  // layout calls will need to be done (with updateLayout())
   resize?: boolean;
-} & Omit<GridConstraintOptions, 'excludeInvisible'>;
+} & Omit<GridConstraintOptions, 'excludeInvisible' | 'preferredWidthProperty' | 'preferredHeightProperty' | 'minimumWidthProperty' | 'minimumHeightProperty'>;
 
 type SuperType = NodeOptions & WidthSizableSelfOptions & HeightSizableSelfOptions;
 
@@ -109,6 +111,13 @@ export default class GridBox extends WidthSizable( HeightSizable( Node ) ) {
     this._cellMap.set( node, cell );
 
     this._constraint.addCell( cell );
+  }
+
+  /**
+   * Manually run the layout (for instance, if resize:false is currently set, or if there is other hackery going on).
+   */
+  updateLayout(): void {
+    this._constraint.updateLayout();
   }
 
   /**

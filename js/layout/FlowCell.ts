@@ -39,21 +39,17 @@ export default class FlowCell extends FlowConfigurable( LayoutCell ) {
     return this._leftMargin !== null ? this._leftMargin : this._flowConstraint._leftMargin!;
   }
 
-
   get effectiveRightMargin(): number {
     return this._rightMargin !== null ? this._rightMargin : this._flowConstraint._rightMargin!;
   }
-
 
   get effectiveTopMargin(): number {
     return this._topMargin !== null ? this._topMargin : this._flowConstraint._topMargin!;
   }
 
-
   get effectiveBottomMargin(): number {
     return this._bottomMargin !== null ? this._bottomMargin : this._flowConstraint._bottomMargin!;
   }
-
 
   get effectiveGrow(): number {
     return this._grow !== null ? this._grow : this._flowConstraint._grow!;
