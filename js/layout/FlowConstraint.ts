@@ -138,7 +138,6 @@ type SelfOptions = {
 
 export type FlowConstraintOptions = SelfOptions & FlowConfigurableOptions;
 
-// TODO: Have LayoutBox use this when we're ready
 export default class FlowConstraint extends FlowConfigurable( LayoutConstraint ) {
 
   private readonly cells: FlowCell[];
@@ -193,12 +192,9 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
     // Key configuration changes to relayout
     this.changedEmitter.addListener( this._updateLayoutListener );
 
-    // TODO: optimize?
-    this.orientationChangedEmitter.addListener( () => {
-      this.cells.forEach( cell => {
-        cell.orientation = this.orientation;
-      } );
-    } );
+    this.orientationChangedEmitter.addListener( () => this.cells.forEach( cell => {
+      cell.orientation = this.orientation;
+    } ) );
 
     this.preferredWidthProperty.lazyLink( this._updateLayoutListener );
     this.preferredHeightProperty.lazyLink( this._updateLayoutListener );
@@ -252,12 +248,13 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
     }
 
     // Determine our preferred sizes (they can be null, in which case)
-    let preferredSize: number | null = orientation === Orientation.HORIZONTAL ? this.preferredWidthProperty.value : this.preferredHeightProperty.value;
-    const preferredOppositeSize = orientation === Orientation.HORIZONTAL ? this.preferredHeightProperty.value : this.preferredWidthProperty.value;
+    let preferredSize: number | null = this.getPreferredProperty( orientation ).value;
+    const preferredOppositeSize: number | null = this.getPreferredProperty( oppositeOrientation ).value;
 
     // What is the largest of the minimum sizes of cells (e.g. if we're wrapping, this would be our minimum size)
     const maxMinimumCellSize: number = Math.max( ...cells.map( cell => cell.getMinimumSize( orientation ) || 0 ) );
 
+    // TODO: how to handle disobeying preferred size?
     if ( maxMinimumCellSize > ( preferredSize || Number.POSITIVE_INFINITY ) ) {
       preferredSize = maxMinimumCellSize;
     }
@@ -372,37 +369,69 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
 
     // Secondary-direction layout
     let secondaryPosition = 0;
-    lines.forEach( line => {
-      const maximumSize = Math.max( preferredOppositeSize || 0, ...line.map( cell => cell.getMinimumSize( oppositeOrientation ) || 0 ) );
+    lines.forEach( ( line, index ) => {
+      // Mimicking https://www.w3.org/TR/css-flexbox-1/#align-items-property for baseline (for our origin)
+      // Origin will sync all origin-based items (so their origin matches), and then position ALL of that as if it was
+      // align left or top (depending on the orientation).
+
+      // Find the union of all origin-based cells (will be Bounds2.NOTHING if there are none)
+      const maximumOriginBounds = line.reduce( ( bounds: Bounds2, cell: FlowCell ) => {
+        return cell.effectiveAlign === FlowConfigurableAlign.ORIGIN ? bounds.union( cell.getOriginBounds() ) : bounds;
+      }, Bounds2.NOTHING );
+
+      // When we lay out everything with align:origin, what is the dimension of all of that content?
+      const maximumOriginSize = maximumOriginBounds.isFinite() ? maximumOriginBounds[ oppositeOrientation.size ] : 0;
+
+      // TODO: using preferredOppositeSize doesn't seem to mesh well with wrapping, no? Perhaps align-content equivalent would fix this?
+      const lineSize = Math.max( preferredOppositeSize || 0, maximumOriginSize, ...line.map( cell => cell.getMinimumSize( oppositeOrientation ) || 0 ) );
+
+      // The distance from the "start" (top/left) to the origin, for origin-aligned items
+      const originOffset = maximumOriginBounds.isValid() ? -maximumOriginBounds.top : 0;
+
+      // The position of the "start" (top/left) for the entire line
+      const lineStartPosition = index === 0 ? -originOffset : secondaryPosition;
+
+      if ( index === 0 ) {
+        minOppositeCoordinate = lineStartPosition;
+      }
+      if ( index === lines.length - 1 ) {
+        maxOppositeCoordinate = lineStartPosition + lineSize;
+      }
 
       line.forEach( cell => {
         const align = cell.effectiveAlign;
 
-        // If stretching, we'll expand to the maximumSize (otherwise will use the minimum size available)
-        const preferredSize = ( cell.effectiveStretch && cell.isSizable( oppositeOrientation ) ) ? maximumSize : cell.getMinimumSize( oppositeOrientation );
+        // If stretching, we'll expand to the lineSize (otherwise will use the minimum size available)
+        const preferredSize = ( cell.effectiveStretch && cell.isSizable( oppositeOrientation ) ) ? lineSize : cell.getMinimumSize( oppositeOrientation );
 
         cell.attemptPreferredSize( oppositeOrientation, preferredSize );
 
         if ( align === FlowConfigurableAlign.ORIGIN ) {
-          // TODO: handle layout bounds
-          cell.positionOrigin( oppositeOrientation, secondaryPosition );
+          cell.positionOrigin( oppositeOrientation, lineStartPosition + originOffset );
         }
         else {
-          cell.positionStart( oppositeOrientation, secondaryPosition + ( maximumSize - preferredSize ) * align.padRatio );
+          cell.positionStart( oppositeOrientation, lineStartPosition + ( lineSize - preferredSize ) * align.padRatio );
         }
 
         const cellBounds = cell.getCellBounds();
         assert && assert( cellBounds.isFinite() );
-
-        minOppositeCoordinate = Math.min( minOppositeCoordinate, oppositeOrientation === Orientation.HORIZONTAL ? cellBounds.minX : cellBounds.minY );
-        maxOppositeCoordinate = Math.max( maxOppositeCoordinate, oppositeOrientation === Orientation.HORIZONTAL ? cellBounds.maxX : cellBounds.maxY );
       } );
 
-      // TODO: This is insufficient for origin, if we wrap, our origin setup will be off
-      secondaryPosition += maximumSize + this.lineSpacing;
+      const incrementAmount = lineSize + this.lineSpacing;
+
+      if ( index === 0 ) {
+        // If we're the first line, we need to include the lineStartPosition (if we had something origin-positioned,
+        // we want to have the first line's position origin be exactly 0). We'll start from there, and then each line
+        // in the future will be simpler with an increment (originOffset will handle things nicely)
+        secondaryPosition = lineStartPosition + incrementAmount;
+      }
+      else {
+        // Otherwise we can just increment by the line size (and add in spacing)
+        secondaryPosition += incrementAmount;
+      }
     } );
 
-    // TODO: align-content flexbox equivalent
+    // TODO: align-content flexbox equivalent (this is possibly not needed, since we are typically not wrapping?
     // For now, we'll just pad ourself out
     if ( preferredOppositeSize && ( maxOppositeCoordinate - minOppositeCoordinate ) < preferredOppositeSize ) {
       maxOppositeCoordinate = minOppositeCoordinate + preferredOppositeSize;
@@ -541,6 +570,10 @@ export default class FlowConstraint extends FlowConfigurable( LayoutConstraint )
     this.cells.splice( minChangeIndex, maxChangeIndex - minChangeIndex + 1, ...cells );
 
     this.updateLayoutAutomatically();
+  }
+
+  getPreferredProperty( orientation: Orientation ): IProperty<number | null> {
+    return orientation === Orientation.HORIZONTAL ? this.preferredWidthProperty : this.preferredHeightProperty;
   }
 
   /**

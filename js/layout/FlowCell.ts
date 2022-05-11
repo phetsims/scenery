@@ -166,6 +166,14 @@ export default class FlowCell extends FlowConfigurable( LayoutCell ) {
     }
   }
 
+  /**
+   * Returns the bounding box of the cell if it was repositioned to have its origin shifted to the origin of the
+   * ancestor node's local coordinate frame.
+   */
+  getOriginBounds(): Bounds2 {
+    return this.getCellBounds().shiftedXY( -this.proxy.x, -this.proxy.y );
+  }
+
   getCellBounds(): Bounds2 {
     return this.proxy.bounds.withOffsets(
       this.effectiveLeftMargin,
